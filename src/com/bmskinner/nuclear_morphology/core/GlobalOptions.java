@@ -59,6 +59,9 @@ public class GlobalOptions extends AbstractHashOptions {
     
     public static final String IS_DEBUG_INTERFACE_KEY    = "USE_DEBUG_INTERFACE";
     
+    /** While GLCM is in development, only show the charts via a config flag */
+    public static final String IS_GLCM_INTERFACE_KEY    = "USE_GLCM_INTERFACE";
+    
     /** The number of threads that should be used by ImageJ's image filtering methods */
     public static final String NUM_IMAGEJ_THREADS_KEY    = "NUM_IMAGEJ_THREADS";
     
@@ -116,6 +119,7 @@ public class GlobalOptions extends AbstractHashOptions {
         setBoolean(IS_CONVERT_DATASETS_KEY, true);
         setBoolean(IS_DEBUG_INTERFACE_KEY, false);
         setInt(NUM_IMAGEJ_THREADS_KEY, 2);
+        this.setBoolean(IS_GLCM_INTERFACE_KEY, false);
         this.datasetExportFormat = ExportFormat.JAVA;
     }
 

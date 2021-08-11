@@ -23,6 +23,7 @@ import javax.swing.SwingConstants;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 
@@ -46,7 +47,7 @@ public class NuclearStatisticsPanel extends DetailPanel {
 
         DetailPanel nuclearScatterChartPanel = new NuclearScatterChartPanel(context);
         DetailPanel nuclearLobesPanel = new NuclearLobesPanel(context);
-//        DetailPanel nuclearGlcmPanel = new NuclearGlcmPanel(context);
+        DetailPanel nuclearGlcmPanel = new NuclearGlcmPanel(context);
 
         addPanel(nuclearStatsPanel);
         addPanel(boxplotPanel);
@@ -54,7 +55,8 @@ public class NuclearStatisticsPanel extends DetailPanel {
         addPanel(nucleusMagnitudePanel);
         addPanel(nuclearScatterChartPanel);
         addPanel(nuclearLobesPanel);
-//        addPanel(nuclearGlcmPanel);
+        if(GlobalOptions.getInstance().getBoolean(GlobalOptions.IS_GLCM_INTERFACE_KEY))
+        	addPanel(nuclearGlcmPanel);
 
         this.add(tabPane, BorderLayout.CENTER);
     }

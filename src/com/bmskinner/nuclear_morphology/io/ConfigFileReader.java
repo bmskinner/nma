@@ -79,6 +79,8 @@ public class ConfigFileReader {
         properties.setProperty(GlobalOptions.REFOLD_OVERRIDE_KEY, String.valueOf(op.getBoolean(GlobalOptions.REFOLD_OVERRIDE_KEY)));
         properties.setProperty(GlobalOptions.IS_DEBUG_INTERFACE_KEY, String.valueOf(op.getBoolean(GlobalOptions.IS_DEBUG_INTERFACE_KEY)));
         properties.setProperty(GlobalOptions.DEFAULT_EXPORT_FORMAT_KEY, String.valueOf(op.getExportFormat()));
+        properties.setProperty(GlobalOptions.IS_GLCM_INTERFACE_KEY, String.valueOf(op.getBoolean(GlobalOptions.IS_GLCM_INTERFACE_KEY)));
+        
         return properties;
 
     }
@@ -119,6 +121,9 @@ public class ConfigFileReader {
             
             if (GlobalOptions.IS_DEBUG_INTERFACE_KEY.equals(key))
                 op.setBoolean(GlobalOptions.IS_DEBUG_INTERFACE_KEY, Boolean.valueOf(value));
+            
+            if (GlobalOptions.IS_GLCM_INTERFACE_KEY.equals(key))
+                op.setBoolean(GlobalOptions.IS_GLCM_INTERFACE_KEY, Boolean.valueOf(value));
             
             if(GlobalOptions.NUM_IMAGEJ_THREADS_KEY.equals(key))
             	op.setInt(GlobalOptions.NUM_IMAGEJ_THREADS_KEY, Integer.valueOf(value));
