@@ -638,16 +638,12 @@ public class ImageFilterer extends AbstractImageFilterer {
     	
     	for(int i=0; i<ip.getWidth(); i++) {
     		for(int j=0; j<ip.getHeight(); j++) {
-    			
-    			// Special case where both images are blank
-    			if(ip.get(i, j)==0 && counterstain.get(i, j)==0) {
-    				input[i][j] = 1f;
-    				continue;
-    			}
-    			
-    			float out = ((float)ip.get(i, j)) / ((float)counterstain.get(i, j));
-    			out = Float.isInfinite(out) ? 0 : out;
-    			out = Float.isNaN(out) ? 0 : out;
+
+    			// divide by zero is bad; ensure if counterstain is zero
+    			// we zero the result
+    			float cs = counterstain.get(i, j);
+    			float im = ip.get(i, j);
+    			float out = cs==0f ? 0 : im / cs;
     			input[i][j] = out;
     		}
     	}
