@@ -18,7 +18,7 @@ package com.bmskinner.nuclear_morphology.analysis;
 
 import java.util.List;
 
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 
 /**
  * Describes the results that can be obtained from an IAnalysisMethod

@@ -26,12 +26,12 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.ViolinPlots.ViolinCategoryDataset;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
-import com.bmskinner.nuclear_morphology.components.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.ICellCollection;
-import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
-import com.bmskinner.nuclear_morphology.components.nuclear.Colocalisation;
-import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
+import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
+import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
+import com.bmskinner.nuclear_morphology.components.signals.Colocalisation;
+import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
 
 public class SignalViolinDatasetCreator extends ViolinDatasetCreator {
 

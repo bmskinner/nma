@@ -21,7 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 
 /**
  * The default implementation of IAnalysisResult, which provides access to

@@ -31,18 +31,18 @@ import org.jfree.data.xy.XYSeriesCollection;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.ICellCollection;
-import com.bmskinner.nuclear_morphology.components.generic.FloatProfile;
-import com.bmskinner.nuclear_morphology.components.generic.IProfile;
-import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
-import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
-import com.bmskinner.nuclear_morphology.components.generic.Tag;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
-import com.bmskinner.nuclear_morphology.components.generic.UnsegmentedProfileException;
-import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
+import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.profiles.FloatProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
+import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.profiles.UnsegmentedProfileException;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
@@ -244,7 +244,7 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 			// add the segments if any exist and there is only a single dataset
 			if(isShowSegments) {
 //				System.out.println(String.format("Drawing segments for %s", borderTag));
-				List<IBorderSegment> segments = collection.getProfileCollection()
+				List<IProfileSegment> segments = collection.getProfileCollection()
 						.getSegmentedProfile(type, borderTag, Stats.MEDIAN)
 						.getOrderedSegments();
 				
@@ -351,7 +351,7 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 							: nucleus.getProfile(type, Tag.REFERENCE_POINT);
 
 					if(options.firstDataset().getCollection().getProfileCollection().hasSegments()) {
-						List<IBorderSegment> segments = nucleus.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT)
+						List<IProfileSegment> segments = nucleus.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT)
 								.getOrderedSegments();
 						addSegmentsFromProfile(segments, profile, ds, nucleus.getBorderLength(), 0, 0);
 					} else {
@@ -379,7 +379,7 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 				
 				ISegmentedProfile segProfile = (ISegmentedProfile)profile;
 				if(segProfile.hasSegments()) {
-					List<IBorderSegment> segments = segProfile.getOrderedSegments();
+					List<IProfileSegment> segments = segProfile.getOrderedSegments();
 					addSegmentsFromProfile(segments, segProfile, ds, segProfile.size(), 0, 0);
 				} 
 			} else {
@@ -421,7 +421,7 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 	 * @throws ProfileException
 	 * @throws ChartDatasetCreationException 
 	 */
-	private void addSegmentsFromProfile(List<IBorderSegment> segments, IProfile profile, ProfileChartDataset ds,
+	private void addSegmentsFromProfile(List<IProfileSegment> segments, IProfile profile, ProfileChartDataset ds,
 			int length, double offset, int datasetIndex) throws ProfileException, ChartDatasetCreationException {
 
 		IProfile xpoints = createXPositions(profile, length).add(offset);
@@ -429,7 +429,7 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 		float[] xvalues = xpoints.toFloatArray();
 		float[] yvalues = profile.toFloatArray();
 		
-		for (IBorderSegment seg : segments) {
+		for (IProfileSegment seg : segments) {
 			int prevIndex = -1;
 						
 			Iterator<Integer> it = seg.iterator();
@@ -496,7 +496,7 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 
 				// add the segments
 				LOGGER.finest( "Adding ordered segments from reference point");
-				List<IBorderSegment> segments = nucleus.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT)
+				List<IProfileSegment> segments = nucleus.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT)
 						.getOrderedSegments();
 				addSegmentsFromProfile(segments, profile, ds, nucleus.getBorderLength(), 0, 0);
 			}
@@ -554,7 +554,7 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
             IProfile profile = collection.getProfileCollection().getIQRProfile(options.getType(), options.getTag());
 
             if(collection.getProfileCollection().hasSegments()) {
-            	List<IBorderSegment> segments = collection.getProfileCollection()
+            	List<IProfileSegment> segments = collection.getProfileCollection()
                         .getSegmentedProfile(options.getType(), options.getTag(), Stats.MEDIAN).getOrderedSegments();
             	addSegmentsFromProfile(segments, profile, ds, DEFAULT_PROFILE_LENGTH, 0, 0);
             } else {

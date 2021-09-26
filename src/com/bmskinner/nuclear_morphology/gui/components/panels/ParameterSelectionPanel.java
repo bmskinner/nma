@@ -18,14 +18,14 @@ import javax.swing.JPanel;
 
 import com.bmskinner.nuclear_morphology.analysis.image.GLCM.GLCMParameter;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
-import com.bmskinner.nuclear_morphology.components.generic.Tag;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
-import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
+import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.measure.Measurement;
+import com.bmskinner.nuclear_morphology.components.measure.MeasurementDimension;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
-import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
-import com.bmskinner.nuclear_morphology.components.stats.StatisticDimension;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
+import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
+import com.bmskinner.nuclear_morphology.components.profiles.Tag;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -72,7 +72,7 @@ public class ParameterSelectionPanel extends OptionsPanel {
 	
 	@Override
 	protected void setDefaults() {
-		for (PlottableStatistic stat : PlottableStatistic.getNucleusStats((dataset.getCollection().getNucleusType())))
+		for (Measurement stat : Measurement.getNucleusStats((dataset.getCollection().getNucleusType())))
 			options.setBoolean(stat.toString(), false);
 
 		for(ProfileType t : ProfileType.displayValues())
@@ -81,7 +81,7 @@ public class ParameterSelectionPanel extends OptionsPanel {
 		options.setBoolean(ProfileType.ANGLE.toString(), true);
 		
 		try {
-			for (IBorderSegment s : dataset.getCollection().getProfileCollection().getSegments(Tag.REFERENCE_POINT))
+			for (IProfileSegment s : dataset.getCollection().getProfileCollection().getSegments(Tag.REFERENCE_POINT))
 				options.setBoolean(s.getID().toString(), false);
 		} catch(ProfileException | UnavailableBorderTagException e) {
 			LOGGER.log(Loggable.STACK, "Unable to get segments", e);
@@ -97,12 +97,12 @@ public class ParameterSelectionPanel extends OptionsPanel {
 		List<JLabel> labels = new ArrayList<>();
 		List<Component> fields = new ArrayList<>();
 		
-		for (PlottableStatistic stat : PlottableStatistic.getNucleusStats((dataset.getCollection().getNucleusType()))) {
-			if(stat.getDimension().equals(StatisticDimension.DIMENSIONLESS))
+		for (Measurement stat : Measurement.getNucleusStats((dataset.getCollection().getNucleusType()))) {
+			if(stat.getDimension().equals(MeasurementDimension.DIMENSIONLESS))
 				continue;
 			
 			// Handle texture separately
-			PlottableStatistic[] textureStats = GLCMParameter.toStats();
+			Measurement[] textureStats = GLCMParameter.toStats();
 			if(Arrays.stream(textureStats).anyMatch(s->s.equals(stat)))
 				continue;
 			
@@ -136,12 +136,12 @@ public class ParameterSelectionPanel extends OptionsPanel {
 			fields.add(box);
 		}
 		
-		for (PlottableStatistic stat : PlottableStatistic.getNucleusStats((dataset.getCollection().getNucleusType()))) {
-			if(!stat.getDimension().equals(StatisticDimension.DIMENSIONLESS))
+		for (Measurement stat : Measurement.getNucleusStats((dataset.getCollection().getNucleusType()))) {
+			if(!stat.getDimension().equals(MeasurementDimension.DIMENSIONLESS))
 				continue;
 			
 			// Handle texture separately
-			PlottableStatistic[] textureStats = GLCMParameter.toStats();
+			Measurement[] textureStats = GLCMParameter.toStats();
 			if(Arrays.stream(textureStats).anyMatch(s->s.equals(stat)))
 				continue;
 
@@ -166,7 +166,7 @@ public class ParameterSelectionPanel extends OptionsPanel {
 		List<JLabel> labels = new ArrayList<>();
 		List<Component> fields = new ArrayList<>();
 		
-		for (PlottableStatistic stat : GLCMParameter.toStats()) {
+		for (Measurement stat : GLCMParameter.toStats()) {
 			JCheckBox box = new JCheckBox();
 			box.addChangeListener(e ->  options.setBoolean(stat.toString(), box.isSelected()));
 			box.setForeground(Color.DARK_GRAY);
@@ -189,7 +189,7 @@ public class ParameterSelectionPanel extends OptionsPanel {
 		List<Component> fields = new ArrayList<>();
 		
 		try {
-			for (IBorderSegment s : dataset.getCollection().getProfileCollection().getSegments(Tag.REFERENCE_POINT)) {
+			for (IProfileSegment s : dataset.getCollection().getProfileCollection().getSegments(Tag.REFERENCE_POINT)) {
 				JCheckBox box = new JCheckBox();
 				box.setForeground(Color.DARK_GRAY);
 				box.addChangeListener(e->options.setBoolean(s.getID().toString(), box.isSelected()));

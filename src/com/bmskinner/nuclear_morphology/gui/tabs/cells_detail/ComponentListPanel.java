@@ -34,12 +34,12 @@ import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
-import com.bmskinner.nuclear_morphology.components.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.IAcrosome;
-import com.bmskinner.nuclear_morphology.components.ICytoplasm;
-import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
-import com.bmskinner.nuclear_morphology.components.nuclear.ISignalCollection;
+import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.cells.IAcrosome;
+import com.bmskinner.nuclear_morphology.components.cells.ICytoplasm;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
+import com.bmskinner.nuclear_morphology.components.signals.ISignalCollection;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 
 @SuppressWarnings("serial")

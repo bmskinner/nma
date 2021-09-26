@@ -8,11 +8,11 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.bmskinner.nuclear_morphology.TestResources;
-import com.bmskinner.nuclear_morphology.components.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.Statistical;
-import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
-import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.measure.Measurement;
+import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
 
 /**
@@ -35,7 +35,7 @@ public class NucleusDetectionTest {
 		File saveFile = new File(TestResources.MOUSE_TEST_DATASET);
 		IAnalysisDataset test = SampleDatasetReader.openDataset(saveFile);
 		
-		for(PlottableStatistic stat : PlottableStatistic.getNucleusStats()) {
+		for(Measurement stat : Measurement.getNucleusStats()) {
 			double value = test.getCollection().getMedian(stat, CellularComponent.NUCLEUS, MeasurementScale.PIXELS);
 			assertFalse("Error calculating "+stat, Statistical.ERROR_CALCULATING_STAT==value);
 			assertFalse("Did not calculate "+stat, Statistical.STAT_NOT_CALCULATED==value);

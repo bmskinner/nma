@@ -11,32 +11,32 @@ import org.jdom2.Document;
 import org.jdom2.Element;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.components.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.ICell;
-import com.bmskinner.nuclear_morphology.components.ICellCollection;
-import com.bmskinner.nuclear_morphology.components.ICytoplasm;
 import com.bmskinner.nuclear_morphology.components.Imageable;
 import com.bmskinner.nuclear_morphology.components.Taggable;
+import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.cells.ICell;
+import com.bmskinner.nuclear_morphology.components.cells.ICytoplasm;
+import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
-import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
-import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
-import com.bmskinner.nuclear_morphology.components.generic.Tag;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
-import com.bmskinner.nuclear_morphology.components.generic.UnsegmentedProfileException;
-import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
-import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
-import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult;
-import com.bmskinner.nuclear_morphology.components.nuclear.ISignalCollection;
-import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
-import com.bmskinner.nuclear_morphology.components.nuclear.IWarpedSignal;
-import com.bmskinner.nuclear_morphology.components.nuclear.WarpedSignalKey;
+import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
-import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
+import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
+import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.profiles.UnsegmentedProfileException;
+import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
+import com.bmskinner.nuclear_morphology.components.signals.IShellResult;
+import com.bmskinner.nuclear_morphology.components.signals.ISignalCollection;
+import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
+import com.bmskinner.nuclear_morphology.components.signals.IWarpedSignal;
+import com.bmskinner.nuclear_morphology.components.signals.WarpedSignalKey;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
@@ -301,7 +301,7 @@ public abstract class XMLCreator<T> {
 		try {
 			ISegmentedProfile profile = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
 
-			for(IBorderSegment s : profile.getSegments()) {
+			for(IProfileSegment s : profile.getSegments()) {
 				Element seg = new Element(BORDER_SEG_KEY);
 				seg.addContent(createElement(ID_KEY, s.getID()));
 				seg.addContent(createElement(INDEX_KEY, String.valueOf(s.getStartIndex())));
@@ -446,7 +446,7 @@ public abstract class XMLCreator<T> {
 		try {
 			ISegmentedProfile profile = taggable.getProfile(ProfileType.ANGLE);
 			
-			for(IBorderSegment s : profile.getSegments()) {
+			for(IProfileSegment s : profile.getSegments()) {
 				Element seg = new Element(BORDER_SEG_KEY);
 				seg.addContent(createElement(ID_KEY, s.getID()));
 				seg.addContent(createElement(INDEX_KEY, String.valueOf(s.getStartIndex())));
@@ -499,7 +499,7 @@ public abstract class XMLCreator<T> {
 		
 		// add stats
 		Element stats = new Element(STATS_SECTION_KEY);
-		for(PlottableStatistic s : component.getStatistics()) {
+		for(Measurement s : component.getStatistics()) {
 			Element stat = new Element(STAT_KEY);
 			stat.addContent(createElement(NAME_KEY, s));
 			stat.addContent(createElement(VALUE_KEY, String.valueOf(component.getStatistic(s))));

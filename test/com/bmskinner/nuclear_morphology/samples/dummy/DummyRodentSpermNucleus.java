@@ -24,18 +24,18 @@ import java.util.Map;
 import java.util.UUID;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
+import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.cells.ComponentFactory.ComponentCreationException;
+import com.bmskinner.nuclear_morphology.components.generic.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
-import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
-import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
-import com.bmskinner.nuclear_morphology.components.generic.Tag;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
-import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
-import com.bmskinner.nuclear_morphology.components.nuclear.ISignalCollection;
+import com.bmskinner.nuclear_morphology.components.measure.Measurement;
+import com.bmskinner.nuclear_morphology.components.nuclei.DefaultRodentSpermNucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.nuclei.sperm.DefaultRodentSpermNucleus;
-import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
+import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.signals.ISignalCollection;
 
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
@@ -79,10 +79,10 @@ public class DummyRodentSpermNucleus extends DummyCellularComponent implements N
 		nucleus = (Nucleus) component;
 		nucleus.offset(COM.getX(), COM.getY());
         initialise(PROFILE_WINDOW);	    
-        setStatistic(PlottableStatistic.AREA,     AREA);
-        setStatistic(PlottableStatistic.MAX_FERET, MAX_FERET);
-        setStatistic(PlottableStatistic.PERIMETER, PERIMETER);
-        setStatistic(PlottableStatistic.MIN_DIAMETER, MIN_DIAMETER);
+        setStatistic(Measurement.AREA,     AREA);
+        setStatistic(Measurement.MAX_FERET, MAX_FERET);
+        setStatistic(Measurement.PERIMETER, PERIMETER);
+        setStatistic(Measurement.MIN_DIAMETER, MIN_DIAMETER);
 		this.name = name;		
 	}
 	
@@ -127,11 +127,6 @@ public class DummyRodentSpermNucleus extends DummyCellularComponent implements N
 	public void calculateSignalAnglesFromPoint(IBorderPoint p) {
 		nucleus.calculateSignalAnglesFromPoint(p);
 		
-	}
-
-	@Override
-	public String dumpInfo(int type) {
-		return nucleus.dumpInfo(type);
 	}
 
 	@Override

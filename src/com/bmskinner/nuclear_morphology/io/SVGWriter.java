@@ -33,9 +33,9 @@ import java.util.stream.Collectors;
 import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.graphics2d.svg.SVGGraphics2D;
 
-import com.bmskinner.nuclear_morphology.components.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
+import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -124,7 +124,7 @@ public class SVGWriter implements Io {
      * 
      * @param c
      */
-    public void export(@NonNull List<? extends @NonNull CellularComponent> list) {
+    public void export(@NonNull List<? extends com.bmskinner.nuclear_morphology.components.cells.CellularComponent> list) {
     	
     	double w = list.stream().mapToDouble( c-> c.toShape().getBounds2D().getWidth()).sum();
     	double h = list.stream().mapToDouble( c-> c.toShape().getBounds2D().getHeight()).max().orElse(100);

@@ -35,10 +35,12 @@ import org.junit.rules.ExpectedException;
 import com.bmskinner.nuclear_morphology.ComponentTester;
 import com.bmskinner.nuclear_morphology.TestDatasetBuilder;
 import com.bmskinner.nuclear_morphology.TestResources;
-import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
-import com.bmskinner.nuclear_morphology.components.generic.Version;
-import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
-import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.components.datasets.DefaultAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
+import com.bmskinner.nuclear_morphology.components.measure.Measurement;
+import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
+import com.bmskinner.nuclear_morphology.components.nuclei.NucleusType;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 
 /**
@@ -79,7 +81,7 @@ public class DefaultAnalysisDatasetTest extends ComponentTester {
 
     	int defaultArea = TestDatasetBuilder.DEFAULT_BASE_HEIGHT * TestDatasetBuilder.DEFAULT_BASE_WIDTH;
     	
-        ICellCollection c = d.getCollection().filterCollection(PlottableStatistic.AREA, MeasurementScale.PIXELS, defaultArea, defaultArea*2);
+        ICellCollection c = d.getCollection().filterCollection(Measurement.AREA, MeasurementScale.PIXELS, defaultArea, defaultArea*2);
         UUID id = c.getID();
         
         d.addChildCollection(c);        
@@ -90,7 +92,7 @@ public class DefaultAnalysisDatasetTest extends ComponentTester {
     @Test
     public void testAddChildDataset() {
     	int defaultArea = TestDatasetBuilder.DEFAULT_BASE_HEIGHT * TestDatasetBuilder.DEFAULT_BASE_WIDTH;
-        ICellCollection c = d.getCollection().filterCollection(PlottableStatistic.AREA, MeasurementScale.PIXELS, defaultArea, defaultArea*2);
+        ICellCollection c = d.getCollection().filterCollection(Measurement.AREA, MeasurementScale.PIXELS, defaultArea, defaultArea*2);
         IAnalysisDataset ch = new DefaultAnalysisDataset(c);
         UUID id = ch.getId();
         
@@ -116,7 +118,7 @@ public class DefaultAnalysisDatasetTest extends ComponentTester {
     public void testGetChildCount() {
         assertEquals(N_CHILD_DATASETS, d.getChildCount());
         int defaultArea = TestDatasetBuilder.DEFAULT_BASE_HEIGHT * TestDatasetBuilder.DEFAULT_BASE_WIDTH;
-        ICellCollection c = d.getCollection().filterCollection(PlottableStatistic.AREA, MeasurementScale.PIXELS, defaultArea, defaultArea*2);
+        ICellCollection c = d.getCollection().filterCollection(Measurement.AREA, MeasurementScale.PIXELS, defaultArea, defaultArea*2);
         d.addChildCollection(c);  
         assertEquals(N_CHILD_DATASETS+1, d.getChildCount());
     }

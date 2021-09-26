@@ -29,22 +29,22 @@ import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nuclear_morphology.components.ICell;
-import com.bmskinner.nuclear_morphology.components.ICellCollection;
-import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
-import com.bmskinner.nuclear_morphology.components.generic.Tag;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
-import com.bmskinner.nuclear_morphology.components.nuclear.Colocalisation;
-import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
-import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult;
-import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.ShrinkType;
-import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
-import com.bmskinner.nuclear_morphology.components.nuclear.PairwiseSignalDistanceCollection;
-import com.bmskinner.nuclear_morphology.components.nuclear.PairwiseSignalDistanceValue;
-import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
+import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.cells.ICell;
+import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
+import com.bmskinner.nuclear_morphology.components.measure.Measurement;
+import com.bmskinner.nuclear_morphology.components.measure.MeasurementDimension;
+import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
-import com.bmskinner.nuclear_morphology.components.stats.StatisticDimension;
+import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.signals.Colocalisation;
+import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
+import com.bmskinner.nuclear_morphology.components.signals.IShellResult;
+import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
+import com.bmskinner.nuclear_morphology.components.signals.PairwiseSignalDistanceCollection;
+import com.bmskinner.nuclear_morphology.components.signals.PairwiseSignalDistanceValue;
+import com.bmskinner.nuclear_morphology.components.signals.UnavailableSignalGroupException;
+import com.bmskinner.nuclear_morphology.components.signals.IShellResult.ShrinkType;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
@@ -335,14 +335,14 @@ public class SignalManager {
      * @param signalGroupId the signal group
      * @return the median value
      */
-    public double getMedianSignalStatistic(@NonNull final PlottableStatistic stat, @NonNull final MeasurementScale scale, @NonNull final UUID signalGroupId) {
+    public double getMedianSignalStatistic(@NonNull final Measurement stat, @NonNull final MeasurementScale scale, @NonNull final UUID signalGroupId) {
 
         double[] values = null;
         double median;
         /*
          * Angles must be wrapped
          */
-        if (stat.getDimension().equals(StatisticDimension.ANGLE)) {
+        if (stat.getDimension().equals(MeasurementDimension.ANGLE)) {
             values = getOffsetSignalAngles(signalGroupId);
 
             if (values.length == 0) {
@@ -376,12 +376,12 @@ public class SignalManager {
      * @param signalGroupId the signal group
      * @return the values
      */
-    public double[] getSignalStatistics(@NonNull final PlottableStatistic stat, @NonNull final MeasurementScale scale, @NonNull final UUID signalGroupId) {
+    public double[] getSignalStatistics(@NonNull final Measurement stat, @NonNull final MeasurementScale scale, @NonNull final UUID signalGroupId) {
 
         if (!this.hasSignals(signalGroupId))
             return new double[0];
         
-        if(PlottableStatistic.NUCLEUS_SIGNAL_COUNT.equals(stat)) {
+        if(Measurement.NUCLEUS_SIGNAL_COUNT.equals(stat)) {
         	return collection.getCells().stream().flatMap(c->c.getNuclei().stream())
                     .mapToDouble(n->n.getSignalCollection().numberOfSignals(signalGroupId))
                     .toArray();
@@ -406,7 +406,7 @@ public class SignalManager {
      */
     public double getMeanSignalAngle(@NonNull final UUID signalGroupId) {
 
-        double[] values = getSignalStatistics(PlottableStatistic.ANGLE, MeasurementScale.PIXELS, signalGroupId);
+        double[] values = getSignalStatistics(Measurement.ANGLE, MeasurementScale.PIXELS, signalGroupId);
 
         double sumSin = 0;
         double sumCos = 0;
@@ -434,7 +434,7 @@ public class SignalManager {
      */
     public double[] getOffsetSignalAngles(@NonNull final UUID signalGroupId) {
 
-        double[] values = getSignalStatistics(PlottableStatistic.ANGLE, MeasurementScale.PIXELS, signalGroupId);
+        double[] values = getSignalStatistics(Measurement.ANGLE, MeasurementScale.PIXELS, signalGroupId);
 
         if (values.length == 0) {
             return new double[0];

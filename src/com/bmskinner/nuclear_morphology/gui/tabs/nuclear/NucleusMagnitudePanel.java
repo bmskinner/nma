@@ -31,8 +31,8 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nuclear_morphology.charting.datasets.AnalysisDatasetTableCreator;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptionsBuilder;
-import com.bmskinner.nuclear_morphology.components.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
@@ -130,7 +130,7 @@ public class NucleusMagnitudePanel extends AbstractPairwiseDetailPanel {
 
         // NucleusType type =
         // IAnalysisDataset.getBroadestNucleusType(getDatasets());
-        for (PlottableStatistic stat : PlottableStatistic.getNucleusStats()) {
+        for (Measurement stat : Measurement.getNucleusStats()) {
 
             TableOptions options = new TableOptionsBuilder().setDatasets(getDatasets()).addStatistic(stat).build();
 

@@ -28,16 +28,16 @@ import java.util.stream.Collectors;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.components.DefaultAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.DefaultCellCollection;
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.ICellCollection;
-import com.bmskinner.nuclear_morphology.components.MergeSourceAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
-import com.bmskinner.nuclear_morphology.components.nuclear.SignalGroup;
+import com.bmskinner.nuclear_morphology.components.datasets.DefaultAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.datasets.DefaultCellCollection;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
+import com.bmskinner.nuclear_morphology.components.datasets.MergeSourceAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
+import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
+import com.bmskinner.nuclear_morphology.components.signals.SignalGroup;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**

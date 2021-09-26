@@ -10,8 +10,8 @@ import com.bmskinner.nuclear_morphology.charting.datasets.ChartDatasetCreationEx
 import com.bmskinner.nuclear_morphology.charting.datasets.ProfileDatasetCreator;
 import com.bmskinner.nuclear_morphology.charting.datasets.ProfileDatasetCreator.ProfileChartDataset;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
-import com.bmskinner.nuclear_morphology.components.generic.IProfile;
-import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**

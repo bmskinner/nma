@@ -31,19 +31,19 @@ import com.bmskinner.nuclear_morphology.analysis.detection.GenericDetector;
 import com.bmskinner.nuclear_morphology.analysis.detection.StatsMap;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageAnnotator;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
-import com.bmskinner.nuclear_morphology.components.CellFactory;
-import com.bmskinner.nuclear_morphology.components.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.ComponentFactory;
-import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
-import com.bmskinner.nuclear_morphology.components.ICell;
+import com.bmskinner.nuclear_morphology.components.cells.CellFactory;
+import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.cells.ComponentFactory;
+import com.bmskinner.nuclear_morphology.components.cells.ICell;
+import com.bmskinner.nuclear_morphology.components.cells.ComponentFactory.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
+import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.NucleusFactory;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.ICannyOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
-import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -213,9 +213,9 @@ public class FluorescentNucleusFinder extends CellFinder {
 
         result.moveCentreOfMass(offsetCoM);
 
-        result.setStatistic(PlottableStatistic.AREA, values.get(StatsMap.AREA));
-        result.setStatistic(PlottableStatistic.MAX_FERET, values.get(StatsMap.FERET));
-        result.setStatistic(PlottableStatistic.PERIMETER, values.get(StatsMap.PERIM));
+        result.setStatistic(Measurement.AREA, values.get(StatsMap.AREA));
+        result.setStatistic(Measurement.MAX_FERET, values.get(StatsMap.FERET));
+        result.setStatistic(Measurement.PERIMETER, values.get(StatsMap.PERIM));
 
         result.setScale(nuclOptions.getScale());
 

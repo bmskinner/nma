@@ -29,10 +29,9 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
-import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
-import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
-import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.components.cells.ComponentFactory.ComponentCreationException;
+import com.bmskinner.nuclear_morphology.components.measure.Measurement;
+import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 import com.bmskinner.nuclear_morphology.samples.dummy.DummyRodentSpermNucleus;
 
 
@@ -62,8 +61,8 @@ public class DefaultRodentSpermNucleusTest {
         double scale = 5;
         
         // Get and save the values with default scale 1
-        Map<PlottableStatistic, Double> map = new HashMap<>();
-        for(PlottableStatistic stat : PlottableStatistic.getNucleusStats(NucleusType.RODENT_SPERM)){
+        Map<Measurement, Double> map = new HashMap<>();
+        for(Measurement stat : Measurement.getNucleusStats(NucleusType.RODENT_SPERM)){
             map.put(stat, testNucleus.getStatistic(stat));
         }
         
@@ -71,10 +70,10 @@ public class DefaultRodentSpermNucleusTest {
         testNucleus.setScale(scale);
         
         // Get the actual values for microns and pixels
-        for(PlottableStatistic stat : PlottableStatistic.getNucleusStats(NucleusType.RODENT_SPERM)){
+        for(Measurement stat : Measurement.getNucleusStats(NucleusType.RODENT_SPERM)){
             double m = testNucleus.getStatistic(stat, MeasurementScale.MICRONS);
             
-            double expected = PlottableStatistic.convert(map.get(stat), scale, MeasurementScale.MICRONS, stat.getDimension());
+            double expected = Measurement.convert(map.get(stat), scale, MeasurementScale.MICRONS, stat.getDimension());
             assertEquals(stat.toString(), expected, m, 0);
             
             double d = testNucleus.getStatistic(stat, MeasurementScale.PIXELS);
@@ -87,7 +86,7 @@ public class DefaultRodentSpermNucleusTest {
         double epsilon = 0; // the amount of difference permitted 
         double expected = 25;
         
-        for(PlottableStatistic stat : PlottableStatistic.getNucleusStats(NucleusType.RODENT_SPERM)){
+        for(Measurement stat : Measurement.getNucleusStats(NucleusType.RODENT_SPERM)){
             testNucleus.setStatistic(stat, expected);
             double d = testNucleus.getStatistic(stat);
             assertEquals(stat.toString(), expected, d, epsilon);

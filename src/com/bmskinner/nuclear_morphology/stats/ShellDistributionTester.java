@@ -19,9 +19,9 @@ package com.bmskinner.nuclear_morphology.stats;
 import org.apache.commons.math3.stat.inference.ChiSquareTest;
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult;
-import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.Aggregation;
-import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.Normalisation;
+import com.bmskinner.nuclear_morphology.components.signals.IShellResult;
+import com.bmskinner.nuclear_morphology.components.signals.IShellResult.Aggregation;
+import com.bmskinner.nuclear_morphology.components.signals.IShellResult.Normalisation;
 
 /**
  * Compare shell distributions between shell results

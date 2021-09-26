@@ -22,7 +22,7 @@ import com.bmskinner.nuclear_morphology.analysis.mesh.DefaultMeshImage;
 import com.bmskinner.nuclear_morphology.analysis.mesh.Mesh;
 import com.bmskinner.nuclear_morphology.analysis.mesh.MeshCreationException;
 import com.bmskinner.nuclear_morphology.analysis.mesh.MeshImage;
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.gui.tabs.signals.warping.SignalWarpingModel;
 import com.bmskinner.nuclear_morphology.logging.Loggable;

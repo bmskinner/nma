@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.EventObject;
 import java.util.List;
 
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 
 /**
  * Send a list of datasets to registered listeners to draw charts and tables

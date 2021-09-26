@@ -31,13 +31,13 @@ import org.junit.Test;
 
 import com.bmskinner.nuclear_morphology.TestImageDatasetCreator;
 import com.bmskinner.nuclear_morphology.TestResources;
-import com.bmskinner.nuclear_morphology.components.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
+import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.measure.Measurement;
+import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
-import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
 
 /**
@@ -115,7 +115,7 @@ public class BasicAnalysisPipelineTest extends AnalysisPipelineTest {
 
 
 		// Check the stats are the same
-		for(PlottableStatistic s : PlottableStatistic.getStats(CellularComponent.NUCLEUS)){
+		for(Measurement s : Measurement.getStats(CellularComponent.NUCLEUS)){
 			double eMed = exp.getCollection().getMedian(s, CellularComponent.NUCLEUS, MeasurementScale.PIXELS);
 			double oMed = obs.getCollection().getMedian(s, CellularComponent.NUCLEUS, MeasurementScale.PIXELS);
 

@@ -16,17 +16,18 @@ import org.junit.runners.Parameterized.Parameters;
 import com.bmskinner.nuclear_morphology.ComponentTester;
 import com.bmskinner.nuclear_morphology.TestDatasetBuilder;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.components.generic.IProfileCollection;
-import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
-import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
-import com.bmskinner.nuclear_morphology.components.generic.SegmentedFloatProfile;
-import com.bmskinner.nuclear_morphology.components.generic.Tag;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
-import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
-import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
+import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclei.DefaultNucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.nuclei.NucleusType;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfileCollection;
+import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
+import com.bmskinner.nuclear_morphology.components.profiles.SegmentedFloatProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
 
 /**
  * Tests for implementations of the Taggable interface
@@ -85,7 +86,7 @@ public class TaggableTest extends ComponentTester {
 	public void testUpdatingSegmentsInProfile() throws Exception {
 		ISegmentedProfile oldProfile = taggable.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
 		
-		IBorderSegment seg0 = oldProfile.getSegmentAt(0);
+		IProfileSegment seg0 = oldProfile.getSegmentAt(0);
 		UUID segId = seg0.getID();
 		
 		int oldStart = seg0.getStartIndex();
@@ -116,13 +117,13 @@ public class TaggableTest extends ComponentTester {
 		assertEquals("Segment count", 1, oldProfile.getSegmentCount(), testProfile.getSegmentCount());
 		
 		// Test multi segments
-		IBorderSegment oldSeg = oldProfile.getSegmentAt(0);	
-		IBorderSegment testSeg = testProfile.getSegmentAt(0);	
+		IProfileSegment oldSeg = oldProfile.getSegmentAt(0);	
+		IProfileSegment testSeg = testProfile.getSegmentAt(0);	
 		assertEquals("Segment start", oldSeg.getStartIndex(), testSeg.getStartIndex());
 		
 		// Test default segments
-		IBorderSegment oldDefaultSeg = oldProfile.getSegment(IProfileCollection.DEFAULT_SEGMENT_ID);
-		IBorderSegment testDefaultSeg = testProfile.getSegment(IProfileCollection.DEFAULT_SEGMENT_ID);
+		IProfileSegment oldDefaultSeg = oldProfile.getSegment(IProfileCollection.DEFAULT_SEGMENT_ID);
+		IProfileSegment testDefaultSeg = testProfile.getSegment(IProfileCollection.DEFAULT_SEGMENT_ID);
 		assertEquals("Default segment start", oldDefaultSeg.getStartIndex(), testDefaultSeg.getStartIndex());
 		
 		
@@ -141,14 +142,14 @@ public class TaggableTest extends ComponentTester {
 		assertEquals("Segment count", 1, templateProfile.getSegmentCount(), testProfile.getSegmentCount());
 		
 		// Test multi segments
-		IBorderSegment oldSeg = oldProfile.getSegmentAt(0);	
-		IBorderSegment testSeg = testProfile.getSegmentAt(0);	
+		IProfileSegment oldSeg = oldProfile.getSegmentAt(0);	
+		IProfileSegment testSeg = testProfile.getSegmentAt(0);	
 		assertEquals("Segment start", oldSeg.getStartIndex(), testSeg.getStartIndex());
 		
 		// Test default segments
-		IBorderSegment oldDefaultSeg = oldProfile.getSegment(IProfileCollection.DEFAULT_SEGMENT_ID);
-		IBorderSegment templateDefaultSeg = templateProfile.getSegment(IProfileCollection.DEFAULT_SEGMENT_ID);
-		IBorderSegment testDefaultSeg = testProfile.getSegment(IProfileCollection.DEFAULT_SEGMENT_ID);
+		IProfileSegment oldDefaultSeg = oldProfile.getSegment(IProfileCollection.DEFAULT_SEGMENT_ID);
+		IProfileSegment templateDefaultSeg = templateProfile.getSegment(IProfileCollection.DEFAULT_SEGMENT_ID);
+		IProfileSegment testDefaultSeg = testProfile.getSegment(IProfileCollection.DEFAULT_SEGMENT_ID);
 		assertEquals("Default segment start", templateDefaultSeg.getStartIndex(), testDefaultSeg.getStartIndex());
 		assertEquals("Default segment start", oldDefaultSeg.getStartIndex(), testDefaultSeg.getStartIndex());
 	}

@@ -22,7 +22,7 @@ import java.util.List;
 
 import javax.swing.JComboBox;
 
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 
 /**
  * This creates a panel with a drop down list of datasets, specified in the

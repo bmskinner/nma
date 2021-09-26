@@ -18,8 +18,8 @@ package com.bmskinner.nuclear_morphology.core;
 
 import java.io.File;
 
-import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
-import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
+import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
+import com.bmskinner.nuclear_morphology.components.nuclei.NucleusType;
 import com.bmskinner.nuclear_morphology.components.options.AbstractHashOptions;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter.ColourSwatch;
 import com.bmskinner.nuclear_morphology.io.DatasetExportMethod.ExportFormat;

@@ -20,8 +20,10 @@ import java.util.function.Predicate;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
-import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.components.cells.ICell;
+import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
+import com.bmskinner.nuclear_morphology.components.measure.Measurement;
+import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 
 /**
  * Methods for filtering, dividing and combining collections
@@ -74,7 +76,7 @@ public interface Filterable {
      * @param upper the upper bound for the stat
      * @return a new collection with only cells matching the filter
      */
-    ICellCollection filterCollection(@NonNull PlottableStatistic stat, MeasurementScale scale, double lower, double upper);
+    ICellCollection filterCollection(@NonNull Measurement stat, MeasurementScale scale, double lower, double upper);
 
     /**
      * Filter the collection for cells that match the given predicate

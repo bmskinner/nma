@@ -24,19 +24,19 @@ import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nuclear_morphology.components.SegmentedCellularComponent;
 import com.bmskinner.nuclear_morphology.components.Taggable;
-import com.bmskinner.nuclear_morphology.components.generic.DoubleEquation;
+import com.bmskinner.nuclear_morphology.components.UnavailableBorderPointException;
+import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.cells.SegmentedCellularComponent;
+import com.bmskinner.nuclear_morphology.components.generic.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
-import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
-import com.bmskinner.nuclear_morphology.components.generic.LineEquation;
-import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
-import com.bmskinner.nuclear_morphology.components.generic.SegmentedFloatProfile;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderPointException;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
-import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
-import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
+import com.bmskinner.nuclear_morphology.components.measure.DoubleEquation;
+import com.bmskinner.nuclear_morphology.components.measure.LineEquation;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
+import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
+import com.bmskinner.nuclear_morphology.components.profiles.SegmentedFloatProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.utility.AngleTools;
 
@@ -87,8 +87,8 @@ public class ProfileCreator {
      * 
      * @return
      */
-    private List<IBorderSegment> getExistingSegments() {
-        List<IBorderSegment> segments = new ArrayList<>();
+    private List<IProfileSegment> getExistingSegments() {
+        List<IProfileSegment> segments = new ArrayList<>();
         LOGGER.finest( "Getting existing segments from angle profile");
         if(!target.hasProfile(ProfileType.ANGLE))
         	return segments;
@@ -111,7 +111,7 @@ public class ProfileCreator {
 
     private ISegmentedProfile calculateAngleProfile() throws UnavailableBorderPointException {
 
-        List<IBorderSegment> segments = getExistingSegments();
+        List<IProfileSegment> segments = getExistingSegments();
 
         float[] angles = new float[target.getBorderLength()];
 
@@ -159,13 +159,13 @@ public class ProfileCreator {
         return newProfile;
     }
 
-    private void reapplySegments(List<IBorderSegment> segments, ISegmentedProfile profile) {
+    private void reapplySegments(List<IProfileSegment> segments, ISegmentedProfile profile) {
 
         // If the border list has changed, the profile lengths will be different
         // In this case, add and normalise the segment lengths
         if (segments.get(0).getProfileLength() != target.getBorderLength()) {
             try {
-                segments = IBorderSegment.scaleSegments(segments, target.getBorderLength());
+                segments = IProfileSegment.scaleSegments(segments, target.getBorderLength());
             } catch (ProfileException e) {
                 LOGGER.warning("Error scaling segments");
                 LOGGER.log(Loggable.STACK, "Error scaling segments when profiling", e);

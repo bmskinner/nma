@@ -11,17 +11,17 @@ import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.SingleDatasetAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.generic.IProfile;
-import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
-import com.bmskinner.nuclear_morphology.components.generic.Tag;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableComponentException;
-import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
+import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.UnavailableComponentException;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
+import com.bmskinner.nuclear_morphology.components.profiles.Tag;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.jujutsu.tsne.TSneConfiguration;
 import com.jujutsu.tsne.barneshut.BHTSne;
@@ -91,8 +91,8 @@ public class TsneMethod  extends SingleDatasetAnalysisMethod {
 		// if used for clustering, it should be attached to the cluster id
 		for(int i=0; i<nuclei.size(); i++) {
 			Nucleus n = nuclei.get(i);	
-			n.setStatistic(PlottableStatistic.TSNE_1, tSneResult[i][0]);
-			n.setStatistic(PlottableStatistic.TSNE_2, tSneResult[i][1]);
+			n.setStatistic(Measurement.TSNE_1, tSneResult[i][0]);
+			n.setStatistic(Measurement.TSNE_2, tSneResult[i][1]);
 		}
 		
 		Optional<IAnalysisOptions> analysisOptions = dataset.getAnalysisOptions();
@@ -127,19 +127,19 @@ public class TsneMethod  extends SingleDatasetAnalysisMethod {
 			}
 			
 			
-			for (PlottableStatistic stat : PlottableStatistic.getNucleusStats((dataset.getCollection().getNucleusType()))) {
+			for (Measurement stat : Measurement.getNucleusStats((dataset.getCollection().getNucleusType()))) {
 				if(!options.getBoolean(stat.toString()))
 					continue;
 				matrix[i][j++] = n.getStatistic(stat);
 			}
 			
-			for (IBorderSegment s : dataset.getCollection().getProfileCollection().getSegments(Tag.REFERENCE_POINT)) {
+			for (IProfileSegment s : dataset.getCollection().getProfileCollection().getSegments(Tag.REFERENCE_POINT)) {
 				if(!options.getBoolean(s.getID().toString()))
 					continue;
 				
-				IBorderSegment seg = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegment(s.getID());
+				IProfileSegment seg = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegment(s.getID());
                 double proportionPerimeter = (double) seg.length() / (double) seg.getProfileLength();
-				matrix[i][j++] = n.getStatistic(PlottableStatistic.PERIMETER) * proportionPerimeter;
+				matrix[i][j++] = n.getStatistic(Measurement.PERIMETER) * proportionPerimeter;
 			}
 		}
 		return matrix;
@@ -151,7 +151,7 @@ public class TsneMethod  extends SingleDatasetAnalysisMethod {
 	 */
 	private int calculateNumberOfDimensions() {
 		int dimensions = 0;
-		for (PlottableStatistic stat : PlottableStatistic.getNucleusStats((dataset.getCollection().getNucleusType())))
+		for (Measurement stat : Measurement.getNucleusStats((dataset.getCollection().getNucleusType())))
 			if(options.getBoolean(stat.toString()))
 				dimensions++;
 		
@@ -160,7 +160,7 @@ public class TsneMethod  extends SingleDatasetAnalysisMethod {
 				dimensions+=100;
 		
 		try {
-			for (IBorderSegment s : dataset.getCollection().getProfileCollection().getSegments(Tag.REFERENCE_POINT))
+			for (IProfileSegment s : dataset.getCollection().getProfileCollection().getSegments(Tag.REFERENCE_POINT))
 				if(options.getBoolean(s.getID().toString()))
 					dimensions++;
 			

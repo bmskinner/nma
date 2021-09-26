@@ -32,7 +32,12 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
+import com.bmskinner.nuclear_morphology.components.profiles.DefaultProfileSegment;
+import com.bmskinner.nuclear_morphology.components.profiles.FloatProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.SegmentedFloatProfile;
 
 /**
  * Tests for the methods specific to the segmented float profile. Common methods are
@@ -61,32 +66,32 @@ public class SegmentedFloatProfileTest {
 	 * @return
 	 * @throws ProfileException 
 	 */
-	private List<IBorderSegment> makeTestSegments() throws ProfileException{
-		List<IBorderSegment> list = new ArrayList<>();
+	private List<IProfileSegment> makeTestSegments() throws ProfileException{
+		List<IProfileSegment> list = new ArrayList<>();
 		list.add(makeSeg0());
 		list.add(makeSeg1());
 		list.add(makeSeg2());
 		list.add(makeSeg3());
 
-		IBorderSegment.linkSegments(list);
+		IProfileSegment.linkSegments(list);
 
 		return list;
 	}
 	
-	private IBorderSegment makeSeg0(){
-	    return new DefaultBorderSegment(10, 20, 100, UUID.fromString(SEG_0));
+	private IProfileSegment makeSeg0(){
+	    return new DefaultProfileSegment(10, 20, 100, UUID.fromString(SEG_0));
 	}
 	
-	private IBorderSegment makeSeg1(){
-        return new DefaultBorderSegment(20, 45, 100, UUID.fromString(SEG_1));
+	private IProfileSegment makeSeg1(){
+        return new DefaultProfileSegment(20, 45, 100, UUID.fromString(SEG_1));
     }
 	
-	private IBorderSegment makeSeg2(){
-        return new DefaultBorderSegment(45, 89, 100, UUID.fromString(SEG_2));
+	private IProfileSegment makeSeg2(){
+        return new DefaultProfileSegment(45, 89, 100, UUID.fromString(SEG_2));
     }
 	
-	private IBorderSegment makeSeg3(){
-        return new DefaultBorderSegment(89, 10, 100, UUID.fromString(SEG_3));
+	private IProfileSegment makeSeg3(){
+        return new DefaultProfileSegment(89, 10, 100, UUID.fromString(SEG_3));
     }
 	
 	
@@ -97,7 +102,7 @@ public class SegmentedFloatProfileTest {
 	 */
 	private ISegmentedProfile makeTestProfile() throws ProfileException{
 		
-		List<IBorderSegment> list = makeTestSegments();
+		List<IProfileSegment> list = makeTestSegments();
 		IProfile profile = new FloatProfile(10, 100);
 		return new SegmentedFloatProfile(profile, list);
 	}
@@ -107,13 +112,13 @@ public class SegmentedFloatProfileTest {
 
 	@Test
 	public void testSegmentedFloatProfileIProfileListOfIBorderSegment() throws ProfileException {
-	    List<IBorderSegment> list = makeTestSegments();
+	    List<IProfileSegment> list = makeTestSegments();
 	    assertEquals(list.size(), sp.getSegmentCount());
 	}
 		
 	@Test
     public void testSegmentedFloatProfileIProfileListOfIBorderSegmentExceptsOnMismatchedProfileAndList() throws ProfileException {
-        List<IBorderSegment> list = makeTestSegments();
+        List<IProfileSegment> list = makeTestSegments();
         IProfile profile = new FloatProfile(10, 110);
         exception.expect(IllegalArgumentException.class);
         new SegmentedFloatProfile(profile, list);
@@ -161,7 +166,7 @@ public class SegmentedFloatProfileTest {
 	@Test
     public void testGetSegmentsReturnsSingleItemListAfterClearing() throws ProfileException {
 		sp.clearSegments();
-        List<IBorderSegment> result = sp.getSegments();
+        List<IProfileSegment> result = sp.getSegments();
         assertEquals(1, result.size());
     }
 	
@@ -182,7 +187,7 @@ public class SegmentedFloatProfileTest {
 	@Test
     public void testToString() {
 	    StringBuilder builder = new StringBuilder("Profile");
-        for (IBorderSegment seg : sp.getSegments()) {
+        for (IProfileSegment seg : sp.getSegments()) {
             builder.append(" | "+seg.toString());
         }
 

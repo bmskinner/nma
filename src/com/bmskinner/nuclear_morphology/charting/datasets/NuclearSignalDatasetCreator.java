@@ -37,18 +37,18 @@ import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellAnalysisMet
 import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellDetector;
 import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellDetector.Shell;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
-import com.bmskinner.nuclear_morphology.components.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.ICellCollection;
+import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
-import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
-import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult;
-import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.Aggregation;
-import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.Normalisation;
-import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.ShrinkType;
-import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
+import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
+import com.bmskinner.nuclear_morphology.components.signals.IShellResult;
+import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
+import com.bmskinner.nuclear_morphology.components.signals.IShellResult.Aggregation;
+import com.bmskinner.nuclear_morphology.components.signals.IShellResult.Normalisation;
+import com.bmskinner.nuclear_morphology.components.signals.IShellResult.ShrinkType;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.utility.AngleTools;
 
@@ -72,9 +72,9 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
     public IPoint getXYCoordinatesForSignal(@NonNull INuclearSignal n, @NonNull Nucleus outline){
         
     	// the anti-clockwise angle from the OP to the signal
-    	double angle = n.getStatistic(PlottableStatistic.ANGLE);
+    	double angle = n.getStatistic(Measurement.ANGLE);
 
-        double fractionalDistance = n.getStatistic(PlottableStatistic.FRACT_DISTANCE_FROM_COM);
+        double fractionalDistance = n.getStatistic(Measurement.FRACT_DISTANCE_FROM_COM);
 
         // determine the distance to the border at this angle
         double distanceToBorder = outline.getDistanceFromCoMToBorderAtAngle(angle);
@@ -155,7 +155,7 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
 
         		// ellipses are drawn starting from x y at upper left.
         		// Provide an offset from the centre
-        		double offset = n.getStatistic(PlottableStatistic.RADIUS);
+        		double offset = n.getStatistic(Measurement.RADIUS);
 
         		result.add(new Ellipse2D.Double(p.getX() - offset, p.getY() - offset, offset * 2, offset * 2));
         	}
@@ -185,7 +185,7 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
     private NuclearSignalBoxAndWhiskerDataset createMultiDatasetSignalStatisticBoxplotDataset() {
 
     	NuclearSignalBoxAndWhiskerDataset result = new NuclearSignalBoxAndWhiskerDataset();
-        PlottableStatistic stat = options.getStat();
+        Measurement stat = options.getStat();
 
         for (IAnalysisDataset d : options.getDatasets()) {
 
@@ -199,7 +199,7 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
                  * For charting, use offset angles, otherwise the boxplots will
                  * fail on wrapped signals
                  */
-                if (stat.equals(PlottableStatistic.ANGLE)) {
+                if (stat.equals(Measurement.ANGLE)) {
                     values = collection.getSignalManager().getOffsetSignalAngles(signalGroup);
                 }
 

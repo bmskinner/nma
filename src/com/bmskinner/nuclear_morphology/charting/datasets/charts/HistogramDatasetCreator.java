@@ -30,9 +30,9 @@ import com.bmskinner.nuclear_morphology.charting.datasets.AbstractDatasetCreator
 import com.bmskinner.nuclear_morphology.charting.datasets.ChartDatasetCreationException;
 import com.bmskinner.nuclear_morphology.charting.datasets.NucleusDatasetCreator;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
-import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.measure.Measurement;
+import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 
 import weka.estimators.KernelEstimator;
 
@@ -132,7 +132,7 @@ public abstract class HistogramDatasetCreator extends AbstractDatasetCreator<Cha
      * @return an array with the min and max of the range
      * @throws Exception
      */
-    protected static int[] calculateMinAndMaxRange(List<IAnalysisDataset> list, PlottableStatistic stat, String component,
+    protected static int[] calculateMinAndMaxRange(List<IAnalysisDataset> list, Measurement stat, String component,
             MeasurementScale scale) throws ChartDatasetCreationException {
 
         int[] result = new int[2];

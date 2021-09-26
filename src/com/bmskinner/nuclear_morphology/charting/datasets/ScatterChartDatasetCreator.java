@@ -29,19 +29,19 @@ import org.jfree.data.xy.XYDataset;
 
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalManager;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
-import com.bmskinner.nuclear_morphology.components.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.ICellCollection;
-import com.bmskinner.nuclear_morphology.components.IClusterGroup;
 import com.bmskinner.nuclear_morphology.components.Statistical;
-import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
-import com.bmskinner.nuclear_morphology.components.generic.Tag;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
-import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
-import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
+import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
+import com.bmskinner.nuclear_morphology.components.datasets.IClusterGroup;
+import com.bmskinner.nuclear_morphology.components.measure.Measurement;
+import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
-import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
+import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
 import com.bmskinner.nuclear_morphology.gui.dialogs.TsneDialog.ColourByType;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -103,8 +103,8 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator<ChartOpti
 
         MeasurementScale scale = options.getScale();
 
-        PlottableStatistic statA = options.getStat(0);
-        PlottableStatistic statB = options.getStat(1);
+        Measurement statA = options.getStat(0);
+        Measurement statB = options.getStat(1);
 
         for (int i = 0; i < datasets.size(); i++) {
 
@@ -126,13 +126,13 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator<ChartOpti
 
                 try {
 
-                    if (statA.equals(PlottableStatistic.VARIABILITY))
+                    if (statA.equals(Measurement.VARIABILITY))
                         statAValue = c.getNormalisedDifferenceToMedian(Tag.REFERENCE_POINT, n);
                     else
                         statAValue = n.getStatistic(statA, scale);
                     
 
-                    if (statB.equals(PlottableStatistic.VARIABILITY))
+                    if (statB.equals(Measurement.VARIABILITY))
                         statBValue = c.getNormalisedDifferenceToMedian(Tag.REFERENCE_POINT, n);
                     else
                         statBValue = n.getStatistic(statB, scale);
@@ -166,12 +166,12 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator<ChartOpti
     private SignalXYDataset createSignalScatterDataset() throws ChartDatasetCreationException {
         List<IAnalysisDataset> datasets = options.getDatasets();
 
-        List<PlottableStatistic> stats = options.getStats();
+        List<Measurement> stats = options.getStats();
 
         MeasurementScale scale = options.getScale();
 
-        PlottableStatistic statA = stats.get(0);
-        PlottableStatistic statB = stats.get(1);
+        Measurement statA = stats.get(0);
+        Measurement statB = stats.get(1);
 
         SignalXYDataset ds = new SignalXYDataset();
 
@@ -266,8 +266,8 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator<ChartOpti
         // need to transpose the matrix
         for(int i=0; i<nuclei.size(); i++) {
         	Nucleus n = nuclei.get(i);
-        	PlottableStatistic tsne1 = Arrays.stream(n.getStatistics()).filter(s->s.name().equals(xStatName)).findFirst().orElse(PlottableStatistic.TSNE_1);
-        	PlottableStatistic tsne2 = Arrays.stream(n.getStatistics()).filter(s->s.name().equals(yStatName)).findFirst().orElse(PlottableStatistic.TSNE_2);
+        	Measurement tsne1 = Arrays.stream(n.getStatistics()).filter(s->s.name().equals(xStatName)).findFirst().orElse(Measurement.TSNE_1);
+        	Measurement tsne2 = Arrays.stream(n.getStatistics()).filter(s->s.name().equals(yStatName)).findFirst().orElse(Measurement.TSNE_2);
         	xpoints[i] = n.getStatistic(tsne1);
         	ypoints[i] = n.getStatistic(tsne2);
         }

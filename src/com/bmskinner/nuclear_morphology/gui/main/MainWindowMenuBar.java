@@ -41,8 +41,8 @@ import javax.swing.JRadioButtonMenuItem;
 
 import org.eclipse.jdt.annotation.Nullable;
 
-import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
-import com.bmskinner.nuclear_morphology.components.generic.Version;
+import com.bmskinner.nuclear_morphology.components.Version;
+import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.actions.NewAnalysisAction;

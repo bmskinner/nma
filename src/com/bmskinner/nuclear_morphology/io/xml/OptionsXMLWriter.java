@@ -23,7 +23,7 @@ import java.util.logging.Logger;
 import org.eclipse.jdt.annotation.NonNull;
 import org.jdom2.Document;
 
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 
 /**
  * Write the complete set of options for all analyses in a dataset

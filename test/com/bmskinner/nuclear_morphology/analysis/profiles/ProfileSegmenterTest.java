@@ -6,14 +6,14 @@ import org.junit.Test;
 
 import com.bmskinner.nuclear_morphology.ComponentTester;
 import com.bmskinner.nuclear_morphology.TestDatasetBuilder;
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.generic.IProfile;
-import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
-import com.bmskinner.nuclear_morphology.components.generic.Tag;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
-import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
-import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
+import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.nuclei.NucleusType;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
+import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 /**
@@ -32,7 +32,7 @@ public class ProfileSegmenterTest extends ComponentTester {
 		
 		ProfileSegmenter segmenter = new ProfileSegmenter(median);
 				
-		List<IBorderSegment> segments = segmenter.segment();
+		List<IProfileSegment> segments = segmenter.segment();
 		
 		d.getCollection().getProfileCollection().addSegments(segments);
 	}

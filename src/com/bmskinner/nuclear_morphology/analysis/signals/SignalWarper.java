@@ -39,7 +39,7 @@ import com.bmskinner.nuclear_morphology.analysis.mesh.MeshCreationException;
 import com.bmskinner.nuclear_morphology.analysis.mesh.MeshImage;
 import com.bmskinner.nuclear_morphology.analysis.mesh.MeshImageCreationException;
 import com.bmskinner.nuclear_morphology.analysis.mesh.UncomparableMeshImageException;
-import com.bmskinner.nuclear_morphology.components.ICell;
+import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;

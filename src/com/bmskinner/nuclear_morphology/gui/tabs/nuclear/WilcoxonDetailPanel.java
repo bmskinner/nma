@@ -28,8 +28,8 @@ import com.bmskinner.nuclear_morphology.charting.datasets.AnalysisDatasetTableCr
 import com.bmskinner.nuclear_morphology.charting.datasets.tables.AbstractTableCreator;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptionsBuilder;
-import com.bmskinner.nuclear_morphology.components.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
@@ -67,7 +67,7 @@ public class WilcoxonDetailPanel extends AbstractPairwiseDetailPanel {
         scrollPane.setColumnHeaderView(null);
         tablePanel = createTablePanel();
 
-        for (PlottableStatistic stat : PlottableStatistic.getNucleusStats()) {
+        for (Measurement stat : Measurement.getNucleusStats()) {
 
             ExportableTable table = new ExportableTable(AbstractTableCreator.createLoadingTable());
 

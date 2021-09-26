@@ -11,7 +11,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.bmskinner.nuclear_morphology.TestDatasetBuilder;
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 
 /**

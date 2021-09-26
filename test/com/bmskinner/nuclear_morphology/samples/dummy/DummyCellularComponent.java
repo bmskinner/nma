@@ -9,12 +9,12 @@ import java.util.UUID;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.detection.Mask;
-import com.bmskinner.nuclear_morphology.components.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.UnavailableBorderPointException;
+import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.generic.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
-import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderPointException;
-import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
-import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.components.measure.Measurement;
+import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 
 import ij.gui.Roi;
@@ -108,22 +108,22 @@ public class DummyCellularComponent implements CellularComponent {
 	}
 	
 	@Override
-	public double getStatistic(PlottableStatistic stat, MeasurementScale scale) {
+	public double getStatistic(Measurement stat, MeasurementScale scale) {
 		return component.getStatistic(stat, scale);
 	}
 
 	@Override
-	public double getStatistic(PlottableStatistic stat) {
+	public double getStatistic(Measurement stat) {
 	    return component.getStatistic(stat);
 	}
 
 	@Override
-	public void setStatistic(PlottableStatistic stat, double d) {
+	public void setStatistic(Measurement stat, double d) {
 		component.setStatistic(stat, d);
 	}
 
 	@Override
-	public PlottableStatistic[] getStatistics() {
+	public Measurement[] getStatistics() {
 		return component.getStatistics();
 	}
 
@@ -354,7 +354,7 @@ public class DummyCellularComponent implements CellularComponent {
 
 	
 	@Override
-	public boolean hasStatistic(PlottableStatistic stat) {
+	public boolean hasStatistic(Measurement stat) {
 		return component.hasStatistic(stat);
 	}
 
@@ -391,7 +391,7 @@ public class DummyCellularComponent implements CellularComponent {
 	}
 
 	@Override
-	public void clearStatistic(PlottableStatistic stat) {
+	public void clearStatistic(Measurement stat) {
 		component.clearStatistic(stat);
 	}
 

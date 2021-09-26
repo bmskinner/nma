@@ -24,22 +24,22 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.image.GLCM.GLCMParameter;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.components.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.Taggable;
-import com.bmskinner.nuclear_morphology.components.generic.IProfile;
-import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
-import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
-import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
-import com.bmskinner.nuclear_morphology.components.generic.Tag;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableComponentException;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
-import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
+import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.UnavailableComponentException;
+import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.cells.ICell;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.measure.Measurement;
+import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
-import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
+import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
@@ -120,7 +120,7 @@ public class DatasetStatsExporter extends StatsExporter {
 
         outLine.append("Dataset\tFile\tCellID\tComponent\tFolder\tImage\tCentre_of_mass\t");
 
-        for (PlottableStatistic s : PlottableStatistic.getNucleusStats()) {
+        for (Measurement s : Measurement.getNucleusStats()) {
 
             String label = s.label(MeasurementScale.PIXELS)
             		.replace(" ", "_")
@@ -145,7 +145,7 @@ public class DatasetStatsExporter extends StatsExporter {
         }
         
         if(isIncludeGlcm) {
-        	for (PlottableStatistic s : PlottableStatistic.getGlcmStats()) {
+        	for (Measurement s : Measurement.getGlcmStats()) {
         		String label = s.label(MeasurementScale.PIXELS).replace(" ", "_").replace("__", "_");
                 outLine.append("GLCM_"+label + TAB);
         	}
@@ -234,11 +234,11 @@ public class DatasetStatsExporter extends StatsExporter {
 
     private void appendNucleusStats(StringBuilder outLine, IAnalysisDataset d, CellularComponent c) {
 
-        for (PlottableStatistic s : PlottableStatistic.getNucleusStats()) {
+        for (Measurement s : Measurement.getNucleusStats()) {
             double varP = 0;
             double varM = 0;
 
-            if (s.equals(PlottableStatistic.VARIABILITY)) {
+            if (s.equals(Measurement.VARIABILITY)) {
 
                 try {
                     varP = d.getCollection().getNormalisedDifferenceToMedian(Tag.REFERENCE_POINT, (Taggable) c);
@@ -260,7 +260,7 @@ public class DatasetStatsExporter extends StatsExporter {
         }
         
         if(isIncludeGlcm) {
-        	for (PlottableStatistic s : PlottableStatistic.getGlcmStats()) {
+        	for (Measurement s : Measurement.getGlcmStats()) {
         		outLine.append(c.getStatistic(s) + TAB);
         	}
         }
@@ -321,21 +321,21 @@ public class DatasetStatsExporter extends StatsExporter {
                 
         ISegmentedProfile p = c.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
         ISegmentedProfile normalisedProfile = p.interpolate(normProfileLength); // Allows point indexes
-        List<IBorderSegment> segs = p.getOrderedSegments();
+        List<IProfileSegment> segs = p.getOrderedSegments();
         
-        for(IBorderSegment segment : segs){
+        for(IProfileSegment segment : segs){
             if (segment != null) {
             	// Add the length of the segment
                 int indexLength = segment.length();
                 double fractionOfPerimeter = (double) indexLength / (double) segment.getProfileLength();
-                varP = fractionOfPerimeter * c.getStatistic(PlottableStatistic.PERIMETER, MeasurementScale.PIXELS);
-                varM = fractionOfPerimeter * c.getStatistic(PlottableStatistic.PERIMETER, MeasurementScale.MICRONS);
+                varP = fractionOfPerimeter * c.getStatistic(Measurement.PERIMETER, MeasurementScale.PIXELS);
+                varM = fractionOfPerimeter * c.getStatistic(Measurement.PERIMETER, MeasurementScale.MICRONS);
                 outLine.append(varP + TAB);
                 outLine.append(varM + TAB);
                 
                 // Add the index of the segment start and end in the normalised profile.
                 try {
-                	IBorderSegment normalisedSeg = normalisedProfile.getSegment(segment.getID());
+                	IProfileSegment normalisedSeg = normalisedProfile.getSegment(segment.getID());
                 	int start = normalisedSeg.getStartIndex();
                 	int end   = normalisedSeg.getEndIndex();
                 	outLine.append(start + TAB);

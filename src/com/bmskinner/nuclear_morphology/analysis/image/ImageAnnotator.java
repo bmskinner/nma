@@ -31,23 +31,23 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellDetector;
-import com.bmskinner.nuclear_morphology.components.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.Imageable;
 import com.bmskinner.nuclear_morphology.components.Profileable;
+import com.bmskinner.nuclear_morphology.components.UnavailableBorderPointException;
+import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.cells.ICell;
+import com.bmskinner.nuclear_morphology.components.generic.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
-import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
-import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
-import com.bmskinner.nuclear_morphology.components.generic.Tag;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderPointException;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
-import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
-import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
-import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
-import com.bmskinner.nuclear_morphology.components.nuclear.ISignalCollection;
+import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
+import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
+import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
+import com.bmskinner.nuclear_morphology.components.signals.ISignalCollection;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -215,7 +215,7 @@ public class ImageAnnotator extends AbstractImageFilterer {
             ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
             if (profile.hasSegments()) { 
 
-            	for(IBorderSegment seg : profile.getOrderedSegments()) {
+            	for(IProfileSegment seg : profile.getOrderedSegments()) {
             		Paint color = ColourSelecter.getColor(seg.getPosition(), GlobalOptions.getInstance().getSwatch());
             		Iterator<Integer> it = seg.iterator();
             		int lastIndex = n.getOffsetBorderIndex(Tag.REFERENCE_POINT, seg.getEndIndex());
@@ -537,13 +537,13 @@ public class ImageAnnotator extends AbstractImageFilterer {
 
         if (n instanceof INuclearSignal) {
 
-            area = n.getStatistic(PlottableStatistic.AREA);
-            double perim2 = Math.pow(n.getStatistic(PlottableStatistic.PERIMETER), 2);
+            area = n.getStatistic(Measurement.AREA);
+            double perim2 = Math.pow(n.getStatistic(Measurement.PERIMETER), 2);
             circ = (4 * Math.PI) * (area / perim2);
 
         } else {
-            area = n.getStatistic(PlottableStatistic.AREA);
-            circ = n.getStatistic(PlottableStatistic.CIRCULARITY);
+            area = n.getStatistic(Measurement.AREA);
+            circ = n.getStatistic(Measurement.CIRCULARITY);
         }
 
         areaLbl = "Area: " + df.format(area);
@@ -575,13 +575,13 @@ public class ImageAnnotator extends AbstractImageFilterer {
 
         if (signal instanceof INuclearSignal) {
 
-            area = signal.getStatistic(PlottableStatistic.AREA);
-            double perim2 = Math.pow(signal.getStatistic(PlottableStatistic.PERIMETER), 2);
+            area = signal.getStatistic(Measurement.AREA);
+            double perim2 = Math.pow(signal.getStatistic(Measurement.PERIMETER), 2);
             circ = (4 * Math.PI) * (area / perim2);
 
         }
 
-        fraction = area / parent.getStatistic(PlottableStatistic.AREA);
+        fraction = area / parent.getStatistic(Measurement.AREA);
 
         areaLbl = "Area: " + df.format(area);
         perimLbl = "Circ: " + df.format(circ);
@@ -630,7 +630,7 @@ public class ImageAnnotator extends AbstractImageFilterer {
             if (n.getProfile(ProfileType.ANGLE).getSegments().size() > 0) { 
                 for (int i = 0; i < n.getProfile(ProfileType.ANGLE).getSegments().size(); i++) {
 
-                    IBorderSegment seg = n.getProfile(ProfileType.ANGLE).getSegment("Seg_" + i);
+                    IProfileSegment seg = n.getProfile(ProfileType.ANGLE).getSegment("Seg_" + i);
 
                     float[] xpoints = new float[seg.length() + 1];
                     float[] ypoints = new float[seg.length() + 1];
@@ -673,7 +673,7 @@ public class ImageAnnotator extends AbstractImageFilterer {
                                                                             // segments
                 for (int i = 0; i < n.getProfile(ProfileType.ANGLE).getSegments().size(); i++) {
 
-                    IBorderSegment seg = n.getProfile(ProfileType.ANGLE).getSegment("Seg_" + i);
+                    IProfileSegment seg = n.getProfile(ProfileType.ANGLE).getSegment("Seg_" + i);
 
                     float[] xpoints = new float[seg.length() + 1];
                     float[] ypoints = new float[seg.length() + 1];

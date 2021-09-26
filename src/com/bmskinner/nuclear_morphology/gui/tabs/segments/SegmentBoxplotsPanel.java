@@ -37,12 +37,12 @@ import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPa
 import com.bmskinner.nuclear_morphology.charting.charts.panels.ViolinChartPanel;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
-import com.bmskinner.nuclear_morphology.components.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.ICellCollection;
-import com.bmskinner.nuclear_morphology.components.generic.Tag;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
-import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
-import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
+import com.bmskinner.nuclear_morphology.components.measure.Measurement;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
+import com.bmskinner.nuclear_morphology.components.profiles.Tag;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.Labels;
@@ -90,10 +90,10 @@ public class SegmentBoxplotsPanel extends BoxplotsTabPanel implements ActionList
         LOGGER.finest( "Dataset list is not empty");
 
         // Check that all the datasets have the same number of segments
-        if (IBorderSegment.segmentCountsMatch(getDatasets())) { // make a boxplot for each segment
+        if (IProfileSegment.segmentCountsMatch(getDatasets())) { // make a boxplot for each segment
 
             ICellCollection collection = activeDataset().getCollection();
-            List<IBorderSegment> segments;
+            List<IProfileSegment> segments;
             try {
                 segments = collection.getProfileCollection().getSegments(Tag.REFERENCE_POINT);
             } catch (UnavailableBorderTagException | ProfileException e) {
@@ -103,7 +103,7 @@ public class SegmentBoxplotsPanel extends BoxplotsTabPanel implements ActionList
             }
 
             // Get each segment as a boxplot
-            for (IBorderSegment seg : segments) {
+            for (IProfileSegment seg : segments) {
                 JFreeChart chart = AbstractChartFactory.createLoadingChart();
                 ViolinChartPanel chartPanel = new ViolinChartPanel(chart);
                 chartPanel.addChartSetEventListener(this);
@@ -113,7 +113,7 @@ public class SegmentBoxplotsPanel extends BoxplotsTabPanel implements ActionList
 
                 ChartOptions options = new ChartOptionsBuilder()
                 		.setDatasets(getDatasets())
-                        .addStatistic(PlottableStatistic.LENGTH)
+                        .addStatistic(Measurement.LENGTH)
                         .setScale(GlobalOptions.getInstance().getScale())
                         .setSwatch(GlobalOptions.getInstance().getSwatch())
                         .setSegPosition(seg.getPosition())

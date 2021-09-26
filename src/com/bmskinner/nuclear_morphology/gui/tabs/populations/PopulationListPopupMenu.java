@@ -22,8 +22,8 @@ import java.util.List;
 
 import org.eclipse.jdt.annotation.Nullable;
 
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.IClusterGroup;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.datasets.IClusterGroup;
 import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace;
 import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace.BioSample;
 import com.bmskinner.nuclear_morphology.core.DatasetListManager;

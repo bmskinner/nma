@@ -19,8 +19,8 @@ package com.bmskinner.nuclear_morphology.gui.tabs.cells_detail;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.bmskinner.nuclear_morphology.components.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.ICell;
+import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.cells.ICell;
 
 public class CellViewModel {
 

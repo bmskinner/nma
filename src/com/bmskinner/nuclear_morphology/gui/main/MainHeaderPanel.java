@@ -32,7 +32,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 
-import com.bmskinner.nuclear_morphology.components.generic.Version;
+import com.bmskinner.nuclear_morphology.components.Version;
 import com.bmskinner.nuclear_morphology.gui.actions.ImportDatasetAction;
 import com.bmskinner.nuclear_morphology.gui.actions.NewAnalysisAction;
 import com.bmskinner.nuclear_morphology.gui.components.panels.MeasurementUnitSettingsPanel;

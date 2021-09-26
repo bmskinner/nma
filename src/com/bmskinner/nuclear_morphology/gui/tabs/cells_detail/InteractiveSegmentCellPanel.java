@@ -39,18 +39,18 @@ import javax.swing.JPopupMenu;
 
 import com.bmskinner.nuclear_morphology.analysis.image.AbstractImageFilterer;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageAnnotator;
-import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.Statistical;
-import com.bmskinner.nuclear_morphology.components.generic.BorderTagObject;
+import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.generic.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
-import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
-import com.bmskinner.nuclear_morphology.components.generic.Tag;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
-import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
-import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
+import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.components.profiles.BorderTagObject;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
+import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
+import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.core.InterfaceUpdater;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
@@ -229,11 +229,11 @@ public class InteractiveSegmentCellPanel extends InteractiveCellPanel {
 				cell.getPrimaryNucleus().updateVerticallyRotatedNucleus();
 
 				if(tag.equals(Tag.ORIENTATION_POINT) || tag.equals(Tag.REFERENCE_POINT)) {
-					cell.getPrimaryNucleus().setStatistic(PlottableStatistic.OP_RP_ANGLE, Statistical.STAT_NOT_CALCULATED);
+					cell.getPrimaryNucleus().setStatistic(Measurement.OP_RP_ANGLE, Statistical.STAT_NOT_CALCULATED);
 				}
 				cell.getPrimaryNucleus().updateDependentStats();
 				cell.getPrimaryNucleus().setLocked(true);
-				dataset.getCollection().clear(PlottableStatistic.OP_RP_ANGLE, CellularComponent.NUCLEUS);
+				dataset.getCollection().clear(Measurement.OP_RP_ANGLE, CellularComponent.NUCLEUS);
 				cellUpdateHandler.fireCelllUpdateEvent(cell, dataset);
 				createImage();
 			});
@@ -269,12 +269,12 @@ public class InteractiveSegmentCellPanel extends InteractiveCellPanel {
 				// Get the index of the clicked point in the RP-indexed profile
 				int index = cell.getPrimaryNucleus().wrapIndex(rawIndex-rpIndex);
 
-				IBorderSegment seg = cell.getPrimaryNucleus().getProfile(ProfileType.ANGLE)
+				IProfileSegment seg = cell.getPrimaryNucleus().getProfile(ProfileType.ANGLE)
 						.getSegmentContaining(rawIndex);
 
 
-				IBorderSegment prev = seg.prevSegment();
-				IBorderSegment next = seg.nextSegment();
+				IProfileSegment prev = seg.prevSegment();
+				IProfileSegment next = seg.nextSegment();
 
 				JMenuItem prevItem = new JMenuItem("Extend "+prev.getName()+" to here");
 				prevItem.setBorder(BorderFactory.createLineBorder(ColourSelecter.getColor(prev.getPosition()), 3));

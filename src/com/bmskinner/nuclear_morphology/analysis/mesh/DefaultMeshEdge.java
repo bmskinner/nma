@@ -18,9 +18,9 @@ package com.bmskinner.nuclear_morphology.analysis.mesh;
 
 import java.awt.geom.Line2D;
 
-import com.bmskinner.nuclear_morphology.components.generic.DoubleEquation;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
-import com.bmskinner.nuclear_morphology.components.generic.LineEquation;
+import com.bmskinner.nuclear_morphology.components.measure.DoubleEquation;
+import com.bmskinner.nuclear_morphology.components.measure.LineEquation;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 public class DefaultMeshEdge implements MeshEdge {

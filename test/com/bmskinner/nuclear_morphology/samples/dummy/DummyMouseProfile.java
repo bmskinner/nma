@@ -19,8 +19,8 @@
 
 package com.bmskinner.nuclear_morphology.samples.dummy;
 
-import com.bmskinner.nuclear_morphology.components.generic.FloatProfile;
-import com.bmskinner.nuclear_morphology.components.generic.SegmentedFloatProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.FloatProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.SegmentedFloatProfile;
 
 /**
  * This class generates dummy profiles that are based on a single real mouse

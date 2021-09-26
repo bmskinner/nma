@@ -19,7 +19,7 @@ package com.bmskinner.nuclear_morphology.gui.events;
 import java.util.EventObject;
 import java.util.List;
 
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 
 /**
  * Carries instructions on analyses to be performed on a list of datasets.

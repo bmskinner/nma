@@ -27,8 +27,8 @@ import java.io.File;
 import org.junit.Test;
 
 import com.bmskinner.nuclear_morphology.TestResources;
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.generic.Version;
+import com.bmskinner.nuclear_morphology.components.Version;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
 
 public class RoundFormatConverterTest extends OldFormatConverterTest {

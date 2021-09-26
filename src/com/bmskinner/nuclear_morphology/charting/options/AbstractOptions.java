@@ -20,15 +20,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.ICell;
-import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
-import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.Aggregation;
-import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.Normalisation;
-import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.ShrinkType;
+import com.bmskinner.nuclear_morphology.components.cells.ICell;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.measure.Measurement;
+import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.options.DefaultOptions;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
-import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.components.signals.IShellResult.Aggregation;
+import com.bmskinner.nuclear_morphology.components.signals.IShellResult.Normalisation;
+import com.bmskinner.nuclear_morphology.components.signals.IShellResult.ShrinkType;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter.ColourSwatch;
 
 /**
@@ -42,7 +42,7 @@ import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter.ColourSwat
 public abstract class AbstractOptions extends DefaultOptions implements DisplayOptions, HashOptions {
 
     private final List<IAnalysisDataset>   list        = new ArrayList<>();
-    private final List<PlottableStatistic> stats       = new ArrayList<>();
+    private final List<Measurement> stats       = new ArrayList<>();
     
     /** A segment id */
     private UUID segID = null;
@@ -146,7 +146,7 @@ public abstract class AbstractOptions extends DefaultOptions implements DisplayO
     }
 
     @Override
-    public PlottableStatistic getStat() {
+    public Measurement getStat() {
         return stats.get(0);
     }
 
@@ -155,7 +155,7 @@ public abstract class AbstractOptions extends DefaultOptions implements DisplayO
      * 
      * @param stat
      */
-    public void setStat(PlottableStatistic stat) {
+    public void setStat(Measurement stat) {
         this.stats.set(0, stat);
     }
 
@@ -164,7 +164,7 @@ public abstract class AbstractOptions extends DefaultOptions implements DisplayO
      * 
      * @param stats
      */
-    public void setStats(List<PlottableStatistic> stats) {
+    public void setStats(List<Measurement> stats) {
         this.stats.addAll(stats);
     }
 
@@ -173,7 +173,7 @@ public abstract class AbstractOptions extends DefaultOptions implements DisplayO
      * 
      * @param stat
      */
-    public void addStat(PlottableStatistic stat) {
+    public void addStat(Measurement stat) {
         stats.add(stat);
     }
 
@@ -183,7 +183,7 @@ public abstract class AbstractOptions extends DefaultOptions implements DisplayO
      * @return
      */
     @Override
-    public List<PlottableStatistic> getStats() {
+    public List<Measurement> getStats() {
         return stats;
     }
 
@@ -193,7 +193,7 @@ public abstract class AbstractOptions extends DefaultOptions implements DisplayO
      * @see charting.options.DisplayOptions#getStat(int)
      */
     @Override
-    public PlottableStatistic getStat(int index) {
+    public Measurement getStat(int index) {
         return stats.get(index);
     }
 

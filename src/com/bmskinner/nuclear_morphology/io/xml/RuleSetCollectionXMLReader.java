@@ -6,8 +6,8 @@ import java.util.logging.Logger;
 import org.eclipse.jdt.annotation.NonNull;
 import org.jdom2.Element;
 
-import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
-import com.bmskinner.nuclear_morphology.components.generic.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
+import com.bmskinner.nuclear_morphology.components.profiles.Tag;
 import com.bmskinner.nuclear_morphology.components.rules.Rule;
 import com.bmskinner.nuclear_morphology.components.rules.Rule.RuleType;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSet;

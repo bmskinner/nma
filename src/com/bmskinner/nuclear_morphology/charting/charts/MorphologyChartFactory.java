@@ -44,11 +44,11 @@ import com.bmskinner.nuclear_morphology.charting.datasets.NucleusDatasetCreator;
 import com.bmskinner.nuclear_morphology.charting.datasets.ProfileDatasetCreator;
 import com.bmskinner.nuclear_morphology.charting.datasets.ProfileDatasetCreator.ProfileChartDataset;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.generic.BooleanProfile;
-import com.bmskinner.nuclear_morphology.components.generic.IProfile;
-import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
-import com.bmskinner.nuclear_morphology.components.stats.StatisticDimension;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.measure.MeasurementDimension;
+import com.bmskinner.nuclear_morphology.components.profiles.BooleanProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.stats.DipTester;
 import com.bmskinner.nuclear_morphology.stats.SignificanceTest;
@@ -88,7 +88,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 		plot.getDomainAxis().setLabel(type.getLabel());
 		plot.getRangeAxis().setLabel(PROBABILITY_LBL);
 
-		if (type.getDimension().equals(StatisticDimension.ANGLE)) {
+		if (type.getDimension().equals(MeasurementDimension.ANGLE)) {
 			plot.getDomainAxis().setRange(0, 360);
 		}
 

@@ -5,17 +5,17 @@ import java.util.UUID;
 import java.util.logging.Logger;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.ICell;
-import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
-import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
-import com.bmskinner.nuclear_morphology.components.generic.Tag;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableComponentException;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
-import com.bmskinner.nuclear_morphology.components.generic.UnsegmentedProfileException;
-import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
+import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.UnavailableComponentException;
+import com.bmskinner.nuclear_morphology.components.cells.ICell;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
+import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
+import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.profiles.UnsegmentedProfileException;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 /**
@@ -89,7 +89,7 @@ public class DatasetRepairer {
 		try {
 			int rpIndex = n.getBorderIndex(Tag.REFERENCE_POINT);
 			ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE);
-			IBorderSegment s  = profile.getSegment(expectedRPSegmentStart);
+			IProfileSegment s  = profile.getSegment(expectedRPSegmentStart);
 			int segStart = s.getStartIndex();
 
 			if(s.getStartIndex()!=rpIndex) {

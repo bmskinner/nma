@@ -19,7 +19,7 @@ package com.bmskinner.nuclear_morphology.analysis.nucleus;
 import java.util.logging.Logger;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.components.ICellCollection;
+import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**

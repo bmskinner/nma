@@ -29,19 +29,19 @@ import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.charting.datasets.ChartDatasetCreationException;
 import com.bmskinner.nuclear_morphology.charting.datasets.NucleusDatasetCreator;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
-import com.bmskinner.nuclear_morphology.components.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.ICellCollection;
-import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
-import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
-import com.bmskinner.nuclear_morphology.components.generic.Tag;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableComponentException;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
-import com.bmskinner.nuclear_morphology.components.generic.UnsegmentedProfileException;
-import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
+import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.UnavailableComponentException;
+import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
+import com.bmskinner.nuclear_morphology.components.measure.Measurement;
+import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
+import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
+import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.profiles.UnsegmentedProfileException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
@@ -73,7 +73,7 @@ public class NuclearHistogramDatasetCreator extends HistogramDatasetCreator {
 
             ICellCollection collection = dataset.getCollection();
 
-            PlottableStatistic stat = options.getStat();
+            Measurement stat = options.getStat();
             double[] values = collection.getRawValues(stat, CellularComponent.NUCLEUS, options.getScale());
 
             double[] minMaxStep = findMinAndMaxForHistogram(values);
@@ -111,7 +111,7 @@ public class NuclearHistogramDatasetCreator extends HistogramDatasetCreator {
         }
 
         List<IAnalysisDataset> list = options.getDatasets();
-        PlottableStatistic stat = options.getStat();
+        Measurement stat = options.getStat();
         MeasurementScale scale = options.getScale();
 
         int[] minMaxRange = calculateMinAndMaxRange(list, stat, CellularComponent.NUCLEUS, scale);
@@ -180,7 +180,7 @@ public class NuclearHistogramDatasetCreator extends HistogramDatasetCreator {
 
             try {
 
-                IBorderSegment medianSeg = collection.getProfileCollection().getSegmentAt(Tag.REFERENCE_POINT,
+                IProfileSegment medianSeg = collection.getProfileCollection().getSegmentAt(Tag.REFERENCE_POINT,
                         options.getSegPosition());
 
                 /*
@@ -190,7 +190,7 @@ public class NuclearHistogramDatasetCreator extends HistogramDatasetCreator {
 
                 double[] values;
 
-                values = collection.getRawValues(PlottableStatistic.LENGTH,
+                values = collection.getRawValues(Measurement.LENGTH,
                         CellularComponent.NUCLEAR_BORDER_SEGMENT, options.getScale(), medianSeg.getID());
 
                 double[] minMaxStep = findMinAndMaxForHistogram(values);
@@ -200,7 +200,7 @@ public class NuclearHistogramDatasetCreator extends HistogramDatasetCreator {
                 int bins = findNumberOfBins(values, minRounded, maxRounded, minMaxStep[2]);
                 // int bins = findBinSizeForHistogram(values, minMaxStep);
 
-                ds.addSeries(IBorderSegment.SEGMENT_PREFIX + options.getSegPosition() + "_" + collection.getName(),
+                ds.addSeries(IProfileSegment.SEGMENT_PREFIX + options.getSegPosition() + "_" + collection.getName(),
                         values, bins, minRounded, maxRounded);
             } catch (UnavailableBorderTagException | ProfileException e) {
                 throw new ChartDatasetCreationException("Cannot get segments for " + dataset.getName(), e);
@@ -227,7 +227,7 @@ public class NuclearHistogramDatasetCreator extends HistogramDatasetCreator {
             /*
              * Find the seg id for the median segment at the requested position
              */
-            IBorderSegment medianSeg;
+            IProfileSegment medianSeg;
 
             try {
                 medianSeg = collection.getProfileCollection()
@@ -247,12 +247,12 @@ public class NuclearHistogramDatasetCreator extends HistogramDatasetCreator {
             double[] lengths = new double[collection.size()];
             for (Nucleus n : collection.getNuclei()) {
 
-                IBorderSegment seg;
+                IProfileSegment seg;
                 try {
                     seg = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegment(medianSeg.getID());
                     int indexLength = seg.length();
                     double proportionPerimeter = (double) indexLength / (double) seg.getProfileLength();
-                    double length = n.getStatistic(PlottableStatistic.PERIMETER, options.getScale())
+                    double length = n.getStatistic(Measurement.PERIMETER, options.getScale())
                             * proportionPerimeter;
                     lengths[count] = length;
                 } catch (ProfileException | UnavailableComponentException e) {
@@ -275,7 +275,7 @@ public class NuclearHistogramDatasetCreator extends HistogramDatasetCreator {
             /*
              * Find the seg id for the median segment at the requested position
              */
-            IBorderSegment medianSeg;
+            IProfileSegment medianSeg;
             try {
                 medianSeg = collection.getProfileCollection()
                         .getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN)
@@ -294,13 +294,13 @@ public class NuclearHistogramDatasetCreator extends HistogramDatasetCreator {
             double[] lengths = new double[collection.size()];
             for (Nucleus n : collection.getNuclei()) {
 
-                IBorderSegment seg;
+                IProfileSegment seg;
                 try {
                     seg = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegment(medianSeg.getID());
 
                     int indexLength = seg.length();
                     double proportionPerimeter = (double) indexLength / (double) seg.getProfileLength();
-                    double length = n.getStatistic(PlottableStatistic.PERIMETER, options.getScale())
+                    double length = n.getStatistic(Measurement.PERIMETER, options.getScale())
                             * proportionPerimeter;
                     lengths[count] = length;
                 } catch (ProfileException | UnavailableComponentException e) {
@@ -365,7 +365,7 @@ public class NuclearHistogramDatasetCreator extends HistogramDatasetCreator {
 
             double[][] data = { xData, yData };
 
-            ds.addSeries(IBorderSegment.SEGMENT_PREFIX + options.getSegPosition() + "_" + collection.getName(), data);
+            ds.addSeries(IProfileSegment.SEGMENT_PREFIX + options.getSegPosition() + "_" + collection.getName(), data);
         }
 
         return ds;

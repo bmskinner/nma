@@ -12,7 +12,9 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import com.bmskinner.nuclear_morphology.ComponentTester;
-import com.bmskinner.nuclear_morphology.components.SegmentedCellularComponent;
+import com.bmskinner.nuclear_morphology.components.cells.SegmentedCellularComponent;
+import com.bmskinner.nuclear_morphology.components.profiles.FloatProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.samples.dummy.DummySegmentedCellularComponent;
 
 /**
@@ -54,7 +56,7 @@ public class DefaultProfileTest extends ComponentTester {
 	}
 				
 	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultProfile#FloatProfile(com.bmskinner.nuclear_morphology.components.generic.IProfile)}.
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultProfile#FloatProfile(com.bmskinner.nuclear_morphology.components.profiles.IProfile)}.
 	 */
 	@Test
 	public void testFloatProfileIProfile() {

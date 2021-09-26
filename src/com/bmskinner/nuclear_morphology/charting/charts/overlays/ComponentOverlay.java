@@ -30,7 +30,7 @@ import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.ui.RectangleEdge;
 
-import com.bmskinner.nuclear_morphology.components.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 
 @SuppressWarnings("serial")
 public class ComponentOverlay extends ShapeOverlay {

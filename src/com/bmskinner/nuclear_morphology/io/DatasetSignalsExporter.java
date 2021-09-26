@@ -25,16 +25,16 @@ import java.util.stream.Stream;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.components.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.ICell;
-import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
-import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
-import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
+import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.cells.ICell;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.measure.Measurement;
+import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
+import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
 
 public class DatasetSignalsExporter extends StatsExporter {
 
@@ -75,7 +75,7 @@ public class DatasetSignalsExporter extends StatsExporter {
 
         outLine.append(Stream.of(headers).collect(Collectors.joining(TAB))+TAB);
         
-        for(PlottableStatistic s : PlottableStatistic.getSignalStats()) {
+        for(Measurement s : Measurement.getSignalStats()) {
         	 String label = s.label(MeasurementScale.PIXELS)
         			 .replaceAll(" ", "_")
         			 .replaceAll("\\(", "_")
@@ -153,7 +153,7 @@ public class DatasetSignalsExporter extends StatsExporter {
     
     private void appendSignalStats(@NonNull StringBuilder outLine, @NonNull CellularComponent c) {
 
-        for (PlottableStatistic s : PlottableStatistic.getSignalStats()) {
+        for (Measurement s : Measurement.getSignalStats()) {
             double varP = c.getStatistic(s, MeasurementScale.PIXELS);
             double varM = c.getStatistic(s, MeasurementScale.MICRONS);
 

@@ -23,9 +23,9 @@ import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nuclear_morphology.components.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
-import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 
 /**
  * 
@@ -184,7 +184,7 @@ public interface Mesh<E extends CellularComponent> extends Comparable<Mesh<E>> {
      * @param seg the segment
      * @return
      */
-    Set<MeshFace> getFaces(IBorderSegment seg);
+    Set<MeshFace> getFaces(IProfileSegment seg);
 
     /**
      * Test if the given mesh can be compared to this mesh. That is,

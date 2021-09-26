@@ -24,16 +24,16 @@ import java.util.function.Predicate;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
-import com.bmskinner.nuclear_morphology.components.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.ICell;
-import com.bmskinner.nuclear_morphology.components.ICellCollection;
-import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
-import com.bmskinner.nuclear_morphology.components.generic.Tag;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
-import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
+import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.cells.ICell;
+import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
+import com.bmskinner.nuclear_morphology.components.measure.Measurement;
+import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.AbstractHashOptions;
-import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
 
 /**
  * Default implementation of the filtering options
@@ -77,68 +77,68 @@ public class DefaultFilteringOptions extends AbstractHashOptions implements Filt
 	
 
 	@Override
-	public void addMinimumThreshold(@NonNull PlottableStatistic stat, @NonNull String component, double value) {
+	public void addMinimumThreshold(@NonNull Measurement stat, @NonNull String component, double value) {
 		addMinimumThreshold(stat, component, MeasurementScale.PIXELS, null, value);
 	}
 	
 	@Override
-	public void addMinimumThreshold(@NonNull PlottableStatistic stat, @NonNull String component, @Nullable UUID id, double value) {
+	public void addMinimumThreshold(@NonNull Measurement stat, @NonNull String component, @Nullable UUID id, double value) {
 		addMinimumThreshold(stat, component, MeasurementScale.PIXELS, id, value);
 	}
 	
 	@Override
-	public void addMinimumThreshold(@NonNull PlottableStatistic stat, @NonNull String component, @NonNull MeasurementScale scale, double value) {
+	public void addMinimumThreshold(@NonNull Measurement stat, @NonNull String component, @NonNull MeasurementScale scale, double value) {
 		addMinimumThreshold(stat, component, scale, null, value);
 	}
 	
 	@Override
-	public void addMinimumThreshold(@NonNull PlottableStatistic stat, @NonNull String component,
+	public void addMinimumThreshold(@NonNull Measurement stat, @NonNull String component,
 			@NonNull MeasurementScale scale, @Nullable UUID id, double value) {
 		Key k = new Key(stat, component, scale, id);
 		minima.put(k, value);
 	}
 	
 	@Override
-	public void addMaximumThreshold(@NonNull PlottableStatistic stat, @NonNull String component, double value) {
+	public void addMaximumThreshold(@NonNull Measurement stat, @NonNull String component, double value) {
 		addMaximumThreshold(stat, component, MeasurementScale.PIXELS, value);
 	}
 	
 	@Override
-	public void addMaximumThreshold(@NonNull PlottableStatistic stat, @NonNull String component, @Nullable UUID id, double value) {
+	public void addMaximumThreshold(@NonNull Measurement stat, @NonNull String component, @Nullable UUID id, double value) {
 		addMaximumThreshold(stat, component, MeasurementScale.PIXELS, id, value);
 	}
 
 	@Override
-	public void addMaximumThreshold(@NonNull PlottableStatistic stat, @NonNull String component, @NonNull MeasurementScale scale, double value) {
+	public void addMaximumThreshold(@NonNull Measurement stat, @NonNull String component, @NonNull MeasurementScale scale, double value) {
 		addMaximumThreshold(stat, component, scale, null, value);
 	}	
 	
 	@Override
-	public void addMaximumThreshold(@NonNull PlottableStatistic stat, @NonNull String component,
+	public void addMaximumThreshold(@NonNull Measurement stat, @NonNull String component,
 			@NonNull MeasurementScale scale, @Nullable UUID id, double value) {
 		Key k = new Key(stat, component, scale, id);
 		maxima.put(k, value);
 	}
 	
 	@Override
-	public double getMinimaThreshold(@NonNull PlottableStatistic stat, @NonNull String component, @NonNull MeasurementScale scale) {
+	public double getMinimaThreshold(@NonNull Measurement stat, @NonNull String component, @NonNull MeasurementScale scale) {
 		return getMinimaThreshold(stat, component, scale, null);
 	}
 	
 	@Override
-	public double getMinimaThreshold(@NonNull PlottableStatistic stat, @NonNull String component,
+	public double getMinimaThreshold(@NonNull Measurement stat, @NonNull String component,
 			@NonNull MeasurementScale scale, @Nullable UUID id) {
 		Key k = new Key(stat, component, scale, id);
 		return minima.get(k);
 	}
 
 	@Override
-	public double getMaximaThreshold(@NonNull PlottableStatistic stat, @NonNull String component, @NonNull MeasurementScale scale) {
+	public double getMaximaThreshold(@NonNull Measurement stat, @NonNull String component, @NonNull MeasurementScale scale) {
 		return getMaximaThreshold(stat, component, scale, null);
 	}
 	
 	@Override
-	public double getMaximaThreshold(@NonNull PlottableStatistic stat, @NonNull String component,
+	public double getMaximaThreshold(@NonNull Measurement stat, @NonNull String component,
 			@NonNull MeasurementScale scale, @Nullable UUID id) {
 		Key k = new Key(stat, component, scale, id);
 		return maxima.get(k);
@@ -177,12 +177,12 @@ public class DefaultFilteringOptions extends AbstractHashOptions implements Filt
 	
 	private boolean nucleusMatches(Key k, Nucleus n, ICellCollection collection, boolean isMin){
 		try {
-			if(k.stat.equals(PlottableStatistic.VARIABILITY)) {
+			if(k.stat.equals(Measurement.VARIABILITY)) {
 				double v = collection.getNormalisedDifferenceToMedian(Tag.REFERENCE_POINT, n);
 				return isMin ? v>=minima.get(k) : v<=maxima.get(k);
 			}
 				
-			if(k.stat.equals(PlottableStatistic.NUCLEUS_SIGNAL_COUNT)) {
+			if(k.stat.equals(Measurement.NUCLEUS_SIGNAL_COUNT)) {
 				if(k.id==null)
 					return false;
 				double v = n.getSignalCollection().numberOfSignals(k.id);
@@ -216,12 +216,12 @@ public class DefaultFilteringOptions extends AbstractHashOptions implements Filt
 	
 	private class Key{
 		
-		private PlottableStatistic stat;
+		private Measurement stat;
 		private String component;
 		private MeasurementScale scale;
 		private UUID id;
 		
-		public Key(@NonNull PlottableStatistic stat, @NonNull String component, @NonNull MeasurementScale scale, @Nullable UUID id) {
+		public Key(@NonNull Measurement stat, @NonNull String component, @NonNull MeasurementScale scale, @Nullable UUID id) {
 			this.stat = stat;
 			this.component = component;
 			this.scale = scale;

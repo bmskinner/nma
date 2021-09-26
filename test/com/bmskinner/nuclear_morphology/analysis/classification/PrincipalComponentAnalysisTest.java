@@ -10,13 +10,13 @@ import org.junit.Test;
 
 import com.bmskinner.nuclear_morphology.ComponentTester;
 import com.bmskinner.nuclear_morphology.TestDatasetBuilder;
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
-import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.nuclei.NucleusType;
 import com.bmskinner.nuclear_morphology.components.options.DefaultOptions;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
-import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 
 /**
  * Tests for principal component analysis
@@ -46,7 +46,7 @@ public class PrincipalComponentAnalysisTest extends ComponentTester {
 		// Check first 10 PC stats are empty 
 		for(int i=0; i<10; i++) {
 			final int j = i;
-			boolean isPresent = dataset.getCollection().getNuclei().stream().noneMatch(m->m.hasStatistic(PlottableStatistic.makePrincipalComponent(j+1)));
+			boolean isPresent = dataset.getCollection().getNuclei().stream().noneMatch(m->m.hasStatistic(Measurement.makePrincipalComponent(j+1)));
 			assertTrue(isPresent);
 		}
 		
@@ -59,12 +59,12 @@ public class PrincipalComponentAnalysisTest extends ComponentTester {
 		pca.call();
 		
 		Nucleus n = dataset.getCollection().getNuclei().stream().findFirst().get();
-		int nPcs = (int) n.getStatistic(PlottableStatistic.PCA_N);		
+		int nPcs = (int) n.getStatistic(Measurement.PCA_N);		
 		
 		// Test that PCs have been set
 		for(int i=0; i<nPcs; i++) {
 			final int j = i;
-			boolean isPresent = dataset.getCollection().getNuclei().stream().allMatch(m->m.hasStatistic(PlottableStatistic.makePrincipalComponent(j+1)));
+			boolean isPresent = dataset.getCollection().getNuclei().stream().allMatch(m->m.hasStatistic(Measurement.makePrincipalComponent(j+1)));
 			assertTrue(isPresent);
 		}
 	}

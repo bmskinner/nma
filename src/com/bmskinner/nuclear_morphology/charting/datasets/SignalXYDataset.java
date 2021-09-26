@@ -22,8 +22,8 @@ import java.util.UUID;
 
 import org.jfree.data.xy.DefaultXYDataset;
 
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
 
 public class SignalXYDataset extends DefaultXYDataset {
 

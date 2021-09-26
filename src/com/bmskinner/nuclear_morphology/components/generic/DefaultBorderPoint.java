@@ -16,8 +16,6 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.generic;
 
-import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
-
 /**
  * The standard implementation of the {@link IBorderPoint} interface.
  * 

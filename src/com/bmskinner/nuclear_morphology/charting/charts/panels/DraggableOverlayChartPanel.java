@@ -41,8 +41,8 @@ import org.jfree.data.general.DatasetUtilities;
 import org.jfree.ui.RectangleEdge;
 
 import com.bmskinner.nuclear_morphology.charting.ChartComponents;
-import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
-import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
+import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.gui.events.EventListener;
 import com.bmskinner.nuclear_morphology.gui.events.SegmentEvent;
@@ -121,7 +121,7 @@ public class DraggableOverlayChartPanel extends ExportableChartPanel {
         return 0;
     }
     
-    private static double getRescaledIndex(IBorderSegment seg, int newLength) {
+    private static double getRescaledIndex(IProfileSegment seg, int newLength) {
         return (float) seg.getStartIndex() / (float) (seg.getProfileLength()) * (float) newLength;
     }
 
@@ -137,13 +137,13 @@ public class DraggableOverlayChartPanel extends ExportableChartPanel {
 
         try {
         	overlay = new CrosshairOverlay();
-        	List<IBorderSegment> segments = profile.getOrderedSegments();
+        	List<IProfileSegment> segments = profile.getOrderedSegments();
         	for(int i=0; i<profile.getSegmentCount(); i++) {
         		// don't draw the first segment marker (the RP); it can never be altered on this chart
         		if(i==0)
         			continue;
 
-        		IBorderSegment seg = segments.get(i);
+        		IProfileSegment seg = segments.get(i);
 
         		Paint colour = seg.isLocked() ? Color.DARK_GRAY : ColourSelecter.getColor(i);
         			
@@ -241,7 +241,7 @@ public class DraggableOverlayChartPanel extends ExportableChartPanel {
             }
 
             // Get the segment associated with the point
-            IBorderSegment seg = ((SegmentCrosshair) xCrosshair).getSegment();
+            IProfileSegment seg = ((SegmentCrosshair) xCrosshair).getSegment();
 
             // Trigger the update
             if (seg != null) {
@@ -375,14 +375,14 @@ public class DraggableOverlayChartPanel extends ExportableChartPanel {
      *
      */
     private class SegmentCrosshair extends Crosshair {
-        private IBorderSegment segment;
+        private IProfileSegment segment;
 
-        public SegmentCrosshair(double d, Paint paint, Stroke stroke, IBorderSegment segment) {
+        public SegmentCrosshair(double d, Paint paint, Stroke stroke, IProfileSegment segment) {
             super(d, paint, stroke);
             this.segment = segment;
         }
 
-        public IBorderSegment getSegment() {
+        public IProfileSegment getSegment() {
             return segment;
         }
 

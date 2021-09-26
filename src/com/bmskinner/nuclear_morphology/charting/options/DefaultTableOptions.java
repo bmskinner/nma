@@ -24,8 +24,8 @@ import java.util.Set;
 import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
 
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.ICell;
+import com.bmskinner.nuclear_morphology.components.cells.ICell;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 
 /*
  * Hold the drawing options for a table. 

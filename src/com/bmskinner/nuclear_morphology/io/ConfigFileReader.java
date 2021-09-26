@@ -23,8 +23,8 @@ import java.io.IOException;
 import java.util.Properties;
 import java.util.logging.Logger;
 
-import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
-import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
+import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
+import com.bmskinner.nuclear_morphology.components.nuclei.NucleusType;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter.ColourSwatch;
 import com.bmskinner.nuclear_morphology.io.DatasetExportMethod.ExportFormat;

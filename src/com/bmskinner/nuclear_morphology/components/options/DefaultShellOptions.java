@@ -18,8 +18,8 @@ package com.bmskinner.nuclear_morphology.components.options;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.ShrinkType;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.IDetectionSubOptions;
+import com.bmskinner.nuclear_morphology.components.signals.IShellResult.ShrinkType;
 
 /**
  * The default implementation of the shell options

@@ -13,8 +13,8 @@ import org.jdom2.output.XMLOutputter;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.bmskinner.nuclear_morphology.components.generic.Tag;
-import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
+import com.bmskinner.nuclear_morphology.components.nuclei.NucleusType;
+import com.bmskinner.nuclear_morphology.components.profiles.Tag;
 import com.bmskinner.nuclear_morphology.components.rules.Rule;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSet;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
@@ -83,7 +83,7 @@ public class RuleSetCollectionXMLCreatorTest {
 			assertEquals(t.getName(), 
 					rElements.getChild(XMLCreator.NAME_KEY).getValue());
 			
-			assertEquals(t.getTag().name(), 
+			assertEquals(t.type(), 
 					rElements.getChild(XMLCreator.TYPE_KEY).getValue());
 			
 			for(int j=0; j<rList.size(); j++) {

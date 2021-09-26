@@ -22,7 +22,7 @@ import javax.swing.SpinnerNumberModel;
 
 import com.bmskinner.nuclear_morphology.analysis.classification.PrincipalComponentAnalysis;
 import com.bmskinner.nuclear_morphology.analysis.classification.TsneMethod;
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;

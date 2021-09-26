@@ -24,13 +24,13 @@ import javax.swing.table.TableCellRenderer;
 
 import org.eclipse.jdt.annotation.Nullable;
 
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.ICell;
-import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
-import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.Aggregation;
-import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.Normalisation;
-import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.ShrinkType;
-import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.components.cells.ICell;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.measure.Measurement;
+import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
+import com.bmskinner.nuclear_morphology.components.signals.IShellResult.Aggregation;
+import com.bmskinner.nuclear_morphology.components.signals.IShellResult.Normalisation;
+import com.bmskinner.nuclear_morphology.components.signals.IShellResult.ShrinkType;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter.ColourSwatch;
 
 /**
@@ -53,7 +53,7 @@ public class TableOptionsBuilder {
         return this;
     }
 
-    public TableOptionsBuilder addStatistic(PlottableStatistic s) {
+    public TableOptionsBuilder addStatistic(Measurement s) {
         options.addStat(s);
         return this;
     }

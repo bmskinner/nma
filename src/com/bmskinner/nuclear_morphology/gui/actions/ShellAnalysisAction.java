@@ -34,13 +34,13 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellAnalysisMethod;
-import com.bmskinner.nuclear_morphology.components.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
-import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.ShrinkType;
+import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.measure.Measurement;
+import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.options.DefaultShellOptions;
 import com.bmskinner.nuclear_morphology.components.options.IShellOptions;
-import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.components.signals.IShellResult.ShrinkType;
 import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
@@ -98,7 +98,7 @@ public class ShellAnalysisAction extends SingleDatasetResultAction {
     private boolean datasetParametersOk(int shells){
     		
 			double area = dataset.getCollection()
-					.getMin(PlottableStatistic.AREA, 
+					.getMin(Measurement.AREA, 
 							CellularComponent.NUCLEUS, 
 							MeasurementScale.PIXELS);
 			double minArea = ShellAnalysisMethod.MINIMUM_AREA_PER_SHELL * (double)shells;
@@ -109,7 +109,7 @@ public class ShellAnalysisAction extends SingleDatasetResultAction {
 			
 			
 			double circ = dataset.getCollection()
-					.getMin(PlottableStatistic.CIRCULARITY, 
+					.getMin(Measurement.CIRCULARITY, 
 							CellularComponent.NUCLEUS, 
 							MeasurementScale.PIXELS);
 

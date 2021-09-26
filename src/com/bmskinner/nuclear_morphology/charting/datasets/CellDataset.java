@@ -24,7 +24,7 @@ import java.util.Set;
 
 import org.jfree.data.xy.XYDataset;
 
-import com.bmskinner.nuclear_morphology.components.ICell;
+import com.bmskinner.nuclear_morphology.components.cells.ICell;
 
 /**
  * Holds the information needed to draw a cell outline

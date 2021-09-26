@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
-import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
+import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.components.rules.Rule;
 import com.bmskinner.nuclear_morphology.components.rules.Rule.RuleType;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSet;

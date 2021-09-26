@@ -29,8 +29,8 @@ import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPa
 import com.bmskinner.nuclear_morphology.charting.charts.panels.ViolinChartPanel;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
-import com.bmskinner.nuclear_morphology.components.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.tabs.BoxplotsTabPanel;
@@ -52,7 +52,7 @@ public class NuclearGlcmPanel extends BoxplotsTabPanel {
 
         Dimension preferredSize = new Dimension(200, 300);
         
-        for (PlottableStatistic stat : PlottableStatistic.getGlcmStats()) {
+        for (Measurement stat : Measurement.getGlcmStats()) {
 
         	JFreeChart chart = AbstractChartFactory.createEmptyChart();
             ViolinChartPanel panel = new ViolinChartPanel(chart);
@@ -81,7 +81,7 @@ public class NuclearGlcmPanel extends BoxplotsTabPanel {
     protected synchronized void updateMultiple() {
         super.updateMultiple();
 
-        for (PlottableStatistic stat : PlottableStatistic.getGlcmStats()) {
+        for (Measurement stat : Measurement.getGlcmStats()) {
 
             ExportableChartPanel panel = chartPanels.get(stat.toString());
 
@@ -107,7 +107,7 @@ public class NuclearGlcmPanel extends BoxplotsTabPanel {
     public synchronized void setChartsAndTablesLoading() {
         super.setChartsAndTablesLoading();
 
-        for (PlottableStatistic stat : PlottableStatistic.getGlcmStats()) {
+        for (Measurement stat : Measurement.getGlcmStats()) {
             ExportableChartPanel panel = chartPanels.get(stat.toString());
             panel.setChart(AbstractChartFactory.createLoadingChart());
 

@@ -22,9 +22,9 @@ import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-import com.bmskinner.nuclear_morphology.components.generic.FloatEquation;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
-import com.bmskinner.nuclear_morphology.components.generic.LineEquation;
+import com.bmskinner.nuclear_morphology.components.measure.FloatEquation;
+import com.bmskinner.nuclear_morphology.components.measure.LineEquation;
 import com.bmskinner.nuclear_morphology.gui.dialogs.VersionHelpDialog;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 

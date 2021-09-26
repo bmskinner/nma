@@ -26,6 +26,9 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import com.bmskinner.nuclear_morphology.components.profiles.FloatProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
+
 
 public class FloatProfileTest {
 	
@@ -44,7 +47,7 @@ public class FloatProfileTest {
 	
 	
 	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#FloatProfile(float[])}.
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.profiles.FloatProfile#FloatProfile(float[])}.
 	 */
 	@Test
 	public void testFloatProfileFloatArrayWithNullData() {
@@ -73,7 +76,7 @@ public class FloatProfileTest {
     }
 
 	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#FloatProfile(com.bmskinner.nuclear_morphology.components.generic.IProfile)}.
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.profiles.FloatProfile#FloatProfile(com.bmskinner.nuclear_morphology.components.profiles.IProfile)}.
 	 */
 	@Test
 	public void testFloatProfileIProfile() {
@@ -87,7 +90,7 @@ public class FloatProfileTest {
 	}
 	
 	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#FloatProfile(float, int)}.
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.profiles.FloatProfile#FloatProfile(float, int)}.
 	 */
 	@Test
 	public void testFloatProfileFloatInt() {
@@ -107,7 +110,7 @@ public class FloatProfileTest {
 	}
 
 	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#equals(java.lang.Object)}.
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.profiles.FloatProfile#equals(java.lang.Object)}.
 	 */
 	@Test
 	public void testEqualsObject() {

@@ -33,8 +33,8 @@ import org.jfree.data.xy.XYDataset;
 import com.bmskinner.nuclear_morphology.charting.charts.AbstractChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.MorphologyChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPanel;
-import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
-import com.bmskinner.nuclear_morphology.components.stats.StatisticDimension;
+import com.bmskinner.nuclear_morphology.components.measure.MeasurementDimension;
+import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOptionsPanel;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileMarkersOptionsPanel;
@@ -99,7 +99,7 @@ public abstract class AbstractProfileDisplayPanel extends DetailPanel implements
                     length = maximum.intValue() > length ? maximum.intValue() : length;
                 }
 
-                if (type.getDimension().equals(StatisticDimension.ANGLE)) {
+                if (type.getDimension().equals(MeasurementDimension.ANGLE)) {
                     plot.getRangeAxis().setRange(0, 360);
                 } else {
                     plot.getRangeAxis().setAutoRange(true);

@@ -29,8 +29,8 @@ import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPa
 import com.bmskinner.nuclear_morphology.charting.charts.panels.ViolinChartPanel;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
-import com.bmskinner.nuclear_morphology.components.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.tabs.BoxplotsTabPanel;
@@ -51,7 +51,7 @@ public class SignalsBoxplotPanel extends BoxplotsTabPanel {
         this.setLayout(new BorderLayout());
         Dimension preferredSize = new Dimension(200, 300);
 
-        for (PlottableStatistic stat : PlottableStatistic.getSignalStats()) {
+        for (Measurement stat : Measurement.getSignalStats()) {
 
             ChartOptions options = new ChartOptionsBuilder().addStatistic(stat)
                     .setScale(GlobalOptions.getInstance().getScale()).setSwatch(GlobalOptions.getInstance().getSwatch())
@@ -92,7 +92,7 @@ public class SignalsBoxplotPanel extends BoxplotsTabPanel {
     @Override
     protected void updateMultiple() {
 
-        for (PlottableStatistic stat : PlottableStatistic.getSignalStats()) {
+        for (Measurement stat : Measurement.getSignalStats()) {
 
             ExportableChartPanel panel = chartPanels.get(stat.toString());
 

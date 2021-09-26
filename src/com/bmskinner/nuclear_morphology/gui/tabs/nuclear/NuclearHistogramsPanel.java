@@ -30,11 +30,11 @@ import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPa
 import com.bmskinner.nuclear_morphology.charting.charts.panels.SelectableChartPanel;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
-import com.bmskinner.nuclear_morphology.components.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.ICellCollection;
-import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
-import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
+import com.bmskinner.nuclear_morphology.components.measure.Measurement;
+import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.components.HistogramsTabPanel;
@@ -50,7 +50,7 @@ public class NuclearHistogramsPanel extends HistogramsTabPanel  {
 	public NuclearHistogramsPanel(@NonNull InputSupplier context) {
 		super(context, CellularComponent.NUCLEUS);
 		Dimension preferredSize = new Dimension(HISTOGRAM_CHART_WIDTH, HISTOGRAM_CHART_HEIGHT);
-		for (PlottableStatistic stat : PlottableStatistic.getNucleusStats()) {
+		for (Measurement stat : Measurement.getNucleusStats()) {
 
 			JFreeChart chart = HistogramChartFactory.createEmptyHistogram();
 
@@ -76,7 +76,7 @@ public class NuclearHistogramsPanel extends HistogramsTabPanel  {
 
         // NucleusType type =
         // IAnalysisDataset.getBroadestNucleusType(getDatasets());
-        for (PlottableStatistic stat : PlottableStatistic.getNucleusStats()) {
+        for (Measurement stat : Measurement.getNucleusStats()) {
             SelectableChartPanel panel = chartPanels.get(stat.toString());
 
             ChartOptionsBuilder builder = new ChartOptionsBuilder();
@@ -97,7 +97,7 @@ public class NuclearHistogramsPanel extends HistogramsTabPanel  {
         super.setChartsAndTablesLoading();
         // NucleusType type =
         // IAnalysisDataset.getBroadestNucleusType(getDatasets());
-        for (PlottableStatistic stat : PlottableStatistic.getNucleusStats()) {
+        for (Measurement stat : Measurement.getNucleusStats()) {
             ExportableChartPanel panel = chartPanels.get(stat.toString());
             panel.setChart(MorphologyChartFactory.createLoadingChart());
 
@@ -122,9 +122,9 @@ public class NuclearHistogramsPanel extends HistogramsTabPanel  {
      * @param name
      * @return
      */
-    private PlottableStatistic getPanelStatisticFromName(String name) {
-        PlottableStatistic stat = null;
-        for (PlottableStatistic n : PlottableStatistic.getNucleusStats()) {
+    private Measurement getPanelStatisticFromName(String name) {
+        Measurement stat = null;
+        for (Measurement n : Measurement.getNucleusStats()) {
             if (n.toString().equals(name)) {
                 stat = n;
             }
@@ -148,7 +148,7 @@ public class NuclearHistogramsPanel extends HistogramsTabPanel  {
         DecimalFormat df = new DecimalFormat("#.##");
 
         // check the boxplot that fired
-        PlottableStatistic stat = getPanelStatisticFromName(panel.getName());
+        Measurement stat = getPanelStatisticFromName(panel.getName());
 
         if (!lower.isNaN() && !upper.isNaN()) {
 

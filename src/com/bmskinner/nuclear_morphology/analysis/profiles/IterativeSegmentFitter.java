@@ -24,13 +24,13 @@ import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nuclear_morphology.components.generic.BooleanProfile;
-import com.bmskinner.nuclear_morphology.components.generic.DefaultBorderSegment;
-import com.bmskinner.nuclear_morphology.components.generic.IProfile;
-import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
-import com.bmskinner.nuclear_morphology.components.generic.SegmentedFloatProfile;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableComponentException;
-import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
+import com.bmskinner.nuclear_morphology.components.UnavailableComponentException;
+import com.bmskinner.nuclear_morphology.components.profiles.BooleanProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.DefaultProfileSegment;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.SegmentedFloatProfile;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -94,13 +94,13 @@ public class IterativeSegmentFitter {
      */
     private ISegmentedProfile remapSegmentEndpoints(@NonNull IProfile profile) throws ProfileException, UnavailableComponentException {
 
-        List<IBorderSegment> newSegments = new ArrayList<>();
+        List<IProfileSegment> newSegments = new ArrayList<>();
         
         // fit each segment in turn
-        for(IBorderSegment templateSegment : templateProfile.getOrderedSegments())
+        for(IProfileSegment templateSegment : templateProfile.getOrderedSegments())
         	newSegments = bestFitSegment(profile, newSegments, templateSegment.getID());
         LOGGER.finer(String.format("Created %s segments in target profile", newSegments.size()));
-        for(IBorderSegment s : newSegments) // unlock after fitting
+        for(IProfileSegment s : newSegments) // unlock after fitting
         	s.setLocked(false);
         return new SegmentedFloatProfile(profile, newSegments);
     }
@@ -117,24 +117,24 @@ public class IterativeSegmentFitter {
      * @throws ProfileException 
      * @throws UnavailableComponentException 
      */
-    private List<IBorderSegment> bestFitSegment(@NonNull IProfile profile, List<IBorderSegment> segmentsSoFar, @NonNull UUID id) throws ProfileException, UnavailableComponentException {
+    private List<IProfileSegment> bestFitSegment(@NonNull IProfile profile, List<IProfileSegment> segmentsSoFar, @NonNull UUID id) throws ProfileException, UnavailableComponentException {
     	
     	// Start by adding locked segments back to the profile
-    	List<IBorderSegment> newSegments = new ArrayList<>();
-    	for(IBorderSegment s : segmentsSoFar) {
+    	List<IProfileSegment> newSegments = new ArrayList<>();
+    	for(IProfileSegment s : segmentsSoFar) {
     		if(s.isLocked())
     			newSegments.add(s);
     	}
     	
-    	IBorderSegment templateSegment = templateProfile.getSegment(id);
+    	IProfileSegment templateSegment = templateProfile.getSegment(id);
     	// If it is the last segment, just link to the first and return
     	if(templateSegment.getPosition()==templateProfile.getSegmentCount()-1) {
-    		IBorderSegment prevSegment = newSegments.get(newSegments.size()-1);
-    		IBorderSegment lastSegment = new DefaultBorderSegment(prevSegment.getEndIndex(), 0, profile.size(), id);
+    		IProfileSegment prevSegment = newSegments.get(newSegments.size()-1);
+    		IProfileSegment lastSegment = new DefaultProfileSegment(prevSegment.getEndIndex(), 0, profile.size(), id);
     		lastSegment.setLocked(true);
     		LOGGER.finer( "Adding final segment "+lastSegment.getDetail());
     		newSegments.add(lastSegment);
-    		IBorderSegment.linkSegments(newSegments);
+    		IProfileSegment.linkSegments(newSegments);
     		return newSegments;
     	}
     	
@@ -146,16 +146,16 @@ public class IterativeSegmentFitter {
         int startIndex = !segmentsSoFar.isEmpty() ? segmentsSoFar.get(segmentsSoFar.size()-1).getEndIndex():0;
         
         // the lowest index that can be applied to the end of this segment
-        int minEnd = !segmentsSoFar.isEmpty() ? segmentsSoFar.get(segmentsSoFar.size()-1).getEndIndex() + IBorderSegment.MINIMUM_SEGMENT_LENGTH :IBorderSegment.MINIMUM_SEGMENT_LENGTH;
+        int minEnd = !segmentsSoFar.isEmpty() ? segmentsSoFar.get(segmentsSoFar.size()-1).getEndIndex() + IProfileSegment.MINIMUM_SEGMENT_LENGTH :IProfileSegment.MINIMUM_SEGMENT_LENGTH;
 
         // the maximum index that can be applied allowing all remaining segments to be added
         int segsRemaining = templateProfile.getSegmentCount()-templateSegment.getPosition();
-        int maxEnd = profile.size() - (segsRemaining*IBorderSegment.MINIMUM_SEGMENT_LENGTH);
+        int maxEnd = profile.size() - (segsRemaining*IProfileSegment.MINIMUM_SEGMENT_LENGTH);
 
         int bestEnd = findBestScoringSegmentEndpoint(profile, id, startIndex, minEnd, maxEnd, 1);
 
         // Create a new segment with the endpoint applied
-        IBorderSegment newSeg = new DefaultBorderSegment(startIndex, bestEnd, profile.size(), id);
+        IProfileSegment newSeg = new DefaultProfileSegment(startIndex, bestEnd, profile.size(), id);
         newSeg.setLocked(true);
         newSegments.add(newSeg);
         
@@ -182,7 +182,7 @@ public class IterativeSegmentFitter {
     private int findBestScoringSegmentEndpoint(@NonNull IProfile testProfile, @NonNull UUID segId, int startIndex, int minIndex, int maxIndex, int stepSize) throws UnavailableComponentException, ProfileException {
 
     	IProfile tempProfile = testProfile.copy();
-    	IBorderSegment templateSegment = templateProfile.getSegment(segId);
+    	IProfileSegment templateSegment = templateProfile.getSegment(segId);
     	IProfile template = templateProfile.getSubregion(templateSegment);
     	
     	double templateSegmentProportion = (double)templateSegment.length()/(double)templateProfile.size();

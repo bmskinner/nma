@@ -19,7 +19,7 @@ package com.bmskinner.nuclear_morphology.gui.components.panels;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 
-import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
+import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 
 /**
  * Provides a drop down list with the displayable profile types.

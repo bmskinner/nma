@@ -23,8 +23,8 @@ import java.util.UUID;
 
 import org.jdesktop.swingx.treetable.DefaultMutableTreeTableNode;
 
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.IClusterGroup;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.datasets.IClusterGroup;
 import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace;
 
 /**

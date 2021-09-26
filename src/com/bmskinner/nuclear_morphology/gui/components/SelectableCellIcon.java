@@ -20,7 +20,7 @@ import java.awt.Image;
 
 import javax.swing.ImageIcon;
 
-import com.bmskinner.nuclear_morphology.components.ICell;
+import com.bmskinner.nuclear_morphology.components.cells.ICell;
 
 import ij.process.ImageProcessor;
 

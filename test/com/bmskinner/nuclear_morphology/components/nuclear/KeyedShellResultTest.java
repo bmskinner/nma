@@ -31,13 +31,15 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
-import com.bmskinner.nuclear_morphology.components.ICell;
-import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.Aggregation;
-import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.CountType;
-import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.Normalisation;
-import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.ShrinkType;
+import com.bmskinner.nuclear_morphology.components.cells.ICell;
+import com.bmskinner.nuclear_morphology.components.cells.ComponentFactory.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
+import com.bmskinner.nuclear_morphology.components.signals.KeyedShellResult;
+import com.bmskinner.nuclear_morphology.components.signals.IShellResult.Aggregation;
+import com.bmskinner.nuclear_morphology.components.signals.IShellResult.CountType;
+import com.bmskinner.nuclear_morphology.components.signals.IShellResult.Normalisation;
+import com.bmskinner.nuclear_morphology.components.signals.IShellResult.ShrinkType;
 import com.bmskinner.nuclear_morphology.samples.dummy.DummyCell;
 
 public class KeyedShellResultTest {

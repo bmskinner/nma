@@ -7,8 +7,8 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.jdom2.Document;
 import org.jdom2.Element;
 
-import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
-import com.bmskinner.nuclear_morphology.components.generic.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
+import com.bmskinner.nuclear_morphology.components.profiles.Tag;
 import com.bmskinner.nuclear_morphology.components.rules.Rule;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSet;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
@@ -35,7 +35,7 @@ public class RuleSetCollectionXMLCreator extends XMLCreator<RuleSetCollection> {
 		for(Tag t : template.getTags()) {
 			Element tagElement = new Element(TAG_KEY+tagCounter);
 			tagElement.addContent(createElement(NAME_KEY, t.getName()));
-			tagElement.addContent(createElement(TYPE_KEY, t.getTag().name()));
+			tagElement.addContent(createElement(TYPE_KEY, t.type()));
 			List<RuleSet> rList = template.getRuleSets(t);
 			int i=0;
 			for(RuleSet rs : rList) {

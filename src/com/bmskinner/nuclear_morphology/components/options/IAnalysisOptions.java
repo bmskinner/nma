@@ -23,7 +23,7 @@ import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
+import com.bmskinner.nuclear_morphology.components.nuclei.NucleusType;
 import com.bmskinner.nuclear_morphology.components.rules.RuleApplicationType;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 

@@ -11,12 +11,12 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.bmskinner.nuclear_morphology.ComponentTester;
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.IClusterGroup;
-import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.datasets.IClusterGroup;
+import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
-import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
 
 /**
@@ -65,13 +65,13 @@ public class NucleusClusteringMethodTest extends ComponentTester {
 	
 	@Test
 	public void testCanClusterOnIndividualStatistics() throws Exception {
-		for(PlottableStatistic stat : PlottableStatistic.getRoundNucleusStats()) {
+		for(Measurement stat : Measurement.getRoundNucleusStats()) {
 			setUp();
 			testCanClusterOnStatistic(stat);
 		}
 	}
 	
-	private void testCanClusterOnStatistic(PlottableStatistic stat) throws Exception {
+	private void testCanClusterOnStatistic(Measurement stat) throws Exception {
 		IClusteringOptions o = OptionsFactory.makeClusteringOptions();
 		o.setIncludeProfileType(ProfileType.ANGLE, false);
 		o.setIncludeStatistic(stat, true);

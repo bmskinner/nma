@@ -18,7 +18,7 @@ package com.bmskinner.nuclear_morphology.charting.datasets;
 
 import org.jfree.data.xy.XYDataset;
 
-import com.bmskinner.nuclear_morphology.components.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 
 /**
  * Adds storage of cellular components to an XYDataset

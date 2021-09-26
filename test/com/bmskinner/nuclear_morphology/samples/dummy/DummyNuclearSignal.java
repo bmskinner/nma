@@ -22,7 +22,7 @@ package com.bmskinner.nuclear_morphology.samples.dummy;
 import java.io.File;
 
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
-import com.bmskinner.nuclear_morphology.components.nuclear.DefaultNuclearSignal;
+import com.bmskinner.nuclear_morphology.components.signals.DefaultNuclearSignal;
 
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;

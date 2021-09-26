@@ -19,7 +19,7 @@
 
 package com.bmskinner.nuclear_morphology.samples.dummy;
 
-import com.bmskinner.nuclear_morphology.components.DefaultCell;
+import com.bmskinner.nuclear_morphology.components.cells.DefaultCell;
 
 /**
  * A dummy cell for testing

@@ -6,8 +6,8 @@ import org.junit.rules.ExpectedException;
 
 import com.bmskinner.nuclear_morphology.TestDatasetBuilder;
 import com.bmskinner.nuclear_morphology.TestDatasetBuilder.TestComponentShape;
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.nuclei.NucleusType;
 
 public class DatasetSegmentationMethodTest extends AbstractProfileMethodTest {
 		

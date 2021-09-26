@@ -31,26 +31,26 @@ import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.SingleDatasetAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
-import com.bmskinner.nuclear_morphology.components.Consensus;
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.Profileable;
-import com.bmskinner.nuclear_morphology.components.generic.BorderTagObject;
+import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.cells.ComponentFactory.ComponentCreationException;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
-import com.bmskinner.nuclear_morphology.components.generic.IProfile;
-import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
-import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
-import com.bmskinner.nuclear_morphology.components.generic.Tag;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
-import com.bmskinner.nuclear_morphology.components.generic.UnprofilableObjectException;
-import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
+import com.bmskinner.nuclear_morphology.components.measure.Measurement;
+import com.bmskinner.nuclear_morphology.components.nuclei.Consensus;
 import com.bmskinner.nuclear_morphology.components.nuclei.DefaultConsensusNucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.NucleusFactory;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
-import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.components.profiles.BorderTagObject;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
+import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.profiles.UnprofilableObjectException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
@@ -116,7 +116,7 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
         // Required for angle window size calculation
         double perim = ComponentMeasurer.calculatePerimeter(n);
         LOGGER.finer("Consensus perimeter is "+perim);
-        n.setStatistic(PlottableStatistic.PERIMETER, perim);
+        n.setStatistic(Measurement.PERIMETER, perim);
         n.initialise(Profileable.DEFAULT_PROFILE_WINDOW_PROPORTION);
 
         // Build a consensus nucleus from the template points
@@ -139,12 +139,12 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
         // Add segments to the new nucleus profile
         if(dataset.getCollection().getProfileCollection().hasSegments()) {
         	ISegmentedProfile profile = cons.component().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
-        	List<IBorderSegment> segs = dataset.getCollection().getProfileCollection().getSegments(Tag.REFERENCE_POINT);
-        	List<IBorderSegment> newSegs = IBorderSegment.scaleSegments(segs, profile.size());
+        	List<IProfileSegment> segs = dataset.getCollection().getProfileCollection().getSegments(Tag.REFERENCE_POINT);
+        	List<IProfileSegment> newSegs = IProfileSegment.scaleSegments(segs, profile.size());
         	LOGGER.finest(profile.toString());
-        	for(IBorderSegment s : segs)
+        	for(IProfileSegment s : segs)
         		LOGGER.finest(s.toString());
-        	for(IBorderSegment s : newSegs)
+        	for(IProfileSegment s : newSegs)
         		LOGGER.finest(s.toString());
         	profile.setSegments(newSegs);
         	cons.component().setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, profile);

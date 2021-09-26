@@ -18,8 +18,8 @@ package com.bmskinner.nuclear_morphology.gui.events;
 
 import java.util.EventObject;
 
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.ICell;
+import com.bmskinner.nuclear_morphology.components.cells.ICell;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 
 /**
  * Signal that a cell in a dataset has been updated - that is, it's data has

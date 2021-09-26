@@ -5,7 +5,7 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder;
-import com.bmskinner.nuclear_morphology.components.generic.IProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSet;
 import com.bmskinner.nuclear_morphology.samples.IndividualNuclei;
 

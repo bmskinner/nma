@@ -36,12 +36,12 @@ import com.bmskinner.nuclear_morphology.charting.datasets.ChartDatasetCreationEx
 import com.bmskinner.nuclear_morphology.charting.datasets.ScatterChartDatasetCreator;
 import com.bmskinner.nuclear_morphology.charting.datasets.SignalXYDataset;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
-import com.bmskinner.nuclear_morphology.components.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.IClusterGroup;
-import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
+import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.datasets.IClusterGroup;
+import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
-import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.gui.dialogs.TsneDialog.ColourByType;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -80,9 +80,9 @@ public class ScatterChartFactory extends AbstractChartFactory {
         if (options.getStats().size() != 2)
             return createTextAnnotatedEmptyChart("Only one variable selected");
 
-        PlottableStatistic firstStat = options.getStat();
+        Measurement firstStat = options.getStat();
 
-        for (PlottableStatistic stat : options.getStats()) {
+        for (Measurement stat : options.getStats()) {
             if (!stat.getClass().equals(firstStat.getClass())) {
                 LOGGER.fine("Statistic classes are different");
                 return createTextAnnotatedEmptyChart("Variable classes are different");

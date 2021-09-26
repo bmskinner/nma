@@ -19,10 +19,10 @@ package com.bmskinner.nuclear_morphology.components.options;
 import java.io.File;
 
 import com.bmskinner.nuclear_morphology.analysis.classification.TsneMethod;
-import com.bmskinner.nuclear_morphology.components.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
-import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
+import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.nuclei.NucleusType;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.IDetectionSubOptions;
+import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 
 /**
  * Provides default options types.

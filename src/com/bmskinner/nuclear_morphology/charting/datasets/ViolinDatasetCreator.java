@@ -26,21 +26,21 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.ViolinPlots.ViolinCategoryDataset;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
-import com.bmskinner.nuclear_morphology.components.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.ICellCollection;
-import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
-import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
-import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
-import com.bmskinner.nuclear_morphology.components.generic.Tag;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableComponentException;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
-import com.bmskinner.nuclear_morphology.components.generic.UnsegmentedProfileException;
-import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
-import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
+import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.UnavailableComponentException;
+import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
+import com.bmskinner.nuclear_morphology.components.measure.Measurement;
+import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
+import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
+import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.profiles.UnsegmentedProfileException;
+import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
@@ -100,7 +100,7 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
      */
     private ViolinCategoryDataset createCellStatisticViolinDataset() {
         List<IAnalysisDataset> datasets = options.getDatasets();
-        PlottableStatistic stat = options.getStat();
+        Measurement stat = options.getStat();
         MeasurementScale scale = options.getScale();
         ViolinCategoryDataset ds = new ViolinCategoryDataset();
 
@@ -132,7 +132,7 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
      */
     private ViolinCategoryDataset createNucleusStatisticViolinDataset() {
         List<IAnalysisDataset> datasets = options.getDatasets();
-        PlottableStatistic stat = options.getStat();
+        Measurement stat = options.getStat();
         MeasurementScale scale = options.getScale();
         ViolinCategoryDataset ds = new ViolinCategoryDataset();
 
@@ -164,7 +164,7 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
     private ViolinCategoryDataset createSignalStatisticViolinDataset() {
 
         List<IAnalysisDataset> datasets = options.getDatasets();
-        PlottableStatistic stat = options.getStat();
+        Measurement stat = options.getStat();
         MeasurementScale scale = options.getScale();
         ViolinCategoryDataset ds = new ViolinCategoryDataset();
         for (@NonNull IAnalysisDataset d : datasets) {
@@ -185,7 +185,7 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
                      * For charting, use offset angles, otherwise the boxplots
                      * will fail on wrapped signals
                      */
-                    if (stat.equals(PlottableStatistic.ANGLE))
+                    if (stat.equals(Measurement.ANGLE))
                         values = collection.getSignalManager().getOffsetSignalAngles(signalGroup);
 
                     List<Number> list = new ArrayList<>();
@@ -210,13 +210,13 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 
         LOGGER.finest( "Making segment statistic dataset");
 
-        PlottableStatistic stat = options.getStat();
+        Measurement stat = options.getStat();
 
-        if (stat.equals(PlottableStatistic.LENGTH)) {
+        if (stat.equals(Measurement.LENGTH)) {
             return createSegmentLengthDataset(options.getDatasets(), options.getSegPosition());
         }
 
-        if (stat.equals(PlottableStatistic.DISPLACEMENT)) {
+        if (stat.equals(Measurement.DISPLACEMENT)) {
             return createSegmentDisplacementDataset(options.getDatasets(), options.getSegPosition());
         }
 
@@ -241,7 +241,7 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 
             ICellCollection collection = datasets.get(i).getCollection();
             try {
-                IBorderSegment medianSeg = collection.getProfileCollection().getSegmentAt(Tag.REFERENCE_POINT,
+                IProfileSegment medianSeg = collection.getProfileCollection().getSegmentAt(Tag.REFERENCE_POINT,
                         segPosition);
 
                 List<Number> list = new ArrayList<>();
@@ -250,12 +250,12 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 
                 	try {
 
-                		IBorderSegment seg = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegment(medianSeg.getID());
+                		IProfileSegment seg = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegment(medianSeg.getID());
 
                 		double length = 0;
                 		int indexLength = seg.length();
                 		double proportionPerimeter = (double) indexLength / (double) seg.getProfileLength();
-                		length = n.getStatistic(PlottableStatistic.PERIMETER, options.getScale()) * proportionPerimeter;
+                		length = n.getStatistic(Measurement.PERIMETER, options.getScale()) * proportionPerimeter;
                 		list.add(length);
 
                 	} catch (UnavailableComponentException e) {
@@ -264,8 +264,8 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
                 	}
                 }
 
-                String rowKey = IBorderSegment.SEGMENT_PREFIX + segPosition + "_" + i;
-                String colKey = IBorderSegment.SEGMENT_PREFIX + segPosition;
+                String rowKey = IProfileSegment.SEGMENT_PREFIX + segPosition + "_" + i;
+                String colKey = IProfileSegment.SEGMENT_PREFIX + segPosition;
                 dataset.add(list, rowKey, colKey);
 
             } catch (ProfileException e) {
@@ -299,7 +299,7 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 
             ICellCollection collection = collections.get(i).getCollection();
 
-            IBorderSegment medianSeg;
+            IProfileSegment medianSeg;
             try {
                 medianSeg = collection.getProfileCollection()
                         .getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN)
@@ -318,7 +318,7 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 
             		ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
 
-            		IBorderSegment seg = profile.getSegment(medianSeg.getID());
+            		IProfileSegment seg = profile.getSegment(medianSeg.getID());
 
             		double displacement = profile.getDisplacement(seg);
             		list.add(displacement);
@@ -329,8 +329,8 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 
             }
 
-            String rowKey = IBorderSegment.SEGMENT_PREFIX + segPosition + "_" + i;
-            String colKey = IBorderSegment.SEGMENT_PREFIX + segPosition;
+            String rowKey = IProfileSegment.SEGMENT_PREFIX + segPosition + "_" + i;
+            String colKey = IProfileSegment.SEGMENT_PREFIX + segPosition;
 
             dataset.add(list, rowKey, colKey);
         }

@@ -40,20 +40,20 @@ import com.bmskinner.nuclear_morphology.charting.datasets.ChartDatasetCreationEx
 import com.bmskinner.nuclear_morphology.charting.datasets.ProfileDatasetCreator;
 import com.bmskinner.nuclear_morphology.charting.datasets.ProfileDatasetCreator.ProfileChartDataset;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
-import com.bmskinner.nuclear_morphology.components.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.Taggable;
-import com.bmskinner.nuclear_morphology.components.generic.BooleanProfile;
-import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
-import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
-import com.bmskinner.nuclear_morphology.components.generic.Tag;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
-import com.bmskinner.nuclear_morphology.components.generic.UnsegmentedProfileException;
-import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
+import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
+import com.bmskinner.nuclear_morphology.components.measure.MeasurementDimension;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.stats.StatisticDimension;
+import com.bmskinner.nuclear_morphology.components.profiles.BooleanProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
+import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
+import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.profiles.UnsegmentedProfileException;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter.ColourSwatch;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
@@ -111,7 +111,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
 
 		plot.getRangeAxis().setLabel(type.getLabel());
 
-		if (type.getDimension().equals(StatisticDimension.ANGLE)) {
+		if (type.getDimension().equals(MeasurementDimension.ANGLE)) {
 			plot.getRangeAxis().setRange(DEFAULT_ANGLE_AXIS_MIN, DEFAULT_ANGLE_AXIS_MAX);
 			plot.addRangeMarker(ChartComponents.DEGREE_LINE_180);
 		}
@@ -432,7 +432,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
 	 */
 	protected void addSegmentTextAnnotations(ISegmentedProfile profile, XYPlot plot) {
 		double xMax = plot.getDomainAxis().getRange().getUpperBound();
-		for (IBorderSegment seg : profile.getOrderedSegments()) {
+		for (IProfileSegment seg : profile.getOrderedSegments()) {
 
 			int midPoint = seg.getMidpointIndex();
 

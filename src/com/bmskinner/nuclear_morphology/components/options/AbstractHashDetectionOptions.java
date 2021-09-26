@@ -24,8 +24,8 @@ import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nuclear_morphology.components.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -197,13 +197,13 @@ public abstract class AbstractHashDetectionOptions extends AbstractHashOptions i
 
         if (c == null)
             return false;
-        if (c.getStatistic(PlottableStatistic.AREA) < this.getMinSize())
+        if (c.getStatistic(Measurement.AREA) < this.getMinSize())
             return false;
-        if (c.getStatistic(PlottableStatistic.AREA) > this.getMaxSize())
+        if (c.getStatistic(Measurement.AREA) > this.getMaxSize())
             return false;
-        if (c.getStatistic(PlottableStatistic.CIRCULARITY) < this.getMinCirc())
+        if (c.getStatistic(Measurement.CIRCULARITY) < this.getMinCirc())
             return false;
-        if (c.getStatistic(PlottableStatistic.CIRCULARITY) > this.getMaxCirc())
+        if (c.getStatistic(Measurement.CIRCULARITY) > this.getMaxCirc())
             return false;
         return true;
 

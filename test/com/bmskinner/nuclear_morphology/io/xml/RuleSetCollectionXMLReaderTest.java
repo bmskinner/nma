@@ -5,7 +5,7 @@ import static org.junit.Assert.assertEquals;
 import org.jdom2.Document;
 import org.junit.Test;
 
-import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
+import com.bmskinner.nuclear_morphology.components.nuclei.NucleusType;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.io.xml.XMLReader.XMLReadingException;
 

@@ -33,7 +33,7 @@ import com.bmskinner.nuclear_morphology.charting.datasets.tables.AbstractTableCr
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptionsBuilder;
-import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
@@ -83,7 +83,7 @@ public class SegmentStatsPanel extends DetailPanel {
         TableOptions options = makeOptions();
         setTable(options);
 
-        if (IBorderSegment.segmentCountsMatch(getDatasets())) {
+        if (IProfileSegment.segmentCountsMatch(getDatasets())) {
             table.setToolTipText("Mean and range for 95% confidence interval");
 
         } else {

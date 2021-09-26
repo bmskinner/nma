@@ -44,26 +44,26 @@ import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.charting.datasets.tables.AbstractTableCreator;
 import com.bmskinner.nuclear_morphology.charting.options.AbstractOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
-import com.bmskinner.nuclear_morphology.components.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.ICellCollection;
-import com.bmskinner.nuclear_morphology.components.IClusterGroup;
-import com.bmskinner.nuclear_morphology.components.VirtualCellCollection;
-import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
-import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
-import com.bmskinner.nuclear_morphology.components.generic.Tag;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
-import com.bmskinner.nuclear_morphology.components.generic.UnsegmentedProfileException;
-import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
-import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
+import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
+import com.bmskinner.nuclear_morphology.components.datasets.IClusterGroup;
+import com.bmskinner.nuclear_morphology.components.datasets.VirtualCellCollection;
+import com.bmskinner.nuclear_morphology.components.measure.Measurement;
+import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
+import com.bmskinner.nuclear_morphology.components.nuclei.NucleusType;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.ICannyOptions;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions.ClusteringMethod;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
+import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
+import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.profiles.UnsegmentedProfileException;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
-import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.io.Io;
@@ -126,7 +126,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
             Tag point = Tag.REFERENCE_POINT;
 
             // get mapping from ordered segments to segment names
-            List<IBorderSegment> segments;
+            List<IProfileSegment> segments;
             try {
                 segments = collection.getProfileCollection()
                         .getSegmentedProfile(ProfileType.ANGLE, point, Stats.MEDIAN).getOrderedSegments();
@@ -145,7 +145,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
             DecimalFormat df = new DecimalFormat(DEFAULT_DECIMAL_FORMAT);
             DecimalFormat pf = new DecimalFormat(DEFAULT_PROBABILITY_FORMAT);
 
-            for (IBorderSegment segment : segments) {
+            for (IProfileSegment segment : segments) {
 
                 List<Object> rowData = new ArrayList<>();
 
@@ -154,7 +154,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
                 rowData.add(segment.getStartIndex());
                 rowData.add(segment.getEndIndex());
 
-                double[] meanLengths = collection.getRawValues(PlottableStatistic.LENGTH,
+                double[] meanLengths = collection.getRawValues(Measurement.LENGTH,
                         CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, segment.getID());
 
                 double mean = DoubleStream.of(meanLengths).average().orElse(0);
@@ -195,7 +195,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
         DefaultTableModel model = new DefaultTableModel();
 
         // If the datasets have different segment counts, show error message
-        if (!IBorderSegment.segmentCountsMatch(options.getDatasets())) {
+        if (!IProfileSegment.segmentCountsMatch(options.getDatasets())) {
             model.addColumn(Labels.INCONSISTENT_SEGMENT_NUMBER);
             return model;
         }
@@ -205,7 +205,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
         List<Object> fieldNames = new ArrayList<>();
 
         // assumes all datasets have the same number of segments
-        List<IBorderSegment> segments;
+        List<IProfileSegment> segments;
         try {
             segments = options.firstDataset().getCollection().getProfileCollection().getSegments(Tag.REFERENCE_POINT);
         } catch (UnavailableBorderTagException | ProfileException e1) {
@@ -219,7 +219,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
         List<Object> colours = new ArrayList<>();
         colours.add(EMPTY_STRING);
         
-        for (IBorderSegment segment : segments) {
+        for (IProfileSegment segment : segments) {
             fieldNames.add(segment.getName());
             colours.add(EMPTY_STRING); // Add the segment colours columns
         }
@@ -235,16 +235,16 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
             ICellCollection collection = dataset.getCollection();
 
             try {
-            	List<IBorderSegment> segs = collection.getProfileCollection()
+            	List<IProfileSegment> segs = collection.getProfileCollection()
             			.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN)
                         .getOrderedSegments();
             	
             	List<Object> rowData = new ArrayList<>();
                 rowData.add(dataset.getName());
                 
-                for (IBorderSegment segment : segs) {
+                for (IProfileSegment segment : segs) {
 
-                    double[] meanLengths = collection.getRawValues(PlottableStatistic.LENGTH,
+                    double[] meanLengths = collection.getRawValues(Measurement.LENGTH,
                             CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, segment.getID());
                     double mean = DoubleStream.of(meanLengths).average().orElse(0);
 
@@ -538,7 +538,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 
         List<Object> columnData = new ArrayList<>();
         columnData.add(NUCLEUS_LABEL);
-        for (PlottableStatistic stat : PlottableStatistic.getNucleusStats(type)) {
+        for (Measurement stat : Measurement.getNucleusStats(type)) {
             for (String value : valueLabels) {
                 columnData.add(stat.toString() + value);
             }
@@ -566,7 +566,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
         datasetData.add(collection.size());
         NucleusType type = IAnalysisDataset.getBroadestNucleusType(options.getDatasets());
         DecimalFormat df = new DecimalFormat(DEFAULT_DECIMAL_FORMAT);
-        for (PlottableStatistic stat : PlottableStatistic.getNucleusStats(type)) {
+        for (Measurement stat : Measurement.getNucleusStats(type)) {
             double[] stats = collection.getRawValues(stat, CellularComponent.NUCLEUS, scale);
 
             double mean = DoubleStream.of(stats).average().orElse(0);
@@ -808,12 +808,12 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 
         DefaultTableModel model = makeEmptyWilcoxonTable(options.getDatasets());
 
-        PlottableStatistic stat = options.getStat();
+        Measurement stat = options.getStat();
         
         MeasurementScale scale = GlobalOptions.getInstance().getScale();
 
         int nComparisons = (options.datasetCount()*(options.datasetCount()-1))/2;
-        nComparisons *= PlottableStatistic.getNucleusStats().size(); // correct for each set of analyses also
+        nComparisons *= Measurement.getNucleusStats().size(); // correct for each set of analyses also
         // add columns
         DecimalFormat df = new DecimalFormat(DEFAULT_PROBABILITY_FORMAT);
         for (IAnalysisDataset dataset : options.getDatasets()) {
@@ -872,7 +872,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 
             Object[] popData = new Object[options.datasetCount()];
 
-            IBorderSegment medianSeg1;
+            IProfileSegment medianSeg1;
             try {
                 medianSeg1 = dataset.getCollection().getProfileCollection()
                         .getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN)
@@ -893,7 +893,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
                     getPValue = true;
                 } else {
 
-                    IBorderSegment medianSeg2;
+                    IProfileSegment medianSeg2;
                     try {
                         medianSeg2 = dataset2.getCollection().getProfileCollection()
                                 .getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN)
@@ -905,10 +905,10 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
                     }
 
                     popData[i] = df.format(Stats.runWilcoxonTest(dataset.getCollection().getRawValues(
-                            PlottableStatistic.LENGTH, CellularComponent.NUCLEAR_BORDER_SEGMENT,
+                            Measurement.LENGTH, CellularComponent.NUCLEAR_BORDER_SEGMENT,
                             MeasurementScale.PIXELS, medianSeg1.getID()),
 
-                            dataset2.getCollection().getRawValues(PlottableStatistic.LENGTH,
+                            dataset2.getCollection().getRawValues(Measurement.LENGTH,
                                     CellularComponent.NUCLEAR_BORDER_SEGMENT, MeasurementScale.PIXELS,
                                     medianSeg2.getID()),
 
@@ -962,7 +962,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 
         DefaultTableModel model = makeEmptyWilcoxonTable(options.getDatasets());
 
-        PlottableStatistic stat = options.getStat();
+        Measurement stat = options.getStat();
         
         MeasurementScale scale = GlobalOptions.getInstance().getScale();
 
@@ -1031,7 +1031,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
         DecimalFormat df = new DecimalFormat("#0.0000");
         for (IAnalysisDataset dataset : options.getDatasets()) {
 
-            IBorderSegment medianSeg1;
+            IProfileSegment medianSeg1;
             try {
                 medianSeg1 = dataset.getCollection().getProfileCollection()
                         .getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN)
@@ -1043,7 +1043,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
             }
             
             DescriptiveStatistics ds = new DescriptiveStatistics(
-                    dataset.getCollection().getRawValues(PlottableStatistic.LENGTH,
+                    dataset.getCollection().getRawValues(Measurement.LENGTH,
                             CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, medianSeg1.getID()));
                     double value1 = ds.getPercentile(Stats.MEDIAN);
             
@@ -1060,7 +1060,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 
                 } else {
 
-                    IBorderSegment medianSeg2;
+                    IProfileSegment medianSeg2;
                     try {
                         medianSeg2 = dataset2.getCollection().getProfileCollection()
                                 .getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN)
@@ -1072,7 +1072,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
                     }
 
                     DescriptiveStatistics ss = new DescriptiveStatistics(
-                    dataset2.getCollection().getRawValues(PlottableStatistic.LENGTH,
+                    dataset2.getCollection().getRawValues(Measurement.LENGTH,
                             CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, medianSeg2.getID()));
                     double value2 = ss.getPercentile(Stats.MEDIAN);
                     double magnitude = value2 / value1;
@@ -1170,7 +1170,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
         		builder.append(t+Io.NEWLINE);
  
         NucleusType type = IAnalysisDataset.getBroadestNucleusType(options.getDatasets());
-        for (PlottableStatistic stat : PlottableStatistic.getNucleusStats(type))
+        for (Measurement stat : Measurement.getNucleusStats(type))
         	if(op.isIncludeStatistic(stat))
         		builder.append(stat.toString()+Io.NEWLINE);
 

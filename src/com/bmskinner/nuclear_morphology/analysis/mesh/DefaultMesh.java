@@ -30,15 +30,15 @@ import java.util.stream.Collectors;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.Taggable;
+import com.bmskinner.nuclear_morphology.components.UnavailableBorderPointException;
+import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
-import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
-import com.bmskinner.nuclear_morphology.components.generic.Tag;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderPointException;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
-import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
+import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
+import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -439,10 +439,10 @@ public class DefaultMesh<E extends Taggable> implements Mesh<E> {
     	LOGGER.finest( "Determining vertex proportions");
 
     	try {
-    		List<IBorderSegment> segments = component.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getOrderedSegments();
+    		List<IProfileSegment> segments = component.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getOrderedSegments();
 
     		for(int segNumber=0; segNumber<segments.size(); segNumber++) {
-    			IBorderSegment seg = segments.get(segNumber);
+    			IProfileSegment seg = segments.get(segNumber);
     			List<Double> proportions = new ArrayList<>();
 
     			double div = (double) seg.length() / (double) vertexSpacing;
@@ -479,12 +479,12 @@ public class DefaultMesh<E extends Taggable> implements Mesh<E> {
     private void createPeripheralVertices() throws MeshCreationException {
         LOGGER.finest( "Creating peripheral vertices");
         try {
-            List<IBorderSegment> list = component.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getOrderedSegments();
+            List<IProfileSegment> list = component.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getOrderedSegments();
 
             Set<Integer> segs = segmentVertexProportions.keySet();
             for (int segIndex : segs) {
 
-                IBorderSegment segment = list.get(segIndex);
+                IProfileSegment segment = list.get(segIndex);
                 Set<MeshVertex> segVertices = segmentFaces.get(segIndex);
                 LOGGER.finest( "Segment " + segIndex + ": " + segment.length());
 
@@ -699,7 +699,7 @@ public class DefaultMesh<E extends Taggable> implements Mesh<E> {
     }
 
     @Override
-	public Set<MeshFace> getFaces(IBorderSegment seg){
+	public Set<MeshFace> getFaces(IProfileSegment seg){
     	Set<MeshVertex> vertices = this.segmentFaces.get(seg.getPosition());
     	
 //    	faces.stream().filter(f->f.isPeripheral()&&f.getPeripheralVertices().stream().allMatch(v->vertices.contains(v)));

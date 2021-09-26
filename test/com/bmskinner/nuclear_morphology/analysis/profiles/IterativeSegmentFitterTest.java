@@ -13,16 +13,16 @@ import org.junit.rules.ExpectedException;
 import com.bmskinner.nuclear_morphology.ComponentTester;
 import com.bmskinner.nuclear_morphology.TestDatasetBuilder;
 import com.bmskinner.nuclear_morphology.charting.ChartFactoryTest;
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.generic.IProfile;
-import com.bmskinner.nuclear_morphology.components.generic.IProfileCollection;
-import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
-import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
-import com.bmskinner.nuclear_morphology.components.generic.SegmentedFloatProfile;
-import com.bmskinner.nuclear_morphology.components.generic.Tag;
-import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
-import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.nuclei.NucleusType;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfileCollection;
+import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
+import com.bmskinner.nuclear_morphology.components.profiles.SegmentedFloatProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.Tag;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 /** 
@@ -108,8 +108,8 @@ public class IterativeSegmentFitterTest extends ComponentTester {
 		ISegmentedProfile result = fitter.fit(target.copy());
 		
 		for(int i=0; i<target.getSegmentCount(); i++) {
-			IBorderSegment targetSeg = target.getOrderedSegments().get(i);
-			IBorderSegment resultSeg = result.getOrderedSegments().get(i);	
+			IProfileSegment targetSeg = target.getOrderedSegments().get(i);
+			IProfileSegment resultSeg = result.getOrderedSegments().get(i);	
 			assertEquals("Segments should match", targetSeg.toString(), resultSeg.toString());
 		}
 
@@ -140,7 +140,7 @@ public class IterativeSegmentFitterTest extends ComponentTester {
 			assertEquals("Single segment before adding to nucleus", 0, segProfile.getSegment(IProfileCollection.DEFAULT_SEGMENT_ID).getStartIndex());	
 						
 			ISegmentedProfile test  = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
-			IBorderSegment seg = test.getSegment(IProfileCollection.DEFAULT_SEGMENT_ID);
+			IProfileSegment seg = test.getSegment(IProfileCollection.DEFAULT_SEGMENT_ID);
 			assertEquals("Single segment start fetched from nucleus", 0, seg.getStartIndex());			
 		}
 		

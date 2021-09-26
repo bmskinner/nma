@@ -9,11 +9,11 @@ import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.SingleDatasetAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.image.GLCM.GLCMTile;
 import com.bmskinner.nuclear_morphology.analysis.image.GLCM.GLCMParameter;
-import com.bmskinner.nuclear_morphology.components.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.ICell;
+import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.cells.ICell;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 
 public class GLCMCalculationMethod extends SingleDatasetAnalysisMethod {
 
@@ -52,7 +52,7 @@ public class GLCMCalculationMethod extends SingleDatasetAnalysisMethod {
 		}
 		
 		// Clear stats caches
-		for(PlottableStatistic stat : GLCMParameter.toStats()) {
+		for(Measurement stat : GLCMParameter.toStats()) {
 			dataset.getCollection().clear(stat, CellularComponent.NUCLEUS);
 			for(IAnalysisDataset child : dataset.getAllChildDatasets()) {
 				child.getCollection().clear(stat, CellularComponent.NUCLEUS);

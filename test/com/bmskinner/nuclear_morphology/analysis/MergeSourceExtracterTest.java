@@ -36,7 +36,7 @@ import com.bmskinner.nuclear_morphology.TestResources;
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetProfilingMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMethod.MorphologyAnalysisMode;
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.io.DatasetExportMethod;
 import com.bmskinner.nuclear_morphology.io.DatasetExportMethod.ExportFormat;
 import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;

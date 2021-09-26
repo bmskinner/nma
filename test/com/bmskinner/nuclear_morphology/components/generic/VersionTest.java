@@ -8,6 +8,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import com.bmskinner.nuclear_morphology.components.Version;
+
 public class VersionTest {
 	
 	@Rule

@@ -35,9 +35,9 @@ import org.jfree.data.xy.XYDataset;
 
 import com.bmskinner.nuclear_morphology.charting.ChartComponents;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
-import com.bmskinner.nuclear_morphology.components.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.generic.BorderTag;
-import com.bmskinner.nuclear_morphology.components.generic.Tag;
+import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.profiles.BorderTagObject;
+import com.bmskinner.nuclear_morphology.components.profiles.Tag;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 
@@ -206,11 +206,11 @@ public abstract class AbstractChartFactory {
             colour = Color.BLUE;
         if (tag.equals(Tag.REFERENCE_POINT))
             colour = Color.ORANGE;
-        if (tag.getName().equals(BorderTag.INTERSECTION_POINT.toString()))
+        if (tag.getName().equals(BorderTagObject.INTERSECTION_POINT.toString()))
             colour = Color.CYAN;
-        if (tag.getName().equals(BorderTag.TOP_VERTICAL.toString()))
+        if (tag.getName().equals(BorderTagObject.TOP_VERTICAL.toString()))
             colour = Color.GRAY;
-        if (tag.getName().equals(BorderTag.BOTTOM_VERTICAL.toString()))
+        if (tag.getName().equals(BorderTagObject.BOTTOM_VERTICAL.toString()))
             colour = Color.GRAY;
         return colour;
     }

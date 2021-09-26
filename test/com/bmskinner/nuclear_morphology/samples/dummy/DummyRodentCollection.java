@@ -26,17 +26,17 @@ import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetProfilingMethod;
-import com.bmskinner.nuclear_morphology.components.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
-import com.bmskinner.nuclear_morphology.components.DefaultAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.DefaultCell;
-import com.bmskinner.nuclear_morphology.components.DefaultCellCollection;
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.ICell;
-import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
-import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
+import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.cells.DefaultCell;
+import com.bmskinner.nuclear_morphology.components.cells.ICell;
+import com.bmskinner.nuclear_morphology.components.cells.ComponentFactory.ComponentCreationException;
+import com.bmskinner.nuclear_morphology.components.datasets.DefaultAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.datasets.DefaultCellCollection;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.measure.Measurement;
+import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.components.nuclei.NucleusType;
 
 public class DummyRodentCollection extends DefaultCellCollection {
 	
@@ -86,7 +86,7 @@ public class DummyRodentCollection extends DefaultCellCollection {
 		
 		double area;
 		try {
-			area = collection.getMedian(PlottableStatistic.AREA, CellularComponent.NUCLEUS, MeasurementScale.PIXELS);
+			area = collection.getMedian(Measurement.AREA, CellularComponent.NUCLEUS, MeasurementScale.PIXELS);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

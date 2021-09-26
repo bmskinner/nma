@@ -30,16 +30,16 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalManager;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
-import com.bmskinner.nuclear_morphology.components.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.ICellCollection;
-import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
-import com.bmskinner.nuclear_morphology.components.generic.Tag;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
-import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
-import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult;
+import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
+import com.bmskinner.nuclear_morphology.components.measure.Measurement;
+import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
+import com.bmskinner.nuclear_morphology.components.signals.IShellResult;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
@@ -73,9 +73,9 @@ public class ScatterTableDatasetCreator extends AbstractTableCreator {
             return createBlankTable();
         }
 
-        PlottableStatistic firstStat = options.getStat();
+        Measurement firstStat = options.getStat();
 
-        for (PlottableStatistic stat : options.getStats()) {
+        for (Measurement stat : options.getStats()) {
             if (!stat.getClass().equals(firstStat.getClass())) {
                 LOGGER.fine("Statistic classes are different");
                 return createBlankTable();
@@ -117,12 +117,12 @@ public class ScatterTableDatasetCreator extends AbstractTableCreator {
 
         List<IAnalysisDataset> datasets = options.getDatasets();
 
-        List<PlottableStatistic> stats = options.getStats();
+        List<Measurement> stats = options.getStats();
 
         MeasurementScale scale = options.getScale();
 
-        PlottableStatistic statA = stats.get(0);
-        PlottableStatistic statB = stats.get(1);
+        Measurement statA = stats.get(0);
+        Measurement statB = stats.get(1);
         DecimalFormat df = new DecimalFormat(DEFAULT_DECIMAL_FORMAT);
         for (int i = 0; i < datasets.size(); i++) {
 
@@ -141,13 +141,13 @@ public class ScatterTableDatasetCreator extends AbstractTableCreator {
 
                 try {
 
-                    if (statA.equals(PlottableStatistic.VARIABILITY)) {
+                    if (statA.equals(Measurement.VARIABILITY)) {
                         statAValue = c.getNormalisedDifferenceToMedian(Tag.REFERENCE_POINT, n);
                     } else {
                         statAValue = n.getStatistic(statA, scale);
                     }
 
-                    if (statB.equals(PlottableStatistic.VARIABILITY)) {
+                    if (statB.equals(Measurement.VARIABILITY)) {
                         statBValue = c.getNormalisedDifferenceToMedian(Tag.REFERENCE_POINT, n);
                     } else {
                         statBValue = n.getStatistic(statB, scale);
@@ -185,12 +185,12 @@ public class ScatterTableDatasetCreator extends AbstractTableCreator {
 
         List<IAnalysisDataset> datasets = options.getDatasets();
 
-        List<PlottableStatistic> stats = options.getStats();
+        List<Measurement> stats = options.getStats();
 
         MeasurementScale scale = options.getScale();
 
-        PlottableStatistic statA = stats.get(0);
-        PlottableStatistic statB = stats.get(1);
+        Measurement statA = stats.get(0);
+        Measurement statB = stats.get(1);
         DecimalFormat df = new DecimalFormat(DEFAULT_DECIMAL_FORMAT);
         for (int i = 0; i < datasets.size(); i++) {
 

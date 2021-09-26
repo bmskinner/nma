@@ -34,10 +34,10 @@ import com.bmskinner.nuclear_morphology.charting.datasets.NuclearSignalBoxAndWhi
 import com.bmskinner.nuclear_morphology.charting.datasets.NuclearSignalDatasetCreator;
 import com.bmskinner.nuclear_morphology.charting.datasets.NucleusDatasetCreator;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
-import com.bmskinner.nuclear_morphology.components.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
-import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.measure.Measurement;
+import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -109,7 +109,7 @@ public class BoxplotChartFactory extends AbstractChartFactory {
      */
     private JFreeChart createSegmentBoxplot() {
 
-        PlottableStatistic stat = options.getStat();
+        Measurement stat = options.getStat();
 
         BoxAndWhiskerCategoryDataset ds;
         try {

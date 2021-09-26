@@ -22,8 +22,8 @@ import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
-import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.components.measure.Measurement;
+import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.io.xml.XMLCreator;
 
 /**
@@ -51,7 +51,7 @@ public class DefaultClusteringOptions extends AbstractHashOptions implements ICl
 		setInt(EM_ITERATIONS_KEY, DEFAULT_EM_ITERATIONS);
 		setInt(MANUAL_CLUSTER_NUMBER_KEY, DEFAULT_MANUAL_CLUSTER_NUMBER);
 
-		for (PlottableStatistic stat : PlottableStatistic.getRoundNucleusStats())
+		for (Measurement stat : Measurement.getRoundNucleusStats())
 			setBoolean(stat.toString(), false);
 		
 		setBoolean(DEFAULT_PROFILE_TYPE.toString(), DEFAULT_INCLUDE_PROFILE);
@@ -84,7 +84,7 @@ public class DefaultClusteringOptions extends AbstractHashOptions implements ICl
 	}
 
 	@Override
-	public boolean isIncludeStatistic(PlottableStatistic stat) {
+	public boolean isIncludeStatistic(Measurement stat) {
 		if(boolMap.containsKey(stat.toString()))
 			return boolMap.get(stat.toString());
 		return false;
@@ -192,7 +192,7 @@ public class DefaultClusteringOptions extends AbstractHashOptions implements ICl
 	}
 
 	@Override
-	public void setIncludeStatistic(PlottableStatistic stat, boolean selected) {
+	public void setIncludeStatistic(Measurement stat, boolean selected) {
 		setBoolean(stat.toString(), selected);
 	}
 

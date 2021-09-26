@@ -25,7 +25,7 @@ import java.util.Map;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
 
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 
 /**

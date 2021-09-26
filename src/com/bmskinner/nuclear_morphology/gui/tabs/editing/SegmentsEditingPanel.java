@@ -43,18 +43,18 @@ import com.bmskinner.nuclear_morphology.charting.charts.MorphologyChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.ProfileChartFactory;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.ICellCollection;
-import com.bmskinner.nuclear_morphology.components.generic.IProfileCollection;
-import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
-import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
-import com.bmskinner.nuclear_morphology.components.generic.Tag;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
-import com.bmskinner.nuclear_morphology.components.generic.UnsegmentedProfileException;
-import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
+import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfileCollection;
+import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
+import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.profiles.UnsegmentedProfileException;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
@@ -431,9 +431,9 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 
     	// Put the names of the mergable segments into a list
     	
-    	List<IBorderSegment> segList = medianProfile.getOrderedSegments();
+    	List<IProfileSegment> segList = medianProfile.getOrderedSegments();
     	for (int i=0; i<segList.size()-1; i++) { // Do not allow merges across the RP
-    		IBorderSegment seg = segList.get(i); 
+    		IProfileSegment seg = segList.get(i); 
     		SegMergeItem item = new SegMergeItem(seg, seg.nextSegment());
     		names.add(item);
     	}
@@ -459,9 +459,9 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
     }
 
     private class SegMergeItem {
-        private IBorderSegment one, two;
+        private IProfileSegment one, two;
 
-        public SegMergeItem(IBorderSegment one, IBorderSegment two) {
+        public SegMergeItem(IProfileSegment one, IProfileSegment two) {
             this.one = one;
             this.two = two;
         }
@@ -471,20 +471,20 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
             return one.getName() + " - " + two.getName();
         }
 
-        public IBorderSegment getOne() {
+        public IProfileSegment getOne() {
             return one;
         }
 
-        public IBorderSegment getTwo() {
+        public IProfileSegment getTwo() {
             return two;
         }
     }
 
     private void splitAction(ISegmentedProfile medianProfile) {
 
-    	IBorderSegment[] nameArray = medianProfile.getSegments().toArray(new IBorderSegment[0]);
+    	IProfileSegment[] nameArray = medianProfile.getSegments().toArray(new IProfileSegment[0]);
 
-    	String[] options = Arrays.stream(nameArray).map(IBorderSegment::getName).toArray(String[]::new);
+    	String[] options = Arrays.stream(nameArray).map(IProfileSegment::getName).toArray(String[]::new);
 
     	try {
     		int option = getInputSupplier().requestOptionAllVisible(options, "Choose segment to split", STR_SPLIT_SEGMENT);
@@ -507,15 +507,15 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
      */
     private void unmergeAction(ISegmentedProfile medianProfile) throws Exception {
 
-        List<IBorderSegment> names = new ArrayList<>();
+        List<IProfileSegment> names = new ArrayList<>();
 
         // Put the names of the mergable segments into a list
-        for (IBorderSegment seg : medianProfile.getSegments()) {
+        for (IProfileSegment seg : medianProfile.getSegments()) {
             if (seg.hasMergeSources()) {
                 names.add(seg);
             }
         }
-        IBorderSegment[] nameArray = names.toArray(new IBorderSegment[0]);
+        IProfileSegment[] nameArray = names.toArray(new IProfileSegment[0]);
         String[] options = Arrays.stream(nameArray).map(s->s.getName()).toArray(String[]::new);
         
         try {

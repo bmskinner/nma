@@ -30,6 +30,9 @@ import java.awt.geom.Point2D;
 
 import org.junit.Test;
 
+import com.bmskinner.nuclear_morphology.components.measure.DoubleEquation;
+import com.bmskinner.nuclear_morphology.components.measure.LineEquation;
+
 /**
  * @author bms41
  *
@@ -40,7 +43,7 @@ public class DoubleEquationTest {
     private static final DoubleEquation X_EQ_Y = new DoubleEquation(1, 0);
 
     /**
-     * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DoubleEquation#DoubleEquation(double, double)}.
+     * Test method for {@link com.bmskinner.nuclear_morphology.components.measure.DoubleEquation#DoubleEquation(double, double)}.
      */
     @Test
     public void testDoubleEquationDoubleDouble() {
@@ -61,7 +64,7 @@ public class DoubleEquationTest {
     
 
     /**
-     * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DoubleEquation#DoubleEquation(com.bmskinner.nuclear_morphology.components.generic.IPoint, com.bmskinner.nuclear_morphology.components.generic.IPoint)}.
+     * Test method for {@link com.bmskinner.nuclear_morphology.components.measure.DoubleEquation#DoubleEquation(com.bmskinner.nuclear_morphology.components.generic.IPoint, com.bmskinner.nuclear_morphology.components.generic.IPoint)}.
      */
     @Test
     public void testDoubleEquationIPointIPoint() {
@@ -71,7 +74,7 @@ public class DoubleEquationTest {
     }
 
     /**
-     * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DoubleEquation#DoubleEquation(java.awt.geom.Point2D, java.awt.geom.Point2D)}.
+     * Test method for {@link com.bmskinner.nuclear_morphology.components.measure.DoubleEquation#DoubleEquation(java.awt.geom.Point2D, java.awt.geom.Point2D)}.
      */
     @Test
     public void testDoubleEquationPoint2DPoint2D() {
@@ -83,7 +86,7 @@ public class DoubleEquationTest {
     }
 
     /**
-     * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DoubleEquation#getX(double)}.
+     * Test method for {@link com.bmskinner.nuclear_morphology.components.measure.DoubleEquation#getX(double)}.
      */
     @Test
     public void testGetX() {
@@ -92,7 +95,7 @@ public class DoubleEquationTest {
     }
 
     /**
-     * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DoubleEquation#getY(double)}.
+     * Test method for {@link com.bmskinner.nuclear_morphology.components.measure.DoubleEquation#getY(double)}.
      */
     @Test
     public void testGetY() {
@@ -101,7 +104,7 @@ public class DoubleEquationTest {
     }
 
     /**
-     * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DoubleEquation#getM()}.
+     * Test method for {@link com.bmskinner.nuclear_morphology.components.measure.DoubleEquation#getM()}.
      */
     @Test
     public void testGetM() {
@@ -110,7 +113,7 @@ public class DoubleEquationTest {
     }
 
     /**
-     * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DoubleEquation#getC()}.
+     * Test method for {@link com.bmskinner.nuclear_morphology.components.measure.DoubleEquation#getC()}.
      */
     @Test
     public void testGetC() {
@@ -119,7 +122,7 @@ public class DoubleEquationTest {
     }
 
     /**
-     * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DoubleEquation#isOnLine(com.bmskinner.nuclear_morphology.components.generic.IPoint)}.
+     * Test method for {@link com.bmskinner.nuclear_morphology.components.measure.DoubleEquation#isOnLine(com.bmskinner.nuclear_morphology.components.generic.IPoint)}.
      */
     @Test
     public void testIsOnLine() {
@@ -130,7 +133,7 @@ public class DoubleEquationTest {
     }
 
     /**
-     * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DoubleEquation#getPointOnLine(com.bmskinner.nuclear_morphology.components.generic.IPoint, double)}.
+     * Test method for {@link com.bmskinner.nuclear_morphology.components.measure.DoubleEquation#getPointOnLine(com.bmskinner.nuclear_morphology.components.generic.IPoint, double)}.
      */
     @Test
     public void testGetPointOnLine() {
@@ -149,7 +152,7 @@ public class DoubleEquationTest {
     }
 
     /**
-     * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DoubleEquation#getPerpendicular(com.bmskinner.nuclear_morphology.components.generic.IPoint)}.
+     * Test method for {@link com.bmskinner.nuclear_morphology.components.measure.DoubleEquation#getPerpendicular(com.bmskinner.nuclear_morphology.components.generic.IPoint)}.
      */
     @Test
     public void testGetPerpendicular() {
@@ -159,7 +162,7 @@ public class DoubleEquationTest {
     }
 
     /**
-     * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DoubleEquation#translate(com.bmskinner.nuclear_morphology.components.generic.IPoint)}.
+     * Test method for {@link com.bmskinner.nuclear_morphology.components.measure.DoubleEquation#translate(com.bmskinner.nuclear_morphology.components.generic.IPoint)}.
      */
     @Test
     public void testTranslate() {
@@ -170,7 +173,7 @@ public class DoubleEquationTest {
     }
 
     /**
-     * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DoubleEquation#getIntercept(com.bmskinner.nuclear_morphology.components.generic.LineEquation)}.
+     * Test method for {@link com.bmskinner.nuclear_morphology.components.measure.DoubleEquation#getIntercept(com.bmskinner.nuclear_morphology.components.measure.LineEquation)}.
      */
     @Test
     public void testGetIntercept() {
@@ -180,7 +183,7 @@ public class DoubleEquationTest {
     }
 
     /**
-     * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DoubleEquation#intersects(com.bmskinner.nuclear_morphology.components.generic.DoubleEquation)}.
+     * Test method for {@link com.bmskinner.nuclear_morphology.components.measure.DoubleEquation#intersects(com.bmskinner.nuclear_morphology.components.measure.DoubleEquation)}.
      */
     @Test
     public void testIntersects() {

@@ -18,7 +18,7 @@ package com.bmskinner.nuclear_morphology.gui.events;
 
 import java.util.List;
 
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 
 /**
  * Handle selected dataset list update events

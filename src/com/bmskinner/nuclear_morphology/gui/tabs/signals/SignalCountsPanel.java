@@ -45,11 +45,11 @@ import com.bmskinner.nuclear_morphology.charting.charts.ViolinChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPanel;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
-import com.bmskinner.nuclear_morphology.components.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.ICellCollection;
-import com.bmskinner.nuclear_morphology.components.VirtualCellCollection;
-import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
+import com.bmskinner.nuclear_morphology.components.datasets.VirtualCellCollection;
+import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.components.panels.SignalGroupSelectionPanel;
@@ -120,7 +120,7 @@ public class SignalCountsPanel extends DetailPanel {
     	filterBtn.setEnabled(false);
     	ChartOptions options = new ChartOptionsBuilder()
     			.setDatasets(getDatasets())
-        		.addStatistic(PlottableStatistic.NUCLEUS_SIGNAL_COUNT)
+        		.addStatistic(Measurement.NUCLEUS_SIGNAL_COUNT)
         		.setScale(GlobalOptions.getInstance().getScale())
         		.setSwatch(GlobalOptions.getInstance().getSwatch())
         		.setTarget(chartPanel)
@@ -191,7 +191,7 @@ public class SignalCountsPanel extends DetailPanel {
         	
         	FilteringOptions options = new CellCollectionFilterBuilder()
         			.setMatchType(FilterMatchType.ALL_MATCH)
-        			.add(PlottableStatistic.NUCLEUS_SIGNAL_COUNT, CellularComponent.NUCLEUS, groupPanel.getSelectedID(), minSignals, maxSignals)
+        			.add(Measurement.NUCLEUS_SIGNAL_COUNT, CellularComponent.NUCLEUS, groupPanel.getSelectedID(), minSignals, maxSignals)
         			.build();
         	
         	CellCollectionFilterer f = new CellCollectionFilterer(options);

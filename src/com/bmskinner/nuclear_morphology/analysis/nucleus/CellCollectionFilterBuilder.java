@@ -6,8 +6,8 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.bmskinner.nuclear_morphology.analysis.nucleus.FilteringOptions.FilterMatchType;
-import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
-import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.components.measure.Measurement;
+import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 
 /**
  * Simplify creation of filtering options
@@ -49,7 +49,7 @@ public class CellCollectionFilterBuilder {
 	 * @param maxValue the maximum value
 	 * @return this builder
 	 */
-	public CellCollectionFilterBuilder add(@NonNull PlottableStatistic stat, @NonNull String component, double minValue, double maxValue) {
+	public CellCollectionFilterBuilder add(@NonNull Measurement stat, @NonNull String component, double minValue, double maxValue) {
 		options.addMinimumThreshold(stat, component, minValue);
 		options.addMaximumThreshold(stat, component, maxValue);
 		return this;
@@ -64,7 +64,7 @@ public class CellCollectionFilterBuilder {
 	 * @param maxValue the maximum value
 	 * @return this builder
 	 */
-	public CellCollectionFilterBuilder add(@NonNull PlottableStatistic stat, @NonNull String component, MeasurementScale scale, double minValue, double maxValue) {
+	public CellCollectionFilterBuilder add(@NonNull Measurement stat, @NonNull String component, MeasurementScale scale, double minValue, double maxValue) {
 		options.addMinimumThreshold(stat, component, scale, minValue);
 		options.addMaximumThreshold(stat, component, scale, maxValue);
 		return this;
@@ -79,7 +79,7 @@ public class CellCollectionFilterBuilder {
 	 * @param maxValue the maximum value
 	 * @return this builder
 	 */
-	public CellCollectionFilterBuilder add(@NonNull PlottableStatistic stat, @NonNull String component, @Nullable UUID id, double minVvalue, double maxValue) {
+	public CellCollectionFilterBuilder add(@NonNull Measurement stat, @NonNull String component, @Nullable UUID id, double minVvalue, double maxValue) {
 		options.addMinimumThreshold(stat, component, MeasurementScale.PIXELS, id, minVvalue);
 		options.addMaximumThreshold(stat, component, MeasurementScale.PIXELS, id, maxValue);
 		return this;

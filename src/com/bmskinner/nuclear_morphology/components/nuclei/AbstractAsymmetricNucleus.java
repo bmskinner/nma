@@ -24,10 +24,10 @@ import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nuclear_morphology.components.generic.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
-import com.bmskinner.nuclear_morphology.components.generic.Tag;
-import com.bmskinner.nuclear_morphology.components.generic.UnprofilableObjectException;
-import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
+import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.UnprofilableObjectException;
 
 import ij.gui.Roi;
 

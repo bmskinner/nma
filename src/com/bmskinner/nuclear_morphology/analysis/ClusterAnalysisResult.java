@@ -18,8 +18,8 @@ package com.bmskinner.nuclear_morphology.analysis;
 
 import java.util.List;
 
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.IClusterGroup;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.datasets.IClusterGroup;
 
 /**
  * An extension to the default analysis result to hold cluster groups

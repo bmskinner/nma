@@ -49,18 +49,18 @@ import com.bmskinner.nuclear_morphology.charting.charts.panels.CoupledProfileOut
 import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPanel;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
-import com.bmskinner.nuclear_morphology.components.DefaultCell;
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.Taggable;
-import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
-import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
-import com.bmskinner.nuclear_morphology.components.generic.Tag;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
-import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
-import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
+import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.cells.DefaultCell;
+import com.bmskinner.nuclear_morphology.components.cells.ICell;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.generic.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
+import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
+import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.RotationMode;
@@ -85,7 +85,7 @@ public class CellResegmentationDialog extends AbstractCellEditingDialog implemen
 
     private boolean              isRunning  = false;
     private boolean              isSelectRP = false;
-    private List<IBorderSegment> newSegments;
+    private List<IProfileSegment> newSegments;
     private Map<Tag, Integer>    newTags;
     int                          segCount   = 0;
     int                          segStart   = 0;
@@ -208,7 +208,7 @@ public class CellResegmentationDialog extends AbstractCellEditingDialog implemen
         resegmentBtn.addActionListener(e -> {
             Taggable obj = (Taggable) taggableList.getSelectedItem();
             this.isRunning = true;
-            newSegments = new ArrayList<IBorderSegment>();
+            newSegments = new ArrayList<IProfileSegment>();
             table.setModel(createTableModel("Not set"));
             table.getColumnModel().getColumn(COLUMN_STATE).setCellRenderer(new SegmentStateRenderer());
             segCount = 0;
@@ -261,11 +261,11 @@ public class CellResegmentationDialog extends AbstractCellEditingDialog implemen
         LOGGER.finer( "Assigned all segments");
         try {
 
-            List<IBorderSegment> tempList;
+            List<IProfileSegment> tempList;
             if (segCount > 0) {
-                tempList = IBorderSegment.copyWithoutLinking(newSegments);
+                tempList = IProfileSegment.copyWithoutLinking(newSegments);
             } else {
-                tempList = new ArrayList<IBorderSegment>(); // for clearing the
+                tempList = new ArrayList<IProfileSegment>(); // for clearing the
                                                             // profile on start
                                                             // of resegmentation
             }
@@ -274,15 +274,15 @@ public class CellResegmentationDialog extends AbstractCellEditingDialog implemen
                     .getID();
 
             // Make a final segment after the last clicked position
-            IBorderSegment last = IBorderSegment.newSegment(segStart, n.getBorderIndex(Tag.REFERENCE_POINT),
+            IProfileSegment last = IProfileSegment.newSegment(segStart, n.getBorderIndex(Tag.REFERENCE_POINT),
                     n.getBorderLength(), id);
             tempList.add(last);
-            IBorderSegment.linkSegments(tempList);
+            IProfileSegment.linkSegments(tempList);
 
             ISegmentedProfile newProfile = n.getProfile(ProfileType.ANGLE);
             newProfile.setSegments(tempList);
             LOGGER.finer( "Segments added: ");
-            LOGGER.finer( IBorderSegment.toString(tempList));
+            LOGGER.finer( IProfileSegment.toString(tempList));
             LOGGER.finer( "New profile:");
             LOGGER.finer( newProfile.toString());
 
@@ -314,7 +314,7 @@ public class CellResegmentationDialog extends AbstractCellEditingDialog implemen
     		id = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegments().get(segCount).getID();
 
 
-    		IBorderSegment last = IBorderSegment.newSegment(segStart, n.getBorderIndex(Tag.REFERENCE_POINT),
+    		IProfileSegment last = IProfileSegment.newSegment(segStart, n.getBorderIndex(Tag.REFERENCE_POINT),
     				n.getBorderLength(), id);
     		newSegments.add(last);
     		LOGGER.finer( "Added " + last.toString());
@@ -403,7 +403,7 @@ public class CellResegmentationDialog extends AbstractCellEditingDialog implemen
                 UUID id = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegments().get(segCount).getID();
 
                 segStop = n.getBorderIndex(p);
-                IBorderSegment seg = IBorderSegment.newSegment(segStart, segStop, n.getBorderLength(), id);
+                IProfileSegment seg = IProfileSegment.newSegment(segStart, segStop, n.getBorderLength(), id);
                 newSegments.add(seg);
                 LOGGER.finer( "Added " + seg.toString());
                 segStart = segStop;

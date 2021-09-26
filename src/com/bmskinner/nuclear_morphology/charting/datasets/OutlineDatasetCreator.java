@@ -23,17 +23,17 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
-import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.Taggable;
+import com.bmskinner.nuclear_morphology.components.UnavailableBorderPointException;
+import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.generic.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
-import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
-import com.bmskinner.nuclear_morphology.components.generic.Tag;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderPointException;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
-import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
-import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
+import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
+import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -138,7 +138,7 @@ public class OutlineDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 
         Taggable t = (Taggable) component;
 
-        List<IBorderSegment> segmentList;
+        List<IProfileSegment> segmentList;
         try {
             segmentList = t.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegments();
         } catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
@@ -149,7 +149,7 @@ public class OutlineDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
         if (!segmentList.isEmpty()) { // only draw if there are segments
 //            LOGGER.finest( "Component has " + segmentList.size() + " segments");
 
-            for (IBorderSegment seg : segmentList) {
+            for (IProfileSegment seg : segmentList) {
 
                 // If we make the array the length of the segment,
                 // there will be a gap between the segment end and the

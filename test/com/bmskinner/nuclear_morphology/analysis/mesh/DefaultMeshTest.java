@@ -6,7 +6,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
 

@@ -23,15 +23,15 @@ import java.util.logging.Logger;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.DatasetValidator;
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
-import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
-import com.bmskinner.nuclear_morphology.components.generic.Tag;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableComponentException;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
-import com.bmskinner.nuclear_morphology.components.generic.UnsegmentedProfileException;
-import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
+import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.UnavailableComponentException;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
+import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
+import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.profiles.UnsegmentedProfileException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
@@ -96,8 +96,8 @@ public class SegmentationHandler {
         	medianProfile = dataset.getCollection().getProfileCollection().getSegmentedProfile(ProfileType.ANGLE,
                     Tag.REFERENCE_POINT, Stats.MEDIAN);
 
-            IBorderSegment seg1 = medianProfile.getSegment(segID1);
-            IBorderSegment seg2 = medianProfile.getSegment(segID2);
+            IProfileSegment seg1 = medianProfile.getSegment(segID1);
+            IProfileSegment seg2 = medianProfile.getSegment(segID2);
 
             boolean ok = dataset.getCollection().getProfileManager().testSegmentsMergeable(seg1, seg2);
 
@@ -110,8 +110,8 @@ public class SegmentationHandler {
                     ISegmentedProfile childProfile = child.getCollection().getProfileCollection()
                             .getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
 
-                    IBorderSegment childSeg1 = childProfile.getSegment(segID1);
-                    IBorderSegment childSeg2 = childProfile.getSegment(segID2);
+                    IProfileSegment childSeg1 = childProfile.getSegment(segID1);
+                    IProfileSegment childSeg2 = childProfile.getSegment(segID2);
 
                     child.getCollection().getProfileManager().mergeSegments(childSeg1, childSeg2, newID);
                 }
@@ -166,7 +166,7 @@ public class SegmentationHandler {
             ISegmentedProfile medianProfile = dataset.getCollection().getProfileCollection()
                     .getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
 
-            IBorderSegment seg = medianProfile.getSegment(segID);
+            IProfileSegment seg = medianProfile.getSegment(segID);
 
             if (!seg.hasMergeSources()) {
                 LOGGER.warning("Segment is not a merge; cannot unmerge");
@@ -221,7 +221,7 @@ public class SegmentationHandler {
             ISegmentedProfile medianProfile = dataset.getCollection().getProfileCollection()
                     .getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
 
-            IBorderSegment seg = medianProfile.getSegment(segID);
+            IProfileSegment seg = medianProfile.getSegment(segID);
 
             UUID newID1 = UUID.randomUUID();
             UUID newID2 = UUID.randomUUID();

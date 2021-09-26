@@ -27,14 +27,14 @@ import org.jfree.data.xy.XYDataset;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.UnavailableComponentException;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
-import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
-import com.bmskinner.nuclear_morphology.components.generic.Tag;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableComponentException;
-import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
+import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
+import com.bmskinner.nuclear_morphology.components.profiles.Tag;
 
 public class CellDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 	
@@ -67,7 +67,7 @@ public class CellDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 
             LOGGER.finest( "Creating multiple dataset position dataset");
 
-            if (IBorderSegment.segmentCountsMatch(options.getDatasets())) {
+            if (IProfileSegment.segmentCountsMatch(options.getDatasets())) {
 
                 ds = createMultiPositionFeatureDataset();
             } else {
@@ -194,7 +194,7 @@ public class CellDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
                     continue;
 
                 }
-                IBorderSegment segment = verticalNucleus.getProfile(ProfileType.ANGLE).getSegment(segmentID);
+                IProfileSegment segment = verticalNucleus.getProfile(ProfileType.ANGLE).getSegment(segmentID);
                 LOGGER.finest( "Fetched segment " + segmentID.toString());
 
                 int start = segment.getStartIndex();

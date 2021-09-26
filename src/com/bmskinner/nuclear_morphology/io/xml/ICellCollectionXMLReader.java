@@ -10,19 +10,19 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.jdom2.Element;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.components.Consensus;
-import com.bmskinner.nuclear_morphology.components.DefaultCellCollection;
-import com.bmskinner.nuclear_morphology.components.ICell;
-import com.bmskinner.nuclear_morphology.components.ICellCollection;
-import com.bmskinner.nuclear_morphology.components.generic.Tag;
-import com.bmskinner.nuclear_morphology.components.generic.UnprofilableObjectException;
-import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
-import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
-import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
-import com.bmskinner.nuclear_morphology.components.nuclear.SignalGroup;
+import com.bmskinner.nuclear_morphology.components.cells.ICell;
+import com.bmskinner.nuclear_morphology.components.datasets.DefaultCellCollection;
+import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
+import com.bmskinner.nuclear_morphology.components.nuclei.Consensus;
 import com.bmskinner.nuclear_morphology.components.nuclei.DefaultConsensusNucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.NucleusFactory;
+import com.bmskinner.nuclear_morphology.components.nuclei.NucleusType;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
+import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.UnprofilableObjectException;
+import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
+import com.bmskinner.nuclear_morphology.components.signals.SignalGroup;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -105,21 +105,21 @@ public class ICellCollectionXMLReader extends XMLReader<ICellCollection> {
 	
 	private void readCollectionSegments(Element segs, ICellCollection collection) {
 		int profileLength = collection.getProfileCollection().length();
-		List<IBorderSegment> newSegs = new ArrayList<>();
+		List<IProfileSegment> newSegs = new ArrayList<>();
 		int prevStart = -1;
 		UUID prevId = null;
 		for(Element seg : segs.getChildren()) {			
 			UUID id = readUUID(seg);
 			int startIndex = readInt(seg, XMLCreator.INDEX_KEY);
 			if(prevId!=null) {
-				IBorderSegment newSeg = IBorderSegment.newSegment(prevStart, startIndex, profileLength, prevId);
+				IProfileSegment newSeg = IProfileSegment.newSegment(prevStart, startIndex, profileLength, prevId);
 				newSegs.add(newSeg);
 			}
 			prevStart = startIndex;
 			prevId = id;
 		}
 		if(prevId!=null) {
-			IBorderSegment lastSeg = IBorderSegment.newSegment(prevStart, newSegs.get(0).getStartIndex(), profileLength, prevId);
+			IProfileSegment lastSeg = IProfileSegment.newSegment(prevStart, newSegs.get(0).getStartIndex(), profileLength, prevId);
 			newSegs.add(lastSeg);
 		}
 		

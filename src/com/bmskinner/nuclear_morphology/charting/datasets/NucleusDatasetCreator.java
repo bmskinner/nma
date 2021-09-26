@@ -37,31 +37,31 @@ import com.bmskinner.nuclear_morphology.analysis.mesh.MeshVertex;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.DefaultChartOptions;
-import com.bmskinner.nuclear_morphology.components.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.ICell;
-import com.bmskinner.nuclear_morphology.components.ICellCollection;
-import com.bmskinner.nuclear_morphology.components.generic.BooleanProfile;
-import com.bmskinner.nuclear_morphology.components.generic.DoubleEquation;
-import com.bmskinner.nuclear_morphology.components.generic.FloatProfile;
+import com.bmskinner.nuclear_morphology.components.UnavailableBorderPointException;
+import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.UnavailableComponentException;
+import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.cells.ICell;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
+import com.bmskinner.nuclear_morphology.components.generic.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
-import com.bmskinner.nuclear_morphology.components.generic.IProfile;
-import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
-import com.bmskinner.nuclear_morphology.components.generic.LineEquation;
-import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
-import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
-import com.bmskinner.nuclear_morphology.components.generic.Tag;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderPointException;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableComponentException;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
-import com.bmskinner.nuclear_morphology.components.generic.UnsegmentedProfileException;
-import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
-import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
-import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
-import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
+import com.bmskinner.nuclear_morphology.components.measure.DoubleEquation;
+import com.bmskinner.nuclear_morphology.components.measure.LineEquation;
+import com.bmskinner.nuclear_morphology.components.measure.Measurement;
+import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.components.profiles.BooleanProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.FloatProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
+import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.profiles.UnsegmentedProfileException;
+import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
+import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.DipTester;
@@ -106,7 +106,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
      */
     public BoxAndWhiskerCategoryDataset createBoxplotDataset() throws ChartDatasetCreationException {
         List<IAnalysisDataset> datasets = options.getDatasets();
-        PlottableStatistic stat = options.getStat();
+        Measurement stat = options.getStat();
         MeasurementScale scale = options.getScale();
         ExportableBoxAndWhiskerCategoryDataset ds = new ExportableBoxAndWhiskerCategoryDataset();
 
@@ -129,13 +129,13 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
      */
     public BoxAndWhiskerCategoryDataset createSegmentStatDataset() throws ChartDatasetCreationException {
 
-        PlottableStatistic stat = options.getStat();
+        Measurement stat = options.getStat();
 
-        if (stat.equals(PlottableStatistic.LENGTH)) {
+        if (stat.equals(Measurement.LENGTH)) {
             return createSegmentLengthDataset(options.getDatasets(), options.getSegPosition(), options.getScale());
         }
 
-        if (stat.equals(PlottableStatistic.DISPLACEMENT)) {
+        if (stat.equals(Measurement.DISPLACEMENT)) {
             return createSegmentDisplacementDataset(options.getDatasets(), options.getSegPosition());
         }
 
@@ -158,7 +158,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 
             ICellCollection collection = collections.get(i).getCollection();
 
-            IBorderSegment medianSeg;
+            IProfileSegment medianSeg;
             try {
                 medianSeg = collection.getProfileCollection()
                         .getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN)
@@ -176,13 +176,13 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 
                 try {
 
-                    IBorderSegment seg = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT)
+                    IProfileSegment seg = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT)
                             .getSegment(medianSeg.getID());
 
                     if (seg != null) {
                         int indexLength = seg.length();
                         double proportionPerimeter = (double) indexLength / (double) seg.getProfileLength();
-                        length = n.getStatistic(PlottableStatistic.PERIMETER, scale) * proportionPerimeter;
+                        length = n.getStatistic(Measurement.PERIMETER, scale) * proportionPerimeter;
 
                     }
 
@@ -195,8 +195,8 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
                 list.add(length);
             }
 
-            dataset.add(list, IBorderSegment.SEGMENT_PREFIX + segPosition + "_" + i,
-                    IBorderSegment.SEGMENT_PREFIX + segPosition);
+            dataset.add(list, IProfileSegment.SEGMENT_PREFIX + segPosition + "_" + i,
+                    IProfileSegment.SEGMENT_PREFIX + segPosition);
         }
         return dataset;
     }
@@ -218,7 +218,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 
             ICellCollection collection = collections.get(i).getCollection();
 
-            IBorderSegment medianSeg;
+            IProfileSegment medianSeg;
             try {
                 medianSeg = collection.getProfileCollection()
                         .getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN)
@@ -235,7 +235,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 
                 try {
                     ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
-                    IBorderSegment seg = profile.getSegment(medianSeg.getID());
+                    IProfileSegment seg = profile.getSegment(medianSeg.getID());
 
                     double displacement = profile.getDisplacement(seg);
                     list.add(displacement);
@@ -246,8 +246,8 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
                 }
             }
 
-            dataset.add(list, IBorderSegment.SEGMENT_PREFIX + segPosition + "_" + i,
-                    IBorderSegment.SEGMENT_PREFIX + segPosition);
+            dataset.add(list, IProfileSegment.SEGMENT_PREFIX + segPosition + "_" + i,
+                    IProfileSegment.SEGMENT_PREFIX + segPosition);
         }
         return dataset;
     }
@@ -272,20 +272,20 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 
             ICellCollection collection = datasets.get(i).getCollection();
 
-            List<IBorderSegment> segments;
+            List<IProfileSegment> segments;
             try {
                 segments = collection.getProfileCollection()
                         .getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN)
                         .getOrderedSegments();
 
-                for (IBorderSegment medianSeg : segments) {
+                for (IProfileSegment medianSeg : segments) {
 
                     int medianSegmentLength = medianSeg.length();
 
                     List<Integer> list = new ArrayList<>(0);
 
                     for (Nucleus n : collection.getNuclei()) {
-                        IBorderSegment seg = n.getProfile(ProfileType.ANGLE).getSegment(medianSeg.getName());
+                        IProfileSegment seg = n.getProfile(ProfileType.ANGLE).getSegment(medianSeg.getName());
 
                         int differenceToMedian = 0;
                         // if seg is null, catch before we throw an error
@@ -432,7 +432,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
         	if (angleProfile.hasSegments()) { // only draw if there are segments
 
         		// go through each segment
-        		for (IBorderSegment seg : angleProfile.getOrderedSegments()) {
+        		for (IProfileSegment seg : angleProfile.getOrderedSegments()) {
 
         			addSegmentIQRToConsensus(seg, ds, n, scaledRange, Tag.REFERENCE_POINT);
 
@@ -487,7 +487,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
      * @param n the consensus nucleus
      * @param scaledRange the IQR scale profile
      */
-    private void addSegmentIQRToConsensus(@NonNull IBorderSegment segment, @NonNull FloatXYDataset ds, @NonNull Nucleus n, @NonNull IProfile scaledRange,
+    private void addSegmentIQRToConsensus(@NonNull IProfileSegment segment, @NonNull FloatXYDataset ds, @NonNull Nucleus n, @NonNull IProfile scaledRange,
             @NonNull Tag pointType) throws ChartDatasetCreationException {
 
         // what we need to do is match the profile positions to the borderpoints
@@ -696,8 +696,8 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 
                     if (scale.equals(MeasurementScale.MICRONS)) {
                     	
-                        x = PlottableStatistic.lengthToMicrons(x, consensusScale);
-                        y = PlottableStatistic.lengthToMicrons(y, consensusScale);
+                        x = Measurement.lengthToMicrons(x, consensusScale);
+                        y = Measurement.lengthToMicrons(y, consensusScale);
                     }
 
                     xpoints[j] = x;

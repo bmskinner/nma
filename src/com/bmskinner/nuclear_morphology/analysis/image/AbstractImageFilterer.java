@@ -28,7 +28,7 @@ import javax.swing.ImageIcon;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalWarper;
-import com.bmskinner.nuclear_morphology.components.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 
 import ij.ImagePlus;
 import ij.process.ByteProcessor;

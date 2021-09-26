@@ -4,10 +4,10 @@ package com.bmskinner.nuclear_morphology.samples;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.bmskinner.nuclear_morphology.components.generic.IProfile;
-import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
-import com.bmskinner.nuclear_morphology.components.generic.SegmentedFloatProfile;
-import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.SegmentedFloatProfile;
 
 public class IndividualNuclei {
 	
@@ -60,14 +60,14 @@ public class IndividualNuclei {
 	public static ISegmentedProfile pigSpermSegmentedMedianProfile() throws Exception {
 		
 		// Segment boundaries are chosen from prior segmentation
-		IBorderSegment seg0 = IBorderSegment.newSegment(  0,  16, 327);
-		IBorderSegment seg1 = IBorderSegment.newSegment( 16, 147, 327);
-		IBorderSegment seg2 = IBorderSegment.newSegment(147, 163, 327);
-		IBorderSegment seg3 = IBorderSegment.newSegment(163, 182, 327);
-		IBorderSegment seg4 = IBorderSegment.newSegment(182, 312, 327);
-		IBorderSegment seg5 = IBorderSegment.newSegment(312, 326, 327);
+		IProfileSegment seg0 = IProfileSegment.newSegment(  0,  16, 327);
+		IProfileSegment seg1 = IProfileSegment.newSegment( 16, 147, 327);
+		IProfileSegment seg2 = IProfileSegment.newSegment(147, 163, 327);
+		IProfileSegment seg3 = IProfileSegment.newSegment(163, 182, 327);
+		IProfileSegment seg4 = IProfileSegment.newSegment(182, 312, 327);
+		IProfileSegment seg5 = IProfileSegment.newSegment(312, 326, 327);
 		
-		List<IBorderSegment> list = new ArrayList<IBorderSegment>();
+		List<IProfileSegment> list = new ArrayList<IProfileSegment>();
 		list.add(seg0);
 		list.add(seg1);
 		list.add(seg2);
@@ -75,7 +75,7 @@ public class IndividualNuclei {
 		list.add(seg4);
 		list.add(seg5);
 		
-		IBorderSegment.linkSegments(list);
+		IProfileSegment.linkSegments(list);
 		
 		// Add the segments to the sample data
 		ISegmentedProfile p = new SegmentedFloatProfile(pigSpermMedianProfile(), list);

@@ -15,11 +15,11 @@ import com.bmskinner.nuclear_morphology.analysis.mesh.DefaultMeshImage;
 import com.bmskinner.nuclear_morphology.analysis.mesh.Mesh;
 import com.bmskinner.nuclear_morphology.analysis.mesh.MeshFace;
 import com.bmskinner.nuclear_morphology.analysis.mesh.MeshImage;
-import com.bmskinner.nuclear_morphology.components.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
-import com.bmskinner.nuclear_morphology.components.generic.Tag;
-import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
+import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
+import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
+import com.bmskinner.nuclear_morphology.components.profiles.Tag;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 import com.bmskinner.nuclear_morphology.gui.tabs.signals.warping.SignalWarpingModel.ImageCache.WarpedImageKey;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -66,9 +66,9 @@ public class SectorQuantificationDialog extends JDialog {
 				Mesh<Nucleus> mesh = new DefaultMesh((Nucleus)c);
 				MeshImage meshImage = new DefaultMeshImage(mesh, ip1);
 
-				List<IBorderSegment> segs = ((Nucleus)c).getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegments();
+				List<IProfileSegment> segs = ((Nucleus)c).getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegments();
 				for(int i=0; i<segs.size(); i++) {
-					IBorderSegment s = segs.get(i);
+					IProfileSegment s = segs.get(i);
 					double total = 0;
 					for(MeshFace f : mesh.getFaces(s))
 						total += meshImage.quantifySignalProportion(f);

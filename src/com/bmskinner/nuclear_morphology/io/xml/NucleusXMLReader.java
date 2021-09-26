@@ -9,19 +9,19 @@ import java.util.logging.Logger;
 import org.eclipse.jdt.annotation.NonNull;
 import org.jdom2.Element;
 
-import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
+import com.bmskinner.nuclear_morphology.components.cells.ComponentFactory.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
-import com.bmskinner.nuclear_morphology.components.generic.IProfile;
-import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
-import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
-import com.bmskinner.nuclear_morphology.components.generic.SegmentedFloatProfile;
-import com.bmskinner.nuclear_morphology.components.generic.Tag;
-import com.bmskinner.nuclear_morphology.components.nuclear.DefaultNuclearSignal;
-import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
-import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
+import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.NucleusFactory;
-import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
+import com.bmskinner.nuclear_morphology.components.profiles.SegmentedFloatProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.signals.DefaultNuclearSignal;
+import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.gui.PolygonRoi;
@@ -85,7 +85,7 @@ public class NucleusXMLReader extends XMLReader<Nucleus>{
 		// Add stats
 		Element stats = e.getChild(XMLCreator.STATS_SECTION_KEY);
 		for(Element stat : stats.getChildren(XMLCreator.STAT_KEY)) {
-			PlottableStatistic s = readStat(stat);
+			Measurement s = readStat(stat);
 			double d = readDouble(stat, XMLCreator.VALUE_KEY);
 			n.setStatistic(s, d);
 		}
@@ -164,7 +164,7 @@ public class NucleusXMLReader extends XMLReader<Nucleus>{
 				// Add stats
 				Element stats = signalElement.getChild(XMLCreator.STATS_SECTION_KEY);
 				for(Element statElement : stats.getChildren(XMLCreator.STAT_KEY)) {
-					PlottableStatistic stat = readStat(statElement);
+					Measurement stat = readStat(statElement);
 					double d = readDouble(statElement, XMLCreator.VALUE_KEY);
 					s.setStatistic(stat, d);
 				}
@@ -189,14 +189,14 @@ public class NucleusXMLReader extends XMLReader<Nucleus>{
 	
 	private void readSegments(Element segs, Nucleus n) {
 		
-		List<IBorderSegment> newSegs = new ArrayList<>();
+		List<IProfileSegment> newSegs = new ArrayList<>();
 		int prevStart = -1;
 		UUID prevId = null;
 		for(Element seg : segs.getChildren()) {			
 			UUID id = readUUID(seg);				
 			int startIndex = readInt(seg, XMLCreator.INDEX_KEY);
 			if(prevId!=null) {
-				IBorderSegment newSeg = IBorderSegment.newSegment(prevStart, startIndex, n.getBorderLength(), prevId);
+				IProfileSegment newSeg = IProfileSegment.newSegment(prevStart, startIndex, n.getBorderLength(), prevId);
 				newSegs.add(newSeg);
 			}
 			prevStart = startIndex;
@@ -204,7 +204,7 @@ public class NucleusXMLReader extends XMLReader<Nucleus>{
 		}
 		
 		if(prevId!=null) {
-			IBorderSegment lastSeg = IBorderSegment.newSegment(prevStart, newSegs.get(0).getStartIndex(), n.getBorderLength(), prevId);
+			IProfileSegment lastSeg = IProfileSegment.newSegment(prevStart, newSegs.get(0).getStartIndex(), n.getBorderLength(), prevId);
 			newSegs.add(lastSeg);
 		}
 		try {			

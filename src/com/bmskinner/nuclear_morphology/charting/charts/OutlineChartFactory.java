@@ -70,19 +70,19 @@ import com.bmskinner.nuclear_morphology.charting.datasets.NucleusMeshXYDataset;
 import com.bmskinner.nuclear_morphology.charting.datasets.OutlineDataset;
 import com.bmskinner.nuclear_morphology.charting.datasets.OutlineDatasetCreator;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
-import com.bmskinner.nuclear_morphology.components.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.DefaultCell;
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.Imageable;
-import com.bmskinner.nuclear_morphology.components.generic.BorderTag;
-import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
-import com.bmskinner.nuclear_morphology.components.generic.Tag;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
-import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
-import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
+import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.cells.DefaultCell;
+import com.bmskinner.nuclear_morphology.components.cells.ICell;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.profiles.BorderTagObject;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
+import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
+import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
 import com.bmskinner.nuclear_morphology.gui.RotationMode;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
@@ -681,19 +681,19 @@ public class OutlineChartFactory extends AbstractChartFactory {
 
                     String tagName = name.replace("Tag_", "");
 
-                    if (tagName.equals(BorderTag.ORIENTATION_POINT.toString())) {
+                    if (tagName.equals(BorderTagObject.ORIENTATION_POINT.toString())) {
                         rend.setSeriesPaint(series, Color.BLUE);
                     }
-                    if (tagName.equals(BorderTag.REFERENCE_POINT.toString())) {
+                    if (tagName.equals(BorderTagObject.REFERENCE_POINT.toString())) {
                         rend.setSeriesPaint(series, Color.ORANGE);
                     }
-                    if (tagName.equals(BorderTag.INTERSECTION_POINT.toString())) {
+                    if (tagName.equals(BorderTagObject.INTERSECTION_POINT.toString())) {
                         rend.setSeriesPaint(series, Color.CYAN);
                     }
-                    if (tagName.equals(BorderTag.TOP_VERTICAL.toString())) {
+                    if (tagName.equals(BorderTagObject.TOP_VERTICAL.toString())) {
                         rend.setSeriesPaint(series, Color.GRAY);
                     }
-                    if (tagName.equals(BorderTag.BOTTOM_VERTICAL.toString())) {
+                    if (tagName.equals(BorderTagObject.BOTTOM_VERTICAL.toString())) {
                         rend.setSeriesPaint(series, Color.GRAY);
                     }
 
@@ -1051,10 +1051,10 @@ public class OutlineChartFactory extends AbstractChartFactory {
         if (options.isShowMeshFaces()) {
         	
         	try {
-				List<IBorderSegment> segments = options.firstDataset().getCollection().getConsensus().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegments();
+				List<IProfileSegment> segments = options.firstDataset().getCollection().getConsensus().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegments();
 				
 				for(int i=0; i<segments.size(); i++) {
-					IBorderSegment s = segments.get(i);
+					IProfileSegment s = segments.get(i);
 					for (MeshFace f : mesh.getFaces(s)) {
 						Path2D path = f.toPath();
 	        			Color colour = ColourSelecter.getColor(i, options.getSwatch());

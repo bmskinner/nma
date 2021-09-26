@@ -28,13 +28,13 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.AbstractFinder;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageAnnotator;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageConverter;
-import com.bmskinner.nuclear_morphology.components.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.ICellCollection;
-import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
+import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
+import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
-import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -232,8 +232,8 @@ public class SignalFinder extends AbstractFinder<List<INuclearSignal>> {
      * @return
      */
     private boolean checkSignal(@NonNull INuclearSignal s, @NonNull Nucleus n) {
-        return (s.getStatistic(PlottableStatistic.AREA) >= signalOptions.getMinSize()
-        		&& s.getStatistic(PlottableStatistic.AREA) <= (signalOptions.getMaxFraction() * n.getStatistic(PlottableStatistic.AREA)));
+        return (s.getStatistic(Measurement.AREA) >= signalOptions.getMinSize()
+        		&& s.getStatistic(Measurement.AREA) <= (signalOptions.getMaxFraction() * n.getStatistic(Measurement.AREA)));
     }
 
 }

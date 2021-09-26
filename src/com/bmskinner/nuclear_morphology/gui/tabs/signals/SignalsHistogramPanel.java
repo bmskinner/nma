@@ -26,8 +26,8 @@ import com.bmskinner.nuclear_morphology.charting.charts.HistogramChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.SelectableChartPanel;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
-import com.bmskinner.nuclear_morphology.components.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.components.HistogramsTabPanel;
@@ -44,7 +44,7 @@ public class SignalsHistogramPanel extends HistogramsTabPanel {
         try {
 
             Dimension preferredSize = new Dimension(400, 150);
-            for (PlottableStatistic stat : PlottableStatistic.getSignalStats()) {
+            for (Measurement stat : Measurement.getSignalStats()) {
                 JFreeChart chart = HistogramChartFactory.createEmptyChart();
                 SelectableChartPanel panel = new SelectableChartPanel(chart, stat.toString());
                 panel.setPreferredSize(preferredSize);
@@ -66,7 +66,7 @@ public class SignalsHistogramPanel extends HistogramsTabPanel {
 
         boolean useDensity = useDensityPanel.isSelected();
 
-        for (PlottableStatistic stat : PlottableStatistic.getSignalStats()) {
+        for (Measurement stat : Measurement.getSignalStats()) {
             SelectableChartPanel panel = chartPanels.get(stat.toString());
 
             // JFreeChart chart = null;

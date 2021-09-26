@@ -29,19 +29,19 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nuclear_morphology.analysis.ClusterAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.components.ClusterGroup;
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.ICell;
-import com.bmskinner.nuclear_morphology.components.ICellCollection;
-import com.bmskinner.nuclear_morphology.components.IClusterGroup;
 import com.bmskinner.nuclear_morphology.components.Statistical;
-import com.bmskinner.nuclear_morphology.components.VirtualCellCollection;
+import com.bmskinner.nuclear_morphology.components.cells.ICell;
+import com.bmskinner.nuclear_morphology.components.datasets.DefaultClusterGroup;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
+import com.bmskinner.nuclear_morphology.components.datasets.IClusterGroup;
+import com.bmskinner.nuclear_morphology.components.datasets.VirtualCellCollection;
+import com.bmskinner.nuclear_morphology.components.measure.DefaultMeasurement;
+import com.bmskinner.nuclear_morphology.components.measure.Measurement;
+import com.bmskinner.nuclear_morphology.components.measure.MeasurementDimension;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions.ClusteringMethod;
-import com.bmskinner.nuclear_morphology.components.stats.GenericStatistic;
-import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
-import com.bmskinner.nuclear_morphology.components.stats.StatisticDimension;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import weka.clusterers.Clusterer;
@@ -89,7 +89,7 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
         int clusterNumber = dataset.getMaxClusterGroupNumber() + 1;
 
         // Create a group to store the clustered cells
-        IClusterGroup group = new ClusterGroup(IClusterGroup.CLUSTER_GROUP_PREFIX + "_" + clusterNumber, options,
+        IClusterGroup group = new DefaultClusterGroup(IClusterGroup.CLUSTER_GROUP_PREFIX + "_" + clusterNumber, options,
                 newickTree);
 
         for (int cluster = 0; cluster < clusterMap.size(); cluster++) {
@@ -131,10 +131,10 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
         if(options.getBoolean(IClusteringOptions.USE_TSNE_KEY)) {
         	for(ICell c : dataset.getCollection()) {
         		for(Nucleus n : c.getNuclei()) {
-        			n.setStatistic(new GenericStatistic("TSNE_1_"+group.getId(), StatisticDimension.DIMENSIONLESS), n.getStatistic(PlottableStatistic.TSNE_1));
-        			n.setStatistic(new GenericStatistic("TSNE_2_"+group.getId(), StatisticDimension.DIMENSIONLESS), n.getStatistic(PlottableStatistic.TSNE_2));
-        			n.setStatistic(PlottableStatistic.TSNE_1, Statistical.STAT_NOT_CALCULATED);
-        			n.setStatistic(PlottableStatistic.TSNE_2, Statistical.STAT_NOT_CALCULATED);
+        			n.setStatistic(new DefaultMeasurement("TSNE_1_"+group.getId(), MeasurementDimension.DIMENSIONLESS), n.getStatistic(Measurement.TSNE_1));
+        			n.setStatistic(new DefaultMeasurement("TSNE_2_"+group.getId(), MeasurementDimension.DIMENSIONLESS), n.getStatistic(Measurement.TSNE_2));
+        			n.setStatistic(Measurement.TSNE_1, Statistical.STAT_NOT_CALCULATED);
+        			n.setStatistic(Measurement.TSNE_2, Statistical.STAT_NOT_CALCULATED);
         		}
         	}
         }
@@ -143,13 +143,13 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
         if(options.getBoolean(IClusteringOptions.USE_PCA_KEY)) {
         	for(ICell c : dataset.getCollection()) {
         		for(Nucleus n : c.getNuclei()) {
-        			int nPcs = (int) n.getStatistic(PlottableStatistic.PCA_N);
+        			int nPcs = (int) n.getStatistic(Measurement.PCA_N);
         			
-        			n.setStatistic(PlottableStatistic.makePrincipalComponentNumber(group.getId()), nPcs);
-        			n.clearStatistic(PlottableStatistic.PCA_N);
+        			n.setStatistic(Measurement.makePrincipalComponentNumber(group.getId()), nPcs);
+        			n.clearStatistic(Measurement.PCA_N);
         			for(int i=1; i<=nPcs; i++) {
-        				n.setStatistic(PlottableStatistic.makePrincipalComponent(i, group.getId()), n.getStatistic(PlottableStatistic.makePrincipalComponent(i)));
-        				n.clearStatistic(PlottableStatistic.makePrincipalComponent(i));
+        				n.setStatistic(Measurement.makePrincipalComponent(i, group.getId()), n.getStatistic(Measurement.makePrincipalComponent(i)));
+        				n.clearStatistic(Measurement.makePrincipalComponent(i));
         			}
         		}
         	}

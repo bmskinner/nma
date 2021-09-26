@@ -19,8 +19,8 @@ package com.bmskinner.nuclear_morphology.charting.datasets;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 
-import com.bmskinner.nuclear_morphology.components.Flagellum;
-import com.bmskinner.nuclear_morphology.components.ICell;
+import com.bmskinner.nuclear_morphology.components.cells.Flagellum;
+import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 
 public class TailDatasetCreator {

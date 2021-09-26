@@ -30,19 +30,19 @@ import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.SingleDatasetAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.Profileable;
-import com.bmskinner.nuclear_morphology.components.generic.IProfile;
-import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
-import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
-import com.bmskinner.nuclear_morphology.components.generic.Tag;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.cells.ICell;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.measure.Measurement;
+import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
-import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
+import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
 
 import weka.attributeSelection.PrincipalComponents;
 import weka.core.Attribute;
@@ -101,11 +101,11 @@ public class PrincipalComponentAnalysis extends SingleDatasetAnalysisMethod {
 			Optional<Nucleus> nucl = dataset.getCollection().getNucleus(nucleusId);
 
 			if(nucl.isPresent()) {
-				nucl.get().setStatistic(PlottableStatistic.PCA_N, values.length); // Store the number of expected PCs
+				nucl.get().setStatistic(Measurement.PCA_N, values.length); // Store the number of expected PCs
 				// Store in the generic stats pool until assigned a cluster id by a clustering method
 				for(int pc=0; pc<values.length; pc++) {
 					int readableName = pc+1;
-					PlottableStatistic stat = PlottableStatistic.makePrincipalComponent(readableName);
+					Measurement stat = Measurement.makePrincipalComponent(readableName);
 					nucl.get().setStatistic(stat, values[pc]);
 				}
 				if(i==0) {
@@ -141,7 +141,7 @@ public class PrincipalComponentAnalysis extends SingleDatasetAnalysisMethod {
         	}
         }
 
-        for (PlottableStatistic stat : PlottableStatistic.getNucleusStats(dataset.getCollection().getNucleusType())) {
+        for (Measurement stat : Measurement.getNucleusStats(dataset.getCollection().getNucleusType())) {
             if (options.getBoolean(stat.toString())) {
                 Attribute a = new Attribute(stat.toString());
                 attributes.addElement(a);
@@ -200,7 +200,7 @@ public class PrincipalComponentAnalysis extends SingleDatasetAnalysisMethod {
         	}
         }
         
-        for (PlottableStatistic stat : PlottableStatistic.getNucleusStats(dataset
+        for (Measurement stat : Measurement.getNucleusStats(dataset
         		.getCollection()
         		.getNucleusType())) {
         	

@@ -20,8 +20,8 @@ import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
-import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.components.measure.Measurement;
+import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 
 /**
  * Describes the methods for retrieving aggregate stats from collections of
@@ -39,7 +39,7 @@ public interface StatisticalCollection {
      * @param stat the statistic to recalculate
      * @param component the cellular component to fetch from
      */
-    void clear(PlottableStatistic stat, String component);
+    void clear(Measurement stat, String component);
     
     /**
      * Force the given statistic to be recalculated
@@ -48,7 +48,7 @@ public interface StatisticalCollection {
      * @param component the cellular component to fetch from
      * @param id the sub-component id 
      */
-    void clear(PlottableStatistic stat, String component, UUID id);
+    void clear(Measurement stat, String component, UUID id);
 
     /**
      * Force the statistics at the given scale to be recalculated
@@ -66,7 +66,7 @@ public interface StatisticalCollection {
      * @return the median statistic value
      * @throws Exception
      */
-    double getMedian(@NonNull PlottableStatistic stat, String component, MeasurementScale scale) throws Exception;
+    double getMedian(@NonNull Measurement stat, String component, MeasurementScale scale) throws Exception;
 
     /**
      * Get the median stat for a value with an ID - i.e. a nuclear signal or a
@@ -78,7 +78,7 @@ public interface StatisticalCollection {
      * @return
      * @throws Exception
      */
-    double getMedian(@NonNull PlottableStatistic stat, String component, MeasurementScale scale, UUID id)
+    double getMedian(@NonNull Measurement stat, String component, MeasurementScale scale, UUID id)
             throws Exception;
     
     
@@ -90,7 +90,7 @@ public interface StatisticalCollection {
      * @param id
      * @return the minumum or Statistical.ERROR_CALCULATING_STAT
      */
-    double getMin(@NonNull PlottableStatistic stat, String component, MeasurementScale scale);
+    double getMin(@NonNull Measurement stat, String component, MeasurementScale scale);
     
     /**
      * Get the minimum value of the given stat in the collection
@@ -100,7 +100,7 @@ public interface StatisticalCollection {
      * @param id
      * @return the minumum or Statistical.ERROR_CALCULATING_STAT
      */
-    double getMin(@NonNull PlottableStatistic stat, String component, MeasurementScale scale, UUID id);
+    double getMin(@NonNull Measurement stat, String component, MeasurementScale scale, UUID id);
     
     /**
      * Get the maximum value of the given stat in the collection
@@ -110,7 +110,7 @@ public interface StatisticalCollection {
      * @param id
      * @return the maxumum or Statistical.ERROR_CALCULATING_STAT
      */
-    double getMax(@NonNull PlottableStatistic stat, String component, MeasurementScale scale);
+    double getMax(@NonNull Measurement stat, String component, MeasurementScale scale);
    
     /**
      * Get the maximum value of the given stat in the collection
@@ -120,7 +120,7 @@ public interface StatisticalCollection {
      * @param id
      * @return the maxumum or Statistical.ERROR_CALCULATING_STAT
      */
-    double getMax(@NonNull PlottableStatistic stat, String component, MeasurementScale scale, UUID id);
+    double getMax(@NonNull Measurement stat, String component, MeasurementScale scale, UUID id);
     
     
 
@@ -132,7 +132,7 @@ public interface StatisticalCollection {
      * @param scale the scale to convert values to
      * @return the values in the collection
      */
-    double[] getRawValues(@NonNull PlottableStatistic stat, String component, MeasurementScale scale);
+    double[] getRawValues(@NonNull Measurement stat, String component, MeasurementScale scale);
 
     /**
      * Get the raw values for the given stat for each object in the collectionw
@@ -144,7 +144,7 @@ public interface StatisticalCollection {
      * @param id the id of the compenent to fetch
      * @return the values in the collection
      */
-    double[] getRawValues(@NonNull PlottableStatistic stat, String component, MeasurementScale scale, UUID id);
+    double[] getRawValues(@NonNull Measurement stat, String component, MeasurementScale scale, UUID id);
     
     
     

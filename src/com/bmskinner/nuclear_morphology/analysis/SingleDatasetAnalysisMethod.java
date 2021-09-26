@@ -18,7 +18,7 @@ package com.bmskinner.nuclear_morphology.analysis;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 
 /**
  * An abstract class of analysis method designed for handling single analysis datasets

@@ -12,7 +12,7 @@ import org.jdom2.output.XMLOutputter;
 import org.junit.Test;
 
 import com.bmskinner.nuclear_morphology.TestResources;
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
 
 /**

@@ -21,9 +21,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.IntStream;
 
-import com.bmskinner.nuclear_morphology.components.generic.BooleanProfile;
-import com.bmskinner.nuclear_morphology.components.generic.DoubleProfile;
-import com.bmskinner.nuclear_morphology.components.generic.IProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.BooleanProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.DoubleProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.stats.ModalityTest.BinnedData.Bin;
 
 /**

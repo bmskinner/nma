@@ -49,12 +49,12 @@ import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptionsBuilder;
-import com.bmskinner.nuclear_morphology.components.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.ICellCollection;
-import com.bmskinner.nuclear_morphology.components.VirtualCellCollection;
-import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
-import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
+import com.bmskinner.nuclear_morphology.components.datasets.VirtualCellCollection;
+import com.bmskinner.nuclear_morphology.components.measure.Measurement;
+import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
@@ -90,7 +90,7 @@ public abstract class AbstractScatterChartPanel extends DetailPanel  {
 
     protected JButton gateButton;
 
-    protected JComboBox<PlottableStatistic> statABox, statBBox;
+    protected JComboBox<Measurement> statABox, statBBox;
 
     protected ExportableTable rhoTable;
 
@@ -143,10 +143,10 @@ public abstract class AbstractScatterChartPanel extends DetailPanel  {
     }
     
     private JPanel createHeader() {
-        statABox = new JComboBox<>(PlottableStatistic.getStats(component));
-        statBBox = new JComboBox<>(PlottableStatistic.getStats(component));
+        statABox = new JComboBox<>(Measurement.getStats(component));
+        statBBox = new JComboBox<>(Measurement.getStats(component));
         
-        statABox.setSelectedItem(component.equals(CellularComponent.NUCLEAR_SIGNAL)?PlottableStatistic.FRACT_DISTANCE_FROM_COM:PlottableStatistic.VARIABILITY); // default if present
+        statABox.setSelectedItem(component.equals(CellularComponent.NUCLEAR_SIGNAL)?Measurement.FRACT_DISTANCE_FROM_COM:Measurement.VARIABILITY); // default if present
 
         statABox.addActionListener(e->update(getDatasets()));
         statBBox.addActionListener(e->update(getDatasets()));
@@ -173,8 +173,8 @@ public abstract class AbstractScatterChartPanel extends DetailPanel  {
     @Override
     protected synchronized void updateSingle() {
 
-        PlottableStatistic statA = (PlottableStatistic) statABox.getSelectedItem();
-        PlottableStatistic statB = (PlottableStatistic) statBBox.getSelectedItem();
+        Measurement statA = (Measurement) statABox.getSelectedItem();
+        Measurement statB = (Measurement) statBBox.getSelectedItem();
 
         ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets())
         		.addStatistic(statA)
@@ -256,8 +256,8 @@ public abstract class AbstractScatterChartPanel extends DetailPanel  {
         
         Range domain = getDomainBounds();
         Range range = getRangeBounds();
-        PlottableStatistic statA = (PlottableStatistic) statABox.getSelectedItem();
-        PlottableStatistic statB = (PlottableStatistic) statBBox.getSelectedItem();
+        Measurement statA = (Measurement) statABox.getSelectedItem();
+        Measurement statB = (Measurement) statBBox.getSelectedItem();
         
         FilteringOptions options = new CellCollectionFilterBuilder()
         		.setMatchType(FilterMatchType.ALL_MATCH)

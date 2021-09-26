@@ -20,15 +20,15 @@ import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nuclear_morphology.components.generic.DoubleEquation;
+import com.bmskinner.nuclear_morphology.components.UnavailableBorderPointException;
+import com.bmskinner.nuclear_morphology.components.generic.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
-import com.bmskinner.nuclear_morphology.components.generic.LineEquation;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderPointException;
-import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
-import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
-import com.bmskinner.nuclear_morphology.components.nuclear.ISignalCollection;
+import com.bmskinner.nuclear_morphology.components.measure.DoubleEquation;
+import com.bmskinner.nuclear_morphology.components.measure.LineEquation;
+import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
+import com.bmskinner.nuclear_morphology.components.signals.ISignalCollection;
 
 /**
  * This carries out the calculations of signal positions and angles within a
@@ -49,7 +49,7 @@ public class SignalAnalyser {
             if (!signals.isEmpty()) {
                 for (INuclearSignal s : signals) {
                     double distance = n.getCentreOfMass().getLengthTo(s.getCentreOfMass());
-                    s.setStatistic(PlottableStatistic.DISTANCE_FROM_COM, distance);
+                    s.setStatistic(Measurement.DISTANCE_FROM_COM, distance);
                 }
             }
         }
@@ -102,7 +102,7 @@ public class SignalAnalyser {
             	double nucleusCoMToBorder = borderPoint.getLengthTo(n.getCentreOfMass());
             	double signalCoMToNucleusCoM = n.getCentreOfMass().getLengthTo(signal.getCentreOfMass());
             	double fractionalDistance = Math.min(signalCoMToNucleusCoM / nucleusCoMToBorder, 1);
-            	signal.setStatistic(PlottableStatistic.FRACT_DISTANCE_FROM_COM, fractionalDistance);
+            	signal.setStatistic(Measurement.FRACT_DISTANCE_FROM_COM, fractionalDistance);
             }
             
         }

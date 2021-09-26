@@ -31,11 +31,11 @@ import com.bmskinner.nuclear_morphology.charting.datasets.AnalysisDatasetTableCr
 import com.bmskinner.nuclear_morphology.charting.datasets.tables.AbstractTableCreator;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptionsBuilder;
-import com.bmskinner.nuclear_morphology.components.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.generic.Tag;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
-import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
-import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.measure.Measurement;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
+import com.bmskinner.nuclear_morphology.components.profiles.Tag;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
@@ -91,9 +91,9 @@ public class SegmentMagnitudePanel extends AbstractPairwiseDetailPanel {
         tablePanel = createTablePanel();
         scrollPane.setColumnHeaderView(null);
 
-        if (IBorderSegment.segmentCountsMatch(getDatasets())) {
+        if (IProfileSegment.segmentCountsMatch(getDatasets())) {
 
-            List<IBorderSegment> segments;
+            List<IProfileSegment> segments;
             try {
                 segments = activeDataset().getCollection().getProfileCollection().getSegments(Tag.REFERENCE_POINT);
             } catch (UnavailableBorderTagException | ProfileException e) {
@@ -102,10 +102,10 @@ public class SegmentMagnitudePanel extends AbstractPairwiseDetailPanel {
                 return;
             }
 
-            for (PlottableStatistic stat : PlottableStatistic.getSegmentStats()) {
+            for (Measurement stat : Measurement.getSegmentStats()) {
 
                 // Get each segment as a boxplot
-                for (IBorderSegment seg : segments) {
+                for (IProfileSegment seg : segments) {
                     String segName = seg.getName();
 
                     ExportableTable table = new ExportableTable(AbstractTableCreator.createLoadingTable());

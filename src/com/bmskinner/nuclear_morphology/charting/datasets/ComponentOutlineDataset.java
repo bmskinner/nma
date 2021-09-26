@@ -21,7 +21,7 @@ import java.util.Map;
 
 import org.jfree.data.xy.DefaultXYDataset;
 
-import com.bmskinner.nuclear_morphology.components.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 
 /**
  * Holds the outline of a cellular component

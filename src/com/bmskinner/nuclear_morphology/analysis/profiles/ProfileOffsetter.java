@@ -21,15 +21,15 @@ import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nuclear_morphology.components.ICellCollection;
-import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
-import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
-import com.bmskinner.nuclear_morphology.components.generic.Tag;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableComponentException;
-import com.bmskinner.nuclear_morphology.components.generic.UnsegmentedProfileException;
-import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
+import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.UnavailableComponentException;
+import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
+import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
+import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.UnsegmentedProfileException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
@@ -70,7 +70,7 @@ public class ProfileOffsetter {
 
         UUID segID;
         ISegmentedProfile profile;
-        IBorderSegment segFromRef;
+        IProfileSegment segFromRef;
         try {
             segID = collection.getProfileCollection().getSegmentContaining(tag).getID();
 
@@ -92,7 +92,7 @@ public class ProfileOffsetter {
         for (Nucleus nucleus : collection.getNuclei()) {
         	try {
 
-                IBorderSegment nucleusSegment = nucleus.getProfile(ProfileType.ANGLE).getSegment(segID);
+                IProfileSegment nucleusSegment = nucleus.getProfile(ProfileType.ANGLE).getSegment(segID);
 
                 // find the index in the segment closest to the proportion 
                 int newIndex = nucleusSegment.getProportionalIndex(proportion);

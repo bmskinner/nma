@@ -29,9 +29,9 @@ import org.eclipse.jdt.annotation.Nullable;
 import com.bmskinner.nuclear_morphology.TestResources;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.generic.Version;
-import com.bmskinner.nuclear_morphology.components.generic.Version.UnsupportedVersionException;
+import com.bmskinner.nuclear_morphology.components.Version;
+import com.bmskinner.nuclear_morphology.components.Version.UnsupportedVersionException;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.io.xml.DatasetXMLReader;
 
 /**

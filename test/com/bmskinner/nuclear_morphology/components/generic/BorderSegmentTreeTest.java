@@ -16,9 +16,11 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.components.SegmentedCellularComponent.DefaultSegmentedProfile;
-import com.bmskinner.nuclear_morphology.components.SegmentedCellularComponent.DefaultSegmentedProfile.BorderSegmentTree;
-import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
+import com.bmskinner.nuclear_morphology.components.UnavailableComponentException;
+import com.bmskinner.nuclear_morphology.components.cells.SegmentedCellularComponent.DefaultSegmentedProfile;
+import com.bmskinner.nuclear_morphology.components.cells.SegmentedCellularComponent.DefaultSegmentedProfile.BorderSegmentTree;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfileCollection;
 
 /**
  * Specific tests for the border segment tree. Basic methods are in 
@@ -29,7 +31,7 @@ import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
  */
 public class BorderSegmentTreeTest extends DefaultSegmentedProfileTest {
 
-	protected IBorderSegment singleSegment; // segment covering entire profile
+	protected IProfileSegment singleSegment; // segment covering entire profile
 	
 	@Override
 	@Before
@@ -67,9 +69,9 @@ public class BorderSegmentTreeTest extends DefaultSegmentedProfileTest {
 
 		
 		((BorderSegmentTree)singleSegment).splitAt(singleSegment.getMidpointIndex(), UUID.randomUUID(), UUID.randomUUID());
-		List<IBorderSegment> list = singleSegment.getMergeSources();
-		IBorderSegment s0 = list.get(0);
-		IBorderSegment s1 = list.get(1);
+		List<IProfileSegment> list = singleSegment.getMergeSources();
+		IProfileSegment s0 = list.get(0);
+		IProfileSegment s1 = list.get(1);
 		
 		assertEquals(0, s0.getStartIndex());
 		assertEquals(singleSegment.getMidpointIndex(), s0.getEndIndex());
@@ -80,7 +82,7 @@ public class BorderSegmentTreeTest extends DefaultSegmentedProfileTest {
 
 	@Test
 	public void testGetDistanceToStartWithDoubleSegment() throws UnavailableComponentException {
-		IBorderSegment seg = doubleSegmentProfile.getSegment(DOUBLE_SEG_ID_0);
+		IProfileSegment seg = doubleSegmentProfile.getSegment(DOUBLE_SEG_ID_0);
 		for(int i=seg.getStartIndex(); i<=seg.length()+seg.getStartIndex(); i++) {
 			assertEquals(i, seg.getShortestDistanceToStart(i));
 		}
@@ -95,8 +97,8 @@ public class BorderSegmentTreeTest extends DefaultSegmentedProfileTest {
 	@Test
 	public void testNextSegmentWithChildSegment() throws UnavailableComponentException {
 		
-		IBorderSegment seg_0 = doubleSegmentProfile.getSegment(DOUBLE_SEG_ID_0);
-		IBorderSegment seg_1 = doubleSegmentProfile.getSegment(DOUBLE_SEG_ID_1);
+		IProfileSegment seg_0 = doubleSegmentProfile.getSegment(DOUBLE_SEG_ID_0);
+		IProfileSegment seg_1 = doubleSegmentProfile.getSegment(DOUBLE_SEG_ID_1);
 		
 		assertEquals(seg_1, seg_0.nextSegment());
 		assertEquals(seg_0, seg_1.nextSegment());
@@ -109,8 +111,8 @@ public class BorderSegmentTreeTest extends DefaultSegmentedProfileTest {
 	
 	@Test
 	public void testPrevSegmentWithChildSegment() throws UnavailableComponentException {
-		IBorderSegment seg_0 = doubleSegmentProfile.getSegment(DOUBLE_SEG_ID_0);
-		IBorderSegment seg_1 = doubleSegmentProfile.getSegment(DOUBLE_SEG_ID_1);
+		IProfileSegment seg_0 = doubleSegmentProfile.getSegment(DOUBLE_SEG_ID_0);
+		IProfileSegment seg_1 = doubleSegmentProfile.getSegment(DOUBLE_SEG_ID_1);
 		
 		assertEquals(seg_1, seg_0.prevSegment());
 		assertEquals(seg_0, seg_1.prevSegment());
@@ -120,7 +122,7 @@ public class BorderSegmentTreeTest extends DefaultSegmentedProfileTest {
 
 	@Test
 	public void testTestLength() throws UnavailableComponentException {
-		IBorderSegment seg_0 = doubleSegmentProfile.getSegment(DOUBLE_SEG_ID_0);
+		IProfileSegment seg_0 = doubleSegmentProfile.getSegment(DOUBLE_SEG_ID_0);
 		
 		int start = seg_0.getStartIndex();
 		int end  =  seg_0.getEndIndex();

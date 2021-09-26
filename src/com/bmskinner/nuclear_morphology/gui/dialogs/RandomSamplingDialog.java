@@ -51,8 +51,8 @@ import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPa
 import com.bmskinner.nuclear_morphology.charting.datasets.ChartDatasetCreationException;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.DefaultChartOptions;
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -68,7 +68,7 @@ public class RandomSamplingDialog extends LoadingIconDialog
     private JSpinner                      set1SizeSpinner;
     private JSpinner                      set2SizeSpinner;
     private JSpinner                      iterattionsSpinner;
-    private JComboBox<PlottableStatistic> statsBox;
+    private JComboBox<Measurement> statsBox;
     private JButton                       runButton;
     private JCheckBox                     showDensity;
     private IAnalysisWorker               sampler;
@@ -120,8 +120,8 @@ public class RandomSamplingDialog extends LoadingIconDialog
     }
     
     private JPanel createButtonPanel(){
-    	statsBox = new JComboBox<PlottableStatistic>(PlottableStatistic
-                .getNucleusStats(dataset.getCollection().getNucleusType()).toArray(new PlottableStatistic[0]));
+    	statsBox = new JComboBox<Measurement>(Measurement
+                .getNucleusStats(dataset.getCollection().getNucleusType()).toArray(new Measurement[0]));
 
         int cellCount = dataset.getCollection().size();
         int halfCellCount = cellCount >> 1;
@@ -219,7 +219,7 @@ public class RandomSamplingDialog extends LoadingIconDialog
         int iterations = (int) iterattionsSpinner.getValue();
         int firstCount = (int) set1SizeSpinner.getValue();
         int secondCount = (int) set2SizeSpinner.getValue();
-        PlottableStatistic stat = (PlottableStatistic) statsBox.getSelectedItem();
+        Measurement stat = (Measurement) statsBox.getSelectedItem();
 
         try {
             setStatusLoading();

@@ -45,14 +45,14 @@ import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.Imageable;
+import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.measure.DefaultMeasurement;
+import com.bmskinner.nuclear_morphology.components.measure.Measurement;
+import com.bmskinner.nuclear_morphology.components.measure.MeasurementDimension;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.DefaultOptions;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
-import com.bmskinner.nuclear_morphology.components.stats.GenericStatistic;
-import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
-import com.bmskinner.nuclear_morphology.components.stats.StatisticDimension;
 import com.bmskinner.nuclear_morphology.io.Io;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -117,17 +117,17 @@ public class GLCM {
 		 * Convert to plottable stat for charting
 		 * @return
 		 */
-		public PlottableStatistic toStat() {
-			return new GenericStatistic(toString(), StatisticDimension.DIMENSIONLESS);
+		public Measurement toStat() {
+			return new DefaultMeasurement(toString(), MeasurementDimension.DIMENSIONLESS);
 		}
 
 		/**
 		 * Convert all to plottable stats for charting
 		 * @return
 		 */
-		public static PlottableStatistic[] toStats() {
+		public static Measurement[] toStats() {
 			GLCMParameter[] values = values();
-			PlottableStatistic[] result = new PlottableStatistic[values.length];
+			Measurement[] result = new Measurement[values.length];
 			for(int i=0; i<values.length; i++)
 				result[i] = values[i].toStat();
 			return result;

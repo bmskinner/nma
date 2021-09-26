@@ -19,8 +19,8 @@ package com.bmskinner.nuclear_morphology.gui.events;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.ICell;
+import com.bmskinner.nuclear_morphology.components.cells.ICell;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.gui.events.CellUpdatedEventListener.CellUpdatedEvent;
 
 public class CelllUpdateEventHandler {

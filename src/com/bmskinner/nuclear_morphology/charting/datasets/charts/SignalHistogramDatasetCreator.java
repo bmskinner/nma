@@ -29,12 +29,12 @@ import org.jfree.data.xy.DefaultXYDataset;
 import com.bmskinner.nuclear_morphology.charting.datasets.ChartDatasetCreationException;
 import com.bmskinner.nuclear_morphology.charting.datasets.NucleusDatasetCreator;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
-import com.bmskinner.nuclear_morphology.components.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.ICellCollection;
-import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
-import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
-import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
+import com.bmskinner.nuclear_morphology.components.measure.Measurement;
+import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
+import com.bmskinner.nuclear_morphology.components.nuclei.NucleusType;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import weka.estimators.KernelEstimator;
@@ -63,7 +63,7 @@ public class SignalHistogramDatasetCreator extends HistogramDatasetCreator {
      * @throws Exception
      */
     public List<HistogramDataset> createSignalStatisticHistogramDataset(List<IAnalysisDataset> list,
-            PlottableStatistic stat, MeasurementScale scale) throws ChartDatasetCreationException {
+            Measurement stat, MeasurementScale scale) throws ChartDatasetCreationException {
 
         List<HistogramDataset> result = new ArrayList<HistogramDataset>();
 
@@ -106,7 +106,7 @@ public class SignalHistogramDatasetCreator extends HistogramDatasetCreator {
     public List<DefaultXYDataset> createSignalDensityHistogramDataset() throws ChartDatasetCreationException {
 
         List<IAnalysisDataset> list = options.getDatasets();
-        PlottableStatistic stat = options.getStat();
+        Measurement stat = options.getStat();
         MeasurementScale scale = options.getScale();
 
         List<DefaultXYDataset> result = new ArrayList<DefaultXYDataset>();
@@ -126,7 +126,7 @@ public class SignalHistogramDatasetCreator extends HistogramDatasetCreator {
                 boolean ignoreSignalGroup = false;
 
                 // If the angle is always zero, the estimator will fail
-                if (collection.getNucleusType().equals(NucleusType.ROUND) && stat.equals(PlottableStatistic.ANGLE)) {
+                if (collection.getNucleusType().equals(NucleusType.ROUND) && stat.equals(Measurement.ANGLE)) {
                     ignoreSignalGroup = true;
                 }
 
@@ -252,7 +252,7 @@ public class SignalHistogramDatasetCreator extends HistogramDatasetCreator {
      * @return a Range covering all the data
      * @throws Exception
      */
-    private Range calculateMinAndMaxRange(List<IAnalysisDataset> list, PlottableStatistic stat, MeasurementScale scale)
+    private Range calculateMinAndMaxRange(List<IAnalysisDataset> list, Measurement stat, MeasurementScale scale)
             throws ChartDatasetCreationException {
 
     	

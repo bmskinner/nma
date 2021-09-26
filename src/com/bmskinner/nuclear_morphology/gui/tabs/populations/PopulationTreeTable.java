@@ -32,9 +32,9 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.jdesktop.swingx.JXTreeTable;
 import org.jdesktop.swingx.treetable.TreeTableModel;
 
-import com.bmskinner.nuclear_morphology.components.ClusterGroup;
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.IClusterGroup;
+import com.bmskinner.nuclear_morphology.components.datasets.DefaultClusterGroup;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.datasets.IClusterGroup;
 import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace;
 import com.bmskinner.nuclear_morphology.core.DatasetListManager;
 import com.bmskinner.nuclear_morphology.gui.tabs.populations.PopulationsPanel.TreeSelectionHandler;
@@ -292,7 +292,7 @@ public class PopulationTreeTable extends JXTreeTable {
     public @Nullable IClusterGroup getClusterGroupAtRow(int rowIndex) {
         Object columnOneObject = getModel().getValueAt(rowIndex, PopulationTreeTable.COLUMN_NAME);
 
-        if (columnOneObject instanceof ClusterGroup) {
+        if (columnOneObject instanceof DefaultClusterGroup) {
             return (IClusterGroup) columnOneObject; // row i, column 0
         }
         return null;

@@ -1,6 +1,6 @@
 package com.bmskinner.nuclear_morphology;
 
-import com.bmskinner.nuclear_morphology.components.generic.Version;
+import com.bmskinner.nuclear_morphology.components.Version;
 import com.bmskinner.nuclear_morphology.io.Io;
 
 /**

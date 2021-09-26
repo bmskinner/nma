@@ -20,7 +20,7 @@ import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nuclear_morphology.components.generic.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.Tag;
 
 /**
  * Methods for editing datasets via a tab panel

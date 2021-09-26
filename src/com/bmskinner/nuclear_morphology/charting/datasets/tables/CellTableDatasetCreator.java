@@ -34,26 +34,26 @@ import com.bmskinner.nuclear_morphology.charting.datasets.AbstractCellDatasetCre
 import com.bmskinner.nuclear_morphology.charting.datasets.ChartDatasetCreationException;
 import com.bmskinner.nuclear_morphology.charting.datasets.SignalTableCell;
 import com.bmskinner.nuclear_morphology.charting.options.DisplayOptions;
-import com.bmskinner.nuclear_morphology.components.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.ICell;
-import com.bmskinner.nuclear_morphology.components.ICytoplasm;
-import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
-import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
-import com.bmskinner.nuclear_morphology.components.generic.Tag;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
-import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
-import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
-import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
-import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult;
-import com.bmskinner.nuclear_morphology.components.nuclear.ISignalCollection;
-import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
-import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
+import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.cells.ICell;
+import com.bmskinner.nuclear_morphology.components.cells.ICytoplasm;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.generic.IBorderPoint;
+import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.nuclei.NucleusType;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
-import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
+import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
+import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
+import com.bmskinner.nuclear_morphology.components.signals.IShellResult;
+import com.bmskinner.nuclear_morphology.components.signals.ISignalCollection;
+import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
@@ -103,7 +103,7 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
         }
 
         fieldNames.add("Number of nuclei");
-        rowData.add(cell.getStatistic(PlottableStatistic.CELL_NUCLEUS_COUNT));
+        rowData.add(cell.getStatistic(Measurement.CELL_NUCLEUS_COUNT));
 
         int nucleusNumber = 0;
         for (Nucleus n : cell.getNuclei()) {
@@ -138,7 +138,7 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
         try {
             ISegmentedProfile p = cell.getPrimaryNucleus().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
 
-            for (IBorderSegment s : p.getSegments()) {
+            for (IProfileSegment s : p.getSegments()) {
                 fieldNames.add(s.getName());
                 rowData.add(s.getStartIndex() + "-" + s.getEndIndex());
 
@@ -239,7 +239,7 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 
             ICytoplasm cyto = c.getCytoplasm();
             DecimalFormat df = new DecimalFormat(DEFAULT_DECIMAL_FORMAT);
-            for (PlottableStatistic stat : PlottableStatistic.getComponentStats()) {
+            for (Measurement stat : Measurement.getComponentStats()) {
                 fieldNames.add(stat.label(GlobalOptions.getInstance().getScale()));
 
                 double value = cyto.getStatistic(stat, GlobalOptions.getInstance().getScale());
@@ -328,7 +328,7 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
         
         try {
         	ISegmentedProfile sp = n.getProfile(ProfileType.ANGLE.ANGLE, Tag.REFERENCE_POINT);
-        	for(IBorderSegment s : sp.getOrderedSegments()) {
+        	for(IProfileSegment s : sp.getOrderedSegments()) {
         		fieldNames.add(s.getName());
         		rowData.add(s.toString());
         	}
@@ -353,9 +353,9 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 
         NucleusType type = options.firstDataset().getCollection().getNucleusType();
         DecimalFormat df = new DecimalFormat(DEFAULT_DECIMAL_FORMAT);
-        for (PlottableStatistic stat : PlottableStatistic.getNucleusStats(type)) {
+        for (Measurement stat : Measurement.getNucleusStats(type)) {
 
-            if (!stat.equals(PlottableStatistic.VARIABILITY)) {
+            if (!stat.equals(Measurement.VARIABILITY)) {
 
                 fieldNames.add(stat.label(GlobalOptions.getInstance().getScale()));
 
@@ -435,7 +435,7 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
      */
     private void addSignalStatisticsToTable(List<Object> fieldNames, List<Object> rowData, INuclearSignal s) {
     	DecimalFormat df = new DecimalFormat(DEFAULT_DECIMAL_FORMAT);
-        for (PlottableStatistic stat : PlottableStatistic.getSignalStats()) {
+        for (Measurement stat : Measurement.getSignalStats()) {
 
             fieldNames.add(stat.label(GlobalOptions.getInstance().getScale()));
 

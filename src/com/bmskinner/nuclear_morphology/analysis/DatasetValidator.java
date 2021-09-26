@@ -26,20 +26,20 @@ import java.util.logging.Logger;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.ICell;
-import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.Taggable;
-import com.bmskinner.nuclear_morphology.components.generic.IProfileCollection;
-import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
-import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
-import com.bmskinner.nuclear_morphology.components.generic.Tag;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableComponentException;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
-import com.bmskinner.nuclear_morphology.components.generic.UnsegmentedProfileException;
-import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
+import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.UnavailableComponentException;
+import com.bmskinner.nuclear_morphology.components.cells.ICell;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfileCollection;
+import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
+import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.profiles.UnsegmentedProfileException;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 /**
@@ -353,7 +353,7 @@ public class DatasetValidator {
 				try {
 					int rpIndex = n.getBorderIndex(Tag.REFERENCE_POINT);
 					ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE);
-					for(IBorderSegment s : profile.getSegments()){
+					for(IProfileSegment s : profile.getSegments()){
 						if(s.getStartIndex()==rpIndex)
 							rpIsOk++;
 					}
@@ -523,11 +523,11 @@ public class DatasetValidator {
 
 			// Check each profile index in only covered once by a segment
 			for (UUID id1 : expectedSegments) {
-				IBorderSegment s1 = p.getSegment(id1);
+				IProfileSegment s1 = p.getSegment(id1);
 				for (UUID id2 : expectedSegments) {
 					if(id1==id2)
 						continue;
-					IBorderSegment s2 = p.getSegment(id2);
+					IProfileSegment s2 = p.getSegment(id2);
 					if(s1.overlapsBeyondEndpoints(s2)){
 						errorList.add(String.format("%s overlaps %s in object %s", s1.getDetail(), s2.getDetail(), n.getID()));
 						errorCount++;
@@ -539,17 +539,17 @@ public class DatasetValidator {
 
 				
 			for(UUID id : medianProfile.getSegmentIDs()){
-				IBorderSegment medianSeg = medianProfile.getSegment(id);
-				IBorderSegment objectSeg = p.getSegment(id);
+				IProfileSegment medianSeg = medianProfile.getSegment(id);
+				IProfileSegment objectSeg = p.getSegment(id);
 				if(medianSeg.hasMergeSources()!=objectSeg.hasMergeSources())
 					errorCount++;
-				for(IBorderSegment mge : medianSeg.getMergeSources()) {
+				for(IProfileSegment mge : medianSeg.getMergeSources()) {
 					if(!objectSeg.hasMergeSource(mge.getID())) {
 						errorList.add(String.format("Object segment %s does not have expected median merge source in object %s", mge.getName(), n.getID()));
 						errorCount++;
 					}
 				}
-				for(IBorderSegment obj : objectSeg.getMergeSources()) {
+				for(IProfileSegment obj : objectSeg.getMergeSources()) {
 					if(!medianSeg.hasMergeSource(obj.getID())) {
 						errorList.add(String.format("Median segment %s does not have merge source %s from nucleus %s", medianSeg.getName(), obj.getID(), n.getID()));
 						errorCount++;

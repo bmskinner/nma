@@ -22,7 +22,7 @@ import java.util.EventObject;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.ProgressListener;
-import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
+import com.bmskinner.nuclear_morphology.components.cells.ComponentFactory.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 
 import ij.process.ImageProcessor;

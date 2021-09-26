@@ -24,11 +24,8 @@ import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nuclear_morphology.components.ComponentFactory;
+import com.bmskinner.nuclear_morphology.components.cells.ComponentFactory;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
-import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
-import com.bmskinner.nuclear_morphology.components.nuclei.sperm.DefaultPigSpermNucleus;
-import com.bmskinner.nuclear_morphology.components.nuclei.sperm.DefaultRodentSpermNucleus;
 
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;

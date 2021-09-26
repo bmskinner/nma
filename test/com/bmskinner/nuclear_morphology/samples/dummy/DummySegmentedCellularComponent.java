@@ -2,11 +2,11 @@ package com.bmskinner.nuclear_morphology.samples.dummy;
 
 import java.io.File;
 
-import com.bmskinner.nuclear_morphology.components.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
-import com.bmskinner.nuclear_morphology.components.SegmentedCellularComponent;
+import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.cells.SegmentedCellularComponent;
+import com.bmskinner.nuclear_morphology.components.cells.ComponentFactory.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
-import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
@@ -36,10 +36,10 @@ public class DummySegmentedCellularComponent extends SegmentedCellularComponent 
 	
 	public DummySegmentedCellularComponent(String name) {
 		super(ROI, COM, IMAGE_FILE, IMAGE_CHANNEL, POSITION);
-		setStatistic(PlottableStatistic.AREA,     AREA);
-        setStatistic(PlottableStatistic.MAX_FERET, MAX_FERET);
-        setStatistic(PlottableStatistic.PERIMETER, PERIMETER);
-        setStatistic(PlottableStatistic.MIN_DIAMETER, MIN_DIAMETER);
+		setStatistic(Measurement.AREA,     AREA);
+        setStatistic(Measurement.MAX_FERET, MAX_FERET);
+        setStatistic(Measurement.PERIMETER, PERIMETER);
+        setStatistic(Measurement.MIN_DIAMETER, MIN_DIAMETER);
         try {
 			initialise(PROFILE_WINDOW);
 		} catch (ComponentCreationException e) {

@@ -20,7 +20,7 @@ import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEventHandler;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetUpdateEventHandler;

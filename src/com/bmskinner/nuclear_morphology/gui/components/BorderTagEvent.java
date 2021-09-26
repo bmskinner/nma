@@ -18,7 +18,7 @@ package com.bmskinner.nuclear_morphology.gui.components;
 
 import java.util.EventObject;
 
-import com.bmskinner.nuclear_morphology.components.generic.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.Tag;
 
 /**
  * Border tag events indicate a change to the position of a border tag in a

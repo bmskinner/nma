@@ -23,7 +23,7 @@ import java.util.List;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.RuleSetBuilder;
-import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
+import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 
 /**
  * A collection of rules that can be followed to identify a feature in a

@@ -21,13 +21,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
 
-import com.bmskinner.nuclear_morphology.components.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.ICell;
-import com.bmskinner.nuclear_morphology.components.ICellCollection;
-import com.bmskinner.nuclear_morphology.components.VirtualCellCollection;
-import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
-import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.cells.ICell;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
+import com.bmskinner.nuclear_morphology.components.datasets.VirtualCellCollection;
+import com.bmskinner.nuclear_morphology.components.measure.Measurement;
+import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 
 public class RandomSamplingMethod extends SingleDatasetAnalysisMethod {
 	
@@ -35,7 +35,7 @@ public class RandomSamplingMethod extends SingleDatasetAnalysisMethod {
 	
 	private List<Double>       magnitudes = new ArrayList<>();
     private int                iterations;
-    private PlottableStatistic stat;
+    private Measurement stat;
     
     // the number of cells in the first subset
     private int                first;
@@ -51,7 +51,7 @@ public class RandomSamplingMethod extends SingleDatasetAnalysisMethod {
      * @param first the size of the first subgroup 
      * @param second the size of the second subgroup 
      */
-    public RandomSamplingMethod(IAnalysisDataset dataset, PlottableStatistic stat, int iterations, int first, int second) {
+    public RandomSamplingMethod(IAnalysisDataset dataset, Measurement stat, int iterations, int first, int second) {
         super(dataset);
         this.stat = stat;
         this.iterations = iterations;
@@ -111,7 +111,7 @@ public class RandomSamplingMethod extends SingleDatasetAnalysisMethod {
         }
         LOGGER.finer( "Added second set");
         
-        if(stat.equals(PlottableStatistic.VARIABILITY)) {
+        if(stat.equals(Measurement.VARIABILITY)) {
         	first.createProfileCollection();
         	second.createProfileCollection();
         }

@@ -18,7 +18,6 @@ package com.bmskinner.nuclear_morphology.components.nuclei;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Logger;
 
@@ -28,22 +27,22 @@ import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder.NoDetectedIndexException;
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalAnalyser;
-import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
-import com.bmskinner.nuclear_morphology.components.SegmentedCellularComponent;
+import com.bmskinner.nuclear_morphology.components.cells.ComponentFactory.ComponentCreationException;
+import com.bmskinner.nuclear_morphology.components.UnavailableBorderPointException;
+import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.cells.SegmentedCellularComponent;
+import com.bmskinner.nuclear_morphology.components.generic.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
-import com.bmskinner.nuclear_morphology.components.generic.IProfile;
-import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
-import com.bmskinner.nuclear_morphology.components.generic.Tag;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderPointException;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
-import com.bmskinner.nuclear_morphology.components.generic.UnprofilableObjectException;
-import com.bmskinner.nuclear_morphology.components.nuclear.DefaultSignalCollection;
-import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
-import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
-import com.bmskinner.nuclear_morphology.components.nuclear.ISignalCollection;
+import com.bmskinner.nuclear_morphology.components.measure.Measurement;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
+import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.profiles.UnprofilableObjectException;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSet;
-import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.components.signals.DefaultSignalCollection;
+import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
+import com.bmskinner.nuclear_morphology.components.signals.ISignalCollection;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.utility.AngleTools;
 
@@ -116,7 +115,7 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
     protected DefaultNucleus(Nucleus n) throws UnprofilableObjectException {
         super(n);
         nucleusNumber = n.getNucleusNumber();
-        signalCollection = new DefaultSignalCollection(n.getSignalCollection());
+        signalCollection = n.getSignalCollection().duplicate();
     }
 
     @Override
@@ -214,32 +213,32 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
     }
 
     @Override
-    protected double calculateStatistic(PlottableStatistic stat) {
+    protected double calculateStatistic(Measurement stat) {
 
         double result = super.calculateStatistic(stat);
 
         // Note - variability will remain zero here
         // These stats are specific to nuclei
                 
-        if (PlottableStatistic.ELLIPTICITY.equals(stat))
+        if (Measurement.ELLIPTICITY.equals(stat))
             return calculateEllipticity();
         
-        if (PlottableStatistic.ASPECT.equals(stat))
+        if (Measurement.ASPECT.equals(stat))
            return calculateAspect();
         
-        if (PlottableStatistic.ELONGATION.equals(stat))
+        if (Measurement.ELONGATION.equals(stat))
             return calculateElongation();
                 
-        if (PlottableStatistic.REGULARITY.equals(stat))
+        if (Measurement.REGULARITY.equals(stat))
             return calculateRegularity();
 
-        if (PlottableStatistic.BOUNDING_HEIGHT.equals(stat))
+        if (Measurement.BOUNDING_HEIGHT.equals(stat))
             return getVerticallyRotatedNucleus().getBounds().getHeight();
 
-        if (PlottableStatistic.BOUNDING_WIDTH.equals(stat))
+        if (Measurement.BOUNDING_WIDTH.equals(stat))
             return getVerticallyRotatedNucleus().getBounds().getWidth();
 
-        if (PlottableStatistic.OP_RP_ANGLE.equals(stat)) {
+        if (Measurement.OP_RP_ANGLE.equals(stat)) {
             try {
                 result = getCentreOfMass().findSmallestAngle(this.getBorderPoint(Tag.REFERENCE_POINT),
                         this.getBorderPoint(Tag.ORIENTATION_POINT));
@@ -270,7 +269,7 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
     private double calculateRegularity() {
     	double h = getVerticallyRotatedNucleus().getBounds().getHeight();
         double w = getVerticallyRotatedNucleus().getBounds().getWidth();
-        double a = this.getStatistic(PlottableStatistic.AREA);
+        double a = this.getStatistic(Measurement.AREA);
         return (Math.PI*h*w)/(4*a);
     }
     
@@ -308,7 +307,7 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
     }
 
     public void updateSignalAngle(UUID channel, int signal, double angle) {
-        signalCollection.getSignals(channel).get(signal).setStatistic(PlottableStatistic.ANGLE, angle);
+        signalCollection.getSignals(channel).get(signal).setStatistic(Measurement.ANGLE, angle);
     }
 
     // do not move this into SignalCollection - it is overridden in
@@ -322,39 +321,11 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
                 for (INuclearSignal s : signalCollection.getSignals(signalGroup)) {
 
                     double angle = this.getCentreOfMass().findAbsoluteAngle(p, s.getCentreOfMass());
-                    s.setStatistic(PlottableStatistic.ANGLE, angle);
+                    s.setStatistic(Measurement.ANGLE, angle);
 
                 }
             }
         }
-    }
-
-    /*
-     * Get a readout of the state of the nucleus Used only for debugging
-     */
-    @Override
-	public String dumpInfo(int type) {
-        String result = "";
-        result += "Dumping nucleus info: " + this.getNameAndNumber() + "\n";
-        result += "    Border length: " + this.getBorderLength() + "\n";
-        result += "    CoM: " + this.getCentreOfMass().toString() + "\n";
-        if (type == ALL_POINTS || type == BORDER_POINTS) {
-            result += "    Border:\n";
-            for (int i = 0; i < this.getBorderLength(); i++) {
-                IBorderPoint p = this.getBorderPoint(i);
-                result += "      Index " + i + ": " + p.getX() + "\t" + p.getY() + "\t" + this.getBorderTag(i) + "\n";
-            }
-        }
-        if (type == ALL_POINTS || type == BORDER_TAGS) {
-            result += "    Points of interest:\n";
-            Map<Tag, Integer> pointHash = this.getBorderTags();
-
-            for (Tag s : pointHash.keySet()) {
-                IBorderPoint p = getBorderPoint(pointHash.get(s));
-                result += "    " + s + ": " + p.getX() + "    " + p.getY() + " at index " + pointHash.get(s) + "\n";
-            }
-        }
-        return result;
     }
 
     /**
@@ -412,14 +383,14 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
         double h = verticalNucleus.getBounds().getHeight();
         double w = verticalNucleus.getBounds().getWidth();
 
-        setStatistic(PlottableStatistic.BOUNDING_HEIGHT, h);
-        setStatistic(PlottableStatistic.BOUNDING_WIDTH, w);
+        setStatistic(Measurement.BOUNDING_HEIGHT, h);
+        setStatistic(Measurement.BOUNDING_WIDTH, w);
 
         double aspect = h / w;
-        setStatistic(PlottableStatistic.ELLIPTICITY, aspect);
+        setStatistic(Measurement.ELLIPTICITY, aspect);
 
-        setStatistic(PlottableStatistic.BODY_WIDTH, STAT_NOT_CALCULATED);
-        setStatistic(PlottableStatistic.HOOK_LENGTH, STAT_NOT_CALCULATED);
+        setStatistic(Measurement.BODY_WIDTH, STAT_NOT_CALCULATED);
+        setStatistic(Measurement.HOOK_LENGTH, STAT_NOT_CALCULATED);
 
         return verticalNucleus;
     }

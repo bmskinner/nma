@@ -43,11 +43,11 @@ import com.bmskinner.nuclear_morphology.charting.datasets.charts.HistogramDatase
 import com.bmskinner.nuclear_morphology.charting.datasets.charts.NuclearHistogramDatasetCreator;
 import com.bmskinner.nuclear_morphology.charting.datasets.charts.SignalHistogramDatasetCreator;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
-import com.bmskinner.nuclear_morphology.components.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
-import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
-import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.measure.Measurement;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
+import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -197,7 +197,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
             return createSignalDensityStatsChart();
         }
 
-        PlottableStatistic stat = options.getStat();
+        Measurement stat = options.getStat();
 
         List<HistogramDataset> list;
         try {
@@ -218,7 +218,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
         if (options.hasDatasets()) {
 
             XYPlot plot = chart.getXYPlot();
-            if (stat.equals(PlottableStatistic.ANGLE)) {
+            if (stat.equals(Measurement.ANGLE)) {
                 plot.getDomainAxis().setRange(0, 360);
             }
 
@@ -470,7 +470,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
         }
 
         JFreeChart chart = createHistogram(ds,
-                IBorderSegment.SEGMENT_PREFIX + options.getSegPosition() + " length (" + options.getScale() + ")",
+                IProfileSegment.SEGMENT_PREFIX + options.getSegPosition() + " length (" + options.getScale() + ")",
                 "Nuclei");
 
         if (ds != null && options.hasDatasets()) {
@@ -486,7 +486,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
 
                 String seriesKey = (String) ds.getSeriesKey(j);
                 String seriesName = seriesKey
-                        .replaceFirst(IBorderSegment.SEGMENT_PREFIX + options.getSegPosition() + "_", "");
+                        .replaceFirst(IProfileSegment.SEGMENT_PREFIX + options.getSegPosition() + "_", "");
 
                 for (IAnalysisDataset dataset : options.getDatasets()) {
 

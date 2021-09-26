@@ -16,7 +16,7 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.tabs.cells_detail;
 
-import com.bmskinner.nuclear_morphology.components.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 
 /**
  * This holds CellularComponents for the ComponentListPanel

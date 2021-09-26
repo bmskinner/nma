@@ -22,8 +22,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
-import com.bmskinner.nuclear_morphology.components.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -230,17 +230,17 @@ public abstract class AbstractDetectionOptions implements IDetectionOptions {
         if (c == null) {
             return false;
         }
-        if (c.getStatistic(PlottableStatistic.AREA) < this.minSize) {
+        if (c.getStatistic(Measurement.AREA) < this.minSize) {
             return false;
         }
-        if (c.getStatistic(PlottableStatistic.AREA) > this.maxSize) {
+        if (c.getStatistic(Measurement.AREA) > this.maxSize) {
             return false;
         }
-        if (c.getStatistic(PlottableStatistic.CIRCULARITY) < this.minCirc) {
+        if (c.getStatistic(Measurement.CIRCULARITY) < this.minCirc) {
             return false;
         }
 
-        if (c.getStatistic(PlottableStatistic.CIRCULARITY) > this.maxCirc) {
+        if (c.getStatistic(Measurement.CIRCULARITY) > this.maxCirc) {
             return false;
         }
         return true;

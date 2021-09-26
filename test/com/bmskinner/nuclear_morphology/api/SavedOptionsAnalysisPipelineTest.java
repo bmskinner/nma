@@ -14,8 +14,8 @@ import org.junit.rules.ExpectedException;
 import com.bmskinner.nuclear_morphology.TestResources;
 import com.bmskinner.nuclear_morphology.analysis.DatasetValidator;
 import com.bmskinner.nuclear_morphology.api.AnalysisPipeline.AnalysisPipelineException;
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.generic.Version;
+import com.bmskinner.nuclear_morphology.components.Version;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.io.Io;
 import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
 

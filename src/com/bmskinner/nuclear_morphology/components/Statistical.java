@@ -16,8 +16,8 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components;
 
-import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
-import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.components.measure.Measurement;
+import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 
 /**
  * This interface allows for the retrieval of statistics from cells and their
@@ -38,11 +38,11 @@ public interface Statistical {
      * @param stat
      * @return
      */
-    boolean hasStatistic(PlottableStatistic stat);
+    boolean hasStatistic(Measurement stat);
 
     /**
      * Get the value of the given statistic for this component. Note that
-     * {@link PlottableStatistic.VARIABILILTY} returns zero, as this must be
+     * {@link Measurement.VARIABILILTY} returns zero, as this must be
      * calculated at the collection level
      * 
      * @param stat the statistic to fetch
@@ -50,7 +50,7 @@ public interface Statistical {
      * @return the value or zero if
      *         stat.equals(PlottableStatistic.VARIABILILTY)==true
      */
-    double getStatistic(PlottableStatistic stat, MeasurementScale scale);
+    double getStatistic(Measurement stat, MeasurementScale scale);
 
     /**
      * Get the value of the given {@link PlottableStatistic} for this nucleus.
@@ -73,7 +73,7 @@ public interface Statistical {
      * @param stat
      * @return
      */
-    double getStatistic(PlottableStatistic stat);
+    double getStatistic(Measurement stat);
 
     /**
      * Set the statistic at the default scale ({@link MeasurementScale.PIXELS})
@@ -81,19 +81,19 @@ public interface Statistical {
      * @param stat
      * @param d
      */
-    void setStatistic(PlottableStatistic stat, double d);
+    void setStatistic(Measurement stat, double d);
     
     /*
      * Remove the given statistic
      * @param stat
      */
-    void clearStatistic(PlottableStatistic stat);
+    void clearStatistic(Measurement stat);
 
     /**
      * Get all the statistics in this object
      * 
      * @return
      */
-    PlottableStatistic[] getStatistics();
+    Measurement[] getStatistics();
 
 }

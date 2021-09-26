@@ -18,7 +18,7 @@ package com.bmskinner.nuclear_morphology.gui.components;
 
 import java.awt.Color;
 
-import com.bmskinner.nuclear_morphology.components.generic.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.Tag;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 
 /**

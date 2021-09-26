@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -29,10 +28,8 @@ import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nuclear_morphology.components.generic.BorderTag;
-import com.bmskinner.nuclear_morphology.components.generic.BorderTagObject;
-import com.bmskinner.nuclear_morphology.components.generic.Tag;
-import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
+import com.bmskinner.nuclear_morphology.components.nuclei.NucleusType;
+import com.bmskinner.nuclear_morphology.components.profiles.Tag;
 
 /**
  * This holds the rulesets for identifying each of the BorderTags in a profile.
@@ -229,28 +226,6 @@ public class RuleSetCollection implements Serializable {
 
     private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
-
-        if (map != null) {
-
-            Map<Tag, List<RuleSet>> newMap = new HashMap<>();
-
-            Iterator<?> it = map.keySet().iterator();
-
-            // We need to convert any old tags using enums to the newer objects
-            while (it.hasNext()) {
-                Object tag = it.next();
-                if (tag instanceof BorderTag) {
-                    LOGGER.finer("No BorderTagObject for " + tag.toString() + ": creating");
-                    newMap.put(new BorderTagObject((BorderTag) tag), map.get(tag));
-                }
-
-            }
-
-            if (!newMap.isEmpty()) {
-                map = newMap;
-            }
-
-        }
     }
 
     private void writeObject(java.io.ObjectOutputStream out) throws IOException {

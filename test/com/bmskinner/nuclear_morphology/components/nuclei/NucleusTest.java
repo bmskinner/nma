@@ -31,11 +31,11 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 
-import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.TestComponentFactory;
+import com.bmskinner.nuclear_morphology.components.cells.ComponentFactory.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
-import com.bmskinner.nuclear_morphology.components.generic.Tag;
-import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.components.measure.Measurement;
+import com.bmskinner.nuclear_morphology.components.profiles.Tag;
 
 /**
  * Tests for implementations of the Nucleus interface
@@ -83,7 +83,7 @@ public class NucleusTest {
 	public void testMinDiameter() throws Exception {
 		double expected = 100;
 		double epsilon = 2; // the amount of difference permitted
-		assertEquals(expected, nucleus.getStatistic(PlottableStatistic.MIN_DIAMETER), epsilon);
+		assertEquals(expected, nucleus.getStatistic(Measurement.MIN_DIAMETER), epsilon);
 	}
 		
 	@Test

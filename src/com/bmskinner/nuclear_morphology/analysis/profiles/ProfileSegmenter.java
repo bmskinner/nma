@@ -22,10 +22,10 @@ import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nuclear_morphology.components.generic.BooleanProfile;
-import com.bmskinner.nuclear_morphology.components.generic.IProfile;
-import com.bmskinner.nuclear_morphology.components.generic.IProfileCollection;
-import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
+import com.bmskinner.nuclear_morphology.components.profiles.BooleanProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfileCollection;
 
 /**
  * Divide a profile into segments of interest based on minima and maxima.
@@ -59,7 +59,7 @@ public class ProfileSegmenter {
     private static final double THRESHOLD_FRACTION = 0.10;
 
     private final IProfile profile; // the profile to segment
-    private final List<IBorderSegment> segments = new ArrayList<>();
+    private final List<IProfileSegment> segments = new ArrayList<>();
 
     private BooleanProfile minOrMax = null;
 
@@ -104,7 +104,7 @@ public class ProfileSegmenter {
      * @param splitIndex an index point that must be segmented on
      * @return a list of segments
      */
-    public List<IBorderSegment> segment()  {
+    public List<IProfileSegment> segment()  {
     	LOGGER.fine("-------------------------");
     	LOGGER.fine("Beginning segmentation   ");
     	LOGGER.fine("-------------------------");
@@ -124,7 +124,7 @@ public class ProfileSegmenter {
             if (isValidSegmentEnd(index, segmentStart)) {
 
                 // we've hit a new segment
-                IBorderSegment seg = IBorderSegment.newSegment(segmentStart, index, profile.size());
+                IProfileSegment seg = IProfileSegment.newSegment(segmentStart, index, profile.size());
 
                 segments.add(seg);
 
@@ -143,14 +143,14 @@ public class ProfileSegmenter {
          * space to make a segment running from the current segment start back
          * to index 0
          */
-        IBorderSegment seg = IBorderSegment.newSegment(segmentStart, 0, profile.size());
+        IProfileSegment seg = IProfileSegment.newSegment(segmentStart, 0, profile.size());
         segments.add(seg);
         
         if(segments.size()==1)  // We were unable to detect more than a single segment
         	createSingleSegment();
 
         try {
-            IBorderSegment.linkSegments(segments);
+            IProfileSegment.linkSegments(segments);
             LOGGER.finer( "Segments linked");
         } catch (ProfileException e) {
             LOGGER.warning("Cannot link segments in profile");            
@@ -166,7 +166,7 @@ public class ProfileSegmenter {
      */
     private void createSingleSegment() {
     	segments.clear();
-    	segments.add(IBorderSegment.newSegment(0, 0, profile.size(), IProfileCollection.DEFAULT_SEGMENT_ID));
+    	segments.add(IProfileSegment.newSegment(0, 0, profile.size(), IProfileCollection.DEFAULT_SEGMENT_ID));
     }
     
     
@@ -264,7 +264,7 @@ public class ProfileSegmenter {
     public String toString() {
 
         StringBuilder b = new StringBuilder();
-        for (IBorderSegment s : segments) {
+        for (IProfileSegment s : segments) {
             b.append(s.toString());
             b.append(" | ");
         }

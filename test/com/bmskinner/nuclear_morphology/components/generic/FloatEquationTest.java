@@ -25,6 +25,9 @@ import java.awt.geom.Point2D;
 
 import org.junit.Test;
 
+import com.bmskinner.nuclear_morphology.components.measure.FloatEquation;
+import com.bmskinner.nuclear_morphology.components.measure.LineEquation;
+
 /**
  * Tests for the floating point line equations
  * @author bms41

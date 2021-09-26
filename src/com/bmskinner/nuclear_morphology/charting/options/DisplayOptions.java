@@ -19,13 +19,13 @@ package com.bmskinner.nuclear_morphology.charting.options;
 import java.util.List;
 import java.util.UUID;
 
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.ICell;
-import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
-import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.Aggregation;
-import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.Normalisation;
-import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.ShrinkType;
-import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.components.cells.ICell;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.measure.Measurement;
+import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
+import com.bmskinner.nuclear_morphology.components.signals.IShellResult.Aggregation;
+import com.bmskinner.nuclear_morphology.components.signals.IShellResult.Normalisation;
+import com.bmskinner.nuclear_morphology.components.signals.IShellResult.ShrinkType;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter.ColourSwatch;
 
 /**
@@ -91,14 +91,14 @@ public interface DisplayOptions {
      * 
      * @return
      */
-    public PlottableStatistic getStat();
+    public Measurement getStat();
 
     /**
      * Get the saved stats
      * 
      * @return
      */
-    public List<PlottableStatistic> getStats();
+    public List<Measurement> getStats();
 
     /**
      * Get the statistic at the given index
@@ -106,7 +106,7 @@ public interface DisplayOptions {
      * @param index
      * @return
      */
-    public PlottableStatistic getStat(int index);
+    public Measurement getStat(int index);
 
     /**
      * Get the ID of the segment to display data for

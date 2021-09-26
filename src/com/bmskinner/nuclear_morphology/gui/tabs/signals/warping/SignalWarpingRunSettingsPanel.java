@@ -16,7 +16,7 @@ import javax.swing.SpinnerModel;
 import javax.swing.SpinnerNumberModel;
 
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalManager;
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.gui.components.panels.DatasetSelectionPanel;
 import com.bmskinner.nuclear_morphology.gui.components.panels.SignalGroupSelectionPanel;
 

@@ -4,8 +4,8 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import com.bmskinner.nuclear_morphology.TestDatasetBuilder;
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.nuclei.NucleusType;
 
 /**
  * Test that individual components are drawn correctly in outline charts.

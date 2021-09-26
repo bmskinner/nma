@@ -25,10 +25,10 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.components.generic.DefaultProfileAggregate;
-import com.bmskinner.nuclear_morphology.components.generic.FloatProfile;
-import com.bmskinner.nuclear_morphology.components.generic.IProfile;
-import com.bmskinner.nuclear_morphology.components.generic.IProfileAggregate;
+import com.bmskinner.nuclear_morphology.components.profiles.DefaultProfileAggregate;
+import com.bmskinner.nuclear_morphology.components.profiles.FloatProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfileAggregate;
 
 public class ProfileAggregateTest {
 	

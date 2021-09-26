@@ -18,7 +18,7 @@ package com.bmskinner.nuclear_morphology.analysis.classification;
 
 import java.util.Set;
 
-import com.bmskinner.nuclear_morphology.components.ICell;
+import com.bmskinner.nuclear_morphology.components.cells.ICell;
 
 /**
  * Interface for the classifiers that predict cell types

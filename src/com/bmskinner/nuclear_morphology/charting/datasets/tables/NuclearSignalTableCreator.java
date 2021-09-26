@@ -37,16 +37,16 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.charting.datasets.SignalTableCell;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.ICellCollection;
-import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
-import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult;
-import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
-import com.bmskinner.nuclear_morphology.components.nuclear.PairwiseSignalDistanceCollection;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
+import com.bmskinner.nuclear_morphology.components.measure.Measurement;
+import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions.SignalDetectionMode;
-import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.components.signals.IShellResult;
+import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
+import com.bmskinner.nuclear_morphology.components.signals.PairwiseSignalDistanceCollection;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
@@ -363,7 +363,7 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
         rowNames.add(Labels.Signals.SIGNALS_PER_NUCLEUS);
         rowNames.add("ID");
 
-        for (PlottableStatistic stat : PlottableStatistic.getSignalStats()) {
+        for (Measurement stat : Measurement.getSignalStats()) {
             rowNames.add(stat.label(scale));
         }
 
@@ -443,7 +443,7 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
                 temp.add(df.format(signalPerNucleus));
                 temp.add(signalGroup.toString());
 
-                for (PlottableStatistic stat : PlottableStatistic.getSignalStats()) {
+                for (Measurement stat : Measurement.getSignalStats()) {
                     double pixel = collection.getSignalManager().getMedianSignalStatistic(stat, scale, signalGroup);
                     temp.add(df.format(pixel));
                 }

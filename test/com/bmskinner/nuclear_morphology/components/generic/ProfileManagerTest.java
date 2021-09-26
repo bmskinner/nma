@@ -19,14 +19,21 @@ import org.junit.runners.Parameterized.Parameters;
 import com.bmskinner.nuclear_morphology.TestDatasetBuilder;
 import com.bmskinner.nuclear_morphology.analysis.DatasetValidator;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.components.DefaultCellCollection;
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.ICell;
-import com.bmskinner.nuclear_morphology.components.ICellCollection;
-import com.bmskinner.nuclear_morphology.components.VirtualCellCollection;
-import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
-import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
+import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.cells.ICell;
+import com.bmskinner.nuclear_morphology.components.datasets.DefaultCellCollection;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
+import com.bmskinner.nuclear_morphology.components.datasets.VirtualCellCollection;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.nuclei.NucleusType;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
+import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.ProfileManager;
+import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
+import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.profiles.UnsegmentedProfileException;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 /**
@@ -102,7 +109,7 @@ public class ProfileManagerTest {
 		for(ICell c : collection) {
 			for(Nucleus n : c.getNuclei()) {
 				ISegmentedProfile p = n.getProfile(ProfileType.ANGLE);
-				for(IBorderSegment s : p.getSegments()) {
+				for(IProfileSegment s : p.getSegments()) {
 					assertFalse(s.isLocked());
 				}
 			}
@@ -112,7 +119,7 @@ public class ProfileManagerTest {
 		for(ICell c : collection) {
 			for(Nucleus n : c.getNuclei()) {
 				ISegmentedProfile p = n.getProfile(ProfileType.ANGLE);
-				for(IBorderSegment s : p.getSegments()) {
+				for(IProfileSegment s : p.getSegments()) {
 					if(s.getID().equals(segId1))
 						assertFalse(s.isLocked());
 					else
@@ -129,7 +136,7 @@ public class ProfileManagerTest {
 		for(ICell c : collection) {
 			for(Nucleus n : c.getNuclei()) {
 				ISegmentedProfile p = n.getProfile(ProfileType.ANGLE);
-				for(IBorderSegment s : p.getSegments()) {
+				for(IProfileSegment s : p.getSegments()) {
 					assertFalse(s.isLocked());
 				}
 			}
@@ -140,7 +147,7 @@ public class ProfileManagerTest {
 		for(ICell c : collection) {
 			for(Nucleus n : c.getNuclei()) {
 				ISegmentedProfile p = n.getProfile(ProfileType.ANGLE);
-				for(IBorderSegment s : p.getSegments()) {
+				for(IProfileSegment s : p.getSegments()) {
 					assertTrue(s.isLocked());
 				}
 			}
@@ -155,10 +162,10 @@ public class ProfileManagerTest {
 		List<UUID> segIds = profile.getSegmentIDs();
 		for(int i=0; i<segIds.size(); i++) {
 			UUID segId1 = segIds.get(i);
-			IBorderSegment seg1 = profile.getSegment(segId1);
+			IProfileSegment seg1 = profile.getSegment(segId1);
 			for(int j=0; j<segIds.size(); j++) {
 				UUID segId2 = segIds.get(j);
-				IBorderSegment seg2 = profile.getSegment(segId2);
+				IProfileSegment seg2 = profile.getSegment(segId2);
 				if(i==j)
 					assertFalse("Merging "+seg1.toString()+" and "+seg2.toString()+" should fail", manager.testSegmentsMergeable(seg1, seg2));
 				else {
@@ -193,8 +200,8 @@ public class ProfileManagerTest {
 		UUID newId = UUID.randomUUID();
 		UUID segId1 = profile.getSegmentAt(1).getID();
 		UUID segId2 = profile.getSegmentAt(2).getID();
-		IBorderSegment seg1 = profile.getSegmentAt(1);
-		IBorderSegment seg2 = profile.getSegmentAt(2);
+		IProfileSegment seg1 = profile.getSegmentAt(1);
+		IProfileSegment seg2 = profile.getSegmentAt(2);
 				
 		DatasetValidator dv = new DatasetValidator();
 		assertTrue(dv.validate(collection));
@@ -206,7 +213,7 @@ public class ProfileManagerTest {
 		assertTrue(newIds.contains(newId));
 		assertFalse(newIds.contains(segId1));
 		assertFalse(newIds.contains(segId2));
-		IBorderSegment mergedSegment = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN).getSegment(newId);
+		IProfileSegment mergedSegment = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN).getSegment(newId);
 		assertTrue(mergedSegment.hasMergeSources());
 		assertTrue(mergedSegment.hasMergeSource(segId1));
 		assertTrue(mergedSegment.hasMergeSource(segId2));
@@ -219,7 +226,7 @@ public class ProfileManagerTest {
 				assertTrue(newIds.contains(newId));
 				assertFalse(newIds.contains(segId1));
 				assertFalse(newIds.contains(segId2));
-				IBorderSegment mergedSeg = nucleusProfile.getSegment(newId);
+				IProfileSegment mergedSeg = nucleusProfile.getSegment(newId);
 				assertTrue(mergedSeg.hasMergeSources());
 				assertTrue(mergedSeg.hasMergeSource(segId1));
 				assertTrue(mergedSeg.hasMergeSource(segId2));
@@ -235,8 +242,8 @@ public class ProfileManagerTest {
 		UUID newId = UUID.randomUUID();
 		UUID segId1 = profile.getSegmentAt(1).getID();
 		UUID segId2 = profile.getSegmentAt(2).getID();
-		IBorderSegment seg1 = profile.getSegmentAt(1);
-		IBorderSegment seg2 = profile.getSegmentAt(2);
+		IProfileSegment seg1 = profile.getSegmentAt(1);
+		IProfileSegment seg2 = profile.getSegmentAt(2);
 		
 		if(collection.isVirtual())
 			return;

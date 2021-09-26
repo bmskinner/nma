@@ -29,19 +29,19 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.detection.Detector;
 import com.bmskinner.nuclear_morphology.analysis.detection.StatsMap;
-import com.bmskinner.nuclear_morphology.components.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.ComponentFactory;
-import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
-import com.bmskinner.nuclear_morphology.components.generic.BooleanProfile;
-import com.bmskinner.nuclear_morphology.components.generic.FloatProfile;
+import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.cells.ComponentFactory;
+import com.bmskinner.nuclear_morphology.components.cells.ComponentFactory.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
-import com.bmskinner.nuclear_morphology.components.generic.IProfile;
-import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
-import com.bmskinner.nuclear_morphology.components.nuclear.SignalFactory;
+import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions.SignalDetectionMode;
-import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.components.profiles.BooleanProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.FloatProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
+import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
+import com.bmskinner.nuclear_morphology.components.signals.SignalFactory;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -152,7 +152,7 @@ public class SignalDetector extends Detector {
         // choose the right stack number for the channel
         int stackNumber = ImageImporter.rgbToStack(channel);
 
-        setMaxSize(n.getStatistic(PlottableStatistic.AREA) * options.getMaxFraction());
+        setMaxSize(n.getStatistic(Measurement.AREA) * options.getMaxFraction());
         setMinSize(options.getMinSize());
         setMinCirc(options.getMinCirc());
         setMaxCirc(options.getMaxCirc());
@@ -190,15 +190,15 @@ public class SignalDetector extends Detector {
                 s.setScale(n.getScale()); // copy scaling information from
                                           // source nucleus
 
-                s.setStatistic(PlottableStatistic.AREA, values.get(StatsMap.AREA));
-                s.setStatistic(PlottableStatistic.MAX_FERET, values.get(StatsMap.FERET));
-                s.setStatistic(PlottableStatistic.PERIMETER, values.get(StatsMap.PERIM));
+                s.setStatistic(Measurement.AREA, values.get(StatsMap.AREA));
+                s.setStatistic(Measurement.MAX_FERET, values.get(StatsMap.FERET));
+                s.setStatistic(Measurement.PERIMETER, values.get(StatsMap.PERIM));
 
                 /*
                  * Assuming the signal were a perfect circle of area equal to
                  * the measured area, get the radius for that circle
                  */
-                s.setStatistic(PlottableStatistic.RADIUS, Math.sqrt(values.get(StatsMap.AREA) / Math.PI));
+                s.setStatistic(Measurement.RADIUS, Math.sqrt(values.get(StatsMap.AREA) / Math.PI));
 
                 // only keep the signal if it is within the nucleus
                 if (n.containsOriginalPoint(s.getOriginalCentreOfMass())) {
@@ -267,7 +267,7 @@ public class SignalDetector extends Detector {
         }
 
         // find the threshold from the bins
-        int area = (int) (n.getStatistic(PlottableStatistic.AREA) * options.getMaxFraction());
+        int area = (int) (n.getStatistic(Measurement.AREA) * options.getMaxFraction());
         int total = 0;
         int threshold = 0; // the value to threshold at
 

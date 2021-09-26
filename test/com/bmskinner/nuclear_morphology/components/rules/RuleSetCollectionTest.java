@@ -7,8 +7,8 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.bmskinner.nuclear_morphology.components.generic.DefaultTag;
-import com.bmskinner.nuclear_morphology.components.generic.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.DefaultTag;
+import com.bmskinner.nuclear_morphology.components.profiles.Tag;
 
 /**
  * Test class for rule set collections

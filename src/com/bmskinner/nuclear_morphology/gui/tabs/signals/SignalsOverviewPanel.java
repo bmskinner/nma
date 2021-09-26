@@ -47,9 +47,9 @@ import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptionsBuilder;
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
-import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
+import com.bmskinner.nuclear_morphology.components.signals.IShellResult;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nuclear_morphology.gui.Labels;
@@ -347,7 +347,7 @@ public class SignalsOverviewPanel extends DetailPanel implements ChartSetEventLi
                 }
 
                 // Segments need to match for mesh creation
-                boolean segmentsMatch = IBorderSegment.segmentCountsMatch(getDatasets());
+                boolean segmentsMatch = IProfileSegment.segmentCountsMatch(getDatasets());
 
                 if (!segmentsMatch) {
                     text = "Segments do not match between datasets";

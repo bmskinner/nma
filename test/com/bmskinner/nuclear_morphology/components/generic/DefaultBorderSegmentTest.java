@@ -19,8 +19,14 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
-import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment.SegmentUpdateException;
+import com.bmskinner.nuclear_morphology.components.profiles.DefaultProfileSegment;
+import com.bmskinner.nuclear_morphology.components.profiles.FloatProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfileCollection;
+import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.SegmentedFloatProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment.SegmentUpdateException;
 
 /**
  * @author ben
@@ -28,21 +34,21 @@ import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment.Segmen
  */
 public class DefaultBorderSegmentTest {
 
-	private DefaultBorderSegment test = new DefaultBorderSegment(0, 20, 100);
+	private DefaultProfileSegment test = new DefaultProfileSegment(0, 20, 100);
 	
 	@Rule
 	public final ExpectedException exception = ExpectedException.none();
 	
 	@Before
 	public void setUp(){
-		test = new DefaultBorderSegment(0, 20, 100);
+		test = new DefaultProfileSegment(0, 20, 100);
 	}
 	
 	@Test
 	public void testSegmentCannotBeCreatedWithDefaultIdSmallerThanProfile() {
 
 		try {
-			new DefaultBorderSegment(0, 50, 100, IProfileCollection.DEFAULT_SEGMENT_ID);
+			new DefaultProfileSegment(0, 50, 100, IProfileCollection.DEFAULT_SEGMENT_ID);
 			fail("Should have thrown an illegal argument exception");
 		} catch(IllegalArgumentException e) {
 
@@ -51,65 +57,65 @@ public class DefaultBorderSegmentTest {
 	}
 	
 	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultBorderSegment#DefaultBorderSegment(int, int, int, java.util.UUID)}.
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.profiles.DefaultProfileSegment#DefaultBorderSegment(int, int, int, java.util.UUID)}.
 	 */
 	@Test
 	public void testDefaultBorderSegmentIntIntIntUUID() {
-		new DefaultBorderSegment(0, 20, 100, UUID.randomUUID());
+		new DefaultProfileSegment(0, 20, 100, UUID.randomUUID());
 	}
 
 	@Test
     public void testDefaultBorderSegmentIntIntIntUUIDExceptsOnNullId() {
         exception.expect(IllegalArgumentException.class);
-        new DefaultBorderSegment(0, 20, 100, null);
+        new DefaultProfileSegment(0, 20, 100, null);
     }
 	
 	@Test
     public void testDefaultBorderSegmentIntIntIntUUIDExceptsOnNegativeStart() {
         exception.expect(IllegalArgumentException.class);
-        new DefaultBorderSegment(-1, 20, 100, UUID.randomUUID());
+        new DefaultProfileSegment(-1, 20, 100, UUID.randomUUID());
     }
 	
 	@Test
     public void testDefaultBorderSegmentIntIntIntUUIDExceptsOnLengthEqualsProfile() {
         exception.expect(IllegalArgumentException.class);
-        new DefaultBorderSegment(0, 100, 100, UUID.randomUUID());
+        new DefaultProfileSegment(0, 100, 100, UUID.randomUUID());
     }
 	
 	@Test
     public void testDefaultBorderSegmentIntIntIntUUIDExceptsOnLengthTooLong() {
         exception.expect(IllegalArgumentException.class);
-        new DefaultBorderSegment(0, 99, 100, UUID.randomUUID());
+        new DefaultProfileSegment(0, 99, 100, UUID.randomUUID());
     }
 	
 	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultBorderSegment#DefaultBorderSegment(com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment)}.
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.profiles.DefaultProfileSegment#DefaultBorderSegment(com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment)}.
 	 */
 	@Test
 	public void testDefaultBorderSegmentIBorderSegment() {
-		DefaultBorderSegment s1 = new DefaultBorderSegment(test);
+		DefaultProfileSegment s1 = new DefaultProfileSegment(test);
 		assertEquals(test, s1);
 	}
 
 	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultBorderSegment#getID()}.
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.profiles.DefaultProfileSegment#getID()}.
 	 */
 	@Test
 	public void testGetID() {
 		UUID id = UUID.randomUUID();
-		DefaultBorderSegment test = new DefaultBorderSegment(0, 20, 100, id);
+		DefaultProfileSegment test = new DefaultProfileSegment(0, 20, 100, id);
 		
 		assertEquals(id, test.getID());
 	}
 
 	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultBorderSegment#getMergeSources()}.
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.profiles.DefaultProfileSegment#getMergeSources()}.
 	 */
 	@Test
 	public void testGetMergeSources() {
 						
-		DefaultBorderSegment s1 = new DefaultBorderSegment(0, 11, 100);
-		DefaultBorderSegment s2 = new DefaultBorderSegment(11, 20, 100);
+		DefaultProfileSegment s1 = new DefaultProfileSegment(0, 11, 100);
+		DefaultProfileSegment s2 = new DefaultProfileSegment(11, 20, 100);
 		
 		test.addMergeSource(s1);
 		test.addMergeSource(s2);
@@ -118,9 +124,9 @@ public class DefaultBorderSegmentTest {
 		int[] mgeStart = { 0, 11 };
 		int[] mgeEnd   = { 11, 20 };
 		
-		List<IBorderSegment> sources = test.getMergeSources();
+		List<IProfileSegment> sources = test.getMergeSources();
 		for(int i=0; i<sources.size(); i++){
-			IBorderSegment s = sources.get(i);
+			IProfileSegment s = sources.get(i);
 			assertEquals(mgeStart[i], s.getStartIndex());
 			assertEquals(  mgeEnd[i], s.getEndIndex());	
 		}
@@ -128,7 +134,7 @@ public class DefaultBorderSegmentTest {
 
 
 	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultBorderSegment#hasMergeSources()}.
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.profiles.DefaultProfileSegment#hasMergeSources()}.
 	 */
 	@Test
 	public void testHasMergeSources() {
@@ -137,8 +143,8 @@ public class DefaultBorderSegmentTest {
 		
 		// with sources
 		
-		DefaultBorderSegment s1 = new DefaultBorderSegment(0, 10, 100);
-		DefaultBorderSegment s2 = new DefaultBorderSegment(11, 20, 100);
+		DefaultProfileSegment s1 = new DefaultProfileSegment(0, 10, 100);
+		DefaultProfileSegment s2 = new DefaultProfileSegment(11, 20, 100);
 		
 		test.addMergeSource(s1);
 		test.addMergeSource(s2);
@@ -148,7 +154,7 @@ public class DefaultBorderSegmentTest {
 
 	
 	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultBorderSegment#getName()}.
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.profiles.DefaultProfileSegment#getName()}.
 	 */
 	@Test
 	public void testGetName() {
@@ -159,7 +165,7 @@ public class DefaultBorderSegmentTest {
 	}
 
 	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultBorderSegment#getShortestDistanceToStart(int)}.
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.profiles.DefaultProfileSegment#getShortestDistanceToStart(int)}.
 	 */
 	@Test
 	public void testGetDistanceToStart() {
@@ -173,7 +179,7 @@ public class DefaultBorderSegmentTest {
 	}
 
 	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultBorderSegment#getShortestDistanceToEnd(int)}.
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.profiles.DefaultProfileSegment#getShortestDistanceToEnd(int)}.
 	 */
 	@Test
 	public void testGetDistanceToEnd() {
@@ -182,7 +188,7 @@ public class DefaultBorderSegmentTest {
 	}
 
 	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultBorderSegment#isLocked()}.
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.profiles.DefaultProfileSegment#isLocked()}.
 	 */
 	@Test
 	public void testIsLocked() {
@@ -196,7 +202,7 @@ public class DefaultBorderSegmentTest {
 	}
 
 	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultBorderSegment#getProfileLength()}.
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.profiles.DefaultProfileSegment#getProfileLength()}.
 	 */
 	@Test
 	public void testGetTotalLength() {
@@ -204,12 +210,12 @@ public class DefaultBorderSegmentTest {
 	}
 
 	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultBorderSegment#nextSegment()}.
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.profiles.DefaultProfileSegment#nextSegment()}.
 	 */
 	@Test
 	public void testNextSegment() {
-		DefaultBorderSegment s1 = new DefaultBorderSegment(0,  20, 100);
-		DefaultBorderSegment s2 = new DefaultBorderSegment(20, 30, 100);
+		DefaultProfileSegment s1 = new DefaultProfileSegment(0,  20, 100);
+		DefaultProfileSegment s2 = new DefaultProfileSegment(20, 30, 100);
 		
 		s1.setNextSegment(s2);
 		
@@ -217,12 +223,12 @@ public class DefaultBorderSegmentTest {
 	}
 
 	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultBorderSegment#prevSegment()}.
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.profiles.DefaultProfileSegment#prevSegment()}.
 	 */
 	@Test
 	public void testPrevSegment() {
-		DefaultBorderSegment s1 = new DefaultBorderSegment(0,  20, 100);
-		DefaultBorderSegment s2 = new DefaultBorderSegment(20, 30, 100);
+		DefaultProfileSegment s1 = new DefaultProfileSegment(0,  20, 100);
+		DefaultProfileSegment s2 = new DefaultProfileSegment(20, 30, 100);
 		
 		s2.setPrevSegment(s1);
 		
@@ -231,35 +237,35 @@ public class DefaultBorderSegmentTest {
 
 	
 	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultBorderSegment#length()}.
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.profiles.DefaultProfileSegment#length()}.
 	 */
 	@Test
 	public void testLength() {
-		DefaultBorderSegment s1 = new DefaultBorderSegment(0,  20, 100);
-		DefaultBorderSegment s2 = new DefaultBorderSegment(90, 30, 100);
+		DefaultProfileSegment s1 = new DefaultProfileSegment(0,  20, 100);
+		DefaultProfileSegment s2 = new DefaultProfileSegment(90, 30, 100);
 		
 		assertEquals(21, s1.length());
 		assertEquals(41, s2.length());
 	}
 
 	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultBorderSegment#testLength(int, int)}.
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.profiles.DefaultProfileSegment#testLength(int, int)}.
 	 */
 	@Test
 	public void testTestLength() {
-		DefaultBorderSegment s1 = new DefaultBorderSegment(0,  20, 100);
+		DefaultProfileSegment s1 = new DefaultProfileSegment(0,  20, 100);
 		assertEquals(21, s1.length());
 		
-		DefaultBorderSegment s2 = new DefaultBorderSegment(90,  20, 100);
+		DefaultProfileSegment s2 = new DefaultProfileSegment(90,  20, 100);
 		assertEquals(31, s2.length());
 	}
 
 	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultBorderSegment#wraps(int, int)}.
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.profiles.DefaultProfileSegment#wraps(int, int)}.
 	 */
 	@Test
 	public void testWrapsIntInt() {
-		DefaultBorderSegment s1 = new DefaultBorderSegment(0,  20, 100);
+		DefaultProfileSegment s1 = new DefaultProfileSegment(0,  20, 100);
 		
 		assertFalse(s1.wraps(0, 10));
 		assertTrue(s1.wraps(90, 10));
@@ -270,29 +276,29 @@ public class DefaultBorderSegmentTest {
 	}
 
 	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultBorderSegment#wraps()}.
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.profiles.DefaultProfileSegment#wraps()}.
 	 */
 	@Test
 	public void testWraps() {
 		
-		DefaultBorderSegment s1 = new DefaultBorderSegment(0,  20, 100);
+		DefaultProfileSegment s1 = new DefaultProfileSegment(0,  20, 100);
 		assertFalse(s1.wraps());
 		
 		
-		DefaultBorderSegment s2 = new DefaultBorderSegment(90, 30, 100);
+		DefaultProfileSegment s2 = new DefaultProfileSegment(90, 30, 100);
 		assertTrue(s2.wraps());
 		
-		DefaultBorderSegment s3 = new DefaultBorderSegment(99, 30, 100);
+		DefaultProfileSegment s3 = new DefaultProfileSegment(99, 30, 100);
 		assertTrue(s3.wraps());
 		
 	}
 
 	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultBorderSegment#contains(int)}.
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.profiles.DefaultProfileSegment#contains(int)}.
 	 */
 	@Test
 	public void testContains() {
-		DefaultBorderSegment s1 = new DefaultBorderSegment(0,  20, 100);
+		DefaultProfileSegment s1 = new DefaultProfileSegment(0,  20, 100);
 		assertTrue(s1.contains(0));
 		assertTrue(s1.contains(10));
 		assertTrue(s1.contains(20));
@@ -306,30 +312,30 @@ public class DefaultBorderSegmentTest {
 	}
 
 	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultBorderSegment#testContains(int, int, int)}.
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.profiles.DefaultProfileSegment#testContains(int, int, int)}.
 	 */
 	@Test
 	public void testTestContains() {
-		DefaultBorderSegment s1 = new DefaultBorderSegment(0,  20, 100);
+		DefaultProfileSegment s1 = new DefaultProfileSegment(0,  20, 100);
 
 		// Non wrapping segment
 		for(int i=0; i<=25; i++) {
-			assertTrue(IBorderSegment.contains(0, 25, i, s1.getProfileLength()));
+			assertTrue(IProfileSegment.contains(0, 25, i, s1.getProfileLength()));
 		}
 		
 		for(int i=26; i<s1.length(); i++) {
-			assertFalse(IBorderSegment.contains(0, 25, i, s1.getProfileLength()));
+			assertFalse(IProfileSegment.contains(0, 25, i, s1.getProfileLength()));
 		}
 		
 		// Wrapping segment
 		for(int i=90; i<s1.getProfileLength(); i++) {
-			assertTrue(IBorderSegment.contains(90, 25, i, s1.getProfileLength()));
+			assertTrue(IProfileSegment.contains(90, 25, i, s1.getProfileLength()));
 		}
 		for(int i=0; i<=25; i++) {
-			assertTrue(IBorderSegment.contains(90, 25, i, s1.getProfileLength()));
+			assertTrue(IProfileSegment.contains(90, 25, i, s1.getProfileLength()));
 		}
 		for(int i=26; i<90; i++) {
-			assertFalse(IBorderSegment.contains(90, 25, i, s1.getProfileLength()));
+			assertFalse(IProfileSegment.contains(90, 25, i, s1.getProfileLength()));
 		}
 	}
 	
@@ -387,23 +393,23 @@ public class DefaultBorderSegmentTest {
 //		test.update(0, 101);
 //	}
 	
-	private List<IBorderSegment> createLinkedList() throws ProfileException{
-		DefaultBorderSegment s1 = new DefaultBorderSegment(0,  25, 100);
-		DefaultBorderSegment s2 = new DefaultBorderSegment(25,  40, 100);
-		DefaultBorderSegment s3 = new DefaultBorderSegment(40,  0, 100);
-		List<IBorderSegment> list = new ArrayList<>();
+	private List<IProfileSegment> createLinkedList() throws ProfileException{
+		DefaultProfileSegment s1 = new DefaultProfileSegment(0,  25, 100);
+		DefaultProfileSegment s2 = new DefaultProfileSegment(25,  40, 100);
+		DefaultProfileSegment s3 = new DefaultProfileSegment(40,  0, 100);
+		List<IProfileSegment> list = new ArrayList<>();
 		list.add(s1);
 		list.add(s2);
 		list.add(s3);
-		IBorderSegment.linkSegments(list);
+		IProfileSegment.linkSegments(list);
 		return list;
 	}
 		
 	@Test
 	public void testUpdatingLinkedSegmentsAffectsTwoSegments() throws SegmentUpdateException, ProfileException{
-		List<IBorderSegment> list = createLinkedList();
-		IBorderSegment s1 = list.get(0);
-		IBorderSegment s2 = list.get(1);
+		List<IProfileSegment> list = createLinkedList();
+		IProfileSegment s1 = list.get(0);
+		IProfileSegment s2 = list.get(1);
 		assertTrue(s1.hasNextSegment());
 
 		// No effect on end of s2, but start is updated
@@ -421,9 +427,9 @@ public class DefaultBorderSegmentTest {
 	 */
 	@Test
 	public void testUpdateLinkedSegmentFailsWhenIndexOutOfBounds() throws SegmentUpdateException, ProfileException{
-		List<IBorderSegment> list = createLinkedList();
-		IBorderSegment s1 = list.get(0);
-		IBorderSegment s2 = list.get(1);
+		List<IProfileSegment> list = createLinkedList();
+		IProfileSegment s1 = list.get(0);
+		IProfileSegment s2 = list.get(1);
 		assertTrue(s1.hasNextSegment());
 
 
@@ -449,7 +455,7 @@ public class DefaultBorderSegmentTest {
 	}
 
 	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultBorderSegment#update(int, int)}.
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.profiles.DefaultProfileSegment#update(int, int)}.
 	 * @throws ProfileException 
 	 * @throws SegmentUpdateException 
 	 */
@@ -458,18 +464,18 @@ public class DefaultBorderSegmentTest {
 		/*
 		 * Complete profile of segments
 		 */
-		List<IBorderSegment> list = new ArrayList<IBorderSegment>();
-		DefaultBorderSegment p1 = new DefaultBorderSegment(10, 20, 100);
-		DefaultBorderSegment p2 = new DefaultBorderSegment(20, 45, 100);
-		DefaultBorderSegment p3 = new DefaultBorderSegment(45, 89, 100);
-		DefaultBorderSegment p4 = new DefaultBorderSegment(89, 10, 100);
+		List<IProfileSegment> list = new ArrayList<IProfileSegment>();
+		DefaultProfileSegment p1 = new DefaultProfileSegment(10, 20, 100);
+		DefaultProfileSegment p2 = new DefaultProfileSegment(20, 45, 100);
+		DefaultProfileSegment p3 = new DefaultProfileSegment(45, 89, 100);
+		DefaultProfileSegment p4 = new DefaultProfileSegment(89, 10, 100);
 
 		list.add(p1);
 		list.add(p2);
 		list.add(p3);
 		list.add(p4);
 
-		IBorderSegment.linkSegments(list);
+		IProfileSegment.linkSegments(list);
 
 		p1.update(5, 20);
 		assertEquals(5, p1.getStartIndex());
@@ -488,29 +494,29 @@ public class DefaultBorderSegmentTest {
 	
 	@Test
 	public void testUpdateWithMergeSources() throws SegmentUpdateException{
-		IBorderSegment p1 = new DefaultBorderSegment(10, 30, 100);
-		IBorderSegment m1 = new DefaultBorderSegment(10, 20, 100);
-		IBorderSegment m2 = new DefaultBorderSegment(20, 30, 100);
+		IProfileSegment p1 = new DefaultProfileSegment(10, 30, 100);
+		IProfileSegment m1 = new DefaultProfileSegment(10, 20, 100);
+		IProfileSegment m2 = new DefaultProfileSegment(20, 30, 100);
 
 		p1.addMergeSource(m1);
 		p1.addMergeSource(m2);
 
 		p1.update(14, 30);
 
-		List<IBorderSegment> merges = p1.getMergeSources();
+		List<IProfileSegment> merges = p1.getMergeSources();
 		assertEquals(0, merges.size());
 
 	}
 	
 	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultBorderSegment#setNextSegment(com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment)}.
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.profiles.DefaultProfileSegment#setNextSegment(com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment)}.
 	 */
 	@Test
 	public void testSetNextSegment() {
-		DefaultBorderSegment s1 = new DefaultBorderSegment(0, 11, 100);
-		DefaultBorderSegment s2 = new DefaultBorderSegment(11, 20, 100);
-		DefaultBorderSegment s3 = new DefaultBorderSegment(20, 30, 100);
-		DefaultBorderSegment s4 = new DefaultBorderSegment(11, 20, 90);
+		DefaultProfileSegment s1 = new DefaultProfileSegment(0, 11, 100);
+		DefaultProfileSegment s2 = new DefaultProfileSegment(11, 20, 100);
+		DefaultProfileSegment s3 = new DefaultProfileSegment(20, 30, 100);
+		DefaultProfileSegment s4 = new DefaultProfileSegment(11, 20, 90);
 		
 		
 		assertFalse(s1.hasNextSegment());
@@ -524,14 +530,14 @@ public class DefaultBorderSegmentTest {
 	}
 
 	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultBorderSegment#setPrevSegment(com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment)}.
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.profiles.DefaultProfileSegment#setPrevSegment(com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment)}.
 	 */
 	@Test
 	public void testSetPrevSegment() {
-		DefaultBorderSegment s1 = new DefaultBorderSegment(0, 11, 100);
-		DefaultBorderSegment s2 = new DefaultBorderSegment(11, 20, 100);
-		DefaultBorderSegment s3 = new DefaultBorderSegment(0, 5, 100);
-		DefaultBorderSegment s4 = new DefaultBorderSegment(0, 11, 90);
+		DefaultProfileSegment s1 = new DefaultProfileSegment(0, 11, 100);
+		DefaultProfileSegment s2 = new DefaultProfileSegment(11, 20, 100);
+		DefaultProfileSegment s3 = new DefaultProfileSegment(0, 5, 100);
+		DefaultProfileSegment s4 = new DefaultProfileSegment(0, 11, 90);
 		
 		
 		assertFalse(s2.hasPrevSegment());
@@ -545,12 +551,12 @@ public class DefaultBorderSegmentTest {
 	}
 
 	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultBorderSegment#hasNextSegment()}.
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.profiles.DefaultProfileSegment#hasNextSegment()}.
 	 */
 	@Test
 	public void testHasNextSegment() {
-		DefaultBorderSegment s1 = new DefaultBorderSegment(0, 11, 100);
-		DefaultBorderSegment s2 = new DefaultBorderSegment(11, 20, 100);
+		DefaultProfileSegment s1 = new DefaultProfileSegment(0, 11, 100);
+		DefaultProfileSegment s2 = new DefaultProfileSegment(11, 20, 100);
 		
 		assertFalse(s1.hasNextSegment());
 		s1.setNextSegment(s2);
@@ -559,23 +565,23 @@ public class DefaultBorderSegmentTest {
 	}
 
 	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultBorderSegment#hasPrevSegment()}.
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.profiles.DefaultProfileSegment#hasPrevSegment()}.
 	 */
 	@Test
 	public void testHasPrevSegment() {
-		DefaultBorderSegment s1 = new DefaultBorderSegment(0, 11, 100);
-		DefaultBorderSegment s2 = new DefaultBorderSegment(11, 20, 100);
+		DefaultProfileSegment s1 = new DefaultProfileSegment(0, 11, 100);
+		DefaultProfileSegment s2 = new DefaultProfileSegment(11, 20, 100);
 		assertFalse(s2.hasPrevSegment());
 		s2.setPrevSegment(s1);
 		assertTrue(s2.hasPrevSegment());
 	}
 
 	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultBorderSegment#setPosition(int)}.
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.profiles.DefaultProfileSegment#setPosition(int)}.
 	 */
 	@Test
 	public void testSetPosition() {
-		DefaultBorderSegment s1 = new DefaultBorderSegment(0, 11, 100);
+		DefaultProfileSegment s1 = new DefaultProfileSegment(0, 11, 100);
 		assertEquals(0, s1.getPosition());
 		s1.setPosition(3);
 		assertEquals(3, s1.getPosition());
@@ -586,13 +592,13 @@ public class DefaultBorderSegmentTest {
 	}
 
 	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultBorderSegment#iterator()}.
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.profiles.DefaultProfileSegment#iterator()}.
 	 */
 	@Test
 	public void testIterator() {
 		
 		// Standard
-		DefaultBorderSegment s1 = new DefaultBorderSegment(0, 11, 100);
+		DefaultProfileSegment s1 = new DefaultProfileSegment(0, 11, 100);
 		
 		Iterator<Integer> it = s1.iterator();
 		
@@ -607,7 +613,7 @@ public class DefaultBorderSegmentTest {
 		}
 		
 		// Wrapping
-		DefaultBorderSegment s2 = new DefaultBorderSegment(95, 5, 100);
+		DefaultProfileSegment s2 = new DefaultProfileSegment(95, 5, 100);
 		i=0;
 		
 		int[] exp2 = { 95, 96, 97, 98, 99, 0, 1, 2, 3, 4, 5 };
@@ -626,19 +632,19 @@ public class DefaultBorderSegmentTest {
 		int[] start = { 0,  10, 30, 88 };
 		int[] end   = { 10, 30, 88, 0  };
 		
-		List<IBorderSegment> list = new ArrayList<IBorderSegment>();
+		List<IProfileSegment> list = new ArrayList<IProfileSegment>();
 		
 		for(int i=0; i<start.length; i++){
-			list.add(new DefaultBorderSegment(start[i], end[i], 100));
+			list.add(new DefaultProfileSegment(start[i], end[i], 100));
 		}
 
-		IBorderSegment.linkSegments(list);
+		IProfileSegment.linkSegments(list);
 
-		List<IBorderSegment> result = IBorderSegment.copy(list);
+		List<IProfileSegment> result = IProfileSegment.copy(list);
 
 		for(int i=0; i<start.length; i++){
-		    IBorderSegment t = list.get(i);
-		    IBorderSegment r = result.get(i);
+		    IProfileSegment t = list.get(i);
+		    IProfileSegment r = result.get(i);
 
 		    assertEquals(t, r);
 		}
@@ -647,9 +653,9 @@ public class DefaultBorderSegmentTest {
 	@Test
     public void testOverlaps(){
 	    
-	    DefaultBorderSegment s1 = new DefaultBorderSegment(0,  20, 100);
-	    DefaultBorderSegment s2 = new DefaultBorderSegment(20,  0, 100);
-        DefaultBorderSegment s3 = new DefaultBorderSegment(10, 50, 100);
+	    DefaultProfileSegment s1 = new DefaultProfileSegment(0,  20, 100);
+	    DefaultProfileSegment s2 = new DefaultProfileSegment(20,  0, 100);
+        DefaultProfileSegment s3 = new DefaultProfileSegment(10, 50, 100);
 	    
         assertFalse(s1.overlapsBeyondEndpoints(s2));
         assertFalse(s2.overlapsBeyondEndpoints(s1));

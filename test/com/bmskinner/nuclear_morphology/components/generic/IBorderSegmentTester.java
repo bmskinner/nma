@@ -22,11 +22,15 @@ import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.components.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.SegmentedCellularComponent.DefaultSegmentedProfile;
-import com.bmskinner.nuclear_morphology.components.SegmentedCellularComponent.DefaultSegmentedProfile.BorderSegmentTree;
-import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
-import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment.SegmentUpdateException;
+import com.bmskinner.nuclear_morphology.components.UnavailableComponentException;
+import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.cells.SegmentedCellularComponent.DefaultSegmentedProfile;
+import com.bmskinner.nuclear_morphology.components.cells.SegmentedCellularComponent.DefaultSegmentedProfile.BorderSegmentTree;
+import com.bmskinner.nuclear_morphology.components.profiles.DefaultProfileSegment;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfileCollection;
+import com.bmskinner.nuclear_morphology.components.profiles.OpenBorderSegment;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nuclear_morphology.samples.dummy.DummySegmentedCellularComponent;
 
 /**
@@ -45,16 +49,16 @@ public class IBorderSegmentTester {
 	
 	protected final static UUID SEG_ID_0 = UUID.fromString("00000000-0000-0000-0000-000000000001");
 	
-	private IBorderSegment segment;
+	private IProfileSegment segment;
 	
-	private IBorderSegment singleSegment; // for profiles with one segment
+	private IProfileSegment singleSegment; // for profiles with one segment
 
 	
 	@Rule
 	public final ExpectedException exception = ExpectedException.none();
 	
 	@Parameter(0)
-	public Class<? extends IBorderSegment> source;
+	public Class<? extends IProfileSegment> source;
 
 	@Before
     public void setUp() throws Exception {
@@ -67,7 +71,7 @@ public class IBorderSegmentTester {
 	 * @param source the class to create
 	 * @return
 	 */
-	public static IBorderSegment createInstance(Class<?> source) {
+	public static IProfileSegment createInstance(Class<?> source) {
 		
 		int middleSegmentStart = endIndex;
 		int middleSegmentEnd = endIndex+30;
@@ -87,14 +91,14 @@ public class IBorderSegmentTester {
 //			System.out.println("Beginning");
 			DefaultSegmentedProfile doubleSegmentProfile = comp.new DefaultSegmentedProfile(data);
 //			System.out.println("Profile: "+doubleSegmentProfile.toString());
-			IBorderSegment borderSegmentTree = null;
+			IProfileSegment borderSegmentTree = null;
 			try {
 //				System.out.println("Fetching root segment");
-				IBorderSegment rootSegment = doubleSegmentProfile.getSegment(IProfileCollection.DEFAULT_SEGMENT_ID);
+				IProfileSegment rootSegment = doubleSegmentProfile.getSegment(IProfileCollection.DEFAULT_SEGMENT_ID);
 //				System.out.println("Root: "+rootSegment.getDetail());
 				doubleSegmentProfile.splitSegment(rootSegment, middleSegmentEnd, tempId, finalSegmentId);
 //				System.out.println("Profile: "+doubleSegmentProfile.toString());
-				IBorderSegment tempSegment = doubleSegmentProfile.getSegment(tempId);
+				IProfileSegment tempSegment = doubleSegmentProfile.getSegment(tempId);
 //				System.out.println("Temp: "+tempSegment.getDetail());
 //				System.out.println("Profile: "+doubleSegmentProfile.toString());
 				doubleSegmentProfile.splitSegment(tempSegment, endIndex, SEG_ID_0, middleSegmentId);
@@ -108,23 +112,23 @@ public class IBorderSegmentTester {
 		}
 		
 		// Older classes use the same approach to linking segments
-		List<IBorderSegment> list = new ArrayList<>();
-		if(source==DefaultBorderSegment.class) {
-			IBorderSegment s0 = new DefaultBorderSegment(startIndex, endIndex, profileLength, SEG_ID_0);
-			IBorderSegment s1 = new DefaultBorderSegment(middleSegmentStart, middleSegmentEnd, profileLength, middleSegmentId);
-			IBorderSegment s2 = new DefaultBorderSegment(middleSegmentEnd, startIndex, profileLength, finalSegmentId);
+		List<IProfileSegment> list = new ArrayList<>();
+		if(source==DefaultProfileSegment.class) {
+			IProfileSegment s0 = new DefaultProfileSegment(startIndex, endIndex, profileLength, SEG_ID_0);
+			IProfileSegment s1 = new DefaultProfileSegment(middleSegmentStart, middleSegmentEnd, profileLength, middleSegmentId);
+			IProfileSegment s2 = new DefaultProfileSegment(middleSegmentEnd, startIndex, profileLength, finalSegmentId);
 			list.add(s0); list.add(s1); list.add(s2); 
 		}
 		
 		if(source==OpenBorderSegment.class) {
-			IBorderSegment s0 = new OpenBorderSegment(startIndex, endIndex, profileLength, SEG_ID_0);
-			IBorderSegment s1 = new OpenBorderSegment(middleSegmentStart, middleSegmentEnd, profileLength, middleSegmentId);
-			IBorderSegment s2 = new OpenBorderSegment(middleSegmentEnd, startIndex, profileLength, finalSegmentId);
+			IProfileSegment s0 = new OpenBorderSegment(startIndex, endIndex, profileLength, SEG_ID_0);
+			IProfileSegment s1 = new OpenBorderSegment(middleSegmentStart, middleSegmentEnd, profileLength, middleSegmentId);
+			IProfileSegment s2 = new OpenBorderSegment(middleSegmentEnd, startIndex, profileLength, finalSegmentId);
 			list.add(s0); list.add(s1); list.add(s2); 
 		}
 		
 		try {
-			IBorderSegment.linkSegments(list);
+			IProfileSegment.linkSegments(list);
 		} catch (ProfileException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -140,7 +144,7 @@ public class IBorderSegmentTester {
 		// are created fresh from the appropriate class.
 		return Arrays.asList(
 				BorderSegmentTree.class,
-				DefaultBorderSegment.class,
+				DefaultProfileSegment.class,
 				OpenBorderSegment.class);
 	}
 	
@@ -153,7 +157,7 @@ public class IBorderSegmentTester {
 	@Test
 	public void testClearMergeSources() {
 		assertFalse(segment.hasMergeSources());
-		IBorderSegment mock1 = mock(IBorderSegment.class);
+		IProfileSegment mock1 = mock(IProfileSegment.class);
 		when(mock1.getID()).thenReturn(UUID.randomUUID());
 		when(mock1.getStartIndex()).thenReturn(segment.getMidpointIndex());
 		when(mock1.length()).thenReturn(segment.length()-segment.getMidpointIndex());
@@ -168,7 +172,7 @@ public class IBorderSegmentTester {
 	public void testHasMergeSources() {
 		assertFalse(segment.hasMergeSources());
 		
-		IBorderSegment mock1 = mock(IBorderSegment.class);
+		IProfileSegment mock1 = mock(IProfileSegment.class);
 		when(mock1.getID()).thenReturn(UUID.randomUUID());
 		when(mock1.getStartIndex()).thenReturn(segment.getMidpointIndex());
 		when(mock1.length()).thenReturn(segment.getProfileLength()-segment.getMidpointIndex());
@@ -181,10 +185,10 @@ public class IBorderSegmentTester {
 	@Test
 	public void testAddMergeSource() {
 		// proper merge source
-		DefaultBorderSegment s1 = new DefaultBorderSegment(startIndex, startIndex+20, profileLength);
+		DefaultProfileSegment s1 = new DefaultProfileSegment(startIndex, startIndex+20, profileLength);
 		segment.addMergeSource(s1);
 		
-		IBorderSegment obs = segment.getMergeSources().get(0);
+		IProfileSegment obs = segment.getMergeSources().get(0);
 		assertEquals("Start", s1.getStartIndex(), obs.getStartIndex());
 		assertEquals("End", s1.getEndIndex(), obs.getEndIndex());
 		assertEquals("Id", s1.getID(), obs.getID());
@@ -193,7 +197,7 @@ public class IBorderSegmentTester {
 	@Test
 	public void testAddMergeSourceExceptsOnOutOfRangeArg0() {
 		// invalid merge source - out of range
-		DefaultBorderSegment s2 = new DefaultBorderSegment(endIndex, endIndex+20, profileLength);
+		DefaultProfileSegment s2 = new DefaultProfileSegment(endIndex, endIndex+20, profileLength);
 		exception.expect(IllegalArgumentException.class);
 		segment.addMergeSource(s2);
 	}
@@ -202,35 +206,35 @@ public class IBorderSegmentTester {
 	public void testAddMergeSourceExceptsOnOutOfRangeArg1() {	
 		// invalid merge source - out of range
 		exception.expect(IllegalArgumentException.class);
-		new DefaultBorderSegment(-1, startIndex, profileLength);
+		new DefaultProfileSegment(-1, startIndex, profileLength);
 	}
 	
 	@Test
 	public void testAddMergeSourceExceptsOnWrongProfileLength() {
 		// invalid merge source - wrong length
-		DefaultBorderSegment s = new DefaultBorderSegment(startIndex+10, endIndex-10, profileLength-50);
+		DefaultProfileSegment s = new DefaultProfileSegment(startIndex+10, endIndex-10, profileLength-50);
 		exception.expect(IllegalArgumentException.class);
 		segment.addMergeSource(s);
 	}
 	
 	@Test
     public void testAddMergeSourceExceptsWhenSegmentIdAlreadyExists() {
-		IBorderSegment s = new DefaultBorderSegment(5,  10, profileLength, SEG_ID_0);
+		IProfileSegment s = new DefaultProfileSegment(5,  10, profileLength, SEG_ID_0);
 		exception.expect(IllegalArgumentException.class);
 		segment.addMergeSource(s);
 	}
 	
 	@Test
 	public void testMergeSourcesPreservedWhenSegmentIsDuplicated() {
-		DefaultBorderSegment s1 = new DefaultBorderSegment(startIndex, startIndex+20, profileLength);
-		DefaultBorderSegment s2 = new DefaultBorderSegment(startIndex+20, endIndex, profileLength);
+		DefaultProfileSegment s1 = new DefaultProfileSegment(startIndex, startIndex+20, profileLength);
+		DefaultProfileSegment s2 = new DefaultProfileSegment(startIndex+20, endIndex, profileLength);
 		
 		segment.addMergeSource(s1);
 		segment.addMergeSource(s2);
 		
-		IBorderSegment duplicated = segment.copy();
+		IProfileSegment duplicated = segment.copy();
 		assertTrue(duplicated.hasMergeSources());
-		for(IBorderSegment mge : segment.getMergeSources()) {
+		for(IProfileSegment mge : segment.getMergeSources()) {
 			assertTrue(duplicated.hasMergeSource(mge.getID()));
 		}
 		
@@ -457,22 +461,22 @@ public class IBorderSegmentTester {
 	
 	@Test
 	public void testOverlapsOfNonWrappingSegments() {
-		IBorderSegment overlappingEnd = new DefaultBorderSegment(endIndex, endIndex+10, profileLength);
+		IProfileSegment overlappingEnd = new DefaultProfileSegment(endIndex, endIndex+10, profileLength);
 		assertTrue("Testing overlap of "+segment.toString()+" and "+overlappingEnd.toString(), segment.overlaps(overlappingEnd));
 		
-		IBorderSegment overlappingStart = new DefaultBorderSegment(endIndex+10, startIndex, profileLength);
+		IProfileSegment overlappingStart = new DefaultProfileSegment(endIndex+10, startIndex, profileLength);
 		assertTrue("Testing overlap of "+segment.toString()+" and "+overlappingStart.toString(), segment.overlaps(overlappingStart));
 		
-		IBorderSegment overlappingBoth = new DefaultBorderSegment(endIndex, startIndex, profileLength);
+		IProfileSegment overlappingBoth = new DefaultProfileSegment(endIndex, startIndex, profileLength);
 		assertTrue("Testing overlap of "+segment.toString()+" and "+overlappingBoth.toString(), segment.overlaps(overlappingBoth));
 		
-		IBorderSegment nonoverlapping = new DefaultBorderSegment(endIndex+10, profileLength-10, profileLength);
+		IProfileSegment nonoverlapping = new DefaultProfileSegment(endIndex+10, profileLength-10, profileLength);
 		assertFalse("Testing overlap of "+segment.toString()+" and "+nonoverlapping.toString(), segment.overlaps(nonoverlapping));
 		
-		IBorderSegment endMinusOne = new DefaultBorderSegment(endIndex-1, endIndex+10, profileLength);
+		IProfileSegment endMinusOne = new DefaultProfileSegment(endIndex-1, endIndex+10, profileLength);
 		assertTrue("Testing overlap of "+segment.toString()+" and "+endMinusOne.toString(), segment.overlaps(endMinusOne));
 		
-		IBorderSegment startPlusOne = new DefaultBorderSegment(endIndex+10, startIndex+1, profileLength);
+		IProfileSegment startPlusOne = new DefaultProfileSegment(endIndex+10, startIndex+1, profileLength);
 		assertTrue("Testing overlap of "+segment.toString()+" and "+startPlusOne.toString(), segment.overlaps(startPlusOne));
 	}
 	
@@ -481,46 +485,46 @@ public class IBorderSegmentTester {
 		
 		segment.update(profileLength-10, 10);
 
-		IBorderSegment endOnly = new DefaultBorderSegment(segment.getEndIndex(), 30, profileLength);
+		IProfileSegment endOnly = new DefaultProfileSegment(segment.getEndIndex(), 30, profileLength);
 		assertTrue(String.format("Testing overlap of %s and %s", segment.toString(), endOnly.toString()), segment.overlaps(endOnly));
 		
-		IBorderSegment startOnly = new DefaultBorderSegment(profileLength-20, segment.getStartIndex(), profileLength);
+		IProfileSegment startOnly = new DefaultProfileSegment(profileLength-20, segment.getStartIndex(), profileLength);
 		assertTrue(String.format("Testing overlap of %s and %s", segment.toString(), startOnly.toString()), segment.overlaps(startOnly));
 		
-		IBorderSegment bothRev = new DefaultBorderSegment(segment.getEndIndex(), segment.getStartIndex(), profileLength);
+		IProfileSegment bothRev = new DefaultProfileSegment(segment.getEndIndex(), segment.getStartIndex(), profileLength);
 		assertTrue(String.format("Testing overlap of %s and %s", segment.toString(), bothRev.toString()), segment.overlaps(bothRev));
 		
-		IBorderSegment bothFwd = new DefaultBorderSegment(segment.getStartIndex(), segment.getEndIndex(), profileLength);
+		IProfileSegment bothFwd = new DefaultProfileSegment(segment.getStartIndex(), segment.getEndIndex(), profileLength);
 		assertTrue(String.format("Testing overlap of %s and %s", segment.toString(), bothFwd.toString()), segment.overlaps(bothFwd));
 		
-		IBorderSegment neither = new DefaultBorderSegment(segment.getEndIndex()+10, segment.getStartIndex()-10, profileLength);
+		IProfileSegment neither = new DefaultProfileSegment(segment.getEndIndex()+10, segment.getStartIndex()-10, profileLength);
 		assertFalse(String.format("Testing overlap of %s and %s", segment.toString(), neither.toString()), segment.overlaps(neither));
 		
-		IBorderSegment endMinusOne = new DefaultBorderSegment(segment.getEndIndex()-1, segment.getEndIndex()+10, profileLength);
+		IProfileSegment endMinusOne = new DefaultProfileSegment(segment.getEndIndex()-1, segment.getEndIndex()+10, profileLength);
 		assertTrue(String.format("Testing overlap of %s and %s", segment.toString(), endMinusOne.toString()), segment.overlaps(endMinusOne));
 		
-		IBorderSegment startPlusOne = new DefaultBorderSegment(segment.getEndIndex()+10, segment.getStartIndex()+1, profileLength);
+		IProfileSegment startPlusOne = new DefaultProfileSegment(segment.getEndIndex()+10, segment.getStartIndex()+1, profileLength);
 		assertTrue(String.format("Testing overlap of %s and %s", segment.toString(), startPlusOne.toString()), segment.overlaps(startPlusOne));
 	}
 	
 	@Test
 	public void overlapsBeyondEndpointsOfNonWrappingSegments() {
-		IBorderSegment endOnly = new DefaultBorderSegment(endIndex, endIndex+10, profileLength);
+		IProfileSegment endOnly = new DefaultProfileSegment(endIndex, endIndex+10, profileLength);
 		assertFalse("Expected no overlap of "+segment.toString()+" and "+endOnly.toString(), segment.overlapsBeyondEndpoints(endOnly));
 		
-		IBorderSegment startOnly = new DefaultBorderSegment(endIndex+10, startIndex, profileLength);
+		IProfileSegment startOnly = new DefaultProfileSegment(endIndex+10, startIndex, profileLength);
 		assertFalse("Expected no overlap of "+segment.toString()+" and "+startOnly.toString(), segment.overlapsBeyondEndpoints(startOnly));
 		
-		IBorderSegment both = new DefaultBorderSegment(endIndex, startIndex, profileLength);
+		IProfileSegment both = new DefaultProfileSegment(endIndex, startIndex, profileLength);
 		assertFalse("Expected no overlap of  "+segment.toString()+" and "+both.toString(), segment.overlapsBeyondEndpoints(both));
 
-		IBorderSegment neither = new DefaultBorderSegment(endIndex+10, profileLength-10, profileLength);
+		IProfileSegment neither = new DefaultProfileSegment(endIndex+10, profileLength-10, profileLength);
 		assertFalse("Expected no overlap of "+segment.toString()+" and "+neither.toString(), segment.overlapsBeyondEndpoints(neither));
 		
-		IBorderSegment endMinusOne = new DefaultBorderSegment(endIndex-1, endIndex+10, profileLength);
+		IProfileSegment endMinusOne = new DefaultProfileSegment(endIndex-1, endIndex+10, profileLength);
 		assertTrue("Expected overlap of  "+segment.toString()+" and "+endMinusOne.toString(), segment.overlapsBeyondEndpoints(endMinusOne));
 		
-		IBorderSegment startPlusOne = new DefaultBorderSegment(endIndex+10, startIndex+1, profileLength);
+		IProfileSegment startPlusOne = new DefaultProfileSegment(endIndex+10, startIndex+1, profileLength);
 		assertTrue("Expected overlap of  "+segment.toString()+" and "+startPlusOne.toString(), segment.overlapsBeyondEndpoints(startPlusOne));
 	}
 	
@@ -529,38 +533,38 @@ public class IBorderSegmentTester {
 		
 		segment.update(profileLength-10, 10);
 
-		IBorderSegment endOnly = new DefaultBorderSegment(segment.getEndIndex(), 30, profileLength);
+		IProfileSegment endOnly = new DefaultProfileSegment(segment.getEndIndex(), 30, profileLength);
 		assertFalse(String.format("Testing overlap of %s and %s", segment.toString(), endOnly.toString()), segment.overlapsBeyondEndpoints(endOnly));
 		
-		IBorderSegment startOnly = new DefaultBorderSegment(profileLength-20, segment.getStartIndex(), profileLength);
+		IProfileSegment startOnly = new DefaultProfileSegment(profileLength-20, segment.getStartIndex(), profileLength);
 		assertFalse(String.format("Testing overlap of %s and %s", segment.toString(), startOnly.toString()), segment.overlapsBeyondEndpoints(startOnly));
 		
-		IBorderSegment bothRev = new DefaultBorderSegment(segment.getEndIndex(), segment.getStartIndex(), profileLength);
+		IProfileSegment bothRev = new DefaultProfileSegment(segment.getEndIndex(), segment.getStartIndex(), profileLength);
 		assertFalse(String.format("Testing overlap of %s and %s", segment.toString(), bothRev.toString()), segment.overlapsBeyondEndpoints(bothRev));
 		
-		IBorderSegment bothFwd = new DefaultBorderSegment(segment.getStartIndex(), segment.getEndIndex(), profileLength);
+		IProfileSegment bothFwd = new DefaultProfileSegment(segment.getStartIndex(), segment.getEndIndex(), profileLength);
 		assertTrue(String.format("Testing overlap of %s and %s", segment.toString(), bothFwd.toString()), segment.overlapsBeyondEndpoints(bothFwd));
 		
-		IBorderSegment neither = new DefaultBorderSegment(segment.getEndIndex()+10, segment.getStartIndex()-10, profileLength);
+		IProfileSegment neither = new DefaultProfileSegment(segment.getEndIndex()+10, segment.getStartIndex()-10, profileLength);
 		assertFalse(String.format("Testing overlap of %s and %s", segment.toString(), neither.toString()), segment.overlapsBeyondEndpoints(neither));
 		
-		IBorderSegment endMinusOne = new DefaultBorderSegment(segment.getEndIndex()-1, segment.getEndIndex()+10, profileLength);
+		IProfileSegment endMinusOne = new DefaultProfileSegment(segment.getEndIndex()-1, segment.getEndIndex()+10, profileLength);
 		assertTrue(String.format("Testing overlap of %s and %s", segment.toString(), endMinusOne.toString()), segment.overlapsBeyondEndpoints(endMinusOne));
 		
-		IBorderSegment startPlusOne = new DefaultBorderSegment(segment.getEndIndex()+10, segment.getStartIndex()+1, profileLength);
+		IProfileSegment startPlusOne = new DefaultProfileSegment(segment.getEndIndex()+10, segment.getStartIndex()+1, profileLength);
 		assertTrue(String.format("Testing overlap of %s and %s", segment.toString(), startPlusOne.toString()), segment.overlapsBeyondEndpoints(startPlusOne));
 	}
 	
 	@Test
 	public void testHasNextSegment() throws UnavailableComponentException {
-		IBorderSegment overlappingEnd = new DefaultBorderSegment(endIndex, profileLength, profileLength);
+		IProfileSegment overlappingEnd = new DefaultProfileSegment(endIndex, profileLength, profileLength);
 		segment.setNextSegment(overlappingEnd);
 		assertTrue(segment.hasNextSegment());
 	}
 
 	@Test
 	public void testHasPrevSegment() throws UnavailableComponentException {
-		IBorderSegment overlappingStart = new DefaultBorderSegment(endIndex+1, startIndex, profileLength);
+		IProfileSegment overlappingStart = new DefaultProfileSegment(endIndex+1, startIndex, profileLength);
 		segment.setPrevSegment(overlappingStart);
 		assertTrue(segment.hasPrevSegment());
 	}
@@ -617,7 +621,7 @@ public class IBorderSegmentTester {
 	public void testUpdateSegmentFailsWhenTooShort() throws SegmentUpdateException {
 		exception.expect(SegmentUpdateException.class);
 		// We need to subtract 2 rather than 1 because we are specifying the end index, not the length
-		segment.update(startIndex, startIndex+IBorderSegment.MINIMUM_SEGMENT_LENGTH-2);
+		segment.update(startIndex, startIndex+IProfileSegment.MINIMUM_SEGMENT_LENGTH-2);
 	}
 	
 	@Test

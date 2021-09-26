@@ -11,9 +11,9 @@ import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder;
 
-import com.bmskinner.nuclear_morphology.components.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
-import com.bmskinner.nuclear_morphology.components.generic.Tag;
+import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.options.DefaultCannyHashOptions;
 import com.bmskinner.nuclear_morphology.components.options.DefaultHoughOptions;
 import com.bmskinner.nuclear_morphology.components.options.DefaultShellOptions;
@@ -23,12 +23,12 @@ import com.bmskinner.nuclear_morphology.components.options.ICannyOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.IDetectionSubOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.IDetectionSubOptions.IPreprocessingOptions;
+import com.bmskinner.nuclear_morphology.components.profiles.Tag;
 import com.bmskinner.nuclear_morphology.components.options.IHoughDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.components.options.IShellOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.components.options.PreprocessingOptions;
-import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 
 /**
  * Base class for XML readers
@@ -135,9 +135,9 @@ public abstract class XMLReader<T> {
 	 * @param e the element to parse
 	 * @return
 	 */
-	protected PlottableStatistic readStat(Element e) {
+	protected Measurement readStat(Element e) {
 		String name = e.getChildText(XMLCreator.NAME_KEY);
-		return PlottableStatistic.of(name);
+		return Measurement.of(name);
 	}
 	
 	/**

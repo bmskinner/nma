@@ -30,22 +30,22 @@ import com.bmskinner.nuclear_morphology.analysis.mesh.Mesh;
 import com.bmskinner.nuclear_morphology.analysis.mesh.MeshCreationException;
 import com.bmskinner.nuclear_morphology.analysis.mesh.MeshFace;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.components.ClusterGroup;
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.ICell;
-import com.bmskinner.nuclear_morphology.components.IClusterGroup;
 import com.bmskinner.nuclear_morphology.components.Profileable;
-import com.bmskinner.nuclear_morphology.components.generic.IProfile;
-import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
-import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
-import com.bmskinner.nuclear_morphology.components.generic.Tag;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableComponentException;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.UnavailableComponentException;
+import com.bmskinner.nuclear_morphology.components.cells.ICell;
+import com.bmskinner.nuclear_morphology.components.datasets.DefaultClusterGroup;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.datasets.IClusterGroup;
+import com.bmskinner.nuclear_morphology.components.measure.Measurement;
+import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions.ClusteringMethod;
-import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
+import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import weka.clusterers.HierarchicalClusterer;
@@ -76,7 +76,7 @@ public class TreeBuildingMethod extends CellClusteringMethod {
 
     	makeTree();
         int clusterNumber = dataset.getMaxClusterGroupNumber() + 1;
-        IClusterGroup group = new ClusterGroup(IClusterGroup.CLUSTER_GROUP_PREFIX + "_" + clusterNumber, options,
+        IClusterGroup group = new DefaultClusterGroup(IClusterGroup.CLUSTER_GROUP_PREFIX + "_" + clusterNumber, options,
                 newickTree);
         return new ClusterAnalysisResult(dataset, group);
     }
@@ -157,7 +157,7 @@ public class TreeBuildingMethod extends CellClusteringMethod {
     	
     	// From the first nucleus, find the number of PCs to cluster on
     	Nucleus n = dataset.getCollection().getCells().stream().findFirst().orElseThrow(NullPointerException::new).getPrimaryNucleus();
-    	int nPcs = (int) n.getStatistic(PlottableStatistic.PCA_N); 
+    	int nPcs = (int) n.getStatistic(Measurement.PCA_N); 
 
     	ArrayList<Attribute> attributes = new ArrayList<>();
     	for(int i=1; i<=nPcs; i++)
@@ -203,7 +203,7 @@ public class TreeBuildingMethod extends CellClusteringMethod {
         	}
         }
 
-        for (PlottableStatistic stat : PlottableStatistic.getNucleusStats(collection.getNucleusType())) {
+        for (Measurement stat : Measurement.getNucleusStats(collection.getNucleusType())) {
             if (options.isIncludeStatistic(stat)) {
             	LOGGER.finer("Adding attribute count for "+stat);
                 attributeCount++;
@@ -244,7 +244,7 @@ public class TreeBuildingMethod extends CellClusteringMethod {
         	}
         }
 
-        for (PlottableStatistic stat : PlottableStatistic.getNucleusStats(collection.getNucleusType())) {
+        for (Measurement stat : Measurement.getNucleusStats(collection.getNucleusType())) {
             if (options.isIncludeStatistic(stat)) {
             	LOGGER.finer("Creating attribute for "+stat);
                 Attribute a = new Attribute(stat.toString());
@@ -322,9 +322,9 @@ public class TreeBuildingMethod extends CellClusteringMethod {
     	int attNumber = 0;
     	Instance inst = new SparseInstance(attributes.size());
     	Attribute attX = attributes.get(attNumber++);
-    	inst.setValue(attX, n.getStatistic(PlottableStatistic.TSNE_1));
+    	inst.setValue(attX, n.getStatistic(Measurement.TSNE_1));
     	Attribute attY = attributes.get(attNumber++);
-    	inst.setValue(attY, n.getStatistic(PlottableStatistic.TSNE_2));
+    	inst.setValue(attY, n.getStatistic(Measurement.TSNE_2));
     	
     	if (options.getClusteringMethod().equals(ClusteringMethod.HIERARCHICAL)) {
             String uniqueName = c.getId().toString();
@@ -340,10 +340,10 @@ public class TreeBuildingMethod extends CellClusteringMethod {
     	int attNumber = 0;
     	Instance inst = new SparseInstance(attributes.size());
     	
-    	int nPcs = (int) n.getStatistic(PlottableStatistic.PCA_N);
+    	int nPcs = (int) n.getStatistic(Measurement.PCA_N);
     	for(int i=1; i<=nPcs; i++) {
     		Attribute att = attributes.get(attNumber++);
-    		double pc = n.getStatistic(PlottableStatistic.makePrincipalComponent(i));
+    		double pc = n.getStatistic(Measurement.makePrincipalComponent(i));
     		inst.setValue(att, pc);
     	}
     	
@@ -392,11 +392,11 @@ public class TreeBuildingMethod extends CellClusteringMethod {
         	}
         }
 
-        for (PlottableStatistic stat : PlottableStatistic.getNucleusStats(collection.getNucleusType())) {
+        for (Measurement stat : Measurement.getNucleusStats(collection.getNucleusType())) {
             if (options.isIncludeStatistic(stat)) {
                 Attribute att = attributes.get(attNumber++);
                 
-                if(PlottableStatistic.VARIABILITY.equals(stat)) {
+                if(Measurement.VARIABILITY.equals(stat)) {
                 	 inst.setValue(att, collection.getNormalisedDifferenceToMedian(Tag.REFERENCE_POINT, n));
                 } else {
                 	inst.setValue(att, n.getStatistic(stat, MeasurementScale.MICRONS));

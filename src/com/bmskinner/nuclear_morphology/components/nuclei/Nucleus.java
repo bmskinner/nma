@@ -18,10 +18,10 @@ package com.bmskinner.nuclear_morphology.components.nuclei;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.Taggable;
-import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
-import com.bmskinner.nuclear_morphology.components.nuclear.ISignalCollection;
+import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.generic.IBorderPoint;
+import com.bmskinner.nuclear_morphology.components.signals.ISignalCollection;
 
 /**
  * A Nucleus is the interface to all the possible types of nuclei that will be
@@ -72,8 +72,6 @@ public interface Nucleus extends CellularComponent, Taggable, Comparable<Nucleus
      * @throws Exception
      */
     void calculateSignalAnglesFromPoint(@NonNull IBorderPoint p);
-
-    String dumpInfo(int type);
 
     /**
      * Get the signals in this nucleus

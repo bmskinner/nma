@@ -20,8 +20,8 @@ import java.io.Serializable;
 import java.util.Set;
 import java.util.UUID;
 
-import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
-import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.components.measure.Measurement;
+import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 
 /**
  * This interface describes the options available for clustering cells within
@@ -144,7 +144,7 @@ public interface IClusteringOptions extends Serializable, HashOptions {
      * @param stat
      * @return
      */
-    boolean isIncludeStatistic(PlottableStatistic stat);
+    boolean isIncludeStatistic(Measurement stat);
 
     /**
      * Test if the given profile type is to be included in clustering
@@ -200,7 +200,7 @@ public interface IClusteringOptions extends Serializable, HashOptions {
 
     void setIncludeMesh(boolean defaultIncludeMesh);
 
-    void setIncludeStatistic(PlottableStatistic stat, boolean isIncluded);
+    void setIncludeStatistic(Measurement stat, boolean isIncluded);
 
     void setIncludeSegment(UUID id, boolean isIncluded);
 

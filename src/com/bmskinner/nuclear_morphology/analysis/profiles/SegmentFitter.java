@@ -21,11 +21,11 @@ import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nuclear_morphology.components.generic.IProfile;
-import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableComponentException;
-import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
-import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment.SegmentUpdateException;
+import com.bmskinner.nuclear_morphology.components.UnavailableComponentException;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -101,9 +101,9 @@ public class SegmentFitter {
         ISegmentedProfile tempProfile = profile.copy();
 
         // fit each segment in turn
-        for(IBorderSegment templateSegment : templateProfile.getSegments()) {
+        for(IProfileSegment templateSegment : templateProfile.getSegments()) {
 
-            IBorderSegment segment = tempProfile.getSegment(templateSegment.getID());
+            IProfileSegment segment = tempProfile.getSegment(templateSegment.getID());
 
             if (!segment.isLocked()) { 
                 tempProfile = bestFitSegment(tempProfile, templateSegment.getID()).copy();
@@ -129,14 +129,14 @@ public class SegmentFitter {
     	ISegmentedProfile result = profile.copy();
     	
         // the segment in the input profile to work on
-        IBorderSegment segment = profile.getSegment(id);
+        IProfileSegment segment = profile.getSegment(id);
 
         // Get the initial score to beat
         double bestScore = compareSegmentationPatterns(templateProfile, profile);
 
         // the most extreme negative offset to apply to the end of this segment
         // without making the length invalid
-        int minimumChange = 0 - (segment.length() - IBorderSegment.MINIMUM_SEGMENT_LENGTH);
+        int minimumChange = 0 - (segment.length() - IProfileSegment.MINIMUM_SEGMENT_LENGTH);
 
         // the maximum length offset to apply
         // we can't go beyond the end of the next segment anyway, so use that as
@@ -200,7 +200,7 @@ public class SegmentFitter {
         ISegmentedProfile testProfile = profile.copy();
 
         // not permitted if it violates length constraints
-        IBorderSegment seg = testProfile.getSegment(id);
+        IProfileSegment seg = testProfile.getSegment(id);
         int newStart = testProfile.wrap(seg.getStartIndex()+changeValue);
         
         try {
@@ -255,8 +255,8 @@ public class SegmentFitter {
         if (referenceProfile == null || testProfile == null)
             throw new IllegalArgumentException("Test or reference profile is null");
 
-        IBorderSegment reference = referenceProfile.getSegment(id);
-        IBorderSegment test = testProfile.getSegment(id);
+        IProfileSegment reference = referenceProfile.getSegment(id);
+        IProfileSegment test = testProfile.getSegment(id);
 
         double result = 0;
 

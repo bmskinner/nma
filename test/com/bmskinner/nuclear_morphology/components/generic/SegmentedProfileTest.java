@@ -19,6 +19,8 @@
 package com.bmskinner.nuclear_morphology.components.generic;
 
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.samples.dummy.DummyRodentSpermNucleus;
 
 

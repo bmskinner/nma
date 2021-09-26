@@ -22,7 +22,7 @@ import java.util.Map;
 import javax.swing.ButtonGroup;
 import javax.swing.JRadioButton;
 
-import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
+import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 
 /**
  * This is an options panel holding a group of radio buttons for the available
