@@ -83,7 +83,7 @@ public class MainWindowMenuBar extends JMenuBar  {
 	
 	private static final String VIEW_MENU_LBL     = "View";
 	private static final String CHECK_FOR_UPDATES_ITEM_LBL = "Check for updates";
-	private static final String OPEN_LOG_DIR_LBL = "Open log directory";
+	private static final String OPEN_LOG_DIR_LBL = "Open config directory";
 	private static final String ABOUT_ITEM_LBL = "About";
 	private static final String HELP_MENU_LBL = "Help";
 	private static final String TASK_MONITOR_ITEM_LBL = "Task monitor";

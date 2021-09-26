@@ -81,7 +81,13 @@ public interface Io  {
 	
 	String PROFILE_SAMPLES_KEY = "ProfileSamples";
 	
+	/** The folder to write and store logs and configuration */
+    String CONFIG_FOLDER_NAME = ".nma";
+	
+    /** The file to write and store configuration */
 	String CONFIG_FILE_NAME = "config.ini";
+	
+	
 	
     /**
      * Get the directory that the program is being run from
@@ -106,11 +112,19 @@ public interface Io  {
     }
     
     /**
+     * Get the configuration directory
+     * @return
+     */
+    static File getConfigDir() {
+    	return new File(System.getProperty("user.home"), CONFIG_FOLDER_NAME);
+    }
+    
+    /**
      * Get the config file read at launch
      * @return
      */
     static File getConfigFile() {
-        File dir = getProgramDir();
+        File dir = getConfigDir();
         return new File(dir, CONFIG_FILE_NAME);
     }
     
