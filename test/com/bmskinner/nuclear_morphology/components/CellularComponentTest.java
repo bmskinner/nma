@@ -60,7 +60,7 @@ public class CellularComponentTest  extends ComponentTester {
 				.addSignalsInChannel(0)
 				.segmented().build();
 		if(source==DefaultNucleus.class)
-			return d.getCollection().stream().findFirst().get().getNucleus();
+			return d.getCollection().stream().findFirst().get().getPrimaryNucleus();
 		throw new Exception("Unable to create instance of "+source);
 	}
 	

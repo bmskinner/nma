@@ -56,7 +56,7 @@ public interface ICell extends Serializable, Statistical, Comparable<ICell> {
      * @return
      * 
      */
-    Nucleus getNucleus();
+    Nucleus getPrimaryNucleus();
 
     /**
      * Get the nuclei of the cell

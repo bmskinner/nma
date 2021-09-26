@@ -163,7 +163,7 @@ public class SignalManager {
      * @throws UnloadableImageException if the image cannot be found or opened
      */
     public ImageProcessor getSignalSourceImage(@NonNull final UUID signalGroupId, @NonNull final ICell cell) throws UnloadableImageException {
-    	Nucleus n = cell.getNucleus();
+    	Nucleus n = cell.getPrimaryNucleus();
     	if(n.getSignalCollection().hasSignal(signalGroupId))
     		return n.getSignalCollection().getImage(signalGroupId);
     	throw new UnloadableImageException( String.format("No signal image file %s for nucleus %s", n.getSignalCollection().getSourceFile(signalGroupId), n.getNameAndNumber()));   	

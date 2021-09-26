@@ -296,25 +296,4 @@ public class OptionsFactory {
         return nucleusOptions;
 
     }
-
-    /**
-     * Create default options for neutrophil detection using colour thresholding
-     * 
-     * @param folder
-     * @return
-     * @throws MissingOptionException
-     */
-    public static IAnalysisOptions makeDefaultNeutrophilDetectionOptions(File folder) throws MissingOptionException {
-
-    	IAnalysisOptions options = OptionsFactory.makeAnalysisOptions();
-        options.setNucleusType(NucleusType.NEUTROPHIL);
-
-        IDetectionOptions cytoOptions = OptionsFactory.makeDefaultNeutrophilCytoplasmDetectionOptions(folder);
-        IDetectionOptions nucleusOptions = OptionsFactory.makeDefaultNeutrophilNucleusDetectionOptions(folder);
-
-        options.setDetectionOptions(CellularComponent.NUCLEUS, nucleusOptions);
-        options.setDetectionOptions(CellularComponent.CYTOPLASM, cytoOptions);
-        return options;
-
-    }
 }

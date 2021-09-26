@@ -40,7 +40,7 @@ public class RoundFormatConverterTest extends OldFormatConverterTest {
     public void test_1_13_0_ConvertsToCurrent() throws Exception {
         File f = new File(TestResources.DATASET_FOLDER+DIR_1_13_0, ROUND_FILE);
         IAnalysisDataset d = testConvertsToCurrent(f);
-        assertTrue(d.getVersion().equals(Version.currentVersion()));
+        assertTrue(d.getVersionCreated().equals(Version.currentVersion()));
     }
     
     @Override
@@ -48,7 +48,7 @@ public class RoundFormatConverterTest extends OldFormatConverterTest {
     public void test_1_13_1_ConvertsToCurrent() throws Exception {
         File f = new File(TestResources.DATASET_FOLDER+DIR_1_13_1, ROUND_FILE);
         IAnalysisDataset d = testConvertsToCurrent(f);
-        assertTrue(d.getVersion().equals(Version.currentVersion()));
+        assertTrue(d.getVersionCreated().equals(Version.currentVersion()));
     }
 
     @Override
@@ -56,7 +56,7 @@ public class RoundFormatConverterTest extends OldFormatConverterTest {
     public void test_1_13_2_ConvertsToCurrent() throws Exception {
         File f = new File(TestResources.DATASET_FOLDER+DIR_1_13_2, ROUND_FILE);
         IAnalysisDataset d = testConvertsToCurrent(f);
-        assertTrue(d.getVersion().equals(Version.currentVersion()));
+        assertTrue(d.getVersionCreated().equals(Version.currentVersion()));
     }
     
     @Override
@@ -68,7 +68,7 @@ public class RoundFormatConverterTest extends OldFormatConverterTest {
         // this version has known issues saving the correct format
         // Don't validate, just check deserialisation succeeded
         IAnalysisDataset d = SampleDatasetReader.openDataset(f);
-        assertTrue(d.getVersion().equals(Version.v_1_13_3));
+        assertTrue(d.getVersionCreated().equals(Version.v_1_13_3));
     }
     
     @Override
@@ -76,7 +76,7 @@ public class RoundFormatConverterTest extends OldFormatConverterTest {
     public void test_1_13_4_ConvertsToCurrent() throws Exception {
         File f = new File(TestResources.DATASET_FOLDER+DIR_1_13_4, ROUND_FILE);
         IAnalysisDataset d = testConvertsToCurrent(f);
-        assertTrue(d.getVersion().equals(Version.v_1_13_4));
+        assertTrue(d.getVersionCreated().equals(Version.v_1_13_4));
     }
 
     @Override
@@ -84,7 +84,7 @@ public class RoundFormatConverterTest extends OldFormatConverterTest {
     public void test_1_13_5_ConvertsToCurrent() throws Exception {
         File f = new File(TestResources.DATASET_FOLDER+DIR_1_13_5, ROUND_FILE);
         IAnalysisDataset d = testConvertsToCurrent(f);
-        assertTrue(d.getVersion().equals(Version.v_1_13_5));
+        assertTrue(d.getVersionCreated().equals(Version.v_1_13_5));
     }
 
     @Override
@@ -92,7 +92,7 @@ public class RoundFormatConverterTest extends OldFormatConverterTest {
     public void test_1_13_6_ConvertsToCurrent() throws Exception {
         File f = new File(TestResources.DATASET_FOLDER+DIR_1_13_6, ROUND_FILE);
         IAnalysisDataset d = testConvertsToCurrent(f);
-        assertTrue(d.getVersion().equals(Version.v_1_13_6));
+        assertTrue(d.getVersionCreated().equals(Version.v_1_13_6));
     }
 
     @Override
@@ -100,7 +100,7 @@ public class RoundFormatConverterTest extends OldFormatConverterTest {
     public void test_1_13_7_ConvertsToCurrent() throws Exception {
         File f = new File(TestResources.DATASET_FOLDER+DIR_1_13_7, ROUND_FILE);
         IAnalysisDataset d = testConvertsToCurrent(f);
-        assertTrue(d.getVersion().equals(Version.v_1_13_7));
+        assertTrue(d.getVersionCreated().equals(Version.v_1_13_7));
     }
     
     @Override
@@ -108,7 +108,7 @@ public class RoundFormatConverterTest extends OldFormatConverterTest {
 	public void test_1_13_8_ConvertsToCurrent() throws Exception {
 		 File f = new File(TestResources.DATASET_FOLDER+DIR_1_13_8, ROUND_FILE);
 	        IAnalysisDataset d = testConvertsToCurrent(f);
-	        assertTrue(d.getVersion().equals(Version.v_1_13_8));
+	        assertTrue(d.getVersionCreated().equals(Version.v_1_13_8));
 	}
 
 }

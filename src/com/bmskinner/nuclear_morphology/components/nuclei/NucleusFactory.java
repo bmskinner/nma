@@ -44,7 +44,6 @@ public class NucleusFactory implements ComponentFactory<Nucleus> {
 	
 	private static final Logger LOGGER = Logger.getLogger(NucleusFactory.class.getName());
 
-    private static final String NULL_NUCLEUS_ERROR = "Error making nucleus; constructed object is null";
 	private static final String NULL_COM_ERROR = "Centre of mass cannot be null in nucleus factory";
 	private static final String NULL_ROI_ERROR = "Roi cannot be null in nucleus factory";
 	private int nucleusCount = 0; // store the number of nuclei  created by this factory
@@ -134,8 +133,6 @@ public class NucleusFactory implements ComponentFactory<Nucleus> {
                     nucleusCount); break;
         	case PIG_SPERM: n = new DefaultPigSpermNucleus(roi, centreOfMass, imageFile, channel, originalPosition,
                     nucleusCount); break;
-        	case NEUTROPHIL: n = new DefaultLobedNucleus(roi, centreOfMass, imageFile, channel, originalPosition,
-                    nucleusCount); break;    
         	case ROUND: 
         	default: n = new DefaultNucleus(roi, centreOfMass, imageFile, channel, originalPosition,
                     nucleusCount);
@@ -160,9 +157,7 @@ public class NucleusFactory implements ComponentFactory<Nucleus> {
         	case RODENT_SPERM: n = new DefaultRodentSpermNucleus(roi, centreOfMass, imageFile, channel, originalPosition,
                     nucleusCount, id); break;
         	case PIG_SPERM: n = new DefaultPigSpermNucleus(roi, centreOfMass, imageFile, channel, originalPosition,
-                    nucleusCount, id); break;
-        	case NEUTROPHIL: n = new DefaultLobedNucleus(roi, centreOfMass, imageFile, channel, originalPosition,
-                    nucleusCount, id); break;    
+                    nucleusCount, id); break; 
         	case ROUND: 
         	default: n = new DefaultNucleus(roi, centreOfMass, imageFile, channel, originalPosition,
                     nucleusCount, id);
@@ -186,8 +181,6 @@ public class NucleusFactory implements ComponentFactory<Nucleus> {
         	case RODENT_SPERM: n = new DefaultRodentSpermNucleus(roi, centreOfMass, imageFile, channel, originalPosition,
         			nucleusNumber, id); break;
         	case PIG_SPERM: n = new DefaultPigSpermNucleus(roi, centreOfMass, imageFile, channel, originalPosition,
-        			nucleusNumber, id); break;
-        	case NEUTROPHIL: n = new DefaultLobedNucleus(roi, centreOfMass, imageFile, channel, originalPosition,
         			nucleusNumber, id); break;    
         	case ROUND: 
         	default: n = new DefaultNucleus(roi, centreOfMass, imageFile, channel, originalPosition,

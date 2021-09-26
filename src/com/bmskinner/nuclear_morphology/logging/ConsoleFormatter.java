@@ -29,10 +29,6 @@ public class ConsoleFormatter extends Formatter {
     	buffer.append(SEPARATOR);
     	buffer.append(record.getLevel());
     	buffer.append(SEPARATOR);
-    	buffer.append(record.getSourceMethodName());
-    	buffer.append(SEPARATOR);
-    	buffer.append(record.getSourceClassName());
-    	buffer.append(SEPARATOR);
     	buffer.append(record.getMessage());
     	
 

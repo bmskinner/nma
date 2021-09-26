@@ -142,7 +142,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
 	}
 	
 	private JFreeChart makeIndividualNucleusProfileChart() {
-		Nucleus n = options.getCell().getNucleus();
+		Nucleus n = options.getCell().getPrimaryNucleus();
 		ProfileChartDataset ds;
 		try {
 			ds = new ProfileDatasetCreator(options).createProfileDataset(n);
@@ -150,7 +150,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
 			LOGGER.log(Loggable.STACK, "Error creating profile chart", e);
 			return createErrorChart();
 		}
-		JFreeChart chart = makeProfileChart(ds, options.getCell().getNucleus().getBorderLength());
+		JFreeChart chart = makeProfileChart(ds, options.getCell().getPrimaryNucleus().getBorderLength());
 		
 		// Add markers
 		if (options.isShowMarkers())

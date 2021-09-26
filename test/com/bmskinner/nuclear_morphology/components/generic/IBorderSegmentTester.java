@@ -27,7 +27,6 @@ import com.bmskinner.nuclear_morphology.components.SegmentedCellularComponent.De
 import com.bmskinner.nuclear_morphology.components.SegmentedCellularComponent.DefaultSegmentedProfile.BorderSegmentTree;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment.SegmentUpdateException;
-import com.bmskinner.nuclear_morphology.components.nuclear.NucleusBorderSegment;
 import com.bmskinner.nuclear_morphology.samples.dummy.DummySegmentedCellularComponent;
 
 /**
@@ -121,13 +120,6 @@ public class IBorderSegmentTester {
 			IBorderSegment s0 = new OpenBorderSegment(startIndex, endIndex, profileLength, SEG_ID_0);
 			IBorderSegment s1 = new OpenBorderSegment(middleSegmentStart, middleSegmentEnd, profileLength, middleSegmentId);
 			IBorderSegment s2 = new OpenBorderSegment(middleSegmentEnd, startIndex, profileLength, finalSegmentId);
-			list.add(s0); list.add(s1); list.add(s2); 
-		}
-
-		if(source==NucleusBorderSegment.class) {
-			IBorderSegment s0 = new NucleusBorderSegment(startIndex, endIndex, profileLength, SEG_ID_0);
-			IBorderSegment s1 = new NucleusBorderSegment(middleSegmentStart, middleSegmentEnd, profileLength, middleSegmentId);
-			IBorderSegment s2 = new NucleusBorderSegment(middleSegmentEnd, startIndex, profileLength, finalSegmentId);
 			list.add(s0); list.add(s1); list.add(s2); 
 		}
 		

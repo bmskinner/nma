@@ -124,7 +124,7 @@ public class DefaultAnalysisDatasetTest extends ComponentTester {
   
     @Test
     public void testGetVersion() {
-        assertEquals(Version.currentVersion(), d.getVersion());
+        assertEquals(Version.currentVersion(), d.getVersionCreated());
     }
 
     
@@ -164,7 +164,7 @@ public class DefaultAnalysisDatasetTest extends ComponentTester {
     public void testHasChildIAnalysisDataset() {
         assertTrue(d.hasChildren());
         for(IAnalysisDataset child : d.getChildDatasets()) {
-        	assertTrue(d.hasChild(child));
+        	assertTrue(d.hasDirectChild(child));
         }
     }
 
@@ -172,7 +172,7 @@ public class DefaultAnalysisDatasetTest extends ComponentTester {
     public void testHasChildUUID() {
     	assertTrue(d.hasChildren());
         for(IAnalysisDataset child : d.getChildDatasets()) {
-        	assertTrue(d.hasChild(child.getId()));
+        	assertTrue(d.hasDirectChild(child.getId()));
         }
     }
 

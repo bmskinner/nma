@@ -16,7 +16,6 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components;
 
-import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -111,7 +110,7 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
         for(IAnalysisDataset mge : this.getMergeSources())
         	result.addMergeSource(mge.duplicate());
         
-        result.setDatasetColour((Color) datasetColour);
+        result.setDatasetColour(datasetColour.orElse(null));
         result.setRoot(isRoot);
         
         return result;
@@ -252,7 +251,7 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 
     @Override
     public IAnalysisDataset getChildDataset(@NonNull final UUID id) {
-        if (this.hasChild(id)) {
+        if (this.hasDirectChild(id)) {
             for (IAnalysisDataset c : childDatasets) {
                 if (c.getId().equals(id))
                     return c;
@@ -415,7 +414,7 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
                 boolean clusterRemains = false;
 
                 for (UUID childID : g.getUUIDs()) {
-                    if (this.hasChild(childID))
+                    if (this.hasDirectChild(childID))
                         clusterRemains = true;
                 }
                 if (!clusterRemains) 
@@ -472,7 +471,7 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 
     @Override
     public void deleteChild(@NonNull UUID id) {
-        if (this.hasChild(id)) {
+        if (this.hasDirectChild(id)) {
             this.removeChildCollection(id);
         }
     }
@@ -630,11 +629,6 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
             if (other.cellCollection != null)
                 return false;
         } else if (!cellCollection.equals(other.cellCollection))
-            return false;
-        if (version == null) {
-            if (other.version != null)
-                return false;
-        } else if (!version.equals(other.version))
             return false;
         return true;
     }

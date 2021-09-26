@@ -30,6 +30,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.AbstractAction;
@@ -209,13 +210,10 @@ public class LogPanel extends DetailPanel implements ProgressBarAcceptor {
             try {
                 doc.insertString(doc.getLength(), s, attrs);
             } catch (BadLocationException e) {
-                Loggable.logToImageJ(s);
-                Loggable.logToImageJ("Requested insert at " + e.offsetRequested() + " in document of " + doc.getLength());
-                Loggable.logToImageJ("Error appending to log panel", e);
+                LOGGER.log(Level.SEVERE, "Error updating log panel", e);
             }
         };
         SwingUtilities.invokeLater(r);
-
     }
     
     /**

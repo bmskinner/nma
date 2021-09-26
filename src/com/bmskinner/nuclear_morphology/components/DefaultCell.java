@@ -42,19 +42,10 @@ public class DefaultCell implements ICell {
     private static final long serialVersionUID = 1L;
 
     protected UUID uuid;
-
-    /**
-     * @deprecated since we should use the nuclei list
-     * 
-     * instead
-     */
-    @Deprecated
-    protected Nucleus              nucleus   = null;
-    
+    protected ICytoplasm           cytoplasm = null;
     protected List<IMitochondrion> mitochondria;
     protected List<Flagellum>      tails;
     protected List<IAcrosome>      acrosomes;
-    protected ICytoplasm           cytoplasm = null;
     protected List<Nucleus>        nuclei;
 
     /** The statistical values stored for this object */
@@ -150,7 +141,7 @@ public class DefaultCell implements ICell {
     }
 
     @Override
-    public Nucleus getNucleus() {
+    public Nucleus getPrimaryNucleus() {
         return nuclei.get(0);
     }
 
@@ -194,7 +185,7 @@ public class DefaultCell implements ICell {
     private double chooseScale() {
     	
     	if(hasNucleus()) {
-    		return getNucleus().getScale();
+    		return getPrimaryNucleus().getScale();
     	}
     	if(hasCytoplasm()) {
     		return getCytoplasm().getScale();
@@ -214,9 +205,6 @@ public class DefaultCell implements ICell {
         if (PlottableStatistic.CELL_NUCLEUS_COUNT.equals(stat))
             return nuclei.size();
 
-        if (PlottableStatistic.LOBE_COUNT.equals(stat))
-            return getLobeCount();
-
         if (PlottableStatistic.CELL_NUCLEAR_AREA.equals(stat))
             return getNuclearArea();
 
@@ -228,9 +216,6 @@ public class DefaultCell implements ICell {
     @Override
     public void setStatistic(PlottableStatistic stat, double d) {
         if (PlottableStatistic.CELL_NUCLEUS_COUNT.equals(stat))
-            statistics.put(stat, d);
-
-        if (PlottableStatistic.LOBE_COUNT.equals(stat))
             statistics.put(stat, d);
 
         if (PlottableStatistic.CELL_NUCLEAR_AREA.equals(stat))
@@ -248,12 +233,6 @@ public class DefaultCell implements ICell {
     @Override
     public PlottableStatistic[] getStatistics() {
         return PlottableStatistic.getCellStats().toArray(new PlottableStatistic[0]);
-    }
-
-    private int getLobeCount() {
-        return (int) getNuclei().stream()
-        		.mapToDouble(n -> n.getStatistic(PlottableStatistic.LOBE_COUNT))
-        		.sum();
     }
 
     private int getNuclearArea() {
@@ -501,16 +480,6 @@ public class DefaultCell implements ICell {
     
     private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
-
-        // Replacce old single nucleus fields
-        if (nuclei == null) {
-            nuclei = new ArrayList<>(0);
-            nuclei.add(nucleus);
-        }
-
-        // Add stats if missing
-        if (statistics == null)
-            statistics = new HashMap<>();
     }
 
 }

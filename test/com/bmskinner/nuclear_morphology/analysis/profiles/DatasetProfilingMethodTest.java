@@ -71,11 +71,11 @@ public class DatasetProfilingMethodTest extends AbstractProfileMethodTest {
 				// Confirm all cells are identical
 				for(ICell cell : dataset.getCollection().getCells()) {
 					if(globalCell==null)
-						globalCell = cell.getNucleus();
+						globalCell = cell.getPrimaryNucleus();
 					if(loopCell==null)
-						loopCell=cell.getNucleus();
+						loopCell=cell.getPrimaryNucleus();
 					
-					Nucleus n = cell.getNucleus();
+					Nucleus n = cell.getPrimaryNucleus();
 					testNucleiHaveIdenticalPositions(n, loopCell);
 					testNucleiHaveIdenticalSizes(n, globalCell);
 				}

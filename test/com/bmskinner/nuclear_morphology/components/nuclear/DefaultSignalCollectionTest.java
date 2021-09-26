@@ -29,7 +29,7 @@ public class DefaultSignalCollectionTest extends ComponentTester {
 				.addSignalsInChannel(1)
 				.segmented().build();
 		
-		collection = d.getCollection().streamCells().findFirst().get().getNucleus().getSignalCollection();
+		collection = d.getCollection().streamCells().findFirst().get().getPrimaryNucleus().getSignalCollection();
 	}
 
 	@Test

@@ -18,8 +18,6 @@ package com.bmskinner.nuclear_morphology.logging;
 
 import java.util.logging.Level;
 
-import ij.IJ;
-
 /**
  * This class provides static methods for logging to the ImageJ
  * window
@@ -51,32 +49,5 @@ public class Loggable {
         public StackLevel() {
             super("ERROR", 600);
         }
-    }
-    
-    /**
-     * Log the given message and srack trace from the given throwable to the
-     * ImageJ log window. Only use if the program log panel  or console is not
-     *  expected to be available.
-     * 
-     * @param message
-     * @param t
-     */
-    public static void logToImageJ(String message, Throwable t) {
-        IJ.log(message);
-        IJ.log(t.getMessage());
-        for (StackTraceElement el : t.getStackTrace()) {
-            IJ.log(el.toString());
-        }
-    }
-
-    /**
-     * Log the given message to the ImageJ log window. Only use if the program
-     * log panel or console is not expected to be available.
-     * 
-     * @param message
-     */
-    public static void logToImageJ(String message) {
-        IJ.log(message);
-        System.err.println(message);
     }
 }

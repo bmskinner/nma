@@ -67,8 +67,6 @@ import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
-import com.bmskinner.nuclear_morphology.components.stats.SegmentStatistic;
-import com.bmskinner.nuclear_morphology.components.stats.SignalStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.StatsCache;
 import com.bmskinner.nuclear_morphology.components.stats.VennCache;
 import com.bmskinner.nuclear_morphology.core.DatasetListManager;
@@ -498,7 +496,7 @@ public class DefaultCellCollection implements ICellCollection {
 
 	@Override
 	public synchronized Set<ICell> getCells(@NonNull File imageFile) {
-		return cells.stream().filter(c->c.getNucleus().getSourceFile().equals(imageFile))
+		return cells.stream().filter(c->c.getPrimaryNucleus().getSourceFile().equals(imageFile))
 				.collect(Collectors.toSet());
 	}
 
@@ -722,11 +720,11 @@ public class DefaultCellCollection implements ICellCollection {
 	public synchronized double getMedian(@NonNull PlottableStatistic stat, String component, MeasurementScale scale,
 			UUID id) throws Exception {
 
-		if (CellularComponent.NUCLEAR_SIGNAL.equals(component) || stat.getClass() == SignalStatistic.class) {
+		if (CellularComponent.NUCLEAR_SIGNAL.equals(component)) {
 			return getMedianStatistic(stat, component, scale, id);
 		}
 
-		if (CellularComponent.NUCLEAR_BORDER_SEGMENT.equals(component) || stat.getClass() == SegmentStatistic.class) {
+		if (CellularComponent.NUCLEAR_BORDER_SEGMENT.equals(component)) {
 			return getMedianStatistic(stat, component, scale, id);
 		}
 		return 0;
@@ -782,11 +780,11 @@ public class DefaultCellCollection implements ICellCollection {
 			UUID id){
 
 		// Handle old segment and SignalStatistic enums
-		if (CellularComponent.NUCLEAR_SIGNAL.equals(component) || stat.getClass() == SignalStatistic.class) {
+		if (CellularComponent.NUCLEAR_SIGNAL.equals(component)) {
 			return getMinStatistic(stat, CellularComponent.NUCLEAR_SIGNAL, scale, id);
 		}
 
-		if (CellularComponent.NUCLEAR_BORDER_SEGMENT.equals(component) || stat.getClass() == SegmentStatistic.class) {
+		if (CellularComponent.NUCLEAR_BORDER_SEGMENT.equals(component)) {
 			return getMinStatistic(stat, CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, id);
 		}
 		return getMinStatistic(stat, component, scale, id);
@@ -809,9 +807,9 @@ public class DefaultCellCollection implements ICellCollection {
 			UUID id){
 
 		// Handle old segment andSignalStatistic enums
-		if (CellularComponent.NUCLEAR_SIGNAL.equals(component) || stat.getClass() == SignalStatistic.class)
+		if (CellularComponent.NUCLEAR_SIGNAL.equals(component))
 			return getMaxStatistic(stat, CellularComponent.NUCLEAR_SIGNAL, scale, id);
-		if (CellularComponent.NUCLEAR_BORDER_SEGMENT.equals(component) || stat.getClass() == SegmentStatistic.class)
+		if (CellularComponent.NUCLEAR_BORDER_SEGMENT.equals(component))
 			return getMaxStatistic(stat, CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, id);
 		return getMaxStatistic(stat, component, scale, id);
 	}

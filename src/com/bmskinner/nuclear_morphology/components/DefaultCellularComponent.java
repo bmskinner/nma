@@ -31,11 +31,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Logger;
 
@@ -47,9 +44,7 @@ import com.bmskinner.nuclear_morphology.analysis.image.ImageConverter;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
-import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
-import com.bmskinner.nuclear_morphology.components.stats.SignalStatistic;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
@@ -1293,90 +1288,6 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 
         // needs to be traced to allow interpolation into the border list
         makeBorderList();
-        
-        Set<PlottableStatistic> set = new HashSet<>(statistics.keySet());
-        Iterator<PlottableStatistic> it = set.iterator();
-
-        // Update any old stats to generic plottable statistics
-        // TODO - this should be removed one compatibility is not needed for 1.13.4 or earlier
-        while (it.hasNext()) {
-            PlottableStatistic stat = it.next();
-            double value = statistics.get(stat);
-
-            if (stat.equals(NucleusStatistic.AREA)) {
-                statistics.put(PlottableStatistic.AREA, value);
-            }
-
-            if (stat.equals(NucleusStatistic.PERIMETER)) {
-                statistics.put(PlottableStatistic.PERIMETER, value);
-            }
-
-            if (stat.equals(NucleusStatistic.MAX_FERET)) {
-                statistics.put(PlottableStatistic.MAX_FERET, value);
-            }
-
-            if (stat.equals(NucleusStatistic.MIN_DIAMETER)) {
-                statistics.put(PlottableStatistic.MIN_DIAMETER, value);
-            }
-
-            if (stat.equals(NucleusStatistic.ASPECT)) {
-                statistics.put(PlottableStatistic.ELLIPTICITY, value);
-            }
-
-            if (stat.equals(NucleusStatistic.BOUNDING_HEIGHT)) {
-                statistics.put(PlottableStatistic.BOUNDING_HEIGHT, value);
-            }
-
-            if (stat.equals(NucleusStatistic.BOUNDING_WIDTH)) {
-                statistics.put(PlottableStatistic.BOUNDING_WIDTH, value);
-            }
-
-            if (stat.equals(NucleusStatistic.OP_RP_ANGLE)) {
-                statistics.put(PlottableStatistic.OP_RP_ANGLE, value);
-            }
-
-            if (stat.equals(NucleusStatistic.HOOK_LENGTH)) {
-                statistics.put(PlottableStatistic.HOOK_LENGTH, value);
-            }
-
-            if (stat.equals(NucleusStatistic.BODY_WIDTH)) {
-                statistics.put(PlottableStatistic.BODY_WIDTH, value);
-            }
-
-            if (stat.equals(SignalStatistic.ANGLE)) {
-                statistics.put(PlottableStatistic.ANGLE, value);
-            }
-
-            if (stat.equals(SignalStatistic.AREA)) {
-                statistics.put(PlottableStatistic.AREA, value);
-            }
-
-            if (stat.equals(SignalStatistic.DISTANCE_FROM_COM)) {
-                statistics.put(PlottableStatistic.DISTANCE_FROM_COM, value);
-            }
-
-            if (stat.equals(SignalStatistic.FRACT_DISTANCE_FROM_COM)) {
-                statistics.put(PlottableStatistic.FRACT_DISTANCE_FROM_COM, value);
-            }
-
-            if (stat.equals(SignalStatistic.MAX_FERET)) {
-                statistics.put(PlottableStatistic.MAX_FERET, value);
-            }
-
-            if (stat.equals(SignalStatistic.MIN_DIAMETER)) {
-                statistics.put(PlottableStatistic.MIN_DIAMETER, value);
-            }
-
-            if (stat.equals(SignalStatistic.PERIMETER)) {
-                statistics.put(PlottableStatistic.PERIMETER, value);
-            }
-
-            if (stat.equals(SignalStatistic.RADIUS)) {
-                statistics.put(PlottableStatistic.RADIUS, value);
-            }
-
-        }
-
     }
 
     private synchronized void writeObject(java.io.ObjectOutputStream out) throws IOException {

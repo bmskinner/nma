@@ -60,8 +60,6 @@ import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
-import com.bmskinner.nuclear_morphology.components.nuclear.Lobe;
-import com.bmskinner.nuclear_morphology.components.nuclei.LobedNucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
@@ -599,31 +597,6 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
     }
 
     /**
-     * Create a dataset with lines from each of the BorderTags within the
-     * nucleus to the centre of mass of the nucleus
-     * 
-     * @param cell
-     * @return
-     * @throws Exception
-     */
-    public ComponentOutlineDataset<CellularComponent> createNucleusLobeDataset(@NonNull LobedNucleus nucleus) throws ChartDatasetCreationException {
-
-        ComponentOutlineDataset<CellularComponent> ds = new ComponentOutlineDataset<>();
-
-        int i = 0;
-        Iterator<Lobe> lobes = nucleus.getLobes().iterator();
-        while (lobes.hasNext()) {
-            Lobe l = lobes.next();
-            String seriesKey = CellularComponent.NUCLEAR_LOBE + "_" + i;
-            LOGGER.finest( "Adding lobe to dataset: " + seriesKey);
-            OutlineDatasetCreator dc = new OutlineDatasetCreator(options, l);
-            dc.addOutline(ds, seriesKey, false);
-            i++;
-        }
-        return ds;
-    }
-
-    /**
      * Create a dataset for the signal groups in the cell. Each signalGroup is a
      * new dataset, and each signal in that group is a series
      * 
@@ -646,7 +619,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
             return result;
         
 
-        Nucleus nucleus = cell.getNucleus();
+        Nucleus nucleus = cell.getPrimaryNucleus();
 
         LOGGER.finest( "Attempting to create signal outlines for " + nucleus.getNameAndNumber());
 

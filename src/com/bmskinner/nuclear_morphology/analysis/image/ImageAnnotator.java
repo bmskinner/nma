@@ -46,8 +46,6 @@ import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalCollection;
-import com.bmskinner.nuclear_morphology.components.nuclear.Lobe;
-import com.bmskinner.nuclear_morphology.components.nuclei.LobedNucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
@@ -146,12 +144,6 @@ public class ImageAnnotator extends AbstractImageFilterer {
 
         for (Nucleus n : cell.getNuclei()) {
             annotateBorder(n, Color.ORANGE);
-            if (n instanceof LobedNucleus) {
-                for (Lobe l : ((LobedNucleus) n).getLobes()) {
-                    annotateBorder(l, Color.GREEN);
-                    annotatePoint(l.getCentreOfMass(), Color.GREEN);
-                }
-            }
         }
         return this;
     }

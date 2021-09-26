@@ -134,9 +134,9 @@ public class DatasetDeleter {
         LOGGER.fine("Removing dataset "+d.getName());
         // remove the dataset from its parents
         for (IAnalysisDataset parent : DatasetListManager.getInstance().getAllDatasets()) {
-            if(parent.hasChild(id)) {
+            if(parent.hasDirectChild(id)) {
                 parent.deleteChild(id);
-                LOGGER.fine("Successfully removed child: "+!parent.hasChild(id));
+                LOGGER.fine("Successfully removed child: "+!parent.hasDirectChild(id));
             }
         }
 

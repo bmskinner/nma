@@ -149,7 +149,7 @@ public class CellBorderAdjustmentDialog extends AbstractCellEditingDialog implem
     public void load(final ICell cell, final IAnalysisDataset dataset) {
         super.load(cell, dataset);
 
-        this.setTitle("Adjusting border in " + cell.getNucleus().getNameAndNumber());
+        this.setTitle("Adjusting border in " + cell.getPrimaryNucleus().getNameAndNumber());
         updateCharts(cell);
         selectToggle.setSelected(true);
         ellipse.setFill(selectFill);
@@ -312,7 +312,7 @@ public class CellBorderAdjustmentDialog extends AbstractCellEditingDialog implem
                 .setShowXAxis(false)
                 .setShowYAxis(false)
                 .setShowPoints(true)
-                .addCellularComponent(cell.getNucleus())
+                .addCellularComponent(cell.getPrimaryNucleus())
                 .build();
 
         OutlineChartFactory ocf = new OutlineChartFactory(outlineOptions);
@@ -331,7 +331,7 @@ public class CellBorderAdjustmentDialog extends AbstractCellEditingDialog implem
     }
 
     private void selectClickedPoint(@NonNull IPoint clickedPoint) {
-        for (IBorderPoint point : workingCell.getNucleus().getBorderList()) {
+        for (IBorderPoint point : workingCell.getPrimaryNucleus().getBorderList()) {
 
             if (point.overlapsPerfectly(clickedPoint)) {
 
@@ -363,7 +363,7 @@ public class CellBorderAdjustmentDialog extends AbstractCellEditingDialog implem
 
     private void moveSelectedPoint() {
         // Move the selected point in the border list copy
-        List<IBorderPoint> borderList = workingCell.getNucleus().getBorderList();
+        List<IBorderPoint> borderList = workingCell.getPrimaryNucleus().getBorderList();
         for (int i = 0; i < borderList.size(); i++) {
 
             IBorderPoint point = borderList.get(i);
@@ -374,7 +374,7 @@ public class CellBorderAdjustmentDialog extends AbstractCellEditingDialog implem
             }
         }
         setCellChanged(true);
-        updateWorkingCell(workingCell.getNucleus().getBorderList());
+        updateWorkingCell(workingCell.getPrimaryNucleus().getBorderList());
     }
 
     // Add a point at the screen position in the main chart
@@ -395,7 +395,7 @@ public class CellBorderAdjustmentDialog extends AbstractCellEditingDialog implem
         // Get the border point that is closest to the clicked point
         IBorderPoint bp = null;
         try {
-            bp = workingCell.getNucleus().findClosestBorderPoint(newPoint);
+            bp = workingCell.getPrimaryNucleus().findClosestBorderPoint(newPoint);
         } catch (UnavailableBorderPointException e) {
             LOGGER.log(Loggable.STACK, "Unable to get border point", e);
 
@@ -404,7 +404,7 @@ public class CellBorderAdjustmentDialog extends AbstractCellEditingDialog implem
         List<IBorderPoint> newList = new ArrayList<IBorderPoint>();
 
         // Insert the new point after the closest existing point to it
-        List<IBorderPoint> borderList = workingCell.getNucleus().getBorderList();
+        List<IBorderPoint> borderList = workingCell.getPrimaryNucleus().getBorderList();
         Iterator<IBorderPoint> it = borderList.iterator();
         while (it.hasNext()) {
             IBorderPoint point = it.next();
@@ -421,7 +421,7 @@ public class CellBorderAdjustmentDialog extends AbstractCellEditingDialog implem
 
     private void deleteSelectedPoints() {
         // Remove the selected points from the border list copy
-        List<IBorderPoint> borderList = workingCell.getNucleus().getBorderList();
+        List<IBorderPoint> borderList = workingCell.getPrimaryNucleus().getBorderList();
         Iterator<IBorderPoint> it = borderList.iterator();
         while (it.hasNext()) {
             IBorderPoint point = it.next();
@@ -469,7 +469,7 @@ public class CellBorderAdjustmentDialog extends AbstractCellEditingDialog implem
 
         // Rectangle boundingRectangle = new Rectangle(fp.getBounds());
 
-        CellularComponent c = (CellularComponent) workingCell.getNucleus();
+        CellularComponent c = (CellularComponent) workingCell.getPrimaryNucleus();
 
         // c.setBorderList(newList);
         // c.setBoundingRectangle(boundingRectangle);
@@ -493,7 +493,7 @@ public class CellBorderAdjustmentDialog extends AbstractCellEditingDialog implem
         // Get the positions of segment boundaries
         ISegmentedProfile templateProfile;
         try {
-            templateProfile = workingCell.getNucleus().getProfile(ProfileType.ANGLE);
+            templateProfile = workingCell.getPrimaryNucleus().getProfile(ProfileType.ANGLE);
         } catch (UnavailableProfileTypeException e1) {
             LOGGER.warning("Angle profile not present");
             return;
@@ -501,13 +501,13 @@ public class CellBorderAdjustmentDialog extends AbstractCellEditingDialog implem
         int oldLength = templateProfile.size();
 
         try {
-            workingCell.getNucleus().calculateProfiles();
+            workingCell.getPrimaryNucleus().calculateProfiles();
 
-            int newLength = workingCell.getNucleus().getProfile(ProfileType.ANGLE).size();
+            int newLength = workingCell.getPrimaryNucleus().getProfile(ProfileType.ANGLE).size();
 
             // Get the border tag positions, and set equivalent positions in the
             // new profile
-            Map<Tag, Integer> tagMap = workingCell.getNucleus().getBorderTags();
+            Map<Tag, Integer> tagMap = workingCell.getPrimaryNucleus().getBorderTags();
 
             Map<Tag, Integer> newMap = new HashMap<Tag, Integer>();
 

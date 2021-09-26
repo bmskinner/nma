@@ -17,7 +17,6 @@
 package com.bmskinner.nuclear_morphology.components;
 
 import java.awt.Color;
-import java.awt.Paint;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -47,7 +46,13 @@ public abstract class AbstractAnalysisDataset implements Serializable {
     private static final long serialVersionUID = 1L;
 
     /**The software version in which the dataset was created */
-    protected final Version version;
+    protected final Version versionCreated;
+    
+    /**The software version in which the dataset was saved */
+    protected final Version versionLastSaved;
+    
+    /** Direct parent dataset to this dataset */
+    protected Optional<IAnalysisDataset> parentDataset = Optional.empty();
 
     /** Direct child datasets to this dataset */
     protected Set<IAnalysisDataset> childDatasets = new HashSet<>();
@@ -56,11 +61,11 @@ public abstract class AbstractAnalysisDataset implements Serializable {
     protected ICellCollection cellCollection;
 
     /** The colour to draw this dataset in charts */
-    protected Paint datasetColour = null;
+    protected Optional<Color> datasetColour = Optional.empty();
 
     /** Clusters identified in this dataset */
     protected List<IClusterGroup> clusterGroups = new ArrayList<>();
-
+    
     /**
      * Create a dataset from a cell collection
      * 
@@ -68,11 +73,16 @@ public abstract class AbstractAnalysisDataset implements Serializable {
      */
     protected AbstractAnalysisDataset(ICellCollection collection) {
         this.cellCollection = collection;
-        this.version = Version.currentVersion();
+        this.versionCreated = Version.currentVersion();
+        this.versionLastSaved = Version.currentVersion();
     }
     
-    public Version getVersion() {
-        return this.version;
+    public Version getVersionCreated() {
+        return this.versionCreated;
+    }
+    
+    public Version getVersionLastSaved() {
+        return this.versionLastSaved;
     }
 
     public UUID getId() {
@@ -88,34 +98,41 @@ public abstract class AbstractAnalysisDataset implements Serializable {
     }
         
     public void setDatasetColour(Color colour) {
-        datasetColour = colour;
+        datasetColour = Optional.of(colour);
 
     }
 
     public Optional<Color> getDatasetColour() {
-        return Optional.ofNullable((Color)datasetColour);
+        return datasetColour;
     }
 
     public boolean hasDatasetColour() {
-        return datasetColour != null;
+        return datasetColour.isPresent();
+    }
+    
+    public boolean hasParent() {
+    	return parentDataset.isPresent();
+    }
+    public Optional<IAnalysisDataset> getParent(){
+    	return parentDataset;
     }
 
-    public boolean hasChild(IAnalysisDataset child) {
-        return hasChild(child.getId());
+    public boolean hasDirectChild(IAnalysisDataset child) {
+        return hasDirectChild(child.getId());
     }
 
     public abstract Set<UUID> getChildUUIDs();
 
-    public boolean hasChild(UUID child) {
+    public boolean hasDirectChild(UUID child) {
         return getChildUUIDs().contains(child);
     }
 
-    public boolean hasRecursiveChild(IAnalysisDataset child) {
-        if (hasChild(child)) {
+    public boolean hasAnyChild(IAnalysisDataset child) {
+        if (hasDirectChild(child)) {
             return true;
         }
         for (IAnalysisDataset c : childDatasets) {
-            if (c.hasRecursiveChild(child)) {
+            if (c.hasAnyChild(child)) {
                 return true;
             }
         }
@@ -227,7 +244,7 @@ public abstract class AbstractAnalysisDataset implements Serializable {
 		result = prime * result + ((childDatasets == null) ? 0 : childDatasets.hashCode());
 		result = prime * result + ((clusterGroups == null) ? 0 : clusterGroups.hashCode());
 		result = prime * result + ((datasetColour == null) ? 0 : datasetColour.hashCode());
-		result = prime * result + ((version == null) ? 0 : version.hashCode());
+		result = prime * result + ((versionCreated == null) ? 0 : versionCreated.hashCode());
 		return result;
 	}
 
@@ -245,6 +262,11 @@ public abstract class AbstractAnalysisDataset implements Serializable {
 				return false;
 		} else if (!cellCollection.equals(other.cellCollection))
 			return false;
+		if (parentDataset == null) {
+			if (other.parentDataset != null)
+				return false;
+		} else if (!parentDataset.equals(other.parentDataset))
+			return false;
 		if (childDatasets == null) {
 			if (other.childDatasets != null)
 				return false;
@@ -260,10 +282,15 @@ public abstract class AbstractAnalysisDataset implements Serializable {
 				return false;
 		} else if (!datasetColour.equals(other.datasetColour))
 			return false;
-		if (version == null) {
-			if (other.version != null)
+		if (versionCreated == null) {
+			if (other.versionCreated != null)
 				return false;
-		} else if (!version.equals(other.version))
+		} else if (!versionCreated.equals(other.versionCreated))
+			return false;
+		if (versionLastSaved == null) {
+			if (other.versionLastSaved != null)
+				return false;
+		} else if (!versionLastSaved.equals(other.versionLastSaved))
 			return false;
 		return true;
 	}

@@ -221,8 +221,7 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod impleme
 			// Refold
 			NucleusType t = options.getNucleusType();
 			switch(t){
-				case ROUND:
-				case NEUTROPHIL: {
+				case ROUND: {
 					if(!dataset.getCollection().hasConsensus())
 						methodsToRun.add(new ProfileRefoldMethod(dataset, CurveRefoldingMode.FAST));
 					for(IAnalysisDataset d : dataset.getAllChildDatasets())

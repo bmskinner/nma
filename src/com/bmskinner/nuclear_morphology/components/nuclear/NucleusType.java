@@ -23,7 +23,6 @@ import java.util.Map;
 
 import com.bmskinner.nuclear_morphology.components.generic.BorderTag;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
-import com.bmskinner.nuclear_morphology.components.nuclei.DefaultLobedNucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.DefaultNucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.sperm.DefaultPigSpermNucleus;
@@ -39,8 +38,7 @@ import com.bmskinner.nuclear_morphology.components.nuclei.sperm.DefaultRodentSpe
 public enum NucleusType {
     ROUND("Round nucleus", "Head", "Tail", DefaultNucleus.class), 
     RODENT_SPERM("Rodent sperm nucleus", "Tip", "Tail", DefaultRodentSpermNucleus.class), 
-    PIG_SPERM("Pig sperm nucleus", "Tail", "Tail", DefaultPigSpermNucleus.class), 
-    NEUTROPHIL("Lobed nucleus", "Head", "Tail", DefaultLobedNucleus.class);
+    PIG_SPERM("Pig sperm nucleus", "Tail", "Tail", DefaultPigSpermNucleus.class);
 
     private final String   name;
     private final Class<?> nucleusClass;

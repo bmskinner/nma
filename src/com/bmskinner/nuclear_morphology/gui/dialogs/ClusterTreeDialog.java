@@ -176,7 +176,7 @@ public class ClusterTreeDialog extends MessagingDialog {
                     ICell c = getCell(t).get();
                     t.setAttribute("Cell", c);
                     n.setAttribute("ShortName",
-                            c.getNucleus().getSourceFolder().getName() + "/" + c.getNucleus().getNameAndNumber());
+                            c.getPrimaryNucleus().getSourceFolder().getName() + "/" + c.getPrimaryNucleus().getNameAndNumber());
                 }
             }
         } catch (IOException e) {
@@ -337,7 +337,7 @@ public class ClusterTreeDialog extends MessagingDialog {
                 IAnalysisDataset cluster = null;
 
                 
-                if (dataset.hasChild(id)) {
+                if (dataset.hasDirectChild(id)) {
 
                     cluster = dataset.getChildDataset(id);
 

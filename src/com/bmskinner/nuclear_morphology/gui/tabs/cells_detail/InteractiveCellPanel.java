@@ -254,7 +254,7 @@ public abstract class InteractiveCellPanel extends JPanel {
 	
 	protected ImageProcessor rotateToVertical(ICell c, ImageProcessor ip) throws UnavailableBorderTagException {
         // Calculate angle for vertical rotation
-        Nucleus n = c.getNucleus();
+        Nucleus n = c.getPrimaryNucleus();
 
         IPoint topPoint;
         IPoint btmPoint;

@@ -139,7 +139,7 @@ public class ShellOverviewDialog extends AbstractCellCollectionDialog {
 		ImageProcessor full = renderFullImage(cell);
 
 		File folder = dataset.getCollection().getOutputFolder();
-		File outputfile = new File(folder,  cell.getNucleus().getNameAndNumber()+Io.TIFF_FILE_EXTENSION);
+		File outputfile = new File(folder,  cell.getPrimaryNucleus().getNameAndNumber()+Io.TIFF_FILE_EXTENSION);
 
 		FileSaver saver = new FileSaver(new ImagePlus("", full));
 		saver.saveAsTiff(outputfile.getAbsolutePath());
@@ -152,7 +152,7 @@ public class ShellOverviewDialog extends AbstractCellCollectionDialog {
             if (c.hasCytoplasm()) {
                 ip = c.getCytoplasm().getComponentRGBImage();
             } else {
-                ip = c.getNucleus().getComponentImage();
+                ip = c.getPrimaryNucleus().getComponentImage();
             }
         } catch (UnloadableImageException e) {
             LOGGER.log(Loggable.STACK, "Cannot load image for component", e);

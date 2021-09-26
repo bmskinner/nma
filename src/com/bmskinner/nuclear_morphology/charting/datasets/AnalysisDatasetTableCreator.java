@@ -398,7 +398,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
         dataList.add(folder);
         dataList.add(options.getNucleusType().toString());
         dataList.add(options.getProfileWindowProportion());
-        dataList.add(dataset.getVersion().toString());
+        dataList.add(dataset.getVersionCreated().toString());
         dataList.add(options.getRuleApplicationType().toString());
         
         if(this.options.getBoolean(AbstractOptions.SHOW_RECOVER_MERGE_SOURCE_KEY))

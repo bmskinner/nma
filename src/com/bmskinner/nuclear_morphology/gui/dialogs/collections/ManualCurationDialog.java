@@ -47,8 +47,6 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
-import com.bmskinner.nuclear_morphology.components.nuclear.Lobe;
-import com.bmskinner.nuclear_morphology.components.nuclei.LobedNucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.gui.components.SelectableCellIcon;
@@ -317,7 +315,7 @@ public class ManualCurationDialog extends AbstractCellCollectionDialog {
 	    		}
 	    		ip.flipVertical(); // Y axis needs inverting
 	    		
-	    		if(c.getNucleus().isClockwiseRP())
+	    		if(c.getPrimaryNucleus().isClockwiseRP())
 	    			ip.flipHorizontal();
 	    	}
 	    	// Rescale the resulting image
@@ -333,14 +331,6 @@ public class ManualCurationDialog extends AbstractCellCollectionDialog {
 	    	an = an.annotateBorder(c.getCytoplasm(), c.getCytoplasm(), Color.CYAN);
 	    	for (Nucleus n : c.getNuclei()) {
 	    		an.annotateBorder(n, c.getCytoplasm(), Color.ORANGE);
-
-	    		if (n instanceof LobedNucleus) {
-
-	    			for (Lobe l : ((LobedNucleus) n).getLobes()) {
-	    				an.annotateBorder(l, c.getCytoplasm(), Color.RED);
-	    				an.annotatePoint(l.getCentreOfMass(), c.getCytoplasm(), Color.GREEN);
-	    			}
-	    		}
 	    	}
 
 	    	ip = an.toProcessor();
@@ -348,7 +338,7 @@ public class ManualCurationDialog extends AbstractCellCollectionDialog {
 	    }
 	    
 	    private ImageProcessor importNucleus(ICell c) throws UnloadableImageException {
-	    	ImageProcessor ip = c.getNucleus().getComponentImage();
+	    	ImageProcessor ip = c.getPrimaryNucleus().getComponentImage();
 	    	ImageAnnotator an = new ImageAnnotator(ip);
 	    	for (Nucleus n : c.getNuclei()) {
 	    		an = an.annotateSegments(n, n);
@@ -377,7 +367,7 @@ public class ManualCurationDialog extends AbstractCellCollectionDialog {
 	    	ip.invert();
 	    	ImageAnnotator an = new ImageAnnotator(ip);
 	    	an.convertToColorProcessor();
-	    	an.crop(c.getNucleus());
+	    	an.crop(c.getPrimaryNucleus());
 	    	for (Nucleus n : c.getNuclei()) {
 	    		an = an.annotateSegments(n, n);
 	    	}
@@ -389,11 +379,11 @@ public class ManualCurationDialog extends AbstractCellCollectionDialog {
 	    	// Ideally, find the folder containing the signals, and get the appropriate file name
 	    	// But if the dataset is merged, we can't use the value in the signal detection options,
 	    	// so hack it for now
-	    	if(c.getNucleus().getSignalCollection().hasSignal(signal))
-	    		return c.getNucleus().getSignalCollection().getSourceFile(signal);
+	    	if(c.getPrimaryNucleus().getSignalCollection().hasSignal(signal))
+	    		return c.getPrimaryNucleus().getSignalCollection().getSourceFile(signal);
 	    	
 	    	// Otherwise try the nucleus image and hope it's RGB
-	    	return c.getNucleus().getSourceFile();
+	    	return c.getPrimaryNucleus().getSourceFile();
 	    }
 	    
 	    @Override

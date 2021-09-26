@@ -43,7 +43,7 @@ public class AbstractProfileMethodTest extends ComponentTester {
 				.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
 						
 		for(ICell cell : dataset.getCollection().getCells()) {
-			ISegmentedProfile cellProfile = cell.getNucleus().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+			ISegmentedProfile cellProfile = cell.getPrimaryNucleus().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
 			if(!equals(median.toFloatArray(), cellProfile.toFloatArray(), 0.0001f))
 				fail("Failed for dataset with "+dataset.getCollection().getNucleusCount()+" nuclei");			
 		}
@@ -63,8 +63,8 @@ public class AbstractProfileMethodTest extends ComponentTester {
 		// Confirm all cells are identical
 		for(ICell cell : dataset.getCollection()) {
 			if(globalCell==null)
-				globalCell = cell.getNucleus();			
-			Nucleus n = cell.getNucleus();
+				globalCell = cell.getPrimaryNucleus();			
+			Nucleus n = cell.getPrimaryNucleus();
 			assertTrue(equals(globalCell.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).toFloatArray(), n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).toFloatArray(), 0.001f));
 		}
 	}

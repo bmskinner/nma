@@ -46,7 +46,6 @@ public class NuclearStatisticsPanel extends DetailPanel {
         DetailPanel nucleusMagnitudePanel = new NucleusMagnitudePanel(context);
 
         DetailPanel nuclearScatterChartPanel = new NuclearScatterChartPanel(context);
-        DetailPanel nuclearLobesPanel = new NuclearLobesPanel(context);
         DetailPanel nuclearGlcmPanel = new NuclearGlcmPanel(context);
 
         addPanel(nuclearStatsPanel);
@@ -54,7 +53,7 @@ public class NuclearStatisticsPanel extends DetailPanel {
         addPanel(wilcoxonPanel);
         addPanel(nucleusMagnitudePanel);
         addPanel(nuclearScatterChartPanel);
-        addPanel(nuclearLobesPanel);
+
         if(GlobalOptions.getInstance().getBoolean(GlobalOptions.IS_GLCM_INTERFACE_KEY))
         	addPanel(nuclearGlcmPanel);
 

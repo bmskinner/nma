@@ -75,7 +75,7 @@ public class ShellDetectorTest extends ComponentTester {
         		.addSignalsInChannel(0)
         		.build();
 
-    	testNucleus = d.getCollection().streamCells().findFirst().get().getNucleus();
+    	testNucleus = d.getCollection().streamCells().findFirst().get().getPrimaryNucleus();
     	testSignal  = testNucleus.getSignalCollection().getSignals(TestDatasetBuilder.RED_SIGNAL_GROUP).get(0);
     	
     }

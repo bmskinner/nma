@@ -57,7 +57,6 @@ public interface PlottableStatistic extends Serializable {
 		static final String OP_RP_ANGLE      = "Angle between reference points";
 		static final String HOOK_LENGTH      = "Length of hook";
 		static final String BODY_WIDTH       = "Width of body";
-		static final String LOBE_COUNT       = "Number of lobes";
 		static final String PATH_LENGTH      = "Path length";
 		static final String CELL_NUCLEUS_COUNT   = "Nuclei per cell";
 		static final String CELL_NUCLEAR_AREA    = "Nuclear area";
@@ -93,7 +92,6 @@ public interface PlottableStatistic extends Serializable {
     static final PlottableStatistic OP_RP_ANGLE     = new GenericStatistic(Names.OP_RP_ANGLE,     StatisticDimension.ANGLE);
     static final PlottableStatistic HOOK_LENGTH     = new GenericStatistic(Names.HOOK_LENGTH,     StatisticDimension.LENGTH);
     static final PlottableStatistic BODY_WIDTH      = new GenericStatistic(Names.BODY_WIDTH,      StatisticDimension.LENGTH);
-    static final PlottableStatistic LOBE_COUNT      = new GenericStatistic(Names.LOBE_COUNT,      StatisticDimension.DIMENSIONLESS);
     static final PlottableStatistic PATH_LENGTH     = new GenericStatistic(Names.PATH_LENGTH,     StatisticDimension.DIMENSIONLESS);
 
     // Stats for the whole cell, aggregated across sub-components
@@ -188,7 +186,6 @@ public interface PlottableStatistic extends Serializable {
     	list.add(OP_RP_ANGLE);
     	list.add(HOOK_LENGTH);
     	list.add(BODY_WIDTH);
-    	list.add(LOBE_COUNT);
     	list.add(PATH_LENGTH);
     	list.add(CELL_NUCLEUS_COUNT);
     	list.add(CELL_NUCLEAR_AREA);
@@ -239,7 +236,6 @@ public interface PlottableStatistic extends Serializable {
         list.add(CELL_NUCLEUS_COUNT);
         list.add(CELL_NUCLEAR_AREA);
         list.add(CELL_NUCLEAR_RATIO);
-        list.add(LOBE_COUNT);
         return list;
     }
 
@@ -261,7 +257,6 @@ public interface PlottableStatistic extends Serializable {
 
         switch (type) {
         case ROUND:  return getRoundNucleusStats();
-        case NEUTROPHIL: return getLobedNucleusStats();
         case PIG_SPERM: return getRoundNucleusStats();
         case RODENT_SPERM: return getRodentSpermNucleusStats();
         default: return getRoundNucleusStats();
@@ -287,17 +282,6 @@ public interface PlottableStatistic extends Serializable {
     	for(PlottableStatistic s : GLCMParameter.toStats())
     		list.add(s);
     	return list;
-    }
-
-    /**
-     * Get stats for round nuclei
-     * 
-     * @return
-     */
-    static List<PlottableStatistic> getLobedNucleusStats() {
-        List<PlottableStatistic> list = getRoundNucleusStats();
-        list.add(LOBE_COUNT);
-        return list;
     }
 
     /**

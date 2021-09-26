@@ -29,7 +29,7 @@ public class DatasetXMLCreator extends XMLCreator<IAnalysisDataset> {
 	public Document create() {
 		Element rootElement = new Element(ANALYSIS_DATASET_KEY);
 		
-		rootElement.addContent(createElement(SOFTWARE_CREATION_VERSION_KEY, template.getVersion()));
+		rootElement.addContent(createElement(SOFTWARE_CREATION_VERSION_KEY, template.getVersionCreated()));
 		rootElement.addContent(createElement(SOFTWARE_SERIALISE_VERSION_KEY, Version.currentVersion()));
 		rootElement.addContent(createElement(DATASET_NAME_KEY, template.getName()));
 		rootElement.addContent(createElement(DATASET_ID_KEY, template.getId()));

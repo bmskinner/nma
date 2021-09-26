@@ -28,8 +28,6 @@ import javax.swing.border.EmptyBorder;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageAnnotator;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
 import com.bmskinner.nuclear_morphology.components.ICell;
-import com.bmskinner.nuclear_morphology.components.nuclear.Lobe;
-import com.bmskinner.nuclear_morphology.components.nuclei.LobedNucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -102,14 +100,6 @@ public class AnnotatedNucleusPanel extends JPanel {
         		an = an.annotateBorder(c.getCytoplasm(), c.getCytoplasm(), Color.CYAN);
         		for (Nucleus n : c.getNuclei()) {
         			an.annotateBorder(n, c.getCytoplasm(), Color.ORANGE);
-
-        			if (n instanceof LobedNucleus) {
-
-        				for (Lobe l : ((LobedNucleus) n).getLobes()) {
-        					an.annotateBorder(l, c.getCytoplasm(), Color.RED);
-        					an.annotatePoint(l.getCentreOfMass(), c.getCytoplasm(), Color.GREEN);
-        				}
-        			}
         		}
 
         	} else {

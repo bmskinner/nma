@@ -82,7 +82,6 @@ import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagE
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
-import com.bmskinner.nuclear_morphology.components.nuclei.LobedNucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.gui.RotationMode;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
@@ -311,13 +310,13 @@ public class OutlineChartFactory extends AbstractChartFactory {
         Set<ICell> cells = m.getCellsWithNuclearSignals(options.getSignalGroup(), true);
 
         for (ICell cell : cells) {
-            LOGGER.fine("Drawing signals for cell " + cell.getNucleus().getNameAndNumber());
+            LOGGER.fine("Drawing signals for cell " + cell.getPrimaryNucleus().getNameAndNumber());
             // Get each nucleus. Make a mesh.
             Mesh<Nucleus> cellMesh;
             try {
-                cellMesh = new DefaultMesh<>(cell.getNucleus(), meshConsensus);
+                cellMesh = new DefaultMesh<>(cell.getPrimaryNucleus(), meshConsensus);
             } catch (MeshCreationException e1) {
-                LOGGER.fine("Cannot make mesh for " + cell.getNucleus().getNameAndNumber());
+                LOGGER.fine("Cannot make mesh for " + cell.getPrimaryNucleus().getNameAndNumber());
                 LOGGER.log(Loggable.STACK, ERROR_CREATING_MESH_MSG, e1);
                 return createErrorChart();
             }
@@ -327,7 +326,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
             try {
                 ImageProcessor warped;
                 try {
-                    ip = cell.getNucleus().getSignalCollection().getImage(options.getSignalGroup());
+                    ip = cell.getPrimaryNucleus().getSignalCollection().getImage(options.getSignalGroup());
 
                     // Create NucleusMeshImage from nucleus.
                     MeshImage<Nucleus> im = new DefaultMeshImage<>(cellMesh, ip);
@@ -335,7 +334,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
                     // Draw NucleusMeshImage onto consensus mesh.
                     warped = im.drawImage(meshConsensus);
                 } catch (UncomparableMeshImageException | MeshImageCreationException e) {
-                    LOGGER.fine("Cannot make mesh for " + cell.getNucleus().getNameAndNumber());
+                    LOGGER.fine("Cannot make mesh for " + cell.getPrimaryNucleus().getNameAndNumber());
                     LOGGER.log(Loggable.STACK, ERROR_CREATING_MESH_MSG, e);
                     return createErrorChart();
                 }
@@ -344,9 +343,9 @@ public class OutlineChartFactory extends AbstractChartFactory {
 
             } catch (UnloadableImageException e) {
                 LOGGER.warning("Unable to load signal image for signal group " + options.getSignalGroup() + " in cell "
-                        + cell.getNucleus().getNameAndNumber());
+                        + cell.getPrimaryNucleus().getNameAndNumber());
                 LOGGER.log(Loggable.STACK, "Unable to load signal image for signal group " + options.getSignalGroup() + " in cell "
-                        + cell.getNucleus().getNameAndNumber(), e);
+                        + cell.getPrimaryNucleus().getNameAndNumber(), e);
             }
 
         }
@@ -385,8 +384,8 @@ public class OutlineChartFactory extends AbstractChartFactory {
                     try {
 
                         Mesh<Nucleus> mesh1 = options.getRotateMode().equals(RotationMode.ACTUAL)
-                                ? new DefaultMesh<>(options.getCell().getNucleus())
-                                : new DefaultMesh<>(options.getCell().getNucleus().getVerticallyRotatedNucleus());
+                                ? new DefaultMesh<>(options.getCell().getPrimaryNucleus())
+                                : new DefaultMesh<>(options.getCell().getPrimaryNucleus().getVerticallyRotatedNucleus());
 
                         Mesh<Nucleus> mesh2 = new DefaultMesh<>(options.firstDataset().getCollection().getConsensus(),
                                 mesh1);
@@ -409,12 +408,12 @@ public class OutlineChartFactory extends AbstractChartFactory {
 
                     try {
 
-                        Mesh<Nucleus> mesh1 = new DefaultMesh<>(options.getCell().getNucleus());
+                        Mesh<Nucleus> mesh1 = new DefaultMesh<>(options.getCell().getPrimaryNucleus());
                         Mesh<Nucleus> mesh2 = new DefaultMesh<>(options.firstDataset().getCollection().getConsensus(),
                                 mesh1);
 
                         //
-                        ImageProcessor nucleusIP = options.getCell().getNucleus().getImage();
+                        ImageProcessor nucleusIP = options.getCell().getPrimaryNucleus().getImage();
 
                         // Create a mesh image from the nucleus
                         MeshImage<Nucleus> im = new DefaultMeshImage<>(mesh1, nucleusIP);
@@ -427,15 +426,15 @@ public class OutlineChartFactory extends AbstractChartFactory {
 
                     } catch (UnloadableImageException e) {
                         LOGGER.warning("Cannot load nucleus image: "
-                                + options.getCell().getNucleus().getSourceFile().getAbsolutePath());
+                                + options.getCell().getPrimaryNucleus().getSourceFile().getAbsolutePath());
                         LOGGER.log(Loggable.STACK, "Error loading nucleus image", e);
                         return createErrorChart();
                     } catch (MeshImageCreationException e) {
-                        LOGGER.fine("Cannot create mesh for " + options.getCell().getNucleus().getNameAndNumber());
+                        LOGGER.fine("Cannot create mesh for " + options.getCell().getPrimaryNucleus().getNameAndNumber());
                         LOGGER.log(Loggable.STACK, ERROR_CREATING_MESH_MSG, e);
                         return createErrorChart();
                     } catch (UncomparableMeshImageException e) {
-                        LOGGER.fine("Cannot compare mesh for " + options.getCell().getNucleus().getNameAndNumber());
+                        LOGGER.fine("Cannot compare mesh for " + options.getCell().getPrimaryNucleus().getNameAndNumber());
                         LOGGER.log(Loggable.STACK, "Error comparing mesh", e);
                         return createErrorChart();
                     } catch (MeshCreationException e) {
@@ -539,7 +538,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
         IAnalysisDataset dataset = options.firstDataset();
 
         if (options.getRotateMode().equals(RotationMode.VERTICAL)) {
-            Nucleus n = cell.getNucleus().getVerticallyRotatedNucleus();
+            Nucleus n = cell.getPrimaryNucleus().getVerticallyRotatedNucleus();
             cell = new DefaultCell(n);
         }
 
@@ -577,21 +576,14 @@ public class OutlineChartFactory extends AbstractChartFactory {
                     cellDataset.addTags("Tags_" + n.getID(), tags);
                 }
 
-                if (n instanceof LobedNucleus) {
-
-                    OutlineDataset<CellularComponent> lobes = new NucleusDatasetCreator(options)
-                            .createNucleusLobeDataset((LobedNucleus) n);
-                    cellDataset.addLobes(CellularComponent.NUCLEAR_LOBE + "_" + n.getID(), lobes);
-                }
-
                 if (options.isShowSignals()) {
                     LOGGER.finest( "Displaying signals on chart");
-                    if (cell.getNucleus().getSignalCollection().hasSignal()) {
+                    if (cell.getPrimaryNucleus().getSignalCollection().hasSignal()) {
 
                         List<ComponentOutlineDataset<CellularComponent>> signalsDatasets = new NucleusDatasetCreator(options)
                                 .createSignalOutlines(cell, dataset);
 
-                        LOGGER.finest( "Fetched signal outline datasets for " + cell.getNucleus().getNameAndNumber());
+                        LOGGER.finest( "Fetched signal outline datasets for " + cell.getPrimaryNucleus().getNameAndNumber());
 
                         for (OutlineDataset<CellularComponent> d : signalsDatasets) {
 

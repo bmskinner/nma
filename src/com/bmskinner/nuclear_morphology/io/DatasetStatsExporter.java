@@ -87,7 +87,7 @@ public class DatasetStatsExporter extends StatsExporter {
         // Only include if present in all datasets
         isIncludeGlcm = list.stream()
         		.allMatch(d->d.getCollection().getCells().stream()
-        				.allMatch(c->c.getNucleus().hasStatistic(GLCMParameter.SUM.toStat())));
+        				.allMatch(c->c.getPrimaryNucleus().hasStatistic(GLCMParameter.SUM.toStat())));
         
         normProfileLength = chooseNormalisedProfileLength();
     }
@@ -104,7 +104,7 @@ public class DatasetStatsExporter extends StatsExporter {
         profileSamples = options.getInt(Io.PROFILE_SAMPLES_KEY);
         
         isIncludeGlcm = dataset.getCollection().getCells().stream()
-        				.allMatch(c->c.getNucleus().hasStatistic(GLCMParameter.SUM.toStat()));
+        				.allMatch(c->c.getPrimaryNucleus().hasStatistic(GLCMParameter.SUM.toStat()));
         
         normProfileLength = chooseNormalisedProfileLength();
     }

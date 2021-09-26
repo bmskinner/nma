@@ -176,7 +176,7 @@ public class ProfileManagerTest {
 		DatasetValidator dv = new DatasetValidator();
 		assertTrue(dv.validate(collection));		
 		// Merge on one nucleus will take it out of sync
-		Nucleus n = collection.streamCells().findFirst().get().getNucleus();
+		Nucleus n = collection.streamCells().findFirst().get().getPrimaryNucleus();
 		ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
 		UUID segId1 = profile.getSegmentAt(1).getID();
 		UUID segId2 = profile.getSegmentAt(2).getID();

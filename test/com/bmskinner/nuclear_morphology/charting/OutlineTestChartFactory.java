@@ -38,7 +38,7 @@ public class OutlineTestChartFactory extends ChartFactoryTest {
 		String title = new Exception().getStackTrace()[0].getMethodName();
 		ChartOptions options = new ChartOptionsBuilder().setDatasets(dataset)
 				.setCell(cell)
-				.addCellularComponent(cell.getNucleus())
+				.addCellularComponent(cell.getPrimaryNucleus())
 				.build();
 		return makeChartPanel(new OutlineChartFactory(options).makeCellOutlineChart(), options, title, IS_FIXED_ASPECT);
 	}

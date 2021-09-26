@@ -156,7 +156,7 @@ public class TreeBuildingMethod extends CellClusteringMethod {
     private ArrayList<Attribute> makePCAttributes() {
     	
     	// From the first nucleus, find the number of PCs to cluster on
-    	Nucleus n = dataset.getCollection().getCells().stream().findFirst().orElseThrow(NullPointerException::new).getNucleus();
+    	Nucleus n = dataset.getCollection().getCells().stream().findFirst().orElseThrow(NullPointerException::new).getPrimaryNucleus();
     	int nPcs = (int) n.getStatistic(PlottableStatistic.PCA_N); 
 
     	ArrayList<Attribute> attributes = new ArrayList<>();

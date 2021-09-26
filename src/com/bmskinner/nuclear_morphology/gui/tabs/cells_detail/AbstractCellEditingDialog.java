@@ -94,9 +94,9 @@ public abstract class AbstractCellEditingDialog extends MessagingDialog {
         this.cell = cell;
         this.dataset = dataset;
         this.workingCell = new DefaultCell(cell);
-        workingCell.getNucleus().setLocked(false);
+        workingCell.getPrimaryNucleus().setLocked(false);
 
-        this.setTitle("Editing " + cell.getNucleus().getNameAndNumber());
+        this.setTitle("Editing " + cell.getPrimaryNucleus().getNameAndNumber());
     }
 
     /**
@@ -130,7 +130,7 @@ public abstract class AbstractCellEditingDialog extends MessagingDialog {
         // Replace the input cell with the working cell
         if (save == 0) {
 
-            workingCell.getNucleus().setLocked(true); // Prevent further changes
+            workingCell.getPrimaryNucleus().setLocked(true); // Prevent further changes
                                                       // without unlocking
             dataset.getCollection().replaceCell(workingCell);
 

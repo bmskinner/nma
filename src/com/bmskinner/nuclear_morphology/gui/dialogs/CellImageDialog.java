@@ -64,7 +64,7 @@ public class CellImageDialog extends LoadingIconDialog {
 
         this.setLayout(new BorderLayout());
         this.add(panel, BorderLayout.CENTER);
-        this.setTitle(cell.getNucleus().getNameAndNumber());
+        this.setTitle(cell.getPrimaryNucleus().getNameAndNumber());
 
         this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 

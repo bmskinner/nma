@@ -16,7 +16,6 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components;
 
-import java.awt.Color;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -82,7 +81,7 @@ public class ChildAnalysisDataset extends AbstractAnalysisDataset implements IAn
 		for(IAnalysisDataset mge : this.getMergeSources())
 			cd.addMergeSource(mge.duplicate());
 
-		cd.setDatasetColour((Color) datasetColour);
+		cd.setDatasetColour(datasetColour.orElse(null));
 
 		return cd;
 	}
@@ -163,7 +162,7 @@ public class ChildAnalysisDataset extends AbstractAnalysisDataset implements IAn
 
 	@Override
 	public IAnalysisDataset getChildDataset(@NonNull UUID id) {
-		if (this.hasChild(id)) {
+		if (this.hasDirectChild(id)) {
 
 			for (IAnalysisDataset c : childDatasets) {
 				if (c.getId().equals(id)) {
@@ -281,7 +280,7 @@ public class ChildAnalysisDataset extends AbstractAnalysisDataset implements IAn
 				boolean clusterRemains = false;
 
 				for (UUID childID : g.getUUIDs()) {
-					if (this.hasChild(childID)) {
+					if (this.hasDirectChild(childID)) {
 						clusterRemains = true;
 					}
 				}
@@ -365,7 +364,7 @@ public class ChildAnalysisDataset extends AbstractAnalysisDataset implements IAn
 	}
 
 	@Override
-	public boolean hasChild(UUID id) {
+	public boolean hasDirectChild(UUID id) {
 
 		for (IAnalysisDataset child : childDatasets) {
 			if (child.getId().equals(id)) {

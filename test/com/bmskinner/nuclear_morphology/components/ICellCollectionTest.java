@@ -244,11 +244,11 @@ public class ICellCollectionTest extends ComponentTester {
 	@Test
 	public void testContainsExact() {
 		ICell c = collection.streamCells().findFirst().get();
-		UUID id = c.getNucleus().getID();
+		UUID id = c.getPrimaryNucleus().getID();
 		ICell cell = mock(ICell.class);
 		when(cell.getId()).thenReturn(id);
 		when(cell.hasNucleus()).thenReturn(false);
-		when(cell.getNucleus()).thenReturn(null);
+		when(cell.getPrimaryNucleus()).thenReturn(null);
 		assertFalse(collection.containsExact(cell));
 		assertTrue(collection.containsExact(c));
 	}
@@ -309,7 +309,7 @@ public class ICellCollectionTest extends ComponentTester {
 	public void testGetMaxProfileLength() {
 		int exp = collection.streamCells().mapToInt(c->{
 			try {
-				return c.getNucleus().getProfile(ProfileType.ANGLE).size();
+				return c.getPrimaryNucleus().getProfile(ProfileType.ANGLE).size();
 			} catch (UnavailableProfileTypeException e) {
 				return Integer.MAX_VALUE;
 			}
@@ -321,7 +321,7 @@ public class ICellCollectionTest extends ComponentTester {
 	public void testSetScale() {
 		final double scale = 12;
 		collection.setScale(scale);
-		assertTrue(collection.streamCells().allMatch(c->c.getNucleus().getScale()==scale));
+		assertTrue(collection.streamCells().allMatch(c->c.getPrimaryNucleus().getScale()==scale));
 	}
 	
 	@Test

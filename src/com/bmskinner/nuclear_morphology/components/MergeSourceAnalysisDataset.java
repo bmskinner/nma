@@ -47,9 +47,6 @@ public class MergeSourceAnalysisDataset extends AbstractAnalysisDataset implemen
 
     private static final long serialVersionUID = 1L;
 
-    private IAnalysisDataset parent; // the 'parent to this dataset; the merged
-                                     // dataset with the real cells
-
     private IAnalysisOptions analysisOptions; // the analysis options for
                                                      // the merge source
 
@@ -66,13 +63,13 @@ public class MergeSourceAnalysisDataset extends AbstractAnalysisDataset implemen
                 mergeSource.getCollection())
         );
 
-        this.parent = merged;
+        this.parentDataset = Optional.of(merged);
         
         Optional<IAnalysisOptions> optionalOptions = mergeSource.getAnalysisOptions();
         if(optionalOptions.isPresent())
         	analysisOptions = optionalOptions.get().duplicate();
 
-        this.datasetColour = mergeSource.getDatasetColour().orElse(null);
+        this.datasetColour = Optional.ofNullable(mergeSource.getDatasetColour().orElse(null));
 
         try {
         	getCollection().createProfileCollection();
@@ -89,15 +86,6 @@ public class MergeSourceAnalysisDataset extends AbstractAnalysisDataset implemen
         	}
         }
 
-    }
-
-    /**
-     * Get the parent dataset (in this case, the merged dataset)
-     * 
-     * @return the parent dataset
-     */
-    public IAnalysisDataset getParent() {
-        return parent;
     }
 
     @Override
@@ -117,7 +105,7 @@ public class MergeSourceAnalysisDataset extends AbstractAnalysisDataset implemen
 
     @Override
     public File getSavePath() {
-        return parent.getSavePath();
+        return parentDataset.get().getSavePath();
     }
 
     @Override

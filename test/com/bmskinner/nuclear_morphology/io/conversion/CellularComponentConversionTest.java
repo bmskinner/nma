@@ -63,7 +63,7 @@ public class CellularComponentConversionTest extends ComponentTester {
 			return; // stop the null parameter checker complaining
 		}
 		
-		assertEquals(Version.v_1_13_8, d.getVersion());
+		assertEquals(Version.v_1_13_8, d.getVersionCreated());
 		
 		// Check the profile aggregate
 		
@@ -74,7 +74,7 @@ public class CellularComponentConversionTest extends ComponentTester {
 		Field cellsField = getInheritedField(col.getClass(), "cells");		
 		
 		for(ICell cell : col) {
-			Nucleus n = cell.getNucleus();
+			Nucleus n = cell.getPrimaryNucleus();
 			
 			Field xField = getInheritedField(n.getClass(), "xpoints");	
 			Field yField = getInheritedField(n.getClass(), "ypoints");		
@@ -131,7 +131,7 @@ public class CellularComponentConversionTest extends ComponentTester {
 			fail("Dataset could not be opened");
 			return; // stop the null parameter checker complaining
 		}
-		assertEquals(Version.v_1_13_8, d.getVersion());
+		assertEquals(Version.v_1_13_8, d.getVersionCreated());
 
 		// Check the profile aggregate
 

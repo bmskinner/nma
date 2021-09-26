@@ -101,8 +101,7 @@ public class RefoldNucleusAction extends SingleDatasetResultAction {
      */
     private IAnalysisMethod chooseMethod(NucleusType t) throws Exception {
     	switch(t){
-        case ROUND:
-        case NEUTROPHIL: {
+        case ROUND: {
             return new ProfileRefoldMethod(dataset, CurveRefoldingMode.FAST);
         }
         
@@ -120,8 +119,7 @@ public class RefoldNucleusAction extends SingleDatasetResultAction {
      */
     private int chooseProgressLength(NucleusType t) {
     	switch(t){
-        case ROUND:
-        case NEUTROPHIL: {
+        case ROUND:{
             return CurveRefoldingMode.FAST.maxIterations();
         }
         

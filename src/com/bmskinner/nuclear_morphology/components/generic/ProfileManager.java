@@ -533,7 +533,7 @@ public class ProfileManager {
 
     	LOGGER.fine("Updating segment start index");
     	
-        Nucleus n = cell.getNucleus();
+        Nucleus n = cell.getPrimaryNucleus();
         ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
 
         IBorderSegment seg = profile.getSegment(id);

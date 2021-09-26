@@ -27,7 +27,7 @@ public class DefaultNuclearSignalTest extends ComponentTester {
 				.addSignalsInChannel(0)
 				.segmented().build();
 		
-		signal = d.getCollection().streamCells().findFirst().get().getNucleus()
+		signal = d.getCollection().streamCells().findFirst().get().getPrimaryNucleus()
 				.getSignalCollection().getSignals(TestDatasetBuilder.RED_SIGNAL_GROUP).get(0);
 	}
 	

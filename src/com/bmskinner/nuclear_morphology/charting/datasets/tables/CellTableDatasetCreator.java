@@ -102,9 +102,8 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
             addCytoplasmDataToTable(fieldNames, rowData, cell, d);
         }
 
-        fieldNames.add("Number of nuclei (lobes)");
-        rowData.add(cell.getStatistic(PlottableStatistic.CELL_NUCLEUS_COUNT) + " ("
-                + cell.getStatistic(PlottableStatistic.LOBE_COUNT) + ")");
+        fieldNames.add("Number of nuclei");
+        rowData.add(cell.getStatistic(PlottableStatistic.CELL_NUCLEUS_COUNT));
 
         int nucleusNumber = 0;
         for (Nucleus n : cell.getNuclei()) {
@@ -137,7 +136,7 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
         List<Object> rowData = new ArrayList<Object>(0);
 
         try {
-            ISegmentedProfile p = cell.getNucleus().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+            ISegmentedProfile p = cell.getPrimaryNucleus().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
 
             for (IBorderSegment s : p.getSegments()) {
                 fieldNames.add(s.getName());
@@ -173,7 +172,7 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 
         List<Object> columnNames = new ArrayList<Object>(0);
 
-        ISignalCollection sc = cell.getNucleus().getSignalCollection();
+        ISignalCollection sc = cell.getPrimaryNucleus().getSignalCollection();
 
         if (sc.numberOfSignals() == 0) {
             return AbstractTableCreator.createBlankTable();

@@ -143,17 +143,17 @@ public class CellFileExporter extends MultipleDatasetAnalysisMethod implements I
 
         for (ICell c : d.getCollection().getCells()) {
 
-            int[] originalPosition = c.getNucleus().getPosition();
+            int[] originalPosition = c.getPrimaryNucleus().getPosition();
 
-            IPoint com = c.getNucleus().getCentreOfMass();
+            IPoint com = c.getPrimaryNucleus().getCentreOfMass();
 
             double x = com.getX() + originalPosition[CellularComponent.X_BASE];
             double y = com.getY() + originalPosition[CellularComponent.Y_BASE];
 
             try {
 
-                if (c.getNucleus().getSourceFile() != null) {
-                    builder.append(c.getNucleus().getSourceFile().getAbsolutePath());
+                if (c.getPrimaryNucleus().getSourceFile() != null) {
+                    builder.append(c.getPrimaryNucleus().getSourceFile().getAbsolutePath());
                     builder.append("\t");
                     builder.append(x);
                     builder.append("-");

@@ -84,7 +84,7 @@ public class ComponentListPanel extends AbstractCellDetailPanel implements ListS
 
         if (this.getCellModel().hasCell()) {
 
-            Nucleus n = getCellModel().getCell().getNucleus();
+            Nucleus n = getCellModel().getCell().getPrimaryNucleus();
             // Every cell has a nucleus
             ComponentListCell nucleusCell = new ComponentListCell(CellularComponent.NUCLEUS, n);
 

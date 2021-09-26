@@ -308,7 +308,7 @@ public class CellResegmentationDialog extends AbstractCellEditingDialog implemen
     	setEnabled(true);
     	table.getModel().setValueAt("OK", segCount, COLUMN_STATE);
 
-    	Nucleus n = workingCell.getNucleus();
+    	Nucleus n = workingCell.getPrimaryNucleus();
     	UUID id;
     	try {
     		id = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegments().get(segCount).getID();
@@ -339,7 +339,7 @@ public class CellResegmentationDialog extends AbstractCellEditingDialog implemen
             LOGGER.fine("Selected RP index: " + newRpIndex);
 
             // Make a new cell with the updated RP
-            workingCell.getNucleus().setBorderTag(Tag.REFERENCE_POINT, newRpIndex);
+            workingCell.getPrimaryNucleus().setBorderTag(Tag.REFERENCE_POINT, newRpIndex);
 
             LOGGER.fine("Updated RP");
 
@@ -370,13 +370,13 @@ public class CellResegmentationDialog extends AbstractCellEditingDialog implemen
                     .setShowAnnotations(true).setInvertYAxis(true) // only
                                                                    // invert for
                                                                    // actual
-                    .setShowPoints(false).addCellularComponent(cell.getNucleus()).build();
+                    .setShowPoints(false).addCellularComponent(cell.getPrimaryNucleus()).build();
 
             LOGGER.finer( "Making charts");
             JFreeChart profileChart = new ProfileChartFactory(profileOptions).createProfileChart();
             JFreeChart outlineChart = new OutlineChartFactory(outlineOptions).makeCellOutlineChart();
             LOGGER.finer( "Updating charts");
-            panel.setObject(cell.getNucleus());
+            panel.setObject(cell.getPrimaryNucleus());
             panel.getProfilePanel().setChart(profileChart);
             panel.getOutlinePanel().setChart(outlineChart);
         };

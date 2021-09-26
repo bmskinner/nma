@@ -167,14 +167,14 @@ public class CellSegmentsPanel extends AbstractCellDetailPanel implements ChartS
 
         			LOGGER.fine("Updating segment start index to "+event.index);
         			// This is a manual change, so disable any lock
-        			getCellModel().getCell().getNucleus().setLocked(false);
+        			getCellModel().getCell().getPrimaryNucleus().setLocked(false);
 
         			// Carry out the update
         			activeDataset().getCollection().getProfileManager()
         			.updateCellSegmentStartIndex(getCellModel().getCell(), event.id, event.index);
 
         			// even if no lock was previously set, there should be one now a manual adjustment was made
-        			getCellModel().getCell().getNucleus().setLocked(true);
+        			getCellModel().getCell().getPrimaryNucleus().setLocked(true);
 
         			// Recache necessary charts within this panel at once
         			refreshChartCache();

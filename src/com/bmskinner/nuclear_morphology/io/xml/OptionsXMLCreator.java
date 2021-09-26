@@ -62,7 +62,7 @@ public class OptionsXMLCreator extends XMLCreator<IAnalysisDataset> {
 	
 	private static void appendElement(@NonNull IAnalysisDataset dataset, @NonNull IAnalysisOptions options, Element rootElement) {
 		
-		rootElement.addContent(createElement(SOFTWARE_CREATION_VERSION_KEY, dataset.getVersion())); 
+		rootElement.addContent(createElement(SOFTWARE_CREATION_VERSION_KEY, dataset.getVersionCreated())); 
 		rootElement.addContent(createElement(SOFTWARE_SERIALISE_VERSION_KEY, Version.currentVersion()));
 		
 		for(String key : options.getDetectionOptionTypes()){

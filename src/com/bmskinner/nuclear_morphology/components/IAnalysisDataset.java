@@ -63,7 +63,14 @@ public interface IAnalysisDataset extends Serializable {
      * 
      * @return
      */
-    Version getVersion();
+    Version getVersionCreated();
+    
+    /**
+     * Get the software version the dataset was last saved in
+     * 
+     * @return
+     */
+    Version getVersionLastSaved();
 
     /**
      * Add the given cell collection as a child to this dataset. A new dataset
@@ -374,7 +381,7 @@ public interface IAnalysisDataset extends Serializable {
      * @param child the dataset to test
      * @return
      */
-    boolean hasChild(@NonNull IAnalysisDataset child);
+    boolean hasDirectChild(@NonNull IAnalysisDataset child);
 
     /**
      * Test if the given dataset is a child of this dataset or of one of its
@@ -383,7 +390,7 @@ public interface IAnalysisDataset extends Serializable {
      * @param child
      * @return
      */
-    boolean hasRecursiveChild(@NonNull IAnalysisDataset child);
+    boolean hasAnyChild(@NonNull IAnalysisDataset child);
 
     /**
      * Check if the given dataset is a child dataset of this
@@ -391,7 +398,7 @@ public interface IAnalysisDataset extends Serializable {
      * @param child
      * @return
      */
-    boolean hasChild(@NonNull UUID child);
+    boolean hasDirectChild(@NonNull UUID child);
     
     /**
      * Update the image scale for all cells in the dataset

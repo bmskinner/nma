@@ -69,7 +69,7 @@ public abstract class ImageImportWorker extends SwingWorker<Boolean, SelectableC
 
     	List<ICell> cells = new ArrayList<>(dataset.getCollection().getCells());
     	
-    	cells.sort((c1, c2)-> c1.getNucleus().getNameAndNumber().compareTo(c2.getNucleus().getNameAndNumber()));
+    	cells.sort((c1, c2)-> c1.getPrimaryNucleus().getNameAndNumber().compareTo(c2.getPrimaryNucleus().getNameAndNumber()));
         for (ICell c : cells) {
         	if(isCancelled())
         		return false;
@@ -77,7 +77,7 @@ public abstract class ImageImportWorker extends SwingWorker<Boolean, SelectableC
             	SelectableCellIcon ic = importCellImage(c);
                 publish(ic);
             } catch (Exception e) {
-                LOGGER.log(Loggable.STACK, "Error importing cell image: "+c.getNucleus().getNameAndNumber(), e);
+                LOGGER.log(Loggable.STACK, "Error importing cell image: "+c.getPrimaryNucleus().getNameAndNumber(), e);
             }
         }
         return true;
@@ -107,7 +107,7 @@ public abstract class ImageImportWorker extends SwingWorker<Boolean, SelectableC
     
     protected ImageProcessor rotateToVertical(ICell c, ImageProcessor ip) throws UnavailableBorderTagException {
         // Calculate angle for vertical rotation
-        Nucleus n = c.getNucleus();
+        Nucleus n = c.getPrimaryNucleus();
 
         IPoint topPoint;
         IPoint btmPoint;

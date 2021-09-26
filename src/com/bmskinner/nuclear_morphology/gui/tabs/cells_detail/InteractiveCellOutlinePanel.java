@@ -205,7 +205,7 @@ public class InteractiveCellOutlinePanel extends InteractiveCellPanel {
 		try {
 			ImageProcessor rot = rotateToVertical(cell, an.toProcessor());
 			rot.flipVertical(); // Y axis needs inverting since images have 0 at top
-			if(cell.getNucleus().isClockwiseRP())
+			if(cell.getPrimaryNucleus().isClockwiseRP())
 				rot.flipHorizontal();
 			return new ImageAnnotator(rot, getWidth(), getHeight());
 			
@@ -341,7 +341,7 @@ public class InteractiveCellOutlinePanel extends InteractiveCellPanel {
 		
 		IPoint clickedPoint = translateRenderedLocationToSourceImage(cx, cy);
 
-		Optional<IBorderPoint> point = cell.getNucleus().getBorderList()
+		Optional<IBorderPoint> point = cell.getPrimaryNucleus().getBorderList()
 				.stream().filter(
 					p->clickedPoint.getX()>=p.getX()-0.4 && 
 							clickedPoint.getX()<=p.getX()+0.4 &&
@@ -360,20 +360,20 @@ public class InteractiveCellOutlinePanel extends InteractiveCellPanel {
 			g2.setColor(Color.CYAN);
 			try {
 				
-				if(cell.getNucleus().hasBorderTag(Tag.TOP_VERTICAL) && 
-						cell.getNucleus().getBorderPoint(Tag.TOP_VERTICAL).overlapsPerfectly(point.get())) {
+				if(cell.getPrimaryNucleus().hasBorderTag(Tag.TOP_VERTICAL) && 
+						cell.getPrimaryNucleus().getBorderPoint(Tag.TOP_VERTICAL).overlapsPerfectly(point.get())) {
 					g2.setColor(ColourSelecter.getColour(Tag.TOP_VERTICAL));
 				}
-				if(cell.getNucleus().hasBorderTag(Tag.BOTTOM_VERTICAL) && 
-						cell.getNucleus().getBorderPoint(Tag.BOTTOM_VERTICAL).overlapsPerfectly(point.get())) {
+				if(cell.getPrimaryNucleus().hasBorderTag(Tag.BOTTOM_VERTICAL) && 
+						cell.getPrimaryNucleus().getBorderPoint(Tag.BOTTOM_VERTICAL).overlapsPerfectly(point.get())) {
 					g2.setColor(ColourSelecter.getColour(Tag.BOTTOM_VERTICAL));
 				}
-				if(cell.getNucleus().hasBorderTag(Tag.REFERENCE_POINT) && 
-						cell.getNucleus().getBorderPoint(Tag.REFERENCE_POINT).overlapsPerfectly(point.get())) {
+				if(cell.getPrimaryNucleus().hasBorderTag(Tag.REFERENCE_POINT) && 
+						cell.getPrimaryNucleus().getBorderPoint(Tag.REFERENCE_POINT).overlapsPerfectly(point.get())) {
 					g2.setColor(ColourSelecter.getColour(Tag.REFERENCE_POINT));
 				}
-				if(cell.getNucleus().hasBorderTag(Tag.ORIENTATION_POINT) && 
-						cell.getNucleus().getBorderPoint(Tag.ORIENTATION_POINT).overlapsPerfectly(point.get())) {
+				if(cell.getPrimaryNucleus().hasBorderTag(Tag.ORIENTATION_POINT) && 
+						cell.getPrimaryNucleus().getBorderPoint(Tag.ORIENTATION_POINT).overlapsPerfectly(point.get())) {
 					g2.setColor(ColourSelecter.getColour(Tag.ORIENTATION_POINT));
 				}
 

@@ -359,13 +359,13 @@ public class TestDatasetBuilder {
 			
 			
 			if(redSignals) {
-				INuclearSignal s = TestComponentFactory.createSignal(cell.getNucleus(), 0.2, 0);
-				cell.getNucleus().getSignalCollection().addSignal(s, RED_SIGNAL_GROUP);
+				INuclearSignal s = TestComponentFactory.createSignal(cell.getPrimaryNucleus(), 0.2, 0);
+				cell.getPrimaryNucleus().getSignalCollection().addSignal(s, RED_SIGNAL_GROUP);
 			}
 			
 			if(greenSignals) {
-				INuclearSignal s = TestComponentFactory.createSignal(cell.getNucleus(), 0.2, 1);
-				cell.getNucleus().getSignalCollection().addSignal(s, GREEN_SIGNAL_GROUP);
+				INuclearSignal s = TestComponentFactory.createSignal(cell.getPrimaryNucleus(), 0.2, 1);
+				cell.getPrimaryNucleus().getSignalCollection().addSignal(s, GREEN_SIGNAL_GROUP);
 			}
 			
 		}

@@ -41,8 +41,8 @@ public class Version implements Serializable {
      * bugfix increments, but is not guaranteed between revision or major
      * version increments.
      */
-    public static final int VERSION_MAJOR    = 1;
-    public static final int VERSION_MINOR    = 21;
+    public static final int VERSION_MAJOR    = 2;
+    public static final int VERSION_MINOR    = 0;
     public static final int VERSION_REVISION = 0;
 
     private final int major;

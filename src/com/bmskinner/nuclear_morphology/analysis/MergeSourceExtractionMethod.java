@@ -149,7 +149,7 @@ public class MergeSourceExtractionMethod extends MultipleDatasetAnalysisMethod {
     	if (dataset instanceof MergeSourceAnalysisDataset) {
 
      		MergeSourceAnalysisDataset d = (MergeSourceAnalysisDataset) dataset;
-     		IAnalysisDataset parent =  d.getParent();
+     		IAnalysisDataset parent =  d.getParent().get();
      		if(parent.isRoot())
      			return parent;
      		return getRootParent(parent);

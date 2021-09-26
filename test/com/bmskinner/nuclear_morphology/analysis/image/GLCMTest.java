@@ -152,11 +152,11 @@ public class GLCMTest {
 		IAnalysisDataset d = SampleDatasetReader.openTestRodentDataset();
 		
 		for(ICell cell : d.getCollection()) {
-			ImageProcessor ip = cell.getNucleus().getComponentImage().convertToByte(false);
+			ImageProcessor ip = cell.getPrimaryNucleus().getComponentImage().convertToByte(false);
 			GLCMTile result1 = glcm.calculate(ip);
-			GLCMTile result = glcm.calculate(cell.getNucleus());
+			GLCMTile result = glcm.calculate(cell.getPrimaryNucleus());
 			System.out.println(result1);
-			assertEquals(cell.getNucleus().getNameAndNumber()+": Sum should be 1", 1d, 
+			assertEquals(cell.getPrimaryNucleus().getNameAndNumber()+": Sum should be 1", 1d, 
 					result1.get(GLCMParameter.SUM), 0.015);
 			assertFalse("Nucleus specific GLCM should not be identical to whole image GLCM",
 					result.toString().equals(result1.toString()));
@@ -172,11 +172,11 @@ public class GLCMTest {
 		IAnalysisDataset d = SampleDatasetReader.openTestRodentDataset();
 		
 		for(ICell cell : d.getCollection()) {
-			ImageProcessor ip = cell.getNucleus().getComponentImage().convertToByte(false);
+			ImageProcessor ip = cell.getPrimaryNucleus().getComponentImage().convertToByte(false);
 			GLCMTile result1 = glcm.calculate(ip);
-			GLCMTile result = glcm.calculate(cell.getNucleus());
+			GLCMTile result = glcm.calculate(cell.getPrimaryNucleus());
 			System.out.println(result1);
-			assertEquals(cell.getNucleus().getNameAndNumber()+": Sum should be 1", 1d, 
+			assertEquals(cell.getPrimaryNucleus().getNameAndNumber()+": Sum should be 1", 1d, 
 					result1.get(GLCMParameter.SUM), 0.015);
 			assertFalse("Nucleus specific GLCM should not be identical to whole image GLCM",
 					result.toString().equals(result1.toString()));

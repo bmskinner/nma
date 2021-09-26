@@ -146,7 +146,7 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
     	}
 
     	// check we are not merging a parent and child (would just get parent)
-    	if (datasets.size() == 2 && (datasets.get(0).hasChild(datasets.get(1)) || datasets.get(1).hasChild(datasets.get(0)))) {
+    	if (datasets.size() == 2 && (datasets.get(0).hasDirectChild(datasets.get(1)) || datasets.get(1).hasDirectChild(datasets.get(0)))) {
     		LOGGER.warning("Merging parent and child would be silly.");
     		return false;
 

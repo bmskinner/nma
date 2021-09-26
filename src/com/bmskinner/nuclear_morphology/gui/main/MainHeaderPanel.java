@@ -34,7 +34,6 @@ import javax.swing.JPopupMenu;
 
 import com.bmskinner.nuclear_morphology.components.generic.Version;
 import com.bmskinner.nuclear_morphology.gui.actions.ImportDatasetAction;
-import com.bmskinner.nuclear_morphology.gui.actions.NeutrophilAnalysisAction;
 import com.bmskinner.nuclear_morphology.gui.actions.NewAnalysisAction;
 import com.bmskinner.nuclear_morphology.gui.components.panels.MeasurementUnitSettingsPanel;
 import com.bmskinner.nuclear_morphology.gui.dialogs.MainOptionsDialog;
@@ -117,12 +116,6 @@ public class MainHeaderPanel extends JPanel {
             popup.add(new JMenuItem(new AbstractAction(NEW_STANDARD_LBL) {
                 public void actionPerformed(ActionEvent e) {
                     Runnable r = new NewAnalysisAction(mw.getProgressAcceptor(), mw.getEventHandler());
-                    r.run();
-                }
-            }));
-            popup.add(new JMenuItem(new AbstractAction(NEW_NEUTROPHIL_LBL) {
-                public void actionPerformed(ActionEvent e) {
-                    Runnable r = new NeutrophilAnalysisAction(mw.getProgressAcceptor(), mw.getEventHandler());
                     r.run();
                 }
             }));

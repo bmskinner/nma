@@ -203,7 +203,7 @@ public class InteractiveSegmentCellPanel extends InteractiveCellPanel {
 			IPoint clickedPoint = translatePanelLocationToSourceImage(e.getX(), e.getY());
 
 			// Not a circle around the valid point to click, but close enough
-			Optional<IBorderPoint> point = cell.getNucleus().getBorderList()
+			Optional<IBorderPoint> point = cell.getPrimaryNucleus().getBorderList()
 					.stream().filter(p->{
 						return clickedPoint.getX()>=p.getX()-POINT_CLICK_RADIUS_PIXELS && 
 								clickedPoint.getX()<=p.getX()+POINT_CLICK_RADIUS_PIXELS &&
@@ -223,16 +223,16 @@ public class InteractiveSegmentCellPanel extends InteractiveCellPanel {
 		private synchronized void updateTag(Tag tag, int newIndex) {
 
 			ThreadManager.getInstance().execute(()->{
-				cell.getNucleus().setLocked(false);
+				cell.getPrimaryNucleus().setLocked(false);
 
-				cell.getNucleus().setBorderTag(tag, newIndex);
-				cell.getNucleus().updateVerticallyRotatedNucleus();
+				cell.getPrimaryNucleus().setBorderTag(tag, newIndex);
+				cell.getPrimaryNucleus().updateVerticallyRotatedNucleus();
 
 				if(tag.equals(Tag.ORIENTATION_POINT) || tag.equals(Tag.REFERENCE_POINT)) {
-					cell.getNucleus().setStatistic(PlottableStatistic.OP_RP_ANGLE, Statistical.STAT_NOT_CALCULATED);
+					cell.getPrimaryNucleus().setStatistic(PlottableStatistic.OP_RP_ANGLE, Statistical.STAT_NOT_CALCULATED);
 				}
-				cell.getNucleus().updateDependentStats();
-				cell.getNucleus().setLocked(true);
+				cell.getPrimaryNucleus().updateDependentStats();
+				cell.getPrimaryNucleus().setLocked(true);
 				dataset.getCollection().clear(PlottableStatistic.OP_RP_ANGLE, CellularComponent.NUCLEUS);
 				cellUpdateHandler.fireCelllUpdateEvent(cell, dataset);
 				createImage();
@@ -262,14 +262,14 @@ public class InteractiveSegmentCellPanel extends InteractiveCellPanel {
 		 */
 		private void addSegmentsToPopup(JPopupMenu popupMenu, IBorderPoint point) {
 			try {
-				int rawIndex = cell.getNucleus().getBorderIndex(point);
+				int rawIndex = cell.getPrimaryNucleus().getBorderIndex(point);
 
-				int rpIndex = cell.getNucleus().getBorderIndex(Tag.REFERENCE_POINT);
+				int rpIndex = cell.getPrimaryNucleus().getBorderIndex(Tag.REFERENCE_POINT);
 
 				// Get the index of the clicked point in the RP-indexed profile
-				int index = cell.getNucleus().wrapIndex(rawIndex-rpIndex);
+				int index = cell.getPrimaryNucleus().wrapIndex(rawIndex-rpIndex);
 
-				IBorderSegment seg = cell.getNucleus().getProfile(ProfileType.ANGLE)
+				IBorderSegment seg = cell.getPrimaryNucleus().getProfile(ProfileType.ANGLE)
 						.getSegmentContaining(rawIndex);
 
 
@@ -329,7 +329,7 @@ public class InteractiveSegmentCellPanel extends InteractiveCellPanel {
 				item.setOpaque(true);
 
 				item.addActionListener(a -> {
-					int pIndex = cell.getNucleus().getBorderIndex(point);
+					int pIndex = cell.getPrimaryNucleus().getBorderIndex(point);
 					updateTag(tag, pIndex);
 					repaint();
 				});
@@ -357,7 +357,7 @@ public class InteractiveSegmentCellPanel extends InteractiveCellPanel {
 					item.setForeground(Color.DARK_GRAY);
 
 					item.addActionListener(a -> {
-						int pIndex = cell.getNucleus().getBorderIndex(point);
+						int pIndex = cell.getPrimaryNucleus().getBorderIndex(point);
 						updateTag(tag, pIndex);
 					});
 					popupMenu.add(item);
@@ -386,7 +386,7 @@ public class InteractiveSegmentCellPanel extends InteractiveCellPanel {
 
 
 		// Find the point that was clicked
-		Optional<IBorderPoint> point = cell.getNucleus().getBorderList()
+		Optional<IBorderPoint> point = cell.getPrimaryNucleus().getBorderList()
 				.stream().filter(p->{
 					return clickedPoint.getX()>=p.getX()-0.4 && 
 							clickedPoint.getX()<=p.getX()+0.4 &&
@@ -408,20 +408,20 @@ public class InteractiveSegmentCellPanel extends InteractiveCellPanel {
 			// Highlight the border depending on what border tags are present
 			try {
 
-				if(cell.getNucleus().hasBorderTag(Tag.TOP_VERTICAL) && 
-						cell.getNucleus().getBorderPoint(Tag.TOP_VERTICAL).overlapsPerfectly(point.get())) {
+				if(cell.getPrimaryNucleus().hasBorderTag(Tag.TOP_VERTICAL) && 
+						cell.getPrimaryNucleus().getBorderPoint(Tag.TOP_VERTICAL).overlapsPerfectly(point.get())) {
 					g2.setColor(ColourSelecter.getColour(Tag.TOP_VERTICAL));
 				}
-				if(cell.getNucleus().hasBorderTag(Tag.BOTTOM_VERTICAL) && 
-						cell.getNucleus().getBorderPoint(Tag.BOTTOM_VERTICAL).overlapsPerfectly(point.get())) {
+				if(cell.getPrimaryNucleus().hasBorderTag(Tag.BOTTOM_VERTICAL) && 
+						cell.getPrimaryNucleus().getBorderPoint(Tag.BOTTOM_VERTICAL).overlapsPerfectly(point.get())) {
 					g2.setColor(ColourSelecter.getColour(Tag.BOTTOM_VERTICAL));
 				}
-				if(cell.getNucleus().hasBorderTag(Tag.REFERENCE_POINT) && 
-						cell.getNucleus().getBorderPoint(Tag.REFERENCE_POINT).overlapsPerfectly(point.get())) {
+				if(cell.getPrimaryNucleus().hasBorderTag(Tag.REFERENCE_POINT) && 
+						cell.getPrimaryNucleus().getBorderPoint(Tag.REFERENCE_POINT).overlapsPerfectly(point.get())) {
 					g2.setColor(ColourSelecter.getColour(Tag.REFERENCE_POINT));
 				}
-				if(cell.getNucleus().hasBorderTag(Tag.ORIENTATION_POINT) && 
-						cell.getNucleus().getBorderPoint(Tag.ORIENTATION_POINT).overlapsPerfectly(point.get())) {
+				if(cell.getPrimaryNucleus().hasBorderTag(Tag.ORIENTATION_POINT) && 
+						cell.getPrimaryNucleus().getBorderPoint(Tag.ORIENTATION_POINT).overlapsPerfectly(point.get())) {
 					g2.setColor(ColourSelecter.getColour(Tag.ORIENTATION_POINT));
 				}
 

@@ -118,7 +118,7 @@ public class MergeCollectionAction extends MultiDatasetResultAction {
      */
     private boolean datasetsAreMergeable() {
 
-    	if (datasets.size() == 2 && (datasets.get(0).hasChild(datasets.get(1)) || datasets.get(1).hasChild(datasets.get(0)))) {
+    	if (datasets.size() == 2 && (datasets.get(0).hasDirectChild(datasets.get(1)) || datasets.get(1).hasDirectChild(datasets.get(0)))) {
     		LOGGER.warning("No. Merging parent and child is silly.");
     		return false;
     	}

@@ -62,7 +62,7 @@ public class TaggableTest extends ComponentTester {
 					.ofType(NucleusType.ROUND)
 					.randomOffsetProfiles(true)
 					.segmented().build();
-			return d.getCollection().getCells().stream().findFirst().get().getNucleus();
+			return d.getCollection().getCells().stream().findFirst().get().getPrimaryNucleus();
 		}
 
 		throw new Exception("Unable to create instance of "+source);

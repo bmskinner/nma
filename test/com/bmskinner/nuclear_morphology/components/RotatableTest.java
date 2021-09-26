@@ -66,7 +66,7 @@ public class RotatableTest extends ComponentTester {
 		// Profile length of the test nucleus
 		int length = t.getCollection().stream()
 				.findFirst().get()
-				.getNucleus()
+				.getPrimaryNucleus()
 				.getBorderLength();
 		
 		// The initial bottom vertical point
@@ -92,7 +92,7 @@ public class RotatableTest extends ComponentTester {
 			for(ICell c : d.getCollection()) {
 				
 				// Set the TV and BV to the current indices
-				Nucleus n = c.getNucleus();
+				Nucleus n = c.getPrimaryNucleus();
 				n.setBorderTag(Tag.TOP_VERTICAL, tIndex);
 				n.setBorderTag(Tag.BOTTOM_VERTICAL, bIndex);
 				n.alignVertically();

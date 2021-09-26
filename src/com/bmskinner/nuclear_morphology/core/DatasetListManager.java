@@ -231,7 +231,7 @@ public final class DatasetListManager {
         if (d.isRoot())
             return d;
         for (IAnalysisDataset root : getRootDatasets())
-            if (root.hasRecursiveChild(d))
+            if (root.hasAnyChild(d))
             	return root;
         return null;
     }
@@ -268,13 +268,13 @@ public final class DatasetListManager {
 
         for (IAnalysisDataset root : this.getRootDatasets()) {
 
-            if (root.hasRecursiveChild(d)) {
+            if (root.hasAnyChild(d)) {
 
                 // Get the child of the root dataset which is a parent
                 // to the input dataset
 
                 for (IAnalysisDataset parent : root.getAllChildDatasets()) {
-                    if (parent.hasChild(d)) {
+                    if (parent.hasDirectChild(d)) {
                         return parent;
                     }
                 }

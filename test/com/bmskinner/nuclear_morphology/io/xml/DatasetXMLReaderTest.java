@@ -50,8 +50,8 @@ public class DatasetXMLReaderTest extends ComponentTester {
 			ICell wroteCell = d.getCollection().getCell(cellId);
 			ICell readCell  = read.getCollection().getCell(cellId);
 			
-			Nucleus wroteNucleus = wroteCell.getNucleus();
-			Nucleus readNucleus = readCell.getNucleus();
+			Nucleus wroteNucleus = wroteCell.getPrimaryNucleus();
+			Nucleus readNucleus = readCell.getPrimaryNucleus();
 			List<String> skip = new ArrayList<>();
 			skip.add("profileMap");
 			skip.add("signalCollection");
@@ -60,7 +60,7 @@ public class DatasetXMLReaderTest extends ComponentTester {
 		
 		for(IAnalysisDataset child : d.getAllChildDatasets()) {
 			UUID childId = child.getId();
-			assertTrue(read.hasChild(childId));
+			assertTrue(read.hasDirectChild(childId));
 			assertEquals("Child cell count", child.getCollection().size(), read.getChildDataset(childId).getCollection().size());
 			for(ICell c : child.getCollection())
 				assertTrue(read.getChildDataset(childId).getCollection().contains(c));

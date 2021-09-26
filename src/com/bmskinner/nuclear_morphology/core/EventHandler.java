@@ -57,7 +57,6 @@ import com.bmskinner.nuclear_morphology.gui.actions.FishRemappingAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ImportDatasetAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ImportWorkflowAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ImportWorkspaceAction;
-import com.bmskinner.nuclear_morphology.gui.actions.LobeDetectionAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ManualClusterAction;
 import com.bmskinner.nuclear_morphology.gui.actions.MergeCollectionAction;
 import com.bmskinner.nuclear_morphology.gui.actions.MergeSignalsAction;
@@ -296,9 +295,6 @@ public class EventHandler implements EventListener {
 
             if (event.type().equals(SignalChangeEvent.EXPORT_SINGLE_CELL_IMAGES))
                 return new ExportSingleCellImagesAction(selectedDatasets, acceptor, EventHandler.this);
-
-            if (event.type().equals(SignalChangeEvent.LOBE_DETECTION))
-                return new LobeDetectionAction(selectedDataset, acceptor, EventHandler.this);
             
             if (event.type().equals(SignalChangeEvent.MERGE_DATASETS_ACTION))
                 return new MergeCollectionAction(selectedDatasets, acceptor, EventHandler.this);

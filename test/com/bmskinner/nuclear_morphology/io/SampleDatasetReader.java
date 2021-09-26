@@ -95,8 +95,8 @@ public class SampleDatasetReader {
     public static IAnalysisDataset openXMLDataset(@NonNull File f) throws Exception {
     	DatasetXMLReader dxr = new DatasetXMLReader(f);
     	IAnalysisDataset d =  dxr.read();
-    	if(!Version.versionIsSupported(d.getVersion()))
-    		throw new UnsupportedVersionException(d.getVersion());
+    	if(!Version.versionIsSupported(d.getVersionCreated()))
+    		throw new UnsupportedVersionException(d.getVersionCreated());
     	return d;
     }
     

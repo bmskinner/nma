@@ -146,7 +146,7 @@ public class CellRelocationMethod extends SingleDatasetAnalysisMethod {
                 /*  New dataset found */
                 activeID = UUID.fromString(line.split(TAB)[1]);
 
-                if (dataset.getId().equals(activeID) || dataset.hasChild(activeID)) {
+                if (dataset.getId().equals(activeID) || dataset.hasDirectChild(activeID)) {
                     // the dataset already exists with this id - we must fail
                     scanner.close();
                     LOGGER.warning("Dataset in cell file already exists");
