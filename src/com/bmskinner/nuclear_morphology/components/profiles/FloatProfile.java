@@ -289,21 +289,6 @@ public class FloatProfile implements IProfile {
         return new FloatProfile(newArray);
     }
 
-    /**
-     * Offset the array by the given amount
-     * 
-     * @param arr
-     * @param j
-     * @return
-     */
-    private static float[] offset(float[] arr, int j) {
-        float[] newArray = new float[arr.length];
-        for (int i = 0; i < arr.length; i++) {
-            newArray[i] = arr[wrapIndex(i + j, arr.length)];
-        }
-        return newArray;
-    }
-
     @Override
     public IProfile smooth(int windowSize) {
         
@@ -417,35 +402,6 @@ public class FloatProfile implements IProfile {
 		return CellularComponent.getBestFitOffset(array, test, minOffset, maxOffset);
 	}
 	
-    /**
-     * Get the sliding window offset of array 1 that best matches array 2. The
-     * arrays must be the same length
-     * 
-     * @param arr1
-     * @param arr2
-     * @return
-     */
-    private int getBestFitOffset(float[] arr1, float[] arr2) {
-
-        double lowestScore = CellularComponent.squareDifference(arr1, arr2);
-        int index = 0;
-
-        // Position by position
-        for (int i = 0; i < arr1.length; i++) {
-
-            float[] tmp = offset(arr1, i);
-
-            // // Compare to array 2
-            double score = CellularComponent.squareDifference(tmp, arr2);
-            if (score < lowestScore) {
-                lowestScore = score;
-                index = i;
-            }
-
-        }
-        return index;
-    }
-
     /*
      * --------------------
      *  Detect minima within profiles

@@ -67,11 +67,11 @@ public class OpenBorderSegment implements IProfileSegment {
      * @param id the id of the segment
      */
     public OpenBorderSegment(int startIndex, int endIndex, int total, UUID id) {
+    	if (id == null)
+            throw new IllegalArgumentException("Segment ID cannot be null");
     	if(id.equals(IProfileCollection.DEFAULT_SEGMENT_ID) && startIndex!=endIndex)
 			throw new IllegalArgumentException(String.format("Cannot make default segment %s-%s; it would be shorter than the entire profile", startIndex, endIndex));
-        if (id == null)
-            throw new IllegalArgumentException("Segment ID cannot be null");
-
+        
         this.startIndex = startIndex;
         this.endIndex = endIndex;
         this.totalLength = total;

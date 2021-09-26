@@ -431,10 +431,6 @@ public class ProfileManager {
             return;
         }
         LOGGER.fine("Got existing list of " + segments.size() + " segments");
-
-        // use the same array length as the source collection to avoid segment slippage
-        int profileLength = sourcePC.length();
-
         
         // Create a new profile collection for the destination, so profiles are refreshed
         IProfileCollection destPC = destination.getProfileCollection();

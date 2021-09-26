@@ -543,7 +543,6 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 
         try {
 
-        	int counter = 0;
             for (UUID segID : template.getSegmentIDs()) {
                 IProfileSegment thisSeg = this.getSegment(segID);
                 IProfileSegment templateSeg = template.getSegment(segID);
@@ -555,7 +554,6 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
                 // Interpolate the segment region to the new length
                 IProfile revisedProfile = interpolateSegment(thisSeg, newLength);
                 finalSegmentProfiles.add(revisedProfile);
-                counter++;
             }
 
         } catch (UnavailableComponentException e) {

@@ -192,19 +192,6 @@ public class DefaultProfileAggregate implements IProfileAggregate {
     }
     
     /**
-     * Get the values for the given nucleus in the aggregate
-     * 
-     * @param n
-     * @return
-     */
-    private float[] getValuesForNucleus(int n) {
-        float[] values = new float[profileCount];
-        for (int i = 0; i < profileCount; i++)
-            values[i] = aggregate[i][n];
-        return values;
-    }
-
-    /**
      * Calculate the profile for the given quartile
      * 
      * @param quartile
