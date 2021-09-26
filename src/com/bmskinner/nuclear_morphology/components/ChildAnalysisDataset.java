@@ -81,7 +81,7 @@ public class ChildAnalysisDataset extends AbstractAnalysisDataset implements IAn
 		for(IAnalysisDataset mge : this.getMergeSources())
 			cd.addMergeSource(mge.duplicate());
 
-		cd.setDatasetColour(datasetColour.orElse(null));
+		cd.setDatasetColour(datasetColour);
 
 		return cd;
 	}

@@ -63,13 +63,13 @@ public class MergeSourceAnalysisDataset extends AbstractAnalysisDataset implemen
                 mergeSource.getCollection())
         );
 
-        this.parentDataset = Optional.of(merged);
+        this.parentDataset = merged;
         
         Optional<IAnalysisOptions> optionalOptions = mergeSource.getAnalysisOptions();
         if(optionalOptions.isPresent())
         	analysisOptions = optionalOptions.get().duplicate();
 
-        this.datasetColour = Optional.ofNullable(mergeSource.getDatasetColour().orElse(null));
+        this.datasetColour = mergeSource.getDatasetColour().orElse(null);
 
         try {
         	getCollection().createProfileCollection();
@@ -105,7 +105,7 @@ public class MergeSourceAnalysisDataset extends AbstractAnalysisDataset implemen
 
     @Override
     public File getSavePath() {
-        return parentDataset.get().getSavePath();
+        return parentDataset.getSavePath();
     }
 
     @Override

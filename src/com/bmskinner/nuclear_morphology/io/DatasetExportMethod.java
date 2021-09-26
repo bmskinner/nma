@@ -163,8 +163,7 @@ public class DatasetExportMethod extends SingleDatasetAnalysisMethod {
     public boolean saveAnalysisDataset(IAnalysisDataset dataset, File saveFile) {
 
         boolean ok = true;
-        // Since we're creating a save format, go with nmd: Nuclear
-		// Morphology Dataset
+
 		LOGGER.fine("Saving dataset to " + saveFile.getAbsolutePath());
 		
 		File parentFolder = saveFile.getParentFile();

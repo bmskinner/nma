@@ -110,7 +110,7 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
         for(IAnalysisDataset mge : this.getMergeSources())
         	result.addMergeSource(mge.duplicate());
         
-        result.setDatasetColour(datasetColour.orElse(null));
+        result.setDatasetColour(datasetColour);
         result.setRoot(isRoot);
         
         return result;
@@ -665,7 +665,4 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
         }
     }
 
-    private synchronized void writeObject(java.io.ObjectOutputStream out) throws IOException {
-        out.defaultWriteObject();
-    }
 }

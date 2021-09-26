@@ -52,7 +52,7 @@ public abstract class AbstractAnalysisDataset implements Serializable {
     protected final Version versionLastSaved;
     
     /** Direct parent dataset to this dataset */
-    protected Optional<IAnalysisDataset> parentDataset = Optional.empty();
+    protected IAnalysisDataset parentDataset = null;
 
     /** Direct child datasets to this dataset */
     protected Set<IAnalysisDataset> childDatasets = new HashSet<>();
@@ -61,7 +61,7 @@ public abstract class AbstractAnalysisDataset implements Serializable {
     protected ICellCollection cellCollection;
 
     /** The colour to draw this dataset in charts */
-    protected Optional<Color> datasetColour = Optional.empty();
+    protected Color datasetColour = null;
 
     /** Clusters identified in this dataset */
     protected List<IClusterGroup> clusterGroups = new ArrayList<>();
@@ -98,23 +98,23 @@ public abstract class AbstractAnalysisDataset implements Serializable {
     }
         
     public void setDatasetColour(Color colour) {
-        datasetColour = Optional.of(colour);
+        datasetColour = colour;
 
     }
 
     public Optional<Color> getDatasetColour() {
-        return datasetColour;
+        return Optional.ofNullable(datasetColour);
     }
 
     public boolean hasDatasetColour() {
-        return datasetColour.isPresent();
+        return datasetColour != null;
     }
     
     public boolean hasParent() {
-    	return parentDataset.isPresent();
+    	return parentDataset != null;
     }
     public Optional<IAnalysisDataset> getParent(){
-    	return parentDataset;
+    	return Optional.ofNullable(parentDataset);
     }
 
     public boolean hasDirectChild(IAnalysisDataset child) {
@@ -227,20 +227,13 @@ public abstract class AbstractAnalysisDataset implements Serializable {
     public String toString(){
         return getName();
     }
-
-    private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-
-    	// The first thing to be deserialised in this dataset will be the Version.
-    	// If not supported, an UnsupportedVersionException will be thrown, and
-    	// passed upwards here for the import method to handle.
-        in.defaultReadObject();
-    }
     
     @Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((cellCollection == null) ? 0 : cellCollection.hashCode());
+		result = prime * result + ((parentDataset == null) ? 0 : parentDataset.hashCode());
 		result = prime * result + ((childDatasets == null) ? 0 : childDatasets.hashCode());
 		result = prime * result + ((clusterGroups == null) ? 0 : clusterGroups.hashCode());
 		result = prime * result + ((datasetColour == null) ? 0 : datasetColour.hashCode());
