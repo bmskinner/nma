@@ -21,8 +21,8 @@ import com.bmskinner.nuclear_morphology.components.nuclei.NucleusType;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.Tag;
 import com.bmskinner.nuclear_morphology.components.profiles.UnprofilableObjectException;
+import com.bmskinner.nuclear_morphology.components.signals.DefaultSignalGroup;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
-import com.bmskinner.nuclear_morphology.components.signals.SignalGroup;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -135,7 +135,7 @@ public class ICellCollectionXMLReader extends XMLReader<ICellCollection> {
 			LOGGER.fine("Adding signal group to "+collection.getName());
 			String name = groupElement.getChildText(XMLCreator.NAME_KEY);
 			UUID id = readUUID(groupElement);
-			ISignalGroup sg = new SignalGroup(name);
+			ISignalGroup sg = new DefaultSignalGroup(name);
 			Element colourElement = groupElement.getChild(XMLCreator.COLOUR_KEY);
 			if(colourElement!=null)
 				sg.setGroupColour(Color.decode(colourElement.getText()));

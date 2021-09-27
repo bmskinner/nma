@@ -201,7 +201,7 @@ public class CellRelocationMethod extends SingleDatasetAnalysisMethod {
         
         LOGGER.info(map.get(activeID).getCollection().size()+" cells out of "+ cellCount+" relocated");
 
-        if(cellCount==0) {
+        if(cellCount==0 && activeID!=null) {
         	LOGGER.warning("No cells in dataset "+map.get(activeID).getName());
         	dataset.deleteChild(activeID);
         	map.remove(activeID);

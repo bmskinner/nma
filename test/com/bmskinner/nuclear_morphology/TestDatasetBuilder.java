@@ -10,21 +10,21 @@ import com.bmskinner.nuclear_morphology.analysis.classification.NucleusClusterin
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetProfilingMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMethod.MorphologyAnalysisMode;
+import com.bmskinner.nuclear_morphology.components.TestComponentFactory;
+import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
+import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.DefaultAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.DefaultCellCollection;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
-import com.bmskinner.nuclear_morphology.components.TestComponentFactory;
-import com.bmskinner.nuclear_morphology.components.cells.ICell;
-import com.bmskinner.nuclear_morphology.components.cells.ComponentFactory.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.nuclei.NucleusType;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
 import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
+import com.bmskinner.nuclear_morphology.components.signals.DefaultSignalGroup;
 import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
-import com.bmskinner.nuclear_morphology.components.signals.SignalGroup;
 
 /**
  * Simplify the creation of test datasets using a builder pattern
@@ -328,7 +328,7 @@ public class TestDatasetBuilder {
 		o.getNuclusDetectionOptions().get().setMaxSize( (baseWidth+maxSizeVariation)*(baseHeight+maxSizeVariation) );
 
 		if(redSignals) {
-			ISignalGroup g = new SignalGroup(RED_SIGNAL_GROUP_NAME);
+			ISignalGroup g = new DefaultSignalGroup(RED_SIGNAL_GROUP_NAME);
 			g.setGroupColour(Color.red);
 			collection.addSignalGroup(RED_SIGNAL_GROUP, g);
 			INuclearSignalOptions n = OptionsFactory.makeNuclearSignalOptions(new File(TEST_DATASET_IMAGE_FOLDER));
@@ -336,7 +336,7 @@ public class TestDatasetBuilder {
 		}
 		
 		if(greenSignals) {
-			ISignalGroup g = new SignalGroup(GREEN_SIGNAL_GROUP_NAME);
+			ISignalGroup g = new DefaultSignalGroup(GREEN_SIGNAL_GROUP_NAME);
 			g.setGroupColour(Color.GREEN);
 			collection.addSignalGroup(GREEN_SIGNAL_GROUP, g);
 			INuclearSignalOptions n = OptionsFactory.makeNuclearSignalOptions(new File(TEST_DATASET_IMAGE_FOLDER));

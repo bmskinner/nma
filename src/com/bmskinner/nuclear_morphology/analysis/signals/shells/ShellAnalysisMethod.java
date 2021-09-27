@@ -45,7 +45,7 @@ import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.signals.KeyedShellResult;
-import com.bmskinner.nuclear_morphology.components.signals.SignalGroup;
+import com.bmskinner.nuclear_morphology.components.signals.DefaultSignalGroup;
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult.CountType;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
@@ -231,7 +231,7 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
     }
 
     private synchronized void addRandomSignal() {
-    	ISignalGroup random = new SignalGroup("Random distribution");
+    	ISignalGroup random = new DefaultSignalGroup("Random distribution");
     	random.setGroupColour(Color.LIGHT_GRAY);
     	KeyedShellResult channelCounter = counters.get(IShellResult.RANDOM_SIGNAL_ID);
     	random.setShellResult(channelCounter);

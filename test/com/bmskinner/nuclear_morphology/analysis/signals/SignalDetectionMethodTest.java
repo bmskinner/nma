@@ -36,7 +36,7 @@ import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
-import com.bmskinner.nuclear_morphology.components.signals.SignalGroup;
+import com.bmskinner.nuclear_morphology.components.signals.DefaultSignalGroup;
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult.ShrinkType;
 import com.bmskinner.nuclear_morphology.core.DatasetListManager;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
@@ -83,7 +83,7 @@ public class SignalDetectionMethodTest extends ComponentTester {
     	redOptions.setMaxFraction(0.5);
     	redOptions.setMinSize(5);
 
-    	ISignalGroup red = new SignalGroup(TestImageDatasetCreator.RED_SIGNAL_NAME);
+    	ISignalGroup red = new DefaultSignalGroup(TestImageDatasetCreator.RED_SIGNAL_NAME);
     	red.setGroupColour(Color.RED);
     	d.getCollection().addSignalGroup(TestImageDatasetCreator.RED_SIGNAL_ID, red);
     	d.getAnalysisOptions().get().setDetectionOptions(TestImageDatasetCreator.RED_SIGNAL_ID.toString(), redOptions);

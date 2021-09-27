@@ -17,6 +17,7 @@
 package com.bmskinner.nuclear_morphology.components.datasets;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -29,6 +30,7 @@ import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nuclear_morphology.components.Version;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
@@ -402,4 +404,10 @@ public class ChildAnalysisDataset extends AbstractAnalysisDataset implements IAn
 			return false;
 		return true;
 	}
+	
+    private void writeObject(java.io.ObjectOutputStream out) throws IOException {
+    	// Ensure the save version is correct at time of save 
+    	this.versionLastSaved = Version.currentVersion();
+    	out.defaultWriteObject();
+    }
 }

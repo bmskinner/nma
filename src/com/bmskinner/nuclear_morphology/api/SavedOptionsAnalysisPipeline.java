@@ -51,8 +51,8 @@ import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
 import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.components.options.IShellOptions;
+import com.bmskinner.nuclear_morphology.components.signals.DefaultSignalGroup;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
-import com.bmskinner.nuclear_morphology.components.signals.SignalGroup;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.io.DatasetExportMethod;
 import com.bmskinner.nuclear_morphology.io.DatasetExportMethod.ExportFormat;
@@ -262,7 +262,7 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod impleme
 				INuclearSignalOptions signalOptions = datasetOptions.getNuclearSignalOptions(signalGroupId);
 				
 				signalOptions.setFolder(imageFolder);
-				ISignalGroup signalGroup = new SignalGroup(signalNames.get(signalGroupId));
+				ISignalGroup signalGroup = new DefaultSignalGroup(signalNames.get(signalGroupId));
 				signalGroup.setGroupColour(ColourSelecter.getSignalColour(signalOptions.getChannel()));
 				
 				LOGGER.info("Set signal group "+signalGroup.getGroupName()+" to "+signalOptions.getFolder());

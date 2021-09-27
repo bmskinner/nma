@@ -36,8 +36,8 @@ import com.bmskinner.nuclear_morphology.components.datasets.MergeSourceAnalysisD
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
+import com.bmskinner.nuclear_morphology.components.signals.DefaultSignalGroup;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
-import com.bmskinner.nuclear_morphology.components.signals.SignalGroup;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -178,7 +178,7 @@ public class MergeSourceExtractionMethod extends MultipleDatasetAnalysisMethod {
 
 			if (addSignalGroup) {
 				ISignalGroup oldGroup = templateCollection.getSignalGroup(signalGroupId).orElseThrow(MissingOptionException::new);
-				ISignalGroup newGroup = new SignalGroup(oldGroup, false);
+				ISignalGroup newGroup = new DefaultSignalGroup(oldGroup, false);
 			    newDataset.getCollection().addSignalGroup(signalGroupId, newGroup);
 			}
         }

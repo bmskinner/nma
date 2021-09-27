@@ -23,8 +23,6 @@ import java.net.URISyntaxException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.swing.filechooser.FileFilter;
-
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**

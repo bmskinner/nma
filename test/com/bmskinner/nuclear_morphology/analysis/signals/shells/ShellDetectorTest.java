@@ -185,7 +185,7 @@ public class ShellDetectorTest extends ComponentTester {
     public void testRealSignalsDetectedInMouseSpermDataset() throws Exception {
         IAnalysisDataset dataset = SampleDatasetReader.openTestMouseSignalsDataset();
         for(ISignalGroup s : dataset.getCollection().getSignalGroups()) {
-        	s.setShellResult(null);
+        	s.clearShellResult();
         	assertFalse("Shells should not exist on first open", s.hasShellResult());
         }
         

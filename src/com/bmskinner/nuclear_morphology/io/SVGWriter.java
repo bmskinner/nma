@@ -134,6 +134,8 @@ public class SVGWriter implements Io {
     	double x = 0;
 
     	for(CellularComponent c : list){
+    		if(c==null) continue;
+    		
      		Shape s = c.toShape();
 
             Rectangle2D r = s.getBounds();

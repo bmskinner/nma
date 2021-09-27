@@ -72,6 +72,12 @@ public interface ISignalGroup extends Serializable {
      * @param result
      */
     void setShellResult(@NonNull IShellResult result);
+    
+    
+    /**
+     * Remove the shell result if present
+     */
+    void clearShellResult();
 
     /**
      * Test if a shell result is available

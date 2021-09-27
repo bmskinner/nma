@@ -17,7 +17,6 @@
 package com.bmskinner.nuclear_morphology.components.datasets;
 
 import java.awt.Color;
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -49,7 +48,7 @@ public abstract class AbstractAnalysisDataset implements Serializable {
     protected final Version versionCreated;
     
     /**The software version in which the dataset was saved */
-    protected final Version versionLastSaved;
+    protected Version versionLastSaved;
     
     /** Direct parent dataset to this dataset */
     protected IAnalysisDataset parentDataset = null;

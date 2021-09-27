@@ -32,9 +32,9 @@ import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
  * @author bms41
  *
  */
-public class SignalGroup implements ISignalGroup {
+public class DefaultSignalGroup implements ISignalGroup {
 
-	private static final Logger LOGGER = Logger.getLogger(SignalGroup.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(DefaultSignalGroup.class.getName());
     private static final long serialVersionUID = 1L;
     private IShellResult      shellResult      = null;
     private String            groupName        = "";
@@ -53,7 +53,7 @@ public class SignalGroup implements ISignalGroup {
     /**
      * Default constructor
      */
-    public SignalGroup(@NonNull String name) {
+    public DefaultSignalGroup(@NonNull String name) {
         groupName = name;
     }
 
@@ -63,7 +63,7 @@ public class SignalGroup implements ISignalGroup {
      * 
      * @param s
      */
-    public SignalGroup(@NonNull ISignalGroup s, boolean copyWarped) {
+    public DefaultSignalGroup(@NonNull ISignalGroup s, boolean copyWarped) {
 
     	shellResult = null;
         groupName = s.getGroupName();
@@ -75,7 +75,7 @@ public class SignalGroup implements ISignalGroup {
     
 	@Override
 	public ISignalGroup duplicate() {
-		return new SignalGroup(this, true);
+		return new DefaultSignalGroup(this, true);
 	}
 	
 	@Override
@@ -101,6 +101,11 @@ public class SignalGroup implements ISignalGroup {
     @Override
     public void setShellResult(@NonNull IShellResult shellResult) {
         this.shellResult = shellResult;
+    }
+    
+    @Override
+    public void clearShellResult() {
+    	shellResult = null;
     }
 
     @Override
@@ -168,7 +173,7 @@ public class SignalGroup implements ISignalGroup {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		SignalGroup other = (SignalGroup) obj;
+		DefaultSignalGroup other = (DefaultSignalGroup) obj;
 		if (groupColour == null) {
 			if (other.groupColour != null)
 				return false;

@@ -254,6 +254,7 @@ public class DatasetMergingDialog extends LoadingIconDialog {
     		
     		
     		for(IAnalysisDataset d2 : matchingDatasets) {
+    			if(u1==null) continue;
     			if(d1==d2) continue;
 
     			// Get the id from d2

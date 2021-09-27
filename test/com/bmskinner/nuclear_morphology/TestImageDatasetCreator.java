@@ -34,7 +34,7 @@ import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
-import com.bmskinner.nuclear_morphology.components.signals.SignalGroup;
+import com.bmskinner.nuclear_morphology.components.signals.DefaultSignalGroup;
 import com.bmskinner.nuclear_morphology.io.DatasetExportMethod;
 import com.bmskinner.nuclear_morphology.io.DatasetExportMethod.ExportFormat;
 import com.bmskinner.nuclear_morphology.io.xml.OptionsXMLWriter;
@@ -214,7 +214,7 @@ public class TestImageDatasetCreator {
         	redOptions.setMaxFraction(0.5);
         	redOptions.setMinSize(5);
 
-        	ISignalGroup red = new SignalGroup(RED_SIGNAL_NAME);
+        	ISignalGroup red = new DefaultSignalGroup(RED_SIGNAL_NAME);
         	red.setGroupColour(Color.RED);
         	d.getCollection().addSignalGroup(RED_SIGNAL_ID, red);
         	d.getAnalysisOptions().get().setDetectionOptions(RED_SIGNAL_ID.toString(), redOptions);
@@ -224,7 +224,7 @@ public class TestImageDatasetCreator {
         if(addGreen) {
         	 INuclearSignalOptions greenOptions = OptionsFactory.makeNuclearSignalOptions(testFolder);
              greenOptions.setChannel(1);
-             ISignalGroup green = new SignalGroup(GREEN_SIGNAL_NAME);
+             ISignalGroup green = new DefaultSignalGroup(GREEN_SIGNAL_NAME);
              green.setGroupColour(Color.GREEN);
              d.getCollection().addSignalGroup(GREEN_SIGNAL_ID, green);
              d.getAnalysisOptions().get().setDetectionOptions(GREEN_SIGNAL_ID.toString(), greenOptions);

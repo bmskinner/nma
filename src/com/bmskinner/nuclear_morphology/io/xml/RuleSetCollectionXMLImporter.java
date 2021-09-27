@@ -10,7 +10,6 @@ import org.jdom2.input.SAXBuilder;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.io.Io.Importer;
 import com.bmskinner.nuclear_morphology.io.xml.XMLReader.XMLReadingException;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Import XML files containing ruleset descriptions

@@ -36,7 +36,7 @@ import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
-import com.bmskinner.nuclear_morphology.components.signals.SignalGroup;
+import com.bmskinner.nuclear_morphology.components.signals.DefaultSignalGroup;
 import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.SignalDetectionSettingsPanel;
@@ -136,7 +136,7 @@ public class SignalImageProber extends IntegratedImageProber {
 
         // get the group name
 
-        ISignalGroup group = new SignalGroup(name);
+        ISignalGroup group = new DefaultSignalGroup(name);
         dataset.getCollection().addSignalGroup(id, group);
 
         // Set the default colour for the signal group

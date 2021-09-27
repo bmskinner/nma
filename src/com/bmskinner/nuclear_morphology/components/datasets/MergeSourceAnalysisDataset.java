@@ -17,6 +17,7 @@
 package com.bmskinner.nuclear_morphology.components.datasets;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -30,6 +31,7 @@ import java.util.logging.Logger;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
+import com.bmskinner.nuclear_morphology.components.Version;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -350,6 +352,10 @@ public class MergeSourceAnalysisDataset extends AbstractAnalysisDataset implemen
 		return true;
 	}
     
-    
+    private void writeObject(java.io.ObjectOutputStream out) throws IOException {
+    	// Ensure the save version is correct at time of save 
+    	this.versionLastSaved = Version.currentVersion();
+    	out.defaultWriteObject();
+    }
 
 }
