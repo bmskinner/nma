@@ -27,6 +27,7 @@ import com.bmskinner.nuclear_morphology.TestDatasetBuilder.TestComponentShape;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclei.NucleusType;
 import com.bmskinner.nuclear_morphology.components.options.DefaultShellOptions;
+import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 
 public class ShellAnalysisMethodTest {
     
@@ -40,7 +41,7 @@ public class ShellAnalysisMethodTest {
         		.maxRotation(90)
         		.xBase(50).yBase(50)
         		.baseWidth(50).baseHeight(50)
-        		.ofType(NucleusType.ROUND)
+        		.ofType(RuleSetCollection.roundRuleSetCollection())
         		.withNucleusShape(TestComponentShape.SQUARE)
         		.addSignalsInChannel(0)
         		.addSignalsInChannel(1)

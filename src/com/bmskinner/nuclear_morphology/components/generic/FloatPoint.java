@@ -32,7 +32,6 @@ import org.eclipse.jdt.annotation.NonNull;
 public class FloatPoint extends Point2D.Float implements IPoint {
 
     private static final long serialVersionUID = 1L;
-    private static final double EPSILON = 0.000001;
 
     /**
      * Construct from float values
@@ -95,16 +94,12 @@ public class FloatPoint extends Point2D.Float implements IPoint {
 
     @Override
     public void set(@NonNull IPoint p) {
-        if (p==null)
-            throw new IllegalArgumentException("Destination point is null");
         this.x = (float) p.getX();
         this.y = (float) p.getY();
     }
     
     @Override
     public void set(@NonNull Point2D p) {
-    	if (p==null)
-            throw new IllegalArgumentException("Destination point is null");
         this.x = (float) p.getX();
         this.y = (float) p.getY();
     }
@@ -115,8 +110,7 @@ public class FloatPoint extends Point2D.Float implements IPoint {
         double dy = y - a.y;
         double dx2 = dx * dx;
         double dy2 = dy * dy;
-        double length = Math.sqrt(dx2 + dy2);
-        return length;
+        return Math.sqrt(dx2 + dy2);
     }
 
     @Override
@@ -130,8 +124,7 @@ public class FloatPoint extends Point2D.Float implements IPoint {
         double dy = y - a.getY();
         double dx2 = dx * dx;
         double dy2 = dy * dy;
-        double length = Math.sqrt(dx2 + dy2);
-        return length;
+        return Math.sqrt(dx2 + dy2);
     }
     
     @Override
@@ -141,29 +134,21 @@ public class FloatPoint extends Point2D.Float implements IPoint {
 
     @Override
     public boolean isAbove(@NonNull IPoint p) {
-        if (p==null)
-            throw new IllegalArgumentException("Point is null");
         return y > p.getY();
     }
 
     @Override
     public boolean isBelow(@NonNull IPoint p) {
-        if (p==null)
-            throw new IllegalArgumentException("Point is null");
         return y < p.getY();
     }
 
     @Override
     public boolean isLeftOf(@NonNull IPoint p) {
-        if (p==null)
-            throw new IllegalArgumentException("Point is null");
         return x < p.getX();
     }
 
     @Override
     public boolean isRightOf(@NonNull IPoint p) {
-        if (p==null)
-            throw new IllegalArgumentException("Point is null");
         return x > p.getX();
     }
 
@@ -198,9 +183,6 @@ public class FloatPoint extends Point2D.Float implements IPoint {
 
     @Override
     public double findSmallestAngle(@NonNull IPoint a, @NonNull IPoint c) {
-
-        if (a == null || c == null)
-            throw new IllegalArgumentException("An input point is null in angle finding");
         
         if(a instanceof FloatPoint && c instanceof FloatPoint)
         	return findSmallestAngle( (FloatPoint)a, (FloatPoint)c);
@@ -239,8 +221,6 @@ public class FloatPoint extends Point2D.Float implements IPoint {
     @Override
     public double findAbsoluteAngle(@NonNull IPoint start, @NonNull IPoint end) {
 
-        if (start == null || end == null)
-            throw new IllegalArgumentException("Input points cannot be null for angle calculation");
         IPoint ab = IPoint.makeNew(x - start.getX(), y - start.getY());
         IPoint cb = IPoint.makeNew(x - end.getX(), y - end.getY());
 
@@ -250,62 +230,35 @@ public class FloatPoint extends Point2D.Float implements IPoint {
         double alpha = Math.atan2(cross, dot);
                 
         double angle = alpha * 180 / Math.PI;
-//        System.out.println("Angle: "+angle);
         
         double neg = 0-angle;
-//        System.out.println("Negated angle: "+neg);
         
-        double mod = (neg+360)%360;
-//        System.out.println("Mod angle: "+mod);
-        return mod;
-//        return (360+angle)%360;
-//        return Math.abs();
-    }
-
-    /**
-     * Get the angle in degrees between the specified line and a horizontal
-     * line. Copied from ij.gui.Roi#getFloatAngle()
-     * 
-     * @param x1
-     * @param y1
-     * @param x2
-     * @param y2
-     * @return
-     */
-    private double getFloatAngle(double x1, double y1, double x2, double y2) {
-        double dx = x2 - x1;
-        double dy = y1 - y2;
-        return (180.0 / Math.PI) * Math.atan2(dy, dx);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        
-        if (getClass() != obj.getClass())
-            return false;
-        FloatPoint other = (FloatPoint) obj;
-        if (x != other.x)
-            return false;
-        if (y != other.y)
-            return false;
-        return true;
+        return (neg+360)%360;
     }
 
 	@Override
+	public int hashCode() {
+		return super.hashCode();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		return true;
+	}
+
+	@Override
 	public IPoint minus(@NonNull IPoint p) {
-	    if (p == null)
-            throw new IllegalArgumentException("Point is null");
 		return new FloatPoint(x-p.getX(), y-p.getY());
 	}
 
 	@Override
 	public IPoint plus(@NonNull IPoint p) {
-	    if (p == null)
-            throw new IllegalArgumentException("Point is null");
 		return new FloatPoint(x+p.getX(), y+p.getY());
 	}
 	

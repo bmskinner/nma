@@ -46,10 +46,10 @@ import com.bmskinner.nuclear_morphology.components.generic.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.profiles.BorderTagObject;
+import com.bmskinner.nuclear_morphology.components.profiles.DefaultLandmark;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.core.InterfaceUpdater;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
@@ -220,7 +220,7 @@ public class InteractiveSegmentCellPanel extends InteractiveCellPanel {
 
 		}
 		
-		private synchronized void updateTag(Tag tag, int newIndex) {
+		private synchronized void updateTag(Landmark tag, int newIndex) {
 
 			ThreadManager.getInstance().execute(()->{
 				cell.getPrimaryNucleus().setLocked(false);
@@ -228,7 +228,7 @@ public class InteractiveSegmentCellPanel extends InteractiveCellPanel {
 				cell.getPrimaryNucleus().setBorderTag(tag, newIndex);
 				cell.getPrimaryNucleus().updateVerticallyRotatedNucleus();
 
-				if(tag.equals(Tag.ORIENTATION_POINT) || tag.equals(Tag.REFERENCE_POINT)) {
+				if(tag.equals(Landmark.ORIENTATION_POINT) || tag.equals(Landmark.REFERENCE_POINT)) {
 					cell.getPrimaryNucleus().setStatistic(Measurement.OP_RP_ANGLE, Statistical.STAT_NOT_CALCULATED);
 				}
 				cell.getPrimaryNucleus().updateDependentStats();
@@ -264,7 +264,7 @@ public class InteractiveSegmentCellPanel extends InteractiveCellPanel {
 			try {
 				int rawIndex = cell.getPrimaryNucleus().getBorderIndex(point);
 
-				int rpIndex = cell.getPrimaryNucleus().getBorderIndex(Tag.REFERENCE_POINT);
+				int rpIndex = cell.getPrimaryNucleus().getBorderIndex(Landmark.REFERENCE_POINT);
 
 				// Get the index of the clicked point in the RP-indexed profile
 				int index = cell.getPrimaryNucleus().wrapIndex(rawIndex-rpIndex);
@@ -311,13 +311,13 @@ public class InteractiveSegmentCellPanel extends InteractiveCellPanel {
 		 * @param popupMenu
 		 */
 		private void addTagsToPopup(JPopupMenu popupMenu, IBorderPoint point) {
-			List<Tag> tags = dataset.getCollection().getProfileCollection().getBorderTags();
+			List<Landmark> tags = dataset.getCollection().getProfileCollection().getBorderTags();
 
 			Collections.sort(tags);
 
-			for (Tag tag : tags) {
+			for (Landmark tag : tags) {
 
-				if (tag.equals(Tag.INTERSECTION_POINT))
+				if (tag.equals(Landmark.INTERSECTION_POINT))
 					continue; // The IP is determined solely by the OP
 
 				// Colour the menu item by tag colour
@@ -338,9 +338,9 @@ public class InteractiveSegmentCellPanel extends InteractiveCellPanel {
 			}
 
 			// Find border tags with rulesets that have not been assigned in the median
-			List<Tag> unassignedTags = new ArrayList<>();
-			for (Tag tag : BorderTagObject.values()) {
-				if (tag.equals(Tag.INTERSECTION_POINT))
+			List<Landmark> unassignedTags = new ArrayList<>();
+			for (Landmark tag : Landmark.defaultValues()) {
+				if (tag.equals(Landmark.INTERSECTION_POINT))
 					continue;
 				if (!tags.contains(tag)) {
 					unassignedTags.add(tag);
@@ -352,7 +352,7 @@ public class InteractiveSegmentCellPanel extends InteractiveCellPanel {
 
 				popupMenu.addSeparator();
 
-				for (Tag tag : unassignedTags) {
+				for (Landmark tag : unassignedTags) {
 					JMenuItem item = new JMenuItem("Set "+tag.toString().toLowerCase()+" here");
 					item.setForeground(Color.DARK_GRAY);
 
@@ -408,21 +408,21 @@ public class InteractiveSegmentCellPanel extends InteractiveCellPanel {
 			// Highlight the border depending on what border tags are present
 			try {
 
-				if(cell.getPrimaryNucleus().hasBorderTag(Tag.TOP_VERTICAL) && 
-						cell.getPrimaryNucleus().getBorderPoint(Tag.TOP_VERTICAL).overlapsPerfectly(point.get())) {
-					g2.setColor(ColourSelecter.getColour(Tag.TOP_VERTICAL));
+				if(cell.getPrimaryNucleus().hasBorderTag(Landmark.TOP_VERTICAL) && 
+						cell.getPrimaryNucleus().getBorderPoint(Landmark.TOP_VERTICAL).overlapsPerfectly(point.get())) {
+					g2.setColor(ColourSelecter.getColour(Landmark.TOP_VERTICAL));
 				}
-				if(cell.getPrimaryNucleus().hasBorderTag(Tag.BOTTOM_VERTICAL) && 
-						cell.getPrimaryNucleus().getBorderPoint(Tag.BOTTOM_VERTICAL).overlapsPerfectly(point.get())) {
-					g2.setColor(ColourSelecter.getColour(Tag.BOTTOM_VERTICAL));
+				if(cell.getPrimaryNucleus().hasBorderTag(Landmark.BOTTOM_VERTICAL) && 
+						cell.getPrimaryNucleus().getBorderPoint(Landmark.BOTTOM_VERTICAL).overlapsPerfectly(point.get())) {
+					g2.setColor(ColourSelecter.getColour(Landmark.BOTTOM_VERTICAL));
 				}
-				if(cell.getPrimaryNucleus().hasBorderTag(Tag.REFERENCE_POINT) && 
-						cell.getPrimaryNucleus().getBorderPoint(Tag.REFERENCE_POINT).overlapsPerfectly(point.get())) {
-					g2.setColor(ColourSelecter.getColour(Tag.REFERENCE_POINT));
+				if(cell.getPrimaryNucleus().hasBorderTag(Landmark.REFERENCE_POINT) && 
+						cell.getPrimaryNucleus().getBorderPoint(Landmark.REFERENCE_POINT).overlapsPerfectly(point.get())) {
+					g2.setColor(ColourSelecter.getColour(Landmark.REFERENCE_POINT));
 				}
-				if(cell.getPrimaryNucleus().hasBorderTag(Tag.ORIENTATION_POINT) && 
-						cell.getPrimaryNucleus().getBorderPoint(Tag.ORIENTATION_POINT).overlapsPerfectly(point.get())) {
-					g2.setColor(ColourSelecter.getColour(Tag.ORIENTATION_POINT));
+				if(cell.getPrimaryNucleus().hasBorderTag(Landmark.ORIENTATION_POINT) && 
+						cell.getPrimaryNucleus().getBorderPoint(Landmark.ORIENTATION_POINT).overlapsPerfectly(point.get())) {
+					g2.setColor(ColourSelecter.getColour(Landmark.ORIENTATION_POINT));
 				}
 
 			} catch (UnavailableBorderTagException e) {

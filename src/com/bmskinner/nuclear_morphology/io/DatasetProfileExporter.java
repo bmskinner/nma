@@ -15,7 +15,7 @@ import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
 
 /**
@@ -91,7 +91,7 @@ public class DatasetProfileExporter extends StatsExporter {
     private void appendProfiles(StringBuilder outLine, Taggable c){
     	
     	try {
-    		IProfile p = c.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+    		IProfile p = c.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
 
     		for(int i : p) {
     			double value = p.get(i);

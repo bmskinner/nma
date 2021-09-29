@@ -52,18 +52,17 @@ import com.bmskinner.nuclear_morphology.components.datasets.IClusterGroup;
 import com.bmskinner.nuclear_morphology.components.datasets.VirtualCellCollection;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
-import com.bmskinner.nuclear_morphology.components.nuclei.NucleusType;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.ICannyOptions;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions.ClusteringMethod;
-import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
-import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
-import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
-import com.bmskinner.nuclear_morphology.components.profiles.UnsegmentedProfileException;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
+import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
+import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.profiles.UnsegmentedProfileException;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.io.Io;
@@ -123,7 +122,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
         } else {
             ICellCollection collection = dataset.getCollection();
             // check which reference point to use
-            Tag point = Tag.REFERENCE_POINT;
+            Landmark point = Landmark.REFERENCE_POINT;
 
             // get mapping from ordered segments to segment names
             List<IProfileSegment> segments;
@@ -207,7 +206,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
         // assumes all datasets have the same number of segments
         List<IProfileSegment> segments;
         try {
-            segments = options.firstDataset().getCollection().getProfileCollection().getSegments(Tag.REFERENCE_POINT);
+            segments = options.firstDataset().getCollection().getProfileCollection().getSegments(Landmark.REFERENCE_POINT);
         } catch (UnavailableBorderTagException | ProfileException e1) {
             LOGGER.log(Loggable.STACK, "Error getting segments from profile collection", e1);
             return createBlankTable();
@@ -236,7 +235,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 
             try {
             	List<IProfileSegment> segs = collection.getProfileCollection()
-            			.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN)
+            			.getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN)
                         .getOrderedSegments();
             	
             	List<Object> rowData = new ArrayList<>();
@@ -285,7 +284,6 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
         columnList.add(Labels.AnalysisParameters.NUCLEUS_TYPE);
         columnList.add(Labels.AnalysisParameters.PROFILE_WINDOW);
         columnList.add(Labels.AnalysisParameters.SOFTWARE_VERSION);
-        columnList.add(Labels.AnalysisParameters.RULE_APPLICATON_TYPE);
         
         if(options.getBoolean(AbstractOptions.SHOW_RECOVER_MERGE_SOURCE_KEY))
         	columnList.add(Labels.Merges.RECOVER_SOURCE);
@@ -396,10 +394,9 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
         dataList.add(createNucleusCircFilterString(nO.get()));
         dataList.add(createAnalysisRunTimeString(options));
         dataList.add(folder);
-        dataList.add(options.getNucleusType().toString());
+        dataList.add(options.getRuleSetCollection().getName());
         dataList.add(options.getProfileWindowProportion());
         dataList.add(dataset.getVersionCreated().toString());
-        dataList.add(options.getRuleApplicationType().toString());
         
         if(this.options.getBoolean(AbstractOptions.SHOW_RECOVER_MERGE_SOURCE_KEY))
         	dataList.add(dataset);
@@ -525,12 +522,8 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
         }
 
         final String NUCLEUS_LABEL = "Nuclei";
-        final String[] valueLabels = { " median", " mean", " S.E.M.", " coefficient of variation", " mean 95% CI", " p(unimodal)" };
-
-        NucleusType type = IAnalysisDataset.getBroadestNucleusType(options.getDatasets()); // default,
-                                                                                           // applies
-                                                                                           // to
-                                                                                           // everything
+        final String[] valueLabels = { " median", " mean", " S.E.M.", 
+        		" coefficient of variation", " mean 95% CI", " p(unimodal)" };
 
         DefaultTableModel model = new DefaultTableModel();
 
@@ -538,7 +531,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 
         List<Object> columnData = new ArrayList<>();
         columnData.add(NUCLEUS_LABEL);
-        for (Measurement stat : Measurement.getNucleusStats(type)) {
+        for (Measurement stat : Measurement.getNucleusStats()) {
             for (String value : valueLabels) {
                 columnData.add(stat.toString() + value);
             }
@@ -564,9 +557,9 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
         List<Object> datasetData = new ArrayList<>();
 
         datasetData.add(collection.size());
-        NucleusType type = IAnalysisDataset.getBroadestNucleusType(options.getDatasets());
+
         DecimalFormat df = new DecimalFormat(DEFAULT_DECIMAL_FORMAT);
-        for (Measurement stat : Measurement.getNucleusStats(type)) {
+        for (Measurement stat : Measurement.getNucleusStats()) {
             double[] stats = collection.getRawValues(stat, CellularComponent.NUCLEUS, scale);
 
             double mean = DoubleStream.of(stats).average().orElse(0);
@@ -875,7 +868,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
             IProfileSegment medianSeg1;
             try {
                 medianSeg1 = dataset.getCollection().getProfileCollection()
-                        .getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN)
+                        .getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN)
                         .getSegmentAt(options.getSegPosition());
             } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException
                     | UnsegmentedProfileException e) {
@@ -896,7 +889,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
                     IProfileSegment medianSeg2;
                     try {
                         medianSeg2 = dataset2.getCollection().getProfileCollection()
-                                .getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN)
+                                .getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN)
                                 .getSegmentAt(options.getSegPosition());
                     } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException
                             | UnsegmentedProfileException e) {
@@ -1034,7 +1027,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
             IProfileSegment medianSeg1;
             try {
                 medianSeg1 = dataset.getCollection().getProfileCollection()
-                        .getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN)
+                        .getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN)
                         .getSegmentAt(options.getSegPosition());
             } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException
                     | UnsegmentedProfileException e) {
@@ -1063,7 +1056,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
                     IProfileSegment medianSeg2;
                     try {
                         medianSeg2 = dataset2.getCollection().getProfileCollection()
-                                .getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN)
+                                .getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN)
                                 .getSegmentAt(options.getSegPosition());
                     } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException
                             | UnsegmentedProfileException e) {
@@ -1169,8 +1162,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
         	if(op.getBoolean(t.toString()))
         		builder.append(t+Io.NEWLINE);
  
-        NucleusType type = IAnalysisDataset.getBroadestNucleusType(options.getDatasets());
-        for (Measurement stat : Measurement.getNucleusStats(type))
+        for (Measurement stat : Measurement.getNucleusStats())
         	if(op.isIncludeStatistic(stat))
         		builder.append(stat.toString()+Io.NEWLINE);
 

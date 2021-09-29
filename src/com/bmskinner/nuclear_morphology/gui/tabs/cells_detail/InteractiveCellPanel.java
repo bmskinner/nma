@@ -37,7 +37,7 @@ import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.DefaultOptions;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.gui.events.CellUpdatedEventListener;
 import com.bmskinner.nuclear_morphology.gui.events.CelllUpdateEventHandler;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEventHandler;
@@ -259,19 +259,19 @@ public abstract class InteractiveCellPanel extends JPanel {
         IPoint topPoint;
         IPoint btmPoint;
 
-        if (!n.hasBorderTag(Tag.TOP_VERTICAL) || !n.hasBorderTag(Tag.BOTTOM_VERTICAL)) {
+        if (!n.hasBorderTag(Landmark.TOP_VERTICAL) || !n.hasBorderTag(Landmark.BOTTOM_VERTICAL)) {
             topPoint = n.getCentreOfMass();
-            btmPoint = n.getBorderPoint(Tag.ORIENTATION_POINT);
+            btmPoint = n.getBorderPoint(Landmark.ORIENTATION_POINT);
 
         } else {
 
-            topPoint = n.getBorderPoint(Tag.TOP_VERTICAL);
-            btmPoint = n.getBorderPoint(Tag.BOTTOM_VERTICAL);
+            topPoint = n.getBorderPoint(Landmark.TOP_VERTICAL);
+            btmPoint = n.getBorderPoint(Landmark.BOTTOM_VERTICAL);
 
             // Sometimes the points have been set to overlap in older datasets
             if (topPoint.overlapsPerfectly(btmPoint)) {
                 topPoint = n.getCentreOfMass();
-                btmPoint = n.getBorderPoint(Tag.ORIENTATION_POINT);
+                btmPoint = n.getBorderPoint(Landmark.ORIENTATION_POINT);
             }
         }
 

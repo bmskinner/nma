@@ -30,7 +30,7 @@ import com.bmskinner.nuclear_morphology.analysis.mesh.Mesh;
 import com.bmskinner.nuclear_morphology.analysis.mesh.MeshCreationException;
 import com.bmskinner.nuclear_morphology.analysis.mesh.MeshFace;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.components.Profileable;
+import com.bmskinner.nuclear_morphology.components.Taggable;
 import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.UnavailableComponentException;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
@@ -43,8 +43,8 @@ import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions.ClusteringMethod;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
 import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -189,7 +189,7 @@ public class TreeBuildingMethod extends CellClusteringMethod {
         int profileAttributeCount = 0;
 
      // How many attributes per profile?  
-        double profileWindow = Profileable.DEFAULT_PROFILE_WINDOW_PROPORTION;
+        double profileWindow = Taggable.DEFAULT_PROFILE_WINDOW_PROPORTION;
         if (dataset.hasAnalysisOptions()) 
         	profileWindow = dataset.getAnalysisOptions().orElseThrow(NullPointerException::new).getProfileWindowProportion();
         
@@ -203,7 +203,7 @@ public class TreeBuildingMethod extends CellClusteringMethod {
         	}
         }
 
-        for (Measurement stat : Measurement.getNucleusStats(collection.getNucleusType())) {
+        for (Measurement stat : Measurement.getNucleusStats()) {
             if (options.isIncludeStatistic(stat)) {
             	LOGGER.finer("Adding attribute count for "+stat);
                 attributeCount++;
@@ -244,7 +244,7 @@ public class TreeBuildingMethod extends CellClusteringMethod {
         	}
         }
 
-        for (Measurement stat : Measurement.getNucleusStats(collection.getNucleusType())) {
+        for (Measurement stat : Measurement.getNucleusStats()) {
             if (options.isIncludeStatistic(stat)) {
             	LOGGER.finer("Creating attribute for "+stat);
                 Attribute a = new Attribute(stat.toString());
@@ -285,7 +285,7 @@ public class TreeBuildingMethod extends CellClusteringMethod {
     @Override
 	protected Instances makeInstances() throws ClusteringMethodException {
     	LOGGER.finer("Creating clusterable instances");
-        double windowProportion = Profileable.DEFAULT_PROFILE_WINDOW_PROPORTION;
+        double windowProportion = Taggable.DEFAULT_PROFILE_WINDOW_PROPORTION;
         if (dataset.hasAnalysisOptions())// Merged datasets may not have options
             windowProportion = dataset.getAnalysisOptions().orElseThrow(NullPointerException::new).getProfileWindowProportion();
 
@@ -382,7 +382,7 @@ public class TreeBuildingMethod extends CellClusteringMethod {
         	if(options.getBoolean(t.toString()))    {	
         		LOGGER.finer("Adding attribute for "+t.toString());
         		// Interpolate the profile to the median length
-                IProfile p = n.getProfile(t, Tag.REFERENCE_POINT);
+                IProfile p = n.getProfile(t, Landmark.REFERENCE_POINT);
 
                 for (int i = 0; i < pointsToSample; i++) {
                     Attribute att = attributes.get(attNumber);
@@ -392,12 +392,12 @@ public class TreeBuildingMethod extends CellClusteringMethod {
         	}
         }
 
-        for (Measurement stat : Measurement.getNucleusStats(collection.getNucleusType())) {
+        for (Measurement stat : Measurement.getNucleusStats()) {
             if (options.isIncludeStatistic(stat)) {
                 Attribute att = attributes.get(attNumber++);
                 
                 if(Measurement.VARIABILITY.equals(stat)) {
-                	 inst.setValue(att, collection.getNormalisedDifferenceToMedian(Tag.REFERENCE_POINT, n));
+                	 inst.setValue(att, collection.getNormalisedDifferenceToMedian(Landmark.REFERENCE_POINT, n));
                 } else {
                 	inst.setValue(att, n.getStatistic(stat, MeasurementScale.MICRONS));
                 }

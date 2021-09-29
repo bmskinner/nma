@@ -28,7 +28,7 @@ import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.UnsegmentedProfileException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
@@ -59,7 +59,7 @@ public class ProfileOffsetter {
      * 
      * @throws ProfileOffsetException
      */
-    public void assignBorderTagToNucleiViaFrankenProfile(Tag tag) throws ProfileOffsetException {
+    public void assignBorderTagToNucleiViaFrankenProfile(Landmark tag) throws ProfileOffsetException {
 
         int index;
         try {
@@ -74,7 +74,7 @@ public class ProfileOffsetter {
         try {
             segID = collection.getProfileCollection().getSegmentContaining(tag).getID();
 
-            profile = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT,
+            profile = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT,
             		Stats.MEDIAN);
 
             segFromRef = profile.getSegment(segID);
@@ -132,8 +132,8 @@ public class ProfileOffsetter {
          * Franken profile method: segment proportionality
          */
 
-        assignBorderTagToNucleiViaFrankenProfile(Tag.TOP_VERTICAL);
-        assignBorderTagToNucleiViaFrankenProfile(Tag.BOTTOM_VERTICAL);
+        assignBorderTagToNucleiViaFrankenProfile(Landmark.TOP_VERTICAL);
+        assignBorderTagToNucleiViaFrankenProfile(Landmark.BOTTOM_VERTICAL);
 
         for (Nucleus nucleus : collection.getNuclei()) {
             nucleus.updateVerticallyRotatedNucleus();

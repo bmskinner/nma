@@ -32,7 +32,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellDetector;
 import com.bmskinner.nuclear_morphology.components.Imageable;
-import com.bmskinner.nuclear_morphology.components.Profileable;
+import com.bmskinner.nuclear_morphology.components.Taggable;
 import com.bmskinner.nuclear_morphology.components.UnavailableBorderPointException;
 import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
@@ -43,8 +43,8 @@ import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
 import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalCollection;
@@ -73,16 +73,16 @@ public class ImageAnnotator extends AbstractImageFilterer {
 	/** Converts resized images to original image dimensions */
     private double scale = 1;
     
-    private static final Map<Tag, Color> DEFAULT_TAG_COLOURS = new HashMap<>();
+    private static final Map<Landmark, Color> DEFAULT_TAG_COLOURS = new HashMap<>();
 
     public ImageAnnotator(final ImageProcessor ip) {
         super(ip);
         
-        DEFAULT_TAG_COLOURS.put(Tag.REFERENCE_POINT, Color.ORANGE);
-        DEFAULT_TAG_COLOURS.put(Tag.ORIENTATION_POINT, Color.BLUE);
-        DEFAULT_TAG_COLOURS.put(Tag.TOP_VERTICAL, Color.GREEN);
-        DEFAULT_TAG_COLOURS.put(Tag.BOTTOM_VERTICAL, Color.GREEN);
-        DEFAULT_TAG_COLOURS.put(Tag.INTERSECTION_POINT, Color.CYAN);
+        DEFAULT_TAG_COLOURS.put(Landmark.REFERENCE_POINT, Color.ORANGE);
+        DEFAULT_TAG_COLOURS.put(Landmark.ORIENTATION_POINT, Color.BLUE);
+        DEFAULT_TAG_COLOURS.put(Landmark.TOP_VERTICAL, Color.GREEN);
+        DEFAULT_TAG_COLOURS.put(Landmark.BOTTOM_VERTICAL, Color.GREEN);
+        DEFAULT_TAG_COLOURS.put(Landmark.INTERSECTION_POINT, Color.CYAN);
     }
     
     /**
@@ -91,7 +91,7 @@ public class ImageAnnotator extends AbstractImageFilterer {
      * @param t the tag to get a colour for
      * @return the defined colour, or a default colour
      */
-    private Color getDefaultColour(Tag t) {
+    private Color getDefaultColour(Landmark t) {
     	if(DEFAULT_TAG_COLOURS.containsKey(t))
     		return DEFAULT_TAG_COLOURS.get(t);
     	return Color.PINK;
@@ -198,8 +198,8 @@ public class ImageAnnotator extends AbstractImageFilterer {
          
             try {
                 // Draw lines for the border tags   
-            	for(Tag t : n.getBorderTags().keySet()) {
-            		if(Tag.INTERSECTION_POINT.equals(t)) // Not required to be drawn
+            	for(Landmark t : n.getBorderTags().keySet()) {
+            		if(Landmark.INTERSECTION_POINT.equals(t)) // Not required to be drawn
             			continue;
             		Color c = getDefaultColour(t);
             		annotateLine(n.getCentreOfMass().plus(Imageable.COMPONENT_BUFFER), 
@@ -212,15 +212,15 @@ public class ImageAnnotator extends AbstractImageFilterer {
             }
             
             // Colour the border points for segments    
-            ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+            ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
             if (profile.hasSegments()) { 
 
             	for(IProfileSegment seg : profile.getOrderedSegments()) {
             		Paint color = ColourSelecter.getColor(seg.getPosition(), GlobalOptions.getInstance().getSwatch());
             		Iterator<Integer> it = seg.iterator();
-            		int lastIndex = n.getOffsetBorderIndex(Tag.REFERENCE_POINT, seg.getEndIndex());
+            		int lastIndex = n.getOffsetBorderIndex(Landmark.REFERENCE_POINT, seg.getEndIndex());
             		while(it.hasNext()) {
-            			int index = n.getOffsetBorderIndex(Tag.REFERENCE_POINT, it.next());
+            			int index = n.getOffsetBorderIndex(Landmark.REFERENCE_POINT, it.next());
         				IPoint p = n.getBorderPoint(index).plus(Imageable.COMPONENT_BUFFER);
             			try {
             				
@@ -233,7 +233,7 @@ public class ImageAnnotator extends AbstractImageFilterer {
             	}
             	
             	// Draw the RP again because it will be drawn over by the final segment
-            	IPoint rp = n.getBorderPoint(Tag.REFERENCE_POINT).plus(Imageable.COMPONENT_BUFFER);
+            	IPoint rp = n.getBorderPoint(Landmark.REFERENCE_POINT).plus(Imageable.COMPONENT_BUFFER);
             	annotatePoint(rp, ColourSelecter.getColor(0), 3);
             }
             annotatePoint(n.getCentreOfMass().plus(Imageable.COMPONENT_BUFFER), Color.PINK, RP_POINT_SIZE);
@@ -401,7 +401,7 @@ public class ImageAnnotator extends AbstractImageFilterer {
      */
     public ImageAnnotator annotateOP(Nucleus n) {
         try {
-            return annotatePoint(n.getBorderPoint(Tag.ORIENTATION_POINT), Color.CYAN);
+            return annotatePoint(n.getBorderPoint(Landmark.ORIENTATION_POINT), Color.CYAN);
         } catch (UnavailableBorderTagException e) {
             LOGGER.log(Loggable.STACK, "Cannot find border tag OP", e);
         }
@@ -417,7 +417,7 @@ public class ImageAnnotator extends AbstractImageFilterer {
      */
     public ImageAnnotator annotateRP(Nucleus n) {
         try {
-            return annotatePoint(n.getBorderPoint(Tag.REFERENCE_POINT), Color.YELLOW);
+            return annotatePoint(n.getBorderPoint(Landmark.REFERENCE_POINT), Color.YELLOW);
         } catch (UnavailableBorderTagException e) {
             LOGGER.log(Loggable.STACK, "Cannot find border tag RP", e);
             return this;
@@ -602,7 +602,7 @@ public class ImageAnnotator extends AbstractImageFilterer {
      *            the component
      * @return the annotator
      */
-    public ImageAnnotator annotateMinFeret(Profileable n) {
+    public ImageAnnotator annotateMinFeret(Taggable n) {
         int minIndex;
         try {
             minIndex = n.getProfile(ProfileType.DIAMETER).getIndexOfMin();
@@ -623,7 +623,7 @@ public class ImageAnnotator extends AbstractImageFilterer {
      * @param n the component
      * @return the annotator
      */
-    public ImageAnnotator annotateSegments(Profileable n) {
+    public ImageAnnotator annotateSegments(Taggable n) {
 
         try {
         	// only draw if there are segments
@@ -661,7 +661,7 @@ public class ImageAnnotator extends AbstractImageFilterer {
      * @param n the component
      * @return the annotator
      */
-    public ImageAnnotator annotateSegments(Profileable n, Imageable template) {
+    public ImageAnnotator annotateSegments(Taggable n, Imageable template) {
 
         try {
 

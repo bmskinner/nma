@@ -15,7 +15,8 @@ import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.NucleusType;
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
+import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.utility.AngleTools;
 
 public class RotatableTest extends ComponentTester {
@@ -55,7 +56,7 @@ public class RotatableTest extends ComponentTester {
 		
 		// Create a single nucleus dataset
 		IAnalysisDataset t = new TestDatasetBuilder(1234).cellCount(1)
-				.ofType(NucleusType.ROUND)
+				.ofType(RuleSetCollection.roundRuleSetCollection())
 				.withMaxSizeVariation(0)
 				.randomOffsetProfiles(true)
 				.segmented().build();
@@ -80,7 +81,7 @@ public class RotatableTest extends ComponentTester {
 
 			// Make a new single nucleus dataset
 			IAnalysisDataset d = new TestDatasetBuilder(1234).cellCount(1)
-					.ofType(NucleusType.ROUND)
+					.ofType(RuleSetCollection.roundRuleSetCollection())
 					.withMaxSizeVariation(0)
 					.randomOffsetProfiles(true)
 					.segmented().build();
@@ -90,12 +91,12 @@ public class RotatableTest extends ComponentTester {
 				
 				// Set the TV and BV to the current indices
 				Nucleus n = c.getPrimaryNucleus();
-				n.setBorderTag(Tag.TOP_VERTICAL, tIndex);
-				n.setBorderTag(Tag.BOTTOM_VERTICAL, bIndex);
+				n.setBorderTag(Landmark.TOP_VERTICAL, tIndex);
+				n.setBorderTag(Landmark.BOTTOM_VERTICAL, bIndex);
 				n.alignVertically();
 				
-				IPoint tv = n.getBorderPoint(Tag.TOP_VERTICAL);
-				IPoint bv = n.getBorderPoint(Tag.BOTTOM_VERTICAL);
+				IPoint tv = n.getBorderPoint(Landmark.TOP_VERTICAL);
+				IPoint bv = n.getBorderPoint(Landmark.BOTTOM_VERTICAL);
 
 				// Test if the TV and BV points are vertical after rotation
 				boolean areVertical = areVertical(tv, bv);

@@ -60,7 +60,7 @@ public class FluorescentNucleusFinder extends CellFinder {
     
     public FluorescentNucleusFinder(@NonNull final IAnalysisOptions op) {
         super(op);
-        nuclFactory = new NucleusFactory(op.getNucleusType());
+        nuclFactory = new NucleusFactory();
         Optional<? extends IDetectionOptions> n = options.getDetectionOptions(CellularComponent.NUCLEUS);
         if(!n.isPresent())
         	throw new IllegalArgumentException("No nucleus options");

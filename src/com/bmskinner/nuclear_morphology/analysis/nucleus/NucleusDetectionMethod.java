@@ -213,7 +213,7 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
         	return;
 
         ICellCollection folderCollection = new DefaultCellCollection(folder, outputFolder.getName(), folder.getName(),
-                templateOptions.getNucleusType());
+                templateOptions.getRuleSetCollection());
 
         collectionGroup.put(folder, folderCollection);
 

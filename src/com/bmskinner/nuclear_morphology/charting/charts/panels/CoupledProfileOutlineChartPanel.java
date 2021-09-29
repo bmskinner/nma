@@ -40,7 +40,7 @@ import com.bmskinner.nuclear_morphology.components.UnavailableBorderPointExcepti
 import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.generic.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -125,7 +125,7 @@ public class CoupledProfileOutlineChartPanel {
                 // Take from the angle profile directly
                 double yValue;
                 try {
-                    yValue = obj.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).get(xValue);
+                    yValue = obj.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT).get(xValue);
                 } catch (ProfileException | IndexOutOfBoundsException | UnavailableBorderTagException
                         | UnavailableProfileTypeException e1) {
                     LOGGER.warning("Error getting y-value");
@@ -185,7 +185,7 @@ public class CoupledProfileOutlineChartPanel {
     private IBorderPoint getPointFromProfileIndex(int index) throws UnavailableBorderPointException, UnavailableBorderTagException{
         // Find the index of the border point with the current profile chart x
         // value
-        int rpIndex = obj.getBorderIndex(Tag.REFERENCE_POINT);
+        int rpIndex = obj.getBorderIndex(Landmark.REFERENCE_POINT);
         int xIndex = obj.wrapIndex(index + rpIndex);
 
         // Get that border point

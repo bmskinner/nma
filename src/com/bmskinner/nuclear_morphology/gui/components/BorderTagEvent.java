@@ -18,7 +18,7 @@ package com.bmskinner.nuclear_morphology.gui.components;
 
 import java.util.EventObject;
 
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 
 /**
  * Border tag events indicate a change to the position of a border tag in a
@@ -31,7 +31,7 @@ import com.bmskinner.nuclear_morphology.components.profiles.Tag;
 @SuppressWarnings("serial")
 public class BorderTagEvent extends EventObject {
 
-    private Tag tag;
+    private Landmark tag;
     private int index;
 
     /**
@@ -41,13 +41,13 @@ public class BorderTagEvent extends EventObject {
      * @param tag the affected border tag
      * @param index the affected index
      */
-    public BorderTagEvent(Object source, Tag tag, int index) {
+    public BorderTagEvent(Object source, Landmark tag, int index) {
         super(source);
         this.tag = tag;
         this.index = index;
     }
 
-    public Tag getTag() {
+    public Landmark getTag() {
         return tag;
     }
 

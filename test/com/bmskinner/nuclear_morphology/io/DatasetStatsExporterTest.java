@@ -15,6 +15,7 @@ import com.bmskinner.nuclear_morphology.components.nuclei.NucleusType;
 import com.bmskinner.nuclear_morphology.components.options.DefaultOptions;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
+import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 
 public class DatasetStatsExporterTest {
 
@@ -32,7 +33,7 @@ public class DatasetStatsExporterTest {
 				.cellCount(1)
 				.baseHeight(500)
 				.baseWidth(1000)
-				.ofType(NucleusType.ROUND)
+				.ofType(RuleSetCollection.roundRuleSetCollection())
 				.segmented()
 				.build();
 		

@@ -17,6 +17,7 @@ import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclei.DefaultNucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.NucleusType;
+import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 
 /**
  * Test for classes implementing the CellularComponent interface
@@ -57,7 +58,7 @@ public class CellularComponentTest  extends ComponentTester {
 	 */
 	public static CellularComponent createInstance(Class<? extends CellularComponent> source) throws Exception {
 		IAnalysisDataset d = new TestDatasetBuilder(RNG_SEED).cellCount(N_CELLS)
-				.ofType(NucleusType.ROUND)
+				.ofType(RuleSetCollection.roundRuleSetCollection())
 				.randomOffsetProfiles(true)
 				.addSignalsInChannel(0)
 				.segmented().build();

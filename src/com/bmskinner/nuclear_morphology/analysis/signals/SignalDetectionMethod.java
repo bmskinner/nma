@@ -39,7 +39,7 @@ import com.bmskinner.nuclear_morphology.components.datasets.VirtualCellCollectio
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.NucleusType;
 import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalCollection;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
@@ -150,10 +150,10 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
             LOGGER.fine("Calculating signal angles");
 
             // If the nucleus is asymmetric, calculate angles
-            if (!dataset.getCollection().getNucleusType().equals(NucleusType.ROUND)) {
-                if (n.hasBorderTag(Tag.ORIENTATION_POINT)) {
+            if (dataset.getCollection().getRuleSetCollection().isAsymmetric()) {
+                if (n.hasBorderTag(Landmark.ORIENTATION_POINT)) {
                     LOGGER.finest( "Calculating angle from orientation point");
-                    n.calculateSignalAnglesFromPoint(n.getBorderPoint(Tag.ORIENTATION_POINT));
+                    n.calculateSignalAnglesFromPoint(n.getBorderPoint(Landmark.ORIENTATION_POINT));
                 } else {
                     LOGGER.finest( "No orientation point in nucleus");
                 }

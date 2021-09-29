@@ -8,6 +8,7 @@ import com.bmskinner.nuclear_morphology.TestDatasetBuilder;
 import com.bmskinner.nuclear_morphology.TestDatasetBuilder.TestComponentShape;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclei.NucleusType;
+import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 
 public class DatasetSegmentationMethodTest extends AbstractProfileMethodTest {
 		
@@ -39,7 +40,7 @@ public class DatasetSegmentationMethodTest extends AbstractProfileMethodTest {
 		for(int i=1; i<=maxCells; i++) {
 			IAnalysisDataset dataset = new TestDatasetBuilder(RNG_SEED).cellCount(i)
 					.baseHeight(40).baseWidth(40)
-					.ofType(NucleusType.ROUND)
+					.ofType(RuleSetCollection.roundRuleSetCollection())
 					.randomOffsetProfiles(false)
 					.segmented().build();
 			testSegmentationIsConsistent(dataset);
@@ -57,7 +58,7 @@ public class DatasetSegmentationMethodTest extends AbstractProfileMethodTest {
 		for(int i=1; i<=maxCells; i++) {
 			IAnalysisDataset dataset = new TestDatasetBuilder(RNG_SEED).cellCount(i)
 					.baseHeight(40).baseWidth(40)
-					.ofType(NucleusType.ROUND)
+					.ofType(RuleSetCollection.roundRuleSetCollection())
 					.randomOffsetProfiles(false)
 					.fixedProfileOffset(50)
 					.segmented().build();
@@ -75,7 +76,7 @@ public class DatasetSegmentationMethodTest extends AbstractProfileMethodTest {
 		for(int i=1; i<=maxCells; i++) {
 			IAnalysisDataset dataset = new TestDatasetBuilder(RNG_SEED).cellCount(i)
 					.baseHeight(40).baseWidth(40)
-					.ofType(NucleusType.ROUND)
+					.ofType(RuleSetCollection.roundRuleSetCollection())
 					.randomOffsetProfiles(true)
 					.segmented().build();
 			testSegmentationIsConsistent(dataset);

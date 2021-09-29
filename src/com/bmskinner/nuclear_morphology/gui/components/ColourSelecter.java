@@ -18,7 +18,7 @@ package com.bmskinner.nuclear_morphology.gui.components;
 
 import java.awt.Color;
 
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 
 /**
@@ -114,16 +114,16 @@ public class ColourSelecter {
      * @param tag the tag to get a color for
      * @return the colour
      */
-    public static Color getColour(Tag tag) {
+    public static Color getColour(Landmark tag) {
     	
-    	if(Tag.BOTTOM_VERTICAL.equals(tag) ||
-    		Tag.TOP_VERTICAL.equals(tag))
+    	if(Landmark.BOTTOM_VERTICAL.equals(tag) ||
+    		Landmark.TOP_VERTICAL.equals(tag))
     		return(Color.GREEN);
     	
-    	if(Tag.REFERENCE_POINT.equals(tag))
+    	if(Landmark.REFERENCE_POINT.equals(tag))
     		return Color.ORANGE;
     	
-    	if(Tag.ORIENTATION_POINT.equals(tag))
+    	if(Landmark.ORIENTATION_POINT.equals(tag))
     		return Color.BLUE;
     	
     	return Color.BLACK;

@@ -35,7 +35,7 @@ import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 
 @SuppressWarnings("serial")
@@ -125,7 +125,7 @@ public class KruskalTestDialog extends LoadingIconDialog {
         list.add(dataset2);
 
         ChartOptions options = new ChartOptionsBuilder().setDatasets(list).setNormalised(true)
-                .setAlignment(ProfileAlignment.LEFT).setTag(Tag.REFERENCE_POINT).setShowMarkers(false)
+                .setAlignment(ProfileAlignment.LEFT).setTag(Landmark.REFERENCE_POINT).setShowMarkers(false)
                 .setProfileType(ProfileType.FRANKEN).build();
 
         JFreeChart chart = new MorphologyChartFactory(options).makeKruskalWallisChart();

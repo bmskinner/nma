@@ -6,7 +6,7 @@ import org.junit.Test;
 import com.bmskinner.nuclear_morphology.ComponentTester;
 import com.bmskinner.nuclear_morphology.TestDatasetBuilder;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.nuclei.NucleusType;
+import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
 
 /**
@@ -23,7 +23,7 @@ public class DefaultNuclearSignalTest extends ComponentTester {
 	@Before
 	public void setUp() throws Exception {
 		IAnalysisDataset d = new TestDatasetBuilder(RNG_SEED).cellCount(N_CELLS)
-				.ofType(NucleusType.ROUND)
+				.ofType(RuleSetCollection.roundRuleSetCollection())
 				.withMaxSizeVariation(10)
 				.randomOffsetProfiles(true)
 				.addSignalsInChannel(0)

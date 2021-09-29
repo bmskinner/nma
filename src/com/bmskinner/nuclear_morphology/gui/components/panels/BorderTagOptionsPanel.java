@@ -22,21 +22,21 @@ import java.util.Map;
 import javax.swing.ButtonGroup;
 import javax.swing.JRadioButton;
 
-import com.bmskinner.nuclear_morphology.components.profiles.BorderTagObject;
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
-import com.bmskinner.nuclear_morphology.components.profiles.BorderTagObject.BorderTagType;
+import com.bmskinner.nuclear_morphology.components.profiles.DefaultLandmark;
+import com.bmskinner.nuclear_morphology.components.profiles.LandmarkType;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 
 @SuppressWarnings("serial")
 public class BorderTagOptionsPanel extends EnumeratedOptionsPanel {
 
-    private Map<Tag, JRadioButton> map = new HashMap<>();
+    private Map<Landmark, JRadioButton> map = new HashMap<>();
 
     public BorderTagOptionsPanel() {
 
         super();
         final ButtonGroup group = new ButtonGroup();
 
-        for (BorderTagObject type : BorderTagObject.values(BorderTagType.CORE)) {
+        for (DefaultLandmark type : DefaultLandmark.values(LandmarkType.CORE)) {
             JRadioButton button = new JRadioButton(type.toString());
             button.setActionCommand(type.toString());
             button.addActionListener(this);
@@ -45,12 +45,12 @@ public class BorderTagOptionsPanel extends EnumeratedOptionsPanel {
             map.put(type, button);
         }
         // Set the default
-        map.get(Tag.REFERENCE_POINT).setSelected(true);
+        map.get(Landmark.REFERENCE_POINT).setSelected(true);
 
     }
 
     public void setEnabled(boolean b) {
-        for (Tag type : BorderTagObject.values(BorderTagType.CORE))
+        for (Landmark type : DefaultLandmark.values(LandmarkType.CORE))
             map.get(type).setEnabled(b);
     }
 
@@ -59,8 +59,8 @@ public class BorderTagOptionsPanel extends EnumeratedOptionsPanel {
      * 
      * @return
      */
-    public Tag getSelected() {
-        for (Tag type : BorderTagObject.values(BorderTagType.CORE)) {
+    public Landmark getSelected() {
+        for (Landmark type : DefaultLandmark.values(LandmarkType.CORE)) {
             JRadioButton button = map.get(type);
             if (button.isSelected())
                 return type;

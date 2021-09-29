@@ -51,7 +51,7 @@ import com.bmskinner.nuclear_morphology.components.profiles.BooleanProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.profiles.UnsegmentedProfileException;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
@@ -204,7 +204,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
 		
 		if (options.isShowMarkers()) {
 
-			for (Tag tag : collection.getProfileCollection().getBorderTags()) {
+			for (Landmark tag : collection.getProfileCollection().getBorderTags()) {
 
 				try {
 					int index = collection.getProfileCollection().getIndex(tag);
@@ -407,7 +407,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
 	 * @param plot the plot to draw the domain markers on
 	 */
 	protected void addBorderTagMarkers(@NonNull Taggable n, @NonNull XYPlot plot) {
-		for (Tag tag : n.getBorderTags().keySet()) {
+		for (Landmark tag : n.getBorderTags().keySet()) {
 			try {
 				// get the index of the tag
 				int index = n.getBorderIndex(tag);

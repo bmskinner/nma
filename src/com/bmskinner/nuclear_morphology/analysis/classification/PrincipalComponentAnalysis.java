@@ -30,7 +30,7 @@ import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.SingleDatasetAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.components.Profileable;
+import com.bmskinner.nuclear_morphology.components.Taggable;
 import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
@@ -40,8 +40,8 @@ import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
 import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
 
 import weka.attributeSelection.PrincipalComponents;
@@ -126,7 +126,7 @@ public class PrincipalComponentAnalysis extends SingleDatasetAnalysisMethod {
 	  
 	private FastVector createAttributes() {
 		
-		double profileWindow = Profileable.DEFAULT_PROFILE_WINDOW_PROPORTION;
+		double profileWindow = Taggable.DEFAULT_PROFILE_WINDOW_PROPORTION;
 		if (dataset.hasAnalysisOptions()) 
             profileWindow = dataset.getAnalysisOptions().get().getProfileWindowProportion();
 
@@ -141,7 +141,7 @@ public class PrincipalComponentAnalysis extends SingleDatasetAnalysisMethod {
         	}
         }
 
-        for (Measurement stat : Measurement.getNucleusStats(dataset.getCollection().getNucleusType())) {
+        for (Measurement stat : Measurement.getNucleusStats()) {
             if (options.getBoolean(stat.toString())) {
                 Attribute a = new Attribute(stat.toString());
                 attributes.addElement(a);
@@ -153,7 +153,7 @@ public class PrincipalComponentAnalysis extends SingleDatasetAnalysisMethod {
 
     private Instances createInstances() throws ClusteringMethodException {
 
-        double windowProportion = Profileable.DEFAULT_PROFILE_WINDOW_PROPORTION;
+        double windowProportion = Taggable.DEFAULT_PROFILE_WINDOW_PROPORTION;
         if (dataset.hasAnalysisOptions())// Merged datasets may not have options
             windowProportion = dataset.getAnalysisOptions().get().getProfileWindowProportion();
 
@@ -191,7 +191,7 @@ public class PrincipalComponentAnalysis extends SingleDatasetAnalysisMethod {
 
         for(ProfileType t : ProfileType.displayValues()) {
         	if (options.getBoolean(t.toString())) {
-        		IProfile p = n.getProfile(t, Tag.REFERENCE_POINT);
+        		IProfile p = n.getProfile(t, Landmark.REFERENCE_POINT);
         		for (int i = 0; i < pointsToSample; i++) {
         			Attribute att = (Attribute) attributes.elementAt(i);
         			inst.setValue(att, p.get(i * windowProportion));
@@ -200,9 +200,7 @@ public class PrincipalComponentAnalysis extends SingleDatasetAnalysisMethod {
         	}
         }
         
-        for (Measurement stat : Measurement.getNucleusStats(dataset
-        		.getCollection()
-        		.getNucleusType())) {
+        for (Measurement stat : Measurement.getNucleusStats()) {
         	
         	if (options.getBoolean(stat.toString())) {
         		Attribute att = (Attribute) attributes.elementAt(attNumber++);

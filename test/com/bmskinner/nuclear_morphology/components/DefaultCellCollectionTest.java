@@ -32,6 +32,7 @@ import com.bmskinner.nuclear_morphology.TestDatasetBuilder;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.nuclei.NucleusType;
+import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 
 /**
  * @author bms41
@@ -51,7 +52,7 @@ public class DefaultCellCollectionTest extends ComponentTester {
     public void setUp() throws Exception {
     	super.setUp();
     	d = new TestDatasetBuilder(RNG_SEED).cellCount(N_CELLS)
-				.ofType(NucleusType.ROUND)
+				.ofType(RuleSetCollection.roundRuleSetCollection())
 				.withMaxSizeVariation(10)
 				.randomOffsetProfiles(true)
 				.numberOfClusters(N_CHILD_DATASETS)

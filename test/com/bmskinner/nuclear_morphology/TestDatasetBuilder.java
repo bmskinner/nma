@@ -22,6 +22,7 @@ import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
 import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
+import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.components.signals.DefaultSignalGroup;
 import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
@@ -60,7 +61,7 @@ public class TestDatasetBuilder {
 	public static final TestComponentShape DEFAULT_NUCLEUS_SHAPE = TestComponentShape.SQUARE;
 	
 	private IAnalysisDataset d;
-	private NucleusType type = NucleusType.ROUND;
+	private RuleSetCollection rsc = RuleSetCollection.roundRuleSetCollection();
 	private int nCells = DEFAULT_N_CELLS;
 	private int maxVariation = DEFAULT_VARIATION;
 	private int xBase = DEFAULT_X_BASE;
@@ -123,7 +124,8 @@ public class TestDatasetBuilder {
 		LOGGER.finest("Building dataset");		
 		switch(nucleusShape) {
 		case SQUARE: 
-		default: d = createRectangularDataset(nCells, type, maxVariation, w, h, xBase, yBase, maxRotation, offset, fixedOffset);
+		default: d = createRectangularDataset(nCells, rsc, maxVariation, w, h, xBase, 
+				yBase, maxRotation, offset, fixedOffset);
 		}
 		d.setRoot(true);
 		if(segment || profile)
@@ -174,8 +176,8 @@ public class TestDatasetBuilder {
 		return this;
 	}
 	
-	public TestDatasetBuilder ofType(NucleusType type) {
-		this.type = type;
+	public TestDatasetBuilder ofType(RuleSetCollection rsc) {
+		this.rsc = rsc;
 		return this;
 	}
 	
@@ -319,9 +321,10 @@ public class TestDatasetBuilder {
 	 * @return
 	 * @throws ComponentCreationException
 	 */
-	private IAnalysisDataset createRectangularDataset(int nCells, NucleusType type, int maxSizeVariation, int baseWidth, int baseHeight, int xBase, int yBase, int maxRotationDegrees, boolean randomOffsetStart, int fixedStartOffset) throws ComponentCreationException {
+	private IAnalysisDataset createRectangularDataset(int nCells, RuleSetCollection rsc, int maxSizeVariation, int baseWidth, int baseHeight, int xBase, int yBase, int maxRotationDegrees, boolean randomOffsetStart, int fixedStartOffset) throws ComponentCreationException {
 		
-		ICellCollection collection = new DefaultCellCollection(new File(TEST_DATASET_IMAGE_FOLDER), TEST_DATASET_NAME, TEST_DATASET_NAME, type, TEST_DATASET_UUID);
+		ICellCollection collection = new DefaultCellCollection(new File(TEST_DATASET_IMAGE_FOLDER), 
+				TEST_DATASET_NAME, TEST_DATASET_NAME, rsc, TEST_DATASET_UUID);
 		
 		IAnalysisOptions o =  OptionsFactory.makeDefaultRoundAnalysisOptions(collection.getFolder());
 		o.getNuclusDetectionOptions().get().setMinSize( (baseWidth-maxSizeVariation)*(baseHeight-maxSizeVariation) );

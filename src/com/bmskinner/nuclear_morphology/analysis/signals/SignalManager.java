@@ -36,7 +36,7 @@ import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.measure.MeasurementDimension;
 import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.signals.Colocalisation;
 import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult;
@@ -513,7 +513,7 @@ public class SignalManager {
         LOGGER.finer( "Recalcalculating signal angles");
         for (Nucleus n : collection.getNuclei()) {
             try {
-                n.calculateSignalAnglesFromPoint(n.getBorderPoint(Tag.ORIENTATION_POINT));
+                n.calculateSignalAnglesFromPoint(n.getBorderPoint(Landmark.ORIENTATION_POINT));
             } catch (UnavailableBorderTagException e) {
                 LOGGER.fine("Cannot get OP index");
             }

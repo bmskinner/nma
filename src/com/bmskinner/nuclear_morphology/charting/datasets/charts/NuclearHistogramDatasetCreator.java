@@ -39,7 +39,7 @@ import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.profiles.UnsegmentedProfileException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -180,7 +180,7 @@ public class NuclearHistogramDatasetCreator extends HistogramDatasetCreator {
 
             try {
 
-                IProfileSegment medianSeg = collection.getProfileCollection().getSegmentAt(Tag.REFERENCE_POINT,
+                IProfileSegment medianSeg = collection.getProfileCollection().getSegmentAt(Landmark.REFERENCE_POINT,
                         options.getSegPosition());
 
                 /*
@@ -231,7 +231,7 @@ public class NuclearHistogramDatasetCreator extends HistogramDatasetCreator {
 
             try {
                 medianSeg = collection.getProfileCollection()
-                        .getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN)
+                        .getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN)
                         .getSegmentAt(options.getSegPosition());
             } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException
                     | UnsegmentedProfileException e) {
@@ -249,7 +249,7 @@ public class NuclearHistogramDatasetCreator extends HistogramDatasetCreator {
 
                 IProfileSegment seg;
                 try {
-                    seg = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegment(medianSeg.getID());
+                    seg = n.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT).getSegment(medianSeg.getID());
                     int indexLength = seg.length();
                     double proportionPerimeter = (double) indexLength / (double) seg.getProfileLength();
                     double length = n.getStatistic(Measurement.PERIMETER, options.getScale())
@@ -278,7 +278,7 @@ public class NuclearHistogramDatasetCreator extends HistogramDatasetCreator {
             IProfileSegment medianSeg;
             try {
                 medianSeg = collection.getProfileCollection()
-                        .getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN)
+                        .getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN)
                         .getSegmentAt(options.getSegPosition());
             } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException
                     | UnsegmentedProfileException e2) {
@@ -296,7 +296,7 @@ public class NuclearHistogramDatasetCreator extends HistogramDatasetCreator {
 
                 IProfileSegment seg;
                 try {
-                    seg = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegment(medianSeg.getID());
+                    seg = n.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT).getSegment(medianSeg.getID());
 
                     int indexLength = seg.length();
                     double proportionPerimeter = (double) indexLength / (double) seg.getProfileLength();

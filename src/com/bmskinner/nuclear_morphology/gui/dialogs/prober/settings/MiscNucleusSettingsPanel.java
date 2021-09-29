@@ -51,11 +51,11 @@ public class MiscNucleusSettingsPanel extends SettingsPanel {
 
         Dimension dim = new Dimension(BOX_WIDTH, BOX_HEIGHT);
 
-        keepFailedheckBox.addActionListener(e -> {
-            options.setKeepFailedCollections(keepFailedheckBox.isSelected());
-            fireOptionsChangeEvent();
-        });
-        keepFailedheckBox.setPreferredSize(dim);
+//        keepFailedheckBox.addActionListener(e -> {
+//            options.setKeepFailedCollections(keepFailedheckBox.isSelected());
+//            fireOptionsChangeEvent();
+//        });
+//        keepFailedheckBox.setPreferredSize(dim);
 
     }
 
@@ -85,7 +85,7 @@ public class MiscNucleusSettingsPanel extends SettingsPanel {
     @Override
     protected void update() {
         super.update();
-        keepFailedheckBox.setSelected(options.isKeepFailedCollections());
+//        keepFailedheckBox.setSelected(options.isKeepFailedCollections());
     }
 
     @Override

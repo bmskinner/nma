@@ -26,7 +26,7 @@ import com.bmskinner.nuclear_morphology.components.profiles.BooleanProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.FloatProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -60,7 +60,7 @@ public class DipTester implements SignificanceTest {
      *            the border tag to offset from
      * @return a profile of results
      */
-    public IProfile testCollectionGetPValues(Tag tag, ProfileType type) {
+    public IProfile testCollectionGetPValues(Landmark tag, ProfileType type) {
         IProfile resultProfile = null;
 
         float[] pvals = null;
@@ -128,7 +128,7 @@ public class DipTester implements SignificanceTest {
      *            the p-value threshold
      * @return a boolean profile of results
      */
-    public BooleanProfile testCollectionIsUniModal(Tag tag, double significance, ProfileType type) {
+    public BooleanProfile testCollectionIsUniModal(Landmark tag, double significance, ProfileType type) {
 
         IProfile pvals = testCollectionGetPValues(tag, type);
         boolean[]  modes = new boolean[pvals.size()];

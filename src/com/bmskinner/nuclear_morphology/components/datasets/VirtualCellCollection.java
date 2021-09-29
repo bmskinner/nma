@@ -54,14 +54,13 @@ import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.measure.StatsCache;
 import com.bmskinner.nuclear_morphology.components.nuclei.Consensus;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.nuclei.NucleusType;
 import com.bmskinner.nuclear_morphology.components.profiles.DefaultProfileCollection;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileCollection;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileManager;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
 import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.components.signals.DefaultSignalGroup;
@@ -388,11 +387,6 @@ public class VirtualCellCollection implements ICellCollection {
 	}
 
     @Override
-    public NucleusType getNucleusType() {
-        return parent.getCollection().getNucleusType();
-    }
-
-    @Override
     public void removeCell(@NonNull ICell c) {
         cellIDs.remove(c.getId());
 
@@ -641,7 +635,7 @@ public class VirtualCellCollection implements ICellCollection {
 	 * @throws UnavailableProfileTypeException
 	 */
 	@Override
-	public Nucleus getNucleusMostSimilarToMedian(Tag pointType)
+	public Nucleus getNucleusMostSimilarToMedian(Landmark pointType)
 			throws ProfileException, UnavailableBorderTagException, UnavailableProfileTypeException {
 		Set<Nucleus> list = this.getNuclei();
 
@@ -815,7 +809,7 @@ public class VirtualCellCollection implements ICellCollection {
                 for (Nucleus n : t.getNuclei()) {
 
                     double value = stat.equals(Measurement.VARIABILITY)
-                            ? getNormalisedDifferenceToMedian(Tag.REFERENCE_POINT, n) : n.getStatistic(stat, scale);
+                            ? getNormalisedDifferenceToMedian(Landmark.REFERENCE_POINT, n) : n.getStatistic(stat, scale);
 
                     if (value < lower) {
                         return false;
@@ -877,9 +871,10 @@ public class VirtualCellCollection implements ICellCollection {
             return this.size();
         
 
-        if (d2.getNucleusType() != this.getNucleusType())
-            return 0;
-        
+        // Ensure cells use the same rule
+        if (!d2.getRuleSetCollection().equals(parent.getCollection().getRuleSetCollection()))
+        	return 0;
+
         Set<UUID> toSearch = new HashSet<>(d2.getCellIDs());
         toSearch.retainAll(getCellIDs());
         return toSearch.size();
@@ -1049,7 +1044,7 @@ public class VirtualCellCollection implements ICellCollection {
 		result = getNuclei().parallelStream().mapToDouble(n -> {
 			IProfileSegment segment;
 			try {
-				segment = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegment(id);
+				segment = n.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT).getSegment(id);
 			} catch (ProfileException | UnavailableComponentException e) {
 				return 0;
 			}
@@ -1085,7 +1080,7 @@ public class VirtualCellCollection implements ICellCollection {
 
         }
 		if (Measurement.VARIABILITY.equals(stat)) {
-		    result = this.getNormalisedDifferencesToMedianFromPoint(Tag.REFERENCE_POINT);
+		    result = this.getNormalisedDifferencesToMedianFromPoint(Landmark.REFERENCE_POINT);
 		} else {
 		    result = this.getNuclei().parallelStream().mapToDouble(n -> n.getStatistic(stat, scale)).toArray();
 		}
@@ -1119,7 +1114,7 @@ public class VirtualCellCollection implements ICellCollection {
      * @param pointType the point to fetch profiles from
      * @return an array of normalised differences
      */
-    private synchronized double[] getNormalisedDifferencesToMedianFromPoint(Tag pointType) {
+    private synchronized double[] getNormalisedDifferencesToMedianFromPoint(Landmark pointType) {
 
         IProfile medianProfile;
         try {
@@ -1184,7 +1179,7 @@ public class VirtualCellCollection implements ICellCollection {
     }
 
     @Override
-    public double getNormalisedDifferenceToMedian(Tag pointType, Taggable t) {
+    public double getNormalisedDifferenceToMedian(Landmark pointType, Taggable t) {
         IProfile medianProfile;
         try {
             medianProfile = profileCollection.getProfile(ProfileType.ANGLE, pointType, Stats.MEDIAN).interpolate(FIXED_PROFILE_LENGTH);

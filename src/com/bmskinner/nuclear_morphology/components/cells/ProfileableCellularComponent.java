@@ -41,8 +41,8 @@ import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
 import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.profiles.UnprofilableObjectException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -65,21 +65,21 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 	private static final long serialVersionUID = 1L;
 
     /** The proportion of the perimeter to use for profiling */
-    protected double angleWindowProportion = IAnalysisOptions.DEFAULT_WINDOW_PROPORTION;
+    protected double windowProportion = IAnalysisOptions.DEFAULT_WINDOW_PROPORTION;
 
     /** The profiles for this object */
     protected volatile Map<ProfileType, ISegmentedProfile> profileMap = new ConcurrentHashMap<>();
 
-    /** The indexes of tags in the profiles and border list */
-    protected Map<Tag, Integer> borderTags = new HashMap<>();
+    /** The indexes of landmarks in the profiles and border list */
+    protected Map<Landmark, Integer> profileLandmarks = new HashMap<>();
 
-    /** allow locking of segments and tags */
-    protected boolean segsLocked = false;
+    /** allow locking of segments and landmarks */
+    protected boolean isLocked = false;
 
     /*  TRANSIENT FIELDS  */
 
-    /** The chosen window size based on the window proportion */
-    protected transient int angleProfileWindowSize;
+    /** The chosen window size in pixels based on the window proportion */
+    protected transient int windowSize;
 
     
     /**
@@ -128,8 +128,8 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 
             Taggable comp = (Taggable) c;
 
-            this.angleWindowProportion = comp.getWindowProportion(ProfileType.ANGLE);
-            this.angleProfileWindowSize = comp.getWindowSize(ProfileType.ANGLE);
+            this.windowProportion = comp.getWindowProportion(ProfileType.ANGLE);
+            this.windowSize = comp.getWindowSize(ProfileType.ANGLE);
 
             for (ProfileType type : ProfileType.values()) {
 
@@ -143,7 +143,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
             }
             this.setBorderTags(comp.getBorderTags());
 
-            this.segsLocked = comp.isLocked();
+            this.isLocked = comp.isLocked();
         } else {
             throw new UnprofilableObjectException("Object is not a profileable object");
         }
@@ -158,11 +158,11 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
     protected ProfileableCellularComponent(@NonNull final ProfileableCellularComponent c) {
     	 super(c);
 
-    	 this.angleWindowProportion = c.angleWindowProportion;
-         this.angleProfileWindowSize = c.angleProfileWindowSize;
-         for(Tag t : c.borderTags.keySet())
-        	 borderTags.put(t, c.borderTags.get(t));
-         this.segsLocked = c.segsLocked;
+    	 this.windowProportion = c.windowProportion;
+         this.windowSize = c.windowSize;
+         for(Landmark t : c.profileLandmarks.keySet())
+        	 profileLandmarks.put(t, c.profileLandmarks.get(t));
+         this.isLocked = c.isLocked;
          
          for (ProfileType type : c.profileMap.keySet()) {
              try {
@@ -180,14 +180,14 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
         if (proportion <= 0 || proportion >= 1)
             throw new ComponentCreationException("Must have a value between 0-1");
         
-        angleWindowProportion = proportion;
+        windowProportion = proportion;
         double perimeter = getStatistic(Measurement.PERIMETER);
 
         double angleWindow = perimeter * proportion;
         angleWindow = angleWindow < 1 ? 1 : angleWindow;
 
         // calculate profiles
-        angleProfileWindowSize = (int) Math.ceil(angleWindow);
+        windowSize = (int) Math.ceil(angleWindow);
 
         try {
             calculateProfiles();
@@ -197,7 +197,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 
     }
 
-    public IBorderPoint getPoint(@NonNull Tag tag) throws UnavailableBorderTagException {
+    public IBorderPoint getPoint(@NonNull Landmark tag) throws UnavailableBorderTagException {
         int index = this.getBorderIndex(tag);
         return this.getBorderPoint(index);
     }
@@ -241,7 +241,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
      */
 
     @Override
-    public IBorderPoint getBorderPoint(@NonNull Tag tag) throws UnavailableBorderTagException {
+    public IBorderPoint getBorderPoint(@NonNull Landmark tag) throws UnavailableBorderTagException {
     	int borderIndex = this.getBorderIndex(tag);
 
     	if (borderIndex < 0 || borderIndex >= this.getBorderLength())
@@ -251,23 +251,23 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
     }
 
     @Override
-	public Map<Tag, Integer> getBorderTags() {
-        Map<Tag, Integer> result = new HashMap<>();
-        for (Tag b : borderTags.keySet()) {
-            result.put(b, borderTags.get(b));
+	public Map<Landmark, Integer> getBorderTags() {
+        Map<Landmark, Integer> result = new HashMap<>();
+        for (Landmark b : profileLandmarks.keySet()) {
+            result.put(b, profileLandmarks.get(b));
         }
         return result;
     }
     
     @Override
-	public Tag getBorderTag(@NonNull Tag reference, int index) throws UnavailableBorderTagException {
+	public Landmark getBorderTag(@NonNull Landmark reference, int index) throws UnavailableBorderTagException {
         int newIndex = getOffsetBorderIndex(reference, index);
         return this.getBorderTag(newIndex);
     }
 
     @Override
-	public Tag getBorderTag(int index) {
-        for (Entry<Tag, Integer> entry : borderTags.entrySet()) {
+	public Landmark getBorderTag(int index) {
+        for (Entry<Landmark, Integer> entry : profileLandmarks.entrySet()) {
             if (entry.getValue() == index)
                 return entry.getKey();
         }
@@ -275,9 +275,9 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
     }
     
     @Override
-	public int getBorderIndex(@NonNull Tag tag) throws UnavailableBorderTagException {
-        if (borderTags.containsKey(tag))
-            return borderTags.get(tag);
+	public int getBorderIndex(@NonNull Landmark tag) throws UnavailableBorderTagException {
+        if (profileLandmarks.containsKey(tag))
+            return profileLandmarks.get(tag);
         throw new UnavailableBorderTagException("Tag "+tag+" is not present");
     }
 
@@ -286,17 +286,17 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
      * Replace the tags in the object with the given tag map
      * @param m
      */
-    private void setBorderTags(Map<Tag, Integer> m) {
-        if (segsLocked)
+    private void setBorderTags(Map<Landmark, Integer> m) {
+        if (isLocked)
             return;
-        borderTags.clear();
-        for(Entry<Tag, Integer> entry : m.entrySet())
-        	borderTags.put(entry.getKey(), entry.getValue());
+        profileLandmarks.clear();
+        for(Entry<Landmark, Integer> entry : m.entrySet())
+        	profileLandmarks.put(entry.getKey(), entry.getValue());
     }
 
     @Override
-	public void setBorderTag(@NonNull Tag tag, int i) {
-        if (segsLocked)
+	public void setBorderTag(@NonNull Landmark tag, int i) {
+        if (isLocked)
             return;
         
         if (i < 0 || i >= this.getBorderLength())
@@ -304,10 +304,10 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 
         try {
 
-        	borderTags.put(tag, i);
+        	profileLandmarks.put(tag, i);
         	
             // When moving the RP, move all segments to match
-            if (Tag.REFERENCE_POINT.equals(tag)) {
+            if (Landmark.REFERENCE_POINT.equals(tag)) {
                 ISegmentedProfile p = getProfile(ProfileType.ANGLE);
                 int oldRP = getBorderIndex(tag);
                 int diff = i - oldRP;
@@ -322,9 +322,9 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
             }
 
             // The intersection point should always be opposite the orientation point
-            if (Tag.ORIENTATION_POINT.equals(tag)) {
+            if (Landmark.ORIENTATION_POINT.equals(tag)) {
                 int intersectionIndex = this.getBorderIndex(this.findOppositeBorder(this.getBorderPoint(i)));
-                this.setBorderTag(Tag.INTERSECTION_POINT, intersectionIndex);
+                this.setBorderTag(Landmark.INTERSECTION_POINT, intersectionIndex);
             }
 
 
@@ -336,25 +336,25 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
     }
 
     @Override
-	public void setBorderTag(@NonNull Tag reference, @NonNull Tag tag, int i) throws UnavailableBorderTagException {
-        if (segsLocked)
+	public void setBorderTag(@NonNull Landmark reference, @NonNull Landmark tag, int i) throws UnavailableBorderTagException {
+        if (isLocked)
             return;
         int newIndex = getOffsetBorderIndex(reference, i);
         setBorderTag(tag, newIndex);
     }
 
     @Override
-	public boolean hasBorderTag(@NonNull Tag tag) {
-        return this.borderTags.containsKey(tag);
+	public boolean hasBorderTag(@NonNull Landmark tag) {
+        return this.profileLandmarks.containsKey(tag);
     }
 
     @Override
 	public boolean hasBorderTag(int index) {
-        return this.borderTags.containsValue(index);
+        return this.profileLandmarks.containsValue(index);
     }
 
     @Override
-	public boolean hasBorderTag(@NonNull Tag tag, int index) {
+	public boolean hasBorderTag(@NonNull Landmark tag, int index) {
 
 		try {
 			int newIndex = getOffsetBorderIndex(tag, index);
@@ -367,7 +367,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
     }
 
     @Override
-	public int getOffsetBorderIndex(@NonNull Tag reference, int index) throws UnavailableBorderTagException {
+	public int getOffsetBorderIndex(@NonNull Landmark reference, int index) throws UnavailableBorderTagException {
     	return wrapIndex(index + this.getBorderIndex(reference));
     }
 
@@ -379,22 +379,22 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 
     @Override
 	public boolean isLocked() {
-        return segsLocked;
+        return isLocked;
     }
 
     @Override
 	public void setLocked(boolean b) {
-        segsLocked = b;
+        isLocked = b;
     }
 
     @Override
     public int getWindowSize(@NonNull ProfileType type) {
-        return angleProfileWindowSize;
+        return windowSize;
     }
 
     @Override
 	public double getWindowProportion(@NonNull ProfileType type) {
-        return angleWindowProportion;
+        return windowProportion;
     }
 
     @Override
@@ -402,18 +402,18 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
         if (d <= 0 || d >= 1)
             throw new IllegalArgumentException("Angle window proportion must be higher than 0 and less than 1");
 
-        if (segsLocked)
+        if (isLocked)
             return;
 
         if (type.equals(ProfileType.ANGLE)) {
 
-            angleWindowProportion = d;
+            windowProportion = d;
 
             double perimeter = this.getStatistic(Measurement.PERIMETER);
             double angleWindow = perimeter * d;
 
             // calculate profiles
-            angleProfileWindowSize = (int) Math.round(angleWindow);
+            windowSize = (int) Math.round(angleWindow);
             LOGGER.finest( "Recalculating angle profile");
             ProfileCreator creator = new ProfileCreator(this);
             ISegmentedProfile profile;
@@ -452,14 +452,14 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
     }
 
     @Override
-	public ISegmentedProfile getProfile(@NonNull ProfileType type, @NonNull Tag tag)
+	public ISegmentedProfile getProfile(@NonNull ProfileType type, @NonNull Landmark tag)
             throws ProfileException, UnavailableBorderTagException, UnavailableProfileTypeException {
 
         if (!this.hasBorderTag(tag))
             throw new UnavailableBorderTagException("Tag " + tag + " not present");
 
         // fetch the index of the pointType (the new zero)
-        int tagIndex = borderTags.get(tag);
+        int tagIndex = profileLandmarks.get(tag);
         
         // offset the angle profile to start at the pointIndex
         ISegmentedProfile profile = getProfile(type);
@@ -474,9 +474,9 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
      * @throws UnavailableProfileTypeException 
      */
     @Override
-	public void setProfile(@NonNull ProfileType type, @NonNull Tag tag, @NonNull ISegmentedProfile p) throws UnavailableBorderTagException, UnavailableProfileTypeException {
+	public void setProfile(@NonNull ProfileType type, @NonNull Landmark tag, @NonNull ISegmentedProfile p) throws UnavailableBorderTagException, UnavailableProfileTypeException {
 
-        if (segsLocked)
+        if (isLocked)
             return;
 
         if (!this.hasBorderTag(tag))
@@ -486,7 +486,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
         	throw new IllegalArgumentException(String.format("Input profile length (%d) does not match border length (%d)", p.size(), getBorderLength()));
 
         // fetch the index of the pointType (the zero of the input profile)
-        int tagIndex = this.borderTags.get(tag);
+        int tagIndex = this.profileLandmarks.get(tag);
         
         // Store the old profile in case
         ISegmentedProfile oldProfile = getProfile(type);
@@ -504,7 +504,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
     @Override
 	public void setProfile(@NonNull ProfileType type, @NonNull ISegmentedProfile profile) {
 
-        if (segsLocked)
+        if (isLocked)
             return;
 
         // Replace frankenprofiles completely
@@ -578,7 +578,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 
         super.reverse();
 
-        if (segsLocked) {
+        if (isLocked) {
             return;
         }
         for (Entry<ProfileType, ISegmentedProfile> entry : profileMap.entrySet()) {
@@ -588,7 +588,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
         }
 
         // replace the tag positions also
-        for (Entry<Tag, Integer> entry : borderTags.entrySet()) {
+        for (Entry<Landmark, Integer> entry : profileLandmarks.entrySet()) {
             int index = entry.getValue();
 
             // if was 0, will be  <length-1>; if
@@ -597,7 +597,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
             
             // update the bordertag map directly to avoid segmentation changes
             // due to RP shift
-            borderTags.put(entry.getKey(), newIndex);
+            profileLandmarks.put(entry.getKey(), newIndex);
         }
     }
 
@@ -667,7 +667,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
         if(perimeter==Statistical.ERROR_CALCULATING_STAT)
             perimeter = this.calculateStatistic(Measurement.PERIMETER);
         
-        angleProfileWindowSize = (int) Math.round( perimeter * angleWindowProportion);
+        windowSize = (int) Math.round( perimeter * windowProportion);
 
         // Check if calculation needed
         boolean isRecalculate = false;
@@ -691,11 +691,11 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 		final int prime = 31;
 		int result = super.hashCode();
 		long temp;
-		temp = Double.doubleToLongBits(angleWindowProportion);
+		temp = Double.doubleToLongBits(windowProportion);
 		result = prime * result + (int) (temp ^ (temp >>> 32));
-		result = prime * result + ((borderTags == null) ? 0 : borderTags.hashCode());
+		result = prime * result + ((profileLandmarks == null) ? 0 : profileLandmarks.hashCode());
 		result = prime * result + ((profileMap == null) ? 0 : profileMap.hashCode());
-		result = prime * result + (segsLocked ? 1231 : 1237);
+		result = prime * result + (isLocked ? 1231 : 1237);
 		return result;
 	}
 
@@ -708,19 +708,19 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 		if (getClass() != obj.getClass())
 			return false;
 		ProfileableCellularComponent other = (ProfileableCellularComponent) obj;
-		if (Double.doubleToLongBits(angleWindowProportion) != Double.doubleToLongBits(other.angleWindowProportion))
+		if (Double.doubleToLongBits(windowProportion) != Double.doubleToLongBits(other.windowProportion))
 			return false;
-		if (borderTags == null) {
-			if (other.borderTags != null)
+		if (profileLandmarks == null) {
+			if (other.profileLandmarks != null)
 				return false;
-		} else if (!borderTags.equals(other.borderTags))
+		} else if (!profileLandmarks.equals(other.profileLandmarks))
 			return false;
 		if (profileMap == null) {
 			if (other.profileMap != null)
 				return false;
 		} else if (!profileMap.equals(other.profileMap))
 			return false;
-		if (segsLocked != other.segsLocked)
+		if (isLocked != other.isLocked)
 			return false;
 		return true;
 	}

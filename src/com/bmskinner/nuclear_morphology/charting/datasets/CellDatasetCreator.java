@@ -34,7 +34,7 @@ import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 
 public class CellDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 	
@@ -128,7 +128,7 @@ public class CellDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
              */
             try {
                 UUID segID = dataset.getCollection().getProfileCollection()
-                        .getSegmentAt(Tag.REFERENCE_POINT, options.getSegPosition()).getID();
+                        .getSegmentAt(Landmark.REFERENCE_POINT, options.getSegPosition()).getID();
 
                 List<IPoint> offsetPoints = createAbsolutePositionFeatureList(dataset, segID);
 

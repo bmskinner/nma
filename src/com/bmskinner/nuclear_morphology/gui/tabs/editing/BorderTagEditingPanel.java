@@ -38,7 +38,7 @@ import com.bmskinner.nuclear_morphology.charting.charts.ProfileChartFactory;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.components.BorderTagEvent;
@@ -135,7 +135,7 @@ public class BorderTagEditingPanel extends AbstractEditingPanel implements Actio
         ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets())
         		.setNormalised(normaliseProfile)
                 .setAlignment(ProfileAlignment.LEFT)
-                .setTag(Tag.REFERENCE_POINT)
+                .setTag(Landmark.REFERENCE_POINT)
                 .setShowMarkers(true)
                 .setProfileType(ProfileType.ANGLE)
                 .setShowProfiles(false)
@@ -155,7 +155,7 @@ public class BorderTagEditingPanel extends AbstractEditingPanel implements Actio
          */
 
         ChartOptions rangeOptions = new ChartOptionsBuilder().setDatasets(getDatasets()).setNormalised(normaliseProfile)
-                .setAlignment(ProfileAlignment.LEFT).setTag(Tag.REFERENCE_POINT).setShowMarkers(true)
+                .setAlignment(ProfileAlignment.LEFT).setTag(Landmark.REFERENCE_POINT).setShowMarkers(true)
                 .setProfileType(ProfileType.ANGLE).setShowProfiles(false).setShowIQR(false).setSwatch(GlobalOptions.getInstance().getSwatch())
                 .setShowPoints(false).setShowAnnotations(false).setShowXAxis(false).setShowYAxis(false)
                 .setTarget(dualPanel.getRangePanel()).build();

@@ -69,10 +69,10 @@ import com.bmskinner.nuclear_morphology.charting.options.DefaultChartOptions;
 import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.profiles.BooleanProfile;
-import com.bmskinner.nuclear_morphology.components.profiles.BorderTagObject.BorderTagType;
+import com.bmskinner.nuclear_morphology.components.profiles.LandmarkType;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.rules.Rule;
 import com.bmskinner.nuclear_morphology.components.rules.RuleApplicationType;
@@ -304,7 +304,7 @@ public class RulesetDialog extends LoadingIconDialog
     	       return false;
     	    }
     	};
-    	List<Tag> tagList = new ArrayList<>();
+    	List<Landmark> tagList = new ArrayList<>();
     	List<String> tagCollection = new ArrayList<>();
     	
     	// Dataset tags
@@ -318,7 +318,7 @@ public class RulesetDialog extends LoadingIconDialog
     	}
     	
     	
-    	Tag[] tags = tagList.toArray(new Tag[0]);
+    	Landmark[] tags = tagList.toArray(new Landmark[0]);
     	String[] collections = tagCollection.toArray(new String[0]);
     	
     	model.addColumn("Tag", tags);    	
@@ -336,7 +336,7 @@ public class RulesetDialog extends LoadingIconDialog
     	if(borderTagTable.getSelectedRow()<0) {
     		root = new DefaultMutableTreeNode("");
     	} else {
-    		Tag selectedTag = (Tag)borderTagTable.getValueAt(borderTagTable.getSelectedRow(), 0);  
+    		Landmark selectedTag = (Landmark)borderTagTable.getValueAt(borderTagTable.getSelectedRow(), 0);  
     		String collection = (String) borderTagTable.getValueAt(borderTagTable.getSelectedRow(), 1);  
     		root = createTagNodes(selectedTag, collection);
     	}
@@ -355,7 +355,7 @@ public class RulesetDialog extends LoadingIconDialog
      * @param collection the collection the tag is within. Use {@link IAnalysisDataset::getName} to use the current dataset.
      * @return
      */
-    private DefaultMutableTreeNode createTagNodes(@NonNull Tag tag, @NonNull String collection) {
+    private DefaultMutableTreeNode createTagNodes(@NonNull Landmark tag, @NonNull String collection) {
     	LOGGER.finest("Adding nodes for "+tag);
     	
     	// Get the appropriate RulesetCollection
@@ -377,7 +377,7 @@ public class RulesetDialog extends LoadingIconDialog
      * @param collection the collection to use. Use {@link IAnalysisDataset::getName} to use the current dataset.
      * @return the rulesets for the tag
      */
-    private List<RuleSet> getRulesetsForTag(@NonNull Tag t, @NonNull String collection){
+    private List<RuleSet> getRulesetsForTag(@NonNull Landmark t, @NonNull String collection){
     	if(collection==null || collection.equals(dataset.getName())) {
     		RuleSetCollection datasetCollection = dataset.getCollection().getRuleSetCollection();
     		if(datasetCollection.hasRulesets(t))
@@ -411,15 +411,15 @@ public class RulesetDialog extends LoadingIconDialog
             
             // If the reference point is in the collection, handle it first
             // TODO: this will eventually cause threading issues with large datasets
-            if(rsc.getTags().contains(Tag.REFERENCE_POINT)) {
-            	if(rsc.hasRulesets(Tag.REFERENCE_POINT)) {
-                    dataset.getCollection().getRuleSetCollection().setRuleSets(Tag.REFERENCE_POINT, rsc.getRuleSets(Tag.REFERENCE_POINT));
-                    updateBorderTagAction(Tag.REFERENCE_POINT);
+            if(rsc.getTags().contains(Landmark.REFERENCE_POINT)) {
+            	if(rsc.hasRulesets(Landmark.REFERENCE_POINT)) {
+                    dataset.getCollection().getRuleSetCollection().setRuleSets(Landmark.REFERENCE_POINT, rsc.getRuleSets(Landmark.REFERENCE_POINT));
+                    updateBorderTagAction(Landmark.REFERENCE_POINT);
                 }
             }
             
-            for (Tag tag : rsc.getTags()) {
-            	if(tag.equals(Tag.REFERENCE_POINT))
+            for (Landmark tag : rsc.getTags()) {
+            	if(tag.equals(Landmark.REFERENCE_POINT))
             		continue;
             	LOGGER.fine("Testing existence of tag "+tag);
                 if (rsc.hasRulesets(tag)) {
@@ -435,7 +435,7 @@ public class RulesetDialog extends LoadingIconDialog
         }
     }
 
-    private void updateBorderTagAction(Tag tag) {
+    private void updateBorderTagAction(Landmark tag) {
 
         if (tag != null) {
             ProfileIndexFinder finder = new ProfileIndexFinder();
@@ -457,7 +457,7 @@ public class RulesetDialog extends LoadingIconDialog
                 return;
             }
 
-            if (tag.type().equals(BorderTagType.CORE)) {
+            if (tag.type().equals(LandmarkType.CORE)) {
                 LOGGER.info("Resegmenting dataset");
 
                 fireDatasetEvent(DatasetEvent.REFRESH_MORPHOLOGY, dataset);
@@ -476,7 +476,7 @@ public class RulesetDialog extends LoadingIconDialog
      * @param tagNode
      * @param ruleSet
      */
-    private void addNodesForRuleSet(DefaultMutableTreeNode tagNode, RuleSet ruleSet, Tag tag) {
+    private void addNodesForRuleSet(DefaultMutableTreeNode tagNode, RuleSet ruleSet, Landmark tag) {
     	RuleNodeData profileData = new RuleNodeData(tag, ruleSet, null);
 		DefaultMutableTreeNode profileNode = new DefaultMutableTreeNode(profileData);
 		tagNode.add(profileNode);
@@ -506,14 +506,14 @@ public class RulesetDialog extends LoadingIconDialog
      * @throws UnavailableProfileTypeException
      * @throws ProfileException
      */
-    private JFreeChart createChart(@NonNull Tag t, @NonNull String collection) throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException {
+    private JFreeChart createChart(@NonNull Landmark t, @NonNull String collection) throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException {
     	LOGGER.finest("Creating chart for "+t);
     	JFreeChart chart = ProfileChartFactory.createEmptyChart(ProfileType.ANGLE);
     	ChartOptions options = new DefaultChartOptions((IAnalysisDataset) null);
         MorphologyChartFactory chf = new MorphologyChartFactory(options);
         ProfileIndexFinder finder = new ProfileIndexFinder();
         IProfile p = dataset.getCollection().getProfileCollection().getProfile(ProfileType.ANGLE,
-                Tag.REFERENCE_POINT, Stats.MEDIAN);
+                Landmark.REFERENCE_POINT, Stats.MEDIAN);
         
         BooleanProfile limits = finder.getMatchingProfile(dataset.getCollection(),
         		getRulesetsForTag(t, collection));
@@ -537,9 +537,9 @@ public class RulesetDialog extends LoadingIconDialog
     public class RuleNodeData {
         private RuleSet ruleSet = null;
         private Rule    rule    = null;
-        private Tag     tag     = null;
+        private Landmark     tag     = null;
         
-        public RuleNodeData(@NonNull Tag tag, @Nullable RuleSet ruleSet, @Nullable Rule rule) {;
+        public RuleNodeData(@NonNull Landmark tag, @Nullable RuleSet ruleSet, @Nullable Rule rule) {;
             this.tag = tag;
             this.ruleSet = ruleSet;
             this.rule = rule;
@@ -558,14 +558,14 @@ public class RulesetDialog extends LoadingIconDialog
 
         		if(rule!=null) {
         			IProfile p = dataset.getCollection().getProfileCollection().getProfile(ruleSet.getType(),
-        					Tag.REFERENCE_POINT, Stats.MEDIAN);
+        					Landmark.REFERENCE_POINT, Stats.MEDIAN);
         			BooleanProfile b = finder.getMatchingIndexes(p, rule);
         			return chf.createBooleanProfileChart(p, b);
         		}
 
         		if(ruleSet!=null) {
         			IProfile p = dataset.getCollection().getProfileCollection().getProfile(ruleSet.getType(),
-        					Tag.REFERENCE_POINT, Stats.MEDIAN);
+        					Landmark.REFERENCE_POINT, Stats.MEDIAN);
         			BooleanProfile b = finder.getMatchingIndexes(p, ruleSet);
         			return chf.createBooleanProfileChart(p, b);
         		}
@@ -595,7 +595,7 @@ public class RulesetDialog extends LoadingIconDialog
     	int row = borderTagTable.getSelectedRow();
 		if(row<0)
 			return MorphologyChartFactory.createEmptyChart();
-		Tag t = (Tag)borderTagTable.getValueAt(row, 0);
+		Landmark t = (Landmark)borderTagTable.getValueAt(row, 0);
 		String collection = (String) borderTagTable.getValueAt(row, 1);
 		try {
 			return createChart(t, collection);

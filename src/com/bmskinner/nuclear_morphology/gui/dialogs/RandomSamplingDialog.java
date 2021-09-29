@@ -121,7 +121,7 @@ public class RandomSamplingDialog extends LoadingIconDialog
     
     private JPanel createButtonPanel(){
     	statsBox = new JComboBox<Measurement>(Measurement
-                .getNucleusStats(dataset.getCollection().getNucleusType()).toArray(new Measurement[0]));
+                .getNucleusStats().toArray(new Measurement[0]));
 
         int cellCount = dataset.getCollection().size();
         int halfCellCount = cellCount >> 1;

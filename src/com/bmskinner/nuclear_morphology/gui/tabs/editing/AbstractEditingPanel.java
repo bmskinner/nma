@@ -26,8 +26,8 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nuclear_morphology.analysis.profiles.SegmentationHandler;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
-import com.bmskinner.nuclear_morphology.components.profiles.BorderTagObject.BorderTagType;
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.LandmarkType;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nuclear_morphology.gui.components.BorderTagEvent;
@@ -86,10 +86,10 @@ public abstract class AbstractEditingPanel extends DetailPanel
      * @param newTagIndex
      */
     @Override
-	public void setBorderTagAction(@NonNull Tag tag, int newTagIndex) {
+	public void setBorderTagAction(@NonNull Landmark tag, int newTagIndex) {
     	if(activeDataset()==null)
     		return;
-        if (activeDataset().getCollection().isVirtual() && tag.equals(Tag.REFERENCE_POINT)) {
+        if (activeDataset().getCollection().isVirtual() && tag.equals(Landmark.REFERENCE_POINT)) {
             LOGGER.warning("Cannot update core border tag for a child dataset");
             return;
         }
@@ -105,7 +105,7 @@ public abstract class AbstractEditingPanel extends DetailPanel
 
         refreshChartCache(); // immediate visualisation of result
 
-        if (tag.type().equals(BorderTagType.CORE)) {
+        if (tag.type().equals(LandmarkType.CORE)) {
             this.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.SEGMENTATION_ACTION, getDatasets());
         } else {
             getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);

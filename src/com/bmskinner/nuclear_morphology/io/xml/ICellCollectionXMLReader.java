@@ -19,7 +19,7 @@ import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.NucleusFactory;
 import com.bmskinner.nuclear_morphology.components.nuclei.NucleusType;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.UnprofilableObjectException;
 import com.bmskinner.nuclear_morphology.components.signals.DefaultSignalGroup;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
@@ -39,69 +39,67 @@ public class ICellCollectionXMLReader extends XMLReader<ICellCollection> {
 	private final double windowProportion;
 	private final String collectionName;
 	private final UUID collectionId;
-	private final NucleusType type;
 
 	/**
 	 * Create a reader
 	 * @param e the cell element to read
-	 * @param factory the factory to create nuclei
 	 * @param windowProportion the window proportion
 	 * @param 
 	 */
-	public ICellCollectionXMLReader(@NonNull final Element e, @NonNull final NucleusType type, final double windowProportion, @NonNull String name, @NonNull UUID id) {
+	public ICellCollectionXMLReader(@NonNull final Element e, final double windowProportion, @NonNull String name, @NonNull UUID id) {
 		super(e);
-		this.fact = new NucleusFactory(type);
+		this.fact = new NucleusFactory();
 		this.windowProportion = windowProportion;
 		this.collectionName = name;
 		this.collectionId = id;
-		this.type = type;
 	}
 	
 	@Override
 	public ICellCollection read() throws XMLReadingException {
-		return readRealCollection(rootElement);
+//		return readRealCollection(rootElement);
+		return null;
 	}
 	
-	private ICellCollection readRealCollection(Element e) throws XMLReadingException {
-
-		String outFolder = e.getChildText(XMLCreator.OUTPUT_FOLDER_KEY);
-
-		ICellCollection collection = new DefaultCellCollection(null, outFolder, collectionName, type, collectionId);
-		
-		Element cellsElement = e.getChild(XMLCreator.CELLS_SECTION_KEY);
-		for(Element cell : cellsElement.getChildren(XMLCreator.CELL_KEY)) {
-			XMLReader<ICell> cellReader = new ICellXMLReader(cell, fact, windowProportion);
-			collection.add(cellReader.read());
-		}
-		
-		try {
-			collection.createProfileCollection();
-		} catch (ProfileException e1) {
-			LOGGER.log(Loggable.STACK, e1.getMessage(), e1);
-		}
-		
-		Element tags = e.getChild(XMLCreator.BORDER_TAGS_KEY);
-		for(Element tag : tags.getChildren()) {			
-			Tag t = readTag(tag);
-			int index = readInt(tag, XMLCreator.INDEX_KEY);
-			collection.getProfileCollection().addIndex(t, index);
-		}
-		
-		// Add stats
-		Element segs = e.getChild(XMLCreator.BORDER_SEGS_KEY);
-		readCollectionSegments(segs, collection);
-		
-		// Add signals
-		Element signals = e.getChild(XMLCreator.SIGNAL_GROUPS_SECTION_KEY);
-		readSignalGroups(signals, collection);		
-		
-		if(e.getChild(XMLCreator.CONSENSUS_KEY)!=null){
-			Consensus<Nucleus> consensus = readConsensus(e.getChild(XMLCreator.CONSENSUS_KEY), type);
-			collection.setConsensus(consensus);
-		}
-
-		return collection;
-	}
+//	private ICellCollection readRealCollection(Element e) throws XMLReadingException {
+//
+//		String outFolder = e.getChildText(XMLCreator.OUTPUT_FOLDER_KEY);
+//
+//		ICellCollection collection = new DefaultCellCollection(null, outFolder, collectionName, collectionId);
+//		
+//		Element cellsElement = e.getChild(XMLCreator.CELLS_SECTION_KEY);
+//		for(Element cell : cellsElement.getChildren(XMLCreator.CELL_KEY)) {
+//			XMLReader<ICell> cellReader = new ICellXMLReader(cell, fact, windowProportion);
+//			collection.add(cellReader.read());
+//		}
+//		
+//		try {
+//			collection.createProfileCollection();
+//		} catch (ProfileException e1) {
+//			LOGGER.log(Loggable.STACK, e1.getMessage(), e1);
+//		}
+//		
+//		Element tags = e.getChild(XMLCreator.BORDER_TAGS_KEY);
+//		for(Element tag : tags.getChildren()) {			
+//			Landmark t = readTag(tag);
+//			int index = readInt(tag, XMLCreator.INDEX_KEY);
+//			collection.getProfileCollection().addIndex(t, index);
+//		}
+//		
+//		// Add stats
+//		Element segs = e.getChild(XMLCreator.BORDER_SEGS_KEY);
+//		readCollectionSegments(segs, collection);
+//		
+//		// Add signals
+//		Element signals = e.getChild(XMLCreator.SIGNAL_GROUPS_SECTION_KEY);
+//		readSignalGroups(signals, collection);		
+//		
+//		if(e.getChild(XMLCreator.CONSENSUS_KEY)!=null){
+//			Consensus<Nucleus> consensus = readConsensus(e.getChild(XMLCreator.CONSENSUS_KEY), type);
+//			collection.setConsensus(consensus);
+//		}
+//
+//		return collection;
+//	}
 	
 	private void readCollectionSegments(Element segs, ICellCollection collection) {
 		int profileLength = collection.getProfileCollection().length();

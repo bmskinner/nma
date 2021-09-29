@@ -21,7 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 
 /**
  * The types of nuclei we are able to analyse, with the reference and
@@ -38,13 +38,13 @@ public enum NucleusType {
     private final String   name;
     private final Class<?> nucleusClass;
 
-    private final Map<Tag, String> map = new HashMap<Tag, String>();
+    private final Map<Landmark, String> map = new HashMap<Landmark, String>();
 
     NucleusType(String name, String referencePoint, String orientationPoint, Class<?> nucleusClass) {
         this.name = name;
         this.nucleusClass = nucleusClass;
-        this.map.put(Tag.REFERENCE_POINT, referencePoint);
-        this.map.put(Tag.ORIENTATION_POINT, orientationPoint);
+        this.map.put(Landmark.REFERENCE_POINT, referencePoint);
+        this.map.put(Landmark.ORIENTATION_POINT, orientationPoint);
     }
 
     public String toString() {
@@ -59,7 +59,7 @@ public enum NucleusType {
      * @param point
      * @return
      */
-    public String getPoint(Tag point) {
+    public String getPoint(Landmark point) {
         return this.map.get(point);
     }
 
@@ -74,7 +74,7 @@ public enum NucleusType {
      */
     public String[] pointNames() {
         List<String> list = new ArrayList<String>();
-        for (Tag tag : map.keySet()) {
+        for (Landmark tag : map.keySet()) {
             list.add(map.get(tag));
         }
         return list.toArray(new String[0]);
@@ -86,8 +86,8 @@ public enum NucleusType {
      * @param name
      * @return
      */
-    public Tag getTagFromName(String name) {
-        for (Tag tag : map.keySet()) {
+    public Landmark getTagFromName(String name) {
+        for (Landmark tag : map.keySet()) {
             if (map.get(tag).equals(name)) {
                 return tag;
             }

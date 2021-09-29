@@ -17,6 +17,7 @@ import com.bmskinner.nuclear_morphology.components.nuclei.NucleusType;
 import com.bmskinner.nuclear_morphology.components.options.DefaultOptions;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
+import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 
 /**
  * Tests for principal component analysis
@@ -33,7 +34,7 @@ public class PrincipalComponentAnalysisTest extends ComponentTester {
 	@Before
 	public void setUp() throws Exception {
 		dataset = new TestDatasetBuilder(RNG_SEED).cellCount(50)
-				.ofType(NucleusType.ROUND)
+				.ofType(RuleSetCollection.roundRuleSetCollection())
 				.withMaxSizeVariation(10)
 				.randomOffsetProfiles(true)
 				.numberOfClusters(N_CHILD_DATASETS)

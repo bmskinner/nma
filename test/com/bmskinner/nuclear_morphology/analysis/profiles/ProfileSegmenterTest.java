@@ -12,8 +12,9 @@ import com.bmskinner.nuclear_morphology.components.nuclei.NucleusType;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 /**
@@ -28,7 +29,7 @@ public class ProfileSegmenterTest extends ComponentTester {
 	private void segmentMedianProfile(IAnalysisDataset d) throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException, Exception {
 		IProfile median = d.getCollection()
 				.getProfileCollection()
-				.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
+				.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);
 		
 		ProfileSegmenter segmenter = new ProfileSegmenter(median);
 				
@@ -42,7 +43,7 @@ public class ProfileSegmenterTest extends ComponentTester {
 	public void testSingleCellSquareDatasetSegmentation() throws Exception {
 
 		IAnalysisDataset d = new TestDatasetBuilder(RNG_SEED).cellCount(1)
-				.ofType(NucleusType.ROUND)
+				.ofType(RuleSetCollection.roundRuleSetCollection())
 				.baseHeight(40).baseWidth(40)
 				.profiled().build();
 
@@ -54,7 +55,7 @@ public class ProfileSegmenterTest extends ComponentTester {
 	public void testMultiCellSquareDatasetSegmentation() throws Exception {
 
 		IAnalysisDataset d = new TestDatasetBuilder(RNG_SEED).cellCount(50)
-				.ofType(NucleusType.ROUND)
+				.ofType(RuleSetCollection.roundRuleSetCollection())
 				.baseHeight(40).baseWidth(40)
 				.profiled().build();
 
@@ -65,7 +66,7 @@ public class ProfileSegmenterTest extends ComponentTester {
 	@Test
 	public void testMultiCellVariableSquareDatasetSegmentation() throws Exception {
 
-		IAnalysisDataset d = new TestDatasetBuilder(RNG_SEED).cellCount(50).ofType(NucleusType.ROUND)
+		IAnalysisDataset d = new TestDatasetBuilder(RNG_SEED).cellCount(50).ofType(RuleSetCollection.roundRuleSetCollection())
 				.withMaxSizeVariation(20)
 				.randomOffsetProfiles(false)
 				.baseHeight(40).baseWidth(40).profiled().build();
@@ -77,7 +78,7 @@ public class ProfileSegmenterTest extends ComponentTester {
 	@Test
 	public void testMultiCellVariableOffsetSquareDatasetSegmentation() throws Exception {
 
-		IAnalysisDataset d = new TestDatasetBuilder(RNG_SEED).cellCount(50).ofType(NucleusType.ROUND)
+		IAnalysisDataset d = new TestDatasetBuilder(RNG_SEED).cellCount(50).ofType(RuleSetCollection.roundRuleSetCollection())
 				.withMaxSizeVariation(20)
 				.randomOffsetProfiles(true)
 				.baseHeight(40).baseWidth(40).profiled().build();
@@ -89,7 +90,7 @@ public class ProfileSegmenterTest extends ComponentTester {
 	@Test
 	public void testMultiCellVariableOffsetSquareDatasetSegmentationAndRotation() throws Exception {
 
-		IAnalysisDataset d = new TestDatasetBuilder(RNG_SEED).cellCount(50).ofType(NucleusType.ROUND)
+		IAnalysisDataset d = new TestDatasetBuilder(RNG_SEED).cellCount(50).ofType(RuleSetCollection.roundRuleSetCollection())
 				.withMaxSizeVariation(20)
 				.maxRotation(270)
 				.randomOffsetProfiles(true)

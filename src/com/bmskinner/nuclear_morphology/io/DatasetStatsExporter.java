@@ -38,7 +38,7 @@ import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
@@ -193,7 +193,7 @@ public class DatasetStatsExporter extends StatsExporter {
      */
     @Override
 	protected void append(@NonNull IAnalysisDataset d, @NonNull StringBuilder outLine) throws Exception {
-    	ISegmentedProfile medianProfile = d.getCollection().getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN); 
+    	ISegmentedProfile medianProfile = d.getCollection().getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN); 
         for (ICell cell : d.getCollection().getCells()) {
 
             if (cell.hasNucleus()) {
@@ -241,7 +241,7 @@ public class DatasetStatsExporter extends StatsExporter {
             if (s.equals(Measurement.VARIABILITY)) {
 
                 try {
-                    varP = d.getCollection().getNormalisedDifferenceToMedian(Tag.REFERENCE_POINT, (Taggable) c);
+                    varP = d.getCollection().getNormalisedDifferenceToMedian(Landmark.REFERENCE_POINT, (Taggable) c);
                     varM = varP;
                 } catch (UnavailableBorderTagException e) {
                     LOGGER.log(Loggable.STACK, "Tag not present in component", e);
@@ -279,7 +279,7 @@ public class DatasetStatsExporter extends StatsExporter {
             throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException {
         for (ProfileType type : ProfileType.exportValues()) {
 
-            IProfile p = c.getProfile(type, Tag.REFERENCE_POINT);
+            IProfile p = c.getProfile(type, Landmark.REFERENCE_POINT);
 
             for (int i = 0; i < profileSamples; i++) {
                 double idx = ((double) i) / (double)profileSamples;
@@ -302,7 +302,7 @@ public class DatasetStatsExporter extends StatsExporter {
     private void appendFrankenProfiles(StringBuilder outLine, Taggable c, ISegmentedProfile median)
             throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException {
 
-            ISegmentedProfile s = c.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+            ISegmentedProfile s = c.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
             ISegmentedProfile f = s.frankenNormaliseToProfile(median);
             
             for (int i = 0; i < profileSamples; i++) {
@@ -319,7 +319,7 @@ public class DatasetStatsExporter extends StatsExporter {
         double varP = 0;
         double varM = 0;
                 
-        ISegmentedProfile p = c.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+        ISegmentedProfile p = c.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
         ISegmentedProfile normalisedProfile = p.interpolate(normProfileLength); // Allows point indexes
         List<IProfileSegment> segs = p.getOrderedSegments();
         

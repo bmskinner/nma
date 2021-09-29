@@ -28,7 +28,8 @@ import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions
 import com.bmskinner.nuclear_morphology.components.options.IShellOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.components.options.PreprocessingOptions;
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.LandmarkType;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 
 /**
  * Base class for XML readers
@@ -145,9 +146,10 @@ public abstract class XMLReader<T> {
 	 * @param e the element to parse
 	 * @return
 	 */
-	protected Tag readTag(Element e) {
+	protected Landmark readTag(Element e) {
 		String name = e.getChildText(XMLCreator.NAME_KEY);
-		return Tag.of(name);
+		String type = e.getChildText(XMLCreator.TYPE_KEY);
+		return Landmark.of(name, LandmarkType.valueOf(type));
 	}
 	
 	/**

@@ -13,8 +13,7 @@ import org.jdom2.output.XMLOutputter;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.bmskinner.nuclear_morphology.components.nuclei.NucleusType;
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.rules.Rule;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSet;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
@@ -32,20 +31,17 @@ public class RuleSetCollectionXMLCreatorTest {
 
 	@Test
 	public void testMouseSpermRulesetsCreated() throws IOException {
-		RuleSetCollection rsc = RuleSetCollection.createDefaultRuleSet(NucleusType.RODENT_SPERM);
-		testRuleSetCreated(rsc);
+		testRuleSetCreated(RuleSetCollection.mouseSpermRuleSetCollection());
 	}
 	
 	@Test
 	public void testPigSpermRulesetsCreated() throws IOException {
-		RuleSetCollection rsc = RuleSetCollection.createDefaultRuleSet(NucleusType.PIG_SPERM);
-		testRuleSetCreated(rsc);
+		testRuleSetCreated(RuleSetCollection.pigSpermRuleSetCollection());
 	}
 	
 	@Test
 	public void testRoundRulesetsCreated() throws IOException {
-		RuleSetCollection rsc = RuleSetCollection.createDefaultRuleSet(NucleusType.ROUND);
-		testRuleSetCreated(rsc);
+		testRuleSetCreated(RuleSetCollection.roundRuleSetCollection());
 	}
 	
 	
@@ -58,6 +54,7 @@ public class RuleSetCollectionXMLCreatorTest {
 	private void testRuleSetCreated(RuleSetCollection rsc) throws IOException {
 		RuleSetCollectionXMLCreator rxc = new RuleSetCollectionXMLCreator(rsc);		
 		Document d = rxc.create();
+		printXML(d);
 		testRuleSetCollectionMatches(rsc, d);
 	}
 	
@@ -74,16 +71,16 @@ public class RuleSetCollectionXMLCreatorTest {
 	
 	private void testRuleSetCollectionMatches(RuleSetCollection rsc, Document d) {
 		
-		List<Tag> tags = new ArrayList<>(rsc.getTags());
+		List<Landmark> tags = new ArrayList<>(rsc.getTags());
 		for(int i=0; i<rsc.getTags().size(); i++) {
-			Tag t = tags.get(i);
+			Landmark t = tags.get(i);
 			Element rElements = d.getRootElement().getChild("Tag"+i);
 			List<RuleSet> rList = rsc.getRuleSets(t);
 			
 			assertEquals(t.getName(), 
 					rElements.getChild(XMLCreator.NAME_KEY).getValue());
 			
-			assertEquals(t.type(), 
+			assertEquals(t.type().toString(), 
 					rElements.getChild(XMLCreator.TYPE_KEY).getValue());
 			
 			for(int j=0; j<rList.size(); j++) {

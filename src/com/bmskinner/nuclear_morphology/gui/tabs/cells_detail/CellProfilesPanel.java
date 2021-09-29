@@ -35,7 +35,7 @@ import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.Labels;
@@ -146,7 +146,7 @@ public class CellProfilesPanel extends AbstractCellDetailPanel {
                         .setCell(this.getCellModel().getCell())
                         .setNormalised(false)
                         .setAlignment(ProfileAlignment.LEFT)
-                        .setTag(Tag.REFERENCE_POINT)
+                        .setTag(Landmark.REFERENCE_POINT)
                         .setShowMarkers(true).setProfileType(type)
                         .setSwatch(GlobalOptions.getInstance().getSwatch())
                         .setShowAnnotations(false)

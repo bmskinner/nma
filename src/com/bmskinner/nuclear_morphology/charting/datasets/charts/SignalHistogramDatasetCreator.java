@@ -126,7 +126,7 @@ public class SignalHistogramDatasetCreator extends HistogramDatasetCreator {
                 boolean ignoreSignalGroup = false;
 
                 // If the angle is always zero, the estimator will fail
-                if (collection.getNucleusType().equals(NucleusType.ROUND) && stat.equals(Measurement.ANGLE)) {
+                if (!collection.getRuleSetCollection().isAsymmetric() && stat.equals(Measurement.ANGLE)) {
                     ignoreSignalGroup = true;
                 }
 

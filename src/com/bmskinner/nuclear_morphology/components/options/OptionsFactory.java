@@ -166,7 +166,6 @@ public class OptionsFactory {
      */
     public static IAnalysisOptions makeDefaultPigAnalysisOptions(File testFolder) {
     	IAnalysisOptions op = OptionsFactory.makeAnalysisOptions();
-        op.setNucleusType(NucleusType.PIG_SPERM);
         
         IDetectionOptions nop = OptionsFactory.makeNucleusDetectionOptions(testFolder);
         nop.setMinCirc(0.1);
@@ -183,7 +182,6 @@ public class OptionsFactory {
      */
     public static IAnalysisOptions makeDefaultRoundAnalysisOptions(File testFolder) {
     	IAnalysisOptions op = OptionsFactory.makeAnalysisOptions();
-        op.setNucleusType(NucleusType.ROUND);
         
         IDetectionOptions nop = OptionsFactory.makeNucleusDetectionOptions(testFolder);
         nop.setMinCirc(0.6);

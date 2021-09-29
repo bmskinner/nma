@@ -30,7 +30,7 @@ import com.bmskinner.nuclear_morphology.components.profiles.IProfileAggregate;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileCollection;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.io.DatasetImportMethod.UnloadableDatasetException;
 import com.bmskinner.nuclear_morphology.io.PackageReplacementObjectInputStream;
 import com.bmskinner.nuclear_morphology.stats.Stats;
@@ -82,7 +82,7 @@ public class CellularComponentConversionTest extends ComponentTester {
 			int[] ypoints = (int[]) yField.get(n);
 			
 			Field tagField = getInheritedField(n.getClass(), "borderTags");		
-			Map<Tag, Integer> idx = (Map<Tag, Integer>) tagField.get(n);
+			Map<Landmark, Integer> idx = (Map<Landmark, Integer>) tagField.get(n);
 						
 			
 			Field borderField = getInheritedField(n.getClass(), "borderList");
@@ -145,7 +145,7 @@ public class CellularComponentConversionTest extends ComponentTester {
 		Field idxField = getInheritedField(pro.getClass(), "indexes");
 
 		Map<ProfileType, IProfileAggregate> map = (Map<ProfileType, IProfileAggregate>) mapField.get(pro);
-		Map<Tag, Integer> idx = (Map<Tag, Integer>) idxField.get(pro);
+		Map<Landmark, Integer> idx = (Map<Landmark, Integer>) idxField.get(pro);
 
 		Field aggField = getInheritedField(DefaultProfileAggregate.class, "aggregate");
 		Method m = DefaultProfileAggregate.class.getDeclaredMethod("getValuesForNucleus", int.class);
@@ -156,11 +156,11 @@ public class CellularComponentConversionTest extends ComponentTester {
 		pc.createAndRestoreProfileAggregate(d.getCollection());
 
 		assertEquals(pro.length(), pc.length());
-		for(Tag t : idx.keySet())
+		for(Landmark t : idx.keySet())
 			assertEquals(t.toString(), idx.get(t).intValue(), pc.getIndex(t));
 
-		IProfile profile = pc.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
-		ISegmentedProfile median = pc.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
+		IProfile profile = pc.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);
+		ISegmentedProfile median = pc.getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);
 //		System.out.println("After conversions");
 		float[] firstProfile = (float[]) m.invoke(map.get(ProfileType.ANGLE), 0);
 

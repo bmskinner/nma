@@ -29,8 +29,8 @@ import java.util.UUID;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.Version;
-import com.bmskinner.nuclear_morphology.components.nuclei.NucleusType;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.utility.FileUtils;
 
 /**
@@ -459,13 +459,13 @@ public interface IAnalysisDataset extends Serializable {
      * @param list
      * @return
      */
-    static boolean areSameNucleusType(@NonNull List<IAnalysisDataset> list) {
+    static boolean haveSameRulesets(@NonNull List<IAnalysisDataset> list) {
 
-        NucleusType type = list.get(0).getCollection().getNucleusType();
+        RuleSetCollection col = list.get(0).getCollection().getRuleSetCollection();
 
         for (IAnalysisDataset d : list) {
-            NucleusType next = d.getCollection().getNucleusType();
-            if (!next.equals(type)) {
+        	RuleSetCollection next = d.getCollection().getRuleSetCollection();
+            if (!next.equals(col)) {
                 return false;
             }
         }
@@ -527,22 +527,22 @@ public interface IAnalysisDataset extends Serializable {
         return ok;
     }
 
-    /**
-     * Get the nucleus type that is applicable to all datasets in the list
-     * 
-     * @param list
-     * @return
-     */
-    static NucleusType getBroadestNucleusType(@NonNull List<IAnalysisDataset> list) {
-
-        NucleusType type = list.get(0).getCollection().getNucleusType();
-        if (areSameNucleusType(list)) {
-            return type;
-        }
-
-        return NucleusType.ROUND;
-    }
-    
+//    /**
+//     * Get the nucleus type that is applicable to all datasets in the list
+//     * 
+//     * @param list
+//     * @return
+//     */
+//    static NucleusType getBroadestNucleusType(@NonNull List<IAnalysisDataset> list) {
+//
+//        NucleusType type = list.get(0).getCollection().getNucleusType();
+//        if (haveSameRulesets(list)) {
+//            return type;
+//        }
+//
+//        return NucleusType.ROUND;
+//    }
+//    
 
 
     /**

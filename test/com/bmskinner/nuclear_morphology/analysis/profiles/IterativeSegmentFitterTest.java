@@ -22,7 +22,8 @@ import com.bmskinner.nuclear_morphology.components.profiles.IProfileCollection;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.components.profiles.SegmentedFloatProfile;
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 /** 
@@ -40,12 +41,12 @@ public class IterativeSegmentFitterTest extends ComponentTester {
 		
 	@Test
 	public void testFitterTakesNoActionOnTemplateWithNoSegments() throws Exception {
-		IAnalysisDataset d = new TestDatasetBuilder(RNG_SEED).cellCount(1).ofType(NucleusType.ROUND)
+		IAnalysisDataset d = new TestDatasetBuilder(RNG_SEED).cellCount(1).ofType(RuleSetCollection.roundRuleSetCollection())
 				.randomOffsetProfiles(false)
 				.baseHeight(40).baseWidth(40).profiled().build();
 		
 		ISegmentedProfile template = d.getCollection()
-				.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
+				.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);
 		
 		ISegmentedProfile target = template.copy();
 		
@@ -56,12 +57,12 @@ public class IterativeSegmentFitterTest extends ComponentTester {
 	
 	@Test
 	public void testFittingIdenticalProfileMakesNoChange() throws Exception {
-		IAnalysisDataset d = new TestDatasetBuilder(RNG_SEED).cellCount(1).ofType(NucleusType.ROUND)
+		IAnalysisDataset d = new TestDatasetBuilder(RNG_SEED).cellCount(1).ofType(RuleSetCollection.roundRuleSetCollection())
 				.randomOffsetProfiles(false)
 				.baseHeight(40).baseWidth(40).segmented().build();
 		
 		ISegmentedProfile template = d.getCollection()
-				.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
+				.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);
 		
 		
 		ISegmentedProfile target = template.copy();
@@ -88,19 +89,19 @@ public class IterativeSegmentFitterTest extends ComponentTester {
 	
 	@Test
 	public void testFittingSquareTemplateToRectangularTarget() throws Exception {
-		IAnalysisDataset d1 = new TestDatasetBuilder(RNG_SEED).cellCount(1).ofType(NucleusType.ROUND)
+		IAnalysisDataset d1 = new TestDatasetBuilder(RNG_SEED).cellCount(1).ofType(RuleSetCollection.roundRuleSetCollection())
 				.randomOffsetProfiles(false)
 				.baseHeight(40).baseWidth(40).segmented().build();
 		
 		ISegmentedProfile template = d1.getCollection()
-				.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
+				.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);
 		
-		IAnalysisDataset d2 = new TestDatasetBuilder(RNG_SEED).cellCount(1).ofType(NucleusType.ROUND)
+		IAnalysisDataset d2 = new TestDatasetBuilder(RNG_SEED).cellCount(1).ofType(RuleSetCollection.roundRuleSetCollection())
 				.randomOffsetProfiles(false)
 				.baseHeight(50).baseWidth(30).segmented().build();
 		
 		ISegmentedProfile target = d2.getCollection()
-				.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
+				.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);
 
 				
 		fitter = new IterativeSegmentFitter(template.copy());
@@ -120,26 +121,26 @@ public class IterativeSegmentFitterTest extends ComponentTester {
 	@Test
 	public void testFittingOfSingleSegmentTemplate() throws Exception {
 		
-		IAnalysisDataset d = new TestDatasetBuilder(RNG_SEED).cellCount(10).ofType(NucleusType.ROUND)
+		IAnalysisDataset d = new TestDatasetBuilder(RNG_SEED).cellCount(10).ofType(RuleSetCollection.roundRuleSetCollection())
 				.baseHeight(40).baseWidth(40).profiled().build();
 		
 		ISegmentedProfile singleSegmentProfile = new SegmentedFloatProfile(d.getCollection().getProfileCollection()
-				.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN));
+				.getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN));
 		
 		assertEquals(1, singleSegmentProfile.getSegmentCount());
 		
 		fitter = new IterativeSegmentFitter(singleSegmentProfile);
 		
 		for(Nucleus n : d.getCollection().getNuclei()) {
-			IProfile nucleusProfile  = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+			IProfile nucleusProfile  = n.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
 			ISegmentedProfile segProfile = fitter.fit(nucleusProfile);
-			n.setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, segProfile);
+			n.setProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, segProfile);
 			if(segProfile.getSegmentCount()!=singleSegmentProfile.getSegmentCount())
 				fail("Segments could not be fitted to nucleus");
 			
 			assertEquals("Single segment before adding to nucleus", 0, segProfile.getSegment(IProfileCollection.DEFAULT_SEGMENT_ID).getStartIndex());	
 						
-			ISegmentedProfile test  = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+			ISegmentedProfile test  = n.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
 			IProfileSegment seg = test.getSegment(IProfileCollection.DEFAULT_SEGMENT_ID);
 			assertEquals("Single segment start fetched from nucleus", 0, seg.getStartIndex());			
 		}

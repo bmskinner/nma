@@ -19,7 +19,7 @@ import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.components.profiles.SegmentedFloatProfile;
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.signals.DefaultNuclearSignal;
 import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -180,7 +180,7 @@ public class NucleusXMLReader extends XMLReader<Nucleus>{
 	
 	private void readTags(Element tags, Nucleus n) {
 		for(Element tag : tags.getChildren()) {			
-			Tag t = readTag(tag);
+			Landmark t = readTag(tag);
 			int index = readInt(tag, XMLCreator.INDEX_KEY);
 			n.setBorderTag(t, index);
 		}
@@ -213,8 +213,8 @@ public class NucleusXMLReader extends XMLReader<Nucleus>{
 				ISegmentedProfile segmented = new SegmentedFloatProfile(profile, newSegs);
 				n.setProfile(type, segmented);
 				
-				ISegmentedProfile p = n.getProfile(type, Tag.REFERENCE_POINT); // ensure all profiles are updated to RP
-				n.setProfile(type, Tag.REFERENCE_POINT, p);
+				ISegmentedProfile p = n.getProfile(type, Landmark.REFERENCE_POINT); // ensure all profiles are updated to RP
+				n.setProfile(type, Landmark.REFERENCE_POINT, p);
 			}
 
 		} catch(Exception e1) {

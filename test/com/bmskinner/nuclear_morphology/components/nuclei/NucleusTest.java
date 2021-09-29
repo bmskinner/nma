@@ -35,7 +35,7 @@ import com.bmskinner.nuclear_morphology.components.TestComponentFactory;
 import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 
 /**
  * Tests for implementations of the Nucleus interface
@@ -96,18 +96,18 @@ public class NucleusTest {
 	
 	@Test
 	public void testAlignVertical() throws Exception {
-		nucleus.setBorderTag(Tag.TOP_VERTICAL, 10);
-		nucleus.setBorderTag(Tag.BOTTOM_VERTICAL, 20);
-		assertTrue(nucleus.hasBorderTag(Tag.TOP_VERTICAL));
-		assertTrue(nucleus.hasBorderTag(Tag.BOTTOM_VERTICAL));
+		nucleus.setBorderTag(Landmark.TOP_VERTICAL, 10);
+		nucleus.setBorderTag(Landmark.BOTTOM_VERTICAL, 20);
+		assertTrue(nucleus.hasBorderTag(Landmark.TOP_VERTICAL));
+		assertTrue(nucleus.hasBorderTag(Landmark.BOTTOM_VERTICAL));
 		
-		IPoint tvPre = nucleus.getBorderPoint(Tag.TOP_VERTICAL);
-		IPoint bvPre = nucleus.getBorderPoint(Tag.BOTTOM_VERTICAL);
+		IPoint tvPre = nucleus.getBorderPoint(Landmark.TOP_VERTICAL);
+		IPoint bvPre = nucleus.getBorderPoint(Landmark.BOTTOM_VERTICAL);
 		assertFalse(Math.abs(tvPre.getX()-bvPre.getX())<1);
 		
 		nucleus.alignVertically();
-		IPoint tv = nucleus.getBorderPoint(Tag.TOP_VERTICAL);
-		IPoint bv = nucleus.getBorderPoint(Tag.BOTTOM_VERTICAL);
+		IPoint tv = nucleus.getBorderPoint(Landmark.TOP_VERTICAL);
+		IPoint bv = nucleus.getBorderPoint(Landmark.BOTTOM_VERTICAL);
 		
 		assertEquals(tv.getX(), bv.getX(), 0.0);
 		assertTrue(tv.getY()>bv.getY());
@@ -115,15 +115,15 @@ public class NucleusTest {
 	
 	@Test
 	public void testGetVerticalNucleusIsIdenticalToAlignVertical() throws Exception {
-		nucleus.setBorderTag(Tag.TOP_VERTICAL, 10);
-		nucleus.setBorderTag(Tag.BOTTOM_VERTICAL, 20);
+		nucleus.setBorderTag(Landmark.TOP_VERTICAL, 10);
+		nucleus.setBorderTag(Landmark.BOTTOM_VERTICAL, 20);
 		Nucleus vert = nucleus.getVerticallyRotatedNucleus();
 		
 		nucleus.alignVertically();
-		IPoint tv = nucleus.getBorderPoint(Tag.TOP_VERTICAL);
-		IPoint bv = nucleus.getBorderPoint(Tag.BOTTOM_VERTICAL);
-		IPoint vTv = vert.getBorderPoint(Tag.TOP_VERTICAL);
-		IPoint vBv = vert.getBorderPoint(Tag.BOTTOM_VERTICAL);
+		IPoint tv = nucleus.getBorderPoint(Landmark.TOP_VERTICAL);
+		IPoint bv = nucleus.getBorderPoint(Landmark.BOTTOM_VERTICAL);
+		IPoint vTv = vert.getBorderPoint(Landmark.TOP_VERTICAL);
+		IPoint vBv = vert.getBorderPoint(Landmark.BOTTOM_VERTICAL);
 		
 		assertEquals("Top vertical", tv, vTv);
 		assertEquals("Bottom vertical", bv, vBv);

@@ -32,7 +32,6 @@ import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.profiles.BorderTagObject.BorderTagType;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
@@ -58,7 +57,7 @@ public class DefaultProfileCollection implements IProfileCollection {
 
     private static final long serialVersionUID = 1L;
 
-    private Map<Tag, Integer> indexes  = new HashMap<>(); // indexes of tags in the profile. Assumes the RP is at zero.
+    private Map<Landmark, Integer> indexes  = new HashMap<>(); // indexes of tags in the profile. Assumes the RP is at zero.
     private IProfileSegment[]  segments = null;
 
     private transient int                                 length;
@@ -69,14 +68,14 @@ public class DefaultProfileCollection implements IProfileCollection {
      * Create an empty profile collection. The RP is set to the zero index by default.
      */
     public DefaultProfileCollection() {
-        indexes.put(Tag.REFERENCE_POINT, ZERO_INDEX);
+        indexes.put(Landmark.REFERENCE_POINT, ZERO_INDEX);
     }
     
 	@Override
 	public IProfileCollection duplicate() {
 		DefaultProfileCollection pc = new DefaultProfileCollection();
 		
-		for(Tag t : indexes.keySet())
+		for(Landmark t : indexes.keySet())
 			pc.indexes.put(t, indexes.get(t));
 		
 		pc.segments = new IProfileSegment[segments.length];
@@ -104,7 +103,7 @@ public class DefaultProfileCollection implements IProfileCollection {
     }
 
     @Override
-    public int getIndex(@NonNull Tag pointType) {
+    public int getIndex(@NonNull Landmark pointType) {
         if (pointType == null)
             throw new IllegalArgumentException("The requested offset key is null: " + pointType);
         if (indexes.containsKey(pointType))
@@ -113,21 +112,21 @@ public class DefaultProfileCollection implements IProfileCollection {
     }
 
     @Override
-    public List<Tag> getBorderTags() {
-        List<Tag> result = new ArrayList<Tag>();
-        for (Tag s : indexes.keySet()) {
+    public List<Landmark> getBorderTags() {
+        List<Landmark> result = new ArrayList<Landmark>();
+        for (Landmark s : indexes.keySet()) {
             result.add(s);
         }
         return result;
     }
 
     @Override
-    public boolean hasBorderTag(@NonNull Tag tag) {
+    public boolean hasBorderTag(@NonNull Landmark tag) {
         return indexes.keySet().contains(tag);
     }
 
     @Override
-    public IProfile getProfile(@NonNull ProfileType type, @NonNull Tag tag, double quartile)
+    public IProfile getProfile(@NonNull ProfileType type, @NonNull Landmark tag, double quartile)
             throws UnavailableBorderTagException, ProfileException, UnavailableProfileTypeException {
 
         if (type == null)
@@ -151,7 +150,7 @@ public class DefaultProfileCollection implements IProfileCollection {
     }
 
     @Override
-    public ISegmentedProfile getSegmentedProfile(@NonNull ProfileType type, @NonNull Tag tag, double quartile)
+    public ISegmentedProfile getSegmentedProfile(@NonNull ProfileType type, @NonNull Landmark tag, double quartile)
             throws UnavailableBorderTagException, ProfileException, UnavailableProfileTypeException,
             UnsegmentedProfileException {
 
@@ -186,7 +185,7 @@ public class DefaultProfileCollection implements IProfileCollection {
     }
 
     @Override
-    public synchronized IProfileSegment getSegmentAt(@NonNull Tag tag, int position) {
+    public synchronized IProfileSegment getSegmentAt(@NonNull Landmark tag, int position) {
         return this.getSegments(tag).get(position);
     }
 
@@ -197,7 +196,7 @@ public class DefaultProfileCollection implements IProfileCollection {
 
 
     @Override
-    public synchronized List<IProfileSegment> getSegments(@NonNull Tag tag) {
+    public synchronized List<IProfileSegment> getSegments(@NonNull Landmark tag) {
         if (tag == null)
             throw new IllegalArgumentException("The requested segment key is null: " + tag);
 
@@ -226,12 +225,12 @@ public class DefaultProfileCollection implements IProfileCollection {
 
 
     @Override
-    public boolean hasSegmentStartingWith(@NonNull Tag tag) throws UnsegmentedProfileException {
+    public boolean hasSegmentStartingWith(@NonNull Landmark tag) throws UnsegmentedProfileException {
     	return getSegmentStartingWith(tag) != null;
     }
 
     @Override
-    public IProfileSegment getSegmentStartingWith(@NonNull Tag tag) throws UnsegmentedProfileException {
+    public IProfileSegment getSegmentStartingWith(@NonNull Landmark tag) throws UnsegmentedProfileException {
         List<IProfileSegment> segments = this.getSegments(tag);
 
         if (segments.size() == 0) {
@@ -251,13 +250,13 @@ public class DefaultProfileCollection implements IProfileCollection {
 
 
     @Override
-    public boolean hasSegmentEndingWith(@NonNull Tag tag) throws UnsegmentedProfileException {
+    public boolean hasSegmentEndingWith(@NonNull Landmark tag) throws UnsegmentedProfileException {
     	return getSegmentEndingWith(tag) != null;
     }
 
 
     @Override
-    public IProfileSegment getSegmentEndingWith(@NonNull Tag tag) throws UnsegmentedProfileException {
+    public IProfileSegment getSegmentEndingWith(@NonNull Landmark tag) throws UnsegmentedProfileException {
         List<IProfileSegment> segments = this.getSegments(tag);
 
         if (segments.size() == 0)
@@ -278,7 +277,7 @@ public class DefaultProfileCollection implements IProfileCollection {
 
     @Override
     public IProfileSegment getSegmentContaining(int index) throws UnsegmentedProfileException {
-        List<IProfileSegment> segments = this.getSegments(Tag.REFERENCE_POINT);
+        List<IProfileSegment> segments = this.getSegments(Landmark.REFERENCE_POINT);
 
         if (segments.size() == 0) 
             throw new UnsegmentedProfileException("No segments assigned to profile collection");
@@ -295,7 +294,7 @@ public class DefaultProfileCollection implements IProfileCollection {
 
 
     @Override
-    public IProfileSegment getSegmentContaining(@NonNull Tag tag) throws ProfileException {
+    public IProfileSegment getSegmentContaining(@NonNull Landmark tag) throws ProfileException {
         List<IProfileSegment> segments = this.getSegments(tag);
 
         IProfileSegment result = null;
@@ -308,12 +307,12 @@ public class DefaultProfileCollection implements IProfileCollection {
     }
 
     @Override
-    public void addIndex(@NonNull Tag tag, int offset) {
+    public void addIndex(@NonNull Landmark tag, int offset) {
         if (tag == null)
             throw new IllegalArgumentException("BorderTagObject is null");
 
         // Cannot move the RP from zero
-        if (tag.equals(Tag.REFERENCE_POINT))
+        if (tag.equals(Landmark.REFERENCE_POINT))
             return;
         cache.remove(tag);
         indexes.put(tag, offset);
@@ -322,11 +321,11 @@ public class DefaultProfileCollection implements IProfileCollection {
 
     @Override
     public void addSegments(@NonNull List<IProfileSegment> n) {
-    	addSegments(Tag.REFERENCE_POINT, n);
+    	addSegments(Landmark.REFERENCE_POINT, n);
     }
 
     @Override
-    public void addSegments(@NonNull Tag tag, @NonNull List<IProfileSegment> n) {
+    public void addSegments(@NonNull Landmark tag, @NonNull List<IProfileSegment> n) {
         if (n == null || n.isEmpty())
             throw new IllegalArgumentException("String or segment list is null or empty");
 
@@ -397,7 +396,7 @@ public class DefaultProfileCollection implements IProfileCollection {
                     switch (type) {
                     case FRANKEN: agg.addValues(n.getProfile(type));
                         break;
-                    default: agg.addValues(n.getProfile(type, Tag.REFERENCE_POINT));
+                    default: agg.addValues(n.getProfile(type, Landmark.REFERENCE_POINT));
                         break;
                     }
                 }
@@ -415,14 +414,14 @@ public class DefaultProfileCollection implements IProfileCollection {
      * @param length
      */
     private void createProfileAggregateOfDifferentLength(@NonNull ICellCollection collection, int length) throws ProfileException {
-    	indexes.put(Tag.REFERENCE_POINT, ZERO_INDEX);
+    	indexes.put(Landmark.REFERENCE_POINT, ZERO_INDEX);
     	try {
     		    		
     		// Copy any existing segments, adjusting the lengths using profile interpolation
     		
     		List<IProfileSegment> interpolatedSegments;
     		if(!map.isEmpty()) {
-    			ISegmentedProfile sourceMedian = getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
+    			ISegmentedProfile sourceMedian = getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);
     			interpolatedSegments = sourceMedian.interpolate(length).getSegments();
     		} else {
     			
@@ -445,14 +444,14 @@ public class DefaultProfileCollection implements IProfileCollection {
                 IProfileAggregate agg = new DefaultProfileAggregate(length, collection.size());
                 try {
                     for (Nucleus n : collection.getNuclei())
-                         agg.addValues(n.getProfile(type, Tag.REFERENCE_POINT));
+                         agg.addValues(n.getProfile(type, Landmark.REFERENCE_POINT));
                 } catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
                     LOGGER.log(Loggable.STACK, "Error making aggregate", e);
                 }
                 map.put(type, agg);
             } 	    		
     		
-    		addSegments(Tag.REFERENCE_POINT, interpolatedSegments);
+    		addSegments(Landmark.REFERENCE_POINT, interpolatedSegments);
     	} catch(Exception e) {
     		LOGGER.log(Loggable.STACK, e.getMessage(), e);
     		throw new ProfileException(e);
@@ -481,7 +480,7 @@ public class DefaultProfileCollection implements IProfileCollection {
         StringBuilder builder = new StringBuilder();
 
         builder.append("\tPoint types:");
-        for (Tag tag : this.indexes.keySet()) {
+        for (Landmark tag : this.indexes.keySet()) {
             builder.append("\t" + tag + ": " + this.indexes.get(tag));
         }
         return builder.toString();
@@ -495,9 +494,9 @@ public class DefaultProfileCollection implements IProfileCollection {
 
         try {
 
-            for (Tag tag : this.indexes.keySet()) {
+            for (Landmark tag : this.indexes.keySet()) {
                 if (tag.type()
-                        .equals(BorderTagType.CORE)) {
+                        .equals(LandmarkType.CORE)) {
                     builder.append("\r\nSegments from " + tag + ":\r\n");
                     for (IProfileSegment s : this.getSegments(tag)) {
                         builder.append(s.toString() + "\r\n");
@@ -514,7 +513,7 @@ public class DefaultProfileCollection implements IProfileCollection {
     }
 
     @Override
-    public IProfile getIQRProfile(@NonNull ProfileType type, @NonNull Tag tag)
+    public IProfile getIQRProfile(@NonNull ProfileType type, @NonNull Landmark tag)
             throws UnavailableBorderTagException, ProfileException, UnavailableProfileTypeException {
 
         IProfile q25 = getProfile(type, tag, Stats.LOWER_QUARTILE);
@@ -531,7 +530,7 @@ public class DefaultProfileCollection implements IProfileCollection {
     }
 
     @Override
-    public List<Integer> findMostVariableRegions(@NonNull ProfileType type, @NonNull Tag tag) {
+    public List<Integer> findMostVariableRegions(@NonNull ProfileType type, @NonNull Landmark tag) {
 
         List<Integer> result = new ArrayList<Integer>(0);
 
@@ -650,9 +649,9 @@ public class DefaultProfileCollection implements IProfileCollection {
         private class ProfileKey {
             private final ProfileType type;
             private final double      quartile;
-            private final Tag         tag;
+            private final Landmark         tag;
 
-            public ProfileKey(final ProfileType type, final double quartile, final Tag tag) {
+            public ProfileKey(final ProfileType type, final double quartile, final Landmark tag) {
 
                 this.type = type;
                 this.quartile = quartile;
@@ -663,7 +662,7 @@ public class DefaultProfileCollection implements IProfileCollection {
                 return type.equals(t);
             }
 
-            public boolean has(Tag t) {
+            public boolean has(Landmark t) {
                 return tag.equals(t);
             }
 
@@ -736,22 +735,22 @@ public class DefaultProfileCollection implements IProfileCollection {
          * @param tag the tag
          * @param profile the profile to save
          */
-        public void addProfile(final ProfileType type, final double quartile, final Tag tag, IProfile profile) {
+        public void addProfile(final ProfileType type, final double quartile, final Landmark tag, IProfile profile) {
             ProfileKey key = new ProfileKey(type, quartile, tag);
             map.put(key, profile);
         }
 
-        public boolean hasProfile(final ProfileType type, final double quartile, final Tag tag) {
+        public boolean hasProfile(final ProfileType type, final double quartile, final Landmark tag) {
             ProfileKey key = new ProfileKey(type, quartile, tag);
             return map.containsKey(key);
         }
 
-        public IProfile getProfile(final ProfileType type, final double quartile, final Tag tag) {
+        public IProfile getProfile(final ProfileType type, final double quartile, final Landmark tag) {
             ProfileKey key = new ProfileKey(type, quartile, tag);
             return map.get(key);
         }
 
-        public void remove(final ProfileType type, final double quartile, final Tag tag) {
+        public void remove(final ProfileType type, final double quartile, final Landmark tag) {
             ProfileKey key = new ProfileKey(type, quartile, tag);
             map.remove(key);
         }
@@ -763,7 +762,7 @@ public class DefaultProfileCollection implements IProfileCollection {
         	map.clear();
         }
 
-        public void remove(final Tag t) {
+        public void remove(final Landmark t) {
 
             Iterator<ProfileKey> it = map.keySet().iterator();
             while (it.hasNext()) {
@@ -788,7 +787,7 @@ public class DefaultProfileCollection implements IProfileCollection {
 	}
 
 	@Override
-	public double getProportionOfIndex(@NonNull Tag tag) throws UnavailableBorderTagException {
+	public double getProportionOfIndex(@NonNull Landmark tag) throws UnavailableBorderTagException {
 		return getProportionOfIndex(getIndex(tag));
 	}
 

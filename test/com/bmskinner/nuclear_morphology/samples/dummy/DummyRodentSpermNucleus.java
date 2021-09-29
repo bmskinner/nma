@@ -33,7 +33,7 @@ import com.bmskinner.nuclear_morphology.components.nuclei.DefaultRodentSpermNucl
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalCollection;
 
@@ -204,27 +204,27 @@ public class DummyRodentSpermNucleus extends DummyCellularComponent implements N
 
 
 	@Override
-	public int getBorderIndex(Tag tag) throws UnavailableBorderTagException {
+	public int getBorderIndex(Landmark tag) throws UnavailableBorderTagException {
 	    return nucleus.getBorderIndex(tag);
 	}
 
 	@Override
-	public Tag getBorderTag(Tag tag, int index) throws UnavailableBorderTagException {
+	public Landmark getBorderTag(Landmark tag, int index) throws UnavailableBorderTagException {
 		return nucleus.getBorderTag(tag, index);
 	}
 
 	@Override
-	public Tag getBorderTag(int index) {
+	public Landmark getBorderTag(int index) {
 	    return nucleus.getBorderTag(index);
 	}
 
 	@Override
-	public boolean hasBorderTag(Tag tag) {
+	public boolean hasBorderTag(Landmark tag) {
 		return nucleus.hasBorderTag(tag);
 	}
 
 	@Override
-	public boolean hasBorderTag(Tag tag, int i) {
+	public boolean hasBorderTag(Landmark tag, int i) {
 		return nucleus.hasBorderTag(tag, i);
 	}
 
@@ -234,40 +234,40 @@ public class DummyRodentSpermNucleus extends DummyCellularComponent implements N
 	}
 
 	@Override
-	public void setBorderTag(Tag tag, int i) {
+	public void setBorderTag(Landmark tag, int i) {
 		nucleus.setBorderTag(tag, i);
 	}
 
 	@Override
-	public void setBorderTag(Tag reference, Tag tag,
+	public void setBorderTag(Landmark reference, Landmark tag,
 			int i) throws IndexOutOfBoundsException, UnavailableBorderTagException {
 		nucleus.setBorderTag(reference, tag, i);		
 	}
 
 	@Override
-	public ISegmentedProfile getProfile(ProfileType type, Tag tag) throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException {
+	public ISegmentedProfile getProfile(ProfileType type, Landmark tag) throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException {
 		return nucleus.getProfile(type, tag);
 	}
 
 	@Override
-	public void setProfile(ProfileType type, Tag tag,
+	public void setProfile(ProfileType type, Landmark tag,
 			ISegmentedProfile profile) {
 		setProfile(type, profile);
 		
 	}
 
 	@Override
-	public Map<Tag, Integer> getBorderTags() {
+	public Map<Landmark, Integer> getBorderTags() {
 		return nucleus.getBorderTags();
 	}
 
 	@Override
-	public IBorderPoint getBorderPoint(Tag tag) throws UnavailableBorderTagException {
+	public IBorderPoint getBorderPoint(Landmark tag) throws UnavailableBorderTagException {
 		return nucleus.getBorderPoint(tag);
 	}
 
 	@Override
-	public int getOffsetBorderIndex(Tag reference, int index) throws UnavailableBorderTagException {
+	public int getOffsetBorderIndex(Landmark reference, int index) throws UnavailableBorderTagException {
 		return nucleus.getOffsetBorderIndex(reference, index);
 	}
 

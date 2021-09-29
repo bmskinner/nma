@@ -77,7 +77,7 @@ public class CopyNucleusDetectionSettingsFromOpenDatasetPanel extends CopyFromOp
             		Optional<IDetectionOptions> srcOptions = op.get().getDetectionOptions(CellularComponent.NUCLEUS);
             		options.set(srcOptions.get());
             		options.setFolder(folder);
-                    parent.setNucleusType(op.get().getNucleusType());
+                    parent.setRuleSetCollection(op.get().getRuleSetCollection());
             	}
 
                 fireOptionsChangeEvent();
@@ -96,7 +96,7 @@ public class CopyNucleusDetectionSettingsFromOpenDatasetPanel extends CopyFromOp
 			try {
 				IAnalysisOptions o = new OptionsXMLReader(f).read();
 				options.set(o.getDetectionOptions(CellularComponent.NUCLEUS).get());
-				parent.setNucleusType(o.getNucleusType());
+				parent.setRuleSetCollection(o.getRuleSetCollection());
 				parent.setAngleWindowProportion(o.getProfileWindowProportion());
 				options.setFolder(folder);
 				fireOptionsChangeEvent();

@@ -19,6 +19,7 @@ package com.bmskinner.nuclear_morphology.components.rules;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -36,9 +37,10 @@ import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 public class RuleSet implements Serializable {
 
     private static final long serialVersionUID = 1L;
+    
     // combine rules with AND conditions
-    List<Rule>  rules = new ArrayList<>();
-    ProfileType type; // the type of profile to which the rules apply
+    private List<Rule>  rules = new ArrayList<>();
+    private ProfileType type; // the type of profile to which the rules apply
 
     public RuleSet(final ProfileType type) {
         this.type = type;
@@ -65,21 +67,10 @@ public class RuleSet implements Serializable {
         }
         return b.toString();
     }
-    
-    
-    
 
-    /*
-     * STATIC METHODS FOR BUILT-IN RULESETS
-     */
-
-    @Override
+	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((rules == null) ? 0 : rules.hashCode());
-		result = prime * result + ((type == null) ? 0 : type.hashCode());
-		return result;
+		return Objects.hash(rules, type);
 	}
 
 	@Override
@@ -91,14 +82,7 @@ public class RuleSet implements Serializable {
 		if (getClass() != obj.getClass())
 			return false;
 		RuleSet other = (RuleSet) obj;
-		if (rules == null) {
-			if (other.rules != null)
-				return false;
-		} else if (!rules.equals(other.rules))
-			return false;
-		if (type != other.type)
-			return false;
-		return true;
+		return Objects.equals(rules, other.rules) && type == other.type;
 	}
 
 	/**

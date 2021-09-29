@@ -20,7 +20,7 @@ import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 
 /**
  * Methods for editing datasets via a tab panel
@@ -46,7 +46,7 @@ public interface EditingTabPanel extends TabPanel {
      * @param tag
      * @param newTagIndex
      */
-    void setBorderTagAction(@NonNull Tag tag, int newTagIndex);
+    void setBorderTagAction(@NonNull Landmark tag, int newTagIndex);
 
     /**
      * Update the start index of the given segment to the given index in the

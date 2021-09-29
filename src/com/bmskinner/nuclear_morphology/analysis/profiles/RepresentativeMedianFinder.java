@@ -29,7 +29,7 @@ import com.bmskinner.nuclear_morphology.components.profiles.DefaultProfileAggreg
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
@@ -84,7 +84,7 @@ public class RepresentativeMedianFinder {
         int index = findIndexOfLowestValue(deviations);
         
         // Get this best profile
-        ISegmentedProfile bestProfile = nuclei.get(index).getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+        ISegmentedProfile bestProfile = nuclei.get(index).getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
         
         // Find the other nuclei in the collection that are similar to this one
         List<IProfile> profiles = findBestProfiles(bestProfile);
@@ -106,7 +106,7 @@ public class RepresentativeMedianFinder {
 		try {
 			
 			IProfile template = collection.getProfileCollection().
-					getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
+					getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);
 			
 			float[] differences = calculateDistancesToTemplate(template);
 									
@@ -116,7 +116,7 @@ public class RepresentativeMedianFinder {
 			LOGGER.finer( "Lowest difference index is "+index+" with value "+lowest);
 			
 			// Get this best profile
-			IProfile bestProfile = nuclei.get(index).getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);		
+			IProfile bestProfile = nuclei.get(index).getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);		
 			
 			List<IProfile> profiles = findBestProfiles(bestProfile);
 			
@@ -128,7 +128,7 @@ public class RepresentativeMedianFinder {
 			
 		} catch (UnavailableBorderTagException | UnavailableProfileTypeException | ProfileException e) {
 			LOGGER.log(Loggable.STACK, "Error creating matrix, returning default median", e);
-			return collection.getProfileCollection().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
+			return collection.getProfileCollection().getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);
 		}
 	}
 		
@@ -147,13 +147,13 @@ public class RepresentativeMedianFinder {
 
 		if(nuclei.size()<=2 || medianDiff==0) { // too few profiles or all identical
 			for(Nucleus n : nuclei)  
-				result.add(n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT));
+				result.add(n.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT));
 			return result;
 		}
 
 		for(int i=0; i<differences.length; i++) {
 			if(differences[i]<medianDiff)
-				result.add(nuclei.get(i).getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT));
+				result.add(nuclei.get(i).getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT));
 		}
 		return result;
 	}
@@ -193,7 +193,7 @@ public class RepresentativeMedianFinder {
 	private float[] calculateDistancesToTemplate(IProfile template) throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException {		
 		float[] result = new float[collection.getNucleusCount()];
 		for(int i=0; i<result.length; i++) {
-			result[i] = (float) nuclei.get(i).getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).absoluteSquareDifference(template);
+			result[i] = (float) nuclei.get(i).getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT).absoluteSquareDifference(template);
 		}
 		return result;
 	}
@@ -209,9 +209,9 @@ public class RepresentativeMedianFinder {
 		float[][] matrix = new float[collection.getNucleusCount()][collection.getNucleusCount()];
 		
 		for(int i=0; i<nuclei.size(); i++) {
-			IProfile pI = nuclei.get(i).getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+			IProfile pI = nuclei.get(i).getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
 			for(int j=0; j<nuclei.size(); j++) {
-				matrix[i][j] = (float) pI.absoluteSquareDifference(nuclei.get(j).getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT));
+				matrix[i][j] = (float) pI.absoluteSquareDifference(nuclei.get(j).getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT));
 			}
 		}
 		return matrix;

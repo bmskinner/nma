@@ -37,7 +37,7 @@ import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult;
 import com.bmskinner.nuclear_morphology.gui.Labels;
@@ -142,13 +142,13 @@ public class ScatterTableDatasetCreator extends AbstractTableCreator {
                 try {
 
                     if (statA.equals(Measurement.VARIABILITY)) {
-                        statAValue = c.getNormalisedDifferenceToMedian(Tag.REFERENCE_POINT, n);
+                        statAValue = c.getNormalisedDifferenceToMedian(Landmark.REFERENCE_POINT, n);
                     } else {
                         statAValue = n.getStatistic(statA, scale);
                     }
 
                     if (statB.equals(Measurement.VARIABILITY)) {
-                        statBValue = c.getNormalisedDifferenceToMedian(Tag.REFERENCE_POINT, n);
+                        statBValue = c.getNormalisedDifferenceToMedian(Landmark.REFERENCE_POINT, n);
                     } else {
                         statBValue = n.getStatistic(statB, scale);
                     }

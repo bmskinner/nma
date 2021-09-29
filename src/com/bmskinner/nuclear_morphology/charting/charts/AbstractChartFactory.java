@@ -36,8 +36,8 @@ import org.jfree.data.xy.XYDataset;
 import com.bmskinner.nuclear_morphology.charting.ChartComponents;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.profiles.BorderTagObject;
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.DefaultLandmark;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 
@@ -176,7 +176,7 @@ public abstract class AbstractChartFactory {
      * @param tag the tag to use for colour selection
      * @param value the domain axis value to draw at
      */
-    protected void addDomainMarkerToXYPlot(final XYPlot plot, final Tag tag, final double value) {
+    protected void addDomainMarkerToXYPlot(final XYPlot plot, final Landmark tag, final double value) {
         Color colour = chooseTagColour(tag);
         plot.addDomainMarker(new ValueMarker(value, colour, ChartComponents.MARKER_STROKE));
     }
@@ -188,7 +188,7 @@ public abstract class AbstractChartFactory {
      * @param tag the tag to use for colour selection
      * @param value the domain axis value to draw at
      */
-    protected void addDomainMarkerToXYPlot(final XYPlot plot, final Tag tag, final int value) {
+    protected void addDomainMarkerToXYPlot(final XYPlot plot, final Landmark tag, final int value) {
         Color colour = chooseTagColour(tag);
         plot.addDomainMarker(new ValueMarker(value, colour, ChartComponents.MARKER_STROKE));
     }
@@ -199,18 +199,18 @@ public abstract class AbstractChartFactory {
      * @param tag the tag to be rendered
      * @return the colour for the tag, or black if the tag was null or unknown
      */
-    private Color chooseTagColour(final Tag tag) {
+    private Color chooseTagColour(final Landmark tag) {
         Color colour = Color.BLACK;
 
-        if (tag.equals(Tag.ORIENTATION_POINT))
+        if (tag.equals(Landmark.ORIENTATION_POINT))
             colour = Color.BLUE;
-        if (tag.equals(Tag.REFERENCE_POINT))
+        if (tag.equals(Landmark.REFERENCE_POINT))
             colour = Color.ORANGE;
-        if (tag.getName().equals(BorderTagObject.INTERSECTION_POINT.toString()))
+        if (tag.getName().equals(DefaultLandmark.INTERSECTION_POINT.toString()))
             colour = Color.CYAN;
-        if (tag.getName().equals(BorderTagObject.TOP_VERTICAL.toString()))
+        if (tag.getName().equals(DefaultLandmark.TOP_VERTICAL.toString()))
             colour = Color.GRAY;
-        if (tag.getName().equals(BorderTagObject.BOTTOM_VERTICAL.toString()))
+        if (tag.getName().equals(DefaultLandmark.BOTTOM_VERTICAL.toString()))
             colour = Color.GRAY;
         return colour;
     }

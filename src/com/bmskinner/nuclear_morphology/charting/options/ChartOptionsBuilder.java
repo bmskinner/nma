@@ -29,7 +29,7 @@ import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult.Aggregation;
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult.Normalisation;
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult.ShrinkType;
@@ -99,7 +99,7 @@ public class ChartOptionsBuilder {
         return this;
     }
 
-    public ChartOptionsBuilder setTag(Tag tag) {
+    public ChartOptionsBuilder setTag(Landmark tag) {
         options.setTag(tag);
         return this;
     }

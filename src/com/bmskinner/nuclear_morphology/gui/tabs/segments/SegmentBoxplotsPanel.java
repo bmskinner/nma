@@ -42,7 +42,7 @@ import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.Labels;
@@ -95,7 +95,7 @@ public class SegmentBoxplotsPanel extends BoxplotsTabPanel implements ActionList
             ICellCollection collection = activeDataset().getCollection();
             List<IProfileSegment> segments;
             try {
-                segments = collection.getProfileCollection().getSegments(Tag.REFERENCE_POINT);
+                segments = collection.getProfileCollection().getSegments(Landmark.REFERENCE_POINT);
             } catch (UnavailableBorderTagException | ProfileException e) {
                 LOGGER.warning("Cannot get segments");
                 LOGGER.log(Loggable.STACK, "Cannot get segments", e);

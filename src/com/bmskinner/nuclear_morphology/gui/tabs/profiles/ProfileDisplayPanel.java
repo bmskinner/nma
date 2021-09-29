@@ -23,7 +23,7 @@ import com.bmskinner.nuclear_morphology.charting.charts.ProfileChartFactory;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
@@ -90,7 +90,7 @@ public class ProfileDisplayPanel extends AbstractProfileDisplayPanel {
         ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets())
         		.setNormalised(normalised)
                 .setAlignment(alignment)
-                .setTag(Tag.REFERENCE_POINT)
+                .setTag(Landmark.REFERENCE_POINT)
                 .setShowMarkers(showMarkers)
                 .setShowProfiles(hideProfiles)
                 .setSwatch(GlobalOptions.getInstance().getSwatch())

@@ -37,7 +37,7 @@ import com.bmskinner.nuclear_morphology.components.profiles.IProfileCollection;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.components.profiles.SegmentedFloatProfile;
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -238,7 +238,7 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 	 * @return
 	 */
 	private IAnalysisResult runRefreshAnalysis() throws Exception {
-		ISegmentedProfile median = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
+		ISegmentedProfile median = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);
 		assignSegmentsToNuclei(median);
 		return new DefaultAnalysisResult(dataset);
 	}
@@ -304,13 +304,13 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 			boolean wasLocked = n.isLocked();
 			if(wasLocked)
 				n.setLocked(false);
-			IProfile nucleusProfile  = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+			IProfile nucleusProfile  = n.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
 			ISegmentedProfile segProfile = fitter.fit(nucleusProfile);
-			n.setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, segProfile);
+			n.setProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, segProfile);
 			if(segProfile.getSegmentCount()!=template.getSegmentCount())
 				throw new ProfileException("Segments could not be fitted to nucleus");
 			if(template.getSegmentCount()==1) {
-				ISegmentedProfile test  = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+				ISegmentedProfile test  = n.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
 				IProfileSegment seg = test.getSegment(IProfileCollection.DEFAULT_SEGMENT_ID);
 				if(seg.getStartIndex()!=0) {
 					throw new ProfileException("Single segment does not start at RP in nucleus");

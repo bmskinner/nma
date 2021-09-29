@@ -33,7 +33,8 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.LandmarkType;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSet;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.gui.dialogs.SettingsDialog;
@@ -85,7 +86,7 @@ public class RulesetSaveDialog extends SettingsDialog {
 
         for(Entry<String, RuleSetCollection> entry : customCollections.entrySet() ) {
         	main.add(new JLabel(entry.getKey()), c);
-        	for(Tag t : entry.getValue().getTags()) {
+        	for(Landmark t : entry.getValue().getTags()) {
         		c.gridy++;
         		main.add(new RuleSetPanel(entry.getKey(), t), c);
 
@@ -129,9 +130,9 @@ public class RulesetSaveDialog extends SettingsDialog {
     	 private final JCheckBox box;
     	 private final JTextField text;
     	 private final String collectionName;
-    	 private final Tag oldTag;
+    	 private final Landmark oldTag;
          
-         public RuleSetPanel(String collectionName, Tag t) {
+         public RuleSetPanel(String collectionName, Landmark t) {
         	 this.collectionName = collectionName;
         	 this.oldTag = t;
         	 this.setLayout(new FlowLayout());
@@ -151,12 +152,12 @@ public class RulesetSaveDialog extends SettingsDialog {
         	 return collectionName;
          }
          
-         public Tag oldTag() {
+         public Landmark oldTag() {
         	 return oldTag;
          }
          
-         public Tag getTag() {
-        	 return Tag.of(text.getText());
+         public Landmark getTag() {
+        	 return Landmark.of(text.getText(), LandmarkType.EXTENDED);
          }
     }
 }

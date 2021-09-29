@@ -33,6 +33,7 @@ import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
+import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.signals.DefaultSignalGroup;
 import com.bmskinner.nuclear_morphology.io.DatasetExportMethod;
@@ -204,7 +205,7 @@ public class TestImageDatasetCreator {
         
         new DatasetProfilingMethod(d)
 	    	.then(new DatasetSegmentationMethod(d, MorphologyAnalysisMode.NEW))
-	    	.then(op.getNucleusType().equals(NucleusType.ROUND)
+	    	.then(op.getRuleSetCollection().equals(RuleSetCollection.roundRuleSetCollection())
 	    			? new ProfileRefoldMethod(d, CurveRefoldingMode.FAST)
 	    		    : new ConsensusAveragingMethod(d))
 	    	.call();
@@ -253,9 +254,9 @@ public class TestImageDatasetCreator {
          
          new DatasetProfilingMethod(d)
  	    	.then(new DatasetSegmentationMethod(d, MorphologyAnalysisMode.NEW))
- 	    	.then( op.getNucleusType()==NucleusType.ROUND
- 	    			? new ProfileRefoldMethod(d,CurveRefoldingMode.FAST)
- 	    			: new ConsensusAveragingMethod(d))
+ 	    	.then(op.getRuleSetCollection().equals(RuleSetCollection.roundRuleSetCollection())
+	    			? new ProfileRefoldMethod(d, CurveRefoldingMode.FAST)
+	    		    : new ConsensusAveragingMethod(d))
  	    	.thenIf(makeClusters, new NucleusClusteringMethod(d, clusterOptions))
  	    	.call();
          return d;

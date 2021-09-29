@@ -15,7 +15,7 @@ import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 
 /**
  * Create the outline charts for test cases
@@ -71,7 +71,7 @@ public class OutlineTestChartFactory extends ChartFactoryTest {
 			// show the profile corresponding to the chart
 			ChartOptions profileOptions = new ChartOptionsBuilder().setDatasets(dataset)
 					.setCell(cell)
-					.setTag(Tag.REFERENCE_POINT)
+					.setTag(Landmark.REFERENCE_POINT)
 					.setShowMarkers(true)
 					.setShowAnnotations(true)
 					.setProfileType(ProfileType.ANGLE)

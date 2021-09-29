@@ -36,7 +36,7 @@ import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.profiles.UnprofilableObjectException;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSet;
@@ -146,8 +146,8 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
             ProfileIndexFinder f = new ProfileIndexFinder();
             int rpIndex = f.identifyIndex(p, rpSet);
 
-            setBorderTag(Tag.REFERENCE_POINT, rpIndex);
-            setBorderTag(Tag.ORIENTATION_POINT, rpIndex);
+            setBorderTag(Landmark.REFERENCE_POINT, rpIndex);
+            setBorderTag(Landmark.ORIENTATION_POINT, rpIndex);
             
 //            int prevBorderLength = getBorderLength();
 
@@ -159,7 +159,7 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
                 // due to float interpolation from different starting positions
                 // so initialise from scratch
                 profileMap.clear();
-                initialise(angleWindowProportion);
+                initialise(windowProportion);
                 canReverse = false;
                 findPointsAroundBorder();
             }
@@ -168,8 +168,8 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
             LOGGER.log(Loggable.STACK, "Error getting profile type", e);
         } catch (NoDetectedIndexException e) {
             LOGGER.fine("Unable to detect RP in nucleus");
-            setBorderTag(Tag.REFERENCE_POINT, 0);
-            setBorderTag(Tag.ORIENTATION_POINT, 0);
+            setBorderTag(Landmark.REFERENCE_POINT, 0);
+            setBorderTag(Landmark.ORIENTATION_POINT, 0);
         }
     }
 
@@ -240,8 +240,8 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
 
         if (Measurement.OP_RP_ANGLE.equals(stat)) {
             try {
-                result = getCentreOfMass().findSmallestAngle(this.getBorderPoint(Tag.REFERENCE_POINT),
-                        this.getBorderPoint(Tag.ORIENTATION_POINT));
+                result = getCentreOfMass().findSmallestAngle(this.getBorderPoint(Landmark.REFERENCE_POINT),
+                        this.getBorderPoint(Landmark.ORIENTATION_POINT));
             } catch (UnavailableBorderTagException e) {
                 LOGGER.log(Loggable.STACK, "Cannot get border tag", e);
                 result = ERROR_CALCULATING_STAT;
@@ -342,7 +342,7 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
 
         IProfile profile;
         try {
-            profile = this.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+            profile = this.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
         } catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
         	LOGGER.log(Loggable.STACK, "Error getting profile", e);
             return false;
@@ -424,14 +424,14 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
 
     @Override
     public void alignVertically() {
-    	boolean useTVandBV = hasBorderTag(Tag.TOP_VERTICAL) && hasBorderTag(Tag.BOTTOM_VERTICAL);
+    	boolean useTVandBV = hasBorderTag(Landmark.TOP_VERTICAL) && hasBorderTag(Landmark.BOTTOM_VERTICAL);
 
     	if (useTVandBV) {
     		try {
-    			int topPoint = getBorderIndex(Tag.TOP_VERTICAL);
-    			int bottomPoint = getBorderIndex(Tag.BOTTOM_VERTICAL);
+    			int topPoint = getBorderIndex(Landmark.TOP_VERTICAL);
+    			int bottomPoint = getBorderIndex(Landmark.BOTTOM_VERTICAL);
     			if(topPoint == bottomPoint) {
-    				rotatePointToBottom(getBorderPoint(Tag.ORIENTATION_POINT));
+    				rotatePointToBottom(getBorderPoint(Landmark.ORIENTATION_POINT));
     				return;
     			}
 
@@ -441,7 +441,7 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
     		} catch (UnavailableBorderTagException | UnavailableProfileTypeException e) {
     			LOGGER.log(Loggable.STACK, "Cannot get border tag or profile", e);
     			try {
-    				rotatePointToBottom(getBorderPoint(Tag.ORIENTATION_POINT));
+    				rotatePointToBottom(getBorderPoint(Landmark.ORIENTATION_POINT));
     			} catch (UnavailableBorderTagException e1) {
     				LOGGER.log(Loggable.STACK, "Cannot get border tag", e1);
     			}
@@ -450,7 +450,7 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
 
     		// Default if top and bottom vertical points have not been specified
     		try {
-    			rotatePointToBottom(getBorderPoint(Tag.ORIENTATION_POINT));
+    			rotatePointToBottom(getBorderPoint(Landmark.ORIENTATION_POINT));
     		} catch (UnavailableBorderTagException e) {
     			LOGGER.log(Loggable.STACK, "Cannot get border tag", e);
     		}
@@ -476,8 +476,8 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
         IBorderPoint topPoint;
         IBorderPoint bottomPoint;
 
-        topPoint = this.getBorderPoint(Tag.TOP_VERTICAL);
-        bottomPoint = this.getBorderPoint(Tag.BOTTOM_VERTICAL);
+        topPoint = this.getBorderPoint(Landmark.TOP_VERTICAL);
+        bottomPoint = this.getBorderPoint(Landmark.BOTTOM_VERTICAL);
         
         return new IPoint[] { topPoint, bottomPoint };
 

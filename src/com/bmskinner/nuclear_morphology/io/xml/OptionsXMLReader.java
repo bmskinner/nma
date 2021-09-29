@@ -60,8 +60,8 @@ public class OptionsXMLReader extends XMLFileReader<IAnalysisOptions> {
 		if(!rootElement.getName().equals(XMLCreator.DETECTION_SETTINGS_KEY))
 			return op;
 
-		NucleusType type = NucleusType.valueOf(rootElement.getChildText(XMLCreator.NUCLEUS_TYPE_KEY));
-		op.setNucleusType(type);
+//		NucleusType type = NucleusType.valueOf(rootElement.getChildText(XMLCreator.NUCLEUS_TYPE_KEY));
+//		op.setNucleusType(type);
 		double windowSize = Double.parseDouble(rootElement.getChildText(XMLCreator.PROFILE_WINDOW_KEY));
 		op.setAngleWindowProportion(windowSize);
 		RuleApplicationType ruleType = RuleApplicationType.valueOf(rootElement.getChildText(XMLCreator.RULE_APPLICATION_KEY));

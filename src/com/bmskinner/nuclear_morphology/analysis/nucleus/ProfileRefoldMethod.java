@@ -37,7 +37,7 @@ import com.bmskinner.nuclear_morphology.components.nuclei.NucleusType;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.profiles.UnprofilableObjectException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -109,15 +109,15 @@ public class ProfileRefoldMethod extends SingleDatasetAnalysisMethod {
 
         try {
         	// make an entirely new nucleus to play with
-            Nucleus n = collection.getNucleusMostSimilarToMedian(Tag.REFERENCE_POINT);
+            Nucleus n = collection.getNucleusMostSimilarToMedian(Landmark.REFERENCE_POINT);
 
-            refoldNucleus = new DefaultConsensusNucleus(n, collection.getNucleusType());
+            refoldNucleus = new DefaultConsensusNucleus(n);
             
-            IProfile targetProfile = collection.getProfileCollection().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT,
+            IProfile targetProfile = collection.getProfileCollection().getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT,
                     Stats.MEDIAN);
-            IProfile q25 = collection.getProfileCollection().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT,
+            IProfile q25 = collection.getProfileCollection().getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT,
                     Stats.LOWER_QUARTILE);
-            IProfile q75 = collection.getProfileCollection().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT,
+            IProfile q75 = collection.getProfileCollection().getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT,
                     Stats.UPPER_QUARTILE);
 
             if (targetProfile == null) {
@@ -152,7 +152,7 @@ public class ProfileRefoldMethod extends SingleDatasetAnalysisMethod {
     public void refoldCurve() throws Exception {
 
         try {
-            double score = refoldNucleus.component().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT)
+            double score = refoldNucleus.component().getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT)
                     .absoluteSquareDifference(targetCurve);
 
             LOGGER.fine("Refolding curve: initial score: " + (int) score);
@@ -234,7 +234,7 @@ public class ProfileRefoldMethod extends SingleDatasetAnalysisMethod {
     private double iterateOverNucleus() throws ProfileException, UnavailableBorderTagException,
             UnavailableProfileTypeException, UnavailableBorderPointException {
 
-        ISegmentedProfile refoldProfile = refoldNucleus.component().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+        ISegmentedProfile refoldProfile = refoldNucleus.component().getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
 
         // Get the difference between the candidate nucleus profile and the
         // median profile
@@ -255,7 +255,7 @@ public class ProfileRefoldMethod extends SingleDatasetAnalysisMethod {
         Nucleus testNucleus;
         try {
 
-            testNucleus = new DefaultConsensusNucleus(refoldNucleus.component(), NucleusType.ROUND);
+            testNucleus = new DefaultConsensusNucleus(refoldNucleus.component());
 
             // When errors occur, the testNucleus CoM is offset at 0,-15 (may
             // not be constant).
@@ -302,7 +302,7 @@ public class ProfileRefoldMethod extends SingleDatasetAnalysisMethod {
         // // make all changes to a fresh nucleus before buggering up the real
         // one
         LOGGER.finest( "Testing point " + index);
-        double score = testNucleus.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT)
+        double score = testNucleus.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT)
                 .absoluteSquareDifference(targetCurve);
 
         // Get a copy of the point at this index
@@ -336,7 +336,7 @@ public class ProfileRefoldMethod extends SingleDatasetAnalysisMethod {
                 testNucleus.calculateProfiles();
 
                 // Get the new score
-                score = testNucleus.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT)
+                score = testNucleus.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT)
                         .absoluteSquareDifference(targetCurve);
 
                 // If the change to the test nucleus improved the score, apply

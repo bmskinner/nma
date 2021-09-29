@@ -19,33 +19,27 @@ package com.bmskinner.nuclear_morphology.components.profiles;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 /**
  * Allow custom points of interest to be added to a nucleus.
  * 
  * @author bms41
  *
  */
-public class BorderTagObject implements Tag {
+public class DefaultLandmark implements Landmark {
 
     private static final long serialVersionUID = 1L;
         
-    /**
-     * The types of border tag that can be present
-     * @author ben
-     *
-     */
-    public enum BorderTagType {
-    	
-    	/** Core border tags are essential for the software to display or calculate profiles */
-        CORE, 
-        /** Extended border tags are optional, and can be added as needed */
-        EXTENDED
-    };
-
     private final String    name;
-    private final BorderTagType type;
+    private final LandmarkType type;
 
-    public BorderTagObject(final String name, final BorderTagType type) {
+    /**
+     * Create a new landmark with the given name and type
+     * @param name
+     * @param type
+     */
+    public DefaultLandmark(@NonNull final String name, @NonNull final LandmarkType type) {
         this.type = type;
         this.name = name;
     }
@@ -56,7 +50,7 @@ public class BorderTagObject implements Tag {
     }
 
     @Override
-    public BorderTagType type() {
+    public LandmarkType type() {
         return type;
     }
 
@@ -65,24 +59,16 @@ public class BorderTagObject implements Tag {
         return name;
     }
 
-    public static Tag[] values() {
-        return new Tag[] { REFERENCE_POINT, 
-        		ORIENTATION_POINT, 
-        		TOP_VERTICAL, 
-        		BOTTOM_VERTICAL,
-                INTERSECTION_POINT };
-    }
+    public static DefaultLandmark[] values(LandmarkType type) {
 
-    public static BorderTagObject[] values(BorderTagType type) {
-
-        List<Tag> list = new ArrayList<>();
-        for (Tag o : values()) {
+        List<Landmark> list = new ArrayList<>();
+        for (Landmark o : Landmark.defaultValues()) {
             if (o.type().equals(type)) {
                 list.add(o);
             }
         }
 
-        return list.toArray(new BorderTagObject[0]);
+        return list.toArray(new DefaultLandmark[0]);
 
     }
 
@@ -103,7 +89,7 @@ public class BorderTagObject implements Tag {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        BorderTagObject other = (BorderTagObject) obj;
+        DefaultLandmark other = (DefaultLandmark) obj;
         if (name == null) {
             if (other.name != null)
                 return false;
@@ -115,7 +101,7 @@ public class BorderTagObject implements Tag {
     }
 
     @Override
-    public int compareTo(Tag tag) {
+    public int compareTo(Landmark tag) {
         return name.compareTo(tag.getName());
     }
 

@@ -52,7 +52,7 @@ import com.bmskinner.nuclear_morphology.components.profiles.IProfileCollection;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.profiles.UnsegmentedProfileException;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
@@ -205,7 +205,7 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
         ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets())
         		.setNormalised(true)
                 .setAlignment(ProfileAlignment.LEFT)
-                .setShowIQR(false).setTag(Tag.REFERENCE_POINT)
+                .setShowIQR(false).setTag(Landmark.REFERENCE_POINT)
                 .setShowMarkers(false)
                 .setProfileType(ProfileType.ANGLE)
                 .setSwatch(GlobalOptions.getInstance().getSwatch())
@@ -225,7 +225,7 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
          */
 
         ChartOptions rangeOptions = new ChartOptionsBuilder().setDatasets(getDatasets()).setNormalised(true)
-                .setAlignment(ProfileAlignment.LEFT).setShowIQR(false).setTag(Tag.REFERENCE_POINT).setShowMarkers(false)
+                .setAlignment(ProfileAlignment.LEFT).setShowIQR(false).setTag(Landmark.REFERENCE_POINT).setShowMarkers(false)
                 .setProfileType(ProfileType.ANGLE).setSwatch(GlobalOptions.getInstance().getSwatch())
                 .setShowProfiles(false)
                 .setShowPoints(false).setShowXAxis(false).setShowYAxis(false).setTarget(dualPanel.getRangePanel())
@@ -235,7 +235,7 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 
         try {
             profile = activeDataset().getCollection().getProfileCollection().getSegmentedProfile(ProfileType.ANGLE,
-                    Tag.REFERENCE_POINT, Stats.MEDIAN);
+                    Landmark.REFERENCE_POINT, Stats.MEDIAN);
         } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException
                 | UnsegmentedProfileException e) {
             LOGGER.log(Loggable.STACK, "Error getting profile", e);
@@ -300,7 +300,7 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
     	ISegmentedProfile medianProfile;
     	try {
     		medianProfile = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE,
-    				Tag.REFERENCE_POINT, Stats.MEDIAN);
+    				Landmark.REFERENCE_POINT, Stats.MEDIAN);
     	} catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException
     			| UnsegmentedProfileException e) {
     		LOGGER.log(Loggable.STACK, "Error getting profile", e);
@@ -385,7 +385,7 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
         try {
             ICellCollection collection = activeDataset().getCollection();
             ISegmentedProfile medianProfile = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE,
-                    Tag.REFERENCE_POINT, Stats.MEDIAN);
+                    Landmark.REFERENCE_POINT, Stats.MEDIAN);
 
             SegmentsEditingPanel.this.setAnalysing(true);
 

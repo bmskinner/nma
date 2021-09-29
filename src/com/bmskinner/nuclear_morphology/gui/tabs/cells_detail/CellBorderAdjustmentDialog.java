@@ -80,7 +80,7 @@ import com.bmskinner.nuclear_morphology.components.generic.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.gui.RotationMode;
 import com.bmskinner.nuclear_morphology.gui.components.panels.DualChartPanel;
@@ -507,11 +507,11 @@ public class CellBorderAdjustmentDialog extends AbstractCellEditingDialog implem
 
             // Get the border tag positions, and set equivalent positions in the
             // new profile
-            Map<Tag, Integer> tagMap = workingCell.getPrimaryNucleus().getBorderTags();
+            Map<Landmark, Integer> tagMap = workingCell.getPrimaryNucleus().getBorderTags();
 
-            Map<Tag, Integer> newMap = new HashMap<Tag, Integer>();
+            Map<Landmark, Integer> newMap = new HashMap<Landmark, Integer>();
 
-            for (Tag tag : tagMap.keySet()) {
+            for (Landmark tag : tagMap.keySet()) {
                 int oldIndex = tagMap.get(tag);
 
                 double proportion = (double) oldIndex / (double) oldLength;

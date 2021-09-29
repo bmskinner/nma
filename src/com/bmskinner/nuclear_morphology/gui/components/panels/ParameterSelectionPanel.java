@@ -25,7 +25,7 @@ import com.bmskinner.nuclear_morphology.components.measure.MeasurementDimension;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -72,7 +72,7 @@ public class ParameterSelectionPanel extends OptionsPanel {
 	
 	@Override
 	protected void setDefaults() {
-		for (Measurement stat : Measurement.getNucleusStats((dataset.getCollection().getNucleusType())))
+		for (Measurement stat : Measurement.getNucleusStats())
 			options.setBoolean(stat.toString(), false);
 
 		for(ProfileType t : ProfileType.displayValues())
@@ -81,7 +81,7 @@ public class ParameterSelectionPanel extends OptionsPanel {
 		options.setBoolean(ProfileType.ANGLE.toString(), true);
 		
 		try {
-			for (IProfileSegment s : dataset.getCollection().getProfileCollection().getSegments(Tag.REFERENCE_POINT))
+			for (IProfileSegment s : dataset.getCollection().getProfileCollection().getSegments(Landmark.REFERENCE_POINT))
 				options.setBoolean(s.getID().toString(), false);
 		} catch(ProfileException | UnavailableBorderTagException e) {
 			LOGGER.log(Loggable.STACK, "Unable to get segments", e);
@@ -97,7 +97,7 @@ public class ParameterSelectionPanel extends OptionsPanel {
 		List<JLabel> labels = new ArrayList<>();
 		List<Component> fields = new ArrayList<>();
 		
-		for (Measurement stat : Measurement.getNucleusStats((dataset.getCollection().getNucleusType()))) {
+		for (Measurement stat : Measurement.getNucleusStats()) {
 			if(stat.getDimension().equals(MeasurementDimension.DIMENSIONLESS))
 				continue;
 			
@@ -136,7 +136,7 @@ public class ParameterSelectionPanel extends OptionsPanel {
 			fields.add(box);
 		}
 		
-		for (Measurement stat : Measurement.getNucleusStats((dataset.getCollection().getNucleusType()))) {
+		for (Measurement stat : Measurement.getNucleusStats()) {
 			if(!stat.getDimension().equals(MeasurementDimension.DIMENSIONLESS))
 				continue;
 			
@@ -189,7 +189,7 @@ public class ParameterSelectionPanel extends OptionsPanel {
 		List<Component> fields = new ArrayList<>();
 		
 		try {
-			for (IProfileSegment s : dataset.getCollection().getProfileCollection().getSegments(Tag.REFERENCE_POINT)) {
+			for (IProfileSegment s : dataset.getCollection().getProfileCollection().getSegments(Landmark.REFERENCE_POINT)) {
 				JCheckBox box = new JCheckBox();
 				box.setForeground(Color.DARK_GRAY);
 				box.addChangeListener(e->options.setBoolean(s.getID().toString(), box.isSelected()));

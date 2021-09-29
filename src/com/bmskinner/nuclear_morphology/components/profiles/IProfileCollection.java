@@ -33,7 +33,7 @@ public interface IProfileCollection extends Serializable {
     /**
      * If a profile is created without segments, this is the ID of the default segment spanning the entire profile.
      */
-    static final UUID DEFAULT_SEGMENT_ID = UUID.fromString("11111111-2222-3333-4444-555566667777");
+    static final @NonNull UUID DEFAULT_SEGMENT_ID = UUID.fromString("11111111-2222-3333-4444-555566667777");
     
 
     static IProfileCollection makeNew() {
@@ -54,7 +54,7 @@ public interface IProfileCollection extends Serializable {
      * @return the index of the tag
      * @throws UnavailableBorderTagException if the tag is not present
      */
-    int getIndex(@NonNull Tag tag) throws UnavailableBorderTagException;
+    int getIndex(@NonNull Landmark tag) throws UnavailableBorderTagException;
     
     /**
      * Get the proportion of the index along the profile, zeroed on the reference point
@@ -71,7 +71,7 @@ public interface IProfileCollection extends Serializable {
      * @return the proportion of the tag along the profile, from 0-1
      * @throws UnavailableBorderTagException if the tag is not present
      */
-    double getProportionOfIndex(@NonNull Tag tag) throws UnavailableBorderTagException;
+    double getProportionOfIndex(@NonNull Landmark tag) throws UnavailableBorderTagException;
     
     
     /**
@@ -86,7 +86,7 @@ public interface IProfileCollection extends Serializable {
      * 
      * @return
      */
-    List<Tag> getBorderTags();
+    List<Landmark> getBorderTags();
 
     /**
      * Test if the given tag is present in the collection
@@ -94,7 +94,7 @@ public interface IProfileCollection extends Serializable {
      * @param tag
      * @return
      */
-    boolean hasBorderTag(@NonNull Tag tag);
+    boolean hasBorderTag(@NonNull Landmark tag);
 
     /**
      * Get the requested profile from the cached profiles, or generate it from
@@ -108,7 +108,7 @@ public interface IProfileCollection extends Serializable {
      * @throws ProfileException
      * @throws UnavailableProfileTypeException when the profile type does not have an associated aggregate
      */
-    IProfile getProfile(@NonNull ProfileType type, @NonNull Tag tag, double quartile)
+    IProfile getProfile(@NonNull ProfileType type, @NonNull Landmark tag, double quartile)
             throws UnavailableBorderTagException, ProfileException, UnavailableProfileTypeException;
 
     /**
@@ -123,7 +123,7 @@ public interface IProfileCollection extends Serializable {
      * @throws UnavailableProfileTypeException when the profile type does not have an associated aggregate
      * @throws UnsegmentedProfileException when no segments are available for the profile
      */
-    ISegmentedProfile getSegmentedProfile(@NonNull ProfileType type, @NonNull Tag tag, double quartile)
+    ISegmentedProfile getSegmentedProfile(@NonNull ProfileType type, @NonNull Landmark tag, double quartile)
             throws UnavailableBorderTagException, ProfileException, UnavailableProfileTypeException,
             UnsegmentedProfileException;
 
@@ -158,7 +158,7 @@ public interface IProfileCollection extends Serializable {
      * @return a copy of the segments in the profile, offset to start at the tag
      * @throws ProfileException
      */
-    List<IProfileSegment> getSegments(@NonNull Tag tag) throws UnavailableBorderTagException, ProfileException;
+    List<IProfileSegment> getSegments(@NonNull Landmark tag) throws UnavailableBorderTagException, ProfileException;
 
     /**
      * Get the IDs of the segments in this collection. The IDs are ordered by position within
@@ -175,7 +175,7 @@ public interface IProfileCollection extends Serializable {
      * @return
      * @throws ProfileException
      */
-    IProfileSegment getSegmentAt(@NonNull Tag tag, int position) throws UnavailableBorderTagException, ProfileException;
+    IProfileSegment getSegmentAt(@NonNull Landmark tag, int position) throws UnavailableBorderTagException, ProfileException;
 
     /**
      * Test if the collection contains a segment beginning at the given tag
@@ -185,7 +185,7 @@ public interface IProfileCollection extends Serializable {
      * @throws UnsegmentedProfileException
      * @throws UnavailableBorderTagException
      */
-    boolean hasSegmentStartingWith(@NonNull Tag tag) throws UnavailableBorderTagException, UnsegmentedProfileException;
+    boolean hasSegmentStartingWith(@NonNull Landmark tag) throws UnavailableBorderTagException, UnsegmentedProfileException;
 
     /**
      * Fetch the segment from the profile beginning at the given tag; i.e. the
@@ -197,7 +197,7 @@ public interface IProfileCollection extends Serializable {
      * @return a copy of the segment with the tag at its start index, or null
      * @throws UnsegmentedProfileException
      */
-    IProfileSegment getSegmentStartingWith(@NonNull Tag tag) throws UnavailableBorderTagException, UnsegmentedProfileException;
+    IProfileSegment getSegmentStartingWith(@NonNull Landmark tag) throws UnavailableBorderTagException, UnsegmentedProfileException;
 
     /**
      * Test if the collection contains a segment beginning at the given tag
@@ -206,7 +206,7 @@ public interface IProfileCollection extends Serializable {
      * @return
      * @throws Exception
      */
-    boolean hasSegmentEndingWith(@NonNull Tag tag) throws UnavailableBorderTagException, UnsegmentedProfileException;
+    boolean hasSegmentEndingWith(@NonNull Landmark tag) throws UnavailableBorderTagException, UnsegmentedProfileException;
 
     /**
      * Fetch the segment from the profile beginning at the given tag; i.e. the
@@ -217,7 +217,7 @@ public interface IProfileCollection extends Serializable {
      *            the border tag
      * @return a copy of the segment with the tag at its start index, or null
      */
-    IProfileSegment getSegmentEndingWith(@NonNull Tag tag) throws UnavailableBorderTagException, UnsegmentedProfileException;
+    IProfileSegment getSegmentEndingWith(@NonNull Landmark tag) throws UnavailableBorderTagException, UnsegmentedProfileException;
 
     /**
      * Fetch the segment from the profile containing the given index. The zero
@@ -235,7 +235,7 @@ public interface IProfileCollection extends Serializable {
      *            the border tag
      * @return a copy of the segment with the tag index inside, or null
      */
-    IProfileSegment getSegmentContaining(@NonNull Tag tag) throws ProfileException, UnsegmentedProfileException;
+    IProfileSegment getSegmentContaining(@NonNull Landmark tag) throws ProfileException, UnsegmentedProfileException;
 
     /**
      * Add an index for the given tag. Note that setting the index of the RP
@@ -244,7 +244,7 @@ public interface IProfileCollection extends Serializable {
      * @param tag the tag
      * @param index the index of the point in the profile
      */
-    void addIndex(@NonNull Tag tag, int index);
+    void addIndex(@NonNull Landmark tag, int index);
 
     /**
      * Set the segments in the profile collection to the given list,
@@ -265,7 +265,7 @@ public interface IProfileCollection extends Serializable {
      * @throws ProfileException
      * @throws UnavailableBorderTagException
      */
-    void addSegments(@NonNull Tag tag, @NonNull List<IProfileSegment> segments) throws ProfileException, UnavailableBorderTagException;
+    void addSegments(@NonNull Landmark tag, @NonNull List<IProfileSegment> segments) throws ProfileException, UnavailableBorderTagException;
 
     /**
      * Create profile aggregates from the given collection, with a set length.
@@ -304,13 +304,13 @@ public interface IProfileCollection extends Serializable {
      * UnavailableBorderTagException @throws
      * UnavailableProfileTypeException @throws
      */
-    IProfile getIQRProfile(@NonNull ProfileType type, @NonNull Tag tag)
+    IProfile getIQRProfile(@NonNull ProfileType type, @NonNull Landmark tag)
             throws UnavailableBorderTagException, ProfileException, UnavailableProfileTypeException;
 
     /**
      * Find the points in the profile that are most variable
      */
-    List<Integer> findMostVariableRegions(@NonNull ProfileType type, @NonNull Tag tag) throws UnavailableBorderTagException;
+    List<Integer> findMostVariableRegions(@NonNull ProfileType type, @NonNull Landmark tag) throws UnavailableBorderTagException;
 
     /**
      * Get the values within the profile aggregate for the given position

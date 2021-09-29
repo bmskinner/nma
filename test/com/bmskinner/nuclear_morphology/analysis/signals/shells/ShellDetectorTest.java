@@ -39,6 +39,7 @@ import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.NucleusType;
 import com.bmskinner.nuclear_morphology.components.options.DefaultShellOptions;
+import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult.ShrinkType;
@@ -70,7 +71,7 @@ public class ShellDetectorTest extends ComponentTester {
         		.xBase(50).yBase(50)
         		.baseWidth(OBJECT_WIDTH).baseHeight(OBJECT_HEIGHT)
         		.withMaxSizeVariation(0)
-        		.ofType(NucleusType.ROUND)
+        		.ofType(RuleSetCollection.roundRuleSetCollection())
         		.withNucleusShape(TestComponentShape.SQUARE)
         		.addSignalsInChannel(0)
         		.build();

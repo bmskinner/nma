@@ -19,6 +19,7 @@ package com.bmskinner.nuclear_morphology.components.rules;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * An instruction for finding an index in a profile
@@ -88,16 +89,10 @@ public class Rule implements Serializable {
         }
         return b.toString();
     }
-    
-    
 
-    @Override
+	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((type == null) ? 0 : type.hashCode());
-		result = prime * result + ((values == null) ? 0 : values.hashCode());
-		return result;
+		return Objects.hash(type, values);
 	}
 
 	@Override
@@ -109,16 +104,8 @@ public class Rule implements Serializable {
 		if (getClass() != obj.getClass())
 			return false;
 		Rule other = (Rule) obj;
-		if (type != other.type)
-			return false;
-		if (values == null) {
-			if (other.values != null)
-				return false;
-		} else if (!values.equals(other.values))
-			return false;
-		return true;
+		return type == other.type && Objects.equals(values, other.values);
 	}
-
 
 
 	/**

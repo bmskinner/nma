@@ -6,6 +6,7 @@ import org.junit.Test;
 import com.bmskinner.nuclear_morphology.TestDatasetBuilder;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclei.NucleusType;
+import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 
 /**
  * Test that individual components are drawn correctly in outline charts.
@@ -20,7 +21,7 @@ public class OutlineChartFactoryTest extends ChartFactoryTest {
 	public void testOutlineChartOfSingleCellNonSegmentedDataset() throws Exception {
 		IAnalysisDataset d = new TestDatasetBuilder(12345).cellCount(1)
 				.baseHeight(40).baseWidth(40)
-				.ofType(NucleusType.ROUND)
+				.ofType(RuleSetCollection.roundRuleSetCollection())
 				.profiled().build();
 		OutlineTestChartFactory.generateOutlineChartsForAllCells(d, null);
 	}
@@ -29,7 +30,7 @@ public class OutlineChartFactoryTest extends ChartFactoryTest {
 	public void testOutlineChartOfSingleCellSegmentedDataset() throws Exception {
 		IAnalysisDataset d = new TestDatasetBuilder(12345).cellCount(1)
 				.baseHeight(40).baseWidth(40)
-				.ofType(NucleusType.ROUND)
+				.ofType(RuleSetCollection.roundRuleSetCollection())
 				.segmented().build();
 		OutlineTestChartFactory.generateOutlineChartsForAllCells(d, null);
 	}
@@ -38,7 +39,7 @@ public class OutlineChartFactoryTest extends ChartFactoryTest {
 	public void testOutlineChartOfMultiCellNonSegmentedDataset() throws Exception {
 		IAnalysisDataset d = new TestDatasetBuilder(1234).cellCount(10)
 				.baseHeight(40).baseWidth(40)
-				.ofType(NucleusType.ROUND)
+				.ofType(RuleSetCollection.roundRuleSetCollection())
 				.profiled().build();
 		OutlineTestChartFactory.generateOutlineChartsForAllCells(d, null);
 	}
@@ -47,7 +48,7 @@ public class OutlineChartFactoryTest extends ChartFactoryTest {
 	public void testOutlineChartOfMultiCellSegmentedDataset() throws Exception {
 		IAnalysisDataset d = new TestDatasetBuilder(1234).cellCount(10)
 				.baseHeight(40).baseWidth(40)
-				.ofType(NucleusType.ROUND)
+				.ofType(RuleSetCollection.roundRuleSetCollection())
 				.withMaxSizeVariation(10)
 				.segmented().build();
 		OutlineTestChartFactory.generateOutlineChartsForAllCells(d, null);
@@ -57,7 +58,7 @@ public class OutlineChartFactoryTest extends ChartFactoryTest {
 	public void testOutlineChartOfRotatedMultiCellSegmentedDataset() throws Exception {
 		IAnalysisDataset d = new TestDatasetBuilder(12345).cellCount(20)
 				.baseHeight(40).baseWidth(40)
-				.ofType(NucleusType.ROUND)
+				.ofType(RuleSetCollection.roundRuleSetCollection())
 				.maxRotation(90)
 				.segmented().build();
 		OutlineTestChartFactory.generateOutlineChartsForAllCells(d, null);

@@ -23,7 +23,9 @@ import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
 import com.bmskinner.nuclear_morphology.components.Version;
+import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.io.Io;
+import com.bmskinner.nuclear_morphology.io.xml.RulesetCollectionXMLWriter;
 
 /**
  * This is the main class that runs the program.
@@ -40,7 +42,7 @@ public class NuclearMorphologyAnalysis {
 	
 	static {
 		
-		// Create a log folder in the user home dir if needed
+		// Create a config folder in the user home dir if needed
 		File logFolder = Io.getConfigDir();
     	
     	if(!logFolder.exists()) {
@@ -61,7 +63,8 @@ public class NuclearMorphologyAnalysis {
 	 * @param args
 	 */
 	private NuclearMorphologyAnalysis(String[] args){
-		logConfiguration();
+		configureLogging();
+		configureSettingsFiles();
 	    new CommandLineParser(args);
 	}
 	
@@ -77,21 +80,54 @@ public class NuclearMorphologyAnalysis {
 		return instance;
 	}
 		
-	private void logConfiguration(){
-		
+	/**
+	 * Log the program status handlers and files
+	 * and configure the logging options
+	 * 
+	 */
+	private void configureLogging(){
+
 		try {
-				LOGGER.config("Log file location: " + Io.getConfigDir().getAbsolutePath());
-				GlobalOptions.getInstance().setString(GlobalOptions.LOG_DIRECTORY_KEY, 
-						Io.getConfigDir().getAbsolutePath());
+			LOGGER.config("Log file location: " + Io.getConfigDir().getAbsolutePath());
 			
+			GlobalOptions.getInstance().setString(GlobalOptions.LOG_DIRECTORY_KEY, 
+					Io.getConfigDir().getAbsolutePath());
+
 			LOGGER.config("OS: "+System.getProperty("os.name")+", version "+System.getProperty("os.version")+", "+System.getProperty("os.arch"));
 			LOGGER.config("JVM: "+System.getProperty("java.vendor")+", version "+System.getProperty("java.version"));
 			LOGGER.config("NMA version: "+Version.currentVersion());
-			
+
 			// First invokation of the thread manager will log available resources 
 			ThreadManager.getInstance();
 		} catch (SecurityException e ) {
 			LOGGER.log(Level.SEVERE, "Error initialising logger", e);
+		}
+	}
+	
+	/**
+	 * Ensure all default settings files are present
+	 * by creating if needed from inbuilt defaults
+	 */
+	private void configureSettingsFiles() {
+		ensureRuleSetFileExists(RuleSetCollection.mouseSpermRuleSetCollection(), "Mouse sperm.xml");
+		ensureRuleSetFileExists(RuleSetCollection.pigSpermRuleSetCollection(), "Pig sperm.xml");
+		ensureRuleSetFileExists(RuleSetCollection.roundRuleSetCollection(), "Round.xml");
+		
+	}
+	
+	/**
+	 * Check if a file exists for the given ruleset. If not,
+	 * create it.
+	 * @param rsc
+	 * @param fileName
+	 */
+	private void ensureRuleSetFileExists(RuleSetCollection rsc, String fileName) {
+		File ruleFile = new File(Io.getConfigDir(), fileName);
+		RulesetCollectionXMLWriter writer = new RulesetCollectionXMLWriter();
+		if(!ruleFile.exists()) {
+			// create as needed
+			LOGGER.config("Creating default ruleset: "+ruleFile.getAbsolutePath());
+			writer.write(rsc, ruleFile);
 		}
 	}
 }

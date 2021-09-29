@@ -16,9 +16,10 @@ import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclei.NucleusType;
-import com.bmskinner.nuclear_morphology.components.profiles.BorderTagObject;
+import com.bmskinner.nuclear_morphology.components.profiles.DefaultLandmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter.ColourSwatch;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 
@@ -52,7 +53,7 @@ public class ProfileChartFactoryTest extends ChartFactoryTest {
 	 */
 	private void generateChartsforOptions(List<IAnalysisDataset> datasets, String title) throws InterruptedException {
 		List<JPanel> panels = new ArrayList<>();
-		for(Tag tag : BorderTagObject.values()) {
+		for(Landmark tag : Landmark.defaultValues()) {
 			ChartOptions options = new ChartOptionsBuilder().setDatasets(datasets)
 					.setTag(tag)
 					.setShowMarkers(true)
@@ -78,7 +79,7 @@ public class ProfileChartFactoryTest extends ChartFactoryTest {
 		ChartOptions trueOptions = new ChartOptionsBuilder().setDatasets(datasets)
 				.setNormalised(true)
 				.setAlignment(ProfileAlignment.LEFT)
-				.setTag(Tag.REFERENCE_POINT)
+				.setTag(Landmark.REFERENCE_POINT)
 				.setShowMarkers(true)
 				.setProfileType(ProfileType.ANGLE)
 				.setSwatch(ColourSwatch.REGULAR_SWATCH)
@@ -93,7 +94,7 @@ public class ProfileChartFactoryTest extends ChartFactoryTest {
 		ChartOptions falseOptions = new ChartOptionsBuilder().setDatasets(datasets)
 				.setNormalised(false)
 				.setAlignment(ProfileAlignment.LEFT)
-				.setTag(Tag.REFERENCE_POINT)
+				.setTag(Landmark.REFERENCE_POINT)
 				.setShowMarkers(false)
 				.setProfileType(ProfileType.ANGLE)
 				.setSwatch(ColourSwatch.REGULAR_SWATCH)
@@ -110,8 +111,12 @@ public class ProfileChartFactoryTest extends ChartFactoryTest {
 	
 	@Test
 	public void testSingleNucleusProfile() throws Exception {
-		IAnalysisDataset d = new TestDatasetBuilder().cellCount(1).ofType(NucleusType.ROUND)
-				.baseHeight(40).baseWidth(40).build();
+		IAnalysisDataset d = new TestDatasetBuilder()
+				.cellCount(1)
+				.ofType(RuleSetCollection.roundRuleSetCollection())
+				.baseHeight(40)
+				.baseWidth(40)
+				.build();
 		ICell c = d.getCollection().getCells().stream().findFirst().get();
 		d.setDatasetColour(Color.BLUE);
 
@@ -121,7 +126,7 @@ public class ProfileChartFactoryTest extends ChartFactoryTest {
 				.setCell(c)
 				.setNormalised(true)
 				.setAlignment(ProfileAlignment.LEFT)
-				.setTag(Tag.REFERENCE_POINT)
+				.setTag(Landmark.REFERENCE_POINT)
 				.setShowMarkers(true)
 				.setProfileType(ProfileType.ANGLE)
 				.setSwatch(ColourSwatch.REGULAR_SWATCH)
@@ -137,7 +142,7 @@ public class ProfileChartFactoryTest extends ChartFactoryTest {
 				.setCell(c)
 				.setNormalised(false)
 				.setAlignment(ProfileAlignment.LEFT)
-				.setTag(Tag.REFERENCE_POINT)
+				.setTag(Landmark.REFERENCE_POINT)
 				.setShowMarkers(false)
 				.setProfileType(ProfileType.ANGLE)
 				.setSwatch(ColourSwatch.REGULAR_SWATCH)
@@ -154,14 +159,14 @@ public class ProfileChartFactoryTest extends ChartFactoryTest {
 	@Test
 	public void testSingleNucleusDatasetProfileWithSingleSegment() throws Exception {
 		
-		IAnalysisDataset d = new TestDatasetBuilder().cellCount(1).ofType(NucleusType.ROUND)
+		IAnalysisDataset d = new TestDatasetBuilder().cellCount(1).ofType(RuleSetCollection.roundRuleSetCollection())
 				.profiled().build();
 		generateChartsforOptions(d, "Single nucleus dataset, no segments");
 	}
 	
 	@Test
 	public void testSingleNucleusDatasetProfileWithMultipleSegments() throws Exception {
-		IAnalysisDataset d = new TestDatasetBuilder().cellCount(1).ofType(NucleusType.ROUND)
+		IAnalysisDataset d = new TestDatasetBuilder().cellCount(1).ofType(RuleSetCollection.roundRuleSetCollection())
 				.segmented().build();
 		generateChartsforOptions(d, "Single nucleus, segmented");
 	}

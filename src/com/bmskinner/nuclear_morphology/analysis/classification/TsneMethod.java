@@ -21,7 +21,7 @@ import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.jujutsu.tsne.TSneConfiguration;
 import com.jujutsu.tsne.barneshut.BHTSne;
@@ -119,7 +119,7 @@ public class TsneMethod  extends SingleDatasetAnalysisMethod {
 				if(!options.getBoolean(t.toString()))
 					continue;
 				
-				IProfile p = n.getProfile(t, Tag.REFERENCE_POINT);
+				IProfile p = n.getProfile(t, Landmark.REFERENCE_POINT);
 				for (int k = 0; k < 100; k++) {
 					double idx = ((double) k) / 100d;
 					matrix[i][j++] = p.get(idx);
@@ -127,17 +127,17 @@ public class TsneMethod  extends SingleDatasetAnalysisMethod {
 			}
 			
 			
-			for (Measurement stat : Measurement.getNucleusStats((dataset.getCollection().getNucleusType()))) {
+			for (Measurement stat : Measurement.getNucleusStats()) {
 				if(!options.getBoolean(stat.toString()))
 					continue;
 				matrix[i][j++] = n.getStatistic(stat);
 			}
 			
-			for (IProfileSegment s : dataset.getCollection().getProfileCollection().getSegments(Tag.REFERENCE_POINT)) {
+			for (IProfileSegment s : dataset.getCollection().getProfileCollection().getSegments(Landmark.REFERENCE_POINT)) {
 				if(!options.getBoolean(s.getID().toString()))
 					continue;
 				
-				IProfileSegment seg = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegment(s.getID());
+				IProfileSegment seg = n.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT).getSegment(s.getID());
                 double proportionPerimeter = (double) seg.length() / (double) seg.getProfileLength();
 				matrix[i][j++] = n.getStatistic(Measurement.PERIMETER) * proportionPerimeter;
 			}
@@ -151,7 +151,7 @@ public class TsneMethod  extends SingleDatasetAnalysisMethod {
 	 */
 	private int calculateNumberOfDimensions() {
 		int dimensions = 0;
-		for (Measurement stat : Measurement.getNucleusStats((dataset.getCollection().getNucleusType())))
+		for (Measurement stat : Measurement.getNucleusStats())
 			if(options.getBoolean(stat.toString()))
 				dimensions++;
 		
@@ -160,7 +160,7 @@ public class TsneMethod  extends SingleDatasetAnalysisMethod {
 				dimensions+=100;
 		
 		try {
-			for (IProfileSegment s : dataset.getCollection().getProfileCollection().getSegments(Tag.REFERENCE_POINT))
+			for (IProfileSegment s : dataset.getCollection().getProfileCollection().getSegments(Landmark.REFERENCE_POINT))
 				if(options.getBoolean(s.getID().toString()))
 					dimensions++;
 			

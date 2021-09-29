@@ -29,7 +29,7 @@ import com.bmskinner.nuclear_morphology.components.generic.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.profiles.UnprofilableObjectException;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSet;
@@ -110,19 +110,19 @@ public class DefaultPigSpermNucleus extends AbstractAsymmetricNucleus {
                 rpIndex = 0;
             }
 
-            setBorderTag(Tag.REFERENCE_POINT, rpIndex);
+            setBorderTag(Landmark.REFERENCE_POINT, rpIndex);
 
             /*
              * The OP is the same as the RP in pigs
              */
-            setBorderTag(Tag.ORIENTATION_POINT, rpIndex);
+            setBorderTag(Landmark.ORIENTATION_POINT, rpIndex);
 
             /*
              * The IP is opposite the OP
              */
             IBorderPoint op = this.getBorderPoint(rpIndex);
             int ipIndex = getBorderIndex(this.findOppositeBorder(op));
-            setBorderTag(Tag.INTERSECTION_POINT, ipIndex);
+            setBorderTag(Landmark.INTERSECTION_POINT, ipIndex);
 
             // decide if the profile is right or left handed; flip if needed
             if (!this.isProfileOrientationOK() && canReverse) {
@@ -141,8 +141,8 @@ public class DefaultPigSpermNucleus extends AbstractAsymmetricNucleus {
             LOGGER.log(Loggable.STACK, "Error getting profile type", e);
         } catch (NoDetectedIndexException e) {
             LOGGER.fine("Unable to detect RP in nucleus");
-            setBorderTag(Tag.REFERENCE_POINT, 0);
-            setBorderTag(Tag.ORIENTATION_POINT, 0);
+            setBorderTag(Landmark.REFERENCE_POINT, 0);
+            setBorderTag(Landmark.ORIENTATION_POINT, 0);
         }
 
     }

@@ -26,14 +26,14 @@ import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.datasets.VirtualCellCollection;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.nuclei.NucleusType;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileManager;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
 import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.profiles.UnsegmentedProfileException;
+import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 /**
@@ -68,7 +68,7 @@ public class ProfileManagerTest {
 	 */
 	public static ICellCollection createInstance(Class<? extends ICellCollection> source) throws Exception {
 		IAnalysisDataset d = new TestDatasetBuilder(RNG_SEED).cellCount(10)
-				.ofType(NucleusType.ROUND)
+				.ofType(RuleSetCollection.roundRuleSetCollection())
 				.randomOffsetProfiles(true)
 				.segmented().build();
 		if(source==DefaultCellCollection.class){
@@ -102,7 +102,7 @@ public class ProfileManagerTest {
 
 	@Test
 	public void testSetLockOnAllNucleusSegmentsExcept() throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException, UnsegmentedProfileException {
-		ISegmentedProfile profile = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
+		ISegmentedProfile profile = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);
 		UUID segId1 = profile.getSegmentAt(1).getID();
 		
 		manager.setLockOnAllNucleusSegments(false);
@@ -157,7 +157,7 @@ public class ProfileManagerTest {
 	@Test
 	public void testTestSegmentsMergeable() throws Exception {
 		
-		ISegmentedProfile profile = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
+		ISegmentedProfile profile = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);
 		
 		List<UUID> segIds = profile.getSegmentIDs();
 		for(int i=0; i<segIds.size(); i++) {
@@ -184,18 +184,18 @@ public class ProfileManagerTest {
 		assertTrue(dv.validate(collection));		
 		// Merge on one nucleus will take it out of sync
 		Nucleus n = collection.streamCells().findFirst().get().getPrimaryNucleus();
-		ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+		ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
 		UUID segId1 = profile.getSegmentAt(1).getID();
 		UUID segId2 = profile.getSegmentAt(2).getID();
 		profile.mergeSegments(segId1, segId2, UUID.randomUUID());
-		n.setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, profile);
+		n.setProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, profile);
 		assertFalse(dv.validate(collection));
 	}
 
 	@Test
 	public void testMergeSegments() throws Exception {
 
-		ISegmentedProfile profile = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
+		ISegmentedProfile profile = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);
 		List<UUID> segIds = profile.getSegmentIDs();
 		UUID newId = UUID.randomUUID();
 		UUID segId1 = profile.getSegmentAt(1).getID();
@@ -213,14 +213,14 @@ public class ProfileManagerTest {
 		assertTrue(newIds.contains(newId));
 		assertFalse(newIds.contains(segId1));
 		assertFalse(newIds.contains(segId2));
-		IProfileSegment mergedSegment = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN).getSegment(newId);
+		IProfileSegment mergedSegment = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN).getSegment(newId);
 		assertTrue(mergedSegment.hasMergeSources());
 		assertTrue(mergedSegment.hasMergeSource(segId1));
 		assertTrue(mergedSegment.hasMergeSource(segId2));
 		
 		if(collection.isReal()) {
 			for(Nucleus n : collection.getNuclei()) {
-				ISegmentedProfile nucleusProfile =  n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+				ISegmentedProfile nucleusProfile =  n.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
 				List<UUID> nucleusIds = nucleusProfile.getSegmentIDs();
 				assertEquals(newIds.size(), nucleusIds.size());
 				assertTrue(newIds.contains(newId));
@@ -237,7 +237,7 @@ public class ProfileManagerTest {
 
 	@Test
 	public void testUnmergeSegments() throws Exception {
-		ISegmentedProfile profile = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
+		ISegmentedProfile profile = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);
 		List<UUID> segIds = profile.getSegmentIDs();
 		UUID newId = UUID.randomUUID();
 		UUID segId1 = profile.getSegmentAt(1).getID();
@@ -263,7 +263,7 @@ public class ProfileManagerTest {
 		assertTrue(dv.validate(collection));
 		
 		for(Nucleus n : collection.getNuclei()) {
-			ISegmentedProfile nucleusProfile =  n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+			ISegmentedProfile nucleusProfile =  n.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
 			List<UUID> nucleusIds = nucleusProfile.getSegmentIDs();
 			assertEquals(segIds.size(), nucleusIds.size());
 			assertFalse(newIds.contains(newId));

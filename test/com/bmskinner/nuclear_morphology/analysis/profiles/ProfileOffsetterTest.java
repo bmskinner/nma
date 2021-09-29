@@ -26,7 +26,7 @@ import org.junit.rules.ExpectedException;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileOffsetter.ProfileOffsetException;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
 
 
@@ -54,7 +54,7 @@ public class ProfileOffsetterTest {
     @Test
     public void testAssignBorderTagToNucleiViaFrankenProfile() throws ProfileOffsetException {
         ProfileOffsetter p = new ProfileOffsetter(d.getCollection());
-        p.assignBorderTagToNucleiViaFrankenProfile(Tag.ORIENTATION_POINT);
+        p.assignBorderTagToNucleiViaFrankenProfile(Landmark.ORIENTATION_POINT);
     }
 
     @Test

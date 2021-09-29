@@ -28,12 +28,11 @@ import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.profiles.BorderTagObject;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
+import com.bmskinner.nuclear_morphology.components.profiles.LandmarkType;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
 import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
-import com.bmskinner.nuclear_morphology.components.profiles.BorderTagObject.BorderTagType;
 import com.bmskinner.nuclear_morphology.components.rules.RuleApplicationType;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSet;
 import com.bmskinner.nuclear_morphology.stats.Stats;
@@ -93,7 +92,7 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 	private void run() throws Exception {
     	LOGGER.fine("Beginning profiling method");
     	
-    	RuleApplicationType ruleType = dataset.getAnalysisOptions().get().getRuleApplicationType();
+    	RuleApplicationType ruleType = dataset.getAnalysisOptions().get().getRuleSetCollection().getApplicationType();
     	
     	switch(ruleType) {
 	    	case VIA_MEDIAN: {
@@ -124,14 +123,14 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 		// Reference points are assigned in each nucleus on creation
 		// Create a median from the current reference points in the nuclei
 		collection.getProfileCollection()
-				.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
+				.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);
 		
 		
 		// For each tag in the dataset ruleset collection, identify the tag in nuclei
-		Set<Tag> tags = collection.getRuleSetCollection().getTags();
+		Set<Landmark> tags = collection.getRuleSetCollection().getTags();
 		
-		for(Tag t : tags) {
-			if(Tag.REFERENCE_POINT.equals(t)) // Already set
+		for(Landmark t : tags) {
+			if(Landmark.REFERENCE_POINT.equals(t)) // Already set
 				continue;
 			List<RuleSet> ruleSets = collection.getRuleSetCollection().getRuleSets(t);
 			for(Nucleus n :  collection.getNuclei()) {
@@ -171,23 +170,23 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 		collection.createProfileCollection();
 		// Create a median from the current reference points in the nuclei
 		IProfile median = collection.getProfileCollection()
-				.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
+				.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);
 
 
 		// RP index *should be* zero in the median profile at this point
 		// Check this before updating nuclei
-		int rpIndex = finder.identifyIndex(collection, Tag.REFERENCE_POINT);
+		int rpIndex = finder.identifyIndex(collection, Landmark.REFERENCE_POINT);
 		LOGGER.finer( "RP in default median is located at index " + rpIndex);
 
 		IProfile templateProfile = median.offset(rpIndex);
 		// Update the position of the RP in the nuclei to best fit the median
-		collection.getProfileManager().updateTagToMedianBestFit(Tag.REFERENCE_POINT, ProfileType.ANGLE, templateProfile);
+		collection.getProfileManager().updateTagToMedianBestFit(Landmark.REFERENCE_POINT, ProfileType.ANGLE, templateProfile);
 
 		// Regenerate the profile aggregates based on the new RP positions
 		collection.getProfileManager().recalculateProfileAggregates();
 		
 		// Test if the recalculated profile aggregate naturally puts the RP at zero
-		rpIndex = finder.identifyIndex(collection, Tag.REFERENCE_POINT);
+		rpIndex = finder.identifyIndex(collection, Landmark.REFERENCE_POINT);
 
 		int coercionCounter = 0;
 		while (rpIndex != 0 && coercionCounter++<MAX_COERCION_ATTEMPTS) {
@@ -211,11 +210,11 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 	 */
 	private synchronized void identifyNonCoreTags(ICellCollection collection) throws NoDetectedIndexException, UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException {
 		// Identify the border tags in the median profile
-		for(Tag tag : BorderTagObject.values()) {
+		for(Landmark tag : Landmark.defaultValues()) {
 
 			// Don't identify the RP again, it could cause off-by-one errors
 			// We do need to assign the RP in other ProfileTypes though
-			if (tag.equals(Tag.REFERENCE_POINT)) {
+			if (tag.equals(Landmark.REFERENCE_POINT)) {
 
 				LOGGER.fine("Checking location of RP in profile");
 				int index = finder.identifyIndex(collection, tag);
@@ -230,7 +229,7 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 			} catch (NoDetectedIndexException e) {
 				LOGGER.warning("Unable to detect " + tag + " using default ruleset");
 
-				if (tag.type().equals(BorderTagType.CORE)) {
+				if (tag.type().equals(LandmarkType.CORE)) {
 					LOGGER.warning("Falling back on reference point");
 				}
 				continue;
@@ -266,7 +265,7 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 	private int coerceRPToZero(ICellCollection collection) throws NoDetectedIndexException, UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException {
 
 		// check the RP index in the median
-		int rpIndex = finder.identifyIndex(collection, Tag.REFERENCE_POINT);
+		int rpIndex = finder.identifyIndex(collection, Landmark.REFERENCE_POINT);
 		LOGGER.fine("RP in median is located at index " + rpIndex);
 
 		// If RP is not at zero, update
@@ -274,16 +273,16 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 			
 			LOGGER.fine("RP in median is not yet at zero");
 			IProfile median = collection.getProfileCollection()
-					.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
+					.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);
 			IProfile templateProfile = median.offset(rpIndex);
 			// Update the offsets in the profile collection to the new RP
-			collection.getProfileManager().updateTagToMedianBestFit(Tag.REFERENCE_POINT, ProfileType.ANGLE, templateProfile);
+			collection.getProfileManager().updateTagToMedianBestFit(Landmark.REFERENCE_POINT, ProfileType.ANGLE, templateProfile);
 			collection.getProfileManager().recalculateProfileAggregates();
 
 			// Find the effects of the offsets on the RP
 			// It should be found at zero
 			LOGGER.finer( "Checking RP index again");
-			rpIndex = finder.identifyIndex(collection, Tag.REFERENCE_POINT);
+			rpIndex = finder.identifyIndex(collection, Landmark.REFERENCE_POINT);
 			LOGGER.fine("RP in median is now located at index " + rpIndex);
 		}
 

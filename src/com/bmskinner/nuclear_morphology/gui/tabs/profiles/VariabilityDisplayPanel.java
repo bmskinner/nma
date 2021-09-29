@@ -37,7 +37,7 @@ import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPa
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
@@ -141,7 +141,7 @@ public class VariabilityDisplayPanel extends DetailPanel {
         ProfileType type = profileCollectionTypeSettingsPanel.getSelected();
 
         ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets()).setNormalised(true)
-                .setAlignment(ProfileAlignment.LEFT).setTag(Tag.REFERENCE_POINT).setShowMarkers(showMarkers)
+                .setAlignment(ProfileAlignment.LEFT).setTag(Landmark.REFERENCE_POINT).setShowMarkers(showMarkers)
                 .setModalityPosition((Double) pvalueSpinner.getValue())
                 .setSwatch(GlobalOptions.getInstance().getSwatch()).setProfileType(type).setTarget(chartPanel).build();
 

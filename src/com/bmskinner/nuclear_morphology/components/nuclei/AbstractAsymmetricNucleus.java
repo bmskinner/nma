@@ -26,7 +26,7 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.generic.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.UnprofilableObjectException;
 
 import ij.gui.Roi;
@@ -109,7 +109,7 @@ public abstract class AbstractAsymmetricNucleus extends DefaultNucleus {
         
     
     @Override
-   	public void setBorderTag(@NonNull Tag tag, int i) {
+   	public void setBorderTag(@NonNull Landmark tag, int i) {
     	super.setBorderTag(tag, i);
     	orientationChecked = false;
     }

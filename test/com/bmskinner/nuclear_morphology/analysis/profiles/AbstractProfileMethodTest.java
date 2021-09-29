@@ -16,7 +16,7 @@ import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.profiles.UnsegmentedProfileException;
 import com.bmskinner.nuclear_morphology.stats.Stats;
@@ -40,10 +40,10 @@ public class AbstractProfileMethodTest extends ComponentTester {
 		// Check the collection
 		IProfile median = dataset.getCollection()
 				.getProfileCollection()
-				.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
+				.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);
 						
 		for(ICell cell : dataset.getCollection().getCells()) {
-			ISegmentedProfile cellProfile = cell.getPrimaryNucleus().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+			ISegmentedProfile cellProfile = cell.getPrimaryNucleus().getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
 			if(!equals(median.toFloatArray(), cellProfile.toFloatArray(), 0.0001f))
 				fail("Failed for dataset with "+dataset.getCollection().getNucleusCount()+" nuclei");			
 		}
@@ -65,7 +65,7 @@ public class AbstractProfileMethodTest extends ComponentTester {
 			if(globalCell==null)
 				globalCell = cell.getPrimaryNucleus();			
 			Nucleus n = cell.getPrimaryNucleus();
-			assertTrue(equals(globalCell.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).toFloatArray(), n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).toFloatArray(), 0.001f));
+			assertTrue(equals(globalCell.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT).toFloatArray(), n.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT).toFloatArray(), 0.001f));
 		}
 	}
 	
@@ -91,7 +91,7 @@ public class AbstractProfileMethodTest extends ComponentTester {
 		assertTrue("Dataset should be valid", ok);
 
 		ISegmentedProfile median = d.getCollection()
-				.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
+				.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);
 		
 		assertTrue(median.hasSegments() && median.getSegmentCount()>1);	
 	}

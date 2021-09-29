@@ -28,7 +28,7 @@ import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.profiles.BooleanProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.rules.Rule;
 import com.bmskinner.nuclear_morphology.components.rules.Rule.RuleType;
@@ -225,7 +225,7 @@ public class ProfileIndexFinder {
      * @return the index in the profile corresponding to the tag
      * @throws NoDetectedIndexException if the index is not found
      */
-    public int identifyIndex(@NonNull final ICellCollection collection, @NonNull final Tag tag) throws NoDetectedIndexException {
+    public int identifyIndex(@NonNull final ICellCollection collection, @NonNull final Landmark tag) throws NoDetectedIndexException {
 
         List<RuleSet> list = collection.getRuleSetCollection().getRuleSets(tag);
 
@@ -283,7 +283,7 @@ public class ProfileIndexFinder {
         BooleanProfile indexes;
         try {
             indexes = new BooleanProfile(collection.getProfileCollection().getProfile(ProfileType.ANGLE,
-                    Tag.REFERENCE_POINT, Stats.MEDIAN), true);
+                    Landmark.REFERENCE_POINT, Stats.MEDIAN), true);
 
         } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException e) {
         	LOGGER.log(Loggable.STACK, "Cannot get matching profile", e);
@@ -295,7 +295,7 @@ public class ProfileIndexFinder {
             // Get the correct profile for the RuleSet
             IProfile p;
             try {
-                p = collection.getProfileCollection().getProfile(r.getType(), Tag.REFERENCE_POINT, Stats.MEDIAN);
+                p = collection.getProfileCollection().getProfile(r.getType(), Landmark.REFERENCE_POINT, Stats.MEDIAN);
             } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException e) {
             	LOGGER.log(Loggable.STACK, "Cannot get matching profile", e);
                 return new BooleanProfile(collection.getProfileCollection().length(), false);

@@ -20,8 +20,6 @@ import java.io.Serializable;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nuclear_morphology.components.profiles.BorderTagObject.BorderTagType;
-
 /**
  * This interface accesses the tagged points around the periphery of an object.
  * Default tags are provided.
@@ -30,23 +28,34 @@ import com.bmskinner.nuclear_morphology.components.profiles.BorderTagObject.Bord
  * @since 1.13.3
  *
  */
-public interface Tag extends Comparable<Tag>, Serializable {
+public interface Landmark extends Comparable<Landmark>, Serializable {
 
-    @NonNull public static final Tag REFERENCE_POINT    = new BorderTagObject("Reference point", BorderTagType.CORE);
-    @NonNull public static final Tag ORIENTATION_POINT  = new BorderTagObject("Orientation point", BorderTagType.EXTENDED);
-    @NonNull public static final Tag TOP_VERTICAL       = new BorderTagObject("Top vertical", BorderTagType.EXTENDED);
-    @NonNull public static final Tag BOTTOM_VERTICAL    = new BorderTagObject("Bottom vertical", BorderTagType.EXTENDED);
-    @NonNull public static final Tag INTERSECTION_POINT = new BorderTagObject("Intersection", BorderTagType.EXTENDED);
-    @NonNull public static final Tag CUSTOM_POINT       = new BorderTagObject("Custom", BorderTagType.EXTENDED);
-
+    @NonNull public static final Landmark REFERENCE_POINT    = new DefaultLandmark("Reference point", LandmarkType.CORE);
+    @NonNull public static final Landmark ORIENTATION_POINT  = new DefaultLandmark("Orientation point", LandmarkType.EXTENDED);
+    @NonNull public static final Landmark TOP_VERTICAL       = new DefaultLandmark("Top vertical", LandmarkType.EXTENDED);
+    @NonNull public static final Landmark BOTTOM_VERTICAL    = new DefaultLandmark("Bottom vertical", LandmarkType.EXTENDED);
+    @NonNull public static final Landmark INTERSECTION_POINT = new DefaultLandmark("Intersection", LandmarkType.EXTENDED);
     
     /**
      * Create a tag with the given name
      * @param name the name of the tag.
      * @return a tag with the given  name
      */
-    static Tag of(String name) {
-    	return new DefaultTag(name);
+    static Landmark of(@NonNull String name, @NonNull LandmarkType type) {
+    	return new DefaultLandmark(name, type);
+    }
+    
+    /**
+     * Get the default built-in landmark types
+     * @return
+     */
+    static Landmark[] defaultValues() {
+        return new Landmark[] { 
+        		REFERENCE_POINT, 
+        		ORIENTATION_POINT, 
+        		TOP_VERTICAL, 
+        		BOTTOM_VERTICAL,
+                INTERSECTION_POINT };
     }
     
     /**
@@ -61,6 +70,6 @@ public interface Tag extends Comparable<Tag>, Serializable {
      * 
      * @return
      */
-    BorderTagType type();
+    LandmarkType type();
 
 }

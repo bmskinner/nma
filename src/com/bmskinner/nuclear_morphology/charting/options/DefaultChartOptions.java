@@ -25,7 +25,7 @@ import org.jfree.chart.ChartPanel;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.gui.RotationMode;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 
@@ -38,7 +38,7 @@ public class DefaultChartOptions extends AbstractOptions implements ChartOptions
 
     private boolean          normalised       = false;
     private ProfileAlignment alignment        = ProfileAlignment.LEFT;
-    private Tag              tag              = Tag.REFERENCE_POINT;
+    private Landmark              tag              = Landmark.REFERENCE_POINT;
     private boolean          showMarkers      = false;
     private boolean          hideProfiles     = false;
     private boolean          isShowIQR        = true;
@@ -135,12 +135,12 @@ public class DefaultChartOptions extends AbstractOptions implements ChartOptions
 
 
     @Override
-    public Tag getTag() {
+    public Landmark getTag() {
         return tag;
     }
 
 
-    public void setTag(Tag tag) {
+    public void setTag(Landmark tag) {
         this.tag = tag;
     }
 

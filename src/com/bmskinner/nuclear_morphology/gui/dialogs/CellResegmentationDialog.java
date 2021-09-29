@@ -59,7 +59,7 @@ import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
@@ -86,7 +86,7 @@ public class CellResegmentationDialog extends AbstractCellEditingDialog implemen
     private boolean              isRunning  = false;
     private boolean              isSelectRP = false;
     private List<IProfileSegment> newSegments;
-    private Map<Tag, Integer>    newTags;
+    private Map<Landmark, Integer>    newTags;
     int                          segCount   = 0;
     int                          segStart   = 0;
     int                          segStop    = 0;
@@ -197,7 +197,7 @@ public class CellResegmentationDialog extends AbstractCellEditingDialog implemen
         reassignRpBtn.addActionListener(e -> {
 
             this.isSelectRP = true;
-            newTags = new HashMap<Tag, Integer>();
+            newTags = new HashMap<Landmark, Integer>();
             table.setModel(createTableModel(""));
             LOGGER.info("Select RP");
             setEnabled(false);
@@ -213,7 +213,7 @@ public class CellResegmentationDialog extends AbstractCellEditingDialog implemen
             table.getColumnModel().getColumn(COLUMN_STATE).setCellRenderer(new SegmentStateRenderer());
             segCount = 0;
             try {
-				segStart = obj.getBorderIndex(Tag.REFERENCE_POINT);
+				segStart = obj.getBorderIndex(Landmark.REFERENCE_POINT);
 			} catch (UnavailableBorderTagException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
@@ -270,11 +270,11 @@ public class CellResegmentationDialog extends AbstractCellEditingDialog implemen
                                                             // of resegmentation
             }
             // Get the segment ID to make the new segment
-            UUID id = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegments().get(segCount)
+            UUID id = n.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT).getSegments().get(segCount)
                     .getID();
 
             // Make a final segment after the last clicked position
-            IProfileSegment last = IProfileSegment.newSegment(segStart, n.getBorderIndex(Tag.REFERENCE_POINT),
+            IProfileSegment last = IProfileSegment.newSegment(segStart, n.getBorderIndex(Landmark.REFERENCE_POINT),
                     n.getBorderLength(), id);
             tempList.add(last);
             IProfileSegment.linkSegments(tempList);
@@ -286,7 +286,7 @@ public class CellResegmentationDialog extends AbstractCellEditingDialog implemen
             LOGGER.finer( "New profile:");
             LOGGER.finer( newProfile.toString());
 
-            LOGGER.finer( "RP index: " + n.getBorderIndex(Tag.REFERENCE_POINT));
+            LOGGER.finer( "RP index: " + n.getBorderIndex(Landmark.REFERENCE_POINT));
 
             n.setProfile(ProfileType.ANGLE, newProfile);
 
@@ -311,10 +311,10 @@ public class CellResegmentationDialog extends AbstractCellEditingDialog implemen
     	Nucleus n = workingCell.getPrimaryNucleus();
     	UUID id;
     	try {
-    		id = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegments().get(segCount).getID();
+    		id = n.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT).getSegments().get(segCount).getID();
 
 
-    		IProfileSegment last = IProfileSegment.newSegment(segStart, n.getBorderIndex(Tag.REFERENCE_POINT),
+    		IProfileSegment last = IProfileSegment.newSegment(segStart, n.getBorderIndex(Landmark.REFERENCE_POINT),
     				n.getBorderLength(), id);
     		newSegments.add(last);
     		LOGGER.finer( "Added " + last.toString());
@@ -334,12 +334,12 @@ public class CellResegmentationDialog extends AbstractCellEditingDialog implemen
             isSelectRP = false;
             setEnabled(true);
 
-            int newRpIndex = newTags.get(Tag.REFERENCE_POINT);
+            int newRpIndex = newTags.get(Landmark.REFERENCE_POINT);
 
             LOGGER.fine("Selected RP index: " + newRpIndex);
 
             // Make a new cell with the updated RP
-            workingCell.getPrimaryNucleus().setBorderTag(Tag.REFERENCE_POINT, newRpIndex);
+            workingCell.getPrimaryNucleus().setBorderTag(Landmark.REFERENCE_POINT, newRpIndex);
 
             LOGGER.fine("Updated RP");
 
@@ -360,7 +360,7 @@ public class CellResegmentationDialog extends AbstractCellEditingDialog implemen
 
             LOGGER.finer( "Making profile chart options");
             ChartOptions profileOptions = new ChartOptionsBuilder().setDatasets(dataset).setCell(cell)
-                    .setNormalised(false).setAlignment(ProfileAlignment.LEFT).setTag(Tag.REFERENCE_POINT)
+                    .setNormalised(false).setAlignment(ProfileAlignment.LEFT).setTag(Landmark.REFERENCE_POINT)
                     .setShowMarkers(false).setProfileType(ProfileType.ANGLE)
                     .setSwatch(GlobalOptions.getInstance().getSwatch()).setShowPoints(true).build();
 
@@ -391,7 +391,7 @@ public class CellResegmentationDialog extends AbstractCellEditingDialog implemen
 
         if (isSelectRP) {
             setCellChanged(true);
-            newTags.put(Tag.REFERENCE_POINT, n.getBorderIndex(p));
+            newTags.put(Landmark.REFERENCE_POINT, n.getBorderIndex(p));
             moveRPComplete();
         }
 
@@ -400,7 +400,7 @@ public class CellResegmentationDialog extends AbstractCellEditingDialog implemen
             try {
 
                 setCellChanged(true);
-                UUID id = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegments().get(segCount).getID();
+                UUID id = n.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT).getSegments().get(segCount).getID();
 
                 segStop = n.getBorderIndex(p);
                 IProfileSegment seg = IProfileSegment.newSegment(segStart, segStop, n.getBorderLength(), id);
@@ -415,7 +415,7 @@ public class CellResegmentationDialog extends AbstractCellEditingDialog implemen
                 drawCurrentSegments(n);
 
                 // Check against the original cell segment count
-                if (segCount == n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegmentCount()
+                if (segCount == n.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT).getSegmentCount()
                         - 1) {
                     resegmentationComplete();
                 }

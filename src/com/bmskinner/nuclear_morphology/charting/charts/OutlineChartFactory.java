@@ -77,10 +77,10 @@ import com.bmskinner.nuclear_morphology.components.cells.DefaultCell;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.profiles.BorderTagObject;
+import com.bmskinner.nuclear_morphology.components.profiles.DefaultLandmark;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
 import com.bmskinner.nuclear_morphology.gui.RotationMode;
@@ -681,19 +681,19 @@ public class OutlineChartFactory extends AbstractChartFactory {
 
                     String tagName = name.replace("Tag_", "");
 
-                    if (tagName.equals(BorderTagObject.ORIENTATION_POINT.toString())) {
+                    if (tagName.equals(DefaultLandmark.ORIENTATION_POINT.toString())) {
                         rend.setSeriesPaint(series, Color.BLUE);
                     }
-                    if (tagName.equals(BorderTagObject.REFERENCE_POINT.toString())) {
+                    if (tagName.equals(DefaultLandmark.REFERENCE_POINT.toString())) {
                         rend.setSeriesPaint(series, Color.ORANGE);
                     }
-                    if (tagName.equals(BorderTagObject.INTERSECTION_POINT.toString())) {
+                    if (tagName.equals(DefaultLandmark.INTERSECTION_POINT.toString())) {
                         rend.setSeriesPaint(series, Color.CYAN);
                     }
-                    if (tagName.equals(BorderTagObject.TOP_VERTICAL.toString())) {
+                    if (tagName.equals(DefaultLandmark.TOP_VERTICAL.toString())) {
                         rend.setSeriesPaint(series, Color.GRAY);
                     }
-                    if (tagName.equals(BorderTagObject.BOTTOM_VERTICAL.toString())) {
+                    if (tagName.equals(DefaultLandmark.BOTTOM_VERTICAL.toString())) {
                         rend.setSeriesPaint(series, Color.GRAY);
                     }
 
@@ -1051,7 +1051,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
         if (options.isShowMeshFaces()) {
         	
         	try {
-				List<IProfileSegment> segments = options.firstDataset().getCollection().getConsensus().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegments();
+				List<IProfileSegment> segments = options.firstDataset().getCollection().getConsensus().getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT).getSegments();
 				
 				for(int i=0; i<segments.size(); i++) {
 					IProfileSegment s = segments.get(i);

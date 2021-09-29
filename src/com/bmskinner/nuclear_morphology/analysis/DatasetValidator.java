@@ -37,7 +37,7 @@ import com.bmskinner.nuclear_morphology.components.profiles.IProfileCollection;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.profiles.UnsegmentedProfileException;
 import com.bmskinner.nuclear_morphology.stats.Stats;
@@ -207,7 +207,7 @@ public class DatasetValidator {
 
 		for(ICell c : collection) {
 			for (Nucleus n : c.getNuclei()) {
-				if(!n.hasBorderTag(Tag.REFERENCE_POINT)) {
+				if(!n.hasBorderTag(Landmark.REFERENCE_POINT)) {
 					errorList.add(String.format("Nucleus %s does not have RP", n.getNameAndNumber()));
 					errorCells.add(c);
 					withErrors++;
@@ -243,14 +243,14 @@ public class DatasetValidator {
 		IProfileCollection pc = d.getCollection().getProfileCollection();
 		for (ProfileType type : ProfileType.values()) {
 			try {
-				pc.getProfile(type, Tag.REFERENCE_POINT, Stats.MEDIAN);
+				pc.getProfile(type, Landmark.REFERENCE_POINT, Stats.MEDIAN);
 			} catch (UnavailableProfileTypeException | UnavailableBorderTagException | ProfileException e) {
 				summaryList.add(String.format("Root dataset %s does not have %s", d.getName(), type));
 				withErrors++;
 			}
 			
 			try {
-				pc.getSegmentedProfile(type, Tag.REFERENCE_POINT, Stats.MEDIAN);
+				pc.getSegmentedProfile(type, Landmark.REFERENCE_POINT, Stats.MEDIAN);
 			} catch (UnavailableProfileTypeException | UnavailableBorderTagException | ProfileException | UnsegmentedProfileException e) {
 				summaryList.add(String.format("Root dataset %s does not have segmented %s", d.getName(), type));
 				withErrors++;
@@ -261,14 +261,14 @@ public class DatasetValidator {
 			for (IAnalysisDataset child : children) {
 				IProfileCollection childPc = child.getCollection().getProfileCollection();
 				try {
-					childPc.getProfile(type, Tag.REFERENCE_POINT, Stats.MEDIAN);
+					childPc.getProfile(type, Landmark.REFERENCE_POINT, Stats.MEDIAN);
 				} catch (UnavailableProfileTypeException | UnavailableBorderTagException | ProfileException e) {
 					summaryList.add(String.format("Child dataset %s does not have %s", child.getName(), type));
 					withErrors++;
 				}
 				
 				try {
-					childPc.getSegmentedProfile(type, Tag.REFERENCE_POINT, Stats.MEDIAN);
+					childPc.getSegmentedProfile(type, Landmark.REFERENCE_POINT, Stats.MEDIAN);
 				} catch (UnavailableProfileTypeException | UnavailableBorderTagException | ProfileException | UnsegmentedProfileException e) {
 					summaryList.add(String.format("Child dataset %s does not have segmented %s", child.getName(), type));
 					withErrors++;
@@ -289,10 +289,10 @@ public class DatasetValidator {
 		List<IAnalysisDataset> children = d.getAllChildDatasets();
 		int withErrors = 0;
 
-		List<Tag> rootTags = d.getCollection().getProfileCollection().getBorderTags();
+		List<Landmark> rootTags = d.getCollection().getProfileCollection().getBorderTags();
 		for(ICell c : d.getCollection()) {
 			for(Nucleus n : c.getNuclei()) {
-				for(Tag t : rootTags) {
+				for(Landmark t : rootTags) {
 					if(!n.hasBorderTag(t)) {
 						withErrors++;
 						errorList.add(String.format("Nucleus %s does not have root collection tag %s", n.getNameAndNumber(), t));
@@ -303,7 +303,7 @@ public class DatasetValidator {
 		}
 		
 		if(d.getCollection().hasConsensus()) {
-			for(Tag t : rootTags) {
+			for(Landmark t : rootTags) {
 				if(!d.getCollection().getConsensus().hasBorderTag(t)) {
 					withErrors++;
 					errorList.add(String.format("Consensus nucleus does not have root collection tag %s", t));
@@ -313,7 +313,7 @@ public class DatasetValidator {
 			
 
 		for (IAnalysisDataset child : children) {
-			for(Tag t : rootTags) {
+			for(Landmark t : rootTags) {
 				if(!child.getCollection().getProfileCollection().getBorderTags().contains(t)) {
 					withErrors++;
 					errorList.add(String.format("Child dataset %s does not have root collection tag %s", child.getName(), t));
@@ -321,7 +321,7 @@ public class DatasetValidator {
 			}
 			
 			if(child.getCollection().hasConsensus()) {
-				for(Tag t : rootTags) {
+				for(Landmark t : rootTags) {
 					if(!child.getCollection().getConsensus().hasBorderTag(t)) {
 						withErrors++;
 						errorList.add(String.format("Child dataset %s consensus nucleus does not have root collection tag %s", child.getName(), t));
@@ -351,7 +351,7 @@ public class DatasetValidator {
 				int rpIsOk = 0;
 				
 				try {
-					int rpIndex = n.getBorderIndex(Tag.REFERENCE_POINT);
+					int rpIndex = n.getBorderIndex(Landmark.REFERENCE_POINT);
 					ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE);
 					for(IProfileSegment s : profile.getSegments()){
 						if(s.getStartIndex()==rpIndex)
@@ -440,7 +440,7 @@ public class DatasetValidator {
 		ISegmentedProfile medianProfile;
 		try {
 			medianProfile = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE,
-					Tag.REFERENCE_POINT, Stats.MEDIAN);
+					Landmark.REFERENCE_POINT, Stats.MEDIAN);
 		} catch (UnavailableBorderTagException | UnavailableProfileTypeException | ProfileException
 				| UnsegmentedProfileException e) {
 			errorList.add("Unable to fetch median profile for collection");
@@ -489,7 +489,7 @@ public class DatasetValidator {
 		boolean hasSegments = expectedSegments.size()>0;
 		ISegmentedProfile p;
 		try {
-			p = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+			p = n.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
 			if(p.hasSegments()!=hasSegments) {
 				errorList.add(String.format("Profile collection segments is %s; nucleus is %s", hasSegments, p.hasSegments()));
 				errorCount++;

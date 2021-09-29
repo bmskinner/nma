@@ -35,10 +35,9 @@ import com.bmskinner.nuclear_morphology.components.Taggable;
 import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.nuclei.NucleusType;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileCollection;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileManager;
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
 import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
@@ -197,7 +196,7 @@ public interface ICellCollection
      * 
      * @return
      */
-    NucleusType getNucleusType();
+//    NucleusType getNucleusType();
 
     /**
      * Remove the given cell from the collection. If the cell is null, has no
@@ -421,7 +420,7 @@ public interface ICellCollection
      * @throws UnavailableBorderTagException
      * @throws UnavailableProfileTypeException
      */
-    Nucleus getNucleusMostSimilarToMedian(Tag referencePoint)
+    Nucleus getNucleusMostSimilarToMedian(Landmark referencePoint)
             throws ProfileException, UnavailableBorderTagException, UnavailableProfileTypeException;
 
     /**
@@ -492,6 +491,6 @@ public interface ICellCollection
      * @return the variabililty score of the object
      * @throws UnavailableBorderTagException if the tag is not present
      */
-    double getNormalisedDifferenceToMedian(Tag pointType, Taggable t) throws UnavailableBorderTagException;
+    double getNormalisedDifferenceToMedian(Landmark pointType, Taggable t) throws UnavailableBorderTagException;
 
 }

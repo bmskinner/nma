@@ -40,7 +40,7 @@ import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.profiles.UnsegmentedProfileException;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
@@ -212,7 +212,7 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 		ICellCollection collection = options.getDatasets().get(i).getCollection();
 		boolean isNormalised       = options.isNormalised();
 		ProfileAlignment alignment = options.getAlignment();
-		Tag borderTag              = options.getTag();
+		Landmark borderTag              = options.getTag();
 		ProfileType type           = options.getType();
 		boolean isSegmented        = collection.getProfileCollection().hasSegments();
 		boolean isShowSegments     = isSegmented && options.isSingleDataset();
@@ -348,10 +348,10 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 		try {
 			IProfile profile = type.equals(ProfileType.FRANKEN) 
 					? nucleus.getProfile(type)
-							: nucleus.getProfile(type, Tag.REFERENCE_POINT);
+							: nucleus.getProfile(type, Landmark.REFERENCE_POINT);
 
 					if(options.firstDataset().getCollection().getProfileCollection().hasSegments()) {
-						List<IProfileSegment> segments = nucleus.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT)
+						List<IProfileSegment> segments = nucleus.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT)
 								.getOrderedSegments();
 						addSegmentsFromProfile(segments, profile, ds, nucleus.getBorderLength(), 0, 0);
 					} else {
@@ -492,11 +492,11 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 			} else {
 
 				LOGGER.finest( "Getting XY positions along profile from reference point");
-				profile = nucleus.getProfile(type, Tag.REFERENCE_POINT);
+				profile = nucleus.getProfile(type, Landmark.REFERENCE_POINT);
 
 				// add the segments
 				LOGGER.finest( "Adding ordered segments from reference point");
-				List<IProfileSegment> segments = nucleus.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT)
+				List<IProfileSegment> segments = nucleus.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT)
 						.getOrderedSegments();
 				addSegmentsFromProfile(segments, profile, ds, nucleus.getBorderLength(), 0, 0);
 			}

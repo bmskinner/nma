@@ -31,7 +31,7 @@ import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.SingleDatasetAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.components.Profileable;
+import com.bmskinner.nuclear_morphology.components.Taggable;
 import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
@@ -43,12 +43,11 @@ import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.NucleusFactory;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
-import com.bmskinner.nuclear_morphology.components.profiles.BorderTagObject;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
 import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.profiles.UnprofilableObjectException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -96,7 +95,7 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
             UnavailableBorderTagException, ProfileException, UnavailableProfileTypeException {
 
         IPoint com = IPoint.makeNew(0, 0);
-        NucleusFactory fact = new NucleusFactory(dataset.getCollection().getNucleusType());
+        NucleusFactory fact = new NucleusFactory();
         Nucleus n = fact.buildInstance(list, new File("Empty"), 0, com);
         
         Optional<IAnalysisOptions> analysisOptions =  dataset.getAnalysisOptions();
@@ -117,13 +116,13 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
         double perim = ComponentMeasurer.calculatePerimeter(n);
         LOGGER.finer("Consensus perimeter is "+perim);
         n.setStatistic(Measurement.PERIMETER, perim);
-        n.initialise(Profileable.DEFAULT_PROFILE_WINDOW_PROPORTION);
+        n.initialise(Taggable.DEFAULT_PROFILE_WINDOW_PROPORTION);
 
         // Build a consensus nucleus from the template points
-        Consensus<Nucleus> cons = new DefaultConsensusNucleus(n, dataset.getCollection().getNucleusType());
+        Consensus<Nucleus> cons = new DefaultConsensusNucleus(n);
 
-        for (Tag tag : BorderTagObject.values()) {
-            if (Tag.INTERSECTION_POINT.equals(tag)) // not relevant here
+        for (Landmark tag : Landmark.defaultValues()) {
+            if (Landmark.INTERSECTION_POINT.equals(tag)) // not relevant here
                 continue;
             if (dataset.getCollection().getProfileCollection().hasBorderTag(tag)) {
             	
@@ -138,8 +137,8 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
         
         // Add segments to the new nucleus profile
         if(dataset.getCollection().getProfileCollection().hasSegments()) {
-        	ISegmentedProfile profile = cons.component().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
-        	List<IProfileSegment> segs = dataset.getCollection().getProfileCollection().getSegments(Tag.REFERENCE_POINT);
+        	ISegmentedProfile profile = cons.component().getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
+        	List<IProfileSegment> segs = dataset.getCollection().getProfileCollection().getSegments(Landmark.REFERENCE_POINT);
         	List<IProfileSegment> newSegs = IProfileSegment.scaleSegments(segs, profile.size());
         	LOGGER.finest(profile.toString());
         	for(IProfileSegment s : segs)
@@ -147,13 +146,13 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
         	for(IProfileSegment s : newSegs)
         		LOGGER.finest(s.toString());
         	profile.setSegments(newSegs);
-        	cons.component().setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, profile);
-        	n.setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, profile);
+        	cons.component().setProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, profile);
+        	n.setProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, profile);
         }
         
         cons.component().alignVertically();
 
-        if (cons.component().getBorderPoint(Tag.REFERENCE_POINT).getX() > cons.component().getCentreOfMass().getX())
+        if (cons.component().getBorderPoint(Landmark.REFERENCE_POINT).getX() > cons.component().getCentreOfMass().getX())
         	cons.component().flipHorizontal();
         return cons;
 
@@ -169,7 +168,7 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
                 
                 Nucleus v = n.getVerticallyRotatedNucleus();
                 v.moveCentreOfMass(zeroCoM);
-                IProfile p = v.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+                IProfile p = v.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
 
                 for (int i = 0; i < PROFILE_LENGTH; i++) {
 
@@ -180,7 +179,7 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
                     List<IPoint> list = perimeterPoints.get(fractionOfPerimeter);
 
                     int indexInProfile = p.getIndexOfFraction(fractionOfPerimeter);
-                    int borderIndex    = v.getOffsetBorderIndex(Tag.REFERENCE_POINT, indexInProfile);
+                    int borderIndex    = v.getOffsetBorderIndex(Landmark.REFERENCE_POINT, indexInProfile);
                     IPoint point = v.getBorderPoint(borderIndex);
                     list.add(point);
                 }

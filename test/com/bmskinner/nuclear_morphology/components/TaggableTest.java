@@ -26,8 +26,9 @@ import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.components.profiles.SegmentedFloatProfile;
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 
 /**
  * Tests for implementations of the Taggable interface
@@ -60,7 +61,7 @@ public class TaggableTest extends ComponentTester {
 
 		if(source==DefaultNucleus.class){
 			IAnalysisDataset d = new TestDatasetBuilder(RNG_SEED).cellCount(1)
-					.ofType(NucleusType.ROUND)
+					.ofType(RuleSetCollection.roundRuleSetCollection())
 					.randomOffsetProfiles(true)
 					.segmented().build();
 			return d.getCollection().getCells().stream().findFirst().get().getPrimaryNucleus();
@@ -77,14 +78,14 @@ public class TaggableTest extends ComponentTester {
 	@Test
 	public void testGetProfileTypeTag() throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException {
 		ISegmentedProfile rawProfile = taggable.getProfile(ProfileType.ANGLE);
-		ISegmentedProfile tagProfile = taggable.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
-		assertEquals(rawProfile.offset(taggable.getBorderIndex(Tag.REFERENCE_POINT)).toString(), tagProfile.toString());
+		ISegmentedProfile tagProfile = taggable.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
+		assertEquals(rawProfile.offset(taggable.getBorderIndex(Landmark.REFERENCE_POINT)).toString(), tagProfile.toString());
 	}
 
 	
 	@Test
 	public void testUpdatingSegmentsInProfile() throws Exception {
-		ISegmentedProfile oldProfile = taggable.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+		ISegmentedProfile oldProfile = taggable.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
 		
 		IProfileSegment seg0 = oldProfile.getSegmentAt(0);
 		UUID segId = seg0.getID();
@@ -97,21 +98,21 @@ public class TaggableTest extends ComponentTester {
 
 		assertTrue(oldProfile.update(seg0, newStart, newEnd));
 		
-		taggable.setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, oldProfile);
+		taggable.setProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, oldProfile);
 		
 		// Confirm everything was saved properly
-		ISegmentedProfile newProfile = taggable.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+		ISegmentedProfile newProfile = taggable.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
 		assertEquals(oldProfile.toString(), newProfile.toString());
 	}
 	
 	@Test
 	public void testSettingMultiSegmentProfileIsReversible() throws Exception {
 		// Fetch the profile zeroed on the RP
-		ISegmentedProfile oldProfile = taggable.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+		ISegmentedProfile oldProfile = taggable.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
 		ISegmentedProfile templateProfile = new SegmentedFloatProfile(oldProfile);
 		
-		taggable.setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, templateProfile);
-		ISegmentedProfile testProfile  = taggable.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+		taggable.setProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, templateProfile);
+		ISegmentedProfile testProfile  = taggable.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
 		
 		assertEquals("Value at index 0", oldProfile.get(0), testProfile.get(0), 0);
 		assertEquals("Segment count", 1, oldProfile.getSegmentCount(), testProfile.getSegmentCount());
@@ -132,11 +133,11 @@ public class TaggableTest extends ComponentTester {
 	@Test
 	public void testSettingSingleSegmentProfileIsReversible() throws Exception {
 		// Fetch the profile zeroed on the RP
-		ISegmentedProfile oldProfile = taggable.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+		ISegmentedProfile oldProfile = taggable.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
 		ISegmentedProfile templateProfile = new SegmentedFloatProfile(oldProfile.toFloatArray());
 		
-		taggable.setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, templateProfile);
-		ISegmentedProfile testProfile  = taggable.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+		taggable.setProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, templateProfile);
+		ISegmentedProfile testProfile  = taggable.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
 		
 		assertEquals("Value at index 0", oldProfile.get(0), testProfile.get(0), 0);
 		assertEquals("Segment count", 1, templateProfile.getSegmentCount(), testProfile.getSegmentCount());
@@ -157,12 +158,12 @@ public class TaggableTest extends ComponentTester {
 	@Test
 	public void testSettingBorderTags() throws Exception {
 		
-		int rpIndex = taggable.getBorderIndex(Tag.REFERENCE_POINT);
+		int rpIndex = taggable.getBorderIndex(Landmark.REFERENCE_POINT);
 		
 		int newRpIndex = CellularComponent.wrapIndex(rpIndex+10, taggable.getBorderLength());
 		
-		taggable.setBorderTag(Tag.REFERENCE_POINT, newRpIndex);
-		assertEquals(newRpIndex, taggable.getBorderIndex(Tag.REFERENCE_POINT));
+		taggable.setBorderTag(Landmark.REFERENCE_POINT, newRpIndex);
+		assertEquals(newRpIndex, taggable.getBorderIndex(Landmark.REFERENCE_POINT));
 	}
 
 }

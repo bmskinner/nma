@@ -16,6 +16,7 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.options;
 
+import java.io.File;
 import java.io.Serializable;
 import java.util.Optional;
 import java.util.Set;
@@ -23,9 +24,8 @@ import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nuclear_morphology.components.nuclei.NucleusType;
 import com.bmskinner.nuclear_morphology.components.rules.RuleApplicationType;
-import com.bmskinner.nuclear_morphology.core.GlobalOptions;
+import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 
 /**
  * This stores details of an analysis setup for an IAnalysisDataset.
@@ -45,7 +45,6 @@ public interface IAnalysisOptions extends Serializable {
     boolean     DEFAULT_REFOLD            = true;
     boolean     DEFAULT_KEEP_FAILED       = false;
     double      DEFAULT_WINDOW_PROPORTION = 0.05;
-    NucleusType DEFAULT_TYPE              = GlobalOptions.getInstance().getDefaultType();
 
     IAnalysisOptions duplicate();
     
@@ -108,27 +107,19 @@ public interface IAnalysisOptions extends Serializable {
      * @return the profile proportion
      */
     double getProfileWindowProportion();
-
-    /**
-     * Get the type of nucleus being analysed
-     * 
-     * @return the type of nucleus
-     */
-    NucleusType getNucleusType();
     
     /**
-     * Get the application type for rules
-     * @return the application type
+     * Get the rulesets used to detect landmarks
+     * @return
      */
-    RuleApplicationType getRuleApplicationType();
-
+    RuleSetCollection getRuleSetCollection();
+    
     /**
-     * Should the consensus nucleus be automatically refolded?
-     * 
-     * @return the refold option: true to refold, false to not refold
+     * Set the rulesets used to detect landmarks
+     * @param rsc
      */
-    @Deprecated
-    boolean refoldNucleus();
+    void setRuleSetCollection(RuleSetCollection rsc);
+   
 
     Set<UUID> getNuclearSignalGroups();
 
@@ -149,14 +140,6 @@ public interface IAnalysisOptions extends Serializable {
      */
     boolean hasSignalDetectionOptions(@NonNull UUID signalGroup);
 
-    /**
-     * Check if nuclei that do not meet the detection parameters should be kept
-     * in a separate collection
-     * 
-     * @return
-     */
-    @Deprecated
-    boolean isKeepFailedCollections();
     
     /**
      * Get the time the analysis was conducted
@@ -186,41 +169,10 @@ public interface IAnalysisOptions extends Serializable {
      * @param proportion
      */
     void setAngleWindowProportion(double proportion);
-
-    /**
-     * Set the type of nucleus / cell being analysed
-     * 
-     * @param nucleusType
-     */
-    void setNucleusType(NucleusType nucleusType);
-    
-    /**
-     * Set the rule application type
-     * @param type the type to set
-     */
-    void setRuleApplicationType(RuleApplicationType type);
-
-    /**
-     * Set whether the consensus nucleus should be refolded during the analysis
-     * 
-     * @param refoldNucleus
-     */
-    @Deprecated
-    void setRefoldNucleus(boolean refoldNucleus);
-
-    /**
-     * Set whether nuclei that cannot be detected should be retained as a
-     * separate collection
-     * 
-     * @param keepFailedCollections
-     */
-    @Deprecated
-    void setKeepFailedCollections(boolean keepFailedCollections);
-    
+            
     /**
      * Set the values in this options to match the given options
      * @param o
      */
     void set(@NonNull IAnalysisOptions o);
-
 }

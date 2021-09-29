@@ -27,8 +27,8 @@ import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
 import com.bmskinner.nuclear_morphology.components.profiles.UnprofilableObjectException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -46,17 +46,14 @@ public class DefaultConsensusNucleus extends AbstractAsymmetricNucleus implement
 	private static final Logger LOGGER = Logger.getLogger(DefaultConsensusNucleus.class.getName());
 
     private static final long serialVersionUID = 1L;
-
-    private NucleusType type;
     
     private double xOffset = 0;
     private double yOffset = 0;
     private double rotOffset = 0;
 
-    public DefaultConsensusNucleus(Nucleus n, NucleusType type) throws UnprofilableObjectException {
+    public DefaultConsensusNucleus(Nucleus n) throws UnprofilableObjectException {
 
         super(n);
-        this.type = type;
         if (n instanceof DefaultConsensusNucleus) {
 
             // If a consensus nucleus is used as the template, the CoM is
@@ -80,10 +77,6 @@ public class DefaultConsensusNucleus extends AbstractAsymmetricNucleus implement
         }
     }
     
-    public NucleusType getType() {
-        return type;
-    }
-
     @Override
     public int[] getPosition() {
 
@@ -147,8 +140,7 @@ public class DefaultConsensusNucleus extends AbstractAsymmetricNucleus implement
     	if(!(obj instanceof DefaultConsensusNucleus))
     		return false;
     	DefaultConsensusNucleus other = (DefaultConsensusNucleus)obj;
-    	if(!type.equals(other.type))
-    		return false;
+
     	return true;
     }
     
@@ -158,7 +150,7 @@ public class DefaultConsensusNucleus extends AbstractAsymmetricNucleus implement
     	
     	
     	try {
-    		if (n.getBorderPoint(Tag.REFERENCE_POINT).getX() > n.getCentreOfMass().getX())
+    		if (n.getBorderPoint(Landmark.REFERENCE_POINT).getX() > n.getCentreOfMass().getX())
     			n.flipHorizontal();
     	} catch (UnavailableBorderTagException e) {
     		LOGGER.log(Loggable.STACK, "Cannot get RP from vertical nucleus; returning default orientation", e);
@@ -177,7 +169,6 @@ public class DefaultConsensusNucleus extends AbstractAsymmetricNucleus implement
     public int hashCode() {
     	final int prime = 31;
         int result = super.hashCode();
-        result = prime * result + ((type == null) ? 0 : type.hashCode());
         return result;
     }
 
@@ -195,10 +186,9 @@ public class DefaultConsensusNucleus extends AbstractAsymmetricNucleus implement
 	@Override
 	public Consensus<Nucleus> duplicateConsensus() {
 		try {
-			return new DefaultConsensusNucleus(this, type);
+			return new DefaultConsensusNucleus(this);
 		} catch (UnprofilableObjectException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOGGER.log(Loggable.STACK, "Error duplicating consensus", e);
 			return null;
 		}
 	}

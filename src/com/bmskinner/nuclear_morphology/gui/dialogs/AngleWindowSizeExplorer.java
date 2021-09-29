@@ -57,7 +57,7 @@ import com.bmskinner.nuclear_morphology.components.profiles.FloatProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileCollection;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
@@ -231,12 +231,12 @@ public class AngleWindowSizeExplorer extends LoadingIconDialog implements Change
 
         		pc.createProfileAggregate(duplicateCollection, dataset.getCollection().getProfileCollection().length());
 
-        		for (Tag tag : dataset.getCollection().getProfileCollection().getBorderTags()) {
+        		for (Landmark tag : dataset.getCollection().getProfileCollection().getBorderTags()) {
         			pc.addIndex(tag, dataset.getCollection().getProfileCollection().getIndex(tag));
         		}
 
         		// get the profile median
-        		IProfile median = pc.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
+        		IProfile median = pc.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);
 
         		// add to the chart
         		updateChart(median, i);

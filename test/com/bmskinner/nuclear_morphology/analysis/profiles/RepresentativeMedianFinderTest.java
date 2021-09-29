@@ -13,7 +13,8 @@ import com.bmskinner.nuclear_morphology.components.nuclei.NucleusType;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 /**
@@ -26,12 +27,12 @@ public class RepresentativeMedianFinderTest extends AbstractProfileMethodTest {
 		
 	@Test
 	public void testSingleNucleusDatasetReturnsIdenticalProfile() throws Exception {
-		IAnalysisDataset d = new TestDatasetBuilder(RNG_SEED).cellCount(1).ofType(NucleusType.ROUND)
+		IAnalysisDataset d = new TestDatasetBuilder(RNG_SEED).cellCount(1).ofType(RuleSetCollection.roundRuleSetCollection())
 				.randomOffsetProfiles(false)
 				.baseHeight(40).baseWidth(40).segmented().build();
 		
 		ISegmentedProfile template = d.getCollection()
-				.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
+				.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);
 
 				
 		RepresentativeMedianFinder finder = new RepresentativeMedianFinder(d.getCollection());
@@ -55,13 +56,13 @@ public class RepresentativeMedianFinderTest extends AbstractProfileMethodTest {
 	@Test
 	public void testTwoIdenticalNucleusDataset() throws Exception {
 		IAnalysisDataset d = new TestDatasetBuilder(RNG_SEED).cellCount(2)
-				.ofType(NucleusType.ROUND)
+				.ofType(RuleSetCollection.roundRuleSetCollection())
 				.randomOffsetProfiles(false)
 				.baseHeight(40).baseWidth(40)
 				.segmented().build();
 		
 		ISegmentedProfile template = d.getCollection()
-				.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
+				.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);
 
 				
 		RepresentativeMedianFinder finder = new RepresentativeMedianFinder(d.getCollection());
@@ -80,7 +81,7 @@ public class RepresentativeMedianFinderTest extends AbstractProfileMethodTest {
 					.randomOffsetProfiles(false)
 					.profiled().build();
 			ISegmentedProfile template = dataset.getCollection()
-					.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
+					.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);
 
 			RepresentativeMedianFinder finder = new RepresentativeMedianFinder(dataset.getCollection());
 			
@@ -99,7 +100,7 @@ public class RepresentativeMedianFinderTest extends AbstractProfileMethodTest {
 					.randomOffsetProfiles(false)
 					.profiled().build();
 			ISegmentedProfile template = dataset.getCollection()
-					.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
+					.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);
 
 					
 			RepresentativeMedianFinder finder = new RepresentativeMedianFinder(dataset.getCollection());

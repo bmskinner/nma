@@ -32,7 +32,7 @@ import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -140,7 +140,7 @@ public class OutlineDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 
         List<IProfileSegment> segmentList;
         try {
-            segmentList = t.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegments();
+            segmentList = t.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT).getSegments();
         } catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
         	LOGGER.log(Loggable.STACK, "Cannot get profile from RP", e);
             throw new ChartDatasetCreationException("Cannot get profile", e);
@@ -163,7 +163,7 @@ public class OutlineDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
                 for (int j = 0; j <= seg.length(); j++) {
                 	try {
                 		int index = seg.getStartIndex() + j;
-                		int offsetIndex = t.getOffsetBorderIndex(Tag.REFERENCE_POINT, index);
+                		int offsetIndex = t.getOffsetBorderIndex(Landmark.REFERENCE_POINT, index);
 
                 		/*
                 		 * Note that the original border point is used here to

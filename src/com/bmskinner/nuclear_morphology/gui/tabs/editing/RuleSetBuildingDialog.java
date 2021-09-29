@@ -42,7 +42,9 @@ import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.border.Border;
 
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.DefaultLandmark;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
+import com.bmskinner.nuclear_morphology.components.profiles.LandmarkType;
 import com.bmskinner.nuclear_morphology.components.rules.Rule;
 import com.bmskinner.nuclear_morphology.components.rules.Rule.RuleType;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSet;
@@ -58,7 +60,7 @@ public class RuleSetBuildingDialog extends LoadingIconDialog {
 
     private boolean isOK = false;
 
-    private Tag targetTag = Tag.CUSTOM_POINT;
+    private Landmark targetTag = new DefaultLandmark("Custom", LandmarkType.EXTENDED);
 
     private JPanel mainPanel;
 
@@ -76,7 +78,7 @@ public class RuleSetBuildingDialog extends LoadingIconDialog {
         this.setVisible(true);
     }
 
-    public RuleSetBuildingDialog(Tag target) {
+    public RuleSetBuildingDialog(Landmark target) {
         this();
         targetTag = target;
     }

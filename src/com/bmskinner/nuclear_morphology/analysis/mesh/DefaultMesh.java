@@ -37,7 +37,7 @@ import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -439,7 +439,7 @@ public class DefaultMesh<E extends Taggable> implements Mesh<E> {
     	LOGGER.finest( "Determining vertex proportions");
 
     	try {
-    		List<IProfileSegment> segments = component.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getOrderedSegments();
+    		List<IProfileSegment> segments = component.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT).getOrderedSegments();
 
     		for(int segNumber=0; segNumber<segments.size(); segNumber++) {
     			IProfileSegment seg = segments.get(segNumber);
@@ -479,7 +479,7 @@ public class DefaultMesh<E extends Taggable> implements Mesh<E> {
     private void createPeripheralVertices() throws MeshCreationException {
         LOGGER.finest( "Creating peripheral vertices");
         try {
-            List<IProfileSegment> list = component.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getOrderedSegments();
+            List<IProfileSegment> list = component.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT).getOrderedSegments();
 
             Set<Integer> segs = segmentVertexProportions.keySet();
             for (int segIndex : segs) {
@@ -504,7 +504,7 @@ public class DefaultMesh<E extends Taggable> implements Mesh<E> {
 
                     // Since the segments have been offset to the RP, correct back to the actual nucleus index
                     int correctedIndex = CellularComponent
-                            .wrapIndex(index + component.getBorderIndex(Tag.REFERENCE_POINT), segment.getProfileLength());
+                            .wrapIndex(index + component.getBorderIndex(Landmark.REFERENCE_POINT), segment.getProfileLength());
 
                     LOGGER.finest( "Fetching point at index " + correctedIndex);
 

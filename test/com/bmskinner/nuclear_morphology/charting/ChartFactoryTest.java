@@ -25,7 +25,7 @@ import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 
 /**
  * Base class for testing the charting functions. This provides methods for 
@@ -109,7 +109,7 @@ public abstract class ChartFactoryTest {
 			// show the profile corresponding to the chart
 			ChartOptions profileOptions = new ChartOptionsBuilder().setDatasets(d)
 					.setCell(cell)
-					.setTag(Tag.REFERENCE_POINT)
+					.setTag(Landmark.REFERENCE_POINT)
 					.setShowMarkers(true)
 					.setShowAnnotations(true)
 					.setProfileType(ProfileType.ANGLE)

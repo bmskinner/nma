@@ -45,19 +45,14 @@ public class NucleusFactory implements ComponentFactory<Nucleus> {
 	private static final String NULL_COM_ERROR = "Centre of mass cannot be null in nucleus factory";
 	private static final String NULL_ROI_ERROR = "Roi cannot be null in nucleus factory";
 	private int nucleusCount = 0; // store the number of nuclei  created by this factory
-    private final NucleusType type;
-
+	
     /**
      * Create a factory for nuclei of the given type
      * 
      * @param imageFile
      * @param nucleusType
      */
-    public NucleusFactory(@NonNull NucleusType nucleusType) {
-
-        if (nucleusType == null)
-            throw new IllegalArgumentException("Type cannot be null in nucleus factory");
-        type = nucleusType;
+    public NucleusFactory() {
     }
 
     /**
@@ -124,17 +119,8 @@ public class NucleusFactory implements ComponentFactory<Nucleus> {
         if (centreOfMass == null)
             throw new IllegalArgumentException(NULL_COM_ERROR);
         
-        Nucleus n = null;
-
-        switch(type) {
-        	case RODENT_SPERM: n = new DefaultRodentSpermNucleus(roi, centreOfMass, imageFile, channel, originalPosition,
-                    nucleusCount); break;
-        	case PIG_SPERM: n = new DefaultPigSpermNucleus(roi, centreOfMass, imageFile, channel, originalPosition,
-                    nucleusCount); break;
-        	case ROUND: 
-        	default: n = new DefaultNucleus(roi, centreOfMass, imageFile, channel, originalPosition,
-                    nucleusCount);
-        }
+        Nucleus n =  new DefaultNucleus(roi, centreOfMass, imageFile, channel, originalPosition,
+                nucleusCount);
 
         nucleusCount++;
         LOGGER.finer( "Created nucleus with border length "+n.getBorderLength());
@@ -149,17 +135,8 @@ public class NucleusFactory implements ComponentFactory<Nucleus> {
         if (centreOfMass == null)
             throw new IllegalArgumentException(NULL_COM_ERROR);
         
-        Nucleus n = null;
-
-        switch(type) {
-        	case RODENT_SPERM: n = new DefaultRodentSpermNucleus(roi, centreOfMass, imageFile, channel, originalPosition,
-                    nucleusCount, id); break;
-        	case PIG_SPERM: n = new DefaultPigSpermNucleus(roi, centreOfMass, imageFile, channel, originalPosition,
-                    nucleusCount, id); break; 
-        	case ROUND: 
-        	default: n = new DefaultNucleus(roi, centreOfMass, imageFile, channel, originalPosition,
-                    nucleusCount, id);
-        }
+        Nucleus n = new DefaultNucleus(roi, centreOfMass, imageFile, channel, originalPosition,
+                nucleusCount, id);
 
         nucleusCount++;
         LOGGER.finer( "Created nucleus with border length "+n.getBorderLength());
@@ -173,17 +150,8 @@ public class NucleusFactory implements ComponentFactory<Nucleus> {
         if (centreOfMass == null)
             throw new IllegalArgumentException(NULL_COM_ERROR);
         
-        Nucleus n = null;
-
-        switch(type) {
-        	case RODENT_SPERM: n = new DefaultRodentSpermNucleus(roi, centreOfMass, imageFile, channel, originalPosition,
-        			nucleusNumber, id); break;
-        	case PIG_SPERM: n = new DefaultPigSpermNucleus(roi, centreOfMass, imageFile, channel, originalPosition,
-        			nucleusNumber, id); break;    
-        	case ROUND: 
-        	default: n = new DefaultNucleus(roi, centreOfMass, imageFile, channel, originalPosition,
-        			nucleusNumber, id);
-        }
+        Nucleus n = new DefaultNucleus(roi, centreOfMass, imageFile, channel, originalPosition,
+    			nucleusNumber, id);
 
         LOGGER.finer( "Created nucleus with border length "+n.getBorderLength());
         return n;

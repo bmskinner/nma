@@ -48,7 +48,7 @@ import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult;
@@ -136,7 +136,7 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
         List<Object> rowData = new ArrayList<Object>(0);
 
         try {
-            ISegmentedProfile p = cell.getPrimaryNucleus().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+            ISegmentedProfile p = cell.getPrimaryNucleus().getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
 
             for (IProfileSegment s : p.getSegments()) {
                 fieldNames.add(s.getName());
@@ -307,13 +307,13 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 
         if (type != null) {
 
-            for (Tag tag : n.getBorderTags().keySet()) {
+            for (Landmark tag : n.getBorderTags().keySet()) {
                 fieldNames.add(tag);
                 if (n.hasBorderTag(tag)) {
 
                     try {
                         IBorderPoint p = n.getBorderPoint(tag);
-                        int index = n.getOffsetBorderIndex(Tag.REFERENCE_POINT, n.getBorderIndex(tag));
+                        int index = n.getOffsetBorderIndex(Landmark.REFERENCE_POINT, n.getBorderIndex(tag));
                         rowData.add(p.toString() + " at profile index " + index);
                     } catch (UnavailableBorderTagException e) {
                         LOGGER.fine("Tag not present: " + tag);
@@ -327,7 +327,7 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
         }
         
         try {
-        	ISegmentedProfile sp = n.getProfile(ProfileType.ANGLE.ANGLE, Tag.REFERENCE_POINT);
+        	ISegmentedProfile sp = n.getProfile(ProfileType.ANGLE.ANGLE, Landmark.REFERENCE_POINT);
         	for(IProfileSegment s : sp.getOrderedSegments()) {
         		fieldNames.add(s.getName());
         		rowData.add(s.toString());
@@ -351,9 +351,8 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
      */
     private void addNuclearStatisticsToTable(List<Object> fieldNames, List<Object> rowData, Nucleus n) {
 
-        NucleusType type = options.firstDataset().getCollection().getNucleusType();
         DecimalFormat df = new DecimalFormat(DEFAULT_DECIMAL_FORMAT);
-        for (Measurement stat : Measurement.getNucleusStats(type)) {
+        for (Measurement stat : Measurement.getNucleusStats()) {
 
             if (!stat.equals(Measurement.VARIABILITY)) {
 

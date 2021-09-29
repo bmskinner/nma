@@ -49,11 +49,11 @@ public class DatasetXMLReader extends XMLFileReader<IAnalysisDataset> {
 		
 		try {
 			Element analysisOptions = rootElement.getChild(XMLCreator.ANALYSIS_OPTIONS_KEY);
-			NucleusType type = NucleusType.valueOf(analysisOptions.getChildText(XMLCreator.NUCLEUS_TYPE_KEY));
-			fact = new NucleusFactory(type);
+//			NucleusType type = NucleusType.valueOf(analysisOptions.getChildText(XMLCreator.NUCLEUS_TYPE_KEY));
+			fact = new NucleusFactory();
 			windowProportion = readDouble(analysisOptions, XMLCreator.PROFILE_WINDOW_KEY);
 			
-			return readDataset(rootElement, type );
+			return readDataset(rootElement);
 			
 		} catch (ComponentCreationException e) {
 			throw new XMLReadingException("Could not create component from XML", e);
@@ -66,43 +66,34 @@ public class DatasetXMLReader extends XMLFileReader<IAnalysisDataset> {
 			throw new XMLReadingException("Error reading XML: invalid XML format", e);
 		}
 	}
-	
-	private IAnalysisDataset readDataset(Element e, NucleusType type) throws ComponentCreationException, XMLReadingException {
-		
+
+	private IAnalysisDataset readDataset(Element e) throws ComponentCreationException, XMLReadingException {
+
 		Version created = Version.parseString(e.getChildText(XMLCreator.SOFTWARE_CREATION_VERSION_KEY));
 		Version saved   = Version.parseString(e.getChildText(XMLCreator.SOFTWARE_SERIALISE_VERSION_KEY));
 
-		// Add to this to handle version changes
-		if(Version.v_1_14_0.equals(created))
-			return readDataset_1_14_0(e, type);
-		
-		return readDataset_1_14_0(e, type);
-	}
-		
-	private IAnalysisDataset readDataset_1_14_0(Element e, NucleusType type) throws ComponentCreationException, XMLReadingException {
 		String name = e.getChildText(XMLCreator.DATASET_NAME_KEY);
 		UUID id = UUID.fromString(e.getChildText(XMLCreator.DATASET_ID_KEY));
-		XMLReader<ICellCollection> collectionReader = new ICellCollectionXMLReader(e.getChild(XMLCreator.CELL_COLLECTION_KEY), type, windowProportion, name, id);
+		XMLReader<ICellCollection> collectionReader = new ICellCollectionXMLReader(e.getChild(XMLCreator.CELL_COLLECTION_KEY), windowProportion, name, id);
 		ICellCollection c = collectionReader.read();
 		IAnalysisDataset d = new DefaultAnalysisDataset(c, file);
-		
+
 		Element colour = e.getChild(XMLCreator.COLOUR_KEY);
 		if(colour!=null)
 			d.setDatasetColour(Color.decode(colour.getText()));
 		d.setName(name);
-		
+
 		IAnalysisOptions options = readOptions(e.getChild(XMLCreator.ANALYSIS_OPTIONS_KEY));
 		d.setAnalysisOptions(options);
-		
+
 		readChildDatasets(e.getChild(XMLCreator.CHILD_DATASETS_SECTION_KEY), d);
-		
+
 		return d;
 	}
 	
 	private IAnalysisOptions readOptions(Element e) {
 		IAnalysisOptions op = OptionsFactory.makeAnalysisOptions();
-		NucleusType type = NucleusType.valueOf(e.getChild(XMLCreator.NUCLEUS_TYPE_KEY).getText());
-		op.setNucleusType(type);
+
 		double windowSize = readDouble(e, XMLCreator.PROFILE_WINDOW_KEY);
 		op.setAngleWindowProportion(windowSize);
 

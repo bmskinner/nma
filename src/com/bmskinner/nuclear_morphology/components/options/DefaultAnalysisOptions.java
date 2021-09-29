@@ -27,8 +27,8 @@ import java.util.UUID;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.nuclei.NucleusType;
 import com.bmskinner.nuclear_morphology.components.rules.RuleApplicationType;
+import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 
 /**
  * The default implementation of the IAnalysisOptions interface
@@ -45,10 +45,7 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
 
     private double profileWindowProportion;
 
-    private NucleusType type;
-
-    @Deprecated
-    private boolean isRefoldNucleus, isKeepFailed;
+    private RuleSetCollection rulesets;
     
     private final long analysisTime; 
     
@@ -65,9 +62,6 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
      */
     public DefaultAnalysisOptions() {
         profileWindowProportion = DEFAULT_WINDOW_PROPORTION;
-        type = DEFAULT_TYPE;
-        isRefoldNucleus = DEFAULT_REFOLD;
-        isKeepFailed = DEFAULT_KEEP_FAILED;
         analysisTime = System.currentTimeMillis();
     }
 
@@ -136,16 +130,6 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
     }
 
     @Override
-    public NucleusType getNucleusType() {
-        return type;
-    }
-
-    @Override
-    public boolean refoldNucleus() {
-        return isRefoldNucleus;
-    }
-
-    @Override
     public Set<UUID> getNuclearSignalGroups() {
     	Set<UUID> result = new HashSet<>();
     	for(String s : detectionOptions.keySet()) {
@@ -170,11 +154,6 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
         String key = SIGNAL_GROUP+signalGroup.toString();
         return hasDetectionOptions(key);
     }
-
-    @Override
-    public boolean isKeepFailedCollections() {
-        return isKeepFailed;
-    }
     
     @Override
     public long getAnalysisTime() {
@@ -198,24 +177,6 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
     }
 
     @Override
-    public void setNucleusType(NucleusType nucleusType) {
-        type = nucleusType;
-
-    }
-
-    @Override
-    public void setRefoldNucleus(boolean refoldNucleus) {
-        isRefoldNucleus = refoldNucleus;
-
-    }
-
-    @Override
-    public void setKeepFailedCollections(boolean keepFailedCollections) {
-        isKeepFailed = keepFailedCollections;
-
-    }
-
-    @Override
     public INuclearSignalOptions getNuclearSignalOptions(@NonNull UUID signalGroup) {
 
     	Optional<IDetectionOptions> op = getDetectionOptions(SIGNAL_GROUP+signalGroup.toString());
@@ -230,17 +191,7 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
 
         return null;
     }
-    
-	@Override
-	public RuleApplicationType getRuleApplicationType() {
-		return ruleApplicationType;
-	}
-
-	@Override
-	public void setRuleApplicationType(RuleApplicationType type) {
-		ruleApplicationType = type;
-	}
-    
+        
     @Override
     public void set(@NonNull IAnalysisOptions template) {
     	for (String key : template.getDetectionOptionTypes()) {
@@ -250,8 +201,7 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
         }
 
         profileWindowProportion = template.getProfileWindowProportion();
-        type = template.getNucleusType();
-        ruleApplicationType = template.getRuleApplicationType();
+        rulesets = template.getRuleSetCollection();
     }
 
     @Override
@@ -264,11 +214,8 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
         long temp = Double.doubleToLongBits(profileWindowProportion);
         result = prime * result + (int) (temp ^ (temp >>> 32));
 
-        result = prime * result + type.hashCode();
+        result = prime * result + rulesets.hashCode();
         result = prime * result + ruleApplicationType.hashCode();
-
-        result = prime * result + (isRefoldNucleus ? 1231 : 1237);
-        result = prime * result + (isKeepFailed ? 1231 : 1237);
 
         return result;
     }
@@ -305,11 +252,9 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
                 .doubleToLongBits(other.getProfileWindowProportion()))
             return false;
 
-        if (type != other.getNucleusType())
+        if (!rulesets.equals(other.getRuleSetCollection()))
             return false;
-        
-        if(ruleApplicationType != other.getRuleApplicationType())
-        	return false;
+   
         return true;
     }
     
@@ -324,20 +269,22 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
             b.append(d.toString());
         }
         b.append(IDetectionOptions.NEWLINE+profileWindowProportion);
-        b.append(IDetectionOptions.NEWLINE+type);
+        b.append(IDetectionOptions.NEWLINE+rulesets.getName());
         b.append(IDetectionOptions.NEWLINE+ruleApplicationType);
         return b.toString();
     }  
     
     private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
-        
-        //  Changes from 1.15.2 to 1.16.0
-        if(secondaryOptions==null)
-        	secondaryOptions = new HashMap<>();
-        
-        // Changes from 1.18.2 to 1.18.3/1.19.0
-        if(ruleApplicationType==null)
-        	ruleApplicationType = RuleApplicationType.VIA_MEDIAN;
     }
+
+	@Override
+	public RuleSetCollection getRuleSetCollection() {
+		return rulesets;
+	}
+
+	@Override
+	public void setRuleSetCollection(RuleSetCollection rsc) {
+		rulesets = rsc;
+	}
 }

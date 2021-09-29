@@ -37,7 +37,7 @@ import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.profiles.UnsegmentedProfileException;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
@@ -241,7 +241,7 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 
             ICellCollection collection = datasets.get(i).getCollection();
             try {
-                IProfileSegment medianSeg = collection.getProfileCollection().getSegmentAt(Tag.REFERENCE_POINT,
+                IProfileSegment medianSeg = collection.getProfileCollection().getSegmentAt(Landmark.REFERENCE_POINT,
                         segPosition);
 
                 List<Number> list = new ArrayList<>();
@@ -250,7 +250,7 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 
                 	try {
 
-                		IProfileSegment seg = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegment(medianSeg.getID());
+                		IProfileSegment seg = n.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT).getSegment(medianSeg.getID());
 
                 		double length = 0;
                 		int indexLength = seg.length();
@@ -302,7 +302,7 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
             IProfileSegment medianSeg;
             try {
                 medianSeg = collection.getProfileCollection()
-                        .getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN)
+                        .getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN)
                         .getSegmentAt(segPosition);
             } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException
                     | UnsegmentedProfileException e) {
@@ -316,7 +316,7 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 
             	try {
 
-            		ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+            		ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
 
             		IProfileSegment seg = profile.getSegment(medianSeg.getID());
 

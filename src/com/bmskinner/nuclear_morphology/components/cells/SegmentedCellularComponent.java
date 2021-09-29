@@ -44,10 +44,10 @@ import com.bmskinner.nuclear_morphology.components.profiles.IProfileCollection;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.OpenBorderSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.components.profiles.SegmentedFloatProfile;
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
 import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.profiles.UnprofilableObjectException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -129,44 +129,36 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
         if (!this.hasProfile(type))
             throw new UnavailableProfileTypeException("Cannot get profile type " + type);
 
+        
         try {
-        	ISegmentedProfile p = profileMap.get(type);
-        	LOGGER.finest( "Existing profile is not an internal profile class, is "+p.getClass().getSimpleName()+", converting");
-        	// When reading old datasets, sometimes the profile length does not match the border list length.
-        	// This issue is resolved for datasets created in 1.14.0 onwards.
-        	// If this happens, the conversion will fail due to the new length constraints in the profile constructor.
-        	// As a stopgap, interpolate profiles as needed.
-        	if(p.size()!=getBorderLength()) {
-        		p = p.interpolate(getBorderLength());
-        		assignProfile(type, new DefaultSegmentedProfile(p));
-        	}
-//        	LOGGER.fine("Raw profile: "+p.toString());
         	return profileMap.get(type).copy();
-        } catch (IndexOutOfBoundsException | ProfileException e) {
+        } catch (ProfileException e) {
             throw new UnavailableProfileTypeException("Cannot get profile type " + type, e);
         }
     }
 	
 	@Override
 	public void setProfile(@NonNull ProfileType type, @NonNull ISegmentedProfile profile) {
-        if (segsLocked)
+        if (isLocked) {
+        	LOGGER.fine("Cannot set profile: object is locked");
             return;
+        }
 
         if (this.getBorderLength() != profile.size())
             throw new IllegalArgumentException(String.format("Input profile length (%d) does not match border length (%d) for %s", profile.size(), getBorderLength(), type));
         
         try {
     		assignProfile(type, new DefaultSegmentedProfile(profile));
-		} catch (IndexOutOfBoundsException | ProfileException e) {
+		} catch (ProfileException e) {
 			LOGGER.log(Loggable.STACK, "Unable to create copy of profile of type "+type+"; "+e.getMessage(), e);
 		}
     }
 	
 	@Override
-	public void setProfile(@NonNull ProfileType type, @NonNull Tag tag, @NonNull ISegmentedProfile p) throws UnavailableBorderTagException, UnavailableProfileTypeException {
+	public void setProfile(@NonNull ProfileType type, @NonNull Landmark tag, @NonNull ISegmentedProfile p) throws UnavailableBorderTagException, UnavailableProfileTypeException {
 
-		if (segsLocked) {
-			LOGGER.finer("Cannot set profile, segments are locked");
+		if (isLocked) {
+			LOGGER.finer("Cannot set profile: object is locked");
 			return;
 		}
 
@@ -175,7 +167,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			throw new UnavailableBorderTagException(String.format("Tag %s is not present", tag));
 
 		// fetch the index of the tag (the zero of the input profile)
-		int tagIndex = borderTags.get(tag);
+		int tagIndex = profileLandmarks.get(tag);
 
 		// Keep a copy of the old profile
 		ISegmentedProfile oldProfile = getProfile(type);
@@ -192,14 +184,14 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 	}
 		
     @Override
-	public void setBorderTag(@NonNull Tag tag, int i) {
+	public void setBorderTag(@NonNull Landmark tag, int i) {
       
-    	if(!tag.equals(Tag.REFERENCE_POINT)) {
+    	if(!tag.equals(Landmark.REFERENCE_POINT)) {
     		super.setBorderTag(tag, i);
     		return;
     	}
     	
-    	if(!this.hasBorderTag(Tag.REFERENCE_POINT)) {
+    	if(!this.hasBorderTag(Landmark.REFERENCE_POINT)) {
     		super.setBorderTag(tag, i);
     		return;
     	}
@@ -207,7 +199,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
     	// Update segment boundaries if the tag is the RP
     	try {
     		
-    		int oldRP = getBorderIndex(Tag.REFERENCE_POINT);
+    		int oldRP = getBorderIndex(Landmark.REFERENCE_POINT);
     		int amountToOffset = oldRP-i;
 			ISegmentedProfile oldProfile = this.getProfile(ProfileType.ANGLE);
 			super.setBorderTag(tag, i);
@@ -227,14 +219,14 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
     }
 	
     @Override
-	public void setBorderTag(@NonNull Tag reference, @NonNull Tag tag, int i) throws UnavailableBorderTagException {
+	public void setBorderTag(@NonNull Landmark reference, @NonNull Landmark tag, int i) throws UnavailableBorderTagException {
       
-    	if(!tag.equals(Tag.REFERENCE_POINT)) {
+    	if(!tag.equals(Landmark.REFERENCE_POINT)) {
     		super.setBorderTag(reference, tag, i);
     		return;
     	}
     	
-    	if(!this.hasBorderTag(Tag.REFERENCE_POINT)) {
+    	if(!this.hasBorderTag(Landmark.REFERENCE_POINT)) {
     		super.setBorderTag(tag, i);
     		return;
     	}
@@ -242,7 +234,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
     	// Update segment boundaries if the tag is the RP
     	try {
     		
-    		int oldRP = getBorderIndex(Tag.REFERENCE_POINT);
+    		int oldRP = getBorderIndex(Landmark.REFERENCE_POINT);
     		int amountToOffset = oldRP-i;
 			ISegmentedProfile oldProfile = this.getProfile(ProfileType.ANGLE);
 			super.setBorderTag(tag, i);
@@ -777,8 +769,6 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 
 		@Override
 		public IProfile getSubregion(@NonNull IProfileSegment segment) {
-			if (segment == null)
-				throw new IllegalArgumentException("Segment is null");
 			if (segment.getProfileLength() != array.length) {
 				throw new IllegalArgumentException("Segment comes from a different length profile");
 			}
@@ -1086,9 +1076,9 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 		 * the RP index
 		 */
 		private void updateDefaultSegmentToRp() {
-			if(hasBorderTag(Tag.REFERENCE_POINT)) {
+			if(hasBorderTag(Landmark.REFERENCE_POINT)) {
 				try {
-					int rpIndex = getBorderIndex(Tag.REFERENCE_POINT);
+					int rpIndex = getBorderIndex(Landmark.REFERENCE_POINT);
 					segments.startIndex = rpIndex;
 					segments.endIndex   = rpIndex;
 					

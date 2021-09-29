@@ -15,7 +15,6 @@ import com.bmskinner.nuclear_morphology.io.xml.XMLReader.XMLReadingException;
  * Import XML files containing ruleset descriptions
  * @author ben
  * @since 1.18.3
- *
  */
 public class RuleSetCollectionXMLImporter implements Importer {
 	

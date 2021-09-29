@@ -17,7 +17,7 @@ import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMet
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMethod.MorphologyAnalysisMode;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 
 public class DatasetMergeMethodTest {
 
@@ -42,9 +42,9 @@ public class DatasetMergeMethodTest {
 		
 		// Move all tags except RP by a fixed distance
 		for(Nucleus n : d1.getCollection().getNuclei()) {
-			Map<Tag, Integer> tags = n.getBorderTags();
-			for(Tag tag : tags.keySet()) {
-				if(Tag.REFERENCE_POINT.equals(tag))
+			Map<Landmark, Integer> tags = n.getBorderTags();
+			for(Landmark tag : tags.keySet()) {
+				if(Landmark.REFERENCE_POINT.equals(tag))
 					continue;
 				n.setBorderTag(tag, n.getBorderIndex(tag)+10);
 			}
@@ -64,9 +64,9 @@ public class DatasetMergeMethodTest {
 		// Are tag positions properly restored?
 		for(Nucleus n : d1.getCollection().getNuclei()) {
 			Nucleus test = result.getCollection().getNucleus(n.getID()).get();
-			Map<Tag, Integer> tags = n.getBorderTags();
-			for(Tag tag : tags.keySet()) {
-				if(Tag.REFERENCE_POINT.equals(tag))
+			Map<Landmark, Integer> tags = n.getBorderTags();
+			for(Landmark tag : tags.keySet()) {
+				if(Landmark.REFERENCE_POINT.equals(tag))
 					continue;
 				assertEquals(tag.toString(), 
 						tags.get(tag).intValue(), 

@@ -32,8 +32,8 @@ import org.jfree.chart.entity.XYItemEntity;
 
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.profiles.BorderTagObject;
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.DefaultLandmark;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.gui.components.BorderTagEvent;
 import com.bmskinner.nuclear_morphology.gui.events.ChartOptionsRenderedEvent;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
@@ -78,8 +78,8 @@ public class BorderTagDualChartPanel extends DualChartPanel {
     }
 
     public void createBorderTagPopup(ICell cell) {
-        Set<Tag> set = cell.getPrimaryNucleus().getBorderTags().keySet();
-        List<Tag> list = new ArrayList<Tag>(set);
+        Set<Landmark> set = cell.getPrimaryNucleus().getBorderTags().keySet();
+        List<Landmark> list = new ArrayList<Landmark>(set);
         makePopup(list);
 
     }
@@ -87,21 +87,21 @@ public class BorderTagDualChartPanel extends DualChartPanel {
     public synchronized void createBorderTagPopup(IAnalysisDataset dataset) {
     	if(dataset==null)
     		return;
-        List<Tag> list = dataset.getCollection().getProfileCollection().getBorderTags();
+        List<Landmark> list = dataset.getCollection().getProfileCollection().getBorderTags();
         makePopup(list);
     }
 
-    private void makePopup(List<Tag> list) {
+    private void makePopup(List<Landmark> list) {
         popupMenu = new JPopupMenu("Popup");
 
         Collections.sort(list);
 
-        for (Tag tag : list) {
+        for (Landmark tag : list) {
 
             /*
              * The IP is determined solely by the OP
              */
-            if (tag.equals(Tag.INTERSECTION_POINT)) {
+            if (tag.equals(Landmark.INTERSECTION_POINT)) {
                 continue;
             }
 
@@ -115,9 +115,9 @@ public class BorderTagDualChartPanel extends DualChartPanel {
 
         // Find border tags with rulesets that have not been assigned in the
         // median
-        List<Tag> unassignedTags = new ArrayList<Tag>();
-        for (Tag tag : BorderTagObject.values()) {
-            if (tag.equals(Tag.INTERSECTION_POINT)) {
+        List<Landmark> unassignedTags = new ArrayList<Landmark>();
+        for (Landmark tag : Landmark.defaultValues()) {
+            if (tag.equals(Landmark.INTERSECTION_POINT)) {
                 continue;
             }
 
@@ -132,7 +132,7 @@ public class BorderTagDualChartPanel extends DualChartPanel {
 
             popupMenu.addSeparator();
 
-            for (Tag tag : unassignedTags) {
+            for (Landmark tag : unassignedTags) {
                 JMenuItem item = new JMenuItem(tag.toString());
                 item.setForeground(Color.DARK_GRAY);
 

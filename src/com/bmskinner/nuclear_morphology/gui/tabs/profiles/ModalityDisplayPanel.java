@@ -40,7 +40,7 @@ import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPa
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
@@ -200,7 +200,7 @@ public class ModalityDisplayPanel extends DetailPanel implements ActionListener,
         		.setDatasets(getDatasets())
         		.setNormalised(true) // setNormalised is used to indicate use of p-value chart here
                 .setAlignment(ProfileAlignment.LEFT)
-                .setTag(Tag.REFERENCE_POINT)
+                .setTag(Landmark.REFERENCE_POINT)
                 .setShowMarkers(false)
                 .setProfileType(type)
                 .setSwatch(GlobalOptions.getInstance().getSwatch())
@@ -226,7 +226,7 @@ public class ModalityDisplayPanel extends DetailPanel implements ActionListener,
         		.setDatasets(getDatasets())
         		.setNormalised(false) // setNormalised is used to indicate use of main chart here
                 .setAlignment(ProfileAlignment.RIGHT)
-                .setTag(Tag.REFERENCE_POINT)
+                .setTag(Landmark.REFERENCE_POINT)
                 .setShowMarkers(false)
                 .setProfileType(type)
                 .setModalityPosition(fraction)

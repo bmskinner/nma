@@ -23,20 +23,26 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 
-import com.bmskinner.nuclear_morphology.components.nuclei.NucleusType;
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 
 /**
- * This holds the rulesets for identifying each of the BorderTags in a profile.
+ * This holds the rulesets for identifying each of the landmarks in a profile.
  * Multiple RuleSets can be combined for each tag, allowing multiple
- * ProfileTypes to be used. Designed to be stored within a cell collection
+ * profile types to be used. Designed to be stored within a cell collection.
  * 
- * @author bms41
+ * It also stores which landmarks should be used for orientation of the nucleus.
+ * This replaces the v1.x.x series of dedicated classes for each type of nucleus
+ * to be analysed.
+ * 
+ * @author ben
  *
  */
 public class RuleSetCollection implements Serializable {
@@ -44,14 +50,107 @@ public class RuleSetCollection implements Serializable {
 	private static final Logger LOGGER = Logger.getLogger(RuleSetCollection.class.getName());
 
     private static final long serialVersionUID = 1L;
+    
+    private final String name;
 
-    private Map<Tag, List<RuleSet>> map = new HashMap<>();
-
+    private final Map<Landmark, List<RuleSet>> map = new HashMap<>();
+        
+    /** Track which landmarks to use for X axis
+     *  Can both be null for no preference **/
+    private final Landmark leftCoM;
+    private final Landmark rightCoM;
+    
+    /** Track which landmarks to use for Y axis
+     *  Can both be null for no preference **/
+    private final Landmark topVertical;
+    private final Landmark btmVertical;
+    
+    private final Landmark seondaryX;
+    private final Landmark seondaryY;
+    
+    private final String priorityAxis;
+    
+    private final RuleApplicationType ruleApplicationType;
+    
     /**
-     * Create a new empty collection
+     * Create a new empty collection. Specify the landmarks that should
+     * be used preferentially by nuclei for orientation
      */
-    public RuleSetCollection() {
-    	// Created empty
+    public RuleSetCollection(@NonNull String name, @Nullable Landmark left, @Nullable Landmark right, 
+    		@Nullable Landmark top, @Nullable Landmark bottom, @Nullable Landmark seondaryX,
+    		@Nullable Landmark seondaryY, @Nullable String priorityAxis, RuleApplicationType type) {
+    	this.name = name;
+    	leftCoM = left;
+    	rightCoM = right;
+    	topVertical = top;
+    	btmVertical = bottom;
+    	this.seondaryX = seondaryX;
+    	this.seondaryY = seondaryY;
+    	this.priorityAxis = priorityAxis;
+    	this.ruleApplicationType = type;
+    }
+    
+   
+    public String getName() {
+    	return name;
+    }
+    
+    public RuleApplicationType getApplicationType() {
+    	return ruleApplicationType;
+    }
+    
+    /**
+     * Test if the rules specify a preferred landmark
+     * to the left or right of the CoM
+     * @return
+     */
+    public boolean isAsymmetricX() {
+    	return leftCoM!=null || rightCoM!=null;
+    }
+    
+    /**
+     * Test if the rules specify a preferred landmark
+     * above or below the CoM
+     * @return
+     */
+    public boolean isAsymmetricY() {
+    	return topVertical!=null || btmVertical!=null;
+    }
+    
+    /**
+     * Test if there is asymmetry in either axis
+     * @return
+     */
+    public boolean isAsymmetric() {
+    	return isAsymmetricX() || isAsymmetricY();
+    }
+    
+    public Optional<Landmark> getSecondaryX() {
+		return Optional.ofNullable(seondaryX);
+	}
+
+	public Optional<Landmark> getSecondaryY() {
+		return Optional.ofNullable(seondaryY);
+	}
+
+	public Optional<String> getPriorityAxis() {
+		return Optional.ofNullable(priorityAxis);
+	}
+
+	public Optional<Landmark> getLeftLandmark() {
+    	return Optional.ofNullable(leftCoM);
+    }
+    
+    public Optional<Landmark> getRightLandmark() {
+    	return Optional.ofNullable(rightCoM);
+    }
+    
+    public Optional<Landmark> getTopLandmark() {
+    	return Optional.ofNullable(topVertical);
+    }
+    
+    public Optional<Landmark> getBottomLandmark() {
+    	return Optional.ofNullable(btmVertical);
     }
 
     /**
@@ -59,11 +158,11 @@ public class RuleSetCollection implements Serializable {
      * 
      * @param tag
      */
-    public void clearRuleSets(@NonNull Tag tag) {
+    public void clearRuleSets(@NonNull Landmark tag) {
         map.put(tag, new ArrayList<>());
     }
     
-    public List<RuleSet> removeRuleSets(@NonNull Tag tag) {
+    public List<RuleSet> removeRuleSets(@NonNull Landmark tag) {
     	return map.remove(tag);
     }
 
@@ -73,10 +172,8 @@ public class RuleSetCollection implements Serializable {
      * @param tag
      * @param r
      */
-    public void addRuleSet(@NonNull Tag tag, @NonNull RuleSet r) {
-    	if(!map.containsKey(tag)) {
-    		map.put(tag, new ArrayList<>());
-    	}
+    public void addRuleSet(@NonNull Landmark tag, @NonNull RuleSet r) {
+    	map.computeIfAbsent(tag, k -> new ArrayList<>());
     	map.get(tag).add(r);
     }
 
@@ -86,7 +183,7 @@ public class RuleSetCollection implements Serializable {
      * @param tag
      * @param list
      */
-    public void setRuleSets(@NonNull Tag tag, @NonNull List<RuleSet> list) {
+    public void setRuleSets(@NonNull Landmark tag, @NonNull List<RuleSet> list) {
         map.put(tag, new ArrayList<>());
         map.get(tag).addAll(list);
     }
@@ -97,11 +194,11 @@ public class RuleSetCollection implements Serializable {
      * @param tag
      * @param r
      */
-    public List<RuleSet> getRuleSets(@NonNull Tag tag) {
+    public List<RuleSet> getRuleSets(@NonNull Landmark tag) {
         return map.get(tag);
     }
 
-    public Set<Tag> getTags() {
+    public Set<Landmark> getTags() {
         return map.keySet();
     }
 
@@ -110,7 +207,7 @@ public class RuleSetCollection implements Serializable {
      * @param tag the tag to check
      * @return true if rulesets are present, false otherwise
      */
-    public boolean hasRulesets(@NonNull Tag tag) {
+    public boolean hasRulesets(@NonNull Landmark tag) {
     	if(map.containsKey(tag)) {
     		return !map.get(tag).isEmpty();
     	}
@@ -125,31 +222,24 @@ public class RuleSetCollection implements Serializable {
         return map.isEmpty();
     }
 
-    public String toString() {
+    @Override
+	public String toString() {
         StringBuilder b = new StringBuilder();
         b.append("RuleSets:\n");
-        for(Entry<Tag, List<RuleSet>> entry : map.entrySet()) {
-            b.append("\t" + entry.getKey() + ":\n");
+        for(Entry<Landmark, List<RuleSet>> entry : map.entrySet()) {
+            b.append(entry.getKey() + ":\n");
             for (RuleSet r : entry.getValue()) {
-                b.append("\t" + r.toString() + "\n");
+                b.append(r.toString() + "\n");
             }
         }
 
         return b.toString();
     }
-    
-    
 
-    /*
-     * Static methods to create the default rulesets for a given NucleusType
-     */
-
-    @Override
+	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((map == null) ? 0 : map.hashCode());
-		return result;
+		return Objects.hash(btmVertical, leftCoM, map, priorityAxis, 
+				rightCoM, seondaryX, seondaryY, topVertical);
 	}
 
 	@Override
@@ -161,40 +251,27 @@ public class RuleSetCollection implements Serializable {
 		if (getClass() != obj.getClass())
 			return false;
 		RuleSetCollection other = (RuleSetCollection) obj;
-		if (map == null) {
-			if (other.map != null)
-				return false;
-		} else if (!map.equals(other.map))
-			return false;
-		return true;
+		return Objects.equals(btmVertical, other.btmVertical) && Objects.equals(leftCoM, other.leftCoM)
+				&& Objects.equals(map, other.map) && Objects.equals(priorityAxis, other.priorityAxis)
+				&& Objects.equals(rightCoM, other.rightCoM) && Objects.equals(seondaryX, other.seondaryX)
+				&& Objects.equals(seondaryY, other.seondaryY) && Objects.equals(topVertical, other.topVertical)
+				&& Objects.equals(ruleApplicationType, other.ruleApplicationType);
 	}
-
-	public static RuleSetCollection createDefaultRuleSet(NucleusType type) {
-
-        switch (type) {
-        case PIG_SPERM:
-            return createPigSpermRuleSets();
-        case RODENT_SPERM:
-            return createMouseSpermRuleSets();
-        default:
-            return createRoundRuleSets();
-
-        }
-
-    }
 
     /**
      * Create a RuleSetCollection for mouse sperm nuclei
      * 
      * @return
      */
-    private static RuleSetCollection createMouseSpermRuleSets() {
-        RuleSetCollection r = new RuleSetCollection();
+    public static RuleSetCollection mouseSpermRuleSetCollection() {
+        RuleSetCollection r = new RuleSetCollection("Mouse sperm", Landmark.REFERENCE_POINT, null,
+        		Landmark.TOP_VERTICAL, Landmark.BOTTOM_VERTICAL,
+        		null, Landmark.ORIENTATION_POINT, "Y", RuleApplicationType.VIA_MEDIAN);
 
-        r.addRuleSet(Tag.REFERENCE_POINT, RuleSet.mouseSpermRPRuleSet());
-        r.addRuleSet(Tag.ORIENTATION_POINT, RuleSet.mouseSpermOPRuleSet());
-        r.addRuleSet(Tag.TOP_VERTICAL, RuleSet.mouseSpermTVRuleSet());
-        r.addRuleSet(Tag.BOTTOM_VERTICAL, RuleSet.mouseSpermBVRuleSet());
+        r.addRuleSet(Landmark.REFERENCE_POINT, RuleSet.mouseSpermRPRuleSet());
+        r.addRuleSet(Landmark.ORIENTATION_POINT, RuleSet.mouseSpermOPRuleSet());
+        r.addRuleSet(Landmark.TOP_VERTICAL, RuleSet.mouseSpermTVRuleSet());
+        r.addRuleSet(Landmark.BOTTOM_VERTICAL, RuleSet.mouseSpermBVRuleSet());
         return r;
     }
 
@@ -203,11 +280,12 @@ public class RuleSetCollection implements Serializable {
      * 
      * @return
      */
-    private static RuleSetCollection createPigSpermRuleSets() {
-        RuleSetCollection r = new RuleSetCollection();
+    public static RuleSetCollection pigSpermRuleSetCollection() {
+        RuleSetCollection r = new RuleSetCollection("Pig sperm", null, null, null, Landmark.REFERENCE_POINT,
+        		null, Landmark.ORIENTATION_POINT, "Y", RuleApplicationType.VIA_MEDIAN);
 
-        r.addRuleSet(Tag.REFERENCE_POINT, RuleSet.pigSpermRPRuleSet());
-        r.addRuleSet(Tag.ORIENTATION_POINT, RuleSet.pigSpermOPRuleSet());
+        r.addRuleSet(Landmark.REFERENCE_POINT, RuleSet.pigSpermRPRuleSet());
+        r.addRuleSet(Landmark.ORIENTATION_POINT, RuleSet.pigSpermOPRuleSet());
         return r;
     }
 
@@ -216,11 +294,11 @@ public class RuleSetCollection implements Serializable {
      * 
      * @return
      */
-    private static RuleSetCollection createRoundRuleSets() {
-        RuleSetCollection r = new RuleSetCollection();
+    public static RuleSetCollection roundRuleSetCollection() {
+        RuleSetCollection r = new RuleSetCollection("Round", null, null, null, Landmark.REFERENCE_POINT,
+        		null, Landmark.REFERENCE_POINT, "Y", RuleApplicationType.VIA_MEDIAN);
 
-        r.addRuleSet(Tag.REFERENCE_POINT, RuleSet.roundRPRuleSet());
-        r.addRuleSet(Tag.ORIENTATION_POINT, RuleSet.roundOPRuleSet());
+        r.addRuleSet(Landmark.REFERENCE_POINT, RuleSet.roundRPRuleSet());
         return r;
     }
 

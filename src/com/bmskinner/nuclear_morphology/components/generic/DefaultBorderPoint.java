@@ -26,8 +26,8 @@ package com.bmskinner.nuclear_morphology.components.generic;
 public class DefaultBorderPoint extends FloatPoint implements IBorderPoint {
     private static final long serialVersionUID = 1L;
 
-    private IBorderPoint prevPoint = null;
-    private IBorderPoint nextPoint = null;
+    private transient IBorderPoint prevPoint = null;
+    private transient IBorderPoint nextPoint = null;
 
     /**
      * Construct from x and y positions
@@ -123,4 +123,7 @@ public class DefaultBorderPoint extends FloatPoint implements IBorderPoint {
 	public boolean hasPrevPoint() {
         return prevPoint != null;
     }
+    
+    
+    
 }

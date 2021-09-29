@@ -35,6 +35,7 @@ import com.bmskinner.nuclear_morphology.components.nuclei.NucleusType;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
+import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
 
 /**
@@ -87,7 +88,7 @@ public class ImageableTest extends ComponentTester {
 		File testFolder = new File(TestResources.IMAGE_FOLDER+"issues/offsets/").getAbsoluteFile();
     	
     	IAnalysisOptions op = OptionsFactory.makeAnalysisOptions();
-    	op.setNucleusType(NucleusType.ROUND);
+    	op.setRuleSetCollection(RuleSetCollection.roundRuleSetCollection());
     	IDetectionOptions nOp = OptionsFactory.makeNucleusDetectionOptions(testFolder);
     	nOp.setMaxSize(2000000);
     	nOp.setMinSize(5000);

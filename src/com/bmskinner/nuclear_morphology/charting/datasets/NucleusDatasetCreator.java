@@ -57,7 +57,7 @@ import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.profiles.UnsegmentedProfileException;
 import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
@@ -161,7 +161,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
             IProfileSegment medianSeg;
             try {
                 medianSeg = collection.getProfileCollection()
-                        .getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN)
+                        .getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN)
                         .getSegmentAt(segPosition);
             } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException
                     | UnsegmentedProfileException e) {
@@ -176,7 +176,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 
                 try {
 
-                    IProfileSegment seg = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT)
+                    IProfileSegment seg = n.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT)
                             .getSegment(medianSeg.getID());
 
                     if (seg != null) {
@@ -221,7 +221,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
             IProfileSegment medianSeg;
             try {
                 medianSeg = collection.getProfileCollection()
-                        .getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN)
+                        .getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN)
                         .getSegmentAt(segPosition);
             } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException
                     | UnsegmentedProfileException e) {
@@ -234,7 +234,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
             for (Nucleus n : collection.getNuclei()) {
 
                 try {
-                    ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+                    ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
                     IProfileSegment seg = profile.getSegment(medianSeg.getID());
 
                     double displacement = profile.getDisplacement(seg);
@@ -275,7 +275,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
             List<IProfileSegment> segments;
             try {
                 segments = collection.getProfileCollection()
-                        .getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN)
+                        .getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN)
                         .getOrderedSegments();
 
                 for (IProfileSegment medianSeg : segments) {
@@ -359,7 +359,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
     	ComponentOutlineDataset ds = (ComponentOutlineDataset) createBareNucleusOutline(consensus);
     	
     	try {
-    		IBorderPoint p = consensus.getBorderPoint(Tag.ORIENTATION_POINT);
+    		IBorderPoint p = consensus.getBorderPoint(Landmark.ORIENTATION_POINT);
 			double[] xpoints = new double[1];
 	        double[] ypoints = new double[1];
 	        
@@ -368,7 +368,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 	        
 	        double[][] data = { xpoints, ypoints };
 	        
-	        ds.addSeries(Tag.ORIENTATION_POINT, data);
+	        ds.addSeries(Landmark.ORIENTATION_POINT, data);
 			
 		} catch (UnavailableBorderTagException e) {
 			throw new ChartDatasetCreationException("Unable to get OP", e);
@@ -407,8 +407,8 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
         IProfile q25;
         IProfile q75;
         try {
-            q25 = collection.getProfileCollection().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.LOWER_QUARTILE);
-            q75 = collection.getProfileCollection().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.UPPER_QUARTILE);
+            q25 = collection.getProfileCollection().getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.LOWER_QUARTILE);
+            q75 = collection.getProfileCollection().getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.UPPER_QUARTILE);
         } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException e) {
             LOGGER.log(Loggable.STACK, "Error getting upper or lower quartile profile from tag", e);
             throw new ChartDatasetCreationException("Unable to get quartile profile", e);
@@ -425,7 +425,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
         scaledRange = scaledRange.multiply(scale / 10); // set to 10% min radius of the chart
 
         try {
-        	ISegmentedProfile angleProfile = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+        	ISegmentedProfile angleProfile = n.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
 
         	// At this point, the angle profile and the iqr profile should be in sync
         	// The following set of checks confirms this.
@@ -434,7 +434,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
         		// go through each segment
         		for (IProfileSegment seg : angleProfile.getOrderedSegments()) {
 
-        			addSegmentIQRToConsensus(seg, ds, n, scaledRange, Tag.REFERENCE_POINT);
+        			addSegmentIQRToConsensus(seg, ds, n, scaledRange, Landmark.REFERENCE_POINT);
 
         			// draw the segment
         			float[] xpoints = new float[seg.length()];
@@ -456,15 +456,15 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
         	if(ds.getSeriesCount()<angleProfile.getSegmentCount())
         		throw new ChartDatasetCreationException("Cannot make segmented nucleus outline: too few series in chart dataset");
         } catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException | UnavailableBorderPointException e) {
-        	LOGGER.log(Loggable.STACK, "Error getting nucleus angle profile from " + Tag.REFERENCE_POINT, e);
+        	LOGGER.log(Loggable.STACK, "Error getting nucleus angle profile from " + Landmark.REFERENCE_POINT, e);
         	throw new ChartDatasetCreationException("Cannot make segmented nucleus outline", e);
         }
         
         // Add the TV, BV as a series only if the options are in debug mode
         if(GlobalOptions.getInstance().getBoolean(GlobalOptions.IS_DEBUG_INTERFACE_KEY)) {
         	try {
-        		IPoint tv = n.getBorderPoint(Tag.TOP_VERTICAL);
-        		IPoint bv = n.getBorderPoint(Tag.BOTTOM_VERTICAL);
+        		IPoint tv = n.getBorderPoint(Landmark.TOP_VERTICAL);
+        		IPoint bv = n.getBorderPoint(Landmark.BOTTOM_VERTICAL);
 
         		float[] xpoints = { (float) tv.getX(), (float) bv.getX() };
         		float[] ypoints = { (float) tv.getY(), (float) bv.getY() };
@@ -488,7 +488,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
      * @param scaledRange the IQR scale profile
      */
     private void addSegmentIQRToConsensus(@NonNull IProfileSegment segment, @NonNull FloatXYDataset ds, @NonNull Nucleus n, @NonNull IProfile scaledRange,
-            @NonNull Tag pointType) throws ChartDatasetCreationException {
+            @NonNull Landmark pointType) throws ChartDatasetCreationException {
 
         // what we need to do is match the profile positions to the borderpoints
         // Add lines to show the IQR of the angle profile at each point
@@ -578,7 +578,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 
         FloatXYDataset ds = new FloatXYDataset();
         try {
-            for (Tag tag : nucleus.getBorderTags().keySet()) {
+            for (Landmark tag : nucleus.getBorderTags().keySet()) {
                 IBorderPoint tagPoint;
 
                 int tagIndex = nucleus.getBorderIndex(tag);

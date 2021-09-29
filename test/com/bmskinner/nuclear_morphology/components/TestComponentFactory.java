@@ -110,7 +110,7 @@ public class TestComponentFactory {
 		n.rotate(rotation);
 				
 		// Note - the roi interpolation will smooth corners
-		n.initialise(Profileable.DEFAULT_PROFILE_WINDOW_PROPORTION);
+		n.initialise(Taggable.DEFAULT_PROFILE_WINDOW_PROPORTION);
 		n.findPointsAroundBorder();		
 		return n;
 	}
@@ -137,7 +137,7 @@ public class TestComponentFactory {
 		n.rotate(rotation);
 		
 		// Note - the roi interpolation will smooth corners
-		n.initialise(Profileable.DEFAULT_PROFILE_WINDOW_PROPORTION);
+		n.initialise(Taggable.DEFAULT_PROFILE_WINDOW_PROPORTION);
 		n.findPointsAroundBorder();		
 		return n;
 	}

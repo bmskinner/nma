@@ -1,14 +1,18 @@
 package com.bmskinner.nuclear_morphology.io.xml;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Optional;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.jdom2.Document;
 import org.jdom2.Element;
 
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
 import com.bmskinner.nuclear_morphology.components.rules.Rule;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSet;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
@@ -32,7 +36,7 @@ public class RuleSetCollectionXMLCreator extends XMLCreator<RuleSetCollection> {
 		Element rootElement = new Element(RULESET_COLLECTION_KEY);
 		
 		int tagCounter = 0;
-		for(Tag t : template.getTags()) {
+		for(Landmark t : template.getTags()) {
 			Element tagElement = new Element(TAG_KEY+tagCounter);
 			tagElement.addContent(createElement(NAME_KEY, t.getName()));
 			tagElement.addContent(createElement(TYPE_KEY, t.type()));
@@ -46,7 +50,56 @@ public class RuleSetCollectionXMLCreator extends XMLCreator<RuleSetCollection> {
 			tagCounter++;
 			rootElement.addContent(tagElement);
 		}
+		
+		
+		
+		try {
+			
+			// Add values known not to be nullable
+			rootElement.addContent(new Element("Name").addContent(template.getName()));
+			rootElement.addContent(new Element("Type").addContent(template.getApplicationType().toString()));
+			
+			// Add the orientation landmark names
+			addOrientationElements(RuleSetCollection.class.getMethod("getTopLandmark"), rootElement);
+			addOrientationElements(RuleSetCollection.class.getMethod("getBottomLandmark"), rootElement);
+			addOrientationElements(RuleSetCollection.class.getMethod("getLeftLandmark"), rootElement);
+			addOrientationElements(RuleSetCollection.class.getMethod("getRightLandmark"), rootElement);	
+			
+			addOrientationElements(RuleSetCollection.class.getMethod("getSecondaryX"), rootElement);
+			addOrientationElements(RuleSetCollection.class.getMethod("getSecondaryY"), rootElement);
+			
+			// Add priority axis separately since it's a string not a landmark
+			if(template.getPriorityAxis().isPresent()) {
+				rootElement.addContent(new Element("PriorityAxis")
+						.addContent(template.getPriorityAxis().get().toString()));
+			}
+			
+
+		} catch (NoSuchMethodException | SecurityException e) {
+			LOGGER.log(Level.SEVERE, "Unable to reflect ruleset collection", e);
+		}		
 		return new Document(rootElement);
+	}
+	
+	/**
+	 * Simplify creation of landmark elements by reflecting on the method
+	 * names.
+	 * @param f the method to create an element for
+	 * @param rootElement the element to add any created element to
+	 */
+	private void addOrientationElements(Method f, Element rootElement) {
+		try {
+			String lmName = f.getName().replaceAll("get","").replaceAll("Landmark", "");			
+			Optional<Landmark> lm = (Optional<Landmark>)f.invoke(template);
+			
+			if(lm.isPresent()) {
+				Element element = new Element(lmName);
+				element.addContent(lm.get().toString());
+				rootElement.addContent(element);
+			}
+		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+			LOGGER.log(Level.SEVERE, "Unable to reflect ruleset collection", e);
+		}
 	}
 	
 	private Element createRuleSet(RuleSet rs, String name) {

@@ -28,7 +28,7 @@ import com.bmskinner.nuclear_morphology.components.options.MissingOptionExceptio
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.profiles.UnsegmentedProfileException;
 import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
@@ -244,7 +244,7 @@ public abstract class XMLCreator<T> {
 			appendElement(element, options.getDetectionOptions(key).get());
 			e.addContent(element);
 		}
-		e.addContent(createElement(NUCLEUS_TYPE_KEY, options.getNucleusType().name()));
+//		e.addContent(createElement(NUCLEUS_TYPE_KEY, options.getNucleusType().name()));
 		e.addContent(createElement(PROFILE_WINDOW_KEY, String.valueOf(options.getProfileWindowProportion())));
 		return e;
 	}
@@ -258,7 +258,7 @@ public abstract class XMLCreator<T> {
 		Element e = new Element(CELL_COLLECTION_KEY);
 		
 		if(collection.isReal()) {
-			e.addContent(createElement(NUCLEUS_TYPE_KEY, collection.getNucleusType()));
+//			e.addContent(createElement(NUCLEUS_TYPE_KEY, collection.getNucleusType()));
 			e.addContent(createElement(OUTPUT_FOLDER_KEY, collection.getOutputFolder().getAbsolutePath()));
 
 			Element cellsElement = new Element(CELLS_SECTION_KEY);
@@ -283,7 +283,7 @@ public abstract class XMLCreator<T> {
 		
 		// Add border tags
 		Element tags = new Element(BORDER_TAGS_KEY);
-		for(Tag t : collection.getProfileCollection().getBorderTags()) {
+		for(Landmark t : collection.getProfileCollection().getBorderTags()) {
 			Element tag = new Element(BORDER_TAG_KEY);
 			tag.addContent(createElement(NAME_KEY, t.getName()));
 			try {
@@ -299,7 +299,7 @@ public abstract class XMLCreator<T> {
 		// Add segments
 		Element segs = new Element(BORDER_SEGS_KEY);
 		try {
-			ISegmentedProfile profile = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
+			ISegmentedProfile profile = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);
 
 			for(IProfileSegment s : profile.getSegments()) {
 				Element seg = new Element(BORDER_SEG_KEY);
@@ -428,7 +428,7 @@ public abstract class XMLCreator<T> {
 		
 		// Add border tags
 		Element tags = new Element(BORDER_TAGS_KEY);
-		for(Tag t : taggable.getBorderTags().keySet()) {
+		for(Landmark t : taggable.getBorderTags().keySet()) {
 			Element tag = new Element(BORDER_TAG_KEY);
 			tag.addContent(createElement(NAME_KEY, t.getName()));
 			try {

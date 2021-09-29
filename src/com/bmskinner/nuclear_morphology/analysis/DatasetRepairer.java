@@ -13,7 +13,7 @@ import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.profiles.UnsegmentedProfileException;
 import com.bmskinner.nuclear_morphology.stats.Stats;
@@ -52,7 +52,7 @@ public class DatasetRepairer {
 
 			UUID seg0Id = d.getCollection()
 					.getProfileCollection()
-					.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN)
+					.getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN)
 					.getSegmentContaining(0)
 					.getID();
 
@@ -87,7 +87,7 @@ public class DatasetRepairer {
 		if(wasLocked)
 			n.setLocked(false);
 		try {
-			int rpIndex = n.getBorderIndex(Tag.REFERENCE_POINT);
+			int rpIndex = n.getBorderIndex(Landmark.REFERENCE_POINT);
 			ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE);
 			IProfileSegment s  = profile.getSegment(expectedRPSegmentStart);
 			int segStart = s.getStartIndex();
@@ -96,7 +96,7 @@ public class DatasetRepairer {
 				// We can't just set RP since setting RP will update segments by the same amount
 				// Need to copy the profile and segments as is, then reload them after the RP has been changed
 				LOGGER.finest("RP at "+rpIndex+"; expected at "+segStart);
-				n.setBorderTag(Tag.REFERENCE_POINT, segStart);
+				n.setBorderTag(Landmark.REFERENCE_POINT, segStart);
 				LOGGER.finest(n.getNameAndNumber()+": updated RP to index "+segStart);
 				n.setProfile(ProfileType.ANGLE, profile);
 			}

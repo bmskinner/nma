@@ -44,7 +44,7 @@ import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException
 import com.bmskinner.nuclear_morphology.components.generic.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.core.InterfaceUpdater;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
@@ -360,21 +360,21 @@ public class InteractiveCellOutlinePanel extends InteractiveCellPanel {
 			g2.setColor(Color.CYAN);
 			try {
 				
-				if(cell.getPrimaryNucleus().hasBorderTag(Tag.TOP_VERTICAL) && 
-						cell.getPrimaryNucleus().getBorderPoint(Tag.TOP_VERTICAL).overlapsPerfectly(point.get())) {
-					g2.setColor(ColourSelecter.getColour(Tag.TOP_VERTICAL));
+				if(cell.getPrimaryNucleus().hasBorderTag(Landmark.TOP_VERTICAL) && 
+						cell.getPrimaryNucleus().getBorderPoint(Landmark.TOP_VERTICAL).overlapsPerfectly(point.get())) {
+					g2.setColor(ColourSelecter.getColour(Landmark.TOP_VERTICAL));
 				}
-				if(cell.getPrimaryNucleus().hasBorderTag(Tag.BOTTOM_VERTICAL) && 
-						cell.getPrimaryNucleus().getBorderPoint(Tag.BOTTOM_VERTICAL).overlapsPerfectly(point.get())) {
-					g2.setColor(ColourSelecter.getColour(Tag.BOTTOM_VERTICAL));
+				if(cell.getPrimaryNucleus().hasBorderTag(Landmark.BOTTOM_VERTICAL) && 
+						cell.getPrimaryNucleus().getBorderPoint(Landmark.BOTTOM_VERTICAL).overlapsPerfectly(point.get())) {
+					g2.setColor(ColourSelecter.getColour(Landmark.BOTTOM_VERTICAL));
 				}
-				if(cell.getPrimaryNucleus().hasBorderTag(Tag.REFERENCE_POINT) && 
-						cell.getPrimaryNucleus().getBorderPoint(Tag.REFERENCE_POINT).overlapsPerfectly(point.get())) {
-					g2.setColor(ColourSelecter.getColour(Tag.REFERENCE_POINT));
+				if(cell.getPrimaryNucleus().hasBorderTag(Landmark.REFERENCE_POINT) && 
+						cell.getPrimaryNucleus().getBorderPoint(Landmark.REFERENCE_POINT).overlapsPerfectly(point.get())) {
+					g2.setColor(ColourSelecter.getColour(Landmark.REFERENCE_POINT));
 				}
-				if(cell.getPrimaryNucleus().hasBorderTag(Tag.ORIENTATION_POINT) && 
-						cell.getPrimaryNucleus().getBorderPoint(Tag.ORIENTATION_POINT).overlapsPerfectly(point.get())) {
-					g2.setColor(ColourSelecter.getColour(Tag.ORIENTATION_POINT));
+				if(cell.getPrimaryNucleus().hasBorderTag(Landmark.ORIENTATION_POINT) && 
+						cell.getPrimaryNucleus().getBorderPoint(Landmark.ORIENTATION_POINT).overlapsPerfectly(point.get())) {
+					g2.setColor(ColourSelecter.getColour(Landmark.ORIENTATION_POINT));
 				}
 
 			} catch (UnavailableBorderTagException e) {

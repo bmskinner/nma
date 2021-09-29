@@ -64,13 +64,12 @@ import com.bmskinner.nuclear_morphology.components.measure.StatsCache;
 import com.bmskinner.nuclear_morphology.components.measure.VennCache;
 import com.bmskinner.nuclear_morphology.components.nuclei.Consensus;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.nuclei.NucleusType;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileCollection;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileManager;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
 import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult;
@@ -106,7 +105,7 @@ public class DefaultCellCollection implements ICellCollection {
 	private String name;
 
 	/** The type of nuclei this collection contains */
-	private NucleusType nucleusType;
+//	private NucleusType nucleusType;
 
 	/** Aggregated profiles from cells, plus medians */
 	private IProfileCollection profileCollection = IProfileCollection.makeNew();
@@ -121,7 +120,7 @@ public class DefaultCellCollection implements ICellCollection {
 	private Map<UUID, ISignalGroup> signalGroups = new HashMap<>(0);
 
 	/** Rules used to identify border points */
-	private RuleSetCollection ruleSets = new RuleSetCollection();
+	private RuleSetCollection ruleSets;
 
 	/*  TRANSIENT FIELDS  */
 
@@ -146,8 +145,9 @@ public class DefaultCellCollection implements ICellCollection {
 	 * @param name the name of the collection
 	 * @param nucleusType the class of nucleus to be held
 	 */
-	public DefaultCellCollection(File folder, @Nullable String outputFolder, @Nullable String name, NucleusType nucleusType) {
-		this(folder, outputFolder, name, nucleusType, java.util.UUID.randomUUID());
+	public DefaultCellCollection(File folder, @Nullable String outputFolder, 
+			@Nullable String name, RuleSetCollection ruleSets) {
+		this(folder, outputFolder, name, ruleSets, java.util.UUID.randomUUID());
 	}
 
 	/**
@@ -162,15 +162,15 @@ public class DefaultCellCollection implements ICellCollection {
 	 * @param id specify an id for the collection, rather than generating
 	 *            randomly.
 	 */
-	public DefaultCellCollection(File folder, @Nullable String outputFolder, @Nullable String name, NucleusType nucleusType, UUID id) {
+	public DefaultCellCollection(File folder, @Nullable String outputFolder, @Nullable String name, 
+			RuleSetCollection ruleSets, UUID id) {
 
 		this.uuid = id;
 		this.folder = folder;
 		this.outputFolder = outputFolder;
 		this.name = name == null ? folder.getName() : name;// if name is null, use the image folder name
-		this.nucleusType = nucleusType;
 
-		ruleSets = RuleSetCollection.createDefaultRuleSet(nucleusType);
+		this.ruleSets = ruleSets;
 	}
 
 	/**
@@ -190,14 +190,13 @@ public class DefaultCellCollection implements ICellCollection {
 	 * @param name
 	 */
 	public DefaultCellCollection(ICellCollection template, String name) {
-		this(template.getFolder(), template.getOutputFolderName(), name, template.getNucleusType());
+		this(template.getFolder(), template.getOutputFolderName(), name, template.getRuleSetCollection());
 	}
 	
 
 	@Override
 	public ICellCollection duplicate() {
-		DefaultCellCollection result = new DefaultCellCollection(folder, outputFolder, name, nucleusType, uuid);
-		result.ruleSets = ruleSets;
+		DefaultCellCollection result = new DefaultCellCollection(folder, outputFolder, name, ruleSets, uuid);
 		
 		for(ICell c : this)
 			result.addCell(c.duplicate());
@@ -389,10 +388,10 @@ public class DefaultCellCollection implements ICellCollection {
 		return Optional.empty();
 	}
 
-	@Override
-	public NucleusType getNucleusType() {
-		return this.nucleusType;
-	}
+//	@Override
+//	public NucleusType getNucleusType() {
+//		return this.nucleusType;
+//	}
 
 	/*  METHODS IMPLEMENTING THE REFOLDABLE INTERFACE  */
 
@@ -576,7 +575,7 @@ public class DefaultCellCollection implements ICellCollection {
 	 * @param pointType the tag to zero profiles against
 	 * @return an array of normalised differences
 	 */
-	private synchronized double[] getNormalisedDifferencesToMedianFromPoint(Tag pointType) {
+	private synchronized double[] getNormalisedDifferencesToMedianFromPoint(Landmark pointType) {
 		IProfile medianProfile;
 		try {
 			medianProfile = this.getProfileCollection().getProfile(ProfileType.ANGLE, pointType, Stats.MEDIAN).interpolate(FIXED_PROFILE_LENGTH);
@@ -613,7 +612,7 @@ public class DefaultCellCollection implements ICellCollection {
 	 * @throws Exception
 	 */
 	@Override
-	public double getNormalisedDifferenceToMedian(Tag pointType, Taggable t) {
+	public double getNormalisedDifferenceToMedian(Landmark pointType, Taggable t) {
 		IProfile medianProfile;
 		try {
 			medianProfile = profileCollection.getProfile(ProfileType.ANGLE, pointType, Stats.MEDIAN).interpolate(FIXED_PROFILE_LENGTH);
@@ -640,7 +639,7 @@ public class DefaultCellCollection implements ICellCollection {
 	 * @param pointTypeB
 	 * @return
 	 */
-	public double[] getPointToPointDistances(Tag pointTypeA, Tag pointTypeB) {
+	public double[] getPointToPointDistances(Landmark pointTypeA, Landmark pointTypeB) {
 		int count = this.getNucleusCount();
 		double[] result = new double[count];
 		int i = 0;
@@ -667,7 +666,7 @@ public class DefaultCellCollection implements ICellCollection {
 	 * @throws UnavailableProfileTypeException
 	 */
 	@Override
-	public Nucleus getNucleusMostSimilarToMedian(Tag pointType)
+	public Nucleus getNucleusMostSimilarToMedian(Landmark pointType)
 			throws ProfileException, UnavailableBorderTagException, UnavailableProfileTypeException {
 		
 		Set<Nucleus> list = this.getNuclei();
@@ -866,7 +865,7 @@ public class DefaultCellCollection implements ICellCollection {
 
 		}
 		if (Measurement.VARIABILITY.equals(stat)) {
-			result = this.getNormalisedDifferencesToMedianFromPoint(Tag.REFERENCE_POINT);
+			result = this.getNormalisedDifferencesToMedianFromPoint(Landmark.REFERENCE_POINT);
 		} else {
 			result = this.getNuclei().parallelStream().mapToDouble(n -> n.getStatistic(stat, scale)).toArray();
 		}
@@ -895,7 +894,7 @@ public class DefaultCellCollection implements ICellCollection {
 		result = getNuclei().parallelStream().mapToDouble(n -> {
 			IProfileSegment segment;
 			try {
-				segment = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegment(id);
+				segment = n.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT).getSegment(id);
 			} catch (ProfileException | UnavailableComponentException e) {
 				LOGGER.log(Loggable.STACK, String.format("Error getting segment %s from nucleus %s in DefaultCellCollection::getSegmentStatistics", id, n.getNameAndNumber()), e);
 				errorCount.incrementAndGet();
@@ -964,7 +963,7 @@ public class DefaultCellCollection implements ICellCollection {
 				for (Nucleus n : t.getNuclei()) {
 
 					double value = stat.equals(Measurement.VARIABILITY)
-							? getNormalisedDifferenceToMedian(Tag.REFERENCE_POINT, n) : n.getStatistic(stat, scale);
+							? getNormalisedDifferenceToMedian(Landmark.REFERENCE_POINT, n) : n.getStatistic(stat, scale);
 
 							if (value < lower) {
 								return false;
@@ -1221,7 +1220,8 @@ public class DefaultCellCollection implements ICellCollection {
 		if (d2 == this)
 			return cells.size();
 
-		if (d2.getNucleusType() != nucleusType)
+		// Ensure cells use the same rule
+		if (!d2.getRuleSetCollection().equals(ruleSets))
 			return 0;
 
 		Set<UUID> toSearch = new HashSet<>(d2.getCellIDs());
@@ -1258,7 +1258,7 @@ public class DefaultCellCollection implements ICellCollection {
 		StringBuilder b = new StringBuilder("Collection:" + getName() + newLine)
 				.append("Collection:" + getName() + newLine).append("Nuclei: " + this.getNucleusCount() + newLine)
 				.append("Clockwise: " + this.countClockWiseRPNuclei() + newLine)
-				.append("Nucleus type: " + this.nucleusType + newLine).append("Profile collections:" + newLine);
+				.append("Profile collections:" + newLine);
 
 		IProfileCollection pc = this.getProfileCollection();
 		b.append(pc.toString() + newLine);
@@ -1289,11 +1289,6 @@ public class DefaultCellCollection implements ICellCollection {
 
 		in.defaultReadObject();
 		
-		if (ruleSets == null || ruleSets.isEmpty()) {
-		 LOGGER.info("Creating default ruleset for collection");
-			ruleSets = RuleSetCollection.createDefaultRuleSet(nucleusType);
-		}
-
 		statsCache = new StatsCache();
 		vennCache = new VennCache();
 
@@ -1323,7 +1318,6 @@ public class DefaultCellCollection implements ICellCollection {
 		result = prime * result + ((folder == null) ? 0 : folder.hashCode());
 		result = prime * result + ((cells == null) ? 0 : cells.hashCode());
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		result = prime * result + ((nucleusType == null) ? 0 : nucleusType.hashCode());
 		result = prime * result + ((outputFolder == null) ? 0 : outputFolder.hashCode());
 		result = prime * result + ((profileCollection == null) ? 0 : profileCollection.hashCode());
 		result = prime * result + ((ruleSets == null) ? 0 : ruleSets.hashCode());
@@ -1360,8 +1354,6 @@ public class DefaultCellCollection implements ICellCollection {
 			if (other.name != null)
 				return false;
 		} else if (!name.equals(other.name))
-			return false;
-		if (nucleusType != other.nucleusType)
 			return false;
 		if (outputFolder == null) {
 			if (other.outputFolder != null)

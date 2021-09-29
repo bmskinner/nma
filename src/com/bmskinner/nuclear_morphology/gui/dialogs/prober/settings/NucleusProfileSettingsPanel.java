@@ -20,7 +20,9 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridBagLayout;
+import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
@@ -32,10 +34,11 @@ import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.nuclei.NucleusType;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
-import com.bmskinner.nuclear_morphology.components.rules.RuleApplicationType;
+import com.bmskinner.nuclear_morphology.io.Io;
+import com.bmskinner.nuclear_morphology.io.xml.RuleSetCollectionXMLImporter;
+import com.bmskinner.nuclear_morphology.io.xml.XMLReader.XMLReadingException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -56,20 +59,25 @@ public class NucleusProfileSettingsPanel extends SettingsPanel {
 
     private static final String TYPE_LBL           = "Nucleus type";
     private static final String PROFILE_WINDOW_LBL = "Profile window";
-    private static final String RULE_APPLICATION_LBL = "Apply rulesets";
 
     private IAnalysisOptions options;
 
     private JSpinner profileWindow;
 
-    private JComboBox<NucleusType> typeBox;
+    private JComboBox<String> typeBox;
     
-    private JComboBox<RuleApplicationType> ruleTypeBox;
-
     public NucleusProfileSettingsPanel(final IAnalysisOptions op) {
         super();
         options = op;
         this.add(createPanel(), BorderLayout.CENTER);
+    }
+    
+    private String[] getAvailableRulesets(){
+    	File[] files = Io.getConfigDir().listFiles((d, s) -> s.toLowerCase().endsWith(Io.XML_FILE_EXTENSION));
+    	return Arrays.stream(files)
+    			.map(File::getName)
+    			.map(f-> f.replaceAll(Io.XML_FILE_EXTENSION, ""))
+    			.toArray(String[]::new);
     }
 
     /**
@@ -77,8 +85,7 @@ public class NucleusProfileSettingsPanel extends SettingsPanel {
      */
     private void createSpinners() {
 
-        typeBox = new JComboBox<>(NucleusType.values());
-        typeBox.setSelectedItem(options.getNucleusType());
+        typeBox = new JComboBox<>(getAvailableRulesets());
 
         typeBox.addActionListener(e -> {
 
@@ -86,8 +93,14 @@ public class NucleusProfileSettingsPanel extends SettingsPanel {
         	if(!nOptions.isPresent())
         		return;
 
-        	NucleusType type = (NucleusType) typeBox.getSelectedItem();
-        	options.setNucleusType(type);
+        	// Rebuild the file name from the cleaned names
+        	File type = new File(Io.getConfigDir(), (String)typeBox.getSelectedItem()+Io.XML_FILE_EXTENSION);
+        	RuleSetCollectionXMLImporter reader = new RuleSetCollectionXMLImporter(type);
+        	try {
+	        	options.setRuleSetCollection(reader.importRuleset());
+			} catch (XMLReadingException e1) {
+				LOGGER.log(Loggable.STACK, e1, () -> "Unable to read XML file: "+type.getAbsolutePath());
+			}
         });
 
         profileWindow = new JSpinner(new SpinnerNumberModel(options.getProfileWindowProportion(), MIN_PROFILE_PROP,
@@ -106,15 +119,7 @@ public class NucleusProfileSettingsPanel extends SettingsPanel {
                 LOGGER.log(Loggable.STACK, "Parsing error in JSpinner", e1);
             }
 
-        });
-        
-        
-        ruleTypeBox = new JComboBox<>(RuleApplicationType.values());
-        ruleTypeBox.setSelectedItem(options.getRuleApplicationType());
-        ruleTypeBox.addActionListener(e -> {
-        	options.setRuleApplicationType( (RuleApplicationType)ruleTypeBox.getSelectedItem());
-        });
-        
+        });        
     }
 
     private JPanel createPanel() {
@@ -126,13 +131,11 @@ public class NucleusProfileSettingsPanel extends SettingsPanel {
         List<JLabel> labels = new ArrayList<>();
         labels.add(new JLabel(TYPE_LBL));
         labels.add(new JLabel(PROFILE_WINDOW_LBL));
-        labels.add(new JLabel(RULE_APPLICATION_LBL));
 
         List<Component> fields = new ArrayList<>();
 
         fields.add(typeBox);
         fields.add(profileWindow);
-        fields.add(ruleTypeBox);
 
         addLabelTextRows(labels, fields, panel);
 
@@ -145,7 +148,6 @@ public class NucleusProfileSettingsPanel extends SettingsPanel {
     @Override
     protected void update() {
         super.update();
-        typeBox.setSelectedItem(options.getNucleusType());
         profileWindow.setValue(options.getProfileWindowProportion());
     }
 
@@ -154,6 +156,5 @@ public class NucleusProfileSettingsPanel extends SettingsPanel {
         super.setEnabled(b);
         profileWindow.setEnabled(b);
         typeBox.setEnabled(b);
-        ruleTypeBox.setEnabled(b);
     }
 }

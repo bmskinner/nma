@@ -40,8 +40,9 @@ import com.bmskinner.nuclear_morphology.components.nuclei.NucleusType;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileManager;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.Tag;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
@@ -79,7 +80,7 @@ public class ICellCollectionTest extends ComponentTester {
 	 */
 	public static ICellCollection createInstance(Class<? extends ICellCollection> source) throws Exception {
 		IAnalysisDataset d = new TestDatasetBuilder(RNG_SEED).cellCount(N_CELLS)
-				.ofType(NucleusType.ROUND)
+				.ofType(RuleSetCollection.roundRuleSetCollection())
 				.randomOffsetProfiles(true)
 				.addSignalsInChannel(0)
 				.segmented().build();
@@ -180,11 +181,6 @@ public class ICellCollectionTest extends ComponentTester {
 	public void testGetCell() {
 		for(UUID id : collection.getCellIDs())
 			assertEquals(id, collection.getCell(id).getId());
-	}
-
-	@Test
-	public void testGetNucleusType() {
-		assertEquals(NucleusType.ROUND, collection.getNucleusType());
 	}
 
 	@Test
@@ -340,9 +336,9 @@ public class ICellCollectionTest extends ComponentTester {
 		
 		// Ensure TV and BV are set
 		ProfileManager m = collection.getProfileManager();
-		IProfile p = collection.getProfileCollection().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
-		m.updateBorderTag(Tag.TOP_VERTICAL, 0);
-		m.updateBorderTag(Tag.BOTTOM_VERTICAL, 10);
+		IProfile p = collection.getProfileCollection().getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);
+		m.updateBorderTag(Landmark.TOP_VERTICAL, 0);
+		m.updateBorderTag(Landmark.BOTTOM_VERTICAL, 10);
 		
 		// Run consensus averaging on the collection. Wrap in a new dataset. 
 		// Analysis options will not be copied!
@@ -353,8 +349,8 @@ public class ICellCollectionTest extends ComponentTester {
 		for(int tIndex=0; tIndex<p.size(); tIndex++) {
 			if(tIndex==bIndex)
 				continue;
-			m.updateBorderTag(Tag.TOP_VERTICAL, tIndex);
-			m.updateBorderTag(Tag.BOTTOM_VERTICAL, bIndex);
+			m.updateBorderTag(Landmark.TOP_VERTICAL, tIndex);
+			m.updateBorderTag(Landmark.BOTTOM_VERTICAL, bIndex);
 
 			assertTrue(collection.hasConsensus());
 
@@ -362,8 +358,8 @@ public class ICellCollectionTest extends ComponentTester {
 			panels.add(ChartFactoryTest.makeConsensusChartPanel(d));
 
 			Nucleus n = collection.getConsensus(); // is aligned vertically
-			IPoint tv = n.getBorderPoint(Tag.TOP_VERTICAL);
-			IPoint bv = n.getBorderPoint(Tag.BOTTOM_VERTICAL);
+			IPoint tv = n.getBorderPoint(Landmark.TOP_VERTICAL);
+			IPoint bv = n.getBorderPoint(Landmark.BOTTOM_VERTICAL);
 			
 			boolean areVertical = areVertical(tv, bv);
 			if(!areVertical)

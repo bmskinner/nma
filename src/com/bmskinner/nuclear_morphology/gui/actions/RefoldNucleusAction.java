@@ -66,7 +66,7 @@ public class RefoldNucleusAction extends SingleDatasetResultAction {
         try {
             boolean override = GlobalOptions.getInstance().getBoolean(GlobalOptions.REFOLD_OVERRIDE_KEY);
 
-            IAnalysisMethod m;
+            IAnalysisMethod m = new ConsensusAveragingMethod(dataset);
             int progressLength = PROGRESS_BAR_LENGTH;
             // The averaging method does not work for nuclei that are round, or have extreme variability. 
             // In these cases, or if the program config file has been set to override, use the old profile method.
@@ -74,9 +74,9 @@ public class RefoldNucleusAction extends SingleDatasetResultAction {
                 m = new ProfileRefoldMethod(dataset, CurveRefoldingMode.FAST);
                 progressLength = CurveRefoldingMode.FAST.maxIterations();
             } else {
-                NucleusType t = dataset.getCollection().getNucleusType();
-                m = chooseMethod(t);
-                progressLength = chooseProgressLength(t);
+//                NucleusType t = dataset.getCollection().getNucleusType();
+//                m = chooseMethod(t);
+//                progressLength = chooseProgressLength(t);
             }
 
             
@@ -99,17 +99,17 @@ public class RefoldNucleusAction extends SingleDatasetResultAction {
      * @return
      * @throws Exception 
      */
-    private IAnalysisMethod chooseMethod(NucleusType t) throws Exception {
-    	switch(t){
-        case ROUND: {
-            return new ProfileRefoldMethod(dataset, CurveRefoldingMode.FAST);
-        }
-        
-        default: {
-            return new ConsensusAveragingMethod(dataset);
-        }
-    }
-    }
+//    private IAnalysisMethod chooseMethod(NucleusType t) throws Exception {
+//    	switch(t){
+//        case ROUND: {
+//            return new ProfileRefoldMethod(dataset, CurveRefoldingMode.FAST);
+//        }
+//        
+//        default: {
+//            return new ConsensusAveragingMethod(dataset);
+//        }
+//    }
+//    }
     
     /**
      * Choose the length of the progress bar based on the nucleus type
@@ -117,17 +117,17 @@ public class RefoldNucleusAction extends SingleDatasetResultAction {
      * @param t
      * @return
      */
-    private int chooseProgressLength(NucleusType t) {
-    	switch(t){
-        case ROUND:{
-            return CurveRefoldingMode.FAST.maxIterations();
-        }
-        
-        default: {
-            return PROGRESS_BAR_LENGTH;
-        }
-    	}
-    }
+//    private int chooseProgressLength(NucleusType t) {
+//    	switch(t){
+//        case ROUND:{
+//            return CurveRefoldingMode.FAST.maxIterations();
+//        }
+//        
+//        default: {
+//            return PROGRESS_BAR_LENGTH;
+//        }
+//    	}
+//    }
 
     @Override
     public void finished() {
