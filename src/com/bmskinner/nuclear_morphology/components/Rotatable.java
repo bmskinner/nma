@@ -19,6 +19,7 @@ package com.bmskinner.nuclear_morphology.components;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
+import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 
 /**
  * Objects implementing this interface can be rotated by arbirtary amounts, and
@@ -51,6 +52,19 @@ public interface Rotatable {
     }
     
     /**
+     * Given two points, rotate the object so that they are horizontal. It is not
+     * necessary for the points to be within the object, only that they have the
+     * same coordinate system
+     * 
+     * @param topPoint the point to have the higher Y value
+     * @param bottomPoint the point to have the lower Y value
+     */
+    default void alignPointsOnHorizontal(final @NonNull IPoint leftPoint, final @NonNull IPoint rightPoint) {
+    	double angle = getAngleToRotateHorizontal(leftPoint, rightPoint);
+        rotate(angle);
+    }
+    
+    /**
      * Find the clockwise angle in degrees required to place the top point above the bottom point
      * such that their x coordinates are zero, and the y value of topPoint is greater than the y value
      * of bottomPoint
@@ -63,6 +77,20 @@ public interface Rotatable {
         IPoint bi = IPoint.makeNew(bottomPoint.getX(), bottomPoint.getY()+10);
         return bottomPoint.findAbsoluteAngle(topPoint, bi);
     }
+    
+    /**
+     * Find the clockwise angle in degrees required to place the left point left of the right point
+     * such that their y coordinate difference is zero, and the x value of right is greater than the x value
+     * of left
+     * @param leftPoint
+     * @param rightPoint
+     * @return
+     */
+    static double getAngleToRotateHorizontal(final @NonNull IPoint leftPoint, final @NonNull IPoint rightPoint) {
+        // Take a horizontal line from L to Li. Rotate object by the absolute angle R-L-Li 
+        IPoint bi = IPoint.makeNew(leftPoint.getX()+10, leftPoint.getY());
+        return rightPoint.findAbsoluteAngle(leftPoint, bi);
+    }
 
     /**
      * Rotate the object so that the given point is directly below the centre of
@@ -71,6 +99,14 @@ public interface Rotatable {
      * @param bottomPoint
      */
     void rotatePointToBottom(final @NonNull IPoint bottomPoint);
+    
+    /**
+     * Rotate the object so that the given point is directly left of the centre of
+     * mass
+     * 
+     * @param bottomPoint
+     */
+    void rotatePointToLeft(IPoint leftPoint);
 
     /**
      * Rotate the object by the given amount clockwise around the centre of mass
@@ -89,5 +125,18 @@ public interface Rotatable {
      * Flip the object horizontally about the centre of mass
      */
     void flipHorizontal();
+    
+    /**
+     * Flip the object vertically, centred on the given point
+     * @param centre the point about which to flip
+     */
+    void flipVertical(final @NonNull IPoint centre);
+
+    /**
+     * Flip the object vertically about the centre of mass
+     */
+	void flipVertical();
+
+	
 
 }

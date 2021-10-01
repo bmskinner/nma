@@ -205,8 +205,6 @@ public class InteractiveCellOutlinePanel extends InteractiveCellPanel {
 		try {
 			ImageProcessor rot = rotateToVertical(cell, an.toProcessor());
 			rot.flipVertical(); // Y axis needs inverting since images have 0 at top
-			if(cell.getPrimaryNucleus().isClockwiseRP())
-				rot.flipHorizontal();
 			return new ImageAnnotator(rot, getWidth(), getHeight());
 			
 		} catch (UnavailableBorderTagException e) {

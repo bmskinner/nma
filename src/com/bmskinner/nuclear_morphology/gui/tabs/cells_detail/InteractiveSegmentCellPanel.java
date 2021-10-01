@@ -39,17 +39,13 @@ import javax.swing.JPopupMenu;
 
 import com.bmskinner.nuclear_morphology.analysis.image.AbstractImageFilterer;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageAnnotator;
-import com.bmskinner.nuclear_morphology.components.Statistical;
 import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
-import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.generic.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
-import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.profiles.DefaultLandmark;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
-import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
+import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.core.InterfaceUpdater;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
@@ -226,14 +222,9 @@ public class InteractiveSegmentCellPanel extends InteractiveCellPanel {
 				cell.getPrimaryNucleus().setLocked(false);
 
 				cell.getPrimaryNucleus().setBorderTag(tag, newIndex);
-				cell.getPrimaryNucleus().updateVerticallyRotatedNucleus();
 
-				if(tag.equals(Landmark.ORIENTATION_POINT) || tag.equals(Landmark.REFERENCE_POINT)) {
-					cell.getPrimaryNucleus().setStatistic(Measurement.OP_RP_ANGLE, Statistical.STAT_NOT_CALCULATED);
-				}
 				cell.getPrimaryNucleus().updateDependentStats();
 				cell.getPrimaryNucleus().setLocked(true);
-				dataset.getCollection().clear(Measurement.OP_RP_ANGLE, CellularComponent.NUCLEUS);
 				cellUpdateHandler.fireCelllUpdateEvent(cell, dataset);
 				createImage();
 			});

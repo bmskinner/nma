@@ -24,10 +24,8 @@ import java.util.logging.Logger;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileCreator;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
-import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.components.profiles.UnprofilableObjectException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -41,7 +39,7 @@ import ij.process.FloatPolygon;
  * @since 1.13.3
  *
  */
-public class DefaultConsensusNucleus extends AbstractAsymmetricNucleus implements Consensus<Nucleus>  {
+public class DefaultConsensusNucleus extends DefaultNucleus implements Consensus<Nucleus>  {
 	
 	private static final Logger LOGGER = Logger.getLogger(DefaultConsensusNucleus.class.getName());
 
@@ -139,30 +137,15 @@ public class DefaultConsensusNucleus extends AbstractAsymmetricNucleus implement
     		return false;
     	if(!(obj instanceof DefaultConsensusNucleus))
     		return false;
-    	DefaultConsensusNucleus other = (DefaultConsensusNucleus)obj;
-
     	return true;
     }
     
     @Override
-	protected Nucleus createVerticallyRotatedNucleus() {
+    public Nucleus getVerticallyRotatedNucleus() {
     	Nucleus n = super.getVerticallyRotatedNucleus();
-    	
-    	
-    	try {
-    		if (n.getBorderPoint(Landmark.REFERENCE_POINT).getX() > n.getCentreOfMass().getX())
-    			n.flipHorizontal();
-    	} catch (UnavailableBorderTagException e) {
-    		LOGGER.log(Loggable.STACK, "Cannot get RP from vertical nucleus; returning default orientation", e);
-    	}
     	n.rotate(rotOffset);
     	n.offset(xOffset, yOffset);
     	return n;
-    }
-    
-    @Override
-    public Nucleus getVerticallyRotatedNucleus() {
-    	return createVerticallyRotatedNucleus();
     }
     
     @Override

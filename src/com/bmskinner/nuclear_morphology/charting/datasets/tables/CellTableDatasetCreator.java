@@ -299,9 +299,6 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
         fieldNames.add("Current nucleus position");
         rowData.add("x: " + df.format(n.getMinX()) + " : y: " + df.format(n.getMinY()));
         
-        fieldNames.add("Is RP clockwise?");
-        rowData.add(n.isClockwiseRP());
-
         for (Landmark tag : n.getBorderTags().keySet()) {
         	fieldNames.add(tag);
         	if (n.hasBorderTag(tag)) {

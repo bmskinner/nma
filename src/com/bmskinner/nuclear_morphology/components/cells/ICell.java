@@ -80,41 +80,6 @@ public interface ICell extends Serializable, Statistical, Comparable<ICell> {
     void addNucleus(Nucleus n);
 
     /**
-     * Get the mitochondria of the cell
-     * 
-     * @return
-     */
-    List<IMitochondrion> getMitochondria();
-
-    /**
-     * Set the mitochondria of the cell
-     * 
-     * @param mitochondria
-     */
-    void setMitochondria(List<IMitochondrion> mitochondria);
-
-    /**
-     * Get the flagella in the cell
-     * 
-     * @return
-     */
-    List<Flagellum> getFlagella();
-
-    /**
-     * Get the acrosomes for the cell
-     * 
-     * @return
-     */
-    List<IAcrosome> getAcrosomes();
-
-    /**
-     * Add an acrosome to the cell
-     * 
-     * @param acrosome
-     */
-    void addAcrosome(IAcrosome acrosome);
-
-    /**
      * Get the cytoplasm of the cell
      * 
      * @return the cytoplasm, or null if not present
@@ -134,27 +99,6 @@ public interface ICell extends Serializable, Statistical, Comparable<ICell> {
      * @return
      */
     boolean hasNucleus();
-
-    /**
-     * Test if the cell has a flagellum
-     * 
-     * @return
-     */
-    boolean hasFlagellum();
-
-    /**
-     * Test if the cell has mitochondria
-     * 
-     * @return
-     */
-    boolean hasMitochondria();
-
-    /**
-     * Test if the cell has an acrosome
-     * 
-     * @return
-     */
-    boolean hasAcrosome();
 
     /**
      * Test if the cell has a cytoplasm
@@ -184,20 +128,6 @@ public interface ICell extends Serializable, Statistical, Comparable<ICell> {
      * @return
      */
     boolean hasNuclearSignals(UUID signalGroupId);
-    
-    /**
-     * Add a new mitochondrion to the cell
-     * 
-     * @param mitochondrion
-     */
-    void addMitochondrion(IMitochondrion mitochondrion);
-
-    /**
-     * Add a flagellum to the cell
-     * 
-     * @param tail
-     */
-    void addFlagellum(Flagellum tail);
 
     /**
      * Set the cytoplasm of the cell

@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -45,9 +46,6 @@ public class DefaultCell implements ICell {
 
     protected UUID uuid;
     protected ICytoplasm           cytoplasm = null;
-    protected List<IMitochondrion> mitochondria;
-    protected List<Flagellum>      tails;
-    protected List<IAcrosome>      acrosomes;
     protected List<Nucleus>        nuclei;
 
     /** The statistical values stored for this object */
@@ -68,9 +66,6 @@ public class DefaultCell implements ICell {
     public DefaultCell(@NonNull UUID id) {
         this.uuid = id;
         nuclei = new ArrayList<>(0);
-        mitochondria = new ArrayList<>(0);
-        tails = new ArrayList<>(0);
-        acrosomes = new ArrayList<>(0);
         statistics = new HashMap<>();
     }
 
@@ -107,21 +102,6 @@ public class DefaultCell implements ICell {
         nuclei = new ArrayList<>(0);
         for (Nucleus m : c.getNuclei()) {
             nuclei.add(m.duplicate());
-        }
-
-        mitochondria = new ArrayList<>(0);
-        for (IMitochondrion m : c.getMitochondria()) {
-            mitochondria.add(m.duplicate());
-        }
-
-        tails = new ArrayList<>(0);
-        for (Flagellum f : c.getFlagella()) {
-            tails.add(f.duplicate());
-        }
-
-        acrosomes = new ArrayList<>(0);
-        for (IAcrosome a : c.getAcrosomes()) {
-            acrosomes.add(a.duplicate());
         }
 
         if (c.hasCytoplasm())
@@ -275,58 +255,8 @@ public class DefaultCell implements ICell {
     }
 
     @Override
-    public List<IMitochondrion> getMitochondria() {
-        return mitochondria;
-    }
-
-    @Override
-    public void setMitochondria(List<IMitochondrion> mitochondria) {
-        this.mitochondria = mitochondria;
-    }
-
-    @Override
-    public void addMitochondrion(IMitochondrion mitochondrion) {
-        this.mitochondria.add(mitochondrion);
-    }
-
-    @Override
-    public List<Flagellum> getFlagella() {
-        return this.tails;
-    }
-
-    @Override
-    public void addFlagellum(Flagellum tail) {
-        this.tails.add(tail);
-    }
-
-    @Override
-    public List<IAcrosome> getAcrosomes() {
-        return this.acrosomes;
-    }
-
-    @Override
-    public void addAcrosome(IAcrosome acrosome) {
-        this.acrosomes.add(acrosome);
-    }
-
-    @Override
-    public boolean hasAcrosome() {
-        return !this.acrosomes.isEmpty();
-    }
-
-    @Override
     public boolean hasNucleus() {
         return !nuclei.isEmpty();
-    }
-
-    @Override
-    public boolean hasFlagellum() {
-        return !this.tails.isEmpty();
-    }
-
-    @Override
-    public boolean hasMitochondria() {
-        return !this.mitochondria.isEmpty();
     }
 
     @Override
@@ -348,11 +278,7 @@ public class DefaultCell implements ICell {
     @Override
     public List<Taggable> getTaggables() {
         List<Taggable> result = new ArrayList<>(0);
-        
-        result.addAll(getTaggables(acrosomes));
-        result.addAll(getTaggables(mitochondria));
         result.addAll(getTaggables(nuclei));
-        result.addAll(getTaggables(tails));
         
         if(hasCytoplasm()){
             if(cytoplasm instanceof Taggable){
@@ -373,9 +299,6 @@ public class DefaultCell implements ICell {
     @Override
     public void setScale(double scale) {
         nuclei.stream().forEach(n->n.setScale(scale));
-        tails.stream().forEach(n->n.setScale(scale));
-        acrosomes.stream().forEach(n->n.setScale(scale));
-        mitochondria.stream().forEach(n->n.setScale(scale));
         if(cytoplasm!=null)
         	cytoplasm.setScale(scale);
     }
@@ -390,58 +313,6 @@ public class DefaultCell implements ICell {
         return getNuclei().stream().anyMatch(n->n.getSignalCollection().hasSignal(signalGroupId));
     }
         
-    @Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		DefaultCell other = (DefaultCell) obj;
-		if (acrosomes == null) {
-			if (other.acrosomes != null)
-				return false;
-		} else if (!acrosomes.equals(other.acrosomes))
-			return false;
-		if (cytoplasm == null) {
-			if (other.cytoplasm != null)
-				return false;
-		} else if (!cytoplasm.equals(other.cytoplasm))
-			return false;
-		if (mitochondria == null) {
-			if (other.mitochondria != null)
-				return false;
-		} else if (!mitochondria.equals(other.mitochondria))
-			return false;
-		if (nuclei == null) {
-			if (other.nuclei != null)
-				return false;
-		} else if (!nuclei.equals(other.nuclei))
-			return false;
-		if (statistics == null) {
-			if (other.statistics != null)
-				return false;
-		} else if (!statistics.equals(other.statistics))
-			return false;
-		if (tails == null) {
-			if (other.tails != null)
-				return false;
-		} else if (!tails.equals(other.tails))
-			return false;
-		if (uuid == null) {
-			if (other.uuid != null)
-				return false;
-		} else if (!uuid.equals(other.uuid))
-			return false;
-		return true;
-	}
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.ICell#compareTo(components.Cell)
-     */
     @Override
     public int compareTo(ICell o) {
 
@@ -466,18 +337,24 @@ public class DefaultCell implements ICell {
         out.defaultWriteObject();
     }
     
+    
+    
     @Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		DefaultCell other = (DefaultCell) obj;
+		return Objects.equals(cytoplasm, other.cytoplasm) && Objects.equals(nuclei, other.nuclei)
+				&& Objects.equals(statistics, other.statistics) && Objects.equals(uuid, other.uuid);
+	}
+
+	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((acrosomes == null) ? 0 : acrosomes.hashCode());
-		result = prime * result + ((cytoplasm == null) ? 0 : cytoplasm.hashCode());
-		result = prime * result + ((mitochondria == null) ? 0 : mitochondria.hashCode());
-		result = prime * result + ((nuclei == null) ? 0 : nuclei.hashCode());
-		result = prime * result + ((statistics == null) ? 0 : statistics.hashCode());
-		result = prime * result + ((tails == null) ? 0 : tails.hashCode());
-		result = prime * result + ((uuid == null) ? 0 : uuid.hashCode());
-		return result;
+		return Objects.hash(cytoplasm, nuclei, statistics, uuid);
 	}
     
     private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {

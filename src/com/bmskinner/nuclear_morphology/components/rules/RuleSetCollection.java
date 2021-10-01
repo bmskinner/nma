@@ -68,7 +68,7 @@ public class RuleSetCollection implements Serializable {
     private final Landmark seondaryX;
     private final Landmark seondaryY;
     
-    private final String priorityAxis;
+    private final PriorityAxis priorityAxis;
     
     private final RuleApplicationType ruleApplicationType;
     
@@ -78,7 +78,7 @@ public class RuleSetCollection implements Serializable {
      */
     public RuleSetCollection(@NonNull String name, @Nullable Landmark left, @Nullable Landmark right, 
     		@Nullable Landmark top, @Nullable Landmark bottom, @Nullable Landmark seondaryX,
-    		@Nullable Landmark seondaryY, @Nullable String priorityAxis, RuleApplicationType type) {
+    		@Nullable Landmark seondaryY, @Nullable PriorityAxis priorityAxis, RuleApplicationType type) {
     	this.name = name;
     	leftCoM = left;
     	rightCoM = right;
@@ -133,7 +133,7 @@ public class RuleSetCollection implements Serializable {
 		return Optional.ofNullable(seondaryY);
 	}
 
-	public Optional<String> getPriorityAxis() {
+	public Optional<PriorityAxis> getPriorityAxis() {
 		return Optional.ofNullable(priorityAxis);
 	}
 
@@ -266,7 +266,7 @@ public class RuleSetCollection implements Serializable {
     public static RuleSetCollection mouseSpermRuleSetCollection() {
         RuleSetCollection r = new RuleSetCollection("Mouse sperm", Landmark.REFERENCE_POINT, null,
         		Landmark.TOP_VERTICAL, Landmark.BOTTOM_VERTICAL,
-        		null, Landmark.ORIENTATION_POINT, "Y", RuleApplicationType.VIA_MEDIAN);
+        		null, Landmark.ORIENTATION_POINT, PriorityAxis.Y, RuleApplicationType.VIA_MEDIAN);
 
         r.addRuleSet(Landmark.REFERENCE_POINT, RuleSet.mouseSpermRPRuleSet());
         r.addRuleSet(Landmark.ORIENTATION_POINT, RuleSet.mouseSpermOPRuleSet());
@@ -282,7 +282,7 @@ public class RuleSetCollection implements Serializable {
      */
     public static RuleSetCollection pigSpermRuleSetCollection() {
         RuleSetCollection r = new RuleSetCollection("Pig sperm", null, null, null, Landmark.REFERENCE_POINT,
-        		null, Landmark.ORIENTATION_POINT, "Y", RuleApplicationType.VIA_MEDIAN);
+        		null, Landmark.ORIENTATION_POINT, PriorityAxis.Y, RuleApplicationType.VIA_MEDIAN);
 
         r.addRuleSet(Landmark.REFERENCE_POINT, RuleSet.pigSpermRPRuleSet());
         r.addRuleSet(Landmark.ORIENTATION_POINT, RuleSet.pigSpermOPRuleSet());
@@ -296,7 +296,7 @@ public class RuleSetCollection implements Serializable {
      */
     public static RuleSetCollection roundRuleSetCollection() {
         RuleSetCollection r = new RuleSetCollection("Round", null, null, null, Landmark.REFERENCE_POINT,
-        		null, Landmark.REFERENCE_POINT, "Y", RuleApplicationType.VIA_MEDIAN);
+        		null, Landmark.REFERENCE_POINT, PriorityAxis.Y, RuleApplicationType.VIA_MEDIAN);
 
         r.addRuleSet(Landmark.REFERENCE_POINT, RuleSet.roundRPRuleSet());
         return r;

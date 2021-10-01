@@ -87,7 +87,6 @@ public interface Measurement extends Serializable {
     static final Measurement REGULARITY      = new DefaultMeasurement(Names.REGULARITY,      MeasurementDimension.DIMENSIONLESS);
     static final Measurement BOUNDING_HEIGHT = new DefaultMeasurement(Names.BOUNDING_HEIGHT, MeasurementDimension.LENGTH);
     static final Measurement BOUNDING_WIDTH  = new DefaultMeasurement(Names.BOUNDING_WIDTH,  MeasurementDimension.LENGTH);
-    static final Measurement OP_RP_ANGLE     = new DefaultMeasurement(Names.OP_RP_ANGLE,     MeasurementDimension.ANGLE);
     static final Measurement HOOK_LENGTH     = new DefaultMeasurement(Names.HOOK_LENGTH,     MeasurementDimension.LENGTH);
     static final Measurement BODY_WIDTH      = new DefaultMeasurement(Names.BODY_WIDTH,      MeasurementDimension.LENGTH);
     static final Measurement PATH_LENGTH     = new DefaultMeasurement(Names.PATH_LENGTH,     MeasurementDimension.DIMENSIONLESS);
@@ -181,7 +180,6 @@ public interface Measurement extends Serializable {
     	list.add(REGULARITY);
     	list.add(BOUNDING_HEIGHT);
     	list.add(BOUNDING_WIDTH);
-    	list.add(OP_RP_ANGLE);
     	list.add(HOOK_LENGTH);
     	list.add(BODY_WIDTH);
     	list.add(PATH_LENGTH);

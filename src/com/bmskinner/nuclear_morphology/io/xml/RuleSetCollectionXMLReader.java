@@ -11,6 +11,7 @@ import org.jdom2.Element;
 
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
+import com.bmskinner.nuclear_morphology.components.rules.PriorityAxis;
 import com.bmskinner.nuclear_morphology.components.rules.Rule;
 import com.bmskinner.nuclear_morphology.components.rules.Rule.RuleType;
 import com.bmskinner.nuclear_morphology.components.rules.RuleApplicationType;
@@ -98,7 +99,7 @@ public class RuleSetCollectionXMLReader extends XMLReader<RuleSetCollection>{
 		
 		// Now build the collection
 		RuleSetCollection rsc = new RuleSetCollection(ruleName, lftTag, rgtTag, topTag, btmTag,
-				scndX, scndY, priorityAxis, RuleApplicationType.valueOf(ruleType));
+				scndX, scndY, PriorityAxis.valueOf(priorityAxis), RuleApplicationType.valueOf(ruleType));
 		for(Entry<Landmark, RuleSet> e : map.entrySet()) {
 			rsc.addRuleSet(e.getKey(), e.getValue());
 		}

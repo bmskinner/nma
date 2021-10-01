@@ -62,7 +62,7 @@ public interface Taggable extends CellularComponent {
      * subsequent orientation.
      * @throws ComponentCreationException
      */
-    public void findPointsAroundBorder(@NonNull RuleSetCollection rsc) throws ComponentCreationException;
+    public void findLandmarks(@NonNull RuleSetCollection rsc) throws ComponentCreationException;
 
     /**
      * Check if the object has a profile of the given type

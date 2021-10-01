@@ -27,6 +27,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileCreator;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
@@ -94,7 +95,8 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
      * @param channel the RGB channel the component was found in
      * @param position the bounding position of the component in the original image
      */
-    public ProfileableCellularComponent(@NonNull Roi roi, @NonNull IPoint centreOfMass, File source, int channel, int[] position) {
+    protected ProfileableCellularComponent(@NonNull Roi roi, @NonNull IPoint centreOfMass, 
+    		File source, int channel, int[] position) {
     	super(roi, centreOfMass, source, channel, position);
     }
     
@@ -111,7 +113,8 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
      * @param position the bounding position of the component in the original image
      * @param id the id of the component. Only use when deserialising!
      */
-    public ProfileableCellularComponent(@NonNull Roi roi, @NonNull IPoint centreOfMass, File source, int channel, int[] position, @NonNull UUID id) {
+    protected ProfileableCellularComponent(@NonNull Roi roi, @NonNull IPoint centreOfMass, 
+    		File source, int channel, int[] position, @Nullable UUID id) {
         super(roi, centreOfMass, source, channel, position, id);
     }
 
@@ -121,7 +124,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
      * @param c
      * @throws UnprofilableObjectException
      */
-    public ProfileableCellularComponent(@NonNull final CellularComponent c) throws UnprofilableObjectException {
+    protected ProfileableCellularComponent(@NonNull final CellularComponent c) throws UnprofilableObjectException {
         super(c);
 
         if (c instanceof Taggable) {
@@ -213,25 +216,24 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
     public abstract boolean isProfileOrientationOK();
 
     @Override
-    protected double calculateStatistic(Measurement stat) {
+    protected void calculateStatistic(Measurement stat) {
 
-        double result = super.calculateStatistic(stat);
+       super.calculateStatistic(stat);
 
         if (Measurement.MIN_DIAMETER.equals(stat))
-            return this.getNarrowestDiameter();
+            setStatistic(stat, getNarrowestDiameter());
 
         if (Measurement.PATH_LENGTH.equals(stat))
-            return this.getPathLength(ProfileType.ANGLE);
+        	setStatistic(stat, getPathLength(ProfileType.ANGLE));
 
         if (Measurement.PERIMETER.equals(stat)) {
             double perimeter=0;
             for(IBorderPoint p : getBorderList()){
                 perimeter += p.getLengthTo(p.nextPoint());
             }
-            return perimeter;
+            setStatistic(stat, perimeter);
         }
 
-        return result;
     }
 
     /*
@@ -665,7 +667,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
     	 // set transient fields
         double perimeter = this.getStatistic(Measurement.PERIMETER);
         if(perimeter==Statistical.ERROR_CALCULATING_STAT)
-            perimeter = this.calculateStatistic(Measurement.PERIMETER);
+            calculateStatistic(Measurement.PERIMETER);
         
         windowSize = (int) Math.round( perimeter * windowProportion);
 

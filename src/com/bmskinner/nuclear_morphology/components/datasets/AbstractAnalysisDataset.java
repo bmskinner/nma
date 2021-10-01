@@ -232,7 +232,6 @@ public abstract class AbstractAnalysisDataset implements Serializable {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((cellCollection == null) ? 0 : cellCollection.hashCode());
-		result = prime * result + ((parentDataset == null) ? 0 : parentDataset.hashCode());
 		result = prime * result + ((childDatasets == null) ? 0 : childDatasets.hashCode());
 		result = prime * result + ((clusterGroups == null) ? 0 : clusterGroups.hashCode());
 		result = prime * result + ((datasetColour == null) ? 0 : datasetColour.hashCode());

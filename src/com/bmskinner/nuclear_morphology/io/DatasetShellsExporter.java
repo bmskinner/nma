@@ -32,6 +32,7 @@ import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult;
@@ -127,7 +128,8 @@ public class DatasetShellsExporter extends StatsExporter {
         		continue;
             ISignalGroup signalGroup = groupOptn.get();
             String groupName   = signalGroup.getGroupName();
-            String groupFolder = d.getAnalysisOptions().get().getNuclearSignalOptions(signalGroupId).getFolder().getAbsolutePath();            
+            String groupFolder = d.getAnalysisOptions().get()
+            		.getNuclearSignalOptions(signalGroupId).getFile(HashOptions.DETECTION_FOLDER).getAbsolutePath();            
             Optional<IShellResult> oShellResult = signalGroup.getShellResult();
             if(!oShellResult.isPresent())
                 continue;

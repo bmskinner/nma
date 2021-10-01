@@ -95,7 +95,7 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
             UnavailableBorderTagException, ProfileException, UnavailableProfileTypeException {
 
         IPoint com = IPoint.makeNew(0, 0);
-        NucleusFactory fact = new NucleusFactory();
+        NucleusFactory fact = new NucleusFactory(dataset.getAnalysisOptions().get().getRuleSetCollection());
         Nucleus n = fact.buildInstance(list, new File("Empty"), 0, com);
         
         Optional<IAnalysisOptions> analysisOptions =  dataset.getAnalysisOptions();
@@ -121,7 +121,7 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
         // Build a consensus nucleus from the template points
         Consensus<Nucleus> cons = new DefaultConsensusNucleus(n);
 
-        for (Landmark tag : Landmark.defaultValues()) {
+        for (Landmark tag : dataset.getAnalysisOptions().get().getRuleSetCollection().getTags()) {
             if (Landmark.INTERSECTION_POINT.equals(tag)) // not relevant here
                 continue;
             if (dataset.getCollection().getProfileCollection().hasBorderTag(tag)) {

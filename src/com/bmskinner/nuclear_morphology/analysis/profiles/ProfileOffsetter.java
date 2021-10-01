@@ -134,11 +134,6 @@ public class ProfileOffsetter {
 
         assignBorderTagToNucleiViaFrankenProfile(Landmark.TOP_VERTICAL);
         assignBorderTagToNucleiViaFrankenProfile(Landmark.BOTTOM_VERTICAL);
-
-        for (Nucleus nucleus : collection.getNuclei()) {
-            nucleus.updateVerticallyRotatedNucleus();
-        }
-
     }
 
     public class ProfileOffsetException extends Exception {

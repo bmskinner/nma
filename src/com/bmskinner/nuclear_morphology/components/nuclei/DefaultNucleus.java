@@ -17,11 +17,12 @@
 package com.bmskinner.nuclear_morphology.components.nuclei;
 
 import java.io.File;
-import java.io.IOException;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder;
@@ -35,10 +36,11 @@ import com.bmskinner.nuclear_morphology.components.generic.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
-import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
+import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.profiles.UnprofilableObjectException;
+import com.bmskinner.nuclear_morphology.components.rules.PriorityAxis;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSet;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.components.signals.DefaultSignalCollection;
@@ -64,12 +66,24 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
     private static final long serialVersionUID = 1L;
 
     /** The number of the nucleus in its image, for display */
-    protected int nucleusNumber;
+    private int nucleusNumber;
+    
+    /** Store the landmarks to be used for orientation */
+    private Landmark t = null;
+    private Landmark b = null;
+    private Landmark r = null;
+    private Landmark l = null;
+    private Landmark x = null;
+    private Landmark y = null;
+    private PriorityAxis priorityAxis = PriorityAxis.Y;
+    
 
     /** FISH signals in the nucleus */
     protected ISignalCollection signalCollection = new DefaultSignalCollection();
 
     protected transient boolean canReverse = true;
+    
+    
     
     /**
      * Construct with an ROI, a source image and channel, and the original
@@ -85,9 +99,16 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
      * @param id the id of the component. Only use when deserialising!
      */
     public DefaultNucleus(@NonNull Roi roi, @NonNull IPoint centreOfMass, File source, 
-    		int channel, int[] position, int number, @NonNull UUID id) {
+    		int channel, int[] position, int number, @Nullable UUID id, RuleSetCollection rsc) {
         super(roi, centreOfMass, source, channel, position, id);
         this.nucleusNumber = number;
+        t = rsc.getTopLandmark().orElse(null);
+        b = rsc.getBottomLandmark().orElse(null);
+        l = rsc.getLeftLandmark().orElse(null);
+        r = rsc.getRightLandmark().orElse(null);
+        x = rsc.getSecondaryX().orElse(null);
+        y = rsc.getSecondaryY().orElse(null);
+        priorityAxis = rsc.getPriorityAxis().orElse(PriorityAxis.Y);        
     }
 
     /**
@@ -101,9 +122,8 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
      * @param centreOfMass
      */
     public DefaultNucleus(@NonNull Roi roi, @NonNull IPoint centreOfMass, @NonNull File f, 
-    		int channel, int[] position, int number) {
-        super(roi, centreOfMass, f, channel, position);
-        this.nucleusNumber = number;
+    		int channel, int[] position, int number, RuleSetCollection rsc) {
+        this(roi, centreOfMass, f, channel, position, number, null, rsc);
     }
 
     /**
@@ -116,6 +136,14 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
         super(n);
         nucleusNumber = n.getNucleusNumber();
         signalCollection = n.getSignalCollection().duplicate();
+        
+        t = n.getTopLandmark();
+        b = n.getBottomLandmark();
+        l = n.getLeftLandmark();
+        r = n.getRightLandmark();
+        x = n.getSecondaryX();
+        y = n.getSecondaryX();
+        priorityAxis = n.getPriorityAxis();
     }
 
     @Override
@@ -128,41 +156,77 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
         }
         return null;
     }
+    
+    
 
-    /*
+    @Override
+	public @Nullable Landmark getTopLandmark() {
+		return t;
+	}
+
+	@Override
+	public @Nullable Landmark getBottomLandmark() {
+		return b;
+	}
+
+	@Override
+	public @Nullable Landmark getLeftLandmark() {
+		return l;
+	}
+
+	@Override
+	public @Nullable Landmark getRightLandmark() {
+		return r;
+	}
+
+	@Override
+	public @Nullable Landmark getSecondaryX() {
+		return x;
+	}
+
+	@Override
+	public @Nullable Landmark getSecondaryY() {
+		return y;
+	}
+
+	@Override
+	public @Nullable PriorityAxis getPriorityAxis() {
+		return priorityAxis;
+	}
+
+	/*
      * Finds the key points of interest around the border of the Nucleus. Can
      * use several different methods, and take a best-fit, or just use one. The
      * default in a round nucleus is to get the longest diameter and set this as
      * the head/tail axis.
      */
     @Override
-    public void findPointsAroundBorder(@NonNull RuleSetCollection rsc) throws ComponentCreationException {
-
-        try {
-
-        	// estimate the RP using the round rules
-            RuleSet rpSet = RuleSet.roundRPRuleSet();
-            IProfile p = this.getProfile(rpSet.getType());
-            ProfileIndexFinder f = new ProfileIndexFinder();
-            int rpIndex = f.identifyIndex(p, rpSet);
-
-            setBorderTag(Landmark.REFERENCE_POINT, rpIndex);
-            setBorderTag(Landmark.ORIENTATION_POINT, rpIndex);
-            
-            if (!this.isProfileOrientationOK() && canReverse) {
-                reverse();
-                profileMap.clear();
-                initialise(windowProportion);
-                canReverse = false;
-                findPointsAroundBorder(rsc);
-            }
-
-        } catch (UnavailableProfileTypeException e) {
-            LOGGER.log(Loggable.STACK, "Error getting profile type", e);
-        } catch (NoDetectedIndexException e) {
-            LOGGER.fine("Unable to detect RP in nucleus");
-            setBorderTag(Landmark.REFERENCE_POINT, 0);
-            setBorderTag(Landmark.ORIENTATION_POINT, 0);
+    public void findLandmarks(@NonNull RuleSetCollection rsc) throws ComponentCreationException {
+    	
+    	
+    	for(Landmark lm : rsc.getTags()) {
+    		LOGGER.finer(()->"Locating "+lm);
+    		
+    		try {
+    			for(RuleSet rule : rsc.getRuleSets(lm)) {
+    				IProfile p = this.getProfile(rule.getType());
+    				ProfileIndexFinder f = new ProfileIndexFinder();
+    				int index = f.identifyIndex(p, rule);
+    				setBorderTag(lm, index);
+    			}
+    		} catch (UnavailableProfileTypeException e) {
+    			LOGGER.log(Loggable.STACK, "Error getting profile type", e);
+    		} catch (NoDetectedIndexException e) {
+    			LOGGER.fine("Unable to detect "+lm+" in nucleus");
+    		}
+    	}
+    	
+    	if (!this.isProfileOrientationOK() && canReverse) {
+            reverse();
+            profileMap.clear();
+            initialise(windowProportion);
+            canReverse = false;
+            findLandmarks(rsc);
         }
     }
     
@@ -206,42 +270,30 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
     }
 
     @Override
-    protected double calculateStatistic(Measurement stat) {
+    protected void calculateStatistic(Measurement stat) {
 
-        double result = super.calculateStatistic(stat);
+        super.calculateStatistic(stat);
 
         // Note - variability will remain zero here
         // These stats are specific to nuclei
                 
         if (Measurement.ELLIPTICITY.equals(stat))
-            return calculateEllipticity();
+            setStatistic(stat, calculateEllipticity());
         
         if (Measurement.ASPECT.equals(stat))
-           return calculateAspect();
+        	setStatistic(stat, calculateAspect());
         
         if (Measurement.ELONGATION.equals(stat))
-            return calculateElongation();
+        	setStatistic(stat, calculateElongation());
                 
         if (Measurement.REGULARITY.equals(stat))
-            return calculateRegularity();
+        	setStatistic(stat, calculateRegularity());
 
         if (Measurement.BOUNDING_HEIGHT.equals(stat))
-            return getVerticallyRotatedNucleus().getBounds().getHeight();
+        	setStatistic(stat, getVerticallyRotatedNucleus().getBounds().getHeight());
 
         if (Measurement.BOUNDING_WIDTH.equals(stat))
-            return getVerticallyRotatedNucleus().getBounds().getWidth();
-
-        if (Measurement.OP_RP_ANGLE.equals(stat)) {
-            try {
-                result = getCentreOfMass().findSmallestAngle(this.getBorderPoint(Landmark.REFERENCE_POINT),
-                        this.getBorderPoint(Landmark.ORIENTATION_POINT));
-            } catch (UnavailableBorderTagException e) {
-                LOGGER.log(Loggable.STACK, "Cannot get border tag", e);
-                result = ERROR_CALCULATING_STAT;
-            }
-        }
-
-        return result;
+        	setStatistic(stat, getVerticallyRotatedNucleus().getBounds().getWidth());
     }
     
     /**
@@ -287,11 +339,6 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
 
     protected void setSignals(ISignalCollection collection) {
         signalCollection = collection;
-    }
-
-    @Override
-    public boolean isClockwiseRP() {
-        return false;
     }
 
     @Override
@@ -355,12 +402,6 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
     }
 
     @Override
-    public void updateVerticallyRotatedNucleus() {
-//    	verticalNucleus = null;
-//        verticalNucleus = getVerticallyRotatedNucleus();
-    }
-
-    @Override
     public Nucleus getVerticallyRotatedNucleus() {
         // Make an exact copy of the nucleus
         LOGGER.finest( "Creating vertical nucleus");
@@ -417,99 +458,126 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
 
     @Override
     public void alignVertically() {
-    	boolean useTVandBV = hasBorderTag(Landmark.TOP_VERTICAL) && hasBorderTag(Landmark.BOTTOM_VERTICAL);
+    	
+    	try {
+    		// Use the points defined in the RuleSetCollection
+    		// to determine how to orient the nucleus
+    		if(priorityAxis.equals(PriorityAxis.Y)) {
 
-    	if (useTVandBV) {
-    		try {
-    			int topPoint = getBorderIndex(Landmark.TOP_VERTICAL);
-    			int bottomPoint = getBorderIndex(Landmark.BOTTOM_VERTICAL);
-    			if(topPoint == bottomPoint) {
-    				rotatePointToBottom(getBorderPoint(Landmark.ORIENTATION_POINT));
-    				return;
+    			// Check if t and b are present
+    			if(hasBorderTag(t) && hasBorderTag(b)) {
+    				IPoint topPoint    = getBorderPoint(t);
+    				IPoint bottomPoint = getBorderPoint(b);
+    				if(topPoint != bottomPoint) {
+            			alignPointsOnVertical(topPoint, bottomPoint);
+    				} else if(hasBorderTag(y)) {
+    					rotatePointToBottom(getBorderPoint(y));
+    				}
+    			} else if(hasBorderTag(y)) { // if no t and b, fall back to y
+    				rotatePointToBottom(getBorderPoint(y));
+    			}
+    			
+    			// Now check x, and flip as needed
+    			if(hasBorderTag(l) && hasBorderTag(r)) {
+    				IPoint leftPoint  = getBorderPoint(l);
+    				IPoint rightPoint = getBorderPoint(r);
+    				if(leftPoint.isRightOf(rightPoint)) {
+    					flipHorizontal();
+    				}
+    			} else if(hasBorderTag(l)) {
+    				IPoint leftPoint  = getBorderPoint(l);
+    				if(leftPoint.isRightOf(getCentreOfMass()))
+    					flipHorizontal();
+    			} else if(hasBorderTag(r)) {
+    				IPoint rightPoint = getBorderPoint(r);
+    				if(rightPoint.isLeftOf(getCentreOfMass()))
+    					flipHorizontal();
+    			} else if(hasBorderTag(x)) {
+    				IPoint leftPoint = getBorderPoint(x);
+    				if(leftPoint.isRightOf(getCentreOfMass()))
+    					flipHorizontal();
     			}
 
-    			IPoint[] points = getBorderPointsForVerticalAlignment();
-    			alignPointsOnVertical(points[0], points[1]);
-
-    		} catch (UnavailableBorderTagException | UnavailableProfileTypeException e) {
-    			LOGGER.log(Loggable.STACK, "Cannot get border tag or profile", e);
-    			try {
-    				rotatePointToBottom(getBorderPoint(Landmark.ORIENTATION_POINT));
-    			} catch (UnavailableBorderTagException e1) {
-    				LOGGER.log(Loggable.STACK, "Cannot get border tag", e1);
+    		} else {
+    			// Same logic but now if X axis is the priority
+    			
+    			// Check if l and r are present
+    			if(hasBorderTag(t) && hasBorderTag(b)) {
+    				IPoint leftPoint  = getBorderPoint(l);
+    				IPoint rightPoint = getBorderPoint(r);
+    				if(leftPoint != rightPoint) {
+            			alignPointsOnHorizontal(leftPoint, rightPoint);
+    				} else {
+    					rotatePointToLeft(getBorderPoint(x));
+    				}
+    			} else if(hasBorderTag(y)) { // if no l and r, fall back to x
+    				rotatePointToLeft(getBorderPoint(x));
     			}
+    			
+    			// Now check y, and flip as needed
+    			if(hasBorderTag(t) && hasBorderTag(b)) {
+    				IPoint topPoint  = getBorderPoint(t);
+    				IPoint bottomPoint = getBorderPoint(b);
+    				if(topPoint.isBelow(bottomPoint)) {
+    					flipVertical();
+    				}
+    			} else if(hasBorderTag(t)) {
+    				IPoint topPoint  = getBorderPoint(t);
+    				if(topPoint.isBelow(getCentreOfMass()))
+    					flipVertical();
+    			} else if(hasBorderTag(b)) {
+    				IPoint bottomPoint = getBorderPoint(b);
+    				if(bottomPoint.isAbove(getCentreOfMass()))
+    					flipVertical();
+    			} else if(hasBorderTag(y)) {
+    				IPoint bottomPoint = getBorderPoint(y);
+    				if(bottomPoint.isAbove(getCentreOfMass()))
+    					flipVertical();
+    			}
+    			
     		}
-    	} else {
-
-    		// Default if top and bottom vertical points have not been specified
+    	} catch (UnavailableBorderTagException e) {
+    		LOGGER.log(Loggable.STACK, "Cannot get border tag or profile", e);
     		try {
     			rotatePointToBottom(getBorderPoint(Landmark.ORIENTATION_POINT));
-    		} catch (UnavailableBorderTagException e) {
-    			LOGGER.log(Loggable.STACK, "Cannot get border tag", e);
+    		} catch (UnavailableBorderTagException e1) {
+    			LOGGER.log(Loggable.STACK, "Cannot get border tag", e1);
     		}
     	}
-
-    }
-
-    /**
-     * Detect the points that can be used for vertical alignment.These are based
-     * on the BorderTags TOP_VERTICAL and BOTTOM_VETICAL. The actual points
-     * returned are not necessarily on the border of the nucleus; a bibble
-     * correction is performed on the line drawn between the two border points,
-     * minimising the sum-of-squares to each border point within the region
-     * covered by the line.
-     * 
-     * @return
-     * @throws UnavailableBorderTagException
-     * @throws UnavailableProfileTypeException
-     */
-    private IPoint[] getBorderPointsForVerticalAlignment()
-            throws UnavailableBorderTagException, UnavailableProfileTypeException {
-
-        IBorderPoint topPoint;
-        IBorderPoint bottomPoint;
-
-        topPoint = this.getBorderPoint(Landmark.TOP_VERTICAL);
-        bottomPoint = this.getBorderPoint(Landmark.BOTTOM_VERTICAL);
-        
-        return new IPoint[] { topPoint, bottomPoint };
-
-//        // Find the border points between the top and bottom verticals
-//        List<IBorderPoint> pointsInRegion = new ArrayList<IBorderPoint>();
+    	
+    	
+    	
+//    	boolean useTVandBV = hasBorderTag(Landmark.TOP_VERTICAL) && hasBorderTag(Landmark.BOTTOM_VERTICAL);
 //
-//        int topIndex = this.getBorderIndex(Tag.TOP_VERTICAL);
-//        int btmIndex = this.getBorderIndex(Tag.BOTTOM_VERTICAL);
-//        int totalSize = this.getProfile(ProfileType.ANGLE).size();
+//    	if (useTVandBV) {
+//    		try {
+//    			int topPoint = getBorderIndex(Landmark.TOP_VERTICAL);
+//    			int bottomPoint = getBorderIndex(Landmark.BOTTOM_VERTICAL);
+//    			if(topPoint == bottomPoint) {
+//    				rotatePointToBottom(getBorderPoint(Landmark.ORIENTATION_POINT));
+//    				return;
+//    			}
 //
-//        // A segment has built in methods for iterating through just the points
-//        // it contains
-//        // TODO: This has problems if we have short regions. Replace.
-//        IBorderSegment region = new OpenBorderSegment(topIndex, btmIndex, totalSize);
+//    			IPoint[] points = getBorderPointsForVerticalAlignment();
+//    			alignPointsOnVertical(points[0], points[1]);
 //
-//        int index = topIndex;
+//    		} catch (UnavailableBorderTagException | UnavailableProfileTypeException e) {
+//    			LOGGER.log(Loggable.STACK, "Cannot get border tag or profile", e);
+//    			try {
+//    				rotatePointToBottom(getBorderPoint(Landmark.ORIENTATION_POINT));
+//    			} catch (UnavailableBorderTagException e1) {
+//    				LOGGER.log(Loggable.STACK, "Cannot get border tag", e1);
+//    			}
+//    		}
+//    	} else {
 //
-//        Iterator<Integer> it = region.iterator();
-//
-//        while (it.hasNext()) {
-//            index = it.next();
-//            pointsInRegion.add(this.getBorderPoint(index));
-//        }
-//
-//        // As an anti-bibble defence, get a best fit line acrosss the region
-//        // Use the line of best fit to find appropriate top and bottom vertical
-//        // points
-//        LineEquation eq = DoubleEquation.calculateBestFitLine(pointsInRegion);
-////        System.out.println("Best fit: "+eq);
-//
-//        // Take values along the best fit line that are close to the original TV
-//        // and BV
-//
-//        IPoint top = IPoint.makeNew(topPoint.getX(), eq.getY(topPoint.getX()));
-//        IPoint btm = IPoint.makeNew(bottomPoint.getX(), eq.getY(bottomPoint.getX()));
-//        
-////        System.out.println("Alignment point top: "+top);
-////        System.out.println("Alignment point bottom: "+btm);
-//        return new IPoint[] { top, btm };
+//    		// Default if top and bottom vertical points have not been specified
+//    		try {
+//    			rotatePointToBottom(getBorderPoint(Landmark.ORIENTATION_POINT));
+//    		} catch (UnavailableBorderTagException e) {
+//    			LOGGER.log(Loggable.STACK, "Cannot get border tag", e);
+//    		}
+//    	}
 
     }
     
@@ -560,15 +628,15 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
     @Override
 	public String toString() {
         String newLine = System.getProperty("line.separator");
-        StringBuilder b = new StringBuilder(super.toString()+newLine);
+        StringBuilder builder = new StringBuilder(super.toString()+newLine);
 
-        b.append(this.getNameAndNumber());
-        b.append(newLine);
-        b.append(this.getID().toString());
-        b.append(newLine);
-        b.append(this.getSignalCollection().toString());
-        b.append(newLine);
-        return b.toString();
+        builder.append(this.getNameAndNumber());
+        builder.append(newLine);
+        builder.append(this.getID().toString());
+        builder.append(newLine);
+        builder.append(this.getSignalCollection().toString());
+        builder.append(newLine);
+        return builder.toString();
     }
 
     @Override
@@ -596,41 +664,30 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
 		return byName;
 
     }
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + Objects.hash(b, l, nucleusNumber, priorityAxis, r, signalCollection, t, x, y);
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		DefaultNucleus other = (DefaultNucleus) obj;
+		return Objects.equals(b, other.b) && Objects.equals(l, other.l) && nucleusNumber == other.nucleusNumber
+				&& priorityAxis == other.priorityAxis && Objects.equals(r, other.r)
+				&& Objects.equals(signalCollection, other.signalCollection) && Objects.equals(t, other.t)
+				&& Objects.equals(x, other.x) && Objects.equals(y, other.y);
+	}
     
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = super.hashCode();
+    
 
-        result = prime * result + nucleusNumber;
-
-        result = prime * result + ((signalCollection == null) ? 0 : signalCollection.hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        DefaultNucleus other = (DefaultNucleus) obj;
-        if (nucleusNumber != other.nucleusNumber)
-            return false;
-
-        if (signalCollection == null) {
-            if (other.signalCollection != null)
-                return false;
-        } else if (!signalCollection.equals(other.signalCollection))
-            return false;
-        return true;
-    }
-
-    private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-
-        in.defaultReadObject();
-//        this.verticalNucleus = null;
-    }
 }

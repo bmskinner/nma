@@ -59,7 +59,7 @@ public class FluorescentNucleusFinder extends CellFinder {
     
     public FluorescentNucleusFinder(@NonNull final IAnalysisOptions op) {
         super(op);
-        nuclFactory = new NucleusFactory();
+        nuclFactory = new NucleusFactory(op.getRuleSetCollection());
         Optional<HashOptions> n = options.getDetectionOptions(CellularComponent.NUCLEUS);
         if(!n.isPresent())
         	throw new IllegalArgumentException("No nucleus options");
@@ -216,7 +216,7 @@ public class FluorescentNucleusFinder extends CellFinder {
 
         double prop = options.getProfileWindowProportion();
         result.initialise(prop);
-        result.findPointsAroundBorder(options.getRuleSetCollection());
+        result.findLandmarks(options.getRuleSetCollection());
         LOGGER.finer("Created nucleus from roi "+f.getName());
         return result;
     }

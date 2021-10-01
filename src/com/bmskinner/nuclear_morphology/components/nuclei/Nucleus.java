@@ -17,10 +17,14 @@
 package com.bmskinner.nuclear_morphology.components.nuclei;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 
 import com.bmskinner.nuclear_morphology.components.Taggable;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.generic.IBorderPoint;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
+import com.bmskinner.nuclear_morphology.components.rules.PriorityAxis;
+import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalCollection;
 
 /**
@@ -89,20 +93,22 @@ public interface Nucleus extends CellularComponent, Taggable, Comparable<Nucleus
      * @return
      */
     Nucleus getVerticallyRotatedNucleus();
+    
+    
+    @Nullable Landmark getTopLandmark();
+    
+    @Nullable Landmark getBottomLandmark();
+    
+    @Nullable Landmark getLeftLandmark();
+    
+    @Nullable Landmark getRightLandmark();
+    
+    @Nullable Landmark getSecondaryX();
+    
+    @Nullable Landmark getSecondaryY();
+    
+    @Nullable PriorityAxis getPriorityAxis();
 
-    /**
-     * Invalidate the existing cached vertically rotated nucleus, and
-     * recalculate.
-     */
-    void updateVerticallyRotatedNucleus();
-
-    /**
-     * Is the reference point of the vertically rotated nucleus pointing to the
-     * right (i.e. is the tip pointing in a clockwise direction)?
-     * 
-     * @return
-     */
-    boolean isClockwiseRP();
 
     /**
      * Thrown when a nucleus type in a collection is incorrect for a requested

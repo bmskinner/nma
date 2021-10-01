@@ -146,7 +146,6 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 			// Ensure segments are copied appropriately to verticals
 			// Ensure hook statistics are generated appropriately
 			for (Nucleus n : dataset.getCollection().getNuclei()) {
-				n.updateVerticallyRotatedNucleus();
 				n.updateDependentStats();
 			}
 			LOGGER.fine("Updated verticals and stats");

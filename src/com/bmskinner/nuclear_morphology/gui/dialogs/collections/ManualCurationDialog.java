@@ -314,9 +314,7 @@ public class ManualCurationDialog extends AbstractCellCollectionDialog {
 	    			LOGGER.log(Loggable.STACK, "Unable to rotate", e);
 	    		}
 	    		ip.flipVertical(); // Y axis needs inverting
-	    		
-	    		if(c.getPrimaryNucleus().isClockwiseRP())
-	    			ip.flipHorizontal();
+
 	    	}
 	    	// Rescale the resulting image
 	    	ip = new ImageFilterer(ip).resizeKeepingAspect(ROW_IMAGE_HEIGHT, ROW_IMAGE_HEIGHT).toProcessor();

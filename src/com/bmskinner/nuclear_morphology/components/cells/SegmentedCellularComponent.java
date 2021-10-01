@@ -79,7 +79,8 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
      * @param channel the RGB channel the component was found in
      * @param position the bounding position of the component in the original image
      */
-    public SegmentedCellularComponent(@NonNull Roi roi, @NonNull IPoint centreOfMass, File source, int channel, int[] position) {
+    protected SegmentedCellularComponent(@NonNull Roi roi, @NonNull IPoint centreOfMass, 
+    		File source, int channel, int[] position) {
     	super(roi, centreOfMass, source, channel, position);
     }
     
@@ -96,7 +97,8 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
      * @param position the bounding position of the component in the original image
      * @param id the id of the component. Only use when deserialising!
      */
-    public SegmentedCellularComponent(@NonNull Roi roi, @NonNull IPoint centreOfMass, File source, int channel, int[] position, @NonNull UUID id) {
+    protected SegmentedCellularComponent(@NonNull Roi roi, @NonNull IPoint centreOfMass, 
+    		File source, int channel, int[] position, @Nullable UUID id) {
         super(roi, centreOfMass, source, channel, position, id);
     }
 
@@ -106,7 +108,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 	 * @param c
 	 * @throws UnprofilableObjectException
 	 */
-	public SegmentedCellularComponent(@NonNull final CellularComponent c) throws UnprofilableObjectException {
+    protected SegmentedCellularComponent(@NonNull final CellularComponent c) throws UnprofilableObjectException {
 		super(c);
 	}
 	

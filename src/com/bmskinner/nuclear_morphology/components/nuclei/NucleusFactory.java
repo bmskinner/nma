@@ -27,6 +27,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.cells.ComponentFactory;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
+import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
@@ -43,13 +44,16 @@ public class NucleusFactory implements ComponentFactory<Nucleus> {
 	private static final Logger LOGGER = Logger.getLogger(NucleusFactory.class.getName());
 	private int nucleusCount = 0; // store the number of nuclei  created by this factory
 	
+	private RuleSetCollection rsc;
+	
     /**
      * Create a factory for nuclei of the given type
      * 
      * @param imageFile
      * @param nucleusType
      */
-    public NucleusFactory() {
+    public NucleusFactory(@NonNull RuleSetCollection rsc) {
+    	this.rsc = rsc;
     }
 
     /**
@@ -113,7 +117,7 @@ public class NucleusFactory implements ComponentFactory<Nucleus> {
             throws ComponentCreationException {
     	
         Nucleus n =  new DefaultNucleus(roi, centreOfMass, imageFile, channel, originalPosition,
-                nucleusCount);
+                nucleusCount, rsc);
 
         nucleusCount++;
         LOGGER.finer( "Created nucleus with border length "+n.getBorderLength());
@@ -125,7 +129,7 @@ public class NucleusFactory implements ComponentFactory<Nucleus> {
             throws ComponentCreationException {
         
         Nucleus n = new DefaultNucleus(roi, centreOfMass, imageFile, channel, originalPosition,
-                nucleusCount, id);
+                nucleusCount, id, rsc);
 
         nucleusCount++;
         LOGGER.finer( "Created nucleus with border length "+n.getBorderLength());
@@ -135,7 +139,7 @@ public class NucleusFactory implements ComponentFactory<Nucleus> {
     public Nucleus buildInstance(@NonNull Roi roi, File imageFile, int channel, int[] originalPosition, @NonNull IPoint centreOfMass, UUID id, int nucleusNumber) {
         
         Nucleus n = new DefaultNucleus(roi, centreOfMass, imageFile, channel, originalPosition,
-    			nucleusNumber, id);
+    			nucleusNumber, id, rsc);
 
         LOGGER.finer( "Created nucleus with border length "+n.getBorderLength());
         return n;

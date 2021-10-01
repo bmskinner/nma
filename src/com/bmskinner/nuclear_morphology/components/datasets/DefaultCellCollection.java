@@ -1229,15 +1229,15 @@ public class DefaultCellCollection implements ICellCollection {
 		return toSearch.size();
 	}
 
-	public int countClockWiseRPNuclei() {
-		int count = 0;
-		for (Nucleus n : getNuclei()) {
-			if (n.isClockwiseRP()) {
-				count++;
-			}
-		}
-		return count;
-	}
+//	public int countClockWiseRPNuclei() {
+//		int count = 0;
+//		for (Nucleus n : getNuclei()) {
+//			if (n.isClockwiseRP()) {
+//				count++;
+//			}
+//		}
+//		return count;
+//	}
 
 	@Override
 	public void setScale(double scale){
@@ -1256,8 +1256,8 @@ public class DefaultCellCollection implements ICellCollection {
 		String newLine = System.getProperty("line.separator");
 
 		StringBuilder b = new StringBuilder("Collection:" + getName() + newLine)
-				.append("Collection:" + getName() + newLine).append("Nuclei: " + this.getNucleusCount() + newLine)
-				.append("Clockwise: " + this.countClockWiseRPNuclei() + newLine)
+				.append("Collection:" + getName() + newLine)
+				.append("Nuclei: " + this.getNucleusCount() + newLine)
 				.append("Profile collections:" + newLine);
 
 		IProfileCollection pc = this.getProfileCollection();

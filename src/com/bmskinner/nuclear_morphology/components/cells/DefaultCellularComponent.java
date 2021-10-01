@@ -37,6 +37,7 @@ import java.util.UUID;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 
 import com.bmskinner.nuclear_morphology.analysis.detection.BooleanMask;
 import com.bmskinner.nuclear_morphology.analysis.detection.Mask;
@@ -174,16 +175,12 @@ public abstract class DefaultCellularComponent implements CellularComponent {
      * @param position the bounding position of the component in the original image
      * @param id the id of the component. Only use when deserialising!
      */
-    public DefaultCellularComponent(@NonNull Roi roi, @NonNull IPoint centreOfMass, File source, int channel, int[] position, @NonNull UUID id) {
-    
-        if (centreOfMass == null)
-            throw new IllegalArgumentException("Centre of mass cannot be null");
-        if (roi == null)
-            throw new IllegalArgumentException("Roi cannot be null in cellular component");
+    public DefaultCellularComponent(@NonNull Roi roi, @NonNull IPoint centreOfMass, 
+    		File source, int channel, int[] position, @Nullable UUID id) {
 
         this.originalCentreOfMass = IPoint.makeNew(centreOfMass);
         this.centreOfMass = IPoint.makeNew(centreOfMass);
-        this.id = id;
+        this.id = id==null ? UUID.randomUUID() : id;
         this.sourceFile = source;
         this.channel = channel;
         this.position = position;
@@ -192,7 +189,6 @@ public abstract class DefaultCellularComponent implements CellularComponent {
         // reconstructed.
         double epsilon = 1;
         Polygon polygon = roi.getPolygon();
-//        log("Roi polygon has "+polygon.npoints);
         Rectangle2D bounds = polygon.getBounds().getFrame();
 
         // // since small signals can have imprecision on the CoM that puts them
@@ -615,19 +611,16 @@ public abstract class DefaultCellularComponent implements CellularComponent {
             return stat.convert(result, this.scale, measurementScale);
         }
         
-        double result = calculateStatistic(stat);
-        setStatistic(stat, result);
-        return result;
+        calculateStatistic(stat);
+        return stat.convert(statistics.get(stat), this.scale, measurementScale);
     }
 
-    protected double calculateStatistic(final Measurement stat) {
-        double result = Statistical.ERROR_CALCULATING_STAT;
+    protected void calculateStatistic(final Measurement stat) {
 
         // Do not add getters for values added at creation time
         // or you'll get infinite loops when things break
         if (Measurement.CIRCULARITY.equals(stat))
-            return this.calculateCircularity();
-        return result;
+        	setStatistic(stat, calculateCircularity());
     }
     
     /**
@@ -662,7 +655,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	public void updateDependentStats() {
         for (Measurement stat : statistics.keySet()) {
             if (this.getStatistic(stat) == Statistical.STAT_NOT_CALCULATED)
-                this.setStatistic(stat, calculateStatistic(stat));
+                calculateStatistic(stat);
         }
 
     }
@@ -833,6 +826,23 @@ public abstract class DefaultCellularComponent implements CellularComponent {
             double dx = xCentre - n.getX();
             double xNew = xCentre + dx;
             n.setX(xNew);
+        }
+    }
+    
+    @Override
+	public void flipVertical() {
+    	flipVertical(centreOfMass);
+    }
+    
+    @Override
+	public void flipVertical(final @NonNull IPoint p) {
+
+        double yCentre = p.getY();
+
+        for (IBorderPoint n : borderList) {
+            double dy = yCentre - n.getY();
+            double yNew = yCentre + dy;
+            n.setY(yNew);
         }
     }
 
@@ -1302,16 +1312,18 @@ public abstract class DefaultCellularComponent implements CellularComponent {
      * #############################################
      */
 
-    /**
-     * Rotate the nucleus so that the given point is directly below the centre
-     * of mass
-     * 
-     * @param bottomPoint
-     */
+
     @Override
 	public void rotatePointToBottom(IPoint bottomPoint) {
         this.alignPointsOnVertical(centreOfMass, bottomPoint);
     }
+    
+    @Override
+   	public void rotatePointToLeft(IPoint leftPoint) {
+           this.alignPointsOnHorizontal(leftPoint, centreOfMass);
+       }
+    
+    
     
     @Override
     public void rotate(double angle) {

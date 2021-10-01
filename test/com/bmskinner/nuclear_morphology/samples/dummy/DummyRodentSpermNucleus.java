@@ -23,18 +23,22 @@ import java.io.File;
 import java.util.Map;
 import java.util.UUID;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.generic.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
+import com.bmskinner.nuclear_morphology.components.nuclei.DefaultNucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.DefaultRodentSpermNucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalCollection;
 
 import ij.gui.PolygonRoi;
@@ -74,7 +78,7 @@ public class DummyRodentSpermNucleus extends DummyCellularComponent implements N
 	}
 	
 	public DummyRodentSpermNucleus(String name) throws ComponentCreationException{
-		component = new DefaultRodentSpermNucleus(ROI, COM, IMAGE_FILE, IMAGE_CHANNEL,  
+		component = new DefaultNucleus(ROI, COM, IMAGE_FILE, IMAGE_CHANNEL,  
 	            POSITION , component_NUMBER);
 		nucleus = (Nucleus) component;
 		nucleus.offset(COM.getX(), COM.getY());
@@ -87,8 +91,8 @@ public class DummyRodentSpermNucleus extends DummyCellularComponent implements N
 	}
 	
 	@Override
-	public void findPointsAroundBorder() throws ComponentCreationException {
-		nucleus.findPointsAroundBorder();
+	public void findLandmarks(@NonNull RuleSetCollection rsc) throws ComponentCreationException {
+		nucleus.findLandmarks(rsc);
 		
 	}
 
@@ -124,7 +128,7 @@ public class DummyRodentSpermNucleus extends DummyCellularComponent implements N
 
 
 	@Override
-	public void calculateSignalAnglesFromPoint(IBorderPoint p) {
+	public void calculateSignalAnglesFromPoint(@NonNull IBorderPoint p) {
 		nucleus.calculateSignalAnglesFromPoint(p);
 		
 	}
@@ -150,33 +154,33 @@ public class DummyRodentSpermNucleus extends DummyCellularComponent implements N
 	}
 
 	@Override
-	public boolean hasProfile(ProfileType type) {
+	public boolean hasProfile(@NonNull ProfileType type) {
 		return nucleus.hasProfile(type);
 	}
 
 	@Override
-	public ISegmentedProfile getProfile(ProfileType type) throws UnavailableProfileTypeException {
+	public ISegmentedProfile getProfile(@NonNull ProfileType type) throws UnavailableProfileTypeException {
 		return nucleus.getProfile(type);
 	}
 
 	@Override
-	public void setProfile(ProfileType type, ISegmentedProfile profile) {
+	public void setProfile(@NonNull ProfileType type, @NonNull ISegmentedProfile profile) {
 		nucleus.setProfile(type, profile);
 		
 	}
 
 	@Override
-	public int getWindowSize(ProfileType type) {
+	public int getWindowSize(@NonNull ProfileType type) {
 		return nucleus.getWindowSize(type);
 	}
 
 	@Override
-	public double getWindowProportion(ProfileType type) {
+	public double getWindowProportion(@NonNull ProfileType type) {
 		return nucleus.getWindowProportion(type);
 	}
 
 	@Override
-	public void setWindowProportion(ProfileType type, double d) {
+	public void setWindowProportion(@NonNull ProfileType type, double d) {
 		nucleus.setWindowProportion(type, d);
 	}
 
@@ -191,7 +195,7 @@ public class DummyRodentSpermNucleus extends DummyCellularComponent implements N
 	}
 
 	@Override
-	public void setSegmentStartLock(boolean lock, UUID segID) {
+	public void setSegmentStartLock(boolean lock, @NonNull UUID segID) {
 		nucleus.setSegmentStartLock(lock, segID);
 	}
 
@@ -204,12 +208,12 @@ public class DummyRodentSpermNucleus extends DummyCellularComponent implements N
 
 
 	@Override
-	public int getBorderIndex(Landmark tag) throws UnavailableBorderTagException {
+	public int getBorderIndex(@NonNull Landmark tag) throws UnavailableBorderTagException {
 	    return nucleus.getBorderIndex(tag);
 	}
 
 	@Override
-	public Landmark getBorderTag(Landmark tag, int index) throws UnavailableBorderTagException {
+	public Landmark getBorderTag(@NonNull Landmark tag, int index) throws UnavailableBorderTagException {
 		return nucleus.getBorderTag(tag, index);
 	}
 
@@ -219,12 +223,12 @@ public class DummyRodentSpermNucleus extends DummyCellularComponent implements N
 	}
 
 	@Override
-	public boolean hasBorderTag(Landmark tag) {
+	public boolean hasBorderTag(@NonNull Landmark tag) {
 		return nucleus.hasBorderTag(tag);
 	}
 
 	@Override
-	public boolean hasBorderTag(Landmark tag, int i) {
+	public boolean hasBorderTag(@NonNull Landmark tag, int i) {
 		return nucleus.hasBorderTag(tag, i);
 	}
 
@@ -234,24 +238,24 @@ public class DummyRodentSpermNucleus extends DummyCellularComponent implements N
 	}
 
 	@Override
-	public void setBorderTag(Landmark tag, int i) {
+	public void setBorderTag(@NonNull Landmark tag, int i) {
 		nucleus.setBorderTag(tag, i);
 	}
 
 	@Override
-	public void setBorderTag(Landmark reference, Landmark tag,
+	public void setBorderTag(@NonNull Landmark reference, @NonNull Landmark tag,
 			int i) throws IndexOutOfBoundsException, UnavailableBorderTagException {
 		nucleus.setBorderTag(reference, tag, i);		
 	}
 
 	@Override
-	public ISegmentedProfile getProfile(ProfileType type, Landmark tag) throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException {
+	public ISegmentedProfile getProfile(@NonNull ProfileType type, @NonNull Landmark tag) throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException {
 		return nucleus.getProfile(type, tag);
 	}
 
 	@Override
-	public void setProfile(ProfileType type, Landmark tag,
-			ISegmentedProfile profile) {
+	public void setProfile(@NonNull ProfileType type, @NonNull Landmark tag,
+			@NonNull ISegmentedProfile profile) {
 		setProfile(type, profile);
 		
 	}
@@ -262,12 +266,12 @@ public class DummyRodentSpermNucleus extends DummyCellularComponent implements N
 	}
 
 	@Override
-	public IBorderPoint getBorderPoint(Landmark tag) throws UnavailableBorderTagException {
+	public IBorderPoint getBorderPoint(@NonNull Landmark tag) throws UnavailableBorderTagException {
 		return nucleus.getBorderPoint(tag);
 	}
 
 	@Override
-	public int getOffsetBorderIndex(Landmark reference, int index) throws UnavailableBorderTagException {
+	public int getOffsetBorderIndex(@NonNull Landmark reference, int index) throws UnavailableBorderTagException {
 		return nucleus.getOffsetBorderIndex(reference, index);
 	}
 

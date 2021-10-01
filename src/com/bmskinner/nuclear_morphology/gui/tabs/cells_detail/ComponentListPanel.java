@@ -35,7 +35,6 @@ import org.jfree.chart.JFreeChart;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.cells.IAcrosome;
 import com.bmskinner.nuclear_morphology.components.cells.ICytoplasm;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
@@ -80,7 +79,7 @@ public class ComponentListPanel extends AbstractCellDetailPanel implements ListS
      * @return
      */
     private ListModel<ComponentListCell> createListModel() {
-        DefaultListModel<ComponentListCell> model = new DefaultListModel<ComponentListCell>();
+        DefaultListModel<ComponentListCell> model = new DefaultListModel<>();
 
         if (this.getCellModel().hasCell()) {
 
@@ -95,13 +94,6 @@ public class ComponentListPanel extends AbstractCellDetailPanel implements ListS
                 ICytoplasm cyto = getCellModel().getCell().getCytoplasm();
                 ComponentListCell cytoCell = new ComponentListCell(CellularComponent.CYTOPLASM, cyto);
                 model.addElement(cytoCell);
-            }
-
-            // Acrosomes
-            if (getCellModel().getCell().hasAcrosome()) {
-                IAcrosome a = getCellModel().getCell().getAcrosomes().get(0);
-                ComponentListCell cell = new ComponentListCell(CellularComponent.ACROSOME, a);
-                model.addElement(cell);
             }
 
             ISignalCollection signalCollection = n.getSignalCollection();
