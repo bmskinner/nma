@@ -39,7 +39,7 @@ import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter.ColourSwat
  * @since 1.12.0
  *
  */
-public abstract class AbstractOptions extends DefaultOptions implements DisplayOptions, HashOptions {
+public abstract class AbstractOptions extends com.bmskinner.nuclear_morphology.components.options.DefaultOptions implements DisplayOptions, HashOptions {
 
     private final List<IAnalysisDataset>   list        = new ArrayList<>();
     private final List<Measurement> stats       = new ArrayList<>();

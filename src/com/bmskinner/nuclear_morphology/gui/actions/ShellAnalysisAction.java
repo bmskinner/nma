@@ -38,8 +38,8 @@ import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
-import com.bmskinner.nuclear_morphology.components.options.DefaultShellOptions;
-import com.bmskinner.nuclear_morphology.components.options.IShellOptions;
+import com.bmskinner.nuclear_morphology.components.options.DefaultOptions;
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult.ShrinkType;
 import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
@@ -74,8 +74,8 @@ public class ShellAnalysisAction extends SingleDatasetResultAction {
     	ShellAnalysisSetupDialog sd = new ShellAnalysisSetupDialog(dataset);
     	if(sd.isReadyToRun()) {
     		
-    		IShellOptions op = sd.getOptions();
-    		if(! datasetParametersOk(op.getShellNumber())){
+    		HashOptions op = sd.getOptions();
+    		if(! datasetParametersOk(op.getInt(HashOptions.SHELL_COUNT_INT))){
             	this.cancel();
             	return;
             }
@@ -135,7 +135,7 @@ public class ShellAnalysisAction extends SingleDatasetResultAction {
 
         private static final String DIALOG_TITLE = "Shell analysis options";
         
-        IShellOptions o = new DefaultShellOptions();
+        HashOptions o = new DefaultOptions();
 
         public ShellAnalysisSetupDialog(final @NonNull IAnalysisDataset dataset) {
             this(dataset, DIALOG_TITLE);
@@ -154,7 +154,8 @@ public class ShellAnalysisAction extends SingleDatasetResultAction {
         }
         
         
-        public IShellOptions getOptions() {
+        @Override
+		public HashOptions getOptions() {
         	return o;
         }
 
@@ -177,16 +178,16 @@ public class ShellAnalysisAction extends SingleDatasetResultAction {
             List<Component> fields = new ArrayList<>();
             
             JComboBox<ShrinkType> typeBox = new JComboBox<>(ShrinkType.values());
-            typeBox.setSelectedItem(IShellOptions.DEFAULT_EROSION_METHOD);
-            typeBox.addActionListener(e -> o.setErosionMethod( (ShrinkType) typeBox.getSelectedItem()));
+            typeBox.setSelectedItem(HashOptions.DEFAULT_EROSION_METHOD);
+            typeBox.addActionListener(e -> o.setString(HashOptions.SHELL_EROSION_METHOD_KEY, typeBox.getSelectedItem().toString()));
             
             labels.add(new JLabel("Erosion method"));
             fields.add(typeBox);
             
             
-            SpinnerNumberModel sModel = new SpinnerNumberModel(IShellOptions.DEFAULT_SHELL_COUNT, 2, 10, 1);
+            SpinnerNumberModel sModel = new SpinnerNumberModel(HashOptions.DEFAULT_SHELL_COUNT, 2, 10, 1);
             JSpinner spinner = new JSpinner(sModel);
-            spinner.addChangeListener(e-> o.setShellNumber( (int)sModel.getValue()));
+            spinner.addChangeListener(e-> o.setInt(HashOptions.SHELL_COUNT_INT, (int)sModel.getValue()));
             
             labels.add(new JLabel("Number of shells"));
             fields.add(spinner);

@@ -28,10 +28,7 @@ import javax.swing.JLabel;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 
-import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
-import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.IDetectionSubOptions;
-import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
-import com.bmskinner.nuclear_morphology.components.options.PreprocessingOptions;
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 @SuppressWarnings("serial")
@@ -61,16 +58,11 @@ public class ColourThresholdingSettingsPanel extends SettingsPanel {
     private JSpinner minBriSpinner;
     private JSpinner maxBriSpinner;
 
-    private PreprocessingOptions options;
+    private HashOptions options;
 
-    public ColourThresholdingSettingsPanel(final IDetectionOptions options) {
+    public ColourThresholdingSettingsPanel(final HashOptions options) {
 
-        try {
-            this.options = (PreprocessingOptions) options.getSubOptions(IDetectionSubOptions.BACKGROUND_OPTIONS);
-        } catch (MissingOptionException e) {
-            LOGGER.warning("Missing background options");
-            LOGGER.log(Loggable.STACK, e.getMessage(), e);
-        }
+        this.options = options;
 
         createSpinners();
         createPanel();
@@ -85,33 +77,33 @@ public class ColourThresholdingSettingsPanel extends SettingsPanel {
         // JXMultiThumbSlider sl = new JXMultiThumbSlider();
 
         minHueSpinner = new JSpinner(
-                new SpinnerNumberModel(Integer.valueOf(options.getInt(PreprocessingOptions.MIN_HUE)), THRESHOLD_MIN,
+                new SpinnerNumberModel(Integer.valueOf(options.getInt(HashOptions.MIN_HUE)), THRESHOLD_MIN,
                         THRESHOLD_MAX, THRESHOLD_STEP));
 
         maxHueSpinner = new JSpinner(
-                new SpinnerNumberModel(Integer.valueOf(options.getInt(PreprocessingOptions.MAX_HUE)), THRESHOLD_MIN,
+                new SpinnerNumberModel(Integer.valueOf(options.getInt(HashOptions.MAX_HUE)), THRESHOLD_MIN,
                         THRESHOLD_MAX, THRESHOLD_STEP));
 
         minSatSpinner = new JSpinner(
-                new SpinnerNumberModel(Integer.valueOf(options.getInt(PreprocessingOptions.MIN_SAT)), THRESHOLD_MIN,
+                new SpinnerNumberModel(Integer.valueOf(options.getInt(HashOptions.MIN_SAT)), THRESHOLD_MIN,
                         THRESHOLD_MAX, THRESHOLD_STEP));
 
         maxSatSpinner = new JSpinner(
-                new SpinnerNumberModel(Integer.valueOf(options.getInt(PreprocessingOptions.MAX_SAT)), THRESHOLD_MIN,
+                new SpinnerNumberModel(Integer.valueOf(options.getInt(HashOptions.MAX_SAT)), THRESHOLD_MIN,
                         THRESHOLD_MAX, THRESHOLD_STEP));
 
         minBriSpinner = new JSpinner(
-                new SpinnerNumberModel(Integer.valueOf(options.getInt(PreprocessingOptions.MIN_BRI)), THRESHOLD_MIN,
+                new SpinnerNumberModel(Integer.valueOf(options.getInt(HashOptions.MIN_BRI)), THRESHOLD_MIN,
                         THRESHOLD_MAX, THRESHOLD_STEP));
 
         maxBriSpinner = new JSpinner(
-                new SpinnerNumberModel(Integer.valueOf(options.getInt(PreprocessingOptions.MAX_BRI)), THRESHOLD_MIN,
+                new SpinnerNumberModel(Integer.valueOf(options.getInt(HashOptions.MAX_BRI)), THRESHOLD_MIN,
                         THRESHOLD_MAX, THRESHOLD_STEP));
 
-        useThresholdCheckBox = new JCheckBox("", options.getBoolean(PreprocessingOptions.USE_COLOUR_THRESHOLD));
+        useThresholdCheckBox = new JCheckBox("", options.getBoolean(HashOptions.IS_USE_COLOUR_THRESHOLD));
         useThresholdCheckBox.addActionListener(e -> {
             boolean isActive = useThresholdCheckBox.isSelected();
-            options.setUseColourThreshold(isActive);
+            options.setBoolean(HashOptions.IS_USE_COLOUR_THRESHOLD, isActive);
             minHueSpinner.setEnabled(isActive);
             maxHueSpinner.setEnabled(isActive);
             minSatSpinner.setEnabled(isActive);
@@ -133,7 +125,9 @@ public class ColourThresholdingSettingsPanel extends SettingsPanel {
 
                 }
 
-                options.setHueThreshold((int) j.getValue(), (int) maxHueSpinner.getValue());
+                options.setInt(HashOptions.MIN_HUE, (int) j.getValue());
+                options.setInt(HashOptions.MAX_HUE, (int) maxHueSpinner.getValue());
+
                 fireOptionsChangeEvent();
             } catch (ParseException e1) {
                 LOGGER.warning("Parsing exception");
@@ -154,7 +148,9 @@ public class ColourThresholdingSettingsPanel extends SettingsPanel {
 
                 }
 
-                options.setHueThreshold((int) minHueSpinner.getValue(), (int) j.getValue());
+                options.setInt(HashOptions.MIN_HUE, (int) minHueSpinner.getValue());
+                options.setInt(HashOptions.MAX_HUE, (int) j.getValue());
+
                 fireOptionsChangeEvent();
             } catch (ParseException e1) {
                 LOGGER.warning("Parsing exception");
@@ -174,8 +170,10 @@ public class ColourThresholdingSettingsPanel extends SettingsPanel {
                     j.setValue(value.intValue() - 1); // Cannot be above max
 
                 }
+                
+                options.setInt(HashOptions.MIN_SAT, (int) j.getValue());
+                options.setInt(HashOptions.MAX_SAT, (int) maxSatSpinner.getValue());
 
-                options.setSaturationThreshold((int) j.getValue(), (int) maxSatSpinner.getValue());
                 fireOptionsChangeEvent();
             } catch (ParseException e1) {
                 LOGGER.warning("Parsing exception");
@@ -195,8 +193,9 @@ public class ColourThresholdingSettingsPanel extends SettingsPanel {
                     j.setValue(value.intValue() + 1); // Cannot be above max
 
                 }
-
-                options.setSaturationThreshold((int) minSatSpinner.getValue(), (int) j.getValue());
+                
+                options.setInt(HashOptions.MIN_SAT, (int) minSatSpinner.getValue());
+                options.setInt(HashOptions.MAX_SAT, (int) j.getValue());
                 fireOptionsChangeEvent();
             } catch (ParseException e1) {
                 LOGGER.warning("Parsing exception");
@@ -217,7 +216,9 @@ public class ColourThresholdingSettingsPanel extends SettingsPanel {
 
                 }
 
-                options.setBrightnessThreshold((int) j.getValue(), (int) maxBriSpinner.getValue());
+                options.setInt(HashOptions.MIN_BRI, (int) j.getValue());
+                options.setInt(HashOptions.MAX_BRI, (int) maxBriSpinner.getValue());
+
                 fireOptionsChangeEvent();
             } catch (ParseException e1) {
                 LOGGER.warning("Parsing exception");
@@ -238,7 +239,9 @@ public class ColourThresholdingSettingsPanel extends SettingsPanel {
 
                 }
 
-                options.setBrightnessThreshold((int) minBriSpinner.getValue(), (int) j.getValue());
+                options.setInt(HashOptions.MIN_BRI, (int) minBriSpinner.getValue());
+                options.setInt(HashOptions.MAX_BRI, (int) j.getValue());
+
                 fireOptionsChangeEvent();
             } catch (ParseException e1) {
                 LOGGER.warning("Parsing exception");

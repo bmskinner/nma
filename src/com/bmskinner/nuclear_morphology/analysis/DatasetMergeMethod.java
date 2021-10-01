@@ -36,15 +36,13 @@ import com.bmskinner.nuclear_morphology.components.datasets.DefaultCellCollectio
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.nuclei.NucleusType;
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
-import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.IDetectionSubOptions;
-import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.components.signals.DefaultSignalGroup;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.io.Io;
@@ -122,7 +120,7 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 
     		// make a new collection
     		ICellCollection newCollection = new DefaultCellCollection(newDatasetFolder, null, newDatasetName,
-    				datasets.get(0).getCollection().getNucleusType());
+    				datasets.get(0).getCollection().getRuleSetCollection());
 
     		IAnalysisDataset newDataset = performMerge(newCollection);
 
@@ -161,15 +159,15 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
     }
 
     /**
-     * Check if the nucleus classes of all datasets match Cannot merge
+     * Check if the nucleus classes of all datasets match. Cannot merge
      * collections with different classes
      * 
      * @return true if all collection have the same nucleus type, false otherwise
      */
     private boolean nucleiHaveSameType() {
-        NucleusType testClass = datasets.get(0).getCollection().getNucleusType();
+        RuleSetCollection testClass = datasets.get(0).getCollection().getRuleSetCollection();
         for (IAnalysisDataset d : datasets) {
-            if (!d.getCollection().getNucleusType().equals(testClass))
+            if (!d.getCollection().getRuleSetCollection().equals(testClass))
                 return false;
         }
         return true;
@@ -240,12 +238,12 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
      */
     private IAnalysisOptions mergeOptions(IAnalysisDataset newDataset) throws MissingOptionException {
     	IAnalysisOptions mergedOptions = OptionsFactory.makeAnalysisOptions();
-    	IDetectionOptions nucleus = OptionsFactory.makeNucleusDetectionOptions((File)null);
+    	HashOptions nucleus = OptionsFactory.makeNucleusDetectionOptions((File)null);
 
     	IAnalysisDataset d1 = datasets.get(0);
     	IAnalysisOptions d1Options = d1.getAnalysisOptions().orElseThrow(MissingOptionException::new);
 		
-		List<IDetectionOptions> templates = new ArrayList<>();
+		List<HashOptions> templates = new ArrayList<>();
 		for (IAnalysisDataset d : datasets) {
 			IAnalysisOptions dOptions = d.getAnalysisOptions().orElseThrow(MissingOptionException::new);
 			templates.add(dOptions.getNuclusDetectionOptions().orElseThrow(MissingOptionException::new));
@@ -253,13 +251,13 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 		mergeDetectionOptions(nucleus, templates);
 
     	mergedOptions.setDetectionOptions(CellularComponent.NUCLEUS, nucleus);
-    	mergedOptions.setNucleusType(d1Options.getNucleusType());
+    	mergedOptions.setRuleSetCollection(d1Options.getRuleSetCollection());
     	mergedOptions.setAngleWindowProportion(d1Options.getProfileWindowProportion());
 
     	
     	// Merge signal group options
     	for(UUID signalGroupId : newDataset.getCollection().getSignalGroupIDs()) {
-    		INuclearSignalOptions signal = OptionsFactory.makeNuclearSignalOptions((File)null);    		
+    		HashOptions signal = OptionsFactory.makeNuclearSignalOptions((File)null);    		
     		//TODO: Merge the signal detection options
     		mergedOptions.setDetectionOptions(IAnalysisOptions.SIGNAL_GROUP+signalGroupId.toString(), signal);
     	}
@@ -276,10 +274,10 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
      * @param templates
      * @throws MissingOptionException
      */
-    private void mergeDetectionOptions(IDetectionOptions merged, List<IDetectionOptions> templates) throws MissingOptionException {
+    private void mergeDetectionOptions(HashOptions merged, List<HashOptions> templates) throws MissingOptionException {
     	
     	// Get a base template to compare the others to
-    	IDetectionOptions t1 = templates.get(0);
+    	HashOptions t1 = templates.get(0);
     	
     	mergeFloatOptions(merged, t1);
     	
@@ -293,13 +291,13 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
     	
     }
     
-    private void mergeFloatOptions(IDetectionOptions merged, IDetectionOptions template) throws MissingOptionException {
+    private void mergeFloatOptions(HashOptions merged, HashOptions template) throws MissingOptionException {
     	for(String s : template.getFloatKeys()){
 			float result = template.getFloat(s);
 			boolean canAdd = true;
 			for (IAnalysisDataset d : datasets) {
 				IAnalysisOptions dOptions = d.getAnalysisOptions().orElseThrow(MissingOptionException::new);
-				IDetectionOptions nOptions = dOptions.getNuclusDetectionOptions().orElseThrow(MissingOptionException::new);
+				HashOptions nOptions = dOptions.getNuclusDetectionOptions().orElseThrow(MissingOptionException::new);
 				canAdd &= nOptions.getFloat(s)==result;
 			}
 			if(canAdd)
@@ -310,13 +308,13 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
     }
     
     
-    private void mergeDoubleOptions(IDetectionOptions merged, IDetectionOptions template) throws MissingOptionException {
+    private void mergeDoubleOptions(HashOptions merged, HashOptions template) throws MissingOptionException {
     	for(String s : template.getDoubleKeys()){
 			double result = template.getDouble(s);
 			boolean canAdd = true;
 			for (IAnalysisDataset d : datasets) {
 				IAnalysisOptions dOptions = d.getAnalysisOptions().orElseThrow(MissingOptionException::new);
-				IDetectionOptions nOptions = dOptions.getNuclusDetectionOptions().orElseThrow(MissingOptionException::new);
+				HashOptions nOptions = dOptions.getNuclusDetectionOptions().orElseThrow(MissingOptionException::new);
 				canAdd &= nOptions.getDouble(s)==result;
 			}
 			if(canAdd)
@@ -326,13 +324,13 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 		}
     }
     
-    private void mergeIntOptions(IDetectionOptions merged, IDetectionOptions template) throws MissingOptionException {
+    private void mergeIntOptions(HashOptions merged, HashOptions template) throws MissingOptionException {
     	for(String s : template.getIntegerKeys()){
 			int result = template.getInt(s);
 			boolean canAdd = true;
 			for (IAnalysisDataset d : datasets) {
 				IAnalysisOptions dOptions = d.getAnalysisOptions().orElseThrow(MissingOptionException::new);
-				IDetectionOptions nOptions = dOptions.getNuclusDetectionOptions().orElseThrow(MissingOptionException::new);
+				HashOptions nOptions = dOptions.getNuclusDetectionOptions().orElseThrow(MissingOptionException::new);
 				canAdd &= nOptions.getInt(s)==result;
 			}
 			if(canAdd)
@@ -342,13 +340,13 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 		}
     }
     
-    private void mergeStringOptions(IDetectionOptions merged, IDetectionOptions template) throws MissingOptionException {
+    private void mergeStringOptions(HashOptions merged, HashOptions template) throws MissingOptionException {
     	for(String s : template.getStringKeys()){
 			String result = template.getString(s);
 			boolean canAdd = true;
 			for (IAnalysisDataset d : datasets) {
 				IAnalysisOptions dOptions = d.getAnalysisOptions().orElseThrow(MissingOptionException::new);
-				IDetectionOptions nOptions = dOptions.getNuclusDetectionOptions().orElseThrow(MissingOptionException::new);
+				HashOptions nOptions = dOptions.getNuclusDetectionOptions().orElseThrow(MissingOptionException::new);
 				canAdd &= nOptions.getString(s).equals(result);
 			}
 			if(canAdd)
@@ -358,13 +356,13 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 		}
     }
     
-    private void mergeSubOptions(IDetectionOptions merged, IDetectionOptions template) throws MissingOptionException {
+    private void mergeSubOptions(HashOptions merged, HashOptions template) throws MissingOptionException {
     	for(String s : template.getSubOptionKeys()){
-			IDetectionSubOptions mergedOptions = template.getSubOptions(s);
+			HashOptions mergedOptions = template.getSubOptions(s);
 			boolean canAdd = true;
 			for (IAnalysisDataset d : datasets) {
 				IAnalysisOptions dOptions = d.getAnalysisOptions().orElseThrow(MissingOptionException::new);
-				IDetectionOptions nOptions = dOptions.getNuclusDetectionOptions().orElseThrow(MissingOptionException::new);
+				HashOptions nOptions = dOptions.getNuclusDetectionOptions().orElseThrow(MissingOptionException::new);
 				if(nOptions.hasSubOptions(s))
 					canAdd &= nOptions.getSubOptions(s).equals(mergedOptions);
 				else

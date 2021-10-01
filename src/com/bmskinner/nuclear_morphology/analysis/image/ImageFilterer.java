@@ -17,20 +17,14 @@
 package com.bmskinner.nuclear_morphology.analysis.image;
 
 import java.awt.Dimension;
-import java.awt.Point;
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.detection.CannyEdgeDetector;
-import com.bmskinner.nuclear_morphology.analysis.detection.Hough_Circles;
 import com.bmskinner.nuclear_morphology.analysis.detection.Kuwahara_Filter;
-import com.bmskinner.nuclear_morphology.components.generic.IPoint;
-import com.bmskinner.nuclear_morphology.components.options.ICannyOptions;
-import com.bmskinner.nuclear_morphology.components.options.IHoughDetectionOptions;
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 import ij.ImagePlus;
@@ -222,7 +216,6 @@ public class ImageFilterer extends AbstractImageFilterer {
 
                 int[][] kernel = getKernel(input, x, y);
                 if (bridgePixel(kernel)) {
-                    // IJ.log( "Bridge "+y+" "+x);
                     array[y][x] = 255;
                 }
             }
@@ -371,7 +364,6 @@ public class ImageFilterer extends AbstractImageFilterer {
          * If the central pixel is filled, do nothing.
          */
         if (array[1][1] == 255) {
-            // System.out.println("Skip, filled");
             return false;
         }
 
@@ -392,7 +384,6 @@ public class ImageFilterer extends AbstractImageFilterer {
         }
 
         if (vStripe < 3 && hStripe < 3) {
-            // System.out.println("No stripe");
             return false;
         }
 
@@ -506,12 +497,12 @@ public class ImageFilterer extends AbstractImageFilterer {
      * @param options the canny options
      * @return this filterer with a new ByteProcessor containing the edge detected image
      */
-    public ImageFilterer cannyEdgeDetection(@NonNull ICannyOptions options) {
+    public ImageFilterer cannyEdgeDetection(@NonNull HashOptions options) {
     	LOGGER.finest("Running Canny edge detection");
         ByteProcessor result = null;
 
         // // calculation of auto threshold
-        if (options.isCannyAutoThreshold()) {
+        if (options.getBoolean(HashOptions.IS_CANNY_AUTO_THRESHOLD)) {
             autoDetectCannyThresholds(options, ip);
         }
 
@@ -526,47 +517,9 @@ public class ImageFilterer extends AbstractImageFilterer {
         converted.getGraphics().drawImage(edges, 0, 0, null);
 
         result = new ByteProcessor(converted);
-
-        converted = null;
         ip = result;
         LOGGER.finest("Ran Canny edge detection");
         return this;
-    }
-
-    /**
-     * Run circle detection using given Hough transform options
-     * 
-     * @param options the detection options
-     * @return the points at the centres of the detected circles
-     */
-    public List<IPoint> houghCircleDetection(@NonNull IHoughDetectionOptions options) {
-
-        LOGGER.finest("Running hough detection");
-
-        Hough_Circles circ = new Hough_Circles();
-
-        circ.threshold = options.getHoughThreshold();
-        circ.maxCircles = options.getNumberOfCircles();
-        circ.radiusMin = (int) options.getMinRadius();
-        circ.radiusMax = (int) options.getMaxRadius();
-        circ.radiusInc = 1;
-
-        // Repeat the nucleus detection parameters
-
-        circ.run(ip);
-
-        List<IPoint> list = new ArrayList<>();
-        Point[] points = circ.centerPoint;
-
-        if (points != null) {
-            for (Point p : points) {
-                if (p != null) {
-                    list.add(IPoint.makeNew(p.getX(), p.getY()));
-                }
-            }
-        }
-        LOGGER.finest("Ran hough detection");
-        return list;
     }
 
     /**
@@ -576,7 +529,7 @@ public class ImageFilterer extends AbstractImageFilterer {
      * @param optons the canny options
      * @param image the image to analyse
      */
-    private void autoDetectCannyThresholds(ICannyOptions options, ImageProcessor image) {
+    private void autoDetectCannyThresholds(HashOptions options, ImageProcessor image) {
         // calculation of auto threshold
 
         // find the median intensity of the image
@@ -596,10 +549,8 @@ public class ImageFilterer extends AbstractImageFilterer {
         double upper = Math.min(255, (1.0 + (0.6 * sigma)) * medianPixel);
         upper = upper < 0.3 ? 0.3 : upper; // hard limit
 
-        if (options instanceof ICannyOptions) {
-            ((ICannyOptions) options).setLowThreshold((float) lower);
-            ((ICannyOptions) options).setHighThreshold((float) upper);
-        }
+        options.setFloat(HashOptions.CANNY_LOW_THRESHOLD_FLT, (float) lower);
+        options.setFloat(HashOptions.CANNY_HIGH_THRESHOLD_FLT, (float) upper);
     }
 
     /**

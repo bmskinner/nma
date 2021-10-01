@@ -44,7 +44,7 @@ import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalCollection;
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult.ShrinkType;
 import com.bmskinner.nuclear_morphology.gui.components.SelectableCellIcon;
@@ -87,9 +87,9 @@ public class ShellOverviewDialog extends AbstractCellCollectionDialog {
 		String folderPath = "";
 		Optional<IAnalysisOptions> analOpt = dataset.getAnalysisOptions();
 		if(analOpt.isPresent()) {
-			Optional<IDetectionOptions> nuclOpt = analOpt.get().getNuclusDetectionOptions();
+			Optional<HashOptions> nuclOpt = analOpt.get().getNuclusDetectionOptions();
 			if(nuclOpt.isPresent())
-				folderPath = nuclOpt.get().getFolder().getAbsolutePath();
+				folderPath = nuclOpt.get().getFile(HashOptions.DETECTION_FOLDER).getAbsolutePath();
 		}
 
 		header.add(new JLabel(HEADER_LBL + folderPath));

@@ -43,7 +43,7 @@ import com.bmskinner.nuclear_morphology.components.Version;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult;
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult.Aggregation;
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult.CountType;
@@ -103,11 +103,12 @@ public class DemoReportGenerator {
 				
 				File chartFile = new File(saveFolder, dataset.getName()+"_"+group.getGroupName()+Io.PNG_FILE_EXTENSION);
 				
-				IDetectionOptions signalOptions = dataset.getAnalysisOptions().get().getNuclearSignalOptions(signalGroupId);
+				HashOptions signalOptions = dataset.getAnalysisOptions().get().getNuclearSignalOptions(signalGroupId);
 				
 				JFreeChart chart = new ShellChartFactory(barChartOptions).createShellChart();
 				chart.setTitle(String.format("%s", dataset.getName()));
-				Title channelSubtitle = new TextTitle(String.format("Signal group: %s (%s)", group.getGroupName(), ImageImporter.channelIntToName(signalOptions.getChannel())));
+				Title channelSubtitle = new TextTitle(String.format("Signal group: %s (%s)", group.getGroupName(), 
+						ImageImporter.channelIntToName(signalOptions.getInt(HashOptions.CHANNEL))));
 				chart.addSubtitle(channelSubtitle);
 				
 				if(random.isPresent()) {
@@ -154,7 +155,7 @@ public class DemoReportGenerator {
 
 		Map<Integer, UUID> channelMap = new HashMap<>();
 		for(UUID id : dataset.getAnalysisOptions().get().getNuclearSignalGroups()) {
-			int channel = dataset.getAnalysisOptions().get().getNuclearSignalOptions(id).getChannel();
+			int channel = dataset.getAnalysisOptions().get().getNuclearSignalOptions(id).getInt(HashOptions.CHANNEL);
 			channelMap.put(channel, id);
 		}
 		

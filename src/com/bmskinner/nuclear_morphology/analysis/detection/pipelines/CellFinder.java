@@ -25,7 +25,10 @@ import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
+import com.bmskinner.nuclear_morphology.components.measure.Measurement;
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
@@ -78,6 +81,20 @@ public abstract class CellFinder extends AbstractFinder<Collection<ICell>> {
     		LOGGER.finer("Found images in "+f.getName());
     	});
     	return list;
+    }
+    
+    public static boolean isValid(HashOptions o, CellularComponent c) {
+    	if (c == null)
+            return false;
+        if (c.getStatistic(Measurement.AREA) < o.getInt(HashOptions.MIN_SIZE_PIXELS))
+            return false;
+        if (c.getStatistic(Measurement.AREA) > o.getInt(HashOptions.MAX_SIZE_PIXELS))
+            return false;
+        if (c.getStatistic(Measurement.CIRCULARITY) < o.getDouble(HashOptions.MIN_CIRC))
+            return false;
+        if (c.getStatistic(Measurement.CIRCULARITY) > o.getDouble(HashOptions.MAX_CIRC))
+            return false;
+        return true;
     }
 
 }

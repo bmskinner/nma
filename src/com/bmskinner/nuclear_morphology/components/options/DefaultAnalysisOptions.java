@@ -20,6 +20,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -27,8 +29,8 @@ import java.util.UUID;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.rules.RuleApplicationType;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
+import com.bmskinner.nuclear_morphology.io.Io;
 
 /**
  * The default implementation of the IAnalysisOptions interface
@@ -41,7 +43,7 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
 
     private static final long serialVersionUID = 1L;
 
-    private Map<String, IDetectionOptions> detectionOptions = new HashMap<>();
+    private Map<String, HashOptions> detectionOptions = new HashMap<>();
 
     private double profileWindowProportion;
 
@@ -52,9 +54,6 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
     /* Store options that are not detection options. For example, clustering or tSNE options */
      private Map<String, HashOptions> secondaryOptions = new HashMap<>();
      
-     /** How border tags should be detected in this dataset */
-     private RuleApplicationType ruleApplicationType = RuleApplicationType.VIA_MEDIAN;
-
 
     /**
      * The default constructor, which sets default options specified in
@@ -81,12 +80,11 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
 	}
 
     @Override
-    public Optional<IDetectionOptions> getDetectionOptions(String key){
+    public Optional<HashOptions> getDetectionOptions(String key){
         if (detectionOptions.containsKey(key)) {
             return Optional.of(detectionOptions.get(key));
         }
 		return Optional.empty();
-
     }
 
     @Override
@@ -95,7 +93,17 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
     }
     
 	@Override
-	public Optional<IDetectionOptions> getNuclusDetectionOptions() {
+	public RuleSetCollection getRuleSetCollection() {
+		return rulesets;
+	}
+
+	@Override
+	public void setRuleSetCollection(RuleSetCollection rsc) {
+		rulesets = rsc;
+	}
+    
+	@Override
+	public Optional<HashOptions> getNuclusDetectionOptions() {
 		return getDetectionOptions(CellularComponent.NUCLEUS);
 	}
 
@@ -161,7 +169,7 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
     }
 
     @Override
-    public void setDetectionOptions(String key, IDetectionOptions options) {
+    public void setDetectionOptions(String key, HashOptions options) {
         detectionOptions.put(key, options);
     }
     
@@ -177,25 +185,20 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
     }
 
     @Override
-    public INuclearSignalOptions getNuclearSignalOptions(@NonNull UUID signalGroup) {
-
-    	Optional<IDetectionOptions> op = getDetectionOptions(SIGNAL_GROUP+signalGroup.toString());
+    public HashOptions getNuclearSignalOptions(@NonNull UUID signalGroup) {
+    	//TODO Ugly
+    	Optional<HashOptions> op = getDetectionOptions(SIGNAL_GROUP+signalGroup.toString());
     	
     	if(op.isPresent())
-    		return (INuclearSignalOptions) op.get();
+    		return op.get();
     	
-    	// If is is the old format
-    	op = getDetectionOptions(signalGroup.toString());
-    	if(op.isPresent())
-    		return (INuclearSignalOptions) op.get();
-
         return null;
     }
         
     @Override
     public void set(@NonNull IAnalysisOptions template) {
     	for (String key : template.getDetectionOptionTypes()) {
-            Optional<IDetectionOptions> op  = template.getDetectionOptions(key);
+            Optional<HashOptions> op  = template.getDetectionOptions(key);
             if(op.isPresent())
 	            setDetectionOptions(key, op.get().duplicate());
         }
@@ -203,88 +206,41 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
         profileWindowProportion = template.getProfileWindowProportion();
         rulesets = template.getRuleSetCollection();
     }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 0;
-
-        result = prime * result + detectionOptions.hashCode();
-
-        long temp = Double.doubleToLongBits(profileWindowProportion);
-        result = prime * result + (int) (temp ^ (temp >>> 32));
-
-        result = prime * result + rulesets.hashCode();
-        result = prime * result + ruleApplicationType.hashCode();
-
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o)
-            return true;
-        if (o == null)
-            return false;
-        if (!(o instanceof IAnalysisOptions))
-            return false;
-        IAnalysisOptions other = (IAnalysisOptions) o;
-        
-        Set<String> thisKeys  =  detectionOptions.keySet();
-        Set<String> otherKeys =  other.getDetectionOptionTypes();
-        
-        if(!thisKeys.equals(otherKeys))
-        	return false;
-
-        for (String key : thisKeys) {
-            IDetectionOptions subOptions = detectionOptions.get(key);
-            if(!other.hasDetectionOptions(key))
-            	return false;
-            Optional<IDetectionOptions> otherSubOp = other.getDetectionOptions(key);
-            if(!otherSubOp.isPresent())
-            	return false;
-            IDetectionOptions otherSub = otherSubOp.get();
-            if (!subOptions.equals(otherSub))
-            	return false;
-        }
-
-        if (Double.doubleToLongBits(profileWindowProportion) != Double
-                .doubleToLongBits(other.getProfileWindowProportion()))
-            return false;
-
-        if (!rulesets.equals(other.getRuleSetCollection()))
-            return false;
-   
-        return true;
-    }
-    
     
     @Override
+	public int hashCode() {
+		return Objects.hash(analysisTime, detectionOptions, profileWindowProportion, rulesets, secondaryOptions);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		DefaultAnalysisOptions other = (DefaultAnalysisOptions) obj;
+		return analysisTime == other.analysisTime && Objects.equals(detectionOptions, other.detectionOptions)
+				&& Double.doubleToLongBits(profileWindowProportion) == Double
+						.doubleToLongBits(other.profileWindowProportion)
+				&& Objects.equals(rulesets, other.rulesets) && Objects.equals(secondaryOptions, other.secondaryOptions);
+	}
+
+	@Override
     public String toString() {
-        StringBuilder b = new StringBuilder("Analysis options"+IDetectionOptions.NEWLINE);
-        b.append("Run at: "+analysisTime+IDetectionOptions.NEWLINE);
-        for (String s : detectionOptions.keySet()) {
-            b.append(s+IDetectionOptions.NEWLINE);
-            IDetectionOptions d = detectionOptions.get(s);
-            b.append(d.toString());
+        StringBuilder b = new StringBuilder("Analysis options"+Io.NEWLINE);
+        b.append("Run at: "+analysisTime+Io.NEWLINE);
+        for(Entry<String,HashOptions> e : detectionOptions.entrySet()) {
+            b.append(e.getKey()+Io.NEWLINE);
+            b.append(e.getValue().toString());
         }
-        b.append(IDetectionOptions.NEWLINE+profileWindowProportion);
-        b.append(IDetectionOptions.NEWLINE+rulesets.getName());
-        b.append(IDetectionOptions.NEWLINE+ruleApplicationType);
+        b.append(Io.NEWLINE+profileWindowProportion);
+        b.append(Io.NEWLINE+rulesets.getName());
         return b.toString();
     }  
     
     private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
     }
-
-	@Override
-	public RuleSetCollection getRuleSetCollection() {
-		return rulesets;
-	}
-
-	@Override
-	public void setRuleSetCollection(RuleSetCollection rsc) {
-		rulesets = rsc;
-	}
 }

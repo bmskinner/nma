@@ -52,6 +52,7 @@ import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.datasets.VirtualCellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
@@ -95,7 +96,9 @@ public class FishRemappingProberPanel extends GenericImageProberPanel {
     public FishRemappingProberPanel(@NonNull IAnalysisDataset dataset, @NonNull Finder<?> finder, Window parent)
             throws MissingOptionException {
 
-        super(dataset.getAnalysisOptions().get().getDetectionOptions(CellularComponent.NUCLEUS).get().getFolder(), finder, parent);
+        super(dataset.getAnalysisOptions().get()
+        		.getDetectionOptions(CellularComponent.NUCLEUS).get()
+        		.getFile(HashOptions.DETECTION_FOLDER), finder, parent);
 
         this.setHeaderLabelText(HEADER_LBL);
         this.dataset = dataset;

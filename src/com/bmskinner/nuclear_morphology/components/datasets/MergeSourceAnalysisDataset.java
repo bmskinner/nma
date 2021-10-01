@@ -32,8 +32,8 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.Version;
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -126,9 +126,9 @@ public class MergeSourceAnalysisDataset extends AbstractAnalysisDataset implemen
 		if(op.isPresent()){
 			Set<String> detectionOptions = op.get().getDetectionOptionTypes();
 			for(String detectedComponent : detectionOptions) {
-				Optional<IDetectionOptions> subOptions = op.get().getDetectionOptions(detectedComponent);
+				Optional<HashOptions> subOptions = op.get().getDetectionOptions(detectedComponent);
 				if(subOptions.isPresent())
-					subOptions.get().setScale(scale);
+					subOptions.get().setDouble(HashOptions.SCALE, scale);
 			}
 		}
 		

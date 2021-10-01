@@ -32,8 +32,8 @@ import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
@@ -54,7 +54,7 @@ public class SignalFinder extends AbstractFinder<List<INuclearSignal>> {
 	private static final Logger LOGGER = Logger.getLogger(SignalFinder.class.getName());
 
     private SignalDetector              detector;
-    private final INuclearSignalOptions signalOptions;
+    private final HashOptions signalOptions;
     private final ICellCollection       collection;
 
     /**
@@ -63,16 +63,16 @@ public class SignalFinder extends AbstractFinder<List<INuclearSignal>> {
      * @param signalOptions the signal group analysis options
      * @param collection the cell collection to detect within
      */
-    public SignalFinder(@NonNull IAnalysisOptions analysisOptions, @NonNull INuclearSignalOptions signalOptions, @NonNull ICellCollection collection) {
+    public SignalFinder(@NonNull IAnalysisOptions analysisOptions, @NonNull HashOptions signalOptions, @NonNull ICellCollection collection) {
         super(analysisOptions);
         this.signalOptions = signalOptions;
         this.collection = collection;
 
-        INuclearSignalOptions testOptions = (INuclearSignalOptions) signalOptions.duplicate();
-        testOptions.setMinSize(5);
-        testOptions.setMaxFraction(1d);
+        HashOptions testOptions = signalOptions.duplicate();
+        testOptions.setInt(HashOptions.MIN_SIZE_PIXELS, 5);
+        testOptions.setDouble(HashOptions.MAX_FRACTION, 1d);
 
-        detector = new SignalDetector(testOptions, testOptions.getChannel());
+        detector = new SignalDetector(testOptions, testOptions.getInt(HashOptions.CHANNEL));
     }
 
     @Override
@@ -104,15 +104,15 @@ public class SignalFinder extends AbstractFinder<List<INuclearSignal>> {
 
         List<INuclearSignal> list = new ArrayList<>();
 
-        INuclearSignalOptions testOptions = (INuclearSignalOptions) signalOptions.duplicate();
-        testOptions.setMinSize(5);
-        testOptions.setMaxFraction(1d);
-        detector = new SignalDetector(testOptions, testOptions.getChannel());
+        HashOptions testOptions = signalOptions.duplicate();
+        testOptions.setInt(HashOptions.MIN_SIZE_PIXELS, 5);
+        testOptions.setDouble(HashOptions.MAX_FRACTION, 1d);
+        detector = new SignalDetector(testOptions, testOptions.getInt(HashOptions.CHANNEL));
 
         ImageStack stack = new ImageImporter(imageFile).importToStack();
 
         // Find the processor number in the stack to use
-        int stackNumber = ImageImporter.rgbToStack(signalOptions.getChannel());
+        int stackNumber = ImageImporter.rgbToStack(signalOptions.getInt(HashOptions.CHANNEL));
 
         // Ignore incorrect channel selections
         if (stack.getSize() < stackNumber) {
@@ -139,7 +139,7 @@ public class SignalFinder extends AbstractFinder<List<INuclearSignal>> {
         // name
 
         String imageName = imageFile.getName();
-        File dapiFolder = options.getDetectionOptions(CellularComponent.NUCLEUS).get().getFolder();
+        File dapiFolder = options.getDetectionOptions(CellularComponent.NUCLEUS).get().getFile(HashOptions.DETECTION_FOLDER);
 
         File dapiFile = new File(dapiFolder, imageName);
 
@@ -188,7 +188,7 @@ public class SignalFinder extends AbstractFinder<List<INuclearSignal>> {
      */
     public List<INuclearSignal> findInImage(@NonNull File imageFile, @NonNull Nucleus n) throws ImageImportException {
 
-        detector = new SignalDetector(signalOptions, signalOptions.getChannel());
+        detector = new SignalDetector(signalOptions, signalOptions.getInt(HashOptions.CHANNEL));
 
         List<INuclearSignal> list = new ArrayList<>();
         try {
@@ -232,8 +232,8 @@ public class SignalFinder extends AbstractFinder<List<INuclearSignal>> {
      * @return
      */
     private boolean checkSignal(@NonNull INuclearSignal s, @NonNull Nucleus n) {
-        return (s.getStatistic(Measurement.AREA) >= signalOptions.getMinSize()
-        		&& s.getStatistic(Measurement.AREA) <= (signalOptions.getMaxFraction() * n.getStatistic(Measurement.AREA)));
+        return (s.getStatistic(Measurement.AREA) >= signalOptions.getInt(HashOptions.MIN_SIZE_PIXELS)
+        		&& s.getStatistic(Measurement.AREA) <= (signalOptions.getDouble(HashOptions.MAX_FRACTION) * n.getStatistic(Measurement.AREA)));
     }
 
 }

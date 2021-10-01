@@ -28,9 +28,7 @@ import javax.swing.JLabel;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 
-import com.bmskinner.nuclear_morphology.components.options.ICannyOptions;
-import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
-import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -41,7 +39,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  *
  */
 @SuppressWarnings("serial")
-public class ImagePreprocessingSettingsPanel extends SettingsPanel {
+public class ImagePreprocessingSettingsPanel extends DetectionSettingsPanel {
 	
 	private static final Logger LOGGER = Logger.getLogger(ImagePreprocessingSettingsPanel.class.getName());
 
@@ -55,7 +53,6 @@ public class ImagePreprocessingSettingsPanel extends SettingsPanel {
 
     private static final String USE_KUWAHARA_LBL          = "Kuwahara filter";
     private static final String FLATTEN_CHROMOCENTRES_LBL = "Flatten chromocentres";
-    // private static final String ADD_BORDER_LBL = "Add border to images";
 
     private static final String KUWAHARA_KERNEL_LBL      = "Kuwahara kernel";
     private static final String FLATTENING_THRESHOLD_LBL = "Flattening threshold";
@@ -68,14 +65,8 @@ public class ImagePreprocessingSettingsPanel extends SettingsPanel {
 
     private JCheckBox addBorderCheckBox;
 
-    private ICannyOptions options;
-
-    public ImagePreprocessingSettingsPanel(final IDetectionOptions options) {
-        try {
-            this.options = options.getCannyOptions();
-        } catch (MissingOptionException e) {
-            LOGGER.warning("missing Canny options");
-        }
+    public ImagePreprocessingSettingsPanel(HashOptions options) {
+    	super(options);
         createSpinners();
         createPanel();
     }
@@ -88,18 +79,11 @@ public class ImagePreprocessingSettingsPanel extends SettingsPanel {
 	protected void update() {
         super.update();
 
-        kuwaharaRadiusSpinner.setValue(options.getKuwaharaKernel());
-        flattenImageThresholdSpinner.setValue(options.getFlattenThreshold());
+        kuwaharaRadiusSpinner.setValue(options.getInt(HashOptions.KUWAHARA_RADIUS_INT));
+        flattenImageThresholdSpinner.setValue(options.getInt(HashOptions.FLATTENING_THRESHOLD_INT));
 
-        useKuwaharaCheckBox.setSelected(options.isUseKuwahara());
-        flattenImageCheckBox.setSelected(options.isUseFlattenImage());
-
-    }
-
-    public void set(final ICannyOptions options) {
-
-        this.options.set(options);
-        update();
+        useKuwaharaCheckBox.setSelected(options.getBoolean(HashOptions.IS_USE_KUWAHARA));
+        flattenImageCheckBox.setSelected(options.getBoolean(HashOptions.IS_USE_FLATTENING));
 
     }
 
@@ -109,40 +93,37 @@ public class ImagePreprocessingSettingsPanel extends SettingsPanel {
      */
     private void createSpinners() {
 
-        kuwaharaRadiusSpinner = new JSpinner(new SpinnerNumberModel(Integer.valueOf(options.getKuwaharaKernel()),
+        kuwaharaRadiusSpinner = new JSpinner(new SpinnerNumberModel(Integer.valueOf(options.getInt(HashOptions.KUWAHARA_RADIUS_INT)),
                 KUWAHARA_WIDTH_MIN, KUWAHARA_WIDTH_MAX, KUWAHARA_WIDTH_STEP));
 
         flattenImageThresholdSpinner = new JSpinner(
-                new SpinnerNumberModel(Integer.valueOf(options.getFlattenThreshold()), FLATTEN_THRESHOLD_MIN,
+                new SpinnerNumberModel(Integer.valueOf(options.getInt(HashOptions.FLATTENING_THRESHOLD_INT)), FLATTEN_THRESHOLD_MIN,
                         FLATTEN_THRESHOLD_MAX, FLATTEN_THRESHOLD_STEP));
 
-        useKuwaharaCheckBox = new JCheckBox("", options.isUseKuwahara());
+        useKuwaharaCheckBox = new JCheckBox("", options.getBoolean(HashOptions.IS_USE_KUWAHARA));
         useKuwaharaCheckBox.addActionListener(e -> {
-            options.setUseKuwahara(useKuwaharaCheckBox.isSelected());
-            kuwaharaRadiusSpinner.setEnabled(useKuwaharaCheckBox.isSelected());
-            fireOptionsChangeEvent();
+        	kuwaharaRadiusSpinner.setEnabled(useKuwaharaCheckBox.isSelected());
+        	updateOptions(HashOptions.IS_USE_KUWAHARA, useKuwaharaCheckBox.isSelected());
+
         });
 
-        flattenImageCheckBox = new JCheckBox("", options.isUseFlattenImage());
+        flattenImageCheckBox = new JCheckBox("", options.getBoolean(HashOptions.IS_USE_FLATTENING));
         flattenImageCheckBox.addActionListener(e -> {
-            options.setFlattenImage(flattenImageCheckBox.isSelected());
             flattenImageThresholdSpinner.setEnabled(flattenImageCheckBox.isSelected());
-            fireOptionsChangeEvent();
+            updateOptions(HashOptions.IS_USE_FLATTENING, flattenImageCheckBox.isSelected());
         });
 
         // Add the border adding box
-        addBorderCheckBox = new JCheckBox("", options.isAddBorder());
+        addBorderCheckBox = new JCheckBox("", options.getBoolean(HashOptions.IS_CANNY_ADD_BORDER));
         addBorderCheckBox.addActionListener(e -> {
-            options.setAddBorder(addBorderCheckBox.isSelected());
-            fireOptionsChangeEvent();
+        	updateOptions(HashOptions.IS_CANNY_ADD_BORDER, addBorderCheckBox.isSelected());
         });
 
         flattenImageThresholdSpinner.addChangeListener(e -> {
             try {
                 JSpinner j = (JSpinner) e.getSource();
                 j.commitEdit();
-                options.setFlattenThreshold((Integer) j.getValue());
-                fireOptionsChangeEvent();
+                updateOptions(HashOptions.FLATTENING_THRESHOLD_INT, (Integer) j.getValue());
             } catch (ParseException e1) {
                 LOGGER.warning("Parsing exception");
                 LOGGER.log(Loggable.STACK, "Parsing error in JSpinner", e1);
@@ -161,8 +142,7 @@ public class ImagePreprocessingSettingsPanel extends SettingsPanel {
                     j.setValue(value.intValue() - 1);
 
                 } else {
-                    options.setKuwaharaKernel(value);
-                    fireOptionsChangeEvent();
+                	updateOptions(HashOptions.KUWAHARA_RADIUS_INT, (Integer) j.getValue());
                 }
 
             } catch (ParseException e1) {
@@ -178,8 +158,8 @@ public class ImagePreprocessingSettingsPanel extends SettingsPanel {
 
         this.setLayout(new GridBagLayout());
 
-        List<JLabel> labelList = new ArrayList<JLabel>();
-        List<JComponent> fieldList = new ArrayList<JComponent>();
+        List<JLabel> labelList = new ArrayList<>();
+        List<JComponent> fieldList = new ArrayList<>();
 
         labelList.add(new JLabel(USE_KUWAHARA_LBL));
         labelList.add(new JLabel(KUWAHARA_KERNEL_LBL));

@@ -31,7 +31,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.io.Io;
 import com.bmskinner.nuclear_morphology.io.Io.Importer;
@@ -146,11 +146,11 @@ public class FileSelector {
         if(!op.isPresent())
         	return null;
         
-        Optional<IDetectionOptions> im = op.get().getDetectionOptions(CellularComponent.NUCLEUS);
+        Optional<HashOptions> im = op.get().getDetectionOptions(CellularComponent.NUCLEUS);
         if(!im.isPresent())
         	return null;
 
-        defaultDir = im.get().getFolder();
+        defaultDir = im.get().getFile(HashOptions.DETECTION_FOLDER);
         return chooseOpenFile(defaultDir, filter, "Choose remapping file");
     }
     
@@ -301,11 +301,11 @@ public class FileSelector {
         if(!op.isPresent())
         	return null;
         
-        Optional<IDetectionOptions> im = op.get().getDetectionOptions(CellularComponent.NUCLEUS);
+        Optional<HashOptions> im = op.get().getDetectionOptions(CellularComponent.NUCLEUS);
         if(!im.isPresent())
         	return null;
 
-        File defaultDir = im.get().getFolder();
+        File defaultDir = im.get().getFile(HashOptions.DETECTION_FOLDER);
         return chooseFolder(null, defaultDir);
     }
     
@@ -321,11 +321,11 @@ public class FileSelector {
         if(!op.isPresent())
         	return null;
         
-        Optional<IDetectionOptions> im = op.get().getDetectionOptions(CellularComponent.NUCLEUS);
+        Optional<HashOptions> im = op.get().getDetectionOptions(CellularComponent.NUCLEUS);
         if(!im.isPresent())
         	return null;
         
-        File defaultDir =  im.get().getFolder();
+        File defaultDir =  im.get().getFile(HashOptions.DETECTION_FOLDER);
         return chooseFolder(null, defaultDir);
     }
     

@@ -27,9 +27,8 @@ import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalDetectionMethod;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
-import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
@@ -60,9 +59,9 @@ public class AddNuclearSignalAction extends SingleDatasetResultAction {
         	File defaultDir = null;
         	Optional<IAnalysisOptions> op = dataset.getAnalysisOptions();
         	if(op.isPresent()) {
-        		Optional<IDetectionOptions> im = op.get().getDetectionOptions(CellularComponent.NUCLEUS);
+        		Optional<HashOptions> im = op.get().getDetectionOptions(CellularComponent.NUCLEUS);
         		if(im.isPresent())
-        			defaultDir = im.get().getFolder();
+        			defaultDir = im.get().getFile(HashOptions.DETECTION_FOLDER);
         	}
         	
         	File folder = null;
@@ -79,7 +78,7 @@ public class AddNuclearSignalAction extends SingleDatasetResultAction {
 
             if (analysisSetup.isOk()) {
 
-                INuclearSignalOptions options = analysisSetup.getOptions();
+                HashOptions options = analysisSetup.getOptions();
 
                 IAnalysisMethod m = new SignalDetectionMethod(dataset, options, analysisSetup.getId());
 

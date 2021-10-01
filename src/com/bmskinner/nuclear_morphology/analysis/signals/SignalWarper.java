@@ -42,7 +42,7 @@ import com.bmskinner.nuclear_morphology.analysis.mesh.UncomparableMeshImageExcep
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.gui.tabs.signals.warping.SignalWarpingRunSettings;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
@@ -244,12 +244,12 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> {
 				// We need to get the file in which no signals were detected
 				// This is not stored in a nucleus, so combine the expected file name 
 				// with the source folder				
-				INuclearSignalOptions signalOptions = getSignalOptions(n);
+				HashOptions signalOptions = getSignalOptions(n);
 
 				if(signalOptions!=null) {
-					File imageFolder = signalOptions.getFolder();
+					File imageFolder = signalOptions.getFile(HashOptions.DETECTION_FOLDER);
 					File imageFile   = new File(imageFolder, n.getSourceFileName());
-					ip = new ImageImporter(imageFile).importImage(signalOptions.getChannel());
+					ip = new ImageImporter(imageFile).importImage(signalOptions.getInt(HashOptions.CHANNEL));
 
 				} else {
 					return createEmptyProcessor();
@@ -268,7 +268,7 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> {
 	 * @param n the nucleus to fetch options for
 	 * @return the signal options if present, otherwise null
 	 */
-	private INuclearSignalOptions getSignalOptions(@NonNull Nucleus n) {
+	private HashOptions getSignalOptions(@NonNull Nucleus n) {
 		
 		// If merged datasets are being warped, the imageFolder will not
 		// be correct, since the analysis options are mostly blank. We need

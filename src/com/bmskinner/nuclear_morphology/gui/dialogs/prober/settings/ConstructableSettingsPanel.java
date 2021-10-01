@@ -24,8 +24,8 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.OptionsChangeEvent;
 
@@ -43,7 +43,7 @@ public class ConstructableSettingsPanel extends SettingsPanel {
     public static final String  TOPHAT_LBL         = "Top hat filtering";
     public static final String  OBJECT_FINDING_LBL = "Object finding";
     public static final String  SIZE_SETTINGS_LBL  = "Filtering";
-    public static final String  PROFILING_LBL      = "Profiling";
+    public static final String  PROFILING_LBL      = "Landmark detection";
     public static final String  MISC_LBL           = "Other";
     public static final String  CHANNEL_LBL        = "Image";
     public static final String  PREPROCESSING_LBL  = "Preprocessing";
@@ -116,7 +116,7 @@ public class ConstructableSettingsPanel extends SettingsPanel {
      */
     public ConstructableSettingsPanel addEdgeThresholdSwitchPanel(String optionsKey, String label)
             throws MissingOptionException {
-        Optional<IDetectionOptions> subOptions = options.getDetectionOptions(optionsKey);
+        Optional<HashOptions> subOptions = options.getDetectionOptions(optionsKey);
         if(!subOptions.isPresent())
         	return this;
         
@@ -153,7 +153,7 @@ public class ConstructableSettingsPanel extends SettingsPanel {
      * @throws MissingOptionException
      */
     public ConstructableSettingsPanel addThresholdPanel(String optionsKey, String label) throws MissingOptionException {
-        Optional<IDetectionOptions> subOptions = options.getDetectionOptions(optionsKey);
+        Optional<HashOptions> subOptions = options.getDetectionOptions(optionsKey);
         if(!subOptions.isPresent())
         	return this;
         SettingsPanel panel = new ThresholdSettingsPanel(subOptions.get());
@@ -187,7 +187,7 @@ public class ConstructableSettingsPanel extends SettingsPanel {
      */
     public ConstructableSettingsPanel addColourThresholdWatershedSwitchPanel(String optionsKey, String label)
             throws MissingOptionException {
-    	Optional<IDetectionOptions> subOptions = options.getDetectionOptions(optionsKey);
+    	Optional<HashOptions> subOptions = options.getDetectionOptions(optionsKey);
         if(!subOptions.isPresent())
         	return this;
         SettingsPanel panel = new ColourThresholdWatershedSwitchPanel(subOptions.get());
@@ -220,7 +220,7 @@ public class ConstructableSettingsPanel extends SettingsPanel {
      * @throws MissingOptionException
      */
     public ConstructableSettingsPanel addTopHatPanel(String optionsKey, String label) throws MissingOptionException {
-    	Optional<IDetectionOptions> subOptions = options.getDetectionOptions(optionsKey);
+    	Optional<HashOptions> subOptions = options.getDetectionOptions(optionsKey);
         if(!subOptions.isPresent())
         	return this;
         SettingsPanel panel = new TophatPanel(subOptions.get());
@@ -256,7 +256,7 @@ public class ConstructableSettingsPanel extends SettingsPanel {
      */
     public ConstructableSettingsPanel addColorThresholdPanel(String optionsKey, String label)
             throws MissingOptionException {
-    	Optional<IDetectionOptions> subOptions = options.getDetectionOptions(optionsKey);
+    	Optional<HashOptions> subOptions = options.getDetectionOptions(optionsKey);
         if(!subOptions.isPresent())
         	return this;
         SettingsPanel panel = new ColourThresholdingSettingsPanel(subOptions.get());
@@ -292,7 +292,7 @@ public class ConstructableSettingsPanel extends SettingsPanel {
      */
     public ConstructableSettingsPanel addImageProcessingPanel(String optionsKey, String label)
             throws MissingOptionException {
-    	Optional<IDetectionOptions> subOptions = options.getDetectionOptions(optionsKey);
+    	Optional<HashOptions> subOptions = options.getDetectionOptions(optionsKey);
         if(!subOptions.isPresent())
         	return this;
         SettingsPanel panel = new ImagePreprocessingSettingsPanel(subOptions.get());
@@ -327,7 +327,7 @@ public class ConstructableSettingsPanel extends SettingsPanel {
      * @throws MissingOptionException
      */
     public ConstructableSettingsPanel addSizePanel(String optionsKey, String label) throws MissingOptionException {
-    	Optional<IDetectionOptions> subOptions = options.getDetectionOptions(optionsKey);
+    	Optional<HashOptions> subOptions = options.getDetectionOptions(optionsKey);
         if(!subOptions.isPresent())
         	return this;
         SettingsPanel panel = new ComponentSizeSettingsPanel(subOptions.get());
@@ -387,7 +387,7 @@ public class ConstructableSettingsPanel extends SettingsPanel {
      */
     public ConstructableSettingsPanel addImageChannelPanel(String optionsKey, String label)
             throws MissingOptionException {
-    	Optional<IDetectionOptions> subOptions = options.getDetectionOptions(optionsKey);
+    	Optional<HashOptions> subOptions = options.getDetectionOptions(optionsKey);
         if(!subOptions.isPresent())
         	return this;
         SettingsPanel panel = new ImageChannelSettingsPanel(subOptions.get());
@@ -414,16 +414,14 @@ public class ConstructableSettingsPanel extends SettingsPanel {
     /**
      * Add a panel for copying options values from open datasets
      * 
-     * @param optionsKey
-     *            the options subtype to select
-     * @param label
-     *            the label to give the panel
+     * @param optionsKey the options subtype to select
+     * @param label the label to give the panel
      * @return
      * @throws MissingOptionException
      */
     public ConstructableSettingsPanel addCopyFromOpenPanel(String optionsKey, String label)
             throws MissingOptionException {
-    	Optional<IDetectionOptions> subOptions = options.getDetectionOptions(optionsKey);
+    	Optional<HashOptions> subOptions = options.getDetectionOptions(optionsKey);
         if(!subOptions.isPresent())
         	return this;
         SettingsPanel panel = new CopyNucleusDetectionSettingsFromOpenDatasetPanel(options, subOptions.get());

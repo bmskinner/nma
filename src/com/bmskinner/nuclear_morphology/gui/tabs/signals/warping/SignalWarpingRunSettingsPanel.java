@@ -17,6 +17,7 @@ import javax.swing.SpinnerNumberModel;
 
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalManager;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.gui.components.panels.DatasetSelectionPanel;
 import com.bmskinner.nuclear_morphology.gui.components.panels.SignalGroupSelectionPanel;
 
@@ -117,7 +118,7 @@ public class SignalWarpingRunSettingsPanel
     			signalBox.setDataset(datasetBoxOne.getSelectedDataset());
     			
     			int threshold = datasetBoxOne.getSelectedDataset().getAnalysisOptions().get()
-    					.getNuclearSignalOptions(signalBox.getSelectedID()).getThreshold();
+    					.getNuclearSignalOptions(signalBox.getSelectedID()).getInt(HashOptions.THRESHOLD);
     			minThresholdSpinner.setValue(threshold);
     		}
     		
@@ -138,7 +139,7 @@ public class SignalWarpingRunSettingsPanel
 	        } else {
 	        	setSignalSettingsEnabled(true);
 	            int threshold = datasetBoxOne.getSelectedDataset().getAnalysisOptions().get()
-    					.getNuclearSignalOptions(signalBox.getSelectedID()).getThreshold();
+    					.getNuclearSignalOptions(signalBox.getSelectedID()).getInt(HashOptions.THRESHOLD);
     			minThresholdSpinner.setValue(threshold);
 	        }
     	});
@@ -149,7 +150,7 @@ public class SignalWarpingRunSettingsPanel
     	// Set the initial value to the signal detection threshold of the initial selected signal group
     	int threshold = datasetBoxOne.getSelectedDataset().getAnalysisOptions().isPresent() 
     			? datasetBoxOne.getSelectedDataset().getAnalysisOptions().get()
-				.getNuclearSignalOptions(signalBox.getSelectedID()).getThreshold() : 0;
+				.getNuclearSignalOptions(signalBox.getSelectedID()).getInt(HashOptions.THRESHOLD) : 0;
     	SpinnerModel minThresholdModel = new SpinnerNumberModel(threshold, 0, 255, 1);
     	minThresholdSpinner = new JSpinner(minThresholdModel);
     	minThresholdSpinner.setToolTipText(MIN_THRESHOLD_TOOLTIP);

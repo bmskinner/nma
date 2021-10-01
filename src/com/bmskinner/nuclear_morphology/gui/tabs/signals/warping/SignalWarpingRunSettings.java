@@ -6,7 +6,7 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.options.AbstractHashOptions;
+import com.bmskinner.nuclear_morphology.components.options.DefaultOptions;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
 
 /**
@@ -15,7 +15,7 @@ import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
  * @since 1.19.4
  *
  */
-public class SignalWarpingRunSettings extends AbstractHashOptions {
+public class SignalWarpingRunSettings extends DefaultOptions {
 
 	private static final long serialVersionUID = 1L;
 	

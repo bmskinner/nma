@@ -35,7 +35,7 @@ import javax.swing.SpinnerNumberModel;
 
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.io.Io;
 import com.bmskinner.nuclear_morphology.io.xml.RuleSetCollectionXMLImporter;
 import com.bmskinner.nuclear_morphology.io.xml.XMLReader.XMLReadingException;
@@ -79,6 +79,15 @@ public class NucleusProfileSettingsPanel extends SettingsPanel {
     			.map(f-> f.replaceAll(Io.XML_FILE_EXTENSION, ""))
     			.toArray(String[]::new);
     }
+    
+    private void setRuleset(File f) {
+    	RuleSetCollectionXMLImporter reader = new RuleSetCollectionXMLImporter(f);
+    	try {
+        	options.setRuleSetCollection(reader.importRuleset());
+		} catch (XMLReadingException e1) {
+			LOGGER.log(Loggable.STACK, e1, () -> "Unable to read XML file: "+f.getAbsolutePath());
+		}
+    }
 
     /**
      * Create the settings spinners based on the input options
@@ -89,19 +98,18 @@ public class NucleusProfileSettingsPanel extends SettingsPanel {
 
         typeBox.addActionListener(e -> {
 
-        	Optional<IDetectionOptions> nOptions = options.getDetectionOptions(CellularComponent.NUCLEUS);
+        	Optional<HashOptions> nOptions = options.getDetectionOptions(CellularComponent.NUCLEUS);
         	if(!nOptions.isPresent())
         		return;
 
         	// Rebuild the file name from the cleaned names
         	File type = new File(Io.getConfigDir(), (String)typeBox.getSelectedItem()+Io.XML_FILE_EXTENSION);
-        	RuleSetCollectionXMLImporter reader = new RuleSetCollectionXMLImporter(type);
-        	try {
-	        	options.setRuleSetCollection(reader.importRuleset());
-			} catch (XMLReadingException e1) {
-				LOGGER.log(Loggable.STACK, e1, () -> "Unable to read XML file: "+type.getAbsolutePath());
-			}
+        	setRuleset(type);
         });
+        
+        // Set the default from the order of the dropdown list
+        File defaultRuleset = new File(Io.getConfigDir(), (String)typeBox.getSelectedItem()+Io.XML_FILE_EXTENSION);
+        setRuleset(defaultRuleset);
 
         profileWindow = new JSpinner(new SpinnerNumberModel(options.getProfileWindowProportion(), MIN_PROFILE_PROP,
                 MAX_PROFILE_PROP, STEP_PROFILE_PROP));

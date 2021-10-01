@@ -40,8 +40,8 @@ import com.bmskinner.nuclear_morphology.components.datasets.DefaultCellCollectio
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 import com.bmskinner.nuclear_morphology.io.Io;
@@ -75,7 +75,7 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
      * @param options the options to detect with
      */
     public NucleusDetectionMethod(@NonNull String outputFolder, @NonNull IAnalysisOptions options) {
-        this(new File(options.getDetectionOptions(CellularComponent.NUCLEUS).get().getFolder(), outputFolder), options);
+        this(new File(options.getDetectionOptions(CellularComponent.NUCLEUS).get().getString(HashOptions.DETECTION_FOLDER), outputFolder), options);
     }
     
     /**
@@ -104,16 +104,17 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
 
             LOGGER.info("Running nucleus detector");
             
-            Optional<? extends IDetectionOptions> op = templateOptions.getDetectionOptions(CellularComponent.NUCLEUS);
+            Optional<HashOptions> op = templateOptions.getDetectionOptions(CellularComponent.NUCLEUS);
             if(!op.isPresent()){
             	LOGGER.warning("No nucleus detection options present");
             	return;
             }
             
             // Detect the nuclei in the folders selected
-            processFolder(op.get().getFolder());
+            File filePath = new File(op.get().getString(HashOptions.DETECTION_FOLDER));
+            processFolder(filePath);
 
-            LOGGER.fine("Detected nuclei in "+ op.get().getFolder().getAbsolutePath());
+            LOGGER.fine("Detected nuclei in "+ filePath.getAbsolutePath());
             
             if(Thread.interrupted())
                 return;
@@ -132,11 +133,11 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
     private int getTotalImagesToAnalyse() {
 
         LOGGER.info("Counting images to analyse");
-        Optional<? extends IDetectionOptions> op = templateOptions.getDetectionOptions(CellularComponent.NUCLEUS);
+        Optional<HashOptions> op = templateOptions.getDetectionOptions(CellularComponent.NUCLEUS);
         if(!op.isPresent())
         	return 0;
         
-        File folder = op.get().getFolder();
+        File folder = new File(op.get().getString(HashOptions.DETECTION_FOLDER));
         int totalImages = countSuitableImages(folder);
         fireUpdateProgressTotalLength(totalImages);
         LOGGER.info(String.format("Analysing %d images", totalImages));
@@ -154,6 +155,7 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
     private List<IAnalysisDataset> analysePopulations() {
 
         LOGGER.fine("Creating cell collections");
+        LOGGER.fine(templateOptions.toString());
         List<IAnalysisDataset> foundDatasets = new ArrayList<>();
 
         for (final Entry<File, ICellCollection> entry : collectionGroup.entrySet()) {
@@ -167,7 +169,7 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
             
             // Ensure the actual folder of images is set in the analysis options, not a root folder
             IAnalysisOptions datasetOptions = templateOptions.duplicate();
-            datasetOptions.getDetectionOptions(CellularComponent.NUCLEUS).get().setFolder(folder);
+            datasetOptions.getDetectionOptions(CellularComponent.NUCLEUS).get().setString(HashOptions.DETECTION_FOLDER, folder.getAbsolutePath());
             dataset.setAnalysisOptions(datasetOptions);
             
             dataset.setRoot(true);

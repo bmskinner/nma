@@ -16,7 +16,6 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.options;
 
-import java.io.File;
 import java.io.Serializable;
 import java.util.Optional;
 import java.util.Set;
@@ -24,7 +23,6 @@ import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nuclear_morphology.components.rules.RuleApplicationType;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 
 /**
@@ -46,6 +44,10 @@ public interface IAnalysisOptions extends Serializable {
     boolean     DEFAULT_KEEP_FAILED       = false;
     double      DEFAULT_WINDOW_PROPORTION = 0.05;
 
+    /**
+     * Duplicate this options object
+     * @return
+     */
     IAnalysisOptions duplicate();
     
     /**
@@ -54,8 +56,16 @@ public interface IAnalysisOptions extends Serializable {
      * @param key the component to detect
      * @return the detection options for the component
      */
-    Optional<IDetectionOptions> getDetectionOptions(String key);
+    Optional<HashOptions> getDetectionOptions(String key);
 
+    
+    /**
+     * Fetch the options used to detect the nucleus, if present.
+     * This is a shortcut for {@code IAnalysisOptions::getDetectionOptions(CellularComponent.NUCLEUS)}
+     * @return
+     */
+    Optional<HashOptions> getNuclusDetectionOptions();
+    
     /**
      * Get the type of detection options stored
      * 
@@ -64,20 +74,13 @@ public interface IAnalysisOptions extends Serializable {
     Set<String> getDetectionOptionTypes();
 
     /**
-     * Check if the given type name is already present
+     * Check if the given type name is present
      * 
      * @param type the name to check
      * @return true if present, false otherwise
      */
     boolean hasDetectionOptions(String type);
-    
-    /**
-     * Fetch the options used to detect the nucleus, if present.
-     * This is a shortcut for {@code IAnalysisOptions::getDetectionOptions(CellularComponent.NUCLEUS)}
-     * @return
-     */
-    Optional<IDetectionOptions> getNuclusDetectionOptions();
-    
+
     /**
      * Get secondary options for a given key
      * 
@@ -129,7 +132,7 @@ public interface IAnalysisOptions extends Serializable {
      * @param signalGroup the group id
      * @return nuclear detection options for the group
      */
-    INuclearSignalOptions getNuclearSignalOptions(@NonNull UUID signalGroup);
+    HashOptions getNuclearSignalOptions(@NonNull UUID signalGroup);
     
 
     /**
@@ -153,7 +156,7 @@ public interface IAnalysisOptions extends Serializable {
      * @param key
      * @param options
      */
-    void setDetectionOptions(String key, IDetectionOptions options);
+    void setDetectionOptions(String key, HashOptions options);
     
     /**
      * Set the secondary options for the given key

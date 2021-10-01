@@ -36,8 +36,8 @@ import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.NucleusDetectionMethod;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
@@ -55,7 +55,7 @@ public class NewAnalysisAction extends VoidResultAction {
 	private static final Logger LOGGER = Logger.getLogger(NewAnalysisAction.class.getName());
 
     private IAnalysisOptions options;
-    private IDetectionOptions nucleusOptions;
+    private HashOptions nucleusOptions;
 
     private File folder = null;
 
@@ -109,13 +109,13 @@ public class NewAnalysisAction extends VoidResultAction {
 
         if (analysisSetup.isOk()) {
 
-        	Optional<IDetectionOptions> op = options.getDetectionOptions(CellularComponent.NUCLEUS);
+        	Optional<HashOptions> op = options.getDetectionOptions(CellularComponent.NUCLEUS);
             if(!op.isPresent()){
             	cancel();
             	return;
             }
 
-            File directory = op.get().getFolder();
+            File directory = new File(op.get().getString(HashOptions.DETECTION_FOLDER));
             if (directory == null) {
                 cancel();
                 return;
@@ -187,7 +187,7 @@ public class NewAnalysisAction extends VoidResultAction {
 
         folder = file;
 
-        nucleusOptions.setFolder(file);
+        nucleusOptions.setString(HashOptions.DETECTION_FOLDER, file.getAbsolutePath());
         return true;
     }
 

@@ -16,7 +16,7 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings;
 
-import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 
 /**
  * The top level settings class for detection options
@@ -28,9 +28,9 @@ import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 @SuppressWarnings("serial")
 public abstract class DetectionSettingsPanel extends SettingsPanel {
 
-    protected IDetectionOptions options;
+    protected HashOptions options;
 
-    public DetectionSettingsPanel(IDetectionOptions op) {
+    public DetectionSettingsPanel(HashOptions op) {
 
         options = op;
     }
@@ -40,8 +40,41 @@ public abstract class DetectionSettingsPanel extends SettingsPanel {
      * 
      * @param options
      */
-    public void set(IDetectionOptions options) {
+    public void set(HashOptions options) {
     	this.options.set(options);
     	update();
+    }
+    
+    /**
+     * Update the given option and notify listeners that the options 
+     * have changed
+     * @param option
+     * @param value
+     */
+    protected void updateOptions(String option, int value) {
+    	options.setInt(option, value);
+    	fireOptionsChangeEvent();
+    }
+    
+    /**
+     * Update the given option and notify listeners that the options 
+     * have changed
+     * @param option
+     * @param value
+     */
+    protected void updateOptions(String option, double value) {
+    	options.setDouble(option, value);
+    	fireOptionsChangeEvent();
+    }
+    
+    /**
+     * Update the given option and notify listeners that the options 
+     * have changed
+     * @param option
+     * @param value
+     */
+    protected void updateOptions(String option, boolean value) {
+    	options.setBoolean(option, value);
+    	fireOptionsChangeEvent();
     }
 }

@@ -33,6 +33,7 @@ import com.bmskinner.nuclear_morphology.charting.datasets.tables.NuclearSignalTa
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
@@ -74,7 +75,7 @@ public class SignalsAnalysisPanel extends DetailPanel {
 
                     		cosmeticHandler.updateSignalSource(d, signalGroup.getID());
                     		SignalTableCell newValue = new SignalTableCell(signalGroup.getID(), 
-                    				d.getAnalysisOptions().get().getNuclearSignalOptions(signalGroup.getID()).getFolder().getAbsolutePath(),
+                    				d.getAnalysisOptions().get().getNuclearSignalOptions(signalGroup.getID()).getFile(HashOptions.DETECTION_FOLDER).getAbsolutePath(),
                     				signalGroup.getColor());
                     		table.getModel().setValueAt(newValue, row, column);
                     		table.repaint();

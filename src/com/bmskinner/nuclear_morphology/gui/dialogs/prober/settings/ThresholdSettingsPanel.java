@@ -26,7 +26,7 @@ import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 
-import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 @SuppressWarnings("serial")
@@ -42,7 +42,7 @@ public class ThresholdSettingsPanel extends DetectionSettingsPanel {
 
     private JSpinner thresholdSpinner;
 
-    public ThresholdSettingsPanel(final IDetectionOptions options) {
+    public ThresholdSettingsPanel(final HashOptions options) {
         super(options);
 
         this.add(createPanel(), BorderLayout.CENTER);
@@ -53,7 +53,7 @@ public class ThresholdSettingsPanel extends DetectionSettingsPanel {
         JPanel panel = new JPanel(new FlowLayout());
 
         thresholdSpinner = new JSpinner(
-                new SpinnerNumberModel(Integer.valueOf(options.getThreshold()), MIN_RANGE, MAX_RANGE, STEP));
+                new SpinnerNumberModel(Integer.valueOf(options.getInt(HashOptions.THRESHOLD)), MIN_RANGE, MAX_RANGE, STEP));
 
         JLabel lbl = new JLabel(THRESHOLD_LBL);
 
@@ -63,7 +63,7 @@ public class ThresholdSettingsPanel extends DetectionSettingsPanel {
         thresholdSpinner.addChangeListener(e -> {
             try {
                 thresholdSpinner.commitEdit();
-                options.setThreshold(((Integer) thresholdSpinner.getValue()).intValue());
+                options.setInt(HashOptions.THRESHOLD, ((Integer) thresholdSpinner.getValue()).intValue());
                 fireOptionsChangeEvent();
             } catch (ParseException e1) {
                 LOGGER.warning("Parsing error in JSpinner");
@@ -78,7 +78,7 @@ public class ThresholdSettingsPanel extends DetectionSettingsPanel {
     protected void update() {
         super.update();
         isUpdating = true;
-        thresholdSpinner.setValue(options.getThreshold());
+        thresholdSpinner.setValue(options.getInt(HashOptions.THRESHOLD));
         isUpdating = false;
     }
 

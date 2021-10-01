@@ -88,7 +88,7 @@ public class OptionsXMLCreator extends XMLCreator<IAnalysisDataset> {
 		
 //		rootElement.addContent(createElement(NUCLEUS_TYPE_KEY, options.getNucleusType().name()));
 		rootElement.addContent(createElement(PROFILE_WINDOW_KEY, String.valueOf(options.getProfileWindowProportion())));
-		rootElement.addContent(createElement(RULE_APPLICATION_KEY, options.getRuleApplicationType().name()));
+		rootElement.addContent(createElement(RULE_APPLICATION_KEY, options.getRuleSetCollection().getApplicationType().name()));
 	}
 
 		

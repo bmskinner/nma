@@ -14,7 +14,7 @@ import org.jdom2.input.SAXBuilder;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
-import com.bmskinner.nuclear_morphology.components.options.DefaultCannyHashOptions;
+import com.bmskinner.nuclear_morphology.components.options.CannyOptions;
 import com.bmskinner.nuclear_morphology.components.options.DefaultHoughOptions;
 import com.bmskinner.nuclear_morphology.components.options.DefaultShellOptions;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
@@ -283,7 +283,7 @@ public abstract class XMLReader<T> {
 			}
 			
 			if(subType.equals(IDetectionSubOptions.CANNY_OPTIONS)) {
-				ICannyOptions canny = new DefaultCannyHashOptions();
+				ICannyOptions canny = new CannyOptions();
 				addKeyedValues(component, canny);
 				o.setSubOptions(subType, canny);
 			}

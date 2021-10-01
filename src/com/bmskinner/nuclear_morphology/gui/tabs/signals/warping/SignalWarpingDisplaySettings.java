@@ -1,6 +1,6 @@
 package com.bmskinner.nuclear_morphology.gui.tabs.signals.warping;
 
-import com.bmskinner.nuclear_morphology.components.options.AbstractHashOptions;
+import com.bmskinner.nuclear_morphology.components.options.DefaultOptions;
 
 /**
  * Store display settings for warped signals. These settings
@@ -9,7 +9,7 @@ import com.bmskinner.nuclear_morphology.components.options.AbstractHashOptions;
  * @since 1.19.4
  *
  */
-public class SignalWarpingDisplaySettings extends AbstractHashOptions {
+public class SignalWarpingDisplaySettings extends DefaultOptions {
 	
 	public static final boolean DEFAULT_IS_PSEUDOCOLOUR = true;
 	public static final int DEFAULT_THRESHOLD = 0;

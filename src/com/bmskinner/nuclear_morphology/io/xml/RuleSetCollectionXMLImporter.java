@@ -1,10 +1,12 @@
 package com.bmskinner.nuclear_morphology.io.xml;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.jdom2.Document;
+import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder;
 
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
@@ -34,7 +36,7 @@ public class RuleSetCollectionXMLImporter implements Importer {
 	         RuleSetCollectionXMLReader reader = new RuleSetCollectionXMLReader(document.getRootElement());
 	         return reader.read();
 	         
-		} catch(Exception e) {
+		} catch(IOException | JDOMException e) {
 			LOGGER.fine("Error reading "+file.getAbsolutePath()+" as a ruleset file");
 			throw new XMLReadingException("Unable to read file as ruleset", e);
 		}

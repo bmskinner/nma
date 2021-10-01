@@ -35,8 +35,8 @@ import com.bmskinner.nuclear_morphology.components.cells.ComponentFactory;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
-import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions.SignalDetectionMode;
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
+import com.bmskinner.nuclear_morphology.components.options.SignalDetectionMode;
 import com.bmskinner.nuclear_morphology.components.profiles.BooleanProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.FloatProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
@@ -63,7 +63,7 @@ public class SignalDetector extends Detector {
 	
 	private static final Logger LOGGER = Logger.getLogger(SignalDetector.class.getName());
 
-    private INuclearSignalOptions                  options;
+    private HashOptions                  options;
     private final ComponentFactory<INuclearSignal> factory = new SignalFactory();
     private int                                    channel;
     private int                                    minThreshold;
@@ -74,14 +74,14 @@ public class SignalDetector extends Detector {
      * @param options the size and circularity parameters
      * @param channel the RGB channel
      */
-    public SignalDetector(INuclearSignalOptions options, int channel) {
+    public SignalDetector(HashOptions options, int channel) {
         if (options == null)
             throw new IllegalArgumentException("Detection options cannot be null");
         if (channel < 0)
             throw new IllegalArgumentException("Channel must be greater or equal to 0");
         this.options = options;
         this.channel = channel;
-        this.minThreshold = options.getThreshold();
+        this.minThreshold = options.getInt(HashOptions.THRESHOLD);
     }
 
     /**
@@ -95,19 +95,19 @@ public class SignalDetector extends Detector {
      */
     public List<INuclearSignal> detectSignal(@NonNull File sourceFile, @NonNull ImageStack stack, @NonNull Nucleus n) {
 
-        options.setThreshold(minThreshold); // reset to default
+        options.setInt(HashOptions.THRESHOLD, minThreshold); // reset to default
 
-        if (options.getDetectionMode().equals(SignalDetectionMode.FORWARD)) {
+        if (options.getString(HashOptions.SIGNAL_DETECTION_MODE_KEY).equals(SignalDetectionMode.FORWARD.toString())) {
             LOGGER.finest( "Running forward detection");
             return detectForwardThresholdSignal(sourceFile, stack, n);
         }
 
-        if (options.getDetectionMode().equals(SignalDetectionMode.REVERSE)) {
+        if (options.getString(HashOptions.SIGNAL_DETECTION_MODE_KEY).equals(SignalDetectionMode.REVERSE.toString())) {
             LOGGER.finest( "Running reverse detection");
             return detectReverseThresholdSignal(sourceFile, stack, n);
         }
 
-        if (options.getDetectionMode().equals(SignalDetectionMode.ADAPTIVE)) {
+        if (options.getString(HashOptions.SIGNAL_DETECTION_MODE_KEY).equals(SignalDetectionMode.ADAPTIVE.toString())) {
             LOGGER.finest( "Running adaptive detection");
             return detectHistogramThresholdSignal(sourceFile, stack, n);
         }
@@ -131,10 +131,10 @@ public class SignalDetector extends Detector {
         // the given minimum
         if (newThreshold > minThreshold) {
             LOGGER.fine("Threshold set at: " + newThreshold);
-            options.setThreshold(newThreshold);
+            options.setInt(HashOptions.THRESHOLD, newThreshold);
         } else {
             LOGGER.fine("Threshold kept at minimum: " + minThreshold);
-            options.setThreshold(minThreshold);
+            options.setInt(HashOptions.THRESHOLD, minThreshold);
         }
     }
 
@@ -152,11 +152,11 @@ public class SignalDetector extends Detector {
         // choose the right stack number for the channel
         int stackNumber = ImageImporter.rgbToStack(channel);
 
-        setMaxSize(n.getStatistic(Measurement.AREA) * options.getMaxFraction());
-        setMinSize(options.getMinSize());
-        setMinCirc(options.getMinCirc());
-        setMaxCirc(options.getMaxCirc());
-        setThreshold(options.getThreshold());
+        setMaxSize(n.getStatistic(Measurement.AREA) * options.getDouble(HashOptions.MAX_FRACTION));
+        setMinSize(options.getInt(HashOptions.MIN_SIZE_PIXELS));
+        setMinCirc(options.getDouble(HashOptions.MIN_CIRC));
+        setMaxCirc(options.getDouble(HashOptions.MAX_CIRC));
+        setThreshold(options.getInt(HashOptions.THRESHOLD));
 
         Map<Roi, StatsMap> roiList = new HashMap<>();
         List<INuclearSignal> signals = new ArrayList<>();
@@ -267,7 +267,7 @@ public class SignalDetector extends Detector {
         }
 
         // find the threshold from the bins
-        int area = (int) (n.getStatistic(Measurement.AREA) * options.getMaxFraction());
+        int area = (int) (n.getStatistic(Measurement.AREA) * options.getDouble(HashOptions.MAX_FRACTION));
         int total = 0;
         int threshold = 0; // the value to threshold at
 

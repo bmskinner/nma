@@ -26,7 +26,7 @@ import javax.swing.JOptionPane;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.core.DatasetListManager;
 import com.bmskinner.nuclear_morphology.gui.components.FileSelector;
 import com.bmskinner.nuclear_morphology.io.xml.OptionsXMLReader;
@@ -51,7 +51,7 @@ public class CopyNucleusDetectionSettingsFromOpenDatasetPanel extends CopyFromOp
      * @param parent
      * @param op
      */
-    public CopyNucleusDetectionSettingsFromOpenDatasetPanel(IAnalysisOptions parent, IDetectionOptions op) {
+    public CopyNucleusDetectionSettingsFromOpenDatasetPanel(IAnalysisOptions parent, HashOptions op) {
         super(parent, op);
     }
     
@@ -71,12 +71,12 @@ public class CopyNucleusDetectionSettingsFromOpenDatasetPanel extends CopyFromOp
             	LOGGER.fine("Copying options from dataset: " + sourceDataset.getName());
 
             	// Ensure the folder is not overwritten by the new options
-            	File folder = options.getFolder();
+            	File folder = new File(options.getString(HashOptions.DETECTION_FOLDER));
             	Optional<IAnalysisOptions> op = sourceDataset.getAnalysisOptions();
             	if(op.isPresent()){
-            		Optional<IDetectionOptions> srcOptions = op.get().getDetectionOptions(CellularComponent.NUCLEUS);
+            		Optional<HashOptions> srcOptions = op.get().getDetectionOptions(CellularComponent.NUCLEUS);
             		options.set(srcOptions.get());
-            		options.setFolder(folder);
+            		options.setString(HashOptions.DETECTION_FOLDER, folder.getAbsolutePath());
                     parent.setRuleSetCollection(op.get().getRuleSetCollection());
             	}
 
@@ -88,7 +88,7 @@ public class CopyNucleusDetectionSettingsFromOpenDatasetPanel extends CopyFromOp
 	@Override
 	protected ActionListener createOpenActionListener() {
 		return (e) -> {
-			File folder = options.getFolder();
+			File folder = new File(options.getString(HashOptions.DETECTION_FOLDER));
 			File f = FileSelector.chooseOptionsImportFile(folder);
 			if(f==null)
 				return;
@@ -98,7 +98,9 @@ public class CopyNucleusDetectionSettingsFromOpenDatasetPanel extends CopyFromOp
 				options.set(o.getDetectionOptions(CellularComponent.NUCLEUS).get());
 				parent.setRuleSetCollection(o.getRuleSetCollection());
 				parent.setAngleWindowProportion(o.getProfileWindowProportion());
-				options.setFolder(folder);
+				
+				// Ensure folder is not overwritted when other options were copied
+				options.setString(HashOptions.DETECTION_FOLDER, folder.getAbsolutePath());
 				fireOptionsChangeEvent();
 
 			} catch (XMLReadingException e1) {

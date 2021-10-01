@@ -31,12 +31,11 @@ import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.Finder;
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalFinder;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
-import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
-import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.signals.DefaultSignalGroup;
+import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
 import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.SignalDetectionSettingsPanel;
@@ -57,7 +56,7 @@ public class SignalImageProber extends IntegratedImageProber {
     private static final String DIALOG_TITLE_BAR_LBL = "Signal detection settings";
     private static final String NEW_NAME_LBL         = "Enter a signal group name";
 
-    private final INuclearSignalOptions options;
+    private final HashOptions options;
     private final IAnalysisDataset dataset;
     private UUID id;
 
@@ -76,12 +75,12 @@ public class SignalImageProber extends IntegratedImageProber {
         if(!op.isPresent())
         	throw new IllegalArgumentException("Dataset has no options");
         
-        Optional<IDetectionOptions> nOp = op.get().getDetectionOptions(CellularComponent.NUCLEUS);
+        Optional<HashOptions> nOp = op.get().getDetectionOptions(CellularComponent.NUCLEUS);
         
         if(!nOp.isPresent())
         	throw new IllegalArgumentException("Dataset has no nucles options");
 
-        options.setScale(nOp.get().getScale());
+        options.setDouble(HashOptions.SCALE, nOp.get().getDouble(HashOptions.SCALE));
 
 
         try {
@@ -114,7 +113,7 @@ public class SignalImageProber extends IntegratedImageProber {
         this.setVisible(true);
     }
 
-    public INuclearSignalOptions getOptions() {
+    public HashOptions getOptions() {
         return options;
     }
 
@@ -140,8 +139,7 @@ public class SignalImageProber extends IntegratedImageProber {
         dataset.getCollection().addSignalGroup(id, group);
 
         // Set the default colour for the signal group
-//        int totalGroups = dataset.getCollection().getSignalGroups().size();
-        Color colour = ColourSelecter.getSignalColour(options.getChannel());
+        Color colour = ColourSelecter.getSignalColour(options.getInt(HashOptions.CHANNEL));
         group.setGroupColour(colour);
 
         dataset.getAnalysisOptions().get().setDetectionOptions(id.toString(), options);

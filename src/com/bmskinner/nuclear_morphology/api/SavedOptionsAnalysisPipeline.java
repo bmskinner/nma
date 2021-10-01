@@ -47,10 +47,12 @@ import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellAnalysisMet
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclei.NucleusType;
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
 import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.components.options.IShellOptions;
+import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.components.signals.DefaultSignalGroup;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
@@ -201,7 +203,9 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod impleme
 	}
 	
 	private List<IAnalysisDataset> createNucleusDetectionMethod(@NonNull IAnalysisOptions options, File imageFolder) throws Exception {
-		options.getDetectionOptions(CellularComponent.NUCLEUS).get().setFolder(imageFolder);
+		options.getDetectionOptions(CellularComponent.NUCLEUS)
+		.orElseThrow(MissingOptionException::new)
+		.setFile(HashOptions.DETECTION_FOLDER, imageFolder);
 		List<IAnalysisDataset> datasets = new NucleusDetectionMethod(outputFolder, options).call().getDatasets();
 		for(IAnalysisDataset dataset : datasets) {
 			methodsToRun.add(new DatasetProfilingMethod(dataset));
@@ -219,24 +223,23 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod impleme
 	private void createRefoldingMethod(List<IAnalysisDataset> datasets, @NonNull IAnalysisOptions options) throws Exception {
 		for(IAnalysisDataset dataset : datasets) {
 			// Refold
-			NucleusType t = options.getNucleusType();
-			switch(t){
-				case ROUND: {
-					if(!dataset.getCollection().hasConsensus())
-						methodsToRun.add(new ProfileRefoldMethod(dataset, CurveRefoldingMode.FAST));
-					for(IAnalysisDataset d : dataset.getAllChildDatasets())
-						if(!d.getCollection().hasConsensus())
-							methodsToRun.add(new ProfileRefoldMethod(d, CurveRefoldingMode.FAST));
-					break;
-				}
-				default: {
-					if(!dataset.getCollection().hasConsensus())
-						methodsToRun.add(new ConsensusAveragingMethod(dataset));
-					for(IAnalysisDataset d : dataset.getAllChildDatasets())
-						if(!d.getCollection().hasConsensus())
-							methodsToRun.add(new ConsensusAveragingMethod(d));
-				}
-			}
+//			switch(t){
+//				case ROUND: {
+//					if(!dataset.getCollection().hasConsensus())
+//						methodsToRun.add(new ProfileRefoldMethod(dataset, CurveRefoldingMode.FAST));
+//					for(IAnalysisDataset d : dataset.getAllChildDatasets())
+//						if(!d.getCollection().hasConsensus())
+//							methodsToRun.add(new ProfileRefoldMethod(d, CurveRefoldingMode.FAST));
+//					break;
+//				}
+//				default: {
+//					if(!dataset.getCollection().hasConsensus())
+//						methodsToRun.add(new ConsensusAveragingMethod(dataset));
+//					for(IAnalysisDataset d : dataset.getAllChildDatasets())
+//						if(!d.getCollection().hasConsensus())
+//							methodsToRun.add(new ConsensusAveragingMethod(d));
+//				}
+//			}
 		}
 	}
 	

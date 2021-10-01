@@ -32,8 +32,8 @@ import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.datasets.IClusterGroup;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace;
 import com.bmskinner.nuclear_morphology.core.DatasetListManager;
@@ -78,9 +78,9 @@ public class CosmeticHandler {
     		double initialScale = 1;
     		Optional<IAnalysisOptions> op = dataset.getAnalysisOptions();
     		if(op.isPresent()){
-    			Optional<IDetectionOptions> nOp = op.get().getDetectionOptions(CellularComponent.NUCLEUS);
+    			Optional<HashOptions> nOp = op.get().getDetectionOptions(CellularComponent.NUCLEUS);
     			if(nOp.isPresent())
-    				initialScale = nOp.get().getScale();
+    				initialScale = nOp.get().getDouble(HashOptions.SCALE);
     		}
     		
 			double scale = parent.getInputSupplier().requestDouble(Labels.Cells.CHOOSE_NEW_SCALE_LBL, initialScale, 1, 100000, 1);
@@ -214,7 +214,7 @@ public class CosmeticHandler {
 
     	try {
     		
-    		File currentFolder = d.getAnalysisOptions().get().getNuclearSignalOptions(signalGroup).getFolder();
+    		File currentFolder = d.getAnalysisOptions().get().getNuclearSignalOptions(signalGroup).getFile(HashOptions.DETECTION_FOLDER);
     		File newFolder = parent.getInputSupplier().requestFolder(FileUtils.extantComponent(currentFolder));
 
     		d.getCollection().getSignalManager().updateSignalSourceFolder(signalGroup, newFolder.getAbsoluteFile());
@@ -251,7 +251,7 @@ public class CosmeticHandler {
     public void updateNucleusSource(@NonNull IAnalysisDataset d) {
 
     	try {
-    		File currentFolder = d.getAnalysisOptions().get().getDetectionOptions(CellularComponent.NUCLEUS).get().getFolder();
+    		File currentFolder = d.getAnalysisOptions().get().getDetectionOptions(CellularComponent.NUCLEUS).get().getFile(HashOptions.DETECTION_FOLDER);
     		File newFolder = parent.getInputSupplier().requestFolder(FileUtils.extantComponent(currentFolder));
     		    		
     		d.getCollection().setSourceFolder(newFolder);

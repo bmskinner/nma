@@ -23,7 +23,7 @@ import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JPanel;
 
-import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.OptionsChangeEvent;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -41,7 +41,7 @@ public class SignalDetectionSettingsPanel extends SettingsPanel {
 	
 	private static final Logger LOGGER = Logger.getLogger(SignalDetectionSettingsPanel.class.getName());
 
-    private INuclearSignalOptions options;
+    private HashOptions options;
 
     private static final String OBJECT_FINDING_LBL = "Object finding";
     private static final String SIZE_SETTINGS_LBL  = "Filtering";
@@ -49,7 +49,7 @@ public class SignalDetectionSettingsPanel extends SettingsPanel {
     private static final String CHANNEL_LBL        = "Image";
     private static final String COPY_LBL           = "Copy";
 
-    public SignalDetectionSettingsPanel(INuclearSignalOptions options) {
+    public SignalDetectionSettingsPanel(HashOptions options) {
 
         try {
             this.options = options;

@@ -34,8 +34,9 @@ import com.bmskinner.nuclear_morphology.components.Version;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
+import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
 
 /**
  * This is the virtual child dataset, which retains only the pointer to its
@@ -70,8 +71,11 @@ public class ChildAnalysisDataset extends AbstractAnalysisDataset implements IAn
 			cd.getCollection().addCell(c);
 
 		// copy the signals
-		for(UUID id : cellCollection.getSignalGroupIDs())
-			cd.getCollection().addSignalGroup(id, cellCollection.getSignalGroup(id).get().duplicate());
+		for(UUID id : cellCollection.getSignalGroupIDs()) {
+			Optional<ISignalGroup> optg = cellCollection.getSignalGroup(id);
+			if(optg.isPresent())
+				cd.getCollection().addSignalGroup(id, optg.get().duplicate());
+		}
 
 
 		// copy child datasets
@@ -112,22 +116,24 @@ public class ChildAnalysisDataset extends AbstractAnalysisDataset implements IAn
 	}
 
 	@Override
-	public void setSavePath(@NonNull File file) {}
+	public void setSavePath(@NonNull File file) {
+		// We can't set a path for a child 
+	}
 
 	@Override
 	public void setScale(double scale) {				
 		if(scale<=0) // don't allow a scale to cause divide by zero errors
 			return;
-		LOGGER.fine("Setting scale for "+getName()+" to "+scale);
+		LOGGER.fine(() -> "Setting scale for "+getName()+" to "+scale);
 		getCollection().setScale(scale);
 
 		Optional<IAnalysisOptions> op = getAnalysisOptions();
 		if(op.isPresent()){
 			Set<String> detectionOptions = op.get().getDetectionOptionTypes();
 			for(String detectedComponent : detectionOptions) {
-				Optional<IDetectionOptions> subOptions = op.get().getDetectionOptions(detectedComponent);
+				Optional<HashOptions> subOptions = op.get().getDetectionOptions(detectedComponent);
 				if(subOptions.isPresent())
-					subOptions.get().setScale(scale);
+					subOptions.get().setDouble(HashOptions.SCALE, scale);
 			}
 		}
 
@@ -138,7 +144,7 @@ public class ChildAnalysisDataset extends AbstractAnalysisDataset implements IAn
 
 	@Override
 	public Set<UUID> getChildUUIDs() {
-		Set<UUID> result = new HashSet<UUID>(childDatasets.size());
+		Set<UUID> result = new HashSet<>(childDatasets.size());
 		for (IAnalysisDataset c : childDatasets) {
 			result.add(c.getId());
 		}
@@ -148,7 +154,7 @@ public class ChildAnalysisDataset extends AbstractAnalysisDataset implements IAn
 
 	@Override
 	public Set<UUID> getAllChildUUIDs() {
-		Set<UUID> result = new HashSet<UUID>();
+		Set<UUID> result = new HashSet<>();
 
 		Set<UUID> idlist = getChildUUIDs();
 		result.addAll(idlist);
@@ -188,26 +194,27 @@ public class ChildAnalysisDataset extends AbstractAnalysisDataset implements IAn
 
 	@Override
 	public Set<IAnalysisDataset> getAllMergeSources() {
-		return new HashSet<IAnalysisDataset>(0);
+		return new HashSet<>(0);
 	}
 
 	@Override
 	public void addMergeSource(@NonNull IAnalysisDataset dataset) {
+		// Not possible for a child
 	}
 
 	@Override
 	public Set<IAnalysisDataset> getMergeSources() {
-		return new HashSet<IAnalysisDataset>(0);
+		return new HashSet<>(0);
 	}
 
 	@Override
 	public Set<UUID> getMergeSourceIDs() {
-		return new HashSet<UUID>(0);
+		return new HashSet<>(0);
 	}
 
 	@Override
 	public Set<UUID> getAllMergeSourceIDs() {
-		return new HashSet<UUID>(0);
+		return new HashSet<>(0);
 	}
 
 	@Override
@@ -242,7 +249,7 @@ public class ChildAnalysisDataset extends AbstractAnalysisDataset implements IAn
 
 	@Override
 	public List<IAnalysisDataset> getAllChildDatasets() {
-		List<IAnalysisDataset> result = new ArrayList<IAnalysisDataset>();
+		List<IAnalysisDataset> result = new ArrayList<>();
 		if (!childDatasets.isEmpty()) {
 
 			for (IAnalysisDataset d : childDatasets) {
@@ -270,13 +277,14 @@ public class ChildAnalysisDataset extends AbstractAnalysisDataset implements IAn
 
 	@Override
 	public void setAnalysisOptions(IAnalysisOptions analysisOptions) {
+		// Not possible for a child
 	}
 
 	@Override
 	public void refreshClusterGroups() {
 		if (this.hasClusters()) {
 			// Find the groups that need removing
-			List<IClusterGroup> groupsToDelete = new ArrayList<IClusterGroup>();
+			List<IClusterGroup> groupsToDelete = new ArrayList<>();
 			for (IClusterGroup g : this.getClusterGroups()) {
 				boolean clusterRemains = false;
 
@@ -306,6 +314,7 @@ public class ChildAnalysisDataset extends AbstractAnalysisDataset implements IAn
 
 	@Override
 	public void setRoot(boolean b) {
+		// Not possible for a child
 	}
 
 	@Override
@@ -354,8 +363,10 @@ public class ChildAnalysisDataset extends AbstractAnalysisDataset implements IAn
     	// Use arrays to avoid concurrent modifications to cluster groups
     	Object[] ids = clusterGroups.parallelStream().map(IClusterGroup::getId).toArray();
     	for(Object id : ids) {
-    		IClusterGroup g = clusterGroups.stream().filter(group->group.getId().equals(id)).findFirst().get();
-    		deleteClusterGroup(g);
+    		Optional<IClusterGroup> optg = clusterGroups.stream()
+    				.filter(group->group.getId().equals(id)).findFirst();
+    		if(optg.isPresent())
+    			deleteClusterGroup(optg.get());
     	}
     }
 
@@ -386,13 +397,10 @@ public class ChildAnalysisDataset extends AbstractAnalysisDataset implements IAn
 		return this.cellCollection.getName();
 	}
 
-	@Override
+    @Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = super.hashCode();
-		return result;
+		return super.hashCode();
 	}
-
 
 	@Override
 	public boolean equals(Object obj) {
@@ -404,8 +412,8 @@ public class ChildAnalysisDataset extends AbstractAnalysisDataset implements IAn
 			return false;
 		return true;
 	}
-	
-    private void writeObject(java.io.ObjectOutputStream out) throws IOException {
+
+	private void writeObject(java.io.ObjectOutputStream out) throws IOException {
     	// Ensure the save version is correct at time of save 
     	this.versionLastSaved = Version.currentVersion();
     	out.defaultWriteObject();

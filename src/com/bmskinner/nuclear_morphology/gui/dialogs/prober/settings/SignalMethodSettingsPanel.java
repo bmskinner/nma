@@ -28,8 +28,8 @@ import javax.swing.JPanel;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
-import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions.SignalDetectionMode;
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
+import com.bmskinner.nuclear_morphology.components.options.SignalDetectionMode;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 
 @SuppressWarnings("serial")
@@ -41,13 +41,13 @@ public class SignalMethodSettingsPanel extends SettingsPanel {
     private static final String REVERSE_DESC_LABEL  = Labels.Signals.REVERSE_THRESHOLDING_RADIO_LABEL;
     private static final String ADAPTIVE_DESC_LABEL = Labels.Signals.ADAPTIVE_THRESHOLDING_RADIO_LABEL;
 
-    private INuclearSignalOptions options;
+    private HashOptions options;
 
     private JComboBox<SignalDetectionMode> box;
 
     private JPanel cardPanel;
 
-    public SignalMethodSettingsPanel(INuclearSignalOptions op) {
+    public SignalMethodSettingsPanel(HashOptions op) {
         options = op;
 
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
@@ -78,7 +78,7 @@ public class SignalMethodSettingsPanel extends SettingsPanel {
         List<JLabel> labels = new ArrayList<JLabel>();
         labels.add(new JLabel(METHOD_LBL));
 
-        List<JComboBox<SignalDetectionMode>> fields = new ArrayList<JComboBox<SignalDetectionMode>>();
+        List<JComboBox<SignalDetectionMode>> fields = new ArrayList<>();
         fields.add(box);
 
         addLabelTextRows(labels, fields, panel);
@@ -90,13 +90,13 @@ public class SignalMethodSettingsPanel extends SettingsPanel {
 
     private void createSpinners() {
 
-        box = new JComboBox<SignalDetectionMode>(SignalDetectionMode.values());
+        box = new JComboBox<>(SignalDetectionMode.values());
         box.setSelectedItem(SignalDetectionMode.FORWARD);
 
         box.addActionListener(e -> {
 
             SignalDetectionMode mode = (SignalDetectionMode) box.getSelectedItem();
-            options.setDetectionMode(mode);
+            options.setString(HashOptions.SIGNAL_DETECTION_MODE_KEY, mode.toString());
 
             CardLayout cl = (CardLayout) cardPanel.getLayout();
 
@@ -119,7 +119,7 @@ public class SignalMethodSettingsPanel extends SettingsPanel {
      * 
      * @param options
      */
-    public void set(@NonNull INuclearSignalOptions options) {
+    public void set(@NonNull HashOptions options) {
     	this.options.set(options);
     	update();
     }

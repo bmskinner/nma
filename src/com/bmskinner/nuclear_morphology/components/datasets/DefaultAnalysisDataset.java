@@ -35,11 +35,11 @@ import com.bmskinner.nuclear_morphology.components.Version;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileCollection;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
-import com.bmskinner.nuclear_morphology.io.Io.Importer;
+import com.bmskinner.nuclear_morphology.io.Io;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -63,13 +63,13 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
      * Other datasets associated with this dataset, that will need to be saved
      * out. Includes merge sources presently, with scope for expansion
      */
-    private Set<IAnalysisDataset> otherDatasets = new HashSet<IAnalysisDataset>();
+    private Set<IAnalysisDataset> otherDatasets = new HashSet<>();
 
     /**
      * The ids of datasets merged to create this dataset. The IDs must be
      * present in otherCollections.
      */
-    private Set<UUID> mergeSources = new HashSet<UUID>(0);
+    private Set<UUID> mergeSources = new HashSet<>(0);
 
     private File savePath; // the file to save this dataset to
 
@@ -82,7 +82,7 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
      * @param collection
      */
     public DefaultAnalysisDataset(ICellCollection collection) {
-        this(collection, new File(collection.getOutputFolder(), collection.getName() + Importer.SAVE_FILE_EXTENSION));
+        this(collection, new File(collection.getOutputFolder(), collection.getName() + Io.SAVE_FILE_EXTENSION));
     }
 
     /**
@@ -213,16 +213,16 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
     public void setScale(double scale) {				
 		if(scale<=0) // don't allow a scale to cause divide by zero errors
 			return;
-		LOGGER.fine("Setting scale for "+getName()+" to "+scale);
+		LOGGER.fine(() -> "Setting scale for "+getName()+" to "+scale);
 		getCollection().setScale(scale);
 		
 		Optional<IAnalysisOptions> op = getAnalysisOptions();
 		if(op.isPresent()){
 			Set<String> detectionOptions = op.get().getDetectionOptionTypes();
 			for(String detectedComponent : detectionOptions) {
-				Optional<IDetectionOptions> subOptions = op.get().getDetectionOptions(detectedComponent);
+				Optional<HashOptions> subOptions = op.get().getDetectionOptions(detectedComponent);
 				if(subOptions.isPresent())
-					subOptions.get().setScale(scale);
+					subOptions.get().setDouble(HashOptions.SCALE, scale);
 			}
 		}
 		
@@ -501,13 +501,12 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
     	// Is the name of the expectedImageDirectory the same as the dataset
     	// image directory?
     	// Update the analysis options
-        Optional<IAnalysisOptions> analysisOptions = getAnalysisOptions();
-        if(!analysisOptions.isPresent()) {
+        if(analysisOptions==null) {
         	LOGGER.warning("No analysis options to contain image folder");
         	return;
         }
         
-    	Optional<IDetectionOptions> nucleusOptions = analysisOptions.get()
+    	Optional<HashOptions> nucleusOptions = analysisOptions
     			.getDetectionOptions(CellularComponent.NUCLEUS);
     	
     	if(!nucleusOptions.isPresent()) {
@@ -517,7 +516,8 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
     	
     	// Check that the folders have the same name - if the files have
     	// just been copied between computers, this should be true
-    	String expectedName = nucleusOptions.get().getFolder().getName();
+    	String filePath = nucleusOptions.get().getString(HashOptions.DETECTION_FOLDER);
+    	String expectedName = new File(filePath).getName();
 
     	if (!expectedImageDirectory.getName().equals(expectedName)) {
     		LOGGER.warning(String.format("Caution: Existing dataset folder '%s' does not match new folder name '%s'",
@@ -534,7 +534,7 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
         getCollection().setSourceFolder(expectedImageDirectory);
         
         // Update the analysis options
-        nucleusOptions.get().setFolder(expectedImageDirectory);
+        nucleusOptions.get().setString(HashOptions.DETECTION_FOLDER, expectedImageDirectory.getAbsolutePath());
 
         
         //TODO add unit tests that this completes correctly
@@ -638,9 +638,6 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
     private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
 
         in.defaultReadObject();
-
-        if (cellCollection == null)
-            LOGGER.warning("No cell collection could be read in dataset");
 
         IProfileCollection pc = cellCollection.getProfileCollection();
         

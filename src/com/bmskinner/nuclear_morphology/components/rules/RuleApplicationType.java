@@ -18,9 +18,9 @@ public enum RuleApplicationType {
 	 */
 	VIA_MEDIAN;
 		
-	@Override
-	public String toString() {
+	public String prettyFormat() {
 		return this.name().substring(0, 1).toUpperCase() + 
 				this.name().substring(1).replace("_", " ").toLowerCase();
 	}
+
 }

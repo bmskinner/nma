@@ -29,6 +29,7 @@ import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 
 /**
  * Objects implementing this interface can have BorderTags assigned to points
@@ -56,13 +57,12 @@ public interface Taggable extends CellularComponent {
 
 
     /**
-     * Finds the key points of interest around the border of the object. Can
-     * use several different methods, and take a best-fit, or just use one. The
-     * default in a round nucleus is to get the longest diameter and set this as
-     * the head/tail axis.
+     * Finds the key points of interest around the border of the object.
+     * Specify the rulesets that should be used for landmark detection and
+     * subsequent orientation.
      * @throws ComponentCreationException
      */
-    public void findPointsAroundBorder() throws ComponentCreationException;
+    public void findPointsAroundBorder(@NonNull RuleSetCollection rsc) throws ComponentCreationException;
 
     /**
      * Check if the object has a profile of the given type

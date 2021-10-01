@@ -32,7 +32,7 @@ import com.bmskinner.nuclear_morphology.io.xml.XMLCreator;
  * @since 1.14.0
  *
  */
-public class DefaultClusteringOptions extends AbstractHashOptions implements IClusteringOptions {
+public class DefaultClusteringOptions extends DefaultOptions implements IClusteringOptions {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -68,15 +68,15 @@ public class DefaultClusteringOptions extends AbstractHashOptions implements ICl
 
 	@Override
 	public boolean isIncludeSegment(UUID i) {
-		if(boolMap.containsKey(i.toString()))
-			return boolMap.get(i.toString());
-		return false;
+		if(!hasBoolean(i.toString()))
+			return false;
+		return getBoolean(i.toString()); // could be present, but false
 	}
 
 	@Override
 	public Set<UUID> getSegments() {
 		Set<UUID> result = new HashSet<>();
-		for(String s : boolMap.keySet()) {
+		for(String s : getBooleanKeys()) {
 			if(XMLCreator.isUUID(s))
 				result.add(UUID.fromString(s));
 		}
@@ -85,59 +85,59 @@ public class DefaultClusteringOptions extends AbstractHashOptions implements ICl
 
 	@Override
 	public boolean isIncludeStatistic(Measurement stat) {
-		if(boolMap.containsKey(stat.toString()))
-			return boolMap.get(stat.toString());
-		return false;
+		if(!hasBoolean(stat.toString()))
+			return false;
+		return getBoolean(stat.toString());
 	}
 
 
 	@Override
 	public boolean isIncludeProfile(ProfileType t) {
-		if(boolMap.containsKey(t.toString()))
-			return boolMap.get(t.toString());
-		return false;
+		if(!hasBoolean(t.toString()))
+			return false;
+		return getBoolean(t.toString());
 	}
 
 	@Override
 	public boolean isUseSimilarityMatrix() {
-		if(boolMap.containsKey(USE_SIMILARITY_MATRIX_KEY))
-			return boolMap.get(USE_SIMILARITY_MATRIX_KEY);
-		return false;
+		if(!hasBoolean(USE_SIMILARITY_MATRIX_KEY))
+			return false;
+		return getBoolean(USE_SIMILARITY_MATRIX_KEY);
 	}
 
 	@Override
 	public ClusteringMethod getClusteringMethod() {
-		if(stringMap.containsKey(CLUSTER_METHOD_KEY))
-			return ClusteringMethod.valueOf(stringMap.get(CLUSTER_METHOD_KEY));
-		return null;
+		if(!hasString(CLUSTER_METHOD_KEY))
+			return null;
+		return ClusteringMethod.valueOf(getString(CLUSTER_METHOD_KEY));
 	}
 
 	@Override
 	public int getClusterNumber() {
-		if(intMap.containsKey(MANUAL_CLUSTER_NUMBER_KEY))
-			return intMap.get(MANUAL_CLUSTER_NUMBER_KEY);
-		return 0;
+		if(!hasInt(MANUAL_CLUSTER_NUMBER_KEY))
+			return 0;
+		return getInt(MANUAL_CLUSTER_NUMBER_KEY);
 	}
 
 	@Override
 	public HierarchicalClusterMethod getHierarchicalMethod() {
-		if(stringMap.containsKey(HIERARCHICAL_METHOD_KEY))
-			return HierarchicalClusterMethod.valueOf(stringMap.get(HIERARCHICAL_METHOD_KEY));
-		return null;
+		if(!hasString(HIERARCHICAL_METHOD_KEY))
+			return null;
+		return HierarchicalClusterMethod.valueOf(getString(HIERARCHICAL_METHOD_KEY));
 	}
 
 	@Override
 	public int getIterations() {
-		if(intMap.containsKey(EM_ITERATIONS_KEY))
-			return intMap.get(EM_ITERATIONS_KEY);
-		return 0;
+		if(!hasInt(EM_ITERATIONS_KEY))
+			return 0;
+		return getInt(EM_ITERATIONS_KEY);
 	}
 
 	@Override
 	public boolean isIncludeMesh() {
-		if(boolMap.containsKey(INCLUDE_MESH_KEY))
-			return boolMap.get(INCLUDE_MESH_KEY);
-		return false;
+		if(!hasBoolean(INCLUDE_MESH_KEY))
+			return false;
+		return getBoolean(INCLUDE_MESH_KEY);
 	}
 
 	@Override

@@ -41,9 +41,6 @@ import ij.process.FloatPolygon;
 public class NucleusFactory implements ComponentFactory<Nucleus> {
 	
 	private static final Logger LOGGER = Logger.getLogger(NucleusFactory.class.getName());
-
-	private static final String NULL_COM_ERROR = "Centre of mass cannot be null in nucleus factory";
-	private static final String NULL_ROI_ERROR = "Roi cannot be null in nucleus factory";
 	private int nucleusCount = 0; // store the number of nuclei  created by this factory
 	
     /**
@@ -114,11 +111,7 @@ public class NucleusFactory implements ComponentFactory<Nucleus> {
     @Override
     public Nucleus buildInstance(@NonNull Roi roi, File imageFile, int channel, int[] originalPosition, @NonNull IPoint centreOfMass)
             throws ComponentCreationException {
-    	if (roi == null)
-    		throw new IllegalArgumentException(NULL_ROI_ERROR);
-        if (centreOfMass == null)
-            throw new IllegalArgumentException(NULL_COM_ERROR);
-        
+    	
         Nucleus n =  new DefaultNucleus(roi, centreOfMass, imageFile, channel, originalPosition,
                 nucleusCount);
 
@@ -130,10 +123,6 @@ public class NucleusFactory implements ComponentFactory<Nucleus> {
     @Override
     public Nucleus buildInstance(@NonNull Roi roi, File imageFile, int channel, int[] originalPosition, @NonNull IPoint centreOfMass, UUID id)
             throws ComponentCreationException {
-    	if (roi == null)
-    		throw new IllegalArgumentException(NULL_ROI_ERROR);
-        if (centreOfMass == null)
-            throw new IllegalArgumentException(NULL_COM_ERROR);
         
         Nucleus n = new DefaultNucleus(roi, centreOfMass, imageFile, channel, originalPosition,
                 nucleusCount, id);
@@ -143,12 +132,7 @@ public class NucleusFactory implements ComponentFactory<Nucleus> {
         return n;
     }
     
-    public Nucleus buildInstance(@NonNull Roi roi, File imageFile, int channel, int[] originalPosition, @NonNull IPoint centreOfMass, UUID id, int nucleusNumber)
-            throws ComponentCreationException {
-    	if (roi == null)
-    		throw new IllegalArgumentException(NULL_ROI_ERROR);
-        if (centreOfMass == null)
-            throw new IllegalArgumentException(NULL_COM_ERROR);
+    public Nucleus buildInstance(@NonNull Roi roi, File imageFile, int channel, int[] originalPosition, @NonNull IPoint centreOfMass, UUID id, int nucleusNumber) {
         
         Nucleus n = new DefaultNucleus(roi, centreOfMass, imageFile, channel, originalPosition,
     			nucleusNumber, id);

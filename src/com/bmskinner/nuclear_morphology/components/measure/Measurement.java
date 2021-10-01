@@ -23,7 +23,6 @@ import java.util.UUID;
 
 import com.bmskinner.nuclear_morphology.analysis.image.GLCM.GLCMParameter;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.nuclei.NucleusType;
 
 /**
  * This interface describes statistical measures
@@ -245,21 +244,6 @@ public interface Measurement extends Serializable {
      */
     static List<Measurement> getNucleusStats() {
         return getRodentSpermNucleusStats();
-    }
-
-    /**
-     * Get stats for round nuclei
-     * 
-     * @return
-     */
-    static List<Measurement> getNucleusStats(NucleusType type) {
-
-        switch (type) {
-        case ROUND:  return getRoundNucleusStats();
-        case PIG_SPERM: return getRoundNucleusStats();
-        case RODENT_SPERM: return getRodentSpermNucleusStats();
-        default: return getRoundNucleusStats();
-        }
     }
 
     static List<Measurement> getRoundNucleusStats() {

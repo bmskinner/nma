@@ -119,7 +119,7 @@ public class BorderTagEditingPanel extends AbstractEditingPanel implements Actio
 
         ruleSetButton = new JButton(STR_SHOW_RULESETS);
         ruleSetButton.addActionListener(this);
-        panel.add(ruleSetButton);
+//        panel.add(ruleSetButton); //TODO: enable once rulesets are working again
 
         return panel;
     }

@@ -42,7 +42,7 @@ import com.bmskinner.nuclear_morphology.components.nuclei.DefaultConsensusNucleu
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.NucleusFactory;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
@@ -100,9 +100,9 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
         
         Optional<IAnalysisOptions> analysisOptions =  dataset.getAnalysisOptions();
         if(analysisOptions.isPresent()) {
-        	Optional<IDetectionOptions> nucleusOptions = analysisOptions.get().getNuclusDetectionOptions();
+        	Optional<HashOptions> nucleusOptions = analysisOptions.get().getNuclusDetectionOptions();
         	if(nucleusOptions.isPresent()) {
-        		double scale = nucleusOptions.get().getScale();
+        		double scale = nucleusOptions.get().getDouble(HashOptions.SCALE);
         		n.setScale(scale);
         	} else {
         		LOGGER.fine("No nucleus detection options present, unable to find pixel scale for consensus");

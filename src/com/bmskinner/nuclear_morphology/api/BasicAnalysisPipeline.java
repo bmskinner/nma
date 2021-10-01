@@ -72,7 +72,7 @@ public class BasicAnalysisPipeline {
      */
     private void runNewAnalysis(String folder, IAnalysisOptions op, File saveFile) throws Exception {
         
-        if(!op.getDetectionOptions(CellularComponent.NUCLEUS).get().getFolder().exists())
+        if(!op.getDetectionOptions(CellularComponent.NUCLEUS).get().getFile(HashOptions.DETECTION_FOLDER).exists())
             throw new IllegalArgumentException("Detection folder does not exist");
         
         File statsFile = new File(saveFile.getParentFile(), saveFile.getName()+Io.TAB_FILE_EXTENSION);

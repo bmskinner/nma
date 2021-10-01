@@ -19,7 +19,7 @@ package com.bmskinner.nuclear_morphology.analysis.detection;
 import java.awt.image.BufferedImage;
 import java.util.Arrays;
 
-import com.bmskinner.nuclear_morphology.components.options.ICannyOptions;
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 
 /**
  * <p>
@@ -105,11 +105,11 @@ public class CannyEdgeDetector {
         contrastNormalized = false;
     }
 
-    public CannyEdgeDetector(ICannyOptions options) {
-        this.setLowThreshold(options.getLowThreshold());
-        this.setHighThreshold(options.getHighThreshold());
-        this.setGaussianKernelRadius(options.getKernelRadius());
-        this.setGaussianKernelWidth(options.getKernelWidth());
+    public CannyEdgeDetector(HashOptions options) {
+        this.setLowThreshold(options.getFloat(HashOptions.CANNY_LOW_THRESHOLD_FLT));
+        this.setHighThreshold(options.getFloat(HashOptions.CANNY_HIGH_THRESHOLD_FLT));
+        this.setGaussianKernelRadius(options.getFloat(HashOptions.CANNY_KERNEL_RADIUS_FLT));
+        this.setGaussianKernelWidth(options.getInt(HashOptions.CANNY_KERNEL_WIDTH_INT));
         contrastNormalized = false;
     }
 

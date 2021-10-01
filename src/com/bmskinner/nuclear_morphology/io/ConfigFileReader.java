@@ -24,7 +24,6 @@ import java.util.Properties;
 import java.util.logging.Logger;
 
 import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
-import com.bmskinner.nuclear_morphology.components.nuclei.NucleusType;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter.ColourSwatch;
 import com.bmskinner.nuclear_morphology.io.DatasetExportMethod.ExportFormat;
@@ -75,7 +74,6 @@ public class ConfigFileReader {
         properties.setProperty(GlobalOptions.DEFAULT_FILL_CONSENSUS_KEY, String.valueOf(op.isFillConsensus()));
         properties.setProperty(GlobalOptions.DEFAULT_USE_ANTIALIASING_KEY, String.valueOf(op.isAntiAlias()));
         properties.setProperty(GlobalOptions.DEFAULT_SWATCH_KEY, String.valueOf(op.getSwatch().name()));
-        properties.setProperty(GlobalOptions.DEFAULT_NUCLEUS_TYPE_KEY, String.valueOf(op.getDefaultType().name()));
         properties.setProperty(GlobalOptions.REFOLD_OVERRIDE_KEY, String.valueOf(op.getBoolean(GlobalOptions.REFOLD_OVERRIDE_KEY)));
         properties.setProperty(GlobalOptions.IS_DEBUG_INTERFACE_KEY, String.valueOf(op.getBoolean(GlobalOptions.IS_DEBUG_INTERFACE_KEY)));
         properties.setProperty(GlobalOptions.DEFAULT_EXPORT_FORMAT_KEY, String.valueOf(op.getExportFormat()));
@@ -112,9 +110,6 @@ public class ConfigFileReader {
 
             if (GlobalOptions.DEFAULT_SWATCH_KEY.equals(key))
                 op.setSwatch(ColourSwatch.valueOf(value));
-
-            if (GlobalOptions.DEFAULT_NUCLEUS_TYPE_KEY.equals(key))
-                op.setDefaultType(NucleusType.valueOf(value));
 
             if (GlobalOptions.REFOLD_OVERRIDE_KEY.equals(key))
                 op.setBoolean(GlobalOptions.REFOLD_OVERRIDE_KEY, Boolean.valueOf(value));

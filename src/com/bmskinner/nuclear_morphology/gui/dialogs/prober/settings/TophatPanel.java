@@ -27,7 +27,7 @@ import javax.swing.JLabel;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 
-import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -50,9 +50,9 @@ public class TophatPanel extends SettingsPanel {
 
     private JSpinner radiusSpinner;
 
-    private IDetectionOptions options;
+    private HashOptions options;
 
-    public TophatPanel(final IDetectionOptions options) {
+    public TophatPanel(final HashOptions options) {
         this.options = options;
         createSpinners();
         createPanel();
@@ -65,7 +65,7 @@ public class TophatPanel extends SettingsPanel {
     private void createSpinners() {
 
         radiusSpinner = new JSpinner(
-                new SpinnerNumberModel(Integer.valueOf(options.getInt(IDetectionOptions.TOP_HAT_RADIUS)),
+                new SpinnerNumberModel(Integer.valueOf(options.getInt(HashOptions.TOP_HAT_RADIUS)),
                         TOPHAT_RADIUS_MIN, TOPHAT_RADIUS_MAX, TOPHAT_RADIUS_STEP));
 
         // add the change listeners
@@ -75,7 +75,7 @@ public class TophatPanel extends SettingsPanel {
                 radiusSpinner.commitEdit();
 
                 Integer value = (Integer) j.getValue();
-                options.setInt(IDetectionOptions.TOP_HAT_RADIUS, value.intValue());
+                options.setInt(HashOptions.TOP_HAT_RADIUS, value.intValue());
                 fireOptionsChangeEvent();
             } catch (ParseException e1) {
                 LOGGER.warning("Parsing exception");
@@ -92,8 +92,8 @@ public class TophatPanel extends SettingsPanel {
 
             this.setLayout(new GridBagLayout());
 
-            List<JLabel> labelList = new ArrayList<JLabel>();
-            List<JComponent> fieldList = new ArrayList<JComponent>();
+            List<JLabel> labelList = new ArrayList<>();
+            List<JComponent> fieldList = new ArrayList<>();
 
             labelList.add(new JLabel(RADIUS_LBL));
             fieldList.add(radiusSpinner);
@@ -114,7 +114,7 @@ public class TophatPanel extends SettingsPanel {
 	protected void update() {
         super.update();
         isUpdating = true;
-        radiusSpinner.setValue(options.getInt(IDetectionOptions.TOP_HAT_RADIUS));
+        radiusSpinner.setValue(options.getInt(HashOptions.TOP_HAT_RADIUS));
         isUpdating = false;
     }
 

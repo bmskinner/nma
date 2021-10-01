@@ -40,13 +40,14 @@ import com.bmskinner.nuclear_morphology.components.datasets.VirtualCellCollectio
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IShellOptions;
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.signals.KeyedShellResult;
 import com.bmskinner.nuclear_morphology.components.signals.DefaultSignalGroup;
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult.CountType;
+import com.bmskinner.nuclear_morphology.components.signals.IShellResult.ShrinkType;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
@@ -68,13 +69,13 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
 	public static final int MINIMUM_AREA_PER_SHELL = 50;
 	public static final double MINIMUM_CIRCULARITY = 0.07;
 	
-	private final IShellOptions options;
+	private final HashOptions options;
 	
 	private ICellCollection collection;
 
     private final Map<UUID, KeyedShellResult> counters = new HashMap<>();
 
-    public ShellAnalysisMethod(@NonNull final IAnalysisDataset dataset, @NonNull final IShellOptions o) {
+    public ShellAnalysisMethod(@NonNull final IAnalysisDataset dataset, @NonNull final HashOptions o) {
         super(dataset);
         options = o;
     }
@@ -92,7 +93,7 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
              return;
     	 
         LOGGER.info(String.format("Performing %s shell analysis with %s shells on dataset %s...", 
-        		options.getErosionMethod(), options.getShellNumber(), collection.getName()));
+        		options.getString(HashOptions.SHELL_EROSION_METHOD_KEY), options.getInt(HashOptions.SHELL_COUNT_INT), collection.getName()));
         
         
         // If this is a child, and the parent already has the data, just copy it
@@ -137,7 +138,7 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
     	for (UUID signalGroupId : collection.getSignalManager().getSignalGroupIDs()) {
             if (IShellResult.RANDOM_SIGNAL_ID.equals(signalGroupId))
                 continue;
-            counters.put(signalGroupId, new KeyedShellResult( options.getShellNumber(), options.getErosionMethod()));
+            counters.put(signalGroupId, new KeyedShellResult( options.getInt(HashOptions.SHELL_COUNT_INT), ShrinkType.valueOf(options.getString(HashOptions.SHELL_EROSION_METHOD_KEY))));
             
             // Assign the options to each signal group
             LOGGER.fine("Creating signal counter for group "+signalGroupId);
@@ -146,12 +147,14 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
             	LOGGER.warning("No analysis options in dataset; unable to set shell options");
             	return;
             }
-            datasetOptions.get().getNuclearSignalOptions(signalGroupId).setShellOptions(options);
+            
+            // Store the shell options in the signal options
+            datasetOptions.get().getNuclearSignalOptions(signalGroupId).set(options);
         }
     	
     	// Ensure a random distribution exists
     	if(!collection.getSignalManager().getSignalGroupIDs().contains(IShellResult.RANDOM_SIGNAL_ID))
-    		counters.put(IShellResult.RANDOM_SIGNAL_ID, new KeyedShellResult(options.getShellNumber(), options.getErosionMethod()));
+    		counters.put(IShellResult.RANDOM_SIGNAL_ID, new KeyedShellResult(options.getInt(HashOptions.SHELL_COUNT_INT), ShrinkType.valueOf(options.getString(HashOptions.SHELL_EROSION_METHOD_KEY))));
     }
     
     private synchronized void createResults() {
@@ -182,7 +185,7 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
     private void copyShellResults(@NonNull UUID group, @NonNull ICellCollection src, @NonNull ICellCollection dest) {
     	IShellResult channelCounter = src.getSignalGroup(group).get().getShellResult().get();
     	if (dest.getSignalManager().hasSignals(group) || IShellResult.RANDOM_SIGNAL_ID.equals(group)) {
-    		KeyedShellResult childCounter = new KeyedShellResult(options.getShellNumber(), options.getErosionMethod());
+    		KeyedShellResult childCounter = new KeyedShellResult(options.getInt(HashOptions.SHELL_COUNT_INT), ShrinkType.valueOf(options.getString(HashOptions.SHELL_EROSION_METHOD_KEY)));
     		for(ICell c : dest.getCells()) {
     			for(Nucleus n : c.getNuclei()) {
 
@@ -269,8 +272,8 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
 
             try {
                 shellDetector = new ShellDetector(n,  
-                		options.getShellNumber(), 
-                		options.getErosionMethod());
+                		options.getInt(HashOptions.SHELL_COUNT_INT), 
+                		ShrinkType.valueOf(options.getString(HashOptions.SHELL_EROSION_METHOD_KEY)));
             } catch (ShellAnalysisException e1) {
                 LOGGER.warning("Unable to make shells for " + n.getNameAndNumber());
                 LOGGER.log(Loggable.STACK, "Error in shell detector", e1);
@@ -344,8 +347,8 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
             if(iterations<=0)
                 throw new IllegalArgumentException("Must have at least one iteration");
             shellDetector = detector;
-            counts = new long[ options.getShellNumber()];
-            for(int i=0; i< options.getShellNumber(); i++){
+            counts = new long[ options.getInt(HashOptions.SHELL_COUNT_INT)];
+            for(int i=0; i< options.getInt(HashOptions.SHELL_COUNT_INT); i++){
                 counts[i] = 0;
             }
 

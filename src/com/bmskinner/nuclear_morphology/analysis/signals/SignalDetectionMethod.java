@@ -37,8 +37,7 @@ import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.datasets.VirtualCellCollection;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.nuclei.NucleusType;
-import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalCollection;
@@ -57,7 +56,7 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
 	
 	private static final Logger LOGGER = Logger.getLogger(SignalDetectionMethod.class.getName());
 
-    protected final INuclearSignalOptions options;
+    protected final HashOptions options;
     protected final File folder;
     protected final int channel;
     protected final UUID signalGroupId;
@@ -72,7 +71,7 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
      * @throws UnavailableSignalGroupException if the group is not present in the dataset
      */
 
-    public SignalDetectionMethod(@NonNull final IAnalysisDataset d, @NonNull final INuclearSignalOptions options, @NonNull final UUID group)
+    public SignalDetectionMethod(@NonNull final IAnalysisDataset d, @NonNull final HashOptions options, @NonNull final UUID group)
             throws UnavailableSignalGroupException {
         super(d);
         
@@ -82,9 +81,9 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
         if(!d.getCollection().hasSignalGroup(group))
         	throw new IllegalArgumentException("Signal group is not present in dataset");
 
-        this.options = (INuclearSignalOptions) options.duplicate();
-        this.folder  = options.getFolder().getAbsoluteFile();
-        this.channel = options.getChannel();
+        this.options = options.duplicate();
+        this.folder  = options.getFile(HashOptions.DETECTION_FOLDER).getAbsoluteFile();
+        this.channel = options.getInt(HashOptions.CHANNEL);
         this.signalGroupId = group;
         this.channelName = d.getCollection().getSignalGroup(group).get().getGroupName();
     }
@@ -102,7 +101,7 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
 
         try {
 
-            int originalMinThreshold = options.getThreshold();
+            int originalMinThreshold = options.getInt(HashOptions.THRESHOLD);
 
             SignalFinder finder = new SignalFinder(dataset.getAnalysisOptions().get(), options, dataset.getCollection());
 
@@ -116,7 +115,7 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
     
     private void detectInCell(ICell c, SignalFinder finder, int originalMinThreshold){
         // reset the min threshold for each cell
-        options.setThreshold(originalMinThreshold);
+        options.setInt(HashOptions.THRESHOLD, originalMinThreshold);
         
         for(Nucleus n : c.getNuclei())
         	detectInNucleus(n, finder);

@@ -42,8 +42,8 @@ import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
-import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions.SignalDetectionMode;
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
+import com.bmskinner.nuclear_morphology.components.options.SignalDetectionMode;
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.signals.PairwiseSignalDistanceCollection;
@@ -264,7 +264,7 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
                 SignalTableCell cell = new SignalTableCell(signalGroup,
                         collection.getSignalManager().getSignalGroupName(signalGroup), colour);
 
-                INuclearSignalOptions ns = null;
+                HashOptions ns = null;
                 Optional<? extends IAnalysisOptions> op = dataset.getAnalysisOptions();
                 if(!op.isPresent()){
                     for (int i = 0; i < rowsPerSignalGroup; i++) {
@@ -282,21 +282,21 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
                     }
 
                 } else {
-                    Object signalThreshold = ns.getDetectionMode().equals(SignalDetectionMode.FORWARD)
-                            ? ns.getThreshold() : "Variable";
+                    Object signalThreshold = ns.getString(HashOptions.SIGNAL_DETECTION_MODE_KEY).equals(SignalDetectionMode.FORWARD.toString())
+                            ? ns.getInt(HashOptions.THRESHOLD) : "Variable";
                             
                     DecimalFormat df = new DecimalFormat(DEFAULT_DECIMAL_FORMAT);
 
                     rowData.add(Labels.Signals.SIGNAL_COLOUR_LABEL);
                     rowData.add(cell);
-                    rowData.add(ns.getChannel());
-                    rowData.add(ns.getFolder());
+                    rowData.add(ns.getInt(HashOptions.CHANNEL));
+                    rowData.add(ns.getString(HashOptions.DETECTION_FOLDER));
                     rowData.add(signalThreshold);
-                    rowData.add(ns.getMinSize());
-                    rowData.add(df.format(ns.getMaxFraction()));
-                    rowData.add(df.format(ns.getMinCirc()));
-                    rowData.add(df.format(ns.getMaxCirc()));
-                    rowData.add(ns.getDetectionMode().toString());
+                    rowData.add(ns.getInt(HashOptions.MIN_SIZE_PIXELS));
+                    rowData.add(df.format(ns.getDouble(HashOptions.MAX_FRACTION)));
+                    rowData.add(df.format(ns.getDouble(HashOptions.MIN_CIRC)));
+                    rowData.add(df.format(ns.getDouble(HashOptions.MAX_CIRC)));
+                    rowData.add(ns.getString(HashOptions.SIGNAL_DETECTION_MODE_KEY));
                 }
 
             } finally {

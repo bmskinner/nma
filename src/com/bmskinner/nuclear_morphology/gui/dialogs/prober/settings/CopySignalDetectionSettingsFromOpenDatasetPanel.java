@@ -11,7 +11,7 @@ import javax.swing.JOptionPane;
 
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.core.DatasetListManager;
 import com.bmskinner.nuclear_morphology.gui.components.FileSelector;
 import com.bmskinner.nuclear_morphology.io.xml.OptionsXMLReader;
@@ -35,7 +35,7 @@ public class CopySignalDetectionSettingsFromOpenDatasetPanel extends CopyFromOpe
      * @param parent
      * @param op
      */
-    public CopySignalDetectionSettingsFromOpenDatasetPanel(IDetectionOptions op) {
+    public CopySignalDetectionSettingsFromOpenDatasetPanel(HashOptions op) {
         super(null, op);
     }
 
@@ -75,11 +75,11 @@ public class CopySignalDetectionSettingsFromOpenDatasetPanel extends CopyFromOpe
             if (choice != null) {
 
             	LOGGER.fine("Copying options from: " + choice);
-//            	// Ensure the folder is not overwritten by the new options
-            	File folder = options.getFolder();
-            	IDetectionOptions template = choice.d.getAnalysisOptions().get().getNuclearSignalOptions(choice.signalGroupId);
+            	File folder = new File(options.getString(HashOptions.DETECTION_FOLDER));
+            	HashOptions template = choice.d.getAnalysisOptions().get().getNuclearSignalOptions(choice.signalGroupId);
             	options.set(template);
-            	options.setFolder(folder);
+            	// Ensure folder is not overwritted when other options were copied
+				options.setString(HashOptions.DETECTION_FOLDER, folder.getAbsolutePath());
                 fireOptionsChangeEvent();
             }
 		};
@@ -88,7 +88,7 @@ public class CopySignalDetectionSettingsFromOpenDatasetPanel extends CopyFromOpe
 	@Override
 	protected ActionListener createOpenActionListener() {
 		return (e) -> {
-			File folder = options.getFolder();
+			File folder = new File(options.getString(HashOptions.DETECTION_FOLDER));
 			File f = FileSelector.chooseOptionsImportFile(folder);
 			if(f==null)
 				return;
@@ -97,8 +97,10 @@ public class CopySignalDetectionSettingsFromOpenDatasetPanel extends CopyFromOpe
 				IAnalysisOptions o = new OptionsXMLReader(f).read();
 				
 				// Find the channels in the imported file
-				String[] choices = o.getNuclearSignalGroups().stream().map(id->{
-					return "Channel "+String.valueOf(o.getNuclearSignalOptions(id).getChannel());
+				String[] choices = o.getNuclearSignalGroups()
+						.stream()
+						.map(id->{
+							return "Channel "+String.valueOf(o.getNuclearSignalOptions(id).getInt(HashOptions.CHANNEL));
 				}).toArray(String[]::new);
 				
 				String choice = (String) JOptionPane.showInputDialog(null,
@@ -113,10 +115,11 @@ public class CopySignalDetectionSettingsFromOpenDatasetPanel extends CopyFromOpe
 
 				o.getNuclearSignalGroups().stream()
 					.map(id-> o.getNuclearSignalOptions(id))
-					.filter(op->op.getChannel()==channel)
+					.filter(op->op.getInt(HashOptions.CHANNEL)==channel)
 					.findFirst()
 					.ifPresent(op->options.set(op));
-				options.setFolder(folder);
+				// Ensure folder is not overwritted when other options were copied
+				options.setString(HashOptions.DETECTION_FOLDER, folder.getAbsolutePath());
 				fireOptionsChangeEvent();
 
 			} catch (XMLReadingException e1) {

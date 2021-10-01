@@ -19,8 +19,7 @@ package com.bmskinner.nuclear_morphology.core;
 import java.io.File;
 
 import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
-import com.bmskinner.nuclear_morphology.components.nuclei.NucleusType;
-import com.bmskinner.nuclear_morphology.components.options.AbstractHashOptions;
+import com.bmskinner.nuclear_morphology.components.options.DefaultOptions;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter.ColourSwatch;
 import com.bmskinner.nuclear_morphology.io.DatasetExportMethod.ExportFormat;
 
@@ -31,7 +30,7 @@ import com.bmskinner.nuclear_morphology.io.DatasetExportMethod.ExportFormat;
  *
  */
 @SuppressWarnings("serial")
-public class GlobalOptions extends AbstractHashOptions {
+public class GlobalOptions extends DefaultOptions {
 
     private static GlobalOptions instance;
     private static final Object           lockObject = new Object(); // synchronisation
@@ -78,8 +77,6 @@ public class GlobalOptions extends AbstractHashOptions {
     private ColourSwatch swatch;
 
     private static final double DEFAULT_SCALE = 1;
-
-    private NucleusType defaultType;
     
     private ExportFormat datasetExportFormat;
 
@@ -114,21 +111,12 @@ public class GlobalOptions extends AbstractHashOptions {
         setBoolean(IS_USE_ANTIALIASING, true);
         setDouble(DEFAULT_IMAGE_SCALE_KEY, DEFAULT_SCALE);
         this.defaultDir = new File(System.getProperty("user.home"));
-        this.defaultType = NucleusType.RODENT_SPERM;
         setBoolean(REFOLD_OVERRIDE_KEY, false);
         setBoolean(IS_CONVERT_DATASETS_KEY, true);
         setBoolean(IS_DEBUG_INTERFACE_KEY, false);
         setInt(NUM_IMAGEJ_THREADS_KEY, 2);
         this.setBoolean(IS_GLCM_INTERFACE_KEY, false);
         this.datasetExportFormat = ExportFormat.JAVA;
-    }
-
-    public NucleusType getDefaultType() {
-        return defaultType;
-    }
-
-    public synchronized void setDefaultType(NucleusType defaultType) {
-        this.defaultType = defaultType;
     }
 
     public synchronized MeasurementScale getScale() {
@@ -229,7 +217,6 @@ public class GlobalOptions extends AbstractHashOptions {
 		int result = super.hashCode();
 		result = prime * result + ((datasetExportFormat == null) ? 0 : datasetExportFormat.hashCode());
 		result = prime * result + ((defaultDir == null) ? 0 : defaultDir.hashCode());
-		result = prime * result + ((defaultType == null) ? 0 : defaultType.hashCode());
 		result = prime * result + ((scale == null) ? 0 : scale.hashCode());
 		result = prime * result + ((swatch == null) ? 0 : swatch.hashCode());
 		return result;
@@ -250,8 +237,6 @@ public class GlobalOptions extends AbstractHashOptions {
 			if (other.defaultDir != null)
 				return false;
 		} else if (!defaultDir.equals(other.defaultDir))
-			return false;
-		if (defaultType != other.defaultType)
 			return false;
 		if (scale != other.scale)
 			return false;

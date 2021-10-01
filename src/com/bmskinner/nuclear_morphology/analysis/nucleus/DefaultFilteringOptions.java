@@ -31,7 +31,7 @@ import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.options.AbstractHashOptions;
+import com.bmskinner.nuclear_morphology.components.options.DefaultOptions;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
 
@@ -41,7 +41,7 @@ import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
  * @since 1.14.0
  *
  */
-public class DefaultFilteringOptions extends AbstractHashOptions implements FilteringOptions {
+public class DefaultFilteringOptions extends DefaultOptions implements FilteringOptions {
 	
 	private static final long serialVersionUID = 1L;
 	private final Map<Key, Double> minima = new HashMap<>();

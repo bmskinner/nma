@@ -40,6 +40,7 @@ import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.profiles.UnprofilableObjectException;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSet;
+import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.components.signals.DefaultSignalCollection;
 import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalCollection;
@@ -68,9 +69,6 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
     /** FISH signals in the nucleus */
     protected ISignalCollection signalCollection = new DefaultSignalCollection();
 
-    /** cache the vertically rotated nucleus */
-//    protected transient Nucleus verticalNucleus = null;
-
     protected transient boolean canReverse = true;
     
     /**
@@ -86,7 +84,8 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
      * @param position the bounding position of the component in the original image
      * @param id the id of the component. Only use when deserialising!
      */
-    public DefaultNucleus(@NonNull Roi roi, @NonNull IPoint centreOfMass, File source, int channel, int[] position, int number, @NonNull UUID id) {
+    public DefaultNucleus(@NonNull Roi roi, @NonNull IPoint centreOfMass, File source, 
+    		int channel, int[] position, int number, @NonNull UUID id) {
         super(roi, centreOfMass, source, channel, position, id);
         this.nucleusNumber = number;
     }
@@ -101,7 +100,8 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
      * @param position
      * @param centreOfMass
      */
-    public DefaultNucleus(@NonNull Roi roi, @NonNull IPoint centreOfMass, @NonNull File f, int channel, int[] position, int number) {
+    public DefaultNucleus(@NonNull Roi roi, @NonNull IPoint centreOfMass, @NonNull File f, 
+    		int channel, int[] position, int number) {
         super(roi, centreOfMass, f, channel, position);
         this.nucleusNumber = number;
     }
@@ -136,7 +136,7 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
      * the head/tail axis.
      */
     @Override
-    public void findPointsAroundBorder() throws ComponentCreationException {
+    public void findPointsAroundBorder(@NonNull RuleSetCollection rsc) throws ComponentCreationException {
 
         try {
 
@@ -149,19 +149,12 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
             setBorderTag(Landmark.REFERENCE_POINT, rpIndex);
             setBorderTag(Landmark.ORIENTATION_POINT, rpIndex);
             
-//            int prevBorderLength = getBorderLength();
-
             if (!this.isProfileOrientationOK() && canReverse) {
                 reverse();
-//                if(getBorderLength()!=prevBorderLength)
-//                	System.out.println(String.format("Border length changed from %s to %s", prevBorderLength, getBorderLength()));
-                // the number of border points can change when reversing
-                // due to float interpolation from different starting positions
-                // so initialise from scratch
                 profileMap.clear();
                 initialise(windowProportion);
                 canReverse = false;
-                findPointsAroundBorder();
+                findPointsAroundBorder(rsc);
             }
 
         } catch (UnavailableProfileTypeException e) {
@@ -172,7 +165,7 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
             setBorderTag(Landmark.ORIENTATION_POINT, 0);
         }
     }
-
+    
     @Override
     public void initialise(double proportion) throws ComponentCreationException {
 

@@ -38,8 +38,8 @@ import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.datasets.VirtualCellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -231,11 +231,11 @@ public class CellRelocationMethod extends SingleDatasetAnalysisMethod {
         // Note - we don't need the file to exist for the assignment to work
         Optional<IAnalysisOptions> analysisOptions = dataset.getAnalysisOptions();
         if(analysisOptions.isPresent()) {
-        	Optional<IDetectionOptions> nucleusOptions = analysisOptions.get()
+        	Optional<HashOptions> nucleusOptions = analysisOptions.get()
         			.getDetectionOptions(CellularComponent.NUCLEUS);
         	
         	if(nucleusOptions.isPresent()) {
-        		File currentImageDirectory = nucleusOptions.get().getFolder();
+        		File currentImageDirectory = new File(nucleusOptions.get().getString(HashOptions.DETECTION_FOLDER));
 
         		File savedFile = getFile(line);
         		// Get the image name and substitute the parent dataset path.

@@ -42,13 +42,12 @@ import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.generic.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.nuclei.NucleusType;
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
-import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
+import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult;
@@ -303,28 +302,24 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
         fieldNames.add("Is RP clockwise?");
         rowData.add(n.isClockwiseRP());
 
-        NucleusType type = NucleusType.getNucleusType(n);
+        for (Landmark tag : n.getBorderTags().keySet()) {
+        	fieldNames.add(tag);
+        	if (n.hasBorderTag(tag)) {
 
-        if (type != null) {
+        		try {
+        			IBorderPoint p = n.getBorderPoint(tag);
+        			int index = n.getOffsetBorderIndex(Landmark.REFERENCE_POINT, n.getBorderIndex(tag));
+        			rowData.add(p.toString() + " at profile index " + index);
+        		} catch (UnavailableBorderTagException e) {
+        			LOGGER.fine("Tag not present: " + tag);
+        			rowData.add("Missing tag");
+        		}
 
-            for (Landmark tag : n.getBorderTags().keySet()) {
-                fieldNames.add(tag);
-                if (n.hasBorderTag(tag)) {
-
-                    try {
-                        IBorderPoint p = n.getBorderPoint(tag);
-                        int index = n.getOffsetBorderIndex(Landmark.REFERENCE_POINT, n.getBorderIndex(tag));
-                        rowData.add(p.toString() + " at profile index " + index);
-                    } catch (UnavailableBorderTagException e) {
-                        LOGGER.fine("Tag not present: " + tag);
-                        rowData.add("Missing tag");
-                    }
-
-                } else {
-                    rowData.add("N/A");
-                }
-            }
+        	} else {
+        		rowData.add("N/A");
+        	}
         }
+
         
         try {
         	ISegmentedProfile sp = n.getProfile(ProfileType.ANGLE.ANGLE, Landmark.REFERENCE_POINT);
@@ -393,7 +388,7 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
                 Optional<IAnalysisOptions> datasetOptionsOptional = d.getAnalysisOptions();
                 if(!datasetOptionsOptional.isPresent())
                 	continue;
-                INuclearSignalOptions signalOptions = datasetOptionsOptional.get().getNuclearSignalOptions(signalGroup);
+                HashOptions signalOptions = datasetOptionsOptional.get().getNuclearSignalOptions(signalGroup);
 
                 fieldNames.add("");
                 rowData.add("");
@@ -409,7 +404,7 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
                 rowData.add(n.getSignalCollection().getSourceFile(signalGroup));
 
                 fieldNames.add("Source channel");
-                rowData.add(signalOptions==null?Labels.NA:signalOptions.getChannel());
+                rowData.add(signalOptions==null?Labels.NA:signalOptions.getInt(HashOptions.CHANNEL));
 
                 fieldNames.add("Number of signals");
                 rowData.add(n.getSignalCollection().numberOfSignals(signalGroup));

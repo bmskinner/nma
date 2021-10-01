@@ -28,8 +28,8 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMethod.MorphologyAnalysisMode;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace;
 import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace.BioSample;
 import com.bmskinner.nuclear_morphology.components.workspaces.WorkspaceFactory;
@@ -446,9 +446,9 @@ public class EventHandler implements EventListener {
         		// Get the first dataset scale
         		Optional<IAnalysisOptions> d0Options = selectedDatasets.get(0).getAnalysisOptions();
         		if(d0Options.isPresent()) {
-        			Optional<IDetectionOptions> d0NucleusOptions = d0Options.get().getNuclusDetectionOptions();
+        			Optional<HashOptions> d0NucleusOptions = d0Options.get().getNuclusDetectionOptions();
         			if(d0NucleusOptions.isPresent()) {
-        				d0scale = d0NucleusOptions.get().getScale();
+        				d0scale = d0NucleusOptions.get().getDouble(HashOptions.SCALE);
         			}
         		}
         		
@@ -457,9 +457,9 @@ public class EventHandler implements EventListener {
         		boolean allMatch = selectedDatasets.stream().allMatch(d->{
         			Optional<IAnalysisOptions> dOptions = d.getAnalysisOptions();
         			if(dOptions.isPresent()) {
-        				Optional<IDetectionOptions> dNucleusOptions = dOptions.get().getNuclusDetectionOptions();
+        				Optional<HashOptions> dNucleusOptions = dOptions.get().getNuclusDetectionOptions();
         				if(dNucleusOptions.isPresent()) {
-        					return dNucleusOptions.get().getScale()==d0scaleFinal;
+        					return dNucleusOptions.get().getDouble(HashOptions.SCALE)==d0scaleFinal;
         				}
         			}
         			return false;

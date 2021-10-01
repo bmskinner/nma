@@ -20,6 +20,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
+import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 
 import com.bmskinner.nuclear_morphology.components.Version;
@@ -36,6 +37,8 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  */
 public class VersionHelpDialog extends SettingsDialog {
 		
+	private static final String LABEL_FONT = "Label.font";
+
 	private static final Logger LOGGER = Logger.getLogger(VersionHelpDialog.class.getName());
 	
 	private static final String DIALOG_TITLE = "About";
@@ -69,7 +72,7 @@ public class VersionHelpDialog extends SettingsDialog {
 	 private JPanel createMainPanel() {
 		 JPanel panel = new JPanel(new BorderLayout());
 
-		 JTabbedPane pane = new JTabbedPane(JTabbedPane.TOP);
+		 JTabbedPane pane = new JTabbedPane(SwingConstants.TOP);
 		 pane.addTab(DIALOG_TITLE, createAboutPanel());
 
 		 JScrollPane licPane = createGPLLicensePanel();
@@ -87,7 +90,7 @@ public class VersionHelpDialog extends SettingsDialog {
 	 
 	 private JTextArea createAboutPanel() {
 		 JTextArea textBox = new JTextArea();
-		 textBox.setFont(UIManager.getFont("Label.font"));
+		 textBox.setFont(UIManager.getFont(LABEL_FONT));
 		 
 		 String text = "Nuclear Morphology Analysis version "+Version.currentVersion()+Io.NEWLINE
 				 + Io.NEWLINE
@@ -117,7 +120,7 @@ public class VersionHelpDialog extends SettingsDialog {
 
 	 private JScrollPane createGPLLicensePanel() {		 
 		 JTextArea textBox = new JTextArea();
-		 textBox.setFont(UIManager.getFont("Label.font"));
+		 textBox.setFont(UIManager.getFont(LABEL_FONT));
 
 		 String fileName = "/licenses/GNU-GPLv3.txt";
 
@@ -131,7 +134,7 @@ public class VersionHelpDialog extends SettingsDialog {
 	 
 	 private JScrollPane createDependencyPanel() {		 
 		 JTextArea textBox = new JTextArea();
-		 textBox.setFont(UIManager.getFont("Label.font"));
+		 textBox.setFont(UIManager.getFont(LABEL_FONT));
 
 		 String fileName = "/licenses/DependencyLicenses.txt";
 		 

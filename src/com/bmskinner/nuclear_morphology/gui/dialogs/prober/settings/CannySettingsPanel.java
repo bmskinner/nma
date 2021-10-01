@@ -30,7 +30,7 @@ import javax.swing.JLabel;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 
-import com.bmskinner.nuclear_morphology.components.options.ICannyOptions;
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -79,9 +79,9 @@ public class CannySettingsPanel extends SettingsPanel implements ActionListener 
     private JSpinner  closingObjectRadiusSpinner;
     private JCheckBox cannyAutoThresholdCheckBox;
 
-    private ICannyOptions options;
+    private HashOptions options;
 
-    public CannySettingsPanel(final ICannyOptions options) {
+    public CannySettingsPanel(final HashOptions options) {
         this.options = options;
         createSpinners();
         createPanel();
@@ -95,18 +95,17 @@ public class CannySettingsPanel extends SettingsPanel implements ActionListener 
 	protected void update() {
         super.update();
         isUpdating = true;
-        cannyLowThreshold.setValue((double) options.getLowThreshold());
-        cannyHighThreshold.setValue((double) options.getHighThreshold());
-        cannyKernelRadius.setValue((double) options.getKernelRadius());
-        cannyKernelWidth.setValue(options.getKernelWidth());
-        closingObjectRadiusSpinner.setValue(options.getClosingObjectRadius());
+        cannyLowThreshold.setValue((double) options.getFloat(HashOptions.CANNY_LOW_THRESHOLD_FLT));
+        cannyHighThreshold.setValue((double) options.getFloat(HashOptions.CANNY_HIGH_THRESHOLD_FLT));
+        cannyKernelRadius.setValue((double) options.getFloat(HashOptions.CANNY_KERNEL_RADIUS_FLT));
+        cannyKernelWidth.setValue(options.getInt(HashOptions.CANNY_KERNEL_WIDTH_INT));
+        closingObjectRadiusSpinner.setValue(options.getInt(HashOptions.CANNY_CLOSING_RADIUS_INT));
 
-        cannyAutoThresholdCheckBox.setSelected(options.isCannyAutoThreshold());
+        cannyAutoThresholdCheckBox.setSelected(options.getBoolean(HashOptions.IS_CANNY_AUTO_THRESHOLD));
         isUpdating = false;
     }
 
-    public void set(final ICannyOptions options) {
-
+    public void set(final HashOptions options) {
         this.options.set(options);
         update();
 
@@ -118,20 +117,20 @@ public class CannySettingsPanel extends SettingsPanel implements ActionListener 
      */
     private void createSpinners() {
 
-        cannyLowThreshold = new JSpinner(new SpinnerNumberModel(options.getLowThreshold(), THRESHOLD_MIN,
+        cannyLowThreshold = new JSpinner(new SpinnerNumberModel((double) options.getFloat(HashOptions.CANNY_LOW_THRESHOLD_FLT), THRESHOLD_MIN,
                 LOW_THRESHOLD_MAX, THRESHOLD_STEP_SIZE));
 
-        cannyHighThreshold = new JSpinner(new SpinnerNumberModel(options.getHighThreshold(), THRESHOLD_MIN,
+        cannyHighThreshold = new JSpinner(new SpinnerNumberModel((double) options.getFloat(HashOptions.CANNY_HIGH_THRESHOLD_FLT), THRESHOLD_MIN,
                 HIGH_THRESHOLD_MAX, THRESHOLD_STEP_SIZE));
 
-        cannyKernelRadius = new JSpinner(new SpinnerNumberModel(options.getKernelRadius(), KERNEL_RADIUS_MIN,
+        cannyKernelRadius = new JSpinner(new SpinnerNumberModel((double) options.getFloat(HashOptions.CANNY_KERNEL_RADIUS_FLT), KERNEL_RADIUS_MIN,
                 KERNEL_RADIUS_MAX, THRESHOLD_STEP_SIZE));
 
-        cannyKernelWidth = new JSpinner(new SpinnerNumberModel(Integer.valueOf(options.getKernelWidth()),
+        cannyKernelWidth = new JSpinner(new SpinnerNumberModel(Integer.valueOf(options.getInt(HashOptions.CANNY_KERNEL_WIDTH_INT)),
                 CANNY_KERNEL_WIDTH_MIN, CANNY_KERNEL_WIDTH_MAX, CANNY_KERNEL_WIDTH_STEP));
 
         closingObjectRadiusSpinner = new JSpinner(
-                new SpinnerNumberModel(Integer.valueOf(options.getClosingObjectRadius()), CLOSING_RADIUS_MIN,
+                new SpinnerNumberModel(Integer.valueOf(options.getInt(HashOptions.CANNY_CLOSING_RADIUS_INT)), CLOSING_RADIUS_MIN,
                         CLOSING_RADIUS_MAX, CLOSING_RADIUS_STEP));
 
         cannyAutoThresholdCheckBox = new JCheckBox("", false);
@@ -148,7 +147,7 @@ public class CannySettingsPanel extends SettingsPanel implements ActionListener 
                     cannyLowThreshold.setValue(cannyHighThreshold.getValue());
                 }
                 Double doubleValue = (Double) j.getValue();
-                options.setLowThreshold(doubleValue.floatValue());
+                options.setFloat(HashOptions.CANNY_LOW_THRESHOLD_FLT, doubleValue.floatValue());
                 fireOptionsChangeEvent();
             } catch (ParseException e1) {
                 LOGGER.warning("Parsing exception");
@@ -167,7 +166,7 @@ public class CannySettingsPanel extends SettingsPanel implements ActionListener 
                     j.setValue(cannyLowThreshold.getValue());
                 }
                 Double doubleValue = (Double) j.getValue();
-                options.setHighThreshold(doubleValue.floatValue());
+                options.setFloat(HashOptions.CANNY_HIGH_THRESHOLD_FLT, doubleValue.floatValue());
                 fireOptionsChangeEvent();
             } catch (ParseException e1) {
                 LOGGER.warning("Parsing exception");
@@ -181,7 +180,7 @@ public class CannySettingsPanel extends SettingsPanel implements ActionListener 
                 JSpinner j = (JSpinner) e.getSource();
                 j.commitEdit();
                 Double doubleValue = (Double) j.getValue();
-                options.setKernelRadius(doubleValue.floatValue());
+                options.setFloat(HashOptions.CANNY_KERNEL_RADIUS_FLT, doubleValue.floatValue());
                 fireOptionsChangeEvent();
             } catch (ParseException e1) {
                 LOGGER.warning("Parsing exception");
@@ -195,7 +194,7 @@ public class CannySettingsPanel extends SettingsPanel implements ActionListener 
                 JSpinner j = (JSpinner) e.getSource();
                 j.commitEdit();
                 Integer value = (Integer) j.getValue();
-                options.setKernelWidth(value.intValue());
+                options.setInt(HashOptions.CANNY_KERNEL_WIDTH_INT, value.intValue());
                 fireOptionsChangeEvent();
             } catch (ParseException e1) {
                 LOGGER.warning("Parsing exception");
@@ -208,7 +207,7 @@ public class CannySettingsPanel extends SettingsPanel implements ActionListener 
             try {
                 JSpinner j = (JSpinner) e.getSource();
                 j.commitEdit();
-                options.setClosingObjectRadius((Integer) j.getValue());
+                options.setInt(HashOptions.CANNY_CLOSING_RADIUS_INT, (int)j.getValue());
                 fireOptionsChangeEvent();
             } catch (ParseException e1) {
                 LOGGER.warning("Parsing exception");
@@ -273,11 +272,11 @@ public class CannySettingsPanel extends SettingsPanel implements ActionListener 
         if (e.getActionCommand().equals(AUTO_THRESHOLD_ACTION)) {
 
             if (cannyAutoThresholdCheckBox.isSelected()) {
-                options.setCannyAutoThreshold(true);
+                options.setBoolean(HashOptions.IS_CANNY_AUTO_THRESHOLD, true);
                 cannyLowThreshold.setEnabled(false);
                 cannyHighThreshold.setEnabled(false);
             } else {
-                options.setCannyAutoThreshold(false);
+            	options.setBoolean(HashOptions.IS_CANNY_AUTO_THRESHOLD, false);
                 cannyLowThreshold.setEnabled(true);
                 cannyHighThreshold.setEnabled(true);
             }

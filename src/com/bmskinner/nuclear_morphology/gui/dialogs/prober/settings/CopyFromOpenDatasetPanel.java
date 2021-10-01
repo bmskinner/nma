@@ -8,7 +8,7 @@ import javax.swing.JButton;
 import javax.swing.JPanel;
 
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.core.DatasetListManager;
 
 /**
@@ -34,7 +34,7 @@ public abstract class CopyFromOpenDatasetPanel extends DetectionSettingsPanel {
     
     protected IAnalysisOptions parent;
     
-    public CopyFromOpenDatasetPanel(IAnalysisOptions parent, IDetectionOptions op) {
+    public CopyFromOpenDatasetPanel(IAnalysisOptions parent, HashOptions op) {
     	super(op);
         this.parent = parent;
         this.add(createPanel(), BorderLayout.CENTER);

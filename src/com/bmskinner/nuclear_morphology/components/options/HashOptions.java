@@ -16,16 +16,208 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.options;
 
+import java.io.File;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
+
+import com.bmskinner.nuclear_morphology.components.signals.IShellResult.ShrinkType;
+import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 
 /**
  * The interface for options classes. Store options as key value pairs
  * @author bms41
  *
  */
+/**
+ * @author ben
+ *
+ */
 public interface HashOptions extends Serializable {
+	
+	String CANNY_SUBOPTIONS_KEY = "Canny";
+	String BACKGROUND_KEY = "Background";
+	
+    String DETECTION_FOLDER                = "Folder";
+    String THRESHOLD             = "Threshold";
+    String CHANNEL               = "Channel";
+    String IS_RGB                = "Is RGB";
+    String MIN_CIRC              = "Min circ";
+    String MAX_CIRC              = "Max circ";
+    String MIN_SIZE_PIXELS       = "Min size";
+    String MAX_SIZE_PIXELS       = "Max size";
+    String SCALE                 = "Scale";
+    String IS_NORMALISE_CONTRAST = "Normalise contrast";
+    String IS_USE_CANNY          = "Use Canny";
+    String DYNAMIC               = "Dynamic";
+    String EROSION               = "Erosion";
+    String IS_USE_WATERSHED      = "Use watershed";
+    String TOP_HAT_RADIUS        = "Top hat radius";
+
+    double  DEFAULT_SCALE        = GlobalOptions.getInstance().getImageScale();
+    double  DEFAULT_MIN_CIRC     = 0;
+    double  DEFAULT_MAX_CIRC     = 1;
+    boolean DEFAULT_IS_RGB       = false;
+    boolean DEFAULT_IS_NORMALISE = false;
+
+    boolean DEFAULT_IS_USE_WATERSHED = true;
+    int     DEFAULT_DYNAMIC          = 1;
+    int     DEFAULT_EROSION          = 1;
+    
+    int      DEFAULT_MIN_NUCLEUS_SIZE   = 2000;
+    int      DEFAULT_MAX_NUCLEUS_SIZE   = 10000;
+    double   DEFAULT_MIN_NUCLEUS_CIRC   = 0.2;
+    double   DEFAULT_MAX_NUCLEUS_CIRC   = 0.8;
+    int      DEFAULT_NUCLEUS_THRESHOLD  = 36;
+
+    int     DEFAULT_CHANNEL            = 2;
+    boolean DEFAULT_NORMALISE_CONTRAST = false;
+    
+    /** Constants relating to signal**/
+    
+    String MAX_FRACTION       = "Max fraction";
+    String SIGNAL_DETECTION_MODE_KEY = "DETECTION_MODE";
+
+    int                 DEFAULT_SIGNAL_THRESHOLD    = 70;
+    int                 DEFAULT_MIN_SIGNAL_SIZE     = 5;
+    int                 DEFAULT_MAX_SIGNAL_SIZE     = 100000;
+    double              DEFAULT_MAX_SIGNAL_FRACTION = 0.1;
+    SignalDetectionMode DEFAULT_METHOD              = SignalDetectionMode.FORWARD;
+    int                 DEFAULT_SIGNAL_CHANNEL      = 0;
+    
+    /** Constants relating to Canny edge detection **/
+    String CANNY_LOW_THRESHOLD_FLT     = "Canny low threshold";
+    String CANNY_HIGH_THRESHOLD_FLT    = "Canny high threshold";
+    String CANNY_KERNEL_RADIUS_FLT     = "Canny kernel radius";
+    String CANNY_KERNEL_WIDTH_INT      = "Canny kernel width";
+    String CANNY_CLOSING_RADIUS_INT    = "Closing radius";
+    
+    String IS_CANNY_AUTO_THRESHOLD       = "Use auto threshold";
+    String IS_CANNY_ADD_BORDER           = "Add border";
+
+    float   DEFAULT_CANNY_LOW_THRESHOLD        = 0.5f;
+    float   DEFAULT_CANNY_HIGH_THRESHOLD       = 1.5f;
+    float   DEFAULT_CANNY_TAIL_LOW_THRESHOLD   = 0.1f;
+    float   DEFAULT_CANNY_TAIL_HIGH_THRESHOLD  = 0.5f;
+    float   DEFAULT_CANNY_KERNEL_RADIUS        = 3;
+    int     DEFAULT_CANNY_KERNEL_WIDTH         = 16;
+    int     DEFAULT_CANNY_CLOSING_RADIUS      = 5;
+    int     DEFAULT_TAIL_CLOSING_OBJECT_RADIUS = 3;
+    
+    boolean DEFAULT_IS_USE_CANNY                  = true;
+    boolean DEFAULT_IS_CANNY_AUTO_THRESHOLD       = false;
+    boolean DEFAULT_IS_CANNY_ADD_BORDER           = false;
+    
+    
+    /** Constants relating to preprocessing options **/
+    String IS_USE_GAUSSIAN         = "Use Gaussian blur";
+    String IS_USE_KUWAHARA         = "Use Kuwahara filter";
+    String IS_USE_ROLLING_BALL     = "Use Rolling ball";
+    String IS_USE_FLATTENING       = "Use flattening";
+    
+    
+    /** Should minimum values be raised to a given threshold */
+    String IS_USE_RAISING          = "Use raising";
+    String IS_USE_COLOUR_THRESHOLD = "Use colour threshold";
+
+    String GAUSSIAN_RADIUS          = "Gaussian radius";
+    String KUWAHARA_RADIUS_INT      = "Kuwahara radius";
+    String ROLLING_BALL_RADIUS      = "Rolling ball radius";
+    String FLATTENING_THRESHOLD_INT = "Flattening threshold";
+    String RAISING_THRESHOLD_INT    = "Raising threshold";
+
+    String MIN_HUE = "Min hue";
+    String MAX_HUE = "Max hue";
+    String MIN_SAT = "Min saturation";
+    String MAX_SAT = "Max saturation";
+    String MIN_BRI = "Min brightness";
+    String MAX_BRI = "Max brightness";
+
+    int     DEFAULT_KUWAHARA_RADIUS = 3;
+    boolean DEFAULT_USE_GAUSSIAN           = false;
+    boolean DEFAULT_USE_KUWAHARA           = true;
+    boolean DEFAULT_USE_ROLLING_BALL       = false;
+    boolean DEFAULT_IS_USE_FLATTENNING  = true;
+    int     DEFAULT_FLATTEN_THRESHOLD      = 100;
+    boolean DEFAULT_IS_USE_RAISING    = false;
+    int     DEFAULT_RAISE_THRESHOLD        = 100;
+    boolean DEFAULT_IS_USE_COLOUR_THRESHOLD   = false;
+
+    int DEFAULT_MIN_HUE = 0;
+    int DEFAULT_MAX_HUE = 255;
+    int DEFAULT_MIN_SAT = 0;
+    int DEFAULT_MAX_SAT = 255;
+    int DEFAULT_MIN_BRI = 0;
+    int DEFAULT_MAX_BRI = 255;
+    
+    /** Constants relating to shell analysis options **/
+    String SHELL_COUNT_INT = "SHELL_COUNT";
+	String SHELL_EROSION_METHOD_KEY = "EROSION_METHOD";
+	
+	int DEFAULT_SHELL_COUNT = 5;
+	ShrinkType DEFAULT_EROSION_METHOD = ShrinkType.AREA;
+	
+	/**
+	 * Create a copy of this options object
+	 * @return
+	 */
+	HashOptions duplicate();
+	
+	/**
+	 * Test if suboptions are present with the given key
+	 * @param s
+	 * @return
+	 */
+	boolean hasSubOptions(String s);
+	
+	/**
+	 * Get suboptions with the given key, if present
+	 * @param s
+	 * @return
+	 */
+	HashOptions getSubOptions(String s);
+	
+	/**
+	 * Set suboptions for a given key
+	 * @param s
+	 * @param o
+	 */
+	void setSubOptions(String s, HashOptions o);
+	
+	/**
+	 * Test if the given boolean key is present
+	 * @param s
+	 * @return
+	 */
+	boolean hasBoolean(String s);
+	
+	/**
+	 * Test if the given float key is present
+	 * @param s
+	 * @return
+	 */
+	boolean hasFloat(String s);
+	
+	/**
+	 * Test if the given double key is present
+	 * @param s
+	 * @return
+	 */
+	boolean hasDouble(String s);
+	
+	/**
+	 * Test if the given integer key is present
+	 * @param s
+	 * @return
+	 */
+	boolean hasInt(String s);
+	
+	/**
+	 * Test if the given string key is present
+	 * @param s
+	 * @return
+	 */
+	boolean hasString(String s);
 	
     /**
      * Get the double value with the given key.
@@ -104,7 +296,21 @@ public interface HashOptions extends Serializable {
      * @param v
      */
     void setString(String k, String v);
-
+    
+    /**
+     * Set the file value with the given key
+     * @param k
+     * @param v
+     */
+    File getFile(String s);
+    
+    /**
+     * Get the file value with the given key
+     * @param k
+     * @param v
+     */
+    void setFile(String s, File f);
+    
     /**
      * Get the keys to all the boolean values in this options.
      * 
@@ -139,6 +345,13 @@ public interface HashOptions extends Serializable {
      * @return
      */
     List<String> getStringKeys();
+    
+    /**
+     * Get the keys to all the sub options in this options.
+     * 
+     * @return
+     */
+    List<String> getSubOptionKeys();
     
     /**
      * Get the keys to all the values in this options.

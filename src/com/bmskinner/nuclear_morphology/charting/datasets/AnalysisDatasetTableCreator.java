@@ -52,12 +52,10 @@ import com.bmskinner.nuclear_morphology.components.datasets.IClusterGroup;
 import com.bmskinner.nuclear_morphology.components.datasets.VirtualCellCollection;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.ICannyOptions;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions.ClusteringMethod;
-import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
-import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
@@ -374,7 +372,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
     	options = options == null ? optOptions.get() : options;
         String folder;
 
-        Optional<IDetectionOptions> nO = options.getDetectionOptions(CellularComponent.NUCLEUS);
+        Optional<HashOptions> nO = options.getDetectionOptions(CellularComponent.NUCLEUS);
         
         if(!nO.isPresent()) {
         	LOGGER.log(Loggable.STACK, "No nucleus options in dataset "+dataset.getName());
@@ -384,8 +382,8 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
         if (dataset.hasMergeSources()) {
             folder = Labels.NA_MERGE;
         } else {
-        	File optionsFolder = nO.get().getFolder();
-        	folder = optionsFolder!=null ? optionsFolder.getAbsolutePath() : "Missing data";
+        	File optionsFolder = new File(nO.get().getString(HashOptions.DETECTION_FOLDER));
+        	folder = optionsFolder.getAbsolutePath();
         }
 
         dataList.add(createImagePreprocessingString(nO.get()));
@@ -403,78 +401,67 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
         return dataList;
     }
     
-    private String createImagePreprocessingString(@Nullable IDetectionOptions nucleusOptions) {
+    private String createImagePreprocessingString(@Nullable HashOptions options) {
     	StringBuilder builder = new StringBuilder();
-    	if(nucleusOptions==null) {
+    	if(options==null) {
     		builder.append(Labels.NA);
     		return builder.toString();
     	}
-    	ICannyOptions nucleusCannyOptions;
-		try {
-			nucleusCannyOptions = nucleusOptions.getCannyOptions();
-		} catch (MissingOptionException e) {
-			builder.append(Labels.NA);
-			return builder.toString();
-		}
 		
-		if(nucleusCannyOptions.isUseKuwahara())
-			builder.append("Kuwahara kernel: "+nucleusCannyOptions.getKuwaharaKernel()+Io.NEWLINE);
-		if(nucleusCannyOptions.isUseFlattenImage())
-			builder.append("Flattening threshold: "+nucleusCannyOptions.getFlattenThreshold());	
+		if(options.getBoolean(HashOptions.IS_USE_KUWAHARA))
+			builder.append("Kuwahara kernel: "+options.getInt(HashOptions.KUWAHARA_RADIUS_INT)+Io.NEWLINE);
+		if(options.getBoolean(HashOptions.IS_USE_FLATTENING))
+			builder.append("Flattening threshold: "+options.getInt(HashOptions.FLATTENING_THRESHOLD_INT));	
 		return builder.toString();
     }
 
-    private String createNucleusEdgeDetectionString(@Nullable IDetectionOptions nucleusOptions) {
+    private String createNucleusEdgeDetectionString(@Nullable HashOptions nucleusOptions) {
     	StringBuilder builder = new StringBuilder();
     	if(nucleusOptions==null)
     		return builder.toString();
-    	ICannyOptions nucleusCannyOptions;
-		try {
-			nucleusCannyOptions = nucleusOptions.getCannyOptions();
-		} catch (MissingOptionException e) {
-			return builder.toString();
-		}
-				
-		boolean isCanny = nucleusCannyOptions.isUseCanny();
+
+		boolean isCanny = nucleusOptions.getBoolean(HashOptions.IS_USE_CANNY);
 		if(isCanny) {
 			builder.append("Canny edge detection"+Io.NEWLINE);
 			
-			if(nucleusCannyOptions.isCannyAutoThreshold()) {
+			if(nucleusOptions.getBoolean(HashOptions.IS_CANNY_AUTO_THRESHOLD)) {
 				builder.append("Auto-threshold"+Io.NEWLINE);
 			} else {
-				builder.append("Low threshold: "+nucleusCannyOptions.getLowThreshold()+Io.NEWLINE);
-				builder.append("High threshold: "+nucleusCannyOptions.getHighThreshold()+Io.NEWLINE);
+				builder.append("Low threshold: "+nucleusOptions.getFloat(HashOptions.CANNY_LOW_THRESHOLD_FLT)+Io.NEWLINE);
+				builder.append("High threshold: "+nucleusOptions.getFloat(HashOptions.CANNY_HIGH_THRESHOLD_FLT)+Io.NEWLINE);
 			}
-			builder.append("Kernel radius: "+nucleusCannyOptions.getKernelRadius()+Io.NEWLINE);
-			builder.append("Kernel width: "+nucleusCannyOptions.getKernelWidth()+Io.NEWLINE);
-			builder.append("Closing radius: "+nucleusCannyOptions.getClosingObjectRadius());
+			builder.append("Kernel radius: "+nucleusOptions.getFloat(HashOptions.CANNY_KERNEL_RADIUS_FLT)+Io.NEWLINE);
+			builder.append("Kernel width: "+nucleusOptions.getInt(HashOptions.CANNY_KERNEL_WIDTH_INT)+Io.NEWLINE);
+			builder.append("Closing radius: "+nucleusOptions.getInt(HashOptions.CANNY_CLOSING_RADIUS_INT));
 		} else {
-			builder.append("Threshold: "+nucleusOptions.getThreshold());
+			builder.append("Threshold: "+nucleusOptions.getInt(HashOptions.THRESHOLD));
 		}		
 		return builder.toString();
     }
     
-    private String createNucleusSizeFilterString(@Nullable IDetectionOptions nucleusOptions) {
+    private String createNucleusSizeFilterString(@Nullable HashOptions nucleusOptions) {
     	StringBuilder builder = new StringBuilder();
     	if(nucleusOptions==null) {
     		builder.append(Labels.NA);
     		return builder.toString();
     	}
-    	builder.append("Min: "+nucleusOptions.getMinSize()+Io.NEWLINE+"Max: "+nucleusOptions.getMaxSize());
+    	builder.append("Min pixels: "+nucleusOptions.getInt(HashOptions.MIN_SIZE_PIXELS)
+    	+Io.NEWLINE+"Max pixels: "+nucleusOptions.getInt(HashOptions.MAX_SIZE_PIXELS));
 		return builder.toString();
     }
     
-    private String createNucleusCircFilterString(@Nullable IDetectionOptions nucleusOptions) {
+    private String createNucleusCircFilterString(@Nullable HashOptions nucleusOptions) {
     	StringBuilder builder = new StringBuilder();
     	DecimalFormat formatter = new DecimalFormat("#.##");
     	if(nucleusOptions==null) {
     		builder.append(Labels.NA);
     		return builder.toString();
     	}
-    	builder.append("Min: "+formatter.format(nucleusOptions.getMinCirc())+Io.NEWLINE+"Max: "+formatter.format(nucleusOptions.getMaxCirc()));
-		return builder.toString();
+    	builder.append("Min: "+formatter.format(nucleusOptions.getDouble(HashOptions.MIN_CIRC))
+    	+Io.NEWLINE+"Max: "+formatter.format(nucleusOptions.getDouble(HashOptions.MAX_CIRC)));
+    	return builder.toString();
     }
-    
+
     private String createAnalysisRunTimeString(@Nullable IAnalysisOptions analysisOptions) {
     	StringBuilder builder = new StringBuilder();
     	if(analysisOptions==null) {

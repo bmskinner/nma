@@ -47,7 +47,7 @@ import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
 import com.bmskinner.nuclear_morphology.gui.components.SelectableCellIcon;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
@@ -349,7 +349,7 @@ public class ManualCurationDialog extends AbstractCellCollectionDialog {
 	    
 	    private ImageProcessor importSignal(UUID signal, ICell c) throws ImageImportException {
 	    	
-	    	INuclearSignalOptions signalOptions = dataset.getAnalysisOptions().get().getNuclearSignalOptions(signal);
+	    	HashOptions signalOptions = dataset.getAnalysisOptions().get().getNuclearSignalOptions(signal);
 	    	
 	    	if(signalOptions==null)
 	    		return ImageFilterer.createWhiteColorProcessor(150, 150);
@@ -363,7 +363,7 @@ public class ManualCurationDialog extends AbstractCellCollectionDialog {
 	    		return ImageFilterer.createWhiteColorProcessor(150, 150);
 	    	}
 
-	    	ImageProcessor ip = new ImageImporter(signalFile).importImage(signalOptions.getChannel());
+	    	ImageProcessor ip = new ImageImporter(signalFile).importImage(signalOptions.getInt(HashOptions.CHANNEL));
 	    	ip.invert();
 	    	ImageAnnotator an = new ImageAnnotator(ip);
 	    	an.convertToColorProcessor();

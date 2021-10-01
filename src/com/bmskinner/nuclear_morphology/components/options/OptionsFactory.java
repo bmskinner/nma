@@ -20,9 +20,8 @@ import java.io.File;
 
 import com.bmskinner.nuclear_morphology.analysis.classification.TsneMethod;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.nuclei.NucleusType;
-import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.IDetectionSubOptions;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
+import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 
 /**
  * Provides default options types.
@@ -32,27 +31,43 @@ import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
  *
  */
 public class OptionsFactory {
+	
+	/**
+	 * We only use static methods
+	 */
+	private OptionsFactory() {}
 
     /**
      * Create the default options type for nucleus detection
      * 
-     * @param folder
-     *            the folder to be searched
+     * @param folder the folder to be searched
      * @return
      */
-	public static IDetectionOptions makeNucleusDetectionOptions(File folder) {
-        return new DefaultNucleusHashDetectionOptions(folder);
-    }
+	public static HashOptions makeNucleusDetectionOptions(File folder) {
+		DefaultOptions d = new DefaultOptions();
+		
+		d.setString(HashOptions.DETECTION_FOLDER, folder.getAbsolutePath());
+        
+		d.setInt(HashOptions.MIN_SIZE_PIXELS, HashOptions.DEFAULT_MIN_NUCLEUS_SIZE);
+		d.setInt(HashOptions.MAX_SIZE_PIXELS, HashOptions.DEFAULT_MAX_NUCLEUS_SIZE);
 
-    /**
-     * Create the default options type for nucleus detection based on a template
-     * 
-     * @param template
-     *            the template options
-     * @return
-     */
-	public static IDetectionOptions makeNucleusDetectionOptions(IDetectionOptions template) {
-        return new DefaultNucleusHashDetectionOptions(template);
+		d.setDouble(HashOptions.MIN_CIRC, HashOptions.DEFAULT_MIN_NUCLEUS_CIRC);
+		d.setDouble(HashOptions.MAX_CIRC, HashOptions.DEFAULT_MAX_NUCLEUS_CIRC);
+                
+		d.setInt(HashOptions.THRESHOLD, HashOptions.DEFAULT_NUCLEUS_THRESHOLD);
+
+		d.setDouble(HashOptions.SCALE, GlobalOptions.getInstance().getImageScale());
+        
+		d.setInt(HashOptions.CHANNEL, HashOptions.DEFAULT_CHANNEL);
+        
+		d.setBoolean(HashOptions.IS_NORMALISE_CONTRAST, HashOptions.DEFAULT_NORMALISE_CONTRAST);
+
+		d.setBoolean(HashOptions.IS_RGB, HashOptions.DEFAULT_IS_RGB);
+		
+
+		d.set(OptionsFactory.makeCannyOptions());
+		d.set(OptionsFactory.makePreprocessingOptions());
+		return d;
     }
 
     /**
@@ -60,40 +75,24 @@ public class OptionsFactory {
      * 
      * @return
      */
-	public static ICannyOptions makeCannyOptions() {
-        return new DefaultCannyHashOptions();
-    }
+	public static HashOptions makeCannyOptions() {
+		
+		DefaultOptions d = new DefaultOptions();
+		d.setBoolean(HashOptions.IS_USE_CANNY, HashOptions.DEFAULT_IS_USE_CANNY);
+		
+		d.setBoolean(HashOptions.IS_CANNY_AUTO_THRESHOLD, HashOptions.DEFAULT_IS_CANNY_AUTO_THRESHOLD);
 
-    /**
-     * Create the default options type for Canny edge detection based on a
-     * template
-     * 
-     * @param template
-     *            the template options
-     * @return
-     */
-	public static ICannyOptions makeCannyOptions(ICannyOptions template) {
-        return new DefaultCannyHashOptions(template);
-    }
+		d.setFloat(HashOptions.CANNY_LOW_THRESHOLD_FLT, HashOptions.DEFAULT_CANNY_LOW_THRESHOLD);
+		d.setFloat(HashOptions.CANNY_HIGH_THRESHOLD_FLT, HashOptions.DEFAULT_CANNY_HIGH_THRESHOLD);
 
-    /**
-     * Create the default options type for circle detection
-     * 
-     * @return
-     */
-	public static IHoughDetectionOptions makeHoughOptions() {
-        return new DefaultHoughOptions();
-    }
+		d.setFloat(HashOptions.CANNY_KERNEL_RADIUS_FLT, HashOptions.DEFAULT_CANNY_KERNEL_RADIUS);
+		d.setInt(HashOptions.CANNY_KERNEL_WIDTH_INT, HashOptions.DEFAULT_CANNY_KERNEL_WIDTH);
 
-    /**
-     * Create the default options type for circle detection based on a template
-     * 
-     * @param template
-     *            the template options
-     * @return
-     */
-	public static IHoughDetectionOptions makeHoughOptions(IHoughDetectionOptions template) {
-        return new DefaultHoughOptions(template);
+		d.setInt(HashOptions.CANNY_CLOSING_RADIUS_INT, HashOptions.DEFAULT_CANNY_CLOSING_RADIUS);
+
+		d.setBoolean(HashOptions.IS_CANNY_ADD_BORDER, HashOptions.DEFAULT_IS_CANNY_ADD_BORDER);
+		
+		return d;
     }
 
     /**
@@ -101,8 +100,28 @@ public class OptionsFactory {
      * 
      * @return
      */
-	public static IDetectionSubOptions makePreprocessingOptions() {
-        return new PreprocessingOptions();
+	public static HashOptions makePreprocessingOptions() {
+		DefaultOptions d = new DefaultOptions();
+		
+		d.setBoolean(HashOptions.IS_USE_GAUSSIAN, HashOptions.DEFAULT_USE_GAUSSIAN);
+		d.setBoolean(HashOptions.IS_USE_KUWAHARA, HashOptions.DEFAULT_USE_KUWAHARA);
+		d.setBoolean(HashOptions.IS_USE_ROLLING_BALL, HashOptions.DEFAULT_USE_ROLLING_BALL);
+		d.setBoolean(HashOptions.IS_USE_FLATTENING, HashOptions.DEFAULT_IS_USE_FLATTENNING);
+		d.setBoolean(HashOptions.IS_USE_RAISING, HashOptions.DEFAULT_IS_USE_RAISING);
+		d.setBoolean(HashOptions.IS_USE_COLOUR_THRESHOLD, HashOptions.DEFAULT_IS_USE_COLOUR_THRESHOLD);
+		
+		d.setInt(HashOptions.KUWAHARA_RADIUS_INT, HashOptions.DEFAULT_KUWAHARA_RADIUS);
+		d.setInt(HashOptions.FLATTENING_THRESHOLD_INT, HashOptions.DEFAULT_FLATTEN_THRESHOLD);
+		d.setInt(HashOptions.RAISING_THRESHOLD_INT, HashOptions.DEFAULT_RAISE_THRESHOLD);
+		
+
+		d.setInt(HashOptions.MIN_HUE, HashOptions.DEFAULT_MIN_HUE);
+		d.setInt(HashOptions.MAX_HUE, HashOptions.DEFAULT_MAX_HUE);
+		d.setInt(HashOptions.MIN_SAT, HashOptions.DEFAULT_MIN_SAT);
+		d.setInt(HashOptions.MAX_SAT, HashOptions.DEFAULT_MAX_SAT);
+		d.setInt(HashOptions.MIN_BRI, HashOptions.DEFAULT_MIN_BRI);
+		d.setInt(HashOptions.MAX_BRI, HashOptions.DEFAULT_MAX_BRI);
+		return d;
     }
 
     /**
@@ -112,21 +131,34 @@ public class OptionsFactory {
      *            the folder to be searched
      * @return
      */
-	public static INuclearSignalOptions makeNuclearSignalOptions(File folder) {
-        return new DefaultNuclearSignalHashOptions(folder);
-    }
+	public static HashOptions makeNuclearSignalOptions(File folder) {
+		DefaultOptions d = new DefaultOptions();
+		d.setString(HashOptions.DETECTION_FOLDER, folder.getAbsolutePath());
+		
+		d.setDouble(HashOptions.MAX_FRACTION, HashOptions.DEFAULT_MAX_SIGNAL_FRACTION);
+		d.setString(HashOptions.SIGNAL_DETECTION_MODE_KEY, HashOptions.DEFAULT_METHOD.name());
+		
+		d.setDouble(HashOptions.MIN_SIZE_PIXELS, HashOptions.DEFAULT_MIN_SIGNAL_SIZE);
+		d.setDouble(HashOptions.MAX_SIZE_PIXELS, HashOptions.DEFAULT_MAX_SIGNAL_SIZE);
 
-    /**
-     * Create the default options type for nuclear signal detection based on a
-     * template
-     * 
-     * @param template
-     *            the template options
-     * @return
-     */
-	public static INuclearSignalOptions makeNuclearSignalOptions(INuclearSignalOptions template) {
-        return new DefaultNuclearSignalHashOptions(template);
+		d.setDouble(HashOptions.MIN_CIRC, HashOptions.DEFAULT_MIN_CIRC);
+		d.setDouble(HashOptions.MAX_CIRC, HashOptions.DEFAULT_MAX_CIRC);
+		d.setInt(HashOptions.CHANNEL, HashOptions.DEFAULT_SIGNAL_CHANNEL);
+		d.setInt(HashOptions.THRESHOLD, HashOptions.DEFAULT_SIGNAL_THRESHOLD);
+
+		d.setDouble(HashOptions.SCALE, GlobalOptions.getInstance().getImageScale());
+		d.setBoolean(HashOptions.IS_RGB, HashOptions.DEFAULT_IS_RGB);
+		d.setBoolean(HashOptions.IS_NORMALISE_CONTRAST, HashOptions.DEFAULT_IS_NORMALISE);
+		return d;
     }
+	
+	public static HashOptions makeShellAnalysisOptions() {
+		DefaultOptions d = new DefaultOptions();
+		d.setInt(HashOptions.SHELL_COUNT_INT, HashOptions.DEFAULT_SHELL_COUNT);
+		d.setString(HashOptions.SHELL_EROSION_METHOD_KEY, HashOptions.DEFAULT_EROSION_METHOD.name());
+		return d;
+	}
+
 
     /**
      * Create the default analysis options type
@@ -167,10 +199,9 @@ public class OptionsFactory {
     public static IAnalysisOptions makeDefaultPigAnalysisOptions(File testFolder) {
     	IAnalysisOptions op = OptionsFactory.makeAnalysisOptions();
         
-        IDetectionOptions nop = OptionsFactory.makeNucleusDetectionOptions(testFolder);
-        nop.setMinCirc(0.1);
-        nop.setMaxCirc(0.9);
-        
+        HashOptions nop = OptionsFactory.makeNucleusDetectionOptions(testFolder);
+        nop.setDouble(HashOptions.MIN_CIRC, 0.1);
+        nop.setDouble(HashOptions.MAX_CIRC, 0.9);        
         op.setDetectionOptions(CellularComponent.NUCLEUS, nop);
         return op;
     }
@@ -183,9 +214,9 @@ public class OptionsFactory {
     public static IAnalysisOptions makeDefaultRoundAnalysisOptions(File testFolder) {
     	IAnalysisOptions op = OptionsFactory.makeAnalysisOptions();
         
-        IDetectionOptions nop = OptionsFactory.makeNucleusDetectionOptions(testFolder);
-        nop.setMinCirc(0.6);
-        nop.setMaxCirc(1.0);
+        HashOptions nop = OptionsFactory.makeNucleusDetectionOptions(testFolder);
+        nop.setDouble(HashOptions.MIN_CIRC, 0.6);
+        nop.setDouble(HashOptions.MAX_CIRC, 1.0);   
         
         op.setDetectionOptions(CellularComponent.NUCLEUS, nop);
         return op;
@@ -221,77 +252,4 @@ public class OptionsFactory {
     	return options;
     }
 
-    /**
-     * Create default options for cytoplasm detection in neutrophils using
-     * colour thresholding
-     * 
-     * @param folder
-     * @return
-     * @throws MissingOptionException
-     */
-    public static IDetectionOptions makeDefaultNeutrophilCytoplasmDetectionOptions(File folder)
-            throws MissingOptionException {
-
-    	IDetectionOptions cytoOptions = OptionsFactory.makeNucleusDetectionOptions(folder);
-
-        cytoOptions.setBoolean(IDetectionOptions.IS_USE_WATERSHED, false);
-        cytoOptions.setInt(IDetectionOptions.EROSION, IDetectionOptions.DEFAULT_EROSION);
-        cytoOptions.setInt(IDetectionOptions.DYNAMIC, IDetectionOptions.DEFAULT_DYNAMIC);
-
-        cytoOptions.setRGB(true);
-
-        cytoOptions.setMinCirc(0);
-        cytoOptions.setMaxCirc(1);
-        cytoOptions.setMinSize(3000);
-        cytoOptions.setMaxSize(12000); // for 20x images
-        PreprocessingOptions pre = (PreprocessingOptions) cytoOptions
-                .getSubOptions(IDetectionSubOptions.BACKGROUND_OPTIONS);
-        pre.setUseColourThreshold(true);
-        pre.setHueThreshold(0, 104);
-        pre.setSaturationThreshold(0, 50);
-        pre.setBrightnessThreshold(142, 255);
-        cytoOptions.getCannyOptions().setUseKuwahara(false);
-        ;
-        cytoOptions.getCannyOptions().setFlattenImage(false);
-        cytoOptions.getCannyOptions().setUseCanny(false);
-        return cytoOptions;
-    }
-
-    /**
-     * Create default options for nucleus detection in neutrophils using colour
-     * thresholding
-     * 
-     * @param folder
-     * @return
-     * @throws MissingOptionException
-     */
-    public static IDetectionOptions makeDefaultNeutrophilNucleusDetectionOptions(File folder)
-            throws MissingOptionException {
-
-    	IDetectionOptions nucleusOptions = OptionsFactory.makeNucleusDetectionOptions(folder);
-        nucleusOptions.setInt(IDetectionOptions.TOP_HAT_RADIUS, 20);
-        nucleusOptions.setBoolean(IDetectionOptions.IS_USE_WATERSHED, true);
-        nucleusOptions.setInt(IDetectionOptions.EROSION, IDetectionOptions.DEFAULT_EROSION);
-        nucleusOptions.setInt(IDetectionOptions.DYNAMIC, IDetectionOptions.DEFAULT_DYNAMIC);
-
-        nucleusOptions.setRGB(true);
-        nucleusOptions.setThreshold(20);
-
-        nucleusOptions.setMinCirc(0);
-        nucleusOptions.setMaxCirc(1);
-        nucleusOptions.setMinSize(500);
-        nucleusOptions.setMaxSize(3000);
-        PreprocessingOptions preN = (PreprocessingOptions) nucleusOptions
-                .getSubOptions(IDetectionSubOptions.BACKGROUND_OPTIONS);
-        preN.setUseColourThreshold(true);
-        preN.setHueThreshold(0, 255);
-        preN.setSaturationThreshold(4, 120);
-        preN.setBrightnessThreshold(90, 250);
-        nucleusOptions.getCannyOptions().setUseKuwahara(false);
-        ;
-        nucleusOptions.getCannyOptions().setFlattenImage(false);
-        nucleusOptions.getCannyOptions().setUseCanny(false);
-        return nucleusOptions;
-
-    }
 }

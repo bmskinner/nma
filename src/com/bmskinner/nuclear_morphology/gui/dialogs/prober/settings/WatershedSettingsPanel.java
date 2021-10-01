@@ -29,7 +29,7 @@ import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 
-import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 public class WatershedSettingsPanel extends DetectionSettingsPanel {
@@ -50,7 +50,7 @@ public class WatershedSettingsPanel extends DetectionSettingsPanel {
     private JSpinner dynamicSpinner;
     private JSpinner erosionSpinner;
 
-    public WatershedSettingsPanel(final IDetectionOptions options) {
+    public WatershedSettingsPanel(final HashOptions options) {
         super(options);
 
         this.add(createPanel(), BorderLayout.CENTER);
@@ -60,13 +60,13 @@ public class WatershedSettingsPanel extends DetectionSettingsPanel {
     private JPanel createPanel() {
         JPanel panel = new JPanel(new GridBagLayout());
 
-        List<JLabel> labelList = new ArrayList<JLabel>();
-        List<JComponent> fieldList = new ArrayList<JComponent>();
+        List<JLabel> labelList = new ArrayList<>();
+        List<JComponent> fieldList = new ArrayList<>();
 
-        dynamicSpinner = new JSpinner(new SpinnerNumberModel(Integer.valueOf(options.getInt(IDetectionOptions.DYNAMIC)),
+        dynamicSpinner = new JSpinner(new SpinnerNumberModel(Integer.valueOf(options.getInt(HashOptions.DYNAMIC)),
                 DYNAMIC_MIN_RANGE, DYNAMIC_MAX_RANGE, DYNAMIC_STEP));
 
-        erosionSpinner = new JSpinner(new SpinnerNumberModel(Integer.valueOf(options.getInt(IDetectionOptions.EROSION)),
+        erosionSpinner = new JSpinner(new SpinnerNumberModel(Integer.valueOf(options.getInt(HashOptions.EROSION)),
                 EROSION_MIN_RANGE, EROSION_MAX_RANGE, EROSION_STEP));
 
         JLabel dynabmicLbl = new JLabel(DYNAMIC_LBL);
@@ -77,7 +77,7 @@ public class WatershedSettingsPanel extends DetectionSettingsPanel {
         dynamicSpinner.addChangeListener(e -> {
             try {
                 dynamicSpinner.commitEdit();
-                options.setInt(IDetectionOptions.DYNAMIC, ((Integer) dynamicSpinner.getValue()).intValue());
+                options.setInt(HashOptions.DYNAMIC, ((Integer) dynamicSpinner.getValue()).intValue());
                 fireOptionsChangeEvent();
             } catch (ParseException e1) {
                 LOGGER.warning("Parsing error in JSpinner");
@@ -93,7 +93,7 @@ public class WatershedSettingsPanel extends DetectionSettingsPanel {
         erosionSpinner.addChangeListener(e -> {
             try {
                 erosionSpinner.commitEdit();
-                options.setInt(IDetectionOptions.EROSION, ((Integer) erosionSpinner.getValue()).intValue());
+                options.setInt(HashOptions.EROSION, ((Integer) erosionSpinner.getValue()).intValue());
                 fireOptionsChangeEvent();
             } catch (ParseException e1) {
                 LOGGER.warning("Parsing error in JSpinner");
@@ -110,8 +110,8 @@ public class WatershedSettingsPanel extends DetectionSettingsPanel {
     protected void update() {
         super.update();
         isUpdating = true;
-        dynamicSpinner.setValue(options.getInt(IDetectionOptions.DYNAMIC));
-        erosionSpinner.setValue(options.getInt(IDetectionOptions.EROSION));
+        dynamicSpinner.setValue(options.getInt(HashOptions.DYNAMIC));
+        erosionSpinner.setValue(options.getInt(HashOptions.EROSION));
         isUpdating = false;
     }
 

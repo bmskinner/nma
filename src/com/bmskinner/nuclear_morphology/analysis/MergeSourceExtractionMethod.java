@@ -34,6 +34,7 @@ import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.datasets.MergeSourceAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.components.signals.DefaultSignalGroup;
@@ -100,9 +101,14 @@ public class MergeSourceExtractionMethod extends MultipleDatasetAnalysisMethod {
     	ICellCollection templateCollection = template.getCollection();
     	
     	// Make a new real cell collection from the virtual collection
-    	File imageFolder = template.getAnalysisOptions().orElseThrow(MissingOptionException::new).getNuclusDetectionOptions().orElseThrow(MissingOptionException::new).getFolder();
+    	File imageFolder = template.getAnalysisOptions()
+    			.orElseThrow(MissingOptionException::new)
+    			.getNuclusDetectionOptions()
+    			.orElseThrow(MissingOptionException::new)
+    			.getFile(HashOptions.DETECTION_FOLDER);
+    	
     	ICellCollection newCollection = new DefaultCellCollection(imageFolder, null,
-    			templateCollection.getName(), templateCollection.getNucleusType());
+    			templateCollection.getName(), templateCollection.getRuleSetCollection());
 
     	templateCollection.getCells().forEach(c->newCollection.addCell(c.duplicate()));
 

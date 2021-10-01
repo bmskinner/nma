@@ -32,7 +32,7 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -44,7 +44,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  *
  */
 @SuppressWarnings("serial")
-public class ComponentSizeSettingsPanel extends DetectionSettingsPanel implements ChangeListener {
+public class ComponentSizeSettingsPanel extends DetectionSettingsPanel {
 	
 	private static final Logger LOGGER = Logger.getLogger(ComponentSizeSettingsPanel.class.getName());
 
@@ -65,7 +65,7 @@ public class ComponentSizeSettingsPanel extends DetectionSettingsPanel implement
     private JSpinner minCircSpinner;
     private JSpinner maxCircSpinner;
 
-    public ComponentSizeSettingsPanel(final IDetectionOptions options) {
+    public ComponentSizeSettingsPanel(final HashOptions options) {
         super(options);
         this.add(createPanel(), BorderLayout.CENTER);
 
@@ -76,16 +76,16 @@ public class ComponentSizeSettingsPanel extends DetectionSettingsPanel implement
      */
     private void createSpinners() {
         minSizeSpinner = new JSpinner(
-                new SpinnerNumberModel(new Integer((int) options.getMinSize()), MIN_RANGE_SIZE, null, SIZE_STEP_SIZE));
+                new SpinnerNumberModel(Integer.valueOf(options.getInt(HashOptions.MIN_SIZE_PIXELS)), MIN_RANGE_SIZE, null, SIZE_STEP_SIZE));
 
         maxSizeSpinner = new JSpinner(
-                new SpinnerNumberModel(new Integer((int) options.getMaxSize()), MIN_RANGE_SIZE, null, SIZE_STEP_SIZE));
+                new SpinnerNumberModel(Integer.valueOf(options.getInt(HashOptions.MAX_SIZE_PIXELS)), MIN_RANGE_SIZE, null, SIZE_STEP_SIZE));
 
         minCircSpinner = new JSpinner(
-                new SpinnerNumberModel(options.getMinCirc(), MIN_RANGE_CIRC, MAX_RANGE_CIRC, CIRC_STEP_SIZE));
+                new SpinnerNumberModel(options.getDouble(HashOptions.MIN_CIRC), MIN_RANGE_CIRC, MAX_RANGE_CIRC, CIRC_STEP_SIZE));
 
         maxCircSpinner = new JSpinner(
-                new SpinnerNumberModel(options.getMaxCirc(), MIN_RANGE_CIRC, MAX_RANGE_CIRC, CIRC_STEP_SIZE));
+                new SpinnerNumberModel(options.getDouble(HashOptions.MAX_CIRC), MIN_RANGE_CIRC, MAX_RANGE_CIRC, CIRC_STEP_SIZE));
 
         Dimension dim = new Dimension(BOX_WIDTH, BOX_HEIGHT);
         minSizeSpinner.setPreferredSize(dim);
@@ -93,10 +93,23 @@ public class ComponentSizeSettingsPanel extends DetectionSettingsPanel implement
         minCircSpinner.setPreferredSize(dim);
         maxCircSpinner.setPreferredSize(dim);
 
-        minSizeSpinner.addChangeListener(this);
-        maxSizeSpinner.addChangeListener(this);
-        minCircSpinner.addChangeListener(this);
-        maxCircSpinner.addChangeListener(this);
+        minSizeSpinner.addChangeListener(e->{
+        	updateOptions(HashOptions.MIN_SIZE_PIXELS, (Integer) minSizeSpinner.getValue());
+        });
+        
+        maxSizeSpinner.addChangeListener(e->{
+        	updateOptions(HashOptions.MAX_SIZE_PIXELS, (Integer) maxSizeSpinner.getValue());
+        });
+        
+        
+        minCircSpinner.addChangeListener(e->{
+        	updateOptions(HashOptions.MIN_CIRC, (Double) minCircSpinner.getValue());
+        });
+        
+        
+        maxCircSpinner.addChangeListener(e->{
+        	updateOptions(HashOptions.MAX_CIRC, (Double) maxCircSpinner.getValue());
+        });
     }
 
     /**
@@ -112,14 +125,14 @@ public class ComponentSizeSettingsPanel extends DetectionSettingsPanel implement
 
         panel.setLayout(new GridBagLayout());
 
-        List<JLabel> labels = new ArrayList<JLabel>();
+        List<JLabel> labels = new ArrayList<>();
 
         labels.add(new JLabel(MIN_SIZE_LBL));
         labels.add(new JLabel(MAX_SIZE_LBL));
         labels.add(new JLabel(MIN_CIRC_LBL));
         labels.add(new JLabel(MAX_CIRC_LBL));
 
-        List<Component> fields = new ArrayList<Component>();
+        List<Component> fields = new ArrayList<>();
 
         fields.add(minSizeSpinner);
         fields.add(maxSizeSpinner);
@@ -137,10 +150,10 @@ public class ComponentSizeSettingsPanel extends DetectionSettingsPanel implement
     @Override
     protected void update() {
         super.update();
-        minSizeSpinner.setValue((int) options.getMinSize());
-        maxSizeSpinner.setValue((int) options.getMaxSize());
-        minCircSpinner.setValue(options.getMinCirc());
-        maxCircSpinner.setValue(options.getMaxCirc());
+        minSizeSpinner.setValue(options.getInt(HashOptions.MIN_SIZE_PIXELS));
+        maxSizeSpinner.setValue(options.getInt(HashOptions.MAX_SIZE_PIXELS));
+        minCircSpinner.setValue(options.getDouble(HashOptions.MIN_CIRC));
+        maxCircSpinner.setValue(options.getDouble(HashOptions.MAX_CIRC));
     }
 
     @Override
@@ -150,67 +163,6 @@ public class ComponentSizeSettingsPanel extends DetectionSettingsPanel implement
         maxSizeSpinner.setEnabled(b);
         minCircSpinner.setEnabled(b);
         maxCircSpinner.setEnabled(b);
-
-    }
-
-    @Override
-    public void stateChanged(ChangeEvent e) {
-
-        try {
-
-            if (e.getSource() == minSizeSpinner) {
-                JSpinner j = (JSpinner) e.getSource();
-                j.commitEdit();
-
-                // ensure never larger than max
-                if ((Integer) j.getValue() > (Integer) maxSizeSpinner.getValue()) {
-                    j.setValue(maxSizeSpinner.getValue());
-                }
-
-                options.setMinSize((Integer) j.getValue());
-            }
-
-            if (e.getSource() == maxSizeSpinner) {
-                JSpinner j = (JSpinner) e.getSource();
-                j.commitEdit();
-
-                // ensure never smaller than min
-                if ((Integer) j.getValue() < (Integer) minSizeSpinner.getValue()) {
-                    j.setValue(minSizeSpinner.getValue());
-                }
-
-                options.setMaxSize((Integer) j.getValue());
-            }
-
-            if (e.getSource() == minCircSpinner) {
-                JSpinner j = (JSpinner) e.getSource();
-                j.commitEdit();
-
-                // ensure never larger than max
-                if ((Double) j.getValue() > (Double) maxCircSpinner.getValue()) {
-                    j.setValue(maxCircSpinner.getValue());
-                }
-
-                options.setMinCirc((Double) j.getValue());
-            }
-
-            if (e.getSource() == maxCircSpinner) {
-                JSpinner j = (JSpinner) e.getSource();
-                j.commitEdit();
-
-                // ensure never smaller than min
-                if ((Double) j.getValue() < (Double) minCircSpinner.getValue()) {
-                    j.setValue(minCircSpinner.getValue());
-                }
-
-                options.setMaxCirc((Double) j.getValue());
-            }
-
-            fireOptionsChangeEvent();
-
-        } catch (ParseException e1) {
-            LOGGER.log(Loggable.STACK, "Parsing error in JSpinner", e1);
-        }
 
     }
 }
