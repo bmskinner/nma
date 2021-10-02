@@ -35,10 +35,7 @@ import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.classification.NucleusClusteringMethod;
-import com.bmskinner.nuclear_morphology.analysis.nucleus.ConsensusAveragingMethod;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.NucleusDetectionMethod;
-import com.bmskinner.nuclear_morphology.analysis.nucleus.ProfileRefoldMethod;
-import com.bmskinner.nuclear_morphology.analysis.nucleus.ProfileRefoldMethod.CurveRefoldingMode;
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetProfilingMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMethod.MorphologyAnalysisMode;
@@ -46,12 +43,9 @@ import com.bmskinner.nuclear_morphology.analysis.signals.SignalDetectionMethod;
 import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellAnalysisMethod;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.nuclei.NucleusType;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
-import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
-import com.bmskinner.nuclear_morphology.components.options.IShellOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.components.signals.DefaultSignalGroup;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
@@ -256,25 +250,25 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod impleme
 		for(IAnalysisDataset dataset : datasets) {
 			// Add signals
 			boolean checkShell = true;
-			IShellOptions shellOptions = null;
+			HashOptions shellOptions = null;
 			
 			IAnalysisOptions datasetOptions = dataset.getAnalysisOptions().get();
 			
 			for(UUID signalGroupId : options.getNuclearSignalGroups()) {
 				
-				INuclearSignalOptions signalOptions = datasetOptions.getNuclearSignalOptions(signalGroupId);
+				HashOptions signalOptions = datasetOptions.getNuclearSignalOptions(signalGroupId);
 				
-				signalOptions.setFolder(imageFolder);
+				signalOptions.setFile(HashOptions.DETECTION_FOLDER, imageFolder);
 				ISignalGroup signalGroup = new DefaultSignalGroup(signalNames.get(signalGroupId));
-				signalGroup.setGroupColour(ColourSelecter.getSignalColour(signalOptions.getChannel()));
+				signalGroup.setGroupColour(ColourSelecter.getSignalColour(signalOptions.getInt(HashOptions.CHANNEL)));
 				
-				LOGGER.info("Set signal group "+signalGroup.getGroupName()+" to "+signalOptions.getFolder());
+				LOGGER.info("Set signal group "+signalGroup.getGroupName()+" to "+imageFolder);
 				
 				dataset.getCollection().addSignalGroup(signalGroupId, signalGroup);
 				methodsToRun.add(new SignalDetectionMethod(dataset, signalOptions, signalGroupId));
 				if(checkShell) {
-					if(signalOptions.hasShellOptions())
-						shellOptions = signalOptions.getShellOptions();
+					if(signalOptions.hasBoolean(HashOptions.SHELL_COUNT_INT))
+						shellOptions = signalOptions;
 					checkShell = false;
 				}
 			}

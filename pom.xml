@@ -179,9 +179,9 @@
 							<encoding>UTF-8</encoding>
 						</configuration>
 					</execution>
-					
-					<!-- Copy the wiki pages with version info to the wiki directory so the 
-						wiki is up to date -->
+
+					<!-- Copy the wiki pages with version info to the wiki directory so 
+						the wiki is up to date -->
 					<execution>
 						<id>wiki-md</id>
 						<phase>process-resources</phase>
@@ -202,8 +202,8 @@
 							<encoding>UTF-8</encoding>
 						</configuration>
 					</execution>
-					
-					<!-- Copy Bitbucket upload script from templates into scripts-->
+
+					<!-- Copy Bitbucket upload script from templates into scripts -->
 					<execution>
 						<id>bitbucket-upload</id>
 						<phase>process-resources</phase>
@@ -224,7 +224,7 @@
 							<encoding>UTF-8</encoding>
 						</configuration>
 					</execution>
-					
+
 				</executions>
 			</plugin>
 
@@ -451,12 +451,10 @@
 			<artifactId>jebl</artifactId>
 			<version>0.4</version>
 		</dependency>
-
-
 		<dependency>
 			<groupId>org.jfree</groupId>
 			<artifactId>jfreechart</artifactId>
-			<version>1.0.19</version>
+			<version>1.5.3</version>
 		</dependency>
 		<dependency>
 			<groupId>net.imagej</groupId>

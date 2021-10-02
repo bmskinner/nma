@@ -27,7 +27,7 @@ import javax.swing.JPanel;
 import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.XYPlot;
-import org.jfree.data.general.DatasetUtilities;
+import org.jfree.data.general.DatasetUtils;
 import org.jfree.data.xy.XYDataset;
 
 import com.bmskinner.nuclear_morphology.charting.charts.AbstractChartFactory;
@@ -95,7 +95,7 @@ public abstract class AbstractProfileDisplayPanel extends DetailPanel implements
                 int length = 100;
                 for (int i = 0; i < plot.getDatasetCount(); i++) {
                     XYDataset dataset = plot.getDataset(i);
-                    Number maximum = DatasetUtilities.findMaximumDomainValue(dataset);
+                    Number maximum = DatasetUtils.findMaximumDomainValue(dataset);
                     length = maximum.intValue() > length ? maximum.intValue() : length;
                 }
 

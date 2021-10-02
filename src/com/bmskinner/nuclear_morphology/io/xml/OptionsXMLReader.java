@@ -27,12 +27,10 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.jdom2.Element;
 
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.nuclei.NucleusType;
 import com.bmskinner.nuclear_morphology.components.options.DefaultClusteringOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
-import com.bmskinner.nuclear_morphology.components.rules.RuleApplicationType;
 
 /**
  * Read options XML files into analysis options objects
@@ -60,12 +58,8 @@ public class OptionsXMLReader extends XMLFileReader<IAnalysisOptions> {
 		if(!rootElement.getName().equals(XMLCreator.DETECTION_SETTINGS_KEY))
 			return op;
 
-//		NucleusType type = NucleusType.valueOf(rootElement.getChildText(XMLCreator.NUCLEUS_TYPE_KEY));
-//		op.setNucleusType(type);
 		double windowSize = Double.parseDouble(rootElement.getChildText(XMLCreator.PROFILE_WINDOW_KEY));
 		op.setAngleWindowProportion(windowSize);
-		RuleApplicationType ruleType = RuleApplicationType.valueOf(rootElement.getChildText(XMLCreator.RULE_APPLICATION_KEY));
-		op.setRuleApplicationType(ruleType);
 		
 		// should be single elements with options class
 		for(Element component : rootElement.getChildren(XMLCreator.DETECTION_METHOD_KEY))

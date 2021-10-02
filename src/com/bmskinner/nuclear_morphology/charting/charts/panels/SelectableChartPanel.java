@@ -39,8 +39,8 @@ import org.jfree.chart.plot.Crosshair;
 import org.jfree.chart.plot.IntervalMarker;
 import org.jfree.chart.plot.Marker;
 import org.jfree.chart.plot.XYPlot;
-import org.jfree.ui.Layer;
-import org.jfree.ui.RectangleEdge;
+import org.jfree.chart.ui.Layer;
+import org.jfree.chart.ui.RectangleEdge;
 
 import com.bmskinner.nuclear_morphology.gui.events.EventListener;
 import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;

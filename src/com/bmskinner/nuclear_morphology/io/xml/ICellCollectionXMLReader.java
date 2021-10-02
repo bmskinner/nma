@@ -60,47 +60,6 @@ public class ICellCollectionXMLReader extends XMLReader<ICellCollection> {
 		return null;
 	}
 	
-//	private ICellCollection readRealCollection(Element e) throws XMLReadingException {
-//
-//		String outFolder = e.getChildText(XMLCreator.OUTPUT_FOLDER_KEY);
-//
-//		ICellCollection collection = new DefaultCellCollection(null, outFolder, collectionName, collectionId);
-//		
-//		Element cellsElement = e.getChild(XMLCreator.CELLS_SECTION_KEY);
-//		for(Element cell : cellsElement.getChildren(XMLCreator.CELL_KEY)) {
-//			XMLReader<ICell> cellReader = new ICellXMLReader(cell, fact, windowProportion);
-//			collection.add(cellReader.read());
-//		}
-//		
-//		try {
-//			collection.createProfileCollection();
-//		} catch (ProfileException e1) {
-//			LOGGER.log(Loggable.STACK, e1.getMessage(), e1);
-//		}
-//		
-//		Element tags = e.getChild(XMLCreator.BORDER_TAGS_KEY);
-//		for(Element tag : tags.getChildren()) {			
-//			Landmark t = readTag(tag);
-//			int index = readInt(tag, XMLCreator.INDEX_KEY);
-//			collection.getProfileCollection().addIndex(t, index);
-//		}
-//		
-//		// Add stats
-//		Element segs = e.getChild(XMLCreator.BORDER_SEGS_KEY);
-//		readCollectionSegments(segs, collection);
-//		
-//		// Add signals
-//		Element signals = e.getChild(XMLCreator.SIGNAL_GROUPS_SECTION_KEY);
-//		readSignalGroups(signals, collection);		
-//		
-//		if(e.getChild(XMLCreator.CONSENSUS_KEY)!=null){
-//			Consensus<Nucleus> consensus = readConsensus(e.getChild(XMLCreator.CONSENSUS_KEY), type);
-//			collection.setConsensus(consensus);
-//		}
-//
-//		return collection;
-//	}
-	
 	private void readCollectionSegments(Element segs, ICellCollection collection) {
 		int profileLength = collection.getProfileCollection().length();
 		List<IProfileSegment> newSegs = new ArrayList<>();
@@ -142,11 +101,11 @@ public class ICellCollectionXMLReader extends XMLReader<ICellCollection> {
 		}
 	}
 	
-	private Consensus<Nucleus> readConsensus(Element e, NucleusType type) throws XMLReadingException {
+	private Consensus<Nucleus> readConsensus(Element e) throws XMLReadingException {
 		XMLReader<Nucleus> nuclReader = new NucleusXMLReader(e.getChild(XMLCreator.NUCLEUS_KEY), fact, windowProportion);
 		Nucleus template = nuclReader.read();
 		try {
-			return new DefaultConsensusNucleus(template, type);
+			return new DefaultConsensusNucleus(template);
 		} catch (UnprofilableObjectException e1) {
 			LOGGER.log(Loggable.STACK, "Error reading consensus", e1);
 			throw new XMLReadingException(e1);

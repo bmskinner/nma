@@ -34,9 +34,9 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.DefaultXYItemRenderer;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
-import org.jfree.data.general.DatasetUtilities;
+import org.jfree.chart.ui.TextAnchor;
+import org.jfree.data.general.DatasetUtils;
 import org.jfree.data.xy.XYDataset;
-import org.jfree.ui.TextAnchor;
 
 import com.bmskinner.nuclear_morphology.charting.ChartComponents;
 import com.bmskinner.nuclear_morphology.charting.datasets.ChartDatasetCreationException;
@@ -193,7 +193,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 		for (int i = 0; i < plot.getDatasetCount(); i++) {
 
 			// Ensure annotation is placed in the right y position
-			double y = DatasetUtilities.findMaximumRangeValue(plot.getDataset(i)).doubleValue();
+			double y = DatasetUtils.findMaximumRangeValue(plot.getDataset(i)).doubleValue();
 			yMax = y > yMax ? y : yMax;
 
 		}
@@ -351,8 +351,8 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 		plot.addRangeMarker(new ValueMarker(180, Color.BLACK, ChartComponents.MARKER_STROKE));
 
 		DefaultXYItemRenderer rend = new DefaultXYItemRenderer();
-		rend.setBaseShapesVisible(true);
-		rend.setBaseShape(ChartComponents.DEFAULT_POINT_SHAPE);
+		rend.setDefaultShapesVisible(true);
+		rend.setDefaultShape(ChartComponents.DEFAULT_POINT_SHAPE);
 		rend.setSeriesPaint(0, Color.BLACK);
 		rend.setSeriesVisibleInLegend(0, false);
 		rend.setSeriesPaint(1, Color.LIGHT_GRAY);

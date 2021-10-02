@@ -223,8 +223,8 @@ public class BoxplotChartFactory extends AbstractChartFactory {
         BoxAndWhiskerRenderer renderer = new BoxAndWhiskerRenderer();
         plot.setRenderer(renderer);
         renderer.setUseOutlinePaintForWhiskers(true);
-        renderer.setBaseOutlinePaint(Color.BLACK);
-        renderer.setBaseFillPaint(Color.LIGHT_GRAY);
+        renderer.setDefaultOutlinePaint(Color.BLACK);
+        renderer.setDefaultFillPaint(Color.LIGHT_GRAY);
         renderer.setMeanVisible(false);
     }
 

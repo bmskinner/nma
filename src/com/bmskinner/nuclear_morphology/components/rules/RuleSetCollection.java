@@ -64,7 +64,7 @@ public class RuleSetCollection implements Serializable {
      *  Can both be null for no preference **/
     private final Landmark topVertical;
     private final Landmark btmVertical;
-    
+
     private final Landmark seondaryX;
     private final Landmark seondaryY;
     
@@ -90,7 +90,6 @@ public class RuleSetCollection implements Serializable {
     	this.ruleApplicationType = type;
     }
     
-   
     public String getName() {
     	return name;
     }
@@ -124,7 +123,7 @@ public class RuleSetCollection implements Serializable {
     public boolean isAsymmetric() {
     	return isAsymmetricX() || isAsymmetricY();
     }
-    
+
     public Optional<Landmark> getSecondaryX() {
 		return Optional.ofNullable(seondaryX);
 	}
@@ -140,11 +139,11 @@ public class RuleSetCollection implements Serializable {
 	public Optional<Landmark> getLeftLandmark() {
     	return Optional.ofNullable(leftCoM);
     }
-    
+
     public Optional<Landmark> getRightLandmark() {
     	return Optional.ofNullable(rightCoM);
     }
-    
+
     public Optional<Landmark> getTopLandmark() {
     	return Optional.ofNullable(topVertical);
     }

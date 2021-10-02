@@ -43,9 +43,9 @@ import org.jfree.chart.plot.ValueMarker;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
-import org.jfree.data.general.DatasetUtilities;
+import org.jfree.chart.ui.Layer;
+import org.jfree.data.general.DatasetUtils;
 import org.jfree.data.xy.XYDataset;
-import org.jfree.ui.Layer;
 
 import com.bmskinner.nuclear_morphology.analysis.image.ImageConverter;
 import com.bmskinner.nuclear_morphology.analysis.mesh.DefaultMesh;
@@ -79,8 +79,8 @@ import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.profiles.DefaultLandmark;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
-import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
+import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
 import com.bmskinner.nuclear_morphology.gui.RotationMode;
@@ -182,9 +182,9 @@ public class OutlineChartFactory extends AbstractChartFactory {
 					rend.setSeriesPaint(series, colour);
 				}
 
-				rend.setBaseLinesVisible(false);
-				rend.setBaseShapesVisible(true);
-				rend.setBaseSeriesVisibleInLegend(false);
+				rend.setDefaultLinesVisible(false);
+				rend.setDefaultShapesVisible(true);
+				rend.setDefaultSeriesVisibleInLegend(false);
 			}
 			plot.setRenderer(1, rend);
 
@@ -249,8 +249,8 @@ public class OutlineChartFactory extends AbstractChartFactory {
         double xChartMin = Double.MAX_VALUE;
         double yChartMin = Double.MAX_VALUE;
         for(XYDataset ds : outlineDatasets) {
-        	xChartMin = Math.min(xChartMin, DatasetUtilities.findMinimumDomainValue(ds).doubleValue());
-        	yChartMin = Math.min(yChartMin, DatasetUtilities.findMinimumRangeValue(ds).doubleValue());
+        	xChartMin = Math.min(xChartMin, DatasetUtils.findMinimumDomainValue(ds).doubleValue());
+        	yChartMin = Math.min(yChartMin, DatasetUtils.findMinimumRangeValue(ds).doubleValue());
         }
         
         // Get the max bounding box size for the consensus nuclei,
@@ -262,8 +262,8 @@ public class OutlineChartFactory extends AbstractChartFactory {
         drawImageAsAnnotation(image, plot, 255, -xOffset, -yOffset, options.isShowBounds());
 
         // Set the colour of the nucleus outline
-    	plot.getRenderer().setBasePaint(Color.BLACK);
-    	plot.getRenderer().setBaseSeriesVisible(true);
+    	plot.getRenderer().setDefaultPaint(Color.BLACK);
+    	plot.getRenderer().setDefaultSeriesVisible(true);
         for(int i=0; i<outlineDatasets.size(); i++) {
         	plot.setDataset(i, outlineDatasets.get(i));
         	plot.getRenderer().setSeriesPaint(i, Color.black);
@@ -357,8 +357,8 @@ public class OutlineChartFactory extends AbstractChartFactory {
             return createErrorChart();
         }
         plot.setDataset(0, ds);
-        plot.getRenderer(0).setBasePaint(Color.BLACK);
-        plot.getRenderer(0).setBaseSeriesVisible(true);
+        plot.getRenderer(0).setDefaultPaint(Color.BLACK);
+        plot.getRenderer(0).setDefaultSeriesVisible(true);
         applyDefaultAxisOptions(chart);
         return chart;
     }
@@ -772,7 +772,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
                 ip.getHeight());
         plot.setDataset(0, bounds);
         XYItemRenderer rend = plot.getRenderer(0);
-        rend.setBaseSeriesVisible(false);
+        rend.setDefaultSeriesVisible(false);
 
         plot.getDomainAxis().setRange(0, ip.getWidth());
         plot.getRangeAxis().setRange(0, ip.getHeight());
@@ -948,10 +948,10 @@ public class OutlineChartFactory extends AbstractChartFactory {
         	Paint colour = dataset.getDatasetColour().orElse(ColourSelecter.getColor(datasetNumber++));
 
             XYLineAndShapeRenderer r = new XYLineAndShapeRenderer(true, false);
-            r.setBaseSeriesVisibleInLegend(false);
-            r.setBaseStroke(ChartComponents.PROFILE_STROKE);
+            r.setDefaultSeriesVisibleInLegend(false);
+            r.setDefaultStroke(ChartComponents.PROFILE_STROKE);
             r.setSeriesPaint(0, colour);
-            r.setBaseToolTipGenerator(tooltip);
+            r.setDefaultToolTipGenerator(tooltip);
 
             for (Nucleus n : dataset.getCollection().getNuclei()) {
 
@@ -998,7 +998,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 			try {
 				NucleusMeshXYDataset dataset = new NucleusDatasetCreator(options).createNucleusMeshVertexDataset(mesh);
 				XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer(false, true);
-				renderer.setBaseSeriesVisibleInLegend(false);
+				renderer.setDefaultSeriesVisibleInLegend(false);
 
 				for (int series = 0; series < dataset.getSeriesCount(); series++) {
 
@@ -1024,8 +1024,8 @@ public class OutlineChartFactory extends AbstractChartFactory {
 			try {
 				NucleusMeshXYDataset dataset = new NucleusDatasetCreator(options).createNucleusMeshEdgeDataset(mesh);
 				XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer(true, false);
-				renderer.setBaseSeriesVisibleInLegend(false);
-				renderer.setBaseStroke(ChartComponents.MARKER_STROKE);
+				renderer.setDefaultSeriesVisibleInLegend(false);
+				renderer.setDefaultStroke(ChartComponents.MARKER_STROKE);
 
 				for (int series = 0; series < dataset.getSeriesCount(); series++) {
 

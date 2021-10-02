@@ -23,12 +23,10 @@ import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
-import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
-import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
+import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.profiles.UnsegmentedProfileException;
 import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
@@ -37,7 +35,6 @@ import com.bmskinner.nuclear_morphology.components.signals.ISignalCollection;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.signals.IWarpedSignal;
 import com.bmskinner.nuclear_morphology.components.signals.WarpedSignalKey;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 import ij.process.ImageProcessor;
@@ -550,21 +547,6 @@ public abstract class XMLCreator<T> {
 	private static Element createKeyPairElement(String key, double value) {
 		return createKeyPairElement(key, String.valueOf(value));
 	}
-	
-	protected static void appendElement(Element rootElement, @NonNull IDetectionOptions options) {
-		appendElement(rootElement, (HashOptions)options);
-		for(String key : options.getSubOptionKeys()){
-			Element element = new Element(SUB_OPTION_KEY);
-			element.setAttribute(SUB_TYPE_KEY, key);
-			try {
-				appendElement(element, options.getSubOptions(key));
-				rootElement.addContent(element);
-			} catch (MissingOptionException e) {
-				LOGGER.log(Loggable.STACK, "Missing option", e);
-			}
-			
-		}
-	}
 		
 	protected static void appendElement(Element rootElement, @NonNull HashOptions options) {
 		
@@ -601,6 +583,13 @@ public abstract class XMLCreator<T> {
 			for(String key : options.getStringKeys())
 				stringElement.addContent(createKeyPairElement(key, options.getString(key)));
 			rootElement.addContent(stringElement);
+		}
+		
+		for(String key : options.getSubOptionKeys()){
+			Element element = new Element(SUB_OPTION_KEY);
+			element.setAttribute(SUB_TYPE_KEY, key);
+			appendElement(element, options.getSubOptions(key));
+			rootElement.addContent(element);
 		}
 	}
 

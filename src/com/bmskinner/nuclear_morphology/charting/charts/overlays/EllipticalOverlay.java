@@ -35,7 +35,7 @@ import org.jfree.chart.panel.AbstractOverlay;
 import org.jfree.chart.panel.Overlay;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
-import org.jfree.ui.RectangleEdge;
+import org.jfree.chart.ui.RectangleEdge;
 
 @SuppressWarnings("serial")
 public class EllipticalOverlay extends AbstractOverlay

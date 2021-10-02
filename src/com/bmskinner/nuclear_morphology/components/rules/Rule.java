@@ -31,8 +31,8 @@ public class Rule implements Serializable {
 
     private static final long  serialVersionUID = 1L;
     private final RuleType     type;
-    private final List<Double> values           = new ArrayList<>(); // spare
-                                                                           // field
+    
+    private final List<Double> values = new ArrayList<>(); // spare field
 
     public Rule(RuleType type, double value) {
 

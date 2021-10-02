@@ -31,7 +31,7 @@ import java.util.UUID;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
-import org.jfree.chart.ChartUtilities;
+import org.jfree.chart.ChartUtils;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.title.TextTitle;
 import org.jfree.chart.title.Title;
@@ -127,9 +127,9 @@ public class DemoReportGenerator {
 				chart.getCategoryPlot().setRangeGridlinesVisible(true);
 				chart.getCategoryPlot().setRangeGridlinePaint(Color.LIGHT_GRAY);
 				chart.getCategoryPlot().getRangeAxis().setRange(0, 60);
-//				BufferedImage buffImg = chart.createBufferedImage(300, 200);
+
 				OutputStream out = new FileOutputStream(chartFile);
-				ChartUtilities.writeChartAsPNG(out, chart, 800, 600);
+				ChartUtils.writeChartAsPNG(out, chart, 800, 600);
 				
 				out.close();
 			}

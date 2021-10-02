@@ -40,6 +40,7 @@ public class RuleSet implements Serializable {
     
     // combine rules with AND conditions
     private List<Rule>  rules = new ArrayList<>();
+    
     private ProfileType type; // the type of profile to which the rules apply
 
     public RuleSet(final ProfileType type) {

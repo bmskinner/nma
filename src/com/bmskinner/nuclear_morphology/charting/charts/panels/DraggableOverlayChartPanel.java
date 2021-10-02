@@ -37,8 +37,9 @@ import org.jfree.chart.panel.CrosshairOverlay;
 import org.jfree.chart.panel.Overlay;
 import org.jfree.chart.plot.Crosshair;
 import org.jfree.chart.plot.XYPlot;
-import org.jfree.data.general.DatasetUtilities;
-import org.jfree.ui.RectangleEdge;
+
+import org.jfree.chart.ui.RectangleEdge;
+import org.jfree.data.general.DatasetUtils;
 
 import com.bmskinner.nuclear_morphology.charting.ChartComponents;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
@@ -209,7 +210,7 @@ public class DraggableOverlayChartPanel extends ExportableChartPanel {
      * @return
      */
     private double getMaximumDomainValue() {
-		Number maxDomainValue = DatasetUtilities.findMaximumDomainValue(getChart().getXYPlot().getDataset());
+		Number maxDomainValue = DatasetUtils.findMaximumDomainValue(getChart().getXYPlot().getDataset());
 		return Math.ceil(maxDomainValue.doubleValue()/1000)*1000;
     }
 

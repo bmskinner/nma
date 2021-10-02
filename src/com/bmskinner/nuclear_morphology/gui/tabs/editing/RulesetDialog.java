@@ -222,20 +222,6 @@ public class RulesetDialog extends LoadingIconDialog
 
     private JPanel createButtonPanel() {
         JPanel panel = new JPanel(new FlowLayout());
-        
-        // Allow switching of dataset rule type
-        RuleApplicationType currentRule = dataset.getAnalysisOptions().get().getRuleApplicationType(); 
-        ButtonGroup bg = new ButtonGroup();
-        for(RuleApplicationType ruleType: RuleApplicationType.values()) {
-        	JRadioButton btn = new JRadioButton(ruleType.toString());
-        	
-        	btn.addActionListener(e->dataset.getAnalysisOptions().get()
-            		.setRuleApplicationType(ruleType));
-        	btn.setSelected(currentRule.equals(ruleType));
-        	bg.add(btn);
-        	panel.add(btn);
-        }
-        
 
         JButton addButton = new JButton(Labels.EditingBorderTags.RULESET_DIALOG_CUSTOM_BTN);
 

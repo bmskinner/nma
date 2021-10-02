@@ -14,22 +14,11 @@ import org.jdom2.input.SAXBuilder;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
-import com.bmskinner.nuclear_morphology.components.options.CannyOptions;
-import com.bmskinner.nuclear_morphology.components.options.DefaultHoughOptions;
-import com.bmskinner.nuclear_morphology.components.options.DefaultShellOptions;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.ICannyOptions;
-import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
-import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.IDetectionSubOptions;
-import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.IDetectionSubOptions.IPreprocessingOptions;
-import com.bmskinner.nuclear_morphology.components.options.IHoughDetectionOptions;
-import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
-import com.bmskinner.nuclear_morphology.components.options.IShellOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
-import com.bmskinner.nuclear_morphology.components.options.PreprocessingOptions;
-import com.bmskinner.nuclear_morphology.components.profiles.LandmarkType;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
+import com.bmskinner.nuclear_morphology.components.profiles.LandmarkType;
 
 /**
  * Base class for XML readers
@@ -260,34 +249,12 @@ public abstract class XMLReader<T> {
 	 */
 	private void addComponentNucleus(@NonNull Element e, @NonNull IAnalysisOptions op) {
 		File f = op.getDetectionOptions(CellularComponent.NUCLEUS).isPresent() 
-				? op.getDetectionOptions(CellularComponent.NUCLEUS).get().getFolder() : EMPTY_FILE;
+				? op.getDetectionOptions(CellularComponent.NUCLEUS).get().getFile(HashOptions.DETECTION_FOLDER) : EMPTY_FILE;
 
-		IDetectionOptions o = OptionsFactory.makeNucleusDetectionOptions(f);
+		HashOptions o = OptionsFactory.makeNucleusDetectionOptions(f);
 		
 		// Primary keys
 		addKeyedValues(e, o);
-
-		for(Element component : e.getChildren(XMLCreator.SUB_OPTION_KEY)) {
-			String subType = component.getAttribute(XMLCreator.SUB_TYPE_KEY).getValue();
-			
-			if(subType.equals(IDetectionSubOptions.BACKGROUND_OPTIONS)) {
-				IPreprocessingOptions pre = new PreprocessingOptions();
-				addKeyedValues(component, pre);
-				o.setSubOptions(subType, pre);
-			}
-			
-			if(subType.equals(IDetectionSubOptions.HOUGH_OPTIONS)) {
-				IHoughDetectionOptions hough = new DefaultHoughOptions();
-				addKeyedValues(component, hough);
-				o.setSubOptions(subType, hough);
-			}
-			
-			if(subType.equals(IDetectionSubOptions.CANNY_OPTIONS)) {
-				ICannyOptions canny = new CannyOptions();
-				addKeyedValues(component, canny);
-				o.setSubOptions(subType, canny);
-			}
-		}
 		op.setDetectionOptions(CellularComponent.NUCLEUS, o);
 	}
 	
@@ -301,16 +268,8 @@ public abstract class XMLReader<T> {
 		try {
 			Element idElement = e.getChild(XMLCreator.ID_KEY);
 			UUID id = idElement==null ? UUID.randomUUID() : UUID.fromString(idElement.getText());				
-			INuclearSignalOptions n = OptionsFactory.makeNuclearSignalOptions(EMPTY_FILE);
+			HashOptions n = OptionsFactory.makeNuclearSignalOptions(EMPTY_FILE);
 			addKeyedValues(e, n);				
-			for(Element component : e.getChildren(XMLCreator.SUB_OPTION_KEY)) {
-				String subType = component.getAttribute(XMLCreator.SUB_TYPE_KEY).getValue();
-				if(subType.equals(IDetectionSubOptions.SHELL_OPTIONS)) {
-					IShellOptions s = new DefaultShellOptions();
-					addKeyedValues(component, s);
-					n.setShellOptions(s);
-				}
-			}
 			op.setDetectionOptions(IAnalysisOptions.SIGNAL_GROUP+id.toString(), n);
 		} catch(IllegalArgumentException e1) {
 			// it wasn't a uuid

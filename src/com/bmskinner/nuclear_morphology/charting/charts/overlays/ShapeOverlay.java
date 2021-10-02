@@ -35,7 +35,7 @@ import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.panel.AbstractOverlay;
 import org.jfree.chart.panel.Overlay;
 import org.jfree.chart.plot.XYPlot;
-import org.jfree.ui.RectangleEdge;
+import org.jfree.chart.ui.RectangleEdge;
 
 public class ShapeOverlay extends AbstractOverlay implements Overlay, PropertyChangeListener, Serializable {
 

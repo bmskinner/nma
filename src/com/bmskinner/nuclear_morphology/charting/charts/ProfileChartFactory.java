@@ -31,8 +31,8 @@ import org.jfree.chart.plot.ValueMarker;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYDifferenceRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
-import org.jfree.data.general.DatasetUtilities;
-import org.jfree.ui.TextAnchor;
+import org.jfree.data.general.DatasetUtils;
+import org.jfree.chart.ui.TextAnchor;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.charting.ChartComponents;
@@ -221,7 +221,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
 						indexToDraw = ((indexToDraw / collection.getProfileCollection().length()) * ds.getMaxDomainValue());
 
 					if (options.getAlignment().equals(ProfileAlignment.RIGHT) && !options.isNormalised()) {
-						int maxX = DatasetUtilities.findMaximumDomainValue(ds.getLines()).intValue();
+						int maxX = DatasetUtils.findMaximumDomainValue(ds.getLines()).intValue();
 						int amountToAdd = maxX - collection.getProfileCollection().length();
 						indexToDraw += amountToAdd;
 					}
@@ -304,10 +304,10 @@ public class ProfileChartFactory extends AbstractChartFactory {
 		plot.getDomainAxis().setRange(DEFAULT_PROFILE_START_INDEX, xLength);
 		XYLineAndShapeRenderer lineRenderer = new XYLineAndShapeRenderer();
 
-		lineRenderer.setBaseShapesVisible(options.isShowPoints());
-		lineRenderer.setBaseLinesVisible(options.isShowLines());
-		lineRenderer.setBaseShape(ChartComponents.DEFAULT_POINT_SHAPE);
-		lineRenderer.setBaseToolTipGenerator(null);
+		lineRenderer.setDefaultShapesVisible(options.isShowPoints());
+		lineRenderer.setDefaultLinesVisible(options.isShowLines());
+		lineRenderer.setDefaultShape(ChartComponents.DEFAULT_POINT_SHAPE);
+		lineRenderer.setDefaultToolTipGenerator(null);
 		plot.setRenderer(0, lineRenderer);
 
 		// Format the line charts
@@ -335,7 +335,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
 			Paint profileColour = options.getDatasets().get(i).getDatasetColour().orElse(ColourSelecter.getColor(i, options.getSwatch()));
 			Paint colour = ColourSelecter.getTransparentColour((Color) profileColour, true, 128);
 			XYDifferenceRenderer rangeRenderer = new XYDifferenceRenderer(colour, colour, false);
-			rangeRenderer.setBaseToolTipGenerator(null);
+			rangeRenderer.setDefaultToolTipGenerator(null);
 			plot.setRenderer(i+1, rangeRenderer);
 			for (int series = 0; series<ds.getRanges(i).getSeriesCount(); series++) {
 				rangeRenderer.setSeriesPaint(series, colour);
@@ -505,7 +505,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
             }
 
             try {
-                double ymax = DatasetUtilities.findMaximumRangeValue(plot.getDataset()).doubleValue();
+                double ymax = DatasetUtils.findMaximumRangeValue(plot.getDataset()).doubleValue();
                 DecimalFormat df = new DecimalFormat("#0.000");
                 XYTextAnnotation annotation = new XYTextAnnotation(
                         String.format("Markers for non-unimodal positions (p<%s)", df.format(significance)), 1, ymax);

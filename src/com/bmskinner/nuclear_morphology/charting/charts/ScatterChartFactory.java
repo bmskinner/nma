@@ -234,8 +234,8 @@ public class ScatterChartFactory extends AbstractChartFactory {
 
         public ScatterChartRenderer() {
             super();
-            setBaseShapesVisible(true);
-            setBaseShape(ChartComponents.DEFAULT_POINT_SHAPE);
+            setDefaultShapesVisible(true);
+            setDefaultShape(ChartComponents.DEFAULT_POINT_SHAPE);
         }
 
         @Override
@@ -250,7 +250,7 @@ public class ScatterChartFactory extends AbstractChartFactory {
 
         @Override
         public Shape getSeriesShape(int series) {
-            return this.getBaseShape();
+            return this.getDefaultShape();
         }
 
     }

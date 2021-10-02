@@ -49,7 +49,8 @@ public class DatasetXMLReader extends XMLFileReader<IAnalysisDataset> {
 		
 		try {
 			Element analysisOptions = rootElement.getChild(XMLCreator.ANALYSIS_OPTIONS_KEY);
-//			NucleusType type = NucleusType.valueOf(analysisOptions.getChildText(XMLCreator.NUCLEUS_TYPE_KEY));
+			
+			
 			fact = new NucleusFactory();
 			windowProportion = readDouble(analysisOptions, XMLCreator.PROFILE_WINDOW_KEY);
 			

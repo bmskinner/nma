@@ -458,83 +458,16 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
 
     @Override
     public void alignVertically() {
-    	
+
     	try {
     		// Use the points defined in the RuleSetCollection
     		// to determine how to orient the nucleus
     		if(priorityAxis.equals(PriorityAxis.Y)) {
-
-    			// Check if t and b are present
-    			if(hasBorderTag(t) && hasBorderTag(b)) {
-    				IPoint topPoint    = getBorderPoint(t);
-    				IPoint bottomPoint = getBorderPoint(b);
-    				if(topPoint != bottomPoint) {
-            			alignPointsOnVertical(topPoint, bottomPoint);
-    				} else if(hasBorderTag(y)) {
-    					rotatePointToBottom(getBorderPoint(y));
-    				}
-    			} else if(hasBorderTag(y)) { // if no t and b, fall back to y
-    				rotatePointToBottom(getBorderPoint(y));
-    			}
-    			
-    			// Now check x, and flip as needed
-    			if(hasBorderTag(l) && hasBorderTag(r)) {
-    				IPoint leftPoint  = getBorderPoint(l);
-    				IPoint rightPoint = getBorderPoint(r);
-    				if(leftPoint.isRightOf(rightPoint)) {
-    					flipHorizontal();
-    				}
-    			} else if(hasBorderTag(l)) {
-    				IPoint leftPoint  = getBorderPoint(l);
-    				if(leftPoint.isRightOf(getCentreOfMass()))
-    					flipHorizontal();
-    			} else if(hasBorderTag(r)) {
-    				IPoint rightPoint = getBorderPoint(r);
-    				if(rightPoint.isLeftOf(getCentreOfMass()))
-    					flipHorizontal();
-    			} else if(hasBorderTag(x)) {
-    				IPoint leftPoint = getBorderPoint(x);
-    				if(leftPoint.isRightOf(getCentreOfMass()))
-    					flipHorizontal();
-    			}
+    			alignVerticallyPriorityY();
 
     		} else {
     			// Same logic but now if X axis is the priority
-    			
-    			// Check if l and r are present
-    			if(hasBorderTag(t) && hasBorderTag(b)) {
-    				IPoint leftPoint  = getBorderPoint(l);
-    				IPoint rightPoint = getBorderPoint(r);
-    				if(leftPoint != rightPoint) {
-            			alignPointsOnHorizontal(leftPoint, rightPoint);
-    				} else {
-    					rotatePointToLeft(getBorderPoint(x));
-    				}
-    			} else if(hasBorderTag(y)) { // if no l and r, fall back to x
-    				rotatePointToLeft(getBorderPoint(x));
-    			}
-    			
-    			// Now check y, and flip as needed
-    			if(hasBorderTag(t) && hasBorderTag(b)) {
-    				IPoint topPoint  = getBorderPoint(t);
-    				IPoint bottomPoint = getBorderPoint(b);
-    				if(topPoint.isBelow(bottomPoint)) {
-    					flipVertical();
-    				}
-    			} else if(hasBorderTag(t)) {
-    				IPoint topPoint  = getBorderPoint(t);
-    				if(topPoint.isBelow(getCentreOfMass()))
-    					flipVertical();
-    			} else if(hasBorderTag(b)) {
-    				IPoint bottomPoint = getBorderPoint(b);
-    				if(bottomPoint.isAbove(getCentreOfMass()))
-    					flipVertical();
-    			} else if(hasBorderTag(y)) {
-    				IPoint bottomPoint = getBorderPoint(y);
-    				if(bottomPoint.isAbove(getCentreOfMass()))
-    					flipVertical();
-    			}
-    			
+    			alignVerticallyPriorityX();
     		}
     	} catch (UnavailableBorderTagException e) {
     		LOGGER.log(Loggable.STACK, "Cannot get border tag or profile", e);
@@ -544,41 +477,79 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
     			LOGGER.log(Loggable.STACK, "Cannot get border tag", e1);
     		}
     	}
-    	
-    	
-    	
-//    	boolean useTVandBV = hasBorderTag(Landmark.TOP_VERTICAL) && hasBorderTag(Landmark.BOTTOM_VERTICAL);
-//
-//    	if (useTVandBV) {
-//    		try {
-//    			int topPoint = getBorderIndex(Landmark.TOP_VERTICAL);
-//    			int bottomPoint = getBorderIndex(Landmark.BOTTOM_VERTICAL);
-//    			if(topPoint == bottomPoint) {
-//    				rotatePointToBottom(getBorderPoint(Landmark.ORIENTATION_POINT));
-//    				return;
-//    			}
-//
-//    			IPoint[] points = getBorderPointsForVerticalAlignment();
-//    			alignPointsOnVertical(points[0], points[1]);
-//
-//    		} catch (UnavailableBorderTagException | UnavailableProfileTypeException e) {
-//    			LOGGER.log(Loggable.STACK, "Cannot get border tag or profile", e);
-//    			try {
-//    				rotatePointToBottom(getBorderPoint(Landmark.ORIENTATION_POINT));
-//    			} catch (UnavailableBorderTagException e1) {
-//    				LOGGER.log(Loggable.STACK, "Cannot get border tag", e1);
-//    			}
-//    		}
-//    	} else {
-//
-//    		// Default if top and bottom vertical points have not been specified
-//    		try {
-//    			rotatePointToBottom(getBorderPoint(Landmark.ORIENTATION_POINT));
-//    		} catch (UnavailableBorderTagException e) {
-//    			LOGGER.log(Loggable.STACK, "Cannot get border tag", e);
-//    		}
-//    	}
-
+    }
+    
+    private void alignVerticallyPriorityY() throws UnavailableBorderTagException {
+    	// Check if t and b are present
+		if(hasBorderTag(t) && hasBorderTag(b)) {
+			IPoint topPoint    = getBorderPoint(t);
+			IPoint bottomPoint = getBorderPoint(b);
+			if(topPoint != bottomPoint) {
+    			alignPointsOnVertical(topPoint, bottomPoint);
+			} else if(hasBorderTag(y)) {
+				rotatePointToBottom(getBorderPoint(y));
+			}
+		} else if(hasBorderTag(y)) { // if no t and b, fall back to y
+			rotatePointToBottom(getBorderPoint(y));
+		}
+		
+		// Now check x, and flip as needed
+		if(hasBorderTag(l) && hasBorderTag(r)) {
+			IPoint leftPoint  = getBorderPoint(l);
+			IPoint rightPoint = getBorderPoint(r);
+			if(leftPoint.isRightOf(rightPoint)) {
+				flipHorizontal();
+			}
+		} else if(hasBorderTag(l)) {
+			IPoint leftPoint  = getBorderPoint(l);
+			if(leftPoint.isRightOf(getCentreOfMass()))
+				flipHorizontal();
+		} else if(hasBorderTag(r)) {
+			IPoint rightPoint = getBorderPoint(r);
+			if(rightPoint.isLeftOf(getCentreOfMass()))
+				flipHorizontal();
+		} else if(hasBorderTag(x)) {
+			IPoint leftPoint = getBorderPoint(x);
+			if(leftPoint.isRightOf(getCentreOfMass()))
+				flipHorizontal();
+		}
+    }
+    
+    
+    private void alignVerticallyPriorityX() throws UnavailableBorderTagException {
+    	// Check if l and r are present
+		if(hasBorderTag(t) && hasBorderTag(b)) {
+			IPoint leftPoint  = getBorderPoint(l);
+			IPoint rightPoint = getBorderPoint(r);
+			if(leftPoint != rightPoint) {
+    			alignPointsOnHorizontal(leftPoint, rightPoint);
+			} else {
+				rotatePointToLeft(getBorderPoint(x));
+			}
+		} else if(hasBorderTag(y)) { // if no l and r, fall back to x
+			rotatePointToLeft(getBorderPoint(x));
+		}
+		
+		// Now check y, and flip as needed
+		if(hasBorderTag(t) && hasBorderTag(b)) {
+			IPoint topPoint  = getBorderPoint(t);
+			IPoint bottomPoint = getBorderPoint(b);
+			if(topPoint.isBelow(bottomPoint)) {
+				flipVertical();
+			}
+		} else if(hasBorderTag(t)) {
+			IPoint topPoint  = getBorderPoint(t);
+			if(topPoint.isBelow(getCentreOfMass()))
+				flipVertical();
+		} else if(hasBorderTag(b)) {
+			IPoint bottomPoint = getBorderPoint(b);
+			if(bottomPoint.isAbove(getCentreOfMass()))
+				flipVertical();
+		} else if(hasBorderTag(y)) {
+			IPoint bottomPoint = getBorderPoint(y);
+			if(bottomPoint.isAbove(getCentreOfMass()))
+				flipVertical();
+		}
     }
     
     @Override
@@ -587,6 +558,16 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
 
         for (UUID id : signalCollection.getSignalGroupIds()) {
             signalCollection.getSignals(id).stream().forEach(s -> s.flipHorizontal(p));
+        }
+
+    }
+    
+    @Override
+    public void flipVertical(@NonNull IPoint p) {
+        super.flipVertical(p);
+
+        for (UUID id : signalCollection.getSignalGroupIds()) {
+            signalCollection.getSignals(id).stream().forEach(s -> s.flipVertical(p));
         }
 
     }

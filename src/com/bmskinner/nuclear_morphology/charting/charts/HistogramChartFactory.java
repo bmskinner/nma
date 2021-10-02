@@ -32,7 +32,7 @@ import org.jfree.chart.renderer.xy.StandardXYBarPainter;
 import org.jfree.chart.renderer.xy.XYBarRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.Range;
-import org.jfree.data.general.DatasetUtilities;
+import org.jfree.data.general.DatasetUtils;
 import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
@@ -301,8 +301,8 @@ public class HistogramChartFactory extends AbstractChartFactory {
 
                 plot.setDataset(datasetCount, ds);
                 XYLineAndShapeRenderer rend = new XYLineAndShapeRenderer();
-                rend.setBaseLinesVisible(true);
-                rend.setBaseShapesVisible(false);
+                rend.setDefaultLinesVisible(true);
+                rend.setDefaultShapesVisible(false);
                 plot.setRenderer(datasetCount, rend);
 
                 for (int j = 0; j < ds.getSeriesCount(); j++) {
@@ -575,8 +575,8 @@ public class HistogramChartFactory extends AbstractChartFactory {
      */
     private void setDomainRange(XYPlot plot, XYDataset ds) {
 
-        Number max = DatasetUtilities.findMaximumDomainValue(ds);
-        Number min = DatasetUtilities.findMinimumDomainValue(ds);
+        Number max = DatasetUtils.findMaximumDomainValue(ds);
+        Number min = DatasetUtils.findMinimumDomainValue(ds);
         if (max.doubleValue() > min.doubleValue()) { // stop if 0 and 0 or no
                                                      // values found
             plot.getDomainAxis().setRange(min.doubleValue(), max.doubleValue());
@@ -595,8 +595,8 @@ public class HistogramChartFactory extends AbstractChartFactory {
         Range r = plot.getDomainAxis().getRange();
 
         for (XYDataset ds : list) {
-            Number maxX = DatasetUtilities.findMaximumDomainValue(ds);
-            Number minX = DatasetUtilities.findMinimumDomainValue(ds);
+            Number maxX = DatasetUtils.findMaximumDomainValue(ds);
+            Number minX = DatasetUtils.findMinimumDomainValue(ds);
 
             Range sub = new Range(minX.doubleValue(), maxX.doubleValue());
 

@@ -231,7 +231,7 @@ public abstract class AbstractChartFactory {
         XYPlot plot = chart.getXYPlot();
         plot.setBackgroundPaint(Color.WHITE);
 
-        plot.getRenderer().setBaseToolTipGenerator(null);
+        plot.getRenderer().setDefaultToolTipGenerator(null);
         plot.getRenderer().setURLGenerator(null);
         chart.setAntiAlias(GlobalOptions.getInstance().isAntiAlias()); // disabled for performance testing
         return chart;

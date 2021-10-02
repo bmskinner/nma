@@ -40,7 +40,7 @@ import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.XYPlot;
-import org.jfree.data.general.DatasetUtilities;
+import org.jfree.data.general.DatasetUtils;
 import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
 import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
 import org.jfree.data.statistics.HistogramDataset;
@@ -263,21 +263,21 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
                 }
 
                 // No values in the dataset, skip
-                if (DatasetUtilities.findMaximumDomainValue(dataset) == null) {
+                if (DatasetUtils.findMaximumDomainValue(dataset) == null) {
                     continue;
                 }
 
-                xMax = DatasetUtilities.findMaximumDomainValue(dataset).doubleValue() > xMax
-                        ? DatasetUtilities.findMaximumDomainValue(dataset).doubleValue() : xMax;
+                xMax = DatasetUtils.findMaximumDomainValue(dataset).doubleValue() > xMax
+                        ? DatasetUtils.findMaximumDomainValue(dataset).doubleValue() : xMax;
 
-                xMin = DatasetUtilities.findMinimumDomainValue(dataset).doubleValue() < xMin
-                        ? DatasetUtilities.findMinimumDomainValue(dataset).doubleValue() : xMin;
+                xMin = DatasetUtils.findMinimumDomainValue(dataset).doubleValue() < xMin
+                        ? DatasetUtils.findMinimumDomainValue(dataset).doubleValue() : xMin;
 
-                yMax = DatasetUtilities.findMaximumRangeValue(dataset).doubleValue() > yMax
-                        ? DatasetUtilities.findMaximumRangeValue(dataset).doubleValue() : yMax;
+                yMax = DatasetUtils.findMaximumRangeValue(dataset).doubleValue() > yMax
+                        ? DatasetUtils.findMaximumRangeValue(dataset).doubleValue() : yMax;
 
-                yMin = DatasetUtilities.findMinimumRangeValue(dataset).doubleValue() < yMin
-                        ? DatasetUtilities.findMinimumRangeValue(dataset).doubleValue() : yMin;
+                yMin = DatasetUtils.findMinimumRangeValue(dataset).doubleValue() < yMin
+                        ? DatasetUtils.findMinimumRangeValue(dataset).doubleValue() : yMin;
             }
 
             // If no useful datasets were found (e.g. all datasets were

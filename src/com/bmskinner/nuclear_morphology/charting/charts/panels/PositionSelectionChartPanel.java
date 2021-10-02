@@ -27,7 +27,7 @@ import java.util.logging.Logger;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.plot.XYPlot;
-import org.jfree.ui.RectangleEdge;
+import org.jfree.chart.ui.RectangleEdge;
 
 import com.bmskinner.nuclear_morphology.charting.charts.overlays.RectangleOverlay;
 import com.bmskinner.nuclear_morphology.charting.charts.overlays.RectangleOverlayObject;
