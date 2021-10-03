@@ -9,7 +9,6 @@
 	<!-- Define custom properties to be exported -->
 	<properties>
 		<project.full.name>Nuclear_Morphology_Analysis</project.full.name>
-		<project.code.name>Galaxy</project.code.name>
 		<version>${project.version}</version>
 		<version.suffix></version.suffix>
 		<project.build.sourceEncoding>ISO-8859-1</project.build.sourceEncoding>
@@ -452,11 +451,6 @@
 			<version>0.4</version>
 		</dependency>
 		<dependency>
-			<groupId>org.jfree</groupId>
-			<artifactId>jfreechart</artifactId>
-			<version>1.5.3</version>
-		</dependency>
-		<dependency>
 			<groupId>net.imagej</groupId>
 			<artifactId>ij</artifactId>
 			<version>1.51s</version>
@@ -484,18 +478,18 @@
 		</dependency>
 		<dependency>
 			<groupId>org.jfree</groupId>
-			<artifactId>jfreesvg</artifactId>
-			<version>3.4</version>
+			<artifactId>jfreechart</artifactId>
+			<version>1.5.3</version>
 		</dependency>
 		<dependency>
 			<groupId>org.jfree</groupId>
-			<artifactId>jcommon</artifactId>
-			<version>1.0.23</version>
+			<artifactId>org.jfree.svg</artifactId>
+			<version>5.0.1</version>
 		</dependency>
 		<dependency>
 			<groupId>net.sourceforge.jdistlib</groupId>
 			<artifactId>jdistlib</artifactId>
-			<version>0.4.1</version>
+			<version>0.4.5</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>

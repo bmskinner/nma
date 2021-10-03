@@ -25,14 +25,14 @@ import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.profiles.BooleanProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.FloatProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
-import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
+import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
-import jdistlib.InvNormal;
-import jdistlib.disttest.DistributionTest;
-import jdistlib.disttest.NormalityTest;
+import net.sourceforge.jdistlib.InvNormal;
+import net.sourceforge.jdistlib.disttest.DistributionTest;
+import net.sourceforge.jdistlib.disttest.NormalityTest;
 
 /**
  * The purpose is to test the difference at a particular point of a median
