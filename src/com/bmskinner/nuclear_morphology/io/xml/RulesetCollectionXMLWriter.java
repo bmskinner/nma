@@ -21,7 +21,7 @@ public class RulesetCollectionXMLWriter extends XMLWriter {
 	
 	public void write(@NonNull RuleSetCollection rs, @NonNull File outFile) {
 		
-		Document doc = new RuleSetCollectionXMLCreator(rs).create();
+		Document doc = new Document(rs.toXmlElement());
 		try {
 			writeXML(doc, outFile);
 		} catch (IOException e) {

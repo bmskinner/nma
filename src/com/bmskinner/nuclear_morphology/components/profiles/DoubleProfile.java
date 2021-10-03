@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.stream.IntStream;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.jdom2.Element;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
@@ -34,7 +35,8 @@ import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
  *
  */
 public class DoubleProfile extends AbstractProfile implements IProfile {
-
+	
+	private static final String XML_PROFILE = "Profile";
     private static final long serialVersionUID = 1L;
     protected final double[]  array;
 
@@ -92,6 +94,17 @@ public class DoubleProfile extends AbstractProfile implements IProfile {
         for (int i = 0; i < this.array.length; i++) {
             array[i] = value;
         }
+    }
+    
+    public DoubleProfile(Element e) {
+    	String[] s = e.getText()
+    			.replace("[", "")
+    			.replace("]", "")
+    			.split(",");
+    	array = new double[s.length];
+    	for(int i=0; i<s.length; i++) {
+    		array[i] = Double.parseDouble(s[i]);
+    	}
     }
 
     /*
@@ -832,8 +845,17 @@ public class DoubleProfile extends AbstractProfile implements IProfile {
         }
         return builder.toString();
     }
+    
+    
 
-    /**
+    @Override
+	public Element toXmlElement() {
+    	Element e = new Element(XML_PROFILE);
+		e.setText(Arrays.toString(array));
+		return e;
+	}
+
+	/**
      * Given a list of ordered profiles, merge them into one contiguous profile
      * 
      * @param list the list of profiles to merge

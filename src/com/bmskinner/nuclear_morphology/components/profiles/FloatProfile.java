@@ -22,6 +22,7 @@ import java.util.Iterator;
 import java.util.stream.IntStream;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.jdom2.Element;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
@@ -35,6 +36,8 @@ import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
  *
  */
 public class FloatProfile implements IProfile {
+	
+	private static final String XML_PROFILE = "Profile";
 
     private static final long serialVersionUID = 1L;
 
@@ -59,8 +62,6 @@ public class FloatProfile implements IProfile {
      * @param p the profile to copy
      */
     public FloatProfile(@NonNull final IProfile p) {
-    	if (p==null)
-    		throw new IllegalArgumentException("Profile is null");
     	if(p instanceof FloatProfile) {
     		FloatProfile other = (FloatProfile)p;
     		this.array = Arrays.copyOf(other.array,other.array.length);
@@ -84,6 +85,17 @@ public class FloatProfile implements IProfile {
         this.array = new float[length];
         for (int i = 0; i < this.array.length; i++)
             array[i] = value;
+    }
+    
+    public FloatProfile(Element e) {
+    	String[] s = e.getText()
+    			.replace("[", "")
+    			.replace("]", "")
+    			.split(",");
+    	array = new float[s.length];
+    	for(int i=0; i<s.length; i++) {
+    		array[i] = Float.parseFloat(s[i]);
+    	}
     }
 
     @Override
@@ -830,6 +842,15 @@ public class FloatProfile implements IProfile {
     private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
     }
+    
+    
+
+	@Override
+	public Element toXmlElement() {
+		Element e = new Element(XML_PROFILE);
+		e.setText(Arrays.toString(array));
+		return e;
+	}
 
 	@Override
 	public int wrap(int index) {

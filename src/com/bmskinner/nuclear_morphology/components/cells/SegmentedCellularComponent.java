@@ -30,6 +30,7 @@ import java.util.stream.IntStream;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.jdom2.Element;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileCreator;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
@@ -263,6 +264,8 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 	public class DefaultProfile implements IProfile {
 
 		private static final long serialVersionUID = 1L;
+		
+		private static final String XML_PROFILE = "Profile";
 		protected final float[] array;
 
 		/**
@@ -284,10 +287,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 		 * 
 		 * @param p the profile to copy
 		 */
-		public DefaultProfile(@NonNull final IProfile p) {
-			if (p==null)
-				throw new IllegalArgumentException("Profile is null");
-			
+		public DefaultProfile(@NonNull final IProfile p) {			
 			if(p.size()!=getBorderLength())
 				throw new IllegalArgumentException(String.format("Input profile length (%d) does not match border length (%d) in DefaultProfile constructor", p.size(), getBorderLength()));
 
@@ -310,6 +310,17 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 				array[i] = value;
 			}
 		}
+		
+		public DefaultProfile(Element e) {
+	    	String[] s = e.getText()
+	    			.replace("[", "")
+	    			.replace("]", "")
+	    			.split(",");
+	    	array = new float[s.length];
+	    	for(int i=0; i<s.length; i++) {
+	    		array[i] = Float.parseFloat(s[i]);
+	    	}
+	    }
 
 		@Override
 		public int size() {
@@ -458,22 +469,6 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			}
 			return result;
 		}
-
-
-//		/**
-//		 * Check the lengths of the two profiles. Return the first profile
-//		 * interpolated to the length of the longer.
-//		 * 
-//		 * @param profile1 the profile to return interpolated
-//		 * @param profile2 the profile to compare
-//		 * @return a new profile with the length of the longest input profile
-//		 * @throws ProfileException
-//		 */
-//		private IProfile equaliseLengths(@NonNull IProfile profile1, @NonNull IProfile profile2) throws ProfileException {
-//			if (profile2.size() <= profile1.size())
-//				return profile1;
-//			return profile1.interpolate(profile2.size()); // profile 1 is smaller; interpolate to profile 2 length
-//		}
 
 		@Override
 		public double absoluteSquareDifference(@NonNull IProfile testProfile) throws ProfileException {
@@ -713,11 +708,6 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			return new BooleanProfile(values);
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see components.generic.IProfile#getWindow(int, int)
-		 */
 		@Override
 		public IProfile getWindow(int index, int windowSize) {
 
@@ -968,6 +958,13 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 				builder.append("Index " + i + "\t" + array[i] + "\r\n");
 			}
 			return builder.toString();
+		}
+		
+		@Override
+		public Element toXmlElement() {
+			Element e = new Element(XML_PROFILE);
+			e.setText(Arrays.toString(array));
+			return e;
 		}
 
 		/**

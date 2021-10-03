@@ -21,18 +21,32 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import org.eclipse.jdt.annotation.NonNull;
+import org.jdom2.Element;
+
+import com.bmskinner.nuclear_morphology.components.rules.Rule.RuleType;
+import com.bmskinner.nuclear_morphology.io.XmlSerializable;
+import com.bmskinner.nuclear_morphology.io.xml.XMLCreator;
+
 /**
  * An instruction for finding an index in a profile
  * 
  * @author bms41
  *
  */
-public class Rule implements Serializable {
+public class Rule implements Serializable, XmlSerializable {
 
-    private static final long  serialVersionUID = 1L;
-    private final RuleType     type;
+    private static final String XML_VALUE = "Value";
+
+	private static final String XML_RULE = "Rule";
+
+	private static final String XML_TYPE = "Type";
+
+	private static final long  serialVersionUID = 1L;
     
-    private final List<Double> values = new ArrayList<>(); // spare field
+    private final RuleType     type;
+
+    private final List<Double> values = new ArrayList<>();
 
     public Rule(RuleType type, double value) {
 
@@ -45,6 +59,21 @@ public class Rule implements Serializable {
         this.type = type;
         double v = value ? 1d : 0d;
         this.values.add(v);
+    }
+    
+    /**
+     * Construct from an XML element. Use for 
+     * unmarshalling. The element should conform
+     * to the specification in {@link XmlSerializable}.
+     * @param e the XML element containing the data.
+     */
+    public Rule(@NonNull Element e) {
+    	RuleType rt = RuleType.valueOf(e.getChildText(XML_TYPE));
+		this.type = rt;
+        
+		for(Element c : e.getChildren(XML_VALUE)) {
+			addValue(Double.parseDouble(c.getValue()));
+		}
     }
 
     public void addValue(double d) {
@@ -106,7 +135,19 @@ public class Rule implements Serializable {
 		Rule other = (Rule) obj;
 		return type == other.type && Objects.equals(values, other.values);
 	}
+	
+	@Override
+	public Element toXmlElement() {
 
+		Element e = new Element(XML_RULE);
+		
+		e.addContent(new Element(XML_TYPE).setText(getType().toString()));
+
+		for(int i=0; i<valueCount(); i++) {
+			e.addContent(new Element(XML_VALUE).setText(String.valueOf(getValue(i))));
+		}
+		return e;
+	}
 
 	/**
      * A type of instruction to follow

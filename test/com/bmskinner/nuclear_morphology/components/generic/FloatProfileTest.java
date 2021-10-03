@@ -21,6 +21,7 @@ package com.bmskinner.nuclear_morphology.components.generic;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import org.jdom2.Element;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -135,6 +136,17 @@ public class FloatProfileTest {
             assertEquals(exp[i], obs[i], 0);
         }
         return equal;
+	}
+	
+	@Test
+	public void testXmlSerialiseas() {
+		IProfile p2 = new FloatProfile(data);
+
+		Element e = p2.toXmlElement();
+		
+		IProfile test = new FloatProfile(e);
+		
+		assertEquals(p2, test);
 	}
 	
 }

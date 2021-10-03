@@ -191,9 +191,7 @@ public abstract class XMLCreator<T> {
 	 * @return
 	 */
 	protected static Element createElement(String key, String value) {
-		Element e = new Element(key);
-		e.setText(value);
-		return e;
+		return new Element(key).setText(value);
 	}
 	
 	/**

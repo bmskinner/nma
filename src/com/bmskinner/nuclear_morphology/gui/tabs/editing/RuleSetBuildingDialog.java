@@ -163,7 +163,7 @@ public class RuleSetBuildingDialog extends LoadingIconDialog {
     }
 
     public RuleSetCollection getCollection() {
-        RuleSetCollection collection = new RuleSetCollection();
+        RuleSetCollection collection = RuleSetCollection.roundRuleSetCollection();
         for (Component c : mainPanel.getComponents()) {
             if (c.getClass().isAssignableFrom(RuleSetPanel.class)) {
 

@@ -33,8 +33,7 @@ public class RuleSetCollectionXMLImporter implements Importer {
 	         SAXBuilder saxBuilder = new SAXBuilder();
 	         Document document = saxBuilder.build(file);
 	         
-	         RuleSetCollectionXMLReader reader = new RuleSetCollectionXMLReader(document.getRootElement());
-	         return reader.read();
+	         return new RuleSetCollection(document.getRootElement());
 	         
 		} catch(IOException | JDOMException e) {
 			LOGGER.fine("Error reading "+file.getAbsolutePath()+" as a ruleset file");

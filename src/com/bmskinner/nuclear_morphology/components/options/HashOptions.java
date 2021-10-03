@@ -23,6 +23,7 @@ import java.util.Map;
 
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult.ShrinkType;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
+import com.bmskinner.nuclear_morphology.io.XmlSerializable;
 
 /**
  * The interface for options classes. Store options as key value pairs
@@ -33,7 +34,7 @@ import com.bmskinner.nuclear_morphology.core.GlobalOptions;
  * @author ben
  *
  */
-public interface HashOptions extends Serializable {
+public interface HashOptions extends Serializable, XmlSerializable {
 	
 	String CANNY_SUBOPTIONS_KEY = "Canny";
 	String BACKGROUND_KEY = "Background";

@@ -105,7 +105,7 @@ public class RulesetSaveDialog extends SettingsDialog {
      * @return
      */
     public RuleSetCollection getSelected() {
-        RuleSetCollection result = new RuleSetCollection();
+        RuleSetCollection result = RuleSetCollection.roundRuleSetCollection();
         for (Component c : main.getComponents()) {
         	
         	if (c instanceof RuleSetPanel) {

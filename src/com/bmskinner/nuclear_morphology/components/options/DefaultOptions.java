@@ -28,6 +28,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.jdom2.Element;
 
 import com.bmskinner.nuclear_morphology.io.Io;
 
@@ -39,7 +40,7 @@ import com.bmskinner.nuclear_morphology.io.Io;
  * @since 1.13.4
  */
 public class DefaultOptions implements Serializable, HashOptions {
-
+	
     private static final long serialVersionUID = 1L;
     private final Map<String, Integer> intMap    = new HashMap<>();
     private final Map<String, Double>  dblMap    = new HashMap<>();
@@ -60,6 +61,32 @@ public class DefaultOptions implements Serializable, HashOptions {
      */
     protected DefaultOptions(@NonNull HashOptions o) {
     	set(o);
+    }
+    
+    public DefaultOptions(Element e) {
+		
+		// Add each map
+    	
+    	
+		for(Element i : e.getChildren("Integer"))
+			intMap.put(i.getAttributeValue("name").toString(), Integer.parseInt(i.getText()));
+		
+		for(Element i : e.getChildren("Float"))
+			fltMap.put(i.getAttributeValue("name").toString(), Float.parseFloat(i.getText()));
+		
+		for(Element i : e.getChildren("Double"))
+			dblMap.put(i.getAttributeValue("name").toString(), Double.parseDouble(i.getText()));
+		
+		for(Element i : e.getChildren("Boolean"))
+			boolMap.put(i.getAttributeValue("name").toString(), Boolean.parseBoolean(i.getText()));
+		
+		for(Element i : e.getChildren("String"))
+			stringMap.put(i.getAttributeValue("name").toString(), i.getText());
+		
+		
+		for(Element i : e.getChildren("Suboption"))
+			subMap.put(i.getAttributeValue("name").toString(), new DefaultOptions(i.getChild("Options")));
+		
     }
     
     @Override
@@ -321,6 +348,40 @@ public class DefaultOptions implements Serializable, HashOptions {
             sb.append("\t" + e.getKey() + ": " + e.getValue() + Io.NEWLINE);
         return sb.toString();
     }
+
+	@Override
+	public Element toXmlElement() {
+		Element e = new Element("Options");
+		
+		// Add each map
+		for(Entry<String, Integer> entry : intMap.entrySet()) {
+			e.addContent(new Element("Integer").setAttribute("name", entry.getKey()).setText(entry.getValue().toString()));
+		}
+		
+
+		for(Entry<String, Float> entry : fltMap.entrySet()) {
+			e.addContent(new Element("Float").setAttribute("name", entry.getKey()).setText(entry.getValue().toString()));
+		}
+		
+		for(Entry<String, Double> entry : dblMap.entrySet()) {
+			e.addContent(new Element("Double").setAttribute("name", entry.getKey()).setText(entry.getValue().toString()));
+		}
+		
+		for(Entry<String, Boolean> entry : boolMap.entrySet()) {
+			e.addContent(new Element("Boolean").setAttribute("name", entry.getKey()).setText(entry.getValue().toString()));
+		}
+		
+		for(Entry<String, String> entry : stringMap.entrySet()) {
+			e.addContent(new Element("String").setAttribute("name", entry.getKey()).setText(entry.getValue().toString()));
+		}
+		
+		// Add the sub-options
+		for(Entry<String, HashOptions> entry : subMap.entrySet()) {
+			e.addContent(new Element("Suboption").setAttribute("name", entry.getKey())
+					.addContent(entry.getValue().toXmlElement() ));
+		}
+		return e;
+	}
 
 	@Override
 	public int hashCode() {

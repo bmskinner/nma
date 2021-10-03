@@ -22,9 +22,13 @@ import java.util.List;
 import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.jdom2.Element;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.RuleSetBuilder;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
+import com.bmskinner.nuclear_morphology.components.rules.Rule.RuleType;
+import com.bmskinner.nuclear_morphology.io.XmlSerializable;
+import com.bmskinner.nuclear_morphology.io.xml.XMLCreator;
 
 /**
  * A collection of rules that can be followed to identify a feature in a
@@ -34,19 +38,36 @@ import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
  * @author bms41
  *
  */
-public class RuleSet implements Serializable {
+public class RuleSet implements Serializable, XmlSerializable {
 
-    private static final long serialVersionUID = 1L;
+    private static final String XML_TYPE = "Type";
+	private static final String XML_RULE = "Rule";
+
+	private static final long serialVersionUID = 1L;
     
-    // combine rules with AND conditions
-    private List<Rule>  rules = new ArrayList<>();
-    
-    private ProfileType type; // the type of profile to which the rules apply
+    /** the type of profile to which the rules apply */
+    private final ProfileType type;
+
+    private final List<Rule>  rules = new ArrayList<>();
 
     public RuleSet(final ProfileType type) {
         this.type = type;
     }
+    
+    /**
+     * Construct from an XML element. Use for 
+     * unmarshalling. The element should conform
+     * to the specification in {@link XmlSerializable}.
+     * @param e the XML element containing the data.
+     */
+    public RuleSet(@NonNull Element e) {
+    	type = ProfileType.fromString(e.getChildText(XML_TYPE));
 
+		for(Element r : e.getChildren(XML_RULE)) {
+			addRule(new Rule(r));
+		}
+    }
+    
     public void addRule(@NonNull final Rule r) {
         rules.add(r);
     }
@@ -68,6 +89,17 @@ public class RuleSet implements Serializable {
         }
         return b.toString();
     }
+    
+	@Override
+	public Element toXmlElement() {		
+		Element e = new Element(XML_RULE);
+		e.addContent(new Element(XML_TYPE).setText(getType().toString()));
+		
+		for(Rule r : getRules()) {
+			e.addContent(r.toXmlElement());
+		}
+		return e;
+	}
 
 	@Override
 	public int hashCode() {

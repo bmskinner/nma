@@ -22,6 +22,7 @@ import java.util.List;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
+import com.bmskinner.nuclear_morphology.io.XmlSerializable;
 
 /**
  * A profile contains an array of values, and this interface details both access
@@ -31,7 +32,7 @@ import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
  * @since 1.13.3
  *
  */
-public interface IProfile extends Serializable, Iterable<Integer> {
+public interface IProfile extends Serializable, Iterable<Integer>, XmlSerializable {
 
     static final int ARRAY_BEFORE = -1;
     static final int ARRAY_AFTER  = 1;

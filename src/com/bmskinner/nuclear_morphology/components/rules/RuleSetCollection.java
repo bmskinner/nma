@@ -30,8 +30,11 @@ import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.jdom2.Element;
 
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
+import com.bmskinner.nuclear_morphology.components.profiles.LandmarkType;
+import com.bmskinner.nuclear_morphology.io.XmlSerializable;
 
 /**
  * This holds the rulesets for identifying each of the landmarks in a profile.
@@ -45,8 +48,32 @@ import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
  * @author ben
  *
  */
-public class RuleSetCollection implements Serializable {
+public class RuleSetCollection implements Serializable, XmlSerializable {
 	
+	private static final String XML_PRIORITY_AXIS = "PriorityAxis";
+
+	private static final String XML_SECONDARY_Y = "SecondaryY";
+
+	private static final String XML_SECONDARY_X = "SecondaryX";
+
+	private static final String XML_BOTTOM_LANDMARK = "BottomLandmark";
+
+	private static final String XML_TOP_LANDMARK = "TopLandmark";
+
+	private static final String XML_RIGHT_LANDMARK = "RightLandmark";
+
+	private static final String XML_LEFT_LANDMARK = "LeftLandmark";
+
+	private static final String XML_RULE_APPLICATION_TYPE = "RuleApplicationType";
+
+	private static final String XML_RULE_SET_COLLECTION = "RuleSetCollection";
+
+	private static final String XML_TYPE = "Type";
+
+	private static final String XML_TAG = "Tag";
+
+	private static final String XML_NAME = "Name";
+
 	private static final Logger LOGGER = Logger.getLogger(RuleSetCollection.class.getName());
 
     private static final long serialVersionUID = 1L;
@@ -90,6 +117,65 @@ public class RuleSetCollection implements Serializable {
     	this.ruleApplicationType = type;
     }
     
+    public RuleSetCollection(Element e) {
+    	name = e.getChildText(XML_NAME);
+    	
+    	// Add the rulesets
+    	for(Element t : e.getChildren(XML_TAG)) {
+    		
+    		String lmName = t.getChildText(XML_NAME);
+    		LandmarkType lmType = LandmarkType.valueOf(t.getChildText(XML_TYPE));
+    		Landmark l = Landmark.of(lmName, lmType);
+    		
+    		List<RuleSet> rules = new ArrayList<>();
+    		for(Element r : t.getChildren("Rule")) {
+    			rules.add(new RuleSet(r));
+    		}
+    		map.put(l, rules);
+    	}
+    	
+    	// Add other rules
+    	priorityAxis = PriorityAxis.valueOf(e.getChildText(XML_PRIORITY_AXIS));
+    	ruleApplicationType = RuleApplicationType.valueOf(e.getChildText(XML_RULE_APPLICATION_TYPE));
+    	    	
+    	// Add the orientation landmarks
+    	if(e.getChild(XML_LEFT_LANDMARK)!=null) {
+    		leftCoM = map.keySet().stream().filter(l->l.getName().equals(e.getChildText(XML_LEFT_LANDMARK))).findFirst().orElse(null);
+    	} else {
+    		leftCoM = null;
+    	}
+    	
+    	if(e.getChild(XML_RIGHT_LANDMARK)!=null) {
+    		rightCoM = map.keySet().stream().filter(l->l.getName().equals(e.getChildText(XML_RIGHT_LANDMARK))).findFirst().orElse(null);
+    	} else {
+    		rightCoM = null;
+    	}
+    	
+    	if(e.getChild(XML_TOP_LANDMARK)!=null) {
+    		topVertical = map.keySet().stream().filter(l->l.getName().equals(e.getChildText(XML_TOP_LANDMARK))).findFirst().orElse(null);
+    	} else {
+    		topVertical = null;
+    	}
+    	
+    	if(e.getChild(XML_BOTTOM_LANDMARK)!=null) {
+    		btmVertical = map.keySet().stream().filter(l->l.getName().equals(e.getChildText(XML_BOTTOM_LANDMARK))).findFirst().orElse(null);
+    	} else {
+    		btmVertical = null;
+    	}
+    	
+    	if(e.getChild(XML_SECONDARY_X)!=null) {
+    		seondaryX = map.keySet().stream().filter(l->l.getName().equals(e.getChildText(XML_SECONDARY_X))).findFirst().orElse(null);
+    	} else {
+    		seondaryX = null;
+    	}
+    	
+    	if(e.getChild(XML_SECONDARY_Y)!=null) {
+    		seondaryY = map.keySet().stream().filter(l->l.getName().equals(e.getChildText(XML_SECONDARY_Y))).findFirst().orElse(null);
+    	} else {
+    		seondaryY = null;
+    	}
+    }
+
     public String getName() {
     	return name;
     }
@@ -233,6 +319,46 @@ public class RuleSetCollection implements Serializable {
         }
 
         return b.toString();
+    }
+    
+    public Element toXmlElement() {
+    	
+    	Element rootElement = new Element(XML_RULE_SET_COLLECTION);
+    	
+    	rootElement.addContent(new Element(XML_NAME).addContent(getName()));
+		
+    	// Add the landmark rule definitions 
+		for(Landmark t : getTags()) {
+			Element tagElement = new Element(XML_TAG);
+			tagElement.addContent(new Element(XML_NAME).setText(t.getName()));
+			tagElement.addContent(new Element(XML_TYPE).setText(t.type().toString()));
+			
+			for(RuleSet rs : getRuleSets(t)) {
+				tagElement.addContent(rs.toXmlElement());
+			}
+			rootElement.addContent(tagElement);
+		}
+		
+		// Add rule application type
+		rootElement.addContent(new Element(XML_RULE_APPLICATION_TYPE).addContent(getApplicationType().toString()));
+		
+		// Add any orientation landmarks
+		if(leftCoM!=null)
+			rootElement.addContent(new Element(XML_LEFT_LANDMARK).addContent(leftCoM.toString()));
+		if(rightCoM!=null)
+			rootElement.addContent(new Element(XML_RIGHT_LANDMARK).addContent(rightCoM.toString()));
+		if(topVertical!=null)
+			rootElement.addContent(new Element(XML_TOP_LANDMARK).addContent(topVertical.toString()));
+		if(btmVertical!=null)
+			rootElement.addContent(new Element(XML_BOTTOM_LANDMARK).addContent(btmVertical.toString()));
+		if(seondaryX!=null)
+			rootElement.addContent(new Element(XML_SECONDARY_X).addContent(seondaryX.toString()));
+		if(seondaryY!=null)
+			rootElement.addContent(new Element(XML_SECONDARY_Y).addContent(seondaryY.toString()));
+		if(priorityAxis!=null)
+			rootElement.addContent(new Element(XML_PRIORITY_AXIS).addContent(priorityAxis.toString()));
+			
+		return rootElement;
     }
 
 	@Override
