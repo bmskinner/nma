@@ -24,7 +24,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
-import com.bmskinner.nuclear_morphology.components.generic.IBorderPoint;
+import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
@@ -288,7 +288,7 @@ public interface Taggable extends CellularComponent {
      * @throws IndexOutOfBoundsException
      * @throws UnavailableBorderTagException
      */
-    IBorderPoint getBorderPoint(@NonNull Landmark tag) throws UnavailableBorderTagException;
+    IPoint getBorderPoint(@NonNull Landmark tag) throws UnavailableBorderTagException;
 
     /**
      * Get the border index of point in the border list, removing offset to a

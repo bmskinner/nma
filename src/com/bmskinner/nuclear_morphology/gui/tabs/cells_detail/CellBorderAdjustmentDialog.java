@@ -57,9 +57,9 @@ import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.entity.EntityCollection;
 import org.jfree.chart.entity.XYItemEntity;
 import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.ui.RectangleEdge;
 import org.jfree.data.Range;
 import org.jfree.data.xy.XYDataset;
-import org.jfree.chart.ui.RectangleEdge;
 
 import com.bmskinner.nuclear_morphology.charting.charts.ConsensusNucleusChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.OutlineChartFactory;
@@ -71,16 +71,13 @@ import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPa
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.UnavailableBorderPointException;
-import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.cells.DefaultCell;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.generic.DefaultBorderPoint;
-import com.bmskinner.nuclear_morphology.components.generic.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
-import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
+import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.gui.RotationMode;
 import com.bmskinner.nuclear_morphology.gui.components.panels.DualChartPanel;
@@ -107,7 +104,7 @@ public class CellBorderAdjustmentDialog extends AbstractCellEditingDialog implem
 
     private DualChartPanel dualPanel;
 
-    Map<IBorderPoint, XYShapeAnnotation> selectedPoints = new HashMap<IBorderPoint, XYShapeAnnotation>();
+    Map<IPoint, XYShapeAnnotation> selectedPoints = new HashMap<IPoint, XYShapeAnnotation>();
 
     private boolean canMove = false; // set if a point can be moved or not
 
@@ -331,7 +328,7 @@ public class CellBorderAdjustmentDialog extends AbstractCellEditingDialog implem
     }
 
     private void selectClickedPoint(@NonNull IPoint clickedPoint) {
-        for (IBorderPoint point : workingCell.getPrimaryNucleus().getBorderList()) {
+        for (IPoint point : workingCell.getPrimaryNucleus().getBorderList()) {
 
             if (point.overlapsPerfectly(clickedPoint)) {
 
@@ -358,15 +355,15 @@ public class CellBorderAdjustmentDialog extends AbstractCellEditingDialog implem
             dualPanel.getMainPanel().getChart().getXYPlot().removeAnnotation(a);
 
         }
-        selectedPoints = new HashMap<IBorderPoint, XYShapeAnnotation>();
+        selectedPoints = new HashMap<IPoint, XYShapeAnnotation>();
     }
 
     private void moveSelectedPoint() {
         // Move the selected point in the border list copy
-        List<IBorderPoint> borderList = workingCell.getPrimaryNucleus().getBorderList();
+        List<IPoint> borderList = workingCell.getPrimaryNucleus().getBorderList();
         for (int i = 0; i < borderList.size(); i++) {
 
-            IBorderPoint point = borderList.get(i);
+            IPoint point = borderList.get(i);
             if (selectedPoints.containsKey(point)) {
                 // workingCell.getNucleus().updateBorderPoint(i,
                 // finalMovePointX, finalMovePointY);
@@ -393,7 +390,7 @@ public class CellBorderAdjustmentDialog extends AbstractCellEditingDialog implem
         IPoint newPoint = IPoint.makeNew(newX, newY);
 
         // Get the border point that is closest to the clicked point
-        IBorderPoint bp = null;
+        IPoint bp = null;
         try {
             bp = workingCell.getPrimaryNucleus().findClosestBorderPoint(newPoint);
         } catch (UnavailableBorderPointException e) {
@@ -401,17 +398,17 @@ public class CellBorderAdjustmentDialog extends AbstractCellEditingDialog implem
 
         }
 
-        List<IBorderPoint> newList = new ArrayList<IBorderPoint>();
+        List<IPoint> newList = new ArrayList<>();
 
         // Insert the new point after the closest existing point to it
-        List<IBorderPoint> borderList = workingCell.getPrimaryNucleus().getBorderList();
-        Iterator<IBorderPoint> it = borderList.iterator();
+        List<IPoint> borderList = workingCell.getPrimaryNucleus().getBorderList();
+        Iterator<IPoint> it = borderList.iterator();
         while (it.hasNext()) {
-            IBorderPoint point = it.next();
+            IPoint point = it.next();
             newList.add(point);
 
             if (point.equals(bp)) {
-                newList.add(new DefaultBorderPoint(newPoint));
+                newList.add(newPoint.duplicate());
             }
         }
         setCellChanged(true);
@@ -421,10 +418,10 @@ public class CellBorderAdjustmentDialog extends AbstractCellEditingDialog implem
 
     private void deleteSelectedPoints() {
         // Remove the selected points from the border list copy
-        List<IBorderPoint> borderList = workingCell.getPrimaryNucleus().getBorderList();
-        Iterator<IBorderPoint> it = borderList.iterator();
+        List<IPoint> borderList = workingCell.getPrimaryNucleus().getBorderList();
+        Iterator<IPoint> it = borderList.iterator();
         while (it.hasNext()) {
-            IBorderPoint point = it.next();
+            IPoint point = it.next();
             if (selectedPoints.containsKey(point)) {
                 it.remove();
             }
@@ -434,7 +431,7 @@ public class CellBorderAdjustmentDialog extends AbstractCellEditingDialog implem
 
     }
 
-    private void updateWorkingCell(List<IBorderPoint> borderList) {
+    private void updateWorkingCell(List<IPoint> borderList) {
         // Make a interpolated FloatPolygon from the new array
         float[] xPoints = new float[borderList.size()];
         float[] yPoints = new float[borderList.size()];
@@ -453,26 +450,10 @@ public class CellBorderAdjustmentDialog extends AbstractCellEditingDialog implem
 
         // Make new border list and assign to the working cell
 
-        List<IBorderPoint> newList = new ArrayList<IBorderPoint>();
+        List<IPoint> newList = new ArrayList<>();
         for (int i = 0; i < fp.npoints; i++) {
-            IBorderPoint point = new DefaultBorderPoint(fp.xpoints[i], fp.ypoints[i]);
-
-            if (i > 0) {
-                point.setPrevPoint(newList.get(i - 1));
-                point.prevPoint().setNextPoint(point);
-            }
-            newList.add(point);
+            newList.add(IPoint.makeNew(fp.xpoints[i], fp.ypoints[i]));
         }
-        // link endpoints
-        newList.get(newList.size() - 1).setNextPoint(newList.get(0));
-        newList.get(0).setPrevPoint(newList.get(newList.size() - 1));
-
-        // Rectangle boundingRectangle = new Rectangle(fp.getBounds());
-
-        CellularComponent c = (CellularComponent) workingCell.getPrimaryNucleus();
-
-        // c.setBorderList(newList);
-        // c.setBoundingRectangle(boundingRectangle);
 
         Range domainRange = dualPanel.getMainPanel().getChart().getXYPlot().getDomainAxis().getRange();
         Range rangeRange = dualPanel.getMainPanel().getChart().getXYPlot().getRangeAxis().getRange();

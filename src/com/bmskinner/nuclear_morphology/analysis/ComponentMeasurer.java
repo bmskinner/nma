@@ -16,12 +16,10 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.analysis;
 
-import java.util.Iterator;
-
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nuclear_morphology.components.UnavailableBorderPointException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.generic.IBorderPoint;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 /**
@@ -47,10 +45,13 @@ public final class ComponentMeasurer {
      */
     public static double calculatePerimeter(@NonNull final CellularComponent c) {
         double perimeter = 0;
-        Iterator<IBorderPoint> it = c.getBorderList().iterator();
-        while (it.hasNext()) {
-            IBorderPoint point = it.next();
-            perimeter += point.getLengthTo(point.prevPoint());
+        try {
+        for(int i=0; i<c.getBorderLength(); i++) {
+        	perimeter += c.getBorderPoint(i)
+        			.getLengthTo(c.getBorderPoint(CellularComponent.wrapIndex(i, c.getBorderLength())));
+        }
+        } catch(UnavailableBorderPointException e) {
+        	//TODO
         }
         return perimeter;
     }

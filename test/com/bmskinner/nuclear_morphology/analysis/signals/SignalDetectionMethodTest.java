@@ -1,49 +1,25 @@
 package com.bmskinner.nuclear_morphology.analysis.signals;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.awt.Color;
 import java.io.File;
-import java.util.Arrays;
-import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
 
 import com.bmskinner.nuclear_morphology.ComponentTester;
-import com.bmskinner.nuclear_morphology.TestDatasetBuilder;
-import com.bmskinner.nuclear_morphology.TestResources;
-import com.bmskinner.nuclear_morphology.TestDatasetBuilder.TestComponentShape;
 import com.bmskinner.nuclear_morphology.TestImageDatasetCreator;
-import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
-import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellAnalysisMethod.ShellAnalysisException;
-import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellDetector.Shell;
-import com.bmskinner.nuclear_morphology.charting.ImageViewer;
-import com.bmskinner.nuclear_morphology.components.Imageable;
-import com.bmskinner.nuclear_morphology.components.Statistical;
+import com.bmskinner.nuclear_morphology.TestResources;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.measure.Measurement;
-import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
-import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.nuclei.NucleusType;
-import com.bmskinner.nuclear_morphology.components.options.DefaultShellOptions;
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
-import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
-import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
-import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.signals.DefaultSignalGroup;
-import com.bmskinner.nuclear_morphology.components.signals.IShellResult.ShrinkType;
+import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
 import com.bmskinner.nuclear_morphology.core.DatasetListManager;
-import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
-import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
-import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
-
-import ij.process.ImageProcessor;
 
 /**
  * Test the shell detector is functioning
@@ -65,9 +41,9 @@ public class SignalDetectionMethodTest extends ComponentTester {
 	public void testAddingSignalChangesDatasetHash() throws Exception {
 		File testFolder = new File(TestResources.TESTING_MOUSE_SIGNALS_FOLDER).getAbsoluteFile();
     	IAnalysisOptions op = OptionsFactory.makeDefaultRodentAnalysisOptions(testFolder);
-    	IDetectionOptions nucleus = op.getDetectionOptions(CellularComponent.NUCLEUS).get();
-    	nucleus.setMaxSize(12000);
-    	nucleus.setMinSize(4000);
+    	HashOptions nucleus = op.getDetectionOptions(CellularComponent.NUCLEUS).get();
+    	nucleus.setInt(HashOptions.MAX_SIZE_PIXELS, 12000);
+    	nucleus.setInt(HashOptions.MIN_SIZE_PIXELS, 4000);
 
     	// Make the dataset with no signals
     	IAnalysisDataset d = TestImageDatasetCreator.createTestDataset(testFolder.toString(), op, false);
@@ -79,9 +55,10 @@ public class SignalDetectionMethodTest extends ComponentTester {
     	
     	
     	// Add signals from the red channel
-    	INuclearSignalOptions redOptions = OptionsFactory.makeNuclearSignalOptions(testFolder);
-    	redOptions.setMaxFraction(0.5);
-    	redOptions.setMinSize(5);
+    	HashOptions redOptions = OptionsFactory.makeNuclearSignalOptions(testFolder);
+    	redOptions.setDouble(HashOptions.MAX_FRACTION, 0.5);
+    	redOptions.setInt(HashOptions.MIN_SIZE_PIXELS, 5);
+
 
     	ISignalGroup red = new DefaultSignalGroup(TestImageDatasetCreator.RED_SIGNAL_NAME);
     	red.setGroupColour(Color.RED);

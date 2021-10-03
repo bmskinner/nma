@@ -29,7 +29,7 @@
 //import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
 //import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 //import com.bmskinner.nuclear_morphology.components.generic.DefaultBorderPoint;
-//import com.bmskinner.nuclear_morphology.components.generic.IBorderPoint;
+//import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 //import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 //import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 //import com.bmskinner.nuclear_morphology.components.profiles.BooleanProfile;
@@ -273,7 +273,7 @@
 //             * This is the corner furthest from the tip. Can be confused as to
 //             * which side of the sperm head is chosen
 //             */
-//            IBorderPoint spermTail2;
+//            IPoint spermTail2;
 //
 //            spermTail2 = findTailPointFromMinima();
 //            this.addTailEstimatePosition(spermTail2);
@@ -283,7 +283,7 @@
 //             * a line orthogonal, and pick the intersecting border points The
 //             * border furthest from the tip is the tail
 //             */
-//            IBorderPoint spermTail1;
+//            IPoint spermTail1;
 //
 //            spermTail1 = this.findTailByNarrowestWidthMethod();
 //            this.addTailEstimatePosition(spermTail1);
@@ -293,7 +293,7 @@
 //             * between them on roi
 //             */
 //            int consensusTailIndex = this.getPositionBetween(spermTail2, spermTail1);
-//            IBorderPoint consensusTail = this.getBorderPoint(consensusTailIndex);
+//            IPoint consensusTail = this.getBorderPoint(consensusTailIndex);
 //
 //            setBorderTag(Landmark.ORIENTATION_POINT, consensusTailIndex);
 //
@@ -346,7 +346,7 @@
 //     * array. The putative tail is the point furthest from the sum of the
 //     * distances from the CoM and the tip
 //     */
-//    public IBorderPoint findTailPointFromMinima()
+//    public IPoint findTailPointFromMinima()
 //            throws UnavailableBorderTagException, UnavailableProfileTypeException {
 //
 //        // we cannot be sure that the greatest distance between two points will
@@ -368,7 +368,7 @@
 //        BooleanProfile array = this.getProfile(ProfileType.ANGLE).getLocalMinima(5);
 //
 //        double maxDistance = 0;
-//        IBorderPoint tail;
+//        IPoint tail;
 //
 //        tail = this.getBorderPoint(Landmark.REFERENCE_POINT);
 //        // start at tip, move round
@@ -397,7 +397,7 @@
 //     * orthogonal, and pick the intersecting border points The border furthest
 //     * from the tip is the tail
 //     */
-//    public IBorderPoint findTailByNarrowestWidthMethod() throws UnavailableBorderTagException {
+//    public IPoint findTailByNarrowestWidthMethod() throws UnavailableBorderTagException {
 //
 //        // Find the narrowest point around the CoM
 //        // For a position in teh roi, draw a line through the CoM to the
@@ -405,14 +405,14 @@
 //        // Measure the length; if < min length..., store equation and border(s)
 //
 //        double minDistance = this.getStatistic(Measurement.MAX_FERET);
-//        IBorderPoint reference;
+//        IPoint reference;
 //
 //        reference = this.getBorderPoint(Landmark.REFERENCE_POINT);
 //
 //        for (int i = 0; i < this.getBorderLength(); i++) {
 //
-//            IBorderPoint p = this.getBorderPoint(i);
-//            IBorderPoint opp = this.findOppositeBorder(p);
+//            IPoint p = this.getBorderPoint(i);
+//            IPoint opp = this.findOppositeBorder(p);
 //            double distance = p.getLengthTo(opp);
 //
 //            if (distance < minDistance) {
@@ -428,10 +428,10 @@
 //        // if close to 90, and the distance to the tip > CoM-tip, keep the point
 //        // return the best point
 //        double difference = 90;
-//        IBorderPoint tail = new DefaultBorderPoint(0, 0);
+//        IPoint tail = new DefaultBorderPoint(0, 0);
 //        for (int i = 0; i < this.getBorderLength(); i++) {
 //
-//            IBorderPoint p = this.getBorderPoint(i);
+//            IPoint p = this.getBorderPoint(i);
 //            double angle = this.getCentreOfMass().findSmallestAngle(reference, p);
 //
 //            if (Math.abs(90 - angle) < difference && p.getLengthTo(this.getBorderPoint(Landmark.REFERENCE_POINT)) > this
@@ -445,7 +445,7 @@
 //    }
 //    
 //    @Override // needs to override AsymmetricNucleus version because hook/hump calculation
-//    public void calculateSignalAnglesFromPoint(IBorderPoint p) {
+//    public void calculateSignalAnglesFromPoint(IPoint p) {
 //
 //        super.calculateSignalAnglesFromPoint(p);
 //

@@ -37,7 +37,7 @@ import com.bmskinner.nuclear_morphology.components.UnavailableBorderPointExcepti
 import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
-import com.bmskinner.nuclear_morphology.components.generic.IBorderPoint;
+import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
@@ -149,7 +149,7 @@ public class ImageAnnotator extends AbstractImageFilterer {
     }
     
     public ImageAnnotator annotateOutlineOnCroppedComponent(final CellularComponent n, Color outlineColour, int strokeWeight) {
-    	 for(IBorderPoint p : n.getBorderList()) 
+    	 for(IPoint p : n.getBorderList()) 
          	annotatePoint(p.plus(Imageable.COMPONENT_BUFFER), outlineColour, strokeWeight);
          return this;
     }
@@ -187,7 +187,7 @@ public class ImageAnnotator extends AbstractImageFilterer {
         try {
         	
         	// Provide a background for all points to increase visibility
-            for(IBorderPoint p : n.getBorderList()) {
+            for(IPoint p : n.getBorderList()) {
             	try {
             		annotatePoint(p.plus(Imageable.COMPONENT_BUFFER), Color.DARK_GRAY, 3);
             	} catch(IllegalArgumentException e) {
@@ -606,8 +606,8 @@ public class ImageAnnotator extends AbstractImageFilterer {
         int minIndex;
         try {
             minIndex = n.getProfile(ProfileType.DIAMETER).getIndexOfMin();
-            IBorderPoint narrow1 = n.getBorderPoint(minIndex);
-            IBorderPoint narrow2 = n.findOppositeBorder(narrow1);
+            IPoint narrow1 = n.getBorderPoint(minIndex);
+            IPoint narrow2 = n.findOppositeBorder(narrow1);
             return annotateLine(narrow1, narrow2, Color.MAGENTA);
         } catch (UnavailableProfileTypeException | ProfileException | UnavailableBorderPointException e) {
             LOGGER.log(Loggable.STACK, "Unable to get diameter profile", e);
@@ -679,7 +679,7 @@ public class ImageAnnotator extends AbstractImageFilterer {
                     float[] ypoints = new float[seg.length() + 1];
                     for (int j = 0; j <= seg.length(); j++) {
                         int k = n.wrapIndex(seg.getStartIndex() + j);
-                        IBorderPoint p = n.getOriginalBorderPoint(k); // get the
+                        IPoint p = n.getOriginalBorderPoint(k); // get the
                                                                       // border
                                                                       // points
                                                                       // in the

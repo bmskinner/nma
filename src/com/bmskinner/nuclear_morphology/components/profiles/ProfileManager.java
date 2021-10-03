@@ -36,7 +36,7 @@ import com.bmskinner.nuclear_morphology.components.UnavailableComponentException
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
-import com.bmskinner.nuclear_morphology.components.generic.IBorderPoint;
+import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -327,7 +327,7 @@ public class ProfileManager {
 		if(n.hasBorderTag(Landmark.TOP_VERTICAL) && n.hasBorderTag(Landmark.BOTTOM_VERTICAL)) {
 			LOGGER.finer( "Updating OP due to TV or BV change");
 			Nucleus vertN = n.getVerticallyRotatedNucleus();
-			IBorderPoint bottom = vertN.getBorderList().stream()
+			IPoint bottom = vertN.getBorderList().stream()
 				.filter(p-> p.getY()<vertN.getCentreOfMass().getY())
 				.min(Comparator.comparing(p->Math.abs(p.getX()-vertN.getCentreOfMass().getX()))).get();
 			int newOp = vertN.getBorderIndex(bottom);

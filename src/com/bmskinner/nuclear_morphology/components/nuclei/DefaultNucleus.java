@@ -32,7 +32,6 @@ import com.bmskinner.nuclear_morphology.components.UnavailableBorderPointExcepti
 import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.cells.SegmentedCellularComponent;
-import com.bmskinner.nuclear_morphology.components.generic.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
@@ -353,7 +352,7 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
     // do not move this into SignalCollection - it is overridden in
     // RodentSpermNucleus
     @Override
-	public void calculateSignalAnglesFromPoint(@NonNull IBorderPoint p) {
+	public void calculateSignalAnglesFromPoint(@NonNull IPoint p) {
     	
         for (UUID signalGroup : signalCollection.getSignalGroupIds()) {
 

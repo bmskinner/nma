@@ -40,7 +40,6 @@ import javax.swing.JPopupMenu;
 import com.bmskinner.nuclear_morphology.analysis.image.AbstractImageFilterer;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageAnnotator;
 import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
-import com.bmskinner.nuclear_morphology.components.generic.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
@@ -199,7 +198,7 @@ public class InteractiveSegmentCellPanel extends InteractiveCellPanel {
 			IPoint clickedPoint = translatePanelLocationToSourceImage(e.getX(), e.getY());
 
 			// Not a circle around the valid point to click, but close enough
-			Optional<IBorderPoint> point = cell.getPrimaryNucleus().getBorderList()
+			Optional<IPoint> point = cell.getPrimaryNucleus().getBorderList()
 					.stream().filter(p->{
 						return clickedPoint.getX()>=p.getX()-POINT_CLICK_RADIUS_PIXELS && 
 								clickedPoint.getX()<=p.getX()+POINT_CLICK_RADIUS_PIXELS &&
@@ -230,7 +229,7 @@ public class InteractiveSegmentCellPanel extends InteractiveCellPanel {
 			});
 		}
 
-		private synchronized JPopupMenu createPopup(IBorderPoint point) {
+		private synchronized JPopupMenu createPopup(IPoint point) {
 			JPopupMenu popupMenu = new JPopupMenu("Popup");
 			if(cell==null)
 				return popupMenu;
@@ -251,7 +250,7 @@ public class InteractiveSegmentCellPanel extends InteractiveCellPanel {
 		 * @param popupMenu
 		 * @param point
 		 */
-		private void addSegmentsToPopup(JPopupMenu popupMenu, IBorderPoint point) {
+		private void addSegmentsToPopup(JPopupMenu popupMenu, IPoint point) {
 			try {
 				int rawIndex = cell.getPrimaryNucleus().getBorderIndex(point);
 
@@ -301,7 +300,7 @@ public class InteractiveSegmentCellPanel extends InteractiveCellPanel {
 		 * Add tags to the popup menu
 		 * @param popupMenu
 		 */
-		private void addTagsToPopup(JPopupMenu popupMenu, IBorderPoint point) {
+		private void addTagsToPopup(JPopupMenu popupMenu, IPoint point) {
 			List<Landmark> tags = dataset.getCollection().getProfileCollection().getBorderTags();
 
 			Collections.sort(tags);
@@ -377,7 +376,7 @@ public class InteractiveSegmentCellPanel extends InteractiveCellPanel {
 
 
 		// Find the point that was clicked
-		Optional<IBorderPoint> point = cell.getPrimaryNucleus().getBorderList()
+		Optional<IPoint> point = cell.getPrimaryNucleus().getBorderList()
 				.stream().filter(p->{
 					return clickedPoint.getX()>=p.getX()-0.4 && 
 							clickedPoint.getX()<=p.getX()+0.4 &&

@@ -25,7 +25,7 @@ import com.bmskinner.nuclear_morphology.analysis.image.MultiScaleStructuralSimil
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalWarper;
 import com.bmskinner.nuclear_morphology.charting.charts.ConsensusNucleusChartFactory;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.generic.IBorderPoint;
+import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.signals.IWarpedSignal;
@@ -466,7 +466,7 @@ implements SignalWarpingDisplayListener,
 			ip.setColor(colour);
 
 			// Draw the border
-			for(IBorderPoint p : target.getBorderList()) {
+			for(IPoint p : target.getBorderList()) {
 				ip.drawDot(p.getXAsInt(), p.getYAsInt());
 			}
 		}

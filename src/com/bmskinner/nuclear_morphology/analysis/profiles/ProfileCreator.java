@@ -27,8 +27,9 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nuclear_morphology.components.Taggable;
 import com.bmskinner.nuclear_morphology.components.UnavailableBorderPointException;
 import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.cells.SegmentedCellularComponent;
-import com.bmskinner.nuclear_morphology.components.generic.IBorderPoint;
+import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.measure.DoubleEquation;
 import com.bmskinner.nuclear_morphology.components.measure.LineEquation;
@@ -117,7 +118,7 @@ public class ProfileCreator {
 
         Shape s = target.toShape();
 
-        List<IBorderPoint> borderList = target.getBorderList();
+        List<IPoint> borderList = target.getBorderList();
 
         if (borderList == null)
             throw new UnavailableBorderPointException("Null border list in target");
@@ -129,9 +130,9 @@ public class ProfileCreator {
 
         for(int index=0; index<borderList.size(); index++) {
 
-        	IBorderPoint point       = borderList.get(index);
-            IBorderPoint pointBefore = point.prevPoint(pointOffset);
-            IBorderPoint pointAfter  = point.nextPoint(pointOffset);
+        	IPoint point       = borderList.get(index);
+        	IPoint pointBefore = borderList.get(CellularComponent.wrapIndex(index+pointOffset, target.getBorderLength()));
+        	IPoint pointAfter  = borderList.get(CellularComponent.wrapIndex(index-pointOffset, target.getBorderLength()));
 
             // Find the smallest angle between the points
             float angle = (float) point.findSmallestAngle(pointBefore, pointAfter);
@@ -189,13 +190,14 @@ public class ProfileCreator {
         float[] profile = new float[target.getBorderLength()];
         int index = 0;
 
-        Iterator<IBorderPoint> it = target.getBorderList().iterator();
+        Iterator<IPoint> it = target.getBorderList().iterator();
         while (it.hasNext()) {
 
-            IBorderPoint point = it.next();
+            IPoint point = it.next();
 
-            IBorderPoint prev = point.prevPoint(1);
-            IBorderPoint next = point.nextPoint(1);
+        	IPoint prev = target.getBorderList().get(CellularComponent.wrapIndex(index+1, target.getBorderLength()));
+        	IPoint next = target.getBorderList().get(CellularComponent.wrapIndex(index-1, target.getBorderLength()));
+
 
             // Get the equation between the first two points
             LineEquation eq = new DoubleEquation(prev, point);
@@ -245,11 +247,11 @@ public class ProfileCreator {
         float[] profile = new float[target.getBorderLength()];
         
         try {
-        	List<IBorderPoint> points = target.getBorderList();
+        	List<IPoint> points = target.getBorderList();
         	for(int index=0; index<points.size(); index++) {
         		try {
-        			IBorderPoint point = points.get(index);
-        			IBorderPoint opp   = target.findOppositeBorder(point);
+        			IPoint point = points.get(index);
+        			IPoint opp   = target.findOppositeBorder(point);
         			profile[index] = (float) point.getLengthTo(opp);
         		} catch(Exception e) {
         			LOGGER.log(Loggable.STACK, "Error finding opposite border in index "+index, e);
@@ -276,10 +278,10 @@ public class ProfileCreator {
         float[] profile = new float[target.getBorderLength()];
 
         int index = 0;
-        Iterator<IBorderPoint> it = target.getBorderList().iterator();
+        Iterator<IPoint> it = target.getBorderList().iterator();
         while (it.hasNext()) {
 
-            IBorderPoint point = it.next();
+            IPoint point = it.next();
             profile[index++] = (float) point.getLengthTo(target.getCentreOfMass());
 
         }
@@ -304,7 +306,7 @@ public class ProfileCreator {
         float[] profile = new float[target.getBorderLength()];
 
         int index = 0;
-        Iterator<IBorderPoint> it = target.getBorderList().iterator();
+        Iterator<IPoint> it = target.getBorderList().iterator();
 
         int pointOffset = target.getWindowSize(ProfileType.ANGLE);
 
@@ -314,10 +316,10 @@ public class ProfileCreator {
 
         while (it.hasNext()) {
 
-            IBorderPoint point = it.next();
+            IPoint point = it.next();
 
-            IBorderPoint pointBefore = point.prevPoint(pointOffset);
-            double distance = point.getLengthTo(pointBefore);
+            IPoint prev = target.getBorderList().get(CellularComponent.wrapIndex(index+1, target.getBorderLength()));
+            double distance = point.getLengthTo(prev);
 
             profile[index] = (float) distance;
             index++;

@@ -11,7 +11,6 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nuclear_morphology.analysis.detection.Mask;
 import com.bmskinner.nuclear_morphology.components.UnavailableBorderPointException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.generic.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
@@ -143,17 +142,17 @@ public class DummyCellularComponent implements CellularComponent {
 	}
 
 	@Override
-	public IBorderPoint getBorderPoint(int i) throws UnavailableBorderPointException {
+	public IPoint getBorderPoint(int i) throws UnavailableBorderPointException {
 		return component.getBorderPoint(i);
 	}
 
 	@Override
-	public IBorderPoint getOriginalBorderPoint(int i) throws UnavailableBorderPointException {
+	public IPoint getOriginalBorderPoint(int i) throws UnavailableBorderPointException {
 		return component.getOriginalBorderPoint(i);
 	}
 
 	@Override
-	public int getBorderIndex(IBorderPoint p) {
+	public int getBorderIndex(IPoint p) {
 		return component.getBorderIndex(p);
 	}
 
@@ -173,12 +172,12 @@ public class DummyCellularComponent implements CellularComponent {
 	}
 
 	@Override
-	public List<IBorderPoint> getBorderList() {
+	public List<IPoint> getBorderList() {
 		return component.getBorderList();
 	}
 
 	@Override
-	public List<IBorderPoint> getOriginalBorderList() throws UnavailableBorderPointException {
+	public List<IPoint> getOriginalBorderList() throws UnavailableBorderPointException {
 		return component.getOriginalBorderList();
 	}
 
@@ -268,22 +267,22 @@ public class DummyCellularComponent implements CellularComponent {
 	}
 
 	@Override
-	public int getPositionBetween(IBorderPoint pointA, IBorderPoint pointB) {
+	public int getPositionBetween(IPoint pointA, IPoint pointB) {
 		return component.getPositionBetween(pointA, pointB);
 	}
 
 	@Override
-	public IBorderPoint findOppositeBorder(IBorderPoint p) throws UnavailableBorderPointException {
+	public IPoint findOppositeBorder(IPoint p) throws UnavailableBorderPointException {
 		return component.findOppositeBorder(p);
 	}
 
 	@Override
-	public IBorderPoint findOrthogonalBorderPoint(IBorderPoint a) throws UnavailableBorderPointException {
+	public IPoint findOrthogonalBorderPoint(IPoint a) throws UnavailableBorderPointException {
 		return component.findOrthogonalBorderPoint(a);
 	}
 
 	@Override
-	public IBorderPoint findClosestBorderPoint(IPoint p) throws UnavailableBorderPointException {
+	public IPoint findClosestBorderPoint(IPoint p) throws UnavailableBorderPointException {
 		return component.findClosestBorderPoint(p);
 	}
 

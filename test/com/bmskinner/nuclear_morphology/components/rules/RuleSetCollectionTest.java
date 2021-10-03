@@ -1,15 +1,6 @@
 package com.bmskinner.nuclear_morphology.components.rules;
 
-import static org.junit.Assert.assertEquals;
-
-import java.util.List;
-
 import org.junit.Before;
-import org.junit.Test;
-
-import com.bmskinner.nuclear_morphology.components.profiles.DefaultLandmark;
-import com.bmskinner.nuclear_morphology.components.profiles.LandmarkType;
-import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 
 /**
  * Test class for rule set collections

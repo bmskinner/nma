@@ -21,7 +21,7 @@ import java.util.List;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.UnavailableBorderPointException;
-import com.bmskinner.nuclear_morphology.components.generic.IBorderPoint;
+import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.measure.DoubleEquation;
 import com.bmskinner.nuclear_morphology.components.measure.LineEquation;
@@ -98,7 +98,7 @@ public class SignalAnalyser {
             			minDistanceToSignal = distanceToSignal;
             		}
             	}
-            	IBorderPoint borderPoint = n.getBorderPoint(minDeltaYIndex);
+            	IPoint borderPoint = n.getBorderPoint(minDeltaYIndex);
             	double nucleusCoMToBorder = borderPoint.getLengthTo(n.getCentreOfMass());
             	double signalCoMToNucleusCoM = n.getCentreOfMass().getLengthTo(signal.getCentreOfMass());
             	double fractionalDistance = Math.min(signalCoMToNucleusCoM / nucleusCoMToBorder, 1);

@@ -28,15 +28,13 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
-import com.bmskinner.nuclear_morphology.components.generic.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.nuclei.DefaultNucleus;
-import com.bmskinner.nuclear_morphology.components.nuclei.DefaultRodentSpermNucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
-import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
+import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalCollection;
@@ -128,7 +126,7 @@ public class DummyRodentSpermNucleus extends DummyCellularComponent implements N
 
 
 	@Override
-	public void calculateSignalAnglesFromPoint(@NonNull IBorderPoint p) {
+	public void calculateSignalAnglesFromPoint(@NonNull IPoint p) {
 		nucleus.calculateSignalAnglesFromPoint(p);
 		
 	}
@@ -266,7 +264,7 @@ public class DummyRodentSpermNucleus extends DummyCellularComponent implements N
 	}
 
 	@Override
-	public IBorderPoint getBorderPoint(@NonNull Landmark tag) throws UnavailableBorderTagException {
+	public IPoint getBorderPoint(@NonNull Landmark tag) throws UnavailableBorderTagException {
 		return nucleus.getBorderPoint(tag);
 	}
 

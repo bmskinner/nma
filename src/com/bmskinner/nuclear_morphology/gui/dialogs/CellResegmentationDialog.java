@@ -54,12 +54,12 @@ import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException
 import com.bmskinner.nuclear_morphology.components.cells.DefaultCell;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.generic.IBorderPoint;
+import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
-import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
+import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
@@ -386,7 +386,7 @@ public class CellResegmentationDialog extends AbstractCellEditingDialog implemen
 
     @Override
     public void borderPointEventReceived(BorderPointEvent event) {
-        IBorderPoint p = event.getPoint();
+        IPoint p = event.getPoint();
         Taggable n = (Taggable) taggableList.getSelectedItem();
 
         if (isSelectRP) {

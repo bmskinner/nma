@@ -44,7 +44,7 @@ import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
-import com.bmskinner.nuclear_morphology.components.generic.IBorderPoint;
+import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.measure.DoubleEquation;
 import com.bmskinner.nuclear_morphology.components.measure.LineEquation;
@@ -321,7 +321,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 
         try {
             for (int i = 0; i < n.getBorderLength(); i++) {
-                IBorderPoint p = n.getBorderPoint(i);
+                IPoint p = n.getBorderPoint(i);
                 xpoints[i] = p.getX();
                 ypoints[i] = p.getY();
             }
@@ -359,7 +359,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
     	ComponentOutlineDataset ds = (ComponentOutlineDataset) createBareNucleusOutline(consensus);
     	
     	try {
-    		IBorderPoint p = consensus.getBorderPoint(Landmark.ORIENTATION_POINT);
+    		IPoint p = consensus.getBorderPoint(Landmark.ORIENTATION_POINT);
 			double[] xpoints = new double[1];
 	        double[] ypoints = new double[1];
 	        
@@ -444,7 +444,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
         			int i = 0;
         			while(it.hasNext()) {
         				int index = it.next();
-        				IBorderPoint p = n.getBorderPoint(index);
+        				IPoint p = n.getBorderPoint(index);
         				xpoints[i] = (float) p.getX();
         				ypoints[i++] = (float) p.getY();
         			}
@@ -516,7 +516,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
         		int index = CellularComponent.wrapIndex(segmentIndex + n.getBorderIndex(pointType), n.getBorderLength());
 
         		// get the border point at this index
-        		IBorderPoint p = n.getBorderPoint(index);
+        		IPoint p = n.getBorderPoint(index);
 
                 // Find points three indexes ahead and behind to make a triangle
                 // from
@@ -579,7 +579,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
         FloatXYDataset ds = new FloatXYDataset();
         try {
             for (Landmark tag : nucleus.getBorderTags().keySet()) {
-                IBorderPoint tagPoint;
+                IPoint tagPoint;
 
                 int tagIndex = nucleus.getBorderIndex(tag);
                 tagPoint = nucleus.getOriginalBorderPoint(tagIndex);
@@ -689,7 +689,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 
                 int j = 0;
 
-                for (IBorderPoint p : n.getBorderList()) {
+                for (IPoint p : n.getBorderList()) {
 
                     double x = p.getX();
                     double y = p.getY();

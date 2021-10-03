@@ -28,7 +28,6 @@ import com.bmskinner.nuclear_morphology.components.Imageable;
 import com.bmskinner.nuclear_morphology.components.Rotatable;
 import com.bmskinner.nuclear_morphology.components.Statistical;
 import com.bmskinner.nuclear_morphology.components.UnavailableBorderPointException;
-import com.bmskinner.nuclear_morphology.components.generic.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 
@@ -123,7 +122,7 @@ public interface CellularComponent extends Imageable, Serializable, Rotatable, S
      * @param i
      * @return
      */
-    IBorderPoint getBorderPoint(int i) throws UnavailableBorderPointException;
+    IPoint getBorderPoint(int i) throws UnavailableBorderPointException;
 
     /**
      * Get a copy of the original (non-offset) border point at the given index
@@ -131,7 +130,7 @@ public interface CellularComponent extends Imageable, Serializable, Rotatable, S
      * @param i
      * @return
      */
-    IBorderPoint getOriginalBorderPoint(int i) throws UnavailableBorderPointException;
+    IPoint getOriginalBorderPoint(int i) throws UnavailableBorderPointException;
 
     /**
      * Get the index of the given point in the border list
@@ -139,7 +138,7 @@ public interface CellularComponent extends Imageable, Serializable, Rotatable, S
      * @param p
      * @return
      */
-    int getBorderIndex(@NonNull IBorderPoint p);
+    int getBorderIndex(@NonNull IPoint p);
 
     /**
      * Update the border point at the given index to the given x y coordinates
@@ -171,7 +170,7 @@ public interface CellularComponent extends Imageable, Serializable, Rotatable, S
      * 
      * @return
      */
-    public List<IBorderPoint> getBorderList();
+    public List<IPoint> getBorderList();
 
     /**
      * Get a copy of the nucleus border points in the border list offset to
@@ -179,7 +178,7 @@ public interface CellularComponent extends Imageable, Serializable, Rotatable, S
      * 
      * @return
      */
-    List<IBorderPoint> getOriginalBorderList() throws UnavailableBorderPointException;
+    List<IPoint> getOriginalBorderList() throws UnavailableBorderPointException;
     
     /**
      * Get the integer roi positions used to create the object before smoothing and interpolation
@@ -365,7 +364,7 @@ public interface CellularComponent extends Imageable, Serializable, Rotatable, S
      * halfway between them. Used for obtaining a consensus between potential
      * tail positions
      */
-    int getPositionBetween(@NonNull IBorderPoint pointA, @NonNull IBorderPoint pointB);
+    int getPositionBetween(@NonNull IPoint pointA, @NonNull IPoint pointB);
 
     /**
      * For a position in the roi, draw a line through the CoM and get the
@@ -375,7 +374,7 @@ public interface CellularComponent extends Imageable, Serializable, Rotatable, S
      * @return
      * @throws UnavailableBorderPointException
      */
-    IBorderPoint findOppositeBorder(@NonNull IBorderPoint p) throws UnavailableBorderPointException;
+    IPoint findOppositeBorder(@NonNull IPoint p) throws UnavailableBorderPointException;
 
     /**
      * @param a the point to draw to the centre of mass
@@ -384,7 +383,7 @@ public interface CellularComponent extends Imageable, Serializable, Rotatable, S
      * @throws UnavailableBorderPointException
      *             if the input point is not found in the component border
      */
-    IBorderPoint findOrthogonalBorderPoint(@NonNull IBorderPoint a) throws UnavailableBorderPointException;
+    IPoint findOrthogonalBorderPoint(@NonNull IPoint a) throws UnavailableBorderPointException;
 
     /**
      * Find the border point in this object that is closest to the given XYPoint
@@ -392,7 +391,7 @@ public interface CellularComponent extends Imageable, Serializable, Rotatable, S
      * @param p
      * @return
      */
-    IBorderPoint findClosestBorderPoint(@NonNull IPoint p) throws UnavailableBorderPointException;
+    IPoint findClosestBorderPoint(@NonNull IPoint p) throws UnavailableBorderPointException;
     
     /**
      * Create the border list from the stored int[] points. Mimics the internal

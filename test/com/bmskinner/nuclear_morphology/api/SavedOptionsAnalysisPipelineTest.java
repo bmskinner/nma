@@ -2,22 +2,16 @@ package com.bmskinner.nuclear_morphology.api;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import java.io.File;
-import java.util.logging.Level;
 
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import com.bmskinner.nuclear_morphology.TestResources;
-import com.bmskinner.nuclear_morphology.analysis.DatasetValidator;
-import com.bmskinner.nuclear_morphology.api.AnalysisPipeline.AnalysisPipelineException;
 import com.bmskinner.nuclear_morphology.components.Version;
-import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.io.Io;
-import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
 
 /**
  * Test the workflows can save a valid dataset

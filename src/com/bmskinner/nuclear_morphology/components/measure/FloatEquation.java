@@ -19,7 +19,6 @@ package com.bmskinner.nuclear_morphology.components.measure;
 import java.awt.geom.Point2D;
 import java.util.List;
 
-import com.bmskinner.nuclear_morphology.components.generic.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 
 public class FloatEquation implements LineEquation {
@@ -232,13 +231,13 @@ public class FloatEquation implements LineEquation {
      * @param points
      * @return
      */
-    public static LineEquation calculateBestFitLine(List<IBorderPoint> points) {
+    public static LineEquation calculateBestFitLine(List<IPoint> points) {
 
         // Find the means of x and y
         double xMean = 0;
         double yMean = 0;
 
-        for (IBorderPoint p : points) {
+        for (IPoint p : points) {
             xMean += p.getX();
             yMean += p.getY();
         }
@@ -257,7 +256,7 @@ public class FloatEquation implements LineEquation {
         double sumDiffs = 0;
         double sumSquare = 0;
 
-        for (IBorderPoint p : points) {
+        for (IPoint p : points) {
 
             double x = p.getX() - xMean;
             double y = p.getY() - yMean;

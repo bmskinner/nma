@@ -23,8 +23,8 @@ import javax.swing.ButtonGroup;
 import javax.swing.JRadioButton;
 
 import com.bmskinner.nuclear_morphology.components.profiles.DefaultLandmark;
-import com.bmskinner.nuclear_morphology.components.profiles.LandmarkType;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
+import com.bmskinner.nuclear_morphology.components.profiles.LandmarkType;
 
 @SuppressWarnings("serial")
 public class BorderTagOptionsPanel extends EnumeratedOptionsPanel {

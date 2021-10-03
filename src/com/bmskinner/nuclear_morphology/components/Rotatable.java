@@ -19,7 +19,6 @@ package com.bmskinner.nuclear_morphology.components;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
-import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 
 /**
  * Objects implementing this interface can be rotated by arbirtary amounts, and

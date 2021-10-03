@@ -28,7 +28,7 @@ import com.bmskinner.nuclear_morphology.components.UnavailableBorderPointExcepti
 import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
-import com.bmskinner.nuclear_morphology.components.generic.IBorderPoint;
+import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclei.Consensus;
 import com.bmskinner.nuclear_morphology.components.nuclei.DefaultConsensusNucleus;
@@ -195,9 +195,9 @@ public class ProfileRefoldMethod extends SingleDatasetAnalysisMethod {
 //         */
 //        for (int i = offset; i < refoldNucleus.component().getBorderLength(); i += 2) {
 //
-//            IBorderPoint thisPoint = refoldNucleus.component().getBorderPoint(i);
-//            IBorderPoint prevPoint = thisPoint.prevPoint();
-//            IBorderPoint nextPoint = thisPoint.nextPoint();
+//            IPoint thisPoint = refoldNucleus.component().getBorderPoint(i);
+//            IPoint prevPoint = thisPoint.prevPoint();
+//            IPoint nextPoint = thisPoint.nextPoint();
 //
 //            /*
 //             * get the point o, half way between the previous point p and next
@@ -305,7 +305,7 @@ public class ProfileRefoldMethod extends SingleDatasetAnalysisMethod {
                 .absoluteSquareDifference(targetCurve);
 
         // Get a copy of the point at this index
-        IBorderPoint p = testNucleus.getBorderPoint(index);
+        IPoint p = testNucleus.getBorderPoint(index);
 
         // Save the old position
         double oldX = p.getX();

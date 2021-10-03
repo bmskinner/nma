@@ -111,7 +111,7 @@ public class TestComponentFactory {
 				
 		// Note - the roi interpolation will smooth corners
 		n.initialise(Taggable.DEFAULT_PROFILE_WINDOW_PROPORTION);
-		n.findPointsAroundBorder();		
+		n.findLandmarks(null)
 		return n;
 	}
 	

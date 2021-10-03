@@ -29,11 +29,11 @@ import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.UnavailableComponentException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.generic.IBorderPoint;
+import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 
 /**
  * Border segments mark a region with start and end positions within a component
- * border, and provide iterative access through the {@link IBorderPoint}s they
+ * border, and provide iterative access through the {@link IPoint}s they
  * contain. It is possible for the start position to be higher than the end
  * position if the segment spans the end of the profile and wraps back to the
  * beginning.

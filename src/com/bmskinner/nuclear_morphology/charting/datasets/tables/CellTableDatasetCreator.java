@@ -39,7 +39,7 @@ import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.cells.ICytoplasm;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.generic.IBorderPoint;
+import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
@@ -304,7 +304,7 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
         	if (n.hasBorderTag(tag)) {
 
         		try {
-        			IBorderPoint p = n.getBorderPoint(tag);
+        			IPoint p = n.getBorderPoint(tag);
         			int index = n.getOffsetBorderIndex(Landmark.REFERENCE_POINT, n.getBorderIndex(tag));
         			rowData.add(p.toString() + " at profile index " + index);
         		} catch (UnavailableBorderTagException e) {

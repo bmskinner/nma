@@ -41,7 +41,6 @@ import com.bmskinner.nuclear_morphology.analysis.mesh.MeshImageCreationException
 import com.bmskinner.nuclear_morphology.analysis.mesh.UncomparableMeshImageException;
 import com.bmskinner.nuclear_morphology.charting.image.MeshAnnotator;
 import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
-import com.bmskinner.nuclear_morphology.components.generic.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
@@ -339,7 +338,7 @@ public class InteractiveCellOutlinePanel extends InteractiveCellPanel {
 		
 		IPoint clickedPoint = translateRenderedLocationToSourceImage(cx, cy);
 
-		Optional<IBorderPoint> point = cell.getPrimaryNucleus().getBorderList()
+		Optional<IPoint> point = cell.getPrimaryNucleus().getBorderList()
 				.stream().filter(
 					p->clickedPoint.getX()>=p.getX()-0.4 && 
 							clickedPoint.getX()<=p.getX()+0.4 &&

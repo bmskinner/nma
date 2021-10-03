@@ -31,9 +31,8 @@ import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.nuclei.NucleusType;
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
@@ -89,13 +88,13 @@ public class ImageableTest extends ComponentTester {
     	
     	IAnalysisOptions op = OptionsFactory.makeAnalysisOptions();
     	op.setRuleSetCollection(RuleSetCollection.roundRuleSetCollection());
-    	IDetectionOptions nOp = OptionsFactory.makeNucleusDetectionOptions(testFolder);
-    	nOp.setMaxSize(2000000);
-    	nOp.setMinSize(5000);
-    	nOp.setThreshold(30);
-    	nOp.setChannel(2);
-    	nOp.getCannyOptions().setUseCanny(false);
-    	nOp.getCannyOptions().setUseKuwahara(false);
+    	HashOptions nOp = OptionsFactory.makeNucleusDetectionOptions(testFolder);
+    	nOp.setInt(HashOptions.MAX_SIZE_PIXELS, 2000000);
+    	nOp.setInt(HashOptions.MIN_SIZE_PIXELS, 5000);
+    	nOp.setInt(HashOptions.THRESHOLD, 30);
+    	nOp.setInt(HashOptions.CHANNEL, 2);
+    	nOp.setBoolean(HashOptions.IS_USE_CANNY, false);
+    	nOp.setBoolean(HashOptions.IS_USE_KUWAHARA, false);
     	op.setDetectionOptions(CellularComponent.NUCLEUS, nOp);
     	op.setAngleWindowProportion(0.03);
 

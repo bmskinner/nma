@@ -62,7 +62,7 @@ public class DefaultRodentSpermNucleusTest {
         
         // Get and save the values with default scale 1
         Map<Measurement, Double> map = new HashMap<>();
-        for(Measurement stat : Measurement.getNucleusStats(NucleusType.RODENT_SPERM)){
+        for(Measurement stat : Measurement.getNucleusStats()){
             map.put(stat, testNucleus.getStatistic(stat));
         }
         
@@ -70,7 +70,7 @@ public class DefaultRodentSpermNucleusTest {
         testNucleus.setScale(scale);
         
         // Get the actual values for microns and pixels
-        for(Measurement stat : Measurement.getNucleusStats(NucleusType.RODENT_SPERM)){
+        for(Measurement stat : Measurement.getNucleusStats()){
             double m = testNucleus.getStatistic(stat, MeasurementScale.MICRONS);
             
             double expected = Measurement.convert(map.get(stat), scale, MeasurementScale.MICRONS, stat.getDimension());
@@ -86,7 +86,7 @@ public class DefaultRodentSpermNucleusTest {
         double epsilon = 0; // the amount of difference permitted 
         double expected = 25;
         
-        for(Measurement stat : Measurement.getNucleusStats(NucleusType.RODENT_SPERM)){
+        for(Measurement stat : Measurement.getNucleusStats()){
             testNucleus.setStatistic(stat, expected);
             double d = testNucleus.getStatistic(stat);
             assertEquals(stat.toString(), expected, d, epsilon);

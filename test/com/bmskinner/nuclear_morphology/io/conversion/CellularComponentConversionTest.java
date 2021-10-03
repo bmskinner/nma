@@ -21,7 +21,7 @@ import com.bmskinner.nuclear_morphology.components.Version;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.DefaultCellCollection;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.generic.IBorderPoint;
+import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.profiles.DefaultProfileAggregate;
 import com.bmskinner.nuclear_morphology.components.profiles.DefaultProfileCollection;
@@ -29,8 +29,8 @@ import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileAggregate;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileCollection;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
-import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
+import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.io.DatasetImportMethod.UnloadableDatasetException;
 import com.bmskinner.nuclear_morphology.io.PackageReplacementObjectInputStream;
 import com.bmskinner.nuclear_morphology.stats.Stats;
@@ -86,7 +86,7 @@ public class CellularComponentConversionTest extends ComponentTester {
 						
 			
 			Field borderField = getInheritedField(n.getClass(), "borderList");
-			List<IBorderPoint> borderList = (List<IBorderPoint>) borderField.get(n);
+			List<IPoint> borderList = (List<IPoint>) borderField.get(n);
 		}
 
 

@@ -37,12 +37,11 @@ import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellDetector.Sh
 import com.bmskinner.nuclear_morphology.components.Imageable;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.nuclei.NucleusType;
-import com.bmskinner.nuclear_morphology.components.options.DefaultShellOptions;
+import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
-import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult.ShrinkType;
+import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
@@ -190,7 +189,7 @@ public class ShellDetectorTest extends ComponentTester {
         	assertFalse("Shells should not exist on first open", s.hasShellResult());
         }
         
-        IAnalysisMethod m = new ShellAnalysisMethod(dataset, new DefaultShellOptions());
+        IAnalysisMethod m = new ShellAnalysisMethod(dataset, OptionsFactory.makeShellAnalysisOptions());
         m.call();
         
         for(ISignalGroup s : dataset.getCollection().getSignalGroups()) {

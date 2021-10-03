@@ -38,7 +38,7 @@ import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.Taggable;
 import com.bmskinner.nuclear_morphology.components.UnavailableBorderPointException;
 import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
-import com.bmskinner.nuclear_morphology.components.generic.IBorderPoint;
+import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
@@ -135,7 +135,7 @@ public class CoupledProfileOutlineChartPanel {
 
                 // Find the index of the border point with the current profile
                 // chart x value
-                IBorderPoint p;
+                IPoint p;
                 try {
                     p = getPointFromProfileIndex(xValue);
                     xCrosshairOutline.setValue(p.getX());
@@ -159,7 +159,7 @@ public class CoupledProfileOutlineChartPanel {
 
                     int xValue = getProfileIndexFromChart(e.getX());
 
-                    IBorderPoint p;
+                    IPoint p;
                     try {
                         p = getPointFromProfileIndex(xValue);
                         fireBorderPointEvent(p);
@@ -182,14 +182,14 @@ public class CoupledProfileOutlineChartPanel {
         return xValue;
     }
 
-    private IBorderPoint getPointFromProfileIndex(int index) throws UnavailableBorderPointException, UnavailableBorderTagException{
+    private IPoint getPointFromProfileIndex(int index) throws UnavailableBorderPointException, UnavailableBorderTagException{
         // Find the index of the border point with the current profile chart x
         // value
         int rpIndex = obj.getBorderIndex(Landmark.REFERENCE_POINT);
         int xIndex = obj.wrapIndex(index + rpIndex);
 
         // Get that border point
-        IBorderPoint p = obj.getOriginalBorderPoint(xIndex);
+        IPoint p = obj.getOriginalBorderPoint(xIndex);
         return p;
     }
 
@@ -209,7 +209,7 @@ public class CoupledProfileOutlineChartPanel {
         listeners.remove(l);
     }
 
-    protected synchronized void fireBorderPointEvent(IBorderPoint p) {
+    protected synchronized void fireBorderPointEvent(IPoint p) {
 
         BorderPointEvent event = new BorderPointEvent(this, p);
         Iterator<Object> iterator = listeners.iterator();
@@ -221,14 +221,14 @@ public class CoupledProfileOutlineChartPanel {
     @SuppressWarnings("serial")
     public class BorderPointEvent extends EventObject {
 
-        private IBorderPoint p;
+        private IPoint p;
 
-        public BorderPointEvent(Object source, IBorderPoint p) {
+        public BorderPointEvent(Object source, IPoint p) {
             super(source);
             this.p = p;
         }
 
-        public IBorderPoint getPoint() {
+        public IPoint getPoint() {
             return p;
         }
     }

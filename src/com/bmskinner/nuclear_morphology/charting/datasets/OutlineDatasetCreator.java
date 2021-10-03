@@ -27,7 +27,7 @@ import com.bmskinner.nuclear_morphology.components.Taggable;
 import com.bmskinner.nuclear_morphology.components.UnavailableBorderPointException;
 import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.generic.IBorderPoint;
+import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
@@ -171,7 +171,7 @@ public class OutlineDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
                 		 * methods.
                 		 */
                 		// p = t.getBorderPoint(offsetIndex);
-                		IBorderPoint p = t.getOriginalBorderPoint(offsetIndex);
+                		IPoint p = t.getOriginalBorderPoint(offsetIndex);
                 		xpoints[j] = p.getX() - 0.5;
                 		ypoints[j] = p.getY() - 0.5;
                 	} catch (UnavailableBorderPointException | UnavailableBorderTagException e) {

@@ -22,7 +22,6 @@ import java.util.UUID;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
-import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 
 import ij.gui.Roi;
 

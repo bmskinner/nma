@@ -44,7 +44,6 @@ import com.bmskinner.nuclear_morphology.analysis.detection.Mask;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageConverter;
 import com.bmskinner.nuclear_morphology.components.Imageable;
 import com.bmskinner.nuclear_morphology.components.Statistical;
-import com.bmskinner.nuclear_morphology.components.generic.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
@@ -71,6 +70,8 @@ import ij.process.ImageProcessor;
  */
 public abstract class DefaultCellularComponent implements CellularComponent {
 	
+	private static final String SOURCE_IMAGE_IS_NOT_AVAILABLE = "Source image is not available";
+
 	private static final Logger LOGGER = Logger.getLogger(DefaultCellularComponent.class.getName());
 
 	/** the distance from a point to allow for searching an opposite border point*/
@@ -87,9 +88,9 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 
     /**
      * The original position in the source image of the component. Values are
-     * stored at the indexes in {@link CellularComponent.X_BASE},
-     * {@link CellularComponent.Y_BASE}, {@link CellularComponent.WIDTH} and
-     * {@link CellularComponent.HEIGHT}
+     * stored at the indexes in {@link Imageable.X_BASE},
+     * {@link Imageable.Y_BASE}, {@link Imageable.WIDTH} and
+     * {@link Imageable.HEIGHT}
      * 
      * @see AbstractCellularComponent#getPosition()
      */
@@ -125,7 +126,8 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     private double scale = DEFAULT_SCALE;
 
     /** The points within the Roi from which the object was detected  */
-    private int[] xpoints, ypoints;
+    private int[] xpoints; 
+    private int[] ypoints;
 
     /*
      * TRANSIENT FILEDS
@@ -135,7 +137,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
      * The complete border list, offset to an appropriate position for the
      * object
      */
-    private transient List<IBorderPoint> borderList = new ArrayList<>();
+    private transient List<IPoint> borderList = new ArrayList<>();
 
     /** Cache images while memory is available. */
     private transient WeakReference <ImageProcessor> imageRef = new WeakReference <>(null);
@@ -158,7 +160,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
      * @param channel the RGB channel the component was found in
      * @param position the bounding position of the component in the original image
      */
-    public DefaultCellularComponent(@NonNull Roi roi, @NonNull IPoint centreOfMass, File source, int channel, int[] position) {
+    protected DefaultCellularComponent(@NonNull Roi roi, @NonNull IPoint centreOfMass, File source, int channel, int[] position) {
     	this(roi, centreOfMass, source, channel, position, UUID.randomUUID() );
     }
     
@@ -175,7 +177,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
      * @param position the bounding position of the component in the original image
      * @param id the id of the component. Only use when deserialising!
      */
-    public DefaultCellularComponent(@NonNull Roi roi, @NonNull IPoint centreOfMass, 
+    protected DefaultCellularComponent(@NonNull Roi roi, @NonNull IPoint centreOfMass, 
     		File source, int channel, int[] position, @Nullable UUID id) {
 
         this.originalCentreOfMass = IPoint.makeNew(centreOfMass);
@@ -241,7 +243,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
      */
     private void makeBorderList() {
 
-    	LOGGER.finest( "Creating border list from "+xpoints.length+" integer points");
+    	LOGGER.finest(()->"Creating border list from "+xpoints.length+" integer points");
     	
         // Make a copy of the int[] points otherwise creating a polygon roi
         // will reset them to 0,0 coordinates
@@ -265,18 +267,9 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 
         LOGGER.finest( "Interpolated integer list to smoothed list of "+smoothed.npoints);
         for (int i = 0; i < smoothed.npoints; i++) {
-            IBorderPoint point = IBorderPoint.makeNew(smoothed.xpoints[i], smoothed.ypoints[i]);
-
-            if (i > 0) {
-                point.setPrevPoint(borderList.get(i - 1));
-                point.prevPoint().setNextPoint(point);
-            }
+            IPoint point = IPoint.makeNew(smoothed.xpoints[i], smoothed.ypoints[i]);
             borderList.add(point);
         }
-        // link endpoints
-        borderList.get(borderList.size() - 1).setNextPoint(borderList.get(0));
-        borderList.get(0).setPrevPoint(borderList.get(borderList.size() - 1));
-
         moveCentreOfMass(oldCoM);
         calculateBounds();
     }
@@ -287,7 +280,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
         double yMax = -Double.MAX_VALUE;
         double yMin = Double.MAX_VALUE;
 
-        for (IBorderPoint p : borderList) {
+        for (IPoint p : borderList) {
             xMax = p.getX() > xMax ? p.getX() : xMax;
             xMin = p.getX() < xMin ? p.getX() : xMin;
             yMax = p.getY() > yMax ? p.getY() : yMax;
@@ -297,7 +290,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
         double w = xMax - xMin;
         double h = yMax - yMin;
 
-        // Constructor for rectangle - upper-left point plus w and h;
+        // Constructor for rectangle: upper-left point plus w and h
         // Note that the coordinates have y increasing downwards, so the upper
         // point is yMin
         bounds = new Rectangle2D.Double(xMin, yMin, w, h);
@@ -346,29 +339,9 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     	LOGGER.finest( "Duplicating border list from template component");
         this.borderList = new ArrayList<>(c.getBorderLength());
 
-        for (IBorderPoint p : c.getBorderList()) {
-            borderList.add(IBorderPoint.makeNew(p));
+        for (IPoint p : c.getBorderList()) {
+            borderList.add(IPoint.makeNew(p));
         }
-
-        // Link points
-
-        for (int i = 0; i < borderList.size(); i++) {
-            IBorderPoint point = borderList.get(i);
-
-            if (i > 0 && i < borderList.size() - 1) {
-                point.setNextPoint(borderList.get(i + 1));
-                point.setPrevPoint(borderList.get(i - 1));
-            }
-        }
-
-        // Set first and last
-        IBorderPoint first = borderList.get(0);
-        first.setNextPoint(borderList.get(1));
-        first.setPrevPoint(borderList.get(borderList.size() - 1));
-
-        IBorderPoint last = borderList.get(borderList.size() - 1);
-        last.setNextPoint(borderList.get(0));
-        last.setPrevPoint(borderList.get(borderList.size() - 2));
     }
 
     @Override
@@ -466,7 +439,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
         	return ip;
         } catch (ImageImportException e) {
         	LOGGER.log(Loggable.STACK, "Error importing source image " + this.getSourceFile().getAbsolutePath(), e);
-        	throw new UnloadableImageException("Source image is not available");
+        	throw new UnloadableImageException(SOURCE_IMAGE_IS_NOT_AVAILABLE);
         }
     }
     
@@ -484,7 +457,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
             return imageStack.getProcessor(stack);
         } catch (ImageImportException e) {
             LOGGER.log(Loggable.STACK, "Error importing source image " + this.getSourceFile().getAbsolutePath(), e);
-            throw new UnloadableImageException("Source image is not available");
+            throw new UnloadableImageException(SOURCE_IMAGE_IS_NOT_AVAILABLE);
         }
 
     }
@@ -501,18 +474,18 @@ public abstract class DefaultCellularComponent implements CellularComponent {
         ImageProcessor ip = getImage().duplicate();
 
         if (ip == null) {
-            throw new UnloadableImageException("Source image is not available");
+            throw new UnloadableImageException(SOURCE_IMAGE_IS_NOT_AVAILABLE);
         }
 
         int[] positions = getPosition();
 
-        int padding = CellularComponent.COMPONENT_BUFFER; // a border of pixels
+        int padding = Imageable.COMPONENT_BUFFER; // a border of pixels
                                                           // beyond the cell
                                                           // boundary
-        int wideW = positions[CellularComponent.WIDTH] + (padding * 2);
-        int wideH = positions[CellularComponent.HEIGHT] + (padding * 2);
-        int wideX = positions[CellularComponent.X_BASE] - padding;
-        int wideY = positions[CellularComponent.Y_BASE] - padding;
+        int wideW = positions[Imageable.WIDTH] + (padding * 2);
+        int wideH = positions[Imageable.HEIGHT] + (padding * 2);
+        int wideX = positions[Imageable.X_BASE] - padding;
+        int wideY = positions[Imageable.Y_BASE] - padding;
 
         wideX = wideX < 0 ? 0 : wideX;
         wideY = wideY < 0 ? 0 : wideY;
@@ -527,7 +500,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     public ImageProcessor getGreyscaleComponentImage() throws UnloadableImageException {
     	ImageProcessor ip = getGreyscaleImage().duplicate();
     	if (ip == null) {
-            throw new UnloadableImageException("Source image is not available");
+            throw new UnloadableImageException(SOURCE_IMAGE_IS_NOT_AVAILABLE);
         }
 
         int[] positions = getPosition();
@@ -554,18 +527,18 @@ public abstract class DefaultCellularComponent implements CellularComponent {
         ImageProcessor ip = getRGBImage().duplicate();
 
         if (ip == null) {
-            throw new UnloadableImageException("Source image is not available");
+            throw new UnloadableImageException(SOURCE_IMAGE_IS_NOT_AVAILABLE);
         }
 
         int[] positions = getPosition();
 
-        int padding = CellularComponent.COMPONENT_BUFFER; // a border of pixels
+        int padding = Imageable.COMPONENT_BUFFER; // a border of pixels
                                                           // beyond the cell
                                                           // boundary
-        int wideW = (positions[CellularComponent.WIDTH] + (padding * 2));
-        int wideH = (positions[CellularComponent.HEIGHT] + (padding * 2));
-        int wideX = (positions[CellularComponent.X_BASE] - padding);
-        int wideY = (positions[CellularComponent.Y_BASE] - padding);
+        int wideW = (positions[Imageable.WIDTH] + (padding * 2));
+        int wideH = (positions[Imageable.HEIGHT] + (padding * 2));
+        int wideX = (positions[Imageable.X_BASE] - padding);
+        int wideY = (positions[Imageable.Y_BASE] - padding);
 
         wideX = wideX < 0 ? 0 : wideX;
         wideY = wideY < 0 ? 0 : wideY;
@@ -676,26 +649,26 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     }
 
     @Override
-	public IBorderPoint getBorderPoint(int i) {
+	public IPoint getBorderPoint(int i) {
         return borderList.get(i);
     }
 
     @Override
-	public IBorderPoint getOriginalBorderPoint(int i) {
-        IBorderPoint p = getBorderPoint(i);
+	public IPoint getOriginalBorderPoint(int i) {
+        IPoint p = getBorderPoint(i);
 
         double diffX = p.getX() - centreOfMass.getX();
         double diffY = p.getY() - centreOfMass.getY();
         
         // Offset to the original position
-        return IBorderPoint.makeNew(originalCentreOfMass.getX() + diffX,
+        return IPoint.makeNew(originalCentreOfMass.getX() + diffX,
                 originalCentreOfMass.getY() + diffY);
     }
 
     @Override
-	public int getBorderIndex(@NonNull IBorderPoint p) {
+	public int getBorderIndex(@NonNull IPoint p) {
         for(int i=0; i<borderList.size(); i++) {
-        	IBorderPoint n = borderList.get(i);
+        	IPoint n = borderList.get(i);
         	if(n.overlapsPerfectly(p))
         		return i;
         }
@@ -714,20 +687,20 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     }
 
     @Override
-	public List<IBorderPoint> getBorderList() {
+	public List<IPoint> getBorderList() {
         return this.borderList;
     }
 
     @Override
-	public List<IBorderPoint> getOriginalBorderList() {
-        List<IBorderPoint> result = new ArrayList<IBorderPoint>(borderList.size());
+	public List<IPoint> getOriginalBorderList() {
+        List<IPoint> result = new ArrayList<>(borderList.size());
 
         double diffX = originalCentreOfMass.getX() - centreOfMass.getX();
         double diffY = originalCentreOfMass.getY() - centreOfMass.getY();
 
         // Offset to the original position
-        for (IBorderPoint p : borderList) {
-            result.add(IBorderPoint.makeNew(p.getX() + diffX, p.getY() + diffY));
+        for (IPoint p : borderList) {
+            result.add(IPoint.makeNew(p.getX() + diffX, p.getY() + diffY));
         }
         return result;
     }
@@ -822,7 +795,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 
         double xCentre = p.getX();
 
-        for (IBorderPoint n : borderList) {
+        for (IPoint n : borderList) {
             double dx = xCentre - n.getX();
             double xNew = xCentre + dx;
             n.setX(xNew);
@@ -839,7 +812,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 
         double yCentre = p.getY();
 
-        for (IBorderPoint n : borderList) {
+        for (IPoint n : borderList) {
             double dy = yCentre - n.getY();
             double yNew = yCentre + dy;
             n.setY(yNew);
@@ -850,8 +823,8 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	public double getMedianDistanceBetweenPoints() {
         double[] distances = new double[this.borderList.size()];
         for (int i = 0; i < this.borderList.size(); i++) {
-            IBorderPoint p = borderList.get(i);
-            IBorderPoint next = borderList.get(wrapIndex(i + 1));
+            IPoint p = borderList.get(i);
+            IPoint next = borderList.get(wrapIndex(i + 1));
             distances[i] = p.getLengthTo(next);
         }
         return Stats.quartile(distances, Stats.MEDIAN);
@@ -885,7 +858,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 
         /// update each border point
         for (int i = 0; i < borderList.size(); i++) {
-            IBorderPoint p = borderList.get(i);
+            IPoint p = borderList.get(i);
             p.offset(xOffset, yOffset);
         }
 
@@ -897,7 +870,8 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     @Override
 	public void reverse() {
     	LOGGER.fine("Reversing component border list");
-        int[] newXpoints = new int[xpoints.length], newYpoints = new int[xpoints.length];
+        int[] newXpoints = new int[xpoints.length];
+        int[] newYpoints = new int[xpoints.length];
 
         for (int i = xpoints.length - 1, j = 0; j < xpoints.length; i--, j++) {
             newXpoints[j] = xpoints[i];
@@ -945,7 +919,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
         float[] ypoints = new float[borderList.size() + 1];
 
         for (int i = 0; i < borderList.size(); i++) {
-            IBorderPoint p = borderList.get(i);
+            IPoint p = borderList.get(i);
             xpoints[i] = (float) p.getX() + xOffset;
             ypoints[i] = (float) p.getY() + yOffset;
         }
@@ -1021,10 +995,10 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 
         Path2D.Double path = new Path2D.Double();
 
-        IBorderPoint first = borderList.get(0);
+        IPoint first = borderList.get(0);
         path.moveTo((first.getX() + xOffset) / sc, (first.getY() + yOffset) / sc);
 
-        for (IBorderPoint b : this.borderList) {
+        for (IPoint b : this.borderList) {
             path.lineTo((b.getX() + xOffset) / sc, (b.getY() + yOffset) / sc);
         }
         path.closePath();
@@ -1105,7 +1079,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
      * tail positions. Ensure we choose the smaller distance
      */
     @Override
-	public int getPositionBetween(@NonNull IBorderPoint pointA, @NonNull IBorderPoint pointB) {
+	public int getPositionBetween(@NonNull IPoint pointA, @NonNull IPoint pointB) {
 
         int a = 0;
         int b = 0;
@@ -1131,14 +1105,14 @@ public abstract class DefaultCellularComponent implements CellularComponent {
         int difference2 = this.getBorderLength() - difference1;
 
         // get the midpoint
-        int mid1 = this.wrapIndex((int) Math.floor((difference1 / 2) + minIndex));
-        int mid2 = this.wrapIndex((int) Math.floor((difference2 / 2) + maxIndex));
+        int mid1 = this.wrapIndex((int) Math.floor(((double)difference1 / 2) + minIndex));
+        int mid2 = this.wrapIndex((int) Math.floor(((double)difference2 / 2) + maxIndex));
 
         return difference1 < difference2 ? mid1 : mid2;
     }
 
     @Override
-	public IBorderPoint findOppositeBorder(@NonNull IBorderPoint p) {
+	public IPoint findOppositeBorder(@NonNull IPoint p) {
         // Find the point that is closest to 180 degrees across the CoM
     	double distToCom = p.getLengthTo(centreOfMass);
     	
@@ -1151,14 +1125,14 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     }
 
     @Override
-    public IBorderPoint findOrthogonalBorderPoint(@NonNull IBorderPoint a) {
+    public IPoint findOrthogonalBorderPoint(@NonNull IPoint a) {
         return borderList.stream()
                 .min(Comparator.comparing(point-> Math.abs(90-centreOfMass.findSmallestAngle(a, point)) ))
                 .get();
     }
 
     @Override
-    public IBorderPoint findClosestBorderPoint(@NonNull IPoint p) {
+    public IPoint findClosestBorderPoint(@NonNull IPoint p) {
         return borderList.stream()
                 .min(Comparator.comparing(point->point.getLengthTo(p) ))
                 .get();
@@ -1245,7 +1219,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     @Override
 	public void refreshBorderList(boolean useSplineFitting) {
 
-    	LOGGER.finest( "Creating border list from "+xpoints.length+" integer points");
+    	LOGGER.finest(()->"Creating border list from "+xpoints.length+" integer points");
     	
         // Make a copy of the int[] points otherwise creating a polygon roi
         // will reset them to 0,0 coordinates
@@ -1272,17 +1246,9 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 
         LOGGER.finest( "Interpolated integer list to smoothed list of "+smoothed.npoints);
         for (int i = 0; i < smoothed.npoints; i++) {
-            IBorderPoint point = IBorderPoint.makeNew(smoothed.xpoints[i], smoothed.ypoints[i]);
-
-            if (i > 0) {
-                point.setPrevPoint(borderList.get(i - 1));
-                point.prevPoint().setNextPoint(point);
-            }
+            IPoint point = IPoint.makeNew(smoothed.xpoints[i], smoothed.ypoints[i]);
             borderList.add(point);
         }
-        // link endpoints
-        borderList.get(borderList.size() - 1).setNextPoint(borderList.get(0));
-        borderList.get(0).setPrevPoint(borderList.get(borderList.size() - 1));
 
         moveCentreOfMass(oldCoM);
         calculateBounds();
@@ -1314,7 +1280,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 
 
     @Override
-	public void rotatePointToBottom(IPoint bottomPoint) {
+	public void rotatePointToBottom(@NonNull IPoint bottomPoint) {
         this.alignPointsOnVertical(centreOfMass, bottomPoint);
     }
     
@@ -1330,7 +1296,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
         if (angle != 0) {
         	double rad = Math.toRadians(-angle); 
         	AffineTransform tf = AffineTransform.getRotateInstance(rad, centreOfMass.getX(), centreOfMass.getY());
-            for (IBorderPoint p : borderList) {
+            for (IPoint p : borderList) {
             	Point2D result = tf.transform(p.toPoint2D(), null);
                 p.set(result);
             }
@@ -1399,7 +1365,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 
         }
 
-        private Map<Key, Shape> cache = new HashMap<Key, Shape>();
+        private Map<Key, Shape> cache = new HashMap<>();
 
         public ShapeCache() {
         }

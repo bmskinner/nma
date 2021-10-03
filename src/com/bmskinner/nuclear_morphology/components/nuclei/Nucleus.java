@@ -21,10 +21,9 @@ import org.eclipse.jdt.annotation.Nullable;
 
 import com.bmskinner.nuclear_morphology.components.Taggable;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.generic.IBorderPoint;
+import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.rules.PriorityAxis;
-import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalCollection;
 
 /**
@@ -75,7 +74,7 @@ public interface Nucleus extends CellularComponent, Taggable, Comparable<Nucleus
      * @param p the border point to orient from (the zero angle)
      * @throws Exception
      */
-    void calculateSignalAnglesFromPoint(@NonNull IBorderPoint p);
+    void calculateSignalAnglesFromPoint(@NonNull IPoint p);
 
     /**
      * Get the signals in this nucleus

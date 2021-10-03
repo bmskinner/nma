@@ -36,7 +36,6 @@ import com.bmskinner.nuclear_morphology.components.Taggable;
 import com.bmskinner.nuclear_morphology.components.UnavailableBorderPointException;
 import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.UnavailableComponentException;
-import com.bmskinner.nuclear_morphology.components.generic.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
@@ -200,7 +199,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 
     }
 
-    public IBorderPoint getPoint(@NonNull Landmark tag) throws UnavailableBorderTagException {
+    public IPoint getPoint(@NonNull Landmark tag) throws UnavailableBorderTagException {
         int index = this.getBorderIndex(tag);
         return this.getBorderPoint(index);
     }
@@ -228,8 +227,8 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 
         if (Measurement.PERIMETER.equals(stat)) {
             double perimeter=0;
-            for(IBorderPoint p : getBorderList()){
-                perimeter += p.getLengthTo(p.nextPoint());
+            for(int i=0; i<this.getBorderLength(); i++) {
+            	perimeter += this.getBorderPoint(i).getLengthTo(getBorderPoint(wrapIndex(i+1)));
             }
             setStatistic(stat, perimeter);
         }
@@ -243,7 +242,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
      */
 
     @Override
-    public IBorderPoint getBorderPoint(@NonNull Landmark tag) throws UnavailableBorderTagException {
+    public IPoint getBorderPoint(@NonNull Landmark tag) throws UnavailableBorderTagException {
     	int borderIndex = this.getBorderIndex(tag);
 
     	if (borderIndex < 0 || borderIndex >= this.getBorderLength())
@@ -603,12 +602,12 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
         }
     }
 
-    public IBorderPoint getNarrowestDiameterPoint() throws UnavailableBorderPointException {
+    public IPoint getNarrowestDiameterPoint() throws UnavailableBorderPointException {
 
         try {
 
             int index = this.getProfile(ProfileType.DIAMETER).getIndexOfMin();
-            return IBorderPoint.makeNew(this.getBorderPoint(index));
+            return IPoint.makeNew(this.getBorderPoint(index));
 
         } catch (UnavailableProfileTypeException | ProfileException e) {
             LOGGER.log(Loggable.STACK, "Error getting diameter profile minimum", e);
