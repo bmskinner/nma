@@ -1,5 +1,7 @@
 package com.bmskinner.nuclear_morphology.components;
 
+import static org.junit.Assert.assertEquals;
+
 import java.util.Arrays;
 
 import org.junit.Before;
@@ -69,9 +71,8 @@ public class CellularComponentTest  extends ComponentTester {
 	@Test
 	public void testDuplicate() throws Exception {
 		CellularComponent dup = component.duplicate();
-//		assertEquals(component, dup);
+		assertEquals(component, dup);
 //		testDuplicatesByField(component, dup); //TODO: not yet implemented for signal collections
-		
 	}
 
 

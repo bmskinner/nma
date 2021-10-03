@@ -117,6 +117,12 @@ public class RuleSetCollection implements Serializable, XmlSerializable {
     	this.ruleApplicationType = type;
     }
     
+    /**
+     * Construct from an XML element. Use for 
+     * unmarshalling. The element should conform
+     * to the specification in {@link XmlSerializable}.
+     * @param e the XML element containing the data.
+     */
     public RuleSetCollection(Element e) {
     	name = e.getChildText(XML_NAME);
     	

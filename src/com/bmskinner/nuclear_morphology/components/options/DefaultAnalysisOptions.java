@@ -16,7 +16,6 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.options;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -27,6 +26,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.jdom2.Element;
 
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
@@ -72,6 +72,22 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
     public DefaultAnalysisOptions(@NonNull IAnalysisOptions template) {
         set(template);
         analysisTime = template.getAnalysisTime();
+    }
+    
+    public DefaultAnalysisOptions(@NonNull Element e) {
+    	
+    	// Add the detection options
+    	for(Element i : e.getChildren("Detection"))
+    		detectionOptions.put(i.getAttributeValue("name"), new DefaultOptions(i.getChild("Options")));
+    	
+    	profileWindowProportion = Double.valueOf(e.getChild("ProfileWindow").getText());
+    	analysisTime = Long.valueOf(e.getChild("AnalysisTime").getText());
+    			
+    	rulesets = new RuleSetCollection(e.getChild("RuleSetCollection"));
+    	
+    	// Add the secondary options
+    	for(Element i : e.getChildren("Secondary"))
+    		secondaryOptions.put(i.getAttributeValue("name"), new DefaultOptions(i.getChild("Options")));
     }
     
     @Override
@@ -238,9 +254,34 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
         b.append(Io.NEWLINE+profileWindowProportion);
         b.append(Io.NEWLINE+rulesets.getName());
         return b.toString();
-    }  
-    
-    private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-        in.defaultReadObject();
     }
+
+	@Override
+	public Element toXmlElement() {
+		Element e = new Element("AnalysisOptions");
+		
+		// Add the detection options
+		for(Entry<String, HashOptions> entry : detectionOptions.entrySet()) {
+			e.addContent(new Element("Detection").setAttribute("name", entry.getKey())
+					.addContent(entry.getValue().toXmlElement() ));
+		}
+		
+		e.addContent(new Element("ProfileWindow")
+				.setText(String.valueOf(profileWindowProportion)));
+		
+		e.addContent(new Element("AnalysisTime")
+				.setText(String.valueOf(analysisTime)));
+		
+		e.addContent(rulesets.toXmlElement());
+		
+		// Add the secondary options
+		for(Entry<String, HashOptions> entry : secondaryOptions.entrySet()) {
+			e.addContent(new Element("Secondary").setAttribute("name", entry.getKey())
+					.addContent(entry.getValue().toXmlElement() ));
+		}
+
+		return e;
+	}  
+	
+	
 }

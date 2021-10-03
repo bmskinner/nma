@@ -31,6 +31,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.jdom2.Element;
 
 import com.bmskinner.nuclear_morphology.io.Io;
+import com.bmskinner.nuclear_morphology.io.XmlSerializable;
 
 /**
  * A base for all the options classes that need to store options as a key value
@@ -63,29 +64,33 @@ public class DefaultOptions implements Serializable, HashOptions {
     	set(o);
     }
     
+    /**
+     * Construct from an XML element. Use for 
+     * unmarshalling. The element should conform
+     * to the specification in {@link XmlSerializable}.
+     * @param e the XML element containing the data.
+     */
     public DefaultOptions(Element e) {
 		
 		// Add each map
-    	
-    	
 		for(Element i : e.getChildren("Integer"))
-			intMap.put(i.getAttributeValue("name").toString(), Integer.parseInt(i.getText()));
+			intMap.put(i.getAttributeValue("name"), Integer.parseInt(i.getText()));
 		
 		for(Element i : e.getChildren("Float"))
-			fltMap.put(i.getAttributeValue("name").toString(), Float.parseFloat(i.getText()));
+			fltMap.put(i.getAttributeValue("name"), Float.parseFloat(i.getText()));
 		
 		for(Element i : e.getChildren("Double"))
-			dblMap.put(i.getAttributeValue("name").toString(), Double.parseDouble(i.getText()));
+			dblMap.put(i.getAttributeValue("name"), Double.parseDouble(i.getText()));
 		
 		for(Element i : e.getChildren("Boolean"))
-			boolMap.put(i.getAttributeValue("name").toString(), Boolean.parseBoolean(i.getText()));
+			boolMap.put(i.getAttributeValue("name"), Boolean.parseBoolean(i.getText()));
 		
 		for(Element i : e.getChildren("String"))
-			stringMap.put(i.getAttributeValue("name").toString(), i.getText());
+			stringMap.put(i.getAttributeValue("name"), i.getText());
 		
 		
 		for(Element i : e.getChildren("Suboption"))
-			subMap.put(i.getAttributeValue("name").toString(), new DefaultOptions(i.getChild("Options")));
+			subMap.put(i.getAttributeValue("name"), new DefaultOptions(i.getChild("Options")));
 		
     }
     

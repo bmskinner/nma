@@ -24,6 +24,7 @@ import java.util.UUID;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
+import com.bmskinner.nuclear_morphology.io.XmlSerializable;
 
 /**
  * This stores details of an analysis setup for an IAnalysisDataset.
@@ -32,7 +33,7 @@ import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
  * @since 1.13.3
  *
  */
-public interface IAnalysisOptions extends Serializable {
+public interface IAnalysisOptions extends Serializable, XmlSerializable {
 
     // Standard detection keys are in CellularComponent
     String SIGNAL_GROUP   = "SignalGroup_";

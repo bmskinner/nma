@@ -76,14 +76,11 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
     private Landmark y = null;
     private PriorityAxis priorityAxis = PriorityAxis.Y;
     
-
     /** FISH signals in the nucleus */
     protected ISignalCollection signalCollection = new DefaultSignalCollection();
 
     protected transient boolean canReverse = true;
-    
-    
-    
+
     /**
      * Construct with an ROI, a source image and channel, and the original
      * position in the source image. It sets the immutable original centre of

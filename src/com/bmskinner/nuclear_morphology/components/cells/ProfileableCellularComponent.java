@@ -28,6 +28,7 @@ import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.jdom2.Element;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileCreator;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
@@ -68,7 +69,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
     protected double windowProportion = IAnalysisOptions.DEFAULT_WINDOW_PROPORTION;
 
     /** The profiles for this object */
-    protected volatile Map<ProfileType, ISegmentedProfile> profileMap = new ConcurrentHashMap<>();
+    protected Map<ProfileType, ISegmentedProfile> profileMap = new ConcurrentHashMap<>();
 
     /** The indexes of landmarks in the profiles and border list */
     protected Map<Landmark, Integer> profileLandmarks = new HashMap<>();
@@ -687,7 +688,32 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
         }
     }
     
+    
+    
     @Override
+	public Element toXmlElement() {
+		Element e = super.toXmlElement();
+		
+		e.addContent(new Element("WindowProportion").setText(String.valueOf(windowProportion)));
+
+		for(Entry<ProfileType, ISegmentedProfile> entry : profileMap.entrySet()) {
+			e.addContent(new Element("Profile")
+					.setAttribute("type", entry.getKey().toString())
+					.setContent(entry.getValue().toXmlElement()));
+		}
+		
+		for(Entry<Landmark, Integer> entry : profileLandmarks.entrySet()) {
+			e.addContent(new Element("Landmark")
+					.setAttribute("name", entry.getKey().toString())
+					.setText(String.valueOf(entry.getValue())));
+		}
+		
+		e.addContent(new Element("IsLocked").setText(String.valueOf(isLocked)));
+
+		return e;
+    }
+
+	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();

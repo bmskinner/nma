@@ -33,11 +33,13 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.jdom2.Element;
 
 import com.bmskinner.nuclear_morphology.analysis.detection.BooleanMask;
 import com.bmskinner.nuclear_morphology.analysis.detection.Mask;
@@ -50,6 +52,7 @@ import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
+import com.bmskinner.nuclear_morphology.io.XmlSerializable;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
@@ -73,9 +76,6 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	private static final String SOURCE_IMAGE_IS_NOT_AVAILABLE = "Source image is not available";
 
 	private static final Logger LOGGER = Logger.getLogger(DefaultCellularComponent.class.getName());
-
-	/** the distance from a point to allow for searching an opposite border point*/
-    private static final int OPPOSITE_BORDER_INTERVAL_PIXELS = 4;
     
     /** The pixel spacing between border points after roi interpolation */
 	private static final int INTERPOLATION_INTERVAL_PIXELS = 1;
@@ -92,7 +92,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
      * {@link Imageable.Y_BASE}, {@link Imageable.WIDTH} and
      * {@link Imageable.HEIGHT}
      * 
-     * @see AbstractCellularComponent#getPosition()
+     * @see CellularComponent#getPosition()
      */
     private final int[] position;
 
@@ -121,19 +121,21 @@ public abstract class DefaultCellularComponent implements CellularComponent {
      * The length of a micron in pixels. Allows conversion between pixels and SI
      * units. Set to 1 by default.
      * 
-     * @see AbstractCellularComponent#setScale()
+     * @see CellularComponent#setScale()
      */
     private double scale = DEFAULT_SCALE;
 
     /** The points within the Roi from which the object was detected  */
     private int[] xpoints; 
     private int[] ypoints;
+    
+    
 
     /*
      * TRANSIENT FILEDS
      */
 
-    /**
+	/**
      * The complete border list, offset to an appropriate position for the
      * object
      */
@@ -233,6 +235,48 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 
         makeBorderList();
 
+    }
+    
+    /**
+     * Construct from an XML element. Use for 
+     * unmarshalling. The element should conform
+     * to the specification in {@link XmlSerializable}.
+     * @param e the XML element containing the data.
+     */
+    protected DefaultCellularComponent(Element e) {
+    	id = UUID.fromString(e.getChildText("Id"));
+    	
+    	String[] posString = e.getChildText("Position").replace("[", "").replace("]", "").split(",");
+    	position = new int[posString.length];
+    	for(int i=0; i<posString.length; i++)
+    		position[i] = Integer.parseInt(posString[i]);
+    	
+    	String[] comString = e.getChildText("CentreOfMass").split(",");
+    	centreOfMass = IPoint.makeNew(Float.parseFloat(comString[0]), Float.parseFloat(comString[1]));
+    	
+    	String[] comString2 = e.getChildText("OriginalCentreOfMass").split(",");
+    	originalCentreOfMass = IPoint.makeNew(Float.parseFloat(comString2[0]), Float.parseFloat(comString2[1]));
+
+    	// Add measurements
+    	for(Element el : e.getChild("Measurements").getChildren("Measurement")) {
+    		Measurement m = Measurement.of(el.getAttributeValue("name"));
+    		statistics.put(m, Double.parseDouble(el.getText()));
+    	}
+    	
+    	sourceFile = new File(e.getChildText("SourceFile"));
+    	channel = Integer.parseInt(e.getChildText("Channel"));
+    	scale   = Double.parseDouble(e.getChildText("Scale"));
+    	
+    	String[] xp = e.getChildText("xpoints").replace("[", "").replace("]", "").split(",");
+    	String[] yp = e.getChildText("ypoints").replace("[", "").replace("]", "").split(",");
+
+    	xpoints = new int[xp.length];
+    	ypoints = new int[xp.length];
+    	for(int i=0; i<xp.length; i++) {
+    		xpoints[i] = Integer.parseInt(xp[i]); 
+    		ypoints[i] = Integer.parseInt(yp[i]); 
+    	}
+    	makeBorderList();
     }
 
     /**
@@ -1143,6 +1187,33 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     	return String.format("Bounds: x: %s-%s y: %s-%s", this.getBase().getX(), this.getBase().getX()+this.getBounds().getWidth(), 
     			this.getBase().getY(), this.getBase().getY()+this.getBounds().getHeight());
     }
+    
+    @Override
+	public Element toXmlElement() {
+    	Element e = new Element("Component");
+    	
+    	e.addContent(new Element("Id").setText(id.toString()));
+    	e.addContent(new Element("Position").setText(Arrays.toString(position)));
+    	e.addContent(new Element("CentreOfMass").setText(centreOfMass.getX()+","+centreOfMass.getY()));
+    	e.addContent(new Element("OriginalCentreOfMass").setText(originalCentreOfMass.getX()+","+originalCentreOfMass.getY()));
+    	
+    	Element stats = new Element("Measurements");
+    	for(Entry<Measurement, Double> entry : statistics.entrySet()) {
+    		stats.addContent(new Element("Measurement")
+    				.setAttribute("name", entry.getKey().toString())
+    				.setText(entry.getValue().toString()));
+    	}
+    	e.addContent(stats);
+    	
+    	e.addContent(new Element("SourceFile").setText(sourceFile.getAbsolutePath()));
+    	e.addContent(new Element("Channel").setText(String.valueOf(channel)));
+    	e.addContent(new Element("Scale").setText(String.valueOf(scale)));
+    	
+    	e.addContent(new Element("xpoints").setText(Arrays.toString(xpoints)));
+    	e.addContent(new Element("ypoints").setText(Arrays.toString(ypoints)));
+    	
+    	return e;
+	}
         
     @Override
 	public synchronized int hashCode() {

@@ -45,8 +45,8 @@ public class DefaultCell implements ICell {
     private static final long serialVersionUID = 1L;
 
     protected UUID uuid;
-    protected ICytoplasm           cytoplasm = null;
-    protected List<Nucleus>        nuclei;
+    protected ICytoplasm cytoplasm = null;
+    protected List<Nucleus> nuclei;
 
     /** The statistical values stored for this object */
     private Map<Measurement, Double> statistics;

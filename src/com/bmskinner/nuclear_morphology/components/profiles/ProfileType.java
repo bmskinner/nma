@@ -30,8 +30,7 @@ public enum ProfileType {
     FRANKEN("Franken profile", "Angle", MeasurementDimension.ANGLE), 
     DIAMETER("Diameter profile", "Distance across CoM", MeasurementDimension.LENGTH), 
     RADIUS("Radius profile", "Distance from CoM", MeasurementDimension.LENGTH),
-    ZAHN_ROSKIES("Zahn-Roskies profile", "Angle delta", MeasurementDimension.DIMENSIONLESS),
-    ZAHN_ROSKIE("Zahn-Roskies legacy profile", "Angle delta", MeasurementDimension.DIMENSIONLESS); // typo, only kept for 1.13.5 compat. 
+    ZAHN_ROSKIES("Zahn-Roskies profile", "Angle delta", MeasurementDimension.DIMENSIONLESS);
 
     private String             name;
     private String             label;

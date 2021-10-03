@@ -30,6 +30,7 @@ import com.bmskinner.nuclear_morphology.components.Statistical;
 import com.bmskinner.nuclear_morphology.components.UnavailableBorderPointException;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
+import com.bmskinner.nuclear_morphology.io.XmlSerializable;
 
 import ij.gui.Roi;
 import ij.process.FloatPolygon;
@@ -42,7 +43,8 @@ import ij.process.FloatPolygon;
  * @since 1.11.0
  *
  */
-public interface CellularComponent extends Imageable, Serializable, Rotatable, Statistical {
+public interface CellularComponent extends Imageable, Serializable, XmlSerializable, 
+	Rotatable, Statistical {
 	
     // Standard components
     String WHOLE_CELL             = "Cell";

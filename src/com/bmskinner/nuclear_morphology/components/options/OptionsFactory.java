@@ -21,6 +21,7 @@ import java.io.File;
 import com.bmskinner.nuclear_morphology.analysis.classification.TsneMethod;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
+import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 
 /**
@@ -188,6 +189,7 @@ public class OptionsFactory {
     public static IAnalysisOptions makeDefaultRodentAnalysisOptions(File testFolder) {
     	IAnalysisOptions op = makeAnalysisOptions();
         op.setDetectionOptions(CellularComponent.NUCLEUS, OptionsFactory.makeNucleusDetectionOptions(testFolder));
+        op.setRuleSetCollection(RuleSetCollection.mouseSpermRuleSetCollection());
         return op;
     }
     
@@ -203,6 +205,7 @@ public class OptionsFactory {
         nop.setDouble(HashOptions.MIN_CIRC, 0.1);
         nop.setDouble(HashOptions.MAX_CIRC, 0.9);        
         op.setDetectionOptions(CellularComponent.NUCLEUS, nop);
+        op.setRuleSetCollection(RuleSetCollection.pigSpermRuleSetCollection());
         return op;
     }
     
@@ -219,6 +222,7 @@ public class OptionsFactory {
         nop.setDouble(HashOptions.MAX_CIRC, 1.0);   
         
         op.setDetectionOptions(CellularComponent.NUCLEUS, nop);
+        op.setRuleSetCollection(RuleSetCollection.roundRuleSetCollection());
         return op;
     }
 

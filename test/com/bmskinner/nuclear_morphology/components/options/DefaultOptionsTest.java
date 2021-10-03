@@ -1,4 +1,4 @@
-package com.bmskinner.nuclear_morphology.components;
+package com.bmskinner.nuclear_morphology.components.options;
 
 import static org.junit.Assert.*;
 

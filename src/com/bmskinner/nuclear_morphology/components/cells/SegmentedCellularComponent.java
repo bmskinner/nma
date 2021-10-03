@@ -961,10 +961,8 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 		}
 		
 		@Override
-		public Element toXmlElement() {
-			Element e = new Element(XML_PROFILE);
-			e.setText(Arrays.toString(array));
-			return e;
+		public Element toXmlElement() {			
+			return new Element(XML_PROFILE).setText(Arrays.toString(array));
 		}
 
 		/**
@@ -1706,6 +1704,18 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 				return false;
 			return true;
 		}
+		
+		@Override
+		public Element toXmlElement() {
+			Element e = super.toXmlElement();
+			
+			for(IProfileSegment s : this.getSegments()) {
+				e.addContent(new Element("segment")
+						.setAttribute("id", s.getID().toString())
+						.setText(String.valueOf(s.getStartIndex())));
+			}
+			return e;
+		}
 
 		/**
 		 * Wrap the segment index to allow incrementing of segment indices in loops
@@ -1778,8 +1788,6 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			protected BorderSegmentTree(@NonNull UUID id, int start, int end, @Nullable BorderSegmentTree parent){
 				if(id.equals(IProfileCollection.DEFAULT_SEGMENT_ID) && start!=end)
 					throw new IllegalArgumentException(String.format("Cannot make default segment %s-%s; it would be shorter than the entire profile", startIndex, endIndex));
-//				if(!id.equals(IProfileCollection.DEFAULT_SEGMENT_ID)&&start==end)
-//					throw new IllegalArgumentException(String.format("Cannot make non-default segment %s-%s; it would cover the entire profile", startIndex, endIndex));
 				if(start<0 || start>=size())
 					throw new IllegalArgumentException(String.format("Start index %d is outside profile bounds", start));
 				if(end<0 || end>=size())
@@ -1869,8 +1877,6 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 
 			@Override
 			public void addMergeSource(@NonNull IProfileSegment seg) {
-				if(seg==null)
-					throw new IllegalArgumentException("Segment is null");
 				if(seg.getID().equals(IProfileCollection.DEFAULT_SEGMENT_ID)) // never replace or chain the default segment
 					return;
 				if(seg.getID().equals(id))
@@ -2194,8 +2200,6 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 
 		    @Override
 		    public boolean overlapsBeyondEndpoints(@NonNull IProfileSegment seg){
-		    	if(seg==null)
-		    		return false;
 		    	if(seg.getProfileLength()!=getProfileLength())
 					return false;
 		    	
@@ -2212,8 +2216,6 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 		    
 		    @Override
 		    public boolean overlaps(@NonNull IProfileSegment seg){
-		    	if(seg==null)
-		    		return false;
 		    	if(seg.getProfileLength()!=getProfileLength())
 					return false;
 				return seg.contains(startIndex) 

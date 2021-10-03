@@ -25,11 +25,9 @@ import com.bmskinner.nuclear_morphology.analysis.signals.SignalDetectionMethod;
 import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellAnalysisMethod;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.options.DefaultShellOptions;
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
-import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
-import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.components.signals.DefaultSignalGroup;
@@ -150,9 +148,9 @@ public class TestImageDatasetCreator {
 
     	File testFolder = new File(TestResources.TESTING_MOUSE_SIGNALS_FOLDER).getAbsoluteFile();
     	IAnalysisOptions op = OptionsFactory.makeDefaultRodentAnalysisOptions(testFolder);
-    	IDetectionOptions nucleus = op.getDetectionOptions(CellularComponent.NUCLEUS).get();
-    	nucleus.setMaxSize(12000);
-    	nucleus.setMinSize(4000);
+    	HashOptions nucleus = op.getDetectionOptions(CellularComponent.NUCLEUS).get();
+    	nucleus.setInt(HashOptions.MIN_SIZE_PIXELS, 4000);
+    	nucleus.setInt(HashOptions.MAX_SIZE_PIXELS, 12000);
     	File saveFile = new File(TestResources.MOUSE_SIGNALS_DATASET).getAbsoluteFile();;
     	IAnalysisDataset d = createTestSignalDataset(op, true, false);
     	saveTestDataset(d, saveFile);
@@ -163,9 +161,9 @@ public class TestImageDatasetCreator {
 
     	File testFolder = new File(TestResources.TESTING_PIG_SIGNALS_FOLDER).getAbsoluteFile();
     	IAnalysisOptions op = OptionsFactory.makeDefaultPigAnalysisOptions(testFolder);
-    	IDetectionOptions nucleus = op.getDetectionOptions(CellularComponent.NUCLEUS).get();
-    	nucleus.setMaxSize(15000);
-    	nucleus.setMinSize(4000);
+    	HashOptions nucleus = op.getDetectionOptions(CellularComponent.NUCLEUS).get();
+    	nucleus.setInt(HashOptions.MIN_SIZE_PIXELS, 4000);
+    	nucleus.setInt(HashOptions.MAX_SIZE_PIXELS, 15000);
     	File saveFile = new File(TestResources.PIG_SIGNALS_DATASET).getAbsoluteFile();;
     	
     	IAnalysisDataset d = createTestSignalDataset(op, false, true);
@@ -194,7 +192,7 @@ public class TestImageDatasetCreator {
      */
     private static IAnalysisDataset createTestSignalDataset(IAnalysisOptions op, boolean addRed, boolean addGreen) throws Exception {
     	
-    	File testFolder = op.getDetectionOptions(CellularComponent.NUCLEUS).get().getFolder();
+    	File testFolder = op.getDetectionOptions(CellularComponent.NUCLEUS).get().getFile(HashOptions.DETECTION_FOLDER);
     	if(!testFolder.exists()){
             throw new IllegalArgumentException("Detection folder does not exist");
         }
@@ -209,9 +207,9 @@ public class TestImageDatasetCreator {
 	    	.call();
 
         if(addRed) {
-        	INuclearSignalOptions redOptions = OptionsFactory.makeNuclearSignalOptions(testFolder);
-        	redOptions.setMaxFraction(0.5);
-        	redOptions.setMinSize(5);
+        	HashOptions redOptions = OptionsFactory.makeNuclearSignalOptions(testFolder);
+        	redOptions.setInt(HashOptions.MIN_SIZE_PIXELS, 5);
+        	redOptions.setDouble(HashOptions.MAX_FRACTION, 0.5);
 
         	ISignalGroup red = new DefaultSignalGroup(RED_SIGNAL_NAME);
         	red.setGroupColour(Color.RED);
@@ -221,8 +219,8 @@ public class TestImageDatasetCreator {
         }
         
         if(addGreen) {
-        	 INuclearSignalOptions greenOptions = OptionsFactory.makeNuclearSignalOptions(testFolder);
-             greenOptions.setChannel(1);
+        	HashOptions greenOptions = OptionsFactory.makeNuclearSignalOptions(testFolder);
+             greenOptions.setInt(HashOptions.CHANNEL, 1);
              ISignalGroup green = new DefaultSignalGroup(GREEN_SIGNAL_NAME);
              green.setGroupColour(Color.GREEN);
              d.getCollection().addSignalGroup(GREEN_SIGNAL_ID, green);
@@ -230,7 +228,7 @@ public class TestImageDatasetCreator {
              new SignalDetectionMethod(d, greenOptions, GREEN_SIGNAL_ID).call();
         }
 
-    	new ShellAnalysisMethod(d, new DefaultShellOptions()).call();
+    	new ShellAnalysisMethod(d, OptionsFactory.makeShellAnalysisOptions()).call();
     	return d;
     }
     
@@ -243,7 +241,7 @@ public class TestImageDatasetCreator {
      * @throws Exception if anything goes wrong
      */
     public static IAnalysisDataset createTestDataset(String folder, IAnalysisOptions op, boolean makeClusters) throws Exception {
-    	 if(!op.getDetectionOptions(CellularComponent.NUCLEUS).get().getFolder().exists())
+    	 if(!op.getDetectionOptions(CellularComponent.NUCLEUS).get().getFile(HashOptions.DETECTION_FOLDER).exists())
              throw new IllegalArgumentException("Detection folder does not exist");
 
          IAnalysisDataset d = new NucleusDetectionMethod(folder, op).call().getFirstDataset();
