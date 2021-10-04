@@ -74,7 +74,7 @@ public class HierarchicalTreeSetupDialog extends SubAnalysisSetupDialog {
 	 */
 	protected HierarchicalTreeSetupDialog(final @NonNull IAnalysisDataset dataset, final String title) {
 		super(dataset, title);
-		options = OptionsFactory.makeDefaultClusteringOptions(ClusteringMethod.HIERARCHICAL);
+		options = OptionsFactory.makeDefaultClusteringOptions();
 		createUI();
 
 		// Don't display for subclasses

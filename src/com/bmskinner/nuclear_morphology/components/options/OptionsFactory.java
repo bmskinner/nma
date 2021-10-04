@@ -225,12 +225,12 @@ public class OptionsFactory {
 
     /**
      * Create an instance of the default clustering options using
-     * {@link IClusteringOptions#DEFAULT_CLUSTER_METHOD}
+     * {@link HashOptions#DEFAULT_CLUSTER_METHOD}
      * @return
      */
-    public static HashOptions makeDefaultClusteringOptions(ClusteringMethod method) {
+    public static HashOptions makeDefaultClusteringOptions() {
     	HashOptions o = new DefaultOptions();
-    	o.setString(HashOptions.CLUSTER_METHOD_KEY, method.name());
+    	o.setString(HashOptions.CLUSTER_METHOD_KEY, HashOptions.DEFAULT_CLUSTER_METHOD.name());
 		o.setString(HashOptions.CLUSTER_HIERARCHICAL_METHOD_KEY, HashOptions.DEFAULT_HIERARCHICAL_METHOD.name());
 
 		o.setBoolean(HashOptions.CLUSTER_USE_SIMILARITY_MATRIX_KEY, HashOptions.DEFAULT_USE_SIMILARITY_MATRIX);

@@ -46,7 +46,7 @@ public class ClusteringSetupDialog extends SubAnalysisSetupDialog  {
 
     public ClusteringSetupDialog(final @NonNull IAnalysisDataset dataset) {
         super(dataset, DIALOG_TITLE);
-        options = OptionsFactory.makeDefaultClusteringOptions(HashOptions.DEFAULT_CLUSTER_METHOD);
+        options = OptionsFactory.makeDefaultClusteringOptions();
         createUI();
         packAndDisplay();
     }
