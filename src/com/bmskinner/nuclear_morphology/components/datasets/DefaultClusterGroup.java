@@ -24,8 +24,7 @@ import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
-import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 
 /**
  * This holds the ids of datasets created by clustering, plus the clustering
@@ -40,7 +39,7 @@ public class DefaultClusterGroup implements IClusterGroup {
     private List<UUID> ids = new ArrayList<>();
     
     /** Options used to generate the cluster */
-    private IClusteringOptions options = null;
+    private HashOptions options = null;
     private String name;
     private String newickTree = null;
     private UUID id;
@@ -51,7 +50,7 @@ public class DefaultClusterGroup implements IClusterGroup {
      * @param name the group name (informal)
      * @param options the options used to create the cluster
      */
-    public DefaultClusterGroup(@NonNull String name, @NonNull IClusteringOptions options) {
+    public DefaultClusterGroup(@NonNull String name, @NonNull HashOptions options) {
         this.name = name;
         this.options = options;
         this.id = UUID.randomUUID();
@@ -64,7 +63,7 @@ public class DefaultClusterGroup implements IClusterGroup {
      * @param options the options used to create the cluster
      * @param tree the Newick tree for the cluster as a String
      */
-    public DefaultClusterGroup(@NonNull String name, @NonNull IClusteringOptions options, @NonNull String tree) {
+    public DefaultClusterGroup(@NonNull String name, @NonNull HashOptions options, @NonNull String tree) {
         this(name, options);
         this.newickTree = tree;
     }
@@ -75,7 +74,7 @@ public class DefaultClusterGroup implements IClusterGroup {
      */
     public DefaultClusterGroup(@NonNull IClusterGroup template) {
     	if(template.getOptions().isPresent()){
-    		options = OptionsFactory.makeClusteringOptions(template.getOptions().get());
+    		options = template.getOptions().get().duplicate();
     	} else {
     		options = null;
     	}
@@ -137,7 +136,7 @@ public class DefaultClusterGroup implements IClusterGroup {
     }
 
     @Override
-    public Optional<IClusteringOptions> getOptions() {
+    public Optional<HashOptions> getOptions() {
         return Optional.ofNullable(options);
     }
 

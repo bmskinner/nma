@@ -21,10 +21,9 @@ import javax.swing.SpinnerModel;
 import javax.swing.SpinnerNumberModel;
 
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.options.ClusteringMethod;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
-import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
-import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions.ClusteringMethod;
-import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions.HierarchicalClusterMethod;
+import com.bmskinner.nuclear_morphology.components.options.HierarchicalClusterMethod;
 
 /**
  * Options panel for clustering setup
@@ -56,10 +55,10 @@ public class ClusteringMethodSelectionPanel  extends OptionsPanel implements Act
 
 	@Override
 	protected void setDefaults() {
-		options.setString(IClusteringOptions.CLUSTER_METHOD_KEY, ClusteringMethod.HIERARCHICAL.name());
-		options.setInt(IClusteringOptions.MANUAL_CLUSTER_NUMBER_KEY, IClusteringOptions.DEFAULT_MANUAL_CLUSTER_NUMBER);
-		options.setString(IClusteringOptions.HIERARCHICAL_METHOD_KEY, IClusteringOptions.DEFAULT_HIERARCHICAL_METHOD.name());
-		options.setInt(IClusteringOptions.EM_ITERATIONS_KEY, IClusteringOptions.DEFAULT_EM_ITERATIONS);
+		options.setString(HashOptions.CLUSTER_METHOD_KEY, ClusteringMethod.HIERARCHICAL.name());
+		options.setInt(HashOptions.CLUSTER_MANUAL_CLUSTER_NUMBER_KEY, HashOptions.DEFAULT_MANUAL_CLUSTER_NUMBER);
+		options.setString(HashOptions.CLUSTER_HIERARCHICAL_METHOD_KEY, HashOptions.DEFAULT_HIERARCHICAL_METHOD.name());
+		options.setInt(HashOptions.CLUSTER_EM_ITERATIONS_KEY, HashOptions.DEFAULT_EM_ITERATIONS);
 	}
 
 	@Override
@@ -115,13 +114,13 @@ public class ClusteringMethodSelectionPanel  extends OptionsPanel implements Act
 		List<Component> fields = new ArrayList<>();
 
 		clusterMethodBox = new JComboBox<>(HierarchicalClusterMethod.values());
-		clusterMethodBox.setSelectedItem(IClusteringOptions.DEFAULT_HIERARCHICAL_METHOD);
+		clusterMethodBox.setSelectedItem(HashOptions.DEFAULT_HIERARCHICAL_METHOD);
 		clusterMethodBox.addActionListener(this);
 
 		labels.add(new JLabel(CLUSTER_METHOD_LBL));
 		fields.add(clusterMethodBox);
 
-		SpinnerModel model = new SpinnerNumberModel(IClusteringOptions.DEFAULT_MANUAL_CLUSTER_NUMBER, // initial
+		SpinnerModel model = new SpinnerNumberModel(HashOptions.DEFAULT_MANUAL_CLUSTER_NUMBER, // initial
 				// value
 				1, // min
 				100, // max
@@ -134,7 +133,7 @@ public class ClusteringMethodSelectionPanel  extends OptionsPanel implements Act
 		fields.add(clusterNumberSpinner);
 
 		clusterNumberSpinner.addChangeListener(e -> 
-			addIntToOptions(clusterNumberSpinner, options, IClusteringOptions.MANUAL_CLUSTER_NUMBER_KEY)
+			addIntToOptions(clusterNumberSpinner, options, HashOptions.CLUSTER_MANUAL_CLUSTER_NUMBER_KEY)
 		);
 
 		addLabelTextRows(labels, fields, layout, panel);
@@ -151,7 +150,7 @@ public class ClusteringMethodSelectionPanel  extends OptionsPanel implements Act
 		List<JLabel> labels = new ArrayList<>();
 		List<Component> fields = new ArrayList<>();
 
-		SpinnerModel model = new SpinnerNumberModel(IClusteringOptions.DEFAULT_EM_ITERATIONS, // initial
+		SpinnerModel model = new SpinnerNumberModel(HashOptions.DEFAULT_EM_ITERATIONS, // initial
 				// value
 				1, // min
 				1000, // max
@@ -159,7 +158,7 @@ public class ClusteringMethodSelectionPanel  extends OptionsPanel implements Act
 
 		iterationsSpinner = new JSpinner(model);
 		iterationsSpinner.addChangeListener(e -> 
-				addIntToOptions(iterationsSpinner, options, IClusteringOptions.EM_ITERATIONS_KEY)
+				addIntToOptions(iterationsSpinner, options, HashOptions.CLUSTER_EM_ITERATIONS_KEY)
 		);
 
 		labels.add(new JLabel(EM_ITERATIONS_LBL));
@@ -180,16 +179,16 @@ public class ClusteringMethodSelectionPanel  extends OptionsPanel implements Act
 
 			clusterNumberSpinner.setEnabled(true);
 
-			options.setString(IClusteringOptions.CLUSTER_METHOD_KEY, ClusteringMethod.HIERARCHICAL.name());
-			options.setInt(IClusteringOptions.MANUAL_CLUSTER_NUMBER_KEY, (Integer) clusterNumberSpinner.getValue());
-			options.setString(IClusteringOptions.HIERARCHICAL_METHOD_KEY, ((HierarchicalClusterMethod) clusterMethodBox.getSelectedItem()).name());
+			options.setString(HashOptions.CLUSTER_METHOD_KEY, ClusteringMethod.HIERARCHICAL.name());
+			options.setInt(HashOptions.CLUSTER_MANUAL_CLUSTER_NUMBER_KEY, (Integer) clusterNumberSpinner.getValue());
+			options.setString(HashOptions.CLUSTER_HIERARCHICAL_METHOD_KEY, ((HierarchicalClusterMethod) clusterMethodBox.getSelectedItem()).name());
 		}
 
 		if (emBtn.isSelected()) {
 			CardLayout cl = (CardLayout) (cardPanel.getLayout());
 			cl.show(cardPanel, EM_CLUSTERING_LBL);
-			options.setString(IClusteringOptions.CLUSTER_METHOD_KEY, ClusteringMethod.EM.name());
-			options.setInt(IClusteringOptions.EM_ITERATIONS_KEY, (Integer) iterationsSpinner.getValue());
+			options.setString(HashOptions.CLUSTER_METHOD_KEY, ClusteringMethod.EM.name());
+			options.setInt(HashOptions.CLUSTER_EM_ITERATIONS_KEY, (Integer) iterationsSpinner.getValue());
 		}
 	}
 }

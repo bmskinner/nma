@@ -52,10 +52,9 @@ import com.bmskinner.nuclear_morphology.components.datasets.IClusterGroup;
 import com.bmskinner.nuclear_morphology.components.datasets.VirtualCellCollection;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
+import com.bmskinner.nuclear_morphology.components.options.ClusteringMethod;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
-import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions.ClusteringMethod;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
@@ -1116,15 +1115,15 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
     
     private String createDimensionalPlotString(IClusterGroup group) {
     	StringBuilder builder = new StringBuilder();
-    	Optional<IClusteringOptions> opn = group.getOptions();
+    	Optional<HashOptions> opn = group.getOptions();
     	
     	if(!opn.isPresent()) {
     		builder.append(Labels.NA);
     		return builder.toString();
     	}
 
-        IClusteringOptions op = opn.get();
-        if(op.getBoolean(IClusteringOptions.USE_TSNE_KEY) || op.getBoolean(IClusteringOptions.USE_PCA_KEY)) {
+    	HashOptions op = opn.get();
+        if(op.getBoolean(HashOptions.CLUSTER_USE_TSNE_KEY) || op.getBoolean(HashOptions.CLUSTER_USE_PCA_KEY)) {
         	builder.append(Labels.Clusters.VIEW_PLOT);
         }
 
@@ -1136,26 +1135,33 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
     
     private String createClusterParameterString(IClusterGroup group) {
     	StringBuilder builder = new StringBuilder();
-    	Optional<IClusteringOptions> opn = group.getOptions();
+    	Optional<HashOptions> opn = group.getOptions();
     	
     	if(!opn.isPresent()) {
     		builder.append(Labels.NA);
     		return builder.toString();
     	}
 
-        IClusteringOptions op = opn.get();
+        HashOptions op = opn.get();
 
         for(ProfileType t : ProfileType.displayValues())
         	if(op.getBoolean(t.toString()))
         		builder.append(t+Io.NEWLINE);
  
         for (Measurement stat : Measurement.getNucleusStats())
-        	if(op.isIncludeStatistic(stat))
+        	if(op.getBoolean(stat.toString()))
         		builder.append(stat.toString()+Io.NEWLINE);
 
-        for (UUID id : op.getSegments())
-        	if(op.isIncludeSegment(id))
-        		builder.append("Segment_"+id.toString()+Io.NEWLINE);
+        for(String s : op.getStringKeys()) {
+        	try {
+        		UUID id = UUID.fromString(s);
+        		if(op.getBoolean(id.toString()))
+            		builder.append("Segment_"+id.toString()+Io.NEWLINE);
+        	} catch(IllegalArgumentException e) {
+        		//not a UUID, skip
+        	}
+        }
+        	
         
         String s = builder.toString();
         if(s.equals(EMPTY_STRING))
@@ -1166,24 +1172,24 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
     
     private String createDimensionalReductionString(IClusterGroup group) {
     	StringBuilder builder = new StringBuilder();
-    	Optional<IClusteringOptions> opn = group.getOptions();
+    	Optional<HashOptions> opn = group.getOptions();
     	
     	if(!opn.isPresent()) {
     		builder.append(Labels.NA);
     		return builder.toString();
     	}
     	
-        IClusteringOptions op = opn.get();
-        if(op.getBoolean(IClusteringOptions.USE_TSNE_KEY)) {
+        HashOptions op = opn.get();
+        if(op.getBoolean(HashOptions.CLUSTER_USE_TSNE_KEY)) {
         	builder.append(Labels.Clusters.TSNE+Io.NEWLINE);
         	builder.append(Labels.Clusters.TSNE_PERPLEXITY+": "+op.getDouble(TsneMethod.PERPLEXITY_KEY)+Io.NEWLINE);
         	builder.append(Labels.Clusters.TSNE_MAX_ITER+": "+op.getInt(TsneMethod.MAX_ITERATIONS_KEY));
         }
         
-        if(op.getBoolean(IClusteringOptions.USE_PCA_KEY)) {
+        if(op.getBoolean(HashOptions.CLUSTER_USE_PCA_KEY)) {
         	builder.append(Labels.Clusters.PCA+Io.NEWLINE);
         	builder.append(Labels.Clusters.PCA_VARIANCE+": "+op.getDouble(PrincipalComponentAnalysis.PROPORTION_VARIANCE_KEY)+Io.NEWLINE);
-        	builder.append(Labels.Clusters.PCA_NUM_PCS+": "+op.getInt(IClusteringOptions.NUM_PCS_KEY)+Io.NEWLINE);
+        	builder.append(Labels.Clusters.PCA_NUM_PCS+": "+op.getInt(HashOptions.CLUSTER_NUM_PCS_KEY)+Io.NEWLINE);
         }
 
         String s = builder.toString();
@@ -1194,23 +1200,23 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
     
     private String createClusterMethodString(IClusterGroup group) {
     	StringBuilder builder = new StringBuilder();
-    	Optional<IClusteringOptions> opn = group.getOptions();
+    	Optional<HashOptions> opn = group.getOptions();
     	
     	if(!opn.isPresent()) {
     		builder.append(Labels.NA);
     		return builder.toString();
     	}
     	
-    	IClusteringOptions op = opn.get();
+    	HashOptions op = opn.get();
     	
-    	ClusteringMethod method = op.getClusteringMethod();
+    	ClusteringMethod method = ClusteringMethod.valueOf(op.getString(HashOptions.CLUSTER_METHOD_KEY));
     	builder.append(method+Io.NEWLINE);
     	if(method.equals(ClusteringMethod.EM)) {
-    		builder.append(op.getIterations()+" iterations"+Io.NEWLINE);
+    		builder.append(op.getInt(HashOptions.CLUSTER_EM_ITERATIONS_KEY)+" iterations"+Io.NEWLINE);
     	}
     	
     	if(method.equals(ClusteringMethod.HIERARCHICAL)) {
-    		builder.append("Distance: "+op.getHierarchicalMethod()+Io.NEWLINE);
+    		builder.append("Distance: "+op.getString(HashOptions.CLUSTER_HIERARCHICAL_METHOD_KEY)+Io.NEWLINE);
     	}
         return builder.toString();
     }

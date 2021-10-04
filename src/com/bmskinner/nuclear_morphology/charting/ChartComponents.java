@@ -22,7 +22,7 @@ import java.awt.Shape;
 
 import org.jfree.chart.event.MarkerChangeListener;
 import org.jfree.chart.plot.ValueMarker;
-import org.jfree.util.ShapeUtilities;
+import org.jfree.chart.util.ShapeUtils;
 
 public class ChartComponents {
 
@@ -73,5 +73,5 @@ public class ChartComponents {
         public void addChangeListener(MarkerChangeListener listener){}
     };
 
-    public static final Shape DEFAULT_POINT_SHAPE = ShapeUtilities.createDiamond(5);
+    public static final Shape DEFAULT_POINT_SHAPE = ShapeUtils.createDiamond(5);
 }

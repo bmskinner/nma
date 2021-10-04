@@ -21,6 +21,7 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
+import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult.ShrinkType;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.io.XmlSerializable;
@@ -157,6 +158,35 @@ public interface HashOptions extends Serializable, XmlSerializable {
 	
 	int DEFAULT_SHELL_COUNT = 5;
 	ShrinkType DEFAULT_EROSION_METHOD = ShrinkType.AREA;
+	
+	/** Constants relating to clustering options **/
+	String CLUSTER_USE_SIMILARITY_MATRIX_KEY = "USE_SIMILARITY_MATRIX";
+	String CLUSTER_MANUAL_CLUSTER_NUMBER_KEY = "MANUAL_CLUSTER_NUMBER";
+	String CLUSTER_METHOD_KEY        = "CLUSTER_METHOD";
+	String CLUSTER_HIERARCHICAL_METHOD_KEY   = "HIERARCHICAL_METHOD";
+	String CLUSTER_EM_ITERATIONS_KEY         = "EM_ITERATIONS";
+	String CLUSTER_MODALITY_REGIONS_KEY      = "MODALITY_REGIONS";
+	String CLUSTER_USE_MODALITY_KEY          = "USE_MODALITY";
+	String CLUSTER_INCLUDE_PROFILE_KEY       = "INCLUDE_PROFILE";
+	String CLUSTER_INCLUDE_MESH_KEY          = "INCLUDE_MESH";
+	String CLUSTER_PROFILE_TYPE_KEY          = "PROFILE_TYPE";
+	String CLUSTER_USE_TSNE_KEY              = "Use t-SNE";
+	String CLUSTER_USE_PCA_KEY               = "Use PCA";
+	String CLUSTER_NUM_PCS_KEY               = "Number of PCs";
+
+    int                       DEFAULT_MANUAL_CLUSTER_NUMBER = 2;
+    ClusteringMethod          DEFAULT_CLUSTER_METHOD        = ClusteringMethod.HIERARCHICAL;
+    HierarchicalClusterMethod DEFAULT_HIERARCHICAL_METHOD   = HierarchicalClusterMethod.WARD;
+    ProfileType               DEFAULT_PROFILE_TYPE          = ProfileType.ANGLE;
+    int                       DEFAULT_EM_ITERATIONS         = 100;
+    int                       DEFAULT_MODALITY_REGIONS      = 2;
+    boolean                   DEFAULT_USE_MODALITY          = true;
+    boolean                   DEFAULT_USE_SIMILARITY_MATRIX = false;
+    boolean                   DEFAULT_INCLUDE_PROFILE       = true;
+    boolean                   DEFAULT_INCLUDE_MESH          = false;
+    boolean                   DEFAULT_USE_TSNE              = false;
+    boolean                   DEFAULT_USE_PCA               = false;
+	
 	
 	/**
 	 * Create a copy of this options object

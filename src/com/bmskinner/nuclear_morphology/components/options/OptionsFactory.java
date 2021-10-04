@@ -20,6 +20,7 @@ import java.io.File;
 
 import com.bmskinner.nuclear_morphology.analysis.classification.TsneMethod;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 
@@ -227,17 +228,23 @@ public class OptionsFactory {
      * {@link IClusteringOptions#DEFAULT_CLUSTER_METHOD}
      * @return
      */
-    public static IClusteringOptions makeClusteringOptions() {
-        return new DefaultClusteringOptions(IClusteringOptions.DEFAULT_CLUSTER_METHOD);
-    }
+    public static HashOptions makeDefaultClusteringOptions(ClusteringMethod method) {
+    	HashOptions o = new DefaultOptions();
+    	o.setString(HashOptions.CLUSTER_METHOD_KEY, method.name());
+		o.setString(HashOptions.CLUSTER_HIERARCHICAL_METHOD_KEY, HashOptions.DEFAULT_HIERARCHICAL_METHOD.name());
 
-    /**
-     * Create an instance of clustering options based on the given template
-     * @param template the tamplate options
-     * @return
-     */
-    public static IClusteringOptions makeClusteringOptions(IClusteringOptions template) {
-        return new DefaultClusteringOptions(template);
+		o.setBoolean(HashOptions.CLUSTER_USE_SIMILARITY_MATRIX_KEY, HashOptions.DEFAULT_USE_SIMILARITY_MATRIX);
+		o.setBoolean(HashOptions.CLUSTER_INCLUDE_MESH_KEY, HashOptions.DEFAULT_INCLUDE_MESH);
+		o.setBoolean(HashOptions.CLUSTER_USE_TSNE_KEY, HashOptions.DEFAULT_USE_TSNE);
+
+		o.setInt(HashOptions.CLUSTER_EM_ITERATIONS_KEY, HashOptions.DEFAULT_EM_ITERATIONS);
+		o.setInt(HashOptions.CLUSTER_MANUAL_CLUSTER_NUMBER_KEY, HashOptions.DEFAULT_MANUAL_CLUSTER_NUMBER);
+
+		for (Measurement stat : Measurement.getRoundNucleusStats())
+			o.setBoolean(stat.toString(), false);
+		
+		o.setBoolean(HashOptions.DEFAULT_PROFILE_TYPE.toString(), HashOptions.DEFAULT_INCLUDE_PROFILE);
+		return o;
     }
     
     /**

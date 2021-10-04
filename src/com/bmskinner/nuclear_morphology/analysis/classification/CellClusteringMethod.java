@@ -26,7 +26,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nuclear_morphology.analysis.SingleDatasetAnalysisMethod;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
-import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 
 import weka.core.Instance;
 import weka.core.Instances;
@@ -42,9 +42,9 @@ public abstract class CellClusteringMethod extends SingleDatasetAnalysisMethod {
 	
 	protected final Map<Instance, UUID> cellToInstanceMap = new HashMap<>();
 	protected final ICellCollection    collection;
-	protected final IClusteringOptions options;
+	protected final HashOptions options;
 	
-	public CellClusteringMethod(@NonNull IAnalysisDataset dataset, @NonNull IClusteringOptions options) {
+	public CellClusteringMethod(@NonNull IAnalysisDataset dataset, @NonNull HashOptions options) {
         super(dataset);
         this.collection = dataset.getCollection();
         this.options = options;

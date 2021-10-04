@@ -40,8 +40,9 @@ import com.bmskinner.nuclear_morphology.components.measure.DefaultMeasurement;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.measure.MeasurementDimension;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
-import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions.ClusteringMethod;
+import com.bmskinner.nuclear_morphology.components.options.ClusteringMethod;
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
+import com.bmskinner.nuclear_morphology.components.options.HierarchicalClusterMethod;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import weka.clusterers.Clusterer;
@@ -74,7 +75,7 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
      * @param dataset the analysis dataset with nuclei to cluster
      * @param options the clustering options
      */
-    public NucleusClusteringMethod(@NonNull IAnalysisDataset dataset, @NonNull IClusteringOptions options) {
+    public NucleusClusteringMethod(@NonNull IAnalysisDataset dataset, @NonNull HashOptions options) {
         super(dataset, options);
     }
 
@@ -128,7 +129,7 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
         LOGGER.fine("Profiles copied to all clusters");
         
         // Move tSNE values to their cluster group if needed
-        if(options.getBoolean(IClusteringOptions.USE_TSNE_KEY)) {
+        if(options.getBoolean(HashOptions.CLUSTER_USE_TSNE_KEY)) {
         	for(ICell c : dataset.getCollection()) {
         		for(Nucleus n : c.getNuclei()) {
         			n.setStatistic(new DefaultMeasurement("TSNE_1_"+group.getId(), MeasurementDimension.DIMENSIONLESS), n.getStatistic(Measurement.TSNE_1));
@@ -140,7 +141,7 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
         }
         
      // Move PCA values to their cluster group if needed        
-        if(options.getBoolean(IClusteringOptions.USE_PCA_KEY)) {
+        if(options.getBoolean(HashOptions.CLUSTER_USE_PCA_KEY)) {
         	for(ICell c : dataset.getCollection()) {
         		for(Nucleus n : c.getNuclei()) {
         			int nPcs = (int) n.getStatistic(Measurement.PCA_N);
@@ -179,13 +180,13 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
             Instances instances = makeInstances();
 
             // create the clusterer to run on the Instances
-            String[] optionArray = this.options.getOptions();
+            String[] optionArray = createClustererOptions();
 
             for (String s : optionArray) {
                 LOGGER.finest( "Clusterer options: " + s);
             }
-
-            if (options.getClusteringMethod().equals(ClusteringMethod.HIERARCHICAL)) {
+            ClusteringMethod cm = ClusteringMethod.valueOf(options.getString(HashOptions.CLUSTER_METHOD_KEY));
+            if (cm.equals(ClusteringMethod.HIERARCHICAL)) {
                 HierarchicalClusterer hc1 = new HierarchicalClusterer();
 
                 hc1.setOptions(optionArray);
@@ -198,18 +199,12 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
                 LOGGER.finest(newickTree);
                 
                 // Create a new clusterer with the desired number of clusters
-                
-//                HierarchicalClusterer hc2 = new HierarchicalClusterer();
-
-//                hc2.setOptions(optionArray); // set the options
-//                hc2.setDistanceFunction(new EuclideanDistance());
-//                hc2.setDistanceIsBranchLength(true);
-                hc1.setNumClusters(options.getClusterNumber());
+                hc1.setNumClusters(options.getInt(HashOptions.CLUSTER_MANUAL_CLUSTER_NUMBER_KEY));
                 hc1.buildClusterer(instances); // build the clusterer
                 assignClusters(hc1);
             }
 
-            if (options.getClusteringMethod().equals(ClusteringMethod.EM)) {
+            if (cm.equals(ClusteringMethod.EM)) {
                 EM clusterer = new EM(); // new instance of clusterer
                 clusterer.setOptions(optionArray); // set the options
                 clusterer.buildClusterer(instances); // build the clusterer

@@ -38,7 +38,6 @@ import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
-import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
@@ -119,7 +118,7 @@ public class PrincipalComponentAnalysis extends SingleDatasetAnalysisMethod {
 				LOGGER.fine("No nucleus in collection for instance "+i+" with id "+nucleusId);
 		}
 
-		options.setInt(IClusteringOptions.NUM_PCS_KEY, expectedPcs);
+		options.setInt(HashOptions.CLUSTER_NUM_PCS_KEY, expectedPcs);
 
 		return new DefaultAnalysisResult(dataset);
 	}

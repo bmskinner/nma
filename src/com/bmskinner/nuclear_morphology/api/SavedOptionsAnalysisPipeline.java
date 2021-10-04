@@ -45,7 +45,7 @@ import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.components.signals.DefaultSignalGroup;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
@@ -284,8 +284,8 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod impleme
 	
 	private void createClusteringMethods(List<IAnalysisDataset> datasets) throws Exception {
 		OptionsXMLReader r = new OptionsXMLReader(xmlFile);
-		List<IClusteringOptions> clusterOptions = r.readClusteringOptions();
-		 for(IClusteringOptions cluster : clusterOptions) {
+		List<HashOptions> clusterOptions = r.readClusteringOptions();
+		 for(HashOptions cluster : clusterOptions) {
 			 for(IAnalysisDataset dataset : datasets) {
 				 methodsToRun.add(new NucleusClusteringMethod(dataset, cluster));
 			 }

@@ -24,7 +24,6 @@ import com.bmskinner.nuclear_morphology.analysis.classification.PrincipalCompone
 import com.bmskinner.nuclear_morphology.analysis.classification.TsneMethod;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
-import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -56,8 +55,8 @@ public class DimensionalReductionSelectionPanel extends OptionsPanel {
 	@Override
 	protected void setDefaults() {
 		options.set(OptionsFactory.makeDefaultTsneOptions());
-		options.setBoolean(IClusteringOptions.USE_TSNE_KEY,  IClusteringOptions.DEFAULT_USE_TSNE);
-		options.setBoolean(IClusteringOptions.USE_PCA_KEY,  IClusteringOptions.DEFAULT_USE_PCA);
+		options.setBoolean(HashOptions.CLUSTER_USE_TSNE_KEY,  HashOptions.DEFAULT_USE_TSNE);
+		options.setBoolean(HashOptions.CLUSTER_USE_PCA_KEY,  HashOptions.DEFAULT_USE_PCA);
 	}
 
 	@Override
@@ -89,7 +88,7 @@ public class DimensionalReductionSelectionPanel extends OptionsPanel {
 		
 		JCheckBox noneBox = new JCheckBox();
 		noneBox.setForeground(Color.DARK_GRAY);
-		noneBox.setSelected( !(options.getBoolean(IClusteringOptions.USE_TSNE_KEY) || options.getBoolean(IClusteringOptions.USE_PCA_KEY)));
+		noneBox.setSelected( !(options.getBoolean(HashOptions.CLUSTER_USE_TSNE_KEY) || options.getBoolean(HashOptions.CLUSTER_USE_PCA_KEY)));
 		JLabel noneLabel = new JLabel("None");
 		labels.add(noneLabel);
 		fields.add(noneBox);
@@ -97,26 +96,26 @@ public class DimensionalReductionSelectionPanel extends OptionsPanel {
 		JCheckBox tSNEBox = new JCheckBox();
 		tSNEBox.setForeground(Color.DARK_GRAY);
 		
-		tSNEBox.setSelected(options.getBoolean(IClusteringOptions.USE_TSNE_KEY));
+		tSNEBox.setSelected(options.getBoolean(HashOptions.CLUSTER_USE_TSNE_KEY));
 		JLabel label = new JLabel(Labels.Clusters.TSNE);
 
 		JSpinner iterationsSpinner = makeMaxIterationsSpinner();
-		iterationsSpinner.setEnabled(options.getBoolean(IClusteringOptions.USE_TSNE_KEY));
+		iterationsSpinner.setEnabled(options.getBoolean(HashOptions.CLUSTER_USE_TSNE_KEY));
 		JSpinner perplexitySpinner = makePerplexitySpinner();
-		perplexitySpinner.setEnabled(options.getBoolean(IClusteringOptions.USE_TSNE_KEY));
+		perplexitySpinner.setEnabled(options.getBoolean(HashOptions.CLUSTER_USE_TSNE_KEY));
 		
 		
 		// Add checkbox listeners last so we can reference the spinners
 		
 		tSNEBox.addChangeListener(e->{
-			options.setBoolean(IClusteringOptions.USE_TSNE_KEY, tSNEBox.isSelected());
+			options.setBoolean(HashOptions.CLUSTER_USE_TSNE_KEY, tSNEBox.isSelected());
 			iterationsSpinner.setEnabled(tSNEBox.isSelected());
 			perplexitySpinner.setEnabled(tSNEBox.isSelected());
 		});
 		
 		noneBox.addActionListener(e->{
-			options.setBoolean(IClusteringOptions.USE_PCA_KEY, false);
-			options.setBoolean(IClusteringOptions.USE_TSNE_KEY, false);
+			options.setBoolean(HashOptions.CLUSTER_USE_PCA_KEY, false);
+			options.setBoolean(HashOptions.CLUSTER_USE_TSNE_KEY, false);
 			iterationsSpinner.setEnabled(tSNEBox.isSelected());
 			perplexitySpinner.setEnabled(tSNEBox.isSelected());
 		});
@@ -133,14 +132,14 @@ public class DimensionalReductionSelectionPanel extends OptionsPanel {
 		
 		
 		JCheckBox pcaBox = new JCheckBox();
-		pcaBox.setSelected(options.getBoolean(IClusteringOptions.USE_PCA_KEY));
+		pcaBox.setSelected(options.getBoolean(HashOptions.CLUSTER_USE_PCA_KEY));
 		JLabel pcaLbl = new JLabel(Labels.Clusters.PCA);
 		
 		JSpinner pcaSpinner = makePcaVarianceSpinner();
-		pcaSpinner.setEnabled(options.getBoolean(IClusteringOptions.USE_PCA_KEY));
+		pcaSpinner.setEnabled(options.getBoolean(HashOptions.CLUSTER_USE_PCA_KEY));
 		
 		pcaBox.addChangeListener(e->{
-			options.setBoolean(IClusteringOptions.USE_PCA_KEY, pcaBox.isSelected());
+			options.setBoolean(HashOptions.CLUSTER_USE_PCA_KEY, pcaBox.isSelected());
 			pcaSpinner.setEnabled(pcaBox.isSelected());
 		});
 		
