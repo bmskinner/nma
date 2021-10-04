@@ -40,7 +40,7 @@ import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.IClusterGroup;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
-import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.gui.dialogs.TsneDialog.ColourByType;
@@ -191,7 +191,7 @@ public class ScatterChartFactory extends AbstractChartFactory {
     		XYDataset ds = ScatterChartDatasetCreator.createTsneScatterDataset(d, type, plotGroup, colourGroup);
     		
     		//TODO: add an input parameter for which method we want to display
-    		String prefix = plotGroup.getOptions().get().getBoolean(IClusteringOptions.USE_PCA_KEY) ? "PC " : "t-SNE ";
+    		String prefix = plotGroup.getOptions().get().getBoolean(HashOptions.CLUSTER_USE_PCA_KEY) ? "PC " : "t-SNE ";
     		
     		String xLabel = prefix+"1";
     		String yLabel = prefix+"2";

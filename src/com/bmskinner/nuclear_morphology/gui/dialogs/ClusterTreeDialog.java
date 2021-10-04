@@ -56,7 +56,7 @@ import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.datasets.IClusterGroup;
 import com.bmskinner.nuclear_morphology.components.datasets.VirtualCellCollection;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nuclear_morphology.gui.DefaultInputSupplier;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
@@ -539,8 +539,8 @@ public class ClusterTreeDialog extends MessagingDialog {
      * @return
      */
     private IClusterGroup makeNewClusterGroup(List<IAnalysisDataset> list) {
-        IClusteringOptions newOptions = group.getOptions().get().duplicate();
-        newOptions.setClusterNumber(list.size());
+        HashOptions newOptions = group.getOptions().get().duplicate();
+        newOptions.setInt(HashOptions.CLUSTER_MANUAL_CLUSTER_NUMBER_KEY, list.size());
 
         int clusterNumber = dataset.getMaxClusterGroupNumber() + 1;
         IClusterGroup newGroup = new DefaultClusterGroup(IClusterGroup.CLUSTER_GROUP_PREFIX + "_" + clusterNumber, newOptions,

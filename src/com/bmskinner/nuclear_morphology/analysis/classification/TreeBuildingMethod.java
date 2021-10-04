@@ -40,8 +40,9 @@ import com.bmskinner.nuclear_morphology.components.datasets.IClusterGroup;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
-import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions.ClusteringMethod;
+import com.bmskinner.nuclear_morphology.components.options.ClusteringMethod;
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
+import com.bmskinner.nuclear_morphology.components.options.HierarchicalClusterMethod;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
@@ -67,7 +68,7 @@ public class TreeBuildingMethod extends CellClusteringMethod {
      * @param dataset
      * @param options
      */
-    public TreeBuildingMethod(@NonNull IAnalysisDataset dataset, @NonNull IClusteringOptions options) {
+    public TreeBuildingMethod(@NonNull IAnalysisDataset dataset, @NonNull HashOptions options) {
         super(dataset, options);
     }
 
@@ -91,6 +92,26 @@ public class TreeBuildingMethod extends CellClusteringMethod {
         return newickTree;
     }
 
+    protected String[] createClustererOptions() {
+    	ClusteringMethod cm = ClusteringMethod.from(options);
+    	if(cm.equals(ClusteringMethod.HIERARCHICAL)) {
+    		String[] o = new String[4];
+            o[0] = "-N"; // number of clusters
+            o[1] = String.valueOf(options.getInt(HashOptions.CLUSTER_MANUAL_CLUSTER_NUMBER_KEY));
+            o[2] = "-L"; // algorithm
+            HierarchicalClusterMethod hm = HierarchicalClusterMethod.valueOf(options.getString(HashOptions.CLUSTER_HIERARCHICAL_METHOD_KEY));
+            o[3] =  hm.code();
+            return o;
+    	}
+    	
+    	if (cm.equals(ClusteringMethod.EM)) {
+    		String[] o = new String[2];
+            o[0] = "-I"; // max. iterations
+            o[1] = String.valueOf(options.getInt(HashOptions.CLUSTER_EM_ITERATIONS_KEY));
+            return o;
+        }
+    	return null;
+    }
 
 
     /**
@@ -107,15 +128,9 @@ public class TreeBuildingMethod extends CellClusteringMethod {
             Instances instances = makeInstances();
 
             // create the clusterer to run on the Instances
-            String[] optionArray = options.getOptions();
+            String[] optionArray = createClustererOptions();
 
             try {
-
-                LOGGER.finer( "Clusterer is type " + options.getClusteringMethod());
-                for (String s : optionArray) {
-                    LOGGER.finest( "Clusterer options: " + s);
-                }
-
                 HierarchicalClusterer clusterer = new HierarchicalClusterer();
 
                 clusterer.setOptions(optionArray); // set the options
@@ -146,7 +161,7 @@ public class TreeBuildingMethod extends CellClusteringMethod {
     	ArrayList<Attribute> attributes = new ArrayList<>();
     	attributes.add(new Attribute("tSNE_X"));
     	attributes.add(new Attribute("tSNE_Y"));
-    	 if (options.getClusteringMethod().equals(ClusteringMethod.HIERARCHICAL)) {
+    	 if (ClusteringMethod.from(options).equals(ClusteringMethod.HIERARCHICAL)) {
              Attribute name = new Attribute("name", (List<String>) null);
              attributes.add(name);
          }
@@ -164,7 +179,7 @@ public class TreeBuildingMethod extends CellClusteringMethod {
     		attributes.add(new Attribute("PC_"+i));
 
     	
-    	 if (options.getClusteringMethod().equals(ClusteringMethod.HIERARCHICAL)) {
+    	 if (ClusteringMethod.from(options).equals(ClusteringMethod.HIERARCHICAL)) {
              Attribute name = new Attribute("name", (List<String>) null);
              attributes.add(name);
          }
@@ -176,11 +191,11 @@ public class TreeBuildingMethod extends CellClusteringMethod {
     	
     	// Shortcuts if dimensional reduction is chosen
     	LOGGER.finer("Checking if tSNE clustering is set");
-    	if(options.getBoolean(IClusteringOptions.USE_TSNE_KEY))
+    	if(options.getBoolean(HashOptions.CLUSTER_USE_TSNE_KEY))
         	return makeTsneAttributes();
     	
     	LOGGER.finer("Checking if PCA clustering is set");
-    	if(options.getBoolean(IClusteringOptions.USE_PCA_KEY))
+    	if(options.getBoolean(HashOptions.CLUSTER_USE_PCA_KEY))
         	return makePCAttributes();   	
 
     	LOGGER.finer("Creating attribute count on values directly");
@@ -204,7 +219,7 @@ public class TreeBuildingMethod extends CellClusteringMethod {
         }
 
         for (Measurement stat : Measurement.getNucleusStats()) {
-            if (options.isIncludeStatistic(stat)) {
+            if (options.getBoolean(stat.toString())) {
             	LOGGER.finer("Adding attribute count for "+stat);
                 attributeCount++;
             }
@@ -212,7 +227,7 @@ public class TreeBuildingMethod extends CellClusteringMethod {
 
         Mesh<Nucleus> mesh = null;
 
-        if(options.isIncludeMesh() && collection.hasConsensus()){
+        if(options.getBoolean(HashOptions.CLUSTER_INCLUDE_MESH_KEY) && collection.hasConsensus()){
         	LOGGER.finer("Adding attribute count for mesh");
             try {
 				mesh = new DefaultMesh(collection.getConsensus());
@@ -224,7 +239,7 @@ public class TreeBuildingMethod extends CellClusteringMethod {
             
         }
 
-        if (options.getClusteringMethod().equals(ClusteringMethod.HIERARCHICAL)) {
+        if (ClusteringMethod.from(options).equals(ClusteringMethod.HIERARCHICAL)) {
         	LOGGER.finer("Adding attribute count for name - hierarchical only");
             attributeCount++;
         }
@@ -245,22 +260,22 @@ public class TreeBuildingMethod extends CellClusteringMethod {
         }
 
         for (Measurement stat : Measurement.getNucleusStats()) {
-            if (options.isIncludeStatistic(stat)) {
+            if (options.getBoolean(stat.toString())) {
             	LOGGER.finer("Creating attribute for "+stat);
                 Attribute a = new Attribute(stat.toString());
                 attributes.add(a);
             }
         }
 
-        for (UUID segID : options.getSegments()) {
-            if (options.isIncludeSegment(segID)) {
+        for (UUID segID : getSegmentIds()) {
+            if (options.getBoolean(segID.toString())) {
                 LOGGER.finer( "Creating attribute for segment" + segID.toString());
                 Attribute a = new Attribute("att_" + segID.toString());
                 attributes.add(a);
             }
         }
 
-        if (options.isIncludeMesh() && collection.hasConsensus() && mesh!=null ){
+        if (options.getBoolean(HashOptions.CLUSTER_INCLUDE_MESH_KEY) && collection.hasConsensus() && mesh!=null ){
 
             for (MeshFace face : mesh.getFaces()) {
                 LOGGER.finer( "Creating attribute for face " + face.toString());
@@ -269,12 +284,24 @@ public class TreeBuildingMethod extends CellClusteringMethod {
             }
         }
 
-        if (options.getClusteringMethod().equals(ClusteringMethod.HIERARCHICAL)) {
+        if (ClusteringMethod.from(options).equals(ClusteringMethod.HIERARCHICAL)) {
         	LOGGER.finer("Creating attribute for name - hierarchical only");
             Attribute name = new Attribute("name", (List<String>) null);
             attributes.add(name);
         }
         return attributes;
+    }
+    
+    private List<UUID> getSegmentIds(){
+    	List<UUID> list = new ArrayList<>();
+    	for(String s : options.getStringKeys()) {
+    		try {
+    			list.add(UUID.fromString(s));
+    		} catch(IllegalArgumentException e) {
+    			// not a UUID
+    		}
+    	}
+    	return list;
     }
 
     /**
@@ -295,7 +322,7 @@ public class TreeBuildingMethod extends CellClusteringMethod {
         Instances instances = new Instances(collection.getName(), attributes, collection.size());
 
         Mesh<Nucleus> template = null;
-        if (options.isIncludeMesh() && collection.hasConsensus()) {
+        if (options.getBoolean(HashOptions.CLUSTER_INCLUDE_MESH_KEY) && collection.hasConsensus()) {
             try {
 				template = new DefaultMesh(collection.getConsensus());
 			} catch (MeshCreationException e) {
@@ -326,7 +353,7 @@ public class TreeBuildingMethod extends CellClusteringMethod {
     	Attribute attY = attributes.get(attNumber++);
     	inst.setValue(attY, n.getStatistic(Measurement.TSNE_2));
     	
-    	if (options.getClusteringMethod().equals(ClusteringMethod.HIERARCHICAL)) {
+    	if (ClusteringMethod.from(options).equals(ClusteringMethod.HIERARCHICAL)) {
             String uniqueName = c.getId().toString();
             Attribute att = attributes.get(attNumber++);
             inst.setValue(att, uniqueName);
@@ -347,7 +374,7 @@ public class TreeBuildingMethod extends CellClusteringMethod {
     		inst.setValue(att, pc);
     	}
     	
-    	if (options.getClusteringMethod().equals(ClusteringMethod.HIERARCHICAL)) {
+    	if (ClusteringMethod.from(options).equals(ClusteringMethod.HIERARCHICAL)) {
             String uniqueName = c.getId().toString();
             Attribute att = attributes.get(attNumber++);
             inst.setValue(att, uniqueName);
@@ -362,12 +389,12 @@ public class TreeBuildingMethod extends CellClusteringMethod {
             ProfileException, MeshCreationException {
 
         
-        if(options.getBoolean(IClusteringOptions.USE_TSNE_KEY)) {
+        if(options.getBoolean(HashOptions.CLUSTER_USE_TSNE_KEY)) {
         	addTsneNucleus(c, n, attributes, instances);
         	return;
         }
         
-        if(options.getBoolean(IClusteringOptions.USE_PCA_KEY)) {
+        if(options.getBoolean(HashOptions.CLUSTER_USE_PCA_KEY)) {
         	addPCANucleus(c, n, attributes, instances);
         	return;
         }
@@ -393,7 +420,7 @@ public class TreeBuildingMethod extends CellClusteringMethod {
         }
 
         for (Measurement stat : Measurement.getNucleusStats()) {
-            if (options.isIncludeStatistic(stat)) {
+            if (options.getBoolean(stat.toString())) {
                 Attribute att = attributes.get(attNumber++);
                 
                 if(Measurement.VARIABILITY.equals(stat)) {
@@ -405,8 +432,8 @@ public class TreeBuildingMethod extends CellClusteringMethod {
             }
         }
 
-        for (UUID segID : options.getSegments()) {
-            if (options.isIncludeSegment(segID)) {
+        for (UUID segID : getSegmentIds()) {
+            if (options.getBoolean(segID.toString())) {
                 Attribute att = attributes.get(attNumber++);
                 double length = 0;
                 try {
@@ -418,7 +445,7 @@ public class TreeBuildingMethod extends CellClusteringMethod {
             }
         }
 
-        if (options.isIncludeMesh() && collection.hasConsensus()) {
+        if (options.getBoolean(HashOptions.CLUSTER_INCLUDE_MESH_KEY) && collection.hasConsensus()) {
 
             Mesh<Nucleus> mesh = new DefaultMesh(n, template);
             for (MeshFace face : mesh.getFaces()) {
@@ -427,7 +454,7 @@ public class TreeBuildingMethod extends CellClusteringMethod {
             }
         }
 
-        if (options.getClusteringMethod().equals(ClusteringMethod.HIERARCHICAL)) {
+        if (ClusteringMethod.from(options).equals(ClusteringMethod.HIERARCHICAL)) {
             String uniqueName = c.getId().toString();
             Attribute att = attributes.get(attNumber++);
             inst.setValue(att, uniqueName);

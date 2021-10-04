@@ -38,7 +38,7 @@ import com.bmskinner.nuclear_morphology.components.datasets.IClusterGroup;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
@@ -221,8 +221,8 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator<ChartOpti
     	ComponentXYDataset<Nucleus> ds = new ComponentXYDataset<>();
     	
     	//TODO: add an input parameter for which method we want to display
-    	String prefix1 = plotGroup.getOptions().get().getBoolean(IClusteringOptions.USE_PCA_KEY) ? "PC1_" : "TSNE_1_";
-    	String prefix2 = plotGroup.getOptions().get().getBoolean(IClusteringOptions.USE_PCA_KEY) ? "PC2_" : "TSNE_2_";
+    	String prefix1 = plotGroup.getOptions().get().getBoolean(HashOptions.CLUSTER_USE_PCA_KEY) ? "PC1_" : "TSNE_1_";
+    	String prefix2 = plotGroup.getOptions().get().getBoolean(HashOptions.CLUSTER_USE_PCA_KEY) ? "PC2_" : "TSNE_2_";
     	
     	if(type.equals(ColourByType.CLUSTER) && colourGroup==null)
     		type = ColourByType.NONE;

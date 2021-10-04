@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 
 /**
  * The cluster group saves a list of child datasets with a group name and a
@@ -107,7 +107,7 @@ public interface IClusterGroup extends Serializable {
      * 
      * @return
      */
-    Optional<IClusteringOptions> getOptions();
+    Optional<HashOptions> getOptions();
 
     /**
      * Test if this group contains the given dataset id
@@ -124,6 +124,5 @@ public interface IClusterGroup extends Serializable {
      */
     boolean hasTree();
 
-    String toString();
 
 }

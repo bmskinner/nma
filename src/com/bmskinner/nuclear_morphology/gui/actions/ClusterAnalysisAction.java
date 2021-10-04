@@ -30,7 +30,6 @@ import com.bmskinner.nuclear_morphology.analysis.classification.PrincipalCompone
 import com.bmskinner.nuclear_morphology.analysis.classification.TsneMethod;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
-import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
 import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
@@ -65,19 +64,19 @@ public class ClusterAnalysisAction extends SingleDatasetResultAction {
         	HashOptions setupOptions = clusterSetup.getOptions();
         	boolean canRunClusteringDirectly = true;
         	
-        	if(setupOptions.getBoolean(IClusteringOptions.USE_TSNE_KEY)) {
+        	if(setupOptions.getBoolean(HashOptions.CLUSTER_USE_TSNE_KEY)) {
         		canRunClusteringDirectly = false;
         		runTsne(setupOptions);
         	}
         	
-        	if(clusterSetup.getOptions().getBoolean(IClusteringOptions.USE_PCA_KEY)) {
+        	if(clusterSetup.getOptions().getBoolean(HashOptions.CLUSTER_USE_PCA_KEY)) {
         		canRunClusteringDirectly = false;
         		runPca(setupOptions);
         	}
         	
         	// Only run clustering on profiles if no dimensionality reduction
         	if(canRunClusteringDirectly)
-        		runClustering((IClusteringOptions) setupOptions);
+        		runClustering((HashOptions) setupOptions);
 
         } else {
         	this.cancel();
@@ -94,7 +93,7 @@ public class ClusterAnalysisAction extends SingleDatasetResultAction {
 		worker = new DefaultAnalysisWorker(m);
 		worker.addPropertyChangeListener(e->{
 			if(e.getPropertyName().equals(IAnalysisWorker.FINISHED_MSG)) {
-				runClustering((IClusteringOptions) setupOptions);
+				runClustering((HashOptions) setupOptions);
 			}
 		});
 		ThreadManager.getInstance().submit(worker);
@@ -109,7 +108,7 @@ public class ClusterAnalysisAction extends SingleDatasetResultAction {
 		worker = new DefaultAnalysisWorker(m);
 		worker.addPropertyChangeListener(e->{
 			if(e.getPropertyName().equals(IAnalysisWorker.FINISHED_MSG)) {
-				runClustering((IClusteringOptions) setupOptions);
+				runClustering((HashOptions) setupOptions);
 			}
 		});
 		ThreadManager.getInstance().submit(worker);
@@ -119,7 +118,7 @@ public class ClusterAnalysisAction extends SingleDatasetResultAction {
      * Run clustering on the nuclear profiles with the given options
      * @param setupOptions
      */
-    private void runClustering(IClusteringOptions options) {
+    private void runClustering(HashOptions options) {
     	IAnalysisMethod m2 = new NucleusClusteringMethod(dataset, options);
 		worker = new DefaultAnalysisWorker(m2);
 		worker.addPropertyChangeListener(ClusterAnalysisAction.this);

@@ -27,7 +27,6 @@ import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.classification.NucleusClusteringMethod;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
-import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ClusteringMethodSelectionPanel;
 import com.bmskinner.nuclear_morphology.gui.components.panels.DimensionalReductionSelectionPanel;
@@ -43,12 +42,11 @@ import com.bmskinner.nuclear_morphology.gui.components.panels.ParameterSelection
 public class ClusteringSetupDialog extends SubAnalysisSetupDialog  {
 
     private static final String DIALOG_TITLE = "Clustering options";
-	protected final IClusteringOptions options;
+	protected final HashOptions options;
 
     public ClusteringSetupDialog(final @NonNull IAnalysisDataset dataset) {
         super(dataset, DIALOG_TITLE);
-        options = OptionsFactory.makeClusteringOptions();
-        setDefaults();
+        options = OptionsFactory.makeDefaultClusteringOptions();
         createUI();
         packAndDisplay();
     }
@@ -58,10 +56,7 @@ public class ClusteringSetupDialog extends SubAnalysisSetupDialog  {
 	 */
 	@Override
 	protected void setDefaults() {
-		options.setClusterNumber(IClusteringOptions.DEFAULT_MANUAL_CLUSTER_NUMBER);
-		options.setHierarchicalMethod(IClusteringOptions.DEFAULT_HIERARCHICAL_METHOD);
-		options.setIterations(IClusteringOptions.DEFAULT_EM_ITERATIONS);
-		options.setBoolean(IClusteringOptions.USE_TSNE_KEY,  IClusteringOptions.DEFAULT_USE_TSNE);
+		// handled by the options factory
 	}
 
     @Override

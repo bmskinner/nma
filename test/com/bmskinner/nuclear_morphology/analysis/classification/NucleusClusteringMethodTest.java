@@ -14,7 +14,7 @@ import com.bmskinner.nuclear_morphology.ComponentTester;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.IClusterGroup;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
-import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
@@ -50,10 +50,11 @@ public class NucleusClusteringMethodTest extends ComponentTester {
 	}
 
 	private void testCanClusterOnProfile(ProfileType type) throws Exception {
-		IClusteringOptions o = OptionsFactory.makeClusteringOptions();
-		o.setIncludeProfileType(ProfileType.ANGLE, false);
-		o.setIncludeProfileType(type, true);
-		o.setClusterNumber(TWO_CLUSTERS);
+		HashOptions o = OptionsFactory.makeDefaultClusteringOptions();
+		o.setBoolean(ProfileType.ANGLE.toString(), false);
+		o.setBoolean(type.toString(), true);
+		o.setInt(HashOptions.CLUSTER_MANUAL_CLUSTER_NUMBER_KEY, TWO_CLUSTERS);
+
 		new NucleusClusteringMethod(merged, o).call();
 		assertNotNull(merged.getCollection());
 		assertTrue(type.toString()+" has clusters:",merged.hasClusters());
@@ -72,10 +73,11 @@ public class NucleusClusteringMethodTest extends ComponentTester {
 	}
 	
 	private void testCanClusterOnStatistic(Measurement stat) throws Exception {
-		IClusteringOptions o = OptionsFactory.makeClusteringOptions();
-		o.setIncludeProfileType(ProfileType.ANGLE, false);
-		o.setIncludeStatistic(stat, true);
-		o.setClusterNumber(TWO_CLUSTERS);
+		HashOptions o = OptionsFactory.makeDefaultClusteringOptions();
+		o.setBoolean(ProfileType.ANGLE.toString(), false);
+		o.setBoolean(stat.toString(), true);
+		o.setInt(HashOptions.CLUSTER_MANUAL_CLUSTER_NUMBER_KEY, TWO_CLUSTERS);
+
 		new NucleusClusteringMethod(merged, o).call();
 		assertNotNull(merged.getCollection());
 		assertTrue(stat.toString()+" has clusters:",merged.hasClusters());

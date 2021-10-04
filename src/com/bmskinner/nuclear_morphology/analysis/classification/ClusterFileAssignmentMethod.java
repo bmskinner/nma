@@ -42,6 +42,7 @@ import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.datasets.IClusterGroup;
 import com.bmskinner.nuclear_morphology.components.datasets.VirtualCellCollection;
+import com.bmskinner.nuclear_morphology.components.options.DefaultOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -185,7 +186,8 @@ public class ClusterFileAssignmentMethod extends SingleDatasetAnalysisMethod {
         
         int clusterNumber = dataset.getMaxClusterGroupNumber() + 1;
 
-        IClusterGroup group = new DefaultClusterGroup(IClusterGroup.CLUSTER_GROUP_PREFIX + "_" + clusterNumber, OptionsFactory.makeClusteringOptions());
+        IClusterGroup group = new DefaultClusterGroup(IClusterGroup.CLUSTER_GROUP_PREFIX + "_" + clusterNumber, 
+        		new DefaultOptions());
 
         // Make collections for the new clusters
         long nClusters = cellMap.values().stream().distinct().count();
