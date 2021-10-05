@@ -6,7 +6,7 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
-import com.bmskinner.nuclear_morphology.components.cells.SegmentedCellularComponent;
+import com.bmskinner.nuclear_morphology.components.cells.ProfileableCellularComponent;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
@@ -14,7 +14,7 @@ import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
 
-public class DummySegmentedCellularComponent extends SegmentedCellularComponent {
+public class DummySegmentedCellularComponent extends ProfileableCellularComponent {
 	
 	private final String name;
 	

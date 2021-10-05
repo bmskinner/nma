@@ -35,7 +35,7 @@ import com.bmskinner.nuclear_morphology.analysis.signals.SignalAnalyser;
 import com.bmskinner.nuclear_morphology.components.UnavailableBorderPointException;
 import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
-import com.bmskinner.nuclear_morphology.components.cells.SegmentedCellularComponent;
+import com.bmskinner.nuclear_morphology.components.cells.ProfileableCellularComponent;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
@@ -62,7 +62,7 @@ import ij.gui.Roi;
  * @since 1.13.3
  *
  */
-public class DefaultNucleus extends SegmentedCellularComponent implements Nucleus {
+public class DefaultNucleus extends ProfileableCellularComponent implements Nucleus {
 	
 	private static final Logger LOGGER = Logger.getLogger(DefaultNucleus.class.getName());
 

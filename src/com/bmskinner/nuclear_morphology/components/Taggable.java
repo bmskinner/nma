@@ -244,7 +244,7 @@ public interface Taggable extends CellularComponent {
      * @param i the index of the border point relative to the reference
      * @throws UnavailableBorderTagException if  the reference tag is not present
      */
-    void setBorderTag(@NonNull Landmark reference, @NonNull Landmark tag, int i) throws IndexOutOfBoundsException, UnavailableBorderTagException;
+//    void setBorderTag(@NonNull Landmark reference, @NonNull Landmark tag, int i) throws IndexOutOfBoundsException, UnavailableBorderTagException;
 
     /**
      * Get a copy of the profile offset to start at the given point

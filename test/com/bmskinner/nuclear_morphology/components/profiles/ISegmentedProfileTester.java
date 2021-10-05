@@ -23,7 +23,6 @@ import com.bmskinner.nuclear_morphology.ComponentTester;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.UnavailableComponentException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.cells.SegmentedCellularComponent.DefaultSegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nuclear_morphology.samples.dummy.DummySegmentedCellularComponent;
 
@@ -73,13 +72,6 @@ public class ISegmentedProfileTester extends ComponentTester {
 		Arrays.fill(data, 1);
 		
 		List<IProfileSegment> segments = makeTestSegments();
-
-		if(source==DefaultSegmentedProfile.class){
-			DefaultSegmentedProfile profile = comp.new DefaultSegmentedProfile(data);
-			profile.setSegments(segments);
-			return profile;
-		}
-
 		if(source==SegmentedFloatProfile.class)
 			return new SegmentedFloatProfile(new FloatProfile(data), segments);
 
@@ -103,7 +95,6 @@ public class ISegmentedProfileTester extends ComponentTester {
 		// we're making class references. The actual objects under test
 		// are created fresh from the appropriate class.
 		return Arrays.asList(
-				DefaultSegmentedProfile.class,
 				SegmentedFloatProfile.class);
 	}
 	

@@ -22,7 +22,6 @@ import org.junit.runners.Parameterized.Parameters;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.cells.SegmentedCellularComponent.DefaultProfile;
 import com.bmskinner.nuclear_morphology.samples.dummy.DummySegmentedCellularComponent;
 
 /**
@@ -69,13 +68,7 @@ public class IProfileTester {
 	 * @return
 	 * @throws Exception 
 	 */
-	private static IProfile createInstance(Class<? extends IProfile> source, float[] data) throws Exception {
-
-		if(source==DefaultProfile.class) {
-			DummySegmentedCellularComponent comp = new DummySegmentedCellularComponent();
-			return comp.new DefaultProfile(data);
-		}
-		
+	private static IProfile createInstance(Class<? extends IProfile> source, float[] data) throws Exception {		
 		if(source==FloatProfile.class)
 			return new FloatProfile(data);
 		
@@ -98,7 +91,6 @@ public class IProfileTester {
 		// we're making class references. The actual objects under test
 		// are created fresh from the appropriate class.
 		return Arrays.asList(
-				DefaultProfile.class,
 				FloatProfile.class,
 				DoubleProfile.class);
 	}

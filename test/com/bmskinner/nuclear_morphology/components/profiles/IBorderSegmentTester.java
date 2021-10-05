@@ -24,8 +24,6 @@ import org.junit.runners.Parameterized.Parameters;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.UnavailableComponentException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.cells.SegmentedCellularComponent.DefaultSegmentedProfile;
-import com.bmskinner.nuclear_morphology.components.cells.SegmentedCellularComponent.DefaultSegmentedProfile.BorderSegmentTree;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nuclear_morphology.samples.dummy.DummySegmentedCellularComponent;
 
@@ -82,31 +80,7 @@ public class IBorderSegmentTester {
 		DummySegmentedCellularComponent comp = new DummySegmentedCellularComponent();
 		float[] data = new float[comp.getBorderLength()];
 		Arrays.fill(data, 1);
-		
-		if(source==BorderSegmentTree.class){
-//			System.out.println("Beginning");
-			DefaultSegmentedProfile doubleSegmentProfile = comp.new DefaultSegmentedProfile(data);
-//			System.out.println("Profile: "+doubleSegmentProfile.toString());
-			IProfileSegment borderSegmentTree = null;
-			try {
-//				System.out.println("Fetching root segment");
-				IProfileSegment rootSegment = doubleSegmentProfile.getSegment(IProfileCollection.DEFAULT_SEGMENT_ID);
-//				System.out.println("Root: "+rootSegment.getDetail());
-				doubleSegmentProfile.splitSegment(rootSegment, middleSegmentEnd, tempId, finalSegmentId);
-//				System.out.println("Profile: "+doubleSegmentProfile.toString());
-				IProfileSegment tempSegment = doubleSegmentProfile.getSegment(tempId);
-//				System.out.println("Temp: "+tempSegment.getDetail());
-//				System.out.println("Profile: "+doubleSegmentProfile.toString());
-				doubleSegmentProfile.splitSegment(tempSegment, endIndex, SEG_ID_0, middleSegmentId);
-//				System.out.println("Fetching test segment");
-				borderSegmentTree = doubleSegmentProfile.getSegment(SEG_ID_0);
-			} catch (UnavailableComponentException | ProfileException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			return borderSegmentTree;
-		}
-		
+				
 		// Older classes use the same approach to linking segments
 		List<IProfileSegment> list = new ArrayList<>();
 		if(source==DefaultProfileSegment.class) {
@@ -139,7 +113,6 @@ public class IBorderSegmentTester {
 		// we're making class references. The actual objects under test
 		// are created fresh from the appropriate class.
 		return Arrays.asList(
-				BorderSegmentTree.class,
 				DefaultProfileSegment.class,
 				OpenBorderSegment.class);
 	}

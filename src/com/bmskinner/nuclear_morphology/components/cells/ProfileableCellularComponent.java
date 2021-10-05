@@ -355,6 +355,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
                 int diff = i - oldRP;
                 try {
                     p.nudgeSegments(diff);
+                    segments = p.getSegments();
                 } catch (ProfileException e) {
                     LOGGER.log(Loggable.STACK, "Error nudging segments when assigning RP", e);
                     return;
@@ -368,22 +369,13 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
                 int intersectionIndex = this.getBorderIndex(this.findOppositeBorder(this.getBorderPoint(i)));
                 this.setBorderTag(Landmark.INTERSECTION_POINT, intersectionIndex);
             }
-
-
         } catch (UnavailableProfileTypeException e) {
         	LOGGER.log(Loggable.STACK, "Unable to find angle profile in object", e);
         } catch(UnavailableBorderTagException e) {
         	LOGGER.log(Loggable.STACK, String.format("Error getting border tag %s for object", tag), e);
         }
     }
-
-    @Override
-	public void setBorderTag(@NonNull Landmark reference, @NonNull Landmark tag, int i) throws UnavailableBorderTagException {
-        if (isLocked)
-            return;
-        int newIndex = getOffsetBorderIndex(reference, i);
-        setBorderTag(tag, newIndex);
-    }
+       
 
     @Override
 	public boolean hasBorderTag(@NonNull Landmark tag) {
@@ -559,7 +551,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
     		setProfile(type, creator.createProfile(type));
     	}
     }
-
+    
     @Override
 	public void setSegmentStartLock(boolean lock, @NonNull UUID segID) {
     	segments.stream().filter(s->s.getID().equals(segID)).forEach(s->s.setLocked(lock));

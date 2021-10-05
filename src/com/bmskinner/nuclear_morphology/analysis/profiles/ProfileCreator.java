@@ -28,7 +28,6 @@ import com.bmskinner.nuclear_morphology.components.Taggable;
 import com.bmskinner.nuclear_morphology.components.UnavailableBorderPointException;
 import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.cells.SegmentedCellularComponent;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.measure.DoubleEquation;
 import com.bmskinner.nuclear_morphology.components.measure.LineEquation;
@@ -144,13 +143,8 @@ public class ProfileCreator {
             angles[index] = s.contains(midX, midY) ? angle : 360 - angle;
         }
 
-        // Make a new profile. If possible, use the internal segmentation type of the component
-        ISegmentedProfile newProfile;
-        if(target instanceof SegmentedCellularComponent) {
-        	newProfile = ((SegmentedCellularComponent)target).new DefaultSegmentedProfile(angles);
-        } else {
-        	newProfile = new SegmentedFloatProfile(angles);
-        }
+        // Make a new profile.
+        ISegmentedProfile newProfile = new SegmentedFloatProfile(angles);
 
         // Reapply any segments that were present in the original profile
         if (!segments.isEmpty()) 
@@ -231,13 +225,7 @@ public class ProfileCreator {
         }
         
         // Make a new profile. If possible, use the internal segmentation type of the component
-        ISegmentedProfile newProfile;
-        if(target instanceof SegmentedCellularComponent) {
-        	newProfile = ((SegmentedCellularComponent)target).new DefaultSegmentedProfile(profile);
-        } else {
-        	newProfile = new SegmentedFloatProfile(profile);
-        }
-        return newProfile;
+        return new SegmentedFloatProfile(profile);
     }
 
     private ISegmentedProfile calculateDiameterProfile() throws UnavailableBorderPointException {
@@ -260,15 +248,7 @@ public class ProfileCreator {
         	LOGGER.log(Loggable.STACK, "Error creating diameter profile", e);
         	LOGGER.warning("profile length "+profile.length);
         }
-
-     // Make a new profile. If possible, use the internal segmentation type of the component
-        ISegmentedProfile newProfile;
-        if(target instanceof SegmentedCellularComponent) {
-        	newProfile = ((SegmentedCellularComponent)target).new DefaultSegmentedProfile(profile);
-        } else {
-        	newProfile = new SegmentedFloatProfile(profile);
-        }
-        return newProfile;
+        return new SegmentedFloatProfile(profile);
     }
 
     private ISegmentedProfile calculateRadiusProfile() {
@@ -283,15 +263,7 @@ public class ProfileCreator {
             profile[index++] = (float) point.getLengthTo(target.getCentreOfMass());
 
         }
-
-     // Make a new profile. If possible, use the internal segmentation type of the component
-        ISegmentedProfile newProfile;
-        if(target instanceof SegmentedCellularComponent) {
-        	newProfile = ((SegmentedCellularComponent)target).new DefaultSegmentedProfile(profile);
-        } else {
-        	newProfile = new SegmentedFloatProfile(profile);
-        }
-        return newProfile;
+        return new SegmentedFloatProfile(profile);
     }
 
     /**
@@ -322,15 +294,7 @@ public class ProfileCreator {
             profile[index] = (float) distance;
             index++;
         }
-
-        // Make a new profile. If possible, use the internal segmentation type of the component
-        ISegmentedProfile newProfile;
-        if(target instanceof SegmentedCellularComponent) {
-        	newProfile = ((SegmentedCellularComponent)target).new DefaultSegmentedProfile(profile);
-        } else {
-        	newProfile = new SegmentedFloatProfile(profile);
-        }
-        return newProfile;
+        return new SegmentedFloatProfile(profile);
     }
 
 }
