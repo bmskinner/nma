@@ -17,9 +17,8 @@ import com.bmskinner.nuclear_morphology.components.datasets.DefaultAnalysisDatas
 import com.bmskinner.nuclear_morphology.components.datasets.DefaultCellCollection;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
-import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.components.signals.DefaultSignalGroup;
@@ -134,8 +133,8 @@ public class TestDatasetBuilder {
 		
 		if(nClusters>0) {
 			LOGGER.finest("Clustering dataset");		
-			IClusteringOptions o = OptionsFactory.makeClusteringOptions();
-			o.setClusterNumber(nClusters);
+			HashOptions o = OptionsFactory.makeDefaultClusteringOptions();
+			o.setInt(HashOptions.CLUSTER_MANUAL_CLUSTER_NUMBER_KEY, nClusters);
 			new NucleusClusteringMethod(d, o).call();
 		}
 				
@@ -326,14 +325,14 @@ public class TestDatasetBuilder {
 				TEST_DATASET_NAME, TEST_DATASET_NAME, rsc, TEST_DATASET_UUID);
 		
 		IAnalysisOptions o =  OptionsFactory.makeDefaultRoundAnalysisOptions(collection.getFolder());
-		o.getNuclusDetectionOptions().get().setMinSize( (baseWidth-maxSizeVariation)*(baseHeight-maxSizeVariation) );
-		o.getNuclusDetectionOptions().get().setMaxSize( (baseWidth+maxSizeVariation)*(baseHeight+maxSizeVariation) );
+		o.getNuclusDetectionOptions().get().setInt(HashOptions.MIN_SIZE_PIXELS, (baseWidth-maxSizeVariation)*(baseHeight-maxSizeVariation) );
+		o.getNuclusDetectionOptions().get().setInt(HashOptions.MAX_SIZE_PIXELS, (baseWidth+maxSizeVariation)*(baseHeight+maxSizeVariation) );
 
 		if(redSignals) {
 			ISignalGroup g = new DefaultSignalGroup(RED_SIGNAL_GROUP_NAME);
 			g.setGroupColour(Color.red);
 			collection.addSignalGroup(RED_SIGNAL_GROUP, g);
-			INuclearSignalOptions n = OptionsFactory.makeNuclearSignalOptions(new File(TEST_DATASET_IMAGE_FOLDER));
+			HashOptions n = OptionsFactory.makeNuclearSignalOptions(new File(TEST_DATASET_IMAGE_FOLDER));
 			o.setDetectionOptions(IAnalysisOptions.SIGNAL_GROUP+RED_SIGNAL_GROUP, n);
 		}
 		
@@ -341,7 +340,7 @@ public class TestDatasetBuilder {
 			ISignalGroup g = new DefaultSignalGroup(GREEN_SIGNAL_GROUP_NAME);
 			g.setGroupColour(Color.GREEN);
 			collection.addSignalGroup(GREEN_SIGNAL_GROUP, g);
-			INuclearSignalOptions n = OptionsFactory.makeNuclearSignalOptions(new File(TEST_DATASET_IMAGE_FOLDER));
+			HashOptions n = OptionsFactory.makeNuclearSignalOptions(new File(TEST_DATASET_IMAGE_FOLDER));
 			o.setDetectionOptions(IAnalysisOptions.SIGNAL_GROUP+GREEN_SIGNAL_GROUP, n);
 		}
 

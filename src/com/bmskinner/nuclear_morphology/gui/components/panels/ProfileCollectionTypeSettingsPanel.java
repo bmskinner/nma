@@ -35,7 +35,7 @@ import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 @SuppressWarnings("serial")
 public class ProfileCollectionTypeSettingsPanel extends EnumeratedOptionsPanel {
 
-    private Map<ProfileType, JRadioButton> map = new HashMap<ProfileType, JRadioButton>();
+    private Map<ProfileType, JRadioButton> map = new HashMap<>();
 
     /**
      * Create a new panel
@@ -54,7 +54,7 @@ public class ProfileCollectionTypeSettingsPanel extends EnumeratedOptionsPanel {
             map.put(type, button);
         }
         // Set the default
-        map.get(ProfileType.FRANKEN).setSelected(true);
+        map.get(ProfileType.ANGLE).setSelected(true);
 
     }
 

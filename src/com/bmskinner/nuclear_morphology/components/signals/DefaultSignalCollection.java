@@ -24,11 +24,13 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.jdom2.Element;
 
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
@@ -49,6 +51,10 @@ import ij.process.ImageProcessor;
  */
 public class DefaultSignalCollection implements ISignalCollection {
 	
+	private static final String XML_COLLECTION = "SignalCollection";
+	private static final String XML_SIGNALS = "Signals";
+	private static final String XML_SIGNAL_ID = "SignalId";
+	
 	private static final Logger LOGGER = Logger.getLogger(DefaultSignalCollection.class.getName());
 	
     private static final long serialVersionUID = 1L;
@@ -63,8 +69,39 @@ public class DefaultSignalCollection implements ISignalCollection {
      */
     public DefaultSignalCollection() {
     }
+    
+    public DefaultSignalCollection(Element e) {
+    	
+    	for(Element id : e.getChildren(XML_SIGNALS)) {
+    		UUID uuid = UUID.fromString(id.getAttributeValue(XML_SIGNAL_ID));
+    		collection.computeIfAbsent(uuid, k -> new ArrayList<>());
+    		
+    		for(Element s : id.getChildren()) {
+    			collection.get(uuid).add(new DefaultNuclearSignal(s));
+    		}
+    		
+    	}
+    }
+    
 
-    /**
+    @Override
+	public Element toXmlElement() {
+		Element e = new Element(XML_COLLECTION);
+		
+		for(Entry<UUID, List<INuclearSignal>> entry : collection.entrySet()) {
+			
+			for(INuclearSignal s : entry.getValue()) {
+				e.addContent(new Element(XML_SIGNALS)
+						.setAttribute(XML_SIGNAL_ID, entry.getKey().toString())
+						.addContent(s.toXmlElement()));
+			}
+		}
+		return e;
+	}
+
+
+
+	/**
      * Duplicate a signal collection
      * 
      * @param s

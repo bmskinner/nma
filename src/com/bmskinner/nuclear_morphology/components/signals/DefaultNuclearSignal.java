@@ -17,9 +17,11 @@
 package com.bmskinner.nuclear_morphology.components.signals;
 
 import java.io.File;
+import java.util.Objects;
 import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.jdom2.Element;
 
 import com.bmskinner.nuclear_morphology.components.cells.DefaultCellularComponent;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
@@ -34,6 +36,8 @@ import ij.gui.Roi;
  *
  */
 public class DefaultNuclearSignal extends DefaultCellularComponent implements INuclearSignal {
+	
+	private static final String XML_CLOSEST_BORDER = "ClosestBorder";
 
     private static final long serialVersionUID = 1L;
 
@@ -57,6 +61,11 @@ public class DefaultNuclearSignal extends DefaultCellularComponent implements IN
         this.closestNuclearBorderPoint = n.getClosestBorderPoint();
     }
     
+    public DefaultNuclearSignal(Element e) {
+    	super(e);
+    	closestNuclearBorderPoint = Integer.valueOf(e.getChildText(XML_CLOSEST_BORDER));
+    }
+    
     @Override
     public INuclearSignal duplicate() {
     	return new DefaultNuclearSignal(this);
@@ -78,10 +87,17 @@ public class DefaultNuclearSignal extends DefaultCellularComponent implements IN
     }
 
 	@Override
+	public Element toXmlElement() {
+		Element e = super.toXmlElement();
+		e.addContent(new Element(XML_CLOSEST_BORDER).setText(String.valueOf(closestNuclearBorderPoint)));
+		return e;
+	}
+
+	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + closestNuclearBorderPoint;
+		result = prime * result + Objects.hash(closestNuclearBorderPoint);
 		return result;
 	}
 
@@ -94,10 +110,6 @@ public class DefaultNuclearSignal extends DefaultCellularComponent implements IN
 		if (getClass() != obj.getClass())
 			return false;
 		DefaultNuclearSignal other = (DefaultNuclearSignal) obj;
-		if (closestNuclearBorderPoint != other.closestNuclearBorderPoint)
-			return false;
-		return true;
+		return closestNuclearBorderPoint == other.closestNuclearBorderPoint;
 	}
-    
-    
 }

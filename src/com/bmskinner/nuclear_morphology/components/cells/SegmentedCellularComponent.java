@@ -113,6 +113,10 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 		super(c);
 	}
 	
+	public SegmentedCellularComponent(Element e) throws ComponentCreationException {
+		super(e);
+	}
+
 	@Override
     public void calculateProfiles() throws ProfileException {
 
@@ -126,66 +130,37 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
     	}
     }
 	
-	@Override
-	public ISegmentedProfile getProfile(@NonNull ProfileType type) throws UnavailableProfileTypeException {
-
-        if (!this.hasProfile(type))
-            throw new UnavailableProfileTypeException("Cannot get profile type " + type);
-
-        
-        try {
-        	return profileMap.get(type).copy();
-        } catch (ProfileException e) {
-            throw new UnavailableProfileTypeException("Cannot get profile type " + type, e);
-        }
-    }
+//	@Override
+//	public ISegmentedProfile getProfile(@NonNull ProfileType type) throws UnavailableProfileTypeException {
+//
+//        if (!this.hasProfile(type))
+//            throw new UnavailableProfileTypeException("Cannot get profile type " + type);
+//
+//        
+//        try {
+//        	return profileMap.get(type);
+//        } catch (ProfileException e) {
+//            throw new UnavailableProfileTypeException("Cannot get profile type " + type, e);
+//        }
+//    }
 	
-	@Override
-	public void setProfile(@NonNull ProfileType type, @NonNull ISegmentedProfile profile) {
-        if (isLocked) {
-        	LOGGER.fine("Cannot set profile: object is locked");
-            return;
-        }
-
-        if (this.getBorderLength() != profile.size())
-            throw new IllegalArgumentException(String.format("Input profile length (%d) does not match border length (%d) for %s", profile.size(), getBorderLength(), type));
-        
-        try {
-    		assignProfile(type, new DefaultSegmentedProfile(profile));
-		} catch (ProfileException e) {
-			LOGGER.log(Loggable.STACK, "Unable to create copy of profile of type "+type+"; "+e.getMessage(), e);
-		}
-    }
-	
-	@Override
-	public void setProfile(@NonNull ProfileType type, @NonNull Landmark tag, @NonNull ISegmentedProfile p) throws UnavailableBorderTagException, UnavailableProfileTypeException {
-
-		if (isLocked) {
-			LOGGER.finer("Cannot set profile: object is locked");
-			return;
-		}
-
+//	@Override
+//	public void setProfile(@NonNull ProfileType type, @NonNull ISegmentedProfile profile) {
+//        if (isLocked) {
+//        	LOGGER.fine("Cannot set profile: object is locked");
+//            return;
+//        }
+//
+//        if (this.getBorderLength() != profile.size())
+//            throw new IllegalArgumentException(String.format("Input profile length (%d) does not match border length (%d) for %s", profile.size(), getBorderLength(), type));
+//        
+//        try {
+//    		assignProfile(type, new DefaultSegmentedProfile(profile));
+//		} catch (ProfileException e) {
+//			LOGGER.log(Loggable.STACK, "Unable to create copy of profile of type "+type+"; "+e.getMessage(), e);
+//		}
+//    }
 			
-		if (!this.hasBorderTag(tag))
-			throw new UnavailableBorderTagException(String.format("Tag %s is not present", tag));
-
-		// fetch the index of the tag (the zero of the input profile)
-		int tagIndex = profileLandmarks.get(tag);
-
-		// Keep a copy of the old profile
-		ISegmentedProfile oldProfile = getProfile(type);
-
-		try {
-			// subtract the tag offset from the profile   
-			int newStartIndex = wrapIndex(-tagIndex);
-			ISegmentedProfile offsetNewProfile =  p.offset(newStartIndex);
-			setProfile(type, offsetNewProfile);
-		} catch (ProfileException e) { // restore the old profile
-			LOGGER.log(Loggable.STACK, String.format("Error setting profile %s at %s; restoring original profile", type, tag), e);
-			setProfile(type, oldProfile);
-		}
-	}
-		
     @Override
 	public void setBorderTag(@NonNull Landmark tag, int i) {
       
@@ -2223,6 +2198,15 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 						|| contains(seg.getStartIndex()) 
 						|| contains(seg.getEndIndex());
 		    }
+		    
+		    @Override
+			public IProfileSegment reverse() {
+				  // invert the segment by swapping start and end
+		        int newStart = length() - 1 - getEndIndex();
+		        int newEnd   = length() - 1 - getStartIndex();
+		        
+		        return new DefaultProfileSegment(newStart, newEnd, length(), getID());
+			}
 			
 			@Override
 			public String toString() {

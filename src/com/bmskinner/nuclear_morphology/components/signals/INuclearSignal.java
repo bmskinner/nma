@@ -45,6 +45,7 @@ public interface INuclearSignal extends CellularComponent {
     void setClosestBorderPoint(int p);
 
 
-    INuclearSignal duplicate();
+    @Override
+	INuclearSignal duplicate();
 
 }

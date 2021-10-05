@@ -1,4 +1,4 @@
-package com.bmskinner.nuclear_morphology.components.generic;
+package com.bmskinner.nuclear_morphology.components.profiles;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -6,7 +6,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
 
-import org.jdom2.Element;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -14,9 +13,6 @@ import org.junit.rules.ExpectedException;
 
 import com.bmskinner.nuclear_morphology.ComponentTester;
 import com.bmskinner.nuclear_morphology.components.cells.SegmentedCellularComponent;
-import com.bmskinner.nuclear_morphology.components.profiles.DoubleProfile;
-import com.bmskinner.nuclear_morphology.components.profiles.FloatProfile;
-import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.samples.dummy.DummySegmentedCellularComponent;
 
 /**

@@ -658,5 +658,16 @@ public class DefaultProfileSegment implements IProfileSegment {
 				|| contains(seg.getStartIndex()) 
 				|| contains(seg.getEndIndex());
     }
+
+	@Override
+	public IProfileSegment reverse() {
+		  // invert the segment by swapping start and end
+        int newStart = totalLength - 1 - getEndIndex();
+        int newEnd   = totalLength - 1 - getStartIndex();
+        
+        return new DefaultProfileSegment(newStart, newEnd, totalLength, getID());
+	}
+    
+    
     
 }

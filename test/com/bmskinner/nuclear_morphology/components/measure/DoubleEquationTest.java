@@ -20,7 +20,7 @@
 /**
  * 
  */
-package com.bmskinner.nuclear_morphology.components.generic;
+package com.bmskinner.nuclear_morphology.components.measure;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -30,8 +30,8 @@ import java.awt.geom.Point2D;
 
 import org.junit.Test;
 
-import com.bmskinner.nuclear_morphology.components.measure.DoubleEquation;
-import com.bmskinner.nuclear_morphology.components.measure.LineEquation;
+import com.bmskinner.nuclear_morphology.components.generic.FloatPoint;
+import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 
 /**
  * @author bms41

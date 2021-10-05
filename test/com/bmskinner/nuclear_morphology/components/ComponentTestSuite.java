@@ -5,7 +5,6 @@ import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 import com.bmskinner.nuclear_morphology.components.generic.ComponentGenericTestSuite;
-import com.bmskinner.nuclear_morphology.components.nuclear.ComponentNuclearTestSuite;
 import com.bmskinner.nuclear_morphology.components.nuclei.ComponentNucleiTestSuite;
 import com.bmskinner.nuclear_morphology.components.rules.ComponentRulesTestSuite;
 
@@ -18,14 +17,8 @@ import com.bmskinner.nuclear_morphology.components.rules.ComponentRulesTestSuite
 @RunWith(Suite.class)
 @SuiteClasses({ 
 	ComponentGenericTestSuite.class,
-	ComponentNuclearTestSuite.class,
 	ComponentNucleiTestSuite.class,
 	ComponentRulesTestSuite.class,
-	CellularComponentTest.class,
-	DefaultAnalysisDatasetTest.class, 
-	DefaultCellCollectionTest.class, 
-	DefaultCellTest.class,
-	ICellCollectionTest.class, 
 	ImageableTest.class,
 	TaggableTest.class, 
 	RotatableTest.class,

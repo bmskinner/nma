@@ -27,7 +27,7 @@ import com.bmskinner.nuclear_morphology.components.measure.MeasurementDimension;
  */
 public enum ProfileType {
     ANGLE("Angle profile", "Angle", MeasurementDimension.ANGLE), 
-    FRANKEN("Franken profile", "Angle", MeasurementDimension.ANGLE), 
+//    FRANKEN("Franken profile", "Angle", MeasurementDimension.ANGLE), 
     DIAMETER("Diameter profile", "Distance across CoM", MeasurementDimension.LENGTH), 
     RADIUS("Radius profile", "Distance from CoM", MeasurementDimension.LENGTH),
     ZAHN_ROSKIES("Zahn-Roskies profile", "Angle delta", MeasurementDimension.DIMENSIONLESS);

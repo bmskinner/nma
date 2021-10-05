@@ -17,12 +17,16 @@
 package com.bmskinner.nuclear_morphology.components.nuclei;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.jdom2.Element;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder;
@@ -63,25 +67,46 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
 	private static final Logger LOGGER = Logger.getLogger(DefaultNucleus.class.getName());
 
     private static final long serialVersionUID = 1L;
+    
+    private static final String XML_NUCLEUS_NUMBER = "NucleusNumber";
+    private static final String XML_ORIENTATION = "OrientationMark";
+    private static final String XML_PRIORITY_AXIS = "PriorityAxis";
+    private static final String XML_SIGNAL_COLLECTION = "SignalCollection";
+    
 
     /** The number of the nucleus in its image, for display */
     private int nucleusNumber;
     
     /** Store the landmarks to be used for orientation */
-    private Landmark t = null;
-    private Landmark b = null;
-    private Landmark r = null;
-    private Landmark l = null;
-    private Landmark x = null;
-    private Landmark y = null;
+    private Map<String, Landmark> orientationMarks = new HashMap<>();
+
     private PriorityAxis priorityAxis = PriorityAxis.Y;
     
     /** FISH signals in the nucleus */
     protected ISignalCollection signalCollection = new DefaultSignalCollection();
 
     protected transient boolean canReverse = true;
+    
+    public DefaultNucleus(Element e) throws ComponentCreationException {
+    	super(e);
+    }
 
-    /**
+    @Override
+	public Element toXmlElement() {
+		Element e = super.toXmlElement();
+		
+		e.addContent(new Element(XML_NUCLEUS_NUMBER).setText(String.valueOf(nucleusNumber)));
+		for(Entry<String, Landmark> entry : orientationMarks.entrySet()) {
+			e.addContent(new Element(XML_ORIENTATION).setAttribute("name", entry.getKey())
+					.setText(entry.getValue().toString()));
+		}
+		e.addContent(new Element(XML_PRIORITY_AXIS).setText(priorityAxis.toString()));
+		e.addContent(signalCollection.toXmlElement());
+		
+		return e;
+	}
+
+	/**
      * Construct with an ROI, a source image and channel, and the original
      * position in the source image. It sets the immutable original centre of
      * mass, and the mutable current centre of mass. It also assigns a random ID
@@ -98,12 +123,13 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
     		int channel, int[] position, int number, @Nullable UUID id, RuleSetCollection rsc) {
         super(roi, centreOfMass, source, channel, position, id);
         this.nucleusNumber = number;
-        t = rsc.getTopLandmark().orElse(null);
-        b = rsc.getBottomLandmark().orElse(null);
-        l = rsc.getLeftLandmark().orElse(null);
-        r = rsc.getRightLandmark().orElse(null);
-        x = rsc.getSecondaryX().orElse(null);
-        y = rsc.getSecondaryY().orElse(null);
+        
+        for(String s : Landmark.orientationMarks()) {
+        	if(rsc.getLandmark(s).isPresent()) {
+        		orientationMarks.put(s, rsc.getLandmark(s).get());
+        	}
+        }
+        
         priorityAxis = rsc.getPriorityAxis().orElse(PriorityAxis.Y);        
     }
 
@@ -133,12 +159,11 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
         nucleusNumber = n.getNucleusNumber();
         signalCollection = n.getSignalCollection().duplicate();
         
-        t = n.getTopLandmark();
-        b = n.getBottomLandmark();
-        l = n.getLeftLandmark();
-        r = n.getRightLandmark();
-        x = n.getSecondaryX();
-        y = n.getSecondaryX();
+        for(String s : Landmark.orientationMarks()) {
+        	if(n.getLandmark(s)!=null)
+        		orientationMarks.put(s, n.getLandmark(s));
+        }
+
         priorityAxis = n.getPriorityAxis();
     }
 
@@ -153,36 +178,9 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
         return null;
     }
     
-    
-
     @Override
-	public @Nullable Landmark getTopLandmark() {
-		return t;
-	}
-
-	@Override
-	public @Nullable Landmark getBottomLandmark() {
-		return b;
-	}
-
-	@Override
-	public @Nullable Landmark getLeftLandmark() {
-		return l;
-	}
-
-	@Override
-	public @Nullable Landmark getRightLandmark() {
-		return r;
-	}
-
-	@Override
-	public @Nullable Landmark getSecondaryX() {
-		return x;
-	}
-
-	@Override
-	public @Nullable Landmark getSecondaryY() {
-		return y;
+	public @Nullable Landmark getLandmark(String s) {
+		return orientationMarks.get(s);
 	}
 
 	@Override
@@ -477,34 +475,43 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
     
     private void alignVerticallyPriorityY() throws UnavailableBorderTagException {
     	// Check if t and b are present
-		if(hasBorderTag(t) && hasBorderTag(b)) {
+    	
+    	Landmark t = orientationMarks.get(Landmark.TOP_POINT);
+    	Landmark b = orientationMarks.get(Landmark.BTM_POINT);
+    	Landmark y = orientationMarks.get(Landmark.SECONDARY_Y_POINT);
+    	Landmark r = orientationMarks.get(Landmark.RIGHT_POINT);
+    	Landmark l = orientationMarks.get(Landmark.LEFT_POINT);
+    	Landmark x = orientationMarks.get(Landmark.SECONDARY_X_POINT);
+    	
+    	
+		if(t!=null && hasBorderTag(t) && b!=null && hasBorderTag(b)) {
 			IPoint topPoint    = getBorderPoint(t);
 			IPoint bottomPoint = getBorderPoint(b);
 			if(topPoint != bottomPoint) {
     			alignPointsOnVertical(topPoint, bottomPoint);
-			} else if(hasBorderTag(y)) {
+			} else if(y!=null && hasBorderTag(y)) {
 				rotatePointToBottom(getBorderPoint(y));
 			}
-		} else if(hasBorderTag(y)) { // if no t and b, fall back to y
+		} else if(y!=null && hasBorderTag(y)) { // if no t and b, fall back to y
 			rotatePointToBottom(getBorderPoint(y));
 		}
 		
 		// Now check x, and flip as needed
-		if(hasBorderTag(l) && hasBorderTag(r)) {
+		if(l!=null && hasBorderTag(l) && r!=null && hasBorderTag(r)) {
 			IPoint leftPoint  = getBorderPoint(l);
 			IPoint rightPoint = getBorderPoint(r);
 			if(leftPoint.isRightOf(rightPoint)) {
 				flipHorizontal();
 			}
-		} else if(hasBorderTag(l)) {
+		} else if(l!=null && hasBorderTag(l)) {
 			IPoint leftPoint  = getBorderPoint(l);
 			if(leftPoint.isRightOf(getCentreOfMass()))
 				flipHorizontal();
-		} else if(hasBorderTag(r)) {
+		} else if(r!=null && hasBorderTag(r)) {
 			IPoint rightPoint = getBorderPoint(r);
 			if(rightPoint.isLeftOf(getCentreOfMass()))
 				flipHorizontal();
-		} else if(hasBorderTag(x)) {
+		} else if(x!=null && hasBorderTag(x)) {
 			IPoint leftPoint = getBorderPoint(x);
 			if(leftPoint.isRightOf(getCentreOfMass()))
 				flipHorizontal();
@@ -513,35 +520,43 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
     
     
     private void alignVerticallyPriorityX() throws UnavailableBorderTagException {
+    	
+    	Landmark t = orientationMarks.get(Landmark.TOP_POINT);
+    	Landmark b = orientationMarks.get(Landmark.BTM_POINT);
+    	Landmark y = orientationMarks.get(Landmark.SECONDARY_Y_POINT);
+    	Landmark r = orientationMarks.get(Landmark.RIGHT_POINT);
+    	Landmark l = orientationMarks.get(Landmark.LEFT_POINT);
+    	Landmark x = orientationMarks.get(Landmark.SECONDARY_X_POINT);
+    	
     	// Check if l and r are present
-		if(hasBorderTag(t) && hasBorderTag(b)) {
+		if(l!=null && hasBorderTag(l) && r!=null && hasBorderTag(r)) {
 			IPoint leftPoint  = getBorderPoint(l);
 			IPoint rightPoint = getBorderPoint(r);
 			if(leftPoint != rightPoint) {
     			alignPointsOnHorizontal(leftPoint, rightPoint);
-			} else {
+			} else if(x!=null && hasBorderTag(x)) { // if no l and r, fall back to x
 				rotatePointToLeft(getBorderPoint(x));
 			}
-		} else if(hasBorderTag(y)) { // if no l and r, fall back to x
+		} else if(x!=null && hasBorderTag(x)) { // if no l and r, fall back to x
 			rotatePointToLeft(getBorderPoint(x));
 		}
 		
 		// Now check y, and flip as needed
-		if(hasBorderTag(t) && hasBorderTag(b)) {
+		if(t!=null && hasBorderTag(t) && b!=null && hasBorderTag(b)) {
 			IPoint topPoint  = getBorderPoint(t);
 			IPoint bottomPoint = getBorderPoint(b);
 			if(topPoint.isBelow(bottomPoint)) {
 				flipVertical();
 			}
-		} else if(hasBorderTag(t)) {
+		} else if(t!=null && hasBorderTag(t)) {
 			IPoint topPoint  = getBorderPoint(t);
 			if(topPoint.isBelow(getCentreOfMass()))
 				flipVertical();
-		} else if(hasBorderTag(b)) {
+		} else if(b!=null && hasBorderTag(b)) {
 			IPoint bottomPoint = getBorderPoint(b);
 			if(bottomPoint.isAbove(getCentreOfMass()))
 				flipVertical();
-		} else if(hasBorderTag(y)) {
+		} else if(y!=null && hasBorderTag(y)) {
 			IPoint bottomPoint = getBorderPoint(y);
 			if(bottomPoint.isAbove(getCentreOfMass()))
 				flipVertical();
@@ -646,7 +661,7 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + Objects.hash(b, l, nucleusNumber, priorityAxis, r, signalCollection, t, x, y);
+		result = prime * result + Objects.hash(nucleusNumber, orientationMarks, priorityAxis, signalCollection);
 		return result;
 	}
 
@@ -659,12 +674,7 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
 		if (getClass() != obj.getClass())
 			return false;
 		DefaultNucleus other = (DefaultNucleus) obj;
-		return Objects.equals(b, other.b) && Objects.equals(l, other.l) && nucleusNumber == other.nucleusNumber
-				&& priorityAxis == other.priorityAxis && Objects.equals(r, other.r)
-				&& Objects.equals(signalCollection, other.signalCollection) && Objects.equals(t, other.t)
-				&& Objects.equals(x, other.x) && Objects.equals(y, other.y);
+		return nucleusNumber == other.nucleusNumber && Objects.equals(orientationMarks, other.orientationMarks)
+				&& priorityAxis == other.priorityAxis && Objects.equals(signalCollection, other.signalCollection);
 	}
-    
-    
-
 }

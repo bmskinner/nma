@@ -27,7 +27,6 @@ import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.components.signals.DefaultSignalGroup;
@@ -246,7 +245,7 @@ public class TestImageDatasetCreator {
 
          IAnalysisDataset d = new NucleusDetectionMethod(folder, op).call().getFirstDataset();
          
-         IClusteringOptions clusterOptions = OptionsFactory.makeClusteringOptions();
+         HashOptions clusterOptions = OptionsFactory.makeDefaultClusteringOptions();
          
          new DatasetProfilingMethod(d)
  	    	.then(new DatasetSegmentationMethod(d, MorphologyAnalysisMode.NEW))

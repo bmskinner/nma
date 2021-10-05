@@ -1,4 +1,4 @@
-package com.bmskinner.nuclear_morphology.components.generic;
+package com.bmskinner.nuclear_morphology.components.profiles;
 
 import static org.junit.Assert.assertTrue;
 
@@ -9,7 +9,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
 
 public class DefaultSegmentedProfileTest extends DefaultProfileTest {
 	

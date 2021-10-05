@@ -3,11 +3,8 @@ package com.bmskinner.nuclear_morphology.components;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.fail;
 
-import java.awt.Color;
 import java.io.File;
-import java.util.UUID;
 
-import org.eclipse.jdt.annotation.NonNull;
 import org.junit.Test;
 
 import com.bmskinner.nuclear_morphology.TestDatasetBuilder;
@@ -18,18 +15,14 @@ import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclei.DefaultNucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.components.signals.DefaultNuclearSignal;
-import com.bmskinner.nuclear_morphology.components.signals.DefaultSignalCollection;
 import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
-import com.bmskinner.nuclear_morphology.components.signals.ISignalCollection;
-import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 
 import ij.gui.OvalRoi;
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
-import ij.process.ColorProcessor;
 import ij.process.FloatPolygon;
-import ij.process.ImageProcessor;
 
 /**
  * Construct test components for unit testing
@@ -111,7 +104,7 @@ public class TestComponentFactory {
 				
 		// Note - the roi interpolation will smooth corners
 		n.initialise(Taggable.DEFAULT_PROFILE_WINDOW_PROPORTION);
-		n.findLandmarks(null);
+		n.findLandmarks(RuleSetCollection.roundRuleSetCollection());
 		return n;
 	}
 	
@@ -138,50 +131,51 @@ public class TestComponentFactory {
 		
 		// Note - the roi interpolation will smooth corners
 		n.initialise(Taggable.DEFAULT_PROFILE_WINDOW_PROPORTION);
-		n.findPointsAroundBorder();		
+		n.findLandmarks(RuleSetCollection.roundRuleSetCollection());		
 		return n;
 	}
 	
 	private static Nucleus createNucleus(Roi roi, IPoint com, File f, int channel, int[] position, int number ) {
-		Nucleus n = new DefaultNucleus(roi, com, f, 0, position, 0) {
-			
-			private static final long serialVersionUID = 1L;
-			private ISignalCollection overrideCollection = new DefaultSignalCollection() {
-				private static final long serialVersionUID = 1L;
-
-				@Override
-				    public ImageProcessor getImage(@NonNull final UUID signalGroup) throws UnloadableImageException {
-					 if (this.getSignals(signalGroup).size() == 0)
-				            throw new UnloadableImageException("No signals in group");
-					 return this.getSignals(signalGroup).get(0).getImage();
-				 }
-			};
-			
-			@Override
-			public ImageProcessor getGreyscaleImage() {
-				return getImage();
-			}
-
-			@Override
-			public ImageProcessor getImage() {
-				Roi finalRoi = toOriginalRoi();
-				
-				int[] position = getPosition(); 
-				int xmax = position[Imageable.X_BASE]+position[Imageable.WIDTH]+Imageable.COMPONENT_BUFFER;
-				int ymax = position[Imageable.Y_BASE]+position[Imageable.HEIGHT]+Imageable.COMPONENT_BUFFER;
-				
-				ImageProcessor ip = new ColorProcessor(xmax, ymax);
-		    	ip.setColor(Color.WHITE);
-		    	ip.fill(finalRoi);
-		    	return ip;
-			}
-			
-			@Override
-			public ISignalCollection getSignalCollection() {
-				return overrideCollection;
-			}
-			
-		};
+		Nucleus n = new DefaultNucleus(roi, com, f, 0, position, 0, RuleSetCollection.roundRuleSetCollection());
+//		Nucleus n = new DefaultNucleus(roi, com, f, 0, position, 0, RuleSetCollection.roundRuleSetCollection()) {
+//			
+//			private static final long serialVersionUID = 1L;
+//			private ISignalCollection overrideCollection = new DefaultSignalCollection() {
+//				private static final long serialVersionUID = 1L;
+//
+//				@Override
+//				    public ImageProcessor getImage(@NonNull final UUID signalGroup) throws UnloadableImageException {
+//					 if (this.getSignals(signalGroup).size() == 0)
+//				            throw new UnloadableImageException("No signals in group");
+//					 return this.getSignals(signalGroup).get(0).getImage();
+//				 }
+//			};
+//			
+//			@Override
+//			public ImageProcessor getGreyscaleImage() {
+//				return getImage();
+//			}
+//
+//			@Override
+//			public ImageProcessor getImage() {
+//				Roi finalRoi = toOriginalRoi();
+//				
+//				int[] position = getPosition(); 
+//				int xmax = position[Imageable.X_BASE]+position[Imageable.WIDTH]+Imageable.COMPONENT_BUFFER;
+//				int ymax = position[Imageable.Y_BASE]+position[Imageable.HEIGHT]+Imageable.COMPONENT_BUFFER;
+//				
+//				ImageProcessor ip = new ColorProcessor(xmax, ymax);
+//		    	ip.setColor(Color.WHITE);
+//		    	ip.fill(finalRoi);
+//		    	return ip;
+//			}
+//			
+//			@Override
+//			public ISignalCollection getSignalCollection() {
+//				return overrideCollection;
+//			}
+//			
+//		};
 		return n;
 	}
 
@@ -219,29 +213,31 @@ public class TestComponentFactory {
 		int[] position = {xBase, yBase, w, h};		
 		File f = new File("empty file");
 		
-		INuclearSignal s = new DefaultNuclearSignal(roi, com, f, channel, position) {
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			public ImageProcessor getGreyscaleImage() {
-				return getImage();
-			}
-			
-			@Override
-			public ImageProcessor getImage() {
-				Roi finalRoi = toOriginalRoi();
-				
-				int[] position = getPosition(); 
-				int xmax = position[Imageable.X_BASE]+position[Imageable.WIDTH]+Imageable.COMPONENT_BUFFER;
-				int ymax = position[Imageable.Y_BASE]+position[Imageable.HEIGHT]+Imageable.COMPONENT_BUFFER;
-				
-				ImageProcessor ip = new ColorProcessor(xmax, ymax);
-		    	ip.setColor(Color.WHITE);
-		    	ip.fill(finalRoi);
-		    	return ip;
-			}
-		};
-		return s;
+		return new DefaultNuclearSignal(roi, com, f, channel, position);
+		
+//		INuclearSignal s = new DefaultNuclearSignal(roi, com, f, channel, position) {
+//			private static final long serialVersionUID = 1L;
+//
+//			@Override
+//			public ImageProcessor getGreyscaleImage() {
+//				return getImage();
+//			}
+//			
+//			@Override
+//			public ImageProcessor getImage() {
+//				Roi finalRoi = toOriginalRoi();
+//				
+//				int[] position = getPosition(); 
+//				int xmax = position[Imageable.X_BASE]+position[Imageable.WIDTH]+Imageable.COMPONENT_BUFFER;
+//				int ymax = position[Imageable.Y_BASE]+position[Imageable.HEIGHT]+Imageable.COMPONENT_BUFFER;
+//				
+//				ImageProcessor ip = new ColorProcessor(xmax, ymax);
+//		    	ip.setColor(Color.WHITE);
+//		    	ip.fill(finalRoi);
+//		    	return ip;
+//			}
+//		};
+//		return s;
 	}
 		
 	/**

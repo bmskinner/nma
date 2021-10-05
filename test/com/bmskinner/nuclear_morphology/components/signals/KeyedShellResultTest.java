@@ -17,7 +17,7 @@
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
 
-package com.bmskinner.nuclear_morphology.components.nuclear;
+package com.bmskinner.nuclear_morphology.components.signals;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;

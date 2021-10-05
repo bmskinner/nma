@@ -30,7 +30,6 @@ import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.cells.SegmentedCellularComponent;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
-import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.measure.DoubleEquation;
 import com.bmskinner.nuclear_morphology.components.measure.LineEquation;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
@@ -72,7 +71,6 @@ public class ProfileCreator {
 	            case DIAMETER:     return calculateDiameterProfile();
 	            case RADIUS:       return calculateRadiusProfile();
 	            case ZAHN_ROSKIES: return calculateZahnRoskiesProfile();
-	            case FRANKEN:      LOGGER.finest( "Frankenprofile");
 	            default:           return calculateAngleProfile();
             }
         } catch (UnavailableBorderPointException e) {

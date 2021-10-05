@@ -27,7 +27,6 @@ import java.util.stream.Stream;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.analysis.signals.SignalManager;
 import com.bmskinner.nuclear_morphology.components.Filterable;
 import com.bmskinner.nuclear_morphology.components.Refoldable;
 import com.bmskinner.nuclear_morphology.components.StatisticalCollection;
@@ -41,6 +40,7 @@ import com.bmskinner.nuclear_morphology.components.profiles.ProfileManager;
 import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
+import com.bmskinner.nuclear_morphology.components.signals.SignalManager;
 
 /**
  * This interface will provides the primary access to cell data, as well as the

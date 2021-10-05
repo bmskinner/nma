@@ -27,6 +27,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
+import com.bmskinner.nuclear_morphology.io.XmlSerializable;
 
 import ij.process.ImageProcessor;
 
@@ -39,7 +40,7 @@ import ij.process.ImageProcessor;
  * @since 1.13.3
  *
  */
-public interface ISignalCollection extends Serializable {
+public interface ISignalCollection extends Serializable, XmlSerializable {
 	
 	/**
 	 * Create a copy of this collection

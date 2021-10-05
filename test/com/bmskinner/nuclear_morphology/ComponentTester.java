@@ -103,17 +103,17 @@ public abstract class ComponentTester extends FloatArrayTester {
 				continue;
 			if(f.getType().equals(WeakReference.class))
 				continue;
-			if(f.getType().equals(Class.forName("com.bmskinner.nuclear_morphology.components.DefaultCellularComponent$ShapeCache")))
+			if(f.getType().equals(Class.forName("com.bmskinner.nuclear_morphology.components.cells.DefaultCellularComponent$ShapeCache")))
 				continue;
-			if(f.getType().equals(Class.forName("com.bmskinner.nuclear_morphology.components.generic.DefaultProfileCollection$ProfileCache")))
+			if(f.getType().equals(Class.forName("com.bmskinner.nuclear_morphology.components.profiles.DefaultProfileCollection$ProfileCache")))
 				continue;	
-			if(f.getType().equals(Class.forName("com.bmskinner.nuclear_morphology.components.stats.StatsCache")))
+			if(f.getType().equals(Class.forName("com.bmskinner.nuclear_morphology.components.measure.StatsCache")))
 				continue;
-			if(f.getType().equals(Class.forName("com.bmskinner.nuclear_morphology.components.stats.VennCache")))
+			if(f.getType().equals(Class.forName("com.bmskinner.nuclear_morphology.components.measure.VennCache")))
 				continue;
-			if(f.getType().equals(Class.forName("com.bmskinner.nuclear_morphology.analysis.signals.SignalManager")))
+			if(f.getType().equals(Class.forName("com.bmskinner.nuclear_morphology.components.signals.SignalManager")))
 				continue;
-			if(f.getType().equals(Class.forName("com.bmskinner.nuclear_morphology.components.generic.ProfileManager")))
+			if(f.getType().equals(Class.forName("com.bmskinner.nuclear_morphology.components.profiles.ProfileManager")))
 				continue;
 			Object oValue = f.get(original);
 			Object dValue  = f.get(dup);

@@ -394,8 +394,8 @@ public class DefaultProfileCollection implements IProfileCollection {
             try {
                 for (Nucleus n : collection.getNuclei()) {
                     switch (type) {
-                    case FRANKEN: agg.addValues(n.getProfile(type));
-                        break;
+//                    case FRANKEN: agg.addValues(n.getProfile(type));
+//                        break;
                     default: agg.addValues(n.getProfile(type, Landmark.REFERENCE_POINT));
                         break;
                     }

@@ -1,6 +1,6 @@
 package com.bmskinner.nuclear_morphology.components.options;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -9,10 +9,6 @@ import org.jdom2.Element;
 import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
 import org.junit.Test;
-
-import com.bmskinner.nuclear_morphology.components.options.DefaultOptions;
-import com.bmskinner.nuclear_morphology.components.options.HashOptions;
-import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 
 public class DefaultOptionsTest {
 

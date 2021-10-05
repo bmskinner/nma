@@ -1,4 +1,4 @@
-package com.bmskinner.nuclear_morphology.components;
+package com.bmskinner.nuclear_morphology.components.cells;
 
 import static org.junit.Assert.assertEquals;
 
@@ -15,7 +15,6 @@ import org.junit.runners.Parameterized.Parameters;
 
 import com.bmskinner.nuclear_morphology.ComponentTester;
 import com.bmskinner.nuclear_morphology.TestDatasetBuilder;
-import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclei.DefaultNucleus;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;

@@ -1,5 +1,12 @@
 package com.bmskinner.nuclear_morphology.components.nuclei;
 
+import static org.junit.Assert.assertEquals;
+
+import java.io.PrintWriter;
+
+import org.jdom2.Element;
+import org.jdom2.output.Format;
+import org.jdom2.output.XMLOutputter;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -25,6 +32,20 @@ public class DefaultNucleusTest extends ComponentTester {
 	public void testDuplicate() throws Exception {
 		Nucleus dup = nucleus.duplicate();
 		testDuplicatesByField(dup.duplicate(), dup);
+	}
+	
+	@Test
+	public void testXmlSerializes() throws Exception {
+		
+		Element e = nucleus.toXmlElement();
+		
+		XMLOutputter xmlOutput = new XMLOutputter();
+		xmlOutput.setFormat(Format.getPrettyFormat());
+		xmlOutput.output(e, new PrintWriter( System.out ));
+
+		Nucleus test = new DefaultNucleus(e);
+		
+		assertEquals(nucleus, test);
 	}
 	
 }

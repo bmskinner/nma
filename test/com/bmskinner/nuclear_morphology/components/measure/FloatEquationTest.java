@@ -17,7 +17,7 @@
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
 
-package com.bmskinner.nuclear_morphology.components.generic;
+package com.bmskinner.nuclear_morphology.components.measure;
 
 import static org.junit.Assert.assertEquals;
 
@@ -25,8 +25,8 @@ import java.awt.geom.Point2D;
 
 import org.junit.Test;
 
-import com.bmskinner.nuclear_morphology.components.measure.FloatEquation;
-import com.bmskinner.nuclear_morphology.components.measure.LineEquation;
+import com.bmskinner.nuclear_morphology.components.generic.FloatPoint;
+import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 
 /**
  * Tests for the floating point line equations

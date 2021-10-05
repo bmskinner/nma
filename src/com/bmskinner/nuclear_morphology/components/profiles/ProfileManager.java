@@ -115,9 +115,9 @@ public class ProfileManager {
         index = CellularComponent.wrapIndex(index, getProfileLength());
 
         for (ProfileType type : ProfileType.values()) {
-            if (type.equals(ProfileType.FRANKEN)) {
-                continue;
-            }
+//            if (type.equals(ProfileType.FRANKEN)) {
+//                continue;
+//            }
 
             collection.getProfileCollection().addIndex(tag, index);
         }

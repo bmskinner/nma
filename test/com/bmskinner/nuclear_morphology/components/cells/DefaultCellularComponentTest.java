@@ -28,7 +28,7 @@ public class DefaultCellularComponentTest {
 		xmlOutput.output(e, new PrintWriter( System.out ));
 
 		
-//		assertEquals(o, test);
+//		assertEquals(comp, test);
 	}
 
 

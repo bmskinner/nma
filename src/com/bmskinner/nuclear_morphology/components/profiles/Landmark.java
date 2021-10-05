@@ -29,12 +29,19 @@ import org.eclipse.jdt.annotation.NonNull;
  *
  */
 public interface Landmark extends Comparable<Landmark>, Serializable {
-
-    @NonNull public static final Landmark REFERENCE_POINT    = new DefaultLandmark("Reference point", LandmarkType.CORE);
-    @NonNull public static final Landmark ORIENTATION_POINT  = new DefaultLandmark("Orientation point", LandmarkType.EXTENDED);
-    @NonNull public static final Landmark TOP_VERTICAL       = new DefaultLandmark("Top vertical", LandmarkType.EXTENDED);
-    @NonNull public static final Landmark BOTTOM_VERTICAL    = new DefaultLandmark("Bottom vertical", LandmarkType.EXTENDED);
-    @NonNull public static final Landmark INTERSECTION_POINT = new DefaultLandmark("Intersection", LandmarkType.EXTENDED);
+	
+	String TOP_POINT = "TopPoint";
+	String BTM_POINT = "BottomPoint";
+	String LEFT_POINT = "LeftPoint";
+	String RIGHT_POINT = "RightPoint";
+	String SECONDARY_X_POINT = "SecondaryX";
+	String SECONDARY_Y_POINT = "SecondaryY";
+	
+    @NonNull Landmark REFERENCE_POINT    = new DefaultLandmark("Reference point", LandmarkType.CORE);
+    @NonNull Landmark ORIENTATION_POINT  = new DefaultLandmark("Orientation point", LandmarkType.EXTENDED);
+    @NonNull Landmark TOP_VERTICAL       = new DefaultLandmark("Top vertical", LandmarkType.EXTENDED);
+    @NonNull Landmark BOTTOM_VERTICAL    = new DefaultLandmark("Bottom vertical", LandmarkType.EXTENDED);
+    @NonNull Landmark INTERSECTION_POINT = new DefaultLandmark("Intersection", LandmarkType.EXTENDED);
     
     /**
      * Create a tag with the given name
@@ -56,6 +63,18 @@ public interface Landmark extends Comparable<Landmark>, Serializable {
         		TOP_VERTICAL, 
         		BOTTOM_VERTICAL,
                 INTERSECTION_POINT };
+    }
+    
+    /**
+     * Get the marks that can be used for orientation
+     * @return
+     */
+    static String[] orientationMarks() {
+    	return new String[] {
+    			TOP_POINT, BTM_POINT,
+    			LEFT_POINT, RIGHT_POINT,
+    			SECONDARY_X_POINT, SECONDARY_Y_POINT
+    	};
     }
     
     /**

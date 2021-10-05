@@ -92,20 +92,9 @@ public interface Nucleus extends CellularComponent, Taggable, Comparable<Nucleus
      * @return
      */
     Nucleus getVerticallyRotatedNucleus();
-    
-    
-    @Nullable Landmark getTopLandmark();
-    
-    @Nullable Landmark getBottomLandmark();
-    
-    @Nullable Landmark getLeftLandmark();
-    
-    @Nullable Landmark getRightLandmark();
-    
-    @Nullable Landmark getSecondaryX();
-    
-    @Nullable Landmark getSecondaryY();
-    
+
+    @Nullable Landmark getLandmark(String landmark);
+
     @Nullable PriorityAxis getPriorityAxis();
 
 

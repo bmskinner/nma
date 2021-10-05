@@ -42,8 +42,8 @@ public class ProfileDisplayPanel extends AbstractProfileDisplayPanel {
         JFreeChart chart = ProfileChartFactory.createEmptyChart(type);
         chartPanel.setChart(chart);
 
-        if (this.type == ProfileType.FRANKEN)
-            this.profileAlignmentOptionsPanel.setEnabled(false);
+//        if (this.type == ProfileType.FRANKEN)
+//            this.profileAlignmentOptionsPanel.setEnabled(false);
     }
     
     @Override

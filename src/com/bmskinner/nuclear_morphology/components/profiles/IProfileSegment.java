@@ -467,6 +467,14 @@ public interface IProfileSegment extends Serializable, Iterable<Integer> {
      * @see IBorderSegment::overlapsBeyondEndpoints
      */
     boolean overlaps(@NonNull IProfileSegment seg);
+    
+    
+    /**
+     * Reverse the segment in the profile. Acts as if the
+     * profile has been entirely reversed
+     * @return 
+     */
+    IProfileSegment reverse();
 
     
     /**
@@ -695,7 +703,7 @@ public interface IProfileSegment extends Serializable, Iterable<Integer> {
         }
         return builder.toString();
     }
-    
+        
     static int calculateSegmentLength(int start, int end, int total){
         return start < end ? end - start : end + (total - start);
     }

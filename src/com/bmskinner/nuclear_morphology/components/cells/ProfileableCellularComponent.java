@@ -18,13 +18,16 @@ package com.bmskinner.nuclear_morphology.components.cells;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
@@ -36,14 +39,16 @@ import com.bmskinner.nuclear_morphology.components.Statistical;
 import com.bmskinner.nuclear_morphology.components.Taggable;
 import com.bmskinner.nuclear_morphology.components.UnavailableBorderPointException;
 import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
-import com.bmskinner.nuclear_morphology.components.UnavailableComponentException;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
+import com.bmskinner.nuclear_morphology.components.profiles.LandmarkType;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
+import com.bmskinner.nuclear_morphology.components.profiles.SegmentedFloatProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.profiles.UnprofilableObjectException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -61,15 +66,20 @@ import ij.gui.Roi;
  */
 public abstract class ProfileableCellularComponent extends DefaultCellularComponent implements Taggable {
 	
+	private static final String XML_WINDOW_PROPORTION = "WindowProportion";
+
 	private static final Logger LOGGER = Logger.getLogger(ProfileableCellularComponent.class.getName());
 
 	private static final long serialVersionUID = 1L;
 
     /** The proportion of the perimeter to use for profiling */
     protected double windowProportion = IAnalysisOptions.DEFAULT_WINDOW_PROPORTION;
+    
+    /** The segmentation pattern for the object */
+    protected List<IProfileSegment> segments = new ArrayList<>();
 
     /** The profiles for this object */
-    protected Map<ProfileType, ISegmentedProfile> profileMap = new ConcurrentHashMap<>();
+    protected Map<ProfileType, IProfile> profileMap = new ConcurrentHashMap<>();
 
     /** The indexes of landmarks in the profiles and border list */
     protected Map<Landmark, Integer> profileLandmarks = new HashMap<>();
@@ -133,11 +143,12 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 
             this.windowProportion = comp.getWindowProportion(ProfileType.ANGLE);
             this.windowSize = comp.getWindowSize(ProfileType.ANGLE);
-
+            
             for (ProfileType type : ProfileType.values()) {
 
                 try {
                     profileMap.put(type, comp.getProfile(type).copy());
+                    segments = comp.getProfile(type).getSegments();
                 } catch (UnavailableProfileTypeException e) {
                 	// not present in this profile; possibly a deprecated type; ignore and continue
                 } catch (ProfileException e) {
@@ -170,6 +181,10 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
          for (ProfileType type : c.profileMap.keySet()) {
              try {
                  this.profileMap.put(type, c.profileMap.get(type).copy());
+                 for(IProfileSegment s : c.segments) {
+                	 segments.add(s.copy());
+                 }
+                 IProfileSegment.linkSegments(segments);
 
              } catch (ProfileException e) {
                  LOGGER.log(Loggable.STACK, "Cannot make new profile type " + type + " from template", e);
@@ -178,7 +193,32 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
          }
     }
     
-    @Override
+    public ProfileableCellularComponent(Element e) throws ComponentCreationException {
+		super(e);
+		windowProportion = Double.parseDouble(e.getChildText(XML_WINDOW_PROPORTION));
+		
+		isLocked = Boolean.parseBoolean(e.getChildText("IsLocked"));
+		
+		for(Element el : e.getChildren("Landmark")){
+			profileLandmarks.put(Landmark.of(el.getAttribute("name").getValue(), 
+					LandmarkType.valueOf(el.getAttribute("type").getValue())), 
+					Integer.parseInt(el.getText()));
+		}
+		
+//		initialise(windowProportion);
+		
+		for(Element el : e.getChildren("Profile")){
+			profileMap.put(null, null);
+		}
+		
+//		for(Entry<ProfileType, ISegmentedProfile> entry : profileMap.entrySet()) {
+//			e.addContent(new Element("Profile")
+//					.setAttribute("type", entry.getKey().toString())
+//					.setContent(entry.getValue().toXmlElement()));
+//		}
+	}
+
+	@Override
 	public void initialise(double proportion) throws ComponentCreationException {
         if (proportion <= 0 || proportion >= 1)
             throw new ComponentCreationException("Must have a value between 0-1");
@@ -439,9 +479,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
             throw new UnavailableProfileTypeException("Cannot get profile type " + type);
 
         try {
-        	LOGGER.finer( "Getting profile: "+type);
-        	ISegmentedProfile template = profileMap.get(type);
-        	return template.copy();
+        	return new SegmentedFloatProfile(profileMap.get(type), segments);
         	
         } catch (ProfileException e) {
             throw new UnavailableProfileTypeException("Cannot get profile type " + type, e);
@@ -467,53 +505,48 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
         ISegmentedProfile profile = getProfile(type);
         return profile.offset(tagIndex);
     }
-    
-    /**
-     * 
-     * @param p
-     * @param pointType
-     * @throws UnavailableBorderTagException 
-     * @throws UnavailableProfileTypeException 
-     */
-    @Override
+        
+	@Override
 	public void setProfile(@NonNull ProfileType type, @NonNull Landmark tag, @NonNull ISegmentedProfile p) throws UnavailableBorderTagException, UnavailableProfileTypeException {
 
-        if (isLocked)
-            return;
+		if (isLocked) {
+			LOGGER.finer("Cannot set profile: object is locked");
+			return;
+		}
 
-        if (!this.hasBorderTag(tag))
-            throw new UnavailableBorderTagException("Tag " + tag + " is not present");
+		if (!this.hasBorderTag(tag))
+			throw new UnavailableBorderTagException(String.format("Tag %s is not present", tag));
 
-        if (this.getBorderLength() != p.size())
-        	throw new IllegalArgumentException(String.format("Input profile length (%d) does not match border length (%d)", p.size(), getBorderLength()));
+		// fetch the index of the tag (the zero of the input profile)
+		int tagIndex = profileLandmarks.get(tag);
 
-        // fetch the index of the pointType (the zero of the input profile)
-        int tagIndex = this.profileLandmarks.get(tag);
-        
-        // Store the old profile in case
-        ISegmentedProfile oldProfile = getProfile(type);
-        
-        try {
-            // remove the offset from the profile, by setting the profile to start from the pointIndex
-            assignProfile(type, p.offset(-tagIndex));
-        } catch (ProfileException e) {
-            LOGGER.log(Loggable.STACK, "Error setting profile " + type + " at " + tag, e);
-            assignProfile(type, oldProfile);
-        }
+		// Keep a copy of the old profile
+		ISegmentedProfile oldProfile = getProfile(type);
 
-    }
-
+		try {
+			// subtract the tag offset from the profile   
+			int newStartIndex = wrapIndex(-tagIndex);
+			ISegmentedProfile offsetNewProfile =  p.offset(newStartIndex);
+			setProfile(type, offsetNewProfile);
+		} catch (ProfileException e) { // restore the old profile
+			LOGGER.log(Loggable.STACK, String.format("Error setting profile %s at %s; restoring original profile", type, tag), e);
+			setProfile(type, oldProfile);
+		}
+	}
+    
     @Override
 	public void setProfile(@NonNull ProfileType type, @NonNull ISegmentedProfile profile) {
 
         if (isLocked)
             return;
 
-        // Replace frankenprofiles completely
         assignProfile(type, profile);
+        
+        segments = profile.getOrderedSegments();
+        
     }
     
-    protected void assignProfile(@NonNull ProfileType type, @NonNull ISegmentedProfile profile) {
+    protected void assignProfile(@NonNull ProfileType type, @NonNull IProfile profile) {
     	profileMap.put(type, profile);
     }
 
@@ -523,28 +556,13 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
     	ProfileCreator creator = new ProfileCreator(this);
 
     	for (ProfileType type : ProfileType.values()) {
-    		LOGGER.finest( "Attempting to create profile "+type);
-    		ISegmentedProfile profile = creator.createProfile(type);
-    		LOGGER.finest( "Assigning profile "+type);
-    		assignProfile(type, profile);
+    		setProfile(type, creator.createProfile(type));
     	}
     }
 
     @Override
 	public void setSegmentStartLock(boolean lock, @NonNull UUID segID) {
-        if (segID == null)
-            throw new IllegalArgumentException("Requested seg id is null");
-
-        for (ISegmentedProfile p : profileMap.values()) {
-
-            if (p.hasSegment(segID)) {
-                try {
-                    p.getSegment(segID).setLocked(lock);
-                } catch (UnavailableComponentException e) {
-                    LOGGER.log(Loggable.STACK, e.getMessage(), e);
-                }
-            }
-        }
+    	segments.stream().filter(s->s.getID().equals(segID)).forEach(s->s.setLocked(lock));
     }
 
     private double getPathLength(ProfileType type) {
@@ -583,11 +601,16 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
         if (isLocked) {
             return;
         }
-        for (Entry<ProfileType, ISegmentedProfile> entry : profileMap.entrySet()) {
-            ISegmentedProfile profile = entry.getValue();
+        // Reverse profiles
+        for (Entry<ProfileType, IProfile> entry : profileMap.entrySet()) {
+            IProfile profile = entry.getValue();
             profile.reverse();
             assignProfile(entry.getKey(), profile);
         }
+        
+        // Reverse segments
+        List<IProfileSegment> segs = segments.stream().map(s->s.reverse()).collect(Collectors.toList());
+        segments = segs;
 
         // replace the tag positions also
         for (Entry<Landmark, Integer> entry : profileLandmarks.entrySet()) {
@@ -694,9 +717,9 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 	public Element toXmlElement() {
 		Element e = super.toXmlElement();
 		
-		e.addContent(new Element("WindowProportion").setText(String.valueOf(windowProportion)));
+		e.addContent(new Element(XML_WINDOW_PROPORTION).setText(String.valueOf(windowProportion)));
 
-		for(Entry<ProfileType, ISegmentedProfile> entry : profileMap.entrySet()) {
+		for(Entry<ProfileType, IProfile> entry : profileMap.entrySet()) {
 			e.addContent(new Element("Profile")
 					.setAttribute("type", entry.getKey().toString())
 					.setContent(entry.getValue().toXmlElement()));
@@ -705,6 +728,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 		for(Entry<Landmark, Integer> entry : profileLandmarks.entrySet()) {
 			e.addContent(new Element("Landmark")
 					.setAttribute("name", entry.getKey().toString())
+					.setAttribute("type", entry.getKey().type().toString())
 					.setText(String.valueOf(entry.getValue())));
 		}
 		

@@ -1,4 +1,4 @@
-package com.bmskinner.nuclear_morphology.components.generic;
+package com.bmskinner.nuclear_morphology.components.profiles;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -23,12 +23,6 @@ import org.junit.runners.Parameterized.Parameters;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.cells.SegmentedCellularComponent.DefaultProfile;
-import com.bmskinner.nuclear_morphology.components.profiles.BooleanProfile;
-import com.bmskinner.nuclear_morphology.components.profiles.DefaultProfileSegment;
-import com.bmskinner.nuclear_morphology.components.profiles.DoubleProfile;
-import com.bmskinner.nuclear_morphology.components.profiles.FloatProfile;
-import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
-import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.samples.dummy.DummySegmentedCellularComponent;
 
 /**

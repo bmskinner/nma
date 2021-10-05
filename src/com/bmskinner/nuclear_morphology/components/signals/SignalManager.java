@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package com.bmskinner.nuclear_morphology.analysis.signals;
+package com.bmskinner.nuclear_morphology.components.signals;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -37,14 +37,7 @@ import com.bmskinner.nuclear_morphology.components.measure.MeasurementDimension;
 import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
-import com.bmskinner.nuclear_morphology.components.signals.Colocalisation;
-import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
-import com.bmskinner.nuclear_morphology.components.signals.IShellResult;
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult.ShrinkType;
-import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
-import com.bmskinner.nuclear_morphology.components.signals.PairwiseSignalDistanceCollection;
-import com.bmskinner.nuclear_morphology.components.signals.PairwiseSignalDistanceValue;
-import com.bmskinner.nuclear_morphology.components.signals.UnavailableSignalGroupException;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 

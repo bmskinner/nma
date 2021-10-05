@@ -699,12 +699,14 @@ public class OpenBorderSegment implements IProfileSegment {
 				|| contains(seg.getEndIndex());
     }
 
-    private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-        in.defaultReadObject();
-    }
-
-    private void writeObject(java.io.ObjectOutputStream out) throws IOException {
-        out.defaultWriteObject();
-    }
+	@Override
+	public IProfileSegment reverse() {
+		  // invert the segment by swapping start and end
+        int newStart = totalLength - 1 - getEndIndex();
+        int newEnd   = totalLength - 1 - getStartIndex();
+        
+        return new DefaultProfileSegment(newStart, newEnd, totalLength, getID());
+	}
+   
 
 }

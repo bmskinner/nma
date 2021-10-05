@@ -182,11 +182,11 @@ public class ProfileChartFactory extends AbstractChartFactory {
 		ICellCollection collection = dataset.getCollection();
 
 		try {
-			if (options.getType().equals(ProfileType.FRANKEN)) {
-				ds = new ProfileDatasetCreator(options).createProfileDataset(); //TODO: replace if needed
-			} else {
+//			if (options.getType().equals(ProfileType.FRANKEN)) {
+//				ds = new ProfileDatasetCreator(options).createProfileDataset(); //TODO: replace if needed
+//			} else {
 				ds = new ProfileDatasetCreator(options).createProfileDataset();
-			}
+//			}
 		} catch (ChartDatasetCreationException e) {
 			LOGGER.log(Loggable.STACK, "Error making profile dataset", e);
 			return createErrorChart();
