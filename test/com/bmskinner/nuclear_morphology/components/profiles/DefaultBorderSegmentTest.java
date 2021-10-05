@@ -8,17 +8,23 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
+import org.jdom2.Element;
+import org.jdom2.output.Format;
+import org.jdom2.output.XMLOutputter;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
+import com.bmskinner.nuclear_morphology.components.nuclei.DefaultNucleus;
+import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment.SegmentUpdateException;
 
 /**
@@ -658,6 +664,20 @@ public class DefaultBorderSegmentTest {
         
         assertTrue(s2.overlapsBeyondEndpoints(s3));
         assertTrue(s3.overlapsBeyondEndpoints(s2));
+	}
+	
+	@Test
+	public void testXmlSerializes() throws Exception {
+		
+		Element e = test.toXmlElement();
+		
+		XMLOutputter xmlOutput = new XMLOutputter();
+		xmlOutput.setFormat(Format.getPrettyFormat());
+		xmlOutput.output(e, new PrintWriter( System.out ));
+
+		DefaultProfileSegment recovered = new DefaultProfileSegment(e);
+		
+		assertEquals(test, recovered);
 	}
 	
 }

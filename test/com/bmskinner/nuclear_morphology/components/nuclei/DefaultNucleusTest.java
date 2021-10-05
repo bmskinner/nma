@@ -44,6 +44,7 @@ public class DefaultNucleusTest extends ComponentTester {
 		xmlOutput.output(e, new PrintWriter( System.out ));
 
 		Nucleus test = new DefaultNucleus(e);
+		xmlOutput.output(test.toXmlElement(), new PrintWriter( System.out ));
 		
 		assertEquals(nucleus, test);
 	}

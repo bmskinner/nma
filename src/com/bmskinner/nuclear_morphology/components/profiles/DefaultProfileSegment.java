@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.jdom2.Element;
 
 import com.bmskinner.nuclear_morphology.components.UnavailableComponentException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
@@ -69,6 +70,9 @@ public class DefaultProfileSegment implements IProfileSegment {
                                                           // profile
     private transient boolean        isLocked    = false; // allow the start
                                                           // index to be fixed
+    
+    
+    
 
     /**
      * Construct with an existing UUID. This allows nucleus segments to directly
@@ -105,7 +109,33 @@ public class DefaultProfileSegment implements IProfileSegment {
         this.uuid = id;
     }
 
-    /**
+    @Override
+	public Element toXmlElement() {
+		Element e = new Element("Segment").setAttribute("id", uuid.toString());
+		e.addContent(new Element("Start").setText(String.valueOf(startIndex)));
+		e.addContent(new Element("End").setText(String.valueOf(endIndex)));
+		e.addContent(new Element("Total").setText(String.valueOf(totalLength)));
+		
+		for(IProfileSegment s : mergeSources) {
+			e.addContent(new Element("MergeSource").setContent(s.toXmlElement()));
+		}
+		return e;
+	}
+    
+    public DefaultProfileSegment(Element e) {
+    	uuid = UUID.fromString(e.getAttributeValue("id"));
+    	startIndex = Integer.parseInt(e.getChildText("Start"));
+    	endIndex = Integer.parseInt(e.getChildText("End"));
+    	totalLength = Integer.parseInt(e.getChildText("Total"));
+    	
+    	mergeSources = new IProfileSegment[e.getChildren("MergeSource").size()];
+    	int i=0;
+    	for(Element el : e.getChildren("MergeSource")) {
+    		mergeSources[i++] = new DefaultProfileSegment(el);
+    	}
+    }
+
+	/**
      * Construct with a default random id
      * 
      * @param startIndex the start index of the segment

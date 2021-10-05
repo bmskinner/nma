@@ -30,6 +30,7 @@ import com.bmskinner.nuclear_morphology.components.UnavailableComponentException
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
+import com.bmskinner.nuclear_morphology.io.XmlSerializable;
 
 /**
  * Border segments mark a region with start and end positions within a component
@@ -82,7 +83,7 @@ import com.bmskinner.nuclear_morphology.components.generic.IPoint;
  * @since 1.13.3
  *
  */
-public interface IProfileSegment extends Serializable, Iterable<Integer> {
+public interface IProfileSegment extends Serializable, XmlSerializable, Iterable<Integer> {
 
     /**
      * The smallest number of indexes in a segment. 

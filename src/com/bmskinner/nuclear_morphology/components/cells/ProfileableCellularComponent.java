@@ -207,9 +207,9 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 		
 //		initialise(windowProportion);
 		
-		for(Element el : e.getChildren("Profile")){
-			profileMap.put(null, null);
-		}
+//		for(Element el : e.getChildren("Profile")){
+//			profileMap.put(null, null);
+//		}
 		
 //		for(Entry<ProfileType, ISegmentedProfile> entry : profileMap.entrySet()) {
 //			e.addContent(new Element("Profile")
@@ -711,10 +711,16 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 		
 		e.addContent(new Element(XML_WINDOW_PROPORTION).setText(String.valueOf(windowProportion)));
 
-		for(Entry<ProfileType, IProfile> entry : profileMap.entrySet()) {
-			e.addContent(new Element("Profile")
-					.setAttribute("type", entry.getKey().toString())
-					.setContent(entry.getValue().toXmlElement()));
+//		for(Entry<ProfileType, IProfile> entry : profileMap.entrySet()) {
+//			e.addContent(new Element("Profile")
+//					.setAttribute("type", entry.getKey().toString())
+//					.setContent(entry.getValue().toXmlElement()));
+//		}
+		
+		for(IProfileSegment s : segments) {
+			e.addContent(new Element("Segment")
+					.setAttribute("id", s.getID().toString())
+					.setContent(s.toXmlElement()));
 		}
 		
 		for(Entry<Landmark, Integer> entry : profileLandmarks.entrySet()) {

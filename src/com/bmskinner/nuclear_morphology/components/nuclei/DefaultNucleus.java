@@ -89,6 +89,19 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
     
     public DefaultNucleus(Element e) throws ComponentCreationException {
     	super(e);
+    	nucleusNumber = Integer.valueOf(e.getChildText(XML_NUCLEUS_NUMBER));
+    	
+    	for(Element el : e.getChildren(XML_ORIENTATION)) {
+    		String name = el.getAttributeValue("name");
+    		Landmark l = this.getBorderTags().keySet().stream()
+    				.filter(lm->lm.getName().equals(el.getText()))
+    				.findFirst().get();
+    		orientationMarks.put(name, l);
+    	}
+    	priorityAxis = PriorityAxis.valueOf(e.getChildText(XML_PRIORITY_AXIS));
+    	signalCollection = new DefaultSignalCollection(e.getChild(XML_SIGNAL_COLLECTION));
+    	
+    	this.initialise(windowProportion);
     }
 
     @Override
