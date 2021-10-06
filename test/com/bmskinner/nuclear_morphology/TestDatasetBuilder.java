@@ -330,7 +330,7 @@ public class TestDatasetBuilder {
 		if(redSignals) {
 			ISignalGroup g = new DefaultSignalGroup(RED_SIGNAL_GROUP_NAME, RED_SIGNAL_GROUP);
 			g.setGroupColour(Color.red);
-			collection.addSignalGroup(RED_SIGNAL_GROUP, g);
+			collection.addSignalGroup(g);
 			HashOptions n = OptionsFactory.makeNuclearSignalOptions(new File(TEST_DATASET_IMAGE_FOLDER));
 			o.setDetectionOptions(IAnalysisOptions.SIGNAL_GROUP+RED_SIGNAL_GROUP, n);
 		}
@@ -338,7 +338,7 @@ public class TestDatasetBuilder {
 		if(greenSignals) {
 			ISignalGroup g = new DefaultSignalGroup(GREEN_SIGNAL_GROUP_NAME, GREEN_SIGNAL_GROUP);
 			g.setGroupColour(Color.GREEN);
-			collection.addSignalGroup(GREEN_SIGNAL_GROUP, g);
+			collection.addSignalGroup(g);
 			HashOptions n = OptionsFactory.makeNuclearSignalOptions(new File(TEST_DATASET_IMAGE_FOLDER));
 			o.setDetectionOptions(IAnalysisOptions.SIGNAL_GROUP+GREEN_SIGNAL_GROUP, n);
 		}

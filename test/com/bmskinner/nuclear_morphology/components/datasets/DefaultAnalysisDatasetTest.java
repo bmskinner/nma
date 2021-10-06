@@ -91,7 +91,7 @@ public class DefaultAnalysisDatasetTest extends ComponentTester {
     public void testAddChildDataset() {
     	int defaultArea = TestDatasetBuilder.DEFAULT_BASE_HEIGHT * TestDatasetBuilder.DEFAULT_BASE_WIDTH;
         ICellCollection c = d.getCollection().filterCollection(Measurement.AREA, MeasurementScale.PIXELS, defaultArea, defaultArea*2);
-        IAnalysisDataset ch = new DefaultAnalysisDataset(c);
+        IAnalysisDataset ch = new DefaultAnalysisDataset(c, new File(TestDatasetBuilder.TEST_DATASET_IMAGE_FOLDER));
         UUID id = ch.getId();
         
         d.addChildDataset(ch);

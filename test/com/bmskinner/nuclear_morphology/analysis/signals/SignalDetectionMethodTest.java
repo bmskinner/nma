@@ -62,7 +62,7 @@ public class SignalDetectionMethodTest extends ComponentTester {
 
     	ISignalGroup red = new DefaultSignalGroup(TestImageDatasetCreator.RED_SIGNAL_NAME, TestImageDatasetCreator.RED_SIGNAL_ID);
     	red.setGroupColour(Color.RED);
-    	d.getCollection().addSignalGroup(TestImageDatasetCreator.RED_SIGNAL_ID, red);
+    	d.getCollection().addSignalGroup(red);
     	d.getAnalysisOptions().get().setDetectionOptions(TestImageDatasetCreator.RED_SIGNAL_ID.toString(), redOptions);
     	new SignalDetectionMethod(d, redOptions, TestImageDatasetCreator.RED_SIGNAL_ID).call();
     	

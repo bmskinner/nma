@@ -54,6 +54,7 @@ import com.bmskinner.nuclear_morphology.io.DatasetExportMethod;
 import com.bmskinner.nuclear_morphology.io.DatasetExportMethod.ExportFormat;
 import com.bmskinner.nuclear_morphology.io.Io.Importer;
 import com.bmskinner.nuclear_morphology.io.xml.OptionsXMLReader;
+import com.bmskinner.nuclear_morphology.io.xml.XMLReader;
 import com.bmskinner.nuclear_morphology.io.xml.XMLReader.XMLReadingException;
 import com.bmskinner.nuclear_morphology.reports.ShellReportMethod;
 
@@ -191,9 +192,7 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod impleme
 	 * @throws XMLReadingException if the file cannot be read
 	 */
 	private IAnalysisOptions readOptions() throws XMLReadingException {
-		OptionsXMLReader r = new OptionsXMLReader(xmlFile);
-		IAnalysisOptions options = r.read();
-		return options;
+		return XMLReader.readAnalysisOptions(xmlFile);
 	}
 	
 	private List<IAnalysisDataset> createNucleusDetectionMethod(@NonNull IAnalysisOptions options, File imageFolder) throws Exception {

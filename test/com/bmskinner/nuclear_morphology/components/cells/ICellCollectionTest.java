@@ -272,15 +272,6 @@ public class ICellCollectionTest extends ComponentTester {
 		assertTrue(collection.getProfileCollection()!=null);
 	}
 
-	@Test
-	public void testGetFolder() {
-		assertTrue(collection.getFolder().equals(new File(TestDatasetBuilder.TEST_DATASET_IMAGE_FOLDER)));
-	}
-
-	@Test
-	public void testGetOutputFolderName() {
-		assertTrue(collection.getOutputFolderName().equals(TestDatasetBuilder.TEST_DATASET_NAME));
-	}
 
 	@Test
 	public void testGetSignalGroupIDs() {
@@ -301,7 +292,7 @@ public class ICellCollectionTest extends ComponentTester {
 		when( group.getGroupName()).thenReturn("A test group");
 		
 		assertFalse(collection.hasSignalGroup(TestDatasetBuilder.GREEN_SIGNAL_GROUP));
-		collection.addSignalGroup(TestDatasetBuilder.GREEN_SIGNAL_GROUP, group);
+		collection.addSignalGroup(group);
 		assertTrue(collection.hasSignalGroup(TestDatasetBuilder.GREEN_SIGNAL_GROUP));
 	}
 
@@ -340,7 +331,7 @@ public class ICellCollectionTest extends ComponentTester {
 		
 		// Run consensus averaging on the collection. Wrap in a new dataset. 
 		// Analysis options will not be copied!
-		IAnalysisDataset d = new DefaultAnalysisDataset(collection);
+		IAnalysisDataset d = new DefaultAnalysisDataset(collection, new File(TestDatasetBuilder.TEST_DATASET_IMAGE_FOLDER));
 		
 		new ConsensusAveragingMethod(d).call();
 		int bIndex=0;

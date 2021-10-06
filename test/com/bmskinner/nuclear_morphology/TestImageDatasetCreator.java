@@ -212,7 +212,7 @@ public class TestImageDatasetCreator {
 
         	ISignalGroup red = new DefaultSignalGroup(RED_SIGNAL_NAME, RED_SIGNAL_ID);
         	red.setGroupColour(Color.RED);
-        	d.getCollection().addSignalGroup(RED_SIGNAL_ID, red);
+        	d.getCollection().addSignalGroup(red);
         	d.getAnalysisOptions().get().setDetectionOptions(RED_SIGNAL_ID.toString(), redOptions);
         	new SignalDetectionMethod(d, redOptions, RED_SIGNAL_ID).call();
         }
@@ -222,7 +222,7 @@ public class TestImageDatasetCreator {
              greenOptions.setInt(HashOptions.CHANNEL, 1);
              ISignalGroup green = new DefaultSignalGroup(GREEN_SIGNAL_NAME, GREEN_SIGNAL_ID);
              green.setGroupColour(Color.GREEN);
-             d.getCollection().addSignalGroup(GREEN_SIGNAL_ID, green);
+             d.getCollection().addSignalGroup(green);
              d.getAnalysisOptions().get().setDetectionOptions(GREEN_SIGNAL_ID.toString(), greenOptions);
              new SignalDetectionMethod(d, greenOptions, GREEN_SIGNAL_ID).call();
         }

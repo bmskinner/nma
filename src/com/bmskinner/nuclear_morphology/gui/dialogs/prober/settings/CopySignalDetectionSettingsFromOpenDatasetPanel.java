@@ -10,11 +10,11 @@ import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
+import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.core.DatasetListManager;
 import com.bmskinner.nuclear_morphology.gui.components.FileSelector;
-import com.bmskinner.nuclear_morphology.io.xml.OptionsXMLReader;
+import com.bmskinner.nuclear_morphology.io.xml.XMLReader;
 import com.bmskinner.nuclear_morphology.io.xml.XMLReader.XMLReadingException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -94,7 +94,7 @@ public class CopySignalDetectionSettingsFromOpenDatasetPanel extends CopyFromOpe
 				return;
 
 			try {
-				IAnalysisOptions o = new OptionsXMLReader(f).read();
+				IAnalysisOptions o = XMLReader.readAnalysisOptions(f);
 				
 				// Find the channels in the imported file
 				String[] choices = o.getNuclearSignalGroups()

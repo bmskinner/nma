@@ -25,11 +25,11 @@ import javax.swing.JOptionPane;
 
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
+import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.core.DatasetListManager;
 import com.bmskinner.nuclear_morphology.gui.components.FileSelector;
-import com.bmskinner.nuclear_morphology.io.xml.OptionsXMLReader;
+import com.bmskinner.nuclear_morphology.io.xml.XMLReader;
 import com.bmskinner.nuclear_morphology.io.xml.XMLReader.XMLReadingException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -94,7 +94,7 @@ public class CopyNucleusDetectionSettingsFromOpenDatasetPanel extends CopyFromOp
 				return;
 
 			try {
-				IAnalysisOptions o = new OptionsXMLReader(f).read();
+				IAnalysisOptions o = XMLReader.readAnalysisOptions(f);
 				options.set(o.getDetectionOptions(CellularComponent.NUCLEUS).get());
 				parent.setRuleSetCollection(o.getRuleSetCollection());
 				parent.setAngleWindowProportion(o.getProfileWindowProportion());
