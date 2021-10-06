@@ -18,10 +18,16 @@ package com.bmskinner.nuclear_morphology.components.signals;
 
 import java.io.Serializable;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.jdom2.Element;
 
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
+import com.bmskinner.nuclear_morphology.components.nuclei.DefaultConsensusNucleus;
+import com.bmskinner.nuclear_morphology.io.XmlSerializable;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Key for mapping templates to images
@@ -29,7 +35,9 @@ import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
  * @since 1.14.0
  *
  */
-public class WarpedSignalKey implements Serializable {
+public class WarpedSignalKey implements Serializable, XmlSerializable {
+	
+	private static final Logger LOGGER = Logger.getLogger(WarpedSignalKey.class.getName());
 
 	private static final long serialVersionUID = 1L;
 	private final CellularComponent targetShape;
@@ -54,6 +62,42 @@ public class WarpedSignalKey implements Serializable {
 		this.isBinarised = isBinarised;
 		this.isNormalised = isNormalised;
 	}
+	
+	public WarpedSignalKey(@NonNull Element e) {
+		
+		CellularComponent c = null;
+		try {
+			c = new DefaultConsensusNucleus(e.getChild("TargetShape"));
+		} catch (ComponentCreationException e1) {
+			LOGGER.log(Loggable.STACK, "Unable to unmarshal warped key target shape", e);
+		}
+		
+		targetShape = c;
+		
+		targetShapeId = UUID.fromString(e.getChildText("TargetShapeId"));
+		templateId    = UUID.fromString(e.getChildText("TemplateId"));
+		
+		isCellWithSignalsOnly = Boolean.valueOf(e.getChildText("IsCellWithSignalsOnly"));
+		isNormalised = Boolean.valueOf(e.getChildText("IsNormalised"));
+		isBinarised = Boolean.valueOf(e.getChildText("IsBinarised"));
+		
+		threshold = Integer.valueOf(e.getChildText("Threshold"));
+	}
+	
+	@Override
+	public Element toXmlElement() {
+		Element e = new Element("WarpedSignalKey");
+		e.addContent(new Element("TargetShape").setContent(targetShape.toXmlElement()));
+		
+		e.addContent("TargetShapeId").setText(targetShapeId.toString());
+		e.addContent("IsCellWithSignalsOnly").setText(String.valueOf(isCellWithSignalsOnly));
+		e.addContent("Threshold").setText(String.valueOf(threshold));
+		e.addContent("TemplateId").setText(templateId.toString());
+		e.addContent("IsBinarised").setText(String.valueOf(isBinarised));
+		e.addContent("IsNormalised").setText(String.valueOf(isNormalised));
+		
+		return e;
+	} 
 	
 	public UUID getTemplateId() {
 		return templateId;

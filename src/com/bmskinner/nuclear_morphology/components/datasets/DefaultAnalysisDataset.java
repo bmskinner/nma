@@ -76,17 +76,6 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
     private IAnalysisOptions analysisOptions;
 
     /**
-     * Create a dataset from a cell collection. The save file is set as the
-     * output folder of the collection
-     * 
-     * @param collection
-     */
-    @Deprecated
-    public DefaultAnalysisDataset(ICellCollection collection) {
-        this(collection, new File(collection.getOutputFolder(), collection.getName() + Io.SAVE_FILE_EXTENSION));
-    }
-
-    /**
      * Create a dataset from a cell collection, with a defined save file
      * 
      * @param collection
@@ -99,9 +88,9 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 
     @Override
     public IAnalysisDataset duplicate() throws Exception {
-    	DefaultAnalysisDataset result = new DefaultAnalysisDataset(cellCollection);
+    	DefaultAnalysisDataset result = new DefaultAnalysisDataset(cellCollection, savePath);
         
-        result.setAnalysisOptions(analysisOptions);
+        result.setAnalysisOptions(analysisOptions.duplicate());
 
         result.cellCollection = cellCollection.duplicate();
         

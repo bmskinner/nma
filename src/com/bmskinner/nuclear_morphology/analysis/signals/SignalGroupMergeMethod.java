@@ -95,7 +95,7 @@ public class SignalGroupMergeMethod extends SingleDatasetAnalysisMethod {
         	DefaultSignalGroup newGroup = new DefaultSignalGroup(sb.toString(), UUID.randomUUID());
         	
         	// Duplicate the signals into the new signal group
-        	dataset.getCollection().addSignalGroup(newGroup.getId(), newGroup);
+        	dataset.getCollection().addSignalGroup(newGroup);
         	for(Nucleus n : dataset.getCollection().getNuclei()) {
         		for(DatasetSignalId id : idSet) {
         			List<INuclearSignal> signals = n.getSignalCollection().getSignals(id.s);

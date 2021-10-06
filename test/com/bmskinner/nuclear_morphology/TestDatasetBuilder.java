@@ -328,7 +328,7 @@ public class TestDatasetBuilder {
 		o.getNuclusDetectionOptions().get().setInt(HashOptions.MAX_SIZE_PIXELS, (baseWidth+maxSizeVariation)*(baseHeight+maxSizeVariation) );
 
 		if(redSignals) {
-			ISignalGroup g = new DefaultSignalGroup(RED_SIGNAL_GROUP_NAME);
+			ISignalGroup g = new DefaultSignalGroup(RED_SIGNAL_GROUP_NAME, RED_SIGNAL_GROUP);
 			g.setGroupColour(Color.red);
 			collection.addSignalGroup(RED_SIGNAL_GROUP, g);
 			HashOptions n = OptionsFactory.makeNuclearSignalOptions(new File(TEST_DATASET_IMAGE_FOLDER));
@@ -336,7 +336,7 @@ public class TestDatasetBuilder {
 		}
 		
 		if(greenSignals) {
-			ISignalGroup g = new DefaultSignalGroup(GREEN_SIGNAL_GROUP_NAME);
+			ISignalGroup g = new DefaultSignalGroup(GREEN_SIGNAL_GROUP_NAME, GREEN_SIGNAL_GROUP);
 			g.setGroupColour(Color.GREEN);
 			collection.addSignalGroup(GREEN_SIGNAL_GROUP, g);
 			HashOptions n = OptionsFactory.makeNuclearSignalOptions(new File(TEST_DATASET_IMAGE_FOLDER));

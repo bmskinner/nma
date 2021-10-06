@@ -31,6 +31,7 @@ import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.components.profiles.UnprofilableObjectException;
+import com.bmskinner.nuclear_morphology.io.XmlSerializable;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.process.FloatPolygon;
@@ -80,6 +81,12 @@ public class DefaultConsensusNucleus extends DefaultNucleus implements Consensus
         }
     }
     
+    /**
+     * Construct from an XML element. Use for 
+     * unmarshalling. The element should conform
+     * to the specification in {@link XmlSerializable}.
+     * @param e the XML element containing the data.
+     */
     public DefaultConsensusNucleus(Element e) throws ComponentCreationException {
     	super(e);
     	xOffset = Integer.valueOf(e.getChildText("OffsetX"));

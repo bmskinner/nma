@@ -71,10 +71,8 @@ public class ChildAnalysisDataset extends AbstractAnalysisDataset implements IAn
 			cd.getCollection().addCell(c);
 
 		// copy the signals
-		for(UUID id : cellCollection.getSignalGroupIDs()) {
-			Optional<ISignalGroup> optg = cellCollection.getSignalGroup(id);
-			if(optg.isPresent())
-				cd.getCollection().addSignalGroup(id, optg.get().duplicate());
+		for(ISignalGroup s : cellCollection.getSignalGroups()) {
+			cd.getCollection().addSignalGroup(s.duplicate());
 		}
 
 

@@ -101,7 +101,8 @@ public class VirtualCellCollection implements ICellCollection {
     /** the refolded consensus nucleus */
     private Consensus<Nucleus> consensusNucleus;
 
-    /** Store signal groups separately to allow shell results to be kept */
+    /** Store shell results separately to allow separate shell analysis
+     * between parent and child datasets */
     private Map<UUID, IShellResult> shellResults = new HashMap<>(0);
 
     /*
@@ -505,30 +506,6 @@ public class VirtualCellCollection implements ICellCollection {
     }
 
     @Override
-    @Deprecated
-    public File getFolder() {
-        return parent.getCollection().getFolder();
-    }
-
-    @Override
-    @Deprecated
-    public String getOutputFolderName() {
-        return parent.getCollection().getOutputFolderName();
-    }
-
-    @Override
-    @Deprecated
-    public File getOutputFolder() {
-        return parent.getCollection().getOutputFolder();
-    }
-
-    @Override
-    @Deprecated
-    public void setOutputFolder(@NonNull File folder) {
-        parent.getCollection().setOutputFolder(folder);
-    }
-
-    @Override
     public Set<File> getImageFiles() {
 
         Set<File> result = new HashSet<File>(cellIDs.size());
@@ -559,7 +536,7 @@ public class VirtualCellCollection implements ICellCollection {
         // result
         // This SignalGroup is never saved to file, so does not need serialising
         @SuppressWarnings("serial")
-        ISignalGroup result = new DefaultSignalGroup(parent.getCollection().getSignalGroup(signalGroup).get(), true) {
+        ISignalGroup result = new DefaultSignalGroup(parent.getCollection().getSignalGroup(signalGroup).get()) {
 
             @Override
             public void setShellResult(@NonNull IShellResult result) {
@@ -602,8 +579,8 @@ public class VirtualCellCollection implements ICellCollection {
     }
 
     @Override
-    public void addSignalGroup(@NonNull UUID newID, @NonNull ISignalGroup newGroup) {
-        parent.getCollection().addSignalGroup(newID, newGroup);
+    public void addSignalGroup(@NonNull ISignalGroup newGroup) {
+        parent.getCollection().addSignalGroup(newGroup);
     }
 
     @Override
@@ -1284,7 +1261,6 @@ public class VirtualCellCollection implements ICellCollection {
 
 		StringBuilder b = new StringBuilder("Collection:" + getName() + newLine)
 				.append("Nuclei: " + this.getNucleusCount() + newLine)
-				.append("Source folder: " + this.getFolder().getAbsolutePath() + newLine)
 				.append("Profile collections:" + newLine)
 				.append("Parent: "+parent.getName());
 

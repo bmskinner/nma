@@ -210,7 +210,7 @@ public class TestImageDatasetCreator {
         	redOptions.setInt(HashOptions.MIN_SIZE_PIXELS, 5);
         	redOptions.setDouble(HashOptions.MAX_FRACTION, 0.5);
 
-        	ISignalGroup red = new DefaultSignalGroup(RED_SIGNAL_NAME);
+        	ISignalGroup red = new DefaultSignalGroup(RED_SIGNAL_NAME, RED_SIGNAL_ID);
         	red.setGroupColour(Color.RED);
         	d.getCollection().addSignalGroup(RED_SIGNAL_ID, red);
         	d.getAnalysisOptions().get().setDetectionOptions(RED_SIGNAL_ID.toString(), redOptions);
@@ -220,7 +220,7 @@ public class TestImageDatasetCreator {
         if(addGreen) {
         	HashOptions greenOptions = OptionsFactory.makeNuclearSignalOptions(testFolder);
              greenOptions.setInt(HashOptions.CHANNEL, 1);
-             ISignalGroup green = new DefaultSignalGroup(GREEN_SIGNAL_NAME);
+             ISignalGroup green = new DefaultSignalGroup(GREEN_SIGNAL_NAME, GREEN_SIGNAL_ID);
              green.setGroupColour(Color.GREEN);
              d.getCollection().addSignalGroup(GREEN_SIGNAL_ID, green);
              d.getAnalysisOptions().get().setDetectionOptions(GREEN_SIGNAL_ID.toString(), greenOptions);

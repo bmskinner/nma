@@ -30,12 +30,9 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -47,6 +44,7 @@ import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.jdom2.Element;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.Statistical;
@@ -54,6 +52,7 @@ import com.bmskinner.nuclear_morphology.components.Taggable;
 import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.UnavailableComponentException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.cells.DefaultCell;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
@@ -63,6 +62,7 @@ import com.bmskinner.nuclear_morphology.components.measure.StatsCache;
 import com.bmskinner.nuclear_morphology.components.measure.VennCache;
 import com.bmskinner.nuclear_morphology.components.nuclei.Consensus;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.profiles.DefaultProfileCollection;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileCollection;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
@@ -71,10 +71,12 @@ import com.bmskinner.nuclear_morphology.components.profiles.ProfileManager;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
+import com.bmskinner.nuclear_morphology.components.signals.DefaultSignalGroup;
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.signals.SignalManager;
 import com.bmskinner.nuclear_morphology.core.DatasetListManager;
+import com.bmskinner.nuclear_morphology.io.XmlSerializable;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
@@ -107,7 +109,7 @@ public class DefaultCellCollection implements ICellCollection {
 	private Set<ICell> cells = new HashSet<>(20);
 
 	/** Signal groups, keyed on their unique id */
-	private Map<UUID, ISignalGroup> signalGroups = new HashMap<>(0);
+	private Set<ISignalGroup> signalGroups = new HashSet<>(0);
 
 	/** Rules used to identify border points */
 	private RuleSetCollection ruleSets;
@@ -163,7 +165,50 @@ public class DefaultCellCollection implements ICellCollection {
 	public DefaultCellCollection(ICellCollection template, String name) {
 		this(template.getRuleSetCollection(), name, null);
 	}
+
+    /**
+     * Construct from an XML element. Use for 
+     * unmarshalling. The element should conform
+     * to the specification in {@link XmlSerializable}.
+     * @param e the XML element containing the data.
+     */
+	public DefaultCellCollection(Element e) throws ComponentCreationException {
+		
+		uuid = UUID.fromString(e.getAttributeValue("id"));
+		name = e.getAttributeValue("name");
+		
+		profileCollection = new DefaultProfileCollection(e.getChild("ProfileCollection"));
+
+		for(Element el : e.getChildren("Cell"))
+			cells.add(new DefaultCell(el));
+		
+		
+		for(Element el : e.getChildren("SignalGroup"))
+			signalGroups.add(new DefaultSignalGroup(el));
+
+		ruleSets = new RuleSetCollection(e.getChild("RuleSetCollection"));
+	}
 	
+
+	@Override
+	public Element toXmlElement() {
+		Element e = new Element("CellCollection").setAttribute("id", uuid.toString()).setAttribute("name", name);
+		e.addContent(profileCollection.toXmlElement());
+		
+		if(consensusNucleus!=null)
+			e.addContent(consensusNucleus.toXmlElement());
+		
+		for(ICell c : cells)
+			e.addContent(c.toXmlElement());
+		
+		for(ISignalGroup c : signalGroups)
+			e.addContent(c.toXmlElement());
+		
+		
+		e.addContent(ruleSets.toXmlElement());
+		
+		return e;
+	}
 
 	@Override
 	public ICellCollection duplicate() {
@@ -176,8 +221,8 @@ public class DefaultCellCollection implements ICellCollection {
 		result.profileCollection = profileCollection.duplicate();
 		
 		// copy the signals
-        for(UUID id : getSignalGroupIDs())
-        	result.addSignalGroup(id, getSignalGroup(id).get().duplicate());
+        for(ISignalGroup s : getSignalGroups())
+        	result.addSignalGroup(s.duplicate());
 		return result;
 	}
 
@@ -1066,14 +1111,14 @@ public class DefaultCellCollection implements ICellCollection {
 	@Override
 	public Set<UUID> getSignalGroupIDs() {
 
-		Set<UUID> ids = new HashSet<>(signalGroups.keySet());
+		Set<UUID> ids = signalGroups.stream().map(s->s.getId()).collect(Collectors.toSet());
 		ids.remove(IShellResult.RANDOM_SIGNAL_ID);
 		return ids;
 	}
 
 	@Override
 	public Collection<ISignalGroup> getSignalGroups() {
-		return this.signalGroups.values();
+		return signalGroups;
 	}
 
 	/**
@@ -1084,17 +1129,17 @@ public class DefaultCellCollection implements ICellCollection {
 	 */
 	@Override
 	public Optional<ISignalGroup> getSignalGroup(@NonNull UUID id) {
-		return Optional.ofNullable(this.signalGroups.get(id));
+		return signalGroups.stream().filter(s->s.getId().equals(id)).findFirst();
 	}
 
 	@Override
-	public void addSignalGroup(@NonNull UUID id, @NonNull ISignalGroup group) {
-		this.signalGroups.put(id, group);
+	public void addSignalGroup(@NonNull ISignalGroup group) {
+		signalGroups.add(group);
 	}
 
 	@Override
 	public boolean hasSignalGroup(@NonNull UUID id) {
-		return this.signalGroups.containsKey(id);
+		return signalGroups.stream().anyMatch(s->s.getId().equals(id));
 	}
 
 	/**
@@ -1214,11 +1259,10 @@ public class DefaultCellCollection implements ICellCollection {
 		b.append(this.ruleSets.toString() + newLine);
 
 		b.append("Signal groups:" + newLine);
-		for(Entry<UUID, ISignalGroup> entry : signalGroups.entrySet()) {
-			UUID signalGroupID = entry.getKey();
-			ISignalGroup group = entry.getValue();
+		for(ISignalGroup entry : signalGroups) {
+			UUID signalGroupID = entry.getId();
 			int count = this.getSignalManager().getSignalCount(signalGroupID);
-			b.append(signalGroupID.toString() + ": " + group.toString() + " | " + count + newLine);
+			b.append(entry.toString() + " | " + count + newLine);
 		}
 
 		if(this.hasConsensus()){

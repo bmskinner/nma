@@ -17,13 +17,16 @@
 package com.bmskinner.nuclear_morphology.components.signals;
 
 import java.awt.Color;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.jdom2.Element;
 
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
+import com.bmskinner.nuclear_morphology.io.XmlSerializable;
 
 /**
  * This contains information about nuclear signals within an
@@ -54,6 +57,45 @@ public class DefaultSignalGroup implements ISignalGroup {
     	this.id = id;
         groupName = name;
     }
+    
+    /**
+     * Construct from an XML element. Use for 
+     * unmarshalling. The element should conform
+     * to the specification in {@link XmlSerializable}.
+     * @param e the XML element containing the data.
+     */
+    public DefaultSignalGroup(@NonNull Element e) {
+    	id = UUID.fromString(e.getAttributeValue("id"));
+    	groupName = e.getAttributeValue("name");
+    	isVisible = Boolean.parseBoolean(e.getChildText("Isvisible"));
+    	groupColour = Color.decode(e.getChildText("Colour"));
+
+    	if(e.getChild("ShellResult")!=null)
+    		shellResult = new DefaultShellResult(e.getChild("ShellResult"));
+
+    	if(e.getChild("WarpedSignal")!=null) 
+    		warpedSignals = new ShortWarpedSignal(e.getChild("WarpedSignal"));	
+
+
+    }
+
+
+	@Override
+	public Element toXmlElement() {
+		Element e = new Element("SignalGroup").setAttribute("id", id.toString()).setAttribute("name", groupName);
+		e.addContent("IsVisible").setText(String.valueOf(isVisible));
+		
+		if(groupColour!=null)
+			e.addContent(new Element("Colour").setText(String.valueOf(groupColour.getRGB())));
+		
+		if(shellResult!=null)
+			e.addContent(shellResult.toXmlElement());
+		
+		if(warpedSignals!=null)
+			e.addContent(warpedSignals.toXmlElement());
+
+		return e;
+	} 
 
     /**
      * Construct from an existing group, duplicating the values in the template
@@ -156,17 +198,10 @@ public class DefaultSignalGroup implements ISignalGroup {
     public String toString() {
         return groupName;
     }
-    
+
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((groupColour == null) ? 0 : groupColour.hashCode());
-		result = prime * result + ((groupName == null) ? 0 : groupName.hashCode());
-		result = prime * result + (isVisible ? 1231 : 1237);
-		result = prime * result + ((shellResult == null) ? 0 : shellResult.hashCode());
-		result = prime * result + ((warpedSignals == null) ? 0 : warpedSignals.hashCode());
-		return result;
+		return Objects.hash(groupColour, groupName, id, isVisible, shellResult, warpedSignals);
 	}
 
 	@Override
@@ -178,28 +213,11 @@ public class DefaultSignalGroup implements ISignalGroup {
 		if (getClass() != obj.getClass())
 			return false;
 		DefaultSignalGroup other = (DefaultSignalGroup) obj;
-		if (groupColour == null) {
-			if (other.groupColour != null)
-				return false;
-		} else if (!groupColour.equals(other.groupColour))
-			return false;
-		if (groupName == null) {
-			if (other.groupName != null)
-				return false;
-		} else if (!groupName.equals(other.groupName))
-			return false;
-		if (isVisible != other.isVisible)
-			return false;
-		if (shellResult == null) {
-			if (other.shellResult != null)
-				return false;
-		} else if (!shellResult.equals(other.shellResult))
-			return false;
-		if (warpedSignals == null) {
-			if (other.warpedSignals != null)
-				return false;
-		} else if (!warpedSignals.equals(other.warpedSignals))
-			return false;
-		return true;
-	}      
+		return Objects.equals(groupColour, other.groupColour) && Objects.equals(groupName, other.groupName)
+				&& Objects.equals(id, other.id) && isVisible == other.isVisible
+				&& Objects.equals(shellResult, other.shellResult) && Objects.equals(warpedSignals, other.warpedSignals);
+	}
+    
+	
+     
 }

@@ -38,6 +38,7 @@ import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
+import com.bmskinner.nuclear_morphology.io.XmlSerializable;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.process.ImageProcessor;
@@ -70,6 +71,12 @@ public class DefaultSignalCollection implements ISignalCollection {
     public DefaultSignalCollection() {
     }
     
+    /**
+     * Construct from an XML element. Use for 
+     * unmarshalling. The element should conform
+     * to the specification in {@link XmlSerializable}.
+     * @param e the XML element containing the data.
+     */
     public DefaultSignalCollection(Element e) {
     	
     	for(Element id : e.getChildren(XML_SIGNALS)) {

@@ -238,7 +238,7 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
     	random.setGroupColour(Color.LIGHT_GRAY);
     	DefaultShellResult channelCounter = counters.get(IShellResult.RANDOM_SIGNAL_ID);
     	random.setShellResult(channelCounter);
-    	collection.addSignalGroup(IShellResult.RANDOM_SIGNAL_ID, random);
+    	collection.addSignalGroup(random);
     	copyShellResultsToChildDatasets(IShellResult.RANDOM_SIGNAL_ID);
     }
 

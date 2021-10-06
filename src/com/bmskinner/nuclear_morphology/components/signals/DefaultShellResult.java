@@ -69,6 +69,12 @@ public class DefaultShellResult implements IShellResult {
         }
     }
     
+    /**
+     * Construct from an XML element. Use for 
+     * unmarshalling. The element should conform
+     * to the specification in {@link XmlSerializable}.
+     * @param e the XML element containing the data.
+     */
     public DefaultShellResult(Element e) {
     	nShells = Integer.valueOf(e.getChildText("nShells"));
     	type = ShrinkType.valueOf(e.getChildText("ShrinkType"));

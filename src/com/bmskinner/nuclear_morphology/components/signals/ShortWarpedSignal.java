@@ -1,16 +1,20 @@
 package com.bmskinner.nuclear_morphology.components.signals;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.jdom2.Element;
 
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.io.XmlSerializable;
 
 import ij.process.ImageProcessor;
 
@@ -47,12 +51,56 @@ public class ShortWarpedSignal implements IWarpedSignal {
 		id = signalGroupId;
 	}
 	
+	
+    /**
+     * Construct from an XML element. Use for 
+     * unmarshalling. The element should conform
+     * to the specification in {@link XmlSerializable}.
+     * @param e the XML element containing the data.
+     */
+	public ShortWarpedSignal(@NonNull Element e) {
+		id = UUID.fromString(e.getAttributeValue("id"));
+		
+		for(Element el : e.getChildren("Image")) {
+			WarpedSignalKey k = new WarpedSignalKey(el.getChild("WarpedSignalKey"));
+			
+			String[] s = el.getChildText("Bytes").replace("[", "").replace("]", "").replace(" ", "").split(",");
+			byte[] b = new byte[s.length];
+			for(int i=0; i<s.length; i++)
+				b[i] = Byte.valueOf(s[i]);
+			
+			images.put(k, b);
+			
+			targetNames.put(k, el.getChildText("Name"));
+			
+			widths.put(k, Integer.parseInt(el.getChildText("Width")));
+		}
+	}
+	
+	@Override
+	public Element toXmlElement() {
+		Element e = new Element("WarpedSignal").setAttribute("id", id.toString());
+
+		for(Entry<WarpedSignalKey, byte[]> entry : images.entrySet()) {
+			Element el = new Element("Image");
+			el.addContent(entry.getKey().toXmlElement());
+			el.addContent(new Element("Bytes").setText(Arrays.toString(entry.getValue())));
+			el.addContent(new Element("Name").setText(targetNames.get(entry.getKey())));
+			el.addContent(new Element("Width").setText( String.valueOf(widths.get(entry.getKey()))));
+			e.addContent(el);
+		}		
+		return e;
+	}
+
+
+
 	@Override
 	public IWarpedSignal duplicate() {
 		ShortWarpedSignal w = new ShortWarpedSignal(id);
-		for(WarpedSignalKey k : images.keySet()) {
-			w.images.put(k, images.get(k));
-			w.targetNames.put(k, targetNames.get(k));
+		for(Entry<WarpedSignalKey, byte[]> entry : images.entrySet()) {
+			w.images.put(entry.getKey(), entry.getValue());
+			w.targetNames.put(entry.getKey(), targetNames.get(entry.getKey()));
+			w.widths.put(entry.getKey(), widths.get(entry.getKey()));
 		}
 		return w;
 	}

@@ -23,6 +23,8 @@ import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nuclear_morphology.io.XmlSerializable;
+
 /**
  * Signal groups are used to store common metadata about nuclear signals within
  * a cell collection - for example, the folder of images the signals were
@@ -32,7 +34,7 @@ import org.eclipse.jdt.annotation.NonNull;
  * @since 1.13.3
  *
  */
-public interface ISignalGroup extends Serializable {
+public interface ISignalGroup extends Serializable, XmlSerializable {
 	
 	UUID getId();
 	

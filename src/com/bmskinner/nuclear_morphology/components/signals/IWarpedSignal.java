@@ -26,6 +26,7 @@ import java.util.UUID;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.io.XmlSerializable;
 
 import ij.process.ByteProcessor;
 import ij.process.ImageProcessor;
@@ -38,7 +39,7 @@ import ij.process.ShortProcessor;
  * @since 1.14.0
  *
  */
-public interface IWarpedSignal extends Serializable {
+public interface IWarpedSignal extends Serializable, XmlSerializable {
 	
 	/**
 	 * Create a byte array from the given byte processor.

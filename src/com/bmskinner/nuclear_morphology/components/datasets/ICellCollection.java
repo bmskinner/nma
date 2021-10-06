@@ -348,7 +348,7 @@ public interface ICellCollection
      * @param newID
      * @param newGroup
      */
-    void addSignalGroup(@NonNull UUID newID, @NonNull ISignalGroup newGroup);
+    void addSignalGroup(@NonNull ISignalGroup newGroup);
 
     /**
      * Get the signal manager for the collection

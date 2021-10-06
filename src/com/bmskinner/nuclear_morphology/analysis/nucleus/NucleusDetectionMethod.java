@@ -166,7 +166,7 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
         		continue;
 
         	File folder = entry.getKey();
-            IAnalysisDataset dataset = new DefaultAnalysisDataset(collection);
+            IAnalysisDataset dataset = new DefaultAnalysisDataset(collection, new File(outputFolder, collection.getName()+Io.SAVE_FILE_EXTENSION));
             
             // Ensure the actual folder of images is set in the analysis options, not a root folder
             IAnalysisOptions datasetOptions = templateOptions.duplicate();
@@ -174,7 +174,6 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
             dataset.setAnalysisOptions(datasetOptions);
             
             dataset.setRoot(true);
-            dataset.setSavePath(new File(outputFolder, dataset.getName()+Io.SAVE_FILE_EXTENSION));
 
             LOGGER.info("Analysing " + collection.getName());
 

@@ -2,6 +2,7 @@ package com.bmskinner.nuclear_morphology.components.nuclei;
 
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
+import com.bmskinner.nuclear_morphology.io.XmlSerializable;
 
 /**
  * Wrapper for consensus objects allowing offsets and rotations
@@ -10,7 +11,7 @@ import com.bmskinner.nuclear_morphology.components.generic.IPoint;
  *
  * @param <E> the type of object this is a consensus of 
  */
-public interface Consensus<E extends CellularComponent> {
+public interface Consensus<E extends CellularComponent> extends XmlSerializable {
 
 	/**
 	 * Move the consensus by the given amount in X and Y axes

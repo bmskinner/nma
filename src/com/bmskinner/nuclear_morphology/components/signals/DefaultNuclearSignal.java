@@ -25,6 +25,7 @@ import org.jdom2.Element;
 
 import com.bmskinner.nuclear_morphology.components.cells.DefaultCellularComponent;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
+import com.bmskinner.nuclear_morphology.io.XmlSerializable;
 
 import ij.gui.Roi;
 
@@ -61,6 +62,13 @@ public class DefaultNuclearSignal extends DefaultCellularComponent implements IN
         this.closestNuclearBorderPoint = n.getClosestBorderPoint();
     }
     
+    
+    /**
+     * Construct from an XML element. Use for 
+     * unmarshalling. The element should conform
+     * to the specification in {@link XmlSerializable}.
+     * @param e the XML element containing the data.
+     */
     public DefaultNuclearSignal(Element e) {
     	super(e);
     	closestNuclearBorderPoint = Integer.valueOf(e.getChildText(XML_CLOSEST_BORDER));

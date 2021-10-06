@@ -193,7 +193,7 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 
             // All the existing signal groups before merging
             for (UUID signalGroupID : d.getCollection().getSignalGroupIDs()) {
-                newCollection.addSignalGroup(signalGroupID,
+                newCollection.addSignalGroup(
                         new DefaultSignalGroup(d.getCollection().getSignalGroup(signalGroupID).orElseThrow(NullPointerException::new)));
             }
         }
@@ -212,7 +212,7 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
         //TODO update nuclear signal options with new ids
 
         // create the dataset; has no analysis options at present
-        IAnalysisDataset newDataset = new DefaultAnalysisDataset(newCollection);
+        IAnalysisDataset newDataset = new DefaultAnalysisDataset(newCollection, saveFile);
         newDataset.setRoot(true);
 
         // Add the original datasets as merge sources

@@ -216,7 +216,7 @@ public class SignalManager {
 
 		    // the new group for the signals
 		    ISignalGroup newGroup = oldGroup.duplicate();
-		    collection.addSignalGroup(newID, newGroup);
+		    collection.addSignalGroup(newGroup);
 		}
 
 		collection.removeSignalGroup(oldID);
@@ -478,7 +478,7 @@ public class SignalManager {
         for (UUID id : collection.getSignalGroupIDs()) {
             ISignalGroup newGroup;
             newGroup = collection.getSignalGroup(id).get().duplicate();
-			target.addSignalGroup(id, newGroup);
+			target.addSignalGroup(newGroup);
         }
     }
 
