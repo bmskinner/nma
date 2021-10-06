@@ -29,9 +29,9 @@ import org.jfree.chart.labels.CategoryItemLabelGenerator;
 import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.renderer.category.CategoryItemRendererState;
 import org.jfree.chart.renderer.category.LayeredBarRenderer;
-import org.jfree.data.category.CategoryDataset;
 import org.jfree.chart.ui.GradientPaintTransformer;
 import org.jfree.chart.ui.RectangleEdge;
+import org.jfree.data.category.CategoryDataset;
 
 /**
  * This renderer is designed for showing shell results. The expected

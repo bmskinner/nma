@@ -39,8 +39,8 @@ import com.bmskinner.nuclear_morphology.components.Taggable;
 import com.bmskinner.nuclear_morphology.components.UnavailableBorderPointException;
 import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
-import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
+import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 

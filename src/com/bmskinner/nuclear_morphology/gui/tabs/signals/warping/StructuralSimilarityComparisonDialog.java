@@ -28,13 +28,13 @@ import org.jfree.chart.axis.CategoryAxis;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.CategoryPlot;
 
-import com.bmskinner.ViolinPlots.ViolinCategoryDataset;
-import com.bmskinner.ViolinPlots.ViolinRenderer;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.image.MultiScaleStructuralSimilarityIndex;
 import com.bmskinner.nuclear_morphology.analysis.image.MultiScaleStructuralSimilarityIndex.MSSIMScore;
 import com.bmskinner.nuclear_morphology.analysis.image.PerCellMSSSIMCalculationMethod;
 import com.bmskinner.nuclear_morphology.analysis.image.PerCellMSSSIMCalculationMethod.ViolinKey;
+import com.bmskinner.nuclear_morphology.charting.ViolinCategoryDataset;
+import com.bmskinner.nuclear_morphology.charting.ViolinRenderer;
 import com.bmskinner.nuclear_morphology.charting.charts.AbstractChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.ViolinChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPanel;

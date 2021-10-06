@@ -37,7 +37,6 @@ import org.jfree.chart.panel.CrosshairOverlay;
 import org.jfree.chart.panel.Overlay;
 import org.jfree.chart.plot.Crosshair;
 import org.jfree.chart.plot.XYPlot;
-
 import org.jfree.chart.ui.RectangleEdge;
 import org.jfree.data.general.DatasetUtils;
 

@@ -6,7 +6,6 @@ import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -26,7 +25,6 @@ import com.bmskinner.nuclear_morphology.analysis.signals.SignalWarper;
 import com.bmskinner.nuclear_morphology.charting.charts.ConsensusNucleusChartFactory;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
-import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.signals.IWarpedSignal;
 import com.bmskinner.nuclear_morphology.components.signals.ShortWarpedSignal;
@@ -41,8 +39,6 @@ import com.bmskinner.nuclear_morphology.utility.FileUtils;
 
 import ij.IJ;
 import ij.ImagePlus;
-import ij.gui.Toolbar;
-import ij.plugin.CanvasResizer;
 import ij.plugin.RGBStackMerge;
 import ij.process.ImageProcessor;
 

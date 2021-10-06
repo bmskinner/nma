@@ -6,7 +6,7 @@ import java.util.UUID;
 import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.data.KeyedObjects2D;
 
-import com.bmskinner.ViolinPlots.ExportableBoxAndWhiskerCategoryDataset;
+import com.bmskinner.nuclear_morphology.charting.ExportableBoxAndWhiskerCategoryDataset;
 
 /**
  * Store signal group information on top of a boxplot dataset

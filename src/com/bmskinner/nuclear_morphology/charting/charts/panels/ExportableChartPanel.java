@@ -48,7 +48,7 @@ import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYZDataset;
 
-import com.bmskinner.ViolinPlots.ExportableBoxAndWhiskerCategoryDataset;
+import com.bmskinner.nuclear_morphology.charting.ExportableBoxAndWhiskerCategoryDataset;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.CoupledProfileOutlineChartPanel.BorderPointEventListener;
 import com.bmskinner.nuclear_morphology.charting.datasets.FloatXYDataset;
 import com.bmskinner.nuclear_morphology.charting.datasets.ShellResultDataset;

@@ -45,10 +45,10 @@ import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult;
-import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult.Aggregation;
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult.Normalisation;
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult.ShrinkType;
+import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.utility.AngleTools;
 

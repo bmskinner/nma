@@ -28,8 +28,8 @@ import org.jfree.chart.axis.CategoryAxis;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.CategoryPlot;
 
-import com.bmskinner.ViolinPlots.ViolinCategoryDataset;
-import com.bmskinner.ViolinPlots.ViolinRenderer;
+import com.bmskinner.nuclear_morphology.charting.ViolinCategoryDataset;
+import com.bmskinner.nuclear_morphology.charting.ViolinRenderer;
 import com.bmskinner.nuclear_morphology.charting.datasets.ChartDatasetCreationException;
 import com.bmskinner.nuclear_morphology.charting.datasets.SignalViolinDatasetCreator;
 import com.bmskinner.nuclear_morphology.charting.datasets.ViolinDatasetCreator;

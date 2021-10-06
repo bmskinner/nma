@@ -36,10 +36,8 @@ import javax.swing.table.DefaultTableModel;
 import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
-import com.bmskinner.nuclear_morphology.analysis.image.ImageConverter;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
 import com.bmskinner.nuclear_morphology.charting.charts.OutlineChartFactory;
-import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
@@ -48,7 +46,6 @@ import com.bmskinner.nuclear_morphology.components.signals.IWarpedSignal;
 import com.bmskinner.nuclear_morphology.components.signals.WarpedSignalKey;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.tabs.signals.warping.SignalWarpingModel.ImageCache.WarpedImageKey;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.ImagePlus;
 import ij.process.ImageProcessor;

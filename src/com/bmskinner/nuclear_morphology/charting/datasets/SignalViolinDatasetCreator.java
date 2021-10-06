@@ -24,7 +24,7 @@ import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.ViolinPlots.ViolinCategoryDataset;
+import com.bmskinner.nuclear_morphology.charting.ViolinCategoryDataset;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
