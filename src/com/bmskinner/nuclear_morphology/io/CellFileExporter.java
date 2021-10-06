@@ -74,7 +74,7 @@ public class CellFileExporter extends MultipleDatasetAnalysisMethod implements I
     private boolean exportCellLocations(IAnalysisDataset d) {
 
         String fileName = d.getName() + "." + Importer.LOC_FILE_EXTENSION;
-        File exportFile = new File(d.getCollection().getOutputFolder(), fileName);
+        File exportFile = new File(d.getSavePath().getParent(), fileName);
         
         if (!exportFile.getParentFile().isDirectory()) {
             // the desired output folder does not exist

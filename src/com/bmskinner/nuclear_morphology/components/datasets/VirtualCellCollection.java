@@ -27,6 +27,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -38,6 +39,7 @@ import java.util.stream.Stream;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.jdom2.Element;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.Statistical;
@@ -45,6 +47,7 @@ import com.bmskinner.nuclear_morphology.components.Taggable;
 import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.UnavailableComponentException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.cells.DefaultCell;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
@@ -52,6 +55,7 @@ import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.measure.StatsCache;
 import com.bmskinner.nuclear_morphology.components.nuclei.Consensus;
+import com.bmskinner.nuclear_morphology.components.nuclei.DefaultConsensusNucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.profiles.DefaultProfileCollection;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
@@ -62,6 +66,7 @@ import com.bmskinner.nuclear_morphology.components.profiles.ProfileManager;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
+import com.bmskinner.nuclear_morphology.components.signals.DefaultShellResult;
 import com.bmskinner.nuclear_morphology.components.signals.DefaultSignalGroup;
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
@@ -109,11 +114,52 @@ public class VirtualCellCollection implements ICellCollection {
      * TRANSIENT FIELDS
      */
 
-    protected volatile transient Map<UUID, Integer> vennCache = new HashMap<>();
+    protected transient Map<UUID, Integer> vennCache = new HashMap<>();
 
     private transient ProfileManager profileManager = new ProfileManager(this);
     private transient SignalManager  signalManager  = new SignalManager(this);
     private transient StatsCache statsCache = new StatsCache();
+    
+    
+    public VirtualCellCollection(@NonNull Element e) throws ComponentCreationException {
+    	uuid = UUID.fromString(e.getAttributeValue("id"));
+		name = e.getAttributeValue("name");
+		
+		parent = null; //TODO: add into serialization
+		
+		profileCollection = new DefaultProfileCollection(e.getChild("ProfileCollection"));
+		
+		if(e.getChild("ConsensusNucleus")!=null)
+			consensusNucleus = new DefaultConsensusNucleus(e.getChild("ConsensusNucleus"));
+
+		for(Element el : e.getChildren("CellId"))
+			cellIDs.add(UUID.fromString(el.getText()));
+		
+		
+		for(Element el : e.getChildren("ShellResult")) {
+			UUID id = UUID.fromString(el.getAttributeValue("id"));
+			IShellResult s = new DefaultShellResult(el);
+			shellResults.put(id, s);
+		}
+    }
+    		
+    
+	@Override
+	public Element toXmlElement() {
+		Element e = new Element("ChildCellCollection").setAttribute("id", uuid.toString()).setAttribute("name", name);
+		e.addContent(profileCollection.toXmlElement());
+		
+		if(consensusNucleus!=null)
+			e.addContent(consensusNucleus.toXmlElement());
+		
+		for(UUID c : cellIDs)
+			e.addContent(new Element("CellId").setText(c.toString()));
+		
+		for(Entry<UUID, IShellResult> c : shellResults.entrySet())
+			e.addContent(new Element("ShellResult").setAttribute("id", c.getKey().toString()).setContent(c.getValue().toXmlElement()));
+		
+		return e;
+	}
 
     /**
      * Create from a parent dataset, and provide a name
@@ -166,7 +212,7 @@ public class VirtualCellCollection implements ICellCollection {
             this.addCell(cell);
         }
     }
-    
+        
 	@Override
 	public ICellCollection duplicate() {
 		VirtualCellCollection result = new VirtualCellCollection(parent, this);

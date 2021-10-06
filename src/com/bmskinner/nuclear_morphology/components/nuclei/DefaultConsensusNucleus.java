@@ -97,7 +97,7 @@ public class DefaultConsensusNucleus extends DefaultNucleus implements Consensus
     
     @Override
 	public Element toXmlElement() {
-		Element e = super.toXmlElement();
+    	Element e = super.toXmlElement().setName("ConsensusNucleus");
 		e.addContent(new Element("OffsetX").setText(String.valueOf(xOffset)));
 		e.addContent(new Element("OffsetY").setText(String.valueOf(yOffset)));
 		e.addContent(new Element("OffsetR").setText(String.valueOf(rotOffset)));

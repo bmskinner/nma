@@ -16,6 +16,7 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.actions;
 
+import java.io.File;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -27,6 +28,7 @@ import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.datasets.VirtualCellCollection;
 import com.bmskinner.nuclear_morphology.core.EventHandler;
+import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.dialogs.DatasetArithmeticSetupDialog;
 import com.bmskinner.nuclear_morphology.gui.dialogs.DatasetArithmeticSetupDialog.DatasetArithmeticOperation;
@@ -44,6 +46,8 @@ public class DatasetArithmeticAction extends MultiDatasetResultAction {
 	private static final Logger LOGGER = Logger.getLogger(DatasetArithmeticAction.class.getName());
 
     private static final @NonNull String PROGRESS_LBL = "Dataset arithmetic";
+    
+    private File saveFile;
 
     public DatasetArithmeticAction(@NonNull List<IAnalysisDataset> list, @NonNull ProgressBarAcceptor acceptor, @NonNull EventHandler eh) {
         super(list, PROGRESS_LBL, acceptor, eh);
@@ -60,8 +64,9 @@ public class DatasetArithmeticAction extends MultiDatasetResultAction {
              */
 
             DatasetArithmeticSetupDialog dialog = new DatasetArithmeticSetupDialog(datasets);
-
             if (dialog.isReadyToRun()) {
+            	
+            	saveFile = eh.getInputSupplier().requestFolder("Select new directory of images...");
 
             	IAnalysisDataset datasetOne = dialog.getDatasetOne();
                 IAnalysisDataset datasetTwo = dialog.getDatasetTwo();
@@ -107,6 +112,10 @@ public class DatasetArithmeticAction extends MultiDatasetResultAction {
 
             }
 
+        } catch(RequestCancelledException e1) {
+        	// User request cancelled
+        	LOGGER.fine("User cancelled dataset arithmetic action");
+        	
         } catch (Exception e1) {
             LOGGER.log(Loggable.STACK, "Error in dataset arithmetic", e1);
 
@@ -135,7 +144,7 @@ public class DatasetArithmeticAction extends MultiDatasetResultAction {
 				}
 
             } else {
-                newDataset = new DefaultAnalysisDataset(newCollection);
+                newDataset = new DefaultAnalysisDataset(newCollection, saveFile);
                 newDataset.setRoot(true);
                 getDatasetEventHandler().fireDatasetEvent(DatasetEvent.MORPHOLOGY_ANALYSIS_ACTION, newDataset);
             }

@@ -138,7 +138,7 @@ public class ShellOverviewDialog extends AbstractCellCollectionDialog {
 	private void export(ICell cell) {
 		ImageProcessor full = renderFullImage(cell);
 
-		File folder = dataset.getCollection().getOutputFolder();
+		File folder = dataset.getSavePath().getParentFile();
 		File outputfile = new File(folder,  cell.getPrimaryNucleus().getNameAndNumber()+Io.TIFF_FILE_EXTENSION);
 
 		FileSaver saver = new FileSaver(new ImagePlus("", full));

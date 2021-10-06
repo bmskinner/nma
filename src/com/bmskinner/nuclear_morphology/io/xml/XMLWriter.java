@@ -25,6 +25,7 @@ import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.jdom2.Document;
+import org.jdom2.Element;
 import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
 
@@ -39,6 +40,16 @@ import com.bmskinner.nuclear_morphology.io.CountedOutputStream;
 public abstract class XMLWriter {
 	
 	private static final Logger LOGGER = Logger.getLogger(XMLWriter.class.getName());
+	
+	/**
+	 * Write the given XML element to a file
+	 * @param e the xml element
+	 * @param outputFile the file to write to
+	 * @throws IOException if the write fails
+	 */
+	public static void writeXML(@NonNull Element e, @NonNull File outputFile) throws IOException {
+		writeXML(new Document(e), outputFile);
+	}
 	
 	/**
 	 * Write the given XML document to a file

@@ -61,6 +61,7 @@ import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.measure.StatsCache;
 import com.bmskinner.nuclear_morphology.components.measure.VennCache;
 import com.bmskinner.nuclear_morphology.components.nuclei.Consensus;
+import com.bmskinner.nuclear_morphology.components.nuclei.DefaultConsensusNucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.profiles.DefaultProfileCollection;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
@@ -178,6 +179,9 @@ public class DefaultCellCollection implements ICellCollection {
 		name = e.getAttributeValue("name");
 		
 		profileCollection = new DefaultProfileCollection(e.getChild("ProfileCollection"));
+		
+		if(e.getChild("ConsensusNucleus")!=null)
+			consensusNucleus = new DefaultConsensusNucleus(e.getChild("ConsensusNucleus"));
 
 		for(Element el : e.getChildren("Cell"))
 			cells.add(new DefaultCell(el));

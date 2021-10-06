@@ -135,8 +135,8 @@ public class SignalImageProber extends IntegratedImageProber {
 
         // get the group name
 
-        ISignalGroup group = new DefaultSignalGroup(name);
-        dataset.getCollection().addSignalGroup(id, group);
+        ISignalGroup group = new DefaultSignalGroup(name, id);
+        dataset.getCollection().addSignalGroup(group);
 
         // Set the default colour for the signal group
         Color colour = ColourSelecter.getSignalColour(options.getInt(HashOptions.CHANNEL));
