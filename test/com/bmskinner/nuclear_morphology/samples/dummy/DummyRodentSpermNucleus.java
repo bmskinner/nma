@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
@@ -36,6 +37,7 @@ import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.rules.PriorityAxis;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalCollection;
 
@@ -77,7 +79,7 @@ public class DummyRodentSpermNucleus extends DummyCellularComponent implements N
 	
 	public DummyRodentSpermNucleus(String name) throws ComponentCreationException{
 		component = new DefaultNucleus(ROI, COM, IMAGE_FILE, IMAGE_CHANNEL,  
-	            POSITION , component_NUMBER);
+	            POSITION , component_NUMBER, RuleSetCollection.mouseSpermRuleSetCollection());
 		nucleus = (Nucleus) component;
 		nucleus.offset(COM.getX(), COM.getY());
         initialise(PROFILE_WINDOW);	    
@@ -139,16 +141,6 @@ public class DummyRodentSpermNucleus extends DummyCellularComponent implements N
 	@Override
 	public Nucleus getVerticallyRotatedNucleus() {
 		return nucleus.getVerticallyRotatedNucleus();
-	}
-
-	@Override
-	public void updateVerticallyRotatedNucleus() {
-		nucleus.updateVerticallyRotatedNucleus();
-	}
-
-	@Override
-	public boolean isClockwiseRP() {
-		return nucleus.isClockwiseRP();
 	}
 
 	@Override
@@ -241,12 +233,6 @@ public class DummyRodentSpermNucleus extends DummyCellularComponent implements N
 	}
 
 	@Override
-	public void setBorderTag(@NonNull Landmark reference, @NonNull Landmark tag,
-			int i) throws IndexOutOfBoundsException, UnavailableBorderTagException {
-		nucleus.setBorderTag(reference, tag, i);		
-	}
-
-	@Override
 	public ISegmentedProfile getProfile(@NonNull ProfileType type, @NonNull Landmark tag) throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException {
 		return nucleus.getProfile(type, tag);
 	}
@@ -282,6 +268,18 @@ public class DummyRodentSpermNucleus extends DummyCellularComponent implements N
 	@Override
 	public int compareTo(Nucleus o) {
 		return nucleus.compareTo(o);
+	}
+
+	@Override
+	public @Nullable Landmark getLandmark(String landmark) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public @Nullable PriorityAxis getPriorityAxis() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	

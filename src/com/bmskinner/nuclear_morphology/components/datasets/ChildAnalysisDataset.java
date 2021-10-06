@@ -29,8 +29,10 @@ import java.util.UUID;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.jdom2.Element;
 
 import com.bmskinner.nuclear_morphology.components.Version;
+import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
@@ -62,6 +64,18 @@ public class ChildAnalysisDataset extends AbstractAnalysisDataset implements IAn
 		super(collection);
 		this.parentDataset = parent;
 	}
+	
+	public ChildAnalysisDataset(@NonNull Element e) throws ComponentCreationException {
+		super(e);
+	}
+
+	@Override
+	public Element toXmlElement() {
+		Element e = super.toXmlElement().setName("ChildAnalysisDataset");
+		return e;
+	}
+
+
 
 	@Override
 	public IAnalysisDataset duplicate() throws Exception {
@@ -201,8 +215,8 @@ public class ChildAnalysisDataset extends AbstractAnalysisDataset implements IAn
 	}
 
 	@Override
-	public Set<IAnalysisDataset> getMergeSources() {
-		return new HashSet<>(0);
+	public List<IAnalysisDataset> getMergeSources() {
+		return new ArrayList<>(0);
 	}
 
 	@Override

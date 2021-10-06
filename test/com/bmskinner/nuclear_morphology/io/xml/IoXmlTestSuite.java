@@ -6,11 +6,6 @@ import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
 @SuiteClasses({ 
-	DatasetXMLCreatorTest.class, 
-	DatasetXMLReaderTest.class, 
-	OptionsXMLReaderTest.class,
-	RuleSetCollectionXMLCreatorTest.class,
-	RuleSetCollectionXMLReaderTest.class,
 	XMLWriterTest.class })
 public class IoXmlTestSuite {
 

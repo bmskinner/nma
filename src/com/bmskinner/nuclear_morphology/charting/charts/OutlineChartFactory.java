@@ -307,7 +307,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
         int yOffset = h >> 1;
 
         SignalManager m = dataset.getCollection().getSignalManager();
-        Set<ICell> cells = m.getCellsWithNuclearSignals(options.getSignalGroup(), true);
+        List<ICell> cells = m.getCellsWithNuclearSignals(options.getSignalGroup(), true);
 
         for (ICell cell : cells) {
             LOGGER.fine("Drawing signals for cell " + cell.getPrimaryNucleus().getNameAndNumber());

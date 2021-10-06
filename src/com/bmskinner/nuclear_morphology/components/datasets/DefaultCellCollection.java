@@ -28,6 +28,7 @@ package com.bmskinner.nuclear_morphology.components.datasets;
 import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -82,7 +83,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 /**
- * This is a more efficient replacement for the <=1.13.2 cell collections
+ * Store cells and their profiles
  * 
  * @author bms41
  * @since 1.13.3
@@ -107,7 +108,7 @@ public class DefaultCellCollection implements ICellCollection {
 	private Consensus<Nucleus> consensusNucleus; 
 
 	/** All the cells in this collection */
-	private Set<ICell> cells = new HashSet<>(20);
+	private List<ICell> cells = new ArrayList<>(20);
 
 	/** Signal groups, keyed on their unique id */
 	private Set<ISignalGroup> signalGroups = new HashSet<>(0);
@@ -173,8 +174,7 @@ public class DefaultCellCollection implements ICellCollection {
      * to the specification in {@link XmlSerializable}.
      * @param e the XML element containing the data.
      */
-	public DefaultCellCollection(Element e) throws ComponentCreationException {
-		
+	public DefaultCellCollection(@NonNull Element e) throws ComponentCreationException {	
 		uuid = UUID.fromString(e.getAttributeValue("id"));
 		name = e.getAttributeValue("name");
 		
@@ -191,6 +191,11 @@ public class DefaultCellCollection implements ICellCollection {
 			signalGroups.add(new DefaultSignalGroup(el));
 
 		ruleSets = new RuleSetCollection(e.getChild("RuleSetCollection"));
+		try {
+			createProfileCollection();
+		} catch (ProfileException e1) {
+			throw new ComponentCreationException("Unable to generate profiles", e1);
+		}
 	}
 	
 
@@ -349,18 +354,7 @@ public class DefaultCellCollection implements ICellCollection {
 
 	@Override
 	public synchronized void removeCell(@NonNull ICell c) {
-		if(c==null)
-			return;
-
-		// Since cell hashcodes change during profiling and segmentation,
-		// we can't just use cells.remove(c).
-
-		Set<ICell> newCells = new HashSet<>();
-		for(ICell cell : cells)
-			if(!cell.getId().equals(c.getId()))
-				newCells.add(cell);
-		
-		cells = newCells;
+		cells.removeIf(cell->cell.getId().equals(c.getId()));
 	}
 
 	@Override
@@ -486,7 +480,7 @@ public class DefaultCellCollection implements ICellCollection {
 	}
 
 	@Override
-	public Set<ICell> getCells() {
+	public List<ICell> getCells() {
 		return cells;
 	}
 

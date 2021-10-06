@@ -89,9 +89,14 @@ public class DefaultConsensusNucleus extends DefaultNucleus implements Consensus
      */
     public DefaultConsensusNucleus(Element e) throws ComponentCreationException {
     	super(e);
-    	xOffset = Integer.valueOf(e.getChildText("OffsetX"));
-    	yOffset = Integer.valueOf(e.getChildText("OffsetY"));
-    	rotOffset = Integer.valueOf(e.getChildText("OffsetR"));
+    	if(e.getChildText("OffsetX")!=null)
+    		xOffset = Double.valueOf(e.getChildText("OffsetX"));
+
+    	if(e.getChildText("OffsetY")!=null)
+    		yOffset = Double.valueOf(e.getChildText("OffsetY"));
+
+    	if(e.getChildText("OffsetR")!=null)
+    		rotOffset = Double.valueOf(e.getChildText("OffsetR"));
     }
     
     

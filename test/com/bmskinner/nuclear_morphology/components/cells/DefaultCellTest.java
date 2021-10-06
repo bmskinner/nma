@@ -52,6 +52,7 @@ public class DefaultCellTest extends ComponentTester {
 				.withMaxSizeVariation(1)
 				.randomOffsetProfiles(true)
 				.numberOfClusters(N_CHILD_DATASETS)
+				.addSignalsInChannel(0)
 				.segmented().build();
     	c = d.getCollection().getCells().stream().findFirst().get();
     }
@@ -73,7 +74,7 @@ public class DefaultCellTest extends ComponentTester {
 
 		ICell test = new DefaultCell(e);
 //		xmlOutput.output(test.toXmlElement(), new PrintWriter( System.out ));
-		
+		testDuplicatesByField(c, test);
 		assertEquals(c, test);
 	}
 	

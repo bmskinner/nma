@@ -26,9 +26,7 @@ import org.jdom2.Element;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.RuleSetBuilder;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.rules.Rule.RuleType;
 import com.bmskinner.nuclear_morphology.io.XmlSerializable;
-import com.bmskinner.nuclear_morphology.io.xml.XMLCreator;
 
 /**
  * A collection of rules that can be followed to identify a feature in a

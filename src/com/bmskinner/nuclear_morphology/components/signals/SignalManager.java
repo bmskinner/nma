@@ -66,10 +66,10 @@ public class SignalManager {
      * @param hasSignal true to retrive cells with signals. False to retrieve cells without signals
      * @return the cells
      */
-    public Set<ICell> getCellsWithNuclearSignals(@NonNull final UUID signalGroupId, boolean hasSignal) {
+    public List<ICell> getCellsWithNuclearSignals(@NonNull final UUID signalGroupId, boolean hasSignal) {
         return collection.streamCells()
                 .filter( c->c.hasNuclearSignals(signalGroupId)==hasSignal)
-                .collect(Collectors.toSet());
+                .collect(Collectors.toList());
     }
     
     /**
@@ -380,7 +380,7 @@ public class SignalManager {
                     .toArray();
         }
 
-        Set<ICell> cells = getCellsWithNuclearSignals(signalGroupId, true);        
+        List<ICell> cells = getCellsWithNuclearSignals(signalGroupId, true);        
         return cells.stream().flatMap(  c->c.getNuclei().stream()  )
             .flatMap(  n->n.getSignalCollection()
                     .getStatistics(stat, scale, signalGroupId)

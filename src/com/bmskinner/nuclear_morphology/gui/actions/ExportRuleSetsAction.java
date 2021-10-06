@@ -1,6 +1,7 @@
 package com.bmskinner.nuclear_morphology.gui.actions;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -13,7 +14,7 @@ import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.components.FileSelector;
 import com.bmskinner.nuclear_morphology.io.Io;
-import com.bmskinner.nuclear_morphology.io.xml.RulesetCollectionXMLWriter;
+import com.bmskinner.nuclear_morphology.io.xml.XMLWriter;
 
 /**
  * Action to export ruleset collections as XML
@@ -44,8 +45,12 @@ public class ExportRuleSetsAction extends MultiDatasetResultAction {
 	         }
 
 	         Runnable r = () ->{
-	        	 RulesetCollectionXMLWriter m = new RulesetCollectionXMLWriter();
-	        	 m.write(datasets.get(0).getCollection().getRuleSetCollection(), file);
+	        	 
+	        	 try {
+					XMLWriter.writeXML(datasets.get(0).getCollection().getRuleSetCollection().toXmlElement(), file);
+				} catch (IOException e) {
+					LOGGER.warning("Unable to write rulesets to file");
+				}
 	        	 cancel();
 	         };
 	         ThreadManager.getInstance().submit(r);
@@ -58,8 +63,11 @@ public class ExportRuleSetsAction extends MultiDatasetResultAction {
 					
 					for(IAnalysisDataset d : datasets) {
 						File f = new File(folder, d.getName()+Io.XML_FILE_EXTENSION);
-						RulesetCollectionXMLWriter m = new RulesetCollectionXMLWriter();
-						m.write(d.getCollection().getRuleSetCollection(), f);
+						try {
+							XMLWriter.writeXML(d.getCollection().getRuleSetCollection().toXmlElement(), f);
+						} catch (IOException e) {
+							LOGGER.warning("Unable to write rulesets to file");
+						}
 					 LOGGER.info(String.format("Exported %s rulesets to %s", d.getName(), f.getAbsolutePath()));
 					}
 					 cancel();

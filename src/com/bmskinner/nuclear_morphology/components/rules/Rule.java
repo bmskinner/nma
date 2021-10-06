@@ -24,9 +24,7 @@ import java.util.Objects;
 import org.eclipse.jdt.annotation.NonNull;
 import org.jdom2.Element;
 
-import com.bmskinner.nuclear_morphology.components.rules.Rule.RuleType;
 import com.bmskinner.nuclear_morphology.io.XmlSerializable;
-import com.bmskinner.nuclear_morphology.io.xml.XMLCreator;
 
 /**
  * An instruction for finding an index in a profile

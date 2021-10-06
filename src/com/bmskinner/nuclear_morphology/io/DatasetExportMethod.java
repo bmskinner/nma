@@ -27,7 +27,6 @@ import java.nio.channels.FileChannel;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
-import org.jdom2.Document;
 import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
 
@@ -36,7 +35,6 @@ import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.SingleDatasetAnalysisMethod;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.core.DatasetListManager;
-import com.bmskinner.nuclear_morphology.io.xml.DatasetXMLCreator;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -140,10 +138,9 @@ public class DatasetExportMethod extends SingleDatasetAnalysisMethod {
  				CountedOutputStream cos = new CountedOutputStream(os);
  				){
  			cos.addCountListener(this::fireProgressEvent);
- 			Document doc = new DatasetXMLCreator(dataset).create();
  			XMLOutputter xmlOutput = new XMLOutputter();
  			xmlOutput.setFormat(Format.getPrettyFormat());
- 			xmlOutput.output(doc, cos);
+ 			xmlOutput.output(dataset.toXmlElement(), cos);
  		} catch (IOException e) {
  			LOGGER.log(Loggable.STACK, String.format("Unable to write to file %s: %s", saveFile.getAbsolutePath(), e.getMessage()), e);
  			ok = false;

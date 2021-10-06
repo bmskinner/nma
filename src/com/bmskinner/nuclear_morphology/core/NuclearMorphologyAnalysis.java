@@ -25,7 +25,7 @@ import java.util.logging.Logger;
 import com.bmskinner.nuclear_morphology.components.Version;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.io.Io;
-import com.bmskinner.nuclear_morphology.io.xml.RulesetCollectionXMLWriter;
+import com.bmskinner.nuclear_morphology.io.xml.XMLWriter;
 
 /**
  * This is the main class that runs the program.
@@ -123,11 +123,14 @@ public class NuclearMorphologyAnalysis {
 	 */
 	private void ensureRuleSetFileExists(RuleSetCollection rsc, String fileName) {
 		File ruleFile = new File(Io.getConfigDir(), fileName);
-		RulesetCollectionXMLWriter writer = new RulesetCollectionXMLWriter();
 		if(!ruleFile.exists()) {
 			// create as needed
 			LOGGER.config("Creating default ruleset: "+ruleFile.getAbsolutePath());
-			writer.write(rsc, ruleFile);
+			try {
+				XMLWriter.writeXML(rsc.toXmlElement(), ruleFile);
+			} catch (IOException e) {
+				LOGGER.log(Level.SEVERE, "Unable to create default ruleset", e);
+			}
 		}
 	}
 }

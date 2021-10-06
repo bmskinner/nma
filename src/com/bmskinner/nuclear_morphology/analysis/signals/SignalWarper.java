@@ -92,7 +92,7 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> {
 
         // Count the number of cells to include
         SignalManager m = warpingOptions.templateDataset().getCollection().getSignalManager();
-        Set<ICell> cells = warpingOptions.getBoolean(SignalWarpingRunSettings.IS_ONLY_CELLS_WITH_SIGNALS_KEY) 
+        List<ICell> cells = warpingOptions.getBoolean(SignalWarpingRunSettings.IS_ONLY_CELLS_WITH_SIGNALS_KEY) 
         		? m.getCellsWithNuclearSignals(warpingOptions.signalId(), true) 
         		: warpingOptions.templateDataset().getCollection().getCells();
         totalCells = cells.size();
@@ -162,7 +162,7 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> {
     	LOGGER.finer( "Generating warped images for " + warpingOptions.templateDataset().getName());
     	final List<ImageProcessor> warpedImages = Collections.synchronizedList(new ArrayList<>());
     	
-    	Set<ICell> cells = getCells(warpingOptions.getBoolean(SignalWarpingRunSettings.IS_ONLY_CELLS_WITH_SIGNALS_KEY));
+    	List<ICell> cells = getCells(warpingOptions.getBoolean(SignalWarpingRunSettings.IS_ONLY_CELLS_WITH_SIGNALS_KEY));
     	
     	cells.parallelStream().flatMap(c->c.getNuclei().stream()).forEach(n->{
     		LOGGER.finer( "Drawing signals for " + n.getNameAndNumber());
@@ -304,10 +304,10 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> {
      * @param withSignalsOnly
      * @return
      */
-    private Set<ICell> getCells(boolean withSignalsOnly) {
+    private List<ICell> getCells(boolean withSignalsOnly) {
 
         SignalManager m = warpingOptions.templateDataset().getCollection().getSignalManager();
-        Set<ICell> cells;
+        List<ICell> cells;
         if (withSignalsOnly) {
             LOGGER.finer( "Only fetching cells with signals");
             cells = m.getCellsWithNuclearSignals(warpingOptions.signalId(), true);

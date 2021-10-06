@@ -31,6 +31,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nuclear_morphology.components.Version;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
+import com.bmskinner.nuclear_morphology.io.XmlSerializable;
 import com.bmskinner.nuclear_morphology.utility.FileUtils;
 
 /**
@@ -41,7 +42,7 @@ import com.bmskinner.nuclear_morphology.utility.FileUtils;
  * @since 1.13.3
  *
  */
-public interface IAnalysisDataset extends Serializable {
+public interface IAnalysisDataset extends Serializable, XmlSerializable {
 
     /**
      * Get the ID of the dataset
@@ -173,7 +174,7 @@ public interface IAnalysisDataset extends Serializable {
      * 
      * @return
      */
-    Set<IAnalysisDataset> getMergeSources();
+    List<IAnalysisDataset> getMergeSources();
 
     /**
      * Get the ids of all datasets considered merge sources to this dataset
@@ -481,7 +482,7 @@ public interface IAnalysisDataset extends Serializable {
      */
     static boolean mergedSourceOptionsAreSame(@NonNull IAnalysisDataset dataset) {
 
-        Set<IAnalysisDataset> list = dataset.getMergeSources();
+        List<IAnalysisDataset> list = dataset.getMergeSources();
 
         boolean ok = true;
 

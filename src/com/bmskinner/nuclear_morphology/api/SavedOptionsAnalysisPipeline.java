@@ -243,7 +243,7 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod impleme
 	 */
 	private void createSignalDetectionMethods(List<IAnalysisDataset> datasets, @NonNull IAnalysisOptions options, File imageFolder) throws Exception {
 		
-		OptionsXMLReader r = new OptionsXMLReader(xmlFile);
+		XMLReader.readOptions(xmlFile);
 		Map<UUID, String> signalNames = r.readSignalGroupNames();
 		
 		for(IAnalysisDataset dataset : datasets) {
@@ -282,8 +282,9 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod impleme
 	}
 	
 	private void createClusteringMethods(List<IAnalysisDataset> datasets) throws Exception {
-		OptionsXMLReader r = new OptionsXMLReader(xmlFile);
-		List<HashOptions> clusterOptions = r.readClusteringOptions();
+		IAnalysisOptions o = XMLReader.readAnalysisOptions(xmlFile);
+		o.getSecondaryOptions(); //TODO
+//		List<HashOptions> clusterOptions = r.readClusteringOptions();
 		 for(HashOptions cluster : clusterOptions) {
 			 for(IAnalysisDataset dataset : datasets) {
 				 methodsToRun.add(new NucleusClusteringMethod(dataset, cluster));

@@ -6,12 +6,16 @@ import static org.junit.Assert.assertThat;
 
 import java.lang.ref.SoftReference;
 import java.lang.ref.WeakReference;
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -118,24 +122,69 @@ public abstract class ComponentTester extends FloatArrayTester {
 			Object oValue = f.get(original);
 			Object dValue  = f.get(dup);
 			
-			int oHash = oValue==null?-1:oValue.hashCode();
-			int dHash = dValue==null?-1:dValue.hashCode();
-			if(oValue!=null&&oValue.getClass().equals(float[].class)) {
-				oHash = Arrays.hashCode((float[])oValue);
-				dHash = Arrays.hashCode((float[])dValue);
-			}
-			if(oValue!=null&&oValue.getClass().equals(int[].class)) {
-				oHash = Arrays.hashCode((int[])oValue);
-				dHash = Arrays.hashCode((int[])dValue);
-			}
-			if(oValue!=null&&oValue.getClass().equals(double[].class)) {
-				oHash = Arrays.hashCode((double[])oValue);
-				dHash = Arrays.hashCode((double[])dValue);
-			}
-			
 			// ignore transient fields
-			if(!Modifier.isTransient(f.getModifiers()))
-				assertThat("Field "+f.getName()+" in "+original.getClass().getSimpleName()+": hashcodes: original "+oHash+" | dup "+dHash, dValue, equalTo(oValue));
+			if(!Modifier.isTransient(f.getModifiers())) {
+				if(oValue!=null && !oValue.equals(dValue)) {
+					
+					if(oValue.getClass().equals(float[].class)) {
+						System.out.println(Arrays.toString((float[])oValue));
+						System.out.println(Arrays.toString((float[])dValue));
+					}
+					if(oValue.getClass().equals(int[].class)) {
+						System.out.println(Arrays.toString((int[])oValue));
+						System.out.println(Arrays.toString((int[])dValue));
+					}
+					if(oValue.getClass().equals(double[].class)) {
+						System.out.println(Arrays.toString((double[])oValue));
+						System.out.println(Arrays.toString((double[])dValue));
+					}
+					if(oValue.getClass().equals(byte[].class)) {
+						System.out.println(Arrays.toString((byte[])oValue));
+						System.out.println(Arrays.toString((byte[])dValue));
+					}
+					
+					// Issue with arrays in hashmaps: Object.hashcode()
+					// depends on reference, so is not equal between two
+					// arrays. Need to use Arrays.hashcode().
+					if(oValue.getClass().equals(HashMap.class)) {
+
+						int oHash = 0;
+						int dHash = 0;
+						HashMap o = (HashMap)oValue;
+						HashMap d = (HashMap)dValue;
+						
+						for(Object e : o.keySet()) {
+							Object v0 = o.get(e);
+							Object v1 = d.get(e);
+							if(v0.getClass().equals(byte[].class)) {
+								oHash += Arrays.hashCode((byte[])v0);
+								dHash += Arrays.hashCode((byte[])v1);
+							}
+							
+						}
+						oValue = oHash;
+						dValue = dHash;
+					
+					}
+					if(oValue.getClass().equals(HashSet.class)) {
+						int oHash = 0;
+						int dHash = 0;
+						HashSet o = (HashSet)oValue;
+						HashSet d = (HashSet)dValue;
+						if(!o.containsAll(d)) {
+							System.out.println("Elements not shared in set");
+							for(Object v0 : o) {
+								System.out.println(d.contains(v0));
+							}
+							
+						}
+					}
+					
+				}
+				
+				String msg = "Field '"+f.getName()+"' in "+original.getClass().getSimpleName()+" does not match";
+				assertThat(msg, dValue, equalTo(oValue));
+			}
 		}
 
 		assertEquals("Equals method in "+original.getClass().getSimpleName(), original, dup);

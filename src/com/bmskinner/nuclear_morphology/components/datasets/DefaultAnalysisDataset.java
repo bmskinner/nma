@@ -29,12 +29,15 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.jdom2.Element;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.Version;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.options.DefaultAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileCollection;
@@ -85,8 +88,49 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
         this.savePath = saveFile;
         this.isRoot = false;
     }
+    
+    public DefaultAnalysisDataset(@NonNull Element e) throws ComponentCreationException {
+    	super(e);
+    	isRoot = Boolean.valueOf(e.getChildText("IsRoot"));
+    	
+    	for(Element el : e.getChild("OtherDatasets").getChildren()) {
+    		otherDatasets.add(new ChildAnalysisDataset(el));
+    	}
+    	
+    	for(Element el : e.getChildren("MergeSource")) {
+    		mergeSources.add(UUID.fromString(el.getText()));
+    	}
+    	
+    	savePath = new File(e.getChildText("SaveFile")).getAbsoluteFile();
+    	
+    	analysisOptions = new DefaultAnalysisOptions(e.getChild("AnalysisOptions"));
+    }
 
     @Override
+	public Element toXmlElement() {
+		Element e = super.toXmlElement();
+		
+		e.addContent(new Element("IsRoot").setText(String.valueOf(isRoot)));
+		
+		Element other = new Element("OtherDatasets");
+		for(IAnalysisDataset c : otherDatasets) {
+			other.addContent(c.toXmlElement());
+		}
+		e.addContent(other);
+		
+		for(UUID i : mergeSources)
+			e.addContent(new Element("MergeSource").setText(i.toString()));
+		
+		e.addContent(new Element("SaveFile").setText(savePath.getPath()));
+		
+		e.addContent(analysisOptions.toXmlElement());
+		
+		return e;
+	}
+
+
+
+	@Override
     public IAnalysisDataset duplicate() throws Exception {
     	DefaultAnalysisDataset result = new DefaultAnalysisDataset(cellCollection, savePath);
         
@@ -144,8 +188,8 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
      */
     private void removeChildCollection(UUID id) {
     	    	
-    	childDatasets = childDatasets.stream().filter(d->!d.getId().equals(id)).collect(Collectors.toSet());
-
+    	childDatasets.removeIf(c->c.getId().equals(id));
+    	
     	for (IClusterGroup g : clusterGroups) {
             if (g.hasDataset(id)) {
                 g.removeDataset(id);
@@ -305,8 +349,8 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
     }
 
     @Override
-    public Set<IAnalysisDataset> getMergeSources() {
-        Set<IAnalysisDataset> result = new HashSet<>();
+    public List<IAnalysisDataset> getMergeSources() {
+    	List<IAnalysisDataset> result = new ArrayList<>();
         for (UUID id : mergeSources) 
             result.add(this.getAssociatedDataset(id));
         return result;

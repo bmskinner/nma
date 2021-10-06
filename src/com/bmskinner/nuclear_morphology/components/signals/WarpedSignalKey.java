@@ -67,7 +67,10 @@ public class WarpedSignalKey implements Serializable, XmlSerializable {
 		
 		CellularComponent c = null;
 		try {
-			c = new DefaultConsensusNucleus(e.getChild("TargetShape"));
+			for(Element el : e.getChild("TargetShape").getChildren()) {
+				c = new DefaultConsensusNucleus(el);
+			}
+			
 		} catch (ComponentCreationException e1) {
 			LOGGER.log(Loggable.STACK, "Unable to unmarshal warped key target shape", e);
 		}
@@ -89,12 +92,12 @@ public class WarpedSignalKey implements Serializable, XmlSerializable {
 		Element e = new Element("WarpedSignalKey");
 		e.addContent(new Element("TargetShape").setContent(targetShape.toXmlElement()));
 		
-		e.addContent("TargetShapeId").setText(targetShapeId.toString());
-		e.addContent("IsCellWithSignalsOnly").setText(String.valueOf(isCellWithSignalsOnly));
-		e.addContent("Threshold").setText(String.valueOf(threshold));
-		e.addContent("TemplateId").setText(templateId.toString());
-		e.addContent("IsBinarised").setText(String.valueOf(isBinarised));
-		e.addContent("IsNormalised").setText(String.valueOf(isNormalised));
+		e.addContent(new Element("TargetShapeId").setText(targetShapeId.toString()));
+		e.addContent(new Element("IsCellWithSignalsOnly").setText(String.valueOf(isCellWithSignalsOnly)));
+		e.addContent(new Element("Threshold").setText(String.valueOf(threshold)));
+		e.addContent(new Element("TemplateId").setText(templateId.toString()));
+		e.addContent(new Element("IsBinarised").setText(String.valueOf(isBinarised)));
+		e.addContent(new Element("IsNormalised").setText(String.valueOf(isNormalised)));
 		
 		return e;
 	} 

@@ -48,7 +48,7 @@ public class DefaultSignalCollectionTest extends ComponentTester {
 	}
 	
 	@Test
-	public void testXmlSerialiseas() throws IOException {
+	public void testXmlSerializes() throws IOException {
 
 		Element e = collection.toXmlElement();		
 		XMLOutputter xmlOutput = new XMLOutputter();

@@ -20,6 +20,7 @@
 package com.bmskinner.nuclear_morphology.samples.dummy;
 
 import java.io.File;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
@@ -42,7 +43,7 @@ public class DummyRodentCollection extends DefaultCellCollection {
 	
 	public DummyRodentCollection(int nuclei){
 		
-		super( new File("C:\\"), "out", "test",RuleSetCollection.mouseSpermRuleSetCollection() );
+		super(RuleSetCollection.mouseSpermRuleSetCollection(), "test", UUID.randomUUID() );
 
 		for(int i=0; i<nuclei; i++){
 			
@@ -71,7 +72,7 @@ public class DummyRodentCollection extends DefaultCellCollection {
 	public static void main(String[] args){	
 		
 		DummyRodentCollection collection = new DummyRodentCollection(10000);
-		IAnalysisDataset d = new DefaultAnalysisDataset(collection);		
+		IAnalysisDataset d = new DefaultAnalysisDataset(collection, new File("C:\\"));		
 		IAnalysisMethod profiler = new DatasetProfilingMethod(d);
 		
 		IAnalysisWorker w = new DefaultAnalysisWorker(profiler);

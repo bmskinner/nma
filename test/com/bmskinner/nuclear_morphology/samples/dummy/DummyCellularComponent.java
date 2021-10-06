@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.jdom2.Element;
 
 import com.bmskinner.nuclear_morphology.analysis.detection.Mask;
 import com.bmskinner.nuclear_morphology.components.UnavailableBorderPointException;
@@ -397,6 +398,30 @@ public class DummyCellularComponent implements CellularComponent {
 	@Override
 	public ImageProcessor getGreyscaleComponentImage() throws UnloadableImageException {
 		return component.getGreyscaleComponentImage();
+	}
+
+	@Override
+	public Element toXmlElement() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void rotatePointToLeft(IPoint leftPoint) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void flipVertical(@NonNull IPoint centre) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void flipVertical() {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

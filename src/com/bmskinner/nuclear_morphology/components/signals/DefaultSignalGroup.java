@@ -67,7 +67,7 @@ public class DefaultSignalGroup implements ISignalGroup {
     public DefaultSignalGroup(@NonNull Element e) {
     	id = UUID.fromString(e.getAttributeValue("id"));
     	groupName = e.getAttributeValue("name");
-    	isVisible = Boolean.parseBoolean(e.getChildText("Isvisible"));
+    	isVisible = Boolean.parseBoolean(e.getChildText("IsVisible"));
     	groupColour = Color.decode(e.getChildText("Colour"));
 
     	if(e.getChild("ShellResult")!=null)
@@ -83,7 +83,7 @@ public class DefaultSignalGroup implements ISignalGroup {
 	@Override
 	public Element toXmlElement() {
 		Element e = new Element("SignalGroup").setAttribute("id", id.toString()).setAttribute("name", groupName);
-		e.addContent("IsVisible").setText(String.valueOf(isVisible));
+		e.addContent(new Element("IsVisible").setText(String.valueOf(isVisible)));
 		
 		if(groupColour!=null)
 			e.addContent(new Element("Colour").setText(String.valueOf(groupColour.getRGB())));

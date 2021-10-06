@@ -34,10 +34,10 @@ import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
+import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.io.Io;
-import com.bmskinner.nuclear_morphology.io.xml.RuleSetCollectionXMLImporter;
+import com.bmskinner.nuclear_morphology.io.xml.XMLReader;
 import com.bmskinner.nuclear_morphology.io.xml.XMLReader.XMLReadingException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -81,9 +81,8 @@ public class NucleusProfileSettingsPanel extends SettingsPanel {
     }
     
     private void setRuleset(File f) {
-    	RuleSetCollectionXMLImporter reader = new RuleSetCollectionXMLImporter(f);
     	try {
-        	options.setRuleSetCollection(reader.importRuleset());
+        	options.setRuleSetCollection(XMLReader.readRulesetCollection(f));
 		} catch (XMLReadingException e1) {
 			LOGGER.log(Loggable.STACK, e1, () -> "Unable to read XML file: "+f.getAbsolutePath());
 		}

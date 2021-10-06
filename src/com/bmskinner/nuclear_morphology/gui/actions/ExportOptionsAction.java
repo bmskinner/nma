@@ -17,6 +17,7 @@
 package com.bmskinner.nuclear_morphology.gui.actions;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -29,7 +30,7 @@ import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.components.FileSelector;
 import com.bmskinner.nuclear_morphology.io.Io;
-import com.bmskinner.nuclear_morphology.io.xml.OptionsXMLWriter;
+import com.bmskinner.nuclear_morphology.io.xml.XMLWriter;
 
 /**
  * Export the options stored in a dataset
@@ -60,8 +61,11 @@ public class ExportOptionsAction extends MultiDatasetResultAction {
 	         }
 
 	         Runnable r = () ->{
-	        	 OptionsXMLWriter m = new OptionsXMLWriter();
-	        	 m.write(datasets.get(0), file);
+	        	 try {
+					XMLWriter.writeXML(datasets.get(0).getAnalysisOptions().get().toXmlElement(), file);
+				} catch (IOException e) {
+					LOGGER.warning("Unable to write options to file");
+				}
 	        	 cancel();
 	         };
 	         ThreadManager.getInstance().submit(r);
@@ -71,11 +75,13 @@ public class ExportOptionsAction extends MultiDatasetResultAction {
 			 try {
 				File folder = eh.getInputSupplier().requestFolder(IAnalysisDataset.commonPathOfFiles(datasets));
 				Runnable r = () ->{
-					
 					for(IAnalysisDataset d : datasets) {
 						File f = new File(folder, d.getName()+Io.XML_FILE_EXTENSION);
-						OptionsXMLWriter m = new OptionsXMLWriter();
-						m.write(d, f);
+						try {
+							XMLWriter.writeXML(d.getAnalysisOptions().get().toXmlElement(), f);
+						} catch (IOException e) {
+							LOGGER.warning("Unable to write options to file");
+						}
 					 LOGGER.info(String.format("Exported %s options to %s", d.getName(), f.getAbsolutePath()));
 					}
 					 cancel();

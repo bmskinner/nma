@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -15,6 +16,7 @@ import org.jdom2.Element;
 
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.io.XmlSerializable;
+import com.bmskinner.nuclear_morphology.utility.StringUtils;
 
 import ij.process.ImageProcessor;
 
@@ -64,11 +66,7 @@ public class ShortWarpedSignal implements IWarpedSignal {
 		for(Element el : e.getChildren("Image")) {
 			WarpedSignalKey k = new WarpedSignalKey(el.getChild("WarpedSignalKey"));
 			
-			String[] s = el.getChildText("Bytes").replace("[", "").replace("]", "").replace(" ", "").split(",");
-			byte[] b = new byte[s.length];
-			for(int i=0; i<s.length; i++)
-				b[i] = Byte.valueOf(s[i]);
-			
+			byte[] b = StringUtils.hexToBytes(el.getChildText("Bytes"));			
 			images.put(k, b);
 			
 			targetNames.put(k, el.getChildText("Name"));
@@ -84,16 +82,14 @@ public class ShortWarpedSignal implements IWarpedSignal {
 		for(Entry<WarpedSignalKey, byte[]> entry : images.entrySet()) {
 			Element el = new Element("Image");
 			el.addContent(entry.getKey().toXmlElement());
-			el.addContent(new Element("Bytes").setText(Arrays.toString(entry.getValue())));
+			el.addContent(new Element("Bytes").setText(StringUtils.bytesToHex(entry.getValue())));
 			el.addContent(new Element("Name").setText(targetNames.get(entry.getKey())));
 			el.addContent(new Element("Width").setText( String.valueOf(widths.get(entry.getKey()))));
 			e.addContent(el);
 		}		
 		return e;
 	}
-
-
-
+	
 	@Override
 	public IWarpedSignal duplicate() {
 		ShortWarpedSignal w = new ShortWarpedSignal(id);
@@ -198,25 +194,22 @@ public class ShortWarpedSignal implements IWarpedSignal {
 		allKeys.addAll(widths.keySet());
 		StringBuilder sb = new StringBuilder();
 		for(WarpedSignalKey k : allKeys ) {
-			sb.append(k)
+			sb.append("Key: "+k)
 			.append(" Image: "+images.containsKey(k))
-			.append("Target: "+targetNames.containsKey(k))
-			.append("Widths: "+widths.containsKey(k))
+			.append(" Target: "+targetNames.containsKey(k))
+			.append(" Widths: "+widths.containsKey(k))
 			.append("\n");
 		}
+		
+		sb.append(images.hashCode());
 		return sb.toString();
 	}
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((id == null) ? 0 : id.hashCode());
-		result = prime * result + ((images == null) ? 0 : images.hashCode());
-		result = prime * result + ((targetNames == null) ? 0 : targetNames.hashCode());
-		result = prime * result + ((widths == null) ? 0 : widths.hashCode());
-		return result;
+		return Objects.hash(id, images, targetNames, widths);
 	}
+
 
 	@Override
 	public boolean equals(Object obj) {
@@ -227,27 +220,29 @@ public class ShortWarpedSignal implements IWarpedSignal {
 		if (getClass() != obj.getClass())
 			return false;
 		ShortWarpedSignal other = (ShortWarpedSignal) obj;
-		if (id == null) {
-			if (other.id != null)
+		
+		// Issue with arrays in hashmaps: Object.hashcode()
+		// depends on reference, so is not equal between two
+		// arrays. Need to use Arrays.hashcode().
+		Set<WarpedSignalKey> allKeys = new HashSet<>();
+		allKeys.addAll(getWarpedSignalKeys());
+		allKeys.addAll(other.getWarpedSignalKeys());
+		
+		for(WarpedSignalKey k : allKeys) {
+			if(!images.containsKey(k))
+					return false;
+			if(!other.images.containsKey(k))
 				return false;
-		} else if (!id.equals(other.id))
-			return false;
-		if (images == null) {
-			if (other.images != null)
+			byte[] b0 = images.get(k);
+			byte[] b1 = other.images.get(k);
+			
+			if(Arrays.hashCode(b0)!=Arrays.hashCode(b1))
 				return false;
-		} else if (!images.equals(other.images))
-			return false;
-		if (targetNames == null) {
-			if (other.targetNames != null)
-				return false;
-		} else if (!targetNames.equals(other.targetNames))
-			return false;
-		if(widths == null) {
-			if (other.widths != null)
-				return false;
-		} else if (!widths.equals(other.widths))
-			return false;
-		return true;
+		}
+		
+		return Objects.equals(id, other.id) 
+				&& Objects.equals(targetNames, other.targetNames) && Objects.equals(widths, other.widths);
 	}
 
+	
 }

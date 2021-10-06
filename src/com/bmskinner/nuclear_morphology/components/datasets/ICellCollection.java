@@ -19,6 +19,7 @@ package com.bmskinner.nuclear_morphology.components.datasets;
 import java.io.File;
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -107,7 +108,7 @@ public interface ICellCollection
      * 
      * @return
      */
-    Set<ICell> getCells();
+    List<ICell> getCells();
     
     /**
      * Stream the cells in the collection

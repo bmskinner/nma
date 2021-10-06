@@ -126,7 +126,7 @@ public class ICellCollectionTest extends ComponentTester {
 
 	@Test
 	public void testGetCells() {
-		Set<ICell> cells = collection.getCells();
+		List<ICell> cells = collection.getCells();
 		assertEquals(N_CELLS, cells.size());
 	}
 
@@ -187,8 +187,7 @@ public class ICellCollectionTest extends ComponentTester {
 		assertTrue(collection.contains(c));
 		collection.removeCell(c);
 		
-		Set<ICell> cells = collection.getCells();
-		cells.remove(c);
+		List<ICell> cells = collection.getCells();
 		assertEquals(N_CELLS-1, cells.size());
 				
 		assertEquals(N_CELLS-1, collection.size());

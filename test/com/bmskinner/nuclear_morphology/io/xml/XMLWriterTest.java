@@ -1,5 +1,6 @@
 package com.bmskinner.nuclear_morphology.io.xml;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -13,6 +14,10 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+
+import com.bmskinner.nuclear_morphology.TestDatasetBuilder;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 
 public class XMLWriterTest {
 
@@ -32,12 +37,23 @@ public class XMLWriterTest {
 	}
 	
 	@Test
-	public void testUUIDDetected() {
-		UUID id = UUID.randomUUID();
-		assertTrue(XMLCreator.isUUID(id.toString()));
-		assertFalse(XMLCreator.isUUID(null));
-		assertFalse(XMLCreator.isUUID("This is not a UUID"));
-		assertFalse(XMLCreator.isUUID("00001111-2222-333-44444-555566667777")); // too few in 3
+	public void testDatasetCanBeWrittenAndRead() throws Exception {
+		IAnalysisDataset d = new TestDatasetBuilder(123).cellCount(10)
+				.ofType(RuleSetCollection.roundRuleSetCollection())
+				.withMaxSizeVariation(10)
+				.randomOffsetProfiles(true)
+				.numberOfClusters(2)
+				.segmented().build();
+
+		exception.expect(IllegalArgumentException.class);
+		
+		File f =  new File("moose");
+		XMLWriter.writeXML(d.toXmlElement(), f);
+		
+		IAnalysisDataset test = XMLReader.readDataset(f);
+		
+		assertEquals(d, test);
 	}
+
 
 }

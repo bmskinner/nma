@@ -23,7 +23,9 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.jdom2.Element;
 
+import com.bmskinner.nuclear_morphology.components.options.DefaultOptions;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 
 /**
@@ -55,8 +57,39 @@ public class DefaultClusterGroup implements IClusterGroup {
         this.options = options;
         this.id = UUID.randomUUID();
     }
+    
+    public DefaultClusterGroup(@NonNull Element e) { 
+    	id = UUID.fromString(e.getAttributeValue("id"));
+    	name = e.getAttributeValue("name");
+    	
+    	if(e.getChild("NewickTree")!=null)
+    		newickTree = e.getChildText("NewickTree");
+    	
+    	options = new DefaultOptions(e.getChild("Options"));
+    	
+    	for(Element el : e.getChildren("DatasetId"))
+    		ids.add(UUID.fromString(el.getText()));
+    	
+    }
 
-    /**
+    @Override
+	public Element toXmlElement() {
+    	Element e = new Element("ClusterGroup").setAttribute("id", id.toString()).setAttribute("name", name);
+    	
+    	e.addContent(options.toXmlElement());
+    	
+    	if(newickTree!=null)
+    		e.addContent(new Element("NewickTree").setText(newickTree));
+    	
+    	for(UUID i : ids)
+    		e.addContent(new Element("DatasetId").setText(i.toString()));
+    	
+    	return e;
+	}
+
+
+
+	/**
      * Create a new cluster group with a tree
      * 
      * @param name the group name (informal)

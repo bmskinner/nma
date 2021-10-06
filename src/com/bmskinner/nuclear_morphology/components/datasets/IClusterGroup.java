@@ -22,6 +22,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
+import com.bmskinner.nuclear_morphology.io.XmlSerializable;
 
 /**
  * The cluster group saves a list of child datasets with a group name and a
@@ -30,7 +31,7 @@ import com.bmskinner.nuclear_morphology.components.options.HashOptions;
  * @author ben
  *
  */
-public interface IClusterGroup extends Serializable {
+public interface IClusterGroup extends Serializable, XmlSerializable {
 
     String CLUSTER_GROUP_PREFIX = "Group";
     

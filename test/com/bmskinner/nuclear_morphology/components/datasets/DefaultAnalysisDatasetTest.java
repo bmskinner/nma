@@ -25,8 +25,12 @@ import static org.junit.Assert.assertTrue;
 
 import java.awt.Color;
 import java.io.File;
+import java.io.PrintWriter;
 import java.util.UUID;
 
+import org.jdom2.Element;
+import org.jdom2.output.Format;
+import org.jdom2.output.XMLOutputter;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -175,5 +179,22 @@ public class DefaultAnalysisDatasetTest extends ComponentTester {
         	assertTrue(d.hasDirectChild(child.getId()));
         }
     }
+    
+	@Test
+	public void testXmlSerializes() throws Exception {
+
+		Element e = d.toXmlElement();		
+		XMLOutputter xmlOutput = new XMLOutputter();
+		xmlOutput.setFormat(Format.getPrettyFormat());
+		xmlOutput.output(e, new PrintWriter( System.out ));
+		
+		// files are not absolute on test dataset creation
+		d.setSavePath(d.getSavePath().getAbsoluteFile());
+		
+		IAnalysisDataset test = new DefaultAnalysisDataset(e);
+		xmlOutput.output(test.toXmlElement(), new PrintWriter( System.out ));
+		testDuplicatesByField(d, test);
+		assertEquals(d, test);
+	}
 
 }

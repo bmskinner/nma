@@ -7,6 +7,9 @@ import org.jdom2.Document;
 import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder;
 
+import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
+import com.bmskinner.nuclear_morphology.components.datasets.DefaultAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.options.DefaultAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.DefaultOptions;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
@@ -22,6 +25,11 @@ import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
  */
 public abstract class XMLReader {
 	
+	
+	public static IAnalysisDataset readDataset(File f) throws XMLReadingException, ComponentCreationException {
+		Document d = readDocument(f);
+		return new DefaultAnalysisDataset(d.getRootElement());
+	}
 	
 	public static RuleSetCollection readRulesetCollection(File f) throws XMLReadingException {
 		Document d = readDocument(f);

@@ -17,6 +17,8 @@
 package com.bmskinner.nuclear_morphology.components.datasets;
 
 import java.awt.Color;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -28,8 +30,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.jdom2.Element;
+import org.jdom2.output.Format;
+import org.jdom2.output.XMLOutputter;
 
 import com.bmskinner.nuclear_morphology.components.Version;
+import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 
 /**
  * This is the most primitive information an analysis dataset requires. This
@@ -54,7 +60,7 @@ public abstract class AbstractAnalysisDataset implements Serializable {
     protected IAnalysisDataset parentDataset = null;
 
     /** Direct child datasets to this dataset */
-    protected Set<IAnalysisDataset> childDatasets = new HashSet<>();
+    protected List<IAnalysisDataset> childDatasets = new ArrayList<>();
 
     /** The cell collection for this dataset */
     protected ICellCollection cellCollection;
@@ -75,6 +81,56 @@ public abstract class AbstractAnalysisDataset implements Serializable {
         this.versionCreated = Version.currentVersion();
         this.versionLastSaved = Version.currentVersion();
     }
+    
+    protected AbstractAnalysisDataset(@NonNull Element e) throws ComponentCreationException {
+    	versionCreated = Version.fromString(e.getChildText("VersionCreated"));
+    	versionLastSaved = Version.fromString(e.getChildText("VersionLastSaved"));
+
+    	if(e.getChild("Colour")!=null)
+    		datasetColour = Color.decode(e.getChildText("Colour"));
+
+
+    	if(e.getChild("ChildDatasets")!=null) {
+    		for(Element el : e.getChild("ChildDatasets").getChildren()) {
+    			childDatasets.add(new ChildAnalysisDataset(el));
+    		}
+    	}
+
+    	for(Element el : e.getChildren("ClusterGroup")) {
+    		clusterGroups.add(new DefaultClusterGroup(el));
+    	}
+    	
+    	if(e.getChild("CellCollection")!=null)
+    		cellCollection = new DefaultCellCollection(e.getChild("CellCollection")); 
+    	if(e.getChild("ChildCellCollection")!=null)
+    		cellCollection = new VirtualCellCollection(e.getChild("ChildCellCollection")); 
+    }
+    
+	public Element toXmlElement() {
+		Element e = new Element("AnalysisDataset");
+		e.addContent(new Element("VersionCreated").setText(versionCreated.toString()));
+		e.addContent(new Element("VersionLastSaved").setText(Version.currentVersion().toString()));
+		
+		if(datasetColour!=null)
+			e.addContent(new Element("Colour").setText(String.valueOf(datasetColour.getRGB())));
+		
+		if(!childDatasets.isEmpty()) {
+			Element el = new Element("ChildDatasets");
+			for(IAnalysisDataset c : childDatasets) {
+				el.addContent(c.toXmlElement());
+			}
+			e.addContent(el);
+		}
+		
+		for(IClusterGroup c : clusterGroups) {
+			e.addContent(c.toXmlElement());
+		}
+		
+		e.addContent(cellCollection.toXmlElement());
+		
+		
+		return e;
+	}
     
     public Version getVersionCreated() {
         return this.versionCreated;

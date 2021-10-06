@@ -20,6 +20,7 @@ import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -314,23 +315,15 @@ public class VirtualCellCollection implements ICellCollection {
 	}
 
     @Override
-    public synchronized Set<ICell> getCells() {
-
-        Set<ICell> result = new HashSet<ICell>(cellIDs.size());
+    public synchronized List<ICell> getCells() {
         ICellCollection parentCollection = parent.getCollection();
         if (parentCollection == null) {
             LOGGER.warning("Cannot access parent collection");
-            return result;
+            return new ArrayList<>();
         }
         return parentCollection.getCells().parallelStream()
 	        .filter(c->cellIDs.contains(c.getId()))
-	        .collect(Collectors.toSet());
-//        for (ICell cell : parentCollection.getCells()) {
-//            if (cellIDs.contains(cell.getId())) {
-//                result.add(cell);
-//            }
-//        }
-//        return result;
+	        .collect(Collectors.toList());
     }
     
     @Override

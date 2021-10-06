@@ -186,7 +186,7 @@ public class MergeSourceAnalysisDataset extends AbstractAnalysisDataset implemen
     }
 
     @Override
-    public Set<IAnalysisDataset> getMergeSources() {
+    public List<IAnalysisDataset> getMergeSources() {
         return childDatasets;
     }
 
