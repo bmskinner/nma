@@ -23,3 +23,7 @@ Nuclear_Morphology.iml
 .project
 
 /target/
+
+# Testing files
+rxrepl.exe
+updateVersion.ps1
