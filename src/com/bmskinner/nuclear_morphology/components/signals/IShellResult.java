@@ -24,6 +24,7 @@ import org.eclipse.jdt.annotation.Nullable;
 
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.io.XmlSerializable;
 
 /**
  * The interface for shell analysis results
@@ -32,7 +33,7 @@ import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
  * @since 1.13.3
  *
  */
-public interface IShellResult extends Serializable {
+public interface IShellResult extends Serializable, XmlSerializable {
     
     UUID RANDOM_SIGNAL_ID = UUID.fromString("00000000-0000-0000-0000-000000000000");
     

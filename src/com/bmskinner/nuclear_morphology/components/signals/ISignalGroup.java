@@ -19,6 +19,7 @@ package com.bmskinner.nuclear_morphology.components.signals;
 import java.awt.Color;
 import java.io.Serializable;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -32,6 +33,8 @@ import org.eclipse.jdt.annotation.NonNull;
  *
  */
 public interface ISignalGroup extends Serializable {
+	
+	UUID getId();
 	
 	/**
 	 * Create a copy of this signal group

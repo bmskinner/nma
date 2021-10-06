@@ -18,9 +18,11 @@ package com.bmskinner.nuclear_morphology.components.signals;
 
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -29,32 +31,33 @@ import java.util.stream.LongStream;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.jdom2.Element;
 
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.signals.IShellResult.Aggregation;
+import com.bmskinner.nuclear_morphology.io.XmlSerializable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 /**
  * This shell result is designed to allow raw data to be
  * exported from shell analyses. Averages and normalisations are computed when data are requested,
- * rather than needing to be pre-computed and stored as in the {@link DefaultShellResult}.
+ * rather than needing to be pre-computed and stored.
  * @author bms41
  * @since 1.13.8
  *
  */
-public class KeyedShellResult implements IShellResult {
+public class DefaultShellResult implements IShellResult {
     
 	private static final long serialVersionUID = 1L;
-	final int nShells;
-	final ShrinkType type;
-	private final Map<CountType, ShellCount> map = new HashMap<>();    
+	private final int nShells;
+	private final ShrinkType type;
+	private final Map<CountType, ShellCount> map = new EnumMap<>(CountType.class);    
     
     /**
      * Create with the given number of shells
      * @param nShells
      */
-    public KeyedShellResult(int nShells, ShrinkType type){
+    public DefaultShellResult(int nShells, ShrinkType type){
         if (nShells < 1) 
             throw new IllegalArgumentException("Shell count must be greater than 1");
         
@@ -66,11 +69,42 @@ public class KeyedShellResult implements IShellResult {
         }
     }
     
-    /**
+    public DefaultShellResult(Element e) {
+    	nShells = Integer.valueOf(e.getChildText("nShells"));
+    	type = ShrinkType.valueOf(e.getChildText("ShrinkType"));
+    	
+    	for(Element el : e.getChildren("CountEntry")) {
+    		CountType c = CountType.valueOf(el.getChildText("CountType"));
+    		ShellCount s = new ShellCount(el.getChild("ShellCount"));
+    		map.put(c, s);
+    	}
+    }
+    
+    @Override
+	public Element toXmlElement() {
+		Element e = new Element("ShellResult");
+		
+		e.addContent(new Element("nShells").setText(String.valueOf(nShells)));
+		e.addContent(new Element("ShrinkType").setText(type.toString()));
+		
+		for(Entry<CountType, ShellCount> entry : map.entrySet()) {
+			Element c = new Element("CountEntry");
+			
+			c.addContent(new Element("CountType").setText(entry.getKey().toString()));
+			c.addContent(entry.getValue().toXmlElement());
+			e.addContent(c);
+		}
+		
+		return e;
+	}
+
+
+
+	/**
      * Create with the given number of shells
      * @param nShells
      */
-    private KeyedShellResult(KeyedShellResult r){
+    private DefaultShellResult(DefaultShellResult r){
     	this(r.getNumberOfShells(), r.getType());
         
         for(CountType t : CountType.values()) {
@@ -80,7 +114,7 @@ public class KeyedShellResult implements IShellResult {
     
     @Override
     public IShellResult duplicate() {
-    	return new KeyedShellResult(this);
+    	return new DefaultShellResult(this);
     }
     
     /**
@@ -111,26 +145,26 @@ public class KeyedShellResult implements IShellResult {
             }
         }
         
-        Key k = signal==null 
-        		? new Key(cell.getId(), nucleus.getID()) 
-        		: new Key(cell.getId(), nucleus.getID(), signal.getID());
+        ShellKey k = signal==null 
+        		? new ShellKey(cell.getId(), nucleus.getID()) 
+        		: new ShellKey(cell.getId(), nucleus.getID(), signal.getID());
 
         map.get(countType).putValues(k, shellData);
     }
     
     @Override
 	public long[] getPixelValues(@NonNull CountType countType, @NonNull ICell cell, @NonNull Nucleus nucleus, @Nullable INuclearSignal signal) {
-    	Key k = signal==null 
-        		? new Key(cell.getId(), nucleus.getID()) 
-        		: new Key(cell.getId(), nucleus.getID(), signal.getID());
+    	ShellKey k = signal==null 
+        		? new ShellKey(cell.getId(), nucleus.getID()) 
+        		: new ShellKey(cell.getId(), nucleus.getID(), signal.getID());
     	return map.get(countType).getPixelIntensities(k);
     }  
     
     @Override
 	public double[] getProportions(@NonNull CountType countType, @NonNull ICell cell, @NonNull Nucleus nucleus, @Nullable INuclearSignal signal) {
-    	Key k = signal==null 
-        		? new Key(cell.getId(), nucleus.getID()) 
-        		: new Key(cell.getId(), nucleus.getID(), signal.getID());
+    	ShellKey k = signal==null 
+        		? new ShellKey(cell.getId(), nucleus.getID()) 
+        		: new ShellKey(cell.getId(), nucleus.getID(), signal.getID());
         		
         long[] intensities = map.get(countType).getPixelIntensities(k);
         if(intensities==null)
@@ -277,18 +311,46 @@ public class KeyedShellResult implements IShellResult {
      * @author bms41
      *
      */
-    private class ShellCount implements Serializable {
+    private class ShellCount implements Serializable, XmlSerializable {
 
 		private static final long serialVersionUID = 1L;
-		private final Map<Key, long[]> results;
+		private final Map<ShellKey, long[]> results = new HashMap<>();
         
-        public ShellCount(){
-            results = new HashMap<>();
+        public ShellCount(){ /* Nothing to create */ }
+
+        
+        public ShellCount(Element e) {
+        	
+        	for(Element el : e.getChildren("Entry")) {
+        		ShellKey k = new ShellKey(el.getChild("ShellKey"));
+        		String[] s = el.getChildText("Counts").replace("[", "")
+        		.replace("]", "").replace(" ", "").split(",");
+        		
+        		long[] l = new long[s.length];
+        		for(int i=0; i<s.length; i++) {
+        			l[i] = Long.parseLong(s[i]);
+        		}
+        	}
         }
         
-        public ShellCount duplicate() {
+        @Override
+		public Element toXmlElement() {
+        	Element e = new Element("ShellCount");
+        	
+        	for(Entry<ShellKey, long[]> entry : results.entrySet()) {
+        		Element c = new Element("Entry");
+        		c.addContent(entry.getKey().toXmlElement());
+        		c.addContent(new Element("Counts").setText(Arrays.toString(entry.getValue())));
+        		e.addContent(c);
+        	}			
+			return e;
+		}
+
+
+
+		public ShellCount duplicate() {
         	ShellCount result = new ShellCount();
-        	for(Key k: results.keySet()) {
+        	for(ShellKey k: results.keySet()) {
         		result.results.put(k.duplicate(), results.get(k));
         	}
         	return result;
@@ -300,7 +362,7 @@ public class KeyedShellResult implements IShellResult {
          * @param k
          * @param values
          */
-        public void putValues(@NonNull Key k, long[] values){
+        public void putValues(@NonNull ShellKey k, long[] values){
             results.put(k, values);
         }
                 
@@ -337,7 +399,7 @@ public class KeyedShellResult implements IShellResult {
          * @param k the key of the object
          * @return
          */
-        public long sum(Key k){
+        public long sum(ShellKey k){
             if(results.containsKey(k))
                 return LongStream.of(results.get(k)).sum();
             return 0;
@@ -347,7 +409,7 @@ public class KeyedShellResult implements IShellResult {
          * Fetch all the object keys
          * @return
          */
-        public Set<Key> keys(){
+        public Set<ShellKey> keys(){
             return results.keySet();
         }
         
@@ -358,7 +420,7 @@ public class KeyedShellResult implements IShellResult {
          * @param agg the aggregation level
          * @return the object keys matching the aggregation level
          */
-        public Set<Key> keys(Aggregation agg){
+        public Set<ShellKey> keys(Aggregation agg){
         	switch(agg){
         		case BY_NUCLEUS: return results.keySet().stream().filter(k->!k.hasSignal()).collect(Collectors.toSet());
         		case BY_SIGNAL:  return results.keySet().stream().filter(k->k.hasSignal()).collect(Collectors.toSet());
@@ -366,13 +428,13 @@ public class KeyedShellResult implements IShellResult {
         	}
         }
                 
-        public long getPixelIntensity(Key k, int shell){
+        public long getPixelIntensity(ShellKey k, int shell){
             if(results.containsKey(k))
                 return results.get(k)[shell];
             return 0;
         }
         
-        public long[] getPixelIntensities(Key k){
+        public long[] getPixelIntensities(ShellKey k){
             return results.get(k);
         }
         
@@ -403,7 +465,7 @@ public class KeyedShellResult implements IShellResult {
             StringBuilder b = new StringBuilder("Shells : "+nShells+"\n");
             b.append("Size : "+size()+"\n");
             b.append("Keys :\n");
-            for(Key k :keys()){
+            for(ShellKey k :keys()){
                 b.append(k+"\n");
             }
             for(int i=0; i<nShells; i++){
@@ -418,35 +480,59 @@ public class KeyedShellResult implements IShellResult {
      * @author bms41
      *
      */
-     private class Key implements Serializable {
+     private class ShellKey implements Serializable, XmlSerializable {
 		private static final long serialVersionUID = 1L;
 		private final UUID cellId;
         private final UUID componentId;
         private final UUID signalId;
         
-        public Key(@NonNull UUID cellId, @NonNull UUID componentId) {
+        public ShellKey(@NonNull UUID cellId, @NonNull UUID componentId) {
             this(cellId, componentId, null );
         }
         
-        public Key(@NonNull UUID cellId, @NonNull UUID componentId, @Nullable UUID signalId) {
+        public ShellKey(@NonNull UUID cellId, @NonNull UUID componentId, @Nullable UUID signalId) {
 
             this.cellId = cellId;
             this.componentId = componentId;
             this.signalId = signalId;
         }
         
-        public Key duplicate() {
+        public ShellKey(Element e) {
+        	cellId = UUID.fromString(e.getChildText("CellId"));
+        	componentId = UUID.fromString(e.getChildText("ComponentId"));
+        	
+        	if(e.getChild("SignalId")!=null)
+        		signalId = UUID.fromString(e.getChildText("SignalId"));
+        	else 
+        		signalId = null;
+        }
+        
+        @Override
+		public Element toXmlElement() {
+			Element e = new Element("ShellKey");
+			
+			if(cellId!=null)
+				e.addContent(new Element("CellId").setText(cellId.toString()));
+			if(componentId!=null)
+				e.addContent(new Element("ComponentId").setText(componentId.toString()));
+			if(signalId!=null)
+				e.addContent(new Element("SignalId").setText(signalId.toString()));
+			
+			return e;
+		}
+
+		public ShellKey duplicate() {
         	if(signalId==null)
-        		return new Key(UUID.fromString(cellId.toString()), UUID.fromString(componentId.toString()), null);
-        	return new Key(UUID.fromString(cellId.toString()), UUID.fromString(componentId.toString()), UUID.fromString(signalId.toString()));
+        		return new ShellKey(UUID.fromString(cellId.toString()), UUID.fromString(componentId.toString()), null);
+        	return new ShellKey(UUID.fromString(cellId.toString()), UUID.fromString(componentId.toString()), UUID.fromString(signalId.toString()));
         }
         
         /**
          * Fetch the key covering the cell and component only
          * @return
          */
-        public Key componentKey(){
-            return new Key(cellId, componentId);
+        public ShellKey componentKey(){
+            return new ShellKey(cellId, componentId);
         }
 
         @Override
@@ -489,7 +575,7 @@ public class KeyedShellResult implements IShellResult {
                 return false;
             if (getClass() != obj.getClass())
                 return false;
-            Key other = (Key) obj;
+            ShellKey other = (ShellKey) obj;
             if (!getOuterType().equals(other.getOuterType()))
                 return false;
             if (cellId == null) {
@@ -510,8 +596,8 @@ public class KeyedShellResult implements IShellResult {
             return true;
         }
 
-        private KeyedShellResult getOuterType() {
-            return KeyedShellResult.this;
+        private DefaultShellResult getOuterType() {
+            return DefaultShellResult.this;
         }
     }
     

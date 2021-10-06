@@ -44,7 +44,7 @@ import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
-import com.bmskinner.nuclear_morphology.components.signals.KeyedShellResult;
+import com.bmskinner.nuclear_morphology.components.signals.DefaultShellResult;
 import com.bmskinner.nuclear_morphology.components.signals.DefaultSignalGroup;
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult.CountType;
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult.ShrinkType;
@@ -73,7 +73,7 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
 	
 	private ICellCollection collection;
 
-    private final Map<UUID, KeyedShellResult> counters = new HashMap<>();
+    private final Map<UUID, DefaultShellResult> counters = new HashMap<>();
 
     public ShellAnalysisMethod(@NonNull final IAnalysisDataset dataset, @NonNull final HashOptions o) {
         super(dataset);
@@ -138,7 +138,7 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
     	for (UUID signalGroupId : collection.getSignalManager().getSignalGroupIDs()) {
             if (IShellResult.RANDOM_SIGNAL_ID.equals(signalGroupId))
                 continue;
-            counters.put(signalGroupId, new KeyedShellResult( options.getInt(HashOptions.SHELL_COUNT_INT), ShrinkType.valueOf(options.getString(HashOptions.SHELL_EROSION_METHOD_KEY))));
+            counters.put(signalGroupId, new DefaultShellResult( options.getInt(HashOptions.SHELL_COUNT_INT), ShrinkType.valueOf(options.getString(HashOptions.SHELL_EROSION_METHOD_KEY))));
             
             // Assign the options to each signal group
             LOGGER.fine("Creating signal counter for group "+signalGroupId);
@@ -154,7 +154,7 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
     	
     	// Ensure a random distribution exists
     	if(!collection.getSignalManager().getSignalGroupIDs().contains(IShellResult.RANDOM_SIGNAL_ID))
-    		counters.put(IShellResult.RANDOM_SIGNAL_ID, new KeyedShellResult(options.getInt(HashOptions.SHELL_COUNT_INT), ShrinkType.valueOf(options.getString(HashOptions.SHELL_EROSION_METHOD_KEY))));
+    		counters.put(IShellResult.RANDOM_SIGNAL_ID, new DefaultShellResult(options.getInt(HashOptions.SHELL_COUNT_INT), ShrinkType.valueOf(options.getString(HashOptions.SHELL_EROSION_METHOD_KEY))));
     }
     
     private synchronized void createResults() {
@@ -164,7 +164,7 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
         for (UUID group : counters.keySet()) {
             addRandom |= collection.getSignalManager().hasSignals(group);
             if (collection.getSignalManager().hasSignals(group)) {
-                KeyedShellResult channelCounter = counters.get(group);
+                DefaultShellResult channelCounter = counters.get(group);
                 collection.getSignalGroup(group).get().setShellResult(channelCounter);
                 copyShellResultsToChildDatasets(group);
             }
@@ -185,7 +185,7 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
     private void copyShellResults(@NonNull UUID group, @NonNull ICellCollection src, @NonNull ICellCollection dest) {
     	IShellResult channelCounter = src.getSignalGroup(group).get().getShellResult().get();
     	if (dest.getSignalManager().hasSignals(group) || IShellResult.RANDOM_SIGNAL_ID.equals(group)) {
-    		KeyedShellResult childCounter = new KeyedShellResult(options.getInt(HashOptions.SHELL_COUNT_INT), ShrinkType.valueOf(options.getString(HashOptions.SHELL_EROSION_METHOD_KEY)));
+    		DefaultShellResult childCounter = new DefaultShellResult(options.getInt(HashOptions.SHELL_COUNT_INT), ShrinkType.valueOf(options.getString(HashOptions.SHELL_EROSION_METHOD_KEY)));
     		for(ICell c : dest.getCells()) {
     			for(Nucleus n : c.getNuclei()) {
 
@@ -234,9 +234,9 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
     }
 
     private synchronized void addRandomSignal() {
-    	ISignalGroup random = new DefaultSignalGroup("Random distribution");
+    	ISignalGroup random = new DefaultSignalGroup("Random distribution", IShellResult.RANDOM_SIGNAL_ID);
     	random.setGroupColour(Color.LIGHT_GRAY);
-    	KeyedShellResult channelCounter = counters.get(IShellResult.RANDOM_SIGNAL_ID);
+    	DefaultShellResult channelCounter = counters.get(IShellResult.RANDOM_SIGNAL_ID);
     	random.setShellResult(channelCounter);
     	collection.addSignalGroup(IShellResult.RANDOM_SIGNAL_ID, random);
     	copyShellResultsToChildDatasets(IShellResult.RANDOM_SIGNAL_ID);
@@ -308,7 +308,7 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
             if (sourceFile == null) 
                 return;
             
-            KeyedShellResult counter = counters.get(signalGroup);
+            DefaultShellResult counter = counters.get(signalGroup);
             
             ImageStack signalStack = new ImageImporter(sourceFile).importToStack();
             int signalChannel = n.getSignalCollection().getSourceChannel(signalGroup);

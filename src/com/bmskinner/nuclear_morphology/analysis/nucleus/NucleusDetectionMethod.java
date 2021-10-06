@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -214,10 +215,10 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
         if(!containsImageFiles(folder))
         	return;
 
-        ICellCollection folderCollection = new DefaultCellCollection(folder, outputFolder.getName(), folder.getName(),
-                templateOptions.getRuleSetCollection());
+        ICellCollection fc = new DefaultCellCollection(templateOptions.getRuleSetCollection(), 
+        		folder.getName(), UUID.randomUUID());
 
-        collectionGroup.put(folder, folderCollection);
+        collectionGroup.put(folder, fc);
 
         final Finder<Collection<ICell>> finder = new FluorescentNucleusFinder(templateOptions);
         finder.addProgressListener(this);
@@ -226,7 +227,7 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
             final Collection<ICell> cells = finder.findInFolder(folder);
             if (!cells.isEmpty() && !outputFolder.exists()) 
             	outputFolder.mkdir();
-            folderCollection.addAll(cells);
+            fc.addAll(cells);
             LOGGER.fine("Detected "+cells.size()+" nuclei in "+folder.getAbsolutePath());
         } catch (ImageImportException e) {
             LOGGER.log(Loggable.STACK, "Error searching folder", e);

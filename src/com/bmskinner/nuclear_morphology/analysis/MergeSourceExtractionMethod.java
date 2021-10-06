@@ -107,8 +107,8 @@ public class MergeSourceExtractionMethod extends MultipleDatasetAnalysisMethod {
     			.orElseThrow(MissingOptionException::new)
     			.getFile(HashOptions.DETECTION_FOLDER);
     	
-    	ICellCollection newCollection = new DefaultCellCollection(imageFolder, null,
-    			templateCollection.getName(), templateCollection.getRuleSetCollection());
+    	ICellCollection newCollection = new DefaultCellCollection(
+    			templateCollection.getRuleSetCollection(), templateCollection.getName(), UUID.randomUUID());
 
     	templateCollection.getCells().forEach(c->newCollection.addCell(c.duplicate()));
 
@@ -184,7 +184,7 @@ public class MergeSourceExtractionMethod extends MultipleDatasetAnalysisMethod {
 
 			if (addSignalGroup) {
 				ISignalGroup oldGroup = templateCollection.getSignalGroup(signalGroupId).orElseThrow(MissingOptionException::new);
-				ISignalGroup newGroup = new DefaultSignalGroup(oldGroup, false);
+				ISignalGroup newGroup = new DefaultSignalGroup(oldGroup);
 			    newDataset.getCollection().addSignalGroup(signalGroupId, newGroup);
 			}
         }

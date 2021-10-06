@@ -70,7 +70,7 @@ public abstract class AbstractAnalysisDataset implements Serializable {
      * 
      * @param collection
      */
-    protected AbstractAnalysisDataset(ICellCollection collection) {
+    protected AbstractAnalysisDataset(@NonNull ICellCollection collection) {
         this.cellCollection = collection;
         this.versionCreated = Version.currentVersion();
         this.versionLastSaved = Version.currentVersion();

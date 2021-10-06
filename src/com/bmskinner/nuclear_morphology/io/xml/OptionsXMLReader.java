@@ -27,9 +27,9 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.jdom2.Element;
 
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.options.DefaultClusteringOptions;
+import com.bmskinner.nuclear_morphology.components.options.DefaultOptions;
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 
 /**
@@ -74,13 +74,13 @@ public class OptionsXMLReader extends XMLFileReader<IAnalysisOptions> {
 	 * Read the clustering options from file
 	 * @return the detected options, or an empty list
 	 */
-	public List<IClusteringOptions> readClusteringOptions(){
-		List<IClusteringOptions> result = new ArrayList<>();
+	public List<HashOptions> readClusteringOptions(){
+		List<HashOptions> result = new ArrayList<>();
 
 		Element clusters = rootElement.getChild(XMLCreator.CLUSTERS_SECTION_KEY);
 		if(clusters!=null) { // may not be present
 			for(Element component : clusters.getChildren(XMLCreator.CLUSTER_GROUP)) {
-				IClusteringOptions o = buildClusteringOptions(component);
+				HashOptions o = new DefaultOptions(component);
 				result.add(o);
 			}
 		}
@@ -108,11 +108,4 @@ public class OptionsXMLReader extends XMLFileReader<IAnalysisOptions> {
 		}
 		return result;
 	}
-	
-	private IClusteringOptions buildClusteringOptions(@NonNull Element e) {
-		IClusteringOptions o = new DefaultClusteringOptions();
-		addKeyedValues(e, o);
-		return o;
-	}
-
 }

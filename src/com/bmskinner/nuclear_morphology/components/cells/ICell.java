@@ -25,6 +25,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nuclear_morphology.components.Statistical;
 import com.bmskinner.nuclear_morphology.components.Taggable;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.io.XmlSerializable;
 
 /**
  * All cell types implement this interface. A cell can have multiple nuclei, and zero,
@@ -34,7 +35,7 @@ import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
  * @since 1.13.3
  *
  */
-public interface ICell extends Serializable, Statistical, Comparable<ICell> {
+public interface ICell extends Serializable, XmlSerializable, Statistical, Comparable<ICell> {
 
 	/**
 	 * Create a copy of this cell

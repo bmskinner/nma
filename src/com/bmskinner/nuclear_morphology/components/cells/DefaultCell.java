@@ -16,22 +16,25 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.cells;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.jdom2.Element;
 
 import com.bmskinner.nuclear_morphology.components.Statistical;
 import com.bmskinner.nuclear_morphology.components.Taggable;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
+import com.bmskinner.nuclear_morphology.components.nuclei.DefaultNucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.io.XmlSerializable;
 
 /**
  * The cell is the highest level of analysis here. Cells we can analyse have a
@@ -46,27 +49,46 @@ public class DefaultCell implements ICell {
 
     protected UUID uuid;
     protected ICytoplasm cytoplasm = null;
-    protected List<Nucleus> nuclei;
+    protected List<Nucleus> nuclei = new ArrayList<>();
 
     /** The statistical values stored for this object */
-    private Map<Measurement, Double> statistics;
+    private Map<Measurement, Double> statistics = new HashMap<>();
 
     /**
      * Create a new cell with a random ID
      */
     protected DefaultCell() {
-        this(java.util.UUID.randomUUID());
+        this(UUID.randomUUID());
+    }
+    
+    /**
+     * Construct from an XML element. Use for 
+     * unmarshalling. The element should conform
+     * to the specification in {@link XmlSerializable}.
+     * @param e the XML element containing the data.
+     */
+    public DefaultCell(@NonNull Element e) throws ComponentCreationException {
+    	uuid = UUID.fromString(e.getAttributeValue("id"));
+    	
+    	for(Element el : e.getChildren("Nucleus")) {
+    		nuclei.add(new DefaultNucleus(el));
+    	}
+    	
+    	// Add measurements
+    	for(Element el : e.getChildren("Measurement")) {
+    		Measurement m = Measurement.of(el.getAttributeValue("name"));
+    		statistics.put(m, Double.parseDouble(el.getText()));
+    	}
+    	
     }
 
-    /**
+	/**
      * Create a new cell with the given ID.
      * 
      * @param id the id for the new cell
      */
     public DefaultCell(@NonNull UUID id) {
         this.uuid = id;
-        nuclei = new ArrayList<>(0);
-        statistics = new HashMap<>();
     }
 
     /**
@@ -332,11 +354,27 @@ public class DefaultCell implements ICell {
 
         return val;
     }
-
-    private void writeObject(java.io.ObjectOutputStream out) throws IOException {
-        out.defaultWriteObject();
-    }
     
+    @Override
+	public Element toXmlElement() {
+		Element e = new Element("Cell").setAttribute("id", uuid.toString());
+		
+		if(cytoplasm!=null)
+			e.addContent(cytoplasm.toXmlElement());
+		
+		for(Nucleus n : nuclei) {
+			e.addContent(n.toXmlElement());
+		}
+		
+    	for(Entry<Measurement, Double> entry : statistics.entrySet()) {
+    		e.addContent(new Element("Measurement")
+    				.setAttribute("name", entry.getKey().toString())
+    				.setText(entry.getValue().toString()));
+    	}
+				
+		return e;
+	}
+
     
     
     @Override
@@ -356,9 +394,5 @@ public class DefaultCell implements ICell {
 	public int hashCode() {
 		return Objects.hash(cytoplasm, nuclei, statistics, uuid);
 	}
-    
-    private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-        in.defaultReadObject();
-    }
 
 }

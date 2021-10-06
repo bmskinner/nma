@@ -24,27 +24,32 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.jdom2.Element;
+import org.jdom2.output.Format;
+import org.jdom2.output.XMLOutputter;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.profiles.DefaultProfileCollection;
 import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult.Aggregation;
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult.CountType;
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult.Normalisation;
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult.ShrinkType;
-import com.bmskinner.nuclear_morphology.components.signals.KeyedShellResult;
+import com.bmskinner.nuclear_morphology.components.signals.DefaultShellResult;
 import com.bmskinner.nuclear_morphology.samples.dummy.DummyCell;
 
-public class KeyedShellResultTest {
+public class DefaultShellResultTest {
     
-    private KeyedShellResult k;
+    private DefaultShellResult k;
     private ICell c;
     private Nucleus n;
     private INuclearSignal s;
@@ -52,7 +57,7 @@ public class KeyedShellResultTest {
     
     @Before
     public void setUp() throws ComponentCreationException{
-        k = new KeyedShellResult(N_SHELLS, ShrinkType.AREA);
+        k = new DefaultShellResult(N_SHELLS, ShrinkType.AREA);
         c = mock(ICell.class);
         when(c.getId()).thenReturn(UUID.fromString("00000000-0000-0000-0000-000000000001"));
         
@@ -201,4 +206,22 @@ public class KeyedShellResultTest {
     	}
     	return Arrays.equals(obs, exp);
     }
+    
+	@Test
+	public void testXmlSerializes() throws Exception {
+				
+		long[] sig = { 1, 2, 3, 4, 5 };
+        long[] cnt = { 1, 2, 3, 4, 5 };        
+        k.addShellData(CountType.SIGNAL,  c, n, s, sig);
+        k.addShellData(CountType.COUNTERSTAIN,  c, n, cnt);
+		Element e = k.toXmlElement();
+		
+		XMLOutputter xmlOutput = new XMLOutputter();
+		xmlOutput.setFormat(Format.getPrettyFormat());
+		xmlOutput.output(e, new PrintWriter( System.out ));
+
+		DefaultShellResult recovered = new DefaultShellResult(e);
+		
+		assertEquals(k, recovered);
+	}
 }

@@ -22,8 +22,11 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.logging.Logger;
 
+import org.jdom2.Element;
+
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileCreator;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
+import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
@@ -48,6 +51,8 @@ public class DefaultConsensusNucleus extends DefaultNucleus implements Consensus
     private double xOffset = 0;
     private double yOffset = 0;
     private double rotOffset = 0;
+    
+    
 
     public DefaultConsensusNucleus(Nucleus n) throws UnprofilableObjectException {
 
@@ -75,7 +80,26 @@ public class DefaultConsensusNucleus extends DefaultNucleus implements Consensus
         }
     }
     
+    public DefaultConsensusNucleus(Element e) throws ComponentCreationException {
+    	super(e);
+    	xOffset = Integer.valueOf(e.getChildText("OffsetX"));
+    	yOffset = Integer.valueOf(e.getChildText("OffsetY"));
+    	rotOffset = Integer.valueOf(e.getChildText("OffsetR"));
+    }
+    
+    
     @Override
+	public Element toXmlElement() {
+		Element e = super.toXmlElement();
+		e.addContent(new Element("OffsetX").setText(String.valueOf(xOffset)));
+		e.addContent(new Element("OffsetY").setText(String.valueOf(yOffset)));
+		e.addContent(new Element("OffsetR").setText(String.valueOf(rotOffset)));
+		return e;
+	}
+
+
+
+	@Override
     public int[] getPosition() {
 
         Rectangle bounds = toPolygon().getBounds();

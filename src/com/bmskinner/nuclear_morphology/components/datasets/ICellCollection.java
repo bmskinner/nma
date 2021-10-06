@@ -41,6 +41,7 @@ import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTy
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.signals.SignalManager;
+import com.bmskinner.nuclear_morphology.io.XmlSerializable;
 
 /**
  * This interface will provides the primary access to cell data, as well as the
@@ -51,7 +52,8 @@ import com.bmskinner.nuclear_morphology.components.signals.SignalManager;
  *
  */
 public interface ICellCollection
-        extends Serializable, Filterable, StatisticalCollection, Refoldable<Nucleus>, Collection<ICell> {
+        extends Serializable, XmlSerializable, Filterable, 
+        StatisticalCollection, Refoldable<Nucleus>, Collection<ICell> {
 
 	
 	/** The length to interpolate profiles for comparisons between objects */
@@ -291,37 +293,6 @@ public interface ICellCollection
      * @throws ProfileException if creation fails
      */
     void createProfileCollection() throws ProfileException;
-
-    /**
-     * Get the folder the nuclei in the collection were imaged from
-     * 
-     * @return
-     * @deprecated because we should be using the analysis options for this
-     */
-    File getFolder();
-
-    /**
-     * Get the name of the analysis output folder
-     * 
-     * @return
-     * @deprecated because we should use the analysis dataset save path for this
-     */
-    String getOutputFolderName();
-
-    /**
-     * Get the output folder (e.g. to save the dataset into). If an output
-     * folder name (such as a date) has been input, it will be included
-     * 
-     * @return the folder
-     * @deprecated because we should use the analysis dataset save path for this
-     */
-    File getOutputFolder();
-
-    /**
-     * Set the output folder of the collection
-     * @deprecated because we should use the analysis dataset save path for this
-     */
-    void setOutputFolder(@NonNull File folder);
 
     /**
      * Get the distinct source image file list for all nuclei in the collection

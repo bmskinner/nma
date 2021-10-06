@@ -81,6 +81,7 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
      * 
      * @param collection
      */
+    @Deprecated
     public DefaultAnalysisDataset(ICellCollection collection) {
         this(collection, new File(collection.getOutputFolder(), collection.getName() + Io.SAVE_FILE_EXTENSION));
     }
@@ -90,7 +91,7 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
      * 
      * @param collection
      */
-    public DefaultAnalysisDataset(ICellCollection collection, File saveFile) {
+    public DefaultAnalysisDataset(@NonNull ICellCollection collection, @NonNull File saveFile) {
         super(collection);
         this.savePath = saveFile;
         this.isRoot = false;

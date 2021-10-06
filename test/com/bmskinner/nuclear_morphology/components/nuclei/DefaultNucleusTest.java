@@ -11,7 +11,10 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.bmskinner.nuclear_morphology.ComponentTester;
+import com.bmskinner.nuclear_morphology.TestDatasetBuilder;
 import com.bmskinner.nuclear_morphology.components.TestComponentFactory;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 
 /**
  * Tests for the default nucleus class
@@ -25,7 +28,13 @@ public class DefaultNucleusTest extends ComponentTester {
 	@Override
 	@Before
 	public void setUp() throws Exception {
-		nucleus = TestComponentFactory.rectangularNucleus(100, 100, 20, 20, 0, 20);
+		IAnalysisDataset d = new TestDatasetBuilder(RNG_SEED).cellCount(N_CELLS)
+				.ofType(RuleSetCollection.roundRuleSetCollection())
+				.withMaxSizeVariation(1)
+				.randomOffsetProfiles(true)
+				.numberOfClusters(N_CHILD_DATASETS)
+				.segmented().build();
+		nucleus = d.getCollection().getCells().stream().findFirst().get().getPrimaryNucleus();
 	}
 
 	@Test
@@ -44,6 +53,7 @@ public class DefaultNucleusTest extends ComponentTester {
 		xmlOutput.output(e, new PrintWriter( System.out ));
 
 		Nucleus test = new DefaultNucleus(e);
+		System.out.println();
 		xmlOutput.output(test.toXmlElement(), new PrintWriter( System.out ));
 		
 		assertEquals(nucleus, test);

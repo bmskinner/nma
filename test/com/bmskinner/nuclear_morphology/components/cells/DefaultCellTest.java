@@ -19,6 +19,13 @@
 
 package com.bmskinner.nuclear_morphology.components.cells;
 
+import static org.junit.Assert.assertEquals;
+
+import java.io.PrintWriter;
+
+import org.jdom2.Element;
+import org.jdom2.output.Format;
+import org.jdom2.output.XMLOutputter;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -27,6 +34,8 @@ import org.junit.rules.ExpectedException;
 import com.bmskinner.nuclear_morphology.ComponentTester;
 import com.bmskinner.nuclear_morphology.TestDatasetBuilder;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.nuclei.DefaultNucleus;
+import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 
 public class DefaultCellTest extends ComponentTester {
@@ -50,7 +59,23 @@ public class DefaultCellTest extends ComponentTester {
     @Test
     public void testDuplicate() throws Exception {
     	ICell dup = c.duplicate();
-    	testDuplicatesByField(dup.duplicate(), dup);
+    	testDuplicatesByField(c, dup);
     }
+    
+	@Test
+	public void testXmlSerializes() throws Exception {
+		
+		Element e = c.toXmlElement();
+		
+		XMLOutputter xmlOutput = new XMLOutputter();
+		xmlOutput.setFormat(Format.getPrettyFormat());
+		xmlOutput.output(e, new PrintWriter( System.out ));
+
+		ICell test = new DefaultCell(e);
+//		xmlOutput.output(test.toXmlElement(), new PrintWriter( System.out ));
+		
+		assertEquals(c, test);
+	}
+	
 
 }

@@ -24,8 +24,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -42,6 +44,7 @@ import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.profiles.DefaultProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
@@ -76,10 +79,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
     protected double windowProportion = IAnalysisOptions.DEFAULT_WINDOW_PROPORTION;
     
     /** The segmentation pattern for the object */
-    protected List<IProfileSegment> segments = new ArrayList<>();
-
-    /** The profiles for this object */
-    protected Map<ProfileType, IProfile> profileMap = new ConcurrentHashMap<>();
+    private List<IProfileSegment> segments = new ArrayList<>();
 
     /** The indexes of landmarks in the profiles and border list */
     protected Map<Landmark, Integer> profileLandmarks = new HashMap<>();
@@ -88,6 +88,9 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
     protected boolean isLocked = false;
 
     /*  TRANSIENT FIELDS  */
+    
+    /** The profiles for this object */
+    protected transient Map<ProfileType, IProfile> profileMap = new ConcurrentHashMap<>();
 
     /** The chosen window size in pixels based on the window proportion */
     protected transient int windowSize;
@@ -193,9 +196,10 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
          }
     }
     
-    public ProfileableCellularComponent(Element e) throws ComponentCreationException {
+    protected ProfileableCellularComponent(Element e) throws ComponentCreationException {
 		super(e);
 		windowProportion = Double.parseDouble(e.getChildText(XML_WINDOW_PROPORTION));
+		windowSize = Math.max(1,(int) Math.ceil(getStatistic(Measurement.PERIMETER) * windowProportion));
 		
 		isLocked = Boolean.parseBoolean(e.getChildText("IsLocked"));
 		
@@ -205,17 +209,26 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 					Integer.parseInt(el.getText()));
 		}
 		
-//		initialise(windowProportion);
+		for(Element el : e.getChildren("Segment")){
+			segments.add(new DefaultProfileSegment(el));
+		}
+		try {
+			IProfileSegment.linkSegments(segments);
+			
+			ProfileCreator creator = new ProfileCreator(this);
+
+	    	for (ProfileType type : ProfileType.values()) {
+	    		profileMap.put(type, creator.createProfile(type));
+	    	}
+			
+		} catch (ProfileException e1) {
+			LOGGER.log(Level.SEVERE, "Unable to link segments in object constructor", e1);
+		}
 		
-//		for(Element el : e.getChildren("Profile")){
-//			profileMap.put(null, null);
-//		}
 		
-//		for(Entry<ProfileType, ISegmentedProfile> entry : profileMap.entrySet()) {
-//			e.addContent(new Element("Profile")
-//					.setAttribute("type", entry.getKey().toString())
-//					.setContent(entry.getValue().toXmlElement()));
-//		}
+		
+		// Note - do not call initialise here since subclasses 
+		// will not have set all fields yet
 	}
 
 	@Override
@@ -711,16 +724,8 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 		
 		e.addContent(new Element(XML_WINDOW_PROPORTION).setText(String.valueOf(windowProportion)));
 
-//		for(Entry<ProfileType, IProfile> entry : profileMap.entrySet()) {
-//			e.addContent(new Element("Profile")
-//					.setAttribute("type", entry.getKey().toString())
-//					.setContent(entry.getValue().toXmlElement()));
-//		}
-		
 		for(IProfileSegment s : segments) {
-			e.addContent(new Element("Segment")
-					.setAttribute("id", s.getID().toString())
-					.setContent(s.toXmlElement()));
+			e.addContent(s.toXmlElement());
 		}
 		
 		for(Entry<Landmark, Integer> entry : profileLandmarks.entrySet()) {
@@ -739,12 +744,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		long temp;
-		temp = Double.doubleToLongBits(windowProportion);
-		result = prime * result + (int) (temp ^ (temp >>> 32));
-		result = prime * result + ((profileLandmarks == null) ? 0 : profileLandmarks.hashCode());
-		result = prime * result + ((profileMap == null) ? 0 : profileMap.hashCode());
-		result = prime * result + (isLocked ? 1231 : 1237);
+		result = prime * result + Objects.hash(isLocked, profileLandmarks, profileMap, segments, windowProportion);
 		return result;
 	}
 
@@ -757,20 +757,13 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 		if (getClass() != obj.getClass())
 			return false;
 		ProfileableCellularComponent other = (ProfileableCellularComponent) obj;
-		if (Double.doubleToLongBits(windowProportion) != Double.doubleToLongBits(other.windowProportion))
-			return false;
-		if (profileLandmarks == null) {
-			if (other.profileLandmarks != null)
-				return false;
-		} else if (!profileLandmarks.equals(other.profileLandmarks))
-			return false;
-		if (profileMap == null) {
-			if (other.profileMap != null)
-				return false;
-		} else if (!profileMap.equals(other.profileMap))
-			return false;
-		if (isLocked != other.isLocked)
-			return false;
-		return true;
+		return isLocked == other.isLocked 
+				&& Objects.equals(profileLandmarks, other.profileLandmarks)
+				&& Objects.equals(segments, other.segments)
+				&& Double.doubleToLongBits(windowProportion) == Double.doubleToLongBits(other.windowProportion);
 	}
+
+    
+    
+
 }

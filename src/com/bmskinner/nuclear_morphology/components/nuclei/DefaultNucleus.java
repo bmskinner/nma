@@ -49,6 +49,7 @@ import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.components.signals.DefaultSignalCollection;
 import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalCollection;
+import com.bmskinner.nuclear_morphology.io.XmlSerializable;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.utility.AngleTools;
 
@@ -87,6 +88,12 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
 
     protected transient boolean canReverse = true;
     
+    /**
+     * Construct from an XML element. Use for 
+     * unmarshalling. The element should conform
+     * to the specification in {@link XmlSerializable}.
+     * @param e the XML element containing the data.
+     */
     public DefaultNucleus(Element e) throws ComponentCreationException {
     	super(e);
     	nucleusNumber = Integer.valueOf(e.getChildText(XML_NUCLEUS_NUMBER));
@@ -100,13 +107,11 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
     	}
     	priorityAxis = PriorityAxis.valueOf(e.getChildText(XML_PRIORITY_AXIS));
     	signalCollection = new DefaultSignalCollection(e.getChild(XML_SIGNAL_COLLECTION));
-    	
-    	this.initialise(windowProportion);
     }
 
     @Override
 	public Element toXmlElement() {
-		Element e = super.toXmlElement();
+		Element e = super.toXmlElement().setName("Nucleus");
 		
 		e.addContent(new Element(XML_NUCLEUS_NUMBER).setText(String.valueOf(nucleusNumber)));
 		for(Entry<String, Landmark> entry : orientationMarks.entrySet()) {
@@ -687,7 +692,9 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
 		if (getClass() != obj.getClass())
 			return false;
 		DefaultNucleus other = (DefaultNucleus) obj;
-		return nucleusNumber == other.nucleusNumber && Objects.equals(orientationMarks, other.orientationMarks)
-				&& priorityAxis == other.priorityAxis && Objects.equals(signalCollection, other.signalCollection);
+		return nucleusNumber == other.nucleusNumber 
+				&& Objects.equals(orientationMarks, other.orientationMarks)
+				&& priorityAxis == other.priorityAxis 
+				&& Objects.equals(signalCollection, other.signalCollection);
 	}
 }

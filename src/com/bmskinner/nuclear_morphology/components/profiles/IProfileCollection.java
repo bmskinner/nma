@@ -25,8 +25,9 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
+import com.bmskinner.nuclear_morphology.io.XmlSerializable;
 
-public interface IProfileCollection extends Serializable {
+public interface IProfileCollection extends Serializable, XmlSerializable {
 
     static final int ZERO_INDEX = 0;
     

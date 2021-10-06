@@ -119,8 +119,8 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
     		LOGGER.fine("Checked new file names");
 
     		// make a new collection
-    		ICellCollection newCollection = new DefaultCellCollection(newDatasetFolder, null, newDatasetName,
-    				datasets.get(0).getCollection().getRuleSetCollection());
+    		ICellCollection newCollection = new DefaultCellCollection(datasets.get(0).getCollection().getRuleSetCollection(), 
+    				newDatasetName, UUID.randomUUID());
 
     		IAnalysisDataset newDataset = performMerge(newCollection);
 
@@ -194,7 +194,7 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
             // All the existing signal groups before merging
             for (UUID signalGroupID : d.getCollection().getSignalGroupIDs()) {
                 newCollection.addSignalGroup(signalGroupID,
-                        new DefaultSignalGroup(d.getCollection().getSignalGroup(signalGroupID).orElseThrow(NullPointerException::new), COPY_WARPED));
+                        new DefaultSignalGroup(d.getCollection().getSignalGroup(signalGroupID).orElseThrow(NullPointerException::new)));
             }
         }
         

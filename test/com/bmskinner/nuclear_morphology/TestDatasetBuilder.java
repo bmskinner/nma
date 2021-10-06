@@ -321,10 +321,9 @@ public class TestDatasetBuilder {
 	 */
 	private IAnalysisDataset createRectangularDataset(int nCells, RuleSetCollection rsc, int maxSizeVariation, int baseWidth, int baseHeight, int xBase, int yBase, int maxRotationDegrees, boolean randomOffsetStart, int fixedStartOffset) throws ComponentCreationException {
 		
-		ICellCollection collection = new DefaultCellCollection(new File(TEST_DATASET_IMAGE_FOLDER), 
-				TEST_DATASET_NAME, TEST_DATASET_NAME, rsc, TEST_DATASET_UUID);
+		ICellCollection collection = new DefaultCellCollection(rsc, TEST_DATASET_NAME, TEST_DATASET_UUID);
 		
-		IAnalysisOptions o =  OptionsFactory.makeDefaultRoundAnalysisOptions(collection.getFolder());
+		IAnalysisOptions o =  OptionsFactory.makeDefaultRoundAnalysisOptions(new File(TEST_DATASET_IMAGE_FOLDER));
 		o.getNuclusDetectionOptions().get().setInt(HashOptions.MIN_SIZE_PIXELS, (baseWidth-maxSizeVariation)*(baseHeight-maxSizeVariation) );
 		o.getNuclusDetectionOptions().get().setInt(HashOptions.MAX_SIZE_PIXELS, (baseWidth+maxSizeVariation)*(baseHeight+maxSizeVariation) );
 
@@ -371,7 +370,7 @@ public class TestDatasetBuilder {
 			
 		}
 		
-		IAnalysisDataset d = new DefaultAnalysisDataset(collection);
+		IAnalysisDataset d = new DefaultAnalysisDataset(collection, new File(TEST_DATASET_IMAGE_FOLDER));
 		d.setAnalysisOptions(o);
 
 		return d;

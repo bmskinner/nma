@@ -17,8 +17,8 @@
 package com.bmskinner.nuclear_morphology.components.signals;
 
 import java.awt.Color;
-import java.io.File;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -36,24 +36,22 @@ public class DefaultSignalGroup implements ISignalGroup {
 
 	private static final Logger LOGGER = Logger.getLogger(DefaultSignalGroup.class.getName());
     private static final long serialVersionUID = 1L;
-    private IShellResult      shellResult      = null;
+    
+    private UUID			  id;
     private String            groupName        = "";
     private boolean           isVisible        = true;
     private Color             groupColour      = null;
     
-    @Deprecated
-    private int               channel          = 0;
-    
-    @Deprecated
-    private File              folder           = null;
-    
+    private IShellResult      shellResult      = null;
+        
     // Space to store warped signals from this signal group against a template consensus
     private IWarpedSignal	 warpedSignals     = null;
     
     /**
      * Default constructor
      */
-    public DefaultSignalGroup(@NonNull String name) {
+    public DefaultSignalGroup(@NonNull String name, @NonNull UUID id) {
+    	this.id = id;
         groupName = name;
     }
 
@@ -63,19 +61,25 @@ public class DefaultSignalGroup implements ISignalGroup {
      * 
      * @param s
      */
-    public DefaultSignalGroup(@NonNull ISignalGroup s, boolean copyWarped) {
+    public DefaultSignalGroup(@NonNull ISignalGroup s) {
 
     	shellResult = null;
         groupName = s.getGroupName();
         isVisible = s.isVisible();
         groupColour = s.getGroupColour().isPresent() ? s.getGroupColour().get() : null;
-        if(copyWarped)
-        	warpedSignals = s.getWarpedSignals().orElse(null);
+        warpedSignals = s.getWarpedSignals().orElse(null);
     }
     
+    
+    
+	@Override
+	public UUID getId() {
+		return id;
+	}
+
 	@Override
 	public ISignalGroup duplicate() {
-		return new DefaultSignalGroup(this, true);
+		return new DefaultSignalGroup(this);
 	}
 	
 	@Override

@@ -93,19 +93,9 @@ public class DefaultCellCollection implements ICellCollection {
 
 	/** Unique collection id */
 	private final UUID uuid;
-
-	/** The image folder with the source of the cells */
-	// this should be only specified in the analysis options, and per cell
-	@Deprecated private File folder;
-	
-	/** The name of the folder to save outputs */
-	private String outputFolder;
 	
 	/** The name of the collection */
 	private String name;
-
-	/** The type of nuclei this collection contains */
-//	private NucleusType nucleusType;
 
 	/** Aggregated profiles from cells, plus medians */
 	private IProfileCollection profileCollection = IProfileCollection.makeNew();
@@ -114,7 +104,7 @@ public class DefaultCellCollection implements ICellCollection {
 	private Consensus<Nucleus> consensusNucleus; 
 
 	/** All the cells in this collection */
-	private volatile Set<ICell> cells = new HashSet<>(100);
+	private Set<ICell> cells = new HashSet<>(20);
 
 	/** Signal groups, keyed on their unique id */
 	private Map<UUID, ISignalGroup> signalGroups = new HashMap<>(0);
@@ -128,48 +118,29 @@ public class DefaultCellCollection implements ICellCollection {
 	 * Cache statistics from the cells in the collection. This should be updated
 	 * if a cell is added or lost
 	 */
-	private volatile transient StatsCache statsCache = new StatsCache();
+	private transient StatsCache statsCache = new StatsCache();
 
 	/** cache the number of shared cells with other datasets */
-	protected volatile transient VennCache vennCache = new VennCache();
+	protected transient VennCache vennCache = new VennCache();
 
 	private transient SignalManager  signalManager  = new SignalManager(this);
 	private transient ProfileManager profileManager = new ProfileManager(this);
 
-	/**
-	 * Constructor.
-	 * 
-	 * @param folder the folder of images
-	 * @param outputFolder a name for the outputs (usually the analysis date). Can be
-	 *            null
-	 * @param name the name of the collection
-	 * @param nucleusType the class of nucleus to be held
-	 */
-	public DefaultCellCollection(File folder, @Nullable String outputFolder, 
-			@Nullable String name, RuleSetCollection ruleSets) {
-		this(folder, outputFolder, name, ruleSets, java.util.UUID.randomUUID());
-	}
 
 	/**
-	 * Constructor with non-random id. Use only when copying an old collection.
-	 * Can cause ID conflicts!
+	 * Constructor
 	 * 
-	 * @param folder the folder of images
-	 * @param outputFolder a name for the outputs (usually the analysis date). Can be
-	 *            null
+	 * @param ruleSets the rules used to identify landmarks
 	 * @param name the name of the collection
-	 * @param nucleusClass the class of nucleus to be held
 	 * @param id specify an id for the collection, rather than generating
-	 *            randomly.
+	 *            randomly. Leave null to use a random id
 	 */
-	public DefaultCellCollection(File folder, @Nullable String outputFolder, @Nullable String name, 
-			RuleSetCollection ruleSets, UUID id) {
+	public DefaultCellCollection(@NonNull RuleSetCollection ruleSets,  
+			@Nullable String name, 
+			@Nullable UUID id) {
 
-		this.uuid = id;
-		this.folder = folder;
-		this.outputFolder = outputFolder;
-		this.name = name == null ? folder.getName() : name;// if name is null, use the image folder name
-
+		this.uuid = id==null ? UUID.randomUUID() : id;
+		this.name = name;
 		this.ruleSets = ruleSets;
 	}
 
@@ -190,13 +161,13 @@ public class DefaultCellCollection implements ICellCollection {
 	 * @param name
 	 */
 	public DefaultCellCollection(ICellCollection template, String name) {
-		this(template.getFolder(), template.getOutputFolderName(), name, template.getRuleSetCollection());
+		this(template.getRuleSetCollection(), name, null);
 	}
 	
 
 	@Override
 	public ICellCollection duplicate() {
-		DefaultCellCollection result = new DefaultCellCollection(folder, outputFolder, name, ruleSets, uuid);
+		DefaultCellCollection result = new DefaultCellCollection(ruleSets, name, uuid);
 		
 		for(ICell c : this)
 			result.addCell(c.duplicate());
@@ -440,29 +411,6 @@ public class DefaultCellCollection implements ICellCollection {
 	@Override
 	public IProfileCollection getProfileCollection() {
 		return profileCollection;
-	}
-
-	@Override @Deprecated
-	public File getFolder() {
-		return folder;
-	}
-
-	@Override
-	public String getOutputFolderName() {
-		return outputFolder;
-	}
-
-	@Override @Deprecated
-	public File getOutputFolder() {
-		if (outputFolder == null)
-			return getFolder();
-		return new File(this.getFolder(), outputFolder);
-	}
-
-	@Override
-	public void setOutputFolder(@NonNull File folder) {
-		this.folder = folder;
-		this.outputFolder = null;
 	}
 
 	@Override
@@ -1068,7 +1016,7 @@ public class DefaultCellCollection implements ICellCollection {
 	public void setSourceFolder(@NonNull File newFolder) {
 		if(!newFolder.exists())
 			return;   
-		folder = newFolder;
+
 		cells.stream()
 		.flatMap(c->c.getNuclei().stream())
 		.forEach(n->{
@@ -1315,10 +1263,8 @@ public class DefaultCellCollection implements ICellCollection {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((consensusNucleus == null) ? 0 : consensusNucleus.hashCode());
-		result = prime * result + ((folder == null) ? 0 : folder.hashCode());
 		result = prime * result + ((cells == null) ? 0 : cells.hashCode());
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		result = prime * result + ((outputFolder == null) ? 0 : outputFolder.hashCode());
 		result = prime * result + ((profileCollection == null) ? 0 : profileCollection.hashCode());
 		result = prime * result + ((ruleSets == null) ? 0 : ruleSets.hashCode());
 		result = prime * result + ((signalGroups == null) ? 0 : signalGroups.hashCode());
@@ -1340,11 +1286,6 @@ public class DefaultCellCollection implements ICellCollection {
 				return false;
 		} else if (!consensusNucleus.equals(other.consensusNucleus))
 			return false;
-		if (folder == null) {
-			if (other.folder != null)
-				return false;
-		} else if (!folder.equals(other.folder))
-			return false;
 		if (cells == null) {
 			if (other.cells != null)
 				return false;
@@ -1354,11 +1295,6 @@ public class DefaultCellCollection implements ICellCollection {
 			if (other.name != null)
 				return false;
 		} else if (!name.equals(other.name))
-			return false;
-		if (outputFolder == null) {
-			if (other.outputFolder != null)
-				return false;
-		} else if (!outputFolder.equals(other.outputFolder))
 			return false;
 		if (profileCollection == null) {
 			if (other.profileCollection != null)

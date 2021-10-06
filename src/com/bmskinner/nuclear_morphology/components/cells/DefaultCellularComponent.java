@@ -246,7 +246,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
      * @param e the XML element containing the data.
      */
     protected DefaultCellularComponent(Element e) {
-    	id = UUID.fromString(e.getChildText("Id"));
+    	id = UUID.fromString(e.getAttributeValue("id"));
     	
     	String[] posString = e.getChildText("Position")
     			.replace("[", "")
@@ -264,7 +264,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     	originalCentreOfMass = IPoint.makeNew(Float.parseFloat(comString2[0]), Float.parseFloat(comString2[1]));
 
     	// Add measurements
-    	for(Element el : e.getChild("Measurements").getChildren("Measurement")) {
+    	for(Element el : e.getChildren("Measurement")) {
     		Measurement m = Measurement.of(el.getAttributeValue("name"));
     		statistics.put(m, Double.parseDouble(el.getText()));
     	}
@@ -1196,20 +1196,17 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     
     @Override
 	public Element toXmlElement() {
-    	Element e = new Element("Component");
+    	Element e = new Element("Component").setAttribute("id", id.toString());
     	
-    	e.addContent(new Element("Id").setText(id.toString()));
     	e.addContent(new Element("Position").setText(Arrays.toString(position)));
     	e.addContent(new Element("CentreOfMass").setText(centreOfMass.getX()+","+centreOfMass.getY()));
     	e.addContent(new Element("OriginalCentreOfMass").setText(originalCentreOfMass.getX()+","+originalCentreOfMass.getY()));
     	
-    	Element stats = new Element("Measurements");
     	for(Entry<Measurement, Double> entry : statistics.entrySet()) {
-    		stats.addContent(new Element("Measurement")
+    		e.addContent(new Element("Measurement")
     				.setAttribute("name", entry.getKey().toString())
     				.setText(entry.getValue().toString()));
     	}
-    	e.addContent(stats);
     	
     	e.addContent(new Element("SourceFile").setText(sourceFile.getAbsolutePath()));
     	e.addContent(new Element("Channel").setText(String.valueOf(channel)));

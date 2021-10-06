@@ -24,14 +24,17 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.Map.Entry;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.jdom2.Element;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.io.XmlSerializable;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
@@ -71,6 +74,28 @@ public class DefaultProfileCollection implements IProfileCollection {
         indexes.put(Landmark.REFERENCE_POINT, ZERO_INDEX);
     }
     
+    /**
+     * Construct from an XML element. Use for 
+     * unmarshalling. The element should conform
+     * to the specification in {@link XmlSerializable}.
+     * @param e the XML element containing the data.
+     */
+    public DefaultProfileCollection(Element e) {
+    	for(Element el : e.getChildren("Landmark")){
+    		indexes.put(Landmark.of(el.getAttribute("name").getValue(), 
+					LandmarkType.valueOf(el.getAttribute("type").getValue())), 
+					Integer.parseInt(el.getText()));
+		}
+		
+    	segments = new IProfileSegment[e.getChildren("Segment").size()];
+    	int i=0;
+		for(Element el : e.getChildren("Segment")){
+			segments[i++] = new DefaultProfileSegment(el);
+		}
+		
+		length = segments[0].length();
+    }
+
 	@Override
 	public IProfileCollection duplicate() {
 		DefaultProfileCollection pc = new DefaultProfileCollection();
@@ -629,6 +654,24 @@ public class DefaultProfileCollection implements IProfileCollection {
 	}
 
 
+    
+	@Override
+	public Element toXmlElement() {
+		Element e = new Element("ProfileCollection");
+		
+		for(IProfileSegment s : segments) {
+			e.addContent(s.toXmlElement());
+		}
+		
+		for(Entry<Landmark, Integer> entry : indexes.entrySet()) {
+			e.addContent(new Element("Landmark")
+					.setAttribute("name", entry.getKey().toString())
+					.setAttribute("type", entry.getKey().type().toString())
+					.setText(String.valueOf(entry.getValue())));
+		}
+		
+		return e;
+	}
 
 	/**
      * The cache for profiles
