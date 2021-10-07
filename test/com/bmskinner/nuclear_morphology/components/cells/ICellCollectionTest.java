@@ -34,6 +34,8 @@ import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.datasets.VirtualDataset;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
+import com.bmskinner.nuclear_morphology.components.measure.Measurement;
+import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
@@ -77,8 +79,10 @@ public class ICellCollectionTest extends ComponentTester {
 	 * @throws Exception 
 	 */
 	public static ICellCollection createInstance(Class<? extends ICellCollection> source) throws Exception {
-		IAnalysisDataset d = new TestDatasetBuilder(RNG_SEED).cellCount(N_CELLS)
+		IAnalysisDataset d = new TestDatasetBuilder(RNG_SEED)
+				.cellCount(N_CELLS)
 				.ofType(RuleSetCollection.roundRuleSetCollection())
+				.withMaxSizeVariation(10)
 				.randomOffsetProfiles(true)
 				.addSignalsInChannel(0)
 				.segmented().build();
@@ -87,13 +91,8 @@ public class ICellCollectionTest extends ComponentTester {
 		}
 		
 		if(source==VirtualDataset.class){
-			VirtualDataset v = new VirtualDataset(d,TestDatasetBuilder.TEST_DATASET_NAME, TestDatasetBuilder.TEST_DATASET_UUID);
-			v.addAll(d.getCollection().getCells());
-			v.createProfileCollection();
-			d.getCollection().getProfileManager().copyCollectionOffsets(v);
-			for(ICell c : d.getCollection().getCells()) {
-				v.addCell(c);
-			}
+			VirtualDataset v = new VirtualDataset(d,TestDatasetBuilder.TEST_DATASET_NAME, 
+					TestDatasetBuilder.TEST_DATASET_UUID, d.getCollection());
 			return v;
 		}
 
@@ -317,11 +316,6 @@ public class ICellCollectionTest extends ComponentTester {
 	}
 	
 	@Test
-	public void testGetMedianArrayLength() {
-		assertEquals(178, collection.getMedianArrayLength());
-	}
-	
-	@Test
 	public void testSetConsensus() throws Exception {
 		// Run consensus averaging on the collection. Wrap in a new dataset. 
 		IAnalysisDataset d = new DefaultAnalysisDataset(collection, 
@@ -369,6 +363,22 @@ public class ICellCollectionTest extends ComponentTester {
 		}
 		
 	}
-
+		
+	@Test 
+	public void testFilterCollection() throws Exception {
+		double medianArea = collection.getMedian(Measurement.AREA, CellularComponent.NUCLEUS,
+				MeasurementScale.PIXELS);
+		double minArea = collection.getMin(Measurement.AREA, CellularComponent.NUCLEUS,
+				MeasurementScale.PIXELS);
+		System.out.println(minArea);
+		System.out.println(medianArea);
+		System.out.println(collection.size());
+		
+		ICellCollection c = collection.filterCollection(Measurement.AREA, MeasurementScale.PIXELS, 
+				medianArea, medianArea*10);
+		System.out.println(c.size());
+		
+		assertTrue("Filtering in "+source.getSimpleName(), c.getNucleusCount()<collection.getNucleusCount());
+	}
 
 }

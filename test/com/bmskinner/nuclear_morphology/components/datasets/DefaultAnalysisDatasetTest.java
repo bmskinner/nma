@@ -40,6 +40,7 @@ import com.bmskinner.nuclear_morphology.ComponentTester;
 import com.bmskinner.nuclear_morphology.TestDatasetBuilder;
 import com.bmskinner.nuclear_morphology.TestResources;
 import com.bmskinner.nuclear_morphology.components.Version;
+import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
@@ -71,39 +72,44 @@ public class DefaultAnalysisDatasetTest extends ComponentTester {
 				.segmented().build();
     }
 
-//    @Test
-//    public void testDuplicate() throws Exception {
-//    	IAnalysisDataset dup = d.duplicate();
-//    	testDuplicatesByField(d, dup);
-//    }
+    @Test
+    public void testDuplicate() throws Exception {
+    	IAnalysisDataset dup = d.copy();
+    	testDuplicatesByField(d, dup);
+    }
 
   
     @Test
-    public void testAddChildCollection() {
+    public void testAddChildCollection() throws Exception {
 
-    	int defaultArea = TestDatasetBuilder.DEFAULT_BASE_HEIGHT * TestDatasetBuilder.DEFAULT_BASE_WIDTH;
+    	double defaultArea = d.getCollection().getMedian(Measurement.AREA, CellularComponent.NUCLEUS, MeasurementScale.PIXELS);
     	
         ICellCollection c = d.getCollection().filterCollection(Measurement.AREA, MeasurementScale.PIXELS, defaultArea, defaultArea*2);
         UUID id = c.getId();
         
-        d.addChildCollection(c);        
-        assertEquals(N_CHILD_DATASETS+1, d.getChildCount());
-        assertEquals(c, d.getChildDataset(id).getCollection());
+        assertTrue("Filtered collection should contain cells", c.size()>0);
+        d.addChildCollection(c);  
+        
+        assertEquals("Dataset should have child count of", N_CHILD_DATASETS+1, d.getChildCount());
+        
+        assertTrue("New child collection should be present", d.hasDirectChild(id));
     }
 
     @Test
-    public void testAddChildDataset() {
-    	int defaultArea = TestDatasetBuilder.DEFAULT_BASE_HEIGHT * TestDatasetBuilder.DEFAULT_BASE_WIDTH;
-        ICellCollection c = d.getCollection().filterCollection(Measurement.AREA, MeasurementScale.PIXELS, defaultArea, defaultArea*2);
+    public void testAddChildDataset() throws Exception {
+    	double defaultArea = d.getCollection().getMedian(Measurement.AREA, CellularComponent.NUCLEUS, MeasurementScale.PIXELS);
+    	ICellCollection c = d.getCollection().filterCollection(Measurement.AREA, MeasurementScale.PIXELS, defaultArea, defaultArea*2);
         IAnalysisDataset ch = new DefaultAnalysisDataset(c, new File(TestDatasetBuilder.TEST_DATASET_IMAGE_FOLDER));
         UUID id = ch.getId();
-        
+                
+        assertTrue("Filtered collection should contain cells", c.size()>0);
         d.addChildDataset(ch);
-        assertEquals(N_CHILD_DATASETS+1, d.getChildCount());
-        assertEquals(ch, d.getChildDataset(id));
+        
+        assertEquals("Dataset should have child count of", N_CHILD_DATASETS+1, d.getChildCount());
+        
+        assertTrue("New child collection should be present", d.hasDirectChild(id));
     }
-
-  
+      
     @Test
     public void testSetSavePath() {
         File f = new File(TestResources.DATASET_FOLDER+"Test.nmd");

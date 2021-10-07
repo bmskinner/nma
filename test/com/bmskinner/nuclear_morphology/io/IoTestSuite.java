@@ -18,9 +18,10 @@ import com.bmskinner.nuclear_morphology.io.xml.IoXmlTestSuite;
 	IoConversionTestSuite.class,
 	IoXmlTestSuite.class,
 	DatasetMergeTest.class, 
+	DatasetStatsExporterTest.class,
+	UpdateCheckerTest.class,
 	WorkspaceExporterTest.class,
-	WorkspaceImporterTest.class,
-	UpdateCheckerTest.class
+	WorkspaceImporterTest.class
 })
 public class IoTestSuite {
 

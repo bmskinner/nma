@@ -129,6 +129,23 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
 		this.parentDataset = parent;
 	}
 	
+	/**
+	 * Construct from a parentDataset.getCollection() dataset (of which this will be a child) and a
+	 * cell collection
+	 * 
+	 * @param parent the parent dataset to this
+	 * @param name the name for this new dataset
+	 * @param id the id for the this dataset. Random if null
+	 * @param cells the collection from which to copy cells
+	 * @throws ProfileException 
+	 */
+	public VirtualDataset(@NonNull IAnalysisDataset parent, String name, @Nullable UUID id, ICellCollection cells) throws ProfileException {
+		this(parent, name, id);
+		addAll(cells);
+		createProfileCollection();
+		cells.getProfileManager().copyCollectionOffsets(this);
+	}
+	
 	public VirtualDataset(@NonNull Element e) throws ComponentCreationException {
 		super(e);
 		uuid = UUID.fromString(e.getAttributeValue("id"));
@@ -147,6 +164,28 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
 			UUID id = UUID.fromString(el.getAttributeValue("id"));
 			IShellResult s = new DefaultShellResult(el);
 			shellResults.put(id, s);
+		}
+	}
+	
+	/**
+	 * Construct from an existing dataset. Used internally
+	 * for duplication.
+	 * @param v
+	 */
+	private VirtualDataset(VirtualDataset v) {
+		super();
+		uuid = v.uuid;
+		name = v.name;
+		
+		if(v.analysisOptions!=null)
+			analysisOptions = v.analysisOptions.duplicate();
+		cellIDs.addAll(v.cellIDs);
+		profileCollection = v.profileCollection.duplicate();
+		parentDataset = v.parentDataset;
+		if(v.consensusNucleus!=null)
+			consensusNucleus = v.consensusNucleus.duplicateConsensus();
+		for(Entry<UUID, IShellResult> e : v.shellResults.entrySet()) {
+			shellResults.put(e.getKey(), e.getValue().duplicate());
 		}
 	}
 	
@@ -704,21 +743,19 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
 
         String newName = "Filtered_" + predicate.toString();
 
-        ICellCollection subCollection = new DefaultCellCollection(this.getCollection(), newName);
+        ICellCollection subCollection = new VirtualDataset(this, newName);
 
         List<ICell> list = getCells().stream().filter(predicate).collect(Collectors.toList());
 
         LOGGER.finest( "Adding cells to new collection");
         for (ICell cell : list)
-            subCollection.addCell(new DefaultCell(cell));
+            subCollection.addCell(cell.duplicate());
 
         if (subCollection.size() == 0) {
             LOGGER.warning("No cells in collection");
         } else {
         	try {
-
-                // TODO - this fails on converted collections from (at least) 1.13.0
-                // with no profiles in aggregate
+        		subCollection.createProfileCollection();
                 this.getProfileManager().copyCollectionOffsets(subCollection);
                 this.getSignalManager().copySignalGroups(subCollection);
 
@@ -1165,12 +1202,12 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
 		String newLine = System.getProperty("line.separator");
 
 		StringBuilder b = new StringBuilder("Collection:" + getName() + newLine)
+				.append("Class: "+this.getClass().getSimpleName()+newLine)
 				.append("Nuclei: " + this.getNucleusCount() + newLine)
+				.append("Parent dataset: "+parentDataset.getCollection().getName()+newLine)
 				.append("Profile collections:" + newLine)
-				.append("parentDataset.getCollection(): "+parentDataset.getCollection().getName());
+				.append(profileCollection.toString()+newLine);
 
-		IProfileCollection pc = this.getProfileCollection();
-		b.append(pc.toString() + newLine);
 
 		if(this.hasConsensus()){
 			b.append("Consensus:" + newLine);
@@ -1193,7 +1230,8 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
         // If the name is the same as this dataset, or one of the child datasets, 
         // apply a suffix
         if(getName().equals(dataset.getName()) || 
-        		childDatasets.stream().map(IAnalysisDataset::getName).anyMatch(s->s.equals(dataset.getName()))) {
+        		childDatasets.stream().map(IAnalysisDataset::getName)
+        		.anyMatch(s->s.equals(dataset.getName()))) {
         	String newName = chooseSuffix(dataset.getName());
         	dataset.setName(newName);
         }
@@ -1490,14 +1528,12 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
 
 	@Override
 	public ICellCollection duplicate() {
-		// TODO Auto-generated method stub
-		return null;
+		return new VirtualDataset(this);
 	}
 
 	@Override
 	public IAnalysisDataset copy() throws Exception {
-		// TODO Auto-generated method stub
-		return null;
+		return new VirtualDataset(this);
 	}
 
 

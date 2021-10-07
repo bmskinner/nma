@@ -290,7 +290,7 @@ public class TestImageDatasetCreator {
         if(xmlFile.exists())
         	xmlFile.delete();
         assertFalse("Expecting xml file to be deleted: "+xmlFile.getAbsolutePath(), xmlFile.exists());
-        XMLWriter.writeXML(d.toXmlElement(), xmlFile);
+        XMLWriter.writeXML(d.getAnalysisOptions().get().toXmlElement(), xmlFile);
         assertTrue("Expecting xml exported to "+xmlFile.getAbsolutePath(), xmlFile.exists());
         
     }

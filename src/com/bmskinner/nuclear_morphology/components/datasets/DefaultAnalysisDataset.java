@@ -75,7 +75,7 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
      * The ids of datasets merged to create this dataset. The IDs must be
      * present in otherCollections.
      */
-    private Set<UUID> mergeSources = new HashSet<>(0);
+    private Set<UUID> mergeSources = new HashSet<>();
 
     private File savePath; // the file to save this dataset to
 
@@ -144,14 +144,12 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 
     @Override
 	public IAnalysisDataset copy() throws Exception {
-    	DefaultAnalysisDataset result = new DefaultAnalysisDataset(cellCollection, savePath);
+    	DefaultAnalysisDataset result = new DefaultAnalysisDataset(cellCollection.duplicate(), savePath);
         
         result.setAnalysisOptions(analysisOptions.duplicate());
-
-        result.cellCollection = cellCollection.duplicate();
         
         // copy child datasets
-        for(IAnalysisDataset child : this.getAllChildDatasets())
+        for(IAnalysisDataset child : this.getChildDatasets())
         	result.addChildDataset(child.copy());
         
         // copy merge sources
@@ -181,14 +179,14 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 
     @Override
     public void addChildCollection(@NonNull final ICellCollection collection) {
-    	addChildDataset(new VirtualDataset(this, collection.getName(), collection.getId()));
+    	VirtualDataset v = new VirtualDataset(this, collection.getName(), collection.getId());
+    	v.addAll(collection.getCells());
+    	addChildDataset(v);
     }
 
     @Override
     public void addChildDataset(@NonNull final IAnalysisDataset dataset) {
-        dataset.setRoot(false);
-        
-        
+
         if(dataset instanceof VirtualDataset) {
         	// Ensure no duplicate dataset names
         	// If the name is the same as this dataset, or one of the child datasets, 
@@ -198,8 +196,8 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
         		String newName = chooseSuffix(dataset.getName());
         		dataset.setName(newName);
         	}
-        	childDatasets.add(dataset);
         }
+    	childDatasets.add(dataset);
     }
     
     /**

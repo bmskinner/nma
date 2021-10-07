@@ -77,7 +77,6 @@ import com.bmskinner.nuclear_morphology.components.signals.DefaultSignalGroup;
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.signals.SignalManager;
-import com.bmskinner.nuclear_morphology.core.DatasetListManager;
 import com.bmskinner.nuclear_morphology.io.XmlSerializable;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
@@ -918,7 +917,7 @@ public class DefaultCellCollection implements ICellCollection {
 		List<ICell> list = cells.parallelStream().filter(predicate).collect(Collectors.toList());
 
 		for (ICell cell : list)
-			subCollection.addCell(new DefaultCell(cell));
+			subCollection.addCell(cell);
 
 		if (subCollection.size() == 0) {
 			LOGGER.warning("No cells in collection");
@@ -926,6 +925,7 @@ public class DefaultCellCollection implements ICellCollection {
 		}
 
 		try {
+			subCollection.createProfileCollection();
 			this.getProfileManager().copyCollectionOffsets(subCollection);
 			this.getSignalManager().copySignalGroups(subCollection);
 
@@ -1236,12 +1236,10 @@ public class DefaultCellCollection implements ICellCollection {
 		String newLine = System.getProperty("line.separator");
 
 		StringBuilder b = new StringBuilder("Collection:" + getName() + newLine)
-				.append("Collection:" + getName() + newLine)
+				.append("Class: "+this.getClass().getSimpleName()+newLine)
 				.append("Nuclei: " + this.getNucleusCount() + newLine)
-				.append("Profile collections:" + newLine);
-
-		IProfileCollection pc = this.getProfileCollection();
-		b.append(pc.toString() + newLine);
+				.append("Profile collections:" + newLine)
+				.append(profileCollection.toString()+newLine);
 
 		b.append(this.ruleSets.toString() + newLine);
 

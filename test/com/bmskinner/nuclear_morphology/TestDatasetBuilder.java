@@ -17,6 +17,7 @@ import com.bmskinner.nuclear_morphology.components.datasets.DefaultAnalysisDatas
 import com.bmskinner.nuclear_morphology.components.datasets.DefaultCellCollection;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
+import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
@@ -202,6 +203,13 @@ public class TestDatasetBuilder {
 		return this;
 	}
 	
+	/**
+	 * Set the maximum amount of variation in size of 
+	 * the nuclei
+	 * Default value {@link #DEFAULT_VARIATION}.
+	 * @param i the maximum variation in size
+	 * @return this builder
+	 */
 	public TestDatasetBuilder withMaxSizeVariation(int i) {
 		maxVariation = i;
 		return this;
@@ -354,7 +362,8 @@ public class TestDatasetBuilder {
 			int borderLength = (width+height)*2;
 			int borderOffset = randomOffsetStart ? (int) (rng.nextDouble()*borderLength) : fixedStartOffset;
 			
-			ICell cell = createCell(width, height, degreeRot, borderOffset);		
+			ICell cell = createCell(width, height, degreeRot, borderOffset);	
+			cell.getPrimaryNucleus().setStatistic(Measurement.AREA, width*height);
 			collection.addCell(cell);
 			
 			
