@@ -105,7 +105,7 @@ public class FishRemappingProber extends IntegratedImageProber {
 
                 dataset.addChildCollection(sub);
 
-                final IAnalysisDataset subDataset = dataset.getChildDataset(sub.getID());
+                final IAnalysisDataset subDataset = dataset.getChildDataset(sub.getId());
                 newList.add(subDataset);
             }
         }

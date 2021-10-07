@@ -49,7 +49,6 @@ import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.datasets.IClusterGroup;
-import com.bmskinner.nuclear_morphology.components.datasets.VirtualCellCollection;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.options.ClusteringMethod;
@@ -60,6 +59,7 @@ import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.profiles.UnsegmentedProfileException;
+import com.bmskinner.nuclear_morphology.core.DatasetListManager;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.io.Io;
@@ -337,12 +337,8 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
         } else {
         	// if this is a child of merged datasets, get the root.
         	if(!dataset.isRoot()){
-        		ICellCollection c = dataset.getCollection();
-        		if(c.isVirtual()){
-        			VirtualCellCollection v = (VirtualCellCollection)c;
-        			return createAnalysisParametersMergeColumn(v.getRootParent());
-        		}
-        		
+        		return createAnalysisParametersMergeColumn(DatasetListManager.getInstance().getRootParent(dataset));
+
         	} else {
         		return makeStringList(Labels.NA, 9);
         	}

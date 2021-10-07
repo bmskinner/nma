@@ -101,7 +101,7 @@ public interface ICellCollection
      * 
      * @return
      */
-    UUID getID();
+    UUID getId();
 
     /**
      * Get the cells in the collection
@@ -368,12 +368,6 @@ public interface ICellCollection
      * @return
      */
     RuleSetCollection getRuleSetCollection();
-
-    /**
-     * Force a recalculation of vertically oriented nuclei
-     */
-    @Deprecated // since 1.15.0 vertical nuclei are calculated de novo on each call
-    void updateVerticalNuclei();
 
     /**
      * Update the source image folder to the given directory for each cell

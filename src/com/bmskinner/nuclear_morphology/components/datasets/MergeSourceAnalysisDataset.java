@@ -43,6 +43,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  * @since 1.13.3
  *
  */
+@Deprecated
 public class MergeSourceAnalysisDataset extends AbstractAnalysisDataset implements IAnalysisDataset {
 	
 	private static final Logger LOGGER = Logger.getLogger(MergeSourceAnalysisDataset.class.getName());
@@ -61,9 +62,7 @@ public class MergeSourceAnalysisDataset extends AbstractAnalysisDataset implemen
      * @param mergeSource the original dataset which was merged
      */
     public MergeSourceAnalysisDataset(IAnalysisDataset merged, IAnalysisDataset mergeSource) {
-        super(new VirtualCellCollection(merged, mergeSource.getName(), mergeSource.getId(),
-                mergeSource.getCollection())
-        );
+        super();
 
         this.parentDataset = merged;
         
@@ -91,7 +90,7 @@ public class MergeSourceAnalysisDataset extends AbstractAnalysisDataset implemen
     }
 
     @Override
-    public IAnalysisDataset duplicate() throws Exception {
+    public IAnalysisDataset copy() throws Exception {
         throw new Exception("Not yet implemented");
     }
 

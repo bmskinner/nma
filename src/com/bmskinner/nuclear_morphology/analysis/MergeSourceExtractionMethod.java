@@ -108,7 +108,7 @@ public class MergeSourceExtractionMethod extends MultipleDatasetAnalysisMethod {
     			.getFile(HashOptions.DETECTION_FOLDER);
     	
     	ICellCollection newCollection = new DefaultCellCollection(
-    			templateCollection.getRuleSetCollection(), templateCollection.getName(), templateCollection.getID());
+    			templateCollection.getRuleSetCollection(), templateCollection.getName(), templateCollection.getId());
 
     	templateCollection.getCells().forEach(c->newCollection.addCell(c.duplicate()));
 

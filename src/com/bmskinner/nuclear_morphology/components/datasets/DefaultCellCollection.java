@@ -191,11 +191,11 @@ public class DefaultCellCollection implements ICellCollection {
 			signalGroups.add(new DefaultSignalGroup(el));
 
 		ruleSets = new RuleSetCollection(e.getChild("RuleSetCollection"));
-		try {
-			createProfileCollection();
-		} catch (ProfileException e1) {
-			throw new ComponentCreationException("Unable to generate profiles", e1);
-		}
+//		try {
+//			createProfileCollection();
+//		} catch (ProfileException e1) {
+//			throw new ComponentCreationException("Unable to generate profiles", e1);
+//		}
 	}
 	
 
@@ -246,7 +246,7 @@ public class DefaultCellCollection implements ICellCollection {
 	}
 
 	@Override
-	public UUID getID() {
+	public UUID getId() {
 		return this.uuid;
 	}
 
@@ -401,11 +401,6 @@ public class DefaultCellCollection implements ICellCollection {
 		}
 		return Optional.empty();
 	}
-
-//	@Override
-//	public NucleusType getNucleusType() {
-//		return this.nucleusType;
-//	}
 
 	/*  METHODS IMPLEMENTING THE REFOLDABLE INTERFACE  */
 
@@ -1039,20 +1034,14 @@ public class DefaultCellCollection implements ICellCollection {
 	private ICellCollection chooseNewCollectionType(@NonNull ICellCollection other, String newName) {
 
 		// Decide if the other collection is also a child of the same root parent
-		IAnalysisDataset rootThis  = DatasetListManager.getInstance().getRootParent(this);
-		IAnalysisDataset rootOther = DatasetListManager.getInstance().getRootParent(other);
+//		IAnalysisDataset rootThis  = DatasetListManager.getInstance().getRootParent(this);
+//		IAnalysisDataset rootOther = DatasetListManager.getInstance().getRootParent(other);
 		
 		// If the two datasets have different root parents, return a new real collection
-		return rootThis==rootOther ? new VirtualCellCollection(rootThis, newName)
-								   : new DefaultCellCollection(this, newName);
-	}
-
-
-	@Override
-	public void updateVerticalNuclei() {
-		getNuclei().parallelStream().forEach(Nucleus::updateDependentStats);
-		statsCache.clear(Measurement.BODY_WIDTH, CellularComponent.NUCLEUS, null);
-		statsCache.clear(Measurement.HOOK_LENGTH, CellularComponent.NUCLEUS, null);
+//		return rootThis==rootOther ? new VirtualCellCollection(rootThis, newName)
+//								   : new DefaultCellCollection(this, newName);
+		
+		return new VirtualDataset(this, newName);
 	}
 
 	@Override
@@ -1147,7 +1136,7 @@ public class DefaultCellCollection implements ICellCollection {
 	 */
 	@Override
 	public void removeSignalGroup(@NonNull UUID id) {
-		this.signalGroups.remove(id);
+		signalGroups.removeIf(s->s.getId().equals(id));
         cells.stream().flatMap(c->c.getNuclei().stream())
         .forEach(n->n.getSignalCollection().removeSignals(id));
 

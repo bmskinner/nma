@@ -20,7 +20,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Logger;
 
@@ -32,10 +31,9 @@ import com.bmskinner.nuclear_morphology.analysis.SingleDatasetAnalysisMethod;
 import com.bmskinner.nuclear_morphology.components.UnavailableBorderPointException;
 import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
-import com.bmskinner.nuclear_morphology.components.datasets.ChildAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
-import com.bmskinner.nuclear_morphology.components.datasets.VirtualCellCollection;
+import com.bmskinner.nuclear_morphology.components.datasets.VirtualDataset;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
@@ -174,7 +172,7 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
             LOGGER.finer( "Processing " + collection.getName());
             processSubPopulation(collection);
             LOGGER.finer( "Processed " + collection.getName());
-            list.add(dataset.getChildDataset(collection.getID()));
+            list.add(dataset.getChildDataset(collection.getId()));
         }
 
         LOGGER.fine("Finished processing sub-populations");
@@ -190,7 +188,8 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
         try {
             LOGGER.finer( "Creating new analysis dataset for " + collection.getName());
 
-            IAnalysisDataset subDataset = new ChildAnalysisDataset(dataset, collection);
+            VirtualDataset subDataset = new VirtualDataset(dataset, collection.getName());
+            subDataset.addAll(collection);
 
             dataset.addChildDataset(subDataset);
             dataset.getCollection().getProfileManager().copyCollectionOffsets(collection);
@@ -225,12 +224,9 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
 		
 		if (!list.isEmpty()) {
 		    LOGGER.fine("Signal group " + group.getGroupName() + ": found nuclei with signals");
-		    ICellCollection listCollection = new VirtualCellCollection(dataset,
-		            group.getGroupName() + "_with_signals");
-
-		    for (ICell c : list) {
-		        listCollection.addCell(c);
-		    }
+		    ICellCollection listCollection = new VirtualDataset(dataset,
+		            group.getGroupName() + "_with_signals", UUID.randomUUID());
+		    listCollection.addAll(list);
 		    signalPopulations.add(listCollection);
 		}
         return signalPopulations;

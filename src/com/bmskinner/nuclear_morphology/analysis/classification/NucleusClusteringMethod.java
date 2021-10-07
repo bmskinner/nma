@@ -35,14 +35,13 @@ import com.bmskinner.nuclear_morphology.components.datasets.DefaultClusterGroup;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.datasets.IClusterGroup;
-import com.bmskinner.nuclear_morphology.components.datasets.VirtualCellCollection;
+import com.bmskinner.nuclear_morphology.components.datasets.VirtualDataset;
 import com.bmskinner.nuclear_morphology.components.measure.DefaultMeasurement;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.measure.MeasurementDimension;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.ClusteringMethod;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
-import com.bmskinner.nuclear_morphology.components.options.HierarchicalClusterMethod;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import weka.clusterers.Clusterer;
@@ -114,7 +113,7 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
 
                 // attach the clusters to their parent collection
                 LOGGER.fine("Cluster " + cluster + ": " + c.size() + " nuclei");
-                IAnalysisDataset clusterDataset = dataset.getChildDataset(c.getID());
+                IAnalysisDataset clusterDataset = dataset.getChildDataset(c.getId());
                 clusterDataset.setRoot(false);
 
                 // set shared counts
@@ -238,9 +237,7 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
 		LOGGER.fine("Clustering found "+numberOfClusters+" clusters");
 
     	for (int i = 0; i <numberOfClusters ; i++) {
-    		ICellCollection clusterCollection = new VirtualCellCollection(dataset, "Cluster_" + i);
-
-    		clusterCollection.setName("Cluster_" + i);
+    		ICellCollection clusterCollection = new VirtualDataset(dataset, "Cluster_" + i);
     		clusterMap.put(i, clusterCollection);
     	}
 

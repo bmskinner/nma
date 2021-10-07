@@ -54,7 +54,7 @@ import com.bmskinner.nuclear_morphology.components.datasets.DefaultClusterGroup;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.datasets.IClusterGroup;
-import com.bmskinner.nuclear_morphology.components.datasets.VirtualCellCollection;
+import com.bmskinner.nuclear_morphology.components.datasets.VirtualDataset;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
@@ -458,7 +458,7 @@ public class ClusterTreeDialog extends MessagingDialog {
 
         String newName = template.getName() + "_ManualCluster_" + clusterList.size();
         newName = checkName(clusterList.size());
-        ICellCollection clusterCollection = new VirtualCellCollection(dataset, newName);
+        ICellCollection clusterCollection = new VirtualDataset(dataset, newName);
 
         Tree tree = viewer.getTreePane().getTree();
 
@@ -497,7 +497,7 @@ public class ClusterTreeDialog extends MessagingDialog {
                     LOGGER.log(Loggable.STACK, "Error in offsetting", e);
                 }
 
-                IAnalysisDataset clusterDataset = dataset.getChildDataset(c.getID());
+                IAnalysisDataset clusterDataset = dataset.getChildDataset(c.getId());
 
                 list.add(clusterDataset);
             }

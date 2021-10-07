@@ -35,19 +35,20 @@ import com.bmskinner.nuclear_morphology.analysis.SingleDatasetAnalysisMethod;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.datasets.VirtualDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
-import com.bmskinner.nuclear_morphology.components.datasets.VirtualCellCollection;
+import com.bmskinner.nuclear_morphology.components.datasets.VirtualDataset;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
-import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
-import com.bmskinner.nuclear_morphology.components.signals.IShellResult;
-import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
+import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.signals.DefaultShellResult;
 import com.bmskinner.nuclear_morphology.components.signals.DefaultSignalGroup;
+import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
+import com.bmskinner.nuclear_morphology.components.signals.IShellResult;
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult.CountType;
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult.ShrinkType;
+import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
@@ -97,20 +98,20 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
         
         
         // If this is a child, and the parent already has the data, just copy it
-        if(collection instanceof VirtualCellCollection) {
-        	ICellCollection parent = ((VirtualCellCollection)collection).getParent().getCollection();
+        if(collection.isVirtual()) {
+        	IAnalysisDataset parent = ((VirtualDataset)collection).getParent().get();
         	for (UUID signalGroupId : collection.getSignalManager().getSignalGroupIDs()) {
-        		if(parent.getSignalGroup(signalGroupId).get().hasShellResult())
-					copyShellResults(signalGroupId, parent, collection);	
+        		if(parent.getCollection().getSignalGroup(signalGroupId).get().hasShellResult())
+					copyShellResults(signalGroupId, parent.getCollection(), collection);	
         	}
         	
-        	Optional<ISignalGroup> randomGroup = parent.getSignalGroup(IShellResult.RANDOM_SIGNAL_ID);
+        	Optional<ISignalGroup> randomGroup = parent.getCollection().getSignalGroup(IShellResult.RANDOM_SIGNAL_ID);
         	if(!randomGroup.isPresent()) {
         		LOGGER.warning("Parent dataset does not have shell results to copy");
         		return;
         	}
         	if(randomGroup.get().hasShellResult())
-        		copyShellResults(IShellResult.RANDOM_SIGNAL_ID, parent, collection);	        	
+        		copyShellResults(IShellResult.RANDOM_SIGNAL_ID, parent.getCollection(), collection);	        	
         	return;
         }
 

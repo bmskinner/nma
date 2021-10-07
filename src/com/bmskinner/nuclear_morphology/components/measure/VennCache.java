@@ -112,7 +112,7 @@ public class VennCache {
      *            the number of shared nuclei
      */
     public void addCount(@NonNull ICellCollection d, int i) {
-        Key k = new Key(d.getID());
+        Key k = new Key(d.getId());
         map.put(k, i);
     }
 
@@ -136,7 +136,7 @@ public class VennCache {
      * @return the shared count
      */
     public int getCount(@NonNull ICellCollection d) {
-        Key k = new Key(d.getID());
+        Key k = new Key(d.getId());
         return map.get(k);
     }
 
@@ -158,7 +158,7 @@ public class VennCache {
      *            the collection
      */
     public boolean hasCount(@NonNull ICellCollection d) {
-        Key k = new Key(d.getID());
+        Key k = new Key(d.getId());
         return map.containsKey(k);
     }
 

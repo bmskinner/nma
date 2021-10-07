@@ -43,7 +43,7 @@ import com.bmskinner.nuclear_morphology.utility.FileUtils;
  *
  */
 public interface IAnalysisDataset extends Serializable, XmlSerializable {
-
+	
     /**
      * Get the ID of the dataset
      * @return
@@ -57,7 +57,7 @@ public interface IAnalysisDataset extends Serializable, XmlSerializable {
      * @return
      * @throws Exception
      */
-    IAnalysisDataset duplicate() throws Exception;
+    IAnalysisDataset copy() throws Exception;
 
     /**
      * Get the software version used to create the dataset
@@ -269,7 +269,9 @@ public interface IAnalysisDataset extends Serializable, XmlSerializable {
     boolean hasAnalysisOptions();
 
     /**
-     * Set the analysis options for the dataset
+     * Set the analysis options for the dataset.
+     * Note that if this is a child dataset, the
+     * child and parent will lose sync
      * 
      * @param analysisOptions
      */

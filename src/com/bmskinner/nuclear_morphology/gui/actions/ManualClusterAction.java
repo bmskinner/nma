@@ -18,7 +18,7 @@ import com.bmskinner.nuclear_morphology.components.datasets.DefaultClusterGroup;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.datasets.IClusterGroup;
-import com.bmskinner.nuclear_morphology.components.datasets.VirtualCellCollection;
+import com.bmskinner.nuclear_morphology.components.datasets.VirtualDataset;
 import com.bmskinner.nuclear_morphology.components.options.ClusteringMethod;
 import com.bmskinner.nuclear_morphology.components.options.DefaultOptions;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
@@ -97,7 +97,7 @@ public class ManualClusterAction extends SingleDatasetResultAction {
         	 * @return
         	 */
         	public ICellCollection toCollection(String name){
-        		ICellCollection coll = new VirtualCellCollection(dataset, name);
+        		ICellCollection coll = new VirtualDataset(dataset, name);
         		
         		for(ICell c : selectedCells){
         			coll.addCell(c);
@@ -186,7 +186,7 @@ public class ManualClusterAction extends SingleDatasetResultAction {
                     dataset.addChildCollection(coll);
 
                     // attach the clusters to their parent collection
-                    IAnalysisDataset clusterDataset = dataset.getChildDataset(coll.getID());
+                    IAnalysisDataset clusterDataset = dataset.getChildDataset(coll.getId());
                     clusterDataset.setRoot(false);
 
                     // set shared counts

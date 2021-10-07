@@ -1,19 +1,3 @@
-/*******************************************************************************
- * Copyright (C) 2018 Ben Skinner
- * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.datasets;
 
 import java.awt.Color;
@@ -28,10 +12,10 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.Map.Entry;
 import java.util.function.Predicate;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -58,6 +42,8 @@ import com.bmskinner.nuclear_morphology.components.measure.StatsCache;
 import com.bmskinner.nuclear_morphology.components.nuclei.Consensus;
 import com.bmskinner.nuclear_morphology.components.nuclei.DefaultConsensusNucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
+import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.profiles.DefaultProfileCollection;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileCollection;
@@ -72,34 +58,30 @@ import com.bmskinner.nuclear_morphology.components.signals.DefaultSignalGroup;
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.signals.SignalManager;
-import com.bmskinner.nuclear_morphology.core.DatasetListManager;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 /**
- * This class provides access to child dataset ICell lists and statistics
- * 
+ * A combination cell collection and dataset used for storing child
+ * datasets and other sub-datasets
  * @author ben
- * @since 1.13.3
+ * @since 2.0.0
  *
  */
-public class VirtualCellCollection implements ICellCollection {
+public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysisDataset, ICellCollection {
 	
-	private static final Logger LOGGER = Logger.getLogger(VirtualCellCollection.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(VirtualDataset.class.getName());
 
     private static final long serialVersionUID = 1L;
-
-    /** the dataset this is a child of */
-    private final IAnalysisDataset parent;
-
-    /** the cells that belong to this collection */
-    private final Set<UUID> cellIDs = new HashSet<>(0);
-
+    
     /** the collection id */
     private final UUID uuid;
 
     /** the name of the collection */
     private String name;
+
+    /** the cells that belong to this collection */
+    private final Set<UUID> cellIDs = new HashSet<>(0);
 
     /** this holds the mapping of tail indexes etc in the median profile arrays */
     private IProfileCollection profileCollection = new DefaultProfileCollection();
@@ -108,9 +90,9 @@ public class VirtualCellCollection implements ICellCollection {
     private Consensus<Nucleus> consensusNucleus;
 
     /** Store shell results separately to allow separate shell analysis
-     * between parent and child datasets */
+     * between parentDataset.getCollection() and child datasets */
     private Map<UUID, IShellResult> shellResults = new HashMap<>(0);
-
+    
     /*
      * TRANSIENT FIELDS
      */
@@ -120,14 +102,38 @@ public class VirtualCellCollection implements ICellCollection {
     private transient ProfileManager profileManager = new ProfileManager(this);
     private transient SignalManager  signalManager  = new SignalManager(this);
     private transient StatsCache statsCache = new StatsCache();
-    
-    
-    public VirtualCellCollection(@NonNull Element e) throws ComponentCreationException {
-    	uuid = UUID.fromString(e.getAttributeValue("id"));
+	
+	/**
+	 * Construct from a parent dataset (of which this will be a child). The
+	 * new dataset will have a random UUID
+	 * 
+	 * @param parent the parent dataset to this
+	 * @param name the name for this new dataset
+	 */
+	public VirtualDataset(@NonNull IAnalysisDataset parent, String name) {
+		this(parent, name, null);
+	}
+	
+	/**
+	 * Construct from a parentDataset.getCollection() dataset (of which this will be a child) and a
+	 * cell collection
+	 * 
+	 * @param parent the parent dataset to this
+	 * @param name the name for this new dataset
+	 * @param id the id for the this dataset. Random if null
+	 */
+	public VirtualDataset(@NonNull IAnalysisDataset parent, String name, @Nullable UUID id) {
+		super();
+		this.uuid = id==null ? UUID.randomUUID() : id;
+		this.name = name;
+		this.parentDataset = parent;
+	}
+	
+	public VirtualDataset(@NonNull Element e) throws ComponentCreationException {
+		super(e);
+		uuid = UUID.fromString(e.getAttributeValue("id"));
 		name = e.getAttributeValue("name");
-		
-		parent = null; //TODO: add into serialization
-		
+				
 		profileCollection = new DefaultProfileCollection(e.getChild("ProfileCollection"));
 		
 		if(e.getChild("ConsensusNucleus")!=null)
@@ -142,14 +148,17 @@ public class VirtualCellCollection implements ICellCollection {
 			IShellResult s = new DefaultShellResult(el);
 			shellResults.put(id, s);
 		}
-    }
-    		
-    
+	}
+	
 	@Override
 	public Element toXmlElement() {
-		Element e = new Element("ChildCellCollection").setAttribute("id", uuid.toString()).setAttribute("name", name);
-		e.addContent(profileCollection.toXmlElement());
+		Element e = super.toXmlElement().setName("VirtualDataset")
+				.setAttribute("id", uuid.toString())
+				.setAttribute("name", name);
 		
+		// Collection content
+		e.addContent(profileCollection.toXmlElement());
+
 		if(consensusNucleus!=null)
 			e.addContent(consensusNucleus.toXmlElement());
 		
@@ -159,76 +168,16 @@ public class VirtualCellCollection implements ICellCollection {
 		for(Entry<UUID, IShellResult> c : shellResults.entrySet())
 			e.addContent(new Element("ShellResult").setAttribute("id", c.getKey().toString()).setContent(c.getValue().toXmlElement()));
 		
+		
 		return e;
 	}
 
-    /**
-     * Create from a parent dataset, and provide a name
-     * 
-     * @param parent the parent dataset
-     * @param name the name of the new collection
-     */
-    public VirtualCellCollection(@NonNull IAnalysisDataset parent, @NonNull String name) {
-        this(parent, name, UUID.randomUUID());
-    }
-
-    /**
-     * Create from a parent dataset, and provide a name and UUID
-     * 
-     * @param parent
-     * @param name
-     * @param id
-     */
-    public VirtualCellCollection(@NonNull IAnalysisDataset parent, @NonNull String name, @NonNull UUID id) {
-        this.parent = parent;
-        this.name = name == null ? "Undefined dataset name" : name;
-        this.uuid = id;
-
-    }
-    
-    /**
-     * Create for a parent dataset, providing a collection of cells 
-     * to populate the new collection. The name and ID are copied from
-     * the cell collection.
-     * 
-     * @param parent the dataset to which this will belong
-     * @param cells the collection of cells to add to this collection
-     */
-    public VirtualCellCollection(@NonNull IAnalysisDataset parent, @NonNull ICellCollection cells) {
-        this(parent, cells.getName(), cells.getID(), cells);
-    }
-
-    /**
-     * Create from a parent dataset, spcifying the collection name and id, and
-     * providing a collection of cells to populate the new collection.
-     * 
-     * @param parent the dataset to which this will belong
-     * @param name the name of the collection
-     * @param id the id of the collection
-     * @param cells the collection of cells to add to this collection
-     */
-    public VirtualCellCollection(@NonNull IAnalysisDataset parent, @NonNull String name, @NonNull UUID id, @NonNull ICellCollection cells) {
-        this(parent, name, id);
-        for (ICell cell : cells.getCells()) {
-            this.addCell(cell);
-        }
-    }
-        
 	@Override
-	public ICellCollection duplicate() {
-		VirtualCellCollection result = new VirtualCellCollection(parent, this);
-		
-		result.consensusNucleus = consensusNucleus.duplicateConsensus();
-		result.profileCollection = profileCollection.duplicate();
-		
-		return result;
+	public ICellCollection getCollection() {
+		return this;
 	}
-
-    public IAnalysisDataset getParent() {
-        return parent;
-    }
-
-    @Override
+	
+	@Override
     public void setName(@NonNull String s) {
         this.name = s;
 
@@ -240,7 +189,7 @@ public class VirtualCellCollection implements ICellCollection {
     }
 
     @Override
-    public UUID getID() {
+    public UUID getId() {
         return uuid;
     }
 
@@ -316,12 +265,7 @@ public class VirtualCellCollection implements ICellCollection {
 
     @Override
     public synchronized List<ICell> getCells() {
-        ICellCollection parentCollection = parent.getCollection();
-        if (parentCollection == null) {
-            LOGGER.warning("Cannot access parent collection");
-            return new ArrayList<>();
-        }
-        return parentCollection.getCells().parallelStream()
+        return parentDataset.getCollection().getCells().parallelStream()
 	        .filter(c->cellIDs.contains(c.getId()))
 	        .collect(Collectors.toList());
     }
@@ -335,7 +279,7 @@ public class VirtualCellCollection implements ICellCollection {
     public synchronized Set<ICell> getCells(@NonNull File f) {
         Set<ICell> result = new HashSet<ICell>(cellIDs.size());
 
-        for (ICell cell : parent.getCollection().getCells()) {
+        for (ICell cell : parentDataset.getCollection().getCells()) {
             if (cellIDs.contains(cell.getId())) {
                 if (cell.getPrimaryNucleus().getSourceFile().equals(f)) {
                     result.add(cell);
@@ -362,15 +306,8 @@ public class VirtualCellCollection implements ICellCollection {
 
     @Override
     public synchronized Set<Nucleus> getNuclei() {
-
-        ICellCollection parentCollection = parent.getCollection();
-
-        if (parentCollection == null) {
-            LOGGER.warning("Parent collection not restored!");
-            return new HashSet<Nucleus>(cellIDs.size());
-        }
         
-        return parentCollection.getCells().parallelStream()
+        return parentDataset.getCollection().getCells().parallelStream()
 	        .filter(c->cellIDs.contains(c.getId()))
 	        .flatMap(c -> c.getNuclei().stream())
 	        .collect(Collectors.toSet());
@@ -384,13 +321,7 @@ public class VirtualCellCollection implements ICellCollection {
     @Override
     public synchronized Set<Nucleus> getNuclei(@NonNull File imageFile) {
 
-        ICellCollection parentCollection = parent.getCollection();
-        if (parentCollection == null) {
-            LOGGER.warning("Parent collection not restored!");
-            return new HashSet<Nucleus>();
-        }
-
-        return cellIDs.stream().map(id -> parentCollection.getCell(id))
+        return cellIDs.stream().map(id -> parentDataset.getCollection().getCell(id))
                 .flatMap(c -> c.getNuclei().stream())
                 .filter(n -> n.getSourceFile().equals(imageFile))
                 .collect(Collectors.toSet());
@@ -398,20 +329,20 @@ public class VirtualCellCollection implements ICellCollection {
 
     @Override
     public void addCell(@NonNull ICell c) {
-        if (!parent.getCollection().contains(c.getId()))
-            throw new IllegalArgumentException("Cannot add a cell to a virtual collection that is not in the parent");
+        if (!parentDataset.getCollection().contains(c.getId()))
+            throw new IllegalArgumentException("Cannot add a cell to a virtual collection that is not in the parentDataset.getCollection()");
         cellIDs.add(c.getId());
     }
 
     @Override
     public void replaceCell(@NonNull ICell c) {
-        parent.getCollection().replaceCell(c);
+        parentDataset.getCollection().replaceCell(c);
     }
 
     @Override
     public ICell getCell(@NonNull UUID id) {
         if (cellIDs.contains(id))
-            return parent.getCollection().getCell(id);
+            return parentDataset.getCollection().getCell(id);
         return null;
     }
     
@@ -511,12 +442,12 @@ public class VirtualCellCollection implements ICellCollection {
 
     @Override
     public boolean containsExact(@NonNull ICell cell) {
-        return parent.getCollection().containsExact(cell);
+        return parentDataset.getCollection().containsExact(cell);
     }
 
     @Override
     public boolean hasLockedCells() {
-        return parent.getCollection().hasLockedCells();
+        return parentDataset.getCollection().hasLockedCells();
     }
 
     @Override
@@ -534,14 +465,14 @@ public class VirtualCellCollection implements ICellCollection {
      * Create the profile collections to hold angles from nuclear profiles based
      * on the current nucleus profiles. The ProfileAggregate for each
      * ProfileType is recalculated. The resulting median profiles will have the
-     * same length at the parent collection after this update
+     * same length at the parentDataset.getCollection() collection after this update
      * 
      * @return
      * @throws ProfileException 
      */
     @Override
 	public void createProfileCollection() throws ProfileException {
-        profileCollection.createProfileAggregate(this, parent.getCollection().getMedianArrayLength());
+        profileCollection.createProfileAggregate(this, parentDataset.getCollection().getMedianArrayLength());
     }
 
     @Override
@@ -557,25 +488,25 @@ public class VirtualCellCollection implements ICellCollection {
 
     @Override
     public Set<UUID> getSignalGroupIDs() {
-        return parent.getCollection().getSignalGroupIDs();
+        return parentDataset.getCollection().getSignalGroupIDs();
     }
 
     @Override
     public void removeSignalGroup(@NonNull UUID id) {
-    	parent.getCollection().removeSignalGroup(id);
+    	parentDataset.getCollection().removeSignalGroup(id);
     }
 
     @Override
     public  Optional<ISignalGroup> getSignalGroup(@NonNull UUID signalGroup) {
 
-    	if(!parent.getCollection().hasSignalGroup(signalGroup))
+    	if(!parentDataset.getCollection().hasSignalGroup(signalGroup))
     		return Optional.empty();
     	    
         // Override the shell storage to point to this collection, not the shell
         // result
         // This SignalGroup is never saved to file, so does not need serialising
         @SuppressWarnings("serial")
-        ISignalGroup result = new DefaultSignalGroup(parent.getCollection().getSignalGroup(signalGroup).get()) {
+        ISignalGroup result = new DefaultSignalGroup(parentDataset.getCollection().getSignalGroup(signalGroup).get()) {
 
             @Override
             public void setShellResult(@NonNull IShellResult result) {
@@ -594,12 +525,12 @@ public class VirtualCellCollection implements ICellCollection {
 
             @Override
             public void setGroupColour(@NonNull Color newColor) {
-                parent.getCollection().getSignalGroup(signalGroup).get().setGroupColour(newColor);
+                parentDataset.getCollection().getSignalGroup(signalGroup).get().setGroupColour(newColor);
             }
 
             @Override
             public void setVisible(boolean b) {
-                parent.getCollection().getSignalGroup(signalGroup).get().setVisible(b);
+                parentDataset.getCollection().getSignalGroup(signalGroup).get().setVisible(b);
             }
 
         };
@@ -609,17 +540,17 @@ public class VirtualCellCollection implements ICellCollection {
 
     @Override
     public boolean hasSignalGroup(@NonNull UUID signalGroup) {
-        return parent.getCollection().hasSignalGroup(signalGroup);
+        return parentDataset.getCollection().hasSignalGroup(signalGroup);
     }
 
     @Override
     public Collection<ISignalGroup> getSignalGroups() {
-        return parent.getCollection().getSignalGroups();
+        return parentDataset.getCollection().getSignalGroups();
     }
 
     @Override
     public void addSignalGroup(@NonNull ISignalGroup newGroup) {
-        parent.getCollection().addSignalGroup(newGroup);
+        parentDataset.getCollection().addSignalGroup(newGroup);
     }
 
     @Override
@@ -629,17 +560,12 @@ public class VirtualCellCollection implements ICellCollection {
 
     @Override
     public RuleSetCollection getRuleSetCollection() {
-        return parent.getCollection().getRuleSetCollection();
-    }
-
-    @Override
-    public void updateVerticalNuclei() {
-        parent.getCollection().updateVerticalNuclei();
+        return parentDataset.getCollection().getRuleSetCollection();
     }
 
     @Override
     public void setSourceFolder(@NonNull File expectedImageDirectory) {
-        parent.getCollection().setSourceFolder(expectedImageDirectory);
+        parentDataset.getCollection().setSourceFolder(expectedImageDirectory);
     }
 
 	/**
@@ -685,17 +611,6 @@ public class VirtualCellCollection implements ICellCollection {
         return profileManager;
     }
 
-    public IAnalysisDataset getRootParent() {
-        if (parent.isRoot()) {
-            return parent;
-        }
-		if (parent.getCollection() instanceof VirtualCellCollection) {
-		    VirtualCellCollection v = (VirtualCellCollection) parent.getCollection();
-		    return v.getRootParent();
-		}
-		return null;
-    }
-
 	/**
 	 * Choose if the merged collection for this and another collection should be a child of this,
 	 * a child of the other collection, or a new real collection.
@@ -705,13 +620,15 @@ public class VirtualCellCollection implements ICellCollection {
 	 */
 	private ICellCollection chooseNewCollectionType(@NonNull ICellCollection other, String newName) {
 
-		// Decide if the other collection is also a child of the same root parent
-		IAnalysisDataset rootThis  = DatasetListManager.getInstance().getRootParent(this);
-		IAnalysisDataset rootOther = DatasetListManager.getInstance().getRootParent(other);
+		// Decide if the other collection is also a child of the same root parentDataset.getCollection()
+//		IAnalysisDataset rootThis  = DatasetListManager.getInstance().getRootparentDataset.getCollection()(this);
+//		IAnalysisDataset rootOther = DatasetListManager.getInstance().getRootparentDataset.getCollection()(other);
 		
-		// If the two datasets have different root parents, return a new real collection
-		return rootThis==rootOther ? new VirtualCellCollection(rootThis, newName)
-								   : new DefaultCellCollection(this, newName);
+		// If the two datasets have different root parentDataset.getCollection()s, return a new real collection
+//		return rootThis==rootOther ? new VirtualCellCollection(rootThis, newName)
+//								   : new DefaultCellCollection(this, newName);
+		
+//		return new VirtualDataset(this, newName);
 	}
 
     @Override
@@ -787,7 +704,7 @@ public class VirtualCellCollection implements ICellCollection {
 
         String newName = "Filtered_" + predicate.toString();
 
-        ICellCollection subCollection = new DefaultCellCollection(this, newName);
+        ICellCollection subCollection = new DefaultCellCollection(this.getCollection(), newName);
 
         List<ICell> list = getCells().stream().filter(predicate).collect(Collectors.toList());
 
@@ -851,24 +768,24 @@ public class VirtualCellCollection implements ICellCollection {
 
     @Override
     public int countShared(@NonNull IAnalysisDataset d2) {
-        return countShared(d2.getCollection());
+        return countShared(d2);
 
     }
 
     @Override
     public int countShared(@NonNull ICellCollection d2) {
-        if (this.vennCache.containsKey(d2.getID())) {
-            return vennCache.get(d2.getID());
+        if (this.vennCache.containsKey(d2.getId())) {
+            return vennCache.get(d2.getId());
         }
         int shared = countSharedNuclei(d2);
-        vennCache.put(d2.getID(), shared);
+        vennCache.put(d2.getId(), shared);
         d2.setSharedCount(this, shared);
         return shared;
     }
 
     @Override
     public void setSharedCount(@NonNull ICellCollection d2, int i) {
-        vennCache.put(d2.getID(), i);
+        vennCache.put(d2.getId(), i);
     }
 
     /**
@@ -883,12 +800,12 @@ public class VirtualCellCollection implements ICellCollection {
         if (d2 == this)
             return this.size();
 
-        if (parent.getCollection() == d2)
+        if (parentDataset.getCollection() == d2)
             return this.size();
         
 
         // Ensure cells use the same rule
-        if (!d2.getRuleSetCollection().equals(parent.getCollection().getRuleSetCollection()))
+        if (!d2.getRuleSetCollection().equals(parentDataset.getCollection().getRuleSetCollection()))
         	return 0;
 
         Set<UUID> toSearch = new HashSet<>(d2.getCellIDs());
@@ -1182,17 +1099,6 @@ public class VirtualCellCollection implements ICellCollection {
 
     }
     
-    @Override
-    public void setScale(double scale){
-    	
-        for (ICell c : getCells())
-            c.setScale(scale);
-
-        if (hasConsensus())
-        	consensusNucleus.component().setScale(scale);
-
-        clear(MeasurementScale.MICRONS);
-    }
 
     @Override
     public double getNormalisedDifferenceToMedian(Landmark pointType, Taggable t) {
@@ -1233,9 +1139,9 @@ public class VirtualCellCollection implements ICellCollection {
 			offsetConsensus(0, 0);
         }
         
-        // Don't try to restore profile aggregates here - the parent collection has
-        // not finished loading, and so calls to parent will be null. Do the restore in the
-        // parent class after reading this object has finished.
+        // Don't try to restore profile aggregates here - the parentDataset.getCollection() collection has
+        // not finished loading, and so calls to parentDataset.getCollection() will be null. Do the restore in the
+        // parentDataset.getCollection() class after reading this object has finished.
     }
 
 	@Override
@@ -1251,47 +1157,7 @@ public class VirtualCellCollection implements ICellCollection {
 		return result;
 	}
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		VirtualCellCollection other = (VirtualCellCollection) obj;
-		if (cellIDs == null) {
-			if (other.cellIDs != null)
-				return false;
-		} else if (!cellIDs.equals(other.cellIDs))
-			return false;
-		if (consensusNucleus == null) {
-			if (other.consensusNucleus != null)
-				return false;
-		} else if (!consensusNucleus.equals(other.consensusNucleus))
-			return false;
-		if (name == null) {
-			if (other.name != null)
-				return false;
-		} else if (!name.equals(other.name))
-			return false;
-		if (profileCollection == null) {
-			if (other.profileCollection != null)
-				return false;
-		} else if (!profileCollection.equals(other.profileCollection))
-			return false;
-		if (shellResults == null) {
-			if (other.shellResults != null)
-				return false;
-		} else if (!shellResults.equals(other.shellResults))
-			return false;
-		if (uuid == null) {
-			if (other.uuid != null)
-				return false;
-		} else if (!uuid.equals(other.uuid))
-			return false;
-		return true;
-	}
+	
     
 	@Override
 	public String toString() {
@@ -1301,7 +1167,7 @@ public class VirtualCellCollection implements ICellCollection {
 		StringBuilder b = new StringBuilder("Collection:" + getName() + newLine)
 				.append("Nuclei: " + this.getNucleusCount() + newLine)
 				.append("Profile collections:" + newLine)
-				.append("Parent: "+parent.getName());
+				.append("parentDataset.getCollection(): "+parentDataset.getCollection().getName());
 
 		IProfileCollection pc = this.getProfileCollection();
 		b.append(pc.toString() + newLine);
@@ -1313,6 +1179,326 @@ public class VirtualCellCollection implements ICellCollection {
 
 		return b.toString();
 	}
+
+	@Override
+	public void addChildCollection(@NonNull ICellCollection collection) {
+		VirtualDataset c = new VirtualDataset(this, collection.getName());
+		c.addAll(collection);
+		addChildDataset(c);
+	}
+
+	@Override
+	public void addChildDataset(@NonNull IAnalysisDataset dataset) {
+        // Ensure no duplicate dataset names
+        // If the name is the same as this dataset, or one of the child datasets, 
+        // apply a suffix
+        if(getName().equals(dataset.getName()) || 
+        		childDatasets.stream().map(IAnalysisDataset::getName).anyMatch(s->s.equals(dataset.getName()))) {
+        	String newName = chooseSuffix(dataset.getName());
+        	dataset.setName(newName);
+        }
+        childDatasets.add(dataset);
+
+	}
+
+	@Override
+	public File getSavePath() {
+		return parentDataset.getSavePath();
+	}
+
+	@Override
+	public void setSavePath(@NonNull File file) {
+		// We can't set a path for a child 
+	}
+
+	@Override
+	public void setScale(double scale) {				
+		if(scale<=0) // don't allow a scale to cause divide by zero errors
+			return;
+
+		Optional<IAnalysisOptions> op = getAnalysisOptions();
+		if(op.isPresent()){
+			Set<String> detectionOptions = op.get().getDetectionOptionTypes();
+			for(String detectedComponent : detectionOptions) {
+				Optional<HashOptions> subOptions = op.get().getDetectionOptions(detectedComponent);
+				if(subOptions.isPresent())
+					subOptions.get().setDouble(HashOptions.SCALE, scale);
+			}
+		}
+
+		for(IAnalysisDataset child : getChildDatasets()) {
+			child.setScale(scale);
+		}
+
+		for (ICell c : getCells())
+			c.setScale(scale);
+
+		if (hasConsensus())
+			consensusNucleus.component().setScale(scale);
+
+		clear(MeasurementScale.MICRONS);
+	}
+
+	@Override
+	public Set<UUID> getChildUUIDs() {
+		Set<UUID> result = new HashSet<>(childDatasets.size());
+		for (IAnalysisDataset c : childDatasets) {
+			result.add(c.getId());
+		}
+
+		return result;
+	}
+
+	@Override
+	public Set<UUID> getAllChildUUIDs() {
+		Set<UUID> result = new HashSet<>();
+
+		Set<UUID> idlist = getChildUUIDs();
+		result.addAll(idlist);
+
+		for (UUID id : idlist) {
+			IAnalysisDataset d = getChildDataset(id);
+
+			result.addAll(d.getAllChildUUIDs());
+		}
+		return result;
+	}
+
+	@Override
+	public IAnalysisDataset getChildDataset(@NonNull UUID id) {
+		if (this.hasDirectChild(id)) {
+
+			for (IAnalysisDataset c : childDatasets) {
+				if (c.getId().equals(id)) {
+					return c;
+				}
+			}
+
+		} else {
+			for (IAnalysisDataset child : this.getAllChildDatasets()) {
+				if (child.getId().equals(id)) {
+					return child;
+				}
+			}
+		}
+		return null;
+	}
+
+	@Override
+	public IAnalysisDataset getMergeSource(@NonNull UUID id) {
+		return null;
+	}
+
+	@Override
+	public Set<IAnalysisDataset> getAllMergeSources() {
+		return new HashSet<>(0);
+	}
+
+	@Override
+	public void addMergeSource(@NonNull IAnalysisDataset dataset) {
+		// Not possible for a child
+	}
+
+	@Override
+	public List<IAnalysisDataset> getMergeSources() {
+		return new ArrayList<>(0);
+	}
+
+	@Override
+	public Set<UUID> getMergeSourceIDs() {
+		return new HashSet<>(0);
+	}
+
+	@Override
+	public Set<UUID> getAllMergeSourceIDs() {
+		return new HashSet<>(0);
+	}
+
+	@Override
+	public boolean hasMergeSource(UUID id) {
+		return false;
+	}
+
+	@Override
+	public boolean hasMergeSource(IAnalysisDataset dataset) {
+		return false;
+	}
+
+	@Override
+	public boolean hasMergeSources() {
+		return false;
+	}
+
+	@Override
+	public int getChildCount() {
+		return childDatasets.size();
+	}
+
+	@Override
+	public boolean hasChildren() {
+		return !childDatasets.isEmpty();
+	}
+
+	@Override
+	public Collection<IAnalysisDataset> getChildDatasets() {
+		return childDatasets;
+	}
+
+	@Override
+	public List<IAnalysisDataset> getAllChildDatasets() {
+		List<IAnalysisDataset> result = new ArrayList<>();
+		if (!childDatasets.isEmpty()) {
+
+			for (IAnalysisDataset d : childDatasets) {
+				result.add(d);
+				result.addAll(d.getAllChildDatasets());
+			}
+		}
+		return result;
+	}
+
+	@Override
+	public Optional<IAnalysisOptions> getAnalysisOptions() {
+		if(analysisOptions==null)
+			return parentDataset.getAnalysisOptions();
+		return Optional.ofNullable(analysisOptions);
+	}
+
+	@Override
+	public boolean hasAnalysisOptions() {
+		if(analysisOptions==null)
+			return parentDataset.hasAnalysisOptions();
+		return true;
+	}
+
+	@Override
+	public void setAnalysisOptions(IAnalysisOptions analysisOptions) {
+		this.analysisOptions.set(analysisOptions);
+	}
+
+	@Override
+	public void refreshClusterGroups() {
+		if (this.hasClusters()) {
+			// Find the groups that need removing
+			List<IClusterGroup> groupsToDelete = new ArrayList<>();
+			for (IClusterGroup g : this.getClusterGroups()) {
+				boolean clusterRemains = false;
+
+				for (UUID childID : g.getUUIDs()) {
+					if (this.hasDirectChild(childID)) {
+						clusterRemains = true;
+					}
+				}
+				if (!clusterRemains) {
+					groupsToDelete.add(g);
+				}
+			}
+
+			// Remove the groups
+			for (IClusterGroup g : groupsToDelete) {
+				this.deleteClusterGroup(g);
+			}
+
+		}
+
+	}
+
+	@Override
+	public boolean isRoot() {
+		return false;
+	}
+
+	@Override
+	public void setRoot(boolean b) {
+		// Not possible for a child
+	}
+
+	@Override
+	public void deleteChild(@NonNull UUID id) {
+		Iterator<IAnalysisDataset> it = childDatasets.iterator();
+
+		while (it.hasNext()) {
+			IAnalysisDataset child = it.next();
+
+			if (child.getId().equals(id)) {
+				for (IClusterGroup g : clusterGroups) {
+					if (g.hasDataset(id)) {
+						g.removeDataset(id);
+					}
+				}
+				it.remove();
+				break;
+			}
+		}
+	}
+
+    @Override
+    public void deleteClusterGroup(@NonNull final IClusterGroup group) {
+
+        if (hasClusterGroup(group)) {
+        	UUID[] groupIds = group.getUUIDs().toArray(new UUID[0]);
+        	
+        	for(UUID id : groupIds)
+        		deleteChild(id);
+            
+            // Remove saved values associated with the cluster group
+            // e.g. tSNE, PCA
+            for(Nucleus n : getCollection().getNuclei()) {
+            	for(Measurement s : n.getStatistics()) {
+            		if(s.toString().endsWith(group.getId().toString()))
+            			n.clearStatistic(s);
+            	}
+            }
+            this.clusterGroups.remove(group);
+        }
+    }
     
+    @Override
+    public void deleteClusterGroups() {
+    	LOGGER.fine("Deleting all cluster groups in "+getName());
+    	// Use arrays to avoid concurrent modifications to cluster groups
+    	Object[] ids = clusterGroups.parallelStream().map(IClusterGroup::getId).toArray();
+    	for(Object id : ids) {
+    		Optional<IClusterGroup> optg = clusterGroups.stream()
+    				.filter(group->group.getId().equals(id)).findFirst();
+    		if(optg.isPresent())
+    			deleteClusterGroup(optg.get());
+    	}
+    }
+
+	@Override
+	public void deleteMergeSource(@NonNull UUID id) {
+		// No action
+	}
+
+	@Override
+	public boolean hasDirectChild(UUID id) {
+
+		for (IAnalysisDataset child : childDatasets) {
+			if (child.getId().equals(id)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	@Override
+	public void updateSourceImageDirectory(@NonNull File expectedImageDirectory) {
+		parentDataset.updateSourceImageDirectory(expectedImageDirectory);
+
+	}
+
+	@Override
+	public ICellCollection duplicate() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public IAnalysisDataset copy() throws Exception {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 
 }

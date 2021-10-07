@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -24,7 +25,7 @@ import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.DefaultCellCollection;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
-import com.bmskinner.nuclear_morphology.components.datasets.VirtualCellCollection;
+import com.bmskinner.nuclear_morphology.components.datasets.VirtualDataset;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.stats.Stats;
@@ -68,8 +69,9 @@ public class ProfileManagerTest {
 			return d.getCollection();
 		}
 		
-		if(source==VirtualCellCollection.class){
-			ICellCollection v = new VirtualCellCollection(d,TestDatasetBuilder.TEST_DATASET_NAME, TestDatasetBuilder.TEST_DATASET_UUID, d.getCollection());
+		if(source==VirtualDataset.class){
+			VirtualDataset v = new VirtualDataset(d,TestDatasetBuilder.TEST_DATASET_NAME, TestDatasetBuilder.TEST_DATASET_UUID);
+			v.addAll(d.getCollection().getCells());
 			v.createProfileCollection();
 			d.getCollection().getProfileManager().copyCollectionOffsets(v);
 			for(ICell c : d.getCollection().getCells()) {
@@ -84,7 +86,7 @@ public class ProfileManagerTest {
 	@Parameters
 	public static Iterable<Class<? extends ICellCollection>> arguments() {
 		return Arrays.asList(DefaultCellCollection.class,
-				VirtualCellCollection.class);
+				VirtualDataset.class);
 	}
 
 	@Test
@@ -241,10 +243,16 @@ public class ProfileManagerTest {
 		if(collection.isVirtual())
 			return;
 		
-		manager.mergeSegments(seg1, seg2, newId);
 		DatasetValidator dv = new DatasetValidator();
-		assertTrue(dv.validate(collection));
+		boolean b = dv.validate(collection);
+		System.out.println(dv.getSummary().stream().collect(Collectors.joining()));
+		assertTrue(source.getSimpleName(), b);
 		
+		manager.mergeSegments(seg1, seg2, newId);
+		
+		b = dv.validate(collection);
+		System.out.println(dv.getSummary().stream().collect(Collectors.joining()));
+		assertTrue(source.getSimpleName(), b);
 		manager.unmergeSegments(newId); // only testable for real collection here, because merging is a noop
 		
 		List<UUID> newIds = collection.getProfileCollection().getSegmentIDs();
@@ -253,7 +261,7 @@ public class ProfileManagerTest {
 		assertTrue(newIds.contains(segId1));
 		assertTrue(newIds.contains(segId2));
 		
-		assertTrue(dv.validate(collection));
+		assertTrue(source.getSimpleName(), dv.validate(collection));
 		
 		for(Nucleus n : collection.getNuclei()) {
 			ISegmentedProfile nucleusProfile =  n.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);

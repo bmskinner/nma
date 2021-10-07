@@ -25,7 +25,7 @@ import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
-import com.bmskinner.nuclear_morphology.components.datasets.VirtualCellCollection;
+import com.bmskinner.nuclear_morphology.components.datasets.VirtualDataset;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 
@@ -94,8 +94,8 @@ public class RandomSamplingMethod extends SingleDatasetAnalysisMethod {
     private ICellCollection[] makeRandomSampledCollection(int firstSize, int secondSize) throws Exception {
         ICellCollection[] result = new ICellCollection[2];
 
-        ICellCollection first = new VirtualCellCollection(dataset, "first");
-        ICellCollection second = new VirtualCellCollection(dataset, "second");
+        ICellCollection first = new VirtualDataset(dataset, "first");
+        ICellCollection second = new VirtualDataset(dataset, "second");
         LOGGER.finer( "Created new collections");
 
         List<ICell> cells = new ArrayList<>(dataset.getCollection().getCells());

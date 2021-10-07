@@ -38,7 +38,7 @@ import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
-import com.bmskinner.nuclear_morphology.components.datasets.VirtualCellCollection;
+import com.bmskinner.nuclear_morphology.components.datasets.VirtualDataset;
 import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.dialogs.SettingsDialog;
@@ -73,10 +73,8 @@ public class ExtractRandomCellsAction extends SingleDatasetResultAction {
 			
 			List<ICell> subList = cells.subList(0, dialog.getCellCount());
 
-			ICellCollection c = new VirtualCellCollection(dataset, "Random_selection");
-			for(ICell cell : subList){
-				c.addCell(cell);
-			}
+			ICellCollection c = new VirtualDataset(dataset, "Random_selection");
+			c.addAll(subList);
 
 			 if (c.hasCells()) {
 
@@ -90,7 +88,7 @@ public class ExtractRandomCellsAction extends SingleDatasetResultAction {
 	                dataset.addChildCollection(c);
 
 	                // attach the clusters to their parent collection
-	                IAnalysisDataset d = dataset.getChildDataset(c.getID());
+	                IAnalysisDataset d = dataset.getChildDataset(c.getId());
 	                d.setRoot(false);
 
 	                // set shared counts

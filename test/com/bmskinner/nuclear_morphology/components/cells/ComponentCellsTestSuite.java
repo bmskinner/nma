@@ -5,8 +5,11 @@ import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
-@SuiteClasses({ CellularComponentTest.class, DefaultCellCollectionTest.class, DefaultCellTest.class,
-		DefaultCellularComponentTest.class, ICellCollectionTest.class })
+@SuiteClasses({ CellularComponentTest.class, 
+	DefaultCellCollectionTest.class, 
+	DefaultCellTest.class,
+	DefaultCellularComponentTest.class, 
+	ICellCollectionTest.class })
 public class ComponentCellsTestSuite {
 
 }

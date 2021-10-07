@@ -52,7 +52,7 @@ import com.bmskinner.nuclear_morphology.charting.options.TableOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
-import com.bmskinner.nuclear_morphology.components.datasets.VirtualCellCollection;
+import com.bmskinner.nuclear_morphology.components.datasets.VirtualDataset;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
@@ -275,7 +275,7 @@ public abstract class AbstractScatterChartPanel extends DetailPanel  {
         		ICellCollection filtered  = f.filter(d.getCollection());
         		
         		// Put them into a virtual collection
-        		ICellCollection virt = new VirtualCellCollection(d, filtered.getName());
+        		ICellCollection virt = new VirtualDataset(d, filtered.getName());
         		filtered.getCells().forEach(c->virt.addCell(c));
         		virt.setName("Filtered_" + statA + "_" + statB);
         		

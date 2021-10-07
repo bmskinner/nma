@@ -32,7 +32,7 @@ import com.bmskinner.nuclear_morphology.components.datasets.DefaultAnalysisDatas
 import com.bmskinner.nuclear_morphology.components.datasets.DefaultCellCollection;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
-import com.bmskinner.nuclear_morphology.components.datasets.VirtualCellCollection;
+import com.bmskinner.nuclear_morphology.components.datasets.VirtualDataset;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
@@ -86,8 +86,9 @@ public class ICellCollectionTest extends ComponentTester {
 			return d.getCollection();
 		}
 		
-		if(source==VirtualCellCollection.class){
-			ICellCollection v = new VirtualCellCollection(d,TestDatasetBuilder.TEST_DATASET_NAME, TestDatasetBuilder.TEST_DATASET_UUID, d.getCollection());
+		if(source==VirtualDataset.class){
+			VirtualDataset v = new VirtualDataset(d,TestDatasetBuilder.TEST_DATASET_NAME, TestDatasetBuilder.TEST_DATASET_UUID);
+			v.addAll(d.getCollection().getCells());
 			v.createProfileCollection();
 			d.getCollection().getProfileManager().copyCollectionOffsets(v);
 			for(ICell c : d.getCollection().getCells()) {
@@ -102,12 +103,12 @@ public class ICellCollectionTest extends ComponentTester {
 	@Parameters
 	public static Iterable<Class<? extends ICellCollection>> arguments() {
 		return Arrays.asList(DefaultCellCollection.class,
-				VirtualCellCollection.class);
+				VirtualDataset.class);
 	}
 	
 	@Test
 	public void testGetID() {
-		assertEquals(TestDatasetBuilder.TEST_DATASET_UUID, collection.getID());
+		assertEquals(TestDatasetBuilder.TEST_DATASET_UUID, collection.getId());
 	}
 
 
@@ -289,6 +290,7 @@ public class ICellCollectionTest extends ComponentTester {
 	public void testAddSignalGroup() {
 		ISignalGroup group = mock(ISignalGroup.class);
 		when( group.getGroupName()).thenReturn("A test group");
+		when( group.getId()).thenReturn(TestDatasetBuilder.GREEN_SIGNAL_GROUP);
 		
 		assertFalse(collection.hasSignalGroup(TestDatasetBuilder.GREEN_SIGNAL_GROUP));
 		collection.addSignalGroup(group);
@@ -320,6 +322,19 @@ public class ICellCollectionTest extends ComponentTester {
 	}
 	
 	@Test
+	public void testSetConsensus() throws Exception {
+		// Run consensus averaging on the collection. Wrap in a new dataset. 
+		IAnalysisDataset d = new DefaultAnalysisDataset(collection, 
+				new File(TestDatasetBuilder.TEST_DATASET_IMAGE_FOLDER));
+
+		assertFalse(collection.hasConsensus());
+		new ConsensusAveragingMethod(d).call();
+		
+		
+		assertTrue(collection.hasConsensus());
+	}
+	
+	@Test
 	public void testGetConsensusOrientsVertically() throws Exception {
 		
 		// Ensure TV and BV are set
@@ -331,16 +346,14 @@ public class ICellCollectionTest extends ComponentTester {
 		// Run consensus averaging on the collection. Wrap in a new dataset. 
 		// Analysis options will not be copied!
 		IAnalysisDataset d = new DefaultAnalysisDataset(collection, new File(TestDatasetBuilder.TEST_DATASET_IMAGE_FOLDER));
+		new ConsensusAveragingMethod(d).call();		
 		
-		new ConsensusAveragingMethod(d).call();
 		int bIndex=0;
 		for(int tIndex=0; tIndex<p.size(); tIndex++) {
 			if(tIndex==bIndex)
 				continue;
 			m.updateBorderTag(Landmark.TOP_VERTICAL, tIndex);
 			m.updateBorderTag(Landmark.BOTTOM_VERTICAL, bIndex);
-
-			assertTrue(collection.hasConsensus());
 
 			List<JPanel> panels = new ArrayList<>();
 			panels.add(ChartFactoryTest.makeConsensusChartPanel(d));

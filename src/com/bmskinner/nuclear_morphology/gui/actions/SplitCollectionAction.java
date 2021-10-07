@@ -75,7 +75,7 @@ public class SplitCollectionAction extends SingleDatasetResultAction {
                         LOGGER.info("Reapplying morphology...");
 
                         int flag = 0;
-                        IAnalysisDataset newDataset = dataset.getChildDataset(newCollection.getID());
+                        IAnalysisDataset newDataset = dataset.getChildDataset(newCollection.getId());
                         final CountDownLatch latch = new CountDownLatch(1);
                         new RunSegmentationAction(newDataset, dataset, flag, progressAcceptors.get(0), eh, latch);
                     }

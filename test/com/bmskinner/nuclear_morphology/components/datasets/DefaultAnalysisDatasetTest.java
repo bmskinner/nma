@@ -71,11 +71,11 @@ public class DefaultAnalysisDatasetTest extends ComponentTester {
 				.segmented().build();
     }
 
-    @Test
-    public void testDuplicate() throws Exception {
-    	IAnalysisDataset dup = d.duplicate();
-    	testDuplicatesByField(dup.duplicate(), dup);
-    }
+//    @Test
+//    public void testDuplicate() throws Exception {
+//    	IAnalysisDataset dup = d.duplicate();
+//    	testDuplicatesByField(d, dup);
+//    }
 
   
     @Test
@@ -84,7 +84,7 @@ public class DefaultAnalysisDatasetTest extends ComponentTester {
     	int defaultArea = TestDatasetBuilder.DEFAULT_BASE_HEIGHT * TestDatasetBuilder.DEFAULT_BASE_WIDTH;
     	
         ICellCollection c = d.getCollection().filterCollection(Measurement.AREA, MeasurementScale.PIXELS, defaultArea, defaultArea*2);
-        UUID id = c.getID();
+        UUID id = c.getId();
         
         d.addChildCollection(c);        
         assertEquals(N_CHILD_DATASETS+1, d.getChildCount());
@@ -192,6 +192,7 @@ public class DefaultAnalysisDatasetTest extends ComponentTester {
 		d.setSavePath(d.getSavePath().getAbsoluteFile());
 		
 		IAnalysisDataset test = new DefaultAnalysisDataset(e);
+//		test.relinkChildren();
 		xmlOutput.output(test.toXmlElement(), new PrintWriter( System.out ));
 		testDuplicatesByField(d, test);
 		assertEquals(d, test);

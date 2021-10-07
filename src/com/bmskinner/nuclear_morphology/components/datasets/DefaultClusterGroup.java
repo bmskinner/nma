@@ -155,7 +155,7 @@ public class DefaultClusterGroup implements IClusterGroup {
 
     @Override
     public void addDataset(final ICellCollection collection) {
-        this.ids.add(collection.getID());
+        this.ids.add(collection.getId());
     }
 
     @Override

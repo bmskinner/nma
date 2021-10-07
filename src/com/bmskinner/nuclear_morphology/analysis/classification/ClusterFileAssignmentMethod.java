@@ -41,9 +41,8 @@ import com.bmskinner.nuclear_morphology.components.datasets.DefaultClusterGroup;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.datasets.IClusterGroup;
-import com.bmskinner.nuclear_morphology.components.datasets.VirtualCellCollection;
+import com.bmskinner.nuclear_morphology.components.datasets.VirtualDataset;
 import com.bmskinner.nuclear_morphology.components.options.DefaultOptions;
-import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -193,8 +192,8 @@ public class ClusterFileAssignmentMethod extends SingleDatasetAnalysisMethod {
         long nClusters = cellMap.values().stream().distinct().count();
         LOGGER.fine("Creating "+nClusters+" child datasets");
         for (int i = 1; i <= nClusters; i++) {
-            ICellCollection clusterCollection = new VirtualCellCollection(dataset, "Cluster_" + i);
-            clusterCollection.setName("Cluster_" + i);
+            ICellCollection clusterCollection = new VirtualDataset(dataset,
+            		"Cluster_" + i, UUID.randomUUID());
             clusterMap.put(i, clusterCollection);
         }
         
@@ -226,8 +225,8 @@ public class ClusterFileAssignmentMethod extends SingleDatasetAnalysisMethod {
         }
         
         // Add unmapped cells to a final cluster
-        ICellCollection clusterCollection = new VirtualCellCollection(dataset, "Unmapped");
-        clusterCollection.setName("Unmapped");
+        ICellCollection clusterCollection = new VirtualDataset(dataset,
+        		"Unmapped", UUID.randomUUID());
         clusterCollection.addAll(unmappedCells);
         clusterMap.put( (int)nClusters+1, clusterCollection);
         
@@ -253,7 +252,7 @@ public class ClusterFileAssignmentMethod extends SingleDatasetAnalysisMethod {
                 dataset.addChildCollection(c);
 
                 // attach the clusters to their parent collection
-                IAnalysisDataset clusterDataset = dataset.getChildDataset(c.getID());
+                IAnalysisDataset clusterDataset = dataset.getChildDataset(c.getId());
                 clusterDataset.setRoot(false);
 
                 // set shared counts

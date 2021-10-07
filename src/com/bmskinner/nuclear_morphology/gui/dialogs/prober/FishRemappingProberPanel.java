@@ -49,11 +49,10 @@ import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
-import com.bmskinner.nuclear_morphology.components.datasets.VirtualCellCollection;
+import com.bmskinner.nuclear_morphology.components.datasets.VirtualDataset;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
-import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
@@ -398,10 +397,10 @@ public class FishRemappingProberPanel extends GenericImageProberPanel {
      * @throws Exception
      */
     public List<ICellCollection> getSubCollections() {
-        List<ICellCollection> result = new ArrayList<ICellCollection>(0);
+        List<ICellCollection> result = new ArrayList<>();
 
         if (!selectedNucleiLeft.isEmpty()) {
-            ICellCollection subCollectionLeft = new VirtualCellCollection(dataset, "SubCollectionLeft");
+            ICellCollection subCollectionLeft = new VirtualDataset(dataset, "SubCollectionLeft");
             for (UUID id : selectedNucleiLeft) {
                 ICell cell = dataset.getCollection().getCell(id);
                 subCollectionLeft.addCell(cell);
@@ -410,7 +409,7 @@ public class FishRemappingProberPanel extends GenericImageProberPanel {
         }
 
         if (!selectedNucleiRight.isEmpty()) {
-            ICellCollection subCollectionRight = new VirtualCellCollection(dataset, "SubCollectionRight");
+            ICellCollection subCollectionRight = new VirtualDataset(dataset, "SubCollectionRight");
             for (UUID id : selectedNucleiRight) {
                 ICell cell = dataset.getCollection().getCell(id);
                 subCollectionRight.addCell(cell);

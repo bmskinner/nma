@@ -32,10 +32,8 @@ import com.bmskinner.nuclear_morphology.analysis.SingleDatasetAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
-import com.bmskinner.nuclear_morphology.components.datasets.ChildAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
-import com.bmskinner.nuclear_morphology.components.datasets.VirtualCellCollection;
+import com.bmskinner.nuclear_morphology.components.datasets.VirtualDataset;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
@@ -164,9 +162,7 @@ public class CellRelocationMethod extends SingleDatasetAnalysisMethod {
 
                 if(activeID==null)
                 	continue;
-                ICellCollection c = new VirtualCellCollection(dataset, activeName, activeID);
-
-                IAnalysisDataset d = new ChildAnalysisDataset(dataset, c);
+                IAnalysisDataset d = new VirtualDataset(dataset, activeName, activeID);
 
 
                 Optional<IAnalysisOptions> op = dataset.getAnalysisOptions();

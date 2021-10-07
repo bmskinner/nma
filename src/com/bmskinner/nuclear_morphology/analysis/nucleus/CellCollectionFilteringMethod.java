@@ -27,7 +27,7 @@ import com.bmskinner.nuclear_morphology.analysis.MultipleDatasetAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
-import com.bmskinner.nuclear_morphology.components.datasets.VirtualCellCollection;
+import com.bmskinner.nuclear_morphology.components.datasets.VirtualDataset;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -71,8 +71,8 @@ public class CellCollectionFilteringMethod extends MultipleDatasetAnalysisMethod
 				LOGGER.info("Skipping; all cells passed filter for "+d.getName());
 				continue;
 			}
-			ICellCollection v = new VirtualCellCollection(d, filtered);
-			v.setName(newCollectionName);
+			ICellCollection v = new VirtualDataset(d, newCollectionName, null);
+			v.addAll(filtered);
 			try {
 				d.getCollection().getProfileManager().copyCollectionOffsets(v);
 				d.getCollection().getSignalManager().copySignalGroups(v);

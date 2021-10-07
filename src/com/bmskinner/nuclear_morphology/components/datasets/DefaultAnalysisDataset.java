@@ -42,7 +42,6 @@ import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileCollection;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
-import com.bmskinner.nuclear_morphology.io.Io;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -61,6 +60,10 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
     private static final long serialVersionUID = 1L;
 
     private boolean isRoot = false; // is this a root dataset
+    
+
+    /** The cell collection for this dataset */
+    protected ICellCollection cellCollection;
 
     /**
      * Other datasets associated with this dataset, that will need to be saved
@@ -76,15 +79,14 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 
     private File savePath; // the file to save this dataset to
 
-    private IAnalysisOptions analysisOptions;
-
     /**
      * Create a dataset from a cell collection, with a defined save file
      * 
      * @param collection
      */
     public DefaultAnalysisDataset(@NonNull ICellCollection collection, @NonNull File saveFile) {
-        super(collection);
+        super();
+        this.cellCollection = collection;
         this.savePath = saveFile;
         this.isRoot = false;
     }
@@ -94,7 +96,7 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
     	isRoot = Boolean.valueOf(e.getChildText("IsRoot"));
     	
     	for(Element el : e.getChild("OtherDatasets").getChildren()) {
-    		otherDatasets.add(new ChildAnalysisDataset(el));
+    		otherDatasets.add(new VirtualDataset(el));
     	}
     	
     	for(Element el : e.getChildren("MergeSource")) {
@@ -104,6 +106,15 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
     	savePath = new File(e.getChildText("SaveFile")).getAbsoluteFile();
     	
     	analysisOptions = new DefaultAnalysisOptions(e.getChild("AnalysisOptions"));
+    	
+//		for(IAnalysisDataset d : this.childDatasets) {
+//			try {
+//				d.getCollection().getProfileCollection().createAndRestoreProfileAggregate(d.getCollection());
+//			} catch (ProfileException e1) {
+//				throw new ComponentCreationException("Unable to generate profiles", e1);
+//			}
+//		}
+		
     }
 
     @Override
@@ -111,6 +122,8 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 		Element e = super.toXmlElement();
 		
 		e.addContent(new Element("IsRoot").setText(String.valueOf(isRoot)));
+		
+		e.addContent(cellCollection.toXmlElement());
 		
 		Element other = new Element("OtherDatasets");
 		for(IAnalysisDataset c : otherDatasets) {
@@ -129,9 +142,8 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 	}
 
 
-
-	@Override
-    public IAnalysisDataset duplicate() throws Exception {
+    @Override
+	public IAnalysisDataset copy() throws Exception {
     	DefaultAnalysisDataset result = new DefaultAnalysisDataset(cellCollection, savePath);
         
         result.setAnalysisOptions(analysisOptions.duplicate());
@@ -140,45 +152,54 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
         
         // copy child datasets
         for(IAnalysisDataset child : this.getAllChildDatasets())
-        	result.addChildDataset(child.duplicate());
+        	result.addChildDataset(child.copy());
         
         // copy merge sources
         for(IAnalysisDataset mge : this.getMergeSources())
-        	result.addMergeSource(mge.duplicate());
+        	result.addMergeSource(mge.copy());
         
         result.setDatasetColour(datasetColour);
         result.setRoot(isRoot);
         
         return result;
     }
+    
+    @Override
+	public UUID getId() {
+        return cellCollection.getId();
+    }
+
+    @Override
+	public String getName() {
+        return cellCollection.getName();
+    }
+
+    @Override
+	public void setName(@NonNull String s) {
+        cellCollection.setName(s);
+    }
 
     @Override
     public void addChildCollection(@NonNull final ICellCollection collection) {
-
-        if (collection.isVirtual()) {
-        	addChildDataset(new ChildAnalysisDataset(this, collection));
-        } else {
-        	IAnalysisDataset childDataset = new DefaultAnalysisDataset(collection, this.savePath);
-            childDataset.setRoot(false);
-            if(analysisOptions!=null)
-                childDataset.setAnalysisOptions(analysisOptions);
-            addChildDataset(childDataset);
-        }
+    	addChildDataset(new VirtualDataset(this, collection.getName(), collection.getId()));
     }
 
     @Override
     public void addChildDataset(@NonNull final IAnalysisDataset dataset) {
         dataset.setRoot(false);
         
-        // Ensure no duplicate dataset names
-        // If the name is the same as this dataset, or one of the child datasets, 
-        // apply a suffix
-        if(getName().equals(dataset.getName()) || 
-        		childDatasets.stream().map(IAnalysisDataset::getName).anyMatch(s->s.equals(dataset.getName()))) {
-        	String newName = chooseSuffix(dataset.getName());
-        	dataset.setName(newName);
+        
+        if(dataset instanceof VirtualDataset) {
+        	// Ensure no duplicate dataset names
+        	// If the name is the same as this dataset, or one of the child datasets, 
+        	// apply a suffix
+        	if(getName().equals(dataset.getName()) || 
+        			childDatasets.stream().map(IAnalysisDataset::getName).anyMatch(s->s.equals(dataset.getName()))) {
+        		String newName = chooseSuffix(dataset.getName());
+        		dataset.setName(newName);
+        	}
+        	childDatasets.add(dataset);
         }
-        childDatasets.add(dataset);
     }
     
     /**
@@ -342,8 +363,9 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
      */
     @Override
     public void addMergeSource(@NonNull IAnalysisDataset dataset) {
-
-        IAnalysisDataset mergeSource = new MergeSourceAnalysisDataset(this, dataset);
+    	VirtualDataset mergeSource = new VirtualDataset(this, dataset.getName(), dataset.getId());
+        mergeSource.addAll(dataset.getCollection().getCells());
+        mergeSource.setAnalysisOptions(dataset.getAnalysisOptions().get());
         this.mergeSources.add(mergeSource.getId());
         this.addAssociatedDataset(mergeSource);
     }
@@ -422,23 +444,6 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
     public ICellCollection getCollection() {
         return this.cellCollection;
     }
-
-    @Override
-    public Optional<IAnalysisOptions> getAnalysisOptions() {
-        return Optional.ofNullable(analysisOptions);
-    }
-
-    @Override
-    public boolean hasAnalysisOptions() {
-        return analysisOptions != null;
-    }
-
-
-    @Override
-    public void setAnalysisOptions(IAnalysisOptions analysisOptions) {
-        this.analysisOptions = analysisOptions;
-    }
-
 
     @Override
     public void refreshClusterGroups() {

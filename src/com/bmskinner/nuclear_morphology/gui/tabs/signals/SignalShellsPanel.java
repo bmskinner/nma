@@ -62,7 +62,7 @@ import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
-import com.bmskinner.nuclear_morphology.components.datasets.VirtualCellCollection;
+import com.bmskinner.nuclear_morphology.components.datasets.VirtualDataset;
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult.Aggregation;
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult.Normalisation;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
@@ -484,7 +484,7 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
 			
 			try {
 			 LOGGER.info("Found "+filtered.size()+" cells");
-				ICellCollection virt = new VirtualCellCollection(dataset, "Filtered_on_shell");
+				ICellCollection virt = new VirtualDataset(dataset, "Filtered_on_shell");
 				filtered.getCells().forEach(virt::addCell);
 				dataset.getCollection().getProfileManager().copyCollectionOffsets(virt);
 				dataset.addChildCollection(virt);		

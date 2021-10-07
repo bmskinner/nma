@@ -129,6 +129,7 @@ public class DatasetValidator {
 			summaryList.add("Collection OK");
 			return true;
 		}
+		
 		summaryList.add(String.format("collection failed validation: %s out of %s cells have errors", errorCells.size(), collection.size()));
 		return false;
 	}

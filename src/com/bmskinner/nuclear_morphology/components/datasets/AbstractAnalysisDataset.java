@@ -34,8 +34,10 @@ import org.jdom2.Element;
 import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
 
+import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.Version;
 import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
+import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 
 /**
  * This is the most primitive information an analysis dataset requires. This
@@ -46,7 +48,7 @@ import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationExcept
  * @since 1.13.3
  *
  */
-public abstract class AbstractAnalysisDataset implements Serializable {
+public abstract class AbstractAnalysisDataset implements Serializable, IAnalysisDataset {
 
     private static final long serialVersionUID = 1L;
 
@@ -62,8 +64,6 @@ public abstract class AbstractAnalysisDataset implements Serializable {
     /** Direct child datasets to this dataset */
     protected List<IAnalysisDataset> childDatasets = new ArrayList<>();
 
-    /** The cell collection for this dataset */
-    protected ICellCollection cellCollection;
 
     /** The colour to draw this dataset in charts */
     protected Color datasetColour = null;
@@ -71,13 +71,13 @@ public abstract class AbstractAnalysisDataset implements Serializable {
     /** Clusters identified in this dataset */
     protected List<IClusterGroup> clusterGroups = new ArrayList<>();
     
+    /** Options used to construct this dataset */
+    protected IAnalysisOptions analysisOptions = null;
+    
     /**
-     * Create a dataset from a cell collection
-     * 
-     * @param collection
+     * Create a new dataset
      */
-    protected AbstractAnalysisDataset(@NonNull ICellCollection collection) {
-        this.cellCollection = collection;
+    protected AbstractAnalysisDataset() {
         this.versionCreated = Version.currentVersion();
         this.versionLastSaved = Version.currentVersion();
     }
@@ -89,23 +89,18 @@ public abstract class AbstractAnalysisDataset implements Serializable {
     	if(e.getChild("Colour")!=null)
     		datasetColour = Color.decode(e.getChildText("Colour"));
 
-
-    	if(e.getChild("ChildDatasets")!=null) {
-    		for(Element el : e.getChild("ChildDatasets").getChildren()) {
-    			childDatasets.add(new ChildAnalysisDataset(el));
-    		}
-    	}
-
     	for(Element el : e.getChildren("ClusterGroup")) {
     		clusterGroups.add(new DefaultClusterGroup(el));
     	}
     	
-    	if(e.getChild("CellCollection")!=null)
-    		cellCollection = new DefaultCellCollection(e.getChild("CellCollection")); 
-    	if(e.getChild("ChildCellCollection")!=null)
-    		cellCollection = new VirtualCellCollection(e.getChild("ChildCellCollection")); 
+    	if(e.getChild("ChildDatasets")!=null) {
+    		for(Element el : e.getChild("ChildDatasets").getChildren()) {
+    			childDatasets.add(new VirtualDataset(el));
+    		}
+    	}
     }
     
+	@Override
 	public Element toXmlElement() {
 		Element e = new Element("AnalysisDataset");
 		e.addContent(new Element("VersionCreated").setText(versionCreated.toString()));
@@ -117,6 +112,7 @@ public abstract class AbstractAnalysisDataset implements Serializable {
 		if(!childDatasets.isEmpty()) {
 			Element el = new Element("ChildDatasets");
 			for(IAnalysisDataset c : childDatasets) {
+				System.out.println(c.toString());
 				el.addContent(c.toXmlElement());
 			}
 			e.addContent(el);
@@ -125,44 +121,55 @@ public abstract class AbstractAnalysisDataset implements Serializable {
 		for(IClusterGroup c : clusterGroups) {
 			e.addContent(c.toXmlElement());
 		}
-		
-		e.addContent(cellCollection.toXmlElement());
+
 		
 		
 		return e;
 	}
     
-    public Version getVersionCreated() {
+    @Override
+	public Version getVersionCreated() {
         return this.versionCreated;
     }
     
-    public Version getVersionLastSaved() {
+    @Override
+	public Version getVersionLastSaved() {
         return this.versionLastSaved;
     }
 
-    public UUID getId() {
-        return cellCollection.getID();
-    }
 
-    public String getName() {
-        return cellCollection.getName();
-    }
-
-    public void setName(String s) {
-        cellCollection.setName(s);
-    }
         
-    public void setDatasetColour(Color colour) {
+    @Override
+	public void setDatasetColour(Color colour) {
         datasetColour = colour;
 
     }
 
-    public Optional<Color> getDatasetColour() {
+    @Override
+	public Optional<Color> getDatasetColour() {
         return Optional.ofNullable(datasetColour);
     }
 
-    public boolean hasDatasetColour() {
+    @Override
+	public boolean hasDatasetColour() {
         return datasetColour != null;
+    }
+    
+
+    @Override
+    public Optional<IAnalysisOptions> getAnalysisOptions() {
+        return Optional.ofNullable(analysisOptions);
+    }
+    
+
+    @Override
+    public void setAnalysisOptions(IAnalysisOptions analysisOptions) {
+        this.analysisOptions = analysisOptions;
+    }
+
+    @Override
+    public boolean hasAnalysisOptions() {
+        return analysisOptions != null;
     }
     
     public boolean hasParent() {
@@ -172,17 +179,21 @@ public abstract class AbstractAnalysisDataset implements Serializable {
     	return Optional.ofNullable(parentDataset);
     }
 
-    public boolean hasDirectChild(IAnalysisDataset child) {
+    @Override
+	public boolean hasDirectChild(IAnalysisDataset child) {
         return hasDirectChild(child.getId());
     }
 
-    public abstract Set<UUID> getChildUUIDs();
+    @Override
+	public abstract Set<UUID> getChildUUIDs();
 
-    public boolean hasDirectChild(UUID child) {
+    @Override
+	public boolean hasDirectChild(UUID child) {
         return getChildUUIDs().contains(child);
     }
 
-    public boolean hasAnyChild(IAnalysisDataset child) {
+    @Override
+	public boolean hasAnyChild(IAnalysisDataset child) {
         if (hasDirectChild(child)) {
             return true;
         }
@@ -219,13 +230,16 @@ public abstract class AbstractAnalysisDataset implements Serializable {
     	return testName;
     }
     
-    public abstract void deleteClusterGroup(@NonNull IClusterGroup group);
+    @Override
+	public abstract void deleteClusterGroup(@NonNull IClusterGroup group);
 
-    public void addClusterGroup(IClusterGroup group) {
+    @Override
+	public void addClusterGroup(IClusterGroup group) {
         this.clusterGroups.add(group);
     }
 
-    public int getMaxClusterGroupNumber() {
+    @Override
+	public int getMaxClusterGroupNumber() {
         int number = 0;
 
         if (this.hasClusters()) {
@@ -250,7 +264,8 @@ public abstract class AbstractAnalysisDataset implements Serializable {
         return number;
     }
 
-    public boolean hasCluster(UUID id) {
+    @Override
+	public boolean hasCluster(UUID id) {
         for (IClusterGroup g : this.clusterGroups) {
             if (g.hasDataset(id)) 
             	return true;
@@ -258,11 +273,13 @@ public abstract class AbstractAnalysisDataset implements Serializable {
         return false;
     }
 
-    public List<IClusterGroup> getClusterGroups() {
+    @Override
+	public List<IClusterGroup> getClusterGroups() {
         return this.clusterGroups;
     }
 
-    public List<UUID> getClusterIDs() {
+    @Override
+	public List<UUID> getClusterIDs() {
         List<UUID> result = new ArrayList<UUID>();
         for (IClusterGroup g : this.clusterGroups) {
             result.addAll(g.getUUIDs());
@@ -270,11 +287,13 @@ public abstract class AbstractAnalysisDataset implements Serializable {
         return result;
     }
 
-    public boolean hasClusters() {
+    @Override
+	public boolean hasClusters() {
     	return this.clusterGroups != null && this.clusterGroups.size() > 0;
     }
 
-    public boolean hasClusterGroup(IClusterGroup group) {
+    @Override
+	public boolean hasClusterGroup(IClusterGroup group) {
         return clusterGroups.contains(group);
     }
     
@@ -287,7 +306,6 @@ public abstract class AbstractAnalysisDataset implements Serializable {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((cellCollection == null) ? 0 : cellCollection.hashCode());
 		result = prime * result + ((childDatasets == null) ? 0 : childDatasets.hashCode());
 		result = prime * result + ((clusterGroups == null) ? 0 : clusterGroups.hashCode());
 		result = prime * result + ((datasetColour == null) ? 0 : datasetColour.hashCode());
@@ -304,11 +322,6 @@ public abstract class AbstractAnalysisDataset implements Serializable {
 		if (getClass() != obj.getClass())
 			return false;
 		AbstractAnalysisDataset other = (AbstractAnalysisDataset) obj;
-		if (cellCollection == null) {
-			if (other.cellCollection != null)
-				return false;
-		} else if (!cellCollection.equals(other.cellCollection))
-			return false;
 		if (parentDataset == null) {
 			if (other.parentDataset != null)
 				return false;

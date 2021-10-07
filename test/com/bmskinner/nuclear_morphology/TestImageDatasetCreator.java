@@ -33,7 +33,7 @@ import com.bmskinner.nuclear_morphology.components.signals.DefaultSignalGroup;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
 import com.bmskinner.nuclear_morphology.io.DatasetExportMethod;
 import com.bmskinner.nuclear_morphology.io.DatasetExportMethod.ExportFormat;
-import com.bmskinner.nuclear_morphology.io.xml.OptionsXMLWriter;
+import com.bmskinner.nuclear_morphology.io.xml.XMLWriter;
 
 import ij.Prefs;
 
@@ -290,7 +290,7 @@ public class TestImageDatasetCreator {
         if(xmlFile.exists())
         	xmlFile.delete();
         assertFalse("Expecting xml file to be deleted: "+xmlFile.getAbsolutePath(), xmlFile.exists());
-        new OptionsXMLWriter().write(d, xmlFile);
+        XMLWriter.writeXML(d.toXmlElement(), xmlFile);
         assertTrue("Expecting xml exported to "+xmlFile.getAbsolutePath(), xmlFile.exists());
         
     }

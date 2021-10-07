@@ -246,7 +246,7 @@ public final class DatasetListManager {
 			if(d.getCollection().equals(collection) 
 					|| d.getAllChildDatasets().stream()
 					.map(IAnalysisDataset::getCollection)
-					.anyMatch(c->c.getID().equals(collection.getID())))
+					.anyMatch(c->c.getId().equals(collection.getId())))
 				return d;
 		}
 		return null;

@@ -26,7 +26,8 @@ import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.datasets.DefaultAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
-import com.bmskinner.nuclear_morphology.components.datasets.VirtualCellCollection;
+import com.bmskinner.nuclear_morphology.components.datasets.VirtualDataset;
+import com.bmskinner.nuclear_morphology.core.DatasetListManager;
 import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
@@ -130,10 +131,9 @@ public class DatasetArithmeticAction extends MultiDatasetResultAction {
             LOGGER.info("Found " + newCollection.size() + " cells");
             IAnalysisDataset newDataset;
 
-            if (newCollection instanceof VirtualCellCollection) {
+            if (newCollection instanceof VirtualDataset) {
 
-                IAnalysisDataset root = ((VirtualCellCollection) newCollection).getRootParent();
-
+            	IAnalysisDataset root = DatasetListManager.getInstance().getRootParent(newCollection);
                 try {
 					root.getCollection().getProfileManager().copyCollectionOffsets(newCollection);
 					root.addChildCollection(newCollection);

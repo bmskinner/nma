@@ -15,7 +15,7 @@ import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
-import com.bmskinner.nuclear_morphology.components.datasets.VirtualCellCollection;
+import com.bmskinner.nuclear_morphology.components.datasets.VirtualDataset;
 import com.bmskinner.nuclear_morphology.gui.components.SelectableCellIcon;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -162,7 +162,7 @@ public class CellCollectionModel extends DefaultTableModel {
 			return Optional.empty();
 		}
 
-		ICellCollection newCollection = new VirtualCellCollection(dataset, dataset.getName() + "_Curated");
+		ICellCollection newCollection = new VirtualDataset(dataset, dataset.getName() + "_Curated");
 		for (ICell c : cells) {
 			if(c==null)
 				LOGGER.fine("Null cell encountered!");
@@ -174,7 +174,7 @@ public class CellCollectionModel extends DefaultTableModel {
 
 		dataset.addChildCollection(newCollection);
 
-		IAnalysisDataset newDataset = dataset.getChildDataset(newCollection.getID());
+		IAnalysisDataset newDataset = dataset.getChildDataset(newCollection.getId());
 
 		try {
 			newCollection.createProfileCollection();

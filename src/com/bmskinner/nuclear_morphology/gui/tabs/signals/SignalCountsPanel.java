@@ -48,7 +48,7 @@ import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
-import com.bmskinner.nuclear_morphology.components.datasets.VirtualCellCollection;
+import com.bmskinner.nuclear_morphology.components.datasets.VirtualDataset;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
@@ -198,7 +198,7 @@ public class SignalCountsPanel extends DetailPanel {
             
             try {
             	ICellCollection filtered  = f.filter(dataset.getCollection());
-            	ICellCollection virt = new VirtualCellCollection(dataset, filtered.getName());
+            	ICellCollection virt = new VirtualDataset(dataset, filtered.getName());
             	filtered.getCells().forEach(c->virt.addCell(c));
             	virt.setName("Filtered_signal_count_"+groupPanel.getSelectedGroup().getGroupName());
 
