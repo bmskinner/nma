@@ -410,4 +410,11 @@ public interface HashOptions extends Serializable, XmlSerializable {
      * @param o
      */
     void set(HashOptions o);
+    
+    /**
+     * Test if the objects contain the same options
+     * and values 
+     * @return
+     */
+    boolean equals(HashOptions o);
 }

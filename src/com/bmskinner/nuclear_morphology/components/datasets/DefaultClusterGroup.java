@@ -19,6 +19,7 @@ package com.bmskinner.nuclear_morphology.components.datasets;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -196,7 +197,25 @@ public class DefaultClusterGroup implements IClusterGroup {
         return this.name;
     }
 
-    private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+    @Override
+	public int hashCode() {
+		return Objects.hash(id, ids, name, newickTree, options);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		DefaultClusterGroup other = (DefaultClusterGroup) obj;
+		return Objects.equals(id, other.id) && Objects.equals(ids, other.ids) && Objects.equals(name, other.name)
+				&& Objects.equals(newickTree, other.newickTree) && Objects.equals(options, other.options);
+	}
+
+	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
         if(id==null)
         	id = UUID.randomUUID();

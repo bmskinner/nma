@@ -379,7 +379,7 @@ public class TestDatasetBuilder {
 			
 		}
 		
-		IAnalysisDataset d = new DefaultAnalysisDataset(collection, new File(TEST_DATASET_IMAGE_FOLDER));
+		IAnalysisDataset d = new DefaultAnalysisDataset(collection, new File(TEST_DATASET_IMAGE_FOLDER).getAbsoluteFile());
 		d.setAnalysisOptions(o);
 
 		return d;
