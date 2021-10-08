@@ -80,7 +80,7 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
     }
     
     /**
-     * Construct a detector on the given folder, and output the results to the
+     * Construct a detector with the given options and output the results to the
      * given output folder
      * 
      * @param outputFolder the folder to save the results into

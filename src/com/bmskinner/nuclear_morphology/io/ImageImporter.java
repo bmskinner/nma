@@ -74,7 +74,7 @@ public class ImageImporter implements Importer {
      */
     public ImageImporter(final File f) {
         if (!Importer.isSuitableImportFile(f)) 
-            throw new IllegalArgumentException(f.getAbsolutePath() + ": " + INVALID_FILE_ERROR);
+            throw new IllegalArgumentException(f.getAbsolutePath() + ": " + Importer.whyIsUnsuitableImportFile(f));
         this.f = f;
     }
 

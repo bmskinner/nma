@@ -55,7 +55,7 @@ public class ImageableTest extends ComponentTester {
 		
 		// Take an arbitrary nucleus from a test dataset
 		// We only care that it has an offset component image relative to the source image
-		IAnalysisDataset d = SampleDatasetReader.openDataset(new File(TestResources.MOUSE_TEST_DATASET));
+		IAnalysisDataset d = SampleDatasetReader.openDataset(TestResources.MOUSE_TEST_DATASET);
 		Nucleus n = d.getCollection().getNuclei().toArray(new Nucleus[0])[0];
 				
 		// The buffer must be added from the expected value
@@ -70,7 +70,7 @@ public class ImageableTest extends ComponentTester {
 		
 		// Take an arbitrary nucleus from a test dataset
 		// We only care that it has an offset component image relative to the source image
-		IAnalysisDataset d = SampleDatasetReader.openDataset(new File(TestResources.MOUSE_TEST_DATASET));
+		IAnalysisDataset d = SampleDatasetReader.openDataset(TestResources.MOUSE_TEST_DATASET);
 		Nucleus n = d.getCollection().getNuclei().toArray(new Nucleus[0])[0];
 		
 		// This is the template image coordinate converted to source
@@ -99,7 +99,7 @@ public class ImageableTest extends ComponentTester {
     	op.setAngleWindowProportion(0.03);
 
     	File saveFile = new File(TestResources.IMAGE_FOLDER+"issues/offsets/offsets.nmd").getAbsoluteFile();
-    	IAnalysisDataset d = TestImageDatasetCreator.createTestDataset(testFolder.getAbsolutePath(), op, false);
+    	IAnalysisDataset d = TestImageDatasetCreator.createTestDataset(testFolder, op, false);
     	TestImageDatasetCreator.saveTestDataset(d, saveFile);
     	
     	Nucleus n = d.getCollection().getNuclei().toArray(new Nucleus[0])[0];

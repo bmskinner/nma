@@ -81,7 +81,10 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
     		detectionOptions.put(i.getAttributeValue("name"), new DefaultOptions(i.getChild("Options")));
     	
     	profileWindowProportion = Double.valueOf(e.getChild("ProfileWindow").getText());
-    	analysisTime = Long.valueOf(e.getChild("AnalysisTime").getText());
+    	
+    	if(e.getChild("AnalysisTime")!=null)
+    		analysisTime = Long.valueOf(e.getChildText("AnalysisTime"));
+    	else analysisTime = 0;
     			
     	rulesets = new RuleSetCollection(e.getChild("RuleSetCollection"));
     	

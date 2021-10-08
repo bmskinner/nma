@@ -19,12 +19,6 @@ import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 public class DatasetStatsExporterTest {
 
     
-	@Before
-	public void setUp() throws Exception {
-	}
-	
-
-
 	@Test
 	public void testSegmentsInterpolated() throws Exception {
 		

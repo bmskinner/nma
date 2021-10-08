@@ -130,6 +130,8 @@ public class SignalImageProber extends IntegratedImageProber {
     protected void okButtonClicked() {
 
         String name = getGroupName();
+        
+        options.setString(HashOptions.SIGNAL_GROUP_NAME, name);
 
         id = java.util.UUID.randomUUID();
 

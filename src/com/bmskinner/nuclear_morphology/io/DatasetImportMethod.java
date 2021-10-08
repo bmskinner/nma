@@ -119,14 +119,9 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
 
             try {
             	// Deserialise whatever is in the file
-            	try {
-            		LOGGER.fine("Trying to read file as XML");
-            		dataset = readXMLDataset(file);
-            	}  catch (UnloadableDatasetException e) {  // not xml format, try to deserialise directly
-            		LOGGER.fine("Dataset is not a readable XML format; deserialising directly");
-            		dataset = readDataset(file);
+            	LOGGER.fine("Trying to read file as XML");
+            	dataset = readXMLDataset(file);
 
-            	}
             	fireIndeterminateState();
             } catch (UnsupportedVersionException e) {
             	LOGGER.warning("Version "+e.getMessage()+" not supported");

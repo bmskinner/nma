@@ -22,6 +22,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -35,7 +36,10 @@ import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.classification.NucleusClusteringMethod;
+import com.bmskinner.nuclear_morphology.analysis.nucleus.ConsensusAveragingMethod;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.NucleusDetectionMethod;
+import com.bmskinner.nuclear_morphology.analysis.nucleus.ProfileRefoldMethod;
+import com.bmskinner.nuclear_morphology.analysis.nucleus.ProfileRefoldMethod.CurveRefoldingMode;
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetProfilingMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMethod.MorphologyAnalysisMode;
@@ -46,6 +50,7 @@ import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
+import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.components.signals.DefaultSignalGroup;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
@@ -171,9 +176,9 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod impleme
 		for(File imageFolder : imageFolders) {
 			if(options.hasDetectionOptions(CellularComponent.NUCLEUS)) {
 				List<IAnalysisDataset> datasets = createNucleusDetectionMethod(options, imageFolder);
-				createRefoldingMethod(datasets, options);
+				createRefoldingMethod(datasets);
 				createSignalDetectionMethods(datasets, options, imageFolder);
-				createClusteringMethods(datasets);
+				createClusteringMethods(datasets, options);
 				
 				for(IAnalysisDataset dataset : datasets)
 					methodsToRun.add(new DatasetExportMethod(dataset, dataset.getSavePath(), ExportFormat.JAVA)); 
@@ -211,26 +216,21 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod impleme
 	 * @param options
 	 * @throws Exception
 	 */
-	private void createRefoldingMethod(List<IAnalysisDataset> datasets, @NonNull IAnalysisOptions options) throws Exception {
+	private void createRefoldingMethod(List<IAnalysisDataset> datasets) throws Exception {
 		for(IAnalysisDataset dataset : datasets) {
-			// Refold
-//			switch(t){
-//				case ROUND: {
-//					if(!dataset.getCollection().hasConsensus())
-//						methodsToRun.add(new ProfileRefoldMethod(dataset, CurveRefoldingMode.FAST));
-//					for(IAnalysisDataset d : dataset.getAllChildDatasets())
-//						if(!d.getCollection().hasConsensus())
-//							methodsToRun.add(new ProfileRefoldMethod(d, CurveRefoldingMode.FAST));
-//					break;
-//				}
-//				default: {
-//					if(!dataset.getCollection().hasConsensus())
-//						methodsToRun.add(new ConsensusAveragingMethod(dataset));
-//					for(IAnalysisDataset d : dataset.getAllChildDatasets())
-//						if(!d.getCollection().hasConsensus())
-//							methodsToRun.add(new ConsensusAveragingMethod(d));
-//				}
-//			}
+			if(dataset.getCollection().getRuleSetCollection().equals(RuleSetCollection.roundRuleSetCollection())) {
+				if(!dataset.getCollection().hasConsensus())
+					methodsToRun.add(new ProfileRefoldMethod(dataset, CurveRefoldingMode.FAST));
+				for(IAnalysisDataset d : dataset.getAllChildDatasets())
+					if(!d.getCollection().hasConsensus())
+						methodsToRun.add(new ProfileRefoldMethod(d, CurveRefoldingMode.FAST));
+			} else {
+				if(!dataset.getCollection().hasConsensus())
+					methodsToRun.add(new ConsensusAveragingMethod(dataset));
+				for(IAnalysisDataset d : dataset.getAllChildDatasets())
+					if(!d.getCollection().hasConsensus())
+						methodsToRun.add(new ConsensusAveragingMethod(d));
+			}
 		}
 	}
 	
@@ -240,10 +240,7 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod impleme
 	 * @throws Exception
 	 */
 	private void createSignalDetectionMethods(List<IAnalysisDataset> datasets, @NonNull IAnalysisOptions options, File imageFolder) throws Exception {
-		
-		XMLReader.readOptions(xmlFile);
-		Map<UUID, String> signalNames = r.readSignalGroupNames();
-		
+
 		for(IAnalysisDataset dataset : datasets) {
 			// Add signals
 			boolean checkShell = true;
@@ -256,7 +253,9 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod impleme
 				HashOptions signalOptions = datasetOptions.getNuclearSignalOptions(signalGroupId);
 				
 				signalOptions.setFile(HashOptions.DETECTION_FOLDER, imageFolder);
-				ISignalGroup signalGroup = new DefaultSignalGroup(signalNames.get(signalGroupId), signalGroupId );
+				String name = options.getNuclearSignalOptions(signalGroupId).getString(HashOptions.SIGNAL_GROUP_NAME);
+				
+				ISignalGroup signalGroup = new DefaultSignalGroup(name, signalGroupId );
 				signalGroup.setGroupColour(ColourSelecter.getSignalColour(signalOptions.getInt(HashOptions.CHANNEL)));
 				
 				LOGGER.info("Set signal group "+signalGroup.getGroupName()+" to "+imageFolder);
@@ -279,9 +278,9 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod impleme
 		} 
 	}
 	
-	private void createClusteringMethods(List<IAnalysisDataset> datasets) throws Exception {
-		IAnalysisOptions o = XMLReader.readAnalysisOptions(xmlFile);
-		o.getSecondaryOptions(); //TODO
+	private void createClusteringMethods(List<IAnalysisDataset> datasets, @NonNull IAnalysisOptions options) throws Exception {
+
+		options.getSecondaryOptions(DATE_FORMAT);
 //		List<HashOptions> clusterOptions = r.readClusteringOptions();
 		 for(HashOptions cluster : clusterOptions) {
 			 for(IAnalysisDataset dataset : datasets) {

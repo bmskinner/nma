@@ -217,6 +217,24 @@ public interface Io  {
                 return false;              
             return true;
         }
+        
+        /**
+         * Complement to isSuitableImportFile; explains why
+         * that failed
+         * @param f
+         * @return
+         */
+        static String whyIsUnsuitableImportFile(final File f) {
+        	if(f==null)
+        		return "file variablle is null";
+        	if(!f.exists())
+        		return f.getAbsolutePath()+" does not exist";
+        	if(f.isDirectory())
+        		return f.getAbsolutePath()+" is a directory";
+        	if(!f.isFile())
+        		return f.getAbsolutePath()+" is not a file";
+        	return "";
+        }
     }
 
 }

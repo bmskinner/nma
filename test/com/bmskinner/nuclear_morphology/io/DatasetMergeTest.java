@@ -50,14 +50,11 @@ public class DatasetMergeTest {
      */
     @Test
     public void testDatasetMergeIncludesAllCells() throws Exception {
-        
-        File f1 = new File(TestResources.MULTIPLE_SOURCE_1_DATASET);
-        File f2 = new File(TestResources.MULTIPLE_SOURCE_2_DATASET);
-        
+
         int cells = 0;
 
-        IAnalysisDataset d1 = SampleDatasetReader.openDataset(f1);
-        IAnalysisDataset d2 = SampleDatasetReader.openDataset(f2);
+        IAnalysisDataset d1 = SampleDatasetReader.openDataset(TestResources.MULTIPLE_SOURCE_1_DATASET);
+        IAnalysisDataset d2 = SampleDatasetReader.openDataset(TestResources.MULTIPLE_SOURCE_2_DATASET);
 
         List<IAnalysisDataset> toMerge = new ArrayList<>();
         toMerge.add(d1);

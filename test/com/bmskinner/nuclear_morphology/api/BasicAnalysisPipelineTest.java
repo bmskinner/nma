@@ -21,7 +21,6 @@ package com.bmskinner.nuclear_morphology.api;
 
 import static org.junit.Assert.assertEquals;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -52,37 +51,28 @@ public class BasicAnalysisPipelineTest extends AnalysisPipelineTest {
 
 	@Test
 	public void testMouseDatasetMatchesSavedDataset() throws Exception{
-		File saveFile = new File(TestResources.MOUSE_TEST_DATASET);
-		IAnalysisDataset exp = SampleDatasetReader.openDataset(saveFile);
+		IAnalysisDataset exp = SampleDatasetReader.openDataset(TestResources.MOUSE_TEST_DATASET);
+		IAnalysisOptions op = OptionsFactory.makeDefaultRodentAnalysisOptions(TestResources.TESTING_MOUSE_FOLDER);
 
-		File testFolder = new File(TestResources.TESTING_MOUSE_FOLDER);
-		IAnalysisOptions op = OptionsFactory.makeDefaultRodentAnalysisOptions(testFolder);
-
-		IAnalysisDataset obs = TestImageDatasetCreator.createTestDataset(TestResources.UNIT_TEST_FOLDERNAME, op, false);
+		IAnalysisDataset obs = TestImageDatasetCreator.createTestDataset(TestResources.UNIT_TEST_FOLDER, op, false);
 		testDatasetEquality(exp, obs);       
 	}
 
 	@Test
 	public void testPigDatasetMatchesSavedDataset() throws Exception{
-		File saveFile = new File(TestResources.PIG_TEST_DATASET);
-		IAnalysisDataset exp = SampleDatasetReader.openDataset(saveFile);
+		IAnalysisDataset exp = SampleDatasetReader.openDataset(TestResources.PIG_TEST_DATASET);
+		IAnalysisOptions op = OptionsFactory.makeDefaultPigAnalysisOptions(TestResources.TESTING_PIG_FOLDER);
 
-		File testFolder = new File(TestResources.TESTING_PIG_FOLDER);
-		IAnalysisOptions op = OptionsFactory.makeDefaultPigAnalysisOptions(testFolder);
-
-		IAnalysisDataset obs = TestImageDatasetCreator.createTestDataset(TestResources.UNIT_TEST_FOLDERNAME, op, false);
+		IAnalysisDataset obs = TestImageDatasetCreator.createTestDataset(TestResources.UNIT_TEST_FOLDER, op, false);
 		testDatasetEquality(exp, obs);       
 	}
 
 	@Test
 	public void testRoundDatasetMatchesSavedDataset() throws Exception{
-		File saveFile = new File(TestResources.ROUND_TEST_DATASET);
-		IAnalysisDataset exp = SampleDatasetReader.openDataset(saveFile);
+		IAnalysisDataset exp = SampleDatasetReader.openDataset(TestResources.ROUND_TEST_DATASET);
+		IAnalysisOptions op = OptionsFactory.makeDefaultRoundAnalysisOptions(TestResources.TESTING_ROUND_FOLDER);
 
-		File testFolder = new File(TestResources.TESTING_ROUND_FOLDER);
-		IAnalysisOptions op = OptionsFactory.makeDefaultRoundAnalysisOptions(testFolder);
-
-		IAnalysisDataset obs = TestImageDatasetCreator.createTestDataset(TestResources.UNIT_TEST_FOLDERNAME, op, false);
+		IAnalysisDataset obs = TestImageDatasetCreator.createTestDataset(TestResources.UNIT_TEST_FOLDER, op, false);
 		testDatasetEquality(exp, obs);       
 	}
 	

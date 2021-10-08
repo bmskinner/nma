@@ -32,8 +32,7 @@ public class NucleusDetectionTest {
 	
 	@Test
 	public void testAllNuclearParametersCalculated() throws Exception {
-		File saveFile = new File(TestResources.MOUSE_TEST_DATASET);
-		IAnalysisDataset test = SampleDatasetReader.openDataset(saveFile);
+		IAnalysisDataset test = SampleDatasetReader.openDataset(TestResources.MOUSE_TEST_DATASET);
 		
 		for(Measurement stat : Measurement.getNucleusStats()) {
 			double value = test.getCollection().getMedian(stat, CellularComponent.NUCLEUS, MeasurementScale.PIXELS);

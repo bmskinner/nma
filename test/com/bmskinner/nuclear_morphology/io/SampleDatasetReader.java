@@ -48,8 +48,7 @@ public class SampleDatasetReader {
      * @throws Exception
      */
     public static final IAnalysisDataset openTestRodentDataset() throws Exception {
-        File f = new File(TestResources.MOUSE_TEST_DATASET);
-        return openDataset(f);
+        return openDataset(TestResources.MOUSE_TEST_DATASET);
     }
     
     /**
@@ -58,8 +57,7 @@ public class SampleDatasetReader {
      * @throws Exception
      */
     public static final IAnalysisDataset openTestPigDataset() throws Exception {
-        File f = new File(TestResources.PIG_TEST_DATASET);
-        return openDataset(f);
+        return openDataset(TestResources.PIG_TEST_DATASET);
     }
     
     /**
@@ -68,8 +66,7 @@ public class SampleDatasetReader {
      * @throws Exception
      */
     public static final IAnalysisDataset openTestRoundDataset() throws Exception {
-        File f = new File(TestResources.ROUND_TEST_DATASET);
-        return openDataset(f);
+        return openDataset(TestResources.ROUND_TEST_DATASET);
     }
     
     /**
@@ -78,8 +75,7 @@ public class SampleDatasetReader {
      * @throws Exception
      */
     public static final IAnalysisDataset openTestMouseSignalsDataset() throws Exception {
-        File f = new File(TestResources.MOUSE_SIGNALS_DATASET);
-        return openDataset(f);
+        return openDataset(TestResources.MOUSE_SIGNALS_DATASET);
     }
         
     /**

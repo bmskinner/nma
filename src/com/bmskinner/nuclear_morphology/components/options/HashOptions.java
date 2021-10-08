@@ -75,10 +75,11 @@ public interface HashOptions extends Serializable, XmlSerializable {
     int     DEFAULT_CHANNEL            = 2;
     boolean DEFAULT_NORMALISE_CONTRAST = false;
     
-    /** Constants relating to signal**/
+    /** Constants relating to signals **/
     
     String MAX_FRACTION       = "Max fraction";
     String SIGNAL_DETECTION_MODE_KEY = "DETECTION_MODE";
+    String SIGNAL_GROUP_NAME  = "Name";
 
     int                 DEFAULT_SIGNAL_THRESHOLD    = 70;
     int                 DEFAULT_MIN_SIGNAL_SIZE     = 5;
@@ -411,10 +412,4 @@ public interface HashOptions extends Serializable, XmlSerializable {
      */
     void set(HashOptions o);
     
-    /**
-     * Test if the objects contain the same options
-     * and values 
-     * @return
-     */
-    boolean equals(HashOptions o);
 }

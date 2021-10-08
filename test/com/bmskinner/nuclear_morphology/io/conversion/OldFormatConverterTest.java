@@ -67,32 +67,5 @@ public abstract class OldFormatConverterTest extends ComponentTester {
         assertTrue(errors, ok);
         return d;
     }
-    
-    @Test
-    public abstract void test_1_13_0_ConvertsToCurrent() throws Exception;
-    
-    @Test
-    public abstract void test_1_13_1_ConvertsToCurrent() throws Exception;
-    
-    @Test
-    public abstract void test_1_13_2_ConvertsToCurrent() throws Exception;
-    
-    @Test
-    public abstract void test_1_13_3_ConvertsToCurrent() throws Exception;
-    
-    @Test
-    public abstract void test_1_13_4_ConvertsToCurrent() throws Exception;
-    
-    @Test
-    public abstract void test_1_13_5_ConvertsToCurrent() throws Exception;
-    
-    @Test
-    public abstract void test_1_13_6_ConvertsToCurrent() throws Exception;
-    
-    @Test
-    public abstract void test_1_13_7_ConvertsToCurrent() throws Exception;
-    
-    @Test
-    public abstract void test_1_13_8_ConvertsToCurrent() throws Exception;
 
 }

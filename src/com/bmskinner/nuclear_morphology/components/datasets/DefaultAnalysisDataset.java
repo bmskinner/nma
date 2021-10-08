@@ -107,14 +107,7 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
     	
     	analysisOptions = new DefaultAnalysisOptions(e.getChild("AnalysisOptions"));
     	
-//		for(IAnalysisDataset d : this.childDatasets) {
-//			try {
-//				d.getCollection().getProfileCollection().createAndRestoreProfileAggregate(d.getCollection());
-//			} catch (ProfileException e1) {
-//				throw new ComponentCreationException("Unable to generate profiles", e1);
-//			}
-//		}
-		
+    	cellCollection = new DefaultCellCollection(e.getChild("CellCollection"));		
     }
     
     /**

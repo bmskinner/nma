@@ -116,7 +116,7 @@ public class GlobalOptions extends DefaultOptions {
         setBoolean(IS_DEBUG_INTERFACE_KEY, false);
         setInt(NUM_IMAGEJ_THREADS_KEY, 2);
         this.setBoolean(IS_GLCM_INTERFACE_KEY, false);
-        this.datasetExportFormat = ExportFormat.JAVA;
+        this.datasetExportFormat = ExportFormat.XML;
     }
 
     public synchronized MeasurementScale getScale() {

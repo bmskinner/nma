@@ -62,8 +62,8 @@ public class MergeSourceExtracterTest extends SampleDatasetReader {
     
     @Test
     public void testSourceExtractedFromMergedDatasetEqualsInput() throws Exception {
-    	File f1 = new File(TestResources.MOUSE_CLUSTERS_DATASET);
-    	File f2 = new File(TestResources.MOUSE_TEST_DATASET);
+    	File f1 = TestResources.MOUSE_CLUSTERS_DATASET;
+    	File f2 = TestResources.MOUSE_TEST_DATASET;
     	File f3 = new File(MERGED_DATASET_FILE);
 
     	IAnalysisDataset d1 = openDataset(f1);

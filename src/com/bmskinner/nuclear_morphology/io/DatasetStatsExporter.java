@@ -237,6 +237,9 @@ public class DatasetStatsExporter extends StatsExporter {
         for (Measurement s : Measurement.getNucleusStats()) {
             double varP = 0;
             double varM = 0;
+            
+            if(!c.hasStatistic(s))
+            	continue;
 
             if (s.equals(Measurement.VARIABILITY)) {
 

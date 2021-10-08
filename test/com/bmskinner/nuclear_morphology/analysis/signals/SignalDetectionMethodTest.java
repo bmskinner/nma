@@ -39,14 +39,14 @@ public class SignalDetectionMethodTest extends ComponentTester {
 	 */
 	@Test
 	public void testAddingSignalChangesDatasetHash() throws Exception {
-		File testFolder = new File(TestResources.TESTING_MOUSE_SIGNALS_FOLDER).getAbsoluteFile();
+		File testFolder = TestResources.TESTING_MOUSE_SIGNALS_FOLDER;
     	IAnalysisOptions op = OptionsFactory.makeDefaultRodentAnalysisOptions(testFolder);
     	HashOptions nucleus = op.getDetectionOptions(CellularComponent.NUCLEUS).get();
     	nucleus.setInt(HashOptions.MAX_SIZE_PIXELS, 12000);
     	nucleus.setInt(HashOptions.MIN_SIZE_PIXELS, 4000);
 
     	// Make the dataset with no signals
-    	IAnalysisDataset d = TestImageDatasetCreator.createTestDataset(testFolder.toString(), op, false);
+    	IAnalysisDataset d = TestImageDatasetCreator.createTestDataset(testFolder, op, false);
 
     	// Get current hash
     	DatasetListManager.getInstance().addDataset(d);

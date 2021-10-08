@@ -89,7 +89,9 @@ public abstract class AbstractAnalysisDataset implements Serializable, IAnalysis
     	
     	if(e.getChild("ChildDatasets")!=null) {
     		for(Element el : e.getChild("ChildDatasets").getChildren()) {
-    			childDatasets.add(new VirtualDataset(el));
+    			VirtualDataset v = new VirtualDataset(el);
+    			v.parentDataset = this;
+    			childDatasets.add(v);
     		}
     	}
     }
@@ -340,7 +342,9 @@ public abstract class AbstractAnalysisDataset implements Serializable, IAnalysis
 		if (parentDataset == null) {
 			if (other.parentDataset != null)
 				return false;
-		} else if (!parentDataset.equals(other.parentDataset))
+			// Note - we can't compare datasets directly because the equals is recursive through
+			// children
+		} else if (!parentDataset.getId().equals(other.parentDataset.getId()))
 			return false;
 		if (childDatasets == null) {
 			if (other.childDatasets != null)

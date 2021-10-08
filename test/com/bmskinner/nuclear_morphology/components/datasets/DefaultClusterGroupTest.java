@@ -12,7 +12,7 @@ import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 
 public class DefaultClusterGroupTest extends ComponentTester {
 	
-	DefaultClusterGroup g;
+	private DefaultClusterGroup g;
 	
 	@Before
 	public void createGroup() throws Exception {
