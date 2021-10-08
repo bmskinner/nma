@@ -103,7 +103,7 @@ public class CellRelocationMethod extends SingleDatasetAnalysisMethod {
 
                     if (!id.equals(dataset.getId())) {
                         dataset.getCollection().getProfileManager()
-                                .copyCollectionOffsets(dataset.getChildDataset(id).getCollection());
+                                .copySegmentsAndLandmarksTo(dataset.getChildDataset(id).getCollection());
 
                     }
                 }

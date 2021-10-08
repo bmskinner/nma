@@ -79,7 +79,7 @@ public class ExtractRandomCellsAction extends SingleDatasetResultAction {
 			 if (c.hasCells()) {
 
 	                try {
-	                    dataset.getCollection().getProfileManager().copyCollectionOffsets(c);
+	                    dataset.getCollection().getProfileManager().copySegmentsAndLandmarksTo(c);
 	                } catch (ProfileException e) {
 	                    LOGGER.warning("Error copying collection offsets");
 	                    LOGGER.log(Loggable.STACK, "Error in offsetting", e);

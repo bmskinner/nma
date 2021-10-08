@@ -100,7 +100,7 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
                 LOGGER.finest( "Cluster " + cluster + ": " + c.getName());
 
                 try {
-                    dataset.getCollection().getProfileManager().copyCollectionOffsets(c);
+                    dataset.getCollection().getProfileManager().copySegmentsAndLandmarksTo(c);
                 } catch (ProfileException e) {
                     LOGGER.warning("Error copying collection offsets");
                     LOGGER.log(Loggable.STACK, "Error in offsetting", e);
@@ -222,8 +222,9 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
      * cluster
      * 
      * @param clusterer the clusterer to use
+     * @throws ProfileException 
      */
-    private void assignClusters(Clusterer clusterer) {
+    private void assignClusters(Clusterer clusterer) throws ProfileException {
 
     	int numberOfClusters = 0;
 		try {
@@ -260,6 +261,12 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
     			LOGGER.log(Loggable.STACK, "Error assigning instance to cluster", e);
     		}
 
+    	}
+    	
+    	// complete the new collections by profiling 
+    	for (ICellCollection c : clusterMap.values()) {
+    		c.createProfileCollection();
+    		dataset.getCollection().getProfileManager().copySegmentsAndLandmarksTo(c);
     	}
 
     }

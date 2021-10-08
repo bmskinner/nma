@@ -48,6 +48,12 @@ public interface IClusterGroup extends Serializable, XmlSerializable {
      */
     String getName();
     
+    /**
+     * Make a copy of this group
+     * @return
+     */
+    IClusterGroup duplicate();
+    
     
     /**
      * Set the name of the cluster group

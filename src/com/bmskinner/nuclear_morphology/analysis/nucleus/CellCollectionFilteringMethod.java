@@ -59,10 +59,8 @@ public class CellCollectionFilteringMethod extends MultipleDatasetAnalysisMethod
 	@Override
 	public IAnalysisResult call() throws Exception {
 		
-		CellCollectionFilterer filterer = new CellCollectionFilterer(options);
-
 		for(IAnalysisDataset d : datasets) {
-			ICellCollection filtered = filterer.filter(d.getCollection());
+			ICellCollection filtered = CellCollectionFilterer.filter(d.getCollection(), options);
 			if(filtered==null)
 				continue;
 			if (!filtered.hasCells())
@@ -74,7 +72,7 @@ public class CellCollectionFilteringMethod extends MultipleDatasetAnalysisMethod
 			ICellCollection v = new VirtualDataset(d, newCollectionName, null);
 			v.addAll(filtered);
 			try {
-				d.getCollection().getProfileManager().copyCollectionOffsets(v);
+				d.getCollection().getProfileManager().copySegmentsAndLandmarksTo(v);
 				d.getCollection().getSignalManager().copySignalGroups(v);
 
 			} catch (ProfileException e) {

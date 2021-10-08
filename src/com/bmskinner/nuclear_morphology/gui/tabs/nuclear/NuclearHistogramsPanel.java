@@ -175,7 +175,7 @@ public class NuclearHistogramsPanel extends HistogramsTabPanel  {
                             LOGGER.info("Filtered " + subCollection.size() + " nuclei");
                             dataset.addChildCollection(subCollection);
                             try {
-                                dataset.getCollection().getProfileManager().copyCollectionOffsets(subCollection);
+                                dataset.getCollection().getProfileManager().copySegmentsAndLandmarksTo(subCollection);
                             } catch (Exception e1) {
                                 LOGGER.log(Loggable.STACK, "Error applying segments", e1);
                             }

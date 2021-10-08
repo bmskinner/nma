@@ -116,6 +116,25 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 //		}
 		
     }
+    
+    /**
+     * Constructor used for duplicating datasets
+     * @param d the template dataset
+     * @throws Exception 
+     */
+    private DefaultAnalysisDataset(DefaultAnalysisDataset d) {
+    	super(d);
+    	isRoot = d.isRoot;
+    	cellCollection = d.cellCollection.duplicate();
+    	
+    	for(IAnalysisDataset g : d.otherDatasets)
+    		otherDatasets.add(g.copy());
+    	
+    	mergeSources.addAll(d.mergeSources);
+    	
+    	savePath = new File(d.savePath.getAbsolutePath());
+
+    }
 
     @Override
 	public Element toXmlElement() {
@@ -143,23 +162,8 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 
 
     @Override
-	public IAnalysisDataset copy() throws Exception {
-    	DefaultAnalysisDataset result = new DefaultAnalysisDataset(cellCollection.duplicate(), savePath);
-        
-        result.setAnalysisOptions(analysisOptions.duplicate());
-        
-        // copy child datasets
-        for(IAnalysisDataset child : this.getChildDatasets())
-        	result.addChildDataset(child.copy());
-        
-        // copy merge sources
-        for(IAnalysisDataset mge : this.getMergeSources())
-        	result.addMergeSource(mge.copy());
-        
-        result.setDatasetColour(datasetColour);
-        result.setRoot(isRoot);
-        
-        return result;
+	public IAnalysisDataset copy() {
+    	return new DefaultAnalysisDataset(this);
     }
     
     @Override

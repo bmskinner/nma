@@ -192,7 +192,7 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
             subDataset.addAll(collection);
 
             dataset.addChildDataset(subDataset);
-            dataset.getCollection().getProfileManager().copyCollectionOffsets(collection);
+            dataset.getCollection().getProfileManager().copySegmentsAndLandmarksTo(collection);
 
         } catch (Exception e) {
             LOGGER.log(Loggable.STACK, "Error processing signal group", e);

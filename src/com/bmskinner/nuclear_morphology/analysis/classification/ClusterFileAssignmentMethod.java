@@ -242,7 +242,7 @@ public class ClusterFileAssignmentMethod extends SingleDatasetAnalysisMethod {
             if (c.hasCells()) {
 
                 try {
-                	dataset.getCollection().getProfileManager().copyCollectionOffsets(c);
+                	dataset.getCollection().getProfileManager().copySegmentsAndLandmarksTo(c);
                 } catch (ProfileException e) {
                     e.printStackTrace();
                 }

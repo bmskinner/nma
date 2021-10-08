@@ -265,21 +265,19 @@ public abstract class AbstractScatterChartPanel extends DetailPanel  {
         		.add(statB, component, scale, range.getLowerBound(), range.getUpperBound())
         		.build();
         
-        CellCollectionFilterer f = new CellCollectionFilterer(options);
-        
         
         for (IAnalysisDataset d : getDatasets()) {
         	try {
         		
         		// Get the filtered cells as a real collection
-        		ICellCollection filtered  = f.filter(d.getCollection());
+        		ICellCollection filtered  = CellCollectionFilterer.filter(d.getCollection(), options);
         		
         		// Put them into a virtual collection
         		ICellCollection virt = new VirtualDataset(d, filtered.getName());
         		filtered.getCells().forEach(c->virt.addCell(c));
         		virt.setName("Filtered_" + statA + "_" + statB);
         		
-        		d.getCollection().getProfileManager().copyCollectionOffsets(virt);
+        		d.getCollection().getProfileManager().copySegmentsAndLandmarksTo(virt);
         		d.getCollection().getSignalManager().copySignalGroups(virt);
         		d.addChildCollection(virt);		
         	} catch (CollectionFilteringException | ProfileException e1) {

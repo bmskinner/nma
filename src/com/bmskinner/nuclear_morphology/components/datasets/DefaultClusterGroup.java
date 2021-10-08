@@ -71,6 +71,14 @@ public class DefaultClusterGroup implements IClusterGroup {
     		ids.add(UUID.fromString(el.getText()));
     	
     }
+    
+    private DefaultClusterGroup(DefaultClusterGroup g) {
+    	ids.addAll(g.ids);
+    	options = g.options.duplicate();
+    	name = new String(g.name);
+    	newickTree = new String(g.newickTree);
+    	id = g.id;
+    }
 
     @Override
 	public Element toXmlElement() {
@@ -197,5 +205,10 @@ public class DefaultClusterGroup implements IClusterGroup {
     private void writeObject(java.io.ObjectOutputStream out) throws IOException {
         out.defaultWriteObject();
     }
+
+	@Override
+	public IClusterGroup duplicate() {
+		return new DefaultClusterGroup(this);
+	}
 
 }

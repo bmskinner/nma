@@ -17,11 +17,8 @@
 package com.bmskinner.nuclear_morphology.components.datasets;
 
 import java.awt.Color;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -31,10 +28,7 @@ import java.util.regex.Pattern;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.jdom2.Element;
-import org.jdom2.output.Format;
-import org.jdom2.output.XMLOutputter;
 
-import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.Version;
 import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
@@ -98,6 +92,27 @@ public abstract class AbstractAnalysisDataset implements Serializable, IAnalysis
     			childDatasets.add(new VirtualDataset(el));
     		}
     	}
+    }
+    
+    /**
+     * Constructor used when copying datasets
+     * @param d
+     */
+    protected AbstractAnalysisDataset(AbstractAnalysisDataset d) {
+    	versionCreated = d.versionCreated;
+    	versionLastSaved = d.versionLastSaved;
+    	
+    	if(d.datasetColour!=null)
+    		datasetColour = d.datasetColour;
+    	
+    	for(IClusterGroup g : d.clusterGroups)
+    		clusterGroups.add(g.duplicate());
+    	
+    	for(IAnalysisDataset g : d.childDatasets)
+    		childDatasets.add(g.copy());
+    	
+		if(d.analysisOptions!=null)
+			analysisOptions = d.analysisOptions.duplicate();
     }
     
 	@Override

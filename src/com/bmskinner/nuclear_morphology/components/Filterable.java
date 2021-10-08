@@ -34,40 +34,6 @@ import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 public interface Filterable {
 
     /**
-     * Return a collection of cells present in both collections
-     * 
-     * @param other the other collection
-     * @return
-     */
-    ICellCollection and(@NonNull ICellCollection collection);
-
-    /**
-     * Return a collection of cells present this collection but not the other
-     * 
-     * @param other the other collection
-     * @return
-     */
-    ICellCollection not(@NonNull ICellCollection collection);
-
-    /**
-     * Return a collection of cells present this collection or the other but not
-     * both
-     * 
-     * @param other the other collection
-     * @return a new collection with cells not shared between datasets
-     */
-    ICellCollection xor(@NonNull ICellCollection collection);
-
-    /**
-     * Return a collection containing cell in either dataset. Cells in both
-     * datasets are not duplicated.
-     * 
-     * @param collection the comparison dataset
-     * @return a new collection with cells from either dataset
-     */
-    ICellCollection or(@NonNull ICellCollection collection);
-
-    /**
      * Filter the collection on the given statistic
      * 
      * @param stat the stat to filter on

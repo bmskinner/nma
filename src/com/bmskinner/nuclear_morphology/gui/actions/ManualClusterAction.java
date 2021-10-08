@@ -174,7 +174,7 @@ public class ManualClusterAction extends SingleDatasetResultAction {
                 if (coll.hasCells()) {
 
                     try {
-                        dataset.getCollection().getProfileManager().copyCollectionOffsets(coll);
+                        dataset.getCollection().getProfileManager().copySegmentsAndLandmarksTo(coll);
                     } catch (ProfileException e) {
                         LOGGER.warning("Error copying collection offsets");
                         LOGGER.log(Loggable.STACK, "Error in offsetting", e);

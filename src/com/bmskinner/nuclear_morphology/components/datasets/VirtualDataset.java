@@ -12,10 +12,10 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.Map.Entry;
 import java.util.function.Predicate;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -33,7 +33,6 @@ import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException
 import com.bmskinner.nuclear_morphology.components.UnavailableComponentException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
-import com.bmskinner.nuclear_morphology.components.cells.DefaultCell;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
@@ -143,7 +142,7 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
 		this(parent, name, id);
 		addAll(cells);
 		createProfileCollection();
-		cells.getProfileManager().copyCollectionOffsets(this);
+		cells.getProfileManager().copySegmentsAndLandmarksTo(this);
 	}
 	
 	public VirtualDataset(@NonNull Element e) throws ComponentCreationException {
@@ -173,12 +172,10 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
 	 * @param v
 	 */
 	private VirtualDataset(VirtualDataset v) {
-		super();
+		super(v);
 		uuid = v.uuid;
 		name = v.name;
-		
-		if(v.analysisOptions!=null)
-			analysisOptions = v.analysisOptions.duplicate();
+
 		cellIDs.addAll(v.cellIDs);
 		profileCollection = v.profileCollection.duplicate();
 		parentDataset = v.parentDataset;
@@ -650,94 +647,6 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
         return profileManager;
     }
 
-	/**
-	 * Choose if the merged collection for this and another collection should be a child of this,
-	 * a child of the other collection, or a new real collection.
-	 * @param other the other collection which will be merged
-	 * @param newName the name of the new collection
-	 * @return the new collection of the correct type
-	 */
-	private ICellCollection chooseNewCollectionType(@NonNull ICellCollection other, String newName) {
-
-		// Decide if the other collection is also a child of the same root parentDataset.getCollection()
-//		IAnalysisDataset rootThis  = DatasetListManager.getInstance().getRootparentDataset.getCollection()(this);
-//		IAnalysisDataset rootOther = DatasetListManager.getInstance().getRootparentDataset.getCollection()(other);
-		
-		// If the two datasets have different root parentDataset.getCollection()s, return a new real collection
-//		return rootThis==rootOther ? new VirtualCellCollection(rootThis, newName)
-//								   : new DefaultCellCollection(this, newName);
-		
-//		return new VirtualDataset(this, newName);
-	}
-
-    @Override
-    public ICellCollection and(@NonNull ICellCollection other) {
-
-        ICellCollection newCollection = chooseNewCollectionType(other, "AND operation");
-
-        for (ICell c : other.getCells()) {
-
-            if (this.contains(c)) {
-                newCollection.addCell(new DefaultCell(c));
-            }
-        }
-
-        return newCollection;
-    }
-
-    @Override
-    public ICellCollection not(@NonNull ICellCollection other) {
-        ICellCollection newCollection = chooseNewCollectionType(other, "NOT operation");
-
-        for (ICell c : getCells()) {
-
-            if (!other.contains(c)) {
-                newCollection.addCell(new DefaultCell(c));
-            }
-        }
-
-        return newCollection;
-    }
-
-    @Override
-    public ICellCollection xor(@NonNull ICellCollection other) {
-        ICellCollection newCollection = chooseNewCollectionType(other, "XOR operation");
-
-        for (ICell c : getCells()) {
-
-            if (!other.contains(c)) {
-                newCollection.addCell(new DefaultCell(c));
-            }
-        }
-
-        for (ICell c : other.getCells()) {
-
-            if (!this.contains(c)) {
-                newCollection.addCell(new DefaultCell(c));
-            }
-        }
-
-        return newCollection;
-    }
-
-    @Override
-    public ICellCollection or(@NonNull ICellCollection other) {
-        ICellCollection newCollection = chooseNewCollectionType(other, "OR operation");
-
-        for (ICell c : getCells()) {
-            newCollection.addCell(new DefaultCell(c));
-        }
-
-        for (ICell c : other.getCells()) {
-
-            if (!this.contains(c)) {
-                newCollection.addCell(new DefaultCell(c));
-            }
-        }
-
-        return newCollection;
-    }
-
     @Override
     public ICellCollection filter(@NonNull Predicate<ICell> predicate) {
 
@@ -756,7 +665,7 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
         } else {
         	try {
         		subCollection.createProfileCollection();
-                this.getProfileManager().copyCollectionOffsets(subCollection);
+                this.getProfileManager().copySegmentsAndLandmarksTo(subCollection);
                 this.getSignalManager().copySignalGroups(subCollection);
 
             } catch (ProfileException e) {
@@ -1532,7 +1441,7 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
 	}
 
 	@Override
-	public IAnalysisDataset copy() throws Exception {
+	public IAnalysisDataset copy() {
 		return new VirtualDataset(this);
 	}
 

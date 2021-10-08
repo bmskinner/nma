@@ -16,9 +16,11 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.analysis.nucleus;
 
+import java.util.UUID;
 import java.util.logging.Logger;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
+import com.bmskinner.nuclear_morphology.components.datasets.DefaultCellCollection;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -31,25 +33,83 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  */
 public class CellCollectionFilterer {
 	
-	private static final Logger LOGGER = Logger.getLogger(CellCollectionFilterer.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(CellCollectionFilterer.class.getName());	
 	
-	private final FilteringOptions options;
-		
 	/**
-	 * Create with options describing what filters to apply
-	 * @param options
+	 * Create a new collection containing cells that are in both collections.
+	 * The rulesets for the first collection will be applied on the assumption
+	 * that they are the same in both collections
+	 * @param c1 the first collection and source of rulesets for the result
+	 * @param c2 the second collection
+	 * @return
 	 */
-	public CellCollectionFilterer(FilteringOptions options) {
-		this.options = options;
-	}
+	public static ICellCollection and(ICellCollection c1, ICellCollection c2) {			
+		ICellCollection result = new DefaultCellCollection(c1.getRuleSetCollection(), "AND operation", UUID.randomUUID());
 		
+		c1.stream().filter(c->c2.contains(c)).forEach(c->result.add(c.duplicate()));
+
+		return result;
+	}
+	
+
+	/**
+	 * Create a new collection containing cells that are in either collection.
+	 * The rulesets for the first collection will be applied on the assumption
+	 * that they are the same in both collections
+	 * @param c1 the first collection and source of rulesets for the result
+	 * @param c2 the second collection
+	 * @return
+	 */
+	public static ICellCollection or(ICellCollection c1, ICellCollection c2) {			
+		ICellCollection result = new DefaultCellCollection(c1.getRuleSetCollection(), "OR operation", UUID.randomUUID());
+		
+		c1.stream().forEach(c->result.add(c.duplicate()));
+		c2.stream().forEach(c->result.add(c.duplicate()));
+		
+		return result;
+	}
+	
+	/**
+	 * Create a new collection containing cells in collection one that are 
+	 * not in collection two
+	 * The rulesets for the first collection will be applied on the assumption
+	 * that they are the same in both collections
+	 * @param c1 the first collection and source of rulesets for the result
+	 * @param c2 the second collection
+	 * @return
+	 */
+	public static ICellCollection not(ICellCollection c1, ICellCollection c2) {			
+		ICellCollection result = new DefaultCellCollection(c1.getRuleSetCollection(), "NOT operation", UUID.randomUUID());
+		
+		c1.stream().filter(c->!c2.contains(c)).forEach(c->result.add(c.duplicate()));
+		
+		return result;
+	}
+	
+	/**
+	 * Create a new collection containing cells that are not shared between
+	 * the collection (exclusive or).
+	 * The rulesets for the first collection will be applied on the assumption
+	 * that they are the same in both collections
+	 * @param c1 the first collection and source of rulesets for the result
+	 * @param c2 the second collection
+	 * @return
+	 */
+	public static ICellCollection xor(ICellCollection c1, ICellCollection c2) {			
+		ICellCollection result = new DefaultCellCollection(c1.getRuleSetCollection(), "XOR operation", UUID.randomUUID());
+		
+		c1.stream().filter(c->!c2.contains(c)).forEach(c->result.add(c.duplicate()));
+		c2.stream().filter(c->!c1.contains(c)).forEach(c->result.add(c.duplicate()));
+		
+		return result;
+	}
 	/**
 	 * Filter the collection using the internal filtering options
 	 * @param collection the collection to filter
 	 * @return the filtered collection
 	 * @throws CollectionFilteringException
 	 */
-	public ICellCollection filter(ICellCollection collection)
+	public static ICellCollection filter(ICellCollection collection, FilteringOptions options)
 			throws CollectionFilteringException {
 		
 		ICellCollection filtered = collection.filter(options.getPredicate(collection));
@@ -57,7 +117,7 @@ public class CellCollectionFilterer {
         if (filtered == null || !filtered.hasCells())
             throw new CollectionFilteringException("No collection returned");
         try {
-            collection.getProfileManager().copyCollectionOffsets(filtered);
+            collection.getProfileManager().copySegmentsAndLandmarksTo(filtered);
             collection.getSignalManager().copySignalGroups(filtered);
 
         } catch (ProfileException e) {

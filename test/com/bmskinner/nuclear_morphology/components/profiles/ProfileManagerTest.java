@@ -73,7 +73,7 @@ public class ProfileManagerTest {
 			VirtualDataset v = new VirtualDataset(d,TestDatasetBuilder.TEST_DATASET_NAME, TestDatasetBuilder.TEST_DATASET_UUID);
 			v.addAll(d.getCollection().getCells());
 			v.createProfileCollection();
-			d.getCollection().getProfileManager().copyCollectionOffsets(v);
+			d.getCollection().getProfileManager().copySegmentsAndLandmarksTo(v);
 			for(ICell c : d.getCollection().getCells()) {
 				v.addCell(c);
 			}

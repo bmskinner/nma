@@ -31,15 +31,15 @@ import com.bmskinner.nuclear_morphology.components.UnavailableComponentException
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileCollection;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.components.profiles.SegmentedFloatProfile;
-import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
-import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
@@ -204,7 +204,7 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 		if(dataset.hasChildren()){
 			for(IAnalysisDataset child: dataset.getAllChildDatasets()){
 				child.getCollection().setConsensus(null);
-				dataset.getCollection().getProfileManager().copyCollectionOffsets(child.getCollection());				
+				dataset.getCollection().getProfileManager().copySegmentsAndLandmarksTo(child.getCollection());				
 			}
 		}
 		return new DefaultAnalysisResult(dataset);
@@ -254,7 +254,7 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 
 		LOGGER.fine("Applying existing segmentation profile to population");
 
-		sourceCollection.getProfileManager().copyCollectionOffsets(collection);
+		sourceCollection.getProfileManager().copySegmentsAndLandmarksTo(collection);
 
 		// At this point the collection has only a regular profile collections.
 		// No Frankenprofile has been copied.

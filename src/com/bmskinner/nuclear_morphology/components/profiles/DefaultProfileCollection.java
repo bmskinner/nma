@@ -18,13 +18,13 @@ package com.bmskinner.nuclear_morphology.components.profiles;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.UUID;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -61,9 +61,9 @@ public class DefaultProfileCollection implements IProfileCollection {
     private static final long serialVersionUID = 1L;
 
     private Map<Landmark, Integer> indexes  = new HashMap<>(); // indexes of tags in the profile. Assumes the RP is at zero.
-    private IProfileSegment[]  segments = null;
+    private List<IProfileSegment> segments = new ArrayList<>();
 
-    private transient int                                 length;
+    private transient int length;
     private transient Map<ProfileType, IProfileAggregate> map   = new HashMap<>(); // the aggregates for each profile type
     private transient ProfileCache                        cache = new ProfileCache(); // cached median profiles etc
 
@@ -73,7 +73,7 @@ public class DefaultProfileCollection implements IProfileCollection {
     public DefaultProfileCollection() {
         indexes.put(Landmark.REFERENCE_POINT, ZERO_INDEX);
     }
-    
+        
     /**
      * Construct from an XML element. Use for 
      * unmarshalling. The element should conform
@@ -87,39 +87,43 @@ public class DefaultProfileCollection implements IProfileCollection {
 					Integer.parseInt(el.getText()));
 		}
 		
-    	segments = new IProfileSegment[e.getChildren("Segment").size()];
-    	int i=0;
 		for(Element el : e.getChildren("Segment")){
-			segments[i++] = new DefaultProfileSegment(el);
+			segments.add(new DefaultProfileSegment(el));
 		}
 		
-		length = segments[0].length();
+		if(!segments.isEmpty())
+			length = segments.get(0).length();
+    }
+    
+    /**
+     * Used for duplicating
+     * @param p
+     */
+    private DefaultProfileCollection(DefaultProfileCollection p) {
+    	for(Landmark t : p.indexes.keySet())
+			indexes.put(t, p.indexes.get(t));
+    	
+    	for(IProfileSegment s : p.segments)
+			segments.add(s.copy());
+    	
+    	length = p.length;
+    	
+    	for(ProfileType t : p.map.keySet())
+			map.put(t, p.map.get(t).duplicate());
+    	
+    	cache = p.cache.duplicate();
     }
 
 	@Override
 	public IProfileCollection duplicate() {
-		DefaultProfileCollection pc = new DefaultProfileCollection();
-		
-		for(Landmark t : indexes.keySet())
-			pc.indexes.put(t, indexes.get(t));
-		
-		pc.segments = new IProfileSegment[segments.length];
-		for(int i=0; i<segments.length; i++)
-			pc.segments[i] = segments[i].copy();
-		
-		pc.length = length;
-		for(ProfileType t : map.keySet())
-			pc.map.put(t, map.get(t).duplicate());
-		
-		pc.cache = cache.duplicate();
-		return pc;
+		return new DefaultProfileCollection(this);
 	}
     
     @Override
     public int segmentCount() {
     	if(segments==null)
     		return 0;
-    	return segments.length;
+    	return segments.size();
     }
     
     @Override
@@ -186,7 +190,7 @@ public class DefaultProfileCollection implements IProfileCollection {
 
         // get the profile array
         IProfile p = getProfile(type, tag, quartile);
-        if (segments[0] == null)
+        if (segments.isEmpty())
         	throw new UnsegmentedProfileException("No segments assigned to profile collection");
 
         try {
@@ -367,11 +371,12 @@ public class DefaultProfileCollection implements IProfileCollection {
     	for(IProfileSegment s : n) {
     		s.offset(offset);
     	}
-    	this.segments = new IProfileSegment[n.size()];
-
-        for (int i = 0; i < segments.length; i++) {
-            segments[i] = n.get(i).copy();
-        }
+    	
+    	
+    	segments = new ArrayList<>();
+    	for(IProfileSegment s : n) {
+    		segments.add(s.copy());
+    	}
     }
 
     @Override
@@ -401,15 +406,13 @@ public class DefaultProfileCollection implements IProfileCollection {
         
         // There are segments, not just the default segment, and the segment 
         // profile length is different to the required length. Interpolation needed.
-        if (segments != null && segments.length>1 && length != segments[0].getProfileLength()) {
+        if (segments.size()>1 && length != segments.get(0).getProfileLength()) {
         	createProfileAggregateOfDifferentLength(collection, length);
         	return;
         }
-
-        if(segments==null) {
-        	segments = new IProfileSegment[1];
-        	segments[0] = new DefaultProfileSegment(0, 0, length, IProfileCollection.DEFAULT_SEGMENT_ID);
-        }
+        
+        if(segments.isEmpty())
+        	segments.add(new DefaultProfileSegment(0, 0, length, IProfileCollection.DEFAULT_SEGMENT_ID));
         
         for (ProfileType type : ProfileType.values()) {
 
@@ -455,7 +458,7 @@ public class DefaultProfileCollection implements IProfileCollection {
     			List<IProfileSegment> originalSegList = new ArrayList<>();
     			for(IProfileSegment s : segments)
     				originalSegList.add(s);
-        		IProfile template = new FloatProfile(0, segments[0].getProfileLength());
+        		IProfile template = new FloatProfile(0, segments.get(0).getProfileLength());
         		ISegmentedProfile segTemplate = new SegmentedFloatProfile(template, originalSegList);
         		
         		// Now use the interpolation method to adjust the segment lengths
@@ -492,7 +495,7 @@ public class DefaultProfileCollection implements IProfileCollection {
         if (segments == null) {
             createProfileAggregate(collection, collection.getMedianArrayLength());
         } else {
-            int length = segments[0].getProfileLength();
+            int length = segments.get(0).getProfileLength();
             createProfileAggregate(collection, length);
         }
     }
@@ -623,13 +626,12 @@ public class DefaultProfileCollection implements IProfileCollection {
     
     
 
-    @Override
+    
+
+    
+	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((indexes == null) ? 0 : indexes.hashCode());
-		result = prime * result + Arrays.hashCode(segments);
-		return result;
+		return Objects.hash(indexes, segments);
 	}
 
 	@Override
@@ -641,18 +643,9 @@ public class DefaultProfileCollection implements IProfileCollection {
 		if (getClass() != obj.getClass())
 			return false;
 		DefaultProfileCollection other = (DefaultProfileCollection) obj;
-		if (indexes == null) {
-			if (other.indexes != null)
-				return false;
-		} else if (!indexes.equals(other.indexes))
-			return false;
-		if (!Arrays.equals(segments, other.segments))
-			return false;
-		return true;
+		return Objects.equals(indexes, other.indexes) && Objects.equals(segments, other.segments);
 	}
 
-
-    
 	@Override
 	public Element toXmlElement() {
 		Element e = new Element("ProfileCollection");

@@ -193,16 +193,14 @@ public class SignalCountsPanel extends DetailPanel {
         			.setMatchType(FilterMatchType.ALL_MATCH)
         			.add(Measurement.NUCLEUS_SIGNAL_COUNT, CellularComponent.NUCLEUS, groupPanel.getSelectedID(), minSignals, maxSignals)
         			.build();
-        	
-        	CellCollectionFilterer f = new CellCollectionFilterer(options);
-            
+        	            
             try {
-            	ICellCollection filtered  = f.filter(dataset.getCollection());
+            	ICellCollection filtered  = CellCollectionFilterer.filter(dataset.getCollection(), options);
             	ICellCollection virt = new VirtualDataset(dataset, filtered.getName());
             	filtered.getCells().forEach(c->virt.addCell(c));
             	virt.setName("Filtered_signal_count_"+groupPanel.getSelectedGroup().getGroupName());
 
-            	dataset.getCollection().getProfileManager().copyCollectionOffsets(virt);
+            	dataset.getCollection().getProfileManager().copySegmentsAndLandmarksTo(virt);
             	dataset.addChildCollection(virt);		
             } catch (CollectionFilteringException | ProfileException e1) {
             	LOGGER.log(Loggable.STACK, "Unable to filter collection for " + dataset.getName(), e1);

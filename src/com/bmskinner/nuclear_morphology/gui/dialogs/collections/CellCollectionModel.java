@@ -178,7 +178,7 @@ public class CellCollectionModel extends DefaultTableModel {
 
 		try {
 			newCollection.createProfileCollection();
-			dataset.getCollection().getProfileManager().copyCollectionOffsets(newCollection);
+			dataset.getCollection().getProfileManager().copySegmentsAndLandmarksTo(newCollection);
 		} catch (ProfileException e) {
 			LOGGER.log(Level.WARNING, "Unable to copy profiles to new child collection");
 			LOGGER.log(Loggable.STACK, "Error copying profiles to new child collection", e);

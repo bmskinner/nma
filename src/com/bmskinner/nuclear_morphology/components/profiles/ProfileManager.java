@@ -416,7 +416,7 @@ public class ProfileManager {
      * @param destination the collection to update
      * @throws ProfileException if the copy fails
      */
-    public void copyCollectionOffsets(@NonNull final ICellCollection destination) throws ProfileException {
+    public void copySegmentsAndLandmarksTo(@NonNull final ICellCollection destination) throws ProfileException {
 
         // Get the corresponding profile collection from the template
         IProfileCollection sourcePC = collection.getProfileCollection();

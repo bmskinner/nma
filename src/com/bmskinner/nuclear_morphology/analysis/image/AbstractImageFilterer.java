@@ -17,7 +17,6 @@
 package com.bmskinner.nuclear_morphology.analysis.image;
 
 import java.awt.Color;
-import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +26,6 @@ import javax.swing.ImageIcon;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nuclear_morphology.analysis.signals.SignalWarper;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 
 import ij.ImagePlus;

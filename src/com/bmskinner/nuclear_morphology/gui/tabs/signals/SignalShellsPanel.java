@@ -486,7 +486,7 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
 			 LOGGER.info("Found "+filtered.size()+" cells");
 				ICellCollection virt = new VirtualDataset(dataset, "Filtered_on_shell");
 				filtered.getCells().forEach(virt::addCell);
-				dataset.getCollection().getProfileManager().copyCollectionOffsets(virt);
+				dataset.getCollection().getProfileManager().copySegmentsAndLandmarksTo(virt);
 				dataset.addChildCollection(virt);		
 				getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.REFRESH_POPULATIONS);
 			} catch (ProfileException e1) {

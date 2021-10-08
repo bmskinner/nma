@@ -926,7 +926,7 @@ public class DefaultCellCollection implements ICellCollection {
 
 		try {
 			subCollection.createProfileCollection();
-			this.getProfileManager().copyCollectionOffsets(subCollection);
+			this.getProfileManager().copySegmentsAndLandmarksTo(subCollection);
 			this.getSignalManager().copySignalGroups(subCollection);
 
 		} catch (ProfileException e) {
@@ -973,76 +973,6 @@ public class DefaultCellCollection implements ICellCollection {
 		return filter(pred);
 	}
 
-	@Override
-	public ICellCollection and(@NonNull ICellCollection other) {
-
-		ICellCollection newCollection = chooseNewCollectionType(other, "AND operation");
-
-		other.streamCells()
-		.filter(c->contains(c))
-		.forEach(c->newCollection.addCell(c.duplicate()));
-
-		return newCollection;
-	}
-
-	@Override
-	public ICellCollection not(@NonNull ICellCollection other) {
-
-		ICellCollection newCollection = chooseNewCollectionType(other, "NOT operation");
-
-		streamCells()
-		.filter(c->!other.contains(c))
-		.forEach(c->newCollection.addCell(c.duplicate()));
-
-		return newCollection;
-	}
-
-	@Override
-	public ICellCollection xor(@NonNull ICellCollection other) {
-		ICellCollection newCollection = chooseNewCollectionType(other, "XOR operation");
-
-		streamCells()
-		.filter(c->!other.contains(c))
-		.forEach(c->newCollection.addCell(c.duplicate()));
-
-		other.streamCells()
-		.filter(c->!contains(c))
-		.forEach(c->newCollection.addCell(c.duplicate()));
-
-		return newCollection;
-	}
-
-	@Override
-	public ICellCollection or(@NonNull ICellCollection other) {
-
-		ICellCollection newCollection = chooseNewCollectionType(other, "OR operation");
-
-		getCells().forEach(c->newCollection.addCell(new DefaultCell(c)));
-
-		other.getCells().forEach(c->newCollection.addCell(new DefaultCell(c)));
-
-		return newCollection;
-	}
-
-	/**
-	 * Choose if the merged collection for this and another collection should be a child of this,
-	 * a child of the other collection, or a new real collection.
-	 * @param other the other collection which will be merged
-	 * @param newName the name of the new collection
-	 * @return the new collection of the correct type
-	 */
-	private ICellCollection chooseNewCollectionType(@NonNull ICellCollection other, String newName) {
-
-		// Decide if the other collection is also a child of the same root parent
-//		IAnalysisDataset rootThis  = DatasetListManager.getInstance().getRootParent(this);
-//		IAnalysisDataset rootOther = DatasetListManager.getInstance().getRootParent(other);
-		
-		// If the two datasets have different root parents, return a new real collection
-//		return rootThis==rootOther ? new VirtualCellCollection(rootThis, newName)
-//								   : new DefaultCellCollection(this, newName);
-		
-		return new VirtualDataset(this, newName);
-	}
 
 	@Override
 	public void setSourceFolder(@NonNull File newFolder) {

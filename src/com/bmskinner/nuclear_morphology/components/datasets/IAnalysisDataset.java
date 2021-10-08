@@ -55,9 +55,8 @@ public interface IAnalysisDataset extends Serializable, XmlSerializable {
      * datasets, clusters or signal groups
      * 
      * @return
-     * @throws Exception
      */
-    IAnalysisDataset copy() throws Exception;
+    IAnalysisDataset copy();
 
     /**
      * Get the software version used to create the dataset

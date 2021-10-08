@@ -32,7 +32,7 @@ import com.bmskinner.nuclear_morphology.components.datasets.DefaultAnalysisDatas
 import com.bmskinner.nuclear_morphology.components.datasets.DefaultCellCollection;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
-import com.bmskinner.nuclear_morphology.components.datasets.MergeSourceAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.datasets.VirtualDataset;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
@@ -126,7 +126,7 @@ public class MergeSourceExtractionMethod extends MultipleDatasetAnalysisMethod {
     		// This wil match cell segmentations by default, since the cells
     		// have been copied from the merged dataset.
     		parent.getCollection().getProfileManager()
-    		.copyCollectionOffsets(newDataset.getCollection());
+    		.copySegmentsAndLandmarksTo(newDataset.getCollection());
 
     		// Copy over the signal collections where appropriate
     		copySignalGroups(templateCollection, newDataset);
@@ -152,9 +152,10 @@ public class MergeSourceExtractionMethod extends MultipleDatasetAnalysisMethod {
     private @NonNull IAnalysisDataset getRootParent(@NonNull IAnalysisDataset dataset) {
     	if(dataset.isRoot())
     		return dataset;
-    	if (dataset instanceof MergeSourceAnalysisDataset) {
+    	
+    	if (dataset instanceof VirtualDataset) {
 
-     		MergeSourceAnalysisDataset d = (MergeSourceAnalysisDataset) dataset;
+    		VirtualDataset d = (VirtualDataset) dataset;
      		IAnalysisDataset parent =  d.getParent().get();
      		if(parent.isRoot())
      			return parent;
