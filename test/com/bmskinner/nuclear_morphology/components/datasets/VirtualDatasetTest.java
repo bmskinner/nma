@@ -14,10 +14,6 @@ import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 public class VirtualDatasetTest extends ComponentTester {
 	
 	private VirtualDataset d;
-	private static final UUID CHILD_ID_1 = UUID.fromString("00000000-0000-0000-0000-000000000001");
-    private static final UUID CHILD_ID_2 = UUID.fromString("00000000-0000-0000-0000-000000000002");
-    private static final UUID CHILD_ID_NULL = UUID.fromString("00000000-0000-0000-0000-000000000000");
-    
 
 	@Before
     public void loadDataset() throws Exception {    	

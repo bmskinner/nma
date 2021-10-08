@@ -57,7 +57,6 @@ public class ExportWorkspaceAction extends VoidResultAction {
 
     @Override
     public void run() {
-    	WorkspaceExporter exp = WorkspaceExporter.createExporter();
     	for(IWorkspace w : workspaces) {
     	 LOGGER.info("Saving workspace "+w.getName()+"...");
             if(w.getSaveFile()==null) {
@@ -69,7 +68,7 @@ public class ExportWorkspaceAction extends VoidResultAction {
                     continue;
                 }
             }
-            exp.exportWorkspace(w);
+            WorkspaceExporter.exportWorkspace(w);
     	}
         this.cancel();
     }

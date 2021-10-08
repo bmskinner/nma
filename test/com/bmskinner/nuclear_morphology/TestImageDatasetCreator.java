@@ -7,6 +7,7 @@ import java.awt.Color;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.attribute.FileAttribute;
 import java.util.UUID;
 import java.util.logging.Logger;
 
@@ -167,7 +168,7 @@ public class TestImageDatasetCreator {
     	if(!testFolder.exists()){
             throw new IllegalArgumentException("Detection folder does not exist");
         }
-    	
+    	    	
     	IAnalysisDataset d = new NucleusDetectionMethod(testFolder, op).call().getFirstDataset();
         
         new DatasetProfilingMethod(d)
@@ -179,6 +180,7 @@ public class TestImageDatasetCreator {
 
         if(addRed) {
         	HashOptions redOptions = OptionsFactory.makeNuclearSignalOptions(testFolder);
+        	redOptions.setString(HashOptions.SIGNAL_GROUP_NAME, RED_SIGNAL_NAME);
         	redOptions.setInt(HashOptions.MIN_SIZE_PIXELS, 5);
         	redOptions.setDouble(HashOptions.MAX_FRACTION, 0.5);
 
@@ -188,18 +190,19 @@ public class TestImageDatasetCreator {
         	d.getAnalysisOptions().get().setDetectionOptions(RED_SIGNAL_ID.toString(), redOptions);
         	new SignalDetectionMethod(d, redOptions, RED_SIGNAL_ID).call();
         }
-        
+
         if(addGreen) {
         	HashOptions greenOptions = OptionsFactory.makeNuclearSignalOptions(testFolder);
-             greenOptions.setInt(HashOptions.CHANNEL, 1);
-             ISignalGroup green = new DefaultSignalGroup(GREEN_SIGNAL_NAME, GREEN_SIGNAL_ID);
-             green.setGroupColour(Color.GREEN);
-             d.getCollection().addSignalGroup(green);
-             d.getAnalysisOptions().get().setDetectionOptions(GREEN_SIGNAL_ID.toString(), greenOptions);
-             new SignalDetectionMethod(d, greenOptions, GREEN_SIGNAL_ID).call();
+        	greenOptions.setString(HashOptions.SIGNAL_GROUP_NAME, GREEN_SIGNAL_NAME);
+        	greenOptions.setInt(HashOptions.CHANNEL, 1);
+        	ISignalGroup green = new DefaultSignalGroup(GREEN_SIGNAL_NAME, GREEN_SIGNAL_ID);
+        	green.setGroupColour(Color.GREEN);
+        	d.getCollection().addSignalGroup(green);
+        	d.getAnalysisOptions().get().setDetectionOptions(GREEN_SIGNAL_ID.toString(), greenOptions);
+        	new SignalDetectionMethod(d, greenOptions, GREEN_SIGNAL_ID).call();
         }
 
-    	new ShellAnalysisMethod(d, OptionsFactory.makeShellAnalysisOptions()).call();
+        new ShellAnalysisMethod(d, OptionsFactory.makeShellAnalysisOptions()).call();
     	return d;
     }
     
@@ -212,7 +215,9 @@ public class TestImageDatasetCreator {
      * @throws Exception if anything goes wrong
      */
     public static IAnalysisDataset createTestDataset(File outputFolder, IAnalysisOptions op, boolean makeClusters) throws Exception {
-
+    	if(!outputFolder.exists())
+        	Files.createDirectories(outputFolder.toPath());
+    	
     	if(!outputFolder.exists())
     		throw new IllegalArgumentException("Output folder does not exist: "+outputFolder.getAbsolutePath());
     	
@@ -245,6 +250,7 @@ public class TestImageDatasetCreator {
     public static void saveTestDataset(IAnalysisDataset d, File saveFile) throws Exception {
         if(saveFile.exists())
         	saveFile.delete();
+
         
         assertFalse("Expecting output file to be deleted: "+saveFile.getAbsolutePath(), saveFile.exists());
     	new DatasetExportMethod(d, saveFile, ExportFormat.XML).call();
@@ -262,7 +268,7 @@ public class TestImageDatasetCreator {
         assertTrue("Expecting backup copied to "+bakFile.getAbsolutePath(), bakFile.exists());
         
         // Create an xml representation of the analysis options for pipeline testing
-        String xmlName = saveFile.getAbsolutePath().replaceAll(".nmd$", ".xml");
+        String xmlName = saveFile.getAbsolutePath().replaceAll(".nmd$", ".options.xml");
         File xmlFile = new File(xmlName);
         if(xmlFile.exists())
         	xmlFile.delete();

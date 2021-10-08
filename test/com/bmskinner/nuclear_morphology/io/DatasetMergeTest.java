@@ -20,6 +20,7 @@
 package com.bmskinner.nuclear_morphology.io;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
 import java.io.File;
@@ -67,6 +68,7 @@ public class DatasetMergeTest {
 
         IAnalysisResult r = m.call();
         IAnalysisDataset d = r.getFirstDataset();
+        assertNotNull(d);
 
         assertEquals(d.getCollection().getNucleusCount(), cells);
 

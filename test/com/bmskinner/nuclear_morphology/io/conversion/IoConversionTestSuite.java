@@ -33,10 +33,11 @@ import org.junit.runners.Suite.SuiteClasses;
  */
 @RunWith(Suite.class)
 @SuiteClasses({ 
-    MouseFormatConverterTest.class, 
-    PigFormatConverterTest.class, 
-    RoundFormatConverterTest.class,
-    CellularComponentConversionTest.class})
+//    MouseFormatConverterTest.class, 
+//    PigFormatConverterTest.class, 
+//    RoundFormatConverterTest.class,
+//    CellularComponentConversionTest.class
+    })
 
 public class IoConversionTestSuite {
 

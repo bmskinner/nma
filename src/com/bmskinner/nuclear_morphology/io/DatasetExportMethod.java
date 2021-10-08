@@ -96,8 +96,8 @@ public class DatasetExportMethod extends SingleDatasetAnalysisMethod {
 	    			isOk = saveAnalysisDatasetToXML(dataset, saveFile); 
 	    			break;
 	    		}
-	    		case JAVA: 
-	    		default: isOk = saveAnalysisDataset(dataset, saveFile); break;
+//	    		case JAVA: 
+//	    		default: isOk = saveAnalysisDataset(dataset, saveFile); break;
     		}
 
     		if (isOk) 
@@ -145,8 +145,6 @@ public class DatasetExportMethod extends SingleDatasetAnalysisMethod {
  			LOGGER.log(Loggable.STACK, String.format("Unable to write to file %s: %s", saveFile.getAbsolutePath(), e.getMessage()), e);
  			ok = false;
  		}
- 		
-
  		return ok;
     }
     
@@ -157,44 +155,44 @@ public class DatasetExportMethod extends SingleDatasetAnalysisMethod {
      * @param saveFile the file to save as
      * @return
      */
-    public boolean saveAnalysisDataset(IAnalysisDataset dataset, File saveFile) {
-
-        boolean ok = true;
-
-		LOGGER.fine("Saving dataset to " + saveFile.getAbsolutePath());
-		
-		File parentFolder = saveFile.getParentFile();
-		if(!parentFolder.exists())
-			parentFolder.mkdirs();
-
-
-		try(OutputStream fos        = new FileOutputStream(saveFile);
-		    CountedOutputStream cos = new CountedOutputStream(fos);
-		    OutputStream buffer     = new BufferedOutputStream(cos);
-		    ObjectOutputStream output = new ObjectOutputStream(buffer);
-		   ) {
-			
-			 cos.addCountListener(this::fireProgressEvent);
-
-		    output.writeObject(dataset);
-
-		} catch (IOException e) {
-		    LOGGER.log(Loggable.STACK, "IO error saving dataset", e);
-		    ok = false;
-		} catch (Exception e1) {
-		    LOGGER.log(Loggable.STACK, "Unexpected exception saving dataset to: " + saveFile.getAbsolutePath(), e1);
-		    ok = false;
-		} catch (StackOverflowError e) {
-		    LOGGER.log(Loggable.STACK, "StackOverflow saving dataset to: " + saveFile.getAbsolutePath(), e);
-		    ok = false;
-		}
-
-		if (!ok)
-		    return false;
-
-		DatasetListManager.getInstance().updateHashCode(dataset);
-        return true;
-    }
+//    public boolean saveAnalysisDataset(IAnalysisDataset dataset, File saveFile) {
+//
+//        boolean ok = true;
+//
+//		LOGGER.fine("Saving dataset to " + saveFile.getAbsolutePath());
+//		
+//		File parentFolder = saveFile.getParentFile();
+//		if(!parentFolder.exists())
+//			parentFolder.mkdirs();
+//
+//
+//		try(OutputStream fos        = new FileOutputStream(saveFile);
+//		    CountedOutputStream cos = new CountedOutputStream(fos);
+//		    OutputStream buffer     = new BufferedOutputStream(cos);
+//		    ObjectOutputStream output = new ObjectOutputStream(buffer);
+//		   ) {
+//			
+//			 cos.addCountListener(this::fireProgressEvent);
+//
+//		    output.writeObject(dataset);
+//
+//		} catch (IOException e) {
+//		    LOGGER.log(Loggable.STACK, "IO error saving dataset", e);
+//		    ok = false;
+//		} catch (Exception e1) {
+//		    LOGGER.log(Loggable.STACK, "Unexpected exception saving dataset to: " + saveFile.getAbsolutePath(), e1);
+//		    ok = false;
+//		} catch (StackOverflowError e) {
+//		    LOGGER.log(Loggable.STACK, "StackOverflow saving dataset to: " + saveFile.getAbsolutePath(), e);
+//		    ok = false;
+//		}
+//
+//		if (!ok)
+//		    return false;
+//
+//		DatasetListManager.getInstance().updateHashCode(dataset);
+//        return true;
+//    }
 
     /**
      * Save the given dataset to it's preferred save path
@@ -202,14 +200,14 @@ public class DatasetExportMethod extends SingleDatasetAnalysisMethod {
      * @param dataset the dataset
      * @return ok or not
      */
-    public boolean saveAnalysisDataset(IAnalysisDataset dataset) {
-
-        File saveFile = dataset.getSavePath();
-        if (saveFile.exists())
-            saveFile.delete();
-        return saveAnalysisDataset(dataset, saveFile);
-
-    }
+//    public boolean saveAnalysisDataset(IAnalysisDataset dataset) {
+//
+//        File saveFile = dataset.getSavePath();
+//        if (saveFile.exists())
+//            saveFile.delete();
+//        return saveAnalysisDataset(dataset, saveFile);
+//
+//    }
 
     private void backupExistingSaveFile() {
     	File saveFile = dataset.getSavePath();
