@@ -23,7 +23,7 @@ package com.bmskinner.nuclear_morphology.components;
  * @since 1.13.4
  *
  */
-public class UnavailableBorderPointException extends UnavailableComponentException {
+public class UnavailableBorderPointException extends MissingComponentException {
     private static final long serialVersionUID = 1L;
 
     public UnavailableBorderPointException() {

@@ -20,7 +20,7 @@ import org.junit.runners.Parameterized.Parameters;
 import com.bmskinner.nuclear_morphology.TestDatasetBuilder;
 import com.bmskinner.nuclear_morphology.analysis.DatasetValidator;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.DefaultCellCollection;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
@@ -96,7 +96,7 @@ public class ProfileManagerTest {
 	}
 
 	@Test
-	public void testSetLockOnAllNucleusSegmentsExcept() throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException, UnsegmentedProfileException {
+	public void testSetLockOnAllNucleusSegmentsExcept() throws MissingLandmarkException, MissingProfileException, ProfileException, UnsegmentedProfileException {
 		ISegmentedProfile profile = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);
 		UUID segId1 = profile.getSegmentAt(1).getID();
 		

@@ -22,7 +22,7 @@ import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.profiles.DefaultProfileAggregate;
@@ -30,7 +30,7 @@ import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
@@ -66,11 +66,11 @@ public class RepresentativeMedianFinder {
 	/**
 	 * Find the median that describes the largest subset of the dataset
 	 * @return
-	 * @throws UnavailableBorderTagException
-	 * @throws UnavailableProfileTypeException
+	 * @throws MissingLandmarkException
+	 * @throws MissingProfileException
 	 * @throws ProfileException
 	 */
-	public IProfile findMedian() throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException {
+	public IProfile findMedian() throws MissingLandmarkException, MissingProfileException, ProfileException {
     	LOGGER.fine("Beginning median finding");
     	
     	// Get normalised pairwise differences between nuclei profiles
@@ -97,11 +97,11 @@ public class RepresentativeMedianFinder {
 	 * Find the median from the subset of the dataset with greatest similarity
 	 * to the existing collection median
 	 * @return
-	 * @throws UnavailableBorderTagException
-	 * @throws UnavailableProfileTypeException
+	 * @throws MissingLandmarkException
+	 * @throws MissingProfileException
 	 * @throws ProfileException
 	 */
-	public IProfile findCollectionMedian() throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException {
+	public IProfile findCollectionMedian() throws MissingLandmarkException, MissingProfileException, ProfileException {
 
 		try {
 			
@@ -126,7 +126,7 @@ public class RepresentativeMedianFinder {
 			// Return the median profile of this subset
 			return buildMedianFromProfiles(profiles, collection.getMedianArrayLength());
 			
-		} catch (UnavailableBorderTagException | UnavailableProfileTypeException | ProfileException e) {
+		} catch (MissingLandmarkException | MissingProfileException | ProfileException e) {
 			LOGGER.log(Loggable.STACK, "Error creating matrix, returning default median", e);
 			return collection.getProfileCollection().getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);
 		}
@@ -136,11 +136,11 @@ public class RepresentativeMedianFinder {
 	 * Find the profiles in the collection that have a below median difference to the target profile
 	 * @param target
 	 * @return
-	 * @throws UnavailableBorderTagException
-	 * @throws UnavailableProfileTypeException
+	 * @throws MissingLandmarkException
+	 * @throws MissingProfileException
 	 * @throws ProfileException
 	 */
-	public List<IProfile> findBestProfiles(@NonNull IProfile target) throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException{
+	public List<IProfile> findBestProfiles(@NonNull IProfile target) throws MissingLandmarkException, MissingProfileException, ProfileException{
 		float[] differences = calculateDistancesToTemplate(target);
 		float medianDiff = Stats.quartile(differences, Stats.MEDIAN);
 		List<IProfile> result = new ArrayList<>();
@@ -158,7 +158,7 @@ public class RepresentativeMedianFinder {
 		return result;
 	}
 	
-	private IProfile buildMedianFromProfiles(@NonNull final List<IProfile> profiles, int length) throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException {
+	private IProfile buildMedianFromProfiles(@NonNull final List<IProfile> profiles, int length) throws MissingLandmarkException, MissingProfileException, ProfileException {
 		LOGGER.fine("Group size for new median is "+profiles.size());
 		LOGGER.fine("Building aggregate of length "+length);
 		DefaultProfileAggregate agg = new DefaultProfileAggregate(length, profiles.size());
@@ -190,7 +190,7 @@ public class RepresentativeMedianFinder {
 	
 	
 	
-	private float[] calculateDistancesToTemplate(IProfile template) throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException {		
+	private float[] calculateDistancesToTemplate(IProfile template) throws MissingLandmarkException, MissingProfileException, ProfileException {		
 		float[] result = new float[collection.getNucleusCount()];
 		for(int i=0; i<result.length; i++) {
 			result[i] = (float) nuclei.get(i).getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT).absoluteSquareDifference(template);
@@ -201,11 +201,11 @@ public class RepresentativeMedianFinder {
 	/**
 	 * Create a matrix containing the pairwise differences between nuclear profiles.
 	 * @return a matrix in which each nucleus profile is compared to every other nucleus profile
-	 * @throws UnavailableBorderTagException
-	 * @throws UnavailableProfileTypeException
+	 * @throws MissingLandmarkException
+	 * @throws MissingProfileException
 	 * @throws ProfileException
 	 */
-	private float[][] buildDifferenceMatrix() throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException{
+	private float[][] buildDifferenceMatrix() throws MissingLandmarkException, MissingProfileException, ProfileException{
 		float[][] matrix = new float[collection.getNucleusCount()][collection.getNucleusCount()];
 		
 		for(int i=0; i<nuclei.size(); i++) {
@@ -226,11 +226,11 @@ public class RepresentativeMedianFinder {
 	 *       [5, 3, 0]          [-5, 1, 5]
 	 * @param matrix the matrix of pairwise differences between nuclear profiles
 	 * @return a matrix showing the pairwise differences normalised to each nucleus in turn 
-	 * @throws UnavailableBorderTagException
-	 * @throws UnavailableProfileTypeException
+	 * @throws MissingLandmarkException
+	 * @throws MissingProfileException
 	 * @throws ProfileException
 	 */
-	private float[][] buildSimilarityMatrix(float[][] matrix) throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException{
+	private float[][] buildSimilarityMatrix(float[][] matrix) throws MissingLandmarkException, MissingProfileException, ProfileException{
 		float[][] dist = new float[matrix[0].length][matrix[0].length];
 		for(int i=0; i<matrix[0].length; i++) {
 			for(int j=0; j<matrix[0].length; j++) {

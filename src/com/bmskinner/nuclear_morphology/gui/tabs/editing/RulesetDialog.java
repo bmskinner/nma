@@ -64,14 +64,14 @@ import com.bmskinner.nuclear_morphology.charting.charts.ProfileChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPanel;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.DefaultChartOptions;
-import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.profiles.BooleanProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.LandmarkType;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.rules.Rule;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSet;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
@@ -428,8 +428,8 @@ public class RulesetDialog extends LoadingIconDialog
                 LOGGER.info("Updating " + tag + " to index " + newTagIndex);
 
                 dataset.getCollection().getProfileManager().updateBorderTag(tag, newTagIndex);
-            } catch (IndexOutOfBoundsException | ProfileException | UnavailableBorderTagException
-                    | UnavailableProfileTypeException e) {
+            } catch (IndexOutOfBoundsException | ProfileException | MissingLandmarkException
+                    | MissingProfileException e) {
                 LOGGER.warning("Unable to update border tag index");
                 LOGGER.log(Loggable.STACK, "Profile error", e);
                 return;
@@ -484,11 +484,11 @@ public class RulesetDialog extends LoadingIconDialog
      * @param t the tag to display
      * 
      * @return a chart showing the index found by the tag
-     * @throws UnavailableBorderTagException
-     * @throws UnavailableProfileTypeException
+     * @throws MissingLandmarkException
+     * @throws MissingProfileException
      * @throws ProfileException
      */
-    private JFreeChart createChart(@NonNull Landmark t, @NonNull String collection) throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException {
+    private JFreeChart createChart(@NonNull Landmark t, @NonNull String collection) throws MissingLandmarkException, MissingProfileException, ProfileException {
     	LOGGER.finest("Creating chart for "+t);
     	JFreeChart chart = ProfileChartFactory.createEmptyChart(ProfileType.ANGLE);
     	ChartOptions options = new DefaultChartOptions((IAnalysisDataset) null);
@@ -581,7 +581,7 @@ public class RulesetDialog extends LoadingIconDialog
 		String collection = (String) borderTagTable.getValueAt(row, 1);
 		try {
 			return createChart(t, collection);
-		} catch (UnavailableBorderTagException | UnavailableProfileTypeException | ProfileException e) {
+		} catch (MissingLandmarkException | MissingProfileException | ProfileException e) {
 			LOGGER.log(Loggable.STACK, "Unable to make chart: "+e.getMessage(), e);
 			return MorphologyChartFactory.createErrorChart();
 		}

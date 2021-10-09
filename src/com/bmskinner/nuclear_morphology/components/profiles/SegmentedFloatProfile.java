@@ -26,7 +26,7 @@ import java.util.logging.Logger;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.components.UnavailableComponentException;
+import com.bmskinner.nuclear_morphology.components.MissingComponentException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -128,13 +128,13 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
     }
 
     @Override
-    public @NonNull IProfileSegment getSegment(@NonNull UUID id) throws UnavailableComponentException {
+    public @NonNull IProfileSegment getSegment(@NonNull UUID id) throws MissingComponentException {
         for (IProfileSegment seg : this.segments) {
             if (seg.getID().equals(id)) {
                 return seg;
             }
         }
-        throw new UnavailableComponentException("Segment with id " + id.toString() + " not found");
+        throw new MissingComponentException("Segment with id " + id.toString() + " not found");
 
     }
 
@@ -149,7 +149,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
     }
 
     @Override
-    public List<IProfileSegment> getSegmentsFrom(@NonNull UUID id) throws UnavailableComponentException, ProfileException {
+    public List<IProfileSegment> getSegmentsFrom(@NonNull UUID id) throws MissingComponentException, ProfileException {
         return getSegmentsFrom(getSegment(id));
     }
 
@@ -161,7 +161,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
      * @throws ProfileException 
      * @throws Exception
      */
-    private List<IProfileSegment> getSegmentsFrom(@NonNull IProfileSegment firstSeg) throws UnavailableComponentException, ProfileException {
+    private List<IProfileSegment> getSegmentsFrom(@NonNull IProfileSegment firstSeg) throws MissingComponentException, ProfileException {
 
         if (firstSeg == null)
             throw new IllegalArgumentException("Requested first segment is null");
@@ -185,7 +185,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 				if (seg.contains(ZERO_INDEX) && (getSegmentCount()==1 || seg.getEndIndex()!=ZERO_INDEX))
 					return getSegmentsFrom(seg);
 			}
-		} catch (UnavailableComponentException | ProfileException e) {
+		} catch (MissingComponentException | ProfileException e) {
 			LOGGER.warning("Profile error getting segments");
 			LOGGER.log(Loggable.STACK, "Profile error getting segments", e);
 			return new ArrayList<>();
@@ -199,7 +199,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
      * @see components.generic.ISegmentedProfile#getSegment(java.lang.String)
      */
     @Override
-    public IProfileSegment getSegment(@NonNull String name) throws UnavailableComponentException {
+    public IProfileSegment getSegment(@NonNull String name) throws MissingComponentException {
         if (name == null) {
             throw new IllegalArgumentException("Requested segment name is null");
         }
@@ -209,7 +209,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
                 return seg;
             }
         }
-        throw new UnavailableComponentException("Requested segment name is not present");
+        throw new MissingComponentException("Requested segment name is not present");
     }
 
     @Override
@@ -549,7 +549,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
                 finalSegmentProfiles.add(revisedProfile);
             }
 
-        } catch (UnavailableComponentException e) {
+        } catch (MissingComponentException e) {
             throw new ProfileException("Unable to get segment for interpolation: "+e.getMessage(), e);
         }
         
@@ -614,7 +614,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 		try {
 			segment1 = getSegment(seg1);
 			segment2 = getSegment(seg2);
-		} catch (UnavailableComponentException e) {
+		} catch (MissingComponentException e) {
 			throw new IllegalArgumentException("An input segment is not part of this profile");
 		}
 		
@@ -675,7 +675,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 	public void unmergeSegment(@NonNull UUID segId) throws ProfileException {
 		try {
 			unmergeSegment(getSegment(segId));
-		} catch(UnavailableComponentException e) {
+		} catch(MissingComponentException e) {
 			throw new ProfileException(e);
 		}
 	}
@@ -732,7 +732,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 
             return IProfileSegment.isLongEnough(segment.getStartIndex(), splitIndex, segment.getProfileLength())
                     && IProfileSegment.isLongEnough(splitIndex, segment.getEndIndex(), segment.getProfileLength());
-        } catch (UnavailableComponentException e) {
+        } catch (MissingComponentException e) {
             LOGGER.log(Loggable.STACK, e.getMessage(), e);
             return false;
         }

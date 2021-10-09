@@ -18,7 +18,7 @@ import javax.swing.JPanel;
 
 import com.bmskinner.nuclear_morphology.analysis.image.GLCM.GLCMParameter;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.measure.MeasurementDimension;
@@ -83,7 +83,7 @@ public class ParameterSelectionPanel extends OptionsPanel {
 		try {
 			for (IProfileSegment s : dataset.getCollection().getProfileCollection().getSegments(Landmark.REFERENCE_POINT))
 				options.setBoolean(s.getID().toString(), false);
-		} catch(ProfileException | UnavailableBorderTagException e) {
+		} catch(ProfileException | MissingLandmarkException e) {
 			LOGGER.log(Loggable.STACK, "Unable to get segments", e);
 		}
 	}
@@ -198,7 +198,7 @@ public class ParameterSelectionPanel extends OptionsPanel {
 				labels.add(label);
 				fields.add(box);
 			}
-		} catch(ProfileException | UnavailableBorderTagException e) {
+		} catch(ProfileException | MissingLandmarkException e) {
 			LOGGER.log(Loggable.STACK, "Unable to get segments", e);
 		}
 		addLabelTextRows(labels, fields, layout, panel);

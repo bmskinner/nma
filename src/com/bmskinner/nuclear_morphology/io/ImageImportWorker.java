@@ -26,7 +26,7 @@ import javax.swing.SwingWorker;
 import javax.swing.table.TableModel;
 
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisWorker;
-import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
@@ -105,7 +105,7 @@ public abstract class ImageImportWorker extends SwingWorker<Boolean, SelectableC
     }
     protected abstract SelectableCellIcon importCellImage(ICell c);
     
-    protected ImageProcessor rotateToVertical(ICell c, ImageProcessor ip) throws UnavailableBorderTagException {
+    protected ImageProcessor rotateToVertical(ICell c, ImageProcessor ip) throws MissingLandmarkException {
         // Calculate angle for vertical rotation
         Nucleus n = c.getPrimaryNucleus();
 

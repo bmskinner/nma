@@ -2,8 +2,6 @@ package com.bmskinner.nuclear_morphology.analysis;
 
 import static org.junit.Assert.assertFalse;
 
-import java.io.File;
-
 import org.junit.Before;
 import org.junit.Test;
 

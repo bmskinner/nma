@@ -24,7 +24,7 @@ import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.SingleDatasetAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder.NoDetectedIndexException;
-import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
@@ -32,7 +32,7 @@ import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.LandmarkType;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.rules.RuleApplicationType;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSet;
 import com.bmskinner.nuclear_morphology.stats.Stats;
@@ -113,8 +113,8 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 	 * @throws Exception
 	 */
 	private void runPerNucleus() throws ProfileException, 
-	UnavailableProfileTypeException,
-	UnavailableBorderTagException {
+	MissingProfileException,
+	MissingLandmarkException {
 		LOGGER.fine("Detecting border tags per-nucleus");
 		ICellCollection collection = dataset.getCollection();
 		
@@ -204,11 +204,11 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 	 * the median profile, and propagate these to nuclei
 	 * @param collection the collection to work on
 	 * @throws NoDetectedIndexException
-	 * @throws UnavailableBorderTagException
-	 * @throws UnavailableProfileTypeException
+	 * @throws MissingLandmarkException
+	 * @throws MissingProfileException
 	 * @throws ProfileException
 	 */
-	private synchronized void identifyNonCoreTags(ICellCollection collection) throws NoDetectedIndexException, UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException {
+	private synchronized void identifyNonCoreTags(ICellCollection collection) throws NoDetectedIndexException, MissingLandmarkException, MissingProfileException, ProfileException {
 		// Identify the border tags in the median profile
 		for(Landmark tag : Landmark.defaultValues()) {
 
@@ -258,11 +258,11 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 	 * @param collection
 	 * @return
 	 * @throws NoDetectedIndexException
-	 * @throws UnavailableBorderTagException
-	 * @throws UnavailableProfileTypeException
+	 * @throws MissingLandmarkException
+	 * @throws MissingProfileException
 	 * @throws ProfileException
 	 */
-	private int coerceRPToZero(ICellCollection collection) throws NoDetectedIndexException, UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException {
+	private int coerceRPToZero(ICellCollection collection) throws NoDetectedIndexException, MissingLandmarkException, MissingProfileException, ProfileException {
 
 		// check the RP index in the median
 		int rpIndex = finder.identifyIndex(collection, Landmark.REFERENCE_POINT);

@@ -22,7 +22,7 @@ import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.components.UnavailableComponentException;
+import com.bmskinner.nuclear_morphology.components.MissingComponentException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nuclear_morphology.samples.dummy.DummySegmentedCellularComponent;
@@ -525,14 +525,14 @@ public class IBorderSegmentTester {
 	}
 	
 	@Test
-	public void testHasNextSegment() throws UnavailableComponentException {
+	public void testHasNextSegment() throws MissingComponentException {
 		IProfileSegment overlappingEnd = new DefaultProfileSegment(endIndex, profileLength, profileLength);
 		segment.setNextSegment(overlappingEnd);
 		assertTrue(segment.hasNextSegment());
 	}
 
 	@Test
-	public void testHasPrevSegment() throws UnavailableComponentException {
+	public void testHasPrevSegment() throws MissingComponentException {
 		IProfileSegment overlappingStart = new DefaultProfileSegment(endIndex+1, startIndex, profileLength);
 		segment.setPrevSegment(overlappingStart);
 		assertTrue(segment.hasPrevSegment());

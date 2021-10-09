@@ -43,7 +43,7 @@ import com.bmskinner.nuclear_morphology.charting.charts.MorphologyChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.ProfileChartFactory;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
-import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
@@ -53,7 +53,7 @@ import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.UnsegmentedProfileException;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
@@ -236,8 +236,7 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
         try {
             profile = activeDataset().getCollection().getProfileCollection().getSegmentedProfile(ProfileType.ANGLE,
                     Landmark.REFERENCE_POINT, Stats.MEDIAN);
-        } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException
-                | UnsegmentedProfileException e) {
+        } catch (MissingLandmarkException | ProfileException | MissingProfileException e) {
             LOGGER.log(Loggable.STACK, "Error getting profile", e);
 
         }
@@ -301,8 +300,7 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
     	try {
     		medianProfile = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE,
     				Landmark.REFERENCE_POINT, Stats.MEDIAN);
-    	} catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException
-    			| UnsegmentedProfileException e) {
+    	} catch (MissingLandmarkException | ProfileException | MissingProfileException e) {
     		LOGGER.log(Loggable.STACK, "Error getting profile", e);
     		setButtonsEnabled(false);
     		return;

@@ -2,6 +2,7 @@ package com.bmskinner.nuclear_morphology.components.cells;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -26,8 +27,13 @@ import org.junit.runners.Parameterized.Parameters;
 
 import com.bmskinner.nuclear_morphology.ComponentTester;
 import com.bmskinner.nuclear_morphology.TestDatasetBuilder;
+import com.bmskinner.nuclear_morphology.analysis.nucleus.CellCollectionFilterBuilder;
+import com.bmskinner.nuclear_morphology.analysis.nucleus.CellCollectionFilterer;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.ConsensusAveragingMethod;
+import com.bmskinner.nuclear_morphology.analysis.nucleus.FilteringOptions;
 import com.bmskinner.nuclear_morphology.charting.ChartFactoryTest;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
+import com.bmskinner.nuclear_morphology.components.Statistical;
 import com.bmskinner.nuclear_morphology.components.datasets.DefaultAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.DefaultCellCollection;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
@@ -41,7 +47,7 @@ import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileManager;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
 import com.bmskinner.nuclear_morphology.stats.Stats;
@@ -301,7 +307,7 @@ public class ICellCollectionTest extends ComponentTester {
 		int exp = collection.streamCells().mapToInt(c->{
 			try {
 				return c.getPrimaryNucleus().getProfile(ProfileType.ANGLE).size();
-			} catch (UnavailableProfileTypeException e) {
+			} catch (MissingProfileException e) {
 				return Integer.MAX_VALUE;
 			}
 		}).max().orElse(Integer.MAX_VALUE);
@@ -368,17 +374,27 @@ public class ICellCollectionTest extends ComponentTester {
 	public void testFilterCollection() throws Exception {
 		double medianArea = collection.getMedian(Measurement.AREA, CellularComponent.NUCLEUS,
 				MeasurementScale.PIXELS);
-		double minArea = collection.getMin(Measurement.AREA, CellularComponent.NUCLEUS,
-				MeasurementScale.PIXELS);
-		System.out.println(minArea);
-		System.out.println(medianArea);
-		System.out.println(collection.size());
 		
-		ICellCollection c = collection.filterCollection(Measurement.AREA, MeasurementScale.PIXELS, 
-				medianArea, medianArea*10);
-		System.out.println(c.size());
+		FilteringOptions op = new CellCollectionFilterBuilder()
+        		.add(Measurement.AREA, CellularComponent.NUCLEUS, 
+        				MeasurementScale.PIXELS, medianArea, medianArea*10)
+        		.build();
+		
+        ICellCollection c = CellCollectionFilterer.filter(collection, op);
 		
 		assertTrue("Filtering in "+source.getSimpleName(), c.getNucleusCount()<collection.getNucleusCount());
 	}
 
+	@Test 
+	public void testGetDifferenceToMedian() throws MissingLandmarkException {
+		
+		for(Nucleus n :collection.getNuclei()) {
+			double d = collection.getNormalisedDifferenceToMedian(Landmark.REFERENCE_POINT, n);
+			assertNotEquals(Double.NaN, d);
+			assertNotEquals(Statistical.STAT_NOT_CALCULATED, d);
+			assertNotEquals(Statistical.ERROR_CALCULATING_STAT, d);
+		}
+		
+	}
+	
 }

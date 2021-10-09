@@ -23,14 +23,14 @@ import java.util.logging.Logger;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.DatasetValidator;
-import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
-import com.bmskinner.nuclear_morphology.components.UnavailableComponentException;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
+import com.bmskinner.nuclear_morphology.components.MissingComponentException;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.UnsegmentedProfileException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
@@ -125,7 +125,7 @@ public class SegmentationHandler {
 					LOGGER.warning(s);
 			}
 
-        } catch (ProfileException | UnsegmentedProfileException | UnavailableComponentException e) {
+        } catch (ProfileException | MissingComponentException e) {
             LOGGER.warning("Error merging segments");
             if(medianProfile!=null){
                 for (UUID id : medianProfile.getSegmentIDs()) {
@@ -187,7 +187,7 @@ public class SegmentationHandler {
 					LOGGER.warning(s);
 			}
             
-        } catch (ProfileException | UnsegmentedProfileException | UnavailableComponentException e) {
+        } catch (ProfileException | MissingComponentException e) {
             LOGGER.log(Loggable.STACK, "Error unmerging segments", e);
         }
     }
@@ -245,7 +245,7 @@ public class SegmentationHandler {
 					LOGGER.warning(s);
 			}
 
-        } catch (ProfileException | UnsegmentedProfileException | UnavailableComponentException e) {
+        } catch (ProfileException | MissingComponentException e) {
             LOGGER.warning("Error splitting segments");
             LOGGER.log(Loggable.STACK, e.getMessage(), e);
 
@@ -287,7 +287,7 @@ public class SegmentationHandler {
             // Lock all the segments except the one to change
             dataset.getCollection().getProfileManager().setLockOnAllNucleusSegmentsExcept(id, true);
 
-        } catch (ProfileException | UnsegmentedProfileException | UnavailableComponentException e) {
+        } catch (ProfileException | MissingComponentException e) {
             LOGGER.warning("Error updating index of segments");
             LOGGER.log(Loggable.STACK, e.getMessage(), e);
 
@@ -338,8 +338,8 @@ public class SegmentationHandler {
                 child.getCollection().getProfileManager().updateBorderTag(tag, childIndex);
             }
 
-        } catch (IndexOutOfBoundsException | ProfileException | UnavailableBorderTagException
-                | UnavailableProfileTypeException e) {
+        } catch (IndexOutOfBoundsException | ProfileException | MissingLandmarkException
+                | MissingProfileException e) {
             LOGGER.warning("Unable to update border tag index");
             LOGGER.log(Loggable.STACK, "Profiling error", e);
         } catch (Exception e) {
@@ -355,12 +355,12 @@ public class SegmentationHandler {
      * @param tag the tag to update
      * @param index the new index for the tag
      * @return
-     * @throws UnavailableBorderTagException
+     * @throws MissingLandmarkException
      * @throws IndexOutOfBoundsException
-     * @throws UnavailableProfileTypeException
+     * @throws MissingProfileException
      * @throws ProfileException
      */
-    private synchronized boolean couldUpdateTagToExistingTagIndex(Landmark tag, int index) throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException {
+    private synchronized boolean couldUpdateTagToExistingTagIndex(Landmark tag, int index) throws MissingLandmarkException, MissingProfileException, ProfileException {
     	List<Landmark> tags = dataset.getCollection().getProfileCollection().getBorderTags();
     	for(Landmark existingTag : tags) {
     		if(existingTag.equals(tag))

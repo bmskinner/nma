@@ -3,6 +3,7 @@ package com.bmskinner.nuclear_morphology.analysis.image;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.io.File;
 import java.util.logging.Logger;
 
 import org.junit.Test;
@@ -25,7 +26,7 @@ public class MultiScaleStructuralSimilarityIndexTest {
 
 	@Test
 	public void testMSSIMcalculates() {
-		String imagePath = TestResources.IMAGE_FOLDER+"Warping/";
+		String imagePath = TestResources.WARPING_FOLDER.getAbsolutePath();
 		ImageProcessor wtX = IJ.openImage(imagePath+"WT-X.tiff").getProcessor();
 		ImageProcessor shX = IJ.openImage(imagePath+"sh-X.tiff").getProcessor();
 		
@@ -38,7 +39,7 @@ public class MultiScaleStructuralSimilarityIndexTest {
 	
 	@Test
 	public void testMSSIMValueOrderMatchesKnown() {
-		String imagePath = TestResources.IMAGE_FOLDER+"Warping/";
+		String imagePath = TestResources.WARPING_FOLDER.getAbsolutePath();
 		ImageProcessor wtX = IJ.openImage(imagePath+"WT-X.tiff").getProcessor();
 		ImageProcessor shX = IJ.openImage(imagePath+"sh-X.tiff").getProcessor();
 		ImageProcessor shY = IJ.openImage(imagePath+"sh-Y.tiff").getProcessor();

@@ -11,8 +11,8 @@ import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.SingleDatasetAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
-import com.bmskinner.nuclear_morphology.components.UnavailableComponentException;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
+import com.bmskinner.nuclear_morphology.components.MissingComponentException;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
@@ -107,9 +107,9 @@ public class TsneMethod  extends SingleDatasetAnalysisMethod {
 	 * @param nuclei
 	 * @return
 	 * @throws ProfileException
-	 * @throws UnavailableComponentException
+	 * @throws MissingComponentException
 	 */
-	private double[][] makeProfileMatrix(List<Nucleus> nuclei, int initialDims) throws ProfileException, UnavailableComponentException {
+	private double[][] makeProfileMatrix(List<Nucleus> nuclei, int initialDims) throws ProfileException, MissingComponentException {
 		double[][] matrix = new double[nuclei.size()][initialDims];		
 				
 		for(int i=0; i<nuclei.size(); i++) {
@@ -164,7 +164,7 @@ public class TsneMethod  extends SingleDatasetAnalysisMethod {
 				if(options.getBoolean(s.getID().toString()))
 					dimensions++;
 			
-		} catch(ProfileException | UnavailableBorderTagException e) {
+		} catch(ProfileException | MissingLandmarkException e) {
 			LOGGER.log(Loggable.STACK, "Unable to get segments", e);
 		}
 		

@@ -34,7 +34,7 @@ import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellDetector;
 import com.bmskinner.nuclear_morphology.components.Imageable;
 import com.bmskinner.nuclear_morphology.components.Taggable;
 import com.bmskinner.nuclear_morphology.components.UnavailableBorderPointException;
-import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
@@ -44,7 +44,7 @@ import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalCollection;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
@@ -401,7 +401,7 @@ public class ImageAnnotator extends AbstractImageFilterer {
     public ImageAnnotator annotateOP(Nucleus n) {
         try {
             return annotatePoint(n.getBorderPoint(Landmark.ORIENTATION_POINT), Color.CYAN);
-        } catch (UnavailableBorderTagException e) {
+        } catch (MissingLandmarkException e) {
             LOGGER.log(Loggable.STACK, "Cannot find border tag OP", e);
         }
         return this;
@@ -417,7 +417,7 @@ public class ImageAnnotator extends AbstractImageFilterer {
     public ImageAnnotator annotateRP(Nucleus n) {
         try {
             return annotatePoint(n.getBorderPoint(Landmark.REFERENCE_POINT), Color.YELLOW);
-        } catch (UnavailableBorderTagException e) {
+        } catch (MissingLandmarkException e) {
             LOGGER.log(Loggable.STACK, "Cannot find border tag RP", e);
             return this;
         }
@@ -608,7 +608,7 @@ public class ImageAnnotator extends AbstractImageFilterer {
             IPoint narrow1 = n.getBorderPoint(minIndex);
             IPoint narrow2 = n.findOppositeBorder(narrow1);
             return annotateLine(narrow1, narrow2, Color.MAGENTA);
-        } catch (UnavailableProfileTypeException | ProfileException | UnavailableBorderPointException e) {
+        } catch (MissingProfileException | ProfileException | UnavailableBorderPointException e) {
             LOGGER.log(Loggable.STACK, "Unable to get diameter profile", e);
             return this;
         }

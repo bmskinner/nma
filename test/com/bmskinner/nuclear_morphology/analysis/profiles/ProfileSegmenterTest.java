@@ -6,13 +6,13 @@ import org.junit.Test;
 
 import com.bmskinner.nuclear_morphology.ComponentTester;
 import com.bmskinner.nuclear_morphology.TestDatasetBuilder;
-import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
@@ -25,7 +25,7 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
  */
 public class ProfileSegmenterTest extends ComponentTester {
 	
-	private void segmentMedianProfile(IAnalysisDataset d) throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException, Exception {
+	private void segmentMedianProfile(IAnalysisDataset d) throws MissingLandmarkException, MissingProfileException, ProfileException, Exception {
 		IProfile median = d.getCollection()
 				.getProfileCollection()
 				.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);

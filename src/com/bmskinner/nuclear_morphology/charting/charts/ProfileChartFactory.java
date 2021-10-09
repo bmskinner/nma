@@ -40,8 +40,9 @@ import com.bmskinner.nuclear_morphology.charting.datasets.ChartDatasetCreationEx
 import com.bmskinner.nuclear_morphology.charting.datasets.ProfileDatasetCreator;
 import com.bmskinner.nuclear_morphology.charting.datasets.ProfileDatasetCreator.ProfileChartDataset;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
+import com.bmskinner.nuclear_morphology.components.MissingComponentException;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.Taggable;
-import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
@@ -51,9 +52,8 @@ import com.bmskinner.nuclear_morphology.components.profiles.BooleanProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
+import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
-import com.bmskinner.nuclear_morphology.components.profiles.UnsegmentedProfileException;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter.ColourSwatch;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
@@ -162,7 +162,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
 			try {
 				ISegmentedProfile profile = n.getProfile(options.getType(), options.getTag());
 				addSegmentTextAnnotations(profile, chart.getXYPlot());
-			} catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
+			} catch (ProfileException | MissingLandmarkException | MissingProfileException e) {
 				LOGGER.log(Loggable.STACK, "Error adding segment annotations", e);
 				return createErrorChart();
 			}
@@ -228,7 +228,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
 
 					addDomainMarkerToXYPlot(plot, tag, indexToDraw);
 
-				} catch (UnavailableBorderTagException e) {
+				} catch (MissingLandmarkException e) {
 					LOGGER.fine("Tag not present in profile: " + tag);
 				}
 
@@ -240,7 +240,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
 			try {
 				ISegmentedProfile profile = collection.getProfileCollection().getSegmentedProfile(options.getType(), options.getTag(), Stats.MEDIAN);
 				addSegmentTextAnnotations(profile, plot);
-			} catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException | UnsegmentedProfileException e) {
+			} catch (ProfileException | MissingComponentException e) {
 				LOGGER.log(Loggable.STACK, "Error adding segment annotations", e);
 				return createErrorChart();
 			}
@@ -419,7 +419,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
 				index = n.wrapIndex(index - offset);
 				addDomainMarkerToXYPlot(plot, tag, (double) index);
 
-			} catch (UnavailableBorderTagException e) {
+			} catch (MissingLandmarkException e) {
 				LOGGER.log(Loggable.STACK, "Border tag not available", e);
 			}
 		}

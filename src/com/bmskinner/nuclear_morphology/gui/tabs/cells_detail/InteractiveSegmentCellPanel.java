@@ -39,13 +39,13 @@ import javax.swing.JPopupMenu;
 
 import com.bmskinner.nuclear_morphology.analysis.image.AbstractImageFilterer;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageAnnotator;
-import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.core.InterfaceUpdater;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
@@ -291,7 +291,7 @@ public class InteractiveSegmentCellPanel extends InteractiveCellPanel {
 					createImage();
 				});
 				popupMenu.add(nextItem);
-			} catch (UnavailableProfileTypeException | UnavailableBorderTagException e) {
+			} catch (MissingProfileException | MissingLandmarkException e) {
 				LOGGER.log(Loggable.STACK, "Cannot get border tag index", e);
 			}
 		}
@@ -415,7 +415,7 @@ public class InteractiveSegmentCellPanel extends InteractiveCellPanel {
 					g2.setColor(ColourSelecter.getColour(Landmark.ORIENTATION_POINT));
 				}
 
-			} catch (UnavailableBorderTagException e) {
+			} catch (MissingLandmarkException e) {
 				// no action needed, colour remains cyan
 			}
 			g2.setStroke(new BasicStroke(3));

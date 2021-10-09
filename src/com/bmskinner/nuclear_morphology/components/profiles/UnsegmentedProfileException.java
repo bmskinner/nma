@@ -16,6 +16,8 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.profiles;
 
+import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
+
 /**
  * Thrown when a profile collection or segmented profile has no assigned
  * segments
@@ -24,7 +26,7 @@ package com.bmskinner.nuclear_morphology.components.profiles;
  * @since 1.13.3
  *
  */
-public class UnsegmentedProfileException extends Exception {
+public class UnsegmentedProfileException extends ProfileException {
     private static final long serialVersionUID = 1L;
 
     public UnsegmentedProfileException() {

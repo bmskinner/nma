@@ -23,22 +23,22 @@ package com.bmskinner.nuclear_morphology.components;
  * @since 1.13.3
  *
  */
-public class UnavailableBorderTagException extends UnavailableComponentException {
+public class MissingLandmarkException extends MissingComponentException {
     private static final long serialVersionUID = 1L;
 
-    public UnavailableBorderTagException() {
+    public MissingLandmarkException() {
         super();
     }
 
-    public UnavailableBorderTagException(String message) {
+    public MissingLandmarkException(String message) {
         super(message);
     }
 
-    public UnavailableBorderTagException(String message, Throwable cause) {
+    public MissingLandmarkException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public UnavailableBorderTagException(Throwable cause) {
+    public MissingLandmarkException(Throwable cause) {
         super(cause);
     }
 }

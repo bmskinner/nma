@@ -21,7 +21,7 @@ import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nuclear_morphology.components.UnavailableComponentException;
+import com.bmskinner.nuclear_morphology.components.MissingComponentException;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment.SegmentUpdateException;
@@ -80,7 +80,7 @@ public class SegmentFitter {
         	return target;
 		try {
 			return remapSegmentEndpoints(target);
-		} catch (UnavailableComponentException | ProfileException e) {
+		} catch (MissingComponentException | ProfileException e) {
 			LOGGER.log(Loggable.STACK, "Unable to remap segments in profile: "+e.getMessage(), e);
 			return target;
 		}
@@ -91,9 +91,9 @@ public class SegmentFitter {
      * @param profile the profile to fit against the template profile
      * @return a profile with best-fit segmentation to the median
      * @throws ProfileException 
-     * @throws UnavailableComponentException 
+     * @throws MissingComponentException 
      */
-    private ISegmentedProfile remapSegmentEndpoints(@NonNull ISegmentedProfile profile) throws ProfileException, UnavailableComponentException {
+    private ISegmentedProfile remapSegmentEndpoints(@NonNull ISegmentedProfile profile) throws ProfileException, MissingComponentException {
 
         // By default, return the input profile
         ISegmentedProfile result = profile.copy();
@@ -121,9 +121,9 @@ public class SegmentFitter {
      * @param id the segment to test
      * @return
      * @throws ProfileException 
-     * @throws UnavailableComponentException 
+     * @throws MissingComponentException 
      */
-    private ISegmentedProfile bestFitSegment(@NonNull ISegmentedProfile profile, @NonNull UUID id) throws ProfileException, UnavailableComponentException {
+    private ISegmentedProfile bestFitSegment(@NonNull ISegmentedProfile profile, @NonNull UUID id) throws ProfileException, MissingComponentException {
 
         // by default, return the same profile that came in
     	ISegmentedProfile result = profile.copy();
@@ -189,11 +189,11 @@ public class SegmentFitter {
      * @param id the segment to alter
      * @param changeValue the amount to alter the segment by
      * @return the original profile, or a better fit to the median
-     * @throws UnavailableComponentException 
+     * @throws MissingComponentException 
      * @throws ProfileException 
      * @throws Exception
      */
-    private ISegmentedProfile testChange(@NonNull ISegmentedProfile profile, @NonNull UUID id, int changeValue) throws UnavailableComponentException, ProfileException {
+    private ISegmentedProfile testChange(@NonNull ISegmentedProfile profile, @NonNull UUID id, int changeValue) throws MissingComponentException, ProfileException {
         double bestScore = compareSegmentationPatterns(templateProfile, profile);
 
         // apply all changes to a fresh copy of the profile
@@ -223,10 +223,10 @@ public class SegmentFitter {
      * @param referenceProfile
      * @param testProfile
      * @return the score
-     * @throws UnavailableComponentException 
+     * @throws MissingComponentException 
      * @throws Exception
      */
-    private double compareSegmentationPatterns(@NonNull ISegmentedProfile referenceProfile, @NonNull ISegmentedProfile testProfile) throws UnavailableComponentException {
+    private double compareSegmentationPatterns(@NonNull ISegmentedProfile referenceProfile, @NonNull ISegmentedProfile testProfile) throws MissingComponentException {
         if (referenceProfile.getSegmentCount() != testProfile.getSegmentCount())
             throw new IllegalArgumentException("Segment counts are different for profiles");
 
@@ -245,10 +245,10 @@ public class SegmentFitter {
      * @param referenceProfile the profile to measure against
      * @param testProfile the profile to measure
      * @return the sum of square differences between the segments
-     * @throws UnavailableComponentException 
+     * @throws MissingComponentException 
      * @throws Exception
      */
-    private double compareSegments(@NonNull UUID id, @NonNull ISegmentedProfile referenceProfile, @NonNull ISegmentedProfile testProfile) throws UnavailableComponentException {
+    private double compareSegments(@NonNull UUID id, @NonNull ISegmentedProfile referenceProfile, @NonNull ISegmentedProfile testProfile) throws MissingComponentException {
         if (id == null)
             throw new IllegalArgumentException("Segment id is null");
 

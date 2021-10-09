@@ -42,7 +42,7 @@ import javax.swing.table.TableModel;
 
 import com.bmskinner.nuclear_morphology.analysis.image.ImageAnnotator;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
-import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
@@ -310,7 +310,7 @@ public class ManualCurationDialog extends AbstractCellCollectionDialog {
 	    	if (rotate) {
 	    		try {
 	    			ip = rotateToVertical(c, ip);
-	    		} catch (UnavailableBorderTagException e) {
+	    		} catch (MissingLandmarkException e) {
 	    			LOGGER.log(Loggable.STACK, "Unable to rotate", e);
 	    		}
 	    		ip.flipVertical(); // Y axis needs inverting

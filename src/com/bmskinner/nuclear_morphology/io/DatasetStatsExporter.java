@@ -25,8 +25,8 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nuclear_morphology.analysis.image.GLCM.GLCMParameter;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.Taggable;
-import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
-import com.bmskinner.nuclear_morphology.components.UnavailableComponentException;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
+import com.bmskinner.nuclear_morphology.components.MissingComponentException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
@@ -39,7 +39,7 @@ import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
@@ -187,8 +187,8 @@ public class DatasetStatsExporter extends StatsExporter {
      * Append the given dataset stats into the string builder
      * @param d the dataset to export
      * @param outLine the string builder to append to
-     * @throws UnavailableBorderTagException
-     * @throws UnavailableProfileTypeException
+     * @throws MissingLandmarkException
+     * @throws MissingProfileException
      * @throws ProfileException
      */
     @Override
@@ -246,7 +246,7 @@ public class DatasetStatsExporter extends StatsExporter {
                 try {
                     varP = d.getCollection().getNormalisedDifferenceToMedian(Landmark.REFERENCE_POINT, (Taggable) c);
                     varM = varP;
-                } catch (UnavailableBorderTagException e) {
+                } catch (MissingLandmarkException e) {
                     LOGGER.log(Loggable.STACK, "Tag not present in component", e);
                     varP = -1;
                     varM = -1;
@@ -274,12 +274,12 @@ public class DatasetStatsExporter extends StatsExporter {
      * Generate and append profiles for a component
      * @param outLine the string builder to append to
      * @param c the component to export
-     * @throws UnavailableBorderTagException
-     * @throws UnavailableProfileTypeException
+     * @throws MissingLandmarkException
+     * @throws MissingProfileException
      * @throws ProfileException
      */
     private void appendProfiles(StringBuilder outLine, Taggable c)
-            throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException {
+            throws MissingLandmarkException, MissingProfileException, ProfileException {
         for (ProfileType type : ProfileType.exportValues()) {
 
             IProfile p = c.getProfile(type, Landmark.REFERENCE_POINT);
@@ -298,12 +298,12 @@ public class DatasetStatsExporter extends StatsExporter {
      * @param outLine the string builder to append to
      * @param c the component to export
      * @param median the dataset median profile from which the component came
-     * @throws UnavailableBorderTagException
-     * @throws UnavailableProfileTypeException
+     * @throws MissingLandmarkException
+     * @throws MissingProfileException
      * @throws ProfileException
      */
     private void appendFrankenProfiles(StringBuilder outLine, Taggable c, ISegmentedProfile median)
-            throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException {
+            throws MissingLandmarkException, MissingProfileException, ProfileException {
 
             ISegmentedProfile s = c.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
             ISegmentedProfile f = s.frankenNormaliseToProfile(median);
@@ -317,7 +317,7 @@ public class DatasetStatsExporter extends StatsExporter {
     }
     
     private void appendSegments(StringBuilder outLine, Taggable c)
-            throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException {
+            throws MissingLandmarkException, MissingProfileException, ProfileException {
         
         double varP = 0;
         double varM = 0;
@@ -343,7 +343,7 @@ public class DatasetStatsExporter extends StatsExporter {
                 	int end   = normalisedSeg.getEndIndex();
                 	outLine.append(start + TAB);
                     outLine.append(end + TAB);
-				} catch (UnavailableComponentException e) {
+				} catch (MissingComponentException e) {
 					outLine.append("NA" + TAB);
                     outLine.append("NA" + TAB);
 				}
@@ -357,7 +357,7 @@ public class DatasetStatsExporter extends StatsExporter {
 	 * is a multiple of DEFAULT_PROFILE_LENGTH and greater than any 
 	 * individual profile.
 	 * @return
-	 * @throws UnavailableProfileTypeException
+	 * @throws MissingProfileException
 	 */
 	private int chooseNormalisedProfileLength() {
 		int profileLength = DEFAULT_PROFILE_LENGTH;
@@ -370,7 +370,7 @@ public class DatasetStatsExporter extends StatsExporter {
 						profileLength = (int) Math.ceil(l/DEFAULT_PROFILE_LENGTH)*DEFAULT_PROFILE_LENGTH;
 				}
 			}
-		} catch(UnavailableProfileTypeException e) {
+		} catch(MissingProfileException e) {
 			LOGGER.log(Loggable.STACK, "Unable to get profile: "+e.getMessage(), e);
 			LOGGER.fine("Unable to get a profile, defaulting to default profile length of "+DEFAULT_PROFILE_LENGTH);
 		}

@@ -32,13 +32,13 @@ import com.bmskinner.nuclear_morphology.components.Filterable;
 import com.bmskinner.nuclear_morphology.components.Refoldable;
 import com.bmskinner.nuclear_morphology.components.StatisticalCollection;
 import com.bmskinner.nuclear_morphology.components.Taggable;
-import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileCollection;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileManager;
-import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.signals.SignalManager;
@@ -383,11 +383,11 @@ public interface ICellCollection
      *            the tag to zero the profile against
      * @return
      * @throws ProfileException
-     * @throws UnavailableBorderTagException
-     * @throws UnavailableProfileTypeException
+     * @throws MissingLandmarkException
+     * @throws MissingProfileException
      */
     Nucleus getNucleusMostSimilarToMedian(Landmark referencePoint)
-            throws ProfileException, UnavailableBorderTagException, UnavailableProfileTypeException;
+            throws ProfileException, MissingLandmarkException, MissingProfileException;
 
     /**
      * Get the profile manager for the collection
@@ -453,10 +453,10 @@ public interface ICellCollection
      * compared to the median profile of the collection
      * 
      * @param pointType the tag to use as index 0
-     * @param c the taggable object to test
+     * @param t the taggable object to test
      * @return the variabililty score of the object
-     * @throws UnavailableBorderTagException if the tag is not present
+     * @throws MissingLandmarkException if the tag is not present
      */
-    double getNormalisedDifferenceToMedian(Landmark pointType, Taggable t) throws UnavailableBorderTagException;
+    double getNormalisedDifferenceToMedian(Landmark pointType, Taggable t) throws MissingLandmarkException;
 
 }

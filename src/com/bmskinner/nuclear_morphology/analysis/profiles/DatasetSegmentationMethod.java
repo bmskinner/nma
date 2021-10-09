@@ -26,8 +26,8 @@ import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.ProgressEvent;
 import com.bmskinner.nuclear_morphology.analysis.SingleDatasetAnalysisMethod;
-import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
-import com.bmskinner.nuclear_morphology.components.UnavailableComponentException;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
+import com.bmskinner.nuclear_morphology.components.MissingComponentException;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
@@ -39,7 +39,7 @@ import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.components.profiles.SegmentedFloatProfile;
-import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
@@ -267,10 +267,10 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 	 * 
 	 * @param collection
 	 * @throws ProfileException 
-	 * @throws UnavailableProfileTypeException 
-	 * @throws UnavailableBorderTagException 
+	 * @throws MissingProfileException 
+	 * @throws MissingLandmarkException 
 	 */
-	private ISegmentedProfile createSegmentsInMedian() throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException {
+	private ISegmentedProfile createSegmentsInMedian() throws MissingLandmarkException, MissingProfileException, ProfileException {
 		
 		// choose the best subset of nuclei and make a median profile from them
 		LOGGER.fine("Collection median length "+collection.getMedianArrayLength());
@@ -291,11 +291,11 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 	 * collection. The template profile is assumed to be indexed at the reference
 	 * point. This will unlock nuclei as needed to ensure that segments are consistent
 	 * through the dataset.
-	 * @throws UnavailableComponentException 
+	 * @throws MissingComponentException 
 	 * @throws SegmentUpdateException 
 	 * @throws ProfileException 
 	 */
-	private void assignSegmentsToNuclei(@NonNull ISegmentedProfile template) throws ProfileException, UnavailableComponentException {
+	private void assignSegmentsToNuclei(@NonNull ISegmentedProfile template) throws ProfileException, MissingComponentException {
 		IterativeSegmentFitter fitter = new IterativeSegmentFitter(template);
 		for(Nucleus n : collection.getNuclei()) {
 			

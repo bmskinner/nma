@@ -31,7 +31,7 @@ import org.jfree.data.xy.XYSeriesCollection;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
-import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
@@ -41,7 +41,7 @@ import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.UnsegmentedProfileException;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -299,10 +299,10 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 					ds.addLines(NUCLEUS_SERIES_PREFIX + j+ "_"+n.getSourceFileName() + "_" + n.getNucleusNumber(), ndata, i);
 				}
 			}
-		} catch (UnavailableBorderTagException e) {
+		} catch (MissingLandmarkException e) {
 			LOGGER.fine("Border tag is not present: "+borderTag);
 			return;
-		}catch (ProfileException | UnavailableProfileTypeException | UnsegmentedProfileException e) {
+		}catch (ProfileException | MissingProfileException e) {
 			LOGGER.log(Loggable.STACK, "Error getting profile from tag", e);
 			throw new ChartDatasetCreationException("Unable to get median profile", e);
 		}
@@ -314,7 +314,7 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 	 * is a multiple of DEFAULT_PROFILE_LENGTH and greater than any 
 	 * individual profile.
 	 * @return
-	 * @throws UnavailableProfileTypeException
+	 * @throws MissingProfileException
 	 */
 	private int chooseNormalisedProfileLength() {
 		int profileLength = DEFAULT_PROFILE_LENGTH;
@@ -327,7 +327,7 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 						profileLength = (int) Math.ceil(l/DEFAULT_PROFILE_LENGTH)*DEFAULT_PROFILE_LENGTH;
 				}
 			}
-		} catch(UnavailableProfileTypeException e) {
+		} catch(MissingProfileException e) {
 			LOGGER.fine("Unable to get a profile, defaulting to default profile length");
 		}
 		return profileLength;
@@ -358,7 +358,7 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 				ds.addLines(PROFILE_SERIES_PREFIX+nucleus.getNameAndNumber(), data, 0);
 			}        	 
 
-		} catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
+		} catch (ProfileException | MissingLandmarkException | MissingProfileException e) {
 			throw new ChartDatasetCreationException("Cannot get segmented profile for " + nucleus.getNameAndNumber(), e);
 		}
 		return ds;
@@ -493,7 +493,7 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 					.getOrderedSegments();
 			addSegmentsFromProfile(segments, profile, ds, nucleus.getBorderLength(), 0, 0);
 
-		} catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
+		} catch (ProfileException | MissingLandmarkException | MissingProfileException e) {
 			LOGGER.log(Loggable.STACK, "Error getting profile", e);
 			throw new ChartDatasetCreationException("Cannot get segmented profile for " + nucleus.getNameAndNumber());
 		}
@@ -555,8 +555,7 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 				float[][] data = { xpoints.toFloatArray(), profile.toFloatArray() };
 				ds.addLines(MEDIAN_SERIES_PREFIX+"0", data, 0);
 			}
-		} catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException
-				| UnsegmentedProfileException e) {
+		} catch (ProfileException | MissingLandmarkException | MissingProfileException e) {
 			LOGGER.log(Loggable.STACK, "Error creating single dataset variability data", e);
 			throw new ChartDatasetCreationException("Error creating single dataset variability data", e);
 		}
@@ -574,7 +573,7 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 			IProfile profile;
 			try {
 				profile = collection.getProfileCollection().getIQRProfile(options.getType(), options.getTag());
-			} catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException e) {
+			} catch (MissingLandmarkException | ProfileException | MissingProfileException e) {
 				LOGGER.log(Loggable.STACK, "Error getting profile from tag", e);
 				throw new ChartDatasetCreationException("Unable to get median profile", e);
 			}

@@ -8,7 +8,7 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.Taggable;
-import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
@@ -16,7 +16,7 @@ import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 
 /**
  * Class to export only profiles from nuclei
@@ -57,8 +57,8 @@ public class DatasetProfileExporter extends StatsExporter {
      * Append the given dataset stats into the string builder
      * @param d the dataset to export
      * @param outLine the string builder to append to
-     * @throws UnavailableBorderTagException
-     * @throws UnavailableProfileTypeException
+     * @throws MissingLandmarkException
+     * @throws MissingProfileException
      * @throws ProfileException
      */
     @Override
@@ -98,7 +98,7 @@ public class DatasetProfileExporter extends StatsExporter {
     			outLine.append(value +COMMA);
     		}
     		
-    	} catch (UnavailableBorderTagException | UnavailableProfileTypeException | ProfileException e) {
+    	} catch (MissingLandmarkException | MissingProfileException | ProfileException e) {
     		LOGGER.severe("Unable to get profile for component "+c.getID());
     	}
     }

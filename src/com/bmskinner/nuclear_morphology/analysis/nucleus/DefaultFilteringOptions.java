@@ -24,7 +24,7 @@ import java.util.function.Predicate;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
-import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
@@ -190,7 +190,7 @@ public class DefaultFilteringOptions extends DefaultOptions implements Filtering
 			}
 			double v = n.getStatistic(k.stat, k.scale);
 			return isMin ? v>=minima.get(k) : v<=maxima.get(k);
-		} catch (UnavailableBorderTagException e) {
+		} catch (MissingLandmarkException e) {
 			return false;
 		}
 	}

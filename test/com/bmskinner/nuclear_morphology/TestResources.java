@@ -70,7 +70,7 @@ public class TestResources {
     
     public static final String GLCM_SAMPLE_IMAGE = IMAGE_FOLDER+ SLASH+"GLCM"+SLASH+"s61.tiff-3_b43854f1-95c5-4810-bbac-a467ef5dd0ed.tiff";
     
-    public static final String WARPING_FOLDER = IMAGE_FOLDER + SLASH + "Warping";
+    public static final File WARPING_FOLDER = new File(IMAGE_FOLDER, "Warping");
     public static final String WARPING_NORMALISATION_IMAGE = WARPING_FOLDER + SLASH + "Gradient.tiff";
     
 

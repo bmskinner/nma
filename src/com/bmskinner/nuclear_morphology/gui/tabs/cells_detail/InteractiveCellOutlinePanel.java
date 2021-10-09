@@ -40,7 +40,7 @@ import com.bmskinner.nuclear_morphology.analysis.mesh.MeshImage;
 import com.bmskinner.nuclear_morphology.analysis.mesh.MeshImageCreationException;
 import com.bmskinner.nuclear_morphology.analysis.mesh.UncomparableMeshImageException;
 import com.bmskinner.nuclear_morphology.charting.image.MeshAnnotator;
-import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
@@ -206,7 +206,7 @@ public class InteractiveCellOutlinePanel extends InteractiveCellPanel {
 			rot.flipVertical(); // Y axis needs inverting since images have 0 at top
 			return new ImageAnnotator(rot, getWidth(), getHeight());
 			
-		} catch (UnavailableBorderTagException e) {
+		} catch (MissingLandmarkException e) {
 			LOGGER.log(Loggable.STACK, e.getMessage(), e);
 			return an;
 		}
@@ -374,7 +374,7 @@ public class InteractiveCellOutlinePanel extends InteractiveCellPanel {
 					g2.setColor(ColourSelecter.getColour(Landmark.ORIENTATION_POINT));
 				}
 
-			} catch (UnavailableBorderTagException e) {
+			} catch (MissingLandmarkException e) {
 				// no action needed, colour remains cyan
 			}
 

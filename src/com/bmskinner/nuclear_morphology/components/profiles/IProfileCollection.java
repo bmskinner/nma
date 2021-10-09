@@ -23,7 +23,7 @@ import java.util.UUID;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.io.XmlSerializable;
 
@@ -53,9 +53,9 @@ public interface IProfileCollection extends Serializable, XmlSerializable {
      * 
      * @param tag the tag to find
      * @return the index of the tag
-     * @throws UnavailableBorderTagException if the tag is not present
+     * @throws MissingLandmarkException if the tag is not present
      */
-    int getIndex(@NonNull Landmark tag) throws UnavailableBorderTagException;
+    int getIndex(@NonNull Landmark tag) throws MissingLandmarkException;
     
     /**
      * Get the proportion of the index along the profile, zeroed on the reference point
@@ -70,9 +70,9 @@ public interface IProfileCollection extends Serializable, XmlSerializable {
      * 
      * @param tag the tag to find
      * @return the proportion of the tag along the profile, from 0-1
-     * @throws UnavailableBorderTagException if the tag is not present
+     * @throws MissingLandmarkException if the tag is not present
      */
-    double getProportionOfIndex(@NonNull Landmark tag) throws UnavailableBorderTagException;
+    double getProportionOfIndex(@NonNull Landmark tag) throws MissingLandmarkException;
     
     
     /**
@@ -105,12 +105,12 @@ public interface IProfileCollection extends Serializable, XmlSerializable {
      * @param tag the Tag to use as index zero
      * @param quartile the collection quartile to return (0-100)
      * @return the quartile profile from the given tag
-     * @throws UnavailableBorderTagException when the tag is not present
+     * @throws MissingLandmarkException when the tag is not present
      * @throws ProfileException
-     * @throws UnavailableProfileTypeException when the profile type does not have an associated aggregate
+     * @throws MissingProfileException when the profile type does not have an associated aggregate
      */
     IProfile getProfile(@NonNull ProfileType type, @NonNull Landmark tag, double quartile)
-            throws UnavailableBorderTagException, ProfileException, UnavailableProfileTypeException;
+            throws MissingLandmarkException, ProfileException, MissingProfileException;
 
     /**
      * Get a segmented profile offset to start from the given tag. 
@@ -120,13 +120,12 @@ public interface IProfileCollection extends Serializable, XmlSerializable {
      * @param quartile the quartile to fetch
      * @return the profile
      * @throws ProfileException
-     * @throws UnavailableBorderTagException when the tag is not present as an offset
-     * @throws UnavailableProfileTypeException when the profile type does not have an associated aggregate
+     * @throws MissingLandmarkException when the tag is not present as an offset
+     * @throws MissingProfileException when the profile type does not have an associated aggregate
      * @throws UnsegmentedProfileException when no segments are available for the profile
      */
     ISegmentedProfile getSegmentedProfile(@NonNull ProfileType type, @NonNull Landmark tag, double quartile)
-            throws UnavailableBorderTagException, ProfileException, UnavailableProfileTypeException,
-            UnsegmentedProfileException;
+            throws MissingLandmarkException, ProfileException, MissingProfileException;
 
     /**
      * Get the length of the profile aggregate (this is the integer value of the
@@ -159,7 +158,7 @@ public interface IProfileCollection extends Serializable, XmlSerializable {
      * @return a copy of the segments in the profile, offset to start at the tag
      * @throws ProfileException
      */
-    List<IProfileSegment> getSegments(@NonNull Landmark tag) throws UnavailableBorderTagException, ProfileException;
+    List<IProfileSegment> getSegments(@NonNull Landmark tag) throws MissingLandmarkException, ProfileException;
 
     /**
      * Get the IDs of the segments in this collection. The IDs are ordered by position within
@@ -176,7 +175,7 @@ public interface IProfileCollection extends Serializable, XmlSerializable {
      * @return
      * @throws ProfileException
      */
-    IProfileSegment getSegmentAt(@NonNull Landmark tag, int position) throws UnavailableBorderTagException, ProfileException;
+    IProfileSegment getSegmentAt(@NonNull Landmark tag, int position) throws MissingLandmarkException, ProfileException;
 
     /**
      * Test if the collection contains a segment beginning at the given tag
@@ -184,9 +183,9 @@ public interface IProfileCollection extends Serializable, XmlSerializable {
      * @param tag
      * @return
      * @throws UnsegmentedProfileException
-     * @throws UnavailableBorderTagException
+     * @throws MissingLandmarkException
      */
-    boolean hasSegmentStartingWith(@NonNull Landmark tag) throws UnavailableBorderTagException, UnsegmentedProfileException;
+    boolean hasSegmentStartingWith(@NonNull Landmark tag) throws MissingLandmarkException, UnsegmentedProfileException;
 
     /**
      * Fetch the segment from the profile beginning at the given tag; i.e. the
@@ -198,7 +197,7 @@ public interface IProfileCollection extends Serializable, XmlSerializable {
      * @return a copy of the segment with the tag at its start index, or null
      * @throws UnsegmentedProfileException
      */
-    IProfileSegment getSegmentStartingWith(@NonNull Landmark tag) throws UnavailableBorderTagException, UnsegmentedProfileException;
+    IProfileSegment getSegmentStartingWith(@NonNull Landmark tag) throws MissingLandmarkException, UnsegmentedProfileException;
 
     /**
      * Test if the collection contains a segment beginning at the given tag
@@ -207,7 +206,7 @@ public interface IProfileCollection extends Serializable, XmlSerializable {
      * @return
      * @throws Exception
      */
-    boolean hasSegmentEndingWith(@NonNull Landmark tag) throws UnavailableBorderTagException, UnsegmentedProfileException;
+    boolean hasSegmentEndingWith(@NonNull Landmark tag) throws MissingLandmarkException, UnsegmentedProfileException;
 
     /**
      * Fetch the segment from the profile beginning at the given tag; i.e. the
@@ -218,7 +217,7 @@ public interface IProfileCollection extends Serializable, XmlSerializable {
      *            the border tag
      * @return a copy of the segment with the tag at its start index, or null
      */
-    IProfileSegment getSegmentEndingWith(@NonNull Landmark tag) throws UnavailableBorderTagException, UnsegmentedProfileException;
+    IProfileSegment getSegmentEndingWith(@NonNull Landmark tag) throws MissingLandmarkException, UnsegmentedProfileException;
 
     /**
      * Fetch the segment from the profile containing the given index. The zero
@@ -227,7 +226,7 @@ public interface IProfileCollection extends Serializable, XmlSerializable {
      * @param index
      * @return a copy of the segment with the index inside, or null
      */
-    IProfileSegment getSegmentContaining(int index) throws UnsegmentedProfileException;
+    IProfileSegment getSegmentContaining(int index) throws ProfileException;
 
     /**
      * Fetch the segment from the profile containing at the given tag;
@@ -236,7 +235,7 @@ public interface IProfileCollection extends Serializable, XmlSerializable {
      *            the border tag
      * @return a copy of the segment with the tag index inside, or null
      */
-    IProfileSegment getSegmentContaining(@NonNull Landmark tag) throws ProfileException, UnsegmentedProfileException;
+    IProfileSegment getSegmentContaining(@NonNull Landmark tag) throws ProfileException;
 
     /**
      * Add an index for the given tag. Note that setting the index of the RP
@@ -264,9 +263,9 @@ public interface IProfileCollection extends Serializable, XmlSerializable {
      * @param tag the tag with the zero index in the collection
      * @param segments the segments to add
      * @throws ProfileException
-     * @throws UnavailableBorderTagException
+     * @throws MissingLandmarkException
      */
-    void addSegments(@NonNull Landmark tag, @NonNull List<IProfileSegment> segments) throws ProfileException, UnavailableBorderTagException;
+    void addSegments(@NonNull Landmark tag, @NonNull List<IProfileSegment> segments) throws ProfileException, MissingLandmarkException;
 
     /**
      * Create profile aggregates from the given collection, with a set length.
@@ -306,12 +305,12 @@ public interface IProfileCollection extends Serializable, XmlSerializable {
      * UnavailableProfileTypeException @throws
      */
     IProfile getIQRProfile(@NonNull ProfileType type, @NonNull Landmark tag)
-            throws UnavailableBorderTagException, ProfileException, UnavailableProfileTypeException;
+            throws MissingLandmarkException, ProfileException, MissingProfileException;
 
     /**
      * Find the points in the profile that are most variable
      */
-    List<Integer> findMostVariableRegions(@NonNull ProfileType type, @NonNull Landmark tag) throws UnavailableBorderTagException;
+    List<Integer> findMostVariableRegions(@NonNull ProfileType type, @NonNull Landmark tag) throws MissingLandmarkException;
 
     /**
      * Get the values within the profile aggregate for the given position
@@ -319,8 +318,8 @@ public interface IProfileCollection extends Serializable, XmlSerializable {
      * @param type the profile type to search
      * @param position the position between zero and one
      * @return the values at that position
-     * @throws UnavailableProfileTypeException
+     * @throws MissingProfileException
      *             if the profile type is not present
      */
-    double[] getValuesAtPosition(@NonNull ProfileType type, double position) throws UnavailableProfileTypeException;
+    double[] getValuesAtPosition(@NonNull ProfileType type, double position) throws MissingProfileException;
 }

@@ -21,7 +21,7 @@ import org.junit.runners.Parameterized.Parameters;
 
 import com.bmskinner.nuclear_morphology.ComponentTester;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.components.UnavailableComponentException;
+import com.bmskinner.nuclear_morphology.components.MissingComponentException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nuclear_morphology.samples.dummy.DummySegmentedCellularComponent;
@@ -130,7 +130,7 @@ public class ISegmentedProfileTester extends ComponentTester {
 	}
 	
 	@Test
-	public void testGetSegmentUUID() throws ProfileException, UnavailableComponentException {
+	public void testGetSegmentUUID() throws ProfileException, MissingComponentException {
 	    List<IProfileSegment> test = makeTestSegments();
 	    
 	    for(IProfileSegment s : test){
@@ -141,14 +141,14 @@ public class ISegmentedProfileTester extends ComponentTester {
 	
 	
 	@Test
-    public void testGetSegmentUUIDExceptsOnInvalidId() throws ProfileException, UnavailableComponentException {
+    public void testGetSegmentUUIDExceptsOnInvalidId() throws ProfileException, MissingComponentException {
 	    UUID notPresent = UUID.fromString("00000001-1000-1000-1000-100000000000");
-        exception.expect(UnavailableComponentException.class);
+        exception.expect(MissingComponentException.class);
         IProfileSegment seg = profile.getSegment( notPresent);
     }
 
 	@Test
-	public void testHasSegment() throws ProfileException, UnavailableComponentException {
+	public void testHasSegment() throws ProfileException, MissingComponentException {
 	    List<IProfileSegment> test = makeTestSegments();
         
         for(IProfileSegment s : test){
@@ -168,7 +168,7 @@ public class ISegmentedProfileTester extends ComponentTester {
 	@Test
     public void testGetSegmentsFromExceptsOnInvalidId() throws Exception {
 	    UUID notPresent = UUID.fromString("00000001-1000-1000-1000-100000000000");
-        exception.expect(UnavailableComponentException.class);
+        exception.expect(MissingComponentException.class);
         List<IProfileSegment> result = profile.getSegmentsFrom(notPresent);
     }
 	
@@ -233,7 +233,7 @@ public class ISegmentedProfileTester extends ComponentTester {
 	}
 
 	@Test
-	public void testGetSegmentString() throws UnavailableComponentException {
+	public void testGetSegmentString() throws MissingComponentException {
 	    IProfileSegment test = new DefaultProfileSegment(10, 20, profileLength, UUID.fromString(SEG_0));
 	    String name = "Seg_0";
 	    IProfileSegment result = profile.getSegment(name);
@@ -243,8 +243,8 @@ public class ISegmentedProfileTester extends ComponentTester {
 	}
 	
 	@Test
-    public void testGetSegmentStringExceptsWithInvalidInput() throws UnavailableComponentException{
-        exception.expect(UnavailableComponentException.class);
+    public void testGetSegmentStringExceptsWithInvalidInput() throws MissingComponentException{
+        exception.expect(MissingComponentException.class);
         profile.getSegment("Not present");
     }
 
@@ -428,27 +428,27 @@ public class ISegmentedProfileTester extends ComponentTester {
     }
 	    
     @Test
-    public void testNudgeSegmentsWithZeroOffset() throws ProfileException, UnavailableComponentException {
+    public void testNudgeSegmentsWithZeroOffset() throws ProfileException, MissingComponentException {
         testSegmentOffset(0);
     }
 
 	@Test
-	public void testNudgeSegmentsWithPositiveOffset() throws ProfileException, UnavailableComponentException {
+	public void testNudgeSegmentsWithPositiveOffset() throws ProfileException, MissingComponentException {
 	    testSegmentOffset(10);
 	}
 	
 	@Test
-    public void testNudgeSegmentsWithNegativeOffset() throws ProfileException, UnavailableComponentException {
+    public void testNudgeSegmentsWithNegativeOffset() throws ProfileException, MissingComponentException {
 	    testSegmentOffset(-10);
     }
 	
 	@Test
-    public void testNudgeSegmentsWithPositiveOffsetLargerThanProfile() throws ProfileException, UnavailableComponentException {
+    public void testNudgeSegmentsWithPositiveOffsetLargerThanProfile() throws ProfileException, MissingComponentException {
         testSegmentOffset(profile.size()+1);
     }
 	
 	@Test
-    public void testNudgeSegmentsWithNegativeOffsetLargerThanProfile() throws ProfileException, UnavailableComponentException {
+    public void testNudgeSegmentsWithNegativeOffsetLargerThanProfile() throws ProfileException, MissingComponentException {
         testSegmentOffset(-(profile.size()+1));
     }
 	
@@ -456,9 +456,9 @@ public class ISegmentedProfileTester extends ComponentTester {
 	 * Test if the given offset is successfully applied during a nudge
 	 * @param offset
 	 * @throws ProfileException
-	 * @throws UnavailableComponentException
+	 * @throws MissingComponentException
 	 */
-	private void testSegmentOffset(int offset) throws ProfileException, UnavailableComponentException{
+	private void testSegmentOffset(int offset) throws ProfileException, MissingComponentException{
         List<IProfileSegment> test = makeTestSegments();
         profile.nudgeSegments(offset); 
          for(IProfileSegment s : test){
@@ -611,10 +611,10 @@ public class ISegmentedProfileTester extends ComponentTester {
 	 * Create a new profile with the same size, segment lengths and positions
 	 * as the template. Test that franken-profiling has no effect.
 	 * @throws ProfileException
-	 * @throws UnavailableComponentException
+	 * @throws MissingComponentException
 	 */
 	@Test
-	public void testFrankenNormaliseToProfileHsaNoEffectWhenProfilesAreIdentical() throws ProfileException, UnavailableComponentException {
+	public void testFrankenNormaliseToProfileHsaNoEffectWhenProfilesAreIdentical() throws ProfileException, MissingComponentException {
 		List<IProfileSegment> list = makeTestSegments();
         ISegmentedProfile test = new SegmentedFloatProfile(new FloatProfile(10, profileLength), list);
 
@@ -633,10 +633,10 @@ public class ISegmentedProfileTester extends ComponentTester {
 	 * but different positions. Test that franken-profiling generates equal
 	 * segment boundaries
 	 * @throws ProfileException
-	 * @throws UnavailableComponentException
+	 * @throws MissingComponentException
 	 */
 	@Test
-	public void testFrankenNormaliseToProfileWorksWhenProfilesAreSameLength() throws ProfileException, UnavailableComponentException {
+	public void testFrankenNormaliseToProfileWorksWhenProfilesAreSameLength() throws ProfileException, MissingComponentException {
 
 		List<IProfileSegment> list = new ArrayList<>();
         list.add(new DefaultProfileSegment(5,  10, profileLength, UUID.fromString(SEG_0)));
@@ -660,10 +660,10 @@ public class ISegmentedProfileTester extends ComponentTester {
 	 * Create a new profile as the template, longer than the test profile. Test that 
 	 * franken-profiling generates equivalent segment boundaries
 	 * @throws ProfileException
-	 * @throws UnavailableComponentException
+	 * @throws MissingComponentException
 	 */
 	@Test
-	public void testFrankenNormaliseToProfileWorksWhenTargetProfileIsLonger() throws ProfileException, UnavailableComponentException {
+	public void testFrankenNormaliseToProfileWorksWhenTargetProfileIsLonger() throws ProfileException, MissingComponentException {
 		int targetLength = profileLength+50;
 		List<IProfileSegment> list = new ArrayList<>();
         list.add(new DefaultProfileSegment(5,  10, targetLength, UUID.fromString(SEG_0)));
@@ -687,10 +687,10 @@ public class ISegmentedProfileTester extends ComponentTester {
 	 * Create a new profile as the template, shorter than the test profile. Test that 
 	 * franken-profiling generates equivalent segment boundaries
 	 * @throws ProfileException
-	 * @throws UnavailableComponentException
+	 * @throws MissingComponentException
 	 */
 	@Test
-	public void testFrankenNormaliseToProfileWorksWhenTargetProfileIsShorter() throws ProfileException, UnavailableComponentException {
+	public void testFrankenNormaliseToProfileWorksWhenTargetProfileIsShorter() throws ProfileException, MissingComponentException {
 		int targetLength = profileLength-50;
 		List<IProfileSegment> list = new ArrayList<>();
         list.add(new DefaultProfileSegment(5,  10, targetLength, UUID.fromString(SEG_0)));
@@ -730,7 +730,7 @@ public class ISegmentedProfileTester extends ComponentTester {
     }
 	
 	@Test
-	public void testMergeSegments() throws ProfileException, UnavailableComponentException {
+	public void testMergeSegments() throws ProfileException, MissingComponentException {
 	    
 	    int expCount = profile.getSegmentCount()-1;
 	    UUID mergedId = UUID.fromString("00000001-1000-1000-1000-100000000000");
@@ -788,7 +788,7 @@ public class ISegmentedProfileTester extends ComponentTester {
 	}
 					
 	@Test
-    public void testMergeSegmentsExceptsWhenSegment1NotInProfile() throws ProfileException, UnavailableComponentException {
+    public void testMergeSegmentsExceptsWhenSegment1NotInProfile() throws ProfileException, MissingComponentException {
 
         UUID mergedId = UUID.fromString("00000001-1000-1000-1000-100000000000");
         IProfileSegment s1 = new DefaultProfileSegment(5,  10, 110, UUID.randomUUID());
@@ -799,7 +799,7 @@ public class ISegmentedProfileTester extends ComponentTester {
     }
 	
 	@Test
-    public void testMergeSegmentsExceptsWhenSegment2NotInProfile() throws ProfileException, UnavailableComponentException {
+    public void testMergeSegmentsExceptsWhenSegment2NotInProfile() throws ProfileException, MissingComponentException {
 
         UUID mergedId = UUID.fromString("00000001-1000-1000-1000-100000000000");
         IProfileSegment s1 = profile.getSegmentAt(1);
@@ -810,7 +810,7 @@ public class ISegmentedProfileTester extends ComponentTester {
     }
 
 	@Test
-	public void testUnmergeSegment() throws ProfileException, UnavailableComponentException {
+	public void testUnmergeSegment() throws ProfileException, MissingComponentException {
 	    
 	    UUID mergedId = UUID.fromString("00000001-1000-1000-1000-100000000000");
         IProfileSegment s1 = profile.getSegmentAt(1);
@@ -840,7 +840,7 @@ public class ISegmentedProfileTester extends ComponentTester {
 	}
 
 	@Test
-	public void testUnmergeSegmentDoesNothingWhenNoMergedSegments() throws UnavailableComponentException, ProfileException {
+	public void testUnmergeSegmentDoesNothingWhenNoMergedSegments() throws MissingComponentException, ProfileException {
         IProfileSegment s1 = profile.getSegmentAt(1);   
         profile.unmergeSegment(s1);
 	}
@@ -949,7 +949,7 @@ public class ISegmentedProfileTester extends ComponentTester {
 	}
 
 	@Test
-	public void testCopy() throws ProfileException, UnavailableComponentException {
+	public void testCopy() throws ProfileException, MissingComponentException {
 	    ISegmentedProfile copy = profile.copy();
 	    assertEquals(profile.getSegmentCount(), copy.getSegmentCount());
 	    for (UUID id : profile.getSegmentIDs()) {
@@ -987,7 +987,7 @@ public class ISegmentedProfileTester extends ComponentTester {
 	}
 	
 	@Test
-    public void testUpdateStartAndEnd() throws SegmentUpdateException, UnavailableComponentException {
+    public void testUpdateStartAndEnd() throws SegmentUpdateException, MissingComponentException {
 		IProfileSegment seg0 = profile.getSegment(UUID.fromString(SEG_0));
 		
 		int oldStart = seg0.getStartIndex();
@@ -1010,7 +1010,7 @@ public class ISegmentedProfileTester extends ComponentTester {
 	}
 	
 	@Test
-    public void testUpdateStartOnly() throws SegmentUpdateException, UnavailableComponentException {
+    public void testUpdateStartOnly() throws SegmentUpdateException, MissingComponentException {
 		IProfileSegment seg0 = profile.getSegment(UUID.fromString(SEG_0));
 		
 		int oldStart = seg0.getStartIndex();
@@ -1032,7 +1032,7 @@ public class ISegmentedProfileTester extends ComponentTester {
 	}
 	
 	@Test
-    public void testUpdateEndOnly() throws SegmentUpdateException, UnavailableComponentException {
+    public void testUpdateEndOnly() throws SegmentUpdateException, MissingComponentException {
 		IProfileSegment seg0 = profile.getSegment(UUID.fromString(SEG_0));
 		
 		int oldStart = seg0.getStartIndex();
@@ -1053,7 +1053,7 @@ public class ISegmentedProfileTester extends ComponentTester {
 	}
 
 	@Test
-    public void testUpdateFailsOnOutOfBoundsStart() throws SegmentUpdateException, UnavailableComponentException {
+    public void testUpdateFailsOnOutOfBoundsStart() throws SegmentUpdateException, MissingComponentException {
 		IProfileSegment seg0 = profile.getSegment(UUID.fromString(SEG_0));
 		
 		int oldStart = seg0.getStartIndex();
@@ -1081,7 +1081,7 @@ public class ISegmentedProfileTester extends ComponentTester {
 	}	
 	
 	@Test
-    public void testUpdateExceptsOnOutOfBoundsEnd() throws SegmentUpdateException, UnavailableComponentException {
+    public void testUpdateExceptsOnOutOfBoundsEnd() throws SegmentUpdateException, MissingComponentException {
 		IProfileSegment seg0 = profile.getSegment(UUID.fromString(SEG_0));
 		
 		int oldStart = seg0.getStartIndex();

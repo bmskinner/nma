@@ -22,7 +22,7 @@ import java.util.UUID;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.components.UnavailableComponentException;
+import com.bmskinner.nuclear_morphology.components.MissingComponentException;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment.SegmentUpdateException;
 
 /**
@@ -56,10 +56,10 @@ public interface ISegmentedProfile extends IProfile {
      * 
      * @param id
      * @return
-     * @throws UnavailableComponentException if there is no segment with the given id
+     * @throws MissingComponentException if there is no segment with the given id
      * @throws IllegalArgumentException if the id is null
      */
-    @NonNull IProfileSegment getSegment(@NonNull UUID id) throws UnavailableComponentException;
+    @NonNull IProfileSegment getSegment(@NonNull UUID id) throws MissingComponentException;
 
     /**
      * Test if a segment with the given id is present within the profile, or
@@ -90,7 +90,7 @@ public interface ISegmentedProfile extends IProfile {
      * @return
      * @throws Exception
      */
-    List<IProfileSegment> getSegmentsFrom(@NonNull UUID id) throws UnavailableComponentException, ProfileException;
+    List<IProfileSegment> getSegmentsFrom(@NonNull UUID id) throws MissingComponentException, ProfileException;
 
     /**
      * Get a copy of the segments in this profile, ordered from the zero index
@@ -105,11 +105,11 @@ public interface ISegmentedProfile extends IProfile {
      * Get the segment with the given name.
      * @param name the segment name to find
      * @return the segment
-     * @throws UnavailableComponentException if there is no segment with the given name
+     * @throws MissingComponentException if there is no segment with the given name
      * @deprecated since 1.14.0. Start replacing calls with indexes or UUIDs
      */
     @Deprecated
-    IProfileSegment getSegment(@NonNull String name) throws UnavailableComponentException;
+    IProfileSegment getSegment(@NonNull String name) throws MissingComponentException;
 
     /**
      * Get the given segment. Returns null if no segment is found. Gets the

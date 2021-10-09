@@ -162,7 +162,7 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
         // get stats and export
         boolean addRandom = false;
 
-        for (UUID group : counters.keySet()) {
+        for(UUID group : counters.keySet()) {
             addRandom |= collection.getSignalManager().hasSignals(group);
             if (collection.getSignalManager().hasSignals(group)) {
                 DefaultShellResult channelCounter = counters.get(group);

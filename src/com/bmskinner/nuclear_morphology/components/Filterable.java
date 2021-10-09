@@ -42,7 +42,7 @@ public interface Filterable {
      * @param upper the upper bound for the stat
      * @return a new collection with only cells matching the filter
      */
-    ICellCollection filterCollection(@NonNull Measurement stat, MeasurementScale scale, double lower, double upper);
+//    ICellCollection filterCollection(@NonNull Measurement stat, MeasurementScale scale, double lower, double upper);
 
     /**
      * Filter the collection for cells that match the given predicate
@@ -50,6 +50,6 @@ public interface Filterable {
      * @param predicate
      * @return
      */
-    ICellCollection filter(@NonNull Predicate<ICell> predicate);
+//    ICellCollection filter(@NonNull Predicate<ICell> predicate);
 
 }

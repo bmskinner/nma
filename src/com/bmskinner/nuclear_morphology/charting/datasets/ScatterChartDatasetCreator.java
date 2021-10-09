@@ -29,7 +29,7 @@ import org.jfree.data.xy.XYDataset;
 
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.components.Statistical;
-import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
@@ -137,7 +137,7 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator<ChartOpti
                     else
                         statBValue = n.getStatistic(statB, scale);
                     
-                } catch (UnavailableBorderTagException e) {
+                } catch (MissingLandmarkException e) {
                     LOGGER.log(Loggable.STACK, "Tag not present in cell", e);
                     statAValue = Statistical.ERROR_CALCULATING_STAT;
                     statBValue = Statistical.ERROR_CALCULATING_STAT;

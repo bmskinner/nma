@@ -69,7 +69,7 @@ import com.bmskinner.nuclear_morphology.charting.datasets.OutlineDataset;
 import com.bmskinner.nuclear_morphology.charting.datasets.OutlineDatasetCreator;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.components.Imageable;
-import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.cells.DefaultCell;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
@@ -79,7 +79,7 @@ import com.bmskinner.nuclear_morphology.components.profiles.DefaultLandmark;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.signals.SignalManager;
 import com.bmskinner.nuclear_morphology.gui.RotationMode;
@@ -1062,7 +1062,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 					}
 				}
 				
-        	} catch (UnavailableBorderTagException | UnavailableProfileTypeException | ProfileException e) {
+        	} catch (MissingLandmarkException | MissingProfileException | ProfileException e) {
         		LOGGER.log(Loggable.STACK, "Error getting segments for mesh", e);
         		LOGGER.log(Loggable.STACK, "Falling back to old mesh face annotation");
 

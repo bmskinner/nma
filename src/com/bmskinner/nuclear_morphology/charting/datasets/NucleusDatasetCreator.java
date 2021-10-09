@@ -38,8 +38,8 @@ import com.bmskinner.nuclear_morphology.charting.ExportableBoxAndWhiskerCategory
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.DefaultChartOptions;
 import com.bmskinner.nuclear_morphology.components.UnavailableBorderPointException;
-import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
-import com.bmskinner.nuclear_morphology.components.UnavailableComponentException;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
+import com.bmskinner.nuclear_morphology.components.MissingComponentException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
@@ -57,7 +57,7 @@ import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.UnsegmentedProfileException;
 import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
@@ -162,8 +162,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
                 medianSeg = collection.getProfileCollection()
                         .getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN)
                         .getSegmentAt(segPosition);
-            } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException
-                    | UnsegmentedProfileException e) {
+            } catch (MissingLandmarkException | ProfileException | MissingProfileException e) {
                 LOGGER.log(Loggable.STACK, "Error getting profile from tag", e);
                 throw new ChartDatasetCreationException(UNABLE_TO_GET_MEDIAN_PROFILE_ERROR, e);
             }
@@ -185,7 +184,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 
                     }
 
-                } catch (ProfileException | UnavailableComponentException e) {
+                } catch (ProfileException | MissingComponentException e) {
                     LOGGER.warning("Cannot get segment length for " + n.getNameAndNumber());
                     LOGGER.log(Loggable.STACK, "Error getting profile", e);
 
@@ -222,8 +221,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
                 medianSeg = collection.getProfileCollection()
                         .getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN)
                         .getSegmentAt(segPosition);
-            } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException
-                    | UnsegmentedProfileException e) {
+            } catch (MissingLandmarkException | ProfileException | MissingProfileException e) {
                 LOGGER.log(Loggable.STACK, "Error getting profile from tag", e);
                 throw new ChartDatasetCreationException(UNABLE_TO_GET_MEDIAN_PROFILE_ERROR, e);
             }
@@ -239,7 +237,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
                     double displacement = profile.getDisplacement(seg);
                     list.add(displacement);
 
-                } catch (ProfileException | UnavailableComponentException e) {
+                } catch (ProfileException | MissingComponentException e) {
                     LOGGER.warning("Cannot get segment displacement for " + n.getNameAndNumber());
                     LOGGER.log(Loggable.STACK, "Error getting profile", e);
                 }
@@ -298,7 +296,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
                     dataset.add(list, medianSeg.getName(), collection.getName());
                 }
 
-            } catch (ProfileException | UnsegmentedProfileException | UnavailableComponentException e) {
+            } catch (ProfileException | MissingComponentException e) {
                 LOGGER.log(Loggable.STACK, "Error getting profile from tag", e);
                 throw new ChartDatasetCreationException(UNABLE_TO_GET_MEDIAN_PROFILE_ERROR, e);
             }
@@ -369,7 +367,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 	        
 	        ds.addSeries(Landmark.ORIENTATION_POINT, data);
 			
-		} catch (UnavailableBorderTagException e) {
+		} catch (MissingLandmarkException e) {
 			throw new ChartDatasetCreationException("Unable to get OP", e);
 		}
     	return ds;
@@ -408,7 +406,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
         try {
             q25 = collection.getProfileCollection().getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.LOWER_QUARTILE);
             q75 = collection.getProfileCollection().getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.UPPER_QUARTILE);
-        } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException e) {
+        } catch (MissingLandmarkException | ProfileException | MissingProfileException e) {
             LOGGER.log(Loggable.STACK, "Error getting upper or lower quartile profile from tag", e);
             throw new ChartDatasetCreationException("Unable to get quartile profile", e);
         }
@@ -454,7 +452,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 
         	if(ds.getSeriesCount()<angleProfile.getSegmentCount())
         		throw new ChartDatasetCreationException("Cannot make segmented nucleus outline: too few series in chart dataset");
-        } catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException | UnavailableBorderPointException e) {
+        } catch (ProfileException | MissingLandmarkException | MissingProfileException | UnavailableBorderPointException e) {
         	LOGGER.log(Loggable.STACK, "Error getting nucleus angle profile from " + Landmark.REFERENCE_POINT, e);
         	throw new ChartDatasetCreationException("Cannot make segmented nucleus outline", e);
         }
@@ -470,7 +468,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 
         		float[][] data = { xpoints, ypoints };
         		ds.addSeries(TAG_PREFIX, data, ds.getSeriesCount());
-        	} catch (UnavailableBorderTagException e) {
+        	} catch (MissingLandmarkException e) {
         		LOGGER.log(Loggable.STACK, "Error getting border tags", e);
         	}
         }
@@ -553,7 +551,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
                 throw new ChartDatasetCreationException(UNABLE_TO_GET_BORDER_POINT_ERROR, e);
             } catch(IllegalArgumentException e){
                 throw new ChartDatasetCreationException("Problem with line equation", e);
-            } catch (UnavailableBorderTagException e) {
+            } catch (MissingLandmarkException e) {
             	throw new ChartDatasetCreationException("Border tag is not present: "+pointType, e);
 			}
 
@@ -588,7 +586,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
                 float[][] data = { xpoints, ypoints };
                 ds.addSeries("Tag_" + tag, data, 0);
             }
-        } catch (UnavailableBorderPointException | UnavailableBorderTagException e) {
+        } catch (UnavailableBorderPointException | MissingLandmarkException e) {
             throw new ChartDatasetCreationException(UNABLE_TO_GET_BORDER_POINT_ERROR, e);
         }
 
@@ -807,7 +805,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
         double[] dValues;
         try {
             dValues = collection.getProfileCollection().getValuesAtPosition(type, xposition);
-        } catch (UnavailableProfileTypeException e) {
+        } catch (MissingProfileException e) {
             throw new ChartDatasetCreationException("Cannot get profile values", e);
         }
         float[] values = new float[dValues.length];
@@ -843,7 +841,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
         double[] values;
         try {
             values = collection.getProfileCollection().getValuesAtPosition(type, xposition);
-        } catch (UnavailableProfileTypeException e) {
+        } catch (MissingProfileException e) {
             throw new ChartDatasetCreationException("Cannot get profile values at position " + xposition, e);
         }
         // add the values to a kernel estimator

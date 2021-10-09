@@ -16,7 +16,7 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.signals;
 
-import com.bmskinner.nuclear_morphology.components.UnavailableComponentException;
+import com.bmskinner.nuclear_morphology.components.MissingComponentException;
 
 /**
  * Thrown when a requested signal group is not present within a dataset or cell
@@ -25,7 +25,7 @@ import com.bmskinner.nuclear_morphology.components.UnavailableComponentException
  * @since 1.13.3
  *
  */
-public class UnavailableSignalGroupException extends UnavailableComponentException {
+public class UnavailableSignalGroupException extends MissingComponentException {
     private static final long serialVersionUID = 1L;
 
     public UnavailableSignalGroupException() {

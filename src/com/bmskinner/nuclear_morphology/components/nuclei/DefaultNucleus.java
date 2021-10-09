@@ -33,7 +33,7 @@ import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder.NoDetectedIndexException;
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalAnalyser;
 import com.bmskinner.nuclear_morphology.components.UnavailableBorderPointException;
-import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.cells.ProfileableCellularComponent;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
@@ -41,7 +41,7 @@ import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.UnprofilableObjectException;
 import com.bmskinner.nuclear_morphology.components.rules.PriorityAxis;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSet;
@@ -226,7 +226,7 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
     				int index = f.identifyIndex(p, rule);
     				setBorderTag(lm, index);
     			}
-    		} catch (UnavailableProfileTypeException e) {
+    		} catch (MissingProfileException e) {
     			LOGGER.log(Loggable.STACK, "Error getting profile type", e);
     		} catch (NoDetectedIndexException e) {
     			LOGGER.fine("Unable to detect "+lm+" in nucleus");
@@ -278,7 +278,6 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
         for (INuclearSignal s : this.getSignalCollection().getAllSignals()) {
             s.setScale(scale);
         }
-
     }
 
     @Override
@@ -395,7 +394,7 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
         IProfile profile;
         try {
             profile = this.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
-        } catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
+        } catch (ProfileException | MissingLandmarkException | MissingProfileException e) {
         	LOGGER.log(Loggable.STACK, "Error getting profile", e);
             return false;
         }
@@ -481,17 +480,17 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
     			// Same logic but now if X axis is the priority
     			alignVerticallyPriorityX();
     		}
-    	} catch (UnavailableBorderTagException e) {
+    	} catch (MissingLandmarkException e) {
     		LOGGER.log(Loggable.STACK, "Cannot get border tag or profile", e);
     		try {
     			rotatePointToBottom(getBorderPoint(Landmark.ORIENTATION_POINT));
-    		} catch (UnavailableBorderTagException e1) {
+    		} catch (MissingLandmarkException e1) {
     			LOGGER.log(Loggable.STACK, "Cannot get border tag", e1);
     		}
     	}
     }
     
-    private void alignVerticallyPriorityY() throws UnavailableBorderTagException {
+    private void alignVerticallyPriorityY() throws MissingLandmarkException {
     	// Check if t and b are present
     	
     	Landmark t = orientationMarks.get(Landmark.TOP_POINT);
@@ -537,7 +536,7 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
     }
     
     
-    private void alignVerticallyPriorityX() throws UnavailableBorderTagException {
+    private void alignVerticallyPriorityX() throws MissingLandmarkException {
     	
     	Landmark t = orientationMarks.get(Landmark.TOP_POINT);
     	Landmark b = orientationMarks.get(Landmark.BTM_POINT);

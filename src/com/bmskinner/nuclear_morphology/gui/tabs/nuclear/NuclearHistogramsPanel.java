@@ -24,6 +24,9 @@ import java.util.logging.Logger;
 import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
+import com.bmskinner.nuclear_morphology.analysis.nucleus.CellCollectionFilterBuilder;
+import com.bmskinner.nuclear_morphology.analysis.nucleus.CellCollectionFilterer;
+import com.bmskinner.nuclear_morphology.analysis.nucleus.FilteringOptions;
 import com.bmskinner.nuclear_morphology.charting.charts.HistogramChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.MorphologyChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPanel;
@@ -168,7 +171,10 @@ public class NuclearHistogramsPanel extends HistogramsTabPanel  {
 
                         LOGGER.info("Filtering on " + stat.toString() + ": " + df.format(lower) + " - " + df.format(upper));
 
-                        ICellCollection subCollection = collection.filterCollection(stat, scale, lower, upper);
+                        FilteringOptions op = new CellCollectionFilterBuilder()
+                        		.add(stat, CellularComponent.NUCLEUS, scale, lower, upper)
+                        		.build();
+                        ICellCollection subCollection = CellCollectionFilterer.filter(collection, op);
 
                         if (subCollection.hasCells()) {
 

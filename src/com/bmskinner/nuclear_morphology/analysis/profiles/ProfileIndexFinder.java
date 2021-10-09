@@ -23,13 +23,13 @@ import java.util.logging.Logger;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.Taggable;
-import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.profiles.BooleanProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.rules.Rule;
 import com.bmskinner.nuclear_morphology.components.rules.Rule.RuleType;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSet;
@@ -165,9 +165,9 @@ public class ProfileIndexFinder {
      * @param list the rulesets to use
      * @return the first index matching the rules
      * @throws NoDetectedIndexException if no indexes were found
-     * @throws UnavailableProfileTypeException 
+     * @throws MissingProfileException 
      */
-    public int identifyIndex(@NonNull final Taggable t, @NonNull final List<RuleSet> list) throws NoDetectedIndexException, UnavailableProfileTypeException {
+    public int identifyIndex(@NonNull final Taggable t, @NonNull final List<RuleSet> list) throws NoDetectedIndexException, MissingProfileException {
     	 if (list == null || list.isEmpty())
              throw new IllegalArgumentException(RULESET_EMPTY_ERROR);
     	 BooleanProfile indexes = new BooleanProfile(t.getBorderLength(), true);
@@ -285,7 +285,7 @@ public class ProfileIndexFinder {
             indexes = new BooleanProfile(collection.getProfileCollection().getProfile(ProfileType.ANGLE,
                     Landmark.REFERENCE_POINT, Stats.MEDIAN), true);
 
-        } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException e) {
+        } catch (MissingLandmarkException | ProfileException | MissingProfileException e) {
         	LOGGER.log(Loggable.STACK, "Cannot get matching profile", e);
             return new BooleanProfile(collection.getProfileCollection().length(), false);
         }
@@ -296,7 +296,7 @@ public class ProfileIndexFinder {
             IProfile p;
             try {
                 p = collection.getProfileCollection().getProfile(r.getType(), Landmark.REFERENCE_POINT, Stats.MEDIAN);
-            } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException e) {
+            } catch (MissingLandmarkException | ProfileException | MissingProfileException e) {
             	LOGGER.log(Loggable.STACK, "Cannot get matching profile", e);
                 return new BooleanProfile(collection.getProfileCollection().length(), false);
             }

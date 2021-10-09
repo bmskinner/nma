@@ -29,7 +29,7 @@ import javax.swing.table.TableModel;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
-import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
@@ -152,7 +152,7 @@ public class ScatterTableDatasetCreator extends AbstractTableCreator {
                     } else {
                         statBValue = n.getStatistic(statB, scale);
                     }
-                } catch (UnavailableBorderTagException e) {
+                } catch (MissingLandmarkException e) {
                     LOGGER.warning("Cannot get stats for cell");
                     LOGGER.log(Loggable.STACK, "Tag RP not present in cell", e);
                     statAValue = 0;

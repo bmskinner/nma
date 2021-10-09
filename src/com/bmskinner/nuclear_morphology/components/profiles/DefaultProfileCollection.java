@@ -31,7 +31,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.jdom2.Element;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.io.XmlSerializable;
@@ -156,16 +156,16 @@ public class DefaultProfileCollection implements IProfileCollection {
 
     @Override
     public IProfile getProfile(@NonNull ProfileType type, @NonNull Landmark tag, double quartile)
-            throws UnavailableBorderTagException, ProfileException, UnavailableProfileTypeException {
+            throws MissingLandmarkException, ProfileException, MissingProfileException {
 
         if (type == null)
             throw new IllegalArgumentException("Type cannot be null");
         if (tag == null)
             throw new IllegalArgumentException("Tag cannot be null");
         if (!this.hasBorderTag(tag))
-            throw new UnavailableBorderTagException("Tag is not present: " + tag.toString());
+            throw new MissingLandmarkException("Tag is not present: " + tag.toString());
         if (!map.containsKey(type))
-            throw new UnavailableProfileTypeException("Profile type is not present: " + type.toString());
+            throw new MissingProfileException("Profile type is not present: " + type.toString());
 
         if(!cache.hasProfile(type, quartile, tag)) {
         	IProfileAggregate agg = map.get(type);
@@ -179,9 +179,9 @@ public class DefaultProfileCollection implements IProfileCollection {
     }
 
     @Override
-    public ISegmentedProfile getSegmentedProfile(@NonNull ProfileType type, @NonNull Landmark tag, double quartile)
-            throws UnavailableBorderTagException, ProfileException, UnavailableProfileTypeException,
-            UnsegmentedProfileException {
+    public ISegmentedProfile getSegmentedProfile(@NonNull ProfileType type, @NonNull Landmark tag, 
+    		double quartile)
+            throws MissingLandmarkException, ProfileException, MissingProfileException {
 
         if (tag == null || type == null)
             throw new IllegalArgumentException("A profile type and tag is required");
@@ -380,7 +380,7 @@ public class DefaultProfileCollection implements IProfileCollection {
     }
 
     @Override
-    public double[] getValuesAtPosition(@NonNull ProfileType type, double position) throws UnavailableProfileTypeException {
+    public double[] getValuesAtPosition(@NonNull ProfileType type, double position) throws MissingProfileException {
 
         double[] result = map.get(type).getValuesAtPosition(position);
 
@@ -426,7 +426,7 @@ public class DefaultProfileCollection implements IProfileCollection {
                         break;
                     }
                 }
-            } catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
+            } catch (ProfileException | MissingLandmarkException | MissingProfileException e) {
                 LOGGER.log(Loggable.STACK, "Error making aggregate", e);
             }
         }
@@ -471,7 +471,7 @@ public class DefaultProfileCollection implements IProfileCollection {
                 try {
                     for (Nucleus n : collection.getNuclei())
                          agg.addValues(n.getProfile(type, Landmark.REFERENCE_POINT));
-                } catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
+                } catch (ProfileException | MissingLandmarkException | MissingProfileException e) {
                     LOGGER.log(Loggable.STACK, "Error making aggregate", e);
                 }
                 map.put(type, agg);
@@ -540,7 +540,7 @@ public class DefaultProfileCollection implements IProfileCollection {
 
     @Override
     public IProfile getIQRProfile(@NonNull ProfileType type, @NonNull Landmark tag)
-            throws UnavailableBorderTagException, ProfileException, UnavailableProfileTypeException {
+            throws MissingLandmarkException, ProfileException, MissingProfileException {
 
         IProfile q25 = getProfile(type, tag, Stats.LOWER_QUARTILE);
         IProfile q75 = getProfile(type, tag, Stats.UPPER_QUARTILE);
@@ -565,7 +565,7 @@ public class DefaultProfileCollection implements IProfileCollection {
         IProfile iqrProfile;
         try {
             iqrProfile = getIQRProfile(type, tag);
-        } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException e) {
+        } catch (MissingLandmarkException | ProfileException | MissingProfileException e) {
             LOGGER.log(Loggable.STACK, "Error getting variable regions", e);
             return result;
         }
@@ -821,7 +821,7 @@ public class DefaultProfileCollection implements IProfileCollection {
 	}
 
 	@Override
-	public double getProportionOfIndex(@NonNull Landmark tag) throws UnavailableBorderTagException {
+	public double getProportionOfIndex(@NonNull Landmark tag) throws MissingLandmarkException {
 		return getProportionOfIndex(getIndex(tag));
 	}
 

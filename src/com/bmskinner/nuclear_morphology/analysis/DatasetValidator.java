@@ -27,8 +27,8 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.Taggable;
-import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
-import com.bmskinner.nuclear_morphology.components.UnavailableComponentException;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
+import com.bmskinner.nuclear_morphology.components.MissingComponentException;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
@@ -38,7 +38,7 @@ import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.UnsegmentedProfileException;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
@@ -226,7 +226,7 @@ public class DatasetValidator {
 				for (Nucleus n : c.getNuclei()) {
 					try {
 						n.getProfile(type);
-					} catch (UnavailableProfileTypeException e) {
+					} catch (MissingProfileException e) {
 						errorList.add(String.format("Nucleus %s does not have %s profile", n.getNameAndNumber(), type));
 						errorCells.add(c);
 						withErrors++;
@@ -245,14 +245,14 @@ public class DatasetValidator {
 		for (ProfileType type : ProfileType.values()) {
 			try {
 				pc.getProfile(type, Landmark.REFERENCE_POINT, Stats.MEDIAN);
-			} catch (UnavailableProfileTypeException | UnavailableBorderTagException | ProfileException e) {
+			} catch (MissingProfileException | MissingLandmarkException | ProfileException e) {
 				summaryList.add(String.format("Root dataset %s does not have %s", d.getName(), type));
 				withErrors++;
 			}
 			
 			try {
 				pc.getSegmentedProfile(type, Landmark.REFERENCE_POINT, Stats.MEDIAN);
-			} catch (UnavailableProfileTypeException | UnavailableBorderTagException | ProfileException | UnsegmentedProfileException e) {
+			} catch (MissingProfileException | MissingLandmarkException | ProfileException e) {
 				summaryList.add(String.format("Root dataset %s does not have segmented %s", d.getName(), type));
 				withErrors++;
 			}
@@ -263,14 +263,14 @@ public class DatasetValidator {
 				IProfileCollection childPc = child.getCollection().getProfileCollection();
 				try {
 					childPc.getProfile(type, Landmark.REFERENCE_POINT, Stats.MEDIAN);
-				} catch (UnavailableProfileTypeException | UnavailableBorderTagException | ProfileException e) {
+				} catch (MissingProfileException | MissingLandmarkException | ProfileException e) {
 					summaryList.add(String.format("Child dataset %s does not have %s", child.getName(), type));
 					withErrors++;
 				}
 				
 				try {
 					childPc.getSegmentedProfile(type, Landmark.REFERENCE_POINT, Stats.MEDIAN);
-				} catch (UnavailableProfileTypeException | UnavailableBorderTagException | ProfileException | UnsegmentedProfileException e) {
+				} catch (MissingProfileException | MissingLandmarkException | ProfileException e) {
 					summaryList.add(String.format("Child dataset %s does not have segmented %s", child.getName(), type));
 					withErrors++;
 				}
@@ -358,7 +358,7 @@ public class DatasetValidator {
 						if(s.getStartIndex()==rpIndex)
 							rpIsOk++;
 					}
-				} catch (UnavailableBorderTagException | UnavailableProfileTypeException e) {
+				} catch (MissingLandmarkException | MissingProfileException e) {
 					// allow withErrors to fall through
 					LOGGER.fine("No border tag present");
 				}
@@ -442,8 +442,7 @@ public class DatasetValidator {
 		try {
 			medianProfile = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE,
 					Landmark.REFERENCE_POINT, Stats.MEDIAN);
-		} catch (UnavailableBorderTagException | UnavailableProfileTypeException | ProfileException
-				| UnsegmentedProfileException e) {
+		} catch (MissingLandmarkException | MissingProfileException | ProfileException e) {
 			errorList.add("Unable to fetch median profile for collection");
 			return 1;
 		}
@@ -561,7 +560,7 @@ public class DatasetValidator {
 
 
 
-		} catch (ProfileException | UnavailableComponentException e) {
+		} catch (ProfileException | MissingComponentException e) {
 			errorList.add(String.format("Error getting segments for object %s: %s", n.getID(), e.getMessage()));
 			errorCount++;
 		}

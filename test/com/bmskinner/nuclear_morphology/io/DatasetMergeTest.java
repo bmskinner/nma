@@ -64,11 +64,12 @@ public class DatasetMergeTest {
         cells += d1.getCollection().getNucleusCount();
         cells += d2.getCollection().getNucleusCount();
 
-        IAnalysisMethod m = new DatasetMergeMethod(toMerge, new File(TestResources.TESTING_MULTIPLE_BASE_FOLDER+"Merge_test.nmd"));  
+        File saveFile = new File(TestResources.TESTING_MULTIPLE_BASE_FOLDER, "Merge_test.nmd");
+        IAnalysisMethod m = new DatasetMergeMethod(toMerge, saveFile);  
 
         IAnalysisResult r = m.call();
         IAnalysisDataset d = r.getFirstDataset();
-        assertNotNull(d);
+        assertNotNull("Dataset should be returned from merge method", d);
 
         assertEquals(d.getCollection().getNucleusCount(), cells);
 

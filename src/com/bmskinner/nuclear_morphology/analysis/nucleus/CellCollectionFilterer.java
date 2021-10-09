@@ -16,12 +16,23 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.analysis.nucleus;
 
+import java.text.DecimalFormat;
+import java.util.List;
 import java.util.UUID;
+import java.util.function.Predicate;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
+
+import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
+import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.DefaultCellCollection;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
+import com.bmskinner.nuclear_morphology.components.measure.Measurement;
+import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
+import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -103,29 +114,91 @@ public class CellCollectionFilterer {
 		
 		return result;
 	}
+	
 	/**
-	 * Filter the collection using the internal filtering options
+	 * Filter the collection using the given filtering options
 	 * @param collection the collection to filter
+	 * @param options the filtering options to use
 	 * @return the filtered collection
 	 * @throws CollectionFilteringException
 	 */
 	public static ICellCollection filter(ICellCollection collection, FilteringOptions options)
 			throws CollectionFilteringException {
+		return filter(collection, options.getPredicate(collection));
 		
-		ICellCollection filtered = collection.filter(options.getPredicate(collection));
-
-        if (filtered == null || !filtered.hasCells())
-            throw new CollectionFilteringException("No collection returned");
-        try {
-            collection.getProfileManager().copySegmentsAndLandmarksTo(filtered);
-            collection.getSignalManager().copySignalGroups(filtered);
-
-        } catch (ProfileException e) {
-            LOGGER.warning("Error copying collection offsets");
-            LOGGER.log(Loggable.STACK, "Error in offsetting", e);
-        }
-        return filtered;
 	}
+	
+	/**
+	 * Filter the collection using the given cell predicate
+	 * @param collection the collection to filter
+	 * @param pred the predicate determining which cells are valids
+	 * @return the filtered collection
+	 * @throws CollectionFilteringException
+	 */
+	public static ICellCollection filter(ICellCollection collection, Predicate<ICell> pred) throws CollectionFilteringException {
+		String newName = "Filtered_" + pred.toString();
+
+		ICellCollection subCollection = new DefaultCellCollection(collection, newName);
+
+		List<ICell> list = collection.parallelStream()
+				.filter(pred)
+				.collect(Collectors.toList());
+
+		subCollection.addAll(list);
+
+		if (!subCollection.hasCells()) {
+			LOGGER.warning("No cells passed filter");
+			throw new CollectionFilteringException("No collection returned");
+		}
+
+		try {
+			subCollection.createProfileCollection();
+			collection.getProfileManager().copySegmentsAndLandmarksTo(subCollection);
+			collection.getSignalManager().copySignalGroupsTo(subCollection);
+
+		} catch (ProfileException e) {
+			LOGGER.warning("Error copying collection offsets");
+			LOGGER.log(Loggable.STACK, "Error in offsetting", e);
+		}		
+        return subCollection;
+	}
+	
+//	@Override
+//	public static ICellCollection filterCollection(@NonNull Measurement stat, MeasurementScale scale, 
+//			double lower,
+//			double upper) {
+//		DecimalFormat df = new DecimalFormat("#.##");
+//
+//		Predicate<ICell> pred = new Predicate<ICell>() {
+//			@Override
+//			public boolean test(ICell t) {
+//
+//				for (Nucleus n : t.getNuclei()) {
+//
+//					double value = stat.equals(Measurement.VARIABILITY)
+//							? getNormalisedDifferenceToMedian(Landmark.REFERENCE_POINT, n) : n.getStatistic(stat, scale);
+//
+//							if (value < lower) {
+//								return false;
+//							}
+//
+//							if (value > upper) {
+//								return false;
+//							}
+//
+//				}
+//				return true;
+//			}
+//
+//			@Override
+//			public String toString() {
+//				return stat.toString() + "_" + df.format(lower) + "-" + df.format(upper);
+//			}
+//
+//		};
+//
+//		return filter(pred);
+//	}
 	
     /**
      * Thrown when a cell collection cannot be filtered

@@ -12,11 +12,9 @@ import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace;
 
 public class WorkspaceImporterTest {
 
-	public static final String FILE_NAME = "Example.wrk";
-
 	@Test
 	public void testWorkspaceImported() {
-		File f = new File(TestResources.DATASET_FOLDER.getAbsolutePath()+Version.currentVersion(), FILE_NAME);
+		File f = new File(TestResources.DATASET_FOLDER.getAbsolutePath()+Version.currentVersion(), TestResources.MOUSE);
 		IWorkspace w = WorkspaceImporter.createImporter(f).importWorkspace();
 
 		assertEquals(TestResources.MOUSE, w.getName());

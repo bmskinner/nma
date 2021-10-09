@@ -73,7 +73,7 @@ public class CellCollectionFilteringMethod extends MultipleDatasetAnalysisMethod
 			v.addAll(filtered);
 			try {
 				d.getCollection().getProfileManager().copySegmentsAndLandmarksTo(v);
-				d.getCollection().getSignalManager().copySignalGroups(v);
+				d.getCollection().getSignalManager().copySignalGroupsTo(v);
 
 			} catch (ProfileException e) {
 				LOGGER.warning("Error copying collection offsets");

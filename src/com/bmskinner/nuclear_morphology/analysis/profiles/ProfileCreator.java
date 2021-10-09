@@ -26,7 +26,7 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.Taggable;
 import com.bmskinner.nuclear_morphology.components.UnavailableBorderPointException;
-import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.measure.DoubleEquation;
@@ -35,7 +35,7 @@ import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.components.profiles.SegmentedFloatProfile;
-import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.utility.AngleTools;
 
@@ -100,7 +100,7 @@ public class ProfileCreator {
         		segments = templateProfile.getSegments();
         	}
 
-        } catch (UnavailableProfileTypeException e) {
+        } catch (MissingProfileException e) {
         	LOGGER.log(Loggable.STACK, "No profile angle type: "+e.getMessage(), e);
         }
 
@@ -175,7 +175,7 @@ public class ProfileCreator {
      * 
      * @return
      * @throws UnavailableBorderPointException
-     * @throws UnavailableBorderTagException
+     * @throws MissingLandmarkException
      */
     private ISegmentedProfile calculateZahnRoskiesProfile() {
 

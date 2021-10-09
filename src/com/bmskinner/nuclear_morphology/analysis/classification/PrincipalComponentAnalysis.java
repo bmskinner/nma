@@ -31,7 +31,7 @@ import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.SingleDatasetAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.Taggable;
-import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
@@ -41,7 +41,7 @@ import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 
 import weka.attributeSelection.PrincipalComponents;
 import weka.core.Attribute;
@@ -167,8 +167,8 @@ public class PrincipalComponentAnalysis extends SingleDatasetAnalysisMethod {
         	for(Nucleus n : c.getNuclei()) {
         		try {
     				addNucleus(n, attributes, instances,  windowProportion);
-    			} catch (UnavailableBorderTagException
-    					| UnavailableProfileTypeException
+    			} catch (MissingLandmarkException
+    					| MissingProfileException
     					| ProfileException e) {
     				LOGGER.log(Level.SEVERE, "Unable to add nucleus to instances",e);
     			}
@@ -179,7 +179,7 @@ public class PrincipalComponentAnalysis extends SingleDatasetAnalysisMethod {
     }
     
     private void addNucleus(Nucleus n, FastVector attributes, Instances instances,
-            double windowProportion) throws UnavailableBorderTagException, UnavailableProfileTypeException,
+            double windowProportion) throws MissingLandmarkException, MissingProfileException,
             ProfileException {
 
         Instance inst = new SparseInstance(attributes.size());

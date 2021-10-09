@@ -78,7 +78,7 @@ import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.gui.RotationMode;
 import com.bmskinner.nuclear_morphology.gui.components.panels.DualChartPanel;
 import com.bmskinner.nuclear_morphology.gui.dialogs.CellResegmentationDialog;
@@ -475,7 +475,7 @@ public class CellBorderAdjustmentDialog extends AbstractCellEditingDialog implem
         ISegmentedProfile templateProfile;
         try {
             templateProfile = workingCell.getPrimaryNucleus().getProfile(ProfileType.ANGLE);
-        } catch (UnavailableProfileTypeException e1) {
+        } catch (MissingProfileException e1) {
             LOGGER.warning("Angle profile not present");
             return;
         }

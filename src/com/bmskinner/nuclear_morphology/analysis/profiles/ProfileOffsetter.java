@@ -21,15 +21,14 @@ import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
-import com.bmskinner.nuclear_morphology.components.UnavailableComponentException;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
+import com.bmskinner.nuclear_morphology.components.MissingComponentException;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.UnsegmentedProfileException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
@@ -47,68 +46,58 @@ public class ProfileOffsetter {
     private final ICellCollection collection;
 
     public ProfileOffsetter(@NonNull final ICellCollection collection) {
-
-        if (collection == null)
-            throw new IllegalArgumentException("Collection cannot be null");
-
         this.collection = collection;
     }
 
     /**
-     * This method requires the frankenprofiling to be completed
+     * Using the landmark location in the median profile, assign the location
+     * to the equivalent location in every nucleus.
      * 
      * @throws ProfileOffsetException
+     * @throws MissingLandmarkException 
      */
-    public void assignBorderTagToNucleiViaFrankenProfile(Landmark tag) throws ProfileOffsetException {
+    public void assignLandmarkViaFrankenProfile(@NonNull Landmark tag) throws ProfileOffsetException {
 
-        int index;
         try {
-            index = collection.getProfileCollection().getIndex(tag);
-        } catch (UnavailableBorderTagException e2) {
-            throw new ProfileOffsetException("Cannot find " + tag + " index in median", e2);
-        }
+        	int index = collection.getProfileCollection().getIndex(tag);
+        	UUID segID = collection.getProfileCollection().getSegmentContaining(tag).getID();
 
-        UUID segID;
-        ISegmentedProfile profile;
-        IProfileSegment segFromRef;
-        try {
-            segID = collection.getProfileCollection().getSegmentContaining(tag).getID();
-
-            profile = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT,
+            ISegmentedProfile profile = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT,
             		Stats.MEDIAN);
 
-            segFromRef = profile.getSegment(segID);
-        } catch (ProfileException | UnsegmentedProfileException | UnavailableComponentException e1) {
+            IProfileSegment segFromRef = profile.getSegment(segID);
+            
+            /*
+             * Get the proportion of the index through the segment
+             */
+            double proportion = segFromRef.getIndexProportion(index);
+
+            /* Go through each nucleus and apply the position  */
+            for (Nucleus nucleus : collection.getNuclei()) {
+            	try {
+
+                    IProfileSegment nucleusSegment = nucleus.getProfile(ProfileType.ANGLE).getSegment(segID);
+
+                    // find the index in the segment closest to the proportion 
+                    int newIndex = nucleusSegment.getProportionalIndex(proportion);
+
+                    if (newIndex == -1) {
+                        LOGGER.warning("Cannot find " + tag + " index in nucleus profile at proportion " + proportion);
+                        continue;
+                    }
+
+                    nucleus.setBorderTag(tag, newIndex);
+                } catch (IndexOutOfBoundsException | MissingComponentException e) {
+                    LOGGER.log(Loggable.STACK, "Cannot set " + tag + " index in nucleus profile", e);
+                }
+
+            }
+            
+            
+        } catch (ProfileException | MissingComponentException e1) {
             LOGGER.log(Loggable.STACK, "Error getting median profile and segment", e1);
             throw new ProfileOffsetException("Cannot get median profile or segment", e1);
         }
-
-        /*
-         * Get the proportion of the index through the segment
-         */
-        double proportion = segFromRef.getIndexProportion(index);
-
-        /* Go through each nucleus and apply the position  */
-        for (Nucleus nucleus : collection.getNuclei()) {
-        	try {
-
-                IProfileSegment nucleusSegment = nucleus.getProfile(ProfileType.ANGLE).getSegment(segID);
-
-                // find the index in the segment closest to the proportion 
-                int newIndex = nucleusSegment.getProportionalIndex(proportion);
-
-                if (newIndex == -1) {
-                    LOGGER.warning("Cannot find " + tag + " index in nucleus profile at proportion " + proportion);
-                    continue;
-                }
-
-                nucleus.setBorderTag(tag, newIndex);
-            } catch (IndexOutOfBoundsException | UnavailableComponentException e) {
-                LOGGER.log(Loggable.STACK, "Cannot set " + tag + " index in nucleus profile", e);
-            }
-
-        }
-
     }
 
     /**
@@ -128,12 +117,10 @@ public class ProfileOffsetter {
      */
     private void assignTopAndBottomVerticalsViaFrankenProfile() throws ProfileOffsetException {
 
-        /*
-         * Franken profile method: segment proportionality
-         */
+        /* Franken profile method: segment proportionality */
 
-        assignBorderTagToNucleiViaFrankenProfile(Landmark.TOP_VERTICAL);
-        assignBorderTagToNucleiViaFrankenProfile(Landmark.BOTTOM_VERTICAL);
+        assignLandmarkViaFrankenProfile(Landmark.TOP_VERTICAL);
+        assignLandmarkViaFrankenProfile(Landmark.BOTTOM_VERTICAL);
     }
 
     public class ProfileOffsetException extends Exception {

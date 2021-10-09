@@ -32,13 +32,13 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.Taggable;
 import com.bmskinner.nuclear_morphology.components.UnavailableBorderPointException;
-import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -463,7 +463,7 @@ public class DefaultMesh<E extends Taggable> implements Mesh<E> {
     			segmentVertexProportions.put(segNumber, proportions);
     			segmentFaces.put(segNumber, new HashSet<>());
     		}
-    	} catch (UnavailableBorderTagException | UnavailableProfileTypeException | ProfileException e) {
+    	} catch (MissingLandmarkException | MissingProfileException | ProfileException e) {
     		throw new MeshCreationException("Unable to get segments from template nucleus", e);
     	}
 
@@ -516,7 +516,7 @@ public class DefaultMesh<E extends Taggable> implements Mesh<E> {
                 }
 
             }
-        } catch (UnavailableBorderTagException | UnavailableProfileTypeException | ProfileException
+        } catch (MissingLandmarkException | MissingProfileException | ProfileException
                 | UnavailableBorderPointException e) {
             throw new MeshCreationException("Unable to get segments from template nucleus", e);
         }

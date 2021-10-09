@@ -37,11 +37,11 @@ import org.jfree.chart.ui.RectangleEdge;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.Taggable;
 import com.bmskinner.nuclear_morphology.components.UnavailableBorderPointException;
-import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -126,8 +126,8 @@ public class CoupledProfileOutlineChartPanel {
                 double yValue;
                 try {
                     yValue = obj.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT).get(xValue);
-                } catch (ProfileException | IndexOutOfBoundsException | UnavailableBorderTagException
-                        | UnavailableProfileTypeException e1) {
+                } catch (ProfileException | IndexOutOfBoundsException | MissingLandmarkException
+                        | MissingProfileException e1) {
                     LOGGER.warning("Error getting y-value");
                     LOGGER.log(Loggable.STACK, "Error getting y-value", e1);
                     return;
@@ -140,7 +140,7 @@ public class CoupledProfileOutlineChartPanel {
                     p = getPointFromProfileIndex(xValue);
                     xCrosshairOutline.setValue(p.getX());
                     yCrosshairOutline.setValue(p.getY());
-                } catch (UnavailableBorderPointException | UnavailableBorderTagException e1) {
+                } catch (UnavailableBorderPointException | MissingLandmarkException e1) {
                     // TODO Auto-generated catch block
                     e1.printStackTrace();
                 }
@@ -163,7 +163,7 @@ public class CoupledProfileOutlineChartPanel {
                     try {
                         p = getPointFromProfileIndex(xValue);
                         fireBorderPointEvent(p);
-                    } catch (UnavailableBorderPointException | UnavailableBorderTagException e1) {
+                    } catch (UnavailableBorderPointException | MissingLandmarkException e1) {
                         // TODO Auto-generated catch block
                         e1.printStackTrace();
                     }
@@ -182,7 +182,7 @@ public class CoupledProfileOutlineChartPanel {
         return xValue;
     }
 
-    private IPoint getPointFromProfileIndex(int index) throws UnavailableBorderPointException, UnavailableBorderTagException{
+    private IPoint getPointFromProfileIndex(int index) throws UnavailableBorderPointException, MissingLandmarkException{
         // Find the index of the border point with the current profile chart x
         // value
         int rpIndex = obj.getBorderIndex(Landmark.REFERENCE_POINT);

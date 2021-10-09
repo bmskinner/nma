@@ -40,7 +40,7 @@ import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.Statistical;
 import com.bmskinner.nuclear_morphology.components.Taggable;
 import com.bmskinner.nuclear_morphology.components.UnavailableBorderPointException;
-import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
@@ -52,7 +52,7 @@ import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.LandmarkType;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.components.profiles.SegmentedFloatProfile;
-import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.UnprofilableObjectException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -152,7 +152,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
                 try {
                     profileMap.put(type, comp.getProfile(type).copy());
                     segments = comp.getProfile(type).getSegments();
-                } catch (UnavailableProfileTypeException e) {
+                } catch (MissingProfileException e) {
                 	// not present in this profile; possibly a deprecated type; ignore and continue
                 } catch (ProfileException e) {
                     LOGGER.log(Loggable.STACK, "Cannot copy " + type + " from template", e);
@@ -253,7 +253,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 
     }
 
-    public IPoint getPoint(@NonNull Landmark tag) throws UnavailableBorderTagException {
+    public IPoint getPoint(@NonNull Landmark tag) throws MissingLandmarkException {
         int index = this.getBorderIndex(tag);
         return this.getBorderPoint(index);
     }
@@ -273,19 +273,19 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 
        super.calculateStatistic(stat);
 
-        if (Measurement.MIN_DIAMETER.equals(stat))
-            setStatistic(stat, getNarrowestDiameter());
+       if (Measurement.MIN_DIAMETER.equals(stat))
+    	   setStatistic(stat, getNarrowestDiameter());
 
-        if (Measurement.PATH_LENGTH.equals(stat))
-        	setStatistic(stat, getPathLength(ProfileType.ANGLE));
+       if (Measurement.PATH_LENGTH.equals(stat))
+    	   setStatistic(stat, getPathLength(ProfileType.ANGLE));
 
-        if (Measurement.PERIMETER.equals(stat)) {
-            double perimeter=0;
-            for(int i=0; i<this.getBorderLength(); i++) {
-            	perimeter += this.getBorderPoint(i).getLengthTo(getBorderPoint(wrapIndex(i+1)));
-            }
-            setStatistic(stat, perimeter);
-        }
+       if (Measurement.PERIMETER.equals(stat)) {
+    	   double perimeter=0;
+    	   for(int i=0; i<this.getBorderLength(); i++) {
+    		   perimeter += this.getBorderPoint(i).getLengthTo(getBorderPoint(wrapIndex(i+1)));
+    	   }
+    	   setStatistic(stat, perimeter);
+       }
 
     }
 
@@ -296,11 +296,11 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
      */
 
     @Override
-    public IPoint getBorderPoint(@NonNull Landmark tag) throws UnavailableBorderTagException {
+    public IPoint getBorderPoint(@NonNull Landmark tag) throws MissingLandmarkException {
     	int borderIndex = this.getBorderIndex(tag);
 
     	if (borderIndex < 0 || borderIndex >= this.getBorderLength())
-    		throw new UnavailableBorderTagException(String.format("No tag '%s'; registered as index %s", tag, borderIndex));
+    		throw new MissingLandmarkException(String.format("No tag '%s'; registered as index %s", tag, borderIndex));
 
     	return getBorderPoint(borderIndex);
     }
@@ -315,7 +315,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
     }
     
     @Override
-	public Landmark getBorderTag(@NonNull Landmark reference, int index) throws UnavailableBorderTagException {
+	public Landmark getBorderTag(@NonNull Landmark reference, int index) throws MissingLandmarkException {
         int newIndex = getOffsetBorderIndex(reference, index);
         return this.getBorderTag(newIndex);
     }
@@ -330,10 +330,10 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
     }
     
     @Override
-	public int getBorderIndex(@NonNull Landmark tag) throws UnavailableBorderTagException {
+	public int getBorderIndex(@NonNull Landmark tag) throws MissingLandmarkException {
         if (profileLandmarks.containsKey(tag))
             return profileLandmarks.get(tag);
-        throw new UnavailableBorderTagException("Tag "+tag+" is not present");
+        throw new MissingLandmarkException("Tag "+tag+" is not present");
     }
 
     
@@ -382,9 +382,9 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
                 int intersectionIndex = this.getBorderIndex(this.findOppositeBorder(this.getBorderPoint(i)));
                 this.setBorderTag(Landmark.INTERSECTION_POINT, intersectionIndex);
             }
-        } catch (UnavailableProfileTypeException e) {
+        } catch (MissingProfileException e) {
         	LOGGER.log(Loggable.STACK, "Unable to find angle profile in object", e);
-        } catch(UnavailableBorderTagException e) {
+        } catch(MissingLandmarkException e) {
         	LOGGER.log(Loggable.STACK, String.format("Error getting border tag %s for object", tag), e);
         }
     }
@@ -406,7 +406,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 		try {
 			int newIndex = getOffsetBorderIndex(tag, index);
 			return this.hasBorderTag(newIndex);
-		} catch (UnavailableBorderTagException e) {
+		} catch (MissingLandmarkException e) {
 			LOGGER.log(Loggable.STACK, e.getMessage(), e);
 			return false;
 		}
@@ -414,7 +414,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
     }
 
     @Override
-	public int getOffsetBorderIndex(@NonNull Landmark reference, int index) throws UnavailableBorderTagException {
+	public int getOffsetBorderIndex(@NonNull Landmark reference, int index) throws MissingLandmarkException {
     	return wrapIndex(index + this.getBorderIndex(reference));
     }
 
@@ -478,16 +478,16 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
     }
 
     @Override
-	public ISegmentedProfile getProfile(@NonNull ProfileType type) throws UnavailableProfileTypeException {
+	public ISegmentedProfile getProfile(@NonNull ProfileType type) throws MissingProfileException {
 
         if (!this.hasProfile(type))
-            throw new UnavailableProfileTypeException("Cannot get profile type " + type);
+            throw new MissingProfileException("Cannot get profile type " + type);
 
         try {
         	return new SegmentedFloatProfile(profileMap.get(type), segments);
         	
         } catch (ProfileException e) {
-            throw new UnavailableProfileTypeException("Cannot get profile type " + type, e);
+            throw new MissingProfileException("Cannot get profile type " + type, e);
         }
     }
 
@@ -498,10 +498,10 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 
     @Override
 	public ISegmentedProfile getProfile(@NonNull ProfileType type, @NonNull Landmark tag)
-            throws ProfileException, UnavailableBorderTagException, UnavailableProfileTypeException {
+            throws ProfileException, MissingLandmarkException, MissingProfileException {
 
         if (!this.hasBorderTag(tag))
-            throw new UnavailableBorderTagException("Tag " + tag + " not present");
+            throw new MissingLandmarkException("Tag " + tag + " not present");
 
         // fetch the index of the pointType (the new zero)
         int tagIndex = profileLandmarks.get(tag);
@@ -512,7 +512,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
     }
         
 	@Override
-	public void setProfile(@NonNull ProfileType type, @NonNull Landmark tag, @NonNull ISegmentedProfile p) throws UnavailableBorderTagException, UnavailableProfileTypeException {
+	public void setProfile(@NonNull ProfileType type, @NonNull Landmark tag, @NonNull ISegmentedProfile p) throws MissingLandmarkException, MissingProfileException {
 
 		if (isLocked) {
 			LOGGER.finer("Cannot set profile: object is locked");
@@ -520,7 +520,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 		}
 
 		if (!this.hasBorderTag(tag))
-			throw new UnavailableBorderTagException(String.format("Tag %s is not present", tag));
+			throw new MissingLandmarkException(String.format("Tag %s is not present", tag));
 
 		// fetch the index of the tag (the zero of the input profile)
 		int tagIndex = profileLandmarks.get(tag);
@@ -592,7 +592,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
                 pathLength += thisPoint.getLengthTo(prevPoint);
                 prevPoint = thisPoint;
             }
-        } catch (UnavailableProfileTypeException e) {
+        } catch (MissingProfileException e) {
             LOGGER.log(Loggable.STACK, "Error getting angle profile ", e);
         }
         return pathLength;
@@ -638,7 +638,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
             int index = this.getProfile(ProfileType.DIAMETER).getIndexOfMin();
             return IPoint.makeNew(this.getBorderPoint(index));
 
-        } catch (UnavailableProfileTypeException | ProfileException e) {
+        } catch (MissingProfileException | ProfileException e) {
             LOGGER.log(Loggable.STACK, "Error getting diameter profile minimum", e);
             throw new UnavailableBorderPointException("Error getting diameter profile minimum");
         }
@@ -648,7 +648,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
     public double getNarrowestDiameter() {
         try {
             return Arrays.stream(this.getProfile(ProfileType.DIAMETER).toDoubleArray()).min().orElse(0);
-        } catch (UnavailableProfileTypeException e) {
+        } catch (MissingProfileException e) {
             LOGGER.log(Loggable.STACK, "Error getting diameter profile", e);
             return 0;
         }

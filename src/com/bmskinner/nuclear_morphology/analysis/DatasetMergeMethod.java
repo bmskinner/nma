@@ -41,7 +41,7 @@ import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.components.signals.DefaultSignalGroup;
 import com.bmskinner.nuclear_morphology.gui.Labels;
@@ -179,11 +179,11 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
      * 
      * @param newCollection the new collection to copy cells into
      * @return the merged dataset
-     * @throws UnavailableProfileTypeException 
+     * @throws MissingProfileException 
      * @throws MissingOptionException 
      * @throws Exception
      */
-    private IAnalysisDataset performMerge(@NonNull ICellCollection newCollection) throws UnavailableProfileTypeException, MissingOptionException{
+    private IAnalysisDataset performMerge(@NonNull ICellCollection newCollection) throws MissingProfileException, MissingOptionException{
 
         for (IAnalysisDataset d : datasets) {
             

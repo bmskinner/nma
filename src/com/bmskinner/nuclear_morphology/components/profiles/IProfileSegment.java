@@ -26,7 +26,7 @@ import java.util.UUID;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.components.UnavailableComponentException;
+import com.bmskinner.nuclear_morphology.components.MissingComponentException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
@@ -184,9 +184,9 @@ public interface IProfileSegment extends Serializable, XmlSerializable, Iterable
      * Get the merge source with the given id
      * 
      * @return the merge source segment with the given id if present within this segment (recursive)
-     * @throws UnavailableComponentException if the segment does not have the requested source 
+     * @throws MissingComponentException if the segment does not have the requested source 
      */
-    IProfileSegment getMergeSource(@NonNull UUID id) throws UnavailableComponentException;
+    IProfileSegment getMergeSource(@NonNull UUID id) throws MissingComponentException;
 
     /**
      * Get the index at the start of the segment  (inclusive)

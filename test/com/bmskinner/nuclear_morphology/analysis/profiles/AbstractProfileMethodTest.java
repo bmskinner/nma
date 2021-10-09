@@ -9,7 +9,7 @@ import com.bmskinner.nuclear_morphology.ComponentTester;
 import com.bmskinner.nuclear_morphology.analysis.DatasetValidator;
 import com.bmskinner.nuclear_morphology.charting.ChartFactoryTest;
 import com.bmskinner.nuclear_morphology.charting.OutlineTestChartFactory;
-import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
@@ -17,7 +17,7 @@ import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.UnsegmentedProfileException;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
@@ -52,11 +52,11 @@ public class AbstractProfileMethodTest extends ComponentTester {
 	/**
 	 * Test that every cell in the dataset has the same profile
 	 * @param dataset
-	 * @throws UnavailableBorderTagException
-	 * @throws UnavailableProfileTypeException
+	 * @throws MissingLandmarkException
+	 * @throws MissingProfileException
 	 * @throws ProfileException
 	 */
-	protected void testProfilesAreIdenticalForAllCells(@NonNull IAnalysisDataset dataset) throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException {
+	protected void testProfilesAreIdenticalForAllCells(@NonNull IAnalysisDataset dataset) throws MissingLandmarkException, MissingProfileException, ProfileException {
 
 		IProfile globalMedian = null;
 		Nucleus globalCell = null;
@@ -72,13 +72,13 @@ public class AbstractProfileMethodTest extends ComponentTester {
 	/**
 	 * Test that the segmentation is consistent with a dataset
 	 * @param d
-	 * @throws UnavailableBorderTagException
-	 * @throws UnavailableProfileTypeException
+	 * @throws MissingLandmarkException
+	 * @throws MissingProfileException
 	 * @throws ProfileException
 	 * @throws UnsegmentedProfileException
 	 * @throws InterruptedException
 	 */
-	protected void testSegmentationIsConsistent(@NonNull IAnalysisDataset d) throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException, UnsegmentedProfileException, InterruptedException {
+	protected void testSegmentationIsConsistent(@NonNull IAnalysisDataset d) throws MissingLandmarkException, MissingProfileException, ProfileException, UnsegmentedProfileException, InterruptedException {
 
 		DatasetValidator v = new DatasetValidator();
 		boolean ok = v.validate(d);

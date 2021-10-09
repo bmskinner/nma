@@ -31,8 +31,8 @@ import com.bmskinner.nuclear_morphology.analysis.mesh.MeshCreationException;
 import com.bmskinner.nuclear_morphology.analysis.mesh.MeshFace;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.Taggable;
-import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
-import com.bmskinner.nuclear_morphology.components.UnavailableComponentException;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
+import com.bmskinner.nuclear_morphology.components.MissingComponentException;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.DefaultClusterGroup;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
@@ -46,7 +46,7 @@ import com.bmskinner.nuclear_morphology.components.options.HierarchicalClusterMe
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import weka.clusterers.HierarchicalClusterer;
@@ -335,7 +335,7 @@ public class TreeBuildingMethod extends CellClusteringMethod {
         	for(Nucleus n : c.getNuclei()) {
         		 try {
                      addNucleus(c, n, attributes, instances, template, windowProportion);
-                 } catch (UnavailableBorderTagException | UnavailableProfileTypeException | ProfileException
+                 } catch (MissingLandmarkException | MissingProfileException | ProfileException
                          | MeshCreationException e) {
                 	 LOGGER.log(Loggable.STACK, "Cannot add nucleus data", e);
                  }
@@ -385,7 +385,7 @@ public class TreeBuildingMethod extends CellClusteringMethod {
     }
 
     private void addNucleus(ICell c, Nucleus n, ArrayList<Attribute> attributes, Instances instances, Mesh<Nucleus> template,
-            double windowProportion) throws UnavailableBorderTagException, UnavailableProfileTypeException,
+            double windowProportion) throws MissingLandmarkException, MissingProfileException,
             ProfileException, MeshCreationException {
 
         
@@ -438,7 +438,7 @@ public class TreeBuildingMethod extends CellClusteringMethod {
                 double length = 0;
                 try {
                     length = n.getProfile(ProfileType.ANGLE).getSegment(segID).length();
-                } catch (UnavailableComponentException e) {
+                } catch (MissingComponentException e) {
                 	LOGGER.log(Loggable.STACK, "Unable to find segment", e);
                 }
                 inst.setValue(att, length);

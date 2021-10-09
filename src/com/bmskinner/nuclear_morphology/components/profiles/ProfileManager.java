@@ -31,8 +31,8 @@ import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder.NoDetectedIndexException;
 import com.bmskinner.nuclear_morphology.components.Taggable;
-import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
-import com.bmskinner.nuclear_morphology.components.UnavailableComponentException;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
+import com.bmskinner.nuclear_morphology.components.MissingComponentException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
@@ -84,7 +84,7 @@ public class ProfileManager {
             		
             		n.setBorderTag(tag, newIndex);
 
-                } catch (ProfileException | UnavailableProfileTypeException e1) {
+                } catch (ProfileException | MissingProfileException e1) {
                     LOGGER.log(Level.SEVERE, 
                     		"Error updating tag by offset in nucleus " + n.getNameAndNumber(), 
                     		e1);
@@ -165,8 +165,8 @@ public class ProfileManager {
         					Landmark.BOTTOM_VERTICAL,
         					Stats.MEDIAN);
         } catch (ProfileException 
-        		| UnavailableBorderTagException 
-        		| UnavailableProfileTypeException e) {
+        		| MissingLandmarkException 
+        		| MissingProfileException e) {
         	LOGGER.log(Level.SEVERE, "Error getting TV or BV profile", e);
             return;
         }
@@ -212,12 +212,12 @@ public class ProfileManager {
      * @param tag the tag to be updated
      * @param index the new index of the tag in the median, relative to the current RP
      * @throws IndexOutOfBoundsException
-     * @throws UnavailableBorderTagException
+     * @throws MissingLandmarkException
      * @throws ProfileException
-     * @throws UnavailableProfileTypeException
+     * @throws MissingProfileException
      */
     public void updateBorderTag(Landmark tag, int index) throws ProfileException,
-            UnavailableBorderTagException, UnavailableProfileTypeException {
+            MissingLandmarkException, MissingProfileException {
 
         LOGGER.finer( "Updating border tag " + tag);
         if (tag.type().equals(LandmarkType.CORE)) {
@@ -237,11 +237,11 @@ public class ProfileManager {
      * @param tag the extended tag to be updated
      * @param index the new index of the tag in the median, relative to the current RP
      * @throws ProfileException
-     * @throws UnavailableBorderTagException
-     * @throws UnavailableProfileTypeException
+     * @throws MissingLandmarkException
+     * @throws MissingProfileException
      */
     private void updateExtendedBorderTagIndex(@NonNull Landmark tag, int index) throws ProfileException,
-            UnavailableBorderTagException, UnavailableProfileTypeException {
+            MissingLandmarkException, MissingProfileException {
 
         int oldIndex = collection.getProfileCollection().getIndex(tag);
 
@@ -268,7 +268,7 @@ public class ProfileManager {
             				n.updateDependentStats();
             				setOpUsingTvBv(n);
         				}
-        			} catch (UnavailableBorderTagException e) {
+        			} catch (MissingLandmarkException e) {
         				LOGGER.log(Loggable.STACK, "Border tag not available", e);
         			}
         		});
@@ -342,13 +342,13 @@ public class ProfileManager {
      * @param tag the core tag to be updated
      * @param index the new index of the tag in the median, relative to the current RP
      * @throws ProfileException
-     * @throws UnavailableBorderTagException
-     * @throws UnavailableProfileTypeException
+     * @throws MissingLandmarkException
+     * @throws MissingProfileException
      * @throws UnsegmentedProfileException 
      * @throws SegmentUpdateException 
      */
     private void updateCoreBorderTagIndex(@NonNull Landmark tag, int index)
-            throws UnavailableBorderTagException, ProfileException, UnavailableProfileTypeException, UnsegmentedProfileException {
+            throws MissingLandmarkException, ProfileException, MissingProfileException, UnsegmentedProfileException {
 
         LOGGER.fine("Updating core border tag index");
 
@@ -424,7 +424,7 @@ public class ProfileManager {
         List<IProfileSegment> segments;
         try {
             segments = sourcePC.getSegments(Landmark.REFERENCE_POINT);
-        } catch (UnavailableBorderTagException e1) {
+        } catch (MissingLandmarkException e1) {
             LOGGER.warning("RP not found in source collection");
             LOGGER.log(Loggable.STACK, "Error getting segments from RP", e1);
             return;
@@ -452,7 +452,7 @@ public class ProfileManager {
             
             destPC.addSegments(Landmark.REFERENCE_POINT, interpolatedMedian.getSegments());
 
-        } catch (UnavailableBorderTagException | IllegalArgumentException | UnavailableProfileTypeException | UnsegmentedProfileException e) {
+        } catch (MissingLandmarkException | IllegalArgumentException | MissingProfileException | UnsegmentedProfileException e) {
             LOGGER.log(Loggable.STACK, "Cannot add segments to RP", e);
         }
         LOGGER.fine("Copied tags to new collection");
@@ -463,7 +463,7 @@ public class ProfileManager {
         List<IProfileSegment> newSegs;
         try {
             newSegs = destPC.getSegments(Landmark.REFERENCE_POINT);
-        } catch (UnavailableBorderTagException e1) {
+        } catch (MissingLandmarkException e1) {
             LOGGER.warning("RP not found in destination collection");
             LOGGER.log(Loggable.STACK, "Error getting destination segments from RP", e1);
             return;
@@ -523,9 +523,9 @@ public class ProfileManager {
      * @param id the segment id
      * @param index the new start index of the segment
      * @throws ProfileException 
-     * @throws UnavailableComponentException 
+     * @throws MissingComponentException 
      */
-    public void updateCellSegmentStartIndex(@NonNull ICell cell, @NonNull UUID id, int index) throws ProfileException, UnavailableComponentException {
+    public void updateCellSegmentStartIndex(@NonNull ICell cell, @NonNull UUID id, int index) throws ProfileException, MissingComponentException {
 
     	LOGGER.fine("Updating segment start index");
     	
@@ -586,11 +586,11 @@ public class ProfileManager {
      * @param index
      * @throws UnsegmentedProfileException
      * @throws ProfileException
-     * @throws UnavailableComponentException
+     * @throws MissingComponentException
      * @throws Exception
      */
     public void updateMedianProfileSegmentIndex(boolean start, UUID id, int index)
-            throws ProfileException, UnsegmentedProfileException, UnavailableComponentException {
+            throws ProfileException, UnsegmentedProfileException, MissingComponentException {
 
         ISegmentedProfile oldProfile = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE,
                 Landmark.REFERENCE_POINT, Stats.MEDIAN);
@@ -638,10 +638,10 @@ public class ProfileManager {
      * @param seg1 the first in the pair to merge
      * @param seg2 the second in the pair to merge
      * @return true if the merge is possible, false otherwise
-     * @throws UnavailableBorderTagException
+     * @throws MissingLandmarkException
      */
     public boolean testSegmentsMergeable(IProfileSegment seg1, IProfileSegment seg2)
-            throws UnavailableBorderTagException {
+            throws MissingLandmarkException {
 
     	if(!seg1.nextSegment().getID().equals(seg2.getID())) {
     		LOGGER.fine("Segments are not adjacent; cannot merge");
@@ -672,10 +672,10 @@ public class ProfileManager {
      * @param newID the id for the merged segment
      * @throws UnsegmentedProfileException if the median profile is not segmented
      * @throws ProfileException if the update fails
-     * @throws UnavailableComponentException
+     * @throws MissingComponentException
      */
     public void mergeSegments(@NonNull IProfileSegment seg1, @NonNull IProfileSegment seg2, @NonNull UUID newID)
-            throws ProfileException, UnsegmentedProfileException, UnavailableComponentException {
+            throws ProfileException, UnsegmentedProfileException, MissingComponentException {
     	// Note - we can't do the root check here. It must be at the segmentation handler level
     	// otherwise updating child datasets to match a root will fail
 
@@ -734,10 +734,10 @@ public class ProfileManager {
      * @param seg2 the second segment to be merged
      * @param newID the new ID for the merged segment
      * @throws ProfileException
-     * @throws UnavailableComponentException
+     * @throws MissingComponentException
      */
     private void mergeSegments(@NonNull Taggable p, @NonNull IProfileSegment seg1, @NonNull IProfileSegment seg2, @NonNull UUID newID)
-            throws ProfileException, UnavailableComponentException {
+            throws ProfileException, MissingComponentException {
 
         ISegmentedProfile profile = p.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
         profile.mergeSegments(seg1.getID(), seg2.getID(), newID);
@@ -750,12 +750,12 @@ public class ProfileManager {
      * 
      * @param segName
      * @return
-     * @throws UnavailableComponentException 
+     * @throws MissingComponentException 
      * @throws UnsegmentedProfileException 
      * @throws ProfileException 
      * @throws Exception
      */
-    public boolean splitSegment(IProfileSegment seg) throws ProfileException, UnsegmentedProfileException, UnavailableComponentException {
+    public boolean splitSegment(IProfileSegment seg) throws ProfileException, UnsegmentedProfileException, MissingComponentException {
         return splitSegment(seg, null, null);
     }
 
@@ -769,12 +769,12 @@ public class ProfileManager {
      * @return
      * @throws UnsegmentedProfileException
      * @throws ProfileException
-     * @throws UnavailableComponentException
+     * @throws MissingComponentException
      *             if the reference point tag is missing, or the segment is
      *             missing
      */
     public boolean splitSegment(@NonNull IProfileSegment seg, @Nullable UUID newID1, @Nullable UUID newID2)
-            throws ProfileException, UnsegmentedProfileException, UnavailableComponentException {
+            throws ProfileException, UnsegmentedProfileException, MissingComponentException {
 
         if (seg == null)
             throw new IllegalArgumentException("Segment cannot be null");
@@ -834,9 +834,9 @@ public class ProfileManager {
      * @param newId1 the first new segment id
      * @param newId2 the second new segment id
      * @throws ProfileException
-     * @throws UnavailableComponentException
+     * @throws MissingComponentException
      */
-    private void splitNucleusSegment(Nucleus n, UUID segId, double proportion, UUID newId1, UUID newId2) throws ProfileException, UnavailableComponentException {
+    private void splitNucleusSegment(Nucleus n, UUID segId, double proportion, UUID newId1, UUID newId2) throws ProfileException, MissingComponentException {
     	boolean wasLocked = n.isLocked();
 		n.setLocked(false); // not destructive
 		splitSegment(n, segId, proportion, newId1, newId2);
@@ -851,11 +851,11 @@ public class ProfileManager {
      * @param proportion the proportion of the segment at which to split, from 0-1
      * @return true if the segment can be split at the index equivalent to the proportion, false otherwise
      * @throws ProfileException
-     * @throws UnavailableComponentException
+     * @throws MissingComponentException
      * @throws UnsegmentedProfileException
      */
     private boolean isCollectionSplittable(@NonNull UUID id, double proportion)
-            throws ProfileException, UnavailableComponentException, UnsegmentedProfileException {
+            throws ProfileException, MissingComponentException, UnsegmentedProfileException {
 
         ISegmentedProfile medianProfile = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE,
                 Landmark.REFERENCE_POINT, Stats.MEDIAN);
@@ -892,7 +892,7 @@ public class ProfileManager {
             IProfileSegment nSeg = profile.getSegment(id);
             int targetIndex = nSeg.getProportionalIndex(proportion);
             return profile.isSplittable(id, targetIndex);
-        } catch (UnavailableComponentException | ProfileException e) {
+        } catch (MissingComponentException | ProfileException e) {
         	LOGGER.log(Loggable.STACK, "Error getting profile", e);
             return false;
         }
@@ -900,7 +900,7 @@ public class ProfileManager {
     }
 
     private void splitSegment(Taggable t, UUID idToSplit, double proportion, UUID newID1, UUID newID2)
-            throws ProfileException, UnavailableComponentException {
+            throws ProfileException, MissingComponentException {
 
         ISegmentedProfile profile = t.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
         IProfileSegment nSeg = profile.getSegment(idToSplit);
@@ -918,10 +918,10 @@ public class ProfileManager {
      * @return
      * @throws UnsegmentedProfileException
      * @throws ProfileException
-     * @throws UnavailableComponentException
+     * @throws MissingComponentException
      */
     public void unmergeSegments(@NonNull UUID segId)
-            throws ProfileException, UnsegmentedProfileException, UnavailableComponentException {
+            throws ProfileException, UnsegmentedProfileException, MissingComponentException {
     	
         if(segId==null)
             throw new IllegalArgumentException("Segment to unmerge cannot be null");
@@ -962,7 +962,7 @@ public class ProfileManager {
         }
     }
 
-    private void unmergeSegments(@NonNull Taggable t, @NonNull UUID id) throws ProfileException, UnavailableComponentException {
+    private void unmergeSegments(@NonNull Taggable t, @NonNull UUID id) throws ProfileException, MissingComponentException {
         ISegmentedProfile profile = t.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
         profile.unmergeSegment(id);
         t.setProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, profile);

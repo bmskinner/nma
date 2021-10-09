@@ -25,7 +25,7 @@ import java.util.UUID;
 import org.eclipse.jdt.annotation.NonNull;
 import org.jdom2.Element;
 
-import com.bmskinner.nuclear_morphology.components.UnavailableComponentException;
+import com.bmskinner.nuclear_morphology.components.MissingComponentException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 
 /**
@@ -222,7 +222,7 @@ public class OpenBorderSegment implements IProfileSegment {
 	}
 
 	@Override
-	public IProfileSegment getMergeSource(@NonNull UUID id) throws UnavailableComponentException {
+	public IProfileSegment getMergeSource(@NonNull UUID id) throws MissingComponentException {
 		for(IProfileSegment s : mergeSources) {
 			if(s.getID().equals(id))
 				return s;
@@ -230,7 +230,7 @@ public class OpenBorderSegment implements IProfileSegment {
 				return s.getMergeSource(id);
 			}
 		}
-		throw new UnavailableComponentException(String.format("Segment %s is not present", id));
+		throw new MissingComponentException(String.format("Segment %s is not present", id));
 	}
 
     @Override

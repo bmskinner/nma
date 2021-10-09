@@ -37,7 +37,7 @@ import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPa
 import com.bmskinner.nuclear_morphology.charting.charts.panels.ViolinChartPanel;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
-import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
@@ -96,7 +96,7 @@ public class SegmentBoxplotsPanel extends BoxplotsTabPanel implements ActionList
             List<IProfileSegment> segments;
             try {
                 segments = collection.getProfileCollection().getSegments(Landmark.REFERENCE_POINT);
-            } catch (UnavailableBorderTagException | ProfileException e) {
+            } catch (MissingLandmarkException | ProfileException e) {
                 LOGGER.warning("Cannot get segments");
                 LOGGER.log(Loggable.STACK, "Cannot get segments", e);
                 return;

@@ -27,7 +27,7 @@ import com.bmskinner.nuclear_morphology.TestDatasetBuilder;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
@@ -46,7 +46,7 @@ public class SegmentFitterTest {
 	public void testFittingOnUnprofiledDatasetThrowsException() throws Exception {
 		IAnalysisDataset d = new TestDatasetBuilder().cellCount(1).ofType(RuleSetCollection.roundRuleSetCollection())
 				.baseHeight(40).baseWidth(40).build();
-		expectedException.expect(UnavailableProfileTypeException.class);
+		expectedException.expect(MissingProfileException.class);
 		fitter = new SegmentFitter(d.getCollection().getProfileCollection()
 				.getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN));
 		

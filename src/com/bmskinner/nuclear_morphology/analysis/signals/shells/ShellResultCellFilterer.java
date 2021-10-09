@@ -24,6 +24,8 @@ import java.util.stream.LongStream;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nuclear_morphology.analysis.nucleus.CellCollectionFilterer;
+import com.bmskinner.nuclear_morphology.analysis.nucleus.CellCollectionFilterer.CollectionFilteringException;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
@@ -72,7 +74,7 @@ public class ShellResultCellFilterer {
 		return this;
 	}
 	
-	public ICellCollection filter(@NonNull ICellCollection c) {
+	public ICellCollection filter(@NonNull ICellCollection c) throws CollectionFilteringException {
 		if(operation==null)
 			throw new IllegalArgumentException("Operation must be set before filtering");
 		
@@ -126,6 +128,6 @@ public class ShellResultCellFilterer {
 			}
 			return cellPasses;
 		};
-		return c.filter(pred);
+		return CellCollectionFilterer.filter(c, pred);
 	}
 }

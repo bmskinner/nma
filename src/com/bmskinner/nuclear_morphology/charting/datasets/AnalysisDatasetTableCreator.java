@@ -44,7 +44,7 @@ import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.charting.datasets.tables.AbstractTableCreator;
 import com.bmskinner.nuclear_morphology.charting.options.AbstractOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
-import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
@@ -57,7 +57,7 @@ import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.UnsegmentedProfileException;
 import com.bmskinner.nuclear_morphology.core.DatasetListManager;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
@@ -126,8 +126,8 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
             try {
                 segments = collection.getProfileCollection()
                         .getSegmentedProfile(ProfileType.ANGLE, point, Stats.MEDIAN).getOrderedSegments();
-            } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException
-                    | UnsegmentedProfileException e) {
+            } catch (MissingLandmarkException | ProfileException | MissingProfileException
+                     e) {
                 LOGGER.log(Loggable.STACK, "Error getting median profile", e);
                 return createBlankTable();
             }
@@ -204,7 +204,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
         List<IProfileSegment> segments;
         try {
             segments = options.firstDataset().getCollection().getProfileCollection().getSegments(Landmark.REFERENCE_POINT);
-        } catch (UnavailableBorderTagException | ProfileException e1) {
+        } catch (MissingLandmarkException | ProfileException e1) {
             LOGGER.log(Loggable.STACK, "Error getting segments from profile collection", e1);
             return createBlankTable();
         }
@@ -249,8 +249,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
                             + df.format(ci.getSize().doubleValue()));
                 }
                 model.addRow(rowData.toArray(new Object[0]));
-            } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException
-                    | UnsegmentedProfileException e) {
+            } catch (MissingLandmarkException | ProfileException | MissingProfileException e) {
                 LOGGER.log(Loggable.STACK, "Error getting median profile", e);
                 return createBlankTable();
             }
@@ -852,8 +851,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
                 medianSeg1 = dataset.getCollection().getProfileCollection()
                         .getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN)
                         .getSegmentAt(options.getSegPosition());
-            } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException
-                    | UnsegmentedProfileException e) {
+            } catch (MissingLandmarkException | ProfileException | MissingProfileException e) {
                 LOGGER.log(Loggable.STACK, "Error getting median profile", e);
                 return createBlankTable();
             }
@@ -873,8 +871,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
                         medianSeg2 = dataset2.getCollection().getProfileCollection()
                                 .getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN)
                                 .getSegmentAt(options.getSegPosition());
-                    } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException
-                            | UnsegmentedProfileException e) {
+                    } catch (MissingLandmarkException | ProfileException | MissingProfileException e) {
                         LOGGER.log(Loggable.STACK, "Error getting median profile", e);
                         return createBlankTable();
                     }
@@ -1011,8 +1008,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
                 medianSeg1 = dataset.getCollection().getProfileCollection()
                         .getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN)
                         .getSegmentAt(options.getSegPosition());
-            } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException
-                    | UnsegmentedProfileException e) {
+            } catch (MissingLandmarkException | ProfileException | MissingProfileException e) {
                 LOGGER.log(Loggable.STACK, "Error getting median profile", e);
                 return createBlankTable();
             }
@@ -1040,8 +1036,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
                         medianSeg2 = dataset2.getCollection().getProfileCollection()
                                 .getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN)
                                 .getSegmentAt(options.getSegPosition());
-                    } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException
-                            | UnsegmentedProfileException e) {
+                    } catch (MissingLandmarkException | ProfileException | MissingProfileException e) {
                         LOGGER.log(Loggable.STACK, "Error getting median profile", e);
                         return createBlankTable();
                     }

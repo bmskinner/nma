@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
@@ -473,7 +473,7 @@ public class SignalManager {
      * 
      * @param target the collection to add signals to
      */
-    public void copySignalGroups(@NonNull final ICellCollection target) {
+    public void copySignalGroupsTo(@NonNull final ICellCollection target) {
 
         for (UUID id : collection.getSignalGroupIDs()) {
             ISignalGroup newGroup;
@@ -507,7 +507,7 @@ public class SignalManager {
         for (Nucleus n : collection.getNuclei()) {
             try {
                 n.calculateSignalAnglesFromPoint(n.getBorderPoint(Landmark.ORIENTATION_POINT));
-            } catch (UnavailableBorderTagException e) {
+            } catch (MissingLandmarkException e) {
                 LOGGER.fine("Cannot get OP index");
             }
         }

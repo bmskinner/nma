@@ -20,14 +20,14 @@ import java.util.logging.Logger;
 import java.util.stream.IntStream;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.profiles.BooleanProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.FloatProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import net.sourceforge.jdistlib.InvNormal;
@@ -82,8 +82,8 @@ public class DipTester implements SignificanceTest {
 
             resultProfile = new FloatProfile(pvals);
             resultProfile = resultProfile.offset(offset);
-        } catch (ProfileException | UnavailableBorderTagException
-                | UnavailableProfileTypeException e) {
+        } catch (ProfileException | MissingLandmarkException
+                | MissingProfileException e) {
             LOGGER.log(Loggable.STACK, "Error converting values or offsetting profile", e);
             resultProfile = createErrorPValueProfile();
 
@@ -107,10 +107,10 @@ public class DipTester implements SignificanceTest {
      * @param xPosition
      *            the position between zero and one along the profile
      * @return
-     * @throws UnavailableProfileTypeException
+     * @throws MissingProfileException
      * @throws Exception
      */
-    public double getPValueForPositon(double xPosition, ProfileType type) throws UnavailableProfileTypeException {
+    public double getPValueForPositon(double xPosition, ProfileType type) throws MissingProfileException {
 
         double[] values = collection.getProfileCollection().getValuesAtPosition(type, xPosition);
         return getDipTestPValue(values);

@@ -47,6 +47,7 @@ import javax.swing.table.TableModel;
 import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
+import com.bmskinner.nuclear_morphology.analysis.nucleus.CellCollectionFilterer.CollectionFilteringException;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellResultCellFilterer;
 import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellResultCellFilterer.ShellResultFilterOperation;
@@ -471,27 +472,28 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
             panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
             return panel;
         }
-        
+
         public void filter() {
-         LOGGER.info("Filtering "+dataset.getName());
-        	ICellCollection filtered = new ShellResultCellFilterer(groupPanel.getSelectedID())
-        			.setFilter(op, shell, proportion)
-        			.filter(dataset.getCollection());
-			if(!filtered.hasCells()) {
-			 LOGGER.info("No cells found");
-				return;
-			}
-			
-			try {
-			 LOGGER.info("Found "+filtered.size()+" cells");
-				ICellCollection virt = new VirtualDataset(dataset, "Filtered_on_shell");
-				filtered.getCells().forEach(virt::addCell);
-				dataset.getCollection().getProfileManager().copySegmentsAndLandmarksTo(virt);
-				dataset.addChildCollection(virt);		
-				getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.REFRESH_POPULATIONS);
-			} catch (ProfileException e1) {
-				LOGGER.log(Loggable.STACK, "Unable to filter collection for " + dataset.getName(), e1);
-			}
+        	try {
+        		LOGGER.info("Filtering "+dataset.getName());
+        		ICellCollection filtered = new ShellResultCellFilterer(groupPanel.getSelectedID())
+        				.setFilter(op, shell, proportion)
+        				.filter(dataset.getCollection());
+        		if(!filtered.hasCells()) {
+        			LOGGER.info("No cells found");
+        			return;
+        		}
+
+
+        		LOGGER.info("Found "+filtered.size()+" cells");
+        		ICellCollection virt = new VirtualDataset(dataset, "Filtered_on_shell");
+        		filtered.getCells().forEach(virt::addCell);
+        		dataset.getCollection().getProfileManager().copySegmentsAndLandmarksTo(virt);
+        		dataset.addChildCollection(virt);		
+        		getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.REFRESH_POPULATIONS);
+        	} catch (ProfileException | CollectionFilteringException e1) {
+        		LOGGER.log(Loggable.STACK, "Unable to filter collection for " + dataset.getName(), e1);
+        	}
         }
 
 

@@ -28,7 +28,7 @@ import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 
 /**
@@ -78,9 +78,9 @@ public interface Taggable extends CellularComponent {
      * to the order of values across multiple nuclei. If consistency is needed,
      * specify a pointType
      * @return the profile for the object
-     * @throws UnavailableProfileTypeException if the profile type is not found
+     * @throws MissingProfileException if the profile type is not found
      */
-    ISegmentedProfile getProfile(@NonNull ProfileType type) throws UnavailableProfileTypeException;
+    ISegmentedProfile getProfile(@NonNull ProfileType type) throws MissingProfileException;
 
     /**
      * Update the profile of the given type. Since only franken profiles are not
@@ -107,7 +107,7 @@ public interface Taggable extends CellularComponent {
      * in pixels
      * 
      * @return a fraction between 0 and 1
-     * @throws UnavailableProfileTypeException
+     * @throws MissingProfileException
      */
     double getWindowProportion(@NonNull ProfileType type);
 
@@ -176,9 +176,9 @@ public interface Taggable extends CellularComponent {
      * 
      * @param s the tag
      * @return the index of the border point with the tag
-     * @throws UnavailableBorderTagException if the tag is not present in the object
+     * @throws MissingLandmarkException if the tag is not present in the object
      */
-    int getBorderIndex(@NonNull Landmark tag) throws UnavailableBorderTagException;
+    int getBorderIndex(@NonNull Landmark tag) throws MissingLandmarkException;
 
     /**
      * Get the tag at a given index, given the zero index is set at the given
@@ -187,16 +187,16 @@ public interface Taggable extends CellularComponent {
      * @param reference the reference border tag with index zero
      * @param index the index to fetch
      * @return the border tag at the index
-     * @throws UnavailableBorderTagException if the reference tag is not present
+     * @throws MissingLandmarkException if the reference tag is not present
      */
-    Landmark getBorderTag(@NonNull Landmark reference, int index) throws UnavailableBorderTagException;
+    Landmark getBorderTag(@NonNull Landmark reference, int index) throws MissingLandmarkException;
 
     /**
      * Get the tag at the given raw index in the border list
      * 
      * @param index
      * @return the tag at the index
-     * @throws UnavailableBorderTagException if no tag is present at the index
+     * @throws MissingLandmarkException if no tag is present at the index
      */
     Landmark getBorderTag(int index) throws IndexOutOfBoundsException;
 
@@ -253,11 +253,11 @@ public interface Taggable extends CellularComponent {
      * @param tag the tag to offset the profile to
      * @return a copy of the segmented profile
      * @throws ProfileException
-     * @throws UnavailableBorderTagException
-     * @throws UnavailableProfileTypeException
+     * @throws MissingLandmarkException
+     * @throws MissingProfileException
      */
     ISegmentedProfile getProfile(@NonNull ProfileType type, @NonNull Landmark tag)
-            throws ProfileException, UnavailableBorderTagException, UnavailableProfileTypeException;
+            throws ProfileException, MissingLandmarkException, MissingProfileException;
 
     /**
      * Set the profile for the given type, offset to a border tag. The profile can be
@@ -266,11 +266,11 @@ public interface Taggable extends CellularComponent {
      * @param type the type of profile to set
      * @param tag the tag the profile starts from
      * @param profile the profile to be set
-     * @throws UnavailableBorderTagException if the tag is not present
-     * @throws UnavailableProfileTypeException if the profile type is not present
+     * @throws MissingLandmarkException if the tag is not present
+     * @throws MissingProfileException if the profile type is not present
      */
     void setProfile(@NonNull ProfileType type, @NonNull Landmark tag, @NonNull ISegmentedProfile profile)
-            throws UnavailableBorderTagException, UnavailableProfileTypeException;
+            throws MissingLandmarkException, MissingProfileException;
 
     /**
      * Get a copy of the mapping of border tags to index positions within the
@@ -286,9 +286,9 @@ public interface Taggable extends CellularComponent {
      * @param tag the tag to fetch
      * @return a copy of the border point at the tag
      * @throws IndexOutOfBoundsException
-     * @throws UnavailableBorderTagException
+     * @throws MissingLandmarkException
      */
-    IPoint getBorderPoint(@NonNull Landmark tag) throws UnavailableBorderTagException;
+    IPoint getBorderPoint(@NonNull Landmark tag) throws MissingLandmarkException;
 
     /**
      * Get the border index of point in the border list, removing offset to a
@@ -298,7 +298,7 @@ public interface Taggable extends CellularComponent {
      * @param reference the border tag with index zero
      * @param index  the index in a profile zeroed on the reference tag
      * @return the index of the point translated back to the original border list
-     * @throws UnavailableBorderTagException if the reference tag is not present
+     * @throws MissingLandmarkException if the reference tag is not present
      */
-    int getOffsetBorderIndex(@NonNull Landmark reference, int index) throws UnavailableBorderTagException;
+    int getOffsetBorderIndex(@NonNull Landmark reference, int index) throws MissingLandmarkException;
 }

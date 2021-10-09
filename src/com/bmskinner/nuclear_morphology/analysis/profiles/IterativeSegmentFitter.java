@@ -24,7 +24,7 @@ import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nuclear_morphology.components.UnavailableComponentException;
+import com.bmskinner.nuclear_morphology.components.MissingComponentException;
 import com.bmskinner.nuclear_morphology.components.profiles.BooleanProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.DefaultProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
@@ -79,7 +79,7 @@ public class IterativeSegmentFitter {
 
 		try {
 			return remapSegmentEndpoints(target);
-		} catch (UnavailableComponentException e) {
+		} catch (MissingComponentException e) {
 			LOGGER.log(Loggable.STACK, "Could not segment target profile: unable to remap segments in profile: "+e.getMessage(), e);
 			throw new ProfileException("Could not segment target profile", e);
 		}
@@ -90,9 +90,9 @@ public class IterativeSegmentFitter {
      * @param profile the profile to fit against the template profile
      * @return a profile with best-fit segmentation to the median
      * @throws ProfileException 
-     * @throws UnavailableComponentException 
+     * @throws MissingComponentException 
      */
-    private ISegmentedProfile remapSegmentEndpoints(@NonNull IProfile profile) throws ProfileException, UnavailableComponentException {
+    private ISegmentedProfile remapSegmentEndpoints(@NonNull IProfile profile) throws ProfileException, MissingComponentException {
 
         List<IProfileSegment> newSegments = new ArrayList<>();
         
@@ -115,9 +115,9 @@ public class IterativeSegmentFitter {
      * @param id the segment to test
      * @return
      * @throws ProfileException 
-     * @throws UnavailableComponentException 
+     * @throws MissingComponentException 
      */
-    private List<IProfileSegment> bestFitSegment(@NonNull IProfile profile, List<IProfileSegment> segmentsSoFar, @NonNull UUID id) throws ProfileException, UnavailableComponentException {
+    private List<IProfileSegment> bestFitSegment(@NonNull IProfile profile, List<IProfileSegment> segmentsSoFar, @NonNull UUID id) throws ProfileException, MissingComponentException {
     	
     	// Start by adding locked segments back to the profile
     	List<IProfileSegment> newSegments = new ArrayList<>();
@@ -176,10 +176,10 @@ public class IterativeSegmentFitter {
      * @param posOffset the greatest positive offset to the segmnet end index
      * @param stepSize the amount to change the offset in each iteration
      * @return
-     * @throws UnavailableComponentException
+     * @throws MissingComponentException
      * @throws ProfileException
      */
-    private int findBestScoringSegmentEndpoint(@NonNull IProfile testProfile, @NonNull UUID segId, int startIndex, int minIndex, int maxIndex, int stepSize) throws UnavailableComponentException, ProfileException {
+    private int findBestScoringSegmentEndpoint(@NonNull IProfile testProfile, @NonNull UUID segId, int startIndex, int minIndex, int maxIndex, int stepSize) throws MissingComponentException, ProfileException {
 
     	IProfile tempProfile = testProfile.copy();
     	IProfileSegment templateSegment = templateProfile.getSegment(segId);

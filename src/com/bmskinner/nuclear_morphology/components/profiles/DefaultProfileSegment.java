@@ -35,7 +35,7 @@ import java.util.UUID;
 import org.eclipse.jdt.annotation.NonNull;
 import org.jdom2.Element;
 
-import com.bmskinner.nuclear_morphology.components.UnavailableComponentException;
+import com.bmskinner.nuclear_morphology.components.MissingComponentException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 
 /**
@@ -240,14 +240,14 @@ public class DefaultProfileSegment implements IProfileSegment {
 	}
 
 	@Override
-	public IProfileSegment getMergeSource(@NonNull UUID id) throws UnavailableComponentException {
+	public IProfileSegment getMergeSource(@NonNull UUID id) throws MissingComponentException {
 		if(this.uuid.equals(id))
 			return this;
 		for(IProfileSegment s : mergeSources) {
 			if(s.hasMergeSource(id))
 				return s.getMergeSource(id);
 		}
-		throw new UnavailableComponentException("Merge source not present");
+		throw new MissingComponentException("Merge source not present");
 	}
 
 

@@ -34,7 +34,7 @@ import com.bmskinner.nuclear_morphology.charting.datasets.AbstractCellDatasetCre
 import com.bmskinner.nuclear_morphology.charting.datasets.ChartDatasetCreationException;
 import com.bmskinner.nuclear_morphology.charting.datasets.SignalTableCell;
 import com.bmskinner.nuclear_morphology.charting.options.DisplayOptions;
-import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.cells.ICytoplasm;
@@ -48,7 +48,7 @@ import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalCollection;
@@ -146,7 +146,7 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
             model.addColumn("Segment", fieldNames.toArray(new Object[0]));
             model.addColumn("Range (of " + p.size() + ")", rowData.toArray(new Object[0]));
 
-        } catch (UnavailableBorderTagException | UnavailableProfileTypeException | ProfileException e) {
+        } catch (MissingLandmarkException | MissingProfileException | ProfileException e) {
             return AbstractTableCreator.createBlankTable();
         }
 
@@ -307,7 +307,7 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
         			IPoint p = n.getBorderPoint(tag);
         			int index = n.getOffsetBorderIndex(Landmark.REFERENCE_POINT, n.getBorderIndex(tag));
         			rowData.add(p.toString() + " at profile index " + index);
-        		} catch (UnavailableBorderTagException e) {
+        		} catch (MissingLandmarkException e) {
         			LOGGER.fine("Tag not present: " + tag);
         			rowData.add("Missing tag");
         		}

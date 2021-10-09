@@ -14,33 +14,32 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package com.bmskinner.nuclear_morphology.components.profiles;
-
-import com.bmskinner.nuclear_morphology.components.UnavailableComponentException;
+package com.bmskinner.nuclear_morphology.components;
 
 /**
- * Thrown when a profile type is not available within a profile collection.
+ * The exception class to be thrown when a component of a profile or nuclear
+ * object is not present. This is subclassed for the various components.
  * 
  * @author bms41
  * @since 1.13.3
  *
  */
-public class UnavailableProfileTypeException extends UnavailableComponentException {
+public class MissingComponentException extends Exception {
     private static final long serialVersionUID = 1L;
 
-    public UnavailableProfileTypeException() {
+    public MissingComponentException() {
         super();
     }
 
-    public UnavailableProfileTypeException(String message) {
+    public MissingComponentException(String message) {
         super(message);
     }
 
-    public UnavailableProfileTypeException(String message, Throwable cause) {
+    public MissingComponentException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public UnavailableProfileTypeException(Throwable cause) {
+    public MissingComponentException(Throwable cause) {
         super(cause);
     }
 }

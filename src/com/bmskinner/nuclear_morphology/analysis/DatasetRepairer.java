@@ -5,8 +5,8 @@ import java.util.UUID;
 import java.util.logging.Logger;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
-import com.bmskinner.nuclear_morphology.components.UnavailableComponentException;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
+import com.bmskinner.nuclear_morphology.components.MissingComponentException;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
@@ -14,7 +14,7 @@ import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.UnsegmentedProfileException;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
@@ -61,7 +61,7 @@ public class DatasetRepairer {
 					repairNucleusRPNotAtSegmentBoundary(n, seg0Id);
 			}
 
-		} catch (UnavailableBorderTagException | UnavailableProfileTypeException | ProfileException | UnsegmentedProfileException e) {
+		} catch (MissingLandmarkException | MissingProfileException | ProfileException e) {
 			// allow isOk to fall through
 			LOGGER.fine("No border tag present");
 		}
@@ -102,11 +102,11 @@ public class DatasetRepairer {
 			}
 			LOGGER.finest(n.getNameAndNumber()+": Seg start index now "+ n.getProfile(ProfileType.ANGLE).getSegment(expectedRPSegmentStart).getStartIndex());
 			
-		} catch (UnavailableBorderTagException e) {
+		} catch (MissingLandmarkException e) {
 			LOGGER.fine("No RP tag present in "+n.getNameAndNumber());
-		} catch (UnavailableProfileTypeException e) {
+		} catch (MissingProfileException e) {
 			LOGGER.fine("No angle profile present in "+n.getNameAndNumber());
-		} catch (UnavailableComponentException e) {
+		} catch (MissingComponentException e) {
 			LOGGER.fine("No segment with id "+expectedRPSegmentStart+" in "+n.getNameAndNumber());
 		}	
 		n.setLocked(wasLocked);

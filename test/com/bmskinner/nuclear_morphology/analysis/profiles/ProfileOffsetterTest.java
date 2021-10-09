@@ -54,7 +54,7 @@ public class ProfileOffsetterTest {
     @Test
     public void testAssignBorderTagToNucleiViaFrankenProfile() throws ProfileOffsetException {
         ProfileOffsetter p = new ProfileOffsetter(d.getCollection());
-        p.assignBorderTagToNucleiViaFrankenProfile(Landmark.ORIENTATION_POINT);
+        p.assignLandmarkViaFrankenProfile(Landmark.ORIENTATION_POINT);
     }
 
     @Test

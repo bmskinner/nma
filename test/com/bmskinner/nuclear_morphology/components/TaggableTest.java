@@ -26,7 +26,7 @@ import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.components.profiles.SegmentedFloatProfile;
-import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 
 /**
@@ -75,7 +75,7 @@ public class TaggableTest extends ComponentTester {
 	}
 
 	@Test
-	public void testGetProfileTypeTag() throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException {
+	public void testGetProfileTypeTag() throws MissingLandmarkException, MissingProfileException, ProfileException {
 		ISegmentedProfile rawProfile = taggable.getProfile(ProfileType.ANGLE);
 		ISegmentedProfile tagProfile = taggable.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
 		assertEquals(rawProfile.offset(taggable.getBorderIndex(Landmark.REFERENCE_POINT)).toString(), tagProfile.toString());

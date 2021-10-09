@@ -26,8 +26,8 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.charting.ViolinCategoryDataset;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
-import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
-import com.bmskinner.nuclear_morphology.components.UnavailableComponentException;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
+import com.bmskinner.nuclear_morphology.components.MissingComponentException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
@@ -38,7 +38,7 @@ import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.UnsegmentedProfileException;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -258,7 +258,7 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
                 		length = n.getStatistic(Measurement.PERIMETER, options.getScale()) * proportionPerimeter;
                 		list.add(length);
 
-                	} catch (UnavailableComponentException e) {
+                	} catch (MissingComponentException e) {
                 		LOGGER.log(Loggable.STACK, "Error fetching segment for nucleus "+n.getNameAndNumber(), e);
                 		throw new ChartDatasetCreationException("Error fetching segment for nucleus "+n.getNameAndNumber(), e);
                 	}
@@ -271,7 +271,7 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
             } catch (ProfileException e) {
                 LOGGER.log(Loggable.STACK, "Error fetching median profile", e);
                 throw new ChartDatasetCreationException("Error fetching median profile", e);
-            } catch (UnavailableComponentException e) {
+            } catch (MissingComponentException e) {
                 LOGGER.log(Loggable.STACK, "Error fetching segment", e);
                 throw new ChartDatasetCreationException("Error fetching segment", e);
             }
@@ -304,8 +304,7 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
                 medianSeg = collection.getProfileCollection()
                         .getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN)
                         .getSegmentAt(segPosition);
-            } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException
-                    | UnsegmentedProfileException e) {
+            } catch (MissingLandmarkException | ProfileException | MissingProfileException e) {
             	LOGGER.log(Loggable.STACK, "Unable to get segmented median profile", e);
             	throw new ChartDatasetCreationException("Cannot get median profile");
             }
@@ -322,7 +321,7 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 
             		double displacement = profile.getDisplacement(seg);
             		list.add(displacement);
-            	} catch (ProfileException | UnavailableComponentException e) {
+            	} catch (ProfileException | MissingComponentException e) {
             		LOGGER.log(Loggable.STACK, "Error getting segmented profile", e);
             		throw new ChartDatasetCreationException("Cannot get segmented profile", e);
             	}

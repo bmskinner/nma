@@ -25,7 +25,7 @@ import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.SingleDatasetAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.UnavailableBorderPointException;
-import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
@@ -36,7 +36,7 @@ import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.UnprofilableObjectException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
@@ -229,8 +229,8 @@ public class ProfileRefoldMethod extends SingleDatasetAnalysisMethod {
      * Changes to make: Random mutation to the X and Y position. Must remain
      * within a certain range of neighbours
      */
-    private double iterateOverNucleus() throws ProfileException, UnavailableBorderTagException,
-            UnavailableProfileTypeException, UnavailableBorderPointException {
+    private double iterateOverNucleus() throws ProfileException, MissingLandmarkException,
+            MissingProfileException, UnavailableBorderPointException {
 
         ISegmentedProfile refoldProfile = refoldNucleus.component().getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
 
@@ -290,13 +290,13 @@ public class ProfileRefoldMethod extends SingleDatasetAnalysisMethod {
      * @param similarityScore
      * @return
      * @throws ProfileException
-     * @throws UnavailableBorderTagException
-     * @throws UnavailableProfileTypeException
+     * @throws MissingLandmarkException
+     * @throws MissingProfileException
      * @throws UnavailableBorderPointException
      */
     private double improveBorderPoint(int index, double minDistance, double maxDistance, double similarityScore,
-    		 @NonNull Nucleus testNucleus) throws ProfileException, UnavailableBorderTagException,
-            UnavailableProfileTypeException, UnavailableBorderPointException {
+    		 @NonNull Nucleus testNucleus) throws ProfileException, MissingLandmarkException,
+            MissingProfileException, UnavailableBorderPointException {
         // // make all changes to a fresh nucleus before buggering up the real
         // one
         LOGGER.finest( "Testing point " + index);

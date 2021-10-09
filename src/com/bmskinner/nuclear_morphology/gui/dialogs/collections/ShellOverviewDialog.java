@@ -39,7 +39,7 @@ import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
 import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellAnalysisMethod.ShellAnalysisException;
 import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellDetector;
 import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellDetector.Shell;
-import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
@@ -212,7 +212,7 @@ public class ShellOverviewDialog extends AbstractCellCollectionDialog {
 	        if (rotate) {
 	            try {
 	                ip = rotateToVertical(c, ip);
-	            } catch (UnavailableBorderTagException e) {
+	            } catch (MissingLandmarkException e) {
 	                LOGGER.log(Loggable.STACK, "Unable to rotate", e);
 	            }
 	            ip.flipVertical(); // Y axis needs inverting

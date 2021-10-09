@@ -39,6 +39,10 @@ import org.junit.rules.ExpectedException;
 import com.bmskinner.nuclear_morphology.ComponentTester;
 import com.bmskinner.nuclear_morphology.TestDatasetBuilder;
 import com.bmskinner.nuclear_morphology.TestResources;
+import com.bmskinner.nuclear_morphology.analysis.nucleus.CellCollectionFilterBuilder;
+import com.bmskinner.nuclear_morphology.analysis.nucleus.CellCollectionFilterer;
+import com.bmskinner.nuclear_morphology.analysis.nucleus.CellCollectionFilterer.CollectionFilteringException;
+import com.bmskinner.nuclear_morphology.analysis.nucleus.FilteringOptions;
 import com.bmskinner.nuclear_morphology.components.Version;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
@@ -83,8 +87,13 @@ public class DefaultAnalysisDatasetTest extends ComponentTester {
     public void testAddChildCollection() throws Exception {
 
     	double defaultArea = d.getCollection().getMedian(Measurement.AREA, CellularComponent.NUCLEUS, MeasurementScale.PIXELS);
-    	
-        ICellCollection c = d.getCollection().filterCollection(Measurement.AREA, MeasurementScale.PIXELS, defaultArea, defaultArea*2);
+
+		FilteringOptions op = new CellCollectionFilterBuilder()
+        		.add(Measurement.AREA, CellularComponent.NUCLEUS, 
+        				MeasurementScale.PIXELS, defaultArea, defaultArea*2)
+        		.build();
+		
+        ICellCollection c = CellCollectionFilterer.filter(d.getCollection(), op);
         UUID id = c.getId();
         
         assertTrue("Filtered collection should contain cells", c.size()>0);
@@ -98,7 +107,14 @@ public class DefaultAnalysisDatasetTest extends ComponentTester {
     @Test
     public void testAddChildDataset() throws Exception {
     	double defaultArea = d.getCollection().getMedian(Measurement.AREA, CellularComponent.NUCLEUS, MeasurementScale.PIXELS);
-    	ICellCollection c = d.getCollection().filterCollection(Measurement.AREA, MeasurementScale.PIXELS, defaultArea, defaultArea*2);
+    	
+		FilteringOptions op = new CellCollectionFilterBuilder()
+        		.add(Measurement.AREA, CellularComponent.NUCLEUS, 
+        				MeasurementScale.PIXELS,  defaultArea, defaultArea*2)
+        		.build();
+		
+        ICellCollection c = CellCollectionFilterer.filter(d.getCollection(), op);
+
         IAnalysisDataset ch = new DefaultAnalysisDataset(c, new File(TestDatasetBuilder.TEST_DATASET_IMAGE_FOLDER));
         UUID id = ch.getId();
                 
@@ -123,10 +139,17 @@ public class DefaultAnalysisDatasetTest extends ComponentTester {
     }
 
     @Test
-    public void testGetChildCount() {
+    public void testGetChildCount() throws CollectionFilteringException {
         assertEquals(N_CHILD_DATASETS, d.getChildCount());
         int defaultArea = TestDatasetBuilder.DEFAULT_BASE_HEIGHT * TestDatasetBuilder.DEFAULT_BASE_WIDTH;
-        ICellCollection c = d.getCollection().filterCollection(Measurement.AREA, MeasurementScale.PIXELS, defaultArea, defaultArea*2);
+        
+		FilteringOptions op = new CellCollectionFilterBuilder()
+        		.add(Measurement.AREA, CellularComponent.NUCLEUS, 
+        				MeasurementScale.PIXELS, defaultArea, defaultArea*2)
+        		.build();
+		
+        ICellCollection c = CellCollectionFilterer.filter(d.getCollection(), op);
+        
         d.addChildCollection(c);  
         assertEquals(N_CHILD_DATASETS+1, d.getChildCount());
     }

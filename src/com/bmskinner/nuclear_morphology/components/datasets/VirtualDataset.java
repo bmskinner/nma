@@ -29,8 +29,8 @@ import org.jdom2.Element;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.Statistical;
 import com.bmskinner.nuclear_morphology.components.Taggable;
-import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
-import com.bmskinner.nuclear_morphology.components.UnavailableComponentException;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
+import com.bmskinner.nuclear_morphology.components.MissingComponentException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
@@ -50,7 +50,7 @@ import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileManager;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.components.signals.DefaultShellResult;
 import com.bmskinner.nuclear_morphology.components.signals.DefaultSignalGroup;
@@ -609,12 +609,12 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
 	 * 
 	 * @param pointType the point to compare profiles from
 	 * @return the best nucleus
-	 * @throws UnavailableBorderTagException
-	 * @throws UnavailableProfileTypeException
+	 * @throws MissingLandmarkException
+	 * @throws MissingProfileException
 	 */
 	@Override
 	public Nucleus getNucleusMostSimilarToMedian(Landmark pointType)
-			throws ProfileException, UnavailableBorderTagException, UnavailableProfileTypeException {
+			throws ProfileException, MissingLandmarkException, MissingProfileException {
 		Set<Nucleus> list = this.getNuclei();
 
 		// No need to check profiles if there is only one nucleus
@@ -647,70 +647,70 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
         return profileManager;
     }
 
-    @Override
-    public ICellCollection filter(@NonNull Predicate<ICell> predicate) {
-
-        String newName = "Filtered_" + predicate.toString();
-
-        ICellCollection subCollection = new VirtualDataset(this, newName);
-
-        List<ICell> list = getCells().stream().filter(predicate).collect(Collectors.toList());
-
-        LOGGER.finest( "Adding cells to new collection");
-        for (ICell cell : list)
-            subCollection.addCell(cell.duplicate());
-
-        if (subCollection.size() == 0) {
-            LOGGER.warning("No cells in collection");
-        } else {
-        	try {
-        		subCollection.createProfileCollection();
-                this.getProfileManager().copySegmentsAndLandmarksTo(subCollection);
-                this.getSignalManager().copySignalGroups(subCollection);
-
-            } catch (ProfileException e) {
-                LOGGER.warning("Error copying collection offsets");
-                LOGGER.log(Loggable.STACK, "Error in offsetting", e);
-            }
-        }
-        return subCollection;
-    }
-
-    @Override
-    public ICellCollection filterCollection(@NonNull Measurement stat, MeasurementScale scale, double lower,
-            double upper) {
-        DecimalFormat df = new DecimalFormat("#.##");
-
-        Predicate<ICell> pred = new Predicate<ICell>() {
-            @Override
-            public boolean test(ICell t) {
-
-                for (Nucleus n : t.getNuclei()) {
-
-                    double value = stat.equals(Measurement.VARIABILITY)
-                            ? getNormalisedDifferenceToMedian(Landmark.REFERENCE_POINT, n) : n.getStatistic(stat, scale);
-
-                    if (value < lower) {
-                        return false;
-                    }
-
-                    if (value > upper) {
-                        return false;
-                    }
-
-                }
-                return true;
-            }
-
-            @Override
-            public String toString() {
-                return stat.toString() + "_" + df.format(lower) + "-" + df.format(upper);
-            }
-
-        };
-
-        return filter(pred);
-    }
+//    @Override
+//    public ICellCollection filter(@NonNull Predicate<ICell> predicate) {
+//
+//        String newName = "Filtered_" + predicate.toString();
+//
+//        ICellCollection subCollection = new VirtualDataset(this, newName);
+//
+//        List<ICell> list = getCells().stream().filter(predicate).collect(Collectors.toList());
+//
+//        LOGGER.finest( "Adding cells to new collection");
+//        for (ICell cell : list)
+//            subCollection.addCell(cell.duplicate());
+//
+//        if (subCollection.size() == 0) {
+//            LOGGER.warning("No cells in collection");
+//        } else {
+//        	try {
+//        		subCollection.createProfileCollection();
+//                this.getProfileManager().copySegmentsAndLandmarksTo(subCollection);
+//                this.getSignalManager().copySignalGroupsTo(subCollection);
+//
+//            } catch (ProfileException e) {
+//                LOGGER.warning("Error copying collection offsets");
+//                LOGGER.log(Loggable.STACK, "Error in offsetting", e);
+//            }
+//        }
+//        return subCollection;
+//    }
+//
+//    @Override
+//    public ICellCollection filterCollection(@NonNull Measurement stat, MeasurementScale scale, double lower,
+//            double upper) {
+//        DecimalFormat df = new DecimalFormat("#.##");
+//
+//        Predicate<ICell> pred = new Predicate<ICell>() {
+//            @Override
+//            public boolean test(ICell t) {
+//
+//                for (Nucleus n : t.getNuclei()) {
+//
+//                    double value = stat.equals(Measurement.VARIABILITY)
+//                            ? getNormalisedDifferenceToMedian(Landmark.REFERENCE_POINT, n) : n.getStatistic(stat, scale);
+//
+//                    if (value < lower) {
+//                        return false;
+//                    }
+//
+//                    if (value > upper) {
+//                        return false;
+//                    }
+//
+//                }
+//                return true;
+//            }
+//
+//            @Override
+//            public String toString() {
+//                return stat.toString() + "_" + df.format(lower) + "-" + df.format(upper);
+//            }
+//
+//        };
+//
+//        return filter(pred);
+//    }
 
     @Override
     public int countShared(@NonNull IAnalysisDataset d2) {
@@ -924,7 +924,7 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
 			IProfileSegment segment;
 			try {
 				segment = n.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT).getSegment(id);
-			} catch (ProfileException | UnavailableComponentException e) {
+			} catch (ProfileException | MissingComponentException e) {
 				return 0;
 			}
 			double perimeterLength = 0;
@@ -998,7 +998,7 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
         IProfile medianProfile;
         try {
             medianProfile = this.getProfileCollection().getProfile(ProfileType.ANGLE, pointType, Stats.MEDIAN).interpolate(FIXED_PROFILE_LENGTH);
-        } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException e) {
+        } catch (MissingLandmarkException | ProfileException | MissingProfileException e) {
             LOGGER.warning("Cannot get median profile for collection");
             LOGGER.log(Loggable.STACK, "Error getting median profile", e);
             double[] result = new double[size()];
@@ -1013,7 +1013,7 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
                 double diff = angleProfile.absoluteSquareDifference(medianProfile, FIXED_PROFILE_LENGTH);
                 return Math.sqrt(diff/FIXED_PROFILE_LENGTH); // differences in degrees, rather than square degrees
 
-            } catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
+            } catch (ProfileException | MissingLandmarkException | MissingProfileException e) {
                 LOGGER.log(Loggable.STACK, "Error getting nucleus profile", e);
                 return  Double.MAX_VALUE;
             } 
@@ -1051,7 +1051,7 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
         IProfile medianProfile;
         try {
             medianProfile = profileCollection.getProfile(ProfileType.ANGLE, pointType, Stats.MEDIAN).interpolate(FIXED_PROFILE_LENGTH);
-        } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException e) {
+        } catch (MissingLandmarkException | ProfileException | MissingProfileException e) {
             LOGGER.log(Loggable.STACK, "Error getting median profile for collection", e);
             return 0;
         }
@@ -1061,7 +1061,7 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
 
             double diff = angleProfile.absoluteSquareDifference(medianProfile, FIXED_PROFILE_LENGTH);
             return Math.sqrt(diff/FIXED_PROFILE_LENGTH);
-        } catch (ProfileException | UnavailableComponentException e) {
+        } catch (ProfileException | MissingComponentException e) {
             LOGGER.log(Loggable.STACK, "Error getting nucleus profile", e);
             return Double.NaN;
         }

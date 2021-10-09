@@ -29,8 +29,8 @@ import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.charting.datasets.ChartDatasetCreationException;
 import com.bmskinner.nuclear_morphology.charting.datasets.NucleusDatasetCreator;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
-import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
-import com.bmskinner.nuclear_morphology.components.UnavailableComponentException;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
+import com.bmskinner.nuclear_morphology.components.MissingComponentException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
@@ -40,7 +40,7 @@ import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
-import com.bmskinner.nuclear_morphology.components.profiles.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.UnsegmentedProfileException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
@@ -202,7 +202,7 @@ public class NuclearHistogramDatasetCreator extends HistogramDatasetCreator {
 
                 ds.addSeries(IProfileSegment.SEGMENT_PREFIX + options.getSegPosition() + "_" + collection.getName(),
                         values, bins, minRounded, maxRounded);
-            } catch (UnavailableBorderTagException | ProfileException e) {
+            } catch (MissingLandmarkException | ProfileException e) {
                 throw new ChartDatasetCreationException("Cannot get segments for " + dataset.getName(), e);
             }
         }
@@ -233,8 +233,7 @@ public class NuclearHistogramDatasetCreator extends HistogramDatasetCreator {
                 medianSeg = collection.getProfileCollection()
                         .getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN)
                         .getSegmentAt(options.getSegPosition());
-            } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException
-                    | UnsegmentedProfileException e) {
+            } catch (MissingComponentException | ProfileException e) {
                 LOGGER.log(Loggable.STACK, "Error getting profile from tag", e);
                 throw new ChartDatasetCreationException("Unable to get median profile", e);
             }
@@ -255,7 +254,7 @@ public class NuclearHistogramDatasetCreator extends HistogramDatasetCreator {
                     double length = n.getStatistic(Measurement.PERIMETER, options.getScale())
                             * proportionPerimeter;
                     lengths[count] = length;
-                } catch (ProfileException | UnavailableComponentException e) {
+                } catch (ProfileException | MissingComponentException e) {
                     LOGGER.fine("Error getting segment length");
                     lengths[count] = 0;
                 } finally {
@@ -280,8 +279,7 @@ public class NuclearHistogramDatasetCreator extends HistogramDatasetCreator {
                 medianSeg = collection.getProfileCollection()
                         .getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN)
                         .getSegmentAt(options.getSegPosition());
-            } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException
-                    | UnsegmentedProfileException e2) {
+            } catch (MissingComponentException | ProfileException e2) {
                 LOGGER.log(Loggable.STACK, "Error getting profile from tag", e2);
                 throw new ChartDatasetCreationException("Unable to get median profile", e2);
             }
@@ -303,7 +301,7 @@ public class NuclearHistogramDatasetCreator extends HistogramDatasetCreator {
                     double length = n.getStatistic(Measurement.PERIMETER, options.getScale())
                             * proportionPerimeter;
                     lengths[count] = length;
-                } catch (ProfileException | UnavailableComponentException e) {
+                } catch (ProfileException | MissingComponentException e) {
                     LOGGER.log(Loggable.STACK, "Error getting segment length");
                     lengths[count] = 0;
                 } finally {

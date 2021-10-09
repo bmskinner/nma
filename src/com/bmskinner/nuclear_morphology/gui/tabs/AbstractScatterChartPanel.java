@@ -278,7 +278,7 @@ public abstract class AbstractScatterChartPanel extends DetailPanel  {
         		virt.setName("Filtered_" + statA + "_" + statB);
         		
         		d.getCollection().getProfileManager().copySegmentsAndLandmarksTo(virt);
-        		d.getCollection().getSignalManager().copySignalGroups(virt);
+        		d.getCollection().getSignalManager().copySignalGroupsTo(virt);
         		d.addChildCollection(virt);		
         	} catch (CollectionFilteringException | ProfileException e1) {
         		LOGGER.log(Loggable.STACK, "Unable to filter collection for " + d.getName(), e1);

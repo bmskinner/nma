@@ -29,7 +29,7 @@ import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.SingleDatasetAnalysisMethod;
 import com.bmskinner.nuclear_morphology.components.UnavailableBorderPointException;
-import com.bmskinner.nuclear_morphology.components.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
@@ -156,7 +156,7 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
                 }
             }
 
-        } catch (ImageImportException | UnavailableBorderPointException | UnavailableBorderTagException e) {
+        } catch (ImageImportException | UnavailableBorderPointException | MissingLandmarkException e) {
             LOGGER.warning("Cannot open " + imageFile.getAbsolutePath());
             LOGGER.log(Loggable.STACK, "Cannot load image", e);
         }
