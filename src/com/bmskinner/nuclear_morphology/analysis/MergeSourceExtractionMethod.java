@@ -114,7 +114,6 @@ public class MergeSourceExtractionMethod extends MultipleDatasetAnalysisMethod {
 
 
     	IAnalysisDataset newDataset = new DefaultAnalysisDataset(newCollection, template.getSavePath());
-    	newDataset.setRoot(true);
     	
     	try {
     		// Copy over the profile collections

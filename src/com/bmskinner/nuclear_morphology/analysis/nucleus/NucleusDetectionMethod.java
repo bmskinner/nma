@@ -172,8 +172,6 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
             IAnalysisOptions datasetOptions = templateOptions.duplicate();
             datasetOptions.getDetectionOptions(CellularComponent.NUCLEUS).get().setString(HashOptions.DETECTION_FOLDER, folder.getAbsolutePath());
             dataset.setAnalysisOptions(datasetOptions);
-            
-            dataset.setRoot(true);
 
             LOGGER.info("Analysing " + collection.getName());
 

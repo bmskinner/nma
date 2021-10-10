@@ -151,7 +151,6 @@ public class DatasetArithmeticAction extends MultiDatasetResultAction {
 
             } else {
                 newDataset = new DefaultAnalysisDataset(newCollection, saveFile);
-                newDataset.setRoot(true);
                 getDatasetEventHandler().fireDatasetEvent(DatasetEvent.MORPHOLOGY_ANALYSIS_ACTION, newDataset);
             }
         } else {

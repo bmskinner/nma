@@ -187,7 +187,6 @@ public class ManualClusterAction extends SingleDatasetResultAction {
 
                     // attach the clusters to their parent collection
                     IAnalysisDataset clusterDataset = dataset.getChildDataset(coll.getId());
-                    clusterDataset.setRoot(false);
 
                     // set shared counts
                     coll.setSharedCount(dataset.getCollection(), coll.size());

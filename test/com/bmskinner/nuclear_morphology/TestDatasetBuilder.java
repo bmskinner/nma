@@ -126,7 +126,7 @@ public class TestDatasetBuilder {
 		default: d = createRectangularDataset(nCells, rsc, maxVariation, w, h, xBase, 
 				yBase, maxRotation, offset, fixedOffset);
 		}
-		d.setRoot(true);
+
 		if(segment || profile)
 			new DatasetProfilingMethod(d).call();
 		if(segment)

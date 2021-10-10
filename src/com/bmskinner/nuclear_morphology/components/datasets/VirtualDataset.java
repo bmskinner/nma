@@ -3,7 +3,6 @@ package com.bmskinner.nuclear_morphology.components.datasets;
 import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -16,7 +15,6 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.Predicate;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -27,10 +25,10 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.jdom2.Element;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
+import com.bmskinner.nuclear_morphology.components.MissingComponentException;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.Statistical;
 import com.bmskinner.nuclear_morphology.components.Taggable;
-import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
-import com.bmskinner.nuclear_morphology.components.MissingComponentException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
@@ -48,9 +46,9 @@ import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileCollection;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
+import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileManager;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.components.signals.DefaultShellResult;
 import com.bmskinner.nuclear_morphology.components.signals.DefaultSignalGroup;
@@ -313,16 +311,9 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
 
     @Override
     public synchronized Set<ICell> getCells(@NonNull File f) {
-        Set<ICell> result = new HashSet<ICell>(cellIDs.size());
-
-        for (ICell cell : parentDataset.getCollection().getCells()) {
-            if (cellIDs.contains(cell.getId())) {
-                if (cell.getPrimaryNucleus().getSourceFile().equals(f)) {
-                    result.add(cell);
-                }
-            }
-        }
-        return result;
+    	return stream()
+    			.filter(c->c.getPrimaryNucleus().getSourceFile().equals(f))
+    			.collect(Collectors.toSet());
     }
 
     @Override
@@ -337,7 +328,7 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
 
     @Override
     public synchronized Set<UUID> getCellIDs() {
-        return new HashSet<UUID>(cellIDs);
+        return new HashSet<>(cellIDs);
     }
 
     @Override
@@ -488,8 +479,8 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
 
     @Override
     public void setCellsLocked(boolean b) {
-    	for (Nucleus n : this.getNuclei())
-			n.setLocked(b);
+    	for(Nucleus n : this.getNuclei())
+    		n.setLocked(b);
     }
 
     @Override
@@ -508,18 +499,16 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
      */
     @Override
 	public void createProfileCollection() throws ProfileException {
-        profileCollection.createProfileAggregate(this, parentDataset.getCollection().getMedianArrayLength());
+        profileCollection.createProfileAggregate(this, 
+        		parentDataset.getCollection().getMedianArrayLength());
     }
 
     @Override
-    public Set<File> getImageFiles() {
-
-        Set<File> result = new HashSet<File>(cellIDs.size());
-
-        for (ICell c : getCells()) {
-            result.add(c.getPrimaryNucleus().getSourceFile());
-        }
-        return result;
+    public Set<File> getImageFiles() {        
+        return this.stream()
+        		.map(ICell::getPrimaryNucleus)
+        		.map(Nucleus::getSourceFile)
+        		.collect(Collectors.toSet());
     }
 
     @Override
@@ -646,71 +635,6 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
     public ProfileManager getProfileManager() {
         return profileManager;
     }
-
-//    @Override
-//    public ICellCollection filter(@NonNull Predicate<ICell> predicate) {
-//
-//        String newName = "Filtered_" + predicate.toString();
-//
-//        ICellCollection subCollection = new VirtualDataset(this, newName);
-//
-//        List<ICell> list = getCells().stream().filter(predicate).collect(Collectors.toList());
-//
-//        LOGGER.finest( "Adding cells to new collection");
-//        for (ICell cell : list)
-//            subCollection.addCell(cell.duplicate());
-//
-//        if (subCollection.size() == 0) {
-//            LOGGER.warning("No cells in collection");
-//        } else {
-//        	try {
-//        		subCollection.createProfileCollection();
-//                this.getProfileManager().copySegmentsAndLandmarksTo(subCollection);
-//                this.getSignalManager().copySignalGroupsTo(subCollection);
-//
-//            } catch (ProfileException e) {
-//                LOGGER.warning("Error copying collection offsets");
-//                LOGGER.log(Loggable.STACK, "Error in offsetting", e);
-//            }
-//        }
-//        return subCollection;
-//    }
-//
-//    @Override
-//    public ICellCollection filterCollection(@NonNull Measurement stat, MeasurementScale scale, double lower,
-//            double upper) {
-//        DecimalFormat df = new DecimalFormat("#.##");
-//
-//        Predicate<ICell> pred = new Predicate<ICell>() {
-//            @Override
-//            public boolean test(ICell t) {
-//
-//                for (Nucleus n : t.getNuclei()) {
-//
-//                    double value = stat.equals(Measurement.VARIABILITY)
-//                            ? getNormalisedDifferenceToMedian(Landmark.REFERENCE_POINT, n) : n.getStatistic(stat, scale);
-//
-//                    if (value < lower) {
-//                        return false;
-//                    }
-//
-//                    if (value > upper) {
-//                        return false;
-//                    }
-//
-//                }
-//                return true;
-//            }
-//
-//            @Override
-//            public String toString() {
-//                return stat.toString() + "_" + df.format(lower) + "-" + df.format(upper);
-//            }
-//
-//        };
-//
-//        return filter(pred);
-//    }
 
     @Override
     public int countShared(@NonNull IAnalysisDataset d2) {
@@ -1232,51 +1156,6 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
 	}
 
 	@Override
-	public IAnalysisDataset getMergeSource(@NonNull UUID id) {
-		return null;
-	}
-
-	@Override
-	public Set<IAnalysisDataset> getAllMergeSources() {
-		return new HashSet<>(0);
-	}
-
-	@Override
-	public void addMergeSource(@NonNull IAnalysisDataset dataset) {
-		// Not possible for a child
-	}
-
-	@Override
-	public List<IAnalysisDataset> getMergeSources() {
-		return new ArrayList<>(0);
-	}
-
-	@Override
-	public Set<UUID> getMergeSourceIDs() {
-		return new HashSet<>(0);
-	}
-
-	@Override
-	public Set<UUID> getAllMergeSourceIDs() {
-		return new HashSet<>(0);
-	}
-
-	@Override
-	public boolean hasMergeSource(UUID id) {
-		return false;
-	}
-
-	@Override
-	public boolean hasMergeSource(IAnalysisDataset dataset) {
-		return false;
-	}
-
-	@Override
-	public boolean hasMergeSources() {
-		return false;
-	}
-
-	@Override
 	public int getChildCount() {
 		return childDatasets.size();
 	}
@@ -1354,12 +1233,6 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
 	public boolean isRoot() {
 		return false;
 	}
-
-	@Override
-	public void setRoot(boolean b) {
-		// Not possible for a child
-	}
-
 	@Override
 	public void deleteChild(@NonNull UUID id) {
 		Iterator<IAnalysisDataset> it = childDatasets.iterator();

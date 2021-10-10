@@ -97,15 +97,6 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
             ICellCollection c = clusterMap.get(cluster);
 
             if (c.hasCells()) {
-                LOGGER.finest( "Cluster " + cluster + ": " + c.getName());
-
-                try {
-                    dataset.getCollection().getProfileManager().copySegmentsAndLandmarksTo(c);
-                } catch (ProfileException e) {
-                    LOGGER.warning("Error copying collection offsets");
-                    LOGGER.log(Loggable.STACK, "Error in offsetting", e);
-                }
-
                 group.addDataset(c);
                 c.setName(group.getName() + "_" + c.getName());
 
@@ -114,7 +105,6 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
                 // attach the clusters to their parent collection
                 LOGGER.fine("Cluster " + cluster + ": " + c.size() + " nuclei");
                 IAnalysisDataset clusterDataset = dataset.getChildDataset(c.getId());
-                clusterDataset.setRoot(false);
 
                 // set shared counts
                 c.setSharedCount(dataset.getCollection(), c.size());
@@ -237,10 +227,11 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
 		
 		LOGGER.fine("Clustering found "+numberOfClusters+" clusters");
 
-    	for (int i = 0; i <numberOfClusters ; i++) {
-    		ICellCollection clusterCollection = new VirtualDataset(dataset, "Cluster_" + i);
-    		clusterMap.put(i, clusterCollection);
-    	}
+		// Create new empty collections to hold the cells for each cluster
+		for (int i = 0; i <numberOfClusters ; i++) {
+			ICellCollection c = new VirtualDataset(dataset, "Cluster_" + i);
+			clusterMap.put(i, c);
+		}
 
     	for(Entry<Instance,UUID> entry : cellToInstanceMap.entrySet()) {
 
@@ -264,7 +255,7 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
     	}
     	
     	// complete the new collections by profiling 
-    	for (ICellCollection c : clusterMap.values()) {
+    	for(ICellCollection c : clusterMap.values()) {
     		c.createProfileCollection();
     		dataset.getCollection().getProfileManager().copySegmentsAndLandmarksTo(c);
     	}

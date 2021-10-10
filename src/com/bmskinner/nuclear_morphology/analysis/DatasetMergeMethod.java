@@ -213,7 +213,6 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 
         // create the dataset; has no analysis options at present
         IAnalysisDataset newDataset = new DefaultAnalysisDataset(newCollection, saveFile);
-        newDataset.setRoot(true);
 
         // Add the original datasets as merge sources
         for (IAnalysisDataset d : datasets) {

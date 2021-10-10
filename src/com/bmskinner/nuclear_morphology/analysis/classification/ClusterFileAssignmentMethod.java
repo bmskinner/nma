@@ -253,7 +253,6 @@ public class ClusterFileAssignmentMethod extends SingleDatasetAnalysisMethod {
 
                 // attach the clusters to their parent collection
                 IAnalysisDataset clusterDataset = dataset.getChildDataset(c.getId());
-                clusterDataset.setRoot(false);
 
                 // set shared counts
                 c.setSharedCount(dataset.getCollection(), c.size());

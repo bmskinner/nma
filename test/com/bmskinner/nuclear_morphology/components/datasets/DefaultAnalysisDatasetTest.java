@@ -220,8 +220,8 @@ public class DefaultAnalysisDatasetTest extends ComponentTester {
 		// files are not absolute on test dataset creation
 		d.setSavePath(d.getSavePath().getAbsoluteFile());
 		
-		IAnalysisDataset test = new DefaultAnalysisDataset(e);
-//		test.relinkChildren();
+		IAnalysisDataset test = DatasetCreator.createRoot(e);
+
 		xmlOutput.output(test.toXmlElement(), new PrintWriter( System.out ));
 		testDuplicatesByField(d, test);
 		assertEquals(d, test);

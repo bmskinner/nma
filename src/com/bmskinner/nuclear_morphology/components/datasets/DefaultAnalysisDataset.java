@@ -37,7 +37,6 @@ import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.options.DefaultAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileCollection;
@@ -59,23 +58,8 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 
     private static final long serialVersionUID = 1L;
 
-    private boolean isRoot = false; // is this a root dataset
-    
-
     /** The cell collection for this dataset */
     protected ICellCollection cellCollection;
-
-    /**
-     * Other datasets associated with this dataset, that will need to be saved
-     * out. Includes merge sources presently, with scope for expansion
-     */
-    private Set<IAnalysisDataset> otherDatasets = new HashSet<>();
-
-    /**
-     * The ids of datasets merged to create this dataset. The IDs must be
-     * present in otherCollections.
-     */
-    private Set<UUID> mergeSources = new HashSet<>();
 
     private File savePath; // the file to save this dataset to
 
@@ -88,25 +72,13 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
         super();
         this.cellCollection = collection;
         this.savePath = saveFile;
-        this.isRoot = false;
     }
     
-    public DefaultAnalysisDataset(@NonNull Element e) throws ComponentCreationException {
+    DefaultAnalysisDataset(@NonNull Element e) throws ComponentCreationException {
     	super(e);
-    	isRoot = Boolean.valueOf(e.getChildText("IsRoot"));
-    	
-    	for(Element el : e.getChild("OtherDatasets").getChildren()) {
-    		otherDatasets.add(new VirtualDataset(el));
-    	}
-    	
-    	for(Element el : e.getChildren("MergeSource")) {
-    		mergeSources.add(UUID.fromString(el.getText()));
-    	}
-    	
+    	    	
     	savePath = new File(e.getChildText("SaveFile")).getAbsoluteFile();
-    	
-    	analysisOptions = new DefaultAnalysisOptions(e.getChild("AnalysisOptions"));
-    	
+    	    	
     	cellCollection = new DefaultCellCollection(e.getChild("CellCollection"));		
     }
     
@@ -117,7 +89,6 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
      */
     private DefaultAnalysisDataset(DefaultAnalysisDataset d) {
     	super(d);
-    	isRoot = d.isRoot;
     	cellCollection = d.cellCollection.duplicate();
     	
     	for(IAnalysisDataset g : d.otherDatasets)
@@ -132,17 +103,9 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
     @Override
 	public Element toXmlElement() {
 		Element e = super.toXmlElement();
-		
-		e.addContent(new Element("IsRoot").setText(String.valueOf(isRoot)));
-		
+	
 		e.addContent(cellCollection.toXmlElement());
-		
-		Element other = new Element("OtherDatasets");
-		for(IAnalysisDataset c : otherDatasets) {
-			other.addContent(c.toXmlElement());
-		}
-		e.addContent(other);
-		
+				
 		for(UUID i : mergeSources)
 			e.addContent(new Element("MergeSource").setText(i.toString()));
 		
@@ -176,9 +139,12 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 
     @Override
     public void addChildCollection(@NonNull final ICellCollection collection) {
-    	VirtualDataset v = new VirtualDataset(this, collection.getName(), collection.getId());
-    	v.addAll(collection.getCells());
-    	addChildDataset(v);
+    	try {
+    		VirtualDataset v = new VirtualDataset(this, collection.getName(), collection.getId(), collection);
+    		addChildDataset(v);
+    	} catch(ProfileException e) {
+    		LOGGER.warning("Unable to add child collection: "+e.getMessage());
+    	}
     }
 
     @Override
@@ -211,41 +177,6 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
                 g.removeDataset(id);
             }
         }
-    }
-
-    /**
-     * Add the given dataset as an associated dataset. This is not a child, and
-     * must be added to an appropriate identifier list; this is handled by the
-     * public functions calling this method
-     * 
-     * @param dataset
-     *            the dataset to add
-     */
-    private void addAssociatedDataset(@NonNull final IAnalysisDataset dataset) {
-        otherDatasets.add(dataset);
-    }
-
-    /**
-     * Get the associated dataset with the given id. Not public because each
-     * associated dataset should have a further classification, and should be
-     * retrieved through its own method
-     * 
-     * @param id the dataset to get
-     * @return the dataset or null
-     */
-    private IAnalysisDataset getAssociatedDataset(@NonNull final UUID id) {
-    	return otherDatasets.stream().filter(d->d.getId().equals(id)).findFirst().orElse(null);
-    }
-
-    /**
-     * Remove the given dataset from the list of parents and any lists that
-     * depend on parents
-     * 
-     * @param id the UUID to remove
-     */
-    private void removeAssociatedDataset(@NonNull final UUID id) {
-        IAnalysisDataset d = getAssociatedDataset(id);
-        otherDatasets.remove(d);
     }
 
     @Override
@@ -318,93 +249,6 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
         return null;
     }
 
-    @Override
-    public IAnalysisDataset getMergeSource(@NonNull final UUID id) {
-    	
-    	if (this.hasMergeSource(id))
-    		return this.getAssociatedDataset(id);
-
-    	for (IAnalysisDataset child : this.getAllMergeSources()) {
-    		if (child.getId().equals(id))
-    			return child;
-    	}
-        return null;
-    }
-
-    @Override
-    public Set<IAnalysisDataset> getAllMergeSources() {
-
-        Set<IAnalysisDataset> result = new HashSet<>();
-
-        for (UUID id : getMergeSourceIDs()) {
-
-            IAnalysisDataset source = this.getAssociatedDataset(id);
-            if (source.hasMergeSources()) {
-                result.addAll(source.getAllMergeSources());
-            } else {
-                result.add(source);
-            }
-        }
-        return result;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * For default analysis datasets, attempting to add a merge source will
-     * create a new virtual collection of cells from the source dataset.
-     * 
-     * @see analysis.IAnalysisDataset#addMergeSource(analysis.AnalysisDataset)
-     */
-    @Override
-    public void addMergeSource(@NonNull IAnalysisDataset dataset) {
-    	VirtualDataset mergeSource = new VirtualDataset(this, dataset.getName(), dataset.getId());
-        mergeSource.addAll(dataset.getCollection().getCells());
-        mergeSource.setAnalysisOptions(dataset.getAnalysisOptions().get());
-        this.mergeSources.add(mergeSource.getId());
-        this.addAssociatedDataset(mergeSource);
-    }
-
-    @Override
-    public List<IAnalysisDataset> getMergeSources() {
-    	List<IAnalysisDataset> result = new ArrayList<>();
-        for (UUID id : mergeSources) 
-            result.add(this.getAssociatedDataset(id));
-        return result;
-    }
-
-    @Override
-    public Set<UUID> getMergeSourceIDs() {
-        return this.mergeSources;
-    }
-
-    @Override
-    public Set<UUID> getAllMergeSourceIDs() {
-
-        Set<UUID> result = new HashSet<>();
-
-        for (UUID id : this.getMergeSourceIDs()) {
-            result.addAll(getMergeSource(id).getAllMergeSourceIDs());
-        }
-
-        return result;
-    }
-
-    @Override
-    public boolean hasMergeSource(@NonNull final UUID id) {
-        return mergeSources.contains(id);
-    }
-
-
-    @Override
-    public boolean hasMergeSource(@NonNull IAnalysisDataset dataset) {
-        return this.hasMergeSource(dataset.getId());
-    }
-
-    @Override
-    public boolean hasMergeSources() {
-        return !mergeSources.isEmpty();
-    }
 
     @Override
     public int getChildCount() {
@@ -497,25 +341,13 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 
     @Override
     public boolean isRoot() {
-        return isRoot;
-    }
-
-    @Override
-    public void setRoot(boolean b) {
-        isRoot = b;
+        return true;
     }
 
     @Override
     public void deleteChild(@NonNull UUID id) {
         if (this.hasDirectChild(id)) {
             this.removeChildCollection(id);
-        }
-    }
-
-    @Override
-    public void deleteMergeSource(@NonNull final UUID id) {
-        if (this.mergeSources.contains(id)) {
-            this.removeAssociatedDataset(id);
         }
     }
 
@@ -607,7 +439,6 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
         final int prime = 31;
         int result = super.hashCode();
         result = prime * result + ((analysisOptions == null) ? 0 : analysisOptions.hashCode());
-        result = prime * result + (isRoot ? 1231 : 1237);
         result = prime * result + ((mergeSources == null) ? 0 : mergeSources.hashCode());
         result = prime * result + ((otherDatasets == null) ? 0 : otherDatasets.hashCode());
         result = prime * result + ((savePath == null) ? 0 : savePath.hashCode());
@@ -643,8 +474,6 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
             if (other.datasetColour != null)
                 return false;
         } else if (!datasetColour.equals(other.datasetColour))
-            return false;
-        if (isRoot != other.isRoot)
             return false;
         if (mergeSources == null) {
             if (other.mergeSources != null)

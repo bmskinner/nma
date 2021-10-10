@@ -342,13 +342,6 @@ public interface IAnalysisDataset extends Serializable, XmlSerializable {
     boolean isRoot();
 
     /**
-     * Set the dataset root status
-     * 
-     * @param b is the dataset root
-     */
-    void setRoot(boolean b);
-
-    /**
      * Delete a child dataset. Has no effect if no child with the
      * given id is present.
      * 

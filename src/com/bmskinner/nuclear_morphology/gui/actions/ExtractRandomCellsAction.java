@@ -89,8 +89,7 @@ public class ExtractRandomCellsAction extends SingleDatasetResultAction {
 
 	                // attach the clusters to their parent collection
 	                IAnalysisDataset d = dataset.getChildDataset(c.getId());
-	                d.setRoot(false);
-
+	                
 	                // set shared counts
 	                c.setSharedCount(dataset.getCollection(), c.size());
 	                dataset.getCollection().setSharedCount(c, c.size());
