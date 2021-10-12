@@ -135,8 +135,9 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
 	 * @param id the id for the this dataset. Random if null
 	 * @param cells the collection from which to copy cells
 	 * @throws ProfileException 
+	 * @throws MissingProfileException 
 	 */
-	public VirtualDataset(@NonNull IAnalysisDataset parent, String name, @Nullable UUID id, ICellCollection cells) throws ProfileException {
+	public VirtualDataset(@NonNull IAnalysisDataset parent, String name, @Nullable UUID id, ICellCollection cells) throws ProfileException, MissingProfileException {
 		this(parent, name, id);
 		addAll(cells);
 		createProfileCollection();

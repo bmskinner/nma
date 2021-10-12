@@ -16,6 +16,7 @@ import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.datasets.VirtualDataset;
+import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.gui.components.SelectableCellIcon;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -179,7 +180,7 @@ public class CellCollectionModel extends DefaultTableModel {
 		try {
 			newCollection.createProfileCollection();
 			dataset.getCollection().getProfileManager().copySegmentsAndLandmarksTo(newCollection);
-		} catch (ProfileException e) {
+		} catch (ProfileException | MissingProfileException e) {
 			LOGGER.log(Level.WARNING, "Unable to copy profiles to new child collection");
 			LOGGER.log(Loggable.STACK, "Error copying profiles to new child collection", e);
 			return Optional.empty();

@@ -33,6 +33,7 @@ import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
+import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -156,50 +157,14 @@ public class CellCollectionFilterer {
 			collection.getProfileManager().copySegmentsAndLandmarksTo(subCollection);
 			collection.getSignalManager().copySignalGroupsTo(subCollection);
 
-		} catch (ProfileException e) {
+		} catch (ProfileException | MissingProfileException e) {
 			LOGGER.warning("Error copying collection offsets");
 			LOGGER.log(Loggable.STACK, "Error in offsetting", e);
+			throw new CollectionFilteringException(e);
 		}		
         return subCollection;
 	}
-	
-//	@Override
-//	public static ICellCollection filterCollection(@NonNull Measurement stat, MeasurementScale scale, 
-//			double lower,
-//			double upper) {
-//		DecimalFormat df = new DecimalFormat("#.##");
-//
-//		Predicate<ICell> pred = new Predicate<ICell>() {
-//			@Override
-//			public boolean test(ICell t) {
-//
-//				for (Nucleus n : t.getNuclei()) {
-//
-//					double value = stat.equals(Measurement.VARIABILITY)
-//							? getNormalisedDifferenceToMedian(Landmark.REFERENCE_POINT, n) : n.getStatistic(stat, scale);
-//
-//							if (value < lower) {
-//								return false;
-//							}
-//
-//							if (value > upper) {
-//								return false;
-//							}
-//
-//				}
-//				return true;
-//			}
-//
-//			@Override
-//			public String toString() {
-//				return stat.toString() + "_" + df.format(lower) + "-" + df.format(upper);
-//			}
-//
-//		};
-//
-//		return filter(pred);
-//	}
-	
+		
     /**
      * Thrown when a cell collection cannot be filtered
      * 

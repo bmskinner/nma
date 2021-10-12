@@ -11,7 +11,7 @@ doc/*
 screens/*
 target/*
 wiki/*
-test/Samples/*
+test/samples/*
 
 # Non-project related files
 maven.bat

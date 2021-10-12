@@ -37,6 +37,7 @@ import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
+import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.signals.DefaultSignalGroup;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -132,7 +133,7 @@ public class MergeSourceExtractionMethod extends MultipleDatasetAnalysisMethod {
 
     		// Child datasets are not present in merge sources
 
-    	} catch (ProfileException e) {
+    	} catch (ProfileException | MissingProfileException e) {
     		LOGGER.log(Loggable.STACK, "Cannot copy profile offsets to recovered merge source", e);
     	}
 

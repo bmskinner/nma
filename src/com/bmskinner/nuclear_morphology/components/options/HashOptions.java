@@ -412,4 +412,18 @@ public interface HashOptions extends Serializable, XmlSerializable {
      */
     void set(HashOptions o);
     
+    /**
+     * Remove the given key if present.
+     * If the key is used for e.g. String and
+     * int, both will be removed
+     * @param s
+     */
+    void remove(String s);
+    
+    /**
+     * Remove all keys in the given options
+     * @param o
+     */
+    void remove(HashOptions o);
+    
 }

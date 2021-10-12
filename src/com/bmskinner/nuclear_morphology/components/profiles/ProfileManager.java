@@ -415,65 +415,69 @@ public class ProfileManager {
      * 
      * @param destination the collection to update
      * @throws ProfileException if the copy fails
+     * @throws MissingProfileException 
      */
-    public void copySegmentsAndLandmarksTo(@NonNull final ICellCollection destination) throws ProfileException {
+    public void copySegmentsAndLandmarksTo(@NonNull final ICellCollection destination) throws ProfileException, MissingProfileException {
 
         // Get the corresponding profile collection from the template
-        IProfileCollection sourcePC = collection.getProfileCollection();
+    	IProfileCollection sourcePC = collection.getProfileCollection();
+    	try {
+    		List<IProfileSegment> segments = sourcePC.getSegments(Landmark.REFERENCE_POINT);
+    		if(segments.isEmpty())
+    			throw new ProfileException("No segments in profile of "+collection.getName());
+    		
+    		LOGGER.fine("Got existing list of " + segments.size() + " segments");
 
-        List<IProfileSegment> segments;
-        try {
-            segments = sourcePC.getSegments(Landmark.REFERENCE_POINT);
-        } catch (MissingLandmarkException e1) {
-            LOGGER.warning("RP not found in source collection");
-            LOGGER.log(Loggable.STACK, "Error getting segments from RP", e1);
-            return;
-        }
-        LOGGER.fine("Got existing list of " + segments.size() + " segments");
-        
-        // Create a new profile collection for the destination, so profiles are refreshed
-        IProfileCollection destPC = destination.getProfileCollection();
-        destPC.createProfileAggregate(destination, destination.getMedianArrayLength());
-        LOGGER.fine("Created new profile aggregate with length " + destination.getMedianArrayLength());
-                
-        // Copy the tags from the source collection
-        // Use proportional indexes to allow for a changed aggregate length
-        // Note: only the RP must be at a segment boundary. Some mismatches may occur
-        try {
-            for (Landmark key : sourcePC.getBorderTags()) {
-            	double prop = sourcePC.getProportionOfIndex(key);
-            	int adj = destPC.getIndexOfProportion(prop);
-                destPC.addIndex(key, adj);
-            }
-            
-           // Copy the segments, also adjusting the lengths using profile interpolation
-            ISegmentedProfile sourceMedian = sourcePC.getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);
-            ISegmentedProfile interpolatedMedian = sourceMedian.interpolate(destination.getMedianArrayLength());
-            
-            destPC.addSegments(Landmark.REFERENCE_POINT, interpolatedMedian.getSegments());
+    		// Create a new profile collection for the destination, so profiles are refreshed
+    		IProfileCollection destPC = destination.getProfileCollection();
+    		destPC.createProfileAggregate(destination, destination.getMedianArrayLength());
+    		LOGGER.fine("Created new profile aggregate with length " + destination.getMedianArrayLength());
 
-        } catch (MissingLandmarkException | IllegalArgumentException | MissingProfileException | UnsegmentedProfileException e) {
-            LOGGER.log(Loggable.STACK, "Cannot add segments to RP", e);
-        }
-        LOGGER.fine("Copied tags to new collection");
-        
-        
-        // Final sanity check - did the segment IDs get copied properly?
-        LOGGER.fine("Testing profiles");
-        List<IProfileSegment> newSegs;
-        try {
-            newSegs = destPC.getSegments(Landmark.REFERENCE_POINT);
-        } catch (MissingLandmarkException e1) {
-            LOGGER.warning("RP not found in destination collection");
-            LOGGER.log(Loggable.STACK, "Error getting destination segments from RP", e1);
-            return;
-        }
-        
-        for(int i=0; i<newSegs.size(); i++){
-            if(!segments.get(i).getID().equals(newSegs.get(i).getID())){
-                throw new ProfileException("Segment IDs are not consistent with the old profile");
-            }
-        }
+    		// Copy the tags from the source collection
+    		// Use proportional indexes to allow for a changed aggregate length
+    		// Note: only the RP must be at a segment boundary. Some mismatches may occur
+
+    		for (Landmark key : sourcePC.getBorderTags()) {
+    			double prop = sourcePC.getProportionOfIndex(key);
+    			int adj = destPC.getIndexOfProportion(prop);
+    			destPC.addIndex(key, adj);
+    		}
+
+    		// Copy the segments, also adjusting the lengths using profile interpolation
+    		ISegmentedProfile sourceMedian = sourcePC.getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);
+    		ISegmentedProfile interpolatedMedian = sourceMedian.interpolate(destination.getMedianArrayLength());
+
+    		destPC.addSegments(Landmark.REFERENCE_POINT, interpolatedMedian.getSegments());
+
+
+    		LOGGER.fine("Copied tags to new collection");
+
+
+    		// Final sanity check - did the segment IDs get copied properly?
+    		LOGGER.fine("Testing profiles");
+    		List<IProfileSegment> newSegs;
+    		try {
+    			newSegs = destPC.getSegments(Landmark.REFERENCE_POINT);
+    		} catch (MissingLandmarkException e1) {
+    			LOGGER.warning("RP not found in destination collection");
+    			LOGGER.log(Loggable.STACK, "Error getting destination segments from RP", e1);
+    			return;
+    		}
+
+    		if(segments.size()!=newSegs.size())
+    			throw new ProfileException("Segments are not consistent with the old profile: were "+segments.size()+", now "+newSegs.size());
+
+    		for(int i=0; i<newSegs.size(); i++){
+    			if(!segments.get(i).getID().equals(newSegs.get(i).getID())){
+    				throw new ProfileException("Segment IDs are not consistent with the old profile");
+    			}
+    		}
+
+    	} catch (MissingLandmarkException e1) {
+    		LOGGER.warning("RP not found in source collection");
+    		LOGGER.log(Loggable.STACK, "Error getting segments from RP", e1);
+    		return;
+    	}
     }
 
     /**

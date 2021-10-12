@@ -1107,4 +1107,5 @@ public class ISegmentedProfileTester extends ComponentTester {
 		assertEquals("Previous segmented updated", oldStart, prev.getEndIndex());
 		assertEquals("Next segmented updated", oldEnd, next.getStartIndex());
 	}
+
 }

@@ -39,6 +39,7 @@ import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.datasets.VirtualDataset;
+import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.dialogs.SettingsDialog;
@@ -80,7 +81,7 @@ public class ExtractRandomCellsAction extends SingleDatasetResultAction {
 
 	                try {
 	                    dataset.getCollection().getProfileManager().copySegmentsAndLandmarksTo(c);
-	                } catch (ProfileException e) {
+	                } catch (ProfileException | MissingProfileException e) {
 	                    LOGGER.warning("Error copying collection offsets");
 	                    LOGGER.log(Loggable.STACK, "Error in offsetting", e);
 	                }

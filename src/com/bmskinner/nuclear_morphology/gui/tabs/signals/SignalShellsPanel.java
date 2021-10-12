@@ -64,6 +64,7 @@ import com.bmskinner.nuclear_morphology.charting.options.TableOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.datasets.VirtualDataset;
+import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult.Aggregation;
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult.Normalisation;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
@@ -491,7 +492,7 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
         		dataset.getCollection().getProfileManager().copySegmentsAndLandmarksTo(virt);
         		dataset.addChildCollection(virt);		
         		getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.REFRESH_POPULATIONS);
-        	} catch (ProfileException | CollectionFilteringException e1) {
+        	} catch (ProfileException | CollectionFilteringException | MissingProfileException e1) {
         		LOGGER.log(Loggable.STACK, "Unable to filter collection for " + dataset.getName(), e1);
         	}
         }

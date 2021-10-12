@@ -38,6 +38,7 @@ import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -107,7 +108,7 @@ public class CellRelocationMethod extends SingleDatasetAnalysisMethod {
 
                     }
                 }
-            } catch (ProfileException e) {
+            } catch (ProfileException | MissingProfileException e) {
                 LOGGER.warning("Unable to profile new collections");
                 LOGGER.log(Loggable.STACK, "Unable to profile new collections", e);
                 return;

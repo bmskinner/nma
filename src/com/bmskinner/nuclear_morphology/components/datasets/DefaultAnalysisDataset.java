@@ -40,6 +40,7 @@ import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileCollection;
+import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -142,8 +143,8 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
     	try {
     		VirtualDataset v = new VirtualDataset(this, collection.getName(), collection.getId(), collection);
     		addChildDataset(v);
-    	} catch(ProfileException e) {
-    		LOGGER.warning("Unable to add child collection: "+e.getMessage());
+    	} catch(ProfileException | MissingProfileException e) {
+    		LOGGER.log(Loggable.STACK, "Unable to add child collection: "+e.getMessage(), e);
     	}
     }
 

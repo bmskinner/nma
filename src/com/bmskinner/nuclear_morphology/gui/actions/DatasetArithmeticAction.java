@@ -28,6 +28,7 @@ import com.bmskinner.nuclear_morphology.components.datasets.DefaultAnalysisDatas
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.datasets.VirtualDataset;
+import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.core.DatasetListManager;
 import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
@@ -144,7 +145,7 @@ public class DatasetArithmeticAction extends MultiDatasetResultAction {
 					root.getCollection().getProfileManager().copySegmentsAndLandmarksTo(newCollection);
 					root.addChildCollection(newCollection);
 	                getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.REFRESH_POPULATIONS);
-				} catch (ProfileException e) {
+				} catch (ProfileException | MissingProfileException e) {
 					LOGGER.warning("Error: unable to complete operation");
 				 LOGGER.log(Loggable.STACK, "Error copying profile offsets", e);
 				}

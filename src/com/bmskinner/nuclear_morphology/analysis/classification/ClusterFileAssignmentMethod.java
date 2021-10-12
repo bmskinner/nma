@@ -43,6 +43,7 @@ import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.datasets.IClusterGroup;
 import com.bmskinner.nuclear_morphology.components.datasets.VirtualDataset;
 import com.bmskinner.nuclear_morphology.components.options.DefaultOptions;
+import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -243,8 +244,8 @@ public class ClusterFileAssignmentMethod extends SingleDatasetAnalysisMethod {
 
                 try {
                 	dataset.getCollection().getProfileManager().copySegmentsAndLandmarksTo(c);
-                } catch (ProfileException e) {
-                    e.printStackTrace();
+                } catch (ProfileException | MissingProfileException e) {
+                    LOGGER.log(Loggable.STACK, "Error copying segments or landmarks from "+dataset.getName(), e);
                 }
 
                 group.addDataset(c);

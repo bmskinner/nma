@@ -82,8 +82,8 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
     }
 
     /**
-     * Construct using a basic profile. Two segments are created that span the
-     * entire profile, half each
+     * Construct using a basic profile. One segments is created that spans the
+     * entire profile
      * 
      * @param profile
      */
@@ -801,7 +801,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder("Profile");
-        for (IProfileSegment seg : this.segments) {
+        for (IProfileSegment seg : this.getOrderedSegments()) {
             builder.append(" | "+seg.toString());
         }
         return builder.toString();

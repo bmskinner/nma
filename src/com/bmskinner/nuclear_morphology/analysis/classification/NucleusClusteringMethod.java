@@ -42,6 +42,7 @@ import com.bmskinner.nuclear_morphology.components.measure.MeasurementDimension;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.ClusteringMethod;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
+import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import weka.clusterers.Clusterer;
@@ -213,8 +214,9 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
      * 
      * @param clusterer the clusterer to use
      * @throws ProfileException 
+     * @throws MissingProfileException 
      */
-    private void assignClusters(Clusterer clusterer) throws ProfileException {
+    private void assignClusters(Clusterer clusterer) throws ProfileException, MissingProfileException {
 
     	int numberOfClusters = 0;
 		try {

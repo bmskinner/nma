@@ -187,4 +187,13 @@ public class SegmentedFloatProfileTest {
 
        assertEquals(builder.toString(), sp.toString());
     }
+	
+	
+	@Test
+	public void testProfileIsCreatedWhenOnlyOneSegment() {
+		SegmentedFloatProfile p = new SegmentedFloatProfile(new FloatProfile(10, 100));
+		assertEquals(1, p.getSegmentCount());
+		assertEquals(0, p.getSegmentAt(0).getStartIndex());
+		assertEquals(0, p.getSegmentAt(0).getEndIndex());
+	}
 }

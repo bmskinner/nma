@@ -222,9 +222,9 @@ public class ProfileManagerTest {
 				assertFalse(newIds.contains(segId1));
 				assertFalse(newIds.contains(segId2));
 				IProfileSegment mergedSeg = nucleusProfile.getSegment(newId);
-				assertTrue(mergedSeg.hasMergeSources());
-				assertTrue(mergedSeg.hasMergeSource(segId1));
-				assertTrue(mergedSeg.hasMergeSource(segId2));
+				assertTrue("Merged segment should have merge sources", mergedSeg.hasMergeSources());
+				assertTrue("Merged segment should have merge source 1",mergedSeg.hasMergeSource(segId1));
+				assertTrue("Merged segment should have merge source 2",mergedSeg.hasMergeSource(segId2));
 			}
 		}
 	}
@@ -252,7 +252,7 @@ public class ProfileManagerTest {
 		
 		b = dv.validate(collection);
 		System.out.println(dv.getSummary().stream().collect(Collectors.joining()));
-		assertTrue(source.getSimpleName(), b);
+		assertTrue(source.getSimpleName()+" should validate", b);
 		manager.unmergeSegments(newId); // only testable for real collection here, because merging is a noop
 		
 		List<UUID> newIds = collection.getProfileCollection().getSegmentIDs();

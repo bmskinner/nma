@@ -22,6 +22,7 @@ import com.bmskinner.nuclear_morphology.components.datasets.VirtualDataset;
 import com.bmskinner.nuclear_morphology.components.options.ClusteringMethod;
 import com.bmskinner.nuclear_morphology.components.options.DefaultOptions;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
+import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
@@ -175,7 +176,7 @@ public class ManualClusterAction extends SingleDatasetResultAction {
 
                     try {
                         dataset.getCollection().getProfileManager().copySegmentsAndLandmarksTo(coll);
-                    } catch (ProfileException e) {
+                    } catch (ProfileException | MissingProfileException e) {
                         LOGGER.warning("Error copying collection offsets");
                         LOGGER.log(Loggable.STACK, "Error in offsetting", e);
                     }

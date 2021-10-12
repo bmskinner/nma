@@ -57,6 +57,7 @@ import com.bmskinner.nuclear_morphology.components.datasets.IClusterGroup;
 import com.bmskinner.nuclear_morphology.components.datasets.VirtualDataset;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
+import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nuclear_morphology.gui.DefaultInputSupplier;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
@@ -492,7 +493,7 @@ public class ClusterTreeDialog extends MessagingDialog {
 
                 try {
                     dataset.getCollection().getProfileManager().copySegmentsAndLandmarksTo(c);
-                } catch (ProfileException e) {
+                } catch (ProfileException | MissingProfileException e) {
                     LOGGER.warning("Error copying collection offsets");
                     LOGGER.log(Loggable.STACK, "Error in offsetting", e);
                 }

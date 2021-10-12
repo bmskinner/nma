@@ -344,8 +344,26 @@ public class DefaultOptions implements Serializable, HashOptions {
     		target.put(e.getKey(), e.getValue());
     }
 
+    @Override
+	public void remove(String s) {
+    	intMap.remove(s);
+    	dblMap.remove(s);
+    	boolMap.remove(s);
+    	fltMap.remove(s);
+    	stringMap.remove(s);
+    	subMap.remove(s);
+    }
+    
+    
+    
     
     @Override
+	public void remove(HashOptions o) {
+		for(String s : o.getKeys())
+			remove(s);
+	}
+
+	@Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         Map<String, Object> map = getEntries();

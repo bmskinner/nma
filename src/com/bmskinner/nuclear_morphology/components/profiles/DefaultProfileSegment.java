@@ -143,7 +143,7 @@ public class DefaultProfileSegment implements IProfileSegment {
      * @param total the length of the profile that generated the segment
      */
     public DefaultProfileSegment(int startIndex, int endIndex, int total) {
-        this(startIndex, endIndex, total, java.util.UUID.randomUUID());
+        this(startIndex, endIndex, total, UUID.randomUUID());
     }
 
     /**

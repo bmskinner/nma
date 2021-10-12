@@ -29,6 +29,7 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
+import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 
 /**
  * Holds a canny settings panel and a threshold settings panel. Uses a card

@@ -55,6 +55,7 @@ import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.datasets.VirtualDataset;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
+import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
@@ -280,7 +281,7 @@ public abstract class AbstractScatterChartPanel extends DetailPanel  {
         		d.getCollection().getProfileManager().copySegmentsAndLandmarksTo(virt);
         		d.getCollection().getSignalManager().copySignalGroupsTo(virt);
         		d.addChildCollection(virt);		
-        	} catch (CollectionFilteringException | ProfileException e1) {
+        	} catch (CollectionFilteringException | ProfileException | MissingProfileException e1) {
         		LOGGER.log(Loggable.STACK, "Unable to filter collection for " + d.getName(), e1);
         	}
         }
