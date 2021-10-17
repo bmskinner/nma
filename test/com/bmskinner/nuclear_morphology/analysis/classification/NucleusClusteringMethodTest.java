@@ -30,17 +30,20 @@ public class NucleusClusteringMethodTest extends ComponentTester {
 	
 	private static final int TWO_CLUSTERS = 2;
 
-	private IAnalysisDataset merged;
+	private IAnalysisDataset dataset;
 	
 	@Override
 	@Before
 	public void setUp() throws Exception {
 		super.setUp();
-		merged = SampleDatasetReader.openTestRodentDataset();
-		List<IClusterGroup> groups = merged.getClusterGroups();
-		merged.deleteClusterGroups();
+		dataset = SampleDatasetReader.openTestRodentDataset();
 	}
 	
+	/**
+	 * Test that clustering works on all profile types.
+	 * Each type is tested in turn
+	 * @throws Exception
+	 */
 	@Test
 	public void testCanClusterOnProfiles() throws Exception {
 		for(ProfileType type : ProfileType.displayValues()) {
@@ -49,18 +52,23 @@ public class NucleusClusteringMethodTest extends ComponentTester {
 		}
 	}
 
+	/**
+	 * Test if clustering works for the given profile type.
+	 * @param type
+	 * @throws Exception
+	 */
 	private void testCanClusterOnProfile(ProfileType type) throws Exception {
 		HashOptions o = OptionsFactory.makeDefaultClusteringOptions();
 		o.setBoolean(ProfileType.ANGLE.toString(), false);
 		o.setBoolean(type.toString(), true);
 		o.setInt(HashOptions.CLUSTER_MANUAL_CLUSTER_NUMBER_KEY, TWO_CLUSTERS);
 
-		new NucleusClusteringMethod(merged, o).call();
-		assertNotNull(merged.getCollection());
-		assertTrue(type.toString()+" has clusters:",merged.hasClusters());
-		assertEquals(type.toString()+" has single cluster group:",1, merged.getClusterGroups().size());
+		new NucleusClusteringMethod(dataset, o).call();
+		assertNotNull(dataset.getCollection());
+		assertTrue(type.toString()+" has clusters:",dataset.hasClusters());
+		assertEquals(type.toString()+" has single cluster group:",1, dataset.getClusterGroups().size());
 		
-		IClusterGroup group = merged.getClusterGroups().stream().findFirst().get();		
+		IClusterGroup group = dataset.getClusterGroups().stream().findFirst().get();		
 		assertEquals(type.toString()+" should have two clusters in group:",TWO_CLUSTERS, group.getUUIDs().size());
 	}
 	
@@ -78,12 +86,12 @@ public class NucleusClusteringMethodTest extends ComponentTester {
 		o.setBoolean(stat.toString(), true);
 		o.setInt(HashOptions.CLUSTER_MANUAL_CLUSTER_NUMBER_KEY, TWO_CLUSTERS);
 
-		new NucleusClusteringMethod(merged, o).call();
-		assertNotNull(merged.getCollection());
-		assertTrue(stat.toString()+" has clusters:",merged.hasClusters());
-		assertEquals(stat.toString()+" has single cluster group:",1, merged.getClusterGroups().size());
+		new NucleusClusteringMethod(dataset, o).call();
+		assertNotNull(dataset.getCollection());
+		assertTrue(stat.toString()+" has clusters:",dataset.hasClusters());
+		assertEquals(stat.toString()+" has single cluster group:",1, dataset.getClusterGroups().size());
 		
-		IClusterGroup group = merged.getClusterGroups().stream().findFirst().get();		
+		IClusterGroup group = dataset.getClusterGroups().stream().findFirst().get();		
 		assertEquals(stat.toString()+" should have two clusters in group:",TWO_CLUSTERS, group.getUUIDs().size());
 	}
 }
