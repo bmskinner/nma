@@ -100,37 +100,32 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
         return new DefaultAnalysisResult(merged);
     }
 
-    private IAnalysisDataset run() {
+    private IAnalysisDataset run() throws Exception {
 
     	if(!datasetsAreValidToMerge())
     		return null;
 
-    	try {
-    		LOGGER.fine("Finding new file name");
+    	LOGGER.fine("Finding new file name");
 
-    		// Set the names for the new collection
-    		File newDatasetFolder = saveFile.getParentFile();
-    		File newDatasetFile = saveFile;
+    	// Set the names for the new collection
+    	File newDatasetFolder = saveFile.getParentFile();
+    	File newDatasetFile = saveFile;
 
-    		// ensure the new file name is valid
-    		newDatasetFile = checkName(newDatasetFile);
+    	// ensure the new file name is valid
+    	newDatasetFile = checkName(newDatasetFile);
 
-    		String newDatasetName = newDatasetFile.getName().replace(Io.SAVE_FILE_EXTENSION, "");
-    		LOGGER.fine("Checked new file names");
+    	String newDatasetName = newDatasetFile.getName().replace(Io.SAVE_FILE_EXTENSION, "");
+    	LOGGER.fine("Checked new file names");
 
-    		// make a new collection
-    		ICellCollection newCollection = new DefaultCellCollection(datasets.get(0).getCollection().getRuleSetCollection(), 
-    				newDatasetName, UUID.randomUUID());
+    	// make a new collection
+    	ICellCollection newCollection = new DefaultCellCollection(datasets.get(0).getCollection().getRuleSetCollection(), 
+    			newDatasetName, UUID.randomUUID());
 
-    		IAnalysisDataset newDataset = performMerge(newCollection);
+    	IAnalysisDataset newDataset = performMerge(newCollection);
 
-    		spinWheels(MAX_PROGRESS, MILLISECONDS_TO_SLEEP);
-    		
-    		return newDataset;
-    	} catch (Exception e) {
-    		LOGGER.log(Loggable.STACK, "Error merging datasets", e);
-    		return null;
-    	}
+    	spinWheels(MAX_PROGRESS, MILLISECONDS_TO_SLEEP);
+
+    	return newDataset;
     }
     
     /**
@@ -237,7 +232,9 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
      */
     private IAnalysisOptions mergeOptions(IAnalysisDataset newDataset) throws MissingOptionException {
     	IAnalysisOptions mergedOptions = OptionsFactory.makeAnalysisOptions();
-    	HashOptions nucleus = OptionsFactory.makeNucleusDetectionOptions((File)null);
+    	
+    	// Use an empty file since there are multiple folders in the merge
+    	HashOptions nucleus = OptionsFactory.makeNucleusDetectionOptions(new File(""));
 
     	IAnalysisDataset d1 = datasets.get(0);
     	IAnalysisOptions d1Options = d1.getAnalysisOptions().orElseThrow(MissingOptionException::new);
