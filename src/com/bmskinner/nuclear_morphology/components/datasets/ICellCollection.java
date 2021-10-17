@@ -443,9 +443,12 @@ public interface ICellCollection
     int getMaxProfileLength();
 
     /**
-     * Update the image scale for all cells in the collection
-     * @param scale
+     * Update the image scale for all cells in the collection.
+     * Note that this should be invoked by an analysis dataset only,
+     * since it will otherwise unsync the options from the cells
+     * @param scale the new scale in pixels/micron
      */
+    @Deprecated
     void setScale(double scale);
 
     /**

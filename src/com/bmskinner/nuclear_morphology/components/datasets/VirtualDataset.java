@@ -39,6 +39,7 @@ import com.bmskinner.nuclear_morphology.components.measure.StatsCache;
 import com.bmskinner.nuclear_morphology.components.nuclei.Consensus;
 import com.bmskinner.nuclear_morphology.components.nuclei.DefaultConsensusNucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.options.DefaultAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.profiles.DefaultProfileCollection;
@@ -1199,7 +1200,9 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
 	}
 
 	@Override
-	public void setAnalysisOptions(IAnalysisOptions analysisOptions) {
+	public void setAnalysisOptions(@NonNull IAnalysisOptions analysisOptions) {
+		if(this.analysisOptions==null)
+			this.analysisOptions = new DefaultAnalysisOptions();
 		this.analysisOptions.set(analysisOptions);
 	}
 

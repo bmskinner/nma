@@ -1,6 +1,7 @@
 package com.bmskinner.nuclear_morphology.analysis;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -58,6 +59,9 @@ public class DatasetMergeMethodTest {
 		// Merge and resegment the datasets
 		DatasetMergeMethod dm = new DatasetMergeMethod(list, new File("Empty path"));
 		IAnalysisDataset result = dm.call().getFirstDataset();
+		assertNotNull("Merged dataset should not be null", result);
+		
+		
 		new DatasetProfilingMethod(result).call();
 		new DatasetSegmentationMethod(result, MorphologyAnalysisMode.NEW).call();
 				

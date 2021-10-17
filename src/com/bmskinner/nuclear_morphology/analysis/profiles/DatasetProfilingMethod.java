@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.SingleDatasetAnalysisMethod;
@@ -59,7 +61,7 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 	 * Create a profiler for the given dataset
 	 * @param dataset
 	 */
-	public DatasetProfilingMethod(IAnalysisDataset dataset) {
+	public DatasetProfilingMethod(@NonNull IAnalysisDataset dataset) {
 		super(dataset);
 	}
 
@@ -92,7 +94,8 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 	private void run() throws Exception {
     	LOGGER.fine("Beginning profiling method");
     	
-    	RuleApplicationType ruleType = dataset.getAnalysisOptions().get().getRuleSetCollection().getApplicationType();
+    	RuleApplicationType ruleType = dataset.getAnalysisOptions().get()
+    			.getRuleSetCollection().getApplicationType();
     	
     	switch(ruleType) {
 	    	case VIA_MEDIAN: {

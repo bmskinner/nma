@@ -227,7 +227,7 @@ public abstract class AbstractAnalysisDataset implements Serializable, IAnalysis
     
 
     @Override
-    public void setAnalysisOptions(IAnalysisOptions analysisOptions) {
+    public void setAnalysisOptions(@NonNull IAnalysisOptions analysisOptions) {
         this.analysisOptions = analysisOptions;
     }
 
@@ -430,7 +430,11 @@ public abstract class AbstractAnalysisDataset implements Serializable, IAnalysis
     public void addMergeSource(@NonNull IAnalysisDataset dataset) {
     	VirtualDataset mergeSource = new VirtualDataset(this, dataset.getName(), dataset.getId());
         mergeSource.addAll(dataset.getCollection().getCells());
-        mergeSource.setAnalysisOptions(dataset.getAnalysisOptions().get());
+        
+        // May not be present
+        if(dataset.hasAnalysisOptions())
+        	mergeSource.setAnalysisOptions(dataset.getAnalysisOptions().get());
+        
         this.mergeSources.add(mergeSource.getId());
         this.addAssociatedDataset(mergeSource);
     }

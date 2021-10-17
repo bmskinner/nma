@@ -274,7 +274,7 @@ public interface IAnalysisDataset extends Serializable, XmlSerializable {
      * 
      * @param analysisOptions
      */
-    void setAnalysisOptions(IAnalysisOptions analysisOptions);
+    void setAnalysisOptions(@NonNull IAnalysisOptions analysisOptions);
 
     /**
      * Add the given dataset as a cluster result. This is a form of child

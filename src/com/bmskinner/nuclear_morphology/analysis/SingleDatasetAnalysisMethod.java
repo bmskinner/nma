@@ -34,7 +34,7 @@ public abstract class SingleDatasetAnalysisMethod extends AbstractAnalysisMethod
      * Create with a dataset for analysis
      * @param dataset
      */
-    public SingleDatasetAnalysisMethod(@NonNull final IAnalysisDataset dataset) {
+    protected SingleDatasetAnalysisMethod(@NonNull final IAnalysisDataset dataset) {
         super();
         this.dataset = dataset;
     }

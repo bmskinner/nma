@@ -47,8 +47,9 @@ public abstract class ComponentTester extends FloatArrayTester {
 	 * @param bottomPoint the bottom point
 	 * @return
 	 */
-	protected boolean areVertical(@NonNull IPoint topPoint, @NonNull IPoint bottomPoint) {
+	public static boolean areVertical(@NonNull IPoint topPoint, @NonNull IPoint bottomPoint) {
 		double err = bottomPoint.getX()-topPoint.getX();
+		System.out.println(err);
 		LOGGER.fine("Error = "+err);
 		boolean xEqual = (Math.abs(bottomPoint.getX()- topPoint.getX())<0.0001);
 		boolean yAbove = topPoint.getY()>bottomPoint.getY();
