@@ -46,30 +46,21 @@ public class OptionsFactory {
      * @return
      */
 	public static HashOptions makeNucleusDetectionOptions(File folder) {
-		DefaultOptions d = new DefaultOptions();
 		
-		d.setString(HashOptions.DETECTION_FOLDER, folder.getAbsolutePath());
-        
-		d.setInt(HashOptions.MIN_SIZE_PIXELS, HashOptions.DEFAULT_MIN_NUCLEUS_SIZE);
-		d.setInt(HashOptions.MAX_SIZE_PIXELS, HashOptions.DEFAULT_MAX_NUCLEUS_SIZE);
-
-		d.setDouble(HashOptions.MIN_CIRC, HashOptions.DEFAULT_MIN_NUCLEUS_CIRC);
-		d.setDouble(HashOptions.MAX_CIRC, HashOptions.DEFAULT_MAX_NUCLEUS_CIRC);
-                
-		d.setInt(HashOptions.THRESHOLD, HashOptions.DEFAULT_NUCLEUS_THRESHOLD);
-
-		d.setDouble(HashOptions.SCALE, GlobalOptions.getInstance().getImageScale());
-        
-		d.setInt(HashOptions.CHANNEL, HashOptions.DEFAULT_CHANNEL);
-        
-		d.setBoolean(HashOptions.IS_NORMALISE_CONTRAST, HashOptions.DEFAULT_NORMALISE_CONTRAST);
-
-		d.setBoolean(HashOptions.IS_RGB, HashOptions.DEFAULT_IS_RGB);
-		
-
-		d.set(OptionsFactory.makeCannyOptions());
-		d.set(OptionsFactory.makePreprocessingOptions());
-		return d;
+		return new OptionsBuilder()
+				.withValue(HashOptions.DETECTION_FOLDER, folder.getAbsolutePath())
+				.withValue(HashOptions.MIN_SIZE_PIXELS, HashOptions.DEFAULT_MIN_NUCLEUS_SIZE)
+				.withValue(HashOptions.MAX_SIZE_PIXELS, HashOptions.DEFAULT_MAX_NUCLEUS_SIZE)
+				.withValue(HashOptions.MIN_CIRC, HashOptions.DEFAULT_MIN_NUCLEUS_CIRC)
+				.withValue(HashOptions.MAX_CIRC, HashOptions.DEFAULT_MAX_NUCLEUS_CIRC)
+				.withValue(HashOptions.THRESHOLD, HashOptions.DEFAULT_NUCLEUS_THRESHOLD)
+				.withValue(HashOptions.SCALE, GlobalOptions.getInstance().getImageScale())
+				.withValue(HashOptions.CHANNEL, HashOptions.DEFAULT_CHANNEL)
+				.withValue(HashOptions.IS_NORMALISE_CONTRAST, HashOptions.DEFAULT_NORMALISE_CONTRAST)
+				.withValue(HashOptions.IS_RGB, HashOptions.DEFAULT_IS_RGB)
+				.setAll(OptionsFactory.makeCannyOptions())
+				.setAll(OptionsFactory.makePreprocessingOptions())
+				.build();
     }
 
     /**

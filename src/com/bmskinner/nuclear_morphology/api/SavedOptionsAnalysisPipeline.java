@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
@@ -280,15 +281,19 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod impleme
 	
 	private void createClusteringMethods(List<IAnalysisDataset> datasets, @NonNull IAnalysisOptions options) throws Exception {
 
-		options.getSecondaryOptions(DATE_FORMAT);
-//		List<HashOptions> clusterOptions = r.readClusteringOptions();
-		 for(HashOptions cluster : clusterOptions) {
-			 for(IAnalysisDataset dataset : datasets) {
-				 methodsToRun.add(new NucleusClusteringMethod(dataset, cluster));
-			 }
-		 }
+		// Get all the sub-options starting with the cluster options key
+		List<HashOptions> clusterOptions = options.getSecondaryOptionKeys().stream()
+				.filter(s->s.startsWith(HashOptions.CLUSTER_SUB_OPTIONS_KEY))
+				.map(s->options.getSecondaryOptions(s).orElseThrow())
+				.collect(Collectors.toList());
+
+		for(HashOptions cluster : clusterOptions) {
+			for(IAnalysisDataset dataset : datasets) {
+				methodsToRun.add(new NucleusClusteringMethod(dataset, cluster));
+			}
+		}
 	}
-		
+
 	private File createOutputFolder(@NonNull IAnalysisOptions options) {
 		Instant inst = Instant.ofEpochMilli(options.getAnalysisTime());
 		LocalDateTime anTime = LocalDateTime.ofInstant(inst, ZoneOffset.systemDefault());

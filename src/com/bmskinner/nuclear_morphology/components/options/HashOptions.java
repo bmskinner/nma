@@ -161,6 +161,7 @@ public interface HashOptions extends Serializable, XmlSerializable {
 	ShrinkType DEFAULT_EROSION_METHOD = ShrinkType.AREA;
 	
 	/** Constants relating to clustering options **/
+	String CLUSTER_SUB_OPTIONS_KEY           = "Clustering options";
 	String CLUSTER_USE_SIMILARITY_MATRIX_KEY = "USE_SIMILARITY_MATRIX";
 	String CLUSTER_MANUAL_CLUSTER_NUMBER_KEY = "MANUAL_CLUSTER_NUMBER";
 	String CLUSTER_METHOD_KEY        = "CLUSTER_METHOD";
