@@ -104,54 +104,66 @@ public class TaggableTest extends ComponentTester {
 		assertEquals(oldProfile.toString(), newProfile.toString());
 	}
 	
+	/**
+	 * Tests that a segment is not altered by being assigned to 
+	 * a profile; segmented profiles are assigned to a taggable object
+	 * and retrieved, and their endpoints are checked. This test case
+	 * uses a profile with multiple segments
+	 * @throws Exception
+	 */
 	@Test
 	public void testSettingMultiSegmentProfileIsReversible() throws Exception {
 		// Fetch the profile zeroed on the RP
 		ISegmentedProfile oldProfile = taggable.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
+		
+		// Make a duplicate for manipulation - note this will have the same segment pattern
 		ISegmentedProfile templateProfile = new SegmentedFloatProfile(oldProfile);
 		
+		// Set the profile of the object to the newly created profile
 		taggable.setProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, templateProfile);
+		
+		// Fetch the profile back out from the object
 		ISegmentedProfile testProfile  = taggable.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
-		
+		assertEquals("Profiles should match", templateProfile, testProfile);
 		assertEquals("Value at index 0", oldProfile.get(0), testProfile.get(0), 0);
-		assertEquals("Segment count", 1, oldProfile.getSegmentCount(), testProfile.getSegmentCount());
+		assertEquals("Segment count", oldProfile.getSegmentCount(), testProfile.getSegmentCount());
 		
-		// Test multi segments
-		IProfileSegment oldSeg = oldProfile.getSegmentAt(0);	
+		// Test the multiple segments match
+		IProfileSegment tempSeg  = templateProfile.getSegmentAt(0);	
 		IProfileSegment testSeg = testProfile.getSegmentAt(0);	
-		assertEquals("Segment start", oldSeg.getStartIndex(), testSeg.getStartIndex());
-		
-		// Test default segments
-		IProfileSegment oldDefaultSeg = oldProfile.getSegment(IProfileCollection.DEFAULT_SEGMENT_ID);
-		IProfileSegment testDefaultSeg = testProfile.getSegment(IProfileCollection.DEFAULT_SEGMENT_ID);
-		assertEquals("Default segment start", oldDefaultSeg.getStartIndex(), testDefaultSeg.getStartIndex());
-		
-		
+		assertEquals("Segments should match", tempSeg, testSeg);
 	}
 	
+	/**
+	 * Tests that a segment is not altered by being assigned to 
+	 * a profile; segmented profiles are assigned to a taggable object
+	 * and retrieved, and their endpoints are checked. This test case
+	 * uses a profile with a single segment
+	 * @throws Exception
+	 */
 	@Test
 	public void testSettingSingleSegmentProfileIsReversible() throws Exception {
 		// Fetch the profile zeroed on the RP
 		ISegmentedProfile oldProfile = taggable.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
+		
+		// Make a duplicate for manipulation - note this will have only one segment
 		ISegmentedProfile templateProfile = new SegmentedFloatProfile(oldProfile.toFloatArray());
 		
+		// Set the profile of the object to the newly created profile
 		taggable.setProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, templateProfile);
+		
+		// Fetch the profile back out from the object
 		ISegmentedProfile testProfile  = taggable.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
 		
-		assertEquals("Value at index 0", oldProfile.get(0), testProfile.get(0), 0);
-		assertEquals("Segment count", 1, templateProfile.getSegmentCount(), testProfile.getSegmentCount());
-		
-		// Test multi segments
-		IProfileSegment oldSeg = oldProfile.getSegmentAt(0);	
+		// Test the two profiles are identical
+		assertEquals("Profiles should match", templateProfile, testProfile);
+		assertEquals("Value at index 0 should be", templateProfile.get(0), testProfile.get(0), 0);
+		assertEquals("Segment count should be", 1, testProfile.getSegmentCount());
+				
+		// Test the single segments match
+		IProfileSegment tempSeg  = templateProfile.getSegmentAt(0);	
 		IProfileSegment testSeg = testProfile.getSegmentAt(0);	
-		assertEquals("Segment start", oldSeg.getStartIndex(), testSeg.getStartIndex());
-		
-		// Test default segments
-		IProfileSegment oldDefaultSeg = oldProfile.getSegment(IProfileCollection.DEFAULT_SEGMENT_ID);
-		IProfileSegment templateDefaultSeg = templateProfile.getSegment(IProfileCollection.DEFAULT_SEGMENT_ID);
-		IProfileSegment testDefaultSeg = testProfile.getSegment(IProfileCollection.DEFAULT_SEGMENT_ID);
-		assertEquals("Default segment start", templateDefaultSeg.getStartIndex(), testDefaultSeg.getStartIndex());
-		assertEquals("Default segment start", oldDefaultSeg.getStartIndex(), testDefaultSeg.getStartIndex());
+		assertEquals("Segments should match", tempSeg, testSeg);
 	}
 	
 	@Test
