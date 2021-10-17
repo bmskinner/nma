@@ -250,7 +250,7 @@ public class ProfileManager {
         
         // If the new index for the tag is the same as the RP, set directly
         
-        List<Landmark> tags = collection.getProfileCollection().getBorderTags();
+        List<Landmark> tags = collection.getProfileCollection().getLandmarks();
         for(Landmark existingTag : tags) {
         	if(existingTag.equals(tag))
         		continue;
@@ -324,7 +324,7 @@ public class ProfileManager {
      */
     private void setOpUsingTvBv(@NonNull final Nucleus n) {
     	// also update the OP to be directly below the CoM in vertically oriented nucleus
-		if(n.hasBorderTag(Landmark.TOP_VERTICAL) && n.hasBorderTag(Landmark.BOTTOM_VERTICAL)) {
+		if(n.hasLandmark(Landmark.TOP_VERTICAL) && n.hasLandmark(Landmark.BOTTOM_VERTICAL)) {
 			LOGGER.finer( "Updating OP due to TV or BV change");
 			Nucleus vertN = n.getVerticallyRotatedNucleus();
 			IPoint bottom = vertN.getBorderList().stream()
@@ -437,7 +437,7 @@ public class ProfileManager {
     		// Use proportional indexes to allow for a changed aggregate length
     		// Note: only the RP must be at a segment boundary. Some mismatches may occur
 
-    		for (Landmark key : sourcePC.getBorderTags()) {
+    		for (Landmark key : sourcePC.getLandmarks()) {
     			double prop = sourcePC.getProportionOfIndex(key);
     			int adj = destPC.getIndexOfProportion(prop);
     			destPC.addIndex(key, adj);

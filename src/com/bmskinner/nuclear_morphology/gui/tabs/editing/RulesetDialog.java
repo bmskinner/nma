@@ -290,7 +290,7 @@ public class RulesetDialog extends LoadingIconDialog
     	List<String> tagCollection = new ArrayList<>();
     	
     	// Dataset tags
-    	tagList.addAll(d.getCollection().getProfileCollection().getBorderTags());
+    	tagList.addAll(d.getCollection().getProfileCollection().getLandmarks());
     	tagCollection.addAll(tagList.stream().map(t->dataset.getName()).collect(Collectors.toList()));
     	
     	// Custom tags

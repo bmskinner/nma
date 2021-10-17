@@ -361,7 +361,7 @@ public class SegmentationHandler {
      * @throws ProfileException
      */
     private synchronized boolean couldUpdateTagToExistingTagIndex(Landmark tag, int index) throws MissingLandmarkException, MissingProfileException, ProfileException {
-    	List<Landmark> tags = dataset.getCollection().getProfileCollection().getBorderTags();
+    	List<Landmark> tags = dataset.getCollection().getProfileCollection().getLandmarks();
     	for(Landmark existingTag : tags) {
     		if(existingTag.equals(tag))
     			continue;

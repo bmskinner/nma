@@ -141,7 +141,7 @@ public class DefaultProfileCollection implements IProfileCollection {
     }
 
     @Override
-    public List<Landmark> getBorderTags() {
+    public List<Landmark> getLandmarks() {
         List<Landmark> result = new ArrayList<Landmark>();
         for (Landmark s : indexes.keySet()) {
             result.add(s);
@@ -150,7 +150,7 @@ public class DefaultProfileCollection implements IProfileCollection {
     }
 
     @Override
-    public boolean hasBorderTag(@NonNull Landmark tag) {
+    public boolean hasLandmark(@NonNull Landmark tag) {
         return indexes.keySet().contains(tag);
     }
 
@@ -162,7 +162,7 @@ public class DefaultProfileCollection implements IProfileCollection {
             throw new IllegalArgumentException("Type cannot be null");
         if (tag == null)
             throw new IllegalArgumentException("Tag cannot be null");
-        if (!this.hasBorderTag(tag))
+        if (!this.hasLandmark(tag))
             throw new MissingLandmarkException("Tag is not present: " + tag.toString());
         if (!map.containsKey(type))
             throw new MissingProfileException("Profile type is not present: " + type.toString());

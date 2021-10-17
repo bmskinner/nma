@@ -391,7 +391,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
        
 
     @Override
-	public boolean hasBorderTag(@NonNull Landmark tag) {
+	public boolean hasLandmark(@NonNull Landmark tag) {
         return this.profileLandmarks.containsKey(tag);
     }
 
@@ -500,7 +500,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 	public ISegmentedProfile getProfile(@NonNull ProfileType type, @NonNull Landmark tag)
             throws ProfileException, MissingLandmarkException, MissingProfileException {
 
-        if (!this.hasBorderTag(tag))
+        if (!this.hasLandmark(tag))
             throw new MissingLandmarkException("Tag " + tag + " not present");
 
         // fetch the index of the pointType (the new zero)
@@ -519,7 +519,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 			return;
 		}
 
-		if (!this.hasBorderTag(tag))
+		if (!this.hasLandmark(tag))
 			throw new MissingLandmarkException(String.format("Tag %s is not present", tag));
 
 		// fetch the index of the tag (the zero of the input profile)

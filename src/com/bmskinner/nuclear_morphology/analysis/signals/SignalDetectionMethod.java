@@ -148,7 +148,7 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
 
             // If the nucleus is asymmetric, calculate angles
             if (dataset.getCollection().getRuleSetCollection().isAsymmetric()) {
-                if (n.hasBorderTag(Landmark.ORIENTATION_POINT)) {
+                if (n.hasLandmark(Landmark.ORIENTATION_POINT)) {
                     LOGGER.finest( "Calculating angle from orientation point");
                     n.calculateSignalAnglesFromPoint(n.getBorderPoint(Landmark.ORIENTATION_POINT));
                 } else {

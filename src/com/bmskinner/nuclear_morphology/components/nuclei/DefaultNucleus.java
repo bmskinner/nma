@@ -501,34 +501,34 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
     	Landmark x = orientationMarks.get(Landmark.SECONDARY_X_POINT);
     	
     	
-		if(t!=null && hasBorderTag(t) && b!=null && hasBorderTag(b)) {
+		if(t!=null && hasLandmark(t) && b!=null && hasLandmark(b)) {
 			IPoint topPoint    = getBorderPoint(t);
 			IPoint bottomPoint = getBorderPoint(b);
 			if(topPoint != bottomPoint) {
     			alignPointsOnVertical(topPoint, bottomPoint);
-			} else if(y!=null && hasBorderTag(y)) {
+			} else if(y!=null && hasLandmark(y)) {
 				rotatePointToBottom(getBorderPoint(y));
 			}
-		} else if(y!=null && hasBorderTag(y)) { // if no t and b, fall back to y
+		} else if(y!=null && hasLandmark(y)) { // if no t and b, fall back to y
 			rotatePointToBottom(getBorderPoint(y));
 		}
 		
 		// Now check x, and flip as needed
-		if(l!=null && hasBorderTag(l) && r!=null && hasBorderTag(r)) {
+		if(l!=null && hasLandmark(l) && r!=null && hasLandmark(r)) {
 			IPoint leftPoint  = getBorderPoint(l);
 			IPoint rightPoint = getBorderPoint(r);
 			if(leftPoint.isRightOf(rightPoint)) {
 				flipHorizontal();
 			}
-		} else if(l!=null && hasBorderTag(l)) {
+		} else if(l!=null && hasLandmark(l)) {
 			IPoint leftPoint  = getBorderPoint(l);
 			if(leftPoint.isRightOf(getCentreOfMass()))
 				flipHorizontal();
-		} else if(r!=null && hasBorderTag(r)) {
+		} else if(r!=null && hasLandmark(r)) {
 			IPoint rightPoint = getBorderPoint(r);
 			if(rightPoint.isLeftOf(getCentreOfMass()))
 				flipHorizontal();
-		} else if(x!=null && hasBorderTag(x)) {
+		} else if(x!=null && hasLandmark(x)) {
 			IPoint leftPoint = getBorderPoint(x);
 			if(leftPoint.isRightOf(getCentreOfMass()))
 				flipHorizontal();
@@ -546,34 +546,34 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
     	Landmark x = orientationMarks.get(Landmark.SECONDARY_X_POINT);
     	
     	// Check if l and r are present
-		if(l!=null && hasBorderTag(l) && r!=null && hasBorderTag(r)) {
+		if(l!=null && hasLandmark(l) && r!=null && hasLandmark(r)) {
 			IPoint leftPoint  = getBorderPoint(l);
 			IPoint rightPoint = getBorderPoint(r);
 			if(leftPoint != rightPoint) {
     			alignPointsOnHorizontal(leftPoint, rightPoint);
-			} else if(x!=null && hasBorderTag(x)) { // if no l and r, fall back to x
+			} else if(x!=null && hasLandmark(x)) { // if no l and r, fall back to x
 				rotatePointToLeft(getBorderPoint(x));
 			}
-		} else if(x!=null && hasBorderTag(x)) { // if no l and r, fall back to x
+		} else if(x!=null && hasLandmark(x)) { // if no l and r, fall back to x
 			rotatePointToLeft(getBorderPoint(x));
 		}
 		
 		// Now check y, and flip as needed
-		if(t!=null && hasBorderTag(t) && b!=null && hasBorderTag(b)) {
+		if(t!=null && hasLandmark(t) && b!=null && hasLandmark(b)) {
 			IPoint topPoint  = getBorderPoint(t);
 			IPoint bottomPoint = getBorderPoint(b);
 			if(topPoint.isBelow(bottomPoint)) {
 				flipVertical();
 			}
-		} else if(t!=null && hasBorderTag(t)) {
+		} else if(t!=null && hasLandmark(t)) {
 			IPoint topPoint  = getBorderPoint(t);
 			if(topPoint.isBelow(getCentreOfMass()))
 				flipVertical();
-		} else if(b!=null && hasBorderTag(b)) {
+		} else if(b!=null && hasLandmark(b)) {
 			IPoint bottomPoint = getBorderPoint(b);
 			if(bottomPoint.isAbove(getCentreOfMass()))
 				flipVertical();
-		} else if(y!=null && hasBorderTag(y)) {
+		} else if(y!=null && hasLandmark(y)) {
 			IPoint bottomPoint = getBorderPoint(y);
 			if(bottomPoint.isAbove(getCentreOfMass()))
 				flipVertical();

@@ -98,8 +98,8 @@ public class NucleusTest {
 	public void testAlignVertical() throws Exception {
 		nucleus.setBorderTag(Landmark.TOP_VERTICAL, 10);
 		nucleus.setBorderTag(Landmark.BOTTOM_VERTICAL, 20);
-		assertTrue(nucleus.hasBorderTag(Landmark.TOP_VERTICAL));
-		assertTrue(nucleus.hasBorderTag(Landmark.BOTTOM_VERTICAL));
+		assertTrue(nucleus.hasLandmark(Landmark.TOP_VERTICAL));
+		assertTrue(nucleus.hasLandmark(Landmark.BOTTOM_VERTICAL));
 		
 		IPoint tvPre = nucleus.getBorderPoint(Landmark.TOP_VERTICAL);
 		IPoint bvPre = nucleus.getBorderPoint(Landmark.BOTTOM_VERTICAL);

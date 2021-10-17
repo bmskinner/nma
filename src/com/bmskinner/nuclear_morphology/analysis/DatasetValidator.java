@@ -208,7 +208,7 @@ public class DatasetValidator {
 
 		for(ICell c : collection) {
 			for (Nucleus n : c.getNuclei()) {
-				if(!n.hasBorderTag(Landmark.REFERENCE_POINT)) {
+				if(!n.hasLandmark(Landmark.REFERENCE_POINT)) {
 					errorList.add(String.format("Nucleus %s does not have RP", n.getNameAndNumber()));
 					errorCells.add(c);
 					withErrors++;
@@ -290,11 +290,11 @@ public class DatasetValidator {
 		List<IAnalysisDataset> children = d.getAllChildDatasets();
 		int withErrors = 0;
 
-		List<Landmark> rootTags = d.getCollection().getProfileCollection().getBorderTags();
+		List<Landmark> rootTags = d.getCollection().getProfileCollection().getLandmarks();
 		for(ICell c : d.getCollection()) {
 			for(Nucleus n : c.getNuclei()) {
 				for(Landmark t : rootTags) {
-					if(!n.hasBorderTag(t)) {
+					if(!n.hasLandmark(t)) {
 						withErrors++;
 						errorList.add(String.format("Nucleus %s does not have root collection tag %s", n.getNameAndNumber(), t));
 						errorCells.add(c);
@@ -305,7 +305,7 @@ public class DatasetValidator {
 		
 		if(d.getCollection().hasConsensus()) {
 			for(Landmark t : rootTags) {
-				if(!d.getCollection().getConsensus().hasBorderTag(t)) {
+				if(!d.getCollection().getConsensus().hasLandmark(t)) {
 					withErrors++;
 					errorList.add(String.format("Consensus nucleus does not have root collection tag %s", t));
 				}
@@ -315,7 +315,7 @@ public class DatasetValidator {
 
 		for (IAnalysisDataset child : children) {
 			for(Landmark t : rootTags) {
-				if(!child.getCollection().getProfileCollection().getBorderTags().contains(t)) {
+				if(!child.getCollection().getProfileCollection().getLandmarks().contains(t)) {
 					withErrors++;
 					errorList.add(String.format("Child dataset %s does not have root collection tag %s", child.getName(), t));
 				}
@@ -323,7 +323,7 @@ public class DatasetValidator {
 			
 			if(child.getCollection().hasConsensus()) {
 				for(Landmark t : rootTags) {
-					if(!child.getCollection().getConsensus().hasBorderTag(t)) {
+					if(!child.getCollection().getConsensus().hasLandmark(t)) {
 						withErrors++;
 						errorList.add(String.format("Child dataset %s consensus nucleus does not have root collection tag %s", child.getName(), t));
 					}

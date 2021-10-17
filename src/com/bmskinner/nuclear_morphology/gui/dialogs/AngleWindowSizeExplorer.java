@@ -230,7 +230,7 @@ public class AngleWindowSizeExplorer extends LoadingIconDialog implements Change
 
         		pc.createProfileAggregate(duplicateCollection, dataset.getCollection().getProfileCollection().length());
 
-        		for (Landmark tag : dataset.getCollection().getProfileCollection().getBorderTags()) {
+        		for (Landmark tag : dataset.getCollection().getProfileCollection().getLandmarks()) {
         			pc.addIndex(tag, dataset.getCollection().getProfileCollection().getIndex(tag));
         		}
 

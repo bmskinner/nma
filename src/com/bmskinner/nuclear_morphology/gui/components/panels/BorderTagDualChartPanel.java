@@ -86,7 +86,7 @@ public class BorderTagDualChartPanel extends DualChartPanel {
     public synchronized void createBorderTagPopup(IAnalysisDataset dataset) {
     	if(dataset==null)
     		return;
-        List<Landmark> list = dataset.getCollection().getProfileCollection().getBorderTags();
+        List<Landmark> list = dataset.getCollection().getProfileCollection().getLandmarks();
         makePopup(list);
     }
 

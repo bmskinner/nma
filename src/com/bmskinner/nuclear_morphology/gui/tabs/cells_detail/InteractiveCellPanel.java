@@ -259,7 +259,7 @@ public abstract class InteractiveCellPanel extends JPanel {
         IPoint topPoint;
         IPoint btmPoint;
 
-        if (!n.hasBorderTag(Landmark.TOP_VERTICAL) || !n.hasBorderTag(Landmark.BOTTOM_VERTICAL)) {
+        if (!n.hasLandmark(Landmark.TOP_VERTICAL) || !n.hasLandmark(Landmark.BOTTOM_VERTICAL)) {
             topPoint = n.getCentreOfMass();
             btmPoint = n.getBorderPoint(Landmark.ORIENTATION_POINT);
 

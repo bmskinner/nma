@@ -213,8 +213,8 @@ public class DummyRodentSpermNucleus extends DummyCellularComponent implements N
 	}
 
 	@Override
-	public boolean hasBorderTag(@NonNull Landmark tag) {
-		return nucleus.hasBorderTag(tag);
+	public boolean hasLandmark(@NonNull Landmark tag) {
+		return nucleus.hasLandmark(tag);
 	}
 
 	@Override

@@ -301,7 +301,7 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
         
         for (Landmark tag : n.getBorderTags().keySet()) {
         	fieldNames.add(tag);
-        	if (n.hasBorderTag(tag)) {
+        	if (n.hasLandmark(tag)) {
 
         		try {
         			IPoint p = n.getBorderPoint(tag);

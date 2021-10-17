@@ -204,7 +204,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
 		
 		if (options.isShowMarkers()) {
 
-			for (Landmark tag : collection.getProfileCollection().getBorderTags()) {
+			for (Landmark tag : collection.getProfileCollection().getLandmarks()) {
 
 				try {
 					int index = collection.getProfileCollection().getIndex(tag);

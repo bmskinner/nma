@@ -206,7 +206,7 @@ public interface Taggable extends CellularComponent {
      * @param tag the tag to test
      * @return true if the tag is present, false otherwise
      */
-    boolean hasBorderTag(@NonNull Landmark tag);
+    boolean hasLandmark(@NonNull Landmark tag);
 
     /**
      * Check if the nucleus has any border tag at the given index (offset from

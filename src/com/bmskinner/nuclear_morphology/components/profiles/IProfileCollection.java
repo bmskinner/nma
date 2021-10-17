@@ -87,7 +87,7 @@ public interface IProfileCollection extends Serializable, XmlSerializable {
      * 
      * @return
      */
-    List<Landmark> getBorderTags();
+    List<Landmark> getLandmarks();
 
     /**
      * Test if the given tag is present in the collection
@@ -95,7 +95,7 @@ public interface IProfileCollection extends Serializable, XmlSerializable {
      * @param tag
      * @return
      */
-    boolean hasBorderTag(@NonNull Landmark tag);
+    boolean hasLandmark(@NonNull Landmark tag);
 
     /**
      * Get the requested profile from the cached profiles, or generate it from

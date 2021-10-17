@@ -357,19 +357,19 @@ public class InteractiveCellOutlinePanel extends InteractiveCellPanel {
 			g2.setColor(Color.CYAN);
 			try {
 				
-				if(cell.getPrimaryNucleus().hasBorderTag(Landmark.TOP_VERTICAL) && 
+				if(cell.getPrimaryNucleus().hasLandmark(Landmark.TOP_VERTICAL) && 
 						cell.getPrimaryNucleus().getBorderPoint(Landmark.TOP_VERTICAL).overlapsPerfectly(point.get())) {
 					g2.setColor(ColourSelecter.getColour(Landmark.TOP_VERTICAL));
 				}
-				if(cell.getPrimaryNucleus().hasBorderTag(Landmark.BOTTOM_VERTICAL) && 
+				if(cell.getPrimaryNucleus().hasLandmark(Landmark.BOTTOM_VERTICAL) && 
 						cell.getPrimaryNucleus().getBorderPoint(Landmark.BOTTOM_VERTICAL).overlapsPerfectly(point.get())) {
 					g2.setColor(ColourSelecter.getColour(Landmark.BOTTOM_VERTICAL));
 				}
-				if(cell.getPrimaryNucleus().hasBorderTag(Landmark.REFERENCE_POINT) && 
+				if(cell.getPrimaryNucleus().hasLandmark(Landmark.REFERENCE_POINT) && 
 						cell.getPrimaryNucleus().getBorderPoint(Landmark.REFERENCE_POINT).overlapsPerfectly(point.get())) {
 					g2.setColor(ColourSelecter.getColour(Landmark.REFERENCE_POINT));
 				}
-				if(cell.getPrimaryNucleus().hasBorderTag(Landmark.ORIENTATION_POINT) && 
+				if(cell.getPrimaryNucleus().hasLandmark(Landmark.ORIENTATION_POINT) && 
 						cell.getPrimaryNucleus().getBorderPoint(Landmark.ORIENTATION_POINT).overlapsPerfectly(point.get())) {
 					g2.setColor(ColourSelecter.getColour(Landmark.ORIENTATION_POINT));
 				}
