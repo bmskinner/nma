@@ -316,13 +316,6 @@ public class ICellCollectionTest extends ComponentTester {
 	}
 
 	@Test
-	public void testSetScale() {
-		final double scale = 12;
-		collection.setScale(scale);
-		assertTrue(collection.streamCells().allMatch(c->c.getPrimaryNucleus().getScale()==scale));
-	}
-	
-	@Test
 	public void testSetConsensus() throws Exception {
 		// Run consensus averaging on the collection. Wrap in a new dataset. 
 		IAnalysisDataset d = new DefaultAnalysisDataset(collection, 

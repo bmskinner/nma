@@ -36,6 +36,7 @@ import com.bmskinner.nuclear_morphology.components.Version;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
+import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
@@ -196,7 +197,11 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 		if(scale<=0) // don't allow a scale to cause divide by zero errors
 			return;
 		LOGGER.fine(() -> "Setting scale for "+getName()+" to "+scale);
-		getCollection().setScale(scale);
+//		getCollection().setScale(scale);
+		getCollection().forEach(c->c.setScale(scale));
+		if(getCollection().hasConsensus())
+			getCollection().getRawConsensus().component().setScale(scale);
+		getCollection().clear(MeasurementScale.MICRONS);
 		
 		Optional<IAnalysisOptions> op = getAnalysisOptions();
 		if(op.isPresent()){

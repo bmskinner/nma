@@ -1140,27 +1140,6 @@ public class DefaultCellCollection implements ICellCollection {
 		return toSearch.size();
 	}
 
-//	public int countClockWiseRPNuclei() {
-//		int count = 0;
-//		for (Nucleus n : getNuclei()) {
-//			if (n.isClockwiseRP()) {
-//				count++;
-//			}
-//		}
-//		return count;
-//	}
-
-	@Override
-	public void setScale(double scale){
-
-		for (ICell c : cells)
-			c.setScale(scale);
-
-		if(hasConsensus())
-			consensusNucleus.component().setScale(scale);
-		clear(MeasurementScale.MICRONS);
-	}
-
 	@Override
 	public String toString() {
 

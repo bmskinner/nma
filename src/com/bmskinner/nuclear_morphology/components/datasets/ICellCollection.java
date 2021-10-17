@@ -449,7 +449,7 @@ public interface ICellCollection
      * @param scale the new scale in pixels/micron
      */
     @Deprecated
-    void setScale(double scale);
+//    void setScale(double scale);
 
     /**
      * Get the perimeter normalised veriabililty of a nucleus angle profile
