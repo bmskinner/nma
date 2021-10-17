@@ -32,6 +32,7 @@ import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.SingleDatasetAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.Taggable;
+import com.bmskinner.nuclear_morphology.components.MissingComponentException;
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
@@ -43,6 +44,7 @@ import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.NucleusFactory;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
@@ -79,25 +81,21 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
         return new DefaultAnalysisResult(dataset);
     }
 
-    private void run() {
+    private void run() throws MissingComponentException, UnprofilableObjectException, 
+    ComponentCreationException, ProfileException, MissingOptionException {
     	LOGGER.fine("Running consensus averaging on "+dataset.getName());
-        try {
-            List<IPoint> border = getPointAverage();
-            Consensus<Nucleus> refoldNucleus = makeConsensus(border);
-            dataset.getCollection().setConsensus(refoldNucleus);
-        } catch (Exception e) {
-            LOGGER.log(Loggable.STACK, "Error getting points for consensus nucleus", e);
-        }
+    	List<IPoint> border = getPointAverage();
+    	Consensus<Nucleus> refoldNucleus = makeConsensus(border);
+    	dataset.getCollection().setConsensus(refoldNucleus);
     }
-
-    private Consensus<Nucleus> makeConsensus(List<IPoint> list)
-            throws UnprofilableObjectException, ComponentCreationException,
-            MissingLandmarkException, ProfileException, MissingProfileException {
-
-        IPoint com = IPoint.makeNew(0, 0);
-        NucleusFactory fact = new NucleusFactory(dataset.getAnalysisOptions().get().getRuleSetCollection());
-        Nucleus n = fact.buildInstance(list, new File("Empty"), 0, com);
-        
+    
+    /**
+     * If scale is given in the dataset options, apply
+     * it to the given nucleus
+     * @param n
+     */
+    private void setConsensusScale(Nucleus n) {
+    	// Set the nucleus scale if available
         Optional<IAnalysisOptions> analysisOptions =  dataset.getAnalysisOptions();
         if(analysisOptions.isPresent()) {
         	Optional<HashOptions> nucleusOptions = analysisOptions.get().getNuclusDetectionOptions();
@@ -110,34 +108,39 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
         } else {
         	LOGGER.fine("No analysis options present, unable to find pixel scale for consensus");
         }
+    }
 
-        // Calculate the stats for the new consensus
-        // Required for angle window size calculation
-        double perim = ComponentMeasurer.calculatePerimeter(n);
-        LOGGER.finer("Consensus perimeter is "+perim);
-        n.setStatistic(Measurement.PERIMETER, perim);
-        n.initialise(Taggable.DEFAULT_PROFILE_WINDOW_PROPORTION);
-
-        // Build a consensus nucleus from the template points
-        Consensus<Nucleus> cons = new DefaultConsensusNucleus(n);
-
-        for (Landmark tag : dataset.getAnalysisOptions().get().getRuleSetCollection().getTags()) {
-            if (Landmark.INTERSECTION_POINT.equals(tag)) // not relevant here
-                continue;
-            if (dataset.getCollection().getProfileCollection().hasBorderTag(tag)) {
-            	
-                IProfile median = dataset.getCollection().getProfileCollection().getProfile(ProfileType.ANGLE, tag,
-                        Stats.MEDIAN);
-                int newIndex = cons.component().getProfile(ProfileType.ANGLE).findBestFitOffset(median);
-                LOGGER.finer(String.format("Setting %s in consensus to %s ", tag, newIndex));
-                cons.component().setBorderTag(tag, newIndex);
-                n.setBorderTag(tag, newIndex);
-            }
-        }
-        
-        // Add segments to the new nucleus profile
+   
+    /**
+     * Set the landmarks from the profile collection
+     * to the nucleus.
+     * @param n
+     * @throws ProfileException 
+     * @throws MissingProfileException 
+     * @throws MissingLandmarkException 
+     */
+    private void setLandmarks(Nucleus n) throws MissingLandmarkException, MissingProfileException, ProfileException {
+    	// Add all landmarks from the profile collection
+    	// This will include any not present inthe ruleset collection that
+    	// were added manually
+    	for (Landmark l : dataset.getCollection().getProfileCollection().getLandmarks()) {
+    		if (Landmark.INTERSECTION_POINT.equals(l)) // not relevant here
+    			continue;
+    		
+    		IProfile median = dataset.getCollection()
+    				.getProfileCollection()
+    				.getProfile(ProfileType.ANGLE, l, Stats.MEDIAN);
+			int newIndex = n.getProfile(ProfileType.ANGLE).findBestFitOffset(median);
+			LOGGER.finer(()->String.format("Setting %s in consensus to %s ", l, newIndex));
+			n.setBorderTag(l, newIndex);
+    	}
+    	
+    }
+    
+    private void setSegments(Nucleus n) throws MissingLandmarkException, MissingProfileException, ProfileException {
+    	// Add segments to the new nucleus profile
         if(dataset.getCollection().getProfileCollection().hasSegments()) {
-        	ISegmentedProfile profile = cons.component().getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
+        	ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
         	List<IProfileSegment> segs = dataset.getCollection().getProfileCollection().getSegments(Landmark.REFERENCE_POINT);
         	List<IProfileSegment> newSegs = IProfileSegment.scaleSegments(segs, profile.size());
         	LOGGER.finest(profile.toString());
@@ -146,10 +149,36 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
         	for(IProfileSegment s : newSegs)
         		LOGGER.finest(s.toString());
         	profile.setSegments(newSegs);
-        	cons.component().setProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, profile);
         	n.setProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, profile);
         }
+    }
+    
+    private Consensus<Nucleus> makeConsensus(List<IPoint> list)
+            throws UnprofilableObjectException, ComponentCreationException,
+            MissingLandmarkException, ProfileException, MissingProfileException, MissingOptionException {
         
+    	// Create a nucleus with the same rulesets as the dataset
+        IAnalysisOptions op = dataset.getAnalysisOptions().orElseThrow(MissingOptionException::new);
+        NucleusFactory fact = new NucleusFactory(op.getRuleSetCollection());
+        
+    	// Consensus CoM is at the origin for plotting
+        IPoint com = IPoint.makeNew(0, 0);
+        Nucleus n = fact.buildInstance(list, new File("Empty"), 0, com);
+        setConsensusScale(n);
+
+        // Calculate the stats for the new consensus
+        // Required for angle window size calculation
+        double perim = ComponentMeasurer.calculatePerimeter(n);
+        LOGGER.finer("Consensus perimeter is "+perim);
+        n.setStatistic(Measurement.PERIMETER, perim);
+        n.initialise(Taggable.DEFAULT_PROFILE_WINDOW_PROPORTION);
+
+        // Add landmarks and segments from the profile collection
+        setLandmarks(n);
+        setSegments(n);
+        
+        // Build a consensus nucleus from the template points
+        Consensus<Nucleus> cons = new DefaultConsensusNucleus(n);
         cons.component().alignVertically();
 
         if (cons.component().getBorderPoint(Landmark.REFERENCE_POINT).getX() > cons.component().getCentreOfMass().getX())

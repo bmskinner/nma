@@ -43,6 +43,7 @@ import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileManager;
@@ -326,12 +327,13 @@ public class ICellCollectionTest extends ComponentTester {
 		// Run consensus averaging on the collection. Wrap in a new dataset. 
 		IAnalysisDataset d = new DefaultAnalysisDataset(collection, 
 				new File(TestDatasetBuilder.TEST_DATASET_IMAGE_FOLDER));
+		d.setAnalysisOptions(OptionsFactory.makeDefaultRoundAnalysisOptions(new File(TestDatasetBuilder.TEST_DATASET_IMAGE_FOLDER).getAbsoluteFile()));
 
 		assertFalse(collection.hasConsensus());
 		new ConsensusAveragingMethod(d).call();
 		
 		
-		assertTrue(collection.hasConsensus());
+		assertTrue("Collection should have consensus", collection.hasConsensus());
 	}
 	
 	@Test
@@ -339,33 +341,45 @@ public class ICellCollectionTest extends ComponentTester {
 		
 		// Ensure TV and BV are set
 		ProfileManager m = collection.getProfileManager();
-		IProfile p = collection.getProfileCollection().getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);
 		m.updateBorderTag(Landmark.TOP_VERTICAL, 0);
 		m.updateBorderTag(Landmark.BOTTOM_VERTICAL, 10);
 		
 		// Run consensus averaging on the collection. Wrap in a new dataset. 
-		// Analysis options will not be copied!
-		IAnalysisDataset d = new DefaultAnalysisDataset(collection, new File(TestDatasetBuilder.TEST_DATASET_IMAGE_FOLDER));
+		// Analysis options will not be copied - create anew
+		File testFolder = new File(TestDatasetBuilder.TEST_DATASET_IMAGE_FOLDER);
+		IAnalysisDataset d = new DefaultAnalysisDataset(collection, testFolder);
+		d.setAnalysisOptions(OptionsFactory.makeDefaultRoundAnalysisOptions(testFolder));
+		
 		new ConsensusAveragingMethod(d).call();		
 		
+		// Test that the consensus has the same indexes as the template
+		// collection
+		Nucleus n = d.getCollection().getConsensus();
+		IPoint tv = n.getBorderPoint(Landmark.TOP_VERTICAL);
+		IPoint bv = n.getBorderPoint(Landmark.BOTTOM_VERTICAL);
+		assertTrue("Points should be vertical for tv="+tv+" bv="+bv, areVertical(tv, bv));
+		
+		
 		int bIndex=0;
-		for(int tIndex=0; tIndex<p.size(); tIndex++) {
-			if(tIndex==bIndex)
-				continue;
+		for(int tIndex=1; tIndex<m.getProfileLength(); tIndex++) {
 			m.updateBorderTag(Landmark.TOP_VERTICAL, tIndex);
 			m.updateBorderTag(Landmark.BOTTOM_VERTICAL, bIndex);
+			
+			assertEquals("TV should be", tIndex, collection.getProfileCollection().getIndex(Landmark.TOP_VERTICAL));
+			assertEquals("BV should be", bIndex, collection.getProfileCollection().getIndex(Landmark.BOTTOM_VERTICAL));
+			
 
 			List<JPanel> panels = new ArrayList<>();
 			panels.add(ChartFactoryTest.makeConsensusChartPanel(d));
 
-			Nucleus n = collection.getConsensus(); // is aligned vertically
-			IPoint tv = n.getBorderPoint(Landmark.TOP_VERTICAL);
-			IPoint bv = n.getBorderPoint(Landmark.BOTTOM_VERTICAL);
+			n = collection.getConsensus(); // is aligned vertically
+			tv = n.getBorderPoint(Landmark.TOP_VERTICAL);
+			bv = n.getBorderPoint(Landmark.BOTTOM_VERTICAL);
 			
 			boolean areVertical = areVertical(tv, bv);
 			if(!areVertical)
 				ChartFactoryTest.showCharts(panels, "TV: "+tIndex+" BV "+bIndex);
-			assertTrue(areVertical);
+			assertTrue("Points should be vertical for tv="+tv+" bv="+bv, areVertical);
 		}
 		
 	}
