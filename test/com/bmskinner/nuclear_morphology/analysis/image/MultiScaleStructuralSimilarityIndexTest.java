@@ -27,8 +27,8 @@ public class MultiScaleStructuralSimilarityIndexTest {
 	@Test
 	public void testMSSIMcalculates() {
 		String imagePath = TestResources.WARPING_FOLDER.getAbsolutePath();
-		ImageProcessor wtX = IJ.openImage(imagePath+"WT-X.tiff").getProcessor();
-		ImageProcessor shX = IJ.openImage(imagePath+"sh-X.tiff").getProcessor();
+		ImageProcessor wtX = IJ.openImage(imagePath+"/WT-X.tiff").getProcessor();
+		ImageProcessor shX = IJ.openImage(imagePath+"/sh-X.tiff").getProcessor();
 		
 		MultiScaleStructuralSimilarityIndex ms = new MultiScaleStructuralSimilarityIndex();
 		MSSIMScore result = ms.calculateMSSIM(wtX, shX);
@@ -40,9 +40,9 @@ public class MultiScaleStructuralSimilarityIndexTest {
 	@Test
 	public void testMSSIMValueOrderMatchesKnown() {
 		String imagePath = TestResources.WARPING_FOLDER.getAbsolutePath();
-		ImageProcessor wtX = IJ.openImage(imagePath+"WT-X.tiff").getProcessor();
-		ImageProcessor shX = IJ.openImage(imagePath+"sh-X.tiff").getProcessor();
-		ImageProcessor shY = IJ.openImage(imagePath+"sh-Y.tiff").getProcessor();
+		ImageProcessor wtX = IJ.openImage(imagePath+"/WT-X.tiff").getProcessor();
+		ImageProcessor shX = IJ.openImage(imagePath+"/sh-X.tiff").getProcessor();
+		ImageProcessor shY = IJ.openImage(imagePath+"/sh-Y.tiff").getProcessor();
 		
 		MultiScaleStructuralSimilarityIndex ms = new MultiScaleStructuralSimilarityIndex();
 		MSSIMScore wtx_shx_result = ms.calculateMSSIM(wtX, shX);
