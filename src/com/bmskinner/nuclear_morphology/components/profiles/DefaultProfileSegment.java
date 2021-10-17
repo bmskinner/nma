@@ -399,6 +399,7 @@ public class DefaultProfileSegment implements IProfileSegment {
         if (getClass() != obj.getClass())
             return false;
         DefaultProfileSegment other = (DefaultProfileSegment) obj;
+
         if(!uuid.equals(other.uuid))
         	return false;
         if (endIndex != other.endIndex)
@@ -629,7 +630,7 @@ public class DefaultProfileSegment implements IProfileSegment {
 
     @Override
     public String toString() {
-    	return String.format("%d - %d of %d", startIndex, getEndIndex(), totalLength);
+    	return String.format("%d - %d of %d: %s", startIndex, getEndIndex(), totalLength, uuid.toString());
     }
 
     public String getDetail() {

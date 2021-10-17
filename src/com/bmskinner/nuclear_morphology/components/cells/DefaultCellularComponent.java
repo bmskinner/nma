@@ -1189,8 +1189,15 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     
     @Override
     public String toString() {
-    	return String.format("Bounds: x: %s-%s y: %s-%s", this.getBase().getX(), this.getBase().getX()+this.getBounds().getWidth(), 
-    			this.getBase().getY(), this.getBase().getY()+this.getBounds().getHeight());
+    	 StringBuilder builder = new StringBuilder("\nID: "+id.toString()+"\n");
+    	 builder.append(String.format("Bounds: x: %s-%s y: %s-%s", this.getBase().getX(), this.getBase().getX()+this.getBounds().getWidth(), 
+     			this.getBase().getY(), this.getBase().getY()+this.getBounds().getHeight()));
+    	 builder.append("\nMeasurements:\n");
+    	 for(Entry<Measurement, Double> entry : statistics.entrySet()) {
+    		 builder.append(entry.getKey().toString()+": "+entry.getValue().toString()+"\n");
+     	}
+    	
+    	return builder.toString();
     }
     
     @Override

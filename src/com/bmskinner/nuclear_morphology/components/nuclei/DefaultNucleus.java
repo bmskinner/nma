@@ -639,11 +639,9 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
         String newLine = System.getProperty("line.separator");
         StringBuilder builder = new StringBuilder(super.toString()+newLine);
 
-        builder.append(this.getNameAndNumber());
+        builder.append("Name: "+this.getNameAndNumber());
         builder.append(newLine);
-        builder.append(this.getID().toString());
-        builder.append(newLine);
-        builder.append(this.getSignalCollection().toString());
+        builder.append("Signals: "+this.getSignalCollection().toString());
         builder.append(newLine);
         return builder.toString();
     }

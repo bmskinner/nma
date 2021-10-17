@@ -19,19 +19,28 @@
 
 package com.bmskinner.nuclear_morphology.io;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.File;
 import java.util.Map;
 import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.junit.Test;
 
+import com.bmskinner.nuclear_morphology.TestImageDatasetCreator;
 import com.bmskinner.nuclear_morphology.TestResources;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.components.Version;
 import com.bmskinner.nuclear_morphology.components.Version.UnsupportedVersionException;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfileCollection;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.io.xml.XMLReader;
 
 /**
@@ -110,6 +119,20 @@ public class SampleDatasetReader {
         return r.getFirstDataset();
     }
     
-    
+
+    @Test
+    public void testMouseDatasetUnmarshalled() throws Exception {
+    	IAnalysisDataset d1 = openTestRodentDataset();
+
+    	File testFolder = TestResources.TESTING_MOUSE_FOLDER.getAbsoluteFile();
+    	IAnalysisOptions op = OptionsFactory.makeDefaultRodentAnalysisOptions(testFolder);
+    	IAnalysisDataset d2 = TestImageDatasetCreator.createTestDataset(TestResources.UNIT_TEST_FOLDER, op, false);
+    	
+    	IProfileCollection p1 = d1.getCollection().getProfileCollection();
+    	IProfileCollection p2 = d2.getCollection().getProfileCollection();
+    	
+//    	TODO: this will fail because segment ids are random for a new dataset
+    	assertEquals("Profile collections should match", p2, p1);
+    }
 
 }

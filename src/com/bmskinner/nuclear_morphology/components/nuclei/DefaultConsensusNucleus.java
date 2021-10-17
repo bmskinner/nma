@@ -20,6 +20,7 @@ import java.awt.Rectangle;
 import java.awt.Shape;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.util.Objects;
 import java.util.logging.Logger;
 
 import org.jdom2.Element;
@@ -167,14 +168,6 @@ public class DefaultConsensusNucleus extends DefaultNucleus implements Consensus
         return toShape();
     }
     
-    @Override
-    public boolean equals(Object obj) {
-    	if(!super.equals(obj))
-    		return false;
-    	if(!(obj instanceof DefaultConsensusNucleus))
-    		return false;
-    	return true;
-    }
     
     @Override
     public Nucleus getVerticallyRotatedNucleus() {
@@ -184,13 +177,6 @@ public class DefaultConsensusNucleus extends DefaultNucleus implements Consensus
     	return n;
     }
     
-    @Override
-    public int hashCode() {
-    	final int prime = 31;
-        int result = super.hashCode();
-        return result;
-    }
-
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
 
     	in.defaultReadObject();
@@ -217,4 +203,38 @@ public class DefaultConsensusNucleus extends DefaultNucleus implements Consensus
 		return this;
 	}
 
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(super.toString()+"\n");
+		
+		sb.append("Offset: "+xOffset+"-"+yOffset+"\n");
+		sb.append("Rotation: "+rotOffset);
+		return sb.toString();
+	}
+	
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + Objects.hash(rotOffset, xOffset, yOffset);
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		DefaultConsensusNucleus other = (DefaultConsensusNucleus) obj;
+		return Double.doubleToLongBits(rotOffset) == Double.doubleToLongBits(other.rotOffset)
+				&& Double.doubleToLongBits(xOffset) == Double.doubleToLongBits(other.xOffset)
+				&& Double.doubleToLongBits(yOffset) == Double.doubleToLongBits(other.yOffset);
+	}
+
+	
+	
 }

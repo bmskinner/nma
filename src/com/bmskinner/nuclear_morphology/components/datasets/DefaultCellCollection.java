@@ -535,18 +535,13 @@ public class DefaultCellCollection implements ICellCollection {
 		return Arrays.stream(getArrayLengths()).max().orElse(0);
 	}
 
-	/*
-	 * Profile methods
-	 */
-
 	@Override
 	public void createProfileCollection() throws ProfileException {
 		createProfileCollection(getMedianArrayLength());
 	}
 	
 	/*
-	 * Build a set of profile aggregates Default is to make profile
-	 * aggregate from reference point
+	 * Build the profile collection at the specified profile length
 	 * 
 	 */
 	public void createProfileCollection(int length) throws ProfileException {
@@ -1224,7 +1219,7 @@ public class DefaultCellCollection implements ICellCollection {
 			if (other.consensusNucleus != null)
 				return false;
 		} else if (!consensusNucleus.equals(other.consensusNucleus))
-			return false;
+			return false;		
 		if (cells == null) {
 			if (other.cells != null)
 				return false;

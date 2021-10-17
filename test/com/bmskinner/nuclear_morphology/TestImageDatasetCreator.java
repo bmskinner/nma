@@ -1,5 +1,6 @@
 package com.bmskinner.nuclear_morphology;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -7,7 +8,6 @@ import java.awt.Color;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
-import java.nio.file.attribute.FileAttribute;
 import java.util.UUID;
 import java.util.logging.Logger;
 
@@ -29,11 +29,13 @@ import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfileCollection;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.components.signals.DefaultSignalGroup;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
 import com.bmskinner.nuclear_morphology.io.DatasetExportMethod;
 import com.bmskinner.nuclear_morphology.io.DatasetExportMethod.ExportFormat;
+import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
 import com.bmskinner.nuclear_morphology.io.xml.XMLWriter;
 
 import ij.Prefs;
@@ -69,6 +71,7 @@ public class TestImageDatasetCreator {
     	IAnalysisOptions op = OptionsFactory.makeDefaultRodentAnalysisOptions(testFolder);
     	IAnalysisDataset d = createTestDataset(TestResources.UNIT_TEST_FOLDER, op, false);
     	saveTestDataset(d, TestResources.MOUSE_TEST_DATASET);
+    	testUnmarshalling(d, TestResources.MOUSE_TEST_DATASET);
     }
     
     @Test
@@ -78,6 +81,7 @@ public class TestImageDatasetCreator {
     	IAnalysisOptions op = OptionsFactory.makeDefaultPigAnalysisOptions(testFolder);
     	IAnalysisDataset d = createTestDataset(TestResources.UNIT_TEST_FOLDER, op, false);
     	saveTestDataset(d, TestResources.PIG_TEST_DATASET);
+    	testUnmarshalling(d, TestResources.MOUSE_TEST_DATASET);
     }
     
     @Test
@@ -87,6 +91,7 @@ public class TestImageDatasetCreator {
     	IAnalysisOptions op = OptionsFactory.makeDefaultRoundAnalysisOptions(testFolder);
     	IAnalysisDataset d = createTestDataset(TestResources.UNIT_TEST_FOLDER, op, false);
     	saveTestDataset(d, TestResources.ROUND_TEST_DATASET);
+    	testUnmarshalling(d, TestResources.MOUSE_TEST_DATASET);
     }
     
     @Test
@@ -94,6 +99,7 @@ public class TestImageDatasetCreator {
     	IAnalysisOptions op = OptionsFactory.makeDefaultRodentAnalysisOptions(TestResources.TESTING_MULTIPLE_SOURCE_1_FOLDER);
     	IAnalysisDataset d = createTestDataset(TestResources.UNIT_TEST_FOLDER, op, false);
     	saveTestDataset(d, TestResources.MULTIPLE1_TEST_DATASET);
+    	testUnmarshalling(d, TestResources.MOUSE_TEST_DATASET);
     }
     
     @Test
@@ -101,6 +107,7 @@ public class TestImageDatasetCreator {
     	IAnalysisOptions op = OptionsFactory.makeDefaultRodentAnalysisOptions(TestResources.TESTING_MULTIPLE_SOURCE_2_FOLDER);
     	IAnalysisDataset d = createTestDataset(TestResources.UNIT_TEST_FOLDER, op, false);
     	saveTestDataset(d, TestResources.MULTIPLE2_TEST_DATASET);
+    	testUnmarshalling(d, TestResources.MOUSE_TEST_DATASET);
     }
     
     
@@ -109,6 +116,7 @@ public class TestImageDatasetCreator {
     	IAnalysisOptions op = OptionsFactory.makeDefaultRodentAnalysisOptions(TestResources.TESTING_MOUSE_CLUSTERS_FOLDER);
     	IAnalysisDataset d = createTestDataset(TestResources.UNIT_TEST_FOLDER, op, true);
     	saveTestDataset(d, TestResources.MOUSE_CLUSTERS_DATASET);
+    	testUnmarshalling(d, TestResources.MOUSE_TEST_DATASET);
     }
     
     @Test
@@ -116,6 +124,7 @@ public class TestImageDatasetCreator {
     	IAnalysisOptions op = OptionsFactory.makeDefaultPigAnalysisOptions(TestResources.TESTING_PIG_CLUSTERS_FOLDER);
     	IAnalysisDataset d = createTestDataset(TestResources.UNIT_TEST_FOLDER, op, true);
     	saveTestDataset(d, TestResources.PIG_CLUSTERS_DATASET);
+    	testUnmarshalling(d, TestResources.MOUSE_TEST_DATASET);
     }
     
     @Test
@@ -123,6 +132,7 @@ public class TestImageDatasetCreator {
     	IAnalysisOptions op = OptionsFactory.makeDefaultRoundAnalysisOptions(TestResources.TESTING_ROUND_CLUSTERS_FOLDER);
     	IAnalysisDataset d = createTestDataset(TestResources.UNIT_TEST_FOLDER, op, true);
     	saveTestDataset(d, TestResources.ROUND_CLUSTERS_DATASET);
+    	testUnmarshalling(d, TestResources.MOUSE_TEST_DATASET);
     }
     
     @Test
@@ -133,6 +143,7 @@ public class TestImageDatasetCreator {
     	nucleus.setInt(HashOptions.MAX_SIZE_PIXELS, 12000);
     	IAnalysisDataset d = createTestSignalDataset(op, true, false);
     	saveTestDataset(d, TestResources.MOUSE_SIGNALS_DATASET);
+    	testUnmarshalling(d, TestResources.MOUSE_TEST_DATASET);
     }
     
     @Test
@@ -144,6 +155,7 @@ public class TestImageDatasetCreator {
     	
     	IAnalysisDataset d = createTestSignalDataset(op, false, true);
     	saveTestDataset(d, TestResources.PIG_SIGNALS_DATASET);
+    	testUnmarshalling(d, TestResources.MOUSE_TEST_DATASET);
     }
     
     @Test
@@ -151,6 +163,7 @@ public class TestImageDatasetCreator {
     	IAnalysisOptions op = OptionsFactory.makeDefaultRoundAnalysisOptions(TestResources.TESTING_ROUND_SIGNALS_FOLDER);    	
     	IAnalysisDataset d = createTestSignalDataset(op, true, true);
     	saveTestDataset(d, TestResources.ROUND_SIGNALS_DATASET);
+    	testUnmarshalling(d, TestResources.MOUSE_TEST_DATASET);
     }
     
     
@@ -250,7 +263,6 @@ public class TestImageDatasetCreator {
     public static void saveTestDataset(IAnalysisDataset d, File saveFile) throws Exception {
         if(saveFile.exists())
         	saveFile.delete();
-
         
         assertFalse("Expecting output file to be deleted: "+saveFile.getAbsolutePath(), saveFile.exists());
     	new DatasetExportMethod(d, saveFile, ExportFormat.XML).call();
@@ -275,6 +287,26 @@ public class TestImageDatasetCreator {
         assertFalse("Expecting xml file to be deleted: "+xmlFile.getAbsolutePath(), xmlFile.exists());
         XMLWriter.writeXML(d.getAnalysisOptions().get().toXmlElement(), xmlFile);
         assertTrue("Expecting xml exported to "+xmlFile.getAbsolutePath(), xmlFile.exists());
-        
+    }
+    
+    
+    /**
+     * Profiles are regenerated from raw values when datasets are read.
+     * Check that the recalculated values match what is expected. 
+     * Opens a saved dataset, and compares it to a fresh analysis of the
+     * same files.
+     * @throws Exception
+     */
+    public static void testUnmarshalling(IAnalysisDataset d, File saveFile) throws Exception {
+    	IAnalysisDataset t = SampleDatasetReader.openDataset(saveFile);
+
+    	IProfileCollection p1 = d.getCollection().getProfileCollection();
+    	IProfileCollection p2 = t.getCollection().getProfileCollection();
+    	
+    	assertEquals("Options should match", d.getAnalysisOptions().get(), t.getAnalysisOptions().get());
+    	assertEquals("Profile collections should match", p1, p2);
+    	assertEquals("Consensuses should match", d.getCollection().getConsensus(), t.getCollection().getConsensus());
+    	assertEquals("Cell collections should match", d.getCollection(), t.getCollection());
+    	assertEquals("Datasets should match", d, t);
     }
 }

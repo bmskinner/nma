@@ -66,5 +66,4 @@ public class XMLReaderTest {
 		IAnalysisDataset test = XMLReader.readDataset(f);
 		assertEquals(d, test);
 	}
-
 }

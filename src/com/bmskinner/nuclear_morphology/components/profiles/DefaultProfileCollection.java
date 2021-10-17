@@ -92,7 +92,7 @@ public class DefaultProfileCollection implements IProfileCollection {
 		}
 		
 		if(!segments.isEmpty())
-			length = segments.get(0).length();
+			length = segments.get(0).getProfileLength();
     }
     
     /**
@@ -505,9 +505,9 @@ public class DefaultProfileCollection implements IProfileCollection {
 
         StringBuilder builder = new StringBuilder();
 
-        builder.append("\tPoint types:");
+        builder.append("\tPoint types:\r\n");
         for (Landmark tag : this.indexes.keySet()) {
-            builder.append("\t" + tag + ": " + this.indexes.get(tag));
+            builder.append("\t" + tag + ": " + this.indexes.get(tag)+"\r\n");
         }
         return builder.toString();
     }
@@ -515,7 +515,7 @@ public class DefaultProfileCollection implements IProfileCollection {
 
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder();
+        StringBuilder builder = new StringBuilder("Length: "+this.length+"\n");
         builder.append(this.tagString());
 
         try {
@@ -623,12 +623,7 @@ public class DefaultProfileCollection implements IProfileCollection {
     private void writeObject(java.io.ObjectOutputStream out) throws IOException {
         out.defaultWriteObject();
     }
-    
-    
 
-    
-
-    
 	@Override
 	public int hashCode() {
 		return Objects.hash(indexes, segments);
@@ -643,6 +638,18 @@ public class DefaultProfileCollection implements IProfileCollection {
 		if (getClass() != obj.getClass())
 			return false;
 		DefaultProfileCollection other = (DefaultProfileCollection) obj;
+		
+//		if(indexes.size()!=other.indexes.size())
+//			return false;
+//		
+//		for(Landmark l : indexes.keySet()) {
+//			if(!other.indexes.containsKey(l))
+//				return false;
+//			
+//			if(indexes.get(l).intValue()!=other.indexes.get(l).intValue())
+//				return false;
+//		}
+
 		return Objects.equals(indexes, other.indexes) && Objects.equals(segments, other.segments);
 	}
 

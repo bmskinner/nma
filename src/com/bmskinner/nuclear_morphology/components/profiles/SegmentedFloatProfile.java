@@ -56,7 +56,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
     public SegmentedFloatProfile(@NonNull final IProfile p, @NonNull final List<IProfileSegment> segments) throws ProfileException {
         super(p);
         if (segments.isEmpty())
-            throw new IllegalArgumentException("Segment list is null or empty in segmented profile contructor");
+            throw new IllegalArgumentException("Segment list is empty in segmented profile contructor");
 
         if (p.size() != segments.get(0).getProfileLength())
             throw new IllegalArgumentException(String.format("Cannot construct new profile; segment profile length (%d) does not fit this profile (%d)", segments.get(0).getProfileLength(), p.size()));
