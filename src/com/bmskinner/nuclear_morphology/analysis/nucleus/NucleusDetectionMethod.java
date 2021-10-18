@@ -30,6 +30,7 @@ import java.util.logging.Logger;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.AbstractAnalysisMethod;
+import com.bmskinner.nuclear_morphology.analysis.AnalysisMethodException;
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.Finder;
@@ -56,7 +57,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  *
  */
 public class NucleusDetectionMethod extends AbstractAnalysisMethod {
-	
+		
 	private static final Logger LOGGER = Logger.getLogger(NucleusDetectionMethod.class.getName());
 
     private final File outputFolder;
@@ -76,7 +77,8 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
      * @param options the options to detect with
      */
     public NucleusDetectionMethod(@NonNull String outputFolder, @NonNull IAnalysisOptions options) {
-        this(new File(options.getDetectionOptions(CellularComponent.NUCLEUS).get().getString(HashOptions.DETECTION_FOLDER), outputFolder), options);
+        this(new File(options.getDetectionOptions(CellularComponent.NUCLEUS).get()
+        		.getString(HashOptions.DETECTION_FOLDER), outputFolder), options);
     }
     
     /**
@@ -97,38 +99,38 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
         return new DefaultAnalysisResult(datasets);
     }
 
-    public void run() {
+    public void run() throws Exception{
+    	int i = getTotalImagesToAnalyse();
+    	if(i==0) {
+    		LOGGER.info("No analysable images");
+    		throw new AnalysisMethodException("No analysable images");
+    	}
 
-        try {
-            int i = getTotalImagesToAnalyse();
-            if(i==0) return;
+    	LOGGER.info("Running nucleus detector");
 
-            LOGGER.info("Running nucleus detector");
-            
-            Optional<HashOptions> op = templateOptions.getDetectionOptions(CellularComponent.NUCLEUS);
-            if(!op.isPresent()){
-            	LOGGER.warning("No nucleus detection options present");
-            	return;
-            }
-            
-            // Detect the nuclei in the folders selected
-            File filePath = new File(op.get().getString(HashOptions.DETECTION_FOLDER));
-            processFolder(filePath);
+    	Optional<HashOptions> op = templateOptions.getDetectionOptions(CellularComponent.NUCLEUS);
+    	if(!op.isPresent()){
+    		LOGGER.warning("No nucleus detection options present");
+    		throw new AnalysisMethodException("No nucleus detection options present");
+    	}
 
-            LOGGER.fine("Detected nuclei in "+ filePath.getAbsolutePath());
-            
-            if(Thread.interrupted())
-                return;
+    	// Detect the nuclei in the folders selected
+    	File filePath = new File(op.get().getString(HashOptions.DETECTION_FOLDER));
+    	processFolder(filePath);
 
-            List<IAnalysisDataset> analysedDatasets = analysePopulations();
-            
-            datasets.addAll(analysedDatasets);
+    	LOGGER.fine("Detected nuclei in "+ filePath.getAbsolutePath());
 
-            LOGGER.fine("Analysis complete; return collections");
+    	if(Thread.interrupted())
+    		return;
 
-        } catch (Exception e) {
-            LOGGER.log(Loggable.STACK, "Error processing folder", e);
-        }
+    	List<IAnalysisDataset> analysedDatasets = analysePopulations();
+    	
+    	if(analysedDatasets.isEmpty())
+    		throw new AnalysisMethodException("No datasets returned");
+
+    	datasets.addAll(analysedDatasets);
+    	LOGGER.fine("Nucleus detection complete for "+analysedDatasets.size()+" folders");
+
     }
 
     private int getTotalImagesToAnalyse() {

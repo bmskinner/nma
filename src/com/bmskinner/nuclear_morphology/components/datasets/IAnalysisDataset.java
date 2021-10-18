@@ -18,7 +18,6 @@ package com.bmskinner.nuclear_morphology.components.datasets;
 
 import java.awt.Color;
 import java.io.File;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -42,7 +41,7 @@ import com.bmskinner.nuclear_morphology.utility.FileUtils;
  * @since 1.13.3
  *
  */
-public interface IAnalysisDataset extends Serializable, XmlSerializable {
+public interface IAnalysisDataset extends XmlSerializable {
 	
     /**
      * Get the ID of the dataset

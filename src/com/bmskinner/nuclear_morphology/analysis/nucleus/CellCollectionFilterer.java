@@ -149,7 +149,7 @@ public class CellCollectionFilterer {
 
 		if (!subCollection.hasCells()) {
 			LOGGER.warning("No cells passed filter");
-			throw new CollectionFilteringException("No collection returned");
+			throw new CollectionFilteringException("No cells passed filter");
 		}
 
 		try {

@@ -24,8 +24,8 @@ import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.SingleDatasetAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.components.UnavailableBorderPointException;
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
+import com.bmskinner.nuclear_morphology.components.UnavailableBorderPointException;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
@@ -35,8 +35,8 @@ import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
-import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
+import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.components.profiles.UnprofilableObjectException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
@@ -53,7 +53,7 @@ public class ProfileRefoldMethod extends SingleDatasetAnalysisMethod {
 	private static final Logger LOGGER = Logger.getLogger(ProfileRefoldMethod.class.getName());
     
 	private IProfile targetCurve;
-	private Consensus<Nucleus> refoldNucleus;
+	private Consensus refoldNucleus;
     private ICellCollection collection;
 
     private CurveRefoldingMode mode = CurveRefoldingMode.FAST;
@@ -126,9 +126,9 @@ public class ProfileRefoldMethod extends SingleDatasetAnalysisMethod {
             }
 
             targetCurve = targetProfile;
-            refoldNucleus.component().moveCentreOfMass(IPoint.makeNew(0, 0));
+            refoldNucleus.moveCentreOfMass(IPoint.makeNew(0, 0));
 
-            LOGGER.finer( "Result: template at " + refoldNucleus.component().getCentreOfMass());
+            LOGGER.finer( "Result: template at " + refoldNucleus.getCentreOfMass());
 
             if (collection.size() > 1) 
                 refoldCurve(); // carry out the refolding
@@ -150,7 +150,7 @@ public class ProfileRefoldMethod extends SingleDatasetAnalysisMethod {
     public void refoldCurve() throws Exception {
 
         try {
-            double score = refoldNucleus.component().getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT)
+            double score = refoldNucleus.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT)
                     .absoluteSquareDifference(targetCurve);
 
             LOGGER.fine("Refolding curve: initial score: " + (int) score);
@@ -232,7 +232,7 @@ public class ProfileRefoldMethod extends SingleDatasetAnalysisMethod {
     private double iterateOverNucleus() throws ProfileException, MissingLandmarkException,
             MissingProfileException, UnavailableBorderPointException {
 
-        ISegmentedProfile refoldProfile = refoldNucleus.component().getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
+        ISegmentedProfile refoldProfile = refoldNucleus.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
 
         // Get the difference between the candidate nucleus profile and the
         // median profile
@@ -243,7 +243,7 @@ public class ProfileRefoldMethod extends SingleDatasetAnalysisMethod {
         // Use this to establish the max and min distances a point can migrate
         // from its neighbours
         // This is the 'habitable zone' a point can occupy
-        double medianDistanceBetweenPoints = refoldNucleus.component().getMedianDistanceBetweenPoints();
+        double medianDistanceBetweenPoints = refoldNucleus.getMedianDistanceBetweenPoints();
         double minDistance = medianDistanceBetweenPoints * 0.5;
         double maxDistance = medianDistanceBetweenPoints * 1.2;
 
@@ -253,7 +253,7 @@ public class ProfileRefoldMethod extends SingleDatasetAnalysisMethod {
         Nucleus testNucleus;
         try {
 
-            testNucleus = new DefaultConsensusNucleus(refoldNucleus.component());
+            testNucleus = new DefaultConsensusNucleus(refoldNucleus);
 
             // When errors occur, the testNucleus CoM is offset at 0,-15 (may
             // not be constant).
@@ -264,7 +264,7 @@ public class ProfileRefoldMethod extends SingleDatasetAnalysisMethod {
 
             LOGGER.finer( "Test nucleus COM: " + testNucleus.getCentreOfMass());
             LOGGER.finest( "Beginning border tests");
-            for (int i = 0; i < refoldNucleus.component().getBorderLength(); i++) {
+            for (int i = 0; i < refoldNucleus.getBorderLength(); i++) {
                 similarityScore = improveBorderPoint(i, minDistance, maxDistance, similarityScore, testNucleus);
             }
 
@@ -342,13 +342,13 @@ public class ProfileRefoldMethod extends SingleDatasetAnalysisMethod {
                 // real consensus nucleus
 
                 if (score < similarityScore) {
-                    IPoint exisiting = refoldNucleus.component().getBorderPoint(index);
+                    IPoint exisiting = refoldNucleus.getBorderPoint(index);
                     LOGGER.fine("Updating " + exisiting.toString() + " to " + newPoint.toString() + ": "
                             + exisiting.getLengthTo(newPoint));
-                    refoldNucleus.component().updateBorderPoint(index, newPoint);
+                    refoldNucleus.updateBorderPoint(index, newPoint);
                     pointUpdateCounter++;
 
-                    refoldNucleus.component().calculateProfiles();
+                    refoldNucleus.calculateProfiles();
 
                     similarityScore = score;
                 }

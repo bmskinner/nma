@@ -21,15 +21,18 @@ import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nuclear_morphology.analysis.AnalysisMethodException;
 import com.bmskinner.nuclear_morphology.analysis.DatasetValidator;
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.ProgressEvent;
 import com.bmskinner.nuclear_morphology.analysis.SingleDatasetAnalysisMethod;
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
+import com.bmskinner.nuclear_morphology.components.Statistical;
 import com.bmskinner.nuclear_morphology.components.MissingComponentException;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
+import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileCollection;
@@ -126,43 +129,41 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 		LOGGER.fine("-----------------------------");
     	LOGGER.fine("Beginning segmentation method");
     	LOGGER.fine("-----------------------------");
-		try {
 
-			switch (mode) {
-			case COPY:
-				result = runCopyAnalysis();
-				break;
-			case NEW:
-				result = runNewAnalysis();
-				break;
-			case REFRESH:
-				result = runRefreshAnalysis();
-				break;
-			default:
-				result = null;
-				break;
-			}
+    	switch (mode) {
+    	case COPY:
+    		result = runCopyAnalysis();
+    		break;
+    	case NEW:
+    		result = runNewAnalysis();
+    		break;
+    	case REFRESH:
+    		result = runRefreshAnalysis();
+    		break;
+    	default:
+    		result = null;
+    		break;
+    	}
 
-			// Ensure segments are copied appropriately to verticals
-			// Ensure hook statistics are generated appropriately
-			for (Nucleus n : dataset.getCollection().getNuclei()) {
-				n.updateDependentStats();
-			}
-			LOGGER.fine("Updated verticals and stats");
-			
-			
-			DatasetValidator dv = new DatasetValidator();
-			if(!dv.validate(dataset)) {
-				LOGGER.warning("Segmentation failed; resulting dataset did not validate");
-			}
-		} catch (Exception e) {
-			result = null;
-			LOGGER.warning("Error in segmentation: "+e.getMessage());
-			LOGGER.log(Loggable.STACK, "Error in segmentation analysis", e);
-		}
+    	// Ensure segments are copied appropriately to verticals
+    	// Ensure hook statistics are generated appropriately
+    	for (Nucleus n : dataset.getCollection().getNuclei()) {
+    		// Initialise all measurements that do not already exist
+    		for(Measurement m : Measurement.getRodentSpermNucleusStats()) {
+    			if(!n.hasStatistic(m))
+    				n.setStatistic(m, Statistical.STAT_NOT_CALCULATED);
+    		}
+    		n.updateDependentStats();
+    	}
+    	LOGGER.fine("Updated stats");
+
+    	DatasetValidator dv = new DatasetValidator();
+    	if(!dv.validate(dataset)) {
+    		LOGGER.warning("Segmentation failed; resulting dataset did not validate");
+    		throw new AnalysisMethodException("Segmentation failed; resulting dataset did not validate");
+    	}
 
 		return result;
-
 	}
 
 	/**
