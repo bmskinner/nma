@@ -81,7 +81,7 @@ public class TestImageDatasetCreator {
     	IAnalysisOptions op = OptionsFactory.makeDefaultPigAnalysisOptions(testFolder);
     	IAnalysisDataset d = createTestDataset(TestResources.UNIT_TEST_FOLDER, op, false);
     	saveTestDataset(d, TestResources.PIG_TEST_DATASET);
-    	testUnmarshalling(d, TestResources.MOUSE_TEST_DATASET);
+    	testUnmarshalling(d, TestResources.PIG_TEST_DATASET);
     }
     
     @Test
@@ -91,7 +91,7 @@ public class TestImageDatasetCreator {
     	IAnalysisOptions op = OptionsFactory.makeDefaultRoundAnalysisOptions(testFolder);
     	IAnalysisDataset d = createTestDataset(TestResources.UNIT_TEST_FOLDER, op, false);
     	saveTestDataset(d, TestResources.ROUND_TEST_DATASET);
-    	testUnmarshalling(d, TestResources.MOUSE_TEST_DATASET);
+    	testUnmarshalling(d, TestResources.ROUND_TEST_DATASET);
     }
     
     @Test
@@ -107,7 +107,7 @@ public class TestImageDatasetCreator {
     	IAnalysisOptions op = OptionsFactory.makeDefaultRodentAnalysisOptions(TestResources.TESTING_MULTIPLE_SOURCE_2_FOLDER);
     	IAnalysisDataset d = createTestDataset(TestResources.UNIT_TEST_FOLDER, op, false);
     	saveTestDataset(d, TestResources.MULTIPLE2_TEST_DATASET);
-    	testUnmarshalling(d, TestResources.MOUSE_TEST_DATASET);
+    	testUnmarshalling(d, TestResources.MULTIPLE2_TEST_DATASET);
     }
     
     
@@ -116,7 +116,7 @@ public class TestImageDatasetCreator {
     	IAnalysisOptions op = OptionsFactory.makeDefaultRodentAnalysisOptions(TestResources.TESTING_MOUSE_CLUSTERS_FOLDER);
     	IAnalysisDataset d = createTestDataset(TestResources.UNIT_TEST_FOLDER, op, true);
     	saveTestDataset(d, TestResources.MOUSE_CLUSTERS_DATASET);
-    	testUnmarshalling(d, TestResources.MOUSE_TEST_DATASET);
+    	testUnmarshalling(d, TestResources.MOUSE_CLUSTERS_DATASET);
     }
     
     @Test
@@ -124,7 +124,7 @@ public class TestImageDatasetCreator {
     	IAnalysisOptions op = OptionsFactory.makeDefaultPigAnalysisOptions(TestResources.TESTING_PIG_CLUSTERS_FOLDER);
     	IAnalysisDataset d = createTestDataset(TestResources.UNIT_TEST_FOLDER, op, true);
     	saveTestDataset(d, TestResources.PIG_CLUSTERS_DATASET);
-    	testUnmarshalling(d, TestResources.MOUSE_TEST_DATASET);
+    	testUnmarshalling(d, TestResources.PIG_CLUSTERS_DATASET);
     }
     
     @Test
@@ -132,7 +132,7 @@ public class TestImageDatasetCreator {
     	IAnalysisOptions op = OptionsFactory.makeDefaultRoundAnalysisOptions(TestResources.TESTING_ROUND_CLUSTERS_FOLDER);
     	IAnalysisDataset d = createTestDataset(TestResources.UNIT_TEST_FOLDER, op, true);
     	saveTestDataset(d, TestResources.ROUND_CLUSTERS_DATASET);
-    	testUnmarshalling(d, TestResources.MOUSE_TEST_DATASET);
+    	testUnmarshalling(d, TestResources.ROUND_CLUSTERS_DATASET);
     }
     
     @Test
@@ -143,7 +143,7 @@ public class TestImageDatasetCreator {
     	nucleus.setInt(HashOptions.MAX_SIZE_PIXELS, 12000);
     	IAnalysisDataset d = createTestSignalDataset(op, true, false);
     	saveTestDataset(d, TestResources.MOUSE_SIGNALS_DATASET);
-    	testUnmarshalling(d, TestResources.MOUSE_TEST_DATASET);
+    	testUnmarshalling(d, TestResources.MOUSE_SIGNALS_DATASET);
     }
     
     @Test
@@ -155,7 +155,7 @@ public class TestImageDatasetCreator {
     	
     	IAnalysisDataset d = createTestSignalDataset(op, false, true);
     	saveTestDataset(d, TestResources.PIG_SIGNALS_DATASET);
-    	testUnmarshalling(d, TestResources.MOUSE_TEST_DATASET);
+    	testUnmarshalling(d, TestResources.PIG_SIGNALS_DATASET);
     }
     
     @Test
@@ -163,7 +163,7 @@ public class TestImageDatasetCreator {
     	IAnalysisOptions op = OptionsFactory.makeDefaultRoundAnalysisOptions(TestResources.TESTING_ROUND_SIGNALS_FOLDER);    	
     	IAnalysisDataset d = createTestSignalDataset(op, true, true);
     	saveTestDataset(d, TestResources.ROUND_SIGNALS_DATASET);
-    	testUnmarshalling(d, TestResources.MOUSE_TEST_DATASET);
+    	testUnmarshalling(d, TestResources.ROUND_SIGNALS_DATASET);
     }
     
     

@@ -5,7 +5,10 @@ import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
-@SuiteClasses({ CellCollectionFiltererTest.class, ConsensusAveragingMethodTest.class })
+@SuiteClasses({ CellCollectionFiltererTest.class, 
+	ConsensusAveragingMethodTest.class,
+	NucleusDetectionMethodTest.class
+	})
 public class AnalysisNucleusTestSuite {
 
 }

@@ -23,6 +23,7 @@ import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nuclear_morphology.analysis.AnalysisMethodException;
 import com.bmskinner.nuclear_morphology.analysis.ClusterAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.mesh.DefaultMesh;
@@ -30,9 +31,8 @@ import com.bmskinner.nuclear_morphology.analysis.mesh.Mesh;
 import com.bmskinner.nuclear_morphology.analysis.mesh.MeshCreationException;
 import com.bmskinner.nuclear_morphology.analysis.mesh.MeshFace;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.components.Taggable;
-import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.MissingComponentException;
+import com.bmskinner.nuclear_morphology.components.Taggable;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.DefaultClusterGroup;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
@@ -46,7 +46,6 @@ import com.bmskinner.nuclear_morphology.components.options.HierarchicalClusterMe
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import weka.clusterers.HierarchicalClusterer;
@@ -119,42 +118,31 @@ public class TreeBuildingMethod extends CellClusteringMethod {
      * 
      * @param collection
      * @return success or fail
+     * @throws Exception 
      */
-    protected boolean makeTree() {
+    protected boolean makeTree() throws Exception {
+    	// create Instances to hold Instance
+    	Instances instances = makeInstances();
 
-        try {
+    	// create the clusterer to run on the Instances
+    	String[] optionArray = createClustererOptions();
 
-            // create Instances to hold Instance
-            Instances instances = makeInstances();
+    	HierarchicalClusterer clusterer = new HierarchicalClusterer();
 
-            // create the clusterer to run on the Instances
-            String[] optionArray = createClustererOptions();
+    	clusterer.setOptions(optionArray); // set the options
+    	clusterer.setDistanceFunction(new EuclideanDistance());
+    	clusterer.setDistanceIsBranchLength(true);
+    	clusterer.setNumClusters(1);
+    	clusterer.setDebug(true);
 
-            try {
-                HierarchicalClusterer clusterer = new HierarchicalClusterer();
+    	LOGGER.finest( "Building clusterer for tree");
+    	clusterer.buildClusterer(instances); // build the clusterer with
+    	// one cluster for the tree
+    	clusterer.setPrintNewick(true);
 
-                clusterer.setOptions(optionArray); // set the options
-                clusterer.setDistanceFunction(new EuclideanDistance());
-                clusterer.setDistanceIsBranchLength(true);
-                clusterer.setNumClusters(1);
-                clusterer.setDebug(true);
+    	this.newickTree = clusterer.graph();
 
-                LOGGER.finest( "Building clusterer for tree");
-                clusterer.buildClusterer(instances); // build the clusterer with
-                                                     // one cluster for the tree
-                clusterer.setPrintNewick(true);
-
-                this.newickTree = clusterer.graph();
-
-            } catch (Exception e) {
-                LOGGER.log(Loggable.STACK, "Error in clustering", e);
-                return false;
-            }
-        } catch (Exception e) {
-            LOGGER.log(Loggable.STACK, "Error in assignments", e);
-            return false;
-        }
-        return true;
+    	return true;
     }
     
     private ArrayList<Attribute> makeTsneAttributes() {
@@ -187,7 +175,7 @@ public class TreeBuildingMethod extends CellClusteringMethod {
     }
 
     @Override
-	protected ArrayList<Attribute> makeAttributes() throws ClusteringMethodException{
+	protected ArrayList<Attribute> makeAttributes() throws AnalysisMethodException {
     	
     	// Shortcuts if dimensional reduction is chosen
     	LOGGER.finer("Checking if tSNE clustering is set");
@@ -202,6 +190,10 @@ public class TreeBuildingMethod extends CellClusteringMethod {
         // Determine the number of attributes required
         int attributeCount = 0;
         int profileAttributeCount = 0;
+        
+        if(!options.hasString(HashOptions.CLUSTER_METHOD_KEY))
+        	throw new AnalysisMethodException("No clustering method in options");
+        
 
      // How many attributes per profile?  
         double profileWindow = Taggable.DEFAULT_PROFILE_WINDOW_PROPORTION;
@@ -234,7 +226,7 @@ public class TreeBuildingMethod extends CellClusteringMethod {
 				attributeCount += mesh.getFaces().size();
 			} catch (MeshCreationException e) {
 				LOGGER.log(Loggable.STACK, "Cannot create mesh", e);
-				throw new ClusteringMethodException(e);
+				throw new AnalysisMethodException(e);
 			}
             
         }
@@ -307,10 +299,13 @@ public class TreeBuildingMethod extends CellClusteringMethod {
     /**
      * Create Instances using the interpolated profiles of nuclei
      * @return
+     * @throws MeshCreationException 
+     * @throws ProfileException 
+     * @throws MissingComponentException 
      * @throws ClusteringMethodException 
      */
     @Override
-	protected Instances makeInstances() throws ClusteringMethodException {
+	protected Instances makeInstances() throws AnalysisMethodException, MeshCreationException, ProfileException, MissingComponentException {
     	LOGGER.finer("Creating clusterable instances");
         double windowProportion = Taggable.DEFAULT_PROFILE_WINDOW_PROPORTION;
         if (dataset.hasAnalysisOptions())// Merged datasets may not have options
@@ -323,22 +318,12 @@ public class TreeBuildingMethod extends CellClusteringMethod {
 
         Mesh<Nucleus> template = null;
         if (options.getBoolean(HashOptions.CLUSTER_INCLUDE_MESH_KEY) && collection.hasConsensus()) {
-            try {
-				template = new DefaultMesh(collection.getConsensus());
-			} catch (MeshCreationException e) {
-				LOGGER.log(Loggable.STACK, "Cannot create mesh", e);
-				throw new ClusteringMethodException(e);
-			}
+				template = new DefaultMesh<>(collection.getConsensus());
         }
         
         for(ICell c : collection) {
         	for(Nucleus n : c.getNuclei()) {
-        		 try {
                      addNucleus(c, n, attributes, instances, template, windowProportion);
-                 } catch (MissingLandmarkException | MissingProfileException | ProfileException
-                         | MeshCreationException e) {
-                	 LOGGER.log(Loggable.STACK, "Cannot add nucleus data", e);
-                 }
         	}
         }
         return instances;
@@ -385,8 +370,7 @@ public class TreeBuildingMethod extends CellClusteringMethod {
     }
 
     private void addNucleus(ICell c, Nucleus n, ArrayList<Attribute> attributes, Instances instances, Mesh<Nucleus> template,
-            double windowProportion) throws MissingLandmarkException, MissingProfileException,
-            ProfileException, MeshCreationException {
+            double windowProportion) throws ProfileException, MeshCreationException, MissingComponentException {
 
         
         if(options.getBoolean(HashOptions.CLUSTER_USE_TSNE_KEY)) {
@@ -435,12 +419,7 @@ public class TreeBuildingMethod extends CellClusteringMethod {
         for (UUID segID : getSegmentIds()) {
             if (options.getBoolean(segID.toString())) {
                 Attribute att = attributes.get(attNumber++);
-                double length = 0;
-                try {
-                    length = n.getProfile(ProfileType.ANGLE).getSegment(segID).length();
-                } catch (MissingComponentException e) {
-                	LOGGER.log(Loggable.STACK, "Unable to find segment", e);
-                }
+                double length = n.getProfile(ProfileType.ANGLE).getSegment(segID).length();
                 inst.setValue(att, length);
             }
         }

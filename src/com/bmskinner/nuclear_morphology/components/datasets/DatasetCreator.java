@@ -26,8 +26,9 @@ public class DatasetCreator {
 	 */
 	public static IAnalysisDataset createRoot(Element e) throws ComponentCreationException {
 		IAnalysisDataset d = new DefaultAnalysisDataset(e);
-		
 		try {
+			d.getCollection().createProfileCollection();
+			
 			for(IAnalysisDataset c : d.getAllChildDatasets()) {
 				c.getCollection().createProfileCollection();
 			}

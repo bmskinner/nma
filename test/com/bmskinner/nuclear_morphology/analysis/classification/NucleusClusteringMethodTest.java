@@ -5,19 +5,28 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.List;
+import java.util.logging.Handler;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import com.bmskinner.nuclear_morphology.ComponentTester;
+import com.bmskinner.nuclear_morphology.analysis.AnalysisMethodException;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.IClusterGroup;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
+import com.bmskinner.nuclear_morphology.components.options.DefaultOptions;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
+import com.bmskinner.nuclear_morphology.logging.ConsoleFormatter;
+import com.bmskinner.nuclear_morphology.logging.ConsoleHandler;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Tests for the nucleus clustering
@@ -25,8 +34,21 @@ import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
  *
  */
 public class NucleusClusteringMethodTest extends ComponentTester {
+		
+	static final Logger LOGGER = Logger.getLogger(Loggable.PROJECT_LOGGER);
 	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	static {
+		for(Handler h : LOGGER.getHandlers())
+			LOGGER.removeHandler(h);
+		Handler h = new ConsoleHandler(new ConsoleFormatter());
+		LOGGER.setLevel(Level.FINE);
+		h.setLevel(Level.FINE);
+		LOGGER.addHandler(h);
+	}
+		
+	
+    @Rule
+    public final ExpectedException exception = ExpectedException.none();
 	
 	private static final int TWO_CLUSTERS = 2;
 
@@ -50,6 +72,13 @@ public class NucleusClusteringMethodTest extends ComponentTester {
 			setUp();
 			testCanClusterOnProfile(type);
 		}
+	}
+	
+	@Test
+	public void testConstructorFailsOnNullOptions() throws Exception {
+		
+		exception.expect(AnalysisMethodException.class);
+		new NucleusClusteringMethod(dataset, new DefaultOptions()).call();
 	}
 
 	/**

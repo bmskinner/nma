@@ -30,6 +30,7 @@ import javax.swing.JFileChooser;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nuclear_morphology.analysis.AnalysisMethodException;
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
@@ -116,10 +117,6 @@ public class NewAnalysisAction extends VoidResultAction {
             }
 
             File directory = new File(op.get().getString(HashOptions.DETECTION_FOLDER));
-            if (directory == null) {
-                cancel();
-                return;
-            }
 
             LOGGER.info("Directory: " + directory.getName());
 
@@ -127,13 +124,16 @@ public class NewAnalysisAction extends VoidResultAction {
 			LocalDateTime anTime = LocalDateTime.ofInstant(inst, ZoneOffset.systemDefault());
 			String outputFolderName = anTime.format(DateTimeFormatter.ofPattern("YYYY-MM-dd_HH-mm-ss"));
 
-            IAnalysisMethod m = new NucleusDetectionMethod(outputFolderName, options);
-            
-            worker = new DefaultAnalysisWorker(m);
-            worker.addPropertyChangeListener(this);
-            ThreadManager.getInstance().submit(worker);
-            LOGGER.finest( "Worker is executing");
-            analysisSetup.dispose();
+			try {
+				IAnalysisMethod m = new NucleusDetectionMethod(outputFolderName, options);
+				worker = new DefaultAnalysisWorker(m);
+				worker.addPropertyChangeListener(this);
+				ThreadManager.getInstance().submit(worker);
+			} catch (AnalysisMethodException e) {
+				LOGGER.info("Unable to run detection: "+e.getMessage());
+			} finally {
+				analysisSetup.dispose();
+			} 
 
         } else {
             analysisSetup.dispose();

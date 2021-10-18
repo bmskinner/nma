@@ -27,7 +27,6 @@ import com.bmskinner.nuclear_morphology.analysis.signals.AnalysisSignalsTestSuit
 	AnalysisSignalsTestSuite.class,
 	DatasetMergeMethodTest.class,
 	MergeSourceExtracterTest.class, 
-	NucleusDetectionTest.class,
 	ProfileAggregateTest.class,
 	RuleSetTester.class})
 public class AnalysisTestSuite {

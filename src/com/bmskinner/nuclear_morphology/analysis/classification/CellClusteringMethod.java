@@ -23,10 +23,16 @@ import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nuclear_morphology.analysis.AnalysisMethodException;
 import com.bmskinner.nuclear_morphology.analysis.SingleDatasetAnalysisMethod;
+import com.bmskinner.nuclear_morphology.analysis.mesh.MeshCreationException;
+import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
+import com.bmskinner.nuclear_morphology.components.MissingComponentException;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
+import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 
 import weka.core.Instance;
 import weka.core.Instances;
@@ -53,14 +59,20 @@ public abstract class CellClusteringMethod extends SingleDatasetAnalysisMethod {
 	/**
 	 * Create the rows of the matrix to be analysed
 	 * @return
+	 * @throws MeshCreationException 
+	 * @throws ProfileException 
+	 * @throws MissingProfileException 
+	 * @throws MissingLandmarkException 
+	 * @throws MissingComponentException 
 	 * @throws Exception
 	 */
-	protected abstract Instances makeInstances() throws ClusteringMethodException;
+	protected abstract Instances makeInstances() throws AnalysisMethodException, MeshCreationException, MissingLandmarkException, MissingProfileException, ProfileException, MissingComponentException;
 	
 	/**
 	 * Create the columns of the matrix to be analysed
 	 * @return
+	 * @throws AnalysisMethodException 
 	 */
-	protected abstract ArrayList<?> makeAttributes() throws ClusteringMethodException;
+	protected abstract ArrayList<?> makeAttributes() throws AnalysisMethodException;
 	
 }

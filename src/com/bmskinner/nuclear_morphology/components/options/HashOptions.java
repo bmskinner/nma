@@ -331,7 +331,7 @@ public interface HashOptions extends Serializable, XmlSerializable {
     void setString(String k, String v);
     
     /**
-     * Set the file value with the given key
+     * Get the file with the given key. 
      * @param k
      * @param v
      */

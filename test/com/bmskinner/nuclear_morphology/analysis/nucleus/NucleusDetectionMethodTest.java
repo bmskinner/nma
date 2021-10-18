@@ -1,5 +1,6 @@
-package com.bmskinner.nuclear_morphology.analysis;
+package com.bmskinner.nuclear_morphology.analysis.nucleus;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
 import java.io.File;
@@ -8,15 +9,20 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import com.bmskinner.nuclear_morphology.TestImageDatasetCreator;
 import com.bmskinner.nuclear_morphology.TestResources;
+import com.bmskinner.nuclear_morphology.analysis.AnalysisMethodException;
+import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.components.Statistical;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
+import com.bmskinner.nuclear_morphology.components.options.DefaultAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.logging.ConsoleFormatter;
@@ -32,9 +38,12 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  * @since 1.17.1
  *
  */
-public class NucleusDetectionTest {
+public class NucleusDetectionMethodTest {
 	
 	static final Logger LOGGER = Logger.getLogger(Loggable.PROJECT_LOGGER);
+	
+    @Rule
+    public final ExpectedException exception = ExpectedException.none();
 	
 	static {
 		for(Handler h : LOGGER.getHandlers())
@@ -50,12 +59,48 @@ public class NucleusDetectionTest {
 	}
 	
 	@Test
+	public void testFailsOnNonexistentFolder() throws AnalysisMethodException {
+		File testFolder = TestResources.TESTING_MOUSE_FOLDER;
+    	IAnalysisOptions op = OptionsFactory.makeDefaultRodentAnalysisOptions(testFolder);
+    	
+    	exception.expect(AnalysisMethodException.class);
+		NucleusDetectionMethod nm = new NucleusDetectionMethod(new File(""), op);
+	}
+	
+	@Test
+	public void testFailsOnNonexistentOptions() throws AnalysisMethodException {		
+		// Options does not have detection options for nucleus specified
+    	IAnalysisOptions op = new DefaultAnalysisOptions();
+    	
+    	exception.expect(AnalysisMethodException.class);
+		NucleusDetectionMethod nm = new NucleusDetectionMethod(TestResources.TESTING_MOUSE_FOLDER, op);
+	}
+	
+	@Test
+	public void testNucleusDetectionReturnsADataset() throws Exception {
+		File testFolder = TestResources.TESTING_MOUSE_FOLDER.getAbsoluteFile();
+    	IAnalysisOptions op = OptionsFactory.makeDefaultRodentAnalysisOptions(testFolder);
+
+    	NucleusDetectionMethod nm = new NucleusDetectionMethod(TestResources.TESTING_MOUSE_FOLDER, op);
+    	IAnalysisResult r = nm.call();
+    	
+    	IAnalysisDataset d = r.getFirstDataset();
+    	
+    	// Number of nuclei in test folder with default settings
+    	assertEquals("Number of cells", 63, d.getCollection().size());
+	}
+	
+	@Test
 	public void testAllNuclearParametersCalculated() throws Exception {
 		
 		File testFolder = TestResources.TESTING_MOUSE_FOLDER.getAbsoluteFile();
     	IAnalysisOptions op = OptionsFactory.makeDefaultRodentAnalysisOptions(testFolder);
-    	IAnalysisDataset d = TestImageDatasetCreator.createTestDataset(TestResources.UNIT_TEST_FOLDER, op, false);
-		
+
+    	NucleusDetectionMethod nm = new NucleusDetectionMethod(TestResources.TESTING_MOUSE_FOLDER, op);
+    	IAnalysisResult r = nm.call();
+    	
+    	IAnalysisDataset d = r.getFirstDataset();
+    	
 		for(Measurement stat : Measurement.getNucleusStats()) {
 			double value = d.getCollection().getMedian(stat, CellularComponent.NUCLEUS, MeasurementScale.PIXELS);
 			assertFalse("Error calculating "+stat, Statistical.ERROR_CALCULATING_STAT==value);

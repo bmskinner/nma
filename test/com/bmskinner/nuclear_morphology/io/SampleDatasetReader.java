@@ -41,6 +41,7 @@ import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileCollection;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
+import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.io.xml.XMLReader;
 
 /**
@@ -121,18 +122,13 @@ public class SampleDatasetReader {
     
 
     @Test
-    public void testMouseDatasetUnmarshalled() throws Exception {
-    	IAnalysisDataset d1 = openTestRodentDataset();
+    public void testUnmarshalledDatasetHasProfilesCreated() throws Exception {
+    	IAnalysisDataset d = openTestRodentDataset();
+    	
+    	for(ProfileType t : ProfileType.values()) {
+    		d.getCollection().getProfileCollection().getProfile(t, Landmark.REFERENCE_POINT, 50);
+    	}
 
-    	File testFolder = TestResources.TESTING_MOUSE_FOLDER.getAbsoluteFile();
-    	IAnalysisOptions op = OptionsFactory.makeDefaultRodentAnalysisOptions(testFolder);
-    	IAnalysisDataset d2 = TestImageDatasetCreator.createTestDataset(TestResources.UNIT_TEST_FOLDER, op, false);
-    	
-    	IProfileCollection p1 = d1.getCollection().getProfileCollection();
-    	IProfileCollection p2 = d2.getCollection().getProfileCollection();
-    	
-//    	TODO: this will fail because segment ids are random for a new dataset
-    	assertEquals("Profile collections should match", p2, p1);
     }
 
 }

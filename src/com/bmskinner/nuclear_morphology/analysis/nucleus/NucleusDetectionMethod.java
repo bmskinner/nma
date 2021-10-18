@@ -71,12 +71,14 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
 
     /**
      * Construct a detector on the given folder, and output the results to a new
-     * folder in the image directory, with the given name
+     * folder in the image directory, with the given name. The source image directory
+     * is taken from the nucleus detection options
      * 
-     * @param outputFolder the name of the folder for results
+     * @param outputFolder the name of the folder to store results
      * @param options the options to detect with
+     * @throws AnalysisMethodException 
      */
-    public NucleusDetectionMethod(@NonNull String outputFolder, @NonNull IAnalysisOptions options) {
+    public NucleusDetectionMethod(@NonNull String outputFolder, @NonNull IAnalysisOptions options) throws AnalysisMethodException {
         this(new File(options.getDetectionOptions(CellularComponent.NUCLEUS).get()
         		.getString(HashOptions.DETECTION_FOLDER), outputFolder), options);
     }
@@ -87,9 +89,20 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
      * 
      * @param outputFolder the folder to save the results into
      * @param options the options to detect with
+     * @throws AnalysisMethodException 
      */
-    public NucleusDetectionMethod(@NonNull File outputFolder, @NonNull IAnalysisOptions options) {
-        this.outputFolder = outputFolder;
+    public NucleusDetectionMethod(@NonNull File outputFolder, @NonNull IAnalysisOptions options) throws AnalysisMethodException {
+    	// We need the parent of the output folder to exist so 
+    	// the folder can be created
+    	if(outputFolder.getParentFile()==null || !outputFolder.getParentFile().exists())
+    		throw new AnalysisMethodException("Output parent folder does not exist: "+outputFolder.getAbsolutePath());
+       
+    	Optional<HashOptions> op = options.getDetectionOptions(CellularComponent.NUCLEUS);
+    	if(!op.isPresent()){
+    		throw new AnalysisMethodException("No nucleus detection options present");
+    	}
+    	
+    	this.outputFolder = outputFolder;
         this.templateOptions = options;
     }
 
@@ -102,20 +115,16 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
     public void run() throws Exception{
     	int i = getTotalImagesToAnalyse();
     	if(i==0) {
-    		LOGGER.info("No analysable images");
     		throw new AnalysisMethodException("No analysable images");
     	}
 
     	LOGGER.info("Running nucleus detector");
 
+    	// Existence checked in constructor
     	Optional<HashOptions> op = templateOptions.getDetectionOptions(CellularComponent.NUCLEUS);
-    	if(!op.isPresent()){
-    		LOGGER.warning("No nucleus detection options present");
-    		throw new AnalysisMethodException("No nucleus detection options present");
-    	}
 
     	// Detect the nuclei in the folders selected
-    	File filePath = new File(op.get().getString(HashOptions.DETECTION_FOLDER));
+    	File filePath = op.get().getFile(HashOptions.DETECTION_FOLDER);
     	processFolder(filePath);
 
     	LOGGER.fine("Detected nuclei in "+ filePath.getAbsolutePath());
@@ -227,7 +236,7 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
             if (!cells.isEmpty() && !outputFolder.exists()) 
             	outputFolder.mkdir();
             fc.addAll(cells);
-            LOGGER.fine("Detected "+cells.size()+" nuclei in "+folder.getAbsolutePath());
+            LOGGER.fine((()->"Detected "+cells.size()+" nuclei in "+folder.getAbsolutePath()));
         } catch (ImageImportException e) {
             LOGGER.log(Loggable.STACK, "Error searching folder", e);
         }

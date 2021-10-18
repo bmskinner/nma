@@ -26,9 +26,12 @@ import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nuclear_morphology.analysis.AnalysisMethodException;
 import com.bmskinner.nuclear_morphology.analysis.ClusterAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
+import com.bmskinner.nuclear_morphology.analysis.mesh.MeshCreationException;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
+import com.bmskinner.nuclear_morphology.components.MissingComponentException;
 import com.bmskinner.nuclear_morphology.components.Statistical;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.DefaultClusterGroup;
@@ -82,7 +85,11 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
     @Override
     public IAnalysisResult call() throws Exception {
 
-        run();
+    	// Sanity check that this has cluster options
+    	if(!options.hasString(HashOptions.CLUSTER_METHOD_KEY))
+        	throw new AnalysisMethodException("No clustering method in options");
+        
+        cluster();
 
         // Save the clusters to the dataset
         List<IAnalysisDataset> list = new ArrayList<>();
@@ -151,21 +158,14 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
         return new ClusterAnalysisResult(list, group);
     }
 
-    private void run() {
-        boolean ok = cluster();
-        LOGGER.fine("Returning " + ok);
-    }
-
     /**
      * Run the clustering on a collection
      * 
      * @param collection
      * @return success or fail
+     * @throws Exception 
      */
-    public boolean cluster() {
-
-        try {
-
+    public boolean cluster() throws Exception {
             // create Instances to hold Instance
             Instances instances = makeInstances();
 
@@ -201,10 +201,6 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
                 assignClusters(clusterer);
             }
 
-        } catch (Exception e) {
-            LOGGER.log(Loggable.STACK, "Error in cluster assignments", e);
-            return false;
-        }
         return true;
     }
 
