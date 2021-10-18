@@ -18,9 +18,9 @@ package com.bmskinner.nuclear_morphology.components;
 
 import org.eclipse.jdt.annotation.Nullable;
 
-import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclei.Consensus;
+import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 
 /**
  * Provides methods relating to the abillity to refold consensus shapes for a
@@ -31,7 +31,7 @@ import com.bmskinner.nuclear_morphology.components.nuclei.Consensus;
  *
  * @param <E> the component that can be refolded
  */
-public interface Refoldable<E extends CellularComponent> {
+public interface Refoldable {
 
     /**
      * Check if the collection has a consensus component of type <b>E</b>
@@ -45,16 +45,23 @@ public interface Refoldable<E extends CellularComponent> {
      * 
      * @param n
      */
-    void setConsensus(@Nullable Consensus<E> component);
+    void setConsensus(@Nullable Consensus component);
 
     /**
-     * Get the consensus nucleus if set
+     * Get a vertically oriented copy of the consensus
+     * nucleus if present, with any other offsets applied
      * 
      * @return the consensus, or null if not present
      */
-    E getConsensus();
+    Nucleus getConsensus();
     
-    Consensus<E> getRawConsensus();
+    /**
+     * Get the consensus nucleus. Unlike {@link getConsensus},
+     * the actual object is returned, not a vertically oriented
+     * copy
+     * @return
+     */
+    Consensus getRawConsensus();
     
     /**
      * Apply an offset to the consensus shape

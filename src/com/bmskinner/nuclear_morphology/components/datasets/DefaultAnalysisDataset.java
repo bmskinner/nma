@@ -197,10 +197,10 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 		if(scale<=0) // don't allow a scale to cause divide by zero errors
 			return;
 		LOGGER.fine(() -> "Setting scale for "+getName()+" to "+scale);
-//		getCollection().setScale(scale);
+
 		getCollection().forEach(c->c.setScale(scale));
 		if(getCollection().hasConsensus())
-			getCollection().getRawConsensus().component().setScale(scale);
+			getCollection().getRawConsensus().setScale(scale);
 		getCollection().clear(MeasurementScale.MICRONS);
 		
 		Optional<IAnalysisOptions> op = getAnalysisOptions();
@@ -503,40 +503,4 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
             return false;
         return true;
     }
-
-    private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-
-        in.defaultReadObject();
-
-        IProfileCollection pc = cellCollection.getProfileCollection();
-        
-        try {
-        if (pc == null) {
-            LOGGER.warning("Missing profile collection");
-        } else {
-        	 int length = pc.length();
-             // Update all children to have the same profile lengths and offsets
-             if (!childDatasets.isEmpty()) {
-                 for (IAnalysisDataset child : getAllChildDatasets())
-                     child.getCollection().getProfileCollection().createProfileAggregate(child.getCollection(), length);
-             }
-
-             // Allow merge sources to retain their original lengths
-             if (!otherDatasets.isEmpty()) {
-                 for (IAnalysisDataset child : otherDatasets)
-                     child.getCollection().getProfileCollection().createAndRestoreProfileAggregate(child.getCollection());
-             }
-        }
-        } catch(ProfileException e) {
-        	 LOGGER.warning("Unable to update profile aggregates in child datasets");
-        	 LOGGER.log(Loggable.STACK, e.getMessage(), e);
-        }
-    }
-    
-    private void writeObject(java.io.ObjectOutputStream out) throws IOException {
-    	// Ensure the save version is correct at time of save 
-    	this.versionLastSaved = Version.currentVersion();
-    	out.defaultWriteObject();
-    }
-
 }

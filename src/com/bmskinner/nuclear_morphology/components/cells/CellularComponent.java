@@ -43,7 +43,7 @@ import ij.process.FloatPolygon;
  * @since 1.11.0
  *
  */
-public interface CellularComponent extends Imageable, Serializable, XmlSerializable, 
+public interface CellularComponent extends Imageable, XmlSerializable, 
 	Rotatable, Statistical {
 	
     // Standard components

@@ -104,7 +104,7 @@ public class DefaultCellCollection implements ICellCollection {
 	private IProfileCollection profileCollection = IProfileCollection.makeNew();
 
 	/** Refolded consensus nucleus */
-	private Consensus<Nucleus> consensusNucleus; 
+	private Consensus consensusNucleus; 
 
 	/** All the cells in this collection */
 	private List<ICell> cells = new ArrayList<>(20);
@@ -190,11 +190,6 @@ public class DefaultCellCollection implements ICellCollection {
 			signalGroups.add(new DefaultSignalGroup(el));
 
 		ruleSets = new RuleSetCollection(e.getChild("RuleSetCollection"));
-//		try {
-//			createProfileCollection();
-//		} catch (ProfileException e1) {
-//			throw new ComponentCreationException("Unable to generate profiles", e1);
-//		}
 	}
 	
 
@@ -225,7 +220,7 @@ public class DefaultCellCollection implements ICellCollection {
 		for(ICell c : this)
 			result.addCell(c.duplicate());
 		
-		result.consensusNucleus = consensusNucleus==null? null : consensusNucleus.duplicateConsensus();
+		result.consensusNucleus = consensusNucleus==null? null : consensusNucleus.duplicate();
 		result.profileCollection = profileCollection.duplicate();
 		
 		// copy the signals
@@ -409,18 +404,18 @@ public class DefaultCellCollection implements ICellCollection {
 	}
 
 	@Override
-	public void setConsensus(@Nullable Consensus<Nucleus> n) {
+	public void setConsensus(@Nullable Consensus n) {
 		consensusNucleus = n;
 	}
 	
 	@Override
-	public Consensus<Nucleus> getRawConsensus() {
+	public Consensus getRawConsensus() {
 		return consensusNucleus;
 	}
 
 	@Override
 	public Nucleus getConsensus() {
-		return consensusNucleus.component().getVerticallyRotatedNucleus();
+		return consensusNucleus.getVerticallyRotatedNucleus();
 	}
 	
 	@Override

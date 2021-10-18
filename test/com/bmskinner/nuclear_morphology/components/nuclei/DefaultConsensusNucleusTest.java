@@ -1,8 +1,9 @@
 package com.bmskinner.nuclear_morphology.components.nuclei;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import java.io.PrintWriter;
+import java.util.Arrays;
 
 import org.jdom2.Element;
 import org.jdom2.output.Format;
@@ -12,19 +13,13 @@ import org.junit.Test;
 
 import com.bmskinner.nuclear_morphology.ComponentTester;
 import com.bmskinner.nuclear_morphology.TestDatasetBuilder;
-import com.bmskinner.nuclear_morphology.components.TestComponentFactory;
+import com.bmskinner.nuclear_morphology.analysis.nucleus.ConsensusAveragingMethod;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 
-/**
- * Tests for the default nucleus class
- * @author bms41
- * @since 1.14.0
- *
- */
-public class DefaultNucleusTest extends ComponentTester {
+public class DefaultConsensusNucleusTest extends ComponentTester {
 
-	private Nucleus nucleus;	
+	private Consensus nucleus;	
 	@Override
 	@Before
 	public void setUp() throws Exception {
@@ -34,15 +29,22 @@ public class DefaultNucleusTest extends ComponentTester {
 				.randomOffsetProfiles(true)
 				.numberOfClusters(N_CHILD_DATASETS)
 				.segmented().build();
-		nucleus = d.getCollection().getCells().stream().findFirst().get().getPrimaryNucleus();
+		
+		new ConsensusAveragingMethod(d).call();
+		nucleus = d.getCollection().getRawConsensus();
 	}
 
+	/**
+	 * Test that the consensus can be duplicated exactly
+	 * @throws Exception
+	 */
 	@Test
 	public void testDuplicate() throws Exception {
-		Nucleus dup = nucleus.duplicate();
+		Consensus dup = nucleus.duplicate();
 		testDuplicatesByField(nucleus, dup);
 	}
 	
+
 	/**
 	 * Check that duplicating a component multiple times does
 	 * not introduce errors
@@ -50,9 +52,9 @@ public class DefaultNucleusTest extends ComponentTester {
 	 */
 	@Test
 	public void testDuplicateIsStableOverRepeatedIterations() throws Exception {
-		Nucleus dup = nucleus.duplicate();
+		Consensus dup = nucleus.duplicate();
 		for(int i=0; i<20; i++) {
-			Nucleus dup2 = dup.duplicate();
+			Consensus dup2 = dup.duplicate();
 			testDuplicatesByField(dup, dup2);
 			dup = dup2;
 		}		
@@ -67,11 +69,10 @@ public class DefaultNucleusTest extends ComponentTester {
 		xmlOutput.setFormat(Format.getPrettyFormat());
 		xmlOutput.output(e, new PrintWriter( System.out ));
 
-		Nucleus test = new DefaultNucleus(e);
-		System.out.println();
+		Nucleus test = new DefaultConsensusNucleus(e);
 		xmlOutput.output(test.toXmlElement(), new PrintWriter( System.out ));
 		
 		assertEquals(nucleus, test);
 	}
-	
+
 }

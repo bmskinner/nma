@@ -11,13 +11,14 @@ import com.bmskinner.nuclear_morphology.io.XmlSerializable;
  *
  * @param <E> the type of object this is a consensus of 
  */
-public interface Consensus<E extends CellularComponent> extends XmlSerializable {
+public interface Consensus extends XmlSerializable, Nucleus {
 
 	/**
 	 * Move the consensus by the given amount in X and Y axes
 	 * @param xOffset
 	 * @param yOffset
 	 */
+	@Override
 	void offset(double xOffset, double yOffset);
 
 	/**
@@ -42,11 +43,6 @@ public interface Consensus<E extends CellularComponent> extends XmlSerializable 
 	 * Create a duplicate of this consensus
 	 * @return
 	 */
-	Consensus<E> duplicateConsensus();
-	
-	/**
-	 * Get the component this consensus was based on
-	 * @return
-	 */
-	E component();
+	@Override
+	Consensus duplicate();
 }

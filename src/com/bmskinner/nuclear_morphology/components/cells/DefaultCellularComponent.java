@@ -238,6 +238,44 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 
     }
     
+
+    /**
+     * Defensively duplicate a component. The ID is kept consistent.
+     * 
+     * @param a the template component
+     */
+    protected DefaultCellularComponent(CellularComponent a) {
+    	LOGGER.finest( "Constructing a new component from existing template component");
+        this.id = UUID.fromString(a.getID().toString());
+        this.position = Arrays.copyOf(a.getPosition(), a.getPosition().length);       
+        this.originalCentreOfMass = a.getOriginalCentreOfMass().duplicate();
+        this.centreOfMass = a.getCentreOfMass().duplicate();
+        this.sourceFile = new File(a.getSourceFile().getPath());
+        this.channel = a.getChannel();
+        this.scale = a.getScale();
+
+        for (Measurement stat : a.getStatistics()) {
+            try {
+                this.setStatistic(stat, a.getStatistic(stat, MeasurementScale.PIXELS));
+            } catch (Exception e) {
+                LOGGER.log(Loggable.STACK, "Error getting " + stat + " from template", e);
+                this.setStatistic(stat, Statistical.ERROR_CALCULATING_STAT);
+            }
+        }
+
+        if (a instanceof DefaultCellularComponent) {
+
+            DefaultCellularComponent comp = (DefaultCellularComponent) a;
+
+            this.xpoints = Arrays.copyOfRange(comp.xpoints, 0, comp.xpoints.length);
+            this.ypoints = Arrays.copyOf(comp.ypoints, comp.ypoints.length);
+            makeBorderList();
+
+        } else {
+            duplicateBorderList(a);
+        }
+    }
+    
     /**
      * Construct from an XML element. Use for 
      * unmarshalling. The element should conform
@@ -346,50 +384,13 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 
     }
 
-    /**
-     * Defensively dDuplicate a component. The ID is kept consistent.
-     * 
-     * @param a the template component
-     */
-    protected DefaultCellularComponent(CellularComponent a) {
-    	LOGGER.finest( "Constructing a new component from existing template component");
-        this.id = UUID.fromString(a.getID().toString());
-        this.position = Arrays.copyOf(a.getPosition(), a.getPosition().length);
-        this.originalCentreOfMass = IPoint.makeNew(a.getOriginalCentreOfMass());
-        this.centreOfMass = IPoint.makeNew(a.getCentreOfMass());
-        this.sourceFile = new File(a.getSourceFile().getPath());
-        this.channel = a.getChannel();
-        this.scale = a.getScale();
-
-        for (Measurement stat : a.getStatistics()) {
-            try {
-                this.setStatistic(stat, a.getStatistic(stat, MeasurementScale.PIXELS));
-            } catch (Exception e) {
-                LOGGER.log(Loggable.STACK, "Error getting " + stat + " from template", e);
-                this.setStatistic(stat, Statistical.ERROR_CALCULATING_STAT);
-            }
-        }
-
-        if (a instanceof DefaultCellularComponent) {
-
-            DefaultCellularComponent comp = (DefaultCellularComponent) a;
-
-            this.xpoints = Arrays.copyOfRange(comp.xpoints, 0, comp.xpoints.length);
-            this.ypoints = Arrays.copyOf(comp.ypoints, comp.ypoints.length);
-            makeBorderList();
-
-        } else {
-            duplicateBorderList(a);
-        }
-    }
-
     private void duplicateBorderList(CellularComponent c) {
         // Duplicate the border points
     	LOGGER.finest( "Duplicating border list from template component");
         this.borderList = new ArrayList<>(c.getBorderLength());
 
         for (IPoint p : c.getBorderList()) {
-            borderList.add(IPoint.makeNew(p));
+            borderList.add(p.duplicate());
         }
     }
 
@@ -405,7 +406,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 
     @Override
     public int[] getPosition() {
-        return this.position;
+        return Arrays.copyOf(position, position.length);
     }
 
     @Override
@@ -679,7 +680,6 @@ public abstract class DefaultCellularComponent implements CellularComponent {
             if (this.getStatistic(stat) == Statistical.STAT_NOT_CALCULATED)
                 calculateStatistic(stat);
         }
-
     }
 
     @Override

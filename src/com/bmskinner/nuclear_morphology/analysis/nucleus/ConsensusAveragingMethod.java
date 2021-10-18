@@ -31,9 +31,9 @@ import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.SingleDatasetAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.components.Taggable;
 import com.bmskinner.nuclear_morphology.components.MissingComponentException;
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
+import com.bmskinner.nuclear_morphology.components.Taggable;
 import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
@@ -49,8 +49,8 @@ import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
-import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
+import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.components.profiles.UnprofilableObjectException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
@@ -85,7 +85,7 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
     ComponentCreationException, ProfileException, MissingOptionException {
     	LOGGER.fine("Running consensus averaging on "+dataset.getName());
     	List<IPoint> border = getPointAverage();
-    	Consensus<Nucleus> refoldNucleus = makeConsensus(border);
+    	Consensus refoldNucleus = makeConsensus(border);
     	dataset.getCollection().setConsensus(refoldNucleus);
     }
     
@@ -137,6 +137,14 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
     	
     }
     
+    /**
+     * Set the segments from the profile collection
+     * to the nucleus.
+     * @param n
+     * @throws ProfileException 
+     * @throws MissingProfileException 
+     * @throws MissingLandmarkException 
+     */
     private void setSegments(Nucleus n) throws MissingLandmarkException, MissingProfileException, ProfileException {
     	// Add segments to the new nucleus profile
         if(dataset.getCollection().getProfileCollection().hasSegments()) {
@@ -153,17 +161,26 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
         }
     }
     
-    private Consensus<Nucleus> makeConsensus(List<IPoint> list)
+    /**
+     * Create the consensus nucleus
+     * @param n
+     * @throws ProfileException 
+     * @throws MissingProfileException 
+     * @throws MissingLandmarkException 
+     */
+    private Consensus makeConsensus(List<IPoint> list)
             throws UnprofilableObjectException, ComponentCreationException,
             MissingLandmarkException, ProfileException, MissingProfileException, MissingOptionException {
         
     	// Create a nucleus with the same rulesets as the dataset
         IAnalysisOptions op = dataset.getAnalysisOptions().orElseThrow(MissingOptionException::new);
         NucleusFactory fact = new NucleusFactory(op.getRuleSetCollection());
-        
+                
     	// Consensus CoM is at the origin for plotting
         IPoint com = IPoint.makeNew(0, 0);
         Nucleus n = fact.buildInstance(list, new File("Empty"), 0, com);
+        
+        
         setConsensusScale(n);
 
         // Calculate the stats for the new consensus
@@ -178,13 +195,12 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
         setSegments(n);
         
         // Build a consensus nucleus from the template points
-        Consensus<Nucleus> cons = new DefaultConsensusNucleus(n);
-        cons.component().alignVertically();
+        Consensus cons = new DefaultConsensusNucleus(n);
 
-        if (cons.component().getBorderPoint(Landmark.REFERENCE_POINT).getX() > cons.component().getCentreOfMass().getX())
-        	cons.component().flipHorizontal();
+        // TODO: make this use the new orientation scheme (left or right, up or down)
+        if (cons.getBorderPoint(Landmark.REFERENCE_POINT).isRightOf(com))
+        	cons.flipHorizontal();
         return cons;
-
     }
 
     private List<IPoint> getPointAverage() {

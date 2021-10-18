@@ -172,7 +172,7 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
      * @param n the template
      * @throws UnprofilableObjectException
      */
-    protected DefaultNucleus(Nucleus n) throws UnprofilableObjectException {
+    protected DefaultNucleus(@NonNull Nucleus n) throws UnprofilableObjectException {
         super(n);
         nucleusNumber = n.getNucleusNumber();
         signalCollection = n.getSignalCollection().duplicate();
@@ -305,6 +305,12 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
 
         if (Measurement.BOUNDING_WIDTH.equals(stat))
         	setStatistic(stat, getVerticallyRotatedNucleus().getBounds().getWidth());
+        
+        if (Measurement.BODY_WIDTH.equals(stat))
+        	setStatistic(stat, 0);
+        
+        if (Measurement.HOOK_LENGTH.equals(stat))
+        	setStatistic(stat, 0);
     }
     
     /**

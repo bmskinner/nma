@@ -20,6 +20,7 @@ import java.awt.Rectangle;
 import java.awt.Shape;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.logging.Logger;
 
@@ -44,7 +45,7 @@ import ij.process.FloatPolygon;
  * @since 1.13.3
  *
  */
-public class DefaultConsensusNucleus extends DefaultNucleus implements Consensus<Nucleus>  {
+public class DefaultConsensusNucleus extends DefaultNucleus implements Consensus  {
 	
 	private static final Logger LOGGER = Logger.getLogger(DefaultConsensusNucleus.class.getName());
 
@@ -53,33 +54,26 @@ public class DefaultConsensusNucleus extends DefaultNucleus implements Consensus
     private double xOffset = 0;
     private double yOffset = 0;
     private double rotOffset = 0;
-    
-    
 
+    /**
+     * Create from a nucleus. Offsets will be zero.
+     * @param n
+     * @throws UnprofilableObjectException
+     */
     public DefaultConsensusNucleus(Nucleus n) throws UnprofilableObjectException {
-
         super(n);
-        if (n instanceof DefaultConsensusNucleus) {
-
-            // If a consensus nucleus is used as the template, the CoM is
-            // already at zero, and
-            // should not be moved again, otherwise the border list will be
-            // dragged out of position.
-
-            // Calculate the difference between the template and the new nucleus
-
-            double minX = n.getMinX();
-            double minY = n.getMinY();
-
-            double diffX = minX - this.getMinX();
-            double diffY = minY - this.getMinY();
-
-            // Apply the offset to the border list
-            this.offset(diffX, diffY);
-
-        } else {
-            moveCentreOfMass(IPoint.makeNew(0, 0));
-        }
+    }
+    
+    /**
+     * Create from another consensus. Offsets will be copied
+     * @param n
+     * @throws UnprofilableObjectException
+     */
+    public DefaultConsensusNucleus(Consensus n) throws UnprofilableObjectException {
+        super(n);
+        xOffset =  n.currentOffset().getX();
+        yOffset = n.currentOffset().getY();
+        rotOffset = n.currentRotation();
     }
     
     /**
@@ -109,21 +103,6 @@ public class DefaultConsensusNucleus extends DefaultNucleus implements Consensus
 		e.addContent(new Element("OffsetR").setText(String.valueOf(rotOffset)));
 		return e;
 	}
-
-
-
-	@Override
-    public int[] getPosition() {
-
-        Rectangle bounds = toPolygon().getBounds();
-        int newWidth = (int) bounds.getWidth();
-        int newHeight = (int) bounds.getHeight();
-        int newX = (int) this.getMinX();
-        int newY = (int) this.getMinY();
-
-        int[] newPosition = { newX, newY, newWidth, newHeight };
-        return newPosition;
-    }
 
     @Override
     public void calculateProfiles() throws ProfileException {
@@ -189,18 +168,13 @@ public class DefaultConsensusNucleus extends DefaultNucleus implements Consensus
 	}
 	
 	@Override
-	public Consensus<Nucleus> duplicateConsensus() {
+	public Consensus duplicate() {
 		try {
 			return new DefaultConsensusNucleus(this);
 		} catch (UnprofilableObjectException e) {
 			LOGGER.log(Loggable.STACK, "Error duplicating consensus", e);
 			return null;
 		}
-	}
-	
-	@Override
-	public Nucleus component() {
-		return this;
 	}
 
 	@Override

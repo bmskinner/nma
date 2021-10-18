@@ -275,7 +275,7 @@ public class ProfileManager {
         		
         		//Update consensus
         		if (collection.hasConsensus()) {
-        			Nucleus n = collection.getRawConsensus().component();
+        			Nucleus n = collection.getRawConsensus();
         			int existingIndex = n.getBorderIndex(existingTag);
         			n.setBorderTag(tag, existingIndex);
         			setOpUsingTvBv(n);
@@ -304,7 +304,7 @@ public class ProfileManager {
          * Set the border tag in the consensus median profile
          */
         if (collection.hasConsensus()) {
-            Nucleus n = collection.getRawConsensus().component();
+            Nucleus n = collection.getRawConsensus();
             int newIndex = n.getProfile(ProfileType.ANGLE).findBestFitOffset(median);
             n.setBorderTag(tag, newIndex);
             setOpUsingTvBv(n);
@@ -723,7 +723,7 @@ public class ProfileManager {
 
         /* Update the consensus if present */
         if (collection.hasConsensus()) {
-            Nucleus n = collection.getRawConsensus().component();
+            Nucleus n = collection.getRawConsensus();
             mergeSegments(n, seg1, seg2, newID);
         }
     }
@@ -824,7 +824,7 @@ public class ProfileManager {
         
         /*  Update the consensus if present */
         if (collection.hasConsensus()) {
-        	Nucleus n = collection.getRawConsensus().component();
+        	Nucleus n = collection.getRawConsensus();
         	splitNucleusSegment(n, seg.getID(), proportion, newID1, newID2);
         }
         return true;
@@ -873,7 +873,7 @@ public class ProfileManager {
             
         // check consensus //TODO replace with remove consensus
         if (collection.hasConsensus()) {
-        	Nucleus n = collection.getRawConsensus().component();
+        	Nucleus n = collection.getRawConsensus();
             if (!isSplittable(n, id, proportion)) {
                 LOGGER.fine("Consensus not splittable");
                 return false;
@@ -961,7 +961,7 @@ public class ProfileManager {
         
         /* Update the consensus if present */
         if (collection.hasConsensus()) {
-        	Nucleus n = collection.getRawConsensus().component();
+        	Nucleus n = collection.getRawConsensus();
             unmergeSegments(n, segId);
         }
     }

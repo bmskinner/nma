@@ -242,7 +242,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
     }
     
     private void rotateConsensus(double degrees) {
-    	Refoldable<Nucleus> collection = activeDataset().getCollection();
+    	Refoldable collection = activeDataset().getCollection();
     	if (collection.hasConsensus()) {
     		collection.rotateConsensus(collection.currentConsensusRotation()-degrees);
             refreshChartCache(getDatasets());
@@ -391,7 +391,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
     	if (activeDataset()==null) 
     		return;
     	
-    	Refoldable<Nucleus> collection = activeDataset().getCollection();
+    	Refoldable collection = activeDataset().getCollection();
     	if (collection.hasConsensus())
     		return;
 

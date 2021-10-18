@@ -208,9 +208,11 @@ public class FluorescentNucleusFinder extends CellFinder {
 
         result.moveCentreOfMass(offsetCoM);
 
+
         result.setStatistic(Measurement.AREA, values.get(StatsMap.AREA));
         result.setStatistic(Measurement.MAX_FERET, values.get(StatsMap.FERET));
         result.setStatistic(Measurement.PERIMETER, values.get(StatsMap.PERIM));
+
 
         result.setScale(nuclOptions.getDouble(HashOptions.SCALE));
 

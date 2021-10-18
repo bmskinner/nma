@@ -17,7 +17,6 @@
 package com.bmskinner.nuclear_morphology.components.cells;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -37,10 +36,9 @@ import org.jdom2.Element;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileCreator;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.components.Statistical;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.Taggable;
 import com.bmskinner.nuclear_morphology.components.UnavailableBorderPointException;
-import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
@@ -50,9 +48,9 @@ import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.LandmarkType;
+import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.components.profiles.SegmentedFloatProfile;
-import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.UnprofilableObjectException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -139,7 +137,6 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
      */
     protected ProfileableCellularComponent(@NonNull final CellularComponent c) throws UnprofilableObjectException {
         super(c);
-
         if (c instanceof Taggable) {
 
             Taggable comp = (Taggable) c;
@@ -164,7 +161,6 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
         } else {
             throw new UnprofilableObjectException("Object is not a profileable object");
         }
-        
     }
     
     /**
@@ -683,39 +679,6 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
         }
         return bestDistance;
     }
-
-    private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-
-        in.defaultReadObject();
-        restoreFieldsAfterDeserialisation();
-       
-    }
-    
-    protected void restoreFieldsAfterDeserialisation() {
-    	 // set transient fields
-        double perimeter = this.getStatistic(Measurement.PERIMETER);
-        if(perimeter==Statistical.ERROR_CALCULATING_STAT)
-            calculateStatistic(Measurement.PERIMETER);
-        
-        windowSize = (int) Math.round( perimeter * windowProportion);
-
-        // Check if calculation needed
-        boolean isRecalculate = false;
-        for (ProfileType type : ProfileType.values()) {
-            isRecalculate |= !hasProfile(type);
-        }
-        
-        
-        if (isRecalculate) {
-            try {
-                calculateProfiles();
-            } catch (ProfileException e) {
-                LOGGER.warning("Error calculating profiles");
-                LOGGER.log(Loggable.STACK, e.getMessage(), e);
-            }
-        }
-    }
-    
     
     
     @Override

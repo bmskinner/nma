@@ -12,6 +12,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -85,7 +86,7 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
     private IProfileCollection profileCollection = new DefaultProfileCollection();
 
     /** the refolded consensus nucleus */
-    private Consensus<Nucleus> consensusNucleus;
+    private Consensus consensusNucleus;
 
     /** Store shell results separately to allow separate shell analysis
      * between parentDataset.getCollection() and child datasets */
@@ -180,7 +181,7 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
 		profileCollection = v.profileCollection.duplicate();
 		parentDataset = v.parentDataset;
 		if(v.consensusNucleus!=null)
-			consensusNucleus = v.consensusNucleus.duplicateConsensus();
+			consensusNucleus = v.consensusNucleus.duplicate();
 		for(Entry<UUID, IShellResult> e : v.shellResults.entrySet()) {
 			shellResults.put(e.getKey(), e.getValue().duplicate());
 		}
@@ -403,18 +404,18 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
     }
 
 	@Override
-	public void setConsensus(@Nullable Consensus<Nucleus> n) {
+	public void setConsensus(@Nullable Consensus n) {
 		consensusNucleus = n;
 	}
 	
 	@Override
-	public Consensus<Nucleus> getRawConsensus() {
+	public Consensus getRawConsensus() {
 		return consensusNucleus;
 	}
 
 	@Override
 	public Nucleus getConsensus() {
-		return consensusNucleus.component().getVerticallyRotatedNucleus();
+		return consensusNucleus.getVerticallyRotatedNucleus();
 	}
 	
 	@Override
@@ -992,44 +993,6 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
             return Double.NaN;
         }
     }
-
-    private void writeObject(java.io.ObjectOutputStream out) throws IOException {
-        out.defaultWriteObject();
-    }
-
-    private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-
-        in.defaultReadObject();
-        vennCache  = new HashMap<>(); // cache the number of shared nuclei with other datasets
-        statsCache = new StatsCache();
-
-        signalManager = new SignalManager(this);
-        profileManager = new ProfileManager(this);
-
-        if(this.hasConsensus()) {
-			rotateConsensus(0);
-			offsetConsensus(0, 0);
-        }
-        
-        // Don't try to restore profile aggregates here - the parentDataset.getCollection() collection has
-        // not finished loading, and so calls to parentDataset.getCollection() will be null. Do the restore in the
-        // parentDataset.getCollection() class after reading this object has finished.
-    }
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((cellIDs == null) ? 0 : cellIDs.hashCode());
-		result = prime * result + ((consensusNucleus == null) ? 0 : consensusNucleus.hashCode());
-		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		result = prime * result + ((profileCollection == null) ? 0 : profileCollection.hashCode());
-		result = prime * result + ((shellResults == null) ? 0 : shellResults.hashCode());
-		result = prime * result + ((uuid == null) ? 0 : uuid.hashCode());
-		return result;
-	}
-
-	
     
 	@Override
 	public String toString() {
@@ -1050,6 +1013,46 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
 		}
 
 		return b.toString();
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + Objects.hash(cellIDs, consensusNucleus, name, 
+				profileCollection, shellResults, uuid);
+		return result;
+	}
+	
+
+//	@Override
+//	public int hashCode() {
+//		final int prime = 31;
+//		int result = 1;
+//		result = prime * result + ((cellIDs == null) ? 0 : cellIDs.hashCode());
+//		result = prime * result + ((consensusNucleus == null) ? 0 : consensusNucleus.hashCode());
+//		result = prime * result + ((name == null) ? 0 : name.hashCode());
+//		result = prime * result + ((profileCollection == null) ? 0 : profileCollection.hashCode());
+//		result = prime * result + ((shellResults == null) ? 0 : shellResults.hashCode());
+//		result = prime * result + ((uuid == null) ? 0 : uuid.hashCode());
+//		return result;
+//	}
+
+    
+	
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		VirtualDataset other = (VirtualDataset) obj;
+		return Objects.equals(cellIDs, other.cellIDs) && Objects.equals(consensusNucleus, other.consensusNucleus)
+				&& Objects.equals(name, other.name) && Objects.equals(profileCollection, other.profileCollection)
+				&& Objects.equals(shellResults, other.shellResults) && Objects.equals(uuid, other.uuid);
 	}
 
 	@Override
@@ -1107,7 +1110,7 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
 			c.setScale(scale);
 
 		if (hasConsensus())
-			consensusNucleus.component().setScale(scale);
+			consensusNucleus.setScale(scale);
 
 		clear(MeasurementScale.MICRONS);
 	}
