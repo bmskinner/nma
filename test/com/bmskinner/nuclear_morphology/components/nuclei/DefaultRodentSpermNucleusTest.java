@@ -59,10 +59,10 @@ public class DefaultRodentSpermNucleusTest {
     @Test
     public void testGetStatisticPlottableStatisticMeasurementScale() {
         double scale = 5;
-        
+
         // Get and save the values with default scale 1
         Map<Measurement, Double> map = new HashMap<>();
-        for(Measurement stat : Measurement.getNucleusStats()){
+        for(Measurement stat : testNucleus.getStatistics()){
             map.put(stat, testNucleus.getStatistic(stat));
         }
         
@@ -70,7 +70,7 @@ public class DefaultRodentSpermNucleusTest {
         testNucleus.setScale(scale);
         
         // Get the actual values for microns and pixels
-        for(Measurement stat : Measurement.getNucleusStats()){
+        for(Measurement stat : testNucleus.getStatistics()){
             double m = testNucleus.getStatistic(stat, MeasurementScale.MICRONS);
             
             double expected = Measurement.convert(map.get(stat), scale, MeasurementScale.MICRONS, stat.getDimension());

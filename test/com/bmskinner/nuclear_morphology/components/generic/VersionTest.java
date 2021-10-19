@@ -143,9 +143,7 @@ public class VersionTest {
 	@Test
 	public void testVersionIsSupported() {
 		assertTrue(Version.versionIsSupported(Version.currentVersion()));
-		Version v = new Version(1, 5, 3);
-		assertTrue(Version.versionIsSupported(Version.v_1_13_2));
-		assertFalse(Version.versionIsSupported(v));
+		assertFalse(Version.versionIsSupported(Version.v_1_19_0));
 	}
 
 }

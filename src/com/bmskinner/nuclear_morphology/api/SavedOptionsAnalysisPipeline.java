@@ -168,7 +168,7 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod impleme
 		if(!rootFolder.exists())
 	        throw new IllegalArgumentException("Detection folder does not exist");
 
-		IAnalysisOptions options = readOptions();
+		IAnalysisOptions options = XMLReader.readAnalysisOptions(xmlFile);
 
 		if(outputFolder==null)
 			outputFolder = createOutputFolder(options);
@@ -188,15 +188,6 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod impleme
 			}
 		}
     	run(methodsToRun);
-	}
-	
-	/**
-	 * Read the options XML file and create analysis options object
-	 * @return an analysis options object with the options from file
-	 * @throws XMLReadingException if the file cannot be read
-	 */
-	private IAnalysisOptions readOptions() throws XMLReadingException {
-		return XMLReader.readAnalysisOptions(xmlFile);
 	}
 	
 	private List<IAnalysisDataset> createNucleusDetectionMethod(@NonNull IAnalysisOptions options, File imageFolder) throws Exception {
