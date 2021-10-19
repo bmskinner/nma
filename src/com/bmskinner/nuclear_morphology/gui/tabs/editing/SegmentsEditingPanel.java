@@ -38,7 +38,6 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.analysis.profiles.SegmentationHandler;
 import com.bmskinner.nuclear_morphology.charting.charts.MorphologyChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.ProfileChartFactory;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
@@ -53,6 +52,7 @@ import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
+import com.bmskinner.nuclear_morphology.components.profiles.SegmentationHandler;
 import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.UnsegmentedProfileException;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;

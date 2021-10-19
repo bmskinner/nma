@@ -31,6 +31,7 @@ import com.bmskinner.nuclear_morphology.analysis.nucleus.CellCollectionFilterBui
 import com.bmskinner.nuclear_morphology.analysis.nucleus.CellCollectionFilterer;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.ConsensusAveragingMethod;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.FilteringOptions;
+import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.charting.ChartFactoryTest;
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.Statistical;
@@ -308,7 +309,7 @@ public class ICellCollectionTest extends ComponentTester {
 		int exp = collection.streamCells().mapToInt(c->{
 			try {
 				return c.getPrimaryNucleus().getProfile(ProfileType.ANGLE).size();
-			} catch (MissingProfileException e) {
+			} catch (MissingProfileException | ProfileException e) {
 				return Integer.MAX_VALUE;
 			}
 		}).max().orElse(Integer.MAX_VALUE);

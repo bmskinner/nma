@@ -86,7 +86,7 @@ public class ProfileOffsetter {
                         continue;
                     }
 
-                    nucleus.setBorderTag(tag, newIndex);
+                    nucleus.setLandmark(tag, newIndex);
                 } catch (IndexOutOfBoundsException | MissingComponentException e) {
                     LOGGER.log(Loggable.STACK, "Cannot set " + tag + " index in nucleus profile", e);
                 }

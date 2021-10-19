@@ -61,6 +61,7 @@ import org.jfree.chart.ui.RectangleEdge;
 import org.jfree.data.Range;
 import org.jfree.data.xy.XYDataset;
 
+import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.charting.charts.ConsensusNucleusChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.OutlineChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.overlays.EllipticalOverlay;
@@ -475,7 +476,7 @@ public class CellBorderAdjustmentDialog extends AbstractCellEditingDialog implem
         ISegmentedProfile templateProfile;
         try {
             templateProfile = workingCell.getPrimaryNucleus().getProfile(ProfileType.ANGLE);
-        } catch (MissingProfileException e1) {
+        } catch (MissingProfileException | ProfileException e1) {
             LOGGER.warning("Angle profile not present");
             return;
         }

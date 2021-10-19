@@ -226,7 +226,7 @@ public class DatasetValidator {
 				for (Nucleus n : c.getNuclei()) {
 					try {
 						n.getProfile(type);
-					} catch (MissingProfileException e) {
+					} catch (MissingProfileException | ProfileException e) {
 						errorList.add(String.format("Nucleus %s does not have %s profile", n.getNameAndNumber(), type));
 						errorCells.add(c);
 						withErrors++;
@@ -358,7 +358,7 @@ public class DatasetValidator {
 						if(s.getStartIndex()==rpIndex)
 							rpIsOk++;
 					}
-				} catch (MissingLandmarkException | MissingProfileException e) {
+				} catch (MissingLandmarkException | MissingProfileException | ProfileException e) {
 					// allow withErrors to fall through
 					LOGGER.fine("No border tag present");
 				}

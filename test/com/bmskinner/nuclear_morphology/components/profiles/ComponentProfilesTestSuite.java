@@ -5,9 +5,15 @@ import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
-@SuiteClasses({ DefaultBorderSegmentTest.class, DefaultProfileCollectionTest.class, FloatProfileTest.class,
-		IBorderSegmentTester.class, IProfileTester.class, ISegmentedProfileTester.class, ProfileManagerTest.class,
-		SegmentedFloatProfileTest.class })
+@SuiteClasses({ 
+	DefaultBorderSegmentTest.class, 
+	DefaultProfileCollectionTest.class, 
+	FloatProfileTest.class,
+	IProfileSegmentTest.class, 
+	IProfileTester.class, 
+	ISegmentedProfileTester.class, 
+	ProfileManagerTest.class,
+	SegmentedFloatProfileTest.class })
 public class ComponentProfilesTestSuite {
 
 }

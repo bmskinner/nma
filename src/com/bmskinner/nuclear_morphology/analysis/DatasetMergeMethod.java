@@ -28,6 +28,7 @@ import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.analysis.signals.PairedSignalGroups;
 import com.bmskinner.nuclear_morphology.analysis.signals.PairedSignalGroups.DatasetSignalId;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
@@ -176,9 +177,9 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
      * @return the merged dataset
      * @throws MissingProfileException 
      * @throws MissingOptionException 
-     * @throws Exception
+     * @throws ProfileException 
      */
-    private IAnalysisDataset performMerge(@NonNull ICellCollection newCollection) throws MissingProfileException, MissingOptionException{
+    private IAnalysisDataset performMerge(@NonNull ICellCollection newCollection) throws MissingProfileException, MissingOptionException, ProfileException{
 
         for (IAnalysisDataset d : datasets) {
             

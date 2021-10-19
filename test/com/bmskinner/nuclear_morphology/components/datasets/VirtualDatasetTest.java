@@ -17,18 +17,19 @@ import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 
 public class VirtualDatasetTest extends ComponentTester {
 	
+	private IAnalysisDataset parent;
 	private VirtualDataset d;
 
 	@Before
     public void loadDataset() throws Exception {    	
-		IAnalysisDataset d1 = new TestDatasetBuilder(RNG_SEED).cellCount(N_CELLS)
+		parent = new TestDatasetBuilder(RNG_SEED).cellCount(N_CELLS)
 				.ofType(RuleSetCollection.roundRuleSetCollection())
 				.withMaxSizeVariation(10)
 				.randomOffsetProfiles(true)
 				.numberOfClusters(N_CHILD_DATASETS)
 				.segmented().build();
 		
-		d = new VirtualDataset(d1, "test", UUID.randomUUID(), d1.getCollection());
+		d = new VirtualDataset(parent, "test", UUID.randomUUID(), parent.getCollection());
     }
 	
 	@Test
@@ -38,10 +39,8 @@ public class VirtualDatasetTest extends ComponentTester {
 				.withMaxSizeVariation(10)
 				.randomOffsetProfiles(true)
 				.numberOfClusters(N_CHILD_DATASETS)
-				.segmented().build();
-		
-		VirtualDataset v = new VirtualDataset(d1, "test", UUID.randomUUID(), d1.getCollection());		
-		assertEquals(d1.getCollection().getProfileCollection(), v.getProfileCollection());
+				.segmented().build();	
+		assertEquals(parent.getCollection().getProfileCollection(), d.getProfileCollection());
 	}
 	
 	@Test

@@ -149,7 +149,7 @@ public class DummyRodentSpermNucleus extends DummyCellularComponent implements N
 	}
 
 	@Override
-	public ISegmentedProfile getProfile(@NonNull ProfileType type) throws MissingProfileException {
+	public ISegmentedProfile getProfile(@NonNull ProfileType type) throws MissingProfileException, ProfileException {
 		return nucleus.getProfile(type);
 	}
 
@@ -228,8 +228,8 @@ public class DummyRodentSpermNucleus extends DummyCellularComponent implements N
 	}
 
 	@Override
-	public void setBorderTag(@NonNull Landmark tag, int i) {
-		nucleus.setBorderTag(tag, i);
+	public void setLandmark(@NonNull Landmark tag, int i) throws IndexOutOfBoundsException, MissingProfileException, MissingLandmarkException, ProfileException {
+		nucleus.setLandmark(tag, i);
 	}
 
 	@Override

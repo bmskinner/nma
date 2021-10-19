@@ -145,7 +145,7 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 					// Fall back to zero index, correct manually
 				}
 				if(!n.isLocked()) {
-					n.setBorderTag(t, index);
+					n.setLandmark(t, index);
 				} else {
 					LOGGER.fine("Nucleus "+n.getNameAndNumber()+" is locked, not changing "+t);
 				}

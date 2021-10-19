@@ -201,7 +201,7 @@ public class CellDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
                 LOGGER.finest( "Getting start point at index " + start);
                 IPoint point = verticalNucleus.getBorderPoint(start);
                 result.add(point);
-            } catch (MissingComponentException e) {
+            } catch (MissingComponentException | ProfileException e) {
                 LOGGER.warning("Cannot get angle profile for nucleus");
 
             }

@@ -90,8 +90,8 @@ public class RotatableTest extends ComponentTester {
 				
 				// Set the TV and BV to the current indices
 				Nucleus n = c.getPrimaryNucleus();
-				n.setBorderTag(Landmark.TOP_VERTICAL, tIndex);
-				n.setBorderTag(Landmark.BOTTOM_VERTICAL, bIndex);
+				n.setLandmark(Landmark.TOP_VERTICAL, tIndex);
+				n.setLandmark(Landmark.BOTTOM_VERTICAL, bIndex);
 				n.alignVertically();
 				
 				IPoint tv = n.getBorderPoint(Landmark.TOP_VERTICAL);

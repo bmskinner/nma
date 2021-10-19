@@ -47,7 +47,7 @@ public class DatasetMergeMethodTest {
 			for(Landmark tag : tags.keySet()) {
 				if(Landmark.REFERENCE_POINT.equals(tag))
 					continue;
-				n.setBorderTag(tag, n.getBorderIndex(tag)+10);
+				n.setLandmark(tag, n.getBorderIndex(tag)+10);
 			}
 			
 		}

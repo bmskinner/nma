@@ -132,7 +132,7 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
     				.getProfile(ProfileType.ANGLE, l, Stats.MEDIAN);
 			int newIndex = n.getProfile(ProfileType.ANGLE).findBestFitOffset(median);
 			LOGGER.finer(()->String.format("Setting %s in consensus to %s ", l, newIndex));
-			n.setBorderTag(l, newIndex);
+			n.setLandmark(l, newIndex);
     	}
     	
     }

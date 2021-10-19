@@ -34,7 +34,7 @@ import com.bmskinner.nuclear_morphology.samples.dummy.DummySegmentedCellularComp
  *
  */
 @RunWith(Parameterized.class)
-public class IBorderSegmentTester {
+public class IProfileSegmentTest {
 	
 	public final static int startIndex = 0;
 	public final static int endIndex = 49;
@@ -207,6 +207,7 @@ public class IBorderSegmentTester {
 			assertTrue(duplicated.hasMergeSource(mge.getID()));
 		}
 		
+		assertEquals(segment, duplicated);
 	}
 	
 	@Test

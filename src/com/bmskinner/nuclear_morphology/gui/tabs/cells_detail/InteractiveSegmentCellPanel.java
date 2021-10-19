@@ -30,6 +30,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.BorderFactory;
@@ -39,6 +40,7 @@ import javax.swing.JPopupMenu;
 
 import com.bmskinner.nuclear_morphology.analysis.image.AbstractImageFilterer;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageAnnotator;
+import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
@@ -220,7 +222,12 @@ public class InteractiveSegmentCellPanel extends InteractiveCellPanel {
 			ThreadManager.getInstance().execute(()->{
 				cell.getPrimaryNucleus().setLocked(false);
 
-				cell.getPrimaryNucleus().setBorderTag(tag, newIndex);
+				try {
+					cell.getPrimaryNucleus().setLandmark(tag, newIndex);
+				} catch (IndexOutOfBoundsException | MissingProfileException | MissingLandmarkException
+						| ProfileException e) {
+					LOGGER.log(Level.SEVERE, "Unable to set landmark in cell", e);
+				}
 
 				cell.getPrimaryNucleus().updateDependentStats();
 				cell.getPrimaryNucleus().setLocked(true);
@@ -291,7 +298,7 @@ public class InteractiveSegmentCellPanel extends InteractiveCellPanel {
 					createImage();
 				});
 				popupMenu.add(nextItem);
-			} catch (MissingProfileException | MissingLandmarkException e) {
+			} catch (MissingProfileException | MissingLandmarkException | ProfileException e) {
 				LOGGER.log(Loggable.STACK, "Cannot get border tag index", e);
 			}
 		}

@@ -100,7 +100,7 @@ public class ProfileCreator {
         		segments = templateProfile.getSegments();
         	}
 
-        } catch (MissingProfileException e) {
+        } catch (MissingProfileException | ProfileException e) {
         	LOGGER.log(Loggable.STACK, "No profile angle type: "+e.getMessage(), e);
         }
 

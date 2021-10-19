@@ -245,7 +245,6 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
                 rowData.add(df.format(value));
             }
 
-            // ColourMeasurometer cm = new ColourMeasurometer();
             Color colour = ColourMeasurometer.calculateAverageRGB(c, CellularComponent.CYTOPLASM);
 
             fieldNames.add("Average RGB");

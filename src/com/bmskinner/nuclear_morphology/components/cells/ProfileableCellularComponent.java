@@ -37,12 +37,14 @@ import org.jdom2.Element;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileCreator;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
+import com.bmskinner.nuclear_morphology.components.Statistical;
 import com.bmskinner.nuclear_morphology.components.Taggable;
 import com.bmskinner.nuclear_morphology.components.UnavailableBorderPointException;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.profiles.DefaultProfileSegment;
+import com.bmskinner.nuclear_morphology.components.profiles.FloatProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
@@ -155,7 +157,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
                     LOGGER.log(Loggable.STACK, "Cannot copy " + type + " from template", e);
                 }
             }
-            this.setBorderTags(comp.getBorderTags());
+            this.setLandmarks(comp.getBorderTags());
 
             this.isLocked = comp.isLocked();
         } else {
@@ -304,7 +306,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
     @Override
 	public Map<Landmark, Integer> getBorderTags() {
         Map<Landmark, Integer> result = new HashMap<>();
-        for (Landmark b : profileLandmarks.keySet()) {
+        for(Landmark b : profileLandmarks.keySet()) {
             result.put(b, profileLandmarks.get(b));
         }
         return result;
@@ -318,7 +320,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 
     @Override
 	public Landmark getBorderTag(int index) {
-        for (Entry<Landmark, Integer> entry : profileLandmarks.entrySet()) {
+        for(Entry<Landmark, Integer> entry : profileLandmarks.entrySet()) {
             if (entry.getValue() == index)
                 return entry.getKey();
         }
@@ -337,7 +339,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
      * Replace the tags in the object with the given tag map
      * @param m
      */
-    private void setBorderTags(Map<Landmark, Integer> m) {
+    private void setLandmarks(Map<Landmark, Integer> m) {
         if (isLocked)
             return;
         profileLandmarks.clear();
@@ -346,43 +348,36 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
     }
 
     @Override
-	public void setBorderTag(@NonNull Landmark tag, int i) {
-        if (isLocked)
-            return;
-        
-        if (i < 0 || i >= this.getBorderLength())
-            throw new IllegalArgumentException(String.format("Index %s is out of bounds for border length %s", i, getBorderLength()));
+    public void setLandmark(@NonNull Landmark tag, int i) throws MissingProfileException, ProfileException, MissingLandmarkException {
+    	if (isLocked)
+    		return;
 
-        try {
+    	if (i < 0 || i >= this.getBorderLength())
+    		throw new IllegalArgumentException(String.format("Index %s is out of bounds for border length %s", i, getBorderLength()));
 
-        	profileLandmarks.put(tag, i);
-        	
-            // When moving the RP, move all segments to match
-            if (Landmark.REFERENCE_POINT.equals(tag)) {
-                ISegmentedProfile p = getProfile(ProfileType.ANGLE);
-                int oldRP = getBorderIndex(tag);
-                int diff = i - oldRP;
-                try {
-                    p.nudgeSegments(diff);
-                    segments = p.getSegments();
-                } catch (ProfileException e) {
-                    LOGGER.log(Loggable.STACK, "Error nudging segments when assigning RP", e);
-                    return;
-                }
-                setProfile(ProfileType.ANGLE, p);
+    	profileLandmarks.put(tag, i);
 
-            }
+    	// When moving the RP, move all segments to match
+    	if (Landmark.REFERENCE_POINT.equals(tag)) {
+    		ISegmentedProfile p = getProfile(ProfileType.ANGLE);
+    		int oldRP = getBorderIndex(tag);
+    		int diff = i - oldRP;
+    		try {
+    			p.nudgeSegments(diff);
+    			segments = p.getSegments();
+    		} catch (ProfileException e) {
+    			LOGGER.log(Loggable.STACK, "Error nudging segments when assigning RP", e);
+    			return;
+    		}
+    		setProfile(ProfileType.ANGLE, p);
 
-            // The intersection point should always be opposite the orientation point
-            if (Landmark.ORIENTATION_POINT.equals(tag)) {
-                int intersectionIndex = this.getBorderIndex(this.findOppositeBorder(this.getBorderPoint(i)));
-                this.setBorderTag(Landmark.INTERSECTION_POINT, intersectionIndex);
-            }
-        } catch (MissingProfileException e) {
-        	LOGGER.log(Loggable.STACK, "Unable to find angle profile in object", e);
-        } catch(MissingLandmarkException e) {
-        	LOGGER.log(Loggable.STACK, String.format("Error getting border tag %s for object", tag), e);
-        }
+    	}
+
+    	// The intersection point should always be opposite the orientation point
+    	if (Landmark.ORIENTATION_POINT.equals(tag)) {
+    		int intersectionIndex = this.getBorderIndex(this.findOppositeBorder(this.getBorderPoint(i)));
+    		this.setLandmark(Landmark.INTERSECTION_POINT, intersectionIndex);
+    	}
     }
        
 
@@ -468,23 +463,16 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
                 return;
             }
 
-            assignProfile(ProfileType.ANGLE, profile);
+            profileMap.put(type, profile);
 
         }
     }
 
     @Override
-	public ISegmentedProfile getProfile(@NonNull ProfileType type) throws MissingProfileException {
-
-        if (!this.hasProfile(type))
-            throw new MissingProfileException("Cannot get profile type " + type);
-
-        try {
-        	return new SegmentedFloatProfile(profileMap.get(type), segments);
-        	
-        } catch (ProfileException e) {
-            throw new MissingProfileException("Cannot get profile type " + type, e);
-        }
+    public ISegmentedProfile getProfile(@NonNull ProfileType type) throws MissingProfileException, ProfileException {
+    	if (!this.hasProfile(type))
+    		throw new MissingProfileException("Cannot get profile type " + type);
+    	return new SegmentedFloatProfile(profileMap.get(type), segments);
     }
 
     @Override
@@ -507,49 +495,37 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
         return profile.offset(tagIndex);
     }
         
-	@Override
-	public void setProfile(@NonNull ProfileType type, @NonNull Landmark tag, @NonNull ISegmentedProfile p) throws MissingLandmarkException, MissingProfileException {
+    @Override
+    public void setProfile(@NonNull ProfileType type, @NonNull Landmark tag, @NonNull ISegmentedProfile p) throws MissingLandmarkException, MissingProfileException, ProfileException {
 
-		if (isLocked) {
-			LOGGER.finer("Cannot set profile: object is locked");
-			return;
-		}
+    	if (isLocked) {
+    		LOGGER.finer("Cannot set profile: object is locked");
+    		return;
+    	}
 
-		if (!this.hasLandmark(tag))
-			throw new MissingLandmarkException(String.format("Tag %s is not present", tag));
+    	if (!hasLandmark(tag))
+    		throw new MissingLandmarkException(String.format("Tag %s is not present", tag));
 
-		// fetch the index of the tag (the zero of the input profile)
-		int tagIndex = profileLandmarks.get(tag);
+    	// fetch the index of the tag (the zero of the input profile)
+    	int tagIndex = profileLandmarks.get(tag);
 
-		// Keep a copy of the old profile
-		ISegmentedProfile oldProfile = getProfile(type);
+    	// subtract the tag offset from the profile   
+    	int newStartIndex = wrapIndex(-tagIndex);
+    	ISegmentedProfile offsetNewProfile =  p.offset(newStartIndex);
+    	setProfile(type, offsetNewProfile);
+    }
 
-		try {
-			// subtract the tag offset from the profile   
-			int newStartIndex = wrapIndex(-tagIndex);
-			ISegmentedProfile offsetNewProfile =  p.offset(newStartIndex);
-			setProfile(type, offsetNewProfile);
-		} catch (ProfileException e) { // restore the old profile
-			LOGGER.log(Loggable.STACK, String.format("Error setting profile %s at %s; restoring original profile", type, tag), e);
-			setProfile(type, oldProfile);
-		}
-	}
-    
     @Override
 	public void setProfile(@NonNull ProfileType type, @NonNull ISegmentedProfile profile) {
-
         if (isLocked)
             return;
-
-        assignProfile(type, profile);
-        
-        segments = profile.getOrderedSegments();
-        
+        profileMap.put(type, new FloatProfile(profile));
+        segments.clear();
+        for(IProfileSegment s : profile.getSegments()) {
+        	segments.add(s.copy());
+        }
     }
     
-    protected void assignProfile(@NonNull ProfileType type, @NonNull IProfile profile) {
-    	profileMap.put(type, profile);
-    }
 
     @Override
     public void calculateProfiles() throws ProfileException {
@@ -588,8 +564,9 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
                 pathLength += thisPoint.getLengthTo(prevPoint);
                 prevPoint = thisPoint;
             }
-        } catch (MissingProfileException e) {
+        } catch (MissingProfileException | ProfileException e) {
             LOGGER.log(Loggable.STACK, "Error getting angle profile ", e);
+            return Statistical.ERROR_CALCULATING_STAT;
         }
         return pathLength;
     }
@@ -606,7 +583,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
         for (Entry<ProfileType, IProfile> entry : profileMap.entrySet()) {
             IProfile profile = entry.getValue();
             profile.reverse();
-            assignProfile(entry.getKey(), profile);
+            profileMap.put(entry.getKey(), profile);
         }
         
         // Reverse segments
@@ -641,12 +618,12 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 
     }
 
-    public double getNarrowestDiameter() {
+    public double getNarrowestDiameter()  {
         try {
             return Arrays.stream(this.getProfile(ProfileType.DIAMETER).toDoubleArray()).min().orElse(0);
-        } catch (MissingProfileException e) {
+        } catch (MissingProfileException | ProfileException e) {
             LOGGER.log(Loggable.STACK, "Error getting diameter profile", e);
-            return 0;
+            return Statistical.ERROR_CALCULATING_STAT;
         }
     }
 

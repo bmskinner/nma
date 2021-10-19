@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package com.bmskinner.nuclear_morphology.analysis.profiles;
+package com.bmskinner.nuclear_morphology.components.profiles;
 
 import java.util.List;
 import java.util.UUID;
@@ -23,21 +23,16 @@ import java.util.logging.Logger;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.DatasetValidator;
-import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
+import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.MissingComponentException;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
-import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
-import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
-import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
-import com.bmskinner.nuclear_morphology.components.profiles.UnsegmentedProfileException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 /**
  * This coordinates updates to segmentation between datasets and their children.
- * When a UI request is made to update segmentation, this handler is reponsible
+ * When a UI request is made to update segmentation, this handler is responsible
  * for keeping all child datasets in sync
  * 
  * @author bms41
@@ -56,6 +51,8 @@ public class SegmentationHandler {
      * @param d
      */
     public SegmentationHandler(final IAnalysisDataset d) {
+    	if(!d.isRoot())
+    		throw new IllegalArgumentException("Cannot create segment handler for non-root dataset");
         dataset = d;
     }
 
@@ -65,76 +62,63 @@ public class SegmentationHandler {
      * 
      * @param segID1 the segment ID to be merged
      * @param segID2 the segment ID to be merged
+     * @throws MissingComponentException 
+     * @throws ProfileException 
      */
-    public synchronized void mergeSegments(@NonNull UUID segID1, @NonNull UUID segID2) {
+    public synchronized void mergeSegments(@NonNull UUID segID1, @NonNull UUID segID2) throws ProfileException, MissingComponentException {
 
-    	LOGGER.fine("Requested merge of segments "+segID1+" and "+segID2
+    	LOGGER.finer("Requested merge of segments "+segID1+" and "+segID2
     			+" in dataset "+dataset.getName());
-    	
-        if (segID1 == null || segID2 == null)
-            throw new IllegalArgumentException("Segment IDs cannot be null");
 
-        if(!dataset.isRoot()) {
-        	LOGGER.fine("Cannot merge segments in a virtual collection");
-        	return;
-        }
-        
-        // Don't mess with a broken dataset 
-        DatasetValidator dv = new DatasetValidator();
-        if (!dv.validate(dataset)) {
-        	LOGGER.warning(SEGMENTS_ARE_OUT_OF_SYNC_WITH_MEDIAN_LBL);
-        	LOGGER.warning("Canceling merge");
-        	return;
-        }
-        
-        // Give the new merged segment a new ID
-        final UUID newID = UUID.randomUUID();
-        
-        ISegmentedProfile medianProfile = null;
-        try {
-        	LOGGER.fine("Merging segments in root dataset "+dataset.getName());
-        	medianProfile = dataset.getCollection().getProfileCollection().getSegmentedProfile(ProfileType.ANGLE,
-                    Landmark.REFERENCE_POINT, Stats.MEDIAN);
+    	if(!dataset.isRoot()) {
+    		LOGGER.fine("Cannot merge segments in a virtual collection");
+    		return;
+    	}
 
-            IProfileSegment seg1 = medianProfile.getSegment(segID1);
-            IProfileSegment seg2 = medianProfile.getSegment(segID2);
+    	// Don't mess with a broken dataset 
+    	DatasetValidator dv = new DatasetValidator();
+    	if (!dv.validate(dataset)) {
+    		LOGGER.warning(SEGMENTS_ARE_OUT_OF_SYNC_WITH_MEDIAN_LBL);
+    		LOGGER.warning("Canceling merge");
+    		return;
+    	}
 
-            boolean ok = dataset.getCollection().getProfileManager().testSegmentsMergeable(seg1, seg2);
+    	// Give the new merged segment a new ID
+    	final UUID newID = UUID.randomUUID();
 
-            if (ok) {
+    	ISegmentedProfile medianProfile = null;
 
-                dataset.getCollection().getProfileManager().mergeSegments(seg1, seg2, newID);
+    	LOGGER.fine("Merging segments in root dataset "+dataset.getName());
+    	medianProfile = dataset.getCollection().getProfileCollection().getSegmentedProfile(ProfileType.ANGLE,
+    			Landmark.REFERENCE_POINT, Stats.MEDIAN);
 
-                for (IAnalysisDataset child : dataset.getAllChildDatasets()) {
+    	IProfileSegment seg1 = medianProfile.getSegment(segID1);
+    	IProfileSegment seg2 = medianProfile.getSegment(segID2);
 
-                    ISegmentedProfile childProfile = child.getCollection().getProfileCollection()
-                            .getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);
+    	boolean ok = dataset.getCollection().getProfileManager().testSegmentsMergeable(seg1, seg2);
 
-                    IProfileSegment childSeg1 = childProfile.getSegment(segID1);
-                    IProfileSegment childSeg2 = childProfile.getSegment(segID2);
+    	if (ok) {
+    		dataset.getCollection().getProfileManager().mergeSegments(seg1, seg2, newID);
 
-                    child.getCollection().getProfileManager().mergeSegments(childSeg1, childSeg2, newID);
-                }
-            } else {
-                LOGGER.warning("Segments are not mergable");
-            }
-            
-			if(!dv.validate(dataset)) {
-				LOGGER.warning("Merging failed; resulting dataset did not validate");
-				for(String s : dv.getErrors())
-					LOGGER.warning(s);
-			}
+    		for (IAnalysisDataset child : dataset.getAllChildDatasets()) {
 
-        } catch (ProfileException | MissingComponentException e) {
-            LOGGER.warning("Error merging segments");
-            if(medianProfile!=null){
-                for (UUID id : medianProfile.getSegmentIDs()) {
-                    LOGGER.warning(id.toString());
-                }
-            }
-            LOGGER.log(Loggable.STACK, "Error merging segments", e);
+    			ISegmentedProfile childProfile = child.getCollection().getProfileCollection()
+    					.getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);
 
-        }
+    			IProfileSegment childSeg1 = childProfile.getSegment(segID1);
+    			IProfileSegment childSeg2 = childProfile.getSegment(segID2);
+
+    			child.getCollection().getProfileManager().mergeSegments(childSeg1, childSeg2, newID);
+    		}
+    	} else {
+    		LOGGER.warning("Segments are not mergable");
+    	}
+
+    	if(!dv.validate(dataset)) {
+    		LOGGER.warning("Merging failed; resulting dataset did not validate");
+    		for(String s : dv.getErrors())
+    			LOGGER.warning(s);
+    	}
     }
 
     /**

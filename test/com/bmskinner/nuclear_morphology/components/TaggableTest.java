@@ -84,6 +84,8 @@ public class TaggableTest extends ComponentTester {
 	
 	@Test
 	public void testUpdatingSegmentsInProfile() throws Exception {
+		
+		// Get the profile to update
 		ISegmentedProfile oldProfile = taggable.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
 		
 		IProfileSegment seg0 = oldProfile.getSegmentAt(0);
@@ -95,8 +97,10 @@ public class TaggableTest extends ComponentTester {
 		int oldEnd = seg0.getEndIndex();
 		int newEnd = oldEnd+10;
 
+		// Check the update was successful
 		assertTrue(oldProfile.update(seg0, newStart, newEnd));
 		
+		// Put the updated profile back into the nucleus
 		taggable.setProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, oldProfile);
 		
 		// Confirm everything was saved properly
@@ -173,8 +177,26 @@ public class TaggableTest extends ComponentTester {
 		
 		int newRpIndex = CellularComponent.wrapIndex(rpIndex+10, taggable.getBorderLength());
 		
-		taggable.setBorderTag(Landmark.REFERENCE_POINT, newRpIndex);
+		taggable.setLandmark(Landmark.REFERENCE_POINT, newRpIndex);
 		assertEquals(newRpIndex, taggable.getBorderIndex(Landmark.REFERENCE_POINT));
+	}
+	
+	@Test
+	public void testSegmentsCanBeMerged() throws Exception {
+		ISegmentedProfile profile = taggable.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
+		UUID segId1 = profile.getSegmentAt(1).getID();
+		UUID segId2 = profile.getSegmentAt(2).getID();
+		
+		UUID newId = UUID.randomUUID();
+		profile.mergeSegments(segId1, segId2, newId);
+		taggable.setProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, profile);
+		
+		ISegmentedProfile result = taggable.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
+		
+		assertEquals(profile, result);
+		
+		assertTrue(result.getSegment(newId).hasMergeSources());
+		
 	}
 
 }

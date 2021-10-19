@@ -224,13 +224,17 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
     				IProfile p = this.getProfile(rule.getType());
     				ProfileIndexFinder f = new ProfileIndexFinder();
     				int index = f.identifyIndex(p, rule);
-    				setBorderTag(lm, index);
+    				setLandmark(lm, index);
     			}
     		} catch (MissingProfileException e) {
     			LOGGER.log(Loggable.STACK, "Error getting profile type", e);
     		} catch (NoDetectedIndexException e) {
     			LOGGER.fine("Unable to detect "+lm+" in nucleus");
-    		}
+    		} catch (ProfileException e) {
+    			LOGGER.log(Loggable.STACK, "Error getting profile type", e);
+			} catch (MissingLandmarkException e) {
+				LOGGER.log(Loggable.STACK, "Landmark not present", e);
+			}
     	}
     	
     	if (!this.isProfileOrientationOK() && canReverse) {

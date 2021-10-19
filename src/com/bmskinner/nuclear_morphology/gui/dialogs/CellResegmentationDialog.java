@@ -339,7 +339,7 @@ public class CellResegmentationDialog extends AbstractCellEditingDialog implemen
             LOGGER.fine("Selected RP index: " + newRpIndex);
 
             // Make a new cell with the updated RP
-            workingCell.getPrimaryNucleus().setBorderTag(Landmark.REFERENCE_POINT, newRpIndex);
+            workingCell.getPrimaryNucleus().setLandmark(Landmark.REFERENCE_POINT, newRpIndex);
 
             LOGGER.fine("Updated RP");
 

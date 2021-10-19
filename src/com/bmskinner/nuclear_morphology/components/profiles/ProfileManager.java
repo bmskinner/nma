@@ -70,34 +70,31 @@ public class ProfileManager {
      * @param tag the tag to fit
      * @param type the profile type to fit against
      * @param median the template profile to offset against
+     * @throws ProfileException 
+     * @throws MissingProfileException 
+     * @throws MissingLandmarkException 
+     * @throws  
      */
     public void updateTagToMedianBestFit(@NonNull Landmark tag, 
     		@NonNull ProfileType type,
-    		@NonNull IProfile median) {
-
-        collection.getNuclei().parallelStream().forEach(n -> {
-            if (!n.isLocked()) {
-            	try {
-            		// Find positive offset index of this profile which best
-            		// matches the median profile
-            		int newIndex = n.getProfile(type).findBestFitOffset(median);
-            		
-            		n.setBorderTag(tag, newIndex);
-
-                } catch (ProfileException | MissingProfileException e1) {
-                    LOGGER.log(Level.SEVERE, 
-                    		"Error updating tag by offset in nucleus " + n.getNameAndNumber(), 
-                    		e1);
-                    return;
-                }
-
-            	// Update any stats that are based on orientation
-                if (tag.equals(Landmark.TOP_VERTICAL) || tag.equals(Landmark.BOTTOM_VERTICAL)) {
-                    n.updateDependentStats();
-                    setOpUsingTvBv(n);
-                }
+    		@NonNull IProfile median) throws MissingProfileException, ProfileException, MissingLandmarkException {
+    	
+    	for(Nucleus n : collection.getNuclei()) {
+    		if(n.isLocked())
+    			continue;
+    		
+    		// Find positive offset index of this profile which best
+    		// matches the median profile
+    		int newIndex = n.getProfile(type).findBestFitOffset(median);
+    		
+    		n.setLandmark(tag, newIndex);
+    		
+    		// Update any stats that are based on orientation
+            if (tag.equals(Landmark.TOP_VERTICAL) || tag.equals(Landmark.BOTTOM_VERTICAL)) {
+                n.updateDependentStats();
+                setOpUsingTvBv(n);
             }
-        });
+    	}
     }
 
     /**
@@ -126,8 +123,11 @@ public class ProfileManager {
     /**
      * Use the collection's ruleset to calculate the positions of the top and
      * bottom verticals in the median profile, and assign these to the nuclei
+     * @throws ProfileException 
+     * @throws MissingProfileException 
+     * @throws MissingLandmarkException 
      */
-    public void calculateTopAndBottomVerticals() {
+    public void calculateTopAndBottomVerticals() throws MissingProfileException, ProfileException, MissingLandmarkException {
 
         LOGGER.fine("Detecting top and bottom verticals in collection");
 
@@ -149,28 +149,15 @@ public class ProfileManager {
             return;
         }
 
-        LOGGER.fine("Updating nuclei");
-
-        IProfile topMedian;
-        IProfile btmMedian;
-
-        try {
-        	topMedian = collection.getProfileCollection()
+        IProfile topMedian = collection.getProfileCollection()
         			.getProfile(ProfileType.ANGLE,
         					Landmark.TOP_VERTICAL,
         					Stats.MEDIAN);
 
-        	btmMedian = collection.getProfileCollection()
+        IProfile btmMedian = collection.getProfileCollection()
         			.getProfile(ProfileType.ANGLE, 
         					Landmark.BOTTOM_VERTICAL,
         					Stats.MEDIAN);
-        } catch (ProfileException 
-        		| MissingLandmarkException 
-        		| MissingProfileException e) {
-        	LOGGER.log(Level.SEVERE, "Error getting TV or BV profile", e);
-            return;
-        }
-
         updateTagToMedianBestFit(Landmark.TOP_VERTICAL, ProfileType.ANGLE, topMedian);
         updateTagToMedianBestFit(Landmark.BOTTOM_VERTICAL, ProfileType.ANGLE, btmMedian);
 
@@ -184,8 +171,12 @@ public class ProfileManager {
      * to be use to ensure tag indexes are consistent between cells after a
      * collection has been duplicated (e.g. after a merge of datasets) 
      * @param source the collection to take tag indexes from
+     * @throws ProfileException 
+     * @throws MissingLandmarkException 
+     * @throws MissingProfileException 
+     * @throws IndexOutOfBoundsException 
      */
-    public void copyTagIndexesToCells(@NonNull ICellCollection source) {
+    public void copyTagIndexesToCells(@NonNull ICellCollection source) throws IndexOutOfBoundsException, MissingProfileException, MissingLandmarkException, ProfileException {
     	for(Nucleus n : collection.getNuclei()) {
     		if(!source.contains(n)) 
     			continue;
@@ -200,7 +191,7 @@ public class ProfileManager {
     			// segment boundary
     			if(entry.getKey().equals(Landmark.REFERENCE_POINT))
     				continue;
-    			n.setBorderTag(entry.getKey(), entry.getValue());
+    			n.setLandmark(entry.getKey(), entry.getValue());
     		}    		
     	}
     	LOGGER.fine("Updated tag indexes from source collection");
@@ -259,25 +250,20 @@ public class ProfileManager {
         		updateProfileCollectionOffsets(tag, index);
         		
         		// update nuclei - allow possible parallel processing
-        		collection.getNuclei().parallelStream().filter(n->!n.isLocked())
-        		.forEach(n->{
-        			try {
-        				int existingIndex = n.getBorderIndex(existingTag);
-        				n.setBorderTag(tag, existingIndex);
-        				if (tag.equals(Landmark.TOP_VERTICAL) || tag.equals(Landmark.BOTTOM_VERTICAL)) {
-            				n.updateDependentStats();
-            				setOpUsingTvBv(n);
-        				}
-        			} catch (MissingLandmarkException e) {
-        				LOGGER.log(Loggable.STACK, "Border tag not available", e);
-        			}
-        		});
+        		for(Nucleus  n : collection.getNuclei()) {
+        			int existingIndex = n.getBorderIndex(existingTag);
+    				n.setLandmark(tag, existingIndex);
+    				if (tag.equals(Landmark.TOP_VERTICAL) || tag.equals(Landmark.BOTTOM_VERTICAL)) {
+        				n.updateDependentStats();
+        				setOpUsingTvBv(n);
+    				}
+        		}
         		
         		//Update consensus
         		if (collection.hasConsensus()) {
         			Nucleus n = collection.getRawConsensus();
         			int existingIndex = n.getBorderIndex(existingTag);
-        			n.setBorderTag(tag, existingIndex);
+        			n.setLandmark(tag, existingIndex);
         			setOpUsingTvBv(n);
         		}
 
@@ -306,7 +292,7 @@ public class ProfileManager {
         if (collection.hasConsensus()) {
             Nucleus n = collection.getRawConsensus();
             int newIndex = n.getProfile(ProfileType.ANGLE).findBestFitOffset(median);
-            n.setBorderTag(tag, newIndex);
+            n.setLandmark(tag, newIndex);
             setOpUsingTvBv(n);
         }
         
@@ -321,8 +307,12 @@ public class ProfileManager {
      * position for signal angle measurement: the border point directly
      * below the centre of mass.
      * @param n the nucleus to alter
+     * @throws ProfileException 
+     * @throws MissingLandmarkException 
+     * @throws MissingProfileException 
+     * @throws IndexOutOfBoundsException 
      */
-    private void setOpUsingTvBv(@NonNull final Nucleus n) {
+    private void setOpUsingTvBv(@NonNull final Nucleus n) throws IndexOutOfBoundsException, MissingProfileException, MissingLandmarkException, ProfileException {
     	// also update the OP to be directly below the CoM in vertically oriented nucleus
 		if(n.hasLandmark(Landmark.TOP_VERTICAL) && n.hasLandmark(Landmark.BOTTOM_VERTICAL)) {
 			LOGGER.finer( "Updating OP due to TV or BV change");
@@ -331,7 +321,7 @@ public class ProfileManager {
 				.filter(p-> p.getY()<vertN.getCentreOfMass().getY())
 				.min(Comparator.comparing(p->Math.abs(p.getX()-vertN.getCentreOfMass().getX()))).get();
 			int newOp = vertN.getBorderIndex(bottom);
-			n.setBorderTag(Landmark.ORIENTATION_POINT, newOp);
+			n.setLandmark(Landmark.ORIENTATION_POINT, newOp);
 		}
     }
 
@@ -367,8 +357,10 @@ public class ProfileManager {
      * @param newRpIndex the new index for the RP relative to the old RP
      * @param oldMedian the old median profile zeroed on the old RP
      * @throws ProfileException 
+     * @throws MissingProfileException 
+     * @throws MissingLandmarkException 
      */
-    private void moveRp(int newRpIndex, @NonNull ISegmentedProfile oldMedian) throws ProfileException {
+    private void moveRp(int newRpIndex, @NonNull ISegmentedProfile oldMedian) throws ProfileException, MissingProfileException, MissingLandmarkException {
     	// This is the median we will use to update individual nuclei
     	ISegmentedProfile newMedian = oldMedian.offset(newRpIndex);
 
@@ -564,11 +556,11 @@ public class ProfileManager {
         		if (n.hasBorderTag(rawOldIndex)) {
         			Landmark tagToUpdate = n.getBorderTag(rawOldIndex);
         			LOGGER.fine("Updating tag " + tagToUpdate);
-        			n.setBorderTag(tagToUpdate, rawIndex);
+        			n.setLandmark(tagToUpdate, rawIndex);
 
         			// Update intersection point if needed
         			if (tagToUpdate.equals(Landmark.ORIENTATION_POINT)) {
-        				n.setBorderTag(Landmark.INTERSECTION_POINT,
+        				n.setLandmark(Landmark.INTERSECTION_POINT,
         						n.getBorderIndex(n.findOppositeBorder(n.getBorderPoint(Landmark.ORIENTATION_POINT))));
         			}
         		}
@@ -646,14 +638,12 @@ public class ProfileManager {
      */
     public boolean testSegmentsMergeable(IProfileSegment seg1, IProfileSegment seg2)
             throws MissingLandmarkException {
-
+    	
     	if(!seg1.nextSegment().getID().equals(seg2.getID())) {
     		LOGGER.fine("Segments are not adjacent; cannot merge");
     		return false;
     	}
-    		
-    		
-    	
+
         // check the boundaries of the segment - we do not want to merge across the RP
         for (Landmark tag : DefaultLandmark.values(LandmarkType.CORE)) {
 
@@ -679,46 +669,38 @@ public class ProfileManager {
      * @throws MissingComponentException
      */
     public void mergeSegments(@NonNull IProfileSegment seg1, @NonNull IProfileSegment seg2, @NonNull UUID newID)
-            throws ProfileException, UnsegmentedProfileException, MissingComponentException {
+            throws ProfileException, MissingComponentException {
     	// Note - we can't do the root check here. It must be at the segmentation handler level
     	// otherwise updating child datasets to match a root will fail
-
-        if (seg1 == null || seg2 == null || newID == null)
-            throw new IllegalArgumentException("Segment ids cannot be null");
-        
-        ISegmentedProfile medianProfile = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE,
+    	
+        ISegmentedProfile medianProfile = collection.getProfileCollection()
+        		.getSegmentedProfile(ProfileType.ANGLE,
                 Landmark.REFERENCE_POINT, Stats.MEDIAN);
 
          // Only try the merge if both segments are present in the profile
         if (!medianProfile.hasSegment(seg1.getID()))
-            throw new IllegalArgumentException("Median profile does not have segment 1 ID");
+            throw new IllegalArgumentException("Median profile does not have segment 1 with ID "+seg1.getID());
 
         if (!medianProfile.hasSegment(seg2.getID()))
-            throw new IllegalArgumentException("Median profile does not have segment 2 ID");
+            throw new IllegalArgumentException("Median profile does not have segment 2 with ID "+seg1.getID());
 
         // Note - validation is run in segmentation handler
     
         // merge the two segments in the median
-        try {
-            medianProfile.mergeSegments(seg1, seg2, newID);
-         // put the new segment pattern back with the appropriate offset
-            collection.getProfileCollection().addSegments(Landmark.REFERENCE_POINT, medianProfile.getSegments());
-        } catch(ProfileException e){
-        	LOGGER.log(Loggable.STACK, "Error merging segments in median profile; cancelling merge", e);
-            return;
-        }
+        medianProfile.mergeSegments(seg1, seg2, newID);
+        // put the new segment pattern back with the appropriate offset
+        collection.getProfileCollection().addSegments(Landmark.REFERENCE_POINT, medianProfile.getSegments());
+
 
         /*
          * With the median profile segments merged, also merge the segments
          * in the individual nuclei
          */
-        if(collection.isReal()){
-            for (Nucleus n : collection.getNuclei()) {
-                boolean wasLocked = n.isLocked();
-                n.setLocked(false); // Merging segments is not destructive
-                mergeSegments(n, seg1, seg2, newID);
-                n.setLocked(wasLocked);
-            }
+        for (Nucleus n : collection.getNuclei()) {
+        	boolean wasLocked = n.isLocked();
+        	n.setLocked(false); // Merging segments is not destructive
+        	mergeSegments(n, seg1, seg2, newID);
+        	n.setLocked(wasLocked);
         }
 
         /* Update the consensus if present */
@@ -740,10 +722,18 @@ public class ProfileManager {
      * @throws ProfileException
      * @throws MissingComponentException
      */
-    private void mergeSegments(@NonNull Taggable p, @NonNull IProfileSegment seg1, @NonNull IProfileSegment seg2, @NonNull UUID newID)
+    private void mergeSegments(@NonNull Taggable p, @NonNull IProfileSegment seg1, 
+    		@NonNull IProfileSegment seg2, @NonNull UUID newID)
             throws ProfileException, MissingComponentException {
-
         ISegmentedProfile profile = p.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
+        
+        // Only try the merge if both segments are present in the profile
+        if (!profile.hasSegment(seg1.getID()))
+            throw new IllegalArgumentException("Median profile does not have segment 1 with ID "+seg1.getID());
+
+        if (!profile.hasSegment(seg2.getID()))
+            throw new IllegalArgumentException("Median profile does not have segment 2 with ID "+seg1.getID());
+
         profile.mergeSegments(seg1.getID(), seg2.getID(), newID);
         p.setProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, profile);
     }

@@ -96,8 +96,8 @@ public class NucleusTest {
 	
 	@Test
 	public void testAlignVertical() throws Exception {
-		nucleus.setBorderTag(Landmark.TOP_VERTICAL, 10);
-		nucleus.setBorderTag(Landmark.BOTTOM_VERTICAL, 20);
+		nucleus.setLandmark(Landmark.TOP_VERTICAL, 10);
+		nucleus.setLandmark(Landmark.BOTTOM_VERTICAL, 20);
 		assertTrue(nucleus.hasLandmark(Landmark.TOP_VERTICAL));
 		assertTrue(nucleus.hasLandmark(Landmark.BOTTOM_VERTICAL));
 		
@@ -115,8 +115,8 @@ public class NucleusTest {
 	
 	@Test
 	public void testGetVerticalNucleusIsIdenticalToAlignVertical() throws Exception {
-		nucleus.setBorderTag(Landmark.TOP_VERTICAL, 10);
-		nucleus.setBorderTag(Landmark.BOTTOM_VERTICAL, 20);
+		nucleus.setLandmark(Landmark.TOP_VERTICAL, 10);
+		nucleus.setLandmark(Landmark.BOTTOM_VERTICAL, 20);
 		Nucleus vert = nucleus.getVerticallyRotatedNucleus();
 		
 		nucleus.alignVertically();

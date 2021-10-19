@@ -5,17 +5,16 @@ import java.util.UUID;
 import java.util.logging.Logger;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.MissingComponentException;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
-import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
-import com.bmskinner.nuclear_morphology.components.profiles.UnsegmentedProfileException;
+import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 /**
@@ -81,8 +80,9 @@ public class DatasetRepairer {
 	 * is preserved, and the RP is moved to the given segment start index.
 	 * @param n the nucleus to repair.
 	 * @param expectedRPSegmentStart the segment id which the RP should lie on the start index of
+	 * @throws ProfileException 
 	 */
-	private void repairNucleusRPNotAtSegmentBoundary(Nucleus n, UUID expectedRPSegmentStart) {		
+	private void repairNucleusRPNotAtSegmentBoundary(Nucleus n, UUID expectedRPSegmentStart) throws ProfileException {		
 		boolean wasLocked = n.isLocked();
 		if(wasLocked)
 			n.setLocked(false);
@@ -96,7 +96,7 @@ public class DatasetRepairer {
 				// We can't just set RP since setting RP will update segments by the same amount
 				// Need to copy the profile and segments as is, then reload them after the RP has been changed
 				LOGGER.finest("RP at "+rpIndex+"; expected at "+segStart);
-				n.setBorderTag(Landmark.REFERENCE_POINT, segStart);
+				n.setLandmark(Landmark.REFERENCE_POINT, segStart);
 				LOGGER.finest(n.getNameAndNumber()+": updated RP to index "+segStart);
 				n.setProfile(ProfileType.ANGLE, profile);
 			}

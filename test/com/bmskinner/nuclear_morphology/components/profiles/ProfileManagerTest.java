@@ -7,6 +7,8 @@ import static org.junit.Assert.assertTrue;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Handler;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -28,6 +30,8 @@ import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.datasets.VirtualDataset;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
+import com.bmskinner.nuclear_morphology.logging.ConsoleFormatter;
+import com.bmskinner.nuclear_morphology.logging.ConsoleHandler;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 /**
@@ -44,6 +48,15 @@ public class ProfileManagerTest {
 	private static final long RNG_SEED = 42;
 	private ProfileManager manager;
 	private ICellCollection collection;
+		
+	static {
+		for(Handler h : LOGGER.getHandlers())
+			LOGGER.removeHandler(h);
+		Handler h = new ConsoleHandler(new ConsoleFormatter());
+		LOGGER.setLevel(Level.FINE);
+		h.setLevel(Level.FINE);
+		LOGGER.addHandler(h);
+	}
 	
 	@Parameter(0)
 	public Class<? extends ICellCollection> source;
@@ -186,33 +199,96 @@ public class ProfileManagerTest {
 		n.setProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, profile);
 		assertFalse(dv.validate(collection));
 	}
+	
+	/**
+	 * Test that the merging process works when segments are
+	 * merged in a profile and that profile is assigned back to
+	 * a nucleus
+	 * @throws Exception
+	 */
+	@Test
+	public void testMergingSegmentsInNucleus() throws Exception {
+
+		for(Nucleus n : collection.getNuclei()) {
+
+			// Get the profile
+			ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
+
+			// Choose the segments to merge
+			IProfileSegment seg1 = profile.getSegmentAt(1);
+			IProfileSegment seg2 = profile.getSegmentAt(2);
+
+			// Get the IDs
+			UUID newId = UUID.randomUUID();
+			UUID segId1 = seg1.getID();
+			UUID segId2 = seg2.getID();
+
+			// Merge the segments and assign to the nucleus
+			profile.mergeSegments(segId1, segId2, newId);
+			n.setProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, profile);	
+
+			// Get the profile back out from the nucleus
+			ISegmentedProfile newProfile = n.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
+
+			assertEquals("Profiles should match", profile, newProfile);
+
+			assertTrue(newProfile.hasSegment(newId));
+			assertFalse(newProfile.hasSegment(segId1));
+			assertFalse(newProfile.hasSegment(segId2));
+
+			assertTrue(newProfile.getSegment(newId).hasMergeSources());
+			assertTrue("Merged segment should have merge source 1",newProfile.getSegment(newId).hasMergeSource(segId1));
+			assertTrue("Merged segment should have merge source 2",newProfile.getSegment(newId).hasMergeSource(segId2));
+		}
+	}
 
 	@Test
 	public void testMergeSegments() throws Exception {
 
-		ISegmentedProfile profile = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);
-		List<UUID> segIds = profile.getSegmentIDs();
-		UUID newId = UUID.randomUUID();
-		UUID segId1 = profile.getSegmentAt(1).getID();
-		UUID segId2 = profile.getSegmentAt(2).getID();
+		// Get the median profile with segments
+		ISegmentedProfile profile = collection.getProfileCollection()
+				.getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);
+		
+		assertTrue(profile.getSegmentCount()>1);
+		
+		for(Nucleus n : collection.getNuclei())
+			assertFalse(n.isLocked());
+		
 		IProfileSegment seg1 = profile.getSegmentAt(1);
 		IProfileSegment seg2 = profile.getSegmentAt(2);
-				
+		
+		UUID newId = UUID.randomUUID();
+		UUID segId1 = seg1.getID();
+		UUID segId2 = seg2.getID();
+
+		// Confirm the collection is valid before merging	
 		DatasetValidator dv = new DatasetValidator();
 		assertTrue(dv.validate(collection));
+		
+		assertTrue("Segments should be mergeable", manager.testSegmentsMergeable(seg1, seg2));
+		
+		// Merge the segments
 		manager.mergeSegments(seg1, seg2, newId);
+		
+		dv.validate(collection);
+		assertTrue(dv.validate(collection));
 		
 		List<UUID> newIds = collection.getProfileCollection().getSegmentIDs();
 		
-		assertEquals(segIds.size()-1, newIds.size());
+		// Test if the profile segments merged correctly
+		assertEquals(profile.getSegmentCount()-1, newIds.size());
 		assertTrue(newIds.contains(newId));
 		assertFalse(newIds.contains(segId1));
 		assertFalse(newIds.contains(segId2));
-		IProfileSegment mergedSegment = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN).getSegment(newId);
+		
+		IProfileSegment mergedSegment = collection.getProfileCollection()
+				.getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN)
+				.getSegment(newId);
 		assertTrue(mergedSegment.hasMergeSources());
 		assertTrue(mergedSegment.hasMergeSource(segId1));
 		assertTrue(mergedSegment.hasMergeSource(segId2));
 		
+		// If this is a virtual collection, merging is not possible
 		if(collection.isReal()) {
 			for(Nucleus n : collection.getNuclei()) {
 				ISegmentedProfile nucleusProfile =  n.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);

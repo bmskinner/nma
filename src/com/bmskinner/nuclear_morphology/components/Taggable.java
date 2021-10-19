@@ -79,8 +79,9 @@ public interface Taggable extends CellularComponent {
      * specify a pointType
      * @return the profile for the object
      * @throws MissingProfileException if the profile type is not found
+     * @throws ProfileException 
      */
-    ISegmentedProfile getProfile(@NonNull ProfileType type) throws MissingProfileException;
+    ISegmentedProfile getProfile(@NonNull ProfileType type) throws MissingProfileException, ProfileException;
 
     /**
      * Update the profile of the given type. Since only franken profiles are not
@@ -232,19 +233,12 @@ public interface Taggable extends CellularComponent {
      * 
      * @param tag the tag
      * @param i the index of the border point to set the tag at
+     * @throws ProfileException 
+     * @throws MissingProfileException 
+     * @throws MissingLandmarkException 
      */
 
-    void setBorderTag(@NonNull Landmark tag, int i) throws IndexOutOfBoundsException;
-
-    /**
-     * Set or update a border tag based on an index from a reference tag
-     * 
-     * @param reference the border tag with index zero
-     * @param tag the new tag to use
-     * @param i the index of the border point relative to the reference
-     * @throws UnavailableBorderTagException if  the reference tag is not present
-     */
-//    void setBorderTag(@NonNull Landmark reference, @NonNull Landmark tag, int i) throws IndexOutOfBoundsException, UnavailableBorderTagException;
+    void setLandmark(@NonNull Landmark tag, int i) throws IndexOutOfBoundsException, MissingProfileException, ProfileException, MissingLandmarkException;
 
     /**
      * Get a copy of the profile offset to start at the given point
@@ -268,9 +262,10 @@ public interface Taggable extends CellularComponent {
      * @param profile the profile to be set
      * @throws MissingLandmarkException if the tag is not present
      * @throws MissingProfileException if the profile type is not present
+     * @throws ProfileException 
      */
     void setProfile(@NonNull ProfileType type, @NonNull Landmark tag, @NonNull ISegmentedProfile profile)
-            throws MissingLandmarkException, MissingProfileException;
+            throws MissingLandmarkException, MissingProfileException, ProfileException;
 
     /**
      * Get a copy of the mapping of border tags to index positions within the

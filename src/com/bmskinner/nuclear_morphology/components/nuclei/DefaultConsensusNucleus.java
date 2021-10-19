@@ -104,20 +104,20 @@ public class DefaultConsensusNucleus extends DefaultNucleus implements Consensus
 		return e;
 	}
 
-    @Override
-    public void calculateProfiles() throws ProfileException {
-
-        /*
-         * The CurveRefolder currently only uses the angle profile so ignore the
-         * others to speed refolding
-         */
-        ProfileCreator creator = new ProfileCreator(this);
-
-        ISegmentedProfile profile = creator.createProfile(ProfileType.ANGLE);
-
-        assignProfile(ProfileType.ANGLE, profile);
-
-    }
+//    @Override
+//    public void calculateProfiles() throws ProfileException {
+//
+//        /*
+//         * The CurveRefolder currently only uses the angle profile so ignore the
+//         * others to speed refolding
+//         */
+//        ProfileCreator creator = new ProfileCreator(this);
+//
+//        ISegmentedProfile profile = creator.createProfile(ProfileType.ANGLE);
+//
+//        assignProfile(ProfileType.ANGLE, profile);
+//
+//    }
     
     @Override
 	public void offset(double xOffset, double yOffset) {
