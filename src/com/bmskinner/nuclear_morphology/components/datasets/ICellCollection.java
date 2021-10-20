@@ -294,6 +294,15 @@ public interface ICellCollection
      * @throws ProfileException if creation fails
      */
     void createProfileCollection() throws ProfileException;
+    
+    /**
+     * Generate the profile aggregates from all cells in the 
+     * population based on the currently set reference point in each
+     * cell nucleus. The aggregate length will be set to the given
+     * value
+     * @throws ProfileException if creation fails
+     */
+    void createProfileCollection(int length) throws ProfileException;
 
     /**
      * Get the distinct source image file list for all nuclei in the collection

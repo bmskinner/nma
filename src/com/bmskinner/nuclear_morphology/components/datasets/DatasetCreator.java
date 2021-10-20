@@ -30,7 +30,8 @@ public class DatasetCreator {
 			d.getCollection().createProfileCollection();
 			
 			for(IAnalysisDataset c : d.getAllChildDatasets()) {
-				c.getCollection().createProfileCollection();
+				int length = c.getCollection().getProfileCollection().getSegmentContaining(0).getProfileLength();
+				c.getCollection().createProfileCollection(length);
 			}
 		} catch(ProfileException e1) {
 			throw new ComponentCreationException(e1);

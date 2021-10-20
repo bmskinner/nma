@@ -58,14 +58,12 @@ public class DefaultProfileCollection implements IProfileCollection {
 	
 	private static final Logger LOGGER = Logger.getLogger(DefaultProfileCollection.class.getName());
 
-    private static final long serialVersionUID = 1L;
-
     private Map<Landmark, Integer> indexes  = new HashMap<>(); // indexes of tags in the profile. Assumes the RP is at zero.
     private List<IProfileSegment> segments = new ArrayList<>();
 
-    private transient int length;
-    private transient Map<ProfileType, IProfileAggregate> map   = new HashMap<>(); // the aggregates for each profile type
-    private transient ProfileCache                        cache = new ProfileCache(); // cached median profiles etc
+    private int length;
+    private Map<ProfileType, IProfileAggregate> map   = new HashMap<>(); // the aggregates for each profile type
+    private ProfileCache                        cache = new ProfileCache(); // cached median profiles etc
 
     /**
      * Create an empty profile collection. The RP is set to the zero index by default.
@@ -81,6 +79,7 @@ public class DefaultProfileCollection implements IProfileCollection {
      * @param e the XML element containing the data.
      */
     public DefaultProfileCollection(Element e) {
+    	
     	for(Element el : e.getChildren("Landmark")){
     		indexes.put(Landmark.of(el.getAttribute("name").getValue(), 
 					LandmarkType.valueOf(el.getAttribute("type").getValue())), 
@@ -90,6 +89,8 @@ public class DefaultProfileCollection implements IProfileCollection {
 		for(Element el : e.getChildren("Segment")){
 			segments.add(new DefaultProfileSegment(el));
 		}
+		
+		
 		
 		if(!segments.isEmpty())
 			length = segments.get(0).getProfileLength();
@@ -614,16 +615,6 @@ public class DefaultProfileCollection implements IProfileCollection {
         return result;
     }
 
-    private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-        in.defaultReadObject();
-        map = new HashMap<>();
-        cache = new ProfileCache();
-    }
-
-    private void writeObject(java.io.ObjectOutputStream out) throws IOException {
-        out.defaultWriteObject();
-    }
-
 	@Override
 	public int hashCode() {
 		return Objects.hash(indexes, segments);
@@ -656,7 +647,7 @@ public class DefaultProfileCollection implements IProfileCollection {
 	@Override
 	public Element toXmlElement() {
 		Element e = new Element("ProfileCollection");
-		
+				
 		for(IProfileSegment s : segments) {
 			e.addContent(s.toXmlElement());
 		}

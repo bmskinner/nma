@@ -539,6 +539,7 @@ public class DefaultCellCollection implements ICellCollection {
 	 * Build the profile collection at the specified profile length
 	 * 
 	 */
+	@Override
 	public void createProfileCollection(int length) throws ProfileException {
 		profileCollection.createProfileAggregate(this, length);
 	}

@@ -491,19 +491,15 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
         return profileCollection;
     }
 
-    /**
-     * Create the profile collections to hold angles from nuclear profiles based
-     * on the current nucleus profiles. The ProfileAggregate for each
-     * ProfileType is recalculated. The resulting median profiles will have the
-     * same length at the parentDataset.getCollection() collection after this update
-     * 
-     * @return
-     * @throws ProfileException 
-     */
     @Override
 	public void createProfileCollection() throws ProfileException {
         profileCollection.createProfileAggregate(this, 
         		parentDataset.getCollection().getMedianArrayLength());
+    }
+    
+    @Override
+	public void createProfileCollection(int length) throws ProfileException {
+        profileCollection.createProfileAggregate(this, length);
     }
 
     @Override

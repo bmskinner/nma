@@ -16,7 +16,6 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.profiles;
 
-import java.io.Serializable;
 import java.util.List;
 import java.util.UUID;
 
@@ -27,7 +26,7 @@ import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.io.XmlSerializable;
 
-public interface IProfileCollection extends Serializable, XmlSerializable {
+public interface IProfileCollection extends XmlSerializable {
 
     static final int ZERO_INDEX = 0;
     
