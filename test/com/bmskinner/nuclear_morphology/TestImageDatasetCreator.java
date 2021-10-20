@@ -99,7 +99,7 @@ public class TestImageDatasetCreator {
     	IAnalysisOptions op = OptionsFactory.makeDefaultRodentAnalysisOptions(TestResources.TESTING_MULTIPLE_SOURCE_1_FOLDER);
     	IAnalysisDataset d = createTestDataset(TestResources.UNIT_TEST_FOLDER, op, false);
     	saveTestDataset(d, TestResources.MULTIPLE1_TEST_DATASET);
-    	testUnmarshalling(d, TestResources.MOUSE_TEST_DATASET);
+    	testUnmarshalling(d, TestResources.MULTIPLE1_TEST_DATASET);
     }
     
     @Test
