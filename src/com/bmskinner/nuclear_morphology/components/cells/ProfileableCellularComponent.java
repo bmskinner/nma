@@ -273,18 +273,9 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 
        if (Measurement.MIN_DIAMETER.equals(stat))
     	   setStatistic(stat, getNarrowestDiameter());
-
-       if (Measurement.PATH_LENGTH.equals(stat))
-    	   setStatistic(stat, getPathLength(ProfileType.ANGLE));
-
-       if (Measurement.PERIMETER.equals(stat)) {
-    	   double perimeter=0;
-    	   for(int i=0; i<this.getBorderLength(); i++) {
-    		   perimeter += this.getBorderPoint(i).getLengthTo(getBorderPoint(wrapIndex(i+1)));
-    	   }
-    	   setStatistic(stat, perimeter);
-       }
-
+       
+       if(Measurement.MAX_FERET.equals(stat))
+    	   setStatistic(stat, getMaximumDiameter());
     }
 
     /*
@@ -618,9 +609,22 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 
     }
 
-    public double getNarrowestDiameter()  {
+    private double getNarrowestDiameter()  {
         try {
-            return Arrays.stream(this.getProfile(ProfileType.DIAMETER).toDoubleArray()).min().orElse(0);
+            return Arrays.stream(this.getProfile(ProfileType.DIAMETER).toDoubleArray())
+            		.min()
+            		.orElse(Statistical.ERROR_CALCULATING_STAT);
+        } catch (MissingProfileException | ProfileException e) {
+            LOGGER.log(Loggable.STACK, "Error getting diameter profile", e);
+            return Statistical.ERROR_CALCULATING_STAT;
+        }
+    }
+    
+    private double getMaximumDiameter()  {
+        try {
+            return Arrays.stream(this.getProfile(ProfileType.DIAMETER).toDoubleArray())
+            		.max()
+            		.orElse(Statistical.ERROR_CALCULATING_STAT);
         } catch (MissingProfileException | ProfileException e) {
             LOGGER.log(Loggable.STACK, "Error getting diameter profile", e);
             return Statistical.ERROR_CALCULATING_STAT;

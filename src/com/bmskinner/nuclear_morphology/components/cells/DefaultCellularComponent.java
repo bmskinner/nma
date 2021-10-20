@@ -42,6 +42,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.jdom2.Element;
 
+import com.bmskinner.nuclear_morphology.analysis.ComponentMeasurer;
 import com.bmskinner.nuclear_morphology.analysis.detection.BooleanMask;
 import com.bmskinner.nuclear_morphology.analysis.detection.Mask;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageConverter;
@@ -644,6 +645,11 @@ public abstract class DefaultCellularComponent implements CellularComponent {
         // or you'll get infinite loops when things break
         if (Measurement.CIRCULARITY.equals(stat))
         	setStatistic(stat, calculateCircularity());
+        
+        if (Measurement.PERIMETER.equals(stat)) {
+     	   double p = ComponentMeasurer.calculatePerimeter(this);
+     	   setStatistic(stat, p);
+        }
     }
     
     /**

@@ -66,8 +66,6 @@ import ij.gui.Roi;
 public class DefaultNucleus extends ProfileableCellularComponent implements Nucleus {
 	
 	private static final Logger LOGGER = Logger.getLogger(DefaultNucleus.class.getName());
-
-    private static final long serialVersionUID = 1L;
     
     private static final String XML_NUCLEUS_NUMBER = "NucleusNumber";
     private static final String XML_ORIENTATION = "OrientationMark";

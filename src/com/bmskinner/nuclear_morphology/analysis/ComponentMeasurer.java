@@ -16,10 +16,15 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.analysis;
 
+import java.util.logging.Logger;
+
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nuclear_morphology.components.Statistical;
 import com.bmskinner.nuclear_morphology.components.UnavailableBorderPointException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.nuclei.DefaultConsensusNucleus;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 /**
@@ -32,6 +37,8 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
  */
 public final class ComponentMeasurer {
 	
+	private static final Logger LOGGER = Logger.getLogger(ComponentMeasurer.class.getName());
+	
 	/**
 	 * We only use static methods here. Don't allow a public constructor.
 	 */
@@ -43,18 +50,19 @@ public final class ComponentMeasurer {
      * @param c the component to measure
      * @return the perimeter of the component
      */
-    public static double calculatePerimeter(@NonNull final CellularComponent c) {
-        double perimeter = 0;
-        try {
-        for(int i=0; i<c.getBorderLength(); i++) {
-        	perimeter += c.getBorderPoint(i)
-        			.getLengthTo(c.getBorderPoint(CellularComponent.wrapIndex(i, c.getBorderLength())));
-        }
-        } catch(UnavailableBorderPointException e) {
-        	//TODO
-        }
-        return perimeter;
-    }
+	public static double calculatePerimeter(@NonNull final CellularComponent c) {
+		double perimeter = 0;
+		try {
+			for(int i=0; i<c.getBorderLength(); i++) {
+				perimeter += c.getBorderPoint(i)
+						.getLengthTo(c.getBorderPoint(CellularComponent.wrapIndex(i+1, c.getBorderLength())));
+			}
+		} catch(UnavailableBorderPointException e) {
+			LOGGER.log(Loggable.STACK, "Unable to calculate perimeter of object", e);
+			return Statistical.ERROR_CALCULATING_STAT;
+		}
+		return perimeter;
+	}
 
     /**
      * Calculate the area of an object.

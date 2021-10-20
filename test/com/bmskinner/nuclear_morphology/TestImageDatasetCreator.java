@@ -229,7 +229,7 @@ public class TestImageDatasetCreator {
      */
     public static IAnalysisDataset createTestDataset(File outputFolder, IAnalysisOptions op, boolean makeClusters) throws Exception {
     	if(!outputFolder.exists())
-        	Files.createDirectories(outputFolder.toPath());
+        	Files.createDirectories(outputFolder.getAbsoluteFile().toPath());
     	
     	if(!outputFolder.exists())
     		throw new IllegalArgumentException("Output folder does not exist: "+outputFolder.getAbsolutePath());
@@ -238,7 +238,7 @@ public class TestImageDatasetCreator {
     	if(!inputFolder.exists())
     		throw new IllegalArgumentException("Input folder does not exist: "+inputFolder.getAbsolutePath());
 
-    	IAnalysisDataset d = new NucleusDetectionMethod(outputFolder, op).call().getFirstDataset();
+    	IAnalysisDataset d = new NucleusDetectionMethod(outputFolder.getAbsoluteFile(), op).call().getFirstDataset();
 
     	HashOptions clusterOptions = OptionsFactory.makeDefaultClusteringOptions();
 
@@ -307,6 +307,13 @@ public class TestImageDatasetCreator {
     	assertEquals("Profile collections should match", p1, p2);
     	assertEquals("Consensuses should match", d.getCollection().getConsensus(), t.getCollection().getConsensus());
     	assertEquals("Cell collections should match", d.getCollection(), t.getCollection());
+    	assertEquals("Child collections should match", d.getAllChildDatasets(), t.getAllChildDatasets());
+    	assertEquals("Merge sources should match", d.getAllMergeSources(), t.getAllMergeSources());
+    	assertEquals("Dataset colour should match", d.getDatasetColour(), t.getDatasetColour());
+    	assertEquals("Cluster groups should match", d.getClusterGroups(), t.getClusterGroups());
+    	assertEquals("Version created should match", d.getVersionCreated(), t.getVersionCreated());
+    	assertEquals("Save path should match", d.getSavePath(), t.getSavePath());
+    	
     	assertEquals("Datasets should match", d, t);
     }
 }

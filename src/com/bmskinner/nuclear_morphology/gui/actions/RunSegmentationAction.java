@@ -19,9 +19,11 @@ package com.bmskinner.nuclear_morphology.gui.actions;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nuclear_morphology.analysis.AnalysisMethodException;
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMethod;
@@ -38,6 +40,8 @@ import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
  *
  */
 public class RunSegmentationAction extends SingleDatasetResultAction {
+	
+	private static final Logger LOGGER = Logger.getLogger(RunSegmentationAction.class.getName());
 
     private MorphologyAnalysisMode mode = MorphologyAnalysisMode.NEW;
 
@@ -102,7 +106,6 @@ public class RunSegmentationAction extends SingleDatasetResultAction {
         setProgressBarIndeterminate();
         switch (mode) {
 	        case COPY:    runCopyAnalysis(); return;
-//	        case REFRESH: runRefreshAnalysis(); return;
 	        case NEW:
 	        default:      runNewAnalysis(); return;
         }
@@ -111,14 +114,16 @@ public class RunSegmentationAction extends SingleDatasetResultAction {
     private void runCopyAnalysis() {
 
         setProgressMessage("Copying segmentation");
-        IAnalysisMethod m = new DatasetSegmentationMethod(dataset, source.getCollection());
-        worker = new DefaultAnalysisWorker(m);
-        worker.addPropertyChangeListener(this);
-        ThreadManager.getInstance().submit(worker);
-    }
-
-    private void runRefreshAnalysis() {
-    	runAnalysis("Refreshing segmentation");
+		try {
+			IAnalysisMethod m = new DatasetSegmentationMethod(dataset, source.getCollection());
+			worker = new DefaultAnalysisWorker(m);
+	        worker.addPropertyChangeListener(this);
+	        ThreadManager.getInstance().submit(worker);
+		} catch (AnalysisMethodException e) {
+			LOGGER.warning(e.getMessage());
+			finished();
+		}
+        
     }
 
     private void runNewAnalysis() {
@@ -127,10 +132,15 @@ public class RunSegmentationAction extends SingleDatasetResultAction {
     
     private void runAnalysis(String message){
     	setProgressMessage(message);
-        IAnalysisMethod m = new DatasetSegmentationMethod(dataset, mode);
-        worker = new DefaultAnalysisWorker(m);
-        worker.addPropertyChangeListener(this);
-        ThreadManager.getInstance().submit(worker);
+    	try {
+    		IAnalysisMethod m = new DatasetSegmentationMethod(dataset, mode);
+    		worker = new DefaultAnalysisWorker(m);
+    		worker.addPropertyChangeListener(this);
+    		ThreadManager.getInstance().submit(worker);
+    	} catch (AnalysisMethodException e) {
+    		LOGGER.warning(e.getMessage());
+    		finished();
+    	}
     }
 
     @Override
@@ -147,16 +157,7 @@ public class RunSegmentationAction extends SingleDatasetResultAction {
         Thread thr = new Thread() {
         	@Override
             public void run() {
-
-                /*
-                 * When refreshing segmentation, the orientation point may have
-                 * changed. Update the vertical orientation nuclei for the
-                 * dataset. Also force the consensus nucleus to be refolded at
-                 * the next step.
-                 */
-//                if (mode.equals(MorphologyAnalysisMode.REFRESH)) 
-//                    dataset.getCollection().updateVerticalNuclei();
-                
+        		
                 // if no list was provided, or no more entries remain,
                 // call the finish
                 if (!hasRemainingDatasetsToProcess()) {

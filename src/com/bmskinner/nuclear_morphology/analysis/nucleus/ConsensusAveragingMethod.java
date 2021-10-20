@@ -171,7 +171,7 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
     private Consensus makeConsensus(List<IPoint> list)
             throws UnprofilableObjectException, ComponentCreationException,
             MissingLandmarkException, ProfileException, MissingProfileException, MissingOptionException {
-        
+
     	// Create a nucleus with the same rulesets as the dataset
         IAnalysisOptions op = dataset.getAnalysisOptions().orElseThrow(MissingOptionException::new);
         NucleusFactory fact = new NucleusFactory(op.getRuleSetCollection());
@@ -183,11 +183,14 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
         
         setConsensusScale(n);
 
-        // Calculate the stats for the new consensus
+        // Calculate the measured values for the new consensus
         // Required for angle window size calculation
         double perim = ComponentMeasurer.calculatePerimeter(n);
-        LOGGER.finer("Consensus perimeter is "+perim);
         n.setStatistic(Measurement.PERIMETER, perim);
+        
+        double area = ComponentMeasurer.calculateArea(n);
+        n.setStatistic(Measurement.AREA, area);
+
         n.initialise(Taggable.DEFAULT_PROFILE_WINDOW_PROPORTION);
 
         // Add landmarks and segments from the profile collection
@@ -200,6 +203,9 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
         // TODO: make this use the new orientation scheme (left or right, up or down)
         if (cons.getBorderPoint(Landmark.REFERENCE_POINT).isRightOf(com))
         	cons.flipHorizontal();
+        
+        // Calculate any other stats that need the vertical alignment
+        cons.getVerticallyRotatedNucleus();
         return cons;
     }
 

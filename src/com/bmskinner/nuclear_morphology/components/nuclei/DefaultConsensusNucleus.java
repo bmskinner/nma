@@ -16,22 +16,14 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.nuclei;
 
-import java.awt.Rectangle;
 import java.awt.Shape;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.util.Arrays;
 import java.util.Objects;
 import java.util.logging.Logger;
 
 import org.jdom2.Element;
 
-import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileCreator;
-import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
-import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
-import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.components.profiles.UnprofilableObjectException;
 import com.bmskinner.nuclear_morphology.io.XmlSerializable;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -48,8 +40,6 @@ import ij.process.FloatPolygon;
 public class DefaultConsensusNucleus extends DefaultNucleus implements Consensus  {
 	
 	private static final Logger LOGGER = Logger.getLogger(DefaultConsensusNucleus.class.getName());
-
-    private static final long serialVersionUID = 1L;
     
     private double xOffset = 0;
     private double yOffset = 0;
@@ -103,21 +93,6 @@ public class DefaultConsensusNucleus extends DefaultNucleus implements Consensus
 		e.addContent(new Element("OffsetR").setText(String.valueOf(rotOffset)));
 		return e;
 	}
-
-//    @Override
-//    public void calculateProfiles() throws ProfileException {
-//
-//        /*
-//         * The CurveRefolder currently only uses the angle profile so ignore the
-//         * others to speed refolding
-//         */
-//        ProfileCreator creator = new ProfileCreator(this);
-//
-//        ISegmentedProfile profile = creator.createProfile(ProfileType.ANGLE);
-//
-//        assignProfile(ProfileType.ANGLE, profile);
-//
-//    }
     
     @Override
 	public void offset(double xOffset, double yOffset) {
@@ -156,12 +131,6 @@ public class DefaultConsensusNucleus extends DefaultNucleus implements Consensus
     	return n;
     }
     
-    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-
-    	in.defaultReadObject();
-    	alignVertically();
-    }
-
 	@Override
 	public IPoint currentOffset() {
 		return IPoint.makeNew(xOffset, yOffset);

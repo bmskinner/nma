@@ -105,9 +105,13 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 	 * 
 	 * @param dataset the dataset to be segmented
 	 * @param mode the analysis mode to run
+	 * @throws AnalysisMethodException 
 	 */
-	public DatasetSegmentationMethod(@NonNull IAnalysisDataset dataset, @NonNull MorphologyAnalysisMode mode) {
+	public DatasetSegmentationMethod(@NonNull IAnalysisDataset dataset, @NonNull MorphologyAnalysisMode mode) throws AnalysisMethodException {
 		super(dataset);
+		if(!dataset.isRoot())
+			throw new AnalysisMethodException("Dataset is not root, cannot segment");
+
 		collection = dataset.getCollection();
 		this.mode = mode;
 	}
@@ -118,17 +122,16 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 	 * 
 	 * @param dataset the dataset to be segmented
 	 * @param source the collection to copy segment patterns from
+	 * @throws AnalysisMethodException 
 	 */
-	public DatasetSegmentationMethod(@NonNull IAnalysisDataset dataset, @NonNull ICellCollection source) {
+	public DatasetSegmentationMethod(@NonNull IAnalysisDataset dataset, @NonNull ICellCollection source) throws AnalysisMethodException {
 		this(dataset, MorphologyAnalysisMode.COPY);
 		this.sourceCollection = source;
 	}
 
 	@Override
 	public IAnalysisResult call() throws Exception {
-		LOGGER.fine("-----------------------------");
     	LOGGER.fine("Beginning segmentation method");
-    	LOGGER.fine("-----------------------------");
 
     	switch (mode) {
     	case COPY:
@@ -136,9 +139,6 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
     		break;
     	case NEW:
     		result = runNewAnalysis();
-    		break;
-    	case REFRESH:
-    		result = runRefreshAnalysis();
     		break;
     	default:
     		result = null;
@@ -176,21 +176,19 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 	 */
 	private IAnalysisResult runNewAnalysis() throws Exception {
 		if(!dataset.isRoot()) {
-			LOGGER.fine("Dataset is not root, not segmenting");
-			return new DefaultAnalysisResult(dataset);
+			throw new AnalysisMethodException("Dataset is not root, cannot segment");
 		}
 		
 		dataset.getCollection().setConsensus(null); // clear if present
-		LOGGER.fine("Before segmentation median length: "+collection.getMedianArrayLength());
-		ISegmentedProfile median = createSegmentsInMedian(); // 3 - segment the median profile
+		LOGGER.finer("Before segmentation median length: "+collection.getMedianArrayLength());
+		ISegmentedProfile median = createSegmentsInMedian(); // segment the median profile
 		
 		if(median.getSegmentCount()<=0) {
-			LOGGER.warning("Error finding segments in median profile");
-			return new DefaultAnalysisResult(dataset);
+			throw new AnalysisMethodException("Error finding segments in median profile");
 		}
 		
 		if(median.getSegmentCount()==1)
-			LOGGER.warning("Unable to segment the median profile");
+			LOGGER.info("No segments in median profile - creating single segment");
 		
 		// Make a new collection and aggregate to invalidate previous cached data, possibly
 		// with different profile lengths
@@ -229,21 +227,6 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 		return new DefaultAnalysisResult(dataset);
 	}
 
-	
-	/**
-	 * Refresh the nucleus segmentation. Assumes that the segmentation in the
-	 * median profile is correct, and updates all nuclei to match.
-	 * 
-	 * @param collection
-	 * @return
-	 */
-	private IAnalysisResult runRefreshAnalysis() throws Exception {
-		ISegmentedProfile median = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);
-		assignSegmentsToNuclei(median);
-		return new DefaultAnalysisResult(dataset);
-	}
-
-
 	/**
 	 * When a population needs to be reanalysed do not offset nuclei or
 	 * recalculate best fits; just get the new median profile
@@ -274,13 +257,13 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 	private ISegmentedProfile createSegmentsInMedian() throws MissingLandmarkException, MissingProfileException, ProfileException {
 		
 		// choose the best subset of nuclei and make a median profile from them
-		LOGGER.fine("Collection median length "+collection.getMedianArrayLength());
-		LOGGER.fine("Profile collection length "+collection.getProfileCollection().length());
+		LOGGER.finer("Collection median length "+collection.getMedianArrayLength());
+		LOGGER.finer("Profile collection length "+collection.getProfileCollection().length());
 
 		RepresentativeMedianFinder finder = new RepresentativeMedianFinder(collection);
 		
 		IProfile median = finder.findMedian();
-		LOGGER.fine("Representative median length "+median.size());
+		LOGGER.finer("Representative median length "+median.size());
 
 		ProfileSegmenter segmenter = new ProfileSegmenter(median);
 		List<IProfileSegment> segments = segmenter.segment();

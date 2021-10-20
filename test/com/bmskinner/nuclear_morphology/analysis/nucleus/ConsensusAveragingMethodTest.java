@@ -10,7 +10,9 @@ import java.util.UUID;
 import org.junit.Test;
 
 import com.bmskinner.nuclear_morphology.TestDatasetBuilder;
+import com.bmskinner.nuclear_morphology.components.Statistical;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileManager;
@@ -106,6 +108,36 @@ public class ConsensusAveragingMethodTest {
 		new ConsensusAveragingMethod(d).call();	
 		
 		Nucleus n = d.getCollection().getConsensus();
+		assertEquals("Scale should match", scale, n.getScale(), 0);
+	}
+	
+	@Test
+	public void testConsensusHasMeasurements() throws Exception {
+		IAnalysisDataset d = new TestDatasetBuilder(123)
+				.cellCount(10)
+				.ofType(RuleSetCollection.roundRuleSetCollection())
+				.withMaxSizeVariation(10)
+				.randomOffsetProfiles(true)
+				.addSignalsInChannel(0)
+				.segmented().build();
+		
+		double scale = 20;
+		d.setScale(scale);
+		
+		// Make the consensus
+		new ConsensusAveragingMethod(d).call();	
+		
+		Nucleus n = d.getCollection().getConsensus();
+		assertTrue(n.hasStatistic(Measurement.PERIMETER));
+		assertTrue(n.getStatistic(Measurement.PERIMETER)!=Statistical.ERROR_CALCULATING_STAT);
+		assertTrue(n.getStatistic(Measurement.PERIMETER)!=Statistical.STAT_NOT_CALCULATED);
+		
+		assertTrue(n.hasStatistic(Measurement.AREA));
+		assertTrue(n.getStatistic(Measurement.AREA)!=Statistical.ERROR_CALCULATING_STAT);
+		assertTrue(n.getStatistic(Measurement.AREA)!=Statistical.STAT_NOT_CALCULATED);
+		
+		
+		
 		assertEquals("Scale should match", scale, n.getScale(), 0);
 	}
 }

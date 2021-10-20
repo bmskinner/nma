@@ -89,8 +89,7 @@ public interface Measurement extends Serializable {
     static final Measurement BOUNDING_WIDTH  = new DefaultMeasurement(Names.BOUNDING_WIDTH,  MeasurementDimension.LENGTH);
     static final Measurement HOOK_LENGTH     = new DefaultMeasurement(Names.HOOK_LENGTH,     MeasurementDimension.LENGTH);
     static final Measurement BODY_WIDTH      = new DefaultMeasurement(Names.BODY_WIDTH,      MeasurementDimension.LENGTH);
-    static final Measurement PATH_LENGTH     = new DefaultMeasurement(Names.PATH_LENGTH,     MeasurementDimension.DIMENSIONLESS);
-
+    
     // Stats for the whole cell, aggregated across sub-components
     static final Measurement CELL_NUCLEUS_COUNT = new DefaultMeasurement(Names.CELL_NUCLEUS_COUNT, MeasurementDimension.DIMENSIONLESS);
     static final Measurement CELL_NUCLEAR_AREA  = new DefaultMeasurement(Names.CELL_NUCLEAR_AREA, MeasurementDimension.AREA);
@@ -182,7 +181,6 @@ public interface Measurement extends Serializable {
     	list.add(BOUNDING_WIDTH);
     	list.add(HOOK_LENGTH);
     	list.add(BODY_WIDTH);
-    	list.add(PATH_LENGTH);
     	list.add(CELL_NUCLEUS_COUNT);
     	list.add(CELL_NUCLEAR_AREA);
     	list.add(CELL_NUCLEAR_RATIO);
