@@ -8,6 +8,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.FilteringOptions.FilterMatchType;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
+import com.bmskinner.nuclear_morphology.components.options.DefaultFilteringOptions;
 
 /**
  * Simplify creation of filtering options

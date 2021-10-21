@@ -37,6 +37,7 @@ import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.options.DefaultOptions;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
+import com.bmskinner.nuclear_morphology.components.options.OptionsBuilder;
 import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
@@ -110,7 +111,7 @@ public abstract class ExportStatsAction extends MultiDatasetResultAction {
          */
         private class ExportOptionsDialog extends SubAnalysisSetupDialog {
         	
-        	private HashOptions options = new DefaultOptions(); 
+        	private HashOptions options = new OptionsBuilder().build();
         	private static final String PROFILE_SAMPLE_LBL = "Profile samples";
         	
         	public ExportOptionsDialog(final List<IAnalysisDataset> datasets) {

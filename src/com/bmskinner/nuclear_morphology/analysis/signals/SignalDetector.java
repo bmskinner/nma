@@ -43,6 +43,7 @@ import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.signals.SignalFactory;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
+import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.ImageStack;
@@ -63,10 +64,11 @@ public class SignalDetector extends Detector {
 	
 	private static final Logger LOGGER = Logger.getLogger(SignalDetector.class.getName());
 
-    private HashOptions                  options;
+    private HashOptions options;
+    private int channel; // shortcut rather than accessing the options each time
+    private int minThreshold;
+    
     private final ComponentFactory<INuclearSignal> factory = new SignalFactory();
-    private int                                    channel;
-    private int                                    minThreshold;
 
     /**
      * Create a detector with the desired options
@@ -74,14 +76,20 @@ public class SignalDetector extends Detector {
      * @param options the size and circularity parameters
      * @param channel the RGB channel
      */
-    public SignalDetector(HashOptions options, int channel) {
-        if (options == null)
-            throw new IllegalArgumentException("Detection options cannot be null");
+    public SignalDetector(@NonNull HashOptions options) {
+        if(!options.hasInt(HashOptions.CHANNEL))
+        	throw new IllegalArgumentException("Channel not present in detection options");
+        if(!options.hasInt(HashOptions.THRESHOLD))
+        	throw new IllegalArgumentException("Threshold not present in detection options");
+        
+        this.options      = options;
+        this.channel      = options.getInt(HashOptions.CHANNEL);
+        this.minThreshold = options.getInt(HashOptions.THRESHOLD);
+        
         if (channel < 0)
             throw new IllegalArgumentException("Channel must be greater or equal to 0");
-        this.options = options;
-        this.channel = channel;
-        this.minThreshold = options.getInt(HashOptions.THRESHOLD);
+        if (minThreshold < 0)
+            throw new IllegalArgumentException("Min threshold must be greater or equal to 0");
     }
 
     /**
@@ -91,34 +99,29 @@ public class SignalDetector extends Detector {
      * @param sourceFile the file the image came from
      * @param stack the imagestack
      * @param n the nucleus
+     * @throws ImageImportException 
      * @throws Exception
      */
-    public List<INuclearSignal> detectSignal(@NonNull File sourceFile, @NonNull ImageStack stack, @NonNull Nucleus n) {
+    public List<INuclearSignal> detectSignal(@NonNull File sourceFile, @NonNull Nucleus n) throws ImageImportException {
 
         options.setInt(HashOptions.THRESHOLD, minThreshold); // reset to default
 
-        if (options.getString(HashOptions.SIGNAL_DETECTION_MODE_KEY).equals(SignalDetectionMode.FORWARD.toString())) {
+        if (options.getString(HashOptions.SIGNAL_DETECTION_MODE_KEY).equals(SignalDetectionMode.FORWARD.name())) {
             LOGGER.finest( "Running forward detection");
-            return detectForwardThresholdSignal(sourceFile, stack, n);
+            return detectForwardThresholdSignal(sourceFile,  n);
         }
 
-        if (options.getString(HashOptions.SIGNAL_DETECTION_MODE_KEY).equals(SignalDetectionMode.REVERSE.toString())) {
+        if (options.getString(HashOptions.SIGNAL_DETECTION_MODE_KEY).equals(SignalDetectionMode.REVERSE.name())) {
             LOGGER.finest( "Running reverse detection");
-            return detectReverseThresholdSignal(sourceFile, stack, n);
+            return detectReverseThresholdSignal(sourceFile,  n);
         }
 
-        if (options.getString(HashOptions.SIGNAL_DETECTION_MODE_KEY).equals(SignalDetectionMode.ADAPTIVE.toString())) {
+        if (options.getString(HashOptions.SIGNAL_DETECTION_MODE_KEY).equals(SignalDetectionMode.ADAPTIVE.name())) {
             LOGGER.finest( "Running adaptive detection");
-            return detectHistogramThresholdSignal(sourceFile, stack, n);
+            return detectHistogramThresholdSignal(sourceFile,  n);
         }
-        LOGGER.finest( "No mode specified");
-        return new ArrayList<>();
+        throw new IllegalArgumentException("No detection mode found");
     }
-
-    /*
-     * PROTECTED AND PRIVATE METHODS
-     * 
-     */
 
     /**
      * Given a new threshold value, update the options if the value is not below
@@ -130,12 +133,13 @@ public class SignalDetector extends Detector {
         // only use the calculated threshold if it is larger than
         // the given minimum
         if (newThreshold > minThreshold) {
-            LOGGER.fine("Threshold set at: " + newThreshold);
+            LOGGER.finer("Threshold set at: " + newThreshold);
             options.setInt(HashOptions.THRESHOLD, newThreshold);
-        } else {
-            LOGGER.fine("Threshold kept at minimum: " + minThreshold);
-            options.setInt(HashOptions.THRESHOLD, minThreshold);
-        }
+        } 
+//        else {
+//            LOGGER.fine("Threshold kept at minimum: " + minThreshold);
+//            options.setInt(HashOptions.THRESHOLD, minThreshold);
+//        }
     }
 
     /**
@@ -145,33 +149,31 @@ public class SignalDetector extends Detector {
      * @param sourceFile the file the image came from
      * @param stack the imagestack
      * @param n the nucleus
+     * @throws ImageImportException 
      * @throws Exception
      */
-    private List<INuclearSignal> detectForwardThresholdSignal(@NonNull File sourceFile, @NonNull ImageStack stack, @NonNull Nucleus n) {
+    private List<INuclearSignal> detectForwardThresholdSignal(@NonNull File sourceFile, @NonNull Nucleus n) throws ImageImportException {
 
+    	ImageStack stack = new ImageImporter(sourceFile).importToStack();
+    	
         // choose the right stack number for the channel
         int stackNumber = ImageImporter.rgbToStack(channel);
-
-        setMaxSize(n.getStatistic(Measurement.AREA) * options.getDouble(HashOptions.MAX_FRACTION));
+        
+        setMaxSize(n.getStatistic(Measurement.AREA) * options.getDouble(HashOptions.SIGNAL_MAX_FRACTION));
         setMinSize(options.getInt(HashOptions.MIN_SIZE_PIXELS));
         setMinCirc(options.getDouble(HashOptions.MIN_CIRC));
         setMaxCirc(options.getDouble(HashOptions.MAX_CIRC));
         setThreshold(options.getInt(HashOptions.THRESHOLD));
 
-        Map<Roi, StatsMap> roiList = new HashMap<>();
         List<INuclearSignal> signals = new ArrayList<>();
-        try {
-            ImageProcessor ip = stack.getProcessor(stackNumber);
-            roiList = detectRois(ip);
-        } catch (IllegalArgumentException e) {
-            LOGGER.fine("No signal channel in image "+sourceFile.getAbsolutePath());
-            return signals;
-        }
+        ImageProcessor ip = stack.getProcessor(stackNumber);
+        Map<Roi, StatsMap> roiList = detectRois(ip);
 
         if (roiList.isEmpty())
             return signals;
 
-        LOGGER.fine(roiList.size() + " signals in stack " + stackNumber);
+        LOGGER.finer(roiList.size() + " rois in stack " + stackNumber);
+        
 
         for(Entry<Roi, StatsMap> entry : roiList.entrySet()) {
         	Roi r = entry.getKey();
@@ -232,11 +234,12 @@ public class SignalDetector extends Detector {
      *            the imagestack
      * @param n
      *            the nucleus
+     * @throws ImageImportException 
      * @throws Exception
      */
-    private List<INuclearSignal> detectReverseThresholdSignal(File sourceFile, ImageStack stack, Nucleus n) {
+    private List<INuclearSignal> detectReverseThresholdSignal(File sourceFile, Nucleus n) throws ImageImportException {
 
-        LOGGER.finest( "Beginning reverse detection for nucleus");
+        ImageStack stack = new ImageImporter(sourceFile).importToStack();
         // choose the right stack number for the channel
         int stackNumber = ImageImporter.rgbToStack(channel);
 
@@ -267,7 +270,7 @@ public class SignalDetector extends Detector {
         }
 
         // find the threshold from the bins
-        int area = (int) (n.getStatistic(Measurement.AREA) * options.getDouble(HashOptions.MAX_FRACTION));
+        int area = (int) (n.getStatistic(Measurement.AREA) * options.getDouble(HashOptions.SIGNAL_MAX_FRACTION));
         int total = 0;
         int threshold = 0; // the value to threshold at
 
@@ -285,7 +288,7 @@ public class SignalDetector extends Detector {
 
         // now we have the reverse threshold value, do the thresholding
         // and find signal rois
-        return detectForwardThresholdSignal(sourceFile, stack, n);
+        return detectForwardThresholdSignal(sourceFile,  n);
 
     }
 
@@ -294,11 +297,12 @@ public class SignalDetector extends Detector {
      * within the bounding box of the nucleus. The histogram shows a drop at the
      * point where background transitions to real signal. We detect this drop,
      * and set it as the appropriate forward threshold for the nucleus.
+     * @throws ImageImportException 
      * 
      * @throws Exception
      */
-    private List<INuclearSignal> detectHistogramThresholdSignal(@NonNull final File sourceFile, @NonNull final ImageStack stack, @NonNull final Nucleus n) {
-        LOGGER.fine("Beginning histogram detection for nucleus");
+    private List<INuclearSignal> detectHistogramThresholdSignal(@NonNull final File sourceFile, @NonNull final Nucleus n) throws ImageImportException {
+    	ImageStack stack = new ImageImporter(sourceFile).importToStack();
 
         // choose the right stack number for the channel
         int stackNumber = ImageImporter.rgbToStack(channel);
@@ -360,7 +364,7 @@ public class SignalDetector extends Detector {
         maxIndex += 10;
 
         updateThreshold(maxIndex);
-        return detectForwardThresholdSignal(sourceFile, stack, n);
+        return detectForwardThresholdSignal(sourceFile,  n);
     }
     
     private BooleanProfile getLocalMinimaWithRangeThreshold(IProfile p, int window, double threshold, double range){

@@ -78,6 +78,9 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
         
         if(!d.getCollection().hasSignalGroup(group))
         	throw new IllegalArgumentException("Signal group is not present in dataset");
+        
+        if(!options.hasString(HashOptions.SIGNAL_DETECTION_MODE_KEY))
+        	throw new IllegalArgumentException("Signal options are not complete");
 
         this.options = options.duplicate();
         this.folder  = options.getFile(HashOptions.DETECTION_FOLDER).getAbsoluteFile();

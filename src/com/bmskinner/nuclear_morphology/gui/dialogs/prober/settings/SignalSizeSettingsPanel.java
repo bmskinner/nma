@@ -77,7 +77,7 @@ public class SignalSizeSettingsPanel extends DetectionSettingsPanel {
                 new SpinnerNumberModel(Integer.valueOf(options.getInt(HashOptions.MIN_SIZE_PIXELS)), MIN_RANGE_SIZE, null, SIZE_STEP_SIZE));
 
         maxSizeSpinner = new JSpinner(
-                new SpinnerNumberModel(options.getDouble(HashOptions.MAX_FRACTION), MIN_RANGE_CIRC, MAX_RANGE_CIRC, CIRC_STEP_SIZE));
+                new SpinnerNumberModel(options.getDouble(HashOptions.SIGNAL_MAX_FRACTION), MIN_RANGE_CIRC, MAX_RANGE_CIRC, CIRC_STEP_SIZE));
         
         minCircSpinner = new JSpinner(
                 new SpinnerNumberModel(options.getDouble(HashOptions.MIN_CIRC), MIN_RANGE_CIRC, MAX_RANGE_CIRC, CIRC_STEP_SIZE));
@@ -104,7 +104,7 @@ public class SignalSizeSettingsPanel extends DetectionSettingsPanel {
         maxSizeSpinner.addChangeListener(e->{
         	try {
         		maxSizeSpinner.commitEdit();
-        		updateOptions(HashOptions.MAX_FRACTION, (Double) maxSizeSpinner.getValue());
+        		updateOptions(HashOptions.SIGNAL_MAX_FRACTION, (Double) maxSizeSpinner.getValue());
         	} catch(ParseException e1) {
         		LOGGER.log(Loggable.STACK, "Parsing error in JSpinner", e1);
         	}
@@ -181,7 +181,7 @@ public class SignalSizeSettingsPanel extends DetectionSettingsPanel {
         super.update();
         
         minSizeSpinner.setValue(options.getInt(HashOptions.MIN_SIZE_PIXELS));
-        maxSizeSpinner.setValue(options.getDouble(HashOptions.MAX_FRACTION));
+        maxSizeSpinner.setValue(options.getDouble(HashOptions.SIGNAL_MAX_FRACTION));
         minCircSpinner.setValue(options.getDouble(HashOptions.MIN_CIRC));
         maxCircSpinner.setValue(options.getDouble(HashOptions.MAX_CIRC));
     }

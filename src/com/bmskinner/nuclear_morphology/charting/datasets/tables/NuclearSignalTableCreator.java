@@ -293,7 +293,7 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
                     rowData.add(ns.getString(HashOptions.DETECTION_FOLDER));
                     rowData.add(signalThreshold);
                     rowData.add(ns.getInt(HashOptions.MIN_SIZE_PIXELS));
-                    rowData.add(df.format(ns.getDouble(HashOptions.MAX_FRACTION)));
+                    rowData.add(df.format(ns.getDouble(HashOptions.SIGNAL_MAX_FRACTION)));
                     rowData.add(df.format(ns.getDouble(HashOptions.MIN_CIRC)));
                     rowData.add(df.format(ns.getDouble(HashOptions.MAX_CIRC)));
                     rowData.add(ns.getString(HashOptions.SIGNAL_DETECTION_MODE_KEY));

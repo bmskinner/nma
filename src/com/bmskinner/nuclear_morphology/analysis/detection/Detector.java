@@ -158,22 +158,52 @@ public abstract class Detector {
     public void setExcludeEdges(boolean b) {
         excludeEdges = b;
     }
-    
+
     /**
      * Detect and measure ROIs in this image
      * @param image
      * @return
      */
     protected synchronized Map<Roi, StatsMap> detectRois(@NonNull ImageProcessor image){
-        if (Double.isNaN(this.minSize) || Double.isNaN(this.maxSize) || Double.isNaN(this.minCirc)
-                || Double.isNaN(this.maxCirc))
-            throw new IllegalArgumentException(NO_DETECTION_PARAMS_ERR);
+    	if (Double.isNaN(this.minSize) || Double.isNaN(this.maxSize) || Double.isNaN(this.minCirc)
+    			|| Double.isNaN(this.maxCirc))
+    		throw new IllegalArgumentException(NO_DETECTION_PARAMS_ERR);
 
-        if (this.minSize >= this.maxSize)
-            throw new IllegalArgumentException(SIZE_MISMATCH_ERR);
-        if (this.minCirc >= this.maxCirc)
-            throw new IllegalArgumentException(CIRC_MISMATCH_ERR);                
-        return findInImage(image);
+    	if (this.minSize >= this.maxSize)
+    		throw new IllegalArgumentException(SIZE_MISMATCH_ERR);
+    	if (this.minCirc >= this.maxCirc)
+    		throw new IllegalArgumentException(CIRC_MISMATCH_ERR);                
+    	if (!(image instanceof ByteProcessor || image instanceof ShortProcessor))
+    		throw new IllegalArgumentException("Processor must be byte or short");
+
+    	ImageProcessor searchProcessor = image.duplicate();
+    	searchProcessor.threshold(threshold);
+
+    	Map<Roi, StatsMap> result = new HashMap<>();
+
+    	// run the particle analyser
+    	// By default, add all particles to the ROI manager, and do not count
+    	// anything touching the edge
+    	int options = 0;
+
+    	if(excludeEdges)
+    		options = options | ParticleAnalyzer.EXCLUDE_EDGE_PARTICLES;        
+    	if (includeHoles)
+    		options = options | ParticleAnalyzer.INCLUDE_HOLES;
+
+    	ParticleAnalyzer pa = new ParticleAnalyzer(options);
+
+    	boolean success = pa.analyze(image);
+    	if (!success) {
+    		LOGGER.warning("Unable to perform particle analysis");
+    	}
+
+    	for(Roi r : pa.getRois()){
+    		StatsMap m = measure(r, image);
+    		result.put(r, m);
+    	}
+
+    	return result;
     }
 
     /**
@@ -199,43 +229,6 @@ public abstract class Detector {
         values.add(COM_X, rt.getValue(COM_X, 0));
         values.add(COM_Y, rt.getValue(COM_Y, 0));
         return values;
-    }
-
-    private synchronized Map<Roi, StatsMap> findInImage(@NonNull ImageProcessor image) {
-
-        if (!(image instanceof ByteProcessor || image instanceof ShortProcessor))
-            throw new IllegalArgumentException("Processor must be byte or short");
-
-        ImageProcessor searchProcessor = image.duplicate();
-        searchProcessor.threshold(this.threshold);
-        return this.runAnalyser(searchProcessor);
-    }
-    
-    private synchronized Map<Roi, StatsMap> runAnalyser(ImageProcessor processor) {
-        Map<Roi, StatsMap> result = new HashMap<>();
-
-        // run the particle analyser
-        // By default, add all particles to the ROI manager, and do not count
-        // anything touching the edge
-        int options = 0;
-        
-        if(excludeEdges)
-            options = options | ParticleAnalyzer.EXCLUDE_EDGE_PARTICLES;        
-        if (includeHoles)
-            options = options | ParticleAnalyzer.INCLUDE_HOLES;
-
-        ParticleAnalyzer pa = new ParticleAnalyzer(options);
-
-        boolean success = pa.analyze(processor);
-        if (!success)
-            LOGGER.warning("Unable to perform particle analysis");
-
-        for(Roi r : pa.getRois()){
-            StatsMap m = measure(r, processor);
-            result.put(r, m);
-        }
-
-        return result;
     }
     
 

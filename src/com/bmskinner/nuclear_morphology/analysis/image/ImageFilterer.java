@@ -502,7 +502,7 @@ public class ImageFilterer extends AbstractImageFilterer {
         ByteProcessor result = null;
 
         // // calculation of auto threshold
-        if (options.getBoolean(HashOptions.IS_CANNY_AUTO_THRESHOLD)) {
+        if (options.getBoolean(HashOptions.CANNY_IS_AUTO_THRESHOLD)) {
             autoDetectCannyThresholds(options, ip);
         }
 

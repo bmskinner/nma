@@ -43,7 +43,9 @@ import ij.ImageStack;
 import ij.process.ImageProcessor;
 
 /**
- * Implementation of the Finder interface for detecting nuclear signals
+ * Implementation of the Finder interface for detecting nuclear signals.
+ * It generates the step-by-step images for display in the image prober
+ * UI, calling a SignalDetector to find the actual signals 
  * 
  * @author ben
  * @since 1.13.5
@@ -53,9 +55,8 @@ public class SignalFinder extends AbstractFinder<List<INuclearSignal>> {
 	
 	private static final Logger LOGGER = Logger.getLogger(SignalFinder.class.getName());
 
-    private SignalDetector              detector;
-    private final HashOptions signalOptions;
-    private final ICellCollection       collection;
+    private final HashOptions     signalOptions;
+    private final ICellCollection collection;
 
     /**
      * Create a signal detector for a dataset using the given options
@@ -67,19 +68,10 @@ public class SignalFinder extends AbstractFinder<List<INuclearSignal>> {
         super(analysisOptions);
         this.signalOptions = signalOptions;
         this.collection = collection;
-
-        HashOptions testOptions = signalOptions.duplicate();
-        testOptions.setInt(HashOptions.MIN_SIZE_PIXELS, 5);
-        testOptions.setDouble(HashOptions.MAX_FRACTION, 1d);
-
-        detector = new SignalDetector(testOptions, testOptions.getInt(HashOptions.CHANNEL));
     }
 
     @Override
     public List<INuclearSignal> findInFolder(@NonNull File folder) throws ImageImportException {
-
-        if (folder == null)
-            throw new IllegalArgumentException("Folder cannot be null");
 
         List<INuclearSignal> list = new ArrayList<>();
 
@@ -104,10 +96,13 @@ public class SignalFinder extends AbstractFinder<List<INuclearSignal>> {
 
         List<INuclearSignal> list = new ArrayList<>();
 
+        // We need to find all possible signals so we can highlight which
+        // ones pass filters, so we must relax the size thresholds.
+        // Store them in a new options object to preserve the original.
         HashOptions testOptions = signalOptions.duplicate();
         testOptions.setInt(HashOptions.MIN_SIZE_PIXELS, 5);
-        testOptions.setDouble(HashOptions.MAX_FRACTION, 1d);
-        detector = new SignalDetector(testOptions, testOptions.getInt(HashOptions.CHANNEL));
+        testOptions.setDouble(HashOptions.SIGNAL_MAX_FRACTION, 1d);
+        SignalDetector detector = new SignalDetector(testOptions);
 
         ImageStack stack = new ImageImporter(imageFile).importToStack();
 
@@ -150,7 +145,7 @@ public class SignalFinder extends AbstractFinder<List<INuclearSignal>> {
         for (Nucleus n : nuclei) {
             try {
                 // The detector also creates and adds the signals currently
-                List<INuclearSignal> temp = detector.detectSignal(imageFile, stack, n);
+                List<INuclearSignal> temp = detector.detectSignal(imageFile, n);
 
                 if (hasDetectionListeners()) {
                     LOGGER.fine("Drawing signals for " + n.getNameAndNumber());
@@ -159,7 +154,7 @@ public class SignalFinder extends AbstractFinder<List<INuclearSignal>> {
                 }
 
                 for (INuclearSignal s : temp) {
-                    if (checkSignal(s, n)) {
+                    if (isValid(s, n)) {
                         list.add(s);
                     }
                 }
@@ -188,16 +183,16 @@ public class SignalFinder extends AbstractFinder<List<INuclearSignal>> {
      */
     public List<INuclearSignal> findInImage(@NonNull File imageFile, @NonNull Nucleus n) throws ImageImportException {
 
-        detector = new SignalDetector(signalOptions, signalOptions.getInt(HashOptions.CHANNEL));
+    	SignalDetector sd = new SignalDetector(signalOptions);
 
         List<INuclearSignal> list = new ArrayList<>();
         try {
-        	ImageStack stack = new ImageImporter(imageFile).importToStack();
+//        	ImageStack stack = new ImageImporter(imageFile).importToStack();
 
             // The detector also creates the signals currently
-            List<INuclearSignal> temp = detector.detectSignal(imageFile, stack, n);
+            List<INuclearSignal> temp = sd.detectSignal(imageFile, n);
             for (INuclearSignal s : temp)
-                if (checkSignal(s, n)) 
+                if (isValid(s, n)) 
                     list.add(s);
         } catch (IllegalArgumentException | ImageImportException e) {
         	LOGGER.warning("Unable to find images in image "+imageFile.getAbsolutePath()+": "+e.getMessage());
@@ -217,7 +212,7 @@ public class SignalFinder extends AbstractFinder<List<INuclearSignal>> {
 
         an.annotateBorder(n, Color.BLUE);
         for (INuclearSignal s : list) {
-            Color color = checkSignal(s, n) ? Color.ORANGE : Color.RED;
+            Color color = isValid(s, n) ? Color.ORANGE : Color.RED;
             an.annotateBorder(s, color);
             if (annotateStats) {
                 an.annotateSignalStats(n, s, Color.YELLOW, Color.BLUE);
@@ -231,9 +226,9 @@ public class SignalFinder extends AbstractFinder<List<INuclearSignal>> {
      * @param n the nucleus the signal belongs to
      * @return
      */
-    private boolean checkSignal(@NonNull INuclearSignal s, @NonNull Nucleus n) {
+    private boolean isValid(@NonNull INuclearSignal s, @NonNull Nucleus n) {
         return (s.getStatistic(Measurement.AREA) >= signalOptions.getInt(HashOptions.MIN_SIZE_PIXELS)
-        		&& s.getStatistic(Measurement.AREA) <= (signalOptions.getDouble(HashOptions.MAX_FRACTION) * n.getStatistic(Measurement.AREA)));
+        		&& s.getStatistic(Measurement.AREA) <= (signalOptions.getDouble(HashOptions.SIGNAL_MAX_FRACTION) * n.getStatistic(Measurement.AREA)));
     }
 
 }

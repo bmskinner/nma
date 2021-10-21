@@ -143,11 +143,6 @@ public class TestImageDatasetCreator {
     	nucleus.setInt(HashOptions.MIN_SIZE_PIXELS, 4000);
     	nucleus.setInt(HashOptions.MAX_SIZE_PIXELS, 12000);
     	
-//    	HashOptions signalOptions = OptionsFactory.makeNuclearSignalOptions(TestResources.TESTING_MOUSE_SIGNALS_FOLDER);
-//    	signalOptions.setInt(HashOptions.CHANNEL, 0);
-//    	
-//    	op.setDetectionOptions(CellularComponent.NUCLEAR_SIGNAL, signalOptions);
-    	
     	IAnalysisDataset d = createTestSignalDataset(op, true, false);
     	assertTrue("Dataset should have signals", d.getCollection().getSignalManager().getSignalCount()>0);
     	saveTestDataset(d, TestResources.MOUSE_SIGNALS_DATASET);
@@ -204,7 +199,7 @@ public class TestImageDatasetCreator {
         	HashOptions redOptions = OptionsFactory.makeNuclearSignalOptions(testFolder);
         	redOptions.setString(HashOptions.SIGNAL_GROUP_NAME, RED_SIGNAL_NAME);
         	redOptions.setInt(HashOptions.MIN_SIZE_PIXELS, 5);
-        	redOptions.setDouble(HashOptions.MAX_FRACTION, 0.5);
+        	redOptions.setDouble(HashOptions.SIGNAL_MAX_FRACTION, 0.5);
 
         	ISignalGroup red = new DefaultSignalGroup(RED_SIGNAL_NAME, RED_SIGNAL_ID);
         	red.setGroupColour(Color.RED);

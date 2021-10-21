@@ -77,15 +77,14 @@ public interface HashOptions extends Serializable, XmlSerializable {
     
     /** Constants relating to signals **/
     
-    String MAX_FRACTION       = "Max fraction";
+    String SIGNAL_MAX_FRACTION       = "Max fraction";
     String SIGNAL_DETECTION_MODE_KEY = "DETECTION_MODE";
     String SIGNAL_GROUP_NAME  = "Name";
 
     int                 DEFAULT_SIGNAL_THRESHOLD    = 70;
-    int                 DEFAULT_MIN_SIGNAL_SIZE     = 5;
-    int                 DEFAULT_MAX_SIGNAL_SIZE     = 100000;
-    double              DEFAULT_MAX_SIGNAL_FRACTION = 0.1;
-    SignalDetectionMode DEFAULT_METHOD              = SignalDetectionMode.FORWARD;
+    int                 DEFAULT_SIGNAL_MIN_SIZE     = 5;
+    double              DEFAULT_SIGNAL_MAX_FRACTION = 0.1;
+    SignalDetectionMode DEFAULT_SIGNAL_DETECTION_METHOD = SignalDetectionMode.FORWARD;
     int                 DEFAULT_SIGNAL_CHANNEL      = 0;
     
     /** Constants relating to Canny edge detection **/
@@ -95,8 +94,8 @@ public interface HashOptions extends Serializable, XmlSerializable {
     String CANNY_KERNEL_WIDTH_INT      = "Canny kernel width";
     String CANNY_CLOSING_RADIUS_INT    = "Closing radius";
     
-    String IS_CANNY_AUTO_THRESHOLD       = "Use auto threshold";
-    String IS_CANNY_ADD_BORDER           = "Add border";
+    String CANNY_IS_AUTO_THRESHOLD       = "Use auto threshold";
+    String CANNY_IS_ADD_BORDER           = "Add border";
 
     float   DEFAULT_CANNY_LOW_THRESHOLD        = 0.5f;
     float   DEFAULT_CANNY_HIGH_THRESHOLD       = 1.5f;

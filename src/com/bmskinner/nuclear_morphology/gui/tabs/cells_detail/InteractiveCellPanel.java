@@ -37,6 +37,7 @@ import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.DefaultOptions;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
+import com.bmskinner.nuclear_morphology.components.options.OptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.gui.events.CellUpdatedEventListener;
 import com.bmskinner.nuclear_morphology.gui.events.CelllUpdateEventHandler;
@@ -112,7 +113,7 @@ public abstract class InteractiveCellPanel extends JPanel {
 	 * Set the panel to a null state with no cell showing
 	 */
 	public void setNull() {
-		setCell(null, null, null, new DefaultOptions());
+		setCell(null, null, null, new OptionsBuilder().build());
 	}
 
 	/**

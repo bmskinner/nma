@@ -148,11 +148,9 @@ public class ImageImporter implements Importer {
      */
     public ImageStack importToStack() throws ImageImportException {
 
-        ImageStack stack = null;
-
         ImagePlus image = new ImagePlus(f.getAbsolutePath());
 
-        stack = convert(image);
+        ImageStack stack = convert(image);
         image.close();
         return stack;
     }

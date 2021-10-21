@@ -51,8 +51,8 @@ import com.bmskinner.nuclear_morphology.components.measure.DefaultMeasurement;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.measure.MeasurementDimension;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.options.DefaultOptions;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
+import com.bmskinner.nuclear_morphology.components.options.OptionsBuilder;
 import com.bmskinner.nuclear_morphology.io.Io;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -707,11 +707,11 @@ public class GLCM {
 	 * @return
 	 */
 	public static HashOptions defaultOptions() {
-		HashOptions o = new DefaultOptions();
-		o.setInt(STEP_SIZE_KEY, 1);
-		o.setString(ANGLE_KEY, GLCMStepAngle.ALL.toString());
-		o.setBoolean(USE_SYMMETRY_KEY, true);
-		return o;
+		return new OptionsBuilder()
+				.withValue(STEP_SIZE_KEY, 1)
+				.withValue(ANGLE_KEY, GLCMStepAngle.ALL.toString())
+				.withValue(USE_SYMMETRY_KEY, true)
+				.build();
 	}
 
 

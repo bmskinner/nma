@@ -32,6 +32,7 @@ import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.options.DefaultOptions;
+import com.bmskinner.nuclear_morphology.components.options.OptionsBuilder;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileTypeOptionsPanel;
 import com.bmskinner.nuclear_morphology.gui.dialogs.CellResegmentationDialog;
@@ -117,7 +118,7 @@ public class CellSegmentsPanel extends AbstractCellDetailPanel implements ChartS
         	 final ICell cell = getCellModel().getCell();
              final CellularComponent component = getCellModel().getComponent();
         	
-        	imagePanel.setCell(activeDataset(), cell, component, new DefaultOptions());
+        	imagePanel.setCell(activeDataset(), cell, component,  new OptionsBuilder().build());
 
         } catch (Exception e) {
             LOGGER.log(Loggable.STACK, "Error updating cell panel", e);

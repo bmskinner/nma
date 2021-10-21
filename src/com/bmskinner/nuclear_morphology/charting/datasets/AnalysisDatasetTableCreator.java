@@ -418,7 +418,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 		if(isCanny) {
 			builder.append("Canny edge detection"+Io.NEWLINE);
 			
-			if(nucleusOptions.getBoolean(HashOptions.IS_CANNY_AUTO_THRESHOLD)) {
+			if(nucleusOptions.getBoolean(HashOptions.CANNY_IS_AUTO_THRESHOLD)) {
 				builder.append("Auto-threshold"+Io.NEWLINE);
 			} else {
 				builder.append("Low threshold: "+nucleusOptions.getFloat(HashOptions.CANNY_LOW_THRESHOLD_FLT)+Io.NEWLINE);

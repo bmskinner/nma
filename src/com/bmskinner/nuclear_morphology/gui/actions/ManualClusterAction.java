@@ -20,8 +20,8 @@ import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.datasets.IClusterGroup;
 import com.bmskinner.nuclear_morphology.components.datasets.VirtualDataset;
 import com.bmskinner.nuclear_morphology.components.options.ClusteringMethod;
-import com.bmskinner.nuclear_morphology.components.options.DefaultOptions;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
+import com.bmskinner.nuclear_morphology.components.options.OptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
@@ -162,9 +162,10 @@ public class ManualClusterAction extends SingleDatasetResultAction {
         	// Save the clusters to the dataset
             int clusterNumber = dataset.getMaxClusterGroupNumber() + 1;
             
-            HashOptions op = new DefaultOptions();
-            op.setString(HashOptions.CLUSTER_METHOD_KEY, ClusteringMethod.MANUAL.toString());
-            op.setBoolean(HashOptions.CLUSTER_INCLUDE_PROFILE_KEY, false);
+            HashOptions op = new OptionsBuilder()
+            		.withValue(HashOptions.CLUSTER_METHOD_KEY, ClusteringMethod.MANUAL.toString())
+            		.withValue(HashOptions.CLUSTER_INCLUDE_PROFILE_KEY, false)
+            		.build();
             
             IClusterGroup group = new DefaultClusterGroup(IClusterGroup.CLUSTER_GROUP_PREFIX + "_" + clusterNumber, op);
 

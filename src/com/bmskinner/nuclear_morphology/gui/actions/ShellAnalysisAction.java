@@ -40,6 +40,7 @@ import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.options.DefaultOptions;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
+import com.bmskinner.nuclear_morphology.components.options.OptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult.ShrinkType;
 import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
@@ -135,7 +136,7 @@ public class ShellAnalysisAction extends SingleDatasetResultAction {
 
         private static final String DIALOG_TITLE = "Shell analysis options";
         
-        HashOptions o = new DefaultOptions();
+        HashOptions o = new OptionsBuilder().build();
 
         public ShellAnalysisSetupDialog(final @NonNull IAnalysisDataset dataset) {
             this(dataset, DIALOG_TITLE);

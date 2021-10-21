@@ -56,7 +56,7 @@ public class SignalDetectionMethodTest extends ComponentTester {
     	
     	// Add signals from the red channel
     	HashOptions redOptions = OptionsFactory.makeNuclearSignalOptions(testFolder);
-    	redOptions.setDouble(HashOptions.MAX_FRACTION, 0.5);
+    	redOptions.setDouble(HashOptions.SIGNAL_MAX_FRACTION, 0.5);
     	redOptions.setInt(HashOptions.MIN_SIZE_PIXELS, 5);
 
 

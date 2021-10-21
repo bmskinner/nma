@@ -114,9 +114,9 @@ public class ImagePreprocessingSettingsPanel extends DetectionSettingsPanel {
         });
 
         // Add the border adding box
-        addBorderCheckBox = new JCheckBox("", options.getBoolean(HashOptions.IS_CANNY_ADD_BORDER));
+        addBorderCheckBox = new JCheckBox("", options.getBoolean(HashOptions.CANNY_IS_ADD_BORDER));
         addBorderCheckBox.addActionListener(e -> {
-        	updateOptions(HashOptions.IS_CANNY_ADD_BORDER, addBorderCheckBox.isSelected());
+        	updateOptions(HashOptions.CANNY_IS_ADD_BORDER, addBorderCheckBox.isSelected());
         });
 
         flattenImageThresholdSpinner.addChangeListener(e -> {

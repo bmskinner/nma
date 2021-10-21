@@ -17,6 +17,7 @@ import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.options.DefaultOptions;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
+import com.bmskinner.nuclear_morphology.components.options.OptionsBuilder;
 import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
@@ -54,7 +55,7 @@ public class ExportSingleCellImagesAction extends MultiDatasetResultAction {
 
         private static final String DIALOG_TITLE = "Cell image export options";
         
-        HashOptions o = new DefaultOptions();
+        HashOptions o = new OptionsBuilder().build();
 
         public CellImageSetupDialog(final @NonNull List<IAnalysisDataset> datasets) {
             this(datasets, DIALOG_TITLE);

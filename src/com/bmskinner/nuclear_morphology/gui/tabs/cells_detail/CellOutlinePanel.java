@@ -30,6 +30,7 @@ import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.options.DefaultOptions;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
+import com.bmskinner.nuclear_morphology.components.options.OptionsBuilder;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.components.panels.GenericCheckboxPanel;
 import com.bmskinner.nuclear_morphology.gui.dialogs.collections.ManualCurationDialog;
@@ -129,10 +130,11 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
         final ICell cell = getCellModel().getCell();
         final CellularComponent component = getCellModel().getComponent();
         
-        HashOptions displayOptions = new DefaultOptions();
-        displayOptions.setBoolean(CellDisplayOptions.WARP_IMAGE, warpMeshPanel.isSelected());
-        displayOptions.setBoolean(CellDisplayOptions.SHOW_MESH, makeMeshPanel.isSelected());
-        displayOptions.setBoolean(CellDisplayOptions.ROTATE_VERTICAL, rotatePanel.isSelected());
+        HashOptions displayOptions = new OptionsBuilder()
+        		.withValue(CellDisplayOptions.WARP_IMAGE, warpMeshPanel.isSelected())
+        		.withValue(CellDisplayOptions.SHOW_MESH, makeMeshPanel.isSelected())
+        		.withValue(CellDisplayOptions.ROTATE_VERTICAL, rotatePanel.isSelected())
+        		.build();
         
         imagePanel.setCell(activeDataset(), cell, component, displayOptions);
 

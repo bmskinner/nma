@@ -69,24 +69,20 @@ public class OptionsFactory {
      * @return
      */
 	public static HashOptions makeCannyOptions() {
-		
-		DefaultOptions d = new DefaultOptions();
-		d.setBoolean(HashOptions.IS_USE_CANNY, HashOptions.DEFAULT_IS_USE_CANNY);
-		
-		d.setBoolean(HashOptions.IS_CANNY_AUTO_THRESHOLD, HashOptions.DEFAULT_IS_CANNY_AUTO_THRESHOLD);
+		return new OptionsBuilder()
+				.withValue(HashOptions.IS_USE_CANNY, HashOptions.DEFAULT_IS_USE_CANNY)
+				.withValue(HashOptions.CANNY_IS_AUTO_THRESHOLD, HashOptions.DEFAULT_IS_CANNY_AUTO_THRESHOLD)
 
-		d.setFloat(HashOptions.CANNY_LOW_THRESHOLD_FLT, HashOptions.DEFAULT_CANNY_LOW_THRESHOLD);
-		d.setFloat(HashOptions.CANNY_HIGH_THRESHOLD_FLT, HashOptions.DEFAULT_CANNY_HIGH_THRESHOLD);
+				.withValue(HashOptions.CANNY_LOW_THRESHOLD_FLT, HashOptions.DEFAULT_CANNY_LOW_THRESHOLD)
+				.withValue(HashOptions.CANNY_HIGH_THRESHOLD_FLT, HashOptions.DEFAULT_CANNY_HIGH_THRESHOLD)
 
-		d.setFloat(HashOptions.CANNY_KERNEL_RADIUS_FLT, HashOptions.DEFAULT_CANNY_KERNEL_RADIUS);
-		d.setInt(HashOptions.CANNY_KERNEL_WIDTH_INT, HashOptions.DEFAULT_CANNY_KERNEL_WIDTH);
+				.withValue(HashOptions.CANNY_KERNEL_RADIUS_FLT, HashOptions.DEFAULT_CANNY_KERNEL_RADIUS)
+				.withValue(HashOptions.CANNY_KERNEL_WIDTH_INT, HashOptions.DEFAULT_CANNY_KERNEL_WIDTH)
 
-		d.setInt(HashOptions.CANNY_CLOSING_RADIUS_INT, HashOptions.DEFAULT_CANNY_CLOSING_RADIUS);
-
-		d.setBoolean(HashOptions.IS_CANNY_ADD_BORDER, HashOptions.DEFAULT_IS_CANNY_ADD_BORDER);
-		
-		return d;
-    }
+				.withValue(HashOptions.CANNY_CLOSING_RADIUS_INT, HashOptions.DEFAULT_CANNY_CLOSING_RADIUS)
+				.withValue(HashOptions.CANNY_IS_ADD_BORDER, HashOptions.DEFAULT_IS_CANNY_ADD_BORDER)
+				.build();
+	}
 
     /**
      * Create the default options type for image preprocessing
@@ -95,26 +91,26 @@ public class OptionsFactory {
      */
 	public static HashOptions makePreprocessingOptions() {
 		DefaultOptions d = new DefaultOptions();
-		
-		d.setBoolean(HashOptions.IS_USE_GAUSSIAN, HashOptions.DEFAULT_USE_GAUSSIAN);
-		d.setBoolean(HashOptions.IS_USE_KUWAHARA, HashOptions.DEFAULT_USE_KUWAHARA);
-		d.setBoolean(HashOptions.IS_USE_ROLLING_BALL, HashOptions.DEFAULT_USE_ROLLING_BALL);
-		d.setBoolean(HashOptions.IS_USE_FLATTENING, HashOptions.DEFAULT_IS_USE_FLATTENNING);
-		d.setBoolean(HashOptions.IS_USE_RAISING, HashOptions.DEFAULT_IS_USE_RAISING);
-		d.setBoolean(HashOptions.IS_USE_COLOUR_THRESHOLD, HashOptions.DEFAULT_IS_USE_COLOUR_THRESHOLD);
-		
-		d.setInt(HashOptions.KUWAHARA_RADIUS_INT, HashOptions.DEFAULT_KUWAHARA_RADIUS);
-		d.setInt(HashOptions.FLATTENING_THRESHOLD_INT, HashOptions.DEFAULT_FLATTEN_THRESHOLD);
-		d.setInt(HashOptions.RAISING_THRESHOLD_INT, HashOptions.DEFAULT_RAISE_THRESHOLD);
-		
+		return new OptionsBuilder()
+				.withValue(HashOptions.IS_USE_GAUSSIAN, HashOptions.DEFAULT_USE_GAUSSIAN)
+				.withValue(HashOptions.IS_USE_KUWAHARA, HashOptions.DEFAULT_USE_KUWAHARA)
+				.withValue(HashOptions.IS_USE_ROLLING_BALL, HashOptions.DEFAULT_USE_ROLLING_BALL)
+				.withValue(HashOptions.IS_USE_FLATTENING, HashOptions.DEFAULT_IS_USE_FLATTENNING)
+				.withValue(HashOptions.IS_USE_RAISING, HashOptions.DEFAULT_IS_USE_RAISING)
+				.withValue(HashOptions.IS_USE_COLOUR_THRESHOLD, HashOptions.DEFAULT_IS_USE_COLOUR_THRESHOLD)
 
-//		d.setInt(HashOptions.MIN_HUE, HashOptions.DEFAULT_MIN_HUE);
-//		d.setInt(HashOptions.MAX_HUE, HashOptions.DEFAULT_MAX_HUE);
-//		d.setInt(HashOptions.MIN_SAT, HashOptions.DEFAULT_MIN_SAT);
-//		d.setInt(HashOptions.MAX_SAT, HashOptions.DEFAULT_MAX_SAT);
-//		d.setInt(HashOptions.MIN_BRI, HashOptions.DEFAULT_MIN_BRI);
-//		d.setInt(HashOptions.MAX_BRI, HashOptions.DEFAULT_MAX_BRI);
-		return d;
+				.withValue(HashOptions.KUWAHARA_RADIUS_INT, HashOptions.DEFAULT_KUWAHARA_RADIUS)
+				.withValue(HashOptions.FLATTENING_THRESHOLD_INT, HashOptions.DEFAULT_FLATTEN_THRESHOLD)
+				.withValue(HashOptions.RAISING_THRESHOLD_INT, HashOptions.DEFAULT_RAISE_THRESHOLD)
+				.build();
+
+
+//		withValue(HashOptions.MIN_HUE, HashOptions.DEFAULT_MIN_HUE);
+//		withValue(HashOptions.MAX_HUE, HashOptions.DEFAULT_MAX_HUE);
+//		withValue(HashOptions.MIN_SAT, HashOptions.DEFAULT_MIN_SAT);
+//		withValue(HashOptions.MAX_SAT, HashOptions.DEFAULT_MAX_SAT);
+//		withValue(HashOptions.MIN_BRI, HashOptions.DEFAULT_MIN_BRI);
+//		withValue(HashOptions.MAX_BRI, HashOptions.DEFAULT_MAX_BRI);
     }
 
     /**
@@ -126,10 +122,9 @@ public class OptionsFactory {
 	public static HashOptions makeNuclearSignalOptions(File folder) {		
 		return new OptionsBuilder()
 		.withValue(HashOptions.DETECTION_FOLDER, folder.getAbsolutePath())
-		.withValue(HashOptions.MAX_FRACTION, HashOptions.DEFAULT_MAX_SIGNAL_FRACTION)
-		.withValue(HashOptions.SIGNAL_DETECTION_MODE_KEY, HashOptions.DEFAULT_METHOD.name())
-		.withValue(HashOptions.MIN_SIZE_PIXELS, HashOptions.DEFAULT_MIN_SIGNAL_SIZE)
-		.withValue(HashOptions.MAX_SIZE_PIXELS, HashOptions.DEFAULT_MAX_SIGNAL_SIZE)
+		.withValue(HashOptions.SIGNAL_MAX_FRACTION, HashOptions.DEFAULT_SIGNAL_MAX_FRACTION)
+		.withValue(HashOptions.SIGNAL_DETECTION_MODE_KEY, HashOptions.DEFAULT_SIGNAL_DETECTION_METHOD.name())
+		.withValue(HashOptions.MIN_SIZE_PIXELS, HashOptions.DEFAULT_SIGNAL_MIN_SIZE)
 		.withValue(HashOptions.MIN_CIRC, HashOptions.DEFAULT_MIN_CIRC)
 		.withValue(HashOptions.MAX_CIRC, HashOptions.DEFAULT_MAX_CIRC)
 		.withValue(HashOptions.CHANNEL, HashOptions.DEFAULT_SIGNAL_CHANNEL)
@@ -140,11 +135,15 @@ public class OptionsFactory {
 		.build();
     }
 	
+	/**
+	 * Create the default options for shell analysis
+	 * @return
+	 */
 	public static HashOptions makeShellAnalysisOptions() {
-		DefaultOptions d = new DefaultOptions();
-		d.setInt(HashOptions.SHELL_COUNT_INT, HashOptions.DEFAULT_SHELL_COUNT);
-		d.setString(HashOptions.SHELL_EROSION_METHOD_KEY, HashOptions.DEFAULT_EROSION_METHOD.name());
-		return d;
+		return new OptionsBuilder()
+				.withValue(HashOptions.SHELL_COUNT_INT, HashOptions.DEFAULT_SHELL_COUNT)
+				.withValue(HashOptions.SHELL_EROSION_METHOD_KEY, HashOptions.DEFAULT_EROSION_METHOD.name())
+				.build();
 	}
 
 

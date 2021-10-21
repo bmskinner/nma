@@ -101,7 +101,7 @@ public class CannySettingsPanel extends SettingsPanel implements ActionListener 
         cannyKernelWidth.setValue(options.getInt(HashOptions.CANNY_KERNEL_WIDTH_INT));
         closingObjectRadiusSpinner.setValue(options.getInt(HashOptions.CANNY_CLOSING_RADIUS_INT));
 
-        cannyAutoThresholdCheckBox.setSelected(options.getBoolean(HashOptions.IS_CANNY_AUTO_THRESHOLD));
+        cannyAutoThresholdCheckBox.setSelected(options.getBoolean(HashOptions.CANNY_IS_AUTO_THRESHOLD));
         isUpdating = false;
     }
 
@@ -272,11 +272,11 @@ public class CannySettingsPanel extends SettingsPanel implements ActionListener 
         if (e.getActionCommand().equals(AUTO_THRESHOLD_ACTION)) {
 
             if (cannyAutoThresholdCheckBox.isSelected()) {
-                options.setBoolean(HashOptions.IS_CANNY_AUTO_THRESHOLD, true);
+                options.setBoolean(HashOptions.CANNY_IS_AUTO_THRESHOLD, true);
                 cannyLowThreshold.setEnabled(false);
                 cannyHighThreshold.setEnabled(false);
             } else {
-            	options.setBoolean(HashOptions.IS_CANNY_AUTO_THRESHOLD, false);
+            	options.setBoolean(HashOptions.CANNY_IS_AUTO_THRESHOLD, false);
                 cannyLowThreshold.setEnabled(true);
                 cannyHighThreshold.setEnabled(true);
             }
