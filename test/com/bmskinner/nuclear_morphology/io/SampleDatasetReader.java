@@ -114,7 +114,7 @@ public class SampleDatasetReader {
      */
     public static IAnalysisDataset openDataset(@NonNull File f, @Nullable Map<UUID, File> signalMap) throws Exception {        
         if(!f.exists())
-            throw new Exception("File does not exist: "+f.getAbsolutePath()); 
+            throw new IllegalArgumentException("File does not exist: "+f.getAbsolutePath()); 
         IAnalysisMethod m = signalMap==null ? new DatasetImportMethod(f) : new DatasetImportMethod(f, signalMap);
         IAnalysisResult r = m.call();
         return r.getFirstDataset();

@@ -20,6 +20,7 @@ import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nuclear_morphology.analysis.AnalysisMethodException;
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.SingleDatasetAnalysisMethod;
@@ -33,6 +34,7 @@ import com.bmskinner.nuclear_morphology.components.nuclei.Consensus;
 import com.bmskinner.nuclear_morphology.components.nuclei.DefaultConsensusNucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
@@ -55,34 +57,11 @@ public class ProfileRefoldMethod extends SingleDatasetAnalysisMethod {
 	private IProfile targetCurve;
 	private Consensus refoldNucleus;
     private ICellCollection collection;
-
-    private CurveRefoldingMode mode = CurveRefoldingMode.FAST;
+    
+    public static final int MAX_ITERATIONS = 50;
 
     private int pointUpdateCounter = 0;
 
-    public enum CurveRefoldingMode {
-
-        FAST("Fast", 50), 
-        INTENSIVE("Intensive", 1000), 
-        BRUTAL("Brutal", 10000);
-
-        private int    iterations;
-        private String name;
-
-        CurveRefoldingMode(String name, int iterations) {
-            this.name = name;
-            this.iterations = iterations;
-        }
-
-        @Override
-		public String toString() {
-            return this.name;
-        }
-
-        public int maxIterations() {
-            return this.iterations;
-        }
-    }
 
     /**
      * Construct from a collection of cells and the mode of refolding
@@ -91,10 +70,9 @@ public class ProfileRefoldMethod extends SingleDatasetAnalysisMethod {
      * @param refoldMode the type of refolding
      * @throws Exception
      */
-    public ProfileRefoldMethod(@NonNull IAnalysisDataset dataset, @NonNull CurveRefoldingMode refoldMode) throws Exception {
+    public ProfileRefoldMethod(@NonNull IAnalysisDataset dataset) throws Exception {
         super(dataset);
         collection = dataset.getCollection();
-        this.setMode(refoldMode);
     }
 
     @Override
@@ -103,44 +81,46 @@ public class ProfileRefoldMethod extends SingleDatasetAnalysisMethod {
         return new DefaultAnalysisResult(dataset);
     }
 
-    private void run() {
+    private void run() throws Exception {
 
-        try {
-        	// make an entirely new nucleus to play with
-            Nucleus n = collection.getNucleusMostSimilarToMedian(Landmark.REFERENCE_POINT);
+    	// make an entirely new nucleus to play with
+    	Nucleus n = collection.getNucleusMostSimilarToMedian(Landmark.REFERENCE_POINT);
 
-            refoldNucleus = new DefaultConsensusNucleus(n);
-            
-            IProfile targetProfile = collection.getProfileCollection().getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT,
-                    Stats.MEDIAN);
-            IProfile q25 = collection.getProfileCollection().getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT,
-                    Stats.LOWER_QUARTILE);
-            IProfile q75 = collection.getProfileCollection().getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT,
-                    Stats.UPPER_QUARTILE);
+    	refoldNucleus = new DefaultConsensusNucleus(n);
 
-            if (targetProfile == null) {
-                throw new Exception("Null reference to target profile");
-            }
-            if (q25 == null || q75 == null) {
-                throw new Exception("Null reference to q25 or q75 profile");
-            }
+    	IProfile targetProfile = collection.getProfileCollection().getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT,
+    			Stats.MEDIAN);
+    	IProfile q25 = collection.getProfileCollection().getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT,
+    			Stats.LOWER_QUARTILE);
+    	IProfile q75 = collection.getProfileCollection().getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT,
+    			Stats.UPPER_QUARTILE);
 
-            targetCurve = targetProfile;
-            refoldNucleus.moveCentreOfMass(IPoint.makeNew(0, 0));
+    	if (targetProfile == null) {
+    		throw new AnalysisMethodException("Null reference to target profile");
+    	}
+    	if (q25 == null || q75 == null) {
+    		throw new AnalysisMethodException("Null reference to q25 or q75 profile");
+    	}
 
-            LOGGER.finer( "Result: template at " + refoldNucleus.getCentreOfMass());
+    	targetCurve = targetProfile;
+    	refoldNucleus.moveCentreOfMass(IPoint.makeNew(0, 0));
 
-            if (collection.size() > 1) 
-                refoldCurve(); // carry out the refolding
+    	LOGGER.finer( "Result: template at " + refoldNucleus.getCentreOfMass());
 
-            collection.setConsensus(refoldNucleus);
+    	if (collection.size() > 1) 
+    		refoldCurve(); // carry out the refolding
+    	
+    	
+    	// Ensure segments are applied to the new nucleus
+    	ISegmentedProfile profile = refoldNucleus.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
+    	profile.setSegments(n.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT).getOrderedSegments());
+    	refoldNucleus.setProfile(ProfileType.ANGLE, profile);
 
-            LOGGER.fine("Updated " + pointUpdateCounter + " border points");
+    	collection.setConsensus(refoldNucleus);
 
-        } catch (Exception e) {
-            LOGGER.warning("Unable to refold nucleus");
-            LOGGER.log(Loggable.STACK, "Unable to refold nucleus", e);
-        }
+    	LOGGER.fine("Updated " + pointUpdateCounter + " border points");
+
+
     }
 
     /*
@@ -148,79 +128,19 @@ public class ProfileRefoldMethod extends SingleDatasetAnalysisMethod {
      * off this
      */
     public void refoldCurve() throws Exception {
+    	double score = refoldNucleus.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT)
+    			.absoluteSquareDifference(targetCurve);
 
-        try {
-            double score = refoldNucleus.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT)
-                    .absoluteSquareDifference(targetCurve);
+    	LOGGER.fine("Refolding curve: initial score: " + (int) score);
+    	
+    	for(int i=0; i<MAX_ITERATIONS; i++) {
+    		score = iterateOverNucleus();
+    		fireProgressEvent();
+    		LOGGER.finer("Iteration " + i + ": " + (int) score);
+    	}
+    	LOGGER.fine("Refolded curve: final score: " + (int) score);
 
-            LOGGER.fine("Refolding curve: initial score: " + (int) score);
-            int i = 0;
-            while (i < mode.maxIterations()) { // iterate until converging
-                score = this.iterateOverNucleus();
-                fireProgressEvent();
-                LOGGER.fine("Iteration " + i + ": " + (int) score);
-                i++;
-            }
-            LOGGER.fine("Refolded curve: final score: " + (int) score);
-
-        } catch (Exception e) {
-            throw new Exception("Cannot calculate scores: " + e.getMessage());
-        }
     }
-
-    public void setMode(CurveRefoldingMode s) {
-        this.mode = s;
-    }
-
-    /**
-     * Smooth jagged edges in the refold nucleus
-     * 
-     * @throws Exception
-     */
-//    private void smoothCurve(int offset) throws Exception {
-//
-//        // Get the median distance between each border point in the refold
-//        // candidate nucleus.
-//        // Use this to establish the max and min distances a point can migrate
-//        // from its neighbours
-//        double medianDistanceBetweenPoints = refoldNucleus.component().getMedianDistanceBetweenPoints();
-//        double minDistance = medianDistanceBetweenPoints * 0.5;
-//        double maxDistance = medianDistanceBetweenPoints * 1.2;
-//
-//        /*
-//         * Draw a line between the next and previous point Move the point to the
-//         * centre of the line Move ahead two points
-//         * 
-//         */
-//        for (int i = offset; i < refoldNucleus.component().getBorderLength(); i += 2) {
-//
-//            IPoint thisPoint = refoldNucleus.component().getBorderPoint(i);
-//            IPoint prevPoint = thisPoint.prevPoint();
-//            IPoint nextPoint = thisPoint.nextPoint();
-//
-//            /*
-//             * get the point o, half way between the previous point p and next
-//             * point n
-//             */
-//
-//            LineEquation eq = new DoubleEquation(prevPoint, nextPoint);
-//            double distance = prevPoint.getLengthTo(nextPoint) / 2;
-//            IPoint newPoint = eq.getPointOnLine(prevPoint, distance);
-//
-//            /*
-//             * get the point r, half way between o and this point x
-//             * This should smooth the curve without completely blunting corners
-//             */
-//            LineEquation eq2 = new DoubleEquation(newPoint, thisPoint);
-//            double distance2 = newPoint.getLengthTo(thisPoint) / 2;
-//            IPoint replacementPoint = eq2.getPointOnLine(newPoint, distance2);
-//
-//            boolean ok = checkPositionIsOK(newPoint, refoldNucleus.component(), i, minDistance, maxDistance);
-//
-//            if (ok) 
-//                refoldNucleus.component().updateBorderPoint(i, replacementPoint.getX(), replacementPoint.getY());
-//        }
-//    }
 
     /*
      * Go over the target nucleus, adjusting each point. Keep the change if it
@@ -230,7 +150,7 @@ public class ProfileRefoldMethod extends SingleDatasetAnalysisMethod {
      * within a certain range of neighbours
      */
     private double iterateOverNucleus() throws ProfileException, MissingLandmarkException,
-            MissingProfileException, UnavailableBorderPointException {
+            MissingProfileException, UnavailableBorderPointException, UnprofilableObjectException {
 
         ISegmentedProfile refoldProfile = refoldNucleus.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
 
@@ -250,33 +170,21 @@ public class ProfileRefoldMethod extends SingleDatasetAnalysisMethod {
         // make all changes to a fresh nucleus before buggering up the real one
         LOGGER.finest( "Creating test nucleus based on refold candidate");
 
-        Nucleus testNucleus;
-        try {
+        Nucleus testNucleus = new DefaultConsensusNucleus(refoldNucleus);
 
-            testNucleus = new DefaultConsensusNucleus(refoldNucleus);
+        // When errors occur, the testNucleus CoM is offset at 0,-15 (may
+        // not be constant).
+        // Probably due to the correction in the DefaultConsensusNucleus
+        // constructor.
+        // Hence, put it back again to zero.
+//        testNucleus.moveCentreOfMass(IPoint.makeNew(0, 0));
 
-            // When errors occur, the testNucleus CoM is offset at 0,-15 (may
-            // not be constant).
-            // Probably due to the correction in the DefaultConsensusNucleus
-            // constructor.
-            // Hence, put it back again to zero.
-            testNucleus.moveCentreOfMass(IPoint.makeNew(0, 0));
-
-            LOGGER.finer( "Test nucleus COM: " + testNucleus.getCentreOfMass());
-            LOGGER.finest( "Beginning border tests");
-            for (int i = 0; i < refoldNucleus.getBorderLength(); i++) {
-                similarityScore = improveBorderPoint(i, minDistance, maxDistance, similarityScore, testNucleus);
-            }
-
-        } catch (Error e) {
-            LOGGER.warning("Error making new consensus");
-            LOGGER.log(Loggable.STACK, "Error in construction", e);
-        } catch (UnprofilableObjectException e) {
-            LOGGER.warning("Cannot create the test nucleus");
-            LOGGER.log(Loggable.STACK, "Error in nucleus constructor", e);
+        LOGGER.finer( "Test nucleus COM: " + testNucleus.getCentreOfMass());
+        LOGGER.finest( "Beginning border tests");
+        for (int i = 0; i < refoldNucleus.getBorderLength(); i++) {
+        	similarityScore = improveBorderPoint(i, minDistance, maxDistance, similarityScore, testNucleus);
         }
 
-        testNucleus = null;
         return similarityScore;
     }
 
@@ -325,40 +233,36 @@ public class ProfileRefoldMethod extends SingleDatasetAnalysisMethod {
         boolean ok = checkPositionIsOK(newPoint, testNucleus, index, minDistance, maxDistance);
 
         if (ok) {
-            // Update the test nucleus and recalculate the profiles
-            testNucleus.updateBorderPoint(index, newPoint);
+        	// Update the test nucleus and recalculate the profiles
+        	testNucleus.updateBorderPoint(index, newPoint);
 
-            LOGGER.finer( "Testing profiles");
-            try {
+        	LOGGER.finer( "Testing profiles");
 
-                testNucleus.calculateProfiles();
+        	testNucleus.calculateProfiles();
 
-                // Get the new score
-                score = testNucleus.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT)
-                        .absoluteSquareDifference(targetCurve);
+        	// Get the new score
+        	score = testNucleus.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT)
+        			.absoluteSquareDifference(targetCurve);
 
-                // If the change to the test nucleus improved the score, apply
-                // the change to the
-                // real consensus nucleus
+        	// If the change to the test nucleus improved the score, apply
+        	// the change to the
+        	// real consensus nucleus
 
-                if (score < similarityScore) {
-                    IPoint exisiting = refoldNucleus.getBorderPoint(index);
-                    LOGGER.fine("Updating " + exisiting.toString() + " to " + newPoint.toString() + ": "
-                            + exisiting.getLengthTo(newPoint));
-                    refoldNucleus.updateBorderPoint(index, newPoint);
-                    pointUpdateCounter++;
+        	if (score < similarityScore) {
+        		IPoint exisiting = refoldNucleus.getBorderPoint(index);
+        		LOGGER.fine("Updating " + exisiting.toString() + " to " + newPoint.toString() + ": "
+        				+ exisiting.getLengthTo(newPoint));
+        		refoldNucleus.updateBorderPoint(index, newPoint);
+        		pointUpdateCounter++;
 
-                    refoldNucleus.calculateProfiles();
+        		refoldNucleus.calculateProfiles();
 
-                    similarityScore = score;
-                }
-            } catch (ProfileException e) {
-                LOGGER.warning("Cannot calculate profiles in either test or consensus");
-                LOGGER.log(Loggable.STACK, "Error calculating profiles", e);
-            }
+        		similarityScore = score;
+        	}
+
+
         }
-
-        return similarityScore;
+    	return similarityScore;
     }
 
     /**

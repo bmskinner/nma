@@ -566,5 +566,19 @@ public class DatasetValidator {
 		}
 		return errorCount;
 	}
+	
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder("Validator:\nSummary:\n");
+		
+		for(String s : this.getSummary()) {
+			sb.append(s+"\n");
+		}
+		sb.append("Errors:\n");
+		for(String s : this.getErrors()) {
+			sb.append(s+"\n");
+		}
+		return sb.toString();
+	}
 
 }

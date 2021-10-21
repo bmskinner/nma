@@ -121,7 +121,7 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
      */
     private void validateDataset() throws Exception {
     	// Check the validity of the loaded dataset
-    	// Repair if possible, or warn if not
+    	// Repair if possible, or error if not
     	DatasetRepairer dr = new DatasetRepairer();
     	dr.repair(dataset);
 
@@ -130,9 +130,13 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
     		for (String s : dv.getSummary()) {
     			LOGGER.log(Loggable.STACK, s);
     		}
+    		for (String s : dv.getErrors()) {
+    			LOGGER.log(Loggable.STACK, s);
+    		}
+    		
     		LOGGER.warning("The dataset is not properly segmented");
     		LOGGER.warning("Curated datasets and groups have been saved");
-    		LOGGER.warning("Either resegment (Editing>Segmentation>Segment profile) or redetect cells and import the ." + Importer.LOC_FILE_EXTENSION + " file");
+    		LOGGER.warning("Redetect cells and import the ." + Importer.LOC_FILE_EXTENSION + " file");
 
     		new CellFileExporter(dataset).call();
     		throw new AnalysisMethodException("Unable to validate or repair dataset");

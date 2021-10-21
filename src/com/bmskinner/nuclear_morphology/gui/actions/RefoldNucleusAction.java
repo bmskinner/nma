@@ -26,7 +26,6 @@ import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.ConsensusAveragingMethod;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.ProfileRefoldMethod;
-import com.bmskinner.nuclear_morphology.analysis.nucleus.ProfileRefoldMethod.CurveRefoldingMode;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
@@ -70,12 +69,8 @@ public class RefoldNucleusAction extends SingleDatasetResultAction {
             // The averaging method does not work for nuclei that are round, or have extreme variability. 
             // In these cases, or if the program config file has been set to override, use the old profile method.
             if (override){
-                m = new ProfileRefoldMethod(dataset, CurveRefoldingMode.FAST);
-                progressLength = CurveRefoldingMode.FAST.maxIterations();
-            } else {
-//                NucleusType t = dataset.getCollection().getNucleusType();
-//                m = chooseMethod(t);
-//                progressLength = chooseProgressLength(t);
+                m = new ProfileRefoldMethod(dataset);
+                progressLength = ProfileRefoldMethod.MAX_ITERATIONS;
             }
 
             

@@ -18,7 +18,6 @@ import com.bmskinner.nuclear_morphology.analysis.classification.NucleusClusterin
 import com.bmskinner.nuclear_morphology.analysis.nucleus.ConsensusAveragingMethod;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.NucleusDetectionMethod;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.ProfileRefoldMethod;
-import com.bmskinner.nuclear_morphology.analysis.nucleus.ProfileRefoldMethod.CurveRefoldingMode;
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetProfilingMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMethod.MorphologyAnalysisMode;
@@ -187,7 +186,7 @@ public class TestImageDatasetCreator {
         new DatasetProfilingMethod(d)
 	    	.then(new DatasetSegmentationMethod(d, MorphologyAnalysisMode.NEW))
 	    	.then(op.getRuleSetCollection().equals(RuleSetCollection.roundRuleSetCollection())
-	    			? new ProfileRefoldMethod(d, CurveRefoldingMode.FAST)
+	    			? new ProfileRefoldMethod(d)
 	    		    : new ConsensusAveragingMethod(d))
 	    	.call();
 
@@ -245,7 +244,7 @@ public class TestImageDatasetCreator {
     	new DatasetProfilingMethod(d)
     	.then(new DatasetSegmentationMethod(d, MorphologyAnalysisMode.NEW))
     	.then(op.getRuleSetCollection().equals(RuleSetCollection.roundRuleSetCollection())
-    			? new ProfileRefoldMethod(d, CurveRefoldingMode.FAST)
+    			? new ProfileRefoldMethod(d)
     					: new ConsensusAveragingMethod(d))
     	.thenIf(makeClusters, new NucleusClusteringMethod(d, clusterOptions))
     	.call();

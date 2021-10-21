@@ -22,9 +22,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -40,7 +38,6 @@ import com.bmskinner.nuclear_morphology.analysis.classification.NucleusClusterin
 import com.bmskinner.nuclear_morphology.analysis.nucleus.ConsensusAveragingMethod;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.NucleusDetectionMethod;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.ProfileRefoldMethod;
-import com.bmskinner.nuclear_morphology.analysis.nucleus.ProfileRefoldMethod.CurveRefoldingMode;
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetProfilingMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMethod.MorphologyAnalysisMode;
@@ -59,7 +56,6 @@ import com.bmskinner.nuclear_morphology.io.DatasetExportMethod;
 import com.bmskinner.nuclear_morphology.io.DatasetExportMethod.ExportFormat;
 import com.bmskinner.nuclear_morphology.io.Io.Importer;
 import com.bmskinner.nuclear_morphology.io.xml.XMLReader;
-import com.bmskinner.nuclear_morphology.io.xml.XMLReader.XMLReadingException;
 import com.bmskinner.nuclear_morphology.reports.ShellReportMethod;
 
 /**
@@ -212,10 +208,10 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod impleme
 		for(IAnalysisDataset dataset : datasets) {
 			if(dataset.getCollection().getRuleSetCollection().equals(RuleSetCollection.roundRuleSetCollection())) {
 				if(!dataset.getCollection().hasConsensus())
-					methodsToRun.add(new ProfileRefoldMethod(dataset, CurveRefoldingMode.FAST));
+					methodsToRun.add(new ProfileRefoldMethod(dataset));
 				for(IAnalysisDataset d : dataset.getAllChildDatasets())
 					if(!d.getCollection().hasConsensus())
-						methodsToRun.add(new ProfileRefoldMethod(d, CurveRefoldingMode.FAST));
+						methodsToRun.add(new ProfileRefoldMethod(d));
 			} else {
 				if(!dataset.getCollection().hasConsensus())
 					methodsToRun.add(new ConsensusAveragingMethod(dataset));
