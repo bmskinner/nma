@@ -108,41 +108,36 @@ public class OptionsFactory {
 		d.setInt(HashOptions.RAISING_THRESHOLD_INT, HashOptions.DEFAULT_RAISE_THRESHOLD);
 		
 
-		d.setInt(HashOptions.MIN_HUE, HashOptions.DEFAULT_MIN_HUE);
-		d.setInt(HashOptions.MAX_HUE, HashOptions.DEFAULT_MAX_HUE);
-		d.setInt(HashOptions.MIN_SAT, HashOptions.DEFAULT_MIN_SAT);
-		d.setInt(HashOptions.MAX_SAT, HashOptions.DEFAULT_MAX_SAT);
-		d.setInt(HashOptions.MIN_BRI, HashOptions.DEFAULT_MIN_BRI);
-		d.setInt(HashOptions.MAX_BRI, HashOptions.DEFAULT_MAX_BRI);
+//		d.setInt(HashOptions.MIN_HUE, HashOptions.DEFAULT_MIN_HUE);
+//		d.setInt(HashOptions.MAX_HUE, HashOptions.DEFAULT_MAX_HUE);
+//		d.setInt(HashOptions.MIN_SAT, HashOptions.DEFAULT_MIN_SAT);
+//		d.setInt(HashOptions.MAX_SAT, HashOptions.DEFAULT_MAX_SAT);
+//		d.setInt(HashOptions.MIN_BRI, HashOptions.DEFAULT_MIN_BRI);
+//		d.setInt(HashOptions.MAX_BRI, HashOptions.DEFAULT_MAX_BRI);
 		return d;
     }
 
     /**
      * Create the default options type for nuclear signal detection
      * 
-     * @param folder
-     *            the folder to be searched
+     * @param folder the folder to be searched
      * @return
      */
-	public static HashOptions makeNuclearSignalOptions(File folder) {
-		DefaultOptions d = new DefaultOptions();
-		d.setString(HashOptions.DETECTION_FOLDER, folder.getAbsolutePath());
-		
-		d.setDouble(HashOptions.MAX_FRACTION, HashOptions.DEFAULT_MAX_SIGNAL_FRACTION);
-		d.setString(HashOptions.SIGNAL_DETECTION_MODE_KEY, HashOptions.DEFAULT_METHOD.name());
-		
-		d.setDouble(HashOptions.MIN_SIZE_PIXELS, HashOptions.DEFAULT_MIN_SIGNAL_SIZE);
-		d.setDouble(HashOptions.MAX_SIZE_PIXELS, HashOptions.DEFAULT_MAX_SIGNAL_SIZE);
-
-		d.setDouble(HashOptions.MIN_CIRC, HashOptions.DEFAULT_MIN_CIRC);
-		d.setDouble(HashOptions.MAX_CIRC, HashOptions.DEFAULT_MAX_CIRC);
-		d.setInt(HashOptions.CHANNEL, HashOptions.DEFAULT_SIGNAL_CHANNEL);
-		d.setInt(HashOptions.THRESHOLD, HashOptions.DEFAULT_SIGNAL_THRESHOLD);
-
-		d.setDouble(HashOptions.SCALE, GlobalOptions.getInstance().getImageScale());
-		d.setBoolean(HashOptions.IS_RGB, HashOptions.DEFAULT_IS_RGB);
-		d.setBoolean(HashOptions.IS_NORMALISE_CONTRAST, HashOptions.DEFAULT_IS_NORMALISE);
-		return d;
+	public static HashOptions makeNuclearSignalOptions(File folder) {		
+		return new OptionsBuilder()
+		.withValue(HashOptions.DETECTION_FOLDER, folder.getAbsolutePath())
+		.withValue(HashOptions.MAX_FRACTION, HashOptions.DEFAULT_MAX_SIGNAL_FRACTION)
+		.withValue(HashOptions.SIGNAL_DETECTION_MODE_KEY, HashOptions.DEFAULT_METHOD.name())
+		.withValue(HashOptions.MIN_SIZE_PIXELS, HashOptions.DEFAULT_MIN_SIGNAL_SIZE)
+		.withValue(HashOptions.MAX_SIZE_PIXELS, HashOptions.DEFAULT_MAX_SIGNAL_SIZE)
+		.withValue(HashOptions.MIN_CIRC, HashOptions.DEFAULT_MIN_CIRC)
+		.withValue(HashOptions.MAX_CIRC, HashOptions.DEFAULT_MAX_CIRC)
+		.withValue(HashOptions.CHANNEL, HashOptions.DEFAULT_SIGNAL_CHANNEL)
+		.withValue(HashOptions.THRESHOLD, HashOptions.DEFAULT_SIGNAL_THRESHOLD)
+		.withValue(HashOptions.SCALE, GlobalOptions.getInstance().getImageScale())
+		.withValue(HashOptions.IS_RGB, HashOptions.DEFAULT_IS_RGB)
+		.withValue(HashOptions.IS_NORMALISE_CONTRAST, HashOptions.DEFAULT_IS_NORMALISE)
+		.build();
     }
 	
 	public static HashOptions makeShellAnalysisOptions() {

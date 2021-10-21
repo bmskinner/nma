@@ -381,7 +381,6 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
 
                     double angle = this.getCentreOfMass().findAbsoluteAngle(p, s.getCentreOfMass());
                     s.setStatistic(Measurement.ANGLE, angle);
-
                 }
             }
         }

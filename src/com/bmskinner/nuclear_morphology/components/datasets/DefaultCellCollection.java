@@ -27,7 +27,6 @@ package com.bmskinner.nuclear_morphology.components.datasets;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -38,7 +37,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Predicate;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -48,10 +46,10 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.jdom2.Element;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
+import com.bmskinner.nuclear_morphology.components.MissingComponentException;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.Statistical;
 import com.bmskinner.nuclear_morphology.components.Taggable;
-import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
-import com.bmskinner.nuclear_morphology.components.MissingComponentException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.cells.DefaultCell;
@@ -69,9 +67,9 @@ import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileCollection;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
+import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileManager;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.components.signals.DefaultSignalGroup;
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult;
@@ -91,8 +89,6 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
 public class DefaultCellCollection implements ICellCollection {
 	
 	private static final Logger LOGGER = Logger.getLogger(DefaultCellCollection.class.getName());
-
-	private static final long serialVersionUID = 1L;
 
 	/** Unique collection id */
 	private final UUID uuid;
@@ -1148,7 +1144,7 @@ public class DefaultCellCollection implements ICellCollection {
 		for(ISignalGroup entry : signalGroups) {
 			UUID signalGroupID = entry.getId();
 			int count = this.getSignalManager().getSignalCount(signalGroupID);
-			b.append(entry.toString() + " | " + count + newLine);
+			b.append(entry.toString() + " | " + count +" signals across all cells"+ newLine);
 		}
 
 		if(this.hasConsensus()){
@@ -1157,35 +1153,6 @@ public class DefaultCellCollection implements ICellCollection {
 		}
 
 		return b.toString();
-	}
-
-	private synchronized void writeObject(java.io.ObjectOutputStream out) throws IOException {
-		out.defaultWriteObject();
-	}
-
-	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-
-		in.defaultReadObject();
-		
-		statsCache = new StatsCache();
-		vennCache = new VennCache();
-
-		signalManager = new SignalManager(this);
-		profileManager = new ProfileManager(this);
-		
-		 if(this.hasConsensus()) {
-				rotateConsensus(0);
-				offsetConsensus(0, 0);
-	        }
-
-		// Make sure any profile aggregates match the length of saved segments
-		try {
-			this.profileCollection.createAndRestoreProfileAggregate(this);
-		}catch(ProfileException e) {
-			LOGGER.warning("Unable to restore profile aggregate");
-			LOGGER.log(Loggable.STACK, e.getMessage(), e);
-		}
-		
 	}
 	
 	@Override

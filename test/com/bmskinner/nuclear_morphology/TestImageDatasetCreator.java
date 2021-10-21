@@ -108,12 +108,12 @@ public class TestImageDatasetCreator {
     	saveTestDataset(d, TestResources.MULTIPLE2_TEST_DATASET);
     	testUnmarshalling(d, TestResources.MULTIPLE2_TEST_DATASET);
     }
-    
-    
+        
     @Test
     public void createMouseWithClustersDataset() throws Exception{
     	IAnalysisOptions op = OptionsFactory.makeDefaultRodentAnalysisOptions(TestResources.TESTING_MOUSE_CLUSTERS_FOLDER);
     	IAnalysisDataset d = createTestDataset(TestResources.UNIT_TEST_FOLDER, op, true);
+    	assertFalse("Dataset should have clusters", d.getClusterGroups().isEmpty());
     	saveTestDataset(d, TestResources.MOUSE_CLUSTERS_DATASET);
     	testUnmarshalling(d, TestResources.MOUSE_CLUSTERS_DATASET);
     }
@@ -122,6 +122,7 @@ public class TestImageDatasetCreator {
     public void createPigWithClustersDataset() throws Exception{
     	IAnalysisOptions op = OptionsFactory.makeDefaultPigAnalysisOptions(TestResources.TESTING_PIG_CLUSTERS_FOLDER);
     	IAnalysisDataset d = createTestDataset(TestResources.UNIT_TEST_FOLDER, op, true);
+    	assertFalse("Dataset should have clusters", d.getClusterGroups().isEmpty());
     	saveTestDataset(d, TestResources.PIG_CLUSTERS_DATASET);
     	testUnmarshalling(d, TestResources.PIG_CLUSTERS_DATASET);
     }
@@ -130,6 +131,7 @@ public class TestImageDatasetCreator {
     public void createRoundWithClustersDataset() throws Exception{
     	IAnalysisOptions op = OptionsFactory.makeDefaultRoundAnalysisOptions(TestResources.TESTING_ROUND_CLUSTERS_FOLDER);
     	IAnalysisDataset d = createTestDataset(TestResources.UNIT_TEST_FOLDER, op, true);
+    	assertFalse("Dataset should have clusters", d.getClusterGroups().isEmpty());
     	saveTestDataset(d, TestResources.ROUND_CLUSTERS_DATASET);
     	testUnmarshalling(d, TestResources.ROUND_CLUSTERS_DATASET);
     }
@@ -140,7 +142,14 @@ public class TestImageDatasetCreator {
     	HashOptions nucleus = op.getDetectionOptions(CellularComponent.NUCLEUS).get();
     	nucleus.setInt(HashOptions.MIN_SIZE_PIXELS, 4000);
     	nucleus.setInt(HashOptions.MAX_SIZE_PIXELS, 12000);
+    	
+//    	HashOptions signalOptions = OptionsFactory.makeNuclearSignalOptions(TestResources.TESTING_MOUSE_SIGNALS_FOLDER);
+//    	signalOptions.setInt(HashOptions.CHANNEL, 0);
+//    	
+//    	op.setDetectionOptions(CellularComponent.NUCLEAR_SIGNAL, signalOptions);
+    	
     	IAnalysisDataset d = createTestSignalDataset(op, true, false);
+    	assertTrue("Dataset should have signals", d.getCollection().getSignalManager().getSignalCount()>0);
     	saveTestDataset(d, TestResources.MOUSE_SIGNALS_DATASET);
     	testUnmarshalling(d, TestResources.MOUSE_SIGNALS_DATASET);
     }
@@ -153,6 +162,7 @@ public class TestImageDatasetCreator {
     	nucleus.setInt(HashOptions.MAX_SIZE_PIXELS, 15000);
     	
     	IAnalysisDataset d = createTestSignalDataset(op, false, true);
+    	assertTrue("Dataset should have signals", d.getCollection().getSignalManager().getSignalCount()>0);
     	saveTestDataset(d, TestResources.PIG_SIGNALS_DATASET);
     	testUnmarshalling(d, TestResources.PIG_SIGNALS_DATASET);
     }
@@ -161,6 +171,7 @@ public class TestImageDatasetCreator {
     public void createRoundWithSignalsDataset() throws Exception {
     	IAnalysisOptions op = OptionsFactory.makeDefaultRoundAnalysisOptions(TestResources.TESTING_ROUND_SIGNALS_FOLDER);    	
     	IAnalysisDataset d = createTestSignalDataset(op, true, true);
+    	assertTrue("Dataset should have signals", d.getCollection().getSignalManager().getSignalCount()>0);
     	saveTestDataset(d, TestResources.ROUND_SIGNALS_DATASET);
     	testUnmarshalling(d, TestResources.ROUND_SIGNALS_DATASET);
     }
@@ -168,8 +179,7 @@ public class TestImageDatasetCreator {
     
     /**
      * Run a new analysis on the images using the given options.
-     * @param op the nucleus detection options
-     * @param saveFile the full path to the nmd file
+     * @param op the analysis options
      * @param addRed should red signals be detected with default parameters?
      * @param addGreen should green signals be detected with default parameters?
      * @throws Exception

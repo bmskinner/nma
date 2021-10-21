@@ -95,19 +95,13 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
 
     protected void run() {
 
-        LOGGER.fine("Beginning signal detection in channel " + channel);
+    	LOGGER.fine("Beginning signal detection in channel " + channel);
 
-        try {
+    	int originalMinThreshold = options.getInt(HashOptions.THRESHOLD);
 
-            int originalMinThreshold = options.getInt(HashOptions.THRESHOLD);
+    	SignalFinder finder = new SignalFinder(dataset.getAnalysisOptions().get(), options, dataset.getCollection());
 
-            SignalFinder finder = new SignalFinder(dataset.getAnalysisOptions().get(), options, dataset.getCollection());
-
-            dataset.getCollection().getCells().forEach(c-> detectInCell(c, finder, originalMinThreshold));
-
-        } catch (Exception e) {
-            LOGGER.log(Loggable.STACK, "Error in signal detection", e);
-        }
+    	dataset.getCollection().getCells().forEach(c-> detectInCell(c, finder, originalMinThreshold));
     }
     
     
@@ -144,16 +138,12 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
             s.calculateSignalDistancesFromCoM(n);
             s.calculateFractionalSignalDistancesFromCoM(n);
 
-            LOGGER.fine("Calculating signal angles");
+            LOGGER.finer("Calculating signal angles");
 
-            // If the nucleus is asymmetric, calculate angles
-            if (dataset.getCollection().getRuleSetCollection().isAsymmetric()) {
-                if (n.hasLandmark(Landmark.ORIENTATION_POINT)) {
-                    LOGGER.finest( "Calculating angle from orientation point");
-                    n.calculateSignalAnglesFromPoint(n.getBorderPoint(Landmark.ORIENTATION_POINT));
-                } else {
-                    LOGGER.finest( "No orientation point in nucleus");
-                }
+            if (n.hasLandmark(Landmark.ORIENTATION_POINT)) {
+            	n.calculateSignalAnglesFromPoint(n.getBorderPoint(Landmark.ORIENTATION_POINT));
+            } else {
+            	n.calculateSignalAnglesFromPoint(n.getBorderPoint(Landmark.REFERENCE_POINT));
             }
 
         } catch (ImageImportException | UnavailableBorderPointException | MissingLandmarkException e) {

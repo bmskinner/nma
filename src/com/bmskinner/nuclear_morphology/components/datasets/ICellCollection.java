@@ -53,7 +53,7 @@ import com.bmskinner.nuclear_morphology.io.XmlSerializable;
  *
  */
 public interface ICellCollection
-        extends Serializable, XmlSerializable, Filterable, 
+        extends XmlSerializable, Filterable, 
         StatisticalCollection, Refoldable, Collection<ICell> {
 
 	
