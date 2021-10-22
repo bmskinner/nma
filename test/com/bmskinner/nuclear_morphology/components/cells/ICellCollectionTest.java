@@ -342,7 +342,7 @@ public class ICellCollectionTest extends ComponentTester {
 		// Analysis options will not be copied - create anew
 		File testFolder = new File(TestDatasetBuilder.TEST_DATASET_IMAGE_FOLDER);
 		IAnalysisDataset d = new DefaultAnalysisDataset(collection, testFolder);
-		d.setAnalysisOptions(OptionsFactory.makeDefaultRoundAnalysisOptions(testFolder));
+		d.setAnalysisOptions(OptionsFactory.makeDefaultRodentAnalysisOptions(testFolder));
 		
 		new ConsensusAveragingMethod(d).call();		
 		
