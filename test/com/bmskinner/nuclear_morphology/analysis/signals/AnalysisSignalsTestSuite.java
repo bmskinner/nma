@@ -9,7 +9,9 @@ import com.bmskinner.nuclear_morphology.analysis.signals.shells.AnalysisSignalsS
 @SuiteClasses({ 
 	AnalysisSignalsShellsTestSuite.class, 
 	PairedSignalGroupsTest.class,
-	SignalDetectionMethodTest.class})
+	SignalDetectionMethodTest.class,
+	SignalDetectorTest.class
+	})
 public class AnalysisSignalsTestSuite {
 
 }

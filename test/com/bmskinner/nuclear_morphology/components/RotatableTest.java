@@ -1,5 +1,7 @@
 package com.bmskinner.nuclear_morphology.components;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
@@ -103,6 +105,60 @@ public class RotatableTest extends ComponentTester {
 			}
 
 		}
+	}
+	
+	/**
+	 * Test if a nucleus can be aligned horizontally using
+	 * points on its border.
+	 * @throws Exception
+	 */
+	@Test 
+	public void testAlignPointsOnHorizontal() throws Exception {
+		Nucleus n = TestComponentFactory.roundNucleus(50,  50, 100, 100, 0, 0);
+		
+		int length = n.getBorderLength();
+		
+		int i1 = length/2;
+		int i2 = i1+10;
+		
+		IPoint p1 = n.getBorderPoint(i1);
+		IPoint p2 = n.getBorderPoint(i2);
+		
+		n.alignPointsOnHorizontal(p1, p2);
+		
+		IPoint r1 = n.getBorderPoint(i1);
+		IPoint r2 = n.getBorderPoint(i2);
+
+		// After alignment, X values should be identical
+		assertTrue("R1 should have lower X value", r1.isLeftOf(r2));
+		assertEquals("Y values should be equal", r1.getY(), r2.getY(), 0);
+	}
+	
+	/**
+	 * Test if a nucleus can be aligned vertically using
+	 * points on its border.
+	 * @throws Exception
+	 */
+	@Test 
+	public void testAlignPointsOnVertical() throws Exception {
+		Nucleus n = TestComponentFactory.roundNucleus(50,  50, 100, 100, 0, 0);
+		
+		int length = n.getBorderLength();
+		
+		int i1 = length/2;
+		int i2 = i1+10;
+		
+		IPoint p1 = n.getBorderPoint(i1);
+		IPoint p2 = n.getBorderPoint(i2);
+				
+		n.alignPointsOnVertical(p1, p2);
+		
+		IPoint r1 = n.getBorderPoint(i1);
+		IPoint r2 = n.getBorderPoint(i2);	
+		
+		// After alignment, X values should be identical
+		assertTrue("R1 should have higher Y value", r1.isAbove(r2));
+		assertEquals("X values should be equal", r1.getX(), r2.getX(), 0);
 	}
 
 }

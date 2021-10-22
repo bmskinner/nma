@@ -79,8 +79,16 @@ public interface Rotatable {
      */
     static double getAngleToRotateHorizontal(final @NonNull IPoint leftPoint, final @NonNull IPoint rightPoint) {
         // Take a horizontal line from L to Li. Rotate object by the absolute angle R-L-Li 
+    	
+    	/*
+    	 *      L - Li               L - Li
+    	 *       \                 / 
+    	 *        R               R 
+    	 * 
+    	 */
+    	
         IPoint bi = IPoint.makeNew(leftPoint.getX()+10, leftPoint.getY());
-        return rightPoint.findAbsoluteAngle(leftPoint, bi);
+        return leftPoint.findAbsoluteAngle(rightPoint, bi);
     }
 
     /**

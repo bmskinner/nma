@@ -136,47 +136,7 @@ public class TestComponentFactory {
 	}
 	
 	private static Nucleus createNucleus(Roi roi, IPoint com, File f, int channel, int[] position, int number ) {
-		Nucleus n = new DefaultNucleus(roi, com, f, 0, position, 0, RuleSetCollection.roundRuleSetCollection());
-//		Nucleus n = new DefaultNucleus(roi, com, f, 0, position, 0, RuleSetCollection.roundRuleSetCollection()) {
-//			
-//			private static final long serialVersionUID = 1L;
-//			private ISignalCollection overrideCollection = new DefaultSignalCollection() {
-//				private static final long serialVersionUID = 1L;
-//
-//				@Override
-//				    public ImageProcessor getImage(@NonNull final UUID signalGroup) throws UnloadableImageException {
-//					 if (this.getSignals(signalGroup).size() == 0)
-//				            throw new UnloadableImageException("No signals in group");
-//					 return this.getSignals(signalGroup).get(0).getImage();
-//				 }
-//			};
-//			
-//			@Override
-//			public ImageProcessor getGreyscaleImage() {
-//				return getImage();
-//			}
-//
-//			@Override
-//			public ImageProcessor getImage() {
-//				Roi finalRoi = toOriginalRoi();
-//				
-//				int[] position = getPosition(); 
-//				int xmax = position[Imageable.X_BASE]+position[Imageable.WIDTH]+Imageable.COMPONENT_BUFFER;
-//				int ymax = position[Imageable.Y_BASE]+position[Imageable.HEIGHT]+Imageable.COMPONENT_BUFFER;
-//				
-//				ImageProcessor ip = new ColorProcessor(xmax, ymax);
-//		    	ip.setColor(Color.WHITE);
-//		    	ip.fill(finalRoi);
-//		    	return ip;
-//			}
-//			
-//			@Override
-//			public ISignalCollection getSignalCollection() {
-//				return overrideCollection;
-//			}
-//			
-//		};
-		return n;
+		return new DefaultNucleus(roi, com, f, 0, position, 0, RuleSetCollection.roundRuleSetCollection());
 	}
 
 	

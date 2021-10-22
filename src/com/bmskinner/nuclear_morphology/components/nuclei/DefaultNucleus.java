@@ -497,6 +497,11 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
     	}
     }
     
+    /**
+     * Align the nucleus according to the available
+     * orientation points, prioritising the Y axis
+     * @throws MissingLandmarkException
+     */
     private void alignVerticallyPriorityY() throws MissingLandmarkException {
     	// Check if t and b are present
     	
@@ -542,7 +547,11 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
 		}
     }
     
-    
+    /**
+     * Align the nucleus according to the available
+     * orientation points, prioritising the X axis
+     * @throws MissingLandmarkException
+     */
     private void alignVerticallyPriorityX() throws MissingLandmarkException {
     	
     	Landmark t = orientationMarks.get(Landmark.TOP_POINT);

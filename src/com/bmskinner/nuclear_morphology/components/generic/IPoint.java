@@ -131,12 +131,36 @@ public interface IPoint {
      */
     boolean overlaps(final @NonNull IPoint a);
 
+    /**
+     * Test if this point has a higher Y value than 
+     * the given point
+     * @param p
+     * @return
+     */
     boolean isAbove(final @NonNull IPoint p);
 
+    /**
+     * Test if this point has a lower Y value than 
+     * the given point
+     * @param p
+     * @return
+     */
     boolean isBelow(final @NonNull IPoint p);
 
+    /**
+     * Test if this point has a lower X value than 
+     * the given point
+     * @param p
+     * @return
+     */
     boolean isLeftOf(final @NonNull IPoint p);
 
+    /**
+     * Test if this point has a higher X value than 
+     * the given point
+     * @param p
+     * @return
+     */
     boolean isRightOf(final @NonNull IPoint p);
 
     /**
