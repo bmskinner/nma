@@ -124,8 +124,8 @@ public class DefaultConsensusNucleus extends DefaultNucleus implements Consensus
     
     
     @Override
-    public Nucleus getVerticallyRotatedNucleus() {
-    	Nucleus n = super.getVerticallyRotatedNucleus();
+    public Nucleus getOrientedNucleus() {
+    	Nucleus n = super.getOrientedNucleus();
     	n.rotate(rotOffset);
     	n.offset(xOffset, yOffset);
     	return n;

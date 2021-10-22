@@ -6,6 +6,7 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.DefaultOptions;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
 
@@ -51,7 +52,7 @@ public class SignalWarpingRunSettings extends DefaultOptions {
 		return d2;
 	}
 	
-	public CellularComponent targetShape() {
+	public Nucleus targetShape() {
 		return d2.getCollection().getConsensus();
 	}
 	

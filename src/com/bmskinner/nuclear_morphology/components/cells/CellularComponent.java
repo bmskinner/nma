@@ -17,7 +17,6 @@
 package com.bmskinner.nuclear_morphology.components.cells;
 
 import java.awt.Shape;
-import java.io.Serializable;
 import java.util.List;
 import java.util.UUID;
 

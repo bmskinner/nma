@@ -139,8 +139,8 @@ public class DummyRodentSpermNucleus extends DummyCellularComponent implements N
 	}
 
 	@Override
-	public Nucleus getVerticallyRotatedNucleus() {
-		return nucleus.getVerticallyRotatedNucleus();
+	public Nucleus getOrientedNucleus() {
+		return nucleus.getOrientedNucleus();
 	}
 
 	@Override
@@ -280,6 +280,12 @@ public class DummyRodentSpermNucleus extends DummyCellularComponent implements N
 	public @Nullable PriorityAxis getPriorityAxis() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public void orient() {
+		// TODO Auto-generated method stub
+		
 	}
 
 	

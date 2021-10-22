@@ -181,7 +181,7 @@ public class CellDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
          */
         LOGGER.finest( "Fetching segment position for each nucleus");
         for (Nucleus nucleus : dataset.getCollection().getNuclei()) {
-            Nucleus verticalNucleus = nucleus.getVerticallyRotatedNucleus();
+            Nucleus verticalNucleus = nucleus.getOrientedNucleus();
             LOGGER.finest( "Fetched vertical nucleus");
 
             // Get the segment start position XY coordinates

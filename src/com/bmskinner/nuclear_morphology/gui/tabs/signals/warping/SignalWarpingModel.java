@@ -41,6 +41,7 @@ import com.bmskinner.nuclear_morphology.charting.charts.OutlineChartFactory;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.signals.IWarpedSignal;
 import com.bmskinner.nuclear_morphology.components.signals.WarpedSignalKey;
@@ -354,7 +355,7 @@ public class SignalWarpingModel extends DefaultTableModel {
 	 * @param minThreshold the threshold to set before binarisation
 	 * @param image the warped image
 	 */
-	public void addImage(@NonNull CellularComponent targetShape, 
+	public void addImage(@NonNull Nucleus targetShape, 
 			@NonNull String targetName, 
 			@NonNull IAnalysisDataset signalSource, 
 			@NonNull UUID signalGroupId,
@@ -630,7 +631,7 @@ public class SignalWarpingModel extends DefaultTableModel {
             map.put(k, ip);
         }
 
-        public synchronized void add(@NonNull final CellularComponent target, @NonNull final String targetName, 
+        public synchronized void add(@NonNull final Nucleus target, @NonNull final String targetName, 
         		@NonNull final IAnalysisDataset template, @NonNull final UUID signalGroupId, 
         		final boolean isCellsWithSignals, final boolean binarise, final boolean normalise, final int minThreshold,
         		@NonNull final ImageProcessor ip) {
@@ -696,11 +697,11 @@ public class SignalWarpingModel extends DefaultTableModel {
 
         	
          // These may change hashcode due to normal activity, so should not be part of the hashed key
-            private final @NonNull CellularComponent target;
+            private final @NonNull Nucleus target;
             private final @NonNull IAnalysisDataset  template;
 
 
-            public WarpedImageKey(@NonNull final CellularComponent target, @NonNull final String targetName, 
+            public WarpedImageKey(@NonNull final Nucleus target, @NonNull final String targetName, 
             		@NonNull final IAnalysisDataset template, @NonNull final UUID signalGroupId, 
             		final boolean isCellsWithSignals, final boolean binarise, 
             		final boolean normalise, final int minThreshold) {
@@ -708,7 +709,7 @@ public class SignalWarpingModel extends DefaultTableModel {
             	templateId = template.getId();
             	
             	this.target   = target;
-            	target.alignVertically();
+            	target.orient();
             	
                 this.targetName = targetName;
                 this.template = template;
@@ -719,7 +720,7 @@ public class SignalWarpingModel extends DefaultTableModel {
                 this.minThreshold = minThreshold;
             }
 
-            public CellularComponent getTarget() {
+            public Nucleus getTarget() {
 				return target;
 			}
 

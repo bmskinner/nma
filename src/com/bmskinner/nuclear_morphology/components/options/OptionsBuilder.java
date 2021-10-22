@@ -1,5 +1,7 @@
 package com.bmskinner.nuclear_morphology.components.options;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 /**
  * Builder pattern for creating options.
  * @author ben
@@ -8,7 +10,7 @@ package com.bmskinner.nuclear_morphology.components.options;
  */
 public class OptionsBuilder {
 	
-	private HashOptions options = new DefaultOptions();
+	private @NonNull HashOptions options = new DefaultOptions();
 	
 	/**
 	 * Constructor with an internal options object
@@ -21,7 +23,7 @@ public class OptionsBuilder {
 	 * Get the options
 	 * @return
 	 */
-	public HashOptions build() {
+	public @NonNull HashOptions build() {
 		return options;
 	}
 	

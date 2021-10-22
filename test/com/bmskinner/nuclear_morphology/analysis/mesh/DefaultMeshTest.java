@@ -90,7 +90,7 @@ public class DefaultMeshTest {
 
 			for(Nucleus n: d.getCollection().getNuclei()) {
 				try {
-					Mesh<Nucleus> m = new DefaultMesh<>(n.getVerticallyRotatedNucleus(), consensusMesh);
+					Mesh<Nucleus> m = new DefaultMesh<>(n.getOrientedNucleus(), consensusMesh);
 				} catch (MeshCreationException e) {
 					fail("Unable to create mesh for "+n.getNameAndNumber()+": "+e.getMessage());
 				}

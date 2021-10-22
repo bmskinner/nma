@@ -26,6 +26,7 @@ import org.jdom2.Element;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.nuclei.DefaultConsensusNucleus;
+import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.io.XmlSerializable;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -40,7 +41,7 @@ public class WarpedSignalKey implements Serializable, XmlSerializable {
 	private static final Logger LOGGER = Logger.getLogger(WarpedSignalKey.class.getName());
 
 	private static final long serialVersionUID = 1L;
-	private final CellularComponent targetShape;
+	private final Nucleus targetShape;
 	private final UUID targetShapeId;
 	private final boolean isCellWithSignalsOnly;
 	private final int threshold;
@@ -48,7 +49,7 @@ public class WarpedSignalKey implements Serializable, XmlSerializable {
 	private final boolean isBinarised;
 	private final boolean isNormalised;
 	
-	public WarpedSignalKey(@NonNull CellularComponent target, 
+	public WarpedSignalKey(@NonNull Nucleus target, 
 			@NonNull UUID templateId, 
 			final boolean cellsWithSignals, 
 			final int threshold,
@@ -65,7 +66,7 @@ public class WarpedSignalKey implements Serializable, XmlSerializable {
 	
 	public WarpedSignalKey(@NonNull Element e) {
 		
-		CellularComponent c = null;
+		Nucleus c = null;
 		try {
 			for(Element el : e.getChild("TargetShape").getChildren()) {
 				c = new DefaultConsensusNucleus(el);
@@ -106,7 +107,7 @@ public class WarpedSignalKey implements Serializable, XmlSerializable {
 		return templateId;
 	}
 
-	public CellularComponent getTargetShape() {
+	public Nucleus getTargetShape() {
 		return targetShape;
 	}
 

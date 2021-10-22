@@ -384,7 +384,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 
                         Mesh<Nucleus> mesh1 = options.getRotateMode().equals(RotationMode.ACTUAL)
                                 ? new DefaultMesh<>(options.getCell().getPrimaryNucleus())
-                                : new DefaultMesh<>(options.getCell().getPrimaryNucleus().getVerticallyRotatedNucleus());
+                                : new DefaultMesh<>(options.getCell().getPrimaryNucleus().getOrientedNucleus());
 
                         Mesh<Nucleus> mesh2 = new DefaultMesh<>(options.firstDataset().getCollection().getConsensus(),
                                 mesh1);
@@ -537,7 +537,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
         IAnalysisDataset dataset = options.firstDataset();
 
         if (options.getRotateMode().equals(RotationMode.VERTICAL)) {
-            Nucleus n = cell.getPrimaryNucleus().getVerticallyRotatedNucleus();
+            Nucleus n = cell.getPrimaryNucleus().getOrientedNucleus();
             cell = new DefaultCell(n);
         }
 
@@ -954,7 +954,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 
             for (Nucleus n : dataset.getCollection().getNuclei()) {
 
-                Nucleus verticalNucleus = n.getVerticallyRotatedNucleus();
+                Nucleus verticalNucleus = n.getOrientedNucleus();
 
                 OutlineDatasetCreator dc = new OutlineDatasetCreator(options, verticalNucleus);
 

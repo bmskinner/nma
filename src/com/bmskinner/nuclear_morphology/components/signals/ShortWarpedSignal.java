@@ -15,6 +15,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.jdom2.Element;
 
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.io.XmlSerializable;
 import com.bmskinner.nuclear_morphology.utility.StringUtils;
 
@@ -112,7 +113,7 @@ public class ShortWarpedSignal implements IWarpedSignal {
 	}
 
 	@Override
-	public void addWarpedImage(@NonNull CellularComponent template, 
+	public void addWarpedImage(@NonNull Nucleus template, 
 			@NonNull UUID templateId,  
 			@NonNull String name, 
 			boolean isCellWithSignalsOnly, 
@@ -158,7 +159,7 @@ public class ShortWarpedSignal implements IWarpedSignal {
 	}
 
 	@Override
-	public Optional<ImageProcessor> getWarpedImage(@NonNull CellularComponent template,
+	public Optional<ImageProcessor> getWarpedImage(@NonNull Nucleus template,
 			@NonNull UUID templateId, 
 			boolean isCellWithSignalsOnly, 
 			int threshold,

@@ -65,12 +65,6 @@ public class DefaultCytoplasm extends DefaultCellularComponent implements ICytop
     }
 
     @Override
-    public void alignVertically() {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
     public int compareTo(ICytoplasm o) {
         return 0;
     }

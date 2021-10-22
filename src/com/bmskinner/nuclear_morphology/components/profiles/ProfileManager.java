@@ -316,7 +316,7 @@ public class ProfileManager {
     	// also update the OP to be directly below the CoM in vertically oriented nucleus
 		if(n.hasLandmark(Landmark.TOP_VERTICAL) && n.hasLandmark(Landmark.BOTTOM_VERTICAL)) {
 			LOGGER.finer( "Updating OP due to TV or BV change");
-			Nucleus vertN = n.getVerticallyRotatedNucleus();
+			Nucleus vertN = n.getOrientedNucleus();
 			IPoint bottom = vertN.getBorderList().stream()
 				.filter(p-> p.getY()<vertN.getCentreOfMass().getY())
 				.min(Comparator.comparing(p->Math.abs(p.getX()-vertN.getCentreOfMass().getX()))).get();

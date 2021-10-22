@@ -303,10 +303,10 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
         	setStatistic(stat, calculateRegularity());
 
         if (Measurement.BOUNDING_HEIGHT.equals(stat))
-        	setStatistic(stat, getVerticallyRotatedNucleus().getBounds().getHeight());
+        	setStatistic(stat, getOrientedNucleus().getBounds().getHeight());
 
         if (Measurement.BOUNDING_WIDTH.equals(stat))
-        	setStatistic(stat, getVerticallyRotatedNucleus().getBounds().getWidth());
+        	setStatistic(stat, getOrientedNucleus().getBounds().getWidth());
         
         if (Measurement.BODY_WIDTH.equals(stat))
         	setStatistic(stat, 0);
@@ -320,8 +320,8 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
      * @return
      */
     private double calculateElongation() {
-    	double h = getVerticallyRotatedNucleus().getBounds().getHeight();
-        double w = getVerticallyRotatedNucleus().getBounds().getWidth();
+    	double h = getOrientedNucleus().getBounds().getHeight();
+        double w = getOrientedNucleus().getBounds().getWidth();
         return (h-w)/(h+w);
     }
 
@@ -331,8 +331,8 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
      * @return
      */
     private double calculateRegularity() {
-    	double h = getVerticallyRotatedNucleus().getBounds().getHeight();
-        double w = getVerticallyRotatedNucleus().getBounds().getWidth();
+    	double h = getOrientedNucleus().getBounds().getHeight();
+        double w = getOrientedNucleus().getBounds().getWidth();
         double a = this.getStatistic(Measurement.AREA);
         return (Math.PI*h*w)/(4*a);
     }
@@ -350,8 +350,8 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
      * @return
      */
     private double calculateEllipticity() {
-        double h = getVerticallyRotatedNucleus().getBounds().getHeight();
-        double w = getVerticallyRotatedNucleus().getBounds().getWidth();
+        double h = getOrientedNucleus().getBounds().getHeight();
+        double w = getOrientedNucleus().getBounds().getWidth();
 
         return h / w;
     }
@@ -420,7 +420,7 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
     }
 
     @Override
-    public Nucleus getVerticallyRotatedNucleus() {
+    public Nucleus getOrientedNucleus() {
         // Make an exact copy of the nucleus
         LOGGER.finest( "Creating vertical nucleus");
         Nucleus verticalNucleus = this.duplicate();
@@ -430,7 +430,7 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
         // of the template nucleus, then moved to the current CoM.
         // Now align the nucleus on vertical.
 
-        verticalNucleus.alignVertically();
+        verticalNucleus.orient();
 
         double h = verticalNucleus.getBounds().getHeight();
         double w = verticalNucleus.getBounds().getWidth();
@@ -475,7 +475,7 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
      */
 
     @Override
-    public void alignVertically() {
+    public void orient() {
 
     	try {
     		// Use the points defined in the RuleSetCollection

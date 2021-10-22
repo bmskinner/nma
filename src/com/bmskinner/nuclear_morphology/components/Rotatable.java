@@ -30,14 +30,6 @@ import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 public interface Rotatable {
 
     /**
-     * Align the object to vertical using the preferred method. If TOP_VERTICAL
-     * and BOTTOM_VERTICAL points are present, they will ususally be used.
-     * Otherwise, the ORIENTATION_POINT will be rotated to lie directly below
-     * the centre of mass
-     */
-    void alignVertically();
-
-    /**
      * Given two points, rotate the object so that they are vertical. It is not
      * necessary for the points to be within the object, only that they have the
      * same coordinate system

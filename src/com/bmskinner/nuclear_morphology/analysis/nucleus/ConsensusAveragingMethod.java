@@ -205,7 +205,7 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
         	cons.flipHorizontal();
         
         // Calculate any other stats that need the vertical alignment
-        cons.getVerticallyRotatedNucleus();
+        cons.getOrientedNucleus();
         return cons;
     }
 
@@ -217,7 +217,7 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
         dataset.getCollection().getNuclei().forEach(n -> {
             try {
                 
-                Nucleus v = n.getVerticallyRotatedNucleus();
+                Nucleus v = n.getOrientedNucleus();
                 v.moveCentreOfMass(zeroCoM);
                 IProfile p = v.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
 

@@ -338,11 +338,6 @@ public class DummyCellularComponent implements CellularComponent {
 	}
 
 	@Override
-	public void alignVertically() {
-		component.alignVertically();
-	}
-
-	@Override
 	public CellularComponent duplicate() {
 		return component.duplicate();
 	}

@@ -25,6 +25,7 @@ import com.bmskinner.nuclear_morphology.analysis.signals.SignalWarper;
 import com.bmskinner.nuclear_morphology.charting.charts.ConsensusNucleusChartFactory;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
+import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.signals.IWarpedSignal;
 import com.bmskinner.nuclear_morphology.components.signals.ShortWarpedSignal;
@@ -346,7 +347,7 @@ implements SignalWarpingDisplayListener,
 		int buffer = 10;
 		ip = ImageConverter.expandCanvas(ip, buffer, Color.white);
 		
-		List<CellularComponent> targets = model.getSelectedKeys().stream()
+		List<Nucleus> targets = model.getSelectedKeys().stream()
 				.map(key->key.getTarget().duplicate())
 				.distinct()
 				.collect(Collectors.toList());
@@ -395,7 +396,7 @@ implements SignalWarpingDisplayListener,
 		int buffer = 10;
 		ip3 = ImageConverter.expandCanvas(ip3, buffer, Color.black);
 
-		List<CellularComponent> targets = keys.stream()
+		List<Nucleus> targets = keys.stream()
 				.map(k->k.getTarget().duplicate())
 				.distinct()
 				.collect(Collectors.toList());
@@ -425,7 +426,7 @@ implements SignalWarpingDisplayListener,
 		WarpedImageKey key0 = keys.get(0);
 		WarpedImageKey key1 = keys.get(1);
 		
-		List<CellularComponent> targets = keys.stream()
+		List<Nucleus> targets = keys.stream()
 				.map(k->k.getTarget().duplicate())
 				.distinct()
 				.collect(Collectors.toList());
@@ -442,13 +443,13 @@ implements SignalWarpingDisplayListener,
 	}
 	
 	private ImagePlus drawConsensusOnImage(ImageProcessor ip, 
-			List<CellularComponent> targets, 
+			List<Nucleus> targets, 
 			Color colour, String imageName) {
 				
-		for(CellularComponent target : targets) {
+		for(Nucleus target : targets) {
 			// Don't move the existing template
 			target = target.duplicate();
-			target.alignVertically(); // ensure rotation is valid
+			target.orient(); // ensure rotation is valid
 			
 			// Centre the outline on the canvas
 			int wBuffer = (int)Math.round(ip.getWidth()-target.getBounds().getBounds().getWidth())/2;

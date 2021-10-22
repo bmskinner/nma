@@ -69,11 +69,4 @@ public class DummySegmentedCellularComponent extends ProfileableCellularComponen
 		// TODO Auto-generated method stub
 		return false;
 	}
-
-	@Override
-	public void alignVertically() {
-		// TODO Auto-generated method stub
-		
-	}
-
 }

@@ -26,6 +26,7 @@ import java.util.UUID;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.io.XmlSerializable;
 
 import ij.process.ByteProcessor;
@@ -145,7 +146,7 @@ public interface IWarpedSignal extends Serializable, XmlSerializable {
 	 * @param isBinarised if the images were binarised before warping
 	 * @param image the warped image
 	 */	
-	void addWarpedImage(@NonNull CellularComponent target, 
+	void addWarpedImage(@NonNull Nucleus target, 
 			@NonNull UUID templateId, 
 			@NonNull String name, 
 			boolean isCellWithSignalsOnly, 
@@ -168,7 +169,7 @@ public interface IWarpedSignal extends Serializable, XmlSerializable {
 	 * @param isCellWithSignalsOnly whether the image covers all cells in the source dataset, or just those with defined signals
 	 * @return
 	 */
-	Optional<ImageProcessor> getWarpedImage(@NonNull CellularComponent template,  
+	Optional<ImageProcessor> getWarpedImage(@NonNull Nucleus template,  
 			@NonNull UUID templateId, 
 			boolean isCellWithSignalsOnly, 
 			int threshold,

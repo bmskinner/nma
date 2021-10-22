@@ -82,19 +82,35 @@ public interface Nucleus extends CellularComponent, Taggable, Comparable<Nucleus
      * @return
      */
     ISignalCollection getSignalCollection();
+    
+    /**
+     * Orient the nucleus. This will use 
+     * the landmarks and priorities defined by the rulesets
+     * used when creating the nucleus. This affects this object
+     * and does not create a copy.
+     */
+    void orient();
 
 
     /**
-     * Fetch the vertically oriented copy of the nucleus. Calculate if needed.
-     * The vertical alignment with be by TOP_VERTICAL and BOTTOM_VERTICAL if
-     * available, otherwise the ORIENTATION_POINT will be rotated below the CoM
-     * 
+     * Fetch the oriented copy of the nucleus. This will use 
+     * the landmarks and priorities defined by the rulesets
+     * used when creating the nucleus.
+     * @return an oriented copy of the nucleus
+     */
+    Nucleus getOrientedNucleus();
+
+    /**
+     * Get the given landmark from a name
+     * @param landmark
      * @return
      */
-    Nucleus getVerticallyRotatedNucleus();
-
     @Nullable Landmark getLandmark(String landmark);
 
+    /**
+     * Get the axis of priority for the nucleus
+     * @return
+     */
     @Nullable PriorityAxis getPriorityAxis();
 
 

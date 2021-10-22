@@ -77,7 +77,7 @@ public class TPSexporter extends SingleDatasetAnalysisMethod implements Io {
 			for(Nucleus n : dataset.getCollection().getNuclei()) {
 
 				try {
-					appendPerimeter(n.getVerticallyRotatedNucleus(), consensus);
+					appendPerimeter(n.getOrientedNucleus(), consensus);
 				}	catch (MeshCreationException e) {
 					LOGGER.warning("Unable to create mesh for nucleus "+n.getNameAndNumber());
 					LOGGER.fine("Mesh creation error: "+e.getMessage());

@@ -415,7 +415,7 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
 
 	@Override
 	public Nucleus getConsensus() {
-		return consensusNucleus.getVerticallyRotatedNucleus();
+		return consensusNucleus.getOrientedNucleus();
 	}
 	
 	@Override

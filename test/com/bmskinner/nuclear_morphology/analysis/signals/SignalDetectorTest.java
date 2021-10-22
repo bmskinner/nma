@@ -21,6 +21,13 @@ import com.bmskinner.nuclear_morphology.logging.ConsoleFormatter;
 import com.bmskinner.nuclear_morphology.logging.ConsoleHandler;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
+/**
+ * Test that the signal detector is able to find signals
+ * in test images
+ * @author ben
+ * @since 2.0.0
+ *
+ */
 public class SignalDetectorTest {
 	
 	private static final Logger LOGGER = Logger.getLogger(Loggable.PROJECT_LOGGER);

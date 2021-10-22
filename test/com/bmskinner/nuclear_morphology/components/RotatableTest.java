@@ -92,7 +92,7 @@ public class RotatableTest extends ComponentTester {
 				Nucleus n = c.getPrimaryNucleus();
 				n.setLandmark(Landmark.TOP_VERTICAL, tIndex);
 				n.setLandmark(Landmark.BOTTOM_VERTICAL, bIndex);
-				n.alignVertically();
+				n.orient();
 				
 				IPoint tv = n.getBorderPoint(Landmark.TOP_VERTICAL);
 				IPoint bv = n.getBorderPoint(Landmark.BOTTOM_VERTICAL);

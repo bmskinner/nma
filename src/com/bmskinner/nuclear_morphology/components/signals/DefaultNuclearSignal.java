@@ -89,11 +89,6 @@ public class DefaultNuclearSignal extends DefaultCellularComponent implements IN
         this.closestNuclearBorderPoint = p;
     }
 
-    @Override
-    public void alignVertically() {
-        // TODO Auto-generated method stub
-    }
-
 	@Override
 	public Element toXmlElement() {
 		Element e = super.toXmlElement();

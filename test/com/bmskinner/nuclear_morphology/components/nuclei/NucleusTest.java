@@ -105,7 +105,7 @@ public class NucleusTest {
 		IPoint bvPre = nucleus.getBorderPoint(Landmark.BOTTOM_VERTICAL);
 		assertFalse(Math.abs(tvPre.getX()-bvPre.getX())<1);
 		
-		nucleus.alignVertically();
+		nucleus.orient();
 		IPoint tv = nucleus.getBorderPoint(Landmark.TOP_VERTICAL);
 		IPoint bv = nucleus.getBorderPoint(Landmark.BOTTOM_VERTICAL);
 		
@@ -117,9 +117,9 @@ public class NucleusTest {
 	public void testGetVerticalNucleusIsIdenticalToAlignVertical() throws Exception {
 		nucleus.setLandmark(Landmark.TOP_VERTICAL, 10);
 		nucleus.setLandmark(Landmark.BOTTOM_VERTICAL, 20);
-		Nucleus vert = nucleus.getVerticallyRotatedNucleus();
+		Nucleus vert = nucleus.getOrientedNucleus();
 		
-		nucleus.alignVertically();
+		nucleus.orient();
 		IPoint tv = nucleus.getBorderPoint(Landmark.TOP_VERTICAL);
 		IPoint bv = nucleus.getBorderPoint(Landmark.BOTTOM_VERTICAL);
 		IPoint vTv = vert.getBorderPoint(Landmark.TOP_VERTICAL);
