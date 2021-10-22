@@ -87,7 +87,7 @@ public class NewAnalysisAction extends VoidResultAction {
         super(PROGRESS_BAR_LABEL, acceptor, eh);
         this.folder = folder;
         options = OptionsFactory.makeAnalysisOptions();
-        nucleusOptions = OptionsFactory.makeNucleusDetectionOptions(folder);
+        nucleusOptions = OptionsFactory.makeNucleusDetectionOptions(folder).build();
         options.setDetectionOptions(CellularComponent.NUCLEUS, nucleusOptions);
     }
 

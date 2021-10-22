@@ -105,8 +105,6 @@ public class SignalDetector extends Detector {
      */
     public List<INuclearSignal> detectSignal(@NonNull File sourceFile, @NonNull Nucleus n) throws ImageImportException {
 
-        options.setInt(HashOptions.THRESHOLD, minThreshold); // reset to default
-
         if (options.getString(HashOptions.SIGNAL_DETECTION_MODE_KEY).equals(SignalDetectionMode.FORWARD.name())) {
             LOGGER.finer( "Running forward detection");
             return detectForwardThresholdSignal(sourceFile,  n);
@@ -130,18 +128,13 @@ public class SignalDetector extends Detector {
      * 
      * @param newThreshold
      */
-    private void updateThreshold(int newThreshold) {
-        // only use the calculated threshold if it is larger than
-        // the given minimum
-        if (newThreshold > minThreshold) {
-            LOGGER.finer("Threshold set at: " + newThreshold);
-            options.setInt(HashOptions.THRESHOLD, newThreshold);
-        } 
-//        else {
-//            LOGGER.fine("Threshold kept at minimum: " + minThreshold);
-//            options.setInt(HashOptions.THRESHOLD, minThreshold);
-//        }
-    }
+//    private void updateThreshold(int newThreshold) {
+//        // only use the calculated threshold if it is larger than
+//        // the given minimum
+//        if (newThreshold > minThreshold) {
+//            LOGGER.finer("Threshold set at: " + newThreshold);
+//        } 
+//    }
 
     /**
      * Detect a signal in a given stack by standard forward thresholding and add
@@ -159,8 +152,7 @@ public class SignalDetector extends Detector {
     	
         // choose the right stack number for the channel
         int stackNumber = ImageImporter.rgbToStack(channel);
-        setMaxSize(100000);
-//        setMaxSize(n.getStatistic(Measurement.AREA) * options.getDouble(HashOptions.SIGNAL_MAX_FRACTION));
+        setMaxSize(n.getStatistic(Measurement.AREA) * options.getDouble(HashOptions.SIGNAL_MAX_FRACTION));
         setMinSize(options.getInt(HashOptions.MIN_SIZE_PIXELS));
         setMinCirc(options.getDouble(HashOptions.MIN_CIRC));
         setMaxCirc(options.getDouble(HashOptions.MAX_CIRC));
@@ -234,8 +226,6 @@ public class SignalDetector extends Detector {
      * 
      * @param sourceFile
      *            the file the image came from
-     * @param stack
-     *            the imagestack
      * @param n
      *            the nucleus
      * @throws ImageImportException 
@@ -288,7 +278,7 @@ public class SignalDetector extends Detector {
             }
         }
 
-        updateThreshold(threshold);
+        minThreshold = threshold;
 
         // now we have the reverse threshold value, do the thresholding
         // and find signal rois
@@ -367,7 +357,7 @@ public class SignalDetector extends Detector {
          */
         maxIndex += 10;
 
-        updateThreshold(maxIndex);
+        minThreshold = maxIndex;
         return detectForwardThresholdSignal(sourceFile,  n);
     }
     

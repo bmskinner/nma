@@ -45,7 +45,7 @@ public class OptionsFactory {
      * @param folder the folder to be searched
      * @return
      */
-	public static HashOptions makeNucleusDetectionOptions(File folder) {
+	public static OptionsBuilder makeNucleusDetectionOptions(File folder) {
 		
 		return new OptionsBuilder()
 				.withValue(HashOptions.DETECTION_FOLDER, folder.getAbsolutePath())
@@ -58,9 +58,8 @@ public class OptionsFactory {
 				.withValue(HashOptions.CHANNEL, HashOptions.DEFAULT_CHANNEL)
 				.withValue(HashOptions.IS_NORMALISE_CONTRAST, HashOptions.DEFAULT_NORMALISE_CONTRAST)
 				.withValue(HashOptions.IS_RGB, HashOptions.DEFAULT_IS_RGB)
-				.setAll(OptionsFactory.makeCannyOptions())
-				.setAll(OptionsFactory.makePreprocessingOptions())
-				.build();
+				.setAll(OptionsFactory.makeCannyOptions().build())
+				.setAll(OptionsFactory.makePreprocessingOptions().build());
     }
 
     /**
@@ -68,7 +67,7 @@ public class OptionsFactory {
      * 
      * @return
      */
-	public static HashOptions makeCannyOptions() {
+	public static OptionsBuilder makeCannyOptions() {
 		return new OptionsBuilder()
 				.withValue(HashOptions.IS_USE_CANNY, HashOptions.DEFAULT_IS_USE_CANNY)
 				.withValue(HashOptions.CANNY_IS_AUTO_THRESHOLD, HashOptions.DEFAULT_IS_CANNY_AUTO_THRESHOLD)
@@ -80,8 +79,7 @@ public class OptionsFactory {
 				.withValue(HashOptions.CANNY_KERNEL_WIDTH_INT, HashOptions.DEFAULT_CANNY_KERNEL_WIDTH)
 
 				.withValue(HashOptions.CANNY_CLOSING_RADIUS_INT, HashOptions.DEFAULT_CANNY_CLOSING_RADIUS)
-				.withValue(HashOptions.CANNY_IS_ADD_BORDER, HashOptions.DEFAULT_IS_CANNY_ADD_BORDER)
-				.build();
+				.withValue(HashOptions.CANNY_IS_ADD_BORDER, HashOptions.DEFAULT_IS_CANNY_ADD_BORDER);
 	}
 
     /**
@@ -89,8 +87,7 @@ public class OptionsFactory {
      * 
      * @return
      */
-	public static HashOptions makePreprocessingOptions() {
-		DefaultOptions d = new DefaultOptions();
+	public static OptionsBuilder makePreprocessingOptions() {
 		return new OptionsBuilder()
 				.withValue(HashOptions.IS_USE_GAUSSIAN, HashOptions.DEFAULT_USE_GAUSSIAN)
 				.withValue(HashOptions.IS_USE_KUWAHARA, HashOptions.DEFAULT_USE_KUWAHARA)
@@ -101,8 +98,7 @@ public class OptionsFactory {
 
 				.withValue(HashOptions.KUWAHARA_RADIUS_INT, HashOptions.DEFAULT_KUWAHARA_RADIUS)
 				.withValue(HashOptions.FLATTENING_THRESHOLD_INT, HashOptions.DEFAULT_FLATTEN_THRESHOLD)
-				.withValue(HashOptions.RAISING_THRESHOLD_INT, HashOptions.DEFAULT_RAISE_THRESHOLD)
-				.build();
+				.withValue(HashOptions.RAISING_THRESHOLD_INT, HashOptions.DEFAULT_RAISE_THRESHOLD);
 
 
 //		withValue(HashOptions.MIN_HUE, HashOptions.DEFAULT_MIN_HUE);
@@ -119,31 +115,29 @@ public class OptionsFactory {
      * @param folder the folder to be searched
      * @return
      */
-	public static HashOptions makeNuclearSignalOptions(File folder) {		
+	public static OptionsBuilder makeNuclearSignalOptions(File folder) {		
 		return new OptionsBuilder()
-		.withValue(HashOptions.DETECTION_FOLDER, folder.getAbsolutePath())
-		.withValue(HashOptions.SIGNAL_MAX_FRACTION, HashOptions.DEFAULT_SIGNAL_MAX_FRACTION)
-		.withValue(HashOptions.SIGNAL_DETECTION_MODE_KEY, HashOptions.DEFAULT_SIGNAL_DETECTION_METHOD.name())
-		.withValue(HashOptions.MIN_SIZE_PIXELS, HashOptions.DEFAULT_SIGNAL_MIN_SIZE)
-		.withValue(HashOptions.MIN_CIRC, HashOptions.DEFAULT_MIN_CIRC)
-		.withValue(HashOptions.MAX_CIRC, HashOptions.DEFAULT_MAX_CIRC)
-		.withValue(HashOptions.CHANNEL, HashOptions.DEFAULT_SIGNAL_CHANNEL)
-		.withValue(HashOptions.THRESHOLD, HashOptions.DEFAULT_SIGNAL_THRESHOLD)
-		.withValue(HashOptions.SCALE, GlobalOptions.getInstance().getImageScale())
-		.withValue(HashOptions.IS_RGB, HashOptions.DEFAULT_IS_RGB)
-		.withValue(HashOptions.IS_NORMALISE_CONTRAST, HashOptions.DEFAULT_IS_NORMALISE)
-		.build();
-    }
+				.withValue(HashOptions.DETECTION_FOLDER, folder.getAbsolutePath())
+				.withValue(HashOptions.SIGNAL_MAX_FRACTION, HashOptions.DEFAULT_SIGNAL_MAX_FRACTION)
+				.withValue(HashOptions.SIGNAL_DETECTION_MODE_KEY, HashOptions.DEFAULT_SIGNAL_DETECTION_METHOD.name())
+				.withValue(HashOptions.MIN_SIZE_PIXELS, HashOptions.DEFAULT_SIGNAL_MIN_SIZE)
+				.withValue(HashOptions.MIN_CIRC, HashOptions.DEFAULT_MIN_CIRC)
+				.withValue(HashOptions.MAX_CIRC, HashOptions.DEFAULT_MAX_CIRC)
+				.withValue(HashOptions.CHANNEL, HashOptions.DEFAULT_SIGNAL_CHANNEL)
+				.withValue(HashOptions.THRESHOLD, HashOptions.DEFAULT_SIGNAL_THRESHOLD)
+				.withValue(HashOptions.SCALE, GlobalOptions.getInstance().getImageScale())
+				.withValue(HashOptions.IS_RGB, HashOptions.DEFAULT_IS_RGB)
+				.withValue(HashOptions.IS_NORMALISE_CONTRAST, HashOptions.DEFAULT_IS_NORMALISE);
+	}
 	
 	/**
 	 * Create the default options for shell analysis
 	 * @return
 	 */
-	public static HashOptions makeShellAnalysisOptions() {
+	public static OptionsBuilder makeShellAnalysisOptions() {
 		return new OptionsBuilder()
 				.withValue(HashOptions.SHELL_COUNT_INT, HashOptions.DEFAULT_SHELL_COUNT)
-				.withValue(HashOptions.SHELL_EROSION_METHOD_KEY, HashOptions.DEFAULT_EROSION_METHOD.name())
-				.build();
+				.withValue(HashOptions.SHELL_EROSION_METHOD_KEY, HashOptions.DEFAULT_EROSION_METHOD.name());
 	}
 
 
@@ -174,7 +168,7 @@ public class OptionsFactory {
      */
     public static IAnalysisOptions makeDefaultRodentAnalysisOptions(File testFolder) {
     	IAnalysisOptions op = makeAnalysisOptions();
-        op.setDetectionOptions(CellularComponent.NUCLEUS, OptionsFactory.makeNucleusDetectionOptions(testFolder));
+        op.setDetectionOptions(CellularComponent.NUCLEUS, OptionsFactory.makeNucleusDetectionOptions(testFolder).build());
         op.setRuleSetCollection(RuleSetCollection.mouseSpermRuleSetCollection());
         return op;
     }
@@ -187,9 +181,11 @@ public class OptionsFactory {
     public static IAnalysisOptions makeDefaultPigAnalysisOptions(File testFolder) {
     	IAnalysisOptions op = OptionsFactory.makeAnalysisOptions();
         
-        HashOptions nop = OptionsFactory.makeNucleusDetectionOptions(testFolder);
-        nop.setDouble(HashOptions.MIN_CIRC, 0.1);
-        nop.setDouble(HashOptions.MAX_CIRC, 0.9);        
+        HashOptions nop = OptionsFactory.makeNucleusDetectionOptions(testFolder)
+        		.withValue(HashOptions.MIN_CIRC, 0.1)
+        		.withValue(HashOptions.MAX_CIRC, 0.9)
+        		.build();
+    
         op.setDetectionOptions(CellularComponent.NUCLEUS, nop);
         op.setRuleSetCollection(RuleSetCollection.pigSpermRuleSetCollection());
         return op;
@@ -203,9 +199,10 @@ public class OptionsFactory {
     public static IAnalysisOptions makeDefaultRoundAnalysisOptions(File testFolder) {
     	IAnalysisOptions op = OptionsFactory.makeAnalysisOptions();
         
-        HashOptions nop = OptionsFactory.makeNucleusDetectionOptions(testFolder);
-        nop.setDouble(HashOptions.MIN_CIRC, 0.6);
-        nop.setDouble(HashOptions.MAX_CIRC, 1.0);   
+        HashOptions nop = OptionsFactory.makeNucleusDetectionOptions(testFolder)
+        		.withValue(HashOptions.MIN_CIRC, 0.6)
+        		.withValue(HashOptions.MAX_CIRC, 0.9)
+        		.build();
         
         op.setDetectionOptions(CellularComponent.NUCLEUS, nop);
         op.setRuleSetCollection(RuleSetCollection.roundRuleSetCollection());
@@ -217,35 +214,34 @@ public class OptionsFactory {
      * {@link HashOptions#DEFAULT_CLUSTER_METHOD}
      * @return
      */
-    public static HashOptions makeDefaultClusteringOptions() {
-    	HashOptions o = new DefaultOptions();
-    	o.setString(HashOptions.CLUSTER_METHOD_KEY, HashOptions.DEFAULT_CLUSTER_METHOD.name());
-		o.setString(HashOptions.CLUSTER_HIERARCHICAL_METHOD_KEY, HashOptions.DEFAULT_HIERARCHICAL_METHOD.name());
+    public static OptionsBuilder makeDefaultClusteringOptions() {
+    	OptionsBuilder ob = new OptionsBuilder()
+    			.withValue(HashOptions.CLUSTER_METHOD_KEY, HashOptions.DEFAULT_CLUSTER_METHOD.name())
+    			.withValue(HashOptions.CLUSTER_HIERARCHICAL_METHOD_KEY, HashOptions.DEFAULT_HIERARCHICAL_METHOD.name())
 
-		o.setBoolean(HashOptions.CLUSTER_USE_SIMILARITY_MATRIX_KEY, HashOptions.DEFAULT_USE_SIMILARITY_MATRIX);
-		o.setBoolean(HashOptions.CLUSTER_INCLUDE_MESH_KEY, HashOptions.DEFAULT_INCLUDE_MESH);
-		o.setBoolean(HashOptions.CLUSTER_USE_TSNE_KEY, HashOptions.DEFAULT_USE_TSNE);
+    			.withValue(HashOptions.CLUSTER_USE_SIMILARITY_MATRIX_KEY, HashOptions.DEFAULT_USE_SIMILARITY_MATRIX)
+    			.withValue(HashOptions.CLUSTER_INCLUDE_MESH_KEY, HashOptions.DEFAULT_INCLUDE_MESH)
+    			.withValue(HashOptions.CLUSTER_USE_TSNE_KEY, HashOptions.DEFAULT_USE_TSNE)
 
-		o.setInt(HashOptions.CLUSTER_EM_ITERATIONS_KEY, HashOptions.DEFAULT_EM_ITERATIONS);
-		o.setInt(HashOptions.CLUSTER_MANUAL_CLUSTER_NUMBER_KEY, HashOptions.DEFAULT_MANUAL_CLUSTER_NUMBER);
+    			.withValue(HashOptions.CLUSTER_EM_ITERATIONS_KEY, HashOptions.DEFAULT_EM_ITERATIONS)
+    			.withValue(HashOptions.CLUSTER_MANUAL_CLUSTER_NUMBER_KEY, HashOptions.DEFAULT_MANUAL_CLUSTER_NUMBER);
 
-		for (Measurement stat : Measurement.getRoundNucleusStats())
-			o.setBoolean(stat.toString(), false);
-		
-		o.setBoolean(HashOptions.DEFAULT_PROFILE_TYPE.toString(), HashOptions.DEFAULT_INCLUDE_PROFILE);
-		return o;
+    	for (Measurement stat : Measurement.getRoundNucleusStats())
+    		ob = ob.withValue(stat.toString(), false);
+
+    	ob = ob.withValue(HashOptions.DEFAULT_PROFILE_TYPE.toString(), HashOptions.DEFAULT_INCLUDE_PROFILE);
+    	return ob;
     }
     
     /**
      * Create an instance of the default profile tSNE options
      * @return
      */
-    public static HashOptions makeDefaultTsneOptions() {
-    	HashOptions options = new DefaultOptions();
-    	options.setDouble(TsneMethod.PERPLEXITY_KEY, 5);
-    	options.setInt(TsneMethod.MAX_ITERATIONS_KEY, 1000);
-    	options.setString(TsneMethod.PROFILE_TYPE_KEY, ProfileType.ANGLE.toString());
-    	return options;
+    public static OptionsBuilder makeDefaultTsneOptions() {
+    	return new OptionsBuilder()
+    			.withValue(TsneMethod.PERPLEXITY_KEY, 5)
+    			.withValue(TsneMethod.MAX_ITERATIONS_KEY, 1000)
+    			.withValue(TsneMethod.PROFILE_TYPE_KEY, ProfileType.ANGLE.toString());
     }
 
 }

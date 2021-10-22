@@ -45,7 +45,6 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 import ij.ImageStack;
-import ij.Prefs;
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
 import ij.plugin.filter.EDM;

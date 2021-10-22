@@ -49,7 +49,7 @@ public class ShellAnalysisMethodTest {
 
     @Test
     public void test() throws Exception {
-    	new ShellAnalysisMethod(d, OptionsFactory.makeShellAnalysisOptions()).call();
+    	new ShellAnalysisMethod(d, OptionsFactory.makeShellAnalysisOptions().build()).call();
     }
 
 }

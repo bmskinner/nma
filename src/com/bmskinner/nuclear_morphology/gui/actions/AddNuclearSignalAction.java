@@ -66,7 +66,7 @@ public class AddNuclearSignalAction extends SingleDatasetResultAction {
         	
         	File folder = null;
         	
-        	try {
+        	try{
         		folder = eh.getInputSupplier().requestFolder("Choose FISH signal image folder", defaultDir);
         	} catch(RequestCancelledException e) {
         		cancel();
@@ -80,9 +80,9 @@ public class AddNuclearSignalAction extends SingleDatasetResultAction {
 
                 HashOptions options = analysisSetup.getOptions();
 
-                IAnalysisMethod m = new SignalDetectionMethod(dataset, options, analysisSetup.getId());
+                IAnalysisMethod m = new SignalDetectionMethod(dataset, options);
 
-                String name = dataset.getCollection().getSignalGroup(analysisSetup.getId()).orElseThrow(NullPointerException::new).getGroupName();
+                String name = options.getString(HashOptions.SIGNAL_GROUP_NAME);
 
                 worker = new DefaultAnalysisWorker(m, dataset.getCollection().size());
 

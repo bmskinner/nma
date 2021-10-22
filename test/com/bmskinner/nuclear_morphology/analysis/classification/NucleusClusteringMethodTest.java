@@ -87,10 +87,11 @@ public class NucleusClusteringMethodTest extends ComponentTester {
 	 * @throws Exception
 	 */
 	private void testCanClusterOnProfile(ProfileType type) throws Exception {
-		HashOptions o = OptionsFactory.makeDefaultClusteringOptions();
-		o.setBoolean(ProfileType.ANGLE.toString(), false);
-		o.setBoolean(type.toString(), true);
-		o.setInt(HashOptions.CLUSTER_MANUAL_CLUSTER_NUMBER_KEY, TWO_CLUSTERS);
+		HashOptions o = OptionsFactory.makeDefaultClusteringOptions()
+				.withValue(ProfileType.ANGLE.toString(), false)
+				.withValue(type.toString(), true)
+				.withValue(HashOptions.CLUSTER_MANUAL_CLUSTER_NUMBER_KEY, TWO_CLUSTERS)
+				.build();
 
 		new NucleusClusteringMethod(dataset, o).call();
 		assertNotNull(dataset.getCollection());
@@ -109,11 +110,12 @@ public class NucleusClusteringMethodTest extends ComponentTester {
 		}
 	}
 	
-	private void testCanClusterOnStatistic(Measurement stat) throws Exception {
-		HashOptions o = OptionsFactory.makeDefaultClusteringOptions();
-		o.setBoolean(ProfileType.ANGLE.toString(), false);
-		o.setBoolean(stat.toString(), true);
-		o.setInt(HashOptions.CLUSTER_MANUAL_CLUSTER_NUMBER_KEY, TWO_CLUSTERS);
+	private void testCanClusterOnStatistic(Measurement stat) throws Exception {	
+		HashOptions o = OptionsFactory.makeDefaultClusteringOptions()
+				.withValue(ProfileType.ANGLE.toString(), false)
+				.withValue(stat.toString(), true)
+				.withValue(HashOptions.CLUSTER_MANUAL_CLUSTER_NUMBER_KEY, TWO_CLUSTERS)
+				.build();
 
 		new NucleusClusteringMethod(dataset, o).call();
 		assertNotNull(dataset.getCollection());

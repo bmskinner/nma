@@ -189,7 +189,7 @@ public class ShellDetectorTest extends ComponentTester {
         	assertFalse("Shells should not exist on first open", s.hasShellResult());
         }
         
-        new ShellAnalysisMethod(dataset, OptionsFactory.makeShellAnalysisOptions()).call();
+        new ShellAnalysisMethod(dataset, OptionsFactory.makeShellAnalysisOptions().build()).call();
         
         for(ISignalGroup s : dataset.getCollection().getSignalGroups()) {
         	assertTrue("Shells should be created for "+s.getGroupName(), s.hasShellResult());

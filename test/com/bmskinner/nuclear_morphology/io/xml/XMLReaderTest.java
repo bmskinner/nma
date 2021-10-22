@@ -31,7 +31,7 @@ public class XMLReaderTest {
 	
 	@Test
 	public void testReadOptions() throws IOException, XMLReadingException {
-		HashOptions o = OptionsFactory.makeDefaultClusteringOptions();
+		HashOptions o = OptionsFactory.makeDefaultClusteringOptions().build();
 		File f = new File(TestResources.UNIT_TEST_FOLDER, "Options.xml");
 		
 		XMLWriter.writeXML(o.toXmlElement(), f);

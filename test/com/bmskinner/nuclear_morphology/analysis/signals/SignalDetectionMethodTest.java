@@ -55,16 +55,14 @@ public class SignalDetectionMethodTest extends ComponentTester {
     	
     	
     	// Add signals from the red channel
-    	HashOptions redOptions = OptionsFactory.makeNuclearSignalOptions(testFolder);
-    	redOptions.setDouble(HashOptions.SIGNAL_MAX_FRACTION, 0.5);
-    	redOptions.setInt(HashOptions.MIN_SIZE_PIXELS, 5);
+    	HashOptions redOptions = OptionsFactory.makeNuclearSignalOptions(testFolder)
+    			.withValue(HashOptions.SIGNAL_MAX_FRACTION, 0.5)
+    			.withValue(HashOptions.MIN_SIZE_PIXELS, 5)
+    			.withValue(HashOptions.SIGNAL_GROUP_NAME, TestImageDatasetCreator.RED_SIGNAL_NAME)
+    			.withValue(HashOptions.SIGNAL_GROUP_ID, TestImageDatasetCreator.RED_SIGNAL_ID.toString())
+    			.build();
 
-
-    	ISignalGroup red = new DefaultSignalGroup(TestImageDatasetCreator.RED_SIGNAL_NAME, TestImageDatasetCreator.RED_SIGNAL_ID);
-    	red.setGroupColour(Color.RED);
-    	d.getCollection().addSignalGroup(red);
-    	d.getAnalysisOptions().get().setDetectionOptions(TestImageDatasetCreator.RED_SIGNAL_ID.toString(), redOptions);
-    	new SignalDetectionMethod(d, redOptions, TestImageDatasetCreator.RED_SIGNAL_ID).call();
+    	new SignalDetectionMethod(d, redOptions).call();
     	
     	// Get the new hash
     	long newHash = d.hashCode();
@@ -74,4 +72,33 @@ public class SignalDetectionMethodTest extends ComponentTester {
     	assertTrue(DatasetListManager.getInstance().hasRootDataset(d.getId()));
     	assertTrue(DatasetListManager.getInstance().hashCodeChanged());
 	}
+	
+	@Test
+	public void testAddingSignalGroupAddsDetectionOptionsToDataset() throws Exception {
+		File testFolder = TestResources.TESTING_MOUSE_SIGNALS_FOLDER;
+    	IAnalysisOptions op = OptionsFactory.makeDefaultRodentAnalysisOptions(testFolder);
+    	HashOptions nucleus = op.getDetectionOptions(CellularComponent.NUCLEUS).get();
+    	nucleus.setInt(HashOptions.MAX_SIZE_PIXELS, 12000);
+    	nucleus.setInt(HashOptions.MIN_SIZE_PIXELS, 4000);
+
+    	// Make the dataset with no signals
+    	IAnalysisDataset d = TestImageDatasetCreator.createTestDataset(testFolder, op, false);
+    	
+    	// Add signals from the red channel
+    	HashOptions redOptions = OptionsFactory.makeNuclearSignalOptions(testFolder)
+    			.withValue(HashOptions.SIGNAL_MAX_FRACTION, 0.5)
+    			.withValue(HashOptions.MIN_SIZE_PIXELS, 5)
+    			.withValue(HashOptions.SIGNAL_GROUP_NAME, TestImageDatasetCreator.RED_SIGNAL_NAME)
+    			.withValue(HashOptions.SIGNAL_GROUP_ID, TestImageDatasetCreator.RED_SIGNAL_ID.toString())
+    			.build();
+
+    	new SignalDetectionMethod(d, redOptions).call();
+    	
+    	// confirm the signal options were added
+    	assertTrue(d.getAnalysisOptions().get().hasDetectionOptions(TestImageDatasetCreator.RED_SIGNAL_ID.toString()));
+    	assertTrue(d.getAnalysisOptions().get().hasSignalDetectionOptions(TestImageDatasetCreator.RED_SIGNAL_ID));
+    	
+    	
+	}
+	
 }

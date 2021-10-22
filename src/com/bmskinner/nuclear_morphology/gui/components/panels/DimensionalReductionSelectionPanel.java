@@ -54,7 +54,7 @@ public class DimensionalReductionSelectionPanel extends OptionsPanel {
 
 	@Override
 	protected void setDefaults() {
-		options.set(OptionsFactory.makeDefaultTsneOptions());
+		options.set(OptionsFactory.makeDefaultTsneOptions().build());
 		options.setBoolean(HashOptions.CLUSTER_USE_TSNE_KEY,  HashOptions.DEFAULT_USE_TSNE);
 		options.setBoolean(HashOptions.CLUSTER_USE_PCA_KEY,  HashOptions.DEFAULT_USE_PCA);
 	}

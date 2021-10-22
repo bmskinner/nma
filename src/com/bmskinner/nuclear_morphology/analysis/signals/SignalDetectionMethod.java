@@ -16,6 +16,7 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.analysis.signals;
 
+import java.awt.Color;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,10 +38,12 @@ import com.bmskinner.nuclear_morphology.components.datasets.VirtualDataset;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
+import com.bmskinner.nuclear_morphology.components.signals.DefaultSignalGroup;
 import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalCollection;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.signals.UnavailableSignalGroupException;
+import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -57,8 +60,7 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
     protected final HashOptions options;
     protected final File folder;
     protected final int channel;
-    protected final UUID signalGroupId;
-    protected final String channelName;
+//    protected final UUID signalGroupId;
 
     /**
      * For use when running on an existing dataset
@@ -69,15 +71,11 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
      * @throws UnavailableSignalGroupException if the group is not present in the dataset
      */
 
-    public SignalDetectionMethod(@NonNull final IAnalysisDataset d, @NonNull final HashOptions options, @NonNull final UUID group)
-            throws UnavailableSignalGroupException {
+    public SignalDetectionMethod(@NonNull final IAnalysisDataset d, @NonNull final HashOptions options) {
         super(d);
         
         if(!d.getAnalysisOptions().isPresent())
         	throw new IllegalArgumentException("No analysis options in dataset");
-        
-        if(!d.getCollection().hasSignalGroup(group))
-        	throw new IllegalArgumentException("Signal group is not present in dataset");
         
         if(!options.hasString(HashOptions.SIGNAL_DETECTION_MODE_KEY))
         	throw new IllegalArgumentException("Signal options are not complete");
@@ -85,8 +83,20 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
         this.options = options.duplicate();
         this.folder  = options.getFile(HashOptions.DETECTION_FOLDER).getAbsoluteFile();
         this.channel = options.getInt(HashOptions.CHANNEL);
-        this.signalGroupId = group;
-        this.channelName = d.getCollection().getSignalGroup(group).get().getGroupName();
+
+        // Create a signal group in the dataset
+
+        ISignalGroup group = new DefaultSignalGroup(options.getString(HashOptions.SIGNAL_GROUP_NAME), 
+        	 UUID.fromString(options.getString(HashOptions.SIGNAL_GROUP_ID)));
+        
+        dataset.getCollection().addSignalGroup(group);
+
+        // Set the default colour for the signal group
+        Color colour = ColourSelecter.getSignalColour(options.getInt(HashOptions.CHANNEL));
+        group.setGroupColour(colour);
+
+        dataset.getAnalysisOptions().get()
+        	.setDetectionOptions(options.getString(HashOptions.SIGNAL_GROUP_ID), options);
     }
 
     @Override
@@ -134,7 +144,10 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
             List<INuclearSignal> signals = finder.findInImage(imageFile, n);
 
             ISignalCollection signalCollection = n.getSignalCollection();
-            signalCollection.addSignalGroup(signals, signalGroupId, imageFile, channel);
+            signalCollection.addSignalGroup(signals, 
+            		UUID.fromString(options.getString(HashOptions.SIGNAL_GROUP_ID)), 
+            		imageFile, 
+            		channel);
 
             // Measure the detected signals in the nucleus
             SignalAnalyser s = new SignalAnalyser();
@@ -157,7 +170,8 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
     
     private void postDetectionFilter() {
 
-        List<ICellCollection> signalPopulations = dividePopulationBySignals(dataset.getCollection(), signalGroupId);
+        List<ICellCollection> signalPopulations = dividePopulationBySignals(dataset.getCollection(), 
+        		UUID.fromString(options.getString(HashOptions.SIGNAL_GROUP_ID)));
 
         List<IAnalysisDataset> list = new ArrayList<>();
 

@@ -196,30 +196,27 @@ public class TestImageDatasetCreator {
 	    	.call();
 
         if(addRed) {
-        	HashOptions redOptions = OptionsFactory.makeNuclearSignalOptions(testFolder);
-        	redOptions.setString(HashOptions.SIGNAL_GROUP_NAME, RED_SIGNAL_NAME);
-        	redOptions.setInt(HashOptions.MIN_SIZE_PIXELS, 5);
-        	redOptions.setDouble(HashOptions.SIGNAL_MAX_FRACTION, 0.5);
-
-        	ISignalGroup red = new DefaultSignalGroup(RED_SIGNAL_NAME, RED_SIGNAL_ID);
-        	red.setGroupColour(Color.RED);
-        	d.getCollection().addSignalGroup(red);
-        	d.getAnalysisOptions().get().setDetectionOptions(RED_SIGNAL_ID.toString(), redOptions);
-        	new SignalDetectionMethod(d, redOptions, RED_SIGNAL_ID).call();
+        	HashOptions redOptions = OptionsFactory.makeNuclearSignalOptions(testFolder)
+        			.withValue(HashOptions.SIGNAL_MAX_FRACTION, 0.5)
+        			.withValue(HashOptions.MIN_SIZE_PIXELS, 5)
+        			.withValue(HashOptions.SIGNAL_GROUP_NAME, TestImageDatasetCreator.RED_SIGNAL_NAME)
+        			.withValue(HashOptions.SIGNAL_GROUP_ID, TestImageDatasetCreator.RED_SIGNAL_ID.toString())
+        			.build();
+        	new SignalDetectionMethod(d, redOptions).call();
         }
 
         if(addGreen) {
-        	HashOptions greenOptions = OptionsFactory.makeNuclearSignalOptions(testFolder);
-        	greenOptions.setString(HashOptions.SIGNAL_GROUP_NAME, GREEN_SIGNAL_NAME);
-        	greenOptions.setInt(HashOptions.CHANNEL, 1);
-        	ISignalGroup green = new DefaultSignalGroup(GREEN_SIGNAL_NAME, GREEN_SIGNAL_ID);
-        	green.setGroupColour(Color.GREEN);
-        	d.getCollection().addSignalGroup(green);
-        	d.getAnalysisOptions().get().setDetectionOptions(GREEN_SIGNAL_ID.toString(), greenOptions);
-        	new SignalDetectionMethod(d, greenOptions, GREEN_SIGNAL_ID).call();
+        	HashOptions greenOptions = OptionsFactory.makeNuclearSignalOptions(testFolder)
+        			.withValue(HashOptions.SIGNAL_MAX_FRACTION, 0.5)
+        			.withValue(HashOptions.MIN_SIZE_PIXELS, 5)
+        			.withValue(HashOptions.CHANNEL, 1)
+        			.withValue(HashOptions.SIGNAL_GROUP_NAME, TestImageDatasetCreator.GREEN_SIGNAL_NAME)
+        			.withValue(HashOptions.SIGNAL_GROUP_ID, TestImageDatasetCreator.GREEN_SIGNAL_ID.toString())
+        			.build();
+        	new SignalDetectionMethod(d, greenOptions).call();
         }
 
-        new ShellAnalysisMethod(d, OptionsFactory.makeShellAnalysisOptions()).call();
+        new ShellAnalysisMethod(d, OptionsFactory.makeShellAnalysisOptions().build()).call();
     	return d;
     }
     
@@ -244,7 +241,7 @@ public class TestImageDatasetCreator {
 
     	IAnalysisDataset d = new NucleusDetectionMethod(outputFolder.getAbsoluteFile(), op).call().getFirstDataset();
 
-    	HashOptions clusterOptions = OptionsFactory.makeDefaultClusteringOptions();
+    	HashOptions clusterOptions = OptionsFactory.makeDefaultClusteringOptions().build();
 
     	new DatasetProfilingMethod(d)
     	.then(new DatasetSegmentationMethod(d, MorphologyAnalysisMode.NEW))

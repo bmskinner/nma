@@ -235,7 +235,7 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
     	IAnalysisOptions mergedOptions = OptionsFactory.makeAnalysisOptions();
     	
     	// Use an empty file since there are multiple folders in the merge
-    	HashOptions nucleus = OptionsFactory.makeNucleusDetectionOptions(new File(""));
+    	HashOptions nucleus = OptionsFactory.makeNucleusDetectionOptions(new File("")).build();
 
     	IAnalysisDataset d1 = datasets.get(0);
     	IAnalysisOptions d1Options = d1.getAnalysisOptions().orElseThrow(MissingOptionException::new);
@@ -254,7 +254,7 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
     	
     	// Merge signal group options
     	for(UUID signalGroupId : newDataset.getCollection().getSignalGroupIDs()) {
-    		HashOptions signal = OptionsFactory.makeNuclearSignalOptions((File)null);    		
+    		HashOptions signal = OptionsFactory.makeNuclearSignalOptions((File)null).build();    		
     		//TODO: Merge the signal detection options
     		mergedOptions.setDetectionOptions(IAnalysisOptions.SIGNAL_GROUP+signalGroupId.toString(), signal);
     	}

@@ -16,7 +16,7 @@ public class DefaultClusterGroupTest extends ComponentTester {
 	
 	@Before
 	public void createGroup() throws Exception {
-		g = new DefaultClusterGroup("test", OptionsFactory.makeDefaultClusteringOptions(), "tree");
+		g = new DefaultClusterGroup("test", OptionsFactory.makeDefaultClusteringOptions().build(), "tree");
 		
 		IAnalysisDataset d1 = new TestDatasetBuilder(RNG_SEED).cellCount(N_CELLS)
 				.ofType(RuleSetCollection.roundRuleSetCollection())

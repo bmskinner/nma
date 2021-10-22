@@ -15,8 +15,8 @@ public class DefaultOptionsTest {
 	@Test
 	public void testXmlSerializes() throws IOException {
 
-		HashOptions o = OptionsFactory.makePreprocessingOptions();
-		o.setSubOptions("test", OptionsFactory.makeShellAnalysisOptions());
+		HashOptions o = OptionsFactory.makePreprocessingOptions().build();
+		o.setSubOptions("test", OptionsFactory.makeShellAnalysisOptions().build());
 		
 		Element e = o.toXmlElement();
 		

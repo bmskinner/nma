@@ -56,7 +56,7 @@ public class TsneSetupDialog extends SubAnalysisSetupDialog {
      */
     protected TsneSetupDialog(final @NonNull IAnalysisDataset dataset, final String title) {
         super(dataset, title);
-        options = OptionsFactory.makeDefaultTsneOptions();
+        options = OptionsFactory.makeDefaultTsneOptions().build();
         createUI();
         packAndDisplay();
     }

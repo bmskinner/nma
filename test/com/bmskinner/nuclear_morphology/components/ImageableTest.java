@@ -86,17 +86,19 @@ public class ImageableTest extends ComponentTester {
 		
 		File testFolder = new File(TestResources.IMAGE_FOLDER+"issues/offsets/").getAbsoluteFile();
     	
-    	IAnalysisOptions op = OptionsFactory.makeAnalysisOptions();
-    	op.setRuleSetCollection(RuleSetCollection.roundRuleSetCollection());
-    	HashOptions nOp = OptionsFactory.makeNucleusDetectionOptions(testFolder);
-    	nOp.setInt(HashOptions.MAX_SIZE_PIXELS, 2000000);
-    	nOp.setInt(HashOptions.MIN_SIZE_PIXELS, 5000);
-    	nOp.setInt(HashOptions.THRESHOLD, 30);
-    	nOp.setInt(HashOptions.CHANNEL, 2);
-    	nOp.setBoolean(HashOptions.IS_USE_CANNY, false);
-    	nOp.setBoolean(HashOptions.IS_USE_KUWAHARA, false);
-    	op.setDetectionOptions(CellularComponent.NUCLEUS, nOp);
-    	op.setAngleWindowProportion(0.03);
+		IAnalysisOptions op = OptionsFactory.makeAnalysisOptions();
+		op.setRuleSetCollection(RuleSetCollection.roundRuleSetCollection());
+		HashOptions nOp = OptionsFactory.makeNucleusDetectionOptions(testFolder)
+				.withValue(HashOptions.MAX_SIZE_PIXELS, 2000000)
+				.withValue(HashOptions.MIN_SIZE_PIXELS, 5000)
+				.withValue(HashOptions.THRESHOLD, 30)
+				.withValue(HashOptions.CHANNEL, 2)
+				.withValue(HashOptions.IS_USE_CANNY, false)
+				.withValue(HashOptions.IS_USE_KUWAHARA, false)
+				.build();
+		
+		op.setDetectionOptions(CellularComponent.NUCLEUS, nOp);
+		op.setAngleWindowProportion(0.03);
 
     	File saveFile = new File(TestResources.IMAGE_FOLDER+"issues/offsets/offsets.nmd").getAbsoluteFile();
     	IAnalysisDataset d = TestImageDatasetCreator.createTestDataset(testFolder, op, false);

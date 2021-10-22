@@ -241,15 +241,7 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod impleme
 				HashOptions signalOptions = datasetOptions.getNuclearSignalOptions(signalGroupId);
 				
 				signalOptions.setFile(HashOptions.DETECTION_FOLDER, imageFolder);
-				String name = options.getNuclearSignalOptions(signalGroupId).getString(HashOptions.SIGNAL_GROUP_NAME);
-				
-				ISignalGroup signalGroup = new DefaultSignalGroup(name, signalGroupId );
-				signalGroup.setGroupColour(ColourSelecter.getSignalColour(signalOptions.getInt(HashOptions.CHANNEL)));
-				
-				LOGGER.info("Set signal group "+signalGroup.getGroupName()+" to "+imageFolder);
-				
-				dataset.getCollection().addSignalGroup(signalGroup);
-				methodsToRun.add(new SignalDetectionMethod(dataset, signalOptions, signalGroupId));
+				methodsToRun.add(new SignalDetectionMethod(dataset, signalOptions));
 				if(checkShell) {
 					if(signalOptions.hasBoolean(HashOptions.SHELL_COUNT_INT))
 						shellOptions = signalOptions;

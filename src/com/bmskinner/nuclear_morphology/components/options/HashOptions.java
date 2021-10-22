@@ -80,6 +80,7 @@ public interface HashOptions extends Serializable, XmlSerializable {
     String SIGNAL_MAX_FRACTION       = "Max fraction";
     String SIGNAL_DETECTION_MODE_KEY = "DETECTION_MODE";
     String SIGNAL_GROUP_NAME  = "Name";
+    String SIGNAL_GROUP_ID    = "Id";
 
     int                 DEFAULT_SIGNAL_THRESHOLD    = 70;
     int                 DEFAULT_SIGNAL_MIN_SIZE     = 5;

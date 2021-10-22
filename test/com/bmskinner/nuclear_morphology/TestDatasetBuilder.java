@@ -134,8 +134,9 @@ public class TestDatasetBuilder {
 		
 		if(nClusters>0) {
 			LOGGER.finest("Clustering dataset");		
-			HashOptions o = OptionsFactory.makeDefaultClusteringOptions();
-			o.setInt(HashOptions.CLUSTER_MANUAL_CLUSTER_NUMBER_KEY, nClusters);
+			HashOptions o = OptionsFactory.makeDefaultClusteringOptions()
+					.withValue(HashOptions.CLUSTER_MANUAL_CLUSTER_NUMBER_KEY, nClusters)
+					.build();
 			new NucleusClusteringMethod(d, o).call();
 		}
 				
@@ -339,7 +340,7 @@ public class TestDatasetBuilder {
 			ISignalGroup g = new DefaultSignalGroup(RED_SIGNAL_GROUP_NAME, RED_SIGNAL_GROUP);
 			g.setGroupColour(Color.red);
 			collection.addSignalGroup(g);
-			HashOptions n = OptionsFactory.makeNuclearSignalOptions(new File(TEST_DATASET_IMAGE_FOLDER));
+			HashOptions n = OptionsFactory.makeNuclearSignalOptions(new File(TEST_DATASET_IMAGE_FOLDER)).build();
 			o.setDetectionOptions(IAnalysisOptions.SIGNAL_GROUP+RED_SIGNAL_GROUP, n);
 		}
 		
@@ -347,7 +348,7 @@ public class TestDatasetBuilder {
 			ISignalGroup g = new DefaultSignalGroup(GREEN_SIGNAL_GROUP_NAME, GREEN_SIGNAL_GROUP);
 			g.setGroupColour(Color.GREEN);
 			collection.addSignalGroup(g);
-			HashOptions n = OptionsFactory.makeNuclearSignalOptions(new File(TEST_DATASET_IMAGE_FOLDER));
+			HashOptions n = OptionsFactory.makeNuclearSignalOptions(new File(TEST_DATASET_IMAGE_FOLDER)).build();
 			o.setDetectionOptions(IAnalysisOptions.SIGNAL_GROUP+GREEN_SIGNAL_GROUP, n);
 		}
 

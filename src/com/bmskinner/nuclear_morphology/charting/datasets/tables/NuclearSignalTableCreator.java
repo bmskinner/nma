@@ -143,7 +143,7 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
     private List<Object> makeDetectionSettingsColumn(IAnalysisDataset dataset, int signalGroupCount,
             int rowsPerSignalGroup) {
 
-        List<Object> rowData = new ArrayList<Object>(0);
+        List<Object> rowData = new ArrayList<>(0);
 
         int signalGroupsInDataset = dataset.getCollection().getSignalManager().getSignalGroupCount();
 
@@ -252,56 +252,44 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
         int signalGroupNumber = 0; // Store the number of signal groups
                                    // processed from this dataset
 
-        int j = 0;
+        int indexInTable = 0;
         for (UUID signalGroup : collection.getSignalManager().getSignalGroupIDs()) {
 
-            try {
 
-                signalGroupNumber++;
-                Optional<Color> c = collection.getSignalGroup(signalGroup).get().getGroupColour();
-                Color colour = c.isPresent() ? c.get() : ColourSelecter.getColor(j);
-                
-                SignalTableCell cell = new SignalTableCell(signalGroup,
-                        collection.getSignalManager().getSignalGroupName(signalGroup), colour);
+        	signalGroupNumber++;
+        	Optional<Color> c = collection.getSignalGroup(signalGroup).get().getGroupColour();
+        	Color colour = c.isPresent() ? c.get() : ColourSelecter.getColor(indexInTable);
+        	indexInTable++;
 
-                HashOptions ns = null;
-                Optional<? extends IAnalysisOptions> op = dataset.getAnalysisOptions();
-                if(!op.isPresent()){
-                    for (int i = 0; i < rowsPerSignalGroup; i++) {
-                        rowData.add(EMPTY_STRING);
-                    }
-                } else {
-                	ns = op.get().getNuclearSignalOptions(signalGroup);
-                }
+        	SignalTableCell cell = new SignalTableCell(signalGroup,
+        			collection.getSignalManager().getSignalGroupName(signalGroup), colour);
 
-                if (ns == null) { // occurs when no signals are present? Should
-                                  // never occur with the new SignalGroup system
+        	Optional<IAnalysisOptions> op = dataset.getAnalysisOptions();
+        	if(!op.isPresent()){
+        		for (int i = 0; i < rowsPerSignalGroup; i++) {
+        			rowData.add(EMPTY_STRING);
+        		}
+        		continue;
+        	}
 
-                    for (int i = 0; i < rowsPerSignalGroup; i++) {
-                        rowData.add(EMPTY_STRING);
-                    }
+        	HashOptions ns = op.get().getNuclearSignalOptions(signalGroup);
+        	Object signalThreshold = ns.getString(HashOptions.SIGNAL_DETECTION_MODE_KEY)
+        			.equals(SignalDetectionMode.FORWARD.name())
+        			? ns.getInt(HashOptions.THRESHOLD) : "Variable";
 
-                } else {
-                    Object signalThreshold = ns.getString(HashOptions.SIGNAL_DETECTION_MODE_KEY).equals(SignalDetectionMode.FORWARD.toString())
-                            ? ns.getInt(HashOptions.THRESHOLD) : "Variable";
-                            
-                    DecimalFormat df = new DecimalFormat(DEFAULT_DECIMAL_FORMAT);
+        	DecimalFormat df = new DecimalFormat(DEFAULT_DECIMAL_FORMAT);
 
-                    rowData.add(Labels.Signals.SIGNAL_COLOUR_LABEL);
-                    rowData.add(cell);
-                    rowData.add(ns.getInt(HashOptions.CHANNEL));
-                    rowData.add(ns.getString(HashOptions.DETECTION_FOLDER));
-                    rowData.add(signalThreshold);
-                    rowData.add(ns.getInt(HashOptions.MIN_SIZE_PIXELS));
-                    rowData.add(df.format(ns.getDouble(HashOptions.SIGNAL_MAX_FRACTION)));
-                    rowData.add(df.format(ns.getDouble(HashOptions.MIN_CIRC)));
-                    rowData.add(df.format(ns.getDouble(HashOptions.MAX_CIRC)));
-                    rowData.add(ns.getString(HashOptions.SIGNAL_DETECTION_MODE_KEY));
-                }
+        	rowData.add(Labels.Signals.SIGNAL_COLOUR_LABEL);
+        	rowData.add(cell);
+        	rowData.add(ns.getInt(HashOptions.CHANNEL));
+        	rowData.add(ns.getString(HashOptions.DETECTION_FOLDER));
+        	rowData.add(signalThreshold);
+        	rowData.add(ns.getInt(HashOptions.MIN_SIZE_PIXELS));
+        	rowData.add(df.format(ns.getDouble(HashOptions.SIGNAL_MAX_FRACTION)));
+        	rowData.add(df.format(ns.getDouble(HashOptions.MIN_CIRC)));
+        	rowData.add(df.format(ns.getDouble(HashOptions.MAX_CIRC)));
+        	rowData.add(ns.getString(HashOptions.SIGNAL_DETECTION_MODE_KEY));
 
-            } finally {
-                j++;
-            }
         }
 
         /*

@@ -58,7 +58,6 @@ public class SignalImageProber extends IntegratedImageProber {
 
     private final HashOptions options;
     private final IAnalysisDataset dataset;
-    private UUID id;
 
     /**
      * Create with a dataset (from which nuclei will be drawn) and a folder of
@@ -69,7 +68,7 @@ public class SignalImageProber extends IntegratedImageProber {
      */
     public SignalImageProber(@NonNull final IAnalysisDataset dataset, @NonNull final File folder) {
         this.dataset = dataset;
-        options = OptionsFactory.makeNuclearSignalOptions(folder);
+        options = OptionsFactory.makeNuclearSignalOptions(folder).build();
         
         Optional<IAnalysisOptions> op = dataset.getAnalysisOptions();
         if(!op.isPresent())
@@ -78,7 +77,7 @@ public class SignalImageProber extends IntegratedImageProber {
         Optional<HashOptions> nOp = op.get().getDetectionOptions(CellularComponent.NUCLEUS);
         
         if(!nOp.isPresent())
-        	throw new IllegalArgumentException("Dataset has no nucles options");
+        	throw new IllegalArgumentException("Dataset has no nucleus options");
 
         options.setDouble(HashOptions.SCALE, nOp.get().getDouble(HashOptions.SCALE));
 
@@ -117,34 +116,25 @@ public class SignalImageProber extends IntegratedImageProber {
         return options;
     }
 
-    /**
-     * Get the ID of the newly created signal group
-     * 
-     * @return
-     */
-    public UUID getId() {
-        return id;
-    }
-
     @Override
     protected void okButtonClicked() {
 
         String name = getGroupName();
+        UUID id = UUID.randomUUID();
         
         options.setString(HashOptions.SIGNAL_GROUP_NAME, name);
-
-        id = UUID.randomUUID();
-
-        // get the group name
-
-        ISignalGroup group = new DefaultSignalGroup(name, id);
-        dataset.getCollection().addSignalGroup(group);
-
-        // Set the default colour for the signal group
-        Color colour = ColourSelecter.getSignalColour(options.getInt(HashOptions.CHANNEL));
-        group.setGroupColour(colour);
-
-        dataset.getAnalysisOptions().get().setDetectionOptions(id.toString(), options);
+        options.setString(HashOptions.SIGNAL_GROUP_ID, id.toString());
+//
+//        // get the group name
+//
+//        ISignalGroup group = new DefaultSignalGroup(name, id);
+//        dataset.getCollection().addSignalGroup(group);
+//
+//        // Set the default colour for the signal group
+//        Color colour = ColourSelecter.getSignalColour(options.getInt(HashOptions.CHANNEL));
+//        group.setGroupColour(colour);
+//
+//        dataset.getAnalysisOptions().get().setDetectionOptions(id.toString(), options);
     }
 
     /**

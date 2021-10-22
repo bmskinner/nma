@@ -10,9 +10,9 @@ public class OptionsFactoryTest {
 
 	@Test
 	public void testClustersAdded() {
-		HashOptions o = OptionsFactory.makeNucleusDetectionOptions(new File(""));
+		HashOptions o = OptionsFactory.makeNucleusDetectionOptions(new File("")).build();
 		
-		o.setSubOptions(HashOptions.CLUSTER_SUB_OPTIONS_KEY, OptionsFactory.makeDefaultClusteringOptions());
+		o.setSubOptions(HashOptions.CLUSTER_SUB_OPTIONS_KEY, OptionsFactory.makeDefaultClusteringOptions().build());
 
 		HashOptions t = o.getSubOptions(HashOptions.CLUSTER_SUB_OPTIONS_KEY);
 		assertEquals(OptionsFactory.makeDefaultClusteringOptions(), t);

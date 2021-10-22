@@ -178,7 +178,7 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
 
     @Override
     public boolean hasSignalDetectionOptions(@NonNull UUID signalGroup) {
-        String key = SIGNAL_GROUP+signalGroup.toString();
+        String key = signalGroup.toString();
         return hasDetectionOptions(key);
     }
     
