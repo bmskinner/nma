@@ -88,16 +88,25 @@ public class IterativeSegmentFitterTest extends ComponentTester {
 	
 	@Test
 	public void testFittingSquareTemplateToRectangularTarget() throws Exception {
-		IAnalysisDataset d1 = new TestDatasetBuilder(RNG_SEED).cellCount(1).ofType(RuleSetCollection.roundRuleSetCollection())
+		IAnalysisDataset d1 = new TestDatasetBuilder(RNG_SEED)
+				.cellCount(1)
+				.ofType(RuleSetCollection.roundRuleSetCollection())
 				.randomOffsetProfiles(false)
-				.baseHeight(40).baseWidth(40).segmented().build();
+				.baseHeight(40).baseWidth(40)
+				.segmented()
+				.build();
 		
 		ISegmentedProfile template = d1.getCollection()
 				.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);
 		
-		IAnalysisDataset d2 = new TestDatasetBuilder(RNG_SEED).cellCount(1).ofType(RuleSetCollection.roundRuleSetCollection())
+		IAnalysisDataset d2 = new TestDatasetBuilder(RNG_SEED)
+				.cellCount(1)
+				.ofType(RuleSetCollection.roundRuleSetCollection())
 				.randomOffsetProfiles(false)
-				.baseHeight(50).baseWidth(30).segmented().build();
+				.baseHeight(50)
+				.baseWidth(30)
+				.segmented()
+				.build();
 		
 		ISegmentedProfile target = d2.getCollection()
 				.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);
@@ -110,10 +119,10 @@ public class IterativeSegmentFitterTest extends ComponentTester {
 		for(int i=0; i<target.getSegmentCount(); i++) {
 			IProfileSegment targetSeg = target.getOrderedSegments().get(i);
 			IProfileSegment resultSeg = result.getOrderedSegments().get(i);	
-			assertEquals("Segments should match", targetSeg.toString(), resultSeg.toString());
+			assertEquals("Starts should match", targetSeg.getStartIndex(), resultSeg.getStartIndex());
+			assertEquals("Ends should match", targetSeg.getEndIndex(), resultSeg.getEndIndex());
+			assertEquals("Profile lengths should match", targetSeg.getProfileLength(), resultSeg.getProfileLength());
 		}
-
-//		ChartFactoryTest.showProfiles(profiles, names, "Square versus rectangle in fitter");
 	}
 	
 	

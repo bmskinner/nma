@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.util.List;
 import java.util.Random;
 import java.util.logging.Level;
 
@@ -17,6 +18,7 @@ import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
+import com.bmskinner.nuclear_morphology.components.rules.OrientationMark;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.utility.AngleTools;
 
@@ -55,9 +57,11 @@ public class RotatableTest extends ComponentTester {
 	@Test 
 	public void testComponentAlignsVertically() throws Exception {
 		
+		RuleSetCollection rsc = RuleSetCollection.mouseSpermRuleSetCollection();
+		
 		// Create a single nucleus dataset
 		IAnalysisDataset t = new TestDatasetBuilder(1234).cellCount(1)
-				.ofType(RuleSetCollection.roundRuleSetCollection())
+				.ofType(rsc)
 				.withMaxSizeVariation(0)
 				.randomOffsetProfiles(true)
 				.segmented().build();
@@ -82,7 +86,7 @@ public class RotatableTest extends ComponentTester {
 
 			// Make a new single nucleus dataset
 			IAnalysisDataset d = new TestDatasetBuilder(1234).cellCount(1)
-					.ofType(RuleSetCollection.roundRuleSetCollection())
+					.ofType(rsc)
 					.withMaxSizeVariation(0)
 					.randomOffsetProfiles(true)
 					.segmented().build();
@@ -98,7 +102,11 @@ public class RotatableTest extends ComponentTester {
 				
 				IPoint tv = n.getBorderPoint(Landmark.TOP_VERTICAL);
 				IPoint bv = n.getBorderPoint(Landmark.BOTTOM_VERTICAL);
-
+				
+				List<OrientationMark> oms = n.getOrientationMarks();
+				assertTrue(oms.contains(OrientationMark.TOP));
+				assertTrue(oms.contains(OrientationMark.BOTTOM));
+				
 				// Test if the TV and BV points are vertical after rotation
 				boolean areVertical = areVertical(tv, bv);
 				assertTrue(areVertical);
@@ -114,7 +122,7 @@ public class RotatableTest extends ComponentTester {
 	 */
 	@Test 
 	public void testAlignPointsOnHorizontal() throws Exception {
-		Nucleus n = TestComponentFactory.roundNucleus(50,  50, 100, 100, 0, 0);
+		Nucleus n = TestComponentFactory.roundNucleus(50,  50, 100, 100, 0, 0, RuleSetCollection.roundRuleSetCollection());
 		
 		int length = n.getBorderLength();
 		
@@ -141,7 +149,7 @@ public class RotatableTest extends ComponentTester {
 	 */
 	@Test 
 	public void testAlignPointsOnVertical() throws Exception {
-		Nucleus n = TestComponentFactory.roundNucleus(50,  50, 100, 100, 0, 0);
+		Nucleus n = TestComponentFactory.roundNucleus(50,  50, 100, 100, 0, 0, RuleSetCollection.roundRuleSetCollection());
 		
 		int length = n.getBorderLength();
 		

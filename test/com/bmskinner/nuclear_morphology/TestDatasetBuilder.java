@@ -363,7 +363,7 @@ public class TestDatasetBuilder {
 			int borderLength = (width+height)*2;
 			int borderOffset = randomOffsetStart ? (int) (rng.nextDouble()*borderLength) : fixedStartOffset;
 			
-			ICell cell = createCell(width, height, degreeRot, borderOffset);	
+			ICell cell = createCell(width, height, degreeRot, borderOffset, rsc);	
 			cell.getPrimaryNucleus().setStatistic(Measurement.AREA, width*height);
 			collection.addCell(cell);
 			
@@ -386,13 +386,13 @@ public class TestDatasetBuilder {
 		return d;
 	}
 
-	private ICell createCell(int width, int height, double degreeRot, int borderOffset) throws ComponentCreationException {
+	private ICell createCell(int width, int height, double degreeRot, int borderOffset, RuleSetCollection rsc) throws ComponentCreationException {
 		switch(nucleusShape) {
 			case SQUARE: return  TestComponentFactory.rectangularCell(width, height, xBase, yBase, degreeRot, 
-					borderOffset);
+					borderOffset, rsc);
 			case ROUND:
 			default: return  TestComponentFactory.roundCell(width, height, xBase, yBase, degreeRot, 
-					borderOffset);
+					borderOffset, rsc);
 
 		}
 	}

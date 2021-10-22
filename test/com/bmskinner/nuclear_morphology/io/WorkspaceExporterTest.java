@@ -4,7 +4,7 @@ import java.io.File;
 
 import org.junit.Test;
 
-import com.bmskinner.nuclear_morphology.components.Version;
+import com.bmskinner.nuclear_morphology.TestResources;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace;
 import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace.BioSample;
@@ -12,8 +12,6 @@ import com.bmskinner.nuclear_morphology.components.workspaces.WorkspaceFactory;
 
 public class WorkspaceExporterTest {
 	
-	public static final String SAMPLE_DATASET_PATH = "test/samples/datasets/";
-
 	@Test
 	public void testDatasetExported() throws Exception {
 		IAnalysisDataset d = SampleDatasetReader.openTestRodentDataset();
@@ -25,7 +23,8 @@ public class WorkspaceExporterTest {
 		if(b!=null)
 			b.addDataset(d.getSavePath());
 		
-		w.setSaveFile(new File(SAMPLE_DATASET_PATH+Version.currentVersion(), "Example.wrk"));
+		File f = new File(TestResources.DATASET_FOLDER.getAbsolutePath(), "Example.wrk");
+		w.setSaveFile(f);
 		
 		WorkspaceExporter.exportWorkspace(w);
 	}

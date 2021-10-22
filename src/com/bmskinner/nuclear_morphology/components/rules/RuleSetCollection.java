@@ -48,7 +48,7 @@ import com.bmskinner.nuclear_morphology.io.XmlSerializable;
  * @author ben
  *
  */
-public class RuleSetCollection implements Serializable, XmlSerializable {
+public class RuleSetCollection implements XmlSerializable {
 	
 	private static final String XML_PRIORITY_AXIS = "PriorityAxis";
 
@@ -63,15 +63,13 @@ public class RuleSetCollection implements Serializable, XmlSerializable {
 	private static final String XML_NAME = "Name";
 
 	private static final Logger LOGGER = Logger.getLogger(RuleSetCollection.class.getName());
-
-    private static final long serialVersionUID = 1L;
     
     private final String name;
 
     private final Map<Landmark, List<RuleSet>> map = new HashMap<>();
     
     /** Store the landmarks to be used for orientation */
-    private Map<String, Landmark> orientationMarks = new HashMap<>();
+    private Map<OrientationMark, Landmark> orientationMarks = new HashMap<>();
             
     private final PriorityAxis priorityAxis;
     
@@ -87,22 +85,22 @@ public class RuleSetCollection implements Serializable, XmlSerializable {
     	this.name = name;
     	
     	if(left!=null)
-    		orientationMarks.put(Landmark.LEFT_POINT, left);
+    		orientationMarks.put(OrientationMark.LEFT, left);
 
     	if(right!=null)
-    		orientationMarks.put(Landmark.RIGHT_POINT, right);
+    		orientationMarks.put(OrientationMark.RIGHT, right);
 
     	if(top!=null)
-    		orientationMarks.put(Landmark.TOP_POINT, top);
+    		orientationMarks.put(OrientationMark.TOP, top);
 
     	if(bottom!=null)
-    		orientationMarks.put(Landmark.BTM_POINT, bottom);
+    		orientationMarks.put(OrientationMark.BOTTOM, bottom);
 
     	if(seondaryX!=null)
-    		orientationMarks.put(Landmark.SECONDARY_X_POINT, seondaryX);
+    		orientationMarks.put(OrientationMark.X, seondaryX);
 
     	if(seondaryY!=null)
-    		orientationMarks.put(Landmark.SECONDARY_Y_POINT, seondaryY);
+    		orientationMarks.put(OrientationMark.Y, seondaryY);
 
     	this.priorityAxis = priorityAxis;
     	this.ruleApplicationType = type;
@@ -136,10 +134,10 @@ public class RuleSetCollection implements Serializable, XmlSerializable {
     	ruleApplicationType = RuleApplicationType.valueOf(e.getChildText(XML_RULE_APPLICATION_TYPE));
     	    
     	// Add the orientation landmarks
-    	for(String s : Landmark.orientationMarks()) {
-    		if(e.getChild(s)!=null) {
+    	for(OrientationMark s : OrientationMark.values()) {
+    		if(e.getChild(s.name())!=null) {
         		orientationMarks.put(s, map.keySet().stream()
-        				.filter(l->l.getName().equals(e.getChildText(s)))
+        				.filter(l->l.getName().equals(e.getChildText(s.name())))
         				.findFirst().orElse(null));
         	}
     	}
@@ -159,7 +157,7 @@ public class RuleSetCollection implements Serializable, XmlSerializable {
      * @return
      */
     public boolean isAsymmetricX() {
-    	return map.containsKey(Landmark.LEFT_POINT) || map.containsKey(Landmark.RIGHT_POINT);
+    	return map.containsKey(OrientationMark.LEFT) || map.containsKey(OrientationMark.RIGHT);
     }
     
     /**
@@ -168,7 +166,7 @@ public class RuleSetCollection implements Serializable, XmlSerializable {
      * @return
      */
     public boolean isAsymmetricY() {
-    	return map.containsKey(Landmark.TOP_POINT) || map.containsKey(Landmark.BTM_POINT);
+    	return map.containsKey(OrientationMark.TOP) || map.containsKey(OrientationMark.BOTTOM);
     }
     
     /**
@@ -179,7 +177,7 @@ public class RuleSetCollection implements Serializable, XmlSerializable {
     	return isAsymmetricX() || isAsymmetricY();
     }
     
-    public Optional<Landmark> getLandmark(String s) {
+    public Optional<Landmark> getLandmark(OrientationMark s) {
 		return Optional.ofNullable(orientationMarks.get(s));
 	}
 
@@ -292,8 +290,8 @@ public class RuleSetCollection implements Serializable, XmlSerializable {
 		rootElement.addContent(new Element(XML_RULE_APPLICATION_TYPE).addContent(getApplicationType().toString()));
 		
 		// Add any orientation landmarks
-    	for(Entry<String, Landmark> entry : orientationMarks.entrySet()) {
-    		rootElement.addContent(new Element(entry.getKey()).addContent(entry.getValue().toString()));
+    	for(Entry<OrientationMark, Landmark> entry : orientationMarks.entrySet()) {
+    		rootElement.addContent(new Element(entry.getKey().name()).addContent(entry.getValue().toString()));
     	}
 		
 		if(priorityAxis!=null)
@@ -366,13 +364,4 @@ public class RuleSetCollection implements Serializable, XmlSerializable {
         r.addRuleSet(Landmark.REFERENCE_POINT, RuleSet.roundRPRuleSet());
         return r;
     }
-
-    private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-        in.defaultReadObject();
-    }
-
-    private void writeObject(java.io.ObjectOutputStream out) throws IOException {
-        out.defaultWriteObject();
-    }
-
 }

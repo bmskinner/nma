@@ -16,17 +16,13 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.io;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.Charset;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.eclipse.jdt.annotation.NonNull;
+import javax.xml.XMLConstants;
+
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
@@ -35,9 +31,7 @@ import org.jdom2.input.SAXBuilder;
 import com.bmskinner.nuclear_morphology.components.workspaces.DefaultWorkspace;
 import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace;
 import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace.BioSample;
-import com.bmskinner.nuclear_morphology.components.workspaces.WorkspaceFactory;
 import com.bmskinner.nuclear_morphology.io.Io.Importer;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Load a workspace
@@ -46,212 +40,66 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  * @since 1.13.3
  *
  */
-public abstract class WorkspaceImporter implements Importer {
+public class WorkspaceImporter implements Importer {
 	
 	private static final Logger LOGGER = Logger.getLogger(WorkspaceImporter.class.getName());
-	
-	private static final String WORKSPACE_VERSION_1_13_x = "1.13.x";
-	private static final String WORKSPACE_VERSION_1_14_0 = "1.14.0";
-	
-	public abstract IWorkspace importWorkspace();
-    
-    /**
-     * Create an importer to open the given file. The importer will be
-     * created based on the workspace version of the file.
-     * @param f the workspace file to open
-     * @return
-     */
-    public static WorkspaceImporter createImporter(@NonNull final File f) {
-    	String fileVersion = getWorkspaceFileVersion(f);
-    	switch(fileVersion) {
-    	
-    		case WORKSPACE_VERSION_1_13_x: return new v_1_13_WorkspaceImporter(f);
-    		case WORKSPACE_VERSION_1_14_0: return new v_1_14_0_WorkspaceImporter(f);
-    		default: return new v_1_14_0_WorkspaceImporter(f);
-    	}
-    	
-    }
-
-    /**
-     * Determine the workspace file version based on the content of the given file
-     * @param f
-     * @return
-     */
-    private static String getWorkspaceFileVersion(@NonNull final File f){
-
-
-    	try( FileInputStream fstream = new FileInputStream(f);
-    			BufferedReader br = new BufferedReader(new InputStreamReader(fstream));){
-
-    		// Only version 1.14.0 onwards uses xml, so look for
-    		// the xml version identifier in the first line
-    		String firstLine = br.readLine();
-    		if(firstLine.startsWith("<?xml version"))
-    			return WORKSPACE_VERSION_1_14_0;
-
-    	} catch (Exception e) {
-    		// Any exception thrown due to inability to read
-    		// the file as XML
-    		LOGGER.log(Level.FINE, "Unable to read workspace file as XML, assuming v1.13.x");
-    	}
-
-    	// No xml, so it must be the previous workspace type
-    	return WORKSPACE_VERSION_1_13_x;
-    }
-    
-    
+		
     /**
      * Open the workspace format created by software from version 1.14.0.
      * This is based on XML encoding to allow extra fields such as BioSamples
      * to be included.
      * @author bms41
+     * @throws IOException 
+     * @throws JDOMException 
      * @since 1.14.0
      *
      */
-    private static class v_1_14_0_WorkspaceImporter extends WorkspaceImporter {
-    	
-    	private final File  file;
-    	
-    	private v_1_14_0_WorkspaceImporter(@NonNull final File f) {
-    		file=f;
-    	}
 
-		@Override
-		public IWorkspace importWorkspace() {
-			
-			IWorkspace w = WorkspaceFactory.createWorkspace(file);
-			LOGGER.fine("Attempting to read workspace file: "+file.getAbsolutePath());
-			
-		    try {
-		         SAXBuilder saxBuilder = new SAXBuilder();
-		         Document document = saxBuilder.build(file);
-		         
-		         Element workspaceElement = document.getRootElement();
-		         String workspaceName =  workspaceElement.getChild(IWorkspace.WORKSPACE_NAME).getText();
-		         w.setName(workspaceName);
-		         
-		         Element datasetElement =  workspaceElement.getChild(IWorkspace.DATASETS_ELEMENT);
-		         Element sampleElement  =  workspaceElement.getChild(IWorkspace.BIOSAMPLES_ELEMENT);
-		         
-		         List<Element> datasets = datasetElement.getChildren();
+	public static IWorkspace importWorkspace(File file) throws JDOMException, IOException {
+
+		LOGGER.fine("Attempting to read workspace file: "+file.getAbsolutePath());
+
+		SAXBuilder saxBuilder = new SAXBuilder();
+		saxBuilder.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+		saxBuilder.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+
+		Document document = saxBuilder.build(file);
+
+		Element workspaceElement = document.getRootElement();
+		String workspaceName =  workspaceElement.getChild(IWorkspace.WORKSPACE_NAME).getText();
+
+		IWorkspace w = new DefaultWorkspace(file, workspaceName);
+
+		Element datasetElement =  workspaceElement.getChild(IWorkspace.DATASETS_ELEMENT);
+		Element sampleElement  =  workspaceElement.getChild(IWorkspace.BIOSAMPLES_ELEMENT);
+
+		List<Element> datasets = datasetElement.getChildren();
 
 
-		         for(Element dataset : datasets) {
-		        	 String path = dataset.getChild(IWorkspace.DATASET_PATH).getText();
-		        	 File f = new File(path);
-		        	 LOGGER.fine("Workspace has dataset file: "+f.getAbsolutePath());
-		        	 w.add(f);
-		         }
-		         
-
-		         
-		         List<Element> biosamples = sampleElement.getChildren();
-		         for(Element sample : biosamples) {
-		        	 String name = sample.getAttributeValue(IWorkspace.BIOSAMPLES_NAME_KEY);
-
-		        	 w.addBioSample(name);
-		        	 List<Element> sampleDatasets = sample.getChildren(IWorkspace.BIOSAMPLES_DATASET_KEY);
-		        	 for(Element d : sampleDatasets) {
-		        		 String datasetId =  d.getValue();
-		        		 File f = new File(datasetId);
-		        		 BioSample bs = w.getBioSample(name);
-		        		 if(bs!=null)
-		        			 bs.addDataset(f);
-		        	 }
-		         }
-		         		         
-		      } catch(JDOMException e) {
-		    	  LOGGER.log(Level.WARNING, "Unable to read XML of workspace file: "+file.getAbsolutePath());
-		    	  LOGGER.log(Loggable.STACK, "Unable to read XML of workspace file: "+file.getAbsolutePath(),e);
-		      } catch(IOException ioe) {
-		    	  LOGGER.log(Level.WARNING, "IO error reading workspace file: "+file.getAbsolutePath());
-		    	  LOGGER.log(Loggable.STACK, "IO error reading workspace file: "+file.getAbsolutePath(),ioe);
-		      }
-			return w;
+		for(Element dataset : datasets) {
+			String path = dataset.getChild(IWorkspace.DATASET_PATH).getText();
+			File f = new File(path);
+			LOGGER.fine("Workspace has dataset file: "+f.getAbsolutePath());
+			w.add(f);
 		}
-    	
-    }
-    
-    
-    /**
-     * Open the workspace format created by software up till and including version 1.13.8
-     * @author bms41
-     * @since 1.14.0
-     *
-     */
-    private static class v_1_13_WorkspaceImporter extends WorkspaceImporter {
-    	
-    	private final File  file;
-        private final IWorkspace w;
-        private final String CHARSET = "ISO-8859-1";
-    	
-    	public v_1_13_WorkspaceImporter(@NonNull final File f) {
 
-           file = f;
-           w = new DefaultWorkspace(file);    
-        }
-    	
-    	 /**
-         * Import the workspace described by this importer.
-         * Applies to the workspace format in versions 1.13.x.
-         * For v1.14.0 and beyond, use the {@link importWorkspace} method.
-         * 
-         * @return a workspace
-         */
-    	@Override
-        public IWorkspace importWorkspace() {
 
-    		LOGGER.fine("Attempting to read workspace file: "+file);
-            try {
 
-                FileInputStream fstream = new FileInputStream(file);
-                BufferedReader br = new BufferedReader(new InputStreamReader(fstream, Charset.forName(CHARSET)));
+		List<Element> biosamples = sampleElement.getChildren();
+		for(Element sample : biosamples) {
+			String name = sample.getAttributeValue(IWorkspace.BIOSAMPLES_NAME_KEY);
 
-                int i = 0;
-                String strLine;
-                while ((strLine = br.readLine()) != null) {
-                    i++;
-                    parseLine(strLine);
-                }
-                fstream.close();
-            } catch (Exception e) {
-                LOGGER.log(Loggable.STACK, "Error parsing workspace file", e);
-            }
+			w.addBioSample(name);
+			List<Element> sampleDatasets = sample.getChildren(IWorkspace.BIOSAMPLES_DATASET_KEY);
+			for(Element d : sampleDatasets) {
+				String datasetId =  d.getValue();
+				File f = new File(datasetId);
+				BioSample bs = w.getBioSample(name);
+				if(bs!=null)
+					bs.addDataset(f);
+			}
+		}
+		return w;
+	}
 
-            return w;
-        }
-        
-        private void parseLine(String line){
-            
-            // Check line format
-            // Pre 1.13.8 have just the dataset file name.
-            
-            File f = null;
-            
-            if(line.endsWith(Importer.SAVE_FILE_EXTENSION)){
-                // old format
-                f = new File(line);
-                
-            } else {
-                
-                String[] arr = line.split(TAB);
-                f = new File(arr[0]);
-                
-                String group = arr[1];
-                
-                w.addBioSample(group);
-                BioSample bs = w.getBioSample(group);
-                if(bs!=null)
-                	bs.addDataset(f);
-            }
-
-            if (f.exists()) {
-                w.add(f);
-            }
-        }
-
-    	
-    }
-
-   
 }

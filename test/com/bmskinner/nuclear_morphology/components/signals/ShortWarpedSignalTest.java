@@ -14,6 +14,7 @@ import org.junit.Test;
 import com.bmskinner.nuclear_morphology.ComponentTester;
 import com.bmskinner.nuclear_morphology.components.TestComponentFactory;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 
 import ij.process.ByteProcessor;
 
@@ -22,7 +23,7 @@ public class ShortWarpedSignalTest  extends ComponentTester {
 	private IWarpedSignal signal;	
 	@Before
 	public void setUp() throws Exception {
-		Nucleus n = TestComponentFactory.rectangularNucleus(50, 50, 100, 100, 0, 0);
+		Nucleus n = TestComponentFactory.rectangularNucleus(50, 50, 100, 100, 0, 0, RuleSetCollection.roundRuleSetCollection());
 		signal = new ShortWarpedSignal(UUID.randomUUID());
 		
 		ByteProcessor ip = new ByteProcessor(50, 50);

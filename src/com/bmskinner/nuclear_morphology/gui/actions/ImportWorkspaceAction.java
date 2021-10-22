@@ -17,12 +17,15 @@
 package com.bmskinner.nuclear_morphology.gui.actions;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.logging.Logger;
 
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.jdom2.JDOMException;
 
 import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace;
 import com.bmskinner.nuclear_morphology.core.DatasetListManager;
@@ -33,6 +36,8 @@ import com.bmskinner.nuclear_morphology.io.Io.Importer;
 import com.bmskinner.nuclear_morphology.io.WorkspaceImporter;
 
 public class ImportWorkspaceAction extends VoidResultAction {
+	
+	private static final Logger LOGGER = Logger.getLogger(ImportWorkspaceAction.class.getName());
 
     private final File          file;
     private static final @NonNull String PROGRESS_BAR_LABEL = "Opening workspace...";
@@ -66,14 +71,20 @@ public class ImportWorkspaceAction extends VoidResultAction {
         File f = file==null ? selectFile() : file;
         if (f != null) {
         	
-        	IWorkspace w = WorkspaceImporter.createImporter(f).importWorkspace();
-    		DatasetListManager.getInstance().addWorkspace(w);
+        	IWorkspace w;
+			try {
+				w = WorkspaceImporter.importWorkspace(f);
+				DatasetListManager.getInstance().addWorkspace(w);
 
-    		for (File dataFile : w.getFiles()) {
-    			new ImportDatasetAction(progressAcceptors.get(0), eh, dataFile).run();
-    		}
+	    		for (File dataFile : w.getFiles()) {
+	    			new ImportDatasetAction(progressAcceptors.get(0), eh, dataFile).run();
+	    		}
 
-            setProgressMessage(PROGRESS_BAR_LABEL);
+	            setProgressMessage(PROGRESS_BAR_LABEL);
+			} catch (JDOMException | IOException e) {
+				LOGGER.warning("Unable to read workspace file:"+e.getMessage());
+				cancel();
+			}
         }
         cancel();
     }

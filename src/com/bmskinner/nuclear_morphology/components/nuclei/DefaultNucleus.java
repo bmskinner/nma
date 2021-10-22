@@ -17,7 +17,9 @@
 package com.bmskinner.nuclear_morphology.components.nuclei;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
@@ -43,6 +45,7 @@ import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.UnprofilableObjectException;
+import com.bmskinner.nuclear_morphology.components.rules.OrientationMark;
 import com.bmskinner.nuclear_morphology.components.rules.PriorityAxis;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSet;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
@@ -77,7 +80,7 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
     private int nucleusNumber;
     
     /** Store the landmarks to be used for orientation */
-    private Map<String, Landmark> orientationMarks = new HashMap<>();
+    private Map<OrientationMark, Landmark> orientationMarks = new HashMap<>();
 
     private PriorityAxis priorityAxis = PriorityAxis.Y;
     
@@ -97,7 +100,7 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
     	nucleusNumber = Integer.valueOf(e.getChildText(XML_NUCLEUS_NUMBER));
     	
     	for(Element el : e.getChildren(XML_ORIENTATION)) {
-    		String name = el.getAttributeValue("name");
+    		OrientationMark name = OrientationMark.valueOf(el.getAttributeValue("name"));
     		Landmark l = this.getBorderTags().keySet().stream()
     				.filter(lm->lm.getName().equals(el.getText()))
     				.findFirst().get();
@@ -112,8 +115,8 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
 		Element e = super.toXmlElement().setName("Nucleus");
 		
 		e.addContent(new Element(XML_NUCLEUS_NUMBER).setText(String.valueOf(nucleusNumber)));
-		for(Entry<String, Landmark> entry : orientationMarks.entrySet()) {
-			e.addContent(new Element(XML_ORIENTATION).setAttribute("name", entry.getKey())
+		for(Entry<OrientationMark, Landmark> entry : orientationMarks.entrySet()) {
+			e.addContent(new Element(XML_ORIENTATION).setAttribute("name", entry.getKey().name())
 					.setText(entry.getValue().toString()));
 		}
 		e.addContent(new Element(XML_PRIORITY_AXIS).setText(priorityAxis.toString()));
@@ -140,7 +143,7 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
         super(roi, centreOfMass, source, channel, position, id);
         this.nucleusNumber = number;
         
-        for(String s : Landmark.orientationMarks()) {
+        for(OrientationMark s : OrientationMark.values()) {
         	if(rsc.getLandmark(s).isPresent()) {
         		orientationMarks.put(s, rsc.getLandmark(s).get());
         	}
@@ -175,7 +178,7 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
         nucleusNumber = n.getNucleusNumber();
         signalCollection = n.getSignalCollection().duplicate();
         
-        for(String s : Landmark.orientationMarks()) {
+        for(OrientationMark s : OrientationMark.values()) {
         	if(n.getLandmark(s)!=null)
         		orientationMarks.put(s, n.getLandmark(s));
         }
@@ -195,7 +198,7 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
     }
     
     @Override
-	public @Nullable Landmark getLandmark(String s) {
+	public @Nullable Landmark getLandmark(OrientationMark s) {
 		return orientationMarks.get(s);
 	}
 
@@ -497,7 +500,16 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
     	}
     }
     
-    /**
+    
+    
+    @Override
+	public List<OrientationMark> getOrientationMarks() {
+		List<OrientationMark> result = new ArrayList<>();
+		result.addAll(orientationMarks.keySet());
+		return result;
+	}
+
+	/**
      * Align the nucleus according to the available
      * orientation points, prioritising the Y axis
      * @throws MissingLandmarkException
@@ -505,12 +517,12 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
     private void alignVerticallyPriorityY() throws MissingLandmarkException {
     	// Check if t and b are present
     	
-    	Landmark t = orientationMarks.get(Landmark.TOP_POINT);
-    	Landmark b = orientationMarks.get(Landmark.BTM_POINT);
-    	Landmark y = orientationMarks.get(Landmark.SECONDARY_Y_POINT);
-    	Landmark r = orientationMarks.get(Landmark.RIGHT_POINT);
-    	Landmark l = orientationMarks.get(Landmark.LEFT_POINT);
-    	Landmark x = orientationMarks.get(Landmark.SECONDARY_X_POINT);
+    	Landmark t = orientationMarks.get(OrientationMark.TOP);
+    	Landmark b = orientationMarks.get(OrientationMark.BOTTOM);
+    	Landmark y = orientationMarks.get(OrientationMark.Y);
+    	Landmark r = orientationMarks.get(OrientationMark.RIGHT);
+    	Landmark l = orientationMarks.get(OrientationMark.LEFT);
+    	Landmark x = orientationMarks.get(OrientationMark.X);
     	
     	
 		if(t!=null && hasLandmark(t) && b!=null && hasLandmark(b)) {
@@ -554,12 +566,12 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
      */
     private void alignVerticallyPriorityX() throws MissingLandmarkException {
     	
-    	Landmark t = orientationMarks.get(Landmark.TOP_POINT);
-    	Landmark b = orientationMarks.get(Landmark.BTM_POINT);
-    	Landmark y = orientationMarks.get(Landmark.SECONDARY_Y_POINT);
-    	Landmark r = orientationMarks.get(Landmark.RIGHT_POINT);
-    	Landmark l = orientationMarks.get(Landmark.LEFT_POINT);
-    	Landmark x = orientationMarks.get(Landmark.SECONDARY_X_POINT);
+    	Landmark t = orientationMarks.get(OrientationMark.TOP);
+    	Landmark b = orientationMarks.get(OrientationMark.BOTTOM);
+    	Landmark y = orientationMarks.get(OrientationMark.Y);
+    	Landmark r = orientationMarks.get(OrientationMark.RIGHT);
+    	Landmark l = orientationMarks.get(OrientationMark.LEFT);
+    	Landmark x = orientationMarks.get(OrientationMark.X);
     	
     	// Check if l and r are present
 		if(l!=null && hasLandmark(l) && r!=null && hasLandmark(r)) {

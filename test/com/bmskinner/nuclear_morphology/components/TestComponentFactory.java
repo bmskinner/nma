@@ -46,8 +46,8 @@ public class TestComponentFactory {
 	 * @return
 	 * @throws ComponentCreationException
 	 */
-	public static ICell rectangularCell(int w, int h, int xBase, int yBase, double rotation, int fixedStartOffset) throws ComponentCreationException {
-		return new DefaultCell(rectangularNucleus(w, h, xBase, yBase, rotation, fixedStartOffset));
+	public static ICell rectangularCell(int w, int h, int xBase, int yBase, double rotation, int fixedStartOffset, RuleSetCollection rsc) throws ComponentCreationException {
+		return new DefaultCell(rectangularNucleus(w, h, xBase, yBase, rotation, fixedStartOffset, rsc));
 	}
 	
 	/**
@@ -61,8 +61,8 @@ public class TestComponentFactory {
 	 * @return
 	 * @throws ComponentCreationException
 	 */
-	public static ICell roundCell(int w, int h, int xBase, int yBase, double rotation, int fixedStartOffset) throws ComponentCreationException {
-		return new DefaultCell(roundNucleus(w, h, xBase, yBase, rotation, fixedStartOffset));
+	public static ICell roundCell(int w, int h, int xBase, int yBase, double rotation, int fixedStartOffset, RuleSetCollection rsc) throws ComponentCreationException {
+		return new DefaultCell(roundNucleus(w, h, xBase, yBase, rotation, fixedStartOffset, rsc));
 	}
 		
 	/**
@@ -74,7 +74,7 @@ public class TestComponentFactory {
 	 * @return a Nucleus
 	 * @throws ComponentCreationException 
 	 */
-	public static Nucleus rectangularNucleus(int w, int h, int xBase, int yBase, double rotation, int fixedStartOffset) throws ComponentCreationException {
+	public static Nucleus rectangularNucleus(int w, int h, int xBase, int yBase, double rotation, int fixedStartOffset, RuleSetCollection rsc) throws ComponentCreationException {
 
 		if(fixedStartOffset<0 || fixedStartOffset>=(w+h)*2)
 			throw new ComponentCreationException("Offset cannot be less than zero or more than perimeter: "+fixedStartOffset);
@@ -99,7 +99,7 @@ public class TestComponentFactory {
 		IPoint com = IPoint.makeNew(xBase+(w/2), yBase+(h/2));
 		int[] position = {xBase, yBase, w, h};		
 		File f = new File(TestDatasetBuilder.TEST_DATASET_IMAGE_FOLDER);
-		Nucleus n = createNucleus(roi, com, f, 0, position, 0);
+		Nucleus n = createNucleus(roi, com, f, 0, position, 0, rsc);
 		n.rotate(rotation);
 				
 		// Note - the roi interpolation will smooth corners
@@ -108,7 +108,7 @@ public class TestComponentFactory {
 		return n;
 	}
 	
-	public static Nucleus roundNucleus(int w, int h, int xBase, int yBase, double rotation, int fixedStartOffset) throws ComponentCreationException {
+	public static Nucleus roundNucleus(int w, int h, int xBase, int yBase, double rotation, int fixedStartOffset, RuleSetCollection rsc) throws ComponentCreationException {
 		if(fixedStartOffset<0 || fixedStartOffset>=(w+h)*2)
 			throw new ComponentCreationException("Offset cannot be less than zero or more than perimeter: "+fixedStartOffset);
 
@@ -126,7 +126,7 @@ public class TestComponentFactory {
 		int[] position = {xBase, yBase, w, h};		
 		File f = new File(TestDatasetBuilder.TEST_DATASET_IMAGE_FOLDER);
 		
-		Nucleus n = createNucleus(roi, com, f, 0, position, 0);
+		Nucleus n = createNucleus(roi, com, f, 0, position, 0, rsc);
 		n.rotate(rotation);
 		
 		// Note - the roi interpolation will smooth corners
@@ -135,8 +135,8 @@ public class TestComponentFactory {
 		return n;
 	}
 	
-	private static Nucleus createNucleus(Roi roi, IPoint com, File f, int channel, int[] position, int number ) {
-		return new DefaultNucleus(roi, com, f, 0, position, 0, RuleSetCollection.roundRuleSetCollection());
+	private static Nucleus createNucleus(Roi roi, IPoint com, File f, int channel, int[] position, int number, RuleSetCollection rsc) {
+		return new DefaultNucleus(roi, com, f, 0, position, 0, rsc);
 	}
 
 	
@@ -261,7 +261,7 @@ public class TestComponentFactory {
 		new DefaultCell(rectangularNucleus(TestDatasetBuilder.DEFAULT_BASE_WIDTH,
 				TestDatasetBuilder.DEFAULT_BASE_HEIGHT, TestDatasetBuilder.DEFAULT_X_BASE, 
 				TestDatasetBuilder.DEFAULT_Y_BASE, TestDatasetBuilder.DEFAULT_ROTATION, 
-				TestDatasetBuilder.DEFAULT_BORDER_OFFSET));
+				TestDatasetBuilder.DEFAULT_BORDER_OFFSET, RuleSetCollection.roundRuleSetCollection()));
 	}
 	
 	@Test
@@ -269,15 +269,12 @@ public class TestComponentFactory {
 		int max = (TestDatasetBuilder.DEFAULT_BASE_WIDTH+TestDatasetBuilder.DEFAULT_BASE_HEIGHT)*2;
 
 		for(int offset=0; offset<max; offset++) {
-			try {
-				new DefaultCell(rectangularNucleus(TestDatasetBuilder.DEFAULT_BASE_WIDTH,
+			new DefaultCell(rectangularNucleus(TestDatasetBuilder.DEFAULT_BASE_WIDTH,
 					TestDatasetBuilder.DEFAULT_BASE_HEIGHT, TestDatasetBuilder.DEFAULT_X_BASE, 
-					TestDatasetBuilder.DEFAULT_Y_BASE, TestDatasetBuilder.DEFAULT_ROTATION, offset));
-			} catch(ComponentCreationException e) {
-				e.printStackTrace();
-				fail("Component creation failure for offset "+offset);
-			}
+					TestDatasetBuilder.DEFAULT_Y_BASE, TestDatasetBuilder.DEFAULT_ROTATION, offset,
+					RuleSetCollection.roundRuleSetCollection()));
+
 		}
-		
+
 	}
 }

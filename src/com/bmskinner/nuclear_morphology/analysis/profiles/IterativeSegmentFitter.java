@@ -55,8 +55,6 @@ public class IterativeSegmentFitter {
      */
     @SuppressWarnings("null")
 	public IterativeSegmentFitter(@NonNull final ISegmentedProfile template) throws ProfileException {
-        if (template == null)
-            throw new IllegalArgumentException("Template profile is null");
         templateProfile = template.copy();
     }
 
@@ -70,9 +68,6 @@ public class IterativeSegmentFitter {
      */
     public ISegmentedProfile fit(@NonNull final IProfile target) throws ProfileException {
     	LOGGER.finer( "Beginning segment fitting");
-
-        if (target==null)
-            throw new IllegalArgumentException("Target profile is null");
         
         if(templateProfile.getSegmentCount()==1)
         	return new SegmentedFloatProfile(target);
@@ -216,8 +211,6 @@ public class IterativeSegmentFitter {
         		score *= 0.25; //TODO: formalise this rule and find the best value to use
         	}
         	
-//        	if(startIndex==11) // one more than minimum length - check scoring working
-//        		LOGGER.finer( endIndex+"\t"+score+"\t"+tempProfile.get(endIndex));
 
             if (score < bestScore) {
             	bestIndex = endIndex;

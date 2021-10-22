@@ -36,6 +36,7 @@ import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationExcept
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
+import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 
 /**
  * Tests for implementations of the Nucleus interface
@@ -64,7 +65,7 @@ public class NucleusTest {
 	public static Nucleus createInstance(Class<? extends Nucleus> source) throws Exception {
 
 		if(source==DefaultNucleus.class){
-			return TestComponentFactory.rectangularNucleus(100, 100, 20, 20, 0, 20);
+			return TestComponentFactory.rectangularNucleus(100, 100, 20, 20, 0, 20, RuleSetCollection.mouseSpermRuleSetCollection());
 		}
 
 		throw new Exception("Unable to create instance of "+source);

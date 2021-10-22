@@ -19,11 +19,12 @@ package com.bmskinner.nuclear_morphology.components.nuclei;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
+import com.bmskinner.nuclear_morphology.components.Orientable;
 import com.bmskinner.nuclear_morphology.components.Taggable;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
-import com.bmskinner.nuclear_morphology.components.rules.PriorityAxis;
+import com.bmskinner.nuclear_morphology.components.rules.OrientationMark;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalCollection;
 
 /**
@@ -33,7 +34,7 @@ import com.bmskinner.nuclear_morphology.components.signals.ISignalCollection;
  * @author bms41
  *
  */
-public interface Nucleus extends CellularComponent, Taggable, Comparable<Nucleus> {
+public interface Nucleus extends CellularComponent, Taggable, Orientable, Comparable<Nucleus> {
 
     // for debugging - use in calling dumpInfo()
     static final int ALL_POINTS    = 0;
@@ -84,35 +85,12 @@ public interface Nucleus extends CellularComponent, Taggable, Comparable<Nucleus
     ISignalCollection getSignalCollection();
     
     /**
-     * Orient the nucleus. This will use 
-     * the landmarks and priorities defined by the rulesets
-     * used when creating the nucleus. This affects this object
-     * and does not create a copy.
-     */
-    void orient();
-
-
-    /**
      * Fetch the oriented copy of the nucleus. This will use 
      * the landmarks and priorities defined by the rulesets
      * used when creating the nucleus.
      * @return an oriented copy of the nucleus
      */
     Nucleus getOrientedNucleus();
-
-    /**
-     * Get the given landmark from a name
-     * @param landmark
-     * @return
-     */
-    @Nullable Landmark getLandmark(String landmark);
-
-    /**
-     * Get the axis of priority for the nucleus
-     * @return
-     */
-    @Nullable PriorityAxis getPriorityAxis();
-
 
     /**
      * Thrown when a nucleus type in a collection is incorrect for a requested
