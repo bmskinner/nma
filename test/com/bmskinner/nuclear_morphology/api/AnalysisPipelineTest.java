@@ -21,7 +21,6 @@ public abstract class AnalysisPipelineTest {
 
     @Before
 	public void setUp(){
-		Prefs.blackBackground = true;
     	IJ.setBackgroundColor(0, 0, 0);
 	}
     

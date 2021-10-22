@@ -34,6 +34,7 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import ij.ImagePlus;
 import ij.Prefs;
+import ij.gui.ImageWindow;
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
 import ij.gui.Wand;
@@ -222,6 +223,7 @@ public abstract class Detector {
         Analyzer analyser = new Analyzer(imp,
                 Measurements.CENTER_OF_MASS | Measurements.AREA | Measurements.PERIMETER | Measurements.FERET, rt);
         analyser.measure();
+        
         StatsMap values = new StatsMap();
         values.add(StatsMap.AREA, rt.getValue(StatsMap.AREA, 0));
         values.add(StatsMap.FERET, rt.getValue(StatsMap.FERET, 0));
@@ -288,7 +290,7 @@ public abstract class Detector {
         private int roiType;
         private int wandMode = Wand.LEGACY_MODE;
 
-        boolean blackBackground;
+        boolean blackBackground = true;
         
         private final Set<Roi> rois = new HashSet<>();
 
@@ -390,7 +392,7 @@ public abstract class Detector {
                     return false;
 
                 boolean threshold255 = false;
-                if (Prefs.blackBackground)
+                if (blackBackground)
                     threshold255 = !threshold255;
                 if (threshold255) {
                     level1 = 255;

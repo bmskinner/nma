@@ -629,8 +629,6 @@ public class ShellDetector extends Detector {
             double ratio = (double) (shell)  / (double) nShells;
 
             ImageProcessor ip = createFromRoi();
-            boolean bb = Prefs.blackBackground;
-            Prefs.blackBackground = true;
 
             final ImageProcessor ip1 = ip.duplicate();
             new EDM().toEDM(ip1); // zero at edge, 255 at centre
@@ -638,8 +636,7 @@ public class ShellDetector extends Detector {
             
             int threshold = (int) Math.round(ratio * max);          
             final ImageProcessor newIp = setThreshold(ip1, threshold);
-                        
-            Prefs.blackBackground = bb;
+
             newIp.setThreshold(threshold, 255, ImageProcessor.NO_LUT_UPDATE);
 
             Roi roi2 = new ThresholdToSelection().convert(newIp);

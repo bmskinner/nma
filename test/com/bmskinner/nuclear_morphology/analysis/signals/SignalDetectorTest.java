@@ -4,6 +4,9 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.util.List;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.junit.Test;
 
@@ -14,8 +17,22 @@ import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
 import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
+import com.bmskinner.nuclear_morphology.logging.ConsoleFormatter;
+import com.bmskinner.nuclear_morphology.logging.ConsoleHandler;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 public class SignalDetectorTest {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.PROJECT_LOGGER);
+	
+	static {
+		for(Handler h : LOGGER.getHandlers())
+			LOGGER.removeHandler(h);
+		Handler h = new ConsoleHandler(new ConsoleFormatter());
+		LOGGER.setLevel(Level.FINER);
+		h.setLevel(Level.FINER);
+		LOGGER.addHandler(h);
+	}
 
 	/**
 	 * Given a folder of images known to contain detectable
@@ -39,7 +56,7 @@ public class SignalDetectorTest {
 				signals += s.size();
 			}
 		}
-		
+		LOGGER.fine("Found "+signals+" signals");
 		assertTrue(signals>0);
 	}
 

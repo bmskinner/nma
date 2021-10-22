@@ -31,7 +31,6 @@ import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 
-import ij.Prefs;
 import ij.process.ImageProcessor;
 
 /**
@@ -61,7 +60,6 @@ public abstract class AbstractFinder<E> implements Finder<E>{
      */
     public AbstractFinder(@NonNull final IAnalysisOptions op) {
         options = op;
-        Prefs.blackBackground = true;
     }
 
     /*

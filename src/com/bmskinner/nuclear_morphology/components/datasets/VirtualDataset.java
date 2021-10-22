@@ -990,26 +990,26 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
         }
     }
     
-	@Override
-	public String toString() {
-
-		String newLine = System.getProperty("line.separator");
-
-		StringBuilder b = new StringBuilder("Collection:" + getName() + newLine)
-				.append("Class: "+this.getClass().getSimpleName()+newLine)
-				.append("Nuclei: " + this.getNucleusCount() + newLine)
-				.append("Parent dataset: "+parentDataset.getCollection().getName()+newLine)
-				.append("Profile collections:" + newLine)
-				.append(profileCollection.toString()+newLine);
-
-
-		if(this.hasConsensus()){
-			b.append("Consensus:" + newLine);
-			b.append(getConsensus().toString()+newLine);
-		}
-
-		return b.toString();
-	}
+//	@Override
+//	public String toString() {
+//
+//		String newLine = System.getProperty("line.separator");
+//
+//		StringBuilder b = new StringBuilder("Collection:" + getName() + newLine)
+//				.append("Class: "+this.getClass().getSimpleName()+newLine)
+//				.append("Nuclei: " + this.getNucleusCount() + newLine)
+//				.append("Parent dataset: "+parentDataset.getCollection().getName()+newLine)
+//				.append("Profile collections:" + newLine)
+//				.append(profileCollection.toString()+newLine);
+//
+//
+//		if(this.hasConsensus()){
+//			b.append("Consensus:" + newLine);
+//			b.append(getConsensus().toString()+newLine);
+//		}
+//
+//		return b.toString();
+//	}
 
 	@Override
 	public int hashCode() {

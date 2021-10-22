@@ -168,7 +168,7 @@ public class PopulationTreeTable extends JXTreeTable {
      * @return
      */
     public List<String> getDatasetNames() {
-        List<String> result = new ArrayList<String>();
+        List<String> result = new ArrayList<>();
         for (int i = 0; i < getRowCount(); i++) {
             String s = getValueAt(i, PopulationTreeTable.COLUMN_NAME).toString();
             result.add(s);
@@ -183,7 +183,7 @@ public class PopulationTreeTable extends JXTreeTable {
      */
     public List<PopulationTreeTableNode> getSelectedNodes() {
 
-        List<PopulationTreeTableNode> result = new ArrayList<PopulationTreeTableNode>();
+        List<PopulationTreeTableNode> result = new ArrayList<>();
         TreePath[] paths = getTreeSelectionModel().getSelectionPaths();
         for (TreePath p : paths) {
             PopulationTreeTableNode n = (PopulationTreeTableNode) p.getLastPathComponent();
@@ -192,28 +192,13 @@ public class PopulationTreeTable extends JXTreeTable {
         return result;
     }
 
-
-    private List<IAnalysisDataset> getSelectedDatasets() {
-        List<IAnalysisDataset> datasets = new ArrayList<IAnalysisDataset>();
-
-        for (int row = 0; row < getRowCount(); row++) {
-
-            Object ob = getModel().getValueAt(row, PopulationTreeTable.COLUMN_NAME);
-            if (ob instanceof IAnalysisDataset) {
-                datasets.add((IAnalysisDataset) ob);
-            }
-
-        }
-        return datasets;
-    }
-
     /**
      * Find the datasets which are collapsed in the tree
      * 
      * @return
      */
     public List<Object> getCollapsedRows() {
-        List<Object> collapsedRows = new ArrayList<Object>();
+        List<Object> collapsedRows = new ArrayList<>();
         for (int row = 0; row < getRowCount(); row++) {
             if (!isExpanded(row)) {
 

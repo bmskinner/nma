@@ -19,6 +19,7 @@ package com.bmskinner.nuclear_morphology.analysis.signals;
 import java.awt.Rectangle;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -107,17 +108,17 @@ public class SignalDetector extends Detector {
         options.setInt(HashOptions.THRESHOLD, minThreshold); // reset to default
 
         if (options.getString(HashOptions.SIGNAL_DETECTION_MODE_KEY).equals(SignalDetectionMode.FORWARD.name())) {
-            LOGGER.finest( "Running forward detection");
+            LOGGER.finer( "Running forward detection");
             return detectForwardThresholdSignal(sourceFile,  n);
         }
 
         if (options.getString(HashOptions.SIGNAL_DETECTION_MODE_KEY).equals(SignalDetectionMode.REVERSE.name())) {
-            LOGGER.finest( "Running reverse detection");
+            LOGGER.finer( "Running reverse detection");
             return detectReverseThresholdSignal(sourceFile,  n);
         }
 
         if (options.getString(HashOptions.SIGNAL_DETECTION_MODE_KEY).equals(SignalDetectionMode.ADAPTIVE.name())) {
-            LOGGER.finest( "Running adaptive detection");
+            LOGGER.finer( "Running adaptive detection");
             return detectHistogramThresholdSignal(sourceFile,  n);
         }
         throw new IllegalArgumentException("No detection mode found");
@@ -158,8 +159,8 @@ public class SignalDetector extends Detector {
     	
         // choose the right stack number for the channel
         int stackNumber = ImageImporter.rgbToStack(channel);
-        
-        setMaxSize(n.getStatistic(Measurement.AREA) * options.getDouble(HashOptions.SIGNAL_MAX_FRACTION));
+        setMaxSize(100000);
+//        setMaxSize(n.getStatistic(Measurement.AREA) * options.getDouble(HashOptions.SIGNAL_MAX_FRACTION));
         setMinSize(options.getInt(HashOptions.MIN_SIZE_PIXELS));
         setMinCirc(options.getDouble(HashOptions.MIN_CIRC));
         setMaxCirc(options.getDouble(HashOptions.MAX_CIRC));
@@ -167,14 +168,14 @@ public class SignalDetector extends Detector {
 
         List<INuclearSignal> signals = new ArrayList<>();
         ImageProcessor ip = stack.getProcessor(stackNumber);
+                
         Map<Roi, StatsMap> roiList = detectRois(ip);
 
         if (roiList.isEmpty())
             return signals;
 
-        LOGGER.finer(roiList.size() + " rois in stack " + stackNumber);
-        
-
+        LOGGER.finer(roiList.size() + " rois in stack " + stackNumber +" of "+sourceFile.getName());
+        LOGGER.finer("Nucleus position "+Arrays.toString(n.getPosition()));
         for(Entry<Roi, StatsMap> entry : roiList.entrySet()) {
         	Roi r = entry.getKey();
             StatsMap values = entry.getValue();
@@ -184,12 +185,14 @@ public class SignalDetector extends Detector {
             Rectangle bounds = r.getBounds();
             int[] originalPosition = { xbase, ybase, (int) bounds.getWidth(), (int) bounds.getHeight() };
 
+            LOGGER.finer("ROI position "+Arrays.toString(originalPosition));
+
             try {
 
                 INuclearSignal s = factory.buildInstance(r, sourceFile, channel, originalPosition, IPoint
                         .makeNew(values.get(StatsMap.COM_X).floatValue(), values.get(StatsMap.COM_Y).floatValue()));
 
-                s.setScale(n.getScale()); // copy scaling information from
+                s.setScale(n.getScale()); // copy scale information from
                                           // source nucleus
 
                 s.setStatistic(Measurement.AREA, values.get(StatsMap.AREA));
@@ -210,8 +213,9 @@ public class SignalDetector extends Detector {
                     s.offset(-n.getPosition()[CellularComponent.X_BASE], -n.getPosition()[CellularComponent.Y_BASE]);
 
                     signals.add(s);
-
                 }
+                
+                
             } catch (IllegalArgumentException | ComponentCreationException e) {
                 LOGGER.warning("Cannot make signal for component "+n.getNameAndNumber());
                 LOGGER.log(Loggable.STACK, "Error detecting or making signal: "+e.getMessage(), e);

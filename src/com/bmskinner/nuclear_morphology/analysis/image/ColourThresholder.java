@@ -54,6 +54,8 @@ public class ColourThresholder {
 //    private int        numSlices;
     private ImageStack stack;
     private int        width, height, numPixels;
+    
+    private boolean blackBackground = true;
 
     /**
      * Create with default parameters (no thresholding)
@@ -261,8 +263,8 @@ public class ColourThresholder {
             return;
         if (mode == BLACK_AND_WHITE) {
             int[] pixels = (int[]) ip.getPixels();
-            int fcolor = Prefs.blackBackground ? 0xffffffff : 0xff000000;
-            int bcolor = Prefs.blackBackground ? 0xff000000 : 0xffffffff;
+            int fcolor = blackBackground ? 0xffffffff : 0xff000000;
+            int bcolor = blackBackground ? 0xff000000 : 0xffffffff;
             for (int i = 0; i < numPixels; i++) {
                 if (fillMask[i] != 0)
                     pixels[i] = fcolor;

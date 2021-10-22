@@ -75,7 +75,7 @@ public class SignalMethodSettingsPanel extends SettingsPanel {
 
         JPanel panel = new JPanel();
 
-        List<JLabel> labels = new ArrayList<JLabel>();
+        List<JLabel> labels = new ArrayList<>();
         labels.add(new JLabel(METHOD_LBL));
 
         List<JComboBox<SignalDetectionMode>> fields = new ArrayList<>();
@@ -96,7 +96,7 @@ public class SignalMethodSettingsPanel extends SettingsPanel {
         box.addActionListener(e -> {
 
             SignalDetectionMode mode = (SignalDetectionMode) box.getSelectedItem();
-            options.setString(HashOptions.SIGNAL_DETECTION_MODE_KEY, mode.toString());
+            options.setString(HashOptions.SIGNAL_DETECTION_MODE_KEY, mode.name());
 
             CardLayout cl = (CardLayout) cardPanel.getLayout();
 

@@ -358,11 +358,6 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
     }
 
     @Override
-    public String toString() {
-        return super.toString();
-    }
-
-    @Override
     public void updateSourceImageDirectory(@NonNull final File expectedImageDirectory) {
 
     	if (!expectedImageDirectory.exists()) {
