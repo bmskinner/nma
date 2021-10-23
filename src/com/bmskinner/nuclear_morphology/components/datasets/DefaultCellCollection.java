@@ -26,7 +26,6 @@
 package com.bmskinner.nuclear_morphology.components.datasets;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;

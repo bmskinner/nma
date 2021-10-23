@@ -16,15 +16,6 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components;
 
-import java.util.function.Predicate;
-
-import org.eclipse.jdt.annotation.NonNull;
-
-import com.bmskinner.nuclear_morphology.components.cells.ICell;
-import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
-import com.bmskinner.nuclear_morphology.components.measure.Measurement;
-import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
-
 /**
  * Methods for filtering, dividing and combining collections
  * 

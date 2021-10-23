@@ -22,7 +22,6 @@ import java.awt.image.IndexColorModel;
 
 import ij.ImagePlus;
 import ij.ImageStack;
-import ij.Prefs;
 import ij.process.ByteProcessor;
 import ij.process.ColorProcessor;
 import ij.process.ImageProcessor;

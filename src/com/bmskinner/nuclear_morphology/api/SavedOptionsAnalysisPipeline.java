@@ -49,9 +49,6 @@ import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
-import com.bmskinner.nuclear_morphology.components.signals.DefaultSignalGroup;
-import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
-import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.io.DatasetExportMethod;
 import com.bmskinner.nuclear_morphology.io.DatasetExportMethod.ExportFormat;
 import com.bmskinner.nuclear_morphology.io.Io.Importer;
@@ -178,7 +175,7 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod impleme
 				createClusteringMethods(datasets, options);
 				
 				for(IAnalysisDataset dataset : datasets)
-					methodsToRun.add(new DatasetExportMethod(dataset, dataset.getSavePath(), ExportFormat.JAVA)); 
+					methodsToRun.add(new DatasetExportMethod(dataset, dataset.getSavePath(), ExportFormat.XML)); 
 				
 				allDatasets.addAll(datasets);
 			}
