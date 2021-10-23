@@ -39,7 +39,7 @@ public class SignalDetectionMethodTest extends ComponentTester {
 	 */
 	@Test
 	public void testAddingSignalChangesDatasetHash() throws Exception {
-		File testFolder = TestResources.TESTING_MOUSE_SIGNALS_FOLDER;
+		File testFolder = TestResources.MOUSE_SIGNALS_INPUT_FOLDER;
     	IAnalysisOptions op = OptionsFactory.makeDefaultRodentAnalysisOptions(testFolder);
     	HashOptions nucleus = op.getDetectionOptions(CellularComponent.NUCLEUS).get();
     	nucleus.setInt(HashOptions.MAX_SIZE_PIXELS, 12000);
@@ -75,7 +75,7 @@ public class SignalDetectionMethodTest extends ComponentTester {
 	
 	@Test
 	public void testAddingSignalGroupAddsDetectionOptionsToDataset() throws Exception {
-		File testFolder = TestResources.TESTING_MOUSE_SIGNALS_FOLDER;
+		File testFolder = TestResources.MOUSE_SIGNALS_INPUT_FOLDER;
     	IAnalysisOptions op = OptionsFactory.makeDefaultRodentAnalysisOptions(testFolder);
     	HashOptions nucleus = op.getDetectionOptions(CellularComponent.NUCLEUS).get();
     	nucleus.setInt(HashOptions.MAX_SIZE_PIXELS, 12000);

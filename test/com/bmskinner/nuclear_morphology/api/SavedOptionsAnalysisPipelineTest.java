@@ -31,63 +31,63 @@ public class SavedOptionsAnalysisPipelineTest extends AnalysisPipelineTest {
 		assertTrue("Analysis output folder "+TestResources.DATASET_FOLDER.getAbsolutePath(), TestResources.DATASET_FOLDER.exists());
 		
 		File expectedFile = new File(TestResources.DATASET_FOLDER, imageFolder.getName()+Io.SAVE_FILE_EXTENSION);
-		assertTrue("Analysis output file "+expectedFile.getAbsolutePath(), expectedFile.exists());
+		assertTrue("Output file should exist: "+expectedFile.getAbsolutePath(), expectedFile.exists());
 		
 		assertTrue(validateDataset(expectedFile));
 	}
 
 	@Test
 	public void testCreateRoundDataset() throws Exception {
-		File xmlFile = new File(TestResources.IMAGE_FOLDER, "Round.xml");
-		testPipelineCreatesReadableExportFile(TestResources.TESTING_ROUND_FOLDER, xmlFile);
+		File xmlFile = new File(TestResources.ROUND_OUTPUT_FOLDER, "Round.options.xml");
+		testPipelineCreatesReadableExportFile(TestResources.ROUND_INPUT_FOLDER, xmlFile);
 	}
 	
 	@Test
 	public void testCreateRoundDatasetWithSignals() throws Exception {
-		File xmlFile      = new File(TestResources.IMAGE_FOLDER, "Round_with_signals.xml");
-		testPipelineCreatesReadableExportFile(TestResources.TESTING_ROUND_SIGNALS_FOLDER, xmlFile);
+		File xmlFile = new File(TestResources.ROUND_SIGNALS_OUTPUT_FOLDER, "Round_with_signals.xml");
+		testPipelineCreatesReadableExportFile(TestResources.ROUND_SIGNALS_INPUT_FOLDER, xmlFile);
 	}
 	
 	@Test
 	public void testCreateRoundDatasetWithClusters() throws Exception {
-		File xmlFile      = new File(TestResources.IMAGE_FOLDER, "Round_with_clusters.xml");
-		testPipelineCreatesReadableExportFile(TestResources.TESTING_ROUND_CLUSTERS_FOLDER, xmlFile);
+		File xmlFile = new File(TestResources.ROUND_CLUSTERS_OUTPUT_FOLDER, "Round_with_clusters.xml");
+		testPipelineCreatesReadableExportFile(TestResources.ROUND_CLUSTERS_INPUT_FOLDER, xmlFile);
 	}
 	
 	@Test
 	public void testCreatePigDataset() throws Exception {
-		File xmlFile = new File(TestResources.IMAGE_FOLDER, "Pig.xml");
-		testPipelineCreatesReadableExportFile(TestResources.TESTING_PIG_FOLDER, xmlFile);
+		File xmlFile = new File(TestResources.PIG_OUTPUT_FOLDER, "Pig.xml");
+		testPipelineCreatesReadableExportFile(TestResources.PIG_INPUT_FOLDER, xmlFile);
 	}
 	
 	@Test
 	public void testCreatePigDatasetWithSignals() throws Exception {
-		File xmlFile      = new File(TestResources.IMAGE_FOLDER, "Pig_with_signals.xml");
-		testPipelineCreatesReadableExportFile(TestResources.TESTING_PIG_SIGNALS_FOLDER, xmlFile);
+		File xmlFile      = new File(TestResources.PIG_SIGNALS_OUTPUT_FOLDER, "Pig_with_signals.xml");
+		testPipelineCreatesReadableExportFile(TestResources.PIG_SIGNALS_INPUT_FOLDER, xmlFile);
 	}
 	
 	@Test
 	public void testCreatePigDatasetWithClusters() throws Exception {
-		File xmlFile      = new File(TestResources.IMAGE_FOLDER, "Pig_with_clusters.xml");
-		testPipelineCreatesReadableExportFile(TestResources.TESTING_PIG_CLUSTERS_FOLDER, xmlFile);
+		File xmlFile      = new File(TestResources.PIG_CLUSTERS_OUTPUT_FOLDER, "Pig_with_clusters.xml");
+		testPipelineCreatesReadableExportFile(TestResources.PIG_CLUSTERS_INPUT_FOLDER, xmlFile);
 	}
 	
 	@Test
 	public void testCreateMouseDataset() throws Exception {
-		File xmlFile = new File(TestResources.IMAGE_FOLDER, "Mouse.xml");
-		testPipelineCreatesReadableExportFile(TestResources.TESTING_MOUSE_FOLDER, xmlFile);
+		File xmlFile = new File(TestResources.MOUSE_OUTPUT_FOLDER, "Mouse.xml");
+		testPipelineCreatesReadableExportFile(TestResources.MOUSE_INPUT_FOLDER, xmlFile);
 	}
 	
 	@Test
 	public void testCreateMouseDatasetWithSignals() throws Exception {
-		File xmlFile      = new File(TestResources.IMAGE_FOLDER, "Mouse_with_signals.xml");
-		testPipelineCreatesReadableExportFile(TestResources.TESTING_MOUSE_SIGNALS_FOLDER, xmlFile);
+		File xmlFile      = new File(TestResources.MOUSE_SIGNALS_OUTPUT_FOLDER, "Mouse_with_signals.xml");
+		testPipelineCreatesReadableExportFile(TestResources.MOUSE_SIGNALS_INPUT_FOLDER, xmlFile);
 	}
 	
 	@Test
 	public void testCreateMouseDatasetWithClusters() throws Exception {
-		File xmlFile      = new File(TestResources.IMAGE_FOLDER, "Mouse_with_clusters.xml");
-		testPipelineCreatesReadableExportFile(TestResources.TESTING_MOUSE_CLUSTERS_FOLDER, xmlFile);
+		File xmlFile      = new File(TestResources.MOUSE_CLUSTERS_OUTPUT_FOLDER, "Mouse_with_clusters.xml");
+		testPipelineCreatesReadableExportFile(TestResources.MOUSE_CLUSTERS_INPUT_FOLDER, xmlFile);
 	}
 	
 	/**
@@ -98,7 +98,7 @@ public class SavedOptionsAnalysisPipelineTest extends AnalysisPipelineTest {
 	 */
 	@Test
 	public void testMultipleImageFoldersAbortWhenNoImagesDetected() throws Exception {
-		File testFolder   = TestResources.TESTING_MULTIPLE_BASE_FOLDER;
+		File testFolder   = TestResources.MULTIPLE_BASE_FOLDER;
 		File xmlFile      = new File(TestResources.IMAGE_FOLDER, "Multiple_with_DAPI_signals.xml");
 		
 		// Check the input files exist

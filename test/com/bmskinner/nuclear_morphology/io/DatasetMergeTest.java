@@ -64,7 +64,7 @@ public class DatasetMergeTest {
         cells += d1.getCollection().getNucleusCount();
         cells += d2.getCollection().getNucleusCount();
 
-        File saveFile = new File(TestResources.TESTING_MULTIPLE_BASE_FOLDER, "Merge_test.nmd");
+        File saveFile = new File(TestResources.MULTIPLE_BASE_FOLDER, "Merge_test.nmd");
         IAnalysisMethod m = new DatasetMergeMethod(toMerge, saveFile);  
 
         IAnalysisResult r = m.call();

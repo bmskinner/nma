@@ -50,7 +50,7 @@ public class SignalDetectorTest {
 	public void testSignalFound() throws Exception {
 		IAnalysisDataset d = SampleDatasetReader.openTestMouseSignalsDataset();
 		
-		HashOptions o = OptionsFactory.makeNuclearSignalOptions(TestResources.TESTING_MOUSE_SIGNALS_FOLDER)
+		HashOptions o = OptionsFactory.makeNuclearSignalOptions(TestResources.MOUSE_SIGNALS_INPUT_FOLDER)
 				.withValue(HashOptions.SIGNAL_MAX_FRACTION, 0.5)
 				.build();
 		

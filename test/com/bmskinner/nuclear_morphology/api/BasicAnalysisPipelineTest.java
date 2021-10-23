@@ -52,7 +52,7 @@ public class BasicAnalysisPipelineTest extends AnalysisPipelineTest {
 	@Test
 	public void testMouseDatasetMatchesSavedDataset() throws Exception{
 		IAnalysisDataset exp = SampleDatasetReader.openDataset(TestResources.MOUSE_TEST_DATASET);
-		IAnalysisOptions op = OptionsFactory.makeDefaultRodentAnalysisOptions(TestResources.TESTING_MOUSE_FOLDER);
+		IAnalysisOptions op = OptionsFactory.makeDefaultRodentAnalysisOptions(TestResources.MOUSE_INPUT_FOLDER);
 
 		IAnalysisDataset obs = TestImageDatasetCreator.createTestDataset(TestResources.UNIT_TEST_FOLDER, op, false);
 		testDatasetEquality(exp, obs);       
@@ -61,7 +61,7 @@ public class BasicAnalysisPipelineTest extends AnalysisPipelineTest {
 	@Test
 	public void testPigDatasetMatchesSavedDataset() throws Exception{
 		IAnalysisDataset exp = SampleDatasetReader.openDataset(TestResources.PIG_TEST_DATASET);
-		IAnalysisOptions op = OptionsFactory.makeDefaultPigAnalysisOptions(TestResources.TESTING_PIG_FOLDER);
+		IAnalysisOptions op = OptionsFactory.makeDefaultPigAnalysisOptions(TestResources.PIG_INPUT_FOLDER);
 
 		IAnalysisDataset obs = TestImageDatasetCreator.createTestDataset(TestResources.UNIT_TEST_FOLDER, op, false);
 		testDatasetEquality(exp, obs);       
@@ -70,7 +70,7 @@ public class BasicAnalysisPipelineTest extends AnalysisPipelineTest {
 	@Test
 	public void testRoundDatasetMatchesSavedDataset() throws Exception{
 		IAnalysisDataset exp = SampleDatasetReader.openDataset(TestResources.ROUND_TEST_DATASET);
-		IAnalysisOptions op = OptionsFactory.makeDefaultRoundAnalysisOptions(TestResources.TESTING_ROUND_FOLDER);
+		IAnalysisOptions op = OptionsFactory.makeDefaultRoundAnalysisOptions(TestResources.ROUND_INPUT_FOLDER);
 
 		IAnalysisDataset obs = TestImageDatasetCreator.createTestDataset(TestResources.UNIT_TEST_FOLDER, op, false);
 		testDatasetEquality(exp, obs);       

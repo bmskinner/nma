@@ -60,7 +60,7 @@ public class NucleusDetectionMethodTest {
 	
 	@Test
 	public void testFailsOnNonexistentFolder() throws AnalysisMethodException {
-		File testFolder = TestResources.TESTING_MOUSE_FOLDER;
+		File testFolder = TestResources.MOUSE_INPUT_FOLDER;
     	IAnalysisOptions op = OptionsFactory.makeDefaultRodentAnalysisOptions(testFolder);
     	
     	exception.expect(AnalysisMethodException.class);
@@ -73,15 +73,15 @@ public class NucleusDetectionMethodTest {
     	IAnalysisOptions op = new DefaultAnalysisOptions();
     	
     	exception.expect(AnalysisMethodException.class);
-		NucleusDetectionMethod nm = new NucleusDetectionMethod(TestResources.TESTING_MOUSE_FOLDER, op);
+		NucleusDetectionMethod nm = new NucleusDetectionMethod(TestResources.MOUSE_INPUT_FOLDER, op);
 	}
 	
 	@Test
 	public void testNucleusDetectionReturnsADataset() throws Exception {
-		File testFolder = TestResources.TESTING_MOUSE_FOLDER.getAbsoluteFile();
+		File testFolder = TestResources.MOUSE_INPUT_FOLDER.getAbsoluteFile();
     	IAnalysisOptions op = OptionsFactory.makeDefaultRodentAnalysisOptions(testFolder);
 
-    	NucleusDetectionMethod nm = new NucleusDetectionMethod(TestResources.TESTING_MOUSE_FOLDER, op);
+    	NucleusDetectionMethod nm = new NucleusDetectionMethod(TestResources.MOUSE_INPUT_FOLDER, op);
     	IAnalysisResult r = nm.call();
     	
     	IAnalysisDataset d = r.getFirstDataset();
@@ -93,10 +93,10 @@ public class NucleusDetectionMethodTest {
 	@Test
 	public void testAllNuclearParametersCalculated() throws Exception {
 		
-		File testFolder = TestResources.TESTING_MOUSE_FOLDER.getAbsoluteFile();
+		File testFolder = TestResources.MOUSE_INPUT_FOLDER.getAbsoluteFile();
     	IAnalysisOptions op = OptionsFactory.makeDefaultRodentAnalysisOptions(testFolder);
 
-    	NucleusDetectionMethod nm = new NucleusDetectionMethod(TestResources.TESTING_MOUSE_FOLDER, op);
+    	NucleusDetectionMethod nm = new NucleusDetectionMethod(TestResources.MOUSE_INPUT_FOLDER, op);
     	IAnalysisResult r = nm.call();
     	
     	IAnalysisDataset d = r.getFirstDataset();

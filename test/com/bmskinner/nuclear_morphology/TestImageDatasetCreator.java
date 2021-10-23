@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import java.awt.Color;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
@@ -30,8 +29,6 @@ import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileCollection;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
-import com.bmskinner.nuclear_morphology.components.signals.DefaultSignalGroup;
-import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
 import com.bmskinner.nuclear_morphology.io.DatasetExportMethod;
 import com.bmskinner.nuclear_morphology.io.DatasetExportMethod.ExportFormat;
 import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
@@ -66,7 +63,7 @@ public class TestImageDatasetCreator {
     @Test
     public void createMouseDataset() throws Exception{
 
-    	File testFolder = TestResources.TESTING_MOUSE_FOLDER.getAbsoluteFile();
+    	File testFolder = TestResources.MOUSE_INPUT_FOLDER.getAbsoluteFile();
     	IAnalysisOptions op = OptionsFactory.makeDefaultRodentAnalysisOptions(testFolder);
     	IAnalysisDataset d = createTestDataset(TestResources.UNIT_TEST_FOLDER, op, false);
     	saveTestDataset(d, TestResources.MOUSE_TEST_DATASET);
@@ -76,7 +73,7 @@ public class TestImageDatasetCreator {
     @Test
     public void createPigDataset() throws Exception{
 
-    	File testFolder = TestResources.TESTING_PIG_FOLDER.getAbsoluteFile();
+    	File testFolder = TestResources.PIG_INPUT_FOLDER.getAbsoluteFile();
     	IAnalysisOptions op = OptionsFactory.makeDefaultPigAnalysisOptions(testFolder);
     	IAnalysisDataset d = createTestDataset(TestResources.UNIT_TEST_FOLDER, op, false);
     	saveTestDataset(d, TestResources.PIG_TEST_DATASET);
@@ -86,7 +83,7 @@ public class TestImageDatasetCreator {
     @Test
     public void createRoundDataset() throws Exception{
 
-    	File testFolder = TestResources.TESTING_ROUND_FOLDER.getAbsoluteFile();
+    	File testFolder = TestResources.ROUND_INPUT_FOLDER.getAbsoluteFile();
     	IAnalysisOptions op = OptionsFactory.makeDefaultRoundAnalysisOptions(testFolder);
     	IAnalysisDataset d = createTestDataset(TestResources.UNIT_TEST_FOLDER, op, false);
     	saveTestDataset(d, TestResources.ROUND_TEST_DATASET);
@@ -95,7 +92,7 @@ public class TestImageDatasetCreator {
     
     @Test
     public void createMultipleSource1Dataset() throws Exception{
-    	IAnalysisOptions op = OptionsFactory.makeDefaultRodentAnalysisOptions(TestResources.TESTING_MULTIPLE_SOURCE_1_FOLDER);
+    	IAnalysisOptions op = OptionsFactory.makeDefaultRodentAnalysisOptions(TestResources.MULTIPLE_SOURCE_1_FOLDER);
     	IAnalysisDataset d = createTestDataset(TestResources.UNIT_TEST_FOLDER, op, false);
     	saveTestDataset(d, TestResources.MULTIPLE1_TEST_DATASET);
     	testUnmarshalling(d, TestResources.MULTIPLE1_TEST_DATASET);
@@ -103,7 +100,7 @@ public class TestImageDatasetCreator {
     
     @Test
     public void createMultipleSource2Dataset() throws Exception{
-    	IAnalysisOptions op = OptionsFactory.makeDefaultRodentAnalysisOptions(TestResources.TESTING_MULTIPLE_SOURCE_2_FOLDER);
+    	IAnalysisOptions op = OptionsFactory.makeDefaultRodentAnalysisOptions(TestResources.MULTIPLE_SOURCE_2_FOLDER);
     	IAnalysisDataset d = createTestDataset(TestResources.UNIT_TEST_FOLDER, op, false);
     	saveTestDataset(d, TestResources.MULTIPLE2_TEST_DATASET);
     	testUnmarshalling(d, TestResources.MULTIPLE2_TEST_DATASET);
@@ -111,7 +108,7 @@ public class TestImageDatasetCreator {
         
     @Test
     public void createMouseWithClustersDataset() throws Exception{
-    	IAnalysisOptions op = OptionsFactory.makeDefaultRodentAnalysisOptions(TestResources.TESTING_MOUSE_CLUSTERS_FOLDER);
+    	IAnalysisOptions op = OptionsFactory.makeDefaultRodentAnalysisOptions(TestResources.MOUSE_CLUSTERS_INPUT_FOLDER);
     	IAnalysisDataset d = createTestDataset(TestResources.UNIT_TEST_FOLDER, op, true);
     	assertFalse("Dataset should have clusters", d.getClusterGroups().isEmpty());
     	saveTestDataset(d, TestResources.MOUSE_CLUSTERS_DATASET);
@@ -120,7 +117,7 @@ public class TestImageDatasetCreator {
     
     @Test
     public void createPigWithClustersDataset() throws Exception{
-    	IAnalysisOptions op = OptionsFactory.makeDefaultPigAnalysisOptions(TestResources.TESTING_PIG_CLUSTERS_FOLDER);
+    	IAnalysisOptions op = OptionsFactory.makeDefaultPigAnalysisOptions(TestResources.PIG_CLUSTERS_INPUT_FOLDER);
     	IAnalysisDataset d = createTestDataset(TestResources.UNIT_TEST_FOLDER, op, true);
     	assertFalse("Dataset should have clusters", d.getClusterGroups().isEmpty());
     	saveTestDataset(d, TestResources.PIG_CLUSTERS_DATASET);
@@ -129,7 +126,7 @@ public class TestImageDatasetCreator {
     
     @Test
     public void createRoundWithClustersDataset() throws Exception{
-    	IAnalysisOptions op = OptionsFactory.makeDefaultRoundAnalysisOptions(TestResources.TESTING_ROUND_CLUSTERS_FOLDER);
+    	IAnalysisOptions op = OptionsFactory.makeDefaultRoundAnalysisOptions(TestResources.ROUND_CLUSTERS_INPUT_FOLDER);
     	IAnalysisDataset d = createTestDataset(TestResources.UNIT_TEST_FOLDER, op, true);
     	assertFalse("Dataset should have clusters", d.getClusterGroups().isEmpty());
     	saveTestDataset(d, TestResources.ROUND_CLUSTERS_DATASET);
@@ -138,7 +135,7 @@ public class TestImageDatasetCreator {
     
     @Test
     public void createMouseWithSignalsDataset() throws Exception {
-    	IAnalysisOptions op = OptionsFactory.makeDefaultRodentAnalysisOptions(TestResources.TESTING_MOUSE_SIGNALS_FOLDER);
+    	IAnalysisOptions op = OptionsFactory.makeDefaultRodentAnalysisOptions(TestResources.MOUSE_SIGNALS_INPUT_FOLDER);
     	HashOptions nucleus = op.getDetectionOptions(CellularComponent.NUCLEUS).get();
     	nucleus.setInt(HashOptions.MIN_SIZE_PIXELS, 4000);
     	nucleus.setInt(HashOptions.MAX_SIZE_PIXELS, 12000);
@@ -151,7 +148,7 @@ public class TestImageDatasetCreator {
     
     @Test
     public void createPigWithSignalsDataset() throws Exception {
-    	IAnalysisOptions op = OptionsFactory.makeDefaultPigAnalysisOptions(TestResources.TESTING_PIG_SIGNALS_FOLDER);
+    	IAnalysisOptions op = OptionsFactory.makeDefaultPigAnalysisOptions(TestResources.PIG_SIGNALS_INPUT_FOLDER);
     	HashOptions nucleus = op.getDetectionOptions(CellularComponent.NUCLEUS).get();
     	nucleus.setInt(HashOptions.MIN_SIZE_PIXELS, 4000);
     	nucleus.setInt(HashOptions.MAX_SIZE_PIXELS, 15000);
@@ -164,7 +161,7 @@ public class TestImageDatasetCreator {
     
     @Test
     public void createRoundWithSignalsDataset() throws Exception {
-    	IAnalysisOptions op = OptionsFactory.makeDefaultRoundAnalysisOptions(TestResources.TESTING_ROUND_SIGNALS_FOLDER);    	
+    	IAnalysisOptions op = OptionsFactory.makeDefaultRoundAnalysisOptions(TestResources.ROUND_SIGNALS_INPUT_FOLDER);    	
     	IAnalysisDataset d = createTestSignalDataset(op, true, true);
     	assertTrue("Dataset should have signals", d.getCollection().getSignalManager().getSignalCount()>0);
     	saveTestDataset(d, TestResources.ROUND_SIGNALS_DATASET);
