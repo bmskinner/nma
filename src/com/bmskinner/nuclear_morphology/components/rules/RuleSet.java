@@ -190,6 +190,35 @@ public class RuleSet implements Serializable, XmlSerializable {
         		.isZeroIndex()
                 .build();
     }
+    
+    /**
+     * Create a RuleSet that describes how to find the min diameter
+     * left point in pig sperm
+     * 
+     * @return
+     */
+    public static RuleSet pigSpermLHRuleSet() {
+        return new RuleSetBuilder(ProfileType.DIAMETER)
+        		.valueIsLessThan(0.6)
+        		.indexIsLessThan(0.5)
+        		.isMinimum()
+                .build();
+    }
+    
+    
+    /**
+     * Create a RuleSet that describes how to find the min diameter
+     * right point in pig sperm
+     * 
+     * @return
+     */
+    public static RuleSet pigSpermRHRuleSet() {
+        return new RuleSetBuilder(ProfileType.DIAMETER)
+        		.valueIsLessThan(0.6)
+        		.indexIsMoreThan(0.5)
+        		.isMinimum()
+                .build();
+    }
 
     /**
      * Create a RuleSet that describes how to find the RP in round nucleus

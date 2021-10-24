@@ -206,9 +206,13 @@ public abstract class AbstractChartFactory {
             colour = Color.BLUE;
         if (tag.equals(Landmark.REFERENCE_POINT))
             colour = Color.ORANGE;
-        if (tag.getName().equals(DefaultLandmark.TOP_VERTICAL.toString()))
+        if (tag.getName().equals(Landmark.TOP_VERTICAL.toString()))
             colour = Color.GRAY;
-        if (tag.getName().equals(DefaultLandmark.BOTTOM_VERTICAL.toString()))
+        if (tag.getName().equals(Landmark.BOTTOM_VERTICAL.toString()))
+            colour = Color.GRAY;
+        if (tag.getName().equals(Landmark.LEFT_HORIZONTAL.toString()))
+            colour = Color.GRAY;
+        if (tag.getName().equals(Landmark.RIGHT_HORIZONTAL.toString()))
             colour = Color.GRAY;
         return colour;
     }

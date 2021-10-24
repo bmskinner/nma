@@ -342,11 +342,14 @@ public class RuleSetCollection implements XmlSerializable {
      * @return
      */
     public static RuleSetCollection pigSpermRuleSetCollection() {
-        RuleSetCollection r = new RuleSetCollection("Pig sperm", null, null, null, Landmark.REFERENCE_POINT,
-        		null, Landmark.ORIENTATION_POINT, PriorityAxis.Y, RuleApplicationType.VIA_MEDIAN);
+        RuleSetCollection r = new RuleSetCollection("Pig sperm", Landmark.LEFT_HORIZONTAL, 
+        		Landmark.RIGHT_HORIZONTAL, null, null,
+        		null, Landmark.REFERENCE_POINT, PriorityAxis.X, RuleApplicationType.VIA_MEDIAN);
 
         r.addRuleSet(Landmark.REFERENCE_POINT, RuleSet.pigSpermRPRuleSet());
         r.addRuleSet(Landmark.ORIENTATION_POINT, RuleSet.pigSpermOPRuleSet());
+        r.addRuleSet(Landmark.LEFT_HORIZONTAL, RuleSet.pigSpermLHRuleSet());
+        r.addRuleSet(Landmark.RIGHT_HORIZONTAL, RuleSet.pigSpermRHRuleSet());
         return r;
     }
 

@@ -31,12 +31,15 @@ import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.measure.DoubleEquation;
 import com.bmskinner.nuclear_morphology.components.measure.LineEquation;
+import com.bmskinner.nuclear_morphology.components.profiles.FloatProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.components.profiles.SegmentedFloatProfile;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
+import com.bmskinner.nuclear_morphology.stats.Stats;
 import com.bmskinner.nuclear_morphology.utility.AngleTools;
 
 /**
@@ -248,7 +251,12 @@ public class ProfileCreator {
         	LOGGER.log(Loggable.STACK, "Error creating diameter profile", e);
         	LOGGER.warning("profile length "+profile.length);
         }
-        return new SegmentedFloatProfile(profile);
+        
+        // Normalise to the the max diameter
+        double max = Stats.max(profile);
+        IProfile p = new FloatProfile(profile);
+
+        return new SegmentedFloatProfile(p.divide(max));
     }
 
     private ISegmentedProfile calculateRadiusProfile() {
@@ -263,7 +271,11 @@ public class ProfileCreator {
             profile[index++] = (float) point.getLengthTo(target.getCentreOfMass());
 
         }
-        return new SegmentedFloatProfile(profile);
+        
+     // Normalise to the the max diameter
+        double max = Stats.max(profile);
+        IProfile p = new FloatProfile(profile);
+        return new SegmentedFloatProfile(p.divide(max));
     }
 
     /**
