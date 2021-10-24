@@ -11,7 +11,6 @@ import com.bmskinner.nuclear_morphology.components.measure.ComponentMeasureTestS
 import com.bmskinner.nuclear_morphology.components.nuclei.ComponentNucleiTestSuite;
 import com.bmskinner.nuclear_morphology.components.options.ComponentOptionsTestSuite;
 import com.bmskinner.nuclear_morphology.components.profiles.ComponentProfilesTestSuite;
-import com.bmskinner.nuclear_morphology.components.rules.ComponentRulesTestSuite;
 import com.bmskinner.nuclear_morphology.components.signals.ComponentSignalsTestSuite;
 
 /**
@@ -29,7 +28,7 @@ import com.bmskinner.nuclear_morphology.components.signals.ComponentSignalsTestS
 	ComponentNucleiTestSuite.class,
 	ComponentOptionsTestSuite.class,
 	ComponentProfilesTestSuite.class,
-	ComponentRulesTestSuite.class,
+//	ComponentRulesTestSuite.class,
 	ComponentSignalsTestSuite.class,
 	ImageableTest.class,
 	RotatableTest.class,

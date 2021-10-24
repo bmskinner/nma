@@ -1,19 +1,28 @@
-package com.bmskinner.nuclear_morphology.components.rules;
-
-import org.junit.Before;
-
-/**
- * Test class for rule set collections
- * @author ben
- * @since 1.18.3
- *
- */
-public class RuleSetCollectionTest {
-
-	@Before
-	public void setUp() throws Exception {
-	}
-
+//package com.bmskinner.nuclear_morphology.components.rules;
+//
+//import static org.junit.Assert.assertEquals;
+//
+//import java.util.List;
+//
+//import org.junit.Before;
+//import org.junit.Test;
+//
+//import com.bmskinner.nuclear_morphology.components.profiles.DefaultLandmark;
+//import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
+//import com.bmskinner.nuclear_morphology.components.profiles.LandmarkType;
+//
+///**
+// * Test class for rule set collections
+// * @author ben
+// * @since 1.18.3
+// *
+// */
+//public class RuleSetCollectionTest {
+//
+//	@Before
+//	public void setUp() throws Exception {
+//	}
+//
 //	@Test
 //	public void testBorderTagStoredCorrectly() {
 //		RuleSetCollection r = RuleSetCollection.roundRuleSetCollection();
@@ -23,7 +32,7 @@ public class RuleSetCollectionTest {
 //			assertEquals("Ruleset should be stored for tag correctly", RuleSet.roundRPRuleSet(), rsList.get(0));
 //		}  
 //	}
-	
+//	
 //	@Test
 //	public void testDefaultTagStoredCorrectly() {
 //		RuleSetCollection r = new RuleSetCollection();
@@ -32,5 +41,5 @@ public class RuleSetCollectionTest {
 //        List<RuleSet> list = r.getRuleSets(customTag);
 //        assertEquals("Ruleset should be stored for tag correctly", RuleSet.roundRPRuleSet(), list.get(0));
 //	}
-
-}
+//
+//}

@@ -80,37 +80,37 @@ public class ImageableTest extends ComponentTester {
 				.overlaps(Imageable.translateCoordinateToSourceImage(n.getBase(), n)));
 		
 	}
-
-	@Test
-	public void testComponentIsOffsetInSeahorseImage() throws Exception {
-		
-		File testFolder = new File(TestResources.IMAGE_FOLDER+"issues/offsets/").getAbsoluteFile();
-    	
-		IAnalysisOptions op = OptionsFactory.makeAnalysisOptions();
-		op.setRuleSetCollection(RuleSetCollection.roundRuleSetCollection());
-		HashOptions nOp = OptionsFactory.makeNucleusDetectionOptions(testFolder)
-				.withValue(HashOptions.MAX_SIZE_PIXELS, 2000000)
-				.withValue(HashOptions.MIN_SIZE_PIXELS, 5000)
-				.withValue(HashOptions.THRESHOLD, 30)
-				.withValue(HashOptions.CHANNEL, 2)
-				.withValue(HashOptions.IS_USE_CANNY, false)
-				.withValue(HashOptions.IS_USE_KUWAHARA, false)
-				.build();
-		
-		op.setDetectionOptions(CellularComponent.NUCLEUS, nOp);
-		op.setAngleWindowProportion(0.03);
-
-    	File saveFile = new File(TestResources.IMAGE_FOLDER+"issues/offsets/offsets.nmd").getAbsoluteFile();
-    	IAnalysisDataset d = TestImageDatasetCreator.createTestDataset(testFolder, op, false);
-    	TestImageDatasetCreator.saveTestDataset(d, saveFile);
-    	
-    	Nucleus n = d.getCollection().getNuclei().toArray(new Nucleus[0])[0];
-    	
-    	// Check the nucleus has loaded
-    	assertEquals("Original position", IPoint.makeNew(121, 84), n.getOriginalBase());
-    	
-    	IPoint offsetBase = Imageable.translateCoordinateToComponentImage(n.getOriginalBase(), n);    	
-    	assertEquals("Offset position", n.getBase().plus(Imageable.COMPONENT_BUFFER), offsetBase);
-	}
+//
+//	@Test
+//	public void testComponentIsOffsetInSeahorseImage() throws Exception {
+//		
+//		File testFolder = new File(TestResources.IMAGE_FOLDER+"issues/offsets/").getAbsoluteFile();
+//    	
+//		IAnalysisOptions op = OptionsFactory.makeAnalysisOptions();
+//		op.setRuleSetCollection(RuleSetCollection.roundRuleSetCollection());
+//		HashOptions nOp = OptionsFactory.makeNucleusDetectionOptions(testFolder)
+//				.withValue(HashOptions.MAX_SIZE_PIXELS, 2000000)
+//				.withValue(HashOptions.MIN_SIZE_PIXELS, 5000)
+//				.withValue(HashOptions.THRESHOLD, 30)
+//				.withValue(HashOptions.CHANNEL, 2)
+//				.withValue(HashOptions.IS_USE_CANNY, false)
+//				.withValue(HashOptions.IS_USE_KUWAHARA, false)
+//				.build();
+//		
+//		op.setDetectionOptions(CellularComponent.NUCLEUS, nOp);
+//		op.setAngleWindowProportion(0.03);
+//
+//    	File saveFile = new File(TestResources.IMAGE_FOLDER+"issues/offsets/offsets.nmd").getAbsoluteFile();
+//    	IAnalysisDataset d = TestImageDatasetCreator.createTestDataset(testFolder, op, false);
+//    	TestImageDatasetCreator.saveTestDataset(d, saveFile);
+//    	
+//    	Nucleus n = d.getCollection().getNuclei().toArray(new Nucleus[0])[0];
+//    	
+//    	// Check the nucleus has loaded
+//    	assertEquals("Original position", IPoint.makeNew(121, 84), n.getOriginalBase());
+//    	
+//    	IPoint offsetBase = Imageable.translateCoordinateToComponentImage(n.getOriginalBase(), n);    	
+//    	assertEquals("Offset position", n.getBase().plus(Imageable.COMPONENT_BUFFER), offsetBase);
+//	}
 
 }
