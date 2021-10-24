@@ -32,6 +32,10 @@ import com.bmskinner.nuclear_morphology.analysis.detection.GenericDetector;
 import com.bmskinner.nuclear_morphology.analysis.detection.StatsMap;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageAnnotator;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
+import com.bmskinner.nuclear_morphology.analysis.profiles.NoDetectedIndexException;
+import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
+import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.cells.ComponentFactory;
@@ -43,6 +47,11 @@ import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.NucleusFactory;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
+import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
+import com.bmskinner.nuclear_morphology.components.rules.RuleSet;
+import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -54,18 +63,25 @@ public class FluorescentNucleusFinder extends CellFinder {
 	
 	private static final Logger LOGGER = Logger.getLogger(FluorescentNucleusFinder.class.getName());
 
-    private final ComponentFactory<Nucleus> nuclFactory;
+    private final NucleusFactory nuclFactory;
     private final HashOptions nuclOptions;
     private final FinderDisplayType displayType;
     
     public FluorescentNucleusFinder(@NonNull final IAnalysisOptions op, FinderDisplayType t) {
         super(op);
         displayType = t;
-        nuclFactory = new NucleusFactory(op.getRuleSetCollection());
+        
+        if(op.getRuleSetCollection()==null)
+        	throw new IllegalArgumentException("No ruleset provided");
+        
         Optional<HashOptions> n = options.getDetectionOptions(CellularComponent.NUCLEUS);
         if(!n.isPresent())
         	throw new IllegalArgumentException("No nucleus options");
         nuclOptions = n.get();
+        
+        nuclFactory = new NucleusFactory(op.getRuleSetCollection(), 
+        		options.getProfileWindowProportion(),
+        		nuclOptions.getDouble(HashOptions.SCALE));
     }
 
     @Override
@@ -150,11 +166,6 @@ public class FluorescentNucleusFinder extends CellFinder {
 
         ImageImporter importer = new ImageImporter(imageFile);
         
-        ImageProcessor original = importer.toConverter()
-        		.convertToRGBGreyscale()
-                .invert()
-                .toProcessor();
-
         ImageProcessor ip = importer.importImage(nuclOptions.getInt(HashOptions.CHANNEL));
 
         ImageFilterer filt = new ImageFilterer(ip.duplicate());
@@ -200,6 +211,12 @@ public class FluorescentNucleusFinder extends CellFinder {
         }
 
         GenericDetector gd = new GenericDetector();
+        
+        // Display passing and failing size nuclei
+   		ImageProcessor original = importer
+   				.importImageAndInvert(nuclOptions.getInt(HashOptions.CHANNEL))
+   				.convertToRGB();
+        
         // do not use the minimum nucleus size - we want the roi outlined in red
         gd.setSize(MIN_PROFILABLE_OBJECT_SIZE, original.getWidth() * original.getHeight()); 
 
@@ -219,9 +236,7 @@ public class FluorescentNucleusFinder extends CellFinder {
         }
         LOGGER.finer(()->"Detected nuclei in "+imageFile.getName());
         
-     // Display passing and failing size nuclei
-//		ImageProcessor original = new ImageImporter(imageFile).importImageAndInvert(nuclOptions.getInt(HashOptions.CHANNEL))
-//				.convertToRGB();
+
 		ImageAnnotator ann = new ImageAnnotator(original);
 
 		for (Nucleus n : list) {
@@ -250,37 +265,85 @@ public class FluorescentNucleusFinder extends CellFinder {
         LOGGER.fine(()->"Creating nucleus from roi "+f.getName()+" area: "+values.get(StatsMap.AREA));
 
         // save the position of the roi, for later use
-        int xbase = (int) roi.getXBase();
-        int ybase = (int) roi.getYBase();
+//        int xbase = (int) roi.getXBase();
+//        int ybase = (int) roi.getYBase();
 
-        Rectangle bounds = roi.getBounds();
+//        Rectangle bounds = roi.getBounds();
 
-        int[] originalPosition = { xbase, ybase, (int) bounds.getWidth(), (int) bounds.getHeight() };
+//        int[] originalPosition = { xbase, ybase, (int) bounds.getWidth(), (int) bounds.getHeight() };
 
         // create a Nucleus from the roi
         IPoint centreOfMass = IPoint.makeNew(values.get(StatsMap.COM_X), values.get(StatsMap.COM_Y));
 
-        Nucleus result = nuclFactory.buildInstance(roi, f, nuclOptions.getInt(HashOptions.CHANNEL),
-        		originalPosition, centreOfMass);
+        Nucleus result = nuclFactory.new NucleusBuilder()
+        	.fromRoi(roi)
+        	.withFile(f).withChannel(nuclOptions.getInt(HashOptions.CHANNEL))
+        	.withCoM(centreOfMass)
+        	.withMeasurement(Measurement.AREA, values.get(StatsMap.AREA))
+        	.withMeasurement(Measurement.MAX_FERET, values.get(StatsMap.FERET))
+        	.withMeasurement(Measurement.PERIMETER, values.get(StatsMap.PERIM))
+        	.build();
+        
+//        Nucleus result = nuclFactory.buildInstance(roi, f, nuclOptions.getInt(HashOptions.CHANNEL),
+//        		originalPosition, centreOfMass);
 
         // Move the nucleus xbase and ybase to 0,0 coordinates for charting
-        IPoint offsetCoM = IPoint.makeNew(centreOfMass.getX() - xbase, centreOfMass.getY() - ybase);
-
-        result.moveCentreOfMass(offsetCoM);
-
-
-        result.setStatistic(Measurement.AREA, values.get(StatsMap.AREA));
-        result.setStatistic(Measurement.MAX_FERET, values.get(StatsMap.FERET));
-        result.setStatistic(Measurement.PERIMETER, values.get(StatsMap.PERIM));
+//        IPoint offsetCoM = IPoint.makeNew(centreOfMass.getX() - xbase, centreOfMass.getY() - ybase);
+//
+//        result.moveCentreOfMass(offsetCoM);
 
 
-        result.setScale(nuclOptions.getDouble(HashOptions.SCALE));
+//        result.setStatistic(Measurement.AREA, values.get(StatsMap.AREA));
+//        result.setStatistic(Measurement.MAX_FERET, values.get(StatsMap.FERET));
+//        result.setStatistic(Measurement.PERIMETER, values.get(StatsMap.PERIM));
 
-        double prop = options.getProfileWindowProportion();
-        result.initialise(prop);
-        result.findLandmarks(options.getRuleSetCollection());
+
+//        result.setScale(nuclOptions.getDouble(HashOptions.SCALE));
+
+//        double prop = options.getProfileWindowProportion();
+//        result.initialise(prop);
+        ProfileIndexFinder.assignLandmarks(result, options.getRuleSetCollection());
+//        result.findLandmarks(options.getRuleSetCollection());
         LOGGER.finer(()->"Created nucleus from roi "+f.getName());
         return result;
     }
+    
+    /**
+     * Finds the key points of interest around the border of the object.
+     * Specify the rulesets that should be used for landmark detection and
+     * subsequent orientation.
+     * @throws ComponentCreationException
+     */
+//    public void findLandmarks(Nucleus n) throws ComponentCreationException {
+//    	
+//    	for(Landmark lm : options.getRuleSetCollection().getTags()) {
+//    		LOGGER.finer(()->"Locating "+lm);
+//    		
+//    		try {
+//    			for(RuleSet rule : options.getRuleSetCollection().getRuleSets(lm)) {
+//    				IProfile p = n.getProfile(rule.getType());
+//    				int index = ProfileIndexFinder.identifyIndex(p, rule);
+//    				n.setLandmark(lm, index);
+//    			}
+//    		} catch (MissingProfileException e) {
+//    			LOGGER.log(Loggable.STACK, "Error getting profile type", e);
+//    		} catch (NoDetectedIndexException e) {
+//    			LOGGER.fine("Unable to detect "+lm+" in nucleus");
+////    			try {
+////					setLandmark(lm, 0);
+////				} catch (MissingProfileException | ProfileException e1) {
+////					LOGGER.log(Loggable.STACK, "Error getting profile type", e);
+////				}
+//    		} catch (ProfileException e) {
+//    			LOGGER.log(Loggable.STACK, "Error getting profile type", e);
+//			} catch (IndexOutOfBoundsException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			} catch (MissingLandmarkException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//    	}
+//    }
 
 }

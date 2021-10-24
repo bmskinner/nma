@@ -16,6 +16,7 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.analysis;
 
+import java.util.List;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -23,6 +24,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nuclear_morphology.components.Statistical;
 import com.bmskinner.nuclear_morphology.components.UnavailableBorderPointException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
@@ -42,6 +44,24 @@ public final class ComponentMeasurer {
 	 * We only use static methods here. Don't allow a public constructor.
 	 */
 	private ComponentMeasurer() {}
+	
+	
+	/**
+	 * Calculate the perimeter of an object defined by a list of 
+	 * points
+	 * @param points
+	 * @return
+	 */
+	public static double calculatePerimeter(@NonNull final List<IPoint> points) {
+		double perimeter = 0;
+		for(int i=0; i<points.size()-1; i++) {
+			perimeter += points.get(i)
+					.getLengthTo(points.get(i+1));
+		}
+		
+		perimeter += points.get(points.size()-1).getLengthTo(points.get(0));
+		return perimeter;
+	}
 
     /**
      * Calculate the perimeter of the shape based on the border list.

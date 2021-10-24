@@ -33,7 +33,6 @@ import com.bmskinner.nuclear_morphology.analysis.SingleDatasetAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.MissingComponentException;
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
-import com.bmskinner.nuclear_morphology.components.Taggable;
 import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
@@ -94,20 +93,21 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
      * it to the given nucleus
      * @param n
      */
-    private void setConsensusScale(Nucleus n) {
+    private double getScale() {
     	// Set the nucleus scale if available
         Optional<IAnalysisOptions> analysisOptions =  dataset.getAnalysisOptions();
         if(analysisOptions.isPresent()) {
         	Optional<HashOptions> nucleusOptions = analysisOptions.get().getNuclusDetectionOptions();
         	if(nucleusOptions.isPresent()) {
-        		double scale = nucleusOptions.get().getDouble(HashOptions.SCALE);
-        		n.setScale(scale);
+        		return nucleusOptions.get().getDouble(HashOptions.SCALE);
+
         	} else {
         		LOGGER.fine("No nucleus detection options present, unable to find pixel scale for consensus");
         	}
         } else {
         	LOGGER.fine("No analysis options present, unable to find pixel scale for consensus");
         }
+        return -1;
     }
 
    
@@ -171,24 +171,31 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
 
     	// Create a nucleus with the same rulesets as the dataset
         IAnalysisOptions op = dataset.getAnalysisOptions().orElseThrow(MissingOptionException::new);
-        NucleusFactory fact = new NucleusFactory(op.getRuleSetCollection());
+        Nucleus n = new NucleusFactory(op.getRuleSetCollection(), op.getProfileWindowProportion(), getScale())
+        		.new NucleusBuilder()
+        		.fromPoints(list)
+        		.withFile(new File("Empty"))
+        		.withCoM(IPoint.makeNew(0, 0))
+        		.withChannel(0)
+        		.withMeasurement(Measurement.PERIMETER, ComponentMeasurer.calculatePerimeter(list))
+        		.build();
                 
     	// Consensus CoM is at the origin for plotting
-        IPoint com = IPoint.makeNew(0, 0);
-        Nucleus n = fact.buildInstance(list, new File("Empty"), 0, com);
+//        IPoint com = IPoint.makeNew(0, 0);
+//        Nucleus n = fact.buildInstance(list, new File("Empty"), 0, com);
         
         
-        setConsensusScale(n);
+//        setConsensusScale(n);
 
         // Calculate the measured values for the new consensus
         // Required for angle window size calculation
-        double perim = ComponentMeasurer.calculatePerimeter(n);
-        n.setStatistic(Measurement.PERIMETER, perim);
+//        double perim = ComponentMeasurer.calculatePerimeter(n);
+//        n.setStatistic(Measurement.PERIMETER, perim);
         
         double area = ComponentMeasurer.calculateArea(n);
         n.setStatistic(Measurement.AREA, area);
 
-        n.initialise(Taggable.DEFAULT_PROFILE_WINDOW_PROPORTION);
+//        n.initialise(Taggable.DEFAULT_PROFILE_WINDOW_PROPORTION);
 
         // Add landmarks and segments from the profile collection
         setLandmarks(n);
@@ -198,7 +205,7 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
         Consensus cons = new DefaultConsensusNucleus(n);
 
         // TODO: make this use the new orientation scheme (left or right, up or down)
-        if (cons.getBorderPoint(Landmark.REFERENCE_POINT).isRightOf(com))
+        if (cons.getBorderPoint(Landmark.REFERENCE_POINT).isRightOf(cons.getCentreOfMass()))
         	cons.flipHorizontal();
         
         // Calculate any other stats that need the vertical alignment
