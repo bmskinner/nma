@@ -308,13 +308,11 @@ public class MainWindowMenuBar extends JMenuBar  {
 		JMenuItem logItem = new JMenuItem(OPEN_LOG_DIR_LBL);
 		logItem.addActionListener(e-> {
 			Runnable r = () ->{
-				File dir = new File(GlobalOptions.getInstance().getString(GlobalOptions.LOG_DIRECTORY_KEY));
-				LOGGER.fine("Opening log directory: "+dir.getAbsolutePath());
 				try {
-					Desktop.getDesktop().open(dir);
+					Desktop.getDesktop().open(Io.getConfigDir());
 				} catch(IOException ex) {
 					LOGGER.log(Level.SEVERE, "Unable to open folder", ex);
-					JOptionPane.showMessageDialog(this, "Unable to open log folder: "+dir.getAbsolutePath(), "Error opening log folder", JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(this, "Unable to open log folder: "+Io.getConfigDir().getAbsolutePath(), "Error opening log folder", JOptionPane.ERROR_MESSAGE);
 				}
 			};
 			ThreadManager.getInstance().submit(r);

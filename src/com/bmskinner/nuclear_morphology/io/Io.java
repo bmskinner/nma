@@ -81,6 +81,10 @@ public interface Io  {
 	
 	/** The folder to write and store logs and configuration */
     String CONFIG_FOLDER_NAME = ".nma";
+    
+    String RULESET_FOLDER_NAME = "rulesets";
+    
+    String LOG_FOLDER_NAME = "logs";
 	
     /** The file to write and store configuration */
 	String CONFIG_FILE_NAME = "config.ini";
@@ -116,6 +120,25 @@ public interface Io  {
     static File getConfigDir() {
     	return new File(System.getProperty("user.home"), CONFIG_FOLDER_NAME);
     }
+    
+    /**
+     * Get the rulesets directory
+     * @return
+     */
+    static File getRulesetDir() {
+    	File dir = getConfigDir();
+        return new File(dir, RULESET_FOLDER_NAME);
+    }
+    
+    /**
+     * Get the rulesets directory
+     * @return
+     */
+    static File getLogDir() {
+    	File dir = getConfigDir();
+        return new File(dir, LOG_FOLDER_NAME);
+    }
+
     
     /**
      * Get the config file read at launch
@@ -226,7 +249,7 @@ public interface Io  {
          */
         static String whyIsUnsuitableImportFile(final File f) {
         	if(f==null)
-        		return "file variablle is null";
+        		return "File variable is null";
         	if(!f.exists())
         		return f.getAbsolutePath()+" does not exist";
         	if(f.isDirectory())

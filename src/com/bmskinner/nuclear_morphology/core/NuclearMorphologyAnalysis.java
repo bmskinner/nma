@@ -18,6 +18,7 @@ package com.bmskinner.nuclear_morphology.core;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
@@ -43,7 +44,7 @@ public class NuclearMorphologyAnalysis {
 	static {
 		
 		// Create a config folder in the user home dir if needed
-		File logFolder = Io.getConfigDir();
+		File logFolder = Io.getLogDir();
     	
     	if(!logFolder.exists()) {
     		logFolder.mkdirs();
@@ -88,10 +89,10 @@ public class NuclearMorphologyAnalysis {
 	private void configureLogging(){
 
 		try {
-			LOGGER.config("Log file location: " + Io.getConfigDir().getAbsolutePath());
+			LOGGER.config("Log file location: " + Io.getLogDir().getAbsolutePath());
 			
 			GlobalOptions.getInstance().setString(GlobalOptions.LOG_DIRECTORY_KEY, 
-					Io.getConfigDir().getAbsolutePath());
+					Io.getLogDir().getAbsolutePath());
 
 			LOGGER.config("OS: "+System.getProperty("os.name")+", version "+System.getProperty("os.version")+", "+System.getProperty("os.arch"));
 			LOGGER.config("JVM: "+System.getProperty("java.vendor")+", version "+System.getProperty("java.version"));
@@ -109,6 +110,14 @@ public class NuclearMorphologyAnalysis {
 	 * by creating if needed from inbuilt defaults
 	 */
 	private void configureSettingsFiles() {
+		
+		if(!Io.getRulesetDir().exists())
+			try {
+				Files.createDirectories(Io.getRulesetDir().toPath());
+			} catch (IOException e) {
+				LOGGER.log(Level.SEVERE, "Error creating ruleset dir", e);
+			}
+
 		ensureRuleSetFileExists(RuleSetCollection.mouseSpermRuleSetCollection(), "Mouse sperm.xml");
 		ensureRuleSetFileExists(RuleSetCollection.pigSpermRuleSetCollection(), "Pig sperm.xml");
 		ensureRuleSetFileExists(RuleSetCollection.roundRuleSetCollection(), "Round.xml");
@@ -122,7 +131,8 @@ public class NuclearMorphologyAnalysis {
 	 * @param fileName
 	 */
 	private void ensureRuleSetFileExists(RuleSetCollection rsc, String fileName) {
-		File ruleFile = new File(Io.getConfigDir(), fileName);
+		File ruleFile = new File(Io.getRulesetDir(), fileName);
+	
 		if(!ruleFile.exists()) {
 			// create as needed
 			LOGGER.config("Creating default ruleset: "+ruleFile.getAbsolutePath());

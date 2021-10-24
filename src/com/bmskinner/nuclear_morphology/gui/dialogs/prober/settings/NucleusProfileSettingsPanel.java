@@ -73,7 +73,7 @@ public class NucleusProfileSettingsPanel extends SettingsPanel {
     }
     
     private String[] getAvailableRulesets(){
-    	File[] files = Io.getConfigDir().listFiles((d, s) -> s.toLowerCase().endsWith(Io.XML_FILE_EXTENSION));
+    	File[] files = Io.getRulesetDir().listFiles((d, s) -> s.toLowerCase().endsWith(Io.XML_FILE_EXTENSION));
     	return Arrays.stream(files)
     			.map(File::getName)
     			.map(f-> f.replaceAll(Io.XML_FILE_EXTENSION, ""))
@@ -107,7 +107,7 @@ public class NucleusProfileSettingsPanel extends SettingsPanel {
         });
         
         // Set the default from the order of the dropdown list
-        File defaultRuleset = new File(Io.getConfigDir(), (String)typeBox.getSelectedItem()+Io.XML_FILE_EXTENSION);
+        File defaultRuleset = new File(Io.getRulesetDir(), (String)typeBox.getSelectedItem()+Io.XML_FILE_EXTENSION);
         setRuleset(defaultRuleset);
 
         profileWindow = new JSpinner(new SpinnerNumberModel(options.getProfileWindowProportion(), MIN_PROFILE_PROP,
