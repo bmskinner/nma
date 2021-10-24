@@ -25,6 +25,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.Taggable;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
+import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.profiles.BooleanProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
@@ -33,6 +34,7 @@ import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.components.rules.Rule;
 import com.bmskinner.nuclear_morphology.components.rules.Rule.RuleType;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSet;
+import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
@@ -47,37 +49,44 @@ public class ProfileIndexFinder {
 	
 	private static final Logger LOGGER = Logger.getLogger(ProfileIndexFinder.class.getName());
 
-    /**
-     * Thrown when no indexes are found by a ruleset
-     * 
-     * @author bms41
-     * @since 1.13.6
-     *
-     */
-    public class NoDetectedIndexException extends Exception {
-        private static final long serialVersionUID = 1L;
-
-        public NoDetectedIndexException() {
-            super();
-        }
-
-        public NoDetectedIndexException(String message) {
-            super(message);
-        }
-
-        public NoDetectedIndexException(String message, Throwable cause) {
-            super(message, cause);
-        }
-
-        public NoDetectedIndexException(Throwable cause) {
-            super(cause);
-        }
-    }
-
     public static final int    NO_INDEX_FOUND      = -1;
     public static final String RULESET_EMPTY_ERROR = "Ruleset list is empty";
     public static final String NULL_RULE_ERROR     = "Rule is null";
     public static final String NULL_PROFILE_ERROR  = "Profile is null";
+    
+    private ProfileIndexFinder() {}
+    
+    
+    /**
+     * Assign landmarks to the given nucleus using the given 
+     * rulesets. This uses the nucleus' own profiles, and is
+     * independent of any dataset medians
+     * @param n
+     * @param rsc
+     */
+    public static void assignLandmarks(@NonNull Nucleus n, @NonNull RuleSetCollection rsc) {
+    	for(Landmark lm : rsc.getTags()) {
+    		LOGGER.finer(()->"Locating "+lm);
+    		
+    		try {
+    			for(RuleSet rule : rsc.getRuleSets(lm)) {
+    				IProfile p = n.getProfile(rule.getType());
+    				int index = identifyIndex(p, rule);
+    				n.setLandmark(lm, index);
+    			}
+    		} catch (MissingProfileException e) {
+    			LOGGER.log(Loggable.STACK, "Error getting profile type", e);
+    		} catch (NoDetectedIndexException e) {
+    			LOGGER.fine("Unable to detect "+lm+" in nucleus");
+    		} catch (ProfileException e) {
+    			LOGGER.log(Loggable.STACK, "Error getting profile type", e);
+			} catch (IndexOutOfBoundsException e) {
+				LOGGER.log(Loggable.STACK, "Index out of bounds", e);
+			} catch (MissingLandmarkException e) {
+				LOGGER.log(Loggable.STACK, "Landmark not present", e);
+			}
+    	}
+    }
 
     /**
      * Get the indexes in the profile that match the given RuleSet
@@ -86,7 +95,7 @@ public class ProfileIndexFinder {
      * @param r the ruleset to use for identification
      * @return the indexes matching the ruleset
      */
-    public BooleanProfile getMatchingIndexes(@NonNull final IProfile p, @NonNull final RuleSet r) {
+    public static BooleanProfile getMatchingIndexes(@NonNull final IProfile p, @NonNull final RuleSet r) {
         if (p == null)
             throw new IllegalArgumentException(NULL_PROFILE_ERROR);
         if (r == null)
@@ -101,7 +110,7 @@ public class ProfileIndexFinder {
      * @param r the rule to use for identification
      * @return the indexes matching the rule
      */
-    public BooleanProfile getMatchingIndexes(@NonNull final IProfile p, @NonNull final Rule r) {
+    public static BooleanProfile getMatchingIndexes(@NonNull final IProfile p, @NonNull final Rule r) {
         if (p == null)
             throw new IllegalArgumentException(NULL_PROFILE_ERROR);
         if (r == null)
@@ -117,7 +126,7 @@ public class ProfileIndexFinder {
      * @param r the ruleset to use for identification
      * @return the number of indexes matching the ruleset
      */
-    public int countMatchingIndexes(@NonNull final IProfile p, @NonNull final RuleSet r) {
+    public static int countMatchingIndexes(@NonNull final IProfile p, @NonNull final RuleSet r) {
 
         BooleanProfile matchingIndexes = getMatchingIndexes(p, r);
 
@@ -141,7 +150,7 @@ public class ProfileIndexFinder {
      * @return the first matching index in the profile
      * @throws NoDetectedIndexException if no indexes match
      */
-    public int identifyIndex(@NonNull final IProfile p, @NonNull final RuleSet r) throws NoDetectedIndexException {
+    public static int identifyIndex(@NonNull final IProfile p, @NonNull final RuleSet r) throws NoDetectedIndexException {
 
         BooleanProfile matchingIndexes = getMatchingIndexes(p, r);
 
@@ -168,7 +177,7 @@ public class ProfileIndexFinder {
      * @throws MissingProfileException 
      * @throws ProfileException 
      */
-    public int identifyIndex(@NonNull final Taggable t, @NonNull final List<RuleSet> list) throws NoDetectedIndexException, MissingProfileException, ProfileException {
+    public static int identifyIndex(@NonNull final Taggable t, @NonNull final List<RuleSet> list) throws NoDetectedIndexException, MissingProfileException, ProfileException {
     	 if (list == null || list.isEmpty())
              throw new IllegalArgumentException(RULESET_EMPTY_ERROR);
     	 BooleanProfile indexes = new BooleanProfile(t.getBorderLength(), true);
@@ -197,7 +206,7 @@ public class ProfileIndexFinder {
      * @return the first index matching the ruleset 
      * @throws NoDetectedIndexException if the index is not found
      */
-    public int identifyIndex(@NonNull final IProfile p, @NonNull final List<RuleSet> list) throws NoDetectedIndexException {
+    public static int identifyIndex(@NonNull final IProfile p, @NonNull final List<RuleSet> list) throws NoDetectedIndexException {
 
         if (list == null || list.isEmpty())
             throw new IllegalArgumentException(RULESET_EMPTY_ERROR);
@@ -226,7 +235,7 @@ public class ProfileIndexFinder {
      * @return the index in the profile corresponding to the tag
      * @throws NoDetectedIndexException if the index is not found
      */
-    public int identifyIndex(@NonNull final ICellCollection collection, @NonNull final Landmark tag) throws NoDetectedIndexException {
+    public static int identifyIndex(@NonNull final ICellCollection collection, @NonNull final Landmark tag) throws NoDetectedIndexException {
 
         List<RuleSet> list = collection.getRuleSetCollection().getRuleSets(tag);
 
@@ -253,7 +262,7 @@ public class ProfileIndexFinder {
      * @return the index in the profile corresponding to the tag
      * @throws NoDetectedIndexException if the index is not found
      */
-    public int identifyIndex(@NonNull final ICellCollection collection, @NonNull final List<RuleSet> list)
+    public static int identifyIndex(@NonNull final ICellCollection collection, @NonNull final List<RuleSet> list)
             throws NoDetectedIndexException {
 
         if (list == null || list.isEmpty())
@@ -275,7 +284,7 @@ public class ProfileIndexFinder {
      * @param list the rulesets to be tested against the collection
      * @return
      */
-    public BooleanProfile getMatchingProfile(@NonNull final ICellCollection collection, @NonNull final List<RuleSet> list) {
+    public static BooleanProfile getMatchingProfile(@NonNull final ICellCollection collection, @NonNull final List<RuleSet> list) {
 
         if (list == null || list.isEmpty())
             throw new IllegalArgumentException(RULESET_EMPTY_ERROR);
@@ -317,7 +326,7 @@ public class ProfileIndexFinder {
      * @param r
      * @return
      */
-    private BooleanProfile isApplicable(final IProfile p, final RuleSet r) {
+    private static BooleanProfile isApplicable(final IProfile p, final RuleSet r) {
 
         BooleanProfile result = new BooleanProfile(p, true);
         for (Rule rule : r.getRules()) {
@@ -335,7 +344,7 @@ public class ProfileIndexFinder {
      *            be applied
      * @return
      */
-    private BooleanProfile isApplicable(final IProfile p, final Rule r, BooleanProfile limits) {
+    private static BooleanProfile isApplicable(final IProfile p, final Rule r, BooleanProfile limits) {
 
         RuleType type = r.getType();
 
@@ -399,7 +408,7 @@ public class ProfileIndexFinder {
      *            values that will be true
      * @return a boolean profile with each true widened by the fractional amount
      */
-    private BooleanProfile findIndexWithinFractionOf(final BooleanProfile b, final double fraction) {
+    private static BooleanProfile findIndexWithinFractionOf(final BooleanProfile b, final double fraction) {
         BooleanProfile result = new BooleanProfile(b.size(), false);
 
         int range = (int) Math.round((double) b.size() * fraction);
@@ -427,7 +436,7 @@ public class ProfileIndexFinder {
      *            values that will be true
      * @return a boolean profile with each true widened by the fractional amount
      */
-    private BooleanProfile findIndexOutsideFractionOf(final BooleanProfile b, final double fraction) {
+    private static BooleanProfile findIndexOutsideFractionOf(final BooleanProfile b, final double fraction) {
         BooleanProfile result = findIndexWithinFractionOf(b, fraction);
 
         return result.invert();
@@ -446,7 +455,7 @@ public class ProfileIndexFinder {
      *            the maximum distance from value allowed
      * @return
      */
-    private BooleanProfile findConstantRegion(final IProfile p, final BooleanProfile limits, final double value,
+    private static BooleanProfile findConstantRegion(final IProfile p, final BooleanProfile limits, final double value,
             final double window, final double epsilon) {
 
         BooleanProfile result = new BooleanProfile(p); // hard code the
@@ -474,7 +483,7 @@ public class ProfileIndexFinder {
      * @return the first and last index in the profile covering the detected
      *         region
      */
-    private int[] findConsistentRegionBounds(IProfile p, double value, double tolerance, int points){
+    private static int[] findConsistentRegionBounds(IProfile p, double value, double tolerance, int points){
         int counter = 0;
         int start = -1;
         int end = -1;
@@ -526,7 +535,7 @@ public class ProfileIndexFinder {
      *            the first true value [false]
      * @return
      */
-    private BooleanProfile findFirstTrue(final BooleanProfile b, boolean v) {
+    private static BooleanProfile findFirstTrue(final BooleanProfile b, boolean v) {
 
         BooleanProfile result = new BooleanProfile(b.size(), false);
         boolean foundFirst = false;
@@ -557,7 +566,7 @@ public class ProfileIndexFinder {
      *            the last true value [false]
      * @return
      */
-    private BooleanProfile findLastTrue(final BooleanProfile b, boolean v) {
+    private static BooleanProfile findLastTrue(final BooleanProfile b, boolean v) {
 
         BooleanProfile result = new BooleanProfile(b.size(), false);
 
@@ -603,7 +612,7 @@ public class ProfileIndexFinder {
      *            the size of the smoothing window
      * @return
      */
-    private BooleanProfile findLocalMinima(final IProfile p, BooleanProfile limits, boolean include, double window) {
+    private static BooleanProfile findLocalMinima(final IProfile p, BooleanProfile limits, boolean include, double window) {
 
         BooleanProfile result = p.getLocalMinima((int) window); // hard code the
                                                                 // smoothing
@@ -628,7 +637,7 @@ public class ProfileIndexFinder {
      *            the size of the smoothing window
      * @return
      */
-    private BooleanProfile findLocalMaxima(final IProfile p, BooleanProfile limits, boolean include, double window) {
+    private static BooleanProfile findLocalMaxima(final IProfile p, BooleanProfile limits, boolean include, double window) {
 
         BooleanProfile result = p.getLocalMaxima((int) window); // hard code the
                                                                 // smoothing
@@ -654,7 +663,7 @@ public class ProfileIndexFinder {
      *            minumum
      * @return
      */
-    private BooleanProfile findMinimum(final IProfile p, BooleanProfile limits, boolean b) {
+    private static BooleanProfile findMinimum(final IProfile p, BooleanProfile limits, boolean b) {
 
         int index = NO_INDEX_FOUND;
 
@@ -678,7 +687,7 @@ public class ProfileIndexFinder {
      * @param p
      * @return
      */
-    private BooleanProfile findMaximum(final IProfile p, BooleanProfile limits, boolean b) {
+    private static BooleanProfile findMaximum(final IProfile p, BooleanProfile limits, boolean b) {
         int index = NO_INDEX_FOUND;
 
         try {
@@ -702,7 +711,7 @@ public class ProfileIndexFinder {
      * @param fileIndex
      * @return
      */
-    private BooleanProfile findIndexLessThan(final IProfile p, BooleanProfile limits, double proportion) {
+    private static BooleanProfile findIndexLessThan(final IProfile p, BooleanProfile limits, double proportion) {
 
         int index = (int) Math.ceil((double) p.size() * proportion);
 
@@ -724,7 +733,7 @@ public class ProfileIndexFinder {
      * @param fileIndex
      * @return
      */
-    private BooleanProfile findIndexMoreThan(final IProfile p, BooleanProfile limits, double proportion) {
+    private static BooleanProfile findIndexMoreThan(final IProfile p, BooleanProfile limits, double proportion) {
 
         int index = (int) Math.floor((double) p.size() * proportion);
 
@@ -745,7 +754,7 @@ public class ProfileIndexFinder {
      * @param fileIndex
      * @return
      */
-    private BooleanProfile findValueLessThan(final IProfile p, BooleanProfile limits, double value) {
+    private static BooleanProfile findValueLessThan(final IProfile p, BooleanProfile limits, double value) {
 
         BooleanProfile result = new BooleanProfile(p);
 
@@ -767,7 +776,7 @@ public class ProfileIndexFinder {
      * @param fileIndex
      * @return
      */
-    private BooleanProfile findValueMoreThan(final IProfile p, BooleanProfile limits, double value) {
+    private static BooleanProfile findValueMoreThan(final IProfile p, BooleanProfile limits, double value) {
 
         BooleanProfile result = new BooleanProfile(p);
 
@@ -788,7 +797,7 @@ public class ProfileIndexFinder {
      * @param p
      * @return
      */
-    private BooleanProfile findZeroIndex(final IProfile p) {
+    private static BooleanProfile findZeroIndex(final IProfile p) {
 
         BooleanProfile result = new BooleanProfile(p, false);
         result.set(0, true);

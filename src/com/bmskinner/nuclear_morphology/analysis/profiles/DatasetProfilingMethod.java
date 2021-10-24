@@ -25,7 +25,6 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.SingleDatasetAnalysisMethod;
-import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder.NoDetectedIndexException;
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
@@ -41,7 +40,7 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
 
 /**
  * The method for profiling nuclei within a dataset. This detects the optimal indexes
- * to assign border tags within each nucleus
+ * to assign landmarks within each nucleus
  * 
  * @author ben
  * @since 1.13.4
@@ -55,8 +54,6 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 	
 	public static final int MAX_COERCION_ATTEMPTS = 50;
 	
-	private final ProfileIndexFinder finder = new ProfileIndexFinder();
-
 	/**
 	 * Create a profiler for the given dataset
 	 * @param dataset
@@ -139,7 +136,7 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 			for(Nucleus n :  collection.getNuclei()) {
 				int index = 0;
 				try {
-					index = finder.identifyIndex(n, ruleSets);
+					index = ProfileIndexFinder.identifyIndex(n, ruleSets);
 				} catch (NoDetectedIndexException e) {
 					LOGGER.fine("Cannot identify "+t+" in nucleus "+n.getNucleusNumber()+", using index 0");
 					// Fall back to zero index, correct manually
@@ -154,7 +151,7 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 			// Add the index to the median profiles
 			int medianIndex = 0;
 			try {
-				medianIndex = finder.identifyIndex(collection, ruleSets);
+				medianIndex = ProfileIndexFinder.identifyIndex(collection, ruleSets);
 			} catch (NoDetectedIndexException e) {
 				LOGGER.fine("Cannot identify "+t+" in median, using index 0");
 			}
@@ -178,7 +175,7 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 
 		// RP index *should be* zero in the median profile at this point
 		// Check this before updating nuclei
-		int rpIndex = finder.identifyIndex(collection, Landmark.REFERENCE_POINT);
+		int rpIndex = ProfileIndexFinder.identifyIndex(collection, Landmark.REFERENCE_POINT);
 		LOGGER.finer( "RP in default median is located at index " + rpIndex);
 
 		IProfile templateProfile = median.offset(rpIndex);
@@ -189,7 +186,7 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 		collection.getProfileManager().recalculateProfileAggregates();
 		
 		// Test if the recalculated profile aggregate naturally puts the RP at zero
-		rpIndex = finder.identifyIndex(collection, Landmark.REFERENCE_POINT);
+		rpIndex = ProfileIndexFinder.identifyIndex(collection, Landmark.REFERENCE_POINT);
 
 		int coercionCounter = 0;
 		while (rpIndex != 0 && coercionCounter++<MAX_COERCION_ATTEMPTS) {
@@ -220,7 +217,7 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 			if (tag.equals(Landmark.REFERENCE_POINT)) {
 
 				LOGGER.fine("Checking location of RP in profile");
-				int index = finder.identifyIndex(collection, tag);
+				int index = ProfileIndexFinder.identifyIndex(collection, tag);
 				LOGGER.fine("RP in collection is at index " + index);
 				continue;
 			}
@@ -228,7 +225,7 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 			int index = 0;
 
 			try {
-				index = finder.identifyIndex(collection, tag);
+				index = ProfileIndexFinder.identifyIndex(collection, tag);
 			} catch (NoDetectedIndexException e) {
 				LOGGER.warning("Unable to detect " + tag + " using default ruleset");
 
@@ -268,7 +265,7 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 	private int coerceRPToZero(ICellCollection collection) throws NoDetectedIndexException, MissingLandmarkException, MissingProfileException, ProfileException {
 
 		// check the RP index in the median
-		int rpIndex = finder.identifyIndex(collection, Landmark.REFERENCE_POINT);
+		int rpIndex = ProfileIndexFinder.identifyIndex(collection, Landmark.REFERENCE_POINT);
 		LOGGER.fine("RP in median is located at index " + rpIndex);
 
 		// If RP is not at zero, update
@@ -285,7 +282,7 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 			// Find the effects of the offsets on the RP
 			// It should be found at zero
 			LOGGER.finer( "Checking RP index again");
-			rpIndex = finder.identifyIndex(collection, Landmark.REFERENCE_POINT);
+			rpIndex = ProfileIndexFinder.identifyIndex(collection, Landmark.REFERENCE_POINT);
 			LOGGER.fine("RP in median is now located at index " + rpIndex);
 		}
 

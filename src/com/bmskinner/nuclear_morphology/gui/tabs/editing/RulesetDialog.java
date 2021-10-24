@@ -56,9 +56,9 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.jfree.chart.JFreeChart;
 
+import com.bmskinner.nuclear_morphology.analysis.profiles.NoDetectedIndexException;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder;
-import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder.NoDetectedIndexException;
 import com.bmskinner.nuclear_morphology.charting.charts.MorphologyChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.ProfileChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPanel;
@@ -420,10 +420,9 @@ public class RulesetDialog extends LoadingIconDialog
     private void updateBorderTagAction(Landmark tag) {
 
         if (tag != null) {
-            ProfileIndexFinder finder = new ProfileIndexFinder();
             try {
 
-                int newTagIndex = finder.identifyIndex(dataset.getCollection(), tag);
+                int newTagIndex = ProfileIndexFinder.identifyIndex(dataset.getCollection(), tag);
 
                 LOGGER.info("Updating " + tag + " to index " + newTagIndex);
 
@@ -493,11 +492,10 @@ public class RulesetDialog extends LoadingIconDialog
     	JFreeChart chart = ProfileChartFactory.createEmptyChart(ProfileType.ANGLE);
     	ChartOptions options = new DefaultChartOptions((IAnalysisDataset) null);
         MorphologyChartFactory chf = new MorphologyChartFactory(options);
-        ProfileIndexFinder finder = new ProfileIndexFinder();
         IProfile p = dataset.getCollection().getProfileCollection().getProfile(ProfileType.ANGLE,
                 Landmark.REFERENCE_POINT, Stats.MEDIAN);
         
-        BooleanProfile limits = finder.getMatchingProfile(dataset.getCollection(),
+        BooleanProfile limits = ProfileIndexFinder.getMatchingProfile(dataset.getCollection(),
         		getRulesetsForTag(t, collection));
 
     	chart = chf.createBooleanProfileChart(p, limits);
@@ -534,21 +532,20 @@ public class RulesetDialog extends LoadingIconDialog
         public JFreeChart getChart() {
 
         	try {
-        		ProfileIndexFinder finder = new ProfileIndexFinder();
         		ChartOptions options = new DefaultChartOptions((IAnalysisDataset) null);
         		MorphologyChartFactory chf = new MorphologyChartFactory(options);
 
         		if(rule!=null) {
         			IProfile p = dataset.getCollection().getProfileCollection().getProfile(ruleSet.getType(),
         					Landmark.REFERENCE_POINT, Stats.MEDIAN);
-        			BooleanProfile b = finder.getMatchingIndexes(p, rule);
+        			BooleanProfile b = ProfileIndexFinder.getMatchingIndexes(p, rule);
         			return chf.createBooleanProfileChart(p, b);
         		}
 
         		if(ruleSet!=null) {
         			IProfile p = dataset.getCollection().getProfileCollection().getProfile(ruleSet.getType(),
         					Landmark.REFERENCE_POINT, Stats.MEDIAN);
-        			BooleanProfile b = finder.getMatchingIndexes(p, ruleSet);
+        			BooleanProfile b = ProfileIndexFinder.getMatchingIndexes(p, ruleSet);
         			return chf.createBooleanProfileChart(p, b);
         		}
 

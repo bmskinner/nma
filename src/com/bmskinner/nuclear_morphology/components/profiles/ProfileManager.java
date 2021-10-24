@@ -26,9 +26,9 @@ import java.util.logging.Logger;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
+import com.bmskinner.nuclear_morphology.analysis.profiles.NoDetectedIndexException;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder;
-import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder.NoDetectedIndexException;
 import com.bmskinner.nuclear_morphology.components.MissingComponentException;
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.Taggable;
@@ -131,10 +131,8 @@ public class ProfileManager {
         LOGGER.fine("Detecting top and bottom verticals in collection");
 
         try {
-            ProfileIndexFinder finder = new ProfileIndexFinder();
-
-            int topIndex = finder.identifyIndex(collection, Landmark.TOP_VERTICAL);
-            int btmIndex = finder.identifyIndex(collection, Landmark.BOTTOM_VERTICAL);
+            int topIndex = ProfileIndexFinder.identifyIndex(collection, Landmark.TOP_VERTICAL);
+            int btmIndex = ProfileIndexFinder.identifyIndex(collection, Landmark.BOTTOM_VERTICAL);
 
             LOGGER.fine(()->String.format("TV in median is located at index %i", topIndex));
             LOGGER.fine(()->String.format("BV in median is located at index %i ", btmIndex));

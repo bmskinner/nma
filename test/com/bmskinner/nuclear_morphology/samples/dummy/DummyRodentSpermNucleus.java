@@ -94,12 +94,6 @@ public class DummyRodentSpermNucleus extends DummyCellularComponent implements N
 	}
 	
 	@Override
-	public void findLandmarks(@NonNull RuleSetCollection rsc) throws ComponentCreationException {
-		nucleus.findLandmarks(rsc);
-		
-	}
-
-	@Override
 	public void initialise(double angleWindowProportion) throws ComponentCreationException {
 		nucleus.initialise(angleWindowProportion);
 	}

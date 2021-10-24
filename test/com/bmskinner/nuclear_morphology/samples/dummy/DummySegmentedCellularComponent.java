@@ -59,12 +59,6 @@ public class DummySegmentedCellularComponent extends ProfileableCellularComponen
 	}
 
 	@Override
-	public void findLandmarks(@NonNull RuleSetCollection rsc) throws ComponentCreationException {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
 	public boolean isProfileOrientationOK() {
 		// TODO Auto-generated method stub
 		return false;

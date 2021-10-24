@@ -8,6 +8,7 @@ import java.io.File;
 import org.junit.Test;
 
 import com.bmskinner.nuclear_morphology.TestDatasetBuilder;
+import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.cells.DefaultCell;
@@ -104,7 +105,8 @@ public class TestComponentFactory {
 				
 		// Note - the roi interpolation will smooth corners
 		n.initialise(Taggable.DEFAULT_PROFILE_WINDOW_PROPORTION);
-		n.findLandmarks(RuleSetCollection.roundRuleSetCollection());
+		ProfileIndexFinder.assignLandmarks(n, RuleSetCollection.roundRuleSetCollection());
+//		n.findLandmarks(RuleSetCollection.roundRuleSetCollection());
 		return n;
 	}
 	
@@ -131,7 +133,8 @@ public class TestComponentFactory {
 		
 		// Note - the roi interpolation will smooth corners
 		n.initialise(Taggable.DEFAULT_PROFILE_WINDOW_PROPORTION);
-		n.findLandmarks(RuleSetCollection.roundRuleSetCollection());		
+		ProfileIndexFinder.assignLandmarks(n, RuleSetCollection.roundRuleSetCollection());
+//		n.findLandmarks(RuleSetCollection.roundRuleSetCollection());		
 		return n;
 	}
 	
