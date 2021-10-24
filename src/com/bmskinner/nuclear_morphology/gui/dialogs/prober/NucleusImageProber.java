@@ -24,6 +24,7 @@ import java.util.logging.Logger;
 import javax.swing.JPanel;
 
 import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.Finder;
+import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.FinderDisplayType;
 import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.FluorescentNucleusFinder;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
@@ -67,7 +68,7 @@ public class NucleusImageProber extends IntegratedImageProber {
                     .build();
             optionsSettingsPanel.setEnabled(false);
 
-            Finder<Collection<ICell>> finder = new FluorescentNucleusFinder(options);
+            Finder<Collection<ICell>> finder = new FluorescentNucleusFinder(options, FinderDisplayType.PREVIEW);
             imageProberPanel = new GenericImageProberPanel(folder, finder, this);
 
             JPanel footerPanel = createFooter();

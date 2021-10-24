@@ -58,7 +58,7 @@ public abstract class AbstractFinder<E> implements Finder<E>{
      * 
      * @param op the analysis options
      */
-    public AbstractFinder(@NonNull final IAnalysisOptions op) {
+    protected AbstractFinder(@NonNull final IAnalysisOptions op) {
         options = op;
     }
 

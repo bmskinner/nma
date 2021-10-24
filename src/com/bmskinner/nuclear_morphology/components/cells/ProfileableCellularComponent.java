@@ -73,9 +73,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 
 	private static final Logger LOGGER = Logger.getLogger(ProfileableCellularComponent.class.getName());
 
-	private static final long serialVersionUID = 1L;
-
-    /** The proportion of the perimeter to use for profiling */
+	/** The proportion of the perimeter to use for profiling */
     protected double windowProportion = IAnalysisOptions.DEFAULT_WINDOW_PROPORTION;
     
     /** The segmentation pattern for the object */
@@ -533,35 +531,6 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
     @Override
 	public void setSegmentStartLock(boolean lock, @NonNull UUID segID) {
     	segments.stream().filter(s->s.getID().equals(segID)).forEach(s->s.setLocked(lock));
-    }
-
-    private double getPathLength(ProfileType type) {
-        double pathLength = 0;
-
-        try {
-
-            IProfile profile = this.getProfile(type);
-
-            // First previous point is the last point of the profile
-            IPoint prevPoint = IPoint.makeNew(0, profile.get(this.getBorderLength() - 1));
-
-            for (int i = 0; i < this.getBorderLength(); i++) {
-                double normalisedX = ((double) i / (double) this.getBorderLength()) * 100; // normalise
-                                                                                           // to
-                                                                                           // 100
-                                                                                           // length
-
-                // We are measuring along the chart of angle vs position
-                // Each median angle value is treated as an XYPoint
-                IPoint thisPoint = IPoint.makeNew(normalisedX, profile.get(i));
-                pathLength += thisPoint.getLengthTo(prevPoint);
-                prevPoint = thisPoint;
-            }
-        } catch (MissingProfileException | ProfileException e) {
-            LOGGER.log(Loggable.STACK, "Error getting angle profile ", e);
-            return Statistical.ERROR_CALCULATING_STAT;
-        }
-        return pathLength;
     }
 
     @Override

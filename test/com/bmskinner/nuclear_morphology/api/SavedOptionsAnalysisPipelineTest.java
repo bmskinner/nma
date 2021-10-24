@@ -8,6 +8,7 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -17,6 +18,8 @@ import com.bmskinner.nuclear_morphology.io.Io;
 import com.bmskinner.nuclear_morphology.logging.ConsoleFormatter;
 import com.bmskinner.nuclear_morphology.logging.ConsoleHandler;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
+
+import ij.Prefs;
 
 /**
  * Test the workflows can save a valid dataset
@@ -35,6 +38,14 @@ public class SavedOptionsAnalysisPipelineTest extends AnalysisPipelineTest {
 		LOGGER.setLevel(Level.FINE);
 		h.setLevel(Level.FINE);
 		LOGGER.addHandler(h);
+	}
+	
+	@Before
+	public void setUp() {
+		// otherwise we will get threading issues
+		// The RankFilter threads are set to MAX_AVAILABLE_THREADS by default
+		// and under test conditions this blocks the test thread
+		Prefs.setThreads(2); 
 	}
 	
 	

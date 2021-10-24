@@ -400,28 +400,29 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
      */
     @Override
     public boolean isProfileOrientationOK() {
-        int frontPoints = 0;
-        int rearPoints = 0;
-
-        IProfile profile;
-        try {
-            profile = this.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
-        } catch (ProfileException | MissingLandmarkException | MissingProfileException e) {
-        	LOGGER.log(Loggable.STACK, "Error getting profile", e);
-            return false;
-        }
-
-        int midPoint = getBorderLength() >> 1;
-        for (int i = 0; i < getBorderLength(); i++) { // integrate points
-                                                           // over 180
-            if (i < midPoint) 
-                frontPoints += profile.get(i);
-            if (i > midPoint) 
-                rearPoints += profile.get(i);
-        }
-        
-        // if the maxIndex is closer to the end than the beginning
-        return frontPoints > rearPoints;
+    	return true;
+//        int frontPoints = 0;
+//        int rearPoints = 0;
+//
+//        IProfile profile;
+//        try {
+//            profile = this.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
+//        } catch (ProfileException | MissingLandmarkException | MissingProfileException e) {
+//        	LOGGER.log(Loggable.STACK, "Error getting profile", e);
+//            return false;
+//        }
+//
+//        int midPoint = getBorderLength() >> 1;
+//        for (int i = 0; i < getBorderLength(); i++) { // integrate points
+//                                                           // over 180
+//            if (i < midPoint) 
+//                frontPoints += profile.get(i);
+//            if (i > midPoint) 
+//                rearPoints += profile.get(i);
+//        }
+//        
+//        // if the maxIndex is closer to the end than the beginning
+//        return frontPoints > rearPoints;
     }
 
     @Override

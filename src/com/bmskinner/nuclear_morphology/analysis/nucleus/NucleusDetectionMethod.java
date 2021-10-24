@@ -34,6 +34,7 @@ import com.bmskinner.nuclear_morphology.analysis.AnalysisMethodException;
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.Finder;
+import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.FinderDisplayType;
 import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.FluorescentNucleusFinder;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
@@ -139,7 +140,6 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
 
     	datasets.addAll(analysedDatasets);
     	LOGGER.fine("Nucleus detection complete for "+analysedDatasets.size()+" folders");
-
     }
 
     private int getTotalImagesToAnalyse() {
@@ -228,7 +228,7 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
 
         collectionGroup.put(folder, fc);
 
-        final Finder<Collection<ICell>> finder = new FluorescentNucleusFinder(templateOptions);
+        final Finder<Collection<ICell>> finder = new FluorescentNucleusFinder(templateOptions, FinderDisplayType.PIPELINE);
         finder.addProgressListener(this);
 
         try {

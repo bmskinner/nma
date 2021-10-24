@@ -414,21 +414,15 @@ public class ImageFilterer extends AbstractImageFilterer {
      * @return a new ByteProcessor containing the closed image
      */
     public ImageFilterer close(int closingRadius) {
-    	LOGGER.finest("Running gap closing");
-    	LOGGER.finest("RankFilters threads: "+Prefs.getThreads());
-
     	// using the MorphoLibJ library
         ImageProcessor result = ip.convertToByteProcessor();
         
         Strel strel = DiskStrel.fromRadius(closingRadius);
-        LOGGER.finest("Dilating");
         result = strel.dilation(result);
 
         fill(result);
-        LOGGER.finest("Eroding");
         result = strel.erosion(result);
         ip = result;
-        LOGGER.finest("Ran gap closing");
         return this;
     }
 

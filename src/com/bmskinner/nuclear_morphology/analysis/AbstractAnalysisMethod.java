@@ -48,7 +48,7 @@ public abstract class AbstractAnalysisMethod implements IAnalysisMethod, Progres
     private List<Object>       listeners = new ArrayList<>();
     protected IAnalysisResult  result    = null;
 
-    public AbstractAnalysisMethod() {}
+    protected AbstractAnalysisMethod() {}
         
     @Override
     public void addProgressListener(ProgressListener l) {

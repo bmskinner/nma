@@ -50,7 +50,7 @@ public abstract class CellFinder extends AbstractFinder<Collection<ICell>> {
      * 
      * @param op the options for cell detection
      */
-    public CellFinder(@NonNull final IAnalysisOptions op) {
+    protected CellFinder(@NonNull final IAnalysisOptions op) {
         super(op);
 
     }
@@ -73,12 +73,11 @@ public abstract class CellFinder extends AbstractFinder<Collection<ICell>> {
     		if (!ImageImporter.fileIsImportable(f))
     			return;
     		try {
-    			LOGGER.finer("Finding all in image "+f.getName());
     			list.addAll(findInImage(f));
     		} catch (ImageImportException e) {
     			LOGGER.log(Loggable.STACK, "Error searching image", e);
     		}
-    		LOGGER.finer("Found images in "+f.getName());
+    		LOGGER.fine("Found images in "+f.getName());
     	});
     	return list;
     }
