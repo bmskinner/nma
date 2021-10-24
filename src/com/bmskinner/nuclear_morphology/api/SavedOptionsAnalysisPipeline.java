@@ -140,14 +140,10 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod impleme
 	@Override
 	public void run(@NonNull final File rootFolder, 
 			@NonNull final File xmlFile) 
-					throws AnalysisPipelineException {
+					throws Exception {
 		this.xmlFile     = xmlFile;
 		this.rootFolder = rootFolder;
-		try {
-			run();
-		} catch(Exception e) {
-			throw new AnalysisPipelineException(e);
-		}
+		run();
 	}
 
 	/**
@@ -183,7 +179,8 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod impleme
     	run(methodsToRun);
 	}
 	
-	private List<IAnalysisDataset> createNucleusDetectionMethod(@NonNull IAnalysisOptions options, File imageFolder) throws Exception {
+	private List<IAnalysisDataset> createNucleusDetectionMethod(@NonNull IAnalysisOptions options, 
+			File imageFolder) throws Exception {
 		options.getDetectionOptions(CellularComponent.NUCLEUS)
 		.orElseThrow(MissingOptionException::new)
 		.setFile(HashOptions.DETECTION_FOLDER, imageFolder);
@@ -201,21 +198,33 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod impleme
 	 * @param options
 	 * @throws Exception
 	 */
-	private void createRefoldingMethod(List<IAnalysisDataset> datasets) throws Exception {
+	private void createRefoldingMethod(List<IAnalysisDataset> datasets)  {
 		for(IAnalysisDataset dataset : datasets) {
 			if(dataset.getCollection().getRuleSetCollection().equals(RuleSetCollection.roundRuleSetCollection())) {
-				if(!dataset.getCollection().hasConsensus())
-					methodsToRun.add(new ProfileRefoldMethod(dataset));
-				for(IAnalysisDataset d : dataset.getAllChildDatasets())
-					if(!d.getCollection().hasConsensus())
-						methodsToRun.add(new ProfileRefoldMethod(d));
+				createProfileRefoldMethod(datasets);
 			} else {
-				if(!dataset.getCollection().hasConsensus())
-					methodsToRun.add(new ConsensusAveragingMethod(dataset));
-				for(IAnalysisDataset d : dataset.getAllChildDatasets())
-					if(!d.getCollection().hasConsensus())
-						methodsToRun.add(new ConsensusAveragingMethod(d));
+				createAveragingMethod(datasets);
 			}
+		}
+	}
+	
+	private void createProfileRefoldMethod(List<IAnalysisDataset> datasets) {
+		for(IAnalysisDataset dataset : datasets) {
+			if(!dataset.getCollection().hasConsensus())
+				methodsToRun.add(new ProfileRefoldMethod(dataset));
+			for(IAnalysisDataset d : dataset.getAllChildDatasets())
+				if(!d.getCollection().hasConsensus())
+					methodsToRun.add(new ProfileRefoldMethod(d));
+		}
+	}
+	
+	private void createAveragingMethod(List<IAnalysisDataset> datasets) {
+		for(IAnalysisDataset dataset : datasets) {
+			if(!dataset.getCollection().hasConsensus())
+				methodsToRun.add(new ConsensusAveragingMethod(dataset));
+			for(IAnalysisDataset d : dataset.getAllChildDatasets())
+				if(!d.getCollection().hasConsensus())
+					methodsToRun.add(new ConsensusAveragingMethod(d));
 		}
 	}
 	
@@ -224,7 +233,8 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod impleme
 	 * @param options
 	 * @throws Exception
 	 */
-	private void createSignalDetectionMethods(List<IAnalysisDataset> datasets, @NonNull IAnalysisOptions options, File imageFolder) throws Exception {
+	private void createSignalDetectionMethods(List<IAnalysisDataset> datasets, 
+			@NonNull IAnalysisOptions options, File imageFolder) {
 
 		for(IAnalysisDataset dataset : datasets) {
 			// Add signals

@@ -313,10 +313,6 @@ public class InteractiveSegmentCellPanel extends InteractiveCellPanel {
 			Collections.sort(tags);
 
 			for (Landmark tag : tags) {
-
-				if (tag.equals(Landmark.INTERSECTION_POINT))
-					continue; // The IP is determined solely by the OP
-
 				// Colour the menu item by tag colour
 				JMenuItem item = new JMenuItem("Move "+tag.toString().toLowerCase()+" here");
 				item.setBorder(BorderFactory.createLineBorder(ColourSelecter.getColour(tag), 3));
@@ -337,8 +333,6 @@ public class InteractiveSegmentCellPanel extends InteractiveCellPanel {
 			// Find border tags with rulesets that have not been assigned in the median
 			List<Landmark> unassignedTags = new ArrayList<>();
 			for (Landmark tag : Landmark.defaultValues()) {
-				if (tag.equals(Landmark.INTERSECTION_POINT))
-					continue;
 				if (!tags.contains(tag)) {
 					unassignedTags.add(tag);
 				}

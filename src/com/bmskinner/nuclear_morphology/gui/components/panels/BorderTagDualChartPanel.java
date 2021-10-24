@@ -97,13 +97,6 @@ public class BorderTagDualChartPanel extends DualChartPanel {
 
         for (Landmark tag : list) {
 
-            /*
-             * The IP is determined solely by the OP
-             */
-            if (tag.equals(Landmark.INTERSECTION_POINT)) {
-                continue;
-            }
-
             JMenuItem item = new JMenuItem(tag.toString());
 
             item.addActionListener(e -> {
@@ -114,12 +107,8 @@ public class BorderTagDualChartPanel extends DualChartPanel {
 
         // Find border tags with rulesets that have not been assigned in the
         // median
-        List<Landmark> unassignedTags = new ArrayList<Landmark>();
+        List<Landmark> unassignedTags = new ArrayList<>();
         for (Landmark tag : Landmark.defaultValues()) {
-            if (tag.equals(Landmark.INTERSECTION_POINT)) {
-                continue;
-            }
-
             if (!list.contains(tag)) {
                 unassignedTags.add(tag);
 

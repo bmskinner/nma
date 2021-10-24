@@ -105,9 +105,7 @@ public class ProfileSegmenter {
      * @return a list of segments
      */
     public List<IProfileSegment> segment()  {
-    	LOGGER.fine("-------------------------");
     	LOGGER.fine("Beginning segmentation   ");
-    	LOGGER.fine("-------------------------");
         
     	/* Prepare segment start index  */
         int segmentStart = 0;

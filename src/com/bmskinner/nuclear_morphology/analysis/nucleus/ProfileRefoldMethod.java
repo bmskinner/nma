@@ -68,7 +68,7 @@ public class ProfileRefoldMethod extends SingleDatasetAnalysisMethod {
      * @param refoldMode the type of refolding
      * @throws Exception
      */
-    public ProfileRefoldMethod(@NonNull IAnalysisDataset dataset) throws Exception {
+    public ProfileRefoldMethod(@NonNull IAnalysisDataset dataset) {
         super(dataset);
         collection = dataset.getCollection();
     }

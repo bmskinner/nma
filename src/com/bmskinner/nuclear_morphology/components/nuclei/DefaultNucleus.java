@@ -216,7 +216,6 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
     @Override
     public void findLandmarks(@NonNull RuleSetCollection rsc) throws ComponentCreationException {
     	
-    	
     	for(Landmark lm : rsc.getTags()) {
     		LOGGER.finer(()->"Locating "+lm);
     		
@@ -231,10 +230,13 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
     			LOGGER.log(Loggable.STACK, "Error getting profile type", e);
     		} catch (NoDetectedIndexException e) {
     			LOGGER.fine("Unable to detect "+lm+" in nucleus");
+//    			try {
+//					setLandmark(lm, 0);
+//				} catch (MissingProfileException | ProfileException e1) {
+//					LOGGER.log(Loggable.STACK, "Error getting profile type", e);
+//				}
     		} catch (ProfileException e) {
     			LOGGER.log(Loggable.STACK, "Error getting profile type", e);
-			} catch (MissingLandmarkException e) {
-				LOGGER.log(Loggable.STACK, "Landmark not present", e);
 			}
     	}
     	

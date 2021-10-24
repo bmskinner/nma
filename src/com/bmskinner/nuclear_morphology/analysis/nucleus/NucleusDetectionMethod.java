@@ -112,7 +112,7 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
         return new DefaultAnalysisResult(datasets);
     }
 
-    public void run() throws Exception{
+    public void run() throws AnalysisMethodException {
     	int i = getTotalImagesToAnalyse();
     	if(i==0) {
     		throw new AnalysisMethodException("No analysable images");
@@ -207,7 +207,7 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
      * @param folder the folder of images to be analysed
      */
     protected void processFolder(@NonNull final File folder) {
-        
+        LOGGER.fine("Searching "+folder.getAbsolutePath());
         File[] arr = folder.listFiles();
         if (arr == null)
             return;

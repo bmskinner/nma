@@ -11,14 +11,15 @@ import org.junit.Before;
 import com.bmskinner.nuclear_morphology.analysis.DatasetValidator;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.IJ;
-import ij.Prefs;
 
 public abstract class AnalysisPipelineTest {
+	
 
-    protected static Logger logger;
-
+    private static final Logger LOGGER = Logger.getLogger(Loggable.PROJECT_LOGGER);
+    
     @Before
 	public void setUp(){
     	IJ.setBackgroundColor(0, 0, 0);
@@ -29,7 +30,7 @@ public abstract class AnalysisPipelineTest {
 		DatasetValidator dv = new DatasetValidator();
         if (!dv.validate(d)) {
             for (String s : dv.getErrors()) {
-                logger.log(Level.SEVERE, s);
+            	LOGGER.log(Level.SEVERE, s);
             }
         	fail("Dataset failed validation");
         }

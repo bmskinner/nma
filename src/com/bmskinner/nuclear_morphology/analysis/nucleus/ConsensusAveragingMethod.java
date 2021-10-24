@@ -124,9 +124,6 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
     	// This will include any not present inthe ruleset collection that
     	// were added manually
     	for (Landmark l : dataset.getCollection().getProfileCollection().getLandmarks()) {
-    		if (Landmark.INTERSECTION_POINT.equals(l)) // not relevant here
-    			continue;
-    		
     		IProfile median = dataset.getCollection()
     				.getProfileCollection()
     				.getProfile(ProfileType.ANGLE, l, Stats.MEDIAN);

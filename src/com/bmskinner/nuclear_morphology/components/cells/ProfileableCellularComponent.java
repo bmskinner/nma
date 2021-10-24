@@ -339,19 +339,25 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
     }
 
     @Override
-    public void setLandmark(@NonNull Landmark tag, int i) throws MissingProfileException, ProfileException, MissingLandmarkException {
+    public void setLandmark(@NonNull Landmark tag, int i) throws MissingProfileException, 
+    ProfileException {
     	if (isLocked)
     		return;
 
     	if (i < 0 || i >= this.getBorderLength())
     		throw new IllegalArgumentException(String.format("Index %s is out of bounds for border length %s", i, getBorderLength()));
 
-    	profileLandmarks.put(tag, i);
+    	// On first assignment, don't try to adjust any
+    	// profiles, return directly
+    	if(!profileLandmarks.containsKey(tag)) {
+    		profileLandmarks.put(tag, i);
+    		return;
+    	}
 
     	// When moving the RP, move all segments to match
     	if (Landmark.REFERENCE_POINT.equals(tag)) {
     		ISegmentedProfile p = getProfile(ProfileType.ANGLE);
-    		int oldRP = getBorderIndex(tag);
+    		int oldRP = profileLandmarks.get(tag);
     		int diff = i - oldRP;
     		try {
     			p.nudgeSegments(diff);
@@ -363,12 +369,8 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
     		setProfile(ProfileType.ANGLE, p);
 
     	}
-
-    	// The intersection point should always be opposite the orientation point
-    	if (Landmark.ORIENTATION_POINT.equals(tag)) {
-    		int intersectionIndex = this.getBorderIndex(this.findOppositeBorder(this.getBorderPoint(i)));
-    		this.setLandmark(Landmark.INTERSECTION_POINT, intersectionIndex);
-    	}
+    	
+    	profileLandmarks.put(tag, i);
     }
        
 

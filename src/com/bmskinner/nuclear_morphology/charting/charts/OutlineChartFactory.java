@@ -686,9 +686,6 @@ public class OutlineChartFactory extends AbstractChartFactory {
                     if (tagName.equals(DefaultLandmark.REFERENCE_POINT.toString())) {
                         rend.setSeriesPaint(series, Color.ORANGE);
                     }
-                    if (tagName.equals(DefaultLandmark.INTERSECTION_POINT.toString())) {
-                        rend.setSeriesPaint(series, Color.CYAN);
-                    }
                     if (tagName.equals(DefaultLandmark.TOP_VERTICAL.toString())) {
                         rend.setSeriesPaint(series, Color.GRAY);
                     }

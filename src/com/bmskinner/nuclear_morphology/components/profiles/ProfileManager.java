@@ -556,12 +556,6 @@ public class ProfileManager {
         			Landmark tagToUpdate = n.getBorderTag(rawOldIndex);
         			LOGGER.fine("Updating tag " + tagToUpdate);
         			n.setLandmark(tagToUpdate, rawIndex);
-
-        			// Update intersection point if needed
-        			if (tagToUpdate.equals(Landmark.ORIENTATION_POINT)) {
-        				n.setLandmark(Landmark.INTERSECTION_POINT,
-        						n.getBorderIndex(n.findOppositeBorder(n.getBorderPoint(Landmark.ORIENTATION_POINT))));
-        			}
         		}
         		n.updateDependentStats();
 

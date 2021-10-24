@@ -34,7 +34,6 @@ public interface Landmark extends Comparable<Landmark>, Serializable {
     @NonNull Landmark ORIENTATION_POINT  = new DefaultLandmark("Orientation point", LandmarkType.EXTENDED);
     @NonNull Landmark TOP_VERTICAL       = new DefaultLandmark("Top vertical", LandmarkType.EXTENDED);
     @NonNull Landmark BOTTOM_VERTICAL    = new DefaultLandmark("Bottom vertical", LandmarkType.EXTENDED);
-    @NonNull Landmark INTERSECTION_POINT = new DefaultLandmark("Intersection", LandmarkType.EXTENDED);
     
     /**
      * Create a tag with the given name
@@ -54,8 +53,7 @@ public interface Landmark extends Comparable<Landmark>, Serializable {
         		REFERENCE_POINT, 
         		ORIENTATION_POINT, 
         		TOP_VERTICAL, 
-        		BOTTOM_VERTICAL,
-                INTERSECTION_POINT };
+        		BOTTOM_VERTICAL };
     }
     
     /**

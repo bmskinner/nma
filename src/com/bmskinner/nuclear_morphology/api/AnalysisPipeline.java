@@ -32,8 +32,9 @@ public interface AnalysisPipeline {
 	 * provided in an xml file. 
 	 * @param imageFolder the folder of images to be analysed. Can be recursive.
 	 * @param xmlSettingsFile the options file for the analysis
+	 * @throws Exception 
 	 */
-	void run(@NonNull final File imageFolder, @NonNull final File xmlSettingsFile) throws AnalysisPipelineException;
+	void run(@NonNull final File imageFolder, @NonNull final File xmlSettingsFile) throws AnalysisPipelineException, Exception;
 	
 	
 	/**

@@ -81,7 +81,6 @@ public class ImageAnnotator extends AbstractImageFilterer {
         DEFAULT_TAG_COLOURS.put(Landmark.ORIENTATION_POINT, Color.BLUE);
         DEFAULT_TAG_COLOURS.put(Landmark.TOP_VERTICAL, Color.GREEN);
         DEFAULT_TAG_COLOURS.put(Landmark.BOTTOM_VERTICAL, Color.GREEN);
-        DEFAULT_TAG_COLOURS.put(Landmark.INTERSECTION_POINT, Color.CYAN);
     }
     
     /**
@@ -198,8 +197,6 @@ public class ImageAnnotator extends AbstractImageFilterer {
             try {
                 // Draw lines for the border tags   
             	for(Landmark t : n.getBorderTags().keySet()) {
-            		if(Landmark.INTERSECTION_POINT.equals(t)) // Not required to be drawn
-            			continue;
             		Color c = getDefaultColour(t);
             		annotateLine(n.getCentreOfMass().plus(Imageable.COMPONENT_BUFFER), 
                 			n.getBorderPoint(t).plus(Imageable.COMPONENT_BUFFER), 
