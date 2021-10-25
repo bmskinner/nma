@@ -181,7 +181,7 @@ public class SegmentedFloatProfileTest {
 	@Test
     public void testToString() {
 	    StringBuilder builder = new StringBuilder("Profile");
-        for (IProfileSegment seg : sp.getSegments()) {
+        for (IProfileSegment seg : sp.getOrderedSegments()) {
             builder.append(" | "+seg.toString());
         }
 

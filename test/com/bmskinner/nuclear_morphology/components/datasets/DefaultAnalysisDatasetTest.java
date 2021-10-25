@@ -141,7 +141,9 @@ public class DefaultAnalysisDatasetTest extends ComponentTester {
     @Test
     public void testGetChildCount() throws CollectionFilteringException {
         assertEquals(N_CHILD_DATASETS, d.getChildCount());
-        int defaultArea = TestDatasetBuilder.DEFAULT_BASE_HEIGHT * TestDatasetBuilder.DEFAULT_BASE_WIDTH;
+        
+        double defaultArea = d.getCollection().getMedian(Measurement.AREA, CellularComponent.NUCLEUS, 
+        				MeasurementScale.PIXELS);
         
 		FilteringOptions op = new CellCollectionFilterBuilder()
         		.add(Measurement.AREA, CellularComponent.NUCLEUS, 

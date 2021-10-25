@@ -135,9 +135,5 @@ public class ConsensusAveragingMethodTest {
 		assertTrue(n.hasStatistic(Measurement.AREA));
 		assertTrue(n.getStatistic(Measurement.AREA)!=Statistical.ERROR_CALCULATING_STAT);
 		assertTrue(n.getStatistic(Measurement.AREA)!=Statistical.STAT_NOT_CALCULATED);
-		
-		
-		
-		assertEquals("Scale should match", scale, n.getScale(), 0);
 	}
 }

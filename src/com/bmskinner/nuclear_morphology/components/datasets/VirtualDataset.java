@@ -736,8 +736,7 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
     }
 
     @Override
-    public synchronized double getMedian(Measurement stat, String component, MeasurementScale scale)
-            throws Exception {
+    public synchronized double getMedian(@NonNull Measurement stat, String component, MeasurementScale scale) {
         if (this.size() == 0) {
             return 0;
         }
@@ -745,13 +744,13 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
     }
 
     @Override
-    public double[] getRawValues(Measurement stat, String component,
+    public double[] getRawValues(@NonNull Measurement stat, String component,
             MeasurementScale scale) {
         return getRawValues(stat, component, scale, null);
     }
 
     @Override
-    public double[] getRawValues(Measurement stat, String component, MeasurementScale scale,
+    public double[] getRawValues(@NonNull Measurement stat, String component, MeasurementScale scale,
             UUID id) {
 
     	switch(component) {
@@ -766,19 +765,18 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
     }
 
     @Override
-    public double getMedian(Measurement stat, String component, MeasurementScale scale, UUID id)
-            throws Exception {
+    public double getMedian(@NonNull Measurement stat, String component, MeasurementScale scale, UUID id) {
 
         return getMedianStatistic(stat, component, scale, id);
     }
     
     @Override
-    public synchronized double getMin(Measurement stat, String component, MeasurementScale scale) {
+    public synchronized double getMin(@NonNull Measurement stat, String component, MeasurementScale scale) {
         return getMinStatistic(stat, component, scale, null);
     }
     
     @Override
-    public synchronized double getMin(Measurement stat, String component, MeasurementScale scale,
+    public synchronized double getMin(@NonNull Measurement stat, String component, MeasurementScale scale,
             UUID id){
 
     	// Handle old segment andSignalStatistic enums
@@ -800,12 +798,12 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
     }
     
     @Override
-    public synchronized double getMax(Measurement stat, String component, MeasurementScale scale) {
+    public synchronized double getMax(@NonNull Measurement stat, String component, MeasurementScale scale) {
         return getMaxStatistic(stat, component, scale, null);
     }
     
     @Override
-    public synchronized double getMax(Measurement stat, String component, MeasurementScale scale,
+    public synchronized double getMax(@NonNull Measurement stat, String component, MeasurementScale scale,
             UUID id){
 
     	// Handle old segment andSignalStatistic enums
@@ -943,7 +941,7 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
     }
 
     private double getMedianStatistic(Measurement stat, String component, MeasurementScale scale,
-            UUID id) throws Exception {
+            UUID id) {
 
         if (this.statsCache.hasMedian(stat, component, scale, id)) {
             return statsCache.getMedian(stat, component, scale,id);
@@ -1294,7 +1292,7 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
 	}
 
 	@Override
-	public boolean hasDirectChild(UUID id) {
+	public boolean hasDirectChild(@NonNull UUID id) {
 
 		for (IAnalysisDataset child : childDatasets) {
 			if (child.getId().equals(id)) {

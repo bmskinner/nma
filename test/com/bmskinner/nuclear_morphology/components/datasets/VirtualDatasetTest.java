@@ -49,10 +49,16 @@ public class VirtualDatasetTest extends ComponentTester {
     	testDuplicatesByField(d, dup);
     }
 	
+	/**
+	 * A virtual dataset can only be deserialised as 
+	 * part of a root dataset; otherwise it will not 
+	 * have a parent set. Serialize the parent too.
+	 * @throws Exception
+	 */
 	@Test
 	public void testXmlSerializes() throws Exception {
-
-		Element e = d.toXmlElement();		
+		
+		Element e = parent.toXmlElement();		
 		XMLOutputter xmlOutput = new XMLOutputter();
 		xmlOutput.setFormat(Format.getPrettyFormat());
 		xmlOutput.output(e, new PrintWriter( System.out ));
@@ -60,9 +66,9 @@ public class VirtualDatasetTest extends ComponentTester {
 		// files are not absolute on test dataset creation
 		d.setSavePath(d.getSavePath().getAbsoluteFile());
 		
-		IAnalysisDataset test = new VirtualDataset(e);
+		IAnalysisDataset test = DatasetCreator.createRoot(e);
 		xmlOutput.output(test.toXmlElement(), new PrintWriter( System.out ));
-		testDuplicatesByField(d, test);
-		assertEquals(d, test);
+		testDuplicatesByField(parent, test);
+		assertEquals(parent, test);
 	}
 }

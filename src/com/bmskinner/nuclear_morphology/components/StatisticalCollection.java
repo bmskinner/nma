@@ -66,7 +66,7 @@ public interface StatisticalCollection {
      * @return the median statistic value
      * @throws Exception
      */
-    double getMedian(@NonNull Measurement stat, String component, MeasurementScale scale) throws Exception;
+    double getMedian(@NonNull Measurement stat, String component, MeasurementScale scale);
 
     /**
      * Get the median stat for a value with an ID - i.e. a nuclear signal or a
@@ -78,8 +78,7 @@ public interface StatisticalCollection {
      * @return
      * @throws Exception
      */
-    double getMedian(@NonNull Measurement stat, String component, MeasurementScale scale, UUID id)
-            throws Exception;
+    double getMedian(@NonNull Measurement stat, String component, MeasurementScale scale, UUID id);
     
     
     /**

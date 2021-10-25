@@ -80,10 +80,16 @@ public class NucleusTest {
 		return Arrays.asList(DefaultNucleus.class);
 	}
 	
+	/**
+	 * The minimum diameter is expressed as a fraction of the max diameter.
+	 * For a square the max diameter is the diagonal. 
+	 * @throws Exception
+	 */
 	@Test
 	public void testMinDiameter() throws Exception {
-		double expected = 100;
-		double epsilon = 2; // the amount of difference permitted
+		double max = Math.sqrt(100*100*2);
+		double expected = 100/max;
+		double epsilon = 0.01; // the amount of difference permitted
 		assertEquals(expected, nucleus.getStatistic(Measurement.MIN_DIAMETER), epsilon);
 	}
 		

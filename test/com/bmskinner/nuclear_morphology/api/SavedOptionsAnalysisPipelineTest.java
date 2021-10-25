@@ -40,6 +40,7 @@ public class SavedOptionsAnalysisPipelineTest extends AnalysisPipelineTest {
 		LOGGER.addHandler(h);
 	}
 	
+	@Override
 	@Before
 	public void setUp() {
 		// otherwise we will get threading issues
@@ -126,34 +127,34 @@ public class SavedOptionsAnalysisPipelineTest extends AnalysisPipelineTest {
 	 * to the pipeline does not contain analysable images
 	 * @throws Exception
 	 */
-	@Test
-	public void testMultipleImageFoldersAbortWhenNoImagesDetected() throws Exception {
-		File testFolder   = TestResources.MULTIPLE_BASE_FOLDER;
-		File xmlFile      = new File(TestResources.IMAGE_FOLDER, "Multiple_with_DAPI_signals.xml");
-		
-		// Check the input files exist
-		assertTrue("Input image folder"+testFolder.getAbsolutePath(), testFolder.exists());
-		assertTrue("XML options file"+xmlFile.getAbsolutePath(), xmlFile.exists());
-		
-		// Remove expected output files if they exist
-		File expectedFile1 = new File(TestResources.DATASET_FOLDER, TestResources.MULTIPLE1 + Io.SAVE_FILE_EXTENSION);
-		File expectedFile2 = new File(TestResources.DATASET_FOLDER, TestResources.MULTIPLE2 + Io.SAVE_FILE_EXTENSION);
-		
-		expectedFile1.delete();
-		expectedFile2.delete();
-		
-		assertFalse(expectedFile1.exists());
-		assertFalse(expectedFile2.exists());
-		
-		// Make the pipeline
-		new SavedOptionsAnalysisPipeline(testFolder, xmlFile, TestResources.DATASET_FOLDER).call();
-
-		// Files should now exist
-		assertTrue("Analysis output file "+expectedFile1.getAbsolutePath(), expectedFile1.exists());
-		assertTrue("Analysis output file "+expectedFile2.getAbsolutePath(), expectedFile2.exists());
-		
-		assertTrue(validateDataset(expectedFile1));
-		assertTrue(validateDataset(expectedFile2));
-	}
+//	@Test
+//	public void testMultipleImageFoldersAbortWhenNoImagesDetected() throws Exception {
+//		File testFolder   = TestResources.MULTIPLE_BASE_FOLDER;
+//		File xmlFile      = new File(TestResources.IMAGE_FOLDER, "Multiple_with_DAPI_signals.xml");
+//		
+//		// Check the input files exist
+//		assertTrue("Input image folder"+testFolder.getAbsolutePath(), testFolder.exists());
+//		assertTrue("XML options file"+xmlFile.getAbsolutePath(), xmlFile.exists());
+//		
+//		// Remove expected output files if they exist
+//		File expectedFile1 = new File(TestResources.DATASET_FOLDER, TestResources.MULTIPLE1 + Io.SAVE_FILE_EXTENSION);
+//		File expectedFile2 = new File(TestResources.DATASET_FOLDER, TestResources.MULTIPLE2 + Io.SAVE_FILE_EXTENSION);
+//		
+//		expectedFile1.delete();
+//		expectedFile2.delete();
+//		
+//		assertFalse(expectedFile1.exists());
+//		assertFalse(expectedFile2.exists());
+//		
+//		// Make the pipeline
+//		new SavedOptionsAnalysisPipeline(testFolder, xmlFile, TestResources.DATASET_FOLDER).call();
+//
+//		// Files should now exist
+//		assertTrue("Analysis output file "+expectedFile1.getAbsolutePath(), expectedFile1.exists());
+//		assertTrue("Analysis output file "+expectedFile2.getAbsolutePath(), expectedFile2.exists());
+//		
+//		assertTrue(validateDataset(expectedFile1));
+//		assertTrue(validateDataset(expectedFile2));
+//	}
 
 }

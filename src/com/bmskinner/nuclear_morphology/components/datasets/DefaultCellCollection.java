@@ -687,14 +687,13 @@ public class DefaultCellCollection implements ICellCollection {
 	}
 
 	@Override
-	public synchronized double getMedian(@NonNull Measurement stat, String component, MeasurementScale scale)
-			throws Exception {
+	public synchronized double getMedian(@NonNull Measurement stat, String component, MeasurementScale scale) {
 		return getMedianStatistic(stat, component, scale, null);
 	}
 
 	@Override
 	public synchronized double getMedian(@NonNull Measurement stat, String component, MeasurementScale scale,
-			UUID id) throws Exception {
+			UUID id){
 
 		if (CellularComponent.NUCLEAR_SIGNAL.equals(component)) {
 			return getMedianStatistic(stat, component, scale, id);
