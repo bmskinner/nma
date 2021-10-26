@@ -100,7 +100,7 @@ public class NucleusDetectionMethodTest {
     	
     	IAnalysisDataset d = r.getFirstDataset();
     	
-		for(Measurement stat : Measurement.getNucleusStats()) {
+		for(Measurement stat : op.getRuleSetCollection().getMeasurableValues()) {
 			double value = d.getCollection().getMedian(stat, CellularComponent.NUCLEUS, MeasurementScale.PIXELS);
 			assertFalse("Error calculating "+stat, Statistical.ERROR_CALCULATING_STAT==value);
 			assertFalse("Did not calculate "+stat, Statistical.STAT_NOT_CALCULATED==value);

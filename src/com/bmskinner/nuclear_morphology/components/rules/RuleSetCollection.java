@@ -17,7 +17,9 @@
 package com.bmskinner.nuclear_morphology.components.rules;
 
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -30,6 +32,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.jdom2.Element;
 
+import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.LandmarkType;
 import com.bmskinner.nuclear_morphology.io.XmlSerializable;
@@ -67,7 +70,10 @@ public class RuleSetCollection implements XmlSerializable {
     private final Map<Landmark, List<RuleSet>> map = new HashMap<>();
     
     /** Store the landmarks to be used for orientation */
-    private Map<OrientationMark, Landmark> orientationMarks = new HashMap<>();
+    private final Map<OrientationMark, Landmark> orientationMarks = new EnumMap<>(OrientationMark.class);
+    
+    /** Track which measurements should be performed for these nuclei */
+    private final Set<Measurement> validMeasurements = new HashSet<>();
             
     private final PriorityAxis priorityAxis;
     
@@ -139,10 +145,24 @@ public class RuleSetCollection implements XmlSerializable {
         				.findFirst().orElse(null));
         	}
     	}
+    	
+    	for(Element m : e.getChildren("Measurement")) {
+    		validMeasurements.add(Measurement.of(m.getText()));
+    	}
+    	
+
     }
 
     public String getName() {
     	return name;
+    }
+    
+    public Set<Measurement> getMeasurableValues(){
+    	return validMeasurements;
+    }
+    
+    public void addMeasurableValue(Measurement m) {
+    	validMeasurements.add(m);
     }
     
     public RuleApplicationType getApplicationType() {
@@ -291,6 +311,10 @@ public class RuleSetCollection implements XmlSerializable {
     	for(Entry<OrientationMark, Landmark> entry : orientationMarks.entrySet()) {
     		rootElement.addContent(new Element(entry.getKey().name()).addContent(entry.getValue().toString()));
     	}
+    	
+    	for(Measurement m : validMeasurements) {
+    		rootElement.addContent(new Element("Measurement").setText(m.name()));
+    	}
 		
 		if(priorityAxis!=null)
 			rootElement.addContent(new Element(XML_PRIORITY_AXIS).addContent(priorityAxis.toString()));
@@ -333,6 +357,12 @@ public class RuleSetCollection implements XmlSerializable {
         r.addRuleSet(Landmark.ORIENTATION_POINT, RuleSet.mouseSpermOPRuleSet());
         r.addRuleSet(Landmark.TOP_VERTICAL, RuleSet.mouseSpermTVRuleSet());
         r.addRuleSet(Landmark.BOTTOM_VERTICAL, RuleSet.mouseSpermBVRuleSet());
+        
+        for(Measurement m : Measurement.getRoundNucleusStats())
+        	r.addMeasurableValue(m);
+        
+        r.addMeasurableValue(Measurement.BODY_WIDTH);
+        r.addMeasurableValue(Measurement.HOOK_LENGTH);
         return r;
     }
 
@@ -350,6 +380,10 @@ public class RuleSetCollection implements XmlSerializable {
         r.addRuleSet(Landmark.ORIENTATION_POINT, RuleSet.pigSpermOPRuleSet());
         r.addRuleSet(Landmark.LEFT_HORIZONTAL, RuleSet.pigSpermLHRuleSet());
         r.addRuleSet(Landmark.RIGHT_HORIZONTAL, RuleSet.pigSpermRHRuleSet());
+        
+        for(Measurement m : Measurement.getRoundNucleusStats())
+        	r.addMeasurableValue(m);
+        
         return r;
     }
 
@@ -363,6 +397,9 @@ public class RuleSetCollection implements XmlSerializable {
         		null, Landmark.REFERENCE_POINT, PriorityAxis.Y, RuleApplicationType.VIA_MEDIAN);
 
         r.addRuleSet(Landmark.REFERENCE_POINT, RuleSet.roundRPRuleSet());
+        
+        for(Measurement m : Measurement.getRoundNucleusStats())
+        	r.addMeasurableValue(m);
         return r;
     }
 }
