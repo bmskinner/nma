@@ -60,7 +60,9 @@ public class ProfileIndexFinder {
     /**
      * Assign landmarks to the given nucleus using the given 
      * rulesets. This uses the nucleus' own profiles, and is
-     * independent of any dataset medians
+     * independent of any dataset medians. For this reason,
+     * if detection fails, it falls back to assigning the 
+     * landmark to the zero index of the profile
      * @param n
      * @param rsc
      */
@@ -78,6 +80,12 @@ public class ProfileIndexFinder {
     			LOGGER.log(Loggable.STACK, "Error getting profile type", e);
     		} catch (NoDetectedIndexException e) {
     			LOGGER.fine("Unable to detect "+lm+" in nucleus");
+    			try {
+					n.setLandmark(lm, 0);
+				} catch (IndexOutOfBoundsException | MissingProfileException | MissingLandmarkException
+						| ProfileException e1) {
+					LOGGER.log(Loggable.STACK, "Error setting landmark to zero", e);
+				} // default to the zero index 
     		} catch (ProfileException e) {
     			LOGGER.log(Loggable.STACK, "Error getting profile type", e);
 			} catch (IndexOutOfBoundsException e) {
