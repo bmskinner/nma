@@ -104,6 +104,9 @@ public class ConsensusAveragingMethodTest {
 		double scale = 20;
 		d.setScale(scale);
 		
+		for(Nucleus n : d.getCollection().getNuclei())
+			assertEquals("Scale should match", scale, n.getScale(), 0);
+		
 		// Make the consensus
 		new ConsensusAveragingMethod(d).call();	
 		

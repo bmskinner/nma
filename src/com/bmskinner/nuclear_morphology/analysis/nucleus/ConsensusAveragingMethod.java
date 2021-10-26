@@ -89,8 +89,7 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
     }
     
     /**
-     * If scale is given in the dataset options, apply
-     * it to the given nucleus
+     * If scale is given in the dataset options, get it
      * @param n
      */
     private double getScale() {
@@ -100,7 +99,6 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
         	Optional<HashOptions> nucleusOptions = analysisOptions.get().getNuclusDetectionOptions();
         	if(nucleusOptions.isPresent()) {
         		return nucleusOptions.get().getDouble(HashOptions.SCALE);
-
         	} else {
         		LOGGER.fine("No nucleus detection options present, unable to find pixel scale for consensus");
         	}
@@ -179,23 +177,9 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
         		.withChannel(0)
         		.withMeasurement(Measurement.PERIMETER, ComponentMeasurer.calculatePerimeter(list))
         		.build();
-                
-    	// Consensus CoM is at the origin for plotting
-//        IPoint com = IPoint.makeNew(0, 0);
-//        Nucleus n = fact.buildInstance(list, new File("Empty"), 0, com);
-        
-        
-//        setConsensusScale(n);
 
-        // Calculate the measured values for the new consensus
-        // Required for angle window size calculation
-//        double perim = ComponentMeasurer.calculatePerimeter(n);
-//        n.setStatistic(Measurement.PERIMETER, perim);
-        
         double area = ComponentMeasurer.calculateArea(n);
         n.setStatistic(Measurement.AREA, area);
-
-//        n.initialise(Taggable.DEFAULT_PROFILE_WINDOW_PROPORTION);
 
         // Add landmarks and segments from the profile collection
         setLandmarks(n);

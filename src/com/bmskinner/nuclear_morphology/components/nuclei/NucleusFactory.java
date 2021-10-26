@@ -69,7 +69,6 @@ public class NucleusFactory {
 		private int[] original = null;
 		private int count = -1;
 		private boolean isOffset = false; 
-		private double scale;
 		private Map<Measurement, Double> measures = new HashMap<>();
 		
 		public NucleusBuilder() {}
@@ -113,12 +112,7 @@ public class NucleusFactory {
 			count = i;
 			return this;
 		}
-		
-		public  NucleusBuilder withScale(double s) {
-			scale = s;
-			return this;
-		}
-		
+				
 		public  NucleusBuilder withMeasurement(Measurement m, double s) {
 			measures.put(m, s);
 			return this;
@@ -184,8 +178,9 @@ public class NucleusFactory {
     /**
      * Create a factory for nuclei of the given type
      * 
-     * @param imageFile
-     * @param nucleusType
+     * @param rsc the rulesets to use
+     * @param prop the window proportion
+     * @param scale the scale
      */
     public NucleusFactory(@NonNull RuleSetCollection rsc, double prop, double scale) {
     	this.rsc = rsc;
