@@ -26,6 +26,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.junit.Before;
 import org.junit.Test;
 
 import com.bmskinner.nuclear_morphology.TestImageDatasetCreator;
@@ -39,6 +40,8 @@ import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
 
+import ij.Prefs;
+
 /**
  * Test the detection methods to ensure new analyses match previously 
  * saved datasets. The test sets should have been created using the 
@@ -48,6 +51,11 @@ import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
  *
  */
 public class BasicAnalysisPipelineTest extends AnalysisPipelineTest {
+	
+	@Before
+	public void setUp(){		
+		Prefs.setThreads(2); // Attempt to avoid issue 162
+	}
 
 	@Test
 	public void testMouseDatasetMatchesSavedDataset() throws Exception{
