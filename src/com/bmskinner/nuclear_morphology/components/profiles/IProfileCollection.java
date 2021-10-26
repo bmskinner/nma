@@ -275,8 +275,10 @@ public interface IProfileCollection extends XmlSerializable {
      * @param collection the CellCollection
      * @param length the length of the aggregates
      * @throws ProfileException 
+     * @throws MissingProfileException 
+     * @throws MissingLandmarkException 
      */
-    void createProfileAggregate(@NonNull ICellCollection collection, int length) throws ProfileException;
+    void createProfileAggregate(@NonNull ICellCollection collection, int length) throws ProfileException, MissingLandmarkException, MissingProfileException;
 
     /**
      * Create profile aggregates from the given collection, with a length set by
@@ -285,8 +287,10 @@ public interface IProfileCollection extends XmlSerializable {
      * 
      * @param collection the CellCollection
      * @throws ProfileException if the profile aggregate cannot be restored
+     * @throws MissingProfileException 
+     * @throws MissingLandmarkException 
      */
-    void createAndRestoreProfileAggregate(@NonNull ICellCollection collection) throws ProfileException;
+    void createAndRestoreProfileAggregate(@NonNull ICellCollection collection) throws ProfileException, MissingLandmarkException, MissingProfileException;
 
 
     /**

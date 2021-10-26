@@ -137,8 +137,9 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
 	 * @param cells the collection from which to copy cells
 	 * @throws ProfileException 
 	 * @throws MissingProfileException 
+	 * @throws MissingLandmarkException 
 	 */
-	public VirtualDataset(@NonNull IAnalysisDataset parent, String name, @Nullable UUID id, ICellCollection cells) throws ProfileException, MissingProfileException {
+	public VirtualDataset(@NonNull IAnalysisDataset parent, String name, @Nullable UUID id, ICellCollection cells) throws ProfileException, MissingProfileException, MissingLandmarkException {
 		this(parent, name, id);
 		addAll(cells);
 		createProfileCollection();
@@ -491,13 +492,13 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
     }
 
     @Override
-	public void createProfileCollection() throws ProfileException {
+	public void createProfileCollection() throws ProfileException, MissingLandmarkException, MissingProfileException {
         profileCollection.createProfileAggregate(this, 
         		parentDataset.getCollection().getMedianArrayLength());
     }
     
     @Override
-	public void createProfileCollection(int length) throws ProfileException {
+	public void createProfileCollection(int length) throws ProfileException, MissingLandmarkException, MissingProfileException {
         profileCollection.createProfileAggregate(this, length);
     }
 

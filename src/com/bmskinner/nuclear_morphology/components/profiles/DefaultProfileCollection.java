@@ -395,10 +395,10 @@ public class DefaultProfileCollection implements IProfileCollection {
     }
 
     @Override
-    public void createProfileAggregate(@NonNull ICellCollection collection, int length) throws ProfileException {
+    public void createProfileAggregate(@NonNull ICellCollection collection, int length) throws ProfileException, MissingLandmarkException, MissingProfileException {
         if (length <= 0)
             throw new IllegalArgumentException("Requested profile aggregate length is zero or negative");
-        if (collection.size() == 0)
+        if (collection.isEmpty())
             throw new IllegalArgumentException("Cell collection is empty");
         
         this.length = length;
@@ -419,16 +419,14 @@ public class DefaultProfileCollection implements IProfileCollection {
             IProfileAggregate agg = new DefaultProfileAggregate(length, collection.size());
 
             map.put(type, agg);
-            try {
-                for (Nucleus n : collection.getNuclei()) {
-                    switch (type) {
-                    default: agg.addValues(n.getProfile(type, Landmark.REFERENCE_POINT));
-                        break;
-                    }
-                }
-            } catch (ProfileException | MissingLandmarkException | MissingProfileException e) {
-                LOGGER.log(Loggable.STACK, "Error making aggregate", e);
-            }
+//            try {
+            	for (Nucleus n : collection.getNuclei()) {
+            		agg.addValues(n.getProfile(type, Landmark.REFERENCE_POINT));
+
+            	}
+//            } catch (ProfileException | MissingLandmarkException | MissingProfileException e) {
+//                LOGGER.log(Loggable.STACK, "Error making aggregate", e);
+//            }
         }
         
     }
@@ -485,12 +483,12 @@ public class DefaultProfileCollection implements IProfileCollection {
     }
 
 
-    public void createProfileAggregate(@NonNull ICellCollection collection) throws ProfileException {
+    public void createProfileAggregate(@NonNull ICellCollection collection) throws ProfileException, MissingLandmarkException, MissingProfileException {
         createProfileAggregate(collection, collection.getMedianArrayLength());
     }
 
     @Override
-    public void createAndRestoreProfileAggregate(@NonNull ICellCollection collection) throws ProfileException {
+    public void createAndRestoreProfileAggregate(@NonNull ICellCollection collection) throws ProfileException, MissingLandmarkException, MissingProfileException {
 
         if (segments == null) {
             createProfileAggregate(collection, collection.getMedianArrayLength());

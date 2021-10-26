@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.datasets.DefaultAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.DefaultCellCollection;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
@@ -80,8 +81,8 @@ public class MergeSourceExtractionMethod extends MultipleDatasetAnalysisMethod {
          	}
 
             result.add(extracted);
-        	} catch(MissingOptionException e) {
-        		LOGGER.warning("Missing analysis options; skipping "+virtualMergeSource.getName());  
+        	} catch(MissingOptionException | MissingLandmarkException e) {
+        		LOGGER.warning("Missing analysis options or landmark; skipping "+virtualMergeSource.getName());  
         		LOGGER.log(Loggable.STACK, "Missing analysis options in dataset "+virtualMergeSource.getName(),e);
         	}
 
@@ -95,9 +96,10 @@ public class MergeSourceExtractionMethod extends MultipleDatasetAnalysisMethod {
      * @param template
      * @return
      * @throws MissingOptionException 
+     * @throws MissingLandmarkException 
      * @throws NoSuchElementException if the template analysis options are not present
      */
-    private IAnalysisDataset extractMergeSource(@NonNull IAnalysisDataset template) throws MissingOptionException {
+    private IAnalysisDataset extractMergeSource(@NonNull IAnalysisDataset template) throws MissingOptionException, MissingLandmarkException {
 
     	ICellCollection templateCollection = template.getCollection();
     	

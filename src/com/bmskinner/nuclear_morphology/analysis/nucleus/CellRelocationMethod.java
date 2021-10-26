@@ -30,6 +30,7 @@ import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.SingleDatasetAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
@@ -91,7 +92,7 @@ public class CellRelocationMethod extends SingleDatasetAnalysisMethod {
         Set<UUID> newDatasets;
         try {
             newDatasets = parsePathList();
-        } catch (CellRelocationException | ProfileException e) {
+        } catch (CellRelocationException | ProfileException | MissingLandmarkException | MissingProfileException e) {
             LOGGER.log(Loggable.STACK, "Error relocating cells", e);
             return;
         }
@@ -117,7 +118,7 @@ public class CellRelocationMethod extends SingleDatasetAnalysisMethod {
 
     }
 
-    private Set<UUID> parsePathList() throws CellRelocationException, ProfileException {
+    private Set<UUID> parsePathList() throws CellRelocationException, ProfileException, MissingLandmarkException, MissingProfileException {
         Scanner scanner;
         try {
             scanner = new Scanner(inputFile);

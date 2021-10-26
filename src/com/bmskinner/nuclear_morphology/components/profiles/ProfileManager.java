@@ -388,10 +388,12 @@ public class ProfileManager {
      * collection. The length is set to the angle profile length. The zero index
      * of the profile aggregate is the RP.
      * @throws ProfileException 
+     * @throws MissingProfileException 
+     * @throws MissingLandmarkException 
      * 
      * @throws Exception
      */
-    public void recalculateProfileAggregates() throws ProfileException {
+    public void recalculateProfileAggregates() throws ProfileException, MissingLandmarkException, MissingProfileException {
         // use the same array length as the source collection to avoid segment slippage
         IProfileCollection pc = collection.getProfileCollection();
         pc.createProfileAggregate(collection, pc.length());

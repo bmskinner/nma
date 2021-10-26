@@ -526,7 +526,7 @@ public class DefaultCellCollection implements ICellCollection {
 	}
 
 	@Override
-	public void createProfileCollection() throws ProfileException {
+	public void createProfileCollection() throws ProfileException, MissingLandmarkException, MissingProfileException {
 		createProfileCollection(getMedianArrayLength());
 	}
 	
@@ -535,7 +535,7 @@ public class DefaultCellCollection implements ICellCollection {
 	 * 
 	 */
 	@Override
-	public void createProfileCollection(int length) throws ProfileException {
+	public void createProfileCollection(int length) throws ProfileException, MissingLandmarkException, MissingProfileException {
 		profileCollection.createProfileAggregate(this, length);
 	}
 

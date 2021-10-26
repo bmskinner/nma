@@ -17,7 +17,6 @@
 package com.bmskinner.nuclear_morphology.analysis.detection.pipelines;
 
 import java.awt.Color;
-import java.awt.Rectangle;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,13 +31,9 @@ import com.bmskinner.nuclear_morphology.analysis.detection.GenericDetector;
 import com.bmskinner.nuclear_morphology.analysis.detection.StatsMap;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageAnnotator;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
-import com.bmskinner.nuclear_morphology.analysis.profiles.NoDetectedIndexException;
-import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder;
-import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
-import com.bmskinner.nuclear_morphology.components.cells.ComponentFactory;
 import com.bmskinner.nuclear_morphology.components.cells.DefaultCell;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
@@ -47,11 +42,6 @@ import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.NucleusFactory;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
-import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
-import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
-import com.bmskinner.nuclear_morphology.components.rules.RuleSet;
-import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -262,15 +252,7 @@ public class FluorescentNucleusFinder extends CellFinder {
     private synchronized Nucleus makeNucleus(final Roi roi, final File f,
             final StatsMap values) throws ComponentCreationException {
         
-        LOGGER.fine(()->"Creating nucleus from roi "+f.getName()+" area: "+values.get(StatsMap.AREA));
-
-        // save the position of the roi, for later use
-//        int xbase = (int) roi.getXBase();
-//        int ybase = (int) roi.getYBase();
-
-//        Rectangle bounds = roi.getBounds();
-
-//        int[] originalPosition = { xbase, ybase, (int) bounds.getWidth(), (int) bounds.getHeight() };
+        LOGGER.finer(()->"Creating nucleus from roi "+f.getName()+" area: "+values.get(StatsMap.AREA));
 
         // create a Nucleus from the roi
         IPoint centreOfMass = IPoint.makeNew(values.get(StatsMap.COM_X), values.get(StatsMap.COM_Y));
@@ -283,67 +265,10 @@ public class FluorescentNucleusFinder extends CellFinder {
         	.withMeasurement(Measurement.MAX_FERET, values.get(StatsMap.FERET))
         	.withMeasurement(Measurement.PERIMETER, values.get(StatsMap.PERIM))
         	.build();
-        
-//        Nucleus result = nuclFactory.buildInstance(roi, f, nuclOptions.getInt(HashOptions.CHANNEL),
-//        		originalPosition, centreOfMass);
 
-        // Move the nucleus xbase and ybase to 0,0 coordinates for charting
-//        IPoint offsetCoM = IPoint.makeNew(centreOfMass.getX() - xbase, centreOfMass.getY() - ybase);
-//
-//        result.moveCentreOfMass(offsetCoM);
-
-
-//        result.setStatistic(Measurement.AREA, values.get(StatsMap.AREA));
-//        result.setStatistic(Measurement.MAX_FERET, values.get(StatsMap.FERET));
-//        result.setStatistic(Measurement.PERIMETER, values.get(StatsMap.PERIM));
-
-
-//        result.setScale(nuclOptions.getDouble(HashOptions.SCALE));
-
-//        double prop = options.getProfileWindowProportion();
-//        result.initialise(prop);
         ProfileIndexFinder.assignLandmarks(result, options.getRuleSetCollection());
-//        result.findLandmarks(options.getRuleSetCollection());
+
         LOGGER.finer(()->"Created nucleus from roi "+f.getName());
         return result;
     }
-    
-    /**
-     * Finds the key points of interest around the border of the object.
-     * Specify the rulesets that should be used for landmark detection and
-     * subsequent orientation.
-     * @throws ComponentCreationException
-     */
-//    public void findLandmarks(Nucleus n) throws ComponentCreationException {
-//    	
-//    	for(Landmark lm : options.getRuleSetCollection().getTags()) {
-//    		LOGGER.finer(()->"Locating "+lm);
-//    		
-//    		try {
-//    			for(RuleSet rule : options.getRuleSetCollection().getRuleSets(lm)) {
-//    				IProfile p = n.getProfile(rule.getType());
-//    				int index = ProfileIndexFinder.identifyIndex(p, rule);
-//    				n.setLandmark(lm, index);
-//    			}
-//    		} catch (MissingProfileException e) {
-//    			LOGGER.log(Loggable.STACK, "Error getting profile type", e);
-//    		} catch (NoDetectedIndexException e) {
-//    			LOGGER.fine("Unable to detect "+lm+" in nucleus");
-////    			try {
-////					setLandmark(lm, 0);
-////				} catch (MissingProfileException | ProfileException e1) {
-////					LOGGER.log(Loggable.STACK, "Error getting profile type", e);
-////				}
-//    		} catch (ProfileException e) {
-//    			LOGGER.log(Loggable.STACK, "Error getting profile type", e);
-//			} catch (IndexOutOfBoundsException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			} catch (MissingLandmarkException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
-//    	}
-//    }
-
 }

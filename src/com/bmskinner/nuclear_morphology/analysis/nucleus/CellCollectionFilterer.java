@@ -23,6 +23,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.DefaultCellCollection;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
@@ -150,7 +151,7 @@ public class CellCollectionFilterer {
 			collection.getProfileManager().copySegmentsAndLandmarksTo(subCollection);
 			collection.getSignalManager().copySignalGroupsTo(subCollection);
 
-		} catch (ProfileException | MissingProfileException e) {
+		} catch (ProfileException | MissingProfileException | MissingLandmarkException e) {
 			LOGGER.warning("Error copying collection offsets");
 			LOGGER.log(Loggable.STACK, "Error in offsetting", e);
 			throw new CollectionFilteringException(e);

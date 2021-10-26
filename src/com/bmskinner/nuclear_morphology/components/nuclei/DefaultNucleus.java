@@ -205,48 +205,6 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
 	public @Nullable PriorityAxis getPriorityAxis() {
 		return priorityAxis;
 	}
-
-	/*
-     * Finds the key points of interest around the border of the Nucleus. Can
-     * use several different methods, and take a best-fit, or just use one. The
-     * default in a round nucleus is to get the longest diameter and set this as
-     * the head/tail axis.
-     */
-//    @Override
-//    public void findLandmarks(@NonNull RuleSetCollection rsc) throws ComponentCreationException {
-//    	
-//    	for(Landmark lm : rsc.getTags()) {
-//    		LOGGER.finer(()->"Locating "+lm);
-//    		
-//    		try {
-//    			for(RuleSet rule : rsc.getRuleSets(lm)) {
-//    				IProfile p = this.getProfile(rule.getType());
-//    				ProfileIndexFinder f = new ProfileIndexFinder();
-//    				int index = f.identifyIndex(p, rule);
-//    				setLandmark(lm, index);
-//    			}
-//    		} catch (MissingProfileException e) {
-//    			LOGGER.log(Loggable.STACK, "Error getting profile type", e);
-//    		} catch (NoDetectedIndexException e) {
-//    			LOGGER.fine("Unable to detect "+lm+" in nucleus");
-////    			try {
-////					setLandmark(lm, 0);
-////				} catch (MissingProfileException | ProfileException e1) {
-////					LOGGER.log(Loggable.STACK, "Error getting profile type", e);
-////				}
-//    		} catch (ProfileException e) {
-//    			LOGGER.log(Loggable.STACK, "Error getting profile type", e);
-//			}
-//    	}
-//    	
-//    	if (!this.isProfileOrientationOK() && canReverse) {
-//            reverse();
-//            profileMap.clear();
-//            initialise(windowProportion);
-//            canReverse = false;
-//            findLandmarks(rsc);
-//        }
-//    }
     
     @Override
     public void initialise(double proportion) throws ComponentCreationException {

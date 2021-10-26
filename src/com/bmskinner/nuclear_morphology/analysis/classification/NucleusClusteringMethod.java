@@ -30,6 +30,7 @@ import com.bmskinner.nuclear_morphology.analysis.AnalysisMethodException;
 import com.bmskinner.nuclear_morphology.analysis.ClusterAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.Statistical;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.DefaultClusterGroup;
@@ -209,8 +210,9 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
      * @param clusterer the clusterer to use
      * @throws ProfileException 
      * @throws MissingProfileException 
+     * @throws MissingLandmarkException 
      */
-    private void assignClusters(Clusterer clusterer) throws ProfileException, MissingProfileException {
+    private void assignClusters(Clusterer clusterer) throws ProfileException, MissingProfileException, MissingLandmarkException {
 
     	int numberOfClusters = 0;
 		try {

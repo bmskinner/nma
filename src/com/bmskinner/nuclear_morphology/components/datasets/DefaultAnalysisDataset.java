@@ -31,6 +31,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.jdom2.Element;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
@@ -141,7 +142,7 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
     	try {
     		VirtualDataset v = new VirtualDataset(this, collection.getName(), collection.getId(), collection);
     		addChildDataset(v);
-    	} catch(ProfileException | MissingProfileException e) {
+    	} catch(ProfileException | MissingProfileException | MissingLandmarkException e) {
     		LOGGER.log(Loggable.STACK, "Unable to add child collection: "+e.getMessage(), e);
     	}
     }

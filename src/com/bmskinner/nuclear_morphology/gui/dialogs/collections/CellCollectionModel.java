@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import javax.swing.table.DefaultTableModel;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
@@ -180,7 +181,7 @@ public class CellCollectionModel extends DefaultTableModel {
 		try {
 			newCollection.createProfileCollection();
 			dataset.getCollection().getProfileManager().copySegmentsAndLandmarksTo(newCollection);
-		} catch (ProfileException | MissingProfileException e) {
+		} catch (ProfileException | MissingProfileException | MissingLandmarkException e) {
 			LOGGER.log(Level.WARNING, "Unable to copy profiles to new child collection");
 			LOGGER.log(Loggable.STACK, "Error copying profiles to new child collection", e);
 			return Optional.empty();

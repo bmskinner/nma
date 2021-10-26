@@ -33,8 +33,10 @@ import com.bmskinner.nuclear_morphology.charting.charts.ProfileChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPanel;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
+import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
@@ -116,7 +118,7 @@ public class CellProfilesPanel extends AbstractCellDetailPanel {
     			// Trigger refresh of dataset median profile and charts
 				activeDataset().getCollection().getProfileManager().recalculateProfileAggregates();
 				this.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.RECACHE_CHARTS, activeDataset());
-			} catch (ProfileException e) {
+			} catch (ProfileException | MissingLandmarkException | MissingProfileException e) {
 				LOGGER.log(Loggable.STACK, "Error recalculating profile aggregate", e);
 			}
     	}

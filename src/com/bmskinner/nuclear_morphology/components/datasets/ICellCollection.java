@@ -291,8 +291,10 @@ public interface ICellCollection
      * cell nucleus. The aggregate length will be set to the median
      * nucleus border length of the population.
      * @throws ProfileException if creation fails
+     * @throws MissingProfileException 
+     * @throws MissingLandmarkException 
      */
-    void createProfileCollection() throws ProfileException;
+    void createProfileCollection() throws ProfileException, MissingLandmarkException, MissingProfileException;
     
     /**
      * Generate the profile aggregates from all cells in the 
@@ -300,8 +302,10 @@ public interface ICellCollection
      * cell nucleus. The aggregate length will be set to the given
      * value
      * @throws ProfileException if creation fails
+     * @throws MissingProfileException 
+     * @throws MissingLandmarkException 
      */
-    void createProfileCollection(int length) throws ProfileException;
+    void createProfileCollection(int length) throws ProfileException, MissingLandmarkException, MissingProfileException;
 
     /**
      * Get the distinct source image file list for all nuclei in the collection

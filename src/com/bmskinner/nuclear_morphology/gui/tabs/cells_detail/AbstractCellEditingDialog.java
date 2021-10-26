@@ -23,9 +23,11 @@ import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.cells.DefaultCell;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.gui.dialogs.MessagingDialog;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -137,7 +139,7 @@ public abstract class AbstractCellEditingDialog extends MessagingDialog {
             // Trigger a dataset update and reprofiling
             try {
 				dataset.getCollection().createProfileCollection();
-			} catch (ProfileException e) {
+			} catch (ProfileException | MissingLandmarkException | MissingProfileException e) {
 				LOGGER.warning("Unable to profile cell collection");
 				LOGGER.log(Loggable.STACK, e.getMessage(), e);
 			}

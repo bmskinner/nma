@@ -3,7 +3,9 @@ package com.bmskinner.nuclear_morphology.components.datasets;
 import org.jdom2.Element;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
+import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 
 /**
  * Handle dataset creation from XML to ensure any linking
@@ -33,7 +35,7 @@ public class DatasetCreator {
 				int length = c.getCollection().getProfileCollection().getSegmentContaining(0).getProfileLength();
 				c.getCollection().createProfileCollection(length);
 			}
-		} catch(ProfileException e1) {
+		} catch(ProfileException | MissingLandmarkException | MissingProfileException e1) {
 			throw new ComponentCreationException(e1);
 		}
 
