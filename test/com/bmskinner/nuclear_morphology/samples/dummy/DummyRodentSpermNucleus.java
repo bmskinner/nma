@@ -87,7 +87,6 @@ public class DummyRodentSpermNucleus extends DummyCellularComponent implements N
 		nucleus.offset(COM.getX(), COM.getY());
         initialise(PROFILE_WINDOW);	    
         setStatistic(Measurement.AREA,     AREA);
-        setStatistic(Measurement.MAX_FERET, MAX_FERET);
         setStatistic(Measurement.PERIMETER, PERIMETER);
         setStatistic(Measurement.MIN_DIAMETER, MIN_DIAMETER);
 		this.name = name;		

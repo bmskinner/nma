@@ -42,7 +42,6 @@ public interface Measurement extends Serializable {
 
 		static final String AREA             = "Area";
 		static final String PERIMETER        = "Perimeter";
-		static final String MAX_FERET        = "Max feret";
 		static final String MIN_DIAMETER     = "Min diameter";
 		static final String ELLIPTICITY      = "Ellipticity";
 		static final String ASPECT           = "Aspect ratio";
@@ -77,7 +76,6 @@ public interface Measurement extends Serializable {
     // General component statistics
     static final Measurement AREA            = new DefaultMeasurement(Names.AREA,            MeasurementDimension.AREA);
     static final Measurement PERIMETER       = new DefaultMeasurement(Names.PERIMETER,       MeasurementDimension.LENGTH);
-    static final Measurement MAX_FERET       = new DefaultMeasurement(Names.MAX_FERET,       MeasurementDimension.LENGTH);
     static final Measurement MIN_DIAMETER    = new DefaultMeasurement(Names.MIN_DIAMETER,    MeasurementDimension.LENGTH);
     static final Measurement ELLIPTICITY     = new DefaultMeasurement(Names.ELLIPTICITY,     MeasurementDimension.DIMENSIONLESS);
     static final Measurement ASPECT          = new DefaultMeasurement(Names.ASPECT,          MeasurementDimension.DIMENSIONLESS);
@@ -169,7 +167,6 @@ public interface Measurement extends Serializable {
     	List<Measurement> list = new ArrayList<>();
     	list.add(AREA);
     	list.add(PERIMETER);
-    	list.add(MAX_FERET);
     	list.add(MIN_DIAMETER);
     	list.add(ELLIPTICITY);
     	list.add(ASPECT);
@@ -220,7 +217,6 @@ public interface Measurement extends Serializable {
         List<Measurement> list = new ArrayList<>();
         list.add(AREA);
         list.add(PERIMETER);
-        list.add(MAX_FERET);
         list.add(CIRCULARITY);
         return list;
     }

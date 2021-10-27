@@ -29,8 +29,6 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nuclear_morphology.analysis.AnalysisMethodException;
 import com.bmskinner.nuclear_morphology.analysis.ClusterAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
-import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.Statistical;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.DefaultClusterGroup;
@@ -44,8 +42,6 @@ import com.bmskinner.nuclear_morphology.components.measure.MeasurementDimension;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.ClusteringMethod;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
-import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import weka.clusterers.Clusterer;
 import weka.clusterers.EM;
@@ -165,42 +161,39 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
      * @throws Exception 
      */
     public boolean cluster() throws Exception {
-            // create Instances to hold Instance
-            Instances instances = makeInstances();
+    	// create Instances to hold Instance
+    	Instances instances = makeInstances();
 
-            // create the clusterer to run on the Instances
-            String[] optionArray = createClustererOptions();
+    	// create the clusterer to run on the Instances
+    	String[] optionArray = createClustererOptions();
 
-            for (String s : optionArray) {
-                LOGGER.finest( "Clusterer options: " + s);
-            }
-            ClusteringMethod cm = ClusteringMethod.valueOf(options.getString(HashOptions.CLUSTER_METHOD_KEY));
-            if (cm.equals(ClusteringMethod.HIERARCHICAL)) {
-                HierarchicalClusterer hc1 = new HierarchicalClusterer();
+    	ClusteringMethod cm = ClusteringMethod.valueOf(options.getString(HashOptions.CLUSTER_METHOD_KEY));
+    	if (cm.equals(ClusteringMethod.HIERARCHICAL)) {
+    		HierarchicalClusterer hc1 = new HierarchicalClusterer();
 
-                hc1.setOptions(optionArray);
-                hc1.setDistanceFunction(new EuclideanDistance());
-                hc1.setDistanceIsBranchLength(true);
-                hc1.setNumClusters(1); // this is only to get the tree
-                hc1.buildClusterer(instances);
-                hc1.setPrintNewick(true);
-                newickTree = hc1.graph();
-                LOGGER.finest(newickTree);
-                
-                // Create a new clusterer with the desired number of clusters
-                hc1.setNumClusters(options.getInt(HashOptions.CLUSTER_MANUAL_CLUSTER_NUMBER_KEY));
-                hc1.buildClusterer(instances); // build the clusterer
-                assignClusters(hc1);
-            }
+    		hc1.setOptions(optionArray);
+    		hc1.setDistanceFunction(new EuclideanDistance());
+    		hc1.setDistanceIsBranchLength(true);
+    		hc1.setNumClusters(1); // this is only to get the tree
+    		hc1.buildClusterer(instances);
+    		hc1.setPrintNewick(true);
+    		newickTree = hc1.graph();
+    		LOGGER.finest(newickTree);
 
-            if (cm.equals(ClusteringMethod.EM)) {
-                EM clusterer = new EM(); // new instance of clusterer
-                clusterer.setOptions(optionArray); // set the options
-                clusterer.buildClusterer(instances); // build the clusterer
-                assignClusters(clusterer);
-            }
+    		// Create a new clusterer with the desired number of clusters
+    		hc1.setNumClusters(options.getInt(HashOptions.CLUSTER_MANUAL_CLUSTER_NUMBER_KEY));
+    		hc1.buildClusterer(instances); // build the clusterer
+    		assignClusters(hc1);
+    	}
 
-        return true;
+    	if (cm.equals(ClusteringMethod.EM)) {
+    		EM clusterer = new EM(); // new instance of clusterer
+    		clusterer.setOptions(optionArray); // set the options
+    		clusterer.buildClusterer(instances); // build the clusterer
+    		assignClusters(clusterer);
+    	}
+
+    	return true;
     }
 
     /**
@@ -208,20 +201,11 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
      * cluster
      * 
      * @param clusterer the clusterer to use
-     * @throws ProfileException 
-     * @throws MissingProfileException 
-     * @throws MissingLandmarkException 
+     * @throws Exception 
      */
-    private void assignClusters(Clusterer clusterer) throws ProfileException, MissingProfileException, MissingLandmarkException {
+    private void assignClusters(Clusterer clusterer) throws Exception {
 
-    	int numberOfClusters = 0;
-		try {
-			numberOfClusters = clusterer.numberOfClusters();
-		} catch (Exception e1) {
-			LOGGER.warning("Unable to cluster cells: "+e1.getMessage());
-			LOGGER.log(Loggable.STACK, "Unable to cluster cells", e1);
-			return;
-		}
+    	int numberOfClusters = clusterer.numberOfClusters();
 		
 		LOGGER.fine("Clustering found "+numberOfClusters+" clusters");
 
@@ -231,29 +215,24 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
 			clusterMap.put(i, c);
 		}
 
-    	for(Entry<Instance,UUID> entry : cellToInstanceMap.entrySet()) {
+		for(Entry<Instance,UUID> entry : cellToInstanceMap.entrySet()) {
 
-    		try {
+			UUID cellID = entry.getValue();
+			int clusterNumber = clusterer.clusterInstance(entry.getKey());    			
+			ICellCollection cluster = clusterMap.get(clusterNumber);
 
-    			UUID cellID = entry.getValue();
-    			int clusterNumber = clusterer.clusterInstance(entry.getKey());    			
-    			ICellCollection cluster = clusterMap.get(clusterNumber);
-
-    			// should never be null
-    			if (collection.getCell(cellID) != null) {
-    				cluster.addCell(collection.getCell(cellID));
-    			} else {
-    				LOGGER.warning("Error: cell with ID " + cellID + " is not found");
-    			}
-    			fireProgressEvent();
-    		} catch (Exception e) {
-    			LOGGER.log(Loggable.STACK, "Error assigning instance to cluster", e);
-    		}
-
-    	}
+			// should never be null
+			if (collection.getCell(cellID) != null) {
+				cluster.addCell(collection.getCell(cellID));
+			} else {
+				LOGGER.warning("Error: cell with ID " + cellID + " is not found");
+			}
+			fireProgressEvent();
+		}
     	
     	// complete the new collections by profiling 
     	for(ICellCollection c : clusterMap.values()) {
+    		LOGGER.fine("Cluster has "+c.size()+" cells");
     		c.createProfileCollection();
     		dataset.getCollection().getProfileManager().copySegmentsAndLandmarksTo(c);
     	}

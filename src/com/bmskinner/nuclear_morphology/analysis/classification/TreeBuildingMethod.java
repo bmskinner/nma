@@ -309,7 +309,8 @@ public class TreeBuildingMethod extends CellClusteringMethod {
     	LOGGER.finer("Creating clusterable instances");
         double windowProportion = Taggable.DEFAULT_PROFILE_WINDOW_PROPORTION;
         if (dataset.hasAnalysisOptions())// Merged datasets may not have options
-            windowProportion = dataset.getAnalysisOptions().orElseThrow(NullPointerException::new).getProfileWindowProportion();
+            windowProportion = dataset.getAnalysisOptions().orElseThrow(NullPointerException::new)
+            .getProfileWindowProportion();
 
         // Weka clustering uses a table in which columns are attributes and rows are instances
         ArrayList<Attribute> attributes = makeAttributes();

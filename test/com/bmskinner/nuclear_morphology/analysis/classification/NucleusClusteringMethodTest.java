@@ -106,6 +106,7 @@ public class NucleusClusteringMethodTest extends ComponentTester {
 	public void testCanClusterOnIndividualStatistics() throws Exception {
 		for(Measurement stat : Measurement.getRoundNucleusStats()) {
 			setUp();
+			LOGGER.fine("Clustering on "+stat);
 			testCanClusterOnStatistic(stat);
 		}
 	}

@@ -18,7 +18,6 @@ package com.bmskinner.nuclear_morphology.components.cells;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,11 +33,9 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.jdom2.Element;
 
-import com.bmskinner.nuclear_morphology.analysis.ComponentMeasurer;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileCreator;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
-import com.bmskinner.nuclear_morphology.components.Statistical;
 import com.bmskinner.nuclear_morphology.components.Taggable;
 import com.bmskinner.nuclear_morphology.components.UnavailableBorderPointException;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
@@ -254,16 +251,6 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
         int index = this.getBorderIndex(tag);
         return this.getBorderPoint(index);
     }
-
-    /**
-     * Checks if the smoothed array nuclear shape profile has the appropriate
-     * orientation.Counts the number of points above 180 degrees in each half of
-     * the array.
-     * 
-     * @return
-     * @throws Exception
-     */
-    public abstract boolean isProfileOrientationOK();
 
     /*
      *  

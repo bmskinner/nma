@@ -30,9 +30,6 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.jdom2.Element;
 
-import com.bmskinner.nuclear_morphology.analysis.ComponentMeasurer;
-import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder;
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalAnalyser;
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.UnavailableBorderPointException;
@@ -40,14 +37,10 @@ import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationExcept
 import com.bmskinner.nuclear_morphology.components.cells.ProfileableCellularComponent;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
-import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
-import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
-import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.components.profiles.UnprofilableObjectException;
 import com.bmskinner.nuclear_morphology.components.rules.OrientationMark;
 import com.bmskinner.nuclear_morphology.components.rules.PriorityAxis;
-import com.bmskinner.nuclear_morphology.components.rules.RuleSet;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.components.signals.DefaultSignalCollection;
 import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
@@ -273,40 +266,6 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
                 }
             }
         }
-    }
-
-    /**
-     * Checks if the smoothed array nuclear shape profile has the appropriate
-     * orientation.Counts the number of points above 180 degrees in each half of
-     * the array.
-     * TODO -- this is mouse sperm specific
-     * @return
-     */
-    @Override
-    public boolean isProfileOrientationOK() {
-    	return true;
-//        int frontPoints = 0;
-//        int rearPoints = 0;
-//
-//        IProfile profile;
-//        try {
-//            profile = this.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
-//        } catch (ProfileException | MissingLandmarkException | MissingProfileException e) {
-//        	LOGGER.log(Loggable.STACK, "Error getting profile", e);
-//            return false;
-//        }
-//
-//        int midPoint = getBorderLength() >> 1;
-//        for (int i = 0; i < getBorderLength(); i++) { // integrate points
-//                                                           // over 180
-//            if (i < midPoint) 
-//                frontPoints += profile.get(i);
-//            if (i > midPoint) 
-//                rearPoints += profile.get(i);
-//        }
-//        
-//        // if the maxIndex is closer to the end than the beginning
-//        return frontPoints > rearPoints;
     }
 
     @Override

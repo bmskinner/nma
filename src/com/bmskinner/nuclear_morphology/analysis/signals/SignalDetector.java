@@ -188,7 +188,6 @@ public class SignalDetector extends Detector {
                                           // source nucleus
 
                 s.setStatistic(Measurement.AREA, values.get(StatsMap.AREA));
-                s.setStatistic(Measurement.MAX_FERET, values.get(StatsMap.FERET));
                 s.setStatistic(Measurement.PERIMETER, values.get(StatsMap.PERIM));
 
                 /*

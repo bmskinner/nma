@@ -2,14 +2,11 @@ package com.bmskinner.nuclear_morphology.samples.dummy;
 
 import java.io.File;
 
-import org.eclipse.jdt.annotation.NonNull;
-
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.cells.ProfileableCellularComponent;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
-import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
@@ -40,7 +37,6 @@ public class DummySegmentedCellularComponent extends ProfileableCellularComponen
 	public DummySegmentedCellularComponent(String name) {
 		super(ROI, COM, IMAGE_FILE, IMAGE_CHANNEL, POSITION);
 		setStatistic(Measurement.AREA,     AREA);
-        setStatistic(Measurement.MAX_FERET, MAX_FERET);
         setStatistic(Measurement.PERIMETER, PERIMETER);
         setStatistic(Measurement.MIN_DIAMETER, MIN_DIAMETER);
         try {
@@ -58,9 +54,4 @@ public class DummySegmentedCellularComponent extends ProfileableCellularComponen
 		return new DummySegmentedCellularComponent(name);
 	}
 
-	@Override
-	public boolean isProfileOrientationOK() {
-		// TODO Auto-generated method stub
-		return false;
-	}
 }

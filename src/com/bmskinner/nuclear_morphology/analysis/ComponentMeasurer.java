@@ -69,11 +69,11 @@ public final class ComponentMeasurer {
         	return calculateCircularity(c);
         
         if (Measurement.PERIMETER.equals(m)) {
-     	   return ComponentMeasurer.calculatePerimeter(c);
+     	   return calculatePerimeter(c);
         }
         
         if (Measurement.AREA.equals(m)) {
-      	   return ComponentMeasurer.calculateArea(c);
+      	   return calculateArea(c);
          }
         
         if(!(c instanceof Taggable))
@@ -83,10 +83,7 @@ public final class ComponentMeasurer {
         
         if (Measurement.MIN_DIAMETER.equals(m))
      	   return calculateMinDiameter(t);
-        
-        if(Measurement.MAX_FERET.equals(m))
-        	return calculateMaximumDiameter(t);
-        
+                
         if(!(t instanceof Nucleus))
         	return Statistical.INVALID_OBJECT_TYPE;
         
@@ -111,10 +108,10 @@ public final class ComponentMeasurer {
         	return  n.getOrientedNucleus().getBounds().getWidth();
         
         if (Measurement.BODY_WIDTH.equals(m))
-        	return ComponentMeasurer.calculateBodyWidth(n);
+        	return calculateBodyWidth(n);
         
         if (Measurement.HOOK_LENGTH.equals(m))
-        	return ComponentMeasurer.calculateHookLength(n);
+        	return calculateHookLength(n);
 
         return Statistical.STAT_NOT_CALCULATED;
 	}

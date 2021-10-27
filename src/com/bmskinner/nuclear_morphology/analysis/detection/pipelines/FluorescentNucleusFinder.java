@@ -265,7 +265,6 @@ public class FluorescentNucleusFinder extends CellFinder {
         	.withFile(f).withChannel(nuclOptions.getInt(HashOptions.CHANNEL))
         	.withCoM(centreOfMass)
         	.withMeasurement(Measurement.AREA, values.get(StatsMap.AREA))
-        	.withMeasurement(Measurement.MAX_FERET, values.get(StatsMap.FERET))
         	.withMeasurement(Measurement.PERIMETER, values.get(StatsMap.PERIM))
         	.build();
 
