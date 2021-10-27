@@ -113,8 +113,13 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
         return new DefaultAnalysisResult(datasets);
     }
 
+    /**
+     * Run the method. Use {@link call} to get the 
+     * resulting datasets
+     * @throws AnalysisMethodException
+     */
     public void run() throws AnalysisMethodException {
-    	int i = getTotalImagesToAnalyse();
+    	int i = countTotalImagesToAnalyse();
     	if(i==0) {
     		throw new AnalysisMethodException("No analysable images");
     	}
@@ -142,7 +147,12 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
     	LOGGER.fine("Nucleus detection complete for "+analysedDatasets.size()+" folders");
     }
 
-    private int getTotalImagesToAnalyse() {
+    /**
+     * Count the number of images that are available to be analysed
+     * across all folders
+     * @return
+     */
+    private int countTotalImagesToAnalyse() {
 
         LOGGER.info("Counting images to analyse");
         Optional<HashOptions> op = templateOptions.getDetectionOptions(CellularComponent.NUCLEUS);
@@ -164,6 +174,11 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
         return this.datasets;
     }
 
+    /**
+     * From all possible cell collections, choose those
+     * with cells and create root datasets
+     * @return
+     */
     private List<IAnalysisDataset> analysePopulations() {
 
         LOGGER.fine("Creating cell collections");

@@ -1,19 +1,33 @@
 package com.bmskinner.nuclear_morphology.analysis.profiles;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.io.File;
+
+import org.junit.Before;
 import org.junit.Test;
 
 import com.bmskinner.nuclear_morphology.TestDatasetBuilder;
+import com.bmskinner.nuclear_morphology.TestResources;
+import com.bmskinner.nuclear_morphology.analysis.nucleus.NucleusDetectionMethod;
+import com.bmskinner.nuclear_morphology.components.Statistical;
+import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.measure.Measurement;
+import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.stats.Stats;
+
+import ij.Prefs;
 
 /**
  * Test methods for the dataset profiling 
@@ -22,6 +36,11 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
  *
  */
 public class DatasetProfilingMethodTest extends AbstractProfileMethodTest {
+	
+	@Before
+	public void setUp(){		
+		Prefs.setThreads(2); // Attempt to avoid issue 162
+	}
 
 	@Test
 	public void testSingleCellDataset() throws Exception {
@@ -180,6 +199,37 @@ public class DatasetProfilingMethodTest extends AbstractProfileMethodTest {
 		
 		assertTrue(equals(median.toFloatArray(), q1.toFloatArray(), 0.0001f));
 		assertTrue(equals(median.toFloatArray(), q3.toFloatArray(), 0.0001f));
+	}
+	
+	@Test
+	public void testAllNuclearParametersCalculated() throws Exception {
+		
+		File testFolder = TestResources.MOUSE_INPUT_FOLDER.getAbsoluteFile();
+    	IAnalysisOptions op = OptionsFactory.makeDefaultRodentAnalysisOptions(testFolder);
+
+    	NucleusDetectionMethod nm = new NucleusDetectionMethod(TestResources.MOUSE_INPUT_FOLDER, op);
+    	IAnalysisDataset d = nm.call().getFirstDataset();
+    	
+		new DatasetProfilingMethod(d).call();
+    	
+		for(Measurement stat : op.getRuleSetCollection().getMeasurableValues()) {
+			
+			for(Nucleus n : d.getCollection().getNuclei()) {
+				assertTrue("Nucleus should have TV", n.hasLandmark(Landmark.TOP_VERTICAL));
+				assertTrue("Nucleus should have BV", n.hasLandmark(Landmark.BOTTOM_VERTICAL));
+				assertTrue("Nucleus should have "+stat, n.hasStatistic(stat));
+				assertFalse("Nucleus error calculating "+stat, Statistical.ERROR_CALCULATING_STAT==n.getStatistic(stat));
+				assertFalse("Nucleus missing landmark "+stat, Statistical.MISSING_LANDMARK==n.getStatistic(stat));
+				assertFalse("Nucleus did not calculate "+stat, Statistical.STAT_NOT_CALCULATED==n.getStatistic(stat));
+				assertFalse("Not a nucleus "+stat, Statistical.INVALID_OBJECT_TYPE==n.getStatistic(stat));
+			}
+			
+			double value = d.getCollection().getMedian(stat, CellularComponent.NUCLEUS, MeasurementScale.PIXELS);
+			assertFalse("Error calculating "+stat, Statistical.ERROR_CALCULATING_STAT==value);
+			assertFalse("Missing landmark "+stat, Statistical.MISSING_LANDMARK==value);
+			assertFalse("Did not calculate "+stat, Statistical.STAT_NOT_CALCULATED==value);
+			assertFalse("Not a nucleus "+stat, Statistical.INVALID_OBJECT_TYPE==value);
+		}
 	}
 	
 }

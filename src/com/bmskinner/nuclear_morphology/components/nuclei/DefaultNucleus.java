@@ -30,6 +30,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.jdom2.Element;
 
+import com.bmskinner.nuclear_morphology.analysis.ComponentMeasurer;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder;
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalAnalyser;
@@ -243,81 +244,7 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
             s.setScale(scale);
         }
     }
-
-    @Override
-    protected void calculateStatistic(Measurement stat) {
-
-        super.calculateStatistic(stat);
-
-        // Note - variability will remain zero here
-        // These stats are specific to nuclei
-                
-        if (Measurement.ELLIPTICITY.equals(stat))
-            setStatistic(stat, calculateEllipticity());
         
-        if (Measurement.ASPECT.equals(stat))
-        	setStatistic(stat, calculateAspect());
-        
-        if (Measurement.ELONGATION.equals(stat))
-        	setStatistic(stat, calculateElongation());
-                
-        if (Measurement.REGULARITY.equals(stat))
-        	setStatistic(stat, calculateRegularity());
-
-        if (Measurement.BOUNDING_HEIGHT.equals(stat))
-        	setStatistic(stat, getOrientedNucleus().getBounds().getHeight());
-
-        if (Measurement.BOUNDING_WIDTH.equals(stat))
-        	setStatistic(stat, getOrientedNucleus().getBounds().getWidth());
-        
-        if (Measurement.BODY_WIDTH.equals(stat))
-        	setStatistic(stat, 0);
-        
-        if (Measurement.HOOK_LENGTH.equals(stat))
-        	setStatistic(stat, 0);
-    }
-    
-    /**
-     * Calculate the elongation of the object 
-     * @return
-     */
-    private double calculateElongation() {
-    	double h = getOrientedNucleus().getBounds().getHeight();
-        double w = getOrientedNucleus().getBounds().getWidth();
-        return (h-w)/(h+w);
-    }
-
-
-    /**
-     * Calculate the regularity of the object 
-     * @return
-     */
-    private double calculateRegularity() {
-    	double h = getOrientedNucleus().getBounds().getHeight();
-        double w = getOrientedNucleus().getBounds().getWidth();
-        double a = this.getStatistic(Measurement.AREA);
-        return (Math.PI*h*w)/(4*a);
-    }
-    
-    /**
-     * Calculate the aspect of the object 
-     * @return
-     */
-    private double calculateAspect() {
-    	 return 1d/calculateEllipticity();
-    }
-
-    /**
-     * Calculate the ellipticity of the object 
-     * @return
-     */
-    private double calculateEllipticity() {
-        double h = getOrientedNucleus().getBounds().getHeight();
-        double w = getOrientedNucleus().getBounds().getWidth();
-
-        return h / w;
-    }
-
     protected void setSignals(ISignalCollection collection) {
         signalCollection = collection;
     }
@@ -385,34 +312,13 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
     @Override
     public Nucleus getOrientedNucleus() {
         // Make an exact copy of the nucleus
-        LOGGER.finest( "Creating vertical nucleus");
         Nucleus verticalNucleus = this.duplicate();
-
-        // At this point the new nucleus was created at the original image
-        // coordinates
-        // of the template nucleus, then moved to the current CoM.
-        // Now align the nucleus on vertical.
-
         verticalNucleus.orient();
-
-        double h = verticalNucleus.getBounds().getHeight();
-        double w = verticalNucleus.getBounds().getWidth();
-
-        setStatistic(Measurement.BOUNDING_HEIGHT, h);
-        setStatistic(Measurement.BOUNDING_WIDTH, w);
-
-        double aspect = h / w;
-        setStatistic(Measurement.ELLIPTICITY, aspect);
-
-        setStatistic(Measurement.BODY_WIDTH, STAT_NOT_CALCULATED);
-        setStatistic(Measurement.HOOK_LENGTH, STAT_NOT_CALCULATED);
-
         return verticalNucleus;
     }
 
     @Override
     public void moveCentreOfMass(@NonNull IPoint point) {
-
         double diffX = point.getX() - getCentreOfMass().getX();
         double diffY = point.getY() - getCentreOfMass().getY();
         offset(diffX, diffY);

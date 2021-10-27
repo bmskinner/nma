@@ -635,35 +635,37 @@ public abstract class DefaultCellularComponent implements CellularComponent {
             return stat.convert(result, this.scale, measurementScale);
         }
         
-        calculateStatistic(stat);
+        setStatistic(stat, ComponentMeasurer.calculate(stat, this));
+        
+//        calculateStatistic(stat);
         return stat.convert(statistics.get(stat), this.scale, measurementScale);
     }
 
-    protected void calculateStatistic(final Measurement stat) {
-
-        // Do not add getters for values added at creation time
-        // or you'll get infinite loops when things break
-        if (Measurement.CIRCULARITY.equals(stat))
-        	setStatistic(stat, calculateCircularity());
-        
-        if (Measurement.PERIMETER.equals(stat)) {
-     	   double p = ComponentMeasurer.calculatePerimeter(this);
-     	   setStatistic(stat, p);
-        }
-    }
+//    protected void calculateStatistic(final Measurement stat) {
+//
+//        // Do not add getters for values added at creation time
+//        // or you'll get infinite loops when things break
+//        if (Measurement.CIRCULARITY.equals(stat))
+//        	setStatistic(stat, calculateCircularity());
+//        
+//        if (Measurement.PERIMETER.equals(stat)) {
+//     	   double p = ComponentMeasurer.calculatePerimeter(this);
+//     	   setStatistic(stat, p);
+//        }
+//    }
     
-    /**
-     * Calculate the circularity of the object
-     * @return
-     */
-    private double calculateCircularity() {
-    	if (hasStatistic(Measurement.PERIMETER) && hasStatistic(Measurement.AREA)) {
-    		double p = getStatistic(Measurement.PERIMETER);
-    		double a = getStatistic(Measurement.AREA);
-    		return (Math.PI*4*a)/(p*p);
-    	}
-    	return ERROR_CALCULATING_STAT;
-    }
+//    /**
+//     * Calculate the circularity of the object
+//     * @return
+//     */
+//    private double calculateCircularity() {
+//    	if (hasStatistic(Measurement.PERIMETER) && hasStatistic(Measurement.AREA)) {
+//    		double p = getStatistic(Measurement.PERIMETER);
+//    		double a = getStatistic(Measurement.AREA);
+//    		return (Math.PI*4*a)/(p*p);
+//    	}
+//    	return ERROR_CALCULATING_STAT;
+//    }
 
     @Override
     public synchronized void setStatistic(final Measurement stat, double d) {
@@ -684,7 +686,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	public void updateDependentStats() {
         for (Measurement stat : statistics.keySet()) {
             if (this.getStatistic(stat) == Statistical.STAT_NOT_CALCULATED)
-                calculateStatistic(stat);
+            	setStatistic(stat, ComponentMeasurer.calculate(stat, this));
         }
     }
 

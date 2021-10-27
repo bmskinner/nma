@@ -88,23 +88,4 @@ public class NucleusDetectionMethodTest {
     	// Number of nuclei in test folder with default settings
     	assertEquals("Number of cells", 63, d.getCollection().size());
 	}
-	
-	@Test
-	public void testAllNuclearParametersCalculated() throws Exception {
-		
-		File testFolder = TestResources.MOUSE_INPUT_FOLDER.getAbsoluteFile();
-    	IAnalysisOptions op = OptionsFactory.makeDefaultRodentAnalysisOptions(testFolder);
-
-    	NucleusDetectionMethod nm = new NucleusDetectionMethod(TestResources.MOUSE_INPUT_FOLDER, op);
-    	IAnalysisResult r = nm.call();
-    	
-    	IAnalysisDataset d = r.getFirstDataset();
-    	
-		for(Measurement stat : op.getRuleSetCollection().getMeasurableValues()) {
-			double value = d.getCollection().getMedian(stat, CellularComponent.NUCLEUS, MeasurementScale.PIXELS);
-			assertFalse("Error calculating "+stat, Statistical.ERROR_CALCULATING_STAT==value);
-			assertFalse("Did not calculate "+stat, Statistical.STAT_NOT_CALCULATED==value);
-		}
-	}
-
 }

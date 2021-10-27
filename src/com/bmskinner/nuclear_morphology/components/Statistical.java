@@ -30,7 +30,9 @@ import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 public interface Statistical {
 
     double ERROR_CALCULATING_STAT = -1d;
+    double MISSING_LANDMARK       = -2d;
     double STAT_NOT_CALCULATED    = -3d;
+    double INVALID_OBJECT_TYPE    = -4d;
 
     /**
      * Check if the given stat is present

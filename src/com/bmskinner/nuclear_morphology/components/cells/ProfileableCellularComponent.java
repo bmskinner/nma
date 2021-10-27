@@ -34,6 +34,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.jdom2.Element;
 
+import com.bmskinner.nuclear_morphology.analysis.ComponentMeasurer;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileCreator;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
@@ -263,18 +264,6 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
      * @throws Exception
      */
     public abstract boolean isProfileOrientationOK();
-
-    @Override
-    protected void calculateStatistic(Measurement stat) {
-
-       super.calculateStatistic(stat);
-
-       if (Measurement.MIN_DIAMETER.equals(stat))
-    	   setStatistic(stat, getNarrowestDiameter());
-       
-       if(Measurement.MAX_FERET.equals(stat))
-    	   setStatistic(stat, getMaximumDiameter());
-    }
 
     /*
      *  
@@ -580,27 +569,27 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 
     }
 
-    private double getNarrowestDiameter()  {
-        try {
-            return Arrays.stream(this.getProfile(ProfileType.DIAMETER).toDoubleArray())
-            		.min()
-            		.orElse(Statistical.ERROR_CALCULATING_STAT);
-        } catch (MissingProfileException | ProfileException e) {
-            LOGGER.log(Loggable.STACK, "Error getting diameter profile", e);
-            return Statistical.ERROR_CALCULATING_STAT;
-        }
-    }
-    
-    private double getMaximumDiameter()  {
-        try {
-            return Arrays.stream(this.getProfile(ProfileType.DIAMETER).toDoubleArray())
-            		.max()
-            		.orElse(Statistical.ERROR_CALCULATING_STAT);
-        } catch (MissingProfileException | ProfileException e) {
-            LOGGER.log(Loggable.STACK, "Error getting diameter profile", e);
-            return Statistical.ERROR_CALCULATING_STAT;
-        }
-    }
+//    private double getNarrowestDiameter()  {
+//        try {
+//            return Arrays.stream(this.getProfile(ProfileType.DIAMETER).toDoubleArray())
+//            		.min()
+//            		.orElse(Statistical.ERROR_CALCULATING_STAT);
+//        } catch (MissingProfileException | ProfileException e) {
+//            LOGGER.log(Loggable.STACK, "Error getting diameter profile", e);
+//            return Statistical.ERROR_CALCULATING_STAT;
+//        }
+//    }
+//    
+//    private double getMaximumDiameter()  {
+//        try {
+//            return Arrays.stream(this.getProfile(ProfileType.DIAMETER).toDoubleArray())
+//            		.max()
+//            		.orElse(Statistical.ERROR_CALCULATING_STAT);
+//        } catch (MissingProfileException | ProfileException e) {
+//            LOGGER.log(Loggable.STACK, "Error getting diameter profile", e);
+//            return Statistical.ERROR_CALCULATING_STAT;
+//        }
+//    }
 
     /**
      * Go around the border of the object, measuring the angle to the OP. If the

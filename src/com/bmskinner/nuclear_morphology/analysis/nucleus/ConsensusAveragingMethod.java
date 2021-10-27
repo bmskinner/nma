@@ -178,7 +178,7 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
         		.withMeasurement(Measurement.PERIMETER, ComponentMeasurer.calculatePerimeter(list))
         		.build();
 
-        double area = ComponentMeasurer.calculateArea(n);
+        double area = ComponentMeasurer.calculate(Measurement.AREA, n);
         n.setStatistic(Measurement.AREA, area);
 
         // Add landmarks and segments from the profile collection

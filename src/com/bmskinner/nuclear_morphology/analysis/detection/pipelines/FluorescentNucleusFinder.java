@@ -267,6 +267,12 @@ public class FluorescentNucleusFinder extends CellFinder {
         	.build();
 
         ProfileIndexFinder.assignLandmarks(result, options.getRuleSetCollection());
+        
+        // Calculate needed values using current data. These can be overridden
+        // in profiling step
+//        for(Measurement m : options.getRuleSetCollection().getMeasurableValues()) {
+//        	result.getStatistic(m);
+//        }
 
         LOGGER.finer(()->"Created nucleus from roi "+f.getName());
         return result;

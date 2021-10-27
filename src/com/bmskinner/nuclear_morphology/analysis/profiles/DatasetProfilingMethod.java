@@ -22,12 +22,17 @@ import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nuclear_morphology.analysis.ComponentMeasurer;
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.SingleDatasetAnalysisMethod;
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
+import com.bmskinner.nuclear_morphology.components.Statistical;
+import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
+import com.bmskinner.nuclear_morphology.components.measure.Measurement;
+import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
@@ -197,6 +202,21 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 			LOGGER.fine("Unable to coerce RP to index zero");
 		
 		identifyNonCoreTags(collection);
+		
+        // Clear all calculated measured values and force recalculation
+		// since some measurements use the landmarks for orientation
+		for(Nucleus n : dataset.getCollection().getNuclei()) {
+			for(Measurement m : dataset.getAnalysisOptions().get()
+	    			.getRuleSetCollection().getMeasurableValues()) 
+					n.setStatistic(m, ComponentMeasurer.calculate(m, n));
+		}
+		
+		// Clear all calculated values in the median
+        for(Measurement m : dataset.getAnalysisOptions().get()
+    			.getRuleSetCollection().getMeasurableValues()) {
+        	collection.clear(m, CellularComponent.NUCLEUS);
+        	collection.getMedian(m, CellularComponent.NUCLEUS, MeasurementScale.PIXELS);
+        }
 	}
 
 	/**
