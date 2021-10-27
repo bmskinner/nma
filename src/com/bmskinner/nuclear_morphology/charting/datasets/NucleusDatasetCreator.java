@@ -345,35 +345,6 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
     }
     
     /**
-     * Get the outline of the consensus nucleus with the OP drawn
-     * 
-     * @param dataset
-     * @return
-     */
-    public XYDataset createAnnotatedNucleusOutline() throws ChartDatasetCreationException {
-    	Nucleus consensus = options.firstDataset().getCollection().getConsensus();
-    	ComponentOutlineDataset ds = (ComponentOutlineDataset) createBareNucleusOutline(consensus);
-    	
-    	try {
-    		IPoint p = consensus.getBorderPoint(Landmark.ORIENTATION_POINT);
-			double[] xpoints = new double[1];
-	        double[] ypoints = new double[1];
-	        
-	        xpoints[0] = p.getX();
-	        ypoints[0] = p.getY();
-	        
-	        double[][] data = { xpoints, ypoints };
-	        
-	        ds.addSeries(Landmark.ORIENTATION_POINT, data);
-			
-		} catch (MissingLandmarkException e) {
-			throw new ChartDatasetCreationException("Unable to get OP", e);
-		}
-    	return ds;
-    	
-    }
-
-    /**
      * Get the scale of the nucleus; the lowest absolute x or y limit
      * 
      * @param n

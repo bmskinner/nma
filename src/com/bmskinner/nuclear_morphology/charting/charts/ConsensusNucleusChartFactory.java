@@ -216,7 +216,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 
         XYDataset ds;
         try {
-            ds = new NucleusDatasetCreator(options).createAnnotatedNucleusOutline();
+            ds = new NucleusDatasetCreator(options).createBareNucleusOutline(component);
         } catch (ChartDatasetCreationException e) {
             LOGGER.log(Loggable.STACK, "Error creating annotated nucleus outline: "+e.getMessage(), e);
             return createErrorChart();
