@@ -102,7 +102,7 @@ public class NucleusProfileSettingsPanel extends SettingsPanel {
         		return;
 
         	// Rebuild the file name from the cleaned names
-        	File type = new File(Io.getConfigDir(), (String)typeBox.getSelectedItem()+Io.XML_FILE_EXTENSION);
+        	File type = new File(Io.getRulesetDir(), (String)typeBox.getSelectedItem()+Io.XML_FILE_EXTENSION);
         	setRuleset(type);
         });
         

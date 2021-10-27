@@ -213,10 +213,10 @@ public class DatasetProfilingMethodTest extends AbstractProfileMethodTest {
 		new DatasetProfilingMethod(d).call();
     	
 		for(Measurement stat : op.getRuleSetCollection().getMeasurableValues()) {
+			if(stat.equals(Measurement.VARIABILITY))
+				continue; // we can't test this on a per-nucleus level
 			
 			for(Nucleus n : d.getCollection().getNuclei()) {
-				assertTrue("Nucleus should have TV", n.hasLandmark(Landmark.TOP_VERTICAL));
-				assertTrue("Nucleus should have BV", n.hasLandmark(Landmark.BOTTOM_VERTICAL));
 				assertTrue("Nucleus should have "+stat, n.hasStatistic(stat));
 				assertFalse("Nucleus error calculating "+stat, Statistical.ERROR_CALCULATING_STAT==n.getStatistic(stat));
 				assertFalse("Nucleus missing landmark "+stat, Statistical.MISSING_LANDMARK==n.getStatistic(stat));

@@ -549,7 +549,8 @@ public class DefaultCellCollection implements ICellCollection {
 	private synchronized double[] getNormalisedDifferencesToMedianFromPoint(Landmark pointType) {
 		IProfile medianProfile;
 		try {
-			medianProfile = this.getProfileCollection().getProfile(ProfileType.ANGLE, pointType, Stats.MEDIAN).interpolate(FIXED_PROFILE_LENGTH);
+			medianProfile = this.getProfileCollection().getProfile(ProfileType.ANGLE, pointType, Stats.MEDIAN)
+					.interpolate(FIXED_PROFILE_LENGTH);
 		} catch (MissingComponentException | ProfileException e) {
 			LOGGER.warning("Cannot get median profile for collection");
 			LOGGER.log(Loggable.STACK, "Error getting median profile", e);

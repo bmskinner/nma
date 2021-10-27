@@ -95,6 +95,34 @@ public class ProfileIndexFinder {
 			}
     	}
     }
+    
+    /**
+     * Test if the profile orientation is correct; performs a 
+     * simple test that the higher values are to the left
+     * @param n
+     * @return
+     * @throws ProfileException 
+     * @throws MissingProfileException 
+     * @throws MissingLandmarkException 
+     */
+    public static boolean shouldReverseProfile(@NonNull Nucleus n) throws MissingLandmarkException, MissingProfileException, ProfileException {
+      int frontPoints = 0;
+      int rearPoints = 0;
+
+      IProfile profile = n.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
+
+      int midPoint = n.getBorderLength() >> 1;
+      for (int i = 0; i < n.getBorderLength(); i++) { // integrate points
+                                                         // over 180
+          if (i < midPoint) 
+              frontPoints += profile.get(i);
+          if (i > midPoint) 
+              rearPoints += profile.get(i);
+      }
+      
+      // if the maxIndex is closer to the end than the beginning
+      return frontPoints < rearPoints;
+  }
 
     /**
      * Get the indexes in the profile that match the given RuleSet

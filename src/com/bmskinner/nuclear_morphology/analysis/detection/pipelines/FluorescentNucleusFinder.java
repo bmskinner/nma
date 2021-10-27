@@ -31,7 +31,9 @@ import com.bmskinner.nuclear_morphology.analysis.detection.GenericDetector;
 import com.bmskinner.nuclear_morphology.analysis.detection.StatsMap;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageAnnotator;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
+import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.cells.DefaultCell;
@@ -42,6 +44,7 @@ import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.NucleusFactory;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -268,11 +271,18 @@ public class FluorescentNucleusFinder extends CellFinder {
 
         ProfileIndexFinder.assignLandmarks(result, options.getRuleSetCollection());
         
-        // Calculate needed values using current data. These can be overridden
-        // in profiling step
-//        for(Measurement m : options.getRuleSetCollection().getMeasurableValues()) {
-//        	result.getStatistic(m);
-//        }
+        try {
+        	if(ProfileIndexFinder.shouldReverseProfile(result)) {
+        		result.reverse();
+        		result.initialise(options.getProfileWindowProportion());
+        		ProfileIndexFinder.assignLandmarks(result, options.getRuleSetCollection());
+        	}
+        } catch(MissingLandmarkException | MissingProfileException | ProfileException e) {
+        	LOGGER.fine(()->"Unable to reverse profile in nucleus");
+        	throw new ComponentCreationException(e);
+        }
+        
+        
 
         LOGGER.finer(()->"Created nucleus from roi "+f.getName());
         return result;
