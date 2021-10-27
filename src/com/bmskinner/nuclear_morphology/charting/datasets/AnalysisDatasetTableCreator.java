@@ -586,18 +586,6 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
             columnData[row++] = dataset.getName();
         }
         model.addColumn(Labels.DATASET, columnData);
-
-        // add columns
-        // pre-cache data to ensure all values present when we get
-//        synchronized (this) {
-//            for (IAnalysisDataset dataset : list) {
-//                for (IAnalysisDataset dataset2 : list) {
-//                    if (!dataset2.getId().equals(dataset.getId())) {
-//                        dataset.getCollection().countShared(dataset2);
-//                    }
-//                }
-//            }
-//        }
         
         DecimalFormat df = new DecimalFormat(DEFAULT_DECIMAL_FORMAT);
 

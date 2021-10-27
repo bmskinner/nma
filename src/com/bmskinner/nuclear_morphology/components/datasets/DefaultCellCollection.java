@@ -1116,6 +1116,7 @@ public class DefaultCellCollection implements ICellCollection {
 
 		if (d2 == this)
 			return cells.size();
+		
 
 		// Ensure cells use the same rule
 		if (!d2.getRuleSetCollection().equals(ruleSets))

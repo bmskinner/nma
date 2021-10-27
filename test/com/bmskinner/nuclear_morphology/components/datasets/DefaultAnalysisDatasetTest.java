@@ -228,5 +228,13 @@ public class DefaultAnalysisDatasetTest extends ComponentTester {
 		testDuplicatesByField(d, test);
 		assertEquals(d, test);
 	}
+	
+	@Test
+	public void testCountSharedWorksWithChild() {
+		for(IAnalysisDataset c : d.getAllChildDatasets()) {
+			assertEquals(c.getCollection().size(), d.getCollection().countShared(c));
+			assertEquals(c.getCollection().size(),  c.getCollection().countShared(d));
+		}
+	}
 
 }

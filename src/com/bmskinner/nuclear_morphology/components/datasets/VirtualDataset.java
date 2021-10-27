@@ -637,7 +637,7 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
 
     @Override
     public int countShared(@NonNull IAnalysisDataset d2) {
-        return countShared(d2);
+        return countShared(d2.getCollection());
 
     }
 
@@ -667,10 +667,10 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
     private synchronized int countSharedNuclei(ICellCollection d2) {
 
         if (d2 == this)
-            return this.size();
+            return cellIDs.size();
 
         if (parentDataset.getCollection() == d2)
-            return this.size();
+            return cellIDs.size();
         
 
         // Ensure cells use the same rule
@@ -678,7 +678,7 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
         	return 0;
 
         Set<UUID> toSearch = new HashSet<>(d2.getCellIDs());
-        toSearch.retainAll(getCellIDs());
+        toSearch.retainAll(cellIDs);
         return toSearch.size();
     }
 
