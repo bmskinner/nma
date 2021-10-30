@@ -44,6 +44,7 @@ import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
+import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult;
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult.Aggregation;
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult.CountType;
@@ -71,7 +72,7 @@ public class DemoReportGenerator {
 	
 	private static final String ZERO_STRING = "\t0.0000\t0.0000\t0.0000\t0.0000\t0.0000";	
 	
-	public void generateShellReport(@NonNull final IAnalysisDataset dataset) throws IOException {
+	public void generateShellReport(@NonNull final IAnalysisDataset dataset) throws IOException, MissingOptionException {
 		
 		// Store visibility states of each signal
 		Map<UUID,Boolean> wasVisible = new HashMap<>();
@@ -103,7 +104,7 @@ public class DemoReportGenerator {
 				
 				File chartFile = new File(saveFolder, dataset.getName()+"_"+group.getGroupName()+Io.PNG_FILE_EXTENSION);
 				
-				HashOptions signalOptions = dataset.getAnalysisOptions().get().getNuclearSignalOptions(signalGroupId);
+				HashOptions signalOptions = dataset.getAnalysisOptions().get().getNuclearSignalOptions(signalGroupId).orElseThrow(MissingOptionException::new);
 				
 				JFreeChart chart = new ShellChartFactory(barChartOptions).createShellChart();
 				chart.setTitle(String.format("%s", dataset.getName()));
@@ -150,12 +151,13 @@ public class DemoReportGenerator {
 	 * Create a file of shell results compatible with Michael's domain analysis
 	 * macro format, for analysis in existing Excel templates
 	 * @param dataset
+	 * @throws MissingOptionException 
 	 */
-	private void generateDomainAnalysisOutputFormat(@NonNull final IAnalysisDataset dataset) {
+	private void generateDomainAnalysisOutputFormat(@NonNull final IAnalysisDataset dataset) throws MissingOptionException {
 
 		Map<Integer, UUID> channelMap = new HashMap<>();
 		for(UUID id : dataset.getAnalysisOptions().get().getNuclearSignalGroups()) {
-			int channel = dataset.getAnalysisOptions().get().getNuclearSignalOptions(id).getInt(HashOptions.CHANNEL);
+			int channel = dataset.getAnalysisOptions().get().getNuclearSignalOptions(id).orElseThrow(MissingOptionException::new).getInt(HashOptions.CHANNEL);
 			channelMap.put(channel, id);
 		}
 		

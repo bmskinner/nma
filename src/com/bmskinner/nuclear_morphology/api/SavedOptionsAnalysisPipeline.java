@@ -23,6 +23,7 @@ import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -231,10 +232,11 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod impleme
 	/**
 	 * Create the methods to detect signals
 	 * @param options
+	 * @throws MissingOptionException 
 	 * @throws Exception
 	 */
 	private void createSignalDetectionMethods(List<IAnalysisDataset> datasets, 
-			@NonNull IAnalysisOptions options, File imageFolder) {
+			@NonNull IAnalysisOptions options, File imageFolder) throws MissingOptionException {
 
 		for(IAnalysisDataset dataset : datasets) {
 			// Add signals
@@ -245,7 +247,7 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod impleme
 			
 			for(UUID signalGroupId : options.getNuclearSignalGroups()) {
 				
-				HashOptions signalOptions = datasetOptions.getNuclearSignalOptions(signalGroupId);
+				HashOptions signalOptions = datasetOptions.getNuclearSignalOptions(signalGroupId).orElseThrow(MissingOptionException::new);
 				
 				signalOptions.setFile(HashOptions.DETECTION_FOLDER, imageFolder);
 				methodsToRun.add(new SignalDetectionMethod(dataset, signalOptions));

@@ -32,10 +32,10 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.SingleDatasetAnalysisMethod;
+import com.bmskinner.nuclear_morphology.components.MissingComponentException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.datasets.VirtualDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.datasets.VirtualDataset;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
@@ -88,7 +88,7 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
         return new DefaultAnalysisResult(dataset);
     }
 
-    protected void run() {
+    private void run() throws MissingComponentException {
     	collection = dataset.getCollection();
     	if (!collection.getSignalManager().hasSignals()) 
              return;
@@ -115,27 +115,23 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
         	return;
         }
 
-        try {
-        	createShellCounters();
+        createShellCounters();
 
-            // make the shells and measure the values
-            collection.getCells().parallelStream().forEach(c->new CellAnalysis(c).analyse());
-            
-            fireIndeterminateState();
-            createResults();
+        // make the shells and measure the values
+        collection.getCells().parallelStream().forEach(c->new CellAnalysis(c).analyse());
 
-            LOGGER.info("Shell analysis complete");
-        } catch (Exception e) {
-            LOGGER.warning("Error in shell analysis");
-            LOGGER.log(Loggable.STACK, "Error in shell analysis", e);
-            return;
-        }
+        fireIndeterminateState();
+        createResults();
+
+        LOGGER.info("Shell analysis complete");
+
     }
     
     /**
      * Create the shell results for each signal group
+     * @throws MissingComponentException 
      */
-    private void createShellCounters() {
+    private void createShellCounters() throws MissingComponentException {
     	for (UUID signalGroupId : collection.getSignalManager().getSignalGroupIDs()) {
             if (IShellResult.RANDOM_SIGNAL_ID.equals(signalGroupId))
                 continue;
@@ -150,7 +146,7 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
             }
             
             // Store the shell options in the signal options
-            datasetOptions.get().getNuclearSignalOptions(signalGroupId).set(options);
+            datasetOptions.get().getNuclearSignalOptions(signalGroupId).orElseThrow(MissingComponentException::new).set(options);
         }
     	
     	// Ensure a random distribution exists

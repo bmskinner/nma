@@ -118,7 +118,7 @@ public class SignalWarpingRunSettingsPanel
     			signalBox.setDataset(datasetBoxOne.getSelectedDataset());
     			
     			int threshold = datasetBoxOne.getSelectedDataset().getAnalysisOptions().get()
-    					.getNuclearSignalOptions(signalBox.getSelectedID()).getInt(HashOptions.THRESHOLD);
+    					.getNuclearSignalOptions(signalBox.getSelectedID()).get().getInt(HashOptions.THRESHOLD);
     			minThresholdSpinner.setValue(threshold);
     		}
     		
@@ -139,7 +139,7 @@ public class SignalWarpingRunSettingsPanel
 	        } else {
 	        	setSignalSettingsEnabled(true);
 	            int threshold = datasetBoxOne.getSelectedDataset().getAnalysisOptions().get()
-    					.getNuclearSignalOptions(signalBox.getSelectedID()).getInt(HashOptions.THRESHOLD);
+    					.getNuclearSignalOptions(signalBox.getSelectedID()).get().getInt(HashOptions.THRESHOLD);
     			minThresholdSpinner.setValue(threshold);
 	        }
     	});
@@ -150,7 +150,7 @@ public class SignalWarpingRunSettingsPanel
     	// Set the initial value to the signal detection threshold of the initial selected signal group
     	int threshold = datasetBoxOne.getSelectedDataset().getAnalysisOptions().isPresent() 
     			? datasetBoxOne.getSelectedDataset().getAnalysisOptions().get()
-				.getNuclearSignalOptions(signalBox.getSelectedID()).getInt(HashOptions.THRESHOLD) : 0;
+				.getNuclearSignalOptions(signalBox.getSelectedID()).get().getInt(HashOptions.THRESHOLD) : 0;
     	SpinnerModel minThresholdModel = new SpinnerNumberModel(threshold, 0, 255, 1);
     	minThresholdSpinner = new JSpinner(minThresholdModel);
     	minThresholdSpinner.setToolTipText(MIN_THRESHOLD_TOOLTIP);

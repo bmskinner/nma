@@ -42,6 +42,7 @@ import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.SignalDetectionMode;
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult;
@@ -50,6 +51,7 @@ import com.bmskinner.nuclear_morphology.components.signals.PairwiseSignalDistanc
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.ShellDistributionTester;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
@@ -73,57 +75,53 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
      */
     public TableModel createSignalDetectionParametersTable() {
 
-        if (!options.hasDatasets())
-            return createBlankTable();
+    	if (!options.hasDatasets())
+    		return createBlankTable();
 
-        List<IAnalysisDataset> list = options.getDatasets();
-        DefaultTableModel model = new DefaultTableModel();
+    	try {
 
-        
+    		List<IAnalysisDataset> list = options.getDatasets();
+    		DefaultTableModel model = new DefaultTableModel();
 
-        // find the collection with the most channels
-        // this defines the number of rows
-        int maxChannels = list.stream().mapToInt(d -> d.getCollection().getSignalManager().getSignalGroupCount()).max()
-                .orElse(0);
+    		// find the collection with the most channels
+    		// this defines the number of rows
+    		int maxChannels = list.stream().mapToInt(d -> d.getCollection().getSignalManager().getSignalGroupCount()).max()
+    				.orElse(0);
 
-        if (maxChannels == 0)
-            return createBlankTable();
+    		if (maxChannels == 0)
+    			return createBlankTable();
 
-        Object[] rowNameBlock = { "", Labels.Signals.SIGNAL_GROUP_LABEL, Labels.Signals.SIGNAL_CHANNEL_LABEL, Labels.Signals.SIGNAL_SOURCE_LABEL, "Threshold", "Min size",
-                "Max fraction", "Min circ", "Max circ", "Detection mode" };
+    		Object[] rowNameBlock = { "", Labels.Signals.SIGNAL_GROUP_LABEL, Labels.Signals.SIGNAL_CHANNEL_LABEL, Labels.Signals.SIGNAL_SOURCE_LABEL, "Threshold", "Min size",
+    				"Max fraction", "Min circ", "Max circ", "Detection mode" };
 
-        // create the row names
-        List<Object> fieldNames = new ArrayList<Object>(0);
-        fieldNames.add(Labels.Signals.NUMBER_OF_SIGNAL_GROUPS);
+    		// create the row names
+    		List<Object> fieldNames = new ArrayList<Object>(0);
+    		fieldNames.add(Labels.Signals.NUMBER_OF_SIGNAL_GROUPS);
 
-        for (int i = 0; i < maxChannels; i++) {
+    		for (int i = 0; i < maxChannels; i++) {
 
-            for (Object o : rowNameBlock) {
-                fieldNames.add(o);
-            }
-        }
+    			for (Object o : rowNameBlock) {
+    				fieldNames.add(o);
+    			}
+    		}
 
-        int numberOfRowsPerSignalGroup = rowNameBlock.length;
-        model.addColumn(EMPTY_STRING, fieldNames.toArray(new Object[0])); // separate
-                                                                          // row
-                                                                          // block
-                                                                          // for
-                                                                          // each
-                                                                          // channel
+    		// Separate block for each channel
+    		int numberOfRowsPerSignalGroup = rowNameBlock.length;
+    		model.addColumn(EMPTY_STRING, fieldNames.toArray(new Object[0]));
 
-        // make a new column for each collection
-        for (IAnalysisDataset dataset : list) {
+    		// make a new column for each collection
+    		for (IAnalysisDataset dataset : list) {
 
-            List<Object> columnData = makeDetectionSettingsColumn(dataset, maxChannels, numberOfRowsPerSignalGroup);
-            model.addColumn(dataset.getName(), columnData.toArray(new Object[0])); // separate
-                                                                                   // row
-                                                                                   // block
-                                                                                   // for
-                                                                                   // each
-                                                                                   // channel
-        }
+    			// Separate block for each channel
+    			List<Object> columnData = makeDetectionSettingsColumn(dataset, maxChannels, numberOfRowsPerSignalGroup);
+    			model.addColumn(dataset.getName(), columnData.toArray(new Object[0]));
+    		}
 
-        return model;
+    		return model;
+    	} catch(MissingOptionException e) {
+    		LOGGER.log(Loggable.STACK, "Error creating table model", e);
+    		return AbstractTableCreator.createBlankTable();
+    	}
     }
 
     /**
@@ -139,9 +137,10 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
      * @param rowsPerSignalGroup
      *            the number of rows a signal group takes up
      * @return a list of rows for a table.
+     * @throws MissingOptionException 
      */
     private List<Object> makeDetectionSettingsColumn(IAnalysisDataset dataset, int signalGroupCount,
-            int rowsPerSignalGroup) {
+            int rowsPerSignalGroup) throws MissingOptionException {
 
         List<Object> rowData = new ArrayList<>(0);
 
@@ -244,9 +243,10 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
      *            the total number of signal groups in the table
      * @param rowsPerSignalGroup
      *            the number of rows each signal group requires
+     * @throws MissingOptionException 
      */
     private void addNonMergedSignalData(List<Object> rowData, IAnalysisDataset dataset, int signalGroupCount,
-            int rowsPerSignalGroup) {
+            int rowsPerSignalGroup) throws MissingOptionException {
 
         ICellCollection collection = dataset.getCollection();
         int signalGroupNumber = 0; // Store the number of signal groups
@@ -272,7 +272,7 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
         		continue;
         	}
 
-        	HashOptions ns = op.get().getNuclearSignalOptions(signalGroup);
+        	HashOptions ns = op.get().getNuclearSignalOptions(signalGroup).orElseThrow(MissingOptionException::new);
         	Object signalThreshold = ns.getString(HashOptions.SIGNAL_DETECTION_MODE_KEY)
         			.equals(SignalDetectionMode.FORWARD.name())
         			? ns.getInt(HashOptions.THRESHOLD) : "Variable";

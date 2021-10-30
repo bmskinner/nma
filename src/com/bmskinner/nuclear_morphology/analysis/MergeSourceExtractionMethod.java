@@ -106,7 +106,7 @@ public class MergeSourceExtractionMethod extends MultipleDatasetAnalysisMethod {
     	// Make a new real cell collection from the virtual collection
     	File imageFolder = template.getAnalysisOptions()
     			.orElseThrow(MissingOptionException::new)
-    			.getNuclusDetectionOptions()
+    			.getNucleusDetectionOptions()
     			.orElseThrow(MissingOptionException::new)
     			.getFile(HashOptions.DETECTION_FOLDER);
     	

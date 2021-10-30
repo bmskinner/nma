@@ -34,6 +34,7 @@ import com.bmskinner.nuclear_morphology.components.datasets.IClusterGroup;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace;
 import com.bmskinner.nuclear_morphology.core.DatasetListManager;
@@ -42,6 +43,7 @@ import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.utility.FileUtils;
 
 /**
@@ -214,12 +216,18 @@ public class CosmeticHandler {
 
     	try {
     		
-    		File currentFolder = d.getAnalysisOptions().get().getNuclearSignalOptions(signalGroup).getFile(HashOptions.DETECTION_FOLDER);
+    		File currentFolder = d.getAnalysisOptions().orElseThrow(MissingOptionException::new)
+    				.getNuclearSignalOptions(signalGroup).orElseThrow(MissingOptionException::new)
+    				.getFile(HashOptions.DETECTION_FOLDER);
     		File newFolder = parent.getInputSupplier().requestFolder(FileUtils.extantComponent(currentFolder));
 
     		d.getCollection().getSignalManager().updateSignalSourceFolder(signalGroup, newFolder.getAbsoluteFile());
     		parent.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.RECACHE_CHARTS, d);
-    	} catch (RequestCancelledException e) {}           
+    	} catch (RequestCancelledException e) {
+    		// user cancelled, ignore
+    	} catch (MissingOptionException e) {
+    		LOGGER.log(Loggable.STACK, "Error updating signal source", e);
+		}           
 
     }
     

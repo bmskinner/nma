@@ -4,6 +4,7 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.logging.Logger;
 
@@ -12,6 +13,7 @@ import javax.swing.JOptionPane;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.core.DatasetListManager;
 import com.bmskinner.nuclear_morphology.gui.components.FileSelector;
 import com.bmskinner.nuclear_morphology.io.xml.XMLReader;
@@ -76,9 +78,15 @@ public class CopySignalDetectionSettingsFromOpenDatasetPanel extends CopyFromOpe
 
             	LOGGER.fine("Copying options from: " + choice);
             	File folder = new File(options.getString(HashOptions.DETECTION_FOLDER));
-            	HashOptions template = choice.d.getAnalysisOptions().get().getNuclearSignalOptions(choice.signalGroupId);
-            	options.set(template);
-            	// Ensure folder is not overwritted when other options were copied
+            	
+            	if(choice.d.getAnalysisOptions().isPresent()) {
+            		Optional<HashOptions> op = choice.d.getAnalysisOptions().get()
+            				.getNuclearSignalOptions(choice.signalGroupId);
+            		if(op.isPresent()) {
+            			options.set(op.get());
+            		}
+            	}
+            	// Ensure folder is not overwritten when other options were copied
 				options.setString(HashOptions.DETECTION_FOLDER, folder.getAbsolutePath());
                 fireOptionsChangeEvent();
             }
@@ -99,9 +107,11 @@ public class CopySignalDetectionSettingsFromOpenDatasetPanel extends CopyFromOpe
 				// Find the channels in the imported file
 				String[] choices = o.getNuclearSignalGroups()
 						.stream()
-						.map(id->{
-							return "Channel "+String.valueOf(o.getNuclearSignalOptions(id).getInt(HashOptions.CHANNEL));
-				}).toArray(String[]::new);
+						.map(id->o.getNuclearSignalOptions(id))
+						.filter(Optional::isPresent)
+						.map(Optional::get)
+						.map(op->String.valueOf(op.getInt(HashOptions.CHANNEL)))
+						.toArray(String[]::new);
 				
 				String choice = (String) JOptionPane.showInputDialog(null,
 	                    "Choose the channel options to copy", "Choose channel", JOptionPane.QUESTION_MESSAGE, null, choices,
@@ -111,10 +121,12 @@ public class CopySignalDetectionSettingsFromOpenDatasetPanel extends CopyFromOpe
 					return;
 				
 				// Get the first option set matching the channel
-				int channel = Integer.valueOf(choice.replaceAll("Channel ", ""));
+				int channel = Integer.parseInt(choice.replaceAll("Channel ", ""));
 
 				o.getNuclearSignalGroups().stream()
-					.map(id-> o.getNuclearSignalOptions(id))
+					.map(id->o.getNuclearSignalOptions(id))
+					.filter(Optional::isPresent)
+					.map(Optional::get)
 					.filter(op->op.getInt(HashOptions.CHANNEL)==channel)
 					.findFirst()
 					.ifPresent(op->options.set(op));

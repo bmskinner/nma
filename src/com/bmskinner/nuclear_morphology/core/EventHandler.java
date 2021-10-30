@@ -446,7 +446,7 @@ public class EventHandler implements EventListener {
         		// Get the first dataset scale
         		Optional<IAnalysisOptions> d0Options = selectedDatasets.get(0).getAnalysisOptions();
         		if(d0Options.isPresent()) {
-        			Optional<HashOptions> d0NucleusOptions = d0Options.get().getNuclusDetectionOptions();
+        			Optional<HashOptions> d0NucleusOptions = d0Options.get().getNucleusDetectionOptions();
         			if(d0NucleusOptions.isPresent()) {
         				d0scale = d0NucleusOptions.get().getDouble(HashOptions.SCALE);
         			}
@@ -457,7 +457,7 @@ public class EventHandler implements EventListener {
         		boolean allMatch = selectedDatasets.stream().allMatch(d->{
         			Optional<IAnalysisOptions> dOptions = d.getAnalysisOptions();
         			if(dOptions.isPresent()) {
-        				Optional<HashOptions> dNucleusOptions = dOptions.get().getNuclusDetectionOptions();
+        				Optional<HashOptions> dNucleusOptions = dOptions.get().getNucleusDetectionOptions();
         				if(dNucleusOptions.isPresent()) {
         					return dNucleusOptions.get().getDouble(HashOptions.SCALE)==d0scaleFinal;
         				}

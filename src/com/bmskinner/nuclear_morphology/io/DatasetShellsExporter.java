@@ -32,6 +32,7 @@ import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
+import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult;
@@ -112,13 +113,14 @@ public class DatasetShellsExporter extends StatsExporter {
      * Append the given dataset stats into the string builder
      * @param d the dataset to export
      * @param outLine the string builder to append to
+     * @throws MissingOptionException 
      * @throws UnloadableImageException 
      * @throws MissingLandmarkException
      * @throws MissingProfileException
      * @throws ProfileException
      */
     @Override
-    protected void append(@NonNull IAnalysisDataset d, @NonNull StringBuilder outLine) {
+    protected void append(@NonNull IAnalysisDataset d, @NonNull StringBuilder outLine) throws MissingOptionException {
         
         
         for(@NonNull UUID signalGroupId : d.getCollection().getSignalGroupIDs()){
@@ -129,7 +131,7 @@ public class DatasetShellsExporter extends StatsExporter {
             ISignalGroup signalGroup = groupOptn.get();
             String groupName   = signalGroup.getGroupName();
             String groupFolder = d.getAnalysisOptions().get()
-            		.getNuclearSignalOptions(signalGroupId).getFile(HashOptions.DETECTION_FOLDER).getAbsolutePath();            
+            		.getNuclearSignalOptions(signalGroupId).orElseThrow(MissingOptionException::new).getFile(HashOptions.DETECTION_FOLDER).getAbsolutePath();            
             Optional<IShellResult> oShellResult = signalGroup.getShellResult();
             if(!oShellResult.isPresent())
                 continue;

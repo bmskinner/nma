@@ -122,7 +122,7 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
 	}
     
 	@Override
-	public Optional<HashOptions> getNuclusDetectionOptions() {
+	public Optional<HashOptions> getNucleusDetectionOptions() {
 		return getDetectionOptions(CellularComponent.NUCLEUS);
 	}
 
@@ -175,19 +175,29 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
     	}
         return result;
     }
+    
+    @Override
+    public Optional<HashOptions> getNuclearSignalOptions(@NonNull UUID signalGroup) {
+    	return Optional.ofNullable(getDetectionOptions(SIGNAL_GROUP+signalGroup.toString()).orElse(null));
+    }
 
     @Override
     public boolean hasSignalDetectionOptions(@NonNull UUID signalGroup) {
-        String key = signalGroup.toString();
+        String key = SIGNAL_GROUP+signalGroup.toString();
         return hasDetectionOptions(key);
     }
+    
+    @Override
+	public void setNuclearSignalDetectionOptions(HashOptions options) {
+    	setDetectionOptions(SIGNAL_GROUP+options.getString(HashOptions.SIGNAL_GROUP_ID), options);
+	}
     
     @Override
     public long getAnalysisTime() {
     	return analysisTime;
     }
 
-    @Override
+	@Override
     public void setDetectionOptions(String key, HashOptions options) {
         detectionOptions.put(key, options);
     }
@@ -201,17 +211,6 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
     public void setAngleWindowProportion(double proportion) {
         profileWindowProportion = proportion;
 
-    }
-
-    @Override
-    public HashOptions getNuclearSignalOptions(@NonNull UUID signalGroup) {
-    	//TODO Ugly
-    	Optional<HashOptions> op = getDetectionOptions(SIGNAL_GROUP+signalGroup.toString());
-    	
-    	if(op.isPresent())
-    		return op.get();
-    	
-        return null;
     }
         
     @Override

@@ -25,6 +25,7 @@ import com.bmskinner.nuclear_morphology.analysis.mesh.MeshImage;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
+import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.gui.tabs.signals.warping.SignalWarpingModel;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -69,7 +70,7 @@ public class PerCellMSSSIMCalculationMethod
         return result;
     }
 	
-	private Map<ViolinKey, List<MSSIMScore>> calculatePerCellMSSSIMs() {
+	private Map<ViolinKey, List<MSSIMScore>> calculatePerCellMSSSIMs() throws MissingOptionException {
 		LOGGER.fine( "Calculating per cell MS-SSIM*s");
 		int progress = 0;
 		MultiScaleStructuralSimilarityIndex msi = new MultiScaleStructuralSimilarityIndex();
@@ -96,7 +97,8 @@ public class PerCellMSSSIMCalculationMethod
 			Map<UUID, Integer> signalThresholds = new HashMap<>();
 			for(UUID id : d.getCollection().getSignalGroupIDs()) {
 				signalNames.put(id, d.getCollection().getSignalGroup(id).get().getGroupName());
-				signalThresholds.put(id, d.getAnalysisOptions().get().getNuclearSignalOptions(id).getInt(HashOptions.THRESHOLD));
+				
+				signalThresholds.put(id, d.getAnalysisOptions().get().getNuclearSignalOptions(id).orElseThrow(MissingOptionException::new).getInt(HashOptions.THRESHOLD));
 			}
 			
 			

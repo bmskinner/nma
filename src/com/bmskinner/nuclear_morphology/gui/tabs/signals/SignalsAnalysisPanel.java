@@ -75,7 +75,9 @@ public class SignalsAnalysisPanel extends DetailPanel {
 
                     		cosmeticHandler.updateSignalSource(d, signalGroup.getID());
                     		SignalTableCell newValue = new SignalTableCell(signalGroup.getID(), 
-                    				d.getAnalysisOptions().get().getNuclearSignalOptions(signalGroup.getID()).getFile(HashOptions.DETECTION_FOLDER).getAbsolutePath(),
+                    				d.getAnalysisOptions().get()
+                    				.getNuclearSignalOptions(signalGroup.getID()).get()
+                    				.getFile(HashOptions.DETECTION_FOLDER).getAbsolutePath(),
                     				signalGroup.getColor());
                     		table.getModel().setValueAt(newValue, row, column);
                     		table.repaint();

@@ -87,7 +87,7 @@ public class ShellOverviewDialog extends AbstractCellCollectionDialog {
 		String folderPath = "";
 		Optional<IAnalysisOptions> analOpt = dataset.getAnalysisOptions();
 		if(analOpt.isPresent()) {
-			Optional<HashOptions> nuclOpt = analOpt.get().getNuclusDetectionOptions();
+			Optional<HashOptions> nuclOpt = analOpt.get().getNucleusDetectionOptions();
 			if(nuclOpt.isPresent())
 				folderPath = nuclOpt.get().getFile(HashOptions.DETECTION_FOLDER).getAbsolutePath();
 		}

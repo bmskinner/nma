@@ -37,6 +37,7 @@ import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.datasets.VirtualDataset;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
+import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.signals.DefaultSignalGroup;
 import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
@@ -60,7 +61,6 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
     protected final HashOptions options;
     protected final File folder;
     protected final int channel;
-//    protected final UUID signalGroupId;
 
     /**
      * For use when running on an existing dataset
@@ -95,8 +95,7 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
         Color colour = ColourSelecter.getSignalColour(options.getInt(HashOptions.CHANNEL));
         group.setGroupColour(colour);
 
-        dataset.getAnalysisOptions().get()
-        	.setDetectionOptions(options.getString(HashOptions.SIGNAL_GROUP_ID), options);
+        dataset.getAnalysisOptions().get().setNuclearSignalDetectionOptions(options);
     }
 
     @Override

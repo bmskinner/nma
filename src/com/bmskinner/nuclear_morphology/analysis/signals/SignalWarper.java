@@ -42,6 +42,7 @@ import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.components.signals.SignalManager;
 import com.bmskinner.nuclear_morphology.gui.tabs.signals.warping.SignalWarpingRunSettings;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
@@ -155,21 +156,23 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> {
 
     /**
      * Create the warped images for all selected nuclei in the dataset
+     * @throws MissingOptionException 
      * 
      */
-    private List<ImageProcessor> generateImages() {
+    private List<ImageProcessor> generateImages() throws MissingOptionException {
     	LOGGER.finer( "Generating warped images for " + warpingOptions.templateDataset().getName());
     	final List<ImageProcessor> warpedImages = Collections.synchronizedList(new ArrayList<>());
     	
     	List<ICell> cells = getCells(warpingOptions.getBoolean(SignalWarpingRunSettings.IS_ONLY_CELLS_WITH_SIGNALS_KEY));
     	
-    	cells.parallelStream().flatMap(c->c.getNuclei().stream()).forEach(n->{
-    		LOGGER.finer( "Drawing signals for " + n.getNameAndNumber());
-			ImageProcessor nImage = generateNucleusImage(n);
-			warpedImages.add(nImage);
-			publish(warpedImages.size());
-    	});
-
+    	for(ICell c : cells) {
+    		for(Nucleus n : c.getNuclei()) {
+    			LOGGER.finer( "Drawing signals for " + n.getNameAndNumber());
+    			ImageProcessor nImage = generateNucleusImage(n);
+    			warpedImages.add(nImage);
+    			publish(warpedImages.size());
+    		}
+    	}
     	return warpedImages;
     }
     
@@ -187,8 +190,9 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> {
 	 * Create the warped image for a nucleus
 	 * @param n the nucleus to warp
 	 * @return the warped image
+	 * @throws MissingOptionException 
 	 */
-	private ImageProcessor generateNucleusImage(@NonNull Nucleus n) {
+	private ImageProcessor generateNucleusImage(@NonNull Nucleus n) throws MissingOptionException {
 
 		try {
 			Mesh<Nucleus> cellMesh = new DefaultMesh<>(n, meshConsensus);
@@ -231,8 +235,9 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> {
 	 * Fetch the appropriate image to warp for the given nucleus
 	 * @param n the nucleus to warp
 	 * @return the nucleus image
+	 * @throws MissingOptionException 
 	 */
-	private ImageProcessor getNucleusImageProcessor(@NonNull Nucleus n) {
+	private ImageProcessor getNucleusImageProcessor(@NonNull Nucleus n) throws MissingOptionException {
 
 		try {
 			// Get the image with the signal
@@ -267,8 +272,9 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> {
 	 * the dataset is merged or not merged.
 	 * @param n the nucleus to fetch options for
 	 * @return the signal options if present, otherwise null
+	 * @throws MissingOptionException 
 	 */
-	private HashOptions getSignalOptions(@NonNull Nucleus n) {
+	private HashOptions getSignalOptions(@NonNull Nucleus n) throws MissingOptionException {
 		
 		// If merged datasets are being warped, the imageFolder will not
 		// be correct, since the analysis options are mostly blank. We need
@@ -281,7 +287,7 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> {
 			.filter(d->d.getCollection().contains(n))
 			.findFirst().get()
 			.getAnalysisOptions().get()
-			.getNuclearSignalOptions(warpingOptions.signalId());			
+			.getNuclearSignalOptions(warpingOptions.signalId()).orElseThrow(MissingOptionException::new);			
 		} else {
 			
 			Optional<IAnalysisOptions> analysisOptions = warpingOptions.templateDataset()
@@ -289,7 +295,7 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> {
 
 			if(analysisOptions.isPresent()) {
 				return analysisOptions.get()
-						.getNuclearSignalOptions(warpingOptions.signalId());
+						.getNuclearSignalOptions(warpingOptions.signalId()).orElseThrow(MissingOptionException::new);
 
 			}
 		}

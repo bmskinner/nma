@@ -44,6 +44,7 @@ import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
@@ -77,8 +78,6 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
      * Create a table of stats for the given cell.
      * 
      * @return a table model
-     * @throws ChartDatasetCreationException
-     * @throws Exception
      */
     public TableModel createCellInfoTable() {
 
@@ -87,36 +86,42 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 
         if (options.isMultipleDatasets())
             return AbstractTableCreator.createBlankTable();
+        
+        try {
 
-        IAnalysisDataset d = options.firstDataset();
-        DefaultTableModel model = new DefaultTableModel();
+        	IAnalysisDataset d = options.firstDataset();
+        	DefaultTableModel model = new DefaultTableModel();
 
-        List<Object> fieldNames = new ArrayList<Object>(0);
-        List<Object> rowData = new ArrayList<Object>(0);
+        	List<Object> fieldNames = new ArrayList<>(0);
+        	List<Object> rowData = new ArrayList<>(0);
 
-        // find the collection with the most channels
-        // this defines the number of rows
+        	// find the collection with the most channels
+        	// this defines the number of rows
 
-        if (cell.hasCytoplasm()) {
-            addCytoplasmDataToTable(fieldNames, rowData, cell, d);
+        	if (cell.hasCytoplasm()) {
+        		addCytoplasmDataToTable(fieldNames, rowData, cell, d);
+        	}
+
+        	fieldNames.add("Number of nuclei");
+        	rowData.add(cell.getStatistic(Measurement.CELL_NUCLEUS_COUNT));
+
+        	int nucleusNumber = 0;
+        	for (Nucleus n : cell.getNuclei()) {
+        		nucleusNumber++;
+        		fieldNames.add("Nucleus " + nucleusNumber);
+        		rowData.add("");
+        		addNuclearDataToTable(fieldNames, rowData, n, d);
+
+        	}
+
+        	model.addColumn("", fieldNames.toArray(new Object[0]));
+        	model.addColumn("Info", rowData.toArray(new Object[0]));
+
+        	return model;
+        } catch(MissingOptionException e) {
+        	LOGGER.log(Loggable.STACK, "Error creating table model", e);
+        	return AbstractTableCreator.createBlankTable();
         }
-
-        fieldNames.add("Number of nuclei");
-        rowData.add(cell.getStatistic(Measurement.CELL_NUCLEUS_COUNT));
-
-        int nucleusNumber = 0;
-        for (Nucleus n : cell.getNuclei()) {
-            nucleusNumber++;
-            fieldNames.add("Nucleus " + nucleusNumber);
-            rowData.add("");
-            addNuclearDataToTable(fieldNames, rowData, n, d);
-
-        }
-
-        model.addColumn("", fieldNames.toArray(new Object[0]));
-        model.addColumn("Info", rowData.toArray(new Object[0]));
-
-        return model;
     }
 
     public TableModel createCellSegmentsTable() {
@@ -256,7 +261,7 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 
     }
 
-    private void addNuclearDataToTable(List<Object> fieldNames, List<Object> rowData, Nucleus n, IAnalysisDataset d) {
+    private void addNuclearDataToTable(List<Object> fieldNames, List<Object> rowData, Nucleus n, IAnalysisDataset d) throws MissingOptionException {
 
         fieldNames.add(Labels.Cells.SOURCE_FILE_LABEL);
         rowData.add(n.getSourceFile());
@@ -366,9 +371,10 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
      *            the nucleus
      * @param d
      *            the source dataset for the nucleus
+     * @throws MissingOptionException 
      */
     private void addNuclearSignalsToTable(List<Object> fieldNames, List<Object> rowData, Nucleus n,
-            IAnalysisDataset d) {
+            IAnalysisDataset d) throws MissingOptionException {
 
         int j = 0;
 
@@ -384,7 +390,7 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
                 Optional<IAnalysisOptions> datasetOptionsOptional = d.getAnalysisOptions();
                 if(!datasetOptionsOptional.isPresent())
                 	continue;
-                HashOptions signalOptions = datasetOptionsOptional.get().getNuclearSignalOptions(signalGroup);
+                HashOptions signalOptions = datasetOptionsOptional.get().getNuclearSignalOptions(signalGroup).orElseThrow(MissingOptionException::new);
 
                 fieldNames.add("");
                 rowData.add("");

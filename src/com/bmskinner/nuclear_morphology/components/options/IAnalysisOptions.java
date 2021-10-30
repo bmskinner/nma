@@ -65,7 +65,7 @@ public interface IAnalysisOptions extends Serializable, XmlSerializable {
      * This is a shortcut for {@code IAnalysisOptions::getDetectionOptions(CellularComponent.NUCLEUS)}
      * @return
      */
-    Optional<HashOptions> getNuclusDetectionOptions();
+    Optional<HashOptions> getNucleusDetectionOptions();
     
     /**
      * Get the type of detection options stored
@@ -133,7 +133,15 @@ public interface IAnalysisOptions extends Serializable, XmlSerializable {
      * @param signalGroup the group id
      * @return nuclear detection options for the group
      */
-    HashOptions getNuclearSignalOptions(@NonNull UUID signalGroup);
+    Optional<HashOptions> getNuclearSignalOptions(@NonNull UUID signalGroup);
+    
+    /**
+     * Set signal detection options
+     * 
+     * @param key
+     * @param options
+     */
+    void setNuclearSignalDetectionOptions(HashOptions options);
     
 
     /**
@@ -150,6 +158,9 @@ public interface IAnalysisOptions extends Serializable, XmlSerializable {
      * @return the UNIX time
      */
     long getAnalysisTime();
+    
+
+    
     
     /**
      * Set the detection options for the given component

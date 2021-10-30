@@ -242,7 +242,7 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 		List<HashOptions> templates = new ArrayList<>();
 		for (IAnalysisDataset d : datasets) {
 			IAnalysisOptions dOptions = d.getAnalysisOptions().orElseThrow(MissingOptionException::new);
-			templates.add(dOptions.getNuclusDetectionOptions().orElseThrow(MissingOptionException::new));
+			templates.add(dOptions.getNucleusDetectionOptions().orElseThrow(MissingOptionException::new));
 		}
 		mergeDetectionOptions(nucleus, templates);
 
@@ -253,9 +253,10 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
     	
     	// Merge signal group options
     	for(UUID signalGroupId : newDataset.getCollection().getSignalGroupIDs()) {
-    		HashOptions signal = OptionsFactory.makeNuclearSignalOptions((File)null).build();    		
+    		HashOptions signal = OptionsFactory.makeNuclearSignalOptions((File)null)
+    				.withValue(HashOptions.SIGNAL_GROUP_ID, signalGroupId.toString()).build();  
+    		mergedOptions.setNuclearSignalDetectionOptions(signal);
     		//TODO: Merge the signal detection options
-    		mergedOptions.setDetectionOptions(IAnalysisOptions.SIGNAL_GROUP+signalGroupId.toString(), signal);
     	}
     	
     	
@@ -293,7 +294,7 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 			boolean canAdd = true;
 			for (IAnalysisDataset d : datasets) {
 				IAnalysisOptions dOptions = d.getAnalysisOptions().orElseThrow(MissingOptionException::new);
-				HashOptions nOptions = dOptions.getNuclusDetectionOptions().orElseThrow(MissingOptionException::new);
+				HashOptions nOptions = dOptions.getNucleusDetectionOptions().orElseThrow(MissingOptionException::new);
 				canAdd &= nOptions.getFloat(s)==result;
 			}
 			if(canAdd)
@@ -310,7 +311,7 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 			boolean canAdd = true;
 			for (IAnalysisDataset d : datasets) {
 				IAnalysisOptions dOptions = d.getAnalysisOptions().orElseThrow(MissingOptionException::new);
-				HashOptions nOptions = dOptions.getNuclusDetectionOptions().orElseThrow(MissingOptionException::new);
+				HashOptions nOptions = dOptions.getNucleusDetectionOptions().orElseThrow(MissingOptionException::new);
 				canAdd &= nOptions.getDouble(s)==result;
 			}
 			if(canAdd)
@@ -326,7 +327,7 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 			boolean canAdd = true;
 			for (IAnalysisDataset d : datasets) {
 				IAnalysisOptions dOptions = d.getAnalysisOptions().orElseThrow(MissingOptionException::new);
-				HashOptions nOptions = dOptions.getNuclusDetectionOptions().orElseThrow(MissingOptionException::new);
+				HashOptions nOptions = dOptions.getNucleusDetectionOptions().orElseThrow(MissingOptionException::new);
 				canAdd &= nOptions.getInt(s)==result;
 			}
 			if(canAdd)
@@ -342,7 +343,7 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 			boolean canAdd = true;
 			for (IAnalysisDataset d : datasets) {
 				IAnalysisOptions dOptions = d.getAnalysisOptions().orElseThrow(MissingOptionException::new);
-				HashOptions nOptions = dOptions.getNuclusDetectionOptions().orElseThrow(MissingOptionException::new);
+				HashOptions nOptions = dOptions.getNucleusDetectionOptions().orElseThrow(MissingOptionException::new);
 				canAdd &= nOptions.getString(s).equals(result);
 			}
 			if(canAdd)
@@ -358,7 +359,7 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 			boolean canAdd = true;
 			for (IAnalysisDataset d : datasets) {
 				IAnalysisOptions dOptions = d.getAnalysisOptions().orElseThrow(MissingOptionException::new);
-				HashOptions nOptions = dOptions.getNuclusDetectionOptions().orElseThrow(MissingOptionException::new);
+				HashOptions nOptions = dOptions.getNucleusDetectionOptions().orElseThrow(MissingOptionException::new);
 				if(nOptions.hasSubOptions(s))
 					canAdd &= nOptions.getSubOptions(s).equals(mergedOptions);
 				else

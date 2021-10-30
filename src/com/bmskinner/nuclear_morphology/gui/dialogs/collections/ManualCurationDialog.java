@@ -48,6 +48,7 @@ import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
+import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
 import com.bmskinner.nuclear_morphology.gui.components.SelectableCellIcon;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
@@ -345,9 +346,9 @@ public class ManualCurationDialog extends AbstractCellCollectionDialog {
 	    	return flipAndScaleImage(c, ip);
 	    }
 	    
-	    private ImageProcessor importSignal(UUID signal, ICell c) throws ImageImportException {
+	    private ImageProcessor importSignal(UUID signal, ICell c) throws ImageImportException, MissingOptionException {
 	    	
-	    	HashOptions signalOptions = dataset.getAnalysisOptions().get().getNuclearSignalOptions(signal);
+	    	HashOptions signalOptions = dataset.getAnalysisOptions().get().getNuclearSignalOptions(signal).orElseThrow(MissingOptionException::new);
 	    	
 	    	if(signalOptions==null)
 	    		return ImageFilterer.createWhiteColorProcessor(150, 150);
@@ -404,7 +405,7 @@ public class ManualCurationDialog extends AbstractCellCollectionDialog {
 	            
 	            return new SelectableCellIcon(ip, c);
 	            
-	        } catch (UnloadableImageException | ImageImportException e) {
+	        } catch (UnloadableImageException | ImageImportException | MissingOptionException e) {
 	            LOGGER.fine("Cannot load image for component: "+e.getMessage());
 	            return new SelectableCellIcon(ImageFilterer.createBlackColorProcessor(150, 150), c);
 	        }

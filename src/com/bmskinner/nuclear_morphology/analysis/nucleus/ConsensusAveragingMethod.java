@@ -96,7 +96,7 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
     	// Set the nucleus scale if available
         Optional<IAnalysisOptions> analysisOptions =  dataset.getAnalysisOptions();
         if(analysisOptions.isPresent()) {
-        	Optional<HashOptions> nucleusOptions = analysisOptions.get().getNuclusDetectionOptions();
+        	Optional<HashOptions> nucleusOptions = analysisOptions.get().getNucleusDetectionOptions();
         	if(nucleusOptions.isPresent()) {
         		return nucleusOptions.get().getDouble(HashOptions.SCALE);
         	} else {

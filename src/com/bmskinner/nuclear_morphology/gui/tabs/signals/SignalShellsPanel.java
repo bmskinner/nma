@@ -64,6 +64,7 @@ import com.bmskinner.nuclear_morphology.charting.options.TableOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.datasets.VirtualDataset;
+import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult.Aggregation;
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult.Normalisation;
@@ -262,7 +263,7 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
         reportBtn.addActionListener(e->{
         	try {
 				new DemoReportGenerator().generateShellReport(activeDataset());
-			} catch (IOException e1) {
+			} catch (IOException | MissingOptionException e1) {
 				LOGGER.log(Level.WARNING, "Unable to generate report");
 			}
         });

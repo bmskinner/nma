@@ -64,7 +64,7 @@ public class CellFileExporter extends MultipleDatasetAnalysisMethod implements I
     }
 
     @Override
-    public IAnalysisResult call() throws Exception{
+    public IAnalysisResult call() throws Exception {
     	for(IAnalysisDataset d :  datasets) {
     		exportCellLocations(d);
     	}
