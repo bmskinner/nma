@@ -25,6 +25,7 @@ import java.util.logging.Logger;
 import org.eclipse.jdt.annotation.NonNull;
 import org.jdom2.Element;
 
+import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.io.XmlSerializable;
 
@@ -63,8 +64,9 @@ public class DefaultSignalGroup implements ISignalGroup {
      * unmarshalling. The element should conform
      * to the specification in {@link XmlSerializable}.
      * @param e the XML element containing the data.
+     * @throws ComponentCreationException 
      */
-    public DefaultSignalGroup(@NonNull Element e) {
+    public DefaultSignalGroup(@NonNull Element e) throws ComponentCreationException {    	
     	id = UUID.fromString(e.getAttributeValue("id"));
     	groupName = e.getAttributeValue("name");
     	isVisible = Boolean.parseBoolean(e.getChildText("IsVisible"));
@@ -75,8 +77,6 @@ public class DefaultSignalGroup implements ISignalGroup {
 
     	if(e.getChild("WarpedSignal")!=null) 
     		warpedSignals = new ShortWarpedSignal(e.getChild("WarpedSignal"));	
-
-
     }
 
 
@@ -89,7 +89,7 @@ public class DefaultSignalGroup implements ISignalGroup {
 			e.addContent(new Element("Colour").setText(String.valueOf(groupColour.getRGB())));
 		
 		if(shellResult!=null)
-			e.addContent(shellResult.toXmlElement());
+			e.addContent(shellResult.toXmlElement().setAttribute("id", id.toString()));
 		
 		if(warpedSignals!=null)
 			e.addContent(warpedSignals.toXmlElement());

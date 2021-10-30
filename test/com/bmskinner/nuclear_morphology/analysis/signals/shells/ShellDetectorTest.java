@@ -31,12 +31,14 @@ import org.junit.Test;
 import com.bmskinner.nuclear_morphology.ComponentTester;
 import com.bmskinner.nuclear_morphology.TestDatasetBuilder;
 import com.bmskinner.nuclear_morphology.TestDatasetBuilder.TestComponentShape;
+import com.bmskinner.nuclear_morphology.TestImageDatasetCreator;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellAnalysisMethod.ShellAnalysisException;
 import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellDetector.Shell;
 import com.bmskinner.nuclear_morphology.components.Imageable;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
@@ -189,7 +191,12 @@ public class ShellDetectorTest extends ComponentTester {
         	assertFalse("Shells should not exist on first open", s.hasShellResult());
         }
         
-        new ShellAnalysisMethod(dataset, OptionsFactory.makeShellAnalysisOptions().build()).call();
+        assertTrue("Red signal should be present in mouse dataset", dataset.getAnalysisOptions().get().getNuclearSignalGroups().contains(TestImageDatasetCreator.RED_SIGNAL_ID));
+        
+        new ShellAnalysisMethod(dataset, OptionsFactory.makeShellAnalysisOptions()
+        		.withValue(HashOptions.SIGNAL_GROUP_ID, TestImageDatasetCreator.RED_SIGNAL_ID.toString())
+        		.build())
+        .call();
         
         for(ISignalGroup s : dataset.getCollection().getSignalGroups()) {
         	assertTrue("Shells should be created for "+s.getGroupName(), s.hasShellResult());

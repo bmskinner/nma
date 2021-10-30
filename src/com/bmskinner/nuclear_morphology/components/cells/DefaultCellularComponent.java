@@ -55,6 +55,7 @@ import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 import com.bmskinner.nuclear_morphology.io.XmlSerializable;
+import com.bmskinner.nuclear_morphology.io.xml.XMLReader;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
@@ -286,14 +287,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     protected DefaultCellularComponent(Element e) {
     	id = UUID.fromString(e.getAttributeValue("id"));
     	
-    	String[] posString = e.getChildText("Position")
-    			.replace("[", "")
-    			.replace("]", "")
-    			.replace(" ", "")
-    			.split(",");
-    	position = new int[posString.length];
-    	for(int i=0; i<posString.length; i++)
-    		position[i] = Integer.parseInt(posString[i]);
+    	position = XMLReader.parseIntArray(e.getChildText("Position"));
     	
     	String[] comString = e.getChildText("CentreOfMass").split(",");
     	centreOfMass = IPoint.makeNew(Float.parseFloat(comString[0]), Float.parseFloat(comString[1]));
@@ -311,15 +305,9 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     	channel = Integer.parseInt(e.getChildText("Channel"));
     	scale   = Double.parseDouble(e.getChildText("Scale"));
     	
-    	String[] xp = e.getChildText("xpoints").replace("[", "").replace("]", "").replace(" ", "").split(",");
-    	String[] yp = e.getChildText("ypoints").replace("[", "").replace("]", "").replace(" ", "").split(",");
+    	xpoints = XMLReader.parseIntArray(e.getChildText("xpoints"));
+    	ypoints = XMLReader.parseIntArray(e.getChildText("ypoints"));
 
-    	xpoints = new int[xp.length];
-    	ypoints = new int[xp.length];
-    	for(int i=0; i<xp.length; i++) {
-    		xpoints[i] = Integer.parseInt(xp[i]); 
-    		ypoints[i] = Integer.parseInt(yp[i]); 
-    	}
     	makeBorderList();
     }
 

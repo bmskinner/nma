@@ -66,4 +66,22 @@ public class XMLReaderTest {
 		IAnalysisDataset test = XMLReader.readDataset(f);
 		assertEquals(d, test);
 	}
+	
+	@Test
+	public void testReadAnalysisDatasetWithSignals() throws Exception {
+		IAnalysisDataset d = new TestDatasetBuilder(123).cellCount(20)
+				.ofType(RuleSetCollection.roundRuleSetCollection())
+				.withMaxSizeVariation(10)
+				.randomOffsetProfiles(true)
+				.addSignalsInChannel(0)
+				.addSignalsInChannel(1)
+				.numberOfClusters(2)
+				.segmented().build();
+		File f = new File(TestResources.UNIT_TEST_FOLDER, "AnalysisDatasetSignals.nmd");
+		
+		XMLWriter.writeXML(d.toXmlElement(), f);
+		
+		IAnalysisDataset test = XMLReader.readDataset(f);
+		assertEquals(d, test);
+	}
 }

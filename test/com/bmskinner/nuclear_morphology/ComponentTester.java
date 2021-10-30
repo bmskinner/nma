@@ -3,6 +3,7 @@ package com.bmskinner.nuclear_morphology;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 import java.lang.ref.SoftReference;
 import java.lang.ref.WeakReference;
@@ -61,7 +62,7 @@ public abstract class ComponentTester extends FloatArrayTester {
 	 * @param type
 	 * @return
 	 */
-	private List<Field> getInheritedPrivateFields(Class<?> type) {
+	private static List<Field> getInheritedPrivateFields(Class<?> type) {
 	    List<Field> result = new ArrayList<>();
 
 	    Class<?> i = type;
@@ -79,7 +80,7 @@ public abstract class ComponentTester extends FloatArrayTester {
 	 * @param name the inherited field name
 	 * @return
 	 */
-	protected Field getInheritedField(Class<?> type, String name) {
+	protected static Field getInheritedField(Class<?> type, String name) {
 		List<Field> fields = getInheritedPrivateFields(type);
 		for(Field f : fields)
 			if(f.getName().equals(name)) {
@@ -97,7 +98,7 @@ public abstract class ComponentTester extends FloatArrayTester {
 	 * @param fieldsToSkip skip fields in the object with these names
 	 * @throws Exception
 	 */
-	protected void testDuplicatesByField(Object original, Object dup, List<String> fieldsToSkip) throws Exception {
+	protected static void testDuplicatesByField(Object original, Object dup, List<String> fieldsToSkip) throws Exception {
 		for(Field f : getInheritedPrivateFields(dup.getClass())) {
 			
 			if(fieldsToSkip.contains(f.getName()))
@@ -122,75 +123,93 @@ public abstract class ComponentTester extends FloatArrayTester {
 				continue;
 			Object oValue = f.get(original);
 			Object dValue  = f.get(dup);
-			
+
 			// ignore transient fields
 			if(!Modifier.isTransient(f.getModifiers())) {
-				if(oValue!=null && !oValue.equals(dValue)) {
-					
-					if(oValue.getClass().equals(float[].class)) {
-						System.out.println(Arrays.toString((float[])oValue));
-						System.out.println(Arrays.toString((float[])dValue));
-					}
-					if(oValue.getClass().equals(int[].class)) {
-						System.out.println(Arrays.toString((int[])oValue));
-						System.out.println(Arrays.toString((int[])dValue));
-					}
-					if(oValue.getClass().equals(double[].class)) {
-						System.out.println(Arrays.toString((double[])oValue));
-						System.out.println(Arrays.toString((double[])dValue));
-					}
-					if(oValue.getClass().equals(byte[].class)) {
-						System.out.println(Arrays.toString((byte[])oValue));
-						System.out.println(Arrays.toString((byte[])dValue));
-					}
-					
-					// Issue with arrays in hashmaps: Object.hashcode()
-					// depends on reference, so is not equal between two
-					// arrays. Need to use Arrays.hashcode().
-					if(oValue.getClass().equals(HashMap.class)) {
+				if(oValue!=null && dValue!=null) {
 
-						int oHash = 0;
-						int dHash = 0;
-						HashMap o = (HashMap)oValue;
-						HashMap d = (HashMap)dValue;
-						
-						for(Object e : o.keySet()) {
-							Object v0 = o.get(e);
-							Object v1 = d.get(e);
-							if(v0.getClass().equals(byte[].class)) {
-								oHash += Arrays.hashCode((byte[])v0);
-								dHash += Arrays.hashCode((byte[])v1);
-							}
-							
+					if(oValue.getClass().equals(HashMap.class) ||
+							oValue.getClass().equals(HashSet.class)) {
+
+						// Issue with arrays in hashmaps: Object.hashcode()
+						// depends on reference, so is not equal between two
+						// arrays. Need to use Arrays.hashcode().
+						if(oValue.getClass().equals(HashMap.class)) {
+							testHashMapsByField((HashMap)oValue, (HashMap)dValue);
 						}
-						oValue = oHash;
-						dValue = dHash;
-					
-					}
-					if(oValue.getClass().equals(HashSet.class)) {
-						int oHash = 0;
-						int dHash = 0;
-						HashSet o = (HashSet)oValue;
-						HashSet d = (HashSet)dValue;
-						if(!o.containsAll(d)) {
-							System.out.println("Elements not shared in set");
-							for(Object v0 : o) {
-								System.out.println(d.contains(v0));
-							}
-							
+						if(oValue.getClass().equals(HashSet.class)) {
+							testHashSetsByField((HashSet)oValue, (HashSet)dValue);
 						}
 					}
-					
+				} else {
+					String msg = "Field '"+f.getName()+"' in "+original.getClass().getSimpleName()+" does not match";
+					assertThat(msg, dValue, equalTo(oValue));
 				}
-				
-				String msg = "Field '"+f.getName()+"' in "+original.getClass().getSimpleName()+" does not match";
-				assertThat(msg, dValue, equalTo(oValue));
 			}
 		}
 
 		assertEquals("Equals method in "+original.getClass().getSimpleName(), original, dup);
 	}
 	
+	// Issue with arrays in hashmaps: Object.hashcode()
+	// depends on reference, so is not equal between two
+	// arrays. Need to use Arrays.hashcode().
+	private static void testHashMapsByField(HashMap o, HashMap d) {
+		assertTrue("Hashmaps should not both be null", o!=null&&d!=null);
+		assertEquals("Maps should contain same number of elements", o.size(), d.size());
+		
+		long oHash = 0;
+		long dHash = 0;
+	
+		for(Object e : o.keySet()) {
+			Object v0 = o.get(e);
+			Object v1 = d.get(e);
+			
+			if(v0.getClass().equals(byte[].class)) {
+				oHash += Arrays.hashCode((byte[])v0);
+				dHash += Arrays.hashCode((byte[])v1);
+			}
+
+			if(v0.getClass().equals(long[].class)) {
+				oHash += Arrays.hashCode((long[])v0);
+				dHash += Arrays.hashCode((long[])v1);
+			}
+			
+			if(v0.getClass().equals(int[].class)) {
+				oHash += Arrays.hashCode((int[])v0);
+				dHash += Arrays.hashCode((int[])v1);
+			}
+			
+			if(v0.getClass().equals(double[].class)) {
+				oHash += Arrays.hashCode((double[])v0);
+				dHash += Arrays.hashCode((double[])v1);
+			}
+			
+			if(v0.getClass().equals(float[].class)) {
+				oHash += Arrays.hashCode((float[])v0);
+				dHash += Arrays.hashCode((float[])v1);
+			}
+			
+			assertEquals("Hashes should match for key "+e.toString(), oHash, dHash);
+		}
+	}
+	
+	// Issue with arrays in hashmaps: Object.hashcode()
+	// depends on reference, so is not equal between two
+	// arrays. Need to use Arrays.hashcode().
+	private static void testHashSetsByField(HashSet o, HashSet d) {
+		assertTrue("Hashsets should not both be null", o!=null&&d!=null);
+		assertEquals("Hashsets should contain same number of elements", o.size(), d.size());
+		if(!o.containsAll(d)) {
+			System.out.println("Elements not shared in set");
+			for(Object v0 : o) {
+				System.out.println(d.contains(v0));
+			}
+
+		}	
+		assertTrue("All elements should be shared in hashset", o.containsAll(d));
+	}
+		
 	/**
 	 * Test if the fields of two objects have the same hashcodes.
 	 * Skips cache classes which are not used in hashcode methods. 
@@ -198,7 +217,7 @@ public abstract class ComponentTester extends FloatArrayTester {
 	 * @param dup
 	 * @throws Exception
 	 */
-	protected void testDuplicatesByField(Object original, Object dup) throws Exception {
+	public static void testDuplicatesByField(Object original, Object dup) throws Exception {
 		List<String> fieldsToSkip = new ArrayList<>();
 		testDuplicatesByField(original, dup, fieldsToSkip);
 	}

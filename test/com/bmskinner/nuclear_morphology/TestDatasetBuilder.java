@@ -333,23 +333,29 @@ public class TestDatasetBuilder {
 		ICellCollection collection = new DefaultCellCollection(rsc, TEST_DATASET_NAME, TEST_DATASET_UUID);
 		
 		IAnalysisOptions o =  OptionsFactory.makeDefaultRoundAnalysisOptions(new File(TEST_DATASET_IMAGE_FOLDER).getAbsoluteFile());
-		o.getNuclusDetectionOptions().get().setInt(HashOptions.MIN_SIZE_PIXELS, (baseWidth-maxSizeVariation)*(baseHeight-maxSizeVariation) );
-		o.getNuclusDetectionOptions().get().setInt(HashOptions.MAX_SIZE_PIXELS, (baseWidth+maxSizeVariation)*(baseHeight+maxSizeVariation) );
+		o.getNucleusDetectionOptions().get().setInt(HashOptions.MIN_SIZE_PIXELS, (baseWidth-maxSizeVariation)*(baseHeight-maxSizeVariation) );
+		o.getNucleusDetectionOptions().get().setInt(HashOptions.MAX_SIZE_PIXELS, (baseWidth+maxSizeVariation)*(baseHeight+maxSizeVariation) );
 
 		if(redSignals) {
 			ISignalGroup g = new DefaultSignalGroup(RED_SIGNAL_GROUP_NAME, RED_SIGNAL_GROUP);
 			g.setGroupColour(Color.red);
 			collection.addSignalGroup(g);
-			HashOptions n = OptionsFactory.makeNuclearSignalOptions(new File(TEST_DATASET_IMAGE_FOLDER)).build();
-			o.setDetectionOptions(IAnalysisOptions.SIGNAL_GROUP+RED_SIGNAL_GROUP, n);
+			HashOptions n = OptionsFactory.makeNuclearSignalOptions(new File(TEST_DATASET_IMAGE_FOLDER))
+					.withValue(HashOptions.SIGNAL_GROUP_ID, RED_SIGNAL_GROUP.toString())
+					.withValue(HashOptions.SIGNAL_GROUP_NAME, RED_SIGNAL_GROUP_NAME)
+					.build();
+			o.setNuclearSignalDetectionOptions(n);
 		}
 		
 		if(greenSignals) {
 			ISignalGroup g = new DefaultSignalGroup(GREEN_SIGNAL_GROUP_NAME, GREEN_SIGNAL_GROUP);
 			g.setGroupColour(Color.GREEN);
 			collection.addSignalGroup(g);
-			HashOptions n = OptionsFactory.makeNuclearSignalOptions(new File(TEST_DATASET_IMAGE_FOLDER)).build();
-			o.setDetectionOptions(IAnalysisOptions.SIGNAL_GROUP+GREEN_SIGNAL_GROUP, n);
+			HashOptions n = OptionsFactory.makeNuclearSignalOptions(new File(TEST_DATASET_IMAGE_FOLDER))
+					.withValue(HashOptions.SIGNAL_GROUP_ID, GREEN_SIGNAL_GROUP.toString())
+					.withValue(HashOptions.SIGNAL_GROUP_NAME, GREEN_SIGNAL_GROUP_NAME)
+					.build();
+			o.setNuclearSignalDetectionOptions(n);
 		}
 
 		for(int i=0; i<nCells; i++) {

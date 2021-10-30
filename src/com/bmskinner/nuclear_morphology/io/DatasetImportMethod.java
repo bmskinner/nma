@@ -18,6 +18,8 @@ package com.bmskinner.nuclear_morphology.io;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -148,8 +150,9 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
      * so lck files may have proliferated. Kill them with fire.
      * 
      * @param dir the directory to clean
+     * @throws IOException 
      */
-    private void cleanLockFilesInDir(File dir) {
+    private void cleanLockFilesInDir(File dir) throws IOException {
         
         FilenameFilter filter = (folder, name) -> name.toLowerCase().endsWith(Io.LOCK_FILE_EXTENSION);
 
@@ -159,10 +162,9 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
             return;
 
         for (File lockFile : files)
-            lockFile.delete();
+        	Files.delete(lockFile.toPath());
     }
 
-    
     private IAnalysisDataset readXMLDataset(File inputFile) throws UnloadableDatasetException, UnsupportedVersionException {
 
     	try {
@@ -172,7 +174,7 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
     		return d;
     	} catch(XMLReadingException | ComponentCreationException e) {
     		LOGGER.fine("Error reading XML: "+e.getMessage());
-    		throw new UnloadableDatasetException("Cannot read as XML dataset", e);
+    		throw new UnloadableDatasetException("Cannot read as XML dataset: "+inputFile.getAbsolutePath(), e);
     	}
     }
     

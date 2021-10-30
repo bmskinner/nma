@@ -35,6 +35,7 @@ import org.jdom2.output.XMLOutputter;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.bmskinner.nuclear_morphology.ComponentTester;
 import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
@@ -221,7 +222,7 @@ public class DefaultShellResultTest {
 		xmlOutput.output(e, new PrintWriter( System.out ));
 
 		DefaultShellResult recovered = new DefaultShellResult(e);
-		
-		assertEquals(k, recovered);
+		ComponentTester.testDuplicatesByField(k, recovered);
+//		assertEquals(k, recovered);
 	}
 }

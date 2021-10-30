@@ -159,7 +159,8 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
 		for(Element el : e.getChildren("CellId"))
 			cellIDs.add(UUID.fromString(el.getText()));
 		
-		
+		// Shells are not stored in signal groups for child datasets
+		// becuase signal groups can only be added to root datasets
 		for(Element el : e.getChildren("ShellResult")) {
 			UUID id = UUID.fromString(el.getAttributeValue("id"));
 			IShellResult s = new DefaultShellResult(el);
@@ -202,8 +203,9 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
 		for(UUID c : cellIDs)
 			e.addContent(new Element("CellId").setText(c.toString()));
 		
-		for(Entry<UUID, IShellResult> c : shellResults.entrySet())
-			e.addContent(new Element("ShellResult").setAttribute("id", c.getKey().toString()).setContent(c.getValue().toXmlElement()));
+		for(Entry<UUID, IShellResult> c : shellResults.entrySet()) {
+			e.addContent(c.getValue().toXmlElement().setAttribute("id", c.getKey().toString()));
+		}
 		
 		
 		return e;

@@ -67,6 +67,44 @@ public abstract class XMLReader {
 	}
 	
 	/**
+	 * Parse a string to an array, assuming it has the format:
+	 * [1, 2, 3, 4, 5]
+	 * @param arrayText
+	 * @return
+	 */
+	public static long[] parseLongArray(String arrayText) {
+		String[] s = arrayText.replace("[", "")
+				.replace("]", "")
+				.replace(" ", "")
+				.split(",");
+		
+		long[] l = new long[s.length];
+		for(int i=0; i<s.length; i++) {
+			l[i] = Long.parseLong(s[i]);
+		}
+		return l;
+	}
+	
+	/**
+	 * Parse a string to an array, assuming it has the format:
+	 * [1, 2, 3, 4, 5]
+	 * @param arrayText
+	 * @return
+	 */
+	public static int[] parseIntArray(String arrayText) {
+		String[] s = arrayText.replace("[", "")
+				.replace("]", "")
+				.replace(" ", "")
+				.split(",");
+		
+		int[] l = new int[s.length];
+		for(int i=0; i<s.length; i++) {
+			l[i] = Integer.parseInt(s[i]);
+		}
+		return l;
+	}
+	
+	/**
 	 * Thrown when an xml file cannot be read
 	 * @author bms41
 	 * @since 1.14.0

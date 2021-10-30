@@ -29,6 +29,7 @@ import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileCollection;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
+import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
 import com.bmskinner.nuclear_morphology.io.DatasetExportMethod;
 import com.bmskinner.nuclear_morphology.io.DatasetExportMethod.ExportFormat;
 import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
@@ -196,10 +197,11 @@ public class TestImageDatasetCreator {
         	HashOptions redOptions = OptionsFactory.makeNuclearSignalOptions(testFolder)
         			.withValue(HashOptions.SIGNAL_MAX_FRACTION, 0.5)
         			.withValue(HashOptions.MIN_SIZE_PIXELS, 5)
-        			.withValue(HashOptions.SIGNAL_GROUP_NAME, TestImageDatasetCreator.RED_SIGNAL_NAME)
-        			.withValue(HashOptions.SIGNAL_GROUP_ID, TestImageDatasetCreator.RED_SIGNAL_ID.toString())
+        			.withValue(HashOptions.SIGNAL_GROUP_NAME, RED_SIGNAL_NAME)
+        			.withValue(HashOptions.SIGNAL_GROUP_ID, RED_SIGNAL_ID.toString())
         			.build();
         	new SignalDetectionMethod(d, redOptions).call();
+        	assertTrue(d.getCollection().hasSignalGroup(RED_SIGNAL_ID));
         }
 
         if(addGreen) {
@@ -207,10 +209,11 @@ public class TestImageDatasetCreator {
         			.withValue(HashOptions.SIGNAL_MAX_FRACTION, 0.5)
         			.withValue(HashOptions.MIN_SIZE_PIXELS, 5)
         			.withValue(HashOptions.CHANNEL, 1)
-        			.withValue(HashOptions.SIGNAL_GROUP_NAME, TestImageDatasetCreator.GREEN_SIGNAL_NAME)
-        			.withValue(HashOptions.SIGNAL_GROUP_ID, TestImageDatasetCreator.GREEN_SIGNAL_ID.toString())
+        			.withValue(HashOptions.SIGNAL_GROUP_NAME, GREEN_SIGNAL_NAME)
+        			.withValue(HashOptions.SIGNAL_GROUP_ID, GREEN_SIGNAL_ID.toString())
         			.build();
         	new SignalDetectionMethod(d, greenOptions).call();
+        	assertTrue(d.getCollection().hasSignalGroup(GREEN_SIGNAL_ID));
         }
 
         new ShellAnalysisMethod(d, OptionsFactory.makeShellAnalysisOptions().build()).call();
@@ -232,7 +235,7 @@ public class TestImageDatasetCreator {
     	if(!outputFolder.exists())
     		throw new IllegalArgumentException("Output folder does not exist: "+outputFolder.getAbsolutePath());
     	
-    	File inputFolder = op.getNuclusDetectionOptions().get().getFile(HashOptions.DETECTION_FOLDER);
+    	File inputFolder = op.getNucleusDetectionOptions().get().getFile(HashOptions.DETECTION_FOLDER);
     	if(!inputFolder.exists())
     		throw new IllegalArgumentException("Input folder does not exist: "+inputFolder.getAbsolutePath());
 
@@ -304,6 +307,14 @@ public class TestImageDatasetCreator {
     	assertEquals("Options should match", d.getAnalysisOptions().get(), t.getAnalysisOptions().get());
     	assertEquals("Profile collections should match", p1, p2);
     	assertEquals("Consensuses should match", d.getCollection().getConsensus(), t.getCollection().getConsensus());
+    	
+    	for(ISignalGroup s : d.getCollection().getSignalGroups()) {
+    		ComponentTester.testDuplicatesByField(s, t.getCollection().getSignalGroup(s.getId()).get());
+    		assertEquals("Signal groups should match", s, t.getCollection().getSignalGroup(s.getId()).get());
+    	}
+    	
+    	assertEquals(d.getCollection().getSignalGroups().size(), t.getCollection().getSignalGroups().size());
+    	
     	assertEquals("Cell collections should match", d.getCollection(), t.getCollection());
     	assertEquals("Child collections should match", d.getAllChildDatasets(), t.getAllChildDatasets());
     	assertEquals("Merge sources should match", d.getAllMergeSources(), t.getAllMergeSources());

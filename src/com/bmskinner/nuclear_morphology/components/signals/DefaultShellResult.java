@@ -16,16 +16,11 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.signals;
 
-import java.io.Serializable;
 import java.util.Arrays;
 import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
-import java.util.UUID;
-import java.util.stream.Collectors;
+import java.util.Objects;
 import java.util.stream.DoubleStream;
 import java.util.stream.LongStream;
 
@@ -33,6 +28,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.jdom2.Element;
 
+import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.io.XmlSerializable;
@@ -75,13 +71,23 @@ public class DefaultShellResult implements IShellResult {
      * to the specification in {@link XmlSerializable}.
      * @param e the XML element containing the data.
      */
-    public DefaultShellResult(Element e) {
-    	nShells = Integer.valueOf(e.getChildText("nShells"));
+    public DefaultShellResult(Element e) throws ComponentCreationException {
+    	
+    	if(e.getChild("nShells")==null)
+    		throw new ComponentCreationException("No nShells child in element: "+e.toString());
+    	
+    	if(e.getChild("ShrinkType")==null)
+    		throw new ComponentCreationException("No ShrinkType child in element: "+e.toString());
+    	
+    	if(e.getChildren("ShellCount").isEmpty())
+    		throw new ComponentCreationException("No ShellCount children in element: "+e.toString());
+
+    	nShells = Integer.parseInt(e.getChildText("nShells"));
     	type = ShrinkType.valueOf(e.getChildText("ShrinkType"));
     	
-    	for(Element el : e.getChildren("CountEntry")) {
-    		CountType c = CountType.valueOf(el.getChildText("CountType"));
-    		ShellCount s = new ShellCount(el.getChild("ShellCount"));
+    	for(Element el : e.getChildren("ShellCount")) {
+    		CountType c = CountType.valueOf(el.getAttributeValue("CountType"));
+    		ShellCount s = new ShellCount(el);
     		map.put(c, s);
     	}
     }
@@ -94,11 +100,8 @@ public class DefaultShellResult implements IShellResult {
 		e.addContent(new Element("ShrinkType").setText(type.toString()));
 		
 		for(Entry<CountType, ShellCount> entry : map.entrySet()) {
-			Element c = new Element("CountEntry");
-			
-			c.addContent(new Element("CountType").setText(entry.getKey().toString()));
-			c.addContent(entry.getValue().toXmlElement());
-			e.addContent(c);
+			e.addContent(entry.getValue().toXmlElement()
+					.setAttribute("CountType", entry.getKey().toString()));
 		}
 		
 		return e;
@@ -312,299 +315,42 @@ public class DefaultShellResult implements IShellResult {
         return sb.toString();
     }
     
-    /**
-     * Store the individual counts per shell keyed to a source object
-     * @author bms41
-     *
-     */
-    private class ShellCount implements Serializable, XmlSerializable {
-
-		private static final long serialVersionUID = 1L;
-		private final Map<ShellKey, long[]> results = new HashMap<>();
-        
-        public ShellCount(){ /* Nothing to create */ }
-
-        
-        public ShellCount(Element e) {
-        	
-        	for(Element el : e.getChildren("Entry")) {
-        		ShellKey k = new ShellKey(el.getChild("ShellKey"));
-        		String[] s = el.getChildText("Counts").replace("[", "")
-        		.replace("]", "").replace(" ", "").split(",");
-        		
-        		long[] l = new long[s.length];
-        		for(int i=0; i<s.length; i++) {
-        			l[i] = Long.parseLong(s[i]);
-        		}
-        	}
-        }
-        
-        @Override
-		public Element toXmlElement() {
-        	Element e = new Element("ShellCount");
-        	
-        	for(Entry<ShellKey, long[]> entry : results.entrySet()) {
-        		Element c = new Element("Entry");
-        		c.addContent(entry.getKey().toXmlElement());
-        		c.addContent(new Element("Counts").setText(Arrays.toString(entry.getValue())));
-        		e.addContent(c);
-        	}			
-			return e;
-		}
-
-
-
-		public ShellCount duplicate() {
-        	ShellCount result = new ShellCount();
-        	for(ShellKey k: results.keySet()) {
-        		result.results.put(k.duplicate(), results.get(k));
-        	}
-        	return result;
-        }
-        
-        /**
-         * Add the given values to the key. Existing values
-         * are overwitten. 
-         * @param k
-         * @param values
-         */
-        public void putValues(@NonNull ShellKey k, long[] values){
-            results.put(k, values);
-        }
-                
-        /**
-         * Get the number of objects in the counter
-         * @return
-         */
-        public int size(){
-            return results.size();
-        }
-        
-        /**
-         * Get the number of keys in the counter with the given
-         * aggregation level
-         * @return
-         */
-        public int size(Aggregation agg){
-            return keys(agg).size();
-        }
-        
-        /**
-         * Fetch the sum of all values in the given shell
-         * @param shell
-         * @return
-         */
-        public long sum(int shell){
-            if(shell<0||shell>=nShells)
-                throw new IllegalArgumentException("Shell is out of bounds");
-            return results.values().stream().mapToLong(a->a[shell]).sum();
-        }
-        
-        /**
-         * Fetch the sum of all shells for the given object
-         * @param k the key of the object
-         * @return
-         */
-        public long sum(ShellKey k){
-            if(results.containsKey(k))
-                return LongStream.of(results.get(k)).sum();
-            return 0;
-        }
-                
-        /**
-         * Fetch all the object keys
-         * @return
-         */
-        public Set<ShellKey> keys(){
-            return results.keySet();
-        }
-        
-        /**
-         * Fetch only the object keys that match the given aggregation level
-         * i.e {@link Aggregation.BY_NUCLEUS} will not fetch individual signal pixel values and
-         * {@link Aggregation.BY_SIGNAL} will not fetch whole nucleus pixel values
-         * @param agg the aggregation level
-         * @return the object keys matching the aggregation level
-         */
-        public Set<ShellKey> keys(Aggregation agg){
-        	switch(agg){
-        		case BY_NUCLEUS: return results.keySet().stream().filter(k->!k.hasSignal()).collect(Collectors.toSet());
-        		case BY_SIGNAL:  return results.keySet().stream().filter(k->k.hasSignal()).collect(Collectors.toSet());
-        		default:         return results.keySet().stream().filter(k->k.hasSignal()).collect(Collectors.toSet());
-        	}
-        }
-                
-        public long getPixelIntensity(ShellKey k, int shell){
-            if(results.containsKey(k))
-                return results.get(k)[shell];
-            return 0;
-        }
-        
-        public long[] getPixelIntensities(ShellKey k){
-            return results.get(k);
-        }
-        
-        public List<long[]> getCellPixelIntensities(@NonNull UUID cellId){
-            return results.keySet().stream()
-                    .filter(k->k.hasCell(cellId))
-                    .map(k->results.get(k))
-                    .collect(Collectors.toList());
-        }
-        
-        public List<long[]> getComponentPixelIntensities(@NonNull UUID componentId){
-            return results.keySet().stream()
-                    .filter(k->k.hasComponent(componentId))
-                    .map(k->results.get(k))
-                    .collect(Collectors.toList());
-        }
-        
-        public List<long[]> getSignalPixelIntensities(@NonNull UUID signalId){
-            return results.keySet().stream()
-                    .filter(k->k.hasSignal(signalId))
-                    .map(k->results.get(k))
-                    .collect(Collectors.toList());
-        }
-        
-        
-        @Override
-        public String toString(){
-            StringBuilder b = new StringBuilder("Shells : "+nShells+"\n");
-            b.append("Size : "+size()+"\n");
-            b.append("Keys :\n");
-            for(ShellKey k :keys()){
-                b.append(k+"\n");
-            }
-            for(int i=0; i<nShells; i++){
-                 b.append("Shell "+i+": "+sum(i)+"\n");
-            }
-           return b.toString();
-        }
-    }
     
-    /**
-     * A key that allows distinction of cellular components
-     * @author bms41
-     *
-     */
-     private class ShellKey implements Serializable, XmlSerializable {
-		private static final long serialVersionUID = 1L;
-		private final UUID cellId;
-        private final UUID componentId;
-        private final UUID signalId;
-        
-        public ShellKey(@NonNull UUID cellId, @NonNull UUID componentId) {
-            this(cellId, componentId, null );
-        }
-        
-        public ShellKey(@NonNull UUID cellId, @NonNull UUID componentId, @Nullable UUID signalId) {
+    
+    @Override
+	public int hashCode() {
+		return Objects.hash(map, nShells, type);
+	}
 
-            this.cellId = cellId;
-            this.componentId = componentId;
-            this.signalId = signalId;
-        }
-        
-        public ShellKey(Element e) {
-        	cellId = UUID.fromString(e.getChildText("CellId"));
-        	componentId = UUID.fromString(e.getChildText("ComponentId"));
-        	
-        	if(e.getChild("SignalId")!=null)
-        		signalId = UUID.fromString(e.getChildText("SignalId"));
-        	else 
-        		signalId = null;
-        }
-        
-        @Override
-		public Element toXmlElement() {
-			Element e = new Element("ShellKey");
-			
-			if(cellId!=null)
-				e.addContent(new Element("CellId").setText(cellId.toString()));
-			if(componentId!=null)
-				e.addContent(new Element("ComponentId").setText(componentId.toString()));
-			if(signalId!=null)
-				e.addContent(new Element("SignalId").setText(signalId.toString()));
-			
-			return e;
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		DefaultShellResult other = (DefaultShellResult) obj;
+		
+		if(nShells != other.nShells)
+			return false;
+		if(type != other.type)
+			return false;
+		
+		if(map.size()!=other.map.size())
+			return false;
+		
+		for(Entry<CountType, ShellCount> e : map.entrySet()) {
+			if(!other.map.containsKey(e.getKey()))
+				return false;
+			if(!other.map.get(e.getKey()).equals(e.getValue()))
+				return false;
 		}
+		
+		return true;
+	}
 
-		public ShellKey duplicate() {
-        	if(signalId==null)
-        		return new ShellKey(UUID.fromString(cellId.toString()), UUID.fromString(componentId.toString()), null);
-        	return new ShellKey(UUID.fromString(cellId.toString()), UUID.fromString(componentId.toString()), UUID.fromString(signalId.toString()));
-        }
-        
-        /**
-         * Fetch the key covering the cell and component only
-         * @return
-         */
-        public ShellKey componentKey(){
-            return new ShellKey(cellId, componentId);
-        }
-
-        @Override
-        public int hashCode() {
-            final int prime = 31;
-            int result = 1;
-            result = prime * result + getOuterType().hashCode();
-            result = prime * result + ((cellId == null) ? 0 : cellId.hashCode());
-            result = prime * result + ((componentId == null) ? 0 : componentId.hashCode());
-            result = prime * result + ((signalId == null) ? 0 : signalId.hashCode());
-            return result;
-        }
-        
-        public boolean hasCell(@NonNull UUID cellId){
-            return this.cellId.equals(cellId);
-        }
-        
-        public boolean hasComponent(@NonNull UUID id){
-            return this.componentId.equals(id);
-        }
-        
-        public boolean hasSignal(@NonNull UUID id){
-            return signalId!=null&&signalId.equals(id);
-        }
-                
-        public boolean hasSignal(){
-            return signalId!=null;
-        }
-        
-        @Override
-        public String toString(){
-            return signalId==null ? cellId.toString()+"_"+componentId.toString() : cellId.toString()+"_"+componentId.toString()+"_"+signalId.toString();
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (this == obj)
-                return true;
-            if (obj == null)
-                return false;
-            if (getClass() != obj.getClass())
-                return false;
-            ShellKey other = (ShellKey) obj;
-            if (!getOuterType().equals(other.getOuterType()))
-                return false;
-            if (cellId == null) {
-                if (other.cellId != null)
-                    return false;
-            } else if (!cellId.equals(other.cellId))
-                return false;
-            if (componentId == null) {
-                if (other.componentId != null)
-                    return false;
-            } else if (!componentId.equals(other.componentId))
-                return false;
-            if (signalId == null) {
-                if (other.signalId != null)
-                    return false;
-            } else if (!signalId.equals(other.signalId))
-                return false;
-            return true;
-        }
-
-        private DefaultShellResult getOuterType() {
-            return DefaultShellResult.this;
-        }
-    }
+    
+    
     
 }
