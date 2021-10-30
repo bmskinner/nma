@@ -19,7 +19,6 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 
-import com.bmskinner.nuclear_morphology.ComponentTester;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.MissingComponentException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
@@ -33,7 +32,7 @@ import com.bmskinner.nuclear_morphology.samples.dummy.DummySegmentedCellularComp
  *
  */
 @RunWith(Parameterized.class)
-public class ISegmentedProfileTester extends ComponentTester {
+public class ISegmentedProfileTester {
 	
 	public final static int profileLength = 330;
 	
@@ -51,10 +50,9 @@ public class ISegmentedProfileTester extends ComponentTester {
 	@Parameter(0)
 	public Class<? extends ISegmentedProfile> source;
 
-	@Override
 	@Before
     public void setUp() throws Exception {
-		super.setUp();
+
 		profile = createInstance(source);
     }
 

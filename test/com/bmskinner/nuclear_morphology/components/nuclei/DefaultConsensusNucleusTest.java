@@ -17,17 +17,18 @@ import com.bmskinner.nuclear_morphology.analysis.nucleus.ConsensusAveragingMetho
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 
-public class DefaultConsensusNucleusTest extends ComponentTester {
+public class DefaultConsensusNucleusTest {
 
 	private Consensus nucleus;	
-	@Override
+
 	@Before
 	public void setUp() throws Exception {
-		IAnalysisDataset d = new TestDatasetBuilder(RNG_SEED).cellCount(N_CELLS)
+		IAnalysisDataset d = new TestDatasetBuilder(ComponentTester.RNG_SEED)
+				.cellCount(ComponentTester.N_CELLS)
 				.ofType(RuleSetCollection.roundRuleSetCollection())
 				.withMaxSizeVariation(1)
 				.randomOffsetProfiles(true)
-				.numberOfClusters(N_CHILD_DATASETS)
+				.numberOfClusters(ComponentTester.N_CHILD_DATASETS)
 				.segmented().build();
 		
 		new ConsensusAveragingMethod(d).call();
@@ -41,7 +42,7 @@ public class DefaultConsensusNucleusTest extends ComponentTester {
 	@Test
 	public void testDuplicate() throws Exception {
 		Consensus dup = nucleus.duplicate();
-		testDuplicatesByField(nucleus, dup);
+		ComponentTester.testDuplicatesByField(nucleus, dup);
 	}
 	
 
@@ -55,7 +56,7 @@ public class DefaultConsensusNucleusTest extends ComponentTester {
 		Consensus dup = nucleus.duplicate();
 		for(int i=0; i<20; i++) {
 			Consensus dup2 = dup.duplicate();
-			testDuplicatesByField(dup, dup2);
+			ComponentTester.testDuplicatesByField(dup, dup2);
 			dup = dup2;
 		}		
 	}

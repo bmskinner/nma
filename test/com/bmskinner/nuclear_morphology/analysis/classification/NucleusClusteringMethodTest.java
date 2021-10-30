@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import java.util.List;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -14,7 +13,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import com.bmskinner.nuclear_morphology.ComponentTester;
 import com.bmskinner.nuclear_morphology.analysis.AnalysisMethodException;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.IClusterGroup;
@@ -33,7 +31,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  * @author ben
  *
  */
-public class NucleusClusteringMethodTest extends ComponentTester {
+public class NucleusClusteringMethodTest {
 		
 	static final Logger LOGGER = Logger.getLogger(Loggable.PROJECT_LOGGER);
 	
@@ -54,10 +52,8 @@ public class NucleusClusteringMethodTest extends ComponentTester {
 
 	private IAnalysisDataset dataset;
 	
-	@Override
 	@Before
 	public void setUp() throws Exception {
-		super.setUp();
 		dataset = SampleDatasetReader.openTestRodentDataset();
 	}
 	

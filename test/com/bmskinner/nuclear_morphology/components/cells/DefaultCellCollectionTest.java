@@ -53,11 +53,9 @@ public class DefaultCellCollectionTest extends ComponentTester {
     @Rule
     public final ExpectedException exception = ExpectedException.none();
     
-    @Override
 	@Before
     public void setUp() throws Exception {
-    	super.setUp();
-    	d = new TestDatasetBuilder(RNG_SEED).cellCount(N_CELLS)
+    	d = new TestDatasetBuilder(ComponentTester.RNG_SEED).cellCount(N_CELLS)
 				.ofType(RuleSetCollection.roundRuleSetCollection())
 				.withMaxSizeVariation(10)
 				.randomOffsetProfiles(true)

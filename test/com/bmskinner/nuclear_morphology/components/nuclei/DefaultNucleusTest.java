@@ -22,17 +22,18 @@ import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
  * @since 1.14.0
  *
  */
-public class DefaultNucleusTest extends ComponentTester {
+public class DefaultNucleusTest {
 
 	private Nucleus nucleus;	
-	@Override
+
 	@Before
 	public void setUp() throws Exception {
-		IAnalysisDataset d = new TestDatasetBuilder(RNG_SEED).cellCount(N_CELLS)
+		IAnalysisDataset d = new TestDatasetBuilder(ComponentTester.RNG_SEED)
+				.cellCount(ComponentTester.N_CELLS)
 				.ofType(RuleSetCollection.roundRuleSetCollection())
 				.withMaxSizeVariation(1)
 				.randomOffsetProfiles(true)
-				.numberOfClusters(N_CHILD_DATASETS)
+				.numberOfClusters(ComponentTester.N_CHILD_DATASETS)
 				.segmented().build();
 		nucleus = d.getCollection().getCells().stream().findFirst().get().getPrimaryNucleus();
 	}
@@ -40,7 +41,7 @@ public class DefaultNucleusTest extends ComponentTester {
 	@Test
 	public void testDuplicate() throws Exception {
 		Nucleus dup = nucleus.duplicate();
-		testDuplicatesByField(nucleus, dup);
+		ComponentTester.testDuplicatesByField(nucleus, dup);
 	}
 	
 	/**
@@ -53,7 +54,7 @@ public class DefaultNucleusTest extends ComponentTester {
 		Nucleus dup = nucleus.duplicate();
 		for(int i=0; i<20; i++) {
 			Nucleus dup2 = dup.duplicate();
-			testDuplicatesByField(dup, dup2);
+			ComponentTester.testDuplicatesByField(dup, dup2);
 			dup = dup2;
 		}		
 	}

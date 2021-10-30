@@ -34,7 +34,7 @@ import com.bmskinner.nuclear_morphology.io.XmlSerializable;
  * @since 1.13.3
  *
  */
-public interface ISignalGroup extends Serializable, XmlSerializable {
+public interface ISignalGroup extends XmlSerializable {
 	
 	UUID getId();
 	

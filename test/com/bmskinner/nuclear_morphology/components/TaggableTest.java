@@ -20,13 +20,12 @@ import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclei.DefaultNucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.profiles.IProfileCollection;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
+import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.components.profiles.SegmentedFloatProfile;
-import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 
 /**
@@ -36,17 +35,15 @@ import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
  *
  */
 @RunWith(Parameterized.class)
-public class TaggableTest extends ComponentTester {
+public class TaggableTest {
 	
 	private Taggable taggable;
 
 	@Parameter(0)
 	public Class<? extends Taggable> source;
 
-	@Override
 	@Before
 	public void setUp() throws Exception{
-		super.setUp();
 		taggable = createInstance(source);
 	}
 
@@ -59,7 +56,8 @@ public class TaggableTest extends ComponentTester {
 	public static Taggable createInstance(Class<? extends Taggable> source) throws Exception {
 
 		if(source==DefaultNucleus.class){
-			IAnalysisDataset d = new TestDatasetBuilder(RNG_SEED).cellCount(1)
+			IAnalysisDataset d = new TestDatasetBuilder(ComponentTester.RNG_SEED)
+					.cellCount(1)
 					.ofType(RuleSetCollection.roundRuleSetCollection())
 					.randomOffsetProfiles(true)
 					.segmented().build();

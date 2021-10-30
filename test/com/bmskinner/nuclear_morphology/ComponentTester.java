@@ -7,7 +7,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.lang.ref.SoftReference;
 import java.lang.ref.WeakReference;
-import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -16,11 +15,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
-import org.junit.Before;
 
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 
@@ -32,15 +29,10 @@ import com.bmskinner.nuclear_morphology.components.generic.IPoint;
  */
 public abstract class ComponentTester extends FloatArrayTester {
 	
-	protected static final long RNG_SEED = 1234;
-	protected static final int N_CELLS = 10;
-	protected static final int N_CHILD_DATASETS = 2;
-	protected static final Logger LOGGER = Logger.getLogger(ComponentTester.class.getName());
-
-	@Before
-	public void setUp() throws Exception{
-
-	}
+	public static final long RNG_SEED = 1234;
+	public static final int N_CELLS = 10;
+	public static final int N_CHILD_DATASETS = 2;
+	private static final Logger LOGGER = Logger.getLogger(ComponentTester.class.getName());
 	
 	/**
 	 * Test if the two given points are vertically aligned
@@ -135,10 +127,10 @@ public abstract class ComponentTester extends FloatArrayTester {
 						// depends on reference, so is not equal between two
 						// arrays. Need to use Arrays.hashcode().
 						if(oValue.getClass().equals(HashMap.class)) {
-							testHashMapsByField((HashMap)oValue, (HashMap)dValue);
+							testHashMapsByField(f, (HashMap)oValue, (HashMap)dValue);
 						}
 						if(oValue.getClass().equals(HashSet.class)) {
-							testHashSetsByField((HashSet)oValue, (HashSet)dValue);
+							testHashSetsByField(f, (HashSet)oValue, (HashSet)dValue);
 						}
 					}
 				} else {
@@ -154,9 +146,9 @@ public abstract class ComponentTester extends FloatArrayTester {
 	// Issue with arrays in hashmaps: Object.hashcode()
 	// depends on reference, so is not equal between two
 	// arrays. Need to use Arrays.hashcode().
-	private static void testHashMapsByField(HashMap o, HashMap d) {
-		assertTrue("Hashmaps should not both be null", o!=null&&d!=null);
-		assertEquals("Maps should contain same number of elements", o.size(), d.size());
+	private static void testHashMapsByField(Field f, HashMap o, HashMap d) {
+		assertTrue("Hashmaps should not both be null in "+f.getName(), o!=null&&d!=null);
+		assertEquals("Maps should contain same number of elements in "+f.getName(), o.size(), d.size());
 		
 		long oHash = 0;
 		long dHash = 0;
@@ -190,24 +182,19 @@ public abstract class ComponentTester extends FloatArrayTester {
 				dHash += Arrays.hashCode((float[])v1);
 			}
 			
-			assertEquals("Hashes should match for key "+e.toString(), oHash, dHash);
+			assertEquals("Hashes should match for key in "+f.getName()+": "+e.toString(), oHash, dHash);
 		}
 	}
 	
-	// Issue with arrays in hashmaps: Object.hashcode()
-	// depends on reference, so is not equal between two
-	// arrays. Need to use Arrays.hashcode().
-	private static void testHashSetsByField(HashSet o, HashSet d) {
+	private static void testHashSetsByField(Field f, HashSet o, HashSet d) {
 		assertTrue("Hashsets should not both be null", o!=null&&d!=null);
 		assertEquals("Hashsets should contain same number of elements", o.size(), d.size());
-		if(!o.containsAll(d)) {
-			System.out.println("Elements not shared in set");
-			for(Object v0 : o) {
-				System.out.println(d.contains(v0));
-			}
-
-		}	
-		assertTrue("All elements should be shared in hashset", o.containsAll(d));
+		
+		for(Object v0 : o) {
+			assertTrue("Field '"+f.getName()+"' should contain element "+v0.toString(), d.contains(v0));
+		}
+		
+		assertTrue("All elements should be shared in hashset in"+f.getName(), o.containsAll(d));
 	}
 		
 	/**

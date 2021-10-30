@@ -111,7 +111,6 @@ public class TestImageDatasetCreator {
     public void createMouseWithClustersDataset() throws Exception{
     	IAnalysisOptions op = OptionsFactory.makeDefaultRodentAnalysisOptions(TestResources.MOUSE_CLUSTERS_INPUT_FOLDER);
     	IAnalysisDataset d = createTestDataset(TestResources.UNIT_TEST_FOLDER, op, true);
-    	assertFalse("Dataset should have clusters", d.getClusterGroups().isEmpty());
     	saveTestDataset(d, TestResources.MOUSE_CLUSTERS_DATASET);
     	testUnmarshalling(d, TestResources.MOUSE_CLUSTERS_DATASET);
     }
@@ -120,7 +119,6 @@ public class TestImageDatasetCreator {
     public void createPigWithClustersDataset() throws Exception{
     	IAnalysisOptions op = OptionsFactory.makeDefaultPigAnalysisOptions(TestResources.PIG_CLUSTERS_INPUT_FOLDER);
     	IAnalysisDataset d = createTestDataset(TestResources.UNIT_TEST_FOLDER, op, true);
-    	assertFalse("Dataset should have clusters", d.getClusterGroups().isEmpty());
     	saveTestDataset(d, TestResources.PIG_CLUSTERS_DATASET);
     	testUnmarshalling(d, TestResources.PIG_CLUSTERS_DATASET);
     }
@@ -129,7 +127,6 @@ public class TestImageDatasetCreator {
     public void createRoundWithClustersDataset() throws Exception{
     	IAnalysisOptions op = OptionsFactory.makeDefaultRoundAnalysisOptions(TestResources.ROUND_CLUSTERS_INPUT_FOLDER);
     	IAnalysisDataset d = createTestDataset(TestResources.UNIT_TEST_FOLDER, op, true);
-    	assertFalse("Dataset should have clusters", d.getClusterGroups().isEmpty());
     	saveTestDataset(d, TestResources.ROUND_CLUSTERS_DATASET);
     	testUnmarshalling(d, TestResources.ROUND_CLUSTERS_DATASET);
     }
@@ -142,7 +139,6 @@ public class TestImageDatasetCreator {
     	nucleus.setInt(HashOptions.MAX_SIZE_PIXELS, 12000);
     	
     	IAnalysisDataset d = createTestSignalDataset(op, true, false);
-    	assertTrue("Dataset should have signals", d.getCollection().getSignalManager().getSignalCount()>0);
     	saveTestDataset(d, TestResources.MOUSE_SIGNALS_DATASET);
     	testUnmarshalling(d, TestResources.MOUSE_SIGNALS_DATASET);
     }
@@ -155,7 +151,6 @@ public class TestImageDatasetCreator {
     	nucleus.setInt(HashOptions.MAX_SIZE_PIXELS, 15000);
     	
     	IAnalysisDataset d = createTestSignalDataset(op, false, true);
-    	assertTrue("Dataset should have signals", d.getCollection().getSignalManager().getSignalCount()>0);
     	saveTestDataset(d, TestResources.PIG_SIGNALS_DATASET);
     	testUnmarshalling(d, TestResources.PIG_SIGNALS_DATASET);
     }
@@ -164,7 +159,6 @@ public class TestImageDatasetCreator {
     public void createRoundWithSignalsDataset() throws Exception {
     	IAnalysisOptions op = OptionsFactory.makeDefaultRoundAnalysisOptions(TestResources.ROUND_SIGNALS_INPUT_FOLDER);    	
     	IAnalysisDataset d = createTestSignalDataset(op, true, true);
-    	assertTrue("Dataset should have signals", d.getCollection().getSignalManager().getSignalCount()>0);
     	saveTestDataset(d, TestResources.ROUND_SIGNALS_DATASET);
     	testUnmarshalling(d, TestResources.ROUND_SIGNALS_DATASET);
     }
@@ -195,13 +189,16 @@ public class TestImageDatasetCreator {
 
         if(addRed) {
         	HashOptions redOptions = OptionsFactory.makeNuclearSignalOptions(testFolder)
+        			.withValue(HashOptions.CHANNEL, 0)
         			.withValue(HashOptions.SIGNAL_MAX_FRACTION, 0.5)
         			.withValue(HashOptions.MIN_SIZE_PIXELS, 5)
         			.withValue(HashOptions.SIGNAL_GROUP_NAME, RED_SIGNAL_NAME)
         			.withValue(HashOptions.SIGNAL_GROUP_ID, RED_SIGNAL_ID.toString())
         			.build();
         	new SignalDetectionMethod(d, redOptions).call();
-        	assertTrue(d.getCollection().hasSignalGroup(RED_SIGNAL_ID));
+        	assertTrue("Dataset should have red signals", d.getCollection().hasSignalGroup(RED_SIGNAL_ID));
+        	assertTrue("Dataset should have red signals", d.getCollection().getSignalManager().getSignalCount(RED_SIGNAL_ID)>0);
+
         }
 
         if(addGreen) {
@@ -213,7 +210,8 @@ public class TestImageDatasetCreator {
         			.withValue(HashOptions.SIGNAL_GROUP_ID, GREEN_SIGNAL_ID.toString())
         			.build();
         	new SignalDetectionMethod(d, greenOptions).call();
-        	assertTrue(d.getCollection().hasSignalGroup(GREEN_SIGNAL_ID));
+        	assertTrue("Dataset should have green signals", d.getCollection().hasSignalGroup(GREEN_SIGNAL_ID));
+        	assertTrue("Dataset should have green signals", d.getCollection().getSignalManager().getSignalCount(GREEN_SIGNAL_ID)>0);
         }
 
         new ShellAnalysisMethod(d, OptionsFactory.makeShellAnalysisOptions().build()).call();
@@ -250,6 +248,10 @@ public class TestImageDatasetCreator {
     					: new ConsensusAveragingMethod(d))
     	.thenIf(makeClusters, new NucleusClusteringMethod(d, clusterOptions))
     	.call();
+    	
+    	if(makeClusters) {
+    		assertFalse("Dataset should have clusters", d.getClusterGroups().isEmpty());
+    	}
     	return d;
     }
    
@@ -312,9 +314,9 @@ public class TestImageDatasetCreator {
     		ComponentTester.testDuplicatesByField(s, t.getCollection().getSignalGroup(s.getId()).get());
     		assertEquals("Signal groups should match", s, t.getCollection().getSignalGroup(s.getId()).get());
     	}
-    	
+    	    	
     	assertEquals(d.getCollection().getSignalGroups().size(), t.getCollection().getSignalGroups().size());
-    	
+    	ComponentTester.testDuplicatesByField(d.getCollection(), t.getCollection());
     	assertEquals("Cell collections should match", d.getCollection(), t.getCollection());
     	assertEquals("Child collections should match", d.getAllChildDatasets(), t.getAllChildDatasets());
     	assertEquals("Merge sources should match", d.getAllMergeSources(), t.getAllMergeSources());
@@ -323,6 +325,7 @@ public class TestImageDatasetCreator {
     	assertEquals("Version created should match", d.getVersionCreated(), t.getVersionCreated());
     	assertEquals("Save path should match", d.getSavePath(), t.getSavePath());
     	
+    	ComponentTester.testDuplicatesByField(d, t);
     	assertEquals("Datasets should match", d, t);
     }
 }

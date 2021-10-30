@@ -22,13 +22,9 @@ import com.bmskinner.nuclear_morphology.components.rules.OrientationMark;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.utility.AngleTools;
 
-public class RotatableTest extends ComponentTester {
+public class RotatableTest {
 	
-	@Before
-	public void setUp() throws Exception{
-		super.setUp();
-		LOGGER.setLevel(Level.INFO);
-	}
+
 
 	@Test
 	public void testAlignVertical() {
@@ -44,7 +40,7 @@ public class RotatableTest extends ComponentTester {
 
 			t = AngleTools.rotateAboutPoint(t, c, angle);
 			b = AngleTools.rotateAboutPoint(b, c, angle);
-			assertTrue(areVertical(t, b));
+			assertTrue(ComponentTester.areVertical(t, b));
 
 		}
 	}
@@ -108,7 +104,7 @@ public class RotatableTest extends ComponentTester {
 				assertTrue(oms.contains(OrientationMark.BOTTOM));
 				
 				// Test if the TV and BV points are vertical after rotation
-				boolean areVertical = areVertical(tv, bv);
+				boolean areVertical = ComponentTester.areVertical(tv, bv);
 				assertTrue(areVertical);
 			}
 

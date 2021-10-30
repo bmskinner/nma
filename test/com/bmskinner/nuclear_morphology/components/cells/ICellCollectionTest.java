@@ -45,14 +45,12 @@ import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
-import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
+import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileManager;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
-import com.bmskinner.nuclear_morphology.stats.Stats;
 
 /**
  * Tests for implementations of the ICellCollection interface
@@ -61,7 +59,7 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
  *
  */
 @RunWith(Parameterized.class)
-public class ICellCollectionTest extends ComponentTester {
+public class ICellCollectionTest {
 	private static final int N_CELLS = 10;
 
 	private ICellCollection collection;
@@ -72,10 +70,8 @@ public class ICellCollectionTest extends ComponentTester {
 	@Parameter(0)
 	public Class<? extends ICellCollection> source;
 	
-	@Override
 	@Before
 	public void setUp() throws Exception {
-		super.setUp();
 		collection = createInstance(source);
 		
 	}
@@ -87,7 +83,7 @@ public class ICellCollectionTest extends ComponentTester {
 	 * @throws Exception 
 	 */
 	public static ICellCollection createInstance(Class<? extends ICellCollection> source) throws Exception {
-		IAnalysisDataset d = new TestDatasetBuilder(RNG_SEED)
+		IAnalysisDataset d = new TestDatasetBuilder(ComponentTester.RNG_SEED)
 				.cellCount(N_CELLS)
 				.ofType(RuleSetCollection.roundRuleSetCollection())
 				.withMaxSizeVariation(10)
@@ -351,7 +347,7 @@ public class ICellCollectionTest extends ComponentTester {
 		Nucleus n = d.getCollection().getConsensus();
 		IPoint tv = n.getBorderPoint(Landmark.TOP_VERTICAL);
 		IPoint bv = n.getBorderPoint(Landmark.BOTTOM_VERTICAL);
-		assertTrue("Points should be vertical for tv="+tv+" bv="+bv, areVertical(tv, bv));
+		assertTrue("Points should be vertical for tv="+tv+" bv="+bv, ComponentTester.areVertical(tv, bv));
 		
 		
 		int bIndex=0;
@@ -370,7 +366,7 @@ public class ICellCollectionTest extends ComponentTester {
 			tv = n.getBorderPoint(Landmark.TOP_VERTICAL);
 			bv = n.getBorderPoint(Landmark.BOTTOM_VERTICAL);
 			
-			boolean areVertical = areVertical(tv, bv);
+			boolean areVertical = ComponentTester.areVertical(tv, bv);
 			if(!areVertical)
 				ChartFactoryTest.showCharts(panels, "TV: "+tIndex+" BV "+bIndex);
 			assertTrue("Points should be vertical for tv="+tv+" bv="+bv, areVertical);

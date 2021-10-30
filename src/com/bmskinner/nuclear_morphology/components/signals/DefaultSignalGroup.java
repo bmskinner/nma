@@ -39,7 +39,6 @@ import com.bmskinner.nuclear_morphology.io.XmlSerializable;
 public class DefaultSignalGroup implements ISignalGroup {
 
 	private static final Logger LOGGER = Logger.getLogger(DefaultSignalGroup.class.getName());
-    private static final long serialVersionUID = 1L;
     
     private UUID			  id;
     private String            groupName        = "";

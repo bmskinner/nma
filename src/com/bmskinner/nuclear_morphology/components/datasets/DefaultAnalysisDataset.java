@@ -56,8 +56,6 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 	
 	private static final Logger LOGGER = Logger.getLogger(DefaultAnalysisDataset.class.getName());
 
-    private static final long serialVersionUID = 1L;
-
     /** The cell collection for this dataset */
     protected ICellCollection cellCollection;
 

@@ -26,7 +26,7 @@ import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
  *
  */
 @RunWith(Parameterized.class)
-public class CellularComponentTest  extends ComponentTester {
+public class CellularComponentTest {
 	private static final int N_CELLS = 1;
 	
 	private CellularComponent component;
@@ -37,10 +37,8 @@ public class CellularComponentTest  extends ComponentTester {
 	@Parameter(0)
 	public Class<? extends CellularComponent> source;
 	
-	@Override
 	@Before
 	public void setUp() throws Exception {
-		super.setUp();
 		component = createInstance(source);
 		
 	}
@@ -57,7 +55,7 @@ public class CellularComponentTest  extends ComponentTester {
 	 * @throws Exception 
 	 */
 	public static CellularComponent createInstance(Class<? extends CellularComponent> source) throws Exception {
-		IAnalysisDataset d = new TestDatasetBuilder(RNG_SEED).cellCount(N_CELLS)
+		IAnalysisDataset d = new TestDatasetBuilder(ComponentTester.RNG_SEED).cellCount(N_CELLS)
 				.ofType(RuleSetCollection.roundRuleSetCollection())
 				.randomOffsetProfiles(true)
 				.addSignalsInChannel(0)

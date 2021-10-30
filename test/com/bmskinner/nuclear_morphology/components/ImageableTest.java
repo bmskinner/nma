@@ -16,25 +16,13 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import java.io.File;
-
-import org.junit.Before;
 import org.junit.Test;
 
-import com.bmskinner.nuclear_morphology.ComponentTester;
-import com.bmskinner.nuclear_morphology.TestImageDatasetCreator;
 import com.bmskinner.nuclear_morphology.TestResources;
-import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.options.HashOptions;
-import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
-import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
 
 /**
@@ -43,12 +31,7 @@ import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
  * @author ben
  *
  */
-public class ImageableTest extends ComponentTester {
-
-	@Before
-	public void setUp() throws Exception {
-		super.setUp();
-	}
+public class ImageableTest {
 	
 	@Test
 	public void testTranslateCoordinateToComponentImage() throws Exception {

@@ -55,7 +55,7 @@ import ij.process.ImageProcessor;
  * @author ben
  *
  */
-public class ShellDetectorTest extends ComponentTester {
+public class ShellDetectorTest {
 
     private ShellDetector sd;
     private Nucleus testNucleus;
@@ -64,11 +64,9 @@ public class ShellDetectorTest extends ComponentTester {
     private static final int OBJECT_WIDTH = 200;
     private static final int OBJECT_HEIGHT = 200;
 
-    @Override
 	@Before
     public void setUp() throws Exception {
-    	super.setUp();
-    	IAnalysisDataset d = new TestDatasetBuilder(RNG_SEED).cellCount(1)
+    	IAnalysisDataset d = new TestDatasetBuilder(ComponentTester.RNG_SEED).cellCount(1)
         		.xBase(50).yBase(50)
         		.baseWidth(OBJECT_WIDTH).baseHeight(OBJECT_HEIGHT)
         		.withMaxSizeVariation(0)

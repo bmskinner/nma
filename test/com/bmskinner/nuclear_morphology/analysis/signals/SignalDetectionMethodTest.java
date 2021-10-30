@@ -95,7 +95,6 @@ public class SignalDetectionMethodTest extends ComponentTester {
     	new SignalDetectionMethod(d, redOptions).call();
     	
     	// confirm the signal options were added
-    	assertTrue(d.getAnalysisOptions().get().hasDetectionOptions(TestImageDatasetCreator.RED_SIGNAL_ID.toString()));
     	assertTrue(d.getAnalysisOptions().get().hasSignalDetectionOptions(TestImageDatasetCreator.RED_SIGNAL_ID));
 	}
 	

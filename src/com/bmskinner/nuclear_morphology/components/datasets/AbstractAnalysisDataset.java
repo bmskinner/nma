@@ -44,9 +44,7 @@ import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
  * @since 1.13.3
  *
  */
-public abstract class AbstractAnalysisDataset implements Serializable, IAnalysisDataset {
-
-    private static final long serialVersionUID = 1L;
+public abstract class AbstractAnalysisDataset implements IAnalysisDataset {
 
     /**The software version in which the dataset was created */
     protected final Version versionCreated;

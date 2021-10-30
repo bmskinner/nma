@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -73,7 +74,9 @@ import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.components.signals.DefaultSignalGroup;
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
+import com.bmskinner.nuclear_morphology.components.signals.ShellCount;
 import com.bmskinner.nuclear_morphology.components.signals.SignalManager;
+import com.bmskinner.nuclear_morphology.components.signals.IShellResult.CountType;
 import com.bmskinner.nuclear_morphology.io.XmlSerializable;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
@@ -110,19 +113,17 @@ public class DefaultCellCollection implements ICellCollection {
 	/** Rules used to identify border points */
 	private RuleSetCollection ruleSets;
 
-	/*  TRANSIENT FIELDS  */
-
 	/**
 	 * Cache statistics from the cells in the collection. This should be updated
 	 * if a cell is added or lost
 	 */
-	private transient StatsCache statsCache = new StatsCache();
+	private StatsCache statsCache = new StatsCache();
 
 	/** cache the number of shared cells with other datasets */
-	protected transient VennCache vennCache = new VennCache();
+	private VennCache vennCache = new VennCache();
 
-	private transient SignalManager  signalManager  = new SignalManager(this);
-	private transient ProfileManager profileManager = new ProfileManager(this);
+	private SignalManager  signalManager  = new SignalManager(this);
+	private ProfileManager profileManager = new ProfileManager(this);
 
 
 	/**
@@ -1178,6 +1179,18 @@ public class DefaultCellCollection implements ICellCollection {
 		if (getClass() != obj.getClass())
 			return false;
 		DefaultCellCollection other = (DefaultCellCollection) obj;
+		if (uuid == null) {
+			if (other.uuid != null)
+				return false;
+		} else if (!uuid.equals(other.uuid))
+			return false;
+		
+		if (name == null) {
+			if (other.name != null)
+				return false;
+		} else if (!name.equals(other.name))
+			return false;
+		
 		if (consensusNucleus == null) {
 			if (other.consensusNucleus != null)
 				return false;
@@ -1188,11 +1201,7 @@ public class DefaultCellCollection implements ICellCollection {
 				return false;
 		} else if (!cells.equals(other.cells))
 			return false;
-		if (name == null) {
-			if (other.name != null)
-				return false;
-		} else if (!name.equals(other.name))
-			return false;
+
 		if (profileCollection == null) {
 			if (other.profileCollection != null)
 				return false;
@@ -1206,13 +1215,16 @@ public class DefaultCellCollection implements ICellCollection {
 		if (signalGroups == null) {
 			if (other.signalGroups != null)
 				return false;
-		} else if (!signalGroups.equals(other.signalGroups))
-			return false;
-		if (uuid == null) {
-			if (other.uuid != null)
+		} else {
+			if(signalGroups.size()!=other.signalGroups.size())
 				return false;
-		} else if (!uuid.equals(other.uuid))
-			return false;
+			for(ISignalGroup s : signalGroups) {
+				if(!other.signalGroups.contains(s))
+					return false;
+			}
+		}
+		
+
 		return true;
 	}
 }
