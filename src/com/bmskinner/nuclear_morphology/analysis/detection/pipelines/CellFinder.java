@@ -62,6 +62,22 @@ public abstract class CellFinder extends AbstractFinder<Collection<ICell>> {
     	File[] arr = folder.listFiles();
     	if (arr == null)
     		return list;
+    	
+    	// single threaded for use in testing only
+//    	for(File f : arr) {
+//    		if(Thread.interrupted())
+//    			continue;
+//    		if(f.isDirectory())
+//    			continue;
+//    		if (!ImageImporter.fileIsImportable(f))
+//    			continue;
+//    		try {
+//    			list.addAll(findInImage(f));
+//    		} catch (ImageImportException e) {
+//    			LOGGER.log(Loggable.STACK, "Error searching image", e);
+//    		}
+//    		LOGGER.fine("Found images in "+f.getName());
+//    	}
 
     	// Submitted to the FJP::commonPool, which is thread limited by the ThreadManger
     	Stream.of(arr).parallel().forEach(f -> {

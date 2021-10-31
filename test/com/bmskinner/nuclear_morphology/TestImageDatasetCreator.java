@@ -8,6 +8,8 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.UUID;
+import java.util.logging.Handler;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.junit.Before;
@@ -34,6 +36,9 @@ import com.bmskinner.nuclear_morphology.io.DatasetExportMethod;
 import com.bmskinner.nuclear_morphology.io.DatasetExportMethod.ExportFormat;
 import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
 import com.bmskinner.nuclear_morphology.io.xml.XMLWriter;
+import com.bmskinner.nuclear_morphology.logging.ConsoleFormatter;
+import com.bmskinner.nuclear_morphology.logging.ConsoleHandler;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.Prefs;
 
@@ -47,20 +52,25 @@ import ij.Prefs;
  */
 public class TestImageDatasetCreator {
 	
-	protected Logger LOGGER = Logger.getLogger(TestImageDatasetCreator.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(Loggable.PROJECT_LOGGER);
 	
 	public static final UUID RED_SIGNAL_ID   = UUID.fromString("00000000-0000-0000-0000-100000000001");
 	public static final UUID GREEN_SIGNAL_ID = UUID.fromString("00000000-0000-0000-0000-100000000002");
 	
 	public static final String RED_SIGNAL_NAME   = "Test red";
 	public static final String GREEN_SIGNAL_NAME = "Test green";
-
+	
 	@Before
 	public void setUp(){		
 		Prefs.setThreads(2); // Attempt to avoid issue 162
+		for(Handler h : LOGGER.getHandlers())
+			LOGGER.removeHandler(h);
+		Handler h = new ConsoleHandler(new ConsoleFormatter());
+		LOGGER.setLevel(Level.FINE);
+		h.setLevel(Level.FINE);
+		LOGGER.addHandler(h);
 	}
 
-	
     @Test
     public void createMouseDataset() throws Exception{
 
@@ -135,11 +145,18 @@ public class TestImageDatasetCreator {
     public void createMouseWithSignalsDataset() throws Exception {
     	IAnalysisOptions op = OptionsFactory.makeDefaultRodentAnalysisOptions(TestResources.MOUSE_SIGNALS_INPUT_FOLDER);
     	HashOptions nucleus = op.getDetectionOptions(CellularComponent.NUCLEUS).get();
-    	nucleus.setInt(HashOptions.MIN_SIZE_PIXELS, 4000);
-    	nucleus.setInt(HashOptions.MAX_SIZE_PIXELS, 12000);
-    	
+    	nucleus.setInt(HashOptions.MIN_SIZE_PIXELS, 2000);
+    	nucleus.setInt(HashOptions.MAX_SIZE_PIXELS, 10000);
+//    	op.setDetectionOptions(CellularComponent.NUCLEUS, nucleus);
+    	    	
     	IAnalysisDataset d = createTestSignalDataset(op, true, false);
     	saveTestDataset(d, TestResources.MOUSE_SIGNALS_DATASET);
+    	
+    	// We know what should be detected for these images
+    	assertEquals("Nucleus count should match", 80, d.getCollection().size());
+    	assertEquals("Signal count should match", 32, d.getCollection().getSignalManager().getSignalCount(RED_SIGNAL_ID));
+    	
+
     	testUnmarshalling(d, TestResources.MOUSE_SIGNALS_DATASET);
     }
     
@@ -173,10 +190,11 @@ public class TestImageDatasetCreator {
      */
     private static IAnalysisDataset createTestSignalDataset(IAnalysisOptions op, boolean addRed, boolean addGreen) throws Exception {
     	
-    	File testFolder = op.getDetectionOptions(CellularComponent.NUCLEUS).get().getFile(HashOptions.DETECTION_FOLDER);
-    	if(!testFolder.exists()){
+    	File testFolder = op.getDetectionOptions(CellularComponent.NUCLEUS).get()
+    			.getFile(HashOptions.DETECTION_FOLDER);
+    	
+    	if(!testFolder.exists())
             throw new IllegalArgumentException("Detection folder does not exist");
-        }
     	    	
     	IAnalysisDataset d = new NucleusDetectionMethod(testFolder, op).call().getFirstDataset();
         
@@ -190,8 +208,9 @@ public class TestImageDatasetCreator {
         if(addRed) {
         	HashOptions redOptions = OptionsFactory.makeNuclearSignalOptions(testFolder)
         			.withValue(HashOptions.CHANNEL, 0)
-        			.withValue(HashOptions.SIGNAL_MAX_FRACTION, 0.5)
+        			.withValue(HashOptions.THRESHOLD, 70)
         			.withValue(HashOptions.MIN_SIZE_PIXELS, 5)
+        			.withValue(HashOptions.SIGNAL_MAX_FRACTION, 0.5)
         			.withValue(HashOptions.SIGNAL_GROUP_NAME, RED_SIGNAL_NAME)
         			.withValue(HashOptions.SIGNAL_GROUP_ID, RED_SIGNAL_ID.toString())
         			.build();
@@ -203,9 +222,10 @@ public class TestImageDatasetCreator {
 
         if(addGreen) {
         	HashOptions greenOptions = OptionsFactory.makeNuclearSignalOptions(testFolder)
-        			.withValue(HashOptions.SIGNAL_MAX_FRACTION, 0.5)
-        			.withValue(HashOptions.MIN_SIZE_PIXELS, 5)
         			.withValue(HashOptions.CHANNEL, 1)
+        			.withValue(HashOptions.THRESHOLD, 70)
+        			.withValue(HashOptions.MIN_SIZE_PIXELS, 5)
+        			.withValue(HashOptions.SIGNAL_MAX_FRACTION, 0.5)
         			.withValue(HashOptions.SIGNAL_GROUP_NAME, GREEN_SIGNAL_NAME)
         			.withValue(HashOptions.SIGNAL_GROUP_ID, GREEN_SIGNAL_ID.toString())
         			.build();

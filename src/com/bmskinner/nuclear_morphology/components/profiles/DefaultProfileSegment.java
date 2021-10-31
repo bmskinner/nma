@@ -93,7 +93,7 @@ public class DefaultProfileSegment implements IProfileSegment {
             throw new IllegalArgumentException("Segment start and end indexes cannot be negative");
         
         if(startIndex>total || endIndex >total)
-            throw new IllegalArgumentException("Segment start and end indexes cannot be above total length");
+            throw new IllegalArgumentException("Segment start and end indexes ("+startIndex+ " and "+endIndex+") cannot be above total length ("+total+")");
 
         // ensure that the segment meets minimum length requirements
         if (!IProfileSegment.isLongEnough(startIndex, endIndex, total))

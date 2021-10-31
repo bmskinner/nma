@@ -39,7 +39,7 @@ public interface StatisticalCollection {
      * @param stat the statistic to recalculate
      * @param component the cellular component to fetch from
      */
-    void clear(Measurement stat, String component);
+    void clear(@NonNull Measurement stat, @NonNull String component);
     
     /**
      * Force the given statistic to be recalculated
@@ -48,7 +48,7 @@ public interface StatisticalCollection {
      * @param component the cellular component to fetch from
      * @param id the sub-component id 
      */
-    void clear(Measurement stat, String component, UUID id);
+    void clear(@NonNull Measurement stat, @NonNull String component, @NonNull UUID id);
 
     /**
      * Force the statistics at the given scale to be recalculated

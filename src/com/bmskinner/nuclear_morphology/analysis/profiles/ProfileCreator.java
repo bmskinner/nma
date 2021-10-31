@@ -52,12 +52,9 @@ import com.bmskinner.nuclear_morphology.utility.AngleTools;
 public class ProfileCreator {
 	
 	private static final Logger LOGGER = Logger.getLogger(ProfileCreator.class.getName());
-
-    private Taggable target;
-
-    public ProfileCreator(@NonNull Taggable target) {
-        this.target = target;
-    }
+	
+	
+	private ProfileCreator() {} //no constructor, static access only
 
     /**
      * Create a profile for the desired profile type on the template object
@@ -66,19 +63,18 @@ public class ProfileCreator {
      * @return a segmented profile of the requested type.
      * @throws ProfileException
      */
-    public ISegmentedProfile createProfile(@NonNull ProfileType type) throws ProfileException {
+    public static ISegmentedProfile createProfile(Taggable target, @NonNull ProfileType type) throws ProfileException {
         try {
             switch (type) {
-	            case ANGLE:        return calculateAngleProfile();
-	            case DIAMETER:     return calculateDiameterProfile();
-	            case RADIUS:       return calculateRadiusProfile();
-	            case ZAHN_ROSKIES: return calculateZahnRoskiesProfile();
-	            default:           return calculateAngleProfile();
+	            case ANGLE:        return calculateAngleProfile(target);
+	            case DIAMETER:     return calculateDiameterProfile(target);
+	            case RADIUS:       return calculateRadiusProfile(target);
+	            case ZAHN_ROSKIES: return calculateZahnRoskiesProfile(target);
+	            default:           return calculateAngleProfile(target);
             }
         } catch (UnavailableBorderPointException e) {
+        	LOGGER.info("Cannot create profile "+e.getMessage());
             throw new ProfileException("Cannot create profile " + type, e);
-        } catch(Exception e) {
-        	throw new ProfileException("Unexpected exception creating profile " + type+" due to "+e.getMessage(), e);
         }
     }
 
@@ -88,7 +84,7 @@ public class ProfileCreator {
      * 
      * @return
      */
-    private List<IProfileSegment> getExistingSegments() {
+    private static List<IProfileSegment> getExistingSegments(@NonNull Taggable target) {
         List<IProfileSegment> segments = new ArrayList<>();
         LOGGER.finest( "Getting existing segments from angle profile");
         if(!target.hasProfile(ProfileType.ANGLE))
@@ -110,11 +106,22 @@ public class ProfileCreator {
         return segments;
     }
 
-    private ISegmentedProfile calculateAngleProfile() throws UnavailableBorderPointException {
+    /**
+     * Calculate an angle profile for the given object
+     * @param target
+     * @return
+     * @throws UnavailableBorderPointException
+     * @throws ProfileException
+     */
+    private static ISegmentedProfile calculateAngleProfile(@NonNull Taggable target) throws UnavailableBorderPointException, ProfileException {
 
-        List<IProfileSegment> segments = getExistingSegments();
-
+        List<IProfileSegment> segments = getExistingSegments(target);
         float[] angles = new float[target.getBorderLength()];
+        
+        
+        // Confirm that the number of border points is still the same
+//        if(!segments.isEmpty() && segments.get(0).getProfileLength()!=target.getBorderLength())
+//        	throw new ProfileException("Existing segments do not match border length");
 
         Shape s = target.toShape();
 
@@ -123,16 +130,16 @@ public class ProfileCreator {
         if (borderList == null)
             throw new UnavailableBorderPointException("Null border list in target");
 
-        int pointOffset = target.getWindowSize(ProfileType.ANGLE);
+        int windowSize = target.getWindowSize(ProfileType.ANGLE);
 
-        if (pointOffset == 0)
+        if (windowSize == 0)
             throw new UnavailableBorderPointException("Window size has not been set in Profilable object");
 
         for(int index=0; index<borderList.size(); index++) {
 
         	IPoint point       = borderList.get(index);
-        	IPoint pointBefore = borderList.get(CellularComponent.wrapIndex(index+pointOffset, target.getBorderLength()));
-        	IPoint pointAfter  = borderList.get(CellularComponent.wrapIndex(index-pointOffset, target.getBorderLength()));
+        	IPoint pointBefore = borderList.get(target.wrapIndex(index+windowSize));
+        	IPoint pointAfter  = borderList.get(target.wrapIndex(index-windowSize));
 
             // Find the smallest angle between the points
             float angle = (float) point.findSmallestAngle(pointBefore, pointAfter);
@@ -150,23 +157,19 @@ public class ProfileCreator {
         ISegmentedProfile newProfile = new SegmentedFloatProfile(angles);
 
         // Reapply any segments that were present in the original profile
-        if (!segments.isEmpty()) 
-            reapplySegments(segments, newProfile);
+        if (!segments.isEmpty()) {
+        	LOGGER.fine("Reapplying segments");
+            reapplySegments(target, segments, newProfile);
+        }
         return newProfile;
     }
 
-    private void reapplySegments(List<IProfileSegment> segments, ISegmentedProfile profile) {
+    private static void reapplySegments(@NonNull Taggable target, List<IProfileSegment> segments, ISegmentedProfile profile) throws ProfileException {
 
         // If the border list has changed, the profile lengths will be different
         // In this case, add and normalise the segment lengths
         if (segments.get(0).getProfileLength() != target.getBorderLength()) {
-            try {
-                segments = IProfileSegment.scaleSegments(segments, target.getBorderLength());
-            } catch (ProfileException e) {
-                LOGGER.warning("Error scaling segments");
-                LOGGER.log(Loggable.STACK, "Error scaling segments when profiling", e);
-            }
-
+        	segments = IProfileSegment.scaleSegments(segments, target.getBorderLength());
         }
 
         profile.setSegments(segments);
@@ -180,7 +183,7 @@ public class ProfileCreator {
      * @throws UnavailableBorderPointException
      * @throws MissingLandmarkException
      */
-    private ISegmentedProfile calculateZahnRoskiesProfile() {
+    private static ISegmentedProfile calculateZahnRoskiesProfile(@NonNull Taggable target) {
 
         float[] profile = new float[target.getBorderLength()];
         int index = 0;
@@ -231,7 +234,7 @@ public class ProfileCreator {
         return new SegmentedFloatProfile(profile);
     }
 
-    private ISegmentedProfile calculateDiameterProfile() throws UnavailableBorderPointException {
+    private static ISegmentedProfile calculateDiameterProfile(@NonNull Taggable target) throws UnavailableBorderPointException {
 
         float[] profile = new float[target.getBorderLength()];
         
@@ -259,7 +262,7 @@ public class ProfileCreator {
         return new SegmentedFloatProfile(p.divide(max));
     }
 
-    private ISegmentedProfile calculateRadiusProfile() {
+    private static ISegmentedProfile calculateRadiusProfile(@NonNull Taggable target) {
 
         float[] profile = new float[target.getBorderLength()];
 
@@ -279,12 +282,12 @@ public class ProfileCreator {
     }
 
     /**
-     * Calculate the distance between points separated by the windowsize
+     * Calculate the distance between points separated by the window size
      * 
      * @return
      * @throws UnavailableBorderPointException
      */
-    public ISegmentedProfile calculatePointToPointDistanceProfile() throws UnavailableBorderPointException {
+    public static ISegmentedProfile calculatePointToPointDistanceProfile(@NonNull Taggable target) throws UnavailableBorderPointException {
         float[] profile = new float[target.getBorderLength()];
 
         int index = 0;

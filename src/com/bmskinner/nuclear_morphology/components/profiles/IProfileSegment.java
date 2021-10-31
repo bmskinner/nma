@@ -558,12 +558,18 @@ public interface IProfileSegment extends Serializable, XmlSerializable, Iterable
     	List<IProfileSegment> result = new ArrayList<>();
     	
     	if(list.size()==1) {
-    		// only a single segment; this must be from the new SegmentedCellularComponent added
-    		// in 1.14.0. The single segment spans the entire profile, so just update the profile length
-    		// and return.
+    		// only a single segment; The single segment spans the entire profile, 
+    		// so just update the profile length. If the indexes are out of bounds,
+    		// set to the closest valid index.
     		IProfileSegment oldSeg = list.get(0);
-    		IProfileSegment newSeg = IProfileSegment.newSegment(oldSeg.getStartIndex(), oldSeg.getStartIndex(), newLength, oldSeg.getID());
-    		result.add(newSeg);
+    		if(oldSeg.getStartIndex()>=newLength) {
+    			int newIndex = oldSeg.getStartIndex()-newLength;
+    			result.add(IProfileSegment.newSegment(newIndex, 
+    					newIndex, newLength, oldSeg.getID()));
+    		} else {
+    			result.add(IProfileSegment.newSegment(oldSeg.getStartIndex(), 
+    					oldSeg.getStartIndex(), newLength, oldSeg.getID()));
+    		}
     		linkSegments(result);
     		return result;
     	}

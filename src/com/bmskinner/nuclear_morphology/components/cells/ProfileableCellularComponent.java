@@ -209,10 +209,8 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 		try {
 			IProfileSegment.linkSegments(segments);
 			
-			ProfileCreator creator = new ProfileCreator(this);
-
 	    	for (ProfileType type : ProfileType.values()) {
-	    		profileMap.put(type, creator.createProfile(type));
+	    		profileMap.put(type, ProfileCreator.createProfile(this, type));
 	    	}
 			
 		} catch (ProfileException e1) {
@@ -419,18 +417,14 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 
             // calculate profiles
             windowSize = (int) Math.round(angleWindow);
-            LOGGER.finest( "Recalculating angle profile");
-            ProfileCreator creator = new ProfileCreator(this);
-            ISegmentedProfile profile;
+
             try {
-                profile = creator.createProfile(ProfileType.ANGLE);
+            	ISegmentedProfile profile = ProfileCreator.createProfile(this, ProfileType.ANGLE);
+            	profileMap.put(type, profile);
             } catch (ProfileException e) {
                 LOGGER.warning("Unable to set window proportion");
                 LOGGER.log(Loggable.STACK, e.getMessage(), e);
-                return;
             }
-
-            profileMap.put(type, profile);
 
         }
     }
@@ -496,12 +490,8 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 
     @Override
     public void calculateProfiles() throws ProfileException {
-
-    	ProfileCreator creator = new ProfileCreator(this);
-
-    	for (ProfileType type : ProfileType.values()) {
-    		setProfile(type, creator.createProfile(type));
-    	}
+    	for (ProfileType type : ProfileType.values()) 
+    		setProfile(type, ProfileCreator.createProfile(this, type));
     }
     
     @Override
@@ -536,7 +526,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
             // was length-1,  will be 0
             int newIndex = this.getBorderLength() - index - 1;
             
-            // update the bordertag map directly to avoid segmentation changes
+            // update the landmark map directly to avoid segmentation changes
             // due to RP shift
             profileLandmarks.put(entry.getKey(), newIndex);
         }

@@ -11,10 +11,12 @@ import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
 import org.junit.Test;
 
+import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
+
 public class DefaultAnalysisOptionsTest {
 
 	@Test
-	public void testXmlSerializes() throws IOException {
+	public void testXmlSerializes() throws IOException, ComponentCreationException {
 
 		IAnalysisOptions o = OptionsFactory.makeDefaultRodentAnalysisOptions(new File("file"));		
 		Element e = o.toXmlElement();

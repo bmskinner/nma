@@ -207,8 +207,11 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 		// since some measurements use the landmarks for orientation
 		for(Nucleus n : dataset.getCollection().getNuclei()) {
 			for(Measurement m : dataset.getAnalysisOptions().get()
-	    			.getRuleSetCollection().getMeasurableValues()) 
+	    			.getRuleSetCollection().getMeasurableValues()) { 
+				if(m==null)
+					throw new IllegalArgumentException("Error reading ruleset, a measurement is null");
 					n.setStatistic(m, ComponentMeasurer.calculate(m, n));
+			}
 		}
 		
 		// Clear all calculated values in the median

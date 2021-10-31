@@ -24,6 +24,7 @@ import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
@@ -103,7 +104,7 @@ public class CopyNucleusDetectionSettingsFromOpenDatasetPanel extends CopyFromOp
 				options.setString(HashOptions.DETECTION_FOLDER, folder.getAbsolutePath());
 				fireOptionsChangeEvent();
 
-			} catch (XMLReadingException e1) {
+			} catch (XMLReadingException | ComponentCreationException e1) {
 				LOGGER.log(Loggable.STACK, e1.getMessage(), e1);
 			}
 		};

@@ -123,7 +123,7 @@ public class DummyCellularComponent implements CellularComponent {
 	}
 
 	@Override
-	public Measurement[] getStatistics() {
+	public List<Measurement> getStatistics() {
 		return component.getStatistics();
 	}
 

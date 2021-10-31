@@ -99,9 +99,8 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
     		throw new AnalysisMethodException("Output parent folder does not exist: "+outputFolder.getAbsolutePath());
        
     	Optional<HashOptions> op = options.getDetectionOptions(CellularComponent.NUCLEUS);
-    	if(!op.isPresent()){
+    	if(!op.isPresent())
     		throw new AnalysisMethodException("No nucleus detection options present");
-    	}
     	
     	this.outputFolder = outputFolder;
         this.templateOptions = options;

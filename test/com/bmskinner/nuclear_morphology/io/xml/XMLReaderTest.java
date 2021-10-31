@@ -9,6 +9,7 @@ import org.junit.Test;
 
 import com.bmskinner.nuclear_morphology.TestDatasetBuilder;
 import com.bmskinner.nuclear_morphology.TestResources;
+import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
@@ -19,7 +20,7 @@ import com.bmskinner.nuclear_morphology.io.xml.XMLReader.XMLReadingException;
 public class XMLReaderTest {
 
 	@Test
-	public void testReadRuleSets() throws IOException, XMLReadingException {
+	public void testReadRuleSets() throws IOException, XMLReadingException, ComponentCreationException {
 		RuleSetCollection r = RuleSetCollection.mouseSpermRuleSetCollection();
 		File f = new File(TestResources.UNIT_TEST_FOLDER, "Ruleset.xml");
 		
@@ -41,7 +42,7 @@ public class XMLReaderTest {
 	}
 	
 	@Test
-	public void testReadAnalysisOptions() throws IOException, XMLReadingException {
+	public void testReadAnalysisOptions() throws IOException, XMLReadingException, ComponentCreationException {
 		IAnalysisOptions o = OptionsFactory.makeDefaultRodentAnalysisOptions(TestResources.UNIT_TEST_FOLDER);
 		File f = new File(TestResources.UNIT_TEST_FOLDER, "AnalysisOptions.xml");
 		

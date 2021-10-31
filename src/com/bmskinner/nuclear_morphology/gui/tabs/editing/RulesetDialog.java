@@ -65,6 +65,7 @@ import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPa
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.DefaultChartOptions;
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
+import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.profiles.BooleanProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
@@ -253,7 +254,7 @@ public class RulesetDialog extends LoadingIconDialog
 				
 			} catch (RequestCancelledException e1) {
 				// User cancelled, no action
-			} catch (XMLReadingException e1) {
+			} catch (XMLReadingException | ComponentCreationException e1) {
 				LOGGER.warning("Unable to import file: "+e1.getMessage());
 				LOGGER.log(Loggable.STACK, "Error importing XML file", e);
 			}

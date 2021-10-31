@@ -29,6 +29,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.jdom2.Element;
 
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.io.Io;
 
@@ -74,7 +75,7 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
         analysisTime = template.getAnalysisTime();
     }
     
-    public DefaultAnalysisOptions(@NonNull Element e) {
+    public DefaultAnalysisOptions(@NonNull Element e) throws ComponentCreationException {
     	
     	// Add the detection options
     	for(Element i : e.getChildren("Detection"))

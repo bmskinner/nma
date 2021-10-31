@@ -266,8 +266,8 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator<ChartOpti
         // need to transpose the matrix
         for(int i=0; i<nuclei.size(); i++) {
         	Nucleus n = nuclei.get(i);
-        	Measurement tsne1 = Arrays.stream(n.getStatistics()).filter(s->s.name().equals(xStatName)).findFirst().orElse(Measurement.TSNE_1);
-        	Measurement tsne2 = Arrays.stream(n.getStatistics()).filter(s->s.name().equals(yStatName)).findFirst().orElse(Measurement.TSNE_2);
+        	Measurement tsne1 = n.getStatistics().stream().filter(s->s.name().equals(xStatName)).findFirst().orElse(Measurement.TSNE_1);
+        	Measurement tsne2 = n.getStatistics().stream().filter(s->s.name().equals(yStatName)).findFirst().orElse(Measurement.TSNE_2);
         	xpoints[i] = n.getStatistic(tsne1);
         	ypoints[i] = n.getStatistic(tsne2);
         }

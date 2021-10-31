@@ -15,6 +15,7 @@ import org.junit.runners.Suite.SuiteClasses;
 	DatasetProfilingMethodTest.class, 
 	DatasetSegmentationMethodTest.class, 
 	IterativeSegmentFitterTest.class,
+	ProfileCreatorTest.class,
 	ProfileOffsetterTest.class, 
 	ProfileSegmenterTest.class,
 	RepresentativeMedianFinderTest.class, 

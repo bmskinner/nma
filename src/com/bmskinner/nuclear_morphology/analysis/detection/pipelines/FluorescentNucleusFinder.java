@@ -272,6 +272,7 @@ public class FluorescentNucleusFinder extends CellFinder {
         
         try {
         	if(ProfileIndexFinder.shouldReverseProfile(result)) {
+        		LOGGER.fine("Reversing profile for "+result.getNameAndNumber());
         		result.reverse();
         		result.initialise(options.getProfileWindowProportion());
         		ProfileIndexFinder.assignLandmarks(result, options.getRuleSetCollection());

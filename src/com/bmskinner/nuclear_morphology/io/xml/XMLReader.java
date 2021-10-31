@@ -51,7 +51,7 @@ public abstract class XMLReader {
 		return DatasetCreator.createRoot(d.getRootElement());
 	}
 	
-	public static RuleSetCollection readRulesetCollection(File f) throws XMLReadingException {
+	public static RuleSetCollection readRulesetCollection(File f) throws XMLReadingException, ComponentCreationException {
 		Document d = readDocument(f);
 		return new RuleSetCollection(d.getRootElement());
 	}
@@ -61,7 +61,7 @@ public abstract class XMLReader {
 		return new DefaultOptions(d.getRootElement());
 	}
 	
-	public static IAnalysisOptions readAnalysisOptions(File f) throws XMLReadingException {
+	public static IAnalysisOptions readAnalysisOptions(File f) throws XMLReadingException, ComponentCreationException {
 		Document d = readDocument(f);
 		return new DefaultAnalysisOptions(d.getRootElement());
 	}

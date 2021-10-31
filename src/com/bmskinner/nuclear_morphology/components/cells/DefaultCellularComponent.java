@@ -86,7 +86,6 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	/** The default pixel scale */
 	private static final double DEFAULT_SCALE = 1;
 	
-	private static final long serialVersionUID = 1L;
     private final UUID        id;
 
     /**
@@ -106,9 +105,9 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     private final IPoint originalCentreOfMass;
 
     /**
-     * The statistical values stored for this object
+     * The measurement values stored for this object
      */
-    private Map<Measurement, Double> statistics = new HashMap<>();
+    private Map<Measurement, Double> measurements = new HashMap<>();
 
     /**
      * The source file the component was detected in. This is detected on
@@ -131,26 +130,20 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     /** The points within the Roi from which the object was detected  */
     private int[] xpoints; 
     private int[] ypoints;
-    
-    
 
-    /*
-     * TRANSIENT FILEDS
-     */
-
-	/**
+    /**
      * The complete border list, offset to an appropriate position for the
      * object
      */
-    private transient List<IPoint> borderList = new ArrayList<>();
+    private List<IPoint> borderList = new ArrayList<>();
 
     /** Cache images while memory is available. */
-    private transient WeakReference <ImageProcessor> imageRef = new WeakReference <>(null);
+    private WeakReference <ImageProcessor> imageRef = new WeakReference <>(null);
 
     /** Cached object shapes. */
-    private transient ShapeCache shapeCache = new ShapeCache();
+    private ShapeCache shapeCache = new ShapeCache();
 
-    private transient Rectangle2D bounds;
+    private Rectangle2D bounds;
 
     
     /**
@@ -247,7 +240,6 @@ public abstract class DefaultCellularComponent implements CellularComponent {
      * @param a the template component
      */
     protected DefaultCellularComponent(CellularComponent a) {
-    	LOGGER.finest( "Constructing a new component from existing template component");
         this.id = UUID.fromString(a.getID().toString());
         this.position = Arrays.copyOf(a.getPosition(), a.getPosition().length);       
         this.originalCentreOfMass = a.getOriginalCentreOfMass().duplicate();
@@ -256,13 +248,8 @@ public abstract class DefaultCellularComponent implements CellularComponent {
         this.channel = a.getChannel();
         this.scale = a.getScale();
 
-        for (Measurement stat : a.getStatistics()) {
-            try {
-                this.setStatistic(stat, a.getStatistic(stat, MeasurementScale.PIXELS));
-            } catch (Exception e) {
-                LOGGER.log(Loggable.STACK, "Error getting " + stat + " from template", e);
-                this.setStatistic(stat, Statistical.ERROR_CALCULATING_STAT);
-            }
+        for(Measurement stat : a.getStatistics()) {
+        	setStatistic(stat, a.getStatistic(stat, MeasurementScale.PIXELS));
         }
 
         if (a instanceof DefaultCellularComponent) {
@@ -298,7 +285,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     	// Add measurements
     	for(Element el : e.getChildren("Measurement")) {
     		Measurement m = Measurement.of(el.getAttributeValue("name"));
-    		statistics.put(m, Double.parseDouble(el.getText()));
+    		measurements.put(m, Double.parseDouble(el.getText()));
     	}
     	
     	sourceFile = new File(e.getChildText("SourceFile"));
@@ -606,45 +593,50 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     }
 
     @Override
-	public synchronized boolean hasStatistic(final Measurement stat) {
-        return this.statistics.containsKey(stat);
+	public synchronized boolean hasStatistic( @NonNull final Measurement stat) {
+        return this.measurements.containsKey(stat);
     }
 
     @Override
-    public synchronized double getStatistic(final Measurement stat) {
+    public synchronized double getStatistic( @NonNull final Measurement stat) {
         return this.getStatistic(stat, MeasurementScale.PIXELS);
     }
 
     @Override
-    public synchronized double getStatistic(final Measurement stat, final MeasurementScale measurementScale) {
+    public synchronized double getStatistic(@NonNull final Measurement stat,  @NonNull final MeasurementScale measurementScale) {
 
-        if (this.statistics.containsKey(stat)) {
-            double result = statistics.get(stat);
+        if (this.measurements.containsKey(stat)) {
+            double result = measurements.get(stat);
             return stat.convert(result, this.scale, measurementScale);
         }
         
         setStatistic(stat, ComponentMeasurer.calculate(stat, this));
-        return stat.convert(statistics.get(stat), this.scale, measurementScale);
+        return stat.convert(measurements.get(stat), this.scale, measurementScale);
     }
 
     @Override
-    public synchronized void setStatistic(final Measurement stat, double d) {
-        statistics.put(stat, d);
+    public synchronized void setStatistic(@NonNull final Measurement stat, double d) {
+        measurements.put(stat, d);
     }
     
     @Override
-    public synchronized void clearStatistic(final Measurement stat) {
-    	statistics.remove(stat);
+    public synchronized void clearStatistic(@NonNull final Measurement stat) {
+    	measurements.remove(stat);
     }
 
     @Override
-    public Measurement[] getStatistics() {
-        return this.statistics.keySet().toArray(new Measurement[0]);
+    public List<Measurement> getStatistics() {
+    	List<Measurement> result = new ArrayList<>();
+    	for(Measurement m : measurements.keySet()) {
+    		if(m!=null)
+    			result.add(m);
+    	}
+    	return result;
     }
 
     @Override
 	public void updateDependentStats() {
-        for (Measurement stat : statistics.keySet()) {
+        for (Measurement stat : measurements.keySet()) {
             if (this.getStatistic(stat) == Statistical.STAT_NOT_CALCULATED)
             	setStatistic(stat, ComponentMeasurer.calculate(stat, this));
         }
@@ -1161,7 +1153,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     	 builder.append(String.format("Bounds: x: %s-%s y: %s-%s", this.getBase().getX(), this.getBase().getX()+this.getBounds().getWidth(), 
      			this.getBase().getY(), this.getBase().getY()+this.getBounds().getHeight()));
     	 builder.append("\nMeasurements:\n");
-    	 for(Entry<Measurement, Double> entry : statistics.entrySet()) {
+    	 for(Entry<Measurement, Double> entry : measurements.entrySet()) {
     		 builder.append(entry.getKey().toString()+": "+entry.getValue().toString()+"\n");
      	}
     	
@@ -1176,7 +1168,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     	e.addContent(new Element("CentreOfMass").setText(centreOfMass.getX()+","+centreOfMass.getY()));
     	e.addContent(new Element("OriginalCentreOfMass").setText(originalCentreOfMass.getX()+","+originalCentreOfMass.getY()));
     	
-    	for(Entry<Measurement, Double> entry : statistics.entrySet()) {
+    	for(Entry<Measurement, Double> entry : measurements.entrySet()) {
     		e.addContent(new Element("Measurement")
     				.setAttribute("name", entry.getKey().toString())
     				.setText(entry.getValue().toString()));
@@ -1216,7 +1208,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		result = prime * result
 				+ Objects.hash(centreOfMass, 
 						channel, id, originalCentreOfMass, 
-						scale, statistics);
+						scale, measurements);
 		return result;
 	}
 
@@ -1247,7 +1239,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 				&& Objects.equals(originalCentreOfMass, other.originalCentreOfMass)
 				&& Arrays.equals(position, other.position)
 				&& Double.doubleToLongBits(scale) == Double.doubleToLongBits(other.scale)
-				&& Objects.equals(statistics, other.statistics)
+				&& Objects.equals(measurements, other.measurements)
 				&& Arrays.equals(xpoints, other.xpoints) 
 				&& Arrays.equals(ypoints, other.ypoints);
 	}

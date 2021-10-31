@@ -16,6 +16,10 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components;
 
+import java.util.List;
+
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 
@@ -40,7 +44,7 @@ public interface Statistical {
      * @param stat
      * @return
      */
-    boolean hasStatistic(Measurement stat);
+    boolean hasStatistic(@NonNull Measurement stat);
 
     /**
      * Get the value of the given statistic for this component. Note that
@@ -52,7 +56,7 @@ public interface Statistical {
      * @return the value or zero if
      *         stat.equals(PlottableStatistic.VARIABILILTY)==true
      */
-    double getStatistic(Measurement stat, MeasurementScale scale);
+    double getStatistic(@NonNull Measurement stat, @NonNull MeasurementScale scale);
 
     /**
      * Get the value of the given {@link PlottableStatistic} for this nucleus.
@@ -75,7 +79,7 @@ public interface Statistical {
      * @param stat
      * @return
      */
-    double getStatistic(Measurement stat);
+    double getStatistic(@NonNull Measurement stat);
 
     /**
      * Set the statistic at the default scale ({@link MeasurementScale.PIXELS})
@@ -83,19 +87,19 @@ public interface Statistical {
      * @param stat
      * @param d
      */
-    void setStatistic(Measurement stat, double d);
+    void setStatistic(@NonNull Measurement stat, double d);
     
     /*
      * Remove the given statistic
      * @param stat
      */
-    void clearStatistic(Measurement stat);
+    void clearStatistic(@NonNull Measurement stat);
 
     /**
      * Get all the statistics in this object
      * 
      * @return
      */
-    Measurement[] getStatistics();
+    List<Measurement> getStatistics();
 
 }

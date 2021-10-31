@@ -235,8 +235,8 @@ public class DefaultCell implements ICell {
     }
 
     @Override
-    public Measurement[] getStatistics() {
-        return Measurement.getCellStats().toArray(new Measurement[0]);
+    public List<Measurement> getStatistics() {
+        return Measurement.getCellStats();
     }
 
     private int getNuclearArea() {

@@ -32,10 +32,12 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.jdom2.Element;
 
+import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.LandmarkType;
 import com.bmskinner.nuclear_morphology.io.XmlSerializable;
+import com.bmskinner.nuclear_morphology.io.xml.XMLReader.XMLReadingException;
 
 /**
  * This holds the rulesets for identifying each of the landmarks in a profile.
@@ -115,8 +117,10 @@ public class RuleSetCollection implements XmlSerializable {
      * unmarshalling. The element should conform
      * to the specification in {@link XmlSerializable}.
      * @param e the XML element containing the data.
+     * @throws XMLReadingException 
+     * @throws ComponentCreationException 
      */
-    public RuleSetCollection(Element e) {
+    public RuleSetCollection(Element e) throws ComponentCreationException {
     	name = e.getChildText(XML_NAME);
     	
     	// Add the rulesets
