@@ -187,14 +187,12 @@ public class SignalFinder extends AbstractFinder<List<INuclearSignal>> {
 
         List<INuclearSignal> list = new ArrayList<>();
         try {
-//        	ImageStack stack = new ImageImporter(imageFile).importToStack();
-
             // The detector also creates the signals currently
             List<INuclearSignal> temp = sd.detectSignal(imageFile, n);
             for (INuclearSignal s : temp)
                 if (isValid(s, n)) 
                     list.add(s);
-        } catch (IllegalArgumentException | ImageImportException e) {
+        } catch (IllegalArgumentException e) {
         	LOGGER.warning("Unable to find images in image "+imageFile.getAbsolutePath()+": "+e.getMessage());
         	LOGGER.log(Loggable.STACK, "Error in detector with image "+imageFile.getAbsolutePath(), e);
         }

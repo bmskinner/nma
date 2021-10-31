@@ -3,7 +3,6 @@ package com.bmskinner.nuclear_morphology.analysis.image;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import java.io.File;
 import java.util.logging.Logger;
 
 import org.junit.Test;

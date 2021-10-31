@@ -25,8 +25,6 @@ import static org.junit.Assert.fail;
 import java.io.File;
 import java.util.stream.Collectors;
 
-import org.junit.Test;
-
 import com.bmskinner.nuclear_morphology.ComponentTester;
 import com.bmskinner.nuclear_morphology.analysis.DatasetValidator;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;

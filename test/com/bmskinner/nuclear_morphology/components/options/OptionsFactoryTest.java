@@ -1,6 +1,6 @@
 package com.bmskinner.nuclear_morphology.components.options;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.io.File;
 

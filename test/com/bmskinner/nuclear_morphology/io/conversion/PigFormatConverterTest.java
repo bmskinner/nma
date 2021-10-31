@@ -19,16 +19,6 @@
 
 package com.bmskinner.nuclear_morphology.io.conversion;
 
-import static org.junit.Assert.assertTrue;
-
-import java.io.File;
-
-import org.junit.Test;
-
-import com.bmskinner.nuclear_morphology.TestResources;
-import com.bmskinner.nuclear_morphology.components.Version;
-import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
-
 /**
  * Test conversion and opening of old dataset versions
  * @author bms41

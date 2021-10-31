@@ -19,18 +19,6 @@
 
 package com.bmskinner.nuclear_morphology.io.conversion;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
-import java.io.File;
-
-import org.junit.Test;
-
-import com.bmskinner.nuclear_morphology.TestResources;
-import com.bmskinner.nuclear_morphology.components.Version;
-import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
-
 public class RoundFormatConverterTest extends OldFormatConverterTest {
 
     private static final String ROUND_FILE = "Round.bak";

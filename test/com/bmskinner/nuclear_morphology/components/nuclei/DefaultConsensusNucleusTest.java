@@ -1,9 +1,8 @@
 package com.bmskinner.nuclear_morphology.components.nuclei;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.io.PrintWriter;
-import java.util.Arrays;
 
 import org.jdom2.Element;
 import org.jdom2.output.Format;

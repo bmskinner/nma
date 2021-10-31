@@ -1,6 +1,6 @@
 package com.bmskinner.nuclear_morphology.components.datasets;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.io.PrintWriter;
 import java.util.UUID;

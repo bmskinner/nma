@@ -69,7 +69,7 @@ public class CellularComponentTest {
 	public void testDuplicate() throws Exception {
 		CellularComponent dup = component.duplicate();
 		assertEquals(component, dup);
-//		testDuplicatesByField(component, dup); //TODO: not yet implemented for signal collections
+		ComponentTester.testDuplicatesByField(component, dup);
 	}
 
 
