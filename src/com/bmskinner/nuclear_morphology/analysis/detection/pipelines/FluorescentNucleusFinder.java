@@ -234,7 +234,7 @@ public class FluorescentNucleusFinder extends CellFinder {
 
 		for (Nucleus n : list) {
 			Color colour = isValid(nuclOptions,n) ? Color.ORANGE : Color.RED;
-			ann.annotateBorder(n, colour);
+			ann.drawBorder(n, colour);
 		}
 		fireDetectionEvent(ann.toProcessor().duplicate(), "Detected objects");
 

@@ -96,21 +96,23 @@ public class InteractiveCellOutlinePanel extends InteractiveCellPanel {
 			
 			ImageProcessor ip = loadCellImage();
 			ImageAnnotator an = new ImageAnnotator(ip);
-			cropImageToCell(an);
 			updateSourceImageDimensions(an);
 			
-			ImageAnnotator an2 = scaleSmallImageToPanel(an);
+			an = scaleSmallImageToPanel(an);
 
 			for(Nucleus n : cell.getNuclei()){
-				an2.annotateSignalsOnCroppedNucleus(n);
+				an.annotateNucleus(n);
 			}    
 			
 			if(displayOptions.getBoolean(CellDisplayOptions.ROTATE_VERTICAL)) {
-				an2 = rotateVertical(an2);
+				an = rotateVertical(an);
 			}
 			
+			an.crop(cell);
+
+			
 			// Whatever the canvas size, rescale the final image to the panel
-			ImageAnnotator an3 = scaleImageToPanel(an2);
+			ImageAnnotator an3 = scaleImageToPanel(an);
 			displayAnnotatorContents(an3);
 		};
 		new Thread(u).start();
@@ -133,18 +135,6 @@ public class InteractiveCellOutlinePanel extends InteractiveCellPanel {
 		return ip;
 	}
 	
-	/**
-	 * Crop the annotator to the region of the image 
-	 * containing the object of interest
-	 * @param an
-	 */
-	private void cropImageToCell(ImageAnnotator an) {
-		if(cell.hasCytoplasm()){
-			an.crop(cell.getCytoplasm());
-		} else{
-			an.crop(cell.getNuclei().get(0));
-		}
-	}
 	
 	/**
 	 * If the image is smaller than the available space,
@@ -268,7 +258,6 @@ public class InteractiveCellOutlinePanel extends InteractiveCellPanel {
 				output= null;
 				ImageProcessor ip = loadCellImage();
 				ImageAnnotator an = new ImageAnnotator(ip);
-				cropImageToCell(an);
 				
 				Mesh<Nucleus> consensusMesh = new DefaultMesh<>(dataset.getCollection().getConsensus());
 				for(Nucleus n : cell.getNuclei()) {
@@ -284,6 +273,7 @@ public class InteractiveCellOutlinePanel extends InteractiveCellPanel {
 					}
 					
 					// Whatever the canvas size, rescale the final image to the panel
+					an4.crop(cell);
 					an4 = scaleImageToPanel(an4);
 					displayAnnotatorContents(an4);
 				}
@@ -302,7 +292,6 @@ public class InteractiveCellOutlinePanel extends InteractiveCellPanel {
 				output= null;
 				ImageProcessor ip = loadCellImage();
 				ImageAnnotator an = new ImageAnnotator(ip);
-				cropImageToCell(an);
 				updateSourceImageDimensions(an);
 				
 				Mesh<Nucleus> consensusMesh = new DefaultMesh<>(dataset.getCollection().getConsensus());
@@ -313,6 +302,7 @@ public class InteractiveCellOutlinePanel extends InteractiveCellPanel {
         			drawn.flipVertical();
         			an = new ImageAnnotator(drawn, getWidth(), getHeight());
         		}
+        		an.crop(cell);
         		displayAnnotatorContents(an);
 			} catch (MeshCreationException | IllegalArgumentException | MeshImageCreationException | UncomparableMeshImageException e) {
 				LOGGER.log(Loggable.STACK, "Error making mesh or loading image", e);

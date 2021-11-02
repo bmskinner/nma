@@ -94,33 +94,27 @@ public class InteractiveSegmentCellPanel extends InteractiveCellPanel {
 			// Crop to the relevant part of the image
 			LOGGER.finer("Cell raw image: "+ip.getWidth()+" x "+ip.getHeight());
 			ImageAnnotator an = new ImageAnnotator(ip);
-
-			if(cell.hasCytoplasm()){
-				an.crop(cell.getCytoplasm());
-			} else{
-				an.crop(cell.getNuclei().get(0));
-			}
-			LOGGER.finer("Cell cropped image: "+an.toProcessor().getWidth()+" x "+an.toProcessor().getHeight());
-
+			
 			// If the image is smaller than the available space, create a new annotator
 			// that fills this space. If the image is larger than the available space,
 			// create at full size and shrink it later; there will not be room
 			// to draw the features on a smaller canvas
-			ImageAnnotator an2 = new ImageAnnotator(an.toProcessor());
 			boolean isSmaller = an.toProcessor().getWidth()<getWidth() && an.toProcessor().getHeight()<getHeight();
 			if(isSmaller) {
-				an2 = new ImageAnnotator(an.toProcessor(), getWidth(), getHeight());
+				an = new ImageAnnotator(an.toProcessor(), getWidth(), getHeight());
 			}
 			
 			for(Nucleus n : cell.getNuclei()){
-				an2.annotateSegmentsOnCroppedNucleus(n);
-			}    
+				an.annotateNucleus(n);
+			}  
+			
+			an.crop(cell);
 			
 			// Expand or shrink the canvas to fit the panel
-			ImageAnnotator an3 = new ImageAnnotator(an2.toProcessor(), getWidth(), getHeight());
+			an = new ImageAnnotator(an.toProcessor(), getWidth(), getHeight());
 
-			imageLabel.setIcon(an3.toImageIcon());
-			input = an3.toBufferedImage();
+			imageLabel.setIcon(an.toImageIcon());
+			input = an.toBufferedImage();
 			sourceWidth = an.toProcessor().getWidth();
 			sourceHeight = an.toProcessor().getHeight();
 		};

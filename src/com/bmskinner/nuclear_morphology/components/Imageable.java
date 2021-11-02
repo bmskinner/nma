@@ -271,17 +271,6 @@ public interface Imageable {
     	return point
     			.minus(COMPONENT_BUFFER)
     			.plus(template.getOriginalBase().minus(template.getBase()));
-    			
-
-//        double xTem = point.getX() - COMPONENT_BUFFER;
-//        double yTem = point.getY() - COMPONENT_BUFFER;
-//
-//        IPoint temBase = template.getOriginalBase();
-//        double x = xTem + temBase.getX();
-//        double y = yTem + temBase.getY();
-//
-//        return IPoint.makeNew(x, y);
-
     }
 
     /**

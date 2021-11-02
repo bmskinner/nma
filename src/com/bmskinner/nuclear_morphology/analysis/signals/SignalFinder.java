@@ -208,10 +208,10 @@ public class SignalFinder extends AbstractFinder<List<INuclearSignal>> {
      */
     protected void drawSignals(@NonNull Nucleus n, @NonNull List<INuclearSignal> list, @NonNull ImageAnnotator an, boolean annotateStats) {
 
-        an.annotateBorder(n, Color.BLUE);
+        an.drawBorder(n, Color.BLUE);
         for (INuclearSignal s : list) {
             Color color = isValid(s, n) ? Color.ORANGE : Color.RED;
-            an.annotateBorder(s, color);
+            an.drawBorder(s, color);
             if (annotateStats) {
                 an.annotateSignalStats(n, s, Color.YELLOW, Color.BLUE);
             }

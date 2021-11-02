@@ -148,7 +148,7 @@ public class RuleSet implements Serializable, XmlSerializable {
      * @return
      */
     public static RuleSet mouseSpermTVRuleSet() {
-        return new RuleSetBuilder(ProfileType.ANGLE).isConstantRegionAtValue(180, 10, 2).isFirstIndexInRegion().build();
+        return new RuleSetBuilder(ProfileType.ANGLE).isConstantRegionAtValue(180, 10, 10).isFirstIndexInRegion().build();
     }
 
     /**
@@ -158,7 +158,7 @@ public class RuleSet implements Serializable, XmlSerializable {
      * @return
      */
     public static RuleSet mouseSpermBVRuleSet() {
-        return new RuleSetBuilder(ProfileType.ANGLE).isConstantRegionAtValue(180, 10, 2).isLastIndexInRegion().build();
+        return new RuleSetBuilder(ProfileType.ANGLE).isConstantRegionAtValue(180, 10, 10).isLastIndexInRegion().build();
     }
 
     /**

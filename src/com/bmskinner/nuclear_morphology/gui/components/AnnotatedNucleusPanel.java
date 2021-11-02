@@ -130,11 +130,11 @@ public class AnnotatedNucleusPanel extends JPanel {
         ImageAnnotator an = new ImageAnnotator(openProcessor);
 
         if (cell.hasCytoplasm()) {
-            an.annotateBorder(cell.getCytoplasm(), Color.CYAN);
+            an.drawBorder(cell.getCytoplasm(), Color.CYAN);
         }
 
         for (Nucleus n : cell.getNuclei()) {
-            an.annotateBorder(n, Color.ORANGE);
+            an.drawBorder(n, Color.ORANGE);
         }
 
         drawIcon(an.toProcessor());

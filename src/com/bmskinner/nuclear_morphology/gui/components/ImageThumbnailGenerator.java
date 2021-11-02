@@ -87,7 +87,7 @@ public class ImageThumbnailGenerator implements ChartMouseListener {
 		Color annotationColour = isRgb ? Color.WHITE : Color.ORANGE;
 		ImageProcessor ip;
 		try {
-			ip = isRgb ? n.getComponentRGBImage() : n.getComponentImage();
+			ip = isRgb ? n.getRGBImage() : n.getImage();
 		} catch(UnloadableImageException e) {
 			LOGGER.fine("Unable to load component image: "+e.getMessage());
 			// No image, but we can still draw the outline
@@ -99,7 +99,9 @@ public class ImageThumbnailGenerator implements ChartMouseListener {
 
 
 		ImageAnnotator an = new ImageAnnotator(ip)
-				.annotateOutlineOnCroppedComponent(n, annotationColour, 3);
+				.drawBorder(n, annotationColour);
+//				.annotateOutlineOnCroppedComponent(n, annotationColour, 3);
+		an.crop(n);
 		an.resizeKeepingAspect(150, 150);
 		ip = an.toProcessor();
 

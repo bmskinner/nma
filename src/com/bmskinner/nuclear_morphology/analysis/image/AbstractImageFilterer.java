@@ -27,6 +27,7 @@ import javax.swing.ImageIcon;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.cells.ICell;
 
 import ij.ImagePlus;
 import ij.process.ByteProcessor;
@@ -426,7 +427,23 @@ public abstract class AbstractImageFilterer {
      * 
      * @return
      */
-    public void crop(@NonNull CellularComponent c) {
+    public AbstractImageFilterer crop(@NonNull ICell c) {
+
+        if (ip == null)
+            throw new IllegalArgumentException("Image processor is null");
+        
+        if(c.hasCytoplasm()) {
+        	return crop(c.getCytoplasm());
+        }
+        return crop(c.getPrimaryNucleus());
+    }
+    
+    /**
+     * Crop the image to the region covered by the given component
+     * 
+     * @return
+     */
+    public AbstractImageFilterer crop(@NonNull CellularComponent c) {
 
         if (ip == null)
             throw new IllegalArgumentException("Image processor is null");
@@ -443,6 +460,7 @@ public abstract class AbstractImageFilterer {
         ip.setRoi(wideX, wideY, wideW, wideH);
         ImageProcessor result = ip.crop();
         ip = result;
+        return this;
     }
     
     /**
