@@ -86,7 +86,7 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
         // Create a signal group in the dataset
 
         ISignalGroup group = new DefaultSignalGroup(options.getString(HashOptions.SIGNAL_GROUP_NAME), 
-        	 UUID.fromString(options.getString(HashOptions.SIGNAL_GROUP_ID)));
+        		options.getUUID(HashOptions.SIGNAL_GROUP_ID));
         
         dataset.getCollection().addSignalGroup(group);
 
@@ -143,7 +143,7 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
 
             ISignalCollection signalCollection = n.getSignalCollection();
             signalCollection.addSignalGroup(signals, 
-            		UUID.fromString(options.getString(HashOptions.SIGNAL_GROUP_ID)), 
+            		options.getUUID(HashOptions.SIGNAL_GROUP_ID),
             		imageFile, 
             		channel);
 
@@ -169,7 +169,7 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
     private void postDetectionFilter() {
 
         List<ICellCollection> signalPopulations = dividePopulationBySignals(dataset.getCollection(), 
-        		UUID.fromString(options.getString(HashOptions.SIGNAL_GROUP_ID)));
+        		options.getUUID(HashOptions.SIGNAL_GROUP_ID));
 
         List<IAnalysisDataset> list = new ArrayList<>();
 

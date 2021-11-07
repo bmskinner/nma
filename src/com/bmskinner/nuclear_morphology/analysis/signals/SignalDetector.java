@@ -66,7 +66,6 @@ public class SignalDetector extends Detector {
 	private static final Logger LOGGER = Logger.getLogger(SignalDetector.class.getName());
 
     private HashOptions options;
-    private int channel; // shortcut rather than accessing the options each time
     private int minThreshold;
     
     private final ComponentFactory<INuclearSignal> factory = new SignalFactory();
@@ -84,11 +83,8 @@ public class SignalDetector extends Detector {
         	throw new IllegalArgumentException("Threshold not present in detection options");
         
         this.options      = options;
-        this.channel      = options.getInt(HashOptions.CHANNEL);
         this.minThreshold = options.getInt(HashOptions.THRESHOLD);
         
-        if (channel < 0)
-            throw new IllegalArgumentException("Channel must be greater or equal to 0");
         if (minThreshold < 0)
             throw new IllegalArgumentException("Min threshold must be greater or equal to 0");
     }
@@ -123,20 +119,6 @@ public class SignalDetector extends Detector {
     }
 
     /**
-     * Given a new threshold value, update the options if the value is not below
-     * the previously defined minimum
-     * 
-     * @param newThreshold
-     */
-//    private void updateThreshold(int newThreshold) {
-//        // only use the calculated threshold if it is larger than
-//        // the given minimum
-//        if (newThreshold > minThreshold) {
-//            LOGGER.finer("Threshold set at: " + newThreshold);
-//        } 
-//    }
-
-    /**
      * Detect a signal in a given stack by standard forward thresholding and add
      * to the given nucleus
      * 
@@ -148,41 +130,50 @@ public class SignalDetector extends Detector {
      */
     private List<INuclearSignal> detectForwardThresholdSignal(@NonNull File sourceFile, @NonNull Nucleus n) throws ImageImportException {
 
-    	ImageStack stack = new ImageImporter(sourceFile).importToStack();
-    	
-        // choose the right stack number for the channel
-        int stackNumber = ImageImporter.rgbToStack(channel);
+        // Open the image
+        ImageProcessor ip = new ImageImporter(sourceFile).importImage(options.getInt(HashOptions.CHANNEL));
+        
+        // Set up the detector
         setMaxSize(n.getStatistic(Measurement.AREA) * options.getDouble(HashOptions.SIGNAL_MAX_FRACTION));
         setMinSize(options.getInt(HashOptions.MIN_SIZE_PIXELS));
         setMinCirc(options.getDouble(HashOptions.MIN_CIRC));
         setMaxCirc(options.getDouble(HashOptions.MAX_CIRC));
-        setThreshold(options.getInt(HashOptions.THRESHOLD));
-
+        setThreshold(minThreshold); // may have been updated in reverse or histogram method
+           
+        // Run the detection of all potential signal ROIs
+        Map<Roi, StatsMap> rois = detectRois(ip);
         List<INuclearSignal> signals = new ArrayList<>();
-        ImageProcessor ip = stack.getProcessor(stackNumber);
-                
-        Map<Roi, StatsMap> roiList = detectRois(ip);
-
-        if (roiList.isEmpty())
+        if (rois.isEmpty())
             return signals;
+        
+        LOGGER.finer(rois.size() + " rois at "+minThreshold+" for channel "+options.getInt(HashOptions.CHANNEL)+" in "+sourceFile.getName());
+    	
 
-        LOGGER.finer(roiList.size() + " rois in stack " + stackNumber +" of "+sourceFile.getName());
-        LOGGER.finer("Nucleus position "+Arrays.toString(n.getPosition()));
-        for(Entry<Roi, StatsMap> entry : roiList.entrySet()) {
+        for(Entry<Roi, StatsMap> entry : rois.entrySet()) {
         	Roi r = entry.getKey();
             StatsMap values = entry.getValue();
+        	
+            IPoint signalCoM = IPoint.makeNew(
+        			values.get(StatsMap.COM_X).floatValue(), 
+        			values.get(StatsMap.COM_Y).floatValue());
+        	
+            // only keep the roi if it is within the nucleus
+        	if (!n.containsOriginalPoint(signalCoM)) {
+        		continue;
+        	}
+        	LOGGER.finer(rois.size() + " rois at "+minThreshold+" for channel "+options.getInt(HashOptions.CHANNEL)+" in "+sourceFile.getName());
+        	LOGGER.finer("ROI at "+signalCoM+" is in nucleus at "+Arrays.toString(n.getPosition()));
 
             int xbase = (int) r.getXBase();
             int ybase = (int) r.getYBase();
             Rectangle bounds = r.getBounds();
             int[] originalPosition = { xbase, ybase, (int) bounds.getWidth(), (int) bounds.getHeight() };
 
-            LOGGER.finer("ROI position "+Arrays.toString(originalPosition));
-
             try {
 
-                INuclearSignal s = factory.buildInstance(r, sourceFile, channel, originalPosition, IPoint
-                        .makeNew(values.get(StatsMap.COM_X).floatValue(), values.get(StatsMap.COM_Y).floatValue()));
+                INuclearSignal s = factory.buildInstance(r, sourceFile, 
+                		options.getInt(HashOptions.CHANNEL), 
+                		originalPosition, signalCoM);
 
                 s.setScale(n.getScale()); // copy scale information from
                                           // source nucleus
@@ -196,18 +187,13 @@ public class SignalDetector extends Detector {
                  */
                 s.setStatistic(Measurement.RADIUS, Math.sqrt(values.get(StatsMap.AREA) / Math.PI));
 
-                // only keep the signal if it is within the nucleus
-                if (n.containsOriginalPoint(s.getOriginalCentreOfMass())) {
+                // Offset the centre of mass and border points of the signal
+                // to match the nucleus offset
+                s.offset(-n.getPosition()[CellularComponent.X_BASE], -n.getPosition()[CellularComponent.Y_BASE]);
 
-                    // Offset the centre of mass and border points of the signal
-                    // to match the nucleus offset
-                    s.offset(-n.getPosition()[CellularComponent.X_BASE], -n.getPosition()[CellularComponent.Y_BASE]);
+                signals.add(s);
 
-                    signals.add(s);
-                }
-                
-                
-            } catch (IllegalArgumentException | ComponentCreationException e) {
+            } catch (ComponentCreationException e) {
                 LOGGER.warning("Cannot make signal for component "+n.getNameAndNumber());
                 LOGGER.log(Loggable.STACK, "Error detecting or making signal: "+e.getMessage(), e);
             }
@@ -232,11 +218,9 @@ public class SignalDetector extends Detector {
      */
     private List<INuclearSignal> detectReverseThresholdSignal(File sourceFile, Nucleus n) throws ImageImportException {
 
-        ImageStack stack = new ImageImporter(sourceFile).importToStack();
-        // choose the right stack number for the channel
-        int stackNumber = ImageImporter.rgbToStack(channel);
+    	// Open the image
+        ImageProcessor ip = new ImageImporter(sourceFile).importImage(options.getInt(HashOptions.CHANNEL));
 
-        ImageProcessor ip = stack.getProcessor(stackNumber);
         FloatPolygon polygon = n.toOriginalPolygon();
 
         // map brightness to count
@@ -295,12 +279,10 @@ public class SignalDetector extends Detector {
      * @throws Exception
      */
     private List<INuclearSignal> detectHistogramThresholdSignal(@NonNull final File sourceFile, @NonNull final Nucleus n) throws ImageImportException {
-    	ImageStack stack = new ImageImporter(sourceFile).importToStack();
-
-        // choose the right stack number for the channel
-        int stackNumber = ImageImporter.rgbToStack(channel);
-
-        ImageProcessor ip = stack.getProcessor(stackNumber);
+    	
+    	// Open the image
+        ImageProcessor ip = new ImageImporter(sourceFile).importImage(options.getInt(HashOptions.CHANNEL));
+        
         int[] positions = n.getPosition();
         Rectangle boundingBox = new Rectangle((int) positions[CellularComponent.X_BASE],
                 (int) positions[CellularComponent.Y_BASE], (int) positions[CellularComponent.WIDTH],

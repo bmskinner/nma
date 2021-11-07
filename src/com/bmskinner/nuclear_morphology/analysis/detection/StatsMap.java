@@ -17,6 +17,7 @@
 package com.bmskinner.nuclear_morphology.analysis.detection;
 
 import java.util.HashMap;
+import java.util.Map.Entry;
 import java.util.Set;
 
 /**
@@ -58,6 +59,15 @@ public class StatsMap {
         if (!values.containsKey(s))
             throw new IllegalArgumentException("Key is not present");
         return values.get(s);
+    }
+    
+    @Override
+    public String toString() {
+    	StringBuilder sb = new StringBuilder();
+    	for(Entry<String, Double> e : values.entrySet()) {
+    		sb.append(e.getKey()+": "+e.getValue()+"\t");
+    	}
+    	return sb.toString();
     }
 
 }

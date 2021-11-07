@@ -20,7 +20,7 @@
   -----------------------
   Contains the variables for detecting
   nuclei and signals
-*/
+ */
 package com.bmskinner.nuclear_morphology.analysis.detection;
 
 import java.awt.Rectangle;
@@ -32,7 +32,10 @@ import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nuclear_morphology.logging.ImageViewer;
+
 import ij.ImagePlus;
+import ij.Prefs;
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
 import ij.gui.Wand;
@@ -61,424 +64,424 @@ import ij.process.ShortStatistics;
  *
  */
 public abstract class Detector {
-	
+
 	private static final Logger LOGGER = Logger.getLogger(Detector.class.getName());
 
-    public static final int CLOSED_OBJECTS = 0; // Flags to allow detection of
-                                                // open or closed objects
-    public static final int OPEN_OBJECTS   = 1;
+	public static final int CLOSED_OBJECTS = 0; // Flags to allow detection of
+	// open or closed objects
+	public static final int OPEN_OBJECTS   = 1;
 
-    public static final String COM_X = "XM";
-    public static final String COM_Y = "YM";
+	public static final String COM_X = "XM";
+	public static final String COM_Y = "YM";
 
-    public static final String RESULT_TABLE_PERIM = "Perim.";
-    
-//    private static final String NO_IMG_ERR = "No image to analyse";
-    private static final String NO_DETECTION_PARAMS_ERR ="Detection parameters not set";
-    private static final String SIZE_MISMATCH_ERR = "Minimum size >= maximum size";
-    private static final String CIRC_MISMATCH_ERR = "Minimum circularity >= maximum circularity";
-    
-    private double minSize;
-    private double maxSize;
-    private double minCirc;
-    private double maxCirc;
+	public static final String RESULT_TABLE_PERIM = "Perim.";
 
-    private boolean includeHoles = true;
-    private boolean excludeEdges = true;
+	private static final String NO_DETECTION_PARAMS_ERR ="Detection parameters not set";
+	private static final String SIZE_MISMATCH_ERR = "Minimum size >= maximum size";
+	private static final String CIRC_MISMATCH_ERR = "Minimum circularity >= maximum circularity";
 
-    private int threshold = 128;
-        
-    /**
-     * Set the minimum and maximum size ROIs to detect
-     * 
-     * @param min the minimum in pixels
-     * @param max the maximum in pixels
-     */
-    public void setSize(double min, double max) {
-        minSize = min;
-        maxSize = max;
-    }
+	private double minSize;
+	private double maxSize;
+	private double minCirc;
+	private double maxCirc;
 
-    /**
-     * Set the minimum and maximum circularity ROIs to detect
-     * 
-     * @param min the minimum circularity
-     * @param max the maximum circularity
-     */
-    public void setCirc(double min, double max) {
-        minCirc = min;
-        maxCirc = max;
-    }
+	private boolean includeHoles = true;
+	private boolean excludeEdges = true;
 
-    protected double getMinSize() {
+	private int threshold = 128;
+
+	/**
+	 * Set the minimum and maximum size ROIs to detect
+	 * 
+	 * @param min the minimum in pixels
+	 * @param max the maximum in pixels
+	 */
+	public void setSize(double min, double max) {
+		minSize = min;
+		maxSize = max;
+	}
+
+	/**
+	 * Set the minimum and maximum circularity ROIs to detect
+	 * 
+	 * @param min the minimum circularity
+	 * @param max the maximum circularity
+	 */
+	public void setCirc(double min, double max) {
+		minCirc = min;
+		maxCirc = max;
+	}
+
+	protected double getMinSize() {
 		return minSize;
 	}
 
-    protected double getMaxSize() {
+	protected double getMaxSize() {
 		return maxSize;
 	}
 
 	public void setMinSize(double d) {
-        this.minSize = d;
-    }
+		this.minSize = d;
+	}
 
-    public void setMaxSize(double d) {
-        this.maxSize = d;
-    }
+	public void setMaxSize(double d) {
+		this.maxSize = d;
+	}
 
-    public void setMinCirc(double d) {
-        this.minCirc = d;
-    }
+	public void setMinCirc(double d) {
+		this.minCirc = d;
+	}
 
-    public void setMaxCirc(double d) {
-        this.maxCirc = d;
-    }
+	public void setMaxCirc(double d) {
+		this.maxCirc = d;
+	}
 
-    public void setThreshold(int i) {
-        this.threshold = i;
-    }
+	public void setThreshold(int i) {
+		this.threshold = i;
+	}
 
-    /**
-     * Set whether the ROIs should include holes - i.e. should holes be flood
-     * filled before detection
-     * 
-     * @param b
-     */
-    public void setIncludeHoles(boolean b) {
-        includeHoles = b;
-    }
-    
-    /**
-     * Set whether the ROIs should include holes - i.e. should holes be flood
-     * filled before detection
+	/**
+	 * Set whether the ROIs should include holes - i.e. should holes be flood
+	 * filled before detection
+	 * 
+	 * @param b
+	 */
+	public void setIncludeHoles(boolean b) {
+		includeHoles = b;
+	}
 
-     * @param b
-     */
-    public void setExcludeEdges(boolean b) {
-        excludeEdges = b;
-    }
+	/**
+	 * Set whether the ROIs should include holes - i.e. should holes be flood
+	 * filled before detection
 
-    /**
-     * Detect and measure ROIs in this image
-     * @param image
-     * @return
-     */
-    protected synchronized Map<Roi, StatsMap> detectRois(@NonNull ImageProcessor image){
-    	if (Double.isNaN(this.minSize) || Double.isNaN(this.maxSize) || Double.isNaN(this.minCirc)
-    			|| Double.isNaN(this.maxCirc))
-    		throw new IllegalArgumentException(NO_DETECTION_PARAMS_ERR);
+	 * @param b
+	 */
+	public void setExcludeEdges(boolean b) {
+		excludeEdges = b;
+	}
 
-    	if (this.minSize >= this.maxSize)
-    		throw new IllegalArgumentException(SIZE_MISMATCH_ERR);
-    	if (this.minCirc >= this.maxCirc)
-    		throw new IllegalArgumentException(CIRC_MISMATCH_ERR);                
-    	if (!(image instanceof ByteProcessor || image instanceof ShortProcessor))
-    		throw new IllegalArgumentException("Processor must be byte or short");
+	/**
+	 * Detect and measure ROIs in this image
+	 * @param image
+	 * @return
+	 */
+	protected synchronized Map<Roi, StatsMap> detectRois(@NonNull ImageProcessor image){
+		if (Double.isNaN(this.minSize) || Double.isNaN(this.maxSize) || Double.isNaN(this.minCirc)
+				|| Double.isNaN(this.maxCirc))
+			throw new IllegalArgumentException(NO_DETECTION_PARAMS_ERR);
 
-    	ImageProcessor searchProcessor = image.duplicate();
-    	searchProcessor.threshold(threshold);
+		if (this.minSize >= this.maxSize)
+			throw new IllegalArgumentException(SIZE_MISMATCH_ERR);
+		if (this.minCirc >= this.maxCirc)
+			throw new IllegalArgumentException(CIRC_MISMATCH_ERR);                
+		if (!(image instanceof ByteProcessor || image instanceof ShortProcessor))
+			throw new IllegalArgumentException("Processor must be byte or short");
 
-    	Map<Roi, StatsMap> result = new HashMap<>();
+		ImageProcessor searchProcessor = image.duplicate();
+		searchProcessor.threshold(threshold);
 
-    	// run the particle analyser
-    	// By default, add all particles to the ROI manager, and do not count
-    	// anything touching the edge
-    	int options = 0;
+		Map<Roi, StatsMap> result = new HashMap<>();
 
-    	if(excludeEdges)
-    		options = options | ParticleAnalyzer.EXCLUDE_EDGE_PARTICLES;        
-    	if (includeHoles)
-    		options = options | ParticleAnalyzer.INCLUDE_HOLES;
+		// run the particle analyser
+		// By default, add all particles to the ROI manager, and do not count
+		// anything touching the edge
+		int options = 0;
 
-    	ParticleAnalyzer pa = new ParticleAnalyzer(options);
+		if(excludeEdges)
+			options = options | ParticleAnalyzer.EXCLUDE_EDGE_PARTICLES;        
+		if (includeHoles)
+			options = options | ParticleAnalyzer.INCLUDE_HOLES;
 
-    	boolean success = pa.analyze(image);
-    	if (!success) {
-    		LOGGER.warning("Unable to perform particle analysis");
-    	}
 
-    	for(Roi r : pa.getRois()){
-    		StatsMap m = measure(r, image);
-    		result.put(r, m);
-    	}
+		// Run particle analysis on the thresholded binary image
+		ParticleAnalyzer pa = new ParticleAnalyzer(options);
+		boolean success = pa.analyze(searchProcessor);
+		if (!success) {
+			LOGGER.warning("Unable to perform particle analysis");
+		}
 
-    	return result;
-    }
+		// Run measurements on the original image
+		// to ensure CoM detection is accurate
+		for(Roi r : pa.getRois()){
+			StatsMap m = measure(r, image);
+			result.put(r, m);
+		}
 
-    /**
-     * Get the stats for the region covered by the given roi. Uses the channel
-     * previously set.
-     * 
-     * @param roi the region to measure
-     * @return
-     */
-    private synchronized StatsMap measure(@NonNull Roi roi, @NonNull ImageProcessor image) {
+		return result;
+	}
 
-        ImageProcessor searchProcessor = image.duplicate();
-        ImagePlus imp = new ImagePlus(null, searchProcessor);
-        imp.setRoi(roi);
-        ResultsTable rt = new ResultsTable();
-        Analyzer analyser = new Analyzer(imp,
-                Measurements.CENTER_OF_MASS | Measurements.AREA | Measurements.PERIMETER | Measurements.FERET, rt);
-        analyser.measure();
-        
-        StatsMap values = new StatsMap();
-        values.add(StatsMap.AREA, rt.getValue(StatsMap.AREA, 0));
-        values.add(StatsMap.FERET, rt.getValue(StatsMap.FERET, 0));
-        values.add(StatsMap.PERIM, rt.getValue(RESULT_TABLE_PERIM, 0));
-        values.add(COM_X, rt.getValue(COM_X, 0));
-        values.add(COM_Y, rt.getValue(COM_Y, 0));
-        return values;
-    }
-    
+	/**
+	 * Get the stats for the region covered by the given roi. Uses the channel
+	 * previously set.
+	 * 
+	 * @param roi the region to measure
+	 * @return
+	 */
+	private synchronized StatsMap measure(@NonNull Roi roi, @NonNull ImageProcessor image) {
 
-    
-    /**
-     * This recapitulates the basic function of the ImageJ particle
-     * analyzer without using the static roi manager. It works better for
-     * multithreading.
-     * @author bms41
-     * @since 1.13.8
-     *
-     */
-    protected class ParticleAnalyzer implements Measurements {
-                
-        /** Do not measure particles touching edge of image. */
-        public static final int EXCLUDE_EDGE_PARTICLES = 8;
+		ImageProcessor searchProcessor = image.duplicate();
+		ImagePlus imp = new ImagePlus(null, searchProcessor);
+		imp.setRoi(roi);
+		ResultsTable rt = new ResultsTable();
+		Analyzer analyser = new Analyzer(imp,
+				Measurements.CENTER_OF_MASS | Measurements.AREA | Measurements.PERIMETER | Measurements.FERET, rt);
+		analyser.measure();
 
-        /** Flood fill to ignore interior holes. */
-        public static final int INCLUDE_HOLES = 1024;
-        
-        /** Use 4-connected particle tracing. */
-        private static final int FOUR_CONNECTED = 8192;
+		StatsMap values = new StatsMap();
+		values.add(StatsMap.AREA, rt.getValue(StatsMap.AREA, 0));
+		values.add(StatsMap.FERET, rt.getValue(StatsMap.FERET, 0));
+		values.add(StatsMap.PERIM, rt.getValue(RESULT_TABLE_PERIM, 0));
+		values.add(COM_X, rt.getValue(COM_X, 0));
+		values.add(COM_Y, rt.getValue(COM_Y, 0));
+		return values;
+	}
 
-        static final String OPTIONS = "ap.options";
-        
-        static final int BYTE=0, SHORT=1, FLOAT=2, RGB=3;
-        static final double DEFAULT_MIN_SIZE = 0.0;
-        static final double DEFAULT_MAX_SIZE = Double.POSITIVE_INFINITY;
 
-        protected static final int NOTHING=0, OUTLINES=1, BARE_OUTLINES=2, ELLIPSES=3, MASKS=4, ROI_MASKS=5,
-            OVERLAY_OUTLINES=6, OVERLAY_MASKS=7;
 
-        protected int slice;
-        protected boolean processStack;
-        protected boolean excludeEdgeParticles,
-           floodFill;
+	/**
+	 * This recapitulates the basic function of the ImageJ particle
+	 * analyzer without using the static roi manager. It works better for
+	 * multithreading.
+	 * @author bms41
+	 * @since 1.13.8
+	 *
+	 */
+	protected class ParticleAnalyzer implements Measurements {
 
-        private double level1, level2;
+		/** Do not measure particles touching edge of image. */
+		private static final int EXCLUDE_EDGE_PARTICLES = 8;
 
-        private int options;
-        private int measurements;
+		/** Flood fill to ignore interior holes. */
+		private static final int INCLUDE_HOLES = 1024;
 
-        private double fillColor;
-        private int width;
+		/** Use 4-connected particle tracing. */
+		private static final int FOUR_CONNECTED = 8192;
 
-        private Wand wand;
-        private int imageType, imageType2;
-        private int minX, maxX, minY, maxY;
+		private static final int BYTE=0, SHORT=1, FLOAT=2, RGB=3;
 
-        private PolygonFiller pf;
+		private boolean excludeEdgeParticles, floodFill;
 
-        private Rectangle r;
+		private double level1, level2;
 
-        private FloodFiller ff;
-//        private Polygon polygon;
+		private int options;
+		private int measurements;
 
-        private int roiType;
-        private int wandMode = Wand.LEGACY_MODE;
+		private double fillColor;
+		private int width;
 
-        boolean blackBackground = true;
-        
-        private final Set<Roi> rois = new HashSet<>();
+		private Wand wand;
+		private int imageType, imageType2;
+		private int minX, maxX, minY, maxY;
 
-                
-        /** Constructs a ParticleAnalyzer.
+		private PolygonFiller pf;
+
+		private Rectangle r;
+
+		private FloodFiller ff;
+
+		private int roiType;
+		private int wandMode = Wand.LEGACY_MODE;
+
+		private boolean blackBackground = true;
+
+		private final Set<Roi> rois = new HashSet<>();
+
+
+		/** Constructs a ParticleAnalyzer.
             @param options  a flag word created by Oring SHOW_RESULTS, EXCLUDE_EDGE_PARTICLES, etc.
-        */
-        public ParticleAnalyzer(int options) { 
-            this.measurements = Measurements.FERET;
+		 */
+		public ParticleAnalyzer(int options) { 
+			this.measurements = Measurements.FERET;
 
-            slice = 1;
+			if ((options&FOUR_CONNECTED)!=0) {
+				wandMode = Wand.FOUR_CONNECTED;
+				options |= INCLUDE_HOLES;
+			}
+			this.options = options;
+			Prefs.blackBackground = true;
+		}
 
-            if ((options&FOUR_CONNECTED)!=0) {
-                wandMode = Wand.FOUR_CONNECTED;
-                options |= INCLUDE_HOLES;
-            }
-            this.options = options;
-        }
-        
-        /**
-         * Get the detected Rois
-         * @return
-         */
-        public Set<Roi> getRois(){
-            return rois;
-        }
-        
+		/**
+		 * Get the detected Rois
+		 * @return
+		 */
+		public Set<Roi> getRois(){
+			return rois;
+		}
 
-        /** Performs particle analysis on the specified ImagePlus and
+
+		/** Performs particle analysis on the specified ImagePlus and
             ImageProcessor. Returns false if there is an error. */
-        public boolean analyze(ImageProcessor ip) {
-            rois.clear();
+		public boolean analyze(ImageProcessor ip) {
+			rois.clear();
 
-            excludeEdgeParticles = (options&EXCLUDE_EDGE_PARTICLES)!=0;
-            floodFill = (options&INCLUDE_HOLES)==0;
+			excludeEdgeParticles = (options&EXCLUDE_EDGE_PARTICLES)!=0;
+			floodFill = (options&INCLUDE_HOLES)==0;
 
-            ip.snapshot();
+			ip.snapshot();
 
-            if (!setThresholdLevels(ip))
-                return false;
-            width = ip.getWidth();
-            
-            byte[] pixels = null;
-            if (ip instanceof ByteProcessor)
-                pixels = (byte[])ip.getPixels();
-            if (r==null) {
-                r = ip.getRoi();
-            }
-            minX=r.x; maxX=r.x+r.width; minY=r.y; maxY=r.y+r.height;
+			if (!setThresholdLevels(ip))
+				return false;
+			
+			width = ip.getWidth();
 
-            int offset;
-            double value;
+			byte[] pixels = null;
+			if (ip instanceof ByteProcessor)
+				pixels = (byte[])ip.getPixels();
+			if (r==null) {
+				r = ip.getRoi();
+			}
+			minX=r.x; maxX=r.x+r.width; minY=r.y; maxY=r.y+r.height;
 
-            wand = new Wand(ip);
-            pf = new PolygonFiller();
-            if (floodFill) {
-                ImageProcessor ipf = ip.duplicate();
-                ipf.setValue(fillColor);
-                ff = new FloodFiller(ipf);
-            }
-            roiType = Wand.allPoints()?Roi.FREEROI:Roi.TRACED_ROI;
+			int offset;
+			double value;
 
-            boolean done = false;
-            for (int y=r.y; y<(r.y+r.height); y++) {
-                offset = y*width;
-                for (int x=r.x; x<(r.x+r.width); x++) {
-                    if (pixels!=null)
-                        value = pixels[offset+x]&255;
-                    else if (imageType==SHORT)
-                        value = ip.getPixel(x, y);
-                    else
-                        value = ip.getPixelValue(x, y);
-                    if (value>=level1 && value<=level2 && !done) {
-                        analyzeParticle(x, y, ip);
-                        done = level1==0.0&&level2==255.0;
-                    }
-                }
-            }
+			wand = new Wand(ip);
+			pf = new PolygonFiller();
+			if (floodFill) {
+				ImageProcessor ipf = ip.duplicate();
+				ipf.setValue(fillColor);
+				ff = new FloodFiller(ipf);                
+			}
+			roiType = Wand.allPoints()?Roi.FREEROI:Roi.TRACED_ROI;
 
-            ip.resetRoi();
-            ip.reset();
+			boolean done = false;
+			for (int y=r.y; y<(r.y+r.height); y++) {
+				offset = y*width;
+				for (int x=r.x; x<(r.x+r.width); x++) {
+					if (pixels!=null)
+						value = pixels[offset+x]&255;
+					else if (imageType==SHORT)
+						value = ip.getPixel(x, y);
+					else
+						value = ip.getPixelValue(x, y);
+					if (value>=level1 && value<=level2 && !done) {
+						analyzeParticle(x, y, ip);
+						done = level1==0.0&&level2==255.0;
+					}
+				}
+			}
 
-            return true;
-        }
-        
-       private boolean setThresholdLevels(ImageProcessor ip) {
-            double t1 = ip.getMinThreshold();
-            double t2 = ip.getMaxThreshold();
 
-            if (ip instanceof ShortProcessor)
-                imageType = SHORT;
-            else if (ip instanceof FloatProcessor)
-                imageType = FLOAT;
-            else
-                imageType = BYTE;
-            if (t1==ImageProcessor.NO_THRESHOLD) {
+			ip.resetRoi();
+			ip.reset();
 
-                if (imageType!=BYTE)
-                    return false;
+			return true;
+		}
 
-                boolean threshold255 = false;
-                if (blackBackground)
-                    threshold255 = !threshold255;
-                if (threshold255) {
-                    level1 = 255;
-                    level2 = 255;
-                    fillColor = 64;
-                } else {
-                    level1 = 0;
-                    level2 = 0;
-                    fillColor = 192;
-                }
-            } else {
-                level1 = t1;
-                level2 = t2;
-                if (imageType==BYTE) {
-                    if (level1>0)
-                        fillColor = 0;
-                    else if (level2<255)
-                        fillColor = 255;
-                } else if (imageType==SHORT) {
-                    if (level1>0)
-                        fillColor = 0;
-                    else if (level2<65535)
-                        fillColor = 65535;
-                } else if (imageType==FLOAT)
-                        fillColor = -Float.MAX_VALUE;
-                else
-                    return false;
-            }
-            imageType2 = imageType;
+		/**
+		 * Choose how to threshold the input image based on the image
+		 * type.
+		 * @param ip
+		 * @return
+		 */
+		private boolean setThresholdLevels(ImageProcessor ip) {
+			double t1 = ip.getMinThreshold();
+			double t2 = ip.getMaxThreshold();
 
-            return true;
-        }
-                
-       private void analyzeParticle(int x, int y, ImageProcessor ip) {
+			if (ip instanceof ShortProcessor)
+				imageType = SHORT;
+			else if (ip instanceof FloatProcessor)
+				imageType = FLOAT;
+			else
+				imageType = BYTE;
+			if (t1==ImageProcessor.NO_THRESHOLD) {
 
-            wand.autoOutline(x, y, level1, level2, wandMode);
-            if (wand.npoints==0)
-                {return;}
-            Roi roi = new PolygonRoi(wand.xpoints, wand.ypoints, wand.npoints, roiType);
-            Rectangle r = roi.getBounds();
-            if (r.width>1 && r.height>1) {
-                PolygonRoi proi = (PolygonRoi)roi;
-                pf.setPolygon(proi.getXCoordinates(), proi.getYCoordinates(), proi.getNCoordinates());
-                ip.setMask(pf.getMask(r.width, r.height));
-                if (floodFill) ff.particleAnalyzerFill(x, y, level1, level2, ip.getMask(), r);
-            }
-            ip.setRoi(r);
-            ip.setValue(fillColor);
-            ImageStatistics stats = getStatistics(ip, measurements);
-            boolean include = true;
-            
-            if (excludeEdgeParticles && (r.x==minX||r.y==minY||r.x+r.width==maxX||r.y+r.height==maxY))
-            	include = false;
-            
-            ImageProcessor mask = ip.getMask();
-            if (minCirc>0.0 || maxCirc<1.0) {
-                double perimeter = roi.getLength();
-                double circularity = perimeter==0.0?0.0:4.0*Math.PI*(stats.pixelCount/(perimeter*perimeter));
-                if (circularity>1.0) circularity = 1.0;
+				if (imageType!=BYTE)
+					return false;
 
-                if (circularity<minCirc || circularity>maxCirc) include = false;
-            }
-            
-            if (stats.pixelCount>=minSize && stats.pixelCount<=maxSize && include) {
-                stats.xstart=x; stats.ystart=y;
-                rois.add( (Roi) roi.clone());
-            }
+				boolean threshold255 = false;
+				if (blackBackground)
+					threshold255 = !threshold255;
+				if (threshold255) {
+					level1 = 255;
+					level2 = 255;
+					fillColor = 64;
+				} else {
+					level1 = 0;
+					level2 = 0;
+					fillColor = 192;
+				}
+			} else {
+				level1 = t1;
+				level2 = t2;
+				if (imageType==BYTE) {
+					if (level1>0)
+						fillColor = 0;
+					else if (level2<255)
+						fillColor = 255;
+				} else if (imageType==SHORT) {
+					if (level1>0)
+						fillColor = 0;
+					else if (level2<65535)
+						fillColor = 65535;
+				} else if (imageType==FLOAT)
+					fillColor = -Float.MAX_VALUE;
+				else
+					return false;
+			}
+			imageType2 = imageType;
 
-            ip.fill(mask);
-        }
+			return true;
+		}
 
-       private ImageStatistics getStatistics(ImageProcessor ip, int mOptions) {
-            
-            Calibration cal = new Calibration();
-            switch (imageType2) {
-                case BYTE:
-                    return new ByteStatistics(ip, mOptions, cal);
-                case SHORT:
-                    return new ShortStatistics(ip, mOptions, cal);
-                case FLOAT:
-                    return new FloatStatistics(ip, mOptions, cal);
-                case RGB:
-                    return new ColorStatistics(ip, mOptions, cal);
-                default:
-                    return null;
-            }
-        }
-        
+		private void analyzeParticle(int x, int y, ImageProcessor ip) {
 
-    }
+			wand.autoOutline(x, y, level1, level2, wandMode);
+			if (wand.npoints==0){
+				return;
+			}
+			
+			Roi roi = new PolygonRoi(wand.xpoints, wand.ypoints, wand.npoints, roiType);
+			Rectangle r = roi.getBounds();
+			if (r.width>1 && r.height>1) {
+				PolygonRoi proi = (PolygonRoi)roi;
+				pf.setPolygon(proi.getXCoordinates(), proi.getYCoordinates(), proi.getNCoordinates());
+				ip.setMask(pf.getMask(r.width, r.height));
+				if (floodFill) ff.particleAnalyzerFill(x, y, level1, level2, ip.getMask(), r);
+			}
+			ip.setRoi(r);
+			ip.setValue(fillColor);
+			ImageStatistics stats = getStatistics(ip, measurements);
+			boolean include = true;
+
+			if (excludeEdgeParticles && (r.x==minX||r.y==minY||r.x+r.width==maxX||r.y+r.height==maxY))
+				include = false;
+
+			ImageProcessor mask = ip.getMask();
+			if (minCirc>0.0 || maxCirc<1.0) {
+				double perimeter = roi.getLength();
+				double circularity = perimeter==0.0?0.0:4.0*Math.PI*(stats.pixelCount/(perimeter*perimeter));
+				if (circularity>1.0) circularity = 1.0;
+
+				if (circularity<minCirc || circularity>maxCirc) include = false;
+			}
+
+			if (stats.pixelCount>=minSize && stats.pixelCount<=maxSize && include) {
+				stats.xstart=x; stats.ystart=y;
+				rois.add( (Roi) roi.clone());
+			}
+
+			ip.fill(mask);
+		}
+
+		private ImageStatistics getStatistics(ImageProcessor ip, int mOptions) {
+
+			Calibration cal = new Calibration();
+			switch (imageType2) {
+			case BYTE:
+				return new ByteStatistics(ip, mOptions, cal);
+			case SHORT:
+				return new ShortStatistics(ip, mOptions, cal);
+			case FLOAT:
+				return new FloatStatistics(ip, mOptions, cal);
+			case RGB:
+				return new ColorStatistics(ip, mOptions, cal);
+			default:
+				return null;
+			}
+		}
+
+
+	}
 }

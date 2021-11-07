@@ -1,5 +1,6 @@
 package com.bmskinner.nuclear_morphology.analysis.signals;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
@@ -55,17 +56,23 @@ public class SignalDetectorTest {
 				.build();
 		
 		SignalDetector sd = new SignalDetector(o);
+		
+		File testFile = d.getCollection().getImageFiles().stream()
+				.filter(f->f.getName().equals("P104.tiff"))
+				.findFirst().orElseThrow(Exception::new);
 
+		// Check we have nucleus detection working ok
+		assertEquals("File should have 2 nuclei", 2, d.getCollection().getNuclei(testFile).size());
+
+		
 		int signals = 0;
-		for(File f : d.getCollection().getImageFiles()) {
-			for(Nucleus n : d.getCollection().getNuclei(f)) {
-				assertTrue(f.exists());				
-				List<INuclearSignal> s = sd.detectSignal(f.getAbsoluteFile(), n);
-				signals += s.size();
-			}
+		for(Nucleus n : d.getCollection().getNuclei(testFile)) {
+			assertTrue(testFile.exists());				
+			List<INuclearSignal> s = sd.detectSignal(testFile.getAbsoluteFile(), n);
+			signals += s.size();
 		}
-		LOGGER.fine("Found "+signals+" signals");
-		assertTrue(signals>0);
+
+		assertEquals("File should have signals", 3, signals);
 	}
 
 }

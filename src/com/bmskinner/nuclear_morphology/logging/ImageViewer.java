@@ -1,4 +1,4 @@
-package com.bmskinner.nuclear_morphology.charting;
+package com.bmskinner.nuclear_morphology.logging;
 
 import ij.ImagePlus;
 import ij.ImageStack;

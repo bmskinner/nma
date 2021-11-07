@@ -237,7 +237,7 @@ public class GenericImageProberPanel extends JPanel implements ProberReloadEvent
      */
     private List<File> importImages(final File folder) {
 
-        List<File> files = new ArrayList<File>();
+        List<File> files = new ArrayList<>();
         if (folder.listFiles() == null) {
             return files;
         }
@@ -444,10 +444,6 @@ public class GenericImageProberPanel extends JPanel implements ProberReloadEvent
 
             Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
             
-//            LOGGER.fine("Screen size: "+screenSize);
-//            LOGGER.fine("Original image dimensions: w"+originalWidth+" by h"+originalHeight);
-//            LOGGER.fine("Scaling to "+fraction);
-            
             // set the new width
             int newWidth  = (int) ( screenSize.getWidth() * fraction);
             int newHeight = (int) ((double) newWidth / ratio);
@@ -458,7 +454,6 @@ public class GenericImageProberPanel extends JPanel implements ProberReloadEvent
                 newHeight = (int) (screenSize.getHeight() * fraction);
                 newWidth = (int) ((double) newHeight * ratio);
             }
-//            LOGGER.fine("New image dimensions: w"+newWidth+" by h"+newHeight);
             // Create the image
 
             Image result = largeIcon.getImage().getScaledInstance(newWidth, newHeight, Image.SCALE_FAST);

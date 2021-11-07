@@ -64,7 +64,6 @@ public class ProberTableModel extends DefaultTableModel implements DetectionEven
     @Override
     public void detectionEventReceived(DetectionEvent e) {
         ProberTableCell cell = makeIconCell(e.getProcessor(), e.getMessage(), true);
-        LOGGER.fine(e.getMessage()+": Resizing to "+maxDimension);
         ProberTableCell blank = makeIconCell(ImageConverter.createBlankImage(maxDimension, maxDimension), "", true);
 
         if (getRowCount() == 0) {

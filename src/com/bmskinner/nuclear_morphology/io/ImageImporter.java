@@ -180,8 +180,7 @@ public class ImageImporter implements Importer {
 
     /**
      * Import the image in the given file, and return an image processor for the
-     * channel requested. Inverts the greyscale image so white==no signal and
-     * black==full signal
+     * channel requested. Inverts the greyscale image.
      * 
      * @param channel
      * @return
@@ -227,8 +226,6 @@ public class ImageImporter implements Importer {
      * @return the stack with counterstain in slice 1, and other channels following 
      */
     private ImageStack convert(@NonNull ImagePlus image) throws ImageImportException {
-        if (image == null)
-            throw new ImageImportException("Input image is null");
         if (!isImportable(image))
             throw new ImageImportException("Cannot handle image type: " + image.getType());
 
@@ -263,8 +260,6 @@ public class ImageImporter implements Importer {
      * @return the stack
      */
     private ImageStack convertRGB(@NonNull final ImagePlus image) {
-    	if(image==null)
-    		throw new IllegalArgumentException("Image cannot be null");
     	
         int imageDepth = 0; // number of images in the stack to begin
         int bitDepth = 8; // default 8 bit images
