@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -233,6 +234,16 @@ public class DefaultOptions implements Serializable, HashOptions {
 	@Override
 	public void setFile(String s, File f) {
 		stringMap.put(s, f.getAbsolutePath());
+	}
+
+	@Override
+	public UUID getUUID(String s) {
+		return UUID.fromString(stringMap.get(s));
+	}
+
+	@Override
+	public void setUUID(String key, UUID value) {
+		stringMap.put(key, value.toString());
 	}
 
 	@Override

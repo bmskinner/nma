@@ -53,10 +53,9 @@ public class MainWindowCloseAdapter extends WindowAdapter {
 
     @Override
     public void windowClosing(WindowEvent e) {
-        LOGGER.fine("Checking dataset state");
 
         if (DatasetListManager.getInstance().hashCodeChanged()) {
-            LOGGER.fine("Found changed hashcode");
+            LOGGER.fine("Found changed hashcode for at least one dataset");
             String[] options = { "Save and exit", "Exit without saving", "Do not exit" };
 
 			try {
@@ -73,7 +72,6 @@ public class MainWindowCloseAdapter extends WindowAdapter {
 				return;
 			}
         }
-		LOGGER.fine("No change found");
 		close();
     }
 
@@ -86,10 +84,6 @@ public class MainWindowCloseAdapter extends WindowAdapter {
     	LOGGER.config("Clearing loaded datasets");
         DatasetListManager.getInstance().clear();
         GlobalOptions.getInstance().setDefaults();
-//        LOGGER.config("Closing logging handlers");
-//        for (Handler h : Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).getHandlers()) {
-//            h.close();
-//        }
 
         mw.dispose();
         LOGGER.config("Disposed GUI; quitting JVM");

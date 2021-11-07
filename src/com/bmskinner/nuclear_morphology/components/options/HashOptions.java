@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult.ShrinkType;
@@ -343,6 +344,20 @@ public interface HashOptions extends Serializable, XmlSerializable {
      * @param v
      */
     void setFile(String s, File f);
+    
+    /**
+     * Get a UUID stored with the given key
+     * @param s
+     * @return
+     */
+    UUID getUUID(String s);
+    
+    /**
+     * Set a UUID
+     * @param key
+     * @param value
+     */
+    void setUUID(String key, UUID value);
     
     /**
      * Get the keys to all the boolean values in this options.

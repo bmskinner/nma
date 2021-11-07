@@ -125,9 +125,7 @@ public class OptionsFactory {
 				.withValue(HashOptions.MAX_CIRC, HashOptions.DEFAULT_MAX_CIRC)
 				.withValue(HashOptions.CHANNEL, HashOptions.DEFAULT_SIGNAL_CHANNEL)
 				.withValue(HashOptions.THRESHOLD, HashOptions.DEFAULT_SIGNAL_THRESHOLD)
-				.withValue(HashOptions.SCALE, GlobalOptions.getInstance().getImageScale())
-				.withValue(HashOptions.IS_RGB, HashOptions.DEFAULT_IS_RGB)
-				.withValue(HashOptions.IS_NORMALISE_CONTRAST, HashOptions.DEFAULT_IS_NORMALISE);
+				.withValue(HashOptions.SCALE, GlobalOptions.getInstance().getImageScale());
 	}
 	
 	/**

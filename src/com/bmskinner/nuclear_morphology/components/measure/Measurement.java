@@ -21,6 +21,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.analysis.image.GLCM.GLCMParameter;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 
@@ -74,43 +76,43 @@ public interface Measurement extends Serializable {
 	}
 
     // General component statistics
-    static final Measurement AREA            = new DefaultMeasurement(Names.AREA,            MeasurementDimension.AREA);
-    static final Measurement PERIMETER       = new DefaultMeasurement(Names.PERIMETER,       MeasurementDimension.LENGTH);
-    static final Measurement MIN_DIAMETER    = new DefaultMeasurement(Names.MIN_DIAMETER,    MeasurementDimension.LENGTH);
-    static final Measurement ELLIPTICITY     = new DefaultMeasurement(Names.ELLIPTICITY,     MeasurementDimension.DIMENSIONLESS);
-    static final Measurement ASPECT          = new DefaultMeasurement(Names.ASPECT,          MeasurementDimension.DIMENSIONLESS);
-    static final Measurement CIRCULARITY     = new DefaultMeasurement(Names.CIRCULARITY,     MeasurementDimension.DIMENSIONLESS);
-    static final Measurement VARIABILITY     = new DefaultMeasurement(Names.VARIABILITY,     MeasurementDimension.DIMENSIONLESS);
-    static final Measurement ELONGATION      = new DefaultMeasurement(Names.ELONGATION,      MeasurementDimension.DIMENSIONLESS);
-    static final Measurement REGULARITY      = new DefaultMeasurement(Names.REGULARITY,      MeasurementDimension.DIMENSIONLESS);
-    static final Measurement BOUNDING_HEIGHT = new DefaultMeasurement(Names.BOUNDING_HEIGHT, MeasurementDimension.LENGTH);
-    static final Measurement BOUNDING_WIDTH  = new DefaultMeasurement(Names.BOUNDING_WIDTH,  MeasurementDimension.LENGTH);
-    static final Measurement HOOK_LENGTH     = new DefaultMeasurement(Names.HOOK_LENGTH,     MeasurementDimension.LENGTH);
-    static final Measurement BODY_WIDTH      = new DefaultMeasurement(Names.BODY_WIDTH,      MeasurementDimension.LENGTH);
+    @NonNull Measurement AREA            = new DefaultMeasurement(Names.AREA,            MeasurementDimension.AREA);
+    @NonNull Measurement PERIMETER       = new DefaultMeasurement(Names.PERIMETER,       MeasurementDimension.LENGTH);
+    @NonNull Measurement MIN_DIAMETER    = new DefaultMeasurement(Names.MIN_DIAMETER,    MeasurementDimension.LENGTH);
+    @NonNull Measurement ELLIPTICITY     = new DefaultMeasurement(Names.ELLIPTICITY,     MeasurementDimension.DIMENSIONLESS);
+    @NonNull Measurement ASPECT          = new DefaultMeasurement(Names.ASPECT,          MeasurementDimension.DIMENSIONLESS);
+    @NonNull Measurement CIRCULARITY     = new DefaultMeasurement(Names.CIRCULARITY,     MeasurementDimension.DIMENSIONLESS);
+    @NonNull Measurement VARIABILITY     = new DefaultMeasurement(Names.VARIABILITY,     MeasurementDimension.DIMENSIONLESS);
+    @NonNull Measurement ELONGATION      = new DefaultMeasurement(Names.ELONGATION,      MeasurementDimension.DIMENSIONLESS);
+    @NonNull Measurement REGULARITY      = new DefaultMeasurement(Names.REGULARITY,      MeasurementDimension.DIMENSIONLESS);
+    @NonNull Measurement BOUNDING_HEIGHT = new DefaultMeasurement(Names.BOUNDING_HEIGHT, MeasurementDimension.LENGTH);
+    @NonNull Measurement BOUNDING_WIDTH  = new DefaultMeasurement(Names.BOUNDING_WIDTH,  MeasurementDimension.LENGTH);
+    @NonNull Measurement HOOK_LENGTH     = new DefaultMeasurement(Names.HOOK_LENGTH,     MeasurementDimension.LENGTH);
+    @NonNull Measurement BODY_WIDTH      = new DefaultMeasurement(Names.BODY_WIDTH,      MeasurementDimension.LENGTH);
     
     // Stats for the whole cell, aggregated across sub-components
-    static final Measurement CELL_NUCLEUS_COUNT = new DefaultMeasurement(Names.CELL_NUCLEUS_COUNT, MeasurementDimension.DIMENSIONLESS);
-    static final Measurement CELL_NUCLEAR_AREA  = new DefaultMeasurement(Names.CELL_NUCLEAR_AREA, MeasurementDimension.AREA);
-    static final Measurement CELL_NUCLEAR_RATIO = new DefaultMeasurement(Names.CELL_NUCLEAR_RATIO, MeasurementDimension.DIMENSIONLESS);
+    @NonNull Measurement CELL_NUCLEUS_COUNT = new DefaultMeasurement(Names.CELL_NUCLEUS_COUNT, MeasurementDimension.DIMENSIONLESS);
+    @NonNull Measurement CELL_NUCLEAR_AREA  = new DefaultMeasurement(Names.CELL_NUCLEAR_AREA, MeasurementDimension.AREA);
+    @NonNull Measurement CELL_NUCLEAR_RATIO = new DefaultMeasurement(Names.CELL_NUCLEAR_RATIO, MeasurementDimension.DIMENSIONLESS);
     
     // Signal count in nuclei
-    static final Measurement NUCLEUS_SIGNAL_COUNT = new DefaultMeasurement(Names.NUCLEUS_SIGNAL_COUNT, MeasurementDimension.DIMENSIONLESS);
+    @NonNull Measurement NUCLEUS_SIGNAL_COUNT = new DefaultMeasurement(Names.NUCLEUS_SIGNAL_COUNT, MeasurementDimension.DIMENSIONLESS);
 
     // Signal statistics
-    static final Measurement ANGLE                   = new DefaultMeasurement(Names.ANGLE,                   MeasurementDimension.ANGLE);
-    static final Measurement DISTANCE_FROM_COM       = new DefaultMeasurement(Names.DISTANCE_FROM_COM,       MeasurementDimension.LENGTH);
-    static final Measurement FRACT_DISTANCE_FROM_COM = new DefaultMeasurement(Names.FRACT_DISTANCE_FROM_COM, MeasurementDimension.DIMENSIONLESS);
-    static final Measurement RADIUS                  = new DefaultMeasurement(Names.RADIUS,                  MeasurementDimension.LENGTH);
-    static final Measurement LENGTH                  = new DefaultMeasurement(Names.LENGTH,                  MeasurementDimension.LENGTH);
-    static final Measurement DISPLACEMENT            = new DefaultMeasurement(Names.DISPLACEMENT,            MeasurementDimension.ANGLE);    
+    @NonNull Measurement ANGLE                   = new DefaultMeasurement(Names.ANGLE,                   MeasurementDimension.ANGLE);
+    @NonNull Measurement DISTANCE_FROM_COM       = new DefaultMeasurement(Names.DISTANCE_FROM_COM,       MeasurementDimension.LENGTH);
+    @NonNull Measurement FRACT_DISTANCE_FROM_COM = new DefaultMeasurement(Names.FRACT_DISTANCE_FROM_COM, MeasurementDimension.DIMENSIONLESS);
+    @NonNull Measurement RADIUS                  = new DefaultMeasurement(Names.RADIUS,                  MeasurementDimension.LENGTH);
+    @NonNull Measurement LENGTH                  = new DefaultMeasurement(Names.LENGTH,                  MeasurementDimension.LENGTH);
+    @NonNull Measurement DISPLACEMENT            = new DefaultMeasurement(Names.DISPLACEMENT,            MeasurementDimension.ANGLE);    
     
     // Special stats. These should not be included in default charts - they are used as hidden data stores
-    static final Measurement TSNE_1 = new DefaultMeasurement(Names.TSNE_1, MeasurementDimension.DIMENSIONLESS);
-    static final Measurement TSNE_2 = new DefaultMeasurement(Names.TSNE_2, MeasurementDimension.DIMENSIONLESS);
+    @NonNull Measurement TSNE_1 = new DefaultMeasurement(Names.TSNE_1, MeasurementDimension.DIMENSIONLESS);
+    @NonNull Measurement TSNE_2 = new DefaultMeasurement(Names.TSNE_2, MeasurementDimension.DIMENSIONLESS);
     
-    static final Measurement PCA_1 = new DefaultMeasurement(Names.PCA_1, MeasurementDimension.DIMENSIONLESS);
-    static final Measurement PCA_2 = new DefaultMeasurement(Names.PCA_2, MeasurementDimension.DIMENSIONLESS);
-    static final Measurement PCA_N = new DefaultMeasurement(Names.PCA_N, MeasurementDimension.DIMENSIONLESS); // Number of PCs 
+    @NonNull Measurement PCA_1 = new DefaultMeasurement(Names.PCA_1, MeasurementDimension.DIMENSIONLESS);
+    @NonNull Measurement PCA_2 = new DefaultMeasurement(Names.PCA_2, MeasurementDimension.DIMENSIONLESS);
+    @NonNull Measurement PCA_N = new DefaultMeasurement(Names.PCA_N, MeasurementDimension.DIMENSIONLESS); // Number of PCs 
     
 
     /**
@@ -118,7 +120,7 @@ public interface Measurement extends Serializable {
      * {@link CellularComponent}
      * 
      * @param component the component to get stats for
-     * @return applicable stats, or null if the component was not recognised
+     * @return applicable stats, or an empty array if the component was not recognised
      */
     static Measurement[] getStats(String component) {
         if (CellularComponent.NUCLEUS.equals(component))
@@ -127,7 +129,7 @@ public interface Measurement extends Serializable {
             return getSignalStats().toArray(new Measurement[0]);
         if (CellularComponent.NUCLEAR_BORDER_SEGMENT.equals(component))
             return getSegmentStats().toArray(new Measurement[0]);
-        return null;
+        return new Measurement[0];
     }
     
     /**
