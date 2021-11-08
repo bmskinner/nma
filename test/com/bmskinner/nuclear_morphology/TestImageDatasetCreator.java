@@ -147,7 +147,6 @@ public class TestImageDatasetCreator {
     	HashOptions nucleus = op.getDetectionOptions(CellularComponent.NUCLEUS).get();
     	nucleus.setInt(HashOptions.MIN_SIZE_PIXELS, 2000);
     	nucleus.setInt(HashOptions.MAX_SIZE_PIXELS, 10000);
-//    	op.setDetectionOptions(CellularComponent.NUCLEUS, nucleus);
     	    	
     	IAnalysisDataset d = createTestSignalDataset(op, true, false);
     	saveTestDataset(d, TestResources.MOUSE_SIGNALS_DATASET);

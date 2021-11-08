@@ -35,6 +35,7 @@ import java.util.logging.Logger;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
+import javax.swing.ImageIcon;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 
@@ -54,6 +55,7 @@ import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.gui.events.CellUpdatedEventListener;
 import com.bmskinner.nuclear_morphology.gui.events.SegmentEvent;
 import com.bmskinner.nuclear_morphology.gui.events.SegmentEvent.SegmentUpdateType;
+import com.bmskinner.nuclear_morphology.gui.tabs.CellImagePainter;
 import com.bmskinner.nuclear_morphology.gui.events.SegmentEventListener;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -92,31 +94,28 @@ public class InteractiveSegmentCellPanel extends InteractiveCellPanel {
 			}
 			
 			// Crop to the relevant part of the image
-			LOGGER.finer("Cell raw image: "+ip.getWidth()+" x "+ip.getHeight());
+//			LOGGER.fine("Cell raw image: "+ip.getWidth()+" x "+ip.getHeight());
 			ImageAnnotator an = new ImageAnnotator(ip);
-			
-			// If the image is smaller than the available space, create a new annotator
-			// that fills this space. If the image is larger than the available space,
-			// create at full size and shrink it later; there will not be room
-			// to draw the features on a smaller canvas
-			boolean isSmaller = an.toProcessor().getWidth()<getWidth() && an.toProcessor().getHeight()<getHeight();
-			if(isSmaller) {
-				an = new ImageAnnotator(an.toProcessor(), getWidth(), getHeight());
-			}
-			
-			for(Nucleus n : cell.getNuclei()){
-				an.annotateNucleus(n);
-			}  
-			
+
 			an.crop(cell);
 			
+			// Store the original image width after cropping
+			double w = an.toProcessor().getWidth();
+						
 			// Expand or shrink the canvas to fit the panel
 			an = new ImageAnnotator(an.toProcessor(), getWidth(), getHeight());
 
-			imageLabel.setIcon(an.toImageIcon());
-			input = an.toBufferedImage();
-			sourceWidth = an.toProcessor().getWidth();
-			sourceHeight = an.toProcessor().getHeight();
+			BufferedImage bp = an.toBufferedImage();
+			sourceWidth = bp.getWidth();
+			sourceHeight = bp.getHeight();
+			
+			double ratio = (double)bp.getWidth()/w;
+			
+//			LOGGER.fine("Original "+w+" Source "+sourceWidth+" new "+getWidth()+" Ratio "+ratio);
+			
+			input = CellImagePainter.paintCell(bp, cell, ratio);
+			imageLabel.setIcon(new ImageIcon(input));
+			
 		};
 		new Thread(u).start(); // avoid thread manager so updates are immediate
 	}
