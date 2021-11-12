@@ -18,16 +18,33 @@ package com.bmskinner.nuclear_morphology.gui.tabs.cells_detail;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.swing.BorderFactory;
+import javax.swing.Box;
 import javax.swing.ImageIcon;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 
 import org.eclipse.jdt.annotation.Nullable;
+import org.jdesktop.swingx.decorator.ComponentAdapter;
 
+import com.bmskinner.nuclear_morphology.analysis.image.AbstractImageFilterer;
+import com.bmskinner.nuclear_morphology.analysis.image.ImageAnnotator;
+import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.Imageable;
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
@@ -37,11 +54,25 @@ import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsBuilder;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
+import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
+import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
+import com.bmskinner.nuclear_morphology.core.ThreadManager;
+import com.bmskinner.nuclear_morphology.gui.ImageClickListener;
+import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
+import com.bmskinner.nuclear_morphology.gui.components.panels.MagnifiableImagePanel;
 import com.bmskinner.nuclear_morphology.gui.events.CellUpdatedEventListener;
 import com.bmskinner.nuclear_morphology.gui.events.CelllUpdateEventHandler;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEventHandler;
 import com.bmskinner.nuclear_morphology.gui.events.EventListener;
+import com.bmskinner.nuclear_morphology.gui.events.SegmentEvent;
+import com.bmskinner.nuclear_morphology.gui.events.SegmentEventListener;
+import com.bmskinner.nuclear_morphology.gui.events.SegmentEvent.SegmentUpdateType;
+import com.bmskinner.nuclear_morphology.gui.painters.CellImagePainter;
+import com.bmskinner.nuclear_morphology.io.ImageImporter;
+import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.process.Blitter;
 import ij.process.ColorProcessor;
@@ -54,7 +85,7 @@ import ij.process.ImageProcessor;
  * @since 1.14.0
  *
  */
-public abstract class InteractiveCellPanel extends JPanel {
+public class InteractiveCellPanel extends JPanel {
 	
 	private static final Logger LOGGER = Logger.getLogger(InteractiveCellPanel.class.getName());
 
@@ -65,30 +96,14 @@ public abstract class InteractiveCellPanel extends JPanel {
 	protected ICell cell = null;
 	protected CellularComponent component = null;
 	protected HashOptions displayOptions;
-
 	
-//	/** Stores the image displayed on screen */
-//	protected JLabel imageLabel;
-//	
-//	/** The image with no decorations*/
-//	protected transient BufferedImage raw;
-//	
-//	/** The display image with decorations*/
-//	protected transient BufferedImage annotated;
-//	
-//	/** The raw image enlarged for bulge selection */
-//	protected transient BufferedImage rawEnlarged;
-//	
-//	/** The image displayed in the panel */
-//	protected transient BufferedImage output;
-//
-//	/**	 The radius of the source box for bulge images */
-//	protected int smallRadius = 25;
-//	
-//	/**	 The radius of the display box for bulge images */
-//	protected int bigRadius   = 50;
-//	protected int sourceWidth;
-//	protected int sourceHeight;
+	/** Allow a magnified image to be displayed*/
+	private MagnifiableImagePanel imagePanel;
+	
+	/** Track the scaling ratio between the original cell and the scaled image */
+	private double scaleRatio;
+
+	private transient List<SegmentEventListener> listeners = new ArrayList<>();
 	
 	/**
 	 * Keys for display options. These are used in a HashOptions
@@ -110,16 +125,11 @@ public abstract class InteractiveCellPanel extends JPanel {
 	 * Create with a parent panel to listen for cell updates
 	 * @param parent
 	 */
-	protected InteractiveCellPanel(CellUpdatedEventListener parent){
+	public InteractiveCellPanel(CellUpdatedEventListener parent){
 		
 		cellUpdateHandler.addCellUpdatedEventListener(parent);
 		setLayout(new BorderLayout());
-//		imageLabel = new JLabel();
-//		imageLabel.setHorizontalAlignment(JLabel.CENTER);
-//		imageLabel.setVerticalAlignment(JLabel.CENTER);
-//		imageLabel.setHorizontalTextPosition(JLabel.CENTER);
-//		imageLabel.setVerticalTextPosition(JLabel.CENTER);
-//		add(imageLabel, BorderLayout.CENTER);
+		addComponentListener(new ResizeListener(this));
 	}
 	
 	/**
@@ -140,10 +150,7 @@ public abstract class InteractiveCellPanel extends JPanel {
 			@Nullable ICell cell,
 			@Nullable CellularComponent component, 
 			HashOptions cellDisplayOptions) {
-//		if(dataset==null || cell==null || component==null) {
-//			imageLabel.setIcon(null);
-//			return;
-//		}
+
 		this.dataset     = dataset;
 		this.cell        = cell;
 		this.component   = component;
@@ -166,106 +173,7 @@ public abstract class InteractiveCellPanel extends JPanel {
 	public synchronized void removeDatasetEventListener(EventListener l) {
         dh.removeListener(l);
     }
-	
-	
-//	/**
-//	 * Update the rendered image with the mouse at the given location
-//	 * @param x
-//	 * @param y
-//	 */
-//	protected synchronized void updateImage(int x, int y) {
-//		if (output == null) 
-//			output = new BufferedImage( raw.getWidth(), raw.getHeight(),  BufferedImage.TYPE_INT_ARGB);
-//		computeBulgeImage(raw, x, y, smallRadius, bigRadius, output);
-//		if(imageLabel!=null)
-//			imageLabel.setIcon(new ImageIcon(output));
-//		repaint();
-//	}
-	
-	/**
-	 * Create the base image for the panel.
-	 */
-	protected abstract void createImage();
-	
-	/**
-	 * Create the image with square overlay for rendering
-	 */
-//	protected abstract void computeBulgeImage(BufferedImage input, int cx, int cy, 
-//	        int small, int big, BufferedImage output);
-	
-	
-	/**
-	 * Translate the given point from a location within this JPanel
-	 * to a location within the original cell source image.
-	 * @param x
-	 * @param y
-	 * @return
-	 */
-//	protected synchronized IPoint translatePanelLocationToSourceImage(int x, int y) {
-//		// The original image dimensions
-//		int w = sourceWidth;
-//		int h = sourceHeight;
-//		
-//		// The rescaled dimensions
-//		int iconWidth = imageLabel.getIcon().getIconWidth();
-//		int iconHeight = imageLabel.getIcon().getIconHeight();
-//		
-//		// The image panel dimensions
-//		int panelWidth = getWidth();
-//		int panelHeight = getHeight();
-//		
-//		// The position of the click relative to the icon
-//		int iconX = x-((panelWidth-iconWidth)/2);
-//		int iconY = y-((panelHeight-iconHeight)/2);
-//		
-//		// The position  of the click within the original image
-//		double xPositionInImage = (((double)iconX/(double) iconWidth)*w)-Imageable.COMPONENT_BUFFER;
-//		double yPositionInImage = (((double)iconY/(double) iconHeight)*h)-Imageable.COMPONENT_BUFFER;
-//		return IPoint.makeNew(xPositionInImage, yPositionInImage);
-//	}
-		
-	/**
-	 * Translate the given point from a location within this JPanel
-	 * to a location within the rendered image.
-	 * @param e the event with coordinates
-	 * @return
-	 */
-//	protected synchronized IPoint translatePanelLocationToRenderedImage(MouseEvent e) {
-//		// The rescaled dimensions
-//		if(imageLabel==null)
-//			return null;
-//		int iconWidth = imageLabel.getIcon().getIconWidth();
-//		int iconHeight = imageLabel.getIcon().getIconHeight();
-//		
-//		// The image panel dimensions
-//		int panelWidth = getWidth();
-//		int panelHeight = getHeight();
-//		
-//		// The position of the click relative to the icon
-//		int iconX = e.getX()-((panelWidth-iconWidth)/2);
-//		int iconY = e.getY()-((panelHeight-iconHeight)/2);
-//		return IPoint.makeNew(iconX, iconY);
-//	}
-	
-	/**
-	 * Translate the given point from a location within the rendered image
-	 * to a location within the original cell source image.
-	 * @param x
-	 * @param y
-	 * @return
-	 */
-//	protected synchronized IPoint translateRenderedLocationToSourceImage(double x, double y) {		
-//		// The rescaled dimensions
-//		int iconWidth = imageLabel.getIcon().getIconWidth();
-//		int iconHeight = imageLabel.getIcon().getIconHeight();
-//						
-//		// The position  of the click within the original image
-//		double xPositionInImage = ((x/iconWidth)*sourceWidth)-Imageable.COMPONENT_BUFFER;
-//		double yPositionInImage = ((y/iconHeight)*sourceHeight)-Imageable.COMPONENT_BUFFER;
-//		return IPoint.makeNew(xPositionInImage, yPositionInImage);
-//	}
-
-	
+				
 	protected ImageProcessor rotateToVertical(ICell c, ImageProcessor ip) throws MissingLandmarkException {
         // Calculate angle for vertical rotation
         Nucleus n = c.getPrimaryNucleus();
@@ -377,4 +285,290 @@ public abstract class InteractiveCellPanel extends JPanel {
         newIp.copyBits(ip, xBase, yBase, Blitter.COPY);
         return newIp;
     }
+	
+	public synchronized void createImage() {
+		LOGGER.finer( "Redrawing cell image");
+
+		if(dataset==null || cell==null || component==null) {
+			return;
+		}
+
+		ImageProcessor ip = ImageImporter.importImage(cell, component);
+
+		// Store the original image width after cropping
+		int cellImageWidth = ip.getWidth();
+		
+		// Expand or shrink the canvas to fit the panel
+		BufferedImage image = ImageAnnotator.resizeKeepingAspect(ip, getWidth(), getHeight()).getBufferedImage();
+		
+		scaleRatio = image.getWidth()/(double)cellImageWidth;
+
+		if(imagePanel==null) {
+			imagePanel = new MagnifiableImagePanel(image, new CellImagePainter(cell, cellImageWidth));
+			imagePanel.addImageClickListener(new ImageClickAdapter());
+		}
+		else
+			imagePanel.set(image, new CellImagePainter(cell, cellImageWidth));
+
+		
+		add(imagePanel, BorderLayout.CENTER);
+	}
+
+	public synchronized void addSegmentEventListener(SegmentEventListener l) {
+		listeners.add(l);
+	}
+
+	public synchronized void removeSegmentEventListener(SegmentEventListener l) {
+		listeners.remove(l);
+	}
+
+	/**
+	 * Fire a segmentation event
+	 * @param id the segment to be altered
+	 * @param index the index to be altered
+	 * @param type the update type. Types are specified as static ints in SegmentEvent
+	 */
+	protected synchronized void fireSegmentEvent(UUID id, int index, SegmentUpdateType type) {
+		SegmentEvent e = new SegmentEvent(this, id, index, type);
+
+		for (SegmentEventListener l : listeners) {
+			l.segmentEventReceived(e);
+		}
+	}
+
+	/**
+	 * Respond to mouse inputs
+	 * @author bms41
+	 * @since 1.5.4
+	 *
+	 */
+	private class ImageClickAdapter implements ImageClickListener {
+		
+		/** When a clicking a feature in an image, allow the clicked point to be 
+		 * this many pixels away from the true point */
+		private static final double POINT_CLICK_RADIUS_PIXELS = 0.4;
+
+		@Override
+		public void imageClicked(int x, int y) {
+			if(imagePanel==null)
+				return;
+			
+			// Translate to coordinates in the cell image (remove scaling)
+			double ix = (x/scaleRatio);
+			double iy = (y/scaleRatio);
+
+			double cx = ix - Imageable.COMPONENT_BUFFER + cell.getPrimaryNucleus().getBase().getX();
+			double cy = iy - Imageable.COMPONENT_BUFFER + cell.getPrimaryNucleus().getBase().getY();
+			
+			// Not a circle around the valid point to click, but close enough
+			Optional<IPoint> point = cell.getPrimaryNucleus().getBorderList()
+					.stream()
+					.filter(p ->
+						cx >= p.getX()-POINT_CLICK_RADIUS_PIXELS && 
+						cx <= p.getX()+POINT_CLICK_RADIUS_PIXELS &&
+						cy >= p.getY()-POINT_CLICK_RADIUS_PIXELS && 
+						cy <= p.getY()+POINT_CLICK_RADIUS_PIXELS
+					)
+					.findFirst();
+
+			if(point.isPresent()) {
+				JPopupMenu popup = createPopup(point.get());
+				popup.show(imagePanel, x, y);
+			}
+
+		}
+		
+		private synchronized void updateTag(Landmark tag, int newIndex) {
+
+			ThreadManager.getInstance().execute(()->{
+				cell.getPrimaryNucleus().setLocked(false);
+
+				try {
+					cell.getPrimaryNucleus().setLandmark(tag, newIndex);
+				} catch (IndexOutOfBoundsException | MissingProfileException | MissingLandmarkException
+						| ProfileException e) {
+					LOGGER.log(Level.SEVERE, "Unable to set landmark in cell", e);
+				}
+
+				cell.getPrimaryNucleus().updateDependentStats();
+				cell.getPrimaryNucleus().setLocked(true);
+				cellUpdateHandler.fireCelllUpdateEvent(cell, dataset);
+				createImage();
+			});
+		}
+
+		private synchronized JPopupMenu createPopup(IPoint point) {
+			JPopupMenu popupMenu = new JPopupMenu("Popup");
+			if(cell==null)
+				return popupMenu;
+
+			addSegmentsToPopup(popupMenu, point);
+
+			popupMenu.addSeparator();
+
+			addTagsToPopup(popupMenu, point);
+
+			return popupMenu;
+		}
+		
+		/**
+		 * Add segment update options to the popup menu, coloured
+		 * by segment
+		 * @param popupMenu
+		 * @param point
+		 */
+		private void addSegmentsToPopup(JPopupMenu popupMenu, IPoint point) {
+			try {
+				int rawIndex = cell.getPrimaryNucleus().getBorderIndex(point);
+
+				int rpIndex = cell.getPrimaryNucleus().getBorderIndex(Landmark.REFERENCE_POINT);
+
+				// Get the index of the clicked point in the RP-indexed profile
+				int index = cell.getPrimaryNucleus().wrapIndex(rawIndex-rpIndex);
+
+				IProfileSegment seg = cell.getPrimaryNucleus().getProfile(ProfileType.ANGLE)
+						.getSegmentContaining(rawIndex);
+
+
+				IProfileSegment prev = seg.prevSegment();
+				IProfileSegment next = seg.nextSegment();
+
+				JMenuItem prevItem = new JMenuItem("Extend "+prev.getName()+" to here");
+				prevItem.setBorder(BorderFactory.createLineBorder(ColourSelecter.getColor(prev.getPosition()), 3));
+				prevItem.setBorderPainted(true);
+
+				prevItem.addActionListener(e->{
+					LOGGER.fine(String.format("Updating segment %s start to %d", next.getID(), index));
+					fireSegmentEvent(seg.getID(), index, SegmentUpdateType.MOVE_START_INDEX);
+					cellUpdateHandler.fireCelllUpdateEvent(cell, dataset);
+					createImage();
+				});
+				popupMenu.add(prevItem);
+
+				popupMenu.add(Box.createVerticalStrut(2)); // stop borders touching
+
+				JMenuItem nextItem = new JMenuItem("Extend "+next.getName()+" to here");
+				nextItem.setBorder(BorderFactory.createLineBorder(ColourSelecter.getColor(next.getPosition()), 3));
+				nextItem.setBorderPainted(true);
+
+				nextItem.addActionListener(e->{
+					LOGGER.fine(String.format("Updating segment %s start to %d", next.getID(), index));
+					fireSegmentEvent(next.getID(), index, SegmentUpdateType.MOVE_START_INDEX);
+					cellUpdateHandler.fireCelllUpdateEvent(cell, dataset);
+					createImage();
+				});
+				popupMenu.add(nextItem);
+			} catch (MissingProfileException | MissingLandmarkException | ProfileException e) {
+				LOGGER.log(Loggable.STACK, "Cannot get border tag index", e);
+			}
+		}
+		
+		/**
+		 * Add tags to the popup menu
+		 * @param popupMenu
+		 */
+		private void addTagsToPopup(JPopupMenu popupMenu, IPoint point) {
+			List<Landmark> tags = dataset.getCollection().getProfileCollection().getLandmarks();
+
+			Collections.sort(tags);
+
+			for (Landmark tag : tags) {
+				// Colour the menu item by tag colour
+				JMenuItem item = new JMenuItem("Move "+tag.toString().toLowerCase()+" here");
+				item.setBorder(BorderFactory.createLineBorder(ColourSelecter.getColour(tag), 3));
+				item.setBackground(ColourSelecter.getColour(tag).darker());
+				item.setBorderPainted(true);
+				item.setForeground(Color.WHITE);
+				item.setOpaque(true);
+
+				item.addActionListener(a -> {
+					int pIndex = cell.getPrimaryNucleus().getBorderIndex(point);
+					updateTag(tag, pIndex);
+					repaint();
+				});
+				popupMenu.add(item);
+				popupMenu.add(Box.createVerticalStrut(2)); // stop borders touching
+			}
+
+			// Find border tags with rulesets that have not been assigned in the median
+			List<Landmark> unassignedTags = new ArrayList<>();
+			for (Landmark tag : Landmark.defaultValues()) {
+				if (!tags.contains(tag)) {
+					unassignedTags.add(tag);
+				}
+			}
+
+			if (!unassignedTags.isEmpty()) {
+				Collections.sort(unassignedTags);
+
+				popupMenu.addSeparator();
+
+				for (Landmark tag : unassignedTags) {
+					JMenuItem item = new JMenuItem("Set "+tag.toString().toLowerCase()+" here");
+					item.setForeground(Color.DARK_GRAY);
+
+					item.addActionListener(a -> {
+						int pIndex = cell.getPrimaryNucleus().getBorderIndex(point);
+						updateTag(tag, pIndex);
+					});
+					popupMenu.add(item);
+				}
+			}
+		}
+
+
+	}
+	
+	/**
+	 * Ensure the image is repainted on resizing of the panel
+	 * @author ben
+	 * @since 2.0.0
+	 *
+	 */
+	private class ResizeListener extends ComponentAdapter implements ComponentListener {
+        public ResizeListener(JComponent component) {
+			super(component);
+		}
+
+		@Override
+		public void componentResized(ComponentEvent e) {
+            createImage();
+            repaint();
+        }
+
+		@Override
+		public void componentMoved(ComponentEvent e) {}
+
+		@Override
+		public void componentShown(ComponentEvent e) {}
+
+		@Override
+		public void componentHidden(ComponentEvent e) {}
+
+		@Override
+		public Object getValueAt(int row, int column) {
+			return null;
+		}
+
+		@Override
+		public boolean isCellEditable(int row, int column) {
+			return false;
+		}
+
+		@Override
+		public boolean hasFocus() {
+			return false;
+		}
+
+		@Override
+		public boolean isSelected() {
+			return false;
+		}
+
+		@Override
+		public boolean isEditable() {
+			return false;
+		}
+}
+
 }

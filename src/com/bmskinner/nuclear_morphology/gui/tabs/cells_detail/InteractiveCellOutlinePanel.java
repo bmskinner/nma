@@ -68,14 +68,14 @@ public class InteractiveCellOutlinePanel extends InteractiveCellPanel {
 
 	public InteractiveCellOutlinePanel(@NonNull CellUpdatedEventListener parent){
 		super(parent);
-		CellImageMouseListener mouseListener = new CellImageMouseListener();
+//		CellImageMouseListener mouseListener = new CellImageMouseListener();
 //		imageLabel.addMouseWheelListener(mouseListener);
 //		imageLabel.addMouseMotionListener(mouseListener);
 //		imageLabel.addMouseListener(mouseListener);
 	}
 
 	@Override
-	protected void createImage() {
+	public void createImage() {
 		if(displayOptions.getBoolean(CellDisplayOptions.SHOW_MESH)) {
 //			createMeshImage();
 			return;
@@ -204,57 +204,7 @@ public class InteractiveCellOutlinePanel extends InteractiveCellPanel {
 			return an;
 		}
 	}
-	
-	/**
-	 * Listener for mouse interactions with the image on display
-	 * @author bms41
-	 * @since 1.15.0
-	 *
-	 */
-	private class CellImageMouseListener extends MouseAdapter {
 		
-		private static final int SMALL_MULTIPLIER = 1;
-		private static final int LARGE_MULTIPLIER = 3;
-
-		/** Minimum radius of the zoomed image */
-		private static final int SMALL_MIN_RADIUS = 5;
-		private static final int SMALL_MAX_RADIUS = 100;
-		
-		private static final int LARGE_MIN_RADIUS = 10;
-		private static final int LARGE_MAX_RADIUS = 200;
-		
-		public CellImageMouseListener() { super(); }
-		
-		
-		@Override
-        public synchronized void mouseWheelMoved(MouseWheelEvent e) {
-//			if(imageLabel.getIcon()==null)
-//				return;
-//			// Modify the square size
-//            if ((e.getModifiersEx() & InputEvent.CTRL_DOWN_MASK) ==
-//                InputEvent.CTRL_DOWN_MASK){
-//            	int temp = smallRadius +( SMALL_MULTIPLIER * e.getWheelRotation());
-//            	smallRadius = NumberTools.constrain(temp, SMALL_MIN_RADIUS, SMALL_MAX_RADIUS);
-//            } else {
-//            	// Modify the zoom
-//            	int temp = bigRadius +( LARGE_MULTIPLIER * e.getWheelRotation());
-//            	bigRadius = NumberTools.constrain(temp, LARGE_MIN_RADIUS, LARGE_MAX_RADIUS);
-//            }
-//            IPoint p = translatePanelLocationToRenderedImage(e); 
-//			updateImage(p.getXAsInt(), p.getYAsInt());
-        }
-		
-//		@Override
-//		public synchronized void mouseMoved(MouseEvent e){
-//			if(imageLabel.getIcon()==null)
-//				return;
-//			IPoint p = translatePanelLocationToRenderedImage(e); 
-//			if(p==null)
-//				return;
-//			updateImage(p.getXAsInt(), p.getYAsInt());
-//		}		
-	}
-	
 //	private void createMeshImage() {
 //		InterfaceUpdater u = () ->{
 //			try {

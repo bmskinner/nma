@@ -49,14 +49,11 @@ public class IndividualCellDetailPanel extends DetailPanel {
 
     /** Cells in the active dataset */
     protected CellsListPanel       cellsListPanel;
-    
-    /** View and modify cell segments */
-    protected CellSegmentsPanel     segmentProfilePanel;
-    
+        
     /** View and cell profiles */
     protected CellProfilesPanel   cellBorderTagPanel;
     
-    /** View and modify cell tags */
+    /** View and modify cell landmarks */
     protected CellOutlinePanel     outlinePanel; 
     
     /** View cell info */
@@ -81,7 +78,6 @@ public class IndividualCellDetailPanel extends DetailPanel {
             this.setLayout(new BorderLayout());
             JPanel westPanel = createCellandSignalListPanels(context);
             this.addSubPanel(cellStatsPanel);
-            this.addSubPanel(segmentProfilePanel);
             this.addSubPanel(cellBorderTagPanel);
             this.addSubPanel(outlinePanel);
             this.addSubPanel(cellsListPanel);
@@ -92,7 +88,6 @@ public class IndividualCellDetailPanel extends DetailPanel {
             tabPane = new JTabbedPane(JTabbedPane.LEFT);
             tabPane.add(cellStatsPanel.getPanelTitle(), cellStatsPanel);
             tabPane.add(cellBorderTagPanel.getPanelTitle(), cellBorderTagPanel);
-            tabPane.add(segmentProfilePanel.getPanelTitle(), segmentProfilePanel);
             
             tabPane.add(outlinePanel.getPanelTitle(), outlinePanel);
             tabPane.add(cellsignalStatsPanel.getPanelTitle(), cellsignalStatsPanel);
@@ -117,20 +112,16 @@ public class IndividualCellDetailPanel extends DetailPanel {
     }
 
     private void createSubPanels(@NonNull InputSupplier context) {
-        segmentProfilePanel = new CellSegmentsPanel(context, model); // the nucleus angle
-                                                           // profile
         cellBorderTagPanel = new CellProfilesPanel(context, model);
         outlinePanel = new CellOutlinePanel(context, model); // the outline of the cell
                                                     // and detected objects
         cellStatsPanel = new CellStatsPanel(context, model); // the stats table
         cellsignalStatsPanel = new CellSignalStatsPanel(context, model);
 
-        model.addView(segmentProfilePanel);
         model.addView(cellBorderTagPanel);
         model.addView(outlinePanel);
         model.addView(cellStatsPanel);
         model.addView(cellsignalStatsPanel);
-        // model.addView(cellSegTablePanel);
     }
 
     private JPanel createCellandSignalListPanels(@NonNull InputSupplier context) {

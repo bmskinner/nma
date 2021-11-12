@@ -20,7 +20,12 @@ import java.io.File;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nuclear_morphology.analysis.image.AbstractImageFilterer;
+import com.bmskinner.nuclear_morphology.analysis.image.ImageAnnotator;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageConverter;
+import com.bmskinner.nuclear_morphology.components.Imageable;
+import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.io.Io.Importer;
 
 import ij.ImagePlus;
@@ -76,6 +81,31 @@ public class ImageImporter implements Importer {
         if (!Importer.isSuitableImportFile(f)) 
             throw new IllegalArgumentException(f.getAbsolutePath() + ": " + Importer.whyIsUnsuitableImportFile(f));
         this.f = f;
+    }
+    
+    /**
+     * Get the image for the given cellular component,
+     * and crop it to the bounds of the given cell. If the 
+     * image cannot be imported, a white colour processor
+     * is returned of sufficient dimensions to contain the 
+     * cell.
+     * @param cell
+     * @param c
+     * @return
+     */
+    public static ImageProcessor importImage(@NonNull ICell cell, @NonNull CellularComponent c) {
+    	ImageProcessor ip;
+		try{
+			ip = c.getImage();
+		} catch(UnloadableImageException e){
+			ip = AbstractImageFilterer.createWhiteColorProcessor(
+					(int)c.getMaxX()+Imageable.COMPONENT_BUFFER, 
+					(int)c.getMaxY()+Imageable.COMPONENT_BUFFER);
+		}
+
+		// Crop to the relevant part of the image
+		AbstractImageFilterer an = new ImageAnnotator(ip).crop(cell);
+		return an.toProcessor();
     }
 
     /**

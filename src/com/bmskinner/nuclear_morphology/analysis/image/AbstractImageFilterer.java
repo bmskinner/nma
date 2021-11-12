@@ -463,17 +463,14 @@ public abstract class AbstractImageFilterer {
     }
     
     /**
-     * Resize the image to fit the given dimensions, preserving aspect ratio.
-     * 
-     * @param maxWidth the maximum width of the new image
-     * @param maxHeight the maximum height of the new image
-     * @return a new image resized to fit the given dimensions
+     * Resize the given image to the maximum possible within the given
+     * constraints on width and height. Aspect ratio is preserved. 
+     * @param ip
+     * @param maxWidth
+     * @param maxHeight
+     * @return the resized image
      */
-    public AbstractImageFilterer resizeKeepingAspect(int maxWidth, int maxHeight) {
-
-        if (ip == null) {
-            throw new IllegalArgumentException("Image processor is null");
-        }
+    public static ImageProcessor resizeKeepingAspect(@NonNull ImageProcessor ip, int maxWidth, int maxHeight) {
 
         int originalWidth = ip.getWidth();
         int originalHeight = ip.getHeight();
@@ -486,8 +483,18 @@ public abstract class AbstractImageFilterer {
                                                                     // constrain
                                                                     // width too
 
-        ImageProcessor result = ip.duplicate().resize((int) finalWidth);
-        ip = result;
+        return ip.duplicate().resize((int) finalWidth);
+    }
+    
+    /**
+     * Resize the image to fit the given dimensions, preserving aspect ratio.
+     * 
+     * @param maxWidth the maximum width of the new image
+     * @param maxHeight the maximum height of the new image
+     * @return a new image resized to fit the given dimensions
+     */
+    public AbstractImageFilterer resizeKeepingAspect(int maxWidth, int maxHeight) {
+        ip = resizeKeepingAspect(ip, maxWidth, maxHeight);
         return this;
     }
     
