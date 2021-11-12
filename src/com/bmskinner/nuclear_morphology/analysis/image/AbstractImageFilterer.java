@@ -458,8 +458,7 @@ public abstract class AbstractImageFilterer {
         wideY = wideY < 0 ? 0 : wideY;
 
         ip.setRoi(wideX, wideY, wideW, wideH);
-        ImageProcessor result = ip.crop();
-        ip = result;
+        ip = ip.crop();
         return this;
     }
     

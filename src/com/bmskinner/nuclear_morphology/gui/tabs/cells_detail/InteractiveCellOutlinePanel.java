@@ -69,19 +69,19 @@ public class InteractiveCellOutlinePanel extends InteractiveCellPanel {
 	public InteractiveCellOutlinePanel(@NonNull CellUpdatedEventListener parent){
 		super(parent);
 		CellImageMouseListener mouseListener = new CellImageMouseListener();
-		imageLabel.addMouseWheelListener(mouseListener);
-		imageLabel.addMouseMotionListener(mouseListener);
-		imageLabel.addMouseListener(mouseListener);
+//		imageLabel.addMouseWheelListener(mouseListener);
+//		imageLabel.addMouseMotionListener(mouseListener);
+//		imageLabel.addMouseListener(mouseListener);
 	}
 
 	@Override
 	protected void createImage() {
 		if(displayOptions.getBoolean(CellDisplayOptions.SHOW_MESH)) {
-			createMeshImage();
+//			createMeshImage();
 			return;
 		}
 		if(displayOptions.getBoolean(CellDisplayOptions.WARP_IMAGE)) {
-			createWarpImage();
+//			createWarpImage();
 			return;
 		}
 		createCellImage();
@@ -92,7 +92,10 @@ public class InteractiveCellOutlinePanel extends InteractiveCellPanel {
 	 */
 	private synchronized void createCellImage() {
 		InterfaceUpdater u = () ->{
-			output = null;
+
+			if(dataset==null || cell==null || component==null) {
+				return;
+			}
 			
 			ImageProcessor ip = loadCellImage();
 			ImageAnnotator an = new ImageAnnotator(ip);
@@ -170,8 +173,8 @@ public class InteractiveCellOutlinePanel extends InteractiveCellPanel {
 	 * @param an
 	 */
 	private void displayAnnotatorContents(ImageAnnotator an) {
-		imageLabel.setIcon(an.toImageIcon());
-		input = an.toBufferedImage();
+//		imageLabel.setIcon(an.toImageIcon());
+//		annotated = an.toBufferedImage();
 	}
 	
 	/**
@@ -180,8 +183,8 @@ public class InteractiveCellOutlinePanel extends InteractiveCellPanel {
 	 * @param an
 	 */
 	private void updateSourceImageDimensions(ImageAnnotator an) {
-		sourceWidth = an.toProcessor().getWidth();
-		sourceHeight = an.toProcessor().getHeight();
+//		sourceWidth = an.toProcessor().getWidth();
+//		sourceHeight = an.toProcessor().getHeight();
 	}
 	
 	/**
@@ -225,158 +228,158 @@ public class InteractiveCellOutlinePanel extends InteractiveCellPanel {
 		
 		@Override
         public synchronized void mouseWheelMoved(MouseWheelEvent e) {
-			if(imageLabel.getIcon()==null)
-				return;
-			// Modify the square size
-            if ((e.getModifiersEx() & InputEvent.CTRL_DOWN_MASK) ==
-                InputEvent.CTRL_DOWN_MASK){
-            	int temp = smallRadius +( SMALL_MULTIPLIER * e.getWheelRotation());
-            	smallRadius = NumberTools.constrain(temp, SMALL_MIN_RADIUS, SMALL_MAX_RADIUS);
-            } else {
-            	// Modify the zoom
-            	int temp = bigRadius +( LARGE_MULTIPLIER * e.getWheelRotation());
-            	bigRadius = NumberTools.constrain(temp, LARGE_MIN_RADIUS, LARGE_MAX_RADIUS);
-            }
-            IPoint p = translatePanelLocationToRenderedImage(e); 
-			updateImage(p.getXAsInt(), p.getYAsInt());
+//			if(imageLabel.getIcon()==null)
+//				return;
+//			// Modify the square size
+//            if ((e.getModifiersEx() & InputEvent.CTRL_DOWN_MASK) ==
+//                InputEvent.CTRL_DOWN_MASK){
+//            	int temp = smallRadius +( SMALL_MULTIPLIER * e.getWheelRotation());
+//            	smallRadius = NumberTools.constrain(temp, SMALL_MIN_RADIUS, SMALL_MAX_RADIUS);
+//            } else {
+//            	// Modify the zoom
+//            	int temp = bigRadius +( LARGE_MULTIPLIER * e.getWheelRotation());
+//            	bigRadius = NumberTools.constrain(temp, LARGE_MIN_RADIUS, LARGE_MAX_RADIUS);
+//            }
+//            IPoint p = translatePanelLocationToRenderedImage(e); 
+//			updateImage(p.getXAsInt(), p.getYAsInt());
         }
 		
-		@Override
-		public synchronized void mouseMoved(MouseEvent e){
-			if(imageLabel.getIcon()==null)
-				return;
-			IPoint p = translatePanelLocationToRenderedImage(e); 
-			if(p==null)
-				return;
-			updateImage(p.getXAsInt(), p.getYAsInt());
-		}		
+//		@Override
+//		public synchronized void mouseMoved(MouseEvent e){
+//			if(imageLabel.getIcon()==null)
+//				return;
+//			IPoint p = translatePanelLocationToRenderedImage(e); 
+//			if(p==null)
+//				return;
+//			updateImage(p.getXAsInt(), p.getYAsInt());
+//		}		
 	}
 	
-	private void createMeshImage() {
-		InterfaceUpdater u = () ->{
-			try {
-				output= null;
-				ImageProcessor ip = loadCellImage();
-				ImageAnnotator an = new ImageAnnotator(ip);
-				
-				Mesh<Nucleus> consensusMesh = new DefaultMesh<>(dataset.getCollection().getConsensus());
-				for(Nucleus n : cell.getNuclei()) {
-					
-					Mesh<Nucleus> m = new DefaultMesh<>(n, consensusMesh);
-					Mesh<Nucleus> compMesh = m.comparison(consensusMesh);
-					MeshAnnotator an3 = new MeshAnnotator( an.toProcessor(), getWidth(), getHeight(), compMesh);
-					an3.annotateNucleusMeshEdges();
-										
-					ImageAnnotator an4 = an3.toAnnotator();
-					if(displayOptions.getBoolean(CellDisplayOptions.ROTATE_VERTICAL)) {
-						an4 = rotateVertical(an4);
-					}
-					
-					// Whatever the canvas size, rescale the final image to the panel
-					an4.crop(cell);
-					an4 = scaleImageToPanel(an4);
-					displayAnnotatorContents(an4);
-				}
-
-			} catch (MeshCreationException | IllegalArgumentException e) {
-				LOGGER.log(Loggable.STACK, "Error making mesh or loading image", e);
-				setNull();
-			}
-		};
-		ThreadManager.getInstance().submit(u);
-	}
+//	private void createMeshImage() {
+//		InterfaceUpdater u = () ->{
+//			try {
+//				output= null;
+//				ImageProcessor ip = loadCellImage();
+//				ImageAnnotator an = new ImageAnnotator(ip);
+//				
+//				Mesh<Nucleus> consensusMesh = new DefaultMesh<>(dataset.getCollection().getConsensus());
+//				for(Nucleus n : cell.getNuclei()) {
+//					
+//					Mesh<Nucleus> m = new DefaultMesh<>(n, consensusMesh);
+//					Mesh<Nucleus> compMesh = m.comparison(consensusMesh);
+//					MeshAnnotator an3 = new MeshAnnotator( an.toProcessor(), getWidth(), getHeight(), compMesh);
+//					an3.annotateNucleusMeshEdges();
+//										
+//					ImageAnnotator an4 = an3.toAnnotator();
+//					if(displayOptions.getBoolean(CellDisplayOptions.ROTATE_VERTICAL)) {
+//						an4 = rotateVertical(an4);
+//					}
+//					
+//					// Whatever the canvas size, rescale the final image to the panel
+//					an4.crop(cell);
+//					an4 = scaleImageToPanel(an4);
+//					displayAnnotatorContents(an4);
+//				}
+//
+//			} catch (MeshCreationException | IllegalArgumentException e) {
+//				LOGGER.log(Loggable.STACK, "Error making mesh or loading image", e);
+//				setNull();
+//			}
+//		};
+//		ThreadManager.getInstance().submit(u);
+//	}
 	
-	private void createWarpImage() {
-		InterfaceUpdater u = () ->{
-			try {
-				output= null;
-				ImageProcessor ip = loadCellImage();
-				ImageAnnotator an = new ImageAnnotator(ip);
-				updateSourceImageDimensions(an);
-				
-				Mesh<Nucleus> consensusMesh = new DefaultMesh<>(dataset.getCollection().getConsensus());
-        		for(Nucleus n : cell.getNuclei()) {
-        			Mesh<Nucleus> m = new DefaultMesh<>(n, consensusMesh);
-        			MeshImage<Nucleus> im = new DefaultMeshImage<>(m, ip.duplicate());
-        			ImageProcessor drawn = im.drawImage(consensusMesh);
-        			drawn.flipVertical();
-        			an = new ImageAnnotator(drawn, getWidth(), getHeight());
-        		}
-        		an.crop(cell);
-        		displayAnnotatorContents(an);
-			} catch (MeshCreationException | IllegalArgumentException | MeshImageCreationException | UncomparableMeshImageException e) {
-				LOGGER.log(Loggable.STACK, "Error making mesh or loading image", e);
-				setNull();
-			}
-		};
-		ThreadManager.getInstance().submit(u);
-	}
+//	private void createWarpImage() {
+//		InterfaceUpdater u = () ->{
+//			try {
+//				output= null;
+//				ImageProcessor ip = loadCellImage();
+//				ImageAnnotator an = new ImageAnnotator(ip);
+//				updateSourceImageDimensions(an);
+//				
+//				Mesh<Nucleus> consensusMesh = new DefaultMesh<>(dataset.getCollection().getConsensus());
+//        		for(Nucleus n : cell.getNuclei()) {
+//        			Mesh<Nucleus> m = new DefaultMesh<>(n, consensusMesh);
+//        			MeshImage<Nucleus> im = new DefaultMeshImage<>(m, ip.duplicate());
+//        			ImageProcessor drawn = im.drawImage(consensusMesh);
+//        			drawn.flipVertical();
+//        			an = new ImageAnnotator(drawn, getWidth(), getHeight());
+//        		}
+//        		an.crop(cell);
+//        		displayAnnotatorContents(an);
+//			} catch (MeshCreationException | IllegalArgumentException | MeshImageCreationException | UncomparableMeshImageException e) {
+//				LOGGER.log(Loggable.STACK, "Error making mesh or loading image", e);
+//				setNull();
+//			}
+//		};
+//		ThreadManager.getInstance().submit(u);
+//	}
 	
-	@Override
-	protected synchronized void computeBulgeImage(BufferedImage input, int cx, int cy, 
-	        int small, int big, BufferedImage output){
-		
-		int dx1 = cx-big; // the big rectangle
-		int dy1 = cy-big;
-		int dx2 = cx+big;
-		int dy2 = cy+big;
-		
-		int sx1 = cx-small; // the small source rectangle
-		int sy1 = cy-small;
-		int sx2 = cx+small;
-		int sy2 = cy+small;
-		
-		IPoint clickedPoint = translateRenderedLocationToSourceImage(cx, cy);
-
-		Optional<IPoint> point = cell.getPrimaryNucleus().getBorderList()
-				.stream().filter(
-					p->clickedPoint.getX()>=p.getX()-0.4 && 
-							clickedPoint.getX()<=p.getX()+0.4 &&
-							clickedPoint.getY()>=p.getY()-0.4 && 
-							clickedPoint.getY()<=p.getY()+0.4)
-				.findFirst();
-
-		Graphics2D g2 = output.createGraphics();
-		
-		g2.drawImage(input, 0, 0, null);
-		g2.drawImage(input, dx1, dy1, dx2, dy2, sx1, sy1, sx2, sy2, null);
-		Color c = g2.getColor();
-		Stroke s = g2.getStroke();
-		
-		if(point.isPresent()) {
-			g2.setColor(Color.CYAN);
-			try {
-				
-				if(cell.getPrimaryNucleus().hasLandmark(Landmark.TOP_VERTICAL) && 
-						cell.getPrimaryNucleus().getBorderPoint(Landmark.TOP_VERTICAL).overlapsPerfectly(point.get())) {
-					g2.setColor(ColourSelecter.getColour(Landmark.TOP_VERTICAL));
-				}
-				if(cell.getPrimaryNucleus().hasLandmark(Landmark.BOTTOM_VERTICAL) && 
-						cell.getPrimaryNucleus().getBorderPoint(Landmark.BOTTOM_VERTICAL).overlapsPerfectly(point.get())) {
-					g2.setColor(ColourSelecter.getColour(Landmark.BOTTOM_VERTICAL));
-				}
-				if(cell.getPrimaryNucleus().hasLandmark(Landmark.REFERENCE_POINT) && 
-						cell.getPrimaryNucleus().getBorderPoint(Landmark.REFERENCE_POINT).overlapsPerfectly(point.get())) {
-					g2.setColor(ColourSelecter.getColour(Landmark.REFERENCE_POINT));
-				}
-				if(cell.getPrimaryNucleus().hasLandmark(Landmark.ORIENTATION_POINT) && 
-						cell.getPrimaryNucleus().getBorderPoint(Landmark.ORIENTATION_POINT).overlapsPerfectly(point.get())) {
-					g2.setColor(ColourSelecter.getColour(Landmark.ORIENTATION_POINT));
-				}
-
-			} catch (MissingLandmarkException e) {
-				// no action needed, colour remains cyan
-			}
-
-			g2.setStroke(new BasicStroke(3));
-		} else {
-			g2.setColor(Color.BLACK);
-			g2.setStroke(new BasicStroke(2));
-		}
-
-		g2.drawRect(dx1, dy1, big*2, big*2);
-		
-		g2.setColor(c);
-		g2.setStroke(s);
-	}
+//	@Override
+//	protected synchronized void computeBulgeImage(BufferedImage input, int cx, int cy, 
+//	        int small, int big, BufferedImage output){
+//		
+//		int dx1 = cx-big; // the big rectangle
+//		int dy1 = cy-big;
+//		int dx2 = cx+big;
+//		int dy2 = cy+big;
+//		
+//		int sx1 = cx-small; // the small source rectangle
+//		int sy1 = cy-small;
+//		int sx2 = cx+small;
+//		int sy2 = cy+small;
+//		
+//		IPoint clickedPoint = translateRenderedLocationToSourceImage(cx, cy);
+//
+//		Optional<IPoint> point = cell.getPrimaryNucleus().getBorderList()
+//				.stream().filter(
+//					p->clickedPoint.getX()>=p.getX()-0.4 && 
+//							clickedPoint.getX()<=p.getX()+0.4 &&
+//							clickedPoint.getY()>=p.getY()-0.4 && 
+//							clickedPoint.getY()<=p.getY()+0.4)
+//				.findFirst();
+//
+//		Graphics2D g2 = output.createGraphics();
+//		
+//		g2.drawImage(input, 0, 0, null);
+//		g2.drawImage(input, dx1, dy1, dx2, dy2, sx1, sy1, sx2, sy2, null);
+//		Color c = g2.getColor();
+//		Stroke s = g2.getStroke();
+//		
+//		if(point.isPresent()) {
+//			g2.setColor(Color.CYAN);
+//			try {
+//				
+//				if(cell.getPrimaryNucleus().hasLandmark(Landmark.TOP_VERTICAL) && 
+//						cell.getPrimaryNucleus().getBorderPoint(Landmark.TOP_VERTICAL).overlapsPerfectly(point.get())) {
+//					g2.setColor(ColourSelecter.getColour(Landmark.TOP_VERTICAL));
+//				}
+//				if(cell.getPrimaryNucleus().hasLandmark(Landmark.BOTTOM_VERTICAL) && 
+//						cell.getPrimaryNucleus().getBorderPoint(Landmark.BOTTOM_VERTICAL).overlapsPerfectly(point.get())) {
+//					g2.setColor(ColourSelecter.getColour(Landmark.BOTTOM_VERTICAL));
+//				}
+//				if(cell.getPrimaryNucleus().hasLandmark(Landmark.REFERENCE_POINT) && 
+//						cell.getPrimaryNucleus().getBorderPoint(Landmark.REFERENCE_POINT).overlapsPerfectly(point.get())) {
+//					g2.setColor(ColourSelecter.getColour(Landmark.REFERENCE_POINT));
+//				}
+//				if(cell.getPrimaryNucleus().hasLandmark(Landmark.ORIENTATION_POINT) && 
+//						cell.getPrimaryNucleus().getBorderPoint(Landmark.ORIENTATION_POINT).overlapsPerfectly(point.get())) {
+//					g2.setColor(ColourSelecter.getColour(Landmark.ORIENTATION_POINT));
+//				}
+//
+//			} catch (MissingLandmarkException e) {
+//				// no action needed, colour remains cyan
+//			}
+//
+//			g2.setStroke(new BasicStroke(3));
+//		} else {
+//			g2.setColor(Color.BLACK);
+//			g2.setStroke(new BasicStroke(2));
+//		}
+//
+//		g2.drawRect(dx1, dy1, big*2, big*2);
+//		
+//		g2.setColor(c);
+//		g2.setStroke(s);
+//	}
 }

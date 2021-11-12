@@ -57,9 +57,7 @@ import ij.process.ImageProcessor;
 public abstract class InteractiveCellPanel extends JPanel {
 	
 	private static final Logger LOGGER = Logger.getLogger(InteractiveCellPanel.class.getName());
-	
-	protected JLabel imageLabel;
-	
+
 	protected DatasetEventHandler dh = new DatasetEventHandler(this);
 	protected transient CelllUpdateEventHandler cellUpdateHandler = new CelllUpdateEventHandler(this);
 	
@@ -68,13 +66,29 @@ public abstract class InteractiveCellPanel extends JPanel {
 	protected CellularComponent component = null;
 	protected HashOptions displayOptions;
 
-	// the undistorted image
-	protected transient BufferedImage input;
-	protected transient BufferedImage output;
-	protected int smallRadius = 25;
-	protected int bigRadius   = 50;
-	protected int sourceWidth;
-	protected int sourceHeight;
+	
+//	/** Stores the image displayed on screen */
+//	protected JLabel imageLabel;
+//	
+//	/** The image with no decorations*/
+//	protected transient BufferedImage raw;
+//	
+//	/** The display image with decorations*/
+//	protected transient BufferedImage annotated;
+//	
+//	/** The raw image enlarged for bulge selection */
+//	protected transient BufferedImage rawEnlarged;
+//	
+//	/** The image displayed in the panel */
+//	protected transient BufferedImage output;
+//
+//	/**	 The radius of the source box for bulge images */
+//	protected int smallRadius = 25;
+//	
+//	/**	 The radius of the display box for bulge images */
+//	protected int bigRadius   = 50;
+//	protected int sourceWidth;
+//	protected int sourceHeight;
 	
 	/**
 	 * Keys for display options. These are used in a HashOptions
@@ -96,16 +110,16 @@ public abstract class InteractiveCellPanel extends JPanel {
 	 * Create with a parent panel to listen for cell updates
 	 * @param parent
 	 */
-	public InteractiveCellPanel(CellUpdatedEventListener parent){
+	protected InteractiveCellPanel(CellUpdatedEventListener parent){
 		
 		cellUpdateHandler.addCellUpdatedEventListener(parent);
 		setLayout(new BorderLayout());
-		imageLabel = new JLabel();
-		imageLabel.setHorizontalAlignment(JLabel.CENTER);
-		imageLabel.setVerticalAlignment(JLabel.CENTER);
-		imageLabel.setHorizontalTextPosition(JLabel.CENTER);
-		imageLabel.setVerticalTextPosition(JLabel.CENTER);
-		add(imageLabel, BorderLayout.CENTER);
+//		imageLabel = new JLabel();
+//		imageLabel.setHorizontalAlignment(JLabel.CENTER);
+//		imageLabel.setVerticalAlignment(JLabel.CENTER);
+//		imageLabel.setHorizontalTextPosition(JLabel.CENTER);
+//		imageLabel.setVerticalTextPosition(JLabel.CENTER);
+//		add(imageLabel, BorderLayout.CENTER);
 	}
 	
 	/**
@@ -126,10 +140,10 @@ public abstract class InteractiveCellPanel extends JPanel {
 			@Nullable ICell cell,
 			@Nullable CellularComponent component, 
 			HashOptions cellDisplayOptions) {
-		if(dataset==null || cell==null || component==null) {
-			imageLabel.setIcon(null);
-			return;
-		}
+//		if(dataset==null || cell==null || component==null) {
+//			imageLabel.setIcon(null);
+//			return;
+//		}
 		this.dataset     = dataset;
 		this.cell        = cell;
 		this.component   = component;
@@ -154,19 +168,19 @@ public abstract class InteractiveCellPanel extends JPanel {
     }
 	
 	
-	/**
-	 * Update the rendered image with the mouse at the given location
-	 * @param x
-	 * @param y
-	 */
-	protected synchronized void updateImage(int x, int y) {
-		if (output == null) 
-			output = new BufferedImage( input.getWidth(), input.getHeight(),  BufferedImage.TYPE_INT_ARGB);
-		computeBulgeImage(input, x, y, smallRadius, bigRadius, output);
-		if(imageLabel!=null)
-			imageLabel.setIcon(new ImageIcon(output));
-		repaint();
-	}
+//	/**
+//	 * Update the rendered image with the mouse at the given location
+//	 * @param x
+//	 * @param y
+//	 */
+//	protected synchronized void updateImage(int x, int y) {
+//		if (output == null) 
+//			output = new BufferedImage( raw.getWidth(), raw.getHeight(),  BufferedImage.TYPE_INT_ARGB);
+//		computeBulgeImage(raw, x, y, smallRadius, bigRadius, output);
+//		if(imageLabel!=null)
+//			imageLabel.setIcon(new ImageIcon(output));
+//		repaint();
+//	}
 	
 	/**
 	 * Create the base image for the panel.
@@ -176,8 +190,8 @@ public abstract class InteractiveCellPanel extends JPanel {
 	/**
 	 * Create the image with square overlay for rendering
 	 */
-	protected abstract void computeBulgeImage(BufferedImage input, int cx, int cy, 
-	        int small, int big, BufferedImage output);
+//	protected abstract void computeBulgeImage(BufferedImage input, int cx, int cy, 
+//	        int small, int big, BufferedImage output);
 	
 	
 	/**
@@ -187,28 +201,28 @@ public abstract class InteractiveCellPanel extends JPanel {
 	 * @param y
 	 * @return
 	 */
-	protected synchronized IPoint translatePanelLocationToSourceImage(int x, int y) {
-		// The original image dimensions
-		int w = sourceWidth;
-		int h = sourceHeight;
-		
-		// The rescaled dimensions
-		int iconWidth = imageLabel.getIcon().getIconWidth();
-		int iconHeight = imageLabel.getIcon().getIconHeight();
-		
-		// The image panel dimensions
-		int panelWidth = getWidth();
-		int panelHeight = getHeight();
-		
-		// The position of the click relative to the icon
-		int iconX = x-((panelWidth-iconWidth)/2);
-		int iconY = y-((panelHeight-iconHeight)/2);
-		
-		// The position  of the click within the original image
-		double xPositionInImage = (((double)iconX/(double) iconWidth)*w)-Imageable.COMPONENT_BUFFER;
-		double yPositionInImage = (((double)iconY/(double) iconHeight)*h)-Imageable.COMPONENT_BUFFER;
-		return IPoint.makeNew(xPositionInImage, yPositionInImage);
-	}
+//	protected synchronized IPoint translatePanelLocationToSourceImage(int x, int y) {
+//		// The original image dimensions
+//		int w = sourceWidth;
+//		int h = sourceHeight;
+//		
+//		// The rescaled dimensions
+//		int iconWidth = imageLabel.getIcon().getIconWidth();
+//		int iconHeight = imageLabel.getIcon().getIconHeight();
+//		
+//		// The image panel dimensions
+//		int panelWidth = getWidth();
+//		int panelHeight = getHeight();
+//		
+//		// The position of the click relative to the icon
+//		int iconX = x-((panelWidth-iconWidth)/2);
+//		int iconY = y-((panelHeight-iconHeight)/2);
+//		
+//		// The position  of the click within the original image
+//		double xPositionInImage = (((double)iconX/(double) iconWidth)*w)-Imageable.COMPONENT_BUFFER;
+//		double yPositionInImage = (((double)iconY/(double) iconHeight)*h)-Imageable.COMPONENT_BUFFER;
+//		return IPoint.makeNew(xPositionInImage, yPositionInImage);
+//	}
 		
 	/**
 	 * Translate the given point from a location within this JPanel
@@ -216,22 +230,22 @@ public abstract class InteractiveCellPanel extends JPanel {
 	 * @param e the event with coordinates
 	 * @return
 	 */
-	protected synchronized IPoint translatePanelLocationToRenderedImage(MouseEvent e) {
-		// The rescaled dimensions
-		if(imageLabel==null)
-			return null;
-		int iconWidth = imageLabel.getIcon().getIconWidth();
-		int iconHeight = imageLabel.getIcon().getIconHeight();
-		
-		// The image panel dimensions
-		int panelWidth = getWidth();
-		int panelHeight = getHeight();
-		
-		// The position of the click relative to the icon
-		int iconX = e.getX()-((panelWidth-iconWidth)/2);
-		int iconY = e.getY()-((panelHeight-iconHeight)/2);
-		return IPoint.makeNew(iconX, iconY);
-	}
+//	protected synchronized IPoint translatePanelLocationToRenderedImage(MouseEvent e) {
+//		// The rescaled dimensions
+//		if(imageLabel==null)
+//			return null;
+//		int iconWidth = imageLabel.getIcon().getIconWidth();
+//		int iconHeight = imageLabel.getIcon().getIconHeight();
+//		
+//		// The image panel dimensions
+//		int panelWidth = getWidth();
+//		int panelHeight = getHeight();
+//		
+//		// The position of the click relative to the icon
+//		int iconX = e.getX()-((panelWidth-iconWidth)/2);
+//		int iconY = e.getY()-((panelHeight-iconHeight)/2);
+//		return IPoint.makeNew(iconX, iconY);
+//	}
 	
 	/**
 	 * Translate the given point from a location within the rendered image
@@ -240,16 +254,16 @@ public abstract class InteractiveCellPanel extends JPanel {
 	 * @param y
 	 * @return
 	 */
-	protected synchronized IPoint translateRenderedLocationToSourceImage(double x, double y) {		
-		// The rescaled dimensions
-		int iconWidth = imageLabel.getIcon().getIconWidth();
-		int iconHeight = imageLabel.getIcon().getIconHeight();
-						
-		// The position  of the click within the original image
-		double xPositionInImage = ((x/iconWidth)*sourceWidth)-Imageable.COMPONENT_BUFFER;
-		double yPositionInImage = ((y/iconHeight)*sourceHeight)-Imageable.COMPONENT_BUFFER;
-		return IPoint.makeNew(xPositionInImage, yPositionInImage);
-	}
+//	protected synchronized IPoint translateRenderedLocationToSourceImage(double x, double y) {		
+//		// The rescaled dimensions
+//		int iconWidth = imageLabel.getIcon().getIconWidth();
+//		int iconHeight = imageLabel.getIcon().getIconHeight();
+//						
+//		// The position  of the click within the original image
+//		double xPositionInImage = ((x/iconWidth)*sourceWidth)-Imageable.COMPONENT_BUFFER;
+//		double yPositionInImage = ((y/iconHeight)*sourceHeight)-Imageable.COMPONENT_BUFFER;
+//		return IPoint.makeNew(xPositionInImage, yPositionInImage);
+//	}
 
 	
 	protected ImageProcessor rotateToVertical(ICell c, ImageProcessor ip) throws MissingLandmarkException {
