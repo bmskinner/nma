@@ -29,15 +29,15 @@ import ij.process.ImageProcessor;
 
 public class MeshAnnotator extends ImageAnnotator {
 
-	private Mesh<Nucleus> mesh;
-	private MeshImage<Nucleus> image;
+	private Mesh mesh;
+	private MeshImage image;
 	
-	public MeshAnnotator(ImageProcessor ip, Mesh<Nucleus> m) {
+	public MeshAnnotator(ImageProcessor ip, Mesh m) {
 		super(ip);
 		mesh = m;
 	}
 	
-	public MeshAnnotator(ImageProcessor ip, int maxWidth, int maxHeight, Mesh<Nucleus> m) {
+	public MeshAnnotator(ImageProcessor ip, int maxWidth, int maxHeight, Mesh m) {
 		super(ip, maxWidth, maxHeight);
 		mesh = m;
 	}

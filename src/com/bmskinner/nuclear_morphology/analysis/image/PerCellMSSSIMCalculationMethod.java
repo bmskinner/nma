@@ -80,9 +80,9 @@ public class PerCellMSSSIMCalculationMethod
 			LOGGER.fine("Calculating MS-SSIM* scores for "+d.getName());
 			
 			// Get the consensus mesh for the current target shape
-			Mesh<Nucleus> meshConsensus;
+			Mesh meshConsensus;
 			try {
-				meshConsensus = new DefaultMesh<>(d.getCollection().getConsensus());
+				meshConsensus = new DefaultMesh(d.getCollection().getConsensus());
 			} catch (MeshCreationException e2) {
 				LOGGER.log(Level.FINE, "Error making mesh of consensus", e2);
 				progress+=d.getCollection().getNucleusCount();
@@ -135,10 +135,10 @@ public class PerCellMSSSIMCalculationMethod
 	}
 
    
-	private ImageProcessor generateNucleusImage(@NonNull Mesh<Nucleus> meshConsensus, int w, int h, @NonNull Nucleus n, UUID signalGroup, int threshold) {
+	private ImageProcessor generateNucleusImage(@NonNull Mesh meshConsensus, int w, int h, @NonNull Nucleus n, UUID signalGroup, int threshold) {
 
 		try {
-			Mesh<Nucleus> cellMesh = new DefaultMesh<>(n, meshConsensus);
+			Mesh cellMesh = new DefaultMesh(n, meshConsensus);
 
 		    // Get the image with the signal
 		    ImageProcessor ip;
@@ -150,7 +150,7 @@ public class PerCellMSSSIMCalculationMethod
 		    	return ImageFilterer.createBlackByteProcessor(w, h);
 		    }
 
-		    MeshImage<Nucleus> meshImage = new DefaultMeshImage<>(cellMesh, ip);
+		    MeshImage meshImage = new DefaultMeshImage(cellMesh, ip);
 
 		    // Draw NucleusMeshImage onto consensus mesh.
 		    return meshImage.drawImage(meshConsensus);

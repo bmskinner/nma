@@ -73,7 +73,7 @@ public class TPSexporter extends SingleDatasetAnalysisMethod implements Io {
 		
 		
 		try {
-			Mesh<Taggable> consensus = new DefaultMesh<>(dataset.getCollection().getConsensus(), TPS_VERTEX_SPACING);
+			Mesh consensus = new DefaultMesh(dataset.getCollection().getConsensus(), TPS_VERTEX_SPACING);
 			for(Nucleus n : dataset.getCollection().getNuclei()) {
 
 				try {
@@ -97,7 +97,7 @@ public class TPSexporter extends SingleDatasetAnalysisMethod implements Io {
 	 * @param t
 	 * @throws MeshCreationException 
 	 */
-	private void appendPerimeter(Taggable t, Mesh<Taggable> target) throws MeshCreationException {
+	private void appendPerimeter(Taggable t, Mesh target) throws MeshCreationException {
 		
 		/*
 		 * TPS format example:
@@ -109,7 +109,7 @@ public class TPSexporter extends SingleDatasetAnalysisMethod implements Io {
 		 */
 		
 		// A mesh generates the evenly spaced landmarks by default
-		Mesh<Taggable> mesh = new DefaultMesh<>(t, target);
+		Mesh mesh = new DefaultMesh(t, target);
 				
 		int vertexCount = mesh.getPeripheralVertexCount();
 		

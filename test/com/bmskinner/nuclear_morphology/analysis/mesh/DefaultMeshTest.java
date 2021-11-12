@@ -65,11 +65,11 @@ public class DefaultMeshTest {
 	 */
 	private void testDatasetGeneratesMeshForAllNuclei(@NonNull final IAnalysisDataset d) {
 		try {
-			Mesh<Nucleus> consensusMesh = new DefaultMesh<>(d.getCollection().getConsensus());
+			Mesh consensusMesh = new DefaultMesh(d.getCollection().getConsensus());
 
 			for(Nucleus n: d.getCollection().getNuclei()) {
 				try {
-					Mesh<Nucleus> m = new DefaultMesh<>(n, consensusMesh);
+					Mesh m = new DefaultMesh(n, consensusMesh);
 				} catch (MeshCreationException e) {
 					fail("Unable to create mesh for "+n.getNameAndNumber()+": "+e.getMessage());
 				}
@@ -86,11 +86,11 @@ public class DefaultMeshTest {
 	 */
 	private void testDatasetGeneratesMeshForAllVerticalNuclei(@NonNull final IAnalysisDataset d) {
 		try {
-			Mesh<Nucleus> consensusMesh = new DefaultMesh<>(d.getCollection().getConsensus());
+			Mesh consensusMesh = new DefaultMesh(d.getCollection().getConsensus());
 
 			for(Nucleus n: d.getCollection().getNuclei()) {
 				try {
-					Mesh<Nucleus> m = new DefaultMesh<>(n.getOrientedNucleus(), consensusMesh);
+					Mesh m = new DefaultMesh(n.getOrientedNucleus(), consensusMesh);
 				} catch (MeshCreationException e) {
 					fail("Unable to create mesh for "+n.getNameAndNumber()+": "+e.getMessage());
 				}

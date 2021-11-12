@@ -23,6 +23,7 @@ import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nuclear_morphology.components.Taggable;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
@@ -52,11 +53,11 @@ import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
  * @since 1.13.3
  *
  */
-public interface Mesh<E extends CellularComponent> extends Comparable<Mesh<E>> {
+public interface Mesh extends Comparable<Mesh> {
 
     int DEFAULT_VERTEX_SPACING = 10;
 
-    E getComponent();
+    Taggable getComponent();
 
     String getComponentName();
 
@@ -194,7 +195,7 @@ public interface Mesh<E extends CellularComponent> extends Comparable<Mesh<E>> {
      * @param mesh the mesh to test
      * @return true if the mesh can be compared to this mesh, false otherwise
      */
-    boolean isComparableTo(@NonNull Mesh<E> mesh);
+    boolean isComparableTo(@NonNull Mesh mesh);
 
     /**
      * Find the edge and face ratios of this mesh versus the given mesh. Meshes
@@ -203,7 +204,7 @@ public interface Mesh<E extends CellularComponent> extends Comparable<Mesh<E>> {
      * @param mesh
      * @return
      */
-    Mesh<E> comparison(@NonNull Mesh<E> mesh);
+    Mesh comparison(@NonNull Mesh mesh);
     
     /**
      * Find the edge and face ratios of this mesh versus the mesh fit to the target object. 
@@ -212,15 +213,8 @@ public interface Mesh<E extends CellularComponent> extends Comparable<Mesh<E>> {
      * @return
      * @throws MeshCreationException if the mesh cannot be created
      */
-    Mesh<E> comparison(@NonNull E target) throws MeshCreationException;
+    Mesh comparison(@NonNull Taggable target) throws MeshCreationException;
 
-    /**
-     * Reposition the vertices such that the internal skeleton vertices form a
-     * vertical line, equally spaced.
-     * 
-     * @return
-     */
-//    Mesh<E> straighten();
 
     /**
      * Get the face within this mesh described by the given face

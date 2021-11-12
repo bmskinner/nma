@@ -12,6 +12,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
+import com.bmskinner.nuclear_morphology.components.Imageable;
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.UnavailableBorderPointException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
@@ -40,13 +41,12 @@ public class CellImagePainter implements ImagePainter {
 	private double originalWidth;
 	
 	/**
-	 * Create with cell to paint and ratio for final image
+	 * Create with cell to paint
 	 * @param cell
-	 * @param ratio
 	 */
-	public CellImagePainter(ICell cell, double originalWidth) {
+	public CellImagePainter(ICell cell) {
 		this.cell = cell;
-		this.originalWidth = originalWidth;
+		this.originalWidth = cell.getPrimaryNucleus().getPosition()[Imageable.WIDTH]+ (Imageable.COMPONENT_BUFFER*2);
 	}
 	
 	

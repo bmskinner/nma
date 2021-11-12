@@ -33,7 +33,7 @@ import ij.process.ImageProcessor;
  * @since 1.13.3
  *
  */
-public interface MeshImage<E extends CellularComponent> {
+public interface MeshImage {
 
     /**
      * Draw the image in this object onto the coordinates in the given mesh
@@ -42,7 +42,7 @@ public interface MeshImage<E extends CellularComponent> {
      * @return an image processor with the image drawn according to the mesh
      * @throws UncomparableMeshImageException if the mesh does not match this MeshImage
      */
-    ImageProcessor drawImage(@NonNull Mesh<E> mesh) throws UncomparableMeshImageException;
+    ImageProcessor drawImage(@NonNull Mesh mesh) throws UncomparableMeshImageException;
 
     /**
      * Get the pixels for the given face in the mesh

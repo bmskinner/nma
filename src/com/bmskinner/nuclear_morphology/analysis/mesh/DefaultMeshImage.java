@@ -38,13 +38,13 @@ import ij.process.ImageProcessor;
  * @param <E>
  *
  */
-public class DefaultMeshImage<E extends CellularComponent> implements MeshImage<E> {
+public class DefaultMeshImage implements MeshImage {
 	
 	private static final Logger LOGGER = Logger.getLogger(DefaultMeshImage.class.getName());
 
-    final private Map<MeshFace, List<MeshPixel>> map = new HashMap<>();
+    private final Map<MeshFace, List<MeshPixel>> map = new HashMap<>();
 
-    final private Mesh<E> template;
+    private final Mesh template;
 
     /**
      * Create based on a template mesh and image. Each pixel within the template
@@ -54,7 +54,7 @@ public class DefaultMeshImage<E extends CellularComponent> implements MeshImage<
      * @param ip the image to fetch pixels from
      * @throws MeshImageCreationException
      */
-    public DefaultMeshImage(@NonNull final Mesh<E> mesh, @NonNull final ImageProcessor ip) throws MeshImageCreationException {
+    public DefaultMeshImage(@NonNull final Mesh mesh, @NonNull final ImageProcessor ip) throws MeshImageCreationException {
         template = mesh;
 
         // Create MeshPixels from the image processor for the region described
@@ -73,7 +73,7 @@ public class DefaultMeshImage<E extends CellularComponent> implements MeshImage<
 
 
     @Override
-    public ImageProcessor drawImage(@NonNull Mesh<E> mesh) throws UncomparableMeshImageException {
+    public ImageProcessor drawImage(@NonNull Mesh mesh) throws UncomparableMeshImageException {
 
         if (!mesh.isComparableTo(template))
             throw new UncomparableMeshImageException("Meshes do not match");
@@ -281,7 +281,7 @@ public class DefaultMeshImage<E extends CellularComponent> implements MeshImage<
             if (x < bounds.getMinX() || x > bounds.getMaxX()) // skip pixels outside the object bounds
                 continue;
 
-            for (int y = 0; y < ip.getHeight(); y++) {
+            for(int y = 0; y < ip.getHeight(); y++) {
 
                 if (y < bounds.getMinY() || y > bounds.getMaxY()) {
                     continue;

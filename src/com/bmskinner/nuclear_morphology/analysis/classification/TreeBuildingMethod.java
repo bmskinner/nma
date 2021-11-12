@@ -217,7 +217,7 @@ public class TreeBuildingMethod extends CellClusteringMethod {
             }
         }
 
-        Mesh<Nucleus> mesh = null;
+        Mesh mesh = null;
 
         if(options.getBoolean(HashOptions.CLUSTER_INCLUDE_MESH_KEY) && collection.hasConsensus()){
         	LOGGER.finer("Adding attribute count for mesh");
@@ -317,9 +317,9 @@ public class TreeBuildingMethod extends CellClusteringMethod {
 
         Instances instances = new Instances(collection.getName(), attributes, collection.size());
 
-        Mesh<Nucleus> template = null;
+        Mesh template = null;
         if (options.getBoolean(HashOptions.CLUSTER_INCLUDE_MESH_KEY) && collection.hasConsensus()) {
-				template = new DefaultMesh<>(collection.getConsensus());
+				template = new DefaultMesh(collection.getConsensus());
         }
         
         for(ICell c : collection) {
@@ -370,7 +370,7 @@ public class TreeBuildingMethod extends CellClusteringMethod {
          fireProgressEvent();
     }
 
-    private void addNucleus(ICell c, Nucleus n, ArrayList<Attribute> attributes, Instances instances, Mesh<Nucleus> template,
+    private void addNucleus(ICell c, Nucleus n, ArrayList<Attribute> attributes, Instances instances, Mesh template,
             double windowProportion) throws ProfileException, MeshCreationException, MissingComponentException {
 
         
@@ -427,7 +427,7 @@ public class TreeBuildingMethod extends CellClusteringMethod {
 
         if (options.getBoolean(HashOptions.CLUSTER_INCLUDE_MESH_KEY) && collection.hasConsensus()) {
 
-            Mesh<Nucleus> mesh = new DefaultMesh(n, template);
+            Mesh mesh = new DefaultMesh(n, template);
             for (MeshFace face : mesh.getFaces()) {
                 Attribute att = attributes.get(attNumber++);
                 inst.setValue(att, face.getArea());

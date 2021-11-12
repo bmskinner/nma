@@ -94,6 +94,22 @@ public class ImageImporter implements Importer {
      * @return
      */
     public static ImageProcessor importImage(@NonNull ICell cell, @NonNull CellularComponent c) {
+    	ImageProcessor ip = importImage(c);
+
+		// Crop to the relevant part of the image
+		AbstractImageFilterer an = new ImageAnnotator(ip).crop(cell);
+		return an.toProcessor();
+    }
+    
+    /**
+     * Get the image for the given cellular component. If the 
+     * image cannot be imported, a white colour processor
+     * is returned of sufficient dimensions to contain the 
+     * component.
+     * @param c
+     * @return
+     */
+    public static ImageProcessor importImage(@NonNull CellularComponent c) {
     	ImageProcessor ip;
 		try{
 			ip = c.getImage();
@@ -102,10 +118,7 @@ public class ImageImporter implements Importer {
 					(int)c.getMaxX()+Imageable.COMPONENT_BUFFER, 
 					(int)c.getMaxY()+Imageable.COMPONENT_BUFFER);
 		}
-
-		// Crop to the relevant part of the image
-		AbstractImageFilterer an = new ImageAnnotator(ip).crop(cell);
-		return an.toProcessor();
+		return ip;
     }
 
     /**

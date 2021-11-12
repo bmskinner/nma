@@ -63,7 +63,7 @@ public class SectorQuantificationDialog extends JDialog {
 				
 				ImageProcessor ip1 = model.getImage(k1);
 
-				Mesh<Nucleus> mesh = new DefaultMesh((Nucleus)c);
+				Mesh mesh = new DefaultMesh((Nucleus)c);
 				MeshImage meshImage = new DefaultMeshImage(mesh, ip1);
 
 				List<IProfileSegment> segs = ((Nucleus)c).getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT).getSegments();

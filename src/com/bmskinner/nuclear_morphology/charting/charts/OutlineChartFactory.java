@@ -284,9 +284,9 @@ public class OutlineChartFactory extends AbstractChartFactory {
         XYPlot plot = chart.getXYPlot();
 
         // Get consensus mesh.
-        Mesh<Nucleus> meshConsensus;
+        Mesh meshConsensus;
         try {
-            meshConsensus = new DefaultMesh<>(dataset.getCollection().getConsensus());
+            meshConsensus = new DefaultMesh(dataset.getCollection().getConsensus());
         } catch (MeshCreationException e) {
             LOGGER.log(Loggable.STACK, "Error creating consensus mesh", e);
             return createErrorChart();
@@ -311,9 +311,9 @@ public class OutlineChartFactory extends AbstractChartFactory {
         for (ICell cell : cells) {
             LOGGER.fine("Drawing signals for cell " + cell.getPrimaryNucleus().getNameAndNumber());
             // Get each nucleus. Make a mesh.
-            Mesh<Nucleus> cellMesh;
+            Mesh cellMesh;
             try {
-                cellMesh = new DefaultMesh<>(cell.getPrimaryNucleus(), meshConsensus);
+                cellMesh = new DefaultMesh(cell.getPrimaryNucleus(), meshConsensus);
             } catch (MeshCreationException e1) {
                 LOGGER.fine("Cannot make mesh for " + cell.getPrimaryNucleus().getNameAndNumber());
                 LOGGER.log(Loggable.STACK, ERROR_CREATING_MESH_MSG, e1);
@@ -328,7 +328,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
                     ip = cell.getPrimaryNucleus().getSignalCollection().getImage(options.getSignalGroup());
 
                     // Create NucleusMeshImage from nucleus.
-                    MeshImage<Nucleus> im = new DefaultMeshImage<>(cellMesh, ip);
+                    MeshImage im = new DefaultMeshImage(cellMesh, ip);
 
                     // Draw NucleusMeshImage onto consensus mesh.
                     warped = im.drawImage(meshConsensus);
@@ -382,14 +382,14 @@ public class OutlineChartFactory extends AbstractChartFactory {
 
                     try {
 
-                        Mesh<Nucleus> mesh1 = options.getRotateMode().equals(RotationMode.ACTUAL)
-                                ? new DefaultMesh<>(options.getCell().getPrimaryNucleus())
-                                : new DefaultMesh<>(options.getCell().getPrimaryNucleus().getOrientedNucleus());
+                        Mesh mesh1 = options.getRotateMode().equals(RotationMode.ACTUAL)
+                                ? new DefaultMesh(options.getCell().getPrimaryNucleus())
+                                : new DefaultMesh(options.getCell().getPrimaryNucleus().getOrientedNucleus());
 
-                        Mesh<Nucleus> mesh2 = new DefaultMesh<>(options.firstDataset().getCollection().getConsensus(),
+                        Mesh mesh2 = new DefaultMesh(options.firstDataset().getCollection().getConsensus(),
                                 mesh1);
 
-                        Mesh<Nucleus> result = mesh1.comparison(mesh2);
+                        Mesh result = mesh1.comparison(mesh2);
                         return createMeshChart(result, 0.5);
 
                     } catch (MeshCreationException e) {
@@ -407,15 +407,15 @@ public class OutlineChartFactory extends AbstractChartFactory {
 
                     try {
 
-                        Mesh<Nucleus> mesh1 = new DefaultMesh<>(options.getCell().getPrimaryNucleus());
-                        Mesh<Nucleus> mesh2 = new DefaultMesh<>(options.firstDataset().getCollection().getConsensus(),
+                        Mesh mesh1 = new DefaultMesh(options.getCell().getPrimaryNucleus());
+                        Mesh mesh2 = new DefaultMesh(options.firstDataset().getCollection().getConsensus(),
                                 mesh1);
 
                         //
                         ImageProcessor nucleusIP = options.getCell().getPrimaryNucleus().getImage();
 
                         // Create a mesh image from the nucleus
-                        MeshImage<Nucleus> im = new DefaultMeshImage<>(mesh1, nucleusIP);
+                        MeshImage im = new DefaultMeshImage(mesh1, nucleusIP);
 
                         // Draw the image onto the shape described by the
                         // consensus nucleus
@@ -984,7 +984,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
      * @return
      * @throws Exception
      */
-    public JFreeChart createMeshChart(Mesh<Nucleus> mesh, double log2Ratio) throws ChartCreationException {
+    public JFreeChart createMeshChart(Mesh mesh, double log2Ratio) throws ChartCreationException {
     	JFreeChart chart = createBaseXYChart();
 		XYPlot plot = chart.getXYPlot();
 		

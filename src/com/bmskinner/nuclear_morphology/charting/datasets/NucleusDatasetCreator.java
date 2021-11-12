@@ -902,7 +902,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
      * @return
      * @throws Exception
      */
-    public NucleusMeshXYDataset createNucleusMeshVertexDataset(Mesh<Nucleus> mesh) throws ChartDatasetCreationException {
+    public NucleusMeshXYDataset createNucleusMeshVertexDataset(Mesh mesh) throws ChartDatasetCreationException {
         NucleusMeshXYDataset ds = new NucleusMeshXYDataset();
 
         for (MeshVertex v : mesh.getPeripheralVertices()) {
@@ -932,7 +932,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
      * @return
      * @throws Exception
      */
-    public NucleusMeshXYDataset createNucleusMeshEdgeDataset(Mesh<Nucleus> mesh) throws ChartDatasetCreationException {
+    public NucleusMeshXYDataset createNucleusMeshEdgeDataset(Mesh mesh) throws ChartDatasetCreationException {
         NucleusMeshXYDataset ds = new NucleusMeshXYDataset();
 
 
@@ -957,7 +957,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
      * @return
      * @throws Exception
      */
-    public NucleusMeshXYDataset createNucleusMeshMidpointDataset(Mesh<Nucleus> mesh) throws ChartDatasetCreationException {
+    public NucleusMeshXYDataset createNucleusMeshMidpointDataset(Mesh mesh) throws ChartDatasetCreationException {
         NucleusMeshXYDataset ds = new NucleusMeshXYDataset();
 
         for (MeshEdge edge : mesh.getEdges()) {
@@ -973,7 +973,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
         return ds;
     }
 
-    public HistogramDataset createNucleusMeshHistogramDataset(Mesh<Nucleus> mesh) throws ChartDatasetCreationException {
+    public HistogramDataset createNucleusMeshHistogramDataset(Mesh mesh) throws ChartDatasetCreationException {
         HistogramDataset ds = new HistogramDataset();
 
         int bins = 100;

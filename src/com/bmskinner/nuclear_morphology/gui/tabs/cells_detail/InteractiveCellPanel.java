@@ -44,6 +44,13 @@ import org.jdesktop.swingx.decorator.ComponentAdapter;
 
 import com.bmskinner.nuclear_morphology.analysis.image.AbstractImageFilterer;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageAnnotator;
+import com.bmskinner.nuclear_morphology.analysis.mesh.DefaultMesh;
+import com.bmskinner.nuclear_morphology.analysis.mesh.DefaultMeshImage;
+import com.bmskinner.nuclear_morphology.analysis.mesh.Mesh;
+import com.bmskinner.nuclear_morphology.analysis.mesh.MeshCreationException;
+import com.bmskinner.nuclear_morphology.analysis.mesh.MeshImage;
+import com.bmskinner.nuclear_morphology.analysis.mesh.MeshImageCreationException;
+import com.bmskinner.nuclear_morphology.analysis.mesh.UncomparableMeshImageException;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.Imageable;
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
@@ -70,6 +77,8 @@ import com.bmskinner.nuclear_morphology.gui.events.SegmentEvent;
 import com.bmskinner.nuclear_morphology.gui.events.SegmentEventListener;
 import com.bmskinner.nuclear_morphology.gui.events.SegmentEvent.SegmentUpdateType;
 import com.bmskinner.nuclear_morphology.gui.painters.CellImagePainter;
+import com.bmskinner.nuclear_morphology.gui.painters.ImagePainter;
+import com.bmskinner.nuclear_morphology.gui.painters.WarpedCellPainter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -292,28 +301,57 @@ public class InteractiveCellPanel extends JPanel {
 		if(dataset==null || cell==null || component==null) {
 			return;
 		}
-
-		ImageProcessor ip = ImageImporter.importImage(cell, component);
-
-		// Store the original image width after cropping
-		int cellImageWidth = ip.getWidth();
 		
-		// Expand or shrink the canvas to fit the panel
-		BufferedImage image = ImageAnnotator.resizeKeepingAspect(ip, getWidth(), getHeight()).getBufferedImage();
+		// Create the underlying image, and an appropriate painter
+		BufferedImage image = createRawImage();
+		ImagePainter painter = createPainter();
 		
-		scaleRatio = image.getWidth()/(double)cellImageWidth;
+		// Store the original image width ratio after cropping
+		scaleRatio = image.getWidth()/(double)cell.getPrimaryNucleus().getPosition()[Imageable.WIDTH]+ (Imageable.COMPONENT_BUFFER*2);
 
 		if(imagePanel==null) {
-			imagePanel = new MagnifiableImagePanel(image, new CellImagePainter(cell, cellImageWidth));
+			imagePanel = new MagnifiableImagePanel(image, painter);
 			imagePanel.addImageClickListener(new ImageClickAdapter());
 		}
 		else
-			imagePanel.set(image, new CellImagePainter(cell, cellImageWidth));
+			imagePanel.set(image, painter);
 
 		
 		add(imagePanel, BorderLayout.CENTER);
 	}
+	
+	private ImagePainter createPainter() {
+		if(displayOptions.getBoolean(CellDisplayOptions.WARP_IMAGE))
+			return new WarpedCellPainter(dataset, cell);
+		return new CellImagePainter(cell);
+	}
+	
+	private BufferedImage createRawImage() {
+		if(displayOptions.getBoolean(CellDisplayOptions.WARP_IMAGE))
+			return createWarpImage();
+		
+		ImageProcessor ip = ImageImporter.importImage(cell, component);
+		
+		// Expand or shrink the canvas to fit the panel
+		return ImageAnnotator.resizeKeepingAspect(ip, getWidth(), getHeight()).getBufferedImage();
+	}
 
+	private BufferedImage createWarpImage() {
+		ImageProcessor ip = ImageImporter.importImage(component);
+		try {
+			Mesh consensusMesh = new DefaultMesh(dataset.getCollection().getConsensus());
+			for(Nucleus n : cell.getNuclei()) {
+				Mesh m = new DefaultMesh(n, consensusMesh);
+				MeshImage im = new DefaultMeshImage(m, ip.duplicate());
+				ip = im.drawImage(consensusMesh);
+				ip.flipVertical();
+			}
+		} catch (MeshCreationException | IllegalArgumentException | MeshImageCreationException | UncomparableMeshImageException e) {
+			LOGGER.log(Loggable.STACK, "Error making mesh or loading image", e);
+		}
+		return ImageAnnotator.resizeKeepingAspect(ip, getWidth(), getHeight()).getBufferedImage();
+	}
+	
 	public synchronized void addSegmentEventListener(SegmentEventListener l) {
 		listeners.add(l);
 	}

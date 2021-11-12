@@ -47,7 +47,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  * @author bms41
  *
  */
-public class DefaultMesh<E extends Taggable> implements Mesh<E> {
+public class DefaultMesh implements Mesh {
 	
 	private static final Logger LOGGER = Logger.getLogger(DefaultMesh.class.getName());
 	
@@ -77,7 +77,7 @@ public class DefaultMesh<E extends Taggable> implements Mesh<E> {
     private final Map<Integer, Set<MeshVertex>> segmentFaces = new HashMap<>();
 
     /** The component the mesh is constructed from */
-    private final E component;
+    private final Taggable component;
 
     /**
      * Construct a mesh from the given component with default vertex spacing
@@ -85,7 +85,7 @@ public class DefaultMesh<E extends Taggable> implements Mesh<E> {
      * @param c the component to construct from 
      * @throws MeshCreationException
      */
-    public DefaultMesh(@NonNull E c) throws MeshCreationException {
+    public DefaultMesh(@NonNull Taggable c) throws MeshCreationException {
         this(c, DEFAULT_VERTEX_SPACING);
     }
 
@@ -96,7 +96,7 @@ public class DefaultMesh<E extends Taggable> implements Mesh<E> {
      * @param vertexSpacing the spacing between peripheral vertices
      * @throws MeshCreationException
      */
-    public DefaultMesh(@NonNull E c, int vertexSpacing) throws MeshCreationException {
+    public DefaultMesh(@NonNull Taggable c, int vertexSpacing) throws MeshCreationException {
         this.component = c;
         this.vertexSpacing = vertexSpacing;
         
@@ -120,7 +120,7 @@ public class DefaultMesh<E extends Taggable> implements Mesh<E> {
      * @param template the mesh to use for proportions
      * @throws MeshCreationException
      */
-    public DefaultMesh(@NonNull E n, @NonNull Mesh<E> template) throws MeshCreationException {
+    public DefaultMesh(@NonNull Taggable n, @NonNull Mesh template) throws MeshCreationException {
         this.component = n;
         
         for(Integer segIndex : template.getVertexProportions().keySet()) {
@@ -146,7 +146,7 @@ public class DefaultMesh<E extends Taggable> implements Mesh<E> {
      * 
      * @param template
      */
-    public DefaultMesh(Mesh<E> template) {
+    public DefaultMesh(Mesh template) {
         component = template.getComponent();
         vertexSpacing = template.getVertexSpacing();
         
@@ -166,7 +166,7 @@ public class DefaultMesh<E extends Taggable> implements Mesh<E> {
     }
 
     @Override
-    public E getComponent() {
+    public Taggable getComponent() {
         return component;
     }
 
@@ -321,7 +321,7 @@ public class DefaultMesh<E extends Taggable> implements Mesh<E> {
     }
 
     @Override
-    public boolean isComparableTo(@NonNull Mesh<E> mesh) { 	
+    public boolean isComparableTo(@NonNull Mesh mesh) { 	
         if (this.peripheralVertices.size() != mesh.getPeripheralVertexCount())
             return false;
         if (this.internalVertices.size() != mesh.getInternalVertexCount())
@@ -334,13 +334,13 @@ public class DefaultMesh<E extends Taggable> implements Mesh<E> {
     }
     
     @Override
-    public Mesh<E> comparison(@NonNull E target) throws MeshCreationException {
-    	return comparison(new DefaultMesh<E>(target, this));
+    public Mesh comparison(@NonNull Taggable target) throws MeshCreationException {
+    	return comparison(new DefaultMesh(target, this));
     }
     
 
     @Override
-    public Mesh<E> comparison(@NonNull Mesh<E> mesh) {
+    public Mesh comparison(@NonNull Mesh mesh) {
 
         if (!this.isComparableTo(mesh))
             throw new IllegalArgumentException("Cannot compare meshes");
@@ -348,10 +348,10 @@ public class DefaultMesh<E extends Taggable> implements Mesh<E> {
         LOGGER.finest( "Comparing this mesh " + this.getComponentName() + " to " + mesh.getComponentName());
         LOGGER.finest( "Mesh has " + mesh.getFaceCount() + " faces");
 
-        DefaultMesh<E> result = new DefaultMesh<E>(this);
+        DefaultMesh result = new DefaultMesh(this);
 
-        List<MeshEdge> ourEdges = new ArrayList<MeshEdge>(edges);
-        List<MeshEdge> theirEdges = new ArrayList<MeshEdge>(mesh.getEdges());
+        List<MeshEdge> ourEdges = new ArrayList<>(edges);
+        List<MeshEdge> theirEdges = new ArrayList<>(mesh.getEdges());
 
         for (int i = 0; i < ourEdges.size(); i++) {
             MeshEdge our = ourEdges.get(i);
@@ -740,7 +740,7 @@ public class DefaultMesh<E extends Taggable> implements Mesh<E> {
     }
 
     @Override
-    public int compareTo(Mesh<E> o) {
+    public int compareTo(Mesh o) {
 
         if (this.isComparableTo(o)) {
             return 0;

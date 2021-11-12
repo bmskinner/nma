@@ -77,7 +77,7 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> {
     private int totalCells;
     
     /** The mesh images are warped onto */
-    private final Mesh<Nucleus> meshConsensus;
+    private final Mesh meshConsensus;
         
     /**
      * Construct with settings object.
@@ -108,7 +108,7 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> {
         			.getCollection().getConsensus(); // Issue here when using '.duplicate()' - causes image sizing issue
             
     		// Create the consensus mesh to warp each cell onto
-    		meshConsensus = new DefaultMesh<>(target);
+    		meshConsensus = new DefaultMesh(target);
         } catch (MeshCreationException e2) {
     		LOGGER.log(Loggable.STACK, "Error creating mesh", e2);
     		throw new IllegalArgumentException("Could not create mesh", e2);
@@ -195,7 +195,7 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> {
 	private ImageProcessor generateNucleusImage(@NonNull Nucleus n) throws MissingOptionException {
 
 		try {
-			Mesh<Nucleus> cellMesh = new DefaultMesh<>(n, meshConsensus);
+			Mesh cellMesh = new DefaultMesh(n, meshConsensus);
 
 			ImageProcessor ip = getNucleusImageProcessor(n);
 		    
@@ -218,7 +218,7 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> {
 		    }
 
 		    // Create a mesh coordinate image from the nucleus
-		    MeshImage<Nucleus> meshImage = new DefaultMeshImage<>(cellMesh, ip);
+		    MeshImage meshImage = new DefaultMeshImage(cellMesh, ip);
 
 		    // Draw the mesh image onto the consensus mesh.
 		    LOGGER.finer( "Warping image onto consensus mesh");
