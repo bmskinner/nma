@@ -32,6 +32,7 @@ import java.util.stream.Collectors;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.bmskinner.nuclear_morphology.ComponentTester;
 import com.bmskinner.nuclear_morphology.TestResources;
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetProfilingMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMethod;
@@ -60,12 +61,19 @@ public class MergeSourceExtracterTest extends SampleDatasetReader {
     	 assertTrue(extracted.isEmpty());
     }
     
+    /**
+     * This tests if a merge source can be recovered losslessly. We open two
+     * datasets and merge them. We then extract the merge source
+     * and compare it to the original saved dataset.
+     * @throws Exception
+     */
     @Test
     public void testSourceExtractedFromMergedDatasetEqualsInput() throws Exception {
     	File f1 = TestResources.MOUSE_CLUSTERS_DATASET;
     	File f2 = TestResources.MOUSE_TEST_DATASET;
     	File f3 = new File(MERGED_DATASET_FILE);
 
+    	// Open the template datasets
     	IAnalysisDataset d1 = openDataset(f1);
     	IAnalysisDataset d2 = openDataset(f2);
 
@@ -73,28 +81,35 @@ public class MergeSourceExtracterTest extends SampleDatasetReader {
     	datasets.add(d1);
     	datasets.add(d2);
 
+    	// Merge the datasets
     	DatasetMergeMethod dm = new DatasetMergeMethod(datasets, f3);
     	IAnalysisDataset merged = dm.call().getFirstDataset();
     	
     	new DatasetProfilingMethod(merged)
     	.then(new DatasetSegmentationMethod(merged, MorphologyAnalysisMode.NEW))
-    	.then(new DatasetExportMethod(merged, f3, ExportFormat.JAVA))
+    	.then(new DatasetExportMethod(merged, f3, ExportFormat.XML))
     	.call();
     	DatasetValidator dv = new DatasetValidator();
     	if(!dv.validate(merged))
 			fail("Dataset "+merged.getName()+" did not validate:\n"+dv.getErrors().stream().collect(Collectors.joining("\n")));
     	
+    	
+    	// Extract the merge sources
     	List<IAnalysisDataset> sources = new ArrayList<>();
     	sources.addAll(merged.getAllMergeSources());
     	
     	MergeSourceExtractionMethod mse = new MergeSourceExtractionMethod(sources);
     	List<IAnalysisDataset> extracted = mse.call().getDatasets();
 
-    	
+    	// Ensure the merge sources validate
     	for(IAnalysisDataset m : extracted){
     		if(!dv.validate(m))
     			fail("Dataset "+m.getName()+" did not validate:\n"+dv.getErrors().stream().collect(Collectors.joining("\n")));
     	}
+    	    	
+    	// Test if the extracted datasets match their originals
+    	ComponentTester.testDuplicatesByField(d1, extracted.get(0));
+    	ComponentTester.testDuplicatesByField(d2, extracted.get(1));
     	
     	assertEquals(d1.getCollection().size(), extracted.get(0).getCollection().size());
     	assertEquals(d2.getCollection().size(), extracted.get(1).getCollection().size());
