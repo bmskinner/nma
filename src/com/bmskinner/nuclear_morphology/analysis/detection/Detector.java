@@ -32,8 +32,6 @@ import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nuclear_morphology.logging.ImageViewer;
-
 import ij.ImagePlus;
 import ij.Prefs;
 import ij.gui.PolygonRoi;

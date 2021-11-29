@@ -20,8 +20,6 @@ import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
-
 import ij.process.ImageProcessor;
 
 /**

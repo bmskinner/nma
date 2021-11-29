@@ -47,7 +47,6 @@ import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
-import ij.ImageStack;
 import ij.gui.Roi;
 import ij.measure.Calibration;
 import ij.measure.Measurements;
