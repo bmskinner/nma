@@ -87,16 +87,26 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	private static final double DEFAULT_SCALE = 1;
 	
     private final UUID        id;
-
+    
     /**
-     * The original position in the source image of the component. Values are
-     * stored at the indexes in {@link Imageable.X_BASE},
-     * {@link Imageable.Y_BASE}, {@link Imageable.WIDTH} and
-     * {@link Imageable.HEIGHT}
-     * 
-     * @see CellularComponent#getPosition()
+     * The leftmost x position in the object
      */
-    private final int[] position;
+    private final int xBase;
+    
+    /**
+     * The lowest y position in the object
+     */
+    private final int yBase;
+    
+    /**
+     * The width of the object
+     */
+    private final int width;
+    
+    /**
+     * The height of the object
+     */
+    private final int height;
 
     /** The current centre of the object. */
     private IPoint centreOfMass;
@@ -158,8 +168,9 @@ public abstract class DefaultCellularComponent implements CellularComponent {
      * @param channel the RGB channel the component was found in
      * @param position the bounding position of the component in the original image
      */
-    protected DefaultCellularComponent(@NonNull Roi roi, @NonNull IPoint centreOfMass, File source, int channel, int[] position) {
-    	this(roi, centreOfMass, source, channel, position, UUID.randomUUID() );
+    protected DefaultCellularComponent(@NonNull Roi roi, @NonNull IPoint centreOfMass, File source, int channel, 
+    		int x, int y, int w, int h) {
+    	this(roi, centreOfMass, source, channel, x, y, w, h, UUID.randomUUID() );
     }
     
     /**
@@ -176,14 +187,17 @@ public abstract class DefaultCellularComponent implements CellularComponent {
      * @param id the id of the component. Only use when deserialising!
      */
     protected DefaultCellularComponent(@NonNull Roi roi, @NonNull IPoint centreOfMass, 
-    		File source, int channel, int[] position, @Nullable UUID id) {
+    		File source, int channel, int x, int y, int w, int h, @Nullable UUID id) {
 
         this.originalCentreOfMass = IPoint.makeNew(centreOfMass);
         this.centreOfMass = IPoint.makeNew(centreOfMass);
         this.id = id==null ? UUID.randomUUID() : id;
         this.sourceFile = source;
         this.channel = channel;
-        this.position = position;
+        this.xBase = x;
+        this.yBase = y;
+        this.width = w;
+        this.height = h;
 
         // Store the original points. From these, the smooth polygon can be
         // reconstructed.
@@ -241,7 +255,10 @@ public abstract class DefaultCellularComponent implements CellularComponent {
      */
     protected DefaultCellularComponent(CellularComponent a) {
         this.id = UUID.fromString(a.getID().toString());
-        this.position = Arrays.copyOf(a.getPosition(), a.getPosition().length);       
+        this.xBase = a.getXBase();
+        this.yBase = a.getYBase();
+        this.width = a.getWidth();
+        this.height = a.getHeight();
         this.originalCentreOfMass = a.getOriginalCentreOfMass().duplicate();
         this.centreOfMass = a.getCentreOfMass().duplicate();
         this.sourceFile = new File(a.getSourceFile().getPath());
@@ -274,8 +291,11 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     protected DefaultCellularComponent(Element e) {
     	id = UUID.fromString(e.getAttributeValue("id"));
     	
-    	position = XMLReader.parseIntArray(e.getChildText("Position"));
-    	
+    	this.xBase = Integer.parseInt(e.getChildText("XBase"));
+        this.yBase = Integer.parseInt(e.getChildText("YBase"));
+        this.width = Integer.parseInt(e.getChildText("Width"));
+        this.height = Integer.parseInt(e.getChildText("Height"));
+    	    	
     	String[] comString = e.getChildText("CentreOfMass").split(",");
     	centreOfMass = IPoint.makeNew(Float.parseFloat(comString[0]), Float.parseFloat(comString[1]));
     	
@@ -381,13 +401,28 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     }
 
     @Override
-    public int[] getPosition() {
-        return Arrays.copyOf(position, position.length);
-    }
+	public int getXBase() {
+		return xBase;
+	}
 
-    @Override
+	@Override
+	public int getYBase() {
+		return yBase;
+	}
+
+	@Override
+	public int getWidth() {
+		return width;
+	}
+
+	@Override
+	public int getHeight() {
+		return height;
+	}
+
+	@Override
     public IPoint getOriginalBase() {
-        return IPoint.makeNew(position[X_BASE], position[Y_BASE]);
+        return IPoint.makeNew(xBase, yBase);
     }
     
     @Override
@@ -503,15 +538,13 @@ public abstract class DefaultCellularComponent implements CellularComponent {
             throw new UnloadableImageException(SOURCE_IMAGE_IS_NOT_AVAILABLE);
         }
 
-        int[] positions = getPosition();
-
         int padding = Imageable.COMPONENT_BUFFER; // a border of pixels
                                                           // beyond the cell
                                                           // boundary
-        int wideW = positions[Imageable.WIDTH] + (padding * 2);
-        int wideH = positions[Imageable.HEIGHT] + (padding * 2);
-        int wideX = positions[Imageable.X_BASE] - padding;
-        int wideY = positions[Imageable.Y_BASE] - padding;
+        int wideW = width + (padding * 2);
+        int wideH = height + (padding * 2);
+        int wideX = xBase - padding;
+        int wideY = yBase - padding;
 
         wideX = wideX < 0 ? 0 : wideX;
         wideY = wideY < 0 ? 0 : wideY;
@@ -529,15 +562,13 @@ public abstract class DefaultCellularComponent implements CellularComponent {
             throw new UnloadableImageException(SOURCE_IMAGE_IS_NOT_AVAILABLE);
         }
 
-        int[] positions = getPosition();
-
         int padding = Imageable.COMPONENT_BUFFER; // a border of pixels
                                                           // beyond the cell
                                                           // boundary
-        int wideW = positions[Imageable.WIDTH] + (padding * 2);
-        int wideH = positions[Imageable.HEIGHT] + (padding * 2);
-        int wideX = positions[Imageable.X_BASE] - padding;
-        int wideY = positions[Imageable.Y_BASE] - padding;
+        int wideW = width + (padding * 2);
+        int wideH = height + (padding * 2);
+        int wideX = xBase - padding;
+        int wideY = yBase - padding;
 
         wideX = wideX < 0 ? 0 : wideX;
         wideY = wideY < 0 ? 0 : wideY;
@@ -556,15 +587,13 @@ public abstract class DefaultCellularComponent implements CellularComponent {
             throw new UnloadableImageException(SOURCE_IMAGE_IS_NOT_AVAILABLE);
         }
 
-        int[] positions = getPosition();
-
         int padding = Imageable.COMPONENT_BUFFER; // a border of pixels
                                                           // beyond the cell
                                                           // boundary
-        int wideW = (positions[Imageable.WIDTH] + (padding * 2));
-        int wideH = (positions[Imageable.HEIGHT] + (padding * 2));
-        int wideX = (positions[Imageable.X_BASE] - padding);
-        int wideY = (positions[Imageable.Y_BASE] - padding);
+        int wideW = width + (padding * 2);
+        int wideH = height + (padding * 2);
+        int wideX = xBase - padding;
+        int wideY = yBase - padding;
 
         wideX = wideX < 0 ? 0 : wideX;
         wideY = wideY < 0 ? 0 : wideY;
@@ -768,7 +797,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 
         // Fast check - is the point within the bounding rectangle moved to the
         // original position?
-        Rectangle r = new Rectangle(position[X_BASE], position[Y_BASE], position[WIDTH], position[HEIGHT]);
+        Rectangle r = new Rectangle(xBase, yBase, width, height);
         if (!r.contains(x, y))
             return false;
         return this.toOriginalShape().contains(x, y);
@@ -1164,7 +1193,11 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	public Element toXmlElement() {
     	Element e = new Element("Component").setAttribute("id", id.toString());
     	
-    	e.addContent(new Element("Position").setText(Arrays.toString(position)));
+    	e.addContent(new Element("XBase").setText(String.valueOf(xBase)));
+    	e.addContent(new Element("YBase").setText(String.valueOf(yBase)));
+    	e.addContent(new Element("Width").setText(String.valueOf(width)));
+    	e.addContent(new Element("Height").setText(String.valueOf(height)));
+    	    	
     	e.addContent(new Element("CentreOfMass").setText(centreOfMass.getX()+","+centreOfMass.getY()));
     	e.addContent(new Element("OriginalCentreOfMass").setText(originalCentreOfMass.getX()+","+originalCentreOfMass.getY()));
     	
@@ -1190,7 +1223,6 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + Arrays.hashCode(position);
 		result = prime * result + Arrays.hashCode(xpoints);
 		result = prime * result + Arrays.hashCode(ypoints);
 		
@@ -1208,7 +1240,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		result = prime * result
 				+ Objects.hash(centreOfMass, 
 						channel, id, originalCentreOfMass, 
-						scale, measurements);
+						scale, measurements, xBase, yBase, width, height);
 		return result;
 	}
 
@@ -1237,7 +1269,10 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 				&& channel == other.channel
 				&& Objects.equals(id, other.id) 
 				&& Objects.equals(originalCentreOfMass, other.originalCentreOfMass)
-				&& Arrays.equals(position, other.position)
+				&& Objects.equals(xBase, other.xBase)
+				&& Objects.equals(yBase, other.yBase)
+				&& Objects.equals(width, other.width)
+				&& Objects.equals(height, other.height)
 				&& Double.doubleToLongBits(scale) == Double.doubleToLongBits(other.scale)
 				&& Objects.equals(measurements, other.measurements)
 				&& Arrays.equals(xpoints, other.xpoints) 

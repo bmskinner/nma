@@ -46,7 +46,7 @@ public class CellImagePainter implements ImagePainter {
 	 */
 	public CellImagePainter(ICell cell) {
 		this.cell = cell;
-		this.originalWidth = cell.getPrimaryNucleus().getPosition()[Imageable.WIDTH]+ (Imageable.COMPONENT_BUFFER*2);
+		this.originalWidth = cell.getPrimaryNucleus().getWidth()+ (Imageable.COMPONENT_BUFFER*2);
 	}
 	
 	

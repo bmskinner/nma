@@ -23,7 +23,7 @@ public class WarpedCellPainter implements ImagePainter {
 	public WarpedCellPainter(IAnalysisDataset dataset, ICell cell) {
 		this.dataset = dataset;
 		this.cell = cell;
-		this.originalWidth = cell.getPrimaryNucleus().getPosition()[Imageable.WIDTH] + (Imageable.COMPONENT_BUFFER*2);
+		this.originalWidth = cell.getPrimaryNucleus().getWidth() + (Imageable.COMPONENT_BUFFER*2);
 	}
 
 	@Override

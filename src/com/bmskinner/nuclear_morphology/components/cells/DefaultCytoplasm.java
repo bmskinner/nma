@@ -34,10 +34,8 @@ import ij.gui.Roi;
  */
 public class DefaultCytoplasm extends DefaultCellularComponent implements ICytoplasm {
 
-    private static final long serialVersionUID = 1L;
-
-    public DefaultCytoplasm(@NonNull Roi roi, @NonNull IPoint centreOfMass, File f, int channel, int[] position, @NonNull UUID id) {
-        super(roi, centreOfMass, f, channel, position, id);
+    public DefaultCytoplasm(@NonNull Roi roi, @NonNull IPoint centreOfMass, File f, int channel, int x, int y, int w, int h, @NonNull UUID id) {
+        super(roi, centreOfMass, f, channel, x, y, w, h, id);
     }
 
     
@@ -51,8 +49,8 @@ public class DefaultCytoplasm extends DefaultCellularComponent implements ICytop
      * @param position
      * @param centreOfMass
      */
-    public DefaultCytoplasm(@NonNull Roi roi, @NonNull IPoint centreOfMass, File f, int channel, int[] position) {
-        super(roi, centreOfMass, f, channel, position);
+    public DefaultCytoplasm(@NonNull Roi roi, @NonNull IPoint centreOfMass, File f, int channel, int x, int y, int w, int h) {
+        super(roi, centreOfMass, f, channel, x, y, w, h);
     }
 
     protected DefaultCytoplasm(ICytoplasm n) {

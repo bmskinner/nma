@@ -43,39 +43,61 @@ public interface Imageable {
      */
     public static final int COMPONENT_BUFFER = 10;
 
-    /**
-     * The array index of the left-most x coordinate of the object in
-     * {@link #setPosition(double[])} and {@link #getPosition(double[])}
-     */
-    static final int X_BASE = 0;
+//    /**
+//     * The array index of the left-most x coordinate of the object in
+//     * {@link #setPosition(double[])} and {@link #getPosition(double[])}
+//     */
+//    static final int X_BASE = 0;
+//
+//    /**
+//     * The array index of the top-most (lowest) y coordinate of the object in
+//     * {@link #setPosition(double[])} and {@link #getPosition(double[])}
+//     */
+//    static final int Y_BASE = 1;
+//
+//    /**
+//     * The array index of the width of the object in
+//     * {@link #setPosition(double[])} and {@link #getPosition(double[])}
+//     */
+//    static final int WIDTH = 2;
+//
+//    /**
+//     * The array index of the height of the object in
+//     * {@link #setPosition(double[])} and {@link #getPosition(double[])}
+//     */
+//    static final int HEIGHT = 3;
 
+//    /**
+//     * Get the position of the object in the original image. The indexes in the
+//     * array are {@link #X_BASE} of the bounding box, {@link #Y_BASE} of the
+//     * bounding box, {@link #WIDTH} of the bounding box and {@link #HEIGHT} of
+//     * the bounding box
+//     * 
+//     * @return the array with the position
+//     */
+//    int[] getPosition();
+    
     /**
-     * The array index of the top-most (lowest) y coordinate of the object in
-     * {@link #setPosition(double[])} and {@link #getPosition(double[])}
+     * The  left-most x coordinate of the object
      */
-    static final int Y_BASE = 1;
-
+    int getXBase();
+    
     /**
-     * The array index of the width of the object in
-     * {@link #setPosition(double[])} and {@link #getPosition(double[])}
+     * The top-most (lowest) y coordinate of the object
      */
-    static final int WIDTH = 2;
-
+    int getYBase();
+    
     /**
-     * The array index of the height of the object in
-     * {@link #setPosition(double[])} and {@link #getPosition(double[])}
+     * The width of the object
+     * @return
      */
-    static final int HEIGHT = 3;
-
+    int getWidth();
+    
     /**
-     * Get the position of the object in the original image. The indexes in the
-     * array are {@link #X_BASE} of the bounding box, {@link #Y_BASE} of the
-     * bounding box, {@link #WIDTH} of the bounding box and {@link #HEIGHT} of
-     * the bounding box
-     * 
-     * @return the array with the position
+     * The height of the object
+     * @return
      */
-    int[] getPosition();
+    int getHeight();
 
     /**
      * Get the base X and Y position of the component in the original image.

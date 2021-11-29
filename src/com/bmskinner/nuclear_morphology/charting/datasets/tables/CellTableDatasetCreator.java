@@ -297,7 +297,7 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
         rowData.add(n.getOriginalCentreOfMass().toString());
 
         fieldNames.add("Original nucleus position");
-        rowData.add("x: " + n.getPosition()[0] + " : y: " + n.getPosition()[1]);
+        rowData.add("x: " + n.getXBase() + " : y: " + n.getYBase());
 
         fieldNames.add("Current nucleus position");
         rowData.add("x: " + df.format(n.getMinX()) + " : y: " + df.format(n.getMinY()));

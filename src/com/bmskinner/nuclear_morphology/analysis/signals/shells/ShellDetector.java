@@ -466,18 +466,27 @@ public class ShellDetector extends Detector {
             return result;
         }
         
-        /**
-         * Get the position of the shell as described in the CellularComponent
-         * interface
-         * 
-         * @return
-         */
+        
+        
         @Override
-		public int[] getPosition() {
-            int[] result = { (int) shellRoi.getBounds().getX(), (int) shellRoi.getBounds().getY(),
-                    (int) shellRoi.getBounds().getWidth(), (int) shellRoi.getBounds().getHeight() };
-            return result;
-        }
+		public int getXBase() {
+			return (int) shellRoi.getBounds().getX();
+		}
+
+		@Override
+		public int getYBase() {
+			return (int) shellRoi.getBounds().getY();
+		}
+
+		@Override
+		public int getWidth() {
+			return (int) shellRoi.getBounds().getWidth();
+		}
+
+		@Override
+		public int getHeight() {
+			return (int) shellRoi.getBounds().getHeight();
+		}
 
         /**
          * Get the bounds of the shell

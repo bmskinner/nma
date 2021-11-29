@@ -448,11 +448,10 @@ public abstract class AbstractImageFilterer {
         if (ip == null)
             throw new IllegalArgumentException("Image processor is null");
         // Choose a clip for the image (an enlargement of the original nucleus ROI
-        int[] positions = c.getPosition();
-        int wideW = positions[CellularComponent.WIDTH] + CellularComponent.COMPONENT_BUFFER*2;
-        int wideH = positions[CellularComponent.HEIGHT] + CellularComponent.COMPONENT_BUFFER*2;
-        int wideX = positions[CellularComponent.X_BASE] - CellularComponent.COMPONENT_BUFFER;
-        int wideY = positions[CellularComponent.Y_BASE] - CellularComponent.COMPONENT_BUFFER;
+        int wideW = c.getWidth() + CellularComponent.COMPONENT_BUFFER*2;
+        int wideH = c.getHeight() + CellularComponent.COMPONENT_BUFFER*2;
+        int wideX = c.getXBase() - CellularComponent.COMPONENT_BUFFER;
+        int wideY = c.getYBase() - CellularComponent.COMPONENT_BUFFER;
 
         wideX = wideX < 0 ? 0 : wideX;
         wideY = wideY < 0 ? 0 : wideY;

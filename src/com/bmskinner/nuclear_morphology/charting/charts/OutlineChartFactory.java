@@ -870,17 +870,15 @@ public class OutlineChartFactory extends AbstractChartFactory {
             return;
         }
 
-        int[] positions = component.getPosition();
-
         XYItemRenderer rend = plot.getRenderer(0); // index zero should be the
                                                    // nucleus outline dataset
 
-        int xBase = positions[Imageable.X_BASE];
-        int yBase = positions[Imageable.Y_BASE];
+        int xBase = component.getXBase();
+        int yBase = component.getYBase();
 
         int padding = 10; // a border of pixels beyond the cell boundary
-        int wideW = positions[Imageable.WIDTH] + (padding * 2);
-        int wideH = positions[Imageable.HEIGHT] + (padding * 2);
+        int wideW = component.getWidth() + (padding * 2);
+        int wideH = component.getHeight() + (padding * 2);
         int wideX = xBase - padding;
         int wideY = yBase - padding;
 

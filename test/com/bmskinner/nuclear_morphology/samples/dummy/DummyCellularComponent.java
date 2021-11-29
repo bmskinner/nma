@@ -101,6 +101,28 @@ public class DummyCellularComponent implements CellularComponent {
 	public IPoint getBase() {
 		return component.getBase();
 	}
+	
+	
+
+	@Override
+	public int getXBase() {
+		return component.getXBase();
+	}
+
+	@Override
+	public int getYBase() {
+		return component.getYBase();
+	}
+
+	@Override
+	public int getWidth() {
+		return component.getWidth();
+	}
+
+	@Override
+	public int getHeight() {
+		return component.getHeight();
+	}
 
 	@Override
 	public @NonNull UUID getID() {
@@ -285,11 +307,6 @@ public class DummyCellularComponent implements CellularComponent {
 	@Override
 	public IPoint findClosestBorderPoint(IPoint p) throws UnavailableBorderPointException {
 		return component.findClosestBorderPoint(p);
-	}
-
-	@Override
-	public int[] getPosition() {
-		return component.getPosition();
 	}
 
 	@Override

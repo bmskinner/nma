@@ -302,7 +302,7 @@ public class InteractiveCellPanel extends JPanel {
 		ImagePainter painter = createPainter();
 		
 		// Store the original image width ratio after cropping
-		scaleRatio = image.getWidth()/(double)cell.getPrimaryNucleus().getPosition()[Imageable.WIDTH]+ (Imageable.COMPONENT_BUFFER*2);
+		scaleRatio = image.getWidth()/(double)cell.getPrimaryNucleus().getWidth()+ (Imageable.COMPONENT_BUFFER*2);
 
 		if(imagePanel==null) {
 			imagePanel = new MagnifiableImagePanel(image, painter);

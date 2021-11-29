@@ -20,7 +20,6 @@ public class DummySegmentedCellularComponent extends ProfileableCellularComponen
 	private static final double PROFILE_WINDOW = 0.05;
 	private static final Roi ROI = new PolygonRoi(X_POINTS, Y_POINTS, Roi.TRACED_ROI);
 	private static final int IMAGE_CHANNEL = 0;
-	private static final int[] POSITION = {105, 34};
 	private static final File IMAGE_FILE = new File("test/com/bmskinner/nuclear_morphology/samples/images/Testing/s60.tiff"); // This component is from Testing\s60\0
 	private static final IPoint COM = IPoint.makeNew(74, 46);
 	
@@ -35,7 +34,7 @@ public class DummySegmentedCellularComponent extends ProfileableCellularComponen
 	}
 	
 	public DummySegmentedCellularComponent(String name) {
-		super(ROI, COM, IMAGE_FILE, IMAGE_CHANNEL, POSITION);
+		super(ROI, COM, IMAGE_FILE, IMAGE_CHANNEL, 105, 35, (int)ROI.getBounds().getWidth(), (int)ROI.getBounds().getHeight());
 		setStatistic(Measurement.AREA,     AREA);
         setStatistic(Measurement.PERIMETER, PERIMETER);
         setStatistic(Measurement.MIN_DIAMETER, MIN_DIAMETER);

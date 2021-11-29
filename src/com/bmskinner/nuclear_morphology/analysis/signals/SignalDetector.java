@@ -161,18 +161,17 @@ public class SignalDetector extends Detector {
         		continue;
         	}
         	LOGGER.finer(rois.size() + " rois at "+minThreshold+" for channel "+options.getInt(HashOptions.CHANNEL)+" in "+sourceFile.getName());
-        	LOGGER.finer("ROI at "+signalCoM+" is in nucleus at "+Arrays.toString(n.getPosition()));
+//        	LOGGER.finer("ROI at "+signalCoM+" is in nucleus at "+Arrays.toString(n.getPosition()));
 
             int xbase = (int) r.getXBase();
             int ybase = (int) r.getYBase();
             Rectangle bounds = r.getBounds();
-            int[] originalPosition = { xbase, ybase, (int) bounds.getWidth(), (int) bounds.getHeight() };
 
             try {
 
                 INuclearSignal s = factory.buildInstance(r, sourceFile, 
                 		options.getInt(HashOptions.CHANNEL), 
-                		originalPosition, signalCoM);
+                		xbase, ybase, (int) bounds.getWidth(), (int)bounds.getHeight(), signalCoM);
 
                 s.setScale(n.getScale()); // copy scale information from
                                           // source nucleus
@@ -188,7 +187,7 @@ public class SignalDetector extends Detector {
 
                 // Offset the centre of mass and border points of the signal
                 // to match the nucleus offset
-                s.offset(-n.getPosition()[CellularComponent.X_BASE], -n.getPosition()[CellularComponent.Y_BASE]);
+                s.offset(-n.getXBase(), -n.getYBase());
 
                 signals.add(s);
 
@@ -282,10 +281,8 @@ public class SignalDetector extends Detector {
     	// Open the image
         ImageProcessor ip = new ImageImporter(sourceFile).importImage(options.getInt(HashOptions.CHANNEL));
         
-        int[] positions = n.getPosition();
-        Rectangle boundingBox = new Rectangle((int) positions[CellularComponent.X_BASE],
-                (int) positions[CellularComponent.Y_BASE], (int) positions[CellularComponent.WIDTH],
-                (int) positions[CellularComponent.HEIGHT]);
+        Rectangle boundingBox = new Rectangle(n.getXBase(),
+                n.getYBase(), n.getWidth(), n.getHeight());
 
         ip.setRoi(boundingBox);
         ImageStatistics statistics = ImageStatistics.getStatistics(ip, Measurements.AREA, new Calibration());

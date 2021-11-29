@@ -132,8 +132,8 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
      * @param id the id of the component. Only use when deserialising!
      */
     public DefaultNucleus(@NonNull Roi roi, @NonNull IPoint centreOfMass, File source, 
-    		int channel, int[] position, int number, @Nullable UUID id, RuleSetCollection rsc) {
-        super(roi, centreOfMass, source, channel, position, id);
+    		int channel, int x, int y, int w, int h, int number, @Nullable UUID id, RuleSetCollection rsc) {
+        super(roi, centreOfMass, source, channel, x, y, w, h, id);
         this.nucleusNumber = number;
         
         for(OrientationMark s : OrientationMark.values()) {
@@ -156,8 +156,8 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
      * @param centreOfMass
      */
     public DefaultNucleus(@NonNull Roi roi, @NonNull IPoint centreOfMass, @NonNull File f, 
-    		int channel, int[] position, int number, RuleSetCollection rsc) {
-        this(roi, centreOfMass, f, channel, position, number, null, rsc);
+    		int channel, int x, int y, int w, int h, int number, RuleSetCollection rsc) {
+        this(roi, centreOfMass, f, channel, x, y, w, h, number, null, rsc);
     }
 
     /**

@@ -97,9 +97,9 @@ public class TestComponentFactory {
 				
 		Roi roi  = new PolygonRoi(xpoints, ypoints, xpoints.length, Roi.POLYGON);
 		IPoint com = IPoint.makeNew(xBase+(w/2), yBase+(h/2));
-		int[] position = {xBase, yBase, w, h};		
+	
 		File f = new File(TestDatasetBuilder.TEST_DATASET_IMAGE_FOLDER);
-		Nucleus n = createNucleus(roi, com, f, 0, position, 0, rsc);
+		Nucleus n = createNucleus(roi, com, f, 0, xBase, yBase, w, h, 0, rsc);
 		n.rotate(rotation);
 				
 		// Note - the roi interpolation will smooth corners
@@ -124,21 +124,20 @@ public class TestComponentFactory {
 				
 		Roi roi  = new PolygonRoi(xpoints, ypoints, xpoints.length, Roi.POLYGON);
 		IPoint com = IPoint.makeNew(xBase+(w/2), yBase+(h/2));
-		int[] position = {xBase, yBase, w, h};		
+
 		File f = new File(TestDatasetBuilder.TEST_DATASET_IMAGE_FOLDER);
 		
-		Nucleus n = createNucleus(roi, com, f, 0, position, 0, rsc);
+		Nucleus n = createNucleus(roi, com, f, 0, xBase, yBase, w, h, 0, rsc);
 		n.rotate(rotation);
 		
 		// Note - the roi interpolation will smooth corners
 		n.initialise(Taggable.DEFAULT_PROFILE_WINDOW_PROPORTION);
 		ProfileIndexFinder.assignLandmarks(n, RuleSetCollection.roundRuleSetCollection());
-//		n.findLandmarks(RuleSetCollection.roundRuleSetCollection());		
 		return n;
 	}
 	
-	private static Nucleus createNucleus(Roi roi, IPoint com, File f, int channel, int[] position, int number, RuleSetCollection rsc) {
-		return new DefaultNucleus(roi, com, f, 0, position, 0, rsc);
+	private static Nucleus createNucleus(Roi roi, IPoint com, File f, int channel, int x, int y, int w, int h, int number, RuleSetCollection rsc) {
+		return new DefaultNucleus(roi, com, f, 0, x, y, w, h, 0, rsc);
 	}
 
 	
@@ -172,34 +171,10 @@ public class TestComponentFactory {
 		
 		Roi roi  = new PolygonRoi(xpoints, ypoints, xpoints.length, Roi.POLYGON);
 		IPoint com = IPoint.makeNew(xBase+(w/2), yBase+(h/2));
-		int[] position = {xBase, yBase, w, h};		
+
 		File f = new File("empty file");
 		
-		return new DefaultNuclearSignal(roi, com, f, channel, position);
-		
-//		INuclearSignal s = new DefaultNuclearSignal(roi, com, f, channel, position) {
-//			private static final long serialVersionUID = 1L;
-//
-//			@Override
-//			public ImageProcessor getGreyscaleImage() {
-//				return getImage();
-//			}
-//			
-//			@Override
-//			public ImageProcessor getImage() {
-//				Roi finalRoi = toOriginalRoi();
-//				
-//				int[] position = getPosition(); 
-//				int xmax = position[Imageable.X_BASE]+position[Imageable.WIDTH]+Imageable.COMPONENT_BUFFER;
-//				int ymax = position[Imageable.Y_BASE]+position[Imageable.HEIGHT]+Imageable.COMPONENT_BUFFER;
-//				
-//				ImageProcessor ip = new ColorProcessor(xmax, ymax);
-//		    	ip.setColor(Color.WHITE);
-//		    	ip.fill(finalRoi);
-//		    	return ip;
-//			}
-//		};
-//		return s;
+		return new DefaultNuclearSignal(roi, com, f, channel, xBase, yBase, w, h);
 	}
 		
 	/**

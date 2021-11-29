@@ -91,10 +91,10 @@ public class ImageThumbnailGenerator implements ChartMouseListener {
 		} catch(UnloadableImageException e) {
 			LOGGER.fine("Unable to load component image: "+e.getMessage());
 			// No image, but we can still draw the outline
-			ip = isRgb ? ImageAnnotator.createBlackColorProcessor(n.getPosition()[Imageable.WIDTH]+Imageable.COMPONENT_BUFFER*2, 
-					n.getPosition()[Imageable.HEIGHT]+Imageable.COMPONENT_BUFFER*2) :
-						ImageAnnotator.createWhiteColorProcessor(n.getPosition()[Imageable.WIDTH]+Imageable.COMPONENT_BUFFER*2, 
-								n.getPosition()[Imageable.HEIGHT]+Imageable.COMPONENT_BUFFER*2);
+			ip = isRgb ? ImageAnnotator.createBlackColorProcessor(n.getWidth()+Imageable.COMPONENT_BUFFER*2, 
+					n.getHeight()+Imageable.COMPONENT_BUFFER*2) :
+						ImageAnnotator.createWhiteColorProcessor(n.getWidth()+Imageable.COMPONENT_BUFFER*2, 
+								n.getHeight()+Imageable.COMPONENT_BUFFER*2);
 		}
 
 

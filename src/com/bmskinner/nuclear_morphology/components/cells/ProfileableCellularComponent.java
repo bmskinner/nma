@@ -105,8 +105,8 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
      * @param position the bounding position of the component in the original image
      */
     protected ProfileableCellularComponent(@NonNull Roi roi, @NonNull IPoint centreOfMass, 
-    		File source, int channel, int[] position) {
-    	super(roi, centreOfMass, source, channel, position);
+    		File source, int channel, int x, int y, int w, int h) {
+    	super(roi, centreOfMass, source, channel, x, y, w, h);
     }
     
     /**
@@ -123,8 +123,8 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
      * @param id the id of the component. Only use when deserialising!
      */
     protected ProfileableCellularComponent(@NonNull Roi roi, @NonNull IPoint centreOfMass, 
-    		File source, int channel, int[] position, @Nullable UUID id) {
-        super(roi, centreOfMass, source, channel, position, id);
+    		File source, int channel, int x, int y, int w, int h, @Nullable UUID id) {
+        super(roi, centreOfMass, source, channel, x, y, w, h, id);
     }
 
     /**

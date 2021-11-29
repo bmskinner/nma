@@ -40,16 +40,14 @@ public class DefaultNuclearSignal extends DefaultCellularComponent implements IN
 	
 	private static final String XML_CLOSEST_BORDER = "ClosestBorder";
 
-    private static final long serialVersionUID = 1L;
-
     private int closestNuclearBorderPoint;
 
-    public DefaultNuclearSignal(@NonNull Roi roi, @NonNull IPoint centreOfMass, @NonNull File f, int channel, int[] position, @NonNull UUID id) {
-        super(roi, centreOfMass, f, channel, position, id);
+    public DefaultNuclearSignal(@NonNull Roi roi, @NonNull IPoint centreOfMass, @NonNull File f, int channel, int x, int y, int w, int h, @NonNull UUID id) {
+        super(roi, centreOfMass, f, channel, x, y, w, h, id);
     }
     
-    public DefaultNuclearSignal(@NonNull Roi roi, @NonNull IPoint centreOfMass, @NonNull File f, int channel, int[] position) {
-        super(roi, centreOfMass, f, channel, position);
+    public DefaultNuclearSignal(@NonNull Roi roi, @NonNull IPoint centreOfMass, @NonNull File f, int channel, int x, int y, int w, int h) {
+        super(roi, centreOfMass, f, channel, x, y, w, h);
     }
 
     /**

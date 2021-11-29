@@ -88,15 +88,13 @@ public class CellImageExportMethod extends MultipleDatasetAnalysisMethod impleme
 	 * @throws UnloadableImageException
 	 */
 	private ImageProcessor cropToSquare(Nucleus n) throws UnloadableImageException {
-		int[] positions = n.getPosition();
+
 		ImageProcessor ip = n.getGreyscaleImage();
-		
-		
 
 		int padding = CellularComponent.COMPONENT_BUFFER;
 		
-		int w = positions[CellularComponent.WIDTH];
-		int h = positions[CellularComponent.HEIGHT];
+		int w = n.getWidth();
+		int h = n.getHeight();
 		
 		int square     = Math.max(w,h);
 		int totalWidth = square+(padding*2);
@@ -104,8 +102,8 @@ public class CellImageExportMethod extends MultipleDatasetAnalysisMethod impleme
 		int xDiff = (w-square)/2;
 		int yDiff = (h-square)/2;
 
-		int x = positions[CellularComponent.X_BASE] - padding + xDiff;
-		int y = positions[CellularComponent.Y_BASE] - padding + yDiff;
+		int x = n.getXBase() - padding + xDiff;
+		int y = n.getYBase() - padding + yDiff;
 
 		x = x < 0 ? 0 : x;
 		y = y < 0 ? 0 : y;

@@ -35,7 +35,6 @@ public class DummyNuclearSignal extends DefaultNuclearSignal {
     private static final Roi ROI = new PolygonRoi(X_POINTS, Y_POINTS, Roi.TRACED_ROI);
     private static final int component_NUMBER = 0;
     private static final int IMAGE_CHANNEL = 0;
-    private static final int[] POSITION = {105, 34};
     private static final File IMAGE_FILE = new File("test/com/bmskinner/nuclear_morphology/samples/images/Testing/s60.tiff"); // This component is from Testing\s60\0
     private static final IPoint COM = IPoint.makeNew(74, 46);
     
@@ -47,7 +46,7 @@ public class DummyNuclearSignal extends DefaultNuclearSignal {
 
     
     public DummyNuclearSignal() {
-        super(ROI, COM, IMAGE_FILE, IMAGE_CHANNEL, POSITION);
+        super(ROI, COM, IMAGE_FILE, IMAGE_CHANNEL, 105, 34, 5, 5);
     }
 
 }
