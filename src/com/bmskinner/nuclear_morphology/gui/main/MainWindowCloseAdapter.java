@@ -107,8 +107,7 @@ public class MainWindowCloseAdapter extends WindowAdapter {
     			Runnable task = new ExportDatasetAction(root, 
     					mw.getProgressAcceptor(), 
     					mw.getEventHandler(), cl, 
-    					false, 
-    					GlobalOptions.getInstance().getExportFormat());
+    					false);
     			new Thread(task).start();
     			try {
     				cl.await();

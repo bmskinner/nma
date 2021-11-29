@@ -83,7 +83,6 @@ import com.bmskinner.nuclear_morphology.gui.events.PopulationListUpdateListener.
 import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.tabs.DatasetSelectionListener;
 import com.bmskinner.nuclear_morphology.gui.tabs.DatasetSelectionListener.DatasetSelectionEvent;
-import com.bmskinner.nuclear_morphology.io.DatasetExportMethod.ExportFormat;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -308,10 +307,10 @@ public class EventHandler implements EventListener {
                 return () -> setScale(selectedDatasets);
                 
             if (event.type().equals(SignalChangeEvent.SAVE_SELECTED_DATASET))
-            	return new ExportDatasetAction(selectedDataset, acceptor, EventHandler.this, null, true, GlobalOptions.getInstance().getExportFormat());
+            	return new ExportDatasetAction(selectedDataset, acceptor, EventHandler.this, null, true);
             
             if (event.type().equals(SignalChangeEvent.EXPORT_XML_DATASET))
-            	return new ExportDatasetAction(selectedDataset, acceptor, EventHandler.this, null, true, ExportFormat.XML);
+            	return new ExportDatasetAction(selectedDataset, acceptor, EventHandler.this, null, true);
             
             if (event.type().equals(SignalChangeEvent.EXPORT_TPS_DATASET))
             	return new ExportTPSAction(selectedDataset, acceptor, EventHandler.this);
@@ -535,7 +534,7 @@ public class EventHandler implements EventListener {
             			try {
             				refoldLatch.await();
             				LOGGER.fine("Starting save action");
-            				new ExportDatasetAction(selectedDatasets, acceptor, EventHandler.this, saveLatch, GlobalOptions.getInstance().getExportFormat()).run();
+            				new ExportDatasetAction(selectedDatasets, acceptor, EventHandler.this, saveLatch).run();
             			} catch(InterruptedException e) {
             				Thread.currentThread().interrupt();
             				return;
@@ -567,7 +566,7 @@ public class EventHandler implements EventListener {
             if (event.method().equals(DatasetEvent.SAVE)) {
             	return () -> {
             		final CountDownLatch latch = new CountDownLatch(1);
-            		new ExportDatasetAction(selectedDatasets, acceptor, EventHandler.this, latch, GlobalOptions.getInstance().getExportFormat()).run();
+            		new ExportDatasetAction(selectedDatasets, acceptor, EventHandler.this, latch).run();
             	};
             }
             
@@ -837,7 +836,7 @@ public class EventHandler implements EventListener {
     			final CountDownLatch latch = new CountDownLatch(1);
 
     			new Thread( () ->{
-    				Runnable task = new ExportDatasetAction(root, acceptor, EventHandler.this, latch, false, GlobalOptions.getInstance().getExportFormat());
+    				Runnable task = new ExportDatasetAction(root, acceptor, EventHandler.this, latch, false);
     				task.run();
     				try {
     					latch.await();

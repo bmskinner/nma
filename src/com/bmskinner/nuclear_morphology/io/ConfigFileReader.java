@@ -26,7 +26,6 @@ import java.util.logging.Logger;
 import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter.ColourSwatch;
-import com.bmskinner.nuclear_morphology.io.DatasetExportMethod.ExportFormat;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -76,7 +75,6 @@ public class ConfigFileReader {
         properties.setProperty(GlobalOptions.DEFAULT_SWATCH_KEY, String.valueOf(op.getSwatch().name()));
         properties.setProperty(GlobalOptions.REFOLD_OVERRIDE_KEY, String.valueOf(op.getBoolean(GlobalOptions.REFOLD_OVERRIDE_KEY)));
         properties.setProperty(GlobalOptions.IS_DEBUG_INTERFACE_KEY, String.valueOf(op.getBoolean(GlobalOptions.IS_DEBUG_INTERFACE_KEY)));
-        properties.setProperty(GlobalOptions.DEFAULT_EXPORT_FORMAT_KEY, String.valueOf(op.getExportFormat()));
         properties.setProperty(GlobalOptions.IS_GLCM_INTERFACE_KEY, String.valueOf(op.getBoolean(GlobalOptions.IS_GLCM_INTERFACE_KEY)));
         
         return properties;
@@ -122,9 +120,6 @@ public class ConfigFileReader {
             
             if(GlobalOptions.NUM_IMAGEJ_THREADS_KEY.equals(key))
             	op.setInt(GlobalOptions.NUM_IMAGEJ_THREADS_KEY, Integer.valueOf(value));
-            
-            if (GlobalOptions.DEFAULT_EXPORT_FORMAT_KEY.equals(key))
-                op.setExportFormat(ExportFormat.valueOf(value));
             
         }
     }

@@ -33,7 +33,6 @@ import com.bmskinner.nuclear_morphology.components.profiles.IProfileCollection;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
 import com.bmskinner.nuclear_morphology.io.DatasetExportMethod;
-import com.bmskinner.nuclear_morphology.io.DatasetExportMethod.ExportFormat;
 import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
 import com.bmskinner.nuclear_morphology.io.xml.XMLWriter;
 import com.bmskinner.nuclear_morphology.logging.ConsoleFormatter;
@@ -287,7 +286,7 @@ public class TestImageDatasetCreator {
         	saveFile.delete();
         
         assertFalse("Expecting output file to be deleted: "+saveFile.getAbsolutePath(), saveFile.exists());
-    	new DatasetExportMethod(d, saveFile, ExportFormat.XML).call();
+    	new DatasetExportMethod(d, saveFile).call();
         assertTrue("Expecting file saved to "+saveFile.getAbsolutePath(), saveFile.exists());
         
         // Copy the saved file into backup file for comparison and conversion testing in the next version.

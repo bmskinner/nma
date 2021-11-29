@@ -21,7 +21,6 @@ import java.io.File;
 import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.options.DefaultOptions;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter.ColourSwatch;
-import com.bmskinner.nuclear_morphology.io.DatasetExportMethod.ExportFormat;
 
 /**
  * This holds the options set globally for the program
@@ -78,8 +77,6 @@ public class GlobalOptions extends DefaultOptions {
 
     private static final double DEFAULT_SCALE = 1;
     
-    private ExportFormat datasetExportFormat;
-
 
     /**
      * Get the global options for the program.
@@ -116,7 +113,6 @@ public class GlobalOptions extends DefaultOptions {
         setBoolean(IS_DEBUG_INTERFACE_KEY, false);
         setInt(NUM_IMAGEJ_THREADS_KEY, 2);
         this.setBoolean(IS_GLCM_INTERFACE_KEY, false);
-        this.datasetExportFormat = ExportFormat.XML;
     }
 
     public synchronized MeasurementScale getScale() {
@@ -128,14 +124,6 @@ public class GlobalOptions extends DefaultOptions {
     }
 
     
-    public ExportFormat getExportFormat() {
-    	return datasetExportFormat;
-    }
-    
-    public synchronized void setExportFormat(ExportFormat format) {
-        this.datasetExportFormat = format;
-    }
-
     public synchronized double getImageScale() {
 
         return getDouble(DEFAULT_IMAGE_SCALE_KEY);
@@ -215,7 +203,6 @@ public class GlobalOptions extends DefaultOptions {
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + ((datasetExportFormat == null) ? 0 : datasetExportFormat.hashCode());
 		result = prime * result + ((defaultDir == null) ? 0 : defaultDir.hashCode());
 		result = prime * result + ((scale == null) ? 0 : scale.hashCode());
 		result = prime * result + ((swatch == null) ? 0 : swatch.hashCode());
@@ -231,8 +218,6 @@ public class GlobalOptions extends DefaultOptions {
 		if (getClass() != obj.getClass())
 			return false;
 		GlobalOptions other = (GlobalOptions) obj;
-		if (datasetExportFormat != other.datasetExportFormat)
-			return false;
 		if (defaultDir == null) {
 			if (other.defaultDir != null)
 				return false;

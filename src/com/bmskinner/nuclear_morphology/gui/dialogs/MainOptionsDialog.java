@@ -40,7 +40,6 @@ import javax.swing.border.EmptyBorder;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.main.MainView;
-import com.bmskinner.nuclear_morphology.io.DatasetExportMethod.ExportFormat;
 import com.bmskinner.nuclear_morphology.logging.ConsoleHandler;
 import com.bmskinner.nuclear_morphology.logging.LogPanelHandler;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -55,8 +54,6 @@ public class MainOptionsDialog extends SettingsDialog implements ActionListener 
     private JComboBox<Level>        programLevelBox;
     private JComboBox<Level>        consoleLevelBox;
     
-    private JComboBox<ExportFormat> saveFormatBox;
-
     private JCheckBox               refoldOverrideBox;
     private JCheckBox               antiAliasBox;
     private JCheckBox               convertDatasetsBox; // should opened
@@ -170,13 +167,6 @@ public class MainOptionsDialog extends SettingsDialog implements ActionListener 
         labels.add(showDebugInterfacLabel);
         fields.add(showDebugInterfaceBox);
         
-        JLabel saveFormatLabel = new JLabel("Save format");
-        saveFormatBox = new JComboBox<>(ExportFormat.values());
-        saveFormatBox.setSelectedItem(GlobalOptions.getInstance().getExportFormat());
-        saveFormatBox.addActionListener(e->GlobalOptions.getInstance().setExportFormat( (ExportFormat)saveFormatBox.getSelectedItem()));
-        labels.add(saveFormatLabel);
-        fields.add(saveFormatBox);
-
         this.addLabelTextRows(labels, fields, layout, panel);
         return panel;
     }

@@ -45,35 +45,16 @@ public class DatasetExportMethod extends SingleDatasetAnalysisMethod {
 	private static final Logger LOGGER = Logger.getLogger(DatasetExportMethod.class.getName());
 
     private File saveFile = null;
-    private ExportFormat format;
 
-    
-    /**
-     * The formats in which an nmd file can be written.
-     * Used because users should not need to deal with a ton of
-     * different file extensions.
-     * @author bms41
-     * @since 1.14.0
-     *
-     */
-    public enum ExportFormat {
-    	
-    	/** Java serialisation */
-    	JAVA,
-    	
-    	/** XML serialisation */
-    	XML;
-    }
     /**
      * Construct with a dataset to export and the file location
      * 
      * @param dataset the dataset to be exported
      * @param saveFile the file to export to
      */
-    public DatasetExportMethod(@NonNull IAnalysisDataset dataset, @NonNull File saveFile, ExportFormat format) {
+    public DatasetExportMethod(@NonNull IAnalysisDataset dataset, @NonNull File saveFile) {
         super(dataset);
         this.saveFile = saveFile;
-        this.format = format;
     }
 
     @Override
@@ -85,17 +66,10 @@ public class DatasetExportMethod extends SingleDatasetAnalysisMethod {
     protected void run() {
 
     	try {
-    		
+
     		boolean isOk = false;
-    		switch(format) {    		
-	    		case XML: {
-	    			backupExistingSaveFile();
-	    			isOk = saveAnalysisDatasetToXML(dataset, saveFile); 
-	    			break;
-	    		}
-//	    		case JAVA: 
-//	    		default: isOk = saveAnalysisDataset(dataset, saveFile); break;
-    		}
+    		backupExistingSaveFile();
+    		isOk = saveAnalysisDatasetToXML(dataset, saveFile); 
 
     		if (isOk) 
     			LOGGER.info("Save was sucessful");
@@ -145,67 +119,6 @@ public class DatasetExportMethod extends SingleDatasetAnalysisMethod {
  		return ok;
     }
     
-    /**
-     * Save the given dataset to the given file
-     * 
-     * @param dataset the dataset
-     * @param saveFile the file to save as
-     * @return
-     */
-//    public boolean saveAnalysisDataset(IAnalysisDataset dataset, File saveFile) {
-//
-//        boolean ok = true;
-//
-//		LOGGER.fine("Saving dataset to " + saveFile.getAbsolutePath());
-//		
-//		File parentFolder = saveFile.getParentFile();
-//		if(!parentFolder.exists())
-//			parentFolder.mkdirs();
-//
-//
-//		try(OutputStream fos        = new FileOutputStream(saveFile);
-//		    CountedOutputStream cos = new CountedOutputStream(fos);
-//		    OutputStream buffer     = new BufferedOutputStream(cos);
-//		    ObjectOutputStream output = new ObjectOutputStream(buffer);
-//		   ) {
-//			
-//			 cos.addCountListener(this::fireProgressEvent);
-//
-//		    output.writeObject(dataset);
-//
-//		} catch (IOException e) {
-//		    LOGGER.log(Loggable.STACK, "IO error saving dataset", e);
-//		    ok = false;
-//		} catch (Exception e1) {
-//		    LOGGER.log(Loggable.STACK, "Unexpected exception saving dataset to: " + saveFile.getAbsolutePath(), e1);
-//		    ok = false;
-//		} catch (StackOverflowError e) {
-//		    LOGGER.log(Loggable.STACK, "StackOverflow saving dataset to: " + saveFile.getAbsolutePath(), e);
-//		    ok = false;
-//		}
-//
-//		if (!ok)
-//		    return false;
-//
-//		DatasetListManager.getInstance().updateHashCode(dataset);
-//        return true;
-//    }
-
-    /**
-     * Save the given dataset to it's preferred save path
-     * 
-     * @param dataset the dataset
-     * @return ok or not
-     */
-//    public boolean saveAnalysisDataset(IAnalysisDataset dataset) {
-//
-//        File saveFile = dataset.getSavePath();
-//        if (saveFile.exists())
-//            saveFile.delete();
-//        return saveAnalysisDataset(dataset, saveFile);
-//
-//    }
-
     private void backupExistingSaveFile() {
     	File saveFile = dataset.getSavePath();
     	if (!saveFile.exists())
