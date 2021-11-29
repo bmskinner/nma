@@ -98,8 +98,13 @@ public abstract class ComponentTester extends FloatArrayTester {
 			if(fieldsToSkip.contains(f.getName()))
 				continue;
 			
+			if(Modifier.isStatic(f.getModifiers())) // ignore static fields
+				continue;
+			
 			if(Modifier.isTransient(f.getModifiers())) // ignore transient fields
 				continue;
+			
+//			LOGGER.fine("Testing field "+f.getName()+" of "+dup.getClass().getName());
 			
 			f.setAccessible(true);	
 
@@ -122,6 +127,10 @@ public abstract class ComponentTester extends FloatArrayTester {
 			
 			Object oValue  = f.get(original);
 			Object dValue  = f.get(dup);
+			
+			// Avoid self referential recursion
+			if(original==oValue)
+				continue;
 
 			if(oValue!=null && dValue!=null) {
 				
@@ -137,10 +146,11 @@ public abstract class ComponentTester extends FloatArrayTester {
 				} else {
 
 					// Don't try to compare classes I didn't write
-					if(f.getType().getName().startsWith("com.bmskinner.nuclear_morphology")) {
+					// and don't try to unpack enums
+					if(f.getType().getName().startsWith("com.bmskinner.nuclear_morphology") && !f.getType().isEnum()) {
 						testDuplicatesByField(oValue, dValue, fieldsToSkip);
 					} else{
-						String msg = "Field '"+f.getName()+"' in "+original.getClass().getSimpleName()+" does not match";
+						String msg = "Field '"+f.getName()+"' in "+f.getType().getSimpleName()+" does not match";
 						assertThat(msg, dValue, equalTo(oValue));
 					}
 				}
