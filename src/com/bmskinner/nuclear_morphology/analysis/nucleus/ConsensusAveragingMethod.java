@@ -66,6 +66,8 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
 public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
 	
 	private static final Logger LOGGER = Logger.getLogger(ConsensusAveragingMethod.class.getName());
+	
+	private static final String EMPTY_FILE = "Empty";
 
 	/** This length was chosen to avoid issues copying segments */
     private static final double PROFILE_LENGTH = 1000d;
@@ -172,7 +174,7 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
         Nucleus n = new NucleusFactory(op.getRuleSetCollection(), op.getProfileWindowProportion(), getScale())
         		.new NucleusBuilder()
         		.fromPoints(list)
-        		.withFile(new File("Empty"))
+        		.withFile(new File(EMPTY_FILE))
         		.withCoM(IPoint.makeNew(0, 0))
         		.withChannel(0)
         		.withMeasurement(Measurement.PERIMETER, ComponentMeasurer.calculatePerimeter(list))

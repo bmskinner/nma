@@ -1174,7 +1174,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     				.setText(entry.getValue().toString()));
     	}
     	
-    	e.addContent(new Element("SourceFile").setText(sourceFile.getAbsolutePath()));
+    	e.addContent(new Element("SourceFile").setText(sourceFile.toString()));
     	e.addContent(new Element("Channel").setText(String.valueOf(channel)));
     	e.addContent(new Element("Scale").setText(String.valueOf(scale)));
     	
