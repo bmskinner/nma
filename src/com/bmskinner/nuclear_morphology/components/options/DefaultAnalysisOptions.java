@@ -42,19 +42,17 @@ import com.bmskinner.nuclear_morphology.io.Io;
  */
 public class DefaultAnalysisOptions implements IAnalysisOptions {
 
-    private static final long serialVersionUID = 1L;
+	private Map<String, HashOptions> detectionOptions = new HashMap<>();
 
-    private Map<String, HashOptions> detectionOptions = new HashMap<>();
+	private double profileWindowProportion;
 
-    private double profileWindowProportion;
+	private RuleSetCollection rulesets;
 
-    private RuleSetCollection rulesets;
-    
-    private final long analysisTime; 
-    
-    /* Store options that are not detection options. For example, clustering or tSNE options */
-     private Map<String, HashOptions> secondaryOptions = new HashMap<>();
-     
+	private final long analysisTime; 
+
+	/* Store options that are not detection options. For example, clustering or tSNE options */
+	private Map<String, HashOptions> secondaryOptions = new HashMap<>();
+
 
     /**
      * The default constructor, which sets default options specified in
@@ -228,9 +226,13 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
     
     @Override
 	public int hashCode() {
-		return Objects.hash(analysisTime, detectionOptions, profileWindowProportion, rulesets, secondaryOptions);
+		return Objects.hash(detectionOptions, profileWindowProportion, rulesets, secondaryOptions);
 	}
 
+	/**
+	 * Note that we don't include analysis time in equality comparison
+	 * since it is necessarily different and not informative
+	 */
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -240,7 +242,7 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
 		if (getClass() != obj.getClass())
 			return false;
 		DefaultAnalysisOptions other = (DefaultAnalysisOptions) obj;
-		return analysisTime == other.analysisTime && Objects.equals(detectionOptions, other.detectionOptions)
+		return Objects.equals(detectionOptions, other.detectionOptions)
 				&& Double.doubleToLongBits(profileWindowProportion) == Double
 						.doubleToLongBits(other.profileWindowProportion)
 				&& Objects.equals(rulesets, other.rulesets) && Objects.equals(secondaryOptions, other.secondaryOptions);

@@ -34,6 +34,8 @@ public abstract class ComponentTester extends FloatArrayTester {
 	public static final int N_CHILD_DATASETS = 2;
 	private static final Logger LOGGER = Logger.getLogger(ComponentTester.class.getName());
 	
+	private static final List<Class> SPECIAL_CLASSES = List.of(HashMap.class, HashSet.class);
+	
 	/**
 	 * Test if the two given points are vertically aligned
 	 * @param topPoint the top point
@@ -90,11 +92,15 @@ public abstract class ComponentTester extends FloatArrayTester {
 	 * @param fieldsToSkip skip fields in the object with these names
 	 * @throws Exception
 	 */
-	protected static void testDuplicatesByField(Object original, Object dup, List<String> fieldsToSkip) throws Exception {
+	public static void testDuplicatesByField(Object original, Object dup, List<String> fieldsToSkip) throws Exception {
 		for(Field f : getInheritedPrivateFields(dup.getClass())) {
 			
 			if(fieldsToSkip.contains(f.getName()))
 				continue;
+			
+			if(Modifier.isTransient(f.getModifiers())) // ignore transient fields
+				continue;
+			
 			f.setAccessible(true);	
 
 			if(f.getType().equals(SoftReference.class))
@@ -113,31 +119,33 @@ public abstract class ComponentTester extends FloatArrayTester {
 				continue;
 			if(f.getType().equals(Class.forName("com.bmskinner.nuclear_morphology.components.profiles.ProfileManager")))
 				continue;
-			Object oValue = f.get(original);
+			
+			Object oValue  = f.get(original);
 			Object dValue  = f.get(dup);
 
-			// ignore transient fields
-			if(!Modifier.isTransient(f.getModifiers())) {
-				if(oValue!=null && dValue!=null) {
+			if(oValue!=null && dValue!=null) {
+				
+				if(SPECIAL_CLASSES.contains(oValue.getClass())) {
 
-					if(oValue.getClass().equals(HashMap.class) ||
-							oValue.getClass().equals(HashSet.class)) {
-
-						// Issue with arrays in hashmaps: Object.hashcode()
-						// depends on reference, so is not equal between two
-						// arrays. Need to use Arrays.hashcode().
-						if(oValue.getClass().equals(HashMap.class)) {
-							testHashMapsByField(f, (HashMap)oValue, (HashMap)dValue);
-						}
-						if(oValue.getClass().equals(HashSet.class)) {
-							testHashSetsByField(f, (HashSet)oValue, (HashSet)dValue);
-						}
+					if(oValue.getClass().equals(HashMap.class)) {
+						testHashMapsByField(f, (HashMap)oValue, (HashMap)dValue);
 					}
+					if(oValue.getClass().equals(HashSet.class)) {
+						testHashSetsByField(f, (HashSet)oValue, (HashSet)dValue);
+					}
+
 				} else {
-					String msg = "Field '"+f.getName()+"' in "+original.getClass().getSimpleName()+" does not match";
-					assertThat(msg, dValue, equalTo(oValue));
+
+					// Don't try to compare classes I didn't write
+					if(f.getType().getName().startsWith("com.bmskinner.nuclear_morphology")) {
+						testDuplicatesByField(oValue, dValue, fieldsToSkip);
+					} else{
+						String msg = "Field '"+f.getName()+"' in "+original.getClass().getSimpleName()+" does not match";
+						assertThat(msg, dValue, equalTo(oValue));
+					}
 				}
 			}
+
 		}
 
 		assertEquals("Equals method in "+original.getClass().getSimpleName(), original, dup);

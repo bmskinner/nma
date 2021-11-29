@@ -1,30 +1,31 @@
 package com.bmskinner.nuclear_morphology.analysis;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import com.bmskinner.nuclear_morphology.TestDatasetBuilder;
 import com.bmskinner.nuclear_morphology.TestDatasetBuilder.TestComponentShape;
+import com.bmskinner.nuclear_morphology.TestResources;
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetProfilingMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMethod.MorphologyAnalysisMode;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
+import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
 
 public class DatasetMergeMethodTest {
-
-	@Before
-	public void setUp() throws Exception {
-	}
+	
+	public static final String MERGED_DATASET_FILE = TestResources.DATASET_FOLDER + "Merge_of_merge.nmd";
 
 	@Test
 	public void testTagsAreCopiedAfterResegmentation() throws Exception {
@@ -77,6 +78,39 @@ public class DatasetMergeMethodTest {
 						test.getBorderIndex(tag));
 			}
 		}
+	}
+	
+	/**
+	 * Test that if a consensus nucleus was present in the merge source, it
+	 * is not carried over to the merge source. This is because segmentation 
+	 * patterns will change in the merging, so we should clear the consensus
+	 * @throws Exception
+	 */
+	@Test
+	public void testConsensusIsRemovedInMergeSource() throws Exception {
+		File f1 = TestResources.MOUSE_CLUSTERS_DATASET;
+    	File f2 = TestResources.MOUSE_TEST_DATASET;
+    	File f3 = new File(MERGED_DATASET_FILE);
+
+    	// Open the template datasets
+    	IAnalysisDataset d1 = SampleDatasetReader.openDataset(f1);
+    	IAnalysisDataset d2 = SampleDatasetReader.openDataset(f2);
+    	
+    	assertTrue(d1.getCollection().hasConsensus());
+    	assertTrue(d2.getCollection().hasConsensus());
+    	
+
+    	List<IAnalysisDataset> datasets = new ArrayList<>();
+    	datasets.add(d1);
+    	datasets.add(d2);
+
+    	// Merge the datasets
+    	DatasetMergeMethod dm = new DatasetMergeMethod(datasets, f3);
+    	IAnalysisDataset merged = dm.call().getFirstDataset();
+    	
+    	for(IAnalysisDataset d : merged.getMergeSources()) {
+    		assertFalse(d.getCollection().hasConsensus());
+    	}
 	}
 
 }

@@ -142,7 +142,7 @@ public class MergeSourceExtractionMethod extends MultipleDatasetAnalysisMethod {
          Optional<IAnalysisOptions> op = template.getAnalysisOptions();
          if(op.isPresent())
              newDataset.setAnalysisOptions(op.get().duplicate());
-         
+
          return newDataset;
     }
     

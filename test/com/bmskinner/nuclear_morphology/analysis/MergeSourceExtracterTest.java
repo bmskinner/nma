@@ -32,17 +32,16 @@ import java.util.stream.Collectors;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.bmskinner.nuclear_morphology.ComponentTester;
 import com.bmskinner.nuclear_morphology.TestResources;
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetProfilingMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMethod.MorphologyAnalysisMode;
+import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.io.DatasetExportMethod;
-import com.bmskinner.nuclear_morphology.io.DatasetExportMethod.ExportFormat;
 import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
 
-public class MergeSourceExtracterTest extends SampleDatasetReader {
+public class MergeSourceExtracterTest {
     
 	private static final Logger LOGGER = Logger.getLogger(MergeSourceExtracterTest.class.getName());
     public static final String MERGED_DATASET_FILE = TestResources.DATASET_FOLDER + "Merge_of_merge.nmd";
@@ -65,6 +64,9 @@ public class MergeSourceExtracterTest extends SampleDatasetReader {
      * This tests if a merge source can be recovered losslessly. We open two
      * datasets and merge them. We then extract the merge source
      * and compare it to the original saved dataset.
+     * 
+     * Note that segmentation is expected to change, and cannot be recovered 
+     * perfectly
      * @throws Exception
      */
     @Test
@@ -74,8 +76,8 @@ public class MergeSourceExtracterTest extends SampleDatasetReader {
     	File f3 = new File(MERGED_DATASET_FILE);
 
     	// Open the template datasets
-    	IAnalysisDataset d1 = openDataset(f1);
-    	IAnalysisDataset d2 = openDataset(f2);
+    	IAnalysisDataset d1 = SampleDatasetReader.openDataset(f1);
+    	IAnalysisDataset d2 = SampleDatasetReader.openDataset(f2);
 
     	List<IAnalysisDataset> datasets = new ArrayList<>();
     	datasets.add(d1);
@@ -87,7 +89,7 @@ public class MergeSourceExtracterTest extends SampleDatasetReader {
     	
     	new DatasetProfilingMethod(merged)
     	.then(new DatasetSegmentationMethod(merged, MorphologyAnalysisMode.NEW))
-    	.then(new DatasetExportMethod(merged, f3, ExportFormat.XML))
+    	.then(new DatasetExportMethod(merged, f3))
     	.call();
     	DatasetValidator dv = new DatasetValidator();
     	if(!dv.validate(merged))
@@ -106,16 +108,23 @@ public class MergeSourceExtracterTest extends SampleDatasetReader {
     		if(!dv.validate(m))
     			fail("Dataset "+m.getName()+" did not validate:\n"+dv.getErrors().stream().collect(Collectors.joining("\n")));
     	}
-    	    	
-    	// Test if the extracted datasets match their originals
-    	ComponentTester.testDuplicatesByField(d1, extracted.get(0));
-    	ComponentTester.testDuplicatesByField(d2, extracted.get(1));
     	
-    	assertEquals(d1.getCollection().size(), extracted.get(0).getCollection().size());
-    	assertEquals(d2.getCollection().size(), extracted.get(1).getCollection().size());
+    	IAnalysisDataset r1 = extracted.stream().filter(d->d.getName().equals(d1.getName())).findFirst().orElseThrow(Exception::new); 
+    	IAnalysisDataset r2 = extracted.stream().filter(d->d.getName().equals(d2.getName())).findFirst().orElseThrow(Exception::new); 
+    	    	    	
+    	for(ICell c : d1.getCollection()) {
+    		assertTrue(r1.getCollection().contains(c));
+    	}
     	
-    	assertEquals(d1.getAnalysisOptions(), extracted.get(0).getAnalysisOptions());
-    	assertEquals(d2.getAnalysisOptions(), extracted.get(1).getAnalysisOptions());
+    	for(ICell c : d2.getCollection()) {
+    		assertTrue(r2.getCollection().contains(c));
+    	}
+    	
+    	assertEquals(d1.getCollection().size(), r1.getCollection().size());
+    	assertEquals(d2.getCollection().size(), r2.getCollection().size());
+    	
+    	assertEquals(d1.getAnalysisOptions(), r1.getAnalysisOptions());
+    	assertEquals(d2.getAnalysisOptions(), r2.getAnalysisOptions());
     }
 
 }

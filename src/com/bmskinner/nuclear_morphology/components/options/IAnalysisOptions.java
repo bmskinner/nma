@@ -16,7 +16,6 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.options;
 
-import java.io.Serializable;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -33,7 +32,7 @@ import com.bmskinner.nuclear_morphology.io.XmlSerializable;
  * @since 1.13.3
  *
  */
-public interface IAnalysisOptions extends Serializable, XmlSerializable {
+public interface IAnalysisOptions extends XmlSerializable {
 
     // Standard detection keys are in CellularComponent
     String SIGNAL_GROUP   = "SignalGroup_";
