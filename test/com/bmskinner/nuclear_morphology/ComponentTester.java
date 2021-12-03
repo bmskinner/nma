@@ -34,7 +34,7 @@ public abstract class ComponentTester extends FloatArrayTester {
 	public static final int N_CHILD_DATASETS = 2;
 	private static final Logger LOGGER = Logger.getLogger(ComponentTester.class.getName());
 	
-	private static final List<Class> SPECIAL_CLASSES = List.of(HashMap.class, HashSet.class);
+	private static final List<Class> SPECIAL_CLASSES = List.of(HashMap.class, HashSet.class, ArrayList.class);
 	
 	/**
 	 * Test if the two given points are vertically aligned
@@ -142,6 +142,10 @@ public abstract class ComponentTester extends FloatArrayTester {
 					if(oValue.getClass().equals(HashSet.class)) {
 						testHashSetsByField(f, (HashSet)oValue, (HashSet)dValue);
 					}
+					
+					if(oValue.getClass().equals(ArrayList.class)) {
+						testListsByField(f, (ArrayList)oValue, (ArrayList)dValue);
+					}
 
 				} else {
 
@@ -161,12 +165,21 @@ public abstract class ComponentTester extends FloatArrayTester {
 		assertEquals("Equals method in "+original.getClass().getSimpleName(), original, dup);
 	}
 	
+	private static void testListsByField(Field f, List o, List d) {
+		assertTrue("Lists should not both be null in "+f.getName(), o!=null&&d!=null);
+		assertEquals("List should contain same number of elements: '"+f.getName()+"' in "+f.getDeclaringClass().getName(), o.size(), d.size());
+		
+		for(int i=0; i<o.size(); i++) {
+			assertEquals("Field '"+f.getName()+"' element "+i+" in lists: "+o+" and "+d, o.get(i), d.get(i));
+		}
+	}
+	
 	// Issue with arrays in hashmaps: Object.hashcode()
 	// depends on reference, so is not equal between two
 	// arrays. Need to use Arrays.hashcode().
 	private static void testHashMapsByField(Field f, HashMap o, HashMap d) {
 		assertTrue("Hashmaps should not both be null in "+f.getName(), o!=null&&d!=null);
-		assertEquals("Maps should contain same number of elements in "+f.getName(), o.size(), d.size());
+		assertEquals("Map should contain same number of elements: '"+f.getName()+"' in "+f.getDeclaringClass().getName(), o.size(), d.size());
 		
 		long oHash = 0;
 		long dHash = 0;
