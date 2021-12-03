@@ -84,6 +84,7 @@ import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.signals.SignalManager;
 import com.bmskinner.nuclear_morphology.gui.RotationMode;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
+import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -294,13 +295,10 @@ public class OutlineChartFactory extends AbstractChartFactory {
 
         // Get the bounding box size for the consensus, to find the offsets for
         // the images created
-        Rectangle2D r = dataset.getCollection().getConsensus().getBounds();
+        Nucleus consensus = dataset.getCollection().getConsensus();
         
-        // Pre-1.12.2 r may be null if bounds were not set. Check.
-        r = r == null ? dataset.getCollection().getConsensus().toPolygon().getBounds() : r;
-        
-        int w = (int) (r.getWidth() * 1.2);
-        int h = (int) (r.getHeight() * 1.2);
+        int w = (int) (consensus.getWidth() * 1.2);
+        int h = (int) (consensus.getHeight() * 1.2);
 
         int xOffset = w >> 1;
         int yOffset = h >> 1;
@@ -422,11 +420,6 @@ public class OutlineChartFactory extends AbstractChartFactory {
 
                         return drawImageAsAnnotation(ip);
 
-                    } catch (UnloadableImageException e) {
-                        LOGGER.warning("Cannot load nucleus image: "
-                                + options.getCell().getPrimaryNucleus().getSourceFile().getAbsolutePath());
-                        LOGGER.log(Loggable.STACK, "Error loading nucleus image", e);
-                        return createErrorChart();
                     } catch (MeshImageCreationException e) {
                         LOGGER.fine("Cannot create mesh for " + options.getCell().getPrimaryNucleus().getNameAndNumber());
                         LOGGER.log(Loggable.STACK, ERROR_CREATING_MESH_MSG, e);
@@ -876,8 +869,8 @@ public class OutlineChartFactory extends AbstractChartFactory {
         int yBase = component.getYBase();
 
         int padding = 10; // a border of pixels beyond the cell boundary
-        int wideW = component.getWidth() + (padding * 2);
-        int wideH = component.getHeight() + (padding * 2);
+        int wideW = (int)component.getWidth() + (padding * 2);
+        int wideH = (int)component.getHeight() + (padding * 2);
         int wideX = xBase - padding;
         int wideY = yBase - padding;
 

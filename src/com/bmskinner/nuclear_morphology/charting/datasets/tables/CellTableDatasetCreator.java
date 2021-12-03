@@ -285,10 +285,10 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
         DecimalFormat df = new DecimalFormat(DEFAULT_DECIMAL_FORMAT);
 
         fieldNames.add("Original bounding width");
-        rowData.add(df.format(n.getBounds().getWidth()));
+        rowData.add(df.format(n.getWidth()));
 
         fieldNames.add("Original bounding height");
-        rowData.add(df.format(n.getBounds().getHeight()));
+        rowData.add(df.format(n.getHeight()));
 
         fieldNames.add("Nucleus CoM");
         rowData.add(n.getCentreOfMass().toString());

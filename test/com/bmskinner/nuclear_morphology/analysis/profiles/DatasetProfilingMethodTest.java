@@ -122,8 +122,8 @@ public class DatasetProfilingMethodTest extends AbstractProfileMethodTest {
 	}
 	
 	private void testNucleiHaveIdenticalSizes(Nucleus obs, Nucleus exp) {
-		assertEquals(exp.getBounds().getWidth(), obs.getBounds().getWidth(), 0.001);
-		assertEquals(exp.getBounds().getHeight(), obs.getBounds().getHeight(), 0.001);
+		assertEquals(exp.getWidth(), obs.getWidth(), 0.001);
+		assertEquals(exp.getHeight(), obs.getHeight(), 0.001);
 	}
 	
 	@Test

@@ -451,8 +451,8 @@ implements SignalWarpingDisplayListener,
 			target.orient(); // ensure rotation is valid
 			
 			// Centre the outline on the canvas
-			int wBuffer = (int)Math.round(ip.getWidth()-target.getBounds().getBounds().getWidth())/2;
-			int hBuffer = (int)Math.round(ip.getHeight()-target.getBounds().getBounds().getHeight())/2;
+			int wBuffer = (int)Math.round(ip.getWidth()-target.getWidth())/2;
+			int hBuffer = (int)Math.round(ip.getHeight()-target.getHeight())/2;
 			LOGGER.fine("Buffer: "+wBuffer+"w "+hBuffer+"h");
 
 			// CoM starts at 0, 0; offset to image coordinates

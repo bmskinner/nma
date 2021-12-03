@@ -105,7 +105,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
      * @param position the bounding position of the component in the original image
      */
     protected ProfileableCellularComponent(@NonNull Roi roi, @NonNull IPoint centreOfMass, 
-    		File source, int channel, int x, int y, int w, int h) {
+    		File source, int channel, int x, int y, double w, double h) {
     	super(roi, centreOfMass, source, channel, x, y, w, h);
     }
     
@@ -123,7 +123,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
      * @param id the id of the component. Only use when deserialising!
      */
     protected ProfileableCellularComponent(@NonNull Roi roi, @NonNull IPoint centreOfMass, 
-    		File source, int channel, int x, int y, int w, int h, @Nullable UUID id) {
+    		File source, int channel, int x, int y, double w, double h, @Nullable UUID id) {
         super(roi, centreOfMass, source, channel, x, y, w, h, id);
     }
 
@@ -501,12 +501,14 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 
     @Override
 	public void reverse() {
-
+        if (isLocked)
+            return;
+        
+        // Note that this action can alter the interpolated
+        // perimeter length, invalidating any existing segments
+        // TODO: account for this
         super.reverse();
 
-        if (isLocked) {
-            return;
-        }
         // Reverse profiles
         for (Entry<ProfileType, IProfile> entry : profileMap.entrySet()) {
             IProfile profile = entry.getValue();

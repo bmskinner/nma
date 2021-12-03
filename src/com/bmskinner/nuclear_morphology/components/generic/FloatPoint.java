@@ -172,7 +172,7 @@ public class FloatPoint extends Point2D.Float implements IPoint {
 
     @Override
     public String toString() {
-    	DecimalFormat df = new DecimalFormat("#0.##");
+    	DecimalFormat df = new DecimalFormat("#0.####");
     	return df.format(getX()) + " - " + df.format(getY());
     }
 
@@ -243,11 +243,14 @@ public class FloatPoint extends Point2D.Float implements IPoint {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
+		if(this == obj)
 			return true;
-		if (!super.equals(obj))
+		
+		// Note that since we override Point2D.Float
+		// value testing is handled here
+		if(!super.equals(obj))
 			return false;
-		if (getClass() != obj.getClass())
+		if(getClass() != obj.getClass())
 			return false;
 		return true;
 	}

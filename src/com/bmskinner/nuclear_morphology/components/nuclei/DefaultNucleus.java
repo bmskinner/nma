@@ -79,8 +79,6 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
     
     /** FISH signals in the nucleus */
     protected ISignalCollection signalCollection = new DefaultSignalCollection();
-
-    protected transient boolean canReverse = true;
     
     /**
      * Construct from an XML element. Use for 

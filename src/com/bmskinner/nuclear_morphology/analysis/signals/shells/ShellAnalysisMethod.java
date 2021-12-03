@@ -383,8 +383,8 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
         private IPoint createRandomPoint(@NonNull CellularComponent template) {
 
             IPoint base = template.getOriginalBase();
-            double w = template.getBounds().getWidth();
-            double h = template.getBounds().getHeight();
+            double w = template.getWidth();
+            double h = template.getHeight();
 
             // Make a pseudo-random position in the rectangle
             double rx = rng.nextDouble();

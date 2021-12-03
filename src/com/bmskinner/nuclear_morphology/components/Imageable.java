@@ -16,16 +16,11 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components;
 
-import java.awt.geom.Rectangle2D;
 import java.io.File;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
-import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
-
-import ij.process.ImageProcessor;
 
 /**
  * This covers the things than can be found within an image.
@@ -42,40 +37,6 @@ public interface Imageable {
      * to the edges of the resulting cropped image
      */
     public static final int COMPONENT_BUFFER = 10;
-
-//    /**
-//     * The array index of the left-most x coordinate of the object in
-//     * {@link #setPosition(double[])} and {@link #getPosition(double[])}
-//     */
-//    static final int X_BASE = 0;
-//
-//    /**
-//     * The array index of the top-most (lowest) y coordinate of the object in
-//     * {@link #setPosition(double[])} and {@link #getPosition(double[])}
-//     */
-//    static final int Y_BASE = 1;
-//
-//    /**
-//     * The array index of the width of the object in
-//     * {@link #setPosition(double[])} and {@link #getPosition(double[])}
-//     */
-//    static final int WIDTH = 2;
-//
-//    /**
-//     * The array index of the height of the object in
-//     * {@link #setPosition(double[])} and {@link #getPosition(double[])}
-//     */
-//    static final int HEIGHT = 3;
-
-//    /**
-//     * Get the position of the object in the original image. The indexes in the
-//     * array are {@link #X_BASE} of the bounding box, {@link #Y_BASE} of the
-//     * bounding box, {@link #WIDTH} of the bounding box and {@link #HEIGHT} of
-//     * the bounding box
-//     * 
-//     * @return the array with the position
-//     */
-//    int[] getPosition();
     
     /**
      * The  left-most x coordinate of the object
@@ -91,13 +52,13 @@ public interface Imageable {
      * The width of the object
      * @return
      */
-    int getWidth();
+    double getWidth();
     
     /**
      * The height of the object
      * @return
      */
-    int getHeight();
+    double getHeight();
 
     /**
      * Get the base X and Y position of the component in the original image.
