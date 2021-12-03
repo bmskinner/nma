@@ -20,13 +20,12 @@ import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nuclear_morphology.analysis.image.AbstractImageFilterer;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageAnnotator;
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.core.InterfaceUpdater;
 import com.bmskinner.nuclear_morphology.gui.events.CellUpdatedEventListener;
-import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
+import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.process.ImageProcessor;
@@ -74,7 +73,7 @@ public class InteractiveCellOutlinePanel extends InteractiveCellPanel {
 				return;
 			}
 			
-			ImageProcessor ip = loadCellImage();
+			ImageProcessor ip = ImageImporter.importFullImageTo24bit(component);
 			ImageAnnotator an = new ImageAnnotator(ip);
 			updateSourceImageDimensions(an);
 			
@@ -97,24 +96,6 @@ public class InteractiveCellOutlinePanel extends InteractiveCellPanel {
 		};
 		new Thread(u).start();
 	}
-	
-	/**
-	 * Load the image for the selected component, or
-	 * create a blank canvas on error
-	 * @return
-	 */
-	private ImageProcessor loadCellImage() {
-		ImageProcessor ip;
-		try{
-			ip = component.getImage();
-			
-		} catch(UnloadableImageException e){
-			LOGGER.finer("Unable to load image: "+component.getSourceFile());
-			ip = AbstractImageFilterer.createWhiteColorProcessor( 1500, 1500); //TODO make based on cell location
-		}
-		return ip;
-	}
-	
 	
 	/**
 	 * If the image is smaller than the available space,

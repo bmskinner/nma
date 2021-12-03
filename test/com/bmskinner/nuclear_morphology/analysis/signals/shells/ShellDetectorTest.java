@@ -34,7 +34,7 @@ import com.bmskinner.nuclear_morphology.TestDatasetBuilder.TestComponentShape;
 import com.bmskinner.nuclear_morphology.TestImageDatasetCreator;
 import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellAnalysisMethod.ShellAnalysisException;
 import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellDetector.Shell;
-import com.bmskinner.nuclear_morphology.components.Imageable;
+import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
@@ -44,6 +44,7 @@ import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult.ShrinkType;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
+import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 
@@ -99,8 +100,8 @@ public class ShellDetectorTest {
      * @return
      * @throws UnloadableImageException
      */
-    private static ImageProcessor drawShells(Imageable template, ShellDetector sd) throws UnloadableImageException{
-    	ImageProcessor ip = template.getImage();
+    private static ImageProcessor drawShells(CellularComponent template, ShellDetector sd) throws UnloadableImageException{
+    	ImageProcessor ip = ImageImporter.importFullImageTo24bit(template);
     	
     	ip.setLineWidth(2);
     	List<Shell> shells = sd.getShells();

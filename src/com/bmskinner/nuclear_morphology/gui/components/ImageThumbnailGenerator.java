@@ -15,6 +15,7 @@ import com.bmskinner.nuclear_morphology.analysis.image.ImageAnnotator;
 import com.bmskinner.nuclear_morphology.charting.datasets.ComponentXYDataset;
 import com.bmskinner.nuclear_morphology.components.Imageable;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 
 import ij.process.ImageProcessor;
@@ -85,22 +86,10 @@ public class ImageThumbnailGenerator implements ChartMouseListener {
 			return;
 
 		Color annotationColour = isRgb ? Color.WHITE : Color.ORANGE;
-		ImageProcessor ip;
-		try {
-			ip = isRgb ? n.getRGBImage() : n.getImage();
-		} catch(UnloadableImageException e) {
-			LOGGER.fine("Unable to load component image: "+e.getMessage());
-			// No image, but we can still draw the outline
-			ip = isRgb ? ImageAnnotator.createBlackColorProcessor(n.getWidth()+Imageable.COMPONENT_BUFFER*2, 
-					n.getHeight()+Imageable.COMPONENT_BUFFER*2) :
-						ImageAnnotator.createWhiteColorProcessor(n.getWidth()+Imageable.COMPONENT_BUFFER*2, 
-								n.getHeight()+Imageable.COMPONENT_BUFFER*2);
-		}
-
+		ImageProcessor ip = isRgb ? ImageImporter.importFileTo24bit(n.getSourceFile()) : ImageImporter.importFullImageTo24bit(n);
 
 		ImageAnnotator an = new ImageAnnotator(ip)
 				.drawBorder(n, annotationColour);
-//				.annotateOutlineOnCroppedComponent(n, annotationColour, 3);
 		an.crop(n);
 		an.resizeKeepingAspect(150, 150);
 		ip = an.toProcessor();

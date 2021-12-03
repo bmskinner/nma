@@ -152,7 +152,7 @@ public class GLCMTest {
 		IAnalysisDataset d = SampleDatasetReader.openTestRodentDataset();
 		
 		for(ICell cell : d.getCollection()) {
-			ImageProcessor ip = cell.getPrimaryNucleus().getComponentImage().convertToByte(false);
+			ImageProcessor ip =  ImageImporter.importCroppedImageTo24bit(cell.getPrimaryNucleus()).convertToByte(false);
 			GLCMTile result1 = glcm.calculate(ip);
 			GLCMTile result = glcm.calculate(cell.getPrimaryNucleus());
 			System.out.println(result1);
@@ -172,7 +172,7 @@ public class GLCMTest {
 		IAnalysisDataset d = SampleDatasetReader.openTestRodentDataset();
 		
 		for(ICell cell : d.getCollection()) {
-			ImageProcessor ip = cell.getPrimaryNucleus().getComponentImage().convertToByte(false);
+			ImageProcessor ip = ImageImporter.importCroppedImageTo24bit(cell.getPrimaryNucleus()).convertToByte(false);
 			GLCMTile result1 = glcm.calculate(ip);
 			GLCMTile result = glcm.calculate(cell.getPrimaryNucleus());
 			System.out.println(result1);

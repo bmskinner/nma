@@ -291,7 +291,7 @@ public class ImagesTabPanel extends DetailPanel {
 
     		InterfaceUpdater r = () -> {
     			try {
-    				ImageProcessor ip = f.exists() ? new ImageImporter(f).importToColorProcessor()
+    				ImageProcessor ip = f.exists() ? ImageImporter.importFileTo24bit(f)
     						: AbstractImageFilterer.createWhiteColorProcessor(1500, 1500); //TODO - check space needed by cells
     				
     				// If an 8bit image was read in, make it colour greyscale

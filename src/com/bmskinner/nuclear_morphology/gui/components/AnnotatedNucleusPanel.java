@@ -29,6 +29,7 @@ import com.bmskinner.nuclear_morphology.analysis.image.ImageAnnotator;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -82,9 +83,9 @@ public class AnnotatedNucleusPanel extends JPanel {
 
         try {
             if (c.hasCytoplasm()) {
-                ip = c.getCytoplasm().getComponentRGBImage();
+                ip = ImageImporter.importCroppedImageTo24bit(c.getCytoplasm());
             } else {
-                ip = c.getNuclei().get(0).getComponentImage();
+                ip = ImageImporter.importCroppedImageTo8bit(c.getPrimaryNucleus());
             }
 
         } catch (UnloadableImageException e) {
@@ -123,9 +124,8 @@ public class AnnotatedNucleusPanel extends JPanel {
             useRGB = true;
         }
         
-        ImageProcessor openProcessor = useRGB ? cell.getCytoplasm().getRGBImage() : cell.getNuclei().get(0).getRGBImage();
-
-//        ImageProcessor openProcessor = useRGB ? cell.getCytoplasm().getRGBImage() : cell.getNuclei().get(0).getImage();
+        ImageProcessor openProcessor = useRGB ? ImageImporter.importCroppedImageTo24bit(cell.getCytoplasm())
+        		: ImageImporter.importCroppedImageTo24bit(cell.getPrimaryNucleus());
 
         ImageAnnotator an = new ImageAnnotator(openProcessor);
 

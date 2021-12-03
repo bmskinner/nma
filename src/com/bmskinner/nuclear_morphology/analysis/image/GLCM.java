@@ -53,6 +53,7 @@ import com.bmskinner.nuclear_morphology.components.measure.MeasurementDimension;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsBuilder;
+import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.Io;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -776,7 +777,7 @@ public class GLCM {
 		Roi roi = component.toRoi();
 		roi.setLocation(Imageable.COMPONENT_BUFFER, Imageable.COMPONENT_BUFFER);
 		try {
-			ImageProcessor ip = component.getGreyscaleComponentImage();
+			ImageProcessor ip = ImageImporter.importCroppedImageTo8bit(component);
 
 			ip.setRoi(roi);
 			GLCMTile r = calculate(ip);

@@ -45,25 +45,10 @@ public class DummyCellularComponent implements CellularComponent {
 	public IPoint getOriginalCentreOfMass() {
 		return component.getOriginalCentreOfMass();
 	}
-	
-	@Override
-	public boolean isSmoothByDefault() {
-		return component.isSmoothByDefault();
-	}
 
 	@Override
 	public String getSourceFileNameWithoutExtension() {
 		return component.getSourceFileNameWithoutExtension();
-	}
-	
-	@Override
-    public ImageProcessor getGreyscaleImage() throws UnloadableImageException {
-        return component.getGreyscaleImage();
-    }
-	
-	@Override
-	public ImageProcessor getRGBImage() throws UnloadableImageException {
-		return component.getRGBImage();
 	}
 
 	@Override
@@ -71,16 +56,10 @@ public class DummyCellularComponent implements CellularComponent {
 		return component.getOriginalBase();
 	}
 
-	@Override
-	public ImageProcessor getComponentRGBImage()
-			throws UnloadableImageException {
-		return component.getComponentRGBImage();
-	}
-
-	@Override
-	public Mask getSourceBooleanMask() {
-		return component.getSourceBooleanMask();
-	}
+//	@Override
+//	public Mask getSourceBooleanMask() {
+//		return component.getSourceBooleanMask();
+//	}
 	
 	@Override
 	public Shape toShape(MeasurementScale scale) {
@@ -115,12 +94,12 @@ public class DummyCellularComponent implements CellularComponent {
 	}
 
 	@Override
-	public int getWidth() {
+	public double getWidth() {
 		return component.getWidth();
 	}
 
 	@Override
-	public int getHeight() {
+	public double getHeight() {
 		return component.getHeight();
 	}
 
@@ -284,10 +263,10 @@ public class DummyCellularComponent implements CellularComponent {
 		return component.toOriginalShape();
 	}
 
-	@Override
-	public Mask getBooleanMask(int height, int width) {
-		return component.getBooleanMask(height, width);
-	}
+//	@Override
+//	public Mask getBooleanMask(int height, int width) {
+//		return component.getBooleanMask(height, width);
+//	}
 
 	@Override
 	public int getPositionBetween(IPoint pointA, IPoint pointB) {
@@ -317,21 +296,6 @@ public class DummyCellularComponent implements CellularComponent {
 	@Override
 	public int getChannel() {
 		return component.getChannel();
-	}
-
-	@Override
-	public ImageProcessor getImage() throws UnloadableImageException {
-		return component.getImage();
-	}
-
-	@Override
-	public ImageProcessor getComponentImage() throws UnloadableImageException {
-		return component.getComponentImage();
-	}
-
-	@Override
-	public Rectangle getBounds() {
-		return component.getBounds().getBounds();
 	}
 
 	@Override
@@ -405,11 +369,6 @@ public class DummyCellularComponent implements CellularComponent {
 	@Override
 	public void clearStatistic(Measurement stat) {
 		component.clearStatistic(stat);
-	}
-
-	@Override
-	public ImageProcessor getGreyscaleComponentImage() throws UnloadableImageException {
-		return component.getGreyscaleComponentImage();
 	}
 
 	@Override

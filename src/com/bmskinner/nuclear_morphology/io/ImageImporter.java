@@ -17,16 +17,17 @@
 package com.bmskinner.nuclear_morphology.io;
 
 import java.io.File;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.image.AbstractImageFilterer;
-import com.bmskinner.nuclear_morphology.analysis.image.ImageAnnotator;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageConverter;
 import com.bmskinner.nuclear_morphology.components.Imageable;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.io.Io.Importer;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -42,6 +43,10 @@ import ij.process.ImageProcessor;
  *
  */
 public class ImageImporter implements Importer {
+	
+	private static final Logger LOGGER = Logger.getLogger(ImageImporter.class.getName());
+	
+	private static final String SOURCE_IMAGE_IS_NOT_AVAILABLE = "Source image is not available";
 
     private static final int[] IMAGE_TYPES_PROCESSED = { ImagePlus.GRAY8, ImagePlus.COLOR_RGB, ImagePlus.GRAY16 };
 
@@ -93,32 +98,68 @@ public class ImageImporter implements Importer {
      * @param c
      * @return
      */
-    public static ImageProcessor importImage(@NonNull ICell cell, @NonNull CellularComponent c) {
-    	ImageProcessor ip = importImage(c);
-
-		// Crop to the relevant part of the image
-		AbstractImageFilterer an = new ImageAnnotator(ip).crop(cell);
-		return an.toProcessor();
+    public static ImageProcessor importCroppedImageTo24bit(@NonNull ICell cell, @NonNull CellularComponent c) {
+    	ImageProcessor ip = importFullImageTo24bit(c);
+		return AbstractImageFilterer.crop(ip, cell);
     }
     
     /**
      * Get the image for the given cellular component. If the 
      * image cannot be imported, a white colour processor
      * is returned of sufficient dimensions to contain the 
-     * component.
-     * @param c
+     * component. The 8-bit image is converted to 24bit RGB to
+     * allow coloured annotations. No cropping is performed
+     * @param c the component to import
      * @return
      */
-    public static ImageProcessor importImage(@NonNull CellularComponent c) {
-    	ImageProcessor ip;
-		try{
-			ip = c.getImage();
-		} catch(UnloadableImageException e){
-			ip = AbstractImageFilterer.createWhiteColorProcessor(
+    public static ImageProcessor importFullImageTo24bit(@NonNull CellularComponent c) {
+        if (!c.getSourceFile().exists()) {
+        	return AbstractImageFilterer.createWhiteColorProcessor(
+					(int)c.getMaxX()+Imageable.COMPONENT_BUFFER, 
+					(int)c.getMaxY()+Imageable.COMPONENT_BUFFER);
+        }
+        try {
+        	ImageProcessor ip = new ImageImporter(c.getSourceFile()).importImage(c.getChannel());
+        	return new ImageConverter(ip).convertToRGBGreyscale().invert().toProcessor();
+        } catch (ImageImportException e) {
+        	return AbstractImageFilterer.createWhiteColorProcessor(
 					(int)c.getMaxX()+Imageable.COMPONENT_BUFFER, 
 					(int)c.getMaxY()+Imageable.COMPONENT_BUFFER);
 		}
-		return ip;
+    }
+    
+    public static ImageProcessor importCroppedImageTo24bit(@NonNull CellularComponent c) {
+    	ImageProcessor ip = importFullImageTo24bit(c);
+        return AbstractImageFilterer.crop(ip, c);
+    }
+    
+    /**
+     * Get the image from which the component was detected. Opens the image and fetches
+     * the appropriate channel. This will return the 8-bit greyscale image used for
+     * object detection.
+     * 
+     * @return an 8-bit greyscale image
+     * @throws UnloadableImageException if the image can't be loaded
+     */
+    public static ImageProcessor importFullImageTo8bit(@NonNull CellularComponent c) throws UnloadableImageException {
+    	if (!c.getSourceFile().exists())
+            throw new UnloadableImageException("Source image is not available: "+c.getSourceFile().getAbsolutePath());
+
+        // Get the stack, make greyscale and invert
+        int stack = ImageImporter.rgbToStack(c.getChannel());
+
+        try {
+            ImageStack imageStack = new ImageImporter(c.getSourceFile()).importToStack();
+            return imageStack.getProcessor(stack);
+        } catch (ImageImportException e) {
+            LOGGER.log(Loggable.STACK, "Error importing source image " + c.getSourceFile().getAbsolutePath(), e);
+            throw new UnloadableImageException(SOURCE_IMAGE_IS_NOT_AVAILABLE);
+        }
+    }
+    
+    public static ImageProcessor importCroppedImageTo8bit(@NonNull CellularComponent c) throws UnloadableImageException {
+        ImageProcessor ip = importFullImageTo8bit(c);
+        return AbstractImageFilterer.crop(ip, c);
     }
 
     /**
@@ -193,7 +234,7 @@ public class ImageImporter implements Importer {
 
         ImagePlus image = new ImagePlus(f.getAbsolutePath());
 
-        ImageStack stack = convert(image);
+        ImageStack stack = convertToStack(image);
         image.close();
         return stack;
     }
@@ -203,10 +244,8 @@ public class ImageImporter implements Importer {
      * 
      * @return the processor
      */
-    public ImageProcessor importToColorProcessor() {
-
-        ImagePlus image = new ImagePlus(f.getAbsolutePath());
-        return image.getProcessor();
+    public static ImageProcessor importFileTo24bit(@NonNull File f) {
+    	return new ImagePlus(f.getAbsolutePath()).getProcessor();
     }
 
     /**
@@ -217,7 +256,7 @@ public class ImageImporter implements Importer {
      * @throws ImageImportException
      */
     public ImageConverter toConverter() throws ImageImportException {
-    	ImageProcessor ip = importToColorProcessor();
+    	ImageProcessor ip = importFileTo24bit(f);
         return new ImageConverter(ip);
     }
 
@@ -268,14 +307,14 @@ public class ImageImporter implements Importer {
      * @param image the image to be converted to a stack
      * @return the stack with counterstain in slice 1, and other channels following 
      */
-    private ImageStack convert(@NonNull ImagePlus image) throws ImageImportException {
+    private ImageStack convertToStack(@NonNull ImagePlus image) throws ImageImportException {
         if (!isImportable(image))
             throw new ImageImportException("Cannot handle image type: " + image.getType());
 
         switch (image.getType()) {
-	        case ImagePlus.GRAY8:     return convertGreyscale(image);
-	        case ImagePlus.COLOR_RGB: return convertRGB(image);
-	        case ImagePlus.GRAY16:    return convert16bitGrey(image);
+	        case ImagePlus.GRAY8:     return convert8bitToStack(image);
+	        case ImagePlus.COLOR_RGB: return convert24bitToStack(image);
+	        case ImagePlus.GRAY16:    return convert16bitTo8bit(image);
 	
 	        default: { // Should never occur given the test in isImportable(), but shows intent
 	            throw new ImageImportException("Unsupported image type: " + image.getType());
@@ -287,7 +326,7 @@ public class ImageImporter implements Importer {
      * @param image the image to convert
      * @return a stack with the input image as position 0
      */
-    private ImageStack convertGreyscale(@NonNull final ImagePlus image) {
+    private ImageStack convert8bitToStack(@NonNull final ImagePlus image) {
     	if(image==null)
     		throw new IllegalArgumentException("Image cannot be null");
         ImageStack result = ImageStack.create(image.getWidth(), image.getHeight(), 0, EIGHT_BIT);
@@ -302,7 +341,7 @@ public class ImageImporter implements Importer {
      * @param image the image to convert to a stack
      * @return the stack
      */
-    private ImageStack convertRGB(@NonNull final ImagePlus image) {
+    private ImageStack convert24bitToStack(@NonNull final ImagePlus image) {
     	
         int imageDepth = 0; // number of images in the stack to begin
         int bitDepth = 8; // default 8 bit images
@@ -329,12 +368,12 @@ public class ImageImporter implements Importer {
      * @param image the 16 bit image to convert
      * @return the stack
      */
-    private ImageStack convert16bitGrey(ImagePlus image) {
+    private ImageStack convert16bitTo8bit(ImagePlus image) {
         // this is the ij.process.ImageConverter, not my
         // analysis.image.ImageConverter
     	ij.process.ImageConverter converter = new ij.process.ImageConverter(image);
         converter.convertToGray8();
-        return convertGreyscale(image);
+        return convert8bitToStack(image);
     }
 
     /**

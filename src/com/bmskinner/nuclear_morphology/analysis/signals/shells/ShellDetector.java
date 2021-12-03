@@ -422,7 +422,7 @@ public class ShellDetector extends Detector {
          * @throws UnloadableImageException
          */
         private long getPixelIntensity(@NonNull CellularComponent s) throws UnloadableImageException {
-        	ImageProcessor ip = s.getGreyscaleImage();
+        	ImageProcessor ip = ImageImporter.importFullImageTo8bit(s);
         	return getPixelIntensity(ip, s.toOriginalShape());
         }
 
@@ -479,24 +479,14 @@ public class ShellDetector extends Detector {
 		}
 
 		@Override
-		public int getWidth() {
-			return (int) shellRoi.getBounds().getWidth();
+		public double getWidth() {
+			return shellRoi.getBounds().getWidth();
 		}
 
 		@Override
-		public int getHeight() {
-			return (int) shellRoi.getBounds().getHeight();
+		public double getHeight() {
+			return shellRoi.getBounds().getHeight();
 		}
-
-        /**
-         * Get the bounds of the shell
-         * 
-         * @return
-         */
-        @Override
-		public Rectangle getBounds() {
-            return shellRoi.getBounds();
-        }
 
         public Shape toShape() {
             return shellRoi.getPolygon();
@@ -528,36 +518,6 @@ public class ShellDetector extends Detector {
 		@Override
 		public int getChannel() {
 			return source.getChannel();
-		}
-
-		@Override
-		public ImageProcessor getImage() throws UnloadableImageException {
-			return source.getImage();
-		}
-		
-        @Override
-        public ImageProcessor getGreyscaleImage() throws UnloadableImageException {
-            return source.getGreyscaleImage();
-        }
-        
-        @Override
-        public ImageProcessor getGreyscaleComponentImage() throws UnloadableImageException {
-            return source.getGreyscaleComponentImage();
-        }
-
-		@Override
-		public ImageProcessor getRGBImage() throws UnloadableImageException {
-			return source.getRGBImage();
-		}
-
-		@Override
-		public ImageProcessor getComponentImage() throws UnloadableImageException {
-			return source.getComponentImage();
-		}
-
-		@Override
-		public ImageProcessor getComponentRGBImage() throws UnloadableImageException {
-			return source.getComponentRGBImage();
 		}
 
 		@Override

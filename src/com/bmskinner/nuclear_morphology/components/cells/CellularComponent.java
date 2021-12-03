@@ -22,7 +22,6 @@ import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nuclear_morphology.analysis.detection.Mask;
 import com.bmskinner.nuclear_morphology.components.Imageable;
 import com.bmskinner.nuclear_morphology.components.Rotatable;
 import com.bmskinner.nuclear_morphology.components.Statistical;
@@ -55,6 +54,9 @@ public interface CellularComponent extends Imageable, XmlSerializable,
     String NUCLEAR_LOBE           = "NuclearLobe";
     String NUCLEAR_BORDER_SEGMENT = "NuclearBorderSegment";
     
+    /** The default pixel/micron scale */
+    double DEFAULT_SCALE = 1;
+    
     /**
      * Get the UUID of the object
      * 
@@ -75,7 +77,7 @@ public interface CellularComponent extends Imageable, XmlSerializable,
      * 
      * @return
      */
-    boolean isSmoothByDefault();
+//    boolean isSmoothByDefault();
 
     /**
      * If any stats are listed as uncalculated, attempt to calculate them
@@ -340,25 +342,6 @@ public interface CellularComponent extends Imageable, XmlSerializable,
      * @return
      */
     Roi toOriginalRoi();
-
-    /**
-     * Create a boolean mask, in which true is within the component and false is
-     * outside the component, for an image centred on the nuclear centre of
-     * mass, of the given size
-     * 
-     * @param height the height of the mask
-     * @param width the width of the mask
-     * @return a mask of size width * height
-     */
-    Mask getBooleanMask(int height, int width);
-
-    /**
-     * Create a boolean mask, in which true is within the nucleus and false is
-     * outside the component, for the original source image of the component
-     * 
-     * @return a mask
-     */
-    Mask getSourceBooleanMask();
 
     /*
      * For two points in the object border, find the point that lies

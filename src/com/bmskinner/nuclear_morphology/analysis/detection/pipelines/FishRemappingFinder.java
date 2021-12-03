@@ -79,7 +79,7 @@ public class FishRemappingFinder extends VoidFinder {
             return null;
         }
 
-        ImageProcessor fp = new ImageImporter(fishImageFile).importToColorProcessor();
+        ImageProcessor fp = ImageImporter.importFileTo24bit(fishImageFile);
         fireDetectionEvent(fp.duplicate(), "FISH image");
 
         fireProgressEvent();

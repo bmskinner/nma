@@ -158,7 +158,7 @@ public class ProfileCreator {
 
         // Reapply any segments that were present in the original profile
         if (!segments.isEmpty()) {
-        	LOGGER.fine("Reapplying segments");
+        	LOGGER.finest("Reapplying segments");
             reapplySegments(target, segments, newProfile);
         }
         return newProfile;

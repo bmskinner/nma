@@ -282,7 +282,7 @@ public class SignalDetector extends Detector {
         ImageProcessor ip = new ImageImporter(sourceFile).importImage(options.getInt(HashOptions.CHANNEL));
         
         Rectangle boundingBox = new Rectangle(n.getXBase(),
-                n.getYBase(), n.getWidth(), n.getHeight());
+                n.getYBase(), (int)n.getWidth(), (int)n.getHeight());
 
         ip.setRoi(boundingBox);
         ImageStatistics statistics = ImageStatistics.getStatistics(ip, Measurements.AREA, new Calibration());

@@ -25,8 +25,6 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -43,27 +41,19 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.jdom2.Element;
 
 import com.bmskinner.nuclear_morphology.analysis.ComponentMeasurer;
-import com.bmskinner.nuclear_morphology.analysis.detection.BooleanMask;
-import com.bmskinner.nuclear_morphology.analysis.detection.Mask;
-import com.bmskinner.nuclear_morphology.analysis.image.ImageConverter;
 import com.bmskinner.nuclear_morphology.components.Imageable;
 import com.bmskinner.nuclear_morphology.components.Statistical;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
-import com.bmskinner.nuclear_morphology.io.ImageImporter;
-import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
-import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 import com.bmskinner.nuclear_morphology.io.XmlSerializable;
 import com.bmskinner.nuclear_morphology.io.xml.XMLReader;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
+import com.bmskinner.nuclear_morphology.utility.ArrayUtils;
 
-import ij.ImageStack;
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
 import ij.process.FloatPolygon;
-import ij.process.ImageProcessor;
 
 /**
  * An abstract implementation of {@link CellularComponent}, which is extended
@@ -76,37 +66,26 @@ import ij.process.ImageProcessor;
  */
 public abstract class DefaultCellularComponent implements CellularComponent {
 	
-	private static final String SOURCE_IMAGE_IS_NOT_AVAILABLE = "Source image is not available";
+//	private static final String SOURCE_IMAGE_IS_NOT_AVAILABLE = "Source image is not available";
 
 	private static final Logger LOGGER = Logger.getLogger(DefaultCellularComponent.class.getName());
     
     /** The pixel spacing between border points after roi interpolation */
 	private static final int INTERPOLATION_INTERVAL_PIXELS = 1;
-	
-	/** The default pixel scale */
-	private static final double DEFAULT_SCALE = 1;
-	
+		
     private final UUID        id;
     
-    /**
-     * The leftmost x position in the object
-     */
+    /** The lowest x position in the object bounding box */
     private final int xBase;
     
-    /**
-     * The lowest y position in the object
-     */
+    /** The lowest y position in the object bounding box */
     private final int yBase;
     
-    /**
-     * The width of the object
-     */
-    private final int width;
+    /** The width of the object bounding box */
+    private final double width;
     
-    /**
-     * The height of the object
-     */
-    private final int height;
+    /** The height of the object bounding box  */
+    private final double height;
 
     /** The current centre of the object. */
     private IPoint centreOfMass;
@@ -114,15 +93,12 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     /** The original centre of the object in its source image. */
     private final IPoint originalCentreOfMass;
 
-    /**
-     * The measurement values stored for this object
-     */
+    /** The measurements stored for this object */
     private Map<Measurement, Double> measurements = new HashMap<>();
 
     /**
      * The source file the component was detected in. This is detected on
-     * dataset loading as a relative path from the .nmd e.g.
-     * C:\MyImageFolder\MyImage.tiff
+     * dataset loading as a relative path from the nmd
      */
     private File sourceFile;
 
@@ -135,27 +111,23 @@ public abstract class DefaultCellularComponent implements CellularComponent {
      * 
      * @see CellularComponent#setScale()
      */
-    private double scale = DEFAULT_SCALE;
+    private double scale = CellularComponent.DEFAULT_SCALE;
 
-    /** The points within the Roi from which the object was detected  */
-    private int[] xpoints; 
-    private int[] ypoints;
+    /** The points within the roi from which the object was detected  */
+    private final int[] xpoints; 
+    private final int[] ypoints;
+    
+    private boolean isReversed = false;
 
-    /**
-     * The complete border list, offset to an appropriate position for the
-     * object
-     */
+    /** The complete border list interpolated from the roi */
     private List<IPoint> borderList = new ArrayList<>();
-
-    /** Cache images while memory is available. */
-    private WeakReference <ImageProcessor> imageRef = new WeakReference <>(null);
 
     /** Cached object shapes. */
     private ShapeCache shapeCache = new ShapeCache();
 
+    /** The object bounding box */
     private Rectangle2D bounds;
 
-    
     /**
      * Construct with an ROI, a source image and channel, and the original
      * position in the source image. It sets the immutable original centre of
@@ -169,7 +141,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
      * @param position the bounding position of the component in the original image
      */
     protected DefaultCellularComponent(@NonNull Roi roi, @NonNull IPoint centreOfMass, File source, int channel, 
-    		int x, int y, int w, int h) {
+    		int x, int y, double w, double h) {
     	this(roi, centreOfMass, source, channel, x, y, w, h, UUID.randomUUID() );
     }
     
@@ -187,8 +159,12 @@ public abstract class DefaultCellularComponent implements CellularComponent {
      * @param id the id of the component. Only use when deserialising!
      */
     protected DefaultCellularComponent(@NonNull Roi roi, @NonNull IPoint centreOfMass, 
-    		File source, int channel, int x, int y, int w, int h, @Nullable UUID id) {
-
+    		File source, int channel, int x, int y, double w, double h, @Nullable UUID id) {
+        
+        // Sanity check: is the CoM inside the roi
+    	if(!doesRoiMatchCom(roi, centreOfMass))
+    		throw new IllegalArgumentException("Centre of mass is not inside ROI");
+        
         this.originalCentreOfMass = IPoint.makeNew(centreOfMass);
         this.centreOfMass = IPoint.makeNew(centreOfMass);
         this.id = id==null ? UUID.randomUUID() : id;
@@ -199,52 +175,60 @@ public abstract class DefaultCellularComponent implements CellularComponent {
         this.width = w;
         this.height = h;
 
-        // Store the original points. From these, the smooth polygon can be
+        // Store the original points of the roi. From these, a smooth polygon can be
         // reconstructed.
-        double epsilon = 1;
         Polygon polygon = roi.getPolygon();
-        Rectangle2D bounds = polygon.getBounds().getFrame();
 
-        // // since small signals can have imprecision on the CoM that puts them
-        // on the border of the
-        // // object, add a small border to consider OK
-
-        double minX = bounds.getX();
-        double maxX = minX + bounds.getWidth();
-
-        minX -= epsilon;
-        maxX += epsilon;
-
-        if (centreOfMass.getX() < minX || centreOfMass.getX() > maxX) {
-            throw new IllegalArgumentException(String.format("The centre of mass X (%d)"
-                    + " must be within the roi x bounds (x = %d-%d)", centreOfMass.getX(), minX, maxX));
-        }
-
-        double minY = bounds.getY();
-        double maxY = minY + bounds.getHeight();
-        minY -= epsilon;
-        maxY += epsilon;
-
-        if (centreOfMass.getY() < minY || centreOfMass.getY() > maxY) {
-            throw new IllegalArgumentException("The centre of mass Y (" + centreOfMass.getY() + ")"
-                    + ") must be within the roi bounds (y = " + minY + "-" + maxY + ")");
-        }
-
-        if (!polygon.contains(centreOfMass.getX(), centreOfMass.getY())) {
-            LOGGER.fine("Centre of mass is not inside the object. You may have a doughnut.");
-        }
-
-        this.xpoints = new int[polygon.npoints];
-        this.ypoints = new int[polygon.npoints];
-
-        // Discard empty indices left in polygon array
-        for (int i = 0; i < polygon.npoints; i++) {
-            this.xpoints[i] = polygon.xpoints[i];
-            this.ypoints[i] = polygon.ypoints[i];
-        }
+        // The polygon may have empty indices in its arrays
+        // so resize these by copying the values to new
+        // arrays
+        this.xpoints = Arrays.copyOfRange(polygon.xpoints, 0, polygon.npoints);
+        this.ypoints = Arrays.copyOfRange(polygon.ypoints, 0, polygon.npoints);
 
         makeBorderList();
+    }
+    
+    /**
+     * Test if the provided centre of mass is within the
+     * the given roi
+     * @param roi
+     * @param com
+     * @return
+     */
+    private boolean doesRoiMatchCom(Roi roi, IPoint com){
+    	    	
+//        double epsilon = 1;
+    	Polygon polygon = roi.getPolygon();
+        Rectangle2D rect = polygon.getBounds().getFrame();
+        
+        return rect.contains(com.getX(), com.getY());
 
+//        // Sanity check: is the CoM inside the roi (with a small buffer)
+//        double minX = rect.getX();
+//        double maxX = minX + rect.getWidth();
+//
+//        minX -= epsilon;
+//        maxX += epsilon;
+//
+//        if (com.getX() < minX || com.getX() > maxX) {
+//            throw new IllegalArgumentException(String.format("The centre of mass X (%d)"
+//                    + " must be within the roi x bounds (x = %d-%d)", com.getX(), minX, maxX));
+//        }
+//
+//        double minY = rect.getY();
+//        double maxY = minY + rect.getHeight();
+//        minY -= epsilon;
+//        maxY += epsilon;
+//
+//        if (com.getY() < minY || com.getY() > maxY) {
+//            throw new IllegalArgumentException("The centre of mass Y (" + com.getY() + ")"
+//                    + ") must be within the roi bounds (y = " + minY + "-" + maxY + ")");
+//        }
+//
+//        if (!polygon.contains(com.getX(), com.getY())) {
+//            LOGGER.fine("Centre of mass is not inside the object. You may have a doughnut.");
+//        }
+//        return true;
     }
     
 
@@ -253,7 +237,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
      * 
      * @param a the template component
      */
-    protected DefaultCellularComponent(CellularComponent a) {
+    protected DefaultCellularComponent(@NonNull CellularComponent a) {
         this.id = UUID.fromString(a.getID().toString());
         this.xBase = a.getXBase();
         this.yBase = a.getYBase();
@@ -269,17 +253,14 @@ public abstract class DefaultCellularComponent implements CellularComponent {
         	setStatistic(stat, a.getStatistic(stat, MeasurementScale.PIXELS));
         }
 
-        if (a instanceof DefaultCellularComponent) {
+        if ( !(a instanceof DefaultCellularComponent))
+        	throw new IllegalArgumentException("Input is incorrect class: "+a.getClass().getName());
 
-            DefaultCellularComponent comp = (DefaultCellularComponent) a;
+        DefaultCellularComponent other = (DefaultCellularComponent) a;
 
-            this.xpoints = Arrays.copyOfRange(comp.xpoints, 0, comp.xpoints.length);
-            this.ypoints = Arrays.copyOf(comp.ypoints, comp.ypoints.length);
-            makeBorderList();
-
-        } else {
-            duplicateBorderList(a);
-        }
+        this.xpoints = Arrays.copyOf(other.xpoints, other.xpoints.length);
+        this.ypoints = Arrays.copyOf(other.ypoints, other.ypoints.length);
+        makeBorderList();
     }
     
     /**
@@ -293,8 +274,8 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     	
     	this.xBase = Integer.parseInt(e.getChildText("XBase"));
         this.yBase = Integer.parseInt(e.getChildText("YBase"));
-        this.width = Integer.parseInt(e.getChildText("Width"));
-        this.height = Integer.parseInt(e.getChildText("Height"));
+        this.width = Double.parseDouble(e.getChildText("Width"));
+        this.height = Double.parseDouble(e.getChildText("Height"));
     	    	
     	String[] comString = e.getChildText("CentreOfMass").split(",");
     	centreOfMass = IPoint.makeNew(Float.parseFloat(comString[0]), Float.parseFloat(comString[1]));
@@ -327,12 +308,18 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     private void makeBorderList() {
 
     	LOGGER.finest(()->"Creating border list from "+xpoints.length+" integer points");
-    	
+
         // Make a copy of the int[] points otherwise creating a polygon roi
         // will reset them to 0,0 coordinates
         int[] xcopy = Arrays.copyOf(xpoints, xpoints.length);
         int[] ycopy = Arrays.copyOf(ypoints, ypoints.length);
-        PolygonRoi roi = new PolygonRoi(xcopy, ycopy, xpoints.length, Roi.TRACED_ROI);
+        
+        if(isReversed) {
+        	xcopy = ArrayUtils.reverse(xcopy);
+        	ycopy = ArrayUtils.reverse(ycopy);
+        }
+        
+        PolygonRoi roi = new PolygonRoi(xcopy, ycopy, xcopy.length, Roi.TRACED_ROI);
 
         // Creating the border list will set everything to the original image
         // position.
@@ -343,21 +330,21 @@ public abstract class DefaultCellularComponent implements CellularComponent {
         borderList = new ArrayList<>();
 
         // convert the roi positions to a list of border points
-        boolean isSmooth = isSmoothByDefault();
         roi.fitSplineForStraightening(); // this prevents the resulting border differing in length between invokations
 
-        FloatPolygon smoothed = roi.getInterpolatedPolygon(1, isSmooth);
+        FloatPolygon smoothed = roi.getInterpolatedPolygon(1, true);
 
         LOGGER.finest( "Interpolated integer list to smoothed list of "+smoothed.npoints);
+                
         for (int i = 0; i < smoothed.npoints; i++) {
             IPoint point = IPoint.makeNew(smoothed.xpoints[i], smoothed.ypoints[i]);
             borderList.add(point);
         }
         moveCentreOfMass(oldCoM);
-        calculateBounds();
+        updateBounds();
     }
 
-    private void calculateBounds() {
+    private void updateBounds() {
         double xMax = -Double.MAX_VALUE;
         double xMin = Double.MAX_VALUE;
         double yMax = -Double.MAX_VALUE;
@@ -370,34 +357,15 @@ public abstract class DefaultCellularComponent implements CellularComponent {
             yMin = p.getY() < yMin ? p.getY() : yMin;
         }
 
-        double w = xMax - xMin;
+        double w  = xMax - xMin;
         double h = yMax - yMin;
-
-        // Constructor for rectangle: upper-left point plus w and h
-        // Note that the coordinates have y increasing downwards, so the upper
-        // point is yMin
+        
         bounds = new Rectangle2D.Double(xMin, yMin, w, h);
-
-    }
-
-    private void duplicateBorderList(CellularComponent c) {
-        // Duplicate the border points
-    	LOGGER.finest( "Duplicating border list from template component");
-        this.borderList = new ArrayList<>(c.getBorderLength());
-
-        for (IPoint p : c.getBorderList()) {
-            borderList.add(p.duplicate());
-        }
-    }
-
-    @Override
-    public boolean isSmoothByDefault() {
-        return true;
     }
 
     @Override
     public @NonNull UUID getID() {
-        return this.id;
+        return id;
     }
 
     @Override
@@ -411,13 +379,13 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	}
 
 	@Override
-	public int getWidth() {
-		return width;
+	public double getWidth() {
+		return bounds.getWidth();
 	}
 
 	@Override
-	public int getHeight() {
-		return height;
+	public double getHeight() {
+		return bounds.getHeight();
 	}
 
 	@Override
@@ -428,11 +396,6 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     @Override
     public IPoint getBase() {
         return IPoint.makeNew(bounds.getMinX(), bounds.getMinY());
-    }
-
-    @Override
-    public Rectangle2D getBounds() {
-        return bounds;
     }
 
     /**
@@ -483,128 +446,6 @@ public abstract class DefaultCellularComponent implements CellularComponent {
         }
         return trimmed;
     }
-
-    @Override
-	public ImageProcessor getImage() throws UnloadableImageException {
-        ImageProcessor ip = imageRef.get();
-        if (ip != null)
-            return ip;
-        if (!getSourceFile().exists())
-        	throw new UnloadableImageException("Source image is not available: "+getSourceFile().getAbsolutePath());
-
-        try {
-        	ip = new ImageImporter(getSourceFile()).importImage(getChannel());
-        	ip = new ImageConverter(ip).convertToRGBGreyscale().invert().toProcessor();
-
-        	imageRef = new WeakReference<>(ip);
-        	return ip;
-        } catch (ImageImportException e) {
-        	LOGGER.log(Loggable.STACK, "Error importing source image " + this.getSourceFile().getAbsolutePath(), e);
-        	throw new UnloadableImageException(SOURCE_IMAGE_IS_NOT_AVAILABLE);
-        }
-    }
-    
-    @Override
-    public ImageProcessor getGreyscaleImage() throws UnloadableImageException {
-
-        if (!getSourceFile().exists())
-            throw new UnloadableImageException("Source image is not available: "+getSourceFile().getAbsolutePath());
-
-        // Get the stack, make greyscale and invert
-        int stack = ImageImporter.rgbToStack(getChannel());
-
-        try {
-            ImageStack imageStack = new ImageImporter(getSourceFile()).importToStack();
-            return imageStack.getProcessor(stack);
-        } catch (ImageImportException e) {
-            LOGGER.log(Loggable.STACK, "Error importing source image " + this.getSourceFile().getAbsolutePath(), e);
-            throw new UnloadableImageException(SOURCE_IMAGE_IS_NOT_AVAILABLE);
-        }
-
-    }
-
-    @Override
-    public ImageProcessor getRGBImage() throws UnloadableImageException {
-        if (!getSourceFile().exists())
-            throw new UnloadableImageException("Source image is not available: "+getSourceFile().getAbsolutePath());
-        return new ImageImporter(getSourceFile()).importToColorProcessor();
-    }
-
-    @Override
-	public ImageProcessor getComponentImage() throws UnloadableImageException {
-        ImageProcessor ip = getImage().duplicate();
-
-        if (ip == null) {
-            throw new UnloadableImageException(SOURCE_IMAGE_IS_NOT_AVAILABLE);
-        }
-
-        int padding = Imageable.COMPONENT_BUFFER; // a border of pixels
-                                                          // beyond the cell
-                                                          // boundary
-        int wideW = width + (padding * 2);
-        int wideH = height + (padding * 2);
-        int wideX = xBase - padding;
-        int wideY = yBase - padding;
-
-        wideX = wideX < 0 ? 0 : wideX;
-        wideY = wideY < 0 ? 0 : wideY;
-
-        ip.setRoi(wideX, wideY, wideW, wideH);
-        ip = ip.crop();
-
-        return ip;
-    }
-    
-    @Override
-    public ImageProcessor getGreyscaleComponentImage() throws UnloadableImageException {
-    	ImageProcessor ip = getGreyscaleImage().duplicate();
-    	if (ip == null) {
-            throw new UnloadableImageException(SOURCE_IMAGE_IS_NOT_AVAILABLE);
-        }
-
-        int padding = Imageable.COMPONENT_BUFFER; // a border of pixels
-                                                          // beyond the cell
-                                                          // boundary
-        int wideW = width + (padding * 2);
-        int wideH = height + (padding * 2);
-        int wideX = xBase - padding;
-        int wideY = yBase - padding;
-
-        wideX = wideX < 0 ? 0 : wideX;
-        wideY = wideY < 0 ? 0 : wideY;
-
-        ip.setRoi(wideX, wideY, wideW, wideH);
-        ip = ip.crop();
-
-        return ip;
-    }
-
-    @Override
-	public ImageProcessor getComponentRGBImage() throws UnloadableImageException {
-        ImageProcessor ip = getRGBImage().duplicate();
-
-        if (ip == null) {
-            throw new UnloadableImageException(SOURCE_IMAGE_IS_NOT_AVAILABLE);
-        }
-
-        int padding = Imageable.COMPONENT_BUFFER; // a border of pixels
-                                                          // beyond the cell
-                                                          // boundary
-        int wideW = width + (padding * 2);
-        int wideH = height + (padding * 2);
-        int wideX = xBase - padding;
-        int wideY = yBase - padding;
-
-        wideX = wideX < 0 ? 0 : wideX;
-        wideY = wideY < 0 ? 0 : wideY;
-
-        ip.setRoi(wideX, wideY, wideW, wideH);
-        ip = ip.crop();
-
-        return ip;
-    }
-
-
 
     @Override
 	public int getChannel() {
@@ -797,7 +638,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 
         // Fast check - is the point within the bounding rectangle moved to the
         // original position?
-        Rectangle r = new Rectangle(xBase, yBase, width, height);
+        Rectangle r = new Rectangle(xBase, yBase, (int)width, (int)height);
         if (!r.contains(x, y))
             return false;
         return this.toOriginalShape().contains(x, y);
@@ -901,24 +742,16 @@ public abstract class DefaultCellularComponent implements CellularComponent {
         }
 
         this.centreOfMass.offset(xOffset, yOffset);
-        calculateBounds();
+        updateBounds();
 
     }
 
     @Override
 	public void reverse() {
     	LOGGER.fine("Reversing component border list");
-        int[] newXpoints = new int[xpoints.length];
-        int[] newYpoints = new int[xpoints.length];
-
-        for (int i = xpoints.length - 1, j = 0; j < xpoints.length; i--, j++) {
-            newXpoints[j] = xpoints[i];
-            newYpoints[j] = ypoints[i];
-        }
-        xpoints = newXpoints;
-        ypoints = newYpoints;
-
+        isReversed = !isReversed;
         makeBorderList(); // Recreate the border list from the new key points
+        
     }
 
     /**
@@ -1057,60 +890,6 @@ public abstract class DefaultCellularComponent implements CellularComponent {
         return CellularComponent.wrapIndex(d, this.getBorderLength());
     }
 
-    /**
-     * Create a boolean mask, in which 1 is within the nucleus and 0 is outside
-     * the nucleus, for an image centred on the nuclear centre of mass, of the
-     * given size
-     * 
-     * @param height
-     * @param width
-     * @return
-     */
-    @Override
-	public Mask getBooleanMask(int height, int width) {
-
-        int halfX = width >> 1;
-        int halfY = height >> 1;
-
-        boolean[][] result = new boolean[height][width];
-
-        for (int x = -halfX, aX = 0; aX < width; x++, aX++) {
-            for (int y = -halfY, aY = 0; aY < height; y++, aY++) {
-                result[aY][aX] = this.containsPoint(IPoint.makeNew(x, y));
-            }
-        }
-        return new BooleanMask(result);
-    }
-
-    /**
-     * Create a boolean mask, in which true is within the nucleus and false is
-     * outside the component, for the original source image of the component
-     * 
-     * @return a mask
-     */
-    @Override
-	public Mask getSourceBooleanMask() {
-        boolean[][] result;
-        try {
-
-            int width = this.getImage().getWidth();
-            int height = this.getImage().getHeight();
-
-            result = new boolean[height][width];
-
-            for (int x = 0; x < width; x++) {
-                for (int y = 0; y < height; y++) {
-                    result[x][y] = this.containsPoint(x, y);
-                }
-            }
-
-        } catch (UnloadableImageException e) {
-            LOGGER.warning("Cannot load source image");
-            result = new boolean[10][10];
-        }
-        return new BooleanMask(result);
-    }
-
     /*
      * For two NucleusBorderPoints in a Nucleus, find the point that lies
      * halfway between them Used for obtaining a consensus between potential
@@ -1179,8 +958,8 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     @Override
     public String toString() {
     	 StringBuilder builder = new StringBuilder("\nID: "+id.toString()+"\n");
-    	 builder.append(String.format("Bounds: x: %s-%s y: %s-%s", this.getBase().getX(), this.getBase().getX()+this.getBounds().getWidth(), 
-     			this.getBase().getY(), this.getBase().getY()+this.getBounds().getHeight()));
+    	 builder.append(String.format("Bounds: x: %s-%s y: %s-%s", this.getBase().getX(), this.getBase().getX()+
+    			 this.getWidth(), this.getBase().getY(), this.getBase().getY()+this.getHeight()));
     	 builder.append("\nMeasurements:\n");
     	 for(Entry<Measurement, Double> entry : measurements.entrySet()) {
     		 builder.append(entry.getKey().toString()+": "+entry.getValue().toString()+"\n");
@@ -1296,22 +1075,18 @@ public abstract class DefaultCellularComponent implements CellularComponent {
         int[] ycopy = Arrays.copyOf(ypoints, ypoints.length);
         PolygonRoi roi = new PolygonRoi(xcopy, ycopy, xpoints.length, Roi.TRACED_ROI);
 
-        // Creating the border list will set everything to the original image
-        // position.
+        // Creating the border list will set everything to the original image position.
         // Move the border list back over the CoM if needed.
         IPoint oldCoM = IPoint.makeNew(centreOfMass);
         centreOfMass = IPoint.makeNew(originalCentreOfMass);
 
         borderList = new ArrayList<>();
 
-        // convert the roi positions to a list of border points
-        // Each object decides whether it should be smoothed.
-        boolean isSmooth = isSmoothByDefault();
-        
+        // convert the roi positions to a list of border points    
         if(useSplineFitting)
         	roi.fitSplineForStraightening(); // this prevents the resulting border differing in length between invokations
                 
-        FloatPolygon smoothed = roi.getInterpolatedPolygon(INTERPOLATION_INTERVAL_PIXELS, isSmooth);
+        FloatPolygon smoothed = roi.getInterpolatedPolygon(INTERPOLATION_INTERVAL_PIXELS, true);
 
         LOGGER.finest( "Interpolated integer list to smoothed list of "+smoothed.npoints);
         for (int i = 0; i < smoothed.npoints; i++) {
@@ -1320,25 +1095,9 @@ public abstract class DefaultCellularComponent implements CellularComponent {
         }
 
         moveCentreOfMass(oldCoM);
-        calculateBounds();
+        updateBounds();
         LOGGER.finest( "Component has "+getBorderLength()+" border points");
 
-    }
-
-	private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-
-        in.defaultReadObject();
-
-        // Fill the transient fields
-        imageRef = new WeakReference<>(null);
-        shapeCache = new ShapeCache();
-
-        // needs to be traced to allow interpolation into the border list
-        makeBorderList();
-    }
-
-    private synchronized void writeObject(java.io.ObjectOutputStream out) throws IOException {
-        out.defaultWriteObject();
     }
 
     /*
@@ -1370,7 +1129,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
                 p.set(result);
             }
         }
-        calculateBounds();
+        updateBounds();
         shapeCache.clear();
     }
 

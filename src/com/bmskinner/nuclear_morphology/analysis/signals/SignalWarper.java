@@ -209,7 +209,7 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> {
 		    
 		    if(warpingOptions.getBoolean(SignalWarpingRunSettings.IS_NORMALISE_TO_COUNTERSTAIN_KEY)) {
 		    	ip = new ImageFilterer(ip)
-		    	.normaliseToCounterStain(n.getGreyscaleImage())
+		    	.normaliseToCounterStain(ImageImporter.importFullImageTo8bit(n))
 		    	.toProcessor();
 		    	
 		    	// The actual floating point values may not be visible to the human eye

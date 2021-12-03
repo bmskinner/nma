@@ -411,8 +411,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
                         Mesh mesh2 = new DefaultMesh(options.firstDataset().getCollection().getConsensus(),
                                 mesh1);
 
-                        //
-                        ImageProcessor nucleusIP = options.getCell().getPrimaryNucleus().getImage();
+                        ImageProcessor nucleusIP = ImageImporter.importFullImageTo24bit(options.getCell().getPrimaryNucleus());
 
                         // Create a mesh image from the nucleus
                         MeshImage im = new DefaultMeshImage(mesh1, nucleusIP);
@@ -864,7 +863,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 
         ImageProcessor openProcessor;
         try {
-        	ImageConverter ic = new ImageConverter(component.getGreyscaleImage()).invert();
+        	ImageConverter ic = new ImageConverter(ImageImporter.importFullImageTo8bit(component)).invert();
         	openProcessor = ic.convertToRGBGreyscale().toProcessor();
         } catch (UnloadableImageException e) {
             return;

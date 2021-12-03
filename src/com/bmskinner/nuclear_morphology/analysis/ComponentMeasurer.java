@@ -102,10 +102,10 @@ public final class ComponentMeasurer {
         	return calculateRegularity(n);
 
         if (Measurement.BOUNDING_HEIGHT.equals(m))
-        	return  n.getOrientedNucleus().getBounds().getHeight();
+        	return  n.getOrientedNucleus().getHeight();
 
         if (Measurement.BOUNDING_WIDTH.equals(m))
-        	return  n.getOrientedNucleus().getBounds().getWidth();
+        	return  n.getOrientedNucleus().getWidth();
         
         if (Measurement.BODY_WIDTH.equals(m))
         	return calculateBodyWidth(n);
@@ -206,8 +206,8 @@ public final class ComponentMeasurer {
      * @return
      */
     private static double calculateElongation(@NonNull final Nucleus n) {
-    	double h = n.getOrientedNucleus().getBounds().getHeight();
-        double w = n.getOrientedNucleus().getBounds().getWidth();
+    	double h = n.getOrientedNucleus().getHeight();
+        double w = n.getOrientedNucleus().getWidth();
         return (h-w)/(h+w);
     }
 
@@ -217,8 +217,8 @@ public final class ComponentMeasurer {
      * @return
      */
     private static double calculateRegularity(@NonNull final Nucleus n) {
-    	double h = n.getOrientedNucleus().getBounds().getHeight();
-        double w = n.getOrientedNucleus().getBounds().getWidth();
+    	double h = n.getOrientedNucleus().getHeight();
+        double w = n.getOrientedNucleus().getWidth();
         double a = n.getStatistic(Measurement.AREA);
         return (Math.PI*h*w)/(4*a);
     }
@@ -236,8 +236,8 @@ public final class ComponentMeasurer {
      * @return
      */
     private static double calculateEllipticity(@NonNull final Nucleus n) {
-        double h = n.getOrientedNucleus().getBounds().getHeight();
-        double w = n.getOrientedNucleus().getBounds().getWidth();
+        double h = n.getOrientedNucleus().getHeight();
+        double w = n.getOrientedNucleus().getWidth();
 
         return h / w;
     }

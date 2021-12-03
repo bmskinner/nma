@@ -49,6 +49,7 @@ import com.bmskinner.nuclear_morphology.components.signals.IShellResult.ShrinkTy
 import com.bmskinner.nuclear_morphology.components.signals.ISignalCollection;
 import com.bmskinner.nuclear_morphology.gui.components.SelectableCellIcon;
 import com.bmskinner.nuclear_morphology.io.ImageImportWorker;
+import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.Io;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -148,16 +149,12 @@ public class ShellOverviewDialog extends AbstractCellCollectionDialog {
 	private ImageProcessor renderFullImage(ICell c){
     	ImageProcessor ip;
 
-        try {
-            if (c.hasCytoplasm()) {
-                ip = c.getCytoplasm().getComponentRGBImage();
-            } else {
-                ip = c.getPrimaryNucleus().getComponentImage();
-            }
-        } catch (UnloadableImageException e) {
-            LOGGER.log(Loggable.STACK, "Cannot load image for component", e);
-            return null;
-        }
+    	if (c.hasCytoplasm()) {
+    		ip = ImageImporter.importCroppedImageTo24bit(c.getCytoplasm());
+    	} else {
+    		ip = ImageImporter.importCroppedImageTo24bit(c.getPrimaryNucleus());
+    	}
+
         
         if(!dataset.getCollection().getSignalManager().hasShellResult())
             return ip;

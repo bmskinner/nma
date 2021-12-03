@@ -428,14 +428,23 @@ public abstract class AbstractImageFilterer {
      * @return
      */
     public AbstractImageFilterer crop(@NonNull ICell c) {
-
-        if (ip == null)
+    	ip = crop(ip, c);
+    	return this;
+    }
+    
+    /**
+     * Crop the image to the region covered by the given cell.
+     * 
+     * @return
+     */
+    public static ImageProcessor crop(ImageProcessor ip, ICell c) {
+    	if (ip == null)
             throw new IllegalArgumentException("Image processor is null");
         
         if(c.hasCytoplasm()) {
-        	return crop(c.getCytoplasm());
+        	return crop(ip, c.getCytoplasm());
         }
-        return crop(c.getPrimaryNucleus());
+        return crop(ip, c.getPrimaryNucleus());
     }
     
     /**
@@ -444,12 +453,23 @@ public abstract class AbstractImageFilterer {
      * @return
      */
     public AbstractImageFilterer crop(@NonNull CellularComponent c) {
-
-        if (ip == null)
+        ip = crop(ip, c);
+        return this;
+    }
+    
+    /**
+     * Crop the image to the region covered by the given component
+     * 
+     * @param ip the image to crop
+     * @param c the component to crop boundaries from 
+     * @return
+     */
+    public static ImageProcessor crop(ImageProcessor ip, CellularComponent c) {
+    	if (ip == null)
             throw new IllegalArgumentException("Image processor is null");
         // Choose a clip for the image (an enlargement of the original nucleus ROI
-        int wideW = c.getWidth() + CellularComponent.COMPONENT_BUFFER*2;
-        int wideH = c.getHeight() + CellularComponent.COMPONENT_BUFFER*2;
+        int wideW = (int)c.getWidth() + CellularComponent.COMPONENT_BUFFER*2;
+        int wideH = (int)c.getHeight() + CellularComponent.COMPONENT_BUFFER*2;
         int wideX = c.getXBase() - CellularComponent.COMPONENT_BUFFER;
         int wideY = c.getYBase() - CellularComponent.COMPONENT_BUFFER;
 
@@ -457,8 +477,7 @@ public abstract class AbstractImageFilterer {
         wideY = wideY < 0 ? 0 : wideY;
 
         ip.setRoi(wideX, wideY, wideW, wideH);
-        ip = ip.crop();
-        return this;
+        return ip.crop();
     }
     
     /**

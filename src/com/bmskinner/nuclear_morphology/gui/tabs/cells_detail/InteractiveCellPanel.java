@@ -325,14 +325,14 @@ public class InteractiveCellPanel extends JPanel {
 		if(displayOptions.getBoolean(CellDisplayOptions.WARP_IMAGE))
 			return createWarpImage();
 		
-		ImageProcessor ip = ImageImporter.importImage(cell, component);
+		ImageProcessor ip = ImageImporter.importCroppedImageTo24bit(cell, component);
 		
 		// Expand or shrink the canvas to fit the panel
 		return ImageAnnotator.resizeKeepingAspect(ip, getWidth(), getHeight()).getBufferedImage();
 	}
 
 	private BufferedImage createWarpImage() {
-		ImageProcessor ip = ImageImporter.importImage(component);
+		ImageProcessor ip = ImageImporter.importFullImageTo24bit(component);
 		try {
 			Mesh consensusMesh = new DefaultMesh(dataset.getCollection().getConsensus());
 			for(Nucleus n : cell.getNuclei()) {

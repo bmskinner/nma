@@ -28,6 +28,7 @@ import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
@@ -55,7 +56,7 @@ public class ColourMeasurometer {
      */
     public int calculateAverageIntensity(CellularComponent component) throws UnloadableImageException {
         Area a = new Area(component.toOriginalShape());
-        return calculateAverageIntensity(a, component.getImage(), Stats.MEDIAN);
+        return calculateAverageIntensity(a, ImageImporter.importFullImageTo24bit(component), Stats.MEDIAN);
     }
 
     /**
@@ -181,7 +182,7 @@ public class ColourMeasurometer {
         }
 
         Area a = new Area(component.toOriginalShape());
-        return calculateAverageRGB(a, component.getRGBImage());
+        return calculateAverageRGB(a, ImageImporter.importFullImageTo24bit(component));
 
     }
 
@@ -207,7 +208,7 @@ public class ColourMeasurometer {
             a.subtract(an);
         }
 
-        return calculateAverageRGB(a, comp.getRGBImage());
+        return calculateAverageRGB(a, ImageImporter.importFullImageTo24bit(comp));
     }
 
     /**
