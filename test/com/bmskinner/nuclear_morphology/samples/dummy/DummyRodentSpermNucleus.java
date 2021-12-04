@@ -143,14 +143,8 @@ public class DummyRodentSpermNucleus extends DummyCellularComponent implements N
 	}
 
 	@Override
-	public ISegmentedProfile getProfile(@NonNull ProfileType type) throws MissingProfileException, ProfileException {
+	public ISegmentedProfile getProfile(@NonNull ProfileType type) throws MissingProfileException, ProfileException, MissingLandmarkException {
 		return nucleus.getProfile(type);
-	}
-
-	@Override
-	public void setProfile(@NonNull ProfileType type, @NonNull ISegmentedProfile profile) {
-		nucleus.setProfile(type, profile);
-		
 	}
 
 	@Override
@@ -197,11 +191,6 @@ public class DummyRodentSpermNucleus extends DummyCellularComponent implements N
 	}
 
 	@Override
-	public Landmark getBorderTag(@NonNull Landmark tag, int index) throws MissingLandmarkException {
-		return nucleus.getBorderTag(tag, index);
-	}
-
-	@Override
 	public Landmark getBorderTag(int index) {
 	    return nucleus.getBorderTag(index);
 	}
@@ -209,16 +198,6 @@ public class DummyRodentSpermNucleus extends DummyCellularComponent implements N
 	@Override
 	public boolean hasLandmark(@NonNull Landmark tag) {
 		return nucleus.hasLandmark(tag);
-	}
-
-	@Override
-	public boolean hasBorderTag(@NonNull Landmark tag, int i) {
-		return nucleus.hasBorderTag(tag, i);
-	}
-
-	@Override
-	public boolean hasBorderTag(int index) {
-		return nucleus.hasBorderTag(index);
 	}
 
 	@Override
@@ -232,15 +211,15 @@ public class DummyRodentSpermNucleus extends DummyCellularComponent implements N
 	}
 
 	@Override
-	public void setProfile(@NonNull ProfileType type, @NonNull Landmark tag,
-			@NonNull ISegmentedProfile profile) {
-		setProfile(type, profile);
+	public void setSegments(@NonNull Landmark tag,
+			@NonNull ISegmentedProfile profile) throws MissingLandmarkException, ProfileException {
+		nucleus.setSegments(tag, profile);
 		
 	}
 
 	@Override
-	public Map<Landmark, Integer> getBorderTags() {
-		return nucleus.getBorderTags();
+	public Map<Landmark, Integer> getLandmarks() {
+		return nucleus.getLandmarks();
 	}
 
 	@Override
@@ -249,14 +228,8 @@ public class DummyRodentSpermNucleus extends DummyCellularComponent implements N
 	}
 
 	@Override
-	public int getOffsetBorderIndex(@NonNull Landmark reference, int index) throws MissingLandmarkException {
-		return nucleus.getOffsetBorderIndex(reference, index);
-	}
-
-	
-	@Override
-	public double getDistanceFromCoMToBorderAtAngle(double angle) {
-		return nucleus.getDistanceFromCoMToBorderAtAngle(angle);
+	public int getIndexRelativeTo(@NonNull Landmark reference, int index) throws MissingLandmarkException {
+		return nucleus.getIndexRelativeTo(reference, index);
 	}
 
 	@Override

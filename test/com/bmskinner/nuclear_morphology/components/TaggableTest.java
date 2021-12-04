@@ -99,7 +99,7 @@ public class TaggableTest {
 		assertTrue(oldProfile.update(seg0, newStart, newEnd));
 		
 		// Put the updated profile back into the nucleus
-		taggable.setProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, oldProfile);
+		taggable.setSegments(Landmark.REFERENCE_POINT, oldProfile);
 		
 		// Confirm everything was saved properly
 		ISegmentedProfile newProfile = taggable.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
@@ -122,7 +122,7 @@ public class TaggableTest {
 		ISegmentedProfile templateProfile = new SegmentedFloatProfile(oldProfile);
 		
 		// Set the profile of the object to the newly created profile
-		taggable.setProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, templateProfile);
+		taggable.setSegments(Landmark.REFERENCE_POINT, templateProfile);
 		
 		// Fetch the profile back out from the object
 		ISegmentedProfile testProfile  = taggable.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
@@ -152,7 +152,7 @@ public class TaggableTest {
 		ISegmentedProfile templateProfile = new SegmentedFloatProfile(oldProfile.toFloatArray());
 		
 		// Set the profile of the object to the newly created profile
-		taggable.setProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, templateProfile);
+		taggable.setSegments(Landmark.REFERENCE_POINT, templateProfile);
 		
 		// Fetch the profile back out from the object
 		ISegmentedProfile testProfile  = taggable.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
@@ -187,7 +187,7 @@ public class TaggableTest {
 		
 		UUID newId = UUID.randomUUID();
 		profile.mergeSegments(segId1, segId2, newId);
-		taggable.setProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, profile);
+		taggable.setSegments(Landmark.REFERENCE_POINT, profile);
 		
 		ISegmentedProfile result = taggable.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
 		

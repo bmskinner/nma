@@ -407,7 +407,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
 	 * @param plot the plot to draw the domain markers on
 	 */
 	protected void addBorderTagMarkers(@NonNull Taggable n, @NonNull XYPlot plot) {
-		for (Landmark tag : n.getBorderTags().keySet()) {
+		for (Landmark tag : n.getLandmarks().keySet()) {
 			try {
 				// get the index of the tag
 				int index = n.getBorderIndex(tag);

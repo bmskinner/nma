@@ -112,7 +112,7 @@ public class ProfileRefoldMethod extends SingleDatasetAnalysisMethod {
     	// Ensure segments are applied to the new nucleus
     	ISegmentedProfile profile = refoldNucleus.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
     	profile.setSegments(n.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT).getOrderedSegments());
-    	refoldNucleus.setProfile(ProfileType.ANGLE, profile);
+    	refoldNucleus.setSegments(Landmark.REFERENCE_POINT, profile);
 
     	collection.setConsensus(refoldNucleus);
 

@@ -212,8 +212,9 @@ public class ProfileIndexFinder {
      * @throws NoDetectedIndexException if no indexes were found
      * @throws MissingProfileException 
      * @throws ProfileException 
+     * @throws MissingLandmarkException 
      */
-    public static int identifyIndex(@NonNull final Taggable t, @NonNull final List<RuleSet> list) throws NoDetectedIndexException, MissingProfileException, ProfileException {
+    public static int identifyIndex(@NonNull final Taggable t, @NonNull final List<RuleSet> list) throws NoDetectedIndexException, MissingProfileException, ProfileException, MissingLandmarkException {
     	 if (list == null || list.isEmpty())
              throw new IllegalArgumentException(RULESET_EMPTY_ERROR);
     	 BooleanProfile indexes = new BooleanProfile(t.getBorderLength(), true);

@@ -225,7 +225,7 @@ public class DatasetValidator {
 				for (Nucleus n : c.getNuclei()) {
 					try {
 						n.getProfile(type);
-					} catch (MissingProfileException | ProfileException e) {
+					} catch (MissingProfileException | ProfileException | MissingLandmarkException e) {
 						errorList.add(String.format("Nucleus %s does not have %s profile", n.getNameAndNumber(), type));
 						errorCells.add(c);
 						withErrors++;

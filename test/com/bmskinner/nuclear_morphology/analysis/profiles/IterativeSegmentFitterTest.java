@@ -142,7 +142,7 @@ public class IterativeSegmentFitterTest extends ComponentTester {
 		for(Nucleus n : d.getCollection().getNuclei()) {
 			IProfile nucleusProfile  = n.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
 			ISegmentedProfile segProfile = fitter.fit(nucleusProfile);
-			n.setProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, segProfile);
+			n.setSegments(Landmark.REFERENCE_POINT, segProfile);
 			if(segProfile.getSegmentCount()!=singleSegmentProfile.getSegmentCount())
 				fail("Segments could not be fitted to nucleus");
 			

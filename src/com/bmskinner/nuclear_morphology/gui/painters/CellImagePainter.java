@@ -108,7 +108,7 @@ public class CellImagePainter implements ImagePainter {
 			// Draw the landmarks
 			g2.setStroke(new BasicStroke(5));
 			
-			for(Landmark lm : n.getBorderTags().keySet()) {
+			for(Landmark lm : n.getLandmarks().keySet()) {
 				IPoint lp = n.getBorderPoint(lm).minus(n.getBase()).plus(CellularComponent.COMPONENT_BUFFER);
 				x = lp.getX()*ratio;
 	            y = lp.getY()*ratio;
@@ -190,7 +190,7 @@ public class CellImagePainter implements ImagePainter {
 				g2.setColor(Color.CYAN);
 
 				// Highlight the border depending on what border tags are present
-				for(Landmark lm : cell.getPrimaryNucleus().getBorderTags().keySet()) {
+				for(Landmark lm : cell.getPrimaryNucleus().getLandmarks().keySet()) {
 					IPoint lp = cell.getPrimaryNucleus()
 							.getBorderPoint(lm)
 							.minus(cell.getPrimaryNucleus().getBase())

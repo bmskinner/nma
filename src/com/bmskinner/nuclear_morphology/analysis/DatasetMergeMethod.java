@@ -31,6 +31,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.analysis.signals.PairedSignalGroups;
 import com.bmskinner.nuclear_morphology.analysis.signals.PairedSignalGroups.DatasetSignalId;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.datasets.DefaultAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.DefaultCellCollection;
@@ -195,7 +196,12 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
         
         for(Nucleus n : newCollection.getNuclei()) {
         	for(ProfileType t : ProfileType.values())
-        		n.getProfile(t).clearSegments();
+				try {
+					n.getProfile(t).clearSegments();
+				} catch (MissingProfileException | MissingLandmarkException | ProfileException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
         		n.setLocked(true); // Ensure tags will not be overwritten by downstream resegmentation
         }
         

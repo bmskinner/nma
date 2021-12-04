@@ -287,7 +287,7 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 				n.setLocked(false);
 			IProfile nucleusProfile  = n.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
 			ISegmentedProfile segProfile = fitter.fit(nucleusProfile);
-			n.setProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, segProfile);
+			n.setSegments(Landmark.REFERENCE_POINT, segProfile);
 			if(segProfile.getSegmentCount()!=template.getSegmentCount())
 				throw new ProfileException("Segments could not be fitted to nucleus");
 			if(template.getSegmentCount()==1) {

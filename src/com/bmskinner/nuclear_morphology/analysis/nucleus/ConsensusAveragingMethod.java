@@ -154,7 +154,7 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
         	for(IProfileSegment s : newSegs)
         		LOGGER.finest(s.toString());
         	profile.setSegments(newSegs);
-        	n.setProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, profile);
+        	n.setSegments(Landmark.REFERENCE_POINT, profile);
         }
     }
     
@@ -220,7 +220,7 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
                     List<IPoint> list = perimeterPoints.get(fractionOfPerimeter);
 
                     int indexInProfile = p.getIndexOfFraction(fractionOfPerimeter);
-                    int borderIndex    = v.getOffsetBorderIndex(Landmark.REFERENCE_POINT, indexInProfile);
+                    int borderIndex    = v.getIndexRelativeTo(Landmark.REFERENCE_POINT, indexInProfile);
                     IPoint point = v.getBorderPoint(borderIndex);
                     list.add(point);
                 }

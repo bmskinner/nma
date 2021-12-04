@@ -44,7 +44,7 @@ public class DatasetMergeMethodTest {
 		
 		// Move all tags except RP by a fixed distance
 		for(Nucleus n : d1.getCollection().getNuclei()) {
-			Map<Landmark, Integer> tags = n.getBorderTags();
+			Map<Landmark, Integer> tags = n.getLandmarks();
 			for(Landmark tag : tags.keySet()) {
 				if(Landmark.REFERENCE_POINT.equals(tag))
 					continue;
@@ -69,7 +69,7 @@ public class DatasetMergeMethodTest {
 		// Are tag positions properly restored?
 		for(Nucleus n : d1.getCollection().getNuclei()) {
 			Nucleus test = result.getCollection().getNucleus(n.getID()).get();
-			Map<Landmark, Integer> tags = n.getBorderTags();
+			Map<Landmark, Integer> tags = n.getLandmarks();
 			for(Landmark tag : tags.keySet()) {
 				if(Landmark.REFERENCE_POINT.equals(tag))
 					continue;

@@ -92,7 +92,7 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
     	
     	for(Element el : e.getChildren(XML_ORIENTATION)) {
     		OrientationMark name = OrientationMark.valueOf(el.getAttributeValue("name"));
-    		Landmark l = this.getBorderTags().keySet().stream()
+    		Landmark l = this.getLandmarks().keySet().stream()
     				.filter(lm->lm.getName().equals(el.getText()))
     				.findFirst().get();
     		orientationMarks.put(name, l);

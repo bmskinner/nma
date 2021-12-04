@@ -180,7 +180,7 @@ public class ProfileManager {
     		
     		Nucleus template = source.getNucleus(n.getID()).get();
     		
-    		Map<Landmark, Integer> tags = template.getBorderTags();
+    		Map<Landmark, Integer> tags = template.getLandmarks();
     		for(Entry<Landmark, Integer> entry : tags.entrySet()) {
     			
     			// RP should never change in re-segmentation, so don't
@@ -533,30 +533,28 @@ public class ProfileManager {
         int newStart = index;
         int newEnd = seg.getEndIndex();
 
-        int rawOldIndex = n.getOffsetBorderIndex(Landmark.REFERENCE_POINT, startPos);
+        int rawOldIndex = n.getIndexRelativeTo(Landmark.REFERENCE_POINT, startPos);
 
         try {
         	if (profile.update(seg, newStart, newEnd)) {
         		LOGGER.finer( String.format("Updating profile segment %s to %s-%s succeeded", seg.getName(), newStart, newEnd));
         		LOGGER.finer( "Profile now: "+profile.toString());
-        		n.setProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, profile);
+        		n.setSegments(Landmark.REFERENCE_POINT, profile);
         		LOGGER.finest( "Updated nucleus profile with new segment boundaries");
 
         		/*
-        		 * Check the border tags - if they overlap the old index replace
+        		 * Check the landmarks - if they overlap the old index replace
         		 * them.
         		 */
-        		int rawIndex = n.getOffsetBorderIndex(Landmark.REFERENCE_POINT, index);
+        		int rawIndex = n.getIndexRelativeTo(Landmark.REFERENCE_POINT, index);
 
         		LOGGER.finest( "Updating to index " + index + " from reference point");
         		LOGGER.finest( "Raw old border point is index " + rawOldIndex);
         		LOGGER.finest( "Raw new border point is index " + rawIndex);
 
-        		if (n.hasBorderTag(rawOldIndex)) {
-        			Landmark tagToUpdate = n.getBorderTag(rawOldIndex);
-        			LOGGER.fine("Updating tag " + tagToUpdate);
-        			n.setLandmark(tagToUpdate, rawIndex);
-        		}
+        		Landmark landmarkToUpdate = n.getBorderTag(rawOldIndex);
+        		LOGGER.finer("Updating tag " + landmarkToUpdate);
+        		n.setLandmark(landmarkToUpdate, rawIndex);
         		n.updateDependentStats();
 
         	} else {
@@ -728,7 +726,7 @@ public class ProfileManager {
             throw new IllegalArgumentException("Median profile does not have segment 2 with ID "+seg1.getID());
 
         profile.mergeSegments(seg1.getID(), seg2.getID(), newID);
-        p.setProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, profile);
+        p.setSegments(Landmark.REFERENCE_POINT, profile);
     }
 
     /**
@@ -894,7 +892,7 @@ public class ProfileManager {
 
         int targetIndex = nSeg.getProportionalIndex(proportion);
         profile.splitSegment(nSeg, targetIndex, newID1, newID2);
-        t.setProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, profile);
+        t.setSegments(Landmark.REFERENCE_POINT, profile);
 
     }
 
@@ -952,7 +950,7 @@ public class ProfileManager {
     private void unmergeSegments(@NonNull Taggable t, @NonNull UUID id) throws ProfileException, MissingComponentException {
         ISegmentedProfile profile = t.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
         profile.unmergeSegment(id);
-        t.setProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, profile);
+        t.setSegments(Landmark.REFERENCE_POINT, profile);
     }
 
 }

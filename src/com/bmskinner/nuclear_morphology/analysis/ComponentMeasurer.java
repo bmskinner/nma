@@ -48,14 +48,14 @@ import ij.process.FloatPolygon;
  *
  */
 public final class ComponentMeasurer {
-	
+
 	private static final Logger LOGGER = Logger.getLogger(ComponentMeasurer.class.getName());
-	
+
 	/**
 	 * We only use static methods here. Don't allow a public constructor.
 	 */
 	private ComponentMeasurer() {}
-	
+
 	/**
 	 * Calculate a measurement for a component. If the measurement type
 	 * is not valid for the component, Statistical.STAT_NOT_CALCULATED
@@ -66,116 +66,149 @@ public final class ComponentMeasurer {
 	 */
 	public static double calculate(Measurement m, CellularComponent c) {
 		if (Measurement.CIRCULARITY.equals(m))
-        	return calculateCircularity(c);
-        
-        if (Measurement.PERIMETER.equals(m)) {
-     	   return calculatePerimeter(c);
-        }
-        
-        if (Measurement.AREA.equals(m)) {
-      	   return calculateArea(c);
-         }
-        
-        if(!(c instanceof Taggable))
-        	return Statistical.INVALID_OBJECT_TYPE;
-        
-        Taggable t = (Taggable)c;
-        
-        if (Measurement.MIN_DIAMETER.equals(m))
-     	   return calculateMinDiameter(t);
-                
-        if(!(t instanceof Nucleus))
-        	return Statistical.INVALID_OBJECT_TYPE;
-        
-        Nucleus n = (Nucleus)t;
-        
-        if (Measurement.ELLIPTICITY.equals(m))
-        	return calculateEllipticity(n);
-        
-        if (Measurement.ASPECT.equals(m))
-        	return calculateAspect(n);
-        
-        if (Measurement.ELONGATION.equals(m))
-        	return calculateElongation(n);
-                
-        if (Measurement.REGULARITY.equals(m))
-        	return calculateRegularity(n);
+			return calculateCircularity(c);
 
-        if (Measurement.BOUNDING_HEIGHT.equals(m))
-        	return  n.getOrientedNucleus().getHeight();
+		if (Measurement.PERIMETER.equals(m)) {
+			return calculatePerimeter(c);
+		}
 
-        if (Measurement.BOUNDING_WIDTH.equals(m))
-        	return  n.getOrientedNucleus().getWidth();
-        
-        if (Measurement.BODY_WIDTH.equals(m))
-        	return calculateBodyWidth(n);
-        
-        if (Measurement.HOOK_LENGTH.equals(m))
-        	return calculateHookLength(n);
+		if (Measurement.AREA.equals(m)) {
+			return calculateArea(c);
+		}
 
-        return Statistical.STAT_NOT_CALCULATED;
+		if(!(c instanceof Taggable))
+			return Statistical.INVALID_OBJECT_TYPE;
+
+		Taggable t = (Taggable)c;
+
+		if (Measurement.MIN_DIAMETER.equals(m))
+			return calculateMinDiameter(t);
+
+		if(!(t instanceof Nucleus))
+			return Statistical.INVALID_OBJECT_TYPE;
+
+		Nucleus n = (Nucleus)t;
+
+		if (Measurement.ELLIPTICITY.equals(m))
+			return calculateEllipticity(n);
+
+		if (Measurement.ASPECT.equals(m))
+			return calculateAspect(n);
+
+		if (Measurement.ELONGATION.equals(m))
+			return calculateElongation(n);
+
+		if (Measurement.REGULARITY.equals(m))
+			return calculateRegularity(n);
+
+		if (Measurement.BOUNDING_HEIGHT.equals(m))
+			return  n.getOrientedNucleus().getHeight();
+
+		if (Measurement.BOUNDING_WIDTH.equals(m))
+			return  n.getOrientedNucleus().getWidth();
+
+		if (Measurement.BODY_WIDTH.equals(m))
+			return calculateBodyWidth(n);
+
+		if (Measurement.HOOK_LENGTH.equals(m))
+			return calculateHookLength(n);
+
+		return Statistical.STAT_NOT_CALCULATED;
 	}
-	
-    /**
-     * Calculate the circularity of an object
-     * @return
-     */
-    private static double calculateCircularity(@NonNull final CellularComponent c) {
-    	if (c.hasStatistic(Measurement.PERIMETER) && c.hasStatistic(Measurement.AREA)) {
-    		double p = c.getStatistic(Measurement.PERIMETER);
-    		double a = c.getStatistic(Measurement.AREA);
-    		return (Math.PI*4*a)/(p*p);
-    	}
-    	return Statistical.ERROR_CALCULATING_STAT;
-    }
-	
-	
+
+	/**
+    * Go around the border of the object, measuring the angle to the OP. If the
+    * angle is closest to target angle, return the distance to the CoM.
+    * 
+    * @param t the object to measure
+    * @param angle the target angle
+    * @return the distance from the closest border point at the requested angle
+    *         to the CoM
+    */
+	public static double getDistanceFromCoMToBorderAtAngle(Taggable t, double angle) {
+
+		double bestDiff = 180;
+		double bestDistance = 180;
+
+		try {
+			for (int i = 0; i < t.getBorderLength(); i++) {
+				IPoint p = t.getBorderPoint(i);
+				double distance = p.getLengthTo(t.getCentreOfMass());
+				double pAngle = t.getCentreOfMass().findSmallestAngle(p, IPoint.makeNew(0, -10));
+				if (p.getX() < 0)
+					pAngle = 360 - pAngle;
+
+				if (Math.abs(angle - pAngle) < bestDiff) {
+					bestDiff = Math.abs(angle - pAngle);
+					bestDistance = distance;
+				}
+			}
+		}catch(UnavailableBorderPointException e) {
+			LOGGER.warning("Unable to caculate distance from CoM to border");
+		}
+		return bestDistance;
+	}
+
+	/**
+	 * Calculate the circularity of an object
+	 * @return
+	 */
+	private static double calculateCircularity(@NonNull final CellularComponent c) {
+		if (c.hasStatistic(Measurement.PERIMETER) && c.hasStatistic(Measurement.AREA)) {
+			double p = c.getStatistic(Measurement.PERIMETER);
+			double a = c.getStatistic(Measurement.AREA);
+			return (Math.PI*4*a)/(p*p);
+		}
+		return Statistical.ERROR_CALCULATING_STAT;
+	}
+
+
 	/**
 	 * Calculate the perimeter of an object defined by a list of 
 	 * points
 	 * @param points
 	 * @return
 	 */
-    public static double calculatePerimeter(@NonNull final List<IPoint> points) {
+	public static double calculatePerimeter(@NonNull final List<IPoint> points) {
 		double perimeter = 0;
 		for(int i=0; i<points.size()-1; i++) {
 			perimeter += points.get(i)
 					.getLengthTo(points.get(i+1));
 		}
-		
+
 		perimeter += points.get(points.size()-1).getLengthTo(points.get(0));
 		return perimeter;
 	}
-	
-    private static double calculateMinDiameter(@NonNull final Taggable c)  {
-        try {
-            return Arrays.stream(c.getProfile(ProfileType.DIAMETER).toDoubleArray())
-            		.min()
-            		.orElse(Statistical.ERROR_CALCULATING_STAT);
-        } catch (MissingProfileException | ProfileException e) {
-            LOGGER.log(Loggable.STACK, "Error getting diameter profile", e);
-            return Statistical.ERROR_CALCULATING_STAT;
-        }
-    }
-    
-    private static double calculateMaximumDiameter(@NonNull final Taggable c)  {
-        try {
-            return Arrays.stream(c.getProfile(ProfileType.DIAMETER).toDoubleArray())
-            		.max()
-            		.orElse(Statistical.ERROR_CALCULATING_STAT);
-        } catch (MissingProfileException | ProfileException e) {
-            LOGGER.log(Loggable.STACK, "Error getting diameter profile", e);
-            return Statistical.ERROR_CALCULATING_STAT;
-        }
-    }
 
-    /**
-     * Calculate the perimeter of the shape based on the border list.
-     * 
-     * @param c the component to measure
-     * @return the perimeter of the component
-     */
-    private static double calculatePerimeter(@NonNull final CellularComponent c) {
+	private static double calculateMinDiameter(@NonNull final Taggable c)  {
+		try {
+			return Arrays.stream(c.getProfile(ProfileType.DIAMETER).toDoubleArray())
+					.min()
+					.orElse(Statistical.ERROR_CALCULATING_STAT);
+		} catch (MissingProfileException | ProfileException | MissingLandmarkException e) {
+			LOGGER.log(Loggable.STACK, "Error getting diameter profile", e);
+			return Statistical.ERROR_CALCULATING_STAT;
+		}
+	}
+
+	private static double calculateMaximumDiameter(@NonNull final Taggable c)  {
+		try {
+			return Arrays.stream(c.getProfile(ProfileType.DIAMETER).toDoubleArray())
+					.max()
+					.orElse(Statistical.ERROR_CALCULATING_STAT);
+		} catch (MissingProfileException | ProfileException | MissingLandmarkException e) {
+			LOGGER.log(Loggable.STACK, "Error getting diameter profile", e);
+			return Statistical.ERROR_CALCULATING_STAT;
+		}
+	}
+
+	/**
+	 * Calculate the perimeter of the shape based on the border list.
+	 * 
+	 * @param c the component to measure
+	 * @return the perimeter of the component
+	 */
+	private static double calculatePerimeter(@NonNull final CellularComponent c) {
 		double perimeter = 0;
 		try {
 			for(int i=0; i<c.getBorderLength(); i++) {
@@ -189,115 +222,115 @@ public final class ComponentMeasurer {
 		return perimeter;
 	}
 
-    /**
-     * Calculate the area of an object.
-     * 
-     * @param c the component to measure
-     * @return the area of the component
-     */
-    private static double calculateArea(@NonNull final CellularComponent c) {
-        return Stats.area(c.toShape());
-    }
-    
-   
-    
-    /**
-     * Calculate the elongation of the object 
-     * @return
-     */
-    private static double calculateElongation(@NonNull final Nucleus n) {
-    	double h = n.getOrientedNucleus().getHeight();
-        double w = n.getOrientedNucleus().getWidth();
-        return (h-w)/(h+w);
-    }
-
-
-    /**
-     * Calculate the regularity of the object 
-     * @return
-     */
-    private static double calculateRegularity(@NonNull final Nucleus n) {
-    	double h = n.getOrientedNucleus().getHeight();
-        double w = n.getOrientedNucleus().getWidth();
-        double a = n.getStatistic(Measurement.AREA);
-        return (Math.PI*h*w)/(4*a);
-    }
-    
-    /**
-     * Calculate the aspect of the object 
-     * @return
-     */
-    private static double calculateAspect(@NonNull final Nucleus n) {
-    	 return 1d/calculateEllipticity(n);
-    }
-
-    /**
-     * Calculate the ellipticity of the object 
-     * @return
-     */
-    private static double calculateEllipticity(@NonNull final Nucleus n) {
-        double h = n.getOrientedNucleus().getHeight();
-        double w = n.getOrientedNucleus().getWidth();
-
-        return h / w;
-    }
-    
-    /**
-     * Given a test nucleus, determine the hook length. Uses the oriented
-     * nucleus.
-     * @param n
-     */
-    private static double calculateHookLength(@NonNull Nucleus n) {
-
-    	if (!n.hasLandmark(Landmark.TOP_VERTICAL) || !n.hasLandmark(Landmark.BOTTOM_VERTICAL)) {
-    		return Statistical.MISSING_LANDMARK;
-    	}
-
-    	// Get the oriented nucleus
-    	Nucleus t = n.getOrientedNucleus();
-    	try {
-    		double vertX = t.getBorderPoint(Landmark.TOP_VERTICAL).getX();
+	/**
+	 * Calculate the area of an object.
+	 * 
+	 * @param c the component to measure
+	 * @return the area of the component
+	 */
+	private static double calculateArea(@NonNull final CellularComponent c) {
+		return Stats.area(c.toShape());
+	}
 
 
 
-    		/* Find the x values in the bounding box of the vertical nucleus.  */
-    		FloatPolygon p = t.toPolygon();
-    		double minX = p.getBounds().getMinX();
-
-    		return vertX - minX;
-    	} catch (MissingLandmarkException e) {
-    		LOGGER.fine("Unable to calculate hook length: "+e.getMessage());
-    		return Statistical.ERROR_CALCULATING_STAT;
-    	}
-    }
-    
-    /**
-     * Given a test nucleus, determine the body width. Uses the oriented
-     * nucleus.
-     * @param n
-     */
-    private static double calculateBodyWidth(@NonNull Nucleus n) {
-
-    	if (!n.hasLandmark(Landmark.TOP_VERTICAL) || !n.hasLandmark(Landmark.BOTTOM_VERTICAL)) {
-    		return Statistical.MISSING_LANDMARK;
-    	}
-
-    	// Get the oriented nucleus
-    	Nucleus t = n.getOrientedNucleus();
-    	try {
-    		double vertX = t.getBorderPoint(Landmark.TOP_VERTICAL).getX();
+	/**
+	 * Calculate the elongation of the object 
+	 * @return
+	 */
+	private static double calculateElongation(@NonNull final Nucleus n) {
+		double h = n.getOrientedNucleus().getHeight();
+		double w = n.getOrientedNucleus().getWidth();
+		return (h-w)/(h+w);
+	}
 
 
+	/**
+	 * Calculate the regularity of the object 
+	 * @return
+	 */
+	private static double calculateRegularity(@NonNull final Nucleus n) {
+		double h = n.getOrientedNucleus().getHeight();
+		double w = n.getOrientedNucleus().getWidth();
+		double a = n.getStatistic(Measurement.AREA);
+		return (Math.PI*h*w)/(4*a);
+	}
 
-    		/* Find the x values in the bounding box of the vertical nucleus.  */
-    		FloatPolygon p = t.toPolygon();
-    		double maxX = p.getBounds().getMaxX();
+	/**
+	 * Calculate the aspect of the object 
+	 * @return
+	 */
+	private static double calculateAspect(@NonNull final Nucleus n) {
+		return 1d/calculateEllipticity(n);
+	}
 
-    		return maxX- vertX;
-    	} catch (MissingLandmarkException e) {
-    		LOGGER.fine("Unable to calculate body width: "+e.getMessage());
-    		return Statistical.ERROR_CALCULATING_STAT;
-    	}
-    }
+	/**
+	 * Calculate the ellipticity of the object 
+	 * @return
+	 */
+	private static double calculateEllipticity(@NonNull final Nucleus n) {
+		double h = n.getOrientedNucleus().getHeight();
+		double w = n.getOrientedNucleus().getWidth();
+
+		return h / w;
+	}
+
+	/**
+	 * Given a test nucleus, determine the hook length. Uses the oriented
+	 * nucleus.
+	 * @param n
+	 */
+	private static double calculateHookLength(@NonNull Nucleus n) {
+
+		if (!n.hasLandmark(Landmark.TOP_VERTICAL) || !n.hasLandmark(Landmark.BOTTOM_VERTICAL)) {
+			return Statistical.MISSING_LANDMARK;
+		}
+
+		// Get the oriented nucleus
+		Nucleus t = n.getOrientedNucleus();
+		try {
+			double vertX = t.getBorderPoint(Landmark.TOP_VERTICAL).getX();
+
+
+
+			/* Find the x values in the bounding box of the vertical nucleus.  */
+			FloatPolygon p = t.toPolygon();
+			double minX = p.getBounds().getMinX();
+
+			return vertX - minX;
+		} catch (MissingLandmarkException e) {
+			LOGGER.fine("Unable to calculate hook length: "+e.getMessage());
+			return Statistical.ERROR_CALCULATING_STAT;
+		}
+	}
+
+	/**
+	 * Given a test nucleus, determine the body width. Uses the oriented
+	 * nucleus.
+	 * @param n
+	 */
+	private static double calculateBodyWidth(@NonNull Nucleus n) {
+
+		if (!n.hasLandmark(Landmark.TOP_VERTICAL) || !n.hasLandmark(Landmark.BOTTOM_VERTICAL)) {
+			return Statistical.MISSING_LANDMARK;
+		}
+
+		// Get the oriented nucleus
+		Nucleus t = n.getOrientedNucleus();
+		try {
+			double vertX = t.getBorderPoint(Landmark.TOP_VERTICAL).getX();
+
+
+
+			/* Find the x values in the bounding box of the vertical nucleus.  */
+			FloatPolygon p = t.toPolygon();
+			double maxX = p.getBounds().getMaxX();
+
+			return maxX- vertX;
+		} catch (MissingLandmarkException e) {
+			LOGGER.fine("Unable to calculate body width: "+e.getMessage());
+			return Statistical.ERROR_CALCULATING_STAT;
+		}
+	}
 
 }

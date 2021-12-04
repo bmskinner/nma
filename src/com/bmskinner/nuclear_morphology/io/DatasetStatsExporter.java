@@ -370,7 +370,7 @@ public class DatasetStatsExporter extends StatsExporter {
 						profileLength = (int) Math.ceil(l/DEFAULT_PROFILE_LENGTH)*DEFAULT_PROFILE_LENGTH;
 				}
 			}
-		} catch(MissingProfileException | ProfileException e) {
+		} catch(MissingProfileException | ProfileException | MissingLandmarkException e) {
 			LOGGER.log(Loggable.STACK, "Unable to get profile: "+e.getMessage(), e);
 			LOGGER.fine("Unable to get a profile, defaulting to default profile length of "+DEFAULT_PROFILE_LENGTH);
 		}

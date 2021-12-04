@@ -302,13 +302,13 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
         fieldNames.add("Current nucleus position");
         rowData.add("x: " + df.format(n.getMinX()) + " : y: " + df.format(n.getMinY()));
         
-        for (Landmark tag : n.getBorderTags().keySet()) {
+        for (Landmark tag : n.getLandmarks().keySet()) {
         	fieldNames.add(tag);
         	if (n.hasLandmark(tag)) {
 
         		try {
         			IPoint p = n.getBorderPoint(tag);
-        			int index = n.getOffsetBorderIndex(Landmark.REFERENCE_POINT, n.getBorderIndex(tag));
+        			int index = n.getIndexRelativeTo(Landmark.REFERENCE_POINT, n.getBorderIndex(tag));
         			rowData.add(p.toString() + " at profile index " + index);
         		} catch (MissingLandmarkException e) {
         			LOGGER.fine("Tag not present: " + tag);

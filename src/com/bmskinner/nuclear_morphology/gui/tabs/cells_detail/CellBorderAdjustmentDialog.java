@@ -71,6 +71,7 @@ import com.bmskinner.nuclear_morphology.charting.charts.panels.CoupledProfileOut
 import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPanel;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.UnavailableBorderPointException;
 import com.bmskinner.nuclear_morphology.components.cells.DefaultCell;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
@@ -476,7 +477,7 @@ public class CellBorderAdjustmentDialog extends AbstractCellEditingDialog implem
         ISegmentedProfile templateProfile;
         try {
             templateProfile = workingCell.getPrimaryNucleus().getProfile(ProfileType.ANGLE);
-        } catch (MissingProfileException | ProfileException e1) {
+        } catch (MissingProfileException | ProfileException | MissingLandmarkException e1) {
             LOGGER.warning("Angle profile not present");
             return;
         }
@@ -489,7 +490,7 @@ public class CellBorderAdjustmentDialog extends AbstractCellEditingDialog implem
 
             // Get the border tag positions, and set equivalent positions in the
             // new profile
-            Map<Landmark, Integer> tagMap = workingCell.getPrimaryNucleus().getBorderTags();
+            Map<Landmark, Integer> tagMap = workingCell.getPrimaryNucleus().getLandmarks();
 
             Map<Landmark, Integer> newMap = new HashMap<Landmark, Integer>();
 

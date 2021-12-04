@@ -326,7 +326,7 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 						profileLength = (int) Math.ceil(l/DEFAULT_PROFILE_LENGTH)*DEFAULT_PROFILE_LENGTH;
 				}
 			}
-		} catch(MissingProfileException | ProfileException e) {
+		} catch(MissingProfileException | ProfileException | MissingLandmarkException e) {
 			LOGGER.fine("Unable to get a profile, defaulting to default profile length");
 		}
 		return profileLength;

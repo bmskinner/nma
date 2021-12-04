@@ -265,7 +265,7 @@ public class CellResegmentationDialog extends AbstractCellEditingDialog implemen
             if (segCount > 0) {
                 tempList = IProfileSegment.copyWithoutLinking(newSegments);
             } else {
-                tempList = new ArrayList<IProfileSegment>(); // for clearing the
+                tempList = new ArrayList<>(); // for clearing the
                                                             // profile on start
                                                             // of resegmentation
             }
@@ -279,7 +279,7 @@ public class CellResegmentationDialog extends AbstractCellEditingDialog implemen
             tempList.add(last);
             IProfileSegment.linkSegments(tempList);
 
-            ISegmentedProfile newProfile = n.getProfile(ProfileType.ANGLE);
+            ISegmentedProfile newProfile = n.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
             newProfile.setSegments(tempList);
             LOGGER.finer( "Segments added: ");
             LOGGER.finer( IProfileSegment.toString(tempList));
@@ -288,7 +288,7 @@ public class CellResegmentationDialog extends AbstractCellEditingDialog implemen
 
             LOGGER.finer( "RP index: " + n.getBorderIndex(Landmark.REFERENCE_POINT));
 
-            n.setProfile(ProfileType.ANGLE, newProfile);
+            n.setSegments(Landmark.REFERENCE_POINT, newProfile);
 
         } catch (ProfileException e) {
             LOGGER.log(Loggable.STACK, "Cannot link segments", e);

@@ -98,7 +98,7 @@ public class DatasetRepairer {
 				LOGGER.finest("RP at "+rpIndex+"; expected at "+segStart);
 				n.setLandmark(Landmark.REFERENCE_POINT, segStart);
 				LOGGER.finest(n.getNameAndNumber()+": updated RP to index "+segStart);
-				n.setProfile(ProfileType.ANGLE, profile);
+//				n.setProfile(ProfileType.ANGLE, profile);
 			}
 			LOGGER.finest(n.getNameAndNumber()+": Seg start index now "+ n.getProfile(ProfileType.ANGLE).getSegment(expectedRPSegmentStart).getStartIndex());
 			

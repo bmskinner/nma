@@ -545,7 +545,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 
         FloatXYDataset ds = new FloatXYDataset();
         try {
-            for (Landmark tag : nucleus.getBorderTags().keySet()) {
+            for (Landmark tag : nucleus.getLandmarks().keySet()) {
                 IPoint tagPoint;
 
                 int tagIndex = nucleus.getBorderIndex(tag);

@@ -60,9 +60,26 @@ public class SegmentFitter {
      */
     @SuppressWarnings("null")
 	public SegmentFitter(@NonNull final ISegmentedProfile template) throws ProfileException {
-        if (template == null)
-            throw new IllegalArgumentException("Median profile is null");
         templateProfile = template.copy();
+    }
+    
+    /**
+     * Run the segment fitter on the given profile. It will take the segments from
+     * the template profile, and apply them to the target profile.
+     * 
+     * @param template the profile with the segments to be fitted
+     * @param target the profile to fit to the template profile 
+     * @return the profile with fitted segments, or on error, the original profile
+     */
+    public static ISegmentedProfile fit(@NonNull final ISegmentedProfile template, @NonNull final ISegmentedProfile target) {
+    	if(!target.hasSegments())
+        	return target;
+		try {
+			return remapSegmentEndpoints(template, target);
+		} catch (MissingComponentException | ProfileException e) {
+			LOGGER.log(Loggable.STACK, "Unable to remap segments in profile: "+e.getMessage(), e);
+			return target;
+		}
     }
 
     /**
@@ -74,16 +91,7 @@ public class SegmentFitter {
      * @return the profile with fitted segments, or on error, the original profile
      */
     public ISegmentedProfile fit(@NonNull final ISegmentedProfile target) {
-        if (target==null)
-            throw new IllegalArgumentException("Target profile is null");
-        if(!target.hasSegments())
-        	return target;
-		try {
-			return remapSegmentEndpoints(target);
-		} catch (MissingComponentException | ProfileException e) {
-			LOGGER.log(Loggable.STACK, "Unable to remap segments in profile: "+e.getMessage(), e);
-			return target;
-		}
+        return fit(templateProfile, target);
     }
 
     /**
@@ -93,7 +101,7 @@ public class SegmentFitter {
      * @throws ProfileException 
      * @throws MissingComponentException 
      */
-    private ISegmentedProfile remapSegmentEndpoints(@NonNull ISegmentedProfile profile) throws ProfileException, MissingComponentException {
+    private static ISegmentedProfile remapSegmentEndpoints(@NonNull final ISegmentedProfile template, @NonNull ISegmentedProfile profile) throws ProfileException, MissingComponentException {
 
         // By default, return the input profile
         ISegmentedProfile result = profile.copy();
@@ -101,16 +109,15 @@ public class SegmentFitter {
         ISegmentedProfile tempProfile = profile.copy();
 
         // fit each segment in turn
-        for(IProfileSegment templateSegment : templateProfile.getSegments()) {
+        for(IProfileSegment templateSegment : template.getSegments()) {
 
             IProfileSegment segment = tempProfile.getSegment(templateSegment.getID());
 
             if (!segment.isLocked()) { 
-                tempProfile = bestFitSegment(tempProfile, templateSegment.getID()).copy();
+                tempProfile = bestFitSegment(template, tempProfile, templateSegment.getID()).copy();
                 result = tempProfile.copy();
             }
         }
-
         return result;
     }
 
@@ -123,7 +130,7 @@ public class SegmentFitter {
      * @throws ProfileException 
      * @throws MissingComponentException 
      */
-    private ISegmentedProfile bestFitSegment(@NonNull ISegmentedProfile profile, @NonNull UUID id) throws ProfileException, MissingComponentException {
+    private static ISegmentedProfile bestFitSegment(@NonNull final ISegmentedProfile template, @NonNull ISegmentedProfile profile, @NonNull UUID id) throws ProfileException, MissingComponentException {
 
         // by default, return the same profile that came in
     	ISegmentedProfile result = profile.copy();
@@ -132,7 +139,7 @@ public class SegmentFitter {
         IProfileSegment segment = profile.getSegment(id);
 
         // Get the initial score to beat
-        double bestScore = compareSegmentationPatterns(templateProfile, profile);
+        double bestScore = compareSegmentationPatterns(template, profile);
 
         // the most extreme negative offset to apply to the end of this segment
         // without making the length invalid
@@ -157,8 +164,8 @@ public class SegmentFitter {
             // find the changeWindow with the best fit,
             // apply all changes to a fresh copy of the profile
         	ISegmentedProfile testProfile = profile.copy();
-            testProfile = testChange(profile, id, changeWindow);
-            double score = compareSegmentationPatterns(templateProfile, testProfile);
+            testProfile = testChange(template, profile, id, changeWindow);
+            double score = compareSegmentationPatterns(template, testProfile);
             if (score < bestScore) {
                 bestChangeWindow = changeWindow;
             }
@@ -170,8 +177,8 @@ public class SegmentFitter {
                 + halfWindow; changeValue++) {
         	ISegmentedProfile testProfile = profile.copy();
 
-            testProfile = testChange(profile, id, changeValue);
-            double score = compareSegmentationPatterns(templateProfile, testProfile);
+            testProfile = testChange(template, profile, id, changeValue);
+            double score = compareSegmentationPatterns(template, testProfile);
             if (score < bestScore) {
                 result = testProfile;
             }
@@ -193,8 +200,8 @@ public class SegmentFitter {
      * @throws ProfileException 
      * @throws Exception
      */
-    private ISegmentedProfile testChange(@NonNull ISegmentedProfile profile, @NonNull UUID id, int changeValue) throws MissingComponentException, ProfileException {
-        double bestScore = compareSegmentationPatterns(templateProfile, profile);
+    private static ISegmentedProfile testChange(@NonNull final ISegmentedProfile template, @NonNull ISegmentedProfile profile, @NonNull UUID id, int changeValue) throws MissingComponentException, ProfileException {
+        double bestScore = compareSegmentationPatterns(template, profile);
 
         // apply all changes to a fresh copy of the profile
         ISegmentedProfile testProfile = profile.copy();
@@ -209,7 +216,7 @@ public class SegmentFitter {
 			return profile;
 		}
         
-        double score = compareSegmentationPatterns(templateProfile, testProfile);
+        double score = compareSegmentationPatterns(template, testProfile);
 
         if (score < bestScore)
         	return testProfile.copy();
@@ -226,7 +233,7 @@ public class SegmentFitter {
      * @throws MissingComponentException 
      * @throws Exception
      */
-    private double compareSegmentationPatterns(@NonNull ISegmentedProfile referenceProfile, @NonNull ISegmentedProfile testProfile) throws MissingComponentException {
+    private static double compareSegmentationPatterns(@NonNull ISegmentedProfile referenceProfile, @NonNull ISegmentedProfile testProfile) throws MissingComponentException {
         if (referenceProfile.getSegmentCount() != testProfile.getSegmentCount())
             throw new IllegalArgumentException("Segment counts are different for profiles");
 
@@ -248,12 +255,7 @@ public class SegmentFitter {
      * @throws MissingComponentException 
      * @throws Exception
      */
-    private double compareSegments(@NonNull UUID id, @NonNull ISegmentedProfile referenceProfile, @NonNull ISegmentedProfile testProfile) throws MissingComponentException {
-        if (id == null)
-            throw new IllegalArgumentException("Segment id is null");
-
-        if (referenceProfile == null || testProfile == null)
-            throw new IllegalArgumentException("Test or reference profile is null");
+    private static double compareSegments(@NonNull UUID id, @NonNull ISegmentedProfile referenceProfile, @NonNull ISegmentedProfile testProfile) throws MissingComponentException {
 
         IProfileSegment reference = referenceProfile.getSegment(id);
         IProfileSegment test = testProfile.getSegment(id);

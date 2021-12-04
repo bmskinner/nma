@@ -250,9 +250,9 @@ public class ImageAnnotator extends AbstractImageFilterer {
     			for(IProfileSegment seg : profile.getOrderedSegments()) {
     				Paint color = ColourSelecter.getColor(seg.getPosition(), GlobalOptions.getInstance().getSwatch());
     				Iterator<Integer> it = seg.iterator();
-    				int lastIndex = n.getOffsetBorderIndex(Landmark.REFERENCE_POINT, seg.getEndIndex());
+    				int lastIndex = n.getIndexRelativeTo(Landmark.REFERENCE_POINT, seg.getEndIndex());
     				while(it.hasNext()) {
-    					int index = n.getOffsetBorderIndex(Landmark.REFERENCE_POINT, it.next());
+    					int index = n.getIndexRelativeTo(Landmark.REFERENCE_POINT, it.next());
     					IPoint p = n.getBorderPoint(index);
     					// since segments overlap, draw the last index larger so the next segment can overlay
     					annotatePoint(p, (Color) color, lastIndex==index ? 5 : 3);
@@ -276,7 +276,7 @@ public class ImageAnnotator extends AbstractImageFilterer {
     	annotateCoM(n);
     	drawSegments(n);
     	annotateSignals(n);
-    	for(Landmark lm : n.getBorderTags().keySet())
+    	for(Landmark lm : n.getLandmarks().keySet())
     		drawLandmark(lm, n);
 
     	return this;

@@ -162,7 +162,7 @@ public class OutlineDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
                 for (int j = 0; j <= seg.length(); j++) {
                 	try {
                 		int index = seg.getStartIndex() + j;
-                		int offsetIndex = t.getOffsetBorderIndex(Landmark.REFERENCE_POINT, index);
+                		int offsetIndex = t.getIndexRelativeTo(Landmark.REFERENCE_POINT, index);
 
                 		/*
                 		 * Note that the original border point is used here to

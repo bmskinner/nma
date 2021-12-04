@@ -305,7 +305,7 @@ public class ICellCollectionTest {
 		int exp = collection.streamCells().mapToInt(c->{
 			try {
 				return c.getPrimaryNucleus().getProfile(ProfileType.ANGLE).size();
-			} catch (MissingProfileException | ProfileException e) {
+			} catch (MissingProfileException | ProfileException | MissingLandmarkException e) {
 				return Integer.MAX_VALUE;
 			}
 		}).max().orElse(Integer.MAX_VALUE);

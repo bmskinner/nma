@@ -196,7 +196,7 @@ public class ProfileManagerTest {
 		UUID segId1 = profile.getSegmentAt(1).getID();
 		UUID segId2 = profile.getSegmentAt(2).getID();
 		profile.mergeSegments(segId1, segId2, UUID.randomUUID());
-		n.setProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, profile);
+		n.setSegments(Landmark.REFERENCE_POINT, profile);
 		assertFalse(dv.validate(collection));
 	}
 	
@@ -225,7 +225,7 @@ public class ProfileManagerTest {
 
 			// Merge the segments and assign to the nucleus
 			profile.mergeSegments(segId1, segId2, newId);
-			n.setProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, profile);	
+			n.setSegments(Landmark.REFERENCE_POINT, profile);	
 
 			// Get the profile back out from the nucleus
 			ISegmentedProfile newProfile = n.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);

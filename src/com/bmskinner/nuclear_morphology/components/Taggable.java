@@ -31,9 +31,8 @@ import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileExcept
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 
 /**
- * Objects implementing this interface can have BorderTags assigned to points
- * around their periphery. These points are linked to index positions within the
- * various profiles of the Profileable interface.
+ * Objects implementing this interface can have Landmarks assigned to points
+ * around their periphery.
  * 
  * @author bms41
  *
@@ -53,15 +52,15 @@ public interface Taggable extends CellularComponent {
      * @throws ComponentCreationException
      */
     void initialise(double proportion) throws ComponentCreationException;
-
-
+    
     /**
-     * Finds the key points of interest around the border of the object.
-     * Specify the rulesets that should be used for landmark detection and
-     * subsequent orientation.
-     * @throws ComponentCreationException
+     * Calculate new profiles for the object. Angle profiles are calculated with
+     * the internal window size - change this with
+     * setWindowSize(ProfileType.ANGLE). It will replace the existing profiles.
+     * 
+     * @throws ProfileException if there was an error in calculating the profiles
      */
-//    public void findLandmarks(@NonNull RuleSetCollection rsc) throws ComponentCreationException;
+    void calculateProfiles() throws ProfileException;
 
     /**
      * Check if the object has a profile of the given type
@@ -73,27 +72,40 @@ public interface Taggable extends CellularComponent {
 
     /**
      * Get a copy of the angle profile. The first index of the profile is the
-     * first border point in the border list. That is, there is no consistency
-     * to the order of values across multiple nuclei. If consistency is needed,
-     * specify a pointType
+     * reference point. If no reference point has been explicitly assigned,
+     * it is assumed to be the first index of the profile.
      * @return the profile for the object
      * @throws MissingProfileException if the profile type is not found
      * @throws ProfileException 
+     * @throws MissingLandmarkException 
      */
-    ISegmentedProfile getProfile(@NonNull ProfileType type) throws MissingProfileException, ProfileException;
+    ISegmentedProfile getProfile(@NonNull ProfileType type) throws MissingProfileException, ProfileException, MissingLandmarkException;
 
     /**
-     * Update the profile of the given type. Since only franken profiles are not
-     * calculated internally, the other profiles just replace the segment list.
-     * This will replace the segment list on all other profile types, to keep
-     * the segmentation pattern consistent.
+     * Get a copy of the profile offset to start at the given point
      * 
-     * @param type
-     * @param profile
-     * @throws Exception
+     * @param type profile type to fetch
+     * @param tag the tag to offset the profile to
+     * @return a copy of the segmented profile
+     * @throws ProfileException
+     * @throws MissingLandmarkException
+     * @throws MissingProfileException
      */
-    void setProfile(@NonNull ProfileType type, @NonNull ISegmentedProfile profile);
+    ISegmentedProfile getProfile(@NonNull ProfileType type, @NonNull Landmark tag)
+            throws ProfileException, MissingLandmarkException, MissingProfileException;
 
+    /**
+     * Set segments offset to a border tag. The profile can be
+     * considered to start from the provided tag.
+     * 
+     * @param tag the tag the profile starts from
+     * @param profile the profile containing segments
+     * @throws MissingLandmarkException if the tag is not present
+     * @throws ProfileException 
+     */
+    void setSegments(@NonNull Landmark tag, @NonNull ISegmentedProfile profile)
+            throws MissingLandmarkException, ProfileException;
+    
     /**
      * Get the window size for generating the specificed profile
      * 
@@ -146,30 +158,22 @@ public interface Taggable extends CellularComponent {
 
     /**
      * Reverse the angle profile of the object. Also reverses the distance
-     * profile, the border list and updates the border tags to the new positions
+     * profile, the border list and updates landmarks to the new positions
      */
     @Override
 	void reverse();
-
+    
     /**
-     * Calculate new profiles for the object. Angle profiles are calculated with
-     * the internal window size - change this with
-     * setWindowSize(ProfileType.ANGLE). It will replace the existing profiles.
+     * Get the border index of point in the border list, removing offset to a
+     * reference tag. This will return the index of the point in the original
+     * border list of the object.
      * 
-     * @throws ProfileException if there was an error in calculating the profiles
+     * @param reference the border tag with index zero
+     * @param index  the index in a profile zeroed on the reference tag
+     * @return the index of the point translated back to the original border list
+     * @throws MissingLandmarkException if the reference tag is not present
      */
-    void calculateProfiles() throws ProfileException;
-
-    /**
-     * Go around the border of the object, measuring the angle to the OP. If the
-     * angle is closest to target angle, return the distance to the CoM.
-     * 
-     * @param angle
-     *            the target angle
-     * @return the distance from the closest border point at the requested angle
-     *         to the CoM
-     */
-    double getDistanceFromCoMToBorderAtAngle(double angle);
+    int getIndexRelativeTo(@NonNull Landmark reference, int index) throws MissingLandmarkException;
 
     /**
      * Get the index of the border point with the given tag.
@@ -179,101 +183,7 @@ public interface Taggable extends CellularComponent {
      * @throws MissingLandmarkException if the tag is not present in the object
      */
     int getBorderIndex(@NonNull Landmark tag) throws MissingLandmarkException;
-
-    /**
-     * Get the tag at a given index, given the zero index is set at the given
-     * reference. If there is no tag at the index, returns null
-     * 
-     * @param reference the reference border tag with index zero
-     * @param index the index to fetch
-     * @return the border tag at the index
-     * @throws MissingLandmarkException if the reference tag is not present
-     */
-    Landmark getBorderTag(@NonNull Landmark reference, int index) throws MissingLandmarkException;
-
-    /**
-     * Get the tag at the given raw index in the border list
-     * 
-     * @param index
-     * @return the tag at the index
-     * @throws MissingLandmarkException if no tag is present at the index
-     */
-    Landmark getBorderTag(int index) throws IndexOutOfBoundsException;
-
-    /**
-     * Check if the nucleus has the given border tag
-     * 
-     * @param tag the tag to test
-     * @return true if the tag is present, false otherwise
-     */
-    boolean hasLandmark(@NonNull Landmark tag);
-
-    /**
-     * Check if the nucleus has any border tag at the given index (offset from
-     * the provided tag)
-     * 
-     * @param tag the border tag with index zero
-     * @param i the index to be tested
-     * @return true if a tag is present at the index, false otherwise
-     */
-    boolean hasBorderTag(@NonNull Landmark tag, int i) throws IndexOutOfBoundsException;
-
-    /**
-     * Check if the nucleus has any border tag at the given index in the raw
-     * border list
-     * 
-     * @param i the index to be tested
-     * @return true if a tag is present at the index, false otherwise
-     */
-    boolean hasBorderTag(int index) throws IndexOutOfBoundsException;
-
-    /**
-     * Set the index of the given border tag. Has no effect if this object is locked.
-     * 
-     * @param tag the tag
-     * @param i the index of the border point to set the tag at
-     * @throws ProfileException 
-     * @throws MissingProfileException 
-     * @throws MissingLandmarkException 
-     */
-
-    void setLandmark(@NonNull Landmark tag, int i) throws IndexOutOfBoundsException, MissingProfileException, ProfileException, MissingLandmarkException;
-
-    /**
-     * Get a copy of the profile offset to start at the given point
-     * 
-     * @param type profile type to fetch
-     * @param tag the tag to offset the profile to
-     * @return a copy of the segmented profile
-     * @throws ProfileException
-     * @throws MissingLandmarkException
-     * @throws MissingProfileException
-     */
-    ISegmentedProfile getProfile(@NonNull ProfileType type, @NonNull Landmark tag)
-            throws ProfileException, MissingLandmarkException, MissingProfileException;
-
-    /**
-     * Set the profile for the given type, offset to a border tag. The profile can be
-     * considered to start from the provided tag.
-     * 
-     * @param type the type of profile to set
-     * @param tag the tag the profile starts from
-     * @param profile the profile to be set
-     * @throws MissingLandmarkException if the tag is not present
-     * @throws MissingProfileException if the profile type is not present
-     * @throws ProfileException 
-     */
-    void setProfile(@NonNull ProfileType type, @NonNull Landmark tag, @NonNull ISegmentedProfile profile)
-            throws MissingLandmarkException, MissingProfileException, ProfileException;
-
-    /**
-     * Get a copy of the mapping of border tags to index positions within the
-     * border list of the nucleus
-     * 
-     * @return
-     */
-    Map<Landmark, Integer> getBorderTags();
-
+    
     /**
      * Get a copy of the border point mapped to the given tag
      * 
@@ -285,14 +195,42 @@ public interface Taggable extends CellularComponent {
     IPoint getBorderPoint(@NonNull Landmark tag) throws MissingLandmarkException;
 
     /**
-     * Get the border index of point in the border list, removing offset to a
-     * reference tag. This will return the index of the point in the original
-     * border list of the object.
+     * Get the tag at the given raw index in the border list
      * 
-     * @param reference the border tag with index zero
-     * @param index  the index in a profile zeroed on the reference tag
-     * @return the index of the point translated back to the original border list
-     * @throws MissingLandmarkException if the reference tag is not present
+     * @param index
+     * @return the tag at the index
+     * @throws MissingLandmarkException if no tag is present at the index
      */
-    int getOffsetBorderIndex(@NonNull Landmark reference, int index) throws MissingLandmarkException;
+    Landmark getBorderTag(int index) throws IndexOutOfBoundsException;
+
+    /**
+     * Check if the nucleus has the given landmark
+     * 
+     * @param landmark the landmark to test
+     * @return true if the landmark is present, false otherwise
+     */
+    boolean hasLandmark(@NonNull Landmark landmark);
+
+    /**
+     * Set the index of the given landmark. Has no effect if this object is locked.
+     * 
+     * @param tag the tag
+     * @param i the index of the border point to set the tag at
+     * @throws ProfileException 
+     * @throws MissingProfileException 
+     * @throws MissingLandmarkException 
+     */
+
+    void setLandmark(@NonNull Landmark tag, int i) throws IndexOutOfBoundsException, MissingProfileException, ProfileException, MissingLandmarkException;
+
+
+
+    /**
+     * Get a copy of the mapping of landmarks to index positions within the
+     * border list of the nucleus
+     * 
+     * @return
+     */
+    Map<Landmark, Integer> getLandmarks();
+
 }

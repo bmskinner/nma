@@ -33,6 +33,7 @@ import org.jfree.data.xy.DefaultXYZDataset;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYZDataset;
 
+import com.bmskinner.nuclear_morphology.analysis.ComponentMeasurer;
 import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellAnalysisMethod.ShellAnalysisException;
 import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellDetector;
 import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellDetector.Shell;
@@ -77,7 +78,7 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
         double fractionalDistance = n.getStatistic(Measurement.FRACT_DISTANCE_FROM_COM);
 
         // determine the distance to the border at this angle
-        double distanceToBorder = outline.getDistanceFromCoMToBorderAtAngle(angle);
+        double distanceToBorder = ComponentMeasurer.getDistanceFromCoMToBorderAtAngle(outline, angle);
 
         // convert to fractional distance to signal
         double distanceFromCoM = distanceToBorder * fractionalDistance;

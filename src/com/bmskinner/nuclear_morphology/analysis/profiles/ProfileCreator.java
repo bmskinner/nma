@@ -99,7 +99,7 @@ public class ProfileCreator {
         		segments = templateProfile.getSegments();
         	}
 
-        } catch (MissingProfileException | ProfileException e) {
+        } catch (MissingProfileException | ProfileException | MissingLandmarkException e) {
         	LOGGER.log(Loggable.STACK, "No profile angle type: "+e.getMessage(), e);
         }
 
