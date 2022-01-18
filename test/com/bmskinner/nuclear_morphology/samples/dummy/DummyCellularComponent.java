@@ -335,12 +335,6 @@ public class DummyCellularComponent implements CellularComponent {
 	}
 
 	@Override
-	public double getMedianDistanceBetweenPoints() {
-		return component.getMedianDistanceBetweenPoints();
-	}
-
-
-	@Override
 	public void reverse() {
 	    component.reverse();
 	}
@@ -353,11 +347,6 @@ public class DummyCellularComponent implements CellularComponent {
 	public double wrapIndex(double d) {
 		// TODO Auto-generated method stub
 		return 0;
-	}
-
-	@Override
-	public void refreshBorderList(boolean useSplineFitting) {
-		component.refreshBorderList(useSplineFitting);
 	}
 
 	@Override

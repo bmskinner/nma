@@ -27,6 +27,7 @@ import com.bmskinner.nuclear_morphology.analysis.SingleDatasetAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.UnavailableBorderPointException;
+import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
@@ -161,7 +162,15 @@ public class ProfileRefoldMethod extends SingleDatasetAnalysisMethod {
         // Use this to establish the max and min distances a point can migrate
         // from its neighbours
         // This is the 'habitable zone' a point can occupy
-        double medianDistanceBetweenPoints = refoldNucleus.getMedianDistanceBetweenPoints();
+        
+        double[] distances = new double[refoldNucleus.getBorderLength()];
+        for (int i = 0; i < refoldNucleus.getBorderLength(); i++) {
+            IPoint p = refoldNucleus.getBorderPoint(i);
+            IPoint next = refoldNucleus.getBorderPoint(CellularComponent.wrapIndex(i + 1, refoldNucleus.getBorderLength()));
+            distances[i] = p.getLengthTo(next);
+        }
+        
+        double medianDistanceBetweenPoints = Stats.quartile(distances, Stats.MEDIAN);
         double minDistance = medianDistanceBetweenPoints * 0.5;
         double maxDistance = medianDistanceBetweenPoints * 1.2;
 

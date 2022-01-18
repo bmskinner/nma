@@ -243,13 +243,6 @@ public interface CellularComponent extends Imageable, XmlSerializable,
     double getMinY();
 
     /**
-     * Get the median distance between each pair of border points
-     * 
-     * @return
-     */
-    double getMedianDistanceBetweenPoints();
-
-    /**
      * Translate the XY coordinates of each border point so that the nuclear
      * centre of mass is at the given point
      * 
@@ -377,17 +370,6 @@ public interface CellularComponent extends Imageable, XmlSerializable,
      */
     IPoint findClosestBorderPoint(@NonNull IPoint p) throws UnavailableBorderPointException;
     
-    /**
-     * Create the border list from the stored int[] points. Mimics the internal
-     * makeBorderList, but allows spline fitting to be disabled. This is used
-     * in converting datasets from pre-1.14.0. Splines are fit by default in 
-     * 1.14.0 onwards, which causes issues deserialising 1.13.8 and earlier datasets.
-     * Disable spline fitting to display these earlier formats properly.
-     * 
-     * @param useSplineFitting should spline fitting be used
-     */
-    public void refreshBorderList(boolean useSplineFitting);
-
     /**
      * Reverse the border outline of this object, including the roi points used
      * to reconstruct it from file

@@ -43,12 +43,12 @@ import org.jdom2.Element;
 import com.bmskinner.nuclear_morphology.analysis.ComponentMeasurer;
 import com.bmskinner.nuclear_morphology.components.Imageable;
 import com.bmskinner.nuclear_morphology.components.Statistical;
+import com.bmskinner.nuclear_morphology.components.generic.FloatPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 import com.bmskinner.nuclear_morphology.io.XmlSerializable;
 import com.bmskinner.nuclear_morphology.io.xml.XMLReader;
-import com.bmskinner.nuclear_morphology.stats.Stats;
 import com.bmskinner.nuclear_morphology.utility.ArrayUtils;
 
 import ij.gui.PolygonRoi;
@@ -120,7 +120,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     private boolean isReversed = false;
 
     /** The complete border list interpolated from the roi */
-    private List<IPoint> borderList = new ArrayList<>();
+    private IPoint[] borderList = new IPoint[0];
 
     /** Cached object shapes. */
     private ShapeCache shapeCache = new ShapeCache();
@@ -196,39 +196,10 @@ public abstract class DefaultCellularComponent implements CellularComponent {
      * @return
      */
     private boolean doesRoiMatchCom(Roi roi, IPoint com){
-    	    	
-//        double epsilon = 1;
     	Polygon polygon = roi.getPolygon();
         Rectangle2D rect = polygon.getBounds().getFrame();
         
         return rect.contains(com.getX(), com.getY());
-
-//        // Sanity check: is the CoM inside the roi (with a small buffer)
-//        double minX = rect.getX();
-//        double maxX = minX + rect.getWidth();
-//
-//        minX -= epsilon;
-//        maxX += epsilon;
-//
-//        if (com.getX() < minX || com.getX() > maxX) {
-//            throw new IllegalArgumentException(String.format("The centre of mass X (%d)"
-//                    + " must be within the roi x bounds (x = %d-%d)", com.getX(), minX, maxX));
-//        }
-//
-//        double minY = rect.getY();
-//        double maxY = minY + rect.getHeight();
-//        minY -= epsilon;
-//        maxY += epsilon;
-//
-//        if (com.getY() < minY || com.getY() > maxY) {
-//            throw new IllegalArgumentException("The centre of mass Y (" + com.getY() + ")"
-//                    + ") must be within the roi bounds (y = " + minY + "-" + maxY + ")");
-//        }
-//
-//        if (!polygon.contains(com.getX(), com.getY())) {
-//            LOGGER.fine("Centre of mass is not inside the object. You may have a doughnut.");
-//        }
-//        return true;
     }
     
 
@@ -327,19 +298,17 @@ public abstract class DefaultCellularComponent implements CellularComponent {
         IPoint oldCoM = centreOfMass.duplicate();
         centreOfMass = originalCentreOfMass.duplicate();
 
-        borderList = new ArrayList<>();
-
         // convert the roi positions to a list of border points
         roi.fitSplineForStraightening(); // this prevents the resulting border differing in length between invokations
 
-        FloatPolygon smoothed = roi.getInterpolatedPolygon(1, true);
+        FloatPolygon smoothed = roi.getInterpolatedPolygon(INTERPOLATION_INTERVAL_PIXELS, true);
 
         LOGGER.finest( "Interpolated integer list to smoothed list of "+smoothed.npoints);
-                
-        for (int i = 0; i < smoothed.npoints; i++) {
-            IPoint point = IPoint.makeNew(smoothed.xpoints[i], smoothed.ypoints[i]);
-            borderList.add(point);
-        }
+        
+        borderList = new IPoint[smoothed.npoints];   
+        for (int i = 0; i < smoothed.npoints; i++)
+            borderList[i] = new FloatPoint(smoothed.xpoints[i], smoothed.ypoints[i]);
+
         moveCentreOfMass(oldCoM);
         updateBounds();
     }
@@ -524,12 +493,12 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 
     @Override
 	public int getBorderLength() {
-        return borderList.size();
+        return borderList.length;
     }
 
     @Override
 	public IPoint getBorderPoint(int i) {
-        return borderList.get(i);
+        return borderList[i];
     }
 
     @Override
@@ -546,8 +515,8 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 
     @Override
 	public int getBorderIndex(@NonNull IPoint p) {
-        for(int i=0; i<borderList.size(); i++) {
-        	IPoint n = borderList.get(i);
+        for(int i=0; i<borderList.length; i++) {
+        	IPoint n = borderList[i];
         	if(n.overlapsPerfectly(p))
         		return i;
         }
@@ -561,18 +530,18 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 
     @Override
 	public void updateBorderPoint(int i, double x, double y) {
-        borderList.get(i).setX(x);
-        borderList.get(i).setY(y);
+        borderList[i].setX(x);
+        borderList[i].setY(y);
     }
 
     @Override
 	public List<IPoint> getBorderList() {
-        return this.borderList;
+        return List.of(borderList);
     }
 
     @Override
 	public List<IPoint> getOriginalBorderList() {
-        List<IPoint> result = new ArrayList<>(borderList.size());
+        List<IPoint> result = new ArrayList<>(borderList.length);
 
         double diffX = originalCentreOfMass.getX() - centreOfMass.getX();
         double diffY = originalCentreOfMass.getY() - centreOfMass.getY();
@@ -698,17 +667,6 @@ public abstract class DefaultCellularComponent implements CellularComponent {
         }
     }
 
-    @Override
-	public double getMedianDistanceBetweenPoints() {
-        double[] distances = new double[this.borderList.size()];
-        for (int i = 0; i < this.borderList.size(); i++) {
-            IPoint p = borderList.get(i);
-            IPoint next = borderList.get(wrapIndex(i + 1));
-            distances[i] = p.getLengthTo(next);
-        }
-        return Stats.quartile(distances, Stats.MEDIAN);
-    }
-
     /**
      * Translate the XY coordinates of each border point so that the nuclear
      * centre of mass is at the given point
@@ -736,8 +694,8 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	public void offset(double xOffset, double yOffset) {
 
         /// update each border point
-        for (int i = 0; i < borderList.size(); i++) {
-            IPoint p = borderList.get(i);
+        for (int i = 0; i < borderList.length; i++) {
+            IPoint p = borderList[i];
             p.offset(xOffset, yOffset);
         }
 
@@ -786,18 +744,18 @@ public abstract class DefaultCellularComponent implements CellularComponent {
      * @return
      */
     private FloatPolygon toOffsetPolygon(float xOffset, float yOffset) {
-        float[] xpoints = new float[borderList.size() + 1];
-        float[] ypoints = new float[borderList.size() + 1];
+        float[] xpoints = new float[borderList.length + 1];
+        float[] ypoints = new float[borderList.length + 1];
 
-        for (int i = 0; i < borderList.size(); i++) {
-            IPoint p = borderList.get(i);
+        for (int i = 0; i < borderList.length; i++) {
+            IPoint p = borderList[i];
             xpoints[i] = (float) p.getX() + xOffset;
             ypoints[i] = (float) p.getY() + yOffset;
         }
 
         // Ensure the polygon is closed
-        xpoints[borderList.size()] = (float) borderList.get(0).getX() + xOffset;
-        ypoints[borderList.size()] = (float) borderList.get(0).getY() + yOffset;
+        xpoints[borderList.length] = (float) borderList[0].getX() + xOffset;
+        ypoints[borderList.length] = (float) borderList[0].getY() + yOffset;
 
         return new FloatPolygon(xpoints, ypoints);
     }
@@ -855,7 +813,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
      */
     private Shape toOffsetShape(double xOffset, double yOffset, MeasurementScale scale) {
 
-        if (borderList.isEmpty())
+        if (borderList.length==0)
             throw new IllegalArgumentException("Border list is empty");
 
         if (shapeCache.has(xOffset, yOffset, scale)) {
@@ -866,7 +824,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 
         Path2D.Double path = new Path2D.Double();
 
-        IPoint first = borderList.get(0);
+        IPoint first = borderList[0];
         path.moveTo((first.getX() + xOffset) / sc, (first.getY() + yOffset) / sc);
 
         for (IPoint b : this.borderList) {
@@ -935,7 +893,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     	
     	// Checking the angle of every point via atan2 is expensive.
     	// We can filter out most of the points beforehand.
-    	return borderList.stream()
+    	return Arrays.stream(borderList)
     			.filter(point->point.getLengthTo(p)>distToCom)
     			.min(Comparator.comparing(point->180-centreOfMass.findSmallestAngle(p, point) ))
     			.orElse(null); // TODO: backup solution?
@@ -943,14 +901,14 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 
     @Override
     public IPoint findOrthogonalBorderPoint(@NonNull IPoint a) {
-        return borderList.stream()
+        return Arrays.stream(borderList)
                 .min(Comparator.comparing(point-> Math.abs(90-centreOfMass.findSmallestAngle(a, point)) ))
                 .get();
     }
 
     @Override
     public IPoint findClosestBorderPoint(@NonNull IPoint p) {
-        return borderList.stream()
+        return Arrays.stream(borderList)
                 .min(Comparator.comparing(point->point.getLengthTo(p) ))
                 .get();
     }
@@ -1057,48 +1015,6 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 				&& Arrays.equals(xpoints, other.xpoints) 
 				&& Arrays.equals(ypoints, other.ypoints);
 	}
-
-	/**
-     * Create the border list from the stored int[] points. Mimics makeBorderList
-     * but adds a check that the created border list does not affect tags
-     * 
-     * @param roi
-     */
-    @Override
-	public void refreshBorderList(boolean useSplineFitting) {
-
-    	LOGGER.finest(()->"Creating border list from "+xpoints.length+" integer points");
-    	
-        // Make a copy of the int[] points otherwise creating a polygon roi
-        // will reset them to 0,0 coordinates
-        int[] xcopy = Arrays.copyOf(xpoints, xpoints.length);
-        int[] ycopy = Arrays.copyOf(ypoints, ypoints.length);
-        PolygonRoi roi = new PolygonRoi(xcopy, ycopy, xpoints.length, Roi.TRACED_ROI);
-
-        // Creating the border list will set everything to the original image position.
-        // Move the border list back over the CoM if needed.
-        IPoint oldCoM = IPoint.makeNew(centreOfMass);
-        centreOfMass = IPoint.makeNew(originalCentreOfMass);
-
-        borderList = new ArrayList<>();
-
-        // convert the roi positions to a list of border points    
-        if(useSplineFitting)
-        	roi.fitSplineForStraightening(); // this prevents the resulting border differing in length between invokations
-                
-        FloatPolygon smoothed = roi.getInterpolatedPolygon(INTERPOLATION_INTERVAL_PIXELS, true);
-
-        LOGGER.finest( "Interpolated integer list to smoothed list of "+smoothed.npoints);
-        for (int i = 0; i < smoothed.npoints; i++) {
-            IPoint point = IPoint.makeNew(smoothed.xpoints[i], smoothed.ypoints[i]);
-            borderList.add(point);
-        }
-
-        moveCentreOfMass(oldCoM);
-        updateBounds();
-        LOGGER.finest( "Component has "+getBorderLength()+" border points");
-
-    }
 
     /*
      * ############################################# 

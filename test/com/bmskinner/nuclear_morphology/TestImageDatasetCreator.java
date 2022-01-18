@@ -25,6 +25,7 @@ import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMet
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalDetectionMethod;
 import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellAnalysisMethod;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
@@ -310,7 +311,6 @@ public class TestImageDatasetCreator {
         assertTrue("Expecting xml exported to "+xmlFile.getAbsolutePath(), xmlFile.exists());
     }
     
-    
     /**
      * Profiles are regenerated from raw values when datasets are read.
      * Check that the recalculated values match what is expected. 
@@ -328,12 +328,22 @@ public class TestImageDatasetCreator {
     	assertEquals("Profile collections should match", p1, p2);
     	assertEquals("Consensuses should match", d.getCollection().getConsensus(), t.getCollection().getConsensus());
     	
+    	
+    	// Check signal groups
     	for(ISignalGroup s : d.getCollection().getSignalGroups()) {
     		ComponentTester.testDuplicatesByField(s, t.getCollection().getSignalGroup(s.getId()).get());
     		assertEquals("Signal groups should match", s, t.getCollection().getSignalGroup(s.getId()).get());
-    	}
-    	    	
+    	}	
     	assertEquals(d.getCollection().getSignalGroups().size(), t.getCollection().getSignalGroups().size());
+    	
+    	// Check each cell    	
+    	for(ICell dCell : d.getCollection()) {
+    		System.out.println("Testing cell "+dCell.getId()+": "+dCell.getPrimaryNucleus().getNameAndNumber());
+    		ICell tCell = t.getCollection().getCell(dCell.getId());
+        	ComponentTester.testDuplicatesByField(dCell, tCell);
+    	}
+    	
+    	// Check the collection
     	ComponentTester.testDuplicatesByField(d.getCollection(), t.getCollection());
     	assertEquals("Cell collections should match", d.getCollection(), t.getCollection());
     	assertEquals("Child collections should match", d.getAllChildDatasets(), t.getAllChildDatasets());

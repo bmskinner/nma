@@ -452,9 +452,9 @@ public class DefaultCellCollection implements ICellCollection {
 		return getNuclei().stream().mapToInt(Nucleus::getBorderLength).toArray();
 	}
 
-	public synchronized double[] getMedianDistanceBetweenPoints() {
-		return getNuclei().stream().mapToDouble(Nucleus::getMedianDistanceBetweenPoints).toArray();
-	}
+//	public synchronized double[] getMedianDistanceBetweenPoints() {
+//		return getNuclei().stream().mapToDouble(Nucleus::getMedianDistanceBetweenPoints).toArray();
+//	}
 
 	@Override
 	public int getNucleusCount() {
