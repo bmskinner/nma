@@ -419,16 +419,12 @@ public class DefaultProfileCollection implements IProfileCollection {
             IProfileAggregate agg = new DefaultProfileAggregate(length, collection.size());
 
             map.put(type, agg);
-//            try {
-            	for (Nucleus n : collection.getNuclei()) {
-            		agg.addValues(n.getProfile(type, Landmark.REFERENCE_POINT));
+            for (Nucleus n : collection.getNuclei()) {
+            	agg.addValues(n.getProfile(type, Landmark.REFERENCE_POINT));
 
-            	}
-//            } catch (ProfileException | MissingLandmarkException | MissingProfileException e) {
-//                LOGGER.log(Loggable.STACK, "Error making aggregate", e);
-//            }
+            }
         }
-        
+
     }
     
     /**

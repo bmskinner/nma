@@ -42,6 +42,7 @@ import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.profiles.DefaultProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfileCollection;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
@@ -421,11 +422,11 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
         if (!this.hasLandmark(tag))
             throw new MissingLandmarkException("Tag " + tag + " not present");
 
-        // fetch the index of the pointType (the new zero)
+        // fetch the index of the pointType (the zero index of the profile to return)
         int tagIndex = profileLandmarks.get(tag);
-        
+                
+        ISegmentedProfile profile = new SegmentedFloatProfile(profileMap.get(type), segments);
         // offset the angle profile to start at the pointIndex
-        ISegmentedProfile profile = getProfile(type);
         return profile.offset(tagIndex);
     }
         
@@ -433,7 +434,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
     public void setSegments(@NonNull Landmark tag, @NonNull ISegmentedProfile p) throws MissingLandmarkException, ProfileException {
 
     	if (isLocked) {
-    		LOGGER.finer("Cannot set profile: object is locked");
+    		LOGGER.finer("Cannot set profile segments: object is locked");
     		return;
     	}
 
@@ -457,10 +458,8 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
     	for (ProfileType type : ProfileType.values()) 
     		profileMap.put(type, ProfileCreator.createProfile(this, type));
     	
-//    	segments.clear();
-//    	for(IProfileSegment s : profile.getSegments()) {
-//    		segments.add(s.copy());
-//    	}
+        segments.add(new DefaultProfileSegment(0, 0, this.getBorderLength(), IProfileCollection.DEFAULT_SEGMENT_ID));
+
     }
     
     @Override

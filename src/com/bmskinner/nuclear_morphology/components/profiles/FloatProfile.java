@@ -404,6 +404,8 @@ public class FloatProfile implements IProfile {
 	public IProfile interpolate(int newLength) throws ProfileException {
 		if(newLength<MINIMUM_PROFILE_LENGTH)
 			throw new IllegalArgumentException(String.format("New length %d below minimum %d",newLength,MINIMUM_PROFILE_LENGTH));
+		if(newLength == size())
+			return this;
 		return new FloatProfile(IProfile.interpolate(array, newLength));
 	}
 
