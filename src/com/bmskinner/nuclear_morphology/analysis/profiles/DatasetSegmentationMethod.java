@@ -158,7 +158,7 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
     	DatasetValidator dv = new DatasetValidator();
     	if(!dv.validate(dataset)) {
     		LOGGER.warning("Segmentation failed; resulting dataset did not validate");
-    		throw new AnalysisMethodException("Segmentation failed; resulting dataset did not validate");
+    		throw new AnalysisMethodException("Segmentation failed; resulting dataset did not validate: "+dv.getSummary());
     	}
 
 		return result;

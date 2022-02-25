@@ -28,6 +28,7 @@ import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.UnavailableBorderPointException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
@@ -149,7 +150,7 @@ public class ProfileRefoldMethod extends SingleDatasetAnalysisMethod {
      * within a certain range of neighbours
      */
     private double iterateOverNucleus() throws ProfileException, MissingLandmarkException,
-            MissingProfileException, UnavailableBorderPointException, UnprofilableObjectException {
+            MissingProfileException, UnavailableBorderPointException, UnprofilableObjectException, ComponentCreationException {
 
         ISegmentedProfile refoldProfile = refoldNucleus.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
 
@@ -208,10 +209,11 @@ public class ProfileRefoldMethod extends SingleDatasetAnalysisMethod {
      * @throws MissingLandmarkException
      * @throws MissingProfileException
      * @throws UnavailableBorderPointException
+     * @throws ComponentCreationException 
      */
     private double improveBorderPoint(int index, double minDistance, double maxDistance, double similarityScore,
     		 @NonNull Nucleus testNucleus) throws ProfileException, MissingLandmarkException,
-            MissingProfileException, UnavailableBorderPointException {
+            MissingProfileException, UnavailableBorderPointException, ComponentCreationException {
         // // make all changes to a fresh nucleus before buggering up the real
         // one
         LOGGER.finest( "Testing point " + index);
@@ -245,7 +247,7 @@ public class ProfileRefoldMethod extends SingleDatasetAnalysisMethod {
 
         	LOGGER.finer( "Testing profiles");
 
-        	testNucleus.calculateProfiles();
+        	testNucleus.initialise(dataset.getAnalysisOptions().get().getProfileWindowProportion());
 
         	// Get the new score
         	score = testNucleus.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT)
@@ -262,7 +264,7 @@ public class ProfileRefoldMethod extends SingleDatasetAnalysisMethod {
         		refoldNucleus.updateBorderPoint(index, newPoint);
         		pointUpdateCounter++;
 
-        		refoldNucleus.calculateProfiles();
+        		refoldNucleus.initialise(dataset.getAnalysisOptions().get().getProfileWindowProportion());
 
         		similarityScore = score;
         	}

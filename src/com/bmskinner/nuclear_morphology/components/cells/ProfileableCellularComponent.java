@@ -237,7 +237,11 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
         windowSize = (int) Math.ceil(angleWindow);
 
         try {
-            calculateProfiles();
+        	for (ProfileType type : ProfileType.values()) 
+        		profileMap.put(type, ProfileCreator.createProfile(this, type));
+        	
+//        	segments.clear(); // TODO: investigate why this is needed but causing segmentation errors after SegmentationMethod
+            segments.add(new DefaultProfileSegment(0, 0, this.getBorderLength(), IProfileCollection.DEFAULT_SEGMENT_ID));
         } catch (ProfileException e) {
             throw new ComponentCreationException("Could not calculate profiles due to "+e.getMessage(), e);
         }
@@ -452,15 +456,6 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
         	segments.add(s.copy());
         }
     }
-
-    @Override
-    public void calculateProfiles() throws ProfileException {
-    	for (ProfileType type : ProfileType.values()) 
-    		profileMap.put(type, ProfileCreator.createProfile(this, type));
-    	
-        segments.add(new DefaultProfileSegment(0, 0, this.getBorderLength(), IProfileCollection.DEFAULT_SEGMENT_ID));
-
-    }
     
     @Override
 	public void setSegmentStartLock(boolean lock, @NonNull UUID segID) {
@@ -476,6 +471,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
         // perimeter length, invalidating any existing segments
         // TODO: account for this
         super.reverse();
+        
         try {
         	
         	// Recreate profiles for new outline

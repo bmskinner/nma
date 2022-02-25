@@ -484,7 +484,7 @@ public class CellBorderAdjustmentDialog extends AbstractCellEditingDialog implem
         int oldLength = templateProfile.size();
 
         try {
-            workingCell.getPrimaryNucleus().calculateProfiles();
+            workingCell.getPrimaryNucleus().initialise(dataset.getAnalysisOptions().get().getProfileWindowProportion());
 
             int newLength = workingCell.getPrimaryNucleus().getProfile(ProfileType.ANGLE).size();
 

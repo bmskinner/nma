@@ -60,7 +60,7 @@ public interface Taggable extends CellularComponent {
      * 
      * @throws ProfileException if there was an error in calculating the profiles
      */
-    void calculateProfiles() throws ProfileException;
+//    void calculateProfiles() throws ProfileException;
 
     /**
      * Check if the object has a profile of the given type

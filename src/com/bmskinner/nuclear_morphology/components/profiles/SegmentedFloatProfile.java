@@ -422,6 +422,10 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
     public ISegmentedProfile interpolate(int length) throws ProfileException {
     	if(length<1)
     		throw new IllegalArgumentException("Cannot interpolate to a zero or negative length");
+    	
+    	
+    	LOGGER.finer("Interpolating profile with "+segments.length+" segments from "+this.size()+" to "+length);
+    	
         // interpolate the IProfile
         IProfile newProfile = super.interpolate(length);
         List<IProfileSegment> newSegs = new ArrayList<>();
@@ -431,7 +435,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
         	newSegs.add(new DefaultProfileSegment(0, 0, length, IProfileCollection.DEFAULT_SEGMENT_ID));
         	return new SegmentedFloatProfile(newProfile, newSegs);
         }
-        	
+            	
 
         // get the proportions of the existing segments
         double[] props = new double[segments.length];
@@ -458,6 +462,8 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
             if (testEnd - testStart < IProfileSegment.MINIMUM_SEGMENT_LENGTH) {
                 newStarts[i + 1] = newStarts[i + 1] + 1;
             }
+            
+            LOGGER.finer("Creating segment "+newStarts[i]+" - "+newStarts[i + 1]);
 
             IProfileSegment seg = new DefaultProfileSegment(newStarts[i], newStarts[i + 1], length, segments[i].getID());
             newSegs.add(seg);

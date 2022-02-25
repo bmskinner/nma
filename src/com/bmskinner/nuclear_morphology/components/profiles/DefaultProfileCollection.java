@@ -411,8 +411,10 @@ public class DefaultProfileCollection implements IProfileCollection {
         	return;
         }
         
+        // No current segments are present. Make a default segment spanning the entire profile
         if(segments.isEmpty())
         	segments.add(new DefaultProfileSegment(0, 0, length, IProfileCollection.DEFAULT_SEGMENT_ID));
+        
         
         for (ProfileType type : ProfileType.values()) {
 
