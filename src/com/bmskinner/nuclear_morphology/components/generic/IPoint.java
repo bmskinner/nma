@@ -261,6 +261,22 @@ public interface IPoint {
     IPoint minus(final double value);
     
     /**
+     * Multiple the values in the point by the given value. Creates
+     * a new point at  {@code x * value} and {@code y * value}.
+     * @param value
+     * @return
+     */
+    IPoint multiply(final double value);
+    
+    /**
+     * Divide the values in the point by the given value. Creates
+     * a new point at  {@code x / value} and {@code y / value}.
+     * @param value
+     * @return
+     */
+    IPoint divide(final double value);
+    
+    /**
      * Set the x-value
      *
      * @param x  the new x-value

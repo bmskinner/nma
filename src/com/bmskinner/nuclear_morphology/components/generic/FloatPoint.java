@@ -274,5 +274,15 @@ public class FloatPoint extends Point2D.Float implements IPoint {
 	public IPoint plus(double value) {
 		return new FloatPoint(x+value, y+value);
 	}
+	
+	@Override
+	public IPoint multiply(double value) {
+		return new FloatPoint(x*value, y*value);
+	}
+	
+	@Override
+	public IPoint divide(double value) {
+		return new FloatPoint(x/value, y/value);
+	}
 
 }

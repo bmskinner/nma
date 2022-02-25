@@ -31,10 +31,13 @@ import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.SingleDatasetAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
+
 import com.bmskinner.nuclear_morphology.components.MissingComponentException;
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
+import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.nuclei.Consensus;
@@ -85,31 +88,15 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
     private void run() throws MissingComponentException, UnprofilableObjectException, 
     ComponentCreationException, ProfileException, MissingOptionException {
     	LOGGER.fine("Running consensus averaging on "+dataset.getName());
-    	List<IPoint> border = getPointAverage();
-    	Consensus refoldNucleus = makeConsensus(border);
-    	dataset.getCollection().setConsensus(refoldNucleus);
-    }
-    
-    /**
-     * If scale is given in the dataset options, get it
-     * @param n
-     */
-    private double getScale() {
-    	// Set the nucleus scale if available
-        Optional<IAnalysisOptions> analysisOptions =  dataset.getAnalysisOptions();
-        if(analysisOptions.isPresent()) {
-        	Optional<HashOptions> nucleusOptions = analysisOptions.get().getNucleusDetectionOptions();
-        	if(nucleusOptions.isPresent()) {
-        		return nucleusOptions.get().getDouble(HashOptions.SCALE);
-        	} else {
-        		LOGGER.fine("No nucleus detection options present, unable to find pixel scale for consensus");
-        	}
-        } else {
-        	LOGGER.fine("No analysis options present, unable to find pixel scale for consensus");
-        }
-        return -1;
-    }
 
+        try {
+            List<IPoint> border = calculatePointAverage();
+            Consensus refoldNucleus = makeConsensus(border);
+            dataset.getCollection().setConsensus(refoldNucleus);
+        } catch (Exception e) {
+            LOGGER.log(Loggable.STACK, "Error getting points for consensus nucleus", e);
+        }
+    }
    
     /**
      * Set the landmarks from the profile collection
@@ -168,10 +155,17 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
     private Consensus makeConsensus(List<IPoint> list)
             throws UnprofilableObjectException, ComponentCreationException,
             MissingLandmarkException, ProfileException, MissingProfileException, MissingOptionException {
+    	
+    	// Decide on the best scale for the consensus, 
+    	// and scale the points back into pixel coordinates
+    	double scale = choosePixelToMicronScale();
+    	LOGGER.fine("Consensus nucleus scale set to "+scale);
+    	for(IPoint p : list)
+    		p.set(p.multiply(scale));
 
     	// Create a nucleus with the same rulesets as the dataset
         IAnalysisOptions op = dataset.getAnalysisOptions().orElseThrow(MissingOptionException::new);
-        Nucleus n = new NucleusFactory(op.getRuleSetCollection(), op.getProfileWindowProportion(), getScale())
+        Nucleus n = new NucleusFactory(op.getRuleSetCollection(), op.getProfileWindowProportion(), scale)
         		.new NucleusBuilder()
         		.fromPoints(list)
         		.withFile(new File(EMPTY_FILE))
@@ -189,7 +183,7 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
         
         // Build a consensus nucleus from the template points
         Consensus cons = new DefaultConsensusNucleus(n);
-
+        
         // TODO: make this use the new orientation scheme (left or right, up or down)
         if (cons.getBorderPoint(Landmark.REFERENCE_POINT).isRightOf(cons.getCentreOfMass()))
         	cons.flipHorizontal();
@@ -198,16 +192,48 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
         cons.getOrientedNucleus();
         return cons;
     }
+        
+    /**
+     * The pixel to micron scale used for the consensus depends on the 
+     * cells in the dataset. If all the cells come from the same microscope,
+     * then we use that scale. If they come from different scopes, then we need
+     * to pick one.
+     * @return
+     */
+    private double choosePixelToMicronScale() {
+        double scale = 1;
+        
+        // Easiest option - the scale is consistent across the dataset, and is in the options
+        Optional<IAnalysisOptions> analysisOptions =  dataset.getAnalysisOptions();
+        if(analysisOptions.isPresent()) {
+        	Optional<HashOptions> nucleusOptions = analysisOptions.get().getNucleusDetectionOptions();
+        	if(nucleusOptions.isPresent()) {
+        		if(nucleusOptions.get().hasDouble(HashOptions.SCALE))
+        			scale = nucleusOptions.get().getDouble(HashOptions.SCALE);
+        	} else {
+        		LOGGER.fine("No nucleus detection options present, unable to find pixel scale for consensus");
+        	}
+        } else {
+        	LOGGER.fine("No analysis options present, unable to find pixel scale for consensus");
+        }
+        
+        // The scale is not set at the dataset level. Choose the scale of the
+        // first nucleus in the dataset.
+        return dataset.getCollection().stream().map(ICell::getPrimaryNucleus).findFirst().get().getScale();
+        
+    }
 
-    private List<IPoint> getPointAverage() {
+    private List<IPoint> calculatePointAverage() {
 
         final Map<Double, List<IPoint>> perimeterPoints = new HashMap<>();
 
         IPoint zeroCoM = IPoint.makeNew(0, 0);
-        dataset.getCollection().getNuclei().forEach(n -> {
-            try {
-                
-                Nucleus v = n.getOrientedNucleus();
+
+        try {
+        	// Make a list of points at equivalent positions in each nucleus
+        	for(Nucleus n : dataset.getCollection().getNuclei()) {
+
+        		Nucleus v = n.getOrientedNucleus();
                 v.moveCentreOfMass(zeroCoM);
                 IProfile p = v.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
 
@@ -224,11 +250,12 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
                     IPoint point = v.getBorderPoint(borderIndex);
                     list.add(point);
                 }
-            } catch (Exception e1) {
-                LOGGER.log(Loggable.STACK, "Error getting perimeter point on nucleus " + n.getNameAndNumber(), e1);
-            }
+        	}
+        } catch (Exception e1) {
+        	LOGGER.log(Loggable.STACK, "Error calculating perimeter points in nuclei", e1);
+        }
 
-        });
+
 
         
         // Avoid errors in border calculation due to identical points by
