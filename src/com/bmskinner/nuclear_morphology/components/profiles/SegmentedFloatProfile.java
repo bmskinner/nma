@@ -518,55 +518,55 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
         return new SegmentedFloatProfile(newProfile, newSegs);
     }
 
-    @Override
-    public ISegmentedProfile frankenNormaliseToProfile(@NonNull ISegmentedProfile template) throws ProfileException {
-        
-        if (template==null)
-            throw new IllegalArgumentException("Template segment is null");
-
-        if (this.getSegmentCount() != template.getSegmentCount())
-            throw new IllegalArgumentException("Segment counts are different in profile and template");
-        
-        for(UUID id : template.getSegmentIDs()){
-            if(!hasSegment(id))
-                throw new IllegalArgumentException("Segment ids do not match between profile and template");
-        }
-
-        /*
-         * The final frankenprofile is made of stitched together profiles from
-         * each segment. The resulting profile should have the same length as this profile.
-         * The segment boundaries should have the same proportional indexes as the template profile
-         */
-                
-        List<IProfile> finalSegmentProfiles = new ArrayList<>(segments.length);
-
-        try {
-
-            for (UUID segID : template.getSegmentIDs()) {
-                IProfileSegment thisSeg = this.getSegment(segID);
-                IProfileSegment templateSeg = template.getSegment(segID);
-                
-                // For each segment, 1 must be subtracted from the length because the
-                // segment lengths include the overlapping end and start indexes.
-                int newLength = templateSeg.length()-1;
-
-                // Interpolate the segment region to the new length
-                IProfile revisedProfile = interpolateSegment(thisSeg, newLength);
-                finalSegmentProfiles.add(revisedProfile);
-            }
-
-        } catch (MissingComponentException e) {
-            throw new ProfileException("Unable to get segment for interpolation: "+e.getMessage(), e);
-        }
-        
-        // Recombine the segment profiles
-        IProfile mergedProfile = IProfile.merge(finalSegmentProfiles);
-
-        if(mergedProfile.size()!=template.size())
-        	throw new ProfileException(String.format("Frankenprofile has a different length (%d) to source profile (%d)", mergedProfile.size(), template.size()));
-        
-        return new SegmentedFloatProfile(mergedProfile, template.getSegments());
-    }
+//    @Override
+//    public ISegmentedProfile frankenNormaliseToProfile(@NonNull ISegmentedProfile template) throws ProfileException {
+//        
+//        if (template==null)
+//            throw new IllegalArgumentException("Template segment is null");
+//
+//        if (this.getSegmentCount() != template.getSegmentCount())
+//            throw new IllegalArgumentException("Segment counts are different in profile and template");
+//        
+//        for(UUID id : template.getSegmentIDs()){
+//            if(!hasSegment(id))
+//                throw new IllegalArgumentException("Segment ids do not match between profile and template");
+//        }
+//
+//        /*
+//         * The final frankenprofile is made of stitched together profiles from
+//         * each segment. The resulting profile should have the same length as this profile.
+//         * The segment boundaries should have the same proportional indexes as the template profile
+//         */
+//                
+//        List<IProfile> finalSegmentProfiles = new ArrayList<>(segments.length);
+//
+//        try {
+//
+//            for (UUID segID : template.getSegmentIDs()) {
+//                IProfileSegment thisSeg = this.getSegment(segID);
+//                IProfileSegment templateSeg = template.getSegment(segID);
+//                
+//                // For each segment, 1 must be subtracted from the length because the
+//                // segment lengths include the overlapping end and start indexes.
+//                int newLength = templateSeg.length()-1;
+//
+//                // Interpolate the segment region to the new length
+//                IProfile revisedProfile = interpolateSegment(thisSeg, newLength);
+//                finalSegmentProfiles.add(revisedProfile);
+//            }
+//
+//        } catch (MissingComponentException e) {
+//            throw new ProfileException("Unable to get segment for interpolation: "+e.getMessage(), e);
+//        }
+//        
+//        // Recombine the segment profiles
+//        IProfile mergedProfile = IProfile.merge(finalSegmentProfiles);
+//
+//        if(mergedProfile.size()!=template.size())
+//        	throw new ProfileException(String.format("Frankenprofile has a different length (%d) to source profile (%d)", mergedProfile.size(), template.size()));
+//        
+//        return new SegmentedFloatProfile(mergedProfile, template.getSegments());
+//    }
 
     /**
      * The interpolation step of frankenprofile creation. The segment in this

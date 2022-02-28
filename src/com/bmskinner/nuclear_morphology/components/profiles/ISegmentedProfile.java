@@ -235,21 +235,6 @@ public interface ISegmentedProfile extends IProfile {
 	ISegmentedProfile offset(int newStartIndex) throws ProfileException;
 
     /**
-     * Interpolate the segments of this profile to the lengths of
-     * the segments in the template. The template must have the same number of
-     * segments. Both this and the template must be already offset to start at
-     * equivalent positions. The two profiles must have the same segment ids.
-     * The resulting profile will have the same length as the template, and the 
-     * segment boundaries will be at the same indexes.
-     * 
-     * @param template the profile with segment proportions to copy.
-     * @return a profile with the values in this profile interpolated segment by segment
-     * @throws ProfileException if the normalisation failed
-     */
-    ISegmentedProfile frankenNormaliseToProfile(@NonNull ISegmentedProfile template) throws ProfileException;
-
-    
-    /**
      * Attempt to merge the given segments into one segment. The segments must
      * belong to the profile, and be adjacent
      * 

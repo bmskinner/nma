@@ -213,7 +213,6 @@ public class DatasetStatsExporter extends StatsExporter {
 
                     if (isIncludeProfiles) {
                         appendProfiles(outLine, n);
-                        appendFrankenProfiles(outLine, n, medianProfile);
                     }
                     
                     if(isIncludeSegments){
@@ -292,30 +291,7 @@ public class DatasetStatsExporter extends StatsExporter {
             }
         }
     }
-    
-    /**
-     * Generate and append a franken profile for the given median
-     * @param outLine the string builder to append to
-     * @param c the component to export
-     * @param median the dataset median profile from which the component came
-     * @throws MissingLandmarkException
-     * @throws MissingProfileException
-     * @throws ProfileException
-     */
-    private void appendFrankenProfiles(StringBuilder outLine, Taggable c, ISegmentedProfile median)
-            throws MissingLandmarkException, MissingProfileException, ProfileException {
-
-            ISegmentedProfile s = c.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
-            ISegmentedProfile f = s.frankenNormaliseToProfile(median);
-            
-            for (int i = 0; i < profileSamples; i++) {
-                double idx = ((double) i) / (double)profileSamples;
-
-                double value = f.get(idx);
-                outLine.append(value + TAB);
-            }
-    }
-    
+        
     private void appendSegments(StringBuilder outLine, Taggable c)
             throws MissingLandmarkException, MissingProfileException, ProfileException {
         
