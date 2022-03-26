@@ -72,14 +72,6 @@ public class IProfileTester {
 		if(source==FloatProfile.class)
 			return new FloatProfile(data);
 		
-		if(source==DoubleProfile.class) {
-			double[] d = new double[data.length];
-			for(int i=0; i<data.length; i++) {
-				d[i] = data[i];
-			}
-			return new DoubleProfile(d);
-		}
-		
 		throw new Exception("Unable to create instance of "+source);
 	}
 	
@@ -91,8 +83,7 @@ public class IProfileTester {
 		// we're making class references. The actual objects under test
 		// are created fresh from the appropriate class.
 		return Arrays.asList(
-				FloatProfile.class,
-				DoubleProfile.class);
+				FloatProfile.class);
 	}
 	
 	@Test
@@ -338,17 +329,24 @@ public class IProfileTester {
 		testAbsoluteSquareDifferenceOnSameLengthProfiles(profile, 0);
 	}
 	
+	/**
+	 * Test that the absolute square difference measure works after interpolation by creating a profile with
+	 * a known difference and checking we calculate the expected ASD
+	 * @param template the profile to test
+	 * @param newLength the new length of hte profile after interpolation 
+	 * @param diff the difference to add to the first profile index
+	 * @throws Exception
+	 */
 	private void testAbsoluteSquareDifferenceOnDifferentLengthProfiles(IProfile template, int newLength, float diff) throws Exception{
 
 	    IProfile interpolated = template.interpolate(newLength);
 	    
-	    double[] arr = interpolated.toDoubleArray();
+	    float[] arr = interpolated.toFloatArray();
 	    arr[0] = arr[0]+diff;
-	            
-	    IProfile p = new DoubleProfile(arr);       
+	    IProfile newProfile = new FloatProfile(arr);
+	                 
         double expDiff = diff*diff;
-        assertEquals(expDiff, template.absoluteSquareDifference(p), 0.001);
-        assertEquals(expDiff, p.absoluteSquareDifference(template), 0.001);
+        assertEquals(expDiff, template.absoluteSquareDifference(newProfile), 0.001);
 	}
 	
 	@Test
