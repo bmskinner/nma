@@ -78,14 +78,14 @@ public class OpenBorderSegment implements IProfileSegment {
         this.mergeSources = new IProfileSegment[0];
         this.uuid = id;
     }
-    
+        
     @Override
 	public Element toXmlElement() {
-		Element e = new Element("Segment").setAttribute("id", uuid.toString());
-		e.addContent(new Element("Start").setText(String.valueOf(startIndex)));
-		e.addContent(new Element("End").setText(String.valueOf(endIndex)));
-		e.addContent(new Element("Total").setText(String.valueOf(totalLength)));
-		
+		Element e = new Element("Segment")
+				.setAttribute("id", uuid.toString())
+				.setAttribute("start", String.valueOf(startIndex))
+				.setAttribute("end", String.valueOf(endIndex))
+				.setAttribute("total", String.valueOf(totalLength));		
 		for(IProfileSegment s : mergeSources) {
 			e.addContent(new Element("MergeSource").setContent(s.toXmlElement()));
 		}
@@ -94,10 +94,10 @@ public class OpenBorderSegment implements IProfileSegment {
     
     public OpenBorderSegment(Element e) {
     	uuid = UUID.fromString(e.getAttributeValue("id"));
-    	startIndex = Integer.parseInt(e.getChildText("Start"));
-    	endIndex = Integer.parseInt(e.getChildText("End"));
-    	totalLength = Integer.parseInt(e.getChildText("Total"));
-    	
+    	startIndex  = Integer.parseInt(e.getAttributeValue("start"));
+    	endIndex    = Integer.parseInt(e.getAttributeValue("end"));
+    	totalLength = Integer.parseInt(e.getAttributeValue("total"));
+    	    	
     	mergeSources = new IProfileSegment[e.getChildren("MergeSource").size()];
     	int i=0;
     	for(Element el : e.getChildren("MergeSource")) {
@@ -398,13 +398,29 @@ public class OpenBorderSegment implements IProfileSegment {
         return true;
     }
     
+//    @Override
+//    public void offset(int offset) {
+//    	startIndex = CellularComponent.wrapIndex(startIndex+offset, totalLength);
+//    	endIndex  = CellularComponent.wrapIndex(endIndex+offset, totalLength);
+//    	for(IProfileSegment s : mergeSources) {
+//    		s.offset(offset);
+//    	}
+//    }
+    
     @Override
-    public void offset(int offset) {
-    	startIndex = CellularComponent.wrapIndex(startIndex+offset, totalLength);
-    	endIndex  = CellularComponent.wrapIndex(endIndex+offset, totalLength);
+    public IProfileSegment offset(int offset) {
+    	
+    	IProfileSegment seg = new DefaultProfileSegment(CellularComponent.wrapIndex(startIndex+offset, totalLength),
+    			CellularComponent.wrapIndex(endIndex+offset, totalLength),
+    			totalLength,
+    			uuid);
+//    	startIndex = CellularComponent.wrapIndex(startIndex+offset, totalLength);
+//    	endIndex  = CellularComponent.wrapIndex(endIndex+offset, totalLength);
     	for(IProfileSegment s : mergeSources) {
-    		s.offset(offset);
+//    		s.offset(offset);
+    		seg.addMergeSource(s.offset(offset));
     	}
+    	return seg;
     }
 
     @Override
