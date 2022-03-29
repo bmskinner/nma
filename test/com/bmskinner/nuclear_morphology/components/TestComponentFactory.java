@@ -3,6 +3,7 @@ package com.bmskinner.nuclear_morphology.components;
 import static org.junit.Assert.assertArrayEquals;
 
 import java.io.File;
+import java.util.logging.Logger;
 
 import org.junit.Test;
 
@@ -15,9 +16,11 @@ import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclei.DefaultNucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.components.signals.DefaultNuclearSignal;
 import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.gui.OvalRoi;
 import ij.gui.PolygonRoi;
@@ -31,6 +34,8 @@ import ij.process.FloatPolygon;
  *
  */
 public class TestComponentFactory {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.PROJECT_LOGGER);
 	
 	public static final int DEFAULT_X_BASE = 10;
 	public static final int DEFAULT_Y_BASE = 10;
@@ -99,7 +104,7 @@ public class TestComponentFactory {
 		IPoint com = IPoint.makeNew(xBase+(w/2), yBase+(h/2));
 	
 		File f = new File(TestDatasetBuilder.TEST_DATASET_IMAGE_FOLDER);
-		Nucleus n = createNucleus(roi, com, f, 0, xBase, yBase, w, h, 0, rsc);
+		Nucleus n = createNucleus(roi, com, f, 0, xBase, yBase, 0, rsc);
 		n.rotate(rotation);
 				
 		// Note - the roi interpolation will smooth corners
@@ -127,17 +132,19 @@ public class TestComponentFactory {
 
 		File f = new File(TestDatasetBuilder.TEST_DATASET_IMAGE_FOLDER);
 		
-		Nucleus n = createNucleus(roi, com, f, 0, xBase, yBase, w, h, 0, rsc);
+		Nucleus n = createNucleus(roi, com, f, 0, xBase, yBase, 0, rsc);
 		n.rotate(rotation);
 		
+//		LOGGER.fine("Initialising new nucleus");
 		// Note - the roi interpolation will smooth corners
 		n.initialise(Taggable.DEFAULT_PROFILE_WINDOW_PROPORTION);
-		ProfileIndexFinder.assignLandmarks(n, RuleSetCollection.roundRuleSetCollection());
+//		LOGGER.fine("Assigning landmarks to new nucleus");
+		ProfileIndexFinder.assignLandmarks(n, RuleSetCollection.roundRuleSetCollection());		
 		return n;
 	}
 	
-	private static Nucleus createNucleus(Roi roi, IPoint com, File f, int channel, int x, int y, int w, int h, int number, RuleSetCollection rsc) {
-		return new DefaultNucleus(roi, com, f, 0, x, y, w, h, 0, rsc);
+	private static Nucleus createNucleus(Roi roi, IPoint com, File f, int channel, int x, int y, int number, RuleSetCollection rsc) {
+		return new DefaultNucleus(roi, com, f, 0, x, y, 0, rsc);
 	}
 
 	
@@ -174,7 +181,7 @@ public class TestComponentFactory {
 
 		File f = new File("empty file");
 		
-		return new DefaultNuclearSignal(roi, com, f, channel, xBase, yBase, w, h);
+		return new DefaultNuclearSignal(roi, com, f, channel, xBase, yBase);
 	}
 		
 	/**

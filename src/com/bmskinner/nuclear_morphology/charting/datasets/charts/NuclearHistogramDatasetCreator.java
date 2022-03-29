@@ -230,7 +230,8 @@ public class NuclearHistogramDatasetCreator extends HistogramDatasetCreator {
             try {
                 medianSeg = collection.getProfileCollection()
                         .getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN)
-                        .getSegmentAt(options.getSegPosition());
+                        .getSegments().get(options.getSegPosition());
+//                        .getSegmentAt(options.getSegPosition());
             } catch (MissingComponentException | ProfileException e) {
                 LOGGER.log(Loggable.STACK, "Error getting profile from tag", e);
                 throw new ChartDatasetCreationException("Unable to get median profile", e);
@@ -276,7 +277,8 @@ public class NuclearHistogramDatasetCreator extends HistogramDatasetCreator {
             try {
                 medianSeg = collection.getProfileCollection()
                         .getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN)
-                        .getSegmentAt(options.getSegPosition());
+                        .getSegments().get(options.getSegPosition());
+//                        .getSegmentAt(options.getSegPosition());
             } catch (MissingComponentException | ProfileException e2) {
                 LOGGER.log(Loggable.STACK, "Error getting profile from tag", e2);
                 throw new ChartDatasetCreationException("Unable to get median profile", e2);

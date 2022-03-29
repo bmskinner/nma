@@ -3,7 +3,9 @@ package com.bmskinner.nuclear_morphology.components;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 
 import org.junit.Before;
@@ -20,6 +22,7 @@ import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclei.DefaultNucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.profiles.DefaultProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
@@ -76,7 +79,7 @@ public class TaggableTest {
 	public void testGetProfileTypeTag() throws MissingLandmarkException, MissingProfileException, ProfileException {
 		ISegmentedProfile rawProfile = taggable.getProfile(ProfileType.ANGLE);
 		ISegmentedProfile tagProfile = taggable.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
-		assertEquals(rawProfile.offset(taggable.getBorderIndex(Landmark.REFERENCE_POINT)).toString(), tagProfile.toString());
+		assertEquals(rawProfile.startFrom(taggable.getBorderIndex(Landmark.REFERENCE_POINT)).toString(), tagProfile.toString());
 	}
 
 	
@@ -86,7 +89,7 @@ public class TaggableTest {
 		// Get the profile to update
 		ISegmentedProfile oldProfile = taggable.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
 		
-		IProfileSegment seg0 = oldProfile.getSegmentAt(0);
+		IProfileSegment seg0 = oldProfile.getSegments().get(1);
 		UUID segId = seg0.getID();
 		
 		int oldStart = seg0.getStartIndex();
@@ -99,11 +102,11 @@ public class TaggableTest {
 		assertTrue(oldProfile.update(seg0, newStart, newEnd));
 		
 		// Put the updated profile back into the nucleus
-		taggable.setSegments(Landmark.REFERENCE_POINT, oldProfile);
+		taggable.setSegments(oldProfile.getSegments());
 		
 		// Confirm everything was saved properly
 		ISegmentedProfile newProfile = taggable.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
-		assertEquals(oldProfile.toString(), newProfile.toString());
+		assertEquals(oldProfile, newProfile);
 	}
 	
 	/**
@@ -122,7 +125,7 @@ public class TaggableTest {
 		ISegmentedProfile templateProfile = new SegmentedFloatProfile(oldProfile);
 		
 		// Set the profile of the object to the newly created profile
-		taggable.setSegments(Landmark.REFERENCE_POINT, templateProfile);
+		taggable.setSegments(templateProfile.getSegments());
 		
 		// Fetch the profile back out from the object
 		ISegmentedProfile testProfile  = taggable.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
@@ -131,8 +134,8 @@ public class TaggableTest {
 		assertEquals("Segment count", oldProfile.getSegmentCount(), testProfile.getSegmentCount());
 		
 		// Test the multiple segments match
-		IProfileSegment tempSeg  = templateProfile.getSegmentAt(0);	
-		IProfileSegment testSeg = testProfile.getSegmentAt(0);	
+		IProfileSegment tempSeg  = templateProfile.getSegments().get(0);
+		IProfileSegment testSeg = testProfile.getSegments().get(0);
 		assertEquals("Segments should match", tempSeg, testSeg);
 	}
 	
@@ -152,7 +155,7 @@ public class TaggableTest {
 		ISegmentedProfile templateProfile = new SegmentedFloatProfile(oldProfile.toFloatArray());
 		
 		// Set the profile of the object to the newly created profile
-		taggable.setSegments(Landmark.REFERENCE_POINT, templateProfile);
+		taggable.setSegments(templateProfile.getSegments());
 		
 		// Fetch the profile back out from the object
 		ISegmentedProfile testProfile  = taggable.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
@@ -163,8 +166,8 @@ public class TaggableTest {
 		assertEquals("Segment count should be", 1, testProfile.getSegmentCount());
 				
 		// Test the single segments match
-		IProfileSegment tempSeg  = templateProfile.getSegmentAt(0);	
-		IProfileSegment testSeg = testProfile.getSegmentAt(0);	
+		IProfileSegment tempSeg  = templateProfile.getSegments().get(0);
+		IProfileSegment testSeg = testProfile.getSegments().get(0);
 		assertEquals("Segments should match", tempSeg, testSeg);
 	}
 	
@@ -182,18 +185,61 @@ public class TaggableTest {
 	@Test
 	public void testSegmentsCanBeMerged() throws Exception {
 		ISegmentedProfile profile = taggable.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
-		UUID segId1 = profile.getSegmentAt(1).getID();
-		UUID segId2 = profile.getSegmentAt(2).getID();
+		UUID segId1 = profile.getSegments().get(1).getID();
+		UUID segId2 = profile.getSegments().get(2).getID();
 		
 		UUID newId = UUID.randomUUID();
 		profile.mergeSegments(segId1, segId2, newId);
-		taggable.setSegments(Landmark.REFERENCE_POINT, profile);
+		taggable.setSegments(profile.getSegments());
 		
 		ISegmentedProfile result = taggable.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
 		
 		assertEquals(profile, result);
 		
 		assertTrue(result.getSegment(newId).hasMergeSources());
+		
+	}
+		
+	@Test
+	public void testGetSegmentsReturnsLinkedSegments() throws Exception {
+		ISegmentedProfile profile = taggable.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
+		List<IProfileSegment> testSegs = profile.getSegments();
+		
+		for(int i=0; i<profile.getSegmentCount(); i++) {
+			assertTrue(testSegs.get(i).hasNextSegment());
+			assertTrue(testSegs.get(i).hasPrevSegment());
+		}
+	}
+	
+	@Test
+	public void testSetSegmentsUpdatesReplacesExistingSegments() throws Exception {
+		ISegmentedProfile profile = taggable.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
+		
+		List<IProfileSegment> newSegs = new ArrayList<>();
+		newSegs.add(new DefaultProfileSegment(0, profile.size()/2, profile.size()));
+		newSegs.add(new DefaultProfileSegment(profile.size()/2, 0, profile.size()));
+		IProfileSegment.linkSegments(newSegs);
+		
+		ISegmentedProfile newProfile = new SegmentedFloatProfile(profile, newSegs);
+		
+		taggable.setSegments(newProfile.getSegments());
+		assertEquals(newProfile, taggable.getProfile(ProfileType.ANGLE));		
+	}
+	
+	@Test
+	public void testReverseBorderReversesSegments() throws Exception {
+		ISegmentedProfile profile = taggable.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
+		
+		taggable.reverse();
+		
+		ISegmentedProfile revProfile = taggable.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
+		
+		assertEquals("Reversed profile should have the same number of segments",
+				profile.getSegmentCount(), revProfile.getSegmentCount());
+		
+		for(IProfileSegment s : profile.getSegments()) {
+			assertTrue(revProfile.hasSegment(s.getID()));
+		}
 		
 	}
 

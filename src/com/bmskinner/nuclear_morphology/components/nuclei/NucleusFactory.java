@@ -137,7 +137,7 @@ public class NucleusFactory {
 			 nucleusCount = count>-1 ? nucleusCount+1 : nucleusCount;
 			 
 			 Nucleus n = new DefaultNucleus(roi, com, file, channel, (int) roi.getXBase(), (int) roi.getYBase(), 
-					 (int) bounds.getWidth(), (int) bounds.getHeight(), number, rsc);
+					  number, rsc);
 			 
 			 if(isOffset) {
 			        IPoint offsetCoM = IPoint.makeNew(com.getX() - (int) roi.getXBase(), com.getY() - (int) roi.getYBase());

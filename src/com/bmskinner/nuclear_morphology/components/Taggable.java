@@ -16,6 +16,7 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components;
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -25,6 +26,7 @@ import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
@@ -95,15 +97,13 @@ public interface Taggable extends CellularComponent {
             throws ProfileException, MissingLandmarkException, MissingProfileException;
 
     /**
-     * Set segments offset to a border tag. The profile can be
-     * considered to start from the provided tag.
+     * Set segments from the reference point. The first segment
+     * must begin at index zero.
      * 
-     * @param tag the tag the profile starts from
-     * @param profile the profile containing segments
-     * @throws MissingLandmarkException if the tag is not present
-     * @throws ProfileException 
+     * @param segments the segments covering the profile
+     * @throws ProfileException if the profile segments are not suitable
      */
-    void setSegments(@NonNull Landmark tag, @NonNull ISegmentedProfile profile)
+    void setSegments(@NonNull List<IProfileSegment> segments)
             throws MissingLandmarkException, ProfileException;
     
     /**
@@ -149,19 +149,19 @@ public interface Taggable extends CellularComponent {
     void setLocked(boolean b);
 
     /**
-     * Set the lock on this segment for all profile types
+     * Set the lock state for this segment
      * 
-     * @param lock
-     * @param segID
+     * @param isLocked
+     * @param segId
      */
-    void setSegmentStartLock(boolean lock, @NonNull UUID segID);
+    void setSegmentStartLock(boolean isLocked, @NonNull UUID segId);
 
     /**
      * Reverse the angle profile of the object. Also reverses the distance
      * profile, the border list and updates landmarks to the new positions
      */
     @Override
-	void reverse();
+	void reverse() throws ProfileException, MissingComponentException;
     
     /**
      * Get the border index of point in the border list, removing offset to a

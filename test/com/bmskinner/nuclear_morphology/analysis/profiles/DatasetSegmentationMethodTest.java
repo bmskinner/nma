@@ -82,7 +82,6 @@ public class DatasetSegmentationMethodTest extends AbstractProfileMethodTest {
 		}
 	}
 	
-	
 	@Test
 	public void testSegmentationCanAccountForVariationInCells() throws Exception {
 

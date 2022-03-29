@@ -32,10 +32,11 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 
 /**
  * Tests for the methods specific to the segmented float profile. Common methods are
- * tested by {@link ISegmentedProfileTester}
+ * tested by {@link ISegmentedProfileTest}
  * @author bms41
  *
  */
@@ -104,12 +105,21 @@ public class SegmentedFloatProfileTest {
 	@Rule
 	public final ExpectedException exception = ExpectedException.none();
 
+	/**
+	 * Test that the sample profile has the correct number of segments
+	 * @throws ProfileException
+	 */
 	@Test
 	public void testSegmentedFloatProfileIProfileListOfIBorderSegment() throws ProfileException {
 	    List<IProfileSegment> list = makeTestSegments();
 	    assertEquals(list.size(), sp.getSegmentCount());
 	}
 		
+	/**
+	 * Test that a profile cannot be created when a source IProfile is paired with
+	 * a list of segments from a different length profile.
+	 * @throws ProfileException
+	 */
 	@Test
     public void testSegmentedFloatProfileIProfileListOfIBorderSegmentExceptsOnMismatchedProfileAndList() throws ProfileException {
         List<IProfileSegment> list = makeTestSegments();
@@ -118,21 +128,35 @@ public class SegmentedFloatProfileTest {
         new SegmentedFloatProfile(profile, list);
     }
 
+	/**
+	 * Test that a profile created using another profile as a template is equal.
+	 * @throws IndexOutOfBoundsException
+	 * @throws ProfileException
+	 */
 	@Test
 	public void testSegmentedFloatProfileISegmentedProfile() throws IndexOutOfBoundsException, ProfileException {
 	    ISegmentedProfile result = new SegmentedFloatProfile(sp);
 	    assertEquals(sp, result);
 	}
 	
+	/**
+	 * Test that a segmented profile created from an IProfile has one default segment
+	 * @throws ProfileException 
+	 */
 	@Test
-	public void testSegmentedFloatProfileIProfile() {
+	public void testSegmentedFloatProfileIProfile() throws ProfileException {
 	    IProfile profile = new FloatProfile(10, 100);
 	    ISegmentedProfile p = new SegmentedFloatProfile(profile);
 	    assertEquals(1, p.getSegmentCount());
+	    assertEquals("Single segment should have default id", IProfileCollection.DEFAULT_SEGMENT_ID, p.getSegments().get(0).getID());
 	}
 	
+	/**
+	 * Test that a profile created from a float array has the correct values
+	 * @throws ProfileException 
+	 */
 	@Test
-	public void testSegmentedFloatProfileFloatArray() {
+	public void testSegmentedFloatProfileFloatArray() throws ProfileException {
 	    float[] array = new float[100];
         for (int i = 0; i < array.length; i++) {
             array[i] = 10;
@@ -144,8 +168,37 @@ public class SegmentedFloatProfileTest {
         }  
 	}
 	
+	/**
+	 * When a segmented profile is created from another profile and a list of 
+	 * segments, check that the segments are equal in the new profile. 
+	 * @throws Exception 
+	 */
 	@Test
-    public void testSegmentedFloatProfileFloatArrayExceptsOnNullArray() {
+	public void testConstructorCopiesSegmentState() throws Exception {
+		
+		// Lock the first segment in the input
+		List<IProfileSegment> inputSegments = makeTestSegments();
+		
+		for(IProfileSegment s: inputSegments)
+			s.setLocked(true);
+		
+		// Make the profile
+		IProfile profile = new FloatProfile(10, 100);
+		ISegmentedProfile p = new SegmentedFloatProfile(profile, inputSegments);
+		
+		List<IProfileSegment> outputSegments = p.getSegments();
+		for(int i=0; i<inputSegments.size(); i++) {
+			assertEquals("Segments should match", inputSegments.get(i), outputSegments.get(i));
+			assertEquals("Segment lock state should match", 
+					inputSegments.get(i).isLocked(), 
+					outputSegments.get(i).isLocked());
+		}
+		
+		assertEquals("Segments should match", inputSegments, outputSegments);
+	}
+	
+	@Test
+    public void testSegmentedFloatProfileFloatArrayExceptsOnNullArray() throws ProfileException {
 	    exception.expect(IllegalArgumentException.class);
         new SegmentedFloatProfile( (float[]) null);
     }
@@ -165,14 +218,14 @@ public class SegmentedFloatProfileTest {
     }
 	
 	@Test
-	public void testClearSegments() {
+	public void testClearSegments() throws ProfileException {
 	    assertTrue(sp.hasSegments());
 	    sp.clearSegments();
 	    assertEquals(1,sp.getSegmentCount());
 	}
 
 	@Test
-	public void testHasSegments() {
+	public void testHasSegments() throws ProfileException {
 		assertTrue(sp.hasSegments());
 		sp.clearSegments();
 		assertEquals(1, sp.getSegmentCount());
@@ -190,10 +243,10 @@ public class SegmentedFloatProfileTest {
 	
 	
 	@Test
-	public void testProfileIsCreatedWhenOnlyOneSegment() {
+	public void testProfileIsCreatedWhenOnlyOneSegment() throws ProfileException {
 		SegmentedFloatProfile p = new SegmentedFloatProfile(new FloatProfile(10, 100));
 		assertEquals(1, p.getSegmentCount());
-		assertEquals(0, p.getSegmentAt(0).getStartIndex());
-		assertEquals(0, p.getSegmentAt(0).getEndIndex());
+		assertEquals(0, p.getSegments().get(0).getStartIndex());
+		assertEquals(0, p.getSegments().get(0).getEndIndex());
 	}
 }

@@ -489,19 +489,33 @@ public class DefaultBorderSegmentTest {
 		ISegmentedProfile sp = new SegmentedFloatProfile(profile, list);
 	}
 	
+	/**
+	 * Test that when a segment with merge sources is updated, the merge sources also
+	 * update
+	 * @throws Exception
+	 */
 	@Test
-	public void testUpdateWithMergeSources() throws SegmentUpdateException{
-		IProfileSegment p1 = new DefaultProfileSegment(10, 30, 100);
-		IProfileSegment m1 = new DefaultProfileSegment(10, 20, 100);
-		IProfileSegment m2 = new DefaultProfileSegment(20, 30, 100);
+	public void testUpdateWithMergeSourcesPreservesSources() throws Exception {
+		
+		int midpoint = 30;
+		IProfileSegment p1 = new DefaultProfileSegment(10, 50, 100);
+		IProfileSegment m1 = new DefaultProfileSegment(10, midpoint, 100);
+		IProfileSegment m2 = new DefaultProfileSegment(midpoint, 50, 100);
 
 		p1.addMergeSource(m1);
 		p1.addMergeSource(m2);
 
-		p1.update(14, 30);
+		int newStart = 14;
+		int newEnd   = 40;
+		p1.update(newStart, newEnd);
+		
+		assertEquals(newStart, p1.getMergeSource(m1.getID()).getStartIndex());
+		assertEquals(midpoint, p1.getMergeSource(m1.getID()).getEndIndex());
+		assertEquals(midpoint, p1.getMergeSource(m2.getID()).getStartIndex());
+		assertEquals(newEnd, p1.getMergeSource(m2.getID()).getEndIndex());
 
 		List<IProfileSegment> merges = p1.getMergeSources();
-		assertEquals(0, merges.size());
+		assertEquals(2, merges.size());
 
 	}
 	
@@ -637,7 +651,7 @@ public class DefaultBorderSegmentTest {
 
 		IProfileSegment.linkSegments(list);
 
-		List<IProfileSegment> result = IProfileSegment.copy(list);
+		List<IProfileSegment> result = IProfileSegment.copyAndLink(list);
 
 		for(int i=0; i<start.length; i++){
 		    IProfileSegment t = list.get(i);

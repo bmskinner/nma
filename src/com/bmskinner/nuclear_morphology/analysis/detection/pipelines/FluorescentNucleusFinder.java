@@ -33,6 +33,7 @@ import com.bmskinner.nuclear_morphology.analysis.image.ImageAnnotator;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder;
+import com.bmskinner.nuclear_morphology.components.MissingComponentException;
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
@@ -45,6 +46,7 @@ import com.bmskinner.nuclear_morphology.components.nuclei.NucleusFactory;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
+import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -272,12 +274,12 @@ public class FluorescentNucleusFinder extends CellFinder {
         
         try {
         	if(ProfileIndexFinder.shouldReverseProfile(result)) {
-        		LOGGER.fine("Reversing profile for "+result.getNameAndNumber());
+        		LOGGER.finer("Reversing profile for "+result.getNameAndNumber());
         		result.reverse();
         		result.initialise(options.getProfileWindowProportion());
         		ProfileIndexFinder.assignLandmarks(result, options.getRuleSetCollection());
         	}
-        } catch(MissingLandmarkException | MissingProfileException | ProfileException e) {
+        } catch(MissingComponentException | ProfileException e) {
         	LOGGER.fine(()->"Unable to reverse profile in nucleus");
         	throw new ComponentCreationException(e);
         }

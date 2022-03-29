@@ -141,7 +141,7 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
         	for(IProfileSegment s : newSegs)
         		LOGGER.finest(s.toString());
         	profile.setSegments(newSegs);
-        	n.setSegments(Landmark.REFERENCE_POINT, profile);
+        	n.setSegments(profile.getSegments());
         }
     }
     

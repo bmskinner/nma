@@ -15,6 +15,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -35,7 +37,11 @@ public abstract class ComponentTester extends FloatArrayTester {
 	private static final Logger LOGGER = Logger.getLogger(ComponentTester.class.getName());
 	
 	/** Classes that we have custom code to inspect **/
-	private static final List<Class> SPECIAL_CLASSES = List.of(HashMap.class, HashSet.class);
+	private static final List<Class> SPECIAL_CLASSES = List.of(HashMap.class, 
+			ConcurrentHashMap.class,
+			Map.class,
+			HashSet.class, 
+			ArrayList.class);
 	
 	/**
 	 * Test if the two given points are vertically aligned
@@ -135,13 +141,25 @@ public abstract class ComponentTester extends FloatArrayTester {
 
 			if(oValue!=null && dValue!=null) {
 				
-				if(SPECIAL_CLASSES.contains(oValue.getClass())) {
-
-					if(oValue.getClass().equals(HashMap.class)) {
-						testHashMapsByField(f, (HashMap)oValue, (HashMap)dValue);
+				Class oClass = oValue.getClass();
+				if(SPECIAL_CLASSES.contains(oClass)) {
+					
+					if(oClass.equals(Map.class) ) {
+						testHashMapsByField(f, (Map)oValue, (Map)dValue);
 					}
-					if(oValue.getClass().equals(HashSet.class)) {
+					
+					if(oClass.equals(ConcurrentHashMap.class) ) {
+						testHashMapsByField(f, (Map)oValue, (Map)dValue);
+					}
+
+					if(oClass.equals(HashMap.class) ) {
+						testHashMapsByField(f, (Map)oValue, (Map)dValue);
+					}
+					if(oClass.equals(HashSet.class)) {
 						testHashSetsByField(f, (HashSet)oValue, (HashSet)dValue);
+					}
+					if(oClass.equals(ArrayList.class)) {
+						testListEqualityByField(f, (List)oValue, (List)dValue, fieldsToSkip);
 					}
 
 				} else {
@@ -151,7 +169,12 @@ public abstract class ComponentTester extends FloatArrayTester {
 					if(f.getType().getName().startsWith("com.bmskinner.nuclear_morphology") && !f.getType().isEnum()) {
 						testDuplicatesByField(oValue, dValue, fieldsToSkip);
 					} else{
-						String msg = "Field '"+f.getName()+"' in "+f.getType().getSimpleName()+" does not match";
+						String msg = "Field '"+f.getName()+"' of type "+f.getType().getName()
+								+ " and class "+ oClass.getName()
+								+" does not match in original object "
+								+original.getClass().getSimpleName()+": "
+								+"Expected: "+ original 
+								+"Found: "+dup;
 						assertThat(msg, dValue, equalTo(oValue));
 					}
 				}
@@ -165,7 +188,7 @@ public abstract class ComponentTester extends FloatArrayTester {
 	// Issue with arrays in hashmaps: Object.hashcode()
 	// depends on reference, so is not equal between two
 	// arrays. Need to use Arrays.hashcode().
-	private static void testHashMapsByField(Field f, HashMap o, HashMap d) {
+	private static void testHashMapsByField(Field f, Map o, Map d) {
 		assertTrue("Hashmaps should not both be null in "+f.getName(), o!=null&&d!=null);
 		assertEquals("Maps should contain same number of elements in "+f.getName(), o.size(), d.size());
 		
@@ -214,6 +237,24 @@ public abstract class ComponentTester extends FloatArrayTester {
 		}
 		
 		assertTrue("All elements should be shared in hashset in"+f.getName(), o.containsAll(d));
+	}
+	
+	/**
+	 * Test if two lists are equal, item by item
+	 * @param f the field to test
+	 * @param o the original list
+	 * @param d the duplicate list
+	 * @throws Exception 
+	 */
+	private static void testListEqualityByField(Field f, List o, List d, List<String> fieldsToSkip) throws Exception {
+		assertTrue("Lists should not both be null", o!=null&&d!=null);
+		assertEquals("Lists should contain same number of elements", o.size(), d.size());
+		
+		for(int i=0; i<o.size(); i++) {
+			assertEquals("Field '"+f.getName()+"' element "+i+" should be equal", o.get(i), d.get(i));
+//			assertTrue("Field '"+f.getName()+"' should contain element "+o.get(i).toString(), d.contains(o.get(i)));
+		}
+		assertTrue("All elements should be shared in list in '"+f.getName()+"'", o.containsAll(d));
 	}
 		
 	/**

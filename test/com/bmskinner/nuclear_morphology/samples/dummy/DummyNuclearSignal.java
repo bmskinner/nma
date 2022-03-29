@@ -46,7 +46,7 @@ public class DummyNuclearSignal extends DefaultNuclearSignal {
 
     
     public DummyNuclearSignal() {
-        super(ROI, COM, IMAGE_FILE, IMAGE_CHANNEL, 105, 34, 5, 5);
+        super(ROI, COM, IMAGE_FILE, IMAGE_CHANNEL, 105, 34);
     }
 
 }

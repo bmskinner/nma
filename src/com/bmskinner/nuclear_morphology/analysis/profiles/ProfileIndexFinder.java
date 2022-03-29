@@ -72,9 +72,13 @@ public class ProfileIndexFinder {
     		
     		try {
     			for(RuleSet rule : rsc.getRuleSets(lm)) {
+//    				LOGGER.fine("Getting raw profile to find "+lm);
     				IProfile p = n.getProfile(rule.getType());
+//    				LOGGER.fine("Finding "+lm);
     				int index = identifyIndex(p, rule);
+//    				LOGGER.fine("Found "+lm+" at "+index);
     				n.setLandmark(lm, index);
+//    				LOGGER.fine("Set "+lm+" using rule to "+index);
     			}
     		} catch (MissingProfileException e) {
     			LOGGER.log(Loggable.STACK, "Error getting profile type", e);

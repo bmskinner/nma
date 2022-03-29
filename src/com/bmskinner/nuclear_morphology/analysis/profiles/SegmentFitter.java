@@ -70,16 +70,18 @@ public class SegmentFitter {
      * @param template the profile with the segments to be fitted
      * @param target the profile to fit to the template profile 
      * @return the profile with fitted segments, or on error, the original profile
+     * @throws MissingComponentException 
+     * @throws ProfileException 
      */
-    public static ISegmentedProfile fit(@NonNull final ISegmentedProfile template, @NonNull final ISegmentedProfile target) {
+    public static ISegmentedProfile fit(@NonNull final ISegmentedProfile template, @NonNull final ISegmentedProfile target) throws ProfileException, MissingComponentException {
     	if(!target.hasSegments())
-        	return target;
-		try {
-			return remapSegmentEndpoints(template, target);
-		} catch (MissingComponentException | ProfileException e) {
-			LOGGER.log(Loggable.STACK, "Unable to remap segments in profile: "+e.getMessage(), e);
-			return target;
-		}
+    		return target;
+    	
+    	// Create segments if needed
+    	if(target.getSegmentCount()!=template.getSegmentCount())
+    		return(remapSegmentEndpoints(template, createSegments(template, target)));
+    	
+    	return remapSegmentEndpoints(template, target);
     }
 
     /**
@@ -89,9 +91,25 @@ public class SegmentFitter {
      * 
      * @param target the profile to fit to the current template profile 
      * @return the profile with fitted segments, or on error, the original profile
+     * @throws MissingComponentException 
+     * @throws ProfileException 
      */
-    public ISegmentedProfile fit(@NonNull final ISegmentedProfile target) {
+    public ISegmentedProfile fit(@NonNull final ISegmentedProfile target) throws ProfileException, MissingComponentException {
         return fit(templateProfile, target);
+    }
+    
+    /**
+     * If the template has a different number of segments to the source, 
+     * then the new segments must be created before fitting can proceed
+     * @return
+     * @throws ProfileException 
+     */
+    private static ISegmentedProfile createSegments(@NonNull final ISegmentedProfile template, 
+    		@NonNull ISegmentedProfile target) throws ProfileException {
+    	ISegmentedProfile inter = template.interpolate(target.size());
+    	ISegmentedProfile result = target.copy();
+    	result.setSegments(inter.getSegments());
+    	return result;
     }
 
     /**
@@ -101,10 +119,12 @@ public class SegmentFitter {
      * @throws ProfileException 
      * @throws MissingComponentException 
      */
-    private static ISegmentedProfile remapSegmentEndpoints(@NonNull final ISegmentedProfile template, @NonNull ISegmentedProfile profile) throws ProfileException, MissingComponentException {
+    private static ISegmentedProfile remapSegmentEndpoints(@NonNull final ISegmentedProfile template, 
+    		@NonNull ISegmentedProfile profile) throws ProfileException, MissingComponentException {
 
         // By default, return the input profile
         ISegmentedProfile result = profile.copy();
+        LOGGER.fine("Profile has "+result.getSegmentCount()+" segs before mapping segments");
 
         ISegmentedProfile tempProfile = profile.copy();
 
@@ -118,6 +138,9 @@ public class SegmentFitter {
                 result = tempProfile.copy();
             }
         }
+        
+        if(result.getSegmentCount()!=template.getSegmentCount())
+        	throw new ProfileException("Segment fitter could not create correct number of segments in target profile");
         return result;
     }
 

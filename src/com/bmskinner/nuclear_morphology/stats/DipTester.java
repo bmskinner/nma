@@ -81,7 +81,7 @@ public class DipTester implements SignificanceTest {
             }
 
             resultProfile = new FloatProfile(pvals);
-            resultProfile = resultProfile.offset(offset);
+            resultProfile = resultProfile.startFrom(offset);
         } catch (ProfileException | MissingLandmarkException
                 | MissingProfileException e) {
             LOGGER.log(Loggable.STACK, "Error converting values or offsetting profile", e);

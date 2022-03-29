@@ -54,25 +54,6 @@ import com.bmskinner.nuclear_morphology.components.profiles.SegmentedFloatProfil
  * 2) Segment the representative median
  * 3) For each nucleus, use iterative segment fitting to map the segments 
  * 
- * The below refers to a previous version
- * The complete analysis pipeline operates via the following pseudocode:<br>
- * <br>
- * 	1) Profile the cell collection<br>
- * 		- identify the RP via dataset RuleSets<br>
- *      - generate a median profile <br>
- * 	2) Find the best fit of each nucleus to the median to refine RP and other Tags<br>
- * 	3) Segment the median profile<br>
- *  4) Fit the segments to the nuclei using best-fit alignments<br>
- *  5) Generate frankenprofiles of each nucleus to the median<br>
- *  6) Profile the frankencollection - generate a new frankenmedian<br>
- *  7) Segment the frankenmedian; new segments may emerge from the reduced variation<br>
- *  8) Fit the frankensegments to the nuclei<br>
- *  9) Measure the sum of profile differences between the nuclei and the frankenmedian<br>
- *  <br>
- *   While this value is decreasing, repeat steps 5-9<br>
- *   <br>
- *   This class contains the methods to carry out steps 3-9.
- * 
  * @author bms41
  *
  */
@@ -158,7 +139,7 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
     	DatasetValidator dv = new DatasetValidator();
     	if(!dv.validate(dataset)) {
     		LOGGER.warning("Segmentation failed; resulting dataset did not validate");
-    		throw new AnalysisMethodException("Segmentation failed; resulting dataset did not validate: "+dv.getSummary());
+    		throw new AnalysisMethodException("Segmentation failed; resulting dataset did not validate: "+dv.getErrors());
     	}
 
 		return result;
@@ -283,13 +264,15 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 			
 			// Ensure new segments can be assigned
 			boolean wasLocked = n.isLocked();
-			if(wasLocked)
-				n.setLocked(false);
+			n.setLocked(false);
+			
 			IProfile nucleusProfile  = n.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
 			ISegmentedProfile segProfile = fitter.fit(nucleusProfile);
-			n.setSegments(Landmark.REFERENCE_POINT, segProfile);
+			n.setSegments(segProfile.getSegments());
+			
 			if(segProfile.getSegmentCount()!=template.getSegmentCount())
 				throw new ProfileException("Segments could not be fitted to nucleus");
+			
 			if(template.getSegmentCount()==1) {
 				ISegmentedProfile test  = n.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
 				IProfileSegment seg = test.getSegment(IProfileCollection.DEFAULT_SEGMENT_ID);

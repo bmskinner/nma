@@ -11,7 +11,7 @@ import org.junit.runners.Suite.SuiteClasses;
 	FloatProfileTest.class,
 	IProfileSegmentTest.class, 
 	IProfileTester.class, 
-	ISegmentedProfileTester.class, 
+	ISegmentedProfileTest.class, 
 	ProfileManagerTest.class,
 	SegmentedFloatProfileTest.class })
 public class ComponentProfilesTestSuite {

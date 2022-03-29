@@ -22,7 +22,9 @@ import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.Imageable;
+import com.bmskinner.nuclear_morphology.components.MissingComponentException;
 import com.bmskinner.nuclear_morphology.components.Rotatable;
 import com.bmskinner.nuclear_morphology.components.Statistical;
 import com.bmskinner.nuclear_morphology.components.UnavailableBorderPointException;
@@ -373,9 +375,11 @@ public interface CellularComponent extends Imageable, XmlSerializable,
     /**
      * Reverse the border outline of this object, including the roi points used
      * to reconstruct it from file
+     * @throws MissingComponentException 
+     * @throws ProfileException 
      * 
      */
-    void reverse();
+    void reverse() throws MissingComponentException, ProfileException;
 
     /**
      * Wrap arrays. If an index falls of the end, it is returned to the start

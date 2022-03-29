@@ -42,12 +42,12 @@ public class DefaultNuclearSignal extends DefaultCellularComponent implements IN
 
     private int closestNuclearBorderPoint;
 
-    public DefaultNuclearSignal(@NonNull Roi roi, @NonNull IPoint centreOfMass, @NonNull File f, int channel, int x, int y, int w, int h, @NonNull UUID id) {
-        super(roi, centreOfMass, f, channel, x, y, w, h, id);
+    public DefaultNuclearSignal(@NonNull Roi roi, @NonNull IPoint centreOfMass, @NonNull File f, int channel, int x, int y, @NonNull UUID id) {
+        super(roi, centreOfMass, f, channel, x, y, id);
     }
     
-    public DefaultNuclearSignal(@NonNull Roi roi, @NonNull IPoint centreOfMass, @NonNull File f, int channel, int x, int y, int w, int h) {
-        super(roi, centreOfMass, f, channel, x, y, w, h);
+    public DefaultNuclearSignal(@NonNull Roi roi, @NonNull IPoint centreOfMass, @NonNull File f, int channel, int x, int y) {
+        super(roi, centreOfMass, f, channel, x, y);
     }
 
     /**

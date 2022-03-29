@@ -171,7 +171,7 @@ public class SignalDetector extends Detector {
 
                 INuclearSignal s = factory.buildInstance(r, sourceFile, 
                 		options.getInt(HashOptions.CHANNEL), 
-                		xbase, ybase, (int) bounds.getWidth(), (int)bounds.getHeight(), signalCoM);
+                		xbase, ybase, signalCoM);
 
                 s.setScale(n.getScale()); // copy scale information from
                                           // source nucleus

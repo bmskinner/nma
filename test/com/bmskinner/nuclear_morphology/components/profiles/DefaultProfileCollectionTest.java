@@ -3,6 +3,7 @@ package com.bmskinner.nuclear_morphology.components.profiles;
 import static org.junit.Assert.assertEquals;
 
 import java.io.PrintWriter;
+import java.util.List;
 
 import org.jdom2.Element;
 import org.jdom2.output.Format;
@@ -38,6 +39,20 @@ public class DefaultProfileCollectionTest extends ComponentTester {
 	public void testDuplicate() throws Exception {
 		IProfileCollection dup = profiles.duplicate();
 		testDuplicatesByField(dup.duplicate(), dup);
+	}
+	
+	@Test
+	public void testAddSegments() throws Exception {
+		List<IProfileSegment> oldSegs = profiles.getSegments(Landmark.REFERENCE_POINT);
+		for(IProfileSegment s : oldSegs) {
+    		s.offset(10);
+    	}
+		
+		profiles.addSegments(oldSegs);
+		
+		List<IProfileSegment> newSegs = profiles.getSegments(Landmark.REFERENCE_POINT);
+		
+		assertEquals(oldSegs, newSegs);
 	}
 	
 	@Test

@@ -36,17 +36,18 @@ import com.bmskinner.nuclear_morphology.samples.dummy.DummySegmentedCellularComp
 @RunWith(Parameterized.class)
 public class IProfileSegmentTest {
 	
-	public final static int startIndex = 0;
-	public final static int endIndex = 49;
-	public final static int segmentLength = 50;
-	public final static int profileLength = 330;
+	public final static int START_INDEX = 0;
+	public final static int END_INDEX = 49;
+	public final static int SEG_LENGTH = 50;
+	public final static int PROFILE_LENGTH = 330;
 	
 	protected final static UUID SEG_ID_0 = UUID.fromString("00000000-0000-0000-0000-000000000001");
 	
+	private static final UUID middleSegmentId = UUID.fromString("00000000-0000-0000-0000-000000000004");
+	private static final UUID finalSegmentId  = UUID.fromString("00000000-0000-0000-0000-000000000005");
+	
 	private IProfileSegment segment;
 	
-	private IProfileSegment singleSegment; // for profiles with one segment
-
 	
 	@Rule
 	public final ExpectedException exception = ExpectedException.none();
@@ -64,46 +65,44 @@ public class IProfileSegmentTest {
 	 * The segment is part of a 3-segment profile
 	 * @param source the class to create
 	 * @return
+	 * @throws ProfileException 
 	 */
-	public static IProfileSegment createInstance(Class<?> source) {
-		
-		int middleSegmentStart = endIndex;
-		int middleSegmentEnd = endIndex+30;
-		
-		// Make a 3 segment profile, so that updating can be properly tested with segment locking
-		UUID tempId          = UUID.fromString("00000000-0000-0000-0000-000000000002");
-		UUID middleSegmentId = UUID.fromString("00000000-0000-0000-0000-000000000004");
-		UUID finalSegmentId  = UUID.fromString("00000000-0000-0000-0000-000000000005");
+	public static IProfileSegment createInstance(Class<?> source) throws ProfileException {
 		
 		// The component from which profiles will be generated
-//		System.out.println("Generating base component for "+source.getSimpleName());
 		DummySegmentedCellularComponent comp = new DummySegmentedCellularComponent();
 		float[] data = new float[comp.getBorderLength()];
 		Arrays.fill(data, 1);
 				
 		// Older classes use the same approach to linking segments
+		List<IProfileSegment> list = createInstanceSegmentList(source);
+
+		IProfileSegment.linkSegments(list);
+
+		return list.get(0);
+	}
+	
+	private static List<IProfileSegment> createInstanceSegmentList(Class<?> source){
+		
+		int middleSegmentStart = END_INDEX;
+		int middleSegmentEnd = END_INDEX+30;
+		
+		// Make a 3 segment profile, so that updating can be properly tested with segment locking		
 		List<IProfileSegment> list = new ArrayList<>();
 		if(source==DefaultProfileSegment.class) {
-			IProfileSegment s0 = new DefaultProfileSegment(startIndex, endIndex, profileLength, SEG_ID_0);
-			IProfileSegment s1 = new DefaultProfileSegment(middleSegmentStart, middleSegmentEnd, profileLength, middleSegmentId);
-			IProfileSegment s2 = new DefaultProfileSegment(middleSegmentEnd, startIndex, profileLength, finalSegmentId);
+			IProfileSegment s0 = new DefaultProfileSegment(START_INDEX, END_INDEX, PROFILE_LENGTH, SEG_ID_0);
+			IProfileSegment s1 = new DefaultProfileSegment(middleSegmentStart, middleSegmentEnd, PROFILE_LENGTH, middleSegmentId);
+			IProfileSegment s2 = new DefaultProfileSegment(middleSegmentEnd, START_INDEX, PROFILE_LENGTH, finalSegmentId);
 			list.add(s0); list.add(s1); list.add(s2); 
 		}
 		
-		if(source==OpenBorderSegment.class) {
-			IProfileSegment s0 = new OpenBorderSegment(startIndex, endIndex, profileLength, SEG_ID_0);
-			IProfileSegment s1 = new OpenBorderSegment(middleSegmentStart, middleSegmentEnd, profileLength, middleSegmentId);
-			IProfileSegment s2 = new OpenBorderSegment(middleSegmentEnd, startIndex, profileLength, finalSegmentId);
-			list.add(s0); list.add(s1); list.add(s2); 
-		}
-		
-		try {
-			IProfileSegment.linkSegments(list);
-		} catch (ProfileException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return list.get(0);
+//		if(source==OpenBorderSegment.class) {
+//			IProfileSegment s0 = new OpenBorderSegment(START_INDEX, END_INDEX, PROFILE_LENGTH, SEG_ID_0);
+//			IProfileSegment s1 = new OpenBorderSegment(middleSegmentStart, middleSegmentEnd, PROFILE_LENGTH, middleSegmentId);
+//			IProfileSegment s2 = new OpenBorderSegment(middleSegmentEnd, START_INDEX, PROFILE_LENGTH, finalSegmentId);
+//			list.add(s0); list.add(s1); list.add(s2); 
+//		}
+		return list;
 	}
 	
     @Parameters
@@ -113,8 +112,7 @@ public class IProfileSegmentTest {
 		// we're making class references. The actual objects under test
 		// are created fresh from the appropriate class.
 		return Arrays.asList(
-				DefaultProfileSegment.class,
-				OpenBorderSegment.class);
+				DefaultProfileSegment.class);
 	}
 	
 	@Test
@@ -154,7 +152,7 @@ public class IProfileSegmentTest {
 	@Test
 	public void testAddMergeSource() {
 		// proper merge source
-		DefaultProfileSegment s1 = new DefaultProfileSegment(startIndex, startIndex+20, profileLength);
+		DefaultProfileSegment s1 = new DefaultProfileSegment(START_INDEX, START_INDEX+20, PROFILE_LENGTH);
 		segment.addMergeSource(s1);
 		
 		IProfileSegment obs = segment.getMergeSources().get(0);
@@ -166,7 +164,7 @@ public class IProfileSegmentTest {
 	@Test
 	public void testAddMergeSourceExceptsOnOutOfRangeArg0() {
 		// invalid merge source - out of range
-		DefaultProfileSegment s2 = new DefaultProfileSegment(endIndex, endIndex+20, profileLength);
+		DefaultProfileSegment s2 = new DefaultProfileSegment(END_INDEX, END_INDEX+20, PROFILE_LENGTH);
 		exception.expect(IllegalArgumentException.class);
 		segment.addMergeSource(s2);
 	}
@@ -175,28 +173,28 @@ public class IProfileSegmentTest {
 	public void testAddMergeSourceExceptsOnOutOfRangeArg1() {	
 		// invalid merge source - out of range
 		exception.expect(IllegalArgumentException.class);
-		new DefaultProfileSegment(-1, startIndex, profileLength);
+		new DefaultProfileSegment(-1, START_INDEX, PROFILE_LENGTH);
 	}
 	
 	@Test
 	public void testAddMergeSourceExceptsOnWrongProfileLength() {
 		// invalid merge source - wrong length
-		DefaultProfileSegment s = new DefaultProfileSegment(startIndex+10, endIndex-10, profileLength-50);
+		DefaultProfileSegment s = new DefaultProfileSegment(START_INDEX+10, END_INDEX-10, PROFILE_LENGTH-50);
 		exception.expect(IllegalArgumentException.class);
 		segment.addMergeSource(s);
 	}
 	
 	@Test
     public void testAddMergeSourceExceptsWhenSegmentIdAlreadyExists() {
-		IProfileSegment s = new DefaultProfileSegment(5,  10, profileLength, SEG_ID_0);
+		IProfileSegment s = new DefaultProfileSegment(5,  10, PROFILE_LENGTH, SEG_ID_0);
 		exception.expect(IllegalArgumentException.class);
 		segment.addMergeSource(s);
 	}
 	
 	@Test
 	public void testMergeSourcesPreservedWhenSegmentIsDuplicated() {
-		DefaultProfileSegment s1 = new DefaultProfileSegment(startIndex, startIndex+20, profileLength);
-		DefaultProfileSegment s2 = new DefaultProfileSegment(startIndex+20, endIndex, profileLength);
+		DefaultProfileSegment s1 = new DefaultProfileSegment(START_INDEX, START_INDEX+20, PROFILE_LENGTH);
+		DefaultProfileSegment s2 = new DefaultProfileSegment(START_INDEX+20, END_INDEX, PROFILE_LENGTH);
 		
 		segment.addMergeSource(s1);
 		segment.addMergeSource(s2);
@@ -212,18 +210,18 @@ public class IProfileSegmentTest {
 	
 	@Test
 	public void testGetStartIndex() throws SegmentUpdateException {
-		assertEquals(startIndex, segment.getStartIndex());
+		assertEquals(START_INDEX, segment.getStartIndex());
 	}
 
 	@Test
 	public void testGetEndIndex() throws SegmentUpdateException {
-		assertEquals(endIndex, segment.getEndIndex());
+		assertEquals(END_INDEX, segment.getEndIndex());
 	}
 	
 	@Test 
 	public void testGetEndIndexOnWrappingSegment() throws SegmentUpdateException {
-		segment.update(profileLength-10, 10);
-		assertEquals(profileLength-10, segment.getStartIndex());
+		segment.update(PROFILE_LENGTH-10, 10);
+		assertEquals(PROFILE_LENGTH-10, segment.getStartIndex());
 		assertEquals(10, segment.getEndIndex());
 	}
 	
@@ -246,8 +244,8 @@ public class IProfileSegmentTest {
 		
 		for(int i=0; i<=100; i++) {
 			double d = i/200d;
-			double dist = segmentLength*d;
-			double exp  = Math.round(CellularComponent.wrapIndex(startIndex+dist, segment.getProfileLength()));
+			double dist = SEG_LENGTH*d;
+			double exp  = Math.round(CellularComponent.wrapIndex(START_INDEX+dist, segment.getProfileLength()));
 			assertEquals("Testing "+d+": "+dist,  (int)exp, segment.getProportionalIndex(d));
 		}
 	}
@@ -265,20 +263,30 @@ public class IProfileSegmentTest {
 	}
 	
 	@Test
-	public void testOffset() {
+	public void testOffset() throws ProfileException {
 		
-		for(int i=-profileLength; i<profileLength; i++) {
+		for(int i=-PROFILE_LENGTH; i<PROFILE_LENGTH; i++) {
 			segment = createInstance(source);
-			segment.offset(i);
-			assertEquals("Offsetting by "+i, CellularComponent.wrapIndex(i, profileLength), segment.getStartIndex());
+			IProfileSegment s2 = segment.offset(i);
+			assertEquals("Offsetting by "+i, CellularComponent.wrapIndex(i, PROFILE_LENGTH), s2.getStartIndex());
 		}
+	}
+	
+	@Test
+	public void testOffsetPreservesSegmentLock() throws ProfileException {
+		IProfileSegment seg = createInstance(source);
+		seg.setLocked(true);
+		assertTrue(seg.isLocked());
+		
+		IProfileSegment s2 = seg.offset(10);
+		assertTrue(s2.isLocked());
 	}
 	
 	@Test
 	public void testOffsetByZeroHasNoEffect() {
 		int exp = segment.getStartIndex();
-		segment.offset(0);
-		assertEquals(exp, segment.getStartIndex());
+		IProfileSegment s2 = segment.offset(0);
+		assertEquals(exp, s2.getStartIndex());
 	}
 
 	@Test
@@ -344,21 +352,151 @@ public class IProfileSegmentTest {
 		}
 	}
 
+	/**
+	 * Test segment can be locked
+	 */
 	@Test
-	public void testSetLocked() {
+	public void testSetLockedTrue() {
 		assertFalse(segment.isLocked());
 		segment.setLocked(true);
 		assertTrue(segment.isLocked());
 	}
 	
+	/**
+	 * Test segment can be unlocked
+	 */
+	@Test
+	public void testSetLockedFalse() {
+		assertFalse(segment.isLocked());
+		segment.setLocked(true);
+		assertTrue(segment.isLocked());
+		segment.setLocked(false);
+		assertFalse(segment.isLocked());
+	}
+	
+	/**
+	 * Test that when a segment is duplicated, the lock state is copied
+	 */
+	@Test
+	public void testLockStateIsCopied() {
+		// Default state
+		IProfileSegment s2  = segment.copy();
+		assertEquals("Segment lock state should be copied", segment.isLocked(), s2.isLocked());
+		
+		// Explicitly lock
+		segment.setLocked(true);
+		s2  = segment.copy();
+		assertEquals("Segment lock state should be copied", segment.isLocked(), s2.isLocked());
+		
+		// Explicitly unlock
+		segment.setLocked(false);
+		s2  = segment.copy();
+		assertEquals("Segment lock state should be copied", segment.isLocked(), s2.isLocked());
+	}
+	
+	@Test
+	public void testSingleSegmentListCanBeLinked() throws ProfileException {
+		List<IProfileSegment> segs = new ArrayList<>();
+		segs.add(new DefaultProfileSegment(START_INDEX, START_INDEX, PROFILE_LENGTH, SEG_ID_0));
+		assertFalse(segs.get(0).hasNextSegment());
+		assertFalse(segs.get(0).hasPrevSegment());
+		
+		IProfileSegment.linkSegments(segs);
+		assertTrue(segs.get(0).hasNextSegment());
+		assertTrue(segs.get(0).hasPrevSegment());
+	}
+	
+	@Test
+	public void testMultiSegmentListCanBeLinked() throws ProfileException {
+		List<IProfileSegment> segs = createInstanceSegmentList(source);
+		
+		// After first creation, segments should not be linked
+		IProfileSegment firstSeg = segs.stream().filter(s->s.getID().equals(SEG_ID_0)).findFirst().get();
+		IProfileSegment finalSeg = segs.stream().filter(s->s.getID().equals(finalSegmentId)).findFirst().get();
+		assertFalse(firstSeg.hasNextSegment());
+		assertFalse(firstSeg.hasPrevSegment());
+		assertFalse(finalSeg.hasNextSegment());
+		assertFalse(finalSeg.hasPrevSegment());
+		
+		// Link and test again
+		IProfileSegment.linkSegments(segs);
+		firstSeg = segs.stream().filter(s->s.getID().equals(SEG_ID_0)).findFirst().get();
+		finalSeg = segs.stream().filter(s->s.getID().equals(finalSegmentId)).findFirst().get();
+		assertTrue(firstSeg.hasNextSegment());
+		assertTrue(firstSeg.hasPrevSegment());
+		assertTrue(finalSeg.hasNextSegment());
+		assertTrue(finalSeg.hasPrevSegment());
+	}
+	
+	/**
+	 * Test that linking a single segment to itself does not affect lock state
+	 * @throws ProfileException
+	 */
+	@Test
+	public void testSingleSegmentListLockStatePersistsThroughLinking() throws ProfileException {
+		List<IProfileSegment> segs = new ArrayList<>();
+		segs.add(new DefaultProfileSegment(START_INDEX, START_INDEX, PROFILE_LENGTH, SEG_ID_0));
+		assertFalse(segs.get(0).isLocked());
+		segs.get(0).setLocked(true);
+		assertTrue(segs.get(0).isLocked());
+		
+		IProfileSegment.linkSegments(segs);
+		assertTrue(segs.get(0).isLocked());
+	}
+	
+	/**
+	 * Test that linking segments does not affect lock state
+	 * @throws ProfileException
+	 */
+	@Test
+	public void testMultiSegmentListLockStatePersistsThroughLinking() throws ProfileException {
+		List<IProfileSegment> segs = createInstanceSegmentList(source);
+		for(IProfileSegment s : segs) {
+			s.setLocked(true);
+			assertTrue(s.isLocked());
+		}
+
+		IProfileSegment.linkSegments(segs);
+		
+		for(IProfileSegment s : segs) {
+			assertTrue(s.isLocked());
+		}
+	}
+	
+	
+	@Test
+	public void testLinkingPreservesMergeSources() throws ProfileException {
+		List<IProfileSegment> segs = createInstanceSegmentList(source);
+
+		IProfileSegment merged = new DefaultProfileSegment(segs.get(0).getStartIndex(), 
+				segs.get(1).getEndIndex(),
+				segs.get(0).getProfileLength(),
+				UUID.randomUUID());
+		
+		merged.addMergeSource(segs.get(0));
+		merged.addMergeSource(segs.get(1));
+
+		List<IProfileSegment> newSegs = new ArrayList<>();
+		newSegs.add(merged);
+		newSegs.add(segs.get(2).copy());
+		
+		assertTrue(segment.getClass().getSimpleName(), newSegs.get(0).hasMergeSource(segs.get(0).getID()));
+		assertTrue(segment.getClass().getSimpleName(), newSegs.get(0).hasMergeSource(segs.get(1).getID()));
+		
+		newSegs = IProfileSegment.linkSegments(newSegs);
+		
+		assertTrue(segment.getClass().getSimpleName(), newSegs.get(0).hasMergeSource(segs.get(0).getID()));
+		assertTrue(segment.getClass().getSimpleName(), newSegs.get(0).hasMergeSource(segs.get(1).getID()));
+	}
+	
 	@Test
 	public void testGetProfileLength() {
-		assertEquals(profileLength, segment.getProfileLength());
+		assertEquals(PROFILE_LENGTH, segment.getProfileLength());
 	}
 	
 	@Test
 	public void testLength() {
-		assertEquals(segmentLength, segment.length() );
+		assertEquals(SEG_LENGTH, segment.length() );
 	}
 	
 	
@@ -370,11 +508,11 @@ public class IProfileSegmentTest {
 	@Test
 	public void testContains() {
 
-		for(int i=startIndex; i<=endIndex; i++) {
+		for(int i=START_INDEX; i<=END_INDEX; i++) {
 			assertTrue(segment.contains(i));
 		}
 		
-		for(int i=endIndex+1; i<segment.getProfileLength(); i++) {
+		for(int i=END_INDEX+1; i<segment.getProfileLength(); i++) {
 			assertFalse(segment.contains(i));
 		}
 	}
@@ -398,7 +536,7 @@ public class IProfileSegmentTest {
 	@Test
 	public void testIteratorOnWrappingSegment() throws SegmentUpdateException {
 
-		segment.update(profileLength-10, 10);
+		segment.update(PROFILE_LENGTH-10, 10);
 		
 		int[] exp = { 320, 321, 322, 323, 324, 325, 326, 327, 328, 329, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
 		
@@ -431,167 +569,167 @@ public class IProfileSegmentTest {
 	
 	@Test
 	public void testOverlapsOfNonWrappingSegments() {
-		IProfileSegment overlappingEnd = new DefaultProfileSegment(endIndex, endIndex+10, profileLength);
+		IProfileSegment overlappingEnd = new DefaultProfileSegment(END_INDEX, END_INDEX+10, PROFILE_LENGTH);
 		assertTrue("Testing overlap of "+segment.toString()+" and "+overlappingEnd.toString(), segment.overlaps(overlappingEnd));
 		
-		IProfileSegment overlappingStart = new DefaultProfileSegment(endIndex+10, startIndex, profileLength);
+		IProfileSegment overlappingStart = new DefaultProfileSegment(END_INDEX+10, START_INDEX, PROFILE_LENGTH);
 		assertTrue("Testing overlap of "+segment.toString()+" and "+overlappingStart.toString(), segment.overlaps(overlappingStart));
 		
-		IProfileSegment overlappingBoth = new DefaultProfileSegment(endIndex, startIndex, profileLength);
+		IProfileSegment overlappingBoth = new DefaultProfileSegment(END_INDEX, START_INDEX, PROFILE_LENGTH);
 		assertTrue("Testing overlap of "+segment.toString()+" and "+overlappingBoth.toString(), segment.overlaps(overlappingBoth));
 		
-		IProfileSegment nonoverlapping = new DefaultProfileSegment(endIndex+10, profileLength-10, profileLength);
+		IProfileSegment nonoverlapping = new DefaultProfileSegment(END_INDEX+10, PROFILE_LENGTH-10, PROFILE_LENGTH);
 		assertFalse("Testing overlap of "+segment.toString()+" and "+nonoverlapping.toString(), segment.overlaps(nonoverlapping));
 		
-		IProfileSegment endMinusOne = new DefaultProfileSegment(endIndex-1, endIndex+10, profileLength);
+		IProfileSegment endMinusOne = new DefaultProfileSegment(END_INDEX-1, END_INDEX+10, PROFILE_LENGTH);
 		assertTrue("Testing overlap of "+segment.toString()+" and "+endMinusOne.toString(), segment.overlaps(endMinusOne));
 		
-		IProfileSegment startPlusOne = new DefaultProfileSegment(endIndex+10, startIndex+1, profileLength);
+		IProfileSegment startPlusOne = new DefaultProfileSegment(END_INDEX+10, START_INDEX+1, PROFILE_LENGTH);
 		assertTrue("Testing overlap of "+segment.toString()+" and "+startPlusOne.toString(), segment.overlaps(startPlusOne));
 	}
 	
 	@Test
 	public void testOverlapsOfWrappingSegments() throws SegmentUpdateException {
 		
-		segment.update(profileLength-10, 10);
+		segment.update(PROFILE_LENGTH-10, 10);
 
-		IProfileSegment endOnly = new DefaultProfileSegment(segment.getEndIndex(), 30, profileLength);
+		IProfileSegment endOnly = new DefaultProfileSegment(segment.getEndIndex(), 30, PROFILE_LENGTH);
 		assertTrue(String.format("Testing overlap of %s and %s", segment.toString(), endOnly.toString()), segment.overlaps(endOnly));
 		
-		IProfileSegment startOnly = new DefaultProfileSegment(profileLength-20, segment.getStartIndex(), profileLength);
+		IProfileSegment startOnly = new DefaultProfileSegment(PROFILE_LENGTH-20, segment.getStartIndex(), PROFILE_LENGTH);
 		assertTrue(String.format("Testing overlap of %s and %s", segment.toString(), startOnly.toString()), segment.overlaps(startOnly));
 		
-		IProfileSegment bothRev = new DefaultProfileSegment(segment.getEndIndex(), segment.getStartIndex(), profileLength);
+		IProfileSegment bothRev = new DefaultProfileSegment(segment.getEndIndex(), segment.getStartIndex(), PROFILE_LENGTH);
 		assertTrue(String.format("Testing overlap of %s and %s", segment.toString(), bothRev.toString()), segment.overlaps(bothRev));
 		
-		IProfileSegment bothFwd = new DefaultProfileSegment(segment.getStartIndex(), segment.getEndIndex(), profileLength);
+		IProfileSegment bothFwd = new DefaultProfileSegment(segment.getStartIndex(), segment.getEndIndex(), PROFILE_LENGTH);
 		assertTrue(String.format("Testing overlap of %s and %s", segment.toString(), bothFwd.toString()), segment.overlaps(bothFwd));
 		
-		IProfileSegment neither = new DefaultProfileSegment(segment.getEndIndex()+10, segment.getStartIndex()-10, profileLength);
+		IProfileSegment neither = new DefaultProfileSegment(segment.getEndIndex()+10, segment.getStartIndex()-10, PROFILE_LENGTH);
 		assertFalse(String.format("Testing overlap of %s and %s", segment.toString(), neither.toString()), segment.overlaps(neither));
 		
-		IProfileSegment endMinusOne = new DefaultProfileSegment(segment.getEndIndex()-1, segment.getEndIndex()+10, profileLength);
+		IProfileSegment endMinusOne = new DefaultProfileSegment(segment.getEndIndex()-1, segment.getEndIndex()+10, PROFILE_LENGTH);
 		assertTrue(String.format("Testing overlap of %s and %s", segment.toString(), endMinusOne.toString()), segment.overlaps(endMinusOne));
 		
-		IProfileSegment startPlusOne = new DefaultProfileSegment(segment.getEndIndex()+10, segment.getStartIndex()+1, profileLength);
+		IProfileSegment startPlusOne = new DefaultProfileSegment(segment.getEndIndex()+10, segment.getStartIndex()+1, PROFILE_LENGTH);
 		assertTrue(String.format("Testing overlap of %s and %s", segment.toString(), startPlusOne.toString()), segment.overlaps(startPlusOne));
 	}
 	
 	@Test
 	public void overlapsBeyondEndpointsOfNonWrappingSegments() {
-		IProfileSegment endOnly = new DefaultProfileSegment(endIndex, endIndex+10, profileLength);
+		IProfileSegment endOnly = new DefaultProfileSegment(END_INDEX, END_INDEX+10, PROFILE_LENGTH);
 		assertFalse("Expected no overlap of "+segment.toString()+" and "+endOnly.toString(), segment.overlapsBeyondEndpoints(endOnly));
 		
-		IProfileSegment startOnly = new DefaultProfileSegment(endIndex+10, startIndex, profileLength);
+		IProfileSegment startOnly = new DefaultProfileSegment(END_INDEX+10, START_INDEX, PROFILE_LENGTH);
 		assertFalse("Expected no overlap of "+segment.toString()+" and "+startOnly.toString(), segment.overlapsBeyondEndpoints(startOnly));
 		
-		IProfileSegment both = new DefaultProfileSegment(endIndex, startIndex, profileLength);
+		IProfileSegment both = new DefaultProfileSegment(END_INDEX, START_INDEX, PROFILE_LENGTH);
 		assertFalse("Expected no overlap of  "+segment.toString()+" and "+both.toString(), segment.overlapsBeyondEndpoints(both));
 
-		IProfileSegment neither = new DefaultProfileSegment(endIndex+10, profileLength-10, profileLength);
+		IProfileSegment neither = new DefaultProfileSegment(END_INDEX+10, PROFILE_LENGTH-10, PROFILE_LENGTH);
 		assertFalse("Expected no overlap of "+segment.toString()+" and "+neither.toString(), segment.overlapsBeyondEndpoints(neither));
 		
-		IProfileSegment endMinusOne = new DefaultProfileSegment(endIndex-1, endIndex+10, profileLength);
+		IProfileSegment endMinusOne = new DefaultProfileSegment(END_INDEX-1, END_INDEX+10, PROFILE_LENGTH);
 		assertTrue("Expected overlap of  "+segment.toString()+" and "+endMinusOne.toString(), segment.overlapsBeyondEndpoints(endMinusOne));
 		
-		IProfileSegment startPlusOne = new DefaultProfileSegment(endIndex+10, startIndex+1, profileLength);
+		IProfileSegment startPlusOne = new DefaultProfileSegment(END_INDEX+10, START_INDEX+1, PROFILE_LENGTH);
 		assertTrue("Expected overlap of  "+segment.toString()+" and "+startPlusOne.toString(), segment.overlapsBeyondEndpoints(startPlusOne));
 	}
 	
 	@Test
 	public void overlapsBeyondEndpointsOfWrappingSegments() throws SegmentUpdateException {
 		
-		segment.update(profileLength-10, 10);
+		segment.update(PROFILE_LENGTH-10, 10);
 
-		IProfileSegment endOnly = new DefaultProfileSegment(segment.getEndIndex(), 30, profileLength);
+		IProfileSegment endOnly = new DefaultProfileSegment(segment.getEndIndex(), 30, PROFILE_LENGTH);
 		assertFalse(String.format("Testing overlap of %s and %s", segment.toString(), endOnly.toString()), segment.overlapsBeyondEndpoints(endOnly));
 		
-		IProfileSegment startOnly = new DefaultProfileSegment(profileLength-20, segment.getStartIndex(), profileLength);
+		IProfileSegment startOnly = new DefaultProfileSegment(PROFILE_LENGTH-20, segment.getStartIndex(), PROFILE_LENGTH);
 		assertFalse(String.format("Testing overlap of %s and %s", segment.toString(), startOnly.toString()), segment.overlapsBeyondEndpoints(startOnly));
 		
-		IProfileSegment bothRev = new DefaultProfileSegment(segment.getEndIndex(), segment.getStartIndex(), profileLength);
+		IProfileSegment bothRev = new DefaultProfileSegment(segment.getEndIndex(), segment.getStartIndex(), PROFILE_LENGTH);
 		assertFalse(String.format("Testing overlap of %s and %s", segment.toString(), bothRev.toString()), segment.overlapsBeyondEndpoints(bothRev));
 		
-		IProfileSegment bothFwd = new DefaultProfileSegment(segment.getStartIndex(), segment.getEndIndex(), profileLength);
+		IProfileSegment bothFwd = new DefaultProfileSegment(segment.getStartIndex(), segment.getEndIndex(), PROFILE_LENGTH);
 		assertTrue(String.format("Testing overlap of %s and %s", segment.toString(), bothFwd.toString()), segment.overlapsBeyondEndpoints(bothFwd));
 		
-		IProfileSegment neither = new DefaultProfileSegment(segment.getEndIndex()+10, segment.getStartIndex()-10, profileLength);
+		IProfileSegment neither = new DefaultProfileSegment(segment.getEndIndex()+10, segment.getStartIndex()-10, PROFILE_LENGTH);
 		assertFalse(String.format("Testing overlap of %s and %s", segment.toString(), neither.toString()), segment.overlapsBeyondEndpoints(neither));
 		
-		IProfileSegment endMinusOne = new DefaultProfileSegment(segment.getEndIndex()-1, segment.getEndIndex()+10, profileLength);
+		IProfileSegment endMinusOne = new DefaultProfileSegment(segment.getEndIndex()-1, segment.getEndIndex()+10, PROFILE_LENGTH);
 		assertTrue(String.format("Testing overlap of %s and %s", segment.toString(), endMinusOne.toString()), segment.overlapsBeyondEndpoints(endMinusOne));
 		
-		IProfileSegment startPlusOne = new DefaultProfileSegment(segment.getEndIndex()+10, segment.getStartIndex()+1, profileLength);
+		IProfileSegment startPlusOne = new DefaultProfileSegment(segment.getEndIndex()+10, segment.getStartIndex()+1, PROFILE_LENGTH);
 		assertTrue(String.format("Testing overlap of %s and %s", segment.toString(), startPlusOne.toString()), segment.overlapsBeyondEndpoints(startPlusOne));
 	}
 	
 	@Test
 	public void testHasNextSegment() throws MissingComponentException {
-		IProfileSegment overlappingEnd = new DefaultProfileSegment(endIndex, profileLength, profileLength);
+		IProfileSegment overlappingEnd = new DefaultProfileSegment(END_INDEX, PROFILE_LENGTH, PROFILE_LENGTH);
 		segment.setNextSegment(overlappingEnd);
 		assertTrue(segment.hasNextSegment());
 	}
 
 	@Test
 	public void testHasPrevSegment() throws MissingComponentException {
-		IProfileSegment overlappingStart = new DefaultProfileSegment(endIndex+1, startIndex, profileLength);
+		IProfileSegment overlappingStart = new DefaultProfileSegment(END_INDEX+1, START_INDEX, PROFILE_LENGTH);
 		segment.setPrevSegment(overlappingStart);
 		assertTrue(segment.hasPrevSegment());
 	}
 	
 	@Test
 	public void testUpdateSegmentEndIndex() throws SegmentUpdateException {
-		assertTrue(segment.update(startIndex, endIndex+5));
-		assertEquals(startIndex, segment.getStartIndex());
-		assertEquals(endIndex+5, segment.getEndIndex());
+		assertTrue(segment.update(START_INDEX, END_INDEX+5));
+		assertEquals(START_INDEX, segment.getStartIndex());
+		assertEquals(END_INDEX+5, segment.getEndIndex());
 	}
 	
 	@Test
 	public void testUpdateSegmentStartIndex() throws SegmentUpdateException {
-		int newStart = startIndex+5;
-		assertTrue(segment.update(newStart, endIndex));
+		int newStart = START_INDEX+5;
+		assertTrue(segment.update(newStart, END_INDEX));
 		assertEquals(newStart, segment.getStartIndex());
-		assertEquals(endIndex, segment.getEndIndex());
+		assertEquals(END_INDEX, segment.getEndIndex());
 	}
 	
 	@Test
 	public void testUpdateSegmentFailsWhenLocked() throws SegmentUpdateException {
 		segment.setLocked(true);
 		exception.expect(SegmentUpdateException.class);
-		segment.update(startIndex, endIndex);
+		segment.update(START_INDEX, END_INDEX);
 	}
 	
 	@Test
 	public void testUpdateToStartOfSegmentFailsWhenPreviousSegmentIsLocked() throws SegmentUpdateException {
 		segment.prevSegment().setLocked(true);
 		exception.expect(SegmentUpdateException.class);
-		segment.update(startIndex+1, endIndex);
+		segment.update(START_INDEX+1, END_INDEX);
 	}
 	
 	@Test
 	public void testUpdateToEndOfSegmentSucceedsWhenPreviousSegmentIsLocked() throws SegmentUpdateException {
 		segment.prevSegment().setLocked(true);
-		segment.update(startIndex, endIndex-1);
+		segment.update(START_INDEX, END_INDEX-1);
 	}
 	
 	@Test
 	public void testUpdateToEndOfSegmentFailsWhenNextSegmentIsLocked() throws SegmentUpdateException {
 		segment.nextSegment().setLocked(true);
 		exception.expect(SegmentUpdateException.class);
-		segment.update(startIndex, endIndex-1);
+		segment.update(START_INDEX, END_INDEX-1);
 	}
 	
 	@Test
 	public void testUpdateToStartfSegmentSucceedsWhenNextSegmentIsLocked() throws SegmentUpdateException {
 		segment.nextSegment().setLocked(true);
-		segment.update(startIndex+1, endIndex);
+		segment.update(START_INDEX+1, END_INDEX);
 	}
 	
 	@Test
 	public void testUpdateSegmentFailsWhenTooShort() throws SegmentUpdateException {
 		exception.expect(SegmentUpdateException.class);
 		// We need to subtract 2 rather than 1 because we are specifying the end index, not the length
-		segment.update(startIndex, startIndex+IProfileSegment.MINIMUM_SEGMENT_LENGTH-2);
+		segment.update(START_INDEX, START_INDEX+IProfileSegment.MINIMUM_SEGMENT_LENGTH-2);
 	}
 	
 	@Test
@@ -625,25 +763,30 @@ public class IProfileSegmentTest {
 	@Test
 	public void testUpdateLoneSegmentFailsOnStartOutOfBoundsLow() throws SegmentUpdateException {
 		exception.expect(SegmentUpdateException.class);
-		segment.update(-1, endIndex);
+		segment.update(-1, END_INDEX);
 	}
 	
 	@Test
 	public void testUpdateLoneSegmentFailsOnStartOutOfBoundsHigh() throws SegmentUpdateException {
 		exception.expect(SegmentUpdateException.class);
-		segment.update(profileLength+1, endIndex);
+		segment.update(PROFILE_LENGTH+1, END_INDEX);
 	}
 	
 	@Test
 	public void testUpdateLoneSegmentFailsOnEndOutOfBoundsLow() throws SegmentUpdateException {
 		exception.expect(SegmentUpdateException.class);
-		segment.update(startIndex, -1);
+		segment.update(START_INDEX, -1);
 	}
 	
 	@Test
 	public void testUpdateLoneSegmentFailsOnEndOutOfBoundsHigh() throws SegmentUpdateException {
 		exception.expect(SegmentUpdateException.class);
-		segment.update(startIndex, profileLength+1);
+		segment.update(START_INDEX, PROFILE_LENGTH+1);
 	}
 	
+	@Test
+	public void testCopy() {
+		IProfileSegment s2 = segment.copy();
+		assertEquals(segment, s2);
+	}	
 }

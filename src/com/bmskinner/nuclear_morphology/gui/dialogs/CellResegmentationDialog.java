@@ -49,6 +49,7 @@ import com.bmskinner.nuclear_morphology.charting.charts.panels.CoupledProfileOut
 import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPanel;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
+import com.bmskinner.nuclear_morphology.components.MissingComponentException;
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.Taggable;
 import com.bmskinner.nuclear_morphology.components.cells.DefaultCell;
@@ -228,7 +229,15 @@ public class CellResegmentationDialog extends AbstractCellEditingDialog implemen
         reverseProfileBtn.addActionListener(e -> {
             Taggable obj = (Taggable) taggableList.getSelectedItem();
             setCellChanged(true);
-            obj.reverse();
+            try {
+				obj.reverse();
+			} catch (MissingComponentException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (ProfileException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
             updateCharts(workingCell);
         });
         panel.add(reverseProfileBtn);
@@ -288,7 +297,7 @@ public class CellResegmentationDialog extends AbstractCellEditingDialog implemen
 
             LOGGER.finer( "RP index: " + n.getBorderIndex(Landmark.REFERENCE_POINT));
 
-            n.setSegments(Landmark.REFERENCE_POINT, newProfile);
+            n.setSegments(newProfile.getSegments());
 
         } catch (ProfileException e) {
             LOGGER.log(Loggable.STACK, "Cannot link segments", e);

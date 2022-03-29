@@ -18,6 +18,9 @@
  *******************************************************************************/
 package com.bmskinner.nuclear_morphology.analysis.profiles;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -25,9 +28,13 @@ import org.junit.rules.ExpectedException;
 
 import com.bmskinner.nuclear_morphology.TestDatasetBuilder;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.profiles.FloatProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
+import com.bmskinner.nuclear_morphology.components.profiles.SegmentedFloatProfile;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
@@ -44,27 +51,47 @@ public class SegmentFitterTest {
 	
 	@Test
 	public void testFittingOnUnprofiledDatasetThrowsException() throws Exception {
-		IAnalysisDataset d = new TestDatasetBuilder().cellCount(1).ofType(RuleSetCollection.roundRuleSetCollection())
-				.baseHeight(40).baseWidth(40).build();
+		IAnalysisDataset d = new TestDatasetBuilder().cellCount(1)
+				.ofType(RuleSetCollection.roundRuleSetCollection())
+				.baseHeight(40)
+				.baseWidth(40)
+				.build();
 		expectedException.expect(MissingProfileException.class);
 		fitter = new SegmentFitter(d.getCollection().getProfileCollection()
 				.getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN));
 		
 	}
 	
-
-	
-//	@Test
-//	public void testFittingOnSingleCellDatasetHasNoEffect() throws Exception {
-//		IAnalysisDataset dataset = TestDatasetFactory.profileDataset(TestDatasetFactory.squareDataset(1));
-//		expectedException.expect(UnavailableProfileTypeException.class);
-//		fitter = new SegmentFitter(dataset.getCollection().getProfileCollection()
-//				.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN));
-//		
-//		fitter.fit(dataset.getCollection().getNuclei().stream().findFirst().get(), dataset.getCollection().getProfileCollection());
-//		
-//	}
-	
-
-
+	/**
+	 * A fitting may take a multi-segment source profile and fit it to a single-segment
+	 * target. If this happens, the target should get the same segmentation pattern as 
+	 * the source
+	 * @throws Exception
+	 */
+	@Test
+	public void testFittingCanApplyProfilesFromTemplate() throws Exception {
+		
+		// Make a segmented dataset
+		IAnalysisDataset d = new TestDatasetBuilder().cellCount(1)
+				.ofType(RuleSetCollection.roundRuleSetCollection())
+				.baseHeight(40)
+				.baseWidth(40)
+				.segmented()
+				.build();
+		assertTrue("Tempalte should have multiple segments", d.getCollection().getProfileManager().getSegmentCount()>1);
+		
+		ISegmentedProfile source = d.getCollection().getProfileCollection()
+				.getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);
+		
+		// Create the fitter
+		fitter = new SegmentFitter(source);
+		
+		// Create a single segment target profile of appropriate length
+		IProfile targetVals = new FloatProfile(100, d.getCollection().getMedianArrayLength());
+		ISegmentedProfile target = new SegmentedFloatProfile(targetVals);
+		assertEquals("Target should have single segment", 1, target.getSegmentCount());
+		
+		ISegmentedProfile result = fitter.fit(target);
+		assertEquals("Fitted profile should have multiple segments", source.getSegmentCount(), result.getSegmentCount());
+	}
 }

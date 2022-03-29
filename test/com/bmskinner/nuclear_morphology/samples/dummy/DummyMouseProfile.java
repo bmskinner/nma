@@ -19,6 +19,7 @@
 
 package com.bmskinner.nuclear_morphology.samples.dummy;
 
+import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.FloatProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.SegmentedFloatProfile;
 
@@ -34,9 +35,10 @@ public class DummyMouseProfile extends SegmentedFloatProfile {
 	
 	/**
 	 * Default constructor using the built in data
+	 * @throws ProfileException 
 	 * 
 	 */
-	public DummyMouseProfile() {
+	public DummyMouseProfile() throws ProfileException {
 		this(PROFILE_DATA);
 		
 		
@@ -58,8 +60,9 @@ public class DummyMouseProfile extends SegmentedFloatProfile {
 	/**
 	 * Create with a defined set of values
 	 * @param values
+	 * @throws ProfileException 
 	 */
-	public DummyMouseProfile(float[] values) {
+	public DummyMouseProfile(float[] values) throws ProfileException {
 		super(values);
 	}
 		

@@ -41,7 +41,9 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.jdom2.Element;
 
 import com.bmskinner.nuclear_morphology.analysis.ComponentMeasurer;
+import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.Imageable;
+import com.bmskinner.nuclear_morphology.components.MissingComponentException;
 import com.bmskinner.nuclear_morphology.components.Statistical;
 import com.bmskinner.nuclear_morphology.components.generic.FloatPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
@@ -141,8 +143,8 @@ public abstract class DefaultCellularComponent implements CellularComponent {
      * @param position the bounding position of the component in the original image
      */
     protected DefaultCellularComponent(@NonNull Roi roi, @NonNull IPoint centreOfMass, File source, int channel, 
-    		int x, int y, double w, double h) {
-    	this(roi, centreOfMass, source, channel, x, y, w, h, UUID.randomUUID() );
+    		int x, int y) {
+    	this(roi, centreOfMass, source, channel, x, y, UUID.randomUUID() );
     }
     
     /**
@@ -159,7 +161,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
      * @param id the id of the component. Only use when deserialising!
      */
     protected DefaultCellularComponent(@NonNull Roi roi, @NonNull IPoint centreOfMass, 
-    		File source, int channel, int x, int y, double w, double h, @Nullable UUID id) {
+    		File source, int channel, int x, int y, @Nullable UUID id) {
         
         // Sanity check: is the CoM inside the roi
     	if(!doesRoiMatchCom(roi, centreOfMass))
@@ -172,8 +174,6 @@ public abstract class DefaultCellularComponent implements CellularComponent {
         this.channel = channel;
         this.xBase = x;
         this.yBase = y;
-        this.width = w;
-        this.height = h;
 
         // Store the original points of the roi. From these, a smooth polygon can be
         // reconstructed.
@@ -186,6 +186,10 @@ public abstract class DefaultCellularComponent implements CellularComponent {
         this.ypoints = Arrays.copyOfRange(polygon.ypoints, 0, polygon.npoints);
 
         makeBorderList();
+        
+        // Calculate width and height from the bounding box
+        this.width = getWidth();
+        this.height = getHeight();
     }
     
     /**
@@ -705,7 +709,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     }
 
     @Override
-	public void reverse() {
+	public void reverse() throws MissingComponentException, ProfileException {
     	LOGGER.fine("Reversing component border list");
         isReversed = !isReversed;
         makeBorderList(); // Recreate the border list from the new key points
@@ -915,14 +919,40 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     
     @Override
     public String toString() {
-    	 StringBuilder builder = new StringBuilder("\nID: "+id.toString()+"\n");
-    	 builder.append(String.format("Bounds: x: %s-%s y: %s-%s", this.getBase().getX(), this.getBase().getX()+
-    			 this.getWidth(), this.getBase().getY(), this.getBase().getY()+this.getHeight()));
-    	 builder.append("\nMeasurements:\n");
-    	 for(Entry<Measurement, Double> entry : measurements.entrySet()) {
-    		 builder.append(entry.getKey().toString()+": "+entry.getValue().toString()+"\n");
-     	}
+    	String newLine = System.getProperty("line.separator");
+    	StringBuilder builder = new StringBuilder("ID: "+id.toString()+newLine);
+    	builder.append(String.format("Bounds: x: %s-%s y: %s-%s", this.getBase().getX(), this.getBase().getX()+
+    			this.getWidth(), this.getBase().getY(), this.getBase().getY()+this.getHeight()));
+    	builder.append(newLine);
+    	builder.append("Bounding height: "+height);
+    	builder.append(newLine);
+    	builder.append("Bounding width: "+width);
+    	builder.append(newLine);
+    	builder.append("CoM: "+centreOfMass);
+    	builder.append(newLine);
+    	builder.append("Original CoM: "+originalCentreOfMass);
+    	builder.append(newLine);
+    	builder.append("Source file: "+sourceFile);
+    	builder.append(newLine);
+    	builder.append("Channel: "+channel);
+    	builder.append(newLine);
+    	builder.append("Scale: "+scale);
+    	builder.append(newLine);
+    	builder.append("isReversed: "+isReversed);
+    	builder.append(newLine);
+    	builder.append("xpoints: "+Arrays.toString(xpoints));
+    	builder.append(newLine);
+    	builder.append("ypoints: "+Arrays.toString(ypoints));
+    	builder.append(newLine);
+    	builder.append("borderList: "+Arrays.toString(borderList));
+    	builder.append(newLine);
     	
+    	
+    	builder.append("Measurements:"+newLine);
+    	for(Entry<Measurement, Double> entry : measurements.entrySet()) {
+    		builder.append(entry.getKey().toString()+": "+entry.getValue().toString()+newLine);
+    	}
+
     	return builder.toString();
     }
     

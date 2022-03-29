@@ -180,10 +180,11 @@ public class ProfileCreator {
      * angle profile, so is not a true ZR transform.
      * 
      * @return
+     * @throws ProfileException 
      * @throws UnavailableBorderPointException
      * @throws MissingLandmarkException
      */
-    private static ISegmentedProfile calculateZahnRoskiesProfile(@NonNull Taggable target) {
+    private static ISegmentedProfile calculateZahnRoskiesProfile(@NonNull Taggable target) throws ProfileException {
 
         float[] profile = new float[target.getBorderLength()];
         int index = 0;
@@ -234,7 +235,7 @@ public class ProfileCreator {
         return new SegmentedFloatProfile(profile);
     }
 
-    private static ISegmentedProfile calculateDiameterProfile(@NonNull Taggable target) throws UnavailableBorderPointException {
+    private static ISegmentedProfile calculateDiameterProfile(@NonNull Taggable target) throws UnavailableBorderPointException, ProfileException {
 
         float[] profile = new float[target.getBorderLength()];
         
@@ -262,7 +263,7 @@ public class ProfileCreator {
         return new SegmentedFloatProfile(p.divide(max));
     }
 
-    private static ISegmentedProfile calculateRadiusProfile(@NonNull Taggable target) {
+    private static ISegmentedProfile calculateRadiusProfile(@NonNull Taggable target) throws ProfileException {
 
         float[] profile = new float[target.getBorderLength()];
 
@@ -286,8 +287,9 @@ public class ProfileCreator {
      * 
      * @return
      * @throws UnavailableBorderPointException
+     * @throws ProfileException 
      */
-    public static ISegmentedProfile calculatePointToPointDistanceProfile(@NonNull Taggable target) throws UnavailableBorderPointException {
+    public static ISegmentedProfile calculatePointToPointDistanceProfile(@NonNull Taggable target) throws UnavailableBorderPointException, ProfileException {
         float[] profile = new float[target.getBorderLength()];
 
         int index = 0;

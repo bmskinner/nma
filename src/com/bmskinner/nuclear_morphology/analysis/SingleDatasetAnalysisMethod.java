@@ -28,7 +28,7 @@ import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
  */
 public abstract class SingleDatasetAnalysisMethod extends AbstractAnalysisMethod {
     
-    protected final IAnalysisDataset dataset;
+    protected final @NonNull IAnalysisDataset dataset;
     
     /**
      * Create with a dataset for analysis

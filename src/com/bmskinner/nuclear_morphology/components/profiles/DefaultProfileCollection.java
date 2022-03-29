@@ -133,8 +133,6 @@ public class DefaultProfileCollection implements IProfileCollection {
 
     @Override
     public int getIndex(@NonNull Landmark pointType) {
-        if (pointType == null)
-            throw new IllegalArgumentException("The requested offset key is null: " + pointType);
         if (indexes.containsKey(pointType))
             return indexes.get(pointType);
 		return -1;
@@ -142,7 +140,7 @@ public class DefaultProfileCollection implements IProfileCollection {
 
     @Override
     public List<Landmark> getLandmarks() {
-        List<Landmark> result = new ArrayList<Landmark>();
+        List<Landmark> result = new ArrayList<>();
         for (Landmark s : indexes.keySet()) {
             result.add(s);
         }
@@ -157,11 +155,6 @@ public class DefaultProfileCollection implements IProfileCollection {
     @Override
     public IProfile getProfile(@NonNull ProfileType type, @NonNull Landmark tag, double quartile)
             throws MissingLandmarkException, ProfileException, MissingProfileException {
-
-        if (type == null)
-            throw new IllegalArgumentException("Type cannot be null");
-        if (tag == null)
-            throw new IllegalArgumentException("Tag cannot be null");
         if (!this.hasLandmark(tag))
             throw new MissingLandmarkException("Tag is not present: " + tag.toString());
         if (!map.containsKey(type))
@@ -171,7 +164,7 @@ public class DefaultProfileCollection implements IProfileCollection {
         	IProfileAggregate agg = map.get(type);
         	IProfile p = agg.getQuartile(quartile);
             int offset = indexes.get(tag);
-            p = p.offset(offset);
+            p = p.startFrom(offset);
             cache.addProfile(type, quartile, tag, p);
         }
         	
@@ -226,8 +219,6 @@ public class DefaultProfileCollection implements IProfileCollection {
 
     @Override
     public synchronized List<IProfileSegment> getSegments(@NonNull Landmark tag) {
-        if (tag == null)
-            throw new IllegalArgumentException("The requested segment key is null: " + tag);
 
         // this must be negative offset for segments
         // since we are moving the pointIndex back to the beginning
@@ -237,9 +228,7 @@ public class DefaultProfileCollection implements IProfileCollection {
         List<IProfileSegment> result = new ArrayList<>();        
         
         for(IProfileSegment s : segments) {
-        	IProfileSegment sc = s.copy(); 
-        	sc.offset(offset);
-        	result.add(sc);
+        	result.add(s.copy().offset(offset));
         }
         
         try {
@@ -288,7 +277,7 @@ public class DefaultProfileCollection implements IProfileCollection {
     public IProfileSegment getSegmentEndingWith(@NonNull Landmark tag) throws UnsegmentedProfileException {
         List<IProfileSegment> segments = this.getSegments(tag);
 
-        if (segments.size() == 0)
+        if (segments.isEmpty())
             throw new UnsegmentedProfileException("No segments assigned to profile collection");
 
         IProfileSegment result = null;
@@ -308,7 +297,7 @@ public class DefaultProfileCollection implements IProfileCollection {
     public IProfileSegment getSegmentContaining(int index) throws UnsegmentedProfileException {
         List<IProfileSegment> segments = this.getSegments(Landmark.REFERENCE_POINT);
 
-        if (segments.size() == 0) 
+        if (segments.isEmpty()) 
             throw new UnsegmentedProfileException("No segments assigned to profile collection");
 
         IProfileSegment result = null;
@@ -337,9 +326,6 @@ public class DefaultProfileCollection implements IProfileCollection {
 
     @Override
     public void addIndex(@NonNull Landmark tag, int offset) {
-        if (tag == null)
-            throw new IllegalArgumentException("BorderTagObject is null");
-
         // Cannot move the RP from zero
         if (tag.equals(Landmark.REFERENCE_POINT))
             return;
@@ -355,8 +341,8 @@ public class DefaultProfileCollection implements IProfileCollection {
 
     @Override
     public void addSegments(@NonNull Landmark tag, @NonNull List<IProfileSegment> n) {
-        if (n == null || n.isEmpty())
-            throw new IllegalArgumentException("String or segment list is null or empty");
+        if (n.isEmpty())
+            throw new IllegalArgumentException("String or segment list is empty");
 
         if (this.length() != n.get(0).getProfileLength())
         	throw new IllegalArgumentException(String.format("Segment profile length (%d) does not fit aggregate length (%d)", n.get(0).getProfileLength(), length()));
@@ -401,23 +387,27 @@ public class DefaultProfileCollection implements IProfileCollection {
         if (collection.isEmpty())
             throw new IllegalArgumentException("Cell collection is empty");
         
+//        LOGGER.fine("Creating profile aggregate");
         this.length = length;
         cache.clear();
         
         // There are segments, not just the default segment, and the segment 
         // profile length is different to the required length. Interpolation needed.
         if (segments.size()>1 && length != segments.get(0).getProfileLength()) {
+        	LOGGER.fine("Segments already exist, interpolating");
         	createProfileAggregateOfDifferentLength(collection, length);
         	return;
         }
         
         // No current segments are present. Make a default segment spanning the entire profile
-        if(segments.isEmpty())
+        if(segments.isEmpty()) {
+//        	LOGGER.fine("Creating default segment across collection");
         	segments.add(new DefaultProfileSegment(0, 0, length, IProfileCollection.DEFAULT_SEGMENT_ID));
+        }
         
         
         for (ProfileType type : ProfileType.values()) {
-
+//        	LOGGER.fine("Creating aggregate for "+type);
             IProfileAggregate agg = new DefaultProfileAggregate(length, collection.size());
 
             map.put(type, agg);
@@ -554,7 +544,7 @@ public class DefaultProfileCollection implements IProfileCollection {
     @Override
     public List<Integer> findMostVariableRegions(@NonNull ProfileType type, @NonNull Landmark tag) {
 
-        List<Integer> result = new ArrayList<Integer>(0);
+        List<Integer> result = new ArrayList<>(0);
 
         // get the IQR and maxima
 
@@ -571,7 +561,7 @@ public class DefaultProfileCollection implements IProfileCollection {
         // given the list of maxima, find the highest 3 regions
         // store the rank (1-3) and the index of the position at this rank
         // To future me: I am sorry about this.
-        Map<Integer, Integer> values = new HashMap<Integer, Integer>(0);
+        Map<Integer, Integer> values = new HashMap<>(0);
 
         int minIndex = -1;
         try {
@@ -585,7 +575,7 @@ public class DefaultProfileCollection implements IProfileCollection {
         values.put(2, minIndex);
         values.put(3, minIndex);
         for (int i = 0; i < maxima.size(); i++) {
-            if (maxima.get(i) == true) {
+            if (maxima.get(i)) {
                 if (iqrProfile.get(i) > iqrProfile.get(values.get(1))) {
                     values.put(3, values.get(2));
                     values.put(2, values.get(1));
@@ -624,18 +614,6 @@ public class DefaultProfileCollection implements IProfileCollection {
 		if (getClass() != obj.getClass())
 			return false;
 		DefaultProfileCollection other = (DefaultProfileCollection) obj;
-		
-//		if(indexes.size()!=other.indexes.size())
-//			return false;
-//		
-//		for(Landmark l : indexes.keySet()) {
-//			if(!other.indexes.containsKey(l))
-//				return false;
-//			
-//			if(indexes.get(l).intValue()!=other.indexes.get(l).intValue())
-//				return false;
-//		}
-
 		return Objects.equals(indexes, other.indexes) && Objects.equals(segments, other.segments);
 	}
 

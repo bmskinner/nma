@@ -352,18 +352,33 @@ public class DatasetValidator {
 				
 				try {
 					int rpIndex = n.getBorderIndex(Landmark.REFERENCE_POINT);
-					ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE);
+					
+					// A profile starting from RP will have RP at index zero.
+					// One segment should start at index 0
+					ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
+					LOGGER.fine("Testing RP "+rpIndex+" on profile "+profile.toString());
 					for(IProfileSegment s : profile.getSegments()){
-						if(s.getStartIndex()==rpIndex)
+						if(s.getStartIndex()==0)
 							rpIsOk++;
 					}
-				} catch (MissingLandmarkException | MissingProfileException | ProfileException e) {
-					// allow withErrors to fall through
-					LOGGER.fine("No border tag present");
-				}
-
-				if(rpIsOk==0) {
-					errorList.add(String.format("Nucleus %s does not have RP at a segment boundary", n.getNameAndNumber()));
+					
+					if(rpIsOk==0) {
+						errorList.add(String.format("Nucleus %s does not have RP at a segment boundary: RP at %s, profile %s", 
+								n.getNameAndNumber(), rpIndex, profile.toString()));
+						errorCells.add(c);
+						allErrors++;
+					}
+					
+				} catch (MissingLandmarkException e) {
+					errorList.add(String.format("Nucleus %s does not have an RP set", n.getNameAndNumber()));
+					errorCells.add(c);
+					allErrors++;
+				} catch(MissingProfileException e) {
+					errorList.add(String.format("Nucleus %s does not have an angle profile", n.getNameAndNumber()));
+					errorCells.add(c);
+					allErrors++;
+				} catch(ProfileException e) {
+					errorList.add(String.format("Nucleus %s had an error finding segments: %s", n.getNameAndNumber(), e.getMessage()));
 					errorCells.add(c);
 					allErrors++;
 				}

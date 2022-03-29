@@ -359,7 +359,7 @@ public class ProfileManager {
      */
     private void moveRp(int newRpIndex, @NonNull ISegmentedProfile oldMedian) throws ProfileException, MissingProfileException, MissingLandmarkException {
     	// This is the median we will use to update individual nuclei
-    	ISegmentedProfile newMedian = oldMedian.offset(newRpIndex);
+    	ISegmentedProfile newMedian = oldMedian.startFrom(newRpIndex);
 
     	updateTagToMedianBestFit(Landmark.REFERENCE_POINT, ProfileType.ANGLE, newMedian);
     	
@@ -459,44 +459,31 @@ public class ProfileManager {
     			throw new ProfileException("Segments are not consistent with the old profile: were "+segments.size()+", now "+newSegs.size());
 
     		for(int i=0; i<newSegs.size(); i++){
+    			// Start and end points can change, but id and lock state should be consistent
+    			// Check ids are in correct order
     			if(!segments.get(i).getID().equals(newSegs.get(i).getID())){
     				throw new ProfileException("Segment IDs are not consistent with the old profile");
+    			}
+    			
+    			// Check lock state preserved
+    			if(segments.get(i).isLocked() != newSegs.get(i).isLocked()){
+    				throw new ProfileException("Segment lock state not consistent with the old profile");
     			}
     		}
 
     	} catch (MissingLandmarkException e1) {
     		LOGGER.warning("RP not found in source collection");
     		LOGGER.log(Loggable.STACK, "Error getting segments from RP", e1);
-    		return;
     	}
     }
-
+    
     /**
-     * Lock the start index of all segments of all profile types in all nuclei
-     * of the collection except for the segment with the given id
-     * 
-     * @param id
-     *            the segmnet to leave unlocked, or to unlock if locked
-     * @throws Exception
+     * Set the lock state for the given segment across the collection
+     * @param segId
+     * @param lockState
      */
-    public void setLockOnAllNucleusSegmentsExcept(UUID id, boolean b) {
-
-        List<UUID> ids = collection.getProfileCollection().getSegmentIDs();
-
-        collection.getNuclei().forEach(n -> {
-
-            ids.forEach(segID -> {
-
-                if (segID.equals(id)) {
-                    n.setSegmentStartLock(!b, segID);
-                } else {
-                    n.setSegmentStartLock(b, segID);
-                }
-
-            });
-
-        });
-
+    public void setLockOnSegment(@NonNull UUID segId, boolean lockState) {
+    	collection.getNuclei().forEach(n-> n.setSegmentStartLock(lockState, segId));
     }
 
     /**
@@ -506,7 +493,7 @@ public class ProfileManager {
      * @param b the segment lock state for all segments
      */
     public void setLockOnAllNucleusSegments(boolean b) {
-        List<UUID> ids = collection.getProfileCollection().getSegmentIDs();
+        List<UUID> ids = collection.getProfileCollection().getSegmentIDs();   
         collection.getNuclei().forEach(n -> ids.forEach(segID -> n.setSegmentStartLock(b, segID)));
     }
 
@@ -539,7 +526,7 @@ public class ProfileManager {
         	if (profile.update(seg, newStart, newEnd)) {
         		LOGGER.finer( String.format("Updating profile segment %s to %s-%s succeeded", seg.getName(), newStart, newEnd));
         		LOGGER.finer( "Profile now: "+profile.toString());
-        		n.setSegments(Landmark.REFERENCE_POINT, profile);
+        		n.setSegments(profile.getSegments());
         		LOGGER.finest( "Updated nucleus profile with new segment boundaries");
 
         		/*
@@ -726,7 +713,7 @@ public class ProfileManager {
             throw new IllegalArgumentException("Median profile does not have segment 2 with ID "+seg1.getID());
 
         profile.mergeSegments(seg1.getID(), seg2.getID(), newID);
-        p.setSegments(Landmark.REFERENCE_POINT, profile);
+        p.setSegments(profile.getSegments());
     }
 
     /**
@@ -892,7 +879,7 @@ public class ProfileManager {
 
         int targetIndex = nSeg.getProportionalIndex(proportion);
         profile.splitSegment(nSeg, targetIndex, newID1, newID2);
-        t.setSegments(Landmark.REFERENCE_POINT, profile);
+        t.setSegments(profile.getSegments());
 
     }
 
@@ -950,7 +937,7 @@ public class ProfileManager {
     private void unmergeSegments(@NonNull Taggable t, @NonNull UUID id) throws ProfileException, MissingComponentException {
         ISegmentedProfile profile = t.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
         profile.unmergeSegment(id);
-        t.setSegments(Landmark.REFERENCE_POINT, profile);
+        t.setSegments(profile.getSegments());
     }
 
 }

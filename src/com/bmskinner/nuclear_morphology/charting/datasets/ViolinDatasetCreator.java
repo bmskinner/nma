@@ -302,7 +302,8 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
             try {
                 medianSeg = collection.getProfileCollection()
                         .getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN)
-                        .getSegmentAt(segPosition);
+                        .getSegments().get(options.getSegPosition());
+//                        .getSegmentAt(segPosition);
             } catch (MissingLandmarkException | ProfileException | MissingProfileException e) {
             	LOGGER.log(Loggable.STACK, "Unable to get segmented median profile", e);
             	throw new ChartDatasetCreationException("Cannot get median profile");

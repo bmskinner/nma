@@ -16,7 +16,6 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.profiles;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -83,7 +82,7 @@ import com.bmskinner.nuclear_morphology.io.XmlSerializable;
  * @since 1.13.3
  *
  */
-public interface IProfileSegment extends Serializable, XmlSerializable, Iterable<Integer> {
+public interface IProfileSegment extends XmlSerializable, Iterable<Integer> {
 
     /**
      * The smallest number of indexes in a segment. 
@@ -328,10 +327,13 @@ public interface IProfileSegment extends Serializable, XmlSerializable, Iterable
     
     
     /**
-     * Offset the segment and its merge sources by the given amount
-     * @param offset
+     * Create a copy of the segment and its merge sources.
+     * The start and end indexes will be increased by the given value, and 
+     * wrapping applied based on the profile length.
+     * @param offset the amount to add to start and end indexes
+     * @return a copy of the segment with the wrapped offset applied
      */
-    void offset(int offset);
+    IProfileSegment offset(int offset);
 
 
     /**
@@ -484,9 +486,8 @@ public interface IProfileSegment extends Serializable, XmlSerializable, Iterable
      * @param list the segments to link
      * @throws ProfileException if updating the first segment indexes fails
      */
-    static void linkSegments(@NonNull IProfileSegment[] list) throws ProfileException {
-        if (list == null)
-            throw new IllegalArgumentException("List of segments is null");
+    static IProfileSegment[] linkSegments(@NonNull IProfileSegment[] list) throws ProfileException {
+        
         for (int i = 0; i < list.length; i++) {
             IProfileSegment s = list[i];
             // Wrap indices
@@ -494,22 +495,21 @@ public interface IProfileSegment extends Serializable, XmlSerializable, Iterable
             int n = i == list.length - 1 ? 0 : i + 1;
 
             if (i == 0) {
-                boolean lockState = s.isLocked();
-                s.setLocked(false);
                 try {
-
+                	boolean lockState = s.isLocked();
+                    s.setLocked(false);
                     s.update(list[p].getEndIndex(), s.getEndIndex());
-
+                    s.setLocked(lockState);
                 } catch (IllegalArgumentException | SegmentUpdateException e) {
                     throw new ProfileException("Error linking final segment: " + e.getMessage());
-                }
-                s.setLocked(lockState);
+                } 
             }
 
             s.setPrevSegment(list[p]);
             s.setNextSegment(list[n]);
             s.setPosition(i);
         }
+        return list;
     }
 
     /**
@@ -517,9 +517,10 @@ public interface IProfileSegment extends Serializable, XmlSerializable, Iterable
      * and end properly. Does not copy the segments.
      * 
      * @param list
+     * @return the input list
      * @throws ProfileException
      */
-    static void linkSegments(@NonNull List<IProfileSegment> list) throws ProfileException {
+    static List<IProfileSegment> linkSegments(@NonNull List<IProfileSegment> list) throws ProfileException {
 
         for (int i = 0; i < list.size(); i++) {
             IProfileSegment s = list.get(i);
@@ -527,23 +528,27 @@ public interface IProfileSegment extends Serializable, XmlSerializable, Iterable
             int p = i == 0 ? list.size() - 1 : i - 1;
             int n = i == list.size() - 1 ? 0 : i + 1;
 
-            if (i == 0) { // first segment
+            if (i == 0) {
 
-                boolean lockState = list.get(0).isLocked();
-                s.setLocked(false);
                 try {
-                	if(s.getStartIndex()!=list.get(p).getEndIndex()) // only update if really necessary, to stop merge sources being lost
+                	// only update if really necessary, to stop merge sources being lost
+                	if(s.getStartIndex()!=list.get(p).getEndIndex()) {
+                		boolean lockState = s.isLocked();
+                		s.setLocked(false);
                 		s.update(list.get(p).getEndIndex(), s.getEndIndex());
+                		s.setLocked(lockState);
+                	}
                 } catch (IllegalArgumentException | SegmentUpdateException e) {
                     throw new ProfileException("Error linking final segment: " + e.getMessage(), e);
                 }
-                s.setLocked(lockState);
+                
             }
 
             s.setPrevSegment(list.get(p));
             s.setNextSegment(list.get(n));
             s.setPosition(i);
         }
+        return list;
     }
 
     /**
@@ -570,8 +575,7 @@ public interface IProfileSegment extends Serializable, XmlSerializable, Iterable
     			result.add(IProfileSegment.newSegment(oldSeg.getStartIndex(), 
     					oldSeg.getStartIndex(), newLength, oldSeg.getID()));
     		}
-    		linkSegments(result);
-    		return result;
+    		return linkSegments(result);
     	}
 
     	// In case the start is not zero
@@ -597,8 +601,7 @@ public interface IProfileSegment extends Serializable, XmlSerializable, Iterable
             result.add(newSeg);
         }
 
-        linkSegments(result);
-        return result;
+        return linkSegments(result);
     }
 
     /**
@@ -609,21 +612,26 @@ public interface IProfileSegment extends Serializable, XmlSerializable, Iterable
      * @return a new list
      * @throws Exception
      */
-    static List<IProfileSegment> copy(@NonNull List<IProfileSegment> list) throws ProfileException {
-    	if (list == null || list.isEmpty())
+    static List<IProfileSegment> copyAndLink(@NonNull List<IProfileSegment> list) throws ProfileException {
+    	if (list.isEmpty())
             throw new IllegalArgumentException("Cannot copy segments: segment list is null or empty");
         List<IProfileSegment> result = copyWithoutLinking(list);
-        linkSegments(result);
-        return result;
+        return linkSegments(result);
     }
 
     
-    static IProfileSegment[] copy(@NonNull IProfileSegment[] segments) throws ProfileException {
-    	if (segments == null || segments.length == 0)
-            throw new IllegalArgumentException("Cannot copy segments: segment list is null or empty");
-    	IProfileSegment[] result = copyWithoutLinking(segments);
-        linkSegments(result);
-        return result;
+    /**
+     * Copy an array of segments, link them and convert to a list
+     * @param segments the segments to be copied
+     * @return a list of linked segments, duplicated from the input
+     * @throws ProfileException
+     */
+    static List<IProfileSegment> copyAndLink(@NonNull IProfileSegment[] segments) throws ProfileException {
+    	if (segments.length == 0)
+            throw new IllegalArgumentException("Cannot copy segments: segment list is empty");
+    	IProfileSegment[] temp = copyWithoutLinking(segments);
+    	List<IProfileSegment> result = Arrays.asList(temp);
+    	return linkSegments(result);
     }
     
     /**
@@ -631,35 +639,37 @@ public interface IProfileSegment extends Serializable, XmlSerializable, Iterable
      * segments
      * 
      * @param list the segments to copy
-     * @return a new list
+     * @return a list of duplicated segments
      * @throws Exception
      */
-    static List<IProfileSegment> copyWithoutLinking(@NonNull List<IProfileSegment> list) throws ProfileException {
+    static List<IProfileSegment> copyWithoutLinking(@NonNull List<IProfileSegment> list) {
     	
-        if (list == null || list.isEmpty())
+        if (list.isEmpty())
             throw new IllegalArgumentException("Cannot copy segments: segment list is null or empty");
         
         List<IProfileSegment> result = new ArrayList<>();
-        for (IProfileSegment segment : list) {
-
-            result.add(IProfileSegment.newSegment(segment));
-        }
+        for (IProfileSegment segment : list)
+        	result.add(segment.copy());
         return result;
     }
 
     /**
      * Make a copy of the given list of segments, but do not link the segments
      * 
-     * @param list
-     * @return
+     * @param segments an array of segments to copy
+     * @return a copy of the segments
      * @throws ProfileException
      */
-    static IProfileSegment[] copyWithoutLinking(@NonNull IProfileSegment[] list) throws ProfileException {
-        if (list == null || list.length == 0) {
+    static IProfileSegment[] copyWithoutLinking(@NonNull IProfileSegment[] segments) {
+        if (segments == null || segments.length == 0) {
             throw new IllegalArgumentException("Cannot copy segments: segment list is null or empty");
         }
-        return Arrays.copyOf(list, list.length);
-
+        
+        IProfileSegment[] result = new IProfileSegment[segments.length];
+        for(int i=0; i<segments.length; i++)
+        	result[i] = segments[i].copy();        	
+        
+        return result;
     }
 
     /**

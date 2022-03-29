@@ -17,6 +17,7 @@
 package com.bmskinner.nuclear_morphology.components.profiles;
 
 import java.util.Arrays;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -32,6 +33,8 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
  *
  */
 public class DefaultProfileAggregate implements IProfileAggregate {
+	
+	private static final Logger LOGGER = Logger.getLogger(DefaultProfileAggregate.class.getName());
 
 	/** the values samples per profile */
     private final float[][] aggregate;  
@@ -80,7 +83,6 @@ public class DefaultProfileAggregate implements IProfileAggregate {
          * Make the profile the desired length, sample each point and add it to
          * the aggregate
          */
-
         IProfile interpolated = profile.interpolate(length);
         for (int i = 0; i < length; i++) {
             float d = (float) interpolated.get(i);

@@ -394,5 +394,12 @@ public class DefaultCell implements ICell {
 	public int hashCode() {
 		return Objects.hash(cytoplasm, nuclei, statistics, uuid);
 	}
+	
+	@Override
+	public String toString() {
+		return "Cell "+this.uuid.toString()+":\n"
+				+statistics.toString()+"\n"
+				+nuclei.toString()+"\n";
+	}
 
 }

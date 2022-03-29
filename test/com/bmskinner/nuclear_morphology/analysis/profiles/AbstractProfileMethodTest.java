@@ -93,7 +93,8 @@ public class AbstractProfileMethodTest extends ComponentTester {
 		ISegmentedProfile median = d.getCollection()
 				.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);
 		
-		assertTrue(median.hasSegments() && median.getSegmentCount()>1);	
+		assertTrue("Median should have segments", median.hasSegments());
+		assertTrue("Median should have more than one segment", median.getSegmentCount()>1);	
 	}
 	
 	

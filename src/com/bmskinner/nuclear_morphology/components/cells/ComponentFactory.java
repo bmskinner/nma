@@ -48,7 +48,7 @@ public interface ComponentFactory<E extends CellularComponent> {
      * @return a component of the type for this factory
      * @throws ComponentCreationException if creation fails
      */
-    E buildInstance(@NonNull Roi roi, File file, int channel, int x, int y, int w, int h, @NonNull IPoint centreOfMass)
+    E buildInstance(@NonNull Roi roi, File file, int channel, int x, int y, @NonNull IPoint centreOfMass)
             throws ComponentCreationException;
     
     /**
@@ -64,6 +64,6 @@ public interface ComponentFactory<E extends CellularComponent> {
      * @return a component of the type for this factory
      * @throws ComponentCreationException if creation fails
      */
-    E buildInstance(@NonNull Roi roi, File file, int channel, int x, int y, int w, int h, @NonNull IPoint centreOfMass, @NonNull UUID id)
+    E buildInstance(@NonNull Roi roi, File file, int channel, int x, int y, @NonNull IPoint centreOfMass, @NonNull UUID id)
             throws ComponentCreationException;
 }

@@ -34,7 +34,7 @@ public class DummySegmentedCellularComponent extends ProfileableCellularComponen
 	}
 	
 	public DummySegmentedCellularComponent(String name) {
-		super(ROI, COM, IMAGE_FILE, IMAGE_CHANNEL, 105, 35, (int)ROI.getBounds().getWidth(), (int)ROI.getBounds().getHeight());
+		super(ROI, COM, IMAGE_FILE, IMAGE_CHANNEL, 105, 35);
 		setStatistic(Measurement.AREA,     AREA);
         setStatistic(Measurement.PERIMETER, PERIMETER);
         setStatistic(Measurement.MIN_DIAMETER, MIN_DIAMETER);

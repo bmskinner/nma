@@ -9,7 +9,8 @@ import org.junit.runners.Suite.SuiteClasses;
 	DefaultCellCollectionTest.class, 
 	DefaultCellTest.class,
 	DefaultCellularComponentTest.class, 
-	ICellCollectionTest.class })
+	ICellCollectionTest.class,
+	ProfilableCellularComponentTest.class})
 public class ComponentCellsTestSuite {
 
 }

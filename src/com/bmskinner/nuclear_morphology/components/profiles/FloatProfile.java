@@ -40,8 +40,6 @@ public class FloatProfile implements IProfile {
 	
 	private static final String XML_PROFILE = "Profile";
 
-    private static final long serialVersionUID = 1L;
-
     protected final float[] array;
 
     /**
@@ -300,7 +298,7 @@ public class FloatProfile implements IProfile {
     }
 
     @Override
-    public IProfile offset(int j) throws ProfileException {
+    public IProfile startFrom(int j) throws ProfileException {
         float[] newArray = new float[array.length];
         for (int i = 0; i < array.length; i++) {
             newArray[i] = array[wrapIndex(i + j)];

@@ -22,7 +22,9 @@ import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nuclear_morphology.analysis.AnalysisMethodException;
 import com.bmskinner.nuclear_morphology.analysis.ComponentMeasurer;
+import com.bmskinner.nuclear_morphology.analysis.DatasetValidator;
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.SingleDatasetAnalysisMethod;
@@ -69,6 +71,10 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 	@Override
 	public IAnalysisResult call() throws Exception {
 		run();
+		
+		DatasetValidator dv = new DatasetValidator();
+		if(!dv.validate(dataset))
+			throw new AnalysisMethodException("Unable to validate dataset after profiling: "+dv.getSummary()+ "\n"+dv.getErrors());
 		return new DefaultAnalysisResult(dataset);
 	}
 
@@ -88,26 +94,25 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 	 * Find the OP and other BorderTags in the median
 	 * 
 	 * Apply to nuclei using offsets
-	 * 
-	 * @param collection
-	 * @param pointType
 	 */
 	private void run() throws Exception {
     	LOGGER.fine("Beginning profiling method");
     	
+    	if(!dataset.hasAnalysisOptions()) {
+    		LOGGER.warning("Unable to run profiling method, no analysis options in dataset "+dataset.getName());
+    		return;
+    	}
+    	
     	RuleApplicationType ruleType = dataset.getAnalysisOptions().get()
     			.getRuleSetCollection().getApplicationType();
     	
-    	switch(ruleType) {
-	    	case VIA_MEDIAN: {
-	    		runViaMedian();
-	    		break;
-	    	}
-	    	case PER_NUCLEUS:{
-	    		runPerNucleus();
-	    		break;
-	    	}
-    	}
+    	
+    	if(RuleApplicationType.VIA_MEDIAN.equals(ruleType))
+    		runViaMedian();
+    	
+    	if(RuleApplicationType.PER_NUCLEUS.equals(ruleType))
+    		runPerNucleus();
+
 	}
 	
 	/**
@@ -170,8 +175,49 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 	private void runViaMedian() throws Exception {
 		LOGGER.fine("Detecting border tags via median");
 		ICellCollection collection = dataset.getCollection();
-
+		
+		// Find and update the RP
+		identifyRP(collection);
+		
+		// Find all other landmarks
+		identifyOtherLandmarks(collection);
+		
+        // Clear all calculated measured values and force recalculation 
+		// in each nucleus since some measurements use the landmarks 
+		// for orientation
+		for(Nucleus n : dataset.getCollection().getNuclei()) {
+			for(Measurement m : dataset.getAnalysisOptions().get()
+	    			.getRuleSetCollection().getMeasurableValues()) { 
+				if(m==null)
+					throw new IllegalArgumentException("Error reading ruleset, a measurement is null");
+					n.setStatistic(m, ComponentMeasurer.calculate(m, n));
+			}
+		}
+		
+		// Clear all calculated median values in the collection and
+		// recalculate. This ensures any values dependent on landmarks
+		// (e.g. bounding dimensions) are correct
+        for(Measurement m : dataset.getAnalysisOptions().get()
+    			.getRuleSetCollection().getMeasurableValues()) {
+        	collection.clear(m, CellularComponent.NUCLEUS);
+        	collection.getMedian(m, CellularComponent.NUCLEUS, MeasurementScale.PIXELS);
+        }
+	}
+	
+	/**
+	 * Identify the RP from the median profile, and use this to refine
+	 * RP placement in each nucleus.
+	 * @param collection
+	 * @throws MissingLandmarkException
+	 * @throws MissingProfileException
+	 * @throws ProfileException
+	 * @throws NoDetectedIndexException
+	 */
+	private synchronized void identifyRP(@NonNull ICellCollection collection) throws MissingLandmarkException, MissingProfileException, ProfileException, NoDetectedIndexException {
+		// Build the profile collection based on the current RP
+		// positions in each nucleus
 		collection.createProfileCollection();
+
 		// Create a median from the current reference points in the nuclei
 		IProfile median = collection.getProfileCollection()
 				.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);
@@ -182,43 +228,32 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 		int rpIndex = ProfileIndexFinder.identifyIndex(collection, Landmark.REFERENCE_POINT);
 		LOGGER.finer( "RP in default median is located at index " + rpIndex);
 
-		IProfile templateProfile = median.offset(rpIndex);
-		// Update the position of the RP in the nuclei to best fit the median
-		collection.getProfileManager().updateTagToMedianBestFit(Landmark.REFERENCE_POINT, ProfileType.ANGLE, templateProfile);
+		// Offset the median profile to place the RP at zero
+		// This does not affect the actual median profile
+		IProfile templateProfile = median.startFrom(rpIndex);
+
+		// Using the template we created, update the position of the RP 
+		// in the nuclei. 
+		collection.getProfileManager()
+		.updateTagToMedianBestFit(Landmark.REFERENCE_POINT, ProfileType.ANGLE, templateProfile);
 
 		// Regenerate the profile aggregates based on the new RP positions
+		// This should create a new median profile with the RP at zero
 		collection.getProfileManager().recalculateProfileAggregates();
-		
+
 		// Test if the recalculated profile aggregate naturally puts the RP at zero
 		rpIndex = ProfileIndexFinder.identifyIndex(collection, Landmark.REFERENCE_POINT);
 
 		int coercionCounter = 0;
 		while (rpIndex != 0 && coercionCounter++<MAX_COERCION_ATTEMPTS) {
-			LOGGER.fine("Coercing RP to zero, round " + coercionCounter);
+//			LOGGER.fine("Coercing RP to zero, round " + coercionCounter);
 			rpIndex = coerceRPToZero(collection);
 		}
+		
+		
 		if(coercionCounter==MAX_COERCION_ATTEMPTS && rpIndex!=0)
 			LOGGER.fine("Unable to coerce RP to index zero");
-		
-		identifyNonCoreTags(collection);
-		
-        // Clear all calculated measured values and force recalculation
-		// since some measurements use the landmarks for orientation
-		for(Nucleus n : dataset.getCollection().getNuclei()) {
-			for(Measurement m : dataset.getAnalysisOptions().get()
-	    			.getRuleSetCollection().getMeasurableValues()) { 
-				if(m==null)
-					throw new IllegalArgumentException("Error reading ruleset, a measurement is null");
-					n.setStatistic(m, ComponentMeasurer.calculate(m, n));
-			}
-		}
-		
-		// Clear all calculated values in the median
-        for(Measurement m : dataset.getAnalysisOptions().get()
-    			.getRuleSetCollection().getMeasurableValues()) {
-        	collection.clear(m, CellularComponent.NUCLEUS);
-        	collection.getMedian(m, CellularComponent.NUCLEUS, MeasurementScale.PIXELS);
-        }
+
 	}
 
 	/**
@@ -230,7 +265,7 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 	 * @throws MissingProfileException
 	 * @throws ProfileException
 	 */
-	private synchronized void identifyNonCoreTags(ICellCollection collection) throws NoDetectedIndexException, MissingLandmarkException, MissingProfileException, ProfileException {
+	private synchronized void identifyOtherLandmarks(ICellCollection collection) throws NoDetectedIndexException, MissingLandmarkException, MissingProfileException, ProfileException {
 		// Identify the border tags in the median profile
 		for(Landmark tag : Landmark.defaultValues()) {
 
@@ -238,9 +273,9 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 			// We do need to assign the RP in other ProfileTypes though
 			if (tag.equals(Landmark.REFERENCE_POINT)) {
 
-				LOGGER.fine("Checking location of RP in profile");
+//				LOGGER.fine("Checking location of RP in profile");
 				int index = ProfileIndexFinder.identifyIndex(collection, tag);
-				LOGGER.fine("RP in collection is at index " + index);
+//				LOGGER.fine("RP in collection is at index " + index);
 				continue;
 			}
 
@@ -256,14 +291,14 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 				}
 				continue;
 			} catch (IllegalArgumentException e) {
-				LOGGER.fine("No ruleset for " + tag + "; skipping");
+				LOGGER.finer("No ruleset for " + tag + "; skipping");
 				continue;
 			}
 
 			// Add the index to the median profiles
 			collection.getProfileManager().updateProfileCollectionOffsets(tag, index);
 
-			LOGGER.fine(tag + " in median is located at index " + index);
+//			LOGGER.fine(tag + " in median is located at index " + index);
 
 			// Create a median from the current reference points in the
 			// nuclei
@@ -271,7 +306,7 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 					Stats.MEDIAN);
 
 			collection.getProfileManager().updateTagToMedianBestFit(tag, ProfileType.ANGLE, tagMedian);
-			LOGGER.fine("Assigned offset in nucleus profiles for " + tag);
+//			LOGGER.fine("Assigned offset in nucleus profiles for " + tag);
 		}
 	}
 
@@ -288,24 +323,23 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 
 		// check the RP index in the median
 		int rpIndex = ProfileIndexFinder.identifyIndex(collection, Landmark.REFERENCE_POINT);
-		LOGGER.fine("RP in median is located at index " + rpIndex);
+//		LOGGER.fine("RP in median is located at index " + rpIndex);
 
 		// If RP is not at zero, update
 		if (rpIndex != 0) {
 			
-			LOGGER.fine("RP in median is not yet at zero");
+//			LOGGER.fine("RP in median is not yet at zero");
 			IProfile median = collection.getProfileCollection()
 					.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);
-			IProfile templateProfile = median.offset(rpIndex);
+			IProfile templateProfile = median.startFrom(rpIndex);
 			// Update the offsets in the profile collection to the new RP
 			collection.getProfileManager().updateTagToMedianBestFit(Landmark.REFERENCE_POINT, ProfileType.ANGLE, templateProfile);
 			collection.getProfileManager().recalculateProfileAggregates();
 
 			// Find the effects of the offsets on the RP
 			// It should be found at zero
-			LOGGER.finer( "Checking RP index again");
 			rpIndex = ProfileIndexFinder.identifyIndex(collection, Landmark.REFERENCE_POINT);
-			LOGGER.fine("RP in median is now located at index " + rpIndex);
+//			LOGGER.fine("RP in median is now located at index " + rpIndex);
 		}
 
 		return rpIndex;

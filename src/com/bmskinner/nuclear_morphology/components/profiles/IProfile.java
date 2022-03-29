@@ -32,7 +32,7 @@ import com.bmskinner.nuclear_morphology.io.XmlSerializable;
  * @since 1.13.3
  *
  */
-public interface IProfile extends Serializable, Iterable<Integer>, XmlSerializable {
+public interface IProfile extends Iterable<Integer>, XmlSerializable {
 
     static final int ARRAY_BEFORE = -1;
     static final int ARRAY_AFTER  = 1;
@@ -328,19 +328,19 @@ public interface IProfile extends Serializable, Iterable<Integer>, XmlSerializab
     IProfile copy() throws ProfileException;
 
     /**
-     * Create a profile offset to start from the given index. For example, a
-     * profile {@code 1, 2, 3, 4} offset by 1 will become {@code 2, 3, 4, 1 }.
+     * Create a profile starting at the given index. For example, a
+     * profile {@code 5, 10, 15, 20} starting from index 1 will become {@code 10, 15, 20, 5 }.
      * 
-     * Offsetting the profile to -1 will produce {@code 4, 1, 2, 3 }.
+     * Setting a start of -1 will produce {@code 20, 5, 10, 15 }.
      * 
-     * Offsetting is reversible: {@code profile.offset(x).offset(-x)} will return the original
-     * profile position.
+     * The offsets are reversible: {@code profile.startFrom(x).startFrom(-x)} will return the original
+     * profile.
 
-     * @param j the index to set as index zero
-     * @return a new profile with the offset applied
+     * @param newStartIndex the index to set as the new start
+     * @return a new profile starting from the desired index
      * @throws ProfileException
      */
-    IProfile offset(int j) throws ProfileException;
+    IProfile startFrom(int newStartIndex) throws ProfileException;
 
     /**
      * Perform a window-averaging smooth of the profile with the given window

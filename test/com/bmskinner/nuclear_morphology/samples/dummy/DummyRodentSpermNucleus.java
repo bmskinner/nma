@@ -34,6 +34,7 @@ import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.nuclei.DefaultNucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
@@ -80,7 +81,7 @@ public class DummyRodentSpermNucleus extends DummyCellularComponent implements N
 	
 	public DummyRodentSpermNucleus(String name) throws ComponentCreationException{
 		component = new DefaultNucleus(ROI, COM, IMAGE_FILE, IMAGE_CHANNEL,  
-	            105, 35, (int)ROI.getBounds().getWidth(), (int)ROI.getBounds().getHeight(), component_NUMBER, RuleSetCollection.mouseSpermRuleSetCollection());
+	            105, 35, component_NUMBER, RuleSetCollection.mouseSpermRuleSetCollection());
 		nucleus = (Nucleus) component;
 		nucleus.offset(COM.getX(), COM.getY());
         initialise(PROFILE_WINDOW);	    
@@ -179,10 +180,10 @@ public class DummyRodentSpermNucleus extends DummyCellularComponent implements N
 
 	
 
-	@Override
-	public void calculateProfiles() throws ProfileException {
-		nucleus.calculateProfiles();
-	}
+//	@Override
+//	public void calculateProfiles() throws ProfileException {
+//		nucleus.calculateProfiles();
+//	}
 
 
 	@Override
@@ -211,9 +212,8 @@ public class DummyRodentSpermNucleus extends DummyCellularComponent implements N
 	}
 
 	@Override
-	public void setSegments(@NonNull Landmark tag,
-			@NonNull ISegmentedProfile profile) throws MissingLandmarkException, ProfileException {
-		nucleus.setSegments(tag, profile);
+	public void setSegments(@NonNull List<IProfileSegment> segs) throws MissingLandmarkException, ProfileException {
+		nucleus.setSegments(segs);
 		
 	}
 

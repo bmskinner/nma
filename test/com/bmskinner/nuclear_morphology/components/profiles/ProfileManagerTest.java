@@ -78,6 +78,8 @@ public class ProfileManagerTest {
 				.ofType(RuleSetCollection.roundRuleSetCollection())
 				.randomOffsetProfiles(true)
 				.segmented().build();
+		
+		
 		if(source==DefaultCellCollection.class){
 			return d.getCollection();
 		}
@@ -107,13 +109,33 @@ public class ProfileManagerTest {
 		int perimeter = TestDatasetBuilder.DEFAULT_BASE_HEIGHT*2 + TestDatasetBuilder.DEFAULT_BASE_WIDTH*2 - 2;
 		assertEquals(perimeter, manager.getProfileLength());
 	}
-
+	
+	/**
+	 * Test that the sample cell collection is suitable for the tests in this class -
+	 * e.g. does it have enough segments in the profile
+	 * @throws ProfileException 
+	 * @throws MissingProfileException 
+	 * @throws MissingLandmarkException 
+	 */
 	@Test
-	public void testSetLockOnAllNucleusSegmentsExcept() throws MissingLandmarkException, MissingProfileException, ProfileException, UnsegmentedProfileException {
+	public void testSampleCollectionIsValid() throws Exception {
+		assertTrue("Test collection should have multiple segments", collection.getProfileManager().getSegmentCount()>1);
+		for(Nucleus n : collection.getNuclei()) {
+			ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
+			assertTrue("Test nucleus should have multiple segments", profile.getSegmentCount()>1);
+		}
+	}
+
+	/**
+	 * Test that when a true segment lock is requested for all but one segment, the lock is applied.
+	 */
+	@Test
+	public void testSetLockTrueOnSegment() throws Exception {
 		ISegmentedProfile profile = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);
-		UUID segId1 = profile.getSegmentAt(1).getID();
+		UUID segId1 = profile.getSegments().get(1).getID();
 		
-		manager.setLockOnAllNucleusSegments(false);
+		// Ensure that all segments are unlocked
+		collection.getProfileManager().setLockOnAllNucleusSegments(false);
 		for(ICell c : collection) {
 			for(Nucleus n : c.getNuclei()) {
 				ISegmentedProfile p = n.getProfile(ProfileType.ANGLE);
@@ -123,40 +145,100 @@ public class ProfileManagerTest {
 			}
 		}
 		
-		manager.setLockOnAllNucleusSegmentsExcept(segId1, true);
+		// Lock all but one segment
+		collection.getProfileManager().setLockOnSegment(segId1, true);
 		for(ICell c : collection) {
 			for(Nucleus n : c.getNuclei()) {
 				ISegmentedProfile p = n.getProfile(ProfileType.ANGLE);
 				for(IProfileSegment s : p.getSegments()) {
-					if(s.getID().equals(segId1))
-						assertFalse(s.isLocked());
-					else
-						assertTrue(s.isLocked());
+					assertEquals("Segment lock state error: "+segId1, s.getID().equals(segId1), s.isLocked());
+				}
+			}
+		}
+		
+	}
+	
+	/**
+	 * Test that when a false segment lock is requested for all but one segment, the lock is applied.
+	 */
+	@Test
+	public void testSetLockFalseOnSegments() throws Exception {
+		ISegmentedProfile profile = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);
+		UUID segId1 = profile.getSegments().get(1).getID();
+		
+		// Ensure that all segments are locked
+		collection.getProfileManager().setLockOnAllNucleusSegments(true);
+		for(ICell c : collection) {
+			for(Nucleus n : c.getNuclei()) {
+				ISegmentedProfile p = n.getProfile(ProfileType.ANGLE);
+				for(IProfileSegment s : p.getSegments()) {
+					assertTrue(s.isLocked());
+				}
+			}
+		}
+		
+		// Unlock all but one segment
+		collection.getProfileManager().setLockOnSegment(segId1, false);
+		for(ICell c : collection) {
+			for(Nucleus n : c.getNuclei()) {
+				ISegmentedProfile p = n.getProfile(ProfileType.ANGLE);
+				for(IProfileSegment s : p.getSegments()) {
+					assertEquals("Segment lock state error: "+segId1, s.getID().equals(segId1), !s.isLocked());
 				}
 			}
 		}
 		
 	}
 
+	/**
+	 * Test that when a true segment lock is requested for all segments, the lock is applied.
+	 */
 	@Test
-	public void testSetLockOnAllNucleusSegments() throws Exception {
-		manager.setLockOnAllNucleusSegments(false);
+	public void testSetLockTrueOnAllNucleusSegments() throws Exception {
+		collection.getProfileManager().setLockOnAllNucleusSegments(false);
 		for(ICell c : collection) {
 			for(Nucleus n : c.getNuclei()) {
 				ISegmentedProfile p = n.getProfile(ProfileType.ANGLE);
 				for(IProfileSegment s : p.getSegments()) {
-					assertFalse(s.isLocked());
+					assertFalse("Segment should be unlocked", s.isLocked());
 				}
 			}
 		}
 		
-		manager.setLockOnAllNucleusSegments(true);
+		collection.getProfileManager().setLockOnAllNucleusSegments(true);
 		
 		for(ICell c : collection) {
 			for(Nucleus n : c.getNuclei()) {
 				ISegmentedProfile p = n.getProfile(ProfileType.ANGLE);
 				for(IProfileSegment s : p.getSegments()) {
-					assertTrue(s.isLocked());
+					assertTrue("Segment should be locked", s.isLocked());
+				}
+			}
+		}
+	}
+	
+	/**
+	 * Test that when a false segment lock is requested for all segments, the lock is applied.
+	 */
+	@Test
+	public void testSetLockFalseOnAllNucleusSegments() throws Exception {
+		collection.getProfileManager().setLockOnAllNucleusSegments(true);
+		for(ICell c : collection) {
+			for(Nucleus n : c.getNuclei()) {
+				ISegmentedProfile p = n.getProfile(ProfileType.ANGLE);
+				for(IProfileSegment s : p.getSegments()) {
+					assertTrue("Segment should be locked", s.isLocked());
+				}
+			}
+		}
+		
+		collection.getProfileManager().setLockOnAllNucleusSegments(false);
+		
+		for(ICell c : collection) {
+			for(Nucleus n : c.getNuclei()) {
+				ISegmentedProfile p = n.getProfile(ProfileType.ANGLE);
+				for(IProfileSegment s : p.getSegments()) {
+					assertFalse("Segment should be unlocked", s.isLocked());
 				}
 			}
 		}
@@ -193,10 +275,10 @@ public class ProfileManagerTest {
 		// Merge on one nucleus will take it out of sync
 		Nucleus n = collection.streamCells().findFirst().get().getPrimaryNucleus();
 		ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
-		UUID segId1 = profile.getSegmentAt(1).getID();
-		UUID segId2 = profile.getSegmentAt(2).getID();
+		UUID segId1 = profile.getSegments().get(1).getID();
+		UUID segId2 = profile.getSegments().get(2).getID();
 		profile.mergeSegments(segId1, segId2, UUID.randomUUID());
-		n.setSegments(Landmark.REFERENCE_POINT, profile);
+		n.setSegments(profile.getSegments());
 		assertFalse(dv.validate(collection));
 	}
 	
@@ -213,19 +295,18 @@ public class ProfileManagerTest {
 
 			// Get the profile
 			ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
+			List<UUID> segs = profile.getSegmentIDs();
 
-			// Choose the segments to merge
-			IProfileSegment seg1 = profile.getSegmentAt(1);
-			IProfileSegment seg2 = profile.getSegmentAt(2);
-
-			// Get the IDs
+			// Choose the segments to merge			
 			UUID newId = UUID.randomUUID();
-			UUID segId1 = seg1.getID();
-			UUID segId2 = seg2.getID();
+			UUID segId1 = segs.get(0);
+			UUID segId2 = segs.get(1);;
 
 			// Merge the segments and assign to the nucleus
 			profile.mergeSegments(segId1, segId2, newId);
-			n.setSegments(Landmark.REFERENCE_POINT, profile);	
+			assertTrue(profile.hasSegment(newId));
+			assertTrue(profile.getSegment(newId).hasMergeSources());
+			n.setSegments(profile.getSegments());	
 
 			// Get the profile back out from the nucleus
 			ISegmentedProfile newProfile = n.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
@@ -254,8 +335,8 @@ public class ProfileManagerTest {
 		for(Nucleus n : collection.getNuclei())
 			assertFalse(n.isLocked());
 		
-		IProfileSegment seg1 = profile.getSegmentAt(1);
-		IProfileSegment seg2 = profile.getSegmentAt(2);
+		IProfileSegment seg1 = profile.getSegments().get(1);
+		IProfileSegment seg2 = profile.getSegments().get(2);
 		
 		UUID newId = UUID.randomUUID();
 		UUID segId1 = seg1.getID();
@@ -311,10 +392,10 @@ public class ProfileManagerTest {
 		ISegmentedProfile profile = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);
 		List<UUID> segIds = profile.getSegmentIDs();
 		UUID newId = UUID.randomUUID();
-		UUID segId1 = profile.getSegmentAt(1).getID();
-		UUID segId2 = profile.getSegmentAt(2).getID();
-		IProfileSegment seg1 = profile.getSegmentAt(1);
-		IProfileSegment seg2 = profile.getSegmentAt(2);
+		UUID segId1 = profile.getSegments().get(1).getID();
+		UUID segId2 = profile.getSegments().get(2).getID();
+		IProfileSegment seg1 = profile.getSegments().get(1);
+		IProfileSegment seg2 = profile.getSegments().get(2);
 		
 		if(collection.isVirtual())
 			return;

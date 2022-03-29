@@ -387,7 +387,7 @@ public class IProfileTester {
 	}
 
 	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.profiles.IProfile#offset(int)}.
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.profiles.IProfile#startFrom(int)}.
 	 */
 	@Test
 	public void testOffsetByOne() throws ProfileException {
@@ -397,12 +397,12 @@ public class IProfileTester {
 	    }
 	    exp1[data.length-1] = data[0];
 	    
-	    float[] result = profile.offset(1).toFloatArray();
+	    float[] result = profile.startFrom(1).toFloatArray();
 	    assertTrue( equals(exp1, result));
 	}
 	
 	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.profiles.IProfile#offset(int)}.
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.profiles.IProfile#startFrom(int)}.
 	 */
 	@Test
 	public void testOffsetByFive() throws ProfileException {
@@ -416,12 +416,12 @@ public class IProfileTester {
 	    	exp1[data.length-i] = data[offset-i];
 	    }
 	    	    
-	    float[] result = profile.offset(offset).toFloatArray();
+	    float[] result = profile.startFrom(offset).toFloatArray();
 	    assertTrue( equals(exp1, result));
 	}
 	
 	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.profiles.IProfile#offset(int)}.
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.profiles.IProfile#startFrom(int)}.
 	 */
 	@Test
 	public void testOffsetByNegativeOne() throws ProfileException {
@@ -432,7 +432,7 @@ public class IProfileTester {
 	    }
 	    exp1[0] = data[data.length-1];
 	    
-	    float[] result = profile.offset(-1).toFloatArray();
+	    float[] result = profile.startFrom(-1).toFloatArray();
 	    assertTrue( equals(exp1, result));
 	}
 
@@ -503,7 +503,7 @@ public class IProfileTester {
 	@Test
 	public void testFindBestFitOffsetHasNoEffectWithZeroOffset() throws ProfileException {
 		int exp = 0;
-		IProfile test = profile.offset(exp);
+		IProfile test = profile.startFrom(exp);
 		int offset = profile.findBestFitOffset(test);
 		assertEquals(exp, offset);
 	}
@@ -516,9 +516,9 @@ public class IProfileTester {
 	public void testFindBestFitOffsetWithPositiveOffsetIdenticalProfile() throws ProfileException {
 		
 		for(int exp=1; exp<profile.size(); exp++){
-			IProfile test = profile.offset(exp);
+			IProfile test = profile.startFrom(exp);
 			int offset = profile.findBestFitOffset(test);
-			IProfile recovered = test.offset(-offset);
+			IProfile recovered = test.startFrom(-offset);
 			assertEquals(exp, offset);
 			assertEquals(profile, recovered);
 		}
@@ -532,9 +532,9 @@ public class IProfileTester {
 	public void testFindBestFitOffsetWithNegativeOffsetIdenticalProfile() throws ProfileException {
 		
 		for(int exp=-1; exp>-profile.size(); exp--){
-			IProfile test = profile.offset(exp);
+			IProfile test = profile.startFrom(exp);
 			int offset = profile.findBestFitOffset(test);
-			IProfile recovered = test.offset(-offset);
+			IProfile recovered = test.startFrom(-offset);
 			
 			int posExp = profile.size()+exp;
 			assertEquals(posExp, offset);
@@ -580,7 +580,7 @@ public class IProfileTester {
 	
 	@Test
 	public void testGetLocalMinimaWorksOnZeroIndex() throws ProfileException {
-		IProfile offset = profile.offset(270);
+		IProfile offset = profile.startFrom(270);
 	    BooleanProfile b = offset.getLocalMinima(3, 180);
 	    assertTrue("Expecting minima at "+offset.get(0), b.get(0));
 	}

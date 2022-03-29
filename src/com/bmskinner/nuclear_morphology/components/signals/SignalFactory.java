@@ -37,16 +37,16 @@ import ij.gui.Roi;
 public class SignalFactory implements ComponentFactory<INuclearSignal> {
 
     @Override
-    public INuclearSignal buildInstance(Roi roi, File file, int channel, int x, int y, int w, int h, IPoint centreOfMass)
+    public INuclearSignal buildInstance(Roi roi, File file, int channel, int x, int y, IPoint centreOfMass)
             throws ComponentCreationException {
-        return new DefaultNuclearSignal(roi, centreOfMass, file, channel, x, y, w, h);
+        return new DefaultNuclearSignal(roi, centreOfMass, file, channel, x, y);
     }
 
 	@Override
-	public INuclearSignal buildInstance(@NonNull Roi roi, File file, int channel, int x, int y, int w, int h,
+	public INuclearSignal buildInstance(@NonNull Roi roi, File file, int channel, int x, int y, 
 			@NonNull IPoint centreOfMass, @NonNull UUID id) throws ComponentCreationException {
 		// TODO Auto-generated method stub
-		return new DefaultNuclearSignal(roi, centreOfMass, file, channel, x, y, w, h, id);
+		return new DefaultNuclearSignal(roi, centreOfMass, file, channel, x, y, id);
 	}
 
 }

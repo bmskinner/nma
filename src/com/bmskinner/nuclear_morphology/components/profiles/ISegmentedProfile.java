@@ -117,17 +117,10 @@ public interface ISegmentedProfile extends IProfile {
      * 
      * @param name
      * @return
+     * @throws ProfileException 
      */
-    IProfileSegment getSegment(@NonNull IProfileSegment segment);
+    IProfileSegment getSegment(@NonNull IProfileSegment segment) throws ProfileException;
 
-    /**
-     * Get the segment at the given position in the profile. is found. Gets the
-     * actual segment, not a copy
-     * 
-     * @param name
-     * @return
-     */
-    IProfileSegment getSegmentAt(int position);
 
     /**
      * Get the segment containing the given index
@@ -146,8 +139,9 @@ public interface ISegmentedProfile extends IProfile {
 
     /**
      * Remove the segments from this profile
+     * @throws ProfileException 
      */
-    void clearSegments();
+    void clearSegments() throws ProfileException;
 
     /**
      * Get the names of the segments in the profile
@@ -200,39 +194,55 @@ public interface ISegmentedProfile extends IProfile {
      * @param startIndex the new start
      * @param endIndex the new end
      * @throws SegmentUpdateException the update failed
+     * @throws ProfileException 
      */
-    boolean update(@NonNull IProfileSegment segment, int startIndex, int endIndex) throws SegmentUpdateException;
+    boolean update(@NonNull IProfileSegment segment, int startIndex, int endIndex) throws SegmentUpdateException, ProfileException;
 
     /**
-     * Move the positions of all segments by the given amount
-     * @param amount
+     * Move the start and end indexes of all segments by the given amount.
+     * Start and end indexes of all segments are increased by the
+     * given value, with wrapping applied.
+     * 
+     * <pre>
+     *  0     5          15                      Index
+     *  |-----|----------|--------------------   Seg boundaries
+     * </pre>
+     * After moving segments by 5, the profile looks like this:
+     * <pre>
+     *        5     10         20            
+     *  ------|-----|----------|--------------
+     * </pre>
+     * @param amount the amount to increase segment start and end indexes
      * @throws ProfileException
      */
-    void nudgeSegments(int amount) throws ProfileException;
+    void moveSegments(int amount) throws ProfileException;
 
 
-    /*
-     * The segmented profile starts like this:
-     * 
-     * 0 5 15 35 |-----|----------|--------------------|
-     * 
-     * After applying offset=5, the profile looks like this:
-     * 
-     * 0 10 30 35 |----------|--------------------|-----|
-     * 
-     * The new profile starts at index 'offset' in the original profile This
-     * means that we must subtract 'offset' from the segment positions to
+    /**
+     * Adjust the segmented profile to start from the given new index.
+     * This works by adjusting the segment start and end indexes. Assume a
+     * segmented profile like this:
+     * <pre>
+     *  0     5          15                   35   Index
+     *  |-----|----------|--------------------     Seg boundaries
+     * </pre>
+     * After starting from index 5, the profile looks like this:
+     * <pre>
+     *  0          10                   30    35
+     *  |----------|--------------------|-----
+     * </pre>
+     * The new profile starts at index 'newStartIndex' in the original profile.
+     * This means that we must subtract 'newStartIndex' from the segment positions to
      * make them line up.
      * 
-     * The nudge function in IBorderSegment moves endpoints by a specified
-     * amount
+     * If you want to move segment bounds without assigning a new start position for
+     * the overall profile, use  {@link ISegmentedProfile::nudgeSegments}.
      * 
      * @param newStartIndex the index from which the profile should start
-     * @see no.components.Profile#offset(int)
-     * 
+     * @return a new profile with the desired start index
      */
     @Override
-	ISegmentedProfile offset(int newStartIndex) throws ProfileException;
+	ISegmentedProfile startFrom(int newStartIndex) throws ProfileException;
 
     /**
      * Attempt to merge the given segments into one segment. The segments must

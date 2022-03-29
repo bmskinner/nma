@@ -33,6 +33,7 @@ import com.bmskinner.nuclear_morphology.charting.charts.ProfileChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPanel;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
+import com.bmskinner.nuclear_morphology.components.MissingComponentException;
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
@@ -109,21 +110,20 @@ public class CellProfilesPanel extends AbstractCellDetailPanel {
      */
     private void reverseProfileAction() {
     	if(this.getCellModel().hasCell()) {
-    		for(Nucleus n : this.getCellModel().getCell().getNuclei()) {
-    			n.reverse();
-    		}
-
-    		this.getCellModel().updateViews();
     		try {
+    			for(Nucleus n : this.getCellModel().getCell().getNuclei()) {
+    				n.reverse();
+    			}
+
+    			this.getCellModel().updateViews();
+
     			// Trigger refresh of dataset median profile and charts
-				activeDataset().getCollection().getProfileManager().recalculateProfileAggregates();
-				this.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.RECACHE_CHARTS, activeDataset());
-			} catch (ProfileException | MissingLandmarkException | MissingProfileException e) {
-				LOGGER.log(Loggable.STACK, "Error recalculating profile aggregate", e);
-			}
+    			activeDataset().getCollection().getProfileManager().recalculateProfileAggregates();
+    			this.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.RECACHE_CHARTS, activeDataset());
+    		} catch (ProfileException | MissingComponentException e) {
+    			LOGGER.log(Loggable.STACK, "Error recalculating profile aggregate", e);
+    		}
     	}
-    	
-    	
     }
 
     public void setButtonsEnabled(boolean b) {

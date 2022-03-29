@@ -269,8 +269,9 @@ public class SegmentationHandler {
             }
 
             // Lock all the segments except the one to change
-            dataset.getCollection().getProfileManager().setLockOnAllNucleusSegmentsExcept(id, true);
-
+            dataset.getCollection().getProfileManager().setLockOnAllNucleusSegments(true);
+            dataset.getCollection().getProfileManager().setLockOnSegment(id, false);
+            
         } catch (ProfileException | MissingComponentException e) {
             LOGGER.warning("Error updating index of segments");
             LOGGER.log(Loggable.STACK, e.getMessage(), e);

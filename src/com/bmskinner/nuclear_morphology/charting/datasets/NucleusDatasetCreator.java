@@ -160,7 +160,8 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
             try {
                 medianSeg = collection.getProfileCollection()
                         .getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN)
-                        .getSegmentAt(segPosition);
+                        .getSegments().get(options.getSegPosition());
+//                        .getSegmentAt(segPosition);
             } catch (MissingLandmarkException | ProfileException | MissingProfileException e) {
                 LOGGER.log(Loggable.STACK, "Error getting profile from tag", e);
                 throw new ChartDatasetCreationException(UNABLE_TO_GET_MEDIAN_PROFILE_ERROR, e);
@@ -219,7 +220,8 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
             try {
                 medianSeg = collection.getProfileCollection()
                         .getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN)
-                        .getSegmentAt(segPosition);
+                        .getSegments().get(options.getSegPosition());
+//                        .getSegmentAt(segPosition);
             } catch (MissingLandmarkException | ProfileException | MissingProfileException e) {
                 LOGGER.log(Loggable.STACK, "Error getting profile from tag", e);
                 throw new ChartDatasetCreationException(UNABLE_TO_GET_MEDIAN_PROFILE_ERROR, e);
