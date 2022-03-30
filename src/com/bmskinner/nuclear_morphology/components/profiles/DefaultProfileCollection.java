@@ -17,6 +17,7 @@
 package com.bmskinner.nuclear_morphology.components.profiles;
 
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -39,7 +40,7 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
 
 /**
  * Holds the ProfileAggregate with individual nucleus values, and stores the
- * indexes of BorderTags within the profile. Provides methods to get the median
+ * indexes of landmarks within the profile. Provides methods to get the median
  * and other quartiles from the collection. The Reference Point is always at the
  * zero index of the collection.
  *
@@ -57,12 +58,21 @@ public class DefaultProfileCollection implements IProfileCollection {
 	
 	private static final Logger LOGGER = Logger.getLogger(DefaultProfileCollection.class.getName());
 
-    private Map<Landmark, Integer> indexes  = new HashMap<>(); // indexes of tags in the profile. Assumes the RP is at zero.
+    /** indexes of landmarks in the median profile with RP at zero */
+    private Map<Landmark, Integer> indexes  = new HashMap<>();
+    
+    /** segments in the median profile with RP at zero */
     private List<IProfileSegment> segments = new ArrayList<>();
 
+    /** length of the median profile */
     private int length;
-    private Map<ProfileType, IProfileAggregate> map   = new HashMap<>(); // the aggregates for each profile type
-    private ProfileCache                        cache = new ProfileCache(); // cached median profiles etc
+    
+    /** the aggregates for each profile type. Note, we keep this transient so test cases of
+     * XML serialisation don't include this field in comparisons */
+    private transient Map<ProfileType, IProfileAggregate> profileMap = new EnumMap<>(ProfileType.class);
+    
+    /** cached median profiles for quicker access */
+    private ProfileCache cache = new ProfileCache();
 
     /**
      * Create an empty profile collection. The RP is set to the zero index by default.
@@ -108,8 +118,8 @@ public class DefaultProfileCollection implements IProfileCollection {
     	
     	length = p.length;
     	
-    	for(ProfileType t : p.map.keySet())
-			map.put(t, p.map.get(t).duplicate());
+    	for(ProfileType t : p.profileMap.keySet())
+			profileMap.put(t, p.profileMap.get(t).duplicate());
     	
     	cache = p.cache.duplicate();
     }
@@ -157,11 +167,11 @@ public class DefaultProfileCollection implements IProfileCollection {
             throws MissingLandmarkException, ProfileException, MissingProfileException {
         if (!this.hasLandmark(tag))
             throw new MissingLandmarkException("Tag is not present: " + tag.toString());
-        if (!map.containsKey(type))
+        if (!profileMap.containsKey(type))
             throw new MissingProfileException("Profile type is not present: " + type.toString());
 
         if(!cache.hasProfile(type, quartile, tag)) {
-        	IProfileAggregate agg = map.get(type);
+        	IProfileAggregate agg = profileMap.get(type);
         	IProfile p = agg.getQuartile(quartile);
             int offset = indexes.get(tag);
             p = p.startFrom(offset);
@@ -176,8 +186,6 @@ public class DefaultProfileCollection implements IProfileCollection {
     		double quartile)
             throws MissingLandmarkException, ProfileException, MissingProfileException {
 
-        if (tag == null || type == null)
-            throw new IllegalArgumentException("A profile type and tag is required");
         if (quartile < 0 || quartile > 100)
             throw new IllegalArgumentException("Quartile must be between 0-100");
 
@@ -187,7 +195,7 @@ public class DefaultProfileCollection implements IProfileCollection {
         	throw new UnsegmentedProfileException("No segments assigned to profile collection");
 
         try {
-            return new SegmentedFloatProfile(p, getSegments(tag));
+            return new DefaultSegmentedProfile(p, getSegments(tag));
         } catch (IndexOutOfBoundsException e) {
             LOGGER.log(Loggable.STACK, "Cannot create segmented profile due to segment/profile mismatch", e);
             throw new ProfileException("Cannot create segmented profile; segment lengths do not match array", e);
@@ -368,7 +376,7 @@ public class DefaultProfileCollection implements IProfileCollection {
     @Override
     public double[] getValuesAtPosition(@NonNull ProfileType type, double position) throws MissingProfileException {
 
-        double[] result = map.get(type).getValuesAtPosition(position);
+        double[] result = profileMap.get(type).getValuesAtPosition(position);
 
         if (result == null) {
             result = new double[length()];
@@ -410,7 +418,7 @@ public class DefaultProfileCollection implements IProfileCollection {
 //        	LOGGER.fine("Creating aggregate for "+type);
             IProfileAggregate agg = new DefaultProfileAggregate(length, collection.size());
 
-            map.put(type, agg);
+            profileMap.put(type, agg);
             for (Nucleus n : collection.getNuclei()) {
             	agg.addValues(n.getProfile(type, Landmark.REFERENCE_POINT));
 
@@ -432,7 +440,7 @@ public class DefaultProfileCollection implements IProfileCollection {
     		// Copy any existing segments, adjusting the lengths using profile interpolation
     		
     		List<IProfileSegment> interpolatedSegments;
-    		if(!map.isEmpty()) {
+    		if(!profileMap.isEmpty()) {
     			ISegmentedProfile sourceMedian = getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);
     			interpolatedSegments = sourceMedian.interpolate(length).getSegments();
     		} else {
@@ -444,8 +452,8 @@ public class DefaultProfileCollection implements IProfileCollection {
     			List<IProfileSegment> originalSegList = new ArrayList<>();
     			for(IProfileSegment s : segments)
     				originalSegList.add(s);
-        		IProfile template = new FloatProfile(0, segments.get(0).getProfileLength());
-        		ISegmentedProfile segTemplate = new SegmentedFloatProfile(template, originalSegList);
+        		IProfile template = new DefaultProfile(0, segments.get(0).getProfileLength());
+        		ISegmentedProfile segTemplate = new DefaultSegmentedProfile(template, originalSegList);
         		
         		// Now use the interpolation method to adjust the segment lengths
         		interpolatedSegments = segTemplate.interpolate(length).getSegments();
@@ -460,7 +468,7 @@ public class DefaultProfileCollection implements IProfileCollection {
                 } catch (ProfileException | MissingLandmarkException | MissingProfileException e) {
                     LOGGER.log(Loggable.STACK, "Error making aggregate", e);
                 }
-                map.put(type, agg);
+                profileMap.put(type, agg);
             } 	    		
     		
     		addSegments(Landmark.REFERENCE_POINT, interpolatedSegments);
@@ -535,7 +543,7 @@ public class DefaultProfileCollection implements IProfileCollection {
                                           // zero profile
 
             LOGGER.warning("Problem calculating the IQR - setting to zero");
-            return new FloatProfile(0, length);
+            return new DefaultProfile(0, length);
         }
 
         return q75.subtract(q25);

@@ -21,7 +21,7 @@ import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.SegmentedFloatProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.DefaultSegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
@@ -132,7 +132,7 @@ public class IterativeSegmentFitterTest extends ComponentTester {
 		IAnalysisDataset d = new TestDatasetBuilder(RNG_SEED).cellCount(10).ofType(RuleSetCollection.roundRuleSetCollection())
 				.baseHeight(40).baseWidth(40).profiled().build();
 		
-		ISegmentedProfile singleSegmentProfile = new SegmentedFloatProfile(d.getCollection().getProfileCollection()
+		ISegmentedProfile singleSegmentProfile = new DefaultSegmentedProfile(d.getCollection().getProfileCollection()
 				.getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN));
 		
 		assertEquals(1, singleSegmentProfile.getSegmentCount());

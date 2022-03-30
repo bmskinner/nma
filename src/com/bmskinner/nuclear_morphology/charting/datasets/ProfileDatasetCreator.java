@@ -35,7 +35,7 @@ import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.profiles.FloatProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.DefaultProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
@@ -402,7 +402,7 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 		for (int i = 0; i < profile.size(); i++) {
 			result[i] = (float) (profile.getFractionOfIndex(i) * newLength);
 		}
-		return new FloatProfile(result);
+		return new DefaultProfile(result);
 	}
 
 	/**

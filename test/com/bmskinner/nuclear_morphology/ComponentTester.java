@@ -190,7 +190,7 @@ public abstract class ComponentTester extends FloatArrayTester {
 	// arrays. Need to use Arrays.hashcode().
 	private static void testHashMapsByField(Field f, Map o, Map d) {
 		assertTrue("Hashmaps should not both be null in "+f.getName(), o!=null&&d!=null);
-		assertEquals("Maps should contain same number of elements in "+f.getName(), o.size(), d.size());
+		assertEquals("Maps should contain same number of elements in field '"+f.getName()+"'", o.size(), d.size());
 		
 		long oHash = 0;
 		long dHash = 0;

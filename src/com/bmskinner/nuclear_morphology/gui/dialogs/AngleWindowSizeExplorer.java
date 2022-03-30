@@ -52,7 +52,7 @@ import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.profiles.FloatProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.DefaultProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileCollection;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
@@ -281,7 +281,7 @@ public class AngleWindowSizeExplorer extends LoadingIconDialog implements Change
         for (int i = 0; i < profile.size(); i++) {
             result[i] = (float) (profile.getFractionOfIndex(i) * newLength);
         }
-        return new FloatProfile(result);
+        return new DefaultProfile(result);
     }
 
     private Color chooseGradientColour(int index) {

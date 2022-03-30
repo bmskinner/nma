@@ -39,7 +39,7 @@ import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.SignalDetectionMode;
 import com.bmskinner.nuclear_morphology.components.profiles.BooleanProfile;
-import com.bmskinner.nuclear_morphology.components.profiles.FloatProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.DefaultProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.signals.SignalFactory;
@@ -302,7 +302,7 @@ public class SignalDetector extends Detector {
          */
         LOGGER.finest( "Initial histo threshold: " + minThreshold);
 
-        IProfile histogramProfile = new FloatProfile(d);
+        IProfile histogramProfile = new DefaultProfile(d);
         IProfile trimmedHisto = histogramProfile.getSubregion(minThreshold, 255);
 
         // smooth the arrays, get the deltas, and double smooth them

@@ -28,7 +28,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 
-public class FloatProfileTest {
+public class DefaultProfileTest {
 	
 	private float[] data;
 	private IProfile profile;
@@ -37,7 +37,7 @@ public class FloatProfileTest {
 	@Before
 	public void setUp(){
 	    data       = new float[] { 10, 5, 1, 2, 7, 19, 12, 3, 9, 20, 13, 6, 4 }; // template data for a profile
-	    profile = new FloatProfile(data);
+	    profile = new DefaultProfile(data);
 	}
 	
 	@Rule
@@ -45,42 +45,42 @@ public class FloatProfileTest {
 	
 	
 	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.profiles.FloatProfile#FloatProfile(float[])}.
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.profiles.DefaultProfile#FloatProfile(float[])}.
 	 */
 	@Test
 	public void testFloatProfileFloatArrayWithNullData() {
 		exception.expect(IllegalArgumentException.class);
-		new FloatProfile( (float[]) null);
+		new DefaultProfile( (float[]) null);
 	}
 	
 	@Test
     public void testFloatProfileFloatIntExceptsWithLengthBelowZero() {
         exception.expect(IllegalArgumentException.class);
-        new FloatProfile(5, -1);
+        new DefaultProfile(5, -1);
     }
 	
 	@Test
     public void testFloatProfileFloatIntExceptsWithLengthZero() {
 	    exception.expect(IllegalArgumentException.class);
-        new FloatProfile(5, 0);
+        new DefaultProfile(5, 0);
 	}
 		
 	@Test
     public void testFloatProfileFloatIntSucceedsWithLengthTwo() {
-        IProfile p = new FloatProfile(5, 2);       
+        IProfile p = new DefaultProfile(5, 2);       
         for( int i =0;i<p.size(); i++){
             assertEquals(5, p.get(i), 0);
         }   
     }
 
 	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.profiles.FloatProfile#FloatProfile(com.bmskinner.nuclear_morphology.components.profiles.IProfile)}.
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.profiles.DefaultProfile#FloatProfile(com.bmskinner.nuclear_morphology.components.profiles.IProfile)}.
 	 */
 	@Test
 	public void testFloatProfileIProfile() {
 
-		IProfile tester = new FloatProfile(data);
-		float[] result = new FloatProfile(tester).toFloatArray();
+		IProfile tester = new DefaultProfile(data);
+		float[] result = new DefaultProfile(tester).toFloatArray();
 		
 		for( int i =0;i<data.length; i++){
 			assertEquals(data[i], result[i],0);
@@ -88,7 +88,7 @@ public class FloatProfileTest {
 	}
 	
 	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.profiles.FloatProfile#FloatProfile(float, int)}.
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.profiles.DefaultProfile#FloatProfile(float, int)}.
 	 */
 	@Test
 	public void testFloatProfileFloatInt() {
@@ -98,7 +98,7 @@ public class FloatProfileTest {
 		
 		float[] exp   = { 1, 1, 1, 1, 1, 1 };
 		
-		IProfile p  = new FloatProfile(value, length);
+		IProfile p  = new DefaultProfile(value, length);
 		
 		float[] result = p.toFloatArray();
 		
@@ -108,11 +108,11 @@ public class FloatProfileTest {
 	}
 
 	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.profiles.FloatProfile#equals(java.lang.Object)}.
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.profiles.DefaultProfile#equals(java.lang.Object)}.
 	 */
 	@Test
 	public void testEqualsObject() {
-		IProfile p2 = new FloatProfile(data);
+		IProfile p2 = new DefaultProfile(data);
 		assertTrue(profile.equals(p2));
 		
 	}
@@ -137,11 +137,11 @@ public class FloatProfileTest {
 	
 	@Test
 	public void testXmlSerialiseas() {
-		IProfile p2 = new FloatProfile(data);
+		IProfile p2 = new DefaultProfile(data);
 
 		Element e = p2.toXmlElement();
 		
-		IProfile test = new FloatProfile(e);
+		IProfile test = new DefaultProfile(e);
 		
 		assertEquals(p2, test);
 	}

@@ -28,13 +28,13 @@ import org.junit.rules.ExpectedException;
 
 import com.bmskinner.nuclear_morphology.TestDatasetBuilder;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.profiles.FloatProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.DefaultProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.SegmentedFloatProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.DefaultSegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
@@ -87,8 +87,8 @@ public class SegmentFitterTest {
 		fitter = new SegmentFitter(source);
 		
 		// Create a single segment target profile of appropriate length
-		IProfile targetVals = new FloatProfile(100, d.getCollection().getMedianArrayLength());
-		ISegmentedProfile target = new SegmentedFloatProfile(targetVals);
+		IProfile targetVals = new DefaultProfile(100, d.getCollection().getMedianArrayLength());
+		ISegmentedProfile target = new DefaultSegmentedProfile(targetVals);
 		assertEquals("Target should have single segment", 1, target.getSegmentCount());
 		
 		ISegmentedProfile result = fitter.fit(target);

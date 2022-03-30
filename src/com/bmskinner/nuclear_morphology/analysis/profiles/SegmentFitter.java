@@ -124,7 +124,6 @@ public class SegmentFitter {
 
         // By default, return the input profile
         ISegmentedProfile result = profile.copy();
-        LOGGER.fine("Profile has "+result.getSegmentCount()+" segs before mapping segments");
 
         ISegmentedProfile tempProfile = profile.copy();
 

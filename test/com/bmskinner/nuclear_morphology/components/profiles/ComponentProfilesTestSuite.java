@@ -8,12 +8,12 @@ import org.junit.runners.Suite.SuiteClasses;
 @SuiteClasses({ 
 	DefaultBorderSegmentTest.class, 
 	DefaultProfileCollectionTest.class, 
-	FloatProfileTest.class,
+	DefaultProfileTest.class,
 	IProfileSegmentTest.class, 
 	IProfileTester.class, 
 	ISegmentedProfileTest.class, 
 	ProfileManagerTest.class,
-	SegmentedFloatProfileTest.class })
+	DefaultSegmentedProfileTest.class })
 public class ComponentProfilesTestSuite {
 
 }

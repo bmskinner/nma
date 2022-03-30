@@ -34,161 +34,10 @@ import com.bmskinner.nuclear_morphology.io.XmlSerializable;
  */
 public interface IProfile extends Iterable<Integer>, XmlSerializable {
 
-    static final int ARRAY_BEFORE = -1;
-    static final int ARRAY_AFTER  = 1;
-    static final int ZERO_INDEX   = 0;
-    static final int MINIMUM_PROFILE_LENGTH = 3;
-
-    /**
-     * Create a new profile of the default type
-     * @param array the array of values
-     * @return a profile
-     */
-    static IProfile makeNew(float[] array) {
-        return new FloatProfile(array);
-    }
-
-    /**
-     * Create a new profile of the default type
-     * @param array the array of values
-     * @return a profile
-     */
-    static IProfile makeNew(double[] array) {
-        float[] d = new float[array.length];
-        for(int i=0; i<array.length; i++){
-            d[i] = (float) array[i];
-        }
-        return new FloatProfile(d);
-    }
-    
-    static IProfile merge(@NonNull List<IProfile> list){
-        if (list == null || list.isEmpty())
-            throw new IllegalArgumentException("Profile list is null or empty");
-
-        int totalLength = 0;
-        for (IProfile p : list) {
-            totalLength += p.size();
-        }
-
-        float[] combinedArray = new float[totalLength];
-
-        int i = 0;
-
-        for (IProfile p : list) {
-
-            for (int j = 0; j < p.size(); j++) {
-                combinedArray[i++] = (float) p.get(j);
-            }
-        }
-
-        return new FloatProfile(combinedArray);
-    }
-    
-	/**
-	 * Interpolate the array to the given length, and return as a new array
-	 * 
-	 * @param array2 the array to interpolate
-	 * @param length the new length
-	 * @return
-	 */
-    static float[] interpolate(float[] array2, int length) {
-
-		float[] result = new float[length];
-
-		for (int i = 0; i < length; i++) {
-			float fraction = ((float) i / (float) length); // get the fractional index 
-			result[i] = getInterpolatedValue(array2, fraction);
-		}
-		return result;
-	}
-        
-	/**
-	 * Interpolate the array to the given length, and return as a new array
-	 * 
-	 * @param array2 the array to interpolate
-	 * @param length the new length
-	 * @return
-	 */
-    static double[] interpolate(double[] array2, int length) {
-
-		double[] result = new double[length];
-
-		// where in the old curve index is the new curve index?
-		for (int i = 0; i < length; i++) {
-			float fraction = ((float) i / (float) length); // get the fractional index
-			result[i] = getInterpolatedValue(array2, fraction);
-		}
-		return result;
-	}
-	
-	/**
-	 * Get the interpolated value at the given fraction along the given array
-	 * 
-	 * @param array2
-	 * @param fraction the fraction, from 0-1
-	 * @return
-	 */
-    static float getInterpolatedValue(float[] array2, float fraction) {
-    	if(fraction==0)
-    		return array2[0];
-    	if(fraction==1)
-    		return array2[array2.length-1];
-    	
-    	double index = fraction * array2.length;
-		// Get the equivalent index of the fraction in the array
-    	int indexLower = (int)index;
-//
-//		// Get the integer portion and find the bounding indices
-
-		if (indexLower == array2.length) // only wrap possible if fraction is range 0-1
-			indexLower = 0;
-
-		int indexHigher = indexLower + 1;
-		if (indexHigher == array2.length) // only wrap possible if fraction is range 0-1
-			indexHigher = 0;
-
-		
-		// Find the fraction between the indices
-		double diffFraction = index - indexLower;
-
-		// Calculate the linear interpolation
-		double interpolate = array2[indexLower] + ((array2[indexHigher] - array2[indexLower]) * diffFraction);
-
-		return (float) interpolate;
-
-	}
-	
-	/**
-	 * Get the interpolated value at the given fraction along the given array
-	 * 
-	 * @param array2
-	 * @param fraction the fraction, from 0-1
-	 * @return
-	 */
-    static double getInterpolatedValue(double[] array2, float fraction) {
-		// Get the equivalent index of the fraction in the array
-		double index = fraction * array2.length;
-		double indexFloor = Math.floor(index);
-
-		// Get the integer portion and find the bounding indices
-		int indexLower = (int) indexFloor;
-		if (indexLower == array2.length) { // only wrap possible if fraction is
-			// range 0-1
-			indexLower = 0;
-		}
-
-		int indexHigher = indexLower + 1;
-		if (indexHigher == array2.length) { // only wrap possible if fraction is
-			// range 0-1
-			indexHigher = 0;
-		}
-
-		// Find the fraction between the indices
-		double diffFraction = index - indexFloor;
-
-		// Calculate the linear interpolation
-		return array2[indexLower] + ((array2[indexHigher] - array2[indexLower]) * diffFraction);
-	}
+    int ARRAY_BEFORE = -1;
+    int ARRAY_AFTER  = 1;
+    int ZERO_INDEX   = 0;
+    int MINIMUM_PROFILE_LENGTH = 3;
 
     /**
      * Get the length of the array in the profile
@@ -480,7 +329,7 @@ public interface IProfile extends Iterable<Integer>, XmlSerializable {
      * @param base
      * @return
      */
-    IProfile power(double exponent);
+    IProfile toPowerOf(double exponent);
 
     /**
      * Get the absolute values from a profile.
@@ -488,14 +337,6 @@ public interface IProfile extends Iterable<Integer>, XmlSerializable {
      * @return
      */
     IProfile absolute();
-
-    /**
-     * Get the cumulative sum of the values in the profile
-     * 
-     * @return
-     */
-    IProfile cumulativeSum();
-
 
     /**
      * Multiply all values within the profile by the value within the given
@@ -566,23 +407,7 @@ public interface IProfile extends Iterable<Integer>, XmlSerializable {
      * @return the new profile
      */
     IProfile subtract(double value);
-    
-    /**
-     * Rescale the values in the profile to fit the given scale.
-     * The lowest value in the profile will be adjusted to the given
-     * minimum, and the maximum value will be adjusted to the given 
-     * maximum. All values in between will be scaled appropriately to
-     * preserve the shape of the profile.
-     * 
-     * For example, a profile 0-2-4-6-8-10 with normaliseAmplitude(0, 5)
-     * would result in a profile 0-1-2-3-4-5
-     * @param minValue the minimum value in the profile
-     * @param maxValue the maximum value in the profile
-     * @return a new profile with all values scaled to fit the range.
-     */
-    IProfile normaliseAmplitude(double minValue, double maxValue);
-
-    
+        
     /**
      * Get the underlying array as a float array. This may involve loss of
      * precision.

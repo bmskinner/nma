@@ -30,7 +30,7 @@ import com.bmskinner.nuclear_morphology.components.profiles.DefaultProfileSegmen
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
-import com.bmskinner.nuclear_morphology.components.profiles.SegmentedFloatProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.DefaultSegmentedProfile;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -70,7 +70,7 @@ public class IterativeSegmentFitter {
     	LOGGER.finer( "Beginning segment fitting");
         
         if(templateProfile.getSegmentCount()==1)
-        	return new SegmentedFloatProfile(target);
+        	return new DefaultSegmentedProfile(target);
 
 		try {
 			return remapSegmentEndpoints(target);
@@ -97,7 +97,7 @@ public class IterativeSegmentFitter {
         LOGGER.finer(String.format("Created %s segments in target profile", newSegments.size()));
         for(IProfileSegment s : newSegments) // unlock after fitting
         	s.setLocked(false);
-        return new SegmentedFloatProfile(profile, newSegments);
+        return new DefaultSegmentedProfile(profile, newSegments);
     }
 
     /**

@@ -26,7 +26,7 @@ import org.junit.rules.ExpectedException;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.DefaultProfileAggregate;
-import com.bmskinner.nuclear_morphology.components.profiles.FloatProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.DefaultProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileAggregate;
 
@@ -62,7 +62,7 @@ public class ProfileAggregateTest {
 	public void addAProfileToTheAggregate() throws ProfileException{
 		
 		float[] array   = { 10, 10, 10, 10, 10, 10, 10, 10, 10, 10 };
-		IProfile values = new FloatProfile(array);
+		IProfile values = new DefaultProfile(array);
 
 		IProfileAggregate tester = new DefaultProfileAggregate(10, 50);
 		

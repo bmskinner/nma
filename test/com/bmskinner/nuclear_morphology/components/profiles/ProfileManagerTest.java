@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -20,7 +21,9 @@ import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 
 import com.bmskinner.nuclear_morphology.TestDatasetBuilder;
+import com.bmskinner.nuclear_morphology.TestResources;
 import com.bmskinner.nuclear_morphology.analysis.DatasetValidator;
+import com.bmskinner.nuclear_morphology.analysis.nucleus.NucleusDetectionMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
@@ -29,9 +32,12 @@ import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.datasets.VirtualDataset;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.logging.ConsoleFormatter;
 import com.bmskinner.nuclear_morphology.logging.ConsoleHandler;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 /**
@@ -44,7 +50,7 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
 @RunWith(Parameterized.class)
 public class ProfileManagerTest {
 	
-	private static final Logger LOGGER = Logger.getLogger(ProfileManagerTest.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(Loggable.PROJECT_LOGGER);
 	private static final long RNG_SEED = 42;
 	private ProfileManager manager;
 	private ICellCollection collection;
@@ -102,6 +108,48 @@ public class ProfileManagerTest {
 	public static Iterable<Class<? extends ICellCollection>> arguments() {
 		return Arrays.asList(DefaultCellCollection.class,
 				VirtualDataset.class);
+	}
+	
+	
+	
+	@Test
+	public void testUpdateLandmarkToMedianBestFit() throws Exception {
+//		fail();
+		
+		// Need a cell collection and a median profile
+		
+		File testFolder = TestResources.MOUSE_INPUT_FOLDER.getAbsoluteFile();
+    	IAnalysisOptions op = OptionsFactory.makeDefaultRodentAnalysisOptions(testFolder);
+    	
+    	IAnalysisDataset d = new NucleusDetectionMethod(TestResources.UNIT_TEST_FOLDER.getAbsoluteFile(), op).call().getFirstDataset();
+    	d.getCollection().createProfileCollection();
+    	
+    	// Create a median from the current reference points in the nuclei
+    	IProfile median = d.getCollection().getProfileCollection()
+    			.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);
+    	
+    	double diff = 0;
+    	for(Nucleus n : d.getCollection().getNuclei()) {
+    		diff += n.getProfile(ProfileType.ANGLE).absoluteSquareDifference(median);
+    	}
+
+    	// Run the fit. Each nucleus should now have the best possible fit
+    	// to the median profile
+    	d.getCollection().getProfileManager()
+		.updateLandmarkToMedianBestFit(Landmark.REFERENCE_POINT, ProfileType.ANGLE, median);
+    	
+    	// Update profile collection
+    	collection.createProfileCollection();
+
+    	IProfile newMedian = d.getCollection().getProfileCollection()
+    			.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);
+    	
+    	double postDiff = 0;
+    	for(Nucleus n : d.getCollection().getNuclei()) {
+    		postDiff += n.getProfile(ProfileType.ANGLE).absoluteSquareDifference(newMedian);
+    	}
+    	LOGGER.fine("Diff: "+diff+"; post diff "+postDiff);
+    	assertTrue(postDiff <= diff);
 	}
 
 	@Test

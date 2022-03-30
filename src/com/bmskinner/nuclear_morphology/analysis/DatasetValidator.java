@@ -356,7 +356,7 @@ public class DatasetValidator {
 					// A profile starting from RP will have RP at index zero.
 					// One segment should start at index 0
 					ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
-					LOGGER.fine("Testing RP "+rpIndex+" on profile "+profile.toString());
+					LOGGER.finer("Testing RP "+rpIndex+" on profile "+profile.toString());
 					for(IProfileSegment s : profile.getSegments()){
 						if(s.getStartIndex()==0)
 							rpIsOk++;

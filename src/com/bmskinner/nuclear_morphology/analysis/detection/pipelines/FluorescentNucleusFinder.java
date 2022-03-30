@@ -143,7 +143,7 @@ public class FluorescentNucleusFinder extends CellFinder {
             	LOGGER.log(Loggable.STACK, "Unable to create nucleus from roi: "+e.getMessage()+"; skipping", e);
             }
         }
-        LOGGER.fine(()->"Detected nuclei in "+imageFile.getName());
+        LOGGER.finer(()->"Detected nuclei in "+imageFile.getName());
         
 		List<ICell> result = new ArrayList<>();
 		for (Nucleus n : list) {
@@ -280,7 +280,7 @@ public class FluorescentNucleusFinder extends CellFinder {
         		ProfileIndexFinder.assignLandmarks(result, options.getRuleSetCollection());
         	}
         } catch(MissingComponentException | ProfileException e) {
-        	LOGGER.fine(()->"Unable to reverse profile in nucleus");
+        	LOGGER.finer(()->"Unable to reverse profile in nucleus");
         	throw new ComponentCreationException(e);
         }
         

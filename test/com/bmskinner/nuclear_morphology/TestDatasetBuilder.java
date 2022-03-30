@@ -6,6 +6,8 @@ import java.util.Random;
 import java.util.UUID;
 import java.util.logging.Logger;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.analysis.classification.NucleusClusteringMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetProfilingMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMethod;
@@ -119,8 +121,7 @@ public class TestDatasetBuilder {
 	 * @return a new dataset
 	 * @throws Exception
 	 */
-	public IAnalysisDataset build() throws Exception {
-		LOGGER.finest("Building dataset");		
+	public @NonNull IAnalysisDataset build() throws Exception {	
 		switch(nucleusShape) {
 		case SQUARE: 
 		default: d = createRectangularDataset(nCells, rsc, maxVariation, w, h, xBase, 
@@ -132,8 +133,7 @@ public class TestDatasetBuilder {
 		if(segment)
 			new DatasetSegmentationMethod(d, MorphologyAnalysisMode.NEW).call();
 		
-		if(nClusters>0) {
-			LOGGER.finest("Clustering dataset");		
+		if(nClusters>0) {	
 			HashOptions o = OptionsFactory.makeDefaultClusteringOptions()
 					.withValue(HashOptions.CLUSTER_MANUAL_CLUSTER_NUMBER_KEY, nClusters)
 					.build();

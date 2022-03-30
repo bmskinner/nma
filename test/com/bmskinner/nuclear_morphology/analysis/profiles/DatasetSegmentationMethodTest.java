@@ -1,18 +1,48 @@
 package com.bmskinner.nuclear_morphology.analysis.profiles;
 
+import java.io.File;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import com.bmskinner.nuclear_morphology.TestDatasetBuilder;
 import com.bmskinner.nuclear_morphology.TestDatasetBuilder.TestComponentShape;
+import com.bmskinner.nuclear_morphology.TestResources;
+import com.bmskinner.nuclear_morphology.analysis.nucleus.NucleusDetectionMethod;
+import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMethod.MorphologyAnalysisMode;
+import com.bmskinner.nuclear_morphology.charting.ChartFactoryTest;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
+import com.bmskinner.nuclear_morphology.logging.ConsoleFormatter;
+import com.bmskinner.nuclear_morphology.logging.ConsoleHandler;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
+
+import ij.Prefs;
 
 public class DatasetSegmentationMethodTest extends AbstractProfileMethodTest {
+	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.PROJECT_LOGGER);
 		
 	@Rule
 	public final ExpectedException expectedException = ExpectedException.none();
+	
+	@Before
+	public void setUp(){		
+		Prefs.setThreads(2); // Attempt to avoid issue 162
+		for(Handler h : LOGGER.getHandlers())
+			LOGGER.removeHandler(h);
+		Handler h = new ConsoleHandler(new ConsoleFormatter());
+		LOGGER.setLevel(Level.FINE);
+		h.setLevel(Level.FINE);
+		LOGGER.addHandler(h);
+	}
 	
 
 	/**
@@ -66,7 +96,9 @@ public class DatasetSegmentationMethodTest extends AbstractProfileMethodTest {
 	}
 	
 	/**
-	 * Test multiple identical cells segmentation, with a variable border offset
+	 * Test multiple identical cells segmentation, with a variable border offset. 
+	 * These should produce a multi-segment profile, but depending on the offset may
+	 * only have the default segment.
 	 * @throws Exception
 	 */
 	@Test
@@ -97,6 +129,11 @@ public class DatasetSegmentationMethodTest extends AbstractProfileMethodTest {
 	}
 	
 	
+	/**
+	 * This specific dataset caused an error during development. This test exists just to confirm that
+	 * the error is gone.
+	 * @throws Exception
+	 */
 	@Test
 	public void testSegmentationIsIndependentOfCellCountInVaryingDatasetWithKnownError() throws Exception {
 
@@ -107,7 +144,6 @@ public class DatasetSegmentationMethodTest extends AbstractProfileMethodTest {
 				.segmented().build();
 		testSegmentationIsConsistent(dataset);
 	}
-	
 	
 	/**
 	 * Test that increasing numbers of varying cells does not affect segment fitting.
@@ -133,7 +169,7 @@ public class DatasetSegmentationMethodTest extends AbstractProfileMethodTest {
 	/**
 	 * Test that increasing numbers of varying cells does not affect segment fitting.
 	 * The number of segments may change in variable dataset, since the median may become distorted,
-	 * but any segments found should be propogated to the cells.
+	 * but any segments found should be propagated to the cells.
 	 * 
 	 * This test ranges from variation of zero (identical cells) to 20 (highly variable dataset)
 	 * across up to 50 cells. 
@@ -170,7 +206,18 @@ public class DatasetSegmentationMethodTest extends AbstractProfileMethodTest {
 				.randomOffsetProfiles(false)
 				.segmented().build();
 		testSegmentationIsConsistent(dataset);
-		
+
+	}
+	
+	@Test
+	public void testSegmentationOfRealData() throws Exception {
+		File testFolder = TestResources.MOUSE_INPUT_FOLDER.getAbsoluteFile();
+    	IAnalysisOptions op = OptionsFactory.makeDefaultRodentAnalysisOptions(testFolder);
+    	
+    	IAnalysisDataset d = new NucleusDetectionMethod(TestResources.UNIT_TEST_FOLDER.getAbsoluteFile(), op).call().getFirstDataset();
+    	new DatasetProfilingMethod(d).call();    	
+    	new DatasetSegmentationMethod(d, MorphologyAnalysisMode.NEW).call();
+    	testSegmentationIsConsistent(d);
 	}
 
 }

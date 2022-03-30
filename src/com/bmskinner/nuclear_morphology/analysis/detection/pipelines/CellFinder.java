@@ -76,7 +76,7 @@ public abstract class CellFinder extends AbstractFinder<Collection<ICell>> {
     		} catch (ImageImportException e) {
     			LOGGER.log(Loggable.STACK, "Error searching image", e);
     		}
-    		LOGGER.fine("Found images in "+f.getName());
+    		LOGGER.finer("Found images in "+f.getName());
     	}
 
     	// Submitted to the FJP::commonPool, which is thread limited by the ThreadManger

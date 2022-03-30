@@ -69,8 +69,8 @@ public class IProfileTester {
 	 * @throws Exception 
 	 */
 	private static IProfile createInstance(Class<? extends IProfile> source, float[] data) throws Exception {		
-		if(source==FloatProfile.class)
-			return new FloatProfile(data);
+		if(source==DefaultProfile.class)
+			return new DefaultProfile(data);
 		
 		throw new Exception("Unable to create instance of "+source);
 	}
@@ -83,7 +83,7 @@ public class IProfileTester {
 		// we're making class references. The actual objects under test
 		// are created fresh from the appropriate class.
 		return Arrays.asList(
-				FloatProfile.class);
+				DefaultProfile.class);
 	}
 	
 	@Test
@@ -343,7 +343,7 @@ public class IProfileTester {
 	    
 	    float[] arr = interpolated.toFloatArray();
 	    arr[0] = arr[0]+diff;
-	    IProfile newProfile = new FloatProfile(arr);
+	    IProfile newProfile = new DefaultProfile(arr);
 	                 
         double expDiff = diff*diff;
         assertEquals(expDiff, template.absoluteSquareDifference(newProfile), 0.001);
@@ -366,7 +366,7 @@ public class IProfileTester {
 	    float[] arr = lengthened.toFloatArray();
 	    arr[0] = arr[0]+diff;
 	            
-	    IProfile differenced = new FloatProfile(arr);       
+	    IProfile differenced = new DefaultProfile(arr);       
         double expDiff = diff*diff;
 
         
@@ -760,7 +760,7 @@ public class IProfileTester {
 
 
 	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.profiles.IProfile#power(double)}.
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.profiles.IProfile#toPowerOf(double)}.
 	 */
 	@Test
 	public void testPower() {
@@ -771,7 +771,7 @@ public class IProfileTester {
 			exp[i] = (float) Math.pow(data[i],d);
 		}
 		
-		float[] result = profile.power(d).toFloatArray();
+		float[] result = profile.toPowerOf(d).toFloatArray();
 		
 		assertTrue( equals(exp, result) );
 	}
@@ -790,21 +790,6 @@ public class IProfileTester {
 		float[] result = p.absolute().toFloatArray();
 		
 		assertTrue( equals(exp, result) );
-	}
-
-	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.profiles.IProfile#cumulativeSum()}.
-	 */
-	@Test
-	public void testCumulativeSum() {
-		float[] exp = new float[data.length];
-		exp[0] = data[0];
-		for(int i=0, j=1; j<data.length; i++, j++){
-			exp[j] = data[j]+exp[i];
-		}
-		float[] result = profile.cumulativeSum().toFloatArray();
-		
-		assertTrue( equals(exp, result, 0.1f) );
 	}
 
 	/**
@@ -862,7 +847,7 @@ public class IProfileTester {
 	@Test
     public void testMultiplyProfileExceptsOnDifferentLength() {
         float[] f    = { 10, 10 };
-        IProfile p2 = new FloatProfile(f);
+        IProfile p2 = new DefaultProfile(f);
         exception.expect(IllegalArgumentException.class);
         profile.multiply(p2);
     }
@@ -933,7 +918,7 @@ public class IProfileTester {
 	@Test
     public void testDivideProfileExceptsOnDifferentLength() {
         float[] f    = { 10, 10 };
-        IProfile divider = new FloatProfile(f);
+        IProfile divider = new DefaultProfile(f);
         exception.expect(IllegalArgumentException.class);
         profile.divide(divider);
     }
@@ -942,7 +927,7 @@ public class IProfileTester {
     public void testDivideIProfileFailsOnSizeMismatch() {
 
         float[] div   = {1, 2, 0.5f, 3,  0.25f };
-        IProfile divider = new FloatProfile(div);
+        IProfile divider = new DefaultProfile(div);
         exception.expect(IllegalArgumentException.class);
         profile.divide(divider);
     }
@@ -971,7 +956,7 @@ public class IProfileTester {
 	@Test
 	public void testAddProfileExceptsOnDifferentLength() {
 	    float[] f    = { 10, 10 };
-	    IProfile p2 = new FloatProfile(f);
+	    IProfile p2 = new DefaultProfile(f);
 	    exception.expect(IllegalArgumentException.class);
 	    profile.add(p2);
 	}
@@ -1025,7 +1010,7 @@ public class IProfileTester {
 	@Test
     public void testSubtractProfileExceptsOnDifferentLength() {
         float[] f    = { 10, 10 };
-        IProfile p2 = new FloatProfile(f);
+        IProfile p2 = new DefaultProfile(f);
         exception.expect(IllegalArgumentException.class);
         profile.subtract(p2);
     }
@@ -1187,69 +1172,7 @@ public class IProfileTester {
 			prev = current;
 		}
 	}
-	
-	@Test
-	public void testNomaliseAmplitude(){
 		
-		IProfile result = profile.normaliseAmplitude(0, 100);
-		
-		double mid = profile.get(0.5);
-		
-		double scaled = (mid/(profile.getMax()-profile.getMin()))*100;
-		
-		assertEquals(0, result.getMin(), 0);
-		assertEquals(100, result.getMax(), 0);
-		assertEquals(scaled, result.get(0.5), 0.0001);
-	}
-	
-	@Test
-	public void testNomaliseAmplitudeExceptsOnNanMin(){
-		exception.expect(IllegalArgumentException.class);
-		profile.normaliseAmplitude(Double.NaN, 100);
-	}
-
-	@Test
-	public void testNomaliseAmplitudeExceptsOnNanMax(){
-		exception.expect(IllegalArgumentException.class);
-		profile.normaliseAmplitude(100, Double.NaN);
-	}
-
-	@Test
-	public void testNomaliseAmplitudeExceptsOnInfiniteMin(){
-		exception.expect(IllegalArgumentException.class);
-		profile.normaliseAmplitude(Double.POSITIVE_INFINITY, 100);
-	}
-
-	@Test
-	public void testNomaliseAmplitudeExceptsOnNegInfiniteMin(){
-		exception.expect(IllegalArgumentException.class);
-		profile.normaliseAmplitude(Double.NEGATIVE_INFINITY, 100);
-	}
-
-	@Test
-	public void testNomaliseAmplitudeExceptsOnInfiniteMax(){
-		exception.expect(IllegalArgumentException.class);
-		profile.normaliseAmplitude(100, Double.POSITIVE_INFINITY);
-	}
-
-	@Test
-	public void testNomaliseAmplitudeExceptsOnNegInfiniteMax(){
-		exception.expect(IllegalArgumentException.class);
-		profile.normaliseAmplitude(100, Double.NEGATIVE_INFINITY);
-	}
-	
-	@Test
-	public void testNomaliseAmplitudeExceptsMinGreaterThanMax(){
-		exception.expect(IllegalArgumentException.class);
-		profile.normaliseAmplitude(101, 100);
-	}
-	
-	@Test
-	public void testNomaliseAmplitudeExceptsMinEqualToMax(){
-		exception.expect(IllegalArgumentException.class);
-		profile.normaliseAmplitude(100, 100);
-	}
-	
 	@Test
 	public void testIteratorReturnsFullRange() {	
 		for(int i : profile) {

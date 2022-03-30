@@ -28,7 +28,7 @@ import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.SegmentedFloatProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.DefaultSegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 
 /**
@@ -122,7 +122,7 @@ public class TaggableTest {
 		ISegmentedProfile oldProfile = taggable.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
 		
 		// Make a duplicate for manipulation - note this will have the same segment pattern
-		ISegmentedProfile templateProfile = new SegmentedFloatProfile(oldProfile);
+		ISegmentedProfile templateProfile = new DefaultSegmentedProfile(oldProfile);
 		
 		// Set the profile of the object to the newly created profile
 		taggable.setSegments(templateProfile.getSegments());
@@ -152,7 +152,7 @@ public class TaggableTest {
 		ISegmentedProfile oldProfile = taggable.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
 		
 		// Make a duplicate for manipulation - note this will have only one segment
-		ISegmentedProfile templateProfile = new SegmentedFloatProfile(oldProfile.toFloatArray());
+		ISegmentedProfile templateProfile = new DefaultSegmentedProfile(oldProfile.toFloatArray());
 		
 		// Set the profile of the object to the newly created profile
 		taggable.setSegments(templateProfile.getSegments());
@@ -220,7 +220,7 @@ public class TaggableTest {
 		newSegs.add(new DefaultProfileSegment(profile.size()/2, 0, profile.size()));
 		IProfileSegment.linkSegments(newSegs);
 		
-		ISegmentedProfile newProfile = new SegmentedFloatProfile(profile, newSegs);
+		ISegmentedProfile newProfile = new DefaultSegmentedProfile(profile, newSegs);
 		
 		taggable.setSegments(newProfile.getSegments());
 		assertEquals(newProfile, taggable.getProfile(ProfileType.ANGLE));		

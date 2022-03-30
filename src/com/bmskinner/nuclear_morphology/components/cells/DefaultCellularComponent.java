@@ -82,12 +82,6 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     
     /** The lowest y position in the object bounding box */
     private final int yBase;
-    
-    /** The width of the object bounding box */
-    private final double width;
-    
-    /** The height of the object bounding box  */
-    private final double height;
 
     /** The current centre of the object. */
     private IPoint centreOfMass;
@@ -110,7 +104,6 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     /**
      * The length of a micron in pixels. Allows conversion between pixels and SI
      * units. Set to 1 by default.
-     * 
      * @see CellularComponent#setScale()
      */
     private double scale = CellularComponent.DEFAULT_SCALE;
@@ -119,6 +112,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     private final int[] xpoints; 
     private final int[] ypoints;
     
+    /** Whether the x and y points should be reversed when making the border */
     private boolean isReversed = false;
 
     /** The complete border list interpolated from the roi */
@@ -186,10 +180,6 @@ public abstract class DefaultCellularComponent implements CellularComponent {
         this.ypoints = Arrays.copyOfRange(polygon.ypoints, 0, polygon.npoints);
 
         makeBorderList();
-        
-        // Calculate width and height from the bounding box
-        this.width = getWidth();
-        this.height = getHeight();
     }
     
     /**
@@ -216,8 +206,6 @@ public abstract class DefaultCellularComponent implements CellularComponent {
         this.id = UUID.fromString(a.getID().toString());
         this.xBase = a.getXBase();
         this.yBase = a.getYBase();
-        this.width = a.getWidth();
-        this.height = a.getHeight();
         this.originalCentreOfMass = a.getOriginalCentreOfMass().duplicate();
         this.centreOfMass = a.getCentreOfMass().duplicate();
         this.sourceFile = new File(a.getSourceFile().getPath());
@@ -249,8 +237,6 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     	
     	this.xBase = Integer.parseInt(e.getChildText("XBase"));
         this.yBase = Integer.parseInt(e.getChildText("YBase"));
-        this.width = Double.parseDouble(e.getChildText("Width"));
-        this.height = Double.parseDouble(e.getChildText("Height"));
     	    	
     	String[] comString = e.getChildText("CentreOfMass").split(",");
     	centreOfMass = IPoint.makeNew(Float.parseFloat(comString[0]), Float.parseFloat(comString[1]));
@@ -270,6 +256,8 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     	
     	xpoints = XMLReader.parseIntArray(e.getChildText("xpoints"));
     	ypoints = XMLReader.parseIntArray(e.getChildText("ypoints"));
+    	
+    	isReversed = Boolean.valueOf(e.getChild("xpoints").getAttributeValue("isReversed"));
 
     	makeBorderList();
     }
@@ -281,8 +269,6 @@ public abstract class DefaultCellularComponent implements CellularComponent {
      * @param roi
      */
     private void makeBorderList() {
-
-    	LOGGER.finest(()->"Creating border list from "+xpoints.length+" integer points");
 
         // Make a copy of the int[] points otherwise creating a polygon roi
         // will reset them to 0,0 coordinates
@@ -611,7 +597,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 
         // Fast check - is the point within the bounding rectangle moved to the
         // original position?
-        Rectangle r = new Rectangle(xBase, yBase, (int)width, (int)height);
+        Rectangle r = new Rectangle(xBase, yBase, (int)getWidth(), (int)getHeight());
         if (!r.contains(x, y))
             return false;
         return this.toOriginalShape().contains(x, y);
@@ -710,7 +696,6 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 
     @Override
 	public void reverse() throws MissingComponentException, ProfileException {
-    	LOGGER.fine("Reversing component border list");
         isReversed = !isReversed;
         makeBorderList(); // Recreate the border list from the new key points
         
@@ -924,10 +909,6 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     	builder.append(String.format("Bounds: x: %s-%s y: %s-%s", this.getBase().getX(), this.getBase().getX()+
     			this.getWidth(), this.getBase().getY(), this.getBase().getY()+this.getHeight()));
     	builder.append(newLine);
-    	builder.append("Bounding height: "+height);
-    	builder.append(newLine);
-    	builder.append("Bounding width: "+width);
-    	builder.append(newLine);
     	builder.append("CoM: "+centreOfMass);
     	builder.append(newLine);
     	builder.append("Original CoM: "+originalCentreOfMass);
@@ -962,8 +943,6 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     	
     	e.addContent(new Element("XBase").setText(String.valueOf(xBase)));
     	e.addContent(new Element("YBase").setText(String.valueOf(yBase)));
-    	e.addContent(new Element("Width").setText(String.valueOf(width)));
-    	e.addContent(new Element("Height").setText(String.valueOf(height)));
     	    	
     	e.addContent(new Element("CentreOfMass").setText(centreOfMass.getX()+","+centreOfMass.getY()));
     	e.addContent(new Element("OriginalCentreOfMass").setText(originalCentreOfMass.getX()+","+originalCentreOfMass.getY()));
@@ -978,9 +957,9 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     	e.addContent(new Element("Channel").setText(String.valueOf(channel)));
     	e.addContent(new Element("Scale").setText(String.valueOf(scale)));
     	
-    	e.addContent(new Element("xpoints").setText(Arrays.toString(xpoints)));
-    	e.addContent(new Element("ypoints").setText(Arrays.toString(ypoints)));
-    	
+    	e.addContent(new Element("xpoints").setAttribute("isReversed", String.valueOf(isReversed))
+    			.setText(Arrays.toString(xpoints)));
+    	e.addContent(new Element("ypoints").setText(Arrays.toString(ypoints)));    	
     	return e;
 	}
         
@@ -1007,7 +986,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		result = prime * result
 				+ Objects.hash(centreOfMass, 
 						channel, id, originalCentreOfMass, 
-						scale, measurements, xBase, yBase, width, height);
+						scale, measurements, xBase, yBase);
 		return result;
 	}
 
@@ -1038,8 +1017,6 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 				&& Objects.equals(originalCentreOfMass, other.originalCentreOfMass)
 				&& Objects.equals(xBase, other.xBase)
 				&& Objects.equals(yBase, other.yBase)
-				&& Objects.equals(width, other.width)
-				&& Objects.equals(height, other.height)
 				&& Double.doubleToLongBits(scale) == Double.doubleToLongBits(other.scale)
 				&& Objects.equals(measurements, other.measurements)
 				&& Arrays.equals(xpoints, other.xpoints) 

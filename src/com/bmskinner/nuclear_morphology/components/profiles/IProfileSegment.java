@@ -442,7 +442,8 @@ public interface IProfileSegment extends XmlSerializable, Iterable<Integer> {
     int getPosition();
 
 
-    Iterator<Integer> iterator();
+    @Override
+	Iterator<Integer> iterator();
   
     /**
      * Get the full description of the segment
@@ -630,7 +631,10 @@ public interface IProfileSegment extends XmlSerializable, Iterable<Integer> {
     	if (segments.length == 0)
             throw new IllegalArgumentException("Cannot copy segments: segment list is empty");
     	IProfileSegment[] temp = copyWithoutLinking(segments);
-    	List<IProfileSegment> result = Arrays.asList(temp);
+    	List<IProfileSegment> result = new ArrayList<>();
+    	for(int i=0; i<temp.length; i++) {
+    		result.add(temp[i]);
+    	}
     	return linkSegments(result);
     }
     

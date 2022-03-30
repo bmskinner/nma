@@ -70,8 +70,8 @@ public class ISegmentedProfileTest {
 		Arrays.fill(data, 1);
 		
 		List<IProfileSegment> segments = makeTestSegments();
-		if(source==SegmentedFloatProfile.class)
-			return new SegmentedFloatProfile(new FloatProfile(data), segments);
+		if(source==DefaultSegmentedProfile.class)
+			return new DefaultSegmentedProfile(new DefaultProfile(data), segments);
 
 		throw new Exception("Unable to create instance of "+source);
 	}
@@ -93,7 +93,7 @@ public class ISegmentedProfileTest {
 		// we're making class references. The actual objects under test
 		// are created fresh from the appropriate class.
 		return Arrays.asList(
-				SegmentedFloatProfile.class);
+				DefaultSegmentedProfile.class);
 	}
 	
 	@Test

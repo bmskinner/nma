@@ -86,7 +86,7 @@ public class RulesetSaveDialog extends SettingsDialog {
 
         for(Entry<String, RuleSetCollection> entry : customCollections.entrySet() ) {
         	main.add(new JLabel(entry.getKey()), c);
-        	for(Landmark t : entry.getValue().getTags()) {
+        	for(Landmark t : entry.getValue().getLandmarks()) {
         		c.gridy++;
         		main.add(new RuleSetPanel(entry.getKey(), t), c);
 

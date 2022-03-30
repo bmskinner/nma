@@ -31,13 +31,13 @@ import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.measure.DoubleEquation;
 import com.bmskinner.nuclear_morphology.components.measure.LineEquation;
-import com.bmskinner.nuclear_morphology.components.profiles.FloatProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.DefaultProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.SegmentedFloatProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.DefaultSegmentedProfile;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 import com.bmskinner.nuclear_morphology.utility.AngleTools;
@@ -154,7 +154,7 @@ public class ProfileCreator {
         }
 
         // Make a new profile.
-        ISegmentedProfile newProfile = new SegmentedFloatProfile(angles);
+        ISegmentedProfile newProfile = new DefaultSegmentedProfile(angles);
 
         // Reapply any segments that were present in the original profile
         if (!segments.isEmpty()) {
@@ -232,7 +232,7 @@ public class ProfileCreator {
         }
         
         // Make a new profile. If possible, use the internal segmentation type of the component
-        return new SegmentedFloatProfile(profile);
+        return new DefaultSegmentedProfile(profile);
     }
 
     private static ISegmentedProfile calculateDiameterProfile(@NonNull Taggable target) throws UnavailableBorderPointException, ProfileException {
@@ -258,9 +258,9 @@ public class ProfileCreator {
         
         // Normalise to the the max diameter
         double max = Stats.max(profile);
-        IProfile p = new FloatProfile(profile);
+        IProfile p = new DefaultProfile(profile);
 
-        return new SegmentedFloatProfile(p.divide(max));
+        return new DefaultSegmentedProfile(p.divide(max));
     }
 
     private static ISegmentedProfile calculateRadiusProfile(@NonNull Taggable target) throws ProfileException {
@@ -278,8 +278,8 @@ public class ProfileCreator {
         
      // Normalise to the the max diameter
         double max = Stats.max(profile);
-        IProfile p = new FloatProfile(profile);
-        return new SegmentedFloatProfile(p.divide(max));
+        IProfile p = new DefaultProfile(profile);
+        return new DefaultSegmentedProfile(p.divide(max));
     }
 
     /**
@@ -311,7 +311,7 @@ public class ProfileCreator {
             profile[index] = (float) distance;
             index++;
         }
-        return new SegmentedFloatProfile(profile);
+        return new DefaultSegmentedProfile(profile);
     }
 
 }

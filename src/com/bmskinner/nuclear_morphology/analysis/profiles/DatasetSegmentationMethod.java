@@ -42,7 +42,7 @@ import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.SegmentedFloatProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.DefaultSegmentedProfile;
 
 /**
  * Run the segmentation of datasets. This allows for the median profile
@@ -246,7 +246,7 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 
 		ProfileSegmenter segmenter = new ProfileSegmenter(median);
 		List<IProfileSegment> segments = segmenter.segment();
-		return new SegmentedFloatProfile(median, segments);
+		return new DefaultSegmentedProfile(median, segments);
 	}
 	
 	/**

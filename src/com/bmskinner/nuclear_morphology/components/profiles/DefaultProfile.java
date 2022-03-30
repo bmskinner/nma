@@ -16,7 +16,6 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.profiles;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.stream.IntStream;
@@ -36,7 +35,7 @@ import com.bmskinner.nuclear_morphology.io.XmlSerializable;
  * @since 1.13.3
  *
  */
-public class FloatProfile implements IProfile {
+public class DefaultProfile implements IProfile {
 	
 	private static final String XML_PROFILE = "Profile";
 
@@ -47,7 +46,7 @@ public class FloatProfile implements IProfile {
      * 
      * @param values the array to use
      */
-    public FloatProfile(final float[] values) {
+    public DefaultProfile(final float[] values) {
 
         if (values==null || values.length == 0)
             throw new IllegalArgumentException("Input array has zero length in profile constructor");
@@ -60,9 +59,9 @@ public class FloatProfile implements IProfile {
      * 
      * @param p the profile to copy
      */
-    public FloatProfile(@NonNull final IProfile p) {
-    	if(p instanceof FloatProfile) {
-    		FloatProfile other = (FloatProfile)p;
+    public DefaultProfile(@NonNull final IProfile p) {
+    	if(p instanceof DefaultProfile) {
+    		DefaultProfile other = (DefaultProfile)p;
     		this.array = Arrays.copyOf(other.array,other.array.length);
     	} else {
     		this.array = p.toFloatArray();
@@ -76,7 +75,7 @@ public class FloatProfile implements IProfile {
      * @param value the value for the profile to hold at each index
      * @param length the length of the profile
      */
-    public FloatProfile(final float value, final int length) {
+    public DefaultProfile(final float value, final int length) {
 
         if (length < 1)
             throw new IllegalArgumentException("Profile length cannot be less than 1");
@@ -92,7 +91,7 @@ public class FloatProfile implements IProfile {
      * to the specification in {@link XmlSerializable}.
      * @param e the XML element containing the data.
      */
-    public FloatProfile(Element e) {
+    public DefaultProfile(Element e) {
     	String[] s = e.getText()
     			.replace("[", "")
     			.replace("]", "")
@@ -124,7 +123,7 @@ public class FloatProfile implements IProfile {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        FloatProfile other = (FloatProfile) obj;
+        DefaultProfile other = (DefaultProfile) obj;
         if (!Arrays.equals(array, other.array))
             return false;
         return true;
@@ -162,9 +161,6 @@ public class FloatProfile implements IProfile {
 
     @Override
     public int getIndexOfMax(@NonNull BooleanProfile limits) throws ProfileException {
-        
-        if(limits==null)
-            throw new IllegalArgumentException("Limits are cannot be null");
 
         if ( limits.size() != array.length)
             throw new IllegalArgumentException("Limits are wrong size for this profile");
@@ -224,9 +220,6 @@ public class FloatProfile implements IProfile {
 
     @Override
     public int getIndexOfMin(@NonNull BooleanProfile limits) throws ProfileException {
-        
-        if(limits==null)
-            throw new IllegalArgumentException("Limits are cannot be null");
 
         if (limits.size() != array.length)
             throw new IllegalArgumentException("Limits are wrong size for this profile");
@@ -271,30 +264,84 @@ public class FloatProfile implements IProfile {
     @Override
     public double absoluteSquareDifference(@NonNull IProfile testProfile) throws ProfileException {
 
-        double[] arr2 = testProfile.toDoubleArray();
+        float[] arr2 = testProfile.toFloatArray();
         if (array.length == arr2.length) 
-            return CellularComponent.squareDifference(this.toDoubleArray(), arr2);
+            return CellularComponent.squareDifference(array, arr2);
 
         // Lengthen the shorter profile
         if (array.length > arr2.length) {
-            arr2 = IProfile.interpolate(arr2, array.length);
-            return CellularComponent.squareDifference(this.toDoubleArray(), arr2);
+            arr2 = interpolate(arr2, array.length);
+            return CellularComponent.squareDifference(array, arr2);
         } else {
-        	double[] arr1 = IProfile.interpolate(this.toDoubleArray(), arr2.length);
+        	float[] arr1 = interpolate(array, arr2.length);
             return CellularComponent.squareDifference(arr1, arr2);
         }
     }
     
+	/**
+	 * Interpolate the array to the given length, and return as a new array
+	 * 
+	 * @param array2 the array to interpolate
+	 * @param length the new length
+	 * @return
+	 */
+    private static float[] interpolate(float[] array2, int length) {
+
+		float[] result = new float[length];
+
+		for (int i = 0; i < length; i++) {
+			float fraction = ((float) i / (float) length); // get the fractional index 
+			result[i] = getInterpolatedValue(array2, fraction);
+		}
+		return result;
+	}
+    
+	/**
+	 * Get the interpolated value at the given fraction along the given array
+	 * 
+	 * @param array2
+	 * @param fraction the fraction, from 0-1
+	 * @return
+	 */
+    private static float getInterpolatedValue(float[] array2, float fraction) {
+    	if(fraction==0)
+    		return array2[0];
+    	if(fraction==1)
+    		return array2[array2.length-1];
+    	
+    	double index = fraction * array2.length;
+		// Get the equivalent index of the fraction in the array
+    	int indexLower = (int)index;
+    	// Get the integer portion and find the bounding indices
+
+		if (indexLower == array2.length) // only wrap possible if fraction is range 0-1
+			indexLower = 0;
+
+		int indexHigher = indexLower + 1;
+		if (indexHigher == array2.length) // only wrap possible if fraction is range 0-1
+			indexHigher = 0;
+
+		
+		// Find the fraction between the indices
+		double diffFraction = index - indexLower;
+
+		// Calculate the linear interpolation
+		double interpolate = array2[indexLower] + ((array2[indexHigher] - array2[indexLower]) * diffFraction);
+
+		return (float) interpolate;
+
+	}
+    
     @Override
   	public double absoluteSquareDifference(@NonNull IProfile testProfile, int interpolationLength) throws ProfileException {
-  		float[] arr1 = IProfile.interpolate(array, interpolationLength);
-  		float[] arr2 = IProfile.interpolate(testProfile.toFloatArray(), interpolationLength);
+  		float[] arr1 = interpolate(array, interpolationLength);
+  		float[] arr2 = interpolate(testProfile.toFloatArray(), interpolationLength);
   		return CellularComponent.squareDifference(arr1, arr2);
   	}
 
     @Override
     public IProfile copy() throws ProfileException {
-        return new FloatProfile(this.array);
+        return new DefaultProfile(this.array);
     }
 
     @Override
@@ -303,7 +350,7 @@ public class FloatProfile implements IProfile {
         for (int i = 0; i < array.length; i++) {
             newArray[i] = array[wrapIndex(i + j)];
         }
-        return new FloatProfile(newArray);
+        return new DefaultProfile(newArray);
     }
 
     @Override
@@ -326,7 +373,7 @@ public class FloatProfile implements IProfile {
 
             result[i] = (float) (average / (windowSize*2 + 1));
         }
-        return new FloatProfile(result);
+        return new DefaultProfile(result);
     }
     
     
@@ -404,7 +451,7 @@ public class FloatProfile implements IProfile {
 			throw new IllegalArgumentException(String.format("New length %d below minimum %d",newLength,MINIMUM_PROFILE_LENGTH));
 		if(newLength == size())
 			return this;
-		return new FloatProfile(IProfile.interpolate(array, newLength));
+		return new DefaultProfile(interpolate(array, newLength));
 	}
 
   
@@ -417,7 +464,7 @@ public class FloatProfile implements IProfile {
 	public int findBestFitOffset(@NonNull IProfile testProfile, int minOffset, int maxOffset) throws ProfileException {
 		float[] test = testProfile.toFloatArray();  
 		if (array.length != test.length) 
-			test = IProfile.interpolate(test, array.length);
+			test = interpolate(test, array.length);
 		return CellularComponent.getBestFitOffset(array, test, minOffset, maxOffset);
 	}
 	
@@ -442,12 +489,8 @@ public class FloatProfile implements IProfile {
         // go through angle array (with tip at start)
         // look at 1-2-3-4-5 points ahead and behind.
         // if all greater, local minimum
-        double[] prevValues = new double[windowSize]; // slots for previous
-                                                      // angles
+        double[] prevValues = new double[windowSize]; // slots for previous angles
         double[] nextValues = new double[windowSize]; // slots for next angles
-
-        // int count = 0;
-        // List<Integer> result = new ArrayList<Integer>(0);
 
         boolean[] minima = new boolean[this.size()];
 
@@ -456,16 +499,8 @@ public class FloatProfile implements IProfile {
             // go through each lookup position and get the appropriate angles
             for (int j = 0; j < prevValues.length; j++) {
 
-                int prev_i = wrapIndex(i - (j + 1)); // the
-                                                                                    // index
-                                                                                    // j+1
-                                                                                    // before
-                                                                                    // i
-                int next_i = wrapIndex(i + (j + 1)); // the
-                                                                                    // index
-                                                                                    // j+1
-                                                                                    // after
-                                                                                    // i
+                int prev_i = wrapIndex(i - (j + 1));
+                int next_i = wrapIndex(i + (j + 1));
 
                 // fill the lookup array
                 prevValues[j] = array[prev_i];
@@ -494,19 +529,12 @@ public class FloatProfile implements IProfile {
             }
 
             if (ok) {
-                // count++;
                 minima[i] = true;
             } else {
                 minima[i] = false;
             }
-
-            // result.add(i);
-
         }
-        BooleanProfile minimaProfile = new BooleanProfile(minima);
-        // this.minimaCalculated = true;
-        // this.minimaCount = count;
-        return minimaProfile;
+        return new BooleanProfile(minima);
     }
 
     @Override
@@ -581,10 +609,7 @@ public class FloatProfile implements IProfile {
 
         float[] result = new float[windowSize * 2 + 1];
 
-        float[] prevValues = getValues(index, windowSize, IProfile.ARRAY_BEFORE); // slots
-                                                                                  // for
-                                                                                  // previous
-                                                                                  // angles
+        float[] prevValues = getValues(index, windowSize, IProfile.ARRAY_BEFORE);
         float[] nextValues = getValues(index, windowSize, IProfile.ARRAY_AFTER);
 
         // need to reverse the previous array
@@ -596,7 +621,7 @@ public class FloatProfile implements IProfile {
             result[windowSize + i + 1] = nextValues[i];
         }
 
-        return new FloatProfile(result);
+        return new DefaultProfile(result);
     }
 
     @Override
@@ -609,7 +634,7 @@ public class FloatProfile implements IProfile {
         if(indexStart < 0 || indexEnd < 0)
             throw new IllegalArgumentException(String.format("Start (%d) or end index (%d) is below zero", indexStart, indexEnd));
         if (indexStart < indexEnd) {
-            return new FloatProfile( Arrays.copyOfRange(array, indexStart, indexEnd+1) );
+            return new DefaultProfile( Arrays.copyOfRange(array, indexStart, indexEnd+1) );
 
         } else { // case when array wraps
 
@@ -625,16 +650,12 @@ public class FloatProfile implements IProfile {
                 result[index++] = d;
             }
 
-            return new FloatProfile(result);
+            return new DefaultProfile(result);
         }
     }
 
     @Override
     public IProfile getSubregion(@NonNull IProfileSegment segment) throws ProfileException {
-
-        if (segment == null)
-            throw new IllegalArgumentException("Segment is null");
-
         if (segment.getProfileLength() != array.length)
             throw new IllegalArgumentException("Segment comes from a different length profile");
         
@@ -669,17 +690,17 @@ public class FloatProfile implements IProfile {
 
             deltas[i] = delta;
         }
-        return new FloatProfile(deltas);
+        return new DefaultProfile(deltas);
     }
 
     @Override
-    public IProfile power(double exponent) {
+    public IProfile toPowerOf(double exponent) {
         float[] values = new float[this.size()];
 
         for (int i = 0; i < array.length; i++) {
             values[i] = (float) Math.pow(array[i], exponent);
         }
-        return new FloatProfile(values);
+        return new DefaultProfile(values);
     }
 
     @Override
@@ -689,19 +710,7 @@ public class FloatProfile implements IProfile {
         for (int i = 0; i < array.length; i++) {
             values[i] = Math.abs(array[i]);
         }
-        return new FloatProfile(values);
-    }
-
-    @Override
-    public IProfile cumulativeSum() {
-        float[] values = new float[this.size()];
-
-        float total = 0;
-        for (int i = 0; i < array.length; i++) {
-            total += array[i];
-            values[i] = total;
-        }
-        return new FloatProfile(values);
+        return new DefaultProfile(values);
     }
 
     @Override
@@ -716,11 +725,11 @@ public class FloatProfile implements IProfile {
         for (int i = 0; i < array.length; i++) { // for each position in sperm
             result[i] = (float) (array[i] * multiplier);
         }
-        return new FloatProfile(result);
+        return new DefaultProfile(result);
     }
 
     @Override
-    public IProfile multiply(IProfile multiplier) {
+    public IProfile multiply(@NonNull IProfile multiplier) {
         if (this.size() != multiplier.size()) {
             throw new IllegalArgumentException("Profile sizes do not match");
         }
@@ -729,7 +738,7 @@ public class FloatProfile implements IProfile {
         for (int i = 0; i < array.length; i++) { // for each position in sperm
             result[i] = (float) (array[i] * multiplier.get(i));
         }
-        return new FloatProfile(result);
+        return new DefaultProfile(result);
     }
 
     @Override
@@ -744,11 +753,11 @@ public class FloatProfile implements IProfile {
         for (int i = 0; i < array.length; i++) { // for each position in sperm
             result[i] = (float) (array[i] / divider);
         }
-        return new FloatProfile(result);
+        return new DefaultProfile(result);
     }
 
     @Override
-    public IProfile divide(IProfile divider) {
+    public IProfile divide(@NonNull IProfile divider) {
         if (this.size() != divider.size()) {
             throw new IllegalArgumentException("Profile sizes do not match");
         }
@@ -757,11 +766,11 @@ public class FloatProfile implements IProfile {
         for (int i = 0; i < array.length; i++) { // for each position in sperm
             result[i] = (float) (array[i] / divider.get(i));
         }
-        return new FloatProfile(result);
+        return new DefaultProfile(result);
     }
 
     @Override
-    public IProfile add(IProfile adder) {
+    public IProfile add(@NonNull IProfile adder) {
         if (this.size() != adder.size()) {
             throw new IllegalArgumentException("Profile sizes do not match");
         }
@@ -770,7 +779,7 @@ public class FloatProfile implements IProfile {
         for (int i = 0; i < array.length; i++) { // for each position in sperm
             result[i] = (float) (array[i] + adder.get(i));
         }
-        return new FloatProfile(result);
+        return new DefaultProfile(result);
     }
 
     @Override
@@ -783,11 +792,11 @@ public class FloatProfile implements IProfile {
         for (int i = 0; i < array.length; i++) { // for each position in sperm
             result[i] = (float) (array[i] + value);
         }
-        return new FloatProfile(result);
+        return new DefaultProfile(result);
     }
 
     @Override
-    public IProfile subtract(IProfile sub) {
+    public IProfile subtract(@NonNull IProfile sub) {
         if (this.size() != sub.size())
             throw new IllegalArgumentException("Profile sizes do not match");
 
@@ -796,7 +805,7 @@ public class FloatProfile implements IProfile {
         for (int i = 0; i < array.length; i++) { // for each position in sperm
             result[i] = (float) (array[i] - sub.get(i));
         }
-        return new FloatProfile(result);
+        return new DefaultProfile(result);
     }
     
     @Override
@@ -810,27 +819,8 @@ public class FloatProfile implements IProfile {
         for (int i = 0; i < array.length; i++) { // for each position in sperm
             result[i] = (float) (array[i] - value);
         }
-        return new FloatProfile(result);
+        return new DefaultProfile(result);
     }
-    
-	@Override
-	public IProfile normaliseAmplitude(double min, double max) {
-		if(Double.isNaN(min) || Double.isNaN(max) || Double.isInfinite(min) || Double.isInfinite(max))
-			throw new IllegalArgumentException("New range cannot be NaN or infinite");
-		if(min>=max)
-			throw new IllegalArgumentException("Min must be less than max in new amplitude");
-		
-		double oldMin = getMin();
-		double oldMax = getMax();
-		double newRange = max-min;
-		float[] result = new float[array.length];
-		
-		for (int i = 0; i < array.length; i++) {
-			result[i] = (float) (((array[i]/(oldMax-oldMin))*newRange)+min);
-		}
-		return new FloatProfile(result);
-	}
-
     
     @Override
     public String toString() {
@@ -841,16 +831,6 @@ public class FloatProfile implements IProfile {
         }
         return builder.toString();
     }
-    
-    private void writeObject(java.io.ObjectOutputStream out) throws IOException {
-        out.defaultWriteObject();
-    }
-
-    private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-        in.defaultReadObject();
-    }
-    
-    
 
 	@Override
 	public Element toXmlElement() {

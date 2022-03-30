@@ -67,23 +67,19 @@ public class ProfileIndexFinder {
      * @param rsc
      */
     public static void assignLandmarks(@NonNull Nucleus n, @NonNull RuleSetCollection rsc) {
-    	for(Landmark lm : rsc.getTags()) {
+    	for(Landmark lm : rsc.getLandmarks()) {
     		LOGGER.finer(()->"Locating "+lm);
     		
     		try {
     			for(RuleSet rule : rsc.getRuleSets(lm)) {
-//    				LOGGER.fine("Getting raw profile to find "+lm);
     				IProfile p = n.getProfile(rule.getType());
-//    				LOGGER.fine("Finding "+lm);
     				int index = identifyIndex(p, rule);
-//    				LOGGER.fine("Found "+lm+" at "+index);
     				n.setLandmark(lm, index);
-//    				LOGGER.fine("Set "+lm+" using rule to "+index);
     			}
     		} catch (MissingProfileException e) {
     			LOGGER.log(Loggable.STACK, "Error getting profile type", e);
     		} catch (NoDetectedIndexException e) {
-    			LOGGER.fine("Unable to detect "+lm+" in nucleus");
+    			LOGGER.finer("Unable to detect "+lm+" in nucleus");
     			try {
 					n.setLandmark(lm, 0);
 				} catch (IndexOutOfBoundsException | MissingProfileException | MissingLandmarkException
@@ -249,7 +245,7 @@ public class ProfileIndexFinder {
      */
     public static int identifyIndex(@NonNull final IProfile p, @NonNull final List<RuleSet> list) throws NoDetectedIndexException {
 
-        if (list == null || list.isEmpty())
+        if (list.isEmpty())
             throw new IllegalArgumentException(RULESET_EMPTY_ERROR);
 
         BooleanProfile indexes = new BooleanProfile(p, true);
@@ -306,7 +302,7 @@ public class ProfileIndexFinder {
     public static int identifyIndex(@NonNull final ICellCollection collection, @NonNull final List<RuleSet> list)
             throws NoDetectedIndexException {
 
-        if (list == null || list.isEmpty())
+        if (list.isEmpty())
             throw new IllegalArgumentException(RULESET_EMPTY_ERROR);
 
         BooleanProfile indexes = getMatchingProfile(collection, list);
@@ -327,7 +323,7 @@ public class ProfileIndexFinder {
      */
     public static BooleanProfile getMatchingProfile(@NonNull final ICellCollection collection, @NonNull final List<RuleSet> list) {
 
-        if (list == null || list.isEmpty())
+        if (list.isEmpty())
             throw new IllegalArgumentException(RULESET_EMPTY_ERROR);
 
         // Make a 'true' profile
@@ -695,12 +691,9 @@ public class ProfileIndexFinder {
     /**
      * Find the index of the minimum value in a profile
      * 
-     * @param p
-     *            the profile to test
-     * @param limits
-     *            the limits to apply to the profile
-     * @param b
-     *            should the test be for indexes that are minimum or are not
+     * @param p the profile to test
+     * @param limits the limits to apply to the profile
+     * @param b should the test be for indexes that are minimum or are not
      *            minumum
      * @return
      */
@@ -711,7 +704,7 @@ public class ProfileIndexFinder {
         try {
             index = p.getIndexOfMin(limits);
         } catch (ProfileException e) {
-            LOGGER.fine("No minimum index found");
+            LOGGER.finer("No minimum index found");
         }
 
         BooleanProfile result = new BooleanProfile(p, !b);

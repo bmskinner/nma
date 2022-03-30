@@ -51,7 +51,7 @@ import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.profiles.BooleanProfile;
-import com.bmskinner.nuclear_morphology.components.profiles.FloatProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.DefaultProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
@@ -755,7 +755,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
     	float[] result = new float[profile.size()];
     	for (int i = 0; i < profile.size(); i++) 
     		result[i] = (float) (profile.getFractionOfIndex(i) * newLength);
-    	return new FloatProfile(result);
+    	return new DefaultProfile(result);
     }
 
     /**

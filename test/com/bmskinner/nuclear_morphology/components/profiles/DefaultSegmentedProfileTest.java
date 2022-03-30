@@ -32,7 +32,6 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 
 /**
  * Tests for the methods specific to the segmented float profile. Common methods are
@@ -40,7 +39,7 @@ import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
  * @author bms41
  *
  */
-public class SegmentedFloatProfileTest {
+public class DefaultSegmentedProfileTest {
     
     // Ids for the test profile segments
     private static final String SEG_0 = "00000000-0000-0000-0000-000000000000";
@@ -98,8 +97,8 @@ public class SegmentedFloatProfileTest {
 	private ISegmentedProfile makeTestProfile() throws ProfileException{
 		
 		List<IProfileSegment> list = makeTestSegments();
-		IProfile profile = new FloatProfile(10, 100);
-		return new SegmentedFloatProfile(profile, list);
+		IProfile profile = new DefaultProfile(10, 100);
+		return new DefaultSegmentedProfile(profile, list);
 	}
 	
 	@Rule
@@ -123,9 +122,9 @@ public class SegmentedFloatProfileTest {
 	@Test
     public void testSegmentedFloatProfileIProfileListOfIBorderSegmentExceptsOnMismatchedProfileAndList() throws ProfileException {
         List<IProfileSegment> list = makeTestSegments();
-        IProfile profile = new FloatProfile(10, 110);
+        IProfile profile = new DefaultProfile(10, 110);
         exception.expect(IllegalArgumentException.class);
-        new SegmentedFloatProfile(profile, list);
+        new DefaultSegmentedProfile(profile, list);
     }
 
 	/**
@@ -135,7 +134,7 @@ public class SegmentedFloatProfileTest {
 	 */
 	@Test
 	public void testSegmentedFloatProfileISegmentedProfile() throws IndexOutOfBoundsException, ProfileException {
-	    ISegmentedProfile result = new SegmentedFloatProfile(sp);
+	    ISegmentedProfile result = new DefaultSegmentedProfile(sp);
 	    assertEquals(sp, result);
 	}
 	
@@ -145,8 +144,8 @@ public class SegmentedFloatProfileTest {
 	 */
 	@Test
 	public void testSegmentedFloatProfileIProfile() throws ProfileException {
-	    IProfile profile = new FloatProfile(10, 100);
-	    ISegmentedProfile p = new SegmentedFloatProfile(profile);
+	    IProfile profile = new DefaultProfile(10, 100);
+	    ISegmentedProfile p = new DefaultSegmentedProfile(profile);
 	    assertEquals(1, p.getSegmentCount());
 	    assertEquals("Single segment should have default id", IProfileCollection.DEFAULT_SEGMENT_ID, p.getSegments().get(0).getID());
 	}
@@ -161,7 +160,7 @@ public class SegmentedFloatProfileTest {
         for (int i = 0; i < array.length; i++) {
             array[i] = 10;
         }
-        ISegmentedProfile p = new SegmentedFloatProfile(array);
+        ISegmentedProfile p = new DefaultSegmentedProfile(array);
         
         for (int i = 0; i < array.length; i++) {
             assertEquals(array[i], p.get(i), 0);
@@ -183,8 +182,8 @@ public class SegmentedFloatProfileTest {
 			s.setLocked(true);
 		
 		// Make the profile
-		IProfile profile = new FloatProfile(10, 100);
-		ISegmentedProfile p = new SegmentedFloatProfile(profile, inputSegments);
+		IProfile profile = new DefaultProfile(10, 100);
+		ISegmentedProfile p = new DefaultSegmentedProfile(profile, inputSegments);
 		
 		List<IProfileSegment> outputSegments = p.getSegments();
 		for(int i=0; i<inputSegments.size(); i++) {
@@ -200,7 +199,7 @@ public class SegmentedFloatProfileTest {
 	@Test
     public void testSegmentedFloatProfileFloatArrayExceptsOnNullArray() throws ProfileException {
 	    exception.expect(IllegalArgumentException.class);
-        new SegmentedFloatProfile( (float[]) null);
+        new DefaultSegmentedProfile( (float[]) null);
     }
 	
 	@Test
@@ -244,7 +243,7 @@ public class SegmentedFloatProfileTest {
 	
 	@Test
 	public void testProfileIsCreatedWhenOnlyOneSegment() throws ProfileException {
-		SegmentedFloatProfile p = new SegmentedFloatProfile(new FloatProfile(10, 100));
+		DefaultSegmentedProfile p = new DefaultSegmentedProfile(new DefaultProfile(10, 100));
 		assertEquals(1, p.getSegmentCount());
 		assertEquals(0, p.getSegments().get(0).getStartIndex());
 		assertEquals(0, p.getSegments().get(0).getEndIndex());

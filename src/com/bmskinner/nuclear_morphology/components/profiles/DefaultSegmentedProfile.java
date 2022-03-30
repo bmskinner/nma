@@ -37,12 +37,12 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  * @since 1.13.3
  *
  */
-public class SegmentedFloatProfile extends FloatProfile implements ISegmentedProfile {
+public class DefaultSegmentedProfile extends DefaultProfile implements ISegmentedProfile {
 	
-	private static final Logger LOGGER = Logger.getLogger(SegmentedFloatProfile.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(DefaultSegmentedProfile.class.getName());
 
     // the segments
-    protected IProfileSegment[] segments = new IProfileSegment[0];
+    private IProfileSegment[] segments = new IProfileSegment[0];
 
     /**
      * Construct using a regular profile and a list of border segments
@@ -51,7 +51,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
      * @param segments the list of segments to use
      * @throws ProfileException
      */
-    public SegmentedFloatProfile(@NonNull final IProfile p, @NonNull final List<IProfileSegment> segments) throws ProfileException {
+    public DefaultSegmentedProfile(@NonNull final IProfile p, @NonNull final List<IProfileSegment> segments) throws ProfileException {
         super(p);
         if (segments.isEmpty())
             throw new IllegalArgumentException("Segment list is empty in segmented profile contructor");
@@ -75,7 +75,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
      * @throws ProfileException
      * @throws IndexOutOfBoundsException
      */
-    public SegmentedFloatProfile(@NonNull final ISegmentedProfile profile) throws IndexOutOfBoundsException, ProfileException {
+    public DefaultSegmentedProfile(@NonNull final ISegmentedProfile profile) throws IndexOutOfBoundsException, ProfileException {
         this(profile, profile.getSegments());
     }
 
@@ -86,7 +86,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
      * @param profile
      * @throws ProfileException 
      */
-    public SegmentedFloatProfile(@NonNull final IProfile profile) throws ProfileException {
+    public DefaultSegmentedProfile(@NonNull final IProfile profile) throws ProfileException {
         super(profile);
         segments = new IProfileSegment[1];
         segments[0] = IProfileSegment.newSegment(0, 0, profile.size(), IProfileCollection.DEFAULT_SEGMENT_ID);
@@ -100,8 +100,8 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
      * @throws ProfileException 
      * @throws Exception
      */
-    public SegmentedFloatProfile(float[] values) throws ProfileException {
-        this(new FloatProfile(values));
+    public DefaultSegmentedProfile(float[] values) throws ProfileException {
+        this(new DefaultProfile(values));
     }
 
     @Override
@@ -368,9 +368,8 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
          * make them line up.
          * 
          */        
-        ISegmentedProfile s = new SegmentedFloatProfile(offsetProfile, getSegments());
+        ISegmentedProfile s = new DefaultSegmentedProfile(offsetProfile, getSegments());
         s.moveSegments(-newStartIndex);
-//        LOGGER.fine("Getting profile post seg-offset: "+s);
         return s;        
     }
     
@@ -391,7 +390,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
         // No segments in profile or single default segment
         if(segments.length<=1) {
         	newSegs.add(new DefaultProfileSegment(0, 0, length, IProfileCollection.DEFAULT_SEGMENT_ID));
-        	return new SegmentedFloatProfile(newProfile, newSegs);
+        	return new DefaultSegmentedProfile(newProfile, newSegs);
         }
             	
 
@@ -473,7 +472,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 
         // assign new segments
         IProfileSegment.linkSegments(newSegs);
-        return new SegmentedFloatProfile(newProfile, newSegs);
+        return new DefaultSegmentedProfile(newProfile, newSegs);
     }
 
     /**
@@ -723,7 +722,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
     
     @Override
     public ISegmentedProfile copy() throws ProfileException {
-    	return new SegmentedFloatProfile(this);
+    	return new DefaultSegmentedProfile(this);
     }
 
 
@@ -743,7 +742,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
             return false;
         if (getClass() != obj.getClass())
             return false;
-        SegmentedFloatProfile other = (SegmentedFloatProfile) obj;
+        DefaultSegmentedProfile other = (DefaultSegmentedProfile) obj;
         if (segments == null) {
             if (other.segments != null)
                 return false;

@@ -23,7 +23,7 @@ import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.profiles.BooleanProfile;
-import com.bmskinner.nuclear_morphology.components.profiles.FloatProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.DefaultProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
@@ -80,7 +80,7 @@ public class DipTester implements SignificanceTest {
                 pvals[i] = (float) getDipTestPValue(values);
             }
 
-            resultProfile = new FloatProfile(pvals);
+            resultProfile = new DefaultProfile(pvals);
             resultProfile = resultProfile.startFrom(offset);
         } catch (ProfileException | MissingLandmarkException
                 | MissingProfileException e) {
@@ -96,7 +96,7 @@ public class DipTester implements SignificanceTest {
         for (int i = 0; i < 100; i++) {
             pvals[i] = 1;
         }
-        return new FloatProfile(pvals);
+        return new DefaultProfile(pvals);
     }
 
     /**

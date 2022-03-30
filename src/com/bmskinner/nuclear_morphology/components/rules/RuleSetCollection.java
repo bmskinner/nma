@@ -252,7 +252,11 @@ public class RuleSetCollection implements XmlSerializable {
         return map.get(tag);
     }
 
-    public Set<Landmark> getTags() {
+    /**
+     * Get the landmarks that are defined in this rule set collection
+     * @return
+     */
+    public Set<Landmark> getLandmarks() {
         return map.keySet();
     }
 
@@ -297,7 +301,7 @@ public class RuleSetCollection implements XmlSerializable {
     	rootElement.addContent(new Element(XML_NAME).addContent(getName()));
 		
     	// Add the landmark rule definitions 
-		for(Landmark t : getTags()) {
+		for(Landmark t : getLandmarks()) {
 			Element tagElement = new Element(XML_TAG);
 			tagElement.addContent(new Element(XML_NAME).setText(t.getName()));
 			tagElement.addContent(new Element(XML_TYPE).setText(t.type().toString()));

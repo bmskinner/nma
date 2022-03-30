@@ -296,8 +296,8 @@ public class RulesetDialog extends LoadingIconDialog
     	
     	// Custom tags
     	for(Entry<String, RuleSetCollection> entry : customCollections.entrySet()) {
-    		tagList.addAll(entry.getValue().getTags());
-    		tagCollection.addAll(entry.getValue().getTags().stream().map(t->entry.getKey()).collect(Collectors.toList()));
+    		tagList.addAll(entry.getValue().getLandmarks());
+    		tagCollection.addAll(entry.getValue().getLandmarks().stream().map(t->entry.getKey()).collect(Collectors.toList()));
     	}
     	
     	
@@ -394,14 +394,14 @@ public class RulesetDialog extends LoadingIconDialog
             
             // If the reference point is in the collection, handle it first
             // TODO: this will eventually cause threading issues with large datasets
-            if(rsc.getTags().contains(Landmark.REFERENCE_POINT)) {
+            if(rsc.getLandmarks().contains(Landmark.REFERENCE_POINT)) {
             	if(rsc.hasRulesets(Landmark.REFERENCE_POINT)) {
                     dataset.getCollection().getRuleSetCollection().setRuleSets(Landmark.REFERENCE_POINT, rsc.getRuleSets(Landmark.REFERENCE_POINT));
                     updateBorderTagAction(Landmark.REFERENCE_POINT);
                 }
             }
             
-            for (Landmark tag : rsc.getTags()) {
+            for (Landmark tag : rsc.getLandmarks()) {
             	if(tag.equals(Landmark.REFERENCE_POINT))
             		continue;
             	LOGGER.fine("Testing existence of tag "+tag);

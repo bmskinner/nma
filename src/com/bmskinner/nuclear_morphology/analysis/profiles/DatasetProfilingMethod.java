@@ -42,6 +42,7 @@ import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileExcept
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.components.rules.RuleApplicationType;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSet;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 /**
@@ -54,7 +55,7 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
  */
 public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 	
-	private static final Logger LOGGER = Logger.getLogger(DatasetProfilingMethod.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(Loggable.PROJECT_LOGGER);
 
 	public static final int RECALCULATE_MEDIAN = 0;
 	
@@ -136,7 +137,7 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 		
 		
 		// For each tag in the dataset ruleset collection, identify the tag in nuclei
-		Set<Landmark> tags = collection.getRuleSetCollection().getTags();
+		Set<Landmark> tags = collection.getRuleSetCollection().getLandmarks();
 		
 		for(Landmark t : tags) {
 			if(Landmark.REFERENCE_POINT.equals(t)) // Already set
@@ -226,34 +227,36 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 		// RP index *should be* zero in the median profile at this point
 		// Check this before updating nuclei
 		int rpIndex = ProfileIndexFinder.identifyIndex(collection, Landmark.REFERENCE_POINT);
-		LOGGER.finer( "RP in default median is located at index " + rpIndex);
+		LOGGER.fine( "RP in default median is located at index " + rpIndex);
 
 		// Offset the median profile to place the RP at zero
 		// This does not affect the actual median profile
 		IProfile templateProfile = median.startFrom(rpIndex);
 
 		// Using the template we created, update the position of the RP 
-		// in the nuclei. 
+		// in each nucleus. 
 		collection.getProfileManager()
-		.updateTagToMedianBestFit(Landmark.REFERENCE_POINT, ProfileType.ANGLE, templateProfile);
+		.updateLandmarkToMedianBestFit(Landmark.REFERENCE_POINT, ProfileType.ANGLE, templateProfile);
 
 		// Regenerate the profile aggregates based on the new RP positions
 		// This should create a new median profile with the RP at zero
-		collection.getProfileManager().recalculateProfileAggregates();
+//		collection.getProfileManager().recalculateProfileAggregates();
+		collection.createProfileCollection();
 
 		// Test if the recalculated profile aggregate naturally puts the RP at zero
 		rpIndex = ProfileIndexFinder.identifyIndex(collection, Landmark.REFERENCE_POINT);
-
+		LOGGER.fine( "RP in recalculated median is located at index " + rpIndex);
+		
 		int coercionCounter = 0;
 		while (rpIndex != 0 && coercionCounter++<MAX_COERCION_ATTEMPTS) {
 //			LOGGER.fine("Coercing RP to zero, round " + coercionCounter);
 			rpIndex = coerceRPToZero(collection);
 		}
-		
-		
+
 		if(coercionCounter==MAX_COERCION_ATTEMPTS && rpIndex!=0)
 			LOGGER.fine("Unable to coerce RP to index zero");
-
+		
+		LOGGER.fine( "Best RP in final median is located at index " + rpIndex);
 	}
 
 	/**
@@ -265,48 +268,29 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 	 * @throws MissingProfileException
 	 * @throws ProfileException
 	 */
-	private synchronized void identifyOtherLandmarks(ICellCollection collection) throws NoDetectedIndexException, MissingLandmarkException, MissingProfileException, ProfileException {
+	private synchronized void identifyOtherLandmarks(ICellCollection collection) throws MissingLandmarkException, MissingProfileException, ProfileException, NoDetectedIndexException {
 		// Identify the border tags in the median profile
-		for(Landmark tag : Landmark.defaultValues()) {
-
-			// Don't identify the RP again, it could cause off-by-one errors
-			// We do need to assign the RP in other ProfileTypes though
-			if (tag.equals(Landmark.REFERENCE_POINT)) {
-
-//				LOGGER.fine("Checking location of RP in profile");
-				int index = ProfileIndexFinder.identifyIndex(collection, tag);
-//				LOGGER.fine("RP in collection is at index " + index);
+		
+		// Which landmarks do we care about? Those defined in the dataset options.
+		Set<Landmark> lms = dataset.getAnalysisOptions().get().getRuleSetCollection().getLandmarks();
+		
+		for(Landmark lm : lms) {
+			// Don't identify the RP again
+			if (Landmark.REFERENCE_POINT.equals(lm)) {
 				continue;
 			}
 
-			int index = 0;
-
-			try {
-				index = ProfileIndexFinder.identifyIndex(collection, tag);
-			} catch (NoDetectedIndexException e) {
-				LOGGER.warning("Unable to detect " + tag + " using default ruleset");
-
-				if (tag.type().equals(LandmarkType.CORE)) {
-					LOGGER.warning("Falling back on reference point");
-				}
-				continue;
-			} catch (IllegalArgumentException e) {
-				LOGGER.finer("No ruleset for " + tag + "; skipping");
-				continue;
-			}
+			int index = ProfileIndexFinder.identifyIndex(collection, lm);
 
 			// Add the index to the median profiles
-			collection.getProfileManager().updateProfileCollectionOffsets(tag, index);
+			collection.getProfileManager().updateProfileCollectionOffsets(lm, index);
 
-//			LOGGER.fine(tag + " in median is located at index " + index);
-
-			// Create a median from the current reference points in the
-			// nuclei
-			IProfile tagMedian = collection.getProfileCollection().getProfile(ProfileType.ANGLE, tag,
+			// Create a median from the current landmark
+			IProfile lmMedian = collection.getProfileCollection().getProfile(ProfileType.ANGLE, lm,
 					Stats.MEDIAN);
 
-			collection.getProfileManager().updateTagToMedianBestFit(tag, ProfileType.ANGLE, tagMedian);
-//			LOGGER.fine("Assigned offset in nucleus profiles for " + tag);
+			// Find the best position for the landmark in each nucleus
+			collection.getProfileManager().updateLandmarkToMedianBestFit(lm, ProfileType.ANGLE, lmMedian);
 		}
 	}
 
@@ -323,23 +307,26 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 
 		// check the RP index in the median
 		int rpIndex = ProfileIndexFinder.identifyIndex(collection, Landmark.REFERENCE_POINT);
-//		LOGGER.fine("RP in median is located at index " + rpIndex);
 
 		// If RP is not at zero, update
 		if (rpIndex != 0) {
-			
-//			LOGGER.fine("RP in median is not yet at zero");
 			IProfile median = collection.getProfileCollection()
 					.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);
+			
+			// Get the median offset to the better start index
 			IProfile templateProfile = median.startFrom(rpIndex);
+			
 			// Update the offsets in the profile collection to the new RP
-			collection.getProfileManager().updateTagToMedianBestFit(Landmark.REFERENCE_POINT, ProfileType.ANGLE, templateProfile);
-			collection.getProfileManager().recalculateProfileAggregates();
+			collection.getProfileManager().updateLandmarkToMedianBestFit(Landmark.REFERENCE_POINT, ProfileType.ANGLE, templateProfile);
+			
+			// At this stage we don't need to preserve the profile collection
+			// becuase there are no other saved landmarks
+			collection.createProfileCollection();
+//			collection.getProfileManager().recalculateProfileAggregates();
 
 			// Find the effects of the offsets on the RP
 			// It should be found at zero
 			rpIndex = ProfileIndexFinder.identifyIndex(collection, Landmark.REFERENCE_POINT);
-//			LOGGER.fine("RP in median is now located at index " + rpIndex);
 		}
 
 		return rpIndex;

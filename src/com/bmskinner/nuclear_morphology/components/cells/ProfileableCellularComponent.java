@@ -50,7 +50,7 @@ import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.LandmarkType;
 import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.SegmentedFloatProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.DefaultSegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.UnprofilableObjectException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -75,7 +75,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
     protected double windowProportion = IAnalysisOptions.DEFAULT_WINDOW_PROPORTION;
     
     /** The segmentation pattern for the object */
-    private List<IProfileSegment> segments = new ArrayList<>();
+    private final List<IProfileSegment> segments = new ArrayList<>();
 
     /** The indexes of landmarks in the profiles and border list */
     protected Map<Landmark, Integer> profileLandmarks = new HashMap<>();
@@ -150,7 +150,10 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 
     		try {
     			profileMap.put(type, comp.getProfile(type).copy());
-    			segments = comp.getProfile(type).startFrom(-comp.getBorderIndex(Landmark.REFERENCE_POINT)).getSegments();
+    			segments.clear();
+    			segments.addAll(comp.getProfile(type)
+    					.startFrom(-comp.getBorderIndex(Landmark.REFERENCE_POINT))
+    					.getSegments());
     		} catch (MissingProfileException e) {
     			// not present in this profile; possibly a deprecated type; ignore and continue
     		} catch (ProfileException e) {
@@ -333,7 +336,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
     	int oldRP = profileLandmarks.get(lm);
     	
     	// This profile has segments starting from the old RP
-    	ISegmentedProfile p = new SegmentedFloatProfile(profileMap.get(ProfileType.ANGLE), segments);
+    	ISegmentedProfile p = new DefaultSegmentedProfile(profileMap.get(ProfileType.ANGLE), segments);
     	
     	/*
     	 * There is at least one segment starting at the original RP index.
@@ -438,7 +441,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
         int lmIndex = profileLandmarks.get(lm);
                 
         // Get the raw profile
-        ISegmentedProfile profile = new SegmentedFloatProfile(profileMap.get(type), segments);
+        ISegmentedProfile profile = new DefaultSegmentedProfile(profileMap.get(type), segments);
         
         // offset the profile to start at the desired landmark
         return profile.startFrom(lmIndex);
@@ -482,9 +485,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 
     	// Note that this action can alter the interpolated
     	// perimeter length, invalidating any existing segments
-    	// TODO: account for this
     	super.reverse();
-    	LOGGER.fine("Reversing component border");
 
     	// Recreate profiles for new outline
     	ISegmentedProfile oldAngleProfile = this.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
@@ -498,7 +499,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
     	// Profile length may have changed, we need to adjust the segmentation pattern
     	// Reverse the copied angle profile, and fit it to the new angle profile
     	oldAngleProfile.reverse();
-    	ISegmentedProfile newAngleProfile = SegmentFitter.fit(oldAngleProfile, new SegmentedFloatProfile(profileMap.get(ProfileType.ANGLE)));
+    	ISegmentedProfile newAngleProfile = SegmentFitter.fit(oldAngleProfile, new DefaultSegmentedProfile(profileMap.get(ProfileType.ANGLE)));
 
     	segments.clear();
     	for(IProfileSegment s : newAngleProfile.getSegments()) {
@@ -507,9 +508,16 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
     	IProfileSegment.linkSegments(segments);
 
     	// Update positions of landmarks
-    	// These should remain within 1 or 2 indexes of the original location
-    	// even after perimeters have changed length
+
+    	// The RP needs to be moved to the first segment start index
+    	this.profileLandmarks.put(Landmark.REFERENCE_POINT, segments.get(0).getStartIndex());
+    	
+    	// Other landmarks are usually not set at the point we reverse borders
+    	// BUT if they are present find the best guess given that the border 
+    	// length may have changed
     	for (Entry<Landmark, Integer> entry : profileLandmarks.entrySet()) {
+    		if(Landmark.REFERENCE_POINT.equals(entry.getKey()))
+    			continue;
     		int index = entry.getValue();
 
     		// if was 0, will be  <length-1>; if

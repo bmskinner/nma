@@ -338,7 +338,6 @@ public class TestImageDatasetCreator {
     	
     	// Check each cell    	
     	for(ICell dCell : d.getCollection()) {
-    		System.out.println("Testing cell "+dCell.getId()+": "+dCell.getPrimaryNucleus().getNameAndNumber());
     		ICell tCell = t.getCollection().getCell(dCell.getId());
         	ComponentTester.testDuplicatesByField(dCell, tCell);
     	}

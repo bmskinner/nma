@@ -171,7 +171,7 @@ public class DefaultProfileAggregate implements IProfileAggregate {
             x += profileIncrement;
             result[i] = x;
         }
-        return new FloatProfile(result);
+        return new DefaultProfile(result);
     }
 
     /*
@@ -207,7 +207,7 @@ public class DefaultProfileAggregate implements IProfileAggregate {
             float[] values = getValuesAtIndex(i);
             medians[i] = Stats.quartile(values, quartile);
         }
-        return new FloatProfile(medians);
+        return new DefaultProfile(medians);
     }
 
     @Override

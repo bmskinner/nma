@@ -29,7 +29,9 @@ public class DatasetCreator {
 	public static IAnalysisDataset createRoot(Element e) throws ComponentCreationException {
 		IAnalysisDataset d = new DefaultAnalysisDataset(e);
 		try {
-			d.getCollection().createProfileCollection();
+//			 Why do we do this when we have the profile collection saved?
+			int pLength = d.getCollection().getProfileCollection().getSegmentContaining(0).getProfileLength();
+			d.getCollection().createProfileCollection(pLength);
 			
 			for(IAnalysisDataset c : d.getAllChildDatasets()) {
 				int length = c.getCollection().getProfileCollection().getSegmentContaining(0).getProfileLength();

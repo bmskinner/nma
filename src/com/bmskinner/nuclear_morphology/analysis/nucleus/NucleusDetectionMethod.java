@@ -180,8 +180,8 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
      */
     private List<IAnalysisDataset> analysePopulations() {
 
-        LOGGER.fine("Creating cell collections");
-        LOGGER.fine(templateOptions.toString());
+        LOGGER.finer("Creating cell collections");
+        LOGGER.finer(templateOptions.toString());
         List<IAnalysisDataset> foundDatasets = new ArrayList<>();
 
         for (final Entry<File, ICellCollection> entry : collectionGroup.entrySet()) {
@@ -221,7 +221,7 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
      * @param folder the folder of images to be analysed
      */
     protected void processFolder(@NonNull final File folder) {
-        LOGGER.fine("Searching "+folder.getAbsolutePath());
+        LOGGER.finer("Searching "+folder.getAbsolutePath());
         File[] arr = folder.listFiles();
         if (arr == null)
             return;
@@ -250,7 +250,7 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
             if (!cells.isEmpty() && !outputFolder.exists()) 
             	outputFolder.mkdir();
             fc.addAll(cells);
-            LOGGER.fine((()->"Detected "+cells.size()+" nuclei in "+folder.getAbsolutePath()));
+            LOGGER.finer((()->"Detected "+cells.size()+" nuclei in "+folder.getAbsolutePath()));
         } catch (ImageImportException e) {
             LOGGER.log(Loggable.STACK, "Error searching folder", e);
         }

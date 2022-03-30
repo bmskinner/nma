@@ -66,7 +66,7 @@ public class ProfileManager {
      * Update the given tag in each nucleus of the collection to the index with
      * a best fit of the profile to the given median profile
      * 
-     * @param tag the tag to fit
+     * @param lm the landmark to fit
      * @param type the profile type to fit against
      * @param median the template profile to offset against
      * @throws ProfileException 
@@ -74,7 +74,7 @@ public class ProfileManager {
      * @throws MissingLandmarkException 
      * @throws  
      */
-    public void updateTagToMedianBestFit(@NonNull Landmark tag, 
+    public void updateLandmarkToMedianBestFit(@NonNull Landmark lm, 
     		@NonNull ProfileType type,
     		@NonNull IProfile median) throws MissingProfileException, ProfileException, MissingLandmarkException {
     	
@@ -82,14 +82,15 @@ public class ProfileManager {
     		if(n.isLocked())
     			continue;
     		
-    		// Find positive offset index of this profile which best
-    		// matches the median profile
-    		int newIndex = n.getProfile(type).findBestFitOffset(median);
+    		// Get the nucleus profile starting at the landmark
+    		// Find the best offset needed to make it match the median profile
+    		int offset = n.getProfile(type, lm).findBestFitOffset(median);
     		
-    		n.setLandmark(tag, newIndex);
+    		// Update the landmark position to the original index plus the offset
+    		n.setLandmark(lm, n.wrapIndex(n.getBorderIndex(lm)+offset));
     		
     		// Update any stats that are based on orientation
-            if (tag.equals(Landmark.TOP_VERTICAL) || tag.equals(Landmark.BOTTOM_VERTICAL)) {
+            if (lm.equals(Landmark.TOP_VERTICAL) || lm.equals(Landmark.BOTTOM_VERTICAL)) {
                 n.updateDependentStats();
                 setOpUsingTvBv(n);
             }
@@ -155,8 +156,8 @@ public class ProfileManager {
         			.getProfile(ProfileType.ANGLE, 
         					Landmark.BOTTOM_VERTICAL,
         					Stats.MEDIAN);
-        updateTagToMedianBestFit(Landmark.TOP_VERTICAL, ProfileType.ANGLE, topMedian);
-        updateTagToMedianBestFit(Landmark.BOTTOM_VERTICAL, ProfileType.ANGLE, btmMedian);
+        updateLandmarkToMedianBestFit(Landmark.TOP_VERTICAL, ProfileType.ANGLE, topMedian);
+        updateLandmarkToMedianBestFit(Landmark.BOTTOM_VERTICAL, ProfileType.ANGLE, btmMedian);
 
         LOGGER.fine("Updated nuclei");
     }
@@ -281,7 +282,7 @@ public class ProfileManager {
         IProfile median = collection.getProfileCollection().getProfile(ProfileType.ANGLE, tag, Stats.MEDIAN);
 
         LOGGER.finer( "Updating tag in nuclei");
-        updateTagToMedianBestFit(tag, ProfileType.ANGLE, median);
+        updateLandmarkToMedianBestFit(tag, ProfileType.ANGLE, median);
 
         /*
          * Set the border tag in the consensus median profile
@@ -361,7 +362,7 @@ public class ProfileManager {
     	// This is the median we will use to update individual nuclei
     	ISegmentedProfile newMedian = oldMedian.startFrom(newRpIndex);
 
-    	updateTagToMedianBestFit(Landmark.REFERENCE_POINT, ProfileType.ANGLE, newMedian);
+    	updateLandmarkToMedianBestFit(Landmark.REFERENCE_POINT, ProfileType.ANGLE, newMedian);
     	
     	// Rebuild the profile aggregate in the collection
     	collection.getProfileCollection().createProfileAggregate(collection, collection.getMedianArrayLength());

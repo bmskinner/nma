@@ -485,8 +485,8 @@ public class DefaultBorderSegmentTest {
 		/*
 		 * Can the profile be offset and still have segments adjusted?
 		 */
-		IProfile profile = new FloatProfile(10, 100);
-		ISegmentedProfile sp = new SegmentedFloatProfile(profile, list);
+		IProfile profile = new DefaultProfile(10, 100);
+		ISegmentedProfile sp = new DefaultSegmentedProfile(profile, list);
 	}
 	
 	/**
