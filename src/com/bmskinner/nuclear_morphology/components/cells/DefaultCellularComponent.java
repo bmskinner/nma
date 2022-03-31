@@ -223,6 +223,8 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 
         this.xpoints = Arrays.copyOf(other.xpoints, other.xpoints.length);
         this.ypoints = Arrays.copyOf(other.ypoints, other.ypoints.length);
+        this.isReversed = a.isReversed();
+
         makeBorderList();
     }
     
@@ -501,6 +503,11 @@ public abstract class DefaultCellularComponent implements CellularComponent {
         // Offset to the original position
         return IPoint.makeNew(originalCentreOfMass.getX() + diffX,
                 originalCentreOfMass.getY() + diffY);
+    }
+    
+    @Override
+    public boolean isReversed() {
+    	return isReversed;
     }
 
     @Override

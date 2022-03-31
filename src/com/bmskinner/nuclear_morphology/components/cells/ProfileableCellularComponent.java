@@ -272,7 +272,8 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
     	int borderIndex = this.getBorderIndex(tag);
 
     	if (borderIndex < 0 || borderIndex >= this.getBorderLength())
-    		throw new MissingLandmarkException(String.format("No tag '%s'; registered as index %s", tag, borderIndex));
+    		throw new MissingLandmarkException(String.format("Landmark '%s' saved at index %s is not within profile (length %s)", 
+    				tag, borderIndex, this.getBorderLength()));
 
     	return getBorderPoint(borderIndex);
     }

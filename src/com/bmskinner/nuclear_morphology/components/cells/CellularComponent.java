@@ -186,6 +186,12 @@ public interface CellularComponent extends Imageable, XmlSerializable,
     List<IPoint> getOriginalBorderList() throws UnavailableBorderPointException;
     
     /**
+     * Test if the border list is calculated in reverse orientation 
+     * @return
+     */
+    boolean isReversed();
+    
+    /**
      * Get the integer roi positions used to create the object before smoothing and interpolation
      * @return an array with two elements:  the x coordinate array, and the y coordinate array
      */

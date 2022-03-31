@@ -95,7 +95,12 @@ public class ShellCount implements XmlSerializable {
      * @return
      */
     public long sum(int shell){
-        return results.values().stream().mapToLong(a->a[shell]).sum();
+    	int l = 0;
+    	for(long[] a : results.values()) {
+    		l += a[shell];
+    	}
+    	return l;
+//        return results.values().stream().mapToLong(a->a[shell]).sum();
     }
     
     /**
@@ -166,15 +171,20 @@ public class ShellCount implements XmlSerializable {
     
     @Override
     public String toString(){
-        StringBuilder b = new StringBuilder("Shells : "+results.size()+"\n");
+        StringBuilder b = new StringBuilder("ShellKeys : "+results.size()+"\n");
         b.append("Size : "+size()+"\n");
-        b.append("Keys :\n");
-        for(ShellKey k :keys()){
-            b.append(k+"\n");
+//        b.append("Keys :\n");
+//        for(ShellKey k :keys()){
+//            b.append(k+"\n");
+//        }
+        
+        for(Entry<ShellKey, long[]> e : results.entrySet()) {
+        	b.append("Key: "+e.getKey()+"\n");
+            for(int i=0; i<e.getValue().length; i++){
+                b.append("Shell "+i+": "+sum(i)+"\n");
+           }
         }
-        for(int i=0; i<results.size(); i++){
-             b.append("Shell "+i+": "+sum(i)+"\n");
-        }
+
        return b.toString();
     }
 

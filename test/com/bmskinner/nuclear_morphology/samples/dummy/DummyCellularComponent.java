@@ -386,4 +386,9 @@ public class DummyCellularComponent implements CellularComponent {
 		
 	}
 
+	@Override
+	public boolean isReversed() {
+		return component.isReversed();
+	}
+
 }
