@@ -78,7 +78,7 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
     private PriorityAxis priorityAxis = PriorityAxis.Y;
     
     /** FISH signals in the nucleus */
-    protected ISignalCollection signalCollection = new DefaultSignalCollection();
+    private ISignalCollection signalCollection = new DefaultSignalCollection();
     
     /**
      * Construct from an XML element. Use for 

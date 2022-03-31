@@ -179,9 +179,9 @@ public class DefaultCellCollection implements ICellCollection {
 			cells.add(new DefaultCell(el));
 		
 		
-		for(Element el : e.getChildren("SignalGroup"))
+		for(Element el : e.getChildren("SignalGroup")) {
 			signalGroups.add(new DefaultSignalGroup(el));
-
+		}
 		ruleSets = new RuleSetCollection(e.getChild("RuleSetCollection"));
 	}
 	
@@ -319,9 +319,6 @@ public class DefaultCellCollection implements ICellCollection {
 
 	@Override
 	public void replaceCell(@NonNull ICell r) {
-		if (r == null)
-			throw new IllegalArgumentException("Cell is null");
-
 		boolean found = false;
 		Iterator<ICell> it = cells.iterator();
 		while (it.hasNext()) {

@@ -68,8 +68,8 @@ public class DefaultSignalGroup implements ISignalGroup {
     public DefaultSignalGroup(@NonNull Element e) throws ComponentCreationException {    	
     	id = UUID.fromString(e.getAttributeValue("id"));
     	groupName = e.getAttributeValue("name");
-    	isVisible = Boolean.parseBoolean(e.getChildText("IsVisible"));
-    	groupColour = Color.decode(e.getChildText("Colour"));
+    	isVisible = Boolean.parseBoolean(e.getAttributeValue("isVisible"));
+    	groupColour = Color.decode(e.getAttributeValue("colour"));
 
     	if(e.getChild("ShellResult")!=null)
     		shellResult = new DefaultShellResult(e.getChild("ShellResult"));
@@ -81,17 +81,19 @@ public class DefaultSignalGroup implements ISignalGroup {
 
 	@Override
 	public Element toXmlElement() {
-		Element e = new Element("SignalGroup").setAttribute("id", id.toString()).setAttribute("name", groupName);
-		e.addContent(new Element("IsVisible").setText(String.valueOf(isVisible)));
+		Element e = new Element("SignalGroup")
+				.setAttribute("id", id.toString())
+				.setAttribute("name", groupName)
+				.setAttribute("isVisible", String.valueOf(isVisible));
 		
 		if(groupColour!=null)
-			e.addContent(new Element("Colour").setText(String.valueOf(groupColour.getRGB())));
+		e = e.setAttribute("colour", String.valueOf(groupColour.getRGB()));
 		
 		if(shellResult!=null)
-			e.addContent(shellResult.toXmlElement().setAttribute("id", id.toString()));
+			e = e.addContent(shellResult.toXmlElement().setAttribute("id", id.toString()));
 		
 		if(warpedSignals!=null)
-			e.addContent(warpedSignals.toXmlElement());
+			e = e.addContent(warpedSignals.toXmlElement());
 
 		return e;
 	} 
@@ -195,12 +197,26 @@ public class DefaultSignalGroup implements ISignalGroup {
 
     @Override
     public String toString() {
-        return groupName;
+    	StringBuilder sb = new StringBuilder();
+    	sb.append(groupName+"\n")
+    	.append(groupColour+"\n")
+    	.append(id.toString()+"\n")
+    	.append(isVisible+"\n")
+    	.append(shellResult+"\n")
+    	.append(warpedSignals);
+        return sb.toString();
     }
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(groupColour, groupName, id, isVisible, shellResult, warpedSignals);
+		final int prime = 31;
+		int result = Objects.hash(groupName, id, isVisible);
+		result = prime * result + ((groupColour == null) ? 0 : groupColour.hashCode());
+		result = prime * result + ((shellResult == null) ? 0 : shellResult.hashCode());
+		result = prime * result + ((warpedSignals == null) ? 0 : warpedSignals.hashCode());
+		
+		return result;
+//		return Objects.hash(groupColour, groupName, id, isVisible, shellResult, warpedSignals);
 	}
 
 	@Override
@@ -212,9 +228,12 @@ public class DefaultSignalGroup implements ISignalGroup {
 		if (getClass() != obj.getClass())
 			return false;
 		DefaultSignalGroup other = (DefaultSignalGroup) obj;
-		return Objects.equals(groupColour, other.groupColour) && Objects.equals(groupName, other.groupName)
-				&& Objects.equals(id, other.id) && isVisible == other.isVisible
-				&& Objects.equals(shellResult, other.shellResult) && Objects.equals(warpedSignals, other.warpedSignals);
+		return Objects.equals(groupColour, other.groupColour) 
+				&& Objects.equals(groupName, other.groupName)
+				&& Objects.equals(id, other.id) 
+				&& isVisible == other.isVisible
+				&& Objects.equals(shellResult, other.shellResult) 
+				&& Objects.equals(warpedSignals, other.warpedSignals);
 	}
     
 	

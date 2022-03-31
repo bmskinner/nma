@@ -172,12 +172,8 @@ public class ShellCount implements XmlSerializable {
     @Override
     public String toString(){
         StringBuilder b = new StringBuilder("ShellKeys : "+results.size()+"\n");
+        b.append("ShellCount hash: "+hashCode());
         b.append("Size : "+size()+"\n");
-//        b.append("Keys :\n");
-//        for(ShellKey k :keys()){
-//            b.append(k+"\n");
-//        }
-        
         for(Entry<ShellKey, long[]> e : results.entrySet()) {
         	b.append("Key: "+e.getKey()+"\n");
             for(int i=0; i<e.getValue().length; i++){
@@ -193,7 +189,11 @@ public class ShellCount implements XmlSerializable {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + Objects.hash(results);
+		for(Entry<ShellKey, long[]> e : results.entrySet()) {
+			result = prime * result + e.getKey().hashCode();
+			result = prime * result + Arrays.hashCode(e.getValue());
+		}
+		
 		return result;
 	}
 
@@ -209,6 +209,10 @@ public class ShellCount implements XmlSerializable {
 		ShellCount other = (ShellCount) obj;
 		if(results.size()!=other.results.size())
 			return false;
+		
+		if(hashCode()!=other.hashCode())
+			return false;
+		
 		
 		for(Entry<ShellKey, long[]> e : results.entrySet()) {
 			if(!other.results.containsKey(e.getKey()))

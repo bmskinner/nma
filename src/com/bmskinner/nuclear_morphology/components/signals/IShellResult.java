@@ -33,7 +33,7 @@ import com.bmskinner.nuclear_morphology.io.XmlSerializable;
  * @since 1.13.3
  *
  */
-public interface IShellResult extends Serializable, XmlSerializable {
+public interface IShellResult extends XmlSerializable {
     
     UUID RANDOM_SIGNAL_ID = UUID.fromString("00000000-0000-0000-0000-000000000000");
     

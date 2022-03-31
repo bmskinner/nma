@@ -84,15 +84,13 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
         this.channel = options.getInt(HashOptions.CHANNEL);
 
         // Create a signal group in the dataset
-
         ISignalGroup group = new DefaultSignalGroup(options.getString(HashOptions.SIGNAL_GROUP_NAME), 
         		options.getUUID(HashOptions.SIGNAL_GROUP_ID));
-        
-        dataset.getCollection().addSignalGroup(group);
-
         // Set the default colour for the signal group
         Color colour = ColourSelecter.getSignalColour(options.getInt(HashOptions.CHANNEL));
         group.setGroupColour(colour);
+        
+        dataset.getCollection().addSignalGroup(group);
 
         dataset.getAnalysisOptions().get().setNuclearSignalDetectionOptions(options);
     }
@@ -140,26 +138,28 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
         try {
 
             List<INuclearSignal> signals = finder.findInImage(imageFile, n);
+            
+            // No need to add a group to a nucleus if there were no signals
+            if(!signals.isEmpty()) {
 
-            ISignalCollection signalCollection = n.getSignalCollection();
-            signalCollection.addSignalGroup(signals, 
-            		options.getUUID(HashOptions.SIGNAL_GROUP_ID),
-            		imageFile, 
-            		channel);
+            	ISignalCollection signalCollection = n.getSignalCollection();
+            	signalCollection.addSignalGroup(signals, 
+            			options.getUUID(HashOptions.SIGNAL_GROUP_ID));
 
-            // Measure the detected signals in the nucleus
-            SignalAnalyser s = new SignalAnalyser();
-            s.calculateSignalDistancesFromCoM(n);
-            s.calculateFractionalSignalDistancesFromCoM(n);
+            	// Measure the detected signals in the nucleus
+            	SignalAnalyser s = new SignalAnalyser();
+            	s.calculateSignalDistancesFromCoM(n);
+            	s.calculateFractionalSignalDistancesFromCoM(n);
 
-            LOGGER.finer("Calculating signal angles");
+            	LOGGER.finer("Calculating signal angles");
 
-            if (n.hasLandmark(Landmark.ORIENTATION_POINT)) {
-            	n.calculateSignalAnglesFromPoint(n.getBorderPoint(Landmark.ORIENTATION_POINT));
-            } else {
-            	n.calculateSignalAnglesFromPoint(n.getBorderPoint(Landmark.REFERENCE_POINT));
+            	if (n.hasLandmark(Landmark.ORIENTATION_POINT)) {
+            		n.calculateSignalAnglesFromPoint(n.getBorderPoint(Landmark.ORIENTATION_POINT));
+            	} else {
+            		n.calculateSignalAnglesFromPoint(n.getBorderPoint(Landmark.REFERENCE_POINT));
+            	}
+
             }
-
         } catch (ImageImportException | UnavailableBorderPointException | MissingLandmarkException e) {
             LOGGER.warning("Cannot open " + imageFile.getAbsolutePath());
             LOGGER.log(Loggable.STACK, "Cannot load image", e);

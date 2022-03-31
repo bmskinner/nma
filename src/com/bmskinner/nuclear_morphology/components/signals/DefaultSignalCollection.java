@@ -17,7 +17,6 @@
 package com.bmskinner.nuclear_morphology.components.signals;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -58,8 +57,6 @@ public class DefaultSignalCollection implements ISignalCollection {
 	
 	private static final Logger LOGGER = Logger.getLogger(DefaultSignalCollection.class.getName());
 	
-    private static final long serialVersionUID = 1L;
-
     /** Holds the signals */
     private Map<UUID, List<INuclearSignal>> collection = new LinkedHashMap<>();
 
@@ -131,11 +128,7 @@ public class DefaultSignalCollection implements ISignalCollection {
 	}
     
     @Override
-    public void addSignalGroup(@NonNull List<INuclearSignal> list, @NonNull UUID groupID, @NonNull File sourceFile, int sourceChannel) {
-        if (list == null || Integer.valueOf(sourceChannel) == null || sourceFile == null || groupID == null) {
-            throw new IllegalArgumentException("Signal list or channel is null");
-        }
-
+    public void addSignalGroup(@NonNull List<INuclearSignal> list, @NonNull UUID groupID) {
         collection.put(groupID, list);
     }
 
@@ -158,9 +151,6 @@ public class DefaultSignalCollection implements ISignalCollection {
 
     @Override
     public void addSignal(@NonNull INuclearSignal n, @NonNull UUID signalGroup) {
-        if (signalGroup == null)
-            throw new IllegalArgumentException("Group is null");
-
         if (collection.get(signalGroup) == null) {
             List<INuclearSignal> list = new ArrayList<>();
             collection.put(signalGroup, list);
@@ -169,13 +159,7 @@ public class DefaultSignalCollection implements ISignalCollection {
     }
 
     @Override
-    public void addSignals(@NonNull List<INuclearSignal> list, @NonNull UUID signalGroup) {
-        if (list == null)
-            throw new IllegalArgumentException("Signal is null");
-
-        if (signalGroup == null)
-            throw new IllegalArgumentException("Group is null");
-        
+    public void addSignals(@NonNull List<INuclearSignal> list, @NonNull UUID signalGroup) {        
         collection.get(signalGroup).addAll(list);
     }
 
@@ -248,9 +232,6 @@ public class DefaultSignalCollection implements ISignalCollection {
 
     @Override
     public boolean hasSignal(@NonNull UUID signalGroup) {
-        if (signalGroup == null) {
-            throw new IllegalArgumentException("Signal group is null");
-        }
         if (!collection.containsKey(signalGroup)) {
             return false;
         }
@@ -266,47 +247,24 @@ public class DefaultSignalCollection implements ISignalCollection {
         return !collection.isEmpty();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.ISignalCollection#numberOfSignals(java.util.UUID)
-     */
+
     @Override
     public int numberOfSignals(@NonNull UUID signalGroup) {
-        if (signalGroup == null)
-            return 0;
         if (this.hasSignal(signalGroup))
             return collection.get(signalGroup).size();
 		return 0;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.ISignalCollection#removeSignals()
-     */
     @Override
     public void removeSignals() {
         collection = new LinkedHashMap<UUID, List<INuclearSignal>>();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.ISignalCollection#removeSignals(java.util.UUID)
-     */
     @Override
     public void removeSignals(@NonNull UUID signalGroup) {
         collection.remove(signalGroup);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * components.nuclear.ISignalCollection#getStatistics(stats.SignalStatistic,
-     * components.generic.MeasurementScale, java.util.UUID)
-     */
     @Override
     public List<Double> getStatistics(@NonNull Measurement stat, MeasurementScale scale, @NonNull UUID signalGroup) {
         List<INuclearSignal> list = getSignals(signalGroup);
@@ -317,16 +275,8 @@ public class DefaultSignalCollection implements ISignalCollection {
         return result;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.ISignalCollection#getImage(java.util.UUID)
-     */
     @Override
     public ImageProcessor getImage(@NonNull final UUID signalGroup) throws UnloadableImageException {
-
-        if (signalGroup == null)
-            throw new UnloadableImageException("Signal group is null");
 
         File f = this.getSourceFile(signalGroup);
 
@@ -462,7 +412,8 @@ public class DefaultSignalCollection implements ISignalCollection {
      * @param id2  the second signal group
      * @return a list of the pixel distances between paired signals
      */
-    public List<Colocalisation<INuclearSignal>> calculateColocalisation(@NonNull UUID id1, @NonNull UUID id2) {
+    @Override
+	public List<Colocalisation<INuclearSignal>> calculateColocalisation(@NonNull UUID id1, @NonNull UUID id2) {
 
         if (id1.equals(id2)) {
             throw new IllegalArgumentException("Signal IDs are the same");
@@ -553,14 +504,6 @@ public class DefaultSignalCollection implements ISignalCollection {
             b.append("\n");
         }
         return b.toString();
-    }
-
-    private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-        in.defaultReadObject();
-    }
-
-    private void writeObject(java.io.ObjectOutputStream out) throws IOException {
-        out.defaultWriteObject();
     }
 
 	@Override

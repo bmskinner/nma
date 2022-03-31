@@ -44,7 +44,6 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
  */
 public class DefaultShellResult implements IShellResult {
     
-	private static final long serialVersionUID = 1L;
 	private final int nShells;
 	private final ShrinkType type;
 	private final Map<CountType, ShellCount> map = new EnumMap<>(CountType.class);    
@@ -309,12 +308,15 @@ public class DefaultShellResult implements IShellResult {
     @Override
     public String toString(){
     	StringBuilder sb = new StringBuilder();
+    	sb.append("Shell result hash: "+hashCode()+"\n");
+    	sb.append("Shrink type: "+type+"\n")
+    	.append("nShells: "+nShells+"\n");
     	for(CountType t : CountType.values()){
     		sb.append(t +"\n"+map.get(t).toString());
     	}
-        return sb.toString();
+    	return sb.toString();
     }
-    
+
     
     
     @Override

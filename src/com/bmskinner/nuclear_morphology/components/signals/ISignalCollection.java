@@ -40,7 +40,7 @@ import ij.process.ImageProcessor;
  * @since 1.13.3
  *
  */
-public interface ISignalCollection extends Serializable, XmlSerializable {
+public interface ISignalCollection extends XmlSerializable {
 	
 	/**
 	 * Create a copy of this collection
@@ -53,10 +53,8 @@ public interface ISignalCollection extends Serializable, XmlSerializable {
      * 
      * @param list the signals
      * @param groupID the group id - this should be consistent across all nuclei in a dataset
-     * @param sourceFile the file the signals originated from
-     * @param sourceChannel the channel the signals originated from
      */
-    void addSignalGroup(@NonNull List<INuclearSignal> list, @NonNull UUID groupID, @NonNull File sourceFile, int sourceChannel);
+    void addSignalGroup(@NonNull List<INuclearSignal> list, @NonNull UUID groupID);
 
     /**
      * Get the signal group ids within the dataset

@@ -91,14 +91,17 @@ import com.bmskinner.nuclear_morphology.io.XmlSerializable;
     
     @Override
     public String toString(){
-        return signalId==null ? cellId.toString()+"_"+componentId.toString() : cellId.toString()+"_"+componentId.toString()+"_"+signalId.toString();
+        return signalId==null ? cellId.toString()+"_"+componentId.toString() + "Hash: "+hashCode()
+        : cellId.toString()+"_"+componentId.toString()+"_"+signalId.toString() + "Hash: "+hashCode();
     }
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + Objects.hash(cellId, componentId, signalId);
+		result = prime * result + ((cellId == null) ? 0 : cellId.hashCode());
+		result = prime * result + ((componentId == null) ? 0 : componentId.hashCode());
+		result = prime * result + ((signalId == null) ? 0 : signalId.hashCode());
 		return result;
 	}
 
@@ -111,7 +114,8 @@ import com.bmskinner.nuclear_morphology.io.XmlSerializable;
 		if (getClass() != obj.getClass())
 			return false;
 		ShellKey other = (ShellKey) obj;
-		return Objects.equals(cellId, other.cellId) && Objects.equals(componentId, other.componentId)
+		return Objects.equals(cellId, other.cellId) 
+				&& Objects.equals(componentId, other.componentId)
 				&& Objects.equals(signalId, other.signalId);
 	}
 
