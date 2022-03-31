@@ -23,6 +23,7 @@ import com.bmskinner.nuclear_morphology.analysis.image.MultiScaleStructuralSimil
 import com.bmskinner.nuclear_morphology.analysis.image.MultiScaleStructuralSimilarityIndex.MSSIMScore;
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalWarper;
 import com.bmskinner.nuclear_morphology.charting.charts.ConsensusNucleusChartFactory;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
@@ -196,7 +197,7 @@ implements SignalWarpingDisplayListener,
 		ThreadManager.getInstance().submit(task);
 	}
 	
-	public void deleteWarpedSignal(WarpedImageKey selectedKey) {
+	public void deleteWarpedSignal(WarpedImageKey selectedKey) throws MissingLandmarkException {
 				
 		ISignalGroup sg  = selectedKey.getTemplate().getCollection().getSignalGroup(selectedKey.getSignalGroupId()).get();
 		
@@ -212,7 +213,7 @@ implements SignalWarpingDisplayListener,
 		model.removeRow(selectedKey);
 	}
 	
-	public void deleteWarpedSignal(int row) {
+	public void deleteWarpedSignal(int row) throws MissingLandmarkException {
 		WarpedImageKey selectedKey = model.getKey(row);
 		deleteWarpedSignal(selectedKey);		
 	}
@@ -445,26 +446,30 @@ implements SignalWarpingDisplayListener,
 			List<Nucleus> targets, 
 			Color colour, String imageName) {
 				
-		for(Nucleus target : targets) {
-			// Don't move the existing template
-			target = target.duplicate();
-			target.orient(); // ensure rotation is valid
-			
-			// Centre the outline on the canvas
-			int wBuffer = (int)Math.round(ip.getWidth()-target.getWidth())/2;
-			int hBuffer = (int)Math.round(ip.getHeight()-target.getHeight())/2;
-			LOGGER.fine("Buffer: "+wBuffer+"w "+hBuffer+"h");
+		try {
+			for(Nucleus target : targets) {
+				// Don't move the existing template
+				target = target.duplicate();
+				target.orient(); // ensure rotation is valid
 
-			// CoM starts at 0, 0; offset to image coordinates
-			target.moveCentreOfMass(IPoint.makeNew(
-					Math.abs(target.getMinX())+wBuffer, 
-					Math.abs(target.getMinY())+hBuffer));
-			ip.setColor(colour);
+				// Centre the outline on the canvas
+				int wBuffer = (int)Math.round(ip.getWidth()-target.getWidth())/2;
+				int hBuffer = (int)Math.round(ip.getHeight()-target.getHeight())/2;
+				LOGGER.fine("Buffer: "+wBuffer+"w "+hBuffer+"h");
 
-			// Draw the border
-			for(IPoint p : target.getBorderList()) {
-				ip.drawDot(p.getXAsInt(), p.getYAsInt());
+				// CoM starts at 0, 0; offset to image coordinates
+				target.moveCentreOfMass(IPoint.makeNew(
+						Math.abs(target.getMinX())+wBuffer, 
+						Math.abs(target.getMinY())+hBuffer));
+				ip.setColor(colour);
+
+				// Draw the border
+				for(IPoint p : target.getBorderList()) {
+					ip.drawDot(p.getXAsInt(), p.getYAsInt());
+				}
 			}
+		} catch(MissingLandmarkException e) {
+			LOGGER.warning("Error getting consensus nucleus");
 		}
 		
 		// Y-coordinates in images increase top to bottom

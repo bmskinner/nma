@@ -134,7 +134,7 @@ public class DummyRodentSpermNucleus extends DummyCellularComponent implements N
 	}
 
 	@Override
-	public Nucleus getOrientedNucleus() {
+	public Nucleus getOrientedNucleus() throws MissingLandmarkException {
 		return nucleus.getOrientedNucleus();
 	}
 

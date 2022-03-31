@@ -28,12 +28,14 @@ import com.bmskinner.nuclear_morphology.components.Statistical;
 import com.bmskinner.nuclear_morphology.components.Taggable;
 import com.bmskinner.nuclear_morphology.components.UnavailableBorderPointException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.cells.DefaultCell;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
+import com.bmskinner.nuclear_morphology.gui.RotationMode;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
@@ -88,24 +90,31 @@ public final class ComponentMeasurer {
 			return Statistical.INVALID_OBJECT_TYPE;
 
 		Nucleus n = (Nucleus)t;
+		
+		try {
 
-		if (Measurement.ELLIPTICITY.equals(m))
-			return calculateEllipticity(n);
+			if (Measurement.ELLIPTICITY.equals(m))
+				return calculateEllipticity(n);
 
-		if (Measurement.ASPECT.equals(m))
-			return calculateAspect(n);
+			if (Measurement.ASPECT.equals(m))
+				return calculateAspect(n);
 
-		if (Measurement.ELONGATION.equals(m))
-			return calculateElongation(n);
+			if (Measurement.ELONGATION.equals(m))
+				return calculateElongation(n);
 
-		if (Measurement.REGULARITY.equals(m))
-			return calculateRegularity(n);
+			if (Measurement.REGULARITY.equals(m))
+				return calculateRegularity(n);
 
-		if (Measurement.BOUNDING_HEIGHT.equals(m))
-			return  n.getOrientedNucleus().getHeight();
+			if (Measurement.BOUNDING_HEIGHT.equals(m))
+				return  n.getOrientedNucleus().getHeight();
 
-		if (Measurement.BOUNDING_WIDTH.equals(m))
-			return  n.getOrientedNucleus().getWidth();
+			if (Measurement.BOUNDING_WIDTH.equals(m))
+				return  n.getOrientedNucleus().getWidth();
+			
+		} catch(MissingLandmarkException e) {
+			LOGGER.log(Loggable.STACK, "Error getting consensus", e);
+			return Statistical.ERROR_CALCULATING_STAT;
+		}
 
 		if (Measurement.BODY_WIDTH.equals(m))
 			return calculateBodyWidth(n);
@@ -237,8 +246,9 @@ public final class ComponentMeasurer {
 	/**
 	 * Calculate the elongation of the object 
 	 * @return
+	 * @throws MissingLandmarkException 
 	 */
-	private static double calculateElongation(@NonNull final Nucleus n) {
+	private static double calculateElongation(@NonNull final Nucleus n) throws MissingLandmarkException {
 		double h = n.getOrientedNucleus().getHeight();
 		double w = n.getOrientedNucleus().getWidth();
 		return (h-w)/(h+w);
@@ -248,8 +258,9 @@ public final class ComponentMeasurer {
 	/**
 	 * Calculate the regularity of the object 
 	 * @return
+	 * @throws MissingLandmarkException 
 	 */
-	private static double calculateRegularity(@NonNull final Nucleus n) {
+	private static double calculateRegularity(@NonNull final Nucleus n) throws MissingLandmarkException {
 		double h = n.getOrientedNucleus().getHeight();
 		double w = n.getOrientedNucleus().getWidth();
 		double a = n.getStatistic(Measurement.AREA);
@@ -259,16 +270,18 @@ public final class ComponentMeasurer {
 	/**
 	 * Calculate the aspect of the object 
 	 * @return
+	 * @throws MissingLandmarkException 
 	 */
-	private static double calculateAspect(@NonNull final Nucleus n) {
+	private static double calculateAspect(@NonNull final Nucleus n) throws MissingLandmarkException {
 		return 1d/calculateEllipticity(n);
 	}
 
 	/**
 	 * Calculate the ellipticity of the object 
 	 * @return
+	 * @throws MissingLandmarkException 
 	 */
-	private static double calculateEllipticity(@NonNull final Nucleus n) {
+	private static double calculateEllipticity(@NonNull final Nucleus n) throws MissingLandmarkException {
 		double h = n.getOrientedNucleus().getHeight();
 		double w = n.getOrientedNucleus().getWidth();
 
@@ -286,9 +299,10 @@ public final class ComponentMeasurer {
 			return Statistical.MISSING_LANDMARK;
 		}
 
-		// Get the oriented nucleus
-		Nucleus t = n.getOrientedNucleus();
+
 		try {
+			// Get the oriented nucleus
+			Nucleus t = n.getOrientedNucleus();
 			double vertX = t.getBorderPoint(Landmark.TOP_VERTICAL).getX();
 
 
@@ -315,12 +329,10 @@ public final class ComponentMeasurer {
 			return Statistical.MISSING_LANDMARK;
 		}
 
-		// Get the oriented nucleus
-		Nucleus t = n.getOrientedNucleus();
 		try {
+			// Get the oriented nucleus
+			Nucleus t = n.getOrientedNucleus();
 			double vertX = t.getBorderPoint(Landmark.TOP_VERTICAL).getX();
-
-
 
 			/* Find the x values in the bounding box of the vertical nucleus.  */
 			FloatPolygon p = t.toPolygon();

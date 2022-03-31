@@ -36,8 +36,9 @@ public interface Orientable {
      * the landmarks and priorities defined by the rulesets
      * used when creating the nucleus. This affects this object
      * and does not create a copy.
+     * @throws MissingLandmarkException 
      */
-    void orient();
+    void orient() throws MissingLandmarkException;
     
     /**
      * Get the axis of priority for orientation

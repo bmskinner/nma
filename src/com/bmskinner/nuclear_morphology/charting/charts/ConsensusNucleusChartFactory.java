@@ -37,6 +37,7 @@ import com.bmskinner.nuclear_morphology.charting.datasets.AbstractDatasetCreator
 import com.bmskinner.nuclear_morphology.charting.datasets.ChartDatasetCreationException;
 import com.bmskinner.nuclear_morphology.charting.datasets.NucleusDatasetCreator;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
@@ -122,7 +123,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
         		Mesh mesh = new DefaultMesh(options.firstDataset().getCollection().getConsensus(),
         				options.getMeshSize());
         		return new OutlineChartFactory(options).createMeshChart(mesh, 0.5);
-        	} catch (ChartCreationException | MeshCreationException e) {
+        	} catch (ChartCreationException | MeshCreationException | MissingLandmarkException e) {
         		LOGGER.log(Loggable.STACK, "Error making mesh chart", e);
         		return createErrorChart();
         	}
@@ -163,7 +164,12 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
     		if (!dataset.getCollection().hasConsensus())
     			return createTextAnnotatedEmptyChart(MULTIPLE_DATASETS_NO_CONSENSUS_ERROR);
 
-    		component = dataset.getCollection().getConsensus();
+    		try {
+				component = dataset.getCollection().getConsensus();
+			} catch (MissingLandmarkException e) {
+				LOGGER.log(Loggable.STACK, "Error creating outline", e);
+				return createErrorChart();
+			}
     	}
 
         XYDataset ds;
@@ -210,7 +216,12 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
     		if (!dataset.getCollection().hasConsensus())
     			return createTextAnnotatedEmptyChart(MULTIPLE_DATASETS_NO_CONSENSUS_ERROR);
 
-    		component = dataset.getCollection().getConsensus();
+    		try {
+				component = dataset.getCollection().getConsensus();
+			} catch (MissingLandmarkException e) {
+				LOGGER.log(Loggable.STACK, "Error creating outline", e);
+				return createErrorChart();
+			}
     	}
 
         XYDataset ds;
@@ -273,8 +284,9 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
      * The minimum returned value will be 1. Checks the range for each dataset's consensus nucleus.
      * 
      * @return the chart maximum range value
+     * @throws MissingLandmarkException 
      */
-    public double getConsensusChartRange() {
+    public double getConsensusChartRange() throws MissingLandmarkException {
 
         double max = 1;
         for (IAnalysisDataset dataset : options.getDatasets()) {
@@ -303,21 +315,23 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
         ICellCollection collection = dataset.getCollection();
         try {
             ds = new NucleusDatasetCreator(options).createSegmentedNucleusOutline(collection);
-        } catch (ChartDatasetCreationException e) {
+            
+            JFreeChart chart = makeConsensusChart(ds);
+            double max = getConsensusChartRange(dataset.getCollection().getConsensus());
+
+            XYPlot plot = chart.getXYPlot();
+            plot.setDataset(0, ds);
+            plot.getDomainAxis().setRange(-max, max);
+            plot.getRangeAxis().setRange(-max, max);
+            formatConsensusChartSeries(plot, true);
+
+            return chart;
+        } catch (ChartDatasetCreationException | MissingLandmarkException e) {
             LOGGER.fine("Unable to make segmented outline, creating base outline instead: "+e.getMessage());
             return makeNucleusOutlineChart();
         }
 
-        JFreeChart chart = makeConsensusChart(ds);
-        double max = getConsensusChartRange(dataset.getCollection().getConsensus());
 
-        XYPlot plot = chart.getXYPlot();
-        plot.setDataset(0, ds);
-        plot.getDomainAxis().setRange(-max, max);
-        plot.getRangeAxis().setRange(-max, max);
-        formatConsensusChartSeries(plot, true);
-
-        return chart;
     }
 
     /**
@@ -375,47 +389,45 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
      * @return a chart
      */
     private JFreeChart makeMultipleConsensusChart() {
-        // multiple nuclei
-        XYDataset ds;
-        try {
-            ds = new NucleusDatasetCreator(options).createMultiNucleusOutline();
-        } catch (ChartDatasetCreationException e) {
-        	LOGGER.log(Loggable.STACK, "Error making consensus dataset", e);
-            return createErrorChart();
-        }
-        JFreeChart chart = makeConsensusChart(ds);
+    	// multiple nuclei
+    	XYDataset ds;
+    	try {
+    		ds = new NucleusDatasetCreator(options).createMultiNucleusOutline();
+    		JFreeChart chart = makeConsensusChart(ds);
 
-        formatConsensusChart(chart);
+    		formatConsensusChart(chart);
 
-        XYPlot plot = chart.getXYPlot();
+    		XYPlot plot = chart.getXYPlot();
 
-        double max = getConsensusChartRange();
+    		double max = getConsensusChartRange();
 
-        plot.getDomainAxis().setRange(-max, max);
-        plot.getRangeAxis().setRange(-max, max);
+    		plot.getDomainAxis().setRange(-max, max);
+    		plot.getRangeAxis().setRange(-max, max);
 
-        int seriesCount = plot.getSeriesCount();
+    		int seriesCount = plot.getSeriesCount();
 
-        for (int i = 0; i < seriesCount; i++) {
-            plot.getRenderer().setSeriesVisibleInLegend(i, false);
-            String name = (String) ds.getSeriesKey(i);
-            plot.getRenderer().setSeriesStroke(i, new BasicStroke(2));
+    		for (int i = 0; i < seriesCount; i++) {
+    			plot.getRenderer().setSeriesVisibleInLegend(i, false);
+    			String name = (String) ds.getSeriesKey(i);
+    			plot.getRenderer().setSeriesStroke(i, new BasicStroke(2));
 
-            // in this context, segment colour refers to the entire
-            // dataset colour (they use the same pallates in ColourSelecter)
-            Paint colour = options.getDatasets().get(i)
-            		.getDatasetColour().orElse(ColourSelecter.getColor(i));
+    			// in this context, segment colour refers to the entire
+    			// dataset colour (they use the same pallates in ColourSelecter)
+    			Paint colour = options.getDatasets().get(i)
+    					.getDatasetColour().orElse(ColourSelecter.getColor(i));
 
-            // get the group id from the name, and make colour
-            plot.getRenderer().setSeriesPaint(i, colour);
-            if (name.startsWith(AbstractDatasetCreator.QUARTILE_SERIES_PREFIX)) {
-                // make the IQR distinct from the median
-                plot.getRenderer().setSeriesPaint(i, ((Color) colour).darker());
-            }
-        }
-        return chart;
+    			// get the group id from the name, and make colour
+    			plot.getRenderer().setSeriesPaint(i, colour);
+    			if (name.startsWith(AbstractDatasetCreator.QUARTILE_SERIES_PREFIX)) {
+    				// make the IQR distinct from the median
+    				plot.getRenderer().setSeriesPaint(i, ((Color) colour).darker());
+    			}
+    		}
+    		return chart;
+
+    	} catch (ChartDatasetCreationException | MissingLandmarkException e) {
+    		LOGGER.log(Loggable.STACK, "Error making consensus dataset", e);
+    		return createErrorChart();
+    	}
     }
-
-    
-
 }

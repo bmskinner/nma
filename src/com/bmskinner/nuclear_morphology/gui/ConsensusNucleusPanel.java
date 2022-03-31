@@ -39,6 +39,7 @@ import com.bmskinner.nuclear_morphology.charting.charts.ConsensusNucleusChartFac
 import com.bmskinner.nuclear_morphology.charting.charts.panels.ConsensusNucleusChartPanel;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.Refoldable;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
@@ -106,7 +107,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
     }
 
     @Override
-    public void setChartsAndTablesLoading() {
+    public synchronized void setChartsAndTablesLoading() {
         consensusChartPanel.setChart(AbstractChartFactory.createLoadingChart());
     }
 
@@ -176,10 +177,14 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
     }
     
     private void offsetConsensus(double x, double y) {
-    	if (activeDataset().getCollection().hasConsensus()) {
-    		IPoint com = activeDataset().getCollection().getConsensus().getCentreOfMass();
-    		activeDataset().getCollection().offsetConsensus(com.getX()+x, com.getY()+y);
-    		refreshChartCache(getDatasets());
+    	try {
+    		if (activeDataset().getCollection().hasConsensus()) {
+    			IPoint com = activeDataset().getCollection().getConsensus().getCentreOfMass();
+    			activeDataset().getCollection().offsetConsensus(com.getX()+x, com.getY()+y);
+    			refreshChartCache(getDatasets());
+    		}
+    	} catch(MissingLandmarkException e) {
+    		consensusChartPanel.setChart(AbstractChartFactory.createErrorChart());;
     	}
     }
 

@@ -6,6 +6,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
@@ -62,8 +63,9 @@ public class DefaultMeshTest {
 	 * Attempt to create a mesh for every nucleus in the given dataset based on 
 	 * the consensus nucleus
 	 * @param d
+	 * @throws MissingLandmarkException 
 	 */
-	private void testDatasetGeneratesMeshForAllNuclei(@NonNull final IAnalysisDataset d) {
+	private void testDatasetGeneratesMeshForAllNuclei(@NonNull final IAnalysisDataset d) throws MissingLandmarkException {
 		try {
 			Mesh consensusMesh = new DefaultMesh(d.getCollection().getConsensus());
 
@@ -83,8 +85,9 @@ public class DefaultMeshTest {
 	 * Attempt to create a mesh for every nucleus in the given dataset based on 
 	 * the consensus nucleus
 	 * @param d
+	 * @throws MissingLandmarkException 
 	 */
-	private void testDatasetGeneratesMeshForAllVerticalNuclei(@NonNull final IAnalysisDataset d) {
+	private void testDatasetGeneratesMeshForAllVerticalNuclei(@NonNull final IAnalysisDataset d) throws MissingLandmarkException {
 		try {
 			Mesh consensusMesh = new DefaultMesh(d.getCollection().getConsensus());
 

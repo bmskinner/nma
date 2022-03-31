@@ -32,6 +32,7 @@ import com.bmskinner.nuclear_morphology.analysis.mesh.MeshCreationException;
 import com.bmskinner.nuclear_morphology.analysis.mesh.MeshFace;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.MissingComponentException;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.Taggable;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.DefaultClusterGroup;
@@ -224,7 +225,7 @@ public class TreeBuildingMethod extends CellClusteringMethod {
             try {
 				mesh = new DefaultMesh(collection.getConsensus());
 				attributeCount += mesh.getFaces().size();
-			} catch (MeshCreationException e) {
+			} catch (MeshCreationException | MissingLandmarkException e) {
 				LOGGER.log(Loggable.STACK, "Cannot create mesh", e);
 				throw new AnalysisMethodException(e);
 			}

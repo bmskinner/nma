@@ -22,6 +22,7 @@ import java.util.logging.Logger;
 
 import org.jdom2.Element;
 
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.profiles.UnprofilableObjectException;
@@ -124,7 +125,7 @@ public class DefaultConsensusNucleus extends DefaultNucleus implements Consensus
     
     
     @Override
-    public Nucleus getOrientedNucleus() {
+    public Nucleus getOrientedNucleus() throws MissingLandmarkException {
     	Nucleus n = super.getOrientedNucleus();
     	n.rotate(rotOffset);
     	n.offset(xOffset, yOffset);

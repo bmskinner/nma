@@ -267,7 +267,7 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
     }
 
     @Override
-    public Nucleus getOrientedNucleus() {
+    public Nucleus getOrientedNucleus() throws MissingLandmarkException {
         // Make an exact copy of the nucleus
         Nucleus verticalNucleus = this.duplicate();
         verticalNucleus.orient();
@@ -301,25 +301,16 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
      */
 
     @Override
-    public void orient() {
+    public void orient() throws MissingLandmarkException {
 
-    	try {
-    		// Use the points defined in the RuleSetCollection
-    		// to determine how to orient the nucleus
-    		if(priorityAxis.equals(PriorityAxis.Y)) {
-    			alignVerticallyPriorityY();
+    	// Use the points defined in the RuleSetCollection
+    	// to determine how to orient the nucleus
+    	if(priorityAxis.equals(PriorityAxis.Y)) {
+    		alignVerticallyPriorityY();
 
-    		} else {
-    			// Same logic but now if X axis is the priority
-    			alignVerticallyPriorityX();
-    		}
-    	} catch (MissingLandmarkException e) {
-    		LOGGER.log(Loggable.STACK, "Cannot get border tag or profile", e);
-    		try {
-    			rotatePointToBottom(getBorderPoint(Landmark.ORIENTATION_POINT));
-    		} catch (MissingLandmarkException e1) {
-    			LOGGER.log(Loggable.STACK, "Cannot get border tag", e1);
-    		}
+    	} else {
+    		// Same logic but now if X axis is the priority
+    		alignVerticallyPriorityX();
     	}
     }
     

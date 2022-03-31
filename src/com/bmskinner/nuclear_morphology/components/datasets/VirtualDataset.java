@@ -69,8 +69,6 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
 public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysisDataset, ICellCollection {
 	
 	private static final Logger LOGGER = Logger.getLogger(VirtualDataset.class.getName());
-
-    private static final long serialVersionUID = 1L;
     
     /** the collection id */
     private final UUID uuid;
@@ -416,7 +414,7 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
 	}
 
 	@Override
-	public Nucleus getConsensus() {
+	public Nucleus getConsensus() throws MissingLandmarkException {
 		return consensusNucleus.getOrientedNucleus();
 	}
 	

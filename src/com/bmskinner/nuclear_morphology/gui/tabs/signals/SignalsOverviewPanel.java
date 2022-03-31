@@ -46,6 +46,7 @@ import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptionsBuilder;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult;
@@ -60,6 +61,7 @@ import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMetho
 import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.signals.warping.SignalWarpingDialog;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 @SuppressWarnings("serial")
 public class SignalsOverviewPanel extends DetailPanel implements ChartSetEventListener {
@@ -232,7 +234,13 @@ public class SignalsOverviewPanel extends DetailPanel implements ChartSetEventLi
 
         warpButton = new JButton(Labels.Signals.WARP_BTN_LBL);
         warpButton.setToolTipText(Labels.Signals.WARP_BTN_TOOLTIP);
-        warpButton.addActionListener(e ->  new SignalWarpingDialog(getDatasets(), this));
+        warpButton.addActionListener(e ->  {
+        	try {
+        		new SignalWarpingDialog(getDatasets(), this);
+        	} catch (MissingLandmarkException e1) {
+        		LOGGER.log(Loggable.STACK, "Cannot orient consensus", e);
+        	}
+        });
         warpButton.setEnabled(false);
         panel.add(warpButton);
         

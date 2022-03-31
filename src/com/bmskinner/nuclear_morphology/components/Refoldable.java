@@ -52,8 +52,9 @@ public interface Refoldable {
      * nucleus if present, with any other offsets applied
      * 
      * @return the consensus, or null if not present
+     * @throws MissingLandmarkException 
      */
-    Nucleus getConsensus();
+    Nucleus getConsensus() throws MissingLandmarkException;
     
     /**
      * Get the consensus nucleus. Unlike {@link getConsensus},

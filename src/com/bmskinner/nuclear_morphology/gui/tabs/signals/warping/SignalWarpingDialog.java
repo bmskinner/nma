@@ -46,6 +46,7 @@ import com.bmskinner.nuclear_morphology.charting.charts.ConsensusNucleusChartFac
 import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPanel;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
@@ -53,6 +54,7 @@ import com.bmskinner.nuclear_morphology.gui.dialogs.LoadingIconDialog;
 import com.bmskinner.nuclear_morphology.gui.tabs.CosmeticHandler;
 import com.bmskinner.nuclear_morphology.gui.tabs.TabPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.signals.warping.SignalWarpingModel.ImageCache.WarpedImageKey;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Displays signals warped onto the consensus nucleus of a dataset
@@ -91,9 +93,10 @@ public class SignalWarpingDialog
      * Construct with a list of datasets available to warp signals to and from
      * 
      * @param datasets
+     * @throws MissingLandmarkException 
      */
     public SignalWarpingDialog(@NonNull final List<IAnalysisDataset> datasets,     
-    	    TabPanel parent) {
+    	    TabPanel parent) throws MissingLandmarkException {
         super();
         this.parent = parent;
         this.datasets = datasets;
@@ -222,7 +225,11 @@ public class SignalWarpingDialog
         		
         		// Click the delete button
         		if(col==model.getColumnIndex(Labels.Signals.Warper.TABLE_HEADER_DELETE_COLUMN)) {
-        			controller.deleteWarpedSignal(row);
+        			try {
+						controller.deleteWarpedSignal(row);
+        			} catch (MissingLandmarkException e1) {
+    					LOGGER.log(Loggable.STACK, "Cannot orient consensus", e);
+    				}
         			controller.displayBlankChart();
         		}
         	}
@@ -249,7 +256,11 @@ public class SignalWarpingDialog
         		keys.add(model.getKey(row));
         	
         	for(WarpedImageKey k : keys)
-        		controller.deleteWarpedSignal(k);
+				try {
+					controller.deleteWarpedSignal(k);
+				} catch (MissingLandmarkException e1) {
+					LOGGER.log(Loggable.STACK, "Cannot orient consensus", e);
+				}
         	
         	controller.displayBlankChart();
         });

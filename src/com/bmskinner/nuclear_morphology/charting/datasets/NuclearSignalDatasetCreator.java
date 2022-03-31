@@ -38,6 +38,7 @@ import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellAnalysisMet
 import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellDetector;
 import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellDetector.Shell;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
@@ -95,8 +96,9 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
      * 
      * @param dataset the dataset
      * @return
+     * @throws ChartDatasetCreationException 
      */
-    public XYDataset createSignalCoMDataset() {
+    public XYDataset createSignalCoMDataset() throws ChartDatasetCreationException {
 
     	NuclearSignalXYDataset ds = new NuclearSignalXYDataset();
         ICellCollection collection = options.firstDataset().getCollection();
@@ -123,19 +125,25 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
 				    	}
 			        }
 				    
-				    
-				    for (INuclearSignal n : signals) {
+				    try {
+				    	Nucleus consensus = collection.getConsensus();
 
-				        IPoint p = getXYCoordinatesForSignal(n, collection.getConsensus());
 
-				        xpoints[signalCount] = p.getX();
-				        ypoints[signalCount] = p.getY();
-				        signalCount++;
+				    	for (INuclearSignal n : signals) {
 
+				    		IPoint p = getXYCoordinatesForSignal(n, consensus);
+
+				    		xpoints[signalCount] = p.getX();
+				    		ypoints[signalCount] = p.getY();
+				    		signalCount++;
+
+				    	}
+				    	double[][] data = { xpoints, ypoints };
+
+				    	ds.addSeries(CellularComponent.NUCLEAR_SIGNAL + "_" + uuid, data, signalList, nucleusList);
+				    } catch(MissingLandmarkException e) {
+				    	throw new ChartDatasetCreationException(e);
 				    }
-				    double[][] data = { xpoints, ypoints };
-				    
-				    ds.addSeries(CellularComponent.NUCLEAR_SIGNAL + "_" + uuid, data, signalList, nucleusList);
 				}
             }
         }
@@ -151,14 +159,19 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
         	return result;
 
         if (collection.getSignalGroup(signalGroup).get().isVisible()) {
-        	for (INuclearSignal n : collection.getSignalManager().getSignals(signalGroup)) {
-        		IPoint p = getXYCoordinatesForSignal(n, collection.getConsensus());
+        	try {
+        		Nucleus consensus = collection.getConsensus();
+        		for (INuclearSignal n : collection.getSignalManager().getSignals(signalGroup)) {
+        			IPoint p = getXYCoordinatesForSignal(n, consensus);
 
-        		// ellipses are drawn starting from x y at upper left.
-        		// Provide an offset from the centre
-        		double offset = n.getStatistic(Measurement.RADIUS);
+        			// ellipses are drawn starting from x y at upper left.
+        			// Provide an offset from the centre
+        			double offset = n.getStatistic(Measurement.RADIUS);
 
-        		result.add(new Ellipse2D.Double(p.getX() - offset, p.getY() - offset, offset * 2, offset * 2));
+        			result.add(new Ellipse2D.Double(p.getX() - offset, p.getY() - offset, offset * 2, offset * 2));
+        		}
+        	} catch(MissingLandmarkException e) {
+        		throw new ChartDatasetCreationException(e);
         	}
 
 		    
@@ -336,7 +349,7 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
             		shellCount, 
             		type);
             
-        } catch (ShellAnalysisException e) {
+        } catch (ShellAnalysisException | MissingLandmarkException e) {
             LOGGER.log(Loggable.STACK, "Error making shells in consensus", e);
             throw new ChartDatasetCreationException("Error making shells", e);
         }

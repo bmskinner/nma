@@ -285,18 +285,18 @@ public class OutlineChartFactory extends AbstractChartFactory {
         XYPlot plot = chart.getXYPlot();
 
         // Get consensus mesh.
+        Nucleus consensus;
         Mesh meshConsensus;
         try {
             meshConsensus = new DefaultMesh(dataset.getCollection().getConsensus());
-        } catch (MeshCreationException e) {
+            consensus = dataset.getCollection().getConsensus();
+        } catch (MeshCreationException | MissingLandmarkException e) {
             LOGGER.log(Loggable.STACK, "Error creating consensus mesh", e);
             return createErrorChart();
         }
 
         // Get the bounding box size for the consensus, to find the offsets for
         // the images created
-        Nucleus consensus = dataset.getCollection().getConsensus();
-        
         int w = (int) (consensus.getWidth() * 1.2);
         int h = (int) (consensus.getHeight() * 1.2);
 
@@ -390,7 +390,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
                         Mesh result = mesh1.comparison(mesh2);
                         return createMeshChart(result, 0.5);
 
-                    } catch (MeshCreationException e) {
+                    } catch (MeshCreationException | MissingLandmarkException e) {
                         LOGGER.log(Loggable.STACK, ERROR_CREATING_MESH_MSG, e);
                         return createErrorChart();
                     }
@@ -431,7 +431,10 @@ public class OutlineChartFactory extends AbstractChartFactory {
                     } catch (MeshCreationException e) {
                         LOGGER.log(Loggable.STACK, ERROR_CREATING_MESH_MSG, e);
                         return createErrorChart();
-                    }
+                    } catch (MissingLandmarkException e) {
+                    	LOGGER.log(Loggable.STACK, "Cannot orient consensus", e);
+                    	return createErrorChart();
+					}
 
                 }
 				return createEmptyChart();
@@ -528,9 +531,14 @@ public class OutlineChartFactory extends AbstractChartFactory {
         ICell cell = options.getCell();
         IAnalysisDataset dataset = options.firstDataset();
 
-        if (options.getRotateMode().equals(RotationMode.VERTICAL)) {
-            Nucleus n = cell.getPrimaryNucleus().getOrientedNucleus();
-            cell = new DefaultCell(n);
+        try {
+        	if (options.getRotateMode().equals(RotationMode.VERTICAL)) {
+        		Nucleus n = cell.getPrimaryNucleus().getOrientedNucleus();
+        		cell = new DefaultCell(n);
+        	} 
+        }catch(MissingLandmarkException e) {
+        	LOGGER.log(Loggable.STACK, "Error getting consensus", e);
+        	return createErrorChart();
         }
 
         CellDataset cellDataset = new CellDataset(cell);
@@ -940,23 +948,23 @@ public class OutlineChartFactory extends AbstractChartFactory {
             r.setDefaultToolTipGenerator(tooltip);
 
             for (Nucleus n : dataset.getCollection().getNuclei()) {
+            	try {
+            		Nucleus verticalNucleus = n.getOrientedNucleus();
 
-                Nucleus verticalNucleus = n.getOrientedNucleus();
+            		OutlineDatasetCreator dc = new OutlineDatasetCreator(options, verticalNucleus);
 
-                OutlineDatasetCreator dc = new OutlineDatasetCreator(options, verticalNucleus);
 
-                try {
 
-                    XYDataset nucleusDataset = dc.createOutline(false);
-                    plot.setDataset(i, nucleusDataset);
-                    plot.setRenderer(i, r);
+            		XYDataset nucleusDataset = dc.createOutline(false);
+            		plot.setDataset(i, nucleusDataset);
+            		plot.setRenderer(i, r);
 
-                } catch (ChartDatasetCreationException e) {
-                    LOGGER.warning("Cannot create data for dataset " + dataset.getName());
-                    LOGGER.log(Loggable.STACK, "Error getting chart data", e);
-                } finally {
-                    i++;
-                }
+            	} catch (ChartDatasetCreationException | MissingLandmarkException e) {
+            		LOGGER.warning("Cannot create data for dataset " + dataset.getName());
+            		LOGGER.log(Loggable.STACK, "Error getting chart data", e);
+            	} finally {
+            		i++;
+            	}
 
             }
         }

@@ -18,6 +18,7 @@ package com.bmskinner.nuclear_morphology.components.nuclei;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.Orientable;
 import com.bmskinner.nuclear_morphology.components.Taggable;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
@@ -86,8 +87,9 @@ public interface Nucleus extends CellularComponent, Taggable, Orientable, Compar
      * the landmarks and priorities defined by the rulesets
      * used when creating the nucleus.
      * @return an oriented copy of the nucleus
+     * @throws MissingLandmarkException 
      */
-    Nucleus getOrientedNucleus();
+    Nucleus getOrientedNucleus() throws MissingLandmarkException;
 
     /**
      * Thrown when a nucleus type in a collection is incorrect for a requested

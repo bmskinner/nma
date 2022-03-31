@@ -39,6 +39,7 @@ import org.jfree.chart.JFreeChart;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
 import com.bmskinner.nuclear_morphology.charting.charts.OutlineChartFactory;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
@@ -74,7 +75,7 @@ public class SignalWarpingModel extends DefaultTableModel {
 	
 	private volatile ImageCache cache = new ImageCache();
 	
-	public SignalWarpingModel(@NonNull List<IAnalysisDataset> datasets) {
+	public SignalWarpingModel(@NonNull List<IAnalysisDataset> datasets) throws MissingLandmarkException {
 		super();
 		this.datasets = datasets;
 
@@ -202,8 +203,9 @@ public class SignalWarpingModel extends DefaultTableModel {
 	/**
 	 * Add warped images saved in datasets to this model
 	 * @param list
+	 * @throws MissingLandmarkException 
 	 */
-	private void addSavedImages(@NonNull List<IAnalysisDataset> list) {
+	private void addSavedImages(@NonNull List<IAnalysisDataset> list) throws MissingLandmarkException {
 		for(IAnalysisDataset d : list) {
 			addSavedImages(d);
 		}
@@ -212,8 +214,9 @@ public class SignalWarpingModel extends DefaultTableModel {
 	/**
 	 * Add warped images saved in a dataset to the model
 	 * @param d
+	 * @throws MissingLandmarkException 
 	 */
-	private void addSavedImages(@NonNull IAnalysisDataset d) {
+	private void addSavedImages(@NonNull IAnalysisDataset d) throws MissingLandmarkException {
 		for(UUID signalGroupId : d.getCollection().getSignalGroupIDs()) {
 			ISignalGroup sg  = d.getCollection().getSignalGroup(signalGroupId).get();
 
@@ -354,6 +357,7 @@ public class SignalWarpingModel extends DefaultTableModel {
 	 * @param isBinarise should images be binarised before warped
 	 * @param minThreshold the threshold to set before binarisation
 	 * @param image the warped image
+	 * @throws MissingLandmarkException 
 	 */
 	public void addImage(@NonNull Nucleus targetShape, 
 			@NonNull String targetName, 
@@ -363,7 +367,7 @@ public class SignalWarpingModel extends DefaultTableModel {
 			final boolean isBinarise, 
 			final boolean isNormalise,
 			final int minThreshold, 
-			@NonNull ImageProcessor image) {
+			@NonNull ImageProcessor image) throws MissingLandmarkException {
 		WarpedImageKey k = cache.new WarpedImageKey(targetShape, 
 				targetName, 
 				signalSource, 
@@ -634,7 +638,7 @@ public class SignalWarpingModel extends DefaultTableModel {
         public synchronized void add(@NonNull final Nucleus target, @NonNull final String targetName, 
         		@NonNull final IAnalysisDataset template, @NonNull final UUID signalGroupId, 
         		final boolean isCellsWithSignals, final boolean binarise, final boolean normalise, final int minThreshold,
-        		@NonNull final ImageProcessor ip) {
+        		@NonNull final ImageProcessor ip) throws MissingLandmarkException {
         	add(new WarpedImageKey(target, targetName, template, 
         			signalGroupId, isCellsWithSignals, binarise, normalise, minThreshold), ip);
         }
@@ -704,7 +708,7 @@ public class SignalWarpingModel extends DefaultTableModel {
             public WarpedImageKey(@NonNull final Nucleus target, @NonNull final String targetName, 
             		@NonNull final IAnalysisDataset template, @NonNull final UUID signalGroupId, 
             		final boolean isCellsWithSignals, final boolean binarise, 
-            		final boolean normalise, final int minThreshold) {
+            		final boolean normalise, final int minThreshold) throws MissingLandmarkException {
             	targetId = target.getID();
             	templateId = template.getId();
             	

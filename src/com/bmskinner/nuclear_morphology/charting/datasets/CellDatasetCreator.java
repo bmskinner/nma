@@ -181,30 +181,29 @@ public class CellDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
          */
         LOGGER.finest( "Fetching segment position for each nucleus");
         for (Nucleus nucleus : dataset.getCollection().getNuclei()) {
-            Nucleus verticalNucleus = nucleus.getOrientedNucleus();
-            LOGGER.finest( "Fetched vertical nucleus");
 
-            // Get the segment start position XY coordinates
+        	try {
+        		Nucleus verticalNucleus = nucleus.getOrientedNucleus();
+        		LOGGER.finest( "Fetched vertical nucleus");
 
-            try {
+        		// Get the segment start position XY coordinates
+        		if (!verticalNucleus.getProfile(ProfileType.ANGLE).hasSegment(segmentID)) {
+        			LOGGER.fine("Segment " + segmentID.toString() + " not found in vertical nucleus for "
+        					+ nucleus.getNameAndNumber());
+        			continue;
 
-                if (!verticalNucleus.getProfile(ProfileType.ANGLE).hasSegment(segmentID)) {
-                    LOGGER.fine("Segment " + segmentID.toString() + " not found in vertical nucleus for "
-                            + nucleus.getNameAndNumber());
-                    continue;
+        		}
+        		IProfileSegment segment = verticalNucleus.getProfile(ProfileType.ANGLE).getSegment(segmentID);
+        		LOGGER.finest( "Fetched segment " + segmentID.toString());
 
-                }
-                IProfileSegment segment = verticalNucleus.getProfile(ProfileType.ANGLE).getSegment(segmentID);
-                LOGGER.finest( "Fetched segment " + segmentID.toString());
+        		int start = segment.getStartIndex();
+        		LOGGER.finest( "Getting start point at index " + start);
+        		IPoint point = verticalNucleus.getBorderPoint(start);
+        		result.add(point);
+        	} catch (MissingComponentException | ProfileException e) {
+        		LOGGER.warning("Cannot get angle profile for nucleus");
 
-                int start = segment.getStartIndex();
-                LOGGER.finest( "Getting start point at index " + start);
-                IPoint point = verticalNucleus.getBorderPoint(start);
-                result.add(point);
-            } catch (MissingComponentException | ProfileException e) {
-                LOGGER.warning("Cannot get angle profile for nucleus");
-
-            }
+        	}
 
         }
         LOGGER.finest( "Fetched segment position for each nucleus");

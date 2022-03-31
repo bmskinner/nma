@@ -25,6 +25,7 @@ import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.logging.Logger;
@@ -33,6 +34,7 @@ import java.util.stream.Collectors;
 import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.svg.SVGGraphics2D;
 
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
@@ -68,55 +70,58 @@ public class SVGWriter implements Io {
      * @param datasets the datasets to export
      */
     public void exportConsensusOutlines(@NonNull List<IAnalysisDataset> datasets, MeasurementScale scale) {
-        List<Nucleus> consensi = datasets.stream()
-                .map(d -> d.getCollection().getConsensus())
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
-        
-        // Set the width of the canvas to double the sum of the individual consensus nucleus bounding widths
-        double w = consensi.stream().mapToDouble( c-> c.toShape(scale).getBounds2D().getWidth()*2).sum();
-        double h = consensi.stream().mapToDouble( c-> c.toShape(scale).getBounds2D().getHeight()*1.25).max().orElse(100);
-               
-       
-        // A buffer around the edges scaled to the size of the nuclei
-        double buffer = h/10;
-        w += buffer*consensi.size()*2;
-        h += buffer*2;
-        
-        // A font cannot be less than 1
-        int fontSize = (int)(h/20);
-        fontSize = Math.max(fontSize, 1);
-        
-        
-        float strokeWidth = (float) h/100;
-        SVGGraphics2D g2 = new SVGGraphics2D((int) w, (int) h);
-        
-        double x = buffer;
+    	try {
+    		List<Nucleus> consensi = new ArrayList<>();
+    		for(IAnalysisDataset d : datasets) {
+    			consensi.add(d.getCollection().getConsensus());
+    		}
 
-        for(IAnalysisDataset d : datasets){
-            if(!d.getCollection().hasConsensus()){
-                continue;
-            }
-            CellularComponent c = d.getCollection().getConsensus();
-            Shape s = c.toShape(scale);
+    		// Set the width of the canvas to double the sum of the individual consensus nucleus bounding widths
+    		double w = consensi.stream().mapToDouble( c-> c.toShape(scale).getBounds2D().getWidth()*2).sum();
+    		double h = consensi.stream().mapToDouble( c-> c.toShape(scale).getBounds2D().getHeight()*1.25).max().orElse(100);
 
-            Rectangle2D r = s.getBounds2D();
-            
-            double xMin = x;
-            double xMax = xMin+(r.getWidth()*2);
 
-            export(s, g2, xMin, buffer*2, strokeWidth);
-            export(d.getName(), g2, (float) xMin, (float)buffer, fontSize);
-            export(String.valueOf(d.getCollection().size()), 
-            		g2, 
-            		(float)((xMin+xMax)/2), 
-            		(float)(buffer+(r.getHeight()/2)), 
-            		fontSize);
-            x+=(r.getWidth()*2)+buffer;
-        }
+    		// A buffer around the edges scaled to the size of the nuclei
+    		double buffer = h/10;
+    		w += buffer*consensi.size()*2;
+    		h += buffer*2;
 
-        write(g2);
-        
+    		// A font cannot be less than 1
+    		int fontSize = (int)(h/20);
+    		fontSize = Math.max(fontSize, 1);
+
+
+    		float strokeWidth = (float) h/100;
+    		SVGGraphics2D g2 = new SVGGraphics2D((int) w, (int) h);
+
+    		double x = buffer;
+
+    		for(IAnalysisDataset d : datasets){
+    			if(!d.getCollection().hasConsensus()){
+    				continue;
+    			}
+    			CellularComponent c = d.getCollection().getConsensus();
+    			Shape s = c.toShape(scale);
+
+    			Rectangle2D r = s.getBounds2D();
+
+    			double xMin = x;
+    			double xMax = xMin+(r.getWidth()*2);
+
+    			export(s, g2, xMin, buffer*2, strokeWidth);
+    			export(d.getName(), g2, (float) xMin, (float)buffer, fontSize);
+    			export(String.valueOf(d.getCollection().size()), 
+    					g2, 
+    					(float)((xMin+xMax)/2), 
+    					(float)(buffer+(r.getHeight()/2)), 
+    					fontSize);
+    			x+=(r.getWidth()*2)+buffer;
+    		}
+
+    		write(g2);
+    	} catch(MissingLandmarkException e) {
+    		LOGGER.log(Loggable.STACK, "Unable to orient consensus", e);
+    	}
     }
     
     /**

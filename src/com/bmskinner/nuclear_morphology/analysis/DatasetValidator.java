@@ -303,11 +303,16 @@ public class DatasetValidator {
 		}
 		
 		if(d.getCollection().hasConsensus()) {
-			for(Landmark t : rootTags) {
-				if(!d.getCollection().getConsensus().hasLandmark(t)) {
-					withErrors++;
-					errorList.add(String.format("Consensus nucleus does not have root collection tag %s", t));
+			
+			try {
+				for(Landmark t : rootTags) {
+					if(!d.getCollection().getConsensus().hasLandmark(t)) {
+						withErrors++;
+						errorList.add(String.format("Consensus nucleus does not have root collection tag %s", t));
+					}
 				}
+			} catch(MissingLandmarkException e) {
+				errorList.add("Consensus nucleus does not have required landmark");
 			}
 		}
 			
@@ -321,11 +326,15 @@ public class DatasetValidator {
 			}
 			
 			if(child.getCollection().hasConsensus()) {
-				for(Landmark t : rootTags) {
-					if(!child.getCollection().getConsensus().hasLandmark(t)) {
-						withErrors++;
-						errorList.add(String.format("Child dataset %s consensus nucleus does not have root collection tag %s", child.getName(), t));
+				try {
+					for(Landmark t : rootTags) {
+						if(!child.getCollection().getConsensus().hasLandmark(t)) {
+							withErrors++;
+							errorList.add(String.format("Child dataset %s consensus nucleus does not have root collection tag %s", child.getName(), t));
+						}
 					}
+				} catch(MissingLandmarkException e) {
+					errorList.add("Consensus nucleus does not have required landmark");
 				}
 			}
 		}
@@ -477,10 +486,14 @@ public class DatasetValidator {
 		}
 
 		if(collection.hasConsensus()) {
-			int consensusErrors = checkSegmentation(collection.getConsensus(), idList, medianProfile);
-			if(consensusErrors>0)
-				errorList.add("Segmentation error in consensus");
-			errorCount += consensusErrors;
+			try {
+				int consensusErrors = checkSegmentation(collection.getConsensus(), idList, medianProfile);
+				if(consensusErrors>0)
+					errorList.add("Segmentation error in consensus");
+				errorCount += consensusErrors;
+			} catch(MissingLandmarkException e) {
+				errorList.add("Consensus nucleus does not have required landmark");
+			}
 		}
 		
 		if(errorCount>0) {

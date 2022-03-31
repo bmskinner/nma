@@ -341,7 +341,7 @@ public class InteractiveCellPanel extends JPanel {
 				ip = im.drawImage(consensusMesh);
 				ip.flipVertical();
 			}
-		} catch (MeshCreationException | IllegalArgumentException | MeshImageCreationException | UncomparableMeshImageException e) {
+		} catch (MeshCreationException | IllegalArgumentException | MeshImageCreationException | UncomparableMeshImageException | MissingLandmarkException e) {
 			LOGGER.log(Loggable.STACK, "Error making mesh or loading image", e);
 		}
 		return ImageAnnotator.resizeKeepingAspect(ip, getWidth(), getHeight()).getBufferedImage();

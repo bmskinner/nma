@@ -4,6 +4,7 @@ import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.DefaultOptions;
@@ -51,7 +52,7 @@ public class SignalWarpingRunSettings extends DefaultOptions {
 		return d2;
 	}
 	
-	public Nucleus targetShape() {
+	public Nucleus targetShape() throws MissingLandmarkException {
 		return d2.getCollection().getConsensus();
 	}
 	

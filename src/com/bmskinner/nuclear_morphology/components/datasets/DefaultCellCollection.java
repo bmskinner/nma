@@ -407,7 +407,7 @@ public class DefaultCellCollection implements ICellCollection {
 	}
 
 	@Override
-	public Nucleus getConsensus() {
+	public Nucleus getConsensus() throws MissingLandmarkException {
 		return consensusNucleus.getOrientedNucleus();
 	}
 	
@@ -1147,7 +1147,12 @@ public class DefaultCellCollection implements ICellCollection {
 
 		if(this.hasConsensus()){
 			b.append("Consensus:" + newLine);
-			b.append(getConsensus().toString()+newLine);
+			
+			try {
+				b.append(getConsensus().toString()+newLine);
+			} catch (MissingLandmarkException e) {
+				b.append("Cannot orient consensus; "+e.getMessage()+newLine);
+			}
 		}
 
 		return b.toString();
