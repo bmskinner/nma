@@ -234,8 +234,12 @@ public class ProfileManager {
 
         int oldIndex = collection.getProfileCollection().getIndex(tag);
 
-        if (oldIndex == -1)
-            LOGGER.finer( "Border tag does not exist and will be created");
+        if (oldIndex == -1) {
+            LOGGER.finer( "Landmark does not exist and will be created in each nucleus");
+            for(Nucleus n : collection.getNuclei()) {
+            	n.setLandmark(tag, 0);
+            }
+        }
         
         // If the new index for the tag is the same as the RP, set directly
         
