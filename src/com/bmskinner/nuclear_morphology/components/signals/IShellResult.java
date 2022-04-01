@@ -16,7 +16,6 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.signals;
 
-import java.io.Serializable;
 import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -35,7 +34,7 @@ import com.bmskinner.nuclear_morphology.io.XmlSerializable;
  */
 public interface IShellResult extends XmlSerializable {
     
-    UUID RANDOM_SIGNAL_ID = UUID.fromString("00000000-0000-0000-0000-000000000000");
+    @NonNull UUID RANDOM_SIGNAL_ID = UUID.fromString("00000000-0000-0000-0000-000000000000");
     
     
     /**

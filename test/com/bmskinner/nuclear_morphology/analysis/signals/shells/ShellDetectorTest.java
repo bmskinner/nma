@@ -41,6 +41,7 @@ import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
+import com.bmskinner.nuclear_morphology.components.signals.IShellResult;
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult.ShrinkType;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
@@ -181,6 +182,11 @@ public class ShellDetectorTest {
         assertTrue(testEquals(inNucleusPixels, inComponentPixels));
     }
         
+    /**
+     * Detect signals in a real image set, and check that shells are 
+     * created appropriately
+     * @throws Exception
+     */
     @Test
     public void testRealSignalsDetectedInMouseSpermDataset() throws Exception {
         IAnalysisDataset dataset = SampleDatasetReader.openTestMouseSignalsDataset();

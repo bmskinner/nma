@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
@@ -67,11 +68,16 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
 	
 	private static final Logger LOGGER = Logger.getLogger(ShellAnalysisMethod.class.getName());
 
+	/** A shell must have a minimum size */
 	public static final int MINIMUM_AREA_PER_SHELL = 50;
+	
+	/** A shell must have a minimum circularity */
 	public static final double MINIMUM_CIRCULARITY = 0.07;
 	
+	/** The analysis options */
 	private final HashOptions options;
 	
+	/** The cells to be analysed */
 	private ICellCollection collection;
 
     private final Map<UUID, DefaultShellResult> counters = new HashMap<>();
@@ -135,10 +141,10 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
     	for (UUID signalGroupId : collection.getSignalManager().getSignalGroupIDs()) {
             if (IShellResult.RANDOM_SIGNAL_ID.equals(signalGroupId))
                 continue;
-            counters.put(signalGroupId, new DefaultShellResult( options.getInt(HashOptions.SHELL_COUNT_INT), ShrinkType.valueOf(options.getString(HashOptions.SHELL_EROSION_METHOD_KEY))));
+            counters.put(signalGroupId, new DefaultShellResult( options.getInt(HashOptions.SHELL_COUNT_INT), 
+            		ShrinkType.valueOf(options.getString(HashOptions.SHELL_EROSION_METHOD_KEY))));
             
             // Assign the options to each signal group
-            LOGGER.fine("Creating signal counter for group "+signalGroupId);
             Optional<IAnalysisOptions> datasetOptions = dataset.getAnalysisOptions();
             if(!datasetOptions.isPresent()) {
             	LOGGER.warning("No analysis options in dataset; unable to set shell options");
@@ -155,19 +161,18 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
     }
     
     private synchronized void createResults() {
-        // get stats and export
+
         boolean addRandom = false;
 
-        for(UUID group : counters.keySet()) {
-            addRandom |= collection.getSignalManager().hasSignals(group);
-            if (collection.getSignalManager().hasSignals(group)) {
-                DefaultShellResult channelCounter = counters.get(group);
-                collection.getSignalGroup(group).get().setShellResult(channelCounter);
-                copyShellResultsToChildDatasets(group);
+        for(Entry<UUID, DefaultShellResult> entry : counters.entrySet()) {
+            addRandom |= collection.getSignalManager().hasSignals(entry.getKey());
+            if (collection.getSignalManager().hasSignals(entry.getKey())) {
+                collection.getSignalGroup(entry.getKey()).get().setShellResult(entry.getValue());
+                copyShellResultsToChildDatasets(entry.getKey());
             }
         }
 
-
+        // Only add a random signal if there was at least one other signal group present
         if (addRandom)
             addRandomSignal();
     }
@@ -235,6 +240,8 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
     	random.setGroupColour(Color.LIGHT_GRAY);
     	DefaultShellResult channelCounter = counters.get(IShellResult.RANDOM_SIGNAL_ID);
     	random.setShellResult(channelCounter);
+    	// If a random group already exists, clear it
+    	collection.removeSignalGroup(IShellResult.RANDOM_SIGNAL_ID);
     	collection.addSignalGroup(random);
     	copyShellResultsToChildDatasets(IShellResult.RANDOM_SIGNAL_ID);
     }
