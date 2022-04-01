@@ -214,8 +214,8 @@ public class ProfileRefoldMethod extends SingleDatasetAnalysisMethod {
     private double improveBorderPoint(int index, double minDistance, double maxDistance, double similarityScore,
     		 @NonNull Nucleus testNucleus) throws ProfileException, MissingLandmarkException,
             MissingProfileException, UnavailableBorderPointException, ComponentCreationException {
-        // // make all changes to a fresh nucleus before buggering up the real
-        // one
+        // Create a new nucleus with an offset to one of the root border points
+    	
         LOGGER.finest( "Testing point " + index);
         double score = testNucleus.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT)
                 .absoluteSquareDifference(targetCurve);

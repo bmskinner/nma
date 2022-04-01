@@ -200,7 +200,8 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod impleme
 	private void createRefoldingMethod(List<IAnalysisDataset> datasets)  {
 		for(IAnalysisDataset dataset : datasets) {
 			if(dataset.getCollection().getRuleSetCollection().equals(RuleSetCollection.roundRuleSetCollection())) {
-				createProfileRefoldMethod(datasets);
+//				createProfileRefoldMethod(datasets);
+				createAveragingMethod(datasets);
 			} else {
 				createAveragingMethod(datasets);
 			}

@@ -183,11 +183,7 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
         
         // Build a consensus nucleus from the template points
         Consensus cons = new DefaultConsensusNucleus(n);
-        
-        // TODO: make this use the new orientation scheme (left or right, up or down)
-        if (cons.getBorderPoint(Landmark.REFERENCE_POINT).isRightOf(cons.getCentreOfMass()))
-        	cons.flipHorizontal();
-        
+
         // Calculate any other stats that need the vertical alignment
         cons.getOrientedNucleus();
         return cons;

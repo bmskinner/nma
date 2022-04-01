@@ -18,7 +18,6 @@ import org.junit.Test;
 import com.bmskinner.nuclear_morphology.analysis.classification.NucleusClusteringMethod;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.ConsensusAveragingMethod;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.NucleusDetectionMethod;
-import com.bmskinner.nuclear_morphology.analysis.nucleus.ProfileRefoldMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetProfilingMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMethod.MorphologyAnalysisMode;
@@ -200,7 +199,7 @@ public class TestImageDatasetCreator {
         new DatasetProfilingMethod(d)
 	    	.then(new DatasetSegmentationMethod(d, MorphologyAnalysisMode.NEW))
 	    	.then(op.getRuleSetCollection().equals(RuleSetCollection.roundRuleSetCollection())
-	    			? new ProfileRefoldMethod(d)
+	    			? new ConsensusAveragingMethod(d) //TODO: replace once new refold method is available
 	    		    : new ConsensusAveragingMethod(d))
 	    	.call();
 
@@ -263,7 +262,7 @@ public class TestImageDatasetCreator {
     	new DatasetProfilingMethod(d)
     	.then(new DatasetSegmentationMethod(d, MorphologyAnalysisMode.NEW))
     	.then(op.getRuleSetCollection().equals(RuleSetCollection.roundRuleSetCollection())
-    			? new ProfileRefoldMethod(d)
+    			? new ConsensusAveragingMethod(d) //TODO: temp replacement before the new ProfileRefoldMethod is written
     					: new ConsensusAveragingMethod(d))
     	.thenIf(makeClusters, new NucleusClusteringMethod(d, clusterOptions))
     	.call();
@@ -325,9 +324,7 @@ public class TestImageDatasetCreator {
     	IProfileCollection p2 = t.getCollection().getProfileCollection();
     	
     	assertEquals("Options should match", d.getAnalysisOptions().get(), t.getAnalysisOptions().get());
-    	assertEquals("Profile collections should match", p1, p2);
-    	assertEquals("Consensuses should match", d.getCollection().getConsensus(), t.getCollection().getConsensus());
-    	
+    	assertEquals("Profile collections should match", p1, p2);   	
     	
     	// Check signal groups
     	for(ISignalGroup s : d.getCollection().getSignalGroups()) {
@@ -342,8 +339,15 @@ public class TestImageDatasetCreator {
         	ComponentTester.testDuplicatesByField(dCell, tCell);
     	}
     	
-    	// Check the collection
-    	ComponentTester.testDuplicatesByField(d.getCollection(), t.getCollection());
+    	// Check the collection. These will check the integer fields, but not the calculated border list
+    	assertEquals("Consensus nuclei should match",d.getCollection().getConsensus(), t.getCollection().getConsensus());
+    	assertEquals("Raw consensus nuclei should match",d.getCollection().getRawConsensus(), t.getCollection().getRawConsensus());
+
+    	// Confirm consensus nuclei are copied successfully
+    	ComponentTester.testDuplicatesByField(d.getCollection().getConsensus(), t.getCollection().getConsensus());
+    	ComponentTester.testDuplicatesByField(d.getCollection().getRawConsensus(), t.getCollection().getRawConsensus());
+
+
     	assertEquals("Cell collections should match", d.getCollection(), t.getCollection());
     	assertEquals("Child collections should match", d.getAllChildDatasets(), t.getAllChildDatasets());
     	assertEquals("Merge sources should match", d.getAllMergeSources(), t.getAllMergeSources());
@@ -351,7 +355,7 @@ public class TestImageDatasetCreator {
     	assertEquals("Cluster groups should match", d.getClusterGroups(), t.getClusterGroups());
     	assertEquals("Version created should match", d.getVersionCreated(), t.getVersionCreated());
     	assertEquals("Save path should match", d.getSavePath(), t.getSavePath());
-    	
+    	ComponentTester.testDuplicatesByField(d.getCollection(), t.getCollection());
     	ComponentTester.testDuplicatesByField(d, t);
     	assertEquals("Datasets should match", d, t);
     }

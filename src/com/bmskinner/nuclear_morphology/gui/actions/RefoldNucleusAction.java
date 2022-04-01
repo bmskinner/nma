@@ -62,16 +62,16 @@ public class RefoldNucleusAction extends SingleDatasetResultAction {
         this.setProgressBarIndeterminate();
         
         try {
-            boolean override = GlobalOptions.getInstance().getBoolean(GlobalOptions.REFOLD_OVERRIDE_KEY);
+//            boolean override = GlobalOptions.getInstance().getBoolean(GlobalOptions.REFOLD_OVERRIDE_KEY);
 
             IAnalysisMethod m = new ConsensusAveragingMethod(dataset);
             int progressLength = PROGRESS_BAR_LENGTH;
             // The averaging method does not work for nuclei that are round, or have extreme variability. 
             // In these cases, or if the program config file has been set to override, use the old profile method.
-            if (override){
-                m = new ProfileRefoldMethod(dataset);
-                progressLength = ProfileRefoldMethod.MAX_ITERATIONS;
-            }
+//            if (override){
+//                m = new ProfileRefoldMethod(dataset);
+//                progressLength = ProfileRefoldMethod.MAX_ITERATIONS;
+//            }
 
             
             worker = new DefaultAnalysisWorker(m, progressLength);
