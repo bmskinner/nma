@@ -30,6 +30,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.jdom2.Element;
 
+import com.bmskinner.nuclear_morphology.analysis.ComponentOrienter;
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalAnalyser;
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.UnavailableBorderPointException;
@@ -302,16 +303,7 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
 
     @Override
     public void orient() throws MissingLandmarkException {
-
-    	// Use the points defined in the RuleSetCollection
-    	// to determine how to orient the nucleus
-    	if(priorityAxis.equals(PriorityAxis.Y)) {
-    		alignVerticallyPriorityY();
-
-    	} else {
-    		// Same logic but now if X axis is the priority
-    		alignVerticallyPriorityX();
-    	}
+    	ComponentOrienter.orient(this);
     }
     
     
@@ -322,105 +314,6 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
 		result.addAll(orientationMarks.keySet());
 		return result;
 	}
-
-	/**
-     * Align the nucleus according to the available
-     * orientation points, prioritising the Y axis
-     * @throws MissingLandmarkException
-     */
-    private void alignVerticallyPriorityY() throws MissingLandmarkException {
-    	// Check if t and b are present
-    	
-    	Landmark t = orientationMarks.get(OrientationMark.TOP);
-    	Landmark b = orientationMarks.get(OrientationMark.BOTTOM);
-    	Landmark y = orientationMarks.get(OrientationMark.Y);
-    	Landmark r = orientationMarks.get(OrientationMark.RIGHT);
-    	Landmark l = orientationMarks.get(OrientationMark.LEFT);
-    	Landmark x = orientationMarks.get(OrientationMark.X);
-    	
-    	
-		if(t!=null && hasLandmark(t) && b!=null && hasLandmark(b)) {
-			IPoint topPoint    = getBorderPoint(t);
-			IPoint bottomPoint = getBorderPoint(b);
-			if(topPoint != bottomPoint) {
-    			alignPointsOnVertical(topPoint, bottomPoint);
-			} else if(y!=null && hasLandmark(y)) {
-				rotatePointToBottom(getBorderPoint(y));
-			}
-		} else if(y!=null && hasLandmark(y)) { // if no t and b, fall back to y
-			rotatePointToBottom(getBorderPoint(y));
-		}
-		
-		// Now check x, and flip as needed
-		if(l!=null && hasLandmark(l) && r!=null && hasLandmark(r)) {
-			IPoint leftPoint  = getBorderPoint(l);
-			IPoint rightPoint = getBorderPoint(r);
-			if(leftPoint.isRightOf(rightPoint)) {
-				flipHorizontal();
-			}
-		} else if(l!=null && hasLandmark(l)) {
-			IPoint leftPoint  = getBorderPoint(l);
-			if(leftPoint.isRightOf(getCentreOfMass()))
-				flipHorizontal();
-		} else if(r!=null && hasLandmark(r)) {
-			IPoint rightPoint = getBorderPoint(r);
-			if(rightPoint.isLeftOf(getCentreOfMass()))
-				flipHorizontal();
-		} else if(x!=null && hasLandmark(x)) {
-			IPoint leftPoint = getBorderPoint(x);
-			if(leftPoint.isRightOf(getCentreOfMass()))
-				flipHorizontal();
-		}
-    }
-    
-    /**
-     * Align the nucleus according to the available
-     * orientation points, prioritising the X axis
-     * @throws MissingLandmarkException
-     */
-    private void alignVerticallyPriorityX() throws MissingLandmarkException {
-    	
-    	Landmark t = orientationMarks.get(OrientationMark.TOP);
-    	Landmark b = orientationMarks.get(OrientationMark.BOTTOM);
-    	Landmark y = orientationMarks.get(OrientationMark.Y);
-    	Landmark r = orientationMarks.get(OrientationMark.RIGHT);
-    	Landmark l = orientationMarks.get(OrientationMark.LEFT);
-    	Landmark x = orientationMarks.get(OrientationMark.X);
-    	
-    	// Check if l and r are present
-		if(l!=null && hasLandmark(l) && r!=null && hasLandmark(r)) {
-			IPoint leftPoint  = getBorderPoint(l);
-			IPoint rightPoint = getBorderPoint(r);
-			if(leftPoint != rightPoint) {
-    			alignPointsOnHorizontal(leftPoint, rightPoint);
-			} else if(x!=null && hasLandmark(x)) { // if no l and r, fall back to x
-				rotatePointToLeft(getBorderPoint(x));
-			}
-		} else if(x!=null && hasLandmark(x)) { // if no l and r, fall back to x
-			rotatePointToLeft(getBorderPoint(x));
-		}
-		
-		// Now check y, and flip as needed
-		if(t!=null && hasLandmark(t) && b!=null && hasLandmark(b)) {
-			IPoint topPoint  = getBorderPoint(t);
-			IPoint bottomPoint = getBorderPoint(b);
-			if(topPoint.isBelow(bottomPoint)) {
-				flipVertical();
-			}
-		} else if(t!=null && hasLandmark(t)) {
-			IPoint topPoint  = getBorderPoint(t);
-			if(topPoint.isBelow(getCentreOfMass()))
-				flipVertical();
-		} else if(b!=null && hasLandmark(b)) {
-			IPoint bottomPoint = getBorderPoint(b);
-			if(bottomPoint.isAbove(getCentreOfMass()))
-				flipVertical();
-		} else if(y!=null && hasLandmark(y)) {
-			IPoint bottomPoint = getBorderPoint(y);
-			if(bottomPoint.isAbove(getCentreOfMass()))
-				flipVertical();
-		}
-    }
     
     @Override
     public void flipHorizontal(@NonNull IPoint p) {
