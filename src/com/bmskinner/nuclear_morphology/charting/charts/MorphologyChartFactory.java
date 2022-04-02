@@ -19,12 +19,10 @@ package com.bmskinner.nuclear_morphology.charting.charts;
 import java.awt.Color;
 import java.awt.Paint;
 import java.text.DecimalFormat;
-import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.annotations.XYTextAnnotation;
 import org.jfree.chart.axis.LogAxis;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.axis.StandardTickUnitSource;
@@ -34,8 +32,6 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.DefaultXYItemRenderer;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
-import org.jfree.chart.ui.TextAnchor;
-import org.jfree.data.general.DatasetUtils;
 import org.jfree.data.xy.XYDataset;
 
 import com.bmskinner.nuclear_morphology.charting.ChartComponents;
@@ -44,14 +40,9 @@ import com.bmskinner.nuclear_morphology.charting.datasets.NucleusDatasetCreator;
 import com.bmskinner.nuclear_morphology.charting.datasets.ProfileDatasetCreator;
 import com.bmskinner.nuclear_morphology.charting.datasets.ProfileDatasetCreator.ProfileChartDataset;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
-import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.measure.MeasurementDimension;
 import com.bmskinner.nuclear_morphology.components.profiles.BooleanProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
-import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
-import com.bmskinner.nuclear_morphology.stats.DipTester;
-import com.bmskinner.nuclear_morphology.stats.SignificanceTest;
 
 /**
  * Generate charts for various morphology profile parameters. 
@@ -65,168 +56,6 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 
 	public MorphologyChartFactory(@NonNull ChartOptions o) {
 		super(o);
-	}
-
-	/**
-	 * Create a chart showing the angle values at the given normalised profile
-	 * position within the AnalysisDataset. The chart holds two chart datasets:
-	 * 0 is the probabililty density function. 1 is the actual values as dots on
-	 * the x-axis
-	 * 
-	 * @param position
-	 * @param list
-	 * * @param type
-	 * @return
-	 * @throws Exception
-	 */
-	private JFreeChart createModalityChart(Double position, List<IAnalysisDataset> list, ProfileType type)
-			throws ChartCreationException {
-
-		JFreeChart chart = createBaseXYChart();
-
-		XYPlot plot = chart.getXYPlot();
-		plot.getDomainAxis().setLabel(type.getLabel());
-		plot.getRangeAxis().setLabel(PROBABILITY_LBL);
-
-		if (type.getDimension().equals(MeasurementDimension.ANGLE)) {
-			plot.getDomainAxis().setRange(0, 360);
-		}
-
-		plot.addDomainMarker(new ValueMarker(180, Color.BLACK, ChartComponents.MARKER_STROKE));
-
-		int datasetCount = 0;
-		int iteration = 0;
-		for (IAnalysisDataset dataset : list) {
-
-			XYDataset ds = new NucleusDatasetCreator(options).createModalityProbabililtyDataset(position, dataset,
-					type);
-			XYDataset values = new NucleusDatasetCreator(options).createModalityValuesDataset(position, dataset, type);
-
-			Paint colour = dataset.getDatasetColour().orElse(ColourSelecter.getColor(iteration));
-
-			plot.setDataset(datasetCount, ds);
-
-			XYLineAndShapeRenderer lineRenderer = new XYLineAndShapeRenderer(true, false);
-			plot.setRenderer(datasetCount, lineRenderer);
-			int seriesCount = plot.getDataset(datasetCount).getSeriesCount();
-			for (int i = 0; i < seriesCount; i++) {
-
-				lineRenderer.setSeriesPaint(i, colour);
-				lineRenderer.setSeriesStroke(i, ChartComponents.MARKER_STROKE);
-				lineRenderer.setSeriesVisibleInLegend(i, false);
-			}
-
-			datasetCount++;
-
-			plot.setDataset(datasetCount, values);
-
-			// draw the individual points
-			XYLineAndShapeRenderer shapeRenderer = new XYLineAndShapeRenderer(false, true);
-
-			plot.setRenderer(datasetCount, shapeRenderer);
-			seriesCount = plot.getDataset(datasetCount).getSeriesCount();
-			for (int i = 0; i < seriesCount; i++) {
-				shapeRenderer.setSeriesPaint(i, colour);
-				shapeRenderer.setSeriesStroke(i, ChartComponents.MARKER_STROKE);
-				shapeRenderer.setSeriesVisibleInLegend(i, false);
-			}
-			datasetCount++;
-			iteration++;
-		}
-
-		return chart;
-	}
-
-	/**
-	 * Create a chart showing the modality profiles for the given options
-	 * @return a modality chart, or a chart with an error label if the data could not be found
-	 */
-	public JFreeChart createModalityProfileChart() {
-
-		XYDataset ds;
-		try {
-			ds = new NucleusDatasetCreator(options).createModalityProfileDataset();
-		} catch (ChartDatasetCreationException e) {
-			return createErrorChart();
-		}
-
-		JFreeChart chart = createBaseXYChart();
-
-		XYPlot plot = chart.getXYPlot();
-		plot.getDomainAxis().setRange(0, 100);
-		plot.getDomainAxis().setLabel(POSITION_LBL);
-		plot.getRangeAxis().setRange(0, 1);
-		plot.getRangeAxis().setLabel(PROBABILITY_LBL);
-		plot.setDataset(ds);
-
-		for (int i = 0; i < options.getDatasets().size(); i++) {
-
-			IAnalysisDataset dataset = options.getDatasets().get(i);
-
-			Paint colour = dataset.getDatasetColour().orElse(ColourSelecter.getColor(i));
-
-			plot.getRenderer().setSeriesPaint(i, colour);
-			plot.getRenderer().setSeriesStroke(i, ChartComponents.MARKER_STROKE);
-			plot.getRenderer().setSeriesVisibleInLegend(i, false);
-		}
-		applyDefaultAxisOptions(chart);
-		return chart;
-	}
-
-	public JFreeChart createModalityPositionChart() {
-
-		if (!options.hasDatasets()) {
-			return createEmptyChart();
-		}
-
-		JFreeChart chart;
-		try {
-			chart = createModalityChart(options.getModalityPosition(), options.getDatasets(), options.getType());
-		} catch (Exception e) {
-			return createErrorChart();
-		}
-		XYPlot plot = chart.getXYPlot();
-
-		double yMax = 0;
-		DecimalFormat df = new DecimalFormat("#0.000");
-
-		for (int i = 0; i < plot.getDatasetCount(); i++) {
-
-			// Ensure annotation is placed in the right y position
-			double y = DatasetUtils.findMaximumRangeValue(plot.getDataset(i)).doubleValue();
-			yMax = y > yMax ? y : yMax;
-
-		}
-
-		int index = 0;
-		for (IAnalysisDataset dataset : options.getDatasets()) {
-
-			// Do the stats testing
-			double pvalue;
-			try {
-				pvalue = new DipTester(dataset.getCollection()).getPValueForPositon(options.getModalityPosition(),
-						options.getType());
-			} catch (Exception e) {
-				return createErrorChart();
-			}
-
-			// Add the annotation
-			double yPos = yMax - (index * (yMax / 20));
-			String statisticalTesting = "p(unimodal) = " + df.format(pvalue);
-			if (pvalue < SignificanceTest.FIVE_PERCENT_SIGNIFICANCE_LEVEL) {
-				statisticalTesting = "* " + statisticalTesting;
-			}
-			XYTextAnnotation annotation = new XYTextAnnotation(statisticalTesting, 355, yPos);
-
-			// Set the text colour
-			Paint colour = dataset.getDatasetColour().orElse(ColourSelecter.getColor(index));
-			annotation.setPaint(colour);
-			annotation.setTextAnchor(TextAnchor.TOP_RIGHT);
-			plot.addAnnotation(annotation);
-			index++;
-		}
-		applyDefaultAxisOptions(chart);
-		return chart;
 	}
 
 	/**

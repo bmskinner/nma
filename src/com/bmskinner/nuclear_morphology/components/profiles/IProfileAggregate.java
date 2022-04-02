@@ -27,56 +27,28 @@ import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
  */
 public interface IProfileAggregate {
 	
-	/**
-	 * Create a copy of this aggregate
-	 * @return
-	 */
-	IProfileAggregate duplicate();
-
     /**
-     * Add the values from the given profile to the aggregate via interpolation
-     * @param yvalues
+     * Add the values from the given profile to the aggregate. The profile
+     * length will be adjusted via interpolation
+     * @param values
      * @throws ProfileException
      */
-    void addValues(@NonNull IProfile yvalues) throws ProfileException;
+    void addValues(@NonNull IProfile values) throws ProfileException;
 
     /**
-     * Get the aggregate length
-     * @return
-     */
-    int length();
-
-    /**
-     * Get the x-axis positions of the centre of each bin.
-     * 
-     * @return the Profile of positions
-     */
-    IProfile getXPositions();
-
-
-    /**
-     * Get the median profile of the aggregate
+     * Get the median profile of the aggregate. Shortcut for
+     * getQuartile(50)
      * @return
      * @throws ProfileException
      */
     IProfile getMedian() throws ProfileException;
 
     /**
-     * Get the profile corresponding to the given quartile of the values in the aggregate
-     * @param quartile
+     * Get the profile corresponding to the given quartile 
+     * of the values in the aggregate
+     * @param quartile - the quartile (0-100)
      * @return
      * @throws ProfileException
      */
-    IProfile getQuartile(double quartile) throws ProfileException;
-
-    /**
-     * Get the angle values at the given position in the aggragate from all
-     * nuclei
-     * 
-     * @param position the position to search. Must be between 0 and the length of
-     *            the aggregate.
-     * @return an unsorted array of the values at the given position
-     * @throws Exception
-     */
-    double[] getValuesAtPosition(double position);
+    IProfile getQuartile(int quartile) throws ProfileException;
 }

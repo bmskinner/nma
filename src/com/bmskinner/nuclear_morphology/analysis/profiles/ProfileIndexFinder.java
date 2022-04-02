@@ -334,7 +334,7 @@ public class ProfileIndexFinder {
 
         } catch (MissingLandmarkException | ProfileException | MissingProfileException e) {
         	LOGGER.log(Loggable.STACK, "Cannot get matching profile", e);
-            return new BooleanProfile(collection.getProfileCollection().length(), false);
+            return new BooleanProfile(collection.getMedianArrayLength(), false);
         }
 
         for (RuleSet r : list) {
@@ -345,7 +345,7 @@ public class ProfileIndexFinder {
                 p = collection.getProfileCollection().getProfile(r.getType(), Landmark.REFERENCE_POINT, Stats.MEDIAN);
             } catch (MissingLandmarkException | ProfileException | MissingProfileException e) {
             	LOGGER.log(Loggable.STACK, "Cannot get matching profile", e);
-                return new BooleanProfile(collection.getProfileCollection().length(), false);
+                return new BooleanProfile(collection.getMedianArrayLength(), false);
             }
 
             // Apply the rule, and update the result profile

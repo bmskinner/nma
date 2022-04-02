@@ -42,6 +42,8 @@ import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
+import com.bmskinner.nuclear_morphology.components.profiles.DefaultProfileSegment;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfileCollection;
 import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
@@ -178,8 +180,9 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
      * @throws MissingProfileException 
      * @throws MissingOptionException 
      * @throws ProfileException 
+     * @throws MissingLandmarkException 
      */
-    private IAnalysisDataset performMerge(@NonNull ICellCollection newCollection) throws MissingProfileException, MissingOptionException, ProfileException{
+    private IAnalysisDataset performMerge(@NonNull ICellCollection newCollection) throws MissingOptionException, ProfileException, MissingLandmarkException{
 
         for (IAnalysisDataset d : datasets) {
             
@@ -195,17 +198,11 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
         }
         
         for(Nucleus n : newCollection.getNuclei()) {
-        	for(ProfileType t : ProfileType.values())
-				try {
-					n.getProfile(t).clearSegments();
-				} catch (MissingProfileException | MissingLandmarkException | ProfileException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-        		n.setLocked(true); // Ensure tags will not be overwritten by downstream resegmentation
-        }
-        
+    		// Ensure that all nuclei have any existing segments removed
+        	// and replaced with the default segment starting at the RP
+        		n.setSegments(List.of(new DefaultProfileSegment(0, 0, n.getBorderLength(), IProfileCollection.DEFAULT_SEGMENT_ID)));
 
+        } 
 
         // Replace signal groups
         mergeSignalGroups(newCollection);

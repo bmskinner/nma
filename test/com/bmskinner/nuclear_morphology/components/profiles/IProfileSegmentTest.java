@@ -199,7 +199,7 @@ public class IProfileSegmentTest {
 		segment.addMergeSource(s1);
 		segment.addMergeSource(s2);
 		
-		IProfileSegment duplicated = segment.copy();
+		IProfileSegment duplicated = segment.duplicate();
 		assertTrue(duplicated.hasMergeSources());
 		for(IProfileSegment mge : segment.getMergeSources()) {
 			assertTrue(duplicated.hasMergeSource(mge.getID()));
@@ -380,17 +380,17 @@ public class IProfileSegmentTest {
 	@Test
 	public void testLockStateIsCopied() {
 		// Default state
-		IProfileSegment s2  = segment.copy();
+		IProfileSegment s2  = segment.duplicate();
 		assertEquals("Segment lock state should be copied", segment.isLocked(), s2.isLocked());
 		
 		// Explicitly lock
 		segment.setLocked(true);
-		s2  = segment.copy();
+		s2  = segment.duplicate();
 		assertEquals("Segment lock state should be copied", segment.isLocked(), s2.isLocked());
 		
 		// Explicitly unlock
 		segment.setLocked(false);
-		s2  = segment.copy();
+		s2  = segment.duplicate();
 		assertEquals("Segment lock state should be copied", segment.isLocked(), s2.isLocked());
 	}
 	
@@ -478,7 +478,7 @@ public class IProfileSegmentTest {
 
 		List<IProfileSegment> newSegs = new ArrayList<>();
 		newSegs.add(merged);
-		newSegs.add(segs.get(2).copy());
+		newSegs.add(segs.get(2).duplicate());
 		
 		assertTrue(segment.getClass().getSimpleName(), newSegs.get(0).hasMergeSource(segs.get(0).getID()));
 		assertTrue(segment.getClass().getSimpleName(), newSegs.get(0).hasMergeSource(segs.get(1).getID()));
@@ -786,7 +786,7 @@ public class IProfileSegmentTest {
 	
 	@Test
 	public void testCopy() {
-		IProfileSegment s2 = segment.copy();
+		IProfileSegment s2 = segment.duplicate();
 		assertEquals(segment, s2);
 	}	
 }

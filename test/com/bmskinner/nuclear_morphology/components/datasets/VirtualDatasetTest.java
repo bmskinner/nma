@@ -40,7 +40,10 @@ public class VirtualDatasetTest extends ComponentTester {
 				.randomOffsetProfiles(true)
 				.numberOfClusters(N_CHILD_DATASETS)
 				.segmented().build();	
-		assertEquals(parent.getCollection().getProfileCollection(), d.getProfileCollection());
+		
+		// Note we test string equality here because the profile collection classes are internal to
+		// each dataset
+		assertEquals(parent.getCollection().getProfileCollection().toString(), d.getProfileCollection().toString());
 	}
 	
 	@Test

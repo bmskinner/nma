@@ -913,8 +913,13 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     public String toString() {
     	String newLine = System.getProperty("line.separator");
     	StringBuilder builder = new StringBuilder("ID: "+id.toString()+newLine);
-    	builder.append(String.format("Bounds: x: %s-%s y: %s-%s", this.getBase().getX(), this.getBase().getX()+
-    			this.getWidth(), this.getBase().getY(), this.getBase().getY()+this.getHeight()));
+    	builder.append(String.format("X bounds: %s-%s", 
+    			this.getBase().getX(),
+    			this.getBase().getX()+ this.getWidth()));
+    	builder.append(newLine);
+    	builder.append(String.format("Y bounds: %s-%s", 
+    			this.getBase().getY(), 
+    			this.getBase().getY()+this.getHeight()));
     	builder.append(newLine);
     	builder.append("CoM: "+centreOfMass);
     	builder.append(newLine);
@@ -934,8 +939,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     	builder.append(newLine);
     	builder.append("borderList: "+Arrays.toString(borderList));
     	builder.append(newLine);
-    	
-    	
+
     	builder.append("Measurements:"+newLine);
     	for(Entry<Measurement, Double> entry : measurements.entrySet()) {
     		builder.append(entry.getKey().toString()+": "+entry.getValue().toString()+newLine);

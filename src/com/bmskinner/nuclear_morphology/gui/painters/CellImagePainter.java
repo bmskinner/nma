@@ -78,7 +78,9 @@ public class CellImagePainter implements ImagePainter {
 		
 		Nucleus n = cell.getPrimaryNucleus();
 		try {
-			ISegmentedProfile sp = cell.getPrimaryNucleus().getProfile(ProfileType.ANGLE);
+			ISegmentedProfile sp = cell.getPrimaryNucleus()
+					.getProfile(ProfileType.ANGLE);
+
 			List<IProfileSegment> segs = sp.getSegments();
 			for (int i = 0; i < segs.size(); i++) {
 				g2.setColor(ColourSelecter.getColor(i));
@@ -86,7 +88,7 @@ public class CellImagePainter implements ImagePainter {
                 IProfileSegment seg = segs.get(i);
 
                 for (int j = 0; j <= seg.length(); j++) {
-                    int k = n.wrapIndex(seg.getStartIndex() + j);
+                    int k = n.wrapIndex(seg.getStartIndex() + j + n.getBorderIndex(Landmark.REFERENCE_POINT) -1);
                     IPoint p = n.getBorderPoint(k)
                     		.minus(n.getBase())
                     		.plus(CellularComponent.COMPONENT_BUFFER);

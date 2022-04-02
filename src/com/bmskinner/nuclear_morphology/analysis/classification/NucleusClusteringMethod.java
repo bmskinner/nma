@@ -233,7 +233,7 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
     	// complete the new collections by profiling 
     	for(ICellCollection c : clusterMap.values()) {
     		LOGGER.fine("Cluster has "+c.size()+" cells");
-    		c.createProfileCollection();
+    		c.getProfileCollection().calculateProfiles();
     		dataset.getCollection().getProfileManager().copySegmentsAndLandmarksTo(c);
     	}
 

@@ -34,7 +34,7 @@ public class ProfileSegmenterTest extends ComponentTester {
 				
 		List<IProfileSegment> segments = segmenter.segment();
 		
-		d.getCollection().getProfileCollection().addSegments(segments);
+		d.getCollection().getProfileCollection().setSegments(segments);
 	}
 
 

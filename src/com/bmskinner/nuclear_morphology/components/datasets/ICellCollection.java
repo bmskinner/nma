@@ -194,13 +194,6 @@ public interface ICellCollection
     Optional<Nucleus> getNucleus(@NonNull UUID id);
 
     /**
-     * Get the type of nucleus this collection should contain
-     * 
-     * @return
-     */
-//    NucleusType getNucleusType();
-
-    /**
      * Remove the given cell from the collection. If the cell is null, has no
      * effect. If the cell is not in the collection, has no effect.
      * 
@@ -284,29 +277,7 @@ public interface ICellCollection
      * @return
      */
     IProfileCollection getProfileCollection();
-
-    /**
-     * Generate the profile aggregates from all cells in the 
-     * population based on the currently set reference point in each
-     * cell nucleus. The aggregate length will be set to the median
-     * nucleus border length of the population.
-     * @throws ProfileException if creation fails
-     * @throws MissingProfileException 
-     * @throws MissingLandmarkException 
-     */
-    void createProfileCollection() throws ProfileException, MissingLandmarkException, MissingProfileException;
     
-    /**
-     * Generate the profile aggregates from all cells in the 
-     * population based on the currently set reference point in each
-     * cell nucleus. The aggregate length will be set to the given
-     * value
-     * @throws ProfileException if creation fails
-     * @throws MissingProfileException 
-     * @throws MissingLandmarkException 
-     */
-    void createProfileCollection(int length) throws ProfileException, MissingLandmarkException, MissingProfileException;
-
     /**
      * Get the distinct source image file list for all nuclei in the collection
      * 
@@ -453,15 +424,6 @@ public interface ICellCollection
      * @return
      */
     int getMaxProfileLength();
-
-    /**
-     * Update the image scale for all cells in the collection.
-     * Note that this should be invoked by an analysis dataset only,
-     * since it will otherwise unsync the options from the cells
-     * @param scale the new scale in pixels/micron
-     */
-    @Deprecated
-//    void setScale(double scale);
 
     /**
      * Get the perimeter normalised veriabililty of a nucleus angle profile

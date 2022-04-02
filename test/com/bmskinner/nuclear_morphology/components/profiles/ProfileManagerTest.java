@@ -93,7 +93,7 @@ public class ProfileManagerTest {
 		if(source==VirtualDataset.class){
 			VirtualDataset v = new VirtualDataset(d,TestDatasetBuilder.TEST_DATASET_NAME, TestDatasetBuilder.TEST_DATASET_UUID);
 			v.addAll(d.getCollection().getCells());
-			v.createProfileCollection();
+			v.getProfileCollection().calculateProfiles();
 			d.getCollection().getProfileManager().copySegmentsAndLandmarksTo(v);
 			for(ICell c : d.getCollection().getCells()) {
 				v.addCell(c);
@@ -122,7 +122,7 @@ public class ProfileManagerTest {
     	IAnalysisOptions op = OptionsFactory.makeDefaultRodentAnalysisOptions(testFolder);
     	
     	IAnalysisDataset d = new NucleusDetectionMethod(TestResources.UNIT_TEST_FOLDER.getAbsoluteFile(), op).call().getFirstDataset();
-    	d.getCollection().createProfileCollection();
+    	d.getCollection().getProfileCollection().calculateProfiles();
     	
     	// Create a median from the current reference points in the nuclei
     	IProfile median = d.getCollection().getProfileCollection()
@@ -139,7 +139,7 @@ public class ProfileManagerTest {
 		.updateLandmarkToMedianBestFit(Landmark.REFERENCE_POINT, ProfileType.ANGLE, median);
     	
     	// Update profile collection
-    	collection.createProfileCollection();
+    	collection.getProfileCollection().calculateProfiles();
 
     	IProfile newMedian = d.getCollection().getProfileCollection()
     			.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);
@@ -150,12 +150,6 @@ public class ProfileManagerTest {
     	}
     	LOGGER.fine("Diff: "+diff+"; post diff "+postDiff);
     	assertTrue(postDiff <= diff);
-	}
-
-	@Test
-	public void testGetProfileLength() {
-		int perimeter = TestDatasetBuilder.DEFAULT_BASE_HEIGHT*2 + TestDatasetBuilder.DEFAULT_BASE_WIDTH*2 - 2;
-		assertEquals(perimeter, manager.getProfileLength());
 	}
 	
 	/**

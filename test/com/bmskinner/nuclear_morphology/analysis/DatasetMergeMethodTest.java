@@ -26,6 +26,43 @@ import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
 public class DatasetMergeMethodTest {
 	
 	public static final String MERGED_DATASET_FILE = TestResources.DATASET_FOLDER + "Merge_of_merge.nmd";
+	
+	@Test
+	public void testMergedDatasetCanBeProfiled() throws Exception {
+		IAnalysisDataset d1 = new TestDatasetBuilder(123)
+				.withNucleusShape(TestComponentShape.SQUARE)
+				.cellCount(10)
+				.segmented()
+				.build();
+		
+		IAnalysisDataset d2 = new TestDatasetBuilder(456)
+				.withNucleusShape(TestComponentShape.SQUARE)
+				.cellCount(10)
+				.segmented()
+				.build();
+		
+		// Move all landmarks in d1 except RP by a fixed distance
+		for(Nucleus n : d1.getCollection().getNuclei()) {
+			Map<Landmark, Integer> tags = n.getLandmarks();
+			for(Landmark tag : tags.keySet()) {
+				if(Landmark.REFERENCE_POINT.equals(tag))
+					continue;
+				n.setLandmark(tag, n.getBorderIndex(tag)+10);
+			}
+		}
+		
+		List<IAnalysisDataset> list = List.of(d1, d2);	
+		
+		// Merge and resegment the datasets
+		DatasetMergeMethod dm = new DatasetMergeMethod(list, new File("Empty path"));
+		IAnalysisDataset result = dm.call().getFirstDataset();
+		assertNotNull("Merged dataset should not be null", result);
+		assertEquals("Merged dataset should have correct cell count", 20, result.getCollection().size());
+
+		// Run new profiling on the merged dataset
+		new DatasetProfilingMethod(result).call();
+		new DatasetSegmentationMethod(result, MorphologyAnalysisMode.NEW).call();
+	}
 
 	@Test
 	public void testTagsAreCopiedAfterResegmentation() throws Exception {
@@ -42,7 +79,7 @@ public class DatasetMergeMethodTest {
 				.segmented()
 				.build();
 		
-		// Move all tags except RP by a fixed distance
+		// Move all landmarks in d1 except RP by a fixed distance
 		for(Nucleus n : d1.getCollection().getNuclei()) {
 			Map<Landmark, Integer> tags = n.getLandmarks();
 			for(Landmark tag : tags.keySet()) {
@@ -50,23 +87,21 @@ public class DatasetMergeMethodTest {
 					continue;
 				n.setLandmark(tag, n.getBorderIndex(tag)+10);
 			}
-			
 		}
 		
-		List<IAnalysisDataset> list = new ArrayList<>();
-		list.add(d1);
-		list.add(d2);
+		List<IAnalysisDataset> list = List.of(d1, d2);	
 		
 		// Merge and resegment the datasets
 		DatasetMergeMethod dm = new DatasetMergeMethod(list, new File("Empty path"));
 		IAnalysisDataset result = dm.call().getFirstDataset();
 		assertNotNull("Merged dataset should not be null", result);
+		assertEquals("Merged dataset should have correct cell count", 20, result.getCollection().size());
 		
-		
+		// Run new profiling on the merged dataset
 		new DatasetProfilingMethod(result).call();
 		new DatasetSegmentationMethod(result, MorphologyAnalysisMode.NEW).call();
 				
-		// Are tag positions properly restored?
+		// Are landmark positions properly restored?
 		for(Nucleus n : d1.getCollection().getNuclei()) {
 			Nucleus test = result.getCollection().getNucleus(n.getID()).get();
 			Map<Landmark, Integer> tags = n.getLandmarks();

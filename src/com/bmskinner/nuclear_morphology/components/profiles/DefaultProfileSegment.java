@@ -27,7 +27,6 @@
 package com.bmskinner.nuclear_morphology.components.profiles;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
@@ -50,27 +49,26 @@ public class DefaultProfileSegment implements IProfileSegment {
 	
 	private static final Logger LOGGER = Logger.getLogger(DefaultProfileSegment.class.getName());
 
-    private UUID uuid; // allows keeping a consistent track of segment IDs with
-                       // a profile
+    private final UUID uuid;
 
     private int startIndex, endIndex, totalLength; // the start and end indexes inclusive
 
     @Deprecated
     private short positionInProfile = 0; // for future refactor
+    
+    /** Merge sources within this segment. Only
+     * two merge sources can be present per segment */
+    private IProfileSegment mergeSourceA = null;
+    private IProfileSegment mergeSourceB = null;
 
-    private IProfileSegment[] mergeSources = new IProfileSegment[0];
-
-    private IProfileSegment prevSegment = null;  // track the previous
-                                                          // segment in the
-                                                          // profile
-    private IProfileSegment nextSegment = null;  // track the next
-                                                          // segment in the
-                                                          // profile
-    private boolean        isLocked    = false; // allow the start
-                                                          // index to be fixed
+    /** The previous segment in the profile if segments are linked */
+    private IProfileSegment prevSegment = null;
     
-    
-    
+    /** The next segment in the profile if segments are linked */
+    private IProfileSegment nextSegment = null;
+        
+    /** Allow the start index to be fixed */
+    private boolean isLocked    = false;
 
     /**
      * Construct with an existing UUID. This allows nucleus segments to directly
@@ -81,11 +79,9 @@ public class DefaultProfileSegment implements IProfileSegment {
      * @param total the length of the profile that generated the segment
      * @param id the id of the segment
      */
-    public DefaultProfileSegment(int startIndex, int endIndex, int total, UUID id) {
+    public DefaultProfileSegment(int startIndex, int endIndex, int total, @NonNull UUID id) {
     	if(IProfileCollection.DEFAULT_SEGMENT_ID.equals(id) && startIndex!=endIndex)
 			throw new IllegalArgumentException(String.format("Cannot make default segment %s-%s; it would be shorter than the entire profile", startIndex, endIndex));
-        if (id == null)
-            throw new IllegalArgumentException("Segment ID cannot be null");
         
         if(startIndex<0 || endIndex <0)
             throw new IllegalArgumentException("Segment start and end indexes cannot be negative");
@@ -103,7 +99,6 @@ public class DefaultProfileSegment implements IProfileSegment {
         this.startIndex = startIndex;
         this.endIndex = endIndex;
         this.totalLength = total;
-        this.mergeSources = new IProfileSegment[0];
         this.uuid = id;
     }
 
@@ -113,10 +108,14 @@ public class DefaultProfileSegment implements IProfileSegment {
 				.setAttribute("id", uuid.toString())
 				.setAttribute("start", String.valueOf(startIndex))
 				.setAttribute("end", String.valueOf(endIndex))
-				.setAttribute("total", String.valueOf(totalLength))
-				.setAttribute("lock", String.valueOf(isLocked));		
-		for(IProfileSegment s : mergeSources) {
-			e.addContent(new Element("MergeSource").setContent(s.toXmlElement()));
+				.setAttribute("total", String.valueOf(totalLength));
+				
+		if(isLocked)
+				e.setAttribute("lock", "true");	// don't waste space on unlocked segments
+		
+		if(mergeSourceA!=null) {
+			e.addContent(new Element("MergeSource").setContent(mergeSourceA.toXmlElement()));
+			e.addContent(new Element("MergeSource").setContent(mergeSourceB.toXmlElement()));
 		}
 		return e;
 	}
@@ -126,14 +125,15 @@ public class DefaultProfileSegment implements IProfileSegment {
     	startIndex  = Integer.parseInt(e.getAttributeValue("start"));
     	endIndex    = Integer.parseInt(e.getAttributeValue("end"));
     	totalLength = Integer.parseInt(e.getAttributeValue("total"));
-    	isLocked    = Boolean.valueOf(e.getAttributeValue("lock"));
     	
-    	mergeSources = new IProfileSegment[e.getChildren("MergeSource").size()];
-    	int i=0;
-    	for(Element el : e.getChildren("MergeSource")) {
-    		mergeSources[i++] = new DefaultProfileSegment(el);
+    	isLocked = e.getAttributeValue("lock")!=null;
+    	
+    	List<Element> merges = e.getChildren("MergeSource");
+    	if(!merges.isEmpty()) {
+    		mergeSourceA = new DefaultProfileSegment(merges.get(0));
+    		mergeSourceB = new DefaultProfileSegment(merges.get(1));
     	}
-    	
+
     	if(totalLength<=0) throw new IllegalArgumentException("XML parsing issue: segment from profile of length zero. Check the XML is valid.");
 
     }
@@ -165,21 +165,13 @@ public class DefaultProfileSegment implements IProfileSegment {
         
         if (n.hasMergeSources()) {
             List<IProfileSegment> otherSources = n.getMergeSources();
-            this.mergeSources = new IProfileSegment[otherSources.size()];
-
-            for (int i = 0; i < otherSources.size(); i++) {
-                mergeSources[i] = otherSources.get(i); // no need to copy, the merge sources are already a copy
-            }
-
-        } else {
-            this.mergeSources = new IProfileSegment[0];
-        }
-
-
+            mergeSourceA = new DefaultProfileSegment(otherSources.get(0));
+    		mergeSourceB = new DefaultProfileSegment(otherSources.get(1));
+        } 
     }
     
     @Override
-	public IProfileSegment copy() {
+	public IProfileSegment duplicate() {
 		return new DefaultProfileSegment(this);
 	}
 
@@ -190,11 +182,11 @@ public class DefaultProfileSegment implements IProfileSegment {
 
     @Override
     public List<IProfileSegment> getMergeSources() {
-        List<IProfileSegment> result = new ArrayList<>();
-        for (IProfileSegment seg : this.mergeSources) {
-            result.add(new DefaultProfileSegment(seg));
-        }
-        return result;
+    	if(mergeSourceA==null && mergeSourceB==null)
+    		return new ArrayList<>();
+    	if(mergeSourceB==null)
+    		return List.of(mergeSourceA);
+    	return List.of(mergeSourceA, mergeSourceB);
     }
 
     @Override
@@ -216,28 +208,33 @@ public class DefaultProfileSegment implements IProfileSegment {
             throw new IllegalArgumentException(String.format("End index of source (%d) from segment %s is not in this segment: %s", 
             		seg.getEndIndex(), seg.getDetail(), this.getDetail()));
 
-        mergeSources = Arrays.copyOf(mergeSources, mergeSources.length + 1);
-        mergeSources[mergeSources.length - 1] = seg;
+        if(mergeSourceA==null) {
+        	mergeSourceA = seg;
+        } else {
+        	mergeSourceB = seg;
+        }
     }
 
     @Override
     public boolean hasMergeSources() {
-        return mergeSources.length > 0;
+    	return mergeSourceA!=null || mergeSourceB !=null;
     }
 
     @Override
     public void clearMergeSources() {
-        mergeSources = new IProfileSegment[0];
+    	mergeSourceA = null;
+    	mergeSourceB = null;
     }
     
 	@Override
 	public boolean hasMergeSource(@NonNull UUID id) {
 		if(this.uuid.equals(id))
 			return true;
-		for(IProfileSegment s: mergeSources) {
-			if(s.hasMergeSource(id))
-				return true;
-		}
+		
+		if(mergeSourceA!=null && mergeSourceA.hasMergeSource(id))
+			return true;
+		if(mergeSourceB!=null && mergeSourceB.hasMergeSource(id))
+			return true;
 		return false;
 	}
 
@@ -245,10 +242,10 @@ public class DefaultProfileSegment implements IProfileSegment {
 	public IProfileSegment getMergeSource(@NonNull UUID id) throws MissingComponentException {
 		if(this.uuid.equals(id))
 			return this;
-		for(IProfileSegment s : mergeSources) {
-			if(s.hasMergeSource(id))
-				return s.getMergeSource(id);
-		}
+		if(mergeSourceA.hasMergeSource(id))
+			return mergeSourceA.getMergeSource(id);
+		if(mergeSourceB.hasMergeSource(id))
+			return mergeSourceB.getMergeSource(id);
 		throw new MissingComponentException("Merge source not present");
 	}
 
@@ -388,7 +385,8 @@ public class DefaultProfileSegment implements IProfileSegment {
         result = prime * result + endIndex;
         result = prime * result + startIndex;
         result = prime * result + totalLength;
-        result = prime * result + mergeSources.hashCode();
+        result = mergeSourceA == null ? prime * result : prime * result + mergeSourceA.hashCode();
+        result = mergeSourceB == null ? prime * result : prime * result + mergeSourceB.hashCode();
         return result;
     }
 
@@ -412,18 +410,25 @@ public class DefaultProfileSegment implements IProfileSegment {
             return false;
         if(isLocked != other.isLocked)
         	return false;
+        if(mergeSourceA!=null) {
+        	if(!mergeSourceA.equals(other.mergeSourceA))
+        		return false;
+        	if(!mergeSourceB.equals(other.mergeSourceB))
+        		return false;
+        }
         return true;
     }
     
     @Override
     public IProfileSegment offset(int offset) {
-//    	LOGGER.fine("Ofsetting segment "+uuid+" by "+offset+" to start at "+CellularComponent.wrapIndex(startIndex+offset, totalLength));
     	IProfileSegment seg = new DefaultProfileSegment(CellularComponent.wrapIndex(startIndex+offset, totalLength),
     			CellularComponent.wrapIndex(endIndex+offset, totalLength),
     			totalLength,
     			uuid);
-    	for(IProfileSegment s : mergeSources) {
-    		seg.addMergeSource(s.offset(offset));
+    	
+    	if(mergeSourceA != null) {
+    		seg.addMergeSource(mergeSourceA.offset(offset));
+    		seg.addMergeSource(mergeSourceB.offset(offset));
     	}
     	seg.setLocked(isLocked);
     	return seg;
@@ -582,8 +587,8 @@ public class DefaultProfileSegment implements IProfileSegment {
          * 
          */
         if(hasMergeSources()) {
-        	mergeSources[0].update(startIndex, mergeSources[0].getEndIndex());
-        	mergeSources[1].update(mergeSources[1].getStartIndex(), endIndex);
+        	mergeSourceA.update(startIndex, mergeSourceA.getEndIndex());
+        	mergeSourceB.update(mergeSourceB.getStartIndex(), endIndex);
         }
         
         // wrap in if to ensure we don't go in circles forever when testing a
@@ -607,8 +612,6 @@ public class DefaultProfileSegment implements IProfileSegment {
 
     @Override
     public void setNextSegment(@NonNull IProfileSegment s) {
-        if (s == null)
-            throw new IllegalArgumentException("Segment cannot be null");
         if (s.getProfileLength() != this.getProfileLength())
             throw new IllegalArgumentException("Segment has a different profile length");
         if (s.getStartIndex() != this.getEndIndex())
@@ -619,10 +622,6 @@ public class DefaultProfileSegment implements IProfileSegment {
 
     @Override
     public void setPrevSegment(@NonNull IProfileSegment s) {
-
-        if (s == null)
-            throw new IllegalArgumentException("Segment cannot be null");
-
         if (s.getProfileLength() != getProfileLength())
             throw new IllegalArgumentException("Segment has a different profile length");
         
@@ -656,13 +655,15 @@ public class DefaultProfileSegment implements IProfileSegment {
 
     @Override
     public String toString() {
-    	return String.format("%d - %d of %d: %s", startIndex, getEndIndex(), totalLength, uuid.toString());
+    	return String.format("%d - %d of %d: %s", 
+    			startIndex, endIndex, totalLength, uuid.toString());
     }
 
-    public String getDetail() {
+    @Override
+	public String getDetail() {
     	return String.format("Segment %s | %s | %s | %s - %s | %s of %s | %s ", 
-				getName(), getID(), getPosition(), getStartIndex(), getEndIndex(), 
-				length(), getProfileLength(), wraps());
+				getName(), getID(), getPosition(), startIndex, endIndex, 
+				length(), totalLength, wraps());
     }
 
     @Override
@@ -688,8 +689,6 @@ public class DefaultProfileSegment implements IProfileSegment {
     
     @Override
     public boolean overlapsBeyondEndpoints(@NonNull IProfileSegment seg){
-    	if(seg==null)
-    		return false;
     	if(seg.getProfileLength()!=getProfileLength())
 			return false;
     	

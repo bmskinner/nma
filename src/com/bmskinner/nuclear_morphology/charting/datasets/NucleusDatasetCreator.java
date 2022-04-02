@@ -62,7 +62,6 @@ import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
-import com.bmskinner.nuclear_morphology.stats.DipTester;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 import ij.process.FloatPolygon;
@@ -709,30 +708,30 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 	 * @return
 	 * @throws Exception
 	 */
-	public XYDataset createModalityProbabililtyDataset(double xposition, IAnalysisDataset dataset, ProfileType type)
-			throws ChartDatasetCreationException {
-
-		FloatXYDataset ds = new FloatXYDataset();
-
-		ICellCollection collection = dataset.getCollection();
-		KernelEstimator est = createProfileProbabililtyKernel(xposition, dataset, type);
-
-		float[] xvalues = new float[3600];
-		float[] yvalues = new float[3600];
-
-		float step = 0.1f;
-		for (int i = 0; i < xvalues.length; i++) {
-
-			float position = i * step;
-			xvalues[i] = position;
-			yvalues[i] = (float) est.getProbability(position);
-		}
-		float[][] data = { xvalues, yvalues };
-
-		ds.addSeries(collection.getName(), data, 0);
-
-		return ds;
-	}
+//	public XYDataset createModalityProbabililtyDataset(double xposition, IAnalysisDataset dataset, ProfileType type)
+//			throws ChartDatasetCreationException {
+//
+//		FloatXYDataset ds = new FloatXYDataset();
+//
+//		ICellCollection collection = dataset.getCollection();
+//		KernelEstimator est = createProfileProbabililtyKernel(xposition, dataset, type);
+//
+//		float[] xvalues = new float[3600];
+//		float[] yvalues = new float[3600];
+//
+//		float step = 0.1f;
+//		for (int i = 0; i < xvalues.length; i++) {
+//
+//			float position = i * step;
+//			xvalues[i] = position;
+//			yvalues[i] = (float) est.getProbability(position);
+//		}
+//		float[][] data = { xvalues, yvalues };
+//
+//		ds.addSeries(collection.getName(), data, 0);
+//
+//		return ds;
+//	}
 
 	/**
 	 * Generate a chart dataset showing the p-values along each profile position
@@ -741,69 +740,31 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 	 * @return
 	 * @throws ChartDatasetCreationException
 	 */
-	public XYDataset createModalityProfileDataset() throws ChartDatasetCreationException {
-
-		FloatXYDataset ds = new FloatXYDataset();
-
-		for (IAnalysisDataset dataset : options.getDatasets()) {
-
-			ICellCollection collection = dataset.getCollection();
-
-			IProfile pvalues = new DipTester(collection).testCollectionGetPValues(options.getTag(), options.getType());
-
-			float[] yvalues = pvalues.toFloatArray();
-			float[] xvalues = createXPositions(pvalues, 100).toFloatArray();
-
-			float[][] data = { xvalues, yvalues };
-			ds.addSeries(collection.getName(), data, 0);
-		}
-
-		return ds;
-	}
+//	public XYDataset createModalityProfileDataset() throws ChartDatasetCreationException {
+//
+//		FloatXYDataset ds = new FloatXYDataset();
+//
+//		for (IAnalysisDataset dataset : options.getDatasets()) {
+//
+//			ICellCollection collection = dataset.getCollection();
+//
+//			IProfile pvalues = new DipTester(collection).testCollectionGetPValues(options.getTag(), options.getType());
+//
+//			float[] yvalues = pvalues.toFloatArray();
+//			float[] xvalues = createXPositions(pvalues, 100).toFloatArray();
+//
+//			float[][] data = { xvalues, yvalues };
+//			ds.addSeries(collection.getName(), data, 0);
+//		}
+//
+//		return ds;
+//	}
 
 	private static IProfile createXPositions(IProfile profile, int newLength){
 		float[] result = new float[profile.size()];
 		for (int i = 0; i < profile.size(); i++) 
 			result[i] = (float) (profile.getFractionOfIndex(i) * newLength);
 		return new DefaultProfile(result);
-	}
-
-	/**
-	 * Create a charting dataset for the angles within the AnalysisDataset at
-	 * the given normalised position. This dataset has the individual angle
-	 * values for each nucleus profile
-	 * 
-	 * @param xposition
-	 * @param dataset
-	 * @return
-	 * @throws ChartDatasetCreationException
-	 */
-	public XYDataset createModalityValuesDataset(double xposition, IAnalysisDataset dataset, ProfileType type) throws ChartDatasetCreationException {
-
-		FloatXYDataset ds = new FloatXYDataset();
-
-		ICellCollection collection = dataset.getCollection();
-
-		double[] dValues;
-		try {
-			dValues = collection.getProfileCollection().getValuesAtPosition(type, xposition);
-		} catch (MissingProfileException e) {
-			throw new ChartDatasetCreationException("Cannot get profile values", e);
-		}
-		float[] values = new float[dValues.length];
-		for(int i=0; i<dValues.length; i++){
-			values[i] = (float) dValues[i];
-		}
-
-
-		float[] xvalues = new float[values.length];
-		for (int i = 0; i < values.length; i++) {
-			xvalues[i] = 0;
-		}
-
-		float[][] data = { values, xvalues };
-		ds.addSeries(collection.getName(), data, 0);
-		return ds;
 	}
 
 	/**
@@ -816,23 +777,23 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 	 * @return
 	 * @throws Exception
 	 */
-	public KernelEstimator createProfileProbabililtyKernel(double xposition, IAnalysisDataset dataset, ProfileType type)
-			throws ChartDatasetCreationException {
-		ICellCollection collection = dataset.getCollection();
-		KernelEstimator est = new KernelEstimator(0.001);
-		double[] values;
-		try {
-			values = collection.getProfileCollection().getValuesAtPosition(type, xposition);
-		} catch (MissingProfileException e) {
-			throw new ChartDatasetCreationException("Cannot get profile values at position " + xposition, e);
-		}
-		// add the values to a kernel estimator
-		// give each value equal weighting
-		for (double d : values) {
-			est.addValue(d, 1);
-		}
-		return est;
-	}
+//	public KernelEstimator createProfileProbabililtyKernel(double xposition, IAnalysisDataset dataset, ProfileType type)
+//			throws ChartDatasetCreationException {
+//		ICellCollection collection = dataset.getCollection();
+//		KernelEstimator est = new KernelEstimator(0.001);
+//		double[] values;
+//		try {
+//			values = collection.getProfileCollection().getValuesAtPosition(type, xposition);
+//		} catch (MissingProfileException e) {
+//			throw new ChartDatasetCreationException("Cannot get profile values at position " + xposition, e);
+//		}
+//		// add the values to a kernel estimator
+//		// give each value equal weighting
+//		for (double d : values) {
+//			est.addValue(d, 1);
+//		}
+//		return est;
+//	}
 
 	/**
 	 * Create a probability kernel estimator for an array of values using
@@ -879,31 +840,6 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 			est.addValue(d.doubleValue(), 1);
 		}
 		return est;
-	}
-
-	/**
-	 * Create a dataset suitable for making a QQ plot
-	 * 
-	 * @param values the array of values to use
-	 * @return a dataset for charting
-	 */
-	public XYDataset createQQDataset(float[] values) throws ChartDatasetCreationException {
-		FloatXYDataset ds = new FloatXYDataset();
-
-		Arrays.sort(values);
-		float[] zscores = new float[values.length];
-
-		for (int i = 0; i < values.length; i++) {
-
-			int rank = i + 1;
-			float percentile = (float) (rank - 0.5) / values.length;
-			zscores[i] = (float) DipTester.getInvNormProbabililty(percentile);
-
-		}
-		float[][] data = { values, zscores };
-		ds.addSeries("Q-Q", data, 0);
-		return ds;
-
 	}
 
 	/**

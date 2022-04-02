@@ -23,6 +23,7 @@ import java.util.logging.Logger;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.profiles.BooleanProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.DefaultProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileCollection;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
@@ -122,7 +123,7 @@ public class ProfileSegmenter {
             if (isValidSegmentEnd(index, segmentStart)) {
 
                 // we've hit a new segment
-                IProfileSegment seg = IProfileSegment.newSegment(segmentStart, index, profile.size());
+                IProfileSegment seg = new DefaultProfileSegment(segmentStart, index, profile.size());
 
                 segments.add(seg);
 
@@ -141,7 +142,7 @@ public class ProfileSegmenter {
          * space to make a segment running from the current segment start back
          * to index 0
          */
-        IProfileSegment seg = IProfileSegment.newSegment(segmentStart, 0, profile.size());
+        IProfileSegment seg = new DefaultProfileSegment(segmentStart, 0, profile.size());
         segments.add(seg);
         
         if(segments.size()==1)  // We were unable to detect more than a single segment
@@ -164,7 +165,7 @@ public class ProfileSegmenter {
      */
     private void createSingleSegment() {
     	segments.clear();
-    	segments.add(IProfileSegment.newSegment(0, 0, profile.size(), IProfileCollection.DEFAULT_SEGMENT_ID));
+    	segments.add(new DefaultProfileSegment(0, 0, profile.size(), IProfileCollection.DEFAULT_SEGMENT_ID));
     }
     
     

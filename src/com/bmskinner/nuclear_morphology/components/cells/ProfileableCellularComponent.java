@@ -185,7 +185,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
              try {
                  this.profileMap.put(type, c.profileMap.get(type).copy());
                  for(IProfileSegment s : c.segments) {
-                	 segments.add(s.copy());
+                	 segments.add(s.duplicate());
                  }
                  IProfileSegment.linkSegments(segments);
 
@@ -349,7 +349,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 
     	segments.clear();
         for(IProfileSegment s : p.getSegments()) {
-        	segments.add(s.copy());
+        	segments.add(s.duplicate());
         }
         profileLandmarks.put(lm, newLmIndex);
     }

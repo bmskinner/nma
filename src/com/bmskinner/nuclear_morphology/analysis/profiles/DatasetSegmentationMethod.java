@@ -171,9 +171,9 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 		
 		// Make a new collection and aggregate to invalidate previous cached data, possibly
 		// with different profile lengths
-		dataset.getCollection().createProfileCollection();
+		dataset.getCollection().getProfileCollection().calculateProfiles();
 				
-		dataset.getCollection().getProfileCollection().addSegments(median.getSegments());
+		dataset.getCollection().getProfileCollection().setSegments(median.getSegments());
 		
 		assignSegmentsToNuclei(median);// 4 - fit the segments to nuclei 
 		
@@ -196,7 +196,7 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 
 		if(!sourceCollection.getProfileCollection().hasSegments()) {
 			LOGGER.fine("Cannot copy segments: source collection has no segments");
-			dataset.getCollection().createProfileCollection(); // ensure profiles are set
+			dataset.getCollection().getProfileCollection().calculateProfiles();
 			return new DefaultAnalysisResult(dataset);
 		}
 
@@ -237,7 +237,7 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 		
 		// choose the best subset of nuclei and make a median profile from them
 		LOGGER.finer("Collection median length "+collection.getMedianArrayLength());
-		LOGGER.finer("Profile collection length "+collection.getProfileCollection().length());
+//		LOGGER.finer("Profile collection length "+collection.getProfileCollection().length());
 
 		RepresentativeMedianFinder finder = new RepresentativeMedianFinder(collection);
 		

@@ -4,6 +4,7 @@ import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.lang.ref.SoftReference;
 import java.lang.ref.WeakReference;
@@ -16,6 +17,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
@@ -51,9 +53,7 @@ public abstract class ComponentTester extends FloatArrayTester {
 	 */
 	public static boolean areVertical(@NonNull IPoint topPoint, @NonNull IPoint bottomPoint) {
 		double err = bottomPoint.getX()-topPoint.getX();
-		System.out.println(err);
-		LOGGER.fine("Error = "+err);
-		boolean xEqual = (Math.abs(bottomPoint.getX()- topPoint.getX())<0.0001);
+		boolean xEqual = (Math.abs(err)<0.0001);
 		boolean yAbove = topPoint.getY()>bottomPoint.getY();
 		return xEqual & yAbove;
 	}
@@ -99,9 +99,12 @@ public abstract class ComponentTester extends FloatArrayTester {
 	 * @param fieldsToSkip skip fields in the object with these names
 	 * @throws Exception
 	 */
-	public static void testDuplicatesByField(Object original, Object dup, List<String> fieldsToSkip) throws Exception {
+	public static void testDuplicatesByField(Object original, Object dup, Set<String> fieldsToSkip) throws Exception {
 		for(Field f : getInheritedPrivateFields(dup.getClass())) {
 			
+			if(f.getName().equals("this$0")) // skip self recursion
+				fieldsToSkip.add(f.getName());
+				
 			if(fieldsToSkip.contains(f.getName()))
 				continue;
 			
@@ -121,7 +124,7 @@ public abstract class ComponentTester extends FloatArrayTester {
 				continue;
 			if(f.getType().equals(Class.forName("com.bmskinner.nuclear_morphology.components.cells.DefaultCellularComponent$ShapeCache")))
 				continue;
-			if(f.getType().equals(Class.forName("com.bmskinner.nuclear_morphology.components.profiles.DefaultProfileCollection$ProfileCache")))
+			if(f.getType().equals(Class.forName("com.bmskinner.nuclear_morphology.components.datasets.DefaultCellCollection$DefaultProfileCollection$ProfileCache")))
 				continue;	
 			if(f.getType().equals(Class.forName("com.bmskinner.nuclear_morphology.components.measure.StatsCache")))
 				continue;
@@ -165,9 +168,19 @@ public abstract class ComponentTester extends FloatArrayTester {
 				} else {
 
 					// Don't try to compare classes I didn't write
-					// and don't try to unpack enums
+					// and don't try to unpack enums. In these cases, just
+					// do a direct equality test
 					if(f.getType().getName().startsWith("com.bmskinner.nuclear_morphology") && !f.getType().isEnum()) {
-						testDuplicatesByField(oValue, dValue, fieldsToSkip);
+						try {
+							testDuplicatesByField(oValue, dValue, fieldsToSkip);
+						} catch(StackOverflowError e) {
+							String msg = "Field '"+f.getName()+"' of type "+f.getType().getName()
+									+ " and class "+ oClass.getName()
+									+" had a stack overflow on value: "+oValue
+									+"Expected: "+ original 
+									+"Found: "+dup;
+							fail(msg);
+						}
 					} else{
 						String msg = "Field '"+f.getName()+"' of type "+f.getType().getName()
 								+ " and class "+ oClass.getName()
@@ -190,8 +203,10 @@ public abstract class ComponentTester extends FloatArrayTester {
 	// arrays. Need to use Arrays.hashcode().
 	private static void testHashMapsByField(Field f, Map o, Map d) {
 		assertTrue("Hashmaps should not both be null in "+f.getName(), o!=null&&d!=null);
-		assertEquals("Maps should contain same number of elements in field '"+f.getName()+"'", o.size(), d.size());
-		
+		assertEquals("Maps should contain same number of elements in field '"+f.getName()
+		+"'; original: "+o+ " duplicate: "+d, 
+		o.size(), d.size());
+
 		long oHash = 0;
 		long dHash = 0;
 	
@@ -246,13 +261,12 @@ public abstract class ComponentTester extends FloatArrayTester {
 	 * @param d the duplicate list
 	 * @throws Exception 
 	 */
-	private static void testListEqualityByField(Field f, List o, List d, List<String> fieldsToSkip) throws Exception {
+	private static void testListEqualityByField(Field f, List o, List d, Set<String> fieldsToSkip) throws Exception {
 		assertTrue("Lists should not both be null", o!=null&&d!=null);
 		assertEquals("Lists should contain same number of elements", o.size(), d.size());
 		
 		for(int i=0; i<o.size(); i++) {
 			assertEquals("Field '"+f.getName()+"' element "+i+" should be equal", o.get(i), d.get(i));
-//			assertTrue("Field '"+f.getName()+"' should contain element "+o.get(i).toString(), d.contains(o.get(i)));
 		}
 		assertTrue("All elements should be shared in list in '"+f.getName()+"'", o.containsAll(d));
 	}
@@ -265,7 +279,7 @@ public abstract class ComponentTester extends FloatArrayTester {
 	 * @throws Exception
 	 */
 	public static void testDuplicatesByField(Object original, Object dup) throws Exception {
-		List<String> fieldsToSkip = new ArrayList<>();
+		Set<String> fieldsToSkip = new HashSet<>();
 		testDuplicatesByField(original, dup, fieldsToSkip);
 	}
 

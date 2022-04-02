@@ -57,6 +57,7 @@ import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.profiles.DefaultProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
@@ -283,7 +284,7 @@ public class CellResegmentationDialog extends AbstractCellEditingDialog implemen
                     .getID();
 
             // Make a final segment after the last clicked position
-            IProfileSegment last = IProfileSegment.newSegment(segStart, n.getBorderIndex(Landmark.REFERENCE_POINT),
+            IProfileSegment last = new DefaultProfileSegment(segStart, n.getBorderIndex(Landmark.REFERENCE_POINT),
                     n.getBorderLength(), id);
             tempList.add(last);
             IProfileSegment.linkSegments(tempList);
@@ -323,7 +324,7 @@ public class CellResegmentationDialog extends AbstractCellEditingDialog implemen
     		id = n.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT).getSegments().get(segCount).getID();
 
 
-    		IProfileSegment last = IProfileSegment.newSegment(segStart, n.getBorderIndex(Landmark.REFERENCE_POINT),
+    		IProfileSegment last = new DefaultProfileSegment(segStart, n.getBorderIndex(Landmark.REFERENCE_POINT),
     				n.getBorderLength(), id);
     		newSegments.add(last);
     		LOGGER.finer( "Added " + last.toString());
@@ -412,7 +413,7 @@ public class CellResegmentationDialog extends AbstractCellEditingDialog implemen
                 UUID id = n.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT).getSegments().get(segCount).getID();
 
                 segStop = n.getBorderIndex(p);
-                IProfileSegment seg = IProfileSegment.newSegment(segStart, segStop, n.getBorderLength(), id);
+                IProfileSegment seg = new DefaultProfileSegment(segStart, segStop, n.getBorderLength(), id);
                 newSegments.add(seg);
                 LOGGER.finer( "Added " + seg.toString());
                 segStart = segStop;

@@ -16,7 +16,7 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
-package com.bmskinner.nuclear_morphology.analysis;
+package com.bmskinner.nuclear_morphology.components.profiles;
 
 import static org.junit.Assert.assertEquals;
 
@@ -25,12 +25,8 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.components.profiles.DefaultProfileAggregate;
-import com.bmskinner.nuclear_morphology.components.profiles.DefaultProfile;
-import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
-import com.bmskinner.nuclear_morphology.components.profiles.IProfileAggregate;
 
-public class ProfileAggregateTest {
+public class DefaultProfileAggregateTest {
 	
 	@Rule
 	public final ExpectedException exception = ExpectedException.none();
@@ -40,22 +36,6 @@ public class ProfileAggregateTest {
 
 		exception.expect(IllegalArgumentException.class);
 		new DefaultProfileAggregate(100, 0); 
-	}
-	
-	@Test
-	public void profileXPositionsAreCalculated(){
-		
-		double[] xArray   = { 5, 15, 25, 35,  45,  55, 65, 75, 85, 95 };
-
-		Integer length = 10;
-
-		IProfileAggregate tester = new DefaultProfileAggregate(length, 1);
-		
-		IProfile xPositions = tester.getXPositions();
-		
-		for( int i =0;i<length; i++){
-			assertEquals("Values should be identical", xArray[i], xPositions.toDoubleArray()[i],0);
-		}
 	}
 	
 	@Test

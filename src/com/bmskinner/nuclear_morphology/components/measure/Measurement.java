@@ -198,7 +198,6 @@ public interface Measurement extends Serializable {
      * Fetch the stat with the given name, if available.
      * @param name the name of the stat
      * @return the stat
-     * @throws IllegalArgumentException if the measurement is not recognised
      */
     static Measurement of(String name) {
     	
@@ -208,7 +207,7 @@ public interface Measurement extends Serializable {
     		if(stat.name().equals(name))
     			return stat;
     	}
-    	throw new IllegalArgumentException(name+" is not a valid measurement");
+    	return new DefaultMeasurement(name, MeasurementDimension.DIMENSIONLESS);
     }
 
     /**

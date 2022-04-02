@@ -7,6 +7,7 @@ import java.util.List;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.DefaultProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.DefaultSegmentedProfile;
 
 public class IndividualNuclei {
@@ -60,12 +61,12 @@ public class IndividualNuclei {
 	public static ISegmentedProfile pigSpermSegmentedMedianProfile() throws Exception {
 		
 		// Segment boundaries are chosen from prior segmentation
-		IProfileSegment seg0 = IProfileSegment.newSegment(  0,  16, 327);
-		IProfileSegment seg1 = IProfileSegment.newSegment( 16, 147, 327);
-		IProfileSegment seg2 = IProfileSegment.newSegment(147, 163, 327);
-		IProfileSegment seg3 = IProfileSegment.newSegment(163, 182, 327);
-		IProfileSegment seg4 = IProfileSegment.newSegment(182, 312, 327);
-		IProfileSegment seg5 = IProfileSegment.newSegment(312, 326, 327);
+		IProfileSegment seg0 = new DefaultProfileSegment(  0,  16, 327);
+		IProfileSegment seg1 = new DefaultProfileSegment( 16, 147, 327);
+		IProfileSegment seg2 = new DefaultProfileSegment(147, 163, 327);
+		IProfileSegment seg3 = new DefaultProfileSegment(163, 182, 327);
+		IProfileSegment seg4 = new DefaultProfileSegment(182, 312, 327);
+		IProfileSegment seg5 = new DefaultProfileSegment(312, 326, 327);
 		
 		List<IProfileSegment> list = new ArrayList<IProfileSegment>();
 		list.add(seg0);

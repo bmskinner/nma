@@ -62,7 +62,7 @@ public class DefaultSegmentedProfile extends DefaultProfile implements ISegmente
         // Link and add the segments into this profile        
         this.segments = new IProfileSegment[segments.size()];
         for (int i = 0; i < segments.size(); i++) {
-            this.segments[i] = segments.get(i).copy();
+            this.segments[i] = segments.get(i).duplicate();
         }
         
         IProfileSegment.linkSegments(this.segments);
@@ -89,7 +89,7 @@ public class DefaultSegmentedProfile extends DefaultProfile implements ISegmente
     public DefaultSegmentedProfile(@NonNull final IProfile profile) throws ProfileException {
         super(profile);
         segments = new IProfileSegment[1];
-        segments[0] = IProfileSegment.newSegment(0, 0, profile.size(), IProfileCollection.DEFAULT_SEGMENT_ID);
+        segments[0] = new DefaultProfileSegment(0, 0, profile.size(), IProfileCollection.DEFAULT_SEGMENT_ID);
         IProfileSegment.linkSegments(this.segments);
     }
 
@@ -237,7 +237,7 @@ public class DefaultSegmentedProfile extends DefaultProfile implements ISegmente
         try {
             segments = new IProfileSegment[segList.size()];
             for (int i = 0; i < segList.size(); i++) {
-                this.segments[i] = segList.get(i).copy();
+                this.segments[i] = segList.get(i).duplicate();
             }
 
             IProfileSegment.linkSegments(segments);
@@ -250,7 +250,7 @@ public class DefaultSegmentedProfile extends DefaultProfile implements ISegmente
     @Override
     public void clearSegments() throws ProfileException {
         segments = new IProfileSegment[1];
-        segments[0] = IProfileSegment.newSegment(0, 0, size(), IProfileCollection.DEFAULT_SEGMENT_ID);
+        segments[0] = new DefaultProfileSegment(0, 0, size(), IProfileCollection.DEFAULT_SEGMENT_ID);
         IProfileSegment.linkSegments(segments);
     }
 
@@ -551,7 +551,7 @@ public class DefaultSegmentedProfile extends DefaultProfile implements ISegmente
         // Create the new segment
         int startIndex = firstSegment.getStartIndex();
         int endIndex   = secondSegment.getEndIndex();
-        IProfileSegment mergedSegment = IProfileSegment.newSegment(startIndex, endIndex, this.size(), newId);
+        IProfileSegment mergedSegment = new DefaultProfileSegment(startIndex, endIndex, this.size(), newId);
 
         LOGGER.fine(()->"Merged segment has source 1: "+mergedSegment.hasMergeSource(seg1Id));
         LOGGER.fine(()->"Merged segment has source 2: "+mergedSegment.hasMergeSource(seg2Id));
@@ -680,8 +680,8 @@ public class DefaultSegmentedProfile extends DefaultProfile implements ISegmente
         // Add the new segments to a list
         List<IProfileSegment> splitSegments = new ArrayList<>();
         splitSegments
-                .add(IProfileSegment.newSegment(segment.getStartIndex(), splitIndex, segment.getProfileLength(), id1));
-        splitSegments.add(IProfileSegment.newSegment(splitIndex, segment.getEndIndex(), segment.getProfileLength(), id2));
+                .add(new DefaultProfileSegment(segment.getStartIndex(), splitIndex, segment.getProfileLength(), id1));
+        splitSegments.add(new DefaultProfileSegment(splitIndex, segment.getEndIndex(), segment.getProfileLength(), id2));
 
         segment.addMergeSource(splitSegments.get(0));
         segment.addMergeSource(splitSegments.get(1));

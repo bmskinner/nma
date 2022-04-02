@@ -228,10 +228,11 @@ public class AngleWindowSizeExplorer extends LoadingIconDialog implements Change
         		// recalc the aggregate
         		IProfileCollection pc = duplicateCollection.getProfileCollection();
 
-        		pc.createProfileAggregate(duplicateCollection, dataset.getCollection().getProfileCollection().length());
+        		pc.calculateProfiles();
+//        		pc.createProfileAggregate(duplicateCollection, dataset.getCollection().getProfileCollection().length());
 
         		for (Landmark tag : dataset.getCollection().getProfileCollection().getLandmarks()) {
-        			pc.addIndex(tag, dataset.getCollection().getProfileCollection().getIndex(tag));
+        			pc.setLandmark(tag, dataset.getCollection().getProfileCollection().getLandmarkIndex(tag));
         		}
 
         		// get the profile median

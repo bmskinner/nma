@@ -59,7 +59,7 @@ public class ProfileOffsetter {
     public void assignLandmarkViaFrankenProfile(@NonNull Landmark tag) throws ProfileOffsetException {
 
         try {
-        	int index = collection.getProfileCollection().getIndex(tag);
+        	int index = collection.getProfileCollection().getLandmarkIndex(tag);
         	UUID segID = collection.getProfileCollection().getSegmentContaining(tag).getID();
 
             ISegmentedProfile profile = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT,

@@ -112,8 +112,8 @@ public class RandomSamplingMethod extends SingleDatasetAnalysisMethod {
         LOGGER.finer( "Added second set");
         
         if(stat.equals(Measurement.VARIABILITY)) {
-        	first.createProfileCollection();
-        	second.createProfileCollection();
+        	first.getProfileCollection().calculateProfiles();
+        	second.getProfileCollection().calculateProfiles();
         }
         
         result[0] = first;

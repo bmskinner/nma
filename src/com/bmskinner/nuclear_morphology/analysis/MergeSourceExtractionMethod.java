@@ -120,7 +120,7 @@ public class MergeSourceExtractionMethod extends MultipleDatasetAnalysisMethod {
     	
     	try {
     		// Copy over the profile collections
-    		newDataset.getCollection().createProfileCollection();
+    		newDataset.getCollection().getProfileCollection().calculateProfiles();
 
     		IAnalysisDataset parent = getRootParent(template);
 

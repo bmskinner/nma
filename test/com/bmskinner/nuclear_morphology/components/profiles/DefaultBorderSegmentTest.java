@@ -60,12 +60,6 @@ public class DefaultBorderSegmentTest {
 	public void testDefaultBorderSegmentIntIntIntUUID() {
 		new DefaultProfileSegment(0, 20, 100, UUID.randomUUID());
 	}
-
-	@Test
-    public void testDefaultBorderSegmentIntIntIntUUIDExceptsOnNullId() {
-        exception.expect(IllegalArgumentException.class);
-        new DefaultProfileSegment(0, 20, 100, null);
-    }
 	
 	@Test
     public void testDefaultBorderSegmentIntIntIntUUIDExceptsOnNegativeStart() {

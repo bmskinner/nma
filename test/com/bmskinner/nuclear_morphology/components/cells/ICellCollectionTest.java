@@ -330,9 +330,9 @@ public class ICellCollectionTest {
 	public void testGetConsensusOrientsVertically() throws Exception {
 		
 		// Ensure TV and BV are set
-		ProfileManager m = collection.getProfileManager();
-		m.updateBorderTag(Landmark.TOP_VERTICAL, 0);
-		m.updateBorderTag(Landmark.BOTTOM_VERTICAL, 10);
+		ProfileManager manager = collection.getProfileManager();
+		manager.updateLandmark(Landmark.TOP_VERTICAL, 0);
+		manager.updateLandmark(Landmark.BOTTOM_VERTICAL, 10);
 		
 		// Run consensus averaging on the collection. Wrap in a new dataset. 
 		// Analysis options will not be copied - create anew
@@ -348,15 +348,27 @@ public class ICellCollectionTest {
 		IPoint tv = n.getBorderPoint(Landmark.TOP_VERTICAL);
 		IPoint bv = n.getBorderPoint(Landmark.BOTTOM_VERTICAL);
 		assertTrue("Points should be vertical for tv="+tv+" bv="+bv, ComponentTester.areVertical(tv, bv));
+
+		// Now test that updating the TV to any index still allows orientation
 		
+		assertTrue(n.getBorderLength()<d.getCollection().getMedianArrayLength());
 		
-		int bIndex=0;
-		for(int tIndex=1; tIndex<m.getProfileLength(); tIndex++) {
-			m.updateBorderTag(Landmark.TOP_VERTICAL, tIndex);
-			m.updateBorderTag(Landmark.BOTTOM_VERTICAL, bIndex);
+		int bIndex=0; // so that it never overlaps TV in the loop
+		// Start from 3 so that the smaller consensus profile does not get
+		// the TV assigned to index 0 when interpolating
+		for(int tIndex=3; tIndex < d.getCollection().getMedianArrayLength(); tIndex++) {
+			manager.updateLandmark(Landmark.TOP_VERTICAL, tIndex);
+			manager.updateLandmark(Landmark.BOTTOM_VERTICAL, bIndex);
 			
-			assertEquals("TV should be", tIndex, collection.getProfileCollection().getIndex(Landmark.TOP_VERTICAL));
-			assertEquals("BV should be", bIndex, collection.getProfileCollection().getIndex(Landmark.BOTTOM_VERTICAL));
+			assertNotEquals("TV and BV should not have the same index in the median", bIndex, tIndex);
+			assertEquals("Median TV should be", tIndex, collection.getProfileCollection().getLandmarkIndex(Landmark.TOP_VERTICAL));
+			assertEquals("Median BV should be", bIndex, collection.getProfileCollection().getLandmarkIndex(Landmark.BOTTOM_VERTICAL));
+			
+			// Check that the update has been made to the consensus
+			n = d.getCollection().getConsensus();
+			int nTIndex = n.getBorderIndex(Landmark.TOP_VERTICAL);
+			int nBIndex = n.getBorderIndex(Landmark.BOTTOM_VERTICAL);
+			assertNotEquals("TV index and BV index should not be the same index in consensus nucleus", nTIndex, nBIndex);
 			
 
 			List<JPanel> panels = new ArrayList<>();
@@ -365,6 +377,9 @@ public class ICellCollectionTest {
 			n = collection.getConsensus(); // is aligned vertically
 			tv = n.getBorderPoint(Landmark.TOP_VERTICAL);
 			bv = n.getBorderPoint(Landmark.BOTTOM_VERTICAL);
+			
+
+			assertNotEquals("TV and BV should not be the same point in consensus nucleus", tv, bv);
 			
 			boolean areVertical = ComponentTester.areVertical(tv, bv);
 			if(!areVertical)

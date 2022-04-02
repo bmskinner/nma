@@ -427,7 +427,7 @@ public class RulesetDialog extends LoadingIconDialog
 
                 LOGGER.info("Updating " + tag + " to index " + newTagIndex);
 
-                dataset.getCollection().getProfileManager().updateBorderTag(tag, newTagIndex);
+                dataset.getCollection().getProfileManager().updateLandmark(tag, newTagIndex);
             } catch (IndexOutOfBoundsException | ProfileException | MissingLandmarkException
                     | MissingProfileException e) {
                 LOGGER.warning("Unable to update border tag index");

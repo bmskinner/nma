@@ -35,7 +35,9 @@ import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.profiles.DefaultProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfileCollection;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.LandmarkType;
 import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
@@ -128,7 +130,7 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 		LOGGER.fine("Detecting border tags per-nucleus");
 		ICellCollection collection = dataset.getCollection();
 		
-		collection.createProfileCollection();
+		collection.getProfileCollection().calculateProfiles();
 		
 		// Reference points are assigned in each nucleus on creation
 		// Create a median from the current reference points in the nuclei
@@ -165,7 +167,7 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 			} catch (NoDetectedIndexException e) {
 				LOGGER.fine("Cannot identify "+t+" in median, using index 0");
 			}
-			collection.getProfileManager().updateProfileCollectionOffsets(t, medianIndex);
+			collection.getProfileManager().updateLandmarkInProfileCollection(t, medianIndex);
 		}
 	}
 	
@@ -217,8 +219,8 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 	private synchronized void identifyRP(@NonNull ICellCollection collection) throws MissingLandmarkException, MissingProfileException, ProfileException, NoDetectedIndexException {
 		// Build the profile collection based on the current RP
 		// positions in each nucleus
-		collection.createProfileCollection();
-
+		collection.getProfileCollection().calculateProfiles();
+				
 		// Create a median from the current reference points in the nuclei
 		IProfile median = collection.getProfileCollection()
 				.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);
@@ -240,8 +242,7 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 
 		// Regenerate the profile aggregates based on the new RP positions
 		// This should create a new median profile with the RP at zero
-//		collection.getProfileManager().recalculateProfileAggregates();
-		collection.createProfileCollection();
+		collection.getProfileCollection().calculateProfiles();
 
 		// Test if the recalculated profile aggregate naturally puts the RP at zero
 		rpIndex = ProfileIndexFinder.identifyIndex(collection, Landmark.REFERENCE_POINT);
@@ -283,7 +284,7 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 			int index = ProfileIndexFinder.identifyIndex(collection, lm);
 
 			// Add the index to the median profiles
-			collection.getProfileManager().updateProfileCollectionOffsets(lm, index);
+			collection.getProfileManager().updateLandmarkInProfileCollection(lm, index);
 
 			// Create a median from the current landmark
 			IProfile lmMedian = collection.getProfileCollection().getProfile(ProfileType.ANGLE, lm,
@@ -321,8 +322,7 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 			
 			// At this stage we don't need to preserve the profile collection
 			// becuase there are no other saved landmarks
-			collection.createProfileCollection();
-//			collection.getProfileManager().recalculateProfileAggregates();
+			collection.getProfileCollection().calculateProfiles();
 
 			// Find the effects of the offsets on the RP
 			// It should be found at zero

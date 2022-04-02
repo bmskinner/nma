@@ -17,7 +17,6 @@
 package com.bmskinner.nuclear_morphology.components.profiles;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
@@ -88,57 +87,23 @@ public interface IProfileSegment extends XmlSerializable, Iterable<Integer> {
      * The smallest number of indexes in a segment. 
      * Setting greater than 1 to allow space for interpolation
      */
-    static final int    MINIMUM_SEGMENT_LENGTH       = 10;
+    int MINIMUM_SEGMENT_LENGTH = 10;
+    
     /**
      * The minimum length that a segment can be interpolated to.
      */
-    static final int    INTERPOLATION_MINIMUM_LENGTH = 2;
+    int INTERPOLATION_MINIMUM_LENGTH = 2;
     
     /**
      * The name segments are prefixed with for display
      */
-    static final String SEGMENT_PREFIX               = "Seg_";
-
-    /**
-     * Create the preferred segment type for this interface
-     * 
-     * @param startIndex the starting index of the segment in a profile, inclusive
-     * @param endIndex the end index of the segment in a profile, inclusive
-     * @param total the total length of the profile
-     * @param id  the id of the segment
-     * @return a new segment of the default type
-     */
-    static IProfileSegment newSegment(int startIndex, int endIndex, int total, @NonNull UUID id) {
-        return new DefaultProfileSegment(startIndex, endIndex, total, id);
-    }
-
-    /**
-     * Create the preferred segment type based on the given template
-     * 
-     * @param seg the template segment
-     * @return a new segment
-     */
-    static IProfileSegment newSegment(@NonNull IProfileSegment seg) {
-        return new DefaultProfileSegment(seg);
-    }
-
-    /**
-     * Create the preferred segment type for this interface
-     * 
-     * @param startIndex the starting index of the segment in a profile, inclusive
-     * @param endIndex the end index of the segment in a profile, inclusive
-     * @param total the total length of the profile
-     * @return a new segment
-     */
-    static IProfileSegment newSegment(int startIndex, int endIndex, int total) {
-        return IProfileSegment.newSegment(startIndex, endIndex, total, java.util.UUID.randomUUID());
-    }
+    String SEGMENT_PREFIX = "Seg_";
     
     /**
      * Create a copy of the current segment
      * @return
      */
-    IProfileSegment copy();
+    IProfileSegment duplicate();
 
     /**
      * Get the segment ID
@@ -570,10 +535,10 @@ public interface IProfileSegment extends XmlSerializable, Iterable<Integer> {
     		IProfileSegment oldSeg = list.get(0);
     		if(oldSeg.getStartIndex()>=newLength) {
     			int newIndex = oldSeg.getStartIndex()-newLength;
-    			result.add(IProfileSegment.newSegment(newIndex, 
+    			result.add(new DefaultProfileSegment(newIndex, 
     					newIndex, newLength, oldSeg.getID()));
     		} else {
-    			result.add(IProfileSegment.newSegment(oldSeg.getStartIndex(), 
+    			result.add(new DefaultProfileSegment(oldSeg.getStartIndex(), 
     					oldSeg.getStartIndex(), newLength, oldSeg.getID()));
     		}
     		return linkSegments(result);
@@ -597,7 +562,7 @@ public interface IProfileSegment extends XmlSerializable, Iterable<Integer> {
             if(i==list.size()-1)
             	segEnd = startIndex;
 
-            IProfileSegment newSeg = IProfileSegment.newSegment(newStartIndex, segEnd, newLength, segment.getID());
+            IProfileSegment newSeg = new DefaultProfileSegment(newStartIndex, segEnd, newLength, segment.getID());
             newStartIndex = segEnd;
             result.add(newSeg);
         }
@@ -653,7 +618,7 @@ public interface IProfileSegment extends XmlSerializable, Iterable<Integer> {
         
         List<IProfileSegment> result = new ArrayList<>();
         for (IProfileSegment segment : list)
-        	result.add(segment.copy());
+        	result.add(segment.duplicate());
         return result;
     }
 
@@ -671,7 +636,7 @@ public interface IProfileSegment extends XmlSerializable, Iterable<Integer> {
         
         IProfileSegment[] result = new IProfileSegment[segments.length];
         for(int i=0; i<segments.length; i++)
-        	result[i] = segments[i].copy();        	
+        	result[i] = segments[i].duplicate();        	
         
         return result;
     }

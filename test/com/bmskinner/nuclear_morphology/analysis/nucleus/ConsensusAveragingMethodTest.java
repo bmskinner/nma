@@ -41,8 +41,8 @@ public class ConsensusAveragingMethodTest {
 		
 		// Add new landmarks
 		ProfileManager m = d.getCollection().getProfileManager();
-		m.updateBorderTag(Landmark.TOP_VERTICAL, 0);
-		m.updateBorderTag(Landmark.BOTTOM_VERTICAL, 10);
+		m.updateLandmark(Landmark.TOP_VERTICAL, 0);
+		m.updateLandmark(Landmark.BOTTOM_VERTICAL, 10);
 		
 		//Expected landmarks
 		Landmark[] lms = { Landmark.REFERENCE_POINT, Landmark.TOP_VERTICAL, Landmark.BOTTOM_VERTICAL};

@@ -311,7 +311,7 @@ public class SegmentationHandler {
                     .getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN)
                     .getFractionOfIndex(index);
 
-            dataset.getCollection().getProfileManager().updateBorderTag(tag, index);
+            dataset.getCollection().getProfileManager().updateLandmark(tag, index);
 
             for (IAnalysisDataset child : dataset.getAllChildDatasets()) {
 
@@ -320,7 +320,7 @@ public class SegmentationHandler {
                         .getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN)
                         .getIndexOfFraction(prop);
 
-                child.getCollection().getProfileManager().updateBorderTag(tag, childIndex);
+                child.getCollection().getProfileManager().updateLandmark(tag, childIndex);
             }
 
         } catch (IndexOutOfBoundsException | ProfileException | MissingLandmarkException
@@ -350,11 +350,11 @@ public class SegmentationHandler {
     	for(Landmark existingTag : tags) {
     		if(existingTag.equals(tag))
     			continue;
-    		int existingTagIndex = dataset.getCollection().getProfileCollection().getIndex(existingTag);
+    		int existingTagIndex = dataset.getCollection().getProfileCollection().getLandmarkIndex(existingTag);
     		if(index==existingTagIndex) {
-    			dataset.getCollection().getProfileManager().updateBorderTag(tag, existingTagIndex);
+    			dataset.getCollection().getProfileManager().updateLandmark(tag, existingTagIndex);
     			for (IAnalysisDataset child : dataset.getAllChildDatasets()) {
-    				child.getCollection().getProfileManager().updateBorderTag(tag, existingTagIndex);
+    				child.getCollection().getProfileManager().updateLandmark(tag, existingTagIndex);
     			}
     			return true;
     		}

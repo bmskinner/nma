@@ -207,7 +207,7 @@ public class CellRelocationMethod extends SingleDatasetAnalysisMethod {
         
         // Make the profile collections for the new datasets
         for (IAnalysisDataset d : map.values()) {
-            d.getCollection().createProfileCollection();
+            d.getCollection().getProfileCollection().calculateProfiles();
         }
 
         scanner.close();

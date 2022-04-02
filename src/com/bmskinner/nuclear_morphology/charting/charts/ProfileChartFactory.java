@@ -19,7 +19,6 @@ package com.bmskinner.nuclear_morphology.charting.charts;
 import java.awt.Color;
 import java.awt.Paint;
 import java.awt.Stroke;
-import java.text.DecimalFormat;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -27,11 +26,9 @@ import java.util.regex.Pattern;
 import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.annotations.XYTextAnnotation;
-import org.jfree.chart.plot.ValueMarker;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYDifferenceRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
-import org.jfree.chart.ui.TextAnchor;
 import org.jfree.data.general.DatasetUtils;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
@@ -48,7 +45,6 @@ import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.measure.MeasurementDimension;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.profiles.BooleanProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
@@ -58,7 +54,6 @@ import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter.ColourSwatch;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
-import com.bmskinner.nuclear_morphology.stats.DipTester;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 /**
@@ -207,22 +202,22 @@ public class ProfileChartFactory extends AbstractChartFactory {
 			for (Landmark tag : collection.getProfileCollection().getLandmarks()) {
 
 				try {
-					int index = collection.getProfileCollection().getIndex(tag);
+					int index = collection.getProfileCollection().getLandmarkIndex(tag);
 
 					// get the offset from to the current draw point
-					int offset = collection.getProfileCollection().getIndex(options.getTag());
+					int offset = collection.getProfileCollection().getLandmarkIndex(options.getTag());
 
 					// adjust the index to the offset
-					index = CellularComponent.wrapIndex(index - offset, collection.getProfileCollection().length());
+					index = CellularComponent.wrapIndex(index - offset, collection.getMedianArrayLength());
 
 					double indexToDraw = index; // convert to a double to allow normalised positioning
 
 					if (options.isNormalised()) // set to the proportion of the point along the profile
-						indexToDraw = ((indexToDraw / collection.getProfileCollection().length()) * ds.getMaxDomainValue());
+						indexToDraw = ((indexToDraw / collection.getMedianArrayLength()) * ds.getMaxDomainValue());
 
 					if (options.getAlignment().equals(ProfileAlignment.RIGHT) && !options.isNormalised()) {
 						int maxX = DatasetUtils.findMaximumDomainValue(ds.getLines()).intValue();
-						int amountToAdd = maxX - collection.getProfileCollection().length();
+						int amountToAdd = maxX - collection.getMedianArrayLength();
 						indexToDraw += amountToAdd;
 					}
 
@@ -484,37 +479,6 @@ public class ProfileChartFactory extends AbstractChartFactory {
         XYPlot plot = chart.getXYPlot();
         plot.getRangeAxis().setLabel(IQR_AXIS_LBL);
         plot.getRangeAxis().setAutoRange(true);
-
-        if (options.isShowMarkers()) { // add the bimodal regions
-            ICellCollection collection = options.firstDataset().getCollection();
-
-            // dip test the profiles
-            double significance = options.getModalityPosition();
-            BooleanProfile modes = new DipTester(collection).testCollectionIsUniModal(options.getTag(), significance,
-                    options.getType());
-
-            // add any regions with bimodal distribution to the chart
-            float[] xPositions = new float[modes.size()];
-            for (int i = 0; i < xPositions.length; i++) 
-            	xPositions[i] = (float) i / (float) xPositions.length * ds.getMaxDomainValue();
-
-            for (int i = 0; i < modes.size(); i++) {
-                double x = xPositions[i];
-                if (modes.get(i))
-                    plot.addDomainMarker(new ValueMarker(x, Color.black, ChartComponents.MARKER_STROKE));
-            }
-
-            try {
-                double ymax = DatasetUtils.findMaximumRangeValue(plot.getDataset()).doubleValue();
-                DecimalFormat df = new DecimalFormat("#0.000");
-                XYTextAnnotation annotation = new XYTextAnnotation(
-                        String.format("Markers for non-unimodal positions (p<%s)", df.format(significance)), 1, ymax);
-                annotation.setTextAnchor(TextAnchor.TOP_LEFT);
-                plot.addAnnotation(annotation);
-            } catch (IllegalArgumentException ex) {
-                LOGGER.fine("Missing data in variability chart");
-            }
-        }
         applyDefaultAxisOptions(chart);
         return chart;
     }

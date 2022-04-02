@@ -75,11 +75,17 @@ public class TaggableTest {
 		return Arrays.asList(DefaultNucleus.class);
 	}
 
+	/**
+	 * Ensure that getting a profile type is equivalent to getting the profile offset to the RP
+	 * @throws MissingLandmarkException
+	 * @throws MissingProfileException
+	 * @throws ProfileException
+	 */
 	@Test
-	public void testGetProfileTypeTag() throws MissingLandmarkException, MissingProfileException, ProfileException {
+	public void testGetProfileTypeLandmark() throws MissingLandmarkException, MissingProfileException, ProfileException {
 		ISegmentedProfile rawProfile = taggable.getProfile(ProfileType.ANGLE);
 		ISegmentedProfile tagProfile = taggable.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
-		assertEquals(rawProfile.startFrom(taggable.getBorderIndex(Landmark.REFERENCE_POINT)).toString(), tagProfile.toString());
+		assertEquals(rawProfile, tagProfile);
 	}
 
 	

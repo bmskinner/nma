@@ -179,7 +179,7 @@ public class CellCollectionModel extends DefaultTableModel {
 		IAnalysisDataset newDataset = dataset.getChildDataset(newCollection.getId());
 
 		try {
-			newCollection.createProfileCollection();
+			newCollection.getProfileCollection().calculateProfiles();
 			dataset.getCollection().getProfileManager().copySegmentsAndLandmarksTo(newCollection);
 		} catch (ProfileException | MissingProfileException | MissingLandmarkException e) {
 			LOGGER.log(Level.WARNING, "Unable to copy profiles to new child collection");

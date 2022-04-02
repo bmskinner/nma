@@ -10,6 +10,7 @@ import com.bmskinner.nuclear_morphology.analysis.mesh.AnalysisMeshTestSuite;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.AnalysisNucleusTestSuite;
 import com.bmskinner.nuclear_morphology.analysis.profiles.AnalysisProfilesTestSuite;
 import com.bmskinner.nuclear_morphology.analysis.signals.AnalysisSignalsTestSuite;
+import com.bmskinner.nuclear_morphology.components.profiles.DefaultProfileAggregateTest;
 
 /**
  * Runs all test classes in the analysis package
@@ -28,7 +29,6 @@ import com.bmskinner.nuclear_morphology.analysis.signals.AnalysisSignalsTestSuit
 	ComponentMeasurerTest.class,
 	DatasetMergeMethodTest.class,
 	MergeSourceExtracterTest.class, 
-	ProfileAggregateTest.class,
 	RuleSetTester.class})
 public class AnalysisTestSuite {
 

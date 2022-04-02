@@ -25,8 +25,8 @@ import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 /**
- * This is for testing a replacement of the profile aggregate using arrays
- * instead of collections. Not serializable.
+ * Aggregate profiles from individual nuclei for calculation of
+ * median and quartile profiles
  * 
  * @author bms41
  * @since 1.13.3
@@ -37,7 +37,7 @@ public class DefaultProfileAggregate implements IProfileAggregate {
 	private static final Logger LOGGER = Logger.getLogger(DefaultProfileAggregate.class.getName());
 
 	/** the values samples per profile */
-    private final float[][] aggregate;  
+    private float[][] aggregate;  
     
     /** the length of the aggregate */
     private final int length; 
@@ -61,17 +61,6 @@ public class DefaultProfileAggregate implements IProfileAggregate {
 
         aggregate = new float[length][profileCount];
     }
-    
-	@Override
-	public IProfileAggregate duplicate() {
-		DefaultProfileAggregate result = new DefaultProfileAggregate(length,profileCount);
-		for(int i=0; i<aggregate.length; i++)
-			for(int j=0; j<aggregate[0].length; j++)
-				result.aggregate[i][j] = aggregate[i][j];
-		return result;
-	}
-    
-    
 
     @Override
 	public void addValues(@NonNull final IProfile profile) throws ProfileException {
@@ -87,7 +76,6 @@ public class DefaultProfileAggregate implements IProfileAggregate {
         for (int i = 0; i < length; i++) {
             float d = (float) interpolated.get(i);
             aggregate[i][counter] = d;
-
         }
 
         counter++;
@@ -95,125 +83,21 @@ public class DefaultProfileAggregate implements IProfileAggregate {
     }
 
     @Override
-	public int length() {
-        return length;
-    }
-
-    @Override
-	public IProfile getMedian() {
-        return calculateQuartile(Stats.MEDIAN);
-    }
-
-    public IProfile getQuartile(float quartile) {
-
-        return calculateQuartile((int) quartile);
-    }
-
-    /**
-     * Get the angle values at the given position in the aggregate.
-     * 
-     * @param position
-     *            the position to search. Must be between 0 and the length of
-     *            the aggregate.
-     * @return an unsorted array of the values at the given position
-     */
-    public float[] getValuesAtPosition(int position) {
-        if (position < 0 || position > length) {
-            throw new IllegalArgumentException("Desired position is out of range: " + position);
-        }
-        return getValuesAtIndex(position);
-    }
-
-    /**
-     * Get the angle values at the given position in the aggregate. If the
-     * requested position is not an integer, the closest integer index values
-     * are returned
-     * 
-     * @param position
-     *            the position to search. Must be between 0 and 1.
-     * @return an unsorted array of the values at the given position
-     */
-    @Override
-	public double[] getValuesAtPosition(double position) {
-        if (position < 0 || position > 1)
-            throw new IllegalArgumentException("Desired x-position is out of range: " + position);
-
-        double indexPosition = (double) this.length * position;
-
-        // Choose the best position to return
-        int index = (int) Math.round(indexPosition);
-
-        float[] result = getValuesAtIndex(index);
-        
-        double[] d = new double[result.length];
-        for(int i=0; i<result.length; i++){
-            d[i] = result[i];
-        }
-        return d;
-    }
-
-    /**
-     * Get the x-axis positions of the centre of each bin.
-     * 
-     * @return the Profile of positions
-     */
-    @Override
-	public IProfile getXPositions() {
-        float[] result = new float[length];
-
-        float profileIncrement = 100f / (float) length;
-        // start counting half a bin below zero
-        // this sets the value to the bin centre
-        float x = -profileIncrement / 2;
-
-        // add the bin size for each positions
-        for (int i = 0; i < length; i++) {
-            x += profileIncrement;
-            result[i] = x;
-        }
-        return new DefaultProfile(result);
-    }
-
-    /*
-     * 
-     * PRIVATE METHODS
-     * 
-     */
-
-    /**
-     * Get the values from each profile at the given position in the aggregate
-     * 
-     * @param i
-     * @return
-     */
-    private float[] getValuesAtIndex(int i) {
-        float[] values = new float[profileCount];
-        for (int n = 0; n < profileCount; n++)
-            values[n] = aggregate[i][n];
-        return values;
+	public IProfile getMedian() throws ProfileException {
+        return getQuartile(Stats.MEDIAN);
     }
     
-    /**
-     * Calculate the profile for the given quartile
-     * 
-     * @param quartile
-     * @return
-     */
-    private IProfile calculateQuartile(int quartile) {
-
+    @Override
+    public IProfile getQuartile(int quartile) throws ProfileException {
         float[] medians = new float[length];
 
         for (int i = 0; i < length; i++) {
-            float[] values = getValuesAtIndex(i);
-            medians[i] = Stats.quartile(values, quartile);
+            medians[i] = Stats.quartile(aggregate[i], quartile);
         }
         return new DefaultProfile(medians);
     }
 
-    @Override
-    public IProfile getQuartile(double quartile) throws ProfileException {
-        return getQuartile((float) quartile);
-    }
+
 
 	@Override
 	public int hashCode() {
@@ -248,10 +132,13 @@ public class DefaultProfileAggregate implements IProfileAggregate {
 
 	@Override
 	public String toString() {
-		return "DefaultProfileAggregate [aggregate=" + Arrays.toString(aggregate) + ", length=" + length
-				+ ", profileCount=" + profileCount + ", counter=" + counter + "]";
+		return "DefaultProfileAggregate [aggregate=" 
+				+ Arrays.toString(aggregate) 
+				+ ", length=" + length
+				+ ", profileCount=" + profileCount 
+				+ ", counter=" + counter + "]";
 	}
-    
+
     
 
 }

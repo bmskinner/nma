@@ -64,7 +64,6 @@ import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.io.Io;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.ConfidenceInterval;
-import com.bmskinner.nuclear_morphology.stats.DipTester;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 /**
@@ -163,13 +162,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
                         + df.format(ci.getUpper().doubleValue()));
                 rowData.add(df.format(sem));
 
-                double pval = DipTester.getDipTestPValue(meanLengths);
-                rowData.add(pf.format(pval));
-
-                model.addColumn(segment.getName(), rowData.toArray(new Object[0])); // separate
-                                                                                    // column
-                                                                                    // per
-                                                                                    // segment
+                model.addColumn(segment.getName(), rowData.toArray(new Object[0]));
             }
         }
         return model;
@@ -551,14 +544,12 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
             ConfidenceInterval ci = new ConfidenceInterval(stats, 0.95);
             String ciString = df.format(mean) + " ± "
                     + df.format(ci.getSize().doubleValue());
-            double diptest = DipTester.getDipTestPValue(stats);
 
             datasetData.add(df.format(median));
             datasetData.add(df.format(mean));
             datasetData.add(df.format(sem));
             datasetData.add(df.format(cv));
             datasetData.add(ciString);
-            datasetData.add(pf.format(diptest));
         }
 
         return datasetData;

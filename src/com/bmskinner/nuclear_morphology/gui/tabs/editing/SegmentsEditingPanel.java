@@ -368,7 +368,8 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 
         IProfileCollection pc = activeDataset().getCollection().getProfileCollection();
 
-        pc.createProfileAggregate(activeDataset().getCollection(), pc.length());
+        pc.calculateProfiles();
+//        pc.createProfileAggregate(activeDataset().getCollection(), pc.length());
 
         Optional<IAnalysisOptions> op = activeDataset().getAnalysisOptions();
         if(op.isPresent())

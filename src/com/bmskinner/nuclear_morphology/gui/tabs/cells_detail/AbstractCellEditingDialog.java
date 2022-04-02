@@ -138,7 +138,7 @@ public abstract class AbstractCellEditingDialog extends MessagingDialog {
 
             // Trigger a dataset update and reprofiling
             try {
-				dataset.getCollection().createProfileCollection();
+				dataset.getCollection().getProfileCollection().calculateProfiles();
 			} catch (ProfileException | MissingLandmarkException | MissingProfileException e) {
 				LOGGER.warning("Unable to profile cell collection");
 				LOGGER.log(Loggable.STACK, e.getMessage(), e);

@@ -147,7 +147,7 @@ public class CellCollectionFilterer {
 		}
 
 		try {
-			subCollection.createProfileCollection();
+			subCollection.getProfileCollection().calculateProfiles();
 			collection.getProfileManager().copySegmentsAndLandmarksTo(subCollection);
 			collection.getSignalManager().copySignalGroupsTo(subCollection);
 
