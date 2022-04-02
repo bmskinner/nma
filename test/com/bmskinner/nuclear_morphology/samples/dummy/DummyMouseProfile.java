@@ -19,9 +19,9 @@
 
 package com.bmskinner.nuclear_morphology.samples.dummy;
 
-import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.DefaultProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.DefaultSegmentedProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.ProfileException;
 
 /**
  * This class generates dummy profiles that are based on a single real mouse

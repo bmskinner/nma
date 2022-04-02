@@ -108,9 +108,24 @@ public class ImageImporter implements Importer {
      * image cannot be imported, a white colour processor
      * is returned of sufficient dimensions to contain the 
      * component. The 8-bit image is converted to 24bit RGB to
+     * allow coloured annotations. The image is then cropped to 
+     * the bounds of the component.
+     * @param c the component to import
+     * @return an RGB greyscale image cropped to the component
+     */
+    public static ImageProcessor importCroppedImageTo24bit(@NonNull CellularComponent c) {
+    	ImageProcessor ip = importFullImageTo24bit(c);
+        return AbstractImageFilterer.crop(ip, c);
+    }
+    
+    /**
+     * Get the image for the given cellular component. If the 
+     * image cannot be imported, a white colour processor
+     * is returned of sufficient dimensions to contain the 
+     * component. The 8-bit image is converted to 24bit RGB to
      * allow coloured annotations. No cropping is performed
      * @param c the component to import
-     * @return
+     * @return an RGB greyscale image containing the component
      */
     public static ImageProcessor importFullImageTo24bit(@NonNull CellularComponent c) {
         if (!c.getSourceFile().exists()) {
@@ -127,12 +142,7 @@ public class ImageImporter implements Importer {
 					(int)c.getMaxY()+Imageable.COMPONENT_BUFFER);
 		}
     }
-    
-    public static ImageProcessor importCroppedImageTo24bit(@NonNull CellularComponent c) {
-    	ImageProcessor ip = importFullImageTo24bit(c);
-        return AbstractImageFilterer.crop(ip, c);
-    }
-    
+        
     /**
      * Get the image from which the component was detected. Opens the image and fetches
      * the appropriate channel. This will return the 8-bit greyscale image used for
@@ -157,6 +167,14 @@ public class ImageImporter implements Importer {
         }
     }
     
+    /**
+     * Get the image from which the component was detected. Opens the image and fetches
+     * the appropriate channel. This will return the 8-bit greyscale image used for
+     * object detection. The image is then cropped to the component bounds.
+     * 
+     * @return an 8-bit greyscale image cropped to the component bounds
+     * @throws UnloadableImageException if the image can't be loaded
+     */
     public static ImageProcessor importCroppedImageTo8bit(@NonNull CellularComponent c) throws UnloadableImageException {
         ImageProcessor ip = importFullImageTo8bit(c);
         return AbstractImageFilterer.crop(ip, c);

@@ -27,6 +27,7 @@ import com.bmskinner.nuclear_morphology.components.profiles.DefaultProfileSegmen
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileCollection;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
+import com.bmskinner.nuclear_morphology.components.profiles.ProfileException;
 
 /**
  * Divide a profile into segments of interest based on minima and maxima.

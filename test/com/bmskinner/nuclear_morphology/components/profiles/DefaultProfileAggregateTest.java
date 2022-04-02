@@ -24,8 +24,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
-
 public class DefaultProfileAggregateTest {
 	
 	@Rule

@@ -240,34 +240,6 @@ public class ManualCurationDialog extends AbstractCellCollectionDialog {
         scrollPane.setViewportView(table);
         getContentPane().add(scrollPane, BorderLayout.CENTER);
     }
-
-//    private void makeNewCollection() {
-//    	LOGGER.finer("Creating new collection from selected cells");
-//    	List<ICell> cells = model.getSelected();
-//    	LOGGER.fine("Selection has "+cells.size()+" cells");
-//
-//        ICellCollection newCollection = new VirtualCellCollection(dataset, dataset.getName() + "_Curated");
-//        for (ICell c : cells) {
-//        	if(c==null)
-//        		LOGGER.fine("Null cell encountered!");
-//        	else
-//        		newCollection.addCell(c);
-//        }
-//        
-//        LOGGER.info("Added " + cells.size() + " cells to new collection");
-//
-//        /* We don;t want to run a new profiling because this will bugger up the
-//         * segment patterns of the original cells. We need to copy the segments
-//         *  over as with FISH remapping */
-//
-//        if (!cells.isEmpty()) {
-//            dataset.addChildCollection(newCollection);
-//            List<IAnalysisDataset> list = new ArrayList<>();
-//            list.add(dataset.getChildDataset(newCollection.getID()));
-//            LOGGER.fine("Firing request for profile segmentation");
-//            fireDatasetEvent(DatasetEvent.COPY_PROFILE_SEGMENTATION, list, dataset);
-//        }
-//    }
     
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
@@ -318,7 +290,9 @@ public class ManualCurationDialog extends AbstractCellCollectionDialog {
 
 	    	}
 	    	// Rescale the resulting image
-	    	ip = new ImageFilterer(ip).resizeKeepingAspect(ROW_IMAGE_HEIGHT, ROW_IMAGE_HEIGHT).toProcessor();
+	    	ip = new ImageFilterer(ip)
+	    			.resizeKeepingAspect(ROW_IMAGE_HEIGHT, ROW_IMAGE_HEIGHT)
+	    			.toProcessor();
 	    	return ip;
 	    }
 

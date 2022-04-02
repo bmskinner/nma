@@ -108,27 +108,45 @@ public abstract class ImageImportWorker extends SwingWorker<Boolean, SelectableC
     protected ImageProcessor rotateToVertical(ICell c, ImageProcessor ip) throws MissingLandmarkException {
         // Calculate angle for vertical rotation
         Nucleus n = c.getPrimaryNucleus();
-
-        IPoint topPoint;
-        IPoint btmPoint;
-
-        if (!n.hasLandmark(Landmark.TOP_VERTICAL) || !n.hasLandmark(Landmark.BOTTOM_VERTICAL)) {
-            topPoint = n.getCentreOfMass();
-            btmPoint = n.getBorderPoint(Landmark.ORIENTATION_POINT);
-
-        } else {
-
-            topPoint = n.getBorderPoint(Landmark.TOP_VERTICAL);
-            btmPoint = n.getBorderPoint(Landmark.BOTTOM_VERTICAL);
-
-            // Sometimes the points have been set to overlap in older datasets
-            if (topPoint.overlapsPerfectly(btmPoint)) {
-                topPoint = n.getCentreOfMass();
-                btmPoint = n.getBorderPoint(Landmark.ORIENTATION_POINT);
-            }
+        
+        IPoint originalRP = n.getBorderPoint(Landmark.REFERENCE_POINT);
+        IPoint orientedRP = n.getOrientedNucleus().getBorderPoint(Landmark.REFERENCE_POINT);
+        IPoint com        = n.getCentreOfMass();
+                
+        double angle = com.findAbsoluteAngle(orientedRP, originalRP);
+        
+        Nucleus test = n.duplicate();
+        test.rotate(angle);
+        IPoint testRP = test.getBorderPoint(Landmark.REFERENCE_POINT);
+        if(!testRP.equals(orientedRP)) {
+        	// We must have a flipped orientation
+        	Nucleus flip = n.duplicate();
+        	flip.flipHorizontal();
+        	originalRP = flip.getBorderPoint(Landmark.REFERENCE_POINT);
+        	angle = com.findAbsoluteAngle(orientedRP, originalRP);
         }
         
-        double angle = findVerticalRotationAngle(topPoint, btmPoint);
+
+//        IPoint topPoint;
+//        IPoint btmPoint;
+//
+//        if (!n.hasLandmark(Landmark.TOP_VERTICAL) || !n.hasLandmark(Landmark.BOTTOM_VERTICAL)) {
+//            topPoint = n.getCentreOfMass();
+//            btmPoint = n.getBorderPoint(Landmark.ORIENTATION_POINT);
+//
+//        } else {
+//
+//            topPoint = n.getBorderPoint(Landmark.TOP_VERTICAL);
+//            btmPoint = n.getBorderPoint(Landmark.BOTTOM_VERTICAL);
+//
+//            // Sometimes the points have been set to overlap in older datasets
+//            if (topPoint.overlapsPerfectly(btmPoint)) {
+//                topPoint = n.getCentreOfMass();
+//                btmPoint = n.getBorderPoint(Landmark.ORIENTATION_POINT);
+//            }
+//        }
+//        
+//        double angle = findVerticalRotationAngle(topPoint, btmPoint);
 
         // Increase the canvas size so rotation does not crop the nucleus
         LOGGER.finest( "Input: " + n.getNameAndNumber() + " - " + ip.getWidth() + " x " + ip.getHeight());
@@ -204,10 +222,6 @@ public abstract class ImageImportWorker extends SwingWorker<Boolean, SelectableC
         // paste old image to centre of enlarged canvas
         int xBase = (w - ip.getWidth()) >> 1;
         int yBase = (h - ip.getHeight()) >> 1;
-
-        LOGGER.finest(String.format("New image %sx%s from %sx%s : Rot: %s", w, h, ip.getWidth(), ip.getHeight(), degrees));
-
-//        LOGGER.finest("Copy starting at " + xBase + ", " + yBase);
 
         ImageProcessor newIp = new ColorProcessor(w, h);
 

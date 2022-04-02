@@ -31,8 +31,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
-
 /**
  * Tests for the methods specific to the segmented float profile. Common methods are
  * tested by {@link ISegmentedProfileTest}

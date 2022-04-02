@@ -2,10 +2,10 @@ package com.bmskinner.nuclear_morphology.components.datasets;
 
 import org.jdom2.Element;
 
-import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
+import com.bmskinner.nuclear_morphology.components.profiles.ProfileException;
 
 /**
  * Handle dataset creation from XML to ensure any linking

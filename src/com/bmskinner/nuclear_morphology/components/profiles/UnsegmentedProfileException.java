@@ -16,8 +16,6 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.profiles;
 
-import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
-
 /**
  * Thrown when a profile collection or segmented profile has no assigned
  * segments

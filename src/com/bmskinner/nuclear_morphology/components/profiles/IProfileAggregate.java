@@ -18,8 +18,6 @@ package com.bmskinner.nuclear_morphology.components.profiles;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
-
 /**
  * Store aggregated profile data.
  * @author bms41
