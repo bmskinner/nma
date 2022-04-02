@@ -70,9 +70,7 @@ public class RepresentativeMedianFinder {
 	 * @throws MissingProfileException
 	 * @throws ProfileException
 	 */
-	public IProfile findMedian() throws MissingLandmarkException, MissingProfileException, ProfileException {
-    	LOGGER.fine("Beginning median finding");
-    	
+	public IProfile findMedian() throws MissingLandmarkException, MissingProfileException, ProfileException {    	
     	// Get normalised pairwise differences between nuclei profiles
 		float[][] differences  = buildDifferenceMatrix();
 		float[][] similarities = buildSimilarityMatrix(differences);
@@ -158,9 +156,8 @@ public class RepresentativeMedianFinder {
 		return result;
 	}
 	
-	private IProfile buildMedianFromProfiles(@NonNull final List<IProfile> profiles, int length) throws MissingLandmarkException, MissingProfileException, ProfileException {
-		LOGGER.fine("Group size for new median is "+profiles.size());
-		LOGGER.fine("Building aggregate of length "+length);
+	private IProfile buildMedianFromProfiles(@NonNull final List<IProfile> profiles, int length) 
+			throws MissingLandmarkException, MissingProfileException, ProfileException {
 		DefaultProfileAggregate agg = new DefaultProfileAggregate(length, profiles.size());
 		for(IProfile p : profiles)
 				agg.addValues(p);

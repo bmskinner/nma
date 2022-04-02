@@ -110,8 +110,6 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 
 	@Override
 	public IAnalysisResult call() throws Exception {
-    	LOGGER.fine("Beginning segmentation method");
-
     	switch (mode) {
     	case COPY:
     		result = runCopyAnalysis();
@@ -134,8 +132,6 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
     		}
     		n.updateDependentStats();
     	}
-    	LOGGER.fine("Updated stats");
-
     	DatasetValidator dv = new DatasetValidator();
     	if(!dv.validate(dataset)) {
     		LOGGER.warning("Segmentation failed; resulting dataset did not validate");
@@ -200,9 +196,7 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 			return new DefaultAnalysisResult(dataset);
 		}
 
-		LOGGER.fine("Copying segmentation pattern");
 		reapplyProfiles();
-		LOGGER.fine("Copying complete");
 		return new DefaultAnalysisResult(dataset);
 	}
 
@@ -214,14 +208,7 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 	 * @param sourceCollection the collection with segments to copy
 	 */
 	private void reapplyProfiles() throws Exception {
-
-		LOGGER.fine("Applying existing segmentation profile to population");
-
 		sourceCollection.getProfileManager().copySegmentsAndLandmarksTo(collection);
-
-		// At this point the collection has only a regular profile collections.
-		// No Frankenprofile has been copied.
-		LOGGER.fine("Re-profiling complete");
 	}
 	
 	/**

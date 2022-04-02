@@ -87,7 +87,7 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
 
     private void run() throws MissingComponentException, UnprofilableObjectException, 
     ComponentCreationException, ProfileException, MissingOptionException {
-    	LOGGER.fine("Running consensus averaging on "+dataset.getName());
+    	LOGGER.finer("Running consensus averaging on "+dataset.getName());
 
         try {
             List<IPoint> border = calculatePointAverage();
@@ -159,7 +159,7 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
     	// Decide on the best scale for the consensus, 
     	// and scale the points back into pixel coordinates
     	double scale = choosePixelToMicronScale();
-    	LOGGER.fine("Consensus nucleus scale set to "+scale);
+    	LOGGER.finer("Consensus nucleus scale set to "+scale);
     	for(IPoint p : list)
     		p.set(p.multiply(scale));
 

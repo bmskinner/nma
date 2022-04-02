@@ -1701,17 +1701,12 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
 	        private class ProfileKey {
 	            private final ProfileType type;
 	            private final double      quartile;
-	            private final Landmark         tag;
+	            private final Landmark    tag;
 
 	            public ProfileKey(final ProfileType type, final double quartile, final Landmark tag) {
-
 	                this.type = type;
 	                this.quartile = quartile;
 	                this.tag = tag;
-	            }
-
-	            public boolean has(ProfileType t) {
-	                return type.equals(t);
 	            }
 
 	            public boolean has(Landmark t) {
@@ -1767,15 +1762,14 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
 	        
 	        public ProfileCache duplicate() {
 	        	ProfileCache result = new ProfileCache();
+	        	
 	        	try {
-	        		for(ProfileKey k : map.keySet()) {
-	        			IProfile p = map.get(k);
-	        			if(p!=null)
-	        				result.map.put(k, p.copy());
-	        		}
+	        	for(Entry<ProfileKey, IProfile> e : map.entrySet())
+	        		result.map.put(e.getKey(), e.getValue().copy());
 	        	} catch(ProfileException e) {
-
+	        		LOGGER.warning("Unable to duplicate profile cache: "+e.getMessage());
 	        	}
+	        	
 	        	return result;
 	        }
 

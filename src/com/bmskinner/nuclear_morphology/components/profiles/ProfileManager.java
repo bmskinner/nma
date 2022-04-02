@@ -58,10 +58,6 @@ public class ProfileManager {
         this.collection = collection;
     }
 
-//    public int getProfileLength() {
-//        return collection.getProfileCollection().length();
-//    }
-
     /**
      * Update the given tag in each nucleus of the collection to the index with
      * a best fit of the profile to the given median profile
@@ -120,17 +116,11 @@ public class ProfileManager {
      */
     public void calculateTopAndBottomVerticals() throws MissingProfileException, ProfileException, MissingLandmarkException {
 
-        LOGGER.fine("Detecting top and bottom verticals in collection");
-
         try {
             int topIndex = ProfileIndexFinder.identifyIndex(collection, Landmark.TOP_VERTICAL);
             int btmIndex = ProfileIndexFinder.identifyIndex(collection, Landmark.BOTTOM_VERTICAL);
-
-            LOGGER.fine(()->String.format("TV in median is located at index %i", topIndex));
-            LOGGER.fine(()->String.format("BV in median is located at index %i ", btmIndex));
-
+           
             updateLandmarkInProfileCollection(Landmark.TOP_VERTICAL, topIndex);
-
             updateLandmarkInProfileCollection(Landmark.BOTTOM_VERTICAL, btmIndex);
 
         } catch (NoDetectedIndexException e) {
@@ -149,8 +139,6 @@ public class ProfileManager {
         					Stats.MEDIAN);
         updateLandmarkToMedianBestFit(Landmark.TOP_VERTICAL, ProfileType.ANGLE, topMedian);
         updateLandmarkToMedianBestFit(Landmark.BOTTOM_VERTICAL, ProfileType.ANGLE, btmMedian);
-
-        LOGGER.fine("Updated nuclei");
     }
     
 
@@ -183,7 +171,6 @@ public class ProfileManager {
     			n.setLandmark(entry.getKey(), entry.getValue());
     		}    		
     	}
-    	LOGGER.fine("Updated tag indexes from source collection");
     }
 
     /**
@@ -356,7 +343,7 @@ public class ProfileManager {
     private void updateCoreBorderTagIndex(@NonNull Landmark tag, int index)
             throws MissingLandmarkException, ProfileException, MissingProfileException, UnsegmentedProfileException {
 
-        LOGGER.fine("Updating core border tag index");
+        LOGGER.finer("Updating core border tag index");
 
         // Get the median zeroed on the RP
         ISegmentedProfile oldMedian = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);
@@ -384,7 +371,6 @@ public class ProfileManager {
     	
     	// Rebuild the profile aggregate in the collection
     	collection.getProfileCollection().calculateProfiles();
-//    	collection.getProfileCollection().createProfileAggregate(collection, collection.getMedianArrayLength());
     }
     
     /**
@@ -414,9 +400,6 @@ public class ProfileManager {
      * @throws Exception
      */
     public void recalculateProfileAggregates() throws ProfileException, MissingLandmarkException, MissingProfileException {
-        // use the same array length as the source collection to avoid segment slippage
-//        IProfileCollection pc = collection.getProfileCollection();
-//        pc.createProfileAggregate(collection, pc.length());
         collection.getProfileCollection().calculateProfiles();
 
     }
@@ -439,13 +422,9 @@ public class ProfileManager {
     		if(segments.isEmpty())
     			throw new ProfileException("No segments in profile of "+collection.getName());
     		
-    		LOGGER.fine("Got existing list of " + segments.size() + " segments");
-
     		// Create a new profile collection for the destination, so profiles are refreshed
     		IProfileCollection destPC = destination.getProfileCollection();
     		destPC.calculateProfiles();
-//    		destPC.createProfileAggregate(destination, destination.getMedianArrayLength());
-    		LOGGER.fine("Created new profile aggregate with length " + destination.getMedianArrayLength());
 
     		// Copy the tags from the source collection
     		// Use proportional indexes to allow for a changed aggregate length
@@ -463,12 +442,7 @@ public class ProfileManager {
 
     		destPC.setSegments(interpolatedMedian.getSegments());
 
-
-    		LOGGER.fine("Copied tags to new collection");
-
-
     		// Final sanity check - did the segment IDs get copied properly?
-    		LOGGER.fine("Testing profiles");
     		List<IProfileSegment> newSegs;
     		try {
     			newSegs = destPC.getSegments(Landmark.REFERENCE_POINT);
@@ -531,8 +505,6 @@ public class ProfileManager {
      * @throws MissingComponentException 
      */
     public void updateCellSegmentStartIndex(@NonNull ICell cell, @NonNull UUID id, int index) throws ProfileException, MissingComponentException {
-
-    	LOGGER.fine("Updating segment start index");
     	
         Nucleus n = cell.getPrimaryNucleus();
         ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
@@ -633,7 +605,6 @@ public class ProfileManager {
             throws MissingLandmarkException {
     	
     	if(!seg1.nextSegment().getID().equals(seg2.getID())) {
-    		LOGGER.fine("Segments are not adjacent; cannot merge");
     		return false;
     	}
 
@@ -643,7 +614,6 @@ public class ProfileManager {
              // Find the position of the border tag in the median profile
             int tagIndex = collection.getProfileCollection().getLandmarkIndex(tag);            
             if(seg1.getEndIndex()==tagIndex || seg2.getStartIndex() == tagIndex) {
-            	LOGGER.fine("Segments cross RP; cannot merge");
             	return false;
             }
         }
@@ -763,9 +733,6 @@ public class ProfileManager {
     public boolean splitSegment(@NonNull IProfileSegment seg, @Nullable UUID newID1, @Nullable UUID newID2)
             throws ProfileException, UnsegmentedProfileException, MissingComponentException {
 
-        if (seg == null)
-            throw new IllegalArgumentException("Segment cannot be null");
-
         ISegmentedProfile medianProfile = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE,
                 Landmark.REFERENCE_POINT, Stats.MEDIAN);
 
@@ -780,7 +747,6 @@ public class ProfileManager {
         double proportion = seg.getIndexProportion(index);
 
         // Validate that all nuclei have segments long enough to be split
-        LOGGER.fine("Testing splittability of collection");
         if (!isCollectionSplittable(seg.getID(), proportion)) {
             LOGGER.warning("Segment cannot be split: profile failed testing");
             return false;
@@ -790,7 +756,6 @@ public class ProfileManager {
         @NonNull UUID nId1 = newID1 == null ? java.util.UUID.randomUUID() : newID1;
         @NonNull UUID nId2 = newID2 == null ? java.util.UUID.randomUUID() : newID2;
         medianProfile.splitSegment(seg, index, nId1, nId2);
-        LOGGER.fine("Split median profile");
 
         // put the new segment pattern back with the appropriate offset
         collection.getProfileCollection().setSegments(medianProfile.getSegments());
@@ -850,7 +815,6 @@ public class ProfileManager {
         int index = medianProfile.getSegment(id).getProportionalIndex(proportion);
 
         if (!medianProfile.isSplittable(id, index)) {
-        	LOGGER.fine("Median profile in "+collection.getName()+" is not splittable");
         	return false;
         }
             
@@ -858,16 +822,13 @@ public class ProfileManager {
         if (collection.hasConsensus()) {
         	Nucleus n = collection.getRawConsensus();
             if (!isSplittable(n, id, proportion)) {
-                LOGGER.fine("Consensus not splittable");
                 return false;
             }
         }
 
         if(collection.isReal()) {
-        	boolean allNucleiSplittable = collection.getNuclei().parallelStream().allMatch( n->isSplittable(n, id, proportion) );
-        	if(!allNucleiSplittable)
-        		LOGGER.fine("At least one nucleus in "+collection.getName()+" is not splittable");
-        	return allNucleiSplittable;
+        	return collection.getNuclei()
+        			.parallelStream().allMatch( n->isSplittable(n, id, proportion));
         }
         return true;
     }
@@ -909,9 +870,6 @@ public class ProfileManager {
      */
     public void unmergeSegments(@NonNull UUID segId)
             throws ProfileException, UnsegmentedProfileException, MissingComponentException {
-    	
-        if(segId==null)
-            throw new IllegalArgumentException("Segment to unmerge cannot be null");
 
         ISegmentedProfile medianProfile = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE,
                 Landmark.REFERENCE_POINT, Stats.MEDIAN);

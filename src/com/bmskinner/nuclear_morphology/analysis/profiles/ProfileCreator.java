@@ -117,11 +117,6 @@ public class ProfileCreator {
 
         List<IProfileSegment> segments = getExistingSegments(target);
         float[] angles = new float[target.getBorderLength()];
-        
-        
-        // Confirm that the number of border points is still the same
-//        if(!segments.isEmpty() && segments.get(0).getProfileLength()!=target.getBorderLength())
-//        	throw new ProfileException("Existing segments do not match border length");
 
         Shape s = target.toShape();
 

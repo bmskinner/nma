@@ -35,11 +35,8 @@ import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.profiles.DefaultProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
-import com.bmskinner.nuclear_morphology.components.profiles.IProfileCollection;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
-import com.bmskinner.nuclear_morphology.components.profiles.LandmarkType;
 import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.components.rules.RuleApplicationType;
@@ -98,9 +95,7 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 	 * 
 	 * Apply to nuclei using offsets
 	 */
-	private void run() throws Exception {
-    	LOGGER.fine("Beginning profiling method");
-    	
+	private void run() throws Exception {    	
     	if(!dataset.hasAnalysisOptions()) {
     		LOGGER.warning("Unable to run profiling method, no analysis options in dataset "+dataset.getName());
     		return;
@@ -127,7 +122,6 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 	private void runPerNucleus() throws ProfileException, 
 	MissingProfileException,
 	MissingLandmarkException {
-		LOGGER.fine("Detecting border tags per-nucleus");
 		ICellCollection collection = dataset.getCollection();
 		
 		collection.getProfileCollection().calculateProfiles();
@@ -176,7 +170,6 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 	 * @throws Exception
 	 */
 	private void runViaMedian() throws Exception {
-		LOGGER.fine("Detecting border tags via median");
 		ICellCollection collection = dataset.getCollection();
 		
 		// Find and update the RP
@@ -193,7 +186,7 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 	    			.getRuleSetCollection().getMeasurableValues()) { 
 				if(m==null)
 					throw new IllegalArgumentException("Error reading ruleset, a measurement is null");
-					n.setStatistic(m, ComponentMeasurer.calculate(m, n));
+				n.setStatistic(m, ComponentMeasurer.calculate(m, n));
 			}
 		}
 		
@@ -229,7 +222,7 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 		// RP index *should be* zero in the median profile at this point
 		// Check this before updating nuclei
 		int rpIndex = ProfileIndexFinder.identifyIndex(collection, Landmark.REFERENCE_POINT);
-		LOGGER.fine( "RP in default median is located at index " + rpIndex);
+//		LOGGER.fine( "RP in default median is located at index " + rpIndex);
 
 		// Offset the median profile to place the RP at zero
 		// This does not affect the actual median profile
@@ -246,7 +239,7 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 
 		// Test if the recalculated profile aggregate naturally puts the RP at zero
 		rpIndex = ProfileIndexFinder.identifyIndex(collection, Landmark.REFERENCE_POINT);
-		LOGGER.fine( "RP in recalculated median is located at index " + rpIndex);
+//		LOGGER.fine( "RP in recalculated median is located at index " + rpIndex);
 		
 		int coercionCounter = 0;
 		while (rpIndex != 0 && coercionCounter++<MAX_COERCION_ATTEMPTS) {
@@ -257,7 +250,7 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 		if(coercionCounter==MAX_COERCION_ATTEMPTS && rpIndex!=0)
 			LOGGER.fine("Unable to coerce RP to index zero");
 		
-		LOGGER.fine( "Best RP in final median is located at index " + rpIndex);
+//		LOGGER.fine( "Best RP in final median is located at index " + rpIndex);
 	}
 
 	/**

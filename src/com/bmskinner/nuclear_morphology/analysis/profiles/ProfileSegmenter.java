@@ -79,8 +79,6 @@ public class ProfileSegmenter {
      * @param p
      */
     public ProfileSegmenter(@NonNull final IProfile p) {
-        if (p == null)
-            throw new IllegalArgumentException("Profile is null");
         profile = p;
         initialise();
     }
@@ -94,8 +92,6 @@ public class ProfileSegmenter {
      */
     public ProfileSegmenter(@NonNull final IProfile p, @NonNull final List<Integer> map) {
         this(p);
-        if (map == null)
-            throw new IllegalArgumentException("Index map is null");
         mustSplit = validateBorderTagMap(map);
     }
     
@@ -105,12 +101,9 @@ public class ProfileSegmenter {
      * @param splitIndex an index point that must be segmented on
      * @return a list of segments
      */
-    public List<IProfileSegment> segment()  {
-    	LOGGER.fine("Beginning segmentation   ");
-        
+    public List<IProfileSegment> segment()  {        
     	/* Prepare segment start index  */
         int segmentStart = 0;
-        LOGGER.finer( "Profile length "+profile.size());
         
         /*
          * Iterate through the profile, looking for breakpoints The reference
@@ -121,14 +114,9 @@ public class ProfileSegmenter {
         for (int index = 0; index < profile.size(); index++) {
 
             if (isValidSegmentEnd(index, segmentStart)) {
-
                 // we've hit a new segment
                 IProfileSegment seg = new DefaultProfileSegment(segmentStart, index, profile.size());
-
                 segments.add(seg);
-
-                LOGGER.fine("New segment found in profile: " + seg.toString());
-
                 segmentStart = index; // Prepare for the next segment
             }
 
@@ -150,12 +138,10 @@ public class ProfileSegmenter {
 
         try {
             IProfileSegment.linkSegments(segments);
-            LOGGER.finer( "Segments linked");
         } catch (ProfileException e) {
             LOGGER.warning("Cannot link segments in profile");            
         }
 
-        LOGGER.fine(String.format("Created %s segments in profile", segments.size()));
         return segments;
     }
 

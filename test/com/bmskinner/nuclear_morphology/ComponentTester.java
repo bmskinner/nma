@@ -126,6 +126,8 @@ public abstract class ComponentTester extends FloatArrayTester {
 				continue;
 			if(f.getType().equals(Class.forName("com.bmskinner.nuclear_morphology.components.datasets.DefaultCellCollection$DefaultProfileCollection$ProfileCache")))
 				continue;	
+			if(f.getType().equals(Class.forName("com.bmskinner.nuclear_morphology.components.datasets.VirtualDataset$DefaultProfileCollection$ProfileCache")))
+				continue;
 			if(f.getType().equals(Class.forName("com.bmskinner.nuclear_morphology.components.measure.StatsCache")))
 				continue;
 			if(f.getType().equals(Class.forName("com.bmskinner.nuclear_morphology.components.measure.VennCache")))

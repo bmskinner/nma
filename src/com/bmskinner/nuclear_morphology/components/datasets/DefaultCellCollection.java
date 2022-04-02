@@ -1619,10 +1619,6 @@ public class DefaultCellCollection implements ICellCollection {
 	                this.tag = tag;
 	            }
 
-	            public boolean has(ProfileType t) {
-	                return type.equals(t);
-	            }
-
 	            public boolean has(Landmark t) {
 	                return tag.equals(t);
 	            }
