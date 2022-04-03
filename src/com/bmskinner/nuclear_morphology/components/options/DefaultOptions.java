@@ -75,19 +75,19 @@ public class DefaultOptions implements Serializable, HashOptions {
 		
 		// Add each map
 		for(Element i : e.getChildren("Integer"))
-			intMap.put(i.getAttributeValue("name"), Integer.parseInt(i.getText()));
+			intMap.put(i.getAttributeValue("name"), Integer.parseInt(i.getAttributeValue("value")));
 		
 		for(Element i : e.getChildren("Float"))
-			fltMap.put(i.getAttributeValue("name"), Float.parseFloat(i.getText()));
+			fltMap.put(i.getAttributeValue("name"), Float.parseFloat(i.getAttributeValue("value")));
 		
 		for(Element i : e.getChildren("Double"))
-			dblMap.put(i.getAttributeValue("name"), Double.parseDouble(i.getText()));
+			dblMap.put(i.getAttributeValue("name"), Double.parseDouble(i.getAttributeValue("value")));
 		
 		for(Element i : e.getChildren("Boolean"))
-			boolMap.put(i.getAttributeValue("name"), Boolean.parseBoolean(i.getText()));
+			boolMap.put(i.getAttributeValue("name"), Boolean.parseBoolean(i.getAttributeValue("value")));
 		
 		for(Element i : e.getChildren("String"))
-			stringMap.put(i.getAttributeValue("name"), i.getText());
+			stringMap.put(i.getAttributeValue("name"), i.getAttributeValue("value"));
 		
 		
 		for(Element i : e.getChildren("Suboption"))
@@ -389,24 +389,34 @@ public class DefaultOptions implements Serializable, HashOptions {
 		
 		// Add each map
 		for(Entry<String, Integer> entry : intMap.entrySet()) {
-			e.addContent(new Element("Integer").setAttribute("name", entry.getKey()).setText(entry.getValue().toString()));
+			e.addContent(new Element("Integer")
+					.setAttribute("name", entry.getKey())
+					.setAttribute("value", entry.getValue().toString()));
 		}
 		
 
 		for(Entry<String, Float> entry : fltMap.entrySet()) {
-			e.addContent(new Element("Float").setAttribute("name", entry.getKey()).setText(entry.getValue().toString()));
+			e.addContent(new Element("Float")
+					.setAttribute("name", entry.getKey())
+					.setAttribute("value", entry.getValue().toString()));
 		}
 		
 		for(Entry<String, Double> entry : dblMap.entrySet()) {
-			e.addContent(new Element("Double").setAttribute("name", entry.getKey()).setText(entry.getValue().toString()));
+			e.addContent(new Element("Double")
+					.setAttribute("name", entry.getKey())
+					.setAttribute("value", entry.getValue().toString()));
 		}
 		
 		for(Entry<String, Boolean> entry : boolMap.entrySet()) {
-			e.addContent(new Element("Boolean").setAttribute("name", entry.getKey()).setText(entry.getValue().toString()));
+			e.addContent(new Element("Boolean")
+					.setAttribute("name", entry.getKey())
+					.setAttribute("value", entry.getValue().toString()));
 		}
 		
 		for(Entry<String, String> entry : stringMap.entrySet()) {
-			e.addContent(new Element("String").setAttribute("name", entry.getKey()).setText(entry.getValue().toString()));
+			e.addContent(new Element("String")
+					.setAttribute("name", entry.getKey())
+					.setAttribute("value", entry.getValue().toString()));
 		}
 		
 		// Add the sub-options

@@ -1260,9 +1260,9 @@ public class DefaultCellCollection implements ICellCollection {
 	    public DefaultProfileCollection(Element e) {
 	    	
 	    	for(Element el : e.getChildren("Landmark")){
-	    		indexes.put(Landmark.of(el.getAttribute("name").getValue(), 
-						LandmarkType.valueOf(el.getAttribute("type").getValue())), 
-						Integer.parseInt(el.getText()));
+	    		indexes.put(Landmark.of(el.getAttributeValue("name"), 
+						LandmarkType.valueOf(el.getAttributeValue("type"))), 
+						Integer.parseInt(el.getAttributeValue("index")));
 			}
 			
 			for(Element el : e.getChildren("Segment")){
@@ -1585,7 +1585,7 @@ public class DefaultCellCollection implements ICellCollection {
 				e.addContent(new Element("Landmark")
 						.setAttribute("name", entry.getKey().toString())
 						.setAttribute("type", entry.getKey().type().toString())
-						.setText(String.valueOf(entry.getValue())));
+						.setAttribute("index", String.valueOf(entry.getValue())));
 			}
 			
 			return e;

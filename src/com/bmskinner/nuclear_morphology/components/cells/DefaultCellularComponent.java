@@ -249,7 +249,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     	// Add measurements
     	for(Element el : e.getChildren("Measurement")) {
     		Measurement m = Measurement.of(el.getAttributeValue("name"));
-    		measurements.put(m, Double.parseDouble(el.getText()));
+    		measurements.put(m, Double.parseDouble(el.getAttributeValue("value")));
     	}
     	
     	sourceFile = new File(e.getChildText("SourceFile"));
@@ -258,8 +258,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     	
     	xpoints = XMLReader.parseIntArray(e.getChildText("xpoints"));
     	ypoints = XMLReader.parseIntArray(e.getChildText("ypoints"));
-    	
-    	isReversed = Boolean.valueOf(e.getChild("xpoints").getAttributeValue("isReversed"));
+    	isReversed = e.getChild("xpoints").getAttributeValue("reverse")!=null;
 
     	makeBorderList();
     }
@@ -961,15 +960,18 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     	for(Entry<Measurement, Double> entry : measurements.entrySet()) {
     		e.addContent(new Element("Measurement")
     				.setAttribute("name", entry.getKey().toString())
-    				.setText(entry.getValue().toString()));
+    				.setAttribute("value", entry.getValue().toString()));
     	}
     	
     	e.addContent(new Element("SourceFile").setText(sourceFile.toString()));
     	e.addContent(new Element("Channel").setText(String.valueOf(channel)));
     	e.addContent(new Element("Scale").setText(String.valueOf(scale)));
     	
-    	e.addContent(new Element("xpoints").setAttribute("isReversed", String.valueOf(isReversed))
-    			.setText(Arrays.toString(xpoints)));
+    	Element xEl = new Element("xpoints").setText(Arrays.toString(xpoints));
+    	if(isReversed)
+    		xEl.setAttribute("reverse", "true");	// don't waste space
+    	e.addContent(xEl);
+    	
     	e.addContent(new Element("ypoints").setText(Arrays.toString(ypoints)));    	
     	return e;
 	}

@@ -59,11 +59,11 @@ public class RuleSetCollection implements XmlSerializable {
 
 	private static final String XML_RULE_SET_COLLECTION = "RuleSetCollection";
 
-	private static final String XML_TYPE = "Type";
+	private static final String XML_TYPE = "type";
 
-	private static final String XML_TAG = "Tag";
+	private static final String XML_TAG = "Landmark";
 
-	private static final String XML_NAME = "Name";
+	private static final String XML_NAME = "name";
 
 	private static final Logger LOGGER = Logger.getLogger(RuleSetCollection.class.getName());
     
@@ -121,25 +121,25 @@ public class RuleSetCollection implements XmlSerializable {
      * @throws ComponentCreationException 
      */
     public RuleSetCollection(Element e) throws ComponentCreationException {
-    	name = e.getChildText(XML_NAME);
+    	name = e.getAttributeValue(XML_NAME);
+    	priorityAxis = PriorityAxis.valueOf(e.getAttributeValue(XML_PRIORITY_AXIS));
+    	ruleApplicationType = RuleApplicationType.valueOf(e.getAttributeValue(XML_RULE_APPLICATION_TYPE));
     	
     	// Add the rulesets
     	for(Element t : e.getChildren(XML_TAG)) {
     		
-    		String lmName = t.getChildText(XML_NAME);
-    		LandmarkType lmType = LandmarkType.valueOf(t.getChildText(XML_TYPE));
+    		String lmName = t.getAttributeValue(XML_NAME);
+    		LandmarkType lmType = LandmarkType.valueOf(t.getAttributeValue(XML_TYPE));
     		Landmark l = Landmark.of(lmName, lmType);
     		
     		List<RuleSet> rules = new ArrayList<>();
-    		for(Element r : t.getChildren("Rule")) {
+    		for(Element r : t.getChildren("Ruleset")) {
     			rules.add(new RuleSet(r));
     		}
     		map.put(l, rules);
     	}
     	
-    	// Add other rules
-    	priorityAxis = PriorityAxis.valueOf(e.getChildText(XML_PRIORITY_AXIS));
-    	ruleApplicationType = RuleApplicationType.valueOf(e.getChildText(XML_RULE_APPLICATION_TYPE));
+    	
     	    
     	// Add the orientation landmarks
     	for(OrientationMark s : OrientationMark.values()) {
@@ -296,25 +296,25 @@ public class RuleSetCollection implements XmlSerializable {
     
     public Element toXmlElement() {
     	
-    	Element rootElement = new Element(XML_RULE_SET_COLLECTION);
+    	Element rootElement = new Element(XML_RULE_SET_COLLECTION)
+    			.setAttribute(XML_NAME, getName())
+    			.setAttribute(XML_RULE_APPLICATION_TYPE, getApplicationType().toString());
     	
-    	rootElement.addContent(new Element(XML_NAME).addContent(getName()));
-		
+    	if(priorityAxis!=null)
+			rootElement.setAttribute(XML_PRIORITY_AXIS, priorityAxis.toString());
+    	
     	// Add the landmark rule definitions 
 		for(Landmark t : getLandmarks()) {
-			Element tagElement = new Element(XML_TAG);
-			tagElement.addContent(new Element(XML_NAME).setText(t.getName()));
-			tagElement.addContent(new Element(XML_TYPE).setText(t.type().toString()));
+			Element tagElement = new Element(XML_TAG)
+					.setAttribute(XML_NAME, t.getName())
+					.setAttribute(XML_TYPE, t.type().toString());
 			
 			for(RuleSet rs : getRuleSets(t)) {
 				tagElement.addContent(rs.toXmlElement());
 			}
 			rootElement.addContent(tagElement);
 		}
-		
-		// Add rule application type
-		rootElement.addContent(new Element(XML_RULE_APPLICATION_TYPE).addContent(getApplicationType().toString()));
-		
+				
 		// Add any orientation landmarks
     	for(Entry<OrientationMark, Landmark> entry : orientationMarks.entrySet()) {
     		rootElement.addContent(new Element(entry.getKey().name()).addContent(entry.getValue().toString()));
@@ -323,10 +323,7 @@ public class RuleSetCollection implements XmlSerializable {
     	for(Measurement m : validMeasurements) {
     		rootElement.addContent(new Element("Measurement").setText(m.name()));
     	}
-		
-		if(priorityAxis!=null)
-			rootElement.addContent(new Element(XML_PRIORITY_AXIS).addContent(priorityAxis.toString()));
-			
+
 		return rootElement;
     }
 

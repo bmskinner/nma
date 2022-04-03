@@ -38,7 +38,7 @@ public class Rule implements Serializable, XmlSerializable {
 
 	private static final String XML_RULE = "Rule";
 
-	private static final String XML_TYPE = "Type";
+	private static final String XML_TYPE = "type";
 
 	private static final long  serialVersionUID = 1L;
     
@@ -66,7 +66,7 @@ public class Rule implements Serializable, XmlSerializable {
      * @param e the XML element containing the data.
      */
     public Rule(@NonNull Element e) {
-    	RuleType rt = RuleType.valueOf(e.getChildText(XML_TYPE));
+    	RuleType rt = RuleType.valueOf(e.getAttributeValue(XML_TYPE));
 		this.type = rt;
         
 		for(Element c : e.getChildren(XML_VALUE)) {
@@ -137,10 +137,8 @@ public class Rule implements Serializable, XmlSerializable {
 	@Override
 	public Element toXmlElement() {
 
-		Element e = new Element(XML_RULE);
+		Element e = new Element(XML_RULE).setAttribute(XML_TYPE, getType().toString());
 		
-		e.addContent(new Element(XML_TYPE).setText(getType().toString()));
-
 		for(int i=0; i<valueCount(); i++) {
 			e.addContent(new Element(XML_VALUE).setText(String.valueOf(getValue(i))));
 		}

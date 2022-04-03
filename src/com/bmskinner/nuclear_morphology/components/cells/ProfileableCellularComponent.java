@@ -204,9 +204,9 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 		isLocked = Boolean.parseBoolean(e.getChildText("IsLocked"));
 		
 		for(Element el : e.getChildren("Landmark")){
-			profileLandmarks.put(Landmark.of(el.getAttribute("name").getValue(), 
-					LandmarkType.valueOf(el.getAttribute("type").getValue())), 
-					Integer.parseInt(el.getText()));
+			profileLandmarks.put(Landmark.of(el.getAttributeValue("name"), 
+					LandmarkType.valueOf(el.getAttributeValue("type"))), 
+					Integer.parseInt(el.getAttributeValue("index")));
 		}
 		
 		for(Element el : e.getChildren("Segment")){
@@ -545,7 +545,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 			e.addContent(new Element("Landmark")
 					.setAttribute("name", entry.getKey().toString())
 					.setAttribute("type", entry.getKey().type().toString())
-					.setText(String.valueOf(entry.getValue())));
+					.setAttribute("index", String.valueOf(entry.getValue())));
 		}
 		
 		e.addContent(new Element("IsLocked").setText(String.valueOf(isLocked)));
