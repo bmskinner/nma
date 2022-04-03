@@ -323,6 +323,7 @@ public class TestImageDatasetCreator {
     	IProfileCollection p1 = d.getCollection().getProfileCollection();
     	IProfileCollection p2 = t.getCollection().getProfileCollection();
     	
+    	ComponentTester.testDuplicatesByField(d.getAnalysisOptions().get(), t.getAnalysisOptions().get());
     	assertEquals("Options should match", d.getAnalysisOptions().get(), t.getAnalysisOptions().get());
     	assertEquals("Profile collections should match", p1, p2);   	
     	

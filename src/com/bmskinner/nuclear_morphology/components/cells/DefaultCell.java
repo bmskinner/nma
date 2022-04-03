@@ -30,6 +30,7 @@ import org.jdom2.Element;
 
 import com.bmskinner.nuclear_morphology.components.Statistical;
 import com.bmskinner.nuclear_morphology.components.Taggable;
+import com.bmskinner.nuclear_morphology.components.measure.DefaultMeasurement;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclei.DefaultNucleus;
@@ -44,8 +45,6 @@ import com.bmskinner.nuclear_morphology.io.XmlSerializable;
  * @since 1.13.3
  */
 public class DefaultCell implements ICell {
-
-    private static final long serialVersionUID = 1L;
 
     protected UUID uuid;
     protected ICytoplasm cytoplasm = null;
@@ -76,8 +75,8 @@ public class DefaultCell implements ICell {
     	
     	// Add measurements
     	for(Element el : e.getChildren("Measurement")) {
-    		Measurement m = Measurement.of(el.getAttributeValue("name"));
-    		statistics.put(m, Double.parseDouble(el.getText()));
+    		Measurement m = new DefaultMeasurement(el);
+    		statistics.put(m, Double.parseDouble(el.getAttributeValue("value")));
     	}
     	
     }
@@ -161,17 +160,17 @@ public class DefaultCell implements ICell {
      */
 
     @Override
-    public synchronized boolean hasStatistic(Measurement stat) {
+    public synchronized boolean hasStatistic(@NonNull Measurement stat) {
         return statistics.containsKey(stat) && Statistical.STAT_NOT_CALCULATED != statistics.get(stat);
     }
 
     @Override
-    public synchronized double getStatistic(Measurement stat) {
+    public synchronized double getStatistic(@NonNull Measurement stat) {
         return this.getStatistic(stat, MeasurementScale.PIXELS);
     }
 
     @Override
-    public synchronized double getStatistic(Measurement stat, MeasurementScale scale) {
+    public synchronized double getStatistic(@NonNull Measurement stat, @NonNull MeasurementScale scale) {
 
         // Get the scale of one of the components of the cell
         double sc = chooseScale();
@@ -218,19 +217,22 @@ public class DefaultCell implements ICell {
     }
 
     @Override
-    public void setStatistic(Measurement stat, double d) {
-        if (Measurement.CELL_NUCLEUS_COUNT.equals(stat))
-            statistics.put(stat, d);
-
-        if (Measurement.CELL_NUCLEAR_AREA.equals(stat))
-            statistics.put(stat, d);
-
-        if (Measurement.CELL_NUCLEAR_RATIO.equals(stat)) 
-            statistics.put(stat, d);
+    public void setStatistic(@NonNull Measurement stat, double d) {
+    	
+    	// These can all be calculated when needed without
+    	// a long wait - no need to store
+//        if (Measurement.CELL_NUCLEUS_COUNT.equals(stat))
+//            statistics.put(stat, d);
+//
+//        if (Measurement.CELL_NUCLEAR_AREA.equals(stat))
+//            statistics.put(stat, d);
+//
+//        if (Measurement.CELL_NUCLEAR_RATIO.equals(stat)) 
+//            statistics.put(stat, d);
     }
     
     @Override
-    public void clearStatistic(Measurement stat) {
+    public void clearStatistic(@NonNull Measurement stat) {
     	statistics.remove(stat);
     }
 
@@ -358,6 +360,10 @@ public class DefaultCell implements ICell {
     @Override
 	public Element toXmlElement() {
 		Element e = new Element("Cell").setAttribute("id", uuid.toString());
+		for(Entry<Measurement, Double> entry : statistics.entrySet()) {
+    		e.addContent(entry.getKey().toXmlElement()
+    				.setAttribute("value", entry.getValue().toString()));
+    	}
 		
 		if(cytoplasm!=null)
 			e.addContent(cytoplasm.toXmlElement());
@@ -366,12 +372,6 @@ public class DefaultCell implements ICell {
 			e.addContent(n.toXmlElement());
 		}
 		
-    	for(Entry<Measurement, Double> entry : statistics.entrySet()) {
-    		e.addContent(new Element("Measurement")
-    				.setAttribute("name", entry.getKey().toString())
-    				.setText(entry.getValue().toString()));
-    	}
-				
 		return e;
 	}
 

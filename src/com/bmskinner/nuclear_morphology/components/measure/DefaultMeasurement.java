@@ -16,6 +16,8 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.measure;
 
+import org.jdom2.Element;
+
 /**
  * Allows for arbitrary measurements to be stored with dimensionality
  * 
@@ -25,13 +27,24 @@ package com.bmskinner.nuclear_morphology.components.measure;
  */
 public class DefaultMeasurement implements Measurement {
 
-    private static final long        serialVersionUID = 1L;
     private final String             name;
     private final MeasurementDimension dim;
 
     public DefaultMeasurement(String s, MeasurementDimension d) {
         name = s.intern();
         dim = d;
+    }
+    
+    public DefaultMeasurement(Element e) {
+    	this(e.getAttributeValue("name"), 
+    			MeasurementDimension.valueOf(e.getAttributeValue("dim")));
+    }
+    
+    @Override
+	public Element toXmlElement() {
+    	return new Element("Measurement")
+				.setAttribute("name", name)
+				.setAttribute("dim", dim.toString());
     }
     
     @Override
@@ -41,7 +54,7 @@ public class DefaultMeasurement implements Measurement {
 
     @Override
     public boolean isDimensionless() {
-        return MeasurementDimension.DIMENSIONLESS.equals(dim);
+        return MeasurementDimension.NONE.equals(dim);
     }
 
     @Override
@@ -59,7 +72,7 @@ public class DefaultMeasurement implements Measurement {
 
         StringBuilder b = new StringBuilder(name);
         
-        if(!dim.equals(MeasurementDimension.DIMENSIONLESS))
+        if(!dim.equals(MeasurementDimension.NONE))
         	b.append(" (")
         	.append(units(scale))
         	.append(")");

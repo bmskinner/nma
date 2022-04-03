@@ -24,6 +24,6 @@ package com.bmskinner.nuclear_morphology.components.measure;
  */
 public enum MeasurementDimension {
 
-    AREA, LENGTH, DIMENSIONLESS, ANGLE
+    AREA, LENGTH, NONE, ANGLE
 
 }

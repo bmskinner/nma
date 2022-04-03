@@ -39,7 +39,9 @@ import com.bmskinner.nuclear_morphology.io.XmlSerializable;
 public class RuleSet implements Serializable, XmlSerializable {
 
     private static final String XML_TYPE = "type";
-	private static final String XML_RULE = "Ruleset";
+	private static final String XML_RULE = "Rule";
+	private static final String XML_RULESET = "Ruleset";
+
 
 	private static final long serialVersionUID = 1L;
     
@@ -90,7 +92,7 @@ public class RuleSet implements Serializable, XmlSerializable {
     
 	@Override
 	public Element toXmlElement() {		
-		Element e = new Element(XML_RULE)
+		Element e = new Element(XML_RULESET)
 				.setAttribute(XML_TYPE, getType().toString());
 		
 		for(Rule r : getRules()) {

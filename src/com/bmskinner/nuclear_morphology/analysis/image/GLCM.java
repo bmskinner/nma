@@ -119,7 +119,7 @@ public class GLCM {
 		 * @return
 		 */
 		public Measurement toStat() {
-			return new DefaultMeasurement(toString(), MeasurementDimension.DIMENSIONLESS);
+			return new DefaultMeasurement(toString(), MeasurementDimension.NONE);
 		}
 
 		/**

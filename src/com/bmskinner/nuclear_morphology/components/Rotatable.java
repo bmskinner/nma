@@ -18,6 +18,7 @@ package com.bmskinner.nuclear_morphology.components;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nuclear_morphology.components.generic.FloatPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 
 /**
@@ -65,7 +66,7 @@ public interface Rotatable {
      */
     static double getAngleToRotateVertical(final @NonNull IPoint topPoint, final @NonNull IPoint bottomPoint) {
         // Take a vertical line from B to Bi. Rotate object by the absolute angle T-B-Bi 
-        IPoint bi = IPoint.makeNew(bottomPoint.getX(), bottomPoint.getY()+10);
+        IPoint bi = new FloatPoint(bottomPoint.getX(), bottomPoint.getY()+10);
         return bottomPoint.findAbsoluteAngle(topPoint, bi);
     }
     
@@ -87,7 +88,7 @@ public interface Rotatable {
     	 * 
     	 */
     	
-        IPoint bi = IPoint.makeNew(leftPoint.getX()+10, leftPoint.getY());
+        IPoint bi = new FloatPoint(leftPoint.getX()+10, leftPoint.getY());
         return leftPoint.findAbsoluteAngle(rightPoint, bi);
     }
 

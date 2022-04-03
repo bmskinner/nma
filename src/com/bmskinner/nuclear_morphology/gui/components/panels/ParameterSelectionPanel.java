@@ -98,7 +98,7 @@ public class ParameterSelectionPanel extends OptionsPanel {
 		List<Component> fields = new ArrayList<>();
 		
 		for (Measurement stat : Measurement.getNucleusStats()) {
-			if(stat.getDimension().equals(MeasurementDimension.DIMENSIONLESS))
+			if(stat.getDimension().equals(MeasurementDimension.NONE))
 				continue;
 			
 			// Handle texture separately
@@ -137,7 +137,7 @@ public class ParameterSelectionPanel extends OptionsPanel {
 		}
 		
 		for (Measurement stat : Measurement.getNucleusStats()) {
-			if(!stat.getDimension().equals(MeasurementDimension.DIMENSIONLESS))
+			if(!stat.getDimension().equals(MeasurementDimension.NONE))
 				continue;
 			
 			// Handle texture separately

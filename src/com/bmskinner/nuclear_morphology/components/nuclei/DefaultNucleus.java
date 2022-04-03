@@ -64,9 +64,9 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
 	
 	private static final Logger LOGGER = Logger.getLogger(DefaultNucleus.class.getName());
     
-    private static final String XML_NUCLEUS_NUMBER = "NucleusNumber";
-    private static final String XML_ORIENTATION = "OrientationMark";
-    private static final String XML_PRIORITY_AXIS = "PriorityAxis";
+    private static final String XML_NUCLEUS_NUMBER = "number";
+    private static final String XML_ORIENTATION = "Orientation";
+    private static final String XML_PRIORITY_AXIS = "axis";
     private static final String XML_SIGNAL_COLLECTION = "SignalCollection";
     
 
@@ -89,29 +89,32 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
      */
     public DefaultNucleus(Element e) throws ComponentCreationException {
     	super(e);
-    	nucleusNumber = Integer.valueOf(e.getChildText(XML_NUCLEUS_NUMBER));
+    	nucleusNumber = Integer.valueOf(e.getAttributeValue(XML_NUCLEUS_NUMBER));
     	
     	for(Element el : e.getChildren(XML_ORIENTATION)) {
     		OrientationMark name = OrientationMark.valueOf(el.getAttributeValue("name"));
     		Landmark l = this.getLandmarks().keySet().stream()
-    				.filter(lm->lm.getName().equals(el.getText()))
+    				.filter(lm->lm.getName().equals(el.getAttributeValue("value")))
     				.findFirst().get();
     		orientationMarks.put(name, l);
     	}
-    	priorityAxis = PriorityAxis.valueOf(e.getChildText(XML_PRIORITY_AXIS));
+    	priorityAxis = PriorityAxis.valueOf(e.getAttributeValue(XML_PRIORITY_AXIS));
     	signalCollection = new DefaultSignalCollection(e.getChild(XML_SIGNAL_COLLECTION));
     }
 
     @Override
 	public Element toXmlElement() {
-		Element e = super.toXmlElement().setName("Nucleus");
-		
-		e.addContent(new Element(XML_NUCLEUS_NUMBER).setText(String.valueOf(nucleusNumber)));
+		Element e = super.toXmlElement()
+				.setName("Nucleus")
+				.setAttribute(XML_PRIORITY_AXIS, priorityAxis.toString())
+				.setAttribute(XML_NUCLEUS_NUMBER, String.valueOf(nucleusNumber));
+				
 		for(Entry<OrientationMark, Landmark> entry : orientationMarks.entrySet()) {
-			e.addContent(new Element(XML_ORIENTATION).setAttribute("name", entry.getKey().name())
-					.setText(entry.getValue().toString()));
+			e.addContent(new Element(XML_ORIENTATION)
+					.setAttribute("name", entry.getKey().name())
+					.setAttribute("value", entry.getValue().toString()));
 		}
-		e.addContent(new Element(XML_PRIORITY_AXIS).setText(priorityAxis.toString()));
+
 		e.addContent(signalCollection.toXmlElement());
 		
 		return e;

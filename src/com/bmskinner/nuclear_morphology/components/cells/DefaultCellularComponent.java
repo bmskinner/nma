@@ -46,6 +46,7 @@ import com.bmskinner.nuclear_morphology.components.MissingComponentException;
 import com.bmskinner.nuclear_morphology.components.Statistical;
 import com.bmskinner.nuclear_morphology.components.generic.FloatPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
+import com.bmskinner.nuclear_morphology.components.measure.DefaultMeasurement;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileException;
@@ -236,19 +237,19 @@ public abstract class DefaultCellularComponent implements CellularComponent {
      */
     protected DefaultCellularComponent(Element e) {
     	id = UUID.fromString(e.getAttributeValue("id"));
-    	
-    	this.xBase = Integer.parseInt(e.getChildText("XBase"));
-        this.yBase = Integer.parseInt(e.getChildText("YBase"));
     	    	
-    	String[] comString = e.getChildText("CentreOfMass").split(",");
-    	centreOfMass = IPoint.makeNew(Float.parseFloat(comString[0]), Float.parseFloat(comString[1]));
+    	xBase = Integer.parseInt(e.getChild("Base").getAttributeValue("x"));
+        yBase = Integer.parseInt(e.getChild("Base").getAttributeValue("y"));
+    	    	
+    	centreOfMass = new FloatPoint(Float.parseFloat(e.getChild("CentreOfMass").getAttributeValue("x")), 
+    			Float.parseFloat(e.getChild("CentreOfMass").getAttributeValue("y")));
     	
-    	String[] comString2 = e.getChildText("OriginalCentreOfMass").split(",");
-    	originalCentreOfMass = IPoint.makeNew(Float.parseFloat(comString2[0]), Float.parseFloat(comString2[1]));
+    	originalCentreOfMass = new FloatPoint(Float.parseFloat(e.getChild("OriginalCentreOfMass").getAttributeValue("x")), 
+    			Float.parseFloat(e.getChild("CentreOfMass").getAttributeValue("y")));
 
     	// Add measurements
     	for(Element el : e.getChildren("Measurement")) {
-    		Measurement m = Measurement.of(el.getAttributeValue("name"));
+    		Measurement m = new DefaultMeasurement(el);
     		measurements.put(m, Double.parseDouble(el.getAttributeValue("value")));
     	}
     	
@@ -949,17 +950,23 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     
     @Override
 	public Element toXmlElement() {
-    	Element e = new Element("Component").setAttribute("id", id.toString());
+    	Element e = new Element("Component")
+    			.setAttribute("id", id.toString());
     	
-    	e.addContent(new Element("XBase").setText(String.valueOf(xBase)));
-    	e.addContent(new Element("YBase").setText(String.valueOf(yBase)));
-    	    	
-    	e.addContent(new Element("CentreOfMass").setText(centreOfMass.getX()+","+centreOfMass.getY()));
-    	e.addContent(new Element("OriginalCentreOfMass").setText(originalCentreOfMass.getX()+","+originalCentreOfMass.getY()));
+    	e.addContent(new Element("Base")
+    			.setAttribute("x", String.valueOf(xBase))
+    			.setAttribute("y", String.valueOf(yBase)));
+    	    	    	
+    	e.addContent(new Element("CentreOfMass")
+    			.setAttribute("x", String.valueOf(centreOfMass.getX()))
+    			.setAttribute("y", String.valueOf(centreOfMass.getY())));
     	
+    	e.addContent(new Element("OriginalCentreOfMass")
+    			.setAttribute("x", String.valueOf(originalCentreOfMass.getX()))
+    			.setAttribute("y", String.valueOf(originalCentreOfMass.getY())));
+
     	for(Entry<Measurement, Double> entry : measurements.entrySet()) {
-    		e.addContent(new Element("Measurement")
-    				.setAttribute("name", entry.getKey().toString())
+    		e.addContent(entry.getKey().toXmlElement()
     				.setAttribute("value", entry.getValue().toString()));
     	}
     	

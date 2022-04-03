@@ -124,8 +124,8 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
         if(options.getBoolean(HashOptions.CLUSTER_USE_TSNE_KEY)) {
         	for(ICell c : dataset.getCollection()) {
         		for(Nucleus n : c.getNuclei()) {
-        			n.setStatistic(new DefaultMeasurement("TSNE_1_"+group.getId(), MeasurementDimension.DIMENSIONLESS), n.getStatistic(Measurement.TSNE_1));
-        			n.setStatistic(new DefaultMeasurement("TSNE_2_"+group.getId(), MeasurementDimension.DIMENSIONLESS), n.getStatistic(Measurement.TSNE_2));
+        			n.setStatistic(new DefaultMeasurement("TSNE_1_"+group.getId(), MeasurementDimension.NONE), n.getStatistic(Measurement.TSNE_1));
+        			n.setStatistic(new DefaultMeasurement("TSNE_2_"+group.getId(), MeasurementDimension.NONE), n.getStatistic(Measurement.TSNE_2));
         			n.setStatistic(Measurement.TSNE_1, Statistical.STAT_NOT_CALCULATED);
         			n.setStatistic(Measurement.TSNE_2, Statistical.STAT_NOT_CALCULATED);
         		}

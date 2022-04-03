@@ -44,7 +44,7 @@ public class DefaultConsensusNucleus extends DefaultNucleus implements Consensus
     
     private double xOffset = 0;
     private double yOffset = 0;
-    private double rotOffset = 0;
+    private double rOffset = 0;
 
     /**
      * Create from a nucleus. Offsets will be zero.
@@ -64,7 +64,7 @@ public class DefaultConsensusNucleus extends DefaultNucleus implements Consensus
         super(n);
         xOffset =  n.currentOffset().getX();
         yOffset = n.currentOffset().getY();
-        rotOffset = n.currentRotation();
+        rOffset = n.currentRotation();
     }
     
     /**
@@ -75,23 +75,21 @@ public class DefaultConsensusNucleus extends DefaultNucleus implements Consensus
      */
     public DefaultConsensusNucleus(Element e) throws ComponentCreationException {
     	super(e);
-    	if(e.getChildText("OffsetX")!=null)
-    		xOffset = Double.valueOf(e.getChildText("OffsetX"));
 
-    	if(e.getChildText("OffsetY")!=null)
-    		yOffset = Double.valueOf(e.getChildText("OffsetY"));
-
-    	if(e.getChildText("OffsetR")!=null)
-    		rotOffset = Double.valueOf(e.getChildText("OffsetR"));
+    	xOffset = Double.valueOf(e.getChild("Offset").getAttributeValue("x"));
+    	yOffset = Double.valueOf(e.getChild("Offset").getAttributeValue("y"));
+    	rOffset = Double.valueOf(e.getChild("Offset").getAttributeValue("r"));
     }
     
     
     @Override
 	public Element toXmlElement() {
     	Element e = super.toXmlElement().setName("ConsensusNucleus");
-		e.addContent(new Element("OffsetX").setText(String.valueOf(xOffset)));
-		e.addContent(new Element("OffsetY").setText(String.valueOf(yOffset)));
-		e.addContent(new Element("OffsetR").setText(String.valueOf(rotOffset)));
+    	
+    	e.addContent(new Element("Offset")
+    			.setAttribute("x", String.valueOf(xOffset))
+    			.setAttribute("y", String.valueOf(yOffset))
+    			.setAttribute("r", String.valueOf(rOffset)));
 		return e;
 	}
     
@@ -103,12 +101,12 @@ public class DefaultConsensusNucleus extends DefaultNucleus implements Consensus
     
     @Override
 	public void addRotation(double angle) {
-    	this.rotOffset = angle;
+    	this.rOffset = angle;
     }
     
     @Override
 	public double currentRotation() {
-    	return rotOffset;
+    	return rOffset;
     }
 
     @Override
@@ -127,7 +125,7 @@ public class DefaultConsensusNucleus extends DefaultNucleus implements Consensus
     @Override
     public Nucleus getOrientedNucleus() throws MissingLandmarkException {
     	Nucleus n = super.getOrientedNucleus();
-    	n.rotate(rotOffset);
+    	n.rotate(rOffset);
     	n.offset(xOffset, yOffset);
     	return n;
     }
@@ -153,7 +151,7 @@ public class DefaultConsensusNucleus extends DefaultNucleus implements Consensus
 		sb.append(super.toString()+"\n");
 		
 		sb.append("Offset: "+xOffset+"-"+yOffset+"\n");
-		sb.append("Rotation: "+rotOffset);
+		sb.append("Rotation: "+rOffset);
 		return sb.toString();
 	}
 	
@@ -161,7 +159,7 @@ public class DefaultConsensusNucleus extends DefaultNucleus implements Consensus
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + Objects.hash(rotOffset, xOffset, yOffset);
+		result = prime * result + Objects.hash(rOffset, xOffset, yOffset);
 		return result;
 	}
 
@@ -174,7 +172,7 @@ public class DefaultConsensusNucleus extends DefaultNucleus implements Consensus
 		if (getClass() != obj.getClass())
 			return false;
 		DefaultConsensusNucleus other = (DefaultConsensusNucleus) obj;
-		return Double.doubleToLongBits(rotOffset) == Double.doubleToLongBits(other.rotOffset)
+		return Double.doubleToLongBits(rOffset) == Double.doubleToLongBits(other.rOffset)
 				&& Double.doubleToLongBits(xOffset) == Double.doubleToLongBits(other.xOffset)
 				&& Double.doubleToLongBits(yOffset) == Double.doubleToLongBits(other.yOffset);
 	}

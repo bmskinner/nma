@@ -67,27 +67,27 @@ import ij.gui.Roi;
  */
 public abstract class ProfileableCellularComponent extends DefaultCellularComponent implements Taggable {
 	
-	private static final String XML_WINDOW_PROPORTION = "WindowProportion";
+	private static final String XML_WINDOW_PROPORTION = "window";
 
 	private static final Logger LOGGER = Logger.getLogger(ProfileableCellularComponent.class.getName());
 
 	/** The proportion of the perimeter to use for profiling */
-    protected double windowProportion = IAnalysisOptions.DEFAULT_WINDOW_PROPORTION;
+	private double windowProportion = IAnalysisOptions.DEFAULT_WINDOW_PROPORTION;
     
     /** The segmentation pattern for the object */
     private final List<IProfileSegment> segments = new ArrayList<>();
 
     /** The indexes of landmarks in the profiles and border list */
-    protected Map<Landmark, Integer> profileLandmarks = new HashMap<>();
+    private Map<Landmark, Integer> profileLandmarks = new HashMap<>();
 
     /** allow locking of segments and landmarks */
-    protected boolean isLocked = false;
+    private boolean isLocked = false;
     
     /** The profiles for this object */
-    protected Map<ProfileType, IProfile> profileMap = new ConcurrentHashMap<>();
+    private Map<ProfileType, IProfile> profileMap = new ConcurrentHashMap<>();
 
     /** The chosen window size in pixels based on the window proportion */
-    protected int windowSize;
+    private int windowSize;
 
     
     /**
@@ -198,10 +198,10 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
     
     protected ProfileableCellularComponent(Element e) throws ComponentCreationException {
 		super(e);
-		windowProportion = Double.parseDouble(e.getChildText(XML_WINDOW_PROPORTION));
+		windowProportion = Double.parseDouble(e.getAttributeValue(XML_WINDOW_PROPORTION));
 		windowSize = Math.max(1,(int) Math.ceil(getStatistic(Measurement.PERIMETER) * windowProportion));
 		
-		isLocked = Boolean.parseBoolean(e.getChildText("IsLocked"));
+		isLocked = e.getAttributeValue("locked")!=null;
 		
 		for(Element el : e.getChildren("Landmark")){
 			profileLandmarks.put(Landmark.of(el.getAttributeValue("name"), 
@@ -533,10 +533,12 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
     
     @Override
 	public Element toXmlElement() {
-		Element e = super.toXmlElement();
-		
-		e.addContent(new Element(XML_WINDOW_PROPORTION).setText(String.valueOf(windowProportion)));
+		Element e = super.toXmlElement()
+				.setAttribute(XML_WINDOW_PROPORTION, String.valueOf(windowProportion));
 
+		if(isLocked)
+			e.setAttribute("locked", "true");
+		
 		for(IProfileSegment s : segments) {
 			e.addContent(s.toXmlElement());
 		}
@@ -548,8 +550,6 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 					.setAttribute("index", String.valueOf(entry.getValue())));
 		}
 		
-		e.addContent(new Element("IsLocked").setText(String.valueOf(isLocked)));
-
 		return e;
     }
 
