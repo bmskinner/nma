@@ -19,6 +19,7 @@ package com.bmskinner.nuclear_morphology.utility;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 
+import com.bmskinner.nuclear_morphology.components.generic.FloatPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 
 /**
@@ -70,7 +71,7 @@ public class AngleTools {
     	double rad = Math.toRadians(-degrees); // Negative since the AT is anti-clockwise rotation (+x towards +y)
     	AffineTransform tf = AffineTransform.getRotateInstance(rad, centre.getX(), centre.getY());
     	Point2D result = tf.transform(p.toPoint2D(), null);
-    	return IPoint.makeNew(result);
+    	return new FloatPoint(result);
     }
 
     /**

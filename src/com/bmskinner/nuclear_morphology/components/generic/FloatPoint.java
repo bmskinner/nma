@@ -67,6 +67,14 @@ public class FloatPoint extends Point2D.Float implements IPoint {
         this(p.getX(), p.getY());
     }
     
+    /**
+     * Create from an existing point
+     * @param p
+     */
+    public FloatPoint(@NonNull final Point2D a) {
+    	this(a.getX(), a.getY());
+    }
+    
     @Override
     public IPoint duplicate() {
     	return new FloatPoint(x, y);
@@ -194,8 +202,8 @@ public class FloatPoint extends Point2D.Float implements IPoint {
          * The vectors are rotated so one is on the xaxis, at which point atan2 does the rest
          */
         
-        IPoint ab = IPoint.makeNew(x - a.getX(), y - a.getY());
-        IPoint cb = IPoint.makeNew(x - c.getX(), y - c.getY());
+        IPoint ab = new FloatPoint(x - a.getX(), y - a.getY());
+        IPoint cb = new FloatPoint(x - c.getX(), y - c.getY());
 
         double dot = (ab.getX() * cb.getX() + ab.getY() * cb.getY()); // dot product
         double cross = (ab.getX() * cb.getY() - ab.getY() * cb.getX()); // cross product
@@ -221,8 +229,8 @@ public class FloatPoint extends Point2D.Float implements IPoint {
     @Override
     public double findAbsoluteAngle(@NonNull IPoint start, @NonNull IPoint end) {
 
-        IPoint ab = IPoint.makeNew(x - start.getX(), y - start.getY());
-        IPoint cb = IPoint.makeNew(x - end.getX(), y - end.getY());
+        IPoint ab = new FloatPoint(x - start.getX(), y - start.getY());
+        IPoint cb = new FloatPoint(x - end.getX(), y - end.getY());
 
         double dot = (ab.getX() * cb.getX() + ab.getY() * cb.getY()); // dot product
         double cross = (ab.getX() * cb.getY() - ab.getY() * cb.getX()); // cross product

@@ -144,13 +144,13 @@ public class ScatterTableDatasetCreator extends AbstractTableCreator {
                     if (statA.equals(Measurement.VARIABILITY)) {
                         statAValue = c.getNormalisedDifferenceToMedian(Landmark.REFERENCE_POINT, n);
                     } else {
-                        statAValue = n.getStatistic(statA, scale);
+                        statAValue = n.getMeasurement(statA, scale);
                     }
 
                     if (statB.equals(Measurement.VARIABILITY)) {
                         statBValue = c.getNormalisedDifferenceToMedian(Landmark.REFERENCE_POINT, n);
                     } else {
-                        statBValue = n.getStatistic(statB, scale);
+                        statBValue = n.getMeasurement(statB, scale);
                     }
                 } catch (MissingLandmarkException e) {
                     LOGGER.warning("Cannot get stats for cell");
@@ -214,8 +214,8 @@ public class ScatterTableDatasetCreator extends AbstractTableCreator {
 
 				for (int j = 0; j < signalCount; j++) {
 
-				    xpoints[j] = list.get(j).getStatistic(statA, scale);
-				    ypoints[j] = list.get(j).getStatistic(statB, scale);
+				    xpoints[j] = list.get(j).getMeasurement(statA, scale);
+				    ypoints[j] = list.get(j).getMeasurement(statB, scale);
 
 				}
 				names.add(c.getName() + "_" + m.getSignalGroupName(id));

@@ -124,10 +124,10 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
         if(options.getBoolean(HashOptions.CLUSTER_USE_TSNE_KEY)) {
         	for(ICell c : dataset.getCollection()) {
         		for(Nucleus n : c.getNuclei()) {
-        			n.setStatistic(new DefaultMeasurement("TSNE_1_"+group.getId(), MeasurementDimension.NONE), n.getStatistic(Measurement.TSNE_1));
-        			n.setStatistic(new DefaultMeasurement("TSNE_2_"+group.getId(), MeasurementDimension.NONE), n.getStatistic(Measurement.TSNE_2));
-        			n.setStatistic(Measurement.TSNE_1, Statistical.STAT_NOT_CALCULATED);
-        			n.setStatistic(Measurement.TSNE_2, Statistical.STAT_NOT_CALCULATED);
+        			n.setMeasurement(new DefaultMeasurement("TSNE_1_"+group.getId(), MeasurementDimension.NONE), n.getMeasurement(Measurement.TSNE_1));
+        			n.setMeasurement(new DefaultMeasurement("TSNE_2_"+group.getId(), MeasurementDimension.NONE), n.getMeasurement(Measurement.TSNE_2));
+        			n.setMeasurement(Measurement.TSNE_1, Statistical.STAT_NOT_CALCULATED);
+        			n.setMeasurement(Measurement.TSNE_2, Statistical.STAT_NOT_CALCULATED);
         		}
         	}
         }
@@ -136,13 +136,13 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
         if(options.getBoolean(HashOptions.CLUSTER_USE_PCA_KEY)) {
         	for(ICell c : dataset.getCollection()) {
         		for(Nucleus n : c.getNuclei()) {
-        			int nPcs = (int) n.getStatistic(Measurement.PCA_N);
+        			int nPcs = (int) n.getMeasurement(Measurement.PCA_N);
         			
-        			n.setStatistic(Measurement.makePrincipalComponentNumber(group.getId()), nPcs);
-        			n.clearStatistic(Measurement.PCA_N);
+        			n.setMeasurement(Measurement.makePrincipalComponentNumber(group.getId()), nPcs);
+        			n.clearMeasurement(Measurement.PCA_N);
         			for(int i=1; i<=nPcs; i++) {
-        				n.setStatistic(Measurement.makePrincipalComponent(i, group.getId()), n.getStatistic(Measurement.makePrincipalComponent(i)));
-        				n.clearStatistic(Measurement.makePrincipalComponent(i));
+        				n.setMeasurement(Measurement.makePrincipalComponent(i, group.getId()), n.getMeasurement(Measurement.makePrincipalComponent(i)));
+        				n.clearMeasurement(Measurement.makePrincipalComponent(i));
         			}
         		}
         	}

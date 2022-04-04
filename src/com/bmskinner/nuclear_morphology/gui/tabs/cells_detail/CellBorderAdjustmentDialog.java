@@ -75,6 +75,7 @@ import com.bmskinner.nuclear_morphology.components.UnavailableBorderPointExcepti
 import com.bmskinner.nuclear_morphology.components.cells.DefaultCell;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.generic.FloatPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
@@ -389,7 +390,7 @@ public class CellBorderAdjustmentDialog extends AbstractCellEditingDialog implem
         double newX = xy.getDomainAxis().java2DToValue(p.getX(), dataArea, xy.getDomainAxisEdge());
 
         LOGGER.log(Loggable.STACK, "Adding point at " + newX + ", " + newY);
-        IPoint newPoint = IPoint.makeNew(newX, newY);
+        IPoint newPoint = new FloatPoint(newX, newY);
 
         // Get the border point that is closest to the clicked point
         IPoint bp = null;
@@ -454,7 +455,7 @@ public class CellBorderAdjustmentDialog extends AbstractCellEditingDialog implem
 
         List<IPoint> newList = new ArrayList<>();
         for (int i = 0; i < fp.npoints; i++) {
-            newList.add(IPoint.makeNew(fp.xpoints[i], fp.ypoints[i]));
+            newList.add(new FloatPoint(fp.xpoints[i], fp.ypoints[i]));
         }
 
         Range domainRange = dualPanel.getMainPanel().getChart().getXYPlot().getDomainAxis().getRange();
@@ -599,7 +600,7 @@ public class CellBorderAdjustmentDialog extends AbstractCellEditingDialog implem
                         double yVal = ds.getYValue(series, item);
 
                         if (ellipse.contains(xVal, yVal)) {
-                            IPoint clickedPoint = IPoint.makeNew(xVal, yVal);
+                            IPoint clickedPoint = new FloatPoint(xVal, yVal);
                             selectClickedPoint(clickedPoint);
                         }
                     }

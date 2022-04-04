@@ -225,8 +225,8 @@ public class SignalFinder extends AbstractFinder<List<INuclearSignal>> {
      * @return
      */
     private boolean isValid(@NonNull INuclearSignal s, @NonNull Nucleus n) {
-        return (s.getStatistic(Measurement.AREA) >= signalOptions.getInt(HashOptions.MIN_SIZE_PIXELS)
-        		&& s.getStatistic(Measurement.AREA) <= (signalOptions.getDouble(HashOptions.SIGNAL_MAX_FRACTION) * n.getStatistic(Measurement.AREA)));
+        return (s.getMeasurement(Measurement.AREA) >= signalOptions.getInt(HashOptions.MIN_SIZE_PIXELS)
+        		&& s.getMeasurement(Measurement.AREA) <= (signalOptions.getDouble(HashOptions.SIGNAL_MAX_FRACTION) * n.getMeasurement(Measurement.AREA)));
     }
 
 }

@@ -9,6 +9,7 @@ import org.jdom2.Document;
 import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder;
 
+import com.bmskinner.nuclear_morphology.components.Version.UnsupportedVersionException;
 import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.datasets.DatasetCreator;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
@@ -46,7 +47,7 @@ public abstract class XMLReader {
 	}
 	
 	
-	public static IAnalysisDataset readDataset(File f) throws XMLReadingException, ComponentCreationException {
+	public static IAnalysisDataset readDataset(File f) throws XMLReadingException, ComponentCreationException, UnsupportedVersionException {
 		Document d = readDocument(f);
 		return DatasetCreator.createRoot(d.getRootElement());
 	}

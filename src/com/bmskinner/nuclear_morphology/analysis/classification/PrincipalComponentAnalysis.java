@@ -100,12 +100,12 @@ public class PrincipalComponentAnalysis extends SingleDatasetAnalysisMethod {
 			Optional<Nucleus> nucl = dataset.getCollection().getNucleus(nucleusId);
 
 			if(nucl.isPresent()) {
-				nucl.get().setStatistic(Measurement.PCA_N, values.length); // Store the number of expected PCs
+				nucl.get().setMeasurement(Measurement.PCA_N, values.length); // Store the number of expected PCs
 				// Store in the generic stats pool until assigned a cluster id by a clustering method
 				for(int pc=0; pc<values.length; pc++) {
 					int readableName = pc+1;
 					Measurement stat = Measurement.makePrincipalComponent(readableName);
-					nucl.get().setStatistic(stat, values[pc]);
+					nucl.get().setMeasurement(stat, values[pc]);
 				}
 				if(i==0) {
 					expectedPcs = values.length;
@@ -203,7 +203,7 @@ public class PrincipalComponentAnalysis extends SingleDatasetAnalysisMethod {
         	
         	if (options.getBoolean(stat.toString())) {
         		Attribute att = (Attribute) attributes.elementAt(attNumber++);
-        		inst.setValue(att, n.getStatistic(stat, MeasurementScale.MICRONS));
+        		inst.setValue(att, n.getMeasurement(stat, MeasurementScale.MICRONS));
         	}
         }
 

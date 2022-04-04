@@ -219,7 +219,7 @@ public class AngleWindowSizeExplorer extends LoadingIconDialog implements Change
         		dataset.getCollection().getCells().forEach(c->{
         		    ICell newCell = new DefaultCell(c);
                     for(Nucleus n : newCell.getNuclei()){
-                        n.setWindowProportion(ProfileType.ANGLE, j);
+                        n.setWindowProportion(j);
                     }
                     duplicateCollection.addCell(newCell);
         		});

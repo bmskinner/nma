@@ -25,6 +25,7 @@ import java.nio.channels.FileChannel;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.jdom2.Document;
 import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
 
@@ -103,15 +104,16 @@ public class DatasetExportMethod extends SingleDatasetAnalysisMethod {
  			throw new IllegalArgumentException(String.format("Parent directory %s is null", saveFile.getAbsolutePath()));
  		if(!saveFile.getParentFile().canWrite())
  			throw new IllegalArgumentException(String.format("Parent directory %s is not writable", saveFile.getParentFile().getName()));
-
+ 		Document doc = new Document(dataset.toXmlElement());
+ 		
  		try(
  				OutputStream os = new FileOutputStream(saveFile);
  				CountedOutputStream cos = new CountedOutputStream(os);
  				){
- 			cos.addCountListener(this::fireProgressEvent);
+ 			cos.addCountListener((l)->fireProgressEvent(l));
  			XMLOutputter xmlOutput = new XMLOutputter();
  			xmlOutput.setFormat(Format.getPrettyFormat());
- 			xmlOutput.output(dataset.toXmlElement(), cos);
+ 			xmlOutput.output(doc, cos);
  		} catch (IOException e) {
  			LOGGER.log(Loggable.STACK, String.format("Unable to write to file %s: %s", saveFile.getAbsolutePath(), e.getMessage()), e);
  			ok = false;

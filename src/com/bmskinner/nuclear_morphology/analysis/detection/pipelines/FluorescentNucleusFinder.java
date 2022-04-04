@@ -22,31 +22,26 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.detection.GenericDetector;
-import com.bmskinner.nuclear_morphology.analysis.detection.StatsMap;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageAnnotator;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder;
+import com.bmskinner.nuclear_morphology.components.ComponentBuilderFactory;
+import com.bmskinner.nuclear_morphology.components.ComponentBuilderFactory.NucleusBuilderFactory;
 import com.bmskinner.nuclear_morphology.components.MissingComponentException;
-import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.cells.DefaultCell;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
-import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.nuclei.NucleusFactory;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -58,23 +53,21 @@ public class FluorescentNucleusFinder extends CellFinder {
 	
 	private static final Logger LOGGER = Logger.getLogger(FluorescentNucleusFinder.class.getName());
 
-    private final NucleusFactory nuclFactory;
-    private final HashOptions nuclOptions;
+    private final NucleusBuilderFactory factory;
+    private final @NonNull HashOptions nuclOptions;
     private final FinderDisplayType displayType;
     
-    public FluorescentNucleusFinder(@NonNull final IAnalysisOptions op, FinderDisplayType t) {
+    public FluorescentNucleusFinder(@NonNull final IAnalysisOptions op, @NonNull FinderDisplayType t) {
         super(op);
         displayType = t;
         
         if(op.getRuleSetCollection()==null)
         	throw new IllegalArgumentException("No ruleset provided");
         
-        Optional<HashOptions> n = options.getDetectionOptions(CellularComponent.NUCLEUS);
-        if(!n.isPresent())
-        	throw new IllegalArgumentException("No nucleus options");
-        nuclOptions = n.get();
+        nuclOptions = options.getDetectionOptions(CellularComponent.NUCLEUS)
+        		.orElseThrow(() -> new IllegalArgumentException("No nucleus options"));
         
-        nuclFactory = new NucleusFactory(op.getRuleSetCollection(), 
+        factory = ComponentBuilderFactory.createNucleusBuilderFactory(op.getRuleSetCollection(), 
         		options.getProfileWindowProportion(),
         		nuclOptions.getDouble(HashOptions.SCALE));
     }
@@ -132,10 +125,10 @@ public class FluorescentNucleusFinder extends CellFinder {
 
         ImageProcessor img = filt.toProcessor();
 
-        Map<Roi, StatsMap> rois = gd.getRois(img.duplicate());
+        Map<Roi, IPoint> rois = gd.getRois(img.duplicate());
         LOGGER.finer(()->"Image: "+imageFile.getName()+": "+rois.size()+" rois");
         
-        for(Entry<Roi, StatsMap> entry : rois.entrySet()) {
+        for(Entry<Roi, IPoint> entry : rois.entrySet()) {
             try {
             	Nucleus n = makeNucleus(entry.getKey(), imageFile, entry.getValue());
             	list.add(n);
@@ -218,13 +211,12 @@ public class FluorescentNucleusFinder extends CellFinder {
         ImageProcessor img = filt.toProcessor();
 
         
-        Map<Roi, StatsMap> rois = gd.getRois(img.duplicate());
+        Map<Roi, IPoint> rois = gd.getRois(img.duplicate());
         LOGGER.finer(()->"Image: "+imageFile.getName()+": "+rois.size()+" rois");
         
-        for(Entry<Roi, StatsMap> entry : rois.entrySet()) {
+        for(Entry<Roi, IPoint> entry : rois.entrySet()) {
             try {
-            	Nucleus n = makeNucleus(entry.getKey(), imageFile, entry.getValue());
-            	list.add(n);
+            	list.add(makeNucleus(entry.getKey(), imageFile, entry.getValue()));
             } catch(ComponentCreationException e) {
             	LOGGER.log(Loggable.STACK, "Unable to create nucleus from roi: "+e.getMessage()+"; skipping", e);
             }
@@ -254,39 +246,28 @@ public class FluorescentNucleusFinder extends CellFinder {
         return result;
     }
 
-    private synchronized Nucleus makeNucleus(final Roi roi, final File f,
-            final StatsMap values) throws ComponentCreationException {
+    private synchronized Nucleus makeNucleus(@NonNull final Roi roi, @NonNull final File f,
+    		@NonNull final IPoint com) throws ComponentCreationException {
         
-        LOGGER.finer(()->"Creating nucleus from roi "+f.getName()+" area: "+values.get(StatsMap.AREA));
-
         // create a Nucleus from the roi
-        IPoint centreOfMass = IPoint.makeNew(values.get(StatsMap.COM_X), values.get(StatsMap.COM_Y));
-
-        Nucleus result = nuclFactory.new NucleusBuilder()
+        Nucleus result = factory.newBuilder()
         	.fromRoi(roi)
-        	.withFile(f).withChannel(nuclOptions.getInt(HashOptions.CHANNEL))
-        	.withCoM(centreOfMass)
-        	.withMeasurement(Measurement.AREA, values.get(StatsMap.AREA))
-        	.withMeasurement(Measurement.PERIMETER, values.get(StatsMap.PERIM))
+        	.withFile(f)
+        	.withChannel(nuclOptions.getInt(HashOptions.CHANNEL))
+        	.withCoM(com)
         	.build();
 
         ProfileIndexFinder.assignLandmarks(result, options.getRuleSetCollection());
         
         try {
         	if(ProfileIndexFinder.shouldReverseProfile(result)) {
-        		LOGGER.finer("Reversing profile for "+result.getNameAndNumber());
         		result.reverse();
-        		result.initialise(options.getProfileWindowProportion());
         		ProfileIndexFinder.assignLandmarks(result, options.getRuleSetCollection());
         	}
         } catch(MissingComponentException | ProfileException e) {
         	LOGGER.finer(()->"Unable to reverse profile in nucleus");
         	throw new ComponentCreationException(e);
         }
-        
-        
-
-        LOGGER.finer(()->"Created nucleus from roi "+f.getName());
         return result;
     }
 }

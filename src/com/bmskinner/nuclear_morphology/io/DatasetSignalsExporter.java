@@ -158,8 +158,8 @@ public class DatasetSignalsExporter extends StatsExporter {
     private void appendSignalStats(@NonNull StringBuilder outLine, @NonNull CellularComponent c) {
 
         for (Measurement s : Measurement.getSignalStats()) {
-            double varP = c.getStatistic(s, MeasurementScale.PIXELS);
-            double varM = c.getStatistic(s, MeasurementScale.MICRONS);
+            double varP = c.getMeasurement(s, MeasurementScale.PIXELS);
+            double varM = c.getMeasurement(s, MeasurementScale.MICRONS);
 
             outLine.append(varP + TAB);
             if (!s.isDimensionless() && !s.isAngle()) {

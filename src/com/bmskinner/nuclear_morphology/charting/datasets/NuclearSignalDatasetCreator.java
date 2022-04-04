@@ -42,6 +42,7 @@ import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
+import com.bmskinner.nuclear_morphology.components.generic.FloatPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
@@ -74,9 +75,9 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
     public IPoint getXYCoordinatesForSignal(@NonNull INuclearSignal n, @NonNull Nucleus outline){
         
     	// the anti-clockwise angle from the OP to the signal
-    	double angle = n.getStatistic(Measurement.ANGLE);
+    	double angle = n.getMeasurement(Measurement.ANGLE);
 
-        double fractionalDistance = n.getStatistic(Measurement.FRACT_DISTANCE_FROM_COM);
+        double fractionalDistance = n.getMeasurement(Measurement.FRACT_DISTANCE_FROM_COM);
 
         // determine the distance to the border at this angle
         double distanceToBorder = ComponentMeasurer.getDistanceFromCoMToBorderAtAngle(outline, angle);
@@ -88,13 +89,12 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
         // but the angle tools returns angles against the x-axis
         double signalX = AngleTools.getXComponentOfAngle(distanceFromCoM, angle - 90);
         double signalY = AngleTools.getYComponentOfAngle(distanceFromCoM, angle - 90);
-        return IPoint.makeNew(signalX, signalY);
+        return new FloatPoint(signalX, signalY);
     }
 
     /**
      * Create a chart dataset for the centres of mass of signals in the dataset
      * 
-     * @param dataset the dataset
      * @return
      * @throws ChartDatasetCreationException 
      */
@@ -166,7 +166,7 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
 
         			// ellipses are drawn starting from x y at upper left.
         			// Provide an offset from the centre
-        			double offset = n.getStatistic(Measurement.RADIUS);
+        			double offset = n.getMeasurement(Measurement.RADIUS);
 
         			result.add(new Ellipse2D.Double(p.getX() - offset, p.getY() - offset, offset * 2, offset * 2));
         		}

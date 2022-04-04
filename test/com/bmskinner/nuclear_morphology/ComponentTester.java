@@ -15,6 +15,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -41,6 +42,7 @@ public abstract class ComponentTester extends FloatArrayTester {
 	/** Classes that we have custom code to inspect **/
 	private static final List<Class> SPECIAL_CLASSES = List.of(HashMap.class, 
 			ConcurrentHashMap.class,
+			LinkedHashMap.class,
 			Map.class,
 			HashSet.class, 
 			ArrayList.class);
@@ -101,8 +103,15 @@ public abstract class ComponentTester extends FloatArrayTester {
 	 */
 	public static void testDuplicatesByField(Object original, Object dup, Set<String> fieldsToSkip) throws Exception {
 		for(Field f : getInheritedPrivateFields(dup.getClass())) {
+
+			// Get the fields present in the object
+//			if(f.getType().getTypeName().equals(f.get(original).getClass().getTypeName()))
+//				fieldsToSkip.add(f.getName()); // skip parent child recursion
 			
 			if(f.getName().equals("this$0")) // skip self recursion
+				fieldsToSkip.add(f.getName());
+			
+			if(f.getName().equals("parentDataset")) // skip dataset recursion
 				fieldsToSkip.add(f.getName());
 				
 			if(fieldsToSkip.contains(f.getName()))
@@ -113,9 +122,9 @@ public abstract class ComponentTester extends FloatArrayTester {
 			
 			if(Modifier.isTransient(f.getModifiers())) // ignore transient fields
 				continue;
-						
+
+//			LOGGER.fine(f.getDeclaringClass().getName()+": "+f.getName());
 			f.setAccessible(true);	
-			
 			// Skip classes we don't need to compare for equality testing
 
 			if(f.getType().equals(SoftReference.class))
@@ -149,17 +158,13 @@ public abstract class ComponentTester extends FloatArrayTester {
 				Class oClass = oValue.getClass();
 				if(SPECIAL_CLASSES.contains(oClass)) {
 					
-					if(oClass.equals(Map.class) ) {
-						testHashMapsByField(f, (Map)oValue, (Map)dValue);
-					}
-					
-					if(oClass.equals(ConcurrentHashMap.class) ) {
+					if(oClass.equals(Map.class)
+							|| oClass.equals(ConcurrentHashMap.class)
+							|| oClass.equals(LinkedHashMap.class)
+							|| oClass.equals(HashMap.class) ) {
 						testHashMapsByField(f, (Map)oValue, (Map)dValue);
 					}
 
-					if(oClass.equals(HashMap.class) ) {
-						testHashMapsByField(f, (Map)oValue, (Map)dValue);
-					}
 					if(oClass.equals(HashSet.class)) {
 						testHashSetsByField(f, (HashSet)oValue, (HashSet)dValue);
 					}
@@ -179,8 +184,8 @@ public abstract class ComponentTester extends FloatArrayTester {
 							String msg = "Field '"+f.getName()+"' of type "+f.getType().getName()
 									+ " and class "+ oClass.getName()
 									+" had a stack overflow on value: "+oValue
-									+"Expected: "+ original 
-									+"Found: "+dup;
+									+" Expected: "+ original 
+									+" Found: "+dup;
 							fail(msg);
 						}
 					} else{
@@ -252,8 +257,6 @@ public abstract class ComponentTester extends FloatArrayTester {
 		for(Object v0 : o) {
 			assertTrue("Field '"+f.getName()+"' should contain element "+v0.toString()+" but does not; set is: "+d, d.contains(v0));
 		}
-		
-//		assertTrue("All elements should be shared in hashset in '"+f.getName()+"'", d.containsAll(d));
 	}
 	
 	/**
@@ -266,9 +269,14 @@ public abstract class ComponentTester extends FloatArrayTester {
 	private static void testListEqualityByField(Field f, List o, List d, Set<String> fieldsToSkip) throws Exception {
 		assertTrue("Lists should not both be null", o!=null&&d!=null);
 		assertEquals("Lists should contain same number of elements", o.size(), d.size());
-		
+		fieldsToSkip.add("prevSegment"); // these will overflow in segmented profiles
+		fieldsToSkip.add("nextSegment");
 		for(int i=0; i<o.size(); i++) {
-			assertEquals("Field '"+f.getName()+"' element "+i+" should be equal", o.get(i), d.get(i));
+			if(o.get(i).getClass().getName().startsWith("com.bmskinner.nuclear_morphology")) {
+				testDuplicatesByField(o.get(i), d.get(i), fieldsToSkip);
+			} else {
+				assertEquals("Field '"+f.getName()+"' element "+i+" should be equal", o.get(i), d.get(i));
+			}
 		}
 		assertTrue("All elements should be shared in list in '"+f.getName()+"'", o.containsAll(d));
 	}

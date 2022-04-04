@@ -150,8 +150,6 @@ public class OutlineChartFactory extends AbstractChartFactory {
 	 * Create a nucleus outline chart with nuclear signals drawn as transparent
 	 * circles
 	 * 
-	 * @param dataset the AnalysisDataset to use to draw the consensus nucleus
-	 * @param signalCoMs the dataset with the signal centre of masses
 	 * @return
      * @throws ChartDatasetCreationException 
 	 * @throws Exception

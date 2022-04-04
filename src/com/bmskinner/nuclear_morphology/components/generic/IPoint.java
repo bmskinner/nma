@@ -34,53 +34,9 @@ public interface IPoint {
 	 * @return
 	 */
 	static IPoint atOrigin() {
-		return makeNew(0, 0);
+		return new FloatPoint(0, 0);
 	}
-	
-    /**
-     * Create a new point of the default type
-     * 
-     * @param x the x position
-     * @param y the y position
-     * @return a point at the specified position
-     */
-    static IPoint makeNew(final float x, final float y) {
-        return new FloatPoint(x, y);
-    }
-
-    /**
-     * Create a new point of the default type
-     * 
-     * @param x the x position
-     * @param y the y position
-     * @return a point at the specified position
-     */
-    static IPoint makeNew(final double x, final double y) {
-        return makeNew((float) x, (float) y);
-    }
-
-    /**
-     * Create a new point of the default type based on the given point
-     * 
-     * @param x the x position
-     * @param y the y position
-     * @return a point at the specified position
-     */
-    static IPoint makeNew(final IPoint a) {
-        return new FloatPoint(a);
-    }
-
-    /**
-     * Create a new point of the default type based on the given point
-     * 
-     * @param x the x position
-     * @param y the y position
-     * @return a point at the specified position
-     */
-    static IPoint makeNew(final Point2D a) {
-        return makeNew(a.getX(), a.getY());
-    }
-    
+	    
     /**
      * Create a duplicate of this point
      * @return a defensive duplicate
@@ -224,7 +180,7 @@ public interface IPoint {
 
         double nx = (a.getX() + b.getX()) / 2;
         double ny = (a.getY() + b.getY()) / 2;
-        return IPoint.makeNew(nx, ny);
+        return new FloatPoint(nx, ny);
     }
     
     
@@ -323,7 +279,7 @@ public interface IPoint {
     	double x = 0;
     	double y = 0;
     	if(points==null || points.isEmpty())
-    		return IPoint.makeNew(x, y);
+    		return new FloatPoint(x, y);
 
     	for(IPoint p :points) {
     		x += p.getX();
@@ -331,7 +287,7 @@ public interface IPoint {
     	}
     	x /= points.size();
     	y /= points.size();
-    	return IPoint.makeNew(x, y);
+    	return new FloatPoint(x, y);
     }
     
 }

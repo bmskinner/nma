@@ -31,6 +31,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.jdom2.Element;
 
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
+import com.bmskinner.nuclear_morphology.components.Version.UnsupportedVersionException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
@@ -72,12 +73,10 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
         this.savePath = saveFile;
     }
     
-    DefaultAnalysisDataset(@NonNull Element e) throws ComponentCreationException {
+    DefaultAnalysisDataset(@NonNull Element e) throws ComponentCreationException, UnsupportedVersionException {
     	super(e);
-    	    	
     	savePath = new File(e.getChildText("SaveFile")).getAbsoluteFile();
-    	    	
-    	cellCollection = new DefaultCellCollection(e.getChild("CellCollection"));		
+    	cellCollection = new DefaultCellCollection(e.getChild("CellCollection"));
     }
     
     /**
@@ -321,9 +320,9 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
             // Remove saved values associated with the cluster group
             // e.g. tSNE, PCA
             for(Nucleus n : getCollection().getNuclei()) {
-            	for(Measurement s : n.getStatistics()) {
+            	for(Measurement s : n.getMeasurements()) {
             		if(s.toString().endsWith(group.getId().toString()))
-            			n.clearStatistic(s);
+            			n.clearMeasurement(s);
             	}
             }
             this.clusterGroups.remove(group);

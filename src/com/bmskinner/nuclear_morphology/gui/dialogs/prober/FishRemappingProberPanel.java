@@ -50,6 +50,7 @@ import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.datasets.VirtualDataset;
+import com.bmskinner.nuclear_morphology.components.generic.FloatPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
@@ -318,7 +319,7 @@ public class FishRemappingProberPanel extends GenericImageProberPanel {
         double largeX = x * factor;
         double largeY = y * factor;
 
-        IPoint p = IPoint.makeNew(largeX, largeY);
+        IPoint p = new FloatPoint(largeX, largeY);
         return p;
     }
 

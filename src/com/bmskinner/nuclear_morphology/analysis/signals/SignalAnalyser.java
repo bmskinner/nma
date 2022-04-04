@@ -48,7 +48,7 @@ public class SignalAnalyser {
             if (!signals.isEmpty()) {
                 for (INuclearSignal s : signals) {
                     double distance = n.getCentreOfMass().getLengthTo(s.getCentreOfMass());
-                    s.setStatistic(Measurement.DISTANCE_FROM_COM, distance);
+                    s.setMeasurement(Measurement.DISTANCE_FROM_COM, distance);
                 }
             }
         }
@@ -101,7 +101,7 @@ public class SignalAnalyser {
             	double nucleusCoMToBorder = borderPoint.getLengthTo(n.getCentreOfMass());
             	double signalCoMToNucleusCoM = n.getCentreOfMass().getLengthTo(signal.getCentreOfMass());
             	double fractionalDistance = Math.min(signalCoMToNucleusCoM / nucleusCoMToBorder, 1);
-            	signal.setStatistic(Measurement.FRACT_DISTANCE_FROM_COM, fractionalDistance);
+            	signal.setMeasurement(Measurement.FRACT_DISTANCE_FROM_COM, fractionalDistance);
             }
             
         }

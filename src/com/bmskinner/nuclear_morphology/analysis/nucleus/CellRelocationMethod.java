@@ -34,6 +34,7 @@ import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.VirtualDataset;
+import com.bmskinner.nuclear_morphology.components.generic.FloatPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
@@ -291,7 +292,7 @@ public class CellRelocationMethod extends SingleDatasetAnalysisMethod {
 
         double x = Double.parseDouble(posArray[0]);
         double y = Double.parseDouble(posArray[1]);
-        return IPoint.makeNew(x, y);
+        return new FloatPoint(x, y);
     }
 
     public class CellRelocationException extends Exception {

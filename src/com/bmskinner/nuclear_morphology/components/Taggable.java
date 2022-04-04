@@ -109,10 +109,9 @@ public interface Taggable extends CellularComponent {
     /**
      * Get the window size for generating the specificed profile
      * 
-     * @param type
      * @return
      */
-    int getWindowSize(@NonNull ProfileType type);
+    int getWindowSize();
 
     /**
      * Get the fraction of the perimeter to use for calculating the window size
@@ -121,7 +120,7 @@ public interface Taggable extends CellularComponent {
      * @return a fraction between 0 and 1
      * @throws MissingProfileException
      */
-    double getWindowProportion(@NonNull ProfileType type);
+    double getWindowProportion();
 
     /**
      * Set the fraction of the perimeter to use for calculating the window size
@@ -132,7 +131,7 @@ public interface Taggable extends CellularComponent {
      *            Profileable.DEFAULT_PROFILE_WINDOW_PROPORTION if not
      *            previously set
      */
-    public void setWindowProportion(@NonNull ProfileType type, double d);
+    public void setWindowProportion(double d);
 
     /**
      * Check if the segments and tags are able to be modified

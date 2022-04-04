@@ -26,10 +26,15 @@ import javax.swing.ImageIcon;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nuclear_morphology.analysis.ComponentOrienter;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
+import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.rules.PriorityAxis;
 
 import ij.ImagePlus;
+import ij.process.Blitter;
 import ij.process.ByteProcessor;
 import ij.process.ColorProcessor;
 import ij.process.FloatProcessor;
@@ -515,6 +520,74 @@ public abstract class AbstractImageFilterer {
         ip = resizeKeepingAspect(ip, maxWidth, maxHeight);
         return this;
     }
+    
+    /**
+     * Enlarge the given processor as needed so that it can be rotated by the given angle
+     * without cropping, then rotates
+     * @param ip
+     * @param degrees
+     * @return
+     */
+    public static ImageProcessor rotateImage(final ImageProcessor ip, double degrees) {
+
+        double rad = Math.toRadians(degrees);
+
+        // Calculate the new width and height of the canvas
+        // new width is h sin(a) + w cos(a) and vice versa for height
+        double newWidth = Math.abs(Math.sin(rad) * ip.getHeight()) + Math.abs(Math.cos(rad) * ip.getWidth());
+        double newHeight = Math.abs(Math.sin(rad) * ip.getWidth()) + Math.abs(Math.cos(rad) * ip.getHeight());
+
+        int w = (int) Math.ceil(newWidth);
+        int h = (int) Math.ceil(newHeight);
+
+        // The new image may be narrower or shorter following rotation.
+        // To avoid clipping, ensure the image never gets smaller in either
+        // dimension.
+        w = w < ip.getWidth() ? ip.getWidth() : w;
+        h = h < ip.getHeight() ? ip.getHeight() : h;
+
+        // paste old image to centre of enlarged canvas
+        int xBase = (w - ip.getWidth()) >> 1;
+        int yBase = (h - ip.getHeight()) >> 1;
+
+        LOGGER.finer( String.format("New image %sx%s from %sx%s : Rot: %s", w, h, ip.getWidth(), ip.getHeight(), degrees));
+        ImageProcessor newIp = new ColorProcessor(w, h);
+
+        newIp.setColor(Color.WHITE); // fill current space with white
+        newIp.fill();
+
+        newIp.setBackgroundValue(16777215); // fill on rotate is RGB int white
+        newIp.copyBits(ip, xBase, yBase, Blitter.COPY);
+        newIp.rotate(degrees);
+        return newIp;
+    }
+    
+    /**
+     * Orient the given image using the rules in a nucleus.
+     * @param ip
+     * @param n
+     * @return
+     */
+    public static ImageProcessor orientImage(final ImageProcessor ip, final Nucleus n) {
+    	try {
+    		ImageProcessor newIp = ip.duplicate();
+    		double angle = ComponentOrienter.calcAngleToAlignVertically(n);
+    		newIp = rotateImage(ip, angle);
+    		boolean isFlip = ComponentOrienter.isFlipNeeded(n);
+    		if(isFlip) {
+    			if(PriorityAxis.Y.equals(n.getPriorityAxis())) {
+    				newIp.flipHorizontal();
+    			} else {
+    				newIp.flipVertical();
+    			}
+    		}
+    		return newIp;
+    	} catch (MissingLandmarkException e) {
+    		LOGGER.warning("Unable to rotate image: "+e.getMessage());
+    	}
+    	return ip;
+    }
+    
     
     /**
      * Rescale the image intensity to fill the 0-255 range

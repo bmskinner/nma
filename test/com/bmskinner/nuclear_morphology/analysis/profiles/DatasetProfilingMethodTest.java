@@ -217,11 +217,11 @@ public class DatasetProfilingMethodTest extends AbstractProfileMethodTest {
 				continue; // we can't test this on a per-nucleus level
 			
 			for(Nucleus n : d.getCollection().getNuclei()) {
-				assertTrue("Nucleus should have "+stat, n.hasStatistic(stat));
-				assertFalse("Nucleus error calculating "+stat, Statistical.ERROR_CALCULATING_STAT==n.getStatistic(stat));
-				assertFalse("Nucleus missing landmark "+stat, Statistical.MISSING_LANDMARK==n.getStatistic(stat));
-				assertFalse("Nucleus did not calculate "+stat, Statistical.STAT_NOT_CALCULATED==n.getStatistic(stat));
-				assertFalse("Not a nucleus "+stat, Statistical.INVALID_OBJECT_TYPE==n.getStatistic(stat));
+				assertTrue("Nucleus should have "+stat, n.hasMeasurement(stat));
+				assertFalse("Nucleus error calculating "+stat, Statistical.ERROR_CALCULATING_STAT==n.getMeasurement(stat));
+				assertFalse("Nucleus missing landmark "+stat, Statistical.MISSING_LANDMARK==n.getMeasurement(stat));
+				assertFalse("Nucleus did not calculate "+stat, Statistical.STAT_NOT_CALCULATED==n.getMeasurement(stat));
+				assertFalse("Not a nucleus "+stat, Statistical.INVALID_OBJECT_TYPE==n.getMeasurement(stat));
 			}
 			
 			double value = d.getCollection().getMedian(stat, CellularComponent.NUCLEUS, MeasurementScale.PIXELS);

@@ -18,6 +18,8 @@ package com.bmskinner.nuclear_morphology.analysis.detection;
 
 import java.util.Map;
 
+import com.bmskinner.nuclear_morphology.components.generic.IPoint;
+
 import ij.gui.Roi;
 import ij.process.ImageProcessor;
 
@@ -45,7 +47,7 @@ public class GenericDetector extends Detector {
      * @param ip
      * @return
      */
-    public synchronized Map<Roi, StatsMap> getRois(ImageProcessor ip) {
+    public synchronized Map<Roi, IPoint> getRois(ImageProcessor ip) {
         this.setMaxSize(ip.getWidth() * ip.getHeight()); // object cannot be larger than the image
         return this.detectRois(ip);
     }

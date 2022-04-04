@@ -552,8 +552,8 @@ public class DefaultSegmentedProfile extends DefaultProfile implements ISegmente
         int endIndex   = secondSegment.getEndIndex();
         IProfileSegment mergedSegment = new DefaultProfileSegment(startIndex, endIndex, this.size(), newId);
 
-        LOGGER.fine(()->"Merged segment has source 1: "+mergedSegment.hasMergeSource(seg1Id));
-        LOGGER.fine(()->"Merged segment has source 2: "+mergedSegment.hasMergeSource(seg2Id));
+//        LOGGER.fine(()->"Merged segment has source 1: "+mergedSegment.hasMergeSource(seg1Id));
+//        LOGGER.fine(()->"Merged segment has source 2: "+mergedSegment.hasMergeSource(seg2Id));
         // Replace the two segments in this profile
         List<IProfileSegment> oldSegs = this.getSegments();
         List<IProfileSegment> newSegs = new ArrayList<>();

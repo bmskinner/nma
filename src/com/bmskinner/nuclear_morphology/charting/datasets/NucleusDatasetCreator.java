@@ -179,7 +179,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 					if (seg != null) {
 						int indexLength = seg.length();
 						double proportionPerimeter = (double) indexLength / (double) seg.getProfileLength();
-						length = n.getStatistic(Measurement.PERIMETER, scale) * proportionPerimeter;
+						length = n.getMeasurement(Measurement.PERIMETER, scale) * proportionPerimeter;
 
 					}
 

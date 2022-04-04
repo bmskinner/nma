@@ -19,6 +19,7 @@ package com.bmskinner.nuclear_morphology.components.measure;
 import java.awt.geom.Point2D;
 import java.util.List;
 
+import com.bmskinner.nuclear_morphology.components.generic.FloatPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 
 public class FloatEquation implements LineEquation {
@@ -115,7 +116,7 @@ public class FloatEquation implements LineEquation {
 
     @Override
     public IPoint getPointOnLine(IPoint p, double distance) {
-        if(isVert) return IPoint.makeNew(p.getX(), p.getY()+distance);
+        if(isVert) return new FloatPoint(p.getX(), p.getY()+distance);
         double xA = p.getX();
 
         /*
@@ -127,7 +128,7 @@ public class FloatEquation implements LineEquation {
 
         double newX = distance > 0 ? xA + dx : xA - dx;
         double newY = this.getY(newX);
-        return IPoint.makeNew(newX, newY);
+        return new FloatPoint(newX, newY);
     }
 
     @Override
@@ -171,7 +172,7 @@ public class FloatEquation implements LineEquation {
 
         double x = (eq.getC() - this.c) / (this.m - eq.getM());
         double y = this.getY(x);
-        return IPoint.makeNew(x, y);
+        return new FloatPoint(x, y);
     }
 
     @Override

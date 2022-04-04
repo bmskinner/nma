@@ -254,7 +254,7 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
                 		double length = 0;
                 		int indexLength = seg.length();
                 		double proportionPerimeter = (double) indexLength / (double) seg.getProfileLength();
-                		length = n.getStatistic(Measurement.PERIMETER, options.getScale()) * proportionPerimeter;
+                		length = n.getMeasurement(Measurement.PERIMETER, options.getScale()) * proportionPerimeter;
                 		list.add(length);
 
                 	} catch (MissingComponentException e) {

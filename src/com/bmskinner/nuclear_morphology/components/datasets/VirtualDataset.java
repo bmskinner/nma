@@ -28,6 +28,7 @@ import com.bmskinner.nuclear_morphology.components.MissingComponentException;
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.Statistical;
 import com.bmskinner.nuclear_morphology.components.Taggable;
+import com.bmskinner.nuclear_morphology.components.Version.UnsupportedVersionException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
@@ -152,7 +153,7 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
 		cells.getProfileManager().copySegmentsAndLandmarksTo(this);
 	}
 	
-	public VirtualDataset(@NonNull Element e) throws ComponentCreationException {
+	public VirtualDataset(@NonNull Element e) throws ComponentCreationException, UnsupportedVersionException {
 		super(e);
 		uuid = UUID.fromString(e.getAttributeValue("id"));
 		name = e.getAttributeValue("name");
@@ -849,7 +850,7 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
 			if (segment != null) {
 				int indexLength = segment.length();
 				double fractionOfPerimeter = (double) indexLength / (double) segment.getProfileLength();
-				perimeterLength = fractionOfPerimeter * n.getStatistic(Measurement.PERIMETER, scale);
+				perimeterLength = fractionOfPerimeter * n.getMeasurement(Measurement.PERIMETER, scale);
 			}
 			return perimeterLength;
 
@@ -879,7 +880,7 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
 		if (Measurement.VARIABILITY.equals(stat)) {
 		    result = this.getNormalisedDifferencesToMedianFromPoint(Landmark.REFERENCE_POINT);
 		} else {
-		    result = this.getNuclei().parallelStream().mapToDouble(n -> n.getStatistic(stat, scale)).toArray();
+		    result = this.getNuclei().parallelStream().mapToDouble(n -> n.getMeasurement(stat, scale)).toArray();
 		}
 		Arrays.sort(result);
 		statsCache.setValues(stat, CellularComponent.NUCLEUS, scale, null, result);
@@ -898,7 +899,7 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
     	double[] result = null;
 		if (statsCache.hasValues(stat, CellularComponent.WHOLE_CELL, scale, null))
 			return statsCache.getValues(stat, CellularComponent.WHOLE_CELL, scale, null);
-		result = getCells().parallelStream().mapToDouble(c -> c.getStatistic(stat, scale)).sorted().toArray();
+		result = getCells().parallelStream().mapToDouble(c -> c.getMeasurement(stat, scale)).sorted().toArray();
 		statsCache.setValues(stat, CellularComponent.WHOLE_CELL, scale, null, result);
 		return result;
     }
@@ -1262,9 +1263,9 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
             // Remove saved values associated with the cluster group
             // e.g. tSNE, PCA
             for(Nucleus n : getCollection().getNuclei()) {
-            	for(Measurement s : n.getStatistics()) {
+            	for(Measurement s : n.getMeasurements()) {
             		if(s.toString().endsWith(group.getId().toString()))
-            			n.clearStatistic(s);
+            			n.clearMeasurement(s);
             	}
             }
             this.clusterGroups.remove(group);

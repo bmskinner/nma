@@ -191,6 +191,12 @@ public class ImportDatasetAction extends VoidResultAction {
             LOGGER.warning("Unable to open file '" + file.getAbsolutePath() + "': " + e.getMessage());
             return;
         } catch (ExecutionException e) {
+        	if(e.getCause() instanceof UnsupportedVersionException){
+        		UnsupportedVersionException e2 = (UnsupportedVersionException)e.getCause();
+        		LOGGER.warning(file.getName()+" was created in version "+e2.getDetectedVersion()+" which is too old to open");
+                return;
+            }
+        	
             LOGGER.warning("Unable to open '" + file.getAbsolutePath() + "': " + e.getMessage());
             return;
         }

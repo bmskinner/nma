@@ -1,8 +1,11 @@
 package com.bmskinner.nuclear_morphology.components.datasets;
 
+import java.util.logging.Logger;
+
 import org.jdom2.Element;
 
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
+import com.bmskinner.nuclear_morphology.components.Version.UnsupportedVersionException;
 import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileException;
@@ -17,6 +20,8 @@ import com.bmskinner.nuclear_morphology.components.profiles.ProfileException;
  */
 public class DatasetCreator {
 	
+	private static final Logger LOGGER = Logger.getLogger(DatasetCreator.class.getName());
+	
 	private DatasetCreator() {}
 	
 	/**
@@ -24,9 +29,10 @@ public class DatasetCreator {
 	 * @param e
 	 * @return
 	 * @throws ComponentCreationException
+	 * @throws UnsupportedVersionException 
 	 * @throws ProfileException 
 	 */
-	public static IAnalysisDataset createRoot(Element e) throws ComponentCreationException {
+	public static IAnalysisDataset createRoot(Element e) throws ComponentCreationException, UnsupportedVersionException {
 		IAnalysisDataset d = new DefaultAnalysisDataset(e);
 		try {
 			d.getCollection().getProfileCollection().calculateProfiles();

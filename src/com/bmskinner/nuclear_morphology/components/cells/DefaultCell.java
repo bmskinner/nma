@@ -129,8 +129,8 @@ public class DefaultCell implements ICell {
             this.cytoplasm = c.getCytoplasm().duplicate();
 
         statistics = new HashMap<>();
-        for(Measurement stat : c.getStatistics())
-        	statistics.put(stat, c.getStatistic(stat));
+        for(Measurement stat : c.getMeasurements())
+        	statistics.put(stat, c.getMeasurement(stat));
     }
     
     @Override
@@ -160,28 +160,28 @@ public class DefaultCell implements ICell {
      */
 
     @Override
-    public synchronized boolean hasStatistic(@NonNull Measurement stat) {
+    public synchronized boolean hasMeasurement(@NonNull Measurement stat) {
         return statistics.containsKey(stat) && Statistical.STAT_NOT_CALCULATED != statistics.get(stat);
     }
 
     @Override
-    public synchronized double getStatistic(@NonNull Measurement stat) {
-        return this.getStatistic(stat, MeasurementScale.PIXELS);
+    public synchronized double getMeasurement(@NonNull Measurement stat) {
+        return this.getMeasurement(stat, MeasurementScale.PIXELS);
     }
 
     @Override
-    public synchronized double getStatistic(@NonNull Measurement stat, @NonNull MeasurementScale scale) {
+    public synchronized double getMeasurement(@NonNull Measurement stat, @NonNull MeasurementScale scale) {
 
         // Get the scale of one of the components of the cell
         double sc = chooseScale();
 
-        if (hasStatistic(stat)) {
+        if (hasMeasurement(stat)) {
             double result = statistics.get(stat);
             return stat.convert(result, sc, scale);
         }
 
         double result = calculateStatistic(stat);
-        statistics.put(stat, result);
+//        statistics.put(stat, result);
         return result;
     }
     
@@ -217,7 +217,7 @@ public class DefaultCell implements ICell {
     }
 
     @Override
-    public void setStatistic(@NonNull Measurement stat, double d) {
+    public void setMeasurement(@NonNull Measurement stat, double d) {
     	
     	// These can all be calculated when needed without
     	// a long wait - no need to store
@@ -232,27 +232,27 @@ public class DefaultCell implements ICell {
     }
     
     @Override
-    public void clearStatistic(@NonNull Measurement stat) {
+    public void clearMeasurement(@NonNull Measurement stat) {
     	statistics.remove(stat);
     }
 
     @Override
-    public List<Measurement> getStatistics() {
+    public List<Measurement> getMeasurements() {
         return Measurement.getCellStats();
     }
 
     private int getNuclearArea() {
         int i = 0;
         for (Nucleus n : nuclei) {
-            i += n.getStatistic(Measurement.AREA);
+            i += n.getMeasurement(Measurement.AREA);
         }
         return i;
     }
 
     private double getNuclearRatio() {
         if (hasCytoplasm()) {
-            double cy = cytoplasm.getStatistic(Measurement.AREA);
-            double n = getStatistic(Measurement.CELL_NUCLEAR_AREA);
+            double cy = cytoplasm.getMeasurement(Measurement.AREA);
+            double n = getMeasurement(Measurement.CELL_NUCLEAR_AREA);
             return n / cy;
         }
         return STAT_NOT_CALCULATED;

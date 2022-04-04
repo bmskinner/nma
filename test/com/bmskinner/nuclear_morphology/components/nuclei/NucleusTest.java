@@ -90,7 +90,7 @@ public class NucleusTest {
 		double max = Math.sqrt(100*100*2);
 		double expected = 100/max;
 		double epsilon = 0.01; // the amount of difference permitted
-		assertEquals(expected, nucleus.getStatistic(Measurement.MIN_DIAMETER), epsilon);
+		assertEquals(expected, nucleus.getMeasurement(Measurement.MIN_DIAMETER), epsilon);
 	}
 		
 	@Test

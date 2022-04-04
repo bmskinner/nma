@@ -24,6 +24,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Logger;
@@ -53,7 +54,7 @@ public class DefaultSignalCollection implements ISignalCollection {
 	
 	private static final String XML_COLLECTION = "SignalCollection";
 	private static final String XML_SIGNALS = "Signals";
-	private static final String XML_SIGNAL_ID = "SignalId";
+	private static final String XML_SIGNALGROUP_ID = "group";
 	
 	private static final Logger LOGGER = Logger.getLogger(DefaultSignalCollection.class.getName());
 	
@@ -75,15 +76,13 @@ public class DefaultSignalCollection implements ISignalCollection {
      * @param e the XML element containing the data.
      */
     public DefaultSignalCollection(Element e) {
-    	
     	for(Element id : e.getChildren(XML_SIGNALS)) {
-    		UUID uuid = UUID.fromString(id.getAttributeValue(XML_SIGNAL_ID));
+    		UUID uuid = UUID.fromString(id.getAttributeValue(XML_SIGNALGROUP_ID));
     		collection.computeIfAbsent(uuid, k -> new ArrayList<>());
     		
     		for(Element s : id.getChildren()) {
     			collection.get(uuid).add(new DefaultNuclearSignal(s));
     		}
-    		
     	}
     }
     
@@ -96,7 +95,7 @@ public class DefaultSignalCollection implements ISignalCollection {
 			
 			for(INuclearSignal s : entry.getValue()) {
 				e.addContent(new Element(XML_SIGNALS)
-						.setAttribute(XML_SIGNAL_ID, entry.getKey().toString())
+						.setAttribute(XML_SIGNALGROUP_ID, entry.getKey().toString())
 						.addContent(s.toXmlElement()));
 			}
 		}
@@ -270,7 +269,7 @@ public class DefaultSignalCollection implements ISignalCollection {
         List<INuclearSignal> list = getSignals(signalGroup);
         List<Double> result = new ArrayList<Double>(0);
         for (int i = 0; i < list.size(); i++) {
-            result.add(list.get(i).getStatistic(stat, scale));
+            result.add(list.get(i).getMeasurement(stat, scale));
         }
         return result;
     }
@@ -490,18 +489,15 @@ public class DefaultSignalCollection implements ISignalCollection {
     @Override
     public String toString() {
 
-        StringBuilder b = new StringBuilder("Signal groups: ");
-        b.append(size());
-        b.append("\n ");
+        StringBuilder b = new StringBuilder("Signal groups: "+size()+"\n");
 
         for (UUID group : collection.keySet()) {
-            b.append(group);
-            b.append(": ");
-            b.append(" : Channel: ");
-            b.append(this.getSourceChannel(group));
-            b.append(" : File: ");
-            b.append(this.getSourceFile(group));
+            b.append(group+": Channel "+getSourceChannel(group)
+            +"; File: "+getSourceFile(group)+"; size "+numberOfSignals(group));
             b.append("\n");
+            for(INuclearSignal s: getSignals(group)) {
+            	b.append(s.toString()+"\n");
+            }
         }
         return b.toString();
     }
@@ -510,7 +506,7 @@ public class DefaultSignalCollection implements ISignalCollection {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((collection == null) ? 0 : collection.hashCode());
+		result = prime * result + ((collection == null) ? 0 : Objects.hashCode(collection));
 		return result;
 	}
 
@@ -524,10 +520,27 @@ public class DefaultSignalCollection implements ISignalCollection {
 			return false;
 		DefaultSignalCollection other = (DefaultSignalCollection) obj;
 		if (collection == null) {
-			if (other.collection != null)
+			if(other.collection != null)
 				return false;
-		} else if (!collection.equals(other.collection))
+		}	
+		
+		// Deep check on signals
+		if(collection.size()!=other.collection.size())
 			return false;
+		
+		for(Entry<UUID, List<INuclearSignal>> e : collection.entrySet()) {
+			if(!other.collection.containsKey(e.getKey()))
+				return false;
+			List<INuclearSignal> otherSignals = other.collection.get(e.getKey());
+			if(e.getValue().size()!=otherSignals.size())
+				return false;
+			if(!Objects.equals(e.getValue(), otherSignals))
+				return false;
+		}
+		
+//		return Objects.equals(collection, other.collection);
+//		} else if (!collection.equals(other.collection))
+//			return false;
 		return true;
 	}
     

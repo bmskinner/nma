@@ -36,6 +36,7 @@ import com.bmskinner.nuclear_morphology.components.Taggable;
 import com.bmskinner.nuclear_morphology.components.UnavailableBorderPointException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
+import com.bmskinner.nuclear_morphology.components.generic.FloatPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
@@ -530,13 +531,13 @@ public class ImageAnnotator extends AbstractImageFilterer {
 
         if (n instanceof INuclearSignal) {
 
-            area = n.getStatistic(Measurement.AREA);
-            double perim2 = Math.pow(n.getStatistic(Measurement.PERIMETER), 2);
+            area = n.getMeasurement(Measurement.AREA);
+            double perim2 = Math.pow(n.getMeasurement(Measurement.PERIMETER), 2);
             circ = (4 * Math.PI) * (area / perim2);
 
         } else {
-            area = n.getStatistic(Measurement.AREA);
-            circ = n.getStatistic(Measurement.CIRCULARITY);
+            area = n.getMeasurement(Measurement.AREA);
+            circ = n.getMeasurement(Measurement.CIRCULARITY);
         }
 
         areaLbl = "Area: " + df.format(area);
@@ -568,13 +569,13 @@ public class ImageAnnotator extends AbstractImageFilterer {
 
         if (signal instanceof INuclearSignal) {
 
-            area = signal.getStatistic(Measurement.AREA);
-            double perim2 = Math.pow(signal.getStatistic(Measurement.PERIMETER), 2);
+            area = signal.getMeasurement(Measurement.AREA);
+            double perim2 = Math.pow(signal.getMeasurement(Measurement.PERIMETER), 2);
             circ = (4 * Math.PI) * (area / perim2);
 
         }
 
-        fraction = area / parent.getStatistic(Measurement.AREA);
+        fraction = area / parent.getMeasurement(Measurement.AREA);
 
         areaLbl = "Area: " + df.format(area);
         perimLbl = "Circ: " + df.format(circ);
@@ -600,25 +601,20 @@ public class ImageAnnotator extends AbstractImageFilterer {
 
         try {
 
-            if (n.getProfile(ProfileType.ANGLE).getSegments().size() > 0) { // only
-                                                                            // draw
-                                                                            // if
-                                                                            // there
-                                                                            // are
-                                                                            // segments
-                for (int i = 0; i < n.getProfile(ProfileType.ANGLE).getSegments().size(); i++) {
+        	// only draw if segments are present
+        	if(n.getProfile(ProfileType.ANGLE).hasSegments()) {
+        		List<IProfileSegment> segs = n.getProfile(ProfileType.ANGLE).getSegments();
+        		
+                for (int i = 0; i < segs.size(); i++) {
 
-                    IProfileSegment seg = n.getProfile(ProfileType.ANGLE).getSegment("Seg_" + i);
+                    IProfileSegment seg = segs.get(i);
 
                     float[] xpoints = new float[seg.length() + 1];
                     float[] ypoints = new float[seg.length() + 1];
                     for (int j = 0; j <= seg.length(); j++) {
                         int k = n.wrapIndex(seg.getStartIndex() + j);
-                        IPoint p = n.getOriginalBorderPoint(k); // get the
-                                                                      // border
-                                                                      // points
-                                                                      // in the
-                                                                      // segment
+                        
+                        IPoint p = n.getOriginalBorderPoint(k);
                         xpoints[j] = (float) (p.getX()*scale);
                         ypoints[j] = (float) (p.getY()*scale);
                     }
@@ -627,7 +623,7 @@ public class ImageAnnotator extends AbstractImageFilterer {
 
                     // Offset the segment relative to the nucleus component
                     // image
-                    IPoint base = IPoint.makeNew(segRoi.getXBase(), segRoi.getYBase());
+                    IPoint base = new FloatPoint(segRoi.getXBase(), segRoi.getYBase());
                     IPoint offset = Imageable.translateCoordinateToComponentImage(base, template);
 
                     segRoi.setLocation(offset.getX(), offset.getY());

@@ -22,6 +22,7 @@ import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import com.bmskinner.nuclear_morphology.components.generic.FloatPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.measure.FloatEquation;
 import com.bmskinner.nuclear_morphology.components.measure.LineEquation;
@@ -265,7 +266,7 @@ public class DefaultMeshFace implements MeshFace {
         avgX /= 3;
         avgY /= 3;
 
-        return IPoint.makeNew(avgX, avgY);
+        return new FloatPoint(avgX, avgY);
     }
 
     @Override

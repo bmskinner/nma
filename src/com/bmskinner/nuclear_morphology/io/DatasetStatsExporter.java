@@ -87,7 +87,7 @@ public class DatasetStatsExporter extends StatsExporter {
         // Only include if present in all datasets
         isIncludeGlcm = list.stream()
         		.allMatch(d->d.getCollection().getCells().stream()
-        				.allMatch(c->c.getPrimaryNucleus().hasStatistic(GLCMParameter.SUM.toStat())));
+        				.allMatch(c->c.getPrimaryNucleus().hasMeasurement(GLCMParameter.SUM.toStat())));
         
         normProfileLength = chooseNormalisedProfileLength();
     }
@@ -104,7 +104,7 @@ public class DatasetStatsExporter extends StatsExporter {
         profileSamples = options.getInt(Io.PROFILE_SAMPLES_KEY);
         
         isIncludeGlcm = dataset.getCollection().getCells().stream()
-        				.allMatch(c->c.getPrimaryNucleus().hasStatistic(GLCMParameter.SUM.toStat()));
+        				.allMatch(c->c.getPrimaryNucleus().hasMeasurement(GLCMParameter.SUM.toStat()));
         
         normProfileLength = chooseNormalisedProfileLength();
     }
@@ -237,7 +237,7 @@ public class DatasetStatsExporter extends StatsExporter {
             double varP = 0;
             double varM = 0;
             
-            if(!c.hasStatistic(s))
+            if(!c.hasMeasurement(s))
             	continue;
 
             if (s.equals(Measurement.VARIABILITY)) {
@@ -251,8 +251,8 @@ public class DatasetStatsExporter extends StatsExporter {
                     varM = -1;
                 }
             } else {
-                varP = c.getStatistic(s, MeasurementScale.PIXELS);
-                varM = c.getStatistic(s, MeasurementScale.MICRONS);
+                varP = c.getMeasurement(s, MeasurementScale.PIXELS);
+                varM = c.getMeasurement(s, MeasurementScale.MICRONS);
             }
 
             outLine.append(varP + TAB);
@@ -263,7 +263,7 @@ public class DatasetStatsExporter extends StatsExporter {
         
         if(isIncludeGlcm) {
         	for (Measurement s : Measurement.getGlcmStats()) {
-        		outLine.append(c.getStatistic(s) + TAB);
+        		outLine.append(c.getMeasurement(s) + TAB);
         	}
         }
     }
@@ -307,8 +307,8 @@ public class DatasetStatsExporter extends StatsExporter {
             	// Add the length of the segment
                 int indexLength = segment.length();
                 double fractionOfPerimeter = (double) indexLength / (double) segment.getProfileLength();
-                varP = fractionOfPerimeter * c.getStatistic(Measurement.PERIMETER, MeasurementScale.PIXELS);
-                varM = fractionOfPerimeter * c.getStatistic(Measurement.PERIMETER, MeasurementScale.MICRONS);
+                varP = fractionOfPerimeter * c.getMeasurement(Measurement.PERIMETER, MeasurementScale.PIXELS);
+                varM = fractionOfPerimeter * c.getMeasurement(Measurement.PERIMETER, MeasurementScale.MICRONS);
                 outLine.append(varP + TAB);
                 outLine.append(varM + TAB);
                 

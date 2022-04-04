@@ -356,24 +356,18 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
         }
     }
 
-    private void setCollectionWindowSize(double windowSize) throws Exception {
+    private void setCollectionWindowSize(double windowProp) throws Exception {
 
         // Update cells
+        for (Nucleus n : activeDataset().getCollection().getNuclei())
+            n.setWindowProportion(windowProp);
 
-        for (Nucleus n : activeDataset().getCollection().getNuclei()) {
-            n.setWindowProportion(ProfileType.ANGLE, windowSize);
-        }
-
-        // recalc the aggregate
-
-        IProfileCollection pc = activeDataset().getCollection().getProfileCollection();
-
-        pc.calculateProfiles();
-//        pc.createProfileAggregate(activeDataset().getCollection(), pc.length());
+        // recalculate profiles
+        activeDataset().getCollection().getProfileCollection().calculateProfiles();;
 
         Optional<IAnalysisOptions> op = activeDataset().getAnalysisOptions();
         if(op.isPresent())
-        	op.get().setAngleWindowProportion(windowSize);
+        	op.get().setAngleWindowProportion(windowProp);
 
     }
 

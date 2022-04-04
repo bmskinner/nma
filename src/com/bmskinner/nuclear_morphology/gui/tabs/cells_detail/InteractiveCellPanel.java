@@ -39,7 +39,9 @@ import javax.swing.JPopupMenu;
 import org.eclipse.jdt.annotation.Nullable;
 import org.jdesktop.swingx.decorator.ComponentAdapter;
 
+import com.bmskinner.nuclear_morphology.analysis.ComponentOrienter;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageAnnotator;
+import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
 import com.bmskinner.nuclear_morphology.analysis.mesh.DefaultMesh;
 import com.bmskinner.nuclear_morphology.analysis.mesh.DefaultMeshImage;
 import com.bmskinner.nuclear_morphology.analysis.mesh.Mesh;
@@ -61,6 +63,7 @@ import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
+import com.bmskinner.nuclear_morphology.components.rules.PriorityAxis;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.ImageClickListener;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
@@ -74,6 +77,7 @@ import com.bmskinner.nuclear_morphology.gui.events.SegmentEvent.SegmentUpdateTyp
 import com.bmskinner.nuclear_morphology.gui.events.SegmentEventListener;
 import com.bmskinner.nuclear_morphology.gui.painters.CellImagePainter;
 import com.bmskinner.nuclear_morphology.gui.painters.ImagePainter;
+import com.bmskinner.nuclear_morphology.gui.painters.OrientedCellImagePainter;
 import com.bmskinner.nuclear_morphology.gui.painters.WarpedCellPainter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -177,119 +181,7 @@ public class InteractiveCellPanel extends JPanel {
 	public synchronized void removeDatasetEventListener(EventListener l) {
         dh.removeListener(l);
     }
-				
-	protected ImageProcessor rotateToVertical(ICell c, ImageProcessor ip) throws MissingLandmarkException {
-        // Calculate angle for vertical rotation
-        Nucleus n = c.getPrimaryNucleus();
-
-        IPoint topPoint;
-        IPoint btmPoint;
-
-        if (!n.hasLandmark(Landmark.TOP_VERTICAL) || !n.hasLandmark(Landmark.BOTTOM_VERTICAL)) {
-            topPoint = n.getCentreOfMass();
-            btmPoint = n.getBorderPoint(Landmark.ORIENTATION_POINT);
-
-        } else {
-
-            topPoint = n.getBorderPoint(Landmark.TOP_VERTICAL);
-            btmPoint = n.getBorderPoint(Landmark.BOTTOM_VERTICAL);
-
-            // Sometimes the points have been set to overlap in older datasets
-            if (topPoint.overlapsPerfectly(btmPoint)) {
-                topPoint = n.getCentreOfMass();
-                btmPoint = n.getBorderPoint(Landmark.ORIENTATION_POINT);
-            }
-        }
-
-        // Find which point is higher in the image
-        IPoint upperPoint = topPoint.getY() > btmPoint.getY() ? topPoint : btmPoint;
-        IPoint lowerPoint = upperPoint == topPoint ? btmPoint : topPoint;
-
-        IPoint comp = IPoint.makeNew(lowerPoint.getX(), upperPoint.getY());
-
-        /*
-         * LA RA RB LB
-         * 
-         * T C C T B C C B \ | | / \ | | / B B T T
-         * 
-         * When Ux<Lx, angle describes the clockwise rotation around L needed to
-         * move U above it. When Ux>Lx, angle describes the anticlockwise
-         * rotation needed to move U above it.
-         * 
-         * If L is supposed to be on top, the clockwise rotation must be 180+a
-         * 
-         * However, the image coordinates have a reversed Y axis
-         */
-
-        double angleFromVertical = lowerPoint.findSmallestAngle(upperPoint, comp);
-
-        double angle = 0;
-        if (topPoint.isLeftOf(btmPoint) && topPoint.isAbove(btmPoint)) {
-            angle = 360 - angleFromVertical;
-            // log("LA: "+angleFromVertical+" to "+angle); // Tested working
-        }
-
-        if (topPoint.isRightOf(btmPoint) && topPoint.isAbove(btmPoint)) {
-            angle = angleFromVertical;
-            // log("RA: "+angleFromVertical+" to "+angle); // Tested working
-        }
-
-        if (topPoint.isLeftOf(btmPoint) && topPoint.isBelow(btmPoint)) {
-            angle = angleFromVertical + 180;
-            // angle = 180-angleFromVertical;
-            // log("LB: "+angleFromVertical+" to "+angle); // Tested working
-        }
-
-        if (topPoint.isRightOf(btmPoint) && topPoint.isBelow(btmPoint)) {
-            // angle = angleFromVertical+180;
-            angle = 180 - angleFromVertical;
-            // log("RB: "+angleFromVertical+" to "+angle); // Tested working
-        }
-
-        // Increase the canvas size so rotation does not crop the nucleus
-        LOGGER.finer( "Input: " + n.getNameAndNumber() + " - " + ip.getWidth() + " x " + ip.getHeight());
-        ImageProcessor newIp = createEnlargedProcessor(ip, angle);
-
-        newIp.rotate(angle);
-        return newIp;
-    }
-	
-	protected ImageProcessor createEnlargedProcessor(ImageProcessor ip, double degrees) {
-
-        double rad = Math.toRadians(degrees);
-
-        // Calculate the new width and height of the canvas
-        // new width is h sin(a) + w cos(a) and vice versa for height
-        double newWidth = Math.abs(Math.sin(rad) * ip.getHeight()) + Math.abs(Math.cos(rad) * ip.getWidth());
-        double newHeight = Math.abs(Math.sin(rad) * ip.getWidth()) + Math.abs(Math.cos(rad) * ip.getHeight());
-
-        int w = (int) Math.ceil(newWidth);
-        int h = (int) Math.ceil(newHeight);
-
-        // The new image may be narrower or shorter following rotation.
-        // To avoid clipping, ensure the image never gets smaller in either
-        // dimension.
-        w = w < ip.getWidth() ? ip.getWidth() : w;
-        h = h < ip.getHeight() ? ip.getHeight() : h;
-
-        // paste old image to centre of enlarged canvas
-        int xBase = (w - ip.getWidth()) >> 1;
-        int yBase = (h - ip.getHeight()) >> 1;
-
-        LOGGER.finer( String.format("New image %sx%s from %sx%s : Rot: %s", w, h, ip.getWidth(), ip.getHeight(), degrees));
-
-        LOGGER.finest( "Copy starting at " + xBase + ", " + yBase);
-
-        ImageProcessor newIp = new ColorProcessor(w, h);
-
-        newIp.setColor(Color.WHITE); // fill current space with white
-        newIp.fill();
-
-        newIp.setBackgroundValue(16777215); // fill on rotate is RGB int white
-        newIp.copyBits(ip, xBase, yBase, Blitter.COPY);
-        return newIp;
-    }
-	
+						
 	public synchronized void createImage() {
 		LOGGER.finer( "Redrawing cell image");
 
@@ -300,7 +192,7 @@ public class InteractiveCellPanel extends JPanel {
 		// Create the underlying image, and an appropriate painter
 		BufferedImage image = createRawImage();
 		ImagePainter painter = createPainter();
-		
+				
 		// Store the original image width ratio after cropping
 		scaleRatio = image.getWidth()/(double)cell.getPrimaryNucleus().getWidth()+ (Imageable.COMPONENT_BUFFER*2);
 
@@ -318,6 +210,9 @@ public class InteractiveCellPanel extends JPanel {
 	private ImagePainter createPainter() {
 		if(displayOptions.getBoolean(CellDisplayOptions.WARP_IMAGE))
 			return new WarpedCellPainter(dataset, cell);
+		if(displayOptions.getBoolean(CellDisplayOptions.ROTATE_VERTICAL)) {
+			return new OrientedCellImagePainter(cell);
+		}
 		return new CellImagePainter(cell);
 	}
 	
@@ -326,6 +221,11 @@ public class InteractiveCellPanel extends JPanel {
 			return createWarpImage();
 		
 		ImageProcessor ip = ImageImporter.importCroppedImageTo24bit(cell, component);
+		
+		if(displayOptions.getBoolean(CellDisplayOptions.ROTATE_VERTICAL)) {
+			ip.flipVertical(); // Y axis needs inverting
+			ip = ImageFilterer.orientImage(ip, cell.getPrimaryNucleus());
+		}
 		
 		// Expand or shrink the canvas to fit the panel
 		return ImageAnnotator.resizeKeepingAspect(ip, getWidth(), getHeight()).getBufferedImage();

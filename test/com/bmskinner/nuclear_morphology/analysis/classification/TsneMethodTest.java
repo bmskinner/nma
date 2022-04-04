@@ -44,7 +44,7 @@ public class TsneMethodTest extends ComponentTester {
 		// Check tSNE stats are empty 
 		boolean isPresent = dataset.getCollection().getNuclei()
 				.stream()
-				.noneMatch(m->m.hasStatistic(Measurement.TSNE_1)||m.hasStatistic(Measurement.TSNE_2));
+				.noneMatch(m->m.hasMeasurement(Measurement.TSNE_1)||m.hasMeasurement(Measurement.TSNE_2));
 		assertTrue(isPresent);
 		
 		
@@ -62,7 +62,7 @@ public class TsneMethodTest extends ComponentTester {
 		// Test that tSNE stats have been set
 		isPresent = dataset.getCollection().getNuclei()
 				.stream()
-				.allMatch(m->m.hasStatistic(Measurement.TSNE_1)&&m.hasStatistic(Measurement.TSNE_2));
+				.allMatch(m->m.hasMeasurement(Measurement.TSNE_1)&&m.hasMeasurement(Measurement.TSNE_2));
 		assertTrue(isPresent);
 		
 	}

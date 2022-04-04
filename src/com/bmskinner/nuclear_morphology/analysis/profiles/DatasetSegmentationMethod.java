@@ -34,6 +34,7 @@ import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.profiles.DefaultSegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileCollection;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
@@ -43,7 +44,6 @@ import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.DefaultSegmentedProfile;
 
 /**
  * Run the segmentation of datasets. This allows for the median profile
@@ -128,8 +128,8 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
     	for (Nucleus n : dataset.getCollection().getNuclei()) {
     		// Initialise all measurements that do not already exist
     		for(Measurement m : Measurement.getRodentSpermNucleusStats()) {
-    			if(!n.hasStatistic(m))
-    				n.setStatistic(m, Statistical.STAT_NOT_CALCULATED);
+    			if(!n.hasMeasurement(m))
+    				n.setMeasurement(m, Statistical.STAT_NOT_CALCULATED);
     		}
     		n.updateDependentStats();
     	}

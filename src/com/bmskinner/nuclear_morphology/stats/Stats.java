@@ -214,11 +214,7 @@ public class Stats {
      */
     public static double getTStatistic(double r, double n) {
         // t = r * sqrt( n-2 / 1-r^2 )
-
-        double t = r * Math.sqrt(((n - 2) / (1 - (r * r))));
-
-        return t;
-
+    	return r * Math.sqrt(((n - 2) / (1 - (r * r))));
     }
     
     /**

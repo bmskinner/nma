@@ -45,7 +45,7 @@ public class PrincipalComponentAnalysisTest extends ComponentTester {
 		// Check first 10 PC stats are empty 
 		for(int i=0; i<10; i++) {
 			final int j = i;
-			boolean isPresent = dataset.getCollection().getNuclei().stream().noneMatch(m->m.hasStatistic(Measurement.makePrincipalComponent(j+1)));
+			boolean isPresent = dataset.getCollection().getNuclei().stream().noneMatch(m->m.hasMeasurement(Measurement.makePrincipalComponent(j+1)));
 			assertTrue(isPresent);
 		}
 		
@@ -58,12 +58,12 @@ public class PrincipalComponentAnalysisTest extends ComponentTester {
 		pca.call();
 		
 		Nucleus n = dataset.getCollection().getNuclei().stream().findFirst().get();
-		int nPcs = (int) n.getStatistic(Measurement.PCA_N);		
+		int nPcs = (int) n.getMeasurement(Measurement.PCA_N);		
 		
 		// Test that PCs have been set
 		for(int i=0; i<nPcs; i++) {
 			final int j = i;
-			boolean isPresent = dataset.getCollection().getNuclei().stream().allMatch(m->m.hasStatistic(Measurement.makePrincipalComponent(j+1)));
+			boolean isPresent = dataset.getCollection().getNuclei().stream().allMatch(m->m.hasMeasurement(Measurement.makePrincipalComponent(j+1)));
 			assertTrue(isPresent);
 		}
 	}

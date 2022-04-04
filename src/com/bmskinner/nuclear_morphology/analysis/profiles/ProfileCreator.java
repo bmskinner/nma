@@ -32,13 +32,13 @@ import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.measure.DoubleEquation;
 import com.bmskinner.nuclear_morphology.components.measure.LineEquation;
 import com.bmskinner.nuclear_morphology.components.profiles.DefaultProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.DefaultSegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.DefaultSegmentedProfile;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 import com.bmskinner.nuclear_morphology.utility.AngleTools;
@@ -126,7 +126,7 @@ public class ProfileCreator {
         if (borderList == null)
             throw new UnavailableBorderPointException("Null border list in target");
 
-        int windowSize = target.getWindowSize(ProfileType.ANGLE);
+        int windowSize = target.getWindowSize();
 
         if (windowSize == 0)
             throw new UnavailableBorderPointException("Window size has not been set in Profilable object");
@@ -291,7 +291,7 @@ public class ProfileCreator {
         int index = 0;
         Iterator<IPoint> it = target.getBorderList().iterator();
 
-        int pointOffset = target.getWindowSize(ProfileType.ANGLE);
+        int pointOffset = target.getWindowSize();
 
         if (pointOffset == 0) {
             throw new UnavailableBorderPointException("Window size has not been set in Profilable object");

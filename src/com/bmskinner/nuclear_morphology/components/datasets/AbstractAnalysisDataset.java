@@ -30,6 +30,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.jdom2.Element;
 
 import com.bmskinner.nuclear_morphology.components.Version;
+import com.bmskinner.nuclear_morphology.components.Version.UnsupportedVersionException;
 import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.options.DefaultAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
@@ -87,9 +88,12 @@ public abstract class AbstractAnalysisDataset implements IAnalysisDataset {
         this.versionLastSaved = Version.currentVersion();
     }
     
-    protected AbstractAnalysisDataset(@NonNull Element e) throws ComponentCreationException {
+    protected AbstractAnalysisDataset(@NonNull Element e) throws ComponentCreationException, UnsupportedVersionException {
     	versionCreated = Version.fromString(e.getChildText("VersionCreated"));
     	versionLastSaved = Version.fromString(e.getChildText("VersionLastSaved"));
+    	
+    	if(!Version.versionIsSupported(versionLastSaved))
+			throw new UnsupportedVersionException(versionLastSaved);
 
     	if(e.getChild("Colour")!=null)
     		datasetColour = Color.decode(e.getChildText("Colour"));

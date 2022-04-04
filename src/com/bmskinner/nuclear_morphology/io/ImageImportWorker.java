@@ -25,13 +25,14 @@ import java.util.logging.Logger;
 import javax.swing.SwingWorker;
 import javax.swing.table.TableModel;
 
+import com.bmskinner.nuclear_morphology.analysis.ComponentOrienter;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisWorker;
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.generic.FloatPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.gui.components.SelectableCellIcon;
 import com.bmskinner.nuclear_morphology.gui.dialogs.collections.ManualCurationDialog;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -108,23 +109,11 @@ public abstract class ImageImportWorker extends SwingWorker<Boolean, SelectableC
     protected ImageProcessor rotateToVertical(ICell c, ImageProcessor ip) throws MissingLandmarkException {
         // Calculate angle for vertical rotation
         Nucleus n = c.getPrimaryNucleus();
+
+        double angle = ComponentOrienter.calcAngleToAlignVertically(n);
         
-        IPoint originalRP = n.getBorderPoint(Landmark.REFERENCE_POINT);
-        IPoint orientedRP = n.getOrientedNucleus().getBorderPoint(Landmark.REFERENCE_POINT);
-        IPoint com        = n.getCentreOfMass();
-                
-        double angle = com.findAbsoluteAngle(orientedRP, originalRP);
+//        boolean isFlip = ComponentOrienter.isFlipNeeded(n);
         
-        Nucleus test = n.duplicate();
-        test.rotate(angle);
-        IPoint testRP = test.getBorderPoint(Landmark.REFERENCE_POINT);
-        if(!testRP.equals(orientedRP)) {
-        	// We must have a flipped orientation
-        	Nucleus flip = n.duplicate();
-        	flip.flipHorizontal();
-        	originalRP = flip.getBorderPoint(Landmark.REFERENCE_POINT);
-        	angle = com.findAbsoluteAngle(orientedRP, originalRP);
-        }
         
 
 //        IPoint topPoint;
@@ -151,14 +140,20 @@ public abstract class ImageImportWorker extends SwingWorker<Boolean, SelectableC
         // Increase the canvas size so rotation does not crop the nucleus
         LOGGER.finest( "Input: " + n.getNameAndNumber() + " - " + ip.getWidth() + " x " + ip.getHeight());
         ImageProcessor newIp = createEnlargedProcessor(ip, angle);
-
         newIp.rotate(angle);
+        
+//        if(isFlip) {
+//        	if(PriorityAxis.Y.equals(n.getPriorityAxis()))
+//        		newIp.flipHorizontal();
+//        	else
+//        		newIp.flipVertical();
+//        }
         return newIp;
     }
     
     private double findVerticalRotationAngle(IPoint top, IPoint bottom) {
         // Find which point is higher in the image
-        IPoint comp = IPoint.makeNew(bottom.getX(), top.getY());
+        IPoint comp = new FloatPoint(bottom.getX(), top.getY());
 
         /*
          * LA RA RB LB

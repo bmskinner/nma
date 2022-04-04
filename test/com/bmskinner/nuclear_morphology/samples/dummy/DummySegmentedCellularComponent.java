@@ -5,6 +5,7 @@ import java.io.File;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.cells.ProfileableCellularComponent;
+import com.bmskinner.nuclear_morphology.components.generic.FloatPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 
@@ -21,7 +22,7 @@ public class DummySegmentedCellularComponent extends ProfileableCellularComponen
 	private static final Roi ROI = new PolygonRoi(X_POINTS, Y_POINTS, Roi.TRACED_ROI);
 	private static final int IMAGE_CHANNEL = 0;
 	private static final File IMAGE_FILE = new File("test/com/bmskinner/nuclear_morphology/samples/images/Testing/s60.tiff"); // This component is from Testing\s60\0
-	private static final IPoint COM = IPoint.makeNew(74, 46);
+	private static final IPoint COM = new FloatPoint(74, 46);
 	
 	
 	public static final double AREA         = 4827.00;
@@ -35,9 +36,9 @@ public class DummySegmentedCellularComponent extends ProfileableCellularComponen
 	
 	public DummySegmentedCellularComponent(String name) {
 		super(ROI, COM, IMAGE_FILE, IMAGE_CHANNEL, 105, 35);
-		setStatistic(Measurement.AREA,     AREA);
-        setStatistic(Measurement.PERIMETER, PERIMETER);
-        setStatistic(Measurement.MIN_DIAMETER, MIN_DIAMETER);
+		setMeasurement(Measurement.AREA,     AREA);
+        setMeasurement(Measurement.PERIMETER, PERIMETER);
+        setMeasurement(Measurement.MIN_DIAMETER, MIN_DIAMETER);
         try {
 			initialise(PROFILE_WINDOW);
 		} catch (ComponentCreationException e) {

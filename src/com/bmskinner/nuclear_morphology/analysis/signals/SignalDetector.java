@@ -28,9 +28,9 @@ import java.util.logging.Logger;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.detection.Detector;
-import com.bmskinner.nuclear_morphology.analysis.detection.StatsMap;
+import com.bmskinner.nuclear_morphology.components.ComponentBuilderFactory;
+import com.bmskinner.nuclear_morphology.components.ComponentBuilderFactory.SignalBuilderFactory;
 import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
-import com.bmskinner.nuclear_morphology.components.cells.ComponentFactory;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
@@ -40,7 +40,6 @@ import com.bmskinner.nuclear_morphology.components.profiles.BooleanProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.DefaultProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
-import com.bmskinner.nuclear_morphology.components.signals.SignalFactory;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -65,7 +64,7 @@ public class SignalDetector extends Detector {
     private HashOptions options;
     private int minThreshold;
     
-    private final ComponentFactory<INuclearSignal> factory = new SignalFactory();
+    private final SignalBuilderFactory factory;
 
     /**
      * Create a detector with the desired options
@@ -84,6 +83,8 @@ public class SignalDetector extends Detector {
         
         if (minThreshold < 0)
             throw new IllegalArgumentException("Min threshold must be greater or equal to 0");
+        
+        factory = ComponentBuilderFactory.createSignalBuilderFactory();
     }
 
     /**
@@ -131,61 +132,36 @@ public class SignalDetector extends Detector {
         ImageProcessor ip = new ImageImporter(sourceFile).importImage(options.getInt(HashOptions.CHANNEL));
         
         // Set up the detector
-        setMaxSize(n.getStatistic(Measurement.AREA) * options.getDouble(HashOptions.SIGNAL_MAX_FRACTION));
+        setMaxSize(n.getMeasurement(Measurement.AREA) * options.getDouble(HashOptions.SIGNAL_MAX_FRACTION));
         setMinSize(options.getInt(HashOptions.MIN_SIZE_PIXELS));
         setMinCirc(options.getDouble(HashOptions.MIN_CIRC));
         setMaxCirc(options.getDouble(HashOptions.MAX_CIRC));
         setThreshold(minThreshold); // may have been updated in reverse or histogram method
            
         // Run the detection of all potential signal ROIs
-        Map<Roi, StatsMap> rois = detectRois(ip);
+        Map<Roi, IPoint> rois = detectRois(ip);
         List<INuclearSignal> signals = new ArrayList<>();
-        if (rois.isEmpty())
-            return signals;
-        
-        LOGGER.finer(rois.size() + " rois at "+minThreshold+" for channel "+options.getInt(HashOptions.CHANNEL)+" in "+sourceFile.getName());
-    	
 
-        for(Entry<Roi, StatsMap> entry : rois.entrySet()) {
+        for(Entry<Roi, IPoint> entry : rois.entrySet()) {
         	Roi r = entry.getKey();
-            StatsMap values = entry.getValue();
-        	
-            IPoint signalCoM = IPoint.makeNew(
-        			values.get(StatsMap.COM_X).floatValue(), 
-        			values.get(StatsMap.COM_Y).floatValue());
         	
             // only keep the roi if it is within the nucleus
-        	if (!n.containsOriginalPoint(signalCoM)) {
+        	if (!n.containsOriginalPoint(entry.getValue()))
         		continue;
-        	}
-        	LOGGER.finer(rois.size() + " rois at "+minThreshold+" for channel "+options.getInt(HashOptions.CHANNEL)+" in "+sourceFile.getName());
-//        	LOGGER.finer("ROI at "+signalCoM+" is in nucleus at "+Arrays.toString(n.getPosition()));
-
-            int xbase = (int) r.getXBase();
-            int ybase = (int) r.getYBase();
-            Rectangle bounds = r.getBounds();
 
             try {
 
-                INuclearSignal s = factory.buildInstance(r, sourceFile, 
-                		options.getInt(HashOptions.CHANNEL), 
-                		xbase, ybase, signalCoM);
-
-                s.setScale(n.getScale()); // copy scale information from
-                                          // source nucleus
-
-                s.setStatistic(Measurement.AREA, values.get(StatsMap.AREA));
-                s.setStatistic(Measurement.PERIMETER, values.get(StatsMap.PERIM));
-
-                /*
-                 * Assuming the signal were a perfect circle of area equal to
-                 * the measured area, get the radius for that circle
-                 */
-                s.setStatistic(Measurement.RADIUS, Math.sqrt(values.get(StatsMap.AREA) / Math.PI));
+            	INuclearSignal s = factory.newBuilder()
+            			.fromRoi(r)
+            			.withFile(sourceFile)
+            			.withChannel(options.getInt(HashOptions.CHANNEL))
+            			.withCoM(entry.getValue())
+            			.withScale(n.getScale())
+            			.build();
 
                 // Offset the centre of mass and border points of the signal
                 // to match the nucleus offset
-                s.offset(-n.getXBase(), -n.getYBase());
+//                s.offset(-n.getXBase(), -n.getYBase());
 
                 signals.add(s);
 
@@ -243,7 +219,7 @@ public class SignalDetector extends Detector {
         }
 
         // find the threshold from the bins
-        int area = (int) (n.getStatistic(Measurement.AREA) * options.getDouble(HashOptions.SIGNAL_MAX_FRACTION));
+        int area = (int) (n.getMeasurement(Measurement.AREA) * options.getDouble(HashOptions.SIGNAL_MAX_FRACTION));
         int total = 0;
         int threshold = 0; // the value to threshold at
 

@@ -13,10 +13,8 @@ import org.jfree.chart.entity.XYItemEntity;
 
 import com.bmskinner.nuclear_morphology.analysis.image.ImageAnnotator;
 import com.bmskinner.nuclear_morphology.charting.datasets.ComponentXYDataset;
-import com.bmskinner.nuclear_morphology.components.Imageable;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
-import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 
 import ij.process.ImageProcessor;
 

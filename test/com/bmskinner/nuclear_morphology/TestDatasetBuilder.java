@@ -370,7 +370,7 @@ public class TestDatasetBuilder {
 			int borderOffset = randomOffsetStart ? (int) (rng.nextDouble()*borderLength) : fixedStartOffset;
 			
 			ICell cell = createCell(width, height, degreeRot, borderOffset, rsc);	
-			cell.getPrimaryNucleus().setStatistic(Measurement.AREA, width*height);
+			cell.getPrimaryNucleus().setMeasurement(Measurement.AREA, width*height);
 			collection.addCell(cell);
 			
 			

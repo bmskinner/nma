@@ -262,8 +262,8 @@ public class Labels {
     	public static final String SOURCE_FILE_LABEL = "Source image file";
     	public static final String SOURCE_FILE_NAME_LABEL = "Source image name";
     	public static final String SOURCE_CHANNEL_LABEL = "Source channel";
-    	public static final String ANGLE_WINDOW_PROP_LABEL = "Angle window prop.";
-    	public static final String ANGLE_WINDOW_SIZE_LABEL = "Angle window size";
+    	public static final String ANGLE_WINDOW_PROP_LABEL = "Profile window prop.";
+    	public static final String ANGLE_WINDOW_SIZE_LABEL = "Profile window size";
     	public static final String SCALE_LABEL = "Scale (pixels/um)";
     	
     	public static final String CHOOSE_NEW_SCALE_LBL      = "Choose the new scale: pixels per micron";

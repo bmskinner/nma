@@ -24,6 +24,7 @@ import com.bmskinner.nuclear_morphology.analysis.image.MultiScaleStructuralSimil
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalWarper;
 import com.bmskinner.nuclear_morphology.charting.charts.ConsensusNucleusChartFactory;
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
+import com.bmskinner.nuclear_morphology.components.generic.FloatPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
@@ -458,7 +459,7 @@ implements SignalWarpingDisplayListener,
 				LOGGER.fine("Buffer: "+wBuffer+"w "+hBuffer+"h");
 
 				// CoM starts at 0, 0; offset to image coordinates
-				target.moveCentreOfMass(IPoint.makeNew(
+				target.moveCentreOfMass(new FloatPoint(
 						Math.abs(target.getMinX())+wBuffer, 
 						Math.abs(target.getMinY())+hBuffer));
 				ip.setColor(colour);

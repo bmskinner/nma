@@ -187,7 +187,7 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 	    			.getRuleSetCollection().getMeasurableValues()) { 
 				if(m==null)
 					throw new IllegalArgumentException("Error reading ruleset, a measurement is null");
-				n.setStatistic(m, ComponentMeasurer.calculate(m, n));
+				n.setMeasurement(m, ComponentMeasurer.calculate(m, n));
 			}
 		}
 		

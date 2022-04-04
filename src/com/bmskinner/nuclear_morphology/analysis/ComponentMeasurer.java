@@ -17,7 +17,6 @@
 package com.bmskinner.nuclear_morphology.analysis;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -27,6 +26,7 @@ import com.bmskinner.nuclear_morphology.components.Statistical;
 import com.bmskinner.nuclear_morphology.components.Taggable;
 import com.bmskinner.nuclear_morphology.components.UnavailableBorderPointException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.generic.FloatPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
@@ -75,6 +75,9 @@ public final class ComponentMeasurer {
 		if (Measurement.AREA.equals(m)) {
 			return calculateArea(c);
 		}
+		
+		if(Measurement.RADIUS.equals(m))
+			return calculateRadius(c);
 
 		if(!(c instanceof Taggable))
 			return Statistical.INVALID_OBJECT_TYPE;
@@ -141,7 +144,7 @@ public final class ComponentMeasurer {
 			for (int i = 0; i < t.getBorderLength(); i++) {
 				IPoint p = t.getBorderPoint(i);
 				double distance = p.getLengthTo(t.getCentreOfMass());
-				double pAngle = t.getCentreOfMass().findSmallestAngle(p, IPoint.makeNew(0, -10));
+				double pAngle = t.getCentreOfMass().findSmallestAngle(p, new FloatPoint(0, -10));
 				if (p.getX() < 0)
 					pAngle = 360 - pAngle;
 
@@ -161,30 +164,20 @@ public final class ComponentMeasurer {
 	 * @return
 	 */
 	private static double calculateCircularity(@NonNull final CellularComponent c) {
-		if (c.hasStatistic(Measurement.PERIMETER) && c.hasStatistic(Measurement.AREA)) {
-			double p = c.getStatistic(Measurement.PERIMETER);
-			double a = c.getStatistic(Measurement.AREA);
+		if (c.hasMeasurement(Measurement.PERIMETER) && c.hasMeasurement(Measurement.AREA)) {
+			double p = c.getMeasurement(Measurement.PERIMETER);
+			double a = c.getMeasurement(Measurement.AREA);
 			return (Math.PI*4*a)/(p*p);
 		}
 		return Statistical.ERROR_CALCULATING_STAT;
 	}
-
-
+	
 	/**
-	 * Calculate the perimeter of an object defined by a list of 
-	 * points
-	 * @param points
+	 * Calculate the radius of an object
 	 * @return
 	 */
-	public static double calculatePerimeter(@NonNull final List<IPoint> points) {
-		double perimeter = 0;
-		for(int i=0; i<points.size()-1; i++) {
-			perimeter += points.get(i)
-					.getLengthTo(points.get(i+1));
-		}
-
-		perimeter += points.get(points.size()-1).getLengthTo(points.get(0));
-		return perimeter;
+	private static double calculateRadius(@NonNull final CellularComponent c) {
+		return Math.sqrt(c.getMeasurement(Measurement.AREA) / Math.PI);
 	}
 
 	private static double calculateMinDiameter(@NonNull final Taggable c)  {
@@ -261,7 +254,7 @@ public final class ComponentMeasurer {
 	private static double calculateRegularity(@NonNull final Nucleus n) throws MissingLandmarkException {
 		double h = n.getOrientedNucleus().getHeight();
 		double w = n.getOrientedNucleus().getWidth();
-		double a = n.getStatistic(Measurement.AREA);
+		double a = n.getMeasurement(Measurement.AREA);
 		return (Math.PI*h*w)/(4*a);
 	}
 

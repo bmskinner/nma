@@ -17,13 +17,21 @@
 package com.bmskinner.nuclear_morphology.io;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.logging.Logger;
+
+import javax.xml.XMLConstants;
+
+import org.jdom2.Document;
+import org.jdom2.JDOMException;
+import org.jdom2.input.SAXBuilder;
 
 import com.bmskinner.nuclear_morphology.analysis.AbstractAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.AnalysisMethodException;
@@ -31,13 +39,11 @@ import com.bmskinner.nuclear_morphology.analysis.DatasetRepairer;
 import com.bmskinner.nuclear_morphology.analysis.DatasetValidator;
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
-import com.bmskinner.nuclear_morphology.components.Version;
 import com.bmskinner.nuclear_morphology.components.Version.UnsupportedVersionException;
 import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
+import com.bmskinner.nuclear_morphology.components.datasets.DatasetCreator;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.io.Io.Importer;
-import com.bmskinner.nuclear_morphology.io.xml.XMLReader;
-import com.bmskinner.nuclear_morphology.io.xml.XMLReader.XMLReadingException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -112,9 +118,29 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
 
     	// Deserialise whatever is in the file
     	LOGGER.fine("Reading file as XML");
-    	dataset = readXMLDataset(file);
-    	validateDataset();
-    	fireIndeterminateState();
+
+    	try(
+    			InputStream is = new FileInputStream(file);
+    			CountedInputStream cis = new CountedInputStream(is);
+    			){
+
+    		cis.addCountListener((l)->fireProgressEvent(l));
+    		SAXBuilder saxBuilder = new SAXBuilder();
+    		saxBuilder.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+    		saxBuilder.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+    		Document doc = saxBuilder.build(cis);
+    		LOGGER.fine("Built XML document");
+    		fireIndeterminateState(); // TODO: hook the indeterminate state to the end of file reading,
+    		// rather than after the document is built - takes a long time with large datasets
+    		dataset = DatasetCreator.createRoot(doc.getRootElement());
+    		validateDataset();
+    	} catch(UnsupportedVersionException e) {
+    		throw(e);
+
+    	} catch(ComponentCreationException | IOException | JDOMException e) {
+    		LOGGER.fine("Error reading XML: "+e.getMessage());
+    		throw new UnloadableDatasetException("Cannot read as XML dataset: "+file.getAbsolutePath(), e);
+    	}
     }
         
     /**
@@ -163,19 +189,6 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
 
         for (File lockFile : files)
         	Files.delete(lockFile.toPath());
-    }
-
-    private IAnalysisDataset readXMLDataset(File inputFile) throws UnloadableDatasetException, UnsupportedVersionException {
-
-    	try {
-    		IAnalysisDataset d = XMLReader.readDataset(inputFile);
-    		if(!Version.versionIsSupported(d.getVersionCreated()))
-    			throw new UnsupportedVersionException(d.getVersionCreated());
-    		return d;
-    	} catch(XMLReadingException | ComponentCreationException e) {
-    		LOGGER.fine("Error reading XML: "+e.getMessage());
-    		throw new UnloadableDatasetException("Cannot read as XML dataset: "+inputFile.getAbsolutePath(), e);
-    	}
     }
     
     public class UnloadableDatasetException extends Exception {

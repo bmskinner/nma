@@ -250,7 +250,7 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
     }
 
     public void updateSignalAngle(UUID channel, int signal, double angle) {
-        signalCollection.getSignals(channel).get(signal).setStatistic(Measurement.ANGLE, angle);
+        signalCollection.getSignals(channel).get(signal).setMeasurement(Measurement.ANGLE, angle);
     }
 
     // do not move this into SignalCollection - it is overridden in
@@ -264,7 +264,7 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
                 for (INuclearSignal s : signalCollection.getSignals(signalGroup)) {
 
                     double angle = this.getCentreOfMass().findAbsoluteAngle(p, s.getCentreOfMass());
-                    s.setStatistic(Measurement.ANGLE, angle);
+                    s.setMeasurement(Measurement.ANGLE, angle);
                 }
             }
         }

@@ -62,21 +62,21 @@ public class DefaultRodentSpermNucleusTest {
 
         // Get and save the values with default scale 1
         Map<Measurement, Double> map = new HashMap<>();
-        for(Measurement stat : testNucleus.getStatistics()){
-            map.put(stat, testNucleus.getStatistic(stat));
+        for(Measurement stat : testNucleus.getMeasurements()){
+            map.put(stat, testNucleus.getMeasurement(stat));
         }
         
         // Update scale
         testNucleus.setScale(scale);
         
         // Get the actual values for microns and pixels
-        for(Measurement stat : testNucleus.getStatistics()){
-            double m = testNucleus.getStatistic(stat, MeasurementScale.MICRONS);
+        for(Measurement stat : testNucleus.getMeasurements()){
+            double m = testNucleus.getMeasurement(stat, MeasurementScale.MICRONS);
             
             double expected = Measurement.convert(map.get(stat), scale, MeasurementScale.MICRONS, stat.getDimension());
             assertEquals(stat.toString(), expected, m, 0);
             
-            double d = testNucleus.getStatistic(stat, MeasurementScale.PIXELS);
+            double d = testNucleus.getMeasurement(stat, MeasurementScale.PIXELS);
             assertEquals(stat.toString(), map.get(stat), d, 0);
         }        
     }
@@ -87,8 +87,8 @@ public class DefaultRodentSpermNucleusTest {
         double expected = 25;
         
         for(Measurement stat : Measurement.getNucleusStats()){
-            testNucleus.setStatistic(stat, expected);
-            double d = testNucleus.getStatistic(stat);
+            testNucleus.setMeasurement(stat, expected);
+            double d = testNucleus.getMeasurement(stat);
             assertEquals(stat.toString(), expected, d, epsilon);
         }
     }

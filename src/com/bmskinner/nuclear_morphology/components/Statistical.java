@@ -39,67 +39,53 @@ public interface Statistical {
     double INVALID_OBJECT_TYPE    = -4d;
 
     /**
-     * Check if the given stat is present
+     * Check if the given measurement is present
      * 
      * @param stat
      * @return
      */
-    boolean hasStatistic(@NonNull Measurement stat);
+    boolean hasMeasurement(@NonNull Measurement stat);
 
     /**
-     * Get the value of the given statistic for this component. Note that
+     * Get the value of the given measurement for this component. Note that
      * {@link Measurement.VARIABILILTY} returns zero, as this must be
      * calculated at the collection level
      * 
-     * @param stat the statistic to fetch
+     * @param stat the measurement to fetch
      * @param scale the units to return values in
      * @return the value or zero if
-     *         stat.equals(PlottableStatistic.VARIABILILTY)==true
+     *         stat.equals(Measurement.VARIABILILTY)
      */
-    double getStatistic(@NonNull Measurement stat, @NonNull MeasurementScale scale);
+    double getMeasurement(@NonNull Measurement stat, @NonNull MeasurementScale scale);
 
     /**
-     * Get the value of the given {@link PlottableStatistic} for this nucleus.
-     * Note that {@link PlottableStatistic.VARIABILILTY} returns zero, as this
-     * must be calculated at the collection level, not the object level. This
-     * method converts exceptions from {@link CellularComponent#getStatistic()}
-     * into RuntimeExceptions, so the method can be used in streams
-     * 
-     * @param stat the statistic to fetch
-     * @param scale the units to return values in
-     * @return the value or zero if stat.equals(
-     *         {@link NucleusStatistic.VARIABILILTY})==true
-     */
-    // public double getSafeStatistic(PlottableStatistic stat, MeasurementScale
-    // scale);
-
-    /**
-     * Get the statistic at the default scale ({@link MeasurementScale.PIXELS})
+     * Get the measurement at the default scale ({@link MeasurementScale.PIXELS}),
+     * calculating if not already present.
      * 
      * @param stat
      * @return
      */
-    double getStatistic(@NonNull Measurement stat);
+    double getMeasurement(@NonNull Measurement stat);
 
     /**
-     * Set the statistic at the default scale ({@link MeasurementScale.PIXELS})
+     * Set the measurement at the default scale ({@link MeasurementScale.PIXELS})
      * 
      * @param stat
      * @param d
      */
-    void setStatistic(@NonNull Measurement stat, double d);
+    void setMeasurement(@NonNull Measurement stat, double d);
     
     /*
-     * Remove the given statistic
-     * @param stat
+     * Remove the given measurement from the cache
+     * @param measurement
      */
-    void clearStatistic(@NonNull Measurement stat);
+    void clearMeasurement(@NonNull Measurement stat);
 
     /**
-     * Get all the statistics in this object
+     * Get all the measurements in this object
      * 
      * @return
      */
-    List<Measurement> getStatistics();
+    List<Measurement> getMeasurements();
 
 }

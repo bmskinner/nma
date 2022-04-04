@@ -21,6 +21,7 @@ package com.bmskinner.nuclear_morphology.samples.dummy;
 
 import java.io.File;
 
+import com.bmskinner.nuclear_morphology.components.generic.FloatPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.signals.DefaultNuclearSignal;
 
@@ -36,7 +37,7 @@ public class DummyNuclearSignal extends DefaultNuclearSignal {
     private static final int component_NUMBER = 0;
     private static final int IMAGE_CHANNEL = 0;
     private static final File IMAGE_FILE = new File("test/com/bmskinner/nuclear_morphology/samples/images/Testing/s60.tiff"); // This component is from Testing\s60\0
-    private static final IPoint COM = IPoint.makeNew(74, 46);
+    private static final IPoint COM = new FloatPoint(74, 46);
     
     
     public static final double AREA         = 4827.00;

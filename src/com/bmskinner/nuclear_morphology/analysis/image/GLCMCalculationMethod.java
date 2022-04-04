@@ -45,7 +45,7 @@ public class GLCMCalculationMethod extends SingleDatasetAnalysisMethod {
 					GLCMTile r = glcm.calculate(n);
 					results.add(r);
 					for(GLCMParameter v : GLCMParameter.values())
-						n.setStatistic(v.toStat(), r.get(v));
+						n.setMeasurement(v.toStat(), r.get(v));
 				}
 				fireProgressEvent();
 			}

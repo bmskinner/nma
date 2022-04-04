@@ -49,7 +49,7 @@ public class FloatEquationTest {
         Point2D p2 = new Point2D.Double(0, 1);
         FloatEquation d = new FloatEquation(p1, p2);
         
-        LineEquation eq = d.getPerpendicular(IPoint.makeNew(p1));
+        LineEquation eq = d.getPerpendicular(new FloatPoint(p1));
         assertEquals(eq.getM(), 0, 0);
         assertEquals(eq.getC(), 0, 0);
         
@@ -58,12 +58,12 @@ public class FloatEquationTest {
     @Test
     public void testFloatEquationIPointIPoint() {
     	
-    	IPoint p0 = IPoint.makeNew(0d, 0d);
+    	IPoint p0 = new FloatPoint(0d, 0d);
     	
     	for(int degree=0; degree<360; degree++) {
     		double x = Math.abs(Math.cos(Math.toRadians(degree)));
     		double y = Math.abs(Math.sin(Math.toRadians(degree)));
-    		IPoint p1 = IPoint.makeNew(x, y);
+    		IPoint p1 = new FloatPoint(x, y);
     		
     		LineEquation l = new FloatEquation(p0, p1);
     		IPoint other = l.getPointOnLine(p0, 1);

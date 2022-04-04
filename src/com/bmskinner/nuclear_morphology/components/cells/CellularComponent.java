@@ -74,14 +74,6 @@ public interface CellularComponent extends Imageable, XmlSerializable,
     CellularComponent duplicate();
 
     /**
-     * Should the border be smoothed when calculating the interpolated border
-     * list
-     * 
-     * @return
-     */
-//    boolean isSmoothByDefault();
-
-    /**
      * If any stats are listed as uncalculated, attempt to calculate them
      */
     void updateDependentStats();

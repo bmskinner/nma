@@ -56,7 +56,7 @@ public class DoubleEquationTest {
         Point2D p2 = new Point2D.Double(0, 1);
         DoubleEquation d = new DoubleEquation(p1, p2);
         
-        LineEquation eq = d.getPerpendicular(IPoint.makeNew(p1));
+        LineEquation eq = d.getPerpendicular(new FloatPoint(p1));
         assertEquals(eq.getM(), 0, 0.0000001);
         assertEquals(eq.getC(), 0, 0.0000001);
         
@@ -140,11 +140,11 @@ public class DoubleEquationTest {
         IPoint pPos = X_EQ_Y.getPointOnLine(ORIGIN, 1);
         IPoint pNeg = X_EQ_Y.getPointOnLine(ORIGIN, -1);
         
-        IPoint p1 = IPoint.makeNew(Math.sqrt(0.5),Math.sqrt(0.5)); 
+        IPoint p1 = new FloatPoint(Math.sqrt(0.5),Math.sqrt(0.5)); 
         assertEquals("x", p1.getX(), pPos.getX(), 0.000001); 
         assertEquals("y", p1.getY(), pPos.getY(), 0.000001);
         
-        IPoint p2 = IPoint.makeNew(-Math.sqrt(0.5),-Math.sqrt(0.5)); 
+        IPoint p2 = new FloatPoint(-Math.sqrt(0.5),-Math.sqrt(0.5)); 
         assertEquals("x", p2.getX(), pNeg.getX(), 0.000001); 
         assertEquals("y", p2.getY(), pNeg.getY(), 0.000001);
         

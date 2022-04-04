@@ -24,6 +24,7 @@ import org.jdom2.Element;
 
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
+import com.bmskinner.nuclear_morphology.components.generic.FloatPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.profiles.UnprofilableObjectException;
 import com.bmskinner.nuclear_morphology.io.XmlSerializable;
@@ -132,7 +133,7 @@ public class DefaultConsensusNucleus extends DefaultNucleus implements Consensus
     
 	@Override
 	public IPoint currentOffset() {
-		return IPoint.makeNew(xOffset, yOffset);
+		return new FloatPoint(xOffset, yOffset);
 	}
 	
 	@Override

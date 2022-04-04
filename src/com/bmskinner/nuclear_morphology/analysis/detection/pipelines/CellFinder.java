@@ -21,7 +21,6 @@ import java.util.Collection;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Logger;
-import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -98,16 +97,14 @@ public abstract class CellFinder extends AbstractFinder<Collection<ICell>> {
     	return list;
     }
     
-    public static boolean isValid(HashOptions o, CellularComponent c) {
-    	if (c == null)
+    public static boolean isValid(@NonNull HashOptions o, @NonNull CellularComponent c) {
+        if(c.getMeasurement(Measurement.AREA) < o.getInt(HashOptions.MIN_SIZE_PIXELS))
             return false;
-        if (c.getStatistic(Measurement.AREA) < o.getInt(HashOptions.MIN_SIZE_PIXELS))
+        if(c.getMeasurement(Measurement.AREA) > o.getInt(HashOptions.MAX_SIZE_PIXELS))
             return false;
-        if (c.getStatistic(Measurement.AREA) > o.getInt(HashOptions.MAX_SIZE_PIXELS))
+        if(c.getMeasurement(Measurement.CIRCULARITY) < o.getDouble(HashOptions.MIN_CIRC))
             return false;
-        if (c.getStatistic(Measurement.CIRCULARITY) < o.getDouble(HashOptions.MIN_CIRC))
-            return false;
-        if (c.getStatistic(Measurement.CIRCULARITY) > o.getDouble(HashOptions.MAX_CIRC))
+        if(c.getMeasurement(Measurement.CIRCULARITY) > o.getDouble(HashOptions.MAX_CIRC))
             return false;
         return true;
     }

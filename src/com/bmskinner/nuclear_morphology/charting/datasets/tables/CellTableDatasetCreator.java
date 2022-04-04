@@ -102,7 +102,7 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
         	}
 
         	fieldNames.add("Number of nuclei");
-        	rowData.add(cell.getStatistic(Measurement.CELL_NUCLEUS_COUNT));
+        	rowData.add(cell.getMeasurement(Measurement.CELL_NUCLEUS_COUNT));
 
         	int nucleusNumber = 0;
         	for (Nucleus n : cell.getNuclei()) {
@@ -245,7 +245,7 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
             for (Measurement stat : Measurement.getComponentStats()) {
                 fieldNames.add(stat.label(GlobalOptions.getInstance().getScale()));
 
-                double value = cyto.getStatistic(stat, GlobalOptions.getInstance().getScale());
+                double value = cyto.getMeasurement(stat, GlobalOptions.getInstance().getScale());
                 rowData.add(df.format(value));
             }
 
@@ -272,10 +272,10 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
         rowData.add(n.getChannel());
 
         fieldNames.add(Labels.Cells.ANGLE_WINDOW_PROP_LABEL);
-        rowData.add(n.getWindowProportion(ProfileType.ANGLE));
+        rowData.add(n.getWindowProportion());
 
         fieldNames.add(Labels.Cells.ANGLE_WINDOW_SIZE_LABEL);
-        rowData.add(n.getWindowSize(ProfileType.ANGLE));
+        rowData.add(n.getWindowSize());
 
         fieldNames.add(Labels.Cells.SCALE_LABEL);
         rowData.add(n.getScale());
@@ -353,7 +353,7 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 
                 fieldNames.add(stat.label(GlobalOptions.getInstance().getScale()));
 
-                double value = n.getStatistic(stat, GlobalOptions.getInstance().getScale());
+                double value = n.getMeasurement(stat, GlobalOptions.getInstance().getScale());
                 rowData.add(df.format(value));
             }
 
@@ -434,7 +434,7 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 
             fieldNames.add(stat.label(GlobalOptions.getInstance().getScale()));
 
-            double value = s.getStatistic(stat, GlobalOptions.getInstance().getScale());
+            double value = s.getMeasurement(stat, GlobalOptions.getInstance().getScale());
 
             rowData.add(df.format(value));
         }

@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import com.bmskinner.nuclear_morphology.components.generic.FloatPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 
 /**
@@ -101,11 +102,11 @@ public class CircleTools {
         double abScalingFactor1 = -pBy2 + tmpSqrt;
         double abScalingFactor2 = -pBy2 - tmpSqrt;
 
-        IPoint p1 = IPoint.makeNew(pointA.getX() - baX * abScalingFactor1, pointA.getY() - baY * abScalingFactor1);
+        IPoint p1 = new FloatPoint(pointA.getX() - baX * abScalingFactor1, pointA.getY() - baY * abScalingFactor1);
         if (disc == 0) { // abScalingFactor1 == abScalingFactor2
             return Collections.singletonList(p1);
         }
-        IPoint p2 = IPoint.makeNew(pointA.getX() - baX * abScalingFactor2, pointA.getY() - baY * abScalingFactor2);
+        IPoint p2 = new FloatPoint(pointA.getX() - baX * abScalingFactor2, pointA.getY() - baY * abScalingFactor2);
         return Arrays.asList(p1, p2);
     }
 
@@ -209,8 +210,8 @@ public class CircleTools {
         yi = y2 + ry;
         yi_prime = y2 - ry;
 
-        IPoint first = IPoint.makeNew(xi, yi);
-        IPoint second = IPoint.makeNew(xi_prime, yi_prime);
+        IPoint first = new FloatPoint(xi, yi);
+        IPoint second = new FloatPoint(xi_prime, yi_prime);
 
         IPoint[] result = { first, second };
         return result;

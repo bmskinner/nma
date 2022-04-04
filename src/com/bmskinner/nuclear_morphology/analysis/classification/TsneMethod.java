@@ -91,8 +91,8 @@ public class TsneMethod  extends SingleDatasetAnalysisMethod {
 		// if used for clustering, it should be attached to the cluster id
 		for(int i=0; i<nuclei.size(); i++) {
 			Nucleus n = nuclei.get(i);	
-			n.setStatistic(Measurement.TSNE_1, tSneResult[i][0]);
-			n.setStatistic(Measurement.TSNE_2, tSneResult[i][1]);
+			n.setMeasurement(Measurement.TSNE_1, tSneResult[i][0]);
+			n.setMeasurement(Measurement.TSNE_2, tSneResult[i][1]);
 		}
 		
 		Optional<IAnalysisOptions> analysisOptions = dataset.getAnalysisOptions();
@@ -130,7 +130,7 @@ public class TsneMethod  extends SingleDatasetAnalysisMethod {
 			for (Measurement stat : Measurement.getNucleusStats()) {
 				if(!options.getBoolean(stat.toString()))
 					continue;
-				matrix[i][j++] = n.getStatistic(stat);
+				matrix[i][j++] = n.getMeasurement(stat);
 			}
 			
 			for (IProfileSegment s : dataset.getCollection().getProfileCollection().getSegments(Landmark.REFERENCE_POINT)) {
@@ -139,7 +139,7 @@ public class TsneMethod  extends SingleDatasetAnalysisMethod {
 				
 				IProfileSegment seg = n.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT).getSegment(s.getID());
                 double proportionPerimeter = (double) seg.length() / (double) seg.getProfileLength();
-				matrix[i][j++] = n.getStatistic(Measurement.PERIMETER) * proportionPerimeter;
+				matrix[i][j++] = n.getMeasurement(Measurement.PERIMETER) * proportionPerimeter;
 			}
 		}
 		return matrix;

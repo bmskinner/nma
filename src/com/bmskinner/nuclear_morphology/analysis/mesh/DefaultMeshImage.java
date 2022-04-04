@@ -26,6 +26,7 @@ import java.util.logging.Logger;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
+import com.bmskinner.nuclear_morphology.components.generic.FloatPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 
 import ij.process.ImageProcessor;
@@ -287,7 +288,7 @@ public class DefaultMeshImage implements MeshImage {
                 }
 
                 // The pixel
-                IPoint pixel = IPoint.makeNew(x, y);
+                IPoint pixel = new FloatPoint(x, y);
                 if (!template.getComponent().containsOriginalPoint(pixel))
                     continue;
 

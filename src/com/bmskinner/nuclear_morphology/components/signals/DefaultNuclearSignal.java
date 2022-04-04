@@ -38,6 +38,8 @@ import ij.gui.Roi;
  */
 public class DefaultNuclearSignal extends DefaultCellularComponent implements INuclearSignal {
 	
+	private static final String XML_SIGNAL = "Signal";
+
 	private static final String XML_CLOSEST_BORDER = "ClosestBorder";
 
     private int closestNuclearBorderPoint;
@@ -89,7 +91,7 @@ public class DefaultNuclearSignal extends DefaultCellularComponent implements IN
 
 	@Override
 	public Element toXmlElement() {
-		Element e = super.toXmlElement();
+		Element e = super.toXmlElement().setName(XML_SIGNAL);
 		e.addContent(new Element(XML_CLOSEST_BORDER).setText(String.valueOf(closestNuclearBorderPoint)));
 		return e;
 	}

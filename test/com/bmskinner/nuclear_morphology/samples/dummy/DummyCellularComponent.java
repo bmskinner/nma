@@ -1,6 +1,5 @@
 package com.bmskinner.nuclear_morphology.samples.dummy;
 
-import java.awt.Rectangle;
 import java.awt.Shape;
 import java.io.File;
 import java.util.List;
@@ -9,7 +8,6 @@ import java.util.UUID;
 import org.eclipse.jdt.annotation.NonNull;
 import org.jdom2.Element;
 
-import com.bmskinner.nuclear_morphology.analysis.detection.Mask;
 import com.bmskinner.nuclear_morphology.components.MissingComponentException;
 import com.bmskinner.nuclear_morphology.components.UnavailableBorderPointException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
@@ -17,11 +15,9 @@ import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 
 import ij.gui.Roi;
 import ij.process.FloatPolygon;
-import ij.process.ImageProcessor;
 
 /**
  * Provide methods for a dummy component
@@ -111,23 +107,23 @@ public class DummyCellularComponent implements CellularComponent {
 	}
 	
 	@Override
-	public double getStatistic(Measurement stat, MeasurementScale scale) {
-		return component.getStatistic(stat, scale);
+	public double getMeasurement(Measurement stat, MeasurementScale scale) {
+		return component.getMeasurement(stat, scale);
 	}
 
 	@Override
-	public double getStatistic(Measurement stat) {
-	    return component.getStatistic(stat);
+	public double getMeasurement(Measurement stat) {
+	    return component.getMeasurement(stat);
 	}
 
 	@Override
-	public void setStatistic(Measurement stat, double d) {
-		component.setStatistic(stat, d);
+	public void setMeasurement(Measurement stat, double d) {
+		component.setMeasurement(stat, d);
 	}
 
 	@Override
-	public List<Measurement> getStatistics() {
-		return component.getStatistics();
+	public List<Measurement> getMeasurements() {
+		return component.getMeasurements();
 	}
 
 	@Override
@@ -332,8 +328,8 @@ public class DummyCellularComponent implements CellularComponent {
 
 	
 	@Override
-	public boolean hasStatistic(Measurement stat) {
-		return component.hasStatistic(stat);
+	public boolean hasMeasurement(Measurement stat) {
+		return component.hasMeasurement(stat);
 	}
 
 	@Override
@@ -358,8 +354,8 @@ public class DummyCellularComponent implements CellularComponent {
 	}
 
 	@Override
-	public void clearStatistic(Measurement stat) {
-		component.clearStatistic(stat);
+	public void clearMeasurement(Measurement stat) {
+		component.clearMeasurement(stat);
 	}
 
 	@Override

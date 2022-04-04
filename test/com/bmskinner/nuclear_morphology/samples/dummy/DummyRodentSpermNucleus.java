@@ -29,6 +29,7 @@ import org.eclipse.jdt.annotation.Nullable;
 
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
+import com.bmskinner.nuclear_morphology.components.generic.FloatPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.nuclei.DefaultNucleus;
@@ -64,7 +65,7 @@ public class DummyRodentSpermNucleus extends DummyCellularComponent implements N
 	private static final int component_NUMBER = 0;
 	private static final int IMAGE_CHANNEL = 0;
 	private static final File IMAGE_FILE = new File("test/samples/images/Testing/s60.tiff"); // This component is from Testing\s60\0
-	private static final IPoint COM = IPoint.makeNew(74, 46);
+	private static final IPoint COM = new FloatPoint(74, 46);
 	
 	
 	public static final double AREA         = 4827.00;
@@ -85,9 +86,9 @@ public class DummyRodentSpermNucleus extends DummyCellularComponent implements N
 		nucleus = (Nucleus) component;
 		nucleus.offset(COM.getX(), COM.getY());
         initialise(PROFILE_WINDOW);	    
-        setStatistic(Measurement.AREA,     AREA);
-        setStatistic(Measurement.PERIMETER, PERIMETER);
-        setStatistic(Measurement.MIN_DIAMETER, MIN_DIAMETER);
+        setMeasurement(Measurement.AREA,     AREA);
+        setMeasurement(Measurement.PERIMETER, PERIMETER);
+        setMeasurement(Measurement.MIN_DIAMETER, MIN_DIAMETER);
 		this.name = name;		
 	}
 	
@@ -149,18 +150,18 @@ public class DummyRodentSpermNucleus extends DummyCellularComponent implements N
 	}
 
 	@Override
-	public int getWindowSize(@NonNull ProfileType type) {
-		return nucleus.getWindowSize(type);
+	public int getWindowSize() {
+		return nucleus.getWindowSize();
 	}
 
 	@Override
-	public double getWindowProportion(@NonNull ProfileType type) {
-		return nucleus.getWindowProportion(type);
+	public double getWindowProportion() {
+		return nucleus.getWindowProportion();
 	}
 
 	@Override
-	public void setWindowProportion(@NonNull ProfileType type, double d) {
-		nucleus.setWindowProportion(type, d);
+	public void setWindowProportion(double d) {
+		nucleus.setWindowProportion(d);
 	}
 
 	@Override

@@ -250,7 +250,7 @@ public class NuclearHistogramDatasetCreator extends HistogramDatasetCreator {
                     seg = n.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT).getSegment(medianSeg.getID());
                     int indexLength = seg.length();
                     double proportionPerimeter = (double) indexLength / (double) seg.getProfileLength();
-                    double length = n.getStatistic(Measurement.PERIMETER, options.getScale())
+                    double length = n.getMeasurement(Measurement.PERIMETER, options.getScale())
                             * proportionPerimeter;
                     lengths[count] = length;
                 } catch (ProfileException | MissingComponentException e) {
@@ -298,7 +298,7 @@ public class NuclearHistogramDatasetCreator extends HistogramDatasetCreator {
 
                     int indexLength = seg.length();
                     double proportionPerimeter = (double) indexLength / (double) seg.getProfileLength();
-                    double length = n.getStatistic(Measurement.PERIMETER, options.getScale())
+                    double length = n.getMeasurement(Measurement.PERIMETER, options.getScale())
                             * proportionPerimeter;
                     lengths[count] = length;
                 } catch (ProfileException | MissingComponentException e) {

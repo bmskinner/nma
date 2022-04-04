@@ -13,10 +13,10 @@ import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.cells.DefaultCell;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
+import com.bmskinner.nuclear_morphology.components.generic.FloatPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclei.DefaultNucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.components.signals.DefaultNuclearSignal;
 import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
@@ -101,7 +101,7 @@ public class TestComponentFactory {
 			ypoints = offsetArray(ypoints, fixedStartOffset);
 				
 		Roi roi  = new PolygonRoi(xpoints, ypoints, xpoints.length, Roi.POLYGON);
-		IPoint com = IPoint.makeNew(xBase+(w/2), yBase+(h/2));
+		IPoint com = new FloatPoint(xBase+(w/2), yBase+(h/2));
 	
 		File f = new File(TestDatasetBuilder.TEST_DATASET_IMAGE_FOLDER);
 		Nucleus n = createNucleus(roi, com, f, 0, xBase, yBase, 0, rsc);
@@ -128,7 +128,7 @@ public class TestComponentFactory {
 			ypoints = offsetArray(ypoints, fixedStartOffset);
 				
 		Roi roi  = new PolygonRoi(xpoints, ypoints, xpoints.length, Roi.POLYGON);
-		IPoint com = IPoint.makeNew(xBase+(w/2), yBase+(h/2));
+		IPoint com = new FloatPoint(xBase+(w/2), yBase+(h/2));
 
 		File f = new File(TestDatasetBuilder.TEST_DATASET_IMAGE_FOLDER);
 		
@@ -177,7 +177,7 @@ public class TestComponentFactory {
 		}
 		
 		Roi roi  = new PolygonRoi(xpoints, ypoints, xpoints.length, Roi.POLYGON);
-		IPoint com = IPoint.makeNew(xBase+(w/2), yBase+(h/2));
+		IPoint com = new FloatPoint(xBase+(w/2), yBase+(h/2));
 
 		File f = new File("empty file");
 		

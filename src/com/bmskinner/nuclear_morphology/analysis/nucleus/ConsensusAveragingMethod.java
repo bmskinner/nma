@@ -26,22 +26,20 @@ import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nuclear_morphology.analysis.ComponentMeasurer;
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.SingleDatasetAnalysisMethod;
+import com.bmskinner.nuclear_morphology.components.ComponentBuilderFactory;
 import com.bmskinner.nuclear_morphology.components.MissingComponentException;
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
-
+import com.bmskinner.nuclear_morphology.components.generic.FloatPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
-import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.nuclei.Consensus;
 import com.bmskinner.nuclear_morphology.components.nuclei.DefaultConsensusNucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.nuclei.NucleusFactory;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
@@ -158,23 +156,20 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
     	// Decide on the best scale for the consensus, 
     	// and scale the points back into pixel coordinates
     	double scale = choosePixelToMicronScale();
-    	LOGGER.finer("Consensus nucleus scale set to "+scale);
+
     	for(IPoint p : list)
     		p.set(p.multiply(scale));
 
     	// Create a nucleus with the same rulesets as the dataset
         IAnalysisOptions op = dataset.getAnalysisOptions().orElseThrow(MissingOptionException::new);
-        Nucleus n = new NucleusFactory(op.getRuleSetCollection(), op.getProfileWindowProportion(), scale)
-        		.new NucleusBuilder()
+        Nucleus n = ComponentBuilderFactory
+        		.createNucleusBuilderFactory(op.getRuleSetCollection(), op.getProfileWindowProportion(), scale)
+        		.newBuilder()
         		.fromPoints(list)
         		.withFile(new File(EMPTY_FILE))
-        		.withCoM(IPoint.makeNew(0, 0))
+        		.withCoM(new FloatPoint(0, 0))
         		.withChannel(0)
-        		.withMeasurement(Measurement.PERIMETER, ComponentMeasurer.calculatePerimeter(list))
         		.build();
-
-        double area = ComponentMeasurer.calculate(Measurement.AREA, n);
-        n.setStatistic(Measurement.AREA, area);
 
         // Add landmarks and segments from the profile collection
         setLandmarks(n);
@@ -222,7 +217,7 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
 
         final Map<Double, List<IPoint>> perimeterPoints = new HashMap<>();
 
-        IPoint zeroCoM = IPoint.makeNew(0, 0);
+        IPoint zeroCoM = new FloatPoint(0, 0);
 
         try {
         	// Make a list of points at equivalent positions in each nucleus
@@ -289,6 +284,6 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
         double xMed = Stats.quartile(xpoints, Stats.MEDIAN);
         double yMed = Stats.quartile(ypoints, Stats.MEDIAN);
 
-        return IPoint.makeNew(xMed, yMed);
+        return new FloatPoint(xMed, yMed);
     }
 }

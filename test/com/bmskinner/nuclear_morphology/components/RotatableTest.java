@@ -12,6 +12,7 @@ import com.bmskinner.nuclear_morphology.ComponentTester;
 import com.bmskinner.nuclear_morphology.TestDatasetBuilder;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.generic.FloatPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
@@ -29,9 +30,9 @@ public class RotatableTest {
 		Random rng = new Random(1234);
 		for(int it=0; it<500; it++) {
 
-			IPoint t = IPoint.makeNew(rng.nextDouble()*10, rng.nextDouble()*10);
-			IPoint b = IPoint.makeNew(rng.nextDouble()*10, rng.nextDouble()*10);
-			IPoint c = IPoint.makeNew(rng.nextDouble()*10, rng.nextDouble()*10);
+			IPoint t = new FloatPoint(rng.nextDouble()*10, rng.nextDouble()*10);
+			IPoint b = new FloatPoint(rng.nextDouble()*10, rng.nextDouble()*10);
+			IPoint c = new FloatPoint(rng.nextDouble()*10, rng.nextDouble()*10);
 
 			double angle = Rotatable.getAngleToRotateVertical(t, b);
 

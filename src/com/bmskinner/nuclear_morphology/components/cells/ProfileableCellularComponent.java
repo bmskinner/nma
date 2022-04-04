@@ -41,6 +41,7 @@ import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.profiles.DefaultProfileSegment;
+import com.bmskinner.nuclear_morphology.components.profiles.DefaultSegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileCollection;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
@@ -50,7 +51,6 @@ import com.bmskinner.nuclear_morphology.components.profiles.LandmarkType;
 import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.DefaultSegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.UnprofilableObjectException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -85,10 +85,6 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
     
     /** The profiles for this object */
     private Map<ProfileType, IProfile> profileMap = new ConcurrentHashMap<>();
-
-    /** The chosen window size in pixels based on the window proportion */
-    private int windowSize;
-
     
     /**
      * Construct with an ROI, a source image and channel, and the original
@@ -143,8 +139,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 
     	Taggable comp = (Taggable) c;
 
-    	this.windowProportion = comp.getWindowProportion(ProfileType.ANGLE);
-    	this.windowSize = comp.getWindowSize(ProfileType.ANGLE);
+    	this.windowProportion = comp.getWindowProportion();
 
     	for (ProfileType type : ProfileType.values()) {
 
@@ -176,7 +171,6 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
     	 super(c);
 
     	 this.windowProportion = c.windowProportion;
-         this.windowSize = c.windowSize;
          for(Landmark t : c.profileLandmarks.keySet())
         	 profileLandmarks.put(t, c.profileLandmarks.get(t));
          this.isLocked = c.isLocked;
@@ -191,7 +185,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 
              } catch (ProfileException e) {
                  LOGGER.log(Loggable.STACK, "Cannot make new profile type " + type + " from template", e);
-                 LOGGER.warning("Error copying profile");
+                 LOGGER.warning("Error copying profile: "+e.getMessage());
              }
          }
     }
@@ -199,7 +193,6 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
     protected ProfileableCellularComponent(Element e) throws ComponentCreationException {
 		super(e);
 		windowProportion = Double.parseDouble(e.getAttributeValue(XML_WINDOW_PROPORTION));
-		windowSize = Math.max(1,(int) Math.ceil(getStatistic(Measurement.PERIMETER) * windowProportion));
 		
 		isLocked = e.getAttributeValue("locked")!=null;
 		
@@ -233,13 +226,6 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
             throw new ComponentCreationException("Must have a value between 0-1");
         
         windowProportion = proportion;
-        double perimeter = getStatistic(Measurement.PERIMETER);
-
-        double angleWindow = perimeter * proportion;
-        angleWindow = angleWindow < 1 ? 1 : angleWindow;
-
-        // calculate profiles
-        windowSize = (int) Math.ceil(angleWindow);
 
         try {
         	for (ProfileType type : ProfileType.values()) 
@@ -251,21 +237,12 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
         } catch (ProfileException e) {
             throw new ComponentCreationException("Could not calculate profiles due to "+e.getMessage(), e);
         }
-        
-        LOGGER.finer("Initialised component: now has "+segments.size()+" segments");
-
     }
 
     public IPoint getPoint(@NonNull Landmark tag) throws MissingLandmarkException {
         int index = this.getBorderIndex(tag);
         return this.getBorderPoint(index);
     }
-
-    /*
-     *  
-     * Methods implementing the Taggable interface 
-     *
-     */
 
     @Override
     public IPoint getBorderPoint(@NonNull Landmark tag) throws MissingLandmarkException {
@@ -382,41 +359,33 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
     }
 
     @Override
-    public int getWindowSize(@NonNull ProfileType type) {
-        return windowSize;
+    public int getWindowSize() {
+    	return Math.max(1,(int) Math.ceil(getMeasurement(Measurement.PERIMETER) * windowProportion));
     }
 
     @Override
-	public double getWindowProportion(@NonNull ProfileType type) {
+	public double getWindowProportion() {
         return windowProportion;
     }
 
     @Override
-	public void setWindowProportion(@NonNull ProfileType type, double d) {
+	public void setWindowProportion(double d) {
         if (d <= 0 || d >= 1)
             throw new IllegalArgumentException("Angle window proportion must be higher than 0 and less than 1");
 
         if (isLocked)
             return;
 
-        if (type.equals(ProfileType.ANGLE)) {
-
-            windowProportion = d;
-
-            double perimeter = this.getStatistic(Measurement.PERIMETER);
-            double angleWindow = perimeter * d;
-
-            // calculate profiles
-            windowSize = (int) Math.round(angleWindow);
-
-            try {
-            	ISegmentedProfile profile = ProfileCreator.createProfile(this, ProfileType.ANGLE);
-            	profileMap.put(type, profile);
-            } catch (ProfileException e) {
-                LOGGER.warning("Unable to set window proportion");
-                LOGGER.log(Loggable.STACK, e.getMessage(), e);
-            }
+        windowProportion = d;
+        
+        try {
+        	for (ProfileType type : ProfileType.values()) 
+        		profileMap.put(type, ProfileCreator.createProfile(this, type));
+        } catch (ProfileException e) {
+        	LOGGER.warning("Unable to set window proportion");
+        	LOGGER.log(Loggable.STACK, e.getMessage(), e);
         }
+        
     }
     
     @Override
@@ -557,7 +526,8 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + Objects.hash(isLocked, profileLandmarks, profileMap, segments, windowProportion);
+		result = prime * result + Objects.hash(isLocked, profileLandmarks, 
+				profileMap, segments, windowProportion);
 		return result;
 	}
 
@@ -583,7 +553,6 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 
         builder.append("Window prop: "+this.windowProportion);
         builder.append(newLine);
-        builder.append("Window size: "+this.windowSize);
         builder.append(newLine);
         builder.append("Segments: "+this.segments);
         builder.append(newLine);

@@ -19,6 +19,7 @@ package com.bmskinner.nuclear_morphology.analysis.mesh;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.bmskinner.nuclear_morphology.components.generic.FloatPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 
 /**
@@ -63,10 +64,9 @@ public class DefaultMeshVertex implements MeshVertex {
      */
     public DefaultMeshVertex(MeshVertex v) {
         this.name = v.getName();
-        this.position = IPoint.makeNew(v.getPosition());
+        this.position = new FloatPoint(v.getPosition());
         this.isPeripheral = v.isPeripheral();
     }
-
 
     @Override
     public boolean isPeripheral() {

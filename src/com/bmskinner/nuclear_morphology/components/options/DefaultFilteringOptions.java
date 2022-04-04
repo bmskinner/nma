@@ -188,7 +188,7 @@ public class DefaultFilteringOptions extends DefaultOptions implements Filtering
 				double v = n.getSignalCollection().numberOfSignals(k.id);
 				return isMin ? v>=minima.get(k) : v<=maxima.get(k);
 			}
-			double v = n.getStatistic(k.stat, k.scale);
+			double v = n.getMeasurement(k.stat, k.scale);
 			return isMin ? v>=minima.get(k) : v<=maxima.get(k);
 		} catch (MissingLandmarkException e) {
 			return false;
@@ -209,7 +209,7 @@ public class DefaultFilteringOptions extends DefaultOptions implements Filtering
 	}
 	
 	private boolean signalMatches(Key k, INuclearSignal s, boolean isMin){
-		double v = s.getStatistic(k.stat, k.scale);
+		double v = s.getMeasurement(k.stat, k.scale);
 		return isMin ? v>=minima.get(k) : v<=maxima.get(k);
 	}
 

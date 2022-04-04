@@ -76,7 +76,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     /** The pixel spacing between border points after roi interpolation */
 	private static final int INTERPOLATION_INTERVAL_PIXELS = 1;
 		
-    private final UUID        id;
+    private final UUID id;
     
     /** The lowest x position in the object bounding box */
     private final int xBase;
@@ -162,8 +162,8 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     	if(!doesRoiMatchCom(roi, centreOfMass))
     		throw new IllegalArgumentException("Centre of mass is not inside ROI");
         
-        this.originalCentreOfMass = IPoint.makeNew(centreOfMass);
-        this.centreOfMass = IPoint.makeNew(centreOfMass);
+        this.originalCentreOfMass = new FloatPoint(centreOfMass);
+        this.centreOfMass = new FloatPoint(centreOfMass);
         this.id = id==null ? UUID.randomUUID() : id;
         this.sourceFile = source;
         this.channel = channel;
@@ -181,22 +181,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
         this.ypoints = Arrays.copyOfRange(polygon.ypoints, 0, polygon.npoints);
 
         makeBorderList();
-    }
-    
-    /**
-     * Test if the provided centre of mass is within the
-     * the given roi
-     * @param roi
-     * @param com
-     * @return
-     */
-    private boolean doesRoiMatchCom(Roi roi, IPoint com){
-    	Polygon polygon = roi.getPolygon();
-        Rectangle2D rect = polygon.getBounds().getFrame();
-        
-        return rect.contains(com.getX(), com.getY());
-    }
-    
+    }   
 
     /**
      * Defensively duplicate a component. The ID is kept consistent.
@@ -213,8 +198,8 @@ public abstract class DefaultCellularComponent implements CellularComponent {
         this.channel = a.getChannel();
         this.scale = a.getScale();
 
-        for(Measurement stat : a.getStatistics()) {
-        	setStatistic(stat, a.getStatistic(stat, MeasurementScale.PIXELS));
+        for(Measurement stat : a.getMeasurements()) {
+        	setMeasurement(stat, a.getMeasurement(stat, MeasurementScale.PIXELS));
         }
 
         if ( !(a instanceof DefaultCellularComponent))
@@ -247,11 +232,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     	originalCentreOfMass = new FloatPoint(Float.parseFloat(e.getChild("OriginalCentreOfMass").getAttributeValue("x")), 
     			Float.parseFloat(e.getChild("CentreOfMass").getAttributeValue("y")));
 
-    	// Add measurements
-    	for(Element el : e.getChildren("Measurement")) {
-    		Measurement m = new DefaultMeasurement(el);
-    		measurements.put(m, Double.parseDouble(el.getAttributeValue("value")));
-    	}
+
     	
     	sourceFile = new File(e.getChildText("SourceFile"));
     	channel = Integer.parseInt(e.getChildText("Channel"));
@@ -262,8 +243,14 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     	isReversed = e.getChild("xpoints").getAttributeValue("reverse")!=null;
 
     	makeBorderList();
+    	
+    	// Add measurements
+    	for(Element el : e.getChildren("Measurement")) {
+    		Measurement m = new DefaultMeasurement(el);
+    		measurements.put(m, Double.parseDouble(el.getAttributeValue("value")));
+    	}
     }
-
+    
     /**
      * Create the border list from the stored int[] points. Move the centre of
      * mass to any stored position.
@@ -300,9 +287,33 @@ public abstract class DefaultCellularComponent implements CellularComponent {
         borderList = new IPoint[smoothed.npoints];   
         for (int i = 0; i < smoothed.npoints; i++)
             borderList[i] = new FloatPoint(smoothed.xpoints[i], smoothed.ypoints[i]);
+        
+        
+        // Recalculate any measurements depending on border values 
+        clearMeasurement(Measurement.CIRCULARITY);
+        clearMeasurement(Measurement.AREA);
+        clearMeasurement(Measurement.PERIMETER);
 
         moveCentreOfMass(oldCoM);
         updateBounds();
+        
+        getMeasurement(Measurement.AREA);
+        getMeasurement(Measurement.PERIMETER);
+        getMeasurement(Measurement.CIRCULARITY);
+    }
+    
+    
+    /**
+     * Test if the provided centre of mass is within the
+     * the given roi
+     * @param roi
+     * @param com
+     * @return
+     */
+    private boolean doesRoiMatchCom(Roi roi, IPoint com){
+    	Polygon polygon = roi.getPolygon();
+        Rectangle2D rect = polygon.getBounds().getFrame();
+        return rect.contains(com.getX(), com.getY());
     }
 
     private void updateBounds() {
@@ -351,12 +362,12 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 
 	@Override
     public IPoint getOriginalBase() {
-        return IPoint.makeNew(xBase, yBase);
+        return new FloatPoint(xBase, yBase);
     }
     
     @Override
     public IPoint getBase() {
-        return IPoint.makeNew(bounds.getMinX(), bounds.getMinY());
+        return new FloatPoint(bounds.getMinX(), bounds.getMinY());
     }
 
     /**
@@ -424,39 +435,35 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     }
 
     @Override
-	public synchronized boolean hasStatistic( @NonNull final Measurement stat) {
+	public synchronized boolean hasMeasurement( @NonNull final Measurement stat) {
         return this.measurements.containsKey(stat);
     }
 
     @Override
-    public synchronized double getStatistic( @NonNull final Measurement stat) {
-        return this.getStatistic(stat, MeasurementScale.PIXELS);
+    public synchronized double getMeasurement( @NonNull final Measurement stat) {
+        return this.getMeasurement(stat, MeasurementScale.PIXELS);
     }
 
     @Override
-    public synchronized double getStatistic(@NonNull final Measurement stat,  @NonNull final MeasurementScale measurementScale) {
-
-        if (this.measurements.containsKey(stat)) {
-            double result = measurements.get(stat);
-            return stat.convert(result, this.scale, measurementScale);
+    public synchronized double getMeasurement(@NonNull final Measurement stat,  @NonNull final MeasurementScale measurementScale) {
+        if (!this.measurements.containsKey(stat)) {
+        	 setMeasurement(stat, ComponentMeasurer.calculate(stat, this));
         }
-        
-        setStatistic(stat, ComponentMeasurer.calculate(stat, this));
         return stat.convert(measurements.get(stat), this.scale, measurementScale);
     }
 
     @Override
-    public synchronized void setStatistic(@NonNull final Measurement stat, double d) {
+    public synchronized void setMeasurement(@NonNull final Measurement stat, double d) {
         measurements.put(stat, d);
     }
     
     @Override
-    public synchronized void clearStatistic(@NonNull final Measurement stat) {
+    public synchronized void clearMeasurement(@NonNull final Measurement stat) {
     	measurements.remove(stat);
     }
 
     @Override
-    public List<Measurement> getStatistics() {
+    public List<Measurement> getMeasurements() {
     	List<Measurement> result = new ArrayList<>();
     	for(Measurement m : measurements.keySet()) {
     		if(m!=null)
@@ -468,8 +475,8 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     @Override
 	public void updateDependentStats() {
         for (Measurement stat : measurements.keySet()) {
-            if (this.getStatistic(stat) == Statistical.STAT_NOT_CALCULATED)
-            	setStatistic(stat, ComponentMeasurer.calculate(stat, this));
+            if (this.getMeasurement(stat) == Statistical.STAT_NOT_CALCULATED)
+            	setMeasurement(stat, ComponentMeasurer.calculate(stat, this));
         }
     }
 
@@ -480,7 +487,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 
     @Override
 	public IPoint getOriginalCentreOfMass() {
-        return IPoint.makeNew(originalCentreOfMass);
+        return new FloatPoint(originalCentreOfMass);
     }
 
     @Override
@@ -501,7 +508,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
         double diffY = p.getY() - centreOfMass.getY();
         
         // Offset to the original position
-        return IPoint.makeNew(originalCentreOfMass.getX() + diffX,
+        return new FloatPoint(originalCentreOfMass.getX() + diffX,
                 originalCentreOfMass.getY() + diffY);
     }
     
@@ -545,7 +552,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 
         // Offset to the original position
         for (IPoint p : borderList) {
-            result.add(IPoint.makeNew(p.getX() + diffX, p.getY() + diffY));
+            result.add(new FloatPoint(p.getX() + diffX, p.getY() + diffY));
         }
         return result;
     }
@@ -705,7 +712,6 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	public void reverse() throws MissingComponentException, ProfileException {
         isReversed = !isReversed;
         makeBorderList(); // Recreate the border list from the new key points
-        
     }
 
     /**
@@ -1029,6 +1035,12 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 			LOGGER.fine("Unable to compare source files");
 		}
 		
+		if(measurements.size()!=other.measurements.size())
+			return false;
+		for(Entry<Measurement, Double> e : measurements.entrySet()) {
+			if(!e.getValue().equals(other.measurements.get(e.getKey())))
+				return false;
+		}
 		
 		return Objects.equals(centreOfMass, other.centreOfMass) 
 				&& isSameFile
@@ -1038,7 +1050,6 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 				&& Objects.equals(xBase, other.xBase)
 				&& Objects.equals(yBase, other.yBase)
 				&& Double.doubleToLongBits(scale) == Double.doubleToLongBits(other.scale)
-				&& Objects.equals(measurements, other.measurements)
 				&& Arrays.equals(xpoints, other.xpoints) 
 				&& Arrays.equals(ypoints, other.ypoints);
 	}

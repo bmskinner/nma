@@ -16,6 +16,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import com.bmskinner.nuclear_morphology.components.generic.FloatPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.gui.ImageClickListener;
 import com.bmskinner.nuclear_morphology.gui.painters.ImagePainter;
@@ -270,7 +271,7 @@ public class MagnifiableImagePanel extends JPanel {
 		// The position  of the click within the original image
 		double xPositionInImage = (((double)iconX/(double) iconWidth)*w);
 		double yPositionInImage = (((double)iconY/(double) iconHeight)*h);
-		return IPoint.makeNew(xPositionInImage, yPositionInImage);
+		return new FloatPoint(xPositionInImage, yPositionInImage);
 	}
 		
 	/**
@@ -293,6 +294,6 @@ public class MagnifiableImagePanel extends JPanel {
 		// The position of the click relative to the icon
 		int iconX = e.getX()-((panelWidth-iconWidth)/2);
 		int iconY = e.getY()-((panelHeight-iconHeight)/2);
-		return IPoint.makeNew(iconX, iconY);
+		return new FloatPoint(iconX, iconY);
 	}	
 }

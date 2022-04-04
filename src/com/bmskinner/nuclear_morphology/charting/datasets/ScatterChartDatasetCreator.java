@@ -128,13 +128,13 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator<ChartOpti
                     if (statA.equals(Measurement.VARIABILITY))
                         statAValue = c.getNormalisedDifferenceToMedian(Landmark.REFERENCE_POINT, n);
                     else
-                        statAValue = n.getStatistic(statA, scale);
+                        statAValue = n.getMeasurement(statA, scale);
                     
 
                     if (statB.equals(Measurement.VARIABILITY))
                         statBValue = c.getNormalisedDifferenceToMedian(Landmark.REFERENCE_POINT, n);
                     else
-                        statBValue = n.getStatistic(statB, scale);
+                        statBValue = n.getMeasurement(statB, scale);
                     
                 } catch (MissingLandmarkException e) {
                     LOGGER.log(Loggable.STACK, "Tag not present in cell", e);
@@ -191,8 +191,8 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator<ChartOpti
                 List<INuclearSignal> list = m.getSignals(id);
 
                 for (int j = 0; j < signalCount; j++) {
-                    xpoints[j] = list.get(j).getStatistic(statA, scale);
-                    ypoints[j] = list.get(j).getStatistic(statB, scale);
+                    xpoints[j] = list.get(j).getMeasurement(statA, scale);
+                    ypoints[j] = list.get(j).getMeasurement(statB, scale);
                 }
 
                 double[][] data = { xpoints, ypoints };
@@ -265,10 +265,10 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator<ChartOpti
         // need to transpose the matrix
         for(int i=0; i<nuclei.size(); i++) {
         	Nucleus n = nuclei.get(i);
-        	Measurement tsne1 = n.getStatistics().stream().filter(s->s.name().equals(xStatName)).findFirst().orElse(Measurement.TSNE_1);
-        	Measurement tsne2 = n.getStatistics().stream().filter(s->s.name().equals(yStatName)).findFirst().orElse(Measurement.TSNE_2);
-        	xpoints[i] = n.getStatistic(tsne1);
-        	ypoints[i] = n.getStatistic(tsne2);
+        	Measurement tsne1 = n.getMeasurements().stream().filter(s->s.name().equals(xStatName)).findFirst().orElse(Measurement.TSNE_1);
+        	Measurement tsne2 = n.getMeasurements().stream().filter(s->s.name().equals(yStatName)).findFirst().orElse(Measurement.TSNE_2);
+        	xpoints[i] = n.getMeasurement(tsne1);
+        	ypoints[i] = n.getMeasurement(tsne2);
         }
     	return new double[][] { xpoints, ypoints };
     }

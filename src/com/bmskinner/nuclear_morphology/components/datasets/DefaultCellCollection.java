@@ -807,7 +807,7 @@ public class DefaultCellCollection implements ICellCollection {
 
 		if (statsCache.hasValues(stat, CellularComponent.WHOLE_CELL, scale, null))
 			return statsCache.getValues(stat, CellularComponent.WHOLE_CELL, scale, null);
-		result = cells.parallelStream().mapToDouble(c -> c.getStatistic(stat, scale)).sorted().toArray();
+		result = cells.parallelStream().mapToDouble(c -> c.getMeasurement(stat, scale)).sorted().toArray();
 		statsCache.setValues(stat, CellularComponent.WHOLE_CELL, scale, null, result);
 		return result;
 
@@ -833,7 +833,7 @@ public class DefaultCellCollection implements ICellCollection {
 		if (Measurement.VARIABILITY.equals(stat)) {
 			result = this.getNormalisedDifferencesToMedianFromPoint(Landmark.REFERENCE_POINT);
 		} else {
-			result = this.getNuclei().parallelStream().mapToDouble(n -> n.getStatistic(stat, scale)).toArray();
+			result = this.getNuclei().parallelStream().mapToDouble(n -> n.getMeasurement(stat, scale)).toArray();
 		}
 		Arrays.sort(result);
 		statsCache.setValues(stat, CellularComponent.NUCLEUS, scale, null, result);
@@ -870,7 +870,7 @@ public class DefaultCellCollection implements ICellCollection {
 			if (segment != null) {
 				int indexLength = segment.length();
 				double fractionOfPerimeter = (double) indexLength / (double) segment.getProfileLength();
-				perimeterLength = fractionOfPerimeter * n.getStatistic(Measurement.PERIMETER, scale);
+				perimeterLength = fractionOfPerimeter * n.getMeasurement(Measurement.PERIMETER, scale);
 			}
 			return perimeterLength;
 

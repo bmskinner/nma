@@ -52,6 +52,7 @@ import com.bmskinner.nuclear_morphology.components.options.MissingOptionExceptio
 import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
 import com.bmskinner.nuclear_morphology.gui.components.SelectableCellIcon;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
+import com.bmskinner.nuclear_morphology.gui.tabs.cells_detail.InteractiveCellPanel.CellDisplayOptions;
 import com.bmskinner.nuclear_morphology.io.ImageImportWorker;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
@@ -281,13 +282,8 @@ public class ManualCurationDialog extends AbstractCellCollectionDialog {
 	     */
 	    private ImageProcessor flipAndScaleImage(ICell c, ImageProcessor ip) {
 	    	if (rotate) {
-	    		try {
-	    			ip = rotateToVertical(c, ip);
-	    		} catch (MissingLandmarkException e) {
-	    			LOGGER.log(Loggable.STACK, "Unable to rotate", e);
-	    		}
 	    		ip.flipVertical(); // Y axis needs inverting
-
+	    		ip = ImageFilterer.orientImage(ip, c.getPrimaryNucleus());
 	    	}
 	    	// Rescale the resulting image
 	    	ip = new ImageFilterer(ip)

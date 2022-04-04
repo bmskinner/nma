@@ -32,6 +32,9 @@ import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nuclear_morphology.components.generic.FloatPoint;
+import com.bmskinner.nuclear_morphology.components.generic.IPoint;
+
 import ij.ImagePlus;
 import ij.Prefs;
 import ij.gui.PolygonRoi;
@@ -161,9 +164,9 @@ public abstract class Detector {
 	/**
 	 * Detect and measure ROIs in this image
 	 * @param image
-	 * @return
+	 * @return a map of ROIs and their CoMs
 	 */
-	protected synchronized Map<Roi, StatsMap> detectRois(@NonNull ImageProcessor image){
+	protected synchronized Map<Roi, IPoint> detectRois(@NonNull ImageProcessor image){
 		if (Double.isNaN(this.minSize) || Double.isNaN(this.maxSize) || Double.isNaN(this.minCirc)
 				|| Double.isNaN(this.maxCirc))
 			throw new IllegalArgumentException(NO_DETECTION_PARAMS_ERR);
@@ -178,7 +181,7 @@ public abstract class Detector {
 		ImageProcessor searchProcessor = image.duplicate();
 		searchProcessor.threshold(threshold);
 
-		Map<Roi, StatsMap> result = new HashMap<>();
+		Map<Roi, IPoint> result = new HashMap<>();
 
 		// run the particle analyser
 		// By default, add all particles to the ROI manager, and do not count
@@ -200,38 +203,28 @@ public abstract class Detector {
 
 		// Run measurements on the original image
 		// to ensure CoM detection is accurate
-		for(Roi r : pa.getRois()){
-			StatsMap m = measure(r, image);
-			result.put(r, m);
-		}
+		for(Roi r : pa.getRois())
+			result.put(r, measure(r, image));
 
 		return result;
 	}
 
 	/**
-	 * Get the stats for the region covered by the given roi. Uses the channel
-	 * previously set.
-	 * 
+	 * Get the CoM for the region covered by the given roi. 	 * 
 	 * @param roi the region to measure
+	 * @param image the image to measure in
 	 * @return
 	 */
-	private synchronized StatsMap measure(@NonNull Roi roi, @NonNull ImageProcessor image) {
+	private synchronized IPoint measure(@NonNull Roi roi, @NonNull ImageProcessor image) {
 
 		ImageProcessor searchProcessor = image.duplicate();
 		ImagePlus imp = new ImagePlus(null, searchProcessor);
 		imp.setRoi(roi);
 		ResultsTable rt = new ResultsTable();
 		Analyzer analyser = new Analyzer(imp,
-				Measurements.CENTER_OF_MASS | Measurements.AREA | Measurements.PERIMETER | Measurements.FERET, rt);
-		analyser.measure();
-
-		StatsMap values = new StatsMap();
-		values.add(StatsMap.AREA, rt.getValue(StatsMap.AREA, 0));
-		values.add(StatsMap.FERET, rt.getValue(StatsMap.FERET, 0));
-		values.add(StatsMap.PERIM, rt.getValue(RESULT_TABLE_PERIM, 0));
-		values.add(COM_X, rt.getValue(COM_X, 0));
-		values.add(COM_Y, rt.getValue(COM_Y, 0));
-		return values;
+				Measurements.CENTER_OF_MASS, rt);
+		analyser.measure();		
+		return new FloatPoint(rt.getValue(COM_X, 0), rt.getValue(COM_Y, 0));
 	}
 
 

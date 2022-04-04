@@ -30,6 +30,7 @@ import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
+import com.bmskinner.nuclear_morphology.components.generic.FloatPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclei.Consensus;
 import com.bmskinner.nuclear_morphology.components.nuclei.DefaultConsensusNucleus;
@@ -103,7 +104,7 @@ public class ProfileRefoldMethod extends SingleDatasetAnalysisMethod {
     	}
 
     	targetCurve = targetProfile;
-    	refoldNucleus.moveCentreOfMass(IPoint.makeNew(0, 0));
+    	refoldNucleus.moveCentreOfMass(new FloatPoint(0, 0));
 
     	LOGGER.finer( "Result: template at " + refoldNucleus.getCentreOfMass());
 
@@ -185,7 +186,7 @@ public class ProfileRefoldMethod extends SingleDatasetAnalysisMethod {
         // Probably due to the correction in the DefaultConsensusNucleus
         // constructor.
         // Hence, put it back again to zero.
-//        testNucleus.moveCentreOfMass(IPoint.makeNew(0, 0));
+//        testNucleus.moveCentreOfMass(new FloatPoint(0, 0));
 
         LOGGER.finer( "Test nucleus COM: " + testNucleus.getCentreOfMass());
         LOGGER.finest( "Beginning border tests");
@@ -237,7 +238,7 @@ public class ProfileRefoldMethod extends SingleDatasetAnalysisMethod {
         double newY = oldY + yDelta;
 
         // Check the new point is valid
-        IPoint newPoint = IPoint.makeNew(newX, newY);
+        IPoint newPoint = new FloatPoint(newX, newY);
 
         boolean ok = checkPositionIsOK(newPoint, testNucleus, index, minDistance, maxDistance);
 

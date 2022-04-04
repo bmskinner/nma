@@ -37,6 +37,7 @@ import com.bmskinner.nuclear_morphology.analysis.detection.Detector;
 import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellAnalysisMethod.ShellAnalysisException;
 import com.bmskinner.nuclear_morphology.components.Imageable;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.generic.FloatPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult.ShrinkType;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
@@ -512,7 +513,7 @@ public class ShellDetector extends Detector {
 
 		@Override
 		public IPoint getOriginalBase() {
-			return IPoint.makeNew(shellRoi.getXBase(), shellRoi.getYBase());
+			return new FloatPoint(shellRoi.getXBase(), shellRoi.getYBase());
 		}
 
 		@Override
@@ -550,7 +551,7 @@ public class ShellDetector extends Detector {
 
 		@Override
 		public IPoint getBase() {
-			return IPoint.makeNew(shellRoi.getXBase(), shellRoi.getYBase());
+			return new FloatPoint(shellRoi.getXBase(), shellRoi.getYBase());
 		}
     }
 
