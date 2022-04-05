@@ -70,13 +70,9 @@ public interface CellularComponent extends Imageable, XmlSerializable,
      * Create a defensive copy of this object
      * 
      * @return
+     * @throws ComponentCreationException 
      */
     CellularComponent duplicate();
-
-    /**
-     * If any stats are listed as uncalculated, attempt to calculate them
-     */
-    void updateDependentStats();
 
     /**
      * Get the number of pixels per micron in the source image
@@ -138,23 +134,6 @@ public interface CellularComponent extends Imageable, XmlSerializable,
     int getBorderIndex(@NonNull IPoint p);
 
     /**
-     * Update the border point at the given index to the given x y coordinates
-     * 
-     * @param i
-     * @param x
-     * @param y
-     */
-    void updateBorderPoint(int i, double x, double y);
-
-    /**
-     * Update the border point at the given index to the given x y coordinates
-     * 
-     * @param i  the index
-     * @param p the new postion
-     */
-    void updateBorderPoint(int i, @NonNull IPoint p);
-
-    /**
      * Get the length of the object border - equivalent to the length
      * of the angle profile - in index units
      * 
@@ -183,12 +162,6 @@ public interface CellularComponent extends Imageable, XmlSerializable,
      */
     boolean isReversed();
     
-    /**
-     * Get the integer roi positions used to create the object before smoothing and interpolation
-     * @return an array with two elements:  the x coordinate array, and the y coordinate array
-     */
-    int[][] getUnsmoothedBorderCoordinates();
-
     /**
      * Test if the given point is within the offset nucleus
      * 

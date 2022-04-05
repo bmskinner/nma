@@ -508,7 +508,7 @@ public class SignalManager {
             try {
                 n.calculateSignalAnglesFromPoint(n.getBorderPoint(Landmark.ORIENTATION_POINT));
             } catch (MissingLandmarkException e) {
-                LOGGER.fine("Cannot get OP index");
+                LOGGER.finer("Cannot get OP index");
             }
         }
     }

@@ -41,7 +41,7 @@ public class DefaultConsensusNucleusTest {
 	@Test
 	public void testDuplicate() throws Exception {
 		Consensus dup = nucleus.duplicate();
-		ComponentTester.testDuplicatesByField(nucleus, dup);
+		ComponentTester.testDuplicatesByField("Consensus", nucleus, dup);
 	}
 	
 
@@ -55,7 +55,7 @@ public class DefaultConsensusNucleusTest {
 		Consensus dup = nucleus.duplicate();
 		for(int i=0; i<20; i++) {
 			Consensus dup2 = dup.duplicate();
-			ComponentTester.testDuplicatesByField(dup, dup2);
+			ComponentTester.testDuplicatesByField("Consensus", dup, dup2);
 			dup = dup2;
 		}		
 	}
@@ -67,10 +67,8 @@ public class DefaultConsensusNucleusTest {
 		
 		XMLOutputter xmlOutput = new XMLOutputter();
 		xmlOutput.setFormat(Format.getPrettyFormat());
-		xmlOutput.output(e, new PrintWriter( System.out ));
 
 		Nucleus test = new DefaultConsensusNucleus(e);
-		xmlOutput.output(test.toXmlElement(), new PrintWriter( System.out ));
 		
 		assertEquals(nucleus, test);
 	}

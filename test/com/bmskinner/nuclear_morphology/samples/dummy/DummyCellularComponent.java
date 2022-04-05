@@ -30,7 +30,7 @@ public class DummyCellularComponent implements CellularComponent {
 	protected CellularComponent component;
 
 	@Override
-	public void rotatePointToBottom(IPoint bottomPoint) {
+	public void rotatePointToBottom(@NonNull IPoint bottomPoint) {
 		component.rotatePointToBottom(bottomPoint);
 	}
 
@@ -107,17 +107,17 @@ public class DummyCellularComponent implements CellularComponent {
 	}
 	
 	@Override
-	public double getMeasurement(Measurement stat, MeasurementScale scale) {
+	public double getMeasurement(@NonNull Measurement stat, @NonNull MeasurementScale scale) {
 		return component.getMeasurement(stat, scale);
 	}
 
 	@Override
-	public double getMeasurement(Measurement stat) {
+	public double getMeasurement(@NonNull Measurement stat) {
 	    return component.getMeasurement(stat);
 	}
 
 	@Override
-	public void setMeasurement(Measurement stat, double d) {
+	public void setMeasurement(@NonNull Measurement stat, double d) {
 		component.setMeasurement(stat, d);
 	}
 
@@ -152,18 +152,8 @@ public class DummyCellularComponent implements CellularComponent {
 	}
 
 	@Override
-	public int getBorderIndex(IPoint p) {
+	public int getBorderIndex(@NonNull IPoint p) {
 		return component.getBorderIndex(p);
-	}
-
-	@Override
-	public void updateBorderPoint(int i, double x, double y) {
-		component.updateBorderPoint(i, x, y);		
-	}
-
-	@Override
-	public void updateBorderPoint(int i, IPoint p) {
-		component.updateBorderPoint(i, p);
 	}
 
 	@Override
@@ -222,12 +212,12 @@ public class DummyCellularComponent implements CellularComponent {
 	}
 
 	@Override
-	public void flipHorizontal(IPoint p) {
+	public void flipHorizontal(@NonNull IPoint p) {
 		component.flipHorizontal(p);		
 	}
 	
 	@Override
-	public void moveCentreOfMass(IPoint point) {
+	public void moveCentreOfMass(@NonNull IPoint point) {
 		component.moveCentreOfMass(point);
 	}
 
@@ -267,22 +257,22 @@ public class DummyCellularComponent implements CellularComponent {
 //	}
 
 	@Override
-	public int getPositionBetween(IPoint pointA, IPoint pointB) {
+	public int getPositionBetween(@NonNull IPoint pointA, @NonNull IPoint pointB) {
 		return component.getPositionBetween(pointA, pointB);
 	}
 
 	@Override
-	public IPoint findOppositeBorder(IPoint p) throws UnavailableBorderPointException {
+	public IPoint findOppositeBorder(@NonNull IPoint p) throws UnavailableBorderPointException {
 		return component.findOppositeBorder(p);
 	}
 
 	@Override
-	public IPoint findOrthogonalBorderPoint(IPoint a) throws UnavailableBorderPointException {
+	public IPoint findOrthogonalBorderPoint(@NonNull IPoint a) throws UnavailableBorderPointException {
 		return component.findOrthogonalBorderPoint(a);
 	}
 
 	@Override
-	public IPoint findClosestBorderPoint(IPoint p) throws UnavailableBorderPointException {
+	public IPoint findClosestBorderPoint(@NonNull IPoint p) throws UnavailableBorderPointException {
 		return component.findClosestBorderPoint(p);
 	}
 
@@ -307,12 +297,12 @@ public class DummyCellularComponent implements CellularComponent {
 	}
 
 	@Override
-	public void setSourceFile(File sourceFile) {
+	public void setSourceFile(@NonNull File sourceFile) {
 		component.setSourceFile(sourceFile);		
 	}
 
 	@Override
-	public void setSourceFolder(File sourceFolder) {
+	public void setSourceFolder(@NonNull File sourceFolder) {
 		component.setSourceFolder(sourceFolder);
 	}
 
@@ -320,18 +310,7 @@ public class DummyCellularComponent implements CellularComponent {
 	public CellularComponent duplicate() {
 		return component.duplicate();
 	}
-
-	@Override
-	public void updateDependentStats() {
-	    component.updateDependentStats();
-	}
-
 	
-	@Override
-	public boolean hasMeasurement(Measurement stat) {
-		return component.hasMeasurement(stat);
-	}
-
 	@Override
 	public void reverse() throws MissingComponentException, ProfileException {
 	    component.reverse();
@@ -348,13 +327,7 @@ public class DummyCellularComponent implements CellularComponent {
 	}
 
 	@Override
-	public int[][] getUnsmoothedBorderCoordinates() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void clearMeasurement(Measurement stat) {
+	public void clearMeasurement(@NonNull Measurement stat) {
 		component.clearMeasurement(stat);
 	}
 
@@ -385,6 +358,12 @@ public class DummyCellularComponent implements CellularComponent {
 	@Override
 	public boolean isReversed() {
 		return component.isReversed();
+	}
+
+	@Override
+	public void clearMeasurements() {
+		component.clearMeasurements();
+		
 	}
 
 }

@@ -9,6 +9,7 @@ import org.junit.Test;
 
 import com.bmskinner.nuclear_morphology.ComponentTester;
 import com.bmskinner.nuclear_morphology.TestDatasetBuilder;
+import com.bmskinner.nuclear_morphology.components.Statistical;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.options.DefaultOptions;
@@ -44,7 +45,8 @@ public class TsneMethodTest extends ComponentTester {
 		// Check tSNE stats are empty 
 		boolean isPresent = dataset.getCollection().getNuclei()
 				.stream()
-				.noneMatch(m->m.hasMeasurement(Measurement.TSNE_1)||m.hasMeasurement(Measurement.TSNE_2));
+				.allMatch(m->m.getMeasurement(Measurement.TSNE_1)==Statistical.ERROR_CALCULATING_STAT
+				|| m.getMeasurement(Measurement.TSNE_2)==Statistical.ERROR_CALCULATING_STAT);
 		assertTrue(isPresent);
 		
 		
@@ -62,7 +64,8 @@ public class TsneMethodTest extends ComponentTester {
 		// Test that tSNE stats have been set
 		isPresent = dataset.getCollection().getNuclei()
 				.stream()
-				.allMatch(m->m.hasMeasurement(Measurement.TSNE_1)&&m.hasMeasurement(Measurement.TSNE_2));
+				.noneMatch(m->m.getMeasurement(Measurement.TSNE_1)==Statistical.ERROR_CALCULATING_STAT
+				|| m.getMeasurement(Measurement.TSNE_2)==Statistical.ERROR_CALCULATING_STAT);
 		assertTrue(isPresent);
 		
 	}

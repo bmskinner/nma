@@ -2,8 +2,10 @@ package com.bmskinner.nuclear_morphology.components.cells;
 
 import static org.junit.Assert.assertEquals;
 
+import java.awt.Shape;
 import java.util.Arrays;
 
+import org.jdom2.Element;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -69,8 +71,8 @@ public class CellularComponentTest {
 	public void testDuplicate() throws Exception {
 		CellularComponent dup = component.duplicate();
 		assertEquals(component, dup);
-		ComponentTester.testDuplicatesByField(component, dup);
+		ComponentTester.testDuplicatesByField(component.getSourceFileName(), component, dup);
 	}
-
+	
 
 }

@@ -31,6 +31,7 @@ import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.Refoldable;
 import com.bmskinner.nuclear_morphology.components.StatisticalCollection;
 import com.bmskinner.nuclear_morphology.components.Taggable;
+import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileCollection;
@@ -61,9 +62,10 @@ public interface ICellCollection
 	
 	 /**
      * Create a copy of the collection
+	 * @throws ComponentCreationException 
      * 
      */
-	ICellCollection duplicate();
+	ICellCollection duplicate() throws ComponentCreationException;
 	
     /**
      * Set the name of the collection

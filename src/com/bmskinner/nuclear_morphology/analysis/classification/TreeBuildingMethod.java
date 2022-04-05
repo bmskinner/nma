@@ -33,6 +33,7 @@ import com.bmskinner.nuclear_morphology.analysis.mesh.MeshFace;
 import com.bmskinner.nuclear_morphology.components.MissingComponentException;
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.Taggable;
+import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.DefaultClusterGroup;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
@@ -225,7 +226,7 @@ public class TreeBuildingMethod extends CellClusteringMethod {
             try {
 				mesh = new DefaultMesh(collection.getConsensus());
 				attributeCount += mesh.getFaces().size();
-			} catch (MeshCreationException | MissingLandmarkException e) {
+			} catch (MeshCreationException | MissingLandmarkException | ComponentCreationException e) {
 				LOGGER.log(Loggable.STACK, "Cannot create mesh", e);
 				throw new AnalysisMethodException(e);
 			}
@@ -303,10 +304,11 @@ public class TreeBuildingMethod extends CellClusteringMethod {
      * @throws MeshCreationException 
      * @throws ProfileException 
      * @throws MissingComponentException 
+     * @throws ComponentCreationException 
      * @throws ClusteringMethodException 
      */
     @Override
-	protected Instances makeInstances() throws AnalysisMethodException, MeshCreationException, ProfileException, MissingComponentException {
+	protected Instances makeInstances() throws AnalysisMethodException, MeshCreationException, ProfileException, MissingComponentException, ComponentCreationException {
     	LOGGER.finer("Creating clusterable instances");
         double windowProportion = Taggable.DEFAULT_PROFILE_WINDOW_PROPORTION;
         if (dataset.hasAnalysisOptions())// Merged datasets may not have options

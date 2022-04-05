@@ -24,6 +24,7 @@ import javax.swing.JOptionPane;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.cells.DefaultCell;
+import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.DefaultCellCollection;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
@@ -61,11 +62,10 @@ public class SplitCollectionAction extends SingleDatasetResultAction {
 
                     ICellCollection newCollection = new DefaultCellCollection(dataset, "Subtraction");
                     
+                    for(ICell c : collection)
+                    	if(!negative.getCollection().contains(c))
+                    		newCollection.add(c.duplicate());
                     
-                    collection.streamCells()
-                        .filter(c->!negative.getCollection().contains(c))
-                        .forEach(c->newCollection.addCell(new DefaultCell(c)));
-
                     newCollection.setName("Not_in_" + negative.getName());
 
                     dataset.addChildCollection(newCollection);

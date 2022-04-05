@@ -51,6 +51,7 @@ import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.MissingComponentException;
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.Taggable;
+import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.cells.DefaultCell;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
@@ -245,7 +246,11 @@ public class CellResegmentationDialog extends AbstractCellEditingDialog implemen
 
         JButton undoBtn = new JButton("Undo");
         undoBtn.addActionListener(e -> {
-            workingCell = new DefaultCell(cell);
+            try {
+				workingCell = cell.duplicate();
+			} catch (ComponentCreationException e1) {
+				LOGGER.severe("Unable to duplicate cell "+e1.getMessage());
+			}
             table.setModel(createTableModel(""));
             updateCharts(workingCell);
 

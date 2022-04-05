@@ -37,8 +37,8 @@ public class SignalDetectorTest {
 		for(Handler h : LOGGER.getHandlers())
 			LOGGER.removeHandler(h);
 		Handler h = new ConsoleHandler(new ConsoleFormatter());
-		LOGGER.setLevel(Level.FINER);
-		h.setLevel(Level.FINER);
+		LOGGER.setLevel(Level.FINE);
+		h.setLevel(Level.FINE);
 		LOGGER.addHandler(h);
 	}
 

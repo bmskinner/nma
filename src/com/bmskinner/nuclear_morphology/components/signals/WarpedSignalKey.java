@@ -63,16 +63,11 @@ public class WarpedSignalKey implements Serializable, XmlSerializable {
 		this.isNormalised = isNormalised;
 	}
 	
-	public WarpedSignalKey(@NonNull Element e) {
+	public WarpedSignalKey(@NonNull Element e) throws ComponentCreationException {
 		
 		Nucleus c = null;
-		try {
-			for(Element el : e.getChild("TargetShape").getChildren()) {
-				c = new DefaultConsensusNucleus(el);
-			}
-			
-		} catch (ComponentCreationException e1) {
-			LOGGER.log(Loggable.STACK, "Unable to unmarshal warped key target shape", e);
+		for(Element el : e.getChild("TargetShape").getChildren()) {
+			c = new DefaultConsensusNucleus(el);
 		}
 		
 		targetShape = c;

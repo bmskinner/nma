@@ -18,6 +18,7 @@ package com.bmskinner.nuclear_morphology.components.nuclei;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -74,52 +75,13 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
     private int nucleusNumber;
     
     /** Store the landmarks to be used for orientation */
-    private Map<OrientationMark, Landmark> orientationMarks = new HashMap<>();
+    private Map<@NonNull OrientationMark, Landmark> orientationMarks = new EnumMap<>(OrientationMark.class);
 
     private PriorityAxis priorityAxis = PriorityAxis.Y;
     
     /** FISH signals in the nucleus */
     private ISignalCollection signalCollection = new DefaultSignalCollection();
     
-    /**
-     * Construct from an XML element. Use for 
-     * unmarshalling. The element should conform
-     * to the specification in {@link XmlSerializable}.
-     * @param e the XML element containing the data.
-     */
-    public DefaultNucleus(Element e) throws ComponentCreationException {
-    	super(e);
-    	nucleusNumber = Integer.valueOf(e.getAttributeValue(XML_NUCLEUS_NUMBER));
-    	
-    	for(Element el : e.getChildren(XML_ORIENTATION)) {
-    		OrientationMark name = OrientationMark.valueOf(el.getAttributeValue("name"));
-    		Landmark l = this.getLandmarks().keySet().stream()
-    				.filter(lm->lm.getName().equals(el.getAttributeValue("value")))
-    				.findFirst().get();
-    		orientationMarks.put(name, l);
-    	}
-    	priorityAxis = PriorityAxis.valueOf(e.getAttributeValue(XML_PRIORITY_AXIS));
-    	signalCollection = new DefaultSignalCollection(e.getChild(XML_SIGNAL_COLLECTION));
-    }
-
-    @Override
-	public Element toXmlElement() {
-		Element e = super.toXmlElement()
-				.setName("Nucleus")
-				.setAttribute(XML_PRIORITY_AXIS, priorityAxis.toString())
-				.setAttribute(XML_NUCLEUS_NUMBER, String.valueOf(nucleusNumber));
-				
-		for(Entry<OrientationMark, Landmark> entry : orientationMarks.entrySet()) {
-			e.addContent(new Element(XML_ORIENTATION)
-					.setAttribute("name", entry.getKey().name())
-					.setAttribute("value", entry.getValue().toString()));
-		}
-
-		e.addContent(signalCollection.toXmlElement());
-		
-		return e;
-	}
-
 	/**
      * Construct with an ROI, a source image and channel, and the original
      * position in the source image. It sets the immutable original centre of
@@ -167,8 +129,9 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
      * 
      * @param n the template
      * @throws UnprofilableObjectException
+     * @throws ComponentCreationException 
      */
-    protected DefaultNucleus(@NonNull Nucleus n) throws UnprofilableObjectException {
+    protected DefaultNucleus(@NonNull Nucleus n) throws UnprofilableObjectException, ComponentCreationException {
         super(n);
         nucleusNumber = n.getNucleusNumber();
         signalCollection = n.getSignalCollection().duplicate();
@@ -181,15 +144,53 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
         priorityAxis = n.getPriorityAxis();
     }
 
+    /**
+     * Construct from an XML element. Use for 
+     * unmarshalling. The element should conform
+     * to the specification in {@link XmlSerializable}.
+     * @param e the XML element containing the data.
+     */
+    public DefaultNucleus(Element e) throws ComponentCreationException {
+    	super(e);
+    	nucleusNumber = Integer.valueOf(e.getAttributeValue(XML_NUCLEUS_NUMBER));
+    	
+    	for(Element el : e.getChildren(XML_ORIENTATION)) {
+    		OrientationMark name = OrientationMark.valueOf(el.getAttributeValue("name"));
+    		Landmark l = this.getLandmarks().keySet().stream()
+    				.filter(lm->lm.getName().equals(el.getAttributeValue("value")))
+    				.findFirst().get();
+    		orientationMarks.put(name, l);
+    	}
+    	priorityAxis = PriorityAxis.valueOf(e.getAttributeValue(XML_PRIORITY_AXIS));
+    	signalCollection = new DefaultSignalCollection(e.getChild(XML_SIGNAL_COLLECTION));
+    }
+
+    @Override
+	public Element toXmlElement() {
+		Element e = super.toXmlElement()
+				.setName("Nucleus")
+				.setAttribute(XML_PRIORITY_AXIS, priorityAxis.toString())
+				.setAttribute(XML_NUCLEUS_NUMBER, String.valueOf(nucleusNumber));
+				
+		for(Entry<OrientationMark, Landmark> entry : orientationMarks.entrySet()) {
+			e.addContent(new Element(XML_ORIENTATION)
+					.setAttribute("name", entry.getKey().name())
+					.setAttribute("value", entry.getValue().toString()));
+		}
+
+		e.addContent(signalCollection.toXmlElement());
+		
+		return e;
+	}
+    
     @Override
     public Nucleus duplicate() {
-        try {
-            return new DefaultNucleus(this);
-        } catch (UnprofilableObjectException e) {
-            LOGGER.warning("Duplication failed");
-            LOGGER.log(Loggable.STACK, "Error duplicating nucleus", e);
-        }
-        return null;
+    	try {
+    		return new DefaultNucleus(this);
+    	} catch (UnprofilableObjectException | ComponentCreationException e) {
+    		LOGGER.severe("Could not duplicate cell: "+e.getMessage());
+    	}
+    	return null;
     }
     
     @Override
@@ -203,17 +204,19 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
 	}
     
     @Override
-    public void initialise(double proportion) throws ComponentCreationException {
+    public void createProfiles(double proportion) throws ComponentCreationException {
 
-        super.initialise(proportion);
+        super.createProfiles(proportion);
 
-        try {
-            SignalAnalyser s = new SignalAnalyser();
-            s.calculateSignalDistancesFromCoM(this);
-            s.calculateFractionalSignalDistancesFromCoM(this);
-        } catch (UnavailableBorderPointException e) {
-            LOGGER.log(Loggable.STACK, "Unable to get border point", e);
-        }
+//        try {
+//        	// If creating profiles has changed landmarks, we 
+//        	// should update signal data
+//            SignalAnalyser s = new SignalAnalyser();
+//            s.calculateSignalDistancesFromCoM(this);
+//            s.calculateFractionalSignalDistancesFromCoM(this);
+//        } catch (UnavailableBorderPointException e) {
+//        	throw new ComponentCreationException(e);
+//        }
     }
 
     @Override
@@ -271,7 +274,7 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
     }
 
     @Override
-    public Nucleus getOrientedNucleus() throws MissingLandmarkException {
+    public Nucleus getOrientedNucleus() throws MissingLandmarkException, ComponentCreationException {
         // Make an exact copy of the nucleus
         Nucleus verticalNucleus = this.duplicate();
         verticalNucleus.orient();
@@ -308,9 +311,7 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
     public void orient() throws MissingLandmarkException {
     	ComponentOrienter.orient(this);
     }
-    
-    
-    
+
     @Override
 	public List<OrientationMark> getOrientationMarks() {
 		List<OrientationMark> result = new ArrayList<>();
@@ -422,11 +423,13 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (!super.equals(obj))
+		if (!super.equals(obj)) {
 			return false;
+		}
 		if (getClass() != obj.getClass())
 			return false;
 		DefaultNucleus other = (DefaultNucleus) obj;
+
 		return nucleusNumber == other.nucleusNumber 
 				&& Objects.equals(orientationMarks, other.orientationMarks)
 				&& priorityAxis == other.priorityAxis 

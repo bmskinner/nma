@@ -14,6 +14,7 @@ import java.util.logging.Logger;
 import org.eclipse.jdt.annotation.NonNull;
 import org.jdom2.Element;
 
+import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.io.XmlSerializable;
 import com.bmskinner.nuclear_morphology.utility.StringUtils;
@@ -59,8 +60,9 @@ public class ShortWarpedSignal implements IWarpedSignal {
      * unmarshalling. The element should conform
      * to the specification in {@link XmlSerializable}.
      * @param e the XML element containing the data.
+     * @throws ComponentCreationException 
      */
-	public ShortWarpedSignal(@NonNull Element e) {
+	public ShortWarpedSignal(@NonNull Element e) throws ComponentCreationException {
 		id = UUID.fromString(e.getAttributeValue("id"));
 		
 		for(Element el : e.getChildren("Image")) {

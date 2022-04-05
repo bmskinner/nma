@@ -34,6 +34,7 @@ import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.components.profiles.DefaultSegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileCollection;
@@ -127,11 +128,12 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
     	// Ensure hook statistics are generated appropriately
     	for (Nucleus n : dataset.getCollection().getNuclei()) {
     		// Initialise all measurements that do not already exist
-    		for(Measurement m : Measurement.getRodentSpermNucleusStats()) {
-    			if(!n.hasMeasurement(m))
-    				n.setMeasurement(m, Statistical.STAT_NOT_CALCULATED);
+    		for(Measurement m : dataset.getAnalysisOptions().orElseThrow(MissingOptionException::new)
+    				.getRuleSetCollection().getMeasurableValues()) {
+    			n.getMeasurement(m);
+//    			if(!n.hasMeasurement(m))
+//    				n.clearMeasurement(m);
     		}
-    		n.updateDependentStats();
     	}
     	DatasetValidator dv = new DatasetValidator();
     	if(!dv.validate(dataset)) {

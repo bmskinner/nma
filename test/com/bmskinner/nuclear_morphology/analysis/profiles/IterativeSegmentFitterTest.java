@@ -47,9 +47,9 @@ public class IterativeSegmentFitterTest extends ComponentTester {
 		ISegmentedProfile template = d.getCollection()
 				.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);
 		
-		ISegmentedProfile target = template.copy();
+		ISegmentedProfile target = template.duplicate();
 		
-		fitter = new IterativeSegmentFitter(template.copy());
+		fitter = new IterativeSegmentFitter(template.duplicate());
 		ISegmentedProfile fitted = fitter.fit(target);
 		assertEquals(target, fitted);
 	}
@@ -64,9 +64,9 @@ public class IterativeSegmentFitterTest extends ComponentTester {
 				.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);
 		
 		
-		ISegmentedProfile target = template.copy();
+		ISegmentedProfile target = template.duplicate();
 				
-		fitter = new IterativeSegmentFitter(template.copy());
+		fitter = new IterativeSegmentFitter(template.duplicate());
 		
 		ISegmentedProfile result = fitter.fit(target);
 		
@@ -112,9 +112,9 @@ public class IterativeSegmentFitterTest extends ComponentTester {
 				.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);
 
 				
-		fitter = new IterativeSegmentFitter(template.copy());
+		fitter = new IterativeSegmentFitter(template.duplicate());
 		
-		ISegmentedProfile result = fitter.fit(target.copy());
+		ISegmentedProfile result = fitter.fit(target.duplicate());
 		
 		for(int i=0; i<target.getSegmentCount(); i++) {
 			IProfileSegment targetSeg = target.getOrderedSegments().get(i);

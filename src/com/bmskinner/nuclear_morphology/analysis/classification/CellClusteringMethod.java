@@ -28,6 +28,7 @@ import com.bmskinner.nuclear_morphology.analysis.SingleDatasetAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.mesh.MeshCreationException;
 import com.bmskinner.nuclear_morphology.components.MissingComponentException;
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
+import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
@@ -64,9 +65,10 @@ public abstract class CellClusteringMethod extends SingleDatasetAnalysisMethod {
 	 * @throws MissingProfileException 
 	 * @throws MissingLandmarkException 
 	 * @throws MissingComponentException 
+	 * @throws ComponentCreationException 
 	 * @throws Exception
 	 */
-	protected abstract Instances makeInstances() throws AnalysisMethodException, MeshCreationException, MissingLandmarkException, MissingProfileException, ProfileException, MissingComponentException;
+	protected abstract Instances makeInstances() throws AnalysisMethodException, MeshCreationException, MissingLandmarkException, MissingProfileException, ProfileException, MissingComponentException, ComponentCreationException;
 	
 	/**
 	 * Create the columns of the matrix to be analysed

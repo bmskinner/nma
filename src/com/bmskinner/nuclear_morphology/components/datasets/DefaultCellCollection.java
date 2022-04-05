@@ -225,7 +225,7 @@ public class DefaultCellCollection implements ICellCollection {
 	}
 
 	@Override
-	public ICellCollection duplicate() {
+	public ICellCollection duplicate() throws ComponentCreationException {
 		DefaultCellCollection result = new DefaultCellCollection(ruleSets, name, uuid);
 		
 		for(ICell c : this)
@@ -422,7 +422,7 @@ public class DefaultCellCollection implements ICellCollection {
 	}
 
 	@Override
-	public Nucleus getConsensus() throws MissingLandmarkException {
+	public Nucleus getConsensus() throws MissingLandmarkException, ComponentCreationException {
 		return consensusNucleus.getOrientedNucleus();
 	}
 	
@@ -640,7 +640,7 @@ public class DefaultCellCollection implements ICellCollection {
 
 		// No need to check profiles if there is only one nucleus
 		if (this.size() == 1)
-			return list.stream().findFirst().get();
+			return list.stream().findFirst().orElseThrow(ProfileException::new);
 
 		IProfile medianProfile = profileCollection.getProfile(ProfileType.ANGLE, pointType, Stats.MEDIAN).interpolate(FIXED_PROFILE_LENGTH);
 
@@ -727,17 +727,16 @@ public class DefaultCellCollection implements ICellCollection {
 	private synchronized double getMedianStatistic(Measurement stat, String component, MeasurementScale scale,
 			UUID id) {
 
-		if (statsCache.hasMedian(stat, component, scale, id))
-			return statsCache.getMedian(stat, component, scale, id);
-
-		double median = Statistical.ERROR_CALCULATING_STAT;
-
-		if (this.hasCells()) {
-			double[] values = getRawValues(stat, component, scale, id);
-			median = Stats.quartile(values, Stats.MEDIAN);
+		if (!statsCache.hasMedian(stat, component, scale, id)) {
+			double median = Statistical.ERROR_CALCULATING_STAT;
+			if (this.hasCells()) {
+				double[] values = getRawValues(stat, component, scale, id);
+				median = Stats.quartile(values, Stats.MEDIAN);
+			}
+			statsCache.setMedian(stat, component, scale, id, median);
 		}
-		statsCache.setMedian(stat, component, scale, id, median);
-		return median;
+		return statsCache.getMedian(stat, component, scale, id);
+
 	}
 
 
@@ -828,8 +827,8 @@ public class DefaultCellCollection implements ICellCollection {
 
 		if (statsCache.hasValues(stat, CellularComponent.NUCLEUS, scale, null)) {
 			return statsCache.getValues(stat, CellularComponent.NUCLEUS, scale, null);
-
 		}
+		
 		if (Measurement.VARIABILITY.equals(stat)) {
 			result = this.getNormalisedDifferencesToMedianFromPoint(Landmark.REFERENCE_POINT);
 		} else {
@@ -1146,7 +1145,7 @@ public class DefaultCellCollection implements ICellCollection {
 			
 			try {
 				b.append(getConsensus().toString()+newLine);
-			} catch (MissingLandmarkException e) {
+			} catch (MissingLandmarkException | ComponentCreationException e) {
 				b.append("Cannot orient consensus; "+e.getMessage()+newLine);
 			}
 		}
@@ -1159,11 +1158,11 @@ public class DefaultCellCollection implements ICellCollection {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((consensusNucleus == null) ? 0 : consensusNucleus.hashCode());
-		result = prime * result + ((cells == null) ? 0 : cells.hashCode());
+		result = prime * result + cells.hashCode();
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
 		result = prime * result + ((profileCollection == null) ? 0 : profileCollection.hashCode());
 		result = prime * result + ((ruleSets == null) ? 0 : ruleSets.hashCode());
-		result = prime * result + ((signalGroups == null) ? 0 : signalGroups.hashCode());
+		result = prime * result + signalGroups.hashCode();
 		result = prime * result + ((uuid == null) ? 0 : uuid.hashCode());
 		return result;
 	}
@@ -1194,10 +1193,7 @@ public class DefaultCellCollection implements ICellCollection {
 				return false;
 		} else if (!consensusNucleus.equals(other.consensusNucleus))
 			return false;		
-		if (cells == null) {
-			if (other.cells != null)
-				return false;
-		} else if (!cells.equals(other.cells))
+		 if (!cells.equals(other.cells))
 			return false;
 
 		if (profileCollection == null) {
@@ -1210,18 +1206,13 @@ public class DefaultCellCollection implements ICellCollection {
 				return false;
 		} else if (!ruleSets.equals(other.ruleSets))
 			return false;
-		if (signalGroups == null) {
-			if (other.signalGroups != null)
+
+		if(signalGroups.size()!=other.signalGroups.size())
+			return false;
+		for(ISignalGroup s : signalGroups) {
+			if(!other.signalGroups.contains(s))
 				return false;
-		} else {
-			if(signalGroups.size()!=other.signalGroups.size())
-				return false;
-			for(ISignalGroup s : signalGroups) {
-				if(!other.signalGroups.contains(s))
-					return false;
-			}
 		}
-		
 
 		return true;
 	}
@@ -1676,7 +1667,7 @@ public class DefaultCellCollection implements ICellCollection {
 	        		for(ProfileKey k : map.keySet()) {
 	        			IProfile p = map.get(k);
 	        			if(p!=null)
-	        				result.map.put(k, p.copy());
+	        				result.map.put(k, p.duplicate());
 	        		}
 	        	} catch(ProfileException e) {
 

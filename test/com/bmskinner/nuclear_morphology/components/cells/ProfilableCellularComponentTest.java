@@ -188,7 +188,7 @@ public class ProfilableCellularComponentTest {
 		Nucleus n = c.getPrimaryNucleus();
 		
 		Nucleus dup = n.duplicate();
-		ComponentTester.testDuplicatesByField(n, dup);
+		ComponentTester.testDuplicatesByField(n.getNameAndNumber(), n, dup);
 		assertEquals(n, dup);
-	}
+	}	
 }

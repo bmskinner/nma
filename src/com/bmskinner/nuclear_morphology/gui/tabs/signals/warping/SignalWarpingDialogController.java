@@ -24,6 +24,7 @@ import com.bmskinner.nuclear_morphology.analysis.image.MultiScaleStructuralSimil
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalWarper;
 import com.bmskinner.nuclear_morphology.charting.charts.ConsensusNucleusChartFactory;
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
+import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.generic.FloatPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
@@ -198,7 +199,7 @@ implements SignalWarpingDisplayListener,
 		ThreadManager.getInstance().submit(task);
 	}
 	
-	public void deleteWarpedSignal(WarpedImageKey selectedKey) throws MissingLandmarkException {
+	public void deleteWarpedSignal(WarpedImageKey selectedKey) throws MissingLandmarkException, ComponentCreationException {
 				
 		ISignalGroup sg  = selectedKey.getTemplate().getCollection().getSignalGroup(selectedKey.getSignalGroupId()).get();
 		
@@ -214,7 +215,7 @@ implements SignalWarpingDisplayListener,
 		model.removeRow(selectedKey);
 	}
 	
-	public void deleteWarpedSignal(int row) throws MissingLandmarkException {
+	public void deleteWarpedSignal(int row) throws MissingLandmarkException, ComponentCreationException {
 		WarpedImageKey selectedKey = model.getKey(row);
 		deleteWarpedSignal(selectedKey);		
 	}

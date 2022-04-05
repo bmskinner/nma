@@ -82,9 +82,10 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
     /**
      * Constructor used for duplicating datasets
      * @param d the template dataset
+     * @throws ComponentCreationException 
      * @throws Exception 
      */
-    private DefaultAnalysisDataset(DefaultAnalysisDataset d) {
+    private DefaultAnalysisDataset(DefaultAnalysisDataset d) throws ComponentCreationException {
     	super(d);
     	cellCollection = d.cellCollection.duplicate();
     	
@@ -115,7 +116,7 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 
 
     @Override
-	public IAnalysisDataset copy() {
+	public IAnalysisDataset copy() throws ComponentCreationException {
     	return new DefaultAnalysisDataset(this);
     }
     

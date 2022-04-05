@@ -85,7 +85,7 @@ public class DummyRodentSpermNucleus extends DummyCellularComponent implements N
 	            105, 35, component_NUMBER, RuleSetCollection.mouseSpermRuleSetCollection());
 		nucleus = (Nucleus) component;
 		nucleus.offset(COM.getX(), COM.getY());
-        initialise(PROFILE_WINDOW);	    
+        createProfiles(PROFILE_WINDOW);	    
         setMeasurement(Measurement.AREA,     AREA);
         setMeasurement(Measurement.PERIMETER, PERIMETER);
         setMeasurement(Measurement.MIN_DIAMETER, MIN_DIAMETER);
@@ -93,8 +93,8 @@ public class DummyRodentSpermNucleus extends DummyCellularComponent implements N
 	}
 	
 	@Override
-	public void initialise(double angleWindowProportion) throws ComponentCreationException {
-		nucleus.initialise(angleWindowProportion);
+	public void createProfiles(double angleWindowProportion) throws ComponentCreationException {
+		nucleus.createProfiles(angleWindowProportion);
 	}
 
 	@Override
@@ -135,7 +135,7 @@ public class DummyRodentSpermNucleus extends DummyCellularComponent implements N
 	}
 
 	@Override
-	public Nucleus getOrientedNucleus() throws MissingLandmarkException {
+	public Nucleus getOrientedNucleus() throws MissingLandmarkException, ComponentCreationException {
 		return nucleus.getOrientedNucleus();
 	}
 

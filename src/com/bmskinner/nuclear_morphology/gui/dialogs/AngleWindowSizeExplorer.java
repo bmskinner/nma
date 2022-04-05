@@ -44,6 +44,7 @@ import com.bmskinner.nuclear_morphology.charting.ChartComponents;
 import com.bmskinner.nuclear_morphology.charting.charts.ProfileChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPanel;
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
+import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.cells.DefaultCell;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.DefaultCellCollection;
@@ -216,20 +217,17 @@ public class AngleWindowSizeExplorer extends LoadingIconDialog implements Change
         		final ICellCollection duplicateCollection = new DefaultCellCollection(dataset.getCollection(), "test");
 
         		// put each cell into the new collection
-        		dataset.getCollection().getCells().forEach(c->{
-        		    ICell newCell = new DefaultCell(c);
-                    for(Nucleus n : newCell.getNuclei()){
+        		for(ICell c : dataset.getCollection() ) {
+        			ICell newCell = c.duplicate();
+        			for(Nucleus n : newCell.getNuclei()){
                         n.setWindowProportion(j);
                     }
                     duplicateCollection.addCell(newCell);
-        		});
-
-
+        		}
+        		
         		// recalc the aggregate
         		IProfileCollection pc = duplicateCollection.getProfileCollection();
-
         		pc.calculateProfiles();
-//        		pc.createProfileAggregate(duplicateCollection, dataset.getCollection().getProfileCollection().length());
 
         		for (Landmark tag : dataset.getCollection().getProfileCollection().getLandmarks()) {
         			pc.setLandmark(tag, dataset.getCollection().getProfileCollection().getLandmarkIndex(tag));
@@ -241,7 +239,7 @@ public class AngleWindowSizeExplorer extends LoadingIconDialog implements Change
         		// add to the chart
         		updateChart(median, i);
         	}
-        } catch(MissingLandmarkException | MissingProfileException | ProfileException e){
+        } catch(MissingLandmarkException | MissingProfileException | ProfileException | ComponentCreationException e){
         	LOGGER.warning("Error making profile collections");
         	LOGGER.log(Loggable.STACK, e.getMessage(), e);
         }

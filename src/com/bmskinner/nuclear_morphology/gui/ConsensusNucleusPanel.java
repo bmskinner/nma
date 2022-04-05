@@ -20,6 +20,7 @@ import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.io.File;
+import java.util.logging.Logger;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -41,6 +42,7 @@ import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.Refoldable;
+import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
@@ -56,6 +58,8 @@ import com.bmskinner.nuclear_morphology.io.SVGWriter;
 
 @SuppressWarnings("serial")
 public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener {
+	
+	private static final Logger LOGGER = Logger.getLogger(ConsensusNucleusPanel.class.getName());
 
     private static final String MESH_FACES_LBL = "Mesh faces";
 	private static final String MESH_EDGES_LBL = "Mesh edges";
@@ -183,7 +187,8 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
     			activeDataset().getCollection().offsetConsensus(com.getX()+x, com.getY()+y);
     			refreshChartCache(getDatasets());
     		}
-    	} catch(MissingLandmarkException e) {
+    	} catch(MissingLandmarkException | ComponentCreationException e) {
+    		LOGGER.severe("Cannot get consensus");
     		consensusChartPanel.setChart(AbstractChartFactory.createErrorChart());;
     	}
     }

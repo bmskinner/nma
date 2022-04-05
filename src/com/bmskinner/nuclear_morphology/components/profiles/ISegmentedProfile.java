@@ -303,18 +303,11 @@ public interface ISegmentedProfile extends IProfile {
      * @return
      */
     boolean isSplittable(@NonNull UUID id, int splitIndex);
-
-    /**
-     * Restore the toString from Profile
-     * 
-     * @return
-     */
-    String valueString();
     
     /**
      * Create a copy of this profile
      * @return
      */
     @Override
-    ISegmentedProfile copy() throws ProfileException;
+    ISegmentedProfile duplicate() throws ProfileException;
 }

@@ -28,6 +28,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nuclear_morphology.components.MissingComponentException;
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.Taggable;
+import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
@@ -51,6 +52,8 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
  */
 public class DatasetValidator {
 	
+	private static final String CONSENSUS_NUCLEUS_LACKS_LANDMARK = "Consensus nucleus does not have required landmark";
+
 	private static final Logger LOGGER = Logger.getLogger(DatasetValidator.class.getName());
 
 	public static final List<String> errorList = new ArrayList<>();
@@ -311,8 +314,8 @@ public class DatasetValidator {
 						errorList.add(String.format("Consensus nucleus does not have root collection tag %s", t));
 					}
 				}
-			} catch(MissingLandmarkException e) {
-				errorList.add("Consensus nucleus does not have required landmark");
+			} catch(MissingLandmarkException | ComponentCreationException e) {
+				errorList.add(CONSENSUS_NUCLEUS_LACKS_LANDMARK);
 			}
 		}
 			
@@ -333,8 +336,8 @@ public class DatasetValidator {
 							errorList.add(String.format("Child dataset %s consensus nucleus does not have root collection tag %s", child.getName(), t));
 						}
 					}
-				} catch(MissingLandmarkException e) {
-					errorList.add("Consensus nucleus does not have required landmark");
+				} catch(MissingLandmarkException | ComponentCreationException e) {
+					errorList.add(CONSENSUS_NUCLEUS_LACKS_LANDMARK);
 				}
 			}
 		}
@@ -491,8 +494,8 @@ public class DatasetValidator {
 				if(consensusErrors>0)
 					errorList.add("Segmentation error in consensus");
 				errorCount += consensusErrors;
-			} catch(MissingLandmarkException e) {
-				errorList.add("Consensus nucleus does not have required landmark");
+			} catch(MissingLandmarkException | ComponentCreationException e) {
+				errorList.add(CONSENSUS_NUCLEUS_LACKS_LANDMARK);
 			}
 		}
 		

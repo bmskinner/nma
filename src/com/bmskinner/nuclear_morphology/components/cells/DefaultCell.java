@@ -23,12 +23,13 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.jdom2.Element;
 
-import com.bmskinner.nuclear_morphology.components.Statistical;
+import com.bmskinner.nuclear_morphology.analysis.ComponentMeasurer;
 import com.bmskinner.nuclear_morphology.components.Taggable;
 import com.bmskinner.nuclear_morphology.components.measure.DefaultMeasurement;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
@@ -45,6 +46,8 @@ import com.bmskinner.nuclear_morphology.io.XmlSerializable;
  * @since 1.13.3
  */
 public class DefaultCell implements ICell {
+	
+	private static final Logger LOGGER = Logger.getLogger(DefaultCell.class.getName());
 
     protected UUID uuid;
     protected ICytoplasm cytoplasm = null;
@@ -95,28 +98,18 @@ public class DefaultCell implements ICell {
      * 
      * @param n the template nucleus for the cell
      */
-    public DefaultCell(Nucleus n) {
+    public DefaultCell(@NonNull Nucleus n) {
         this();
         nuclei.add(n);
-    }
-
-    /**
-     * Create a new cell based on the given nucleus. The nucleus is NOT copied.
-     * 
-     * @param n
-     *            the template nucleus for the cell
-     */
-    public DefaultCell(ICytoplasm c) {
-        this();
-        cytoplasm = c;
     }
 
     /**
      * Duplicate a cell. The ID is kept consistent
      * 
      * @param c the cell to duplicate
+     * @throws ComponentCreationException 
      */
-    public DefaultCell(ICell c) {
+    public DefaultCell(@NonNull ICell c) throws ComponentCreationException {
 
         this.uuid = c.getId();
 
@@ -135,7 +128,12 @@ public class DefaultCell implements ICell {
     
     @Override
     public ICell duplicate() {
-    	return new DefaultCell(this);
+    	try {
+			return new DefaultCell(this);
+		} catch (ComponentCreationException e) {
+			LOGGER.severe("Could not duplicate cell: "+e.getMessage());
+		}
+    	return null;
     }
 
     @Override
@@ -159,10 +157,10 @@ public class DefaultCell implements ICell {
      * 
      */
 
-    @Override
-    public synchronized boolean hasMeasurement(@NonNull Measurement stat) {
-        return statistics.containsKey(stat) && Statistical.STAT_NOT_CALCULATED != statistics.get(stat);
-    }
+//    @Override
+//    public synchronized boolean hasMeasurement(@NonNull Measurement stat) {
+//        return statistics.containsKey(stat);
+//    }
 
     @Override
     public synchronized double getMeasurement(@NonNull Measurement stat) {
@@ -175,14 +173,11 @@ public class DefaultCell implements ICell {
         // Get the scale of one of the components of the cell
         double sc = chooseScale();
 
-        if (hasMeasurement(stat)) {
-            double result = statistics.get(stat);
-            return stat.convert(result, sc, scale);
-        }
-
-        double result = calculateStatistic(stat);
-//        statistics.put(stat, result);
-        return result;
+        if (!statistics.containsKey(stat))
+        	statistics.put(stat, ComponentMeasurer.calculate(stat, this));
+        
+        double result = statistics.get(stat);
+        return stat.convert(result, sc, scale);
     }
     
     private double chooseScale() {
@@ -197,65 +192,27 @@ public class DefaultCell implements ICell {
     	return 1d;
     }
 
-    protected double calculateStatistic(Measurement stat) {
-
-        if (stat == null)
-            throw new IllegalArgumentException("Stat cannot be null");
-
-        // Do not add getters for values added at creation time
-        // or you'll get infinite loops when things break
-
-        if (Measurement.CELL_NUCLEUS_COUNT.equals(stat))
-            return nuclei.size();
-
-        if (Measurement.CELL_NUCLEAR_AREA.equals(stat))
-            return getNuclearArea();
-
-        if (Measurement.CELL_NUCLEAR_RATIO.equals(stat))
-            return getNuclearRatio();
-        return STAT_NOT_CALCULATED;
-    }
-
     @Override
     public void setMeasurement(@NonNull Measurement stat, double d) {
     	
-    	// These can all be calculated when needed without
-    	// a long wait - no need to store
-//        if (Measurement.CELL_NUCLEUS_COUNT.equals(stat))
-//            statistics.put(stat, d);
-//
-//        if (Measurement.CELL_NUCLEAR_AREA.equals(stat))
-//            statistics.put(stat, d);
-//
-//        if (Measurement.CELL_NUCLEAR_RATIO.equals(stat)) 
-//            statistics.put(stat, d);
+    	// All measurements can be calculated when needed without
+    	// a long wait - no need to manually store
+
     }
     
     @Override
     public void clearMeasurement(@NonNull Measurement stat) {
     	statistics.remove(stat);
     }
+    
+    @Override
+    public void clearMeasurements() {
+    	statistics.clear();
+    }
 
     @Override
     public List<Measurement> getMeasurements() {
-        return Measurement.getCellStats();
-    }
-
-    private int getNuclearArea() {
-        int i = 0;
-        for (Nucleus n : nuclei) {
-            i += n.getMeasurement(Measurement.AREA);
-        }
-        return i;
-    }
-
-    private double getNuclearRatio() {
-        if (hasCytoplasm()) {
-            double cy = cytoplasm.getMeasurement(Measurement.AREA);
-            double n = getMeasurement(Measurement.CELL_NUCLEAR_AREA);
-            return n / cy;
-        }
-        return STAT_NOT_CALCULATED;
+    	return new ArrayList<>(statistics.keySet());
     }
 
     /*

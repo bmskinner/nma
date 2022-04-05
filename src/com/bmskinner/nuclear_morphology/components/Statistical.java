@@ -35,16 +35,7 @@ public interface Statistical {
 
     double ERROR_CALCULATING_STAT = -1d;
     double MISSING_LANDMARK       = -2d;
-    double STAT_NOT_CALCULATED    = -3d;
     double INVALID_OBJECT_TYPE    = -4d;
-
-    /**
-     * Check if the given measurement is present
-     * 
-     * @param stat
-     * @return
-     */
-    boolean hasMeasurement(@NonNull Measurement stat);
 
     /**
      * Get the value of the given measurement for this component. Note that
@@ -80,6 +71,11 @@ public interface Statistical {
      * @param measurement
      */
     void clearMeasurement(@NonNull Measurement stat);
+    
+    /**
+     * Clear all measurements from the cache
+     */
+    void clearMeasurements();
 
     /**
      * Get all the measurements in this object

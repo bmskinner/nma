@@ -179,8 +179,9 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
 	 * Construct from an existing dataset. Used internally
 	 * for duplication.
 	 * @param v
+	 * @throws ComponentCreationException 
 	 */
-	private VirtualDataset(VirtualDataset v) {
+	private VirtualDataset(VirtualDataset v) throws ComponentCreationException {
 		super(v);
 		uuid = v.uuid;
 		name = v.name;
@@ -423,7 +424,7 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
 	}
 
 	@Override
-	public Nucleus getConsensus() throws MissingLandmarkException {
+	public Nucleus getConsensus() throws MissingLandmarkException, ComponentCreationException {
 		return consensusNucleus.getOrientedNucleus();
 	}
 	
@@ -1308,12 +1309,12 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
 	}
 
 	@Override
-	public ICellCollection duplicate() {
+	public ICellCollection duplicate() throws ComponentCreationException {
 		return new VirtualDataset(this);
 	}
 
 	@Override
-	public IAnalysisDataset copy() {
+	public IAnalysisDataset copy() throws ComponentCreationException {
 		return new VirtualDataset(this);
 	}
 
@@ -1766,7 +1767,7 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
 	        	
 	        	try {
 	        	for(Entry<ProfileKey, IProfile> e : map.entrySet())
-	        		result.map.put(e.getKey(), e.getValue().copy());
+	        		result.map.put(e.getKey(), e.getValue().duplicate());
 	        	} catch(ProfileException e) {
 	        		LOGGER.warning("Unable to duplicate profile cache: "+e.getMessage());
 	        	}

@@ -18,6 +18,7 @@ package com.bmskinner.nuclear_morphology.components;
 
 import org.eclipse.jdt.annotation.Nullable;
 
+import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclei.Consensus;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
@@ -53,8 +54,9 @@ public interface Refoldable {
      * 
      * @return the consensus, or null if not present
      * @throws MissingLandmarkException 
+     * @throws ComponentCreationException 
      */
-    Nucleus getConsensus() throws MissingLandmarkException;
+    Nucleus getConsensus() throws MissingLandmarkException, ComponentCreationException;
     
     /**
      * Get the consensus nucleus. Unlike {@link getConsensus},

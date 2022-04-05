@@ -32,6 +32,7 @@ import com.bmskinner.nuclear_morphology.components.MissingComponentException;
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.Taggable;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
@@ -67,11 +68,13 @@ public class ProfileManager {
      * @throws ProfileException 
      * @throws MissingProfileException 
      * @throws MissingLandmarkException 
+     * @throws ComponentCreationException 
+     * @throws IndexOutOfBoundsException 
      * @throws  
      */
     public void updateLandmarkToMedianBestFit(@NonNull Landmark lm, 
     		@NonNull ProfileType type,
-    		@NonNull IProfile median) throws MissingProfileException, ProfileException, MissingLandmarkException {
+    		@NonNull IProfile median) throws MissingProfileException, ProfileException, MissingLandmarkException, IndexOutOfBoundsException, ComponentCreationException {
     	
     	for(Nucleus n : collection.getNuclei()) {
     		if(n.isLocked())
@@ -86,7 +89,7 @@ public class ProfileManager {
     		
     		// Update any stats that are based on orientation
             if (lm.equals(Landmark.TOP_VERTICAL) || lm.equals(Landmark.BOTTOM_VERTICAL)) {
-                n.updateDependentStats();
+                n.clearMeasurements();
                 setOpUsingTvBv(n);
             }
     	}
@@ -112,8 +115,10 @@ public class ProfileManager {
      * @throws ProfileException 
      * @throws MissingProfileException 
      * @throws MissingLandmarkException 
+     * @throws ComponentCreationException 
+     * @throws IndexOutOfBoundsException 
      */
-    public void calculateTopAndBottomVerticals() throws MissingProfileException, ProfileException, MissingLandmarkException {
+    public void calculateTopAndBottomVerticals() throws MissingProfileException, ProfileException, MissingLandmarkException, IndexOutOfBoundsException, ComponentCreationException {
 
         try {
             int topIndex = ProfileIndexFinder.identifyIndex(collection, Landmark.TOP_VERTICAL);
@@ -180,9 +185,11 @@ public class ProfileManager {
      * @throws MissingLandmarkException
      * @throws ProfileException
      * @throws MissingProfileException
+     * @throws ComponentCreationException 
+     * @throws IndexOutOfBoundsException 
      */
     public void updateLandmark(@NonNull Landmark lm, int index) throws ProfileException,
-            MissingLandmarkException, MissingProfileException {
+            MissingLandmarkException, MissingProfileException, IndexOutOfBoundsException, ComponentCreationException {
     	
     	if(Landmark.REFERENCE_POINT.equals(lm)) {
     		updateCoreBorderTagIndex(lm, index);
@@ -220,8 +227,9 @@ public class ProfileManager {
      * @throws ProfileException 
      * @throws MissingProfileException 
      * @throws IndexOutOfBoundsException 
+     * @throws ComponentCreationException 
      */
-    private boolean canUpdateLandmarkIndexToExistingLandmark(@NonNull Landmark lm, int newIndex) throws MissingLandmarkException, IndexOutOfBoundsException, MissingProfileException, ProfileException {
+    private boolean canUpdateLandmarkIndexToExistingLandmark(@NonNull Landmark lm, int newIndex) throws MissingLandmarkException, IndexOutOfBoundsException, MissingProfileException, ProfileException, ComponentCreationException {
     	List<Landmark> tags = collection.getProfileCollection().getLandmarks();
     	for(Landmark existingTag : tags) {
     		if(existingTag.equals(lm))
@@ -235,7 +243,7 @@ public class ProfileManager {
     				int existingIndex = n.getBorderIndex(existingTag);
     				n.setLandmark(lm, existingIndex);
     				if (lm.equals(Landmark.TOP_VERTICAL) || lm.equals(Landmark.BOTTOM_VERTICAL)) {
-    					n.updateDependentStats();
+    					n.clearMeasurements();
     					setOpUsingTvBv(n);
     				}
     			}
@@ -264,9 +272,11 @@ public class ProfileManager {
      * @throws ProfileException
      * @throws MissingLandmarkException
      * @throws MissingProfileException
+     * @throws ComponentCreationException 
+     * @throws IndexOutOfBoundsException 
      */
     private void updateExtendedBorderTagIndex(@NonNull Landmark lm, int index) throws ProfileException,
-            MissingLandmarkException, MissingProfileException {
+            MissingLandmarkException, MissingProfileException, IndexOutOfBoundsException, ComponentCreationException {
   
     	try {
     		// Check if the landmark exists
@@ -314,8 +324,9 @@ public class ProfileManager {
      * @throws MissingLandmarkException 
      * @throws MissingProfileException 
      * @throws IndexOutOfBoundsException 
+     * @throws ComponentCreationException 
      */
-    private void setOpUsingTvBv(@NonNull final Nucleus n) throws IndexOutOfBoundsException, MissingProfileException, MissingLandmarkException, ProfileException {
+    private void setOpUsingTvBv(@NonNull final Nucleus n) throws IndexOutOfBoundsException, MissingProfileException, MissingLandmarkException, ProfileException, ComponentCreationException {
     	// also update the OP to be directly below the CoM in vertically oriented nucleus
 		if(n.hasLandmark(Landmark.TOP_VERTICAL) && n.hasLandmark(Landmark.BOTTOM_VERTICAL)) {
 			Nucleus vertN = n.getOrientedNucleus();
@@ -337,10 +348,12 @@ public class ProfileManager {
      * @throws MissingLandmarkException
      * @throws MissingProfileException
      * @throws UnsegmentedProfileException 
+     * @throws ComponentCreationException 
+     * @throws IndexOutOfBoundsException 
      * @throws SegmentUpdateException 
      */
     private void updateCoreBorderTagIndex(@NonNull Landmark tag, int index)
-            throws MissingLandmarkException, ProfileException, MissingProfileException, UnsegmentedProfileException {
+            throws MissingLandmarkException, ProfileException, MissingProfileException, UnsegmentedProfileException, IndexOutOfBoundsException, ComponentCreationException {
 
         LOGGER.finer("Updating core border tag index");
 
@@ -361,8 +374,10 @@ public class ProfileManager {
      * @throws ProfileException 
      * @throws MissingProfileException 
      * @throws MissingLandmarkException 
+     * @throws ComponentCreationException 
+     * @throws IndexOutOfBoundsException 
      */
-    private void moveRp(int newRpIndex, @NonNull ISegmentedProfile oldMedian) throws ProfileException, MissingProfileException, MissingLandmarkException {
+    private void moveRp(int newRpIndex, @NonNull ISegmentedProfile oldMedian) throws ProfileException, MissingProfileException, MissingLandmarkException, IndexOutOfBoundsException, ComponentCreationException {
     	// This is the median we will use to update individual nuclei
     	ISegmentedProfile newMedian = oldMedian.startFrom(newRpIndex);
 
@@ -528,7 +543,7 @@ public class ProfileManager {
 
         		Landmark landmarkToUpdate = n.getBorderTag(rawOldIndex);
         		n.setLandmark(landmarkToUpdate, rawIndex);
-        		n.updateDependentStats();
+        		n.clearMeasurements();
 
         	} else {
         		LOGGER.warning(String.format("Updating %s start index from %s to %s failed", seg.getName(), seg.getStartIndex(), index ));

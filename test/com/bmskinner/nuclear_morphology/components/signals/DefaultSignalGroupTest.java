@@ -2,8 +2,6 @@ package com.bmskinner.nuclear_morphology.components.signals;
 
 import static org.junit.Assert.assertEquals;
 
-import java.io.PrintWriter;
-
 import org.jdom2.Element;
 import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
@@ -34,12 +32,9 @@ public class DefaultSignalGroupTest {
 		
 		for(ISignalGroup s : d.getCollection().getSignalGroups()) {
 			Element e = s.toXmlElement();		
-			XMLOutputter xmlOutput = new XMLOutputter();
-			xmlOutput.setFormat(Format.getPrettyFormat());
-			xmlOutput.output(e, new PrintWriter( System.out ));
 			
 			ISignalGroup test = new DefaultSignalGroup(e);
-			ComponentTester.testDuplicatesByField(s, test);
+			ComponentTester.testDuplicatesByField("Signal group", s, test);
 			assertEquals(s, test);
 		}
 	}

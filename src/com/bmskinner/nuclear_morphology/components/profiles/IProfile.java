@@ -170,7 +170,7 @@ public interface IProfile extends Iterable<Integer>, XmlSerializable {
      * @return a new profile of the same class with the same values as this profile
      * @throws ProfileException if the copy failed
      */
-    IProfile copy() throws ProfileException;
+    IProfile duplicate() throws ProfileException;
 
     /**
      * Create a profile starting at the given index. For example, a

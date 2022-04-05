@@ -139,6 +139,7 @@ public class RulesetDialog extends LoadingIconDialog
         this.centerOnScreen();
 
         this.addWindowListener(new WindowAdapter() {
+            @Override
             public void windowClosing(WindowEvent e) {
                 if (!customCollections.isEmpty()) {
                     askToSaveCustomPoints();
@@ -437,7 +438,10 @@ public class RulesetDialog extends LoadingIconDialog
                 LOGGER.warning("Unable to update border tag index - cannot find index with given ruleset");
                 LOGGER.log(Loggable.STACK, "Unable to find matching index", e);
                 return;
-            }
+            } catch (ComponentCreationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 
             if (tag.type().equals(LandmarkType.CORE)) {
                 LOGGER.info("Resegmenting dataset");

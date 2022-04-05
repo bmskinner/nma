@@ -27,6 +27,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import com.bmskinner.nuclear_morphology.ComponentTester;
+
 
 public class DefaultProfileTest {
 	
@@ -43,6 +45,12 @@ public class DefaultProfileTest {
 	@Rule
 	public final ExpectedException exception = ExpectedException.none();
 	
+	
+	@Test
+	public void testDuplicate() throws Exception {
+		IProfile dup = profile.duplicate();
+		ComponentTester.testDuplicatesByField("Profile", profile, dup);
+	}
 	
 	/**
 	 * Test method for {@link com.bmskinner.nuclear_morphology.components.profiles.DefaultProfile#FloatProfile(float[])}.

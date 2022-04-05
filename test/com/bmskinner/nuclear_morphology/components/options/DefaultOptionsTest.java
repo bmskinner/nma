@@ -3,7 +3,6 @@ package com.bmskinner.nuclear_morphology.components.options;
 import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 
 import org.jdom2.Element;
 import org.jdom2.output.Format;
@@ -21,9 +20,7 @@ public class DefaultOptionsTest {
 		Element e = o.toXmlElement();
 		
 		XMLOutputter xmlOutput = new XMLOutputter();
-		xmlOutput.setFormat(Format.getPrettyFormat());
-		xmlOutput.output(e, new PrintWriter( System.out ));
-		
+		xmlOutput.setFormat(Format.getPrettyFormat());		
 		HashOptions test = new DefaultOptions(e);
 		
 		assertEquals(o, test);

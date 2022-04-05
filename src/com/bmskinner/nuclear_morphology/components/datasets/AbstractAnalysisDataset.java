@@ -127,8 +127,9 @@ public abstract class AbstractAnalysisDataset implements IAnalysisDataset {
     /**
      * Constructor used when copying datasets
      * @param d
+     * @throws ComponentCreationException 
      */
-    protected AbstractAnalysisDataset(AbstractAnalysisDataset d) {
+    protected AbstractAnalysisDataset(AbstractAnalysisDataset d) throws ComponentCreationException {
     	versionCreated = d.versionCreated;
     	versionLastSaved = d.versionLastSaved;
     	
@@ -250,9 +251,6 @@ public abstract class AbstractAnalysisDataset implements IAnalysisDataset {
     }
 
     @Override
-	public abstract Set<UUID> getChildUUIDs();
-
-    @Override
 	public boolean hasDirectChild(@NonNull UUID child) {
         return getChildUUIDs().contains(child);
     }
@@ -295,9 +293,6 @@ public abstract class AbstractAnalysisDataset implements IAnalysisDataset {
     	return testName;
     }
     
-    @Override
-	public abstract void deleteClusterGroup(@NonNull IClusterGroup group);
-
     @Override
 	public void addClusterGroup(@NonNull IClusterGroup group) {
         this.clusterGroups.add(group);
@@ -418,7 +413,7 @@ public abstract class AbstractAnalysisDataset implements IAnalysisDataset {
         for (UUID id : getMergeSourceIDs()) {
 
             IAnalysisDataset source = this.getAssociatedDataset(id);
-            if (source.hasMergeSources()) {
+            if (source != null && source.hasMergeSources()) {
                 result.addAll(source.getAllMergeSources());
             } else {
                 result.add(source);

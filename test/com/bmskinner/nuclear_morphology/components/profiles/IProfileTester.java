@@ -374,13 +374,13 @@ public class IProfileTester {
     }
 
 	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.profiles.IProfile#copy()}.
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.profiles.IProfile#duplicate()}.
 	 * @throws Exception 
 	 */
 	@Test
 	public void testCopy() throws Exception {
 		IProfile p = createInstance(source);
-		float[] result = p.copy().toFloatArray();
+		float[] result = p.duplicate().toFloatArray();
 
 		assertTrue(Arrays.equals(data, result));
 	}

@@ -7,6 +7,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
+import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
@@ -76,7 +77,7 @@ public class DefaultMeshTest {
 					fail("Unable to create mesh for "+n.getNameAndNumber()+": "+e.getMessage());
 				}
 			}
-		} catch (MeshCreationException e) {
+		} catch (MeshCreationException | ComponentCreationException e) {
 			fail("Unable to create consensus mesh: "+e.getMessage());
 		}
 	}
@@ -98,7 +99,7 @@ public class DefaultMeshTest {
 					fail("Unable to create mesh for "+n.getNameAndNumber()+": "+e.getMessage());
 				}
 			}
-		} catch (MeshCreationException e) {
+		} catch (MeshCreationException | ComponentCreationException e) {
 			fail("Unable to create consensus mesh: "+e.getMessage());
 		}
 	}

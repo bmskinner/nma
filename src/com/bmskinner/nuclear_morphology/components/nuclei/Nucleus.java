@@ -22,6 +22,7 @@ import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.Orientable;
 import com.bmskinner.nuclear_morphology.components.Taggable;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalCollection;
 
@@ -88,8 +89,9 @@ public interface Nucleus extends CellularComponent, Taggable, Orientable, Compar
      * used when creating the nucleus.
      * @return an oriented copy of the nucleus
      * @throws MissingLandmarkException 
+     * @throws ComponentCreationException 
      */
-    Nucleus getOrientedNucleus() throws MissingLandmarkException;
+    Nucleus getOrientedNucleus() throws MissingLandmarkException, ComponentCreationException;
 
     /**
      * Thrown when a nucleus type in a collection is incorrect for a requested

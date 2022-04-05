@@ -32,6 +32,8 @@ import com.bmskinner.nuclear_morphology.analysis.signals.PairedSignalGroups;
 import com.bmskinner.nuclear_morphology.analysis.signals.PairedSignalGroups.DatasetSignalId;
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
+import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.DefaultAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.DefaultCellCollection;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
@@ -180,15 +182,17 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
      * @throws MissingOptionException 
      * @throws ProfileException 
      * @throws MissingLandmarkException 
+     * @throws ComponentCreationException 
      */
-    private IAnalysisDataset performMerge(@NonNull ICellCollection newCollection) throws MissingOptionException, ProfileException, MissingLandmarkException{
+    private IAnalysisDataset performMerge(@NonNull ICellCollection newCollection) throws MissingOptionException, ProfileException, MissingLandmarkException, ComponentCreationException{
 
         for (IAnalysisDataset d : datasets) {
+        	
+        	for(ICell c : d.getCollection()) {
+        		if(!newCollection.contains(c))
+        			newCollection.add(c.duplicate());
+        	}
             
-            d.getCollection().streamCells()
-                .filter(c->!newCollection.contains(c))
-                .forEach(c->newCollection.addCell(c.duplicate()));
-
             // All the existing signal groups before merging
             for (UUID signalGroupID : d.getCollection().getSignalGroupIDs()) {
                 newCollection.addSignalGroup(

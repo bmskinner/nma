@@ -36,6 +36,7 @@ import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.Finder;
 import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.FinderDisplayType;
 import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.FluorescentNucleusFinder;
+import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileCreator;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.DefaultAnalysisDataset;
@@ -45,6 +46,7 @@ import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 import com.bmskinner.nuclear_morphology.io.Io;
@@ -166,14 +168,6 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
     }
 
     /**
-     * Get the datasets identified in this method
-     * @return
-     */
-    public List<IAnalysisDataset> getDatasets() {
-        return this.datasets;
-    }
-
-    /**
      * From all possible cell collections, choose those
      * with cells and create root datasets
      * @return
@@ -181,7 +175,6 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
     private List<IAnalysisDataset> analysePopulations() {
 
         LOGGER.finer("Creating cell collections");
-        LOGGER.finer(templateOptions.toString());
         List<IAnalysisDataset> foundDatasets = new ArrayList<>();
 
         for (final Entry<File, ICellCollection> entry : collectionGroup.entrySet()) {
@@ -211,6 +204,7 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
                 LOGGER.log(Loggable.STACK, "Error in nucleus detection", e);
             }
         }
+
         return foundDatasets;
     }
 

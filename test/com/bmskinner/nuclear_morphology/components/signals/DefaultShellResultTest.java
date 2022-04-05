@@ -216,10 +216,9 @@ public class DefaultShellResultTest {
 		
 		XMLOutputter xmlOutput = new XMLOutputter();
 		xmlOutput.setFormat(Format.getPrettyFormat());
-		xmlOutput.output(e, new PrintWriter( System.out ));
+
 
 		DefaultShellResult recovered = new DefaultShellResult(e);
-		ComponentTester.testDuplicatesByField(k, recovered);
-//		assertEquals(k, recovered);
+		ComponentTester.testDuplicatesByField("Shell result", k, recovered);
 	}
 }

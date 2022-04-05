@@ -70,6 +70,7 @@ import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.components.Imageable;
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.cells.DefaultCell;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
@@ -288,7 +289,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
         try {
             meshConsensus = new DefaultMesh(dataset.getCollection().getConsensus());
             consensus = dataset.getCollection().getConsensus();
-        } catch (MeshCreationException | MissingLandmarkException e) {
+        } catch (MeshCreationException | MissingLandmarkException | ComponentCreationException e) {
             LOGGER.log(Loggable.STACK, "Error creating consensus mesh", e);
             return createErrorChart();
         }
@@ -388,7 +389,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
                         Mesh result = mesh1.comparison(mesh2);
                         return createMeshChart(result, 0.5);
 
-                    } catch (MeshCreationException | MissingLandmarkException e) {
+                    } catch (MeshCreationException | MissingLandmarkException | ComponentCreationException e) {
                         LOGGER.log(Loggable.STACK, ERROR_CREATING_MESH_MSG, e);
                         return createErrorChart();
                     }
@@ -429,10 +430,10 @@ public class OutlineChartFactory extends AbstractChartFactory {
                     } catch (MeshCreationException e) {
                         LOGGER.log(Loggable.STACK, ERROR_CREATING_MESH_MSG, e);
                         return createErrorChart();
-                    } catch (MissingLandmarkException e) {
+                    } catch (MissingLandmarkException | ComponentCreationException e) {
                     	LOGGER.log(Loggable.STACK, "Cannot orient consensus", e);
                     	return createErrorChart();
-					}
+                    }
 
                 }
 				return createEmptyChart();
@@ -534,7 +535,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
         		Nucleus n = cell.getPrimaryNucleus().getOrientedNucleus();
         		cell = new DefaultCell(n);
         	} 
-        }catch(MissingLandmarkException e) {
+        }catch(MissingLandmarkException | ComponentCreationException e) {
         	LOGGER.log(Loggable.STACK, "Error getting consensus", e);
         	return createErrorChart();
         }
@@ -957,7 +958,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
             		plot.setDataset(i, nucleusDataset);
             		plot.setRenderer(i, r);
 
-            	} catch (ChartDatasetCreationException | MissingLandmarkException e) {
+            	} catch (ChartDatasetCreationException | MissingLandmarkException | ComponentCreationException e) {
             		LOGGER.warning("Cannot create data for dataset " + dataset.getName());
             		LOGGER.log(Loggable.STACK, "Error getting chart data", e);
             	} finally {
@@ -1055,7 +1056,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 					}
 				}
 				
-        	} catch (MissingLandmarkException | MissingProfileException | ProfileException e) {
+        	} catch (MissingLandmarkException | MissingProfileException | ProfileException | ComponentCreationException e) {
         		LOGGER.log(Loggable.STACK, "Error getting segments for mesh", e);
         		LOGGER.log(Loggable.STACK, "Falling back to old mesh face annotation");
 

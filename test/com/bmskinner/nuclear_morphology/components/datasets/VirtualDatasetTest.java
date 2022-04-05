@@ -49,7 +49,7 @@ public class VirtualDatasetTest extends ComponentTester {
 	@Test
     public void testDuplicate() throws Exception {
     	IAnalysisDataset dup = d.copy();
-    	testDuplicatesByField(d, dup);
+    	testDuplicatesByField(d.getName(), d, dup);
     }
 	
 	/**
@@ -64,14 +64,13 @@ public class VirtualDatasetTest extends ComponentTester {
 		Element e = parent.toXmlElement();		
 		XMLOutputter xmlOutput = new XMLOutputter();
 		xmlOutput.setFormat(Format.getPrettyFormat());
-		xmlOutput.output(e, new PrintWriter( System.out ));
 		
 		// files are not absolute on test dataset creation
 		d.setSavePath(d.getSavePath().getAbsoluteFile());
 		
 		IAnalysisDataset test = DatasetCreator.createRoot(e);
-		xmlOutput.output(test.toXmlElement(), new PrintWriter( System.out ));
-		testDuplicatesByField(parent, test);
+
+		testDuplicatesByField(d.getName(), parent, test);
 		assertEquals(parent, test);
 	}
 }

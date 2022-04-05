@@ -43,7 +43,6 @@ import org.jdom2.Element;
 import com.bmskinner.nuclear_morphology.analysis.ComponentMeasurer;
 import com.bmskinner.nuclear_morphology.components.Imageable;
 import com.bmskinner.nuclear_morphology.components.MissingComponentException;
-import com.bmskinner.nuclear_morphology.components.Statistical;
 import com.bmskinner.nuclear_morphology.components.generic.FloatPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.measure.DefaultMeasurement;
@@ -70,6 +69,8 @@ import ij.process.FloatPolygon;
 public abstract class DefaultCellularComponent implements CellularComponent {
 	
 //	private static final String SOURCE_IMAGE_IS_NOT_AVAILABLE = "Source image is not available";
+
+	private static final String XML_COM = "CoM";
 
 	private static final Logger LOGGER = Logger.getLogger(DefaultCellularComponent.class.getName());
     
@@ -120,7 +121,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     private IPoint[] borderList = new IPoint[0];
 
     /** Cached object shapes. */
-    private ShapeCache shapeCache = new ShapeCache();
+//    private ShapeCache shapeCache = new ShapeCache();
 
     /** The object bounding box */
     private Rectangle2D bounds;
@@ -226,13 +227,18 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     	xBase = Integer.parseInt(e.getChild("Base").getAttributeValue("x"));
         yBase = Integer.parseInt(e.getChild("Base").getAttributeValue("y"));
     	    	
-    	centreOfMass = new FloatPoint(Float.parseFloat(e.getChild("CentreOfMass").getAttributeValue("x")), 
-    			Float.parseFloat(e.getChild("CentreOfMass").getAttributeValue("y")));
+    	centreOfMass = new FloatPoint(Float.parseFloat(e.getChild(XML_COM).getAttributeValue("x")), 
+    			Float.parseFloat(e.getChild(XML_COM).getAttributeValue("y")));
     	
     	originalCentreOfMass = new FloatPoint(Float.parseFloat(e.getChild("OriginalCentreOfMass").getAttributeValue("x")), 
-    			Float.parseFloat(e.getChild("CentreOfMass").getAttributeValue("y")));
+    			Float.parseFloat(e.getChild(XML_COM).getAttributeValue("y")));
 
 
+    	// Add measurements
+    	for(Element el : e.getChildren("Measurement")) {
+    		Measurement m = new DefaultMeasurement(el);
+    		measurements.put(m, Double.parseDouble(el.getAttributeValue("value")));
+    	}
     	
     	sourceFile = new File(e.getChildText("SourceFile"));
     	channel = Integer.parseInt(e.getChildText("Channel"));
@@ -243,12 +249,6 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     	isReversed = e.getChild("xpoints").getAttributeValue("reverse")!=null;
 
     	makeBorderList();
-    	
-    	// Add measurements
-    	for(Element el : e.getChildren("Measurement")) {
-    		Measurement m = new DefaultMeasurement(el);
-    		measurements.put(m, Double.parseDouble(el.getAttributeValue("value")));
-    	}
     }
     
     /**
@@ -277,29 +277,17 @@ public abstract class DefaultCellularComponent implements CellularComponent {
         IPoint oldCoM = centreOfMass.duplicate();
         centreOfMass = originalCentreOfMass.duplicate();
 
-        // convert the roi positions to a list of border points
+        // convert the roi positions to border points
         roi.fitSplineForStraightening(); // this prevents the resulting border differing in length between invokations
 
         FloatPolygon smoothed = roi.getInterpolatedPolygon(INTERPOLATION_INTERVAL_PIXELS, true);
-
-        LOGGER.finest( "Interpolated integer list to smoothed list of "+smoothed.npoints);
         
         borderList = new IPoint[smoothed.npoints];   
         for (int i = 0; i < smoothed.npoints; i++)
             borderList[i] = new FloatPoint(smoothed.xpoints[i], smoothed.ypoints[i]);
         
-        
-        // Recalculate any measurements depending on border values 
-        clearMeasurement(Measurement.CIRCULARITY);
-        clearMeasurement(Measurement.AREA);
-        clearMeasurement(Measurement.PERIMETER);
-
         moveCentreOfMass(oldCoM);
         updateBounds();
-        
-        getMeasurement(Measurement.AREA);
-        getMeasurement(Measurement.PERIMETER);
-        getMeasurement(Measurement.CIRCULARITY);
     }
     
     
@@ -435,11 +423,6 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     }
 
     @Override
-	public synchronized boolean hasMeasurement( @NonNull final Measurement stat) {
-        return this.measurements.containsKey(stat);
-    }
-
-    @Override
     public synchronized double getMeasurement( @NonNull final Measurement stat) {
         return this.getMeasurement(stat, MeasurementScale.PIXELS);
     }
@@ -465,19 +448,13 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     @Override
     public List<Measurement> getMeasurements() {
     	List<Measurement> result = new ArrayList<>();
-    	for(Measurement m : measurements.keySet()) {
-    		if(m!=null)
-    			result.add(m);
-    	}
+    	result.addAll(measurements.keySet());
     	return result;
     }
-
+    
     @Override
-	public void updateDependentStats() {
-        for (Measurement stat : measurements.keySet()) {
-            if (this.getMeasurement(stat) == Statistical.STAT_NOT_CALCULATED)
-            	setMeasurement(stat, ComponentMeasurer.calculate(stat, this));
-        }
+	public void clearMeasurements() {
+    	measurements.clear();
     }
 
     @Override
@@ -528,17 +505,6 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     }
 
     @Override
-	public void updateBorderPoint(int i, @NonNull IPoint p) {
-        this.updateBorderPoint(i, p.getX(), p.getY());
-    }
-
-    @Override
-	public void updateBorderPoint(int i, double x, double y) {
-        borderList[i].setX(x);
-        borderList[i].setY(y);
-    }
-
-    @Override
 	public List<IPoint> getBorderList() {
         return List.of(borderList);
     }
@@ -555,12 +521,6 @@ public abstract class DefaultCellularComponent implements CellularComponent {
             result.add(new FloatPoint(p.getX() + diffX, p.getY() + diffY));
         }
         return result;
-    }
-    
-    
-    @Override
-	public int[][] getUnsmoothedBorderCoordinates(){
-    	return new int[][] { xpoints, ypoints};
     }
 
     /**
@@ -818,9 +778,9 @@ public abstract class DefaultCellularComponent implements CellularComponent {
         if (borderList.length==0)
             throw new IllegalArgumentException("Border list is empty");
 
-        if (shapeCache.has(xOffset, yOffset, scale)) {
-            return shapeCache.get(xOffset, yOffset, scale);
-        }
+//        if (shapeCache.has(xOffset, yOffset, scale)) {
+//            return shapeCache.get(xOffset, yOffset, scale);
+//        }
 
         double sc = scale.equals(MeasurementScale.MICRONS) ? this.scale : 1;
 
@@ -829,12 +789,13 @@ public abstract class DefaultCellularComponent implements CellularComponent {
         IPoint first = borderList[0];
         path.moveTo((first.getX() + xOffset) / sc, (first.getY() + yOffset) / sc);
 
-        for (IPoint b : this.borderList) {
-            path.lineTo((b.getX() + xOffset) / sc, (b.getY() + yOffset) / sc);
-        }
+        for(int i=1; i<borderList.length; i++)
+            path.lineTo((borderList[i].getX() + xOffset) / sc, (borderList[i].getY() + yOffset) / sc);
+        
         path.closePath();
 
-        shapeCache.add(xOffset, yOffset, scale, path);
+
+//        shapeCache.add(xOffset, yOffset, scale, path);
 
         return path;
 
@@ -927,6 +888,12 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     			this.getBase().getY(), 
     			this.getBase().getY()+this.getHeight()));
     	builder.append(newLine);
+    	
+    	builder.append("Border "+borderList.length+": ");
+    	builder.append(Arrays.deepToString(borderList));
+    	
+    	builder.append(newLine);
+    	
     	builder.append("CoM: "+centreOfMass);
     	builder.append(newLine);
     	builder.append("Original CoM: "+originalCentreOfMass);
@@ -943,12 +910,14 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     	builder.append(newLine);
     	builder.append("ypoints: "+Arrays.toString(ypoints));
     	builder.append(newLine);
-    	builder.append("borderList: "+Arrays.toString(borderList));
-    	builder.append(newLine);
 
-    	builder.append("Measurements:"+newLine);
-    	for(Entry<Measurement, Double> entry : measurements.entrySet()) {
-    		builder.append(entry.getKey().toString()+": "+entry.getValue().toString()+newLine);
+    	// Sort by measurement name
+    	builder.append("Measurements: "+newLine);
+    	List<Measurement> mes = new ArrayList<>(measurements.keySet());
+    	mes.sort((c1, c2)->c1.name().compareTo(c2.name()));
+
+    	for(Measurement entry : mes) {
+    		builder.append(entry.toString()+": "+measurements.get(entry).toString()+newLine);
     	}
 
     	return builder.toString();
@@ -963,7 +932,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     			.setAttribute("x", String.valueOf(xBase))
     			.setAttribute("y", String.valueOf(yBase)));
     	    	    	
-    	e.addContent(new Element("CentreOfMass")
+    	e.addContent(new Element(XML_COM)
     			.setAttribute("x", String.valueOf(centreOfMass.getX()))
     			.setAttribute("y", String.valueOf(centreOfMass.getY())));
     	
@@ -1038,8 +1007,9 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		if(measurements.size()!=other.measurements.size())
 			return false;
 		for(Entry<Measurement, Double> e : measurements.entrySet()) {
-			if(!e.getValue().equals(other.measurements.get(e.getKey())))
+			if(!e.getValue().equals(other.measurements.get(e.getKey()))) {
 				return false;
+			}
 		}
 		
 		return Objects.equals(centreOfMass, other.centreOfMass) 
@@ -1084,7 +1054,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
             }
         }
         updateBounds();
-        shapeCache.clear();
+//        shapeCache.clear();
     }
 
     /**
@@ -1094,81 +1064,81 @@ public abstract class DefaultCellularComponent implements CellularComponent {
      * @since 1.13.4
      *
      */
-    private class ShapeCache {
-
-        public class Key {
-            final double           xOffset;
-            final double           yOffset;
-            final MeasurementScale scale;
-
-            public Key(final double x, final double y, final MeasurementScale s) {
-                xOffset = x;
-                yOffset = y;
-                scale = s;
-            }
-
-            @Override
-            public int hashCode() {
-                final int prime = 31;
-                int result = 1;
-                result = prime * result + getOuterType().hashCode();
-                result = prime * result + ((scale == null) ? 0 : scale.hashCode());
-                long temp;
-                temp = Double.doubleToLongBits(xOffset);
-                result = prime * result + (int) (temp ^ (temp >>> 32));
-                temp = Double.doubleToLongBits(yOffset);
-                result = prime * result + (int) (temp ^ (temp >>> 32));
-                return result;
-            }
-
-            @Override
-            public boolean equals(Object obj) {
-                if (this == obj)
-                    return true;
-                if (obj == null)
-                    return false;
-                if (getClass() != obj.getClass())
-                    return false;
-                Key other = (Key) obj;
-                if (!getOuterType().equals(other.getOuterType()))
-                    return false;
-                if (scale != other.scale)
-                    return false;
-                if (Double.doubleToLongBits(xOffset) != Double.doubleToLongBits(other.xOffset))
-                    return false;
-                if (Double.doubleToLongBits(yOffset) != Double.doubleToLongBits(other.yOffset))
-                    return false;
-                return true;
-            }
-
-            private ShapeCache getOuterType() {
-                return ShapeCache.this;
-            }
-
-        }
-
-        private Map<Key, Shape> cache = new HashMap<>();
-
-        public ShapeCache() {
-        }
-
-        public void add(double x, double y, MeasurementScale s, Shape shape) {
-            Key key = new Key(x, y, s);
-            cache.put(key, shape);
-        }
-
-        public Shape get(double x, double y, MeasurementScale s) {
-            Key key = new Key(x, y, s);
-            return cache.get(key);
-        }
-
-        public boolean has(double x, double y, MeasurementScale s) {
-            Key key = new Key(x, y, s);
-            return cache.containsKey(key);
-        }
-
-        public void clear() {
-            cache.clear();
-        }
-    }
+//    private class ShapeCache {
+//
+//        public class Key {
+//            final double           xOffset;
+//            final double           yOffset;
+//            final MeasurementScale scale;
+//
+//            public Key(final double x, final double y, final MeasurementScale s) {
+//                xOffset = x;
+//                yOffset = y;
+//                scale = s;
+//            }
+//
+//            @Override
+//            public int hashCode() {
+//                final int prime = 31;
+//                int result = 1;
+//                result = prime * result + getOuterType().hashCode();
+//                result = prime * result + ((scale == null) ? 0 : scale.hashCode());
+//                long temp;
+//                temp = Double.doubleToLongBits(xOffset);
+//                result = prime * result + (int) (temp ^ (temp >>> 32));
+//                temp = Double.doubleToLongBits(yOffset);
+//                result = prime * result + (int) (temp ^ (temp >>> 32));
+//                return result;
+//            }
+//
+//            @Override
+//            public boolean equals(Object obj) {
+//                if (this == obj)
+//                    return true;
+//                if (obj == null)
+//                    return false;
+//                if (getClass() != obj.getClass())
+//                    return false;
+//                Key other = (Key) obj;
+//                if (!getOuterType().equals(other.getOuterType()))
+//                    return false;
+//                if (scale != other.scale)
+//                    return false;
+//                if (Double.doubleToLongBits(xOffset) != Double.doubleToLongBits(other.xOffset))
+//                    return false;
+//                if (Double.doubleToLongBits(yOffset) != Double.doubleToLongBits(other.yOffset))
+//                    return false;
+//                return true;
+//            }
+//
+//            private ShapeCache getOuterType() {
+//                return ShapeCache.this;
+//            }
+//
+//        }
+//
+//        private Map<Key, Shape> cache = new HashMap<>();
+//
+//        public ShapeCache() {
+//        }
+//
+//        public void add(double x, double y, MeasurementScale s, Shape shape) {
+//            Key key = new Key(x, y, s);
+//            cache.put(key, shape);
+//        }
+//
+//        public Shape get(double x, double y, MeasurementScale s) {
+//            Key key = new Key(x, y, s);
+//            return cache.get(key);
+//        }
+//
+//        public boolean has(double x, double y, MeasurementScale s) {
+//            Key key = new Key(x, y, s);
+//            return cache.containsKey(key);
+//        }
+//
+//        public void clear() {
+//            cache.clear();
+//        }
+//    }
 }

@@ -443,13 +443,13 @@ public class ProfileManagerTest {
 		
 		DatasetValidator dv = new DatasetValidator();
 		boolean b = dv.validate(collection);
-		System.out.println(dv.getSummary().stream().collect(Collectors.joining()));
+
 		assertTrue(source.getSimpleName(), b);
 		
 		manager.mergeSegments(seg1, seg2, newId);
 		
 		b = dv.validate(collection);
-		System.out.println(dv.getSummary().stream().collect(Collectors.joining()));
+
 		assertTrue(source.getSimpleName()+" should validate", b);
 		manager.unmergeSegments(newId); // only testable for real collection here, because merging is a noop
 		

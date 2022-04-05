@@ -28,6 +28,7 @@ import java.util.UUID;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.Version;
+import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.io.XmlSerializable;
@@ -54,8 +55,9 @@ public interface IAnalysisDataset extends XmlSerializable {
      * datasets, clusters or signal groups
      * 
      * @return
+     * @throws ComponentCreationException 
      */
-    IAnalysisDataset copy();
+    IAnalysisDataset copy() throws ComponentCreationException;
 
     /**
      * Get the software version used to create the dataset

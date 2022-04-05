@@ -29,6 +29,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nuclear_morphology.analysis.ComponentOrienter;
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.rules.PriorityAxis;
@@ -65,7 +66,7 @@ public abstract class AbstractImageFilterer {
      * 
      * @param ip the image processor
      */
-    public AbstractImageFilterer(final ImageProcessor ip) {
+    protected AbstractImageFilterer(final ImageProcessor ip) {
         this.ip = ip;
     }
 
@@ -74,7 +75,7 @@ public abstract class AbstractImageFilterer {
      * 
      * @param img the image
      */
-    public AbstractImageFilterer(final ImagePlus img) {
+    protected AbstractImageFilterer(final ImagePlus img) {
         this(img.getProcessor());
     }
 
@@ -83,7 +84,7 @@ public abstract class AbstractImageFilterer {
      * 
      * @param f the template filterer
      */
-    public AbstractImageFilterer(final AbstractImageFilterer f) {
+    protected AbstractImageFilterer(final AbstractImageFilterer f) {
         this.ip = f.ip;
     }
 
@@ -582,7 +583,7 @@ public abstract class AbstractImageFilterer {
     			}
     		}
     		return newIp;
-    	} catch (MissingLandmarkException e) {
+    	} catch (MissingLandmarkException | ComponentCreationException e) {
     		LOGGER.warning("Unable to rotate image: "+e.getMessage());
     	}
     	return ip;
@@ -892,7 +893,7 @@ public abstract class AbstractImageFilterer {
                 continue;
             }
 
-            float diff = r - b;
+            float diff = r - (float)b;
             float scaled = Math.abs(diff) / 255f; // fraction of 8bit space
             float ranged = 0.17f * scaled;
 
@@ -908,8 +909,6 @@ public abstract class AbstractImageFilterer {
             float s = diff < 0 ? 1 - (b / 255f) : 1 - (r / 255f);
 
             float v = 1f;
-
-            // System.out.println("Chosen colour "+h+" - "+s+" - "+v);
 
             int rgb = Color.HSBtoRGB(h, s, v);
             cp.set(i, rgb);

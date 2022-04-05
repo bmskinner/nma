@@ -18,6 +18,7 @@ package com.bmskinner.nuclear_morphology.components.profiles;
 
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.logging.Logger;
 import java.util.stream.IntStream;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -35,6 +36,10 @@ import com.bmskinner.nuclear_morphology.io.XmlSerializable;
  *
  */
 public class DefaultProfile implements IProfile {
+	
+	private static final String CANNOT_ADD_NAN_OR_INFINITY = "Cannot add NaN or infinity";
+
+	private static final Logger LOGGER = Logger.getLogger(DefaultProfile.class.getName());
 	
 	private static final String XML_PROFILE = "Profile";
 
@@ -104,28 +109,6 @@ public class DefaultProfile implements IProfile {
     @Override
     public int size() {
         return array.length;
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + Arrays.hashCode(array);
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        DefaultProfile other = (DefaultProfile) obj;
-        if (!Arrays.equals(array, other.array))
-            return false;
-        return true;
     }
 
     @Override
@@ -339,7 +322,7 @@ public class DefaultProfile implements IProfile {
   	}
 
     @Override
-    public IProfile copy() throws ProfileException {
+    public IProfile duplicate() throws ProfileException {
         return new DefaultProfile(this.array);
     }
 
@@ -716,7 +699,7 @@ public class DefaultProfile implements IProfile {
     public IProfile multiply(double multiplier) {
 
         if (Double.isNaN(multiplier) || Double.isInfinite(multiplier)) {
-            throw new IllegalArgumentException("Cannot add NaN or infinity");
+            throw new IllegalArgumentException(CANNOT_ADD_NAN_OR_INFINITY);
         }
 
         float[] result = new float[this.size()];
@@ -744,7 +727,7 @@ public class DefaultProfile implements IProfile {
     public IProfile divide(double divider) {
 
         if (Double.isNaN(divider) || Double.isInfinite(divider)) {
-            throw new IllegalArgumentException("Cannot add NaN or infinity");
+            throw new IllegalArgumentException(CANNOT_ADD_NAN_OR_INFINITY);
         }
 
         float[] result = new float[this.size()];
@@ -784,7 +767,7 @@ public class DefaultProfile implements IProfile {
     @Override
     public IProfile add(double value) {
         if (Double.isNaN(value) || Double.isInfinite(value))
-            throw new IllegalArgumentException("Cannot add NaN or infinity");
+            throw new IllegalArgumentException(CANNOT_ADD_NAN_OR_INFINITY);
 
         float[] result = new float[array.length];
 
@@ -823,12 +806,7 @@ public class DefaultProfile implements IProfile {
     
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder();
-
-        for (int i = 0; i < array.length; i++) {
-            builder.append("Index " + i + "\t" + array[i] + "\r\n");
-        }
-        return builder.toString();
+        return Arrays.toString(array);
     }
 
 	@Override
@@ -851,4 +829,27 @@ public class DefaultProfile implements IProfile {
 	public Iterator<Integer> iterator() {
 		return IntStream.range(0, array.length).iterator();
 	}
+	
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + Arrays.hashCode(array);
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        DefaultProfile other = (DefaultProfile) obj;
+        if (!Arrays.equals(array, other.array)) 
+            return false;
+        return true;
+    }
 }

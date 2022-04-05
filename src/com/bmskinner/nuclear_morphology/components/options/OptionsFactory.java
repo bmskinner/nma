@@ -166,7 +166,9 @@ public class OptionsFactory {
      */
     public static IAnalysisOptions makeDefaultRodentAnalysisOptions(File testFolder) {
     	IAnalysisOptions op = makeAnalysisOptions();
-        op.setDetectionOptions(CellularComponent.NUCLEUS, OptionsFactory.makeNucleusDetectionOptions(testFolder).build());
+        op.setDetectionOptions(CellularComponent.NUCLEUS, 
+        		OptionsFactory.makeNucleusDetectionOptions(testFolder)
+        		.build());
         op.setRuleSetCollection(RuleSetCollection.mouseSpermRuleSetCollection());
         return op;
     }

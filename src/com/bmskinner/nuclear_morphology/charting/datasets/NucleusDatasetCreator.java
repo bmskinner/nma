@@ -40,6 +40,7 @@ import com.bmskinner.nuclear_morphology.components.MissingComponentException;
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.UnavailableBorderPointException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
@@ -344,7 +345,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 	public XYDataset createBareNucleusOutline(@NonNull IAnalysisDataset dataset) throws ChartDatasetCreationException {
 		try {
 			return createBareNucleusOutline(dataset.getCollection().getConsensus());
-		} catch (MissingLandmarkException e) {
+		} catch (MissingLandmarkException | ComponentCreationException e) {
 			throw new ChartDatasetCreationException(e);
 		}
 	}
@@ -382,7 +383,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 			n = collection.getConsensus();
 			q25 = collection.getProfileCollection().getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.LOWER_QUARTILE);
 			q75 = collection.getProfileCollection().getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.UPPER_QUARTILE);
-		} catch (MissingLandmarkException | ProfileException | MissingProfileException e) {
+		} catch (MissingLandmarkException | ProfileException | MissingProfileException | ComponentCreationException e) {
 			LOGGER.log(Loggable.STACK, "Error getting upper or lower quartile profile or consensus", e);
 			throw new ChartDatasetCreationException("Unable to get quartile profile or consensus", e);
 		}
@@ -585,13 +586,6 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 		List<IAnalysisDataset> datasets = new ArrayList<>();
 		datasets.add(dataset);
 
-		if (cell == null) 
-			return result;
-
-		if (dataset == null)
-			return result;
-
-
 		Nucleus nucleus = cell.getPrimaryNucleus();
 
 		LOGGER.finest( "Attempting to create signal outlines for " + nucleus.getNameAndNumber());
@@ -683,7 +677,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 					ds.addSeries(seriesKey, data);
 					ds.setComponent(seriesKey, n);
 
-				} catch(MissingLandmarkException e) {
+				} catch(MissingLandmarkException | ComponentCreationException e) {
 					throw new ChartDatasetCreationException("Cannot orient consensus", e);
 				}
 			} else {

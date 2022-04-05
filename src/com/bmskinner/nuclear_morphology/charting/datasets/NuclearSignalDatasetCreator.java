@@ -40,6 +40,7 @@ import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellDetector.Sh
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.FloatPoint;
@@ -141,7 +142,7 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
 				    	double[][] data = { xpoints, ypoints };
 
 				    	ds.addSeries(CellularComponent.NUCLEAR_SIGNAL + "_" + uuid, data, signalList, nucleusList);
-				    } catch(MissingLandmarkException e) {
+				    } catch(MissingLandmarkException | ComponentCreationException e) {
 				    	throw new ChartDatasetCreationException(e);
 				    }
 				}
@@ -170,7 +171,7 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
 
         			result.add(new Ellipse2D.Double(p.getX() - offset, p.getY() - offset, offset * 2, offset * 2));
         		}
-        	} catch(MissingLandmarkException e) {
+        	} catch(MissingLandmarkException | ComponentCreationException e) {
         		throw new ChartDatasetCreationException(e);
         	}
 
@@ -349,7 +350,7 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
             		shellCount, 
             		type);
             
-        } catch (ShellAnalysisException | MissingLandmarkException e) {
+        } catch (ShellAnalysisException | MissingLandmarkException | ComponentCreationException e) {
             LOGGER.log(Loggable.STACK, "Error making shells in consensus", e);
             throw new ChartDatasetCreationException("Error making shells", e);
         }

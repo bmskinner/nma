@@ -24,11 +24,16 @@ import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileCreator;
+import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder;
 import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.generic.FloatPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclei.DefaultNucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
+import com.bmskinner.nuclear_morphology.components.profiles.ProfileException;
+import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.components.signals.DefaultNuclearSignal;
 import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
@@ -94,7 +99,6 @@ public class ComponentBuilderFactory {
 			private IPoint com = null;
 			private UUID id = null;
 			private int[] original = null;
-			private int count = -1;
 			private boolean isOffset = false; 
 			
 			private NucleusBuilder() {
@@ -135,11 +139,6 @@ public class ComponentBuilderFactory {
 				return this;
 			}
 			
-			public NucleusBuilder withNumber(int i) {
-				count = i;
-				return this;
-			}
-			
 			public NucleusBuilder offsetToOrigin() {
 				isOffset = true;
 				return this;
@@ -155,9 +154,8 @@ public class ComponentBuilderFactory {
 				 if(id==null)
 					 id = UUID.randomUUID();
 				 
-				 int number = count>-1 ? count : nucleusCount;
-				 nucleusCount = count>-1 ? nucleusCount++ : nucleusCount;
-				 
+				 int number = nucleusCount++;
+					 
 				 Nucleus n = new DefaultNucleus(roi, com, file, channel, (int) roi.getXBase(), (int) roi.getYBase(), 
 						  number, rsc);
 				 
@@ -167,7 +165,21 @@ public class ComponentBuilderFactory {
 				 }
 				 
 				 n.setScale(scale);
-				 n.initialise(windowProp);
+				 n.createProfiles(windowProp);
+
+				 try {
+					 ProfileIndexFinder.assignLandmarks(n, rsc);
+					 if(ProfileIndexFinder.shouldReverseProfile(n)) {
+						 n.reverse();
+						 n.clearMeasurements();
+						 n.createProfiles(windowProp); // ensure all profiles match - rare case
+						 ProfileIndexFinder.assignLandmarks(n, rsc);
+
+					 }
+				 } catch(MissingComponentException | ProfileException e) {
+					 LOGGER.fine(()->"Unable to reverse profile in nucleus");
+					 throw new ComponentCreationException(e);
+				 }
 				 
 				 return n;
 			}

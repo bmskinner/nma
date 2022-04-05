@@ -34,6 +34,7 @@ import org.jfree.svg.SVGGraphics2D;
 
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
@@ -117,7 +118,7 @@ public class SVGWriter implements Io {
     		}
 
     		write(g2);
-    	} catch(MissingLandmarkException e) {
+    	} catch(MissingLandmarkException | ComponentCreationException e) {
     		LOGGER.log(Loggable.STACK, "Unable to orient consensus", e);
     	}
     }

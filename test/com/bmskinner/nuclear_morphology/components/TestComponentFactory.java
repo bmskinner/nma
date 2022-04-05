@@ -108,9 +108,8 @@ public class TestComponentFactory {
 		n.rotate(rotation);
 				
 		// Note - the roi interpolation will smooth corners
-		n.initialise(Taggable.DEFAULT_PROFILE_WINDOW_PROPORTION);
+		n.createProfiles(Taggable.DEFAULT_PROFILE_WINDOW_PROPORTION);
 		ProfileIndexFinder.assignLandmarks(n, RuleSetCollection.roundRuleSetCollection());
-//		n.findLandmarks(RuleSetCollection.roundRuleSetCollection());
 		return n;
 	}
 	
@@ -137,14 +136,15 @@ public class TestComponentFactory {
 		
 //		LOGGER.fine("Initialising new nucleus");
 		// Note - the roi interpolation will smooth corners
-		n.initialise(Taggable.DEFAULT_PROFILE_WINDOW_PROPORTION);
+		n.createProfiles(Taggable.DEFAULT_PROFILE_WINDOW_PROPORTION);
 //		LOGGER.fine("Assigning landmarks to new nucleus");
 		ProfileIndexFinder.assignLandmarks(n, RuleSetCollection.roundRuleSetCollection());		
 		return n;
 	}
 	
 	private static Nucleus createNucleus(Roi roi, IPoint com, File f, int channel, int x, int y, int number, RuleSetCollection rsc) {
-		return new DefaultNucleus(roi, com, f, 0, x, y, 0, rsc);
+		Nucleus n = new DefaultNucleus(roi, com, f, 0, x, y, 0, rsc);
+		return n;
 	}
 
 	

@@ -53,17 +53,8 @@ public interface Taggable extends CellularComponent {
      * @param proportion
      * @throws ComponentCreationException
      */
-    void initialise(double proportion) throws ComponentCreationException;
+    void createProfiles(double proportion) throws ComponentCreationException;
     
-    /**
-     * Calculate new profiles for the object. Angle profiles are calculated with
-     * the internal window size - change this with
-     * setWindowSize(ProfileType.ANGLE). It will replace the existing profiles.
-     * 
-     * @throws ProfileException if there was an error in calculating the profiles
-     */
-//    void calculateProfiles() throws ProfileException;
-
     /**
      * Check if the object has a profile of the given type
      * 

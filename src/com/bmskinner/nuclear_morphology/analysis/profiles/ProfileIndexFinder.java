@@ -80,7 +80,7 @@ public class ProfileIndexFinder {
     		} catch (MissingProfileException e) {
     			LOGGER.log(Loggable.STACK, "Error getting profile type", e);
     		} catch (NoDetectedIndexException e) {
-    			LOGGER.finer("Unable to detect "+lm+" in nucleus");
+    			LOGGER.finer("Unable to detect "+lm+" in nucleus, setting to zero");
     			try {
 					n.setLandmark(lm, 0);
 				} catch (IndexOutOfBoundsException | MissingProfileException | MissingLandmarkException
@@ -133,10 +133,6 @@ public class ProfileIndexFinder {
      * @return the indexes matching the ruleset
      */
     public static BooleanProfile getMatchingIndexes(@NonNull final IProfile p, @NonNull final RuleSet r) {
-        if (p == null)
-            throw new IllegalArgumentException(NULL_PROFILE_ERROR);
-        if (r == null)
-            throw new IllegalArgumentException(NULL_RULE_ERROR);
         return isApplicable(p, r);
     }
 
@@ -148,10 +144,6 @@ public class ProfileIndexFinder {
      * @return the indexes matching the rule
      */
     public static BooleanProfile getMatchingIndexes(@NonNull final IProfile p, @NonNull final Rule r) {
-        if (p == null)
-            throw new IllegalArgumentException(NULL_PROFILE_ERROR);
-        if (r == null)
-            throw new IllegalArgumentException(NULL_RULE_ERROR);
         BooleanProfile result = new BooleanProfile(p, true);
         return isApplicable(p, r, result);
     }
@@ -269,13 +261,13 @@ public class ProfileIndexFinder {
      * internal RuleSets for the border tag
      * 
      * @param collection the cell collection
-     * @param tag the border tag to find
+     * @param lm the border tag to find
      * @return the index in the profile corresponding to the tag
      * @throws NoDetectedIndexException if the index is not found
      */
-    public static int identifyIndex(@NonNull final ICellCollection collection, @NonNull final Landmark tag) throws NoDetectedIndexException {
+    public static int identifyIndex(@NonNull final ICellCollection collection, @NonNull final Landmark lm) throws NoDetectedIndexException {
 
-        List<RuleSet> list = collection.getRuleSetCollection().getRuleSets(tag);
+        List<RuleSet> list = collection.getRuleSetCollection().getRuleSets(lm);
 
         if (list == null || list.isEmpty())
             throw new IllegalArgumentException(RULESET_EMPTY_ERROR);
@@ -284,7 +276,7 @@ public class ProfileIndexFinder {
         	return identifyIndex(collection, list);
         } catch(NoDetectedIndexException e) {
         	// No index was found for the collection, fall back 
-        	LOGGER.fine("No reference point could be found for the collection using the default rules; falling back on longest diameter");
+        	LOGGER.fine(lm+": no index found using default rules; falling back on longest diameter");
         	List<RuleSet> rules = new ArrayList<>();
         	rules.add(RuleSet.roundRPRuleSet());
         	return identifyIndex(collection, rules);

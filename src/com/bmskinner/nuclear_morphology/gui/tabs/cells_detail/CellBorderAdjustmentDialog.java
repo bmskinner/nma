@@ -72,11 +72,13 @@ import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.UnavailableBorderPointException;
+import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.cells.DefaultCell;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.generic.FloatPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
+import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
@@ -289,7 +291,11 @@ public class CellBorderAdjustmentDialog extends AbstractCellEditingDialog implem
 
         JButton undoBtn = new JButton("Undo");
         undoBtn.addActionListener(e -> {
-            workingCell = new DefaultCell(cell);
+            try {
+				workingCell = cell.duplicate();
+			} catch (ComponentCreationException e1) {
+				LOGGER.severe("Cannot copy cell: "+e1.getMessage());
+			}
             updateCharts(workingCell);
             setCellChanged(false);
             mustResegment = false;
@@ -485,7 +491,10 @@ public class CellBorderAdjustmentDialog extends AbstractCellEditingDialog implem
         int oldLength = templateProfile.size();
 
         try {
-            workingCell.getPrimaryNucleus().initialise(dataset.getAnalysisOptions().get().getProfileWindowProportion());
+            workingCell.getPrimaryNucleus()
+            .createProfiles(dataset.getAnalysisOptions()
+            		.orElseThrow(MissingOptionException::new)
+            		.getProfileWindowProportion());
 
             int newLength = workingCell.getPrimaryNucleus().getProfile(ProfileType.ANGLE).size();
 

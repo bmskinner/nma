@@ -39,6 +39,7 @@ import com.bmskinner.nuclear_morphology.analysis.mesh.MeshImage;
 import com.bmskinner.nuclear_morphology.analysis.mesh.MeshImageCreationException;
 import com.bmskinner.nuclear_morphology.analysis.mesh.UncomparableMeshImageException;
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
+import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
@@ -86,9 +87,6 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> {
      */
     public SignalWarper(@NonNull final SignalWarpingRunSettings warpingOptions) {
 
-        if (warpingOptions == null)
-            throw new IllegalArgumentException("Must have options");
-
         this.warpingOptions = warpingOptions;
 
         // Count the number of cells to include
@@ -110,7 +108,7 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> {
             
     		// Create the consensus mesh to warp each cell onto
     		meshConsensus = new DefaultMesh(target);
-        } catch (MeshCreationException | MissingLandmarkException e2) {
+        } catch (MeshCreationException | MissingLandmarkException | ComponentCreationException e2) {
     		LOGGER.log(Loggable.STACK, "Error creating mesh", e2);
     		throw new IllegalArgumentException("Could not create mesh", e2);
     	}

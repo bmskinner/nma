@@ -17,7 +17,6 @@
 package com.bmskinner.nuclear_morphology.analysis.profiles;
 
 import java.awt.Shape;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Logger;
@@ -32,11 +31,7 @@ import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.measure.DoubleEquation;
 import com.bmskinner.nuclear_morphology.components.measure.LineEquation;
 import com.bmskinner.nuclear_morphology.components.profiles.DefaultProfile;
-import com.bmskinner.nuclear_morphology.components.profiles.DefaultSegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
-import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
-import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
-import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -61,10 +56,10 @@ public class ProfileCreator {
      * Create a profile for the desired profile type on the template object
      * 
      * @param type the profile type
-     * @return a segmented profile of the requested type.
+     * @return a profile of the requested type.
      * @throws ProfileException
      */
-    public static ISegmentedProfile createProfile(Taggable target, @NonNull ProfileType type) throws ProfileException {
+    public static IProfile createProfile(@NonNull Taggable target, @NonNull ProfileType type) throws ProfileException {
         try {
             switch (type) {
 	            case ANGLE:        return calculateAngleProfile(target);
@@ -74,49 +69,21 @@ public class ProfileCreator {
 	            default:           return calculateAngleProfile(target);
             }
         } catch (UnavailableBorderPointException e) {
-        	LOGGER.info("Cannot create profile "+e.getMessage());
+        	LOGGER.warning("Cannot create profile "+e.getMessage());
             throw new ProfileException("Cannot create profile " + type, e);
         }
     }
 
     /**
-     * Get the existing segments from the template angle profile. 
-     * Returns an empty list if the profile is not present
-     * 
-     * @return
-     */
-    private static List<IProfileSegment> getExistingSegments(@NonNull Taggable target) {
-        List<IProfileSegment> segments = new ArrayList<>();
-        LOGGER.finest( "Getting existing segments from angle profile");
-        if(!target.hasProfile(ProfileType.ANGLE))
-        	return segments;
-
-        try {
-
-        	ISegmentedProfile templateProfile = target.getProfile(ProfileType.ANGLE);
-        	LOGGER.finest( "Fetched angle profile");
-        	if (templateProfile.hasSegments()) {
-        		LOGGER.finest( "Angle profile has "+templateProfile.getSegmentCount()+" segments");
-        		segments = templateProfile.getSegments();
-        	}
-
-        } catch (MissingProfileException | ProfileException | MissingLandmarkException e) {
-        	LOGGER.log(Loggable.STACK, "No profile angle type: "+e.getMessage(), e);
-        }
-
-        return segments;
-    }
-
-    /**
-     * Calculate an angle profile for the given object
+     * Calculate an angle profile for the given object. The profile 
+     * starts at the first border index in the object
      * @param target
      * @return
      * @throws UnavailableBorderPointException
      * @throws ProfileException
      */
-    private static ISegmentedProfile calculateAngleProfile(@NonNull Taggable target) throws UnavailableBorderPointException, ProfileException {
+    private static IProfile calculateAngleProfile(@NonNull Taggable target) throws UnavailableBorderPointException, ProfileException {
 
-        List<IProfileSegment> segments = getExistingSegments(target);
         float[] angles = new float[target.getBorderLength()];
 
         Shape s = target.toShape();
@@ -127,9 +94,6 @@ public class ProfileCreator {
             throw new UnavailableBorderPointException("Null border list in target");
 
         int windowSize = target.getWindowSize();
-
-        if (windowSize == 0)
-            throw new UnavailableBorderPointException("Window size has not been set in Profilable object");
 
         for(int index=0; index<borderList.size(); index++) {
 
@@ -149,26 +113,7 @@ public class ProfileCreator {
             angles[index] = s.contains(midX, midY) ? angle : 360 - angle;
         }
 
-        // Make a new profile.
-        ISegmentedProfile newProfile = new DefaultSegmentedProfile(angles);
-
-        // Reapply any segments that were present in the original profile
-        if (!segments.isEmpty()) {
-        	LOGGER.finest("Reapplying segments");
-            reapplySegments(target, segments, newProfile);
-        }
-        return newProfile;
-    }
-
-    private static void reapplySegments(@NonNull Taggable target, List<IProfileSegment> segments, ISegmentedProfile profile) throws ProfileException {
-
-        // If the border list has changed, the profile lengths will be different
-        // In this case, add and normalise the segment lengths
-        if (segments.get(0).getProfileLength() != target.getBorderLength()) {
-        	segments = IProfileSegment.scaleSegments(segments, target.getBorderLength());
-        }
-
-        profile.setSegments(segments);
+        return new DefaultProfile(angles);
     }
 
     /**
@@ -180,7 +125,7 @@ public class ProfileCreator {
      * @throws UnavailableBorderPointException
      * @throws MissingLandmarkException
      */
-    private static ISegmentedProfile calculateZahnRoskiesProfile(@NonNull Taggable target) throws ProfileException {
+    private static IProfile calculateZahnRoskiesProfile(@NonNull Taggable target) throws ProfileException {
 
         float[] profile = new float[target.getBorderLength()];
         int index = 0;
@@ -228,10 +173,10 @@ public class ProfileCreator {
         }
         
         // Make a new profile. If possible, use the internal segmentation type of the component
-        return new DefaultSegmentedProfile(profile);
+        return new DefaultProfile(profile);
     }
 
-    private static ISegmentedProfile calculateDiameterProfile(@NonNull Taggable target) throws UnavailableBorderPointException, ProfileException {
+    private static IProfile calculateDiameterProfile(@NonNull Taggable target) throws UnavailableBorderPointException, ProfileException {
 
         float[] profile = new float[target.getBorderLength()];
         
@@ -256,10 +201,10 @@ public class ProfileCreator {
         double max = Stats.max(profile);
         IProfile p = new DefaultProfile(profile);
 
-        return new DefaultSegmentedProfile(p.divide(max));
+        return new DefaultProfile(p.divide(max));
     }
 
-    private static ISegmentedProfile calculateRadiusProfile(@NonNull Taggable target) throws ProfileException {
+    private static IProfile calculateRadiusProfile(@NonNull Taggable target) throws ProfileException {
 
         float[] profile = new float[target.getBorderLength()];
 
@@ -275,7 +220,7 @@ public class ProfileCreator {
      // Normalise to the the max diameter
         double max = Stats.max(profile);
         IProfile p = new DefaultProfile(profile);
-        return new DefaultSegmentedProfile(p.divide(max));
+        return new DefaultProfile(p.divide(max));
     }
 
     /**
@@ -285,7 +230,7 @@ public class ProfileCreator {
      * @throws UnavailableBorderPointException
      * @throws ProfileException 
      */
-    public static ISegmentedProfile calculatePointToPointDistanceProfile(@NonNull Taggable target) throws UnavailableBorderPointException, ProfileException {
+    public static IProfile calculatePointToPointDistanceProfile(@NonNull Taggable target) throws UnavailableBorderPointException, ProfileException {
         float[] profile = new float[target.getBorderLength()];
 
         int index = 0;
@@ -307,7 +252,7 @@ public class ProfileCreator {
             profile[index] = (float) distance;
             index++;
         }
-        return new DefaultSegmentedProfile(profile);
+        return new DefaultProfile(profile);
     }
 
 }

@@ -12,7 +12,9 @@ import com.bmskinner.nuclear_morphology.analysis.classification.NucleusClusterin
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetProfilingMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMethod.MorphologyAnalysisMode;
+import com.bmskinner.nuclear_morphology.components.MissingComponentException;
 import com.bmskinner.nuclear_morphology.components.TestComponentFactory;
+import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.DefaultAnalysisDataset;
@@ -20,9 +22,11 @@ import com.bmskinner.nuclear_morphology.components.datasets.DefaultCellCollectio
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
+import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
+import com.bmskinner.nuclear_morphology.components.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.components.signals.DefaultSignalGroup;
 import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
@@ -75,6 +79,7 @@ public class TestDatasetBuilder {
 	private boolean profile = false;
 	private boolean segment = false;
 	private boolean offset  = DEFAULT_IS_RANDOM_OFFSET;
+	private boolean reverse = false;
 	
 	private boolean redSignals = DEFAULT_RED_SIGNALS;
 	private boolean greenSignals = DEFAULT_GREEN_SIGNALS;
@@ -138,6 +143,10 @@ public class TestDatasetBuilder {
 					.withValue(HashOptions.CLUSTER_MANUAL_CLUSTER_NUMBER_KEY, nClusters)
 					.build();
 			new NucleusClusteringMethod(d, o).call();
+		}
+		
+		for(Measurement m : rsc.getMeasurableValues()) {
+			d.getCollection().getMedian(m, CellularComponent.NUCLEUS, MeasurementScale.PIXELS);
 		}
 				
 		return d;
@@ -327,12 +336,15 @@ public class TestDatasetBuilder {
 	 * @param fixedStartOffset the offset to apply to the border array if randomOffsetStart is false
 	 * @return
 	 * @throws ComponentCreationException
+	 * @throws ProfileException 
+	 * @throws MissingComponentException 
 	 */
-	private IAnalysisDataset createRectangularDataset(int nCells, RuleSetCollection rsc, int maxSizeVariation, int baseWidth, int baseHeight, int xBase, int yBase, int maxRotationDegrees, boolean randomOffsetStart, int fixedStartOffset) throws ComponentCreationException {
+	private IAnalysisDataset createRectangularDataset(int nCells, RuleSetCollection rsc, int maxSizeVariation, int baseWidth, int baseHeight, int xBase, int yBase, int maxRotationDegrees, boolean randomOffsetStart, int fixedStartOffset) throws ComponentCreationException, MissingComponentException, ProfileException {
 		
 		ICellCollection collection = new DefaultCellCollection(rsc, TEST_DATASET_NAME, TEST_DATASET_UUID);
 		
-		IAnalysisOptions o =  OptionsFactory.makeDefaultRoundAnalysisOptions(new File(TEST_DATASET_IMAGE_FOLDER).getAbsoluteFile());
+		IAnalysisOptions o =  OptionsFactory.makeDefaultRoundAnalysisOptions(new File(TEST_DATASET_IMAGE_FOLDER)
+				.getAbsoluteFile());
 		o.getNucleusDetectionOptions().get().setInt(HashOptions.MIN_SIZE_PIXELS, (baseWidth-maxSizeVariation)*(baseHeight-maxSizeVariation) );
 		o.getNucleusDetectionOptions().get().setInt(HashOptions.MAX_SIZE_PIXELS, (baseWidth+maxSizeVariation)*(baseHeight+maxSizeVariation) );
 
@@ -370,7 +382,7 @@ public class TestDatasetBuilder {
 			int borderOffset = randomOffsetStart ? (int) (rng.nextDouble()*borderLength) : fixedStartOffset;
 			
 			ICell cell = createCell(width, height, degreeRot, borderOffset, rsc);	
-			cell.getPrimaryNucleus().setMeasurement(Measurement.AREA, width*height);
+						
 			collection.addCell(cell);
 			
 			

@@ -47,6 +47,7 @@ import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPa
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
+import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
@@ -227,7 +228,7 @@ public class SignalWarpingDialog
         		if(col==model.getColumnIndex(Labels.Signals.Warper.TABLE_HEADER_DELETE_COLUMN)) {
         			try {
 						controller.deleteWarpedSignal(row);
-        			} catch (MissingLandmarkException e1) {
+        			} catch (MissingLandmarkException | ComponentCreationException e1) {
     					LOGGER.log(Loggable.STACK, "Cannot orient consensus", e);
     				}
         			controller.displayBlankChart();
@@ -258,7 +259,7 @@ public class SignalWarpingDialog
         	for(WarpedImageKey k : keys)
 				try {
 					controller.deleteWarpedSignal(k);
-				} catch (MissingLandmarkException e1) {
+				} catch (MissingLandmarkException | ComponentCreationException e1) {
 					LOGGER.log(Loggable.STACK, "Cannot orient consensus", e);
 				}
         	
@@ -346,6 +347,7 @@ public class SignalWarpingDialog
      *
      */
     public class SignalWarpingTableCellRenderer extends DefaultTableCellRenderer {
+        @Override
         public Component getTableCellRendererComponent(JTable table, Object value,
                 boolean isSelected, boolean hasFocus, int row, int column) {
         	Component l = super.getTableCellRendererComponent(table, value, 
@@ -358,6 +360,7 @@ public class SignalWarpingDialog
     }
 
     public class SignalWarpingButtonRenderer extends DefaultTableCellRenderer {
+    	   @Override
     	   public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
     	         return (Component)value;
     	       

@@ -61,7 +61,7 @@ public class SegmentFitter {
      */
     @SuppressWarnings("null")
 	public SegmentFitter(@NonNull final ISegmentedProfile template) throws ProfileException {
-        templateProfile = template.copy();
+        templateProfile = template.duplicate();
     }
     
     /**
@@ -108,7 +108,7 @@ public class SegmentFitter {
     private static ISegmentedProfile createSegments(@NonNull final ISegmentedProfile template, 
     		@NonNull ISegmentedProfile target) throws ProfileException {
     	ISegmentedProfile inter = template.interpolate(target.size());
-    	ISegmentedProfile result = target.copy();
+    	ISegmentedProfile result = target.duplicate();
     	result.setSegments(inter.getSegments());
     	return result;
     }
@@ -124,9 +124,9 @@ public class SegmentFitter {
     		@NonNull ISegmentedProfile profile) throws ProfileException, MissingComponentException {
 
         // By default, return the input profile
-        ISegmentedProfile result = profile.copy();
+        ISegmentedProfile result = profile.duplicate();
 
-        ISegmentedProfile tempProfile = profile.copy();
+        ISegmentedProfile tempProfile = profile.duplicate();
 
         // fit each segment in turn
         for(IProfileSegment templateSegment : template.getSegments()) {
@@ -134,8 +134,8 @@ public class SegmentFitter {
             IProfileSegment segment = tempProfile.getSegment(templateSegment.getID());
 
             if (!segment.isLocked()) { 
-                tempProfile = bestFitSegment(template, tempProfile, templateSegment.getID()).copy();
-                result = tempProfile.copy();
+                tempProfile = bestFitSegment(template, tempProfile, templateSegment.getID()).duplicate();
+                result = tempProfile.duplicate();
             }
         }
         
@@ -156,7 +156,7 @@ public class SegmentFitter {
     private static ISegmentedProfile bestFitSegment(@NonNull final ISegmentedProfile template, @NonNull ISegmentedProfile profile, @NonNull UUID id) throws ProfileException, MissingComponentException {
 
         // by default, return the same profile that came in
-    	ISegmentedProfile result = profile.copy();
+    	ISegmentedProfile result = profile.duplicate();
     	
         // the segment in the input profile to work on
         IProfileSegment segment = profile.getSegment(id);
@@ -186,7 +186,7 @@ public class SegmentFitter {
 
             // find the changeWindow with the best fit,
             // apply all changes to a fresh copy of the profile
-        	ISegmentedProfile testProfile = profile.copy();
+        	ISegmentedProfile testProfile = profile.duplicate();
             testProfile = testChange(template, profile, id, changeWindow);
             double score = compareSegmentationPatterns(template, testProfile);
             if (score < bestScore) {
@@ -198,7 +198,7 @@ public class SegmentFitter {
         // now we have the best window, drop down to a changeValue
         for (int changeValue = bestChangeWindow - halfWindow; changeValue < bestChangeWindow
                 + halfWindow; changeValue++) {
-        	ISegmentedProfile testProfile = profile.copy();
+        	ISegmentedProfile testProfile = profile.duplicate();
 
             testProfile = testChange(template, profile, id, changeValue);
             double score = compareSegmentationPatterns(template, testProfile);
@@ -227,7 +227,7 @@ public class SegmentFitter {
         double bestScore = compareSegmentationPatterns(template, profile);
 
         // apply all changes to a fresh copy of the profile
-        ISegmentedProfile testProfile = profile.copy();
+        ISegmentedProfile testProfile = profile.duplicate();
 
         // not permitted if it violates length constraints
         IProfileSegment seg = testProfile.getSegment(id);
@@ -242,7 +242,7 @@ public class SegmentFitter {
         double score = compareSegmentationPatterns(template, testProfile);
 
         if (score < bestScore)
-        	return testProfile.copy();
+        	return testProfile.duplicate();
         return profile;
     }
     

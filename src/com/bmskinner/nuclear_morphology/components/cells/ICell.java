@@ -40,7 +40,7 @@ public interface ICell extends XmlSerializable, Statistical, Comparable<ICell> {
 	 * Create a copy of this cell
 	 * @return
 	 */
-	ICell duplicate();
+	ICell duplicate() throws ComponentCreationException;
 	
     /**
      * Get the ID of the cell

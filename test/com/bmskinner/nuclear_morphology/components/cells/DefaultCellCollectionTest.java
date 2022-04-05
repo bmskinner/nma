@@ -23,8 +23,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import java.io.PrintWriter;
-
 import org.jdom2.Element;
 import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
@@ -67,7 +65,7 @@ public class DefaultCellCollectionTest extends ComponentTester {
     @Test
     public void testDuplicate() throws Exception {
     	ICellCollection dup = c.duplicate();
-    	testDuplicatesByField(c, dup);
+    	testDuplicatesByField("Cell collection "+c.getName(), c, dup);
     }
         
     @Test
@@ -87,12 +85,10 @@ public class DefaultCellCollectionTest extends ComponentTester {
 		
 		XMLOutputter xmlOutput = new XMLOutputter();
 		xmlOutput.setFormat(Format.getPrettyFormat());
-		xmlOutput.output(e, new PrintWriter( System.out ));
 
 		ICellCollection test = new DefaultCellCollection(e);
-		
-		xmlOutput.output(test.toXmlElement(), new PrintWriter( System.out ));
-		testDuplicatesByField(c, test);
+
+		testDuplicatesByField("Cell collection "+c.getName(), c, test);
 		assertEquals(c, test);
 	}
 

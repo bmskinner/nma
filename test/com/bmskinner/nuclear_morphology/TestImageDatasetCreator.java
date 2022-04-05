@@ -24,14 +24,11 @@ import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMet
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalDetectionMethod;
 import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellAnalysisMethod;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
-import com.bmskinner.nuclear_morphology.components.profiles.IProfileCollection;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
-import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
 import com.bmskinner.nuclear_morphology.io.DatasetExportMethod;
 import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
 import com.bmskinner.nuclear_morphology.io.xml.XMLWriter;
@@ -189,7 +186,7 @@ public class TestImageDatasetCreator {
      * @param addGreen should green signals be detected with default parameters?
      * @throws Exception
      */
-    private static IAnalysisDataset createTestSignalDataset(IAnalysisOptions op, boolean addRed, boolean addGreen) throws Exception {
+    public static IAnalysisDataset createTestSignalDataset(IAnalysisOptions op, boolean addRed, boolean addGreen) throws Exception {
     	
     	File testFolder = op.getDetectionOptions(CellularComponent.NUCLEUS).get()
     			.getFile(HashOptions.DETECTION_FOLDER);
@@ -241,7 +238,7 @@ public class TestImageDatasetCreator {
     
     /**
      * Create and run an analysis
-     * @param folder the folder path of images to analyse
+     * @param folder the output folder for save files
      * @param op the analysis options
      * @param makeClusters should clusters be created
      * @return a dataset with the results of the analysis
@@ -323,48 +320,7 @@ public class TestImageDatasetCreator {
     public static void testUnmarshalling(IAnalysisDataset d, File saveFile) throws Exception {
     	IAnalysisDataset t = SampleDatasetReader.openDataset(saveFile);
     	LOGGER.fine("Sample dataset opened: "+saveFile.getName());
-//
-//    	IProfileCollection p1 = d.getCollection().getProfileCollection();
-//    	IProfileCollection p2 = t.getCollection().getProfileCollection();
-//    	
-//    	ComponentTester.testDuplicatesByField(d.getAnalysisOptions().get(), t.getAnalysisOptions().get());
-//    	assertEquals("Options should match", d.getAnalysisOptions().get(), t.getAnalysisOptions().get());
-//    	assertEquals("Profile collections should match", p1, p2);   	
-//    	
-//    	// Check signal groups
-//    	for(ISignalGroup s : d.getCollection().getSignalGroups()) {
-//    		ComponentTester.testDuplicatesByField(s, t.getCollection().getSignalGroup(s.getId()).get());
-//    		assertEquals("Signal groups should match", s, t.getCollection().getSignalGroup(s.getId()).get());
-//    	}	
-//    	assertEquals(d.getCollection().getSignalGroups().size(), t.getCollection().getSignalGroups().size());
-//    	LOGGER.fine("Checked signal groups");
-//    	
-//    	// Check each cell    	
-//    	for(ICell dCell : d.getCollection()) {
-//    		ICell tCell = t.getCollection().getCell(dCell.getId());
-//        	ComponentTester.testDuplicatesByField(dCell, tCell);
-//    	}
-//    	LOGGER.fine("Checked cells");
-//    	
-//    	// Check the collection. These will check the integer fields, but not the calculated border list
-//    	assertEquals("Consensus nuclei should match",d.getCollection().getConsensus(), t.getCollection().getConsensus());
-//    	assertEquals("Raw consensus nuclei should match",d.getCollection().getRawConsensus(), t.getCollection().getRawConsensus());
-//
-//    	// Confirm consensus nuclei are copied successfully
-//    	ComponentTester.testDuplicatesByField(d.getCollection().getConsensus(), t.getCollection().getConsensus());
-//    	ComponentTester.testDuplicatesByField(d.getCollection().getRawConsensus(), t.getCollection().getRawConsensus());
-//    	LOGGER.fine("Checked consensus");
-//
-//    	assertEquals("Cell collections should match", d.getCollection(), t.getCollection());
-//    	assertEquals("Child collections should match", d.getAllChildDatasets(), t.getAllChildDatasets());
-//    	assertEquals("Merge sources should match", d.getAllMergeSources(), t.getAllMergeSources());
-//    	assertEquals("Dataset colour should match", d.getDatasetColour(), t.getDatasetColour());
-//    	assertEquals("Cluster groups should match", d.getClusterGroups(), t.getClusterGroups());
-//    	assertEquals("Version created should match", d.getVersionCreated(), t.getVersionCreated());
-//    	assertEquals("Save path should match", d.getSavePath(), t.getSavePath());
-//    	ComponentTester.testDuplicatesByField(d.getCollection(), t.getCollection());
-//    	LOGGER.fine("Checked collections");
-    	ComponentTester.testDuplicatesByField(d, t);
+    	ComponentTester.testDuplicatesByField(d.getName(), d, t);
     	assertEquals("Datasets should match", d, t);
     }
 }

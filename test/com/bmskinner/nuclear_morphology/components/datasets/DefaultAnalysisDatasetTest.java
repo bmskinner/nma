@@ -25,12 +25,12 @@ import static org.junit.Assert.assertTrue;
 
 import java.awt.Color;
 import java.io.File;
-import java.io.PrintWriter;
 import java.util.UUID;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.jdom2.Element;
-import org.jdom2.output.Format;
-import org.jdom2.output.XMLOutputter;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -38,17 +38,36 @@ import org.junit.rules.ExpectedException;
 
 import com.bmskinner.nuclear_morphology.ComponentTester;
 import com.bmskinner.nuclear_morphology.TestDatasetBuilder;
+import com.bmskinner.nuclear_morphology.TestImageDatasetCreator;
 import com.bmskinner.nuclear_morphology.TestResources;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.CellCollectionFilterBuilder;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.CellCollectionFilterer;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.CellCollectionFilterer.CollectionFilteringException;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.FilteringOptions;
+import com.bmskinner.nuclear_morphology.analysis.nucleus.NucleusDetectionMethod;
+import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetProfilingMethod;
+import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileCreator;
 import com.bmskinner.nuclear_morphology.components.Version;
+import com.bmskinner.nuclear_morphology.components.Version.UnsupportedVersionException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
+import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
+import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
+import com.bmskinner.nuclear_morphology.components.profiles.DefaultProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
+import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
+import com.bmskinner.nuclear_morphology.logging.ConsoleFormatter;
+import com.bmskinner.nuclear_morphology.logging.ConsoleHandler;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
+
+import ij.Prefs;
 
 /**
  * Testing methods of the analysis dataset
@@ -58,10 +77,22 @@ import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
  */
 public class DefaultAnalysisDatasetTest extends ComponentTester {
 	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.PROJECT_LOGGER);
+	
     private IAnalysisDataset d;
     private static final UUID CHILD_ID_1 = UUID.fromString("00000000-0000-0000-0000-000000000001");
     private static final UUID CHILD_ID_2 = UUID.fromString("00000000-0000-0000-0000-000000000002");
     private static final UUID CHILD_ID_NULL = UUID.fromString("00000000-0000-0000-0000-000000000000");
+    
+	static {		
+		Prefs.setThreads(2); // Attempt to avoid issue 162
+		for(Handler h : LOGGER.getHandlers())
+			LOGGER.removeHandler(h);
+		Handler h = new ConsoleHandler(new ConsoleFormatter());
+		LOGGER.setLevel(Level.FINE);
+		h.setLevel(Level.FINE);
+		LOGGER.addHandler(h);
+	}
     
     @Rule
     public final ExpectedException exception = ExpectedException.none();
@@ -79,7 +110,7 @@ public class DefaultAnalysisDatasetTest extends ComponentTester {
     @Test
     public void testDuplicate() throws Exception {
     	IAnalysisDataset dup = d.copy();
-    	testDuplicatesByField(d, dup);
+    	testDuplicatesByField(d.getName(), d, dup);
     }
 
   
@@ -211,21 +242,20 @@ public class DefaultAnalysisDatasetTest extends ComponentTester {
         }
     }
     
+	/**
+	 * Test that example data can be marshalled and unmarshalled correctly
+	 * @throws Exception
+	 */
 	@Test
 	public void testXmlSerializes() throws Exception {
 
-		Element e = d.toXmlElement();		
-		XMLOutputter xmlOutput = new XMLOutputter();
-		xmlOutput.setFormat(Format.getPrettyFormat());
-		xmlOutput.output(e, new PrintWriter( System.out ));
-		
+		Element e = d.toXmlElement();				
 		// files are not absolute on test dataset creation
 		d.setSavePath(d.getSavePath().getAbsoluteFile());
 		
 		IAnalysisDataset test = DatasetCreator.createRoot(e);
-
-		xmlOutput.output(test.toXmlElement(), new PrintWriter( System.out ));
-		testDuplicatesByField(d, test);
+		
+		testDuplicatesByField(d.getName(), d, test);
 		assertEquals(d, test);
 	}
 	
@@ -236,5 +266,7 @@ public class DefaultAnalysisDatasetTest extends ComponentTester {
 			assertEquals(c.getCollection().size(),  c.getCollection().countShared(d));
 		}
 	}
+	
+	
 
 }

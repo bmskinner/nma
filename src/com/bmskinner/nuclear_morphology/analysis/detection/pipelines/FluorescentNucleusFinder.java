@@ -29,10 +29,8 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nuclear_morphology.analysis.detection.GenericDetector;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageAnnotator;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
-import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder;
 import com.bmskinner.nuclear_morphology.components.ComponentBuilderFactory;
 import com.bmskinner.nuclear_morphology.components.ComponentBuilderFactory.NucleusBuilderFactory;
-import com.bmskinner.nuclear_morphology.components.MissingComponentException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.cells.DefaultCell;
@@ -41,7 +39,6 @@ import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -130,7 +127,14 @@ public class FluorescentNucleusFinder extends CellFinder {
         
         for(Entry<Roi, IPoint> entry : rois.entrySet()) {
             try {
-            	Nucleus n = makeNucleus(entry.getKey(), imageFile, entry.getValue());
+            	
+            	Nucleus n = factory.newBuilder()
+                    	.fromRoi(entry.getKey())
+                    	.withFile(imageFile)
+                    	.withChannel(nuclOptions.getInt(HashOptions.CHANNEL))
+                    	.withCoM(entry.getValue())
+                    	.build();
+            			
             	list.add(n);
             } catch(ComponentCreationException e) {
             	LOGGER.log(Loggable.STACK, "Unable to create nucleus from roi: "+e.getMessage()+"; skipping", e);
@@ -140,7 +144,7 @@ public class FluorescentNucleusFinder extends CellFinder {
         
 		List<ICell> result = new ArrayList<>();
 		for (Nucleus n : list) {
-			if (isValid(nuclOptions,n)) {
+			if (isValid(nuclOptions, n)) {
 				result.add(new DefaultCell(n));
 			}
 		}
@@ -216,7 +220,12 @@ public class FluorescentNucleusFinder extends CellFinder {
         
         for(Entry<Roi, IPoint> entry : rois.entrySet()) {
             try {
-            	list.add(makeNucleus(entry.getKey(), imageFile, entry.getValue()));
+            	list.add(factory.newBuilder()
+                    	.fromRoi(entry.getKey())
+                    	.withFile(imageFile)
+                    	.withChannel(nuclOptions.getInt(HashOptions.CHANNEL))
+                    	.withCoM(entry.getValue())
+                    	.build());
             } catch(ComponentCreationException e) {
             	LOGGER.log(Loggable.STACK, "Unable to create nucleus from roi: "+e.getMessage()+"; skipping", e);
             }
@@ -246,28 +255,4 @@ public class FluorescentNucleusFinder extends CellFinder {
         return result;
     }
 
-    private synchronized Nucleus makeNucleus(@NonNull final Roi roi, @NonNull final File f,
-    		@NonNull final IPoint com) throws ComponentCreationException {
-        
-        // create a Nucleus from the roi
-        Nucleus result = factory.newBuilder()
-        	.fromRoi(roi)
-        	.withFile(f)
-        	.withChannel(nuclOptions.getInt(HashOptions.CHANNEL))
-        	.withCoM(com)
-        	.build();
-
-        ProfileIndexFinder.assignLandmarks(result, options.getRuleSetCollection());
-        
-        try {
-        	if(ProfileIndexFinder.shouldReverseProfile(result)) {
-        		result.reverse();
-        		ProfileIndexFinder.assignLandmarks(result, options.getRuleSetCollection());
-        	}
-        } catch(MissingComponentException | ProfileException e) {
-        	LOGGER.finer(()->"Unable to reverse profile in nucleus");
-        	throw new ComponentCreationException(e);
-        }
-        return result;
-    }
 }

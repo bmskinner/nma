@@ -25,6 +25,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nuclear_morphology.analysis.image.GLCM.GLCMParameter;
 import com.bmskinner.nuclear_morphology.components.MissingComponentException;
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
+import com.bmskinner.nuclear_morphology.components.Statistical;
 import com.bmskinner.nuclear_morphology.components.Taggable;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
@@ -84,11 +85,12 @@ public class DatasetStatsExporter extends StatsExporter {
         }
         profileSamples = options.getInt(Io.PROFILE_SAMPLES_KEY);
         
-        // Only include if present in all datasets
+        // Only include if present in all cells of all datasets
         isIncludeGlcm = list.stream()
         		.allMatch(d->d.getCollection().getCells().stream()
-        				.allMatch(c->c.getPrimaryNucleus().hasMeasurement(GLCMParameter.SUM.toStat())));
-        
+        				.noneMatch(c->c.getPrimaryNucleus()
+        						.getMeasurement(GLCMParameter.SUM.toStat())==Statistical.ERROR_CALCULATING_STAT));
+
         normProfileLength = chooseNormalisedProfileLength();
     }
 
@@ -104,7 +106,8 @@ public class DatasetStatsExporter extends StatsExporter {
         profileSamples = options.getInt(Io.PROFILE_SAMPLES_KEY);
         
         isIncludeGlcm = dataset.getCollection().getCells().stream()
-        				.allMatch(c->c.getPrimaryNucleus().hasMeasurement(GLCMParameter.SUM.toStat()));
+        		.noneMatch(c->c.getPrimaryNucleus()
+						.getMeasurement(GLCMParameter.SUM.toStat())==Statistical.ERROR_CALCULATING_STAT);
         
         normProfileLength = chooseNormalisedProfileLength();
     }
@@ -233,12 +236,9 @@ public class DatasetStatsExporter extends StatsExporter {
 
     private void appendNucleusStats(StringBuilder outLine, IAnalysisDataset d, CellularComponent c) {
 
-        for (Measurement s : Measurement.getNucleusStats()) {
+        for (Measurement s : d.getAnalysisOptions().get().getRuleSetCollection().getMeasurableValues()) {
             double varP = 0;
             double varM = 0;
-            
-            if(!c.hasMeasurement(s))
-            	continue;
 
             if (s.equals(Measurement.VARIABILITY)) {
 
@@ -246,7 +246,7 @@ public class DatasetStatsExporter extends StatsExporter {
                     varP = d.getCollection().getNormalisedDifferenceToMedian(Landmark.REFERENCE_POINT, (Taggable) c);
                     varM = varP;
                 } catch (MissingLandmarkException e) {
-                    LOGGER.log(Loggable.STACK, "Tag not present in component", e);
+                    LOGGER.log(Loggable.STACK, "Landmark not present in component", e);
                     varP = -1;
                     varM = -1;
                 }

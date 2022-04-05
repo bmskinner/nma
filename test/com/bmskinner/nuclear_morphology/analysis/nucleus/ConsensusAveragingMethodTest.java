@@ -131,12 +131,7 @@ public class ConsensusAveragingMethodTest {
 		new ConsensusAveragingMethod(d).call();	
 		
 		Nucleus n = d.getCollection().getConsensus();
-		assertTrue(n.hasMeasurement(Measurement.PERIMETER));
 		assertTrue(n.getMeasurement(Measurement.PERIMETER)!=Statistical.ERROR_CALCULATING_STAT);
-		assertTrue(n.getMeasurement(Measurement.PERIMETER)!=Statistical.STAT_NOT_CALCULATED);
-		
-		assertTrue(n.hasMeasurement(Measurement.AREA));
 		assertTrue(n.getMeasurement(Measurement.AREA)!=Statistical.ERROR_CALCULATING_STAT);
-		assertTrue(n.getMeasurement(Measurement.AREA)!=Statistical.STAT_NOT_CALCULATED);
 	}
 }

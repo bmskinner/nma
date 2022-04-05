@@ -155,7 +155,6 @@ public class GLCMTest {
 			ImageProcessor ip =  ImageImporter.importCroppedImageTo24bit(cell.getPrimaryNucleus()).convertToByte(false);
 			GLCMTile result1 = glcm.calculate(ip);
 			GLCMTile result = glcm.calculate(cell.getPrimaryNucleus());
-			System.out.println(result1);
 			assertEquals(cell.getPrimaryNucleus().getNameAndNumber()+": Sum should be 1", 1d, 
 					result1.get(GLCMParameter.SUM), 0.015);
 			assertFalse("Nucleus specific GLCM should not be identical to whole image GLCM",
@@ -175,7 +174,7 @@ public class GLCMTest {
 			ImageProcessor ip = ImageImporter.importCroppedImageTo24bit(cell.getPrimaryNucleus()).convertToByte(false);
 			GLCMTile result1 = glcm.calculate(ip);
 			GLCMTile result = glcm.calculate(cell.getPrimaryNucleus());
-			System.out.println(result1);
+
 			assertEquals(cell.getPrimaryNucleus().getNameAndNumber()+": Sum should be 1", 1d, 
 					result1.get(GLCMParameter.SUM), 0.015);
 			assertFalse("Nucleus specific GLCM should not be identical to whole image GLCM",

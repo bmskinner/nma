@@ -242,12 +242,9 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 
 			// add the segments if any exist and there is only a single dataset
 			if(isShowSegments) {
-				//				System.out.println(String.format("Drawing segments for %s", borderTag));
 				List<IProfileSegment> segments = collection.getProfileCollection()
 						.getSegmentedProfile(type, borderTag, Stats.MEDIAN)
 						.getOrderedSegments();
-
-				//				System.out.println(String.format("Fetched %s median segments for %s", segments.size(), borderTag));
 
 				if (isNormalised) {
 					addSegmentsFromProfile(segments, medianProfile, ds, normalisedProfileLength, 0, 0);

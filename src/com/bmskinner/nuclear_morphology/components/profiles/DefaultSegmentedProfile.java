@@ -706,21 +706,16 @@ public class DefaultSegmentedProfile extends DefaultProfile implements ISegmente
 
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder("Profile");
+        StringBuilder builder = new StringBuilder(super.toString());
+        builder.append("\n");
         for (IProfileSegment seg : this.getOrderedSegments()) {
-            builder.append(" | "+seg.toString());
+            builder.append(seg.toString()+"\n");
         }
         return builder.toString();
     }
-
-
-    @Override
-    public String valueString() {
-        return super.toString();
-    }
     
     @Override
-    public ISegmentedProfile copy() throws ProfileException {
+    public ISegmentedProfile duplicate() throws ProfileException {
     	return new DefaultSegmentedProfile(this);
     }
 
@@ -739,6 +734,7 @@ public class DefaultSegmentedProfile extends DefaultProfile implements ISegmente
             return true;
         if (!super.equals(obj))
             return false;
+
         if (getClass() != obj.getClass())
             return false;
         DefaultSegmentedProfile other = (DefaultSegmentedProfile) obj;

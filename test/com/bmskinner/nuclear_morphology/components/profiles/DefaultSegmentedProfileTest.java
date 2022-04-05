@@ -227,17 +227,6 @@ public class DefaultSegmentedProfileTest {
 		sp.clearSegments();
 		assertEquals(1, sp.getSegmentCount());
 	}
-
-	@Test
-    public void testToString() {
-	    StringBuilder builder = new StringBuilder("Profile");
-        for (IProfileSegment seg : sp.getOrderedSegments()) {
-            builder.append(" | "+seg.toString());
-        }
-
-       assertEquals(builder.toString(), sp.toString());
-    }
-	
 	
 	@Test
 	public void testProfileIsCreatedWhenOnlyOneSegment() throws ProfileException {

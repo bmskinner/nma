@@ -28,6 +28,7 @@ import org.jfree.data.xy.XYDataset;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.components.MissingComponentException;
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
+import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
@@ -200,7 +201,7 @@ public class CellDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
         		LOGGER.finest( "Getting start point at index " + start);
         		IPoint point = verticalNucleus.getBorderPoint(start);
         		result.add(point);
-        	} catch (MissingComponentException | ProfileException e) {
+        	} catch (MissingComponentException | ProfileException | ComponentCreationException e) {
         		LOGGER.warning("Cannot get angle profile for nucleus");
 
         	}

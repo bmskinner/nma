@@ -25,7 +25,6 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -59,7 +58,7 @@ import ij.gui.Roi;
 /**
  * This is the class of objects that can have profiles applied to them.
  * Positions around the border of the component can be tagged; the profiles will
- * track the tags.
+ * track the tags. Default was false
  * 
  * @author ben
  * @since 1.13.3
@@ -100,8 +99,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
      */
     protected ProfileableCellularComponent(@NonNull Roi roi, @NonNull IPoint centreOfMass, 
     		File source, int channel, int x, int y) {
-    	super(roi, centreOfMass, source, channel, x, y);
-    	profileLandmarks.put(Landmark.REFERENCE_POINT, 0);
+    	this(roi, centreOfMass, source, channel, x, y, null);
     }
     
     /**
@@ -129,65 +127,34 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
      * @param c
      * @throws UnprofilableObjectException
      */
-    protected ProfileableCellularComponent(@NonNull final CellularComponent c) throws UnprofilableObjectException {
+    protected ProfileableCellularComponent(@NonNull final Taggable c) throws ComponentCreationException {
     	super(c);
+
+    	this.windowProportion = c.getWindowProportion();
     	
-    	if (!(c instanceof Taggable)) {
-    		throw new UnprofilableObjectException("Object is not a profileable object");
-    	}
+    	profileLandmarks.clear();
+        for(Entry<Landmark, Integer> entry : c.getLandmarks().entrySet())
+        	profileLandmarks.put(entry.getKey(), entry.getValue());
+        
+    	this.isLocked = c.isLocked();
+    	
+    	try {
 
-
-    	Taggable comp = (Taggable) c;
-
-    	this.windowProportion = comp.getWindowProportion();
-
-    	for (ProfileType type : ProfileType.values()) {
-
-    		try {
-    			profileMap.put(type, comp.getProfile(type).copy());
-    			segments.clear();
-    			segments.addAll(comp.getProfile(type)
-    					.startFrom(-comp.getBorderIndex(Landmark.REFERENCE_POINT))
-    					.getSegments());
-    		} catch (MissingProfileException e) {
-    			// not present in this profile; possibly a deprecated type; ignore and continue
-    		} catch (ProfileException e) {
-    			LOGGER.log(Loggable.STACK, "Cannot copy " + type + " from template", e);
-    		} catch (MissingLandmarkException e) {
-    			LOGGER.log(Loggable.STACK, "Cannot copy " + type + " from template", e);
+    		for (ProfileType type : ProfileType.values()) {
+    			profileMap.put(type, ProfileCreator.createProfile(this, type));
     		}
+
+    		segments.clear();
+    		segments.addAll(c.getProfile(ProfileType.ANGLE)
+    				.startFrom(-c.getBorderIndex(Landmark.REFERENCE_POINT))
+    				.getSegments()); // getSegments creates a copy, no need to duplicate again
+    		IProfileSegment.linkSegments(segments);
+    		
+    	} catch (ProfileException | MissingProfileException | MissingLandmarkException e) {
+    		throw new ComponentCreationException("Cannot make new profile from template", e);
     	}
-    	this.setLandmarks(comp.getLandmarks());
 
-    	this.isLocked = comp.isLocked();
-    }
-    
-    /**
-     * Faster constructor used when duplicating components
-     * @param c
-     * @throws UnprofilableObjectException
-     */
-    protected ProfileableCellularComponent(@NonNull final ProfileableCellularComponent c) {
-    	 super(c);
 
-    	 this.windowProportion = c.windowProportion;
-         for(Landmark t : c.profileLandmarks.keySet())
-        	 profileLandmarks.put(t, c.profileLandmarks.get(t));
-         this.isLocked = c.isLocked;
-         
-         for (ProfileType type : c.profileMap.keySet()) {
-             try {
-                 this.profileMap.put(type, c.profileMap.get(type).copy());
-                 for(IProfileSegment s : c.segments) {
-                	 segments.add(s.duplicate());
-                 }
-                 IProfileSegment.linkSegments(segments);
-
-             } catch (ProfileException e) {
-                 LOGGER.log(Loggable.STACK, "Cannot make new profile type " + type + " from template", e);
-                 LOGGER.warning("Error copying profile: "+e.getMessage());
-             }
-         }
     }
     
     protected ProfileableCellularComponent(Element e) throws ComponentCreationException {
@@ -201,11 +168,11 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 					LandmarkType.valueOf(el.getAttributeValue("type"))), 
 					Integer.parseInt(el.getAttributeValue("index")));
 		}
-		
-		for(Element el : e.getChildren("Segment")){
-			segments.add(new DefaultProfileSegment(el));
-		}
+
 		try {
+			for(Element el : e.getChildren("Segment")){
+				segments.add(new DefaultProfileSegment(el));
+			}
 			IProfileSegment.linkSegments(segments);
 			
 	    	for (ProfileType type : ProfileType.values()) {
@@ -213,7 +180,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 	    	}
 			
 		} catch (ProfileException e1) {
-			LOGGER.log(Level.SEVERE, "Unable to link segments in object constructor", e1);
+			throw new ComponentCreationException("Unable to link segments in object constructor", e1);
 		}
 
 		// Note - do not call initialise here since subclasses 
@@ -221,10 +188,10 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 	}
 
 	@Override
-	public void initialise(double proportion) throws ComponentCreationException {
+	public void createProfiles(double proportion) throws ComponentCreationException {
         if (proportion <= 0 || proportion >= 1)
             throw new ComponentCreationException("Must have a value between 0-1");
-        
+        LOGGER.finer("Beginning create profiles");
         windowProportion = proportion;
 
         try {
@@ -459,8 +426,10 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 
     	// Recreate profiles for new outline
     	ISegmentedProfile oldAngleProfile = this.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
-    	for (Entry<ProfileType, IProfile> entry : profileMap.entrySet()) {
-    		profileMap.put(entry.getKey(), ProfileCreator.createProfile(this, entry.getKey()));
+
+    	for (ProfileType t : ProfileType.values()) {
+    		IProfile p = ProfileCreator.createProfile(this, t);
+    		profileMap.put(t, p);
     	}
 
 
@@ -535,11 +504,20 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (!super.equals(obj))
+		if (!super.equals(obj)) 
 			return false;
+
 		if (getClass() != obj.getClass())
 			return false;
 		ProfileableCellularComponent other = (ProfileableCellularComponent) obj;
+		
+		for(Entry<ProfileType, IProfile> e : profileMap.entrySet()) {
+			if(!other.profileMap.containsKey(e.getKey()))
+				return false;
+			if(!e.getValue().equals(other.profileMap.get(e.getKey())))
+				return false;
+		}
+
 		return isLocked == other.isLocked 
 				&& Objects.equals(profileLandmarks, other.profileLandmarks)
 				&& Objects.equals(segments, other.segments)

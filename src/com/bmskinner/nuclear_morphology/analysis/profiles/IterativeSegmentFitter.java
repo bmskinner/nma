@@ -56,7 +56,7 @@ public class IterativeSegmentFitter {
      */
     @SuppressWarnings("null")
 	public IterativeSegmentFitter(@NonNull final ISegmentedProfile template) throws ProfileException {
-        templateProfile = template.copy();
+        templateProfile = template.duplicate();
     }
 
     /**
@@ -177,7 +177,7 @@ public class IterativeSegmentFitter {
      */
     private int findBestScoringSegmentEndpoint(@NonNull IProfile testProfile, @NonNull UUID segId, int startIndex, int minIndex, int maxIndex, int stepSize) throws MissingComponentException, ProfileException {
 
-    	IProfile tempProfile = testProfile.copy();
+    	IProfile tempProfile = testProfile.duplicate();
     	IProfileSegment templateSegment = templateProfile.getSegment(segId);
     	IProfile template = templateProfile.getSubregion(templateSegment);
     	

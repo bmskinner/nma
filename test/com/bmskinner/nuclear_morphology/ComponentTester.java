@@ -6,6 +6,8 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.awt.Shape;
+import java.awt.geom.PathIterator;
 import java.lang.ref.SoftReference;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
@@ -101,12 +103,9 @@ public abstract class ComponentTester extends FloatArrayTester {
 	 * @param fieldsToSkip skip fields in the object with these names
 	 * @throws Exception
 	 */
-	public static void testDuplicatesByField(Object original, Object dup, Set<String> fieldsToSkip) throws Exception {
+	public static void testDuplicatesByField(String msg, Object original, Object dup, Set<String> fieldsToSkip) throws Exception {
+		
 		for(Field f : getInheritedPrivateFields(dup.getClass())) {
-
-			// Get the fields present in the object
-//			if(f.getType().getTypeName().equals(f.get(original).getClass().getTypeName()))
-//				fieldsToSkip.add(f.getName()); // skip parent child recursion
 			
 			if(f.getName().equals("this$0")) // skip self recursion
 				fieldsToSkip.add(f.getName());
@@ -123,7 +122,6 @@ public abstract class ComponentTester extends FloatArrayTester {
 			if(Modifier.isTransient(f.getModifiers())) // ignore transient fields
 				continue;
 
-//			LOGGER.fine(f.getDeclaringClass().getName()+": "+f.getName());
 			f.setAccessible(true);	
 			// Skip classes we don't need to compare for equality testing
 
@@ -131,8 +129,8 @@ public abstract class ComponentTester extends FloatArrayTester {
 				continue;
 			if(f.getType().equals(WeakReference.class))
 				continue;
-			if(f.getType().equals(Class.forName("com.bmskinner.nuclear_morphology.components.cells.DefaultCellularComponent$ShapeCache")))
-				continue;
+//			if(f.getType().equals(Class.forName("com.bmskinner.nuclear_morphology.components.cells.DefaultCellularComponent$ShapeCache")))
+//				continue;
 			if(f.getType().equals(Class.forName("com.bmskinner.nuclear_morphology.components.datasets.DefaultCellCollection$DefaultProfileCollection$ProfileCache")))
 				continue;	
 			if(f.getType().equals(Class.forName("com.bmskinner.nuclear_morphology.components.datasets.VirtualDataset$DefaultProfileCollection$ProfileCache")))
@@ -162,14 +160,14 @@ public abstract class ComponentTester extends FloatArrayTester {
 							|| oClass.equals(ConcurrentHashMap.class)
 							|| oClass.equals(LinkedHashMap.class)
 							|| oClass.equals(HashMap.class) ) {
-						testHashMapsByField(f, (Map)oValue, (Map)dValue);
+						testHashMapsByField(msg+"->"+f.getName(), f, (Map)oValue, (Map)dValue);
 					}
 
 					if(oClass.equals(HashSet.class)) {
-						testHashSetsByField(f, (HashSet)oValue, (HashSet)dValue);
+						testHashSetsByField(msg+"->"+f.getName(), f, (HashSet)oValue, (HashSet)dValue);
 					}
 					if(oClass.equals(ArrayList.class)) {
-						testListEqualityByField(f, (List)oValue, (List)dValue, fieldsToSkip);
+						testListEqualityByField(msg+"->"+f.getName(), f, (List)oValue, (List)dValue, fieldsToSkip);
 					}
 
 				} else {
@@ -179,83 +177,91 @@ public abstract class ComponentTester extends FloatArrayTester {
 					// do a direct equality test
 					if(f.getType().getName().startsWith("com.bmskinner.nuclear_morphology") && !f.getType().isEnum()) {
 						try {
-							testDuplicatesByField(oValue, dValue, fieldsToSkip);
+							testDuplicatesByField(msg+"->"+f.getName(), oValue, dValue, fieldsToSkip);
 						} catch(StackOverflowError e) {
-							String msg = "Field '"+f.getName()+"' of type "+f.getType().getName()
+							String msg2 = "Field '"+f.getName()+"' of type "+f.getType().getName()
 									+ " and class "+ oClass.getName()
 									+" had a stack overflow on value: "+oValue
 									+" Expected: "+ original 
 									+" Found: "+dup;
-							fail(msg);
+							fail(msg+" "+msg2);
 						}
 					} else{
-						String msg = "Field '"+f.getName()+"' of type "+f.getType().getName()
+						String msg2 = "Field '"+f.getName()+"' of type "+f.getType().getName()
 								+ " and class "+ oClass.getName()
 								+" does not match in original object "
 								+original.getClass().getSimpleName()+": "
 								+"Expected: "+ original 
 								+"Found: "+dup;
-						assertThat(msg, dValue, equalTo(oValue));
+						assertThat(msg+" "+msg2, dValue, equalTo(oValue));
 					}
 				}
 			}
 
 		}
 
-		assertEquals("Equals method in "+original.getClass().getSimpleName(), original, dup);
+		assertEquals(msg+" Equals method in "+original.getClass().getSimpleName(), original, dup);
 	}
 	
 	// Issue with arrays in hashmaps: Object.hashcode()
 	// depends on reference, so is not equal between two
 	// arrays. Need to use Arrays.hashcode().
-	private static void testHashMapsByField(Field f, Map o, Map d) {
-		assertTrue("Hashmaps should not both be null in "+f.getName(), o!=null&&d!=null);
-		assertEquals("Maps should contain same number of elements in field '"+f.getName()
+	private static void testHashMapsByField(String msg, Field f, Map o, Map d) {
+		assertTrue(msg+" Hashmaps should not both be null in "+f.getName(), o!=null&&d!=null);
+		assertEquals(msg+" Maps should contain same number of elements in field '"+f.getName()
 		+"'; original: "+o+ " duplicate: "+d, 
 		o.size(), d.size());
 
-		long oHash = 0;
-		long dHash = 0;
+		List<Class> arrayClasses = List.of(byte[].class, float[].class,
+				long[].class, int[].class, double[].class);
 	
 		for(Object e : o.keySet()) {
 			Object v0 = o.get(e);
 			Object v1 = d.get(e);
 			
-			if(v0.getClass().equals(byte[].class)) {
-				oHash += Arrays.hashCode((byte[])v0);
-				dHash += Arrays.hashCode((byte[])v1);
-			}
+			if(arrayClasses.contains(v0.getClass())){
+				long oHash = 0;
+				long dHash = 0;
+				
+				if(v0.getClass().equals(byte[].class)) {
+					oHash += Arrays.hashCode((byte[])v0);
+					dHash += Arrays.hashCode((byte[])v1);
+				}
 
-			if(v0.getClass().equals(long[].class)) {
-				oHash += Arrays.hashCode((long[])v0);
-				dHash += Arrays.hashCode((long[])v1);
-			}
-			
-			if(v0.getClass().equals(int[].class)) {
-				oHash += Arrays.hashCode((int[])v0);
-				dHash += Arrays.hashCode((int[])v1);
-			}
-			
-			if(v0.getClass().equals(double[].class)) {
-				oHash += Arrays.hashCode((double[])v0);
-				dHash += Arrays.hashCode((double[])v1);
-			}
-			
-			if(v0.getClass().equals(float[].class)) {
-				oHash += Arrays.hashCode((float[])v0);
-				dHash += Arrays.hashCode((float[])v1);
-			}
-			
-			assertEquals("Hashes should match for key in "+f.getName()+": "+e.toString(), oHash, dHash);
+				if(v0.getClass().equals(long[].class)) {
+					oHash += Arrays.hashCode((long[])v0);
+					dHash += Arrays.hashCode((long[])v1);
+				}
+				
+				if(v0.getClass().equals(int[].class)) {
+					oHash += Arrays.hashCode((int[])v0);
+					dHash += Arrays.hashCode((int[])v1);
+				}
+				
+				if(v0.getClass().equals(double[].class)) {
+					oHash += Arrays.hashCode((double[])v0);
+					dHash += Arrays.hashCode((double[])v1);
+				}
+				
+				if(v0.getClass().equals(float[].class)) {
+					oHash += Arrays.hashCode((float[])v0);
+					dHash += Arrays.hashCode((float[])v1);
+				}
+				assertEquals(msg+" Hashes should match for key '"+e+"' in "+f.getName(), oHash, dHash);
+			} else {
+				assertEquals(msg+" Map entries for key '"+e+"' in '"+f.getName()+"' should be equal", v0, v1);
+				assertTrue(msg+" Map should contain duplicated object", o.containsKey(e));
+			}			
 		}
 	}
 	
-	private static void testHashSetsByField(Field f, HashSet o, HashSet d) {
-		assertTrue("Hashsets should not both be null", o!=null&&d!=null);
-		assertEquals("Hashsets should contain same number of elements", o.size(), d.size());
+	private static void testHashSetsByField(String msg, Field f, HashSet o, HashSet d) {
+		assertTrue(msg+" Hashsets should not both be null", o!=null&&d!=null);
+		assertEquals(msg+" Hashsets should contain same number of elements", o.size(), d.size());
 		
 		for(Object v0 : o) {
-			assertTrue("Field '"+f.getName()+"' should contain element "+v0.toString()+" but does not; set is: "+d, d.contains(v0));
+			assertTrue(msg+" Field '"+f.getName()+"' should contain element "+v0.toString()
+			+" but does not; set is: "+d, d.contains(v0));
 		}
 	}
 	
@@ -266,19 +272,19 @@ public abstract class ComponentTester extends FloatArrayTester {
 	 * @param d the duplicate list
 	 * @throws Exception 
 	 */
-	private static void testListEqualityByField(Field f, List o, List d, Set<String> fieldsToSkip) throws Exception {
-		assertTrue("Lists should not both be null", o!=null&&d!=null);
-		assertEquals("Lists should contain same number of elements", o.size(), d.size());
+	private static void testListEqualityByField(String msg, Field f, List o, List d, Set<String> fieldsToSkip) throws Exception {
+		assertTrue(msg+" Field '"+f.getName()+"' lists should not both be null", o!=null&&d!=null);
+		assertEquals(msg+" Field '"+f.getName()+"' lists should contain same number of elements", o.size(), d.size());
 		fieldsToSkip.add("prevSegment"); // these will overflow in segmented profiles
 		fieldsToSkip.add("nextSegment");
 		for(int i=0; i<o.size(); i++) {
 			if(o.get(i).getClass().getName().startsWith("com.bmskinner.nuclear_morphology")) {
-				testDuplicatesByField(o.get(i), d.get(i), fieldsToSkip);
+				testDuplicatesByField(msg, o.get(i), d.get(i), fieldsToSkip);
 			} else {
-				assertEquals("Field '"+f.getName()+"' element "+i+" should be equal", o.get(i), d.get(i));
+				assertEquals(msg+" Field '"+f.getName()+"' element "+i+" should be equal", o.get(i), d.get(i));
 			}
 		}
-		assertTrue("All elements should be shared in list in '"+f.getName()+"'", o.containsAll(d));
+		assertTrue(msg+" Field '"+f.getName()+"' all elements should be shared in list", o.containsAll(d));
 	}
 		
 	/**
@@ -288,9 +294,37 @@ public abstract class ComponentTester extends FloatArrayTester {
 	 * @param dup
 	 * @throws Exception
 	 */
-	public static void testDuplicatesByField(Object original, Object dup) throws Exception {
+	public static void testDuplicatesByField(String msg, Object original, Object dup) throws Exception {
 		Set<String> fieldsToSkip = new HashSet<>();
-		testDuplicatesByField(original, dup, fieldsToSkip);
+		testDuplicatesByField(msg, original, dup, fieldsToSkip);
+	}
+	
+	public static boolean shapesEqual(Shape s, Shape d) {
+		List<double[]> sr = convertShape(s);
+		List<double[]> tr = convertShape(d);
+		
+		assertEquals("Shape lengths should match", sr.size(), tr.size());
+		
+		for(int i=0; i<sr.size(); i++) {
+			assertTrue("Segment "+i+" should match ", Arrays.equals(sr.get(i), tr.get(i)));
+		}
+//		for(double[] d : sr)
+//			System.out.println(Arrays.toString(d));
+		
+		return true;
+	}
+	
+	private static List<double[]> convertShape(Shape s){
+		PathIterator it = s.getPathIterator(null);
+		List<double[]> result = new ArrayList<>();
+		while(!it.isDone()) {
+			double[] vals = new double[6];
+			int t = it.currentSegment(vals);
+			vals[5] = t;
+			result.add(vals);
+			it.next();
+		}
+		return result;
 	}
 
 }

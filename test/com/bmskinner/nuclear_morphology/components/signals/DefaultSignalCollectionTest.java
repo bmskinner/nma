@@ -3,7 +3,6 @@ package com.bmskinner.nuclear_morphology.components.signals;
 import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 
 import org.jdom2.Element;
 import org.jdom2.output.Format;
@@ -44,7 +43,7 @@ public class DefaultSignalCollectionTest extends ComponentTester {
 	@Test
 	public void testDuplicate() throws Exception {
 		ISignalCollection dup = collection.duplicate();
-		testDuplicatesByField(dup.duplicate(), dup);
+		testDuplicatesByField("Signal collection", dup.duplicate(), dup);
 	}
 	
 	@Test
@@ -53,7 +52,7 @@ public class DefaultSignalCollectionTest extends ComponentTester {
 		Element e = collection.toXmlElement();		
 		XMLOutputter xmlOutput = new XMLOutputter();
 		xmlOutput.setFormat(Format.getPrettyFormat());
-		xmlOutput.output(e, new PrintWriter( System.out ));
+
 		
 		ISignalCollection test = new DefaultSignalCollection(e);
 		assertEquals(collection, test);

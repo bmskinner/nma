@@ -51,8 +51,9 @@ public class DefaultConsensusNucleus extends DefaultNucleus implements Consensus
      * Create from a nucleus. Offsets will be zero.
      * @param n
      * @throws UnprofilableObjectException
+     * @throws ComponentCreationException 
      */
-    public DefaultConsensusNucleus(Nucleus n) throws UnprofilableObjectException {
+    public DefaultConsensusNucleus(Nucleus n) throws UnprofilableObjectException, ComponentCreationException {
         super(n);
     }
     
@@ -60,10 +61,11 @@ public class DefaultConsensusNucleus extends DefaultNucleus implements Consensus
      * Create from another consensus. Offsets will be copied
      * @param n
      * @throws UnprofilableObjectException
+     * @throws ComponentCreationException 
      */
-    public DefaultConsensusNucleus(Consensus n) throws UnprofilableObjectException {
+    public DefaultConsensusNucleus(Consensus n) throws UnprofilableObjectException, ComponentCreationException {
         super(n);
-        xOffset =  n.currentOffset().getX();
+        xOffset = n.currentOffset().getX();
         yOffset = n.currentOffset().getY();
         rOffset = n.currentRotation();
     }
@@ -77,9 +79,11 @@ public class DefaultConsensusNucleus extends DefaultNucleus implements Consensus
     public DefaultConsensusNucleus(Element e) throws ComponentCreationException {
     	super(e);
 
-    	xOffset = Double.valueOf(e.getChild("Offset").getAttributeValue("x"));
-    	yOffset = Double.valueOf(e.getChild("Offset").getAttributeValue("y"));
-    	rOffset = Double.valueOf(e.getChild("Offset").getAttributeValue("r"));
+    	if(e.getChild("Offset")!=null) {
+    		xOffset = Double.valueOf(e.getChild("Offset").getAttributeValue("x"));
+    		yOffset = Double.valueOf(e.getChild("Offset").getAttributeValue("y"));
+    		rOffset = Double.valueOf(e.getChild("Offset").getAttributeValue("r"));
+    	}
     }
     
     
@@ -124,7 +128,7 @@ public class DefaultConsensusNucleus extends DefaultNucleus implements Consensus
     
     
     @Override
-    public Nucleus getOrientedNucleus() throws MissingLandmarkException {
+    public Nucleus getOrientedNucleus() throws MissingLandmarkException, ComponentCreationException {
     	Nucleus n = super.getOrientedNucleus();
     	n.rotate(rOffset);
     	n.offset(xOffset, yOffset);
@@ -140,7 +144,7 @@ public class DefaultConsensusNucleus extends DefaultNucleus implements Consensus
 	public Consensus duplicate() {
 		try {
 			return new DefaultConsensusNucleus(this);
-		} catch (UnprofilableObjectException e) {
+		} catch (UnprofilableObjectException | ComponentCreationException e) {
 			LOGGER.log(Loggable.STACK, "Error duplicating consensus", e);
 			return null;
 		}

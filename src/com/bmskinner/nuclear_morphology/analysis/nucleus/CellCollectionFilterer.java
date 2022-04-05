@@ -23,6 +23,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
+import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.DefaultCellCollection;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
@@ -49,11 +50,12 @@ public class CellCollectionFilterer {
 	 * @param c2 the second collection
 	 * @return
 	 */
-	public static ICellCollection and(ICellCollection c1, ICellCollection c2) {			
+	public static ICellCollection and(ICellCollection c1, ICellCollection c2) throws ComponentCreationException {			
 		ICellCollection result = new DefaultCellCollection(c1.getRuleSetCollection(), "AND operation", UUID.randomUUID());
-		
-		c1.stream().filter(c->c2.contains(c)).forEach(c->result.add(c.duplicate()));
-
+		for(ICell c : c1) {
+			if(c2.contains(c))
+				result.add(c.duplicate());
+		}
 		return result;
 	}
 	
@@ -65,13 +67,14 @@ public class CellCollectionFilterer {
 	 * @param c1 the first collection and source of rulesets for the result
 	 * @param c2 the second collection
 	 * @return
+	 * @throws ComponentCreationException 
 	 */
-	public static ICellCollection or(ICellCollection c1, ICellCollection c2) {			
+	public static ICellCollection or(ICellCollection c1, ICellCollection c2) throws ComponentCreationException {			
 		ICellCollection result = new DefaultCellCollection(c1.getRuleSetCollection(), "OR operation", UUID.randomUUID());
-		
-		c1.stream().forEach(c->result.add(c.duplicate()));
-		c2.stream().forEach(c->result.add(c.duplicate()));
-		
+		for(ICell c : c1)
+			result.add(c.duplicate());
+		for(ICell c : c2)
+			result.add(c.duplicate());		
 		return result;
 	}
 	
@@ -83,12 +86,13 @@ public class CellCollectionFilterer {
 	 * @param c1 the first collection and source of rulesets for the result
 	 * @param c2 the second collection
 	 * @return
+	 * @throws ComponentCreationException 
 	 */
-	public static ICellCollection not(ICellCollection c1, ICellCollection c2) {			
+	public static ICellCollection not(ICellCollection c1, ICellCollection c2) throws ComponentCreationException {			
 		ICellCollection result = new DefaultCellCollection(c1.getRuleSetCollection(), "NOT operation", UUID.randomUUID());
-		
-		c1.stream().filter(c->!c2.contains(c)).forEach(c->result.add(c.duplicate()));
-		
+		for(ICell c : c1)
+			if(!c2.contains(c))
+				result.add(c.duplicate());
 		return result;
 	}
 	
@@ -100,13 +104,17 @@ public class CellCollectionFilterer {
 	 * @param c1 the first collection and source of rulesets for the result
 	 * @param c2 the second collection
 	 * @return
+	 * @throws ComponentCreationException 
 	 */
-	public static ICellCollection xor(ICellCollection c1, ICellCollection c2) {			
+	public static ICellCollection xor(ICellCollection c1, ICellCollection c2) throws ComponentCreationException {			
 		ICellCollection result = new DefaultCellCollection(c1.getRuleSetCollection(), "XOR operation", UUID.randomUUID());
+		for(ICell c : c1)
+			if(!c2.contains(c))
+				result.add(c.duplicate());
 		
-		c1.stream().filter(c->!c2.contains(c)).forEach(c->result.add(c.duplicate()));
-		c2.stream().filter(c->!c1.contains(c)).forEach(c->result.add(c.duplicate()));
-		
+		for(ICell c : c2)
+			if(!c1.contains(c))
+				result.add(c.duplicate());		
 		return result;
 	}
 	

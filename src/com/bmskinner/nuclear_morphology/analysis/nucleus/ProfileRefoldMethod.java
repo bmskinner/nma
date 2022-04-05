@@ -244,11 +244,11 @@ public class ProfileRefoldMethod extends SingleDatasetAnalysisMethod {
 
         if (ok) {
         	// Update the test nucleus and recalculate the profiles
-        	testNucleus.updateBorderPoint(index, newPoint);
+//        	testNucleus.updateBorderPoint(index, newPoint); TODO: this has no effect on int coordinates
 
         	LOGGER.finer( "Testing profiles");
 
-        	testNucleus.initialise(dataset.getAnalysisOptions().get().getProfileWindowProportion());
+        	testNucleus.createProfiles(dataset.getAnalysisOptions().get().getProfileWindowProportion());
 
         	// Get the new score
         	score = testNucleus.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT)
@@ -262,10 +262,10 @@ public class ProfileRefoldMethod extends SingleDatasetAnalysisMethod {
         		IPoint exisiting = refoldNucleus.getBorderPoint(index);
         		LOGGER.fine("Updating " + exisiting.toString() + " to " + newPoint.toString() + ": "
         				+ exisiting.getLengthTo(newPoint));
-        		refoldNucleus.updateBorderPoint(index, newPoint);
+//        		refoldNucleus.updateBorderPoint(index, newPoint);
         		pointUpdateCounter++;
 
-        		refoldNucleus.initialise(dataset.getAnalysisOptions().get().getProfileWindowProportion());
+        		refoldNucleus.createProfiles(dataset.getAnalysisOptions().get().getProfileWindowProportion());
 
         		similarityScore = score;
         	}

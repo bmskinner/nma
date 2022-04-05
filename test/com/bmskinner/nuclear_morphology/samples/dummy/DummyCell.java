@@ -22,7 +22,8 @@ package com.bmskinner.nuclear_morphology.samples.dummy;
 import com.bmskinner.nuclear_morphology.components.cells.DefaultCell;
 
 /**
- * A dummy cell for testing
+ * A dummy cell for testing. Does not require any fields to be 
+ * populated
  * @author bms41
  *
  */

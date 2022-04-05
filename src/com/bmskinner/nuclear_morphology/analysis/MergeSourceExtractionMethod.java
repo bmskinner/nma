@@ -28,6 +28,8 @@ import java.util.stream.Collectors;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
+import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
+import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.DefaultAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.DefaultCellCollection;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
@@ -63,7 +65,7 @@ public class MergeSourceExtractionMethod extends MultipleDatasetAnalysisMethod {
         return new DefaultAnalysisResult(extracted);
     }
     
-    private List<IAnalysisDataset> extractSourceDatasets(){
+    private List<IAnalysisDataset> extractSourceDatasets() throws ComponentCreationException{
     	LOGGER.fine("Extracting merge sources");
     	List<IAnalysisDataset> result = new ArrayList<>();     
     	
@@ -97,9 +99,10 @@ public class MergeSourceExtractionMethod extends MultipleDatasetAnalysisMethod {
      * @return
      * @throws MissingOptionException 
      * @throws MissingLandmarkException 
+     * @throws ComponentCreationException 
      * @throws NoSuchElementException if the template analysis options are not present
      */
-    private IAnalysisDataset extractMergeSource(@NonNull IAnalysisDataset template) throws MissingOptionException, MissingLandmarkException {
+    private IAnalysisDataset extractMergeSource(@NonNull IAnalysisDataset template) throws MissingOptionException, MissingLandmarkException, ComponentCreationException {
 
     	ICellCollection templateCollection = template.getCollection();
     	
@@ -113,8 +116,10 @@ public class MergeSourceExtractionMethod extends MultipleDatasetAnalysisMethod {
     	ICellCollection newCollection = new DefaultCellCollection(
     			templateCollection.getRuleSetCollection(), templateCollection.getName(), templateCollection.getId());
 
-    	templateCollection.getCells().forEach(c->newCollection.addCell(c.duplicate()));
-
+    	
+    	for(ICell c : templateCollection) {
+    		newCollection.add(c.duplicate());
+    	}
 
     	IAnalysisDataset newDataset = new DefaultAnalysisDataset(newCollection, template.getSavePath());
     	

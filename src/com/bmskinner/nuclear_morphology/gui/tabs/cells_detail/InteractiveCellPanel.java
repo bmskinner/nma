@@ -52,6 +52,7 @@ import com.bmskinner.nuclear_morphology.analysis.mesh.UncomparableMeshImageExcep
 import com.bmskinner.nuclear_morphology.components.Imageable;
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
@@ -241,7 +242,7 @@ public class InteractiveCellPanel extends JPanel {
 				ip = im.drawImage(consensusMesh);
 				ip.flipVertical();
 			}
-		} catch (MeshCreationException | IllegalArgumentException | MeshImageCreationException | UncomparableMeshImageException | MissingLandmarkException e) {
+		} catch (MeshCreationException | IllegalArgumentException | MeshImageCreationException | UncomparableMeshImageException | MissingLandmarkException | ComponentCreationException e) {
 			LOGGER.log(Loggable.STACK, "Error making mesh or loading image", e);
 		}
 		return ImageAnnotator.resizeKeepingAspect(ip, getWidth(), getHeight()).getBufferedImage();
@@ -323,7 +324,7 @@ public class InteractiveCellPanel extends JPanel {
 					LOGGER.log(Level.SEVERE, "Unable to set landmark in cell", e);
 				}
 
-				cell.getPrimaryNucleus().updateDependentStats();
+				cell.getPrimaryNucleus().clearMeasurements();
 				cell.getPrimaryNucleus().setLocked(true);
 				cellUpdateHandler.fireCelllUpdateEvent(cell, dataset);
 				createImage();

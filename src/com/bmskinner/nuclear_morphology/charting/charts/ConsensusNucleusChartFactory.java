@@ -39,6 +39,7 @@ import com.bmskinner.nuclear_morphology.charting.datasets.NucleusDatasetCreator;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
@@ -123,7 +124,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
         		Mesh mesh = new DefaultMesh(options.firstDataset().getCollection().getConsensus(),
         				options.getMeshSize());
         		return new OutlineChartFactory(options).createMeshChart(mesh, 0.5);
-        	} catch (ChartCreationException | MeshCreationException | MissingLandmarkException e) {
+        	} catch (ChartCreationException | MeshCreationException | MissingLandmarkException | ComponentCreationException e) {
         		LOGGER.log(Loggable.STACK, "Error making mesh chart", e);
         		return createErrorChart();
         	}
@@ -166,7 +167,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 
     		try {
 				component = dataset.getCollection().getConsensus();
-			} catch (MissingLandmarkException e) {
+			} catch (MissingLandmarkException | ComponentCreationException e) {
 				LOGGER.log(Loggable.STACK, "Error creating outline", e);
 				return createErrorChart();
 			}
@@ -218,7 +219,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 
     		try {
 				component = dataset.getCollection().getConsensus();
-			} catch (MissingLandmarkException e) {
+			} catch (MissingLandmarkException | ComponentCreationException e) {
 				LOGGER.log(Loggable.STACK, "Error creating outline", e);
 				return createErrorChart();
 			}
@@ -285,8 +286,9 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
      * 
      * @return the chart maximum range value
      * @throws MissingLandmarkException 
+     * @throws ComponentCreationException 
      */
-    public double getConsensusChartRange() throws MissingLandmarkException {
+    public double getConsensusChartRange() throws MissingLandmarkException, ComponentCreationException {
 
         double max = 1;
         for (IAnalysisDataset dataset : options.getDatasets()) {
@@ -326,7 +328,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
             formatConsensusChartSeries(plot, true);
 
             return chart;
-        } catch (ChartDatasetCreationException | MissingLandmarkException e) {
+        } catch (ChartDatasetCreationException | MissingLandmarkException | ComponentCreationException e) {
             LOGGER.fine("Unable to make segmented outline, creating base outline instead: "+e.getMessage());
             return makeNucleusOutlineChart();
         }
@@ -425,7 +427,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
     		}
     		return chart;
 
-    	} catch (ChartDatasetCreationException | MissingLandmarkException e) {
+    	} catch (ChartDatasetCreationException | MissingLandmarkException | ComponentCreationException e) {
     		LOGGER.log(Loggable.STACK, "Error making consensus dataset", e);
     		return createErrorChart();
     	}

@@ -2,8 +2,6 @@ package com.bmskinner.nuclear_morphology.io.xml;
 
 import static org.junit.Assert.assertEquals;
 
-import java.io.PrintWriter;
-
 import org.jdom2.Element;
 import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
@@ -23,7 +21,6 @@ public class XmlSerializationTestClass {
 		
 		XMLOutputter xmlOutput = new XMLOutputter();
 		xmlOutput.setFormat(Format.getPrettyFormat());
-		xmlOutput.output(e, new PrintWriter( System.out ));
 		
 		RuleSetCollection test = new RuleSetCollection(e);
 		assertEquals(rsc, test);
@@ -37,7 +34,6 @@ public class XmlSerializationTestClass {
 		
 		XMLOutputter xmlOutput = new XMLOutputter();
 		xmlOutput.setFormat(Format.getPrettyFormat());
-		xmlOutput.output(e, new PrintWriter( System.out ));
 		
 		RuleSet test = new RuleSet(e);
 		assertEquals(rs, test);
@@ -54,7 +50,6 @@ public class XmlSerializationTestClass {
 		
 		XMLOutputter xmlOutput = new XMLOutputter();
 		xmlOutput.setFormat(Format.getPrettyFormat());
-		xmlOutput.output(e, new PrintWriter( System.out ));
 		
 		Rule test = new Rule(e);
 		assertEquals(r, test);

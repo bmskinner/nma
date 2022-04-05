@@ -636,7 +636,7 @@ public class DefaultBorderSegmentTest {
 		int[] start = { 0,  10, 30, 88 };
 		int[] end   = { 10, 30, 88, 0  };
 		
-		List<IProfileSegment> list = new ArrayList<IProfileSegment>();
+		List<IProfileSegment> list = new ArrayList<>();
 		
 		for(int i=0; i<start.length; i++){
 			list.add(new DefaultProfileSegment(start[i], end[i], 100));
@@ -678,7 +678,6 @@ public class DefaultBorderSegmentTest {
 		
 		XMLOutputter xmlOutput = new XMLOutputter();
 		xmlOutput.setFormat(Format.getPrettyFormat());
-		xmlOutput.output(e, new PrintWriter( System.out ));
 
 		DefaultProfileSegment recovered = new DefaultProfileSegment(e);
 		

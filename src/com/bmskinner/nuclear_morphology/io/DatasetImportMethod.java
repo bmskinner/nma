@@ -117,7 +117,7 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
     	cleanLockFilesInDir(file.getParentFile());
 
     	// Deserialise whatever is in the file
-    	LOGGER.fine("Reading file as XML");
+//    	LOGGER.fine("Reading file as XML");
 
     	try(
     			InputStream is = new FileInputStream(file);
@@ -129,7 +129,7 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
     		saxBuilder.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
     		saxBuilder.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
     		Document doc = saxBuilder.build(cis);
-    		LOGGER.fine("Built XML document");
+//    		LOGGER.fine("Built XML document");
     		fireIndeterminateState(); // TODO: hook the indeterminate state to the end of file reading,
     		// rather than after the document is built - takes a long time with large datasets
     		dataset = DatasetCreator.createRoot(doc.getRootElement());

@@ -25,6 +25,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nuclear_morphology.analysis.DatasetValidator;
 import com.bmskinner.nuclear_morphology.components.MissingComponentException;
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
+import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
@@ -343,8 +344,9 @@ public class SegmentationHandler {
      * @throws IndexOutOfBoundsException
      * @throws MissingProfileException
      * @throws ProfileException
+     * @throws ComponentCreationException 
      */
-    private synchronized boolean couldUpdateTagToExistingTagIndex(Landmark tag, int index) throws MissingLandmarkException, MissingProfileException, ProfileException {
+    private synchronized boolean couldUpdateTagToExistingTagIndex(Landmark tag, int index) throws MissingLandmarkException, MissingProfileException, ProfileException, IndexOutOfBoundsException, ComponentCreationException {
     	List<Landmark> tags = dataset.getCollection().getProfileCollection().getLandmarks();
     	for(Landmark existingTag : tags) {
     		if(existingTag.equals(tag))

@@ -2,12 +2,9 @@ package com.bmskinner.nuclear_morphology.components.signals;
 
 import static org.junit.Assert.assertEquals;
 
-import java.io.PrintWriter;
 import java.util.UUID;
 
 import org.jdom2.Element;
-import org.jdom2.output.Format;
-import org.jdom2.output.XMLOutputter;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -35,17 +32,12 @@ public class ShortWarpedSignalTest  extends ComponentTester {
 	@Test
 	public void testXmlSerializes() throws Exception {
 
-		Element e = signal.toXmlElement();		
-		XMLOutputter xmlOutput = new XMLOutputter();
-		xmlOutput.setFormat(Format.getPrettyFormat());
-		xmlOutput.output(e, new PrintWriter( System.out ));
-		
+		Element e = signal.toXmlElement();				
 		IWarpedSignal test = new ShortWarpedSignal(e);
 		
 		WarpedSignalKey k = signal.getWarpedSignalKeys().stream().findFirst().get();
-
 		
-		testDuplicatesByField(signal, test);
+		testDuplicatesByField("Warped signal", signal, test);
 		assertEquals(signal, test);
 	}
 }

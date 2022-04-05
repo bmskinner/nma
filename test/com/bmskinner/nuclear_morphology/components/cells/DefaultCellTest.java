@@ -21,8 +21,6 @@ package com.bmskinner.nuclear_morphology.components.cells;
 
 import static org.junit.Assert.assertEquals;
 
-import java.io.PrintWriter;
-
 import org.jdom2.Element;
 import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
@@ -58,7 +56,7 @@ public class DefaultCellTest extends ComponentTester {
     @Test
     public void testDuplicate() throws Exception {
     	ICell dup = c.duplicate();
-    	testDuplicatesByField(c, dup);
+    	testDuplicatesByField("Cell", c, dup);
     }
     
 	@Test
@@ -68,11 +66,9 @@ public class DefaultCellTest extends ComponentTester {
 		
 		XMLOutputter xmlOutput = new XMLOutputter();
 		xmlOutput.setFormat(Format.getPrettyFormat());
-		xmlOutput.output(e, new PrintWriter( System.out ));
 
 		ICell test = new DefaultCell(e);
-//		xmlOutput.output(test.toXmlElement(), new PrintWriter( System.out ));
-		testDuplicatesByField(c, test);
+		testDuplicatesByField("Cell", c, test);
 		assertEquals(c, test);
 	}
 	

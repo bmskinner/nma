@@ -23,6 +23,7 @@ import com.bmskinner.nuclear_morphology.analysis.mesh.Mesh;
 import com.bmskinner.nuclear_morphology.analysis.mesh.MeshCreationException;
 import com.bmskinner.nuclear_morphology.analysis.mesh.MeshImage;
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
+import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
@@ -84,7 +85,7 @@ public class PerCellMSSSIMCalculationMethod
 			Mesh meshConsensus;
 			try {
 				meshConsensus = new DefaultMesh(d.getCollection().getConsensus());
-			} catch (MeshCreationException | MissingLandmarkException e2) {
+			} catch (MeshCreationException | MissingLandmarkException | ComponentCreationException e2) {
 				LOGGER.log(Level.FINE, "Error making mesh of consensus", e2);
 				progress+=d.getCollection().getNucleusCount();
 				publish(progress);

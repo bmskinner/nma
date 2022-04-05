@@ -4,6 +4,7 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.Rotatable;
+import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
@@ -64,8 +65,9 @@ public class ComponentOrienter {
 	 * @param n the nucleus to test
 	 * @return true if flipping on the non-priority axis is needed, false otherwise
 	 * @throws MissingLandmarkException
+	 * @throws ComponentCreationException 
 	 */
-	public static boolean isFlipNeeded(@NonNull Nucleus n) throws MissingLandmarkException {
+	public static boolean isFlipNeeded(@NonNull Nucleus n) throws MissingLandmarkException, ComponentCreationException {
 		
 		// Test on a copy, so we don't affect the actual nucleus
 		// by rotating

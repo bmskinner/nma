@@ -40,7 +40,7 @@ public class DummySegmentedCellularComponent extends ProfileableCellularComponen
         setMeasurement(Measurement.PERIMETER, PERIMETER);
         setMeasurement(Measurement.MIN_DIAMETER, MIN_DIAMETER);
         try {
-			initialise(PROFILE_WINDOW);
+			createProfiles(PROFILE_WINDOW);
 		} catch (ComponentCreationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

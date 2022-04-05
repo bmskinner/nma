@@ -17,6 +17,7 @@ import com.bmskinner.nuclear_morphology.analysis.mesh.MeshCreationException;
 import com.bmskinner.nuclear_morphology.analysis.mesh.MeshVertex;
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.Taggable;
+import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
@@ -84,7 +85,7 @@ public class TPSexporter extends SingleDatasetAnalysisMethod implements Io {
 					LOGGER.fine("Mesh creation error: "+e.getMessage());
 				}
 			}
-		} catch (MeshCreationException | MissingLandmarkException e) {
+		} catch (MeshCreationException | MissingLandmarkException | ComponentCreationException e) {
 			LOGGER.log(Level.SEVERE, "Unable to create mesh for consensus nucleus", e);
 		}
 		

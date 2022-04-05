@@ -100,21 +100,4 @@ public class ProfileSegmenterTest extends ComponentTester {
 //		ChartFactoryTest.showMedianProfile(d, "Multiple variable cells with offsets and rotation");
 	}
 	
-//	@Test
-//	public void testSegmentationOfRodentDataset() throws Exception{
-//		File f = new File(TestResources.DATASET_FOLDER, "Unsegmented_mouse.nmd");
-//		IAnalysisDataset dataset = SampleDatasetReader.openDataset(f);
-//		ISegmentedProfile template = dataset.getCollection()
-//				.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
-//
-//		RepresentativeMedianFinder finder = new RepresentativeMedianFinder(dataset.getCollection());				
-//		IProfile result = finder.findMedian();
-//		ProfileSegmenter segmenter = new ProfileSegmenter(result);
-//		
-//		List<IBorderSegment> segments = segmenter.segment();
-//		for(IBorderSegment s : segments) {
-//			System.out.println(s.getDetail());
-//		}
-//	}
-
 }

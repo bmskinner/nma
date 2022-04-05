@@ -45,7 +45,7 @@ public class DefaultNuclearSignalTest extends ComponentTester {
 		INuclearSignal dup = signal.duplicate();
 		// Don't test the original, because test components override
 		// image methods, changing class signatures
-		testDuplicatesByField(dup.duplicate(), dup);
+		testDuplicatesByField("Signal", dup.duplicate(), dup);
 	}
 	
 	
@@ -57,7 +57,7 @@ public class DefaultNuclearSignalTest extends ComponentTester {
 		
 		XMLOutputter xmlOutput = new XMLOutputter();
 		xmlOutput.setFormat(Format.getPrettyFormat());
-		xmlOutput.output(e, new PrintWriter( System.out ));
+
 		assertEquals(signal, test);
 	}
 	

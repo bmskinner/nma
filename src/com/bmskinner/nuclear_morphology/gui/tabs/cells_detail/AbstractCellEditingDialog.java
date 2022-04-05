@@ -23,6 +23,7 @@ import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
+import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.cells.DefaultCell;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
@@ -54,7 +55,7 @@ public abstract class AbstractCellEditingDialog extends MessagingDialog {
     protected CellViewModel cellModel; // allow changes to be propagated back to
                                        // the other panels
 
-    public AbstractCellEditingDialog(final CellViewModel model) {
+    protected AbstractCellEditingDialog(final CellViewModel model) {
         super(null);
         this.cellModel = model;
 
@@ -95,7 +96,11 @@ public abstract class AbstractCellEditingDialog extends MessagingDialog {
         setCellChanged(false);
         this.cell = cell;
         this.dataset = dataset;
-        this.workingCell = new DefaultCell(cell);
+        try {
+			this.workingCell = cell.duplicate();
+		} catch (ComponentCreationException e) {
+			LOGGER.severe("Cannot copy cell: "+e.getMessage());
+		}
         workingCell.getPrimaryNucleus().setLocked(false);
 
         this.setTitle("Editing " + cell.getPrimaryNucleus().getNameAndNumber());

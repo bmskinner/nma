@@ -9,6 +9,7 @@ import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
+import java.util.logging.Logger;
 
 import org.jfree.chart.axis.CategoryAxis;
 import org.jfree.chart.axis.ValueAxis;
@@ -22,6 +23,8 @@ import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
 
 public class ViolinRenderer extends BoxAndWhiskerRenderer {
+	
+	private static final Logger LOGGER = Logger.getLogger(ViolinRenderer.class.getName());
 	
 	private boolean showBoxplot = true;
 	private boolean showViolin = true;
@@ -62,7 +65,7 @@ public class ViolinRenderer extends BoxAndWhiskerRenderer {
         if (orientation == PlotOrientation.HORIZONTAL) {
             // TODO
             // drawHorizontalItem(g2, state, dataArea, plot, domainAxis,
-            System.out.println("Horizontal not supported");
+        	LOGGER.fine("Horizontal not supported");
         } else if (orientation == PlotOrientation.VERTICAL) {
             drawVerticalItem(g2, state, dataArea, plot, domainAxis, rangeAxis, dataset, row, column);
         }
@@ -241,6 +244,7 @@ public class ViolinRenderer extends BoxAndWhiskerRenderer {
      * @param column
      *            the column index (zero-based).
      */
+    @Override
     public void drawVerticalItem(Graphics2D g2, CategoryItemRendererState state, Rectangle2D dataArea,
             CategoryPlot plot, CategoryAxis domainAxis, ValueAxis rangeAxis, CategoryDataset dataset, int row,
             int column) {

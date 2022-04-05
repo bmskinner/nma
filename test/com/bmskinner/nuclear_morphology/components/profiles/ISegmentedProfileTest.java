@@ -19,6 +19,7 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 
+import com.bmskinner.nuclear_morphology.ComponentTester;
 import com.bmskinner.nuclear_morphology.components.MissingComponentException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment.SegmentUpdateException;
@@ -54,7 +55,7 @@ public class ISegmentedProfileTest {
 
 		profile = createInstance(source);
     }
-
+	
 	/**
 	 * Create an instance of the class under test, using the default index parameters.
 	 * Generates a 4-segment profile, one of which wraps
@@ -93,6 +94,13 @@ public class ISegmentedProfileTest {
 		// are created fresh from the appropriate class.
 		return Arrays.asList(
 				DefaultSegmentedProfile.class);
+	}
+    
+	@Test
+	public void testDuplicate() throws Exception {
+		ISegmentedProfile test = createInstance(source);
+		ISegmentedProfile dup = test.duplicate();
+		ComponentTester.testDuplicatesByField("Seg profile", test, dup);
 	}
 	
 	@Test
@@ -171,7 +179,7 @@ public class ISegmentedProfileTest {
 	
 	@Test
 	public void testGetOrderedSegmentsSucceedsWhenProfileHasOneSegmentStartingAndEndingAtIndexZero() throws ProfileException {
-		ISegmentedProfile testProfile = profile.copy();
+		ISegmentedProfile testProfile = profile.duplicate();
 		List<IProfileSegment> segments = new ArrayList<>();
 		segments.add(new DefaultProfileSegment(0, 0, profile.size(), UUID.fromString(SEG_0)));
 		testProfile.setSegments(segments);
@@ -901,27 +909,17 @@ public class ISegmentedProfileTest {
     }
 	
 	@Test
-	public void testValueString() { 
-	    StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < profile.size(); i++) {
-            builder.append("Index " + i + "\t" + profile.get(i) + "\r\n");
-        }
-        assertEquals(builder.toString(), profile.valueString());
-	}
-
-	@Test
 	public void testCopyString() throws Exception {
-	    ISegmentedProfile copy = profile.copy();
+	    ISegmentedProfile copy = profile.duplicate();
 	    assertEquals(profile.getSegmentCount(), copy.getSegmentCount());
 	    for (UUID id : profile.getSegmentIDs()) {
 	        assertEquals(profile.getSegment(id).getDetail(), copy.getSegment(id).getDetail());
 	    }  
-		assertEquals(profile.valueString(), copy.valueString());
 	}
 	
 	@Test
 	public void testCopy() throws Exception {
-		ISegmentedProfile copy = profile.copy();
+		ISegmentedProfile copy = profile.duplicate();
 		assertEquals("Copied segmented profile should match", profile, copy);
 	}
 
@@ -1032,7 +1030,7 @@ public class ISegmentedProfileTest {
 			profile.update(seg0, newStart, oldEnd);
 			fail("Invalid segment update did not except");
 		} catch(SegmentUpdateException e) {
-//			System.out.println("Expected exception caught: "+e.getMessage());
+			// We want to move on to check the segment was not affected
 		}
 		
 		// Confirm nothing happened
@@ -1060,7 +1058,7 @@ public class ISegmentedProfileTest {
 			profile.update(seg0, oldStart, newEnd);
 			fail("Invalid segment update did not except");
 		} catch(SegmentUpdateException e) {
-//			System.out.println("Expected exception caught: "+e.getMessage());
+			// We want to move on to check the segment was not affected
 		}
 		
 		// Confirm nothing happened

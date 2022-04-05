@@ -1,5 +1,6 @@
 package com.bmskinner.nuclear_morphology.analysis.classification;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.util.logging.Logger;
@@ -9,6 +10,7 @@ import org.junit.Test;
 
 import com.bmskinner.nuclear_morphology.ComponentTester;
 import com.bmskinner.nuclear_morphology.TestDatasetBuilder;
+import com.bmskinner.nuclear_morphology.components.Statistical;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
@@ -45,8 +47,9 @@ public class PrincipalComponentAnalysisTest extends ComponentTester {
 		// Check first 10 PC stats are empty 
 		for(int i=0; i<10; i++) {
 			final int j = i;
-			boolean isPresent = dataset.getCollection().getNuclei().stream().noneMatch(m->m.hasMeasurement(Measurement.makePrincipalComponent(j+1)));
-			assertTrue(isPresent);
+			boolean anyPresent = dataset.getCollection().getNuclei().stream()
+					.anyMatch(m->m.getMeasurement(Measurement.makePrincipalComponent(j+1))!=Statistical.ERROR_CALCULATING_STAT);
+			assertFalse(anyPresent);
 		}
 		
 		// Run the PCA on angle profiles
@@ -63,7 +66,8 @@ public class PrincipalComponentAnalysisTest extends ComponentTester {
 		// Test that PCs have been set
 		for(int i=0; i<nPcs; i++) {
 			final int j = i;
-			boolean isPresent = dataset.getCollection().getNuclei().stream().allMatch(m->m.hasMeasurement(Measurement.makePrincipalComponent(j+1)));
+			boolean isPresent = dataset.getCollection().getNuclei().stream()
+					.allMatch(m->m.getMeasurement(Measurement.makePrincipalComponent(j+1))!=Statistical.ERROR_CALCULATING_STAT);
 			assertTrue(isPresent);
 		}
 	}

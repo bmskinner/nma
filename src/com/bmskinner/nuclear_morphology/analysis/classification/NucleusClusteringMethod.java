@@ -29,7 +29,6 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nuclear_morphology.analysis.AnalysisMethodException;
 import com.bmskinner.nuclear_morphology.analysis.ClusterAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
-import com.bmskinner.nuclear_morphology.components.Statistical;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.DefaultClusterGroup;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
@@ -106,7 +105,7 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
                 dataset.addChildCollection(c);
 
                 // attach the clusters to their parent collection
-                LOGGER.fine("Cluster " + cluster + ": " + c.size() + " nuclei");
+                LOGGER.finer("Cluster " + cluster + ": " + c.size() + " nuclei");
                 IAnalysisDataset clusterDataset = dataset.getChildDataset(c.getId());
 
                 // set shared counts
@@ -118,7 +117,7 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
             	LOGGER.info("No cells assigned to cluster "+cluster);
             }
         }
-        LOGGER.fine("Profiles copied to all clusters");
+        LOGGER.finer("Profiles copied to all clusters");
         
         // Move tSNE values to their cluster group if needed
         if(options.getBoolean(HashOptions.CLUSTER_USE_TSNE_KEY)) {
@@ -126,8 +125,8 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
         		for(Nucleus n : c.getNuclei()) {
         			n.setMeasurement(new DefaultMeasurement("TSNE_1_"+group.getId(), MeasurementDimension.NONE), n.getMeasurement(Measurement.TSNE_1));
         			n.setMeasurement(new DefaultMeasurement("TSNE_2_"+group.getId(), MeasurementDimension.NONE), n.getMeasurement(Measurement.TSNE_2));
-        			n.setMeasurement(Measurement.TSNE_1, Statistical.STAT_NOT_CALCULATED);
-        			n.setMeasurement(Measurement.TSNE_2, Statistical.STAT_NOT_CALCULATED);
+        			n.clearMeasurement(Measurement.TSNE_1);
+        			n.clearMeasurement(Measurement.TSNE_2);
         		}
         	}
         }
@@ -207,7 +206,7 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
 
     	int numberOfClusters = clusterer.numberOfClusters();
 		
-		LOGGER.fine("Clustering found "+numberOfClusters+" clusters");
+		LOGGER.finer("Clustering found "+numberOfClusters+" clusters");
 
 		// Create new empty collections to hold the cells for each cluster
 		for (int i = 0; i <numberOfClusters ; i++) {
@@ -232,7 +231,7 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
     	
     	// complete the new collections by profiling 
     	for(ICellCollection c : clusterMap.values()) {
-    		LOGGER.fine("Cluster has "+c.size()+" cells");
+    		LOGGER.finer("Cluster has "+c.size()+" cells");
     		c.getProfileCollection().calculateProfiles();
     		dataset.getCollection().getProfileManager().copySegmentsAndLandmarksTo(c);
     	}
