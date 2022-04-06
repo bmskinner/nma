@@ -49,8 +49,8 @@ import com.bmskinner.nuclear_morphology.components.measure.DefaultMeasurement;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileException;
+import com.bmskinner.nuclear_morphology.io.XMLReader;
 import com.bmskinner.nuclear_morphology.io.XmlSerializable;
-import com.bmskinner.nuclear_morphology.io.xml.XMLReader;
 import com.bmskinner.nuclear_morphology.utility.ArrayUtils;
 
 import ij.gui.PolygonRoi;

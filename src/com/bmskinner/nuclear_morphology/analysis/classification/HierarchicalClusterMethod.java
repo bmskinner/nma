@@ -1,4 +1,6 @@
-package com.bmskinner.nuclear_morphology.components.options;
+package com.bmskinner.nuclear_morphology.analysis.classification;
+
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 
 /**
  * The available types of hierarchical clustering for the Weka clusterer

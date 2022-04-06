@@ -82,8 +82,8 @@ import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.dialogs.LoadingIconDialog;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
-import com.bmskinner.nuclear_morphology.io.xml.XMLReader;
-import com.bmskinner.nuclear_morphology.io.xml.XMLReader.XMLReadingException;
+import com.bmskinner.nuclear_morphology.io.XMLReader;
+import com.bmskinner.nuclear_morphology.io.XMLReader.XMLReadingException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 

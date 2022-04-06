@@ -24,7 +24,6 @@ import java.util.Objects;
 import org.eclipse.jdt.annotation.NonNull;
 import org.jdom2.Element;
 
-import com.bmskinner.nuclear_morphology.analysis.profiles.RuleSetBuilder;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.io.XmlSerializable;
 

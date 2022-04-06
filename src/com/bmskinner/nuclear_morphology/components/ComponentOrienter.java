@@ -3,8 +3,8 @@ package com.bmskinner.nuclear_morphology.components;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
+import com.bmskinner.nuclear_morphology.components.cells.Nucleus;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
-import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.rules.OrientationMark;
 import com.bmskinner.nuclear_morphology.components.rules.PriorityAxis;

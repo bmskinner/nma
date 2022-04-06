@@ -3,7 +3,7 @@ package com.bmskinner.nuclear_morphology.charting.datasets;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.cells.Nucleus;
 import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
 
 /**

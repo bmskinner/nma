@@ -1,6 +1,5 @@
-package com.bmskinner.nuclear_morphology.components.nuclei;
+package com.bmskinner.nuclear_morphology.components.cells;
 
-import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.io.XmlSerializable;
 

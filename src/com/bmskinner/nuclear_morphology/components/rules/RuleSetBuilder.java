@@ -14,16 +14,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package com.bmskinner.nuclear_morphology.analysis.profiles;
+package com.bmskinner.nuclear_morphology.components.rules;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.rules.Rule;
 import com.bmskinner.nuclear_morphology.components.rules.Rule.RuleType;
-import com.bmskinner.nuclear_morphology.components.rules.RuleSet;
 
 /**
  * Use readable instructions to create a ruleset describing how to find a

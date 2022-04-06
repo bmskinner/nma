@@ -35,6 +35,7 @@ import javax.swing.table.TableModel;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nuclear_morphology.analysis.signals.SignalDetectionMode;
 import com.bmskinner.nuclear_morphology.charting.datasets.SignalTableCell;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
@@ -44,7 +45,6 @@ import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
-import com.bmskinner.nuclear_morphology.components.options.SignalDetectionMode;
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.signals.PairwiseSignalDistanceCollection;

@@ -31,9 +31,9 @@ import org.jfree.data.xy.XYSeriesCollection;
 
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
+import com.bmskinner.nuclear_morphology.components.cells.Nucleus;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
-import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.profiles.DefaultProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;

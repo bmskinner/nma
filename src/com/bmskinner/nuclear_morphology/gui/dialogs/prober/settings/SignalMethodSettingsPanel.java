@@ -28,8 +28,8 @@ import javax.swing.JPanel;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nuclear_morphology.analysis.signals.SignalDetectionMode;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
-import com.bmskinner.nuclear_morphology.components.options.SignalDetectionMode;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 
 @SuppressWarnings("serial")

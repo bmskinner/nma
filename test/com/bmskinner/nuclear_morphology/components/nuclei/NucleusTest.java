@@ -33,6 +33,8 @@ import org.junit.runners.Parameterized.Parameters;
 
 import com.bmskinner.nuclear_morphology.components.TestComponentFactory;
 import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
+import com.bmskinner.nuclear_morphology.components.cells.DefaultNucleus;
+import com.bmskinner.nuclear_morphology.components.cells.Nucleus;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;

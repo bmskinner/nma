@@ -34,8 +34,6 @@ import com.bmskinner.nuclear_morphology.components.Taggable;
 import com.bmskinner.nuclear_morphology.components.measure.DefaultMeasurement;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
-import com.bmskinner.nuclear_morphology.components.nuclei.DefaultNucleus;
-import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.io.XmlSerializable;
 
 /**

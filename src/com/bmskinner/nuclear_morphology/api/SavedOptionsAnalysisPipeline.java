@@ -50,8 +50,8 @@ import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.io.DatasetExportMethod;
+import com.bmskinner.nuclear_morphology.io.XMLReader;
 import com.bmskinner.nuclear_morphology.io.Io.Importer;
-import com.bmskinner.nuclear_morphology.io.xml.XMLReader;
 import com.bmskinner.nuclear_morphology.reports.ShellReportMethod;
 
 /**

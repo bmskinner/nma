@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package com.bmskinner.nuclear_morphology.io.xml;
+package com.bmskinner.nuclear_morphology.io;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -28,8 +28,6 @@ import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
-
-import com.bmskinner.nuclear_morphology.io.CountedOutputStream;
 
 /**
  * Base class for XML writers

@@ -1,4 +1,4 @@
-package com.bmskinner.nuclear_morphology.io.xml;
+package com.bmskinner.nuclear_morphology.io;
 
 import java.io.File;
 import java.io.IOException;

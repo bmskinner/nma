@@ -13,6 +13,9 @@ import org.junit.Test;
 import com.bmskinner.nuclear_morphology.ComponentTester;
 import com.bmskinner.nuclear_morphology.TestDatasetBuilder;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.ConsensusAveragingMethod;
+import com.bmskinner.nuclear_morphology.components.cells.Consensus;
+import com.bmskinner.nuclear_morphology.components.cells.DefaultConsensusNucleus;
+import com.bmskinner.nuclear_morphology.components.cells.Nucleus;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 

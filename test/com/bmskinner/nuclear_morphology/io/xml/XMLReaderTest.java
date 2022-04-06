@@ -15,7 +15,9 @@ import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
-import com.bmskinner.nuclear_morphology.io.xml.XMLReader.XMLReadingException;
+import com.bmskinner.nuclear_morphology.io.XMLReader;
+import com.bmskinner.nuclear_morphology.io.XMLWriter;
+import com.bmskinner.nuclear_morphology.io.XMLReader.XMLReadingException;
 
 public class XMLReaderTest {
 

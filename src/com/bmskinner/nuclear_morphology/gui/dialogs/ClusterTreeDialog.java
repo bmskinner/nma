@@ -49,12 +49,12 @@ import javax.swing.SwingConstants;
 import org.virion.jam.controlpanels.BasicControlPalette;
 
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
+import com.bmskinner.nuclear_morphology.components.cells.Nucleus;
 import com.bmskinner.nuclear_morphology.components.datasets.DefaultClusterGroup;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.datasets.IClusterGroup;
 import com.bmskinner.nuclear_morphology.components.datasets.VirtualDataset;
-import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileException;

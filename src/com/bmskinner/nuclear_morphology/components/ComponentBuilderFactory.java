@@ -26,10 +26,10 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder;
 import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
+import com.bmskinner.nuclear_morphology.components.cells.DefaultNucleus;
+import com.bmskinner.nuclear_morphology.components.cells.Nucleus;
 import com.bmskinner.nuclear_morphology.components.generic.FloatPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
-import com.bmskinner.nuclear_morphology.components.nuclei.DefaultNucleus;
-import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.components.signals.DefaultNuclearSignal;

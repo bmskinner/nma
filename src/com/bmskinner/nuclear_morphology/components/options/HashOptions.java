@@ -22,6 +22,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import com.bmskinner.nuclear_morphology.analysis.classification.ClusteringMethod;
+import com.bmskinner.nuclear_morphology.analysis.classification.HierarchicalClusterMethod;
+import com.bmskinner.nuclear_morphology.analysis.signals.SignalDetectionMode;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult.ShrinkType;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;

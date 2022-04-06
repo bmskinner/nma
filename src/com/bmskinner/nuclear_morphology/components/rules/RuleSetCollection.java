@@ -37,7 +37,7 @@ import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.LandmarkType;
 import com.bmskinner.nuclear_morphology.io.XmlSerializable;
-import com.bmskinner.nuclear_morphology.io.xml.XMLReader.XMLReadingException;
+import com.bmskinner.nuclear_morphology.io.XMLReader.XMLReadingException;
 
 /**
  * This holds the rulesets for identifying each of the landmarks in a profile.

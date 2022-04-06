@@ -15,7 +15,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.jdom2.Element;
 
 import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
-import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.cells.Nucleus;
 import com.bmskinner.nuclear_morphology.io.XmlSerializable;
 import com.bmskinner.nuclear_morphology.utility.StringUtils;
 

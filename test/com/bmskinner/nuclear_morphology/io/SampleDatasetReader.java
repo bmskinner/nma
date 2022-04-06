@@ -35,7 +35,6 @@ import com.bmskinner.nuclear_morphology.components.Version.UnsupportedVersionExc
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.io.xml.XMLReader;
 
 /**
  * Provides a simple access point to open datasets for testing classes

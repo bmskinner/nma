@@ -31,12 +31,12 @@ import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.cells.DefaultCell;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
+import com.bmskinner.nuclear_morphology.components.cells.Nucleus;
 import com.bmskinner.nuclear_morphology.components.datasets.DefaultAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.DefaultCellCollection;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
-import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 
 public class DummyRodentCollection extends DefaultCellCollection {

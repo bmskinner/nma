@@ -10,7 +10,7 @@ import org.junit.Test;
 
 import com.bmskinner.nuclear_morphology.ComponentTester;
 import com.bmskinner.nuclear_morphology.components.TestComponentFactory;
-import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.cells.Nucleus;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 
 import ij.process.ByteProcessor;

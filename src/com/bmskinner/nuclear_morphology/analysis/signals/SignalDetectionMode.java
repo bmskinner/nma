@@ -1,4 +1,4 @@
-package com.bmskinner.nuclear_morphology.components.options;
+package com.bmskinner.nuclear_morphology.analysis.signals;
 
 import com.bmskinner.nuclear_morphology.gui.Labels;
 

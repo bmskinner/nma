@@ -30,6 +30,7 @@ import com.bmskinner.nuclear_morphology.analysis.AnalysisMethodException;
 import com.bmskinner.nuclear_morphology.analysis.ClusterAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
+import com.bmskinner.nuclear_morphology.components.cells.Nucleus;
 import com.bmskinner.nuclear_morphology.components.datasets.DefaultClusterGroup;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
@@ -38,8 +39,6 @@ import com.bmskinner.nuclear_morphology.components.datasets.VirtualDataset;
 import com.bmskinner.nuclear_morphology.components.measure.DefaultMeasurement;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.measure.MeasurementDimension;
-import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.options.ClusteringMethod;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 
 import weka.clusterers.Clusterer;

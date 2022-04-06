@@ -11,9 +11,9 @@ import org.junit.Test;
 
 import com.bmskinner.nuclear_morphology.TestDatasetBuilder;
 import com.bmskinner.nuclear_morphology.components.Statistical;
+import com.bmskinner.nuclear_morphology.components.cells.Nucleus;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
-import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileManager;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;

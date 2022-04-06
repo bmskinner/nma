@@ -21,11 +21,11 @@ import java.util.List;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.UnavailableBorderPointException;
+import com.bmskinner.nuclear_morphology.components.cells.Nucleus;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.measure.DoubleEquation;
 import com.bmskinner.nuclear_morphology.components.measure.LineEquation;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
-import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalCollection;
 

@@ -31,10 +31,10 @@ import javax.swing.JPanel;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
+import com.bmskinner.nuclear_morphology.analysis.classification.HierarchicalClusterMethod;
 import com.bmskinner.nuclear_morphology.analysis.classification.TreeBuildingMethod;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
-import com.bmskinner.nuclear_morphology.components.options.HierarchicalClusterMethod;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.gui.Labels;

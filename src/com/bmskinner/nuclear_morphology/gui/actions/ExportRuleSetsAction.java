@@ -14,7 +14,7 @@ import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.components.FileSelector;
 import com.bmskinner.nuclear_morphology.io.Io;
-import com.bmskinner.nuclear_morphology.io.xml.XMLWriter;
+import com.bmskinner.nuclear_morphology.io.XMLWriter;
 
 /**
  * Action to export ruleset collections as XML

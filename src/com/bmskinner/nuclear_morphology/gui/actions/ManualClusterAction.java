@@ -12,13 +12,13 @@ import javax.swing.JPanel;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
+import com.bmskinner.nuclear_morphology.analysis.classification.ClusteringMethod;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.DefaultClusterGroup;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.datasets.IClusterGroup;
 import com.bmskinner.nuclear_morphology.components.datasets.VirtualDataset;
-import com.bmskinner.nuclear_morphology.components.options.ClusteringMethod;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;

@@ -20,7 +20,7 @@ import java.awt.BorderLayout;
 import java.util.logging.Logger;
 
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
-import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.cells.Nucleus;
 import com.bmskinner.nuclear_morphology.gui.components.AnnotatedNucleusPanel;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 

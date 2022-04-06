@@ -18,8 +18,8 @@ import com.bmskinner.nuclear_morphology.TestResources;
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetProfilingMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMethod.MorphologyAnalysisMode;
+import com.bmskinner.nuclear_morphology.components.cells.Nucleus;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
 

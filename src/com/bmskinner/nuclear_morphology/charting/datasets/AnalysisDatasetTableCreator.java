@@ -38,6 +38,7 @@ import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
+import com.bmskinner.nuclear_morphology.analysis.classification.ClusteringMethod;
 import com.bmskinner.nuclear_morphology.analysis.classification.PrincipalComponentAnalysis;
 import com.bmskinner.nuclear_morphology.analysis.classification.TsneMethod;
 import com.bmskinner.nuclear_morphology.charting.datasets.tables.AbstractTableCreator;
@@ -50,7 +51,6 @@ import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.datasets.IClusterGroup;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
-import com.bmskinner.nuclear_morphology.components.options.ClusteringMethod;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;

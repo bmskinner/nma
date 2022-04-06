@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package com.bmskinner.nuclear_morphology.components.nuclei;
+package com.bmskinner.nuclear_morphology.components.cells;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -35,8 +35,6 @@ import com.bmskinner.nuclear_morphology.analysis.signals.SignalAnalyser;
 import com.bmskinner.nuclear_morphology.components.ComponentOrienter;
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.UnavailableBorderPointException;
-import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
-import com.bmskinner.nuclear_morphology.components.cells.ProfileableCellularComponent;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;

@@ -36,7 +36,7 @@ import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.cells.ICytoplasm;
-import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.cells.Nucleus;
 import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalCollection;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;

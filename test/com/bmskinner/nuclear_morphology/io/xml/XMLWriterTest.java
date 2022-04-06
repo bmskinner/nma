@@ -15,6 +15,8 @@ import org.junit.rules.ExpectedException;
 import com.bmskinner.nuclear_morphology.TestDatasetBuilder;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
+import com.bmskinner.nuclear_morphology.io.XMLReader;
+import com.bmskinner.nuclear_morphology.io.XMLWriter;
 
 public class XMLWriterTest {
 

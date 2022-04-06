@@ -5,8 +5,6 @@ import static org.junit.Assert.assertEquals;
 import org.jdom2.Element;
 import org.junit.Test;
 
-import com.bmskinner.nuclear_morphology.components.nuclei.DefaultNucleus;
-import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
 
 public class DefaultCellularComponentTest {

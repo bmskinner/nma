@@ -16,8 +16,8 @@ import org.jdom2.Element;
 
 import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult.Aggregation;
+import com.bmskinner.nuclear_morphology.io.XMLReader;
 import com.bmskinner.nuclear_morphology.io.XmlSerializable;
-import com.bmskinner.nuclear_morphology.io.xml.XMLReader;
 
 /**
  * Store the individual counts per shell keyed to a source object

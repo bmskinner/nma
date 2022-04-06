@@ -42,6 +42,7 @@ import com.bmskinner.nuclear_morphology.components.UnavailableBorderPointExcepti
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
+import com.bmskinner.nuclear_morphology.components.cells.Nucleus;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
@@ -49,7 +50,6 @@ import com.bmskinner.nuclear_morphology.components.measure.DoubleEquation;
 import com.bmskinner.nuclear_morphology.components.measure.LineEquation;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
-import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.profiles.BooleanProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.DefaultProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;

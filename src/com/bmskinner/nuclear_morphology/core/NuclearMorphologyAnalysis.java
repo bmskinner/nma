@@ -26,7 +26,7 @@ import java.util.logging.Logger;
 import com.bmskinner.nuclear_morphology.components.Version;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.io.Io;
-import com.bmskinner.nuclear_morphology.io.xml.XMLWriter;
+import com.bmskinner.nuclear_morphology.io.XMLWriter;
 
 /**
  * This is the main class that runs the program.

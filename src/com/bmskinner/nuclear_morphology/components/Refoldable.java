@@ -19,9 +19,9 @@ package com.bmskinner.nuclear_morphology.components;
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
+import com.bmskinner.nuclear_morphology.components.cells.Consensus;
+import com.bmskinner.nuclear_morphology.components.cells.Nucleus;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
-import com.bmskinner.nuclear_morphology.components.nuclei.Consensus;
-import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 
 /**
  * Provides methods relating to the abillity to refold consensus shapes for a

@@ -20,10 +20,10 @@ import javax.swing.JSpinner;
 import javax.swing.SpinnerModel;
 import javax.swing.SpinnerNumberModel;
 
+import com.bmskinner.nuclear_morphology.analysis.classification.ClusteringMethod;
+import com.bmskinner.nuclear_morphology.analysis.classification.HierarchicalClusterMethod;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.options.ClusteringMethod;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
-import com.bmskinner.nuclear_morphology.components.options.HierarchicalClusterMethod;
 
 /**
  * Options panel for clustering setup

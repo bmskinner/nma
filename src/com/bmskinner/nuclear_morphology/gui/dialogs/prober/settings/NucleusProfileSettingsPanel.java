@@ -38,8 +38,8 @@ import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationExcept
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.io.Io;
-import com.bmskinner.nuclear_morphology.io.xml.XMLReader;
-import com.bmskinner.nuclear_morphology.io.xml.XMLReader.XMLReadingException;
+import com.bmskinner.nuclear_morphology.io.XMLReader;
+import com.bmskinner.nuclear_morphology.io.XMLReader.XMLReadingException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**

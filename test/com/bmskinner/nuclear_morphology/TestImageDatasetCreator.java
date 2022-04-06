@@ -31,7 +31,7 @@ import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.io.DatasetExportMethod;
 import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
-import com.bmskinner.nuclear_morphology.io.xml.XMLWriter;
+import com.bmskinner.nuclear_morphology.io.XMLWriter;
 import com.bmskinner.nuclear_morphology.logging.ConsoleFormatter;
 import com.bmskinner.nuclear_morphology.logging.ConsoleHandler;
 import com.bmskinner.nuclear_morphology.logging.Loggable;

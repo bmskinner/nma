@@ -11,9 +11,9 @@ import com.bmskinner.nuclear_morphology.analysis.image.GLCM.GLCMParameter;
 import com.bmskinner.nuclear_morphology.analysis.image.GLCM.GLCMTile;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
+import com.bmskinner.nuclear_morphology.components.cells.Nucleus;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
-import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 
 public class GLCMCalculationMethod extends SingleDatasetAnalysisMethod {
 
