@@ -59,7 +59,6 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
     private InteractiveCellPanel imagePanel;
 
     private GenericCheckboxPanel rotatePanel   = new GenericCheckboxPanel("Rotate vertical");
-    private GenericCheckboxPanel makeMeshPanel = new GenericCheckboxPanel("Compare to consensus mesh");
     private GenericCheckboxPanel warpMeshPanel = new GenericCheckboxPanel("Warp image to consensus shape");
     
     // A JDialog is a top level container, and these are not subject to GC on
@@ -98,9 +97,6 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
     	rotatePanel.setEnabled(false);
     	rotatePanel.addActionListener(this);
 
-        makeMeshPanel.addActionListener(this);
-        makeMeshPanel.setEnabled(false);
-
         warpMeshPanel.addActionListener(this);
         warpMeshPanel.setEnabled(false);
          
@@ -108,9 +104,7 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
         adjustBtn.addActionListener(e-> cellBorderAdjustmentDialog.load(getCellModel().getCell(), activeDataset()));
 
         panel.add(rotatePanel);
-        panel.add(makeMeshPanel);
         panel.add(warpMeshPanel);
-//        panel.add(adjustBtn);
         
         return panel;
     }
@@ -119,23 +113,19 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
 
         if (this.isMultipleDatasets() || !this.hasDatasets()) {
         	rotatePanel.setEnabled(false);
-            makeMeshPanel.setEnabled(false);
             warpMeshPanel.setEnabled(false);
             return;
         }
 
         if (!this.getCellModel().hasCell()) {
         	rotatePanel.setEnabled(false);
-            makeMeshPanel.setEnabled(false);
             warpMeshPanel.setEnabled(false);
         } else {
             // Only allow one mesh activity to be active
         	rotatePanel.setEnabled(!warpMeshPanel.isSelected());
-            makeMeshPanel.setEnabled(!warpMeshPanel.isSelected());
-            warpMeshPanel.setEnabled(!makeMeshPanel.isSelected());
+        	 warpMeshPanel.setEnabled(!rotatePanel.isSelected());
 
             if (!activeDataset().getCollection().hasConsensus()) {
-                makeMeshPanel.setEnabled(false);
                 warpMeshPanel.setEnabled(false);
             }
         }
@@ -154,7 +144,6 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
         
         HashOptions displayOptions = new OptionsBuilder()
         		.withValue(CellDisplayOptions.WARP_IMAGE, warpMeshPanel.isSelected())
-        		.withValue(CellDisplayOptions.SHOW_MESH, makeMeshPanel.isSelected())
         		.withValue(CellDisplayOptions.ROTATE_VERTICAL, rotatePanel.isSelected())
         		.build();
         

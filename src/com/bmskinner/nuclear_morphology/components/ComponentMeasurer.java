@@ -67,10 +67,10 @@ public final class ComponentMeasurer {
             return c.getNuclei().size();
 
         if (Measurement.CELL_NUCLEAR_AREA.equals(m))
-            return calculateCellNuclearRatio(c);
+            return calculateCellNuclearArea(c);
 
         if (Measurement.CELL_NUCLEAR_RATIO.equals(m))
-            return calculateCellNuclearArea(c);
+        	return calculateCellNuclearRatio(c);
         return Statistical.ERROR_CALCULATING_STAT;
 	}
 	

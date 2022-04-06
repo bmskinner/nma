@@ -260,8 +260,8 @@
 					<archive>
 						<manifest>
 							<addClasspath>true</addClasspath>
-							<mainClass>com.bmskinner.nuclear_morphology.core.Nuclear_Morphology_Analysis</mainClass>
-							<classpathPrefix>dependency-jars/</classpathPrefix>
+							<mainClass>com.bmskinner.nuclear_morphology.core.NuclearMorphologyAnalysis</mainClass>
+							<classpathPrefix>lib</classpathPrefix>
 						</manifest>
 					</archive>
 				</configuration>
@@ -282,7 +282,7 @@
 						<configuration>
 							<!-- exclude junit, we need runtime dependency only -->
 							<includeScope>runtime</includeScope>
-							<outputDirectory>${project.build.directory}/dependency-jars/</outputDirectory>
+							<outputDirectory>${project.build.directory}/lib</outputDirectory>
 						</configuration>
 					</execution>
 				</executions>
@@ -309,26 +309,9 @@
 							<appendAssemblyId>false</appendAssemblyId>
 							<archive>
 								<manifest>
-									<mainClass>com.bmskinner.nuclear_morphology.core.Nuclear_Morphology_Analysis</mainClass>
+									<mainClass>com.bmskinner.nuclear_morphology.core.NuclearMorphologyAnalysis</mainClass>
 								</manifest>
 							</archive>
-						</configuration>
-					</execution>
-
-					<!-- Create a zip with the jar file and dependencies for distribution 
-						as ImageJ plugin install file -->
-					<execution>
-						<id>create-packaged-zip</id>
-						<phase>package</phase>
-						<goals>
-							<goal>single</goal>
-						</goals>
-						<configuration>
-							<finalName>${jar.finalName}_ImageJ_plugin</finalName>
-							<appendAssemblyId>false</appendAssemblyId>
-							<descriptors>
-								<descriptor>assembly.xml</descriptor>
-							</descriptors>
 						</configuration>
 					</execution>
 				</executions>
@@ -336,6 +319,7 @@
 
 
 			<!-- Use Launch4J to create an exe file for Windows standalone version -->
+			
 			<plugin>
 				<groupId>com.akathist.maven.plugins.launch4j</groupId>
 				<artifactId>launch4j-maven-plugin</artifactId>
@@ -373,7 +357,7 @@
 								<productName>${project.full.name}</productName>
 								<originalFilename>${jar.finalName}.exe</originalFilename>
 								<copyright>Ben Skinner ${project.inceptionYear}-${build.year}</copyright>
-								<internalName>${project.code.name}</internalName>
+								<internalName>${project.full.name}</internalName>
 								<language>ENGLISH_UK</language>
 							</versionInfo>
 						</configuration>
@@ -392,9 +376,7 @@
 				<artifactId>maven-project-info-reports-plugin</artifactId>
 				<version>2.7</version>
 			</plugin>
-
 		</plugins>
-
 	</build>
 
 	<reporting>
@@ -402,7 +384,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-checkstyle-plugin</artifactId>
-				<version>3.0.0</version>
+				<version>3.1.2</version>
 				<reportSets>
 					<reportSet>
 						<reports>
@@ -415,14 +397,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-pmd-plugin</artifactId>
-				<version>3.11.0</version>
-			</plugin>
-
-			<!-- Report code metrics -->
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>jdepend-maven-plugin</artifactId>
-				<version>2.0</version>
+				<version>3.16.0</version>
 			</plugin>
 
 		</plugins>

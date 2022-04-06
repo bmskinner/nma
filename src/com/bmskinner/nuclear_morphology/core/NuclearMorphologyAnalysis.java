@@ -69,6 +69,10 @@ public class NuclearMorphologyAnalysis {
 	    new CommandLineParser(args);
 	}
 	
+	/**
+	 * Main entry when launching jar
+	 * @param args
+	 */
 	public static void main(String[] args){
 		instance = new NuclearMorphologyAnalysis(args);
 	}
