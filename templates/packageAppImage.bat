@@ -1,2 +1,2 @@
 REM Create the portable app image for Windows
-jpackage --name "Nuclear Morphology Analysis" --app-version ${project.version} --input ..\target\standalone --dest ..\target\appimage --type app-image --main-jar Nuclear_Morphology_Analysis_${project.version}_standalone.jar --main-class com.bmskinner.nuclear_morphology.core.NuclearMorphologyAnalysis --win-console
+jpackage --name "Nuclear Morphology Analysis" --app-version ${project.version} --input ..\target\standalone --dest ..\target\appimage --type app-image --main-jar Nuclear_Morphology_Analysis_${project.version}_standalone.jar --main-class com.bmskinner.nuclear_morphology.core.NuclearMorphologyAnalysis

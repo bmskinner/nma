@@ -275,8 +275,7 @@
 					</excludes>
 				</configuration>
 			</plugin>
-
-
+			
 			<!-- Copy project dependencies to new folder -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -298,12 +297,12 @@
 				</executions>
 			</plugin>
 
-
+			<!-- Create a jar with the dependencies included as a standalone version -->
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
 				<version>2.5.5</version>
 
-				<!-- Create a jar with the dependencies included as a standalone version -->
+				
 				<executions>
 					<execution>
 						<id>create-executable-jar</id>
