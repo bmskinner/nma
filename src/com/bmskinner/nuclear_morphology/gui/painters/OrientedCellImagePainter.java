@@ -11,7 +11,7 @@ import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.bmskinner.nuclear_morphology.analysis.ComponentOrienter;
+import com.bmskinner.nuclear_morphology.components.ComponentOrienter;
 import com.bmskinner.nuclear_morphology.components.Imageable;
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.UnavailableBorderPointException;

@@ -40,7 +40,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.jdom2.Element;
 
-import com.bmskinner.nuclear_morphology.analysis.ComponentMeasurer;
+import com.bmskinner.nuclear_morphology.components.ComponentMeasurer;
 import com.bmskinner.nuclear_morphology.components.Imageable;
 import com.bmskinner.nuclear_morphology.components.MissingComponentException;
 import com.bmskinner.nuclear_morphology.components.generic.FloatPoint;

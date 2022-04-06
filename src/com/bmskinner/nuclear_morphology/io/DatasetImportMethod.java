@@ -35,13 +35,13 @@ import org.jdom2.input.SAXBuilder;
 
 import com.bmskinner.nuclear_morphology.analysis.AbstractAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.AnalysisMethodException;
-import com.bmskinner.nuclear_morphology.analysis.DatasetRepairer;
-import com.bmskinner.nuclear_morphology.analysis.DatasetValidator;
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.components.Version.UnsupportedVersionException;
 import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.datasets.DatasetCreator;
+import com.bmskinner.nuclear_morphology.components.datasets.DatasetRepairer;
+import com.bmskinner.nuclear_morphology.components.datasets.DatasetValidator;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.io.Io.Importer;
 import com.bmskinner.nuclear_morphology.logging.Loggable;

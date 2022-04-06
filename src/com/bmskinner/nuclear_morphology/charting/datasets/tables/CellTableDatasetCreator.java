@@ -28,12 +28,10 @@ import java.util.logging.Logger;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
-import com.bmskinner.nuclear_morphology.analysis.image.ColourMeasurometer;
 import com.bmskinner.nuclear_morphology.charting.datasets.AbstractCellDatasetCreator;
 import com.bmskinner.nuclear_morphology.charting.datasets.SignalTableCell;
 import com.bmskinner.nuclear_morphology.charting.options.DisplayOptions;
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
-import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.cells.ICytoplasm;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
@@ -56,7 +54,6 @@ import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
-import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -238,25 +235,14 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
         fieldNames.add("Cytoplasm");
         rowData.add("");
 
-        try {
+        ICytoplasm cyto = c.getCytoplasm();
+		DecimalFormat df = new DecimalFormat(DEFAULT_DECIMAL_FORMAT);
+		for (Measurement stat : Measurement.getComponentStats()) {
+		    fieldNames.add(stat.label(GlobalOptions.getInstance().getScale()));
 
-            ICytoplasm cyto = c.getCytoplasm();
-            DecimalFormat df = new DecimalFormat(DEFAULT_DECIMAL_FORMAT);
-            for (Measurement stat : Measurement.getComponentStats()) {
-                fieldNames.add(stat.label(GlobalOptions.getInstance().getScale()));
-
-                double value = cyto.getMeasurement(stat, GlobalOptions.getInstance().getScale());
-                rowData.add(df.format(value));
-            }
-
-            Color colour = ColourMeasurometer.calculateAverageRGB(c, CellularComponent.CYTOPLASM);
-
-            fieldNames.add("Average RGB");
-            rowData.add(colour.getRed() + ", " + colour.getGreen() + ", " + colour.getBlue());
-
-        } catch (UnloadableImageException e) {
-            LOGGER.log(Loggable.STACK, "Cannot get colour of cytoplasm", e);
-        }
+		    double value = cyto.getMeasurement(stat, GlobalOptions.getInstance().getScale());
+		    rowData.add(df.format(value));
+		}
 
     }
 

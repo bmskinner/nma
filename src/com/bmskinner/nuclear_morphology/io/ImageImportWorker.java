@@ -25,8 +25,8 @@ import java.util.logging.Logger;
 import javax.swing.SwingWorker;
 import javax.swing.table.TableModel;
 
-import com.bmskinner.nuclear_morphology.analysis.ComponentOrienter;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisWorker;
+import com.bmskinner.nuclear_morphology.components.ComponentOrienter;
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;

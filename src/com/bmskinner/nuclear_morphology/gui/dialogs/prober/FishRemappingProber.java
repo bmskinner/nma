@@ -27,8 +27,8 @@ import javax.swing.JPanel;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.Finder;
-import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.FishRemappingFinder;
+import com.bmskinner.nuclear_morphology.analysis.detection.Finder;
+import com.bmskinner.nuclear_morphology.analysis.detection.FishRemappingFinder;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;

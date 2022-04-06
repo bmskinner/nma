@@ -39,7 +39,6 @@ import javax.swing.JPopupMenu;
 import org.eclipse.jdt.annotation.Nullable;
 import org.jdesktop.swingx.decorator.ComponentAdapter;
 
-import com.bmskinner.nuclear_morphology.analysis.ComponentOrienter;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageAnnotator;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
 import com.bmskinner.nuclear_morphology.analysis.mesh.DefaultMesh;
@@ -49,6 +48,7 @@ import com.bmskinner.nuclear_morphology.analysis.mesh.MeshCreationException;
 import com.bmskinner.nuclear_morphology.analysis.mesh.MeshImage;
 import com.bmskinner.nuclear_morphology.analysis.mesh.MeshImageCreationException;
 import com.bmskinner.nuclear_morphology.analysis.mesh.UncomparableMeshImageException;
+import com.bmskinner.nuclear_morphology.components.ComponentOrienter;
 import com.bmskinner.nuclear_morphology.components.Imageable;
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;

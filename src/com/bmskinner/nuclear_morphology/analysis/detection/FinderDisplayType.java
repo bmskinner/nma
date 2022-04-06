@@ -1,4 +1,4 @@
-package com.bmskinner.nuclear_morphology.analysis.detection.pipelines;
+package com.bmskinner.nuclear_morphology.analysis.detection;
 
 /**
  * Switch between finder types

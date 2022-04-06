@@ -8,7 +8,7 @@ import java.util.logging.Logger;
 
 import org.junit.Before;
 
-import com.bmskinner.nuclear_morphology.analysis.DatasetValidator;
+import com.bmskinner.nuclear_morphology.components.datasets.DatasetValidator;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
