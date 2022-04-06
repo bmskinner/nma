@@ -9,6 +9,7 @@ README.md
 bin/*
 doc/*
 screens/*
+scripts/*
 target/*
 wiki/*
 test/samples/*

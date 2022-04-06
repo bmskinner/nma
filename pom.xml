@@ -55,9 +55,11 @@
 			</testResource>
 		</testResources>
 
-		<!-- Tell eclipse how to handle the timestamp plugin -->
+		
 		<pluginManagement>
 			<plugins>
+			
+			<!-- Tell eclipse how to handle the timestamp plugin -->
 				<plugin>
 					<groupId>org.eclipse.m2e</groupId>
 					<artifactId>lifecycle-mapping</artifactId>
@@ -128,6 +130,7 @@
 				</configuration>
 			</plugin>
 
+			<!-- Make files with variables -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-resources-plugin</artifactId>
@@ -224,6 +227,28 @@
 						</configuration>
 					</execution>
 
+				<!-- Copy jpackage script from templates into scripts -->
+					<execution>
+						<id>jpackage-script</id>
+						<phase>process-resources</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.scripts.directory}</outputDirectory>
+							<resources>
+								<resource>
+									<directory>${project.template.directory}</directory>
+									<includes>
+										<include>packageAppImage.bat</include>
+									</includes>
+									<filtering>true</filtering>
+								</resource>
+							</resources>
+							<encoding>UTF-8</encoding>
+						</configuration>
+					</execution>
+
 				</executions>
 			</plugin>
 
@@ -251,21 +276,6 @@
 				</configuration>
 			</plugin>
 
-			<!-- Make an executable jar -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jar-plugin</artifactId>
-				<version>2.3.2</version>
-				<configuration>
-					<archive>
-						<manifest>
-							<addClasspath>true</addClasspath>
-							<mainClass>com.bmskinner.nuclear_morphology.core.NuclearMorphologyAnalysis</mainClass>
-							<classpathPrefix>lib</classpathPrefix>
-						</manifest>
-					</archive>
-				</configuration>
-			</plugin>
 
 			<!-- Copy project dependencies to new folder -->
 			<plugin>
@@ -303,6 +313,7 @@
 						</goals>
 						<configuration>
 							<finalName>${jar.finalName}_standalone</finalName>
+							<outputDirectory>${project.build.directory}/standalone</outputDirectory>
 							<descriptorRefs>
 								<descriptorRef>jar-with-dependencies</descriptorRef>
 							</descriptorRefs>
@@ -319,7 +330,7 @@
 
 
 			<!-- Use Launch4J to create an exe file for Windows standalone version -->
-			
+
 			<plugin>
 				<groupId>com.akathist.maven.plugins.launch4j</groupId>
 				<artifactId>launch4j-maven-plugin</artifactId>
@@ -333,7 +344,7 @@
 						</goals>
 						<configuration>
 							<headerType>gui</headerType>
-							<jar>${project.build.directory}/${jar.finalName}_standalone.jar</jar>
+							<jar>${project.build.directory}/standalone/${jar.finalName}_standalone.jar</jar>
 							<outfile>${project.build.directory}/${jar.finalName}.exe</outfile>
 							<downloadUrl>http://java.com/download</downloadUrl>
 							<classPath>
@@ -365,17 +376,6 @@
 				</executions>
 			</plugin>
 
-
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-site-plugin</artifactId>
-				<version>3.3</version>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-project-info-reports-plugin</artifactId>
-				<version>2.7</version>
-			</plugin>
 		</plugins>
 	</build>
 
