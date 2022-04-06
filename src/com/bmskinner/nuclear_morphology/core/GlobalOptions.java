@@ -157,13 +157,13 @@ public class GlobalOptions extends DefaultOptions {
         setBoolean(DEFAULT_FILL_CONSENSUS_KEY, fillConsensus);
     }
     
-    public synchronized boolean isOverrideRefold() {
-        return getBoolean(REFOLD_OVERRIDE_KEY);
-    }
-
-    public synchronized void setOverrideRefold(boolean b) {
-        setBoolean(REFOLD_OVERRIDE_KEY, b);
-    }
+//    public synchronized boolean isOverrideRefold() {
+//        return getBoolean(REFOLD_OVERRIDE_KEY);
+//    }
+//
+//    public synchronized void setOverrideRefold(boolean b) {
+//        setBoolean(REFOLD_OVERRIDE_KEY, b);
+//    }
 
     public synchronized boolean isAntiAlias() {
         return getBoolean(IS_USE_ANTIALIASING);
@@ -173,13 +173,13 @@ public class GlobalOptions extends DefaultOptions {
         setBoolean(IS_USE_ANTIALIASING, antiAliasing);
     }
 
-    public synchronized boolean isConvertDatasets() {
-    	return getBoolean(IS_CONVERT_DATASETS_KEY);
-    }
-
-    public synchronized void setConvertDatasets(boolean convertDatasets) {
-    	setBoolean(IS_CONVERT_DATASETS_KEY, convertDatasets);
-    }
+//    public synchronized boolean isConvertDatasets() {
+//    	return getBoolean(IS_CONVERT_DATASETS_KEY);
+//    }
+//
+//    public synchronized void setConvertDatasets(boolean convertDatasets) {
+//    	setBoolean(IS_CONVERT_DATASETS_KEY, convertDatasets);
+//    }
 
     /**
      * Get the default directory for exporting results or beginning new

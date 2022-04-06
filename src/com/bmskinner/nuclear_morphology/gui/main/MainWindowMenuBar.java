@@ -46,7 +46,6 @@ import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.actions.NewAnalysisAction;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter.ColourSwatch;
-import com.bmskinner.nuclear_morphology.gui.dialogs.MainOptionsDialog;
 import com.bmskinner.nuclear_morphology.gui.dialogs.VersionHelpDialog;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEventHandler;
 import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
@@ -86,10 +85,10 @@ public class MainWindowMenuBar extends JMenuBar  {
 	private static final String HELP_MENU_LBL = "Help";
 	private static final String TASK_MONITOR_ITEM_LBL = "Task monitor";
 	private static final String FILL_CONSENSUS_ITEM_LBL = "Fill consensus";
+	private static final String ANTIALIAS_ITEM_LBL = "Antialias charts";
 	private static final String SWATCH_ITEM_LBL = "Swatch";
 	private static final String SCALE_ITEM_LBL = "Scale";
-	private static final String OPTIONS_LBL = "Options";
-	private static final String EDIT_MENU_LBL = "Edit";
+
 	private static final String EXIT_LBL = "Exit";
 	private static final String SAVE_WORKSPACES_LBL = "Save workspaces";
 	private static final String SAVE_DATASETS_LBL = "Save datasets";
@@ -136,7 +135,6 @@ public class MainWindowMenuBar extends JMenuBar  {
 		dh.addListener(mw.getEventHandler());
 		
 		add(createFileMenu());
-        add(createEditMenu());
         add(createViewMenu());
         add(createHelpMenu());
         contextMenu = createDatasetMenu();
@@ -206,30 +204,7 @@ public class MainWindowMenuBar extends JMenuBar  {
 		
 		return menu;
 	}
-	
-	private JMenu createEditMenu() {
-		JMenu menu = new JMenu(EDIT_MENU_LBL);
 		
-		JMenuItem i1 = new JMenuItem(OPTIONS_LBL);
-		i1.addActionListener( e -> {
-            MainOptionsDialog dialog = new MainOptionsDialog(mw);
-            dialog.addInterfaceEventListener(mw.getEventHandler());
-        });
-		menu.add(i1);
-		
-		JMenuItem configFileItem = new JMenuItem(OPEN_CONFIG_FILE_LBL);
-		configFileItem.addActionListener(e->{
-			try {
-				Desktop.getDesktop().open(Io.getConfigFile());
-			} catch (IOException e1) {
-				LOGGER.log(Level.SEVERE, "Unable to open config file", e);
-			}
-		});
-		
-		menu.add(configFileItem);
-		return menu;
-	}
-	
 	private JMenu createViewMenu() {
 		JMenu menu = new JMenu(VIEW_MENU_LBL);
 		
@@ -265,14 +240,20 @@ public class MainWindowMenuBar extends JMenuBar  {
 			
 		}
 		menu.add(swatchMenu);
-		
-		
+
 		JCheckBoxMenuItem fillConsensusItem = new JCheckBoxMenuItem(FILL_CONSENSUS_ITEM_LBL, GlobalOptions.getInstance().isFillConsensus());
 		fillConsensusItem.addActionListener( e -> {
 			GlobalOptions.getInstance().setFillConsensus(fillConsensusItem.isSelected());
 			ih.fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
 		});
 		menu.add(fillConsensusItem);
+		
+		JCheckBoxMenuItem antialiasItem = new JCheckBoxMenuItem(ANTIALIAS_ITEM_LBL, GlobalOptions.getInstance().isAntiAlias());
+		fillConsensusItem.addActionListener( e -> {
+			GlobalOptions.getInstance().setAntiAlias(antialiasItem.isSelected());
+			ih.fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
+		});
+		menu.add(antialiasItem);
 		
 		JCheckBoxMenuItem monitorItem = new JCheckBoxMenuItem(TASK_MONITOR_ITEM_LBL, false);
 		monitorItem.addActionListener( e -> monitorPanel.setVisible(!monitorPanel.isVisible()));
@@ -302,6 +283,17 @@ public class MainWindowMenuBar extends JMenuBar  {
 			ThreadManager.getInstance().submit(r);
 		});
 		menu.add(checkItem);
+		
+		JMenuItem configFileItem = new JMenuItem(OPEN_CONFIG_FILE_LBL);
+		configFileItem.addActionListener(e->{
+			try {
+				Desktop.getDesktop().open(Io.getConfigFile());
+			} catch (IOException e1) {
+				LOGGER.log(Level.SEVERE, "Unable to open config file", e);
+			}
+		});
+		
+		menu.add(configFileItem);
 		
 		
 		JMenuItem logItem = new JMenuItem(OPEN_LOG_DIR_LBL);
