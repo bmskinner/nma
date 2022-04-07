@@ -25,16 +25,16 @@ import javax.swing.table.TableModel;
 import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
-import com.bmskinner.nuclear_morphology.charting.charts.AbstractChartFactory;
-import com.bmskinner.nuclear_morphology.charting.charts.ViolinChartFactory;
-import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPanel;
-import com.bmskinner.nuclear_morphology.charting.datasets.tables.NuclearSignalTableCreator;
-import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
-import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
-import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
+import com.bmskinner.nuclear_morphology.visualisation.charts.AbstractChartFactory;
+import com.bmskinner.nuclear_morphology.visualisation.charts.ViolinChartFactory;
+import com.bmskinner.nuclear_morphology.visualisation.charts.panels.ExportableChartPanel;
+import com.bmskinner.nuclear_morphology.visualisation.datasets.tables.NuclearSignalTableCreator;
+import com.bmskinner.nuclear_morphology.visualisation.options.ChartOptions;
+import com.bmskinner.nuclear_morphology.visualisation.options.ChartOptionsBuilder;
+import com.bmskinner.nuclear_morphology.visualisation.options.TableOptions;
 
 /**
  * Show the minimum distances between signals within a dataset

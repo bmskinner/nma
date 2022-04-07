@@ -19,14 +19,14 @@ package com.bmskinner.nuclear_morphology.gui.tabs.profiles;
 import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
-import com.bmskinner.nuclear_morphology.charting.charts.ProfileChartFactory;
-import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
-import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
+import com.bmskinner.nuclear_morphology.visualisation.charts.ProfileChartFactory;
+import com.bmskinner.nuclear_morphology.visualisation.options.ChartOptions;
+import com.bmskinner.nuclear_morphology.visualisation.options.ChartOptionsBuilder;
 
 /**
  * Display a profile chart

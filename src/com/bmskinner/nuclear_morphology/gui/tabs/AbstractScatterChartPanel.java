@@ -38,16 +38,6 @@ import com.bmskinner.nuclear_morphology.analysis.nucleus.CellCollectionFilterer;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.CellCollectionFilterer.CollectionFilteringException;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.FilteringOptions;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.FilteringOptions.FilterMatchType;
-import com.bmskinner.nuclear_morphology.charting.charts.AbstractChartFactory;
-import com.bmskinner.nuclear_morphology.charting.charts.ScatterChartFactory;
-import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPanel;
-import com.bmskinner.nuclear_morphology.charting.datasets.AnalysisDatasetTableCreator;
-import com.bmskinner.nuclear_morphology.charting.datasets.tables.AbstractTableCreator;
-import com.bmskinner.nuclear_morphology.charting.datasets.tables.ScatterTableDatasetCreator;
-import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
-import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
-import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
-import com.bmskinner.nuclear_morphology.charting.options.TableOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
@@ -63,6 +53,16 @@ import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 import com.bmskinner.nuclear_morphology.gui.components.panels.WrappedLabel;
 import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
+import com.bmskinner.nuclear_morphology.visualisation.charts.AbstractChartFactory;
+import com.bmskinner.nuclear_morphology.visualisation.charts.ScatterChartFactory;
+import com.bmskinner.nuclear_morphology.visualisation.charts.panels.ExportableChartPanel;
+import com.bmskinner.nuclear_morphology.visualisation.datasets.AnalysisDatasetTableCreator;
+import com.bmskinner.nuclear_morphology.visualisation.datasets.tables.AbstractTableCreator;
+import com.bmskinner.nuclear_morphology.visualisation.datasets.tables.ScatterTableDatasetCreator;
+import com.bmskinner.nuclear_morphology.visualisation.options.ChartOptions;
+import com.bmskinner.nuclear_morphology.visualisation.options.ChartOptionsBuilder;
+import com.bmskinner.nuclear_morphology.visualisation.options.TableOptions;
+import com.bmskinner.nuclear_morphology.visualisation.options.TableOptionsBuilder;
 
 /**
  * An abstract class implementing the plottable statistic header on a detail

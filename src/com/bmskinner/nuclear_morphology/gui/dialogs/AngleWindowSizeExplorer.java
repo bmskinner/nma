@@ -40,9 +40,6 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.xy.DefaultXYDataset;
 
-import com.bmskinner.nuclear_morphology.charting.ChartComponents;
-import com.bmskinner.nuclear_morphology.charting.charts.ProfileChartFactory;
-import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPanel;
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.cells.DefaultCell;
@@ -63,6 +60,9 @@ import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
+import com.bmskinner.nuclear_morphology.visualisation.ChartComponents;
+import com.bmskinner.nuclear_morphology.visualisation.charts.ProfileChartFactory;
+import com.bmskinner.nuclear_morphology.visualisation.charts.panels.ExportableChartPanel;
 
 @SuppressWarnings("serial")
 public class AngleWindowSizeExplorer extends LoadingIconDialog implements ChangeListener {

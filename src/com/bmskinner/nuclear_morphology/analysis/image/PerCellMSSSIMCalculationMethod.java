@@ -17,19 +17,20 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.image.MultiScaleStructuralSimilarityIndex.MSSIMScore;
 import com.bmskinner.nuclear_morphology.analysis.image.PerCellMSSSIMCalculationMethod.ViolinKey;
-import com.bmskinner.nuclear_morphology.analysis.mesh.DefaultMesh;
-import com.bmskinner.nuclear_morphology.analysis.mesh.DefaultMeshImage;
-import com.bmskinner.nuclear_morphology.analysis.mesh.Mesh;
-import com.bmskinner.nuclear_morphology.analysis.mesh.MeshCreationException;
-import com.bmskinner.nuclear_morphology.analysis.mesh.MeshImage;
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.cells.Nucleus;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.mesh.DefaultMesh;
+import com.bmskinner.nuclear_morphology.components.mesh.DefaultMeshImage;
+import com.bmskinner.nuclear_morphology.components.mesh.Mesh;
+import com.bmskinner.nuclear_morphology.components.mesh.MeshCreationException;
+import com.bmskinner.nuclear_morphology.components.mesh.MeshImage;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.gui.tabs.signals.warping.SignalWarpingModel;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
+import com.bmskinner.nuclear_morphology.visualisation.image.ImageFilterer;
 
 import ij.process.ImageProcessor;
 

@@ -38,14 +38,6 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.jfree.chart.JFreeChart;
 
-import com.bmskinner.nuclear_morphology.charting.Cache;
-import com.bmskinner.nuclear_morphology.charting.ChartCache;
-import com.bmskinner.nuclear_morphology.charting.TableCache;
-import com.bmskinner.nuclear_morphology.charting.charts.AbstractChartFactory;
-import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPanel;
-import com.bmskinner.nuclear_morphology.charting.datasets.tables.AbstractTableCreator;
-import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
-import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.core.DatasetListManager;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
@@ -66,6 +58,14 @@ import com.bmskinner.nuclear_morphology.gui.events.InterfaceEventHandler;
 import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEventHandler;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
+import com.bmskinner.nuclear_morphology.visualisation.Cache;
+import com.bmskinner.nuclear_morphology.visualisation.ChartCache;
+import com.bmskinner.nuclear_morphology.visualisation.TableCache;
+import com.bmskinner.nuclear_morphology.visualisation.charts.AbstractChartFactory;
+import com.bmskinner.nuclear_morphology.visualisation.charts.panels.ExportableChartPanel;
+import com.bmskinner.nuclear_morphology.visualisation.datasets.tables.AbstractTableCreator;
+import com.bmskinner.nuclear_morphology.visualisation.options.ChartOptions;
+import com.bmskinner.nuclear_morphology.visualisation.options.TableOptions;
 
 /**
  * The DetailPanels hold chart and table caches, and track other DetailPanels

@@ -17,12 +17,9 @@ import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisWorker;
-import com.bmskinner.nuclear_morphology.analysis.image.ImageConverter;
-import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
 import com.bmskinner.nuclear_morphology.analysis.image.MultiScaleStructuralSimilarityIndex;
 import com.bmskinner.nuclear_morphology.analysis.image.MultiScaleStructuralSimilarityIndex.MSSIMScore;
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalWarper;
-import com.bmskinner.nuclear_morphology.charting.charts.ConsensusNucleusChartFactory;
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.cells.Nucleus;
@@ -39,6 +36,9 @@ import com.bmskinner.nuclear_morphology.gui.tabs.signals.warping.SignalWarpingMo
 import com.bmskinner.nuclear_morphology.io.Io;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.utility.FileUtils;
+import com.bmskinner.nuclear_morphology.visualisation.charts.ConsensusNucleusChartFactory;
+import com.bmskinner.nuclear_morphology.visualisation.image.ImageConverter;
+import com.bmskinner.nuclear_morphology.visualisation.image.ImageFilterer;
 
 import ij.IJ;
 import ij.ImagePlus;

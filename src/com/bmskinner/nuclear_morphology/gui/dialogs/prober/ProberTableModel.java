@@ -23,9 +23,9 @@ import javax.swing.table.DefaultTableModel;
 
 import com.bmskinner.nuclear_morphology.analysis.detection.Finder.DetectionEvent;
 import com.bmskinner.nuclear_morphology.analysis.detection.Finder.DetectionEventListener;
-import com.bmskinner.nuclear_morphology.analysis.image.ImageConverter;
-import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.GenericImageProberPanel.ProberTableCell;
+import com.bmskinner.nuclear_morphology.visualisation.image.ImageConverter;
+import com.bmskinner.nuclear_morphology.visualisation.image.ImageFilterer;
 
 import ij.process.ImageProcessor;
 

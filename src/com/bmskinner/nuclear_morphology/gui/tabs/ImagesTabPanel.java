@@ -55,10 +55,6 @@ import javax.swing.tree.TreePath;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
-import com.bmskinner.nuclear_morphology.analysis.image.AbstractImageFilterer;
-import com.bmskinner.nuclear_morphology.analysis.image.ImageAnnotator;
-import com.bmskinner.nuclear_morphology.analysis.image.ImageConverter;
-import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
@@ -70,6 +66,10 @@ import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMetho
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.utility.FileUtils;
+import com.bmskinner.nuclear_morphology.visualisation.image.AbstractImageFilterer;
+import com.bmskinner.nuclear_morphology.visualisation.image.ImageAnnotator;
+import com.bmskinner.nuclear_morphology.visualisation.image.ImageConverter;
+import com.bmskinner.nuclear_morphology.visualisation.image.ImageFilterer;
 
 import ij.process.ImageProcessor;
 

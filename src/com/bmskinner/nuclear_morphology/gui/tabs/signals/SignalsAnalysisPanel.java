@@ -27,11 +27,6 @@ import javax.swing.table.TableModel;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nuclear_morphology.charting.datasets.SignalTableCell;
-import com.bmskinner.nuclear_morphology.charting.datasets.tables.AbstractTableCreator;
-import com.bmskinner.nuclear_morphology.charting.datasets.tables.NuclearSignalTableCreator;
-import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
-import com.bmskinner.nuclear_morphology.charting.options.TableOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
@@ -39,6 +34,11 @@ import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
+import com.bmskinner.nuclear_morphology.visualisation.datasets.SignalTableCell;
+import com.bmskinner.nuclear_morphology.visualisation.datasets.tables.AbstractTableCreator;
+import com.bmskinner.nuclear_morphology.visualisation.datasets.tables.NuclearSignalTableCreator;
+import com.bmskinner.nuclear_morphology.visualisation.options.TableOptions;
+import com.bmskinner.nuclear_morphology.visualisation.options.TableOptionsBuilder;
 
 @SuppressWarnings("serial")
 public class SignalsAnalysisPanel extends DetailPanel {

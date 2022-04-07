@@ -33,18 +33,18 @@ import com.bmskinner.nuclear_morphology.analysis.image.MultiScaleStructuralSimil
 import com.bmskinner.nuclear_morphology.analysis.image.MultiScaleStructuralSimilarityIndex.MSSIMScore;
 import com.bmskinner.nuclear_morphology.analysis.image.PerCellMSSSIMCalculationMethod;
 import com.bmskinner.nuclear_morphology.analysis.image.PerCellMSSSIMCalculationMethod.ViolinKey;
-import com.bmskinner.nuclear_morphology.charting.ViolinCategoryDataset;
-import com.bmskinner.nuclear_morphology.charting.ViolinRenderer;
-import com.bmskinner.nuclear_morphology.charting.charts.AbstractChartFactory;
-import com.bmskinner.nuclear_morphology.charting.charts.ViolinChartFactory;
-import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPanel;
-import com.bmskinner.nuclear_morphology.charting.datasets.tables.AbstractTableCreator;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 import com.bmskinner.nuclear_morphology.gui.dialogs.LoadingIconDialog;
 import com.bmskinner.nuclear_morphology.gui.tabs.signals.warping.SignalWarpingModel.ImageCache.WarpedImageKey;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
+import com.bmskinner.nuclear_morphology.visualisation.charts.AbstractChartFactory;
+import com.bmskinner.nuclear_morphology.visualisation.charts.ViolinChartFactory;
+import com.bmskinner.nuclear_morphology.visualisation.charts.ViolinRenderer;
+import com.bmskinner.nuclear_morphology.visualisation.charts.panels.ExportableChartPanel;
+import com.bmskinner.nuclear_morphology.visualisation.datasets.ViolinCategoryDataset;
+import com.bmskinner.nuclear_morphology.visualisation.datasets.tables.AbstractTableCreator;
 
 import ij.process.ImageProcessor;
 

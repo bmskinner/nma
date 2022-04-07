@@ -5,14 +5,14 @@ import java.util.logging.Logger;
 import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
-import com.bmskinner.nuclear_morphology.charting.charts.ProfileChartFactory;
-import com.bmskinner.nuclear_morphology.charting.datasets.ChartDatasetCreationException;
-import com.bmskinner.nuclear_morphology.charting.datasets.ProfileDatasetCreator;
-import com.bmskinner.nuclear_morphology.charting.datasets.ProfileDatasetCreator.ProfileChartDataset;
-import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
+import com.bmskinner.nuclear_morphology.visualisation.charts.ProfileChartFactory;
+import com.bmskinner.nuclear_morphology.visualisation.datasets.ChartDatasetCreationException;
+import com.bmskinner.nuclear_morphology.visualisation.datasets.ProfileDatasetCreator;
+import com.bmskinner.nuclear_morphology.visualisation.datasets.ProfileDatasetCreator.ProfileChartDataset;
+import com.bmskinner.nuclear_morphology.visualisation.options.ChartOptions;
 
 /**
  * Create profile charts for test cases specifically

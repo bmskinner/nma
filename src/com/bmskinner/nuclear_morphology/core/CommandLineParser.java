@@ -23,11 +23,11 @@ import java.util.logging.Logger;
 
 import javax.swing.UIManager;
 
-import com.bmskinner.nuclear_morphology.api.BasicAnalysisPipeline;
-import com.bmskinner.nuclear_morphology.api.SavedOptionsAnalysisPipeline;
 import com.bmskinner.nuclear_morphology.gui.DefaultInputSupplier;
 import com.bmskinner.nuclear_morphology.gui.main.DockableMainWindow;
 import com.bmskinner.nuclear_morphology.io.ConfigFileReader;
+import com.bmskinner.nuclear_morphology.pipelines.BasicAnalysisPipeline;
+import com.bmskinner.nuclear_morphology.pipelines.SavedOptionsAnalysisPipeline;
 
 import ij.IJ;
 import ij.Prefs;

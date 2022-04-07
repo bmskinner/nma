@@ -19,11 +19,11 @@ package com.bmskinner.nuclear_morphology.gui.tabs.segments;
 import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
-import com.bmskinner.nuclear_morphology.charting.charts.ProfileChartFactory;
-import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.tabs.profiles.ProfileDisplayPanel;
+import com.bmskinner.nuclear_morphology.visualisation.charts.ProfileChartFactory;
+import com.bmskinner.nuclear_morphology.visualisation.options.ChartOptions;
 
 @SuppressWarnings("serial")
 public class SegmentProfilePanel extends ProfileDisplayPanel {

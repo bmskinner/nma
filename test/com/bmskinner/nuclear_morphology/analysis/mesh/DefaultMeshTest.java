@@ -10,6 +10,9 @@ import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.cells.Nucleus;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.mesh.DefaultMesh;
+import com.bmskinner.nuclear_morphology.components.mesh.Mesh;
+import com.bmskinner.nuclear_morphology.components.mesh.MeshCreationException;
 import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
 
 /**

@@ -30,18 +30,17 @@ import javax.swing.SwingWorker;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisWorker;
-import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
-import com.bmskinner.nuclear_morphology.analysis.mesh.DefaultMesh;
-import com.bmskinner.nuclear_morphology.analysis.mesh.DefaultMeshImage;
-import com.bmskinner.nuclear_morphology.analysis.mesh.Mesh;
-import com.bmskinner.nuclear_morphology.analysis.mesh.MeshCreationException;
-import com.bmskinner.nuclear_morphology.analysis.mesh.MeshImage;
-import com.bmskinner.nuclear_morphology.analysis.mesh.MeshImageCreationException;
-import com.bmskinner.nuclear_morphology.analysis.mesh.UncomparableMeshImageException;
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.cells.Nucleus;
+import com.bmskinner.nuclear_morphology.components.mesh.DefaultMesh;
+import com.bmskinner.nuclear_morphology.components.mesh.DefaultMeshImage;
+import com.bmskinner.nuclear_morphology.components.mesh.Mesh;
+import com.bmskinner.nuclear_morphology.components.mesh.MeshCreationException;
+import com.bmskinner.nuclear_morphology.components.mesh.MeshImage;
+import com.bmskinner.nuclear_morphology.components.mesh.MeshImageCreationException;
+import com.bmskinner.nuclear_morphology.components.mesh.UncomparableMeshImageException;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
@@ -51,6 +50,7 @@ import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
+import com.bmskinner.nuclear_morphology.visualisation.image.ImageFilterer;
 
 import ij.process.ImageProcessor;
 

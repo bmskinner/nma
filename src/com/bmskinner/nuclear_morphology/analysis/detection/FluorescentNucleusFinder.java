@@ -26,8 +26,6 @@ import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nuclear_morphology.analysis.image.ImageAnnotator;
-import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
 import com.bmskinner.nuclear_morphology.components.ComponentBuilderFactory;
 import com.bmskinner.nuclear_morphology.components.ComponentBuilderFactory.NucleusBuilderFactory;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
@@ -41,6 +39,8 @@ import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
+import com.bmskinner.nuclear_morphology.visualisation.image.ImageAnnotator;
+import com.bmskinner.nuclear_morphology.visualisation.image.ImageFilterer;
 
 import ij.gui.Roi;
 import ij.process.ImageProcessor;

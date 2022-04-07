@@ -11,10 +11,10 @@ import org.jfree.chart.ChartMouseListener;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.entity.XYItemEntity;
 
-import com.bmskinner.nuclear_morphology.analysis.image.ImageAnnotator;
-import com.bmskinner.nuclear_morphology.charting.datasets.ComponentXYDataset;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
+import com.bmskinner.nuclear_morphology.visualisation.datasets.ComponentXYDataset;
+import com.bmskinner.nuclear_morphology.visualisation.image.ImageAnnotator;
 
 import ij.process.ImageProcessor;
 

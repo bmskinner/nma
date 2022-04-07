@@ -19,9 +19,9 @@ package com.bmskinner.nuclear_morphology.gui.tabs.signals;
 import java.awt.Color;
 import java.util.logging.Logger;
 
-import com.bmskinner.nuclear_morphology.charting.datasets.SignalTableCell;
 import com.bmskinner.nuclear_morphology.gui.components.renderers.ConsistentRowTableCellRenderer;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
+import com.bmskinner.nuclear_morphology.visualisation.datasets.SignalTableCell;
 
 /**
  * This allows a blank cell in a table to be coloured with a signal colour based

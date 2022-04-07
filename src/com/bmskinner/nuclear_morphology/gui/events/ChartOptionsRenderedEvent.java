@@ -18,7 +18,7 @@ package com.bmskinner.nuclear_morphology.gui.events;
 
 import java.util.EventObject;
 
-import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
+import com.bmskinner.nuclear_morphology.visualisation.options.ChartOptions;
 
 /**
  * This event is fired when a chart has been rendered for a given set of options

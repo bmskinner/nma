@@ -9,6 +9,7 @@ import org.junit.Test;
 
 import com.bmskinner.nuclear_morphology.TestResources;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
+import com.bmskinner.nuclear_morphology.visualisation.image.ImageFilterer;
 
 import ij.ImagePlus;
 import ij.process.ByteProcessor;
