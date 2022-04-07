@@ -67,11 +67,6 @@ public interface ICell extends XmlSerializable, Statistical, Comparable<ICell> {
     List<Nucleus> getNuclei();
 
     /**
-     * Set the nucleus of the cell
-     */
-    void setNucleus(Nucleus n);
-
-    /**
      * Add a nucleus to the cell
      * 
      * @param n

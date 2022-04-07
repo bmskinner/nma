@@ -98,7 +98,7 @@ public class DefaultCell implements ICell {
      */
     public DefaultCell(@NonNull Nucleus n) {
         this();
-        nuclei.add(n);
+        addNucleus(n);
     }
 
     /**
@@ -149,17 +149,6 @@ public class DefaultCell implements ICell {
         return nuclei;
     }
 
-    /*
-     * 
-     * METHODS IMPLEMENTING THE STATISTICAL INTERFACE
-     * 
-     */
-
-//    @Override
-//    public synchronized boolean hasMeasurement(@NonNull Measurement stat) {
-//        return statistics.containsKey(stat);
-//    }
-
     @Override
     public synchronized double getMeasurement(@NonNull Measurement stat) {
         return this.getMeasurement(stat, MeasurementScale.PIXELS);
@@ -193,7 +182,7 @@ public class DefaultCell implements ICell {
     @Override
     public void setMeasurement(@NonNull Measurement stat, double d) {
     	
-    	// All measurements can be calculated when needed without
+    	// All cell measurements can be calculated when needed without
     	// a long wait - no need to manually store
 
     }
@@ -213,24 +202,13 @@ public class DefaultCell implements ICell {
     	return new ArrayList<>(statistics.keySet());
     }
 
-    /*
-     * 
-     * METHODS IMPLEMENTING THE ICELL INTERFACE
-     * 
-     */
-
-    @Override
-    public void setNucleus(Nucleus nucleus) {
-        if (nuclei.isEmpty()) {
-            nuclei.add(nucleus);
-        } else {
-            nuclei.set(0, nucleus);
-        }
-    }
-
     @Override
     public void addNucleus(Nucleus nucleus) {
-        nuclei.add(nucleus);
+        nuclei.add(nucleus);        
+        statistics.clear();
+        for(Measurement m : Measurement.getCellStats())
+        	getMeasurement(m);
+        
     }
 
     @Override
