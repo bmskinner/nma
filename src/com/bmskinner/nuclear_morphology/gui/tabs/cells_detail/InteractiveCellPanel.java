@@ -72,14 +72,11 @@ import com.bmskinner.nuclear_morphology.gui.events.EventListener;
 import com.bmskinner.nuclear_morphology.gui.events.SegmentEvent;
 import com.bmskinner.nuclear_morphology.gui.events.SegmentEvent.SegmentUpdateType;
 import com.bmskinner.nuclear_morphology.gui.events.SegmentEventListener;
-import com.bmskinner.nuclear_morphology.gui.painters.CellImagePainter;
-import com.bmskinner.nuclear_morphology.gui.painters.ImagePainter;
-import com.bmskinner.nuclear_morphology.gui.painters.OrientedCellImagePainter;
-import com.bmskinner.nuclear_morphology.gui.painters.WarpedCellPainter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
+import com.bmskinner.nuclear_morphology.visualisation.image.CellImagePainter;
 import com.bmskinner.nuclear_morphology.visualisation.image.ImageAnnotator;
-import com.bmskinner.nuclear_morphology.visualisation.image.ImageFilterer;
+import com.bmskinner.nuclear_morphology.visualisation.image.ImagePainter;
 
 import ij.process.ImageProcessor;
 
@@ -103,7 +100,7 @@ public class InteractiveCellPanel extends JPanel {
 	protected HashOptions displayOptions;
 	
 	/** Allow a magnified image to be displayed*/
-	private MagnifiableImagePanel imagePanel;
+	private MagnifiableImagePanel imagePanel = new MagnifiableImagePanel();
 	
 	/** Track the scaling ratio between the original cell and the scaled image */
 	private double scaleRatio;
@@ -133,8 +130,11 @@ public class InteractiveCellPanel extends JPanel {
 	public InteractiveCellPanel(CellUpdatedEventListener parent){
 		
 		cellUpdateHandler.addCellUpdatedEventListener(parent);
+		imagePanel.addImageClickListener(new ImageClickAdapter());
+
 		setLayout(new BorderLayout());
 		addComponentListener(new ResizeListener(this));
+		add(imagePanel, BorderLayout.CENTER);
 	}
 	
 	/**
@@ -186,46 +186,14 @@ public class InteractiveCellPanel extends JPanel {
 			return;
 		}
 		
-		// Create the underlying image, and an appropriate painter
-		BufferedImage image = createRawImage();
 		ImagePainter painter = createPainter();
-				
-		// Store the original image width ratio after cropping
-		scaleRatio = image.getWidth()/(double)cell.getPrimaryNucleus().getWidth()+ (Imageable.COMPONENT_BUFFER*2);
-
-		if(imagePanel==null) {
-			imagePanel = new MagnifiableImagePanel(image, painter);
-			imagePanel.addImageClickListener(new ImageClickAdapter());
-		}
-		else
-			imagePanel.set(image, painter);
-
-		
-		add(imagePanel, BorderLayout.CENTER);
+		imagePanel.set(painter);
 	}
 	
 	private ImagePainter createPainter() {
-		if(displayOptions.getBoolean(CellDisplayOptions.WARP_IMAGE))
-			return new WarpedCellPainter(dataset, cell);
-		if(displayOptions.getBoolean(CellDisplayOptions.ROTATE_VERTICAL)) {
-			return new OrientedCellImagePainter(cell);
-		}
-		return new CellImagePainter(cell);
-	}
-	
-	private BufferedImage createRawImage() {
-		if(displayOptions.getBoolean(CellDisplayOptions.WARP_IMAGE))
-			return createWarpImage();
-		
-		ImageProcessor ip = ImageImporter.importCroppedImageTo24bit(cell, component);
-		
-		if(displayOptions.getBoolean(CellDisplayOptions.ROTATE_VERTICAL)) {
-			ip.flipVertical(); // Y axis needs inverting
-			ip = ImageFilterer.orientImage(ip, cell.getPrimaryNucleus());
-		}
-		
-		// Expand or shrink the canvas to fit the panel
-		return ImageAnnotator.resizeKeepingAspect(ip, getWidth(), getHeight()).getBufferedImage();
+//		if(displayOptions.getBoolean(CellDisplayOptions.WARP_IMAGE))
+//			return new WarpedCellPainter(dataset, cell);
+		return new CellImagePainter(cell, displayOptions.getBoolean(CellDisplayOptions.ROTATE_VERTICAL));
 	}
 
 	private BufferedImage createWarpImage() {

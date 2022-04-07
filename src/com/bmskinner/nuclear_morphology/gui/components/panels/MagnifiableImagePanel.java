@@ -5,8 +5,6 @@ import java.awt.event.InputEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
-import java.awt.geom.AffineTransform;
-import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,8 +17,8 @@ import javax.swing.JPanel;
 import com.bmskinner.nuclear_morphology.components.generic.FloatPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.gui.ImageClickListener;
-import com.bmskinner.nuclear_morphology.gui.painters.ImagePainter;
 import com.bmskinner.nuclear_morphology.utility.NumberTools;
+import com.bmskinner.nuclear_morphology.visualisation.image.ImagePainter;
 
 /**
  * A panel that can hold images. The images can be 
@@ -61,17 +59,9 @@ public class MagnifiableImagePanel extends JPanel {
 	
 	
 	/**
-	 * Create with a raw underlying image
-	 * @param image the image to be displayed
-	 * @param painter the painter for the image
+	 * Create a new panel
 	 */
-	public MagnifiableImagePanel(BufferedImage image, ImagePainter painter) {
-		raw = image;
-		this.painter = painter;
-		annotated   = painter.paint(raw);
-		enlarged = createEnlargedImage();
-		output      = annotated;
-		
+	public MagnifiableImagePanel() {		
 		setLayout(new BorderLayout());
 		imageLabel = new JLabel();
 		imageLabel.setHorizontalAlignment(JLabel.CENTER);
@@ -84,8 +74,6 @@ public class MagnifiableImagePanel extends JPanel {
 		imageLabel.addMouseMotionListener(adapter);
 		imageLabel.addMouseListener(new ImageClickAdapter());
 		add(imageLabel, BorderLayout.CENTER);
-		imageLabel.setIcon(new ImageIcon(output));
-
 	}
 	
 	/**
@@ -93,10 +81,10 @@ public class MagnifiableImagePanel extends JPanel {
 	 * @param image
 	 * @param painter
 	 */
-	public void set(BufferedImage image, ImagePainter painter) {
-		raw = image;
+	public void set(ImagePainter painter) {
 		this.painter = painter;
-		annotated   = painter.paint(raw);
+		raw 		= painter.paintRaw(this.getWidth(), this.getHeight());
+		annotated   = painter.paintDecorated(this.getWidth(), this.getHeight());
 		enlarged = createEnlargedImage();
 		output      = annotated;
 		imageLabel.setIcon(new ImageIcon(output));
@@ -129,16 +117,8 @@ public class MagnifiableImagePanel extends JPanel {
 		double bulgeRatio = (double)bigRadius/(double)smallRadius;
 		int w = (int) (raw.getWidth()*bulgeRatio);
 		int h = (int) (raw.getHeight()*bulgeRatio);
-
-		BufferedImage after = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
-		AffineTransform at = new AffineTransform();
-		at.scale(bulgeRatio, bulgeRatio);
-		AffineTransformOp scaleOp = 
-		   new AffineTransformOp(at, AffineTransformOp.TYPE_BICUBIC);
-		
-		BufferedImage largeRaw = scaleOp.filter(raw, after);
 		// A large annotated image that can be sampled for the bulge box
-		return painter.paint(largeRaw);
+		return painter.paintDecorated(w, h);
 	}
 	
 		
@@ -149,7 +129,6 @@ public class MagnifiableImagePanel extends JPanel {
 	 * @return
 	 */
 	protected BufferedImage createOutputImage(int x, int y) {
-
 		// Create the bulge box
 		return painter.paintMagnified(annotated, enlarged, x, y, smallRadius, bigRadius);
 	}
