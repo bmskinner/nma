@@ -28,9 +28,6 @@ import com.bmskinner.nuclear_morphology.gui.DefaultInputSupplier;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEventHandler;
 import com.bmskinner.nuclear_morphology.gui.events.EventListener;
-import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent;
-import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
-import com.bmskinner.nuclear_morphology.gui.events.InterfaceEventHandler;
 
 /**
  * This extension to a JDialog can fire DatasetEvents and InterfaceEvents to
@@ -42,72 +39,53 @@ import com.bmskinner.nuclear_morphology.gui.events.InterfaceEventHandler;
  */
 @SuppressWarnings("serial")
 public abstract class MessagingDialog extends JDialog {
-    
-    protected final DatasetEventHandler dh = new DatasetEventHandler(this);
-    protected final InterfaceEventHandler ih = new InterfaceEventHandler(this);
-    protected final InputSupplier inputSupplier = new DefaultInputSupplier();
 
-    public MessagingDialog() {
-        super();
-    }
+	protected final DatasetEventHandler dh = new DatasetEventHandler(this);
+	protected final InputSupplier inputSupplier = new DefaultInputSupplier();
 
-    /**
-     * Create with the given Dialog as a parent. Use null to make this dialog
-     * have a taskbar icon
-     * 
-     * @param d the parent. Can be null
-     */
-    public MessagingDialog(Dialog d) {
-        super(d);
-    }
+	public MessagingDialog() {
+		super();
+	}
 
-    public synchronized void addDatasetEventListener(EventListener l) {
-        dh.addListener(l);
-    }
+	/**
+	 * Create with the given Dialog as a parent. Use null to make this dialog have a
+	 * taskbar icon
+	 * 
+	 * @param d the parent. Can be null
+	 */
+	public MessagingDialog(Dialog d) {
+		super(d);
+	}
 
-    public synchronized void removeDatasetEventListener(EventListener l) {
-        dh.removeListener(l);
-    }
+	public synchronized void addDatasetEventListener(EventListener l) {
+		dh.addListener(l);
+	}
 
-    public synchronized void addInterfaceEventListener(EventListener l) {
-    	ih.addListener(l);
-    }
+	public synchronized void removeDatasetEventListener(EventListener l) {
+		dh.removeListener(l);
+	}
 
-    public synchronized void removeInterfaceEventListener(EventListener l) {
-    	ih.removeListener(l);
-    }
+	protected synchronized void fireDatasetEvent(String method, List<IAnalysisDataset> list) {
+		DatasetEvent event = new DatasetEvent(this, method, this.getClass().getSimpleName(), list);
+		dh.fire(event);
+	}
 
-    protected synchronized void fireDatasetEvent(String method, List<IAnalysisDataset> list) {
-        DatasetEvent event = new DatasetEvent(this, method, this.getClass().getSimpleName(), list);
-        dh.fire(event);
-    }
+	protected synchronized void fireDatasetEvent(String method, IAnalysisDataset dataset) {
 
-    protected synchronized void fireDatasetEvent(String method, IAnalysisDataset dataset) {
+		List<IAnalysisDataset> list = new ArrayList<>();
+		list.add(dataset);
+		fireDatasetEvent(method, list);
+	}
 
-        List<IAnalysisDataset> list = new ArrayList<>();
-        list.add(dataset);
-        fireDatasetEvent(method, list);
-    }
+	protected synchronized void fireDatasetEvent(String method, List<IAnalysisDataset> list,
+			IAnalysisDataset template) {
 
-    protected synchronized void fireDatasetEvent(String method, List<IAnalysisDataset> list,
-            IAnalysisDataset template) {
+		DatasetEvent event = new DatasetEvent(this, method, this.getClass().getSimpleName(), list, template);
+		dh.fire(event);
+	}
 
-        DatasetEvent event = new DatasetEvent(this, method, this.getClass().getSimpleName(), list, template);
-        dh.fire(event);
-    }
-
-    protected synchronized void fireDatasetEvent(DatasetEvent event) {
-    	dh.fire(event);
-    }
-
-    protected synchronized void fireInterfaceEvent(InterfaceMethod method) {
-
-        InterfaceEvent event = new InterfaceEvent(this, method, this.getClass().getSimpleName());
-        ih.fire(event);
-    }
-
-    protected synchronized void fireInterfaceEvent(InterfaceEvent event) {
-    	ih.fire(event);
-    }
+	protected synchronized void fireDatasetEvent(DatasetEvent event) {
+		dh.fire(event);
+	}
 
 }

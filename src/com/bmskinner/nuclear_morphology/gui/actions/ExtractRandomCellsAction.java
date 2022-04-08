@@ -43,23 +43,26 @@ import com.bmskinner.nuclear_morphology.components.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.dialogs.SettingsDialog;
-import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
+import com.bmskinner.nuclear_morphology.gui.events.revamp.UIController;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
- * Allow a random subset of cells to be extracted as a child of the given dataset.
+ * Allow a random subset of cells to be extracted as a child of the given
+ * dataset.
+ * 
  * @author ben
  * @since 1.13.8
  *
  */
 public class ExtractRandomCellsAction extends SingleDatasetResultAction {
-	
+
 	private static final Logger LOGGER = Logger.getLogger(ExtractRandomCellsAction.class.getName());
 
 	private static final String PROGRESS_LBL = "Extract cells";
 
-	public ExtractRandomCellsAction(IAnalysisDataset dataset, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh) {
-        super(dataset, PROGRESS_LBL, acceptor, eh);
+	public ExtractRandomCellsAction(IAnalysisDataset dataset, @NonNull final ProgressBarAcceptor acceptor,
+			@NonNull final EventHandler eh) {
+		super(dataset, PROGRESS_LBL, acceptor, eh);
 		this.setProgressBarIndeterminate();
 	}
 
@@ -69,34 +72,34 @@ public class ExtractRandomCellsAction extends SingleDatasetResultAction {
 
 		if (dialog.isReadyToRun()) {
 			List<ICell> cells = new ArrayList<>(dataset.getCollection().getCells());
-			
+
 			Collections.shuffle(cells);
-			
+
 			List<ICell> subList = cells.subList(0, dialog.getCellCount());
 
 			ICellCollection c = new VirtualDataset(dataset, "Random_selection");
 			c.addAll(subList);
 
-			 if (c.hasCells()) {
+			if (c.hasCells()) {
 
-	                try {
-	                    dataset.getCollection().getProfileManager().copySegmentsAndLandmarksTo(c);
-	                } catch (ProfileException | MissingProfileException e) {
-	                    LOGGER.warning("Error copying collection offsets");
-	                    LOGGER.log(Loggable.STACK, "Error in offsetting", e);
-	                }
+				try {
+					dataset.getCollection().getProfileManager().copySegmentsAndLandmarksTo(c);
+				} catch (ProfileException | MissingProfileException e) {
+					LOGGER.warning("Error copying collection offsets");
+					LOGGER.log(Loggable.STACK, "Error in offsetting", e);
+				}
 
-	                dataset.addChildCollection(c);
+				dataset.addChildCollection(c);
 
-	                // attach the clusters to their parent collection
-	                IAnalysisDataset d = dataset.getChildDataset(c.getId());
-	                
-	                // set shared counts
-	                c.setSharedCount(dataset.getCollection(), c.size());
-	                dataset.getCollection().setSharedCount(c, c.size());
-	                
-	                getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.REFRESH_POPULATIONS);
-	            }
+				// attach the clusters to their parent collection
+				IAnalysisDataset d = dataset.getChildDataset(c.getId());
+
+				// set shared counts
+				c.setSharedCount(dataset.getCollection(), c.size());
+				dataset.getCollection().setSharedCount(c, c.size());
+
+				UIController.getInstance().fireDatasetAdded(d);
+			}
 
 		} else {
 			LOGGER.fine("User cancelled operation");
@@ -104,59 +107,57 @@ public class ExtractRandomCellsAction extends SingleDatasetResultAction {
 		cancel();
 	}
 
-
-
 	private class ExtractNucleiSetupDialog extends SettingsDialog implements ActionListener {
-		
-		private JSpinner spinner;
-		public ExtractNucleiSetupDialog() {
-	        super(true);
 
-	        this.setTitle("Extract cells options");
-	        setSize(450, 300);
-	        this.setLocationRelativeTo(null);
-	        createGUI();
-	        // this.pack();
-	        this.setVisible(true);
-	    }
-		
-		public int getCellCount(){
+		private JSpinner spinner;
+
+		public ExtractNucleiSetupDialog() {
+			super(true);
+
+			this.setTitle("Extract cells options");
+			setSize(450, 300);
+			this.setLocationRelativeTo(null);
+			createGUI();
+			// this.pack();
+			this.setVisible(true);
+		}
+
+		public int getCellCount() {
 			return (int) spinner.getModel().getValue();
 		}
 
 		@Override
 		public void actionPerformed(ActionEvent arg0) {
 			// TODO Auto-generated method stub
-			
+
 		}
-		
+
 		private void createGUI() {
 
-	        setLayout(new BorderLayout());
+			setLayout(new BorderLayout());
 
-	        JPanel panel = new JPanel();
-	        GridBagLayout layout = new GridBagLayout();
-	        panel.setLayout(layout);
+			JPanel panel = new JPanel();
+			GridBagLayout layout = new GridBagLayout();
+			panel.setLayout(layout);
 
-	        List<JLabel> labels = new ArrayList<JLabel>();
-	        List<Component> fields = new ArrayList<Component>();
+			List<JLabel> labels = new ArrayList<JLabel>();
+			List<Component> fields = new ArrayList<Component>();
 
-	        spinner = new JSpinner( new SpinnerNumberModel(1, 1, dataset.getCollection().getNucleusCount(), 1));
-	        labels.add(new JLabel("Number of cells"));
-	        fields.add(spinner);
+			spinner = new JSpinner(new SpinnerNumberModel(1, 1, dataset.getCollection().getNucleusCount(), 1));
+			labels.add(new JLabel("Number of cells"));
+			fields.add(spinner);
 
+			this.addLabelTextRows(labels, fields, layout, panel);
 
-	        this.addLabelTextRows(labels, fields, layout, panel);
+			JPanel header = new JPanel(new FlowLayout());
+			header.add(new JLabel("Extract random cells from the dataset"));
 
-	        JPanel header = new JPanel(new FlowLayout());
-	        header.add(new JLabel("Extract random cells from the dataset"));
+			this.add(header, BorderLayout.NORTH);
+			this.add(panel, BorderLayout.CENTER);
 
-	        this.add(header, BorderLayout.NORTH);
-	        this.add(panel, BorderLayout.CENTER);
+			this.add(createFooter(), BorderLayout.SOUTH);
 
-	        this.add(createFooter(), BorderLayout.SOUTH);
-
-	    }
+		}
 	}
 
 }

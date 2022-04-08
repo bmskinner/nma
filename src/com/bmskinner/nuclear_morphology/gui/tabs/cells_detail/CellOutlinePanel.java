@@ -22,7 +22,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.logging.Logger;
 
-import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
@@ -40,181 +39,187 @@ import com.bmskinner.nuclear_morphology.gui.events.ChartOptionsRenderedEvent;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.events.SegmentEvent;
 import com.bmskinner.nuclear_morphology.gui.events.SegmentEvent.SegmentUpdateType;
+import com.bmskinner.nuclear_morphology.gui.events.revamp.SwatchUpdatedListener;
 import com.bmskinner.nuclear_morphology.gui.tabs.cells_detail.InteractiveCellPanel.CellDisplayOptions;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
-
 /**
  * Display panel for cell outlines, including segments and landmarks
+ * 
  * @author ben
  *
  */
 @SuppressWarnings("serial")
-public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionListener, CellUpdatedEventListener {
-	
+public class CellOutlinePanel extends AbstractCellDetailPanel
+		implements ActionListener, CellUpdatedEventListener, SwatchUpdatedListener {
+
 	private static final Logger LOGGER = Logger.getLogger(CellOutlinePanel.class.getName());
 
-    private static final String PANEL_TITLE_LBL = "Outline";
-  
-    private InteractiveCellPanel imagePanel;
+	private static final String PANEL_TITLE_LBL = "Outline";
 
-    private GenericCheckboxPanel rotatePanel   = new GenericCheckboxPanel("Rotate vertical");
-    private GenericCheckboxPanel warpMeshPanel = new GenericCheckboxPanel("Warp image to consensus shape");
-        
-    public CellOutlinePanel(@NonNull InputSupplier context, CellViewModel model) {
-        super(context, model, PANEL_TITLE_LBL);
-        // make the chart for each nucleus
-        this.setLayout(new BorderLayout());
+	private InteractiveCellPanel imagePanel;
 
-        
-        JPanel header = makeHeader();
-        add(header, BorderLayout.NORTH);
+	private GenericCheckboxPanel rotatePanel = new GenericCheckboxPanel("Rotate vertical");
+	private GenericCheckboxPanel warpMeshPanel = new GenericCheckboxPanel("Warp image to consensus shape");
 
-        imagePanel = new InteractiveCellPanel(this);
-        imagePanel.addSegmentEventListener(this);
+	public CellOutlinePanel(@NonNull InputSupplier context, CellViewModel model) {
+		super(context, model, PANEL_TITLE_LBL);
+		// make the chart for each nucleus
+		this.setLayout(new BorderLayout());
 
-        add(imagePanel, BorderLayout.CENTER);
-    }
-    
-    private JPanel makeHeader() {
-    	JPanel panel = new JPanel(new FlowLayout());
-    	
-        JLabel headerLabel = new JLabel("<html><body style='width: 90%'>"
-        		+ "Click a border point to update segments or landmarks.</html>");
-        panel.add(headerLabel);
+		JPanel header = makeHeader();
+		add(header, BorderLayout.NORTH);
 
-    	rotatePanel.setEnabled(false);
-    	rotatePanel.addActionListener(this);
+		imagePanel = new InteractiveCellPanel(this);
+		imagePanel.addSegmentEventListener(this);
 
-        warpMeshPanel.addActionListener(this);
-        warpMeshPanel.setEnabled(false);
-         
-        panel.add(rotatePanel);
-        panel.add(warpMeshPanel);
-        
-        return panel;
-    }
-    
-    private synchronized void updateSettingsPanels() {
+		add(imagePanel, BorderLayout.CENTER);
+	}
 
-        if (this.isMultipleDatasets() || !this.hasDatasets()) {
-        	rotatePanel.setEnabled(false);
-            warpMeshPanel.setEnabled(false);
-            return;
-        }
+	private JPanel makeHeader() {
+		JPanel panel = new JPanel(new FlowLayout());
 
-        if (!this.getCellModel().hasCell()) {
-        	rotatePanel.setEnabled(false);
-            warpMeshPanel.setEnabled(false);
-        } else {
-            // Only allow one mesh activity to be active
-        	rotatePanel.setEnabled(!warpMeshPanel.isSelected());
-        	 warpMeshPanel.setEnabled(!rotatePanel.isSelected());
+		JLabel headerLabel = new JLabel(
+				"<html><body style='width: 90%'>" + "Click a border point to update segments or landmarks.</html>");
+		panel.add(headerLabel);
 
-            if (!activeDataset().getCollection().hasConsensus()) {
-                warpMeshPanel.setEnabled(false);
-            }
-        }
-    }
+		rotatePanel.setEnabled(false);
+		rotatePanel.addActionListener(this);
 
-    @Override
+		warpMeshPanel.addActionListener(this);
+		warpMeshPanel.setEnabled(false);
+
+		panel.add(rotatePanel);
+		panel.add(warpMeshPanel);
+
+		return panel;
+	}
+
+	private synchronized void updateSettingsPanels() {
+
+		if (this.isMultipleDatasets() || !this.hasDatasets()) {
+			rotatePanel.setEnabled(false);
+			warpMeshPanel.setEnabled(false);
+			return;
+		}
+
+		if (!this.getCellModel().hasCell()) {
+			rotatePanel.setEnabled(false);
+			warpMeshPanel.setEnabled(false);
+		} else {
+			// Only allow one mesh activity to be active
+			rotatePanel.setEnabled(!warpMeshPanel.isSelected());
+			warpMeshPanel.setEnabled(!rotatePanel.isSelected());
+
+			if (!activeDataset().getCollection().hasConsensus()) {
+				warpMeshPanel.setEnabled(false);
+			}
+		}
+	}
+
+	@Override
 	public synchronized void update() {
 
-        if (this.isMultipleDatasets() || !this.hasDatasets()) {
-            imagePanel.setNull();
-            return;
-        }
-        
-        final ICell cell = getCellModel().getCell();
-        final CellularComponent component = getCellModel().getComponent();
-        
-        HashOptions displayOptions = new OptionsBuilder()
-        		.withValue(CellDisplayOptions.WARP_IMAGE, warpMeshPanel.isSelected())
-        		.withValue(CellDisplayOptions.ROTATE_VERTICAL, rotatePanel.isSelected())
-        		.build();
-        
-        imagePanel.setCell(activeDataset(), cell, component, displayOptions);
+		if (this.isMultipleDatasets() || !this.hasDatasets()) {
+			imagePanel.setNull();
+			return;
+		}
 
-        updateSettingsPanels();
-    }
+		final ICell cell = getCellModel().getCell();
+		final CellularComponent component = getCellModel().getComponent();
 
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        update();
-    }
+		HashOptions displayOptions = new OptionsBuilder()
+				.withValue(CellDisplayOptions.WARP_IMAGE, warpMeshPanel.isSelected())
+				.withValue(CellDisplayOptions.ROTATE_VERTICAL, rotatePanel.isSelected()).build();
 
-    @Override
-    protected void updateSingle() {
-        update();
-    }
+		imagePanel.setCell(activeDataset(), cell, component, displayOptions);
 
-    @Override
-    protected void updateMultiple() {
-        updateNull();
-    }
+		updateSettingsPanels();
+	}
 
-    @Override
-    protected void updateNull() {
-    	imagePanel.setNull();
-        updateSettingsPanels();
-    }
-    
-    @Override
-    public void refreshChartCache() {
-        clearChartCache();
-        imagePanel.createImage();
-        this.update();
-    }
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		update();
+	}
 
-    @Override
-    public void eventReceived(DatasetEvent event) {
-        super.eventReceived(event);
-        // Pass messages upwards
-        if (event.getSource() instanceof ManualCurationDialog)
-            this.getDatasetEventHandler().fireDatasetEvent(new DatasetEvent(this, event));
-        
-        if(event.getSource()==imagePanel) {
-        	 refreshChartCache();
-        	 getDatasetEventHandler().fireDatasetEvent(new DatasetEvent(this, event));
-        }
-       
-    }
+	@Override
+	protected void updateSingle() {
+		update();
+	}
 
-    @Override
-    public void eventReceived(ChartOptionsRenderedEvent e) {
-        update();
-    }
+	@Override
+	protected void updateMultiple() {
+		updateNull();
+	}
 
-    @Override
-    public void segmentEventReceived(SegmentEvent event) {
+	@Override
+	protected void updateNull() {
+		imagePanel.setNull();
+		updateSettingsPanels();
+	}
 
-        if (event.type.equals(SegmentUpdateType.MOVE_START_INDEX)) {
-        	
-        	// Wrap in a runnable to avoid occasional hanging. Did it help?
-        	Runnable r = () ->{
-        		try {
+	@Override
+	public void refreshChartCache() {
+		clearChartCache();
+		imagePanel.createImage();
+		this.update();
+	}
 
-        			LOGGER.fine("Updating segment start index to "+event.index);
-        			// This is a manual change, so disable any lock
-        			getCellModel().getCell().getPrimaryNucleus().setLocked(false);
+	@Override
+	public void eventReceived(DatasetEvent event) {
+		super.eventReceived(event);
+		// Pass messages upwards
+		if (event.getSource() instanceof ManualCurationDialog)
+			this.getDatasetEventHandler().fireDatasetEvent(new DatasetEvent(this, event));
 
-        			// Carry out the update
-        			activeDataset().getCollection().getProfileManager()
-        			.updateCellSegmentStartIndex(getCellModel().getCell(), event.id, event.index);
+		if (event.getSource() == imagePanel) {
+			refreshChartCache();
+			getDatasetEventHandler().fireDatasetEvent(new DatasetEvent(this, event));
+		}
 
-        			// even if no lock was previously set, there should be one now a manual adjustment was made
-        			getCellModel().getCell().getPrimaryNucleus().setLocked(true);
+	}
 
-        			// Recache necessary charts within this panel at once
-        			refreshChartCache();
+	@Override
+	public void eventReceived(ChartOptionsRenderedEvent e) {
+		update();
+	}
 
-        			// Request a refresh of other panels
-        			getDatasetEventHandler().fireDatasetEvent(DatasetEvent.RECACHE_CHARTS, getDatasets());
-        		} catch (Exception e) {
-        			LOGGER.log(Loggable.STACK, "Error updating segment", e);
-        		}
-        	};
-        	new Thread(r).start();
-        }
-    }
+	@Override
+	public void segmentEventReceived(SegmentEvent event) {
+
+		if (event.type.equals(SegmentUpdateType.MOVE_START_INDEX)) {
+
+			// Wrap in a runnable to avoid occasional hanging. Did it help?
+			Runnable r = () -> {
+				try {
+
+					LOGGER.fine("Updating segment start index to " + event.index);
+					// This is a manual change, so disable any lock
+					getCellModel().getCell().getPrimaryNucleus().setLocked(false);
+
+					// Carry out the update
+					activeDataset().getCollection().getProfileManager()
+							.updateCellSegmentStartIndex(getCellModel().getCell(), event.id, event.index);
+
+					// even if no lock was previously set, there should be one now a manual
+					// adjustment was made
+					getCellModel().getCell().getPrimaryNucleus().setLocked(true);
+
+					// Recache necessary charts within this panel at once
+					refreshChartCache();
+
+					// Request a refresh of other panels
+					getDatasetEventHandler().fireDatasetEvent(DatasetEvent.RECACHE_CHARTS, getDatasets());
+				} catch (Exception e) {
+					LOGGER.log(Loggable.STACK, "Error updating segment", e);
+				}
+			};
+			new Thread(r).start();
+		}
+	}
+
+	@Override
+	public void swatchUpdated() {
+		update(getDatasets());
+	}
 }

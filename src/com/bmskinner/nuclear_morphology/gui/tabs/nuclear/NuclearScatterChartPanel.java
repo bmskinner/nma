@@ -47,4 +47,9 @@ public class NuclearScatterChartPanel extends AbstractScatterChartPanel {
 		update(getDatasets());
 	}
 
+	@Override
+	public void swatchUpdated() {
+		update(getDatasets());
+	}
+
 }

@@ -34,6 +34,7 @@ import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.ScaleUpdatedListener;
+import com.bmskinner.nuclear_morphology.gui.events.revamp.SwatchUpdatedListener;
 import com.bmskinner.nuclear_morphology.gui.tabs.BoxplotsTabPanel;
 import com.bmskinner.nuclear_morphology.visualisation.charts.AbstractChartFactory;
 import com.bmskinner.nuclear_morphology.visualisation.charts.MorphologyChartFactory;
@@ -50,7 +51,8 @@ import com.bmskinner.nuclear_morphology.visualisation.options.ChartOptionsBuilde
  *
  */
 @SuppressWarnings("serial")
-public class CellsBoxplotsPanel extends BoxplotsTabPanel implements ActionListener, ScaleUpdatedListener {
+public class CellsBoxplotsPanel extends BoxplotsTabPanel
+		implements ActionListener, ScaleUpdatedListener, SwatchUpdatedListener {
 
 	private static final Logger LOGGER = Logger.getLogger(CellsBoxplotsPanel.class.getName());
 
@@ -75,6 +77,7 @@ public class CellsBoxplotsPanel extends BoxplotsTabPanel implements ActionListen
 		this.add(scrollPane, BorderLayout.CENTER);
 
 		uiController.addScaleUpdatedListener(this);
+		uiController.addSwatchUpdatedListener(this);
 	}
 
 	@Override
@@ -138,6 +141,11 @@ public class CellsBoxplotsPanel extends BoxplotsTabPanel implements ActionListen
 
 	@Override
 	public void scaleUpdated() {
+		update(getDatasets());
+	}
+
+	@Override
+	public void swatchUpdated() {
 		update(getDatasets());
 	}
 }

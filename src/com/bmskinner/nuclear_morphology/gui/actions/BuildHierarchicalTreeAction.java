@@ -87,7 +87,6 @@ public class BuildHierarchicalTreeAction extends SingleDatasetResultAction imple
 
 			ClusterTreeDialog clusterPanel = new ClusterTreeDialog(dataset, r.getGroup());
 			clusterPanel.addDatasetEventListener(BuildHierarchicalTreeAction.this);
-			clusterPanel.addInterfaceEventListener(this);
 
 			cleanup(); // do not cancel, we need the MainWindow listener to
 						// remain attached

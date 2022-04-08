@@ -29,7 +29,7 @@ import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.components.FileSelector;
-import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
+import com.bmskinner.nuclear_morphology.gui.events.revamp.UIController;
 
 /**
  * Creates child datasets from a .cell mapping file
@@ -39,40 +39,41 @@ import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMetho
  */
 public class RelocateFromFileAction extends SingleDatasetResultAction {
 
-    private static final @NonNull String PROGRESS_LBL = "Relocating cells";
+	private static final @NonNull String PROGRESS_LBL = "Relocating cells";
 
-    public RelocateFromFileAction(@NonNull IAnalysisDataset dataset, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh, CountDownLatch latch) {
-        super(dataset, PROGRESS_LBL, acceptor, eh);
-        this.setLatch(latch);
-        setProgressBarIndeterminate();
-    }
+	public RelocateFromFileAction(@NonNull IAnalysisDataset dataset, @NonNull final ProgressBarAcceptor acceptor,
+			@NonNull final EventHandler eh, CountDownLatch latch) {
+		super(dataset, PROGRESS_LBL, acceptor, eh);
+		this.setLatch(latch);
+		setProgressBarIndeterminate();
+	}
 
-    @Override
-    public void run() {
-        /*
-         * Get the file to search
-         */
+	@Override
+	public void run() {
+		/*
+		 * Get the file to search
+		 */
 
-        File file = FileSelector.chooseRemappingFile(dataset);
-        if (file != null) {
+		File file = FileSelector.chooseRemappingFile(dataset);
+		if (file != null) {
 
-            IAnalysisMethod m = new CellRelocationMethod(dataset, file);
-            worker = new DefaultAnalysisWorker(m);
+			IAnalysisMethod m = new CellRelocationMethod(dataset, file);
+			worker = new DefaultAnalysisWorker(m);
 
-            worker.addPropertyChangeListener(this);
+			worker.addPropertyChangeListener(this);
 
-            this.setProgressMessage("Locating cells...");
-            ThreadManager.getInstance().submit(worker);
-        } else {
-            cancel();
-        }
-    }
+			this.setProgressMessage("Locating cells...");
+			ThreadManager.getInstance().submit(worker);
+		} else {
+			cancel();
+		}
+	}
 
-    @Override
-    public void finished() {
-        getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.REFRESH_POPULATIONS);
-        this.countdownLatch();
-        super.finished();
-    }
+	@Override
+	public void finished() {
+		UIController.getInstance().fireDatasetAdded(dataset);
+		this.countdownLatch();
+		super.finished();
+	}
 
 }

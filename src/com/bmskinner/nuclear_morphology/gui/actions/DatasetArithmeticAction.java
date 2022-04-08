@@ -36,126 +36,128 @@ import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.dialogs.DatasetArithmeticSetupDialog;
 import com.bmskinner.nuclear_morphology.gui.dialogs.DatasetArithmeticSetupDialog.DatasetArithmeticOperation;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
-import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
+import com.bmskinner.nuclear_morphology.gui.events.revamp.UIController;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Trigger methods to perform boolean operations on datasets
+ * 
  * @author Ben Skinner
  *
  */
 public class DatasetArithmeticAction extends MultiDatasetResultAction {
-	
+
 	private static final Logger LOGGER = Logger.getLogger(DatasetArithmeticAction.class.getName());
 
-    private static final @NonNull String PROGRESS_LBL = "Dataset arithmetic";
-    
-    private File saveFile;
+	private static final @NonNull String PROGRESS_LBL = "Dataset arithmetic";
 
-    public DatasetArithmeticAction(@NonNull List<IAnalysisDataset> list, @NonNull ProgressBarAcceptor acceptor, @NonNull EventHandler eh) {
-        super(list, PROGRESS_LBL, acceptor, eh);
-        this.setProgressBarIndeterminate();
-    }
+	private File saveFile;
 
-    @Override
-    public void run() {
-        try {
+	public DatasetArithmeticAction(@NonNull List<IAnalysisDataset> list, @NonNull ProgressBarAcceptor acceptor,
+			@NonNull EventHandler eh) {
+		super(list, PROGRESS_LBL, acceptor, eh);
+		this.setProgressBarIndeterminate();
+	}
 
-            /*
-             * Make a dialog with a dropdown for dataset 1, operator, then
-             * dropdown for dataset 2
-             */
+	@Override
+	public void run() {
+		try {
 
-            DatasetArithmeticSetupDialog dialog = new DatasetArithmeticSetupDialog(datasets);
-            if (dialog.isReadyToRun()) {
-            	
-            	saveFile = eh.getInputSupplier().requestFolder("Select new directory of images...");
+			/*
+			 * Make a dialog with a dropdown for dataset 1, operator, then dropdown for
+			 * dataset 2
+			 */
 
-            	IAnalysisDataset datasetOne = dialog.getDatasetOne();
-                IAnalysisDataset datasetTwo = dialog.getDatasetTwo();
-                DatasetArithmeticOperation operation = dialog.getOperation();
+			DatasetArithmeticSetupDialog dialog = new DatasetArithmeticSetupDialog(datasets);
+			if (dialog.isReadyToRun()) {
 
-                LOGGER.info("Performing " + operation + " on datasets");
-                // prepare a new collection
+				saveFile = eh.getInputSupplier().requestFolder("Select new directory of images...");
 
-                ICellCollection newCollection = null;
+				IAnalysisDataset datasetOne = dialog.getDatasetOne();
+				IAnalysisDataset datasetTwo = dialog.getDatasetTwo();
+				DatasetArithmeticOperation operation = dialog.getOperation();
 
-                switch (operation) {
-                case AND: // present in both
-                	newCollection =  CellCollectionFilterer.and(datasetOne.getCollection(), datasetTwo.getCollection());
+				LOGGER.info("Performing " + operation + " on datasets");
+				// prepare a new collection
 
-                    newCollection.setSharedCount(datasetOne.getCollection(), newCollection.size());
-                    newCollection.setSharedCount(datasetTwo.getCollection(), newCollection.size());
+				ICellCollection newCollection = null;
 
-                    datasetOne.getCollection().setSharedCount(newCollection, newCollection.size());
-                    datasetTwo.getCollection().setSharedCount(newCollection, newCollection.size());
-                    break;
-                case NOT: // present in one, not present in two
-                	newCollection =  CellCollectionFilterer.not(datasetOne.getCollection(), datasetTwo.getCollection());
+				switch (operation) {
+				case AND: // present in both
+					newCollection = CellCollectionFilterer.and(datasetOne.getCollection(), datasetTwo.getCollection());
 
-                    newCollection.setSharedCount(datasetOne.getCollection(), newCollection.size());
-                    newCollection.setSharedCount(datasetTwo.getCollection(), 0);
+					newCollection.setSharedCount(datasetOne.getCollection(), newCollection.size());
+					newCollection.setSharedCount(datasetTwo.getCollection(), newCollection.size());
 
-                    datasetOne.getCollection().setSharedCount(newCollection, newCollection.size());
-                    datasetTwo.getCollection().setSharedCount(newCollection, 0);
+					datasetOne.getCollection().setSharedCount(newCollection, newCollection.size());
+					datasetTwo.getCollection().setSharedCount(newCollection, newCollection.size());
+					break;
+				case NOT: // present in one, not present in two
+					newCollection = CellCollectionFilterer.not(datasetOne.getCollection(), datasetTwo.getCollection());
 
-                    break;
-                case OR: // present in either (merge)
-                	newCollection =  CellCollectionFilterer.or(datasetOne.getCollection(), datasetTwo.getCollection());
-                	newCollection.setSharedCount(datasetOne.getCollection(), datasetOne.getCollection().size());
-                    newCollection.setSharedCount(datasetTwo.getCollection(), datasetTwo.getCollection().size());
+					newCollection.setSharedCount(datasetOne.getCollection(), newCollection.size());
+					newCollection.setSharedCount(datasetTwo.getCollection(), 0);
 
-                    datasetOne.getCollection().setSharedCount(newCollection, datasetOne.getCollection().size());
-                    datasetTwo.getCollection().setSharedCount(newCollection, datasetTwo.getCollection().size());
-                	
-                    break;
-                case XOR: // present in either but not both
-                	newCollection =  CellCollectionFilterer.xor(datasetOne.getCollection(), datasetTwo.getCollection());
-                    break;
-                default:
-                    break;
-                }
+					datasetOne.getCollection().setSharedCount(newCollection, newCollection.size());
+					datasetTwo.getCollection().setSharedCount(newCollection, 0);
 
-                makeNewDataset(newCollection);
+					break;
+				case OR: // present in either (merge)
+					newCollection = CellCollectionFilterer.or(datasetOne.getCollection(), datasetTwo.getCollection());
+					newCollection.setSharedCount(datasetOne.getCollection(), datasetOne.getCollection().size());
+					newCollection.setSharedCount(datasetTwo.getCollection(), datasetTwo.getCollection().size());
 
-            }
+					datasetOne.getCollection().setSharedCount(newCollection, datasetOne.getCollection().size());
+					datasetTwo.getCollection().setSharedCount(newCollection, datasetTwo.getCollection().size());
 
-        } catch(RequestCancelledException e1) {
-        	// User request cancelled
-        	LOGGER.fine("User cancelled dataset arithmetic action");
-        	
-        } catch (Exception e1) {
-            LOGGER.log(Loggable.STACK, "Error in dataset arithmetic", e1);
-
-        } finally {
-            cancel();
-        }
-    }
-
-    private void makeNewDataset(ICellCollection newCollection) {
-        if (newCollection != null && !newCollection.isEmpty()) {
-
-            LOGGER.info("Found " + newCollection.size() + " cells");
-            IAnalysisDataset newDataset;
-
-            if (newCollection instanceof VirtualDataset) {
-
-            	IAnalysisDataset root = DatasetListManager.getInstance().getRootParent(newCollection);
-                try {
-					root.getCollection().getProfileManager().copySegmentsAndLandmarksTo(newCollection);
-					root.addChildCollection(newCollection);
-	                getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.REFRESH_POPULATIONS);
-				} catch (ProfileException | MissingProfileException e) {
-					LOGGER.warning("Error: unable to complete operation");
-				 LOGGER.log(Loggable.STACK, "Error copying profile offsets", e);
+					break;
+				case XOR: // present in either but not both
+					newCollection = CellCollectionFilterer.xor(datasetOne.getCollection(), datasetTwo.getCollection());
+					break;
+				default:
+					break;
 				}
 
-            } else {
-                newDataset = new DefaultAnalysisDataset(newCollection, saveFile);
-                getDatasetEventHandler().fireDatasetEvent(DatasetEvent.MORPHOLOGY_ANALYSIS_ACTION, newDataset);
-            }
-        } else {
-            LOGGER.info("No populations returned");
-        }
-    }
+				makeNewDataset(newCollection);
+
+			}
+
+		} catch (RequestCancelledException e1) {
+			// User request cancelled
+			LOGGER.fine("User cancelled dataset arithmetic action");
+
+		} catch (Exception e1) {
+			LOGGER.log(Loggable.STACK, "Error in dataset arithmetic", e1);
+
+		} finally {
+			cancel();
+		}
+	}
+
+	private void makeNewDataset(ICellCollection newCollection) {
+		if (newCollection != null && !newCollection.isEmpty()) {
+
+			LOGGER.info("Found " + newCollection.size() + " cells");
+			IAnalysisDataset newDataset;
+
+			if (newCollection instanceof VirtualDataset) {
+
+				IAnalysisDataset root = DatasetListManager.getInstance().getRootParent(newCollection);
+				try {
+					root.getCollection().getProfileManager().copySegmentsAndLandmarksTo(newCollection);
+					root.addChildCollection(newCollection);
+					UIController.getInstance().fireDatasetAdded(root);
+				} catch (ProfileException | MissingProfileException e) {
+					LOGGER.warning("Error: unable to complete operation");
+					LOGGER.log(Loggable.STACK, "Error copying profile offsets", e);
+				}
+
+			} else {
+				newDataset = new DefaultAnalysisDataset(newCollection, saveFile);
+				getDatasetEventHandler().fireDatasetEvent(DatasetEvent.MORPHOLOGY_ANALYSIS_ACTION, newDataset);
+			}
+		} else {
+			LOGGER.info("No populations returned");
+		}
+	}
 }

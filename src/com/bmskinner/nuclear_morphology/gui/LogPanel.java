@@ -70,7 +70,6 @@ import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
-import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.main.MainDragAndDropTarget;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
@@ -373,7 +372,7 @@ public class LogPanel extends DetailPanel implements ProgressBarAcceptor {
 	 */
 	private class Console extends JPanel implements ActionListener {
 		private JTextField console = new JTextField();
-		private Map<String, InterfaceMethod> commandMap = new HashMap<String, InterfaceMethod>();
+//		private Map<String, InterfaceMethod> commandMap = new HashMap<String, InterfaceMethod>();
 
 		private int historyIndex = -1;
 		private List<String> history = new LinkedList<>();
@@ -400,11 +399,11 @@ public class LogPanel extends DetailPanel implements ProgressBarAcceptor {
 		private final Map<String, Runnable> runnableCommands = new HashMap<>();
 
 		{
-			commandMap.put("list selected", InterfaceMethod.LIST_SELECTED_DATASETS);
-			commandMap.put("recache charts", InterfaceMethod.RECACHE_CHARTS);
-			commandMap.put("refresh", InterfaceMethod.UPDATE_PANELS);
-			commandMap.put("nucleus history", InterfaceMethod.DUMP_LOG_INFO);
-			commandMap.put("info", InterfaceMethod.INFO);
+//			commandMap.put("list selected", InterfaceMethod.LIST_SELECTED_DATASETS);
+//			commandMap.put("recache charts", InterfaceMethod.RECACHE_CHARTS);
+//			commandMap.put("refresh", InterfaceMethod.UPDATE_PANELS);
+//			commandMap.put("nucleus history", InterfaceMethod.DUMP_LOG_INFO);
+//			commandMap.put("info", InterfaceMethod.INFO);
 		}
 
 		public Console() {
@@ -463,10 +462,10 @@ public class LogPanel extends DetailPanel implements ProgressBarAcceptor {
 
 			runnableCommands.put(HELP_CMD, () -> {
 				LOGGER.info("Available commands: ");
-				for (String key : commandMap.keySet()) {
-					InterfaceMethod im = commandMap.get(key);
-					LOGGER.info(" " + key + " - " + im.toString());
-				}
+//				for (String key : commandMap.keySet()) {
+//					InterfaceMethod im = commandMap.get(key);
+//					LOGGER.info(" " + key + " - " + im.toString());
+//				}
 				LOGGER.info(" check - validate the open root datasets");
 				LOGGER.info(" list  - list the open root datasets");
 				LOGGER.info(" export xml - export the selected dataset in XML format");

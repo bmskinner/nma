@@ -188,7 +188,6 @@ public class BorderTagEditingPanel extends AbstractEditingPanel implements Actio
 
 		if (e.getSource() == ruleSetButton) {
 			RulesetDialog d = new RulesetDialog(activeDataset());
-			d.addInterfaceEventListener(this);
 			d.addDatasetEventListener(this);
 			d.setVisible(true);
 		}

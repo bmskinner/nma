@@ -51,6 +51,7 @@ import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.ConsensusUpdatedListener;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.ScaleUpdatedListener;
+import com.bmskinner.nuclear_morphology.gui.events.revamp.SwatchUpdatedListener;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 import com.bmskinner.nuclear_morphology.io.Io;
 import com.bmskinner.nuclear_morphology.io.SVGWriter;
@@ -62,7 +63,7 @@ import com.bmskinner.nuclear_morphology.visualisation.options.ChartOptionsBuilde
 
 @SuppressWarnings("serial")
 public class ConsensusNucleusPanel extends DetailPanel
-		implements ChangeListener, ConsensusUpdatedListener, ScaleUpdatedListener {
+		implements ChangeListener, ConsensusUpdatedListener, ScaleUpdatedListener, SwatchUpdatedListener {
 
 	private static final Logger LOGGER = Logger.getLogger(ConsensusNucleusPanel.class.getName());
 
@@ -109,6 +110,8 @@ public class ConsensusNucleusPanel extends DetailPanel
 		add(offsetsPanel, BorderLayout.EAST);
 		offsetsPanel.setVisible(false);
 		uiController.addConsensusUpdatedListener(this);
+		uiController.addSwatchUpdatedListener(this);
+		uiController.addScaleUpdatedListener(this);
 	}
 
 	@Override
@@ -520,7 +523,12 @@ public class ConsensusNucleusPanel extends DetailPanel
 
 	@Override
 	public void scaleUpdated() {
-		update(getDatasets());
+		update();
+	}
+
+	@Override
+	public void swatchUpdated() {
+		update();
 	}
 
 }

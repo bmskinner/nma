@@ -31,59 +31,62 @@ import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.components.FileSelector;
-import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
+import com.bmskinner.nuclear_morphology.gui.events.revamp.UIController;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
- * Action to trigger assignment of nuclei to clusters based on 
- * an input definition file
+ * Action to trigger assignment of nuclei to clusters based on an input
+ * definition file
+ * 
  * @author Ben Skinner
  *
  */
 public class ClusterFileAssignmentAction extends SingleDatasetResultAction {
-	
+
 	private static final Logger LOGGER = Logger.getLogger(ClusterFileAssignmentAction.class.getName());
 
-    private static final @NonNull String PROGRESS_BAR_LABEL = "Assigning clustered cells";
+	private static final @NonNull String PROGRESS_BAR_LABEL = "Assigning clustered cells";
 
-    public ClusterFileAssignmentAction(IAnalysisDataset dataset, @NonNull ProgressBarAcceptor acceptor, @NonNull EventHandler eh) {
-        super(dataset, PROGRESS_BAR_LABEL, acceptor, eh);
-    }
+	public ClusterFileAssignmentAction(IAnalysisDataset dataset, @NonNull ProgressBarAcceptor acceptor,
+			@NonNull EventHandler eh) {
+		super(dataset, PROGRESS_BAR_LABEL, acceptor, eh);
+	}
 
-    @Override
-    public void run() {
+	@Override
+	public void run() {
 
-    	File clusterMapFile = FileSelector.chooseFile(dataset.getSavePath().getParentFile());
-    	
-    	if(clusterMapFile!=null) {
+		File clusterMapFile = FileSelector.chooseFile(dataset.getSavePath().getParentFile());
 
-            IAnalysisMethod m = new ClusterFileAssignmentMethod(dataset, clusterMapFile);
-            worker = new DefaultAnalysisWorker(m);
+		if (clusterMapFile != null) {
 
-            worker.addPropertyChangeListener(this);
-            ThreadManager.getInstance().submit(worker);
+			IAnalysisMethod m = new ClusterFileAssignmentMethod(dataset, clusterMapFile);
+			worker = new DefaultAnalysisWorker(m);
 
-        } else {
-            this.cancel();
-        }
-    }
+			worker.addPropertyChangeListener(this);
+			ThreadManager.getInstance().submit(worker);
 
-    @Override
-    public void finished() {
+		} else {
+			this.cancel();
+		}
+	}
 
-        this.setProgressBarVisible(false);
+	@Override
+	public void finished() {
 
-        try {
-            ClusterAnalysisResult r = (ClusterAnalysisResult) worker.get();
-            int size = r.getGroup().size();
-            LOGGER.info("Found " + size + " clusters");
-        } catch (InterruptedException | ExecutionException e) {
-            LOGGER.warning("Error clustering");
-            LOGGER.log(Loggable.STACK, "Error clustering", e);
-            Thread.currentThread().interrupt();
-        }
-        getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.REFRESH_POPULATIONS);
-        super.finished();
+		this.setProgressBarVisible(false);
 
-    }
+		try {
+			ClusterAnalysisResult r = (ClusterAnalysisResult) worker.get();
+			int size = r.getGroup().size();
+			LOGGER.info("Found " + size + " clusters");
+			UIController.getInstance().fireDatasetAdded(r.getDatasets());
+		} catch (InterruptedException | ExecutionException e) {
+			LOGGER.warning("Error clustering");
+			LOGGER.log(Loggable.STACK, "Error clustering", e);
+			Thread.currentThread().interrupt();
+		}
+
+		super.finished();
+
+	}
 }

@@ -27,10 +27,11 @@ import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.ProfilesUpdatedListener;
+import com.bmskinner.nuclear_morphology.gui.events.revamp.SwatchUpdatedListener;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 
 @SuppressWarnings("serial")
-public class NucleusProfilesPanel extends DetailPanel implements ProfilesUpdatedListener {
+public class NucleusProfilesPanel extends DetailPanel implements ProfilesUpdatedListener, SwatchUpdatedListener {
 
 	JTabbedPane tabPanel;
 
@@ -53,6 +54,7 @@ public class NucleusProfilesPanel extends DetailPanel implements ProfilesUpdated
 		this.add(tabPanel, BorderLayout.CENTER);
 
 		uiController.addProfilesUpdatedListener(this);
+		uiController.addSwatchUpdatedListener(this);
 	}
 
 	@Override
@@ -63,5 +65,10 @@ public class NucleusProfilesPanel extends DetailPanel implements ProfilesUpdated
 	@Override
 	public void profilesUpdated(IAnalysisDataset dataset) {
 		refreshChartCache(dataset);
+	}
+
+	@Override
+	public void swatchUpdated() {
+		update(getDatasets());
 	}
 }

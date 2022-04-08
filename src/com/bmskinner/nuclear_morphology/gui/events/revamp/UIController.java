@@ -28,6 +28,8 @@ public class UIController {
 
 	private final List<ScaleUpdatedListener> scaleListeners = new ArrayList<>();
 
+	private final List<SwatchUpdatedListener> swatchListeners = new ArrayList<>();
+
 	private final List<DatasetSelectionUpdatedListener> datasetSelectionListeners = new ArrayList<>();
 
 	private final List<DatasetAddedListener> datasetAddedListeners = new ArrayList<>();
@@ -98,6 +100,15 @@ public class UIController {
 	public void fireScaleUpdated() {
 		for (ScaleUpdatedListener l : scaleListeners)
 			l.scaleUpdated();
+	}
+
+	public void addSwatchUpdatedListener(SwatchUpdatedListener l) {
+		swatchListeners.add(l);
+	}
+
+	public void fireSwatchUpdated() {
+		for (SwatchUpdatedListener l : swatchListeners)
+			l.swatchUpdated();
 	}
 
 	public void addDatasetSelectionUpdatedListener(DatasetSelectionUpdatedListener l) {

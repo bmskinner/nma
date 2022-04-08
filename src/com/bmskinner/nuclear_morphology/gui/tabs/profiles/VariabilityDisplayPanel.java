@@ -41,6 +41,7 @@ import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOp
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileMarkersOptionsPanel;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileTypeOptionsPanel;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.ProfilesUpdatedListener;
+import com.bmskinner.nuclear_morphology.gui.events.revamp.SwatchUpdatedListener;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.SignificanceTest;
@@ -57,7 +58,7 @@ import com.bmskinner.nuclear_morphology.visualisation.options.ChartOptionsBuilde
  *
  */
 @SuppressWarnings("serial")
-public class VariabilityDisplayPanel extends DetailPanel implements ProfilesUpdatedListener {
+public class VariabilityDisplayPanel extends DetailPanel implements ProfilesUpdatedListener, SwatchUpdatedListener {
 
 	private static final Logger LOGGER = Logger.getLogger(VariabilityDisplayPanel.class.getName());
 
@@ -111,6 +112,7 @@ public class VariabilityDisplayPanel extends DetailPanel implements ProfilesUpda
 		this.add(buttonPanel, BorderLayout.NORTH);
 
 		uiController.addProfilesUpdatedListener(this);
+		uiController.addSwatchUpdatedListener(this);
 	}
 
 	@Override
@@ -186,6 +188,11 @@ public class VariabilityDisplayPanel extends DetailPanel implements ProfilesUpda
 	@Override
 	public void profilesUpdated(IAnalysisDataset dataset) {
 		refreshChartCache(dataset);
+	}
+
+	@Override
+	public void swatchUpdated() {
+		update(getDatasets());
 	}
 
 }

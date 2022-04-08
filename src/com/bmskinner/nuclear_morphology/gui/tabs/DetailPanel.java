@@ -136,6 +136,7 @@ public abstract class DetailPanel extends JPanel
 
 		uiController = UIController.getInstance();
 		uiController.addDatasetSelectionUpdatedListener(this);
+
 	}
 
 	/**
@@ -320,32 +321,14 @@ public abstract class DetailPanel extends JPanel
 	public synchronized void update() {
 
 		setUpdating(true);
-
-//		for (TabPanel t : this.getSubPanels()) {
-//			t.update();
-//		}
 		List<IAnalysisDataset> list = DatasetListManager.getInstance().getSelectedDatasets();
 		updateDetail(list);
 
 	}
 
-	/**
-	 * Update with the given dataset.
-	 * 
-	 * @param d
-	 */
-//	protected synchronized void update(final IAnalysisDataset d) {
-//		List<IAnalysisDataset> list = new ArrayList<>();
-//		list.add(d);
-//		update(list);
-//	}
-
 	@Override
 	public synchronized void update(final List<IAnalysisDataset> list) {
-
 		setUpdating(true);
-//		for (TabPanel t : this.getSubPanels())
-//			t.update(list);
 		updateDetail(list);
 	}
 

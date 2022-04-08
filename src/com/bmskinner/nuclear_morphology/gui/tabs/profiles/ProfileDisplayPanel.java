@@ -104,4 +104,9 @@ public class ProfileDisplayPanel extends AbstractProfileDisplayPanel {
 	public void profilesUpdated(IAnalysisDataset dataset) {
 		refreshChartCache(dataset);
 	}
+
+	@Override
+	public void swatchUpdated() {
+		update(getDatasets());
+	}
 }

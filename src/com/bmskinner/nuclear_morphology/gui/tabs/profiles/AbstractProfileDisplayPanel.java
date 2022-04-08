@@ -36,6 +36,7 @@ import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOptionsPanel;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileMarkersOptionsPanel;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.ProfilesUpdatedListener;
+import com.bmskinner.nuclear_morphology.gui.events.revamp.SwatchUpdatedListener;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 import com.bmskinner.nuclear_morphology.visualisation.charts.AbstractChartFactory;
 import com.bmskinner.nuclear_morphology.visualisation.charts.MorphologyChartFactory;
@@ -43,7 +44,7 @@ import com.bmskinner.nuclear_morphology.visualisation.charts.panels.ExportableCh
 
 @SuppressWarnings("serial")
 public abstract class AbstractProfileDisplayPanel extends DetailPanel
-		implements ActionListener, ProfilesUpdatedListener {
+		implements ActionListener, ProfilesUpdatedListener, SwatchUpdatedListener {
 
 	Dimension minimumChartSize = new Dimension(50, 100);
 	Dimension preferredChartSize = new Dimension(400, 300);
@@ -82,6 +83,7 @@ public abstract class AbstractProfileDisplayPanel extends DetailPanel
 
 		this.add(buttonPanel, BorderLayout.NORTH);
 		uiController.addProfilesUpdatedListener(this);
+		uiController.addSwatchUpdatedListener(this);
 	}
 
 	@Override

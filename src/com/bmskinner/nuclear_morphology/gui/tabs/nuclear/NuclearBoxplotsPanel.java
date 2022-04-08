@@ -31,6 +31,7 @@ import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.ScaleUpdatedListener;
+import com.bmskinner.nuclear_morphology.gui.events.revamp.SwatchUpdatedListener;
 import com.bmskinner.nuclear_morphology.gui.tabs.BoxplotsTabPanel;
 import com.bmskinner.nuclear_morphology.visualisation.charts.AbstractChartFactory;
 import com.bmskinner.nuclear_morphology.visualisation.charts.panels.ExportableChartPanel;
@@ -39,7 +40,7 @@ import com.bmskinner.nuclear_morphology.visualisation.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.visualisation.options.ChartOptionsBuilder;
 
 @SuppressWarnings("serial")
-public class NuclearBoxplotsPanel extends BoxplotsTabPanel implements ScaleUpdatedListener {
+public class NuclearBoxplotsPanel extends BoxplotsTabPanel implements ScaleUpdatedListener, SwatchUpdatedListener {
 
 	private static final Logger LOGGER = Logger.getLogger(NuclearBoxplotsPanel.class.getName());
 
@@ -60,6 +61,7 @@ public class NuclearBoxplotsPanel extends BoxplotsTabPanel implements ScaleUpdat
 		this.add(scrollPane, BorderLayout.CENTER);
 
 		uiController.addScaleUpdatedListener(this);
+		uiController.addSwatchUpdatedListener(this);
 	}
 
 	@Override
@@ -124,6 +126,11 @@ public class NuclearBoxplotsPanel extends BoxplotsTabPanel implements ScaleUpdat
 
 	@Override
 	public void scaleUpdated() {
+		update(getDatasets());
+	}
+
+	@Override
+	public void swatchUpdated() {
 		update(getDatasets());
 	}
 

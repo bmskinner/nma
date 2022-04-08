@@ -48,8 +48,6 @@ import com.bmskinner.nuclear_morphology.gui.actions.NewAnalysisAction;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter.ColourSwatch;
 import com.bmskinner.nuclear_morphology.gui.dialogs.VersionHelpDialog;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEventHandler;
-import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
-import com.bmskinner.nuclear_morphology.gui.events.InterfaceEventHandler;
 import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEventHandler;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.UIController;
@@ -97,7 +95,6 @@ public class MainWindowMenuBar extends JMenuBar {
 	private static final String OPEN_CONFIG_FILE_LBL = "Open config file";
 
 	final private SignalChangeEventHandler sh;
-	final private InterfaceEventHandler ih;
 	final private DatasetEventHandler dh;
 	final private MainView mw;
 
@@ -129,9 +126,6 @@ public class MainWindowMenuBar extends JMenuBar {
 		this.mw = mw;
 		sh = new SignalChangeEventHandler(this);
 		sh.addListener(mw.getEventHandler());
-
-		ih = new InterfaceEventHandler(this);
-		ih.addListener(mw.getEventHandler());
 
 		dh = new DatasetEventHandler(this);
 		dh.addListener(mw.getEventHandler());
@@ -215,8 +209,11 @@ public class MainWindowMenuBar extends JMenuBar {
 			if (m.equals(GlobalOptions.getInstance().getScale())) // default config file scale
 				j.setSelected(true);
 			j.addActionListener(e -> {
-				GlobalOptions.getInstance().setScale(m);
-				UIController.getInstance().fireScaleUpdated();
+				Runnable r = () -> {
+					GlobalOptions.getInstance().setScale(m);
+					UIController.getInstance().fireScaleUpdated();
+				};
+				ThreadManager.getInstance().execute(r);
 			});
 			scaleMenu.add(j);
 
@@ -231,28 +228,32 @@ public class MainWindowMenuBar extends JMenuBar {
 			if (c.equals(GlobalOptions.getInstance().getSwatch())) // default config file scale
 				j.setSelected(true);
 			j.addActionListener(e -> {
-				GlobalOptions.getInstance().setSwatch(c);
+				Runnable r = () -> {
+					GlobalOptions.getInstance().setSwatch(c);
+					UIController.getInstance().fireSwatchUpdated();
+				};
+				ThreadManager.getInstance().execute(r);
 			});
 			swatchMenu.add(j);
 
 		}
 		menu.add(swatchMenu);
 
-		JCheckBoxMenuItem fillConsensusItem = new JCheckBoxMenuItem(FILL_CONSENSUS_ITEM_LBL,
-				GlobalOptions.getInstance().isFillConsensus());
-		fillConsensusItem.addActionListener(e -> {
-			GlobalOptions.getInstance().setFillConsensus(fillConsensusItem.isSelected());
-			ih.fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
-		});
-		menu.add(fillConsensusItem);
-
-		JCheckBoxMenuItem antialiasItem = new JCheckBoxMenuItem(ANTIALIAS_ITEM_LBL,
-				GlobalOptions.getInstance().isAntiAlias());
-		fillConsensusItem.addActionListener(e -> {
-			GlobalOptions.getInstance().setAntiAlias(antialiasItem.isSelected());
-			ih.fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
-		});
-		menu.add(antialiasItem);
+//		JCheckBoxMenuItem fillConsensusItem = new JCheckBoxMenuItem(FILL_CONSENSUS_ITEM_LBL,
+//				GlobalOptions.getInstance().isFillConsensus());
+//		fillConsensusItem.addActionListener(e -> {
+//			GlobalOptions.getInstance().setFillConsensus(fillConsensusItem.isSelected());
+//			ih.fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
+//		});
+//		menu.add(fillConsensusItem);
+//
+//		JCheckBoxMenuItem antialiasItem = new JCheckBoxMenuItem(ANTIALIAS_ITEM_LBL,
+//				GlobalOptions.getInstance().isAntiAlias());
+//		fillConsensusItem.addActionListener(e -> {
+//			GlobalOptions.getInstance().setAntiAlias(antialiasItem.isSelected());
+//			ih.fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
+//		});
+//		menu.add(antialiasItem);
 
 		JCheckBoxMenuItem monitorItem = new JCheckBoxMenuItem(TASK_MONITOR_ITEM_LBL, false);
 		monitorItem.addActionListener(e -> monitorPanel.setVisible(!monitorPanel.isVisible()));

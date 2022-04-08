@@ -32,7 +32,6 @@ public class SignalScatterChartPanel extends AbstractScatterChartPanel implement
 	public SignalScatterChartPanel(@NonNull InputSupplier context) {
 		super(context, CellularComponent.NUCLEAR_SIGNAL);
 		uiController.addNuclearSignalUpdatedListener(this);
-
 	}
 
 	@Override
@@ -57,6 +56,11 @@ public class SignalScatterChartPanel extends AbstractScatterChartPanel implement
 
 	@Override
 	public void scaleUpdated() {
+		update(getDatasets());
+	}
+
+	@Override
+	public void swatchUpdated() {
 		update(getDatasets());
 	}
 

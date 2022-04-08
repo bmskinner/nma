@@ -52,6 +52,7 @@ import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledExcep
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 import com.bmskinner.nuclear_morphology.gui.components.panels.WrappedLabel;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.ScaleUpdatedListener;
+import com.bmskinner.nuclear_morphology.gui.events.revamp.SwatchUpdatedListener;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.visualisation.charts.AbstractChartFactory;
 import com.bmskinner.nuclear_morphology.visualisation.charts.ScatterChartFactory;
@@ -72,7 +73,8 @@ import com.bmskinner.nuclear_morphology.visualisation.options.TableOptionsBuilde
  *
  */
 @SuppressWarnings("serial")
-public abstract class AbstractScatterChartPanel extends DetailPanel implements ScaleUpdatedListener {
+public abstract class AbstractScatterChartPanel extends DetailPanel
+		implements ScaleUpdatedListener, SwatchUpdatedListener {
 
 	private static final Logger LOGGER = Logger.getLogger(AbstractScatterChartPanel.class.getName());
 
@@ -115,6 +117,7 @@ public abstract class AbstractScatterChartPanel extends DetailPanel implements S
 		add(createWestPanel(), BorderLayout.WEST);
 
 		uiController.addScaleUpdatedListener(this);
+		uiController.addSwatchUpdatedListener(this);
 	}
 
 	@Override

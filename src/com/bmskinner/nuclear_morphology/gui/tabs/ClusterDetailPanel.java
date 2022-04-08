@@ -157,7 +157,6 @@ public class ClusterDetailPanel extends DetailPanel {
 					Runnable r = () -> {
 						ClusterTreeDialog clusterPanel = new ClusterTreeDialog(d, group);
 						clusterPanel.addDatasetEventListener(ClusterDetailPanel.this);
-						clusterPanel.addInterfaceEventListener(ClusterDetailPanel.this);
 					};
 					new Thread(r).start();
 				}
@@ -167,7 +166,6 @@ public class ClusterDetailPanel extends DetailPanel {
 					Runnable r = () -> {
 						TsneDialog tsneDialog = new TsneDialog(d, group);
 						tsneDialog.addDatasetEventListener(ClusterDetailPanel.this);
-						tsneDialog.addInterfaceEventListener(ClusterDetailPanel.this);
 					};
 					new Thread(r).start();
 				}

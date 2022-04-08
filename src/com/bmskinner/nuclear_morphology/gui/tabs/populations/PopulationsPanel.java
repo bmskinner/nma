@@ -47,6 +47,7 @@ import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.DatasetAddedListener;
+import com.bmskinner.nuclear_morphology.gui.events.revamp.SwatchUpdatedListener;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -58,7 +59,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  *
  */
 @SuppressWarnings("serial")
-public class PopulationsPanel extends DetailPanel implements DatasetAddedListener {
+public class PopulationsPanel extends DetailPanel implements DatasetAddedListener, SwatchUpdatedListener {
 
 	private static final Logger LOGGER = Logger.getLogger(PopulationsPanel.class.getName());
 
@@ -122,6 +123,7 @@ public class PopulationsPanel extends DetailPanel implements DatasetAddedListene
 		this.add(populationScrollPane, BorderLayout.CENTER);
 
 		uiController.addDatasetAddedListener(this);
+		uiController.addSwatchUpdatedListener(this);
 	}
 
 	@Override
@@ -528,5 +530,10 @@ public class PopulationsPanel extends DetailPanel implements DatasetAddedListene
 		update(List.of(last));
 		// This will also trigger a dataset update event as the dataset
 		// is selected, so don't trigger another update here.
+	}
+
+	@Override
+	public void swatchUpdated() {
+		update(getDatasets());
 	}
 }

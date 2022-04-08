@@ -36,151 +36,156 @@ import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 
 /**
  * Run segmentation on the given datasets
+ * 
  * @author ben
  *
  */
 public class RunSegmentationAction extends SingleDatasetResultAction {
-	
+
 	private static final Logger LOGGER = Logger.getLogger(RunSegmentationAction.class.getName());
 
-    private MorphologyAnalysisMode mode = MorphologyAnalysisMode.NEW;
+	private MorphologyAnalysisMode mode = MorphologyAnalysisMode.NEW;
 
-    private static final String PROGRESS_LBL = "Segmentation analysis";
-    private IAnalysisDataset    source       = null;
+	private static final String PROGRESS_LBL = "Segmentation analysis";
+	private IAnalysisDataset source = null;
 
+	/**
+	 * Carry out a segmentation on a dataset
+	 * 
+	 * @param dataset  the dataset to work on
+	 * @param mode     the type of morphology analysis to carry out
+	 * @param downFlag the next analyses to perform
+	 */
+	public RunSegmentationAction(IAnalysisDataset dataset, MorphologyAnalysisMode mode, int downFlag,
+			@NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh, CountDownLatch latch) {
+		super(dataset, PROGRESS_LBL, acceptor, eh, downFlag);
+		this.mode = mode;
+		setLatch(latch);
+	}
 
-    /**
-     * Carry out a segmentation on a dataset
-     * 
-     * @param dataset the dataset to work on
-     * @param mode the type of morphology analysis to carry out
-     * @param downFlag the next analyses to perform
-     */
-    public RunSegmentationAction(IAnalysisDataset dataset, MorphologyAnalysisMode mode, int downFlag, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh,
-            CountDownLatch latch) {
-        super(dataset, PROGRESS_LBL, acceptor, eh, downFlag);
-        this.mode = mode;
-        setLatch(latch);
-    }
+	public RunSegmentationAction(List<IAnalysisDataset> list, MorphologyAnalysisMode mode, int downFlag,
+			@NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh) {
+		super(list, PROGRESS_LBL, acceptor, eh, downFlag);
+		this.mode = mode;
+	}
 
-    public RunSegmentationAction(List<IAnalysisDataset> list, MorphologyAnalysisMode mode, int downFlag,
-    		@NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh) {
-        super(list, PROGRESS_LBL, acceptor, eh, downFlag);
-        this.mode = mode;
-    }
-    
-    public RunSegmentationAction(List<IAnalysisDataset> list, MorphologyAnalysisMode mode, int downFlag,
-    		@NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh, CountDownLatch latch) {
-        super(list, PROGRESS_LBL, acceptor, eh, downFlag);
-        this.mode = mode;
-        setLatch(latch);
-    }
+	public RunSegmentationAction(List<IAnalysisDataset> list, MorphologyAnalysisMode mode, int downFlag,
+			@NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh, CountDownLatch latch) {
+		super(list, PROGRESS_LBL, acceptor, eh, downFlag);
+		this.mode = mode;
+		setLatch(latch);
+	}
 
-    public RunSegmentationAction(IAnalysisDataset dataset, IAnalysisDataset source, int downFlag, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh,
-            CountDownLatch latch) {
-        super(dataset, "Copying morphology to " + dataset.getName(), acceptor, eh);
-        this.downFlag = downFlag;
-        setLatch(latch);
-        this.mode = MorphologyAnalysisMode.COPY;
-        this.source = source;
-    }
+	public RunSegmentationAction(IAnalysisDataset dataset, IAnalysisDataset source, int downFlag,
+			@NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh, CountDownLatch latch) {
+		super(dataset, "Copying morphology to " + dataset.getName(), acceptor, eh);
+		this.downFlag = downFlag;
+		setLatch(latch);
+		this.mode = MorphologyAnalysisMode.COPY;
+		this.source = source;
+	}
 
-    /**
-     * Copy the morphology information from the source dataset to each dataset
-     * in a list
-     * 
-     * @param list
-     * @param source
-     */
-    public RunSegmentationAction(List<IAnalysisDataset> list, IAnalysisDataset source, int downFlag,
-    		@NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh, CountDownLatch latch) {
-        super(list, PROGRESS_LBL, acceptor, eh);
-        this.downFlag = downFlag;
-        this.mode = MorphologyAnalysisMode.COPY;
-        this.source = source;
-        setLatch(latch);
-    }
+	/**
+	 * Copy the morphology information from the source dataset to each dataset in a
+	 * list
+	 * 
+	 * @param list
+	 * @param source
+	 */
+	public RunSegmentationAction(List<IAnalysisDataset> list, IAnalysisDataset source, int downFlag,
+			@NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh, CountDownLatch latch) {
+		super(list, PROGRESS_LBL, acceptor, eh);
+		this.downFlag = downFlag;
+		this.mode = MorphologyAnalysisMode.COPY;
+		this.source = source;
+		setLatch(latch);
+	}
 
-    @Override
-    public void run() {
-        setProgressBarIndeterminate();
-        switch (mode) {
-	        case COPY:    runCopyAnalysis(); return;
-	        case NEW:
-	        default:      runNewAnalysis(); return;
-        }
-    }
+	@Override
+	public void run() {
+		setProgressBarIndeterminate();
+		switch (mode) {
+		case COPY:
+			runCopyAnalysis();
+			return;
+		case NEW:
+		default:
+			runNewAnalysis();
+			return;
+		}
+	}
 
-    private void runCopyAnalysis() {
+	private void runCopyAnalysis() {
 
-        setProgressMessage("Copying segmentation");
+		setProgressMessage("Copying segmentation");
 		try {
 			IAnalysisMethod m = new DatasetSegmentationMethod(dataset, source.getCollection());
 			worker = new DefaultAnalysisWorker(m);
-	        worker.addPropertyChangeListener(this);
-	        ThreadManager.getInstance().submit(worker);
+			worker.addPropertyChangeListener(this);
+			ThreadManager.getInstance().submit(worker);
 		} catch (AnalysisMethodException e) {
 			LOGGER.warning(e.getMessage());
 			finished();
 		}
-        
-    }
 
-    private void runNewAnalysis() {
-    	runAnalysis("Segmenting: " + dataset.getName());
-    }
-    
-    private void runAnalysis(String message){
-    	setProgressMessage(message);
-    	try {
-    		IAnalysisMethod m = new DatasetSegmentationMethod(dataset, mode);
-    		worker = new DefaultAnalysisWorker(m);
-    		worker.addPropertyChangeListener(this);
-    		ThreadManager.getInstance().submit(worker);
-    	} catch (AnalysisMethodException e) {
-    		LOGGER.warning(e.getMessage());
-    		finished();
-    	}
-    }
+	}
 
-    @Override
-    public void finished() {
+	private void runNewAnalysis() {
+		runAnalysis("Segmenting: " + dataset.getName());
+	}
 
-        // ensure the progress bar gets hidden even if it is not removed
-        setProgressBarVisible(false);
-        
-        List<IAnalysisDataset> datasetsToUpdate = new ArrayList<>();
-        datasetsToUpdate.add(dataset);
-        datasetsToUpdate.addAll( dataset.getAllChildDatasets());
-        getDatasetEventHandler().fireDatasetEvent(DatasetEvent.CLEAR_CACHE, datasetsToUpdate);
+	private void runAnalysis(String message) {
+		setProgressMessage(message);
+		try {
+			IAnalysisMethod m = new DatasetSegmentationMethod(dataset, mode);
+			worker = new DefaultAnalysisWorker(m);
+			worker.addPropertyChangeListener(this);
+			ThreadManager.getInstance().submit(worker);
+		} catch (AnalysisMethodException e) {
+			LOGGER.warning(e.getMessage());
+			finished();
+		}
+	}
 
-        Thread thr = new Thread() {
-        	@Override
-            public void run() {
-        		
-                // if no list was provided, or no more entries remain,
-                // call the finish
-                if (!hasRemainingDatasetsToProcess()) {
-                    countdownLatch();
-                    getDatasetEventHandler().fireDatasetEvent(DatasetEvent.SELECT_ONE_DATASET, dataset);
-                    getInterfaceEventHandler().removeListener(eh);
-                    getDatasetEventHandler().removeListener(eh);
-                    RunSegmentationAction.super.finished();
+	@Override
+	public void finished() {
 
-                } else {
+		// ensure the progress bar gets hidden even if it is not removed
+		setProgressBarVisible(false);
 
-                    // otherwise analyse the next item in the list
-                    cancel(); // remove progress bar
+		List<IAnalysisDataset> datasetsToUpdate = new ArrayList<>();
+		datasetsToUpdate.add(dataset);
+		datasetsToUpdate.addAll(dataset.getAllChildDatasets());
+		getDatasetEventHandler().fireDatasetEvent(DatasetEvent.CLEAR_CACHE, datasetsToUpdate);
 
-                    Runnable task = mode.equals(MorphologyAnalysisMode.COPY)
-                            ? new RunSegmentationAction(getRemainingDatasetsToProcess(), source, downFlag, progressAcceptors.get(0), eh, getLatch().get())
-                            : new RunSegmentationAction(getRemainingDatasetsToProcess(), mode, downFlag, progressAcceptors.get(0), eh, getLatch().get());
+		Thread thr = new Thread() {
+			@Override
+			public void run() {
 
-                    task.run();
-                }
-            }
-        };
-        thr.start();
-    }
+				// if no list was provided, or no more entries remain,
+				// call the finish
+				if (!hasRemainingDatasetsToProcess()) {
+					countdownLatch();
+					getDatasetEventHandler().fireDatasetEvent(DatasetEvent.SELECT_ONE_DATASET, dataset);
+					getDatasetEventHandler().removeListener(eh);
+					RunSegmentationAction.super.finished();
+
+				} else {
+
+					// otherwise analyse the next item in the list
+					cancel(); // remove progress bar
+
+					Runnable task = mode.equals(MorphologyAnalysisMode.COPY)
+							? new RunSegmentationAction(getRemainingDatasetsToProcess(), source, downFlag,
+									progressAcceptors.get(0), eh, getLatch().get())
+							: new RunSegmentationAction(getRemainingDatasetsToProcess(), mode, downFlag,
+									progressAcceptors.get(0), eh, getLatch().get());
+
+					task.run();
+				}
+			}
+		};
+		thr.start();
+	}
 
 }

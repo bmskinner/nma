@@ -29,7 +29,7 @@ import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.components.AnnotatedNucleusPanel;
 import com.bmskinner.nuclear_morphology.gui.dialogs.SubAnalysisSetupDialog;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
-import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
+import com.bmskinner.nuclear_morphology.gui.events.revamp.UIController;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 public class ManualClusterAction extends SingleDatasetResultAction {
@@ -62,7 +62,7 @@ public class ManualClusterAction extends SingleDatasetResultAction {
 			// blocks until closed
 			if (mc.isReadyToRun()) {
 				getDatasetEventHandler().fireDatasetEvent(DatasetEvent.SAVE, dataset);
-				getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.REFRESH_POPULATIONS);
+				UIController.getInstance().fireDatasetAdded(dataset);
 			}
 			cancel();
 		} catch (RequestCancelledException e1) {

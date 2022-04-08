@@ -28,6 +28,7 @@ import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
+import com.bmskinner.nuclear_morphology.gui.events.revamp.SwatchUpdatedListener;
 import com.bmskinner.nuclear_morphology.gui.tabs.BoxplotsTabPanel;
 import com.bmskinner.nuclear_morphology.visualisation.charts.AbstractChartFactory;
 import com.bmskinner.nuclear_morphology.visualisation.charts.panels.ExportableChartPanel;
@@ -37,81 +38,85 @@ import com.bmskinner.nuclear_morphology.visualisation.options.ChartOptionsBuilde
 
 /**
  * Display GLCM values measured for nuclei
+ * 
  * @author Ben Skinner
  * @since 1.18.0
  *
  */
 @SuppressWarnings("serial")
-public class NuclearGlcmPanel extends BoxplotsTabPanel {
-	
+public class NuclearGlcmPanel extends BoxplotsTabPanel implements SwatchUpdatedListener {
+
 	private static final Logger LOGGER = Logger.getLogger(NuclearGlcmPanel.class.getName());
 	private static final String PANEL_TITLE_LBL = "GLCM";
-	
+
 	public NuclearGlcmPanel(@NonNull InputSupplier context) {
-        super(context, CellularComponent.NUCLEUS, PANEL_TITLE_LBL);
+		super(context, CellularComponent.NUCLEUS, PANEL_TITLE_LBL);
 
-        Dimension preferredSize = new Dimension(200, 300);
-        
-        for (Measurement stat : Measurement.getGlcmStats()) {
+		Dimension preferredSize = new Dimension(200, 300);
 
-        	JFreeChart chart = AbstractChartFactory.createEmptyChart();
-            ViolinChartPanel panel = new ViolinChartPanel(chart);
-            panel.getChartRenderingInfo().setEntityCollection(null);
-            panel.setPreferredSize(preferredSize);
-            chartPanels.put(stat.toString(), panel);
-            mainPanel.add(panel);
-        }        
-        this.add(scrollPane, BorderLayout.CENTER);
-    }
+		for (Measurement stat : Measurement.getGlcmStats()) {
 
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        update(getDatasets());
-    }
+			JFreeChart chart = AbstractChartFactory.createEmptyChart();
+			ViolinChartPanel panel = new ViolinChartPanel(chart);
+			panel.getChartRenderingInfo().setEntityCollection(null);
+			panel.setPreferredSize(preferredSize);
+			chartPanels.put(stat.toString(), panel);
+			mainPanel.add(panel);
+		}
+		this.add(scrollPane, BorderLayout.CENTER);
+		uiController.addSwatchUpdatedListener(this);
+	}
 
-    @Override
-    protected synchronized void updateSingle() {
-        super.updateSingle();
-        LOGGER.finest( "Passing to update multiple in " + this.getClass().getName());
-        updateMultiple();
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		update(getDatasets());
+	}
 
-    }
+	@Override
+	protected synchronized void updateSingle() {
+		super.updateSingle();
+		LOGGER.finest("Passing to update multiple in " + this.getClass().getName());
+		updateMultiple();
 
-    @Override
-    protected synchronized void updateMultiple() {
-        super.updateMultiple();
+	}
 
-        for (Measurement stat : Measurement.getGlcmStats()) {
+	@Override
+	protected synchronized void updateMultiple() {
+		super.updateMultiple();
 
-            ExportableChartPanel panel = chartPanels.get(stat.toString());
+		for (Measurement stat : Measurement.getGlcmStats()) {
 
-            ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets())
-            		.addStatistic(stat)
-                    .setScale(GlobalOptions.getInstance().getScale())
-                    .setSwatch(GlobalOptions.getInstance().getSwatch())
-                    .setTarget(panel).build();
+			ExportableChartPanel panel = chartPanels.get(stat.toString());
 
-            setChart(options);
-        }
+			ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets()).addStatistic(stat)
+					.setScale(GlobalOptions.getInstance().getScale()).setSwatch(GlobalOptions.getInstance().getSwatch())
+					.setTarget(panel).build();
 
-    }
+			setChart(options);
+		}
 
-    @Override
-    protected synchronized void updateNull() {
-        super.updateNull();
-        LOGGER.finest( "Passing to update multiple in " + this.getClass().getName());
-        updateMultiple();
-    }
+	}
 
-    @Override
-    public synchronized void setChartsAndTablesLoading() {
-        super.setChartsAndTablesLoading();
+	@Override
+	protected synchronized void updateNull() {
+		super.updateNull();
+		LOGGER.finest("Passing to update multiple in " + this.getClass().getName());
+		updateMultiple();
+	}
 
-        for (Measurement stat : Measurement.getGlcmStats()) {
-            ExportableChartPanel panel = chartPanels.get(stat.toString());
-            panel.setChart(AbstractChartFactory.createLoadingChart());
+	@Override
+	public synchronized void setChartsAndTablesLoading() {
+		super.setChartsAndTablesLoading();
 
-        }
-    }
+		for (Measurement stat : Measurement.getGlcmStats()) {
+			ExportableChartPanel panel = chartPanels.get(stat.toString());
+			panel.setChart(AbstractChartFactory.createLoadingChart());
 
+		}
+	}
+
+	@Override
+	public void swatchUpdated() {
+		update(getDatasets());
+	}
 }

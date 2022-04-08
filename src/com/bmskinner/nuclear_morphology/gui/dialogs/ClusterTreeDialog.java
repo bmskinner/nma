@@ -65,7 +65,7 @@ import com.bmskinner.nuclear_morphology.gui.components.DraggableTreeViewer;
 import com.bmskinner.nuclear_morphology.gui.components.VariableNodePainter;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ClusterGroupSelectionPanel;
 import com.bmskinner.nuclear_morphology.gui.components.panels.DatasetSelectionPanel;
-import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
+import com.bmskinner.nuclear_morphology.gui.events.revamp.UIController;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import jebl.evolution.graphs.Node;
@@ -82,582 +82,580 @@ import jebl.gui.trees.treeviewer.painters.BasicLabelPainter.PainterIntent;
 
 /**
  * Display hierarchical clustering trees and apply colours based on clusters.
+ * 
  * @author bms41
  *
  */
 @SuppressWarnings("serial")
 public class ClusterTreeDialog extends MessagingDialog {
-	
+
 	private static final Logger LOGGER = Logger.getLogger(ClusterTreeDialog.class.getName());
-    
-    private static final String ANALYSE_LBL = "Analyse new clusters";
-    private static final String SHOW_MGE_SRC_LBL = "Show merge sources";
-    private static final String EXTRACT_LBL = "Extract selected as cluster";
-    private static final String COPY_NEWICK_LBL = "Copy Newick";
 
-    private JPanel              buttonPanel;
-    private DraggableTreeViewer viewer;
-    private IAnalysisDataset    dataset;
-    private IClusterGroup       group;
+	private static final String ANALYSE_LBL = "Analyse new clusters";
+	private static final String SHOW_MGE_SRC_LBL = "Show merge sources";
+	private static final String EXTRACT_LBL = "Extract selected as cluster";
+	private static final String COPY_NEWICK_LBL = "Copy Newick";
 
-    private DatasetSelectionPanel selectedClusterBox;
-    private ClusterGroupSelectionPanel selectedClusterGroupBox;
+	private JPanel buttonPanel;
+	private DraggableTreeViewer viewer;
+	private IAnalysisDataset dataset;
+	private IClusterGroup group;
 
-    private List<ICellCollection> clusterList = new ArrayList<>(0);
+	private DatasetSelectionPanel selectedClusterBox;
+	private ClusterGroupSelectionPanel selectedClusterGroupBox;
 
-    public ClusterTreeDialog(final IAnalysisDataset dataset, final IClusterGroup group) {
-        super();
-        this.dataset = dataset;
-        this.group = group;
+	private List<ICellCollection> clusterList = new ArrayList<>(0);
 
-        try {
+	public ClusterTreeDialog(final IAnalysisDataset dataset, final IClusterGroup group) {
+		super();
+		this.dataset = dataset;
+		this.group = group;
 
-            this.setLayout(new BorderLayout());
-            this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-            this.viewer = new DraggableTreeViewer(
-                    new BasicControlPalette(0, BasicControlPalette.DisplayMode.INITIALLY_CLOSED, true),
-                    SwingConstants.LEFT);
+		try {
 
-            viewer.addMouseListener(new MouseClusterSelectionAdapter());
+			this.setLayout(new BorderLayout());
+			this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+			this.viewer = new DraggableTreeViewer(
+					new BasicControlPalette(0, BasicControlPalette.DisplayMode.INITIALLY_CLOSED, true),
+					SwingConstants.LEFT);
 
-            this.add(viewer, BorderLayout.CENTER);
+			viewer.addMouseListener(new MouseClusterSelectionAdapter());
 
-            this.buttonPanel = createButtonPanel();
+			this.add(viewer, BorderLayout.CENTER);
 
-            this.add(buttonPanel, BorderLayout.NORTH);
+			this.buttonPanel = createButtonPanel();
 
-            RootedTree r = importTree();
+			this.add(buttonPanel, BorderLayout.NORTH);
 
-            if (r == null) {
-                LOGGER.warning("Unable to import tree");
-                this.dispose();
+			RootedTree r = importTree();
 
-            } else {
-                displayTree(r);
-                this.setModal(false);
-                this.setMinimumSize(new Dimension(500, 500));
-                this.pack();
-                this.setLocationRelativeTo(null);
+			if (r == null) {
+				LOGGER.warning("Unable to import tree");
+				this.dispose();
 
-                this.setVisible(true);
-            }
+			} else {
+				displayTree(r);
+				this.setModal(false);
+				this.setMinimumSize(new Dimension(500, 500));
+				this.pack();
+				this.setLocationRelativeTo(null);
 
-        } catch (Exception e) {
+				this.setVisible(true);
+			}
 
-            LOGGER.log(Level.WARNING, "Error creating tree view");
-            LOGGER.log(Loggable.STACK, "Error creating tree view", e);
-            this.dispose();
-        }
-    }
+		} catch (Exception e) {
 
-    /**
-     * Turn the Newick string in the cluster group into a tree
-     * 
-     * @return
-     */
-    private RootedTree importTree() {
-        RootedTree topTree = null;
-        LOGGER.fine("Reading tree");
-        StringReader reader = new StringReader(group.getTree());
+			LOGGER.log(Level.WARNING, "Error creating tree view");
+			LOGGER.log(Loggable.STACK, "Error creating tree view", e);
+			this.dispose();
+		}
+	}
 
-        boolean readUnquotedLabels = true;
-        NewickImporter imp = new NewickImporter(reader, readUnquotedLabels);
+	/**
+	 * Turn the Newick string in the cluster group into a tree
+	 * 
+	 * @return
+	 */
+	private RootedTree importTree() {
+		RootedTree topTree = null;
+		LOGGER.fine("Reading tree");
+		StringReader reader = new StringReader(group.getTree());
 
-        try {
-            List<Tree> trees = imp.importTrees();
-            topTree = (RootedTree) trees.get(0);
+		boolean readUnquotedLabels = true;
+		NewickImporter imp = new NewickImporter(reader, readUnquotedLabels);
 
-            // Add the cells to the external nodes as attributes
-            // Also set the short names for the nodes
-            for (Node n : topTree.getNodes()) {
+		try {
+			List<Tree> trees = imp.importTrees();
+			topTree = (RootedTree) trees.get(0);
 
-                if (topTree.isExternal(n)) { // choose the taxon nodes
+			// Add the cells to the external nodes as attributes
+			// Also set the short names for the nodes
+			for (Node n : topTree.getNodes()) {
 
-                    Taxon t = topTree.getTaxon(n);
-                    ICell c = getCell(t).get();
-                    t.setAttribute("Cell", c);
-                    n.setAttribute("ShortName",
-                            c.getPrimaryNucleus().getSourceFolder().getName() + "/" + c.getPrimaryNucleus().getNameAndNumber());
-                }
-            }
-        } catch (IOException e) {
-        	LOGGER.log(Level.WARNING, "Unable to display tree: Error reading data");
-        	LOGGER.log(Loggable.STACK, "Error reading tree", e);
-        } catch (DuplicateTaxaException e) {
-        	LOGGER.log(Level.WARNING, "Unable to display tree: duplicate taxon names");
-        	LOGGER.log(Loggable.STACK, "Duplicate taxon names", e);
-        } catch (ImportException e) {
-        	LOGGER.log(Level.WARNING, "Unable to display tree: error importing newick tree");
-        	LOGGER.log(Loggable.STACK, "Error in tree IO", e);
-        }
-        return topTree;
-    }
+				if (topTree.isExternal(n)) { // choose the taxon nodes
 
-    /**
-     * Set the display options for the given tree
-     */
-    private void displayTree(RootedTree tree) {
+					Taxon t = topTree.getTaxon(n);
+					ICell c = getCell(t).get();
+					t.setAttribute("Cell", c);
+					n.setAttribute("ShortName", c.getPrimaryNucleus().getSourceFolder().getName() + "/"
+							+ c.getPrimaryNucleus().getNameAndNumber());
+				}
+			}
+		} catch (IOException e) {
+			LOGGER.log(Level.WARNING, "Unable to display tree: Error reading data");
+			LOGGER.log(Loggable.STACK, "Error reading tree", e);
+		} catch (DuplicateTaxaException e) {
+			LOGGER.log(Level.WARNING, "Unable to display tree: duplicate taxon names");
+			LOGGER.log(Loggable.STACK, "Duplicate taxon names", e);
+		} catch (ImportException e) {
+			LOGGER.log(Level.WARNING, "Unable to display tree: error importing newick tree");
+			LOGGER.log(Loggable.STACK, "Error in tree IO", e);
+		}
+		return topTree;
+	}
 
-        int numTaxa = tree.getTaxa().size();
-        LOGGER.fine("Tree has " + numTaxa + " taxa");
+	/**
+	 * Set the display options for the given tree
+	 */
+	private void displayTree(RootedTree tree) {
 
-        viewer.setTree(tree);
+		int numTaxa = tree.getTaxa().size();
+		LOGGER.fine("Tree has " + numTaxa + " taxa");
 
-        viewer.setSelectionMode(SelectionMode.CLADE);
-        viewer.setTreeLayoutType(TreeLayoutType.RECTILINEAR);
-        viewer.getTreePane().setBranchTransform(true, TransformedRootedTree.Transform.PROPORTIONAL);
-        viewer.getTreePane().setBranchLineWeight(2f);
+		viewer.setTree(tree);
 
-        colourTreeNodesByClusterGroup(group);
+		viewer.setSelectionMode(SelectionMode.CLADE);
+		viewer.setTreeLayoutType(TreeLayoutType.RECTILINEAR);
+		viewer.getTreePane().setBranchTransform(true, TransformedRootedTree.Transform.PROPORTIONAL);
+		viewer.getTreePane().setBranchLineWeight(2f);
 
-        this.setTitle(dataset.getName() + " : " + group.getName() + " : " + numTaxa + " taxa");
-    }
+		colourTreeNodesByClusterGroup(group);
 
-    /**
-     * Fetch the cell from the active dataset that matches the given taxon from
-     * a tree. The match is based on the cell image path.
-     * 
-     * @param t
-     * @return
-     */
-    private Optional<ICell> getCell(Taxon t) {
+		this.setTitle(dataset.getName() + " : " + group.getName() + " : " + numTaxa + " taxa");
+	}
 
-        // Check if the taxon name is a UUID, as the tree format is changing for
-        // 1.13.2
-        // 4ca18dcd-7f5c-4443-89bc-c705435c30f7
+	/**
+	 * Fetch the cell from the active dataset that matches the given taxon from a
+	 * tree. The match is based on the cell image path.
+	 * 
+	 * @param t
+	 * @return
+	 */
+	private Optional<ICell> getCell(Taxon t) {
 
-        boolean isUUID = false;
-        UUID id = null;
-        if (t.getName().length() == 36) {
+		// Check if the taxon name is a UUID, as the tree format is changing for
+		// 1.13.2
+		// 4ca18dcd-7f5c-4443-89bc-c705435c30f7
 
-            try {
-                id = UUID.fromString(t.getName());
-                isUUID = true;
-            } catch (IllegalArgumentException e) {
-                // 36 char String was not a UUID
-            }
-        }
+		boolean isUUID = false;
+		UUID id = null;
+		if (t.getName().length() == 36) {
 
-        if (isUUID && id!=null)
-            return Optional.of(dataset.getCollection().getCell(id));
-		return dataset.getCollection().streamCells()
-		    .filter(c->hasMatchingNucleusName(t.getName(), c))
-		    .findFirst();
-    }
-    
-    private boolean hasMatchingNucleusName(String name, ICell c){
-        return c.getNuclei().stream().anyMatch(n->taxonNamesMatch(name, n));
-    }
+			try {
+				id = UUID.fromString(t.getName());
+				isUUID = true;
+			} catch (IllegalArgumentException e) {
+				// 36 char String was not a UUID
+			}
+		}
 
-    private JPanel createButtonPanel() {
-        JPanel panel = new JPanel(new FlowLayout());
+		if (isUUID && id != null)
+			return Optional.of(dataset.getCollection().getCell(id));
+		return dataset.getCollection().streamCells().filter(c -> hasMatchingNucleusName(t.getName(), c)).findFirst();
+	}
 
-        JButton extractButton = new JButton(EXTRACT_LBL);
-        extractButton.addActionListener(a -> {
-            try {
-                extractSelectedNodesToCluster();
-            } catch (Exception e) {
-                LOGGER.warning("Error extracting cells");
-                LOGGER.log(Loggable.STACK, "Error extracting cells", e);
-            }
-        });
-        panel.add(extractButton);
+	private boolean hasMatchingNucleusName(String name, ICell c) {
+		return c.getNuclei().stream().anyMatch(n -> taxonNamesMatch(name, n));
+	}
 
-        JButton analyseButton = new JButton(ANALYSE_LBL);
-        analyseButton.addActionListener(a -> analyseClusters());
-        panel.add(analyseButton);
+	private JPanel createButtonPanel() {
+		JPanel panel = new JPanel(new FlowLayout());
 
-        if (dataset.hasMergeSources()) {
-            JButton mergeSourceButton = new JButton(SHOW_MGE_SRC_LBL);
-            mergeSourceButton.addActionListener(a -> showMergeSources());
-            panel.add(mergeSourceButton);
-        }
+		JButton extractButton = new JButton(EXTRACT_LBL);
+		extractButton.addActionListener(a -> {
+			try {
+				extractSelectedNodesToCluster();
+			} catch (Exception e) {
+				LOGGER.warning("Error extracting cells");
+				LOGGER.log(Loggable.STACK, "Error extracting cells", e);
+			}
+		});
+		panel.add(extractButton);
 
-        List<IAnalysisDataset> l = dataset.getAllChildDatasets();
-        l.add(0, dataset);
-        selectedClusterBox = new DatasetSelectionPanel(l);
-        selectedClusterBox.setSelectionNull();
-        selectedClusterBox.addActionListener(e -> {
-            selectedClusterGroupBox.setSelectionNull();
-            colourTreeNodesByCluster(selectedClusterBox.getSelectedDataset().getCollection());
-        });
-        panel.add(selectedClusterBox);
-        
-        selectedClusterGroupBox = new ClusterGroupSelectionPanel(dataset.getClusterGroups());
-        selectedClusterGroupBox.setSelectedGroup(group);
-        selectedClusterGroupBox.addActionListener(e->{
-            selectedClusterBox.setSelectionNull();
-            colourTreeNodesByClusterGroup(selectedClusterGroupBox.getSelectedItem());
-        });
-        panel.add(selectedClusterGroupBox);
-       
-        JButton copyNewickButton = new JButton(COPY_NEWICK_LBL);
-        copyNewickButton.addActionListener(a -> {
-        	StringSelection stringSelection = new StringSelection(group.getTree());
-        	Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-        	clipboard.setContents(stringSelection, null);
-         LOGGER.info("Copied Newick tree for cluster "+group.getName());
-        });
-        panel.add(copyNewickButton);
-        return panel;
-    }
+		JButton analyseButton = new JButton(ANALYSE_LBL);
+		analyseButton.addActionListener(a -> analyseClusters());
+		panel.add(analyseButton);
 
-    private void updateNodePainter() {
-        VariableNodePainter painter = new VariableNodePainter("Cluster", viewer.getTreePane().getTree(),
-                PainterIntent.TIP);
-        painter.setBorder(Color.BLACK, new BasicStroke(2f));
-        viewer.getTreePane().setTaxonLabelPainter(painter);
-    }
+		if (dataset.hasMergeSources()) {
+			JButton mergeSourceButton = new JButton(SHOW_MGE_SRC_LBL);
+			mergeSourceButton.addActionListener(a -> showMergeSources());
+			panel.add(mergeSourceButton);
+		}
 
-    /**
-     * Update the taxon colours to match their cluster
-     * 
-     * @param cluster
-     *            the dataset of nuclei in the cluster
-     */
-    private void colourTreeNodesByCluster(final ICellCollection cluster) {
-        // Set everything to grey
-        setNodeColour(dataset.getCollection(), Color.LIGHT_GRAY);
+		List<IAnalysisDataset> l = dataset.getAllChildDatasets();
+		l.add(0, dataset);
+		selectedClusterBox = new DatasetSelectionPanel(l);
+		selectedClusterBox.setSelectionNull();
+		selectedClusterBox.addActionListener(e -> {
+			selectedClusterGroupBox.setSelectionNull();
+			colourTreeNodesByCluster(selectedClusterBox.getSelectedDataset().getCollection());
+		});
+		panel.add(selectedClusterBox);
 
-        if (cluster != null) {
-            // Set the cluster colour
-            setNodeColour(cluster, Color.BLACK);
-        }
-        updateNodePainter();
-    }
+		selectedClusterGroupBox = new ClusterGroupSelectionPanel(dataset.getClusterGroups());
+		selectedClusterGroupBox.setSelectedGroup(group);
+		selectedClusterGroupBox.addActionListener(e -> {
+			selectedClusterBox.setSelectionNull();
+			colourTreeNodesByClusterGroup(selectedClusterGroupBox.getSelectedItem());
+		});
+		panel.add(selectedClusterGroupBox);
 
-    private void colourTreeNodesByClusterGroup(final IClusterGroup group) {
+		JButton copyNewickButton = new JButton(COPY_NEWICK_LBL);
+		copyNewickButton.addActionListener(a -> {
+			StringSelection stringSelection = new StringSelection(group.getTree());
+			Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+			clipboard.setContents(stringSelection, null);
+			LOGGER.info("Copied Newick tree for cluster " + group.getName());
+		});
+		panel.add(copyNewickButton);
+		return panel;
+	}
 
-        if (group != null) {
-        	LOGGER.finer("Colouring nodes by cluster group: " + group.getName());
+	private void updateNodePainter() {
+		VariableNodePainter painter = new VariableNodePainter("Cluster", viewer.getTreePane().getTree(),
+				PainterIntent.TIP);
+		painter.setBorder(Color.BLACK, new BasicStroke(2f));
+		viewer.getTreePane().setTaxonLabelPainter(painter);
+	}
 
-            int clusterNumber = 0;
-            for (UUID id : group.getUUIDs()) {
+	/**
+	 * Update the taxon colours to match their cluster
+	 * 
+	 * @param cluster the dataset of nuclei in the cluster
+	 */
+	private void colourTreeNodesByCluster(final ICellCollection cluster) {
+		// Set everything to grey
+		setNodeColour(dataset.getCollection(), Color.LIGHT_GRAY);
 
-                // Find the appropriate dataset
-                IAnalysisDataset cluster = null;
+		if (cluster != null) {
+			// Set the cluster colour
+			setNodeColour(cluster, Color.BLACK);
+		}
+		updateNodePainter();
+	}
 
-                
-                if (dataset.hasDirectChild(id)) {
+	private void colourTreeNodesByClusterGroup(final IClusterGroup group) {
 
-                    cluster = dataset.getChildDataset(id);
+		if (group != null) {
+			LOGGER.finer("Colouring nodes by cluster group: " + group.getName());
 
-                } else if (dataset.hasMergeSource(id)) {
+			int clusterNumber = 0;
+			for (UUID id : group.getUUIDs()) {
 
-                    cluster = dataset.getMergeSource(id);
-                } else if(dataset.getAllMergeSourceIDs().contains(id)){
-                	cluster = dataset.getMergeSource(id);
-                } else {
-                    // If the cluster was not found, stop
-                    LOGGER.warning("Child dataset not found, cancelling");
-                    return;
-                }
+				// Find the appropriate dataset
+				IAnalysisDataset cluster = null;
 
-                Paint colour = ColourSelecter.getColor(clusterNumber++);
-                setNodeColour(cluster.getCollection(), colour);
+				if (dataset.hasDirectChild(id)) {
 
-                LOGGER.finer("Node colours assigned");
+					cluster = dataset.getChildDataset(id);
 
-            }
+				} else if (dataset.hasMergeSource(id)) {
+
+					cluster = dataset.getMergeSource(id);
+				} else if (dataset.getAllMergeSourceIDs().contains(id)) {
+					cluster = dataset.getMergeSource(id);
+				} else {
+					// If the cluster was not found, stop
+					LOGGER.warning("Child dataset not found, cancelling");
+					return;
+				}
+
+				Paint colour = ColourSelecter.getColor(clusterNumber++);
+				setNodeColour(cluster.getCollection(), colour);
+
+				LOGGER.finer("Node colours assigned");
+
+			}
 //            updateNodePainter();
 
-        } else { // no cluster group, colour everything black
-            setNodeColour(dataset.getCollection(), Color.BLACK);
-        }
-        updateNodePainter();
-    }
+		} else { // no cluster group, colour everything black
+			setNodeColour(dataset.getCollection(), Color.BLACK);
+		}
+		updateNodePainter();
+	}
 
-    /**
-     * Set the label colour for the given cells
-     * 
-     * @param cells
-     * @param colour
-     */
-    private void setNodeColour(final ICellCollection collection, final Paint colour) {
+	/**
+	 * Set the label colour for the given cells
+	 * 
+	 * @param cells
+	 * @param colour
+	 */
+	private void setNodeColour(final ICellCollection collection, final Paint colour) {
 
-        RootedTree tree = viewer.getTreePane().getTree();
+		RootedTree tree = viewer.getTreePane().getTree();
 
-        for (Node n : tree.getNodes()) {
+		for (Node n : tree.getNodes()) {
 
-            if (tree.isExternal(n)) { // choose the taxon nodes
+			if (tree.isExternal(n)) { // choose the taxon nodes
 
-                Taxon t = tree.getTaxon(n);
+				Taxon t = tree.getTaxon(n);
 
-                ICell c = (ICell) t.getAttribute("Cell");
-                collection.streamCells().filter(cell->cell.equals(c))
-                    .forEach(cell->n.setAttribute("Color", colour));
-            }
-        }
-    }
+				ICell c = (ICell) t.getAttribute("Cell");
+				collection.streamCells().filter(cell -> cell.equals(c))
+						.forEach(cell -> n.setAttribute("Color", colour));
+			}
+		}
+	}
 
-    /**
-     * Check that a taxon name matches a nucleus name
-     * 
-     * @param name
-     * @param nucleus
-     * @return
-     */
-    private boolean taxonNamesMatch(String name, Nucleus nucleus) {
+	/**
+	 * Check that a taxon name matches a nucleus name
+	 * 
+	 * @param name
+	 * @param nucleus
+	 * @return
+	 */
+	private boolean taxonNamesMatch(String name, Nucleus nucleus) {
 
-        /*
-         * Testing name: P106.tiff-3 Testing J:\Protocols\Scripts and
-         * macros\Testing_cluster_images\P100.tiff-P100.tiff-0 Testing
-         * Testing_cluster_images-P100.tiff-0 Testing P100.tiff-0 Name not found
-         */
-        String nucleusName = nucleus.getSourceFile() + "-" + nucleus.getNameAndNumber();
+		/*
+		 * Testing name: P106.tiff-3 Testing J:\Protocols\Scripts and
+		 * macros\Testing_cluster_images\P100.tiff-P100.tiff-0 Testing
+		 * Testing_cluster_images-P100.tiff-0 Testing P100.tiff-0 Name not found
+		 */
+		String nucleusName = nucleus.getSourceFile() + "-" + nucleus.getNameAndNumber();
 
-        // the ideal is full file path
-        if (name.equals(nucleusName)) // 'C:\bla\image.tiff-image.tiff-1'
-            return true;
+		// the ideal is full file path
+		if (name.equals(nucleusName)) // 'C:\bla\image.tiff-image.tiff-1'
+			return true;
 
 		nucleusName = nucleus.getSourceFolder().getAbsolutePath() + "-" + nucleus.getNameAndNumber();
 
-		if (name.equals(nucleusName)) 
-		    return true;
-		
+		if (name.equals(nucleusName))
+			return true;
+
 		// Can't get just names from merge sources
 		if (dataset.hasMergeSources())
-		    return false;
+			return false;
 
 		// otherwise look for just the name from an old dataset
 		nucleusName = nucleus.getNameAndNumber();
 		if (name.equals(nucleusName))
-		    return true;
+			return true;
 		return false;
-    }
+	}
 
-    private String checkName(int offset) {
+	private String checkName(int offset) {
 
-        int maxExisting = 0;
-        Pattern pattern = Pattern.compile(dataset.getName() + "_ManualCluster_(\\d+)$");
+		int maxExisting = 0;
+		Pattern pattern = Pattern.compile(dataset.getName() + "_ManualCluster_(\\d+)$");
 
-        for (IAnalysisDataset d : dataset.getChildDatasets()) {
+		for (IAnalysisDataset d : dataset.getChildDatasets()) {
 
-            Matcher matcher = pattern.matcher(d.getName());
+			Matcher matcher = pattern.matcher(d.getName());
 
-            int digit = 0;
+			int digit = 0;
 
-            while (matcher.find()) {
+			while (matcher.find()) {
 
-                digit = Integer.valueOf(matcher.group(1));
+				digit = Integer.valueOf(matcher.group(1));
 
-                if (digit > maxExisting) {
-                    maxExisting = digit;
-                }
-            }
-        }
+				if (digit > maxExisting) {
+					maxExisting = digit;
+				}
+			}
+		}
 
-        int clusterNumber = maxExisting + offset;
+		int clusterNumber = maxExisting + offset;
 
-        String result = dataset.getName() + "_ManualCluster_" + clusterNumber;
+		String result = dataset.getName() + "_ManualCluster_" + clusterNumber;
 
-        return result;
-    }
+		return result;
+	}
 
-    private void extractSelectedNodesToCluster() throws Exception {
-        ICellCollection template = dataset.getCollection();
+	private void extractSelectedNodesToCluster() throws Exception {
+		ICellCollection template = dataset.getCollection();
 
-        String newName = template.getName() + "_ManualCluster_" + clusterList.size();
-        newName = checkName(clusterList.size());
-        ICellCollection clusterCollection = new VirtualDataset(dataset, newName);
+		String newName = template.getName() + "_ManualCluster_" + clusterList.size();
+		newName = checkName(clusterList.size());
+		ICellCollection clusterCollection = new VirtualDataset(dataset, newName);
 
-        Tree tree = viewer.getTreePane().getTree();
+		Tree tree = viewer.getTreePane().getTree();
 
-        Set<Node> nodes = viewer.getTreePane().getSelectedNodes();
-        for (Node n : nodes) {
+		Set<Node> nodes = viewer.getTreePane().getSelectedNodes();
+		for (Node n : nodes) {
 
-            if (tree.isExternal(n)) {
+			if (tree.isExternal(n)) {
 
-                Taxon t = tree.getTaxon(n);
-                ICell c = (ICell) t.getAttribute("Cell");
-                clusterCollection.addCell(c);
-            }
-        }
+				Taxon t = tree.getTaxon(n);
+				ICell c = (ICell) t.getAttribute("Cell");
+				clusterCollection.addCell(c);
+			}
+		}
 
-        if (clusterCollection.hasCells()) {
-            colourTreeNodesByCluster(clusterCollection);
-            clusterList.add(clusterCollection);
-            LOGGER.info("Extracted " + clusterCollection.size() + " cells");
-        } else {
-            LOGGER.warning("No cells found. Check taxon labels are correct");
-        }
-    }
+		if (clusterCollection.hasCells()) {
+			colourTreeNodesByCluster(clusterCollection);
+			clusterList.add(clusterCollection);
+			LOGGER.info("Extracted " + clusterCollection.size() + " cells");
+		} else {
+			LOGGER.warning("No cells found. Check taxon labels are correct");
+		}
+	}
 
-    private void analyseClusters() {
-        List<IAnalysisDataset> list = new ArrayList<>();
+	private void analyseClusters() {
+		List<IAnalysisDataset> list = new ArrayList<>();
 
-        for (ICellCollection c : clusterList) {
-            if (c.hasCells()) {
+		for (ICellCollection c : clusterList) {
+			if (c.hasCells()) {
 
-                dataset.addChildCollection(c);
+				dataset.addChildCollection(c);
 
-                try {
-                    dataset.getCollection().getProfileManager().copySegmentsAndLandmarksTo(c);
-                } catch (ProfileException | MissingProfileException e) {
-                    LOGGER.warning("Error copying collection offsets");
-                    LOGGER.log(Loggable.STACK, "Error in offsetting", e);
-                }
+				try {
+					dataset.getCollection().getProfileManager().copySegmentsAndLandmarksTo(c);
+				} catch (ProfileException | MissingProfileException e) {
+					LOGGER.warning("Error copying collection offsets");
+					LOGGER.log(Loggable.STACK, "Error in offsetting", e);
+				}
 
-                IAnalysisDataset clusterDataset = dataset.getChildDataset(c.getId());
+				IAnalysisDataset clusterDataset = dataset.getChildDataset(c.getId());
 
-                list.add(clusterDataset);
-            }
-        }
+				list.add(clusterDataset);
+			}
+		}
 
-        testClusterGroupable(list);
+		testClusterGroupable(list);
 
-        if (!list.isEmpty()) {
-        	LOGGER.finest("Firing population update request");
-            fireInterfaceEvent(InterfaceMethod.REFRESH_POPULATIONS);
-        } else {
-        	LOGGER.info("No datasets to analyse");
-        }
-        this.setVisible(false);
-        this.dispose();
-    }
+		if (!list.isEmpty()) {
+			LOGGER.finest("Firing population update request");
+			UIController.getInstance().fireDatasetAdded(list);
+		} else {
+			LOGGER.info("No datasets to analyse");
+		}
+		this.setVisible(false);
+		this.dispose();
+	}
 
-    private void showMergeSources() {
-        // Disable the selection dropdown boxes
-        selectedClusterGroupBox.setSelectionNull();
-        selectedClusterBox.setSelectionNull();
+	private void showMergeSources() {
+		// Disable the selection dropdown boxes
+		selectedClusterGroupBox.setSelectionNull();
+		selectedClusterBox.setSelectionNull();
 
+		List<IAnalysisDataset> list = new ArrayList<>(dataset.getAllMergeSources());
 
-        List<IAnalysisDataset> list = new ArrayList<>(dataset.getAllMergeSources());
+		IClusterGroup mergeGroup = makeNewClusterGroup(list);
 
-        IClusterGroup mergeGroup = makeNewClusterGroup(list);
+		for (IAnalysisDataset d : list)
+			mergeGroup.addDataset(d);
 
-        for (IAnalysisDataset d : list)
-            mergeGroup.addDataset(d);
-        
-        colourTreeNodesByClusterGroup(mergeGroup);
-    }
+		colourTreeNodesByClusterGroup(mergeGroup);
+	}
 
-    /**
-     * Create a new cluster group based on the clustering options in the
-     * existing cluster group, and a new list of datasets
-     * 
-     * @param list the datasets to include in the cluster group
-     * @return
-     */
-    private IClusterGroup makeNewClusterGroup(List<IAnalysisDataset> list) {
-        HashOptions newOptions = group.getOptions().get().duplicate();
-        newOptions.setInt(HashOptions.CLUSTER_MANUAL_CLUSTER_NUMBER_KEY, list.size());
+	/**
+	 * Create a new cluster group based on the clustering options in the existing
+	 * cluster group, and a new list of datasets
+	 * 
+	 * @param list the datasets to include in the cluster group
+	 * @return
+	 */
+	private IClusterGroup makeNewClusterGroup(List<IAnalysisDataset> list) {
+		HashOptions newOptions = group.getOptions().get().duplicate();
+		newOptions.setInt(HashOptions.CLUSTER_MANUAL_CLUSTER_NUMBER_KEY, list.size());
 
-        int clusterNumber = dataset.getMaxClusterGroupNumber() + 1;
-        IClusterGroup newGroup = new DefaultClusterGroup(IClusterGroup.CLUSTER_GROUP_PREFIX + "_" + clusterNumber, newOptions,
-                group.getTree());
-        return newGroup;
-    }
+		int clusterNumber = dataset.getMaxClusterGroupNumber() + 1;
+		IClusterGroup newGroup = new DefaultClusterGroup(IClusterGroup.CLUSTER_GROUP_PREFIX + "_" + clusterNumber,
+				newOptions, group.getTree());
+		return newGroup;
+	}
 
-    /**
-     * Check that the list of datasets has only one copy of each cell
-     * 
-     * @param list
-     * @return
-     */
-    private boolean cellsPresentOnlyOnce(List<IAnalysisDataset> list) {
-        boolean ok = true;
-        Set<UUID> cellIDsFound = new HashSet<>();
-                
-        for (IAnalysisDataset d : list) {
-            
-            for (ICell c : d.getCollection().getCells()) {
-                ok &= !cellIDsFound.contains(c.getId());
-                cellIDsFound.add(c.getId());
-            }
-        }
+	/**
+	 * Check that the list of datasets has only one copy of each cell
+	 * 
+	 * @param list
+	 * @return
+	 */
+	private boolean cellsPresentOnlyOnce(List<IAnalysisDataset> list) {
+		boolean ok = true;
+		Set<UUID> cellIDsFound = new HashSet<>();
 
-        return ok;
-    }
+		for (IAnalysisDataset d : list) {
 
-    /**
-     * Check that a cell is not present in more than one cluster
-     * 
-     * @param list
-     * @return true if all cells in the list are present in a cluster
-     */
-    private boolean cellsAllPresent(List<IAnalysisDataset> clusters) {
-        boolean ok = true;
+			for (ICell c : d.getCollection().getCells()) {
+				ok &= !cellIDsFound.contains(c.getId());
+				cellIDsFound.add(c.getId());
+			}
+		}
 
-        List<UUID> cellIDsFound = new ArrayList<UUID>();
-        for (IAnalysisDataset d : clusters) {
-            d.getCollection().getCells().forEach(c->cellIDsFound.add(c.getId()));
-        }
-        
-        return dataset.getCollection().streamCells()
-                .allMatch(c-> cellIDsFound.contains(c.getId()));
-    }
+		return ok;
+	}
 
-    /*
-     * Offer to put the datasets into a cluster group if conditions are met
-     */
-    private void testClusterGroupable(List<IAnalysisDataset> list) {
+	/**
+	 * Check that a cell is not present in more than one cluster
+	 * 
+	 * @param list
+	 * @return true if all cells in the list are present in a cluster
+	 */
+	private boolean cellsAllPresent(List<IAnalysisDataset> clusters) {
+		boolean ok = true;
 
-        if (!list.isEmpty()) {
+		List<UUID> cellIDsFound = new ArrayList<UUID>();
+		for (IAnalysisDataset d : clusters) {
+			d.getCollection().getCells().forEach(c -> cellIDsFound.add(c.getId()));
+		}
 
-        	if (!cellsPresentOnlyOnce(list)) {
-        		LOGGER.info("Cannot make cluster group");
-        		LOGGER.info("Cells present in more than one cluster");
-        		LOGGER.info("Adding as standard manual clusters");
-        		return;
-        	}
+		return dataset.getCollection().streamCells().allMatch(c -> cellIDsFound.contains(c.getId()));
+	}
 
-        	if (!cellsAllPresent(list)) {
-        		LOGGER.info("Cannot make cluster group");
-        		LOGGER.info("Not all cells are assigned clusters");
-        		LOGGER.info("Adding as standard manual clusters");
-        		return;
-        	}
-        	
-        	// Offer to make a cluster group
-        	try {
-        		boolean join = new DefaultInputSupplier().requestApproval("Join the new clusters into a cluster group?", "Create cluster group");
+	/*
+	 * Offer to put the datasets into a cluster group if conditions are met
+	 */
+	private void testClusterGroupable(List<IAnalysisDataset> list) {
 
-        		if (join) {
-        			LOGGER.fine("Creating cluster group");
-        			// Make the group
+		if (!list.isEmpty()) {
 
-        			IClusterGroup newGroup = makeNewClusterGroup(list);
+			if (!cellsPresentOnlyOnce(list)) {
+				LOGGER.info("Cannot make cluster group");
+				LOGGER.info("Cells present in more than one cluster");
+				LOGGER.info("Adding as standard manual clusters");
+				return;
+			}
 
-        			int i = 0;
-        			for (IAnalysisDataset d : list) {
-        				d.setName(newGroup.getName() + "_Cluster_" + i);
-        				newGroup.addDataset(d);
-        				i++;
-        			}
-        			dataset.addClusterGroup(newGroup);
-        			
-        		} else {
-        			LOGGER.info("Adding as standard manual clusters");
-        		}
-        	} catch (RequestCancelledException e) {
-        		LOGGER.info("Adding as standard manual clusters");
-        	}        	
-        }
-    }
+			if (!cellsAllPresent(list)) {
+				LOGGER.info("Cannot make cluster group");
+				LOGGER.info("Not all cells are assigned clusters");
+				LOGGER.info("Adding as standard manual clusters");
+				return;
+			}
 
-    /**
-     * Select cluster nodes based on horizontal position
-     * @author bms41
-     *
-     */
-    protected class MouseClusterSelectionAdapter extends MouseAdapter {
+			// Offer to make a cluster group
+			try {
+				boolean join = new DefaultInputSupplier().requestApproval("Join the new clusters into a cluster group?",
+						"Create cluster group");
 
-        public MouseClusterSelectionAdapter() {}
+				if (join) {
+					LOGGER.fine("Creating cluster group");
+					// Make the group
 
-        @Override
-        public void mouseMoved(MouseEvent e) {
+					IClusterGroup newGroup = makeNewClusterGroup(list);
 
-            Point location = viewer.getMousePosition();
-            double lineLength = viewer.getTreePane().getBounds().getHeight();
-            LOGGER.fine("Mouse at "+location+" length "+lineLength);
+					int i = 0;
+					for (IAnalysisDataset d : list) {
+						d.setName(newGroup.getName() + "_Cluster_" + i);
+						newGroup.addDataset(d);
+						i++;
+					}
+					dataset.addClusterGroup(newGroup);
 
-            Line2D.Double line = new Line2D.Double(location.getX(), 0, location.getX(), lineLength);
+				} else {
+					LOGGER.info("Adding as standard manual clusters");
+				}
+			} catch (RequestCancelledException e) {
+				LOGGER.info("Adding as standard manual clusters");
+			}
+		}
+	}
 
-            viewer.addLine(line);
-            viewer.repaint();
-        }
+	/**
+	 * Select cluster nodes based on horizontal position
+	 * 
+	 * @author bms41
+	 *
+	 */
+	protected class MouseClusterSelectionAdapter extends MouseAdapter {
 
-    }
+		public MouseClusterSelectionAdapter() {
+		}
+
+		@Override
+		public void mouseMoved(MouseEvent e) {
+
+			Point location = viewer.getMousePosition();
+			double lineLength = viewer.getTreePane().getBounds().getHeight();
+			LOGGER.fine("Mouse at " + location + " length " + lineLength);
+
+			Line2D.Double line = new Line2D.Double(location.getX(), 0, location.getX(), lineLength);
+
+			viewer.addLine(line);
+			viewer.repaint();
+		}
+
+	}
 
 }
