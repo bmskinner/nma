@@ -24,7 +24,7 @@ import javax.swing.JTabbedPane;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
-import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
+import com.bmskinner.nuclear_morphology.gui.events.UserActionEvent;
 import com.bmskinner.nuclear_morphology.gui.tabs.cells_detail.IndividualCellDetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.editing.BorderTagEditingPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.editing.SegmentsEditingPanel;
@@ -79,9 +79,9 @@ public class EditingDetailPanel extends DetailPanel {
 	}
 
 	@Override
-	public void eventReceived(SignalChangeEvent event) {
+	public void eventReceived(UserActionEvent event) {
 		// Swallow signals we don't need to pass onwards
-		if (event.type().equals(SignalChangeEvent.MERGE_SIGNALS_ACTION))
+		if (event.type().equals(UserActionEvent.MERGE_SIGNALS_ACTION))
 			return;
 
 		super.eventReceived(event);

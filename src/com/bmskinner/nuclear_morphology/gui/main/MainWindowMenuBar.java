@@ -48,8 +48,8 @@ import com.bmskinner.nuclear_morphology.gui.actions.NewAnalysisAction;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter.ColourSwatch;
 import com.bmskinner.nuclear_morphology.gui.dialogs.VersionHelpDialog;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEventHandler;
-import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
-import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEventHandler;
+import com.bmskinner.nuclear_morphology.gui.events.UserActionEvent;
+import com.bmskinner.nuclear_morphology.gui.events.UserActionEventHandler;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.UIController;
 import com.bmskinner.nuclear_morphology.io.Io;
 import com.bmskinner.nuclear_morphology.io.UpdateChecker;
@@ -94,7 +94,7 @@ public class MainWindowMenuBar extends JMenuBar {
 	private static final String SAVE_DATASETS_LBL = "Save datasets";
 	private static final String OPEN_CONFIG_FILE_LBL = "Open config file";
 
-	final private SignalChangeEventHandler sh;
+	final private UserActionEventHandler sh;
 	final private DatasetEventHandler dh;
 	final private MainView mw;
 
@@ -114,7 +114,7 @@ public class MainWindowMenuBar extends JMenuBar {
 
 		public JMenuItem createSignalChangeMenuItem(String label, String action, @Nullable String tooltip) {
 			JMenuItem item = new JMenuItem(label);
-			item.addActionListener(e -> sh.fireSignalChangeEvent(action));
+			item.addActionListener(e -> sh.fireUserActionEvent(action));
 			if (tooltip != null)
 				item.setToolTipText(tooltip);
 			return item;
@@ -124,7 +124,7 @@ public class MainWindowMenuBar extends JMenuBar {
 	public MainWindowMenuBar(MainView mw) {
 		super();
 		this.mw = mw;
-		sh = new SignalChangeEventHandler(this);
+		sh = new UserActionEventHandler(this);
 		sh.addListener(mw.getEventHandler());
 
 		dh = new DatasetEventHandler(this);
@@ -170,20 +170,20 @@ public class MainWindowMenuBar extends JMenuBar {
 		i1.addActionListener(e -> new NewAnalysisAction(mw.getProgressAcceptor(), mw.getEventHandler()).run());
 		newMenu.add(i1);
 
-		newMenu.add(fact.createSignalChangeMenuItem(NEW_ANALYSIS_SAVED_LBL, SignalChangeEvent.IMPORT_WORKFLOW_PREFIX,
+		newMenu.add(fact.createSignalChangeMenuItem(NEW_ANALYSIS_SAVED_LBL, UserActionEvent.IMPORT_WORKFLOW_PREFIX,
 				NEW_ANALYSIS_SAVED_TOOLTIP));
 		menu.add(newMenu);
 
-		menu.add(fact.createSignalChangeMenuItem(NEW_WORKSPACE_LBL, SignalChangeEvent.NEW_WORKSPACE));
+		menu.add(fact.createSignalChangeMenuItem(NEW_WORKSPACE_LBL, UserActionEvent.NEW_WORKSPACE));
 
 		JMenu openMenu = new JMenu(OPEN_MENU_LBL);
 
-		openMenu.add(fact.createSignalChangeMenuItem(OPEN_DATASET_LBL, SignalChangeEvent.IMPORT_DATASET_PREFIX));
-		openMenu.add(fact.createSignalChangeMenuItem(OPEN_WORKSPACE_LBL, SignalChangeEvent.IMPORT_WORKSPACE_PREFIX));
+		openMenu.add(fact.createSignalChangeMenuItem(OPEN_DATASET_LBL, UserActionEvent.IMPORT_DATASET_PREFIX));
+		openMenu.add(fact.createSignalChangeMenuItem(OPEN_WORKSPACE_LBL, UserActionEvent.IMPORT_WORKSPACE_PREFIX));
 		menu.add(openMenu);
 
-		menu.add(fact.createSignalChangeMenuItem(SAVE_DATASETS_LBL, SignalChangeEvent.SAVE_ALL_DATASETS));
-		menu.add(fact.createSignalChangeMenuItem(SAVE_WORKSPACES_LBL, SignalChangeEvent.EXPORT_WORKSPACE));
+		menu.add(fact.createSignalChangeMenuItem(SAVE_DATASETS_LBL, UserActionEvent.SAVE_ALL_DATASETS));
+		menu.add(fact.createSignalChangeMenuItem(SAVE_WORKSPACES_LBL, UserActionEvent.EXPORT_WORKSPACE));
 
 		JMenuItem exit = new JMenuItem(EXIT_LBL);
 		exit.addActionListener(e -> {

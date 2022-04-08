@@ -29,7 +29,7 @@ import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace.BioSamp
 import com.bmskinner.nuclear_morphology.core.DatasetListManager;
 import com.bmskinner.nuclear_morphology.gui.ContextEnabled;
 import com.bmskinner.nuclear_morphology.gui.Labels;
-import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
+import com.bmskinner.nuclear_morphology.gui.events.UserActionEvent;
 import com.bmskinner.nuclear_morphology.gui.tabs.populations.AbstractPopupMenu.MenuFactory.PopupMenu;
 import com.bmskinner.nuclear_morphology.gui.tabs.populations.AbstractPopupMenu.MenuFactory.PopupMenuItem;
 
@@ -87,17 +87,17 @@ public void createButtons() {
     	
     	MenuFactory fact = new MenuFactory();
     	saveMenuItem = fact.makeItem(Labels.Populations.SAVE_AS_LBL, 
-    			SignalChangeEvent.SAVE_SELECTED_DATASET,
+    			UserActionEvent.SAVE_SELECTED_DATASET,
     			ContextEnabled.ACTIVE_ON_ROOT_DATASET|
 				ContextEnabled.ACTIVE_ON_SINGLE_OBJECT);
         
     	moveUpMenuItem   = fact.makeItem(Labels.Populations.MOVE_UP_LBL,  
-    			SignalChangeEvent.MOVE_DATASET_UP_ACTION,
+    			UserActionEvent.MOVE_DATASET_UP_ACTION,
     			ContextEnabled.ACTIVE_ON_ROOT_DATASET|
     			ContextEnabled.ACTIVE_ON_CHILD_DATASET|
 				ContextEnabled.ACTIVE_ON_SINGLE_OBJECT);
     	moveDownMenuItem = fact.makeItem(Labels.Populations.MOVE_DOWN_LBL, 
-    			SignalChangeEvent.MOVE_DATASET_DOWN_ACTION,
+    			UserActionEvent.MOVE_DATASET_DOWN_ACTION,
     			ContextEnabled.ACTIVE_ON_ROOT_DATASET|
     			ContextEnabled.ACTIVE_ON_CHILD_DATASET|
 				ContextEnabled.ACTIVE_ON_SINGLE_OBJECT);
@@ -116,45 +116,45 @@ public void createButtons() {
         createBiosampleMenu(null);
         
         mergeMenuItem   = fact.makeItem(Labels.Populations.MERGE_LBL, 
-        		SignalChangeEvent.MERGE_DATASETS_ACTION,
+        		UserActionEvent.MERGE_DATASETS_ACTION,
         		ContextEnabled.ACTIVE_ON_ROOT_DATASET|
         		ContextEnabled.ACTIVE_ON_CHILD_DATASET|
 				ContextEnabled.ACTIVE_ON_MULTI_OBJECTS);
         
         curateMenuItem  = fact.makeItem(Labels.Populations.CURATE_LBL, 
-        		SignalChangeEvent.CURATE_DATASET,
+        		UserActionEvent.CURATE_DATASET,
         		ContextEnabled.ACTIVE_ON_ROOT_DATASET|
         		ContextEnabled.ACTIVE_ON_CHILD_DATASET|
 				ContextEnabled.ACTIVE_ON_SINGLE_OBJECT);
         
         deleteMenuItem = fact.makeItem(Labels.Populations.DELETE_LBL, 
-        		SignalChangeEvent.DELETE_DATASET,
+        		UserActionEvent.DELETE_DATASET,
         		ContextEnabled.ACTIVE_ON_ROOT_DATASET|
         		ContextEnabled.ACTIVE_ON_CHILD_DATASET|
         		ContextEnabled.ACTIVE_ON_SINGLE_OBJECT|
 				ContextEnabled.ACTIVE_ON_MULTI_OBJECTS);
         
         booleanMenuItem = fact.makeItem(Labels.Populations.ARITHMETIC_LBL, 
-        		SignalChangeEvent.DATASET_ARITHMETIC,
+        		UserActionEvent.DATASET_ARITHMETIC,
         		ContextEnabled.ACTIVE_ON_ROOT_DATASET|
         		ContextEnabled.ACTIVE_ON_CHILD_DATASET|
 				ContextEnabled.ACTIVE_ON_MULTI_OBJECTS);
 
         extractMenuItem  = fact.makeItem(Labels.Populations.EXTRACT_CELLS_LBL, 
-        		SignalChangeEvent.EXTRACT_SUBSET, 
+        		UserActionEvent.EXTRACT_SUBSET, 
         		ContextEnabled.ACTIVE_ON_ROOT_DATASET|
         		ContextEnabled.ACTIVE_ON_CHILD_DATASET|
 				ContextEnabled.ACTIVE_ON_SINGLE_OBJECT);
         
         changeScaleItem = fact.makeItem(Labels.Populations.CHANGE_SCALE_LBL, 
-        		SignalChangeEvent.CHANGE_SCALE, 
+        		UserActionEvent.CHANGE_SCALE, 
         		ContextEnabled.ACTIVE_ON_ROOT_DATASET|
         		ContextEnabled.ACTIVE_ON_CHILD_DATASET|
         		ContextEnabled.ACTIVE_ON_MULTI_OBJECTS|
 				ContextEnabled.ACTIVE_ON_SINGLE_OBJECT);
         
         relocateMenuItem = fact.makeItem(Labels.Populations.ADD_CHILD_CELLS_LBL, 
-        		SignalChangeEvent.RELOCATE_CELLS, 
+        		UserActionEvent.RELOCATE_CELLS, 
         		ContextEnabled.ACTIVE_ON_ROOT_DATASET|
         		ContextEnabled.ACTIVE_ON_CHILD_DATASET|
 				ContextEnabled.ACTIVE_ON_SINGLE_OBJECT);
@@ -166,64 +166,64 @@ public void createButtons() {
 				ContextEnabled.ACTIVE_ON_SINGLE_OBJECT);
 
         exportStatsMenuItem = fact.makeItem(Labels.Populations.EXPORT_STATS, 
-        		SignalChangeEvent.EXPORT_STATS, 
+        		UserActionEvent.EXPORT_STATS, 
         		ContextEnabled.ACTIVE_ON_ROOT_DATASET|
         		ContextEnabled.ACTIVE_ON_CHILD_DATASET|
         		ContextEnabled.ACTIVE_ON_MULTI_OBJECTS|
 				ContextEnabled.ACTIVE_ON_SINGLE_OBJECT);
         exportProfilesMenuItem = fact.makeItem(Labels.Populations.EXPORT_PROFILES, 
-        		SignalChangeEvent.EXPORT_PROFILES, 
+        		UserActionEvent.EXPORT_PROFILES, 
         		ContextEnabled.ACTIVE_ON_ROOT_DATASET|
         		ContextEnabled.ACTIVE_ON_CHILD_DATASET|
         		ContextEnabled.ACTIVE_ON_MULTI_OBJECTS|
 				ContextEnabled.ACTIVE_ON_SINGLE_OBJECT);
         exportOutlinesMenuItem = fact.makeItem(Labels.Populations.EXPORT_OUTLINES, 
-        		SignalChangeEvent.EXPORT_OUTLINES, 
+        		UserActionEvent.EXPORT_OUTLINES, 
         		ContextEnabled.ACTIVE_ON_ROOT_DATASET|
         		ContextEnabled.ACTIVE_ON_CHILD_DATASET|
         		ContextEnabled.ACTIVE_ON_MULTI_OBJECTS|
 				ContextEnabled.ACTIVE_ON_SINGLE_OBJECT);
         exportSignalsItem   = fact.makeItem(Labels.Populations.EXPORT_SIGNALS, 
-        		SignalChangeEvent.EXPORT_SIGNALS, 
+        		UserActionEvent.EXPORT_SIGNALS, 
         		ContextEnabled.ACTIVE_ON_ROOT_DATASET|
         		ContextEnabled.ACTIVE_ON_CHILD_DATASET|
         		ContextEnabled.ACTIVE_ON_MULTI_OBJECTS|
 				ContextEnabled.ACTIVE_ON_SINGLE_OBJECT);
         exportShellsItem    = fact.makeItem(Labels.Populations.EXPORT_SHELLS, 
-        		SignalChangeEvent.EXPORT_SHELLS, 
+        		UserActionEvent.EXPORT_SHELLS, 
         		ContextEnabled.ACTIVE_ON_ROOT_DATASET|
         		ContextEnabled.ACTIVE_ON_CHILD_DATASET|
         		ContextEnabled.ACTIVE_ON_MULTI_OBJECTS|
 				ContextEnabled.ACTIVE_ON_SINGLE_OBJECT);
         saveCellsMenuItem   = fact.makeItem(Labels.Populations.EXPORT_CELL_LOCS, 
-        		SignalChangeEvent.EXPORT_CELL_LOCS, 
+        		UserActionEvent.EXPORT_CELL_LOCS, 
         		ContextEnabled.ACTIVE_ON_ROOT_DATASET|
         		ContextEnabled.ACTIVE_ON_CHILD_DATASET|
         		ContextEnabled.ACTIVE_ON_MULTI_OBJECTS|
 				ContextEnabled.ACTIVE_ON_SINGLE_OBJECT);
         exportOptionsMenuItem = fact.makeItem(Labels.Populations.EXPORT_OPTIONS, 
-        		SignalChangeEvent.EXPORT_OPTIONS, 
+        		UserActionEvent.EXPORT_OPTIONS, 
         		ContextEnabled.ACTIVE_ON_ROOT_DATASET|
         		ContextEnabled.ACTIVE_ON_CHILD_DATASET|
         		ContextEnabled.ACTIVE_ON_MULTI_OBJECTS|
 				ContextEnabled.ACTIVE_ON_SINGLE_OBJECT);
         
         exportRulesetsMenuItem = fact.makeItem(Labels.Populations.EXPORT_RULESETS, 
-        		SignalChangeEvent.EXPORT_RULESETS, 
+        		UserActionEvent.EXPORT_RULESETS, 
         		ContextEnabled.ACTIVE_ON_ROOT_DATASET|
         		ContextEnabled.ACTIVE_ON_CHILD_DATASET|
         		ContextEnabled.ACTIVE_ON_MULTI_OBJECTS|
 				ContextEnabled.ACTIVE_ON_SINGLE_OBJECT);
         
         exportCellImagesItem = fact.makeItem(Labels.Populations.EXPORT_CELL_IMAGES, 
-        		SignalChangeEvent.EXPORT_SINGLE_CELL_IMAGES, 
+        		UserActionEvent.EXPORT_SINGLE_CELL_IMAGES, 
         		ContextEnabled.ACTIVE_ON_ROOT_DATASET|
         		ContextEnabled.ACTIVE_ON_CHILD_DATASET|
         		ContextEnabled.ACTIVE_ON_MULTI_OBJECTS|
 				ContextEnabled.ACTIVE_ON_SINGLE_OBJECT);
         
         exportXMLDatasetItem = fact.makeItem(Labels.Populations.EXPORT_XML_DATASET, 
-        		SignalChangeEvent.EXPORT_XML_DATASET, 
+        		UserActionEvent.EXPORT_XML_DATASET, 
         		ContextEnabled.ACTIVE_ON_ROOT_DATASET|
 				ContextEnabled.ACTIVE_ON_SINGLE_OBJECT);
         
@@ -238,18 +238,18 @@ public void createButtons() {
         exportSubMenu.add(exportCellImagesItem);
         
         addNuclearSignalMenuItem = fact.makeItem(Labels.Populations.ADD_NUCLEAR_SIGNAL_LBL, 
-        		SignalChangeEvent.ADD_NUCLEAR_SIGNAL, 
+        		UserActionEvent.ADD_NUCLEAR_SIGNAL, 
         		ContextEnabled.ACTIVE_ON_ROOT_DATASET|
 				ContextEnabled.ACTIVE_ON_SINGLE_OBJECT);
         addNuclearSignalMenuItem.setToolTipText(Labels.Populations.ADD_NUCLEAR_SIGNAL_TIP);
         
         fishRemappinglMenuItem = fact.makeItem(Labels.Populations.POST_FISH_MAPPING_LBL, 
-        		SignalChangeEvent.POST_FISH_MAPPING, 
+        		UserActionEvent.POST_FISH_MAPPING, 
         		ContextEnabled.ACTIVE_ON_ROOT_DATASET|
 				ContextEnabled.ACTIVE_ON_SINGLE_OBJECT);
         
         clusterFileMenuItem = fact.makeItem(Labels.Populations.ADD_CLUSTER_FILE_LBL, 
-        		SignalChangeEvent.CLUSTER_FROM_FILE, 
+        		UserActionEvent.CLUSTER_FROM_FILE, 
         		ContextEnabled.ACTIVE_ON_ROOT_DATASET|
         		ContextEnabled.ACTIVE_ON_CHILD_DATASET|
 				ContextEnabled.ACTIVE_ON_SINGLE_OBJECT);
@@ -263,7 +263,7 @@ public void createButtons() {
         addSubMenu.add(clusterFileMenuItem);
         
         replaceFolderMenuItem = fact.makeItem(Labels.Populations.CHANGE_FOLDER_LBL, 
-        		SignalChangeEvent.CHANGE_NUCLEUS_IMAGE_FOLDER, 
+        		UserActionEvent.CHANGE_NUCLEUS_IMAGE_FOLDER, 
         		ContextEnabled.ACTIVE_ON_ROOT_DATASET|
 				ContextEnabled.ACTIVE_ON_SINGLE_OBJECT);
 
@@ -308,7 +308,7 @@ public void createButtons() {
     	List<IWorkspace> workspaces = DatasetListManager.getInstance().getWorkspaces();
     	for(IWorkspace w : workspaces) {
     		String name   = w.has(d) ? Labels.Populations.REMOVE_FROM_LBL_PREFIX : Labels.Populations.ADD_TO_LBL_PREFIX;
-    		String action = w.has(d) ? SignalChangeEvent.REMOVE_FROM_WORKSPACE_PREFIX : SignalChangeEvent.ADD_TO_WORKSPACE_PREFIX;
+    		String action = w.has(d) ? UserActionEvent.REMOVE_FROM_WORKSPACE_PREFIX : UserActionEvent.ADD_TO_WORKSPACE_PREFIX;
     		workspaceSubMenu.add(fact.makeItem(name+w.getName(), action+w.getName(), 
     				ContextEnabled.ACTIVE_ON_ROOT_DATASET|
     				ContextEnabled.ACTIVE_ON_CHILD_DATASET|
@@ -328,7 +328,7 @@ public void createButtons() {
     	MenuFactory fact = new MenuFactory();
 
     	biosampleSubMenu.add(fact.makeItem(Labels.Populations.ADD_TO_NEW_LBL, 
-    			SignalChangeEvent.NEW_BIOSAMPLE_PREFIX,
+    			UserActionEvent.NEW_BIOSAMPLE_PREFIX,
     			ContextEnabled.ACTIVE_ON_ROOT_DATASET|
 				ContextEnabled.ACTIVE_ON_SINGLE_OBJECT));
     	biosampleSubMenu.addSeparator();
@@ -336,7 +336,7 @@ public void createButtons() {
     	for(IWorkspace w : workspaces) {
     		for(BioSample bs : w.getBioSamples()) {
     			String name = bs.hasDataset(d.getSavePath()) ? Labels.Populations.REMOVE_FROM_LBL_PREFIX : Labels.Populations.ADD_TO_LBL_PREFIX;
-    			String action = bs.hasDataset(d.getSavePath()) ? SignalChangeEvent.REMOVE_FROM_BIOSAMPLE_PREFIX : SignalChangeEvent.ADD_TO_BIOSAMPLE_PREFIX;
+    			String action = bs.hasDataset(d.getSavePath()) ? UserActionEvent.REMOVE_FROM_BIOSAMPLE_PREFIX : UserActionEvent.ADD_TO_BIOSAMPLE_PREFIX;
     			biosampleSubMenu.add(fact.makeItem(name+bs.getName(), 
     					action+bs.getName(),
     					ContextEnabled.ACTIVE_ON_ROOT_DATASET|

@@ -48,7 +48,7 @@ import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
-import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
+import com.bmskinner.nuclear_morphology.gui.events.UserActionEvent;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.ConsensusUpdatedListener;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.ScaleUpdatedListener;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.SwatchUpdatedListener;
@@ -467,7 +467,7 @@ public class ConsensusNucleusPanel extends DetailPanel
 	}
 
 	@Override
-	public void eventReceived(SignalChangeEvent event) {
+	public void eventReceived(UserActionEvent event) {
 
 		// pass on log messages back to the main window
 		if (event.sourceName().equals(ConsensusNucleusChartPanel.SOURCE_COMPONENT)) {

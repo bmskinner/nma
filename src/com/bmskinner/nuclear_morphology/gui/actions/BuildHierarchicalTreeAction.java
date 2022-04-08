@@ -36,7 +36,7 @@ import com.bmskinner.nuclear_morphology.gui.events.ChartOptionsRenderedEvent;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetUpdateEvent;
 import com.bmskinner.nuclear_morphology.gui.events.EventListener;
-import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
+import com.bmskinner.nuclear_morphology.gui.events.UserActionEvent;
 
 /**
  * Action for constructing hierarchical trees based on dataset parameters
@@ -113,7 +113,7 @@ public class BuildHierarchicalTreeAction extends SingleDatasetResultAction imple
 	}
 
 	@Override
-	public void eventReceived(SignalChangeEvent event) {
+	public void eventReceived(UserActionEvent event) {
 		// No action
 	}
 

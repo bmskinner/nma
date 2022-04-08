@@ -79,7 +79,6 @@ public class DatasetEvent extends EventObject {
 	public static final String CLEAR_CACHE = "Clear caches";
 	public static final String SAVE = "Save selected";
 	public static final String SAVE_AS = "Save as new file";
-//    public static final String ADD_DATASET        = "Add dataset";
 	public static final String ADD_WORKSPACE = "Add workspace";
 	public static final String RESEGMENT = "Resegment dataset";
 

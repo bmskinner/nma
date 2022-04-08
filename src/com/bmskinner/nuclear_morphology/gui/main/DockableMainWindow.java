@@ -33,7 +33,7 @@ import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.gui.LogPanel;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.events.ChartOptionsRenderedEvent;
-import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
+import com.bmskinner.nuclear_morphology.gui.events.UserActionEvent;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.UIController;
 import com.bmskinner.nuclear_morphology.gui.tabs.AnalysisDetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.ClusterDetailPanel;
@@ -326,7 +326,7 @@ public class DockableMainWindow extends AbstractMainWindow {
 //	}
 
 	@Override
-	public void eventReceived(SignalChangeEvent event) {
+	public void eventReceived(UserActionEvent event) {
 		// TODO Auto-generated method stub
 
 	}

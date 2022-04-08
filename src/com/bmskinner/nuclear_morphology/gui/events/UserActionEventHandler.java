@@ -23,13 +23,13 @@ package com.bmskinner.nuclear_morphology.gui.events;
  * @since 1.13.7
  *
  */
-public class SignalChangeEventHandler extends AbstractEventHandler {
+public class UserActionEventHandler extends AbstractEventHandler {
 
-    public SignalChangeEventHandler(Object parent) {
+    public UserActionEventHandler(Object parent) {
         super(parent);
     }
     
-    public void fireSignalChangeEvent(String method) {
-    	fire(new SignalChangeEvent(parent, method, parent.getClass().getName()));
+    public void fireUserActionEvent(String method) {
+    	fire(new UserActionEvent(parent, method, parent.getClass().getName()));
     }
 }

@@ -70,8 +70,8 @@ public abstract class AbstractEventHandler {
 
 			if (event instanceof DatasetEvent)
 				l.eventReceived((DatasetEvent) event);
-			if (event instanceof SignalChangeEvent)
-				l.eventReceived((SignalChangeEvent) event);
+			if (event instanceof UserActionEvent)
+				l.eventReceived((UserActionEvent) event);
 			if (event instanceof DatasetUpdateEvent)
 				l.eventReceived((DatasetUpdateEvent) event);
 			if (event instanceof ChartOptionsRenderedEvent)

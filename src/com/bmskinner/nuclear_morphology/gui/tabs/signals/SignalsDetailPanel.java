@@ -24,7 +24,7 @@ import javax.swing.JTabbedPane;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
-import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
+import com.bmskinner.nuclear_morphology.gui.events.UserActionEvent;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -78,15 +78,8 @@ public class SignalsDetailPanel extends DetailPanel {
 	}
 
 	@Override
-	public void eventReceived(SignalChangeEvent event) {
+	public void eventReceived(UserActionEvent event) {
 		super.eventReceived(event);
-		if (event.type().equals(SignalChangeEvent.SIGNAL_COLOUR_CHANGE)) {
-			update(getDatasets());
-		}
-
-		if (event.type().startsWith(SignalChangeEvent.GROUP_VISIBLE_PREFIX)
-				&& !event.getSource().getClass().getName().equals(getClass().getName())) {
-		}
 	}
 
 }

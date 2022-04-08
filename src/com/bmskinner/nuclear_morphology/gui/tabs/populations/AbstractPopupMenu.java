@@ -31,7 +31,7 @@ import com.bmskinner.nuclear_morphology.components.datasets.IClusterGroup;
 import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace;
 import com.bmskinner.nuclear_morphology.gui.ContextEnabled;
 import com.bmskinner.nuclear_morphology.gui.events.EventListener;
-import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
+import com.bmskinner.nuclear_morphology.gui.events.UserActionEvent;
 
 /**
  * The base class for popup menus
@@ -225,7 +225,7 @@ public abstract class AbstractPopupMenu extends JPopupMenu {
     }
 
     protected synchronized void fireSignalChangeEvent(String message) {
-        SignalChangeEvent event = new SignalChangeEvent(this, message, SOURCE_COMPONENT);
+        UserActionEvent event = new UserActionEvent(this, message, SOURCE_COMPONENT);
         Iterator<EventListener> iterator = listeners.iterator();
         while (iterator.hasNext()) {
             iterator.next().eventReceived(event);

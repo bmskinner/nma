@@ -29,8 +29,8 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import com.bmskinner.nuclear_morphology.core.EventHandler;
-import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
-import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEventHandler;
+import com.bmskinner.nuclear_morphology.gui.events.UserActionEvent;
+import com.bmskinner.nuclear_morphology.gui.events.UserActionEventHandler;
 import com.bmskinner.nuclear_morphology.io.Io.Importer;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -39,7 +39,7 @@ public class MainDragAndDropTarget extends DropTarget {
 	
 	private static final Logger LOGGER = Logger.getLogger(MainDragAndDropTarget.class.getName());
 
-	SignalChangeEventHandler sh = new SignalChangeEventHandler(this);
+	UserActionEventHandler sh = new UserActionEventHandler(this);
 
     public MainDragAndDropTarget(EventHandler eh) {
         super();
@@ -71,16 +71,16 @@ public class MainDragAndDropTarget extends DropTarget {
                     LOGGER.fine("Checking dropped file");
                     if (f.getName().endsWith(Importer.SAVE_FILE_EXTENSION) 
                             || f.getName().endsWith(Importer.BACKUP_FILE_EXTENSION))
-                        sh.fireSignalChangeEvent(SignalChangeEvent.IMPORT_DATASET_PREFIX + f.getAbsolutePath());
+                        sh.fireUserActionEvent(UserActionEvent.IMPORT_DATASET_PREFIX + f.getAbsolutePath());
                     
                     if (f.getName().endsWith(Importer.WRK_FILE_EXTENSION))
-                    	sh.fireSignalChangeEvent(SignalChangeEvent.IMPORT_WORKSPACE_PREFIX+f.getAbsolutePath());
+                    	sh.fireUserActionEvent(UserActionEvent.IMPORT_WORKSPACE_PREFIX+f.getAbsolutePath());
                     
                     if (f.getName().endsWith(Importer.XML_FILE_EXTENSION))
-                    	sh.fireSignalChangeEvent(SignalChangeEvent.IMPORT_WORKFLOW_PREFIX+f.getAbsolutePath());
+                    	sh.fireUserActionEvent(UserActionEvent.IMPORT_WORKFLOW_PREFIX+f.getAbsolutePath());
 
                     if (f.isDirectory())
-                    	sh.fireSignalChangeEvent(SignalChangeEvent.NEW_ANALYSIS_PREFIX+f.getAbsolutePath());
+                    	sh.fireUserActionEvent(UserActionEvent.NEW_ANALYSIS_PREFIX+f.getAbsolutePath());
                 }
             }
 

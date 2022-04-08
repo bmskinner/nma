@@ -32,7 +32,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
-import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
+import com.bmskinner.nuclear_morphology.gui.events.UserActionEvent;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.visualisation.options.ChartOptions;
@@ -178,11 +178,7 @@ public class IndividualCellDetailPanel extends DetailPanel {
 	}
 
 	@Override
-	public void eventReceived(SignalChangeEvent event) {
-		if (event.type().equals(SignalChangeEvent.SIGNAL_COLOUR_CHANGE)) {
-			model.updateViews();
-		}
-
+	public void eventReceived(UserActionEvent event) {
 	}
 
 }

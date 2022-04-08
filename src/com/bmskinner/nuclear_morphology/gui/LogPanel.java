@@ -70,7 +70,7 @@ import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
-import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
+import com.bmskinner.nuclear_morphology.gui.events.UserActionEvent;
 import com.bmskinner.nuclear_morphology.gui.main.MainDragAndDropTarget;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -498,9 +498,9 @@ public class LogPanel extends DetailPanel implements ProgressBarAcceptor {
 							DatasetListManager.getInstance().getSelectedDatasets()));
 
 			runnableCommands.put(EXPORT_CMD,
-					() -> getSignalChangeEventHandler().fireSignalChangeEvent(SignalChangeEvent.EXPORT_XML_DATASET));
+					() -> getSignalChangeEventHandler().fireUserActionEvent(UserActionEvent.EXPORT_XML_DATASET));
 			runnableCommands.put(EXPORT_TPS,
-					() -> getSignalChangeEventHandler().fireSignalChangeEvent(SignalChangeEvent.EXPORT_TPS_DATASET));
+					() -> getSignalChangeEventHandler().fireUserActionEvent(UserActionEvent.EXPORT_TPS_DATASET));
 		}
 
 		/**

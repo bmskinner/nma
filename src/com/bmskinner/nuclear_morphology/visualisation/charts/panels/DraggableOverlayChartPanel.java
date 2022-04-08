@@ -47,7 +47,7 @@ import com.bmskinner.nuclear_morphology.gui.events.EventListener;
 import com.bmskinner.nuclear_morphology.gui.events.SegmentEvent;
 import com.bmskinner.nuclear_morphology.gui.events.SegmentEvent.SegmentUpdateType;
 import com.bmskinner.nuclear_morphology.gui.events.SegmentEventListener;
-import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
+import com.bmskinner.nuclear_morphology.gui.events.UserActionEvent;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.visualisation.ChartComponents;
 
@@ -423,7 +423,7 @@ public class DraggableOverlayChartPanel extends ExportableChartPanel {
 
     protected synchronized void fireSignalChangeEvent(String message) {
 
-        SignalChangeEvent event = new SignalChangeEvent(this, message, this.getClass().getSimpleName());
+        UserActionEvent event = new UserActionEvent(this, message, this.getClass().getSimpleName());
         Iterator<Object> iterator = listeners.iterator();
         while (iterator.hasNext()) {
             ((EventListener) iterator.next()).eventReceived(event);

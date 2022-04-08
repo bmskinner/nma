@@ -30,7 +30,7 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.ui.RectangleEdge;
 
 import com.bmskinner.nuclear_morphology.gui.events.EventListener;
-import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
+import com.bmskinner.nuclear_morphology.gui.events.UserActionEvent;
 import com.bmskinner.nuclear_morphology.visualisation.charts.overlays.RectangleOverlay;
 import com.bmskinner.nuclear_morphology.visualisation.charts.overlays.RectangleOverlayObject;
 
@@ -781,7 +781,7 @@ public class PositionSelectionChartPanel extends ExportableChartPanel {
 
     protected synchronized void fireSignalChangeEvent(String message) {
 
-        SignalChangeEvent event = new SignalChangeEvent(this, message, this.getClass().getSimpleName());
+        UserActionEvent event = new UserActionEvent(this, message, this.getClass().getSimpleName());
         Iterator<Object> iterator = listeners.iterator();
         while (iterator.hasNext()) {
             ((EventListener) iterator.next()).eventReceived(event);

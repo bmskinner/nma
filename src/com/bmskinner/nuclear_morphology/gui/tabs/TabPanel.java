@@ -23,7 +23,7 @@ import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEventHandler;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetUpdateEventHandler;
 import com.bmskinner.nuclear_morphology.gui.events.EventListener;
-import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEventHandler;
+import com.bmskinner.nuclear_morphology.gui.events.UserActionEventHandler;
 
 public interface TabPanel extends EventListener {
 
@@ -76,17 +76,6 @@ public interface TabPanel extends EventListener {
 	void setCellUpdate(boolean b);
 
 	/**
-	 * Add the given panel as a sub-panel of this. The sub panel will be notified of
-	 * dataset updates, and interface and dataset events fired by the sub panel will
-	 * be passed upwards by this panel.
-	 * 
-	 * @param panel the panel to add
-	 */
-//	void addSubPanel(@NonNull TabPanel panel);
-
-//	TabPanel getParentPanel();
-
-	/**
 	 * Add a listener for signal change events from this panel
 	 * 
 	 * @param l the listener
@@ -115,20 +104,6 @@ public interface TabPanel extends EventListener {
 	void removeDatasetEventListener(EventListener l);
 
 	/**
-	 * Add a listener for interface events from this panel
-	 * 
-	 * @param l the listener
-	 */
-//	void addInterfaceEventListener(EventListener l);
-
-	/**
-	 * Remove a listener for interface events from this panel
-	 * 
-	 * @param l the listener
-	 */
-//	void removeInterfaceEventListener(EventListener l);
-
-	/**
 	 * Add a listener for dataset update events from this panel
 	 * 
 	 * @param l the listener
@@ -141,20 +116,6 @@ public interface TabPanel extends EventListener {
 	 * @param l the listener
 	 */
 	void removeDatasetUpdateEventListener(EventListener l);
-
-	/**
-	 * Get the list of sub panels
-	 * 
-	 * @return
-	 */
-//	public List<TabPanel> getSubPanels();
-
-	/**
-	 * Check if this panel has sub panels
-	 * 
-	 * @return true if sub panels are present
-	 */
-//	boolean hasSubPanels();
 
 	/**
 	 * Set the analysing state. This sets the cursor over the panel and its
@@ -237,11 +198,9 @@ public interface TabPanel extends EventListener {
 
 	DatasetEventHandler getDatasetEventHandler();
 
-//	InterfaceEventHandler getInterfaceEventHandler();
-
 	DatasetUpdateEventHandler getDatasetUpdateEventHandler();
 
-	SignalChangeEventHandler getSignalChangeEventHandler();
+	UserActionEventHandler getSignalChangeEventHandler();
 
 	/**
 	 * Get the input supplier for user interaction with this panel

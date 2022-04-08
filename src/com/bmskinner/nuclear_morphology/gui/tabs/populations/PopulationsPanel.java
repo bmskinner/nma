@@ -45,7 +45,7 @@ import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace;
 import com.bmskinner.nuclear_morphology.core.DatasetListManager;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
-import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
+import com.bmskinner.nuclear_morphology.gui.events.UserActionEvent;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.DatasetAddedListener;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.SwatchUpdatedListener;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
@@ -335,7 +335,7 @@ public class PopulationsPanel extends DetailPanel implements DatasetAddedListene
 		update();
 		treeTable.getColumnModel().getColumn(PopulationTreeTable.COLUMN_NAME).setHeaderValue("Dataset (0)");
 		treeTable.getColumnModel().getColumn(PopulationTreeTable.COLUMN_CELL_COUNT).setHeaderValue("Cells (0)");
-		getSignalChangeEventHandler().fireSignalChangeEvent(SignalChangeEvent.UPDATE_PANELS_WITH_NULL);
+		DatasetListManager.getInstance().setSelectedDatasets(new ArrayList<>());
 	}
 
 	/**
@@ -472,23 +472,23 @@ public class PopulationsPanel extends DetailPanel implements DatasetAddedListene
 	}
 
 	@Override
-	public void eventReceived(SignalChangeEvent event) {
+	public void eventReceived(UserActionEvent event) {
 
 		switch (event.type()) {
 		// catch any signals that affect the datasets directly
-		case SignalChangeEvent.MOVE_DATASET_DOWN_ACTION:
+		case UserActionEvent.MOVE_DATASET_DOWN_ACTION:
 			moveDataset(true);
 			break;
-		case SignalChangeEvent.MOVE_DATASET_UP_ACTION:
+		case UserActionEvent.MOVE_DATASET_UP_ACTION:
 			moveDataset(false);
 			break;
-		case SignalChangeEvent.DELETE_DATASET:
+		case UserActionEvent.DELETE_DATASET:
 			deleteSelectedDatasets();
 			break;
 		default: {
 			// Pass on events from the popup menu
 			if (event.sourceName().equals(PopulationListPopupMenu.SOURCE_COMPONENT))
-				getSignalChangeEventHandler().fireSignalChangeEvent(event.type());
+				getSignalChangeEventHandler().fireUserActionEvent(event.type());
 			break;
 		}
 		}

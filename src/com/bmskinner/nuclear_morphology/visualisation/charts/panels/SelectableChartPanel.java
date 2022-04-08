@@ -43,7 +43,7 @@ import org.jfree.chart.ui.Layer;
 import org.jfree.chart.ui.RectangleEdge;
 
 import com.bmskinner.nuclear_morphology.gui.events.EventListener;
-import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
+import com.bmskinner.nuclear_morphology.gui.events.UserActionEvent;
 
 /**
  * This extension of the ChartPanel provides a new MouseAdapter to mark selected
@@ -215,7 +215,7 @@ public class SelectableChartPanel extends ExportableChartPanel implements ChartM
     }
 
     private synchronized void fireSignalChangeEvent(String message) {
-        SignalChangeEvent event = new SignalChangeEvent(this, message, SOURCE_COMPONENT);
+        UserActionEvent event = new UserActionEvent(this, message, SOURCE_COMPONENT);
         Iterator<Object> iterator = listeners.iterator();
         while (iterator.hasNext()) {
             ((EventListener) iterator.next()).eventReceived(event);

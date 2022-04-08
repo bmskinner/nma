@@ -29,7 +29,7 @@ public interface EventListener {
 
 	void eventReceived(DatasetUpdateEvent event);
 
-	void eventReceived(SignalChangeEvent event);
+	void eventReceived(UserActionEvent event);
 
 //	void eventReceived(InterfaceEvent event);
 	void eventReceived(ChartOptionsRenderedEvent event);

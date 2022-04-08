@@ -77,7 +77,7 @@ import com.bmskinner.nuclear_morphology.gui.events.DatasetUpdateEvent;
 import com.bmskinner.nuclear_morphology.gui.events.EventListener;
 import com.bmskinner.nuclear_morphology.gui.events.PopulationListUpdateListener;
 import com.bmskinner.nuclear_morphology.gui.events.PopulationListUpdateListener.PopulationListUpdateEvent;
-import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
+import com.bmskinner.nuclear_morphology.gui.events.UserActionEvent;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.UIController;
 import com.bmskinner.nuclear_morphology.gui.tabs.DatasetSelectionListener;
 import com.bmskinner.nuclear_morphology.gui.tabs.DatasetSelectionListener.DatasetSelectionEvent;
@@ -100,7 +100,6 @@ public class EventHandler implements EventListener {
 	private ProgressBarAcceptor acceptor;
 
 	private final List<EventListener> updateListeners = new ArrayList<>();
-	private final List<EventListener> interfaceListeners = new ArrayList<>();
 	private final List<EventListener> datasetListeners = new ArrayList<>();
 	private final List<DatasetSelectionListener> selectionListeners = new ArrayList<>();
 	private final List<PopulationListUpdateListener> populationsListUpdateListeners = new ArrayList<>();
@@ -138,10 +137,6 @@ public class EventHandler implements EventListener {
 	 */
 	public void addProgressBarAcceptor(ProgressBarAcceptor p) {
 		acceptor = p;
-	}
-
-	public void addInterfaceEventListener(EventListener l) {
-		interfaceListeners.add(l);
 	}
 
 	public void addDatasetSelectionListener(DatasetSelectionListener l) {
@@ -190,13 +185,13 @@ public class EventHandler implements EventListener {
 		 * @param event
 		 * @return
 		 */
-		public synchronized Runnable create(final SignalChangeEvent event) {
+		public synchronized Runnable create(final UserActionEvent event) {
 
 			final List<IAnalysisDataset> selectedDatasets = DatasetListManager.getInstance().getSelectedDatasets();
 			final IAnalysisDataset selectedDataset = selectedDatasets.isEmpty() ? null : selectedDatasets.get(0);
 
-			if (event.type().startsWith(SignalChangeEvent.IMPORT_WORKFLOW_PREFIX)) {
-				String s = event.type().replace(SignalChangeEvent.IMPORT_WORKFLOW_PREFIX, "");
+			if (event.type().startsWith(UserActionEvent.IMPORT_WORKFLOW_PREFIX)) {
+				String s = event.type().replace(UserActionEvent.IMPORT_WORKFLOW_PREFIX, "");
 
 				// No image folder specified; will be requested in workflow
 				if (s.equals(""))
@@ -207,17 +202,17 @@ public class EventHandler implements EventListener {
 				return new ImportWorkflowAction(acceptor, EventHandler.this, f);
 			}
 
-			if (event.type().startsWith(SignalChangeEvent.IMPORT_DATASET_PREFIX)) {
-				String s = event.type().replace(SignalChangeEvent.IMPORT_DATASET_PREFIX, "");
+			if (event.type().startsWith(UserActionEvent.IMPORT_DATASET_PREFIX)) {
+				String s = event.type().replace(UserActionEvent.IMPORT_DATASET_PREFIX, "");
 				if (s.equals(""))
 					return new ImportDatasetAction(acceptor, EventHandler.this);
 				File f = new File(s);
 				return new ImportDatasetAction(acceptor, EventHandler.this, f);
 			}
 
-			if (event.type().startsWith(SignalChangeEvent.IMPORT_WORKSPACE_PREFIX))
+			if (event.type().startsWith(UserActionEvent.IMPORT_WORKSPACE_PREFIX))
 				return () -> {
-					String s = event.type().replace(SignalChangeEvent.IMPORT_WORKSPACE_PREFIX, "");
+					String s = event.type().replace(UserActionEvent.IMPORT_WORKSPACE_PREFIX, "");
 					if (s.equals("")) {
 						new ImportWorkspaceAction(acceptor, EventHandler.this).run();
 						return;
@@ -226,9 +221,9 @@ public class EventHandler implements EventListener {
 					new ImportWorkspaceAction(acceptor, EventHandler.this, f).run();
 				};
 
-			if (event.type().startsWith(SignalChangeEvent.NEW_ANALYSIS_PREFIX)) {
+			if (event.type().startsWith(UserActionEvent.NEW_ANALYSIS_PREFIX)) {
 				return () -> {
-					String s = event.type().replace(SignalChangeEvent.NEW_ANALYSIS_PREFIX, "");
+					String s = event.type().replace(UserActionEvent.NEW_ANALYSIS_PREFIX, "");
 					if (s.equals(""))
 						return;
 					File f = new File(s);
@@ -237,89 +232,83 @@ public class EventHandler implements EventListener {
 				};
 			}
 
-			if (event.type().equals(SignalChangeEvent.NEW_WORKSPACE))
+			if (event.type().equals(UserActionEvent.NEW_WORKSPACE))
 				return () -> createWorkspace();
 
-			if (event.type().equals(SignalChangeEvent.EXPORT_WORKSPACE))
+			if (event.type().equals(UserActionEvent.EXPORT_WORKSPACE))
 				return new ExportWorkspaceAction(DatasetListManager.getInstance().getWorkspaces(), acceptor,
 						EventHandler.this);
 
 			if (selectedDataset == null)
 				return null;
 
-			if (event.type().equals(SignalChangeEvent.DATASET_ARITHMETIC))
+			if (event.type().equals(UserActionEvent.DATASET_ARITHMETIC))
 				return new DatasetArithmeticAction(selectedDatasets, acceptor, EventHandler.this);
 
-			if (event.type().equals(SignalChangeEvent.EXTRACT_SUBSET))
+			if (event.type().equals(UserActionEvent.EXTRACT_SUBSET))
 				return new ExtractRandomCellsAction(selectedDataset, acceptor, EventHandler.this);
 
-			if (event.type().equals(SignalChangeEvent.CHANGE_NUCLEUS_IMAGE_FOLDER))
+			if (event.type().equals(UserActionEvent.CHANGE_NUCLEUS_IMAGE_FOLDER))
 				return new ReplaceSourceImageDirectoryAction(selectedDataset, acceptor, EventHandler.this);
 
-			if (event.type().equals(SignalChangeEvent.ADD_NUCLEAR_SIGNAL))
+			if (event.type().equals(UserActionEvent.ADD_NUCLEAR_SIGNAL))
 				return new AddNuclearSignalAction(selectedDataset, acceptor, EventHandler.this);
 
-			if (event.type().equals(SignalChangeEvent.CLUSTER_FROM_FILE))
+			if (event.type().equals(UserActionEvent.CLUSTER_FROM_FILE))
 				return new ClusterFileAssignmentAction(selectedDataset, acceptor, EventHandler.this);
 
-			if (event.type().equals(SignalChangeEvent.POST_FISH_MAPPING))
+			if (event.type().equals(UserActionEvent.POST_FISH_MAPPING))
 				return new FishRemappingAction(selectedDatasets, acceptor, EventHandler.this);
 
-			if (event.type().equals(SignalChangeEvent.EXPORT_STATS))
+			if (event.type().equals(UserActionEvent.EXPORT_STATS))
 				return new ExportNuclearStatsAction(selectedDatasets, acceptor, EventHandler.this);
 
-			if (event.type().equals(SignalChangeEvent.EXPORT_PROFILES))
+			if (event.type().equals(UserActionEvent.EXPORT_PROFILES))
 				return new ExportNuclearProfilesAction(selectedDatasets, acceptor, EventHandler.this);
 
-			if (event.type().equals(SignalChangeEvent.EXPORT_OUTLINES))
+			if (event.type().equals(UserActionEvent.EXPORT_OUTLINES))
 				return new ExportNuclearOutlinesAction(selectedDatasets, acceptor, EventHandler.this);
 
-			if (event.type().equals(SignalChangeEvent.EXPORT_SIGNALS))
+			if (event.type().equals(UserActionEvent.EXPORT_SIGNALS))
 				return new ExportSignalsAction(selectedDatasets, acceptor, EventHandler.this);
 
-			if (event.type().equals(SignalChangeEvent.EXPORT_SHELLS))
+			if (event.type().equals(UserActionEvent.EXPORT_SHELLS))
 				return new ExportShellsAction(selectedDatasets, acceptor, EventHandler.this);
 
-			if (event.type().equals(SignalChangeEvent.EXPORT_OPTIONS))
+			if (event.type().equals(UserActionEvent.EXPORT_OPTIONS))
 				return new ExportOptionsAction(selectedDatasets, acceptor, EventHandler.this);
 
-			if (event.type().equals(SignalChangeEvent.EXPORT_RULESETS))
+			if (event.type().equals(UserActionEvent.EXPORT_RULESETS))
 				return new ExportRuleSetsAction(selectedDatasets, acceptor, EventHandler.this);
 
-			if (event.type().equals(SignalChangeEvent.EXPORT_SINGLE_CELL_IMAGES))
+			if (event.type().equals(UserActionEvent.EXPORT_SINGLE_CELL_IMAGES))
 				return new ExportSingleCellImagesAction(selectedDatasets, acceptor, EventHandler.this);
 
-			if (event.type().equals(SignalChangeEvent.MERGE_DATASETS_ACTION))
+			if (event.type().equals(UserActionEvent.MERGE_DATASETS_ACTION))
 				return new MergeCollectionAction(selectedDatasets, acceptor, EventHandler.this);
 
-			if (event.type().equals(SignalChangeEvent.MERGE_SIGNALS_ACTION)) {
+			if (event.type().equals(UserActionEvent.MERGE_SIGNALS_ACTION)) {
 				LOGGER.finer(
 						"Event handler heard new merge signals action request on dataset " + selectedDataset.getName());
 				return new MergeSignalsAction(selectedDataset, acceptor, EventHandler.this);
 			}
 
-			if (event.type().equals(SignalChangeEvent.CHANGE_SCALE))
+			if (event.type().equals(UserActionEvent.CHANGE_SCALE))
 				return () -> setScale(selectedDatasets);
 
-			if (event.type().equals(SignalChangeEvent.SAVE_SELECTED_DATASET))
+			if (event.type().equals(UserActionEvent.SAVE_SELECTED_DATASET))
 				return new ExportDatasetAction(selectedDataset, acceptor, EventHandler.this, null, true);
 
-			if (event.type().equals(SignalChangeEvent.EXPORT_XML_DATASET))
+			if (event.type().equals(UserActionEvent.EXPORT_XML_DATASET))
 				return new ExportDatasetAction(selectedDataset, acceptor, EventHandler.this, null, true);
 
-			if (event.type().equals(SignalChangeEvent.EXPORT_TPS_DATASET))
+			if (event.type().equals(UserActionEvent.EXPORT_TPS_DATASET))
 				return new ExportTPSAction(selectedDataset, acceptor, EventHandler.this);
 
-			if (event.type().equals(SignalChangeEvent.SAVE_ALL_DATASETS))
+			if (event.type().equals(UserActionEvent.SAVE_ALL_DATASETS))
 				return () -> saveRootDatasets();
 
-			if (event.type().equals(SignalChangeEvent.UPDATE_PANELS_WITH_NULL))
-				return () -> fireDatasetUpdateEvent(new ArrayList<IAnalysisDataset>());
-
-			if (event.type().equals(SignalChangeEvent.UPDATE_PANELS))
-				return () -> fireDatasetUpdateEvent(selectedDatasets);
-
-			if (event.type().equals(SignalChangeEvent.CURATE_DATASET))
+			if (event.type().equals(UserActionEvent.CURATE_DATASET))
 				return () -> {
 					Runnable r = () -> {
 						AbstractCellCollectionDialog d = new ManualCurationDialog(selectedDataset);
@@ -328,12 +317,12 @@ public class EventHandler implements EventListener {
 					new Thread(r).start();// separate from the UI and method threads - we must not block them
 				};
 
-			if (event.type().equals(SignalChangeEvent.EXPORT_CELL_LOCS))
+			if (event.type().equals(UserActionEvent.EXPORT_CELL_LOCS))
 				return new ExportCellLocationsAction(selectedDatasets, acceptor, EventHandler.this);
 
-			if (event.type().startsWith(SignalChangeEvent.REMOVE_FROM_WORKSPACE_PREFIX))
+			if (event.type().startsWith(UserActionEvent.REMOVE_FROM_WORKSPACE_PREFIX))
 				return () -> {
-					String workspaceName = event.type().replace(SignalChangeEvent.REMOVE_FROM_WORKSPACE_PREFIX, "");
+					String workspaceName = event.type().replace(UserActionEvent.REMOVE_FROM_WORKSPACE_PREFIX, "");
 					IWorkspace ws = DatasetListManager.getInstance().getWorkspaces().stream()
 							.filter(w -> w.getName().equals(workspaceName)).findFirst()
 							.orElseThrow(IllegalArgumentException::new);
@@ -343,9 +332,9 @@ public class EventHandler implements EventListener {
 							new ArrayList<IAnalysisDataset>()));
 				};
 
-			if (event.type().startsWith(SignalChangeEvent.ADD_TO_WORKSPACE_PREFIX))
+			if (event.type().startsWith(UserActionEvent.ADD_TO_WORKSPACE_PREFIX))
 				return () -> {
-					String workspaceName = event.type().replace(SignalChangeEvent.ADD_TO_WORKSPACE_PREFIX, "");
+					String workspaceName = event.type().replace(UserActionEvent.ADD_TO_WORKSPACE_PREFIX, "");
 					IWorkspace ws = DatasetListManager.getInstance().getWorkspaces().stream()
 							.filter(w -> w.getName().equals(workspaceName)).findFirst()
 							.orElseThrow(IllegalArgumentException::new);
@@ -356,7 +345,7 @@ public class EventHandler implements EventListener {
 							new ArrayList<IAnalysisDataset>()));
 				};
 
-			if (event.type().startsWith(SignalChangeEvent.NEW_BIOSAMPLE_PREFIX))
+			if (event.type().startsWith(UserActionEvent.NEW_BIOSAMPLE_PREFIX))
 				return () -> {
 					LOGGER.fine("Creating new biosample");
 					try {
@@ -376,9 +365,9 @@ public class EventHandler implements EventListener {
 					}
 				};
 
-			if (event.type().startsWith(SignalChangeEvent.REMOVE_FROM_BIOSAMPLE_PREFIX))
+			if (event.type().startsWith(UserActionEvent.REMOVE_FROM_BIOSAMPLE_PREFIX))
 				return () -> {
-					String bsName = event.type().replace(SignalChangeEvent.REMOVE_FROM_BIOSAMPLE_PREFIX, "");
+					String bsName = event.type().replace(UserActionEvent.REMOVE_FROM_BIOSAMPLE_PREFIX, "");
 					LOGGER.fine("Removing dataset from biosample " + bsName);
 					List<IWorkspace> workspaces = DatasetListManager.getInstance().getWorkspaces(selectedDataset);
 					for (IWorkspace w : workspaces) {
@@ -389,9 +378,9 @@ public class EventHandler implements EventListener {
 					fireDatasetSelectionEvent(selectedDataset); // Using to trigger a refresh of the populations panel
 				};
 
-			if (event.type().startsWith(SignalChangeEvent.ADD_TO_BIOSAMPLE_PREFIX))
+			if (event.type().startsWith(UserActionEvent.ADD_TO_BIOSAMPLE_PREFIX))
 				return () -> {
-					String bsName = event.type().replace(SignalChangeEvent.ADD_TO_BIOSAMPLE_PREFIX, "");
+					String bsName = event.type().replace(UserActionEvent.ADD_TO_BIOSAMPLE_PREFIX, "");
 					LOGGER.fine("Adding dataset to biosample " + bsName);
 					List<IWorkspace> workspaces = DatasetListManager.getInstance().getWorkspaces(selectedDataset);
 					for (IWorkspace w : workspaces) {
@@ -402,7 +391,7 @@ public class EventHandler implements EventListener {
 					fireDatasetSelectionEvent(selectedDataset); // Using to trigger a refresh of the populations panel
 				};
 
-			if (event.type().equals(SignalChangeEvent.RELOCATE_CELLS))
+			if (event.type().equals(UserActionEvent.RELOCATE_CELLS))
 				return new RelocateFromFileAction(selectedDataset, acceptor, EventHandler.this, new CountDownLatch(1));
 
 			return null;
@@ -718,7 +707,7 @@ public class EventHandler implements EventListener {
 		 * 
 		 * @param event
 		 */
-		public synchronized void run(final SignalChangeEvent event) {
+		public synchronized void run(final UserActionEvent event) {
 			Runnable r = create(event);
 			if (r != null)
 				r.run();
@@ -737,7 +726,7 @@ public class EventHandler implements EventListener {
 	}
 
 	@Override
-	public synchronized void eventReceived(final SignalChangeEvent event) {
+	public synchronized void eventReceived(final UserActionEvent event) {
 		new ActionFactory().run(event);
 	}
 
@@ -762,66 +751,6 @@ public class EventHandler implements EventListener {
 		}
 
 	}
-
-//	@Override
-//	public synchronized void eventReceived(final InterfaceEvent event) {
-//
-//		fireInterfaceEvent(event); // pass onwards to registered listeners - only MainWindow at present
-//		InterfaceMethod method = event.method();
-//
-//		final List<IAnalysisDataset> selected = DatasetListManager.getInstance().getSelectedDatasets();
-//
-//		switch (method) {
-//
-//		case SAVE_ROOT:
-//			saveRootDatasets(); // DO NOT WRAP IN A SEPARATE THREAD, IT WILL
-//								// LOCK THE PROGRESS BAR
-//
-//			break;
-//
-//		case UPDATE_PANELS: {
-//			fireDatasetUpdateEvent(selected);
-//			break;
-//		}
-//
-//		case LIST_SELECTED_DATASETS:
-//			int count = 0;
-//			for (IAnalysisDataset d : selected) {
-//				LOGGER.info(count + "\t" + d.getName());
-//				count++;
-//			}
-//			break;
-//
-//		case DUMP_LOG_INFO:
-//			for (IAnalysisDataset d : selected) {
-//				for (Nucleus n : d.getCollection().getNuclei()) {
-//					LOGGER.info(n.toString());
-//				}
-//			}
-//			break;
-//
-//		case INFO:
-//			for (IAnalysisDataset d : selected) {
-//				LOGGER.info(d.getCollection().toString());
-//			}
-//			break;
-//
-//		case REFRESH_POPULATIONS: {
-//			firePopulationListUpdateEvent();
-//			break;
-//		}
-//
-//		case RECACHE_CHARTS: {
-//			fireInterfaceEvent(InterfaceEvent.of(this, event.method())); // pass to main window. Change source so it is
-//																			// not ignored
-//			break;
-//		}
-//
-//		default:
-//			break;
-//
-//		}
-//	}
 
 	/**
 	 * Save all the root datasets in the populations panel

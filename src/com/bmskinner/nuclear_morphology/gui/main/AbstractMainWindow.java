@@ -80,7 +80,6 @@ public abstract class AbstractMainWindow extends JFrame
 		isStandalone = standalone;
 		this.eh = eh;
 		setTitle(PROGRAM_TITLE_BAR_LBL);
-		eh.addInterfaceEventListener(this);
 		eh.addDatasetSelectionListener(this);
 		eh.addDatasetEventListener(this);
 		eh.addDatasetUpdateEventListener(this);

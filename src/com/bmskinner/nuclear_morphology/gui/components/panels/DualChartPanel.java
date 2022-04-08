@@ -37,7 +37,7 @@ import com.bmskinner.nuclear_morphology.visualisation.charts.panels.PositionSele
 import com.bmskinner.nuclear_morphology.visualisation.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.visualisation.options.ChartOptionsBuilder;
 import com.bmskinner.nuclear_morphology.gui.events.SegmentEventListener;
-import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
+import com.bmskinner.nuclear_morphology.gui.events.UserActionEvent;
 
 /**
  * This holds two JFreeChart ChartPanels. One is an overview, with a draggable
@@ -184,7 +184,7 @@ public abstract class DualChartPanel implements EventListener, SegmentEventListe
     }
 
     @Override
-    public void eventReceived(SignalChangeEvent event) {
+    public void eventReceived(UserActionEvent event) {
 
         // Change the range of the main chart based on the lower chart
         if (event.type().contains("UpdatePosition") && event.getSource().equals(rangePanel)) {

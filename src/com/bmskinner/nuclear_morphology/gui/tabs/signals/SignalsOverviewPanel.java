@@ -47,7 +47,7 @@ import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 import com.bmskinner.nuclear_morphology.gui.components.ImageThumbnailGenerator;
 import com.bmskinner.nuclear_morphology.gui.events.ChartSetEventListener;
-import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
+import com.bmskinner.nuclear_morphology.gui.events.UserActionEvent;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.ConsensusUpdatedListener;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.NuclearSignalUpdatedListener;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.UIController;
@@ -258,7 +258,7 @@ public class SignalsOverviewPanel extends DetailPanel
 		mergeButton = new JButton(Labels.Signals.MERGE_BTN_LBL);
 		mergeButton.addActionListener(e -> {
 			LOGGER.finer("Firing merge signal action request");
-			getSignalChangeEventHandler().fireSignalChangeEvent(SignalChangeEvent.MERGE_SIGNALS_ACTION);
+			getSignalChangeEventHandler().fireUserActionEvent(UserActionEvent.MERGE_SIGNALS_ACTION);
 		});
 		mergeButton.setEnabled(false);
 		panel.add(mergeButton);
@@ -291,7 +291,7 @@ public class SignalsOverviewPanel extends DetailPanel
 
 				box.addActionListener(e -> {
 					activeDataset().getCollection().getSignalGroup(signalGroup).get().setVisible(box.isSelected());
-					getSignalChangeEventHandler().fireSignalChangeEvent(SignalChangeEvent.GROUP_VISIBLE_PREFIX);
+					uiController.fireNuclearSignalUpdated(activeDataset());
 				});
 				panel.add(box);
 

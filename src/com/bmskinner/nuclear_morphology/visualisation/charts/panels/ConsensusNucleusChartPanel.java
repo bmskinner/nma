@@ -31,7 +31,7 @@ import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.gui.events.EventListener;
-import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
+import com.bmskinner.nuclear_morphology.gui.events.UserActionEvent;
 import com.bmskinner.nuclear_morphology.visualisation.charts.overlays.ComponentOverlay;
 import com.bmskinner.nuclear_morphology.visualisation.charts.overlays.ShapeOverlayObject;
 import com.bmskinner.nuclear_morphology.visualisation.datasets.ComponentOutlineDataset;
@@ -177,7 +177,7 @@ public class ConsensusNucleusChartPanel extends ExportableChartPanel {
     }
 
     private synchronized void fireSignalChangeEvent(String message) {
-        SignalChangeEvent event = new SignalChangeEvent(this, message, SOURCE_COMPONENT);
+        UserActionEvent event = new UserActionEvent(this, message, SOURCE_COMPONENT);
         Iterator<Object> iterator = listeners.iterator();
         while (iterator.hasNext()) {
             ((EventListener) iterator.next()).eventReceived(event);

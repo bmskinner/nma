@@ -53,8 +53,8 @@ import com.bmskinner.nuclear_morphology.gui.events.DatasetEventHandler;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetUpdateEvent;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetUpdateEventHandler;
 import com.bmskinner.nuclear_morphology.gui.events.EventListener;
-import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
-import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEventHandler;
+import com.bmskinner.nuclear_morphology.gui.events.UserActionEvent;
+import com.bmskinner.nuclear_morphology.gui.events.UserActionEventHandler;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.DatasetSelectionUpdatedListener;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.UIController;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -109,7 +109,7 @@ public abstract class DetailPanel extends JPanel
 	/** Event handlers for sending events */
 	private final transient DatasetEventHandler dh = new DatasetEventHandler(this);
 	private final transient DatasetUpdateEventHandler duh = new DatasetUpdateEventHandler(this);
-	private final transient SignalChangeEventHandler sh = new SignalChangeEventHandler(this);
+	private final transient UserActionEventHandler sh = new UserActionEventHandler(this);
 
 	/** Perform cosmetic operations on datasets - renaming, changing colours etc. */
 	protected final transient CosmeticHandler cosmeticHandler = new CosmeticHandler(this);
@@ -708,7 +708,7 @@ public abstract class DetailPanel extends JPanel
 	}
 
 	@Override
-	public SignalChangeEventHandler getSignalChangeEventHandler() {
+	public UserActionEventHandler getSignalChangeEventHandler() {
 		return sh;
 	}
 
@@ -723,7 +723,7 @@ public abstract class DetailPanel extends JPanel
 	}
 
 	@Override
-	public void eventReceived(SignalChangeEvent event) {
+	public void eventReceived(UserActionEvent event) {
 		// Pass messages upwards
 		if (parentPanel != null)
 			parentPanel.eventReceived(event);
@@ -731,7 +731,7 @@ public abstract class DetailPanel extends JPanel
 		// Pass messages downwards
 		for (TabPanel panel : this.subPanels) {
 			if (event.getSource().equals(panel)) {
-				sh.fire(new SignalChangeEvent(this, event));
+				sh.fire(new UserActionEvent(this, event));
 			}
 		}
 	}
