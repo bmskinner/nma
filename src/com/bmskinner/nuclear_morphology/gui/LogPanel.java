@@ -107,7 +107,7 @@ public class LogPanel extends DetailPanel implements ProgressBarAcceptor {
 		this.logPanel = createLogPanel();
 
 		addDatasetEventListener(eh);
-		addSignalChangeListener(eh);
+		addUserActionEventListener(eh);
 		textArea.setDropTarget(new MainDragAndDropTarget(eh));
 		this.add(logPanel, BorderLayout.CENTER);
 	}

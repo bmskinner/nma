@@ -39,7 +39,6 @@ import com.bmskinner.nuclear_morphology.gui.CancellableRunnable;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetUpdateEvent;
 import com.bmskinner.nuclear_morphology.gui.events.EventListener;
-import com.bmskinner.nuclear_morphology.gui.tabs.DatasetSelectionListener;
 import com.bmskinner.nuclear_morphology.gui.tabs.TabPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.populations.PopulationsPanel;
 
@@ -50,7 +49,7 @@ import com.bmskinner.nuclear_morphology.gui.tabs.populations.PopulationsPanel;
  *
  */
 @SuppressWarnings("serial")
-public abstract class AbstractMainWindow extends JFrame implements MainView, EventListener, DatasetSelectionListener {
+public abstract class AbstractMainWindow extends JFrame implements MainView, EventListener {
 
 	private static final String PROGRAM_TITLE_BAR_LBL = "Nuclear Morphology Analysis v"
 			+ Version.currentVersion().toString();
@@ -78,7 +77,6 @@ public abstract class AbstractMainWindow extends JFrame implements MainView, Eve
 		isStandalone = standalone;
 		this.eh = eh;
 		setTitle(PROGRAM_TITLE_BAR_LBL);
-		eh.addDatasetSelectionListener(this);
 		eh.addDatasetEventListener(this);
 		eh.addDatasetUpdateEventListener(this);
 	}
@@ -245,43 +243,6 @@ public abstract class AbstractMainWindow extends JFrame implements MainView, Eve
 		updateListeners.remove(l);
 	}
 
-//	@Override
-//	public void eventReceived(InterfaceEvent event) {
-//
-//		if(event.getSource().equals(eh)){
-//			InterfaceMethod method = event.method();
-//	        
-//	        final List<IAnalysisDataset> selected = DatasetListManager.getInstance().getSelectedDatasets();
-//
-//	        switch (method) {
-//
-//	        case REFRESH_POPULATIONS: getPopulationsPanel().update(selected); // ensure all child datasets are included
-//	            break;
-//
-//	        case UPDATE_IN_PROGRESS:
-//	            for (TabPanel panel : getTabPanels()) {
-//	                panel.setAnalysing(true);
-//	            }
-//	            setCursor(new Cursor(Cursor.WAIT_CURSOR));
-//	            break;
-//
-//	        case UPDATE_COMPLETE:
-//	            for (TabPanel panel : getTabPanels()) {
-//	                panel.setAnalysing(false);
-//	            }
-//	            setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
-//	            break;
-//
-//	        case RECACHE_CHARTS:{
-//	        	recacheCharts();
-//	        	break;
-//	        }
-//			default:
-//				break;
-//	        }
-//		}
-//	}
-
 	/**
 	 * Send panel update requests to all panels
 	 * 
@@ -295,9 +256,6 @@ public abstract class AbstractMainWindow extends JFrame implements MainView, Eve
 
 		public PanelUpdater(final @NonNull List<IAnalysisDataset> datasets) {
 			this.list.addAll(datasets);
-//            log("Ping");
-//        	for(StackTraceElement e :Thread.currentThread().getStackTrace())
-//        		log(e.toString());
 		}
 
 		@Override

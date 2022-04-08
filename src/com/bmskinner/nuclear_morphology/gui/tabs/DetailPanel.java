@@ -19,9 +19,7 @@ package com.bmskinner.nuclear_morphology.gui.tabs;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Cursor;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
@@ -34,7 +32,6 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
 
 import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.jdt.annotation.Nullable;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
@@ -84,12 +81,7 @@ public abstract class DetailPanel extends JPanel
 	protected static final int SINGLE_CLICK = 1;
 	protected static final int DOUBLE_CLICK = 2;
 
-	private final transient List<Object> listeners = new CopyOnWriteArrayList<>();
-
 	private final transient InputSupplier inputSupplier;
-
-	private final transient TabPanel parentPanel;
-	private final transient List<TabPanel> subPanels = new ArrayList<>();
 
 	/** Holds rendered charts for all selected options */
 	protected final transient Cache chartCache = new ChartCache();
@@ -117,23 +109,12 @@ public abstract class DetailPanel extends JPanel
 		this(context, DEFAULT_TAB_TITLE);
 	}
 
-	public DetailPanel(@NonNull final TabPanel parent) {
-		this(parent.getInputSupplier(), parent, DEFAULT_TAB_TITLE);
-	}
-
-	public DetailPanel(@NonNull final InputSupplier context, final String title) {
-		this(context, null, title);
-	}
-
-	public DetailPanel(@NonNull final InputSupplier context, @Nullable final TabPanel parent,
-			@NonNull final String title) {
+	public DetailPanel(@NonNull final InputSupplier context, @NonNull final String title) {
 		inputSupplier = context;
-		parentPanel = parent;
 		panelTabTitleLbl = title;
 
 		uiController = UIController.getInstance();
 		uiController.addDatasetSelectionUpdatedListener(this);
-
 	}
 
 	/**
@@ -149,37 +130,6 @@ public abstract class DetailPanel extends JPanel
 	public InputSupplier getInputSupplier() {
 		return inputSupplier;
 	}
-
-	/**
-	 * Add another detail panel as a sub panel to this. This will pass on refreshes
-	 * and UI updates
-	 * 
-	 * @param panel the panel to add
-	 */
-//	@Override
-//	public void addSubPanel(final @NonNull TabPanel panel) {
-//		subPanels.add(panel);
-//		panel.addSignalChangeListener(this);
-//		panel.addDatasetEventListener(this);
-//
-//		// This will signal to sub panels to update
-//		this.addDatasetUpdateEventListener(panel);
-//	}
-//
-//	@Override
-//	public List<TabPanel> getSubPanels() {
-//		return subPanels;
-//	}
-//
-//	@Override
-//	public boolean hasSubPanels() {
-//		return !subPanels.isEmpty();
-//	}
-
-//	@Override
-//	public TabPanel getParentPanel() {
-//		return parentPanel;
-//	}
 
 	/**
 	 * Fetch the currently active dataset for the panel. Use when only one dataset
@@ -240,12 +190,6 @@ public abstract class DetailPanel extends JPanel
 			return true;
 		}
 
-		for (TabPanel panel : this.subPanels) {
-			if (panel.isUpdating()) {
-				return true;
-			}
-		}
-
 		return false;
 	}
 
@@ -275,9 +219,6 @@ public abstract class DetailPanel extends JPanel
 			}
 			this.setCursor(Cursor.getDefaultCursor());
 		}
-		for (TabPanel panel : this.subPanels) {
-			panel.setAnalysing(b);
-		}
 	}
 
 	/**
@@ -286,12 +227,7 @@ public abstract class DetailPanel extends JPanel
 	 */
 	@Override
 	public synchronized void updateSize() {
-
 		updateSize(this);
-
-		for (TabPanel panel : this.subPanels) {
-			panel.updateSize();
-		}
 	}
 
 	/**
@@ -513,9 +449,6 @@ public abstract class DetailPanel extends JPanel
 	@Override
 	public synchronized void clearChartCache() {
 		this.getChartCache().clear();
-		for (TabPanel panel : this.subPanels) {
-			panel.clearChartCache();
-		}
 	}
 
 	/**
@@ -526,21 +459,11 @@ public abstract class DetailPanel extends JPanel
 	@Override
 	public synchronized void clearChartCache(final List<IAnalysisDataset> list) {
 		getChartCache().clear(list);
-//		if (hasSubPanels()) {
-//			for (TabPanel panel : this.subPanels) {
-//				panel.clearChartCache(list);
-//			}
-//		}
 	}
 
 	@Override
 	public synchronized void clearChartCache(final IAnalysisDataset dataset) {
 		getChartCache().clear(dataset);
-//		if (hasSubPanels()) {
-//			for (TabPanel panel : this.subPanels) {
-//				panel.clearChartCache(dataset);
-//			}
-//		}
 	}
 
 	/**
@@ -605,9 +528,6 @@ public abstract class DetailPanel extends JPanel
 	@Override
 	public synchronized void clearTableCache() {
 		getTableCache().clear();
-		for (TabPanel panel : this.subPanels) {
-			panel.clearTableCache();
-		}
 	}
 
 	/**
@@ -619,11 +539,6 @@ public abstract class DetailPanel extends JPanel
 	@Override
 	public synchronized void clearTableCache(final List<IAnalysisDataset> list) {
 		getTableCache().clear(list);
-//		if (this.hasSubPanels()) {
-//			for (TabPanel panel : this.subPanels) {
-//				panel.clearTableCache(list);
-//			}
-//		}
 	}
 
 	/**
@@ -665,12 +580,12 @@ public abstract class DetailPanel extends JPanel
 	}
 
 	@Override
-	public synchronized void addSignalChangeListener(EventListener l) {
+	public synchronized void addUserActionEventListener(EventListener l) {
 		sh.addListener(l);
 	}
 
 	@Override
-	public synchronized void removeSignalChangeListener(EventListener l) {
+	public synchronized void removeUserActionEventListener(EventListener l) {
 		sh.removeListener(l);
 	}
 
@@ -711,33 +626,12 @@ public abstract class DetailPanel extends JPanel
 
 	@Override
 	public void eventReceived(DatasetEvent event) {
-		// Pass messages upwards
-		for (TabPanel panel : this.subPanels) {
-			if (event.getSource().equals(panel)) {
-				dh.fireDatasetEvent(new DatasetEvent(this, event));
-			}
-		}
 	}
 
 	@Override
 	public void eventReceived(UserActionEvent event) {
-		// Pass messages upwards
-		if (parentPanel != null)
-			parentPanel.eventReceived(event);
 
-		// Pass messages downwards
-		for (TabPanel panel : this.subPanels) {
-			if (event.getSource().equals(panel)) {
-				sh.fire(new UserActionEvent(this, event));
-			}
-		}
 	}
-
-//	@Override
-//	public void eventReceived(ChartOptionsRenderedEvent e) {
-//		// To be overridden as needed by extending classes
-//		update(getDatasets());
-//	}
 
 	/**
 	 * Charting can be an intensive process, especially with background images being
@@ -920,9 +814,6 @@ public abstract class DetailPanel extends JPanel
 	 */
 	@Override
 	public synchronized void setChartsAndTablesLoading() {
-		for (TabPanel p : subPanels) {
-			p.setChartsAndTablesLoading();
-		}
 	}
 
 	@Override
@@ -939,20 +830,12 @@ public abstract class DetailPanel extends JPanel
 
 	@Override
 	public boolean hasCellUpdate() {
-		boolean result = isCellUpdateMade;
-//		for (TabPanel t : getSubPanels()) {
-//			result |= t.hasCellUpdate();
-//		}
-		return result;
+		return isCellUpdateMade;
 	}
 
 	@Override
 	public void setCellUpdate(boolean b) {
 		isCellUpdateMade = b;
-//		for (TabPanel t : getSubPanels()) {
-//			t.setCellUpdate(b);
-//		}
-
 	}
 
 	@Override

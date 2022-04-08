@@ -76,8 +76,6 @@ import com.bmskinner.nuclear_morphology.gui.events.DatasetUpdateEvent;
 import com.bmskinner.nuclear_morphology.gui.events.EventListener;
 import com.bmskinner.nuclear_morphology.gui.events.UserActionEvent;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.UIController;
-import com.bmskinner.nuclear_morphology.gui.tabs.DatasetSelectionListener;
-import com.bmskinner.nuclear_morphology.gui.tabs.DatasetSelectionListener.DatasetSelectionEvent;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -98,7 +96,6 @@ public class EventHandler implements EventListener {
 
 	private final List<EventListener> updateListeners = new ArrayList<>();
 	private final List<EventListener> datasetListeners = new ArrayList<>();
-	private final List<DatasetSelectionListener> selectionListeners = new ArrayList<>();
 
 	/**
 	 * Constructor
@@ -135,22 +132,22 @@ public class EventHandler implements EventListener {
 		acceptor = p;
 	}
 
-	public void addDatasetSelectionListener(DatasetSelectionListener l) {
-		selectionListeners.add(l);
-	}
+//	public void addDatasetSelectionListener(DatasetSelectionListener l) {
+//		selectionListeners.add(l);
+//	}
 
-	private void fireDatasetSelectionEvent(IAnalysisDataset d) {
-		List<IAnalysisDataset> list = new ArrayList<>();
-		list.add(d);
-		fireDatasetSelectionEvent(list);
-	}
+//	private void fireDatasetSelectionEvent(IAnalysisDataset d) {
+//		List<IAnalysisDataset> list = new ArrayList<>();
+//		list.add(d);
+//		fireDatasetSelectionEvent(list);
+//	}
 
-	private void fireDatasetSelectionEvent(List<IAnalysisDataset> list) {
-		DatasetSelectionEvent e = new DatasetSelectionEvent(this, list);
-		for (DatasetSelectionListener l : selectionListeners) {
-			l.datasetSelectionEventReceived(e);
-		}
-	}
+//	private void fireDatasetSelectionEvent(List<IAnalysisDataset> list) {
+//		DatasetSelectionEvent e = new DatasetSelectionEvent(this, list);
+//		for (DatasetSelectionListener l : selectionListeners) {
+//			l.datasetSelectionEventReceived(e);
+//		}
+//	}
 
 	public void addDatasetEventListener(EventListener l) {
 		datasetListeners.add(l);
@@ -353,8 +350,7 @@ public class EventHandler implements EventListener {
 							if (bs != null)
 								bs.addDataset(selectedDataset);
 						}
-						fireDatasetSelectionEvent(selectedDataset); // Using to trigger a refresh of the populations
-																	// panel
+						DatasetListManager.getInstance().setSelectedDataset(selectedDataset);
 					} catch (RequestCancelledException e) {
 						LOGGER.fine("New biosample cancelled");
 						return;
@@ -371,7 +367,7 @@ public class EventHandler implements EventListener {
 						if (b != null)
 							b.removeDataset(selectedDataset);
 					}
-					fireDatasetSelectionEvent(selectedDataset); // Using to trigger a refresh of the populations panel
+					DatasetListManager.getInstance().setSelectedDataset(selectedDataset);
 				};
 
 			if (event.type().startsWith(UserActionEvent.ADD_TO_BIOSAMPLE_PREFIX))
@@ -384,7 +380,7 @@ public class EventHandler implements EventListener {
 						if (b != null)
 							b.addDataset(selectedDataset);
 					}
-					fireDatasetSelectionEvent(selectedDataset); // Using to trigger a refresh of the populations panel
+					DatasetListManager.getInstance().setSelectedDataset(selectedDataset);
 				};
 
 			if (event.type().equals(UserActionEvent.RELOCATE_CELLS))
@@ -737,10 +733,10 @@ public class EventHandler implements EventListener {
 		if (!list.isEmpty()) {
 
 			if (event.method().equals(DatasetEvent.SELECT_DATASETS))
-				fireDatasetSelectionEvent(event.getDatasets());
+				DatasetListManager.getInstance().setSelectedDatasets(event.getDatasets());
 
 			if (event.method().equals(DatasetEvent.SELECT_ONE_DATASET))
-				fireDatasetSelectionEvent(event.firstDataset());
+				DatasetListManager.getInstance().setSelectedDataset(event.firstDataset());
 
 			if (event.method().equals(DatasetEvent.RECACHE_CHARTS) || event.method().equals(DatasetEvent.CLEAR_CACHE))
 				fireDatasetEvent(event);
@@ -784,18 +780,6 @@ public class EventHandler implements EventListener {
 
 	public synchronized void removeDatasetUpdateEventListener(EventListener l) {
 		updateListeners.remove(l);
-	}
-
-//
-//    /**
-//     * Signal listeners that the given datasets should be displayed
-//     * 
-//     * @param list
-//     */
-	public synchronized void fireDatasetUpdateEvent(final List<IAnalysisDataset> list) {
-		for (EventListener l : updateListeners) {
-			l.eventReceived(new DatasetUpdateEvent(this, list));
-		}
 	}
 
 	@Override

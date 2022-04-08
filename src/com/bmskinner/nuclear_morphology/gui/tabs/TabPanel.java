@@ -80,14 +80,14 @@ public interface TabPanel extends EventListener {
 	 * 
 	 * @param l the listener
 	 */
-	void addSignalChangeListener(EventListener l);
+	void addUserActionEventListener(EventListener l);
 
 	/**
 	 * Remove a listener for signal change events from this panel
 	 * 
 	 * @param l the listener
 	 */
-	void removeSignalChangeListener(EventListener l);
+	void removeUserActionEventListener(EventListener l);
 
 	/**
 	 * Add a listener for dataset events from this panel

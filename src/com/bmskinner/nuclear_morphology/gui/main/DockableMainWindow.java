@@ -33,7 +33,6 @@ import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.gui.LogPanel;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.events.UserActionEvent;
-import com.bmskinner.nuclear_morphology.gui.events.revamp.UIController;
 import com.bmskinner.nuclear_morphology.gui.tabs.AnalysisDetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.ClusterDetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
@@ -52,6 +51,7 @@ import com.bmskinner.nuclear_morphology.gui.tabs.signals.SignalsDetailPanel;
 import com.bmskinner.nuclear_morphology.io.UpdateChecker;
 import com.bmskinner.nuclear_morphology.logging.LogPanelFormatter;
 import com.bmskinner.nuclear_morphology.logging.LogPanelHandler;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.javadocking.DockingManager;
 import com.javadocking.dock.Position;
 import com.javadocking.dock.TabDock;
@@ -135,7 +135,7 @@ public class DockableMainWindow extends AbstractMainWindow {
 			textHandler.setFormatter(new LogPanelFormatter());
 
 			// Add to the root program logger
-			Logger.getLogger("com.bmskinner.nuclear_morphology").addHandler(textHandler);
+			Logger.getLogger(Loggable.PROJECT_LOGGER).addHandler(textHandler);
 
 			// ---------------
 			// Create the consensus chart
@@ -234,8 +234,8 @@ public class DockableMainWindow extends AbstractMainWindow {
 			tabDock.addDockable(d, new Position(i++));
 		}
 
-		signalsDetailPanel.addSignalChangeListener(editingDetailPanel);
-		editingDetailPanel.addSignalChangeListener(signalsDetailPanel);
+		signalsDetailPanel.addUserActionEventListener(editingDetailPanel);
+		editingDetailPanel.addUserActionEventListener(signalsDetailPanel);
 
 		tabDock.setSelectedDockable(tabDock.getDockable(0));
 		tabDock.getTabbedPane().addChangeListener(e -> { // listen for tab switches and update charts if cells have been
@@ -263,12 +263,12 @@ public class DockableMainWindow extends AbstractMainWindow {
 
 		this.addDatasetUpdateEventListener(logPanel);
 
-		populationsPanel.addSignalChangeListener(eh);
+		populationsPanel.addUserActionEventListener(eh);
 		populationsPanel.addDatasetEventListener(eh);
 
 		for (TabPanel d : detailPanels) {
 			d.addDatasetEventListener(eh);
-			d.addSignalChangeListener(eh);
+			d.addUserActionEventListener(eh);
 			this.addDatasetUpdateEventListener(d);
 		}
 	}
@@ -281,11 +281,6 @@ public class DockableMainWindow extends AbstractMainWindow {
 	@Override
 	public ProgressBarAcceptor getProgressAcceptor() {
 		return this.logPanel;
-	}
-
-	@Override
-	public void datasetSelectionEventReceived(DatasetSelectionEvent e) {
-		UIController.getInstance().fireDatasetSelectionUpdated(e.getDatasets());
 	}
 
 	@Override

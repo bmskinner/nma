@@ -27,95 +27,99 @@ import com.bmskinner.nuclear_morphology.components.Version;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.io.Io;
 import com.bmskinner.nuclear_morphology.io.XMLWriter;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * This is the main class that runs the program.
+ * 
  * @author bms41
  * @since 1.13.7
  *
  */
 public class NuclearMorphologyAnalysis {
-	
+
 	private static NuclearMorphologyAnalysis instance;
-	
+
 	/** Initialise the logger for the project namespace */
-	private static final Logger LOGGER = Logger.getLogger("com.bmskinner.nuclear_morphology");
-	
+	private static final Logger LOGGER = Logger.getLogger(Loggable.PROJECT_LOGGER);
+
 	static {
-		
+
 		// Create a config folder in the user home dir if needed
 		File logFolder = Io.getLogDir();
-    	
-    	if(!logFolder.exists()) {
-    		logFolder.mkdirs();
-    	}
-		
-    	try {
-    		LogManager.getLogManager()
-    		.readConfiguration(NuclearMorphologyAnalysis.class.getClassLoader()
-    				.getResourceAsStream("logging.properties"));
-    	} catch (SecurityException | IOException e) {
-    		LOGGER.log(Level.SEVERE, "Unable to make log manager", e);
-    	}
+
+		if (!logFolder.exists()) {
+			logFolder.mkdirs();
+		}
+
+		try {
+			LogManager.getLogManager().readConfiguration(
+					NuclearMorphologyAnalysis.class.getClassLoader().getResourceAsStream("logging.properties"));
+		} catch (SecurityException | IOException e) {
+			LOGGER.log(Level.SEVERE, "Unable to make log manager", e);
+		}
 	}
-	
+
 	/**
 	 * Private constructor used when launching as a standalone program
+	 * 
 	 * @param args
 	 */
-	private NuclearMorphologyAnalysis(String[] args){
+	private NuclearMorphologyAnalysis(String[] args) {
 		configureLogging();
 		configureSettingsFiles();
-	    new CommandLineParser(args);
+		new CommandLineParser(args);
 	}
-	
+
 	/**
 	 * Main entry when launching jar
+	 * 
 	 * @param args
 	 */
-	public static void main(String[] args){
+	public static void main(String[] args) {
 		instance = new NuclearMorphologyAnalysis(args);
 	}
-	
+
 	/**
 	 * Get this program instance
+	 * 
 	 * @return
 	 */
-	public static NuclearMorphologyAnalysis getInstance(){
+	public static NuclearMorphologyAnalysis getInstance() {
 		return instance;
 	}
-		
+
 	/**
-	 * Log the program status handlers and files
-	 * and configure the logging options
+	 * Log the program status handlers and files and configure the logging options
 	 * 
 	 */
-	private void configureLogging(){
+	private void configureLogging() {
 
 		try {
 			LOGGER.config("Log file location: " + Io.getLogDir().getAbsolutePath());
-			
-			GlobalOptions.getInstance().setString(GlobalOptions.LOG_DIRECTORY_KEY, 
-					Io.getLogDir().getAbsolutePath());
 
-			LOGGER.config("OS: "+System.getProperty("os.name")+", version "+System.getProperty("os.version")+", "+System.getProperty("os.arch"));
-			LOGGER.config("JVM: "+System.getProperty("java.vendor")+", version "+System.getProperty("java.version"));
-			LOGGER.config("NMA version: "+Version.currentVersion());
+			GlobalOptions.getInstance().setString(GlobalOptions.LOG_DIRECTORY_KEY, Io.getLogDir().getAbsolutePath());
 
-			// First invokation of the thread manager will log available resources 
+			LOGGER.config("OS: " + System.getProperty("os.name") + ", version " + System.getProperty("os.version")
+					+ ", " + System.getProperty("os.arch"));
+			LOGGER.config(
+					"JVM: " + System.getProperty("java.vendor") + ", version " + System.getProperty("java.version"));
+			LOGGER.config("NMA version: " + Version.currentVersion());
+
+			// First invokation of the thread manager will log available resources
 			ThreadManager.getInstance();
-		} catch (SecurityException e ) {
+		} catch (SecurityException e) {
 			LOGGER.log(Level.SEVERE, "Error initialising logger", e);
 		}
 	}
-	
+
 	/**
-	 * Ensure all default settings files are present
-	 * by creating if needed from inbuilt defaults
+	 * Ensure all default settings files are present by creating if needed from
+	 * inbuilt defaults
 	 */
 	private void configureSettingsFiles() {
-		
-		if(!Io.getRulesetDir().exists())
+
+		if (!Io.getRulesetDir().exists())
 			try {
 				Files.createDirectories(Io.getRulesetDir().toPath());
 			} catch (IOException e) {
@@ -125,21 +129,21 @@ public class NuclearMorphologyAnalysis {
 		ensureRuleSetFileExists(RuleSetCollection.mouseSpermRuleSetCollection(), "Mouse sperm.xml");
 		ensureRuleSetFileExists(RuleSetCollection.pigSpermRuleSetCollection(), "Pig sperm.xml");
 		ensureRuleSetFileExists(RuleSetCollection.roundRuleSetCollection(), "Round.xml");
-		
+
 	}
-	
+
 	/**
-	 * Check if a file exists for the given ruleset. If not,
-	 * create it.
+	 * Check if a file exists for the given ruleset. If not, create it.
+	 * 
 	 * @param rsc
 	 * @param fileName
 	 */
 	private void ensureRuleSetFileExists(RuleSetCollection rsc, String fileName) {
 		File ruleFile = new File(Io.getRulesetDir(), fileName);
-	
-		if(!ruleFile.exists()) {
+
+		if (!ruleFile.exists()) {
 			// create as needed
-			LOGGER.config("Creating default ruleset: "+ruleFile.getAbsolutePath());
+			LOGGER.config("Creating default ruleset: " + ruleFile.getAbsolutePath());
 			try {
 				XMLWriter.writeXML(rsc.toXmlElement(), ruleFile);
 			} catch (IOException e) {

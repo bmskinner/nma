@@ -20,6 +20,7 @@ import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Dialog;
 import java.awt.Dimension;
+import java.awt.MediaTracker;
 import java.awt.Toolkit;
 import java.net.URL;
 import java.util.logging.Logger;
@@ -38,179 +39,179 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  */
 @SuppressWarnings("serial")
 public abstract class LoadingIconDialog extends MessagingDialog {
-	
+
 	private static final Logger LOGGER = Logger.getLogger(LoadingIconDialog.class.getName());
-    
-    private static final String RESOURCE_FOLDER  = "icons/";
-    private static final String LOADING_GIF_NAME = "ajax-loader.gif";
-    private static final String BLANK_GIF_NAME   = "blank.gif";
 
-    private JLabel    loadingLabel = new JLabel("");
-    private ImageIcon loadingGif   = null;          // the icon for the loading
-                                                    // gif
-    private ImageIcon blankGif     = null;          // the icon for the blank
-                                                    // gif
+	private static final String RESOURCE_FOLDER = "icons/";
+	private static final String LOADING_GIF_NAME = "ajax-loader.gif";
+	private static final String BLANK_GIF_NAME = "blank.gif";
 
-    public LoadingIconDialog() {
-        super((Dialog) null); // provides a taskbar icon
+	private JLabel loadingLabel = new JLabel("");
+	private ImageIcon loadingGif = null; // the icon for the loading
+											// gif
+	private ImageIcon blankGif = null; // the icon for the blank
+										// gif
 
-        boolean ok = loadResources(RESOURCE_FOLDER);
-        if (!ok)
-            ok = loadResources("");
-        if (!ok)
-            LOGGER.fine("Resource loading failed (gif)");
-        this.loadingLabel.setIcon(blankGif);
+	public LoadingIconDialog() {
+		super((Dialog) null); // provides a taskbar icon
 
-    }
+		boolean ok = loadResources(RESOURCE_FOLDER);
+		if (!ok)
+			ok = loadResources("");
+		if (!ok)
+			LOGGER.fine("Resource loading failed (gif)");
+		this.loadingLabel.setIcon(blankGif);
 
-    // Center on screen ( absolute true/false (exact center or 25% upper left) )
-    public void centerOnScreen() {
-        final int width = getWidth();
-        final int height = getHeight();
-        final Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-        int x = (screenSize.width / 2) - (width / 2);
-        int y = (screenSize.height / 2) - (height / 2);
+	}
 
-        setLocation(x, y);
-    }
+	// Center on screen ( absolute true/false (exact center or 25% upper left) )
+	public void centerOnScreen() {
+		final int width = getWidth();
+		final int height = getHeight();
+		final Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+		int x = (screenSize.width / 2) - (width / 2);
+		int y = (screenSize.height / 2) - (height / 2);
 
-    /**
-     * Get the JLabel with the loading icon
-     * 
-     * @return
-     */
-    protected JLabel getLoadingLabel() {
-        return this.loadingLabel;
-    }
+		setLocation(x, y);
+	}
 
-    /**
-     * Get the gif used for loading
-     * 
-     * @return
-     */
-    protected ImageIcon getLoadingGif() {
-        return this.loadingGif;
-    }
+	/**
+	 * Get the JLabel with the loading icon
+	 * 
+	 * @return
+	 */
+	protected JLabel getLoadingLabel() {
+		return this.loadingLabel;
+	}
 
-    /**
-     * Set the text for the label with the loading icon
-     * 
-     * @param s
-     */
-    protected void setLoadingLabelText(String s) {
-        this.loadingLabel.setText(s);
-    }
+	/**
+	 * Get the gif used for loading
+	 * 
+	 * @return
+	 */
+	protected ImageIcon getLoadingGif() {
+		return this.loadingGif;
+	}
 
-    /**
-     * Fetch the gif loading resources
-     * 
-     */
-    private boolean loadResources(String path) {
+	/**
+	 * Set the text for the label with the loading icon
+	 * 
+	 * @param s
+	 */
+	protected void setLoadingLabelText(String s) {
+		this.loadingLabel.setText(s);
+	}
 
-        String pathToGif = path + LOADING_GIF_NAME;
-        String pathToBlank = path + BLANK_GIF_NAME;
+	/**
+	 * Fetch the gif loading resources
+	 * 
+	 */
+	private boolean loadResources(String path) {
 
-        boolean ok = false;
-        try {
+		String pathToGif = path + LOADING_GIF_NAME;
+		String pathToBlank = path + BLANK_GIF_NAME;
 
-            // Get current classloader
-            ClassLoader cl = this.getClass().getClassLoader();
-            URL urlToGif = cl.getResource(pathToGif);
+		boolean ok = false;
+		try {
 
-            if (urlToGif != null) {
-                loadingGif = loadURL(urlToGif);
-                ok = loadingGif!=null;
-                if(!ok)
-                    LOGGER.warning( "Unable to load loading gif");
-            }
+			// Get current classloader
+			ClassLoader cl = this.getClass().getClassLoader();
+			URL urlToGif = cl.getResource(pathToGif);
 
-            // Get current classloader
-            URL urlToBlank = cl.getResource(pathToBlank);
+			if (urlToGif != null) {
+				loadingGif = loadURL(urlToGif);
+				ok = loadingGif != null;
+				if (!ok)
+					LOGGER.warning("Unable to load loading gif");
+			}
 
-            if (urlToBlank != null) {
-                blankGif = loadURL(urlToBlank);
-                ok = blankGif!=null;
-                if(!ok)
-                    LOGGER.warning( "Unable to load blank gif");
-            }
+			// Get current classloader
+			URL urlToBlank = cl.getResource(pathToBlank);
 
-        } catch (Exception e) {
-            LOGGER.log(Loggable.STACK, "Cannot load gif resource", e);
-        }
-        return ok;
-    }
+			if (urlToBlank != null) {
+				blankGif = loadURL(urlToBlank);
+				ok = blankGif != null;
+				if (!ok)
+					LOGGER.warning("Unable to load blank gif");
+			}
 
-    private ImageIcon loadURL(URL url) {
-        ImageIcon icon = null;
-        if (url != null) {
-            LOGGER.finest( "URL found: " + url.toString());
-            icon = new ImageIcon(url);
+		} catch (Exception e) {
+			LOGGER.log(Loggable.STACK, "Cannot load gif resource", e);
+		}
+		return ok;
+	}
 
-            String status = "";
-            switch (icon.getImageLoadStatus()) {
+	private ImageIcon loadURL(URL url) {
+		ImageIcon icon = null;
+		if (url != null) {
+			LOGGER.finest("URL found: " + url.toString());
+			icon = new ImageIcon(url);
 
-            case 1:
-                status = "Loading";
-                break;
-            case 2:
-                status = "Aborted";
-                break;
-            case 4:
-                status = "Errored";
-                break;
-            case 8:
-                status = "Complete";
-                break;
-            }
+			String status = "";
+			switch (icon.getImageLoadStatus()) {
 
-            LOGGER.finest("Load status: " + status);
-        }
-        return icon;
-    }
+			case MediaTracker.LOADING:
+				status = "Loading";
+				break;
+			case MediaTracker.ABORTED:
+				status = "Aborted";
+				break;
+			case MediaTracker.ERRORED:
+				status = "Errored";
+				break;
+			case MediaTracker.COMPLETE:
+				status = "Complete";
+				break;
+			}
 
-    protected void setLoading(boolean b) {
-        if (b) {
-            setStatusLoading();
-        } else {
-            setStatusLoaded();
-        }
-    }
+			LOGGER.finest("Load status: " + status);
+		}
+		return icon;
+	}
 
-    /**
-     * Set the header label to loading the loading gif
-     */
-    protected void setStatusLoading() {
-        if (loadingGif != null) {
-            ImageIcon hicon = (ImageIcon) loadingLabel.getIcon();
-            if (hicon != null) {
-                hicon.getImage().flush();
-            }
-            loadingLabel.setIcon(loadingGif);
-            loadingLabel.repaint();
-        }
+	protected void setLoading(boolean b) {
+		if (b) {
+			setStatusLoading();
+		} else {
+			setStatusLoaded();
+		}
+	}
 
-        this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-        for (Component c : this.getComponents()) {
-            c.setEnabled(false);
-            c.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-        }
-    }
+	/**
+	 * Set the header label to loading the loading gif
+	 */
+	protected void setStatusLoading() {
+		if (loadingGif != null) {
+			ImageIcon hicon = (ImageIcon) loadingLabel.getIcon();
+			if (hicon != null) {
+				hicon.getImage().flush();
+			}
+			loadingLabel.setIcon(loadingGif);
+			loadingLabel.repaint();
+		}
 
-    /**
-     * Set the header label to the blank gif
-     */
-    protected void setStatusLoaded() {
-        ImageIcon hicon = (ImageIcon) loadingLabel.getIcon();
-        if (hicon != null) {
-            hicon.getImage().flush();
-        }
-        loadingLabel.setIcon(blankGif);
-        loadingLabel.repaint();
+		this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+		for (Component c : this.getComponents()) {
+			c.setEnabled(false);
+			c.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+		}
+	}
 
-        this.setCursor(Cursor.getDefaultCursor());
-        for (Component c : this.getComponents()) {
-            c.setEnabled(true);
-            c.setCursor(Cursor.getDefaultCursor());
-        }
-    }
+	/**
+	 * Set the header label to the blank gif
+	 */
+	protected void setStatusLoaded() {
+		ImageIcon hicon = (ImageIcon) loadingLabel.getIcon();
+		if (hicon != null) {
+			hicon.getImage().flush();
+		}
+		loadingLabel.setIcon(blankGif);
+		loadingLabel.repaint();
+
+		this.setCursor(Cursor.getDefaultCursor());
+		for (Component c : this.getComponents()) {
+			c.setEnabled(true);
+			c.setCursor(Cursor.getDefaultCursor());
+		}
+	}
 }

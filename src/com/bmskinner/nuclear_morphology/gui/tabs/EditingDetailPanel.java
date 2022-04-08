@@ -55,9 +55,9 @@ public class EditingDetailPanel extends DetailPanel {
 		DetailPanel segmentsEditingPanel = new SegmentsEditingPanel(context);
 		DetailPanel borderTagEditingPanel = new BorderTagEditingPanel(context);
 
-		this.addSignalChangeListener(cellDetailPanel);
-		this.addSignalChangeListener(segmentsEditingPanel);
-		this.addSignalChangeListener(borderTagEditingPanel);
+		this.addUserActionEventListener(cellDetailPanel);
+		this.addUserActionEventListener(segmentsEditingPanel);
+		this.addUserActionEventListener(borderTagEditingPanel);
 
 		tabPane.addTab(cellDetailPanel.getPanelTitle(), cellDetailPanel);
 
@@ -65,8 +65,8 @@ public class EditingDetailPanel extends DetailPanel {
 		 * Signals come from the segment panel to this container Signals can be sent to
 		 * the segment panel Events come from the panel only
 		 */
-		segmentsEditingPanel.addSignalChangeListener(this);
-		borderTagEditingPanel.addSignalChangeListener(this);
+		segmentsEditingPanel.addUserActionEventListener(this);
+		borderTagEditingPanel.addUserActionEventListener(this);
 
 		tabPane.addTab("Segmentation", segmentsEditingPanel);
 		tabPane.addTab("Border tags", borderTagEditingPanel);

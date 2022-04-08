@@ -497,12 +497,18 @@ public class PopulationsPanel extends DetailPanel implements DatasetAddedListene
 
 	@Override
 	public void datasetSelectionUpdated(IAnalysisDataset d) {
-		// no action - this is where datasets get selected
+		// no action if dataset selection is not different to current
+		if (!datasetSelectionOrder.equals(List.of(d))) {
+			update(List.of(d));
+		}
 	}
 
 	@Override
 	public void datasetSelectionUpdated(List<IAnalysisDataset> d) {
-		// no action - this is where datasets get selected
+		// no action if dataset selection is not different to current
+		if (!datasetSelectionOrder.equals(d)) {
+			update(d);
+		}
 	}
 
 	@Override
