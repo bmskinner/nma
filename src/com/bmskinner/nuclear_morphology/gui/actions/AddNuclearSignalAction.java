@@ -34,7 +34,7 @@ import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledExcep
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.SignalImageProber;
-import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
+import com.bmskinner.nuclear_morphology.gui.events.revamp.UIController;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -44,69 +44,71 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  *
  */
 public class AddNuclearSignalAction extends SingleDatasetResultAction {
-	
+
 	private static final Logger LOGGER = Logger.getLogger(AddNuclearSignalAction.class.getName());
-	
-    private static final @NonNull String PROGRESS_BAR_LABEL = "Signal detection";
 
-    public AddNuclearSignalAction(@NonNull IAnalysisDataset dataset, @NonNull ProgressBarAcceptor acceptor, @NonNull EventHandler eh) {
-        super(dataset, PROGRESS_BAR_LABEL, acceptor, eh);
-    }
+	private static final @NonNull String PROGRESS_BAR_LABEL = "Signal detection";
 
-    @Override
-    public void run() {
-        try {
-        	File defaultDir = null;
-        	Optional<IAnalysisOptions> op = dataset.getAnalysisOptions();
-        	if(op.isPresent()) {
-        		Optional<HashOptions> im = op.get().getDetectionOptions(CellularComponent.NUCLEUS);
-        		if(im.isPresent())
-        			defaultDir = im.get().getFile(HashOptions.DETECTION_FOLDER);
-        	}
-        	
-        	File folder = null;
-        	
-        	try{
-        		folder = eh.getInputSupplier().requestFolder("Choose FISH signal image folder", defaultDir);
-        	} catch(RequestCancelledException e) {
-        		cancel();
-        		return;
-        	}
+	public AddNuclearSignalAction(@NonNull IAnalysisDataset dataset, @NonNull ProgressBarAcceptor acceptor,
+			@NonNull EventHandler eh) {
+		super(dataset, PROGRESS_BAR_LABEL, acceptor, eh);
+	}
 
-            // add dialog for non-default detection options
-            SignalImageProber analysisSetup = new SignalImageProber(dataset, folder);
+	@Override
+	public void run() {
+		try {
+			File defaultDir = null;
+			Optional<IAnalysisOptions> op = dataset.getAnalysisOptions();
+			if (op.isPresent()) {
+				Optional<HashOptions> im = op.get().getDetectionOptions(CellularComponent.NUCLEUS);
+				if (im.isPresent())
+					defaultDir = im.get().getFile(HashOptions.DETECTION_FOLDER);
+			}
 
-            if (analysisSetup.isOk()) {
+			File folder = null;
 
-                HashOptions options = analysisSetup.getOptions();
+			try {
+				folder = eh.getInputSupplier().requestFolder("Choose FISH signal image folder", defaultDir);
+			} catch (RequestCancelledException e) {
+				cancel();
+				return;
+			}
 
-                IAnalysisMethod m = new SignalDetectionMethod(dataset, options);
+			// add dialog for non-default detection options
+			SignalImageProber analysisSetup = new SignalImageProber(dataset, folder);
 
-                String name = options.getString(HashOptions.SIGNAL_GROUP_NAME);
+			if (analysisSetup.isOk()) {
 
-                worker = new DefaultAnalysisWorker(m, dataset.getCollection().size());
+				HashOptions options = analysisSetup.getOptions();
 
-                this.setProgressMessage("Signal detection: " + name);
-                worker.addPropertyChangeListener(this);
-                ThreadManager.getInstance().submit(worker);
-            } else {
-                this.cancel();
-            }
+				IAnalysisMethod m = new SignalDetectionMethod(dataset, options);
 
-        } catch (Exception e) {
-            this.cancel();
-            LOGGER.warning("Error in signal detection");
-            LOGGER.log(Loggable.STACK, "Error in signal detection", e);
-        }
-    }
+				String name = options.getString(HashOptions.SIGNAL_GROUP_NAME);
 
-    @Override
-    public void finished() {
-        LOGGER.finer( "Finished signal detection");
-        cleanup(); // remove the property change listener
-        getDatasetEventHandler().fireDatasetEvent(DatasetEvent.ADD_DATASET, dataset);
-        getDatasetEventHandler().fireDatasetEvent(DatasetEvent.RECACHE_CHARTS, dataset);
-        cancel();
-    }
+				worker = new DefaultAnalysisWorker(m, dataset.getCollection().size());
+
+				this.setProgressMessage("Signal detection: " + name);
+				worker.addPropertyChangeListener(this);
+				ThreadManager.getInstance().submit(worker);
+			} else {
+				this.cancel();
+			}
+
+		} catch (Exception e) {
+			this.cancel();
+			LOGGER.warning("Error in signal detection");
+			LOGGER.log(Loggable.STACK, "Error in signal detection", e);
+		}
+	}
+
+	@Override
+	public void finished() {
+		LOGGER.finer("Finished signal detection");
+		cleanup(); // remove the property change listener
+		UIController.getInstance().fireDatasetAdded(dataset);
+
+//        getDatasetEventHandler().fireDatasetEvent(DatasetEvent.RECACHE_CHARTS, dataset);
+		cancel();
+	}
 
 }

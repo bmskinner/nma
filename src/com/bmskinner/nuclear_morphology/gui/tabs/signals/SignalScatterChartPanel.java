@@ -16,17 +16,48 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.tabs.signals;
 
+import java.util.List;
+
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
+import com.bmskinner.nuclear_morphology.gui.events.revamp.NuclearSignalUpdatedListener;
 import com.bmskinner.nuclear_morphology.gui.tabs.AbstractScatterChartPanel;
 
 @SuppressWarnings("serial")
-public class SignalScatterChartPanel extends AbstractScatterChartPanel {
+public class SignalScatterChartPanel extends AbstractScatterChartPanel implements NuclearSignalUpdatedListener {
 
-    public SignalScatterChartPanel(@NonNull InputSupplier context) {
-        super(context, CellularComponent.NUCLEAR_SIGNAL);
-    }
+	public SignalScatterChartPanel(@NonNull InputSupplier context) {
+		super(context, CellularComponent.NUCLEAR_SIGNAL);
+		uiController.addNuclearSignalUpdatedListener(this);
+
+	}
+
+	@Override
+	public void nuclearSignalUpdated(List<IAnalysisDataset> datasets) {
+		refreshChartCache(datasets);
+	}
+
+	@Override
+	public void nuclearSignalUpdated(IAnalysisDataset dataset) {
+		refreshChartCache(dataset);
+	}
+
+	@Override
+	public void scaleUpdated(List<IAnalysisDataset> datasets) {
+		refreshChartCache(datasets);
+	}
+
+	@Override
+	public void scaleUpdated(IAnalysisDataset dataset) {
+		refreshChartCache(dataset);
+	}
+
+	@Override
+	public void scaleUpdated() {
+		update(getDatasets());
+	}
 
 }

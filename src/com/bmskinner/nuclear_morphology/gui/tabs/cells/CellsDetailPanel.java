@@ -35,25 +35,21 @@ import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 @SuppressWarnings("serial")
 public class CellsDetailPanel extends DetailPanel {
 
-    private static final String PANEL_TITLE_LBL = "Cell charts";
+	private static final String PANEL_TITLE_LBL = "Cell charts";
 
-    private JTabbedPane tabPane;
+	private JTabbedPane tabPane;
 
-    public CellsDetailPanel(@NonNull InputSupplier context) {
-        super(context, PANEL_TITLE_LBL);
+	public CellsDetailPanel(@NonNull InputSupplier context) {
+		super(context, PANEL_TITLE_LBL);
 
-        this.setLayout(new BorderLayout());
-        tabPane = new JTabbedPane(JTabbedPane.TOP);
+		this.setLayout(new BorderLayout());
+		tabPane = new JTabbedPane(JTabbedPane.TOP);
 
-        DetailPanel boxplotPanel = new CellsBoxplotsPanel(context);
+		DetailPanel boxplotPanel = new CellsBoxplotsPanel(context);
 
+		tabPane.addTab(boxplotPanel.getPanelTitle(), boxplotPanel);
 
-        this.addSubPanel(boxplotPanel);
-
-        tabPane.addTab(boxplotPanel.getPanelTitle(), boxplotPanel);
-
-
-        this.add(tabPane, BorderLayout.CENTER);
-    }
+		this.add(tabPane, BorderLayout.CENTER);
+	}
 
 }

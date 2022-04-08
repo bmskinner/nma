@@ -17,39 +17,51 @@
 package com.bmskinner.nuclear_morphology.gui.tabs.profiles;
 
 import java.awt.BorderLayout;
+import java.util.List;
 
 import javax.swing.JTabbedPane;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
+import com.bmskinner.nuclear_morphology.gui.events.revamp.ProfilesUpdatedListener;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 
 @SuppressWarnings("serial")
-public class NucleusProfilesPanel extends DetailPanel {
-	
+public class NucleusProfilesPanel extends DetailPanel implements ProfilesUpdatedListener {
+
 	JTabbedPane tabPanel;
-    
-    private static final String PANEL_TITLE_LBL = "Nuclear profiles";
 
-    public NucleusProfilesPanel(@NonNull InputSupplier context) {
-        super(context, PANEL_TITLE_LBL);
-        this.setLayout(new BorderLayout());
-        tabPanel = new JTabbedPane(JTabbedPane.TOP);
+	private static final String PANEL_TITLE_LBL = "Nuclear profiles";
 
-        for (ProfileType type : ProfileType.displayValues()) {
+	public NucleusProfilesPanel(@NonNull InputSupplier context) {
+		super(context, PANEL_TITLE_LBL);
+		this.setLayout(new BorderLayout());
+		tabPanel = new JTabbedPane(JTabbedPane.TOP);
 
-            DetailPanel panel = new ProfileDisplayPanel(context, type);
-            this.addSubPanel(panel);
-            tabPanel.addTab(panel.getPanelTitle(), panel);
-        }
+		for (ProfileType type : ProfileType.displayValues()) {
 
-        DetailPanel variabilityChartPanel = new VariabilityDisplayPanel(context);
+			DetailPanel panel = new ProfileDisplayPanel(context, type);
+			tabPanel.addTab(panel.getPanelTitle(), panel);
+		}
 
-        this.addSubPanel(variabilityChartPanel);
-        tabPanel.addTab(variabilityChartPanel.getPanelTitle(), variabilityChartPanel);
-        this.add(tabPanel, BorderLayout.CENTER);
+		DetailPanel variabilityChartPanel = new VariabilityDisplayPanel(context);
 
-    }
+		tabPanel.addTab(variabilityChartPanel.getPanelTitle(), variabilityChartPanel);
+		this.add(tabPanel, BorderLayout.CENTER);
+
+		uiController.addProfilesUpdatedListener(this);
+	}
+
+	@Override
+	public void profilesUpdated(List<IAnalysisDataset> datasets) {
+		refreshChartCache(datasets);
+	}
+
+	@Override
+	public void profilesUpdated(IAnalysisDataset dataset) {
+		refreshChartCache(dataset);
+	}
 }

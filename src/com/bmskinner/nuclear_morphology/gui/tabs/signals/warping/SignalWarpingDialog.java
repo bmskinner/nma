@@ -48,6 +48,7 @@ import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 import com.bmskinner.nuclear_morphology.gui.dialogs.LoadingIconDialog;
+import com.bmskinner.nuclear_morphology.gui.events.revamp.UIController;
 import com.bmskinner.nuclear_morphology.gui.tabs.CosmeticHandler;
 import com.bmskinner.nuclear_morphology.gui.tabs.TabPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.signals.warping.SignalWarpingModel.ImageCache.WarpedImageKey;
@@ -64,308 +65,298 @@ import com.bmskinner.nuclear_morphology.visualisation.options.ChartOptionsBuilde
  *
  */
 @SuppressWarnings("serial")
-public class SignalWarpingDialog 
-	extends LoadingIconDialog {
-	
+public class SignalWarpingDialog extends LoadingIconDialog {
+
 	private static final Logger LOGGER = Logger.getLogger(SignalWarpingDialog.class.getName());
 
-    private static final String EXPORT_IMAGE_LBL    = "Export image";
-    private static final String DIALOG_TITLE        = "Signal warping";
+	private static final String EXPORT_IMAGE_LBL = "Export image";
+	private static final String DIALOG_TITLE = "Signal warping";
 
-    private List<IAnalysisDataset> datasets;
-    private ExportableChartPanel   chartPanel;
+	private List<IAnalysisDataset> datasets;
+	private ExportableChartPanel chartPanel;
 
-    private JTable signalSelectionTable;
+	private JTable signalSelectionTable;
 
-    private final SignalWarpingModel model;
-    
-    private final SignalWarpingDialogController controller;
-    
+	private final SignalWarpingModel model;
+
+	private final SignalWarpingDialogController controller;
+
 //    private final JProgressBar progressBar = new JProgressBar(0,100);
-    
-    private JSplitPane centrePanel;
 
-    private boolean ctrlPressed = false;    
-    
-    /** Allow access to cosmetic handlers for signal colour changes */
-    private final TabPanel parent;
+	private JSplitPane centrePanel;
 
-    /**
-     * Construct with a list of datasets available to warp signals to and from
-     * 
-     * @param datasets
-     * @throws MissingLandmarkException 
-     */
-    public SignalWarpingDialog(@NonNull final List<IAnalysisDataset> datasets,     
-    	    TabPanel parent) throws MissingLandmarkException {
-        super();
-        this.parent = parent;
-        this.datasets = datasets;
-        model = new SignalWarpingModel(datasets); // adds any saved warp images 
-        
-        createUIElements();
+	private boolean ctrlPressed = false;
 
-        controller = new SignalWarpingDialogController(model, 
-        		chartPanel, 
-        		signalSelectionTable, 
-        		new SignalWarpingDisplaySettings());
-        
-        layoutUI();
+	/** Allow access to cosmetic handlers for signal colour changes */
+	private final TabPanel parent;
 
-        addCtrlPressListener();
-        this.setModal(false);
-        
-        this.pack();
-        centrePanel.setDividerLocation(0.65);
-        chartPanel.restoreAutoBounds();
-        this.setVisible(true);
-    }
-    
+	/**
+	 * Construct with a list of datasets available to warp signals to and from
+	 * 
+	 * @param datasets
+	 * @throws MissingLandmarkException
+	 */
+	public SignalWarpingDialog(@NonNull final List<IAnalysisDataset> datasets, TabPanel parent)
+			throws MissingLandmarkException {
+		super();
+		this.parent = parent;
+		this.datasets = datasets;
+		model = new SignalWarpingModel(datasets); // adds any saved warp images
 
-    private boolean isCtrlPressed() {
-        synchronized (SignalWarpingDialog.class) {
-            return ctrlPressed;
-        }
-    }
+		createUIElements();
 
-    private void addCtrlPressListener() {
-        // Track when the Ctrl key is down
-        KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(new KeyEventDispatcher() {
+		controller = new SignalWarpingDialogController(model, chartPanel, signalSelectionTable,
+				new SignalWarpingDisplaySettings());
 
-            @Override
-            public boolean dispatchKeyEvent(KeyEvent ke) {
-                synchronized (SignalWarpingDialog.class) {
-                    switch (ke.getID()) {
-                    case KeyEvent.KEY_PRESSED:
-                        if (ke.getKeyCode() == KeyEvent.VK_CONTROL) {
-                            ctrlPressed = true;
-                        }
-                        break;
+		layoutUI();
 
-                    case KeyEvent.KEY_RELEASED:
-                        if (ke.getKeyCode() == KeyEvent.VK_CONTROL) {
-                            ctrlPressed = false;
-                        }
-                        break;
-                    }
-                    return false;
-                }
-            }
+		addCtrlPressListener();
+		this.setModal(false);
 
-        });
-    }
-    
-    /**
-     * Create the outline chart panel
-     */
-    private void createChartPanel() {
-    	ChartOptions options = new ChartOptionsBuilder()
-    			.setDatasets(datasets.get(0))
-    			.build();
-        JFreeChart chart = new ConsensusNucleusChartFactory(options)
-        		.makeNucleusOutlineChart();
-        
-        chartPanel = new ExportableChartPanel(chart);
-        chartPanel.setFixedAspectRatio(true);
-    }
-    
-    /**
-     * Create the table to show selected signals
-     */
-    private void createTablePanel() {
-    	signalSelectionTable = new ExportableTable(model, false) {
-    		@Override
-    		public Class<?> getColumnClass(int column) {
-    			// Render true/false column as checkbox
-    			if(column==model.getColumnIndex(Labels.Signals.Warper.TABLE_HEADER_SIGNALS_ONLY))
-    				return Boolean.class;
-    			if(column==model.getColumnIndex(Labels.Signals.Warper.TABLE_HEADER_BINARISED))
-    				return Boolean.class;
-    			if(column==model.getColumnIndex(Labels.Signals.Warper.TABLE_HEADER_NORMALISED))
-    				return Boolean.class;
-    			if(column==model.getColumnIndex(Labels.Signals.Warper.TABLE_HEADER_DELETE_COLUMN))
-    				return JButton.class;
-    			else
-    				return super.getColumnClass(column);
-    		}
-    	};
-    
-    	signalSelectionTable.setCellSelectionEnabled(false);
-        signalSelectionTable.setRowSelectionAllowed(true);
-        signalSelectionTable.setColumnSelectionAllowed(false);
-        signalSelectionTable.setAutoCreateRowSorter(true);
-                
-        // Set colour renderer
-        TableColumn colourColumn = signalSelectionTable.getColumn(Labels.Signals.Warper.TABLE_HEADER_COLOUR_COLUMN);
-        colourColumn.setCellRenderer(new SignalWarpingTableCellRenderer());
-        
-        // Set JButton renderer
-        TableColumn buttonColumn = signalSelectionTable.getColumn(Labels.Signals.Warper.TABLE_HEADER_DELETE_COLUMN);
-        buttonColumn.setCellRenderer(new SignalWarpingButtonRenderer());
-        
-        // Handle mouse events
-        signalSelectionTable.addMouseListener(new MouseAdapter() { 	
-        	private static final int DOUBLE_CLICK = 2;
-        	@Override
-        	public void mouseClicked(MouseEvent e) {
-        		JTable table = (JTable) e.getSource();
-        		int row = table.rowAtPoint(e.getPoint());
-        		int col = table.columnAtPoint(e.getPoint());
-        		
-        		
-        		// Change signal group colour
-        		if(e.getClickCount()==DOUBLE_CLICK &&
-        				col==model.getColumnIndex(Labels.Signals.Warper.TABLE_HEADER_COLOUR_COLUMN)) {
+		this.pack();
+		centrePanel.setDividerLocation(0.65);
+		chartPanel.restoreAutoBounds();
+		this.setVisible(true);
+	}
 
-        			WarpedImageKey key = model.getKey(row);         			
-    				new CosmeticHandler(parent).changeSignalColour(key.getTemplate(), 
-    						key.getSignalGroupId());
-    				model.recachePseudoColour(key);
-    				controller.updateChart();
-        		}
-        		
-        		// Click the delete button
-        		if(col==model.getColumnIndex(Labels.Signals.Warper.TABLE_HEADER_DELETE_COLUMN)) {
-        			try {
+	private boolean isCtrlPressed() {
+		synchronized (SignalWarpingDialog.class) {
+			return ctrlPressed;
+		}
+	}
+
+	private void addCtrlPressListener() {
+		// Track when the Ctrl key is down
+		KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(new KeyEventDispatcher() {
+
+			@Override
+			public boolean dispatchKeyEvent(KeyEvent ke) {
+				synchronized (SignalWarpingDialog.class) {
+					switch (ke.getID()) {
+					case KeyEvent.KEY_PRESSED:
+						if (ke.getKeyCode() == KeyEvent.VK_CONTROL) {
+							ctrlPressed = true;
+						}
+						break;
+
+					case KeyEvent.KEY_RELEASED:
+						if (ke.getKeyCode() == KeyEvent.VK_CONTROL) {
+							ctrlPressed = false;
+						}
+						break;
+					}
+					return false;
+				}
+			}
+
+		});
+	}
+
+	/**
+	 * Create the outline chart panel
+	 */
+	private void createChartPanel() {
+		ChartOptions options = new ChartOptionsBuilder().setDatasets(datasets.get(0)).build();
+		JFreeChart chart = new ConsensusNucleusChartFactory(options).makeNucleusOutlineChart();
+
+		chartPanel = new ExportableChartPanel(chart);
+		chartPanel.setFixedAspectRatio(true);
+	}
+
+	/**
+	 * Create the table to show selected signals
+	 */
+	private void createTablePanel() {
+		signalSelectionTable = new ExportableTable(model, false) {
+			@Override
+			public Class<?> getColumnClass(int column) {
+				// Render true/false column as checkbox
+				if (column == model.getColumnIndex(Labels.Signals.Warper.TABLE_HEADER_SIGNALS_ONLY))
+					return Boolean.class;
+				if (column == model.getColumnIndex(Labels.Signals.Warper.TABLE_HEADER_BINARISED))
+					return Boolean.class;
+				if (column == model.getColumnIndex(Labels.Signals.Warper.TABLE_HEADER_NORMALISED))
+					return Boolean.class;
+				if (column == model.getColumnIndex(Labels.Signals.Warper.TABLE_HEADER_DELETE_COLUMN))
+					return JButton.class;
+				else
+					return super.getColumnClass(column);
+			}
+		};
+
+		signalSelectionTable.setCellSelectionEnabled(false);
+		signalSelectionTable.setRowSelectionAllowed(true);
+		signalSelectionTable.setColumnSelectionAllowed(false);
+		signalSelectionTable.setAutoCreateRowSorter(true);
+
+		// Set colour renderer
+		TableColumn colourColumn = signalSelectionTable.getColumn(Labels.Signals.Warper.TABLE_HEADER_COLOUR_COLUMN);
+		colourColumn.setCellRenderer(new SignalWarpingTableCellRenderer());
+
+		// Set JButton renderer
+		TableColumn buttonColumn = signalSelectionTable.getColumn(Labels.Signals.Warper.TABLE_HEADER_DELETE_COLUMN);
+		buttonColumn.setCellRenderer(new SignalWarpingButtonRenderer());
+
+		// Handle mouse events
+		signalSelectionTable.addMouseListener(new MouseAdapter() {
+			private static final int DOUBLE_CLICK = 2;
+
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				JTable table = (JTable) e.getSource();
+				int row = table.rowAtPoint(e.getPoint());
+				int col = table.columnAtPoint(e.getPoint());
+
+				// Change signal group colour
+				if (e.getClickCount() == DOUBLE_CLICK
+						&& col == model.getColumnIndex(Labels.Signals.Warper.TABLE_HEADER_COLOUR_COLUMN)) {
+
+					WarpedImageKey key = model.getKey(row);
+					new CosmeticHandler(parent).changeSignalColour(key.getTemplate(), key.getSignalGroupId());
+					model.recachePseudoColour(key);
+					controller.updateChart();
+					UIController.getInstance().fireNuclearSignalUpdated(key.getTemplate());
+
+				}
+
+				// Click the delete button
+				if (col == model.getColumnIndex(Labels.Signals.Warper.TABLE_HEADER_DELETE_COLUMN)) {
+					try {
 						controller.deleteWarpedSignal(row);
-        			} catch (MissingLandmarkException | ComponentCreationException e1) {
-    					LOGGER.log(Loggable.STACK, "Cannot orient consensus", e);
-    				}
-        			controller.displayBlankChart();
-        		}
-        	}
-        });
-        
-        TableColumn keyColumn = signalSelectionTable.getColumn(Labels.Signals.Warper.TABLE_HEADER_KEY_COLUMN);
-        signalSelectionTable.removeColumn(keyColumn);
-        
-        signalSelectionTable.setRowHeight(25); //TODO make dynamic?
-        
-        createTablePopupMenu();
-    }
-    
-    /**
-     * Create the right-click popup menu for the table
-     */
-    private void createTablePopupMenu() {
-    	// Allow deletion of multiple selected rows via right-click menu
-        JPopupMenu tableMenu = signalSelectionTable.getComponentPopupMenu();
-        JMenuItem deleteItem = new JMenuItem(Labels.Signals.Warper.TABLE_HEADER_DELETE_COLUMN);
-        deleteItem.addActionListener(e->{
-        	List<WarpedImageKey> keys = new ArrayList<>();
-        	for(int row : signalSelectionTable.getSelectedRows())
-        		keys.add(model.getKey(row));
-        	
-        	for(WarpedImageKey k : keys)
+					} catch (MissingLandmarkException | ComponentCreationException e1) {
+						LOGGER.log(Loggable.STACK, "Cannot orient consensus", e);
+					}
+					controller.displayBlankChart();
+				}
+			}
+		});
+
+		TableColumn keyColumn = signalSelectionTable.getColumn(Labels.Signals.Warper.TABLE_HEADER_KEY_COLUMN);
+		signalSelectionTable.removeColumn(keyColumn);
+
+		signalSelectionTable.setRowHeight(25); // TODO make dynamic?
+
+		createTablePopupMenu();
+	}
+
+	/**
+	 * Create the right-click popup menu for the table
+	 */
+	private void createTablePopupMenu() {
+		// Allow deletion of multiple selected rows via right-click menu
+		JPopupMenu tableMenu = signalSelectionTable.getComponentPopupMenu();
+		JMenuItem deleteItem = new JMenuItem(Labels.Signals.Warper.TABLE_HEADER_DELETE_COLUMN);
+		deleteItem.addActionListener(e -> {
+			List<WarpedImageKey> keys = new ArrayList<>();
+			for (int row : signalSelectionTable.getSelectedRows())
+				keys.add(model.getKey(row));
+
+			for (WarpedImageKey k : keys)
 				try {
 					controller.deleteWarpedSignal(k);
 				} catch (MissingLandmarkException | ComponentCreationException e1) {
 					LOGGER.log(Loggable.STACK, "Cannot orient consensus", e);
 				}
-        	
-        	controller.displayBlankChart();
-        });
-        tableMenu.add(deleteItem);
-    }
-    
-    /**
-     * Populate the final fields of the class
-     */
-    private void createUIElements() {
-    	createChartPanel();
-    	createTablePanel();
-    }
-    
-    /**
-     * Decorate and layout the UI elements
-     */
-    private void layoutUI() {
-    	
-    	
-        this.setLayout(new BorderLayout());
-        this.setTitle(DIALOG_TITLE);
-        
-        JPanel runPanel = createRunSettingsPanel();
-        JPanel displayPanel = createDisplaySettingsPanel();
-        JPanel tablePanel = layoutTablePanel();  
-        SignalWarpingMSSSIMPanel msssimPanel = new SignalWarpingMSSSIMPanel(model);
-        controller.addSignalWarpingMSSSIMUpdateListener(msssimPanel);
-        
-        JPanel eastPanel = new JPanel(new BorderLayout());
-        eastPanel.add(displayPanel, BorderLayout.NORTH);
-        eastPanel.add(chartPanel, BorderLayout.CENTER);
-        
-        JPanel westPanel = new JPanel(new BorderLayout());
-        westPanel.add(runPanel, BorderLayout.NORTH);
-        westPanel.add(tablePanel, BorderLayout.CENTER);
-        westPanel.add(msssimPanel, BorderLayout.SOUTH);
 
-        centrePanel = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, 
-        		westPanel, 
-        		eastPanel);
-        add(centrePanel, BorderLayout.CENTER);
-    }
-    
-    private JPanel createRunSettingsPanel() {
-    	SignalWarpingRunSettingsPanel runPanel = new SignalWarpingRunSettingsPanel(controller, model);
-    	runPanel.addSignalWarpingRunEventListener(controller);
-    	runPanel.setBorder(BorderFactory.createTitledBorder("Run settings"));
-    	controller.addSignalWarpingProgressEventListener(runPanel);
-    	return runPanel;
+			controller.displayBlankChart();
+		});
+		tableMenu.add(deleteItem);
+	}
 
-    }
-    
-    private JPanel createDisplaySettingsPanel() {
-    	SignalWarpingDisplaySettingPanel displayPanel = new SignalWarpingDisplaySettingPanel(controller);
-    	displayPanel.setBorder(BorderFactory.createTitledBorder("Display settings"));
-    	displayPanel.addSignalWarpingDisplayListener(controller);
-    	
-    	// Changes to model selection need to update the display
-    	controller.addSignalWarpingDisplayListener(displayPanel);
-    	return displayPanel;
-    }   
-    
-    /**
-     * Create the list of saved warp images
-     * 
-     * @return
-     */
-    private JPanel layoutTablePanel() {
-        JPanel panel = new JPanel();
-        panel.setLayout(new BorderLayout());
+	/**
+	 * Populate the final fields of the class
+	 */
+	private void createUIElements() {
+		createChartPanel();
+		createTablePanel();
+	}
 
-        JScrollPane sp = new JScrollPane(signalSelectionTable);
-        panel.add(sp, BorderLayout.CENTER);
-        return panel;
-    }
+	/**
+	 * Decorate and layout the UI elements
+	 */
+	private void layoutUI() {
 
-    
-    /**
-     * Colour the background of the pseudocolour column in the signal warping table
-     * @author bms41
-     * @since 1.15.0
-     *
-     */
-    public class SignalWarpingTableCellRenderer extends DefaultTableCellRenderer {
-        @Override
-        public Component getTableCellRendererComponent(JTable table, Object value,
-                boolean isSelected, boolean hasFocus, int row, int column) {
-        	Component l = super.getTableCellRendererComponent(table, value, 
-        			isSelected, hasFocus, row, column);
-            Color colour = (Color)value;
-            l.setBackground(colour);
-            l.setForeground(colour);
-            return l;
-        }
-    }
+		this.setLayout(new BorderLayout());
+		this.setTitle(DIALOG_TITLE);
 
-    public class SignalWarpingButtonRenderer extends DefaultTableCellRenderer {
-    	   @Override
-    	   public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-    	         return (Component)value;
-    	       
-    	   }
-    }
-    
+		JPanel runPanel = createRunSettingsPanel();
+		JPanel displayPanel = createDisplaySettingsPanel();
+		JPanel tablePanel = layoutTablePanel();
+		SignalWarpingMSSSIMPanel msssimPanel = new SignalWarpingMSSSIMPanel(model);
+		controller.addSignalWarpingMSSSIMUpdateListener(msssimPanel);
+
+		JPanel eastPanel = new JPanel(new BorderLayout());
+		eastPanel.add(displayPanel, BorderLayout.NORTH);
+		eastPanel.add(chartPanel, BorderLayout.CENTER);
+
+		JPanel westPanel = new JPanel(new BorderLayout());
+		westPanel.add(runPanel, BorderLayout.NORTH);
+		westPanel.add(tablePanel, BorderLayout.CENTER);
+		westPanel.add(msssimPanel, BorderLayout.SOUTH);
+
+		centrePanel = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, westPanel, eastPanel);
+		add(centrePanel, BorderLayout.CENTER);
+	}
+
+	private JPanel createRunSettingsPanel() {
+		SignalWarpingRunSettingsPanel runPanel = new SignalWarpingRunSettingsPanel(controller, model);
+		runPanel.addSignalWarpingRunEventListener(controller);
+		runPanel.setBorder(BorderFactory.createTitledBorder("Run settings"));
+		controller.addSignalWarpingProgressEventListener(runPanel);
+		return runPanel;
+
+	}
+
+	private JPanel createDisplaySettingsPanel() {
+		SignalWarpingDisplaySettingPanel displayPanel = new SignalWarpingDisplaySettingPanel(controller);
+		displayPanel.setBorder(BorderFactory.createTitledBorder("Display settings"));
+		displayPanel.addSignalWarpingDisplayListener(controller);
+
+		// Changes to model selection need to update the display
+		controller.addSignalWarpingDisplayListener(displayPanel);
+		return displayPanel;
+	}
+
+	/**
+	 * Create the list of saved warp images
+	 * 
+	 * @return
+	 */
+	private JPanel layoutTablePanel() {
+		JPanel panel = new JPanel();
+		panel.setLayout(new BorderLayout());
+
+		JScrollPane sp = new JScrollPane(signalSelectionTable);
+		panel.add(sp, BorderLayout.CENTER);
+		return panel;
+	}
+
+	/**
+	 * Colour the background of the pseudocolour column in the signal warping table
+	 * 
+	 * @author bms41
+	 * @since 1.15.0
+	 *
+	 */
+	public class SignalWarpingTableCellRenderer extends DefaultTableCellRenderer {
+		@Override
+		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
+				int row, int column) {
+			Component l = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+			Color colour = (Color) value;
+			l.setBackground(colour);
+			l.setForeground(colour);
+			return l;
+		}
+	}
+
+	public class SignalWarpingButtonRenderer extends DefaultTableCellRenderer {
+		@Override
+		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
+				int row, int column) {
+			return (Component) value;
+
+		}
+	}
 
 }

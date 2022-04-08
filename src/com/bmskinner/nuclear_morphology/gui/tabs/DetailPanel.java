@@ -53,10 +53,10 @@ import com.bmskinner.nuclear_morphology.gui.events.DatasetEventHandler;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetUpdateEvent;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetUpdateEventHandler;
 import com.bmskinner.nuclear_morphology.gui.events.EventListener;
-import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent;
-import com.bmskinner.nuclear_morphology.gui.events.InterfaceEventHandler;
 import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEventHandler;
+import com.bmskinner.nuclear_morphology.gui.events.revamp.DatasetSelectionUpdatedListener;
+import com.bmskinner.nuclear_morphology.gui.events.revamp.UIController;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.visualisation.Cache;
 import com.bmskinner.nuclear_morphology.visualisation.ChartCache;
@@ -76,915 +76,940 @@ import com.bmskinner.nuclear_morphology.visualisation.options.TableOptions;
  *
  */
 @SuppressWarnings("serial")
-public abstract class DetailPanel extends JPanel implements TabPanel, CellUpdatedEventListener {
-	
+public abstract class DetailPanel extends JPanel
+		implements TabPanel, CellUpdatedEventListener, DatasetSelectionUpdatedListener {
+
 	private static final Logger LOGGER = Logger.getLogger(DetailPanel.class.getName());
-	
+
+	/** Handle UI update requests */
+	protected final UIController uiController;
+
 	protected static final int SINGLE_CLICK = 1;
 	protected static final int DOUBLE_CLICK = 2;
 
-    private final transient List<Object> listeners = new CopyOnWriteArrayList<>();
-    
-    private final transient InputSupplier inputSupplier;
+	private final transient List<Object> listeners = new CopyOnWriteArrayList<>();
 
-    private final transient TabPanel parentPanel;
-    private final transient List<TabPanel> subPanels = new ArrayList<>();
-    
-    /** Holds rendered charts for all selected options */
-    protected final transient Cache chartCache = new ChartCache();
-    
-    /** Holds rendered tables for all selected options */
-    protected final transient Cache tableCache = new TableCache();
-    
-    private static final String DEFAULT_TAB_TITLE = "Default";
-    private final String panelTabTitleLbl;
+	private final transient InputSupplier inputSupplier;
 
-    /** Track if the panel is currently in the process of updating */
-    private AtomicBoolean isUpdating = new AtomicBoolean(false);
-    
-    /** Event handlers for sending events */
-    private final transient DatasetEventHandler       dh  = new DatasetEventHandler(this);
-    private final transient InterfaceEventHandler     ih  = new InterfaceEventHandler(this);
-    private final transient DatasetUpdateEventHandler duh = new DatasetUpdateEventHandler(this);
-    private final transient SignalChangeEventHandler  sh  = new SignalChangeEventHandler(this);
-    
-    /** Perform cosmetic operations on datasets - renaming, changing colours etc. */
-    protected final transient CosmeticHandler cosmeticHandler = new CosmeticHandler(this);
-    
-    private boolean isCellUpdateMade = false; // for editing panels to batch UI update requests
+	private final transient TabPanel parentPanel;
+	private final transient List<TabPanel> subPanels = new ArrayList<>();
 
-    public DetailPanel(@NonNull final InputSupplier context) {
-        this(context, DEFAULT_TAB_TITLE);
-    }
-    
-    public DetailPanel(@NonNull final TabPanel parent) {
-    	this(parent.getInputSupplier(), parent, DEFAULT_TAB_TITLE);
-    }
-    
-    public DetailPanel(@NonNull final InputSupplier context, final String title) {
-        this(context, null, title);        
-    }
-    
-    public DetailPanel(@NonNull final InputSupplier context, @Nullable final TabPanel parent, @NonNull final String title) {
-    	inputSupplier = context;
-        parentPanel = parent;
-        panelTabTitleLbl = title;
-    }
-    
-    /**
-     * Get the preferred name of the panel for use in tabs
-     * @return the title
-     */
-    public String getPanelTitle(){
-        return panelTabTitleLbl;
-    }
-    
-    @Override
-    public InputSupplier getInputSupplier() {
-    	return inputSupplier;
-    }
+	/** Holds rendered charts for all selected options */
+	protected final transient Cache chartCache = new ChartCache();
 
-    /**
-     * Add another detail panel as a sub panel to this. This will pass on
-     * refreshes and UI updates
-     * 
-     * @param panel the panel to add
-     */
-    @Override
-	public void addSubPanel(final @NonNull TabPanel panel) {
-        subPanels.add(panel);
-        panel.addSignalChangeListener(this);
-        panel.addDatasetEventListener(this);
-        panel.addInterfaceEventListener(this);
+	/** Holds rendered tables for all selected options */
+	protected final transient Cache tableCache = new TableCache();
 
-        // This will signal to sub panels to update
-        this.addDatasetUpdateEventListener(panel);
-    }
+	private static final String DEFAULT_TAB_TITLE = "Default";
+	private final String panelTabTitleLbl;
 
-    @Override
-    public List<TabPanel> getSubPanels() {
-        return subPanels;
-    }
+	/** Track if the panel is currently in the process of updating */
+	private AtomicBoolean isUpdating = new AtomicBoolean(false);
 
-    @Override
-    public boolean hasSubPanels() {
-        return !subPanels.isEmpty();
-    }
-    
-    @Override
-    public TabPanel getParentPanel(){
-    	return parentPanel;
-    }
+	/** Event handlers for sending events */
+	private final transient DatasetEventHandler dh = new DatasetEventHandler(this);
+	private final transient DatasetUpdateEventHandler duh = new DatasetUpdateEventHandler(this);
+	private final transient SignalChangeEventHandler sh = new SignalChangeEventHandler(this);
 
-    /**
-     * Fetch the currently active dataset for the panel. Use when only one
-     * dataset is expected to be visible; this simply accesses the first dataset
-     * in the list provided
-     * 
-     * @return
-     */
-    @Override
+	/** Perform cosmetic operations on datasets - renaming, changing colours etc. */
+	protected final transient CosmeticHandler cosmeticHandler = new CosmeticHandler(this);
+
+	private boolean isCellUpdateMade = false; // for editing panels to batch UI update requests
+
+	public DetailPanel(@NonNull final InputSupplier context) {
+		this(context, DEFAULT_TAB_TITLE);
+	}
+
+	public DetailPanel(@NonNull final TabPanel parent) {
+		this(parent.getInputSupplier(), parent, DEFAULT_TAB_TITLE);
+	}
+
+	public DetailPanel(@NonNull final InputSupplier context, final String title) {
+		this(context, null, title);
+	}
+
+	public DetailPanel(@NonNull final InputSupplier context, @Nullable final TabPanel parent,
+			@NonNull final String title) {
+		inputSupplier = context;
+		parentPanel = parent;
+		panelTabTitleLbl = title;
+
+		uiController = UIController.getInstance();
+		uiController.addDatasetSelectionUpdatedListener(this);
+	}
+
+	/**
+	 * Get the preferred name of the panel for use in tabs
+	 * 
+	 * @return the title
+	 */
+	public String getPanelTitle() {
+		return panelTabTitleLbl;
+	}
+
+	@Override
+	public InputSupplier getInputSupplier() {
+		return inputSupplier;
+	}
+
+	/**
+	 * Add another detail panel as a sub panel to this. This will pass on refreshes
+	 * and UI updates
+	 * 
+	 * @param panel the panel to add
+	 */
+//	@Override
+//	public void addSubPanel(final @NonNull TabPanel panel) {
+//		subPanels.add(panel);
+//		panel.addSignalChangeListener(this);
+//		panel.addDatasetEventListener(this);
+//
+//		// This will signal to sub panels to update
+//		this.addDatasetUpdateEventListener(panel);
+//	}
+//
+//	@Override
+//	public List<TabPanel> getSubPanels() {
+//		return subPanels;
+//	}
+//
+//	@Override
+//	public boolean hasSubPanels() {
+//		return !subPanels.isEmpty();
+//	}
+
+//	@Override
+//	public TabPanel getParentPanel() {
+//		return parentPanel;
+//	}
+
+	/**
+	 * Fetch the currently active dataset for the panel. Use when only one dataset
+	 * is expected to be visible; this simply accesses the first dataset in the list
+	 * provided
+	 * 
+	 * @return
+	 */
+	@Override
 	public synchronized IAnalysisDataset activeDataset() {
-        return DatasetListManager.getInstance().getActiveDataset();
-    }
+		return DatasetListManager.getInstance().getActiveDataset();
+	}
 
+	/**
+	 * Test if only a single dataset is selected
+	 * 
+	 * @return
+	 */
+	public synchronized boolean isSingleDataset() {
+		return DatasetListManager.getInstance().isSingleSelectedDataset();
+	}
 
-    /**
-     * Test if only a single dataset is selected
-     * 
-     * @return
-     */
-    public synchronized boolean isSingleDataset() {
-        return DatasetListManager.getInstance().isSingleSelectedDataset();
-    }
+	/**
+	 * Test if multiple datasets are selected
+	 * 
+	 * @return
+	 */
+	public synchronized boolean isMultipleDatasets() {
+		return DatasetListManager.getInstance().isMultipleSelectedDatasets();
+	}
 
-    /**
-     * Test if multiple datasets are selected
-     * 
-     * @return
-     */
-    public synchronized boolean isMultipleDatasets() {
-        return DatasetListManager.getInstance().isMultipleSelectedDatasets();
-    }
+	public synchronized boolean hasDatasets() {
+		return DatasetListManager.getInstance().hasSelectedDatasets();
+	}
 
-    public synchronized boolean hasDatasets() {
-        return DatasetListManager.getInstance().hasSelectedDatasets();
-    }
+	/**
+	 * Get the datasets currently displayed in this panel
+	 * 
+	 * @return a list of datasets
+	 */
+	protected synchronized List<IAnalysisDataset> getDatasets() {
+		return DatasetListManager.getInstance().getSelectedDatasets();
+	}
 
-    /**
-     * Get the datasets currently displayed in this panel
-     * @return a list of datasets
-     */
-    protected synchronized List<IAnalysisDataset> getDatasets() {
-        return DatasetListManager.getInstance().getSelectedDatasets();
-    }
+	/**
+	 * Get the chart cache for the panel
+	 * 
+	 * @return
+	 */
+	public synchronized Cache getChartCache() {
+		return this.chartCache;
+	}
 
-    /**
-     * Get the chart cache for the panel
-     * @return
-     */
-    public synchronized Cache getChartCache() {
-        return this.chartCache;
-    }
-
-    @Override
+	@Override
 	public synchronized boolean isUpdating() {
 
-        if (this.isUpdating.get()) {
-            return true;
-        }
+		if (this.isUpdating.get()) {
+			return true;
+		}
 
-        for (TabPanel panel : this.subPanels) {
-            if (panel.isUpdating()) {
-                return true;
-            }
-        }
+		for (TabPanel panel : this.subPanels) {
+			if (panel.isUpdating()) {
+				return true;
+			}
+		}
 
-        return false;
-    }
+		return false;
+	}
 
-    protected synchronized void setUpdating(boolean b) {
-        this.isUpdating.set(b);
-    }
+	protected synchronized void setUpdating(boolean b) {
+		this.isUpdating.set(b);
+	}
 
-    /**
-     * Toggle wait cursor on element
-     * 
-     * @param b
-     */
-    @Override
+	/**
+	 * Toggle wait cursor on element
+	 * 
+	 * @param b
+	 */
+	@Override
 	public synchronized void setAnalysing(boolean b) {
-        if (b) {
+		if (b) {
 
-            for (Component c : this.getComponents()) {
-                c.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-            }
+			for (Component c : this.getComponents()) {
+				c.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+			}
 
-            this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+			this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
-        } else {
+		} else {
 
-            for (Component c : this.getComponents()) {
-                c.setCursor(Cursor.getDefaultCursor());
-            }
-            this.setCursor(Cursor.getDefaultCursor());
-        }
-        for (TabPanel panel : this.subPanels) {
-            panel.setAnalysing(b);
-        }
-    }
+			for (Component c : this.getComponents()) {
+				c.setCursor(Cursor.getDefaultCursor());
+			}
+			this.setCursor(Cursor.getDefaultCursor());
+		}
+		for (TabPanel panel : this.subPanels) {
+			panel.setAnalysing(b);
+		}
+	}
 
-
-    /**
-     * Force any chart panels currently visible on screen to redraw, allowing
-     * text to be rendered with the appropriate aspect ratio
-     */
-    @Override
+	/**
+	 * Force any chart panels currently visible on screen to redraw, allowing text
+	 * to be rendered with the appropriate aspect ratio
+	 */
+	@Override
 	public synchronized void updateSize() {
 
-        updateSize(this);
+		updateSize(this);
 
-        for (TabPanel panel : this.subPanels) {
-            panel.updateSize();
-        }
-    }
+		for (TabPanel panel : this.subPanels) {
+			panel.updateSize();
+		}
+	}
 
-    /**
-     * Carries out the resize - recursively search all containers for chart
-     * panels, and refresh the chart cache if any are found.
-     * 
-     * @param container
-     */
-    private synchronized void updateSize(Container container) {
-        for (Component c : container.getComponents()) {
-            if (c instanceof ExportableChartPanel && c.isShowing()) {
-                    this.refreshChartCache();
-                    return;
-            }
+	/**
+	 * Carries out the resize - recursively search all containers for chart panels,
+	 * and refresh the chart cache if any are found.
+	 * 
+	 * @param container
+	 */
+	private synchronized void updateSize(Container container) {
+		for (Component c : container.getComponents()) {
+			if (c instanceof ExportableChartPanel && c.isShowing()) {
+				this.refreshChartCache();
+				return;
+			}
 
-            if (c instanceof Container) {
-                updateSize((Container) c);
-            }
+			if (c instanceof Container) {
+				updateSize((Container) c);
+			}
 
-        }
-    }
+		}
+	}
 
-    @Override
-    public synchronized void update() {
-    	
-        setUpdating(true);
+	@Override
+	public synchronized void update() {
 
-        for (TabPanel t : this.getSubPanels()) {
-            t.update();
-        }
-        List<IAnalysisDataset> list = DatasetListManager.getInstance().getSelectedDatasets();
-        updateDetail(list);
+		setUpdating(true);
 
-    }
-    
-    /**
-     * Update with the given dataset. 
-     * @param d
-     */
-    protected synchronized void update(final IAnalysisDataset d) {
-        List<IAnalysisDataset> list = new ArrayList<>();
-        list.add(d);
-        update(list);
-    }
+//		for (TabPanel t : this.getSubPanels()) {
+//			t.update();
+//		}
+		List<IAnalysisDataset> list = DatasetListManager.getInstance().getSelectedDatasets();
+		updateDetail(list);
 
-    @Override
-    public synchronized void update(final List<IAnalysisDataset> list) {
+	}
 
-        setUpdating(true);
-        for (TabPanel t : this.getSubPanels())
-            t.update(list);
-        final List<IAnalysisDataset> result = new ArrayList<>();
-        result.addAll(list);
-        updateDetail(result);
-    }
+	/**
+	 * Update with the given dataset.
+	 * 
+	 * @param d
+	 */
+//	protected synchronized void update(final IAnalysisDataset d) {
+//		List<IAnalysisDataset> list = new ArrayList<>();
+//		list.add(d);
+//		update(list);
+//	}
 
-    /**
-     * This method sets which of the overriden handling methods are run by
-     * extending classes.
-     */
-    private synchronized void updateDetail(@NonNull final List<IAnalysisDataset> list) {
-        try {
-            if (list==null || list.isEmpty()) {
-                updateNull();
-                return;
-            }
+	@Override
+	public synchronized void update(final List<IAnalysisDataset> list) {
 
-            if (list.size()>1) {
-                updateMultiple();
-                return;
-            }
-            updateSingle();
+		setUpdating(true);
+//		for (TabPanel t : this.getSubPanels())
+//			t.update(list);
+		updateDetail(list);
+	}
 
-        } catch (Exception e) {
-            LOGGER.fine("Error updating panel " + this.getClass().getName());
-            LOGGER.log(Loggable.STACK, "Error updating panel", e); // save detail for fine logging
+	/**
+	 * This method sets which of the overriden handling methods are run by extending
+	 * classes.
+	 */
+	private synchronized void updateDetail(@NonNull final List<IAnalysisDataset> list) {
+		try {
+			if (list.isEmpty()) {
+				updateNull();
+				return;
+			}
 
-            try {
-                updateNull();
-            } catch (Exception e1) {
-            	LOGGER.fine(this.getClass().getName() + ": Error recovering from error updating panel");
-            	LOGGER.log(Loggable.STACK, "Error recovering from error updating panel", e1);
-            }
-        } finally {
-            setUpdating(false);
-        }
-    }
+			if (list.size() > 1) {
+				updateMultiple();
+				return;
+			}
+			updateSingle();
 
-    /**
-     * This method must be overridden by the extending class to perform the
-     * actual update when a single dataset is selected
-     */
-    protected synchronized void updateSingle() {
+		} catch (Exception e) {
+			LOGGER.fine("Error updating panel " + this.getClass().getName());
+			LOGGER.log(Loggable.STACK, "Error updating panel", e); // save detail for fine logging
 
-    }
+			try {
+				updateNull();
+			} catch (Exception e1) {
+				LOGGER.fine(this.getClass().getName() + ": Error recovering from error updating panel");
+				LOGGER.log(Loggable.STACK, "Error recovering from error updating panel", e1);
+			}
+		} finally {
+			setUpdating(false);
+		}
+	}
 
-    /**
-     * This method must be overridden by the extending class to perform the
-     * actual update when multiple datasets are selected
-     */
-    protected synchronized void updateMultiple() {
-    }
+	/**
+	 * This method must be overridden by the extending class to perform the actual
+	 * update when a single dataset is selected
+	 */
+	protected synchronized void updateSingle() {
 
-    /**
-     * This method must be overridden by the extending class to perform the
-     * actual update when no datasets are selected
-     */
-    protected synchronized void updateNull() {
-    }
+	}
 
-    /**
-     * Fetch the chart with the given options from the cache, and display it in
-     * the target ChartPanel. If the chart is not in the cache, a SwingWorker
-     * will be created to render the chart and display it once complete. Note
-     * that this requires the options to have been created with a setTarget()
-     * value.
-     * 
-     * @param options
-     */
-    protected synchronized void setChart(@NonNull ChartOptions options) {
-        if (chartCache.has(options)) {
-            JFreeChart chart = chartCache.get(options);
-            if (options.getTarget() != null)
-                options.getTarget().setChart(chart);
+	/**
+	 * This method must be overridden by the extending class to perform the actual
+	 * update when multiple datasets are selected
+	 */
+	protected synchronized void updateMultiple() {
+	}
 
-        } else { // No cached chart
-            // Make a background worker to generate the chart and
-            // update the target chart panel when done
-            ChartFactoryWorker worker = new ChartFactoryWorker(options);
-            ThreadManager.getInstance().submit(worker);
-        }
-    }
+	/**
+	 * This method must be overridden by the extending class to perform the actual
+	 * update when no datasets are selected
+	 */
+	protected synchronized void updateNull() {
+	}
 
-    /**
-     * Fetch the table model with the given options from the cache, and display
-     * it in the target JTable. If the model is not in the cache, a SwingWorker
-     * will be created to render the model and display it once complete. Note
-     * that this requires the options to have been created with a setTarget()
-     * value.
-     * 
-     * @param options
-     */
-    protected synchronized void setTable(TableOptions options) {
-        if (chartCache.has(options)) {
-            TableModel model = getTableCache().get(options);
+	/**
+	 * Fetch the chart with the given options from the cache, and display it in the
+	 * target ChartPanel. If the chart is not in the cache, a SwingWorker will be
+	 * created to render the chart and display it once complete. Note that this
+	 * requires the options to have been created with a setTarget() value.
+	 * 
+	 * @param options
+	 */
+	protected synchronized void setChart(@NonNull ChartOptions options) {
+		if (chartCache.has(options)) {
+			JFreeChart chart = chartCache.get(options);
+			if (options.getTarget() != null)
+				options.getTarget().setChart(chart);
 
-            if (options.getTarget() != null) {
-                options.getTarget().setModel(model);
-            }
+		} else { // No cached chart
+			// Make a background worker to generate the chart and
+			// update the target chart panel when done
+			ChartFactoryWorker worker = new ChartFactoryWorker(options);
+			ThreadManager.getInstance().submit(worker);
+		}
+	}
 
-        } else { // No cached chart
+	/**
+	 * Fetch the table model with the given options from the cache, and display it
+	 * in the target JTable. If the model is not in the cache, a SwingWorker will be
+	 * created to render the model and display it once complete. Note that this
+	 * requires the options to have been created with a setTarget() value.
+	 * 
+	 * @param options
+	 */
+	protected synchronized void setTable(TableOptions options) {
+		if (chartCache.has(options)) {
+			TableModel model = getTableCache().get(options);
 
-            // Make a background worker to generate the chart and
-            // update the target chart panel when done
-            TableFactoryWorker worker = new TableFactoryWorker(options);
+			if (options.getTarget() != null) {
+				options.getTarget().setModel(model);
+			}
 
-            ThreadManager.getInstance().submit(worker);
-        }
-    }
+		} else { // No cached chart
 
-    /**
-     * Fetch the desired chart, either from the cache, or by creating it
-     * 
-     * @param options
-     * @return
-     * @throws Exception
-     */
-    protected synchronized JFreeChart getChart(@NonNull ChartOptions options) {
+			// Make a background worker to generate the chart and
+			// update the target chart panel when done
+			TableFactoryWorker worker = new TableFactoryWorker(options);
 
-    	if (chartCache.has(options)) {
-    		return chartCache.get(options);
-    	}
+			ThreadManager.getInstance().submit(worker);
+		}
+	}
 
-    	// Otherwise, no cached chart
+	/**
+	 * Fetch the desired chart, either from the cache, or by creating it
+	 * 
+	 * @param options
+	 * @return
+	 * @throws Exception
+	 */
+//	protected synchronized JFreeChart getChart(@NonNull ChartOptions options) {
+//		if (chartCache.has(options)) {
+//			LOGGER.fine("Fetching cached chart in " + this.getPanelTitle());
+//			return chartCache.get(options);
+//		}
+//
+//		// Otherwise, no cached chart
+//
+//		try {
+//			LOGGER.fine("Creating worker to make chart in " + this.getPanelTitle());
+//			ChartFactoryWorker worker = new ChartFactoryWorker(options);
+//			ThreadManager.getInstance().submit(worker);
+//		} catch (Exception e) {
+//			LOGGER.log(Level.WARNING, "Error creating chart: " + this.getClass().getSimpleName());
+//			LOGGER.log(Loggable.STACK, this.getClass().getName() + ": Error creating chart", e);
+//			return AbstractChartFactory.createErrorChart();
+//		}
+//
+//	}
 
-    	try {
-    		JFreeChart chart = createPanelChartType(options);
-    		chartCache.add(options, chart);
-    		return chart;
-    	} catch (Exception e) {
-    		LOGGER.log(Level.WARNING, "Error creating chart: " + this.getClass().getSimpleName());
-    		LOGGER.log(Loggable.STACK, this.getClass().getName() + ": Error creating chart", e);
-    		return AbstractChartFactory.createErrorChart();
-    	}
+	/**
+	 * Fetch the desired table, either from the cache, or by creating it
+	 * 
+	 * @param options
+	 * @return
+	 * @throws Exception
+	 */
+	protected synchronized TableModel getTable(TableOptions options) {
 
-    }
+		TableModel model;
+		if (getTableCache().has(options)) {
+			model = getTableCache().get(options);
+		} else {
+			try {
+				model = createPanelTableType(options);
+			} catch (Exception e) {
+				LOGGER.log(Level.WARNING, "Error creating table: " + this.getClass().getSimpleName());
+				LOGGER.log(Loggable.STACK, this.getClass().getName() + ": Error creating table", e);
+				model = AbstractTableCreator.createBlankTable();
+			}
+			getTableCache().add(options, model);
+		}
+		return model;
+	}
 
-    /**
-     * Fetch the desired table, either from the cache, or by creating it
-     * 
-     * @param options
-     * @return
-     * @throws Exception
-     */
-    protected synchronized TableModel getTable(TableOptions options) {
+	/**
+	 * This should be overridden to create the appropriate tables for caching
+	 * 
+	 * @param options the table options
+	 * @return null unless overridden
+	 * @throws Exception
+	 */
+	protected TableModel createPanelTableType(@NonNull TableOptions options) {
+		return null;
+	}
 
-        TableModel model;
-        if (getTableCache().has(options)) {
-            model = getTableCache().get(options);
-        } else {
-            try {
-                model = createPanelTableType(options);
-            } catch (Exception e) {
-            	LOGGER.log(Level.WARNING, "Error creating table: " + this.getClass().getSimpleName());
-                LOGGER.log(Loggable.STACK, this.getClass().getName() + ": Error creating table", e);
-                model = AbstractTableCreator.createBlankTable();
-            }
-            getTableCache().add(options, model);
-        }
-        return model;
-    }
+	/**
+	 * This should be overridden to create the appropriate charts for caching
+	 * 
+	 * @param options the chart options
+	 * @return null unless overridden
+	 * @throws Exception
+	 */
+	protected JFreeChart createPanelChartType(@NonNull ChartOptions options) {
+		return null;
+	}
 
-    /**
-     * This should be overridden to create the appropriate tables for caching
-     * 
-     * @param options
-     *            the table options
-     * @return null unless overridden
-     * @throws Exception
-     */
-    protected TableModel createPanelTableType(@NonNull TableOptions options) {
-        return null;
-    }
-
-    /**
-     * This should be overridden to create the appropriate charts for caching
-     * 
-     * @param options
-     *            the chart options
-     * @return null unless overridden
-     * @throws Exception
-     */
-    protected JFreeChart createPanelChartType(@NonNull ChartOptions options) {
-        return null;
-    }
-
-    /**
-     * Remove all charts from the cache. Does not invoke an update
-     * 
-     * @param list
-     */
-    @Override
+	/**
+	 * Remove all charts from the cache. Does not invoke an update
+	 * 
+	 * @param list
+	 */
+	@Override
 	public synchronized void clearChartCache() {
-        this.getChartCache().clear();
-        for (TabPanel panel : this.subPanels) {
-            panel.clearChartCache();
-        }
-    }
+		this.getChartCache().clear();
+		for (TabPanel panel : this.subPanels) {
+			panel.clearChartCache();
+		}
+	}
 
-    /**
-     * Remove all charts from the cache. Does not invoke an update
-     * 
-     * @param list
-     */
-    @Override
+	/**
+	 * Remove all charts from the cache. Does not invoke an update
+	 * 
+	 * @param list
+	 */
+	@Override
 	public synchronized void clearChartCache(final List<IAnalysisDataset> list) {
-        getChartCache().clear(list);
-        if (hasSubPanels()) {
-            for (TabPanel panel : this.subPanels) {
-                panel.clearChartCache(list);
-            }
-        }
-    }
+		getChartCache().clear(list);
+//		if (hasSubPanels()) {
+//			for (TabPanel panel : this.subPanels) {
+//				panel.clearChartCache(list);
+//			}
+//		}
+	}
 
-    /**
-     * Remove all charts from the cache. Then call an update of the panel
-     * 
-     * @param list
-     */
-    @Override
+	@Override
+	public synchronized void clearChartCache(final IAnalysisDataset dataset) {
+		getChartCache().clear(dataset);
+//		if (hasSubPanels()) {
+//			for (TabPanel panel : this.subPanels) {
+//				panel.clearChartCache(dataset);
+//			}
+//		}
+	}
+
+	/**
+	 * Remove all charts from the cache. Then call an update of the panel
+	 * 
+	 * @param list
+	 */
+	@Override
 	public synchronized void refreshChartCache() {
-        clearChartCache();
-        update(getDatasets());
-    }
+		Runnable r = () -> {
+			clearChartCache();
+			update(getDatasets());
+		};
+		ThreadManager.getInstance().execute(r);
+	}
 
-    /**
-     * Remove all charts from the cache containing datasets in the given list,
-     * so they will be recalculated. This allows a refresh of some of the charts
-     * in the chache, without recalculating everything
-     * 
-     * @param list
-     */
-    @Override
+	/**
+	 * Remove all charts from the cache containing datasets in the given list, so
+	 * they will be recalculated. This allows a refresh of some of the charts in the
+	 * chache, without recalculating everything. The charts will only be regenerated
+	 * if they are currently being displayed.
+	 * 
+	 * @param list
+	 */
+	@Override
+	public synchronized void refreshChartCache(final IAnalysisDataset dataset) {
+		Runnable r = () -> {
+			clearChartCache(dataset);
+			if (getDatasets().stream().anyMatch(d -> dataset.getId().equals(d.getId())))
+				update(getDatasets());
+		};
+		ThreadManager.getInstance().execute(r);
+	}
+
+	/**
+	 * Remove all charts from the cache containing datasets in the given list, so
+	 * they will be recalculated. This allows a refresh of some of the charts in the
+	 * chache, without recalculating everything. The charts will only be regenerated
+	 * if they are currently being displayed.
+	 * 
+	 * @param list
+	 */
+	@Override
 	public synchronized void refreshChartCache(final List<IAnalysisDataset> list) {
-        clearChartCache(list);
-        update(getDatasets());
-    }
+		Runnable r = () -> {
+			clearChartCache(list);
+			if (getDatasets().stream().anyMatch(d -> list.contains(d)))
+				update(getDatasets());
+		};
+		ThreadManager.getInstance().execute(r);
+	}
 
-    public synchronized Cache getTableCache() {
-        return this.tableCache;
-    }
+	public synchronized Cache getTableCache() {
+		return this.tableCache;
+	}
 
-    /**
-     * Remove all tables from the cache
-     * 
-     * @param list
-     */
-    @Override
+	/**
+	 * Remove all tables from the cache
+	 * 
+	 * @param list
+	 */
+	@Override
 	public synchronized void clearTableCache() {
-        getTableCache().clear();
-        for (TabPanel panel : this.subPanels) {
-            panel.clearTableCache();
-        }
-    }
+		getTableCache().clear();
+		for (TabPanel panel : this.subPanels) {
+			panel.clearTableCache();
+		}
+	}
 
-    /**
-     * Remove all tables from the cache containing datasets in the given list,
-     * so they will be recalculated
-     * 
-     * @param list
-     */
-    @Override
+	/**
+	 * Remove all tables from the cache containing datasets in the given list, so
+	 * they will be recalculated
+	 * 
+	 * @param list
+	 */
+	@Override
 	public synchronized void clearTableCache(final List<IAnalysisDataset> list) {
-        getTableCache().clear(list);
-        if (this.hasSubPanels()) {
-            for (TabPanel panel : this.subPanels) {
-                panel.clearTableCache(list);
-            }
-        }
-    }
+		getTableCache().clear(list);
+//		if (this.hasSubPanels()) {
+//			for (TabPanel panel : this.subPanels) {
+//				panel.clearTableCache(list);
+//			}
+//		}
+	}
 
-    /**
-     * Remove all charts from the cache and trigger an update
-     * 
-     * @param list
-     */
-    @Override
+	/**
+	 * Remove all charts from the cache and trigger an update
+	 * 
+	 * @param list
+	 */
+	@Override
 	public synchronized void refreshTableCache() {
-        clearTableCache();
-        update(getDatasets());
-    }
+		clearTableCache();
+		update(getDatasets());
+	}
 
-    /**
-     * Remove all tables from the cache containing datasets in the given list,
-     * so they will be recalculated
-     * 
-     * @param list
-     */
-    @Override
+	/**
+	 * Remove all tables from the cache containing datasets in the given list, so
+	 * they will be recalculated
+	 * 
+	 * @param list
+	 */
+	@Override
 	public synchronized void refreshTableCache(final List<IAnalysisDataset> list) {
-        clearTableCache(list);
-        this.update(getDatasets());
-    }
-    
-    /**
-     * Set the given table to use a custom table renderer. The renderer will be
-     * used for every column except the first.
-     * 
-     * @param table
-     */
-    protected synchronized void setRenderer(@NonNull JTable table, @NonNull TableCellRenderer renderer) {
-        int columns = table.getColumnModel().getColumnCount();
-        if (columns > 1) {
-            for (int i = 1; i < columns; i++) {
-                table.getColumnModel().getColumn(i).setCellRenderer(renderer);
-            }
-        }
-    }
+		clearTableCache(list);
+		this.update(getDatasets());
+	}
 
-    @Override
+	/**
+	 * Set the given table to use a custom table renderer. The renderer will be used
+	 * for every column except the first.
+	 * 
+	 * @param table
+	 */
+	protected synchronized void setRenderer(@NonNull JTable table, @NonNull TableCellRenderer renderer) {
+		int columns = table.getColumnModel().getColumnCount();
+		if (columns > 1) {
+			for (int i = 1; i < columns; i++) {
+				table.getColumnModel().getColumn(i).setCellRenderer(renderer);
+			}
+		}
+	}
+
+	@Override
 	public synchronized void addSignalChangeListener(EventListener l) {
-        sh.addListener(l);
-    }
+		sh.addListener(l);
+	}
 
-    @Override
+	@Override
 	public synchronized void removeSignalChangeListener(EventListener l) {
-        sh.removeListener(l);
-    }
-    
-    @Override
+		sh.removeListener(l);
+	}
+
+	@Override
 	public synchronized void addDatasetEventListener(EventListener l) {
-        dh.addListener(l);
-    }
+		dh.addListener(l);
+	}
 
-    @Override
+	@Override
 	public synchronized void removeDatasetEventListener(EventListener l) {
-        dh.removeListener(l);
-    }
-    
-    @Override
+		dh.removeListener(l);
+	}
+
+	@Override
 	public synchronized void addDatasetUpdateEventListener(EventListener l) {
-        duh.addListener(l);
-    }
+		duh.addListener(l);
+	}
 
-    @Override
+	@Override
 	public synchronized void removeDatasetUpdateEventListener(EventListener l) {
-        duh.removeListener(l);
-    }
+		duh.removeListener(l);
+	}
 
-    @Override
-	public synchronized void addInterfaceEventListener(EventListener l) {
-        ih.addListener(l);
-    }
+	@Override
+	public DatasetEventHandler getDatasetEventHandler() {
+		return dh;
+	}
 
-    @Override
-	public synchronized void removeInterfaceEventListener(EventListener l) {
-        ih.removeListener(l);
-    }
+	@Override
+	public DatasetUpdateEventHandler getDatasetUpdateEventHandler() {
+		return duh;
+	}
 
-    @Override
-    public DatasetEventHandler getDatasetEventHandler(){
-        return dh;
-    }
-    
-    @Override
-    public InterfaceEventHandler getInterfaceEventHandler(){
-        return ih;
-    }
-    
-    @Override
-    public DatasetUpdateEventHandler getDatasetUpdateEventHandler(){
-        return duh;
-    }
-    
-    @Override
-    public SignalChangeEventHandler getSignalChangeEventHandler(){
-        return sh;
-    }
+	@Override
+	public SignalChangeEventHandler getSignalChangeEventHandler() {
+		return sh;
+	}
 
-    @Override
-    public void eventReceived(InterfaceEvent event) {
-        // Pass messages upwards
-        for (TabPanel panel : this.subPanels) {
-            if (event.getSource().equals(panel)) {
-                ih.fire(new InterfaceEvent(this, event));
-            }
-        }
-    }
-    
-    @Override
-    public void eventReceived(DatasetEvent event) {
-        // Pass messages upwards
-        for (TabPanel panel : this.subPanels) {
-            if (event.getSource().equals(panel)) {
-                dh.fireDatasetEvent(new DatasetEvent(this, event));
-            }
-        }
-    }
+	@Override
+	public void eventReceived(DatasetEvent event) {
+		// Pass messages upwards
+		for (TabPanel panel : this.subPanels) {
+			if (event.getSource().equals(panel)) {
+				dh.fireDatasetEvent(new DatasetEvent(this, event));
+			}
+		}
+	}
 
-    @Override
-    public void eventReceived(SignalChangeEvent event) {
-        // Pass messages upwards
-    	if(parentPanel!=null)
-    		parentPanel.eventReceived(event);
-    	
-    	// Pass messages downwards
-        for (TabPanel panel : this.subPanels) {
-            if (event.getSource().equals(panel)) {
-                sh.fire(new SignalChangeEvent(this, event));
-            }
-        }
-    }
-    
-    @Override
-    public void eventReceived(ChartOptionsRenderedEvent e) {
-        // To be overridden as needed by extending classes
-        update(getDatasets());
-    }
-    
-    /**
-     * Charting can be an intensive process, especially with background images
-     * being imported for outline charts. This worker will keep the chart
-     * generation off the EDT
-     * 
-     * @author bms41
-     *
-     */
-    protected class ChartFactoryWorker extends SwingWorker<JFreeChart, Void> implements CancellableRunnable, InterfaceUpdater {
+	@Override
+	public void eventReceived(SignalChangeEvent event) {
+		// Pass messages upwards
+		if (parentPanel != null)
+			parentPanel.eventReceived(event);
 
-        private final ChartOptions options;
+		// Pass messages downwards
+		for (TabPanel panel : this.subPanels) {
+			if (event.getSource().equals(panel)) {
+				sh.fire(new SignalChangeEvent(this, event));
+			}
+		}
+	}
 
-        public ChartFactoryWorker(final ChartOptions o) {
-            options = o;
-        }
+	@Override
+	public void eventReceived(ChartOptionsRenderedEvent e) {
+		// To be overridden as needed by extending classes
+		update(getDatasets());
+	}
 
-        @Override
-        protected synchronized JFreeChart doInBackground() throws Exception {
+	/**
+	 * Charting can be an intensive process, especially with background images being
+	 * imported for outline charts. This worker will keep the chart generation off
+	 * the EDT
+	 * 
+	 * @author bms41
+	 *
+	 */
+	protected class ChartFactoryWorker extends SwingWorker<JFreeChart, Void>
+			implements CancellableRunnable, InterfaceUpdater {
 
-            try {
-                if (options.hasTarget()) {
-                    options.getTarget().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-                    options.getTarget().setChart(AbstractChartFactory.createLoadingChart());
-                }
+		private final ChartOptions options;
 
-                JFreeChart chart = createPanelChartType(options);
-                chartCache.add(options, chart);
+		public ChartFactoryWorker(final ChartOptions o) {
+			options = o;
+		}
 
-                return chart;
-            } catch (Exception e) {
-            	LOGGER.log(Level.WARNING, "Error creating chart");
-                LOGGER.log(Loggable.STACK, "Error creating chart", e);
-                return null;
-            }
+		@Override
+		protected synchronized JFreeChart doInBackground() throws Exception {
 
-        }
+			try {
+				if (options.hasTarget()) {
+					options.getTarget().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+					options.getTarget().setChart(AbstractChartFactory.createLoadingChart());
+				}
 
-        @Override
-        public synchronized void done() {
+				JFreeChart chart = createPanelChartType(options);
+				chartCache.add(options, chart);
 
-            try {
-                if (options.hasTarget()) {
-                    options.getTarget().setChart(get());
-                    options.getTarget().setCursor(Cursor.getDefaultCursor());
-                }
-            } catch (InterruptedException e) {
-            	LOGGER.log(Level.WARNING, "Interruption to charting in " + DetailPanel.this.getClass().getName());
-                LOGGER.log(Loggable.STACK, "Interruption to charting", e);
-                Thread.currentThread().interrupt();
-            } catch (ExecutionException e) {
-            	LOGGER.log(Level.WARNING, "Excecution error in charting in " + DetailPanel.this.getClass().getName());
-                LOGGER.log(Loggable.STACK, "Excecution error charting", e);
-            }
-        }
+				return chart;
+			} catch (Exception e) {
+				LOGGER.log(Level.WARNING, "Error creating chart");
+				LOGGER.log(Loggable.STACK, "Error creating chart", e);
+				return null;
+			}
 
-        @Override
-        public void cancel() {
-            this.cancel(true);
-        }
+		}
 
-    }
+		@Override
+		public synchronized void done() {
 
-    /**
-     * Tables can also be an intensive process, especially with venn
-     * comparisons. This worker will keep the model generation off the EDT
-     * 
-     * @author bms41
-     *
-     */
-    protected class TableFactoryWorker extends SwingWorker<TableModel, Void> implements CancellableRunnable, InterfaceUpdater {
+			try {
+				if (options.hasTarget()) {
+					options.getTarget().setChart(get());
+					options.getTarget().setCursor(Cursor.getDefaultCursor());
+				}
+			} catch (InterruptedException e) {
+				LOGGER.log(Level.WARNING, "Interruption to charting in " + DetailPanel.this.getClass().getName());
+				LOGGER.log(Loggable.STACK, "Interruption to charting", e);
+				Thread.currentThread().interrupt();
+			} catch (ExecutionException e) {
+				LOGGER.log(Level.WARNING, "Excecution error in charting in " + DetailPanel.this.getClass().getName());
+				LOGGER.log(Loggable.STACK, "Excecution error charting", e);
+			}
+		}
 
-        private final TableOptions options;
+		@Override
+		public void cancel() {
+			this.cancel(true);
+		}
 
-        public TableFactoryWorker(@NonNull final TableOptions o) {
-            options = o;
-        }
+	}
 
-        @Override
-        protected synchronized TableModel doInBackground() throws Exception {
+	/**
+	 * Tables can also be an intensive process, especially with venn comparisons.
+	 * This worker will keep the model generation off the EDT
+	 * 
+	 * @author bms41
+	 *
+	 */
+	protected class TableFactoryWorker extends SwingWorker<TableModel, Void>
+			implements CancellableRunnable, InterfaceUpdater {
 
-            try {
-                if (options.hasTarget())
-                    options.getTarget().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-                
-                TableModel model = createPanelTableType(options);
-                tableCache.add(options, model);
+		private final TableOptions options;
 
-                return model;
-            } catch (Exception e) {
-            	LOGGER.log(Level.WARNING, "Error creating table model");
-            	LOGGER.log(Loggable.STACK, "Error creating table model", e);
-                return null;
-            }
+		public TableFactoryWorker(@NonNull final TableOptions o) {
+			options = o;
+		}
 
-        }
+		@Override
+		protected synchronized TableModel doInBackground() throws Exception {
 
-        @Override
-        public synchronized void done() {
+			try {
+				if (options.hasTarget())
+					options.getTarget().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
-            try {
-            	JTable table = options.getTarget();
-                if (table != null) {
-                    TableModel model = get();
-                    if (model != null) {
-                    	table.setModel(model);
-                        setRenderers();
-                        if(table instanceof ExportableTable) {
-                        	((ExportableTable) table).updateRowHeights();
-                        }
-                    }
-                    table.setCursor(Cursor.getDefaultCursor());
-                }
-            } catch (InterruptedException e) {
-            	LOGGER.log(Level.WARNING, "Interruption to table creation in " + DetailPanel.this.getClass().getName());
-            	LOGGER.log(Loggable.STACK, "Error in table worker", e);
-            	Thread.currentThread().interrupt();
-            } catch (ExecutionException e) {
-            	LOGGER.log(Level.WARNING, "Excecution error in table creation in " + DetailPanel.this.getClass().getName());
-            	LOGGER.log(Loggable.STACK, "Error in table worker", e);
-            }
-        }
+				TableModel model = createPanelTableType(options);
+				tableCache.add(options, model);
 
-        @Override
-        public void cancel() {
-            LOGGER.fine("Cancelling detail panel table update");
-            this.cancel(true);
-        }
-                
-        private synchronized void setRenderers() {
-            JTable table = options.getTarget();
-            
-           if(table.getRowCount()==0)
-        	   return;
-           
-            int columns = table.getColumnModel().getColumnCount();
+				return model;
+			} catch (Exception e) {
+				LOGGER.log(Level.WARNING, "Error creating table model");
+				LOGGER.log(Loggable.STACK, "Error creating table model", e);
+				return null;
+			}
 
-            for (int i : options.getRendererColumns()) {
+		}
 
-                TableCellRenderer renderer = options.getRenderer(i);
+		@Override
+		public synchronized void done() {
 
-                if (i == TableOptions.FIRST_COLUMN) {
+			try {
+				JTable table = options.getTarget();
+				if (table != null) {
+					TableModel model = get();
+					if (model != null) {
+						table.setModel(model);
+						setRenderers();
+						if (table instanceof ExportableTable) {
+							((ExportableTable) table).updateRowHeights();
+						}
+					}
+					table.setCursor(Cursor.getDefaultCursor());
+				}
+			} catch (InterruptedException e) {
+				LOGGER.log(Level.WARNING, "Interruption to table creation in " + DetailPanel.this.getClass().getName());
+				LOGGER.log(Loggable.STACK, "Error in table worker", e);
+				Thread.currentThread().interrupt();
+			} catch (ExecutionException e) {
+				LOGGER.log(Level.WARNING,
+						"Excecution error in table creation in " + DetailPanel.this.getClass().getName());
+				LOGGER.log(Loggable.STACK, "Error in table worker", e);
+			}
+		}
 
-                    table.getColumnModel().getColumn(0).setCellRenderer(renderer);
-                    continue;
-                }
+		@Override
+		public void cancel() {
+			LOGGER.fine("Cancelling detail panel table update");
+			this.cancel(true);
+		}
 
-                if (i == TableOptions.ALL_COLUMNS) {
-                    for (int j = 0; j < columns; j++) {
-                        table.getColumnModel().getColumn(j).setCellRenderer(renderer);
-                    }
-                    continue;
-                }
+		private synchronized void setRenderers() {
+			JTable table = options.getTarget();
 
-                if (i == TableOptions.ALL_EXCEPT_FIRST_COLUMN) {
-                    for (int j = 1; j < columns; j++) {
-                        table.getColumnModel().getColumn(j).setCellRenderer(renderer);
-                    }
-                    continue;
-                }
+			if (table.getRowCount() == 0)
+				return;
 
-                table.getColumnModel().getColumn(i).setCellRenderer(renderer);
+			int columns = table.getColumnModel().getColumnCount();
 
-            }
+			for (int i : options.getRendererColumns()) {
 
-        }
+				TableCellRenderer renderer = options.getRenderer(i);
 
-    }
+				if (i == TableOptions.FIRST_COLUMN) {
 
-    /**
-     * Signal listeners that the chart with the given options has been rendered
-     * 
-     * @param options
-     */
-    public void fireChartOptionsRenderedEvent(ChartOptions options) {
-        ChartOptionsRenderedEvent e = new ChartOptionsRenderedEvent(this, options);
-        Iterator<Object> iterator = listeners.iterator();
-        while (iterator.hasNext()) {
-            ((ChartOptionsRenderedEventListener) iterator.next()).chartOptionsRenderedEventReceived(e);
-        }
-    }
+					table.getColumnModel().getColumn(0).setCellRenderer(renderer);
+					continue;
+				}
 
-    /**
-     * Add a listener for completed charts rendered into the chart cache of this
-     * panel.
-     * 
-     * @param l
-     */
-    public synchronized void addChartOptionsRenderedEventListener(ChartOptionsRenderedEventListener l) {
-        listeners.add(l);
-    }
+				if (i == TableOptions.ALL_COLUMNS) {
+					for (int j = 0; j < columns; j++) {
+						table.getColumnModel().getColumn(j).setCellRenderer(renderer);
+					}
+					continue;
+				}
 
-    public synchronized void removeChartOptionsRenderedEventListener(ChartOptionsRenderedEventListener l) {
-        listeners.remove(l);
-    }
+				if (i == TableOptions.ALL_EXCEPT_FIRST_COLUMN) {
+					for (int j = 1; j < columns; j++) {
+						table.getColumnModel().getColumn(j).setCellRenderer(renderer);
+					}
+					continue;
+				}
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see gui.tabs.TabPanel#setChartsAndTablesLoading() This sets all sub
-     * panels to invoke the loading state. Any implementing class must still
-     * override this method to provide the expected behaviour for the panel and
-     * call super.setChartsAndTablesLoading()
-     */
-    @Override
-    public synchronized void setChartsAndTablesLoading() {
-        for (TabPanel p : subPanels) {
-            p.setChartsAndTablesLoading();
-        }
-    }
+				table.getColumnModel().getColumn(i).setCellRenderer(renderer);
 
-    @Override
-    public void eventReceived(DatasetUpdateEvent e) {
-        // Signal sub panels to update
-        duh.fireDatasetUpdateEvent(e.getDatasets());
-        this.update(e.getDatasets());
-    }
-    
+			}
+
+		}
+
+	}
+
+	/**
+	 * Signal listeners that the chart with the given options has been rendered
+	 * 
+	 * @param options
+	 */
+	public void fireChartOptionsRenderedEvent(ChartOptions options) {
+		ChartOptionsRenderedEvent e = new ChartOptionsRenderedEvent(this, options);
+		Iterator<Object> iterator = listeners.iterator();
+		while (iterator.hasNext()) {
+			((ChartOptionsRenderedEventListener) iterator.next()).chartOptionsRenderedEventReceived(e);
+		}
+	}
+
+	/**
+	 * Add a listener for completed charts rendered into the chart cache of this
+	 * panel.
+	 * 
+	 * @param l
+	 */
+	public synchronized void addChartOptionsRenderedEventListener(ChartOptionsRenderedEventListener l) {
+		listeners.add(l);
+	}
+
+	public synchronized void removeChartOptionsRenderedEventListener(ChartOptionsRenderedEventListener l) {
+		listeners.remove(l);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gui.tabs.TabPanel#setChartsAndTablesLoading() This sets all sub panels
+	 * to invoke the loading state. Any implementing class must still override this
+	 * method to provide the expected behaviour for the panel and call
+	 * super.setChartsAndTablesLoading()
+	 */
+	@Override
+	public synchronized void setChartsAndTablesLoading() {
+		for (TabPanel p : subPanels) {
+			p.setChartsAndTablesLoading();
+		}
+	}
+
+	@Override
+	public void eventReceived(DatasetUpdateEvent e) {
+		// Signal sub panels to update
+		duh.fireDatasetUpdateEvent(e.getDatasets());
+		this.update(e.getDatasets());
+	}
 
 	@Override
 	public void cellUpdatedEventReceived(CellUpdatedEvent event) {
 		isCellUpdateMade = true;
 	}
-	
+
 	@Override
 	public boolean hasCellUpdate() {
 		boolean result = isCellUpdateMade;
-		for(TabPanel t : getSubPanels()) {
-			result |= t.hasCellUpdate();
-		}
+//		for (TabPanel t : getSubPanels()) {
+//			result |= t.hasCellUpdate();
+//		}
 		return result;
 	}
 
 	@Override
 	public void setCellUpdate(boolean b) {
 		isCellUpdateMade = b;
-		for(TabPanel t : getSubPanels()) {
-			t.setCellUpdate(b);
-		}
-		
+//		for (TabPanel t : getSubPanels()) {
+//			t.setCellUpdate(b);
+//		}
+
+	}
+
+	@Override
+	public void datasetSelectionUpdated(List<IAnalysisDataset> datasets) {
+		this.update(datasets);
+	}
+
+	@Override
+	public void datasetSelectionUpdated(IAnalysisDataset d) {
+		this.update(List.of(d));
 	}
 
 }

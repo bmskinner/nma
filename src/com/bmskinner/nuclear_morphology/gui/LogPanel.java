@@ -70,7 +70,6 @@ import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
-import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent;
 import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.main.MainDragAndDropTarget;
@@ -79,500 +78,505 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * The log panel is where logging messages are displayed. It also holds progress
- * bars from actions. For historical reasons, it also houses the console and contains
- * the console code.
+ * bars from actions. For historical reasons, it also houses the console and
+ * contains the console code.
  * 
  * @author ben
  *
  */
 @SuppressWarnings("serial")
 public class LogPanel extends DetailPanel implements ProgressBarAcceptor {
-	
+
 	private static final Logger LOGGER = Logger.getLogger(LogPanel.class.getName());
 
-    private static final String SHOW_CONSOLE_ACTION = "ShowConsole";
-    
-    private final EventHandler eh;
+	private static final String SHOW_CONSOLE_ACTION = "ShowConsole";
 
-    private JTextPane textArea = new JTextPane();
-    
-    private final Console console = new Console();
+	private final EventHandler eh;
 
-    private JPanel logPanel;      // messages and errors
-    private JPanel progressPanel; // progress bars for analyses
-    private SimpleAttributeSet attrs; // the styling attributes
+	private JTextPane textArea = new JTextPane();
 
-    public LogPanel(@NonNull InputSupplier context, @NonNull EventHandler eh) {
-    	super(context);
-    	this.eh = eh;
-    	this.setLayout(new BorderLayout());
-    	this.logPanel = createLogPanel();
-    	
-    	addDatasetEventListener(eh);
-    	addInterfaceEventListener(eh);
-    	addSignalChangeListener(eh);
-    	textArea.setDropTarget(new MainDragAndDropTarget(eh));
-    	this.add(logPanel, BorderLayout.CENTER);
-    }
-    
-    @Override
-    public String getPanelTitle(){
-        return "Log panel";
-    }
+	private final Console console = new Console();
 
-    /**
-     * Create the log panel for updates
-     * 
-     * @return a scrollable panel
-     */
-    private JPanel createLogPanel() {
-        JPanel panel = new JPanel();
-        panel.setLayout(new BorderLayout());
-        JScrollPane scrollPane = new JScrollPane();
-       
-        createTextPane();
-        scrollPane.setViewportView(textArea);
-        scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+	private JPanel logPanel; // messages and errors
+	private JPanel progressPanel; // progress bars for analyses
+	private SimpleAttributeSet attrs; // the styling attributes
 
-        panel.add(scrollPane, BorderLayout.CENTER);
+	public LogPanel(@NonNull InputSupplier context, @NonNull EventHandler eh) {
+		super(context);
+		this.eh = eh;
+		this.setLayout(new BorderLayout());
+		this.logPanel = createLogPanel();
 
-        progressPanel = new JPanel();
+		addDatasetEventListener(eh);
+		addSignalChangeListener(eh);
+		textArea.setDropTarget(new MainDragAndDropTarget(eh));
+		this.add(logPanel, BorderLayout.CENTER);
+	}
 
-        progressPanel.setLayout(new BoxLayout(progressPanel, BoxLayout.Y_AXIS));
-        panel.add(progressPanel, BorderLayout.NORTH);
-        panel.add(console, BorderLayout.SOUTH);
+	@Override
+	public String getPanelTitle() {
+		return "Log panel";
+	}
 
-        this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_F12, 0),
-                SHOW_CONSOLE_ACTION);
-        this.getActionMap().put(SHOW_CONSOLE_ACTION, new ShowConsoleAction());
-        return panel;
-    }
-    
-    private void createTextPane() {
-    	textArea.setEditorKit(new WrapEditorKit());
-        textArea.setEditable(false);
-        textArea.setBackground(SystemColor.menu);
-        Font font = new Font("Monospaced", Font.PLAIN, 13);
-        
-        // Set the wrapped line indent
-        StyledDocument doc = textArea.getStyledDocument();
-        attrs = new SimpleAttributeSet();
-        StyleConstants.setFirstLineIndent(attrs, -70);
-        StyleConstants.setLeftIndent(attrs, 70);
-        StyleConstants.setFontFamily(attrs, font.getFamily());
-        StyleConstants.setFontSize(attrs, font.getSize());
-        StyleConstants.setForeground(attrs, Color.BLACK);
-        StyleConstants.setBackground(attrs, SystemColor.menu);
-        StyleConstants.setItalic(attrs, false);
-        StyleConstants.setBold(attrs, false);
+	/**
+	 * Create the log panel for updates
+	 * 
+	 * @return a scrollable panel
+	 */
+	private JPanel createLogPanel() {
+		JPanel panel = new JPanel();
+		panel.setLayout(new BorderLayout());
+		JScrollPane scrollPane = new JScrollPane();
 
-        doc.setParagraphAttributes(0, doc.getLength() + 1, attrs, true);
-        doc.setCharacterAttributes(0, doc.getLength() + 1, attrs, true);
+		createTextPane();
+		scrollPane.setViewportView(textArea);
+		scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 
-        DefaultCaret caret = (DefaultCaret) textArea.getCaret();
-        caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
-    }
-    
-    private void listDatasets() {
-        int i = 0;
-        for (IAnalysisDataset d : DatasetListManager.getInstance().getAllDatasets()) {
-            String type = d.getCollection().isReal() ? "Real" : "Virtual";
-            LOGGER.info(i + "\t" + d.getName()+"\t"+type);
-            i++;
-        }
-    }
+		panel.add(scrollPane, BorderLayout.CENTER);
 
-    private void killAllTasks() {
+		progressPanel = new JPanel();
 
-    	LOGGER.info("Threads running in the JVM:");
-        Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
-        for (Thread t : threadSet) {
-        	LOGGER.info("Thread " + t.getId() + ": " + t.getState());
-            t.interrupt();
-        }
+		progressPanel.setLayout(new BoxLayout(progressPanel, BoxLayout.Y_AXIS));
+		panel.add(progressPanel, BorderLayout.NORTH);
+		panel.add(console, BorderLayout.SOUTH);
 
-    }
-    
-    private void listTasks() {
-    	LOGGER.info(ThreadManager.getInstance().toString());
-    }
+		this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_F12, 0),
+				SHOW_CONSOLE_ACTION);
+		this.getActionMap().put(SHOW_CONSOLE_ACTION, new ShowConsoleAction());
+		return panel;
+	}
 
-   
+	private void createTextPane() {
+		textArea.setEditorKit(new WrapEditorKit());
+		textArea.setEditable(false);
+		textArea.setBackground(SystemColor.menu);
+		Font font = new Font("Monospaced", Font.PLAIN, 13);
 
-    /**
-     * Print the given string
-     * @param s
-     */
-    public void print(String s) {
-        StyledDocument doc = textArea.getStyledDocument();
+		// Set the wrapped line indent
+		StyledDocument doc = textArea.getStyledDocument();
+		attrs = new SimpleAttributeSet();
+		StyleConstants.setFirstLineIndent(attrs, -70);
+		StyleConstants.setLeftIndent(attrs, 70);
+		StyleConstants.setFontFamily(attrs, font.getFamily());
+		StyleConstants.setFontSize(attrs, font.getSize());
+		StyleConstants.setForeground(attrs, Color.BLACK);
+		StyleConstants.setBackground(attrs, SystemColor.menu);
+		StyleConstants.setItalic(attrs, false);
+		StyleConstants.setBold(attrs, false);
 
-        Runnable r = () -> {
-            try {
-                doc.insertString(doc.getLength(), s, attrs);
-            } catch (BadLocationException e) {
-                LOGGER.log(Level.SEVERE, "Error updating log panel", e);
-            }
-        };
-        SwingUtilities.invokeLater(r);
-    }
-    
-    /**
-     * Print the given string with a new line
-     * @param s
-     */
-    public void println(String s) {
-    	print(s+System.getProperty("line.separator"));
-    }
+		doc.setParagraphAttributes(0, doc.getLength() + 1, attrs, true);
+		doc.setCharacterAttributes(0, doc.getLength() + 1, attrs, true);
 
-    /**
-     * Clear the log window of all text
-     */
-    public void clear() {
-        textArea.setText(null);
-    }
+		DefaultCaret caret = (DefaultCaret) textArea.getCaret();
+		caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
+	}
 
-    /**
-     * Get all the progress bars attached to the log panel
-     * 
-     * @return
-     */
-    @Override
+	private void listDatasets() {
+		int i = 0;
+		for (IAnalysisDataset d : DatasetListManager.getInstance().getAllDatasets()) {
+			String type = d.getCollection().isReal() ? "Real" : "Virtual";
+			LOGGER.info(i + "\t" + d.getName() + "\t" + type);
+			i++;
+		}
+	}
+
+	private void killAllTasks() {
+
+		LOGGER.info("Threads running in the JVM:");
+		Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
+		for (Thread t : threadSet) {
+			LOGGER.info("Thread " + t.getId() + ": " + t.getState());
+			t.interrupt();
+		}
+
+	}
+
+	private void listTasks() {
+		LOGGER.info(ThreadManager.getInstance().toString());
+	}
+
+	/**
+	 * Print the given string
+	 * 
+	 * @param s
+	 */
+	public void print(String s) {
+		StyledDocument doc = textArea.getStyledDocument();
+
+		Runnable r = () -> {
+			try {
+				doc.insertString(doc.getLength(), s, attrs);
+			} catch (BadLocationException e) {
+				LOGGER.log(Level.SEVERE, "Error updating log panel", e);
+			}
+		};
+		SwingUtilities.invokeLater(r);
+	}
+
+	/**
+	 * Print the given string with a new line
+	 * 
+	 * @param s
+	 */
+	public void println(String s) {
+		print(s + System.getProperty("line.separator"));
+	}
+
+	/**
+	 * Clear the log window of all text
+	 */
+	public void clear() {
+		textArea.setText(null);
+	}
+
+	/**
+	 * Get all the progress bars attached to the log panel
+	 * 
+	 * @return
+	 */
+	@Override
 	public List<JProgressBar> getProgressBars() {
-        List<JProgressBar> result = new ArrayList<JProgressBar>();
-        for (Component c : progressPanel.getComponents()) {
-            if (c.getClass().isInstance(JProgressBar.class)) {
-                result.add((JProgressBar) c);
-            }
+		List<JProgressBar> result = new ArrayList<JProgressBar>();
+		for (Component c : progressPanel.getComponents()) {
+			if (c.getClass().isInstance(JProgressBar.class)) {
+				result.add((JProgressBar) c);
+			}
 
-        }
-        return result;
-    }
+		}
+		return result;
+	}
 
-    @Override
+	@Override
 	public void addProgressBar(JProgressBar progressBar) {
-        progressPanel.add(progressBar);
-        revalidate();
-        repaint();
-    }
+		progressPanel.add(progressBar);
+		revalidate();
+		repaint();
+	}
 
-    @Override
+	@Override
 	public void removeProgressBar(JProgressBar progressBar) {
-        progressPanel.remove(progressBar);
-        revalidate();
-        repaint();
-    }
+		progressPanel.remove(progressBar);
+		revalidate();
+		repaint();
+	}
 
-    private class ShowConsoleAction extends AbstractAction {
+	private class ShowConsoleAction extends AbstractAction {
 
-        public ShowConsoleAction() {
-            super("Show console");
-        }
+		public ShowConsoleAction() {
+			super("Show console");
+		}
 
-        @Override
+		@Override
 		public void actionPerformed(ActionEvent e) {
-            console.toggle();
-        }
-    }
+			console.toggle();
+		}
+	}
 
-    
+	private void validateDatasets(boolean isDetail) {
 
-    private void validateDatasets(boolean isDetail) {
+		DatasetValidator v = new DatasetValidator();
+		for (IAnalysisDataset d : DatasetListManager.getInstance().getRootDatasets()) {
+			LOGGER.info("Validating " + d.getName() + "...");
+			if (!v.validate(d)) {
 
-        DatasetValidator v = new DatasetValidator();
-        for (IAnalysisDataset d : DatasetListManager.getInstance().getRootDatasets()) {
-            LOGGER.info("Validating " + d.getName() + "...");
-            if (!v.validate(d)) {
-            	
-            	if(isDetail) {
-            		for (String s : v.getErrors()) {
-                    	LOGGER.warning(s);
-                    }
-            	} else {
-            		for (String s : v.getSummary()) {
-                    	LOGGER.warning(s);
-                    }
-            		LOGGER.warning("Use 'check detail' for full list of errors");
-            	}                
-            } else {
-            	LOGGER.info("Dataset OK");
-            }
+				if (isDetail) {
+					for (String s : v.getErrors()) {
+						LOGGER.warning(s);
+					}
+				} else {
+					for (String s : v.getSummary()) {
+						LOGGER.warning(s);
+					}
+					LOGGER.warning("Use 'check detail' for full list of errors");
+				}
+			} else {
+				LOGGER.info("Dataset OK");
+			}
 
-        }
-    }
-    
-    private void repairDatasets() {
+		}
+	}
 
-        DatasetRepairer r = new DatasetRepairer();
-        for (IAnalysisDataset d : DatasetListManager.getInstance().getRootDatasets()) {
-            LOGGER.info("Repairing " + d.getName() + "...");
-            r.repair(d);
-        }
-    }
+	private void repairDatasets() {
 
-    @Override
-    public void update(List<IAnalysisDataset> list) {
-        // Does nothing, no datasets are displayed.
-        // Using DetailPanel only for signalling access
+		DatasetRepairer r = new DatasetRepairer();
+		for (IAnalysisDataset d : DatasetListManager.getInstance().getRootDatasets()) {
+			LOGGER.info("Repairing " + d.getName() + "...");
+			r.repair(d);
+		}
+	}
 
-    }
-    
-    class WrapEditorKit extends StyledEditorKit {
-        ViewFactory defaultFactory=new WrapColumnFactory();
-        
-        @Override
-        public ViewFactory getViewFactory() {
-            return defaultFactory;
-        }
- 
-    }
- 
-    class WrapColumnFactory implements ViewFactory {
-        public View create(Element elem) {
-            String kind = elem.getName();
-            if (kind != null) {
-                if (kind.equals(AbstractDocument.ContentElementName)) {
-                    return new WrapLabelView(elem);
-                } else if (kind.equals(AbstractDocument.ParagraphElementName)) {
-                    return new ParagraphView(elem);
-                } else if (kind.equals(AbstractDocument.SectionElementName)) {
-                    return new BoxView(elem, View.Y_AXIS);
-                } else if (kind.equals(StyleConstants.ComponentElementName)) {
-                    return new ComponentView(elem);
-                } else if (kind.equals(StyleConstants.IconElementName)) {
-                    return new IconView(elem);
-                }
-            }
- 
-            // default to text display
-            return new LabelView(elem);
-        }
-    }
- 
-    class WrapLabelView extends LabelView {
-        public WrapLabelView(Element elem) {
-            super(elem);
-        }
-        @Override
-        public float getMinimumSpan(int axis) {
-            switch (axis) {
-                case View.X_AXIS:
-                    return 0;
-                case View.Y_AXIS:
-                    return super.getMinimumSpan(axis);
-                default:
-                    throw new IllegalArgumentException("Invalid axis: " + axis);
-            }
-        }
- 
-    }
-    
-    /**
-     * Allow typed commands for functions that are not ready to expose through the GUI 
-     * @author ben
-     *
-     */
-    private class Console extends JPanel implements ActionListener {
-    	 private JTextField console = new JTextField();
-    	 private Map<String, InterfaceMethod> commandMap = new HashMap<String, InterfaceMethod>();
+	@Override
+	public void update(List<IAnalysisDataset> list) {
+		// Does nothing, no datasets are displayed.
+		// Using DetailPanel only for signalling access
 
-    	private int historyIndex = -1;
-    	private List<String> history = new LinkedList<>();
-    	
-        private static final String NEXT_HISTORY_ACTION = "Next";
-        private static final String PREV_HISTORY_ACTION = "Prev";
+	}
 
-        private static final String HIST_CMD  = "history";
-        private static final String CHECK_CMD = "check";
-        private static final String CHECK_DETAIL_CMD = "check detail";
-        private static final String REPAIR_BASIC_CMD = "repair"; // fix existing issues without resegmenting
-        private static final String HELP_CMD  = "help";
-        private static final String CLEAR_CMD = "clear";
-        private static final String THROW_CMD = "throw";
-        private static final String GLCM_CMD = "glcm";
-        private static final String LIST_CMD  = "list";
-        private static final String KILL_CMD  = "kill";
-        private static final String REPAIR_CMD  = "unfuck"; // start from scratch
-        private static final String TASKS_CMD  = "tasks";
-        private static final String HASH_CMD  = "check hash";
-        private static final String EXPORT_CMD = "export xml";
-        private static final String EXPORT_TPS = "export tps";
+	class WrapEditorKit extends StyledEditorKit {
+		ViewFactory defaultFactory = new WrapColumnFactory();
 
-        private final Map<String, Runnable> runnableCommands = new HashMap<>();
+		@Override
+		public ViewFactory getViewFactory() {
+			return defaultFactory;
+		}
 
-    	{
-    		commandMap.put("list selected", InterfaceMethod.LIST_SELECTED_DATASETS);
-    		commandMap.put("recache charts", InterfaceMethod.RECACHE_CHARTS);
-    		commandMap.put("refresh", InterfaceMethod.UPDATE_PANELS);
-    		commandMap.put("nucleus history", InterfaceMethod.DUMP_LOG_INFO);
-    		commandMap.put("info", InterfaceMethod.INFO);
-    	}
-    	
-    	public Console() {
-    		setLayout(new BorderLayout());
-    		makeCommandList();
-    		Font font = new Font("Monospaced", Font.PLAIN, 13);
-    		console.setFont(font);
-            add(console, BorderLayout.CENTER);
-            setVisible(false);
-            console.addActionListener(this);
+	}
 
-            console.getInputMap(JComponent.WHEN_FOCUSED).put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0),
-                    PREV_HISTORY_ACTION);
+	class WrapColumnFactory implements ViewFactory {
+		@Override
+		public View create(Element elem) {
+			String kind = elem.getName();
+			if (kind != null) {
+				if (kind.equals(AbstractDocument.ContentElementName)) {
+					return new WrapLabelView(elem);
+				} else if (kind.equals(AbstractDocument.ParagraphElementName)) {
+					return new ParagraphView(elem);
+				} else if (kind.equals(AbstractDocument.SectionElementName)) {
+					return new BoxView(elem, View.Y_AXIS);
+				} else if (kind.equals(StyleConstants.ComponentElementName)) {
+					return new ComponentView(elem);
+				} else if (kind.equals(StyleConstants.IconElementName)) {
+					return new IconView(elem);
+				}
+			}
 
-            console.getActionMap().put(PREV_HISTORY_ACTION, new PrevHistoryAction());
+			// default to text display
+			return new LabelView(elem);
+		}
+	}
 
-            console.getInputMap(JComponent.WHEN_FOCUSED).put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0),
-                    NEXT_HISTORY_ACTION);
-            console.getActionMap().put(NEXT_HISTORY_ACTION, new NextHistoryAction());
-    	}
-    	
-    	/**
-    	 * Toggle the visibilty of the console
-    	 */
-    	public void toggle() {
-    		if (isVisible()) {
-                setVisible(false);
-            } else {
-            	setVisible(true);
-            	console.setText(null);
-                console.grabFocus();
-                console.requestFocus();
-                console.requestFocusInWindow();
-            }
-            revalidate();
-            repaint();
-    	}
-    	
-    	 /**
-         * Make the list of local commands to run
-         */
-        private void makeCommandList() {
-        	runnableCommands.put(HIST_CMD, () -> {
-        		LOGGER.info("History: ");
-                for (String s : history)
-                	LOGGER.info("\t"+s);
-            });
-        	
-        	
-        	runnableCommands.put(HASH_CMD, ()->{
-        		Set<IAnalysisDataset> datasets = DatasetListManager.getInstance().getAllDatasets();
-        		
-        		for(IAnalysisDataset d : datasets)
-        			LOGGER.info(d.getName()+": "+d.hashCode());
-        		
-        	});
-        	
-            
-            runnableCommands.put(HELP_CMD, () -> {
-            	LOGGER.info("Available commands: ");
-                for (String key : commandMap.keySet()) {
-                    InterfaceMethod im = commandMap.get(key);
-                    LOGGER.info(" " + key + " - " + im.toString());
-                }
-                LOGGER.info(" check - validate the open root datasets");
-                LOGGER.info(" list  - list the open root datasets");
-                LOGGER.info(" export xml - export the selected dataset in XML format");
-                LOGGER.info(" export tps - export the selected datasets in TPS format");
-                LOGGER.info(" tasks - list the current task list");
-                LOGGER.info(" "+HASH_CMD+" - print the hashes of the selected datasets");
-            });
-           
-            runnableCommands.put(THROW_CMD, () -> {
-            	LOGGER.info("Throwing exception");
-                try {
-                    throw new IllegalArgumentException("Throwing an exception");
-                } catch (Exception e) {
-                    LOGGER.log(Loggable.STACK, "Caught expected exception", e);
-                }
-            });
-            
-            runnableCommands.put(CHECK_CMD,  () -> validateDatasets(false));
-            runnableCommands.put(CHECK_DETAIL_CMD,  () -> validateDatasets(true));
-            runnableCommands.put(REPAIR_BASIC_CMD,  () -> repairDatasets());
-            runnableCommands.put(CLEAR_CMD,  () -> clear());
-            runnableCommands.put(LIST_CMD,   () -> listDatasets());
-            runnableCommands.put(KILL_CMD,   () -> killAllTasks());
-            runnableCommands.put(TASKS_CMD,  () -> listTasks());
-            runnableCommands.put(REPAIR_CMD, () -> getDatasetEventHandler().fireDatasetEvent(DatasetEvent.REFPAIR_SEGMENTATION, DatasetListManager.getInstance().getSelectedDatasets()));
-            runnableCommands.put(GLCM_CMD,   () -> getDatasetEventHandler().fireDatasetEvent(DatasetEvent.RUN_GLCM_ANALYSIS, DatasetListManager.getInstance().getSelectedDatasets()));
-            
-            runnableCommands.put(EXPORT_CMD, () -> getSignalChangeEventHandler().fireSignalChangeEvent(SignalChangeEvent.EXPORT_XML_DATASET));
-            runnableCommands.put(EXPORT_TPS, () -> getSignalChangeEventHandler().fireSignalChangeEvent(SignalChangeEvent.EXPORT_TPS_DATASET));
-        }
-    	
-        /**
-         * Run the given command from the console
-         * 
-         * @param command
-         */
-        private void runCommand(String command) {
-        	if (commandMap.containsKey(command)) {
-                getInterfaceEventHandler().fire(InterfaceEvent.of(this, commandMap.get(command)));
-            } else {
+	class WrapLabelView extends LabelView {
+		public WrapLabelView(Element elem) {
+			super(elem);
+		}
 
-                if (runnableCommands.containsKey(command)) {
-                    runnableCommands.get(command).run();
-                } else {
-                	LOGGER.info("Command not recognised");
-                }
+		@Override
+		public float getMinimumSpan(int axis) {
+			switch (axis) {
+			case View.X_AXIS:
+				return 0;
+			case View.Y_AXIS:
+				return super.getMinimumSpan(axis);
+			default:
+				throw new IllegalArgumentException("Invalid axis: " + axis);
+			}
+		}
 
-            }
-        }
-    	
-    	/*
-         * Listener for the console
-         */
-        @Override
-        public void actionPerformed(ActionEvent e) {
+	}
 
-            if (e.getSource().equals(console)) {
-            	LOGGER.info(console.getText());
-                history.add(console.getText());
-                historyIndex=history.size();
-                runCommand(console.getText());
-                console.setText("");
-            }
-        }
-    	
-    	private class PrevHistoryAction extends AbstractAction {
+	/**
+	 * Allow typed commands for functions that are not ready to expose through the
+	 * GUI
+	 * 
+	 * @author ben
+	 *
+	 */
+	private class Console extends JPanel implements ActionListener {
+		private JTextField console = new JTextField();
+		private Map<String, InterfaceMethod> commandMap = new HashMap<String, InterfaceMethod>();
 
-            public PrevHistoryAction() {
-                super("Prev");
-            }
+		private int historyIndex = -1;
+		private List<String> history = new LinkedList<>();
 
-            @Override
-    		public void actionPerformed(ActionEvent e) {
-            	if (history.isEmpty())
-                    return;
-                if (historyIndex > -1) {
-                	historyIndex--;
-                }
-                if (historyIndex == -1) {
-                    console.setText("");
-                    return;
-                }
-                console.setText(history.get(historyIndex));
-            }
-        }
+		private static final String NEXT_HISTORY_ACTION = "Next";
+		private static final String PREV_HISTORY_ACTION = "Prev";
 
-        private class NextHistoryAction extends AbstractAction {
+		private static final String HIST_CMD = "history";
+		private static final String CHECK_CMD = "check";
+		private static final String CHECK_DETAIL_CMD = "check detail";
+		private static final String REPAIR_BASIC_CMD = "repair"; // fix existing issues without resegmenting
+		private static final String HELP_CMD = "help";
+		private static final String CLEAR_CMD = "clear";
+		private static final String THROW_CMD = "throw";
+		private static final String GLCM_CMD = "glcm";
+		private static final String LIST_CMD = "list";
+		private static final String KILL_CMD = "kill";
+		private static final String REPAIR_CMD = "unfuck"; // start from scratch
+		private static final String TASKS_CMD = "tasks";
+		private static final String HASH_CMD = "check hash";
+		private static final String EXPORT_CMD = "export xml";
+		private static final String EXPORT_TPS = "export tps";
 
-            public NextHistoryAction() {
-                super("Next");
-            }
+		private final Map<String, Runnable> runnableCommands = new HashMap<>();
 
-            @Override
-    		public void actionPerformed(ActionEvent e) {
-            	if (history.isEmpty()) {
-            		historyIndex=0;
-                    return;
-            	}
-                if (historyIndex >= history.size()-1)
-                    return;
-                historyIndex++;
-                console.setText(history.get(historyIndex));
+		{
+			commandMap.put("list selected", InterfaceMethod.LIST_SELECTED_DATASETS);
+			commandMap.put("recache charts", InterfaceMethod.RECACHE_CHARTS);
+			commandMap.put("refresh", InterfaceMethod.UPDATE_PANELS);
+			commandMap.put("nucleus history", InterfaceMethod.DUMP_LOG_INFO);
+			commandMap.put("info", InterfaceMethod.INFO);
+		}
 
-            }
-        }
-    }
+		public Console() {
+			setLayout(new BorderLayout());
+			makeCommandList();
+			Font font = new Font("Monospaced", Font.PLAIN, 13);
+			console.setFont(font);
+			add(console, BorderLayout.CENTER);
+			setVisible(false);
+			console.addActionListener(this);
+
+			console.getInputMap(JComponent.WHEN_FOCUSED).put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0),
+					PREV_HISTORY_ACTION);
+
+			console.getActionMap().put(PREV_HISTORY_ACTION, new PrevHistoryAction());
+
+			console.getInputMap(JComponent.WHEN_FOCUSED).put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0),
+					NEXT_HISTORY_ACTION);
+			console.getActionMap().put(NEXT_HISTORY_ACTION, new NextHistoryAction());
+		}
+
+		/**
+		 * Toggle the visibilty of the console
+		 */
+		public void toggle() {
+			if (isVisible()) {
+				setVisible(false);
+			} else {
+				setVisible(true);
+				console.setText(null);
+				console.grabFocus();
+				console.requestFocus();
+				console.requestFocusInWindow();
+			}
+			revalidate();
+			repaint();
+		}
+
+		/**
+		 * Make the list of local commands to run
+		 */
+		private void makeCommandList() {
+			runnableCommands.put(HIST_CMD, () -> {
+				LOGGER.info("History: ");
+				for (String s : history)
+					LOGGER.info("\t" + s);
+			});
+
+			runnableCommands.put(HASH_CMD, () -> {
+				Set<IAnalysisDataset> datasets = DatasetListManager.getInstance().getAllDatasets();
+
+				for (IAnalysisDataset d : datasets)
+					LOGGER.info(d.getName() + ": " + d.hashCode());
+
+			});
+
+			runnableCommands.put(HELP_CMD, () -> {
+				LOGGER.info("Available commands: ");
+				for (String key : commandMap.keySet()) {
+					InterfaceMethod im = commandMap.get(key);
+					LOGGER.info(" " + key + " - " + im.toString());
+				}
+				LOGGER.info(" check - validate the open root datasets");
+				LOGGER.info(" list  - list the open root datasets");
+				LOGGER.info(" export xml - export the selected dataset in XML format");
+				LOGGER.info(" export tps - export the selected datasets in TPS format");
+				LOGGER.info(" tasks - list the current task list");
+				LOGGER.info(" " + HASH_CMD + " - print the hashes of the selected datasets");
+			});
+
+			runnableCommands.put(THROW_CMD, () -> {
+				LOGGER.info("Throwing exception");
+				try {
+					throw new IllegalArgumentException("Throwing an exception");
+				} catch (Exception e) {
+					LOGGER.log(Loggable.STACK, "Caught expected exception", e);
+				}
+			});
+
+			runnableCommands.put(CHECK_CMD, () -> validateDatasets(false));
+			runnableCommands.put(CHECK_DETAIL_CMD, () -> validateDatasets(true));
+			runnableCommands.put(REPAIR_BASIC_CMD, () -> repairDatasets());
+			runnableCommands.put(CLEAR_CMD, () -> clear());
+			runnableCommands.put(LIST_CMD, () -> listDatasets());
+			runnableCommands.put(KILL_CMD, () -> killAllTasks());
+			runnableCommands.put(TASKS_CMD, () -> listTasks());
+			runnableCommands.put(REPAIR_CMD,
+					() -> getDatasetEventHandler().fireDatasetEvent(DatasetEvent.REFPAIR_SEGMENTATION,
+							DatasetListManager.getInstance().getSelectedDatasets()));
+			runnableCommands.put(GLCM_CMD,
+					() -> getDatasetEventHandler().fireDatasetEvent(DatasetEvent.RUN_GLCM_ANALYSIS,
+							DatasetListManager.getInstance().getSelectedDatasets()));
+
+			runnableCommands.put(EXPORT_CMD,
+					() -> getSignalChangeEventHandler().fireSignalChangeEvent(SignalChangeEvent.EXPORT_XML_DATASET));
+			runnableCommands.put(EXPORT_TPS,
+					() -> getSignalChangeEventHandler().fireSignalChangeEvent(SignalChangeEvent.EXPORT_TPS_DATASET));
+		}
+
+		/**
+		 * Run the given command from the console
+		 * 
+		 * @param command
+		 */
+//		private void runCommand(String command) {
+//			if (commandMap.containsKey(command)) {
+//				getInterfaceEventHandler().fire(InterfaceEvent.of(this, commandMap.get(command)));
+//			} else {
+//
+//				if (runnableCommands.containsKey(command)) {
+//					runnableCommands.get(command).run();
+//				} else {
+//					LOGGER.info("Command not recognised");
+//				}
+//
+//			}
+//		}
+
+		/*
+		 * Listener for the console
+		 */
+		@Override
+		public void actionPerformed(ActionEvent e) {
+
+			if (e.getSource().equals(console)) {
+				LOGGER.info(console.getText());
+				history.add(console.getText());
+				historyIndex = history.size();
+//				runCommand(console.getText());
+				console.setText("");
+			}
+		}
+
+		private class PrevHistoryAction extends AbstractAction {
+
+			public PrevHistoryAction() {
+				super("Prev");
+			}
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (history.isEmpty())
+					return;
+				if (historyIndex > -1) {
+					historyIndex--;
+				}
+				if (historyIndex == -1) {
+					console.setText("");
+					return;
+				}
+				console.setText(history.get(historyIndex));
+			}
+		}
+
+		private class NextHistoryAction extends AbstractAction {
+
+			public NextHistoryAction() {
+				super("Next");
+			}
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (history.isEmpty()) {
+					historyIndex = 0;
+					return;
+				}
+				if (historyIndex >= history.size() - 1)
+					return;
+				historyIndex++;
+				console.setText(history.get(historyIndex));
+
+			}
+		}
+	}
 }

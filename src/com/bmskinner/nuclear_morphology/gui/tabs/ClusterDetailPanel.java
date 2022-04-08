@@ -46,7 +46,6 @@ import com.bmskinner.nuclear_morphology.gui.components.renderers.JTextAreaCellRe
 import com.bmskinner.nuclear_morphology.gui.dialogs.ClusterTreeDialog;
 import com.bmskinner.nuclear_morphology.gui.dialogs.TsneDialog;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
-import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent;
 import com.bmskinner.nuclear_morphology.visualisation.datasets.AnalysisDatasetTableCreator;
 import com.bmskinner.nuclear_morphology.visualisation.datasets.tables.AbstractTableCreator;
 import com.bmskinner.nuclear_morphology.visualisation.options.ChartOptions;
@@ -63,115 +62,116 @@ import com.bmskinner.nuclear_morphology.visualisation.options.TableOptionsBuilde
  */
 @SuppressWarnings("serial")
 public class ClusterDetailPanel extends DetailPanel {
-	
+
 	private static final Logger LOGGER = Logger.getLogger(ClusterDetailPanel.class.getName());
 
-    private static final String PANEL_TITLE_LBL = "Clusters";
-    private static final String NEW_CLUSTER_LBL = "Cluster automatically";
-    private static final String NEW_TREE_LBL    = "Create tree";
-    private static final String NEW_CLASS_LBL   = "Create classifier";
-    private static final String NO_CLUSTERS_LBL = "No clusters present";
-    private static final String MAN_CLUSTER_LBL = "Cluster manually";
-    private static final String FILE_CLUSTER_LBL = "Import from file";
+	private static final String PANEL_TITLE_LBL = "Clusters";
+	private static final String NEW_CLUSTER_LBL = "Cluster automatically";
+	private static final String NEW_TREE_LBL = "Create tree";
+	private static final String NEW_CLASS_LBL = "Create classifier";
+	private static final String NO_CLUSTERS_LBL = "No clusters present";
+	private static final String MAN_CLUSTER_LBL = "Cluster manually";
+	private static final String FILE_CLUSTER_LBL = "Import from file";
 
-    private JButton clusterButton        = new JButton(NEW_CLUSTER_LBL);
-    private JButton buildTreeButton      = new JButton(NEW_TREE_LBL);
-    private JButton saveClassifierButton = new JButton(NEW_CLASS_LBL);
-    private JButton manualClusterBtn     = new JButton(MAN_CLUSTER_LBL);
-    private JButton fileClusterBtn       = new JButton(FILE_CLUSTER_LBL);
+	private JButton clusterButton = new JButton(NEW_CLUSTER_LBL);
+	private JButton buildTreeButton = new JButton(NEW_TREE_LBL);
+	private JButton saveClassifierButton = new JButton(NEW_CLASS_LBL);
+	private JButton manualClusterBtn = new JButton(MAN_CLUSTER_LBL);
+	private JButton fileClusterBtn = new JButton(FILE_CLUSTER_LBL);
 
-    private JLabel statusLabel = new JLabel(NO_CLUSTERS_LBL, SwingConstants.CENTER);
-    private JPanel statusPanel = new JPanel(new BorderLayout());
+	private JLabel statusLabel = new JLabel(NO_CLUSTERS_LBL, SwingConstants.CENTER);
+	private JPanel statusPanel = new JPanel(new BorderLayout());
 
-    private JPanel          mainPanel;
-    private ExportableTable clusterDetailsTable;
+	private JPanel mainPanel;
+	private ExportableTable clusterDetailsTable;
 
-    public ClusterDetailPanel(@NonNull InputSupplier context) {
-        super(context);
+	public ClusterDetailPanel(@NonNull InputSupplier context) {
+		super(context);
 
-        this.setLayout(new BorderLayout());
+		this.setLayout(new BorderLayout());
 
-        mainPanel = createMainPanel();
-        statusPanel = createHeader();
+		mainPanel = createMainPanel();
+		statusPanel = createHeader();
 
-        this.add(mainPanel, BorderLayout.CENTER);
-        this.add(statusPanel, BorderLayout.NORTH);
+		this.add(mainPanel, BorderLayout.CENTER);
+		this.add(statusPanel, BorderLayout.NORTH);
 
-        setEnabled(false);
+		setEnabled(false);
 
-    }
-    
-    @Override
-    public String getPanelTitle(){
-        return PANEL_TITLE_LBL;
-    }
+	}
 
-    /**
-     * Create the main panel with cluster table
-     * 
-     * @return
-     */
-    private JPanel createMainPanel() {
-        JPanel panel = new JPanel();
+	@Override
+	public String getPanelTitle() {
+		return PANEL_TITLE_LBL;
+	}
 
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+	/**
+	 * Create the main panel with cluster table
+	 * 
+	 * @return
+	 */
+	private JPanel createMainPanel() {
+		JPanel panel = new JPanel();
 
-        TableModel optionsModel = AbstractTableCreator.createBlankTable();
-        
-        TableCellRenderer buttonRenderer = new JButtonRenderer();
-        TableCellRenderer textRenderer = new JTextAreaCellRenderer(false);
-        
-        clusterDetailsTable = new ExportableTable(optionsModel) {
-           
-        	@Override
-            public boolean isCellEditable(int rowIndex, int columnIndex) {
-                return false;
-            }
-            
-            @Override
-            public TableCellRenderer getCellRenderer(int row, int column) {
-            	if( (this.getValueAt(row, 0).equals(Labels.Clusters.TREE) || this.getValueAt(row, 0).equals(Labels.Clusters.CLUSTER_DIM_PLOT)) 
-            			&& column>0
-            			&& !(getValueAt(row, column).equals(Labels.NA))) {
-            		return buttonRenderer;
-            	}
-            	return textRenderer;
-            }
-        };
-        
-        MouseListener mouseListener = new MouseListener() {
+		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+
+		TableModel optionsModel = AbstractTableCreator.createBlankTable();
+
+		TableCellRenderer buttonRenderer = new JButtonRenderer();
+		TableCellRenderer textRenderer = new JTextAreaCellRenderer(false);
+
+		clusterDetailsTable = new ExportableTable(optionsModel) {
 
 			@Override
-			public void mouseClicked(MouseEvent e) {				
+			public boolean isCellEditable(int rowIndex, int columnIndex) {
+				return false;
+			}
+
+			@Override
+			public TableCellRenderer getCellRenderer(int row, int column) {
+				if ((this.getValueAt(row, 0).equals(Labels.Clusters.TREE)
+						|| this.getValueAt(row, 0).equals(Labels.Clusters.CLUSTER_DIM_PLOT)) && column > 0
+						&& !(getValueAt(row, column).equals(Labels.NA))) {
+					return buttonRenderer;
+				}
+				return textRenderer;
+			}
+		};
+
+		MouseListener mouseListener = new MouseListener() {
+
+			@Override
+			public void mouseClicked(MouseEvent e) {
 				int row = clusterDetailsTable.rowAtPoint(e.getPoint());
 				int col = clusterDetailsTable.columnAtPoint(e.getPoint());
-				if(col==0)
+				if (col == 0)
 					return;
-				
+
 				IClusterGroup group = (IClusterGroup) clusterDetailsTable.getValueAt(0, col);
 				// find the dataset with this cluster group
-				IAnalysisDataset d = getDatasets().stream().filter(t->t.hasClusterGroup(group)).findFirst().orElse(null);
-				
-	        	if(clusterDetailsTable.getValueAt(row, 0).equals(Labels.Clusters.TREE) && 
-	        			!clusterDetailsTable.getValueAt(row, col).equals(Labels.NA)) {
-	        		Runnable r = () ->{
-	        			ClusterTreeDialog clusterPanel = new ClusterTreeDialog(d, group);
-	                    clusterPanel.addDatasetEventListener(ClusterDetailPanel.this);
-	                    clusterPanel.addInterfaceEventListener(ClusterDetailPanel.this);
-	            	};
-	                new Thread(r).start();
-	        	}
-	        	
-	        	if(clusterDetailsTable.getValueAt(row, 0).equals(Labels.Clusters.CLUSTER_DIM_PLOT) && 
-	        			!clusterDetailsTable.getValueAt(row, col).equals(Labels.NA)) {
-	        		Runnable r = () ->{
-	        			TsneDialog tsneDialog = new TsneDialog(d, group);
-	        			tsneDialog.addDatasetEventListener(ClusterDetailPanel.this);
-	        			tsneDialog.addInterfaceEventListener(ClusterDetailPanel.this);
-	        		};
-	        		new Thread(r).start();
-	        	}
-	        	
+				IAnalysisDataset d = getDatasets().stream().filter(t -> t.hasClusterGroup(group)).findFirst()
+						.orElse(null);
+
+				if (clusterDetailsTable.getValueAt(row, 0).equals(Labels.Clusters.TREE)
+						&& !clusterDetailsTable.getValueAt(row, col).equals(Labels.NA)) {
+					Runnable r = () -> {
+						ClusterTreeDialog clusterPanel = new ClusterTreeDialog(d, group);
+						clusterPanel.addDatasetEventListener(ClusterDetailPanel.this);
+						clusterPanel.addInterfaceEventListener(ClusterDetailPanel.this);
+					};
+					new Thread(r).start();
+				}
+
+				if (clusterDetailsTable.getValueAt(row, 0).equals(Labels.Clusters.CLUSTER_DIM_PLOT)
+						&& !clusterDetailsTable.getValueAt(row, col).equals(Labels.NA)) {
+					Runnable r = () -> {
+						TsneDialog tsneDialog = new TsneDialog(d, group);
+						tsneDialog.addDatasetEventListener(ClusterDetailPanel.this);
+						tsneDialog.addInterfaceEventListener(ClusterDetailPanel.this);
+					};
+					new Thread(r).start();
+				}
+
 			}
 
 			@Override
@@ -193,157 +193,153 @@ public class ClusterDetailPanel extends DetailPanel {
 			public void mouseReleased(MouseEvent e) {
 				// Not needed
 			}
-        	
-        };
-        
-        clusterDetailsTable.addMouseListener(mouseListener);
 
-        clusterDetailsTable.setRowSelectionAllowed(false);
+		};
 
-        JScrollPane scrollPane = new JScrollPane(clusterDetailsTable);
+		clusterDetailsTable.addMouseListener(mouseListener);
 
-        JPanel tablePanel = new JPanel(new BorderLayout());
+		clusterDetailsTable.setRowSelectionAllowed(false);
 
-        tablePanel.add(scrollPane, BorderLayout.CENTER);
-        tablePanel.add(clusterDetailsTable.getTableHeader(), BorderLayout.NORTH);
+		JScrollPane scrollPane = new JScrollPane(clusterDetailsTable);
 
-        panel.add(tablePanel);
-        return panel;
+		JPanel tablePanel = new JPanel(new BorderLayout());
 
-    }
+		tablePanel.add(scrollPane, BorderLayout.CENTER);
+		tablePanel.add(clusterDetailsTable.getTableHeader(), BorderLayout.NORTH);
 
-    /**
-     * This panel shows the status of the dataset, and holds the clustering
-     * button
-     * 
-     * @return
-     */
-    private JPanel createHeader() {
+		panel.add(tablePanel);
+		return panel;
 
-        JPanel panel = new JPanel(new BorderLayout());
+	}
 
-        JPanel buttonPanel = new JPanel(new FlowLayout());
-        clusterButton.addActionListener(e ->  getDatasetEventHandler().fireDatasetEvent(DatasetEvent.CLUSTER, getDatasets()));
-        buildTreeButton.addActionListener(e ->  getDatasetEventHandler().fireDatasetEvent(DatasetEvent.BUILD_TREE, getDatasets()));
-        saveClassifierButton.addActionListener(e -> getDatasetEventHandler().fireDatasetEvent(DatasetEvent.TRAIN_CLASSIFIER, getDatasets()));
-        manualClusterBtn.addActionListener(e ->  getDatasetEventHandler().fireDatasetEvent(DatasetEvent.MANUAL_CLUSTER, getDatasets()));
-        fileClusterBtn.addActionListener(e ->  getDatasetEventHandler().fireDatasetEvent(DatasetEvent.CLUSTER_FROM_FILE, getDatasets()));
-        
-        saveClassifierButton.setEnabled(false);
-        buildTreeButton.setEnabled(true);
-        manualClusterBtn.setEnabled(true);
-        fileClusterBtn.setEnabled(true);
-        buttonPanel.add(manualClusterBtn);
-        buttonPanel.add(clusterButton);
-        buttonPanel.add(fileClusterBtn);
+	/**
+	 * This panel shows the status of the dataset, and holds the clustering button
+	 * 
+	 * @return
+	 */
+	private JPanel createHeader() {
 
-        panel.add(buttonPanel, BorderLayout.SOUTH);
-        panel.add(statusLabel, BorderLayout.CENTER);
-        return panel;
-    }
+		JPanel panel = new JPanel(new BorderLayout());
 
-    @Override
-    public void setEnabled(boolean b) {
-        super.setEnabled(b);
-        clusterButton.setEnabled(b);
-        buildTreeButton.setEnabled(b);
-        manualClusterBtn.setEnabled(b);
-        fileClusterBtn.setEnabled(b);
-        // saveClassifierButton.setEnabled(b); // not yet enabled
-    }
+		JPanel buttonPanel = new JPanel(new FlowLayout());
+		clusterButton
+				.addActionListener(e -> getDatasetEventHandler().fireDatasetEvent(DatasetEvent.CLUSTER, getDatasets()));
+		buildTreeButton.addActionListener(
+				e -> getDatasetEventHandler().fireDatasetEvent(DatasetEvent.BUILD_TREE, getDatasets()));
+		saveClassifierButton.addActionListener(
+				e -> getDatasetEventHandler().fireDatasetEvent(DatasetEvent.TRAIN_CLASSIFIER, getDatasets()));
+		manualClusterBtn.addActionListener(
+				e -> getDatasetEventHandler().fireDatasetEvent(DatasetEvent.MANUAL_CLUSTER, getDatasets()));
+		fileClusterBtn.addActionListener(
+				e -> getDatasetEventHandler().fireDatasetEvent(DatasetEvent.CLUSTER_FROM_FILE, getDatasets()));
 
-    @Override
-    protected synchronized void updateSingle() {
-        updateMultiple();
+		saveClassifierButton.setEnabled(false);
+		buildTreeButton.setEnabled(true);
+		manualClusterBtn.setEnabled(true);
+		fileClusterBtn.setEnabled(true);
+		buttonPanel.add(manualClusterBtn);
+		buttonPanel.add(clusterButton);
+		buttonPanel.add(fileClusterBtn);
 
-    }
+		panel.add(buttonPanel, BorderLayout.SOUTH);
+		panel.add(statusLabel, BorderLayout.CENTER);
+		return panel;
+	}
 
-    @Override
-    protected synchronized void updateMultiple() {
-        setEnabled(true);
+	@Override
+	public void setEnabled(boolean b) {
+		super.setEnabled(b);
+		clusterButton.setEnabled(b);
+		buildTreeButton.setEnabled(b);
+		manualClusterBtn.setEnabled(b);
+		fileClusterBtn.setEnabled(b);
+		// saveClassifierButton.setEnabled(b); // not yet enabled
+	}
 
-        TableOptions options = new TableOptionsBuilder()
-        		.setDatasets(getDatasets())
-        		.setTarget(clusterDetailsTable)
-                .build();
+	@Override
+	protected synchronized void updateSingle() {
+		updateMultiple();
 
-        setTable(options);
+	}
 
-        if (!hasDatasets()) {
-            statusLabel.setText(Labels.NULL_DATASETS);
-            setEnabled(false);
-        } else {
+	@Override
+	protected synchronized void updateMultiple() {
+		setEnabled(true);
 
-            if (isSingleDataset()) {
+		TableOptions options = new TableOptionsBuilder().setDatasets(getDatasets()).setTarget(clusterDetailsTable)
+				.build();
 
-                setEnabled(true);
+		setTable(options);
 
-                if (!activeDataset().hasClusters()) {
+		if (!hasDatasets()) {
+			statusLabel.setText(Labels.NULL_DATASETS);
+			setEnabled(false);
+		} else {
 
-                    statusLabel.setText(NO_CLUSTERS_LBL);
+			if (isSingleDataset()) {
 
-                } else {
-                	int nGroups = activeDataset().getClusterGroups().size();
-                	String plural = nGroups==1 ? "" : "s"; 
-                    statusLabel.setText("Dataset has " + activeDataset().getClusterGroups().size() + " cluster group"+plural);
-                }
-            } else { // more than one dataset selected
-                statusLabel.setText(Labels.MULTIPLE_DATASETS);
-                setEnabled(false);
-            }
-        }
-    }
+				setEnabled(true);
 
-    @Override
-    protected synchronized void updateNull() {
-        updateMultiple();
+				if (!activeDataset().hasClusters()) {
 
-    }
+					statusLabel.setText(NO_CLUSTERS_LBL);
 
-    @Override
-    protected JFreeChart createPanelChartType(@NonNull ChartOptions options) {
-        return null;
-    }
+				} else {
+					int nGroups = activeDataset().getClusterGroups().size();
+					String plural = nGroups == 1 ? "" : "s";
+					statusLabel.setText(
+							"Dataset has " + activeDataset().getClusterGroups().size() + " cluster group" + plural);
+				}
+			} else { // more than one dataset selected
+				statusLabel.setText(Labels.MULTIPLE_DATASETS);
+				setEnabled(false);
+			}
+		}
+	}
 
-    @Override
-    protected TableModel createPanelTableType(@NonNull TableOptions options) {
-        return new AnalysisDatasetTableCreator(options).createClusterOptionsTable();
-    }
+	@Override
+	protected synchronized void updateNull() {
+		updateMultiple();
 
-    @Override
-    public void eventReceived(DatasetEvent event) {
-        super.eventReceived(event);
+	}
 
-        if (event.getSource() instanceof ClusterTreeDialog) {
-            this.getDatasetEventHandler().fireDatasetEvent(event);
-        }
-    }
+	@Override
+	protected JFreeChart createPanelChartType(@NonNull ChartOptions options) {
+		return null;
+	}
 
-    public void interfaceEventReceived(InterfaceEvent event) {
-    	 super.eventReceived(event);
-        if (event.getSource() instanceof ClusterTreeDialog) {
-            getInterfaceEventHandler().fire(event);
-        }
-    }
-            
-    /**
-     * Render a button in a cell. Note, this is non-functional - it just paints 
-     * a button shape. Use a mouse listener on the table for functionality
-     * @author bms41
-     * @since 1.16.0
-     *
-     */
-    private class JButtonRenderer extends JButton  implements TableCellRenderer {
-        @Override
-        public Component getTableCellRendererComponent(JTable table,
-                Object value, boolean isSelected, boolean hasFocus, int row,
-                int column) {
-			String text = value==null ? "" : value instanceof IClusterGroup ? Labels.Clusters.CLUSTER_SHOW_TREE : value.toString();
-            setText(text);
-            setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-            return this;
-        }
-    }
-    
-    
+	@Override
+	protected TableModel createPanelTableType(@NonNull TableOptions options) {
+		return new AnalysisDatasetTableCreator(options).createClusterOptionsTable();
+	}
+
+	@Override
+	public void eventReceived(DatasetEvent event) {
+		super.eventReceived(event);
+
+		if (event.getSource() instanceof ClusterTreeDialog) {
+			this.getDatasetEventHandler().fireDatasetEvent(event);
+		}
+	}
+
+	/**
+	 * Render a button in a cell. Note, this is non-functional - it just paints a
+	 * button shape. Use a mouse listener on the table for functionality
+	 * 
+	 * @author bms41
+	 * @since 1.16.0
+	 *
+	 */
+	private class JButtonRenderer extends JButton implements TableCellRenderer {
+		@Override
+		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
+				int row, int column) {
+			String text = value == null ? ""
+					: value instanceof IClusterGroup ? Labels.Clusters.CLUSTER_SHOW_TREE : value.toString();
+			setText(text);
+			setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+			return this;
+		}
+	}
+
 }

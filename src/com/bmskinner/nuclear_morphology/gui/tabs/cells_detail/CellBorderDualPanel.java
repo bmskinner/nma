@@ -20,46 +20,39 @@ import com.bmskinner.nuclear_morphology.gui.components.panels.DualChartPanel;
 import com.bmskinner.nuclear_morphology.gui.events.ChartOptionsRenderedEvent;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetUpdateEvent;
-import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent;
 
 public class CellBorderDualPanel extends DualChartPanel {
 
-    public static final int DEFAULT_OVERLAY_PERCENT = 25;
+	public static final int DEFAULT_OVERLAY_PERCENT = 25;
 
-    public CellBorderDualPanel() {
-        super(true);
+	public CellBorderDualPanel() {
+		super(true);
 
-        chartPanel.setFixedAspectRatio(true);
+		chartPanel.setFixedAspectRatio(true);
 
-        rangePanel.setRangePct(DEFAULT_OVERLAY_PERCENT);
-        rangePanel.setDomainPct(DEFAULT_OVERLAY_PERCENT);
+		rangePanel.setRangePct(DEFAULT_OVERLAY_PERCENT);
+		rangePanel.setDomainPct(DEFAULT_OVERLAY_PERCENT);
 
-        updateChartPanelRange();
+		updateChartPanelRange();
 
-    }
+	}
 
 	@Override
 	public void eventReceived(DatasetEvent event) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void eventReceived(DatasetUpdateEvent event) {
 		// TODO Auto-generated method stub
-		
-	}
 
-	@Override
-	public void eventReceived(InterfaceEvent event) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void eventReceived(ChartOptionsRenderedEvent event) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }

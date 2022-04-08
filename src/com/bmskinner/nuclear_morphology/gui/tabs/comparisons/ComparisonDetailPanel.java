@@ -27,27 +27,24 @@ import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 
 @SuppressWarnings("serial")
 public class ComparisonDetailPanel extends DetailPanel {
-	
+
 	JTabbedPane tabPanel;
-    
-    private static final String PANEL_TITLE_LBL = "Comparisons";
 
-    public ComparisonDetailPanel(@NonNull InputSupplier context) {
-        super(context, PANEL_TITLE_LBL);
+	private static final String PANEL_TITLE_LBL = "Comparisons";
 
-        this.setLayout(new BorderLayout());
+	public ComparisonDetailPanel(@NonNull InputSupplier context) {
+		super(context, PANEL_TITLE_LBL);
 
-        tabPanel = new JTabbedPane(JTabbedPane.TOP);
+		this.setLayout(new BorderLayout());
 
-        DetailPanel vennPanel = new VennDetailPanel(context);
-        DetailPanel pairwiseVennPanel = new PairwiseVennDetailPanel(context);
+		tabPanel = new JTabbedPane(JTabbedPane.TOP);
 
-        this.addSubPanel(vennPanel);
-        this.addSubPanel(pairwiseVennPanel);
+		DetailPanel vennPanel = new VennDetailPanel(context);
+		DetailPanel pairwiseVennPanel = new PairwiseVennDetailPanel(context);
 
-        tabPanel.addTab(vennPanel.getPanelTitle(), vennPanel);
-        tabPanel.addTab(pairwiseVennPanel.getPanelTitle(), pairwiseVennPanel);
+		tabPanel.addTab(vennPanel.getPanelTitle(), vennPanel);
+		tabPanel.addTab(pairwiseVennPanel.getPanelTitle(), pairwiseVennPanel);
 
-        this.add(tabPanel, BorderLayout.CENTER);
-    }    
+		this.add(tabPanel, BorderLayout.CENTER);
+	}
 }

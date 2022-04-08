@@ -36,7 +36,6 @@ import com.bmskinner.nuclear_morphology.gui.events.ChartOptionsRenderedEvent;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetUpdateEvent;
 import com.bmskinner.nuclear_morphology.gui.events.EventListener;
-import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent;
 import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
 
 /**
@@ -45,88 +44,83 @@ import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
  * @author ben
  *
  */
-public class BuildHierarchicalTreeAction extends SingleDatasetResultAction
-        implements EventListener {
-	
+public class BuildHierarchicalTreeAction extends SingleDatasetResultAction implements EventListener {
+
 	private static final Logger LOGGER = Logger.getLogger(BuildHierarchicalTreeAction.class.getName());
 
-    private static final @NonNull String PROGRESS_BAR_LABEL = "Building tree";
+	private static final @NonNull String PROGRESS_BAR_LABEL = "Building tree";
 
-    public BuildHierarchicalTreeAction(@NonNull IAnalysisDataset dataset, @NonNull ProgressBarAcceptor acceptor, @NonNull EventHandler eh) {
-        super(dataset, PROGRESS_BAR_LABEL, acceptor, eh);
-    }
+	public BuildHierarchicalTreeAction(@NonNull IAnalysisDataset dataset, @NonNull ProgressBarAcceptor acceptor,
+			@NonNull EventHandler eh) {
+		super(dataset, PROGRESS_BAR_LABEL, acceptor, eh);
+	}
 
-    @Override
-    public void run() {
+	@Override
+	public void run() {
 
-        SubAnalysisSetupDialog clusterSetup = new HierarchicalTreeSetupDialog(dataset);
+		SubAnalysisSetupDialog clusterSetup = new HierarchicalTreeSetupDialog(dataset);
 
-        if (clusterSetup.isReadyToRun()) { // if dialog was cancelled, skip
-            IAnalysisMethod m = clusterSetup.getMethod();
+		if (clusterSetup.isReadyToRun()) { // if dialog was cancelled, skip
+			IAnalysisMethod m = clusterSetup.getMethod();
 
-            worker = new DefaultAnalysisWorker(m);
-            worker.addPropertyChangeListener(this);
-            ThreadManager.getInstance().submit(worker);
+			worker = new DefaultAnalysisWorker(m);
+			worker.addPropertyChangeListener(this);
+			ThreadManager.getInstance().submit(worker);
 
-        } else {
-            this.cancel();
-        }
-        clusterSetup.dispose();
-    }
+		} else {
+			this.cancel();
+		}
+		clusterSetup.dispose();
+	}
 
-    /*
-     * (non-Javadoc) Overrides because we need to carry out the morphology
-     * reprofiling on each cluster
-     * 
-     * @see no.gui.MainWindow.ProgressableAction#finished()
-     */
-    @Override
-    public void finished() {
+	/*
+	 * (non-Javadoc) Overrides because we need to carry out the morphology
+	 * reprofiling on each cluster
+	 * 
+	 * @see no.gui.MainWindow.ProgressableAction#finished()
+	 */
+	@Override
+	public void finished() {
 
-        try {
-            ClusterAnalysisResult r = (ClusterAnalysisResult) worker.get();
+		try {
+			ClusterAnalysisResult r = (ClusterAnalysisResult) worker.get();
 
-            ClusterTreeDialog clusterPanel = new ClusterTreeDialog(dataset, r.getGroup());
-            clusterPanel.addDatasetEventListener(BuildHierarchicalTreeAction.this);
-            clusterPanel.addInterfaceEventListener(this);
+			ClusterTreeDialog clusterPanel = new ClusterTreeDialog(dataset, r.getGroup());
+			clusterPanel.addDatasetEventListener(BuildHierarchicalTreeAction.this);
+			clusterPanel.addInterfaceEventListener(this);
 
-            cleanup(); // do not cancel, we need the MainWindow listener to
-                       // remain attached
+			cleanup(); // do not cancel, we need the MainWindow listener to
+						// remain attached
 
-        } catch (InterruptedException | ExecutionException e) {
-        	LOGGER.log(Level.SEVERE, "Error making cluster tree dialog", e);
-        	Thread.currentThread().interrupt();
-        }
-    }
+		} catch (InterruptedException | ExecutionException e) {
+			LOGGER.log(Level.SEVERE, "Error making cluster tree dialog", e);
+			Thread.currentThread().interrupt();
+		}
+	}
 
-    @Override
-    public void eventReceived(DatasetEvent event) {
-        LOGGER.finest( "BuildHierarchicalTreeAction heard dataset event");
-        if (event.method().equals(DatasetEvent.COPY_PROFILE_SEGMENTATION)) {
-            getDatasetEventHandler().fireDatasetEvent(DatasetEvent.COPY_PROFILE_SEGMENTATION, event.getDatasets(), event.secondaryDataset());
-        }
+	@Override
+	public void eventReceived(DatasetEvent event) {
+		LOGGER.finest("BuildHierarchicalTreeAction heard dataset event");
+		if (event.method().equals(DatasetEvent.COPY_PROFILE_SEGMENTATION)) {
+			getDatasetEventHandler().fireDatasetEvent(DatasetEvent.COPY_PROFILE_SEGMENTATION, event.getDatasets(),
+					event.secondaryDataset());
+		}
 
-    }
-
-    @Override
-    public void eventReceived(InterfaceEvent event) {
-        getInterfaceEventHandler().fireInterfaceEvent(event.method());
-
-    }
+	}
 
 	@Override
 	public void eventReceived(DatasetUpdateEvent event) {
-		// No action		
+		// No action
 	}
 
 	@Override
 	public void eventReceived(SignalChangeEvent event) {
-		// No action	
+		// No action
 	}
 
 	@Override
 	public void eventReceived(ChartOptionsRenderedEvent event) {
-		// No action	
+		// No action
 	}
 
 }

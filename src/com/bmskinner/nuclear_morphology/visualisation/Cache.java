@@ -30,41 +30,49 @@ import com.bmskinner.nuclear_morphology.visualisation.options.TableOptions;
 
 public interface Cache {
 
-    /**
-     * Remove all cached charts
-     */
-    void purge();
+	/**
+	 * Remove all cached charts
+	 */
+	void purge();
 
-    /*
-     * Removes all stored entries from the cache
-     */
-    void clear();
+	/*
+	 * Removes all stored entries from the cache
+	 */
+	void clear();
 
-    /**
-     * Remove caches containing any of the given datasets. These will be
-     * recalculated at next call
-     * 
-     * @param list
-     */
-    void clear(List<IAnalysisDataset> list);
+	/**
+	 * Remove caches containing any of the given datasets. These will be
+	 * recalculated at next call
+	 * 
+	 * @param list
+	 */
+	void clear(@NonNull List<IAnalysisDataset> list);
 
-    /**
-     * Remove caches containing the given cell
-     * 
-     * @param cell
-     */
-    void clear(ICell cell);
+	/**
+	 * Remove caches containing any of the given dataset. These will be recalculated
+	 * at next call.
+	 * 
+	 * @param dataset
+	 */
+	void clear(@NonNull IAnalysisDataset dataset);
 
-    boolean has(TableOptions options);
+	/**
+	 * Remove caches containing the given cell
+	 * 
+	 * @param cell
+	 */
+	void clear(ICell cell);
 
-    TableModel get(TableOptions options);
+	boolean has(TableOptions options);
 
-    boolean has(ChartOptions options);
+	TableModel get(TableOptions options);
 
-    JFreeChart get(ChartOptions options);
+	boolean has(ChartOptions options);
 
-    void add(@NonNull ChartOptions options, @NonNull JFreeChart chart);
+	JFreeChart get(ChartOptions options);
 
-    void add(@NonNull TableOptions options, @NonNull TableModel model);
+	void add(@NonNull ChartOptions options, @NonNull JFreeChart chart);
+
+	void add(@NonNull TableOptions options, @NonNull TableModel model);
 
 }

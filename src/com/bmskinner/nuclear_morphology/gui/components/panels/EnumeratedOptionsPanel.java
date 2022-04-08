@@ -20,57 +20,45 @@ import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.swing.JPanel;
 
 import com.bmskinner.nuclear_morphology.gui.events.EventListener;
-import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent;
-import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
 
 @SuppressWarnings("serial")
 public abstract class EnumeratedOptionsPanel extends JPanel implements ActionListener {
 
-    protected List<ActionListener> listeners = new ArrayList<>();
-    private final List<EventListener> interfaceListeners = new ArrayList<>();
+	protected List<ActionListener> listeners = new ArrayList<>();
+	private final List<EventListener> interfaceListeners = new ArrayList<>();
 
-    public EnumeratedOptionsPanel() {
-        this.setLayout(new FlowLayout());
-    }
+	public EnumeratedOptionsPanel() {
+		this.setLayout(new FlowLayout());
+	}
 
-    @Override
-    public void actionPerformed(ActionEvent e) {
+	@Override
+	public void actionPerformed(ActionEvent e) {
 
-        for (ActionListener a : listeners) {
-            a.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, e.getActionCommand()) {
-            });
-        }
-    }
+		for (ActionListener a : listeners) {
+			a.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, e.getActionCommand()) {
+			});
+		}
+	}
 
-    public void addActionListener(ActionListener a) {
-        this.listeners.add(a);
-    }
-    
-    public synchronized void removeActionListener(ActionListener l) {
-        listeners.remove(l);
-    }
+	public void addActionListener(ActionListener a) {
+		this.listeners.add(a);
+	}
 
-    public synchronized void addInterfaceEventListener(EventListener l) {
-        interfaceListeners.add(l);
-    }
+	public synchronized void removeActionListener(ActionListener l) {
+		listeners.remove(l);
+	}
 
-    public synchronized void removeInterfaceEventListener(EventListener l) {
-        interfaceListeners.remove(l);
-    }
+	public synchronized void addInterfaceEventListener(EventListener l) {
+		interfaceListeners.add(l);
+	}
 
-    protected synchronized void fireInterfaceEvent(InterfaceMethod method) {
-
-        InterfaceEvent event = new InterfaceEvent(this, method, this.getClass().getSimpleName());
-        Iterator<EventListener> iterator = interfaceListeners.iterator();
-        while (iterator.hasNext()) {
-            iterator.next().eventReceived(event);
-        }
-    }
+	public synchronized void removeInterfaceEventListener(EventListener l) {
+		interfaceListeners.remove(l);
+	}
 
 }

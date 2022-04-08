@@ -37,124 +37,117 @@ import com.bmskinner.nuclear_morphology.gui.components.BorderTagEvent;
 import com.bmskinner.nuclear_morphology.gui.events.ChartOptionsRenderedEvent;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetUpdateEvent;
-import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent;
 
 public class BorderTagDualChartPanel extends DualChartPanel {
 
-    private int activeProfileIndex = 0;
+	private int activeProfileIndex = 0;
 
-    private JPopupMenu popupMenu = new JPopupMenu("Popup");
+	private JPopupMenu popupMenu = new JPopupMenu("Popup");
 
-    public BorderTagDualChartPanel() {
-        super(false);
+	public BorderTagDualChartPanel() {
+		super(false);
 
-        chartPanel.addChartMouseListener(new ChartMouseListener() {
+		chartPanel.addChartMouseListener(new ChartMouseListener() {
 
-            @Override
+			@Override
 			public void chartMouseClicked(ChartMouseEvent e) {
 
-                if (e.getEntity() instanceof XYItemEntity) {
-                    XYItemEntity ent = (XYItemEntity) e.getEntity();
-                    int series = ent.getSeriesIndex();
-                    int item = ent.getItem();
-                    double x = ent.getDataset().getXValue(series, item);
+				if (e.getEntity() instanceof XYItemEntity) {
+					XYItemEntity ent = (XYItemEntity) e.getEntity();
+					int series = ent.getSeriesIndex();
+					int item = ent.getItem();
+					double x = ent.getDataset().getXValue(series, item);
 
-                    activeProfileIndex = (int) x;
-                    MouseEvent ev = e.getTrigger();
-                    popupMenu.show(ev.getComponent(), ev.getX(), ev.getY());
-                }
+					activeProfileIndex = (int) x;
+					MouseEvent ev = e.getTrigger();
+					popupMenu.show(ev.getComponent(), ev.getX(), ev.getY());
+				}
 
-            }
+			}
 
-            @Override
+			@Override
 			public void chartMouseMoved(ChartMouseEvent e) {
-            }
+			}
 
-        });
+		});
 
-        chartPanel.setRangeZoomable(false);
-        chartPanel.setDomainZoomable(false);
-    }
+		chartPanel.setRangeZoomable(false);
+		chartPanel.setDomainZoomable(false);
+	}
 
-    public void createBorderTagPopup(ICell cell) {
-        Set<Landmark> set = cell.getPrimaryNucleus().getLandmarks().keySet();
-        List<Landmark> list = new ArrayList<Landmark>(set);
-        makePopup(list);
+	public void createBorderTagPopup(ICell cell) {
+		Set<Landmark> set = cell.getPrimaryNucleus().getLandmarks().keySet();
+		List<Landmark> list = new ArrayList<Landmark>(set);
+		makePopup(list);
 
-    }
+	}
 
-    public synchronized void createBorderTagPopup(IAnalysisDataset dataset) {
-    	if(dataset==null)
-    		return;
-        List<Landmark> list = dataset.getCollection().getProfileCollection().getLandmarks();
-        makePopup(list);
-    }
+	public synchronized void createBorderTagPopup(IAnalysisDataset dataset) {
+		if (dataset == null)
+			return;
+		List<Landmark> list = dataset.getCollection().getProfileCollection().getLandmarks();
+		makePopup(list);
+	}
 
-    private void makePopup(List<Landmark> list) {
-        popupMenu = new JPopupMenu("Popup");
+	private void makePopup(List<Landmark> list) {
+		popupMenu = new JPopupMenu("Popup");
 
-        Collections.sort(list);
+		Collections.sort(list);
 
-        for (Landmark tag : list) {
+		for (Landmark tag : list) {
 
-            JMenuItem item = new JMenuItem(tag.toString());
+			JMenuItem item = new JMenuItem(tag.toString());
 
-            item.addActionListener(e -> {
-                fireBorderTagEvent(new BorderTagEvent(item, tag, activeProfileIndex));
-            });
-            popupMenu.add(item);
-        }
+			item.addActionListener(e -> {
+				fireBorderTagEvent(new BorderTagEvent(item, tag, activeProfileIndex));
+			});
+			popupMenu.add(item);
+		}
 
-        // Find border tags with rulesets that have not been assigned in the
-        // median
-        List<Landmark> unassignedTags = new ArrayList<>();
-        for (Landmark tag : Landmark.defaultValues()) {
-            if (!list.contains(tag)) {
-                unassignedTags.add(tag);
+		// Find border tags with rulesets that have not been assigned in the
+		// median
+		List<Landmark> unassignedTags = new ArrayList<>();
+		for (Landmark tag : Landmark.defaultValues()) {
+			if (!list.contains(tag)) {
+				unassignedTags.add(tag);
 
-            }
-        }
+			}
+		}
 
-        if (!unassignedTags.isEmpty()) {
-            Collections.sort(unassignedTags);
+		if (!unassignedTags.isEmpty()) {
+			Collections.sort(unassignedTags);
 
-            popupMenu.addSeparator();
+			popupMenu.addSeparator();
 
-            for (Landmark tag : unassignedTags) {
-                JMenuItem item = new JMenuItem(tag.toString());
-                item.setForeground(Color.DARK_GRAY);
+			for (Landmark tag : unassignedTags) {
+				JMenuItem item = new JMenuItem(tag.toString());
+				item.setForeground(Color.DARK_GRAY);
 
-                item.addActionListener(e -> {
-                    fireBorderTagEvent(new BorderTagEvent(item, tag, activeProfileIndex));
-                });
-                popupMenu.add(item);
-            }
+				item.addActionListener(e -> {
+					fireBorderTagEvent(new BorderTagEvent(item, tag, activeProfileIndex));
+				});
+				popupMenu.add(item);
+			}
 
-        }
-    }
+		}
+	}
 
 	@Override
 	public void eventReceived(DatasetEvent event) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void eventReceived(DatasetUpdateEvent event) {
 		// TODO Auto-generated method stub
-		
-	}
 
-	@Override
-	public void eventReceived(InterfaceEvent event) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void eventReceived(ChartOptionsRenderedEvent event) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }

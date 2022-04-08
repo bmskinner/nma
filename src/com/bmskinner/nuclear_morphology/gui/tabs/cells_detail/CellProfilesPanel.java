@@ -19,6 +19,7 @@ package com.bmskinner.nuclear_morphology.gui.tabs.cells_detail;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.FlowLayout;
+import java.util.List;
 import java.util.logging.Logger;
 
 import javax.swing.JButton;
@@ -28,10 +29,9 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.components.MissingComponentException;
-import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.cells.Nucleus;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
-import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
@@ -40,6 +40,7 @@ import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileTypeOptionsPanel;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
+import com.bmskinner.nuclear_morphology.gui.events.revamp.ProfilesUpdatedListener;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.visualisation.charts.MorphologyChartFactory;
 import com.bmskinner.nuclear_morphology.visualisation.charts.ProfileChartFactory;
@@ -54,137 +55,140 @@ import com.bmskinner.nuclear_morphology.visualisation.options.ChartOptionsBuilde
  *
  */
 @SuppressWarnings("serial")
-public class CellProfilesPanel extends AbstractCellDetailPanel {
-	
+public class CellProfilesPanel extends AbstractCellDetailPanel implements ProfilesUpdatedListener {
+
 	private static final Logger LOGGER = Logger.getLogger(CellProfilesPanel.class.getName());
 
-    private ExportableChartPanel chartPanel;
+	private ExportableChartPanel chartPanel;
 
-    private ProfileTypeOptionsPanel profileOptions = new ProfileTypeOptionsPanel();
+	private ProfileTypeOptionsPanel profileOptions = new ProfileTypeOptionsPanel();
 
-    private JPanel buttonsPanel;
-    private JButton reverseProfileBtn = new JButton(Labels.Cells.REVERSE_PROFILE_BTN_LBL);
+	private JPanel buttonsPanel;
+	private JButton reverseProfileBtn = new JButton(Labels.Cells.REVERSE_PROFILE_BTN_LBL);
 
-    public CellProfilesPanel(@NonNull InputSupplier context, CellViewModel model) {
-        super(context, model, Labels.Cells.PROFILES_PANEL_TITLE_LBL);
+	public CellProfilesPanel(@NonNull InputSupplier context, CellViewModel model) {
+		super(context, model, Labels.Cells.PROFILES_PANEL_TITLE_LBL);
 
-        this.setLayout(new BorderLayout());
+		this.setLayout(new BorderLayout());
 
-        buttonsPanel = makeButtonPanel();
-        this.add(buttonsPanel, BorderLayout.NORTH);
-        setButtonsEnabled(false);
-        
-        chartPanel = new ExportableChartPanel(ProfileChartFactory.createEmptyChart());
-        this.add(chartPanel, BorderLayout.CENTER);
+		buttonsPanel = makeButtonPanel();
+		this.add(buttonsPanel, BorderLayout.NORTH);
+		setButtonsEnabled(false);
 
-        this.setBorder(null);
+		chartPanel = new ExportableChartPanel(ProfileChartFactory.createEmptyChart());
+		this.add(chartPanel, BorderLayout.CENTER);
 
-        setButtonsEnabled(false);
-    }
-    
-    private JPanel makeButtonPanel() {
+		this.setBorder(null);
 
-        JPanel panel = new JPanel(new FlowLayout()) {
-            @Override
-            public void setEnabled(boolean b) {
-                super.setEnabled(b);
-                for (Component c : this.getComponents()) {
-                    c.setEnabled(b);
-                }
-            }
-        };
+		setButtonsEnabled(false);
 
-        panel.add(profileOptions);
-        profileOptions.addActionListener(e -> update());
-        
-        reverseProfileBtn.addActionListener(e -> reverseProfileAction());
-        panel.add(reverseProfileBtn);
-        
-        return panel;
+		uiController.addProfilesUpdatedListener(this);
+	}
 
-    }
-    
-    /**
-     * Reverse the profiles for the active cell. Tags and 
-     * segments are also reversed.
-     */
-    private void reverseProfileAction() {
-    	if(this.getCellModel().hasCell()) {
-    		try {
-    			for(Nucleus n : this.getCellModel().getCell().getNuclei()) {
-    				n.reverse();
-    			}
+	private JPanel makeButtonPanel() {
 
-    			this.getCellModel().updateViews();
+		JPanel panel = new JPanel(new FlowLayout()) {
+			@Override
+			public void setEnabled(boolean b) {
+				super.setEnabled(b);
+				for (Component c : this.getComponents()) {
+					c.setEnabled(b);
+				}
+			}
+		};
 
-    			// Trigger refresh of dataset median profile and charts
-    			activeDataset().getCollection().getProfileManager().recalculateProfileAggregates();
-    			this.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.RECACHE_CHARTS, activeDataset());
-    		} catch (ProfileException | MissingComponentException e) {
-    			LOGGER.log(Loggable.STACK, "Error recalculating profile aggregate", e);
-    		}
-    	}
-    }
+		panel.add(profileOptions);
+		profileOptions.addActionListener(e -> update());
 
-    public void setButtonsEnabled(boolean b) {
-    	buttonsPanel.setEnabled(b);
-    }
+		reverseProfileBtn.addActionListener(e -> reverseProfileAction());
+		panel.add(reverseProfileBtn);
 
-    @Override
+		return panel;
+
+	}
+
+	/**
+	 * Reverse the profiles for the active cell. Tags and segments are also
+	 * reversed.
+	 */
+	private void reverseProfileAction() {
+		if (this.getCellModel().hasCell()) {
+			try {
+				for (Nucleus n : this.getCellModel().getCell().getNuclei()) {
+					n.reverse();
+				}
+
+				this.getCellModel().updateViews();
+
+				// Trigger refresh of dataset median profile and charts
+				activeDataset().getCollection().getProfileManager().recalculateProfileAggregates();
+				this.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.RECACHE_CHARTS, activeDataset());
+			} catch (ProfileException | MissingComponentException e) {
+				LOGGER.log(Loggable.STACK, "Error recalculating profile aggregate", e);
+			}
+		}
+	}
+
+	public void setButtonsEnabled(boolean b) {
+		buttonsPanel.setEnabled(b);
+	}
+
+	@Override
 	public void update() {
 
-        try {
+		try {
 
-            ProfileType type = profileOptions.getSelected();
+			ProfileType type = profileOptions.getSelected();
 
-            if (!this.getCellModel().hasCell()) {
-            	chartPanel.setChart(MorphologyChartFactory.createEmptyChart());
-            	buttonsPanel.setEnabled(false);
+			if (!this.getCellModel().hasCell()) {
+				chartPanel.setChart(MorphologyChartFactory.createEmptyChart());
+				buttonsPanel.setEnabled(false);
 
-            } else {
+			} else {
 
-                ChartOptions options = new ChartOptionsBuilder()
-                		.setDatasets(getDatasets())
-                        .setCell(this.getCellModel().getCell())
-                        .setNormalised(false)
-                        .setAlignment(ProfileAlignment.LEFT)
-                        .setTag(Landmark.REFERENCE_POINT)
-                        .setShowMarkers(true).setProfileType(type)
-                        .setSwatch(GlobalOptions.getInstance().getSwatch())
-                        .setShowAnnotations(false)
-                        .setShowPoints(true)
-                        .setShowXAxis(false)
-                        .setShowYAxis(false)
-                        .setTarget(chartPanel)
-                        .build();
+				ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets())
+						.setCell(this.getCellModel().getCell()).setNormalised(false).setAlignment(ProfileAlignment.LEFT)
+						.setTag(Landmark.REFERENCE_POINT).setShowMarkers(true).setProfileType(type)
+						.setSwatch(GlobalOptions.getInstance().getSwatch()).setShowAnnotations(false)
+						.setShowPoints(true).setShowXAxis(false).setShowYAxis(false).setTarget(chartPanel).build();
 
-                setChart(options);
-                buttonsPanel.setEnabled(true);
+				setChart(options);
+				buttonsPanel.setEnabled(true);
 
-            }
+			}
 
-        } catch (Exception e) {
-            LOGGER.log(Loggable.STACK, "Error updating cell panel", e);
-            chartPanel.setChart(MorphologyChartFactory.createErrorChart());
-            buttonsPanel.setEnabled(false);
-        }
+		} catch (Exception e) {
+			LOGGER.log(Loggable.STACK, "Error updating cell panel", e);
+			chartPanel.setChart(MorphologyChartFactory.createErrorChart());
+			buttonsPanel.setEnabled(false);
+		}
 
-    }
+	}
 
-    @Override
-    public void setChartsAndTablesLoading() {
-        super.setChartsAndTablesLoading();
-        chartPanel.setChart(MorphologyChartFactory.createLoadingChart());
-    }
+	@Override
+	public void setChartsAndTablesLoading() {
+		super.setChartsAndTablesLoading();
+		chartPanel.setChart(MorphologyChartFactory.createLoadingChart());
+	}
 
-    @Override
-    protected JFreeChart createPanelChartType(@NonNull ChartOptions options) {
-        return new ProfileChartFactory(options).createProfileChart();
-    }
+	@Override
+	protected JFreeChart createPanelChartType(@NonNull ChartOptions options) {
+		return new ProfileChartFactory(options).createProfileChart();
+	}
 
-    @Override
-    public void refreshChartCache() {
-        clearChartCache();
-        this.update();
-    }
+	@Override
+	public void refreshChartCache() {
+		clearChartCache();
+		this.update();
+	}
+
+	@Override
+	public void profilesUpdated(List<IAnalysisDataset> datasets) {
+		refreshChartCache(datasets);
+	}
+
+	@Override
+	public void profilesUpdated(IAnalysisDataset dataset) {
+		refreshChartCache(dataset);
+	}
 }

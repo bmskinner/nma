@@ -26,7 +26,6 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
-import com.bmskinner.nuclear_morphology.gui.tabs.TabPanel;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -37,69 +36,57 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  */
 @SuppressWarnings("serial")
 public class SignalsDetailPanel extends DetailPanel {
-	
+
 	private static final Logger LOGGER = Logger.getLogger(SignalsDetailPanel.class.getName());
 
-    private static final String PANEL_TITLE_LBL = "Nuclear signals";
-    private JTabbedPane signalsTabPane;
+	private static final String PANEL_TITLE_LBL = "Nuclear signals";
+	private JTabbedPane signalsTabPane;
 
-    /**
-     * Create the panel.
-     */
-    public SignalsDetailPanel(@NonNull InputSupplier context) {
-        super(context, PANEL_TITLE_LBL);
-        try {
+	/**
+	 * Create the panel.
+	 */
+	public SignalsDetailPanel(@NonNull InputSupplier context) {
+		super(context, PANEL_TITLE_LBL);
+		try {
 
-            this.setLayout(new BorderLayout());
+			this.setLayout(new BorderLayout());
 
-            signalsTabPane = new JTabbedPane(JTabbedPane.TOP);
+			signalsTabPane = new JTabbedPane(JTabbedPane.TOP);
 
-            DetailPanel overviewPanel = new SignalsOverviewPanel(context);
-            DetailPanel countsPanel  = new SignalCountsPanel(context);
-            DetailPanel boxplotPanel = new SignalsBoxplotPanel(context);
-            DetailPanel shellsPanel = new SignalShellsPanel(context);
-            DetailPanel detectionSettingsPanel = new SignalsAnalysisPanel(context);
-            DetailPanel signalScatterChartPanel = new SignalScatterChartPanel(context);
-            DetailPanel colocalistionPanel = new SignalsColocalisationPanel(context);
+			DetailPanel overviewPanel = new SignalsOverviewPanel(context);
+			DetailPanel countsPanel = new SignalCountsPanel(context);
+			DetailPanel boxplotPanel = new SignalsBoxplotPanel(context);
+			DetailPanel shellsPanel = new SignalShellsPanel(context);
+			DetailPanel detectionSettingsPanel = new SignalsAnalysisPanel(context);
+			DetailPanel signalScatterChartPanel = new SignalScatterChartPanel(context);
+			DetailPanel colocalistionPanel = new SignalsColocalisationPanel(context);
 
-            signalsTabPane.addTab(overviewPanel.getPanelTitle(), overviewPanel);
-            signalsTabPane.addTab(detectionSettingsPanel.getPanelTitle(), detectionSettingsPanel);
-            signalsTabPane.addTab(countsPanel.getPanelTitle(), countsPanel);
-            signalsTabPane.addTab(boxplotPanel.getPanelTitle(), boxplotPanel);
+			signalsTabPane.addTab(overviewPanel.getPanelTitle(), overviewPanel);
+			signalsTabPane.addTab(detectionSettingsPanel.getPanelTitle(), detectionSettingsPanel);
+			signalsTabPane.addTab(countsPanel.getPanelTitle(), countsPanel);
+			signalsTabPane.addTab(boxplotPanel.getPanelTitle(), boxplotPanel);
 
-            signalsTabPane.addTab(signalScatterChartPanel.getPanelTitle(), signalScatterChartPanel);
-            signalsTabPane.addTab(shellsPanel.getPanelTitle(), shellsPanel);
-            signalsTabPane.addTab(colocalistionPanel.getPanelTitle(), colocalistionPanel);
+			signalsTabPane.addTab(signalScatterChartPanel.getPanelTitle(), signalScatterChartPanel);
+			signalsTabPane.addTab(shellsPanel.getPanelTitle(), shellsPanel);
+			signalsTabPane.addTab(colocalistionPanel.getPanelTitle(), colocalistionPanel);
 
-            this.addSubPanel(overviewPanel);
-            this.addSubPanel(countsPanel);
-            this.addSubPanel(boxplotPanel);
+			this.add(signalsTabPane, BorderLayout.CENTER);
 
-            this.addSubPanel(shellsPanel);
-            this.addSubPanel(detectionSettingsPanel);
-            this.addSubPanel(signalScatterChartPanel);
-            this.addSubPanel(colocalistionPanel);
+		} catch (Exception e) {
+			LOGGER.log(Loggable.STACK, "Error making signal panel", e);
+		}
+	}
 
-            this.add(signalsTabPane, BorderLayout.CENTER);
+	@Override
+	public void eventReceived(SignalChangeEvent event) {
+		super.eventReceived(event);
+		if (event.type().equals(SignalChangeEvent.SIGNAL_COLOUR_CHANGE)) {
+			update(getDatasets());
+		}
 
-        } catch (Exception e) {
-            LOGGER.log(Loggable.STACK, "Error making signal panel", e);
-        }
-    }
-    
-    @Override
-    public void eventReceived(SignalChangeEvent event) {
-        super.eventReceived(event);
-        if (event.type().equals(SignalChangeEvent.SIGNAL_COLOUR_CHANGE)) {
-            update(getDatasets());
-        }
-        
-        if (event.type().startsWith(SignalChangeEvent.GROUP_VISIBLE_PREFIX) && !event.getSource().getClass().getName().equals(getClass().getName())) {
-//        	log("Receive Ping: "+this.getClass().getSimpleName());
-            for (TabPanel p : this.getSubPanels()) {
-            	p.refreshChartCache(getDatasets());
-            }
-        }
-    }
+		if (event.type().startsWith(SignalChangeEvent.GROUP_VISIBLE_PREFIX)
+				&& !event.getSource().getClass().getName().equals(getClass().getName())) {
+		}
+	}
 
 }

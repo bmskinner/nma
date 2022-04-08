@@ -30,60 +30,58 @@ import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
-import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
+import com.bmskinner.nuclear_morphology.gui.events.revamp.UIController;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 public class MergeSourceExtractionAction extends MultiDatasetResultAction {
-	
+
 	private static final Logger LOGGER = Logger.getLogger(MergeSourceExtractionAction.class.getName());
-    
-    private static final @NonNull String PROGRESS_BAR_LABEL = "Extracting merge source";
-    
-    /**
-     * Refold the given selected dataset
-     */
-    public MergeSourceExtractionAction(List<IAnalysisDataset> datasets, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh) {
-        super(datasets, PROGRESS_BAR_LABEL, acceptor, eh);
-    }
 
-    @Override
-    public void run() {
-        this.setProgressBarIndeterminate();
-        
-        IAnalysisMethod m = new MergeSourceExtractionMethod(datasets);
+	private static final @NonNull String PROGRESS_BAR_LABEL = "Extracting merge source";
 
-        worker = new DefaultAnalysisWorker(m);
-        worker.addPropertyChangeListener(this);
+	/**
+	 * Refold the given selected dataset
+	 */
+	public MergeSourceExtractionAction(List<IAnalysisDataset> datasets, @NonNull final ProgressBarAcceptor acceptor,
+			@NonNull final EventHandler eh) {
+		super(datasets, PROGRESS_BAR_LABEL, acceptor, eh);
+	}
 
-        this.setProgressMessage(PROGRESS_BAR_LABEL);
-        ThreadManager.getInstance().submit(worker);
+	@Override
+	public void run() {
+		this.setProgressBarIndeterminate();
 
-    }
+		IAnalysisMethod m = new MergeSourceExtractionMethod(datasets);
 
-    @Override
-    public void finished() {
-        
-        setProgressBarVisible(false);
+		worker = new DefaultAnalysisWorker(m);
+		worker.addPropertyChangeListener(this);
 
-        try {
+		this.setProgressMessage(PROGRESS_BAR_LABEL);
+		ThreadManager.getInstance().submit(worker);
 
-            IAnalysisResult r = worker.get();
+	}
 
-            for(IAnalysisDataset d : r.getDatasets()){
-                getDatasetEventHandler().fireDatasetEvent(DatasetEvent.ADD_DATASET, d);
-            }
+	@Override
+	public void finished() {
 
-        } catch (InterruptedException e) {
-            LOGGER.warning("Unable to extract merge source" + e.getMessage());
-            LOGGER.log(Loggable.STACK, "Unable to extract merge source", e);
-            return;
-        } catch (ExecutionException e) {
-            LOGGER.warning("Unable to extract merge source" + e.getMessage());
-            LOGGER.log(Loggable.STACK, "Unable to extract merge source", e);
-            return;
-        }
-        
-        super.finished();
-    }
+		setProgressBarVisible(false);
+
+		try {
+
+			IAnalysisResult r = worker.get();
+			UIController.getInstance().fireDatasetAdded(r.getDatasets());
+
+		} catch (InterruptedException e) {
+			LOGGER.warning("Unable to extract merge source" + e.getMessage());
+			LOGGER.log(Loggable.STACK, "Unable to extract merge source", e);
+			return;
+		} catch (ExecutionException e) {
+			LOGGER.warning("Unable to extract merge source" + e.getMessage());
+			LOGGER.log(Loggable.STACK, "Unable to extract merge source", e);
+			return;
+		}
+
+		super.finished();
+	}
 
 }

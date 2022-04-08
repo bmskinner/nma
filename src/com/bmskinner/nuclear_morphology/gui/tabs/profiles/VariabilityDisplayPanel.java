@@ -20,6 +20,7 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.text.ParseException;
+import java.util.List;
 import java.util.logging.Logger;
 
 import javax.swing.JComponent;
@@ -31,6 +32,7 @@ import javax.swing.SpinnerNumberModel;
 import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
@@ -38,6 +40,7 @@ import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileMarkersOptionsPanel;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileTypeOptionsPanel;
+import com.bmskinner.nuclear_morphology.gui.events.revamp.ProfilesUpdatedListener;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.SignificanceTest;
@@ -54,124 +57,135 @@ import com.bmskinner.nuclear_morphology.visualisation.options.ChartOptionsBuilde
  *
  */
 @SuppressWarnings("serial")
-public class VariabilityDisplayPanel extends DetailPanel {
-	
+public class VariabilityDisplayPanel extends DetailPanel implements ProfilesUpdatedListener {
+
 	private static final Logger LOGGER = Logger.getLogger(VariabilityDisplayPanel.class.getName());
 
-    private static final String PANEL_TITLE_LBL = "Variability";
-    private JPanel                 buttonPanel = new JPanel(new FlowLayout());
-    protected ExportableChartPanel chartPanel;
-    private JSpinner               pvalueSpinner;
+	private static final String PANEL_TITLE_LBL = "Variability";
+	private JPanel buttonPanel = new JPanel(new FlowLayout());
+	protected ExportableChartPanel chartPanel;
+	private JSpinner pvalueSpinner;
 
-    private ProfileTypeOptionsPanel profileCollectionTypeSettingsPanel = new ProfileTypeOptionsPanel();
+	private ProfileTypeOptionsPanel profileCollectionTypeSettingsPanel = new ProfileTypeOptionsPanel();
 
-    private ProfileMarkersOptionsPanel profileMarkersOptionsPanel = new ProfileMarkersOptionsPanel();
+	private ProfileMarkersOptionsPanel profileMarkersOptionsPanel = new ProfileMarkersOptionsPanel();
 
-    public VariabilityDisplayPanel(@NonNull InputSupplier context) {
-        super(context);
-        this.setLayout(new BorderLayout());
+	public VariabilityDisplayPanel(@NonNull InputSupplier context) {
+		super(context);
+		this.setLayout(new BorderLayout());
 
-        ChartOptions options = new ChartOptionsBuilder().setProfileType(ProfileType.ANGLE).build();
+		ChartOptions options = new ChartOptionsBuilder().setProfileType(ProfileType.ANGLE).build();
 
-        JFreeChart chart = new ProfileChartFactory(options).createVariabilityChart();
+		JFreeChart chart = new ProfileChartFactory(options).createVariabilityChart();
 
-        chartPanel = new ExportableChartPanel(chart);
-        chartPanel.getChartRenderingInfo().setEntityCollection(null);
-        this.add(chartPanel, BorderLayout.CENTER);
+		chartPanel = new ExportableChartPanel(chart);
+		chartPanel.getChartRenderingInfo().setEntityCollection(null);
+		this.add(chartPanel, BorderLayout.CENTER);
 
-        pvalueSpinner = new JSpinner(
-                new SpinnerNumberModel(SignificanceTest.FIVE_PERCENT_SIGNIFICANCE_LEVEL, 0d, 1d, 0.001d));
-        pvalueSpinner.setEnabled(false);
-        pvalueSpinner.addChangeListener(e->{
-             try {
-            	 pvalueSpinner.commitEdit();
-            	 update(getDatasets());
-             } catch (ParseException e1) {
-                 LOGGER.fine("Error setting p-value spinner: "+e1.getMessage());
-             }
-        });
-        JComponent field = ((JSpinner.DefaultEditor) pvalueSpinner.getEditor());
-        Dimension prefSize = field.getPreferredSize();
-        prefSize = new Dimension(50, prefSize.height);
-        field.setPreferredSize(prefSize);
+		pvalueSpinner = new JSpinner(
+				new SpinnerNumberModel(SignificanceTest.FIVE_PERCENT_SIGNIFICANCE_LEVEL, 0d, 1d, 0.001d));
+		pvalueSpinner.setEnabled(false);
+		pvalueSpinner.addChangeListener(e -> {
+			try {
+				pvalueSpinner.commitEdit();
+				update(getDatasets());
+			} catch (ParseException e1) {
+				LOGGER.fine("Error setting p-value spinner: " + e1.getMessage());
+			}
+		});
+		JComponent field = (pvalueSpinner.getEditor());
+		Dimension prefSize = field.getPreferredSize();
+		prefSize = new Dimension(50, prefSize.height);
+		field.setPreferredSize(prefSize);
 
-        // add extra fields to the header panel
-        buttonPanel.add(new JLabel("Dip test p-value:"));
-        buttonPanel.add(pvalueSpinner);
+		// add extra fields to the header panel
+		buttonPanel.add(new JLabel("Dip test p-value:"));
+		buttonPanel.add(pvalueSpinner);
 
-        profileCollectionTypeSettingsPanel.addActionListener(e-> update(getDatasets()));
-        profileCollectionTypeSettingsPanel.setEnabled(false);
-        buttonPanel.add(profileCollectionTypeSettingsPanel);
+		profileCollectionTypeSettingsPanel.addActionListener(e -> update(getDatasets()));
+		profileCollectionTypeSettingsPanel.setEnabled(false);
+		buttonPanel.add(profileCollectionTypeSettingsPanel);
 
-        buttonPanel.revalidate();
+		buttonPanel.revalidate();
 
-        this.add(buttonPanel, BorderLayout.NORTH);
-    }
+		this.add(buttonPanel, BorderLayout.NORTH);
 
-    
-    @Override
-    public String getPanelTitle(){
-        return PANEL_TITLE_LBL;
-    }
-    
-    @Override
+		uiController.addProfilesUpdatedListener(this);
+	}
+
+	@Override
+	public String getPanelTitle() {
+		return PANEL_TITLE_LBL;
+	}
+
+	@Override
 	public void setEnabled(boolean b) {
-        // borderTagOptionsPanel.setEnabled(b);
-        profileCollectionTypeSettingsPanel.setEnabled(b);
-        profileMarkersOptionsPanel.setEnabled(b);
-        pvalueSpinner.setEnabled(b);
-    }
+		// borderTagOptionsPanel.setEnabled(b);
+		profileCollectionTypeSettingsPanel.setEnabled(b);
+		profileMarkersOptionsPanel.setEnabled(b);
+		pvalueSpinner.setEnabled(b);
+	}
 
-    /**
-     * Update the profile panel with data from the given options
-     */
-    private void updateProfiles(ChartOptions options) {
-        try {
-            setChart(options);
-        } catch (Exception e) {
-           LOGGER.log(Loggable.STACK, "Error in plotting variability chart", e);
-        }
-    }
+	/**
+	 * Update the profile panel with data from the given options
+	 */
+	private void updateProfiles(ChartOptions options) {
+		try {
+			setChart(options);
+		} catch (Exception e) {
+			LOGGER.log(Loggable.STACK, "Error in plotting variability chart", e);
+		}
+	}
 
-    @Override
-    protected void updateSingle() {
+	@Override
+	protected void updateSingle() {
 
-        this.setEnabled(true);
-        boolean showMarkers = profileMarkersOptionsPanel.showMarkers();
-        ProfileType type = profileCollectionTypeSettingsPanel.getSelected();
+		this.setEnabled(true);
+		boolean showMarkers = profileMarkersOptionsPanel.showMarkers();
+		ProfileType type = profileCollectionTypeSettingsPanel.getSelected();
 
-        ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets()).setNormalised(true)
-                .setAlignment(ProfileAlignment.LEFT).setTag(Landmark.REFERENCE_POINT).setShowMarkers(showMarkers)
-                .setModalityPosition((Double) pvalueSpinner.getValue())
-                .setSwatch(GlobalOptions.getInstance().getSwatch()).setProfileType(type).setTarget(chartPanel).build();
+		ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets()).setNormalised(true)
+				.setAlignment(ProfileAlignment.LEFT).setTag(Landmark.REFERENCE_POINT).setShowMarkers(showMarkers)
+				.setModalityPosition((Double) pvalueSpinner.getValue())
+				.setSwatch(GlobalOptions.getInstance().getSwatch()).setProfileType(type).setTarget(chartPanel).build();
 
-        updateProfiles(options);
+		updateProfiles(options);
 
-    }
+	}
 
-    @Override
-    protected void updateMultiple() {
-        updateSingle();
-        // Don't allow marker selection for multiple datasets
-        profileMarkersOptionsPanel.setEnabled(false);
-        pvalueSpinner.setEnabled(false);
-    }
+	@Override
+	protected void updateMultiple() {
+		updateSingle();
+		// Don't allow marker selection for multiple datasets
+		profileMarkersOptionsPanel.setEnabled(false);
+		pvalueSpinner.setEnabled(false);
+	}
 
-    @Override
-    protected void updateNull() {
-        updateSingle();
-        this.setEnabled(false);
-    }
+	@Override
+	protected void updateNull() {
+		updateSingle();
+		this.setEnabled(false);
+	}
 
-    @Override
-    public void setChartsAndTablesLoading() {
-        super.setChartsAndTablesLoading();
-        chartPanel.setChart(AbstractChartFactory.createLoadingChart());
-    }
+	@Override
+	public void setChartsAndTablesLoading() {
+		super.setChartsAndTablesLoading();
+		chartPanel.setChart(AbstractChartFactory.createLoadingChart());
+	}
 
-    @Override
-    protected JFreeChart createPanelChartType(ChartOptions options) {
-        return new ProfileChartFactory(options).createVariabilityChart();
-    }
+	@Override
+	protected JFreeChart createPanelChartType(ChartOptions options) {
+		return new ProfileChartFactory(options).createVariabilityChart();
+	}
+
+	@Override
+	public void profilesUpdated(List<IAnalysisDataset> datasets) {
+		refreshChartCache(datasets);
+	}
+
+	@Override
+	public void profilesUpdated(IAnalysisDataset dataset) {
+		refreshChartCache(dataset);
+	}
 
 }

@@ -19,6 +19,7 @@ package com.bmskinner.nuclear_morphology.gui.tabs.signals;
 import java.awt.BorderLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.List;
 
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -32,7 +33,8 @@ import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
-import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
+import com.bmskinner.nuclear_morphology.gui.events.revamp.NuclearSignalUpdatedListener;
+import com.bmskinner.nuclear_morphology.gui.events.revamp.UIController;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 import com.bmskinner.nuclear_morphology.visualisation.datasets.SignalTableCell;
 import com.bmskinner.nuclear_morphology.visualisation.datasets.tables.AbstractTableCreator;
@@ -41,118 +43,128 @@ import com.bmskinner.nuclear_morphology.visualisation.options.TableOptions;
 import com.bmskinner.nuclear_morphology.visualisation.options.TableOptionsBuilder;
 
 @SuppressWarnings("serial")
-public class SignalsAnalysisPanel extends DetailPanel {
+public class SignalsAnalysisPanel extends DetailPanel implements NuclearSignalUpdatedListener {
 
-    private static final String PANEL_TITLE_LBL = "Detection settings";
-    private ExportableTable table;     // table for analysis parameters
-    private JScrollPane     scrollPane;
+	private static final String PANEL_TITLE_LBL = "Detection settings";
+	private ExportableTable table; // table for analysis parameters
+	private JScrollPane scrollPane;
 
-    public SignalsAnalysisPanel(@NonNull InputSupplier context) {
-        super(context ,PANEL_TITLE_LBL);
-        this.setLayout(new BorderLayout());
+	public SignalsAnalysisPanel(@NonNull InputSupplier context) {
+		super(context, PANEL_TITLE_LBL);
+		this.setLayout(new BorderLayout());
+		uiController.addNuclearSignalUpdatedListener(this);
 
-        table = new ExportableTable(new DefaultTableModel());
-        table.setEnabled(false);
-        table.addMouseListener(new MouseAdapter() {
+		table = new ExportableTable(new DefaultTableModel());
+		table.setEnabled(false);
+		table.addMouseListener(new MouseAdapter() {
 
-            @Override
-            public void mouseClicked(MouseEvent e) {
+			@Override
+			public void mouseClicked(MouseEvent e) {
 
-                JTable table = (JTable) e.getSource();
+				JTable table = (JTable) e.getSource();
 
-                int row = table.rowAtPoint(e.getPoint());
-                int column = table.columnAtPoint(e.getPoint());
-                IAnalysisDataset d = getDatasets().get(column - 1);
-                // double click
-                if (e.getClickCount() == 2) {
+				int row = table.rowAtPoint(e.getPoint());
+				int column = table.columnAtPoint(e.getPoint());
+				IAnalysisDataset d = getDatasets().get(column - 1);
+				// double click
+				if (e.getClickCount() == 2) {
 
-                    String rowName = table.getModel().getValueAt(row, 0).toString();
+					String rowName = table.getModel().getValueAt(row, 0).toString();
 
-                    if (rowName.equals(Labels.Signals.SIGNAL_SOURCE_LABEL)) {
+					if (rowName.equals(Labels.Signals.SIGNAL_SOURCE_LABEL)) {
 
-                    	SignalTableCell signalGroup = getSignalGroupFromTable(table, row - 2, column);
-                    	if(signalGroup!=null) {
+						SignalTableCell signalGroup = getSignalGroupFromTable(table, row - 2, column);
+						if (signalGroup != null) {
 
-                    		cosmeticHandler.updateSignalSource(d, signalGroup.getID());
-                    		SignalTableCell newValue = new SignalTableCell(signalGroup.getID(), 
-                    				d.getAnalysisOptions().get()
-                    				.getNuclearSignalOptions(signalGroup.getID()).get()
-                    				.getFile(HashOptions.DETECTION_FOLDER).getAbsolutePath(),
-                    				signalGroup.getColor());
-                    		table.getModel().setValueAt(newValue, row, column);
-                    		table.repaint();
-                    	}
-                    }
+							cosmeticHandler.updateSignalSource(d, signalGroup.getID());
+							UIController.getInstance().fireNuclearSignalUpdated(d);
+							SignalTableCell newValue = new SignalTableCell(signalGroup.getID(),
+									d.getAnalysisOptions().get().getNuclearSignalOptions(signalGroup.getID()).get()
+											.getFile(HashOptions.DETECTION_FOLDER).getAbsolutePath(),
+									signalGroup.getColor());
+							table.getModel().setValueAt(newValue, row, column);
+							table.repaint();
+						}
+					}
 
-                    if (rowName.equals(Labels.Signals.SIGNAL_GROUP_LABEL)) {
-                        SignalTableCell signalGroup = getSignalGroupFromTable(table, row, column);
-                        if(signalGroup!=null) {
-                        	cosmeticHandler.renameSignalGroup(d, signalGroup.getID());
-                        }
-                    }
+					if (rowName.equals(Labels.Signals.SIGNAL_GROUP_LABEL)) {
+						SignalTableCell signalGroup = getSignalGroupFromTable(table, row, column);
+						if (signalGroup != null) {
+							cosmeticHandler.renameSignalGroup(d, signalGroup.getID());
+							UIController.getInstance().fireNuclearSignalUpdated(d);
+						}
+					}
 
-                    String nextRowName = table.getModel().getValueAt(row + 1, 0).toString();
-                    if (nextRowName.equals(Labels.Signals.SIGNAL_GROUP_LABEL)) {
-                        SignalTableCell signalGroup = getSignalGroupFromTable(table, row + 1, column);
-                        if(signalGroup!=null) {
-                        	cosmeticHandler.changeSignalColour(d, signalGroup.getID());
-                        	update(getDatasets());
-                        	getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
-                        }
-                    }
+					String nextRowName = table.getModel().getValueAt(row + 1, 0).toString();
+					if (nextRowName.equals(Labels.Signals.SIGNAL_GROUP_LABEL)) {
+						SignalTableCell signalGroup = getSignalGroupFromTable(table, row + 1, column);
+						if (signalGroup != null) {
+							cosmeticHandler.changeSignalColour(d, signalGroup.getID());
+							UIController.getInstance().fireNuclearSignalUpdated(d);
+						}
+					}
 
-                }
+				}
 
-            }
-        });
+			}
+		});
+		scrollPane = new JScrollPane(table);
+		this.add(scrollPane, BorderLayout.CENTER);
+	}
 
-        scrollPane = new JScrollPane(table);
-        this.add(scrollPane, BorderLayout.CENTER);
-    }
-    
-    private SignalTableCell getSignalGroupFromTable(JTable table, int row, int column) {
-    	Object o = table.getModel().getValueAt(row, column);
-    	if(o instanceof SignalTableCell)
-    		return (SignalTableCell)o;
-        return null;
-    }
+	private SignalTableCell getSignalGroupFromTable(JTable table, int row, int column) {
+		Object o = table.getModel().getValueAt(row, column);
+		if (o instanceof SignalTableCell)
+			return (SignalTableCell) o;
+		return null;
+	}
 
-    @Override
-    protected void updateSingle() {
+	@Override
+	protected void updateSingle() {
 
-        TableOptions options = new TableOptionsBuilder().setDatasets(getDatasets()).setTarget(table)
-                .setColumnRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN, new SignalDetectionSettingsTableCellRenderer())
-                .build();
+		TableOptions options = new TableOptionsBuilder().setDatasets(getDatasets()).setTarget(table)
+				.setColumnRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN, new SignalDetectionSettingsTableCellRenderer())
+				.build();
 
-        setTable(options);
-    }
+		setTable(options);
+	}
 
-    @Override
-    protected void updateMultiple() {
-        updateSingle();
-    }
+	@Override
+	protected void updateMultiple() {
+		updateSingle();
+	}
 
-    @Override
-    protected void updateNull() {
+	@Override
+	protected void updateNull() {
 
-        TableOptions options = new TableOptionsBuilder().setDatasets(null).build();
+		TableOptions options = new TableOptionsBuilder().setDatasets(null).build();
 
-        TableModel model = getTable(options);
-        table.setModel(model);
-        table.createDefaultColumnsFromModel();
+		TableModel model = getTable(options);
+		table.setModel(model);
+		table.createDefaultColumnsFromModel();
 
-    }
+	}
 
-    @Override
-    public void setChartsAndTablesLoading() {
-        super.setChartsAndTablesLoading();
-        table.setModel(AbstractTableCreator.createLoadingTable());
+	@Override
+	public void setChartsAndTablesLoading() {
+		super.setChartsAndTablesLoading();
+		table.setModel(AbstractTableCreator.createLoadingTable());
 
-    }
+	}
 
-    @Override
-    protected TableModel createPanelTableType(TableOptions options) {
-        return new NuclearSignalTableCreator(options).createSignalDetectionParametersTable();
-    }
+	@Override
+	protected TableModel createPanelTableType(TableOptions options) {
+		return new NuclearSignalTableCreator(options).createSignalDetectionParametersTable();
+	}
+
+	@Override
+	public void nuclearSignalUpdated(List<IAnalysisDataset> datasets) {
+		refreshChartCache(datasets);
+	}
+
+	@Override
+	public void nuclearSignalUpdated(IAnalysisDataset dataset) {
+		refreshChartCache(dataset);
+	}
 
 }

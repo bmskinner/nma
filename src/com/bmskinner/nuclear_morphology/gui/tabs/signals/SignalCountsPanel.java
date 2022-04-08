@@ -50,7 +50,7 @@ import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.components.panels.SignalGroupSelectionPanel;
 import com.bmskinner.nuclear_morphology.gui.dialogs.SettingsDialog;
-import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
+import com.bmskinner.nuclear_morphology.gui.events.revamp.NuclearSignalUpdatedListener;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.visualisation.charts.AbstractChartFactory;
@@ -61,202 +61,208 @@ import com.bmskinner.nuclear_morphology.visualisation.options.ChartOptionsBuilde
 
 /**
  * Plot the number of signals per nucleus/per cell
+ * 
  * @author ben
  * @since 1.14.0
  *
  */
 @SuppressWarnings("serial")
-public class SignalCountsPanel extends DetailPanel {
-	
+public class SignalCountsPanel extends DetailPanel implements NuclearSignalUpdatedListener {
+
 	private static final Logger LOGGER = Logger.getLogger(SignalCountsPanel.class.getName());
-	
+
 	private static final String FILTER_LBL = "Filter nuclei";
-	
+
 	private static final String PANEL_TITLE_LBL = "Signal counts";
-	
+
 	private JButton filterBtn = new JButton(FILTER_LBL);
-	
+
 	private ExportableChartPanel chartPanel;
-	
+
 	public SignalCountsPanel(@NonNull InputSupplier context) {
-        super(context, PANEL_TITLE_LBL);
-        createUI();
-    }
+		super(context, PANEL_TITLE_LBL);
+		createUI();
+		uiController.addNuclearSignalUpdatedListener(this);
+	}
 
-    private void createUI() {
-        this.setLayout(new BorderLayout());
-        JPanel header = createHeader();
-        add(header, BorderLayout.NORTH);
-        
-        chartPanel = new ExportableChartPanel(AbstractChartFactory.createEmptyChart());
-        add(chartPanel, BorderLayout.CENTER);
-    }
-    
-    /**
-     * Create the header panel
-     * 
-     * @return
-     */
-    private JPanel createHeader() {
-        JPanel panel = new JPanel();
-        filterBtn.addActionListener(e->{
-        		SignalCountFilteringSetupDialog dialog = new SignalCountFilteringSetupDialog(activeDataset());
-        		if(dialog.isReadyToRun())
-        			dialog.filter();
-        });
-        panel.add(filterBtn);
-        filterBtn.setEnabled(false);
-        return panel;
-    }
+	private void createUI() {
+		this.setLayout(new BorderLayout());
+		JPanel header = createHeader();
+		add(header, BorderLayout.NORTH);
 
-    @Override
-    protected void updateSingle() {
-        updateMultiple();
-        if(activeDataset()!=null && activeDataset().getCollection().getSignalManager().hasSignals())
-        	filterBtn.setEnabled(true);
-    }
+		chartPanel = new ExportableChartPanel(AbstractChartFactory.createEmptyChart());
+		add(chartPanel, BorderLayout.CENTER);
+	}
 
-    @Override
-    protected void updateMultiple() {
-    	filterBtn.setEnabled(false);
-    	ChartOptions options = new ChartOptionsBuilder()
-    			.setDatasets(getDatasets())
-        		.addStatistic(Measurement.NUCLEUS_SIGNAL_COUNT)
-        		.setScale(GlobalOptions.getInstance().getScale())
-        		.setSwatch(GlobalOptions.getInstance().getSwatch())
-        		.setTarget(chartPanel)
-        		.build();
-        
-        setChart(options);
-    }
+	/**
+	 * Create the header panel
+	 * 
+	 * @return
+	 */
+	private JPanel createHeader() {
+		JPanel panel = new JPanel();
+		filterBtn.addActionListener(e -> {
+			SignalCountFilteringSetupDialog dialog = new SignalCountFilteringSetupDialog(activeDataset());
+			if (dialog.isReadyToRun())
+				dialog.filter();
+		});
+		panel.add(filterBtn);
+		filterBtn.setEnabled(false);
+		return panel;
+	}
 
-    @Override
-    protected void updateNull() {
-        updateMultiple();
-        filterBtn.setEnabled(false);
-    }
-    
-    @Override
-    public void setChartsAndTablesLoading() {
-        super.setChartsAndTablesLoading();
-        chartPanel.setChart(AbstractChartFactory.createLoadingChart());
+	@Override
+	protected void updateSingle() {
+		updateMultiple();
+		if (activeDataset() != null && activeDataset().getCollection().getSignalManager().hasSignals())
+			filterBtn.setEnabled(true);
+	}
 
-    }
+	@Override
+	protected void updateMultiple() {
+		filterBtn.setEnabled(false);
+		ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets())
+				.addStatistic(Measurement.NUCLEUS_SIGNAL_COUNT).setScale(GlobalOptions.getInstance().getScale())
+				.setSwatch(GlobalOptions.getInstance().getSwatch()).setTarget(chartPanel).build();
 
-    @Override
-    protected JFreeChart createPanelChartType(@NonNull ChartOptions options) {
-        return new ViolinChartFactory(options).createStatisticPlot(CellularComponent.NUCLEAR_SIGNAL) ;
-    }
-    
+		setChart(options);
+	}
 
-    private class SignalCountFilteringSetupDialog extends SettingsDialog {
+	@Override
+	protected void updateNull() {
+		updateMultiple();
+		filterBtn.setEnabled(false);
+	}
 
-        private static final String DIALOG_TITLE = "Signal filtering options";
+	@Override
+	public void setChartsAndTablesLoading() {
+		super.setChartsAndTablesLoading();
+		chartPanel.setChart(AbstractChartFactory.createLoadingChart());
 
-        private final IAnalysisDataset dataset;
-        
-        private int minSignals;
-        private int maxSignals;
-        private SignalGroupSelectionPanel groupPanel;
+	}
 
-        protected JPanel headingPanel;
-        protected JPanel optionsPanel;
-        protected JPanel footerPanel;
+	@Override
+	protected JFreeChart createPanelChartType(@NonNull ChartOptions options) {
+		return new ViolinChartFactory(options).createStatisticPlot(CellularComponent.NUCLEAR_SIGNAL);
+	}
 
-        public SignalCountFilteringSetupDialog(final @NonNull IAnalysisDataset dataset) {
-            this(dataset, DIALOG_TITLE);
-        }
+	private class SignalCountFilteringSetupDialog extends SettingsDialog {
 
-        /**
-         * Constructor that does not make panel visible
-         * 
-         * @param mw
-         * @param title
-         */
-        protected SignalCountFilteringSetupDialog(final @NonNull IAnalysisDataset dataset, final String title) {
-            super(true);
-            this.dataset = dataset;
-            setTitle(title);
-            createUI();
-            pack();
-            setVisible(true);
-        }
+		private static final String DIALOG_TITLE = "Signal filtering options";
 
-        protected JPanel createHeader() {
-            JPanel panel = new JPanel();
-            panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-            return panel;
-        }
-        
-        public void filter() {
-        	
-        	FilteringOptions options = new CellCollectionFilterBuilder()
-        			.setMatchType(FilterMatchType.ALL_MATCH)
-        			.add(Measurement.NUCLEUS_SIGNAL_COUNT, CellularComponent.NUCLEUS, groupPanel.getSelectedID(), minSignals, maxSignals)
-        			.build();
-        	            
-            try {
-            	ICellCollection filtered  = CellCollectionFilterer.filter(dataset.getCollection(), options);
-            	ICellCollection virt = new VirtualDataset(dataset, filtered.getName());
-            	filtered.getCells().forEach(c->virt.addCell(c));
-            	virt.setName("Filtered_signal_count_"+groupPanel.getSelectedGroup().getGroupName());
+		private final IAnalysisDataset dataset;
 
-            	dataset.getCollection().getProfileManager().copySegmentsAndLandmarksTo(virt);
-            	dataset.addChildCollection(virt);		
-            } catch (CollectionFilteringException | ProfileException | MissingProfileException e1) {
-            	LOGGER.log(Loggable.STACK, "Unable to filter collection for " + dataset.getName(), e1);
-            }
-            
-            getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.REFRESH_POPULATIONS);
-        }
+		private int minSignals;
+		private int maxSignals;
+		private SignalGroupSelectionPanel groupPanel;
 
+		protected JPanel headingPanel;
+		protected JPanel optionsPanel;
+		protected JPanel footerPanel;
 
-        protected void createUI() {
+		public SignalCountFilteringSetupDialog(final @NonNull IAnalysisDataset dataset) {
+			this(dataset, DIALOG_TITLE);
+		}
 
-            setLayout(new BorderLayout());
-            setBorder(new EmptyBorder(5, 5, 5, 5));
+		/**
+		 * Constructor that does not make panel visible
+		 * 
+		 * @param mw
+		 * @param title
+		 */
+		protected SignalCountFilteringSetupDialog(final @NonNull IAnalysisDataset dataset, final String title) {
+			super(true);
+			this.dataset = dataset;
+			setTitle(title);
+			createUI();
+			pack();
+			setVisible(true);
+		}
 
-            headingPanel = createHeader();
-            getContentPane().add(headingPanel, BorderLayout.NORTH);
+		@Override
+		protected JPanel createHeader() {
+			JPanel panel = new JPanel();
+			panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+			return panel;
+		}
 
-            footerPanel = createFooter();
-            getContentPane().add(footerPanel, BorderLayout.SOUTH);
-            
-            optionsPanel = new JPanel();
-            GridBagLayout layout = new GridBagLayout();
-            optionsPanel.setLayout(layout);
-            
-            List<JLabel> labels = new ArrayList<>();
-            List<Component> fields = new ArrayList<>();
-            
-            
-            groupPanel = new SignalGroupSelectionPanel(dataset);
-            labels.add(new JLabel("Signal group to filter"));
-            fields.add(groupPanel);
-            
-            int max = dataset.getCollection().getNuclei().stream()
-            	.flatMap(n->n.getSignalCollection().getSignals().stream())
-            	.mapToInt(l->l.size()).max().orElse(0);
-            
-            maxSignals = max;
-            
-            SpinnerNumberModel minSignalModel = new SpinnerNumberModel(0, 0, max, 1);
-            JSpinner minSpinner = new JSpinner(minSignalModel);
-            minSpinner.addChangeListener(e-> minSignals = (int) minSignalModel.getValue());
-            
-            labels.add(new JLabel("Min signals per nucleus"));
-            fields.add(minSpinner);
-            
-            SpinnerNumberModel maxSignalModel = new SpinnerNumberModel(max, 0, max, 1);
-            JSpinner maxSpinner = new JSpinner(maxSignalModel);
-            maxSpinner.addChangeListener(e-> maxSignals = (int) maxSignalModel.getValue());
-            
-            labels.add(new JLabel("Max signals per nucleus"));
-            fields.add(maxSpinner);
-            
-            this.addLabelTextRows(labels, fields, layout, optionsPanel);
-            getContentPane().add(optionsPanel, BorderLayout.CENTER);
-        }
-    }
+		public void filter() {
+
+			FilteringOptions options = new CellCollectionFilterBuilder().setMatchType(FilterMatchType.ALL_MATCH)
+					.add(Measurement.NUCLEUS_SIGNAL_COUNT, CellularComponent.NUCLEUS, groupPanel.getSelectedID(),
+							minSignals, maxSignals)
+					.build();
+
+			try {
+				ICellCollection filtered = CellCollectionFilterer.filter(dataset.getCollection(), options);
+				ICellCollection virt = new VirtualDataset(dataset, filtered.getName());
+				filtered.getCells().forEach(c -> virt.addCell(c));
+				virt.setName("Filtered_signal_count_" + groupPanel.getSelectedGroup().getGroupName());
+
+				dataset.getCollection().getProfileManager().copySegmentsAndLandmarksTo(virt);
+				dataset.addChildCollection(virt);
+
+				// TODO: fire a dataset added update
+			} catch (CollectionFilteringException | ProfileException | MissingProfileException e1) {
+				LOGGER.log(Loggable.STACK, "Unable to filter collection for " + dataset.getName(), e1);
+			}
+		}
+
+		protected void createUI() {
+
+			setLayout(new BorderLayout());
+			setBorder(new EmptyBorder(5, 5, 5, 5));
+
+			headingPanel = createHeader();
+			getContentPane().add(headingPanel, BorderLayout.NORTH);
+
+			footerPanel = createFooter();
+			getContentPane().add(footerPanel, BorderLayout.SOUTH);
+
+			optionsPanel = new JPanel();
+			GridBagLayout layout = new GridBagLayout();
+			optionsPanel.setLayout(layout);
+
+			List<JLabel> labels = new ArrayList<>();
+			List<Component> fields = new ArrayList<>();
+
+			groupPanel = new SignalGroupSelectionPanel(dataset);
+			labels.add(new JLabel("Signal group to filter"));
+			fields.add(groupPanel);
+
+			int max = dataset.getCollection().getNuclei().stream()
+					.flatMap(n -> n.getSignalCollection().getSignals().stream()).mapToInt(l -> l.size()).max()
+					.orElse(0);
+
+			maxSignals = max;
+
+			SpinnerNumberModel minSignalModel = new SpinnerNumberModel(0, 0, max, 1);
+			JSpinner minSpinner = new JSpinner(minSignalModel);
+			minSpinner.addChangeListener(e -> minSignals = (int) minSignalModel.getValue());
+
+			labels.add(new JLabel("Min signals per nucleus"));
+			fields.add(minSpinner);
+
+			SpinnerNumberModel maxSignalModel = new SpinnerNumberModel(max, 0, max, 1);
+			JSpinner maxSpinner = new JSpinner(maxSignalModel);
+			maxSpinner.addChangeListener(e -> maxSignals = (int) maxSignalModel.getValue());
+
+			labels.add(new JLabel("Max signals per nucleus"));
+			fields.add(maxSpinner);
+
+			this.addLabelTextRows(labels, fields, layout, optionsPanel);
+			getContentPane().add(optionsPanel, BorderLayout.CENTER);
+		}
+	}
+
+	@Override
+	public void nuclearSignalUpdated(List<IAnalysisDataset> datasets) {
+		refreshChartCache(datasets);
+	}
+
+	@Override
+	public void nuclearSignalUpdated(IAnalysisDataset dataset) {
+		refreshChartCache(dataset);
+	}
 
 }

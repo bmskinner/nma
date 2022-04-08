@@ -17,6 +17,7 @@
 package com.bmskinner.nuclear_morphology.gui.tabs.signals;
 
 import java.awt.BorderLayout;
+import java.util.List;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -25,8 +26,10 @@ import javax.swing.table.TableModel;
 import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
+import com.bmskinner.nuclear_morphology.gui.events.revamp.NuclearSignalUpdatedListener;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 import com.bmskinner.nuclear_morphology.visualisation.charts.AbstractChartFactory;
 import com.bmskinner.nuclear_morphology.visualisation.charts.ViolinChartFactory;
@@ -44,92 +47,104 @@ import com.bmskinner.nuclear_morphology.visualisation.options.TableOptions;
  *
  */
 @SuppressWarnings("serial")
-public class SignalsColocalisationPanel extends DetailPanel {
+public class SignalsColocalisationPanel extends DetailPanel implements NuclearSignalUpdatedListener {
 
-    private static final String PANEL_TITLE_LBL = "Colocalisation";
-    private static final String HEADER_LBL    = "Pairwise distances between the closest signal pairs centres-of-mass";
+	private static final String PANEL_TITLE_LBL = "Colocalisation";
+	private static final String HEADER_LBL = "Pairwise distances between the closest signal pairs centres-of-mass";
 
-    private ExportableChartPanel violinChart;
+	private ExportableChartPanel violinChart;
 
-    public SignalsColocalisationPanel(@NonNull InputSupplier context) {
-        super(context);
-        this.setLayout(new BorderLayout());
+	public SignalsColocalisationPanel(@NonNull InputSupplier context) {
+		super(context);
+		this.setLayout(new BorderLayout());
 
-        JPanel header = createHeader();
-        JPanel mainPanel = createMainPanel();
+		JPanel header = createHeader();
+		JPanel mainPanel = createMainPanel();
 
-        this.add(header, BorderLayout.NORTH);
-        this.add(mainPanel, BorderLayout.CENTER);
-    }
-    
-    @Override
-    public String getPanelTitle(){
-        return PANEL_TITLE_LBL;
-    }
+		this.add(header, BorderLayout.NORTH);
+		this.add(mainPanel, BorderLayout.CENTER);
 
-    /**
-     * Create the header panel
-     * 
-     * @return
-     */
-    private JPanel createHeader() {
-        JPanel panel = new JPanel();
+		uiController.addNuclearSignalUpdatedListener(this);
+	}
 
-        JLabel label = new JLabel(HEADER_LBL);
+	@Override
+	public String getPanelTitle() {
+		return PANEL_TITLE_LBL;
+	}
 
-        panel.add(label);
-        return panel;
-    }
+	/**
+	 * Create the header panel
+	 * 
+	 * @return
+	 */
+	private JPanel createHeader() {
+		JPanel panel = new JPanel();
 
-    /**
-     * Create the main panel with charts and tables
-     * 
-     * @return
-     */
-    private JPanel createMainPanel() {
-        JPanel panel = new JPanel(new BorderLayout());
-        violinChart = new ExportableChartPanel(AbstractChartFactory.createEmptyChart());
-        panel.add(violinChart, BorderLayout.CENTER);
+		JLabel label = new JLabel(HEADER_LBL);
 
-        return panel;
-    }
+		panel.add(label);
+		return panel;
+	}
 
-    @Override
-    protected synchronized void updateSingle() {
-        ChartOptions chartOptions = new ChartOptionsBuilder().setDatasets(getDatasets())
-                .setScale(GlobalOptions.getInstance().getScale()).setTarget(violinChart).build();
+	/**
+	 * Create the main panel with charts and tables
+	 * 
+	 * @return
+	 */
+	private JPanel createMainPanel() {
+		JPanel panel = new JPanel(new BorderLayout());
+		violinChart = new ExportableChartPanel(AbstractChartFactory.createEmptyChart());
+		panel.add(violinChart, BorderLayout.CENTER);
 
-        setChart(chartOptions);
+		return panel;
+	}
 
-    }
+	@Override
+	protected synchronized void updateSingle() {
+		ChartOptions chartOptions = new ChartOptionsBuilder().setDatasets(getDatasets())
+				.setScale(GlobalOptions.getInstance().getScale()).setTarget(violinChart).build();
 
-    @Override
-    protected synchronized void updateMultiple() {
-        ChartOptions chartOptions = new ChartOptionsBuilder().setDatasets(getDatasets())
-                .setScale(GlobalOptions.getInstance().getScale()).setTarget(violinChart).build();
+		setChart(chartOptions);
 
-        setChart(chartOptions);
-    }
+	}
 
-    @Override
-    protected synchronized void updateNull() {
-        violinChart.setChart(AbstractChartFactory.createEmptyChart());
-    }
+	@Override
+	protected synchronized void updateMultiple() {
+		ChartOptions chartOptions = new ChartOptionsBuilder().setDatasets(getDatasets())
+				.setScale(GlobalOptions.getInstance().getScale()).setTarget(violinChart).build();
 
-    @Override
-    public synchronized void setChartsAndTablesLoading() {
-        super.setChartsAndTablesLoading();
-        violinChart.setChart(AbstractChartFactory.createLoadingChart());
+		setChart(chartOptions);
+	}
 
-    }
+	@Override
+	protected synchronized void updateNull() {
+		violinChart.setChart(AbstractChartFactory.createEmptyChart());
+	}
 
-    @Override
-    protected synchronized JFreeChart createPanelChartType(@NonNull ChartOptions options) {
-        return new ViolinChartFactory(options).createSignalColocalisationViolinChart();
-    }
+	@Override
+	public synchronized void setChartsAndTablesLoading() {
+		super.setChartsAndTablesLoading();
+		violinChart.setChart(AbstractChartFactory.createLoadingChart());
 
-    @Override
-    protected synchronized TableModel createPanelTableType(@NonNull TableOptions options) {
-        return new NuclearSignalTableCreator(options).createSignalColocalisationTable();
-    }
+	}
+
+	@Override
+	protected synchronized JFreeChart createPanelChartType(@NonNull ChartOptions options) {
+		return new ViolinChartFactory(options).createSignalColocalisationViolinChart();
+	}
+
+	@Override
+	protected synchronized TableModel createPanelTableType(@NonNull TableOptions options) {
+		return new NuclearSignalTableCreator(options).createSignalColocalisationTable();
+	}
+
+	@Override
+	public void nuclearSignalUpdated(List<IAnalysisDataset> datasets) {
+		refreshChartCache(datasets);
+	}
+
+	@Override
+	public void nuclearSignalUpdated(IAnalysisDataset dataset) {
+		refreshChartCache(dataset);
+	}
 }

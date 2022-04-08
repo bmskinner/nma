@@ -26,57 +26,50 @@ import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.gui.events.ChartOptionsRenderedEvent;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetUpdateEvent;
-import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent;
 import com.bmskinner.nuclear_morphology.visualisation.charts.ProfileChartFactory;
 import com.bmskinner.nuclear_morphology.visualisation.charts.panels.DraggableOverlayChartPanel;
 
 public class SegmentationDualChartPanel extends DualChartPanel {
-	
+
 	protected List<Object> listeners = new ArrayList<>();
 
-    public SegmentationDualChartPanel() {
-        super(false);
+	public SegmentationDualChartPanel() {
+		super(false);
 
-        JFreeChart profileChart = ProfileChartFactory.createEmptyChart(ProfileType.ANGLE);
-        chartPanel = new DraggableOverlayChartPanel(profileChart, null, false);
-        ((DraggableOverlayChartPanel) chartPanel).addSignalChangeListener(this);
-    }
+		JFreeChart profileChart = ProfileChartFactory.createEmptyChart(ProfileType.ANGLE);
+		chartPanel = new DraggableOverlayChartPanel(profileChart, null, false);
+		((DraggableOverlayChartPanel) chartPanel).addSignalChangeListener(this);
+	}
 
-    public void setProfile(ISegmentedProfile profile, boolean normalised) {
+	public void setProfile(ISegmentedProfile profile, boolean normalised) {
 
-        ((DraggableOverlayChartPanel) chartPanel).setProfile(profile, normalised);
-        this.updateChartPanelRange();
-    }
+		((DraggableOverlayChartPanel) chartPanel).setProfile(profile, normalised);
+		this.updateChartPanelRange();
+	}
 
-    public void setCharts(JFreeChart chart, ISegmentedProfile profile, boolean normalised, JFreeChart rangeChart) {
+	public void setCharts(JFreeChart chart, ISegmentedProfile profile, boolean normalised, JFreeChart rangeChart) {
 
-        ((DraggableOverlayChartPanel) chartPanel).setChart(chart, profile, normalised);
-        rangePanel.setChart(rangeChart);
-        this.updateChartPanelRange();
-    }
+		((DraggableOverlayChartPanel) chartPanel).setChart(chart, profile, normalised);
+		rangePanel.setChart(rangeChart);
+		this.updateChartPanelRange();
+	}
 
 	@Override
 	public void eventReceived(DatasetEvent event) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void eventReceived(DatasetUpdateEvent event) {
 		// TODO Auto-generated method stub
-		
-	}
 
-	@Override
-	public void eventReceived(InterfaceEvent event) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void eventReceived(ChartOptionsRenderedEvent event) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }

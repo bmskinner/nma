@@ -30,49 +30,48 @@ import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 @SuppressWarnings("serial")
 public class NuclearStatisticsPanel extends DetailPanel {
 
-    private static final String PANEL_TITLE_LBL = "Nuclear charts";
+	private static final String PANEL_TITLE_LBL = "Nuclear charts";
 
-    private JTabbedPane tabPane;
+	private JTabbedPane tabPane;
 
-    public NuclearStatisticsPanel(@NonNull InputSupplier context) {
-        super(context);
+	public NuclearStatisticsPanel(@NonNull InputSupplier context) {
+		super(context);
 
-        this.setLayout(new BorderLayout());
-        tabPane = new JTabbedPane(SwingConstants.TOP);
+		this.setLayout(new BorderLayout());
+		tabPane = new JTabbedPane(SwingConstants.TOP);
 
-        DetailPanel nuclearStatsPanel = new NuclearStatsPanel(context);
-        DetailPanel boxplotPanel = new NuclearBoxplotsPanel(context);
-        DetailPanel wilcoxonPanel = new WilcoxonDetailPanel(context);
-        DetailPanel nucleusMagnitudePanel = new NucleusMagnitudePanel(context);
+		DetailPanel nuclearStatsPanel = new NuclearStatsPanel(context);
+		DetailPanel boxplotPanel = new NuclearBoxplotsPanel(context);
+		DetailPanel wilcoxonPanel = new WilcoxonDetailPanel(context);
+		DetailPanel nucleusMagnitudePanel = new NucleusMagnitudePanel(context);
 
-        DetailPanel nuclearScatterChartPanel = new NuclearScatterChartPanel(context);
-        DetailPanel nuclearGlcmPanel = new NuclearGlcmPanel(context);
+		DetailPanel nuclearScatterChartPanel = new NuclearScatterChartPanel(context);
+		DetailPanel nuclearGlcmPanel = new NuclearGlcmPanel(context);
 
-        addPanel(nuclearStatsPanel);
-        addPanel(boxplotPanel);
-        addPanel(wilcoxonPanel);
-        addPanel(nucleusMagnitudePanel);
-        addPanel(nuclearScatterChartPanel);
+		addPanel(nuclearStatsPanel);
+		addPanel(boxplotPanel);
+		addPanel(wilcoxonPanel);
+		addPanel(nucleusMagnitudePanel);
+		addPanel(nuclearScatterChartPanel);
 
-        if(GlobalOptions.getInstance().getBoolean(GlobalOptions.IS_GLCM_INTERFACE_KEY))
-        	addPanel(nuclearGlcmPanel);
+		if (GlobalOptions.getInstance().getBoolean(GlobalOptions.IS_GLCM_INTERFACE_KEY))
+			addPanel(nuclearGlcmPanel);
 
-        this.add(tabPane, BorderLayout.CENTER);
-    }
-    
-   
-    /**
-     * Register a sub panel and add to the tab pane
-     * @param panel
-     */
-    private void addPanel(DetailPanel panel) {
-    	this.addSubPanel(panel);
-    	tabPane.addTab(panel.getPanelTitle(), panel);
-    }
+		this.add(tabPane, BorderLayout.CENTER);
+	}
 
-    @Override
-    public String getPanelTitle(){
-        return PANEL_TITLE_LBL;
-    }
-    
+	/**
+	 * Register a sub panel and add to the tab pane
+	 * 
+	 * @param panel
+	 */
+	private void addPanel(DetailPanel panel) {
+		tabPane.addTab(panel.getPanelTitle(), panel);
+	}
+
+	@Override
+	public String getPanelTitle() {
+		return PANEL_TITLE_LBL;
+	}
+
 }

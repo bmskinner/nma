@@ -16,9 +16,12 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.tabs.profiles;
 
+import java.util.List;
+
 import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
@@ -30,73 +33,75 @@ import com.bmskinner.nuclear_morphology.visualisation.options.ChartOptionsBuilde
 
 /**
  * Display a profile chart
+ * 
  * @author bms41
  *
  */
 @SuppressWarnings("serial")
 public class ProfileDisplayPanel extends AbstractProfileDisplayPanel {
 
-    public ProfileDisplayPanel(@NonNull InputSupplier context, ProfileType type) {
-        super(context, type);
+	public ProfileDisplayPanel(@NonNull InputSupplier context, ProfileType type) {
+		super(context, type);
 
-        JFreeChart chart = ProfileChartFactory.createEmptyChart(type);
-        chartPanel.setChart(chart);
+		JFreeChart chart = ProfileChartFactory.createEmptyChart(type);
+		chartPanel.setChart(chart);
+	}
 
-//        if (this.type == ProfileType.FRANKEN)
-//            this.profileAlignmentOptionsPanel.setEnabled(false);
-    }
-    
-    @Override
-    protected void updateSingle() {
-        super.updateSingle();
-        updateChart();
+	@Override
+	protected void updateSingle() {
+		super.updateSingle();
+		updateChart();
 
-    }
+	}
 
-    @Override
-    protected void updateMultiple() {
-        super.updateMultiple();
-        updateChart();
-    }
+	@Override
+	protected void updateMultiple() {
+		super.updateMultiple();
+		updateChart();
+	}
 
-    @Override
-    protected void updateNull() {
-        super.updateNull();
-        JFreeChart chart = ProfileChartFactory.createEmptyChart(type);
-        chartPanel.setChart(chart);
+	@Override
+	protected void updateNull() {
+		super.updateNull();
+		JFreeChart chart = ProfileChartFactory.createEmptyChart(type);
+		chartPanel.setChart(chart);
 
-    }
+	}
 
-    @Override
-    protected JFreeChart createPanelChartType(ChartOptions options) {
-        return new ProfileChartFactory(options).createProfileChart();
-    }
+	@Override
+	protected JFreeChart createPanelChartType(ChartOptions options) {
+		return new ProfileChartFactory(options).createProfileChart();
+	}
 
-    private void updateChart() {
-        ChartOptions options = makeOptions();
-        setChart(options);
-    }
+	private void updateChart() {
+		ChartOptions options = makeOptions();
+		setChart(options);
+	}
 
-    private ChartOptions makeOptions() {
+	private ChartOptions makeOptions() {
 
-        boolean normalised = profileAlignmentOptionsPanel.isNormalised();
-        ProfileAlignment alignment = normalised ? ProfileAlignment.LEFT : profileAlignmentOptionsPanel.getSelected();
-        // BorderTagObject tag = borderTagOptionsPanel.getSelected();
-        boolean showMarkers = profileMarkersOptionsPanel.showMarkers();
-        boolean hideProfiles = profileMarkersOptionsPanel.isShowNuclei();
+		boolean normalised = profileAlignmentOptionsPanel.isNormalised();
+		ProfileAlignment alignment = normalised ? ProfileAlignment.LEFT : profileAlignmentOptionsPanel.getSelected();
+		// BorderTagObject tag = borderTagOptionsPanel.getSelected();
+		boolean showMarkers = profileMarkersOptionsPanel.showMarkers();
+		boolean hideProfiles = profileMarkersOptionsPanel.isShowNuclei();
 
-        // log("Creating options: normalised: "+normalised);
+		// log("Creating options: normalised: "+normalised);
 
-        ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets())
-        		.setNormalised(normalised)
-                .setAlignment(alignment)
-                .setTag(Landmark.REFERENCE_POINT)
-                .setShowMarkers(showMarkers)
-                .setShowProfiles(hideProfiles)
-                .setSwatch(GlobalOptions.getInstance().getSwatch())
-                .setProfileType(type)
-                .setTarget(chartPanel)
-                .build();
-        return options;
-    }
+		ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets()).setNormalised(normalised)
+				.setAlignment(alignment).setTag(Landmark.REFERENCE_POINT).setShowMarkers(showMarkers)
+				.setShowProfiles(hideProfiles).setSwatch(GlobalOptions.getInstance().getSwatch()).setProfileType(type)
+				.setTarget(chartPanel).build();
+		return options;
+	}
+
+	@Override
+	public void profilesUpdated(List<IAnalysisDataset> datasets) {
+		refreshChartCache(datasets);
+	}
+
+	@Override
+	public void profilesUpdated(IAnalysisDataset dataset) {
+		refreshChartCache(dataset);
+	}
 }

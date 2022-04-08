@@ -31,70 +31,60 @@ import com.bmskinner.nuclear_morphology.gui.tabs.editing.SegmentsEditingPanel;
 
 /**
  * Tab pane; holding panels to edit datasets
+ * 
  * @author Ben Skinner
  *
  */
 @SuppressWarnings("serial")
 public class EditingDetailPanel extends DetailPanel {
-	
+
 	private static final Logger LOGGER = Logger.getLogger(EditingDetailPanel.class.getName());
-    
-    private static final String PANEL_TITLE_LBL = "Editing";
-    
-    private JTabbedPane tabPane;
 
-    public EditingDetailPanel(@NonNull InputSupplier context) {
-        super(context);
+	private static final String PANEL_TITLE_LBL = "Editing";
 
-        this.setLayout(new BorderLayout());
-        tabPane = new JTabbedPane();
-        this.add(tabPane, BorderLayout.CENTER);
+	private JTabbedPane tabPane;
 
-        DetailPanel cellDetailPanel = new IndividualCellDetailPanel(context);
-        DetailPanel segmentsEditingPanel = new SegmentsEditingPanel(context);
-        DetailPanel borderTagEditingPanel = new BorderTagEditingPanel(context);
+	public EditingDetailPanel(@NonNull InputSupplier context) {
+		super(context);
 
-        this.addSubPanel(cellDetailPanel);
-        this.addSubPanel(segmentsEditingPanel);
-        this.addSubPanel(borderTagEditingPanel);
+		this.setLayout(new BorderLayout());
+		tabPane = new JTabbedPane();
+		this.add(tabPane, BorderLayout.CENTER);
 
-        this.addSignalChangeListener(cellDetailPanel);
-        this.addSignalChangeListener(segmentsEditingPanel);
-        this.addSignalChangeListener(borderTagEditingPanel);
+		DetailPanel cellDetailPanel = new IndividualCellDetailPanel(context);
+		DetailPanel segmentsEditingPanel = new SegmentsEditingPanel(context);
+		DetailPanel borderTagEditingPanel = new BorderTagEditingPanel(context);
 
-        tabPane.addTab(cellDetailPanel.getPanelTitle(), cellDetailPanel);
+		this.addSignalChangeListener(cellDetailPanel);
+		this.addSignalChangeListener(segmentsEditingPanel);
+		this.addSignalChangeListener(borderTagEditingPanel);
 
-        /*
-         * Signals come from the segment panel to this container Signals can be
-         * sent to the segment panel Events come from the panel only
-         */
-        segmentsEditingPanel.addSignalChangeListener(this);
-        borderTagEditingPanel.addSignalChangeListener(this);
+		tabPane.addTab(cellDetailPanel.getPanelTitle(), cellDetailPanel);
 
-        tabPane.addTab("Segmentation", segmentsEditingPanel);
-        tabPane.addTab("Border tags", borderTagEditingPanel);
+		/*
+		 * Signals come from the segment panel to this container Signals can be sent to
+		 * the segment panel Events come from the panel only
+		 */
+		segmentsEditingPanel.addSignalChangeListener(this);
+		borderTagEditingPanel.addSignalChangeListener(this);
 
-    }
-    
-    @Override
-    public String getPanelTitle(){
-        return PANEL_TITLE_LBL;
-    }
+		tabPane.addTab("Segmentation", segmentsEditingPanel);
+		tabPane.addTab("Border tags", borderTagEditingPanel);
 
-    @Override
-    public void eventReceived(SignalChangeEvent event) {
-        // Swallow signals we don't need to pass onwards
-        if(event.type().equals(SignalChangeEvent.MERGE_SIGNALS_ACTION))
-        	return;
-        	
-        super.eventReceived(event);
-        LOGGER.finer("Editing panel heard signal: " + event.type());
-        
+	}
 
+	@Override
+	public String getPanelTitle() {
+		return PANEL_TITLE_LBL;
+	}
 
-        // Pass downwards if the signal was not generated internally
-        if (!this.getSubPanels().contains(event.getSource())) {
-           getSignalChangeEventHandler().fireSignalChangeEvent(event.type());
-        }
-    }
+	@Override
+	public void eventReceived(SignalChangeEvent event) {
+		// Swallow signals we don't need to pass onwards
+		if (event.type().equals(SignalChangeEvent.MERGE_SIGNALS_ACTION))
+			return;
+
+		super.eventReceived(event);
+
+	}
 }

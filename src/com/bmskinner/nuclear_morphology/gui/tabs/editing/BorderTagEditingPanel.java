@@ -42,7 +42,6 @@ import com.bmskinner.nuclear_morphology.gui.components.panels.BorderTagDualChart
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 import com.bmskinner.nuclear_morphology.gui.events.BorderTagEventListener;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
-import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent;
 import com.bmskinner.nuclear_morphology.visualisation.charts.AbstractChartFactory;
 import com.bmskinner.nuclear_morphology.visualisation.charts.ProfileChartFactory;
 import com.bmskinner.nuclear_morphology.visualisation.options.ChartOptions;
@@ -50,187 +49,168 @@ import com.bmskinner.nuclear_morphology.visualisation.options.ChartOptionsBuilde
 
 @SuppressWarnings("serial")
 public class BorderTagEditingPanel extends AbstractEditingPanel implements ActionListener, BorderTagEventListener {
-	
+
 	private static final Logger LOGGER = Logger.getLogger(BorderTagEditingPanel.class.getName());
 
-    private static final String PANEL_TITLE_LBL = "Border tags";
-    
-    private JPanel buttonsPanel;
+	private static final String PANEL_TITLE_LBL = "Border tags";
 
-    private JButton ruleSetButton;
+	private JPanel buttonsPanel;
 
-    private static final String STR_SHOW_RULESETS = "Rulesets";
+	private JButton ruleSetButton;
 
-    private transient BorderTagDualChartPanel dualPanel;
+	private static final String STR_SHOW_RULESETS = "Rulesets";
 
-    public BorderTagEditingPanel(@NonNull InputSupplier context) {
+	private transient BorderTagDualChartPanel dualPanel;
 
-        super(context, PANEL_TITLE_LBL);
-        this.setLayout(new BorderLayout());
+	public BorderTagEditingPanel(@NonNull InputSupplier context) {
 
-        buttonsPanel = makeButtonPanel();
-        this.add(buttonsPanel, BorderLayout.NORTH);
-        setButtonsEnabled(false);
+		super(context, PANEL_TITLE_LBL);
+		this.setLayout(new BorderLayout());
 
-        dualPanel = new BorderTagDualChartPanel();
-        dualPanel.addBorderTagEventListener(this);
+		buttonsPanel = makeButtonPanel();
+		this.add(buttonsPanel, BorderLayout.NORTH);
+		setButtonsEnabled(false);
 
-        JPanel chartPanel = new JPanel();
-        chartPanel.setLayout(new GridBagLayout());
+		dualPanel = new BorderTagDualChartPanel();
+		dualPanel.addBorderTagEventListener(this);
 
-        GridBagConstraints c = new GridBagConstraints();
-        c.anchor = GridBagConstraints.EAST;
-        c.gridx = 0;
-        c.gridy = 0;
-        c.gridwidth = 1;
-        c.gridheight = 1;
-        c.fill = GridBagConstraints.BOTH; // reset to default
-        c.weightx = 1.0;
-        c.weighty = 0.7;
+		JPanel chartPanel = new JPanel();
+		chartPanel.setLayout(new GridBagLayout());
 
-        chartPanel.add(dualPanel.getMainPanel(), c);
-        c.weighty = 0.3;
-        c.gridx = 0;
-        c.gridy = 1;
-        chartPanel.add(dualPanel.getRangePanel(), c);
+		GridBagConstraints c = new GridBagConstraints();
+		c.anchor = GridBagConstraints.EAST;
+		c.gridx = 0;
+		c.gridy = 0;
+		c.gridwidth = 1;
+		c.gridheight = 1;
+		c.fill = GridBagConstraints.BOTH; // reset to default
+		c.weightx = 1.0;
+		c.weighty = 0.7;
 
-        this.add(chartPanel, BorderLayout.CENTER);
+		chartPanel.add(dualPanel.getMainPanel(), c);
+		c.weighty = 0.3;
+		c.gridx = 0;
+		c.gridy = 1;
+		chartPanel.add(dualPanel.getRangePanel(), c);
 
-    }
-    
-    public void setButtonsEnabled(boolean b) {
-        ruleSetButton.setEnabled(b);
-    }
+		this.add(chartPanel, BorderLayout.CENTER);
 
-    private JPanel makeButtonPanel() {
+	}
 
-        JPanel panel = new JPanel(new FlowLayout()) {
-            @Override
-            public void setEnabled(boolean b) {
-                super.setEnabled(b);
-                for (Component c : this.getComponents()) {
-                    c.setEnabled(b);
-                }
-            }
-        };
+	public void setButtonsEnabled(boolean b) {
+		ruleSetButton.setEnabled(b);
+	}
 
-        JLabel text = new JLabel("Click a point to set as a border tag");
-        panel.add(text);
+	private JPanel makeButtonPanel() {
 
-        ruleSetButton = new JButton(STR_SHOW_RULESETS);
-        ruleSetButton.addActionListener(this);
+		JPanel panel = new JPanel(new FlowLayout()) {
+			@Override
+			public void setEnabled(boolean b) {
+				super.setEnabled(b);
+				for (Component c : this.getComponents()) {
+					c.setEnabled(b);
+				}
+			}
+		};
+
+		JLabel text = new JLabel("Click a point to set as a border tag");
+		panel.add(text);
+
+		ruleSetButton = new JButton(STR_SHOW_RULESETS);
+		ruleSetButton.addActionListener(this);
 //        panel.add(ruleSetButton); //TODO: enable once rulesets are working again
 
-        return panel;
-    }
+		return panel;
+	}
 
-    @Override
-    protected synchronized void updateSingle() {
+	@Override
+	protected synchronized void updateSingle() {
 
-        setButtonsEnabled(true);
+		setButtonsEnabled(true);
 
-        boolean normaliseProfile = false; // cannot be normalised because we
-                                          // must get absolute indexes
+		boolean normaliseProfile = false; // cannot be normalised because we
+											// must get absolute indexes
 
-        ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets())
-        		.setNormalised(normaliseProfile)
-                .setAlignment(ProfileAlignment.LEFT)
-                .setTag(Landmark.REFERENCE_POINT)
-                .setShowMarkers(true)
-                .setProfileType(ProfileType.ANGLE)
-                .setShowProfiles(false)
-                .setShowIQR(false)
-                .setShowPoints(true)
-                .setSwatch(GlobalOptions.getInstance().getSwatch())
-                .setShowAnnotations(false)
-                .setShowXAxis(false)
-                .setShowYAxis(false)
-                .setTarget(dualPanel.getMainPanel())
-                .build();
+		ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets()).setNormalised(normaliseProfile)
+				.setAlignment(ProfileAlignment.LEFT).setTag(Landmark.REFERENCE_POINT).setShowMarkers(true)
+				.setProfileType(ProfileType.ANGLE).setShowProfiles(false).setShowIQR(false).setShowPoints(true)
+				.setSwatch(GlobalOptions.getInstance().getSwatch()).setShowAnnotations(false).setShowXAxis(false)
+				.setShowYAxis(false).setTarget(dualPanel.getMainPanel()).build();
 
-        JFreeChart chart = getChart(options);
+		// We can't set the chart using the normal method because
+		// we need both charts to be created and in scope
+//		JFreeChart chart = getChart(options);
 
-        /*
-         * Create the chart for the range panel
-         */
+		/*
+		 * Create the chart for the range panel
+		 */
 
-        ChartOptions rangeOptions = new ChartOptionsBuilder().setDatasets(getDatasets()).setNormalised(normaliseProfile)
-                .setAlignment(ProfileAlignment.LEFT).setTag(Landmark.REFERENCE_POINT).setShowMarkers(true)
-                .setProfileType(ProfileType.ANGLE).setShowProfiles(false).setShowIQR(false).setSwatch(GlobalOptions.getInstance().getSwatch())
-                .setShowPoints(false).setShowAnnotations(false).setShowXAxis(false).setShowYAxis(false)
-                .setTarget(dualPanel.getRangePanel()).build();
+		ChartOptions rangeOptions = new ChartOptionsBuilder().setDatasets(getDatasets()).setNormalised(normaliseProfile)
+				.setAlignment(ProfileAlignment.LEFT).setTag(Landmark.REFERENCE_POINT).setShowMarkers(true)
+				.setProfileType(ProfileType.ANGLE).setShowProfiles(false).setShowIQR(false)
+				.setSwatch(GlobalOptions.getInstance().getSwatch()).setShowPoints(false).setShowAnnotations(false)
+				.setShowXAxis(false).setShowYAxis(false).setTarget(dualPanel.getRangePanel()).build();
 
-        JFreeChart rangeChart = getChart(rangeOptions);
+//		JFreeChart rangeChart = getChart(rangeOptions);
 
-        dualPanel.setCharts(chart, rangeChart);
-        dualPanel.createBorderTagPopup(activeDataset());
+//		dualPanel.setCharts(chart, rangeChart);
+		dualPanel.createBorderTagPopup(activeDataset());
 
-    }
+	}
 
-    @Override
-    protected synchronized void updateMultiple() {
-        JFreeChart mainChart = AbstractChartFactory.createMultipleDatasetEmptyChart();
-        JFreeChart rangeChart = AbstractChartFactory.createMultipleDatasetEmptyChart();
-        dualPanel.setCharts(mainChart, rangeChart);
-        setButtonsEnabled(false);
-    }
+	@Override
+	protected synchronized void updateMultiple() {
+		JFreeChart mainChart = AbstractChartFactory.createMultipleDatasetEmptyChart();
+		JFreeChart rangeChart = AbstractChartFactory.createMultipleDatasetEmptyChart();
+		dualPanel.setCharts(mainChart, rangeChart);
+		setButtonsEnabled(false);
+	}
 
-    @Override
-    protected synchronized void updateNull() {
-        setButtonsEnabled(false);
-        dualPanel.setCharts(AbstractChartFactory.createEmptyChart(), AbstractChartFactory.createEmptyChart());
-    }
+	@Override
+	protected synchronized void updateNull() {
+		setButtonsEnabled(false);
+		dualPanel.setCharts(AbstractChartFactory.createEmptyChart(), AbstractChartFactory.createEmptyChart());
+	}
 
-    @Override
-    public void setChartsAndTablesLoading() {
-        super.setChartsAndTablesLoading();
-        dualPanel.setCharts(AbstractChartFactory.createLoadingChart(), AbstractChartFactory.createLoadingChart());
-    }
+	@Override
+	public void setChartsAndTablesLoading() {
+		super.setChartsAndTablesLoading();
+		dualPanel.setCharts(AbstractChartFactory.createLoadingChart(), AbstractChartFactory.createLoadingChart());
+	}
 
-    @Override
-    protected JFreeChart createPanelChartType(ChartOptions options) {
-        return new ProfileChartFactory(options).createProfileChart();
-    }
+	@Override
+	protected JFreeChart createPanelChartType(ChartOptions options) {
+		return new ProfileChartFactory(options).createProfileChart();
+	}
 
-    @Override
-    public void actionPerformed(ActionEvent e) {
+	@Override
+	public void actionPerformed(ActionEvent e) {
 
-        if (e.getSource() == ruleSetButton) {
-            RulesetDialog d = new RulesetDialog(activeDataset());
-            d.addInterfaceEventListener(this);
-            d.addDatasetEventListener(this);
-            d.setVisible(true);
-        }
+		if (e.getSource() == ruleSetButton) {
+			RulesetDialog d = new RulesetDialog(activeDataset());
+			d.addInterfaceEventListener(this);
+			d.addDatasetEventListener(this);
+			d.setVisible(true);
+		}
 
-    }
+	}
 
-    @Override
-    public void eventReceived(InterfaceEvent event) {
-        super.eventReceived(event);// Pass messages upwards
+	@Override
+	public void eventReceived(DatasetEvent event) {
+		super.eventReceived(event);
 
-        if (event.getSource() instanceof RulesetDialog) {
-            LOGGER.fine("Heard interface event");
-            getInterfaceEventHandler().fireInterfaceEvent(event.method());
-        }
+		if (event.getSource() instanceof RulesetDialog) {
+			LOGGER.fine("Heard dataset event");
+			this.getDatasetEventHandler().fireDatasetEvent(event.method(), event.getDatasets());
+		}
+	}
 
-    }
+	@Override
+	public void borderTagEventReceived(BorderTagEvent event) {
+		if (event.getSource() instanceof JMenuItem) {
+			setBorderTagAction(event.getTag(), event.getIndex());
+		}
 
-    @Override
-    public void eventReceived(DatasetEvent event) {
-        super.eventReceived(event);
-
-        if (event.getSource() instanceof RulesetDialog) {
-            LOGGER.fine("Heard dataset event");
-            this.getDatasetEventHandler().fireDatasetEvent(event.method(), event.getDatasets());
-        }
-    }
-
-    @Override
-    public void borderTagEventReceived(BorderTagEvent event) {
-        if (event.getSource() instanceof JMenuItem) {
-            setBorderTagAction(event.getTag(), event.getIndex());
-        }
-
-    }
+	}
 
 }

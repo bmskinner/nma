@@ -50,83 +50,86 @@ import com.bmskinner.nuclear_morphology.visualisation.options.TableOptions;
  */
 @SuppressWarnings("serial")
 public abstract class BoxplotsTabPanel extends DetailPanel implements ActionListener {
-	
+
 	private static final Logger LOGGER = Logger.getLogger(BoxplotsTabPanel.class.getName());
 
-    private static final String PANEL_TITLE_LBL = "Violin plots";
-    protected Map<String, ExportableChartPanel> chartPanels = new HashMap<>();
+	private static final String PANEL_TITLE_LBL = "Violin plots";
+	protected Map<String, ExportableChartPanel> chartPanels = new HashMap<>();
 
-    protected JPanel mainPanel;   // hold the charts
-    protected JPanel headerPanel; // hold buttons
+	protected JPanel mainPanel; // hold the charts
+	protected JPanel headerPanel; // hold buttons
 
-    protected JScrollPane scrollPane; // hold the main panel
+	protected JScrollPane scrollPane; // hold the main panel
 
-    protected String component;
+	protected String component;
 
-    /**
-     * Create with the default panel title label
-     * @param context
-     * @param component
-     */
-    public BoxplotsTabPanel(@NonNull InputSupplier context, String component) {
-    	this(context, component, PANEL_TITLE_LBL);
-    }
-    
-    /**
-     * Create with a custom panel title label
-     * @param context
-     * @param component
-     */
-    public BoxplotsTabPanel(@NonNull InputSupplier context, String component, String panelTitle) {
-    	super(context, panelTitle);
-        this.component = component;
-        this.setLayout(new BorderLayout());
+	/**
+	 * Create with the default panel title label
+	 * 
+	 * @param context
+	 * @param component
+	 */
+	public BoxplotsTabPanel(@NonNull InputSupplier context, String component) {
+		this(context, component, PANEL_TITLE_LBL);
+	}
 
-        try {
-            mainPanel = new JPanel();
-            mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.X_AXIS));
+	/**
+	 * Create with a custom panel title label
+	 * 
+	 * @param context
+	 * @param component
+	 */
+	public BoxplotsTabPanel(@NonNull InputSupplier context, String component, String panelTitle) {
+		super(context, panelTitle);
+		this.component = component;
+		this.setLayout(new BorderLayout());
 
-            headerPanel = new JPanel(new FlowLayout());
+		try {
+			mainPanel = new JPanel();
+			mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.X_AXIS));
 
-            this.add(headerPanel, BorderLayout.NORTH);
+			headerPanel = new JPanel(new FlowLayout());
 
-            // add the scroll pane to the tab
-            scrollPane = new JScrollPane(mainPanel);
-            
-            Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-            Dimension preferredFloatingDimension = new Dimension( (int) (screenSize.getWidth()*0.25), (int) (screenSize.getHeight()*0.25) );
-            scrollPane.setPreferredSize(preferredFloatingDimension);
-            
-            this.add(scrollPane, BorderLayout.CENTER);
+			this.add(headerPanel, BorderLayout.NORTH);
 
-            this.setEnabled(false);
-        } catch (Exception e) {
-        	LOGGER.log(Loggable.STACK, "Error creating panel", e);
-        }
-    }
-    
-    @Override
-    public synchronized void setChartsAndTablesLoading() {
-        super.setChartsAndTablesLoading();
-        for (ExportableChartPanel p : chartPanels.values()) {
-            p.setChart(AbstractChartFactory.createLoadingChart());
-        }
+			// add the scroll pane to the tab
+			scrollPane = new JScrollPane(mainPanel);
 
-    }
+			Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+			Dimension preferredFloatingDimension = new Dimension((int) (screenSize.getWidth() * 0.25),
+					(int) (screenSize.getHeight() * 0.25));
+			scrollPane.setPreferredSize(preferredFloatingDimension);
 
-    @Override
-    protected synchronized JFreeChart createPanelChartType(@NonNull ChartOptions options) {
-    	return new ViolinChartFactory(options).createStatisticPlot(component);
-    }
+			this.add(scrollPane, BorderLayout.CENTER);
 
-    @Override
-    protected synchronized TableModel createPanelTableType(@NonNull TableOptions options) {
-        return null;
-    }
+			this.setEnabled(false);
+		} catch (Exception e) {
+			LOGGER.log(Loggable.STACK, "Error creating panel", e);
+		}
+	}
 
-    @Override
-    public void actionPerformed(ActionEvent e) {
-    	this.update(getDatasets());
-    }
+	@Override
+	public synchronized void setChartsAndTablesLoading() {
+		super.setChartsAndTablesLoading();
+		for (ExportableChartPanel p : chartPanels.values()) {
+			p.setChart(AbstractChartFactory.createLoadingChart());
+		}
+
+	}
+
+	@Override
+	protected synchronized JFreeChart createPanelChartType(@NonNull ChartOptions options) {
+		return new ViolinChartFactory(options).createStatisticPlot(component);
+	}
+
+	@Override
+	protected synchronized TableModel createPanelTableType(@NonNull TableOptions options) {
+		return null;
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		this.update(getDatasets());
+	}
 
 }

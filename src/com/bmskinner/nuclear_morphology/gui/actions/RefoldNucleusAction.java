@@ -25,10 +25,8 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.ConsensusAveragingMethod;
-import com.bmskinner.nuclear_morphology.analysis.nucleus.ProfileRefoldMethod;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.core.EventHandler;
-import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -38,110 +36,78 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  * parameters
  */
 public class RefoldNucleusAction extends SingleDatasetResultAction {
-	
+
 	private static final Logger LOGGER = Logger.getLogger(RefoldNucleusAction.class.getName());
 
-    private static final @NonNull String PROGRESS_LBL = "Refolding";
-    private static final int PROGRESS_BAR_LENGTH = 100;
+	private static final @NonNull String PROGRESS_LBL = "Refolding";
+	private static final int PROGRESS_BAR_LENGTH = 100;
 
-    /**
-     * Refold the given selected dataset
-     */
-    public RefoldNucleusAction(@NonNull IAnalysisDataset dataset, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh, CountDownLatch doneSignal) {
-        super(dataset, PROGRESS_LBL, acceptor, eh);
-        this.setLatch(doneSignal);
-    }
-    
-    public RefoldNucleusAction(@NonNull List<IAnalysisDataset> list, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh, CountDownLatch doneSignal) {
-        super(list, PROGRESS_LBL, acceptor, eh);
-        this.setLatch(doneSignal);
-    }
+	/**
+	 * Refold the given selected dataset
+	 */
+	public RefoldNucleusAction(@NonNull IAnalysisDataset dataset, @NonNull final ProgressBarAcceptor acceptor,
+			@NonNull final EventHandler eh, CountDownLatch doneSignal) {
+		super(dataset, PROGRESS_LBL, acceptor, eh);
+		this.setLatch(doneSignal);
+	}
 
-    @Override
-    public void run() {
-        this.setProgressBarIndeterminate();
-        
-        try {
+	public RefoldNucleusAction(@NonNull List<IAnalysisDataset> list, @NonNull final ProgressBarAcceptor acceptor,
+			@NonNull final EventHandler eh, CountDownLatch doneSignal) {
+		super(list, PROGRESS_LBL, acceptor, eh);
+		this.setLatch(doneSignal);
+	}
+
+	@Override
+	public void run() {
+		this.setProgressBarIndeterminate();
+
+		try {
 //            boolean override = GlobalOptions.getInstance().getBoolean(GlobalOptions.REFOLD_OVERRIDE_KEY);
 
-            IAnalysisMethod m = new ConsensusAveragingMethod(dataset);
-            int progressLength = PROGRESS_BAR_LENGTH;
-            // The averaging method does not work for nuclei that are round, or have extreme variability. 
-            // In these cases, or if the program config file has been set to override, use the old profile method.
+			IAnalysisMethod m = new ConsensusAveragingMethod(dataset);
+			int progressLength = PROGRESS_BAR_LENGTH;
+			// The averaging method does not work for nuclei that are round, or have extreme
+			// variability.
+			// In these cases, or if the program config file has been set to override, use
+			// the old profile method.
 //            if (override){
 //                m = new ProfileRefoldMethod(dataset);
 //                progressLength = ProfileRefoldMethod.MAX_ITERATIONS;
 //            }
 
-            
-            worker = new DefaultAnalysisWorker(m, progressLength);
-            worker.addPropertyChangeListener(this);
+			worker = new DefaultAnalysisWorker(m, progressLength);
+			worker.addPropertyChangeListener(this);
 
-            this.setProgressMessage(PROGRESS_LBL + ": " + dataset.getName());
-            ThreadManager.getInstance().submit(worker);
+			this.setProgressMessage(PROGRESS_LBL + ": " + dataset.getName());
+			ThreadManager.getInstance().submit(worker);
 
-        } catch (Exception e1) {
-            this.cancel();
-            LOGGER.warning("Error refolding nucleus");
-            LOGGER.log(Loggable.STACK, "Error refolding nucleus", e1);
-        }
-    }
-    
-    /**
-     * Choose the type of consensus building method based on the nucleus type
-     * @param t
-     * @return
-     * @throws Exception 
-     */
-//    private IAnalysisMethod chooseMethod(NucleusType t) throws Exception {
-//    	switch(t){
-//        case ROUND: {
-//            return new ProfileRefoldMethod(dataset, CurveRefoldingMode.FAST);
-//        }
-//        
-//        default: {
-//            return new ConsensusAveragingMethod(dataset);
-//        }
-//    }
-//    }
-    
-    /**
-     * Choose the length of the progress bar based on the nucleus type
-     * (reflects the method chosen in chooseMethod()
-     * @param t
-     * @return
-     */
-//    private int chooseProgressLength(NucleusType t) {
-//    	switch(t){
-//        case ROUND:{
-//            return CurveRefoldingMode.FAST.maxIterations();
-//        }
-//        
-//        default: {
-//            return PROGRESS_BAR_LENGTH;
-//        }
-//    	}
-//    }
+		} catch (Exception e1) {
+			this.cancel();
+			LOGGER.warning("Error refolding nucleus");
+			LOGGER.log(Loggable.STACK, "Error refolding nucleus", e1);
+		}
+	}
 
-    @Override
-    public void finished() {
+	@Override
+	public void finished() {
 
-    	Runnable r = () -> {
+		Runnable r = () -> {
 
-    		// if no list was provided, or no more entries remain,
-    		// call the finish
-    		if (!hasRemainingDatasetsToProcess()) {
-    			countdownLatch();
-    			RefoldNucleusAction.super.finished();
+			// if no list was provided, or no more entries remain,
+			// call the finish
+			if (!hasRemainingDatasetsToProcess()) {
+				countdownLatch();
+				RefoldNucleusAction.super.finished();
 
-    		} else {
-    			// otherwise analyse the next item in the list
-    			cancel(); // remove progress bar
-    			Runnable task = new RefoldNucleusAction(getRemainingDatasetsToProcess(), progressAcceptors.get(0), eh, getLatch().get());
-    			task.run();
-    		}
-    	};
-    	new Thread(r).start();
-    }
+			} else {
+				// otherwise analyse the next item in the list
+				cancel(); // remove progress bar
+				Runnable task = new RefoldNucleusAction(getRemainingDatasetsToProcess(), progressAcceptors.get(0), eh,
+						getLatch().get());
+				task.run();
+			}
+		};
+		new Thread(r).start();
+	}
 
 }

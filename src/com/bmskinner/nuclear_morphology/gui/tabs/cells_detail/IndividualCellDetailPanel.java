@@ -40,157 +40,149 @@ import com.bmskinner.nuclear_morphology.visualisation.options.TableOptions;
 
 @SuppressWarnings("serial")
 public class IndividualCellDetailPanel extends DetailPanel {
-	
+
 	private static final Logger LOGGER = Logger.getLogger(IndividualCellDetailPanel.class.getName());
-	
-    private JTabbedPane tabPane;
 
-    private static final String PANEL_TITLE_LBL = "Cells";
+	private JTabbedPane tabPane;
 
-    /** Cells in the active dataset */
-    protected CellsListPanel       cellsListPanel;
-        
-    /** View and cell profiles */
-    protected CellProfilesPanel   cellBorderTagPanel;
-    
-    /** View and modify cell landmarks */
-    protected CellOutlinePanel     outlinePanel; 
-    
-    /** View cell info */
-    protected CellStatsPanel       cellStatsPanel;
-    
-    /** Choose image channels to display */
-    protected ComponentListPanel   signalListPanel;
-    
-    /** View pairwise distances for signals */
-    protected CellSignalStatsPanel cellsignalStatsPanel;
-    
-    /** Track the cell on display */
-    private CellViewModel model = new CellViewModel(null, null);
+	private static final String PANEL_TITLE_LBL = "Cells";
 
-    public IndividualCellDetailPanel(@NonNull InputSupplier context) {
+	/** Cells in the active dataset */
+	protected CellsListPanel cellsListPanel;
 
-        super(context);
-        try {
+	/** View and cell profiles */
+	protected CellProfilesPanel cellBorderTagPanel;
 
-            createSubPanels(context);
+	/** View and modify cell landmarks */
+	protected CellOutlinePanel outlinePanel;
 
-            this.setLayout(new BorderLayout());
-            JPanel westPanel = createCellandSignalListPanels(context);
-            this.addSubPanel(cellStatsPanel);
-            this.addSubPanel(cellBorderTagPanel);
-            this.addSubPanel(outlinePanel);
-            this.addSubPanel(cellsListPanel);
-            this.addSubPanel(signalListPanel);
-            this.addSubPanel(cellsignalStatsPanel);
+	/** View cell info */
+	protected CellStatsPanel cellStatsPanel;
 
-            
-            tabPane = new JTabbedPane(JTabbedPane.LEFT);
-            tabPane.add(cellStatsPanel.getPanelTitle(), cellStatsPanel);
-            tabPane.add(cellBorderTagPanel.getPanelTitle(), cellBorderTagPanel);
-            
-            tabPane.add(outlinePanel.getPanelTitle(), outlinePanel);
-            tabPane.add(cellsignalStatsPanel.getPanelTitle(), cellsignalStatsPanel);
-            tabPane.setSelectedComponent(outlinePanel);
-            
-            JSplitPane sp = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
-            sp.setLeftComponent(westPanel);
-            sp.setRightComponent(tabPane);
-            sp.setResizeWeight(0.25);
-            add(sp, BorderLayout.CENTER);
+	/** Choose image channels to display */
+	protected ComponentListPanel signalListPanel;
 
-        } catch (Exception e) {
-        	LOGGER.log(Level.WARNING, "Error creating cell detail panel");
-            LOGGER.log(Loggable.STACK, "Error creating cell detail panel", e);
-        }
-    }
-    
-    
-    @Override
-    public String getPanelTitle(){
-        return PANEL_TITLE_LBL;
-    }
+	/** View pairwise distances for signals */
+	protected CellSignalStatsPanel cellsignalStatsPanel;
 
-    private void createSubPanels(@NonNull InputSupplier context) {
-        cellBorderTagPanel = new CellProfilesPanel(context, model);
-        outlinePanel = new CellOutlinePanel(context, model); // the outline of the cell
-                                                    // and detected objects
-        cellStatsPanel = new CellStatsPanel(context, model); // the stats table
-        cellsignalStatsPanel = new CellSignalStatsPanel(context, model);
+	/** Track the cell on display */
+	private CellViewModel model = new CellViewModel(null, null);
 
-        model.addView(cellBorderTagPanel);
-        model.addView(outlinePanel);
-        model.addView(cellStatsPanel);
-        model.addView(cellsignalStatsPanel);
-    }
+	public IndividualCellDetailPanel(@NonNull InputSupplier context) {
 
-    private JPanel createCellandSignalListPanels(@NonNull InputSupplier context) {
-        JPanel panel = new JPanel(new GridBagLayout());
+		super(context);
+		try {
 
-        GridBagConstraints constraints = new GridBagConstraints();
-        constraints.fill = GridBagConstraints.BOTH;
-        constraints.gridx = 0;
-        constraints.gridy = 0;
-        constraints.gridheight = 2;
-        constraints.gridwidth = 1;
-        constraints.weightx = 0.5;
-        constraints.weighty = 0.6;
-        constraints.anchor = GridBagConstraints.CENTER;
+			createSubPanels(context);
 
-        cellsListPanel = new CellsListPanel(context, model);
-        model.addView(cellsListPanel);
-        cellsListPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
-        panel.add(cellsListPanel, constraints);
+			this.setLayout(new BorderLayout());
+			JPanel westPanel = createCellandSignalListPanels(context);
 
-        constraints.gridx = 0;
-        constraints.gridy = 2;
-        constraints.gridheight = 2;
-        constraints.gridwidth = 1;
-        constraints.weightx = 0.5;
-        constraints.weighty = 0.4;
-        signalListPanel = new ComponentListPanel(context, model);
-        model.addView(signalListPanel);
-        signalListPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
-        panel.add(signalListPanel, constraints);
+			tabPane = new JTabbedPane(JTabbedPane.LEFT);
+			tabPane.add(cellStatsPanel.getPanelTitle(), cellStatsPanel);
+			tabPane.add(cellBorderTagPanel.getPanelTitle(), cellBorderTagPanel);
 
-        return panel;
-    }
+			tabPane.add(outlinePanel.getPanelTitle(), outlinePanel);
+			tabPane.add(cellsignalStatsPanel.getPanelTitle(), cellsignalStatsPanel);
+			tabPane.setSelectedComponent(outlinePanel);
 
-    @Override
-    protected void updateSingle() {
+			JSplitPane sp = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+			sp.setLeftComponent(westPanel);
+			sp.setRightComponent(tabPane);
+			sp.setResizeWeight(0.25);
+			add(sp, BorderLayout.CENTER);
 
-        if (model.hasCell() && !activeDataset().getCollection().containsExact(model.getCell())) {
-            model.setCell(null);
-        }
-    }
+		} catch (Exception e) {
+			LOGGER.log(Level.WARNING, "Error creating cell detail panel");
+			LOGGER.log(Loggable.STACK, "Error creating cell detail panel", e);
+		}
+	}
 
-    @Override
-    protected void updateMultiple() {
-        updateNull();
-    }
+	@Override
+	public String getPanelTitle() {
+		return PANEL_TITLE_LBL;
+	}
 
-    @Override
-    protected void updateNull() {
-        model.setCell(null);
-        model.setComponent(null);
-    }
+	private void createSubPanels(@NonNull InputSupplier context) {
+		cellBorderTagPanel = new CellProfilesPanel(context, model);
+		outlinePanel = new CellOutlinePanel(context, model); // the outline of the cell
+		// and detected objects
+		cellStatsPanel = new CellStatsPanel(context, model); // the stats table
+		cellsignalStatsPanel = new CellSignalStatsPanel(context, model);
 
-    @Override
-    protected JFreeChart createPanelChartType(@NonNull ChartOptions options) {
-        return null;
-    }
+		model.addView(cellBorderTagPanel);
+		model.addView(outlinePanel);
+		model.addView(cellStatsPanel);
+		model.addView(cellsignalStatsPanel);
+	}
 
-    @Override
-    protected TableModel createPanelTableType(@NonNull TableOptions options) {
-        return null;
-    }
+	private JPanel createCellandSignalListPanels(@NonNull InputSupplier context) {
+		JPanel panel = new JPanel(new GridBagLayout());
 
-    @Override
-    public void eventReceived(SignalChangeEvent event) {
-        if (event.type().equals(SignalChangeEvent.SIGNAL_COLOUR_CHANGE)) {
-            model.updateViews();
-        }
+		GridBagConstraints constraints = new GridBagConstraints();
+		constraints.fill = GridBagConstraints.BOTH;
+		constraints.gridx = 0;
+		constraints.gridy = 0;
+		constraints.gridheight = 2;
+		constraints.gridwidth = 1;
+		constraints.weightx = 0.5;
+		constraints.weighty = 0.6;
+		constraints.anchor = GridBagConstraints.CENTER;
 
-    }
+		cellsListPanel = new CellsListPanel(context, model);
+		model.addView(cellsListPanel);
+		cellsListPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
+		panel.add(cellsListPanel, constraints);
+
+		constraints.gridx = 0;
+		constraints.gridy = 2;
+		constraints.gridheight = 2;
+		constraints.gridwidth = 1;
+		constraints.weightx = 0.5;
+		constraints.weighty = 0.4;
+		signalListPanel = new ComponentListPanel(context, model);
+		model.addView(signalListPanel);
+		signalListPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
+		panel.add(signalListPanel, constraints);
+
+		return panel;
+	}
+
+	@Override
+	protected void updateSingle() {
+
+		if (model.hasCell() && !activeDataset().getCollection().containsExact(model.getCell())) {
+			model.setCell(null);
+		}
+	}
+
+	@Override
+	protected void updateMultiple() {
+		updateNull();
+	}
+
+	@Override
+	protected void updateNull() {
+		model.setCell(null);
+		model.setComponent(null);
+	}
+
+	@Override
+	protected JFreeChart createPanelChartType(@NonNull ChartOptions options) {
+		return null;
+	}
+
+	@Override
+	protected TableModel createPanelTableType(@NonNull TableOptions options) {
+		return null;
+	}
+
+	@Override
+	public void eventReceived(SignalChangeEvent event) {
+		if (event.type().equals(SignalChangeEvent.SIGNAL_COLOUR_CHANGE)) {
+			model.updateViews();
+		}
+
+	}
 
 }

@@ -30,100 +30,105 @@ import com.bmskinner.nuclear_morphology.core.DatasetListManager;
 import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
-import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
+import com.bmskinner.nuclear_morphology.gui.events.revamp.UIController;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
- * Launch a profiling action that will create object profiles, and automatically detect tags 
- * using the built-in rules
+ * Launch a profiling action that will create object profiles, and automatically
+ * detect tags using the built-in rules
+ * 
  * @author ben
  *
  */
 public class RunProfilingAction extends SingleDatasetResultAction {
-	
+
 	private static final Logger LOGGER = Logger.getLogger(RunProfilingAction.class.getName());
-	
+
 	private static final @NonNull String PROGRESS_BAR_LABEL = "Profiling";
 
-    public RunProfilingAction(@NonNull final IAnalysisDataset dataset, int downFlag, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh) {
-        super(dataset, PROGRESS_BAR_LABEL, acceptor, eh, downFlag);
-    }
+	public RunProfilingAction(@NonNull final IAnalysisDataset dataset, int downFlag,
+			@NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh) {
+		super(dataset, PROGRESS_BAR_LABEL, acceptor, eh, downFlag);
+	}
 
-    public RunProfilingAction(@NonNull final List<IAnalysisDataset> list, int downFlag, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh) {
-        super(list, PROGRESS_BAR_LABEL, acceptor, eh, downFlag);
-    }
+	public RunProfilingAction(@NonNull final List<IAnalysisDataset> list, int downFlag,
+			@NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh) {
+		super(list, PROGRESS_BAR_LABEL, acceptor, eh, downFlag);
+	}
 
-    public RunProfilingAction(@NonNull final IAnalysisDataset dataset, int downFlag, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh, CountDownLatch latch) {
-        super(dataset, PROGRESS_BAR_LABEL, acceptor, eh, downFlag);
-        this.setLatch(latch);
+	public RunProfilingAction(@NonNull final IAnalysisDataset dataset, int downFlag,
+			@NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh, CountDownLatch latch) {
+		super(dataset, PROGRESS_BAR_LABEL, acceptor, eh, downFlag);
+		this.setLatch(latch);
 
-    }
+	}
 
-    public RunProfilingAction(@NonNull final List<IAnalysisDataset> list, int downFlag, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh, CountDownLatch latch) {
-        super(list, PROGRESS_BAR_LABEL, acceptor, eh, downFlag);
-        this.setLatch(latch);
+	public RunProfilingAction(@NonNull final List<IAnalysisDataset> list, int downFlag,
+			@NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh, CountDownLatch latch) {
+		super(list, PROGRESS_BAR_LABEL, acceptor, eh, downFlag);
+		this.setLatch(latch);
 
-    }
+	}
 
-    public void run() {
-        runNewAnalysis();
-    }
+	@Override
+	public void run() {
+		runNewAnalysis();
+	}
 
-    private void runNewAnalysis() {
-        try {
-            String message = "Profiling: " + dataset.getName();
-            LOGGER.fine("Beginning profliling action");
+	private void runNewAnalysis() {
+		try {
+			String message = "Profiling: " + dataset.getName();
+			LOGGER.fine("Beginning profliling action");
 
-            this.setProgressMessage(message);
-            IAnalysisMethod method = new DatasetProfilingMethod(dataset);
-            worker = new DefaultAnalysisWorker(method);
+			this.setProgressMessage(message);
+			IAnalysisMethod method = new DatasetProfilingMethod(dataset);
+			worker = new DefaultAnalysisWorker(method);
 
-            worker.addPropertyChangeListener(this);
+			worker.addPropertyChangeListener(this);
 
-            ThreadManager.getInstance().submit(worker);
-        } catch (Exception e) {
-            this.cancel();
-            LOGGER.log(Loggable.STACK, "Error in morphology analysis", e);
-        }
-    }
+			ThreadManager.getInstance().submit(worker);
+		} catch (Exception e) {
+			this.cancel();
+			LOGGER.log(Loggable.STACK, "Error in morphology analysis", e);
+		}
+	}
 
-    @Override
-    public void finished() {
+	@Override
+	public void finished() {
 
-        // ensure the progress bar gets hidden even if it is not removed
-        this.setProgressBarVisible(false);
+		// ensure the progress bar gets hidden even if it is not removed
+		this.setProgressBarVisible(false);
 
-        Runnable task = () -> {
+		Runnable task = () -> {
 
-            if ((downFlag & ADD_POPULATION) == ADD_POPULATION) {
-                LOGGER.finest( "Adding dataset to list manager");
-                DatasetListManager.getInstance().addDataset(dataset);
-                LOGGER.finest( "Firing add dataset signal");
-                getDatasetEventHandler().fireDatasetEvent(DatasetEvent.ADD_DATASET, dataset);
+			if ((downFlag & ADD_POPULATION) == ADD_POPULATION) {
+				DatasetListManager.getInstance().addDataset(dataset);
+				UIController.getInstance().fireDatasetAdded(dataset);
 
-            }
+			}
 
-            // if no list was provided, or no more entries remain,
-            // call the finish
-            if (!hasRemainingDatasetsToProcess()) {
+			// if no list was provided, or no more entries remain,
+			// call the finish
+			if (!hasRemainingDatasetsToProcess()) {
 
-                cancel();
-                getInterfaceEventHandler().removeListener(eh);
-                getDatasetEventHandler().removeListener(eh);
-                countdownLatch();
+				cancel();
+				getInterfaceEventHandler().removeListener(eh);
+				getDatasetEventHandler().removeListener(eh);
+				countdownLatch();
 
-            } else {
-                // otherwise analyse the next item in the list
-                cancel(); // remove progress bar
+			} else {
+				// otherwise analyse the next item in the list
+				cancel(); // remove progress bar
 
-                Runnable p = new RunProfilingAction(getRemainingDatasetsToProcess(), downFlag, progressAcceptors.get(0), eh, getLatch().get());
-                p.run();
+				Runnable p = new RunProfilingAction(getRemainingDatasetsToProcess(), downFlag, progressAcceptors.get(0),
+						eh, getLatch().get());
+				p.run();
 
-            }
-        };
+			}
+		};
 
-        ThreadManager.getInstance().execute(task);
+		ThreadManager.getInstance().execute(task);
 
-    }
+	}
 
 }

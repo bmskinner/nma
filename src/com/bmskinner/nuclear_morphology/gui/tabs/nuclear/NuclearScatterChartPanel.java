@@ -16,17 +16,35 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.tabs.nuclear;
 
+import java.util.List;
+
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.tabs.AbstractScatterChartPanel;
 
 @SuppressWarnings("serial")
 public class NuclearScatterChartPanel extends AbstractScatterChartPanel {
 
-    public NuclearScatterChartPanel(@NonNull InputSupplier context) {
-        super(context, CellularComponent.NUCLEUS);
-    }
-    
+	public NuclearScatterChartPanel(@NonNull InputSupplier context) {
+		super(context, CellularComponent.NUCLEUS);
+	}
+
+	@Override
+	public void scaleUpdated(List<IAnalysisDataset> datasets) {
+		refreshChartCache(datasets);
+	}
+
+	@Override
+	public void scaleUpdated(IAnalysisDataset dataset) {
+		refreshChartCache(dataset);
+	}
+
+	@Override
+	public void scaleUpdated() {
+		update(getDatasets());
+	}
+
 }

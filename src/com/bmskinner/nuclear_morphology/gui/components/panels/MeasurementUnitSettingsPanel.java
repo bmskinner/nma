@@ -25,60 +25,61 @@ import javax.swing.JRadioButton;
 
 import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
-import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
+import com.bmskinner.nuclear_morphology.gui.events.revamp.UIController;
 
 @SuppressWarnings("serial")
 public class MeasurementUnitSettingsPanel extends EnumeratedOptionsPanel {
 
-    private Map<MeasurementScale, JRadioButton> map = new HashMap<MeasurementScale, JRadioButton>();
+	private Map<MeasurementScale, JRadioButton> map = new HashMap<MeasurementScale, JRadioButton>();
 
-    /**
-     * Create a panel with all available MeasurementScales as radio buttons
-     * 
-     */
-    public MeasurementUnitSettingsPanel() {
-        super();
+	/**
+	 * Create a panel with all available MeasurementScales as radio buttons
+	 * 
+	 */
+	public MeasurementUnitSettingsPanel() {
+		super();
 
-        final ButtonGroup group = new ButtonGroup();
+		final ButtonGroup group = new ButtonGroup();
 
-        for (MeasurementScale type : MeasurementScale.values()) {
-            JRadioButton button = new JRadioButton(type.toString());
-            button.setActionCommand(type.toString());
-            button.addActionListener(this);
-            this.add(button);
-            group.add(button);
-            map.put(type, button);
-        }
-        // Set the default
-        map.get(GlobalOptions.getInstance().getScale()).setSelected(true);
-    }
+		for (MeasurementScale type : MeasurementScale.values()) {
+			JRadioButton button = new JRadioButton(type.toString());
+			button.setActionCommand(type.toString());
+			button.addActionListener(this);
+			this.add(button);
+			group.add(button);
+			map.put(type, button);
+		}
+		// Set the default
+		map.get(GlobalOptions.getInstance().getScale()).setSelected(true);
+	}
 
-    @Override
-    public void actionPerformed(ActionEvent e) {
+	@Override
+	public void actionPerformed(ActionEvent e) {
 
-        GlobalOptions.getInstance().setScale(getSelected());
-        fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
-    }
+		GlobalOptions.getInstance().setScale(getSelected());
+		UIController.getInstance().fireScaleUpdated();
+	}
 
-    /**
-     * Get the currently selected scale
-     * 
-     * @return
-     */
-    private MeasurementScale getSelected() {
-        for (MeasurementScale type : MeasurementScale.values()) {
-            JRadioButton button = map.get(type);
-            if (button.isSelected()) {
-                return type;
-            }
-        }
-        return null;
-    }
+	/**
+	 * Get the currently selected scale
+	 * 
+	 * @return
+	 */
+	private MeasurementScale getSelected() {
+		for (MeasurementScale type : MeasurementScale.values()) {
+			JRadioButton button = map.get(type);
+			if (button.isSelected()) {
+				return type;
+			}
+		}
+		return null;
+	}
 
-    public void setEnabled(boolean b) {
+	@Override
+	public void setEnabled(boolean b) {
 
-        for (MeasurementScale type : MeasurementScale.values()) {
-            map.get(type).setEnabled(b);
-        }
-    }
+		for (MeasurementScale type : MeasurementScale.values()) {
+			map.get(type).setEnabled(b);
+		}
+	}
 }

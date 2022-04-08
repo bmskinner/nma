@@ -33,7 +33,6 @@ import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledExcep
 import com.bmskinner.nuclear_morphology.gui.components.BorderTagEvent;
 import com.bmskinner.nuclear_morphology.gui.events.BorderTagEventListener;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
-import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.events.SegmentEvent;
 import com.bmskinner.nuclear_morphology.gui.events.SegmentEventListener;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
@@ -41,126 +40,121 @@ import com.bmskinner.nuclear_morphology.gui.tabs.EditingTabPanel;
 
 @SuppressWarnings("serial")
 public abstract class AbstractEditingPanel extends DetailPanel
-        implements SegmentEventListener, BorderTagEventListener, EditingTabPanel {  
-	
-	private static final Logger LOGGER = Logger.getLogger(AbstractEditingPanel.class.getName());
-    
-    public AbstractEditingPanel(@NonNull InputSupplier context, String title){
-        super(context, title);
-    }
+		implements SegmentEventListener, BorderTagEventListener, EditingTabPanel {
 
-    /**
-     * Check if any of the cells in the active collection are locked for
-     * editing. If so, ask the user whether to unlock all cells, or leave cells
-     * locked.
-     */
-    @Override
+	private static final Logger LOGGER = Logger.getLogger(AbstractEditingPanel.class.getName());
+
+	public AbstractEditingPanel(@NonNull InputSupplier context, String title) {
+		super(context, title);
+	}
+
+	/**
+	 * Check if any of the cells in the active collection are locked for editing. If
+	 * so, ask the user whether to unlock all cells, or leave cells locked.
+	 */
+	@Override
 	public void checkCellLock() {
-    	if(activeDataset()==null)
-    		return;
-        ICellCollection collection = activeDataset().getCollection();
+		if (activeDataset() == null)
+			return;
+		ICellCollection collection = activeDataset().getCollection();
 
 //        if (collection.isVirtual())
 //            return;
 
-        if (collection.hasLockedCells()) {
-            String[] options = { "Keep manual values", "Overwrite manual values" };
+		if (collection.hasLockedCells()) {
+			String[] options = { "Keep manual values", "Overwrite manual values" };
 
-            try {
-            	int result = getInputSupplier()
-            			.requestOptionAllVisible(options, 
-            					0, 
-            					"Some cells have been manually segmented. Keep manual values?", 
-            					"Keep manual values?");
-            	if (result != 0)
-            		collection.setCellsLocked(false);
-            } catch(RequestCancelledException e) {} // no action
-        }
-    }
+			try {
+				int result = getInputSupplier().requestOptionAllVisible(options, 0,
+						"Some cells have been manually segmented. Keep manual values?", "Keep manual values?");
+				if (result != 0)
+					collection.setCellsLocked(false);
+			} catch (RequestCancelledException e) {
+			} // no action
+		}
+	}
 
-    /**
-     * Update the border tag in the median profile to the given index, and
-     * update individual nuclei to match.
-     * 
-     * @param tag
-     * @param newTagIndex
-     */
-    @Override
+	/**
+	 * Update the border tag in the median profile to the given index, and update
+	 * individual nuclei to match.
+	 * 
+	 * @param tag
+	 * @param newTagIndex
+	 */
+	@Override
 	public void setBorderTagAction(@NonNull Landmark tag, int newTagIndex) {
-    	if(activeDataset()==null)
-    		return;
-        if (activeDataset().getCollection().isVirtual() && tag.equals(Landmark.REFERENCE_POINT)) {
-            LOGGER.warning("Cannot update core border tag for a child dataset");
-            return;
-        }
+		if (activeDataset() == null)
+			return;
+		if (activeDataset().getCollection().isVirtual() && tag.equals(Landmark.REFERENCE_POINT)) {
+			LOGGER.warning("Cannot update core border tag for a child dataset");
+			return;
+		}
 
-        checkCellLock();
+		checkCellLock();
 
-        LOGGER.info("Updating " + tag + " to index " + newTagIndex);
+		LOGGER.info("Updating " + tag + " to index " + newTagIndex);
 
-        setAnalysing(true);
+		setAnalysing(true);
 
-        SegmentationHandler sh = new SegmentationHandler(activeDataset());
-        sh.setBorderTag(tag, newTagIndex);
+		SegmentationHandler sh = new SegmentationHandler(activeDataset());
+		sh.setBorderTag(tag, newTagIndex);
 
-        refreshChartCache(); // immediate visualisation of result
+		refreshChartCache(); // immediate visualisation of result
 
-        if (tag.type().equals(LandmarkType.CORE)) {
-            this.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.SEGMENTATION_ACTION, getDatasets());
-        } else {
-            getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
-        }
+		if (tag.type().equals(LandmarkType.CORE)) {
+			this.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.SEGMENTATION_ACTION, getDatasets());
+		} else {
+			// TODO: get UI controller to fire here
+		}
 
-        this.setAnalysing(false);
+		this.setAnalysing(false);
 
-    }
+	}
 
-    /**
-     * This triggers a general chart recache for the active dataset and all its
-     * children, but performs the recache on the currnt tab first so results are
-     * showed at once
-     */
-    protected void refreshEditingPanelCharts() {
-        this.refreshChartCache();
+	/**
+	 * This triggers a general chart recache for the active dataset and all its
+	 * children, but performs the recache on the currnt tab first so results are
+	 * showed at once
+	 */
+	protected void refreshEditingPanelCharts() {
+		this.refreshChartCache();
 
-        List<IAnalysisDataset> list = new ArrayList<>();
+		List<IAnalysisDataset> list = new ArrayList<>();
 
-        list.addAll(getDatasets());
-        list.addAll(activeDataset().getAllChildDatasets());
+		list.addAll(getDatasets());
+		list.addAll(activeDataset().getAllChildDatasets());
 
-        this.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.RECACHE_CHARTS, list);
-    }
+		this.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.RECACHE_CHARTS, list);
+	}
 
-    /**
-     * Update the start index of the given segment to the given index in the
-     * median profile, and update individual nuclei to match
-     * 
-     * @param id
-     * @param index
-     * @throws Exception
-     */
-    @Override
+	/**
+	 * Update the start index of the given segment to the given index in the median
+	 * profile, and update individual nuclei to match
+	 * 
+	 * @param id
+	 * @param index
+	 * @throws Exception
+	 */
+	@Override
 	public void updateSegmentStartIndexAction(@NonNull UUID id, int index) throws Exception {
 
-        checkCellLock();
+		checkCellLock();
 
-        SegmentationHandler sh = new SegmentationHandler(activeDataset());
-        sh.updateSegmentStartIndexAction(id, index);
+		SegmentationHandler sh = new SegmentationHandler(activeDataset());
+		sh.updateSegmentStartIndexAction(id, index);
 
-        refreshEditingPanelCharts();
+		refreshEditingPanelCharts();
 
-        this.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.REFRESH_MORPHOLOGY, getDatasets());
+		this.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.REFRESH_MORPHOLOGY, getDatasets());
 
-    }
-    
-    @Override
-    public void borderTagEventReceived(BorderTagEvent event) {
-    }
+	}
 
-    @Override
-    public void segmentEventReceived(SegmentEvent event) {
-    }
-    
-    
+	@Override
+	public void borderTagEventReceived(BorderTagEvent event) {
+	}
+
+	@Override
+	public void segmentEventReceived(SegmentEvent event) {
+	}
 
 }

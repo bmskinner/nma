@@ -35,118 +35,122 @@ import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOptionsPanel;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileMarkersOptionsPanel;
+import com.bmskinner.nuclear_morphology.gui.events.revamp.ProfilesUpdatedListener;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 import com.bmskinner.nuclear_morphology.visualisation.charts.AbstractChartFactory;
 import com.bmskinner.nuclear_morphology.visualisation.charts.MorphologyChartFactory;
 import com.bmskinner.nuclear_morphology.visualisation.charts.panels.ExportableChartPanel;
 
 @SuppressWarnings("serial")
-public abstract class AbstractProfileDisplayPanel extends DetailPanel implements ActionListener {
+public abstract class AbstractProfileDisplayPanel extends DetailPanel
+		implements ActionListener, ProfilesUpdatedListener {
 
-    Dimension minimumChartSize   = new Dimension(50, 100);
-    Dimension preferredChartSize = new Dimension(400, 300);
+	Dimension minimumChartSize = new Dimension(50, 100);
+	Dimension preferredChartSize = new Dimension(400, 300);
 
-    protected JPanel               buttonPanel = new JPanel(new FlowLayout());
-    protected ExportableChartPanel chartPanel;
+	protected JPanel buttonPanel = new JPanel(new FlowLayout());
+	protected ExportableChartPanel chartPanel;
 
-    protected ProfileAlignmentOptionsPanel profileAlignmentOptionsPanel = new ProfileAlignmentOptionsPanel();
-    protected ProfileMarkersOptionsPanel   profileMarkersOptionsPanel   = new ProfileMarkersOptionsPanel();
+	protected ProfileAlignmentOptionsPanel profileAlignmentOptionsPanel = new ProfileAlignmentOptionsPanel();
+	protected ProfileMarkersOptionsPanel profileMarkersOptionsPanel = new ProfileMarkersOptionsPanel();
 
-    protected ProfileType type;
+	protected ProfileType type;
 
-    public AbstractProfileDisplayPanel(@NonNull InputSupplier context, ProfileType type) {
-        super(context);
-        this.type = type;
+	public AbstractProfileDisplayPanel(@NonNull InputSupplier context, ProfileType type) {
+		super(context);
+		this.type = type;
 
-        this.setLayout(new BorderLayout());
-        JFreeChart rawChart = MorphologyChartFactory.createEmptyChart();
-        chartPanel = makeProfileChartPanel(rawChart);
+		this.setLayout(new BorderLayout());
+		JFreeChart rawChart = MorphologyChartFactory.createEmptyChart();
+		chartPanel = makeProfileChartPanel(rawChart);
 
-        chartPanel.setMinimumDrawWidth(0);
-        chartPanel.setMinimumDrawHeight(0);
-        this.setMinimumSize(minimumChartSize);
-        this.setPreferredSize(preferredChartSize);
-        this.add(chartPanel, BorderLayout.CENTER);
+		chartPanel.setMinimumDrawWidth(0);
+		chartPanel.setMinimumDrawHeight(0);
+		this.setMinimumSize(minimumChartSize);
+		this.setPreferredSize(preferredChartSize);
+		this.add(chartPanel, BorderLayout.CENTER);
 
-        // add the alignments panel to the tab
+		// add the alignments panel to the tab
 
-        buttonPanel.add(profileAlignmentOptionsPanel);
-        profileAlignmentOptionsPanel.addActionListener(this);
-        profileAlignmentOptionsPanel.setEnabled(false);
+		buttonPanel.add(profileAlignmentOptionsPanel);
+		profileAlignmentOptionsPanel.addActionListener(this);
+		profileAlignmentOptionsPanel.setEnabled(false);
 
-        buttonPanel.add(profileMarkersOptionsPanel);
-        profileMarkersOptionsPanel.addActionListener(this);
-        profileMarkersOptionsPanel.setEnabled(false);
+		buttonPanel.add(profileMarkersOptionsPanel);
+		profileMarkersOptionsPanel.addActionListener(this);
+		profileMarkersOptionsPanel.setEnabled(false);
 
-        this.add(buttonPanel, BorderLayout.NORTH);
-    }
-    
-    @Override
-    public String getPanelTitle(){
-        return type.toString();
-    }
+		this.add(buttonPanel, BorderLayout.NORTH);
+		uiController.addProfilesUpdatedListener(this);
+	}
 
-    private ExportableChartPanel makeProfileChartPanel(JFreeChart chart) {
-        ExportableChartPanel panel = new ExportableChartPanel(chart) {
-            @Override
-            public void restoreAutoBounds() {
-                XYPlot plot = (XYPlot) this.getChart().getPlot();
+	@Override
+	public String getPanelTitle() {
+		return type.toString();
+	}
 
-                int length = 100;
-                for (int i = 0; i < plot.getDatasetCount(); i++) {
-                    XYDataset dataset = plot.getDataset(i);
-                    Number maximum = DatasetUtils.findMaximumDomainValue(dataset);
-                    length = maximum.intValue() > length ? maximum.intValue() : length;
-                }
+	private ExportableChartPanel makeProfileChartPanel(JFreeChart chart) {
+		ExportableChartPanel panel = new ExportableChartPanel(chart) {
+			@Override
+			public void restoreAutoBounds() {
+				XYPlot plot = (XYPlot) this.getChart().getPlot();
 
-                if (type.getDimension().equals(MeasurementDimension.ANGLE)) {
-                    plot.getRangeAxis().setRange(0, 360);
-                } else {
-                    plot.getRangeAxis().setAutoRange(true);
-                }
+				int length = 100;
+				for (int i = 0; i < plot.getDatasetCount(); i++) {
+					XYDataset dataset = plot.getDataset(i);
+					Number maximum = DatasetUtils.findMaximumDomainValue(dataset);
+					length = maximum.intValue() > length ? maximum.intValue() : length;
+				}
 
-                plot.getDomainAxis().setRange(0, length);
-                return;
-            }
-        };
-        // Disable entity collection for profiles - too much data
-        panel.getChartRenderingInfo().setEntityCollection(null);
-        return panel;
-    }
+				if (type.getDimension().equals(MeasurementDimension.ANGLE)) {
+					plot.getRangeAxis().setRange(0, 360);
+				} else {
+					plot.getRangeAxis().setAutoRange(true);
+				}
 
-    public void setEnabled(boolean b) {
-        profileAlignmentOptionsPanel.setEnabled(b);
-        profileMarkersOptionsPanel.setEnabled(b);
-    }
+				plot.getDomainAxis().setRange(0, length);
+				return;
+			}
+		};
+		// Disable entity collection for profiles - too much data
+		panel.getChartRenderingInfo().setEntityCollection(null);
+		return panel;
+	}
 
-    @Override
-    protected void updateSingle() {
+	@Override
+	public void setEnabled(boolean b) {
+		profileAlignmentOptionsPanel.setEnabled(b);
+		profileMarkersOptionsPanel.setEnabled(b);
+	}
 
-        this.setEnabled(true);
+	@Override
+	protected void updateSingle() {
 
-    }
+		this.setEnabled(true);
 
-    @Override
-    protected void updateMultiple() {
-        // Don't allow marker selection for multiple datasets
-        this.setEnabled(true);
-        profileMarkersOptionsPanel.setEnabled(false);
-    }
+	}
 
-    @Override
-    protected void updateNull() {
-        this.setEnabled(false);
-    }
+	@Override
+	protected void updateMultiple() {
+		// Don't allow marker selection for multiple datasets
+		this.setEnabled(true);
+		profileMarkersOptionsPanel.setEnabled(false);
+	}
 
-    @Override
-    public void setChartsAndTablesLoading() {
-        super.setChartsAndTablesLoading();
-        chartPanel.setChart(AbstractChartFactory.createLoadingChart());
+	@Override
+	protected void updateNull() {
+		this.setEnabled(false);
+	}
 
-    }
+	@Override
+	public void setChartsAndTablesLoading() {
+		super.setChartsAndTablesLoading();
+		chartPanel.setChart(AbstractChartFactory.createLoadingChart());
 
-    @Override
-    public void actionPerformed(ActionEvent e) {
-    	update(getDatasets());
-    }
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		update(getDatasets());
+	}
 }

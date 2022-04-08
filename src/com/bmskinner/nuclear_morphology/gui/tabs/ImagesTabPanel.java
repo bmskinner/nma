@@ -61,8 +61,6 @@ import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledExcep
 import com.bmskinner.nuclear_morphology.core.InterfaceUpdater;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.Labels;
-import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent;
-import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.utility.FileUtils;
@@ -82,415 +80,412 @@ import ij.process.ImageProcessor;
  */
 @SuppressWarnings("serial")
 public class ImagesTabPanel extends DetailPanel {
-	
+
 	private static final Logger LOGGER = Logger.getLogger(ImagesTabPanel.class.getName());
 
-    private JTree  tree;      // hold the image list
-    private JPanel imagePanel;
-    private JLabel label;
-    
-    private static final String IMAGES_LBL = "Images in dataset";
-    private static final String PANEL_TITLE_LBL = "Images";
-    private static final String HEADER_LBL = "Double click a folder to update image paths";
-    
-    /** Store the last folder opened when changing paths */
-    private File lastSelectedFolder = null;
+	private JTree tree; // hold the image list
+	private JPanel imagePanel;
+	private JLabel label;
 
-      
-    /**
-     * Create the panel. 
-     */
-    public ImagesTabPanel(@NonNull InputSupplier context) {
-        super(context);
+	private static final String IMAGES_LBL = "Images in dataset";
+	private static final String PANEL_TITLE_LBL = "Images";
+	private static final String HEADER_LBL = "Double click a folder to update image paths";
 
-        this.setLayout(new BorderLayout());
+	/** Store the last folder opened when changing paths */
+	private File lastSelectedFolder = null;
 
-        createUI();
-    }
-    
-    @Override
-    public String getPanelTitle(){
-        return PANEL_TITLE_LBL;
-    }
+	/**
+	 * Create the panel.
+	 */
+	public ImagesTabPanel(@NonNull InputSupplier context) {
+		super(context);
 
-    private void createUI() {
+		this.setLayout(new BorderLayout());
 
-    	ImageTreeNode root = new ImageTreeNode(IMAGES_LBL);
-        TreeModel treeModel = new DefaultTreeModel(root);
+		createUI();
+	}
 
-        tree = new JTree(treeModel);
-        tree.addTreeSelectionListener(makeListener());
-        tree.addMouseListener(makeDoubleClickListener());
-        tree.setToggleClickCount(0); // disable double clicking to expand nodes
-        tree.setEnabled(false);
-        tree.setCellRenderer(new ImageNodeRenderer());
-        ToolTipManager.sharedInstance().registerComponent(tree);
+	@Override
+	public String getPanelTitle() {
+		return PANEL_TITLE_LBL;
+	}
 
-        imagePanel = new JPanel(new BorderLayout());
-        label = new JLabel();
-        label.setHorizontalAlignment(SwingConstants.CENTER);
-        label.setVerticalAlignment(SwingConstants.CENTER);
-        label.setHorizontalTextPosition(SwingConstants.CENTER);
-        label.setVerticalTextPosition(SwingConstants.CENTER);
-        imagePanel.add(label, BorderLayout.CENTER);
-        JPanel headerPanel = new JPanel();
-        headerPanel.add(new JLabel(HEADER_LBL));
-        imagePanel.add(headerPanel, BorderLayout.NORTH);
-        
+	private void createUI() {
 
-        JScrollPane scrollPane = new JScrollPane(tree);
-        Dimension size = new Dimension(200, 200);
-        scrollPane.setMinimumSize(size);
-        scrollPane.setPreferredSize(size);
-        
-        JSplitPane sp = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
-        sp.setLeftComponent(scrollPane);
-        sp.setRightComponent(imagePanel);
-        
-        this.add(sp, BorderLayout.CENTER);
-    }
+		ImageTreeNode root = new ImageTreeNode(IMAGES_LBL);
+		TreeModel treeModel = new DefaultTreeModel(root);
 
-    /**
-     * Trigger an update with a given dataset.
-     * 
-     */
-    @Override
-    protected synchronized void updateSingle() {
-        updateMultiple();
-    }
+		tree = new JTree(treeModel);
+		tree.addTreeSelectionListener(makeListener());
+		tree.addMouseListener(makeDoubleClickListener());
+		tree.setToggleClickCount(0); // disable double clicking to expand nodes
+		tree.setEnabled(false);
+		tree.setCellRenderer(new ImageNodeRenderer());
+		ToolTipManager.sharedInstance().registerComponent(tree);
 
-    @Override
-    protected synchronized void updateMultiple() {
-    	ImageTreeNode root = new ImageTreeNode(IMAGES_LBL);
+		imagePanel = new JPanel(new BorderLayout());
+		label = new JLabel();
+		label.setHorizontalAlignment(SwingConstants.CENTER);
+		label.setVerticalAlignment(SwingConstants.CENTER);
+		label.setHorizontalTextPosition(SwingConstants.CENTER);
+		label.setVerticalTextPosition(SwingConstants.CENTER);
+		imagePanel.add(label, BorderLayout.CENTER);
+		JPanel headerPanel = new JPanel();
+		headerPanel.add(new JLabel(HEADER_LBL));
+		imagePanel.add(headerPanel, BorderLayout.NORTH);
 
-        for(IAnalysisDataset d : getDatasets()){
-            createNodes(root, d);
-        }
-                
-        tree.setEnabled(true);
+		JScrollPane scrollPane = new JScrollPane(tree);
+		Dimension size = new Dimension(200, 200);
+		scrollPane.setMinimumSize(size);
+		scrollPane.setPreferredSize(size);
 
-        TreeModel model = new DefaultTreeModel(root);
+		JSplitPane sp = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+		sp.setLeftComponent(scrollPane);
+		sp.setRightComponent(imagePanel);
 
-        tree.setModel(model);
-        
-        for(int i=0; i<tree.getRowCount(); i++){
-            tree.expandRow(i);
-        }
-        
-        label.setText(null);
-    }
+		this.add(sp, BorderLayout.CENTER);
+	}
 
-    @Override
-    protected synchronized void updateNull() {
-    	ImageTreeNode root = new ImageTreeNode(IMAGES_LBL);
-    	TreeModel model = new DefaultTreeModel(root);
-    	tree.setModel(model);
-        tree.setEnabled(false);
-        label.setText(Labels.NULL_DATASETS);
-        label.setIcon(null);
-    }
+	/**
+	 * Trigger an update with a given dataset.
+	 * 
+	 */
+	@Override
+	protected synchronized void updateSingle() {
+		updateMultiple();
+	}
 
-    /**
-     * Create the nodes in the tree
-     * 
-     * @param root the root node
-     * @param datase the dataset to use
-     */
-    private void createNodes(DefaultMutableTreeNode root, IAnalysisDataset dataset) {
-        
-    	List<File> files = new ArrayList<>(dataset.getCollection().getImageFiles());
-    	
-    	// Each folder of images should be a node. Find the unique folders
-    	List<File> parents = files.stream()
-    			.map(File::getParentFile)
-    			.distinct()
-    			.sorted()
-    			.collect(Collectors.toList());
-    	
-    	ImageTreeNode datasetRoot = new ImageTreeNode(dataset.getName()+" ("+files.size()+")");
-                
-    	// We want the image names sorted 'sensibly', which is not the same as alphabetically.
-    	// An image s2 should be before s10
-        // The only pattern to recognise for now is eg. "s12.tiff"
-        Pattern p = Pattern.compile("^.?(\\d+)\\.tiff?$");
-        
-        // Sort numerically where possible
-        Comparator<File> comp = (f1, f2) -> {
-            Matcher m1 = p.matcher(f1.getName());
-            Matcher m2 = p.matcher(f2.getName());
+	@Override
+	protected synchronized void updateMultiple() {
+		ImageTreeNode root = new ImageTreeNode(IMAGES_LBL);
 
-            if(m1.matches() && m2.matches()){
-                
-                String s1 = m1.group(1);
-                String s2 = m2.group(1);
+		for (IAnalysisDataset d : getDatasets()) {
+			createNodes(root, d);
+		}
 
-                try {
-                    
-                    int i1 = Integer.parseInt(s1);
-                    int i2 = Integer.parseInt(s2);
-                    return i1 - i2;
-                } catch(NumberFormatException e) {
-                	LOGGER.log(Loggable.STACK, "Error parsing number", e);
-                    return f1.compareTo(f2);
-                }
-            }
-            return f1.compareTo(f2);
-            
-        };
-        
-        Comparator<File> defaultComp = (f1, f2) -> f1.compareTo(f2);
-        
-        
-        for (File parent : parents) {
-        	List<File> inParent = files.stream().filter(f->f.getParentFile().equals(parent))
-        	.collect(Collectors.toList());
-        	
-        	try{
-        		inParent.sort(comp);
-        	} catch(IllegalArgumentException e){ // not the expected format
-        		inParent.sort(defaultComp);
-        	}
-        	ImageTreeNode parentNode = new ImageTreeNode(parent);
-        	
-        	for (File f : inParent)
-                parentNode.add(new ImageTreeNode(f));
+		tree.setEnabled(true);
 
-            datasetRoot.add(parentNode);
-        }
-        
-        root.add(datasetRoot);
+		TreeModel model = new DefaultTreeModel(root);
 
-    }
-    
-    /**
-     * Given an leaf node, get the dataset this came from
-     * @param node
-     * @return
-     */
-    private Optional<IAnalysisDataset> getDataset(ImageTreeNode node){
-    	for(IAnalysisDataset d : getDatasets()){
-    		if(node.toString().equals(d.getName()+" ("+d.getCollection().getImageFiles().size()+")"))
-    			return Optional.of(d);
-    	}
-    	if(node.isRoot())
-    		return Optional.empty();
-    	return getDataset((ImageTreeNode) node.getParent());
+		tree.setModel(model);
 
-    }
+		for (int i = 0; i < tree.getRowCount(); i++) {
+			tree.expandRow(i);
+		}
 
-    private TreeSelectionListener makeListener() {
+		label.setText(null);
+	}
 
-    	return (TreeSelectionEvent e) -> {
-    		ImageTreeNode data = (ImageTreeNode) e.getPath().getLastPathComponent();
+	@Override
+	protected synchronized void updateNull() {
+		ImageTreeNode root = new ImageTreeNode(IMAGES_LBL);
+		TreeModel model = new DefaultTreeModel(root);
+		tree.setModel(model);
+		tree.setEnabled(false);
+		label.setText(Labels.NULL_DATASETS);
+		label.setIcon(null);
+	}
 
-    		File f = data.getFile();
-    		if (f==null || f.isDirectory()) {
-    			label.setIcon(null);
-    			return;
-    		}
+	/**
+	 * Create the nodes in the tree
+	 * 
+	 * @param root   the root node
+	 * @param datase the dataset to use
+	 */
+	private void createNodes(DefaultMutableTreeNode root, IAnalysisDataset dataset) {
 
-    		InterfaceUpdater r = () -> {
-    			try {
-    				ImageProcessor ip = f.exists() ? ImageImporter.importFileTo24bit(f)
-    						: AbstractImageFilterer.createWhiteColorProcessor(1500, 1500); //TODO - check space needed by cells
-    				
-    				// If an 8bit image was read in, make it colour greyscale
-    				ImageConverter cn = new ImageConverter(ip);
-    				if (cn.isByteProcessor()) 
-    					cn.convertToColorProcessor();
-    				ImageAnnotator an = cn.toAnnotator();
+		List<File> files = new ArrayList<>(dataset.getCollection().getImageFiles());
 
-    				Optional<IAnalysisDataset> dataset = getDataset(data);
-    				dataset.ifPresent( d -> d.getCollection().getCells(f).stream().forEach( c-> an.annotateCellBorders(c)) );
+		// Each folder of images should be a node. Find the unique folders
+		List<File> parents = files.stream().map(File::getParentFile).distinct().sorted().collect(Collectors.toList());
 
-    				ImageFilterer ic = new ImageFilterer(an.toProcessor());
-    				ic.resizeKeepingAspect(imagePanel.getWidth(), imagePanel.getHeight());
-    				label.setIcon(ic.toImageIcon());
+		ImageTreeNode datasetRoot = new ImageTreeNode(dataset.getName() + " (" + files.size() + ")");
 
-    			} catch (Exception e1) {
-    				label.setIcon(null);
-    				LOGGER.log(Level.SEVERE, "Error fetching image "+f.getAbsolutePath()+": "+e1.getMessage(), e);
-    			}
-    		};
+		// We want the image names sorted 'sensibly', which is not the same as
+		// alphabetically.
+		// An image s2 should be before s10
+		// The only pattern to recognise for now is eg. "s12.tiff"
+		Pattern p = Pattern.compile("^.?(\\d+)\\.tiff?$");
 
-    		ThreadManager.getInstance().submit(r);
-    	};
-    }
+		// Sort numerically where possible
+		Comparator<File> comp = (f1, f2) -> {
+			Matcher m1 = p.matcher(f1.getName());
+			Matcher m2 = p.matcher(f2.getName());
 
-    /**
-     * Make a listener to allow image folder updating
-     * @return
-     */
-    private MouseListener makeDoubleClickListener(){
-    	return new MouseAdapter(){
-    		@Override
-    		public void mouseClicked(MouseEvent e) {
+			if (m1.matches() && m2.matches()) {
 
-    			if(e.getClickCount()!=2)
-    				return;
-    			
-    			int row = tree.getRowForLocation(e.getX(), e.getY());
-    	        if(row==-1)
-    	        	return;
+				String s1 = m1.group(1);
+				String s2 = m2.group(1);
 
-    	        TreePath selPath = tree.getPathForLocation(e.getX(), e.getY());
-    	        ImageTreeNode node = (ImageTreeNode) selPath.getLastPathComponent();
+				try {
 
-    	        if(node==null)
-    	        	return;
-    	        
-    	        if(node.isLeaf())
-    	        	return; // folders only can be double clicked
-    	        
-    	        updateImageFolder(node);
+					int i1 = Integer.parseInt(s1);
+					int i2 = Integer.parseInt(s2);
+					return i1 - i2;
+				} catch (NumberFormatException e) {
+					LOGGER.log(Loggable.STACK, "Error parsing number", e);
+					return f1.compareTo(f2);
+				}
+			}
+			return f1.compareTo(f2);
 
-    	        tree.repaint();
-    	        getInterfaceEventHandler().fire(InterfaceEvent.of(this, InterfaceMethod.RECACHE_CHARTS));
-    		}
+		};
 
-    	};
-    }
-    
-    /**
-     * Update the folder for the given node
-     * @param node the node to be updated
-     */
-    private void updateImageFolder(ImageTreeNode node) {
-    	
-    	File oldFolder = node.getFile();
-        
-    	// Don't update nodes that have no file
-        if(oldFolder==null)
-        	return;
-        
-    	try {
-        	
-    		// Shortcut file search by finding any extant element of the path
-        	oldFolder = FileUtils.extantComponent(oldFolder);
-        	
-        	// Store the last folder to be selected, to speed choosing other files
-        	File folderToRequest = lastSelectedFolder!=null ? lastSelectedFolder : oldFolder;
-        	File newFolder = getInputSupplier().requestFolder(folderToRequest);
-        	lastSelectedFolder = newFolder;
-        	LOGGER.finer("Image tab last selected folder is now "+lastSelectedFolder.getAbsolutePath());
-        	
-        	// Update the folder for the node and it's children
-        	node.setFile(newFolder); // update node
-        	
-        } catch (RequestCancelledException e1) {
-        	// No action
-        }
-    }
-            
-    private class ImageTreeNode extends DefaultMutableTreeNode {
-    	
-    	 private String name;
-    	 boolean isFile = false;
-    	 
-    	 public ImageTreeNode(String s) {
-     		super();
-     		name = s;
-     		isFile = false;
-     	}
-    	
-    	public ImageTreeNode(@Nullable File f) {
-    		super();
-    		setFile(f);
-    	}
-    	
-    	public boolean isFile() {
-    		return isFile;
-    	}
-    	
-    	/**
-    	 * Get the file in this node, if present. Otherwise return null.
-    	 * @return
-    	 */
-    	public @Nullable File getFile() {
-    		if(isFile)
-    			return new File(name);
-    		return null;
-        }
-    	
-    	public void setFile(File f) {
-    		isFile = true;
-    		name = f.getAbsolutePath();
-    		
-    		// Update each file within the node to the new folder
-        	Enumeration<ImageTreeNode> children = convertChildren();
-        	while(children.hasMoreElements()){
-        		ImageTreeNode imageData = children.nextElement(); 	        
-        		File imageFile = imageData.getFile();
-        		if(imageFile==null)
-        			continue;
+		Comparator<File> defaultComp = (f1, f2) -> f1.compareTo(f2);
 
-        		// Replace the source folder for all nuclei in the current image
-        		getDatasets().stream()
-	        		.flatMap(d->d.getCollection().getCells(imageFile).stream())
-	        		.flatMap(c->c.getNuclei().stream())
-	        		.forEach(n->{
-	        			n.setSourceFolder(f);
-	        			
-	        			// Update signals in the same file
-	        			n.getSignalCollection().getAllSignals().stream()
-	        			.forEach(s->{
-	        				if(s.getSourceFile().equals(imageFile))
-	        					s.setSourceFolder(f);
-	        			});
-	        		});        		
-        		imageData.setFile( new File(f, imageFile.getName()));
-        	}
-    		
-        }
-    	
-    	
-    	/**
-    	 * A conversion method to avoid casting the super.children()
-    	 * method directly (fails in Java 12).
-    	 * @return the converted enumeration
-    	 */
-    	public Enumeration<ImageTreeNode> convertChildren() {
-    		List<ImageTreeNode> list = new ArrayList<>();
-    		Enumeration<TreeNode> nodes = children();
-    		while(nodes.hasMoreElements())
-    			list.add((ImageTreeNode)nodes.nextElement());
-    		return Collections.enumeration(list);
-    	}
-    	
-    	@Override
+		for (File parent : parents) {
+			List<File> inParent = files.stream().filter(f -> f.getParentFile().equals(parent))
+					.collect(Collectors.toList());
+
+			try {
+				inParent.sort(comp);
+			} catch (IllegalArgumentException e) { // not the expected format
+				inParent.sort(defaultComp);
+			}
+			ImageTreeNode parentNode = new ImageTreeNode(parent);
+
+			for (File f : inParent)
+				parentNode.add(new ImageTreeNode(f));
+
+			datasetRoot.add(parentNode);
+		}
+
+		root.add(datasetRoot);
+
+	}
+
+	/**
+	 * Given an leaf node, get the dataset this came from
+	 * 
+	 * @param node
+	 * @return
+	 */
+	private Optional<IAnalysisDataset> getDataset(ImageTreeNode node) {
+		for (IAnalysisDataset d : getDatasets()) {
+			if (node.toString().equals(d.getName() + " (" + d.getCollection().getImageFiles().size() + ")"))
+				return Optional.of(d);
+		}
+		if (node.isRoot())
+			return Optional.empty();
+		return getDataset((ImageTreeNode) node.getParent());
+
+	}
+
+	private TreeSelectionListener makeListener() {
+
+		return (TreeSelectionEvent e) -> {
+			ImageTreeNode data = (ImageTreeNode) e.getPath().getLastPathComponent();
+
+			File f = data.getFile();
+			if (f == null || f.isDirectory()) {
+				label.setIcon(null);
+				return;
+			}
+
+			InterfaceUpdater r = () -> {
+				try {
+					ImageProcessor ip = f.exists() ? ImageImporter.importFileTo24bit(f)
+							: AbstractImageFilterer.createWhiteColorProcessor(1500, 1500); // TODO - check space needed
+																							// by cells
+
+					// If an 8bit image was read in, make it colour greyscale
+					ImageConverter cn = new ImageConverter(ip);
+					if (cn.isByteProcessor())
+						cn.convertToColorProcessor();
+					ImageAnnotator an = cn.toAnnotator();
+
+					Optional<IAnalysisDataset> dataset = getDataset(data);
+					dataset.ifPresent(
+							d -> d.getCollection().getCells(f).stream().forEach(c -> an.annotateCellBorders(c)));
+
+					ImageFilterer ic = new ImageFilterer(an.toProcessor());
+					ic.resizeKeepingAspect(imagePanel.getWidth(), imagePanel.getHeight());
+					label.setIcon(ic.toImageIcon());
+
+				} catch (Exception e1) {
+					label.setIcon(null);
+					LOGGER.log(Level.SEVERE, "Error fetching image " + f.getAbsolutePath() + ": " + e1.getMessage(), e);
+				}
+			};
+
+			ThreadManager.getInstance().submit(r);
+		};
+	}
+
+	/**
+	 * Make a listener to allow image folder updating
+	 * 
+	 * @return
+	 */
+	private MouseListener makeDoubleClickListener() {
+		return new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+
+				if (e.getClickCount() != 2)
+					return;
+
+				int row = tree.getRowForLocation(e.getX(), e.getY());
+				if (row == -1)
+					return;
+
+				TreePath selPath = tree.getPathForLocation(e.getX(), e.getY());
+				ImageTreeNode node = (ImageTreeNode) selPath.getLastPathComponent();
+
+				if (node == null)
+					return;
+
+				if (node.isLeaf())
+					return; // folders only can be double clicked
+
+				updateImageFolder(node);
+
+				tree.repaint();
+//    	        getInterfaceEventHandler().fire(InterfaceEvent.of(this, InterfaceMethod.RECACHE_CHARTS));
+			}
+
+		};
+	}
+
+	/**
+	 * Update the folder for the given node
+	 * 
+	 * @param node the node to be updated
+	 */
+	private void updateImageFolder(ImageTreeNode node) {
+
+		File oldFolder = node.getFile();
+
+		// Don't update nodes that have no file
+		if (oldFolder == null)
+			return;
+
+		try {
+
+			// Shortcut file search by finding any extant element of the path
+			oldFolder = FileUtils.extantComponent(oldFolder);
+
+			// Store the last folder to be selected, to speed choosing other files
+			File folderToRequest = lastSelectedFolder != null ? lastSelectedFolder : oldFolder;
+			File newFolder = getInputSupplier().requestFolder(folderToRequest);
+			lastSelectedFolder = newFolder;
+			LOGGER.finer("Image tab last selected folder is now " + lastSelectedFolder.getAbsolutePath());
+
+			// Update the folder for the node and it's children
+			node.setFile(newFolder); // update node
+
+		} catch (RequestCancelledException e1) {
+			// No action
+		}
+	}
+
+	private class ImageTreeNode extends DefaultMutableTreeNode {
+
+		private String name;
+		boolean isFile = false;
+
+		public ImageTreeNode(String s) {
+			super();
+			name = s;
+			isFile = false;
+		}
+
+		public ImageTreeNode(@Nullable File f) {
+			super();
+			setFile(f);
+		}
+
+		public boolean isFile() {
+			return isFile;
+		}
+
+		/**
+		 * Get the file in this node, if present. Otherwise return null.
+		 * 
+		 * @return
+		 */
+		public @Nullable File getFile() {
+			if (isFile)
+				return new File(name);
+			return null;
+		}
+
+		public void setFile(File f) {
+			isFile = true;
+			name = f.getAbsolutePath();
+
+			// Update each file within the node to the new folder
+			Enumeration<ImageTreeNode> children = convertChildren();
+			while (children.hasMoreElements()) {
+				ImageTreeNode imageData = children.nextElement();
+				File imageFile = imageData.getFile();
+				if (imageFile == null)
+					continue;
+
+				// Replace the source folder for all nuclei in the current image
+				getDatasets().stream().flatMap(d -> d.getCollection().getCells(imageFile).stream())
+						.flatMap(c -> c.getNuclei().stream()).forEach(n -> {
+							n.setSourceFolder(f);
+
+							// Update signals in the same file
+							n.getSignalCollection().getAllSignals().stream().forEach(s -> {
+								if (s.getSourceFile().equals(imageFile))
+									s.setSourceFolder(f);
+							});
+						});
+				imageData.setFile(new File(f, imageFile.getName()));
+			}
+
+		}
+
+		/**
+		 * A conversion method to avoid casting the super.children() method directly
+		 * (fails in Java 12).
+		 * 
+		 * @return the converted enumeration
+		 */
+		public Enumeration<ImageTreeNode> convertChildren() {
+			List<ImageTreeNode> list = new ArrayList<>();
+			Enumeration<TreeNode> nodes = children();
+			while (nodes.hasMoreElements())
+				list.add((ImageTreeNode) nodes.nextElement());
+			return Collections.enumeration(list);
+		}
+
+		@Override
 		public String toString() {
-    		File f = new File(name);
-    		if(f.isDirectory())
-    			return f.getAbsolutePath();
-    		return f.getName();
-        }
-    }
-    
-    /**
-     * Allow the string value of a node to be displayed as a tooltip
-     * @author ben
-     * @since 1.13.8
-     *
-     */
-    private static class ImageNodeRenderer extends DefaultTreeCellRenderer {
-    	
-    	@Override
-        public Component getTreeCellRendererComponent(JTree tree, Object value,
-                boolean sel, boolean expanded, boolean leaf, int row, boolean hasFocus) {
-        	
-    		Component c = super.getTreeCellRendererComponent(tree, value, sel,
-                    expanded, leaf, row, hasFocus);
-            setToolTipText(value.toString());
-            
-            Color fg = Color.BLACK;
-            ImageTreeNode n = (ImageTreeNode) value;
-            if(n.isFile()) {
-            	File f = n.getFile();
-            	if(f==null || !f.exists())
-            		fg = Color.RED;
-            }
-            c.setForeground(fg);
-            return c;
-        }
-    }
+			File f = new File(name);
+			if (f.isDirectory())
+				return f.getAbsolutePath();
+			return f.getName();
+		}
+	}
+
+	/**
+	 * Allow the string value of a node to be displayed as a tooltip
+	 * 
+	 * @author ben
+	 * @since 1.13.8
+	 *
+	 */
+	private static class ImageNodeRenderer extends DefaultTreeCellRenderer {
+
+		@Override
+		public Component getTreeCellRendererComponent(JTree tree, Object value, boolean sel, boolean expanded,
+				boolean leaf, int row, boolean hasFocus) {
+
+			Component c = super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
+			setToolTipText(value.toString());
+
+			Color fg = Color.BLACK;
+			ImageTreeNode n = (ImageTreeNode) value;
+			if (n.isFile()) {
+				File f = n.getFile();
+				if (f == null || !f.exists())
+					fg = Color.RED;
+			}
+			c.setForeground(fg);
+			return c;
+		}
+	}
 }

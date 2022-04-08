@@ -19,15 +19,19 @@ package com.bmskinner.nuclear_morphology.gui.tabs.signals;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
+import java.util.List;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
+import com.bmskinner.nuclear_morphology.gui.events.revamp.NuclearSignalUpdatedListener;
+import com.bmskinner.nuclear_morphology.gui.events.revamp.ScaleUpdatedListener;
 import com.bmskinner.nuclear_morphology.gui.tabs.BoxplotsTabPanel;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.visualisation.charts.ViolinChartFactory;
@@ -37,77 +41,104 @@ import com.bmskinner.nuclear_morphology.visualisation.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.visualisation.options.ChartOptionsBuilder;
 
 @SuppressWarnings("serial")
-public class SignalsBoxplotPanel extends BoxplotsTabPanel {
-	
+public class SignalsBoxplotPanel extends BoxplotsTabPanel
+		implements NuclearSignalUpdatedListener, ScaleUpdatedListener {
+
 	private static final Logger LOGGER = Logger.getLogger(SignalsBoxplotPanel.class.getName());
 
-    public SignalsBoxplotPanel(@NonNull InputSupplier context) {
-        super(context, CellularComponent.NUCLEAR_SIGNAL);
-        createUI();
-    }
+	public SignalsBoxplotPanel(@NonNull InputSupplier context) {
+		super(context, CellularComponent.NUCLEAR_SIGNAL);
+		createUI();
+		uiController.addNuclearSignalUpdatedListener(this);
+		uiController.addScaleUpdatedListener(this);
 
-    private void createUI() {
+	}
 
-        this.setLayout(new BorderLayout());
-        Dimension preferredSize = new Dimension(200, 300);
+	private void createUI() {
 
-        for (Measurement stat : Measurement.getSignalStats()) {
+		this.setLayout(new BorderLayout());
+		Dimension preferredSize = new Dimension(200, 300);
 
-            ChartOptions options = new ChartOptionsBuilder().addStatistic(stat)
-                    .setScale(GlobalOptions.getInstance().getScale()).setSwatch(GlobalOptions.getInstance().getSwatch())
-                    .build();
+		for (Measurement stat : Measurement.getSignalStats()) {
 
-            JFreeChart chart = null;
-            try {
-                chart = new ViolinChartFactory(options).createStatisticPlot(CellularComponent.NUCLEAR_SIGNAL);
-            } catch (Exception e) {
-                LOGGER.log(Loggable.STACK, "Error creating boxplots panel", e);
-            }
+			ChartOptions options = new ChartOptionsBuilder().addStatistic(stat)
+					.setScale(GlobalOptions.getInstance().getScale()).setSwatch(GlobalOptions.getInstance().getSwatch())
+					.build();
 
-            ViolinChartPanel panel = new ViolinChartPanel(chart);
-            panel.setPreferredSize(preferredSize);
-            chartPanels.put(stat.toString(), panel);
-            mainPanel.add(panel);
-        }
+			JFreeChart chart = null;
+			try {
+				chart = new ViolinChartFactory(options).createStatisticPlot(CellularComponent.NUCLEAR_SIGNAL);
+			} catch (Exception e) {
+				LOGGER.log(Loggable.STACK, "Error creating boxplots panel", e);
+			}
 
-        // add the scroll pane to the tab
-//        scrollPane = new JScrollPane(mainPanel);
-        this.add(scrollPane, BorderLayout.CENTER);
+			ViolinChartPanel panel = new ViolinChartPanel(chart);
+			panel.setPreferredSize(preferredSize);
+			chartPanels.put(stat.toString(), panel);
+			mainPanel.add(panel);
+		}
 
-    }
+		// add the scroll pane to the tab
+		this.add(scrollPane, BorderLayout.CENTER);
 
-    @Override
-    public void actionPerformed(ActionEvent e) {
+	}
 
-        update(getDatasets());
+	@Override
+	public void actionPerformed(ActionEvent e) {
 
-    }
+		update(getDatasets());
 
-    @Override
-    protected void updateSingle() {
-        updateMultiple();
+	}
 
-    }
+	@Override
+	protected void updateSingle() {
+		updateMultiple();
 
-    @Override
-    protected void updateMultiple() {
+	}
 
-        for (Measurement stat : Measurement.getSignalStats()) {
+	@Override
+	protected void updateMultiple() {
 
-            ExportableChartPanel panel = chartPanels.get(stat.toString());
+		for (Measurement stat : Measurement.getSignalStats()) {
 
-            ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets()).addStatistic(stat)
-                    .setScale(GlobalOptions.getInstance().getScale()).setSwatch(GlobalOptions.getInstance().getSwatch())
-                    .setTarget(panel).build();
+			ExportableChartPanel panel = chartPanels.get(stat.toString());
 
-            setChart(options);
-        }
+			ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets()).addStatistic(stat)
+					.setScale(GlobalOptions.getInstance().getScale()).setSwatch(GlobalOptions.getInstance().getSwatch())
+					.setTarget(panel).build();
 
-    }
+			setChart(options);
+		}
 
-    @Override
-    protected void updateNull() {
-        updateMultiple();
-    }
+	}
 
+	@Override
+	protected void updateNull() {
+		updateMultiple();
+	}
+
+	@Override
+	public void nuclearSignalUpdated(List<IAnalysisDataset> datasets) {
+		refreshChartCache(datasets);
+	}
+
+	@Override
+	public void nuclearSignalUpdated(IAnalysisDataset dataset) {
+		refreshChartCache(dataset);
+	}
+
+	@Override
+	public void scaleUpdated(List<IAnalysisDataset> datasets) {
+		refreshChartCache(datasets);
+	}
+
+	@Override
+	public void scaleUpdated(IAnalysisDataset dataset) {
+		refreshChartCache(dataset);
+	}
+
+	@Override
+	public void scaleUpdated() {
+		update(getDatasets());
+	}
 }

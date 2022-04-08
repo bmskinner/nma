@@ -51,7 +51,7 @@ import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 import com.bmskinner.nuclear_morphology.gui.components.panels.WrappedLabel;
-import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
+import com.bmskinner.nuclear_morphology.gui.events.revamp.ScaleUpdatedListener;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.visualisation.charts.AbstractChartFactory;
 import com.bmskinner.nuclear_morphology.visualisation.charts.ScatterChartFactory;
@@ -72,229 +72,222 @@ import com.bmskinner.nuclear_morphology.visualisation.options.TableOptionsBuilde
  *
  */
 @SuppressWarnings("serial")
-public abstract class AbstractScatterChartPanel extends DetailPanel  {
-	
+public abstract class AbstractScatterChartPanel extends DetailPanel implements ScaleUpdatedListener {
+
 	private static final Logger LOGGER = Logger.getLogger(AbstractScatterChartPanel.class.getName());
 
-    private static final String PANEL_TITLE_LBL = "Scatter";
-    private static final String FILTER_BTN_LBL  = "Filter visible";
-    private static final String FILTER_BTN_TOOLTIP = "Create a sub-population based on the visible values";
-    
-    private static final String X_AXIS_LBL = "X axis";
-    private static final String Y_AXIS_LBL = "Y axis";
-    
-    private static final String SPEARMAN_LBL = "Spearman's rank correlation coefficients";
-    
-    
-    protected ExportableChartPanel chartPanel;  // hold the charts
-    protected JPanel               headerPanel; // hold buttons
+	private static final String PANEL_TITLE_LBL = "Scatter";
+	private static final String FILTER_BTN_LBL = "Filter visible";
+	private static final String FILTER_BTN_TOOLTIP = "Create a sub-population based on the visible values";
 
-    protected JButton gateButton;
+	private static final String X_AXIS_LBL = "X axis";
+	private static final String Y_AXIS_LBL = "Y axis";
 
-    protected JComboBox<Measurement> statABox, statBBox;
+	private static final String SPEARMAN_LBL = "Spearman's rank correlation coefficients";
 
-    protected ExportableTable rhoTable;
+	protected ExportableChartPanel chartPanel; // hold the charts
+	protected JPanel headerPanel; // hold buttons
 
-    protected String component;
+	protected JButton gateButton;
 
-    public AbstractScatterChartPanel(@NonNull InputSupplier context, String component) {
-        super(context);
-        this.component = component;
+	protected JComboBox<Measurement> statABox, statBBox;
 
-        this.setLayout(new BorderLayout());
+	protected ExportableTable rhoTable;
 
-        headerPanel = createHeader();
+	protected String component;
 
-        this.add(headerPanel, BorderLayout.NORTH);
+	public AbstractScatterChartPanel(@NonNull InputSupplier context, String component) {
+		super(context);
+		this.component = component;
 
-        JFreeChart chart = ScatterChartFactory.createEmptyChart();
+		this.setLayout(new BorderLayout());
 
-        chartPanel = new ExportableChartPanel(chart);
-        chartPanel.getChartRenderingInfo().setEntityCollection(null);
-        
-        add(chartPanel, BorderLayout.CENTER);
-        add(createWestPanel(), BorderLayout.WEST);
-    }
+		headerPanel = createHeader();
 
-    @Override
-    public String getPanelTitle(){
-        return PANEL_TITLE_LBL;
-    }
-    
-    private JPanel createWestPanel() {
-    	JTextArea textArea = new WrappedLabel(SPEARMAN_LBL);
+		this.add(headerPanel, BorderLayout.NORTH);
 
-        JPanel panel = new JPanel(new BorderLayout());
+		JFreeChart chart = ScatterChartFactory.createEmptyChart();
 
-        TableModel model = AnalysisDatasetTableCreator.createBlankTable();
-        rhoTable = new ExportableTable(model);
-        rhoTable.setEnabled(false);
+		chartPanel = new ExportableChartPanel(chart);
+		chartPanel.getChartRenderingInfo().setEntityCollection(null);
 
-        JScrollPane scrollPane = new JScrollPane();
-        scrollPane.setViewportView(rhoTable);
-        scrollPane.setColumnHeaderView(rhoTable.getTableHeader());
-        Dimension size = new Dimension(300, 200);
-        scrollPane.setMinimumSize(size);
-        scrollPane.setPreferredSize(size);
-        
-        panel.add(textArea, BorderLayout.NORTH);
-        panel.add(scrollPane, BorderLayout.CENTER);
-        
-        return panel;
-    }
-    
-    private JPanel createHeader() {
-        statABox = new JComboBox<>(Measurement.getStats(component));
-        statBBox = new JComboBox<>(Measurement.getStats(component));
-        
-        statABox.setSelectedItem(component.equals(CellularComponent.NUCLEAR_SIGNAL)?Measurement.FRACT_DISTANCE_FROM_COM:Measurement.VARIABILITY); // default if present
+		add(chartPanel, BorderLayout.CENTER);
+		add(createWestPanel(), BorderLayout.WEST);
 
-        statABox.addActionListener(e->update(getDatasets()));
-        statBBox.addActionListener(e->update(getDatasets()));
-        
-        statABox.setEnabled(false);
-        statBBox.setEnabled(false);
+		uiController.addScaleUpdatedListener(this);
+	}
 
-        gateButton = new JButton(FILTER_BTN_LBL);
-        gateButton.setToolTipText(FILTER_BTN_TOOLTIP);
-        gateButton.addActionListener(e-> gateOnVisible());
-        gateButton.setEnabled(false);
+	@Override
+	public String getPanelTitle() {
+		return PANEL_TITLE_LBL;
+	}
 
-        JPanel panel = new JPanel(new FlowLayout());
+	private JPanel createWestPanel() {
+		JTextArea textArea = new WrappedLabel(SPEARMAN_LBL);
 
-        panel.add(new JLabel(X_AXIS_LBL));
-        panel.add(statABox);
-        panel.add(new JLabel(Y_AXIS_LBL));
-        panel.add(statBBox);
+		JPanel panel = new JPanel(new BorderLayout());
 
-        panel.add(gateButton);
-        return panel;
-    }
+		TableModel model = AnalysisDatasetTableCreator.createBlankTable();
+		rhoTable = new ExportableTable(model);
+		rhoTable.setEnabled(false);
 
-    @Override
-    protected synchronized void updateSingle() {
+		JScrollPane scrollPane = new JScrollPane();
+		scrollPane.setViewportView(rhoTable);
+		scrollPane.setColumnHeaderView(rhoTable.getTableHeader());
+		Dimension size = new Dimension(300, 200);
+		scrollPane.setMinimumSize(size);
+		scrollPane.setPreferredSize(size);
 
-        Measurement statA = (Measurement) statABox.getSelectedItem();
-        Measurement statB = (Measurement) statBBox.getSelectedItem();
+		panel.add(textArea, BorderLayout.NORTH);
+		panel.add(scrollPane, BorderLayout.CENTER);
 
-        ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets())
-        		.addStatistic(statA)
-                .addStatistic(statB)
-                .setScale(GlobalOptions.getInstance().getScale())
-                .setSwatch(GlobalOptions.getInstance()
-                .getSwatch())
-                .setTarget(chartPanel).build();
+		return panel;
+	}
 
-        setChart(options);
+	private JPanel createHeader() {
+		statABox = new JComboBox<>(Measurement.getStats(component));
+		statBBox = new JComboBox<>(Measurement.getStats(component));
 
-        TableOptions tableOptions = new TableOptionsBuilder().setDatasets(getDatasets())
-        		.addStatistic(statA)
-                .addStatistic(statB)
-                .setScale(GlobalOptions.getInstance().getScale())
-                .setTarget(rhoTable).build();
+		statABox.setSelectedItem(
+				component.equals(CellularComponent.NUCLEAR_SIGNAL) ? Measurement.FRACT_DISTANCE_FROM_COM
+						: Measurement.VARIABILITY); // default if present
 
-        setTable(tableOptions);
+		statABox.addActionListener(e -> update(getDatasets()));
+		statBBox.addActionListener(e -> update(getDatasets()));
 
-        // Check if the panel component is present
-        boolean isActive = activeDataset()!=null;
-        if(isActive && component.equals(CellularComponent.NUCLEAR_SIGNAL))
-        	isActive &= activeDataset().getCollection().getSignalManager().hasSignals();
-        
-        gateButton.setEnabled(isActive);
-        statABox.setEnabled(isActive);
-        statBBox.setEnabled(isActive);
-    }
+		statABox.setEnabled(false);
+		statBBox.setEnabled(false);
 
-    @Override
-    protected synchronized void updateMultiple() {
-        updateSingle();
-    }
+		gateButton = new JButton(FILTER_BTN_LBL);
+		gateButton.setToolTipText(FILTER_BTN_TOOLTIP);
+		gateButton.addActionListener(e -> gateOnVisible());
+		gateButton.setEnabled(false);
 
-    @Override
-    protected synchronized void updateNull() {
+		JPanel panel = new JPanel(new FlowLayout());
 
-        chartPanel.setChart(AbstractChartFactory.createEmptyChart());
-        rhoTable.setModel(AbstractTableCreator.createBlankTable());
-        gateButton.setEnabled(false);
-        statABox.setEnabled(false);
-        statBBox.setEnabled(false);
-    }
+		panel.add(new JLabel(X_AXIS_LBL));
+		panel.add(statABox);
+		panel.add(new JLabel(Y_AXIS_LBL));
+		panel.add(statBBox);
 
-    @Override
-    public synchronized void setChartsAndTablesLoading() {
-        chartPanel.setChart(AbstractChartFactory.createLoadingChart());
-        rhoTable.setModel(AbstractTableCreator.createLoadingTable());
-    }
+		panel.add(gateButton);
+		return panel;
+	}
 
-    @Override
-    protected synchronized TableModel createPanelTableType(TableOptions options) {
-        return new ScatterTableDatasetCreator(options).createSpearmanCorrlationTable(component);
-    }
+	@Override
+	protected synchronized void updateSingle() {
 
-    @Override
-    protected synchronized JFreeChart createPanelChartType(ChartOptions options) {
-        return new ScatterChartFactory(options).createScatterChart(component);
-    }
+		Measurement statA = (Measurement) statABox.getSelectedItem();
+		Measurement statB = (Measurement) statBBox.getSelectedItem();
 
+		ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets()).addStatistic(statA)
+				.addStatistic(statB).setScale(GlobalOptions.getInstance().getScale())
+				.setSwatch(GlobalOptions.getInstance().getSwatch()).setTarget(chartPanel).build();
 
-    protected void gateOnVisible() {
+		setChart(options);
 
-     	int result;
+		TableOptions tableOptions = new TableOptionsBuilder().setDatasets(getDatasets()).addStatistic(statA)
+				.addStatistic(statB).setScale(GlobalOptions.getInstance().getScale()).setTarget(rhoTable).build();
+
+		setTable(tableOptions);
+
+		// Check if the panel component is present
+		boolean isActive = activeDataset() != null;
+		if (isActive && component.equals(CellularComponent.NUCLEAR_SIGNAL))
+			isActive &= activeDataset().getCollection().getSignalManager().hasSignals();
+
+		gateButton.setEnabled(isActive);
+		statABox.setEnabled(isActive);
+		statBBox.setEnabled(isActive);
+	}
+
+	@Override
+	protected synchronized void updateMultiple() {
+		updateSingle();
+	}
+
+	@Override
+	protected synchronized void updateNull() {
+
+		chartPanel.setChart(AbstractChartFactory.createEmptyChart());
+		rhoTable.setModel(AbstractTableCreator.createBlankTable());
+		gateButton.setEnabled(false);
+		statABox.setEnabled(false);
+		statBBox.setEnabled(false);
+	}
+
+	@Override
+	public synchronized void setChartsAndTablesLoading() {
+		chartPanel.setChart(AbstractChartFactory.createLoadingChart());
+		rhoTable.setModel(AbstractTableCreator.createLoadingTable());
+	}
+
+	@Override
+	protected synchronized TableModel createPanelTableType(TableOptions options) {
+		return new ScatterTableDatasetCreator(options).createSpearmanCorrlationTable(component);
+	}
+
+	@Override
+	protected synchronized JFreeChart createPanelChartType(ChartOptions options) {
+		return new ScatterChartFactory(options).createScatterChart(component);
+	}
+
+	protected void gateOnVisible() {
+
+		int result;
 		try {
-			String[] options = { "Do not filter", "Filter collection"};
-			result = this.getInputSupplier().requestOptionAllVisible(options, "Filter selected datasets on visible values?", "Filter datasets?");
+			String[] options = { "Do not filter", "Filter collection" };
+			result = this.getInputSupplier().requestOptionAllVisible(options,
+					"Filter selected datasets on visible values?", "Filter datasets?");
 		} catch (RequestCancelledException e2) {
 			return;
 		}
 
-        if (result == 0)
-            return;
+		if (result == 0)
+			return;
 
-        LOGGER.finer("Filtering datasets on " + statABox.getSelectedItem().toString() + " and "
-                + statBBox.getSelectedItem().toString());
+		LOGGER.finer("Filtering datasets on " + statABox.getSelectedItem().toString() + " and "
+				+ statBBox.getSelectedItem().toString());
 
-        MeasurementScale scale = GlobalOptions.getInstance().getScale();
-        
-        Range domain = getDomainBounds();
-        Range range = getRangeBounds();
-        Measurement statA = (Measurement) statABox.getSelectedItem();
-        Measurement statB = (Measurement) statBBox.getSelectedItem();
-        
-        FilteringOptions options = new CellCollectionFilterBuilder()
-        		.setMatchType(FilterMatchType.ALL_MATCH)
-        		.add(statA, component, scale, domain.getLowerBound(),domain.getUpperBound() )
-        		.add(statB, component, scale, range.getLowerBound(), range.getUpperBound())
-        		.build();
-        
-        
-        for (IAnalysisDataset d : getDatasets()) {
-        	try {
-        		
-        		// Get the filtered cells as a real collection
-        		ICellCollection filtered  = CellCollectionFilterer.filter(d.getCollection(), options);
-        		
-        		// Put them into a virtual collection
-        		ICellCollection virt = new VirtualDataset(d, filtered.getName());
-        		filtered.getCells().forEach(c->virt.addCell(c));
-        		virt.setName("Filtered_" + statA + "_" + statB);
-        		
-        		d.getCollection().getProfileManager().copySegmentsAndLandmarksTo(virt);
-        		d.getCollection().getSignalManager().copySignalGroupsTo(virt);
-        		d.addChildCollection(virt);		
-        	} catch (CollectionFilteringException | ProfileException | MissingProfileException e1) {
-        		LOGGER.log(Loggable.STACK, "Unable to filter collection for " + d.getName(), e1);
-        	}
-        }
+		MeasurementScale scale = GlobalOptions.getInstance().getScale();
 
-        LOGGER.info(String.format("Filtered datasets by %s and %s", statA, statB));
-        getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.REFRESH_POPULATIONS);
-    }
+		Range domain = getDomainBounds();
+		Range range = getRangeBounds();
+		Measurement statA = (Measurement) statABox.getSelectedItem();
+		Measurement statB = (Measurement) statBBox.getSelectedItem();
 
-    protected Range getRangeBounds() {
-        return chartPanel.getChart().getXYPlot().getRangeAxis().getRange();
-    }
+		FilteringOptions options = new CellCollectionFilterBuilder().setMatchType(FilterMatchType.ALL_MATCH)
+				.add(statA, component, scale, domain.getLowerBound(), domain.getUpperBound())
+				.add(statB, component, scale, range.getLowerBound(), range.getUpperBound()).build();
 
-    protected Range getDomainBounds() {
-        return chartPanel.getChart().getXYPlot().getDomainAxis().getRange();
-    }
+		for (IAnalysisDataset d : getDatasets()) {
+			try {
+
+				// Get the filtered cells as a real collection
+				ICellCollection filtered = CellCollectionFilterer.filter(d.getCollection(), options);
+
+				// Put them into a virtual collection
+				ICellCollection virt = new VirtualDataset(d, filtered.getName());
+				filtered.getCells().forEach(c -> virt.addCell(c));
+				virt.setName("Filtered_" + statA + "_" + statB);
+
+				d.getCollection().getProfileManager().copySegmentsAndLandmarksTo(virt);
+				d.getCollection().getSignalManager().copySignalGroupsTo(virt);
+				d.addChildCollection(virt);
+			} catch (CollectionFilteringException | ProfileException | MissingProfileException e1) {
+				LOGGER.log(Loggable.STACK, "Unable to filter collection for " + d.getName(), e1);
+			}
+		}
+
+		LOGGER.info(String.format("Filtered datasets by %s and %s", statA, statB));
+//		getDatasetEventHandler().fireDatasetEvent(DatasetEvent.ADD_DATASET);
+	}
+
+	protected Range getRangeBounds() {
+		return chartPanel.getChart().getXYPlot().getRangeAxis().getRange();
+	}
+
+	protected Range getDomainBounds() {
+		return chartPanel.getChart().getXYPlot().getDomainAxis().getRange();
+	}
 }

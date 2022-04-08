@@ -26,7 +26,6 @@ import java.util.logging.Logger;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMethod.MorphologyAnalysisMode;
-import com.bmskinner.nuclear_morphology.components.cells.Nucleus;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
@@ -76,833 +75,829 @@ import com.bmskinner.nuclear_morphology.gui.events.ChartOptionsRenderedEvent;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetUpdateEvent;
 import com.bmskinner.nuclear_morphology.gui.events.EventListener;
-import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent;
-import com.bmskinner.nuclear_morphology.gui.events.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.events.PopulationListUpdateListener;
 import com.bmskinner.nuclear_morphology.gui.events.PopulationListUpdateListener.PopulationListUpdateEvent;
 import com.bmskinner.nuclear_morphology.gui.events.SignalChangeEvent;
+import com.bmskinner.nuclear_morphology.gui.events.revamp.UIController;
 import com.bmskinner.nuclear_morphology.gui.tabs.DatasetSelectionListener;
 import com.bmskinner.nuclear_morphology.gui.tabs.DatasetSelectionListener.DatasetSelectionEvent;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
- * Listens to messages from the UI and launches actions. This is the hub of messaging;
- * messages are passed from the UI to here, and dispatched back to the UI or to actions.
+ * Listens to messages from the UI and launches actions. This is the hub of
+ * messaging; messages are passed from the UI to here, and dispatched back to
+ * the UI or to actions.
  * 
  * @author bms41
  * @since 1.13.7
  *
  */
 public class EventHandler implements EventListener {
-	
+
 	private static final Logger LOGGER = Logger.getLogger(EventHandler.class.getName());
 
 	private final InputSupplier ic;
-    private ProgressBarAcceptor acceptor;
+	private ProgressBarAcceptor acceptor;
 
-    private final List<EventListener> updateListeners = new ArrayList<>();
-    private final List<EventListener> interfaceListeners = new ArrayList<>();
-    private final List<EventListener> datasetListeners = new ArrayList<>();
-    private final List<DatasetSelectionListener> selectionListeners = new ArrayList<>();
-    private final List<PopulationListUpdateListener> populationsListUpdateListeners = new ArrayList<>();
+	private final List<EventListener> updateListeners = new ArrayList<>();
+	private final List<EventListener> interfaceListeners = new ArrayList<>();
+	private final List<EventListener> datasetListeners = new ArrayList<>();
+	private final List<DatasetSelectionListener> selectionListeners = new ArrayList<>();
+	private final List<PopulationListUpdateListener> populationsListUpdateListeners = new ArrayList<>();
 
-    
-    /**
-     * Constructor 
-     */
-    public EventHandler(@NonNull final InputSupplier context) {
-    	ic = context;
-    }
+	/**
+	 * Constructor
+	 */
+	public EventHandler(@NonNull final InputSupplier context) {
+		ic = context;
+	}
 
+	/**
+	 * Constructor specifying a progress bar acceptor for displaying progress bars
+	 * 
+	 * @param acceptor
+	 */
+	public EventHandler(@NonNull final InputSupplier context, @NonNull final ProgressBarAcceptor acceptor) {
+		this(context);
+		this.acceptor = acceptor;
+	}
 
-    /**
-     * Constructor specifying a progress bar acceptor for displaying progress bars
-     * @param acceptor
-     */
-    public EventHandler(@NonNull final InputSupplier context, @NonNull final ProgressBarAcceptor acceptor) {
-    	this(context);
-        this.acceptor = acceptor;
-    }
-    
-    /**
-     * The input context determines how the system will ask for user input
-     * @return the current context
-     */
-    public InputSupplier getInputSupplier() {
-    	return ic;
-    }
-    
-    /**
-     * Add the given progress bar acceptor to this handler
-     * @param p
-     */
-    public void addProgressBarAcceptor(ProgressBarAcceptor p) {
-    	acceptor = p;
-    }
-    
-    public void addInterfaceEventListener(EventListener l) {
-    	interfaceListeners.add(l);
-    }
-    
-    private void fireInterfaceEvent(InterfaceEvent e) {
-    	for(EventListener l : interfaceListeners) {
-    		l.eventReceived(e);
-    	}
-    }
-    
-    public void addDatasetSelectionListener(DatasetSelectionListener l) {
-    	selectionListeners.add(l);
-    }
-    
-    private void fireDatasetSelectionEvent(IAnalysisDataset d) {
-    	List<IAnalysisDataset> list = new ArrayList<>();
-    	list.add(d);
-    	fireDatasetSelectionEvent(list);
-    }
-    
-    private void fireDatasetSelectionEvent(List<IAnalysisDataset> list) {
-    	DatasetSelectionEvent e = new DatasetSelectionEvent(this, list);
-    	for(DatasetSelectionListener l : selectionListeners) {
-    		l.datasetSelectionEventReceived(e);
-    	}
-    }
-    
-    public void addDatasetEventListener(EventListener l) {
-    	datasetListeners.add(l);
-    }
-        
-    private void fireDatasetEvent(DatasetEvent event) {
-    	for(EventListener l : datasetListeners) {
-    		l.eventReceived(event);
-    	}
-    }
+	/**
+	 * The input context determines how the system will ask for user input
+	 * 
+	 * @return the current context
+	 */
+	public InputSupplier getInputSupplier() {
+		return ic;
+	}
 
-    /**
-     * Map events to the actions they should trigger
-     * 
-     * @author bms41
-     * @since 1.13.4
-     *
-     */
-    private class ActionFactory {
+	/**
+	 * Add the given progress bar acceptor to this handler
+	 * 
+	 * @param p
+	 */
+	public void addProgressBarAcceptor(ProgressBarAcceptor p) {
+		acceptor = p;
+	}
 
-        public ActionFactory() { 
-        	// No fields
-        }
+	public void addInterfaceEventListener(EventListener l) {
+		interfaceListeners.add(l);
+	}
 
-        /**
-         * Create a runnable action for the given event
-         * 
-         * @param event
-         * @return
-         */
-        public synchronized Runnable create(final SignalChangeEvent event) {
-        	
-        	final List<IAnalysisDataset> selectedDatasets = DatasetListManager.getInstance().getSelectedDatasets();
-        	final IAnalysisDataset selectedDataset = selectedDatasets.isEmpty() ? null
-                    : selectedDatasets.get(0);
-        	
-        	if (event.type().startsWith(SignalChangeEvent.IMPORT_WORKFLOW_PREFIX)) {
-                String s = event.type().replace(SignalChangeEvent.IMPORT_WORKFLOW_PREFIX, "");
-                
-                // No image folder specified; will be requested in workflow
-                if(s.equals(""))
-                	return new ImportWorkflowAction(acceptor, EventHandler.this);
-                
-                // Image folder specified                
-                File f = new File(s);
-                return new ImportWorkflowAction(acceptor, EventHandler.this, f);
-            }
-        	
-        	if (event.type().startsWith(SignalChangeEvent.IMPORT_DATASET_PREFIX)) {
-                String s = event.type().replace(SignalChangeEvent.IMPORT_DATASET_PREFIX, "");
-                if(s.equals(""))
-                	return new ImportDatasetAction(acceptor, EventHandler.this);
-                File f = new File(s);
-                return new ImportDatasetAction(acceptor, EventHandler.this, f);
-            }
-            
-            if (event.type().startsWith(SignalChangeEvent.IMPORT_WORKSPACE_PREFIX))
-            	return () -> {
-            		String s = event.type().replace(SignalChangeEvent.IMPORT_WORKSPACE_PREFIX, "");
-            		if(s.equals("")) {
-            			new ImportWorkspaceAction(acceptor, EventHandler.this).run();
-            			return;
-            		}
-            		File f = new File(s);
-            		new ImportWorkspaceAction(acceptor, EventHandler.this, f).run();
-            	};
+	public void addDatasetSelectionListener(DatasetSelectionListener l) {
+		selectionListeners.add(l);
+	}
 
-            	if (event.type().startsWith(SignalChangeEvent.NEW_ANALYSIS_PREFIX)) {
-            		return () -> {
-            			String s = event.type().replace(SignalChangeEvent.NEW_ANALYSIS_PREFIX, "");
-            			if(s.equals(""))
-            				return;
-            			File f = new File(s);
+	private void fireDatasetSelectionEvent(IAnalysisDataset d) {
+		List<IAnalysisDataset> list = new ArrayList<>();
+		list.add(d);
+		fireDatasetSelectionEvent(list);
+	}
 
-            			new NewAnalysisAction(acceptor, EventHandler.this, f).run();
-            		};
-            	}
-            
-            if (event.type().equals(SignalChangeEvent.NEW_WORKSPACE))
-            	return () -> createWorkspace();
-            	
-        	if (event.type().equals(SignalChangeEvent.EXPORT_WORKSPACE))
-                return new ExportWorkspaceAction(DatasetListManager.getInstance().getWorkspaces(), acceptor, EventHandler.this);
-        	
-        	if(selectedDataset==null)
-        		return null;
+	private void fireDatasetSelectionEvent(List<IAnalysisDataset> list) {
+		DatasetSelectionEvent e = new DatasetSelectionEvent(this, list);
+		for (DatasetSelectionListener l : selectionListeners) {
+			l.datasetSelectionEventReceived(e);
+		}
+	}
 
-            if (event.type().equals(SignalChangeEvent.DATASET_ARITHMETIC))
-                return new DatasetArithmeticAction(selectedDatasets, acceptor, EventHandler.this);
-            
-            if (event.type().equals(SignalChangeEvent.EXTRACT_SUBSET))
-                return new ExtractRandomCellsAction(selectedDataset, acceptor, EventHandler.this);
+	public void addDatasetEventListener(EventListener l) {
+		datasetListeners.add(l);
+	}
 
-            if (event.type().equals(SignalChangeEvent.CHANGE_NUCLEUS_IMAGE_FOLDER))
-                return new ReplaceSourceImageDirectoryAction(selectedDataset, acceptor, EventHandler.this);
+	private void fireDatasetEvent(DatasetEvent event) {
+		for (EventListener l : datasetListeners) {
+			l.eventReceived(event);
+		}
+	}
 
-            if (event.type().equals(SignalChangeEvent.ADD_NUCLEAR_SIGNAL))
-                return new AddNuclearSignalAction(selectedDataset, acceptor, EventHandler.this);
-            
-            if (event.type().equals(SignalChangeEvent.CLUSTER_FROM_FILE))
-                return new ClusterFileAssignmentAction(selectedDataset, acceptor, EventHandler.this);
+	/**
+	 * Map events to the actions they should trigger
+	 * 
+	 * @author bms41
+	 * @since 1.13.4
+	 *
+	 */
+	private class ActionFactory {
 
-            if (event.type().equals(SignalChangeEvent.POST_FISH_MAPPING))
-                return new FishRemappingAction(selectedDatasets, acceptor, EventHandler.this);
+		public ActionFactory() {
+			// No fields
+		}
 
-            if (event.type().equals(SignalChangeEvent.EXPORT_STATS))
-                return new ExportNuclearStatsAction(selectedDatasets, acceptor, EventHandler.this);
-            
-            if (event.type().equals(SignalChangeEvent.EXPORT_PROFILES))
-                return new ExportNuclearProfilesAction(selectedDatasets, acceptor, EventHandler.this);
-            
-            if (event.type().equals(SignalChangeEvent.EXPORT_OUTLINES))
-                return new ExportNuclearOutlinesAction(selectedDatasets, acceptor, EventHandler.this);
-            
-            if (event.type().equals(SignalChangeEvent.EXPORT_SIGNALS))
-            	return new ExportSignalsAction(selectedDatasets, acceptor, EventHandler.this);
-            
-            if (event.type().equals(SignalChangeEvent.EXPORT_SHELLS))
-                return new ExportShellsAction(selectedDatasets, acceptor, EventHandler.this);
-            
-            if (event.type().equals(SignalChangeEvent.EXPORT_OPTIONS))
-                return new ExportOptionsAction(selectedDatasets, acceptor, EventHandler.this);
-            
-            if (event.type().equals(SignalChangeEvent.EXPORT_RULESETS))
-                return new ExportRuleSetsAction(selectedDatasets, acceptor, EventHandler.this);
+		/**
+		 * Create a runnable action for the given event
+		 * 
+		 * @param event
+		 * @return
+		 */
+		public synchronized Runnable create(final SignalChangeEvent event) {
 
-            if (event.type().equals(SignalChangeEvent.EXPORT_SINGLE_CELL_IMAGES))
-                return new ExportSingleCellImagesAction(selectedDatasets, acceptor, EventHandler.this);
-            
-            if (event.type().equals(SignalChangeEvent.MERGE_DATASETS_ACTION))
-                return new MergeCollectionAction(selectedDatasets, acceptor, EventHandler.this);
-            
-            if (event.type().equals(SignalChangeEvent.MERGE_SIGNALS_ACTION)) {
-            	LOGGER.finer("Event handler heard new merge signals action request on dataset "+selectedDataset.getName());
-                return new MergeSignalsAction(selectedDataset, acceptor, EventHandler.this);
-            }
+			final List<IAnalysisDataset> selectedDatasets = DatasetListManager.getInstance().getSelectedDatasets();
+			final IAnalysisDataset selectedDataset = selectedDatasets.isEmpty() ? null : selectedDatasets.get(0);
 
-            if (event.type().equals(SignalChangeEvent.CHANGE_SCALE))
-                return () -> setScale(selectedDatasets);
-                
-            if (event.type().equals(SignalChangeEvent.SAVE_SELECTED_DATASET))
-            	return new ExportDatasetAction(selectedDataset, acceptor, EventHandler.this, null, true);
-            
-            if (event.type().equals(SignalChangeEvent.EXPORT_XML_DATASET))
-            	return new ExportDatasetAction(selectedDataset, acceptor, EventHandler.this, null, true);
-            
-            if (event.type().equals(SignalChangeEvent.EXPORT_TPS_DATASET))
-            	return new ExportTPSAction(selectedDataset, acceptor, EventHandler.this);
-            
-            if (event.type().equals(SignalChangeEvent.SAVE_ALL_DATASETS))
-                return () -> saveRootDatasets();
-            	
-        	if (event.type().equals(SignalChangeEvent.UPDATE_PANELS_WITH_NULL) )
-        		return () -> fireDatasetUpdateEvent(new ArrayList<IAnalysisDataset>());
-        		
-        	if (event.type().equals(SignalChangeEvent.UPDATE_PANELS))
-                return () -> fireDatasetUpdateEvent(selectedDatasets);
-                
-                
-            if (event.type().equals(SignalChangeEvent.CURATE_DATASET))
-            	return () -> {
-            		Runnable r = () -> {
-            			AbstractCellCollectionDialog d = new ManualCurationDialog(selectedDataset);
-            			d.addDatasetEventListener(EventHandler.this);
-            		};
-            		new Thread(r).start();// separate from the UI and method threads - we must not block them
-            	};
-                            
-            if (event.type().equals(SignalChangeEvent.EXPORT_CELL_LOCS))
-            	return new ExportCellLocationsAction(selectedDatasets, acceptor, EventHandler.this);
-                    
-            if (event.type().startsWith(SignalChangeEvent.REMOVE_FROM_WORKSPACE_PREFIX))
-            	return () ->{
-            		String workspaceName = event.type().replace(SignalChangeEvent.REMOVE_FROM_WORKSPACE_PREFIX, "");
-            		IWorkspace ws = DatasetListManager.getInstance().getWorkspaces().stream()
-            				.filter(w->w.getName().equals(workspaceName)).findFirst().orElseThrow(IllegalArgumentException::new);
-            		for(IAnalysisDataset d : DatasetListManager.getInstance().getRootParents(selectedDatasets))
-            				ws.remove(d);
-            		fireDatasetEvent(new DatasetEvent(this, DatasetEvent.ADD_WORKSPACE, EventHandler.class.getName(), new ArrayList<IAnalysisDataset>()));
-            	};
-            
-        	if (event.type().startsWith(SignalChangeEvent.ADD_TO_WORKSPACE_PREFIX))
-        		return () -> {
-        			String workspaceName = event.type().replace(SignalChangeEvent.ADD_TO_WORKSPACE_PREFIX, "");
-        			IWorkspace ws = DatasetListManager.getInstance().getWorkspaces().stream()
-        					.filter(w->w.getName().equals(workspaceName)).findFirst().orElseThrow(IllegalArgumentException::new);
-        			
-        			for(IAnalysisDataset d : DatasetListManager.getInstance().getRootParents(selectedDatasets))
-        				ws.add(d);
-        			fireDatasetEvent(new DatasetEvent(this, DatasetEvent.ADD_WORKSPACE, EventHandler.class.getName(), new ArrayList<IAnalysisDataset>()));
-        		};
+			if (event.type().startsWith(SignalChangeEvent.IMPORT_WORKFLOW_PREFIX)) {
+				String s = event.type().replace(SignalChangeEvent.IMPORT_WORKFLOW_PREFIX, "");
 
-    		if (event.type().startsWith(SignalChangeEvent.NEW_BIOSAMPLE_PREFIX))
-    			return () ->{
-    				LOGGER.fine("Creating new biosample");
-    				try {
+				// No image folder specified; will be requested in workflow
+				if (s.equals(""))
+					return new ImportWorkflowAction(acceptor, EventHandler.this);
+
+				// Image folder specified
+				File f = new File(s);
+				return new ImportWorkflowAction(acceptor, EventHandler.this, f);
+			}
+
+			if (event.type().startsWith(SignalChangeEvent.IMPORT_DATASET_PREFIX)) {
+				String s = event.type().replace(SignalChangeEvent.IMPORT_DATASET_PREFIX, "");
+				if (s.equals(""))
+					return new ImportDatasetAction(acceptor, EventHandler.this);
+				File f = new File(s);
+				return new ImportDatasetAction(acceptor, EventHandler.this, f);
+			}
+
+			if (event.type().startsWith(SignalChangeEvent.IMPORT_WORKSPACE_PREFIX))
+				return () -> {
+					String s = event.type().replace(SignalChangeEvent.IMPORT_WORKSPACE_PREFIX, "");
+					if (s.equals("")) {
+						new ImportWorkspaceAction(acceptor, EventHandler.this).run();
+						return;
+					}
+					File f = new File(s);
+					new ImportWorkspaceAction(acceptor, EventHandler.this, f).run();
+				};
+
+			if (event.type().startsWith(SignalChangeEvent.NEW_ANALYSIS_PREFIX)) {
+				return () -> {
+					String s = event.type().replace(SignalChangeEvent.NEW_ANALYSIS_PREFIX, "");
+					if (s.equals(""))
+						return;
+					File f = new File(s);
+
+					new NewAnalysisAction(acceptor, EventHandler.this, f).run();
+				};
+			}
+
+			if (event.type().equals(SignalChangeEvent.NEW_WORKSPACE))
+				return () -> createWorkspace();
+
+			if (event.type().equals(SignalChangeEvent.EXPORT_WORKSPACE))
+				return new ExportWorkspaceAction(DatasetListManager.getInstance().getWorkspaces(), acceptor,
+						EventHandler.this);
+
+			if (selectedDataset == null)
+				return null;
+
+			if (event.type().equals(SignalChangeEvent.DATASET_ARITHMETIC))
+				return new DatasetArithmeticAction(selectedDatasets, acceptor, EventHandler.this);
+
+			if (event.type().equals(SignalChangeEvent.EXTRACT_SUBSET))
+				return new ExtractRandomCellsAction(selectedDataset, acceptor, EventHandler.this);
+
+			if (event.type().equals(SignalChangeEvent.CHANGE_NUCLEUS_IMAGE_FOLDER))
+				return new ReplaceSourceImageDirectoryAction(selectedDataset, acceptor, EventHandler.this);
+
+			if (event.type().equals(SignalChangeEvent.ADD_NUCLEAR_SIGNAL))
+				return new AddNuclearSignalAction(selectedDataset, acceptor, EventHandler.this);
+
+			if (event.type().equals(SignalChangeEvent.CLUSTER_FROM_FILE))
+				return new ClusterFileAssignmentAction(selectedDataset, acceptor, EventHandler.this);
+
+			if (event.type().equals(SignalChangeEvent.POST_FISH_MAPPING))
+				return new FishRemappingAction(selectedDatasets, acceptor, EventHandler.this);
+
+			if (event.type().equals(SignalChangeEvent.EXPORT_STATS))
+				return new ExportNuclearStatsAction(selectedDatasets, acceptor, EventHandler.this);
+
+			if (event.type().equals(SignalChangeEvent.EXPORT_PROFILES))
+				return new ExportNuclearProfilesAction(selectedDatasets, acceptor, EventHandler.this);
+
+			if (event.type().equals(SignalChangeEvent.EXPORT_OUTLINES))
+				return new ExportNuclearOutlinesAction(selectedDatasets, acceptor, EventHandler.this);
+
+			if (event.type().equals(SignalChangeEvent.EXPORT_SIGNALS))
+				return new ExportSignalsAction(selectedDatasets, acceptor, EventHandler.this);
+
+			if (event.type().equals(SignalChangeEvent.EXPORT_SHELLS))
+				return new ExportShellsAction(selectedDatasets, acceptor, EventHandler.this);
+
+			if (event.type().equals(SignalChangeEvent.EXPORT_OPTIONS))
+				return new ExportOptionsAction(selectedDatasets, acceptor, EventHandler.this);
+
+			if (event.type().equals(SignalChangeEvent.EXPORT_RULESETS))
+				return new ExportRuleSetsAction(selectedDatasets, acceptor, EventHandler.this);
+
+			if (event.type().equals(SignalChangeEvent.EXPORT_SINGLE_CELL_IMAGES))
+				return new ExportSingleCellImagesAction(selectedDatasets, acceptor, EventHandler.this);
+
+			if (event.type().equals(SignalChangeEvent.MERGE_DATASETS_ACTION))
+				return new MergeCollectionAction(selectedDatasets, acceptor, EventHandler.this);
+
+			if (event.type().equals(SignalChangeEvent.MERGE_SIGNALS_ACTION)) {
+				LOGGER.finer(
+						"Event handler heard new merge signals action request on dataset " + selectedDataset.getName());
+				return new MergeSignalsAction(selectedDataset, acceptor, EventHandler.this);
+			}
+
+			if (event.type().equals(SignalChangeEvent.CHANGE_SCALE))
+				return () -> setScale(selectedDatasets);
+
+			if (event.type().equals(SignalChangeEvent.SAVE_SELECTED_DATASET))
+				return new ExportDatasetAction(selectedDataset, acceptor, EventHandler.this, null, true);
+
+			if (event.type().equals(SignalChangeEvent.EXPORT_XML_DATASET))
+				return new ExportDatasetAction(selectedDataset, acceptor, EventHandler.this, null, true);
+
+			if (event.type().equals(SignalChangeEvent.EXPORT_TPS_DATASET))
+				return new ExportTPSAction(selectedDataset, acceptor, EventHandler.this);
+
+			if (event.type().equals(SignalChangeEvent.SAVE_ALL_DATASETS))
+				return () -> saveRootDatasets();
+
+			if (event.type().equals(SignalChangeEvent.UPDATE_PANELS_WITH_NULL))
+				return () -> fireDatasetUpdateEvent(new ArrayList<IAnalysisDataset>());
+
+			if (event.type().equals(SignalChangeEvent.UPDATE_PANELS))
+				return () -> fireDatasetUpdateEvent(selectedDatasets);
+
+			if (event.type().equals(SignalChangeEvent.CURATE_DATASET))
+				return () -> {
+					Runnable r = () -> {
+						AbstractCellCollectionDialog d = new ManualCurationDialog(selectedDataset);
+						d.addDatasetEventListener(EventHandler.this);
+					};
+					new Thread(r).start();// separate from the UI and method threads - we must not block them
+				};
+
+			if (event.type().equals(SignalChangeEvent.EXPORT_CELL_LOCS))
+				return new ExportCellLocationsAction(selectedDatasets, acceptor, EventHandler.this);
+
+			if (event.type().startsWith(SignalChangeEvent.REMOVE_FROM_WORKSPACE_PREFIX))
+				return () -> {
+					String workspaceName = event.type().replace(SignalChangeEvent.REMOVE_FROM_WORKSPACE_PREFIX, "");
+					IWorkspace ws = DatasetListManager.getInstance().getWorkspaces().stream()
+							.filter(w -> w.getName().equals(workspaceName)).findFirst()
+							.orElseThrow(IllegalArgumentException::new);
+					for (IAnalysisDataset d : DatasetListManager.getInstance().getRootParents(selectedDatasets))
+						ws.remove(d);
+					fireDatasetEvent(new DatasetEvent(this, DatasetEvent.ADD_WORKSPACE, EventHandler.class.getName(),
+							new ArrayList<IAnalysisDataset>()));
+				};
+
+			if (event.type().startsWith(SignalChangeEvent.ADD_TO_WORKSPACE_PREFIX))
+				return () -> {
+					String workspaceName = event.type().replace(SignalChangeEvent.ADD_TO_WORKSPACE_PREFIX, "");
+					IWorkspace ws = DatasetListManager.getInstance().getWorkspaces().stream()
+							.filter(w -> w.getName().equals(workspaceName)).findFirst()
+							.orElseThrow(IllegalArgumentException::new);
+
+					for (IAnalysisDataset d : DatasetListManager.getInstance().getRootParents(selectedDatasets))
+						ws.add(d);
+					fireDatasetEvent(new DatasetEvent(this, DatasetEvent.ADD_WORKSPACE, EventHandler.class.getName(),
+							new ArrayList<IAnalysisDataset>()));
+				};
+
+			if (event.type().startsWith(SignalChangeEvent.NEW_BIOSAMPLE_PREFIX))
+				return () -> {
+					LOGGER.fine("Creating new biosample");
+					try {
 						String bsName = ic.requestString("New biosample name");
 						List<IWorkspace> workspaces = DatasetListManager.getInstance().getWorkspaces(selectedDataset);
-						for(IWorkspace w : workspaces) {
+						for (IWorkspace w : workspaces) {
 							w.addBioSample(bsName);
 							BioSample bs = w.getBioSample(bsName);
-							if(bs!=null)
+							if (bs != null)
 								bs.addDataset(selectedDataset);
 						}
-						fireDatasetSelectionEvent(selectedDataset); // Using to trigger a refresh of the populations panel
+						fireDatasetSelectionEvent(selectedDataset); // Using to trigger a refresh of the populations
+																	// panel
 					} catch (RequestCancelledException e) {
 						LOGGER.fine("New biosample cancelled");
 						return;
 					}
-    			};	
-        		
-    		
-    		if (event.type().startsWith(SignalChangeEvent.REMOVE_FROM_BIOSAMPLE_PREFIX))
-            	return () ->{
-            		String bsName = event.type().replace(SignalChangeEvent.REMOVE_FROM_BIOSAMPLE_PREFIX, "");
-            		LOGGER.fine("Removing dataset from biosample "+bsName);
-            		List<IWorkspace> workspaces = DatasetListManager.getInstance().getWorkspaces(selectedDataset);
-            		for(IWorkspace w : workspaces) {
-            			BioSample b = w.getBioSample(bsName);
-            			if(b!=null)
-            				b.removeDataset(selectedDataset);
-					}
-					fireDatasetSelectionEvent(selectedDataset); // Using to trigger a refresh of the populations panel
-            	};
-            
-        	if (event.type().startsWith(SignalChangeEvent.ADD_TO_BIOSAMPLE_PREFIX))
-        		return () ->{
-        			String bsName = event.type().replace(SignalChangeEvent.ADD_TO_BIOSAMPLE_PREFIX, "");
-        			LOGGER.fine("Adding dataset to biosample "+bsName);
-        			List<IWorkspace> workspaces = DatasetListManager.getInstance().getWorkspaces(selectedDataset);
-					for(IWorkspace w : workspaces) {
+				};
+
+			if (event.type().startsWith(SignalChangeEvent.REMOVE_FROM_BIOSAMPLE_PREFIX))
+				return () -> {
+					String bsName = event.type().replace(SignalChangeEvent.REMOVE_FROM_BIOSAMPLE_PREFIX, "");
+					LOGGER.fine("Removing dataset from biosample " + bsName);
+					List<IWorkspace> workspaces = DatasetListManager.getInstance().getWorkspaces(selectedDataset);
+					for (IWorkspace w : workspaces) {
 						BioSample b = w.getBioSample(bsName);
-            			if(b!=null)
-            				b.addDataset(selectedDataset);
+						if (b != null)
+							b.removeDataset(selectedDataset);
 					}
 					fireDatasetSelectionEvent(selectedDataset); // Using to trigger a refresh of the populations panel
-        		};
-            
-            
-            if (event.type().equals(SignalChangeEvent.RELOCATE_CELLS)) 
-                return new RelocateFromFileAction(selectedDataset, acceptor, EventHandler.this, new CountDownLatch(1));
+				};
 
-            return null;
-        }
-        
-        /**
-         * Create a new workspace
-         */
-        private void createWorkspace() {
+			if (event.type().startsWith(SignalChangeEvent.ADD_TO_BIOSAMPLE_PREFIX))
+				return () -> {
+					String bsName = event.type().replace(SignalChangeEvent.ADD_TO_BIOSAMPLE_PREFIX, "");
+					LOGGER.fine("Adding dataset to biosample " + bsName);
+					List<IWorkspace> workspaces = DatasetListManager.getInstance().getWorkspaces(selectedDataset);
+					for (IWorkspace w : workspaces) {
+						BioSample b = w.getBioSample(bsName);
+						if (b != null)
+							b.addDataset(selectedDataset);
+					}
+					fireDatasetSelectionEvent(selectedDataset); // Using to trigger a refresh of the populations panel
+				};
 
-    		try {
-    			String workspaceName = ic.requestString("New workspace name");
-    			IWorkspace w = WorkspaceFactory.createWorkspace(workspaceName);
-    			DatasetListManager.getInstance().addWorkspace(w);
-        		LOGGER.info("New workspace created: "+workspaceName);
-        		fireDatasetEvent(new DatasetEvent(this, DatasetEvent.ADD_WORKSPACE, EventHandler.class.getName(), new ArrayList<>()));
-    			
-    		} catch (RequestCancelledException e) {
-    			// no action needed
-    		}
-        	
-        }
-        
-        /**
-         * Set the scale of the given datasets
-         * @param selectedDatasets
-         */
-        private synchronized void setScale(final List<IAnalysisDataset> selectedDatasets) {
-        	if(selectedDatasets.isEmpty())
-        		return;
-        	
-        	try {
-        		double d0scale = 1; 
-        		double currentScale = 1; 
-        		
-        		// is there a common scale in the datasets already?
-        		// Get the first dataset scale
-        		Optional<IAnalysisOptions> d0Options = selectedDatasets.get(0).getAnalysisOptions();
-        		if(d0Options.isPresent()) {
-        			Optional<HashOptions> d0NucleusOptions = d0Options.get().getNucleusDetectionOptions();
-        			if(d0NucleusOptions.isPresent()) {
-        				d0scale = d0NucleusOptions.get().getDouble(HashOptions.SCALE);
-        			}
-        		}
-        		
-        		// check any other datasets match
-        		final double d0scaleFinal = d0scale;
-        		boolean allMatch = selectedDatasets.stream().allMatch(d->{
-        			Optional<IAnalysisOptions> dOptions = d.getAnalysisOptions();
-        			if(dOptions.isPresent()) {
-        				Optional<HashOptions> dNucleusOptions = dOptions.get().getNucleusDetectionOptions();
-        				if(dNucleusOptions.isPresent()) {
-        					return dNucleusOptions.get().getDouble(HashOptions.SCALE)==d0scaleFinal;
-        				}
-        			}
-        			return false;
-        		});
-        		if(allMatch)
-        			currentScale = d0scale;
-        		
-        		// request the new scale
-    			double scale = ic.requestDouble("Pixels per micron", currentScale, 1d, 100000d, 1d);
-    			if (scale > 0) { // don't allow a scale to cause divide by zero errors
-    				selectedDatasets.stream().forEach(d->d.setScale(scale));
-    				eventReceived(new InterfaceEvent(this, InterfaceMethod.RECACHE_CHARTS, "Scale change"));
-    			}
-    				
-    		} catch (RequestCancelledException e) {
-    			//No action needed
-    		}
-        }
+			if (event.type().equals(SignalChangeEvent.RELOCATE_CELLS))
+				return new RelocateFromFileAction(selectedDataset, acceptor, EventHandler.this, new CountDownLatch(1));
 
-        /**
-         * Create a runnable action for the given event
-         * 
-         * @param event
-         * @return
-         */
-        public synchronized Runnable create(final DatasetEvent event) {
+			return null;
+		}
 
-            if (event.getDatasets().isEmpty())
-                return null;
+		/**
+		 * Create a new workspace
+		 */
+		private void createWorkspace() {
 
-            final List<IAnalysisDataset> selectedDatasets = event.getDatasets();
+			try {
+				String workspaceName = ic.requestString("New workspace name");
+				IWorkspace w = WorkspaceFactory.createWorkspace(workspaceName);
+				DatasetListManager.getInstance().addWorkspace(w);
+				LOGGER.info("New workspace created: " + workspaceName);
+				fireDatasetEvent(new DatasetEvent(this, DatasetEvent.ADD_WORKSPACE, EventHandler.class.getName(),
+						new ArrayList<>()));
 
-            // The full pipeline for a new analysis
-            if (event.method().equals(DatasetEvent.MORPHOLOGY_ANALYSIS_ACTION)) {
+			} catch (RequestCancelledException e) {
+				// no action needed
+			}
 
-            	return () ->{
-            		
-            		final CountDownLatch profileLatch = new CountDownLatch(1);
-            		final CountDownLatch segmentLatch = new CountDownLatch(1);
-            		final CountDownLatch refoldLatch  = new CountDownLatch(1);
-            		final CountDownLatch saveLatch    = new CountDownLatch(1);
-            		            		
+		}
 
-            		new Thread( ()->{ // run profiling
-            			new RunProfilingAction(selectedDatasets, SingleDatasetResultAction.NO_FLAG, acceptor, EventHandler.this, profileLatch).run();
-            			
-            		}).start();
+		/**
+		 * Set the scale of the given datasets
+		 * 
+		 * @param selectedDatasets
+		 */
+		private synchronized void setScale(final List<IAnalysisDataset> selectedDatasets) {
+			if (selectedDatasets.isEmpty())
+				return;
 
-            		new Thread( ()-> { // wait for profiling and run segmentation
-            			try {
-            				profileLatch.await();
-            				LOGGER.fine("Starting segmentation action");
-            				new RunSegmentationAction(selectedDatasets, MorphologyAnalysisMode.NEW, SingleDatasetResultAction.NO_FLAG,
-            						acceptor, EventHandler.this, segmentLatch).run();
-            			} catch(InterruptedException e) {
-            				Thread.currentThread().interrupt();
-            				return;
-            			}	
-            		}).start();
+			try {
+				double d0scale = 1;
+				double currentScale = 1;
 
-            		new Thread( ()-> { // wait for segmentation and run refolding
-            			try {
-            				segmentLatch.await();
-            				LOGGER.fine("Starting refolding action");
-            				new RefoldNucleusAction(selectedDatasets, acceptor, EventHandler.this, refoldLatch).run();
-            			} catch(InterruptedException e) {
-            				Thread.currentThread().interrupt();
-            				return;
-            			}
-            		}).start();   
-            		
-            		new Thread( ()-> { // wait for refolding and run save
-            			try {
-            				refoldLatch.await();
-            				LOGGER.fine("Starting save action");
-            				new ExportDatasetAction(selectedDatasets, acceptor, EventHandler.this, saveLatch).run();
-            			} catch(InterruptedException e) {
-            				Thread.currentThread().interrupt();
-            				return;
-            			}	
-            		}).start();
-            		
+				// is there a common scale in the datasets already?
+				// Get the first dataset scale
+				Optional<IAnalysisOptions> d0Options = selectedDatasets.get(0).getAnalysisOptions();
+				if (d0Options.isPresent()) {
+					Optional<HashOptions> d0NucleusOptions = d0Options.get().getNucleusDetectionOptions();
+					if (d0NucleusOptions.isPresent()) {
+						d0scale = d0NucleusOptions.get().getDouble(HashOptions.SCALE);
+					}
+				}
 
-            		new Thread( ()-> { //  wait for save and recache charts
-            			try {
-            				saveLatch.await();
-            				LOGGER.fine("Starting recache action");
-            				fireDatasetEvent(new DatasetEvent(this, DatasetEvent.ADD_DATASET, EventHandler.class.getName(), selectedDatasets));
-            			} catch(InterruptedException e) {
-            				Thread.currentThread().interrupt();
-            				return;
-            			}
-            		}).start();
-            	};
-            }
+				// check any other datasets match
+				final double d0scaleFinal = d0scale;
+				boolean allMatch = selectedDatasets.stream().allMatch(d -> {
+					Optional<IAnalysisOptions> dOptions = d.getAnalysisOptions();
+					if (dOptions.isPresent()) {
+						Optional<HashOptions> dNucleusOptions = dOptions.get().getNucleusDetectionOptions();
+						if (dNucleusOptions.isPresent()) {
+							return dNucleusOptions.get().getDouble(HashOptions.SCALE) == d0scaleFinal;
+						}
+					}
+					return false;
+				});
+				if (allMatch)
+					currentScale = d0scale;
 
-            if (event.method().equals(DatasetEvent.SEGMENTATION_ACTION))
-                return new RunSegmentationAction(selectedDatasets, MorphologyAnalysisMode.NEW, 
-                		SingleDatasetResultAction.NO_FLAG, acceptor, EventHandler.this);
+				// request the new scale
+				double scale = ic.requestDouble("Pixels per micron", currentScale, 1d, 100000d, 1d);
+				if (scale > 0) { // don't allow a scale to cause divide by zero errors
+					selectedDatasets.stream().forEach(d -> d.setScale(scale));
+					UIController.getInstance().fireScaleUpdated(selectedDatasets);
+				}
 
-            if (event.method().equals(DatasetEvent.REFRESH_MORPHOLOGY))
-                return new RunSegmentationAction(selectedDatasets, MorphologyAnalysisMode.REFRESH, 
-                		SingleDatasetResultAction.NO_FLAG, acceptor, EventHandler.this);
-            
-            if (event.method().equals(DatasetEvent.SAVE)) {
-            	return () -> {
-            		final CountDownLatch latch = new CountDownLatch(1);
-            		new ExportDatasetAction(selectedDatasets, acceptor, EventHandler.this, latch).run();
-            	};
-            }
-            
-            // Run a completely new analysis on the dataset
-            if (event.method().equals(DatasetEvent.REFPAIR_SEGMENTATION)) {
+			} catch (RequestCancelledException e) {
+				// No action needed
+			}
+		}
 
-            	// begin a new morphology analysis
-            	return () ->{
-            		final CountDownLatch profileLatch = new CountDownLatch(1);
-            		final CountDownLatch segmentLatch = new CountDownLatch(1);
-            		new Thread( ()->{
-            			new RunProfilingAction(selectedDatasets, SingleDatasetResultAction.NO_FLAG, acceptor, EventHandler.this, profileLatch).run();
-            		}).start();
+		/**
+		 * Create a runnable action for the given event
+		 * 
+		 * @param event
+		 * @return
+		 */
+		public synchronized Runnable create(final DatasetEvent event) {
 
-            		new Thread( ()-> {
-            			
-            			try {
-            				profileLatch.await();
-            				new RunSegmentationAction(selectedDatasets, MorphologyAnalysisMode.NEW, 0, acceptor, EventHandler.this, segmentLatch).run();
-            			} catch(InterruptedException e) {
-            				Thread.currentThread().interrupt();
-            				return;
-            			}
-            			
-            		}).start();
-            		
-            		new Thread( ()-> { //  wait for save and recache charts
-            			try {
-            				segmentLatch.await();
-            				LOGGER.fine("Adding datasets");
-            				fireDatasetEvent(new DatasetEvent(this, DatasetEvent.RECACHE_CHARTS, EventHandler.class.getName(), selectedDatasets));
-            			} catch(InterruptedException e) {
-            				Thread.currentThread().interrupt();
-            				return;
-            			}
-            		}).start();
+			if (event.getDatasets().isEmpty())
+				return null;
 
-            	};
-            }
+			final List<IAnalysisDataset> selectedDatasets = event.getDatasets();
 
-            if (event.method().equals(DatasetEvent.RUN_SHELL_ANALYSIS)) {
-                return new ShellAnalysisAction(event.firstDataset(), acceptor, EventHandler.this);
-            }
+			// The full pipeline for a new analysis
+			if (event.method().equals(DatasetEvent.MORPHOLOGY_ANALYSIS_ACTION)) {
 
-            if (event.method().equals(DatasetEvent.COPY_PROFILE_SEGMENTATION)) {
-            	// copy the profile segmentation from one dataset to another
-            	return () ->{
-            		final IAnalysisDataset source = event.secondaryDataset();
-            		if (source == null)
-            			return;
-            		
-            		final CountDownLatch segmentLatch = new CountDownLatch(1);
-            		new Thread( ()-> { // wait for profiling and run segmentation
-            				LOGGER.fine("Starting segmentation action");
-            				new RunSegmentationAction(selectedDatasets, source, SingleDatasetResultAction.NO_FLAG,
-                    				acceptor, EventHandler.this, segmentLatch).run();
-            		}).start();
+				return () -> {
 
-            		new Thread( ()-> { //  wait for save and recache charts
-            			try {
-            				segmentLatch.await();
-            				LOGGER.fine("Adding datasets");
-            				fireDatasetEvent(new DatasetEvent(this, DatasetEvent.ADD_DATASET, "EventHandler", selectedDatasets));
-            			} catch(InterruptedException e) {
-            				Thread.currentThread().interrupt();
-            				return;
-            			}
-            		}).start();
-            	};
-            }
+					final CountDownLatch profileLatch = new CountDownLatch(1);
+					final CountDownLatch segmentLatch = new CountDownLatch(1);
+					final CountDownLatch refoldLatch = new CountDownLatch(1);
+					final CountDownLatch saveLatch = new CountDownLatch(1);
 
-            if (event.method().equals(DatasetEvent.CLUSTER)) {
-            	LOGGER.fine("Clustering dataset");
-                return new ClusterAnalysisAction(event.firstDataset(), acceptor, EventHandler.this);
-            }
-            
-             
-            if (event.method().equals(DatasetEvent.MANUAL_CLUSTER)) {
-                LOGGER.fine("Manually clustering dataset");
-                return new ManualClusterAction(event.firstDataset(), acceptor, EventHandler.this);
-            }
-            
-            if (event.method().equals(DatasetEvent.CLUSTER_FROM_FILE))
-                return new ClusterFileAssignmentAction(event.firstDataset(), acceptor, EventHandler.this);
+					new Thread(() -> { // run profiling
+						new RunProfilingAction(selectedDatasets, SingleDatasetResultAction.NO_FLAG, acceptor,
+								EventHandler.this, profileLatch).run();
 
+					}).start();
 
-            if (event.method().equals(DatasetEvent.BUILD_TREE)) {
-            	LOGGER.fine("Building a tree from dataset");
-                return new BuildHierarchicalTreeAction(event.firstDataset(), acceptor, EventHandler.this);
-            }
+					new Thread(() -> { // wait for profiling and run segmentation
+						try {
+							profileLatch.await();
+							LOGGER.fine("Starting segmentation action");
+							new RunSegmentationAction(selectedDatasets, MorphologyAnalysisMode.NEW,
+									SingleDatasetResultAction.NO_FLAG, acceptor, EventHandler.this, segmentLatch).run();
+						} catch (InterruptedException e) {
+							Thread.currentThread().interrupt();
+							return;
+						}
+					}).start();
 
-            if (event.method().equals(DatasetEvent.RECALCULATE_MEDIAN)) {
-            	return () ->{
-            		final CountDownLatch latch  = new CountDownLatch(1);
-            		new Thread( ()-> { 
-            			new RunProfilingAction(selectedDatasets, 
-            					SingleDatasetResultAction.NO_FLAG, 
-            					acceptor, 
-            					EventHandler.this, 
-            					latch).run();
-            		}).start();   
-            		
-            		new Thread( ()-> { // wait for profiling to complete and recache charts
-            			try {
-            				latch.await();
-            				fireDatasetEvent(new DatasetEvent(this, DatasetEvent.RECACHE_CHARTS, "EventHandler", selectedDatasets));
-            			} catch(InterruptedException e) {
-            				Thread.currentThread().interrupt();
-            				return;
-            			}	
-            		}).start();
-            	};
-            }
-            
-            if (event.method().equals(DatasetEvent.RUN_GLCM_ANALYSIS)) {
-            	return () -> {
-            		final CountDownLatch latch = new CountDownLatch(1);
-            		new RunGLCMAction(selectedDatasets, latch, acceptor, EventHandler.this).run();
-            	};
-            }
-            
-            if (event.method().equals(DatasetEvent.EXTRACT_SOURCE))
-                return new MergeSourceExtractionAction(event.getDatasets(), acceptor, EventHandler.this);
-            
-            if (event.method().equals(DatasetEvent.REFOLD_CONSENSUS)) {
-            	return () ->{
-            		final CountDownLatch refoldLatch  = new CountDownLatch(1);
-            		new Thread( ()-> { // run refolding
-            			Runnable task = new RefoldNucleusAction(selectedDatasets, acceptor, EventHandler.this, refoldLatch);
-            			task.run();
-            		}).start();   
-            		
-            		new Thread( ()-> { // wait for refolding and recache charts
-            			try {
-            				refoldLatch.await();
-            				fireDatasetEvent(new DatasetEvent(this, DatasetEvent.RECACHE_CHARTS, "EventHandler", selectedDatasets));
-            			} catch(InterruptedException e) {
-            				Thread.currentThread().interrupt();
-            				return;
-            			}	
-            		}).start();
-            	};
+					new Thread(() -> { // wait for segmentation and run refolding
+						try {
+							segmentLatch.await();
+							LOGGER.fine("Starting refolding action");
+							new RefoldNucleusAction(selectedDatasets, acceptor, EventHandler.this, refoldLatch).run();
+						} catch (InterruptedException e) {
+							Thread.currentThread().interrupt();
+							return;
+						}
+					}).start();
 
-            }
-            return null;
-        }
+					new Thread(() -> { // wait for refolding and run save
+						try {
+							refoldLatch.await();
+							LOGGER.fine("Starting save action");
+							new ExportDatasetAction(selectedDatasets, acceptor, EventHandler.this, saveLatch).run();
+						} catch (InterruptedException e) {
+							Thread.currentThread().interrupt();
+							return;
+						}
+					}).start();
 
-        /**
-         * Create and run an action for the given event
-         * 
-         * @param event
-         */
-        public synchronized void run(final SignalChangeEvent event) {
-            Runnable r = create(event);
-            if (r != null)
-                r.run();
-        }
+					new Thread(() -> { // wait for save and recache charts
+						try {
+							saveLatch.await();
+							LOGGER.fine("Starting recache action");
+							UIController.getInstance().fireDatasetAdded(selectedDatasets);
+						} catch (InterruptedException e) {
+							Thread.currentThread().interrupt();
+							return;
+						}
+					}).start();
+				};
+			}
 
-        /**
-         * Create and run an action for the given event
-         * 
-         * @param event
-         */
-        public synchronized void run(final DatasetEvent event) {
-            Runnable r = create(event);
-            if (r != null)
-                r.run();
-        }
-    }
+			if (event.method().equals(DatasetEvent.SEGMENTATION_ACTION))
+				return new RunSegmentationAction(selectedDatasets, MorphologyAnalysisMode.NEW,
+						SingleDatasetResultAction.NO_FLAG, acceptor, EventHandler.this);
 
-    @Override
-    public synchronized void eventReceived(final SignalChangeEvent event) {
-        new ActionFactory().run(event);
-    }
+			if (event.method().equals(DatasetEvent.REFRESH_MORPHOLOGY))
+				return new RunSegmentationAction(selectedDatasets, MorphologyAnalysisMode.REFRESH,
+						SingleDatasetResultAction.NO_FLAG, acceptor, EventHandler.this);
 
-    @Override
-    public synchronized void eventReceived(final DatasetEvent event) {
+			if (event.method().equals(DatasetEvent.SAVE)) {
+				return () -> {
+					final CountDownLatch latch = new CountDownLatch(1);
+					new ExportDatasetAction(selectedDatasets, acceptor, EventHandler.this, latch).run();
+				};
+			}
 
-        // Try to launch via factory
-        new ActionFactory().run(event);
+			// Run a completely new analysis on the dataset
+			if (event.method().equals(DatasetEvent.REFPAIR_SEGMENTATION)) {
 
-        // Remaining methods
-        final List<IAnalysisDataset> list = event.getDatasets();
-        if (!list.isEmpty()) {
+				// begin a new morphology analysis
+				return () -> {
+					final CountDownLatch profileLatch = new CountDownLatch(1);
+					final CountDownLatch segmentLatch = new CountDownLatch(1);
+					new Thread(() -> {
+						new RunProfilingAction(selectedDatasets, SingleDatasetResultAction.NO_FLAG, acceptor,
+								EventHandler.this, profileLatch).run();
+					}).start();
 
-            if (event.method().equals(DatasetEvent.SELECT_DATASETS))
-            	fireDatasetSelectionEvent(event.getDatasets());
+					new Thread(() -> {
 
-            if (event.method().equals(DatasetEvent.SELECT_ONE_DATASET))
-            	fireDatasetSelectionEvent(event.firstDataset());
+						try {
+							profileLatch.await();
+							new RunSegmentationAction(selectedDatasets, MorphologyAnalysisMode.NEW, 0, acceptor,
+									EventHandler.this, segmentLatch).run();
+						} catch (InterruptedException e) {
+							Thread.currentThread().interrupt();
+							return;
+						}
 
-            if (event.method().equals(DatasetEvent.RECACHE_CHARTS) ||
-        		event.method().equals(DatasetEvent.CLEAR_CACHE) ||
-        		event.method().equals(DatasetEvent.ADD_DATASET))
-            	fireDatasetEvent(event);
-        }
+					}).start();
 
-    }
+					new Thread(() -> { // wait for save and recache charts
+						try {
+							segmentLatch.await();
+							LOGGER.fine("Adding datasets");
+							fireDatasetEvent(new DatasetEvent(this, DatasetEvent.RECACHE_CHARTS,
+									EventHandler.class.getName(), selectedDatasets));
+						} catch (InterruptedException e) {
+							Thread.currentThread().interrupt();
+							return;
+						}
+					}).start();
 
-    @Override
-    public synchronized void eventReceived(final InterfaceEvent event) {
+				};
+			}
 
-    	fireInterfaceEvent(event); //pass onwards to registered listeners - only MainWindow at present
-        InterfaceMethod method = event.method();
-        
-        final List<IAnalysisDataset> selected = DatasetListManager.getInstance().getSelectedDatasets();
+			if (event.method().equals(DatasetEvent.RUN_SHELL_ANALYSIS)) {
+				return new ShellAnalysisAction(event.firstDataset(), acceptor, EventHandler.this);
+			}
 
-        switch (method) {
+			if (event.method().equals(DatasetEvent.COPY_PROFILE_SEGMENTATION)) {
+				// copy the profile segmentation from one dataset to another
+				return () -> {
+					final IAnalysisDataset source = event.secondaryDataset();
+					if (source == null)
+						return;
 
-        case SAVE_ROOT:
-            saveRootDatasets(); // DO NOT WRAP IN A SEPARATE THREAD, IT WILL
-                                // LOCK THE PROGRESS BAR
+					final CountDownLatch segmentLatch = new CountDownLatch(1);
+					new Thread(() -> { // wait for profiling and run segmentation
+						LOGGER.fine("Starting segmentation action");
+						new RunSegmentationAction(selectedDatasets, source, SingleDatasetResultAction.NO_FLAG, acceptor,
+								EventHandler.this, segmentLatch).run();
+					}).start();
 
-            break;
+					new Thread(() -> { // wait for save and recache charts
+						try {
+							segmentLatch.await();
+							LOGGER.fine("Adding datasets");
+							UIController.getInstance().fireDatasetAdded(selectedDatasets);
+						} catch (InterruptedException e) {
+							Thread.currentThread().interrupt();
+							return;
+						}
+					}).start();
+				};
+			}
 
-        case UPDATE_PANELS: {
-            fireDatasetUpdateEvent(selected);
-            break;
-        }
+			if (event.method().equals(DatasetEvent.CLUSTER)) {
+				LOGGER.fine("Clustering dataset");
+				return new ClusterAnalysisAction(event.firstDataset(), acceptor, EventHandler.this);
+			}
 
-       
-        case LIST_SELECTED_DATASETS:
-            int count = 0;
-            for (IAnalysisDataset d : selected) {
-                LOGGER.info(count + "\t" + d.getName());
-                count++;
-            }
-            break;
+			if (event.method().equals(DatasetEvent.MANUAL_CLUSTER)) {
+				LOGGER.fine("Manually clustering dataset");
+				return new ManualClusterAction(event.firstDataset(), acceptor, EventHandler.this);
+			}
 
-        case DUMP_LOG_INFO:
-            for (IAnalysisDataset d : selected) {
-                for (Nucleus n : d.getCollection().getNuclei()) {
-                    LOGGER.info(n.toString());
-                }
-            }
-            break;
+			if (event.method().equals(DatasetEvent.CLUSTER_FROM_FILE))
+				return new ClusterFileAssignmentAction(event.firstDataset(), acceptor, EventHandler.this);
 
-        case INFO:
-            for (IAnalysisDataset d : selected) {
-                LOGGER.info(d.getCollection().toString());
-            }
-            break;
-            
-        case REFRESH_POPULATIONS: {
-        	firePopulationListUpdateEvent();
-        	break;
-        }
-        
-        case RECACHE_CHARTS:{
-        	fireInterfaceEvent(InterfaceEvent.of(this, event.method())); // pass to main window. Change source so it is not ignored
-        	break;
-        }
-            
-        default:
-            break;
+			if (event.method().equals(DatasetEvent.BUILD_TREE)) {
+				LOGGER.fine("Building a tree from dataset");
+				return new BuildHierarchicalTreeAction(event.firstDataset(), acceptor, EventHandler.this);
+			}
 
-        }
-    }
+			if (event.method().equals(DatasetEvent.RECALCULATE_MEDIAN)) {
+				return () -> {
+					final CountDownLatch latch = new CountDownLatch(1);
+					new Thread(() -> {
+						new RunProfilingAction(selectedDatasets, SingleDatasetResultAction.NO_FLAG, acceptor,
+								EventHandler.this, latch).run();
+					}).start();
 
-    /**
-     * Save all the root datasets in the populations panel
-     */
-    public synchronized void saveRootDatasets() {
+					new Thread(() -> { // wait for profiling to complete and recache charts
+						try {
+							latch.await();
+							fireDatasetEvent(new DatasetEvent(this, DatasetEvent.RECACHE_CHARTS, "EventHandler",
+									selectedDatasets));
+						} catch (InterruptedException e) {
+							Thread.currentThread().interrupt();
+							return;
+						}
+					}).start();
+				};
+			}
 
-    	Runnable r = () -> {
-    		for (IAnalysisDataset root : DatasetListManager.getInstance().getRootDatasets()) {
-    			final CountDownLatch latch = new CountDownLatch(1);
+			if (event.method().equals(DatasetEvent.RUN_GLCM_ANALYSIS)) {
+				return () -> {
+					final CountDownLatch latch = new CountDownLatch(1);
+					new RunGLCMAction(selectedDatasets, latch, acceptor, EventHandler.this).run();
+				};
+			}
 
-    			new Thread( () ->{
-    				Runnable task = new ExportDatasetAction(root, acceptor, EventHandler.this, latch, false);
-    				task.run();
-    				try {
-    					latch.await();
-    				} catch (InterruptedException e) {
-    					LOGGER.log(Loggable.STACK, "Interruption to thread", e);
-    					Thread.currentThread().interrupt();
-    				}
+			if (event.method().equals(DatasetEvent.EXTRACT_SOURCE))
+				return new MergeSourceExtractionAction(event.getDatasets(), acceptor, EventHandler.this);
 
-    				Runnable wrk = new ExportWorkspaceAction(DatasetListManager.getInstance().getWorkspaces(), acceptor, EventHandler.this);
-    				wrk.run();
-    			}).start();
-    		}
-    		LOGGER.fine("All root datasets attempted to be saved");
-    	};
+			if (event.method().equals(DatasetEvent.REFOLD_CONSENSUS)) {
+				return () -> {
+					final CountDownLatch refoldLatch = new CountDownLatch(1);
+					new Thread(() -> { // run refolding
+						Runnable task = new RefoldNucleusAction(selectedDatasets, acceptor, EventHandler.this,
+								refoldLatch);
+						task.run();
+					}).start();
 
-        ThreadManager.getInstance().execute(r);
-    }
+					new Thread(() -> { // wait for refolding and recache charts
+						try {
+							refoldLatch.await();
+							fireDatasetEvent(new DatasetEvent(this, DatasetEvent.RECACHE_CHARTS, "EventHandler",
+									selectedDatasets));
+						} catch (InterruptedException e) {
+							Thread.currentThread().interrupt();
+							return;
+						}
+					}).start();
+				};
 
-    public synchronized void addDatasetUpdateEventListener(EventListener l) {
-        updateListeners.add(l);
-    }
+			}
+			return null;
+		}
 
-    public synchronized void removeDatasetUpdateEventListener(EventListener l) {
-        updateListeners.remove(l);
-    }
+		/**
+		 * Create and run an action for the given event
+		 * 
+		 * @param event
+		 */
+		public synchronized void run(final SignalChangeEvent event) {
+			Runnable r = create(event);
+			if (r != null)
+				r.run();
+		}
+
+		/**
+		 * Create and run an action for the given event
+		 * 
+		 * @param event
+		 */
+		public synchronized void run(final DatasetEvent event) {
+			Runnable r = create(event);
+			if (r != null)
+				r.run();
+		}
+	}
+
+	@Override
+	public synchronized void eventReceived(final SignalChangeEvent event) {
+		new ActionFactory().run(event);
+	}
+
+	@Override
+	public synchronized void eventReceived(final DatasetEvent event) {
+
+		// Try to launch via factory
+		new ActionFactory().run(event);
+
+		// Remaining methods
+		final List<IAnalysisDataset> list = event.getDatasets();
+		if (!list.isEmpty()) {
+
+			if (event.method().equals(DatasetEvent.SELECT_DATASETS))
+				fireDatasetSelectionEvent(event.getDatasets());
+
+			if (event.method().equals(DatasetEvent.SELECT_ONE_DATASET))
+				fireDatasetSelectionEvent(event.firstDataset());
+
+			if (event.method().equals(DatasetEvent.RECACHE_CHARTS) || event.method().equals(DatasetEvent.CLEAR_CACHE))
+				fireDatasetEvent(event);
+		}
+
+	}
+
+//	@Override
+//	public synchronized void eventReceived(final InterfaceEvent event) {
+//
+//		fireInterfaceEvent(event); // pass onwards to registered listeners - only MainWindow at present
+//		InterfaceMethod method = event.method();
+//
+//		final List<IAnalysisDataset> selected = DatasetListManager.getInstance().getSelectedDatasets();
+//
+//		switch (method) {
+//
+//		case SAVE_ROOT:
+//			saveRootDatasets(); // DO NOT WRAP IN A SEPARATE THREAD, IT WILL
+//								// LOCK THE PROGRESS BAR
+//
+//			break;
+//
+//		case UPDATE_PANELS: {
+//			fireDatasetUpdateEvent(selected);
+//			break;
+//		}
+//
+//		case LIST_SELECTED_DATASETS:
+//			int count = 0;
+//			for (IAnalysisDataset d : selected) {
+//				LOGGER.info(count + "\t" + d.getName());
+//				count++;
+//			}
+//			break;
+//
+//		case DUMP_LOG_INFO:
+//			for (IAnalysisDataset d : selected) {
+//				for (Nucleus n : d.getCollection().getNuclei()) {
+//					LOGGER.info(n.toString());
+//				}
+//			}
+//			break;
+//
+//		case INFO:
+//			for (IAnalysisDataset d : selected) {
+//				LOGGER.info(d.getCollection().toString());
+//			}
+//			break;
+//
+//		case REFRESH_POPULATIONS: {
+//			firePopulationListUpdateEvent();
+//			break;
+//		}
+//
+//		case RECACHE_CHARTS: {
+//			fireInterfaceEvent(InterfaceEvent.of(this, event.method())); // pass to main window. Change source so it is
+//																			// not ignored
+//			break;
+//		}
+//
+//		default:
+//			break;
+//
+//		}
+//	}
+
+	/**
+	 * Save all the root datasets in the populations panel
+	 */
+	public synchronized void saveRootDatasets() {
+
+		Runnable r = () -> {
+			for (IAnalysisDataset root : DatasetListManager.getInstance().getRootDatasets()) {
+				final CountDownLatch latch = new CountDownLatch(1);
+
+				new Thread(() -> {
+					Runnable task = new ExportDatasetAction(root, acceptor, EventHandler.this, latch, false);
+					task.run();
+					try {
+						latch.await();
+					} catch (InterruptedException e) {
+						LOGGER.log(Loggable.STACK, "Interruption to thread", e);
+						Thread.currentThread().interrupt();
+					}
+
+					Runnable wrk = new ExportWorkspaceAction(DatasetListManager.getInstance().getWorkspaces(), acceptor,
+							EventHandler.this);
+					wrk.run();
+				}).start();
+			}
+			LOGGER.fine("All root datasets attempted to be saved");
+		};
+
+		ThreadManager.getInstance().execute(r);
+	}
+
+	public synchronized void addDatasetUpdateEventListener(EventListener l) {
+		updateListeners.add(l);
+	}
+
+	public synchronized void removeDatasetUpdateEventListener(EventListener l) {
+		updateListeners.remove(l);
+	}
+
 //
 //    /**
 //     * Signal listeners that the given datasets should be displayed
 //     * 
 //     * @param list
 //     */
-    public synchronized void fireDatasetUpdateEvent(final List<IAnalysisDataset> list) {
-        for(EventListener l : updateListeners) {
-        	l.eventReceived(new DatasetUpdateEvent(this, list));
-        }
-    }
-    
-    public synchronized void addPopulationListUpdateListener(PopulationListUpdateListener l) {
-    	populationsListUpdateListeners.add(l);
-    }
+	public synchronized void fireDatasetUpdateEvent(final List<IAnalysisDataset> list) {
+		for (EventListener l : updateListeners) {
+			l.eventReceived(new DatasetUpdateEvent(this, list));
+		}
+	}
 
-    public synchronized void removePopulationListUpdateListener(PopulationListUpdateListener l) {
-    	populationsListUpdateListeners.remove(l);
-    }
-    
-    public void firePopulationListUpdateEvent() {
-    	PopulationListUpdateEvent e = new PopulationListUpdateEvent(this);
-    	for(PopulationListUpdateListener l : populationsListUpdateListeners) {
-    		l.populationListUpdateEventReceived(e);
-    	}
-    }
+	public synchronized void addPopulationListUpdateListener(PopulationListUpdateListener l) {
+		populationsListUpdateListeners.add(l);
+	}
 
+	public synchronized void removePopulationListUpdateListener(PopulationListUpdateListener l) {
+		populationsListUpdateListeners.remove(l);
+	}
+
+	public void firePopulationListUpdateEvent() {
+		PopulationListUpdateEvent e = new PopulationListUpdateEvent(this);
+		for (PopulationListUpdateListener l : populationsListUpdateListeners) {
+			l.populationListUpdateEventReceived(e);
+		}
+	}
 
 	@Override
 	public void eventReceived(DatasetUpdateEvent event) {
 		// TODO Auto-generated method stub
-		
-	}
 
+	}
 
 	@Override
 	public void eventReceived(ChartOptionsRenderedEvent event) {
 		// TODO Auto-generated method stub
-		
+
 	}
-    
-    
 
 }

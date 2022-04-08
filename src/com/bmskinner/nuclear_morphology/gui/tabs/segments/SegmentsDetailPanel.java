@@ -33,76 +33,70 @@ import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 @SuppressWarnings("serial")
 public class SegmentsDetailPanel extends DetailPanel {
 
-    private static final String PANEL_TITLE_LBL = "Nuclear segments";
-    
-    private JTabbedPane tabPanel;
+	private static final String PANEL_TITLE_LBL = "Nuclear segments";
 
-    public SegmentsDetailPanel(@NonNull InputSupplier context) {
-        super(context);
-        this.setLayout(new BorderLayout());
+	private JTabbedPane tabPanel;
 
-        tabPanel = new JTabbedPane(JTabbedPane.TOP);
-        tabPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
+	public SegmentsDetailPanel(@NonNull InputSupplier context) {
+		super(context);
+		this.setLayout(new BorderLayout());
 
-        DetailPanel segmentProfilePanel = new SegmentProfilePanel(context);
-        DetailPanel segmentBoxplotsPanel = new SegmentBoxplotsPanel(context);
-        DetailPanel segmentWilcoxonPanel = new SegmentWilcoxonPanel(context);
-        DetailPanel segmentMagnitudePanel = new SegmentMagnitudePanel(context);
-        DetailPanel segmentStatsPanel = new SegmentStatsPanel(context);
+		tabPanel = new JTabbedPane(JTabbedPane.TOP);
+		tabPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 
-        Dimension minimumChartSize = new Dimension(100, 100);
+		DetailPanel segmentProfilePanel = new SegmentProfilePanel(context);
+		DetailPanel segmentBoxplotsPanel = new SegmentBoxplotsPanel(context);
+		DetailPanel segmentWilcoxonPanel = new SegmentWilcoxonPanel(context);
+		DetailPanel segmentMagnitudePanel = new SegmentMagnitudePanel(context);
+		DetailPanel segmentStatsPanel = new SegmentStatsPanel(context);
 
-        segmentProfilePanel.setMinimumSize(minimumChartSize);
-        segmentProfilePanel.setBorder(new EmptyBorder(5, 5, 5, 5));
-        segmentBoxplotsPanel.setMinimumSize(minimumChartSize);
-        segmentWilcoxonPanel.setMinimumSize(minimumChartSize);
-        segmentMagnitudePanel.setMinimumSize(minimumChartSize);
-        segmentStatsPanel.setMinimumSize(minimumChartSize);
-        segmentStatsPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
+		Dimension minimumChartSize = new Dimension(100, 100);
 
-        this.addSubPanel(segmentProfilePanel);
-        this.addSubPanel(segmentBoxplotsPanel);
-        this.addSubPanel(segmentWilcoxonPanel);
-        this.addSubPanel(segmentMagnitudePanel);
-        this.addSubPanel(segmentStatsPanel);
+		segmentProfilePanel.setMinimumSize(minimumChartSize);
+		segmentProfilePanel.setBorder(new EmptyBorder(5, 5, 5, 5));
+		segmentBoxplotsPanel.setMinimumSize(minimumChartSize);
+		segmentWilcoxonPanel.setMinimumSize(minimumChartSize);
+		segmentMagnitudePanel.setMinimumSize(minimumChartSize);
+		segmentStatsPanel.setMinimumSize(minimumChartSize);
+		segmentStatsPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 
-        tabPanel.addTab(segmentBoxplotsPanel.getPanelTitle(), segmentBoxplotsPanel);
-        tabPanel.addTab(segmentWilcoxonPanel.getPanelTitle(), segmentWilcoxonPanel);
-        tabPanel.addTab(segmentMagnitudePanel.getPanelTitle(), segmentMagnitudePanel);
+		tabPanel.addTab(segmentBoxplotsPanel.getPanelTitle(), segmentBoxplotsPanel);
+		tabPanel.addTab(segmentWilcoxonPanel.getPanelTitle(), segmentWilcoxonPanel);
+		tabPanel.addTab(segmentMagnitudePanel.getPanelTitle(), segmentMagnitudePanel);
 
-        JPanel mainPanel = new JPanel(new GridBagLayout());
-        GridBagConstraints constraints = new GridBagConstraints();
-        constraints.fill = GridBagConstraints.BOTH;
-        constraints.gridx = 0;
-        constraints.gridy = 0;
-        constraints.gridheight = 1;
-        constraints.gridwidth = 1;
-        constraints.weightx = 1;
-        constraints.weighty = 0.5;
-        constraints.anchor = GridBagConstraints.CENTER;
+		JPanel mainPanel = new JPanel(new GridBagLayout());
+		GridBagConstraints constraints = new GridBagConstraints();
+		constraints.fill = GridBagConstraints.BOTH;
+		constraints.gridx = 0;
+		constraints.gridy = 0;
+		constraints.gridheight = 1;
+		constraints.gridwidth = 1;
+		constraints.weightx = 1;
+		constraints.weighty = 0.5;
+		constraints.anchor = GridBagConstraints.CENTER;
 
-        mainPanel.add(segmentStatsPanel, constraints);
+		mainPanel.add(segmentStatsPanel, constraints);
 
-        constraints.gridx = 0;
-        constraints.gridy = 1;
-        constraints.gridheight = 1;
-        constraints.gridwidth = 1;
-        constraints.weighty = 1;
-        mainPanel.add(segmentProfilePanel, constraints);
+		constraints.gridx = 0;
+		constraints.gridy = 1;
+		constraints.gridheight = 1;
+		constraints.gridwidth = 1;
+		constraints.weighty = 1;
+		mainPanel.add(segmentProfilePanel, constraints);
 
-        constraints.gridx = 1;
-        constraints.gridy = 0;
-        constraints.gridheight = 2;
-        constraints.gridwidth = 1;
-        mainPanel.add(tabPanel, constraints);
+		constraints.gridx = 1;
+		constraints.gridy = 0;
+		constraints.gridheight = 2;
+		constraints.gridwidth = 1;
+		mainPanel.add(tabPanel, constraints);
 
-        this.add(mainPanel, BorderLayout.CENTER);
+		this.add(mainPanel, BorderLayout.CENTER);
 
-    }
-    
-    @Override
-    public String getPanelTitle(){
-        return PANEL_TITLE_LBL;
-    }
-    
+	}
+
+	@Override
+	public String getPanelTitle() {
+		return PANEL_TITLE_LBL;
+	}
+
 }

@@ -19,15 +19,18 @@ package com.bmskinner.nuclear_morphology.gui.tabs.nuclear;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
+import java.util.List;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
+import com.bmskinner.nuclear_morphology.gui.events.revamp.ScaleUpdatedListener;
 import com.bmskinner.nuclear_morphology.gui.tabs.BoxplotsTabPanel;
 import com.bmskinner.nuclear_morphology.visualisation.charts.AbstractChartFactory;
 import com.bmskinner.nuclear_morphology.visualisation.charts.panels.ExportableChartPanel;
@@ -36,75 +39,92 @@ import com.bmskinner.nuclear_morphology.visualisation.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.visualisation.options.ChartOptionsBuilder;
 
 @SuppressWarnings("serial")
-public class NuclearBoxplotsPanel extends BoxplotsTabPanel {
-	
+public class NuclearBoxplotsPanel extends BoxplotsTabPanel implements ScaleUpdatedListener {
+
 	private static final Logger LOGGER = Logger.getLogger(NuclearBoxplotsPanel.class.getName());
 
-    public NuclearBoxplotsPanel(@NonNull InputSupplier context) {
-        super(context, CellularComponent.NUCLEUS);
+	public NuclearBoxplotsPanel(@NonNull InputSupplier context) {
+		super(context, CellularComponent.NUCLEUS);
 
-        Dimension preferredSize = new Dimension(200, 300);
-        
-        for (Measurement stat : Measurement.getNucleusStats()) {
+		Dimension preferredSize = new Dimension(200, 300);
 
-        	JFreeChart chart = AbstractChartFactory.createEmptyChart();
-            ViolinChartPanel panel = new ViolinChartPanel(chart);
-            panel.getChartRenderingInfo().setEntityCollection(null);
-            panel.setPreferredSize(preferredSize);
-            chartPanels.put(stat.toString(), panel);
-            mainPanel.add(panel);
-        }        
-        this.add(scrollPane, BorderLayout.CENTER);
-    }
+		for (Measurement stat : Measurement.getNucleusStats()) {
 
-    @Override
-    public void actionPerformed(ActionEvent e) {
+			JFreeChart chart = AbstractChartFactory.createEmptyChart();
+			ViolinChartPanel panel = new ViolinChartPanel(chart);
+			panel.getChartRenderingInfo().setEntityCollection(null);
+			panel.setPreferredSize(preferredSize);
+			chartPanels.put(stat.toString(), panel);
+			mainPanel.add(panel);
+		}
+		this.add(scrollPane, BorderLayout.CENTER);
 
-        update(getDatasets());
+		uiController.addScaleUpdatedListener(this);
+	}
 
-    }
+	@Override
+	public void actionPerformed(ActionEvent e) {
 
-    @Override
-    protected synchronized void updateSingle() {
-        super.updateSingle();
-        LOGGER.finest( "Passing to update multiple in " + this.getClass().getName());
-        updateMultiple();
+		update(getDatasets());
 
-    }
+	}
 
-    @Override
-    protected synchronized void updateMultiple() {
-        super.updateMultiple();
+	@Override
+	protected synchronized void updateSingle() {
+		super.updateSingle();
+		LOGGER.finest("Passing to update multiple in " + this.getClass().getName());
+		updateMultiple();
 
-        for (Measurement stat : Measurement.getNucleusStats()) {
+	}
 
-            ExportableChartPanel panel = chartPanels.get(stat.toString());
+	@Override
+	protected synchronized void updateMultiple() {
+		super.updateMultiple();
 
-            ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets()).addStatistic(stat)
-                    .setScale(GlobalOptions.getInstance().getScale()).setSwatch(GlobalOptions.getInstance().getSwatch())
-                    .setTarget(panel).build();
+		for (Measurement stat : Measurement.getNucleusStats()) {
 
-            setChart(options);
-        }
+			ExportableChartPanel panel = chartPanels.get(stat.toString());
 
-    }
+			ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets()).addStatistic(stat)
+					.setScale(GlobalOptions.getInstance().getScale()).setSwatch(GlobalOptions.getInstance().getSwatch())
+					.setTarget(panel).build();
 
-    @Override
-    protected synchronized void updateNull() {
-        super.updateNull();
-        LOGGER.finest( "Passing to update multiple in " + this.getClass().getName());
-        updateMultiple();
-    }
+			setChart(options);
+		}
 
-    @Override
-    public synchronized void setChartsAndTablesLoading() {
-        super.setChartsAndTablesLoading();
+	}
 
-        for (Measurement stat : Measurement.getNucleusStats()) {
-            ExportableChartPanel panel = chartPanels.get(stat.toString());
-            panel.setChart(AbstractChartFactory.createLoadingChart());
+	@Override
+	protected synchronized void updateNull() {
+		super.updateNull();
+		LOGGER.finest("Passing to update multiple in " + this.getClass().getName());
+		updateMultiple();
+	}
 
-        }
-    }
+	@Override
+	public synchronized void setChartsAndTablesLoading() {
+		super.setChartsAndTablesLoading();
+
+		for (Measurement stat : Measurement.getNucleusStats()) {
+			ExportableChartPanel panel = chartPanels.get(stat.toString());
+			panel.setChart(AbstractChartFactory.createLoadingChart());
+
+		}
+	}
+
+	@Override
+	public void scaleUpdated(List<IAnalysisDataset> datasets) {
+		refreshChartCache(datasets);
+	}
+
+	@Override
+	public void scaleUpdated(IAnalysisDataset dataset) {
+		refreshChartCache(dataset);
+	}
+
+	@Override
+	public void scaleUpdated() {
+		update(getDatasets());
+	}
 
 }
