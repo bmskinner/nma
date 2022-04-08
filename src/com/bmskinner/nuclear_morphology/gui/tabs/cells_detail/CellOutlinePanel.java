@@ -35,7 +35,6 @@ import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.components.panels.GenericCheckboxPanel;
 import com.bmskinner.nuclear_morphology.gui.dialogs.collections.ManualCurationDialog;
 import com.bmskinner.nuclear_morphology.gui.events.CellUpdatedEventListener;
-import com.bmskinner.nuclear_morphology.gui.events.ChartOptionsRenderedEvent;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.events.SegmentEvent;
 import com.bmskinner.nuclear_morphology.gui.events.SegmentEvent.SegmentUpdateType;
@@ -177,11 +176,6 @@ public class CellOutlinePanel extends AbstractCellDetailPanel
 			getDatasetEventHandler().fireDatasetEvent(new DatasetEvent(this, event));
 		}
 
-	}
-
-	@Override
-	public void eventReceived(ChartOptionsRenderedEvent e) {
-		update();
 	}
 
 	@Override

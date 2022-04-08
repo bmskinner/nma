@@ -74,8 +74,6 @@ public abstract class AbstractEventHandler {
 				l.eventReceived((UserActionEvent) event);
 			if (event instanceof DatasetUpdateEvent)
 				l.eventReceived((DatasetUpdateEvent) event);
-			if (event instanceof ChartOptionsRenderedEvent)
-				l.eventReceived((ChartOptionsRenderedEvent) event);
 
 		}
 	}

@@ -32,7 +32,6 @@ import com.bmskinner.nuclear_morphology.components.Version;
 import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.gui.LogPanel;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
-import com.bmskinner.nuclear_morphology.gui.events.ChartOptionsRenderedEvent;
 import com.bmskinner.nuclear_morphology.gui.events.UserActionEvent;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.UIController;
 import com.bmskinner.nuclear_morphology.gui.tabs.AnalysisDetailPanel;
@@ -284,55 +283,13 @@ public class DockableMainWindow extends AbstractMainWindow {
 		return this.logPanel;
 	}
 
-//	/**
-//	 * Add the given dataset and all its children to the populations panel
-//	 * 
-//	 * @param dataset
-//	 */
-//	private synchronized void addDataset(final List<IAnalysisDataset> datasets) {
-//		IAnalysisDataset last = null;
-//		for (IAnalysisDataset dataset : datasets) {
-//			LOGGER.fine("Adding dataset " + dataset.getName() + ": " + dataset.hashCode());
-//			DatasetListManager.getInstance().addDataset(dataset);
-//			last = dataset;
-//		}
-//		// This will also trigger a dataset update event as the dataset
-//		// is selected, so don't trigger another update here.
-////		getPopulationsPanel().update(List.of(last));
-//	}
-
 	@Override
 	public void datasetSelectionEventReceived(DatasetSelectionEvent e) {
 		UIController.getInstance().fireDatasetSelectionUpdated(e.getDatasets());
 	}
 
-//	@Override
-//	public void eventReceived(DatasetEvent event) {
-//		super.eventReceived(event);
-//		if (event.method().equals(DatasetEvent.ADD_DATASET))
-//			addDataset(event.getDatasets());
-//	}
-
-//	@Override
-//	public void eventReceived(InterfaceEvent event) {
-//		super.eventReceived(event);
-//		if (event.getSource().equals(eh)) {
-//			InterfaceMethod method = event.method();
-//
-//			if (method.equals(InterfaceMethod.CLEAR_LOG_WINDOW))
-//				logPanel.clear();
-//
-//		}
-//	}
-
 	@Override
 	public void eventReceived(UserActionEvent event) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void eventReceived(ChartOptionsRenderedEvent event) {
 		// TODO Auto-generated method stub
 
 	}

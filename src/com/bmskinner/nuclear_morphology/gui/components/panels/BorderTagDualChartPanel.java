@@ -34,7 +34,6 @@ import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.gui.components.BorderTagEvent;
-import com.bmskinner.nuclear_morphology.gui.events.ChartOptionsRenderedEvent;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetUpdateEvent;
 
@@ -140,12 +139,6 @@ public class BorderTagDualChartPanel extends DualChartPanel {
 
 	@Override
 	public void eventReceived(DatasetUpdateEvent event) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void eventReceived(ChartOptionsRenderedEvent event) {
 		// TODO Auto-generated method stub
 
 	}

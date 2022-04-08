@@ -71,12 +71,9 @@ import com.bmskinner.nuclear_morphology.gui.actions.ShellAnalysisAction;
 import com.bmskinner.nuclear_morphology.gui.actions.SingleDatasetResultAction;
 import com.bmskinner.nuclear_morphology.gui.dialogs.collections.AbstractCellCollectionDialog;
 import com.bmskinner.nuclear_morphology.gui.dialogs.collections.ManualCurationDialog;
-import com.bmskinner.nuclear_morphology.gui.events.ChartOptionsRenderedEvent;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetUpdateEvent;
 import com.bmskinner.nuclear_morphology.gui.events.EventListener;
-import com.bmskinner.nuclear_morphology.gui.events.PopulationListUpdateListener;
-import com.bmskinner.nuclear_morphology.gui.events.PopulationListUpdateListener.PopulationListUpdateEvent;
 import com.bmskinner.nuclear_morphology.gui.events.UserActionEvent;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.UIController;
 import com.bmskinner.nuclear_morphology.gui.tabs.DatasetSelectionListener;
@@ -102,7 +99,6 @@ public class EventHandler implements EventListener {
 	private final List<EventListener> updateListeners = new ArrayList<>();
 	private final List<EventListener> datasetListeners = new ArrayList<>();
 	private final List<DatasetSelectionListener> selectionListeners = new ArrayList<>();
-	private final List<PopulationListUpdateListener> populationsListUpdateListeners = new ArrayList<>();
 
 	/**
 	 * Constructor
@@ -802,29 +798,8 @@ public class EventHandler implements EventListener {
 		}
 	}
 
-	public synchronized void addPopulationListUpdateListener(PopulationListUpdateListener l) {
-		populationsListUpdateListeners.add(l);
-	}
-
-	public synchronized void removePopulationListUpdateListener(PopulationListUpdateListener l) {
-		populationsListUpdateListeners.remove(l);
-	}
-
-	public void firePopulationListUpdateEvent() {
-		PopulationListUpdateEvent e = new PopulationListUpdateEvent(this);
-		for (PopulationListUpdateListener l : populationsListUpdateListeners) {
-			l.populationListUpdateEventReceived(e);
-		}
-	}
-
 	@Override
 	public void eventReceived(DatasetUpdateEvent event) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void eventReceived(ChartOptionsRenderedEvent event) {
 		// TODO Auto-generated method stub
 
 	}

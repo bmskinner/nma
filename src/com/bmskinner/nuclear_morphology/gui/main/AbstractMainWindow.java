@@ -39,7 +39,6 @@ import com.bmskinner.nuclear_morphology.gui.CancellableRunnable;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetUpdateEvent;
 import com.bmskinner.nuclear_morphology.gui.events.EventListener;
-import com.bmskinner.nuclear_morphology.gui.events.PopulationListUpdateListener;
 import com.bmskinner.nuclear_morphology.gui.tabs.DatasetSelectionListener;
 import com.bmskinner.nuclear_morphology.gui.tabs.TabPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.populations.PopulationsPanel;
@@ -51,8 +50,7 @@ import com.bmskinner.nuclear_morphology.gui.tabs.populations.PopulationsPanel;
  *
  */
 @SuppressWarnings("serial")
-public abstract class AbstractMainWindow extends JFrame
-		implements MainView, EventListener, DatasetSelectionListener, PopulationListUpdateListener {
+public abstract class AbstractMainWindow extends JFrame implements MainView, EventListener, DatasetSelectionListener {
 
 	private static final String PROGRAM_TITLE_BAR_LBL = "Nuclear Morphology Analysis v"
 			+ Version.currentVersion().toString();
@@ -83,7 +81,6 @@ public abstract class AbstractMainWindow extends JFrame
 		eh.addDatasetSelectionListener(this);
 		eh.addDatasetEventListener(this);
 		eh.addDatasetUpdateEventListener(this);
-		eh.addPopulationListUpdateListener(this);
 	}
 
 	/**
@@ -223,11 +220,6 @@ public abstract class AbstractMainWindow extends JFrame
 	}
 
 	protected abstract PopulationsPanel getPopulationsPanel();
-
-	@Override
-	public void populationListUpdateEventReceived(PopulationListUpdateEvent event) {
-		this.getPopulationsPanel().update();
-	}
 
 	@Override
 	public void eventReceived(DatasetUpdateEvent event) {

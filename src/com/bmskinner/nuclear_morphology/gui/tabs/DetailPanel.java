@@ -20,7 +20,6 @@ import java.awt.Component;
 import java.awt.Container;
 import java.awt.Cursor;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
@@ -46,8 +45,6 @@ import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.CancellableRunnable;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 import com.bmskinner.nuclear_morphology.gui.events.CellUpdatedEventListener;
-import com.bmskinner.nuclear_morphology.gui.events.ChartOptionsRenderedEvent;
-import com.bmskinner.nuclear_morphology.gui.events.ChartOptionsRenderedEventListener;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEventHandler;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetUpdateEvent;
@@ -736,11 +733,11 @@ public abstract class DetailPanel extends JPanel
 		}
 	}
 
-	@Override
-	public void eventReceived(ChartOptionsRenderedEvent e) {
-		// To be overridden as needed by extending classes
-		update(getDatasets());
-	}
+//	@Override
+//	public void eventReceived(ChartOptionsRenderedEvent e) {
+//		// To be overridden as needed by extending classes
+//		update(getDatasets());
+//	}
 
 	/**
 	 * Charting can be an intensive process, especially with background images being
@@ -911,33 +908,6 @@ public abstract class DetailPanel extends JPanel
 
 		}
 
-	}
-
-	/**
-	 * Signal listeners that the chart with the given options has been rendered
-	 * 
-	 * @param options
-	 */
-	public void fireChartOptionsRenderedEvent(ChartOptions options) {
-		ChartOptionsRenderedEvent e = new ChartOptionsRenderedEvent(this, options);
-		Iterator<Object> iterator = listeners.iterator();
-		while (iterator.hasNext()) {
-			((ChartOptionsRenderedEventListener) iterator.next()).chartOptionsRenderedEventReceived(e);
-		}
-	}
-
-	/**
-	 * Add a listener for completed charts rendered into the chart cache of this
-	 * panel.
-	 * 
-	 * @param l
-	 */
-	public synchronized void addChartOptionsRenderedEventListener(ChartOptionsRenderedEventListener l) {
-		listeners.add(l);
-	}
-
-	public synchronized void removeChartOptionsRenderedEventListener(ChartOptionsRenderedEventListener l) {
-		listeners.remove(l);
 	}
 
 	/*

@@ -23,7 +23,6 @@ import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.gui.events.ChartOptionsRenderedEvent;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetUpdateEvent;
 import com.bmskinner.nuclear_morphology.visualisation.charts.ProfileChartFactory;
@@ -62,12 +61,6 @@ public class SegmentationDualChartPanel extends DualChartPanel {
 
 	@Override
 	public void eventReceived(DatasetUpdateEvent event) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void eventReceived(ChartOptionsRenderedEvent event) {
 		// TODO Auto-generated method stub
 
 	}

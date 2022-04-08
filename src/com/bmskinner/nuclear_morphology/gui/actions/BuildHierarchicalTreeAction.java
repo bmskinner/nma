@@ -32,7 +32,6 @@ import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.dialogs.ClusterTreeDialog;
 import com.bmskinner.nuclear_morphology.gui.dialogs.HierarchicalTreeSetupDialog;
 import com.bmskinner.nuclear_morphology.gui.dialogs.SubAnalysisSetupDialog;
-import com.bmskinner.nuclear_morphology.gui.events.ChartOptionsRenderedEvent;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.events.DatasetUpdateEvent;
 import com.bmskinner.nuclear_morphology.gui.events.EventListener;
@@ -114,11 +113,6 @@ public class BuildHierarchicalTreeAction extends SingleDatasetResultAction imple
 
 	@Override
 	public void eventReceived(UserActionEvent event) {
-		// No action
-	}
-
-	@Override
-	public void eventReceived(ChartOptionsRenderedEvent event) {
 		// No action
 	}
 
