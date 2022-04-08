@@ -60,16 +60,7 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
 
     private GenericCheckboxPanel rotatePanel   = new GenericCheckboxPanel("Rotate vertical");
     private GenericCheckboxPanel warpMeshPanel = new GenericCheckboxPanel("Warp image to consensus shape");
-    
-    // A JDialog is a top level container, and these are not subject to GC on
-    // disposal according to
-    // https://stackoverflow.com/questions/15863178/memory-leaking-on-jdialog-closing
-    // Hence, only keep one dialog, and prevent multiple copies spawning by
-    // loading the active cell in when needed
-//    private final CellResegmentationDialog resegDialog; // not in use while debugging
-    
-    private final CellBorderAdjustmentDialog cellBorderAdjustmentDialog;
-    
+        
     public CellOutlinePanel(@NonNull InputSupplier context, CellViewModel model) {
         super(context, model, PANEL_TITLE_LBL);
         // make the chart for each nucleus
@@ -83,8 +74,6 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
         imagePanel.addSegmentEventListener(this);
 
         add(imagePanel, BorderLayout.CENTER);
-        
-        cellBorderAdjustmentDialog = new CellBorderAdjustmentDialog(model);
     }
     
     private JPanel makeHeader() {
@@ -100,9 +89,6 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
         warpMeshPanel.addActionListener(this);
         warpMeshPanel.setEnabled(false);
          
-        JButton adjustBtn = new JButton("Adjust border");
-        adjustBtn.addActionListener(e-> cellBorderAdjustmentDialog.load(getCellModel().getCell(), activeDataset()));
-
         panel.add(rotatePanel);
         panel.add(warpMeshPanel);
         

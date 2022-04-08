@@ -66,7 +66,11 @@ public class CellImagePainter implements ImagePainter {
 
 		try {
 			
-			Nucleus n = cell.getPrimaryNucleus();
+			Nucleus n = cell.getPrimaryNucleus();	
+
+//			Values val = calcNewImageDimensions(w, h);
+//			Math.cos(val.rads) = w / original;
+//			double r = isOriented ? 1 : (h / Math.cos(val.rads))/h;
 			
 			AffineTransform at = createScaleTransform(originalWidth, originalHeight, w, h);
 
@@ -210,13 +214,12 @@ public class CellImagePainter implements ImagePainter {
 	}
 
 
-	public record Values(
-			double rads,
-			int w,
-			int h){}
-	
-	
-	
+	/**
+	 * Tuple for result of rotation calculation
+	 * @author ben
+	 *
+	 */
+	public record Values(double rads, int w, int h){}
 
 	private Values calcNewImageDimensions(int w, int h) throws MissingLandmarkException {
 		double angle = 360 - ComponentOrienter.calcAngleToAlignVertically(cell.getPrimaryNucleus());

@@ -77,6 +77,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.visualisation.image.CellImagePainter;
 import com.bmskinner.nuclear_morphology.visualisation.image.ImageAnnotator;
 import com.bmskinner.nuclear_morphology.visualisation.image.ImagePainter;
+import com.bmskinner.nuclear_morphology.visualisation.image.WarpedCellPainter;
 
 import ij.process.ImageProcessor;
 
@@ -191,25 +192,9 @@ public class InteractiveCellPanel extends JPanel {
 	}
 	
 	private ImagePainter createPainter() {
-//		if(displayOptions.getBoolean(CellDisplayOptions.WARP_IMAGE))
-//			return new WarpedCellPainter(dataset, cell);
+		if(displayOptions.getBoolean(CellDisplayOptions.WARP_IMAGE))
+			return new WarpedCellPainter(dataset, cell);
 		return new CellImagePainter(cell, displayOptions.getBoolean(CellDisplayOptions.ROTATE_VERTICAL));
-	}
-
-	private BufferedImage createWarpImage() {
-		ImageProcessor ip = ImageImporter.importFullImageTo24bit(component);
-		try {
-			Mesh consensusMesh = new DefaultMesh(dataset.getCollection().getConsensus());
-			for(Nucleus n : cell.getNuclei()) {
-				Mesh m = new DefaultMesh(n, consensusMesh);
-				MeshImage im = new DefaultMeshImage(m, ip.duplicate());
-				ip = im.drawImage(consensusMesh);
-				ip.flipVertical();
-			}
-		} catch (MeshCreationException | IllegalArgumentException | MeshImageCreationException | UncomparableMeshImageException | MissingLandmarkException | ComponentCreationException e) {
-			LOGGER.log(Loggable.STACK, "Error making mesh or loading image", e);
-		}
-		return ImageAnnotator.resizeKeepingAspect(ip, getWidth(), getHeight()).getBufferedImage();
 	}
 	
 	public synchronized void addSegmentEventListener(SegmentEventListener l) {
