@@ -26,6 +26,7 @@ import java.util.Set;
 import javax.swing.table.TableModel;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
@@ -77,7 +78,7 @@ public class TableCache implements Cache {
 	}
 
 	@Override
-	public void clear(@NonNull IAnalysisDataset dataset) {
+	public void clear(@Nullable IAnalysisDataset dataset) {
 		Set<DisplayOptions> toRemove = new HashSet<>();
 
 		for (DisplayOptions op : tableMap.keySet()) {
@@ -104,9 +105,9 @@ public class TableCache implements Cache {
 	 * @param list
 	 */
 	@Override
-	public synchronized void clear(@NonNull List<IAnalysisDataset> list) {
+	public synchronized void clear(@Nullable List<IAnalysisDataset> list) {
 
-		if (list.isEmpty()) {
+		if (list == null || list.isEmpty()) {
 			purge();
 			return;
 		}

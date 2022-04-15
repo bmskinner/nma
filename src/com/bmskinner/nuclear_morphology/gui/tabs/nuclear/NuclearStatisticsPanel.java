@@ -21,10 +21,7 @@ import java.awt.BorderLayout;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingConstants;
 
-import org.eclipse.jdt.annotation.NonNull;
-
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
-import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 
 @SuppressWarnings("serial")
@@ -34,19 +31,19 @@ public class NuclearStatisticsPanel extends DetailPanel {
 
 	private JTabbedPane tabPane;
 
-	public NuclearStatisticsPanel(@NonNull InputSupplier context) {
-		super(context);
+	public NuclearStatisticsPanel() {
+		super();
 
 		this.setLayout(new BorderLayout());
 		tabPane = new JTabbedPane(SwingConstants.TOP);
 
-		DetailPanel nuclearStatsPanel = new NuclearStatsPanel(context);
-		DetailPanel boxplotPanel = new NuclearBoxplotsPanel(context);
-		DetailPanel wilcoxonPanel = new WilcoxonDetailPanel(context);
-		DetailPanel nucleusMagnitudePanel = new NucleusMagnitudePanel(context);
+		DetailPanel nuclearStatsPanel = new NuclearStatsPanel();
+		DetailPanel boxplotPanel = new NuclearBoxplotsPanel();
+		DetailPanel wilcoxonPanel = new WilcoxonDetailPanel();
+		DetailPanel nucleusMagnitudePanel = new NucleusMagnitudePanel();
 
-		DetailPanel nuclearScatterChartPanel = new NuclearScatterChartPanel(context);
-		DetailPanel nuclearGlcmPanel = new NuclearGlcmPanel(context);
+		DetailPanel nuclearScatterChartPanel = new NuclearScatterChartPanel();
+		DetailPanel nuclearGlcmPanel = new NuclearGlcmPanel();
 
 		addPanel(nuclearStatsPanel);
 		addPanel(boxplotPanel);

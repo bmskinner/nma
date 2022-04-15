@@ -16,36 +16,33 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.tabs.editing;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.LandmarkType;
 import com.bmskinner.nuclear_morphology.components.profiles.SegmentationHandler;
-import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
-import com.bmskinner.nuclear_morphology.gui.components.BorderTagEvent;
-import com.bmskinner.nuclear_morphology.gui.events.BorderTagEventListener;
-import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
+import com.bmskinner.nuclear_morphology.gui.events.LandmarkUpdateEvent;
+import com.bmskinner.nuclear_morphology.gui.events.LandmarkUpdateEventListener;
 import com.bmskinner.nuclear_morphology.gui.events.SegmentEvent;
 import com.bmskinner.nuclear_morphology.gui.events.SegmentEventListener;
+import com.bmskinner.nuclear_morphology.gui.events.UserActionEvent;
+import com.bmskinner.nuclear_morphology.gui.events.revamp.UserActionController;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.EditingTabPanel;
 
 @SuppressWarnings("serial")
 public abstract class AbstractEditingPanel extends DetailPanel
-		implements SegmentEventListener, BorderTagEventListener, EditingTabPanel {
+		implements SegmentEventListener, LandmarkUpdateEventListener, EditingTabPanel {
 
 	private static final Logger LOGGER = Logger.getLogger(AbstractEditingPanel.class.getName());
 
-	public AbstractEditingPanel(@NonNull InputSupplier context, String title) {
-		super(context, title);
+	public AbstractEditingPanel(String title) {
+		super(title);
 	}
 
 	/**
@@ -57,9 +54,6 @@ public abstract class AbstractEditingPanel extends DetailPanel
 		if (activeDataset() == null)
 			return;
 		ICellCollection collection = activeDataset().getCollection();
-
-//        if (collection.isVirtual())
-//            return;
 
 		if (collection.hasLockedCells()) {
 			String[] options = { "Keep manual values", "Overwrite manual values" };
@@ -99,10 +93,11 @@ public abstract class AbstractEditingPanel extends DetailPanel
 		SegmentationHandler sh = new SegmentationHandler(activeDataset());
 		sh.setBorderTag(tag, newTagIndex);
 
-		refreshChartCache(); // immediate visualisation of result
+		refreshCache(); // immediate visualisation of result
 
 		if (tag.type().equals(LandmarkType.CORE)) {
-			this.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.SEGMENTATION_ACTION, getDatasets());
+			UserActionController.getInstance().userActionEventReceived(
+					new UserActionEvent(this, UserActionEvent.SEGMENTATION_ACTION, getDatasets()));
 		} else {
 			// TODO: get UI controller to fire here
 		}
@@ -117,14 +112,7 @@ public abstract class AbstractEditingPanel extends DetailPanel
 	 * showed at once
 	 */
 	protected void refreshEditingPanelCharts() {
-		this.refreshChartCache();
-
-		List<IAnalysisDataset> list = new ArrayList<>();
-
-		list.addAll(getDatasets());
-		list.addAll(activeDataset().getAllChildDatasets());
-
-		this.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.RECACHE_CHARTS, list);
+		this.refreshCache();
 	}
 
 	/**
@@ -145,12 +133,13 @@ public abstract class AbstractEditingPanel extends DetailPanel
 
 		refreshEditingPanelCharts();
 
-		this.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.REFRESH_MORPHOLOGY, getDatasets());
+		UserActionController.getInstance()
+				.userActionEventReceived(new UserActionEvent(this, UserActionEvent.REFRESH_MORPHOLOGY, getDatasets()));
 
 	}
 
 	@Override
-	public void borderTagEventReceived(BorderTagEvent event) {
+	public void landmarkUpdateEventReceived(LandmarkUpdateEvent event) {
 	}
 
 	@Override

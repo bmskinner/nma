@@ -41,7 +41,7 @@ import com.bmskinner.nuclear_morphology.core.DatasetListManager;
 import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
-import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
+import com.bmskinner.nuclear_morphology.gui.events.revamp.UIController;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.utility.FileUtils;
 
@@ -107,8 +107,6 @@ public class CosmeticHandler {
 		try {
 			Color newColor = parent.getInputSupplier().requestColor("Choose dataset colour", (Color) oldColour);
 			dataset.setDatasetColour(newColor);
-			parent.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.RECACHE_CHARTS, dataset);
-//			parent.getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
 
 		} catch (RequestCancelledException e) {
 			return;
@@ -249,8 +247,7 @@ public class CosmeticHandler {
 			for (ICell c : cells)
 				for (Nucleus n : c.getNuclei())
 					n.setSourceFolder(folder);
-
-			parent.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.RECACHE_CHARTS, d);
+			UIController.getInstance().fireFilePathUpdated(d);
 		} catch (RequestCancelledException e) {
 		}
 
@@ -269,7 +266,7 @@ public class CosmeticHandler {
 			File newFolder = parent.getInputSupplier().requestFolder(FileUtils.extantComponent(currentFolder));
 
 			d.getCollection().setSourceFolder(newFolder);
-			parent.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.RECACHE_CHARTS, d);
+			UIController.getInstance().fireFilePathUpdated(d);
 		} catch (RequestCancelledException e) {
 		}
 

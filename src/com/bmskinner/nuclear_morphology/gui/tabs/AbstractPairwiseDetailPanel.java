@@ -28,96 +28,89 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 
 import org.eclipse.jdt.annotation.NonNull;
-import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.components.panels.WrappedLabel;
 import com.bmskinner.nuclear_morphology.visualisation.datasets.tables.AbstractTableCreator;
-import com.bmskinner.nuclear_morphology.visualisation.options.DefaultChartOptions;
 
 @SuppressWarnings("serial")
-public abstract class AbstractPairwiseDetailPanel extends DetailPanel {
+public abstract class AbstractPairwiseDetailPanel extends TableDetailPanel {
 
-    protected JPanel      tablePanel;
-    protected JScrollPane scrollPane = new JScrollPane();
+	protected JPanel tablePanel;
+	protected JScrollPane scrollPane = new JScrollPane();
 
-    public AbstractPairwiseDetailPanel(@NonNull InputSupplier context) {
-        super(context);
+	public AbstractPairwiseDetailPanel() {
+		super();
 
-        this.setLayout(new BorderLayout());
+		this.setLayout(new BorderLayout());
 
-        tablePanel = createTablePanel();
-        scrollPane.setViewportView(tablePanel);
+		tablePanel = createTablePanel();
+		scrollPane.setViewportView(tablePanel);
 
-        this.add(createInfoPanel(), BorderLayout.NORTH);
-        this.add(scrollPane, BorderLayout.CENTER);
-    }
+		this.add(createInfoPanel(), BorderLayout.NORTH);
+		this.add(scrollPane, BorderLayout.CENTER);
+	}
 
-    protected JFreeChart createPanelChartType(DefaultChartOptions options) throws Exception {
-        return null;
-    }
+	@Override
+	public void setLoading() {
+		super.setLoading();
+		for (Component c : this.getComponents()) {
+			if (c instanceof JTable) {
 
-    @Override
-    public void setChartsAndTablesLoading() {
-        super.setChartsAndTablesLoading();
-        for (Component c : this.getComponents()) {
-            if (c instanceof JTable) {
+				((JTable) c).setModel(AbstractTableCreator.createLoadingTable());
+			}
+		}
 
-                ((JTable) c).setModel(AbstractTableCreator.createLoadingTable());
-            }
-        }
+	}
 
-    }
+	/**
+	 * Create the info panel
+	 * 
+	 * @return
+	 */
+	protected JPanel createInfoPanel() {
+		JPanel infoPanel = new JPanel();
+		infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
 
-    /**
-     * Create the info panel
-     * 
-     * @return
-     */
-    protected JPanel createInfoPanel() {
-        JPanel infoPanel = new JPanel();
-        infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
-        
-        String infoString = "Pairwise comparisons between populations using Mann-Whitney U test\n"
-        		+"Above the diagonal: Mann-Whitney U statistics\n"
-        		+"Below the diagonal: p-values\n"
-        		+"Significant values at 5% and 1% levels after Bonferroni correction are highlighted in yellow and green";
-        
-        infoPanel.add(new WrappedLabel(infoString));
-        return infoPanel;
-    }
+		String infoString = "Pairwise comparisons between populations using Mann-Whitney U test\n"
+				+ "Above the diagonal: Mann-Whitney U statistics\n" + "Below the diagonal: p-values\n"
+				+ "Significant values at 5% and 1% levels after Bonferroni correction are highlighted in yellow and green";
 
-    /**
-     * Create a new panel to hold tables
-     * 
-     * @return
-     */
-    protected JPanel createTablePanel() {
-        JPanel panel = new JPanel();
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+		infoPanel.add(new WrappedLabel(infoString));
+		return infoPanel;
+	}
 
-        Dimension minSize = new Dimension(10, 10);
-        Dimension prefSize = new Dimension(10, 10);
-        Dimension maxSize = new Dimension(Short.MAX_VALUE, 10);
-        panel.add(new Box.Filler(minSize, prefSize, maxSize));
-        return panel;
-    }
+	/**
+	 * Create a new panel to hold tables
+	 * 
+	 * @return
+	 */
+	protected JPanel createTablePanel() {
+		JPanel panel = new JPanel();
+		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 
-    /**
-     * Prepare a wilcoxon table
-     * 
-     * @param panel the JPanel to add the table to
-     * @param table the table to add
-     * @param model the model to provide
-     * @param label the label for the table
-     */
-    protected void addWilconxonTable(JPanel panel, JTable table, String label) {
-        Dimension minSize = new Dimension(10, 10);
-        Dimension prefSize = new Dimension(10, 10);
-        Dimension maxSize = new Dimension(Short.MAX_VALUE, 10);
-        panel.add(new Box.Filler(minSize, prefSize, maxSize));
-        panel.add(new JLabel(label));
-        panel.add(table);
-        table.setEnabled(false);
-    }
+		Dimension minSize = new Dimension(10, 10);
+		Dimension prefSize = new Dimension(10, 10);
+		Dimension maxSize = new Dimension(Short.MAX_VALUE, 10);
+		panel.add(new Box.Filler(minSize, prefSize, maxSize));
+		return panel;
+	}
+
+	/**
+	 * Prepare a wilcoxon table
+	 * 
+	 * @param panel the JPanel to add the table to
+	 * @param table the table to add
+	 * @param model the model to provide
+	 * @param label the label for the table
+	 */
+	protected void addWilconxonTable(JPanel panel, JTable table, String label) {
+		Dimension minSize = new Dimension(10, 10);
+		Dimension prefSize = new Dimension(10, 10);
+		Dimension maxSize = new Dimension(Short.MAX_VALUE, 10);
+		panel.add(new Box.Filler(minSize, prefSize, maxSize));
+		panel.add(new JLabel(label));
+		panel.add(table);
+		table.setEnabled(false);
+	}
 }

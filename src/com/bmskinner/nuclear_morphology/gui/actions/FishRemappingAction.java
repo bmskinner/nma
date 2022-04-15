@@ -24,7 +24,6 @@ import java.util.logging.Logger;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.components.FileSelector;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.FishRemappingProber;
@@ -43,9 +42,8 @@ public class FishRemappingAction extends SingleDatasetResultAction {
 
 	private File fishDir;
 
-	public FishRemappingAction(final List<IAnalysisDataset> datasets, @NonNull final ProgressBarAcceptor acceptor,
-			@NonNull final EventHandler eh) {
-		super(datasets, PROGRESS_LBL, acceptor, eh);
+	public FishRemappingAction(final List<IAnalysisDataset> datasets, @NonNull final ProgressBarAcceptor acceptor) {
+		super(datasets, PROGRESS_LBL, acceptor);
 
 	}
 
@@ -82,7 +80,7 @@ public class FishRemappingAction extends SingleDatasetResultAction {
 				LOGGER.info("Reapplying morphology...");
 
 				CountDownLatch latch = new CountDownLatch(1);
-				new RunSegmentationAction(newList, dataset, NO_FLAG, progressAcceptors.get(0), eh, latch).run();
+				new RunSegmentationAction(newList, dataset, NO_FLAG, progressAcceptors.get(0), latch).run();
 				new Thread(() -> {
 					try {
 						latch.await();
@@ -110,6 +108,5 @@ public class FishRemappingAction extends SingleDatasetResultAction {
 		// Do not use super.finished(), or it will trigger another save action
 		LOGGER.fine("FISH mapping complete");
 		cancel();
-		getDatasetEventHandler().removeListener(eh);
 	}
 }

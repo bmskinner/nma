@@ -20,9 +20,6 @@ import java.awt.BorderLayout;
 
 import javax.swing.JTabbedPane;
 
-import org.eclipse.jdt.annotation.NonNull;
-
-import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 
 /**
@@ -39,13 +36,13 @@ public class CellsDetailPanel extends DetailPanel {
 
 	private JTabbedPane tabPane;
 
-	public CellsDetailPanel(@NonNull InputSupplier context) {
-		super(context, PANEL_TITLE_LBL);
+	public CellsDetailPanel() {
+		super(PANEL_TITLE_LBL);
 
 		this.setLayout(new BorderLayout());
 		tabPane = new JTabbedPane(JTabbedPane.TOP);
 
-		DetailPanel boxplotPanel = new CellsBoxplotsPanel(context);
+		DetailPanel boxplotPanel = new CellsBoxplotsPanel();
 
 		tabPane.addTab(boxplotPanel.getPanelTitle(), boxplotPanel);
 

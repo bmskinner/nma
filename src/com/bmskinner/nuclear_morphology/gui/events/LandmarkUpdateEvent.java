@@ -16,21 +16,43 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.events;
 
-import com.bmskinner.nuclear_morphology.gui.components.BorderTagEvent;
+import java.util.EventObject;
+
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 
 /**
- * Listen for BorderTag events
+ * Landmark update events indicate a change to the position of a landmark in a
+ * profile.
  * 
  * @author ben
+ * @since 1.13.2
  *
  */
-public interface BorderTagEventListener {
+@SuppressWarnings("serial")
+public class LandmarkUpdateEvent extends EventObject {
 
-    /**
-     * Send an event to be handled.
-     * 
-     * @param event
-     */
-    public void borderTagEventReceived(BorderTagEvent event);
+	private Landmark lm;
+	private int newIndex;
+
+	/**
+	 * Create an event from a source, with the given message
+	 * 
+	 * @param source the source of the datasets
+	 * @param lm    the affected border tag
+	 * @param newIndex  the affected index
+	 */
+	public LandmarkUpdateEvent(Object source, Landmark lm, int newIndex) {
+		super(source);
+		this.lm = lm;
+		this.newIndex = newIndex;
+	}
+
+	public Landmark getLandmark() {
+		return lm;
+	}
+
+	public int getNewIndex() {
+		return newIndex;
+	}
 
 }

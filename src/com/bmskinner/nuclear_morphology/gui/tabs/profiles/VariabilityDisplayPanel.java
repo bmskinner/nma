@@ -42,7 +42,7 @@ import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileMarkersOpti
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileTypeOptionsPanel;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.ProfilesUpdatedListener;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.SwatchUpdatedListener;
-import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
+import com.bmskinner.nuclear_morphology.gui.tabs.ChartDetailPanel;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.SignificanceTest;
 import com.bmskinner.nuclear_morphology.visualisation.charts.AbstractChartFactory;
@@ -58,7 +58,8 @@ import com.bmskinner.nuclear_morphology.visualisation.options.ChartOptionsBuilde
  *
  */
 @SuppressWarnings("serial")
-public class VariabilityDisplayPanel extends DetailPanel implements ProfilesUpdatedListener, SwatchUpdatedListener {
+public class VariabilityDisplayPanel extends ChartDetailPanel
+		implements ProfilesUpdatedListener, SwatchUpdatedListener {
 
 	private static final Logger LOGGER = Logger.getLogger(VariabilityDisplayPanel.class.getName());
 
@@ -71,8 +72,8 @@ public class VariabilityDisplayPanel extends DetailPanel implements ProfilesUpda
 
 	private ProfileMarkersOptionsPanel profileMarkersOptionsPanel = new ProfileMarkersOptionsPanel();
 
-	public VariabilityDisplayPanel(@NonNull InputSupplier context) {
-		super(context);
+	public VariabilityDisplayPanel() {
+		super();
 		this.setLayout(new BorderLayout());
 
 		ChartOptions options = new ChartOptionsBuilder().setProfileType(ProfileType.ANGLE).build();
@@ -170,8 +171,8 @@ public class VariabilityDisplayPanel extends DetailPanel implements ProfilesUpda
 	}
 
 	@Override
-	public void setChartsAndTablesLoading() {
-		super.setChartsAndTablesLoading();
+	public void setLoading() {
+		super.setLoading();
 		chartPanel.setChart(AbstractChartFactory.createLoadingChart());
 	}
 
@@ -182,12 +183,12 @@ public class VariabilityDisplayPanel extends DetailPanel implements ProfilesUpda
 
 	@Override
 	public void profilesUpdated(List<IAnalysisDataset> datasets) {
-		refreshChartCache(datasets);
+		refreshCache(datasets);
 	}
 
 	@Override
 	public void profilesUpdated(IAnalysisDataset dataset) {
-		refreshChartCache(dataset);
+		refreshCache(dataset);
 	}
 
 	@Override

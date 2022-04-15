@@ -24,7 +24,6 @@ import java.awt.FlowLayout;
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -37,7 +36,6 @@ import javax.swing.JPanel;
 import javax.swing.JSpinner;
 
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
-import com.bmskinner.nuclear_morphology.gui.events.EventListener;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -49,7 +47,6 @@ public abstract class SettingsDialog extends JDialog {
 	private static final Logger LOGGER = Logger.getLogger(SettingsDialog.class.getName());
 
 	protected boolean readyToRun = false;
-	private final List<EventListener> interfaceListeners = new ArrayList<>();
 
 	protected static final String EMPTY_STRING = "";
 	protected static final String OK_LBL = "OK";
@@ -205,13 +202,4 @@ public abstract class SettingsDialog extends JDialog {
 	public boolean isReadyToRun() {
 		return this.readyToRun;
 	}
-
-	public synchronized void addInterfaceEventListener(EventListener l) {
-		interfaceListeners.add(l);
-	}
-
-	public synchronized void removeInterfaceEventListener(EventListener l) {
-		interfaceListeners.remove(l);
-	}
-
 }

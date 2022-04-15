@@ -50,8 +50,8 @@ public class SegmentMagnitudePanel extends AbstractPairwiseDetailPanel {
 
     private static final String PANEL_TITLE_LBL = "Magnitude";
     
-    public SegmentMagnitudePanel(@NonNull InputSupplier context) {
-        super(context);
+    public SegmentMagnitudePanel() {
+        super();
     }
     
     @Override

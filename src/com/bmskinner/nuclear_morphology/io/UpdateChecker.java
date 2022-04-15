@@ -17,17 +17,22 @@ import com.google.gson.JsonSyntaxException;
 
 /**
  * Check for updates to the program on the Bitbucket repository
+ * 
  * @author bms41
  * @since 1.15.0
  */
 public class UpdateChecker {
-	
+
 	private static final Logger LOGGER = Logger.getLogger(UpdateChecker.class.getName());
 	private static final String DOWNLOAD_URL = "https://api.bitbucket.org/2.0/repositories/bmskinner/nuclear_morphology/downloads/";
 	private static final String NAME_PATTERN = "Nuclear_Morphology_Analysis_(\\d+\\.\\d+\\.\\d+)";
-	
+
+	private UpdateChecker() {
+	}
+
 	/**
 	 * Get the latest version of the software found in the repository
+	 * 
 	 * @return the latest version found. Will be the current version on error.
 	 */
 	public static Version fetchLatestVersion() {
@@ -44,13 +49,13 @@ public class UpdateChecker {
 
 			JsonArray array = values.getAsJsonArray();
 
-			for(JsonElement e : array) {
+			for (JsonElement e : array) {
 				String name = e.getAsJsonObject().get("name").toString();
-				Matcher m =p.matcher(name);
-				if(m.find()) {
+				Matcher m = p.matcher(name);
+				if (m.find()) {
 					String vString = m.group(1);
 					Version v = Version.fromString(vString);
-					if(v.isNewerThan(latestVersion)) {
+					if (v.isNewerThan(latestVersion)) {
 						latestVersion = v;
 					}
 				}
@@ -60,41 +65,43 @@ public class UpdateChecker {
 		}
 		return latestVersion;
 	}
-	
+
 	/**
 	 * Check if an updated version of the software is available in the default
-	 * repository. 
-	 * @return true if an update is found, false on error, timeout or if this is the latest version
+	 * repository.
+	 * 
+	 * @return true if an update is found, false on error, timeout or if this is the
+	 *         latest version
 	 */
-	public static boolean isUpdateAvailable(Version testVersion) {		
+	public static boolean isUpdateAvailable(Version testVersion) {
 
 		boolean isLaterVersion = false;
-		
+
 		Version latestVersion = fetchLatestVersion();
 		isLaterVersion = latestVersion.isNewerThan(testVersion);
 
-		if(isLaterVersion)
-			LOGGER.fine("Found later version: " +latestVersion);
+		if (isLaterVersion)
+			LOGGER.fine("Found later version: " + latestVersion);
 		else
-			LOGGER.fine("Up to date: " +latestVersion);
+			LOGGER.fine("Up to date: " + latestVersion);
 		return isLaterVersion;
 	}
-	
+
 	private static String downloadJson() throws IOException {
 
 		String result = "";
-		
+
 		URL url = new URL(DOWNLOAD_URL);
-				
-		try(BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()));) {
 
-	        StringBuffer buffer = new StringBuffer();
-	        int read;
-	        char[] chars = new char[1024];
-	        while ((read = reader.read(chars)) != -1)
-	            buffer.append(chars, 0, read); 
+		try (BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()));) {
 
-	        result = buffer.toString();
+			StringBuffer buffer = new StringBuffer();
+			int read;
+			char[] chars = new char[1024];
+			while ((read = reader.read(chars)) != -1)
+				buffer.append(chars, 0, read);
+
+			result = buffer.toString();
 		} catch (IOException e) {
 			LOGGER.fine("Unable to connect to remote server");
 			result = "Unable to connect";

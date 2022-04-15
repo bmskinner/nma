@@ -26,17 +26,9 @@ import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.border.EmptyBorder;
-import javax.swing.table.TableModel;
 
-import org.eclipse.jdt.annotation.NonNull;
-import org.jfree.chart.JFreeChart;
-
-import com.bmskinner.nuclear_morphology.core.InputSupplier;
-import com.bmskinner.nuclear_morphology.gui.events.UserActionEvent;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
-import com.bmskinner.nuclear_morphology.visualisation.options.ChartOptions;
-import com.bmskinner.nuclear_morphology.visualisation.options.TableOptions;
 
 @SuppressWarnings("serial")
 public class IndividualCellDetailPanel extends DetailPanel {
@@ -68,15 +60,15 @@ public class IndividualCellDetailPanel extends DetailPanel {
 	/** Track the cell on display */
 	private CellViewModel model = new CellViewModel(null, null);
 
-	public IndividualCellDetailPanel(@NonNull InputSupplier context) {
+	public IndividualCellDetailPanel() {
 
-		super(context);
+		super();
 		try {
 
-			createSubPanels(context);
+			createSubPanels();
 
 			this.setLayout(new BorderLayout());
-			JPanel westPanel = createCellandSignalListPanels(context);
+			JPanel westPanel = createCellandSignalListPanels();
 
 			tabPane = new JTabbedPane(JTabbedPane.LEFT);
 			tabPane.add(cellStatsPanel.getPanelTitle(), cellStatsPanel);
@@ -103,12 +95,12 @@ public class IndividualCellDetailPanel extends DetailPanel {
 		return PANEL_TITLE_LBL;
 	}
 
-	private void createSubPanels(@NonNull InputSupplier context) {
-		cellBorderTagPanel = new CellProfilesPanel(context, model);
-		outlinePanel = new CellOutlinePanel(context, model); // the outline of the cell
+	private void createSubPanels() {
+		cellBorderTagPanel = new CellProfilesPanel(model);
+		outlinePanel = new CellOutlinePanel(model); // the outline of the cell
 		// and detected objects
-		cellStatsPanel = new CellStatsPanel(context, model); // the stats table
-		cellsignalStatsPanel = new CellSignalStatsPanel(context, model);
+		cellStatsPanel = new CellStatsPanel(model); // the stats table
+		cellsignalStatsPanel = new CellSignalStatsPanel(model);
 
 		model.addView(cellBorderTagPanel);
 		model.addView(outlinePanel);
@@ -116,7 +108,7 @@ public class IndividualCellDetailPanel extends DetailPanel {
 		model.addView(cellsignalStatsPanel);
 	}
 
-	private JPanel createCellandSignalListPanels(@NonNull InputSupplier context) {
+	private JPanel createCellandSignalListPanels() {
 		JPanel panel = new JPanel(new GridBagLayout());
 
 		GridBagConstraints constraints = new GridBagConstraints();
@@ -129,7 +121,7 @@ public class IndividualCellDetailPanel extends DetailPanel {
 		constraints.weighty = 0.6;
 		constraints.anchor = GridBagConstraints.CENTER;
 
-		cellsListPanel = new CellsListPanel(context, model);
+		cellsListPanel = new CellsListPanel(model);
 		model.addView(cellsListPanel);
 		cellsListPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		panel.add(cellsListPanel, constraints);
@@ -140,7 +132,7 @@ public class IndividualCellDetailPanel extends DetailPanel {
 		constraints.gridwidth = 1;
 		constraints.weightx = 0.5;
 		constraints.weighty = 0.4;
-		signalListPanel = new ComponentListPanel(context, model);
+		signalListPanel = new ComponentListPanel(model);
 		model.addView(signalListPanel);
 		signalListPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		panel.add(signalListPanel, constraints);
@@ -165,20 +157,6 @@ public class IndividualCellDetailPanel extends DetailPanel {
 	protected void updateNull() {
 		model.setCell(null);
 		model.setComponent(null);
-	}
-
-	@Override
-	protected JFreeChart createPanelChartType(@NonNull ChartOptions options) {
-		return null;
-	}
-
-	@Override
-	protected TableModel createPanelTableType(@NonNull TableOptions options) {
-		return null;
-	}
-
-	@Override
-	public void eventReceived(UserActionEvent event) {
 	}
 
 }

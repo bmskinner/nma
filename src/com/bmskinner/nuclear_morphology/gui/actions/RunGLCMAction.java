@@ -13,7 +13,6 @@ import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
-import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 
 /**
  * Trigger a GLCM calculation
@@ -28,14 +27,14 @@ public class RunGLCMAction extends SingleDatasetResultAction {
 	private static final @NonNull String PROGRESS_BAR_LABEL = "Calculating GLCM";
 
 	public RunGLCMAction(@NonNull List<IAnalysisDataset> datasets, @NonNull CountDownLatch latch,
-			@NonNull ProgressBarAcceptor acceptor, @NonNull EventHandler eh) {
-		super(datasets, PROGRESS_BAR_LABEL, acceptor, eh);
+			@NonNull ProgressBarAcceptor acceptor) {
+		super(datasets, PROGRESS_BAR_LABEL, acceptor);
 		this.setLatch(latch);
 	}
 
 	public RunGLCMAction(@NonNull IAnalysisDataset dataset, int noFlag, @NonNull ProgressBarAcceptor acceptor,
 			@NonNull EventHandler eh) {
-		super(dataset, dataset.getName() + ": " + PROGRESS_BAR_LABEL, acceptor, eh);
+		super(dataset, dataset.getName() + ": " + PROGRESS_BAR_LABEL, acceptor);
 	}
 
 	@Override
@@ -48,17 +47,14 @@ public class RunGLCMAction extends SingleDatasetResultAction {
 
 	@Override
 	public void finished() {
-		getDatasetEventHandler().fireDatasetEvent(DatasetEvent.RECACHE_CHARTS, dataset);
-
 		if (!hasRemainingDatasetsToProcess()) {
 			super.finished();
-			getDatasetEventHandler().removeListener(eh);
 			countdownLatch();
 
 		} else {
 			// otherwise analyse the next item in the list
 			cancel(); // remove progress bar
-			new RunGLCMAction(getRemainingDatasetsToProcess(), getLatch().get(), progressAcceptors.get(0), eh).run();
+			new RunGLCMAction(getRemainingDatasetsToProcess(), getLatch().get(), progressAcceptors.get(0)).run();
 
 		}
 

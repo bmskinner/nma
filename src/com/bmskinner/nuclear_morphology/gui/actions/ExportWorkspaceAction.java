@@ -24,7 +24,6 @@ import java.util.logging.Logger;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace;
-import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.io.Io;
@@ -45,13 +44,13 @@ public class ExportWorkspaceAction extends VoidResultAction {
 
     private final List<IWorkspace> workspaces = new ArrayList<>();
 
-    public ExportWorkspaceAction(@NonNull final IWorkspace workspace, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh) {
-        super(PROGRESS_LBL, acceptor, eh);
+    public ExportWorkspaceAction(@NonNull final IWorkspace workspace, @NonNull final ProgressBarAcceptor acceptor) {
+        super(PROGRESS_LBL, acceptor);
         workspaces.add(workspace);
     }
     
-    public ExportWorkspaceAction(@NonNull final List<IWorkspace> list, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh) {
-        super(PROGRESS_LBL, acceptor, eh);
+    public ExportWorkspaceAction(@NonNull final List<IWorkspace> list, @NonNull final ProgressBarAcceptor acceptor) {
+        super(PROGRESS_LBL, acceptor);
         workspaces.addAll(list);
     }
 
@@ -62,7 +61,7 @@ public class ExportWorkspaceAction extends VoidResultAction {
             if(w.getSaveFile()==null) {
                 try {
                 	File defaultFolder = w.getFiles().size()>0 ? FileUtils.commonPathOfFiles(w.getFiles()) : null;
-                    File f = eh.getInputSupplier().requestFileSave(defaultFolder, w.getName(), Io.WRK_FILE_EXTENSION_NODOT);
+                    File f = is.requestFileSave(defaultFolder, w.getName(), Io.WRK_FILE_EXTENSION_NODOT);
                     w.setSaveFile(f);
                 } catch(RequestCancelledException e) {
                     continue;

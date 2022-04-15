@@ -17,17 +17,11 @@
 package com.bmskinner.nuclear_morphology.gui.dialogs;
 
 import java.awt.Dialog;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.swing.JDialog;
 
-import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.DefaultInputSupplier;
-import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
-import com.bmskinner.nuclear_morphology.gui.events.DatasetEventHandler;
-import com.bmskinner.nuclear_morphology.gui.events.EventListener;
 
 /**
  * This extension to a JDialog can fire DatasetEvents and InterfaceEvents to
@@ -40,7 +34,6 @@ import com.bmskinner.nuclear_morphology.gui.events.EventListener;
 @SuppressWarnings("serial")
 public abstract class MessagingDialog extends JDialog {
 
-	protected final DatasetEventHandler dh = new DatasetEventHandler(this);
 	protected final InputSupplier inputSupplier = new DefaultInputSupplier();
 
 	public MessagingDialog() {
@@ -56,36 +49,4 @@ public abstract class MessagingDialog extends JDialog {
 	public MessagingDialog(Dialog d) {
 		super(d);
 	}
-
-	public synchronized void addDatasetEventListener(EventListener l) {
-		dh.addListener(l);
-	}
-
-	public synchronized void removeDatasetEventListener(EventListener l) {
-		dh.removeListener(l);
-	}
-
-	protected synchronized void fireDatasetEvent(String method, List<IAnalysisDataset> list) {
-		DatasetEvent event = new DatasetEvent(this, method, this.getClass().getSimpleName(), list);
-		dh.fire(event);
-	}
-
-	protected synchronized void fireDatasetEvent(String method, IAnalysisDataset dataset) {
-
-		List<IAnalysisDataset> list = new ArrayList<>();
-		list.add(dataset);
-		fireDatasetEvent(method, list);
-	}
-
-	protected synchronized void fireDatasetEvent(String method, List<IAnalysisDataset> list,
-			IAnalysisDataset template) {
-
-		DatasetEvent event = new DatasetEvent(this, method, this.getClass().getSimpleName(), list, template);
-		dh.fire(event);
-	}
-
-	protected synchronized void fireDatasetEvent(DatasetEvent event) {
-		dh.fire(event);
-	}
-
 }

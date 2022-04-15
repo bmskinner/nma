@@ -27,7 +27,6 @@ import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.classification.ClusterFileAssignmentMethod;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.components.FileSelector;
@@ -47,9 +46,8 @@ public class ClusterFileAssignmentAction extends SingleDatasetResultAction {
 
 	private static final @NonNull String PROGRESS_BAR_LABEL = "Assigning clustered cells";
 
-	public ClusterFileAssignmentAction(IAnalysisDataset dataset, @NonNull ProgressBarAcceptor acceptor,
-			@NonNull EventHandler eh) {
-		super(dataset, PROGRESS_BAR_LABEL, acceptor, eh);
+	public ClusterFileAssignmentAction(IAnalysisDataset dataset, @NonNull ProgressBarAcceptor acceptor) {
+		super(dataset, PROGRESS_BAR_LABEL, acceptor);
 	}
 
 	@Override

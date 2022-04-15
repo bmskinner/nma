@@ -40,7 +40,6 @@ import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.datasets.VirtualDataset;
 import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.dialogs.SettingsDialog;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.UIController;
@@ -60,9 +59,8 @@ public class ExtractRandomCellsAction extends SingleDatasetResultAction {
 
 	private static final String PROGRESS_LBL = "Extract cells";
 
-	public ExtractRandomCellsAction(IAnalysisDataset dataset, @NonNull final ProgressBarAcceptor acceptor,
-			@NonNull final EventHandler eh) {
-		super(dataset, PROGRESS_LBL, acceptor, eh);
+	public ExtractRandomCellsAction(IAnalysisDataset dataset, @NonNull final ProgressBarAcceptor acceptor) {
+		super(dataset, PROGRESS_LBL, acceptor);
 		this.setProgressBarIndeterminate();
 	}
 

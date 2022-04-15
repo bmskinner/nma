@@ -16,6 +16,7 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.actions;
 
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Logger;
 
@@ -30,13 +31,13 @@ import com.bmskinner.nuclear_morphology.analysis.classification.PrincipalCompone
 import com.bmskinner.nuclear_morphology.analysis.classification.TsneMethod;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
-import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.dialogs.ClusteringSetupDialog;
 import com.bmskinner.nuclear_morphology.gui.dialogs.SubAnalysisSetupDialog;
-import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
+import com.bmskinner.nuclear_morphology.gui.events.UserActionEvent;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.UIController;
+import com.bmskinner.nuclear_morphology.gui.events.revamp.UserActionController;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -51,9 +52,8 @@ public class ClusterAnalysisAction extends SingleDatasetResultAction {
 
 	private static final @NonNull String PROGRESS_BAR_LABEL = "Clustering cells";
 
-	public ClusterAnalysisAction(IAnalysisDataset dataset, @NonNull ProgressBarAcceptor acceptor,
-			@NonNull EventHandler eh) {
-		super(dataset, PROGRESS_BAR_LABEL, acceptor, eh);
+	public ClusterAnalysisAction(IAnalysisDataset dataset, @NonNull ProgressBarAcceptor acceptor) {
+		super(dataset, PROGRESS_BAR_LABEL, acceptor);
 	}
 
 	@Override
@@ -144,7 +144,8 @@ public class ClusterAnalysisAction extends SingleDatasetResultAction {
 			Thread.currentThread().interrupt();
 		}
 
-		getDatasetEventHandler().fireDatasetEvent(DatasetEvent.SAVE, dataset);
+		UserActionController.getInstance()
+				.userActionEventReceived(new UserActionEvent(this, UserActionEvent.SAVE, List.of(dataset)));
 		UIController.getInstance().fireDatasetAdded(dataset);
 		super.finished();
 	}

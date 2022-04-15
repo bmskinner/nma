@@ -26,7 +26,6 @@ import javax.swing.table.TableModel;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 import com.bmskinner.nuclear_morphology.gui.components.renderers.JTextAreaCellRenderer;
 import com.bmskinner.nuclear_morphology.visualisation.datasets.AnalysisDatasetTableCreator;
@@ -39,83 +38,81 @@ import com.bmskinner.nuclear_morphology.visualisation.options.TableOptionsBuilde
  *
  */
 @SuppressWarnings("serial")
-public class AnalysisDetailPanel extends DetailPanel {
-    
-    private static final String PANEL_TITLE_LBL = "Analysis info";
-    private static final String HEADER_LBL      = "Green rows have the same value in all columns";
-    private ExportableTable tableAnalysisParameters;
+public class AnalysisDetailPanel extends TableDetailPanel {
 
-    public AnalysisDetailPanel(@NonNull InputSupplier context) {
-        super(context, PANEL_TITLE_LBL);
+	private static final String PANEL_TITLE_LBL = "Analysis info";
+	private static final String HEADER_LBL = "Green rows have the same value in all columns";
+	private ExportableTable tableAnalysisParameters;
 
-        this.setLayout(new BorderLayout());
+	public AnalysisDetailPanel() {
+		super(PANEL_TITLE_LBL);
 
-        JPanel header = new JPanel();
-        header.add(new JLabel(HEADER_LBL));
-        
-        this.add(header, BorderLayout.NORTH);
-        this.add(createTablePanel(), BorderLayout.CENTER);
+		this.setLayout(new BorderLayout());
 
-    }
+		JPanel header = new JPanel();
+		header.add(new JLabel(HEADER_LBL));
 
-    @Override
-    public synchronized void setChartsAndTablesLoading() {
-        super.setChartsAndTablesLoading();
-        tableAnalysisParameters.setModel(AbstractTableCreator.createLoadingTable());
-    }
+		this.add(header, BorderLayout.NORTH);
+		this.add(createTablePanel(), BorderLayout.CENTER);
 
-    @Override
-    protected TableModel createPanelTableType(@NonNull TableOptions options) {
-        return new AnalysisDatasetTableCreator(options).createAnalysisParametersTable();
-    }
+	}
 
-    @Override
-    protected synchronized void updateSingle() {
-        updateMultiple();
-    }
+	@Override
+	public synchronized void setLoading() {
+		super.setLoading();
+		tableAnalysisParameters.setModel(AbstractTableCreator.createLoadingTable());
+	}
 
-    @Override
-    protected synchronized void updateMultiple() {
-        updateAnalysisParametersPanel();
-    }
+	@Override
+	protected TableModel createPanelTableType(@NonNull TableOptions options) {
+		return new AnalysisDatasetTableCreator(options).createAnalysisParametersTable();
+	}
 
-    @Override
-    protected synchronized void updateNull() {
-        tableAnalysisParameters.setModel(AbstractTableCreator.createBlankTable());
-    }
+	@Override
+	protected synchronized void updateSingle() {
+		updateMultiple();
+	}
 
-    /**
-     * Update the analysis panel with data from the given datasets
-     * 
-     */
-    private void updateAnalysisParametersPanel() {
+	@Override
+	protected synchronized void updateMultiple() {
+		updateAnalysisParametersPanel();
+	}
 
-        TableOptions options = new TableOptionsBuilder()
-        		.setDatasets(getDatasets())
-                .setTarget(tableAnalysisParameters)
-                .build();
+	@Override
+	protected synchronized void updateNull() {
+		tableAnalysisParameters.setModel(AbstractTableCreator.createBlankTable());
+	}
 
-        setTable(options);
+	/**
+	 * Update the analysis panel with data from the given datasets
+	 * 
+	 */
+	private void updateAnalysisParametersPanel() {
 
-    }
+		TableOptions options = new TableOptionsBuilder().setDatasets(getDatasets()).setTarget(tableAnalysisParameters)
+				.build();
 
-    private JPanel createTablePanel() {
-    	JPanel panel = new JPanel();
-    	panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-        
-        tableAnalysisParameters = new ExportableTable();
-        tableAnalysisParameters.setModel(AbstractTableCreator.createBlankTable());
+		setTable(options);
 
-        tableAnalysisParameters.setEnabled(false);
-        tableAnalysisParameters.setDefaultRenderer(Object.class, new JTextAreaCellRenderer());
-        JScrollPane scrollPane = new JScrollPane(tableAnalysisParameters);
+	}
 
-        JPanel tablePanel = new JPanel(new BorderLayout());
+	private JPanel createTablePanel() {
+		JPanel panel = new JPanel();
+		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 
-        tablePanel.add(scrollPane, BorderLayout.CENTER);
-        tablePanel.add(tableAnalysisParameters.getTableHeader(), BorderLayout.NORTH);
-        
-        panel.add(tablePanel);
-        return panel;
-    }
+		tableAnalysisParameters = new ExportableTable();
+		tableAnalysisParameters.setModel(AbstractTableCreator.createBlankTable());
+
+		tableAnalysisParameters.setEnabled(false);
+		tableAnalysisParameters.setDefaultRenderer(Object.class, new JTextAreaCellRenderer());
+		JScrollPane scrollPane = new JScrollPane(tableAnalysisParameters);
+
+		JPanel tablePanel = new JPanel(new BorderLayout());
+
+		tablePanel.add(scrollPane, BorderLayout.CENTER);
+		tablePanel.add(tableAnalysisParameters.getTableHeader(), BorderLayout.NORTH);
+
+		panel.add(tablePanel);
+		return panel;
+	}
 }

@@ -20,12 +20,8 @@ import java.util.List;
 
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
-import com.bmskinner.nuclear_morphology.gui.events.DatasetEventHandler;
-import com.bmskinner.nuclear_morphology.gui.events.DatasetUpdateEventHandler;
-import com.bmskinner.nuclear_morphology.gui.events.EventListener;
-import com.bmskinner.nuclear_morphology.gui.events.UserActionEventHandler;
 
-public interface TabPanel extends EventListener {
+public interface TabPanel {
 
 	/**
 	 * Update the panel display based on the datasets selected in the global list
@@ -76,48 +72,6 @@ public interface TabPanel extends EventListener {
 	void setCellUpdate(boolean b);
 
 	/**
-	 * Add a listener for signal change events from this panel
-	 * 
-	 * @param l the listener
-	 */
-	void addUserActionEventListener(EventListener l);
-
-	/**
-	 * Remove a listener for signal change events from this panel
-	 * 
-	 * @param l the listener
-	 */
-	void removeUserActionEventListener(EventListener l);
-
-	/**
-	 * Add a listener for dataset events from this panel
-	 * 
-	 * @param l the listener
-	 */
-	void addDatasetEventListener(EventListener l);
-
-	/**
-	 * Remove a listener for dataset events from this panel
-	 * 
-	 * @param l the listener
-	 */
-	void removeDatasetEventListener(EventListener l);
-
-	/**
-	 * Add a listener for dataset update events from this panel
-	 * 
-	 * @param l the listener
-	 */
-	void addDatasetUpdateEventListener(EventListener l);
-
-	/**
-	 * Remove a listener for dataset update events from this panel
-	 * 
-	 * @param l the listener
-	 */
-	void removeDatasetUpdateEventListener(EventListener l);
-
-	/**
 	 * Set the analysing state. This sets the cursor over the panel and its
 	 * sub-panels
 	 * 
@@ -128,7 +82,7 @@ public interface TabPanel extends EventListener {
 	/**
 	 * Set the panel state to show loading charts and tables.
 	 */
-	void setChartsAndTablesLoading();
+	void setLoading();
 
 	/**
 	 * Set the controls in this panel to enabled or disabled
@@ -140,67 +94,37 @@ public interface TabPanel extends EventListener {
 	/**
 	 * Remove all charts from the panel chart cache
 	 */
-	void clearChartCache();
+	void clearCache();
 
 	/**
 	 * Remove all charts containing the datasets in the list from the panel chart
 	 * cache
 	 */
-	void clearChartCache(List<IAnalysisDataset> list);
+	void clearCache(List<IAnalysisDataset> list);
 
 	/**
 	 * Remove all charts containing the datasets in the list from the panel chart
 	 * cache
 	 */
-	void clearChartCache(IAnalysisDataset dataset);
-
-	/**
-	 * Remove all tables from the panel table cache
-	 */
-	void clearTableCache();
-
-	/**
-	 * Remove all tables containing the datasets in the list from the panel table
-	 * cache
-	 */
-	void clearTableCache(List<IAnalysisDataset> list);
+	void clearCache(IAnalysisDataset dataset);
 
 	/**
 	 * Remove all charts from the chart cache, then redraw the currently selected
 	 * dataset charts
 	 */
-	void refreshChartCache();
+	void refreshCache();
 
 	/**
 	 * Redraw the charts for the given datasets
 	 * 
 	 * @param list the list of datasets to be redrawn
 	 */
-	void refreshChartCache(List<IAnalysisDataset> list);
+	void refreshCache(List<IAnalysisDataset> list);
 
 	/**
 	 * Redraw the charts for the given datasets
 	 */
-	void refreshChartCache(IAnalysisDataset dataset);
-
-	/**
-	 * Remove all tables from the table cache, then redraw the currently selected
-	 * dataset tables
-	 */
-	void refreshTableCache();
-
-	/**
-	 * Redraw redraw the tables for the given datasets
-	 * 
-	 * @param list the list of datasets to be redrawn
-	 */
-	void refreshTableCache(List<IAnalysisDataset> list);
-
-	DatasetEventHandler getDatasetEventHandler();
-
-	DatasetUpdateEventHandler getDatasetUpdateEventHandler();
-
-	UserActionEventHandler getSignalChangeEventHandler();
+	void refreshCache(IAnalysisDataset dataset);
 
 	/**
 	 * Get the input supplier for user interaction with this panel

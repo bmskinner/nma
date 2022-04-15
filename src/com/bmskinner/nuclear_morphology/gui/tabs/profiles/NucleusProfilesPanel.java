@@ -21,11 +21,8 @@ import java.util.List;
 
 import javax.swing.JTabbedPane;
 
-import org.eclipse.jdt.annotation.NonNull;
-
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.ProfilesUpdatedListener;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.SwatchUpdatedListener;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
@@ -37,18 +34,18 @@ public class NucleusProfilesPanel extends DetailPanel implements ProfilesUpdated
 
 	private static final String PANEL_TITLE_LBL = "Nuclear profiles";
 
-	public NucleusProfilesPanel(@NonNull InputSupplier context) {
-		super(context, PANEL_TITLE_LBL);
+	public NucleusProfilesPanel() {
+		super(PANEL_TITLE_LBL);
 		this.setLayout(new BorderLayout());
 		tabPanel = new JTabbedPane(JTabbedPane.TOP);
 
 		for (ProfileType type : ProfileType.displayValues()) {
 
-			DetailPanel panel = new ProfileDisplayPanel(context, type);
+			DetailPanel panel = new ProfileDisplayPanel(type);
 			tabPanel.addTab(panel.getPanelTitle(), panel);
 		}
 
-		DetailPanel variabilityChartPanel = new VariabilityDisplayPanel(context);
+		DetailPanel variabilityChartPanel = new VariabilityDisplayPanel();
 
 		tabPanel.addTab(variabilityChartPanel.getPanelTitle(), variabilityChartPanel);
 		this.add(tabPanel, BorderLayout.CENTER);
@@ -59,12 +56,12 @@ public class NucleusProfilesPanel extends DetailPanel implements ProfilesUpdated
 
 	@Override
 	public void profilesUpdated(List<IAnalysisDataset> datasets) {
-		refreshChartCache(datasets);
+		refreshCache(datasets);
 	}
 
 	@Override
 	public void profilesUpdated(IAnalysisDataset dataset) {
-		refreshChartCache(dataset);
+		refreshCache(dataset);
 	}
 
 	@Override

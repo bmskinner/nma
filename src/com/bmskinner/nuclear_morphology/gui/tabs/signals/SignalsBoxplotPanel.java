@@ -22,14 +22,12 @@ import java.awt.event.ActionEvent;
 import java.util.List;
 import java.util.logging.Logger;
 
-import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
-import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.NuclearSignalUpdatedListener;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.ScaleUpdatedListener;
 import com.bmskinner.nuclear_morphology.gui.tabs.BoxplotsTabPanel;
@@ -46,8 +44,8 @@ public class SignalsBoxplotPanel extends BoxplotsTabPanel
 
 	private static final Logger LOGGER = Logger.getLogger(SignalsBoxplotPanel.class.getName());
 
-	public SignalsBoxplotPanel(@NonNull InputSupplier context) {
-		super(context, CellularComponent.NUCLEAR_SIGNAL);
+	public SignalsBoxplotPanel() {
+		super(CellularComponent.NUCLEAR_SIGNAL);
 		createUI();
 		uiController.addNuclearSignalUpdatedListener(this);
 		uiController.addScaleUpdatedListener(this);
@@ -119,22 +117,22 @@ public class SignalsBoxplotPanel extends BoxplotsTabPanel
 
 	@Override
 	public void nuclearSignalUpdated(List<IAnalysisDataset> datasets) {
-		refreshChartCache(datasets);
+		refreshCache(datasets);
 	}
 
 	@Override
 	public void nuclearSignalUpdated(IAnalysisDataset dataset) {
-		refreshChartCache(dataset);
+		refreshCache(dataset);
 	}
 
 	@Override
 	public void scaleUpdated(List<IAnalysisDataset> datasets) {
-		refreshChartCache(datasets);
+		refreshCache(datasets);
 	}
 
 	@Override
 	public void scaleUpdated(IAnalysisDataset dataset) {
-		refreshChartCache(dataset);
+		refreshCache(dataset);
 	}
 
 	@Override

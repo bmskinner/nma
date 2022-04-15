@@ -26,16 +26,11 @@ import com.bmskinner.nuclear_morphology.analysis.ClusterAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.dialogs.ClusterTreeDialog;
 import com.bmskinner.nuclear_morphology.gui.dialogs.HierarchicalTreeSetupDialog;
 import com.bmskinner.nuclear_morphology.gui.dialogs.SubAnalysisSetupDialog;
-import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
-import com.bmskinner.nuclear_morphology.gui.events.DatasetUpdateEvent;
-import com.bmskinner.nuclear_morphology.gui.events.EventListener;
-import com.bmskinner.nuclear_morphology.gui.events.UserActionEvent;
 
 /**
  * Action for constructing hierarchical trees based on dataset parameters
@@ -43,15 +38,14 @@ import com.bmskinner.nuclear_morphology.gui.events.UserActionEvent;
  * @author ben
  *
  */
-public class BuildHierarchicalTreeAction extends SingleDatasetResultAction implements EventListener {
+public class BuildHierarchicalTreeAction extends SingleDatasetResultAction {
 
 	private static final Logger LOGGER = Logger.getLogger(BuildHierarchicalTreeAction.class.getName());
 
 	private static final @NonNull String PROGRESS_BAR_LABEL = "Building tree";
 
-	public BuildHierarchicalTreeAction(@NonNull IAnalysisDataset dataset, @NonNull ProgressBarAcceptor acceptor,
-			@NonNull EventHandler eh) {
-		super(dataset, PROGRESS_BAR_LABEL, acceptor, eh);
+	public BuildHierarchicalTreeAction(@NonNull IAnalysisDataset dataset, @NonNull ProgressBarAcceptor acceptor) {
+		super(dataset, PROGRESS_BAR_LABEL, acceptor);
 	}
 
 	@Override
@@ -84,8 +78,7 @@ public class BuildHierarchicalTreeAction extends SingleDatasetResultAction imple
 		try {
 			ClusterAnalysisResult r = (ClusterAnalysisResult) worker.get();
 
-			ClusterTreeDialog clusterPanel = new ClusterTreeDialog(dataset, r.getGroup());
-			clusterPanel.addDatasetEventListener(BuildHierarchicalTreeAction.this);
+			new ClusterTreeDialog(dataset, r.getGroup());
 
 			cleanup(); // do not cancel, we need the MainWindow listener to
 						// remain attached
@@ -95,25 +88,4 @@ public class BuildHierarchicalTreeAction extends SingleDatasetResultAction imple
 			Thread.currentThread().interrupt();
 		}
 	}
-
-	@Override
-	public void eventReceived(DatasetEvent event) {
-		LOGGER.finest("BuildHierarchicalTreeAction heard dataset event");
-		if (event.method().equals(DatasetEvent.COPY_PROFILE_SEGMENTATION)) {
-			getDatasetEventHandler().fireDatasetEvent(DatasetEvent.COPY_PROFILE_SEGMENTATION, event.getDatasets(),
-					event.secondaryDataset());
-		}
-
-	}
-
-	@Override
-	public void eventReceived(DatasetUpdateEvent event) {
-		// No action
-	}
-
-	@Override
-	public void eventReceived(UserActionEvent event) {
-		// No action
-	}
-
 }

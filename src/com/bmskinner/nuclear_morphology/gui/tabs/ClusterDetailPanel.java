@@ -35,20 +35,18 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
 
 import org.eclipse.jdt.annotation.NonNull;
-import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.IClusterGroup;
-import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 import com.bmskinner.nuclear_morphology.gui.components.renderers.JTextAreaCellRenderer;
 import com.bmskinner.nuclear_morphology.gui.dialogs.ClusterTreeDialog;
 import com.bmskinner.nuclear_morphology.gui.dialogs.TsneDialog;
-import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
+import com.bmskinner.nuclear_morphology.gui.events.UserActionEvent;
+import com.bmskinner.nuclear_morphology.gui.events.revamp.UserActionController;
 import com.bmskinner.nuclear_morphology.visualisation.datasets.AnalysisDatasetTableCreator;
 import com.bmskinner.nuclear_morphology.visualisation.datasets.tables.AbstractTableCreator;
-import com.bmskinner.nuclear_morphology.visualisation.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.visualisation.options.TableOptions;
 import com.bmskinner.nuclear_morphology.visualisation.options.TableOptionsBuilder;
 
@@ -61,7 +59,7 @@ import com.bmskinner.nuclear_morphology.visualisation.options.TableOptionsBuilde
  *
  */
 @SuppressWarnings("serial")
-public class ClusterDetailPanel extends DetailPanel {
+public class ClusterDetailPanel extends TableDetailPanel {
 
 	private static final Logger LOGGER = Logger.getLogger(ClusterDetailPanel.class.getName());
 
@@ -85,8 +83,8 @@ public class ClusterDetailPanel extends DetailPanel {
 	private JPanel mainPanel;
 	private ExportableTable clusterDetailsTable;
 
-	public ClusterDetailPanel(@NonNull InputSupplier context) {
-		super(context);
+	public ClusterDetailPanel() {
+		super();
 
 		this.setLayout(new BorderLayout());
 
@@ -155,8 +153,7 @@ public class ClusterDetailPanel extends DetailPanel {
 				if (clusterDetailsTable.getValueAt(row, 0).equals(Labels.Clusters.TREE)
 						&& !clusterDetailsTable.getValueAt(row, col).equals(Labels.NA)) {
 					Runnable r = () -> {
-						ClusterTreeDialog clusterPanel = new ClusterTreeDialog(d, group);
-						clusterPanel.addDatasetEventListener(ClusterDetailPanel.this);
+						new ClusterTreeDialog(d, group);
 					};
 					new Thread(r).start();
 				}
@@ -164,8 +161,7 @@ public class ClusterDetailPanel extends DetailPanel {
 				if (clusterDetailsTable.getValueAt(row, 0).equals(Labels.Clusters.CLUSTER_DIM_PLOT)
 						&& !clusterDetailsTable.getValueAt(row, col).equals(Labels.NA)) {
 					Runnable r = () -> {
-						TsneDialog tsneDialog = new TsneDialog(d, group);
-						tsneDialog.addDatasetEventListener(ClusterDetailPanel.this);
+						new TsneDialog(d, group);
 					};
 					new Thread(r).start();
 				}
@@ -220,16 +216,16 @@ public class ClusterDetailPanel extends DetailPanel {
 		JPanel panel = new JPanel(new BorderLayout());
 
 		JPanel buttonPanel = new JPanel(new FlowLayout());
-		clusterButton
-				.addActionListener(e -> getDatasetEventHandler().fireDatasetEvent(DatasetEvent.CLUSTER, getDatasets()));
-		buildTreeButton.addActionListener(
-				e -> getDatasetEventHandler().fireDatasetEvent(DatasetEvent.BUILD_TREE, getDatasets()));
-		saveClassifierButton.addActionListener(
-				e -> getDatasetEventHandler().fireDatasetEvent(DatasetEvent.TRAIN_CLASSIFIER, getDatasets()));
-		manualClusterBtn.addActionListener(
-				e -> getDatasetEventHandler().fireDatasetEvent(DatasetEvent.MANUAL_CLUSTER, getDatasets()));
-		fileClusterBtn.addActionListener(
-				e -> getDatasetEventHandler().fireDatasetEvent(DatasetEvent.CLUSTER_FROM_FILE, getDatasets()));
+		clusterButton.addActionListener(e -> UserActionController.getInstance()
+				.userActionEventReceived(new UserActionEvent(this, UserActionEvent.CLUSTER, getDatasets())));
+		buildTreeButton.addActionListener(e -> UserActionController.getInstance()
+				.userActionEventReceived(new UserActionEvent(this, UserActionEvent.BUILD_TREE, getDatasets())));
+		saveClassifierButton.addActionListener(e -> UserActionController.getInstance()
+				.userActionEventReceived(new UserActionEvent(this, UserActionEvent.TRAIN_CLASSIFIER, getDatasets())));
+		manualClusterBtn.addActionListener(e -> UserActionController.getInstance()
+				.userActionEventReceived(new UserActionEvent(this, UserActionEvent.MANUAL_CLUSTER, getDatasets())));
+		fileClusterBtn.addActionListener(e -> UserActionController.getInstance()
+				.userActionEventReceived(new UserActionEvent(this, UserActionEvent.CLUSTER_FROM_FILE, getDatasets())));
 
 		saveClassifierButton.setEnabled(false);
 		buildTreeButton.setEnabled(true);
@@ -302,22 +298,8 @@ public class ClusterDetailPanel extends DetailPanel {
 	}
 
 	@Override
-	protected JFreeChart createPanelChartType(@NonNull ChartOptions options) {
-		return null;
-	}
-
-	@Override
 	protected TableModel createPanelTableType(@NonNull TableOptions options) {
 		return new AnalysisDatasetTableCreator(options).createClusterOptionsTable();
-	}
-
-	@Override
-	public void eventReceived(DatasetEvent event) {
-		super.eventReceived(event);
-
-		if (event.getSource() instanceof ClusterTreeDialog) {
-			this.getDatasetEventHandler().fireDatasetEvent(event);
-		}
 	}
 
 	/**

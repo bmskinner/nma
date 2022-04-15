@@ -12,7 +12,6 @@ import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.signals.PairedSignalGroups;
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalGroupMergeMethod;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.dialogs.DatasetMergingDialog;
@@ -40,8 +39,8 @@ public class MergeSignalsAction extends SingleDatasetResultAction {
 	 * @param acceptor
 	 * @param eh
 	 */
-	public MergeSignalsAction(IAnalysisDataset dataset, ProgressBarAcceptor acceptor, EventHandler eh) {
-		super(dataset, PROGRESS_BAR_LABEL, acceptor, eh);
+	public MergeSignalsAction(IAnalysisDataset dataset, ProgressBarAcceptor acceptor) {
+		super(dataset, PROGRESS_BAR_LABEL, acceptor);
 	}
 
 	@Override

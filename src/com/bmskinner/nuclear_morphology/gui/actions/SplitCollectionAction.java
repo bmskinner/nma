@@ -23,75 +23,73 @@ import javax.swing.JOptionPane;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nuclear_morphology.components.cells.DefaultCell;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.DefaultCellCollection;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
-import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 public class SplitCollectionAction extends SingleDatasetResultAction {
-	
+
 	private static final Logger LOGGER = Logger.getLogger(SplitCollectionAction.class.getName());
-	
+
 	private static final @NonNull String PROGRESS_BAR_LABEL = "Splitting collection";
 
-    public SplitCollectionAction(IAnalysisDataset dataset, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh) {
-        super(dataset, PROGRESS_BAR_LABEL, acceptor, eh);
-    }
+	public SplitCollectionAction(IAnalysisDataset dataset, @NonNull final ProgressBarAcceptor acceptor) {
+		super(dataset, PROGRESS_BAR_LABEL, acceptor);
+	}
 
-    @Override
-    public void run() {
-        try {
+	@Override
+	public void run() {
+		try {
 
-            if (dataset.hasChildren()) {
-                LOGGER.info("Splitting collection...");
+			if (dataset.hasChildren()) {
+				LOGGER.info("Splitting collection...");
 
-                IAnalysisDataset[] names = dataset.getAllChildDatasets().toArray(new IAnalysisDataset[0]);
+				IAnalysisDataset[] names = dataset.getAllChildDatasets().toArray(new IAnalysisDataset[0]);
 
-                IAnalysisDataset negative = (IAnalysisDataset) JOptionPane.showInputDialog(null,
-                        "Give me nuclei that are NOT present within the following population", "Split population",
-                        JOptionPane.PLAIN_MESSAGE, null, names, names[0]);
+				IAnalysisDataset negative = (IAnalysisDataset) JOptionPane.showInputDialog(null,
+						"Give me nuclei that are NOT present within the following population", "Split population",
+						JOptionPane.PLAIN_MESSAGE, null, names, names[0]);
 
-                if (negative != null) {
+				if (negative != null) {
 
-                    // prepare a new collection
-                    ICellCollection collection = dataset.getCollection();
+					// prepare a new collection
+					ICellCollection collection = dataset.getCollection();
 
-                    ICellCollection newCollection = new DefaultCellCollection(dataset, "Subtraction");
-                    
-                    for(ICell c : collection)
-                    	if(!negative.getCollection().contains(c))
-                    		newCollection.add(c.duplicate());
-                    
-                    newCollection.setName("Not_in_" + negative.getName());
+					ICellCollection newCollection = new DefaultCellCollection(dataset, "Subtraction");
 
-                    dataset.addChildCollection(newCollection);
+					for (ICell c : collection)
+						if (!negative.getCollection().contains(c))
+							newCollection.add(c.duplicate());
 
-                    if (newCollection.size() > 0) {
+					newCollection.setName("Not_in_" + negative.getName());
 
-                        LOGGER.info("Reapplying morphology...");
+					dataset.addChildCollection(newCollection);
 
-                        int flag = 0;
-                        IAnalysisDataset newDataset = dataset.getChildDataset(newCollection.getId());
-                        final CountDownLatch latch = new CountDownLatch(1);
-                        new RunSegmentationAction(newDataset, dataset, flag, progressAcceptors.get(0), eh, latch);
-                    }
-                } else {
-                    LOGGER.fine("User cancelled split");
-                }
+					if (newCollection.size() > 0) {
 
-            } else {
-                LOGGER.info("Cannot split; no children in dataset");
-            }
+						LOGGER.info("Reapplying morphology...");
 
-        } catch (Exception e1) {
-            LOGGER.log(Loggable.STACK, "Error splitting collection", e1);
-        } finally {
-            cancel();
-        }
-    }
+						int flag = 0;
+						IAnalysisDataset newDataset = dataset.getChildDataset(newCollection.getId());
+						final CountDownLatch latch = new CountDownLatch(1);
+						new RunSegmentationAction(newDataset, dataset, flag, progressAcceptors.get(0), latch);
+					}
+				} else {
+					LOGGER.fine("User cancelled split");
+				}
+
+			} else {
+				LOGGER.info("Cannot split; no children in dataset");
+			}
+
+		} catch (Exception e1) {
+			LOGGER.log(Loggable.STACK, "Error splitting collection", e1);
+		} finally {
+			cancel();
+		}
+	}
 
 }

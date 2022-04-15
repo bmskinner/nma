@@ -23,7 +23,8 @@ import java.util.logging.Logger;
 
 import javax.swing.UIManager;
 
-import com.bmskinner.nuclear_morphology.gui.DefaultInputSupplier;
+import com.bmskinner.nuclear_morphology.gui.events.revamp.UIController;
+import com.bmskinner.nuclear_morphology.gui.events.revamp.UserActionController;
 import com.bmskinner.nuclear_morphology.gui.main.DockableMainWindow;
 import com.bmskinner.nuclear_morphology.io.ConfigFileReader;
 import com.bmskinner.nuclear_morphology.pipelines.BasicAnalysisPipeline;
@@ -34,6 +35,7 @@ import ij.Prefs;
 
 /**
  * Handle arguments passed to the program via the command line.
+ * 
  * @author bms41
  * @since 1.13.7
  *
@@ -43,44 +45,44 @@ public class CommandLineParser {
 	private static final Logger LOGGER = Logger.getLogger(CommandLineParser.class.getName());
 
 	/**
-	 * Construct with an array of parameters for the program 
-	 * to interpret
+	 * Construct with an array of parameters for the program to interpret
+	 * 
 	 * @param arr
 	 */
-	public CommandLineParser(String[] arr){
-		execute(arr);	
+	public CommandLineParser(String[] arr) {
+		execute(arr);
 	}
-
 
 	/**
 	 * Execute the commands provided
+	 * 
 	 * @param arr
 	 */
-	private void execute(String[] arr){
+	private void execute(String[] arr) {
 
 		boolean headless = false;
-		File folder = null; 
+		File folder = null;
 		File options = null;
-		for(String s : arr){
-			LOGGER.config("Argument: "+s);
+		for (String s : arr) {
+			LOGGER.config("Argument: " + s);
 
-			if(s.startsWith("-h")) {
+			if (s.startsWith("-h")) {
 				LOGGER.config("Arguments:");
 				LOGGER.config("\t-folder=<image_folder>");
 				LOGGER.config("\t-options=<xml_options>");
 				System.exit(0);
 			}
 
-			if(s.startsWith("-folder=")) {
-				headless=true;
+			if (s.startsWith("-folder=")) {
+				headless = true;
 				String path = s.replace("-folder=", "").replace("\"", "");
-				folder = new File(path); 
+				folder = new File(path);
 			}
 
-			if(s.startsWith("-options=")) {
-				headless=true;
+			if (s.startsWith("-options=")) {
+				headless = true;
 				String path = s.replace("-options=", "").replace("\"", "");
-				options = new File(path); 
+				options = new File(path);
 			}
 
 		}
@@ -88,9 +90,9 @@ public class CommandLineParser {
 		new ConfigFileReader();
 		int ijThreads = GlobalOptions.getInstance().getInt(GlobalOptions.NUM_IMAGEJ_THREADS_KEY);
 		Prefs.setThreads(ijThreads);
-		LOGGER.config("Internal ImageJ PluginFilter thread count set to "+ijThreads);
+		LOGGER.config("Internal ImageJ PluginFilter thread count set to " + ijThreads);
 
-		if(headless){
+		if (headless) {
 			runHeadless(folder, options);
 		} else {
 			runWithGUI();
@@ -98,23 +100,23 @@ public class CommandLineParser {
 	}
 
 	/**
-	 * Run in headless mode, specifying a folder of images, and 
-	 * a file of options
-	 * @param folder the folder of images
+	 * Run in headless mode, specifying a folder of images, and a file of options
+	 * 
+	 * @param folder  the folder of images
 	 * @param options
 	 */
 	private void runHeadless(final File folder, final File options) {
 		LOGGER.config("Running headless");
-		if(folder!=null) {
-			LOGGER.info("Running on folder: "+folder.getAbsolutePath());
+		if (folder != null) {
+			LOGGER.info("Running on folder: " + folder.getAbsolutePath());
 
-			if(!folder.isDirectory()) {
+			if (!folder.isDirectory()) {
 				LOGGER.warning("A directory is required in the '-folder' argument");
 				return;
 			}
 			try {
-				if(options!=null) {
-					LOGGER.info("Running with saved options: "+options.getAbsolutePath());
+				if (options != null) {
+					LOGGER.info("Running with saved options: " + options.getAbsolutePath());
 					new SavedOptionsAnalysisPipeline(folder, options).call();
 				} else {
 					LOGGER.info("No analysis options provided, using defaults");
@@ -130,18 +132,19 @@ public class CommandLineParser {
 	/**
 	 * Load the program user interface
 	 */
-	private void runWithGUI(){
+	private void runWithGUI() {
 		LOGGER.config("Launching GUI");
-		try {			
+		try {
 			Runnable r = new RunWithGui();
-			EventQueue.invokeLater( r );
-		} catch(Exception e){
+			EventQueue.invokeLater(r);
+		} catch (Exception e) {
 			LOGGER.log(Level.SEVERE, "Error loading GUI", e);
-		} 
+		}
 	}
-	
+
 	/**
 	 * Runnable launcher that can be sent to the EDT
+	 * 
 	 * @author Ben Skinner
 	 * @since 1.18.0
 	 *
@@ -150,24 +153,23 @@ public class CommandLineParser {
 
 		@Override
 		public void run() {
-			IJ.setBackgroundColor(0, 0, 0);  // default background is black
+			IJ.setBackgroundColor(0, 0, 0); // default background is black
 			try {
 				String lAndF = UIManager.getSystemLookAndFeelClassName();
 				UIManager.setLookAndFeel(lAndF);
-				LOGGER.config("Set look and feel to "+UIManager.getLookAndFeel().getName());
-				
+				LOGGER.config("Set look and feel to " + UIManager.getLookAndFeel().getName());
+
 			} catch (Exception e) {
 				LOGGER.log(Level.SEVERE, "Unable to set look and feel", e);
 			}
 
-			boolean useStandalone = true;
+			// Ensure instances created
+			UserActionController.getInstance();
+			UIController.getInstance();
 
-			InputSupplier is = new DefaultInputSupplier();
-			EventHandler eh = new EventHandler(is);
-
-			DockableMainWindow mw = new DockableMainWindow(useStandalone,eh);
+			DockableMainWindow mw = new DockableMainWindow();
 			mw.setVisible(true);
 		}
-		
+
 	}
 }

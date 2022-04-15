@@ -52,15 +52,15 @@ import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 
-import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nuclear_morphology.core.InterfaceUpdater;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.Labels;
+import com.bmskinner.nuclear_morphology.gui.events.revamp.FilePathUpdatedListener;
+import com.bmskinner.nuclear_morphology.gui.events.revamp.UIController;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.utility.FileUtils;
@@ -79,7 +79,7 @@ import ij.process.ImageProcessor;
  *
  */
 @SuppressWarnings("serial")
-public class ImagesTabPanel extends DetailPanel {
+public class ImagesTabPanel extends DetailPanel implements FilePathUpdatedListener {
 
 	private static final Logger LOGGER = Logger.getLogger(ImagesTabPanel.class.getName());
 
@@ -97,10 +97,11 @@ public class ImagesTabPanel extends DetailPanel {
 	/**
 	 * Create the panel.
 	 */
-	public ImagesTabPanel(@NonNull InputSupplier context) {
-		super(context);
+	public ImagesTabPanel() {
+		super();
 
 		this.setLayout(new BorderLayout());
+		UIController.getInstance().addFilePathUpdatedListener(this);
 
 		createUI();
 	}
@@ -487,5 +488,15 @@ public class ImagesTabPanel extends DetailPanel {
 			c.setForeground(fg);
 			return c;
 		}
+	}
+
+	@Override
+	public void filePathUpdated(List<IAnalysisDataset> datasets) {
+		refreshCache(datasets);
+	}
+
+	@Override
+	public void filePathUpdated(IAnalysisDataset dataset) {
+		refreshCache(dataset);
 	}
 }

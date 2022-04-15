@@ -19,28 +19,14 @@ package com.bmskinner.nuclear_morphology.gui.main;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowStateListener;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.JFrame;
 
-import org.eclipse.jdt.annotation.NonNull;
-
 import com.bmskinner.nuclear_morphology.components.Version;
-import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.core.EventHandler;
-import com.bmskinner.nuclear_morphology.core.InputSupplier;
-import com.bmskinner.nuclear_morphology.core.InterfaceUpdater;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
-import com.bmskinner.nuclear_morphology.gui.CancellableRunnable;
-import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
-import com.bmskinner.nuclear_morphology.gui.events.DatasetUpdateEvent;
-import com.bmskinner.nuclear_morphology.gui.events.EventListener;
 import com.bmskinner.nuclear_morphology.gui.tabs.TabPanel;
-import com.bmskinner.nuclear_morphology.gui.tabs.populations.PopulationsPanel;
 
 /**
  * Base class for main windows
@@ -49,22 +35,13 @@ import com.bmskinner.nuclear_morphology.gui.tabs.populations.PopulationsPanel;
  *
  */
 @SuppressWarnings("serial")
-public abstract class AbstractMainWindow extends JFrame implements MainView, EventListener {
+public abstract class AbstractMainWindow extends JFrame implements MainView {
 
 	private static final String PROGRAM_TITLE_BAR_LBL = "Nuclear Morphology Analysis v"
 			+ Version.currentVersion().toString();
 
-	protected final List<EventListener> listeners = new ArrayList<>();
-
-	/** Listeners for datase update events */
-	protected final List<EventListener> updateListeners = new ArrayList<>();
-
 	/** Panels displaying dataset information */
 	protected final List<TabPanel> detailPanels = new ArrayList<>();
-
-	protected final EventHandler eh;
-
-	protected boolean isStandalone = false;
 
 	private static final Logger LOGGER = Logger.getLogger(AbstractMainWindow.class.getName());
 
@@ -73,12 +50,8 @@ public abstract class AbstractMainWindow extends JFrame implements MainView, Eve
 	 * 
 	 * @param standalone is the frame a standalone app, or launched within ImageJ?
 	 */
-	public AbstractMainWindow(boolean standalone, EventHandler eh) {
-		isStandalone = standalone;
-		this.eh = eh;
+	protected AbstractMainWindow() {
 		setTitle(PROGRAM_TITLE_BAR_LBL);
-		eh.addDatasetEventListener(this);
-		eh.addDatasetUpdateEventListener(this);
 	}
 
 	/**
@@ -107,7 +80,6 @@ public abstract class AbstractMainWindow extends JFrame implements MainView, Eve
 					} catch (InterruptedException e1) {
 						return;
 					}
-
 					for (TabPanel d : detailPanels)
 						d.updateSize();
 				};
@@ -116,131 +88,72 @@ public abstract class AbstractMainWindow extends JFrame implements MainView, Eve
 			}
 		});
 
-		this.setDropTarget(new MainDragAndDropTarget(eh));
+		this.setDropTarget(new MainDragAndDropTarget());
 	}
 
 	protected abstract void createUI();
 
-	protected abstract void createEventHandling();
+//	protected abstract void createEventHandling();
 
-	public List<TabPanel> getTabPanels() {
-		return this.detailPanels;
-	}
-
-	/**
-	 * Check if the program has been started as a plugin to ImageJ or as standalone
-	 * 
-	 * @return
-	 */
-	@Override
-	public boolean isStandalone() {
-		return isStandalone;
-	}
-
-	/**
-	 * Get the event handler that dispatches messages and analyses
-	 * 
-	 * @return
-	 */
-	@Override
-	public EventHandler getEventHandler() {
-		return eh;
-	}
-
-	@Override
-	public InputSupplier getInputSupplier() {
-		return eh.getInputSupplier();
-	}
+//	public List<TabPanel> getTabPanels() {
+//		return this.detailPanels;
+//	}
 
 	/**
 	 * Remove all charts and tables from caches, but do not redraw them
 	 */
-	protected synchronized void clearChartCache() {
-		for (TabPanel panel : getTabPanels()) {
-			panel.clearChartCache();
-			panel.clearTableCache();
-		}
-	}
+//	protected synchronized void clearChartCache() {
+//		for (TabPanel panel : getTabPanels()) {
+//			panel.clearCache();
+//		}
+//	}
 
 	/**
 	 * Remove charts and tables from caches which contain the given datasets
 	 * 
 	 * @param list
 	 */
-	protected synchronized void clearChartCache(final List<IAnalysisDataset> list) {
-
-		if (list == null || list.isEmpty()) {
-			LOGGER.log(Level.WARNING, "A cache clear was requested for a specific list, which was null or empty");
-			clearChartCache();
-			return;
-		}
-		for (TabPanel panel : getTabPanels()) {
-			panel.clearChartCache(list);
-			panel.clearTableCache(list);
-		}
-	}
+//	protected synchronized void clearChartCache(final List<IAnalysisDataset> list) {
+//
+//		if (list == null || list.isEmpty()) {
+//			LOGGER.log(Level.WARNING, "A cache clear was requested for a specific list, which was null or empty");
+//			clearChartCache();
+//			return;
+//		}
+//		for (TabPanel panel : getTabPanels()) {
+//			panel.clearCache(list);
+//		}
+//	}
 
 	/*
 	 * Trigger a recache of all charts and tables
 	 */
-	protected synchronized void recacheCharts() {
-		InterfaceUpdater task = () -> {
-			for (TabPanel panel : getTabPanels()) {
-				panel.refreshChartCache();
-				panel.refreshTableCache();
-			}
-		};
-		ThreadManager.getInstance().execute(task);
-	}
+//	protected synchronized void recacheCharts() {
+//		InterfaceUpdater task = () -> {
+//			for (TabPanel panel : getTabPanels()) {
+//				panel.refreshCache();
+//			}
+//		};
+//		ThreadManager.getInstance().execute(task);
+//	}
 
 	/*
 	 * Trigger a recache of all charts and tables which contain the given datasets
 	 */
-	protected synchronized void recacheCharts(final List<IAnalysisDataset> list) {
-
-		InterfaceUpdater task = () -> {
-			for (TabPanel panel : getTabPanels()) {
-				panel.refreshChartCache(list);
-				panel.refreshTableCache(list);
-			}
-		};
-		ThreadManager.getInstance().execute(task);
-
-	}
+//	protected synchronized void recacheCharts(final List<IAnalysisDataset> list) {
+//
+//		InterfaceUpdater task = () -> {
+//			for (TabPanel panel : getTabPanels()) {
+//				panel.refreshCache(list);
+//			}
+//		};
+//		ThreadManager.getInstance().execute(task);
+//
+//	}
 
 	@Override
 	public void dispose() {
 		super.dispose();
-	}
-
-	public synchronized void addDatasetUpdateEventListener(EventListener l) {
-		updateListeners.add(l);
-	}
-
-	protected abstract PopulationsPanel getPopulationsPanel();
-
-	@Override
-	public void eventReceived(DatasetUpdateEvent event) {
-		PanelUpdater r = new PanelUpdater(event.getDatasets());
-		ThreadManager.getInstance().execute(r);
-
-	}
-
-	@Override
-	public void eventReceived(DatasetEvent event) {
-
-		if (event.method().equals(DatasetEvent.RECACHE_CHARTS))
-			recacheCharts(event.getDatasets());
-
-		if (event.method().equals(DatasetEvent.CLEAR_CACHE))
-			clearChartCache(event.getDatasets());
-
-		if (event.method().equals(DatasetEvent.ADD_WORKSPACE))
-			getPopulationsPanel().update();
-	}
-
-	public synchronized void removeDatasetUpdateEventListener(EventListener l) {
-		updateListeners.remove(l);
 	}
 
 	/**
@@ -249,38 +162,38 @@ public abstract class AbstractMainWindow extends JFrame implements MainView, Eve
 	 * @author ben
 	 *
 	 */
-	public class PanelUpdater implements CancellableRunnable, InterfaceUpdater {
-		private final List<IAnalysisDataset> list = new ArrayList<>();
-
-		private final AtomicBoolean isCancelled = new AtomicBoolean(false);
-
-		public PanelUpdater(final @NonNull List<IAnalysisDataset> datasets) {
-			this.list.addAll(datasets);
-		}
-
-		@Override
-		public synchronized void run() {
-
-			// Set the loading state
-			for (TabPanel p : getTabPanels()) {
-				p.setChartsAndTablesLoading();
-			}
-
-			// Fire the update to each listener
-			DatasetUpdateEvent e = new DatasetUpdateEvent(this, list);
-			Iterator<EventListener> iterator = updateListeners.iterator();
-			while (iterator.hasNext()) {
-				if (isCancelled.get())
-					return;
-				iterator.next().eventReceived(e);
-			}
-
-		}
-
-		@Override
-		public void cancel() {
-			isCancelled.set(true);
-		}
-
-	}
+//	public class PanelUpdater implements CancellableRunnable, InterfaceUpdater {
+//		private final List<IAnalysisDataset> list = new ArrayList<>();
+//
+//		private final AtomicBoolean isCancelled = new AtomicBoolean(false);
+//
+//		public PanelUpdater(final @NonNull List<IAnalysisDataset> datasets) {
+//			this.list.addAll(datasets);
+//		}
+//
+//		@Override
+//		public synchronized void run() {
+//
+//			// Set the loading state
+//			for (TabPanel p : getTabPanels()) {
+//				p.setLoading();
+//			}
+//
+//			// Fire the update to each listener
+//			DatasetUpdateEvent e = new DatasetUpdateEvent(this, list);
+//			Iterator<EventListener> iterator = updateListeners.iterator();
+//			while (iterator.hasNext()) {
+//				if (isCancelled.get())
+//					return;
+////				iterator.next().eventReceived(e);
+//			}
+//
+//		}
+//
+//		@Override
+//		public void cancel() {
+//			isCancelled.set(true);
+//		}
+//
+//	}
 }

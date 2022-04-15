@@ -21,13 +21,7 @@ import java.util.logging.Logger;
 
 import javax.swing.JTabbedPane;
 
-import org.eclipse.jdt.annotation.NonNull;
-
-import com.bmskinner.nuclear_morphology.core.InputSupplier;
-import com.bmskinner.nuclear_morphology.gui.events.UserActionEvent;
 import com.bmskinner.nuclear_morphology.gui.tabs.cells_detail.IndividualCellDetailPanel;
-import com.bmskinner.nuclear_morphology.gui.tabs.editing.BorderTagEditingPanel;
-import com.bmskinner.nuclear_morphology.gui.tabs.editing.SegmentsEditingPanel;
 
 /**
  * Tab pane; holding panels to edit datasets
@@ -44,20 +38,20 @@ public class EditingDetailPanel extends DetailPanel {
 
 	private JTabbedPane tabPane;
 
-	public EditingDetailPanel(@NonNull InputSupplier context) {
-		super(context);
+	public EditingDetailPanel() {
+		super();
 
 		this.setLayout(new BorderLayout());
 		tabPane = new JTabbedPane();
 		this.add(tabPane, BorderLayout.CENTER);
 
-		DetailPanel cellDetailPanel = new IndividualCellDetailPanel(context);
-		DetailPanel segmentsEditingPanel = new SegmentsEditingPanel(context);
-		DetailPanel borderTagEditingPanel = new BorderTagEditingPanel(context);
+		DetailPanel cellDetailPanel = new IndividualCellDetailPanel();
+//		DetailPanel segmentsEditingPanel = new SegmentsEditingPanel(context);
+//		DetailPanel borderTagEditingPanel = new BorderTagEditingPanel(context);
 
-		this.addUserActionEventListener(cellDetailPanel);
-		this.addUserActionEventListener(segmentsEditingPanel);
-		this.addUserActionEventListener(borderTagEditingPanel);
+//		this.addUserActionEventListener(cellDetailPanel);
+//		this.addUserActionEventListener(segmentsEditingPanel);
+//		this.addUserActionEventListener(borderTagEditingPanel);
 
 		tabPane.addTab(cellDetailPanel.getPanelTitle(), cellDetailPanel);
 
@@ -65,11 +59,11 @@ public class EditingDetailPanel extends DetailPanel {
 		 * Signals come from the segment panel to this container Signals can be sent to
 		 * the segment panel Events come from the panel only
 		 */
-		segmentsEditingPanel.addUserActionEventListener(this);
-		borderTagEditingPanel.addUserActionEventListener(this);
+//		segmentsEditingPanel.addUserActionEventListener(this);
+//		borderTagEditingPanel.addUserActionEventListener(this);
 
-		tabPane.addTab("Segmentation", segmentsEditingPanel);
-		tabPane.addTab("Border tags", borderTagEditingPanel);
+//		tabPane.addTab("Segmentation", segmentsEditingPanel);
+//		tabPane.addTab("Border tags", borderTagEditingPanel);
 
 	}
 
@@ -78,13 +72,4 @@ public class EditingDetailPanel extends DetailPanel {
 		return PANEL_TITLE_LBL;
 	}
 
-	@Override
-	public void eventReceived(UserActionEvent event) {
-		// Swallow signals we don't need to pass onwards
-		if (event.type().equals(UserActionEvent.MERGE_SIGNALS_ACTION))
-			return;
-
-		super.eventReceived(event);
-
-	}
 }

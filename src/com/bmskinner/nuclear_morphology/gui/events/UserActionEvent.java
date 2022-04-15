@@ -16,7 +16,14 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.events;
 
+import java.util.ArrayList;
 import java.util.EventObject;
+import java.util.List;
+
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
+
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 
 /**
  * An event class to signal a UI event has been triggered
@@ -78,26 +85,105 @@ public class UserActionEvent extends EventObject {
 	public static final String ADD_TO_BIOSAMPLE_PREFIX = "AddToBioSample|";
 	public static final String REMOVE_FROM_BIOSAMPLE_PREFIX = "RemoveFromBioSample|";
 
-	private static final long serialVersionUID = 1L;
-	private String message;
-	private String sourceName;
+	/** Profile and segment */
+	public static final String MORPHOLOGY_ANALYSIS_ACTION = "Morphology analysis action";
+
+	public static final String PROFILING_ACTION = "Profiling action";
+
+	/** Run segmentation on the datasets using existing tagged profiles */
+	public static final String SEGMENTATION_ACTION = "Segment dataset";
 
 	/**
-	 * Create an event from a source, with the given message
+	 * Signal that segments should be copied from the secondary dataset in the
+	 * action to all primary datasets listed
+	 */
+	public static final String COPY_PROFILE_SEGMENTATION = "Copy profile segmentation";
+
+	/**
+	 * Rerun the segmentation on the given datasets, without trying to add as a new
+	 * population.
+	 */
+	public static final String REFRESH_MORPHOLOGY = "Refresh morphology";
+
+	/**
+	 * Run new profiling and segmentation on the given datasets. Do not attempt to
+	 * add as a new population.
+	 */
+	public static final String REFPAIR_SEGMENTATION = "Repair segmentation";
+
+	public static final String REFOLD_CONSENSUS = "Refold consensus";
+	public static final String SELECT_DATASETS = "Select multiple datasets";
+	public static final String SELECT_ONE_DATASET = "Select single dataset";
+	public static final String EXTRACT_SOURCE = "Extract source";
+	public static final String CLUSTER = "Cluster";
+	public static final String MANUAL_CLUSTER = "Manual cluster";
+	public static final String BUILD_TREE = "Build tree";
+	public static final String TRAIN_CLASSIFIER = "Train classifier";
+
+	public static final String SAVE = "Save selected";
+	public static final String SAVE_AS = "Save as new file";
+	public static final String ADD_WORKSPACE = "Add workspace";
+	public static final String RESEGMENT = "Resegment dataset";
+
+	/**
+	 * Rerun the profiling action to generate new median profiles. Also recalculates
+	 * the positions of border tags using built in rules. Does not recache charts.
+	 */
+	public static final String RECALCULATE_MEDIAN = "Recalculate median profiles";
+	public static final String RUN_SHELL_ANALYSIS = "Run shell analysis";
+
+	public static final String RUN_GLCM_ANALYSIS = "Run GLCM analysis";
+
+	private static final long serialVersionUID = 1L;
+	private String message;
+
+	private final List<IAnalysisDataset> datasets = new ArrayList<>();
+
+	/** for use in e.g. copying data from one dataset to others */
+	private IAnalysisDataset secondaryDataset = null;
+
+	/**
+	 * Create an event from a source class, with the given message
 	 * 
 	 * @param source
 	 * @param type
 	 */
-	public UserActionEvent(Object source, String message, String sourceName) {
-		super(source);
-		this.message = message;
-		this.sourceName = sourceName;
+	public UserActionEvent(@NonNull Object source, @NonNull String message) {
+		this(source, message, null, null);
 	}
 
-	public UserActionEvent(Object source, UserActionEvent event) {
-		super(event.getSource());
-		this.message = event.type();
-		this.sourceName = event.sourceName();
+	/**
+	 * Create an event from a source class, with the given message and datasets to
+	 * process
+	 * 
+	 * @param source
+	 * @param type
+	 */
+	public UserActionEvent(@NonNull Object source, @NonNull String message, List<IAnalysisDataset> datasets) {
+		this(source, message, datasets, null);
+	}
+
+	/**
+	 * Create an event from a source class, with the given message and datasets to
+	 * process, including a secondary dataset slot
+	 * 
+	 * @param source
+	 * @param type
+	 */
+	public UserActionEvent(@NonNull Object source, @NonNull String message, List<IAnalysisDataset> datasets,
+			IAnalysisDataset second) {
+		super(source);
+		this.message = message;
+		if (datasets != null)
+			this.datasets.addAll(datasets);
+		this.secondaryDataset = second;
+	}
+
+	public UserActionEvent(UserActionEvent event) {
+		super(event.source);
+		this.message = event.message;
+		this.datasets.addAll(event.datasets);
+		this.secondaryDataset = event.secondaryDataset;
 	}
 
 	/**
@@ -105,17 +191,15 @@ public class UserActionEvent extends EventObject {
 	 * 
 	 * @return
 	 */
-	public String type() {
+	public @NonNull String type() {
 		return message;
 	}
 
-	/**
-	 * The name of the component that fired the event
-	 * 
-	 * @return
-	 */
-	public String sourceName() {
-		return this.sourceName;
+	public @NonNull List<IAnalysisDataset> getDatasets() {
+		return datasets;
 	}
 
+	public @Nullable IAnalysisDataset getSecondaryDataset() {
+		return secondaryDataset;
+	}
 }

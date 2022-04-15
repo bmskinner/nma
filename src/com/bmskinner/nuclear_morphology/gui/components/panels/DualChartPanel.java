@@ -24,20 +24,18 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.gui.components.BorderTagEvent;
-import com.bmskinner.nuclear_morphology.gui.events.BorderTagEventListener;
 import com.bmskinner.nuclear_morphology.gui.events.ChartSetEventListener;
-import com.bmskinner.nuclear_morphology.gui.events.EventListener;
+import com.bmskinner.nuclear_morphology.gui.events.LandmarkUpdateEvent;
+import com.bmskinner.nuclear_morphology.gui.events.LandmarkUpdateEventListener;
 import com.bmskinner.nuclear_morphology.gui.events.SegmentEvent;
 import com.bmskinner.nuclear_morphology.gui.events.SegmentEvent.SegmentUpdateType;
+import com.bmskinner.nuclear_morphology.gui.events.SegmentEventListener;
 import com.bmskinner.nuclear_morphology.visualisation.charts.ProfileChartFactory;
 import com.bmskinner.nuclear_morphology.visualisation.charts.overlays.RectangleOverlayObject;
 import com.bmskinner.nuclear_morphology.visualisation.charts.panels.ExportableChartPanel;
 import com.bmskinner.nuclear_morphology.visualisation.charts.panels.PositionSelectionChartPanel;
 import com.bmskinner.nuclear_morphology.visualisation.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.visualisation.options.ChartOptionsBuilder;
-import com.bmskinner.nuclear_morphology.gui.events.SegmentEventListener;
-import com.bmskinner.nuclear_morphology.gui.events.UserActionEvent;
 
 /**
  * This holds two JFreeChart ChartPanels. One is an overview, with a draggable
@@ -48,202 +46,191 @@ import com.bmskinner.nuclear_morphology.gui.events.UserActionEvent;
  * @author bms41
  *
  */
-public abstract class DualChartPanel implements EventListener, SegmentEventListener, ChartSetEventListener {
+public abstract class DualChartPanel implements SegmentEventListener, ChartSetEventListener {
 
-    protected ExportableChartPanel chartPanel;
+	protected ExportableChartPanel chartPanel;
 
-    protected PositionSelectionChartPanel rangePanel;
+	protected PositionSelectionChartPanel rangePanel;
 
-    protected List<Object> listeners = new ArrayList<Object>();
+	protected List<Object> listeners = new ArrayList<Object>();
 
-    public DualChartPanel(boolean isFixedAspect) {
+	public DualChartPanel(boolean isFixedAspect) {
 
-        ChartOptions options = new ChartOptionsBuilder().setProfileType(ProfileType.ANGLE).setShowXAxis(false)
-                .setShowYAxis(false).build();
+		ChartOptions options = new ChartOptionsBuilder().setProfileType(ProfileType.ANGLE).setShowXAxis(false)
+				.setShowYAxis(false).build();
 
-        JFreeChart profileChart = ProfileChartFactory.createEmptyChart(ProfileType.ANGLE);
-        chartPanel = new ExportableChartPanel(profileChart);
-        chartPanel.setFixedAspectRatio(isFixedAspect);
+		JFreeChart profileChart = ProfileChartFactory.createEmptyChart(ProfileType.ANGLE);
+		chartPanel = new ExportableChartPanel(profileChart);
+		chartPanel.setFixedAspectRatio(isFixedAspect);
 
-        chartPanel.setMinimumDrawWidth(0);
-        chartPanel.setMinimumDrawHeight(0);
-        chartPanel.addChartSetEventListener(this);
-        chartPanel.setDomainZoomable(false); // zoom is controlled only by the
-                                             // range panel
-        chartPanel.setRangeZoomable(false);
+		chartPanel.setMinimumDrawWidth(0);
+		chartPanel.setMinimumDrawHeight(0);
+		chartPanel.addChartSetEventListener(this);
+		chartPanel.setDomainZoomable(false); // zoom is controlled only by the
+												// range panel
+		chartPanel.setRangeZoomable(false);
 
-        /*
-         * A second chart panel at the south with a domain overlay crosshair to
-         * define the centre of the zoomed range on the centre chart panel
-         */
-        JFreeChart rangeChart = ProfileChartFactory.createEmptyChart(ProfileType.ANGLE);
-        rangePanel = new PositionSelectionChartPanel(rangeChart);
-        rangePanel.setFixedAspectRatio(isFixedAspect);
-        rangePanel.addSignalChangeListener(this);
-        rangePanel.addChartSetEventListener(this);
-        rangePanel.setDomainZoomable(false); // zoom is controlled only by the
-                                             // range panel
-        rangePanel.setRangeZoomable(false);
+		/*
+		 * A second chart panel at the south with a domain overlay crosshair to define
+		 * the centre of the zoomed range on the centre chart panel
+		 */
+		JFreeChart rangeChart = ProfileChartFactory.createEmptyChart(ProfileType.ANGLE);
+		rangePanel = new PositionSelectionChartPanel(rangeChart);
+		rangePanel.setFixedAspectRatio(isFixedAspect);
+//		rangePanel.addSignalChangeListener(this);
+		rangePanel.addChartSetEventListener(this);
+		rangePanel.setDomainZoomable(false); // zoom is controlled only by the
+												// range panel
+		rangePanel.setRangeZoomable(false);
 
-        updateChartPanelRange();
+		updateChartPanelRange();
 
-    }
+	}
 
-    /**
-     * Get the main display panel for this chart
-     * 
-     * @return
-     */
-    public ExportableChartPanel getMainPanel() {
-        return chartPanel;
-    }
+	/**
+	 * Get the main display panel for this chart
+	 * 
+	 * @return
+	 */
+	public ExportableChartPanel getMainPanel() {
+		return chartPanel;
+	}
 
-    /**
-     * Get the range display panel for this chart
-     * 
-     * @return
-     */
-    public ExportableChartPanel getRangePanel() {
-        return rangePanel;
-    }
+	/**
+	 * Get the range display panel for this chart
+	 * 
+	 * @return
+	 */
+	public ExportableChartPanel getRangePanel() {
+		return rangePanel;
+	}
 
-    public synchronized void restoreAutoBounds() {
-        chartPanel.restoreAutoBounds();
-        rangePanel.restoreAutoBounds();
-    }
+	public synchronized void restoreAutoBounds() {
+		chartPanel.restoreAutoBounds();
+		rangePanel.restoreAutoBounds();
+	}
 
-    public synchronized void setCharts(@NonNull final JFreeChart chart, @NonNull final JFreeChart rangeChart) {
+	public synchronized void setCharts(@NonNull final JFreeChart chart, @NonNull final JFreeChart rangeChart) {
 
-        if (chart == rangeChart)
-            throw new IllegalArgumentException("Charts cannot be the same object");
+		if (chart == rangeChart)
+			throw new IllegalArgumentException("Charts cannot be the same object");
 
-        this.chartPanel.setChart(chart);
-        this.rangePanel.setChart(rangeChart);
+		this.chartPanel.setChart(chart);
+		this.rangePanel.setChart(rangeChart);
 
-        chartPanel.setDomainZoomable(false); // zoom is controlled only by the
-                                             // range panel
-        chartPanel.setRangeZoomable(false);
-        rangePanel.setDomainZoomable(false); // zoom is controlled only by the
-                                             // range panel
-        rangePanel.setRangeZoomable(false);
+		chartPanel.setDomainZoomable(false); // zoom is controlled only by the
+												// range panel
+		chartPanel.setRangeZoomable(false);
+		rangePanel.setDomainZoomable(false); // zoom is controlled only by the
+												// range panel
+		rangePanel.setRangeZoomable(false);
 
-        this.updateChartPanelRange();
-    }
+		this.updateChartPanelRange();
+	}
 
-    /**
-     * Set the main chart panel domain range to centre on the position in the
-     * range panel
-     */
-    protected synchronized void updateChartPanelRange() {
-    	if(chartPanel==null)
-    		return;
-    	if(chartPanel.getChart()==null)
-    		return;
-    	if(chartPanel.getChart().getXYPlot()==null)
-    		return;
+	/**
+	 * Set the main chart panel domain range to centre on the position in the range
+	 * panel
+	 */
+	protected synchronized void updateChartPanelRange() {
+		if (chartPanel == null)
+			return;
+		if (chartPanel.getChart() == null)
+			return;
+		if (chartPanel.getChart().getXYPlot() == null)
+			return;
 
-        RectangleOverlayObject ob = rangePanel.getOverlayRectangle();
+		RectangleOverlayObject ob = rangePanel.getOverlayRectangle();
 
-        double xmin = ob.getXMinValue();
-        double xmax = ob.getXMaxValue();
+		double xmin = ob.getXMinValue();
+		double xmax = ob.getXMaxValue();
 
-        if (xmin < xmax) { // must have a positive range
-            chartPanel.getChart().getXYPlot().getDomainAxis().setRange(xmin, xmax);
-        }
+		if (xmin < xmax) { // must have a positive range
+			chartPanel.getChart().getXYPlot().getDomainAxis().setRange(xmin, xmax);
+		}
 
-        double ymin = ob.getYMinValue();
-        double ymax = ob.getYMaxValue();
+		double ymin = ob.getYMinValue();
+		double ymax = ob.getYMaxValue();
 
-        if (ymin < ymax) { // must have a positive range
-            chartPanel.getChart().getXYPlot().getRangeAxis().setRange(ymin, ymax);
-        }
-    }
+		if (ymin < ymax) { // must have a positive range
+			chartPanel.getChart().getXYPlot().getRangeAxis().setRange(ymin, ymax);
+		}
+	}
 
-    /**
-     * Toggle wait cursor on element
-     * 
-     * @param b
-     */
-    public void setAnalysing(boolean b) {
-        if (b) {
+	/**
+	 * Toggle wait cursor on element
+	 * 
+	 * @param b
+	 */
+	public void setAnalysing(boolean b) {
+		if (b) {
 
-            // for(Component c : this.getComponents()){
-            // c.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-            // //new Cursor(Cursor.WAIT_CURSOR));
-            // }
-            //
-            // this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+			// for(Component c : this.getComponents()){
+			// c.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+			// //new Cursor(Cursor.WAIT_CURSOR));
+			// }
+			//
+			// this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
-        } else {
+		} else {
 
-            // for(Component c : this.getComponents()){
-            // c.setCursor(Cursor.getDefaultCursor());
-            // }
-            // this.setCursor(Cursor.getDefaultCursor());
-        }
-    }
+			// for(Component c : this.getComponents()){
+			// c.setCursor(Cursor.getDefaultCursor());
+			// }
+			// this.setCursor(Cursor.getDefaultCursor());
+		}
+	}
 
-    @Override
-    public void eventReceived(UserActionEvent event) {
+	public synchronized void addBorderTagEventListener(LandmarkUpdateEventListener l) {
+		listeners.add(l);
+	}
 
-        // Change the range of the main chart based on the lower chart
-        if (event.type().contains("UpdatePosition") && event.getSource().equals(rangePanel)) {
+	public synchronized void removeBorderTagEventListener(LandmarkUpdateEventListener l) {
+		listeners.remove(l);
+	}
 
-            updateChartPanelRange();
-        }
+	protected synchronized void fireLandmarkUpdateEvent(LandmarkUpdateEvent e) {
+		for (Object l : listeners) {
+			((LandmarkUpdateEventListener) l).landmarkUpdateEventReceived(e);
+		}
+	}
 
-    }
+	public synchronized void addSegmentEventListener(SegmentEventListener l) {
+		listeners.add(l);
+	}
 
-    public synchronized void addBorderTagEventListener(BorderTagEventListener l) {
-        listeners.add(l);
-    }
+	public synchronized void removeSegmentEventListener(SegmentEventListener l) {
+		listeners.remove(l);
+	}
 
-    public synchronized void removeBorderTagEventListener(BorderTagEventListener l) {
-        listeners.remove(l);
-    }
+	protected synchronized void fireSegmentEvent(SegmentEvent e) {
+		for (Object l : listeners) {
+			((SegmentEventListener) l).segmentEventReceived(e);
+		}
+	}
 
-    protected synchronized void fireBorderTagEvent(BorderTagEvent e) {
-        for (Object l : listeners) {
-            ((BorderTagEventListener) l).borderTagEventReceived(e);
-        }
-    }
+	protected synchronized void fireSegmentEvent(UUID id, int index, SegmentUpdateType type) {
+		SegmentEvent e = new SegmentEvent(this, id, index, type);
 
-    public synchronized void addSegmentEventListener(SegmentEventListener l) {
-        listeners.add(l);
-    }
+		for (Object l : listeners) {
+			((SegmentEventListener) l).segmentEventReceived(e);
+		}
+	}
 
-    public synchronized void removeSegmentEventListener(SegmentEventListener l) {
-        listeners.remove(l);
-    }
+	@Override
+	public void segmentEventReceived(SegmentEvent event) {
+		for (Object l : listeners) {
+			((SegmentEventListener) l).segmentEventReceived(event);
+		}
+	}
 
-    protected synchronized void fireSegmentEvent(SegmentEvent e) {
-        for (Object l : listeners) {
-            ((SegmentEventListener) l).segmentEventReceived(e);
-        }
-    }
+	@Override
+	public void chartSetEventReceived(ChartSetEvent e) {
 
-    protected synchronized void fireSegmentEvent(UUID id, int index, SegmentUpdateType type) {
-        SegmentEvent e = new SegmentEvent(this, id, index, type);
+		// One of the two charts was set - ensure the charts remain coupled
 
-        for (Object l : listeners) {
-            ((SegmentEventListener) l).segmentEventReceived(e);
-        }
-    }
+		this.updateChartPanelRange();
 
-    @Override
-    public void segmentEventReceived(SegmentEvent event) {
-        for (Object l : listeners) {
-            ((SegmentEventListener) l).segmentEventReceived(event);
-        }
-    }
-
-    @Override
-    public void chartSetEventReceived(ChartSetEvent e) {
-
-        // One of the two charts was set - ensure the charts remain coupled
-
-        this.updateChartPanelRange();
-
-    }
+	}
 
 }

@@ -16,49 +16,46 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.tabs.cells_detail;
 
-import org.eclipse.jdt.annotation.NonNull;
-
-import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.tabs.editing.AbstractEditingPanel;
 
 @SuppressWarnings("serial")
 public abstract class AbstractCellDetailPanel extends AbstractEditingPanel implements CellEditingTabPanel {
 
-    private CellViewModel model;
-    
-    public AbstractCellDetailPanel(@NonNull InputSupplier context, final CellViewModel model, String title) {
-        super(context, title);
-        this.model = model;
-    }
+	private CellViewModel model;
 
-    /**
-     * Update the charts and tables for the current cell and component
-     */
-    @Override
+	public AbstractCellDetailPanel(final CellViewModel model, String title) {
+		super(title);
+		this.model = model;
+	}
+
+	/**
+	 * Update the charts and tables for the current cell and component
+	 */
+	@Override
 	public abstract void update();
 
-    /**
-     * Get the current cell view
-     * 
-     * @return
-     */
-    @Override
+	/**
+	 * Get the current cell view
+	 * 
+	 * @return
+	 */
+	@Override
 	public synchronized CellViewModel getCellModel() {
-        return model;
-    }
+		return model;
+	}
 
-    @Override
+	@Override
 	public synchronized void setCellModel(CellViewModel model) {
-        this.model = model;
-    }
+		this.model = model;
+	}
 
-    /**
-     * Remove any charts that contain the current active cell, causing them to
-     * redraw on the next refresh
-     */
-    @Override
+	/**
+	 * Remove any charts that contain the current active cell, causing them to
+	 * redraw on the next refresh
+	 */
+	@Override
 	public synchronized void clearCellCharts() {
-        this.getChartCache().clear(model.getCell());
-    }
+		this.getCache().clear(model.getCell());
+	}
 
 }

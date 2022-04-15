@@ -23,8 +23,6 @@ import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
-import com.bmskinner.nuclear_morphology.gui.events.DatasetUpdateEvent;
 import com.bmskinner.nuclear_morphology.visualisation.charts.ProfileChartFactory;
 import com.bmskinner.nuclear_morphology.visualisation.charts.panels.DraggableOverlayChartPanel;
 
@@ -37,7 +35,7 @@ public class SegmentationDualChartPanel extends DualChartPanel {
 
 		JFreeChart profileChart = ProfileChartFactory.createEmptyChart(ProfileType.ANGLE);
 		chartPanel = new DraggableOverlayChartPanel(profileChart, null, false);
-		((DraggableOverlayChartPanel) chartPanel).addSignalChangeListener(this);
+//		((DraggableOverlayChartPanel) chartPanel).addSignalChangeListener(this);
 	}
 
 	public void setProfile(ISegmentedProfile profile, boolean normalised) {
@@ -51,18 +49,6 @@ public class SegmentationDualChartPanel extends DualChartPanel {
 		((DraggableOverlayChartPanel) chartPanel).setChart(chart, profile, normalised);
 		rangePanel.setChart(rangeChart);
 		this.updateChartPanelRange();
-	}
-
-	@Override
-	public void eventReceived(DatasetEvent event) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void eventReceived(DatasetUpdateEvent event) {
-		// TODO Auto-generated method stub
-
 	}
 
 }

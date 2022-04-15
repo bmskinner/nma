@@ -21,6 +21,7 @@ import java.util.List;
 import javax.swing.table.TableModel;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
@@ -46,7 +47,7 @@ public interface Cache {
 	 * 
 	 * @param list
 	 */
-	void clear(@NonNull List<IAnalysisDataset> list);
+	void clear(@Nullable List<IAnalysisDataset> list);
 
 	/**
 	 * Remove caches containing any of the given dataset. These will be recalculated
@@ -54,7 +55,7 @@ public interface Cache {
 	 * 
 	 * @param dataset
 	 */
-	void clear(@NonNull IAnalysisDataset dataset);
+	void clear(@Nullable IAnalysisDataset dataset);
 
 	/**
 	 * Remove caches containing the given cell

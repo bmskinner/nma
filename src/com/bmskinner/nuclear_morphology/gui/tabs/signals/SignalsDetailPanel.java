@@ -21,10 +21,6 @@ import java.util.logging.Logger;
 
 import javax.swing.JTabbedPane;
 
-import org.eclipse.jdt.annotation.NonNull;
-
-import com.bmskinner.nuclear_morphology.core.InputSupplier;
-import com.bmskinner.nuclear_morphology.gui.events.UserActionEvent;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -45,21 +41,21 @@ public class SignalsDetailPanel extends DetailPanel {
 	/**
 	 * Create the panel.
 	 */
-	public SignalsDetailPanel(@NonNull InputSupplier context) {
-		super(context, PANEL_TITLE_LBL);
+	public SignalsDetailPanel() {
+		super(PANEL_TITLE_LBL);
 		try {
 
 			this.setLayout(new BorderLayout());
 
 			signalsTabPane = new JTabbedPane(JTabbedPane.TOP);
 
-			DetailPanel overviewPanel = new SignalsOverviewPanel(context);
-			DetailPanel countsPanel = new SignalCountsPanel(context);
-			DetailPanel boxplotPanel = new SignalsBoxplotPanel(context);
-			DetailPanel shellsPanel = new SignalShellsPanel(context);
-			DetailPanel detectionSettingsPanel = new SignalsAnalysisPanel(context);
-			DetailPanel signalScatterChartPanel = new SignalScatterChartPanel(context);
-			DetailPanel colocalistionPanel = new SignalsColocalisationPanel(context);
+			DetailPanel overviewPanel = new SignalsOverviewPanel();
+			DetailPanel countsPanel = new SignalCountsPanel();
+			DetailPanel boxplotPanel = new SignalsBoxplotPanel();
+			DetailPanel shellsPanel = new SignalShellsPanel();
+			DetailPanel detectionSettingsPanel = new SignalsAnalysisPanel();
+			DetailPanel signalScatterChartPanel = new SignalScatterChartPanel();
+			DetailPanel colocalistionPanel = new SignalsColocalisationPanel();
 
 			signalsTabPane.addTab(overviewPanel.getPanelTitle(), overviewPanel);
 			signalsTabPane.addTab(detectionSettingsPanel.getPanelTitle(), detectionSettingsPanel);
@@ -76,10 +72,4 @@ public class SignalsDetailPanel extends DetailPanel {
 			LOGGER.log(Loggable.STACK, "Error making signal panel", e);
 		}
 	}
-
-	@Override
-	public void eventReceived(UserActionEvent event) {
-		super.eventReceived(event);
-	}
-
 }

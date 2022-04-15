@@ -28,66 +28,66 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
-import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.gui.events.UserActionEvent;
-import com.bmskinner.nuclear_morphology.gui.events.UserActionEventHandler;
+import com.bmskinner.nuclear_morphology.gui.events.revamp.UserActionController;
 import com.bmskinner.nuclear_morphology.io.Io.Importer;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 @SuppressWarnings("serial")
 public class MainDragAndDropTarget extends DropTarget {
-	
+
 	private static final Logger LOGGER = Logger.getLogger(MainDragAndDropTarget.class.getName());
 
-	UserActionEventHandler sh = new UserActionEventHandler(this);
+	public MainDragAndDropTarget() {
+		super();
+	}
 
-    public MainDragAndDropTarget(EventHandler eh) {
-        super();
-        sh.addListener(eh);
-    }
+	@Override
+	public synchronized void drop(DropTargetDropEvent dtde) {
 
-    @Override
-    public synchronized void drop(DropTargetDropEvent dtde) {
+		try {
+			dtde.acceptDrop(DnDConstants.ACTION_COPY_OR_MOVE);
+			Transferable t = dtde.getTransferable();
 
-        try {
-            dtde.acceptDrop(DnDConstants.ACTION_COPY_OR_MOVE);
-            Transferable t = dtde.getTransferable();
+			List<File> fileList = new ArrayList<>();
 
-            List<File> fileList = new ArrayList<File>();
+			// Check that what was provided is a list
+			if (t.getTransferData(DataFlavor.javaFileListFlavor) instanceof List<?>) {
 
-            // Check that what was provided is a list
-            if (t.getTransferData(DataFlavor.javaFileListFlavor) instanceof List<?>) {
+				// Check that what is in the list is files
+				List<?> tempList = (List<?>) t.getTransferData(DataFlavor.javaFileListFlavor);
+				for (Object o : tempList) {
+					if (o instanceof File file)
+						fileList.add(file);
+				}
 
-                // Check that what is in the list is files
-                List<?> tempList = (List<?>) t.getTransferData(DataFlavor.javaFileListFlavor);
-                for (Object o : tempList) {
-                    if (o instanceof File)
-                        fileList.add((File) o);
-                }
+				// Open the files - we process *.nmd, *.bak, *.wrk,and *.xml files
 
-                // Open the files - we process *.nmd, *.bak,  *.wrk,and *.xml files
-                
-                for (File f : fileList) {
-                    LOGGER.fine("Checking dropped file");
-                    if (f.getName().endsWith(Importer.SAVE_FILE_EXTENSION) 
-                            || f.getName().endsWith(Importer.BACKUP_FILE_EXTENSION))
-                        sh.fireUserActionEvent(UserActionEvent.IMPORT_DATASET_PREFIX + f.getAbsolutePath());
-                    
-                    if (f.getName().endsWith(Importer.WRK_FILE_EXTENSION))
-                    	sh.fireUserActionEvent(UserActionEvent.IMPORT_WORKSPACE_PREFIX+f.getAbsolutePath());
-                    
-                    if (f.getName().endsWith(Importer.XML_FILE_EXTENSION))
-                    	sh.fireUserActionEvent(UserActionEvent.IMPORT_WORKFLOW_PREFIX+f.getAbsolutePath());
+				for (File f : fileList) {
+					LOGGER.fine("Checking dropped file");
+					if (f.getName().endsWith(Importer.SAVE_FILE_EXTENSION)
+							|| f.getName().endsWith(Importer.BACKUP_FILE_EXTENSION))
+						UserActionController.getInstance().userActionEventReceived(
+								new UserActionEvent(this, UserActionEvent.IMPORT_DATASET_PREFIX + f.getAbsolutePath()));
 
-                    if (f.isDirectory())
-                    	sh.fireUserActionEvent(UserActionEvent.NEW_ANALYSIS_PREFIX+f.getAbsolutePath());
-                }
-            }
+					if (f.getName().endsWith(Importer.WRK_FILE_EXTENSION))
+						UserActionController.getInstance().userActionEventReceived(new UserActionEvent(this,
+								UserActionEvent.IMPORT_WORKSPACE_PREFIX + f.getAbsolutePath()));
 
-        } catch (UnsupportedFlavorException e) {
-            LOGGER.log(Loggable.STACK, "Error in DnD", e);
-        } catch (IOException e) {
-            LOGGER.log(Loggable.STACK, "IO error in DnD", e);
-        }
-    }
+					if (f.getName().endsWith(Importer.XML_FILE_EXTENSION))
+						UserActionController.getInstance().userActionEventReceived(new UserActionEvent(this,
+								UserActionEvent.IMPORT_WORKFLOW_PREFIX + f.getAbsolutePath()));
+
+					if (f.isDirectory())
+						UserActionController.getInstance().userActionEventReceived(
+								new UserActionEvent(this, UserActionEvent.NEW_ANALYSIS_PREFIX + f.getAbsolutePath()));
+				}
+			}
+
+		} catch (UnsupportedFlavorException e) {
+			LOGGER.log(Loggable.STACK, "Error in DnD", e);
+		} catch (IOException e) {
+			LOGGER.log(Loggable.STACK, "IO error in DnD", e);
+		}
+	}
 }

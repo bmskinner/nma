@@ -33,7 +33,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
-import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
+import com.bmskinner.nuclear_morphology.gui.tabs.TableDetailPanel;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.visualisation.datasets.AnalysisDatasetTableCreator;
 import com.bmskinner.nuclear_morphology.visualisation.datasets.tables.AbstractTableCreator;
@@ -41,141 +41,142 @@ import com.bmskinner.nuclear_morphology.visualisation.options.TableOptions;
 import com.bmskinner.nuclear_morphology.visualisation.options.TableOptionsBuilder;
 
 @SuppressWarnings("serial")
-public class PairwiseVennDetailPanel extends DetailPanel {
-	
+public class PairwiseVennDetailPanel extends TableDetailPanel {
+
 	private static final Logger LOGGER = Logger.getLogger(PairwiseVennDetailPanel.class.getName());
 
-    private static final String PANEL_TITLE_LBL = "Detailed Venn";
-    private static final String HEADER_LBL      = "Shows a dataset by dataset comparison of shared and non-shared nuclei";
-    private JPanel mainPanel = new JPanel();
+	private static final String PANEL_TITLE_LBL = "Detailed Venn";
+	private static final String HEADER_LBL = "Shows a dataset by dataset comparison of shared and non-shared nuclei";
+	private JPanel mainPanel = new JPanel();
 
-    private ExportableTable pairwiseVennTable;
+	private ExportableTable pairwiseVennTable;
 
-    public PairwiseVennDetailPanel(@NonNull InputSupplier context) {
-        super(context, PANEL_TITLE_LBL);
-        this.setLayout(new BorderLayout());
-        mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
+	public PairwiseVennDetailPanel() {
+		super(PANEL_TITLE_LBL);
+		this.setLayout(new BorderLayout());
+		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 
-        try {
+		try {
 
-            JScrollPane scrollPane = new JScrollPane();
-            scrollPane.setViewportView(mainPanel);
+			JScrollPane scrollPane = new JScrollPane();
+			scrollPane.setViewportView(mainPanel);
 
-            JPanel header = new JPanel();
-            header.add(new JLabel(HEADER_LBL));
-            
-            this.add(header, BorderLayout.NORTH);
-            this.add(scrollPane, BorderLayout.CENTER);
+			JPanel header = new JPanel();
+			header.add(new JLabel(HEADER_LBL));
 
-            JPanel pairwisePanel = new JPanel(new BorderLayout());
+			this.add(header, BorderLayout.NORTH);
+			this.add(scrollPane, BorderLayout.CENTER);
 
-            TableModel model = AbstractTableCreator.createBlankTable();
+			JPanel pairwisePanel = new JPanel(new BorderLayout());
 
-            pairwiseVennTable = new ExportableTable(model);
+			TableModel model = AbstractTableCreator.createBlankTable();
 
-            pairwisePanel.add(pairwiseVennTable, BorderLayout.CENTER);
-            pairwisePanel.add(pairwiseVennTable.getTableHeader(), BorderLayout.NORTH);
-            mainPanel.add(pairwisePanel);
-            pairwiseVennTable.setEnabled(false);
+			pairwiseVennTable = new ExportableTable(model);
 
-        } catch (Exception e) {
-        	LOGGER.log(Loggable.STACK, "Error updating pairwise venn table", e);
-        }
+			pairwisePanel.add(pairwiseVennTable, BorderLayout.CENTER);
+			pairwisePanel.add(pairwiseVennTable.getTableHeader(), BorderLayout.NORTH);
+			mainPanel.add(pairwisePanel);
+			pairwiseVennTable.setEnabled(false);
 
-    }
-    
-    @Override
-    public void setChartsAndTablesLoading() {
-        pairwiseVennTable.setModel(AbstractTableCreator.createLoadingTable());
-    }
+		} catch (Exception e) {
+			LOGGER.log(Loggable.STACK, "Error updating pairwise venn table", e);
+		}
 
-    @Override
-    protected void updateSingle() {
-        pairwiseVennTable.setModel(AbstractTableCreator.createBlankTable());
-    }
+	}
 
-    @Override
-    protected void updateMultiple() {
-        TableOptions options = new TableOptionsBuilder().setDatasets(getDatasets())
-                .setTarget(pairwiseVennTable)
-                .setColumnRenderer(TableOptions.ALL_COLUMNS, new PairwiseVennTableCellRenderer(getDatasets())).build();
+	@Override
+	public void setLoading() {
+		pairwiseVennTable.setModel(AbstractTableCreator.createLoadingTable());
+	}
 
-        setTable(options);
-    }
+	@Override
+	protected void updateSingle() {
+		pairwiseVennTable.setModel(AbstractTableCreator.createBlankTable());
+	}
 
-    @Override
-    protected void updateNull() {
-        pairwiseVennTable.setModel(AbstractTableCreator.createBlankTable());
-    }
+	@Override
+	protected void updateMultiple() {
+		TableOptions options = new TableOptionsBuilder().setDatasets(getDatasets()).setTarget(pairwiseVennTable)
+				.setColumnRenderer(TableOptions.ALL_COLUMNS, new PairwiseVennTableCellRenderer(getDatasets())).build();
 
-    @Override
-    protected TableModel createPanelTableType(TableOptions options) {
-        return new AnalysisDatasetTableCreator(options).createPairwiseVennTable();
-    }
+		setTable(options);
+	}
 
-    /**
-     * Colour table cell background to show pairwise comparisons. All cells are
-     * white, apart from the diagonal, which is made light grey
-     */
-    class PairwiseVennTableCellRenderer extends javax.swing.table.DefaultTableCellRenderer {
+	@Override
+	protected void updateNull() {
+		pairwiseVennTable.setModel(AbstractTableCreator.createBlankTable());
+	}
 
-        private List<IAnalysisDataset> list;
+	@Override
+	protected TableModel createPanelTableType(TableOptions options) {
+		return new AnalysisDatasetTableCreator(options).createPairwiseVennTable();
+	}
 
-        public PairwiseVennTableCellRenderer(List<IAnalysisDataset> list) {
-            super();
-            this.list = list;
-        }
+	/**
+	 * Colour table cell background to show pairwise comparisons. All cells are
+	 * white, apart from the diagonal, which is made light grey
+	 */
+	class PairwiseVennTableCellRenderer extends javax.swing.table.DefaultTableCellRenderer {
 
-        private int getIndex(IAnalysisDataset d) {
-            if (list.contains(d)) {
-                for (int i = 0; i < list.size(); i++) {
-                    if (list.get(i) == d) {
-                        return i;
-                    }
-                }
-            }
-            return -1;
-        }
+		private List<IAnalysisDataset> list;
 
-        public java.awt.Component getTableCellRendererComponent(javax.swing.JTable table, java.lang.Object value,
-                boolean isSelected, boolean hasFocus, int row, int column) {
+		public PairwiseVennTableCellRenderer(List<IAnalysisDataset> list) {
+			super();
+			this.list = list;
+		}
 
-            Color backColour = Color.WHITE;
-            Color foreColour = Color.BLACK;
+		private int getIndex(IAnalysisDataset d) {
+			if (list.contains(d)) {
+				for (int i = 0; i < list.size(); i++) {
+					if (list.get(i) == d) {
+						return i;
+					}
+				}
+			}
+			return -1;
+		}
 
-            JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+		@Override
+		public java.awt.Component getTableCellRendererComponent(javax.swing.JTable table, java.lang.Object value,
+				boolean isSelected, boolean hasFocus, int row, int column) {
 
-            String cellContents = l.getText();
+			Color backColour = Color.WHITE;
+			Color foreColour = Color.BLACK;
 
-            String columnName = table.getColumnName(column);
-            if ((columnName.equals("Unique %") || columnName.equals("Shared %"))) {
-                // finest("Column name: "+columnName);
-                double pct;
-                try {
+			JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 
-                    NumberFormat nf = NumberFormat.getInstance();
-                    pct = nf.parse(cellContents).doubleValue();
-                } catch (Exception e) {
-                	LOGGER.fine("Error getting value: " + cellContents + " in column " + columnName+": "+e.getMessage());
-                    pct = 0;
-                }
+			String cellContents = l.getText();
 
-                double colourIndex = 255 - ((pct / 100) * 255);
+			String columnName = table.getColumnName(column);
+			if ((columnName.equals("Unique %") || columnName.equals("Shared %"))) {
+				// finest("Column name: "+columnName);
+				double pct;
+				try {
 
-                backColour = new Color((int) colourIndex, (int) colourIndex, (int) colourIndex);
+					NumberFormat nf = NumberFormat.getInstance();
+					pct = nf.parse(cellContents).doubleValue();
+				} catch (Exception e) {
+					LOGGER.fine("Error getting value: " + cellContents + " in column " + columnName + ": "
+							+ e.getMessage());
+					pct = 0;
+				}
 
-                if (pct > 50) {
-                    foreColour = Color.WHITE;
+				double colourIndex = 255 - ((pct / 100) * 255);
 
-                }
+				backColour = new Color((int) colourIndex, (int) colourIndex, (int) colourIndex);
 
-            }
+				if (pct > 50) {
+					foreColour = Color.WHITE;
 
-            l.setBackground(backColour);
-            l.setForeground(foreColour);
+				}
 
-            // Return the JLabel which renders the cell.
-            return l;
-        }
-    }
+			}
+
+			l.setBackground(backColour);
+			l.setForeground(foreColour);
+
+			// Return the JLabel which renders the cell.
+			return l;
+		}
+	}
 }

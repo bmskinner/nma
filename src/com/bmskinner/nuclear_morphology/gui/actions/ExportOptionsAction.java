@@ -24,7 +24,6 @@ import java.util.logging.Logger;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
@@ -34,68 +33,67 @@ import com.bmskinner.nuclear_morphology.io.XMLWriter;
 
 /**
  * Export the options stored in a dataset
+ * 
  * @author ben
  * @since 1.14.0
  *
  */
 public class ExportOptionsAction extends MultiDatasetResultAction {
-	
+
 	private static final Logger LOGGER = Logger.getLogger(ExportOptionsAction.class.getName());
-	
+
 	private static final String PROGRESS_LBL = "Exporting options";
-	
-	public ExportOptionsAction(@NonNull List<IAnalysisDataset> datasets, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh) {
-        super(datasets, PROGRESS_LBL, acceptor, eh);
-    }
-		
-	 @Override
-     public void run() {
-		 setProgressBarIndeterminate();
-		 
-		 if(datasets.size()==1) {
-			 File file = FileSelector.chooseOptionsExportFile(datasets.get(0));
 
-	         if (file == null) {
-	             cancel();
-	             return;
-	         }
+	public ExportOptionsAction(@NonNull List<IAnalysisDataset> datasets, @NonNull final ProgressBarAcceptor acceptor) {
+		super(datasets, PROGRESS_LBL, acceptor);
+	}
 
-	         Runnable r = () ->{
-	        	 try {
+	@Override
+	public void run() {
+		setProgressBarIndeterminate();
+
+		if (datasets.size() == 1) {
+			File file = FileSelector.chooseOptionsExportFile(datasets.get(0));
+
+			if (file == null) {
+				cancel();
+				return;
+			}
+
+			Runnable r = () -> {
+				try {
 					XMLWriter.writeXML(datasets.get(0).getAnalysisOptions().get().toXmlElement(), file);
 				} catch (IOException e) {
 					LOGGER.warning("Unable to write options to file");
 				}
-	        	 cancel();
-	         };
-	         ThreadManager.getInstance().submit(r);
-		 } else {
-			 
-			 // More than one dataset, choose folder only
-			 try {
-				File folder = eh.getInputSupplier().requestFolder(IAnalysisDataset.commonPathOfFiles(datasets));
-				Runnable r = () ->{
-					for(IAnalysisDataset d : datasets) {
-						File f = new File(folder, d.getName()+Io.XML_FILE_EXTENSION);
+				cancel();
+			};
+			ThreadManager.getInstance().submit(r);
+		} else {
+
+			// More than one dataset, choose folder only
+			try {
+				File folder = is.requestFolder(IAnalysisDataset.commonPathOfFiles(datasets));
+				Runnable r = () -> {
+					for (IAnalysisDataset d : datasets) {
+						File f = new File(folder, d.getName() + Io.XML_FILE_EXTENSION);
 						try {
 							XMLWriter.writeXML(d.getAnalysisOptions().get().toXmlElement(), f);
 						} catch (IOException e) {
 							LOGGER.warning("Unable to write options to file");
 						}
-					 LOGGER.info(String.format("Exported %s options to %s", d.getName(), f.getAbsolutePath()));
+						LOGGER.info(String.format("Exported %s options to %s", d.getName(), f.getAbsolutePath()));
 					}
-					 cancel();
-		         };
-		         ThreadManager.getInstance().submit(r);
+					cancel();
+				};
+				ThreadManager.getInstance().submit(r);
 			} catch (RequestCancelledException e) {
 				cancel();
-	             return;
+				return;
 			}
-			 
-			 
-		 }
-		 
-         
-     }
+
+		}
+
+	}
 
 }

@@ -24,13 +24,10 @@ import java.util.List;
 
 import javax.swing.JPanel;
 
-import com.bmskinner.nuclear_morphology.gui.events.EventListener;
-
 @SuppressWarnings("serial")
 public abstract class EnumeratedOptionsPanel extends JPanel implements ActionListener {
 
 	protected List<ActionListener> listeners = new ArrayList<>();
-	private final List<EventListener> interfaceListeners = new ArrayList<>();
 
 	public EnumeratedOptionsPanel() {
 		this.setLayout(new FlowLayout());
@@ -52,13 +49,4 @@ public abstract class EnumeratedOptionsPanel extends JPanel implements ActionLis
 	public synchronized void removeActionListener(ActionListener l) {
 		listeners.remove(l);
 	}
-
-	public synchronized void addInterfaceEventListener(EventListener l) {
-		interfaceListeners.add(l);
-	}
-
-	public synchronized void removeInterfaceEventListener(EventListener l) {
-		interfaceListeners.remove(l);
-	}
-
 }

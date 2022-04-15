@@ -20,6 +20,7 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.FlowLayout;
 import java.util.List;
+import java.util.UUID;
 import java.util.logging.Logger;
 
 import javax.swing.JButton;
@@ -35,13 +36,12 @@ import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
-import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileTypeOptionsPanel;
-import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.ProfilesUpdatedListener;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.SwatchUpdatedListener;
+import com.bmskinner.nuclear_morphology.gui.tabs.ChartDetailPanel;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.visualisation.charts.MorphologyChartFactory;
 import com.bmskinner.nuclear_morphology.visualisation.charts.ProfileChartFactory;
@@ -56,8 +56,8 @@ import com.bmskinner.nuclear_morphology.visualisation.options.ChartOptionsBuilde
  *
  */
 @SuppressWarnings("serial")
-public class CellProfilesPanel extends AbstractCellDetailPanel
-		implements ProfilesUpdatedListener, SwatchUpdatedListener {
+public class CellProfilesPanel extends ChartDetailPanel
+		implements CellEditingTabPanel, ProfilesUpdatedListener, SwatchUpdatedListener {
 
 	private static final Logger LOGGER = Logger.getLogger(CellProfilesPanel.class.getName());
 
@@ -68,8 +68,11 @@ public class CellProfilesPanel extends AbstractCellDetailPanel
 	private JPanel buttonsPanel;
 	private JButton reverseProfileBtn = new JButton(Labels.Cells.REVERSE_PROFILE_BTN_LBL);
 
-	public CellProfilesPanel(@NonNull InputSupplier context, CellViewModel model) {
-		super(context, model, Labels.Cells.PROFILES_PANEL_TITLE_LBL);
+	private CellViewModel model;
+
+	public CellProfilesPanel(CellViewModel model) {
+		super(Labels.Cells.PROFILES_PANEL_TITLE_LBL);
+		this.model = model;
 
 		this.setLayout(new BorderLayout());
 
@@ -114,17 +117,16 @@ public class CellProfilesPanel extends AbstractCellDetailPanel
 	 * reversed.
 	 */
 	private void reverseProfileAction() {
-		if (this.getCellModel().hasCell()) {
+		if (model.hasCell()) {
 			try {
-				for (Nucleus n : this.getCellModel().getCell().getNuclei()) {
+				for (Nucleus n : model.getCell().getNuclei()) {
 					n.reverse();
 				}
 
-				this.getCellModel().updateViews();
+				model.updateViews();
 
 				// Trigger refresh of dataset median profile and charts
 				activeDataset().getCollection().getProfileManager().recalculateProfileAggregates();
-				this.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.RECACHE_CHARTS, activeDataset());
 			} catch (ProfileException | MissingComponentException e) {
 				LOGGER.log(Loggable.STACK, "Error recalculating profile aggregate", e);
 			}
@@ -142,17 +144,17 @@ public class CellProfilesPanel extends AbstractCellDetailPanel
 
 			ProfileType type = profileOptions.getSelected();
 
-			if (!this.getCellModel().hasCell()) {
+			if (!model.hasCell()) {
 				chartPanel.setChart(MorphologyChartFactory.createEmptyChart());
 				buttonsPanel.setEnabled(false);
 
 			} else {
 
-				ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets())
-						.setCell(this.getCellModel().getCell()).setNormalised(false).setAlignment(ProfileAlignment.LEFT)
-						.setTag(Landmark.REFERENCE_POINT).setShowMarkers(true).setProfileType(type)
-						.setSwatch(GlobalOptions.getInstance().getSwatch()).setShowAnnotations(false)
-						.setShowPoints(true).setShowXAxis(false).setShowYAxis(false).setTarget(chartPanel).build();
+				ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets()).setCell(model.getCell())
+						.setNormalised(false).setAlignment(ProfileAlignment.LEFT).setTag(Landmark.REFERENCE_POINT)
+						.setShowMarkers(true).setProfileType(type).setSwatch(GlobalOptions.getInstance().getSwatch())
+						.setShowAnnotations(false).setShowPoints(true).setShowXAxis(false).setShowYAxis(false)
+						.setTarget(chartPanel).build();
 
 				setChart(options);
 				buttonsPanel.setEnabled(true);
@@ -168,8 +170,8 @@ public class CellProfilesPanel extends AbstractCellDetailPanel
 	}
 
 	@Override
-	public void setChartsAndTablesLoading() {
-		super.setChartsAndTablesLoading();
+	public void setLoading() {
+		super.setLoading();
 		chartPanel.setChart(MorphologyChartFactory.createLoadingChart());
 	}
 
@@ -179,23 +181,56 @@ public class CellProfilesPanel extends AbstractCellDetailPanel
 	}
 
 	@Override
-	public void refreshChartCache() {
-		clearChartCache();
+	public void refreshCache() {
+		clearCache();
 		this.update();
 	}
 
 	@Override
 	public void profilesUpdated(List<IAnalysisDataset> datasets) {
-		refreshChartCache(datasets);
+		refreshCache(datasets);
 	}
 
 	@Override
 	public void profilesUpdated(IAnalysisDataset dataset) {
-		refreshChartCache(dataset);
+		refreshCache(dataset);
 	}
 
 	@Override
 	public void swatchUpdated() {
 		update(getDatasets());
+	}
+
+	@Override
+	public void checkCellLock() {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void setBorderTagAction(@NonNull Landmark tag, int newTagIndex) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void updateSegmentStartIndexAction(@NonNull UUID id, int index) throws Exception {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public CellViewModel getCellModel() {
+		return model;
+	}
+
+	@Override
+	public void setCellModel(CellViewModel model) {
+		this.model = model;
+	}
+
+	@Override
+	public void clearCellCharts() {
+		getCache().clear(model.getCell());
 	}
 }

@@ -27,7 +27,6 @@ import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 
@@ -40,7 +39,6 @@ import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
-import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.events.ChartSetEventListener;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.ScaleUpdatedListener;
@@ -61,8 +59,8 @@ public class SegmentBoxplotsPanel extends BoxplotsTabPanel
 
 	private Dimension preferredSize = new Dimension(200, 300);
 
-	public SegmentBoxplotsPanel(@NonNull InputSupplier context) {
-		super(context, CellularComponent.NUCLEAR_BORDER_SEGMENT);
+	public SegmentBoxplotsPanel() {
+		super(CellularComponent.NUCLEAR_BORDER_SEGMENT);
 
 		JFreeChart chart = AbstractChartFactory.createEmptyChart();
 
@@ -155,12 +153,12 @@ public class SegmentBoxplotsPanel extends BoxplotsTabPanel
 
 	@Override
 	public void scaleUpdated(List<IAnalysisDataset> datasets) {
-		refreshChartCache(datasets);
+		refreshCache(datasets);
 	}
 
 	@Override
 	public void scaleUpdated(IAnalysisDataset dataset) {
-		refreshChartCache(dataset);
+		refreshCache(dataset);
 	}
 
 	@Override

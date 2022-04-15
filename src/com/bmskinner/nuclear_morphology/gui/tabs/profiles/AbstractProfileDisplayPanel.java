@@ -24,7 +24,6 @@ import java.awt.event.ActionListener;
 
 import javax.swing.JPanel;
 
-import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.general.DatasetUtils;
@@ -32,18 +31,17 @@ import org.jfree.data.xy.XYDataset;
 
 import com.bmskinner.nuclear_morphology.components.measure.MeasurementDimension;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOptionsPanel;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileMarkersOptionsPanel;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.ProfilesUpdatedListener;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.SwatchUpdatedListener;
-import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
+import com.bmskinner.nuclear_morphology.gui.tabs.ChartDetailPanel;
 import com.bmskinner.nuclear_morphology.visualisation.charts.AbstractChartFactory;
 import com.bmskinner.nuclear_morphology.visualisation.charts.MorphologyChartFactory;
 import com.bmskinner.nuclear_morphology.visualisation.charts.panels.ExportableChartPanel;
 
 @SuppressWarnings("serial")
-public abstract class AbstractProfileDisplayPanel extends DetailPanel
+public abstract class AbstractProfileDisplayPanel extends ChartDetailPanel
 		implements ActionListener, ProfilesUpdatedListener, SwatchUpdatedListener {
 
 	Dimension minimumChartSize = new Dimension(50, 100);
@@ -57,8 +55,8 @@ public abstract class AbstractProfileDisplayPanel extends DetailPanel
 
 	protected ProfileType type;
 
-	public AbstractProfileDisplayPanel(@NonNull InputSupplier context, ProfileType type) {
-		super(context);
+	public AbstractProfileDisplayPanel(ProfileType type) {
+		super();
 		this.type = type;
 
 		this.setLayout(new BorderLayout());
@@ -145,8 +143,8 @@ public abstract class AbstractProfileDisplayPanel extends DetailPanel
 	}
 
 	@Override
-	public void setChartsAndTablesLoading() {
-		super.setChartsAndTablesLoading();
+	public void setLoading() {
+		super.setLoading();
 		chartPanel.setChart(AbstractChartFactory.createLoadingChart());
 
 	}

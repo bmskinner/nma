@@ -18,20 +18,28 @@ package com.bmskinner.nuclear_morphology.visualisation.charts.panels;
 
 import java.awt.Color;
 import java.awt.Paint;
-import java.util.Iterator;
+import java.io.File;
 
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
+import javax.swing.JSpinner;
+import javax.swing.SpinnerNumberModel;
 
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.XYPlot;
 
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
+import com.bmskinner.nuclear_morphology.core.DatasetListManager;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
+import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
+import com.bmskinner.nuclear_morphology.gui.DefaultInputSupplier;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
-import com.bmskinner.nuclear_morphology.gui.events.EventListener;
-import com.bmskinner.nuclear_morphology.gui.events.UserActionEvent;
+import com.bmskinner.nuclear_morphology.gui.events.revamp.UserActionController;
+import com.bmskinner.nuclear_morphology.io.Io;
+import com.bmskinner.nuclear_morphology.io.SVGWriter;
 import com.bmskinner.nuclear_morphology.visualisation.charts.overlays.ComponentOverlay;
 import com.bmskinner.nuclear_morphology.visualisation.charts.overlays.ShapeOverlayObject;
 import com.bmskinner.nuclear_morphology.visualisation.datasets.ComponentOutlineDataset;
@@ -39,7 +47,7 @@ import com.bmskinner.nuclear_morphology.visualisation.datasets.ComponentOutlineD
 @SuppressWarnings("serial")
 public class ConsensusNucleusChartPanel extends ExportableChartPanel {
 
-    private static final String RESET_OFFSET_LBL = "Reset offset to zero";
+	private static final String RESET_OFFSET_LBL = "Reset offset to zero";
 
 	private static final String OFFSET_LBL = "Offset...";
 
@@ -51,137 +59,196 @@ public class ConsensusNucleusChartPanel extends ExportableChartPanel {
 
 	public static final String SOURCE_COMPONENT = "ConsensusNucleusChartPanel";
 
-    public static final String EXPORT_SVG_LBL = "Export SVG";
+	public static final String EXPORT_SVG_LBL = "Export SVG";
 
-    private boolean fillConsensus = true;
+	private boolean fillConsensus = true;
 
-    private ComponentOverlay consensusOverlay = null;
+	private ComponentOverlay consensusOverlay = null;
 
-    public ConsensusNucleusChartPanel(JFreeChart chart) {
-        super(chart);
+	private UserActionController uac = UserActionController.getInstance();
 
-        JPopupMenu popup = createPopupMenu();
-        this.setPopupMenu(popup);
-        this.validate();
-        this.setFixedAspectRatio(true);
-        consensusOverlay = new ComponentOverlay();
-        this.addOverlay(consensusOverlay);
+	public ConsensusNucleusChartPanel(JFreeChart chart) {
+		super(chart);
 
-    }
+		JPopupMenu popup = createPopupMenu();
+		this.setPopupMenu(popup);
+		this.validate();
+		this.setFixedAspectRatio(true);
+		consensusOverlay = new ComponentOverlay();
+		this.addOverlay(consensusOverlay);
 
-    /**
-     * Provide an override to the GlobalOptions for this panel. If this is
-     * false, the consensus will never be filled. If this is true, the consensus
-     * will be filled then the GlobalOptions is also true
-     * 
-     * @return
-     */
-    public void setFillConsensus(boolean b) {
-        fillConsensus = b;
-    }
+	}
 
-    /**
-     * Check if this panel is overriding the global options
-     * 
-     * @return
-     */
-    public boolean isFillConsensus() {
-        return fillConsensus;
-    }
+	/**
+	 * Provide an override to the GlobalOptions for this panel. If this is false,
+	 * the consensus will never be filled. If this is true, the consensus will be
+	 * filled then the GlobalOptions is also true
+	 * 
+	 * @return
+	 */
+	public void setFillConsensus(boolean b) {
+		fillConsensus = b;
+	}
 
-    @Override
-    public synchronized void setChart(JFreeChart chart) {
+	/**
+	 * Check if this panel is overriding the global options
+	 * 
+	 * @return
+	 */
+	public boolean isFillConsensus() {
+		return fillConsensus;
+	}
 
-        super.setChart(chart);
+	@Override
+	public synchronized void setChart(JFreeChart chart) {
 
-        MeasurementScale scale = GlobalOptions.getInstance().getScale();
+		super.setChart(chart);
 
-        // Clear the overlay
-        if (consensusOverlay != null) {
-            consensusOverlay.clearShapes();
+		MeasurementScale scale = GlobalOptions.getInstance().getScale();
 
-            if (!GlobalOptions.getInstance().isFillConsensus())
-                return;
+		// Clear the overlay
+		if (consensusOverlay != null) {
+			consensusOverlay.clearShapes();
 
-            if (!fillConsensus)
-                return;
+			if (!GlobalOptions.getInstance().isFillConsensus())
+				return;
 
-            if (!(chart.getPlot() instanceof XYPlot))
-                return;
+			if (!fillConsensus)
+				return;
 
-            if (!(chart.getXYPlot().getDataset() instanceof ComponentOutlineDataset))
-                return;
+			if (!(chart.getPlot() instanceof XYPlot))
+				return;
 
-            ComponentOutlineDataset ds = (ComponentOutlineDataset) chart.getXYPlot().getDataset();
+			if (!(chart.getXYPlot().getDataset() instanceof ComponentOutlineDataset))
+				return;
 
-            for (int series = 0; series < ds.getSeriesCount(); series++) {
+			ComponentOutlineDataset ds = (ComponentOutlineDataset) chart.getXYPlot().getDataset();
 
-                Comparable seriesKey = ds.getSeriesKey(series);
+			for (int series = 0; series < ds.getSeriesCount(); series++) {
 
-                CellularComponent n = ds.getComponent(seriesKey);
+				Comparable seriesKey = ds.getSeriesKey(series);
 
-                Paint c = chart.getXYPlot().getRenderer().getSeriesPaint(series);
+				CellularComponent n = ds.getComponent(seriesKey);
 
-                if (n != null) {
-                    c = ColourSelecter.getTransparentColour((Color) c, true, 128);
-                    ShapeOverlayObject o = new ShapeOverlayObject(n.toShape(scale), null, null, c);
-                    consensusOverlay.addShape(o, n);
-                }
-            }
+				Paint c = chart.getXYPlot().getRenderer().getSeriesPaint(series);
 
-        }
+				if (n != null) {
+					c = ColourSelecter.getTransparentColour((Color) c, true, 128);
+					ShapeOverlayObject o = new ShapeOverlayObject(n.toShape(scale), null, null, c);
+					consensusOverlay.addShape(o, n);
+				}
+			}
 
-    }
+		}
 
-    private JPopupMenu createPopupMenu() {
-        JPopupMenu popup = this.getPopupMenu();
-        popup.addSeparator();
+	}
 
-        JMenuItem alignItem = new JMenuItem(ALIGN_VERTICAL_LBL);
-        alignItem.addActionListener(e-> fireSignalChangeEvent("AlignVertical"));
-        alignItem.setEnabled(true);
+	private JPopupMenu createPopupMenu() {
+		JPopupMenu popup = this.getPopupMenu();
+		popup.addSeparator();
 
-        JMenuItem rotateItem = new JMenuItem(ROTATE_BY_LBL);
-        rotateItem.addActionListener(e->fireSignalChangeEvent("RotateConsensus"));
+		JMenuItem rotateItem = new JMenuItem(ROTATE_BY_LBL);
+		rotateItem.addActionListener(e -> rotateConsensusNucleus());
 
-        JMenuItem resetItem = new JMenuItem(RESET_ROTATION_LBL);
-        resetItem.addActionListener(e->fireSignalChangeEvent("RotateReset"));
+		JMenuItem resetItem = new JMenuItem(RESET_ROTATION_LBL);
+		resetItem.addActionListener(
+				e -> uac.consensusRotationResetReceived(DatasetListManager.getInstance().getActiveDataset()));
 
-        JMenuItem offsetItem = new JMenuItem(OFFSET_LBL);
-        offsetItem.addActionListener(e->fireSignalChangeEvent("OffsetAction"));
+		JMenuItem offsetItem = new JMenuItem(OFFSET_LBL);
+		offsetItem.addActionListener(e -> offsetConsensusNucleus());
 
-        JMenuItem resetOffsetItem = new JMenuItem(RESET_OFFSET_LBL);
-        resetOffsetItem.addActionListener(e->fireSignalChangeEvent("OffsetReset"));
-        
-        JMenuItem exportSvgItem = new JMenuItem(EXPORT_SVG_LBL);
-        exportSvgItem.addActionListener(e->fireSignalChangeEvent(EXPORT_SVG_LBL));
+		JMenuItem resetOffsetItem = new JMenuItem(RESET_OFFSET_LBL);
+		resetOffsetItem.addActionListener(
+				e -> uac.consensusTranslationResetReceived(DatasetListManager.getInstance().getActiveDataset()));
 
-        popup.add(alignItem);
-        popup.add(rotateItem);
-        popup.add(resetItem);
-        popup.addSeparator();
-        popup.add(offsetItem);
-        popup.add(resetOffsetItem);
-        popup.addSeparator();
-        popup.add(exportSvgItem);
+		JMenuItem exportSvgItem = new JMenuItem(EXPORT_SVG_LBL);
+		exportSvgItem.addActionListener(e -> exportConsensusNuclei());
 
-        return popup;
-    }
+		popup.add(rotateItem);
+		popup.add(resetItem);
+		popup.addSeparator();
+		popup.add(offsetItem);
+		popup.add(resetOffsetItem);
+		popup.addSeparator();
+		popup.add(exportSvgItem);
 
-    public synchronized void addSignalChangeListener(EventListener l) {
-        listeners.add(l);
-    }
+		return popup;
+	}
 
-    public synchronized void removeSignalChangeListener(EventListener l) {
-        listeners.remove(l);
-    }
+	private void rotateConsensusNucleus() {
 
-    private synchronized void fireSignalChangeEvent(String message) {
-        UserActionEvent event = new UserActionEvent(this, message, SOURCE_COMPONENT);
-        Iterator<Object> iterator = listeners.iterator();
-        while (iterator.hasNext()) {
-            ((EventListener) iterator.next()).eventReceived(event);
-        }
-    }
+		IAnalysisDataset d = DatasetListManager.getInstance().getActiveDataset();
+		if (d == null)
+			return;
+		if (!d.getCollection().hasConsensus())
+			return;
 
+		try {
+			double angle = new DefaultInputSupplier().requestDouble("Choose the amount to rotate", 0, -360, 360, 1.0);
+			uac.consensusRotationUpdateReceived(d, angle);
+		} catch (RequestCancelledException e) {
+		}
+	}
+
+	private void offsetConsensusNucleus() {
+		IAnalysisDataset d = DatasetListManager.getInstance().getActiveDataset();
+		if (d == null)
+			return;
+		if (!d.getCollection().hasConsensus())
+			return;
+
+		// get the x and y offset
+		SpinnerNumberModel xModel = new SpinnerNumberModel(0, -100, 100, 0.1);
+		SpinnerNumberModel yModel = new SpinnerNumberModel(0, -100, 100, 0.1);
+
+		JSpinner xSpinner = new JSpinner(xModel);
+		JSpinner ySpinner = new JSpinner(yModel);
+
+		JSpinner[] spinners = { xSpinner, ySpinner };
+
+		int option = JOptionPane.showOptionDialog(null, spinners, "Choose the amount to offset x and y",
+				JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
+		if (option == JOptionPane.CANCEL_OPTION) {
+			// user hit cancel
+		} else if (option == JOptionPane.OK_OPTION) {
+			double x = (Double) xSpinner.getModel().getValue();
+			double y = (Double) ySpinner.getModel().getValue();
+
+			uac.consensusTranslationUpdateReceived(d, x, y);
+		}
+	}
+
+	private void exportConsensusNuclei() {
+		IAnalysisDataset d = DatasetListManager.getInstance().getActiveDataset();
+		if (d == null)
+			return;
+		if (!d.getCollection().hasConsensus())
+			return;
+
+		String defaultFileName = DatasetListManager.getInstance().isMultipleSelectedDatasets() ? "Outlines"
+				: d.getName();
+		File defaultFolder = IAnalysisDataset.commonPathOfFiles(DatasetListManager.getInstance().getSelectedDatasets());
+
+		try {
+			File exportFile = new DefaultInputSupplier().requestFileSave(defaultFolder, defaultFileName,
+					Io.SVG_FILE_EXTENSION_NODOT);
+
+			// If the file exists, confirm before overwriting
+			if (exportFile.exists()) {
+				if (!new DefaultInputSupplier().requestApproval("Overwrite existing file?", "Confirm overwrite"))
+					return;
+			}
+
+			SVGWriter wr = new SVGWriter(exportFile);
+
+			String[] scaleChoices = new String[] { MeasurementScale.MICRONS.toString(),
+					MeasurementScale.PIXELS.toString() };
+
+			int scaleChoice = new DefaultInputSupplier().requestOption(scaleChoices, "Choose scale");
+
+			MeasurementScale scale = scaleChoice == 0 ? MeasurementScale.MICRONS : MeasurementScale.PIXELS;
+			wr.exportConsensusOutlines(DatasetListManager.getInstance().getSelectedDatasets(), scale);
+		} catch (RequestCancelledException e) {
+		}
+	}
 }

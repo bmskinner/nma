@@ -48,8 +48,8 @@ public class NucleusMagnitudePanel extends AbstractPairwiseDetailPanel {
     
     private JButton randomSamplingButton;
 
-    public NucleusMagnitudePanel(@NonNull InputSupplier context) {
-        super(context);
+    public NucleusMagnitudePanel() {
+        super();
     }
     
     @Override

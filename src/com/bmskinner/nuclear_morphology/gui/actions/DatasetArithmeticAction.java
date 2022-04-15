@@ -30,13 +30,13 @@ import com.bmskinner.nuclear_morphology.components.datasets.VirtualDataset;
 import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.core.DatasetListManager;
-import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.dialogs.DatasetArithmeticSetupDialog;
 import com.bmskinner.nuclear_morphology.gui.dialogs.DatasetArithmeticSetupDialog.DatasetArithmeticOperation;
-import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
+import com.bmskinner.nuclear_morphology.gui.events.UserActionEvent;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.UIController;
+import com.bmskinner.nuclear_morphology.gui.events.revamp.UserActionController;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -53,9 +53,8 @@ public class DatasetArithmeticAction extends MultiDatasetResultAction {
 
 	private File saveFile;
 
-	public DatasetArithmeticAction(@NonNull List<IAnalysisDataset> list, @NonNull ProgressBarAcceptor acceptor,
-			@NonNull EventHandler eh) {
-		super(list, PROGRESS_LBL, acceptor, eh);
+	public DatasetArithmeticAction(@NonNull List<IAnalysisDataset> list, @NonNull ProgressBarAcceptor acceptor) {
+		super(list, PROGRESS_LBL, acceptor);
 		this.setProgressBarIndeterminate();
 	}
 
@@ -71,7 +70,7 @@ public class DatasetArithmeticAction extends MultiDatasetResultAction {
 			DatasetArithmeticSetupDialog dialog = new DatasetArithmeticSetupDialog(datasets);
 			if (dialog.isReadyToRun()) {
 
-				saveFile = eh.getInputSupplier().requestFolder("Select new directory of images...");
+				saveFile = is.requestFolder("Select new directory of images...");
 
 				IAnalysisDataset datasetOne = dialog.getDatasetOne();
 				IAnalysisDataset datasetTwo = dialog.getDatasetTwo();
@@ -154,7 +153,8 @@ public class DatasetArithmeticAction extends MultiDatasetResultAction {
 
 			} else {
 				newDataset = new DefaultAnalysisDataset(newCollection, saveFile);
-				getDatasetEventHandler().fireDatasetEvent(DatasetEvent.MORPHOLOGY_ANALYSIS_ACTION, newDataset);
+				UserActionController.getInstance().userActionEventReceived(
+						new UserActionEvent(this, UserActionEvent.MORPHOLOGY_ANALYSIS_ACTION, List.of(newDataset)));
 			}
 		} else {
 			LOGGER.info("No populations returned");

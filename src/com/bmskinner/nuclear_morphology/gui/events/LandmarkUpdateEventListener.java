@@ -17,19 +17,18 @@
 package com.bmskinner.nuclear_morphology.gui.events;
 
 /**
- * Handle selected signal change events
+ * Listen for updates to landmarks in a dataset
  * 
  * @author ben
- * @since 1.13.7
  *
  */
-public class UserActionEventHandler extends AbstractEventHandler {
+public interface LandmarkUpdateEventListener {
 
-    public UserActionEventHandler(Object parent) {
-        super(parent);
-    }
-    
-    public void fireUserActionEvent(String method) {
-    	fire(new UserActionEvent(parent, method, parent.getClass().getName()));
-    }
+	/**
+	 * Inform a listener that a landmark has been updated
+	 * 
+	 * @param event
+	 */
+	public void landmarkUpdateEventReceived(LandmarkUpdateEvent event);
+
 }

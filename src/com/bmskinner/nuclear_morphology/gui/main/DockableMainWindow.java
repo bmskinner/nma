@@ -29,10 +29,8 @@ import javax.swing.JSplitPane;
 import javax.swing.border.EmptyBorder;
 
 import com.bmskinner.nuclear_morphology.components.Version;
-import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.gui.LogPanel;
-import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
-import com.bmskinner.nuclear_morphology.gui.events.UserActionEvent;
+import com.bmskinner.nuclear_morphology.gui.events.revamp.UserActionController;
 import com.bmskinner.nuclear_morphology.gui.tabs.AnalysisDetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.ClusterDetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
@@ -70,10 +68,6 @@ import com.javadocking.model.FloatDockModel;
  */
 public class DockableMainWindow extends AbstractMainWindow {
 
-	private LogPanel logPanel;
-	private PopulationsPanel populationsPanel;
-	private TabDock tabDock; // bottom panel tabs
-
 	private static final Logger LOGGER = Logger.getLogger(DockableMainWindow.class.getName());
 
 	/**
@@ -82,15 +76,12 @@ public class DockableMainWindow extends AbstractMainWindow {
 	 * @param standalone is the frame a standalone app, or launched within ImageJ?
 	 * @param eh         the event handler controlling actions
 	 */
-	public DockableMainWindow(boolean standalone, EventHandler eh) {
-		super(standalone, eh);
+	public DockableMainWindow() {
+		super();
 
 		createWindowListeners();
 
 		createUI();
-
-		this.eh.addProgressBarAcceptor(logPanel);
-		createEventHandling();
 
 		this.setJMenuBar(new MainWindowMenuBar(this));
 
@@ -128,7 +119,8 @@ public class DockableMainWindow extends AbstractMainWindow {
 			dockModel.getFloatDock(this).setChildDockFactory(floatFactory); // ensure floating docks are not converted
 																			// to tab docks
 
-			logPanel = new LogPanel(eh.getInputSupplier(), eh);
+			LogPanel logPanel = new LogPanel();
+			UserActionController.getInstance().setProgressBarAcceptor(logPanel);
 
 			LogPanelHandler textHandler = new LogPanelHandler(logPanel);
 			textHandler.setLevel(Level.INFO);
@@ -140,8 +132,8 @@ public class DockableMainWindow extends AbstractMainWindow {
 			// ---------------
 			// Create the consensus chart
 			// ---------------
-			populationsPanel = new PopulationsPanel(eh.getInputSupplier());
-			ConsensusNucleusPanel consensusNucleusPanel = new ConsensusNucleusPanel(eh.getInputSupplier());
+			PopulationsPanel populationsPanel = new PopulationsPanel();
+			ConsensusNucleusPanel consensusNucleusPanel = new ConsensusNucleusPanel();
 			detailPanels.add(consensusNucleusPanel);
 
 			JSplitPane logAndPopulations = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, logPanel, populationsPanel);
@@ -169,7 +161,7 @@ public class DockableMainWindow extends AbstractMainWindow {
 			c.weighty = 1.0; // max weighting on y axis
 			c.fill = GridBagConstraints.BOTH; // fill to bounds where possible
 			topRow.add(consensusNucleusPanel, c);
-			createTabs();
+			TabDock tabDock = createTabs();
 			dockModel.addRootDock("tabdock", tabDock, this);
 
 			// ---------------
@@ -188,22 +180,22 @@ public class DockableMainWindow extends AbstractMainWindow {
 	/**
 	 * Create the individual analysis tabs
 	 */
-	private void createTabs() {
+	private TabDock createTabs() {
 
-		tabDock = new TabDock();
+		TabDock tabDock = new TabDock();
 
 		// Create the top level tabs in the UI
-		DetailPanel analysisDetailPanel = new AnalysisDetailPanel(eh.getInputSupplier());
-		DetailPanel nucleusProfilesPanel = new NucleusProfilesPanel(eh.getInputSupplier()); // the angle profiles
-		DetailPanel cellsDetailPanel = new CellsDetailPanel(eh.getInputSupplier());
-		DetailPanel nuclearChartsPanel = new NuclearStatisticsPanel(eh.getInputSupplier());
-		DetailPanel signalsDetailPanel = new SignalsDetailPanel(eh.getInputSupplier());
-		DetailPanel clusterDetailPanel = new ClusterDetailPanel(eh.getInputSupplier());
-		DetailPanel mergesDetailPanel = new MergesDetailPanel(eh.getInputSupplier());
-		DetailPanel segmentsDetailPanel = new SegmentsDetailPanel(eh.getInputSupplier());
-		DetailPanel comparisonsPanel = new ComparisonDetailPanel(eh.getInputSupplier());
-		DetailPanel editingDetailPanel = new EditingDetailPanel(eh.getInputSupplier());
-		DetailPanel imagesTabPanel = new ImagesTabPanel(eh.getInputSupplier());
+		DetailPanel analysisDetailPanel = new AnalysisDetailPanel();
+		DetailPanel nucleusProfilesPanel = new NucleusProfilesPanel(); // the angle profiles
+		DetailPanel cellsDetailPanel = new CellsDetailPanel();
+		DetailPanel nuclearChartsPanel = new NuclearStatisticsPanel();
+		DetailPanel signalsDetailPanel = new SignalsDetailPanel();
+		DetailPanel clusterDetailPanel = new ClusterDetailPanel();
+		DetailPanel mergesDetailPanel = new MergesDetailPanel();
+		DetailPanel segmentsDetailPanel = new SegmentsDetailPanel();
+		DetailPanel comparisonsPanel = new ComparisonDetailPanel();
+		DetailPanel editingDetailPanel = new EditingDetailPanel();
+		DetailPanel imagesTabPanel = new ImagesTabPanel();
 
 		detailPanels.add(analysisDetailPanel);
 		detailPanels.add(imagesTabPanel);
@@ -234,59 +226,38 @@ public class DockableMainWindow extends AbstractMainWindow {
 			tabDock.addDockable(d, new Position(i++));
 		}
 
-		signalsDetailPanel.addUserActionEventListener(editingDetailPanel);
-		editingDetailPanel.addUserActionEventListener(signalsDetailPanel);
-
 		tabDock.setSelectedDockable(tabDock.getDockable(0));
-		tabDock.getTabbedPane().addChangeListener(e -> { // listen for tab switches and update charts if cells have been
-															// edited
-			boolean isUpdate = false;
-			for (TabPanel t : detailPanels) {
-				isUpdate |= t.hasCellUpdate();
-			}
-
-			if (isUpdate) {
-				recacheCharts();
-				for (TabPanel t : detailPanels) {
-					t.setCellUpdate(false);
-				}
-			}
-		});
+//		tabDock.getTabbedPane().addChangeListener(e -> { // listen for tab switches and update charts if cells have been
+//															// edited
+//			boolean isUpdate = false;
+//			for (TabPanel t : detailPanels) {
+//				isUpdate |= t.hasCellUpdate();
+//			}
+//
+//			if (isUpdate) {
+//				recacheCharts();
+//				for (TabPanel t : detailPanels) {
+//					t.setCellUpdate(false);
+//				}
+//			}
+//		});
+		return tabDock;
 
 	}
 
 	/**
 	 * Set the event listeners for each tab panel
 	 */
-	@Override
-	protected void createEventHandling() {
-
-		this.addDatasetUpdateEventListener(logPanel);
-
-		populationsPanel.addUserActionEventListener(eh);
-		populationsPanel.addDatasetEventListener(eh);
-
-		for (TabPanel d : detailPanels) {
-			d.addDatasetEventListener(eh);
-			d.addUserActionEventListener(eh);
-			this.addDatasetUpdateEventListener(d);
-		}
-	}
-
-	@Override
-	protected PopulationsPanel getPopulationsPanel() {
-		return this.populationsPanel;
-	}
-
-	@Override
-	public ProgressBarAcceptor getProgressAcceptor() {
-		return this.logPanel;
-	}
-
-	@Override
-	public void eventReceived(UserActionEvent event) {
-		// TODO Auto-generated method stub
-
-	}
-
+//	@Override
+//	protected void createEventHandling() {
+//
+//		this.addDatasetUpdateEventListener(logPanel);
+//
+//		populationsPanel.addDatasetEventListener(eh);
+//
+//		for (TabPanel d : detailPanels) {
+//			d.addDatasetEventListener(eh);
+//			this.addDatasetUpdateEventListener(d);
+//		}
+//	}
 }

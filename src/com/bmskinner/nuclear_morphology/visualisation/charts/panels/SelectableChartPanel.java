@@ -26,7 +26,6 @@ import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.jfree.chart.ChartMouseEvent;
@@ -42,9 +41,6 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.ui.Layer;
 import org.jfree.chart.ui.RectangleEdge;
 
-import com.bmskinner.nuclear_morphology.gui.events.EventListener;
-import com.bmskinner.nuclear_morphology.gui.events.UserActionEvent;
-
 /**
  * This extension of the ChartPanel provides a new MouseAdapter to mark selected
  * locations rather than zooming the chart
@@ -53,191 +49,172 @@ import com.bmskinner.nuclear_morphology.gui.events.UserActionEvent;
 @SuppressWarnings("serial")
 public class SelectableChartPanel extends ExportableChartPanel implements ChartMouseListener {
 
-    private String             name             = null;
-    MouseMarker                mouseMarker      = null;
-    public static final String SOURCE_COMPONENT = "SelectableChartPanel";
-    private List<Object>       listeners        = new ArrayList<Object>();
-    
-    
-    /** Lines drawn over the chart */
-    List<Line2D.Double>        lines            = new ArrayList<Line2D.Double>();
+	private String name = null;
+	MouseMarker mouseMarker = null;
+	public static final String SOURCE_COMPONENT = "SelectableChartPanel";
+	private List<Object> listeners = new ArrayList<Object>();
 
-    private Crosshair xCrosshair;
+	/** Lines drawn over the chart */
+	List<Line2D.Double> lines = new ArrayList<Line2D.Double>();
 
-    public SelectableChartPanel(JFreeChart chart, String name) {
-        super(chart);
-        this.name = name;
-        this.setRangeZoomable(false);
-        this.setDomainZoomable(false);
-        mouseMarker = new MouseMarker(this);
+	private Crosshair xCrosshair;
+
+	public SelectableChartPanel(JFreeChart chart, String name) {
+		super(chart);
+		this.name = name;
+		this.setRangeZoomable(false);
+		this.setDomainZoomable(false);
+		mouseMarker = new MouseMarker(this);
 //        this.addSignalChangeListener(mouseMarker);
-        this.addMouseListener(mouseMarker);
-        this.addChartMouseListener(this);
+		this.addMouseListener(mouseMarker);
+		this.addChartMouseListener(this);
 
-        CrosshairOverlay crosshairOverlay = new CrosshairOverlay();
-        this.xCrosshair = new Crosshair(Double.NaN, Color.GRAY, new BasicStroke(0f));
-        this.xCrosshair.setLabelVisible(false);
+		CrosshairOverlay crosshairOverlay = new CrosshairOverlay();
+		this.xCrosshair = new Crosshair(Double.NaN, Color.GRAY, new BasicStroke(0f));
+		this.xCrosshair.setLabelVisible(false);
 
-        crosshairOverlay.addDomainCrosshair(xCrosshair);
-        this.addOverlay(crosshairOverlay);
+		crosshairOverlay.addDomainCrosshair(xCrosshair);
+		this.addOverlay(crosshairOverlay);
 
-    }
+	}
 
-    public String getName() {
-        return this.name;
-    }
+	@Override
+	public String getName() {
+		return this.name;
+	}
 
-    public Double getGateLower() {
-        return mouseMarker.getMarkerStart();
-    }
+	public Double getGateLower() {
+		return mouseMarker.getMarkerStart();
+	}
 
-    public Double getGateUpper() {
-        return mouseMarker.getMarkerEnd();
-    }
+	public Double getGateUpper() {
+		return mouseMarker.getMarkerEnd();
+	}
 
-    @Override
-    // override the default zoom to keep aspect ratio
-    public void zoom(Rectangle2D selection) {
-    	// Does nothing
-    }
+	@Override
+	// override the default zoom to keep aspect ratio
+	public void zoom(Rectangle2D selection) {
+		// Does nothing
+	}
 
-    @Override
-    public synchronized void setChart(JFreeChart chart) {
-        super.setChart(chart);
-        this.removeMouseListener(mouseMarker);
-        mouseMarker = new MouseMarker(this);
-        this.addMouseListener(mouseMarker);
-    }
+	@Override
+	public synchronized void setChart(JFreeChart chart) {
+		super.setChart(chart);
+		this.removeMouseListener(mouseMarker);
+		mouseMarker = new MouseMarker(this);
+		this.addMouseListener(mouseMarker);
+	}
 
-    public void addLine(Line2D.Double line) {
-        clearLines();
-        this.lines.add(line);
-    }
+	public void addLine(Line2D.Double line) {
+		clearLines();
+		this.lines.add(line);
+	}
 
-    public void clearLines() {
-        this.lines = new ArrayList<Line2D.Double>();
-    }
+	public void clearLines() {
+		this.lines = new ArrayList<Line2D.Double>();
+	}
 
-    @Override
-    public void paint(Graphics g) {
+	@Override
+	public void paint(Graphics g) {
 
-        super.paint(g);
+		super.paint(g);
 
-        Graphics2D g2 = (Graphics2D) g;
-        g2.setPaint(Color.BLACK);
-        g2.setStroke(new BasicStroke(2f));
-        for (Line2D.Double line : lines) {
-            g2.draw(line);
-        }
-    }
+		Graphics2D g2 = (Graphics2D) g;
+		g2.setPaint(Color.BLACK);
+		g2.setStroke(new BasicStroke(2f));
+		for (Line2D.Double line : lines) {
+			g2.draw(line);
+		}
+	}
 
-    private final class MouseMarker extends MouseAdapter {
-        private Marker           marker;
-        private Double           markerStart = Double.NaN;
-        private Double           markerEnd   = Double.NaN;
-        private final XYPlot     plot;
-        private final JFreeChart chart;
-        private final ChartPanel panel;
+	private final class MouseMarker extends MouseAdapter {
+		private Marker marker;
+		private Double markerStart = Double.NaN;
+		private Double markerEnd = Double.NaN;
+		private final XYPlot plot;
+		private final JFreeChart chart;
+		private final ChartPanel panel;
 
-        public static final String SOURCE_COMPONENT = "MouseMarker";
-        private List<Object>       listeners        = new ArrayList<Object>();
+		public static final String SOURCE_COMPONENT = "MouseMarker";
+		private List<Object> listeners = new ArrayList<Object>();
 
-        public MouseMarker(ChartPanel panel) {
-            this.panel = panel;
-            this.chart = panel.getChart();
-            this.plot = (XYPlot) chart.getPlot();
-        }
+		public MouseMarker(ChartPanel panel) {
+			this.panel = panel;
+			this.chart = panel.getChart();
+			this.plot = (XYPlot) chart.getPlot();
+		}
 
-        public Double getMarkerEnd() {
-            return markerEnd.doubleValue();
-        }
+		public Double getMarkerEnd() {
+			return markerEnd.doubleValue();
+		}
 
-        public Double getMarkerStart() {
-            return markerStart.doubleValue();
-        }
+		public Double getMarkerStart() {
+			return markerStart.doubleValue();
+		}
 
-        private void updateMarker() {
-            if (marker != null) {
-                plot.removeDomainMarker(marker, Layer.BACKGROUND);
-            }
+		private void updateMarker() {
+			if (marker != null) {
+				plot.removeDomainMarker(marker, Layer.BACKGROUND);
+			}
 
-            if (!(markerStart.isNaN() && markerEnd.isNaN())) {
+			if (!(markerStart.isNaN() && markerEnd.isNaN())) {
 
-                if (markerEnd > markerStart) {
-                    marker = new IntervalMarker(markerStart, markerEnd);
-                    marker.setPaint(new Color(128, 128, 128, 255));
-                    marker.setAlpha(0.5f);
-                    plot.addDomainMarker(marker, Layer.BACKGROUND);
+				if (markerEnd > markerStart) {
+					marker = new IntervalMarker(markerStart, markerEnd);
+					marker.setPaint(new Color(128, 128, 128, 255));
+					marker.setAlpha(0.5f);
+					plot.addDomainMarker(marker, Layer.BACKGROUND);
 
-                    if (!markerEnd.isNaN()) {
-                    	fireSignalChangeEvent("MarkerPositionUpdated");
-                    }
-                }
+					if (!markerEnd.isNaN()) {
+//						fireSignalChangeEvent("MarkerPositionUpdated");
+					}
+				}
 
-            }
-        }
+			}
+		}
 
-        private Double getPosition(MouseEvent e) {
-        	
-        	//Translate the panel location on screen to a Java2D point
-            Point2D p = panel.translateScreenToJava2D(e.getPoint());
-            
-            // Get the area covered by the panel
-            Rectangle2D plotArea = panel
-            		.getChartRenderingInfo()
-            		.getPlotInfo()
-            		.getDataArea();
+		private Double getPosition(MouseEvent e) {
 
-            XYPlot plot = (XYPlot) chart.getPlot();
+			// Translate the panel location on screen to a Java2D point
+			Point2D p = panel.translateScreenToJava2D(e.getPoint());
 
-            return plot.getDomainAxis().java2DToValue(p.getX(), plotArea, plot.getDomainAxisEdge());
-        }
+			// Get the area covered by the panel
+			Rectangle2D plotArea = panel.getChartRenderingInfo().getPlotInfo().getDataArea();
 
-        @Override
-        public void mouseReleased(MouseEvent e) {
-            markerEnd = getPosition(e);
-            // IJ.log("Mouse up: marker end "+markerEnd);
-            updateMarker();
-        }
+			XYPlot plot = (XYPlot) chart.getPlot();
 
-        @Override
-        public void mousePressed(MouseEvent e) {
-            markerStart = getPosition(e);
-        }
-    }
-    
-    public synchronized void addSignalChangeListener(EventListener l) {
-        listeners.add(l);
-    }
+			return plot.getDomainAxis().java2DToValue(p.getX(), plotArea, plot.getDomainAxisEdge());
+		}
 
-    public synchronized void removeSignalChangeListener(EventListener l) {
-        listeners.remove(l);
-    }
+		@Override
+		public void mouseReleased(MouseEvent e) {
+			markerEnd = getPosition(e);
+			// IJ.log("Mouse up: marker end "+markerEnd);
+			updateMarker();
+		}
 
-    private synchronized void fireSignalChangeEvent(String message) {
-        UserActionEvent event = new UserActionEvent(this, message, SOURCE_COMPONENT);
-        Iterator<Object> iterator = listeners.iterator();
-        while (iterator.hasNext()) {
-            ((EventListener) iterator.next()).eventReceived(event);
-        }
-    }
+		@Override
+		public void mousePressed(MouseEvent e) {
+			markerStart = getPosition(e);
+		}
+	}
 
-    @Override
-    public void chartMouseClicked(ChartMouseEvent arg0) {
-        // TODO Auto-generated method stub
+	@Override
+	public void chartMouseClicked(ChartMouseEvent arg0) {
+		// TODO Auto-generated method stub
 
-    }
+	}
 
-    @Override
-    public void chartMouseMoved(ChartMouseEvent e) {
+	@Override
+	public void chartMouseMoved(ChartMouseEvent e) {
 
-        Rectangle2D dataArea = this.getScreenDataArea();
-        JFreeChart chart = e.getChart();
-        XYPlot plot = (XYPlot) chart.getPlot();
-        ValueAxis xAxis = plot.getDomainAxis();
-        double x = xAxis.java2DToValue(e.getTrigger().getX(), dataArea, RectangleEdge.BOTTOM);
-        this.xCrosshair.setValue(x);
+		Rectangle2D dataArea = this.getScreenDataArea();
+		JFreeChart chart = e.getChart();
+		XYPlot plot = (XYPlot) chart.getPlot();
+		ValueAxis xAxis = plot.getDomainAxis();
+		double x = xAxis.java2DToValue(e.getTrigger().getX(), dataArea, RectangleEdge.BOTTOM);
+		this.xCrosshair.setValue(x);
 
-    }
+	}
 
 }

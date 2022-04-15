@@ -40,8 +40,8 @@ import com.bmskinner.nuclear_morphology.visualisation.options.TableOptionsBuilde
 public class WilcoxonDetailPanel extends AbstractPairwiseDetailPanel {
 
     private static final String PANEL_TITLE_LBL = "Wilcoxon stats";
-    public WilcoxonDetailPanel(@NonNull InputSupplier context) {
-        super(context);
+    public WilcoxonDetailPanel() {
+        super();
     }
 
     @Override

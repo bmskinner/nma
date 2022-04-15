@@ -29,91 +29,90 @@ import org.jdom2.JDOMException;
 
 import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace;
 import com.bmskinner.nuclear_morphology.core.DatasetListManager;
-import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.io.Io.Importer;
 import com.bmskinner.nuclear_morphology.io.WorkspaceImporter;
 
 public class ImportWorkspaceAction extends VoidResultAction {
-	
+
 	private static final Logger LOGGER = Logger.getLogger(ImportWorkspaceAction.class.getName());
 
-    private final File          file;
-    private static final @NonNull String PROGRESS_BAR_LABEL = "Opening workspace...";
-    private static final String DEFAULT_FILE_TYPE  = "Nuclear morphology workspace";
-    
-    /**
-     * Create an import action for the given main window. This will create a
-     * dialog asking for the file to open.
-     * 
-     * @param mw the main window to which a progress bar will be attached
-     */
-    public ImportWorkspaceAction(@NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh) {
-        this(acceptor, eh, null);
-    }
+	private final File file;
+	private static final @NonNull String PROGRESS_BAR_LABEL = "Opening workspace...";
+	private static final String DEFAULT_FILE_TYPE = "Nuclear morphology workspace";
 
-    /**
-     * Create an import action for the given main window. Specify the file to be
-     * opened.
-     * 
-     * @param mw the main window to which a progress bar will be attached
-     * @param file the workspace file to open
-     */
-    public ImportWorkspaceAction(@NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh, @Nullable File file) {
-        super(PROGRESS_BAR_LABEL, acceptor, eh);
-        this.file = file;
-    }
+	/**
+	 * Create an import action for the given main window. This will create a dialog
+	 * asking for the file to open.
+	 * 
+	 * @param mw the main window to which a progress bar will be attached
+	 */
+	public ImportWorkspaceAction(@NonNull final ProgressBarAcceptor acceptor) {
+		this(acceptor, null);
+	}
 
-    @Override
-    public void run() {
-        setProgressBarIndeterminate();
-        File f = file==null ? selectFile() : file;
-        if (f != null) {
-        	
-        	IWorkspace w;
+	/**
+	 * Create an import action for the given main window. Specify the file to be
+	 * opened.
+	 * 
+	 * @param mw   the main window to which a progress bar will be attached
+	 * @param file the workspace file to open
+	 */
+	public ImportWorkspaceAction(@NonNull final ProgressBarAcceptor acceptor, @Nullable File file) {
+		super(PROGRESS_BAR_LABEL, acceptor);
+		this.file = file;
+	}
+
+	@Override
+	public void run() {
+		setProgressBarIndeterminate();
+		File f = file == null ? selectFile() : file;
+		if (f != null) {
+
+			IWorkspace w;
 			try {
 				w = WorkspaceImporter.importWorkspace(f);
 				DatasetListManager.getInstance().addWorkspace(w);
 
-	    		for (File dataFile : w.getFiles()) {
-	    			new ImportDatasetAction(progressAcceptors.get(0), eh, dataFile).run();
-	    		}
+				for (File dataFile : w.getFiles()) {
+					new ImportDatasetAction(progressAcceptors.get(0), dataFile).run();
+				}
 
-	            setProgressMessage(PROGRESS_BAR_LABEL);
+				setProgressMessage(PROGRESS_BAR_LABEL);
 			} catch (JDOMException | IOException e) {
-				LOGGER.warning("Unable to read workspace file:"+e.getMessage());
+				LOGGER.warning("Unable to read workspace file:" + e.getMessage());
 				cancel();
 			}
-        }
-        cancel();
-    }
+		}
+		cancel();
+	}
 
-    /**
-     * Get the file to be loaded
-     * 
-     * @return
-     */
-    private File selectFile() {
+	/**
+	 * Get the file to be loaded
+	 * 
+	 * @return
+	 */
+	private File selectFile() {
 
-        FileNameExtensionFilter filter = new FileNameExtensionFilter(DEFAULT_FILE_TYPE,
-                Importer.WRK_FILE_EXTENSION_NODOT);
+		FileNameExtensionFilter filter = new FileNameExtensionFilter(DEFAULT_FILE_TYPE,
+				Importer.WRK_FILE_EXTENSION_NODOT);
 
-        File defaultDir = GlobalOptions.getInstance().getDefaultDir();
-        JFileChooser fc = new JFileChooser("Select a workspace file...");
-        if (defaultDir.exists()) {
-            fc = new JFileChooser(defaultDir);
-        }
-        fc.setFileFilter(filter);
+		File defaultDir = GlobalOptions.getInstance().getDefaultDir();
+		JFileChooser fc = new JFileChooser("Select a workspace file...");
+		if (defaultDir.exists()) {
+			fc = new JFileChooser(defaultDir);
+		}
+		fc.setFileFilter(filter);
 
-        int returnVal = fc.showOpenDialog(fc);
-        if (returnVal != 0)
-            return null;
-        File file = fc.getSelectedFile();
+		int returnVal = fc.showOpenDialog(fc);
+		if (returnVal != 0)
+			return null;
+		File file = fc.getSelectedFile();
 
-        if (file.isDirectory())
-            return null;
-        return file;
-    }
+		if (file.isDirectory())
+			return null;
+		return file;
+	}
 
 }

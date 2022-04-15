@@ -25,14 +25,12 @@ import java.util.logging.Logger;
 
 import javax.swing.JScrollPane;
 
-import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
-import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.ScaleUpdatedListener;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.SwatchUpdatedListener;
 import com.bmskinner.nuclear_morphology.gui.tabs.BoxplotsTabPanel;
@@ -56,8 +54,8 @@ public class CellsBoxplotsPanel extends BoxplotsTabPanel
 
 	private static final Logger LOGGER = Logger.getLogger(CellsBoxplotsPanel.class.getName());
 
-	public CellsBoxplotsPanel(@NonNull InputSupplier context) {
-		super(context, CellularComponent.WHOLE_CELL);
+	public CellsBoxplotsPanel() {
+		super(CellularComponent.WHOLE_CELL);
 
 		Dimension preferredSize = new Dimension(200, 300);
 
@@ -119,8 +117,8 @@ public class CellsBoxplotsPanel extends BoxplotsTabPanel
 	}
 
 	@Override
-	public void setChartsAndTablesLoading() {
-		super.setChartsAndTablesLoading();
+	public void setLoading() {
+		super.setLoading();
 
 		for (Measurement stat : Measurement.getCellStats()) {
 			ExportableChartPanel panel = chartPanels.get(stat.toString());
@@ -131,12 +129,12 @@ public class CellsBoxplotsPanel extends BoxplotsTabPanel
 
 	@Override
 	public void scaleUpdated(List<IAnalysisDataset> datasets) {
-		refreshChartCache(datasets);
+		refreshCache(datasets);
 	}
 
 	@Override
 	public void scaleUpdated(IAnalysisDataset dataset) {
-		refreshChartCache(dataset);
+		refreshCache(dataset);
 	}
 
 	@Override

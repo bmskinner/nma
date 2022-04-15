@@ -29,7 +29,6 @@ import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
@@ -49,9 +48,8 @@ public class AddNuclearSignalAction extends SingleDatasetResultAction {
 
 	private static final @NonNull String PROGRESS_BAR_LABEL = "Signal detection";
 
-	public AddNuclearSignalAction(@NonNull IAnalysisDataset dataset, @NonNull ProgressBarAcceptor acceptor,
-			@NonNull EventHandler eh) {
-		super(dataset, PROGRESS_BAR_LABEL, acceptor, eh);
+	public AddNuclearSignalAction(@NonNull IAnalysisDataset dataset, @NonNull ProgressBarAcceptor acceptor) {
+		super(dataset, PROGRESS_BAR_LABEL, acceptor);
 	}
 
 	@Override
@@ -68,7 +66,7 @@ public class AddNuclearSignalAction extends SingleDatasetResultAction {
 			File folder = null;
 
 			try {
-				folder = eh.getInputSupplier().requestFolder("Choose FISH signal image folder", defaultDir);
+				folder = is.requestFolder("Choose FISH signal image folder", defaultDir);
 			} catch (RequestCancelledException e) {
 				cancel();
 				return;
@@ -107,7 +105,7 @@ public class AddNuclearSignalAction extends SingleDatasetResultAction {
 		cleanup(); // remove the property change listener
 		UIController.getInstance().fireDatasetAdded(dataset);
 
-//        getDatasetEventHandler().fireDatasetEvent(DatasetEvent.RECACHE_CHARTS, dataset);
+//        getDatasetEventHandler().fireDatasetEvent(UserActionEvent.RECACHE_CHARTS, dataset);
 		cancel();
 	}
 

@@ -30,9 +30,9 @@ import javax.swing.JProgressBar;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisWorker;
-import com.bmskinner.nuclear_morphology.core.EventHandler;
+import com.bmskinner.nuclear_morphology.core.InputSupplier;
+import com.bmskinner.nuclear_morphology.gui.DefaultInputSupplier;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
-import com.bmskinner.nuclear_morphology.gui.events.DatasetEventHandler;
 
 /**
  * The base of all progressible actions. Handles progress bars and workers
@@ -49,11 +49,9 @@ public abstract class VoidResultAction implements PropertyChangeListener, Runnab
 	protected List<JProgressBar> progressBars = new ArrayList<>(); // jcomponents can't be shared across components
 	protected List<ProgressBarAcceptor> progressAcceptors = new ArrayList<>();
 
-	protected EventHandler eh;
-
 	private Optional<CountDownLatch> latch = Optional.empty(); // allow threads to wait
 
-	private final DatasetEventHandler dh = new DatasetEventHandler(this);
+	protected final InputSupplier is = new DefaultInputSupplier();
 
 	/**
 	 * Constructor
@@ -61,20 +59,14 @@ public abstract class VoidResultAction implements PropertyChangeListener, Runnab
 	 * @param barMessage the message to display in the progress bar
 	 * @param mw         the main window
 	 */
-	protected VoidResultAction(@NonNull String barMessage, @NonNull ProgressBarAcceptor acceptor,
-			@NonNull EventHandler eh) {
+	protected VoidResultAction(@NonNull String barMessage, @NonNull ProgressBarAcceptor acceptor) {
 
 		progressAcceptors.add(acceptor);
-		this.eh = eh;
-		dh.addListener(eh);
 		createProgressBar(barMessage);
 	}
 
-	protected VoidResultAction(@NonNull String barMessage, @NonNull List<ProgressBarAcceptor> acceptors,
-			@NonNull EventHandler eh) {
+	protected VoidResultAction(@NonNull String barMessage, @NonNull List<ProgressBarAcceptor> acceptors) {
 		progressAcceptors.addAll(acceptors);
-		this.eh = eh;
-		dh.addListener(eh);
 		createProgressBar(barMessage);
 	}
 
@@ -140,7 +132,7 @@ public abstract class VoidResultAction implements PropertyChangeListener, Runnab
 	 */
 	public void cancel() {
 		removeProgressBar();
-		dh.removeListener(eh);
+//		dh.removeListener(eh);
 	}
 
 	protected void setProgressBarVisible(boolean b) {
@@ -210,10 +202,6 @@ public abstract class VoidResultAction implements PropertyChangeListener, Runnab
 
 	public synchronized boolean isDone() {
 		return worker.isDone();
-	}
-
-	protected DatasetEventHandler getDatasetEventHandler() {
-		return dh;
 	}
 
 }

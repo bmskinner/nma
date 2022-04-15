@@ -21,7 +21,6 @@ import java.util.List;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.table.TableModel;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
@@ -30,14 +29,12 @@ import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.NuclearSignalUpdatedListener;
-import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
+import com.bmskinner.nuclear_morphology.gui.tabs.ChartDetailPanel;
 import com.bmskinner.nuclear_morphology.visualisation.charts.AbstractChartFactory;
 import com.bmskinner.nuclear_morphology.visualisation.charts.ViolinChartFactory;
 import com.bmskinner.nuclear_morphology.visualisation.charts.panels.ExportableChartPanel;
-import com.bmskinner.nuclear_morphology.visualisation.datasets.tables.NuclearSignalTableCreator;
 import com.bmskinner.nuclear_morphology.visualisation.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.visualisation.options.ChartOptionsBuilder;
-import com.bmskinner.nuclear_morphology.visualisation.options.TableOptions;
 
 /**
  * Show the minimum distances between signals within a dataset
@@ -47,15 +44,15 @@ import com.bmskinner.nuclear_morphology.visualisation.options.TableOptions;
  *
  */
 @SuppressWarnings("serial")
-public class SignalsColocalisationPanel extends DetailPanel implements NuclearSignalUpdatedListener {
+public class SignalsColocalisationPanel extends ChartDetailPanel implements NuclearSignalUpdatedListener {
 
 	private static final String PANEL_TITLE_LBL = "Colocalisation";
 	private static final String HEADER_LBL = "Pairwise distances between the closest signal pairs centres-of-mass";
 
 	private ExportableChartPanel violinChart;
 
-	public SignalsColocalisationPanel(@NonNull InputSupplier context) {
-		super(context);
+	public SignalsColocalisationPanel() {
+		super();
 		this.setLayout(new BorderLayout());
 
 		JPanel header = createHeader();
@@ -122,8 +119,8 @@ public class SignalsColocalisationPanel extends DetailPanel implements NuclearSi
 	}
 
 	@Override
-	public synchronized void setChartsAndTablesLoading() {
-		super.setChartsAndTablesLoading();
+	public synchronized void setLoading() {
+		super.setLoading();
 		violinChart.setChart(AbstractChartFactory.createLoadingChart());
 
 	}
@@ -133,18 +130,18 @@ public class SignalsColocalisationPanel extends DetailPanel implements NuclearSi
 		return new ViolinChartFactory(options).createSignalColocalisationViolinChart();
 	}
 
-	@Override
-	protected synchronized TableModel createPanelTableType(@NonNull TableOptions options) {
-		return new NuclearSignalTableCreator(options).createSignalColocalisationTable();
-	}
+//	@Override
+//	protected synchronized TableModel createPanelTableType(@NonNull TableOptions options) {
+//		return new NuclearSignalTableCreator(options).createSignalColocalisationTable();
+//	}
 
 	@Override
 	public void nuclearSignalUpdated(List<IAnalysisDataset> datasets) {
-		refreshChartCache(datasets);
+		refreshCache(datasets);
 	}
 
 	@Override
 	public void nuclearSignalUpdated(IAnalysisDataset dataset) {
-		refreshChartCache(dataset);
+		refreshCache(dataset);
 	}
 }

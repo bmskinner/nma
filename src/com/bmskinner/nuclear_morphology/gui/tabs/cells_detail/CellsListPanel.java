@@ -31,221 +31,204 @@ import javax.swing.JScrollPane;
 import javax.swing.JTree;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
-import javax.swing.table.TableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 
-import org.eclipse.jdt.annotation.NonNull;
-import org.jfree.chart.JFreeChart;
-
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
-import com.bmskinner.nuclear_morphology.visualisation.options.ChartOptions;
-import com.bmskinner.nuclear_morphology.visualisation.options.TableOptions;
 
 @SuppressWarnings("serial")
 public class CellsListPanel extends AbstractCellDetailPanel implements TreeSelectionListener {
-	
+
 	private static final Logger LOGGER = Logger.getLogger(CellsListPanel.class.getName());
 
-    private static final String PANEL_TITLE_LBL = "Cell list";
-    private JTree tree;
+	private static final String PANEL_TITLE_LBL = "Cell list";
+	private JTree tree;
 
-    public CellsListPanel(@NonNull InputSupplier context, CellViewModel model) {
-        super(context, model, PANEL_TITLE_LBL);
-        this.setLayout(new BorderLayout());
+	public CellsListPanel(CellViewModel model) {
+		super(model, PANEL_TITLE_LBL);
+		this.setLayout(new BorderLayout());
 
-        DefaultMutableTreeNode root = new DefaultMutableTreeNode(new NodeData("Cells", null));
-        TreeModel treeModel = new DefaultTreeModel(root);
-        tree = new JTree(treeModel);
-        tree.addTreeSelectionListener(this);
+		DefaultMutableTreeNode root = new DefaultMutableTreeNode(new NodeData("Cells", null));
+		TreeModel treeModel = new DefaultTreeModel(root);
+		tree = new JTree(treeModel);
+		tree.addTreeSelectionListener(this);
 
-        tree.setEnabled(false);
-        JScrollPane scrollPane = new JScrollPane(tree);
-        Dimension size = new Dimension(120, 200);
-        scrollPane.setMinimumSize(size);
-        scrollPane.setPreferredSize(size);
+		tree.setEnabled(false);
+		JScrollPane scrollPane = new JScrollPane(tree);
+		Dimension size = new Dimension(120, 200);
+		scrollPane.setMinimumSize(size);
+		scrollPane.setPreferredSize(size);
 
-        this.add(scrollPane, BorderLayout.CENTER);
-    }
-    
-    /**
-     * Trigger an update with a given dataset
-     * 
-     * @param dataset
-     */
-    @Override
-    protected void updateSingle() {
-        DefaultMutableTreeNode root = new DefaultMutableTreeNode(new NodeData("Cells", null));
+		this.add(scrollPane, BorderLayout.CENTER);
+	}
 
-        createNodes(root, activeDataset());
-        tree.setEnabled(true);
+	/**
+	 * Trigger an update with a given dataset
+	 * 
+	 * @param dataset
+	 */
+	@Override
+	protected void updateSingle() {
+		DefaultMutableTreeNode root = new DefaultMutableTreeNode(new NodeData("Cells", null));
 
-        TreeModel model = new DefaultTreeModel(root);
+		createNodes(root, activeDataset());
+		tree.setEnabled(true);
 
-        tree.removeTreeSelectionListener(this);
-        tree.setModel(model);
+		TreeModel model = new DefaultTreeModel(root);
 
-        // If a cell is still active in view, select it in the list
-        if (this.getCellModel().hasCell()) {
-            DefaultMutableTreeNode node = getNode(this.getCellModel().getCell());
+		tree.removeTreeSelectionListener(this);
+		tree.setModel(model);
 
-            if (node != null) {
-                TreePath path = new TreePath(node.getPath());
+		// If a cell is still active in view, select it in the list
+		if (this.getCellModel().hasCell()) {
+			DefaultMutableTreeNode node = getNode(this.getCellModel().getCell());
 
-                tree.setSelectionPath(path);
-            }
-        }
+			if (node != null) {
+				TreePath path = new TreePath(node.getPath());
 
-        // Replace the listener
-        tree.addTreeSelectionListener(this);
-    }
+				tree.setSelectionPath(path);
+			}
+		}
 
-    @Override
-    protected void updateMultiple() {
-        updateNull();
-    }
+		// Replace the listener
+		tree.addTreeSelectionListener(this);
+	}
 
-    @Override
-    protected void updateNull() {
-        DefaultMutableTreeNode root = new DefaultMutableTreeNode(new NodeData("Cells", null));
+	@Override
+	protected void updateMultiple() {
+		updateNull();
+	}
 
-        tree.setEnabled(false);
+	@Override
+	protected void updateNull() {
+		DefaultMutableTreeNode root = new DefaultMutableTreeNode(new NodeData("Cells", null));
 
-        TreeModel model = new DefaultTreeModel(root);
+		tree.setEnabled(false);
 
-        tree.removeTreeSelectionListener(this);
-        tree.setModel(model);
-        tree.addTreeSelectionListener(this);
-    }
+		TreeModel model = new DefaultTreeModel(root);
 
-    /**
-     * Create the nodes in the tree
-     * 
-     * @param root the root node
-     * @param dataset the dataset to use
-     */
-    private synchronized void createNodes(DefaultMutableTreeNode root, IAnalysisDataset dataset) {
-    	if(dataset==null)
-    		return;
-    	
-        List<ICell> cells = new ArrayList<>(dataset.getCollection().getCells());
-        Collections.sort(cells);
+		tree.removeTreeSelectionListener(this);
+		tree.setModel(model);
+		tree.addTreeSelectionListener(this);
+	}
 
-        for (ICell cell : cells) {
+	/**
+	 * Create the nodes in the tree
+	 * 
+	 * @param root    the root node
+	 * @param dataset the dataset to use
+	 */
+	private synchronized void createNodes(DefaultMutableTreeNode root, IAnalysisDataset dataset) {
+		if (dataset == null)
+			return;
 
-            String name = cell.getNuclei().get(0).getNameAndNumber();
-            UUID id = cell.getId();
+		List<ICell> cells = new ArrayList<>(dataset.getCollection().getCells());
+		Collections.sort(cells);
 
-            root.add(new DefaultMutableTreeNode(new NodeData(name, id)));
-        }
+		for (ICell cell : cells) {
 
-    }
+			String name = cell.getNuclei().get(0).getNameAndNumber();
+			UUID id = cell.getId();
 
-    private DefaultMutableTreeNode getNode(ICell cell) {
-        DefaultMutableTreeNode root = (DefaultMutableTreeNode) tree.getModel().getRoot();
+			root.add(new DefaultMutableTreeNode(new NodeData(name, id)));
+		}
 
-        for (int i = 0; i < root.getChildCount() - 1; i++) {
-            DefaultMutableTreeNode n = (DefaultMutableTreeNode) root.getChildAt(i);
-            NodeData data = (NodeData) n.getUserObject();
-            if (data.getID().equals(cell.getId())) {
-                return n;
-            }
-        }
-        return null;
-    }
+	}
 
-    public class NodeData {
-        private final String name;
-        private final UUID   id;
-        private String imageName;
-        private int    nucleusNumber;
+	private DefaultMutableTreeNode getNode(ICell cell) {
+		DefaultMutableTreeNode root = (DefaultMutableTreeNode) tree.getModel().getRoot();
 
-        public NodeData(final String name, final UUID id) {
-            this.name = name;
-            this.id = id;
-            if (!name.equals("Cells")) {
-                String[] array = name.split("\\.\\w+-"); // remove file
-                                                         // extension and dash,
-                                                         // leaving filename and
-                                                         // nucleus number
-                this.imageName = array[0];
-                
-                try {
-                	nucleusNumber = Integer.valueOf(array[1]);
-                } catch(NumberFormatException e) {
-                	// Not the expected format of xxxx.tif-01
-                	// Maybe single nucleus images - xxxx.tif-01-uuid
-                	// Try parsing it out
-                	nucleusNumber = Integer.valueOf(array[1].split("_")[0]);
-                }
-            }
+		for (int i = 0; i < root.getChildCount() - 1; i++) {
+			DefaultMutableTreeNode n = (DefaultMutableTreeNode) root.getChildAt(i);
+			NodeData data = (NodeData) n.getUserObject();
+			if (data.getID().equals(cell.getId())) {
+				return n;
+			}
+		}
+		return null;
+	}
 
-        }
+	public class NodeData {
+		private final String name;
+		private final UUID id;
+		private String imageName;
+		private int nucleusNumber;
 
-        public String getName() {
-            return name;
-        }
+		public NodeData(final String name, final UUID id) {
+			this.name = name;
+			this.id = id;
+			if (!name.equals("Cells")) {
+				String[] array = name.split("\\.\\w+-"); // remove file
+															// extension and dash,
+															// leaving filename and
+															// nucleus number
+				this.imageName = array[0];
 
-        public UUID getID() {
-            return id;
-        }
+				try {
+					nucleusNumber = Integer.valueOf(array[1]);
+				} catch (NumberFormatException e) {
+					// Not the expected format of xxxx.tif-01
+					// Maybe single nucleus images - xxxx.tif-01-uuid
+					// Try parsing it out
+					nucleusNumber = Integer.valueOf(array[1].split("_")[0]);
+				}
+			}
 
-        @Override
-        public String toString() {
-            if (name.equals("Cells")) {
-                return name;
-            }
-            NumberFormat df = DecimalFormat.getInstance();
-            df.setMaximumFractionDigits(0);
-            df.setMinimumIntegerDigits(2);
-            return imageName + "-" + df.format(nucleusNumber);
-        }
-    }
+		}
 
-    @Override
-    public void valueChanged(TreeSelectionEvent arg0) {
+		public String getName() {
+			return name;
+		}
 
-        DefaultMutableTreeNode node = (DefaultMutableTreeNode) arg0.getPath().getLastPathComponent();
-        NodeData data = (NodeData) node.getUserObject();
+		public UUID getID() {
+			return id;
+		}
 
-        UUID cellID = data.getID();
+		@Override
+		public String toString() {
+			if (name.equals("Cells")) {
+				return name;
+			}
+			NumberFormat df = DecimalFormat.getInstance();
+			df.setMaximumFractionDigits(0);
+			df.setMinimumIntegerDigits(2);
+			return imageName + "-" + df.format(nucleusNumber);
+		}
+	}
 
-        if (this.isSingleDataset()) {
-            try {
+	@Override
+	public void valueChanged(TreeSelectionEvent arg0) {
 
-                if (cellID != null) { // only null for root
-                    this.getCellModel().setCell(activeDataset().getCollection().getCell(cellID));
+		DefaultMutableTreeNode node = (DefaultMutableTreeNode) arg0.getPath().getLastPathComponent();
+		NodeData data = (NodeData) node.getUserObject();
 
-                } else {
-                    this.getCellModel().setCell(null);
-                }
+		UUID cellID = data.getID();
 
-            } catch (Exception e1) {
-            	LOGGER.log(Level.WARNING, "Error fetching cell");
-                LOGGER.log(Loggable.STACK, "Error fetching cell", e1);
-            }
-        }
+		if (this.isSingleDataset()) {
+			try {
 
-    }
+				if (cellID != null) { // only null for root
+					this.getCellModel().setCell(activeDataset().getCollection().getCell(cellID));
 
-    @Override
-    protected TableModel createPanelTableType(TableOptions options) {
-        return null;
-    }
+				} else {
+					this.getCellModel().setCell(null);
+				}
 
-    @Override
-    protected JFreeChart createPanelChartType(ChartOptions options) {
-        return null;
-    }
+			} catch (Exception e1) {
+				LOGGER.log(Level.WARNING, "Error fetching cell");
+				LOGGER.log(Loggable.STACK, "Error fetching cell", e1);
+			}
+		}
 
-    @Override
-    public void update() {
-    	// No action
-    }
+	}
+
+	@Override
+	public void update() {
+		// No action
+	}
 
 }

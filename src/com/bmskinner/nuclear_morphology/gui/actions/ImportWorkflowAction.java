@@ -28,7 +28,6 @@ import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
@@ -52,8 +51,8 @@ public class ImportWorkflowAction extends VoidResultAction {
 	 * 
 	 * @param mw the main window to which a progress bar will be attached
 	 */
-	public ImportWorkflowAction(@NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh) {
-		this(acceptor, eh, null);
+	public ImportWorkflowAction(@NonNull final ProgressBarAcceptor acceptor) {
+		this(acceptor, null);
 	}
 
 	/**
@@ -63,9 +62,8 @@ public class ImportWorkflowAction extends VoidResultAction {
 	 * @param mw   the main window to which a progress bar will be attached
 	 * @param file the workspace file to open
 	 */
-	public ImportWorkflowAction(@NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh,
-			@Nullable File file) {
-		super(PROGRESS_BAR_LABEL, acceptor, eh);
+	public ImportWorkflowAction(@NonNull final ProgressBarAcceptor acceptor, @Nullable File file) {
+		super(PROGRESS_BAR_LABEL, acceptor);
 		this.file = file;
 	}
 
@@ -76,10 +74,10 @@ public class ImportWorkflowAction extends VoidResultAction {
 
 		try {
 			if (file == null)
-				file = eh.getInputSupplier().requestFile("Choose analysis options", null,
-						Importer.XML_FILE_EXTENSION_NODOT, "Analysis options file");
+				file = is.requestFile("Choose analysis options", null, Importer.XML_FILE_EXTENSION_NODOT,
+						"Analysis options file");
 
-			File folder = eh.getInputSupplier().requestFolder("Choose image folder", file.getParentFile());
+			File folder = is.requestFolder("Choose image folder", file.getParentFile());
 
 			IAnalysisMethod m = new SavedOptionsAnalysisPipeline(folder, file);
 

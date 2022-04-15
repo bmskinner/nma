@@ -60,17 +60,11 @@ import javax.swing.text.StyledEditorKit;
 import javax.swing.text.View;
 import javax.swing.text.ViewFactory;
 
-import org.eclipse.jdt.annotation.NonNull;
-
 import com.bmskinner.nuclear_morphology.components.datasets.DatasetRepairer;
 import com.bmskinner.nuclear_morphology.components.datasets.DatasetValidator;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.core.DatasetListManager;
-import com.bmskinner.nuclear_morphology.core.EventHandler;
-import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
-import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
-import com.bmskinner.nuclear_morphology.gui.events.UserActionEvent;
 import com.bmskinner.nuclear_morphology.gui.main.MainDragAndDropTarget;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -90,8 +84,6 @@ public class LogPanel extends DetailPanel implements ProgressBarAcceptor {
 
 	private static final String SHOW_CONSOLE_ACTION = "ShowConsole";
 
-	private final EventHandler eh;
-
 	private JTextPane textArea = new JTextPane();
 
 	private final Console console = new Console();
@@ -100,15 +92,12 @@ public class LogPanel extends DetailPanel implements ProgressBarAcceptor {
 	private JPanel progressPanel; // progress bars for analyses
 	private SimpleAttributeSet attrs; // the styling attributes
 
-	public LogPanel(@NonNull InputSupplier context, @NonNull EventHandler eh) {
-		super(context);
-		this.eh = eh;
+	public LogPanel() {
+		super();
 		this.setLayout(new BorderLayout());
 		this.logPanel = createLogPanel();
 
-		addDatasetEventListener(eh);
-		addUserActionEventListener(eh);
-		textArea.setDropTarget(new MainDragAndDropTarget(eh));
+		textArea.setDropTarget(new MainDragAndDropTarget());
 		this.add(logPanel, BorderLayout.CENTER);
 	}
 
@@ -490,17 +479,17 @@ public class LogPanel extends DetailPanel implements ProgressBarAcceptor {
 			runnableCommands.put(LIST_CMD, () -> listDatasets());
 			runnableCommands.put(KILL_CMD, () -> killAllTasks());
 			runnableCommands.put(TASKS_CMD, () -> listTasks());
-			runnableCommands.put(REPAIR_CMD,
-					() -> getDatasetEventHandler().fireDatasetEvent(DatasetEvent.REFPAIR_SEGMENTATION,
-							DatasetListManager.getInstance().getSelectedDatasets()));
-			runnableCommands.put(GLCM_CMD,
-					() -> getDatasetEventHandler().fireDatasetEvent(DatasetEvent.RUN_GLCM_ANALYSIS,
-							DatasetListManager.getInstance().getSelectedDatasets()));
+//			runnableCommands.put(REPAIR_CMD,
+//					() -> getDatasetEventHandler().fireDatasetEvent(DatasetEvent.REFPAIR_SEGMENTATION,
+//							DatasetListManager.getInstance().getSelectedDatasets()));
+//			runnableCommands.put(GLCM_CMD,
+//					() -> getDatasetEventHandler().fireDatasetEvent(DatasetEvent.RUN_GLCM_ANALYSIS,
+//							DatasetListManager.getInstance().getSelectedDatasets()));
 
-			runnableCommands.put(EXPORT_CMD,
-					() -> getSignalChangeEventHandler().fireUserActionEvent(UserActionEvent.EXPORT_XML_DATASET));
-			runnableCommands.put(EXPORT_TPS,
-					() -> getSignalChangeEventHandler().fireUserActionEvent(UserActionEvent.EXPORT_TPS_DATASET));
+//			runnableCommands.put(EXPORT_CMD,
+//					() -> getSignalChangeEventHandler().fireUserActionEvent(UserActionEvent.EXPORT_XML_DATASET));
+//			runnableCommands.put(EXPORT_TPS,
+//					() -> getSignalChangeEventHandler().fireUserActionEvent(UserActionEvent.EXPORT_TPS_DATASET));
 		}
 
 		/**

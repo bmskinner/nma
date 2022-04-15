@@ -23,6 +23,8 @@ import java.awt.FlowLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
+import java.util.List;
+import java.util.UUID;
 import java.util.logging.Logger;
 
 import javax.swing.JButton;
@@ -33,14 +35,19 @@ import javax.swing.table.TableModel;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
-import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 import com.bmskinner.nuclear_morphology.gui.components.renderers.ConsistentRowTableCellRenderer;
 import com.bmskinner.nuclear_morphology.gui.dialogs.CellImageDialog;
-import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
+import com.bmskinner.nuclear_morphology.gui.events.UserActionEvent;
+import com.bmskinner.nuclear_morphology.gui.events.revamp.FilePathUpdatedListener;
+import com.bmskinner.nuclear_morphology.gui.events.revamp.UIController;
+import com.bmskinner.nuclear_morphology.gui.events.revamp.UserActionController;
 import com.bmskinner.nuclear_morphology.gui.tabs.CosmeticHandler;
+import com.bmskinner.nuclear_morphology.gui.tabs.TableDetailPanel;
 import com.bmskinner.nuclear_morphology.visualisation.datasets.AnalysisDatasetTableCreator;
 import com.bmskinner.nuclear_morphology.visualisation.datasets.SignalTableCell;
 import com.bmskinner.nuclear_morphology.visualisation.datasets.tables.AbstractTableCreator;
@@ -50,204 +57,239 @@ import com.bmskinner.nuclear_morphology.visualisation.options.TableOptionsBuilde
 
 /**
  * Display for overall stats per cell
+ * 
  * @author bms41
  *
  */
 @SuppressWarnings("serial")
-public class CellStatsPanel extends AbstractCellDetailPanel {
-	
+public class CellStatsPanel extends TableDetailPanel implements CellEditingTabPanel, FilePathUpdatedListener {
+
 	private static final Logger LOGGER = Logger.getLogger(CellStatsPanel.class.getName());
 
-    private static final String PANEL_TITLE_LBL = "Info";
-    
-    private ExportableTable table; // individual cell stats
+	private static final String PANEL_TITLE_LBL = "Info";
 
-    private JScrollPane scrollPane;
+	private ExportableTable table; // individual cell stats
 
-    private JButton scaleButton;
-    private JButton sourceButton;
-    
-    private CosmeticHandler ch = new CosmeticHandler(this);
+	private JScrollPane scrollPane;
 
-    public CellStatsPanel(@NonNull InputSupplier context, CellViewModel model) {
-        super(context, model, PANEL_TITLE_LBL);
-        this.setLayout(new BorderLayout());
+	private JButton scaleButton;
+	private JButton sourceButton;
 
-        scrollPane = new JScrollPane();
+	private CosmeticHandler ch = new CosmeticHandler(this);
 
-        TableModel tableModel = AnalysisDatasetTableCreator.createBlankTable();
+	private CellViewModel model;
 
-        table = new ExportableTable(tableModel);
-        table.setEnabled(false);
+	public CellStatsPanel(CellViewModel model) {
+		super(PANEL_TITLE_LBL);
+		this.model = model;
+		this.setLayout(new BorderLayout());
 
-        table.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
+		scrollPane = new JScrollPane();
 
-                JTable table = (JTable) e.getSource();
-                int row = table.rowAtPoint((e.getPoint()));
-                String rowName = table.getModel().getValueAt(row, 0).toString();
+		TableModel tableModel = AnalysisDatasetTableCreator.createBlankTable();
 
-                // double click
-                if (e.getClickCount() == 2) {
+		table = new ExportableTable(tableModel);
+		table.setEnabled(false);
 
-                    // Look for signal group colour
-                    if (rowName.equals("")) {
-                        String nextRowName = table.getModel().getValueAt(row + 1, 0).toString();
-                        if (nextRowName.equals(Labels.Signals.SIGNAL_GROUP_LABEL)) {
-                            SignalTableCell cell = (SignalTableCell) table.getModel().getValueAt(row + 1, 1);
-                            ch.changeSignalColour(activeDataset(), cell.getID());
-                        }
-                    }
-                }
+		table.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
 
-            }
-        });
+				JTable table = (JTable) e.getSource();
+				int row = table.rowAtPoint((e.getPoint()));
+				String rowName = table.getModel().getValueAt(row, 0).toString();
 
-        scrollPane.setViewportView(table);
-        scrollPane.setColumnHeaderView(table.getTableHeader());
+				// double click
+				if (e.getClickCount() == 2) {
 
-        this.add(scrollPane, BorderLayout.CENTER);
+					// Look for signal group colour
+					if (rowName.equals("")) {
+						String nextRowName = table.getModel().getValueAt(row + 1, 0).toString();
+						if (nextRowName.equals(Labels.Signals.SIGNAL_GROUP_LABEL)) {
+							SignalTableCell cell = (SignalTableCell) table.getModel().getValueAt(row + 1, 1);
+							ch.changeSignalColour(activeDataset(), cell.getID());
+						}
+					}
+				}
 
-        JPanel header = createHeader();
-        this.add(header, BorderLayout.NORTH);
+			}
+		});
 
-        this.setEnabled(false);
-    }
-    
-    @Override
-    public void setEnabled(boolean b) {
-        super.setEnabled(b);
-        scaleButton.setEnabled(b);
-        sourceButton.setEnabled(b);
-    }
+		scrollPane.setViewportView(table);
+		scrollPane.setColumnHeaderView(table.getTableHeader());
 
-    private JPanel createHeader() {
-        JPanel panel = new JPanel(new FlowLayout());
+		this.add(scrollPane, BorderLayout.CENTER);
 
-        scaleButton = new JButton("Change scale");
-        scaleButton.addActionListener(e -> {
-            updateScale();
-        });
+		JPanel header = createHeader();
+		this.add(header, BorderLayout.NORTH);
 
-        sourceButton = new JButton("Show source image");
-        sourceButton.addActionListener(e ->  showCellImage() );
+		this.setEnabled(false);
 
-        panel.add(scaleButton);
-        panel.add(sourceButton);
+		UIController.getInstance().addFilePathUpdatedListener(this);
+	}
 
-        return panel;
-    }
+	@Override
+	public void setEnabled(boolean b) {
+		super.setEnabled(b);
+		scaleButton.setEnabled(b);
+		sourceButton.setEnabled(b);
+	}
 
-    private void showCellImage() {
-        new CellImageDialog(this.getCellModel().getCell());
-    }
+	private JPanel createHeader() {
+		JPanel panel = new JPanel(new FlowLayout());
 
-    private void updateScale() {        
-    	ch.changeDatasetScale(activeDataset());
-        refreshTableCache();
-        getDatasetEventHandler().fireDatasetEvent(DatasetEvent.RECACHE_CHARTS, getDatasets());
-    }
+		scaleButton = new JButton("Change scale");
+		scaleButton.addActionListener(e -> UserActionController.getInstance()
+				.userActionEventReceived(new UserActionEvent(this, UserActionEvent.CHANGE_SCALE, getDatasets())));
 
-    @Override
-    public synchronized void refreshTableCache() {
-        LOGGER.finest("Preparing to refresh table cache");
-        clearTableCache();
-        LOGGER.finest("Updating tables after clear");
-        this.update();
-    }
+		sourceButton = new JButton("Show source image");
+		sourceButton.addActionListener(e -> showCellImage());
 
-    @Override
-    public synchronized void update() {
+		panel.add(scaleButton);
+		panel.add(sourceButton);
 
-    	if (this.isMultipleDatasets() || !this.hasDatasets()) {
-    		table.setModel(AbstractTableCreator.createBlankTable());
-    		return;
-    	}
+		return panel;
+	}
 
-    	TableOptions options = new TableOptionsBuilder().setDatasets(getDatasets())
-    			.setCell(this.getCellModel().getCell())
-    			.setScale(GlobalOptions.getInstance().getScale())
-    			.setTarget(table)
-    			.setColumnRenderer(TableOptions.ALL_COLUMNS, new StatsTableCellRenderer())
-    			.build();
+	private void showCellImage() {
+		new CellImageDialog(model.getCell());
+	}
 
-    	setTable(options);
-    }
+	@Override
+	public synchronized void refreshCache() {
+		clearCache();
+		this.update();
+	}
 
-    @Override
-    public void setChartsAndTablesLoading() {
-        table.setModel(AbstractTableCreator.createLoadingTable());
-    }
+	@Override
+	public synchronized void update() {
 
-    @Override
-    protected void updateSingle() {
-        update();
-    }
+		if (this.isMultipleDatasets() || !this.hasDatasets()) {
+			table.setModel(AbstractTableCreator.createBlankTable());
+			return;
+		}
 
-    @Override
-    protected void updateMultiple() {
-        updateNull();
-    }
+		TableOptions options = new TableOptionsBuilder().setDatasets(getDatasets()).setCell(model.getCell())
+				.setScale(GlobalOptions.getInstance().getScale()).setTarget(table)
+				.setColumnRenderer(TableOptions.ALL_COLUMNS, new StatsTableCellRenderer()).build();
 
-    @Override
-    protected void updateNull() {
-        table.setModel(AbstractTableCreator.createBlankTable());
+		setTable(options);
+	}
 
-    }
+	@Override
+	public void setLoading() {
+		table.setModel(AbstractTableCreator.createLoadingTable());
+	}
 
-    @Override
-    protected TableModel createPanelTableType(TableOptions options) {
-        if (getCellModel().hasCell())
-            return new CellTableDatasetCreator(options, getCellModel().getCell()).createCellInfoTable();
-        return AbstractTableCreator.createBlankTable();
-    }
+	@Override
+	protected void updateSingle() {
+		update();
+	}
 
-    /**
-     * Allows for cell background to be coloured based on position in a list.
-     * Used to colour the signal stats list
-     *
-     */
-    private class StatsTableCellRenderer extends ConsistentRowTableCellRenderer {
+	@Override
+	protected void updateMultiple() {
+		updateNull();
+	}
 
-        private static final long serialVersionUID = 1L;
+	@Override
+	protected void updateNull() {
+		table.setModel(AbstractTableCreator.createBlankTable());
 
-        @Override
-		public Component getTableCellRendererComponent(JTable table, Object value,
-                boolean isSelected, boolean hasFocus, int row, int column) {
-        	
-        	Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+	}
 
-            Color bg = Color.WHITE;
-            Color fg = Color.BLACK;
-            
-            // Highlight missing images
-            String header = getFirstColumnText(row, table);
-            if(header.equals(Labels.Cells.SOURCE_FILE_LABEL) && column>0) {
-            	File f = new File(value.toString());
-            	if(!f.exists()) {
-            		fg = Color.RED;
-            	}
-            }
-            
-            // Colour signal groups
-            if (row < table.getModel().getRowCount() - 1 && column==0) {
+	@Override
+	protected TableModel createPanelTableType(TableOptions options) {
+		return new CellTableDatasetCreator(options, model.getCell()).createCellInfoTable();
+	}
 
-                int nextRow = row + 1;
-                String nextRowHeader = getFirstColumnText(nextRow, table);
+	/**
+	 * Allows for cell background to be coloured based on position in a list. Used
+	 * to colour the signal stats list
+	 *
+	 */
+	private class StatsTableCellRenderer extends ConsistentRowTableCellRenderer {
 
-                if (nextRowHeader.equals(Labels.Signals.SIGNAL_GROUP_LABEL)) {
-                    // colour this cell preemptively based on the signal group in the next row
-                    SignalTableCell tableCell = (SignalTableCell) table.getModel().getValueAt(nextRow, 1);
-                    bg = tableCell.getColor();
-                }
-            }
-            // Cells are by default rendered as a JLabel.
-            
-            c.setBackground(bg);
-            c.setForeground(fg);
-            return c;
-        }
-    }
+		private static final long serialVersionUID = 1L;
+
+		@Override
+		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
+				int row, int column) {
+
+			Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+
+			Color bg = Color.WHITE;
+			Color fg = Color.BLACK;
+
+			// Highlight missing images
+			String header = getFirstColumnText(row, table);
+			if (header.equals(Labels.Cells.SOURCE_FILE_LABEL) && column > 0) {
+				File f = new File(value.toString());
+				if (!f.exists()) {
+					fg = Color.RED;
+				}
+			}
+
+			// Colour signal groups
+			if (row < table.getModel().getRowCount() - 1 && column == 0) {
+
+				int nextRow = row + 1;
+				String nextRowHeader = getFirstColumnText(nextRow, table);
+
+				if (nextRowHeader.equals(Labels.Signals.SIGNAL_GROUP_LABEL)) {
+					// colour this cell preemptively based on the signal group in the next row
+					SignalTableCell tableCell = (SignalTableCell) table.getModel().getValueAt(nextRow, 1);
+					bg = tableCell.getColor();
+				}
+			}
+			// Cells are by default rendered as a JLabel.
+
+			c.setBackground(bg);
+			c.setForeground(fg);
+			return c;
+		}
+	}
+
+	@Override
+	public void checkCellLock() {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void setBorderTagAction(@NonNull Landmark tag, int newTagIndex) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void updateSegmentStartIndexAction(@NonNull UUID id, int index) throws Exception {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public CellViewModel getCellModel() {
+		return model;
+	}
+
+	@Override
+	public void setCellModel(CellViewModel model) {
+		this.model = model;
+	}
+
+	@Override
+	public void clearCellCharts() {
+		cache.clear(model.getCell());
+	}
+
+	@Override
+	public void filePathUpdated(List<IAnalysisDataset> datasets) {
+		refreshCache(datasets);
+	}
+
+	@Override
+	public void filePathUpdated(IAnalysisDataset dataset) {
+		refreshCache(dataset);
+	}
 
 }

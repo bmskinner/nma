@@ -24,13 +24,11 @@ import javax.swing.JOptionPane;
 
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
-import com.bmskinner.nuclear_morphology.components.cells.DefaultCell;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.gui.dialogs.MessagingDialog;
-import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -43,115 +41,114 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  */
 @SuppressWarnings("serial")
 public abstract class AbstractCellEditingDialog extends MessagingDialog {
-	
+
 	private static final Logger LOGGER = Logger.getLogger(AbstractCellEditingDialog.class.getName());
 
-    protected ICell            cell    = null;
-    protected ICell            workingCell;
-    protected IAnalysisDataset dataset = null;
+	protected ICell cell = null;
+	protected ICell workingCell;
+	protected IAnalysisDataset dataset = null;
 
-    private boolean hasChanged = false;
+	private boolean hasChanged = false;
 
-    protected CellViewModel cellModel; // allow changes to be propagated back to
-                                       // the other panels
+	protected CellViewModel cellModel; // allow changes to be propagated back to
+										// the other panels
 
-    protected AbstractCellEditingDialog(final CellViewModel model) {
-        super(null);
-        this.cellModel = model;
+	protected AbstractCellEditingDialog(final CellViewModel model) {
+		super(null);
+		this.cellModel = model;
 
-        createUI();
+		createUI();
 
-        this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+		this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 
-        this.pack();
+		this.pack();
 
-        this.addWindowListener(new WindowAdapter() {
+		this.addWindowListener(new WindowAdapter() {
 
-            public void windowClosing(WindowEvent e) {
+			@Override
+			public void windowClosing(WindowEvent e) {
 
-                if (cellHasChanged()) {
-                    requestSaveOption();
-                }
-                setVisible(false);
-            }
-        });
+				if (cellHasChanged()) {
+					requestSaveOption();
+				}
+				setVisible(false);
+			}
+		});
 
-        this.setLocationRelativeTo(null);
-        this.setModal(false);
+		this.setLocationRelativeTo(null);
+		this.setModal(false);
 
-    }
+	}
 
-    /**
-     * Load the given cell and datast (the cell must belong to the dataset) and
-     * display the dialog
-     * 
-     * @param cell
-     * @param dataset
-     */
-    public void load(final ICell cell, final IAnalysisDataset dataset) {
+	/**
+	 * Load the given cell and datast (the cell must belong to the dataset) and
+	 * display the dialog
+	 * 
+	 * @param cell
+	 * @param dataset
+	 */
+	public void load(final ICell cell, final IAnalysisDataset dataset) {
 
-        if (cell == null || dataset == null) {
-            throw new IllegalArgumentException("Cell or dataset is null");
-        }
-        setCellChanged(false);
-        this.cell = cell;
-        this.dataset = dataset;
-        try {
+		if (cell == null || dataset == null) {
+			throw new IllegalArgumentException("Cell or dataset is null");
+		}
+		setCellChanged(false);
+		this.cell = cell;
+		this.dataset = dataset;
+		try {
 			this.workingCell = cell.duplicate();
 		} catch (ComponentCreationException e) {
-			LOGGER.severe("Cannot copy cell: "+e.getMessage());
+			LOGGER.severe("Cannot copy cell: " + e.getMessage());
 		}
-        workingCell.getPrimaryNucleus().setLocked(false);
+		workingCell.getPrimaryNucleus().setLocked(false);
 
-        this.setTitle("Editing " + cell.getPrimaryNucleus().getNameAndNumber());
-    }
+		this.setTitle("Editing " + cell.getPrimaryNucleus().getNameAndNumber());
+	}
 
-    /**
-     * Check if the active cell has been edited
-     * 
-     * @return
-     */
-    protected boolean cellHasChanged() {
-        return hasChanged;
-    }
+	/**
+	 * Check if the active cell has been edited
+	 * 
+	 * @return
+	 */
+	protected boolean cellHasChanged() {
+		return hasChanged;
+	}
 
-    /**
-     * Set whether the active cell has been edited
-     * 
-     * @param b
-     */
-    protected void setCellChanged(boolean b) {
-        hasChanged = b;
-    }
+	/**
+	 * Set whether the active cell has been edited
+	 * 
+	 * @param b
+	 */
+	protected void setCellChanged(boolean b) {
+		hasChanged = b;
+	}
 
-    protected abstract void createUI();
+	protected abstract void createUI();
 
-    protected abstract void updateCharts(ICell cell);
+	protected abstract void updateCharts(ICell cell);
 
-    protected void requestSaveOption() {
+	protected void requestSaveOption() {
 
-        Object[] options = { "Save changes", "Discard changes" };
-        int save = JOptionPane.showOptionDialog(AbstractCellEditingDialog.this, "Save changes to cell?", "Save cell?",
-                JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+		Object[] options = { "Save changes", "Discard changes" };
+		int save = JOptionPane.showOptionDialog(AbstractCellEditingDialog.this, "Save changes to cell?", "Save cell?",
+				JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
 
-        // Replace the input cell with the working cell
-        if (save == 0) {
+		// Replace the input cell with the working cell
+		if (save == 0) {
 
-            workingCell.getPrimaryNucleus().setLocked(true); // Prevent further changes
-                                                      // without unlocking
-            dataset.getCollection().replaceCell(workingCell);
+			workingCell.getPrimaryNucleus().setLocked(true); // Prevent further changes
+			// without unlocking
+			dataset.getCollection().replaceCell(workingCell);
 
-            // Trigger a dataset update and reprofiling
-            try {
+			// Trigger a dataset update and reprofiling
+			try {
 				dataset.getCollection().getProfileCollection().calculateProfiles();
 			} catch (ProfileException | MissingLandmarkException | MissingProfileException e) {
 				LOGGER.warning("Unable to profile cell collection");
 				LOGGER.log(Loggable.STACK, e.getMessage(), e);
 			}
-            cellModel.swapCell(workingCell);
-
-            fireDatasetEvent(DatasetEvent.RECACHE_CHARTS, dataset);
-        }
-    }
+			cellModel.swapCell(workingCell);
+		}
+	}
 
 }

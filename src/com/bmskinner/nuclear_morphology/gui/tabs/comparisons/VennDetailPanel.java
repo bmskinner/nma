@@ -32,140 +32,138 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
-import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
+import com.bmskinner.nuclear_morphology.gui.tabs.TableDetailPanel;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.visualisation.datasets.AnalysisDatasetTableCreator;
 import com.bmskinner.nuclear_morphology.visualisation.options.TableOptions;
 import com.bmskinner.nuclear_morphology.visualisation.options.TableOptionsBuilder;
 
 @SuppressWarnings("serial")
-public class VennDetailPanel extends DetailPanel {
-	
+public class VennDetailPanel extends TableDetailPanel {
+
 	private static final Logger LOGGER = Logger.getLogger(VennDetailPanel.class.getName());
 
-    private static final String PANEL_TITLE_LBL = "Venn";
-    private static final String HEADER_LBL      = "Shows the percentage of each row's cells shared with each column";
-    private JPanel mainPanel = new JPanel();
+	private static final String PANEL_TITLE_LBL = "Venn";
+	private static final String HEADER_LBL = "Shows the percentage of each row's cells shared with each column";
+	private JPanel mainPanel = new JPanel();
 
-    private ExportableTable vennTable;
+	private ExportableTable vennTable;
 
-    public VennDetailPanel(@NonNull InputSupplier context) {
-        super(context, PANEL_TITLE_LBL);
-        this.setLayout(new BorderLayout());
-        mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
+	public VennDetailPanel() {
+		super(PANEL_TITLE_LBL);
+		this.setLayout(new BorderLayout());
+		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 
-        try {
-            JPanel vennPanel = new JPanel(new BorderLayout());
-            
-            JPanel header = new JPanel();
-            header.add(new JLabel(HEADER_LBL));
+		try {
+			JPanel vennPanel = new JPanel(new BorderLayout());
 
-            JScrollPane scrollPane = new JScrollPane();
-            scrollPane.setViewportView(mainPanel);
+			JPanel header = new JPanel();
+			header.add(new JLabel(HEADER_LBL));
 
-            this.add(header, BorderLayout.NORTH);
-            this.add(scrollPane, BorderLayout.CENTER);
-            
+			JScrollPane scrollPane = new JScrollPane();
+			scrollPane.setViewportView(mainPanel);
 
-            vennTable = new ExportableTable(AnalysisDatasetTableCreator.createBlankTable());
-            vennPanel.add(vennTable, BorderLayout.CENTER);
-            vennPanel.add(vennTable.getTableHeader(), BorderLayout.NORTH);
-            mainPanel.add(vennPanel);
-            vennTable.setEnabled(false);
+			this.add(header, BorderLayout.NORTH);
+			this.add(scrollPane, BorderLayout.CENTER);
 
-        } catch (Exception e) {
-            LOGGER.log(Loggable.STACK, "Error creating venn panel", e);
-        }
+			vennTable = new ExportableTable(AnalysisDatasetTableCreator.createBlankTable());
+			vennPanel.add(vennTable, BorderLayout.CENTER);
+			vennPanel.add(vennTable.getTableHeader(), BorderLayout.NORTH);
+			mainPanel.add(vennPanel);
+			vennTable.setEnabled(false);
 
-    }
-    
-    @Override
-    public void setChartsAndTablesLoading() {
-        vennTable.setModel(AnalysisDatasetTableCreator.createLoadingTable());
-    }
+		} catch (Exception e) {
+			LOGGER.log(Loggable.STACK, "Error creating venn panel", e);
+		}
 
-    @Override
-    protected void updateSingle() {
-        updateNull();
-    }
+	}
 
-    @Override
-    protected void updateMultiple() {
-        TableOptions options = new TableOptionsBuilder()
-        		.setDatasets(getDatasets())
-                .setTarget(vennTable)
-                .setColumnRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN, new VennTableCellRenderer())
-                .build();
+	@Override
+	public void setLoading() {
+		vennTable.setModel(AnalysisDatasetTableCreator.createLoadingTable());
+	}
 
-        setTable(options);
+	@Override
+	protected void updateSingle() {
+		updateNull();
+	}
 
-    }
+	@Override
+	protected void updateMultiple() {
+		TableOptions options = new TableOptionsBuilder().setDatasets(getDatasets()).setTarget(vennTable)
+				.setColumnRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN, new VennTableCellRenderer()).build();
 
-    @Override
-    protected void updateNull() {
-        vennTable.setModel(AnalysisDatasetTableCreator.createBlankTable());
-    }
+		setTable(options);
 
-    @Override
-    protected TableModel createPanelTableType(TableOptions options) {
-        return new AnalysisDatasetTableCreator(options).createVennTable();
-    }
+	}
 
-    /**
-     * Colour table cell background to show pairwise comparisons. All cells are
-     * white, apart from the diagonal, which is made light grey
-     */
-    class VennTableCellRenderer extends javax.swing.table.DefaultTableCellRenderer {
+	@Override
+	protected void updateNull() {
+		vennTable.setModel(AnalysisDatasetTableCreator.createBlankTable());
+	}
 
-        public java.awt.Component getTableCellRendererComponent(javax.swing.JTable table, java.lang.Object value,
-                boolean isSelected, boolean hasFocus, int row, int column) {
+	@Override
+	protected TableModel createPanelTableType(TableOptions options) {
+		return new AnalysisDatasetTableCreator(options).createVennTable();
+	}
 
-            Color backColour = Color.WHITE;
-            Color foreColour = Color.BLACK;
+	/**
+	 * Colour table cell background to show pairwise comparisons. All cells are
+	 * white, apart from the diagonal, which is made light grey
+	 */
+	class VennTableCellRenderer extends javax.swing.table.DefaultTableCellRenderer {
 
-            JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+		@Override
+		public java.awt.Component getTableCellRendererComponent(javax.swing.JTable table, java.lang.Object value,
+				boolean isSelected, boolean hasFocus, int row, int column) {
 
-            String cellContents = l.getText();
+			Color backColour = Color.WHITE;
+			Color foreColour = Color.BLACK;
 
-            if (cellContents == null || cellContents.equals("")) {
+			JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 
-                backColour = Color.LIGHT_GRAY;
+			String cellContents = l.getText();
 
-            } else {
+			if (cellContents == null || cellContents.equals("")) {
 
-                String columnName = table.getColumnName(column);
+				backColour = Color.LIGHT_GRAY;
 
-                String pctString = cellContents.replace("%", "");
-                double pct = 0;
-                try {
+			} else {
 
-                    NumberFormat nf = NumberFormat.getInstance();
-                    pct = nf.parse(pctString).doubleValue();
+				String columnName = table.getColumnName(column);
 
-                } catch (ParseException e) {
-                    LOGGER.fine("Error getting value: " + cellContents + " in column " + columnName+": "+e.getMessage());
-                    pct = 0;
-                }
+				String pctString = cellContents.replace("%", "");
+				double pct = 0;
+				try {
 
-                double colourIndex = 255 - ((pct / 100) * 255);
+					NumberFormat nf = NumberFormat.getInstance();
+					pct = nf.parse(pctString).doubleValue();
 
-                colourIndex = colourIndex > 255 ? 255 : colourIndex;
-                colourIndex = colourIndex < 0 ? 0 : colourIndex;
+				} catch (ParseException e) {
+					LOGGER.fine("Error getting value: " + cellContents + " in column " + columnName + ": "
+							+ e.getMessage());
+					pct = 0;
+				}
 
-                backColour = new Color((int) colourIndex, (int) colourIndex, 255);
+				double colourIndex = 255 - ((pct / 100) * 255);
 
-                if (pct > 60) {
-                    foreColour = Color.WHITE;
-                }
+				colourIndex = colourIndex > 255 ? 255 : colourIndex;
+				colourIndex = colourIndex < 0 ? 0 : colourIndex;
 
-            }
+				backColour = new Color((int) colourIndex, (int) colourIndex, 255);
 
-            l.setBackground(backColour);
-            l.setForeground(foreColour);
+				if (pct > 60) {
+					foreColour = Color.WHITE;
+				}
 
-            // Return the JLabel which renders the cell.
-            return l;
-        }
-    }
+			}
+
+			l.setBackground(backColour);
+			l.setForeground(foreColour);
+
+			// Return the JLabel which renders the cell.
+			return l;
+		}
+	}
 
 }

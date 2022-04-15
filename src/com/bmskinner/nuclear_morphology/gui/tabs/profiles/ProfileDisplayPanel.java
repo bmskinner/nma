@@ -18,14 +18,12 @@ package com.bmskinner.nuclear_morphology.gui.tabs.profiles;
 
 import java.util.List;
 
-import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
-import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 import com.bmskinner.nuclear_morphology.visualisation.charts.ProfileChartFactory;
 import com.bmskinner.nuclear_morphology.visualisation.options.ChartOptions;
@@ -40,8 +38,8 @@ import com.bmskinner.nuclear_morphology.visualisation.options.ChartOptionsBuilde
 @SuppressWarnings("serial")
 public class ProfileDisplayPanel extends AbstractProfileDisplayPanel {
 
-	public ProfileDisplayPanel(@NonNull InputSupplier context, ProfileType type) {
-		super(context, type);
+	public ProfileDisplayPanel(ProfileType type) {
+		super(type);
 
 		JFreeChart chart = ProfileChartFactory.createEmptyChart(type);
 		chartPanel.setChart(chart);
@@ -97,12 +95,12 @@ public class ProfileDisplayPanel extends AbstractProfileDisplayPanel {
 
 	@Override
 	public void profilesUpdated(List<IAnalysisDataset> datasets) {
-		refreshChartCache(datasets);
+		refreshCache(datasets);
 	}
 
 	@Override
 	public void profilesUpdated(IAnalysisDataset dataset) {
-		refreshChartCache(dataset);
+		refreshCache(dataset);
 	}
 
 	@Override

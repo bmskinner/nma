@@ -20,46 +20,24 @@ import java.awt.Component;
 import java.awt.Container;
 import java.awt.Cursor;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.JPanel;
-import javax.swing.JTable;
-import javax.swing.SwingWorker;
-import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableModel;
 
 import org.eclipse.jdt.annotation.NonNull;
-import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.core.DatasetListManager;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
-import com.bmskinner.nuclear_morphology.core.InterfaceUpdater;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
-import com.bmskinner.nuclear_morphology.gui.CancellableRunnable;
-import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
+import com.bmskinner.nuclear_morphology.gui.DefaultInputSupplier;
 import com.bmskinner.nuclear_morphology.gui.events.CellUpdatedEventListener;
-import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
-import com.bmskinner.nuclear_morphology.gui.events.DatasetEventHandler;
-import com.bmskinner.nuclear_morphology.gui.events.DatasetUpdateEvent;
-import com.bmskinner.nuclear_morphology.gui.events.DatasetUpdateEventHandler;
-import com.bmskinner.nuclear_morphology.gui.events.EventListener;
-import com.bmskinner.nuclear_morphology.gui.events.UserActionEvent;
-import com.bmskinner.nuclear_morphology.gui.events.UserActionEventHandler;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.DatasetSelectionUpdatedListener;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.UIController;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.visualisation.Cache;
-import com.bmskinner.nuclear_morphology.visualisation.ChartCache;
-import com.bmskinner.nuclear_morphology.visualisation.TableCache;
-import com.bmskinner.nuclear_morphology.visualisation.charts.AbstractChartFactory;
 import com.bmskinner.nuclear_morphology.visualisation.charts.panels.ExportableChartPanel;
-import com.bmskinner.nuclear_morphology.visualisation.datasets.tables.AbstractTableCreator;
-import com.bmskinner.nuclear_morphology.visualisation.options.ChartOptions;
-import com.bmskinner.nuclear_morphology.visualisation.options.TableOptions;
 
 /**
  * The DetailPanels hold chart and table caches, and track other DetailPanels
@@ -81,13 +59,10 @@ public abstract class DetailPanel extends JPanel
 	protected static final int SINGLE_CLICK = 1;
 	protected static final int DOUBLE_CLICK = 2;
 
-	private final transient InputSupplier inputSupplier;
-
-	/** Holds rendered charts for all selected options */
-	protected final transient Cache chartCache = new ChartCache();
+	private final transient InputSupplier inputSupplier = new DefaultInputSupplier();
 
 	/** Holds rendered tables for all selected options */
-	protected final transient Cache tableCache = new TableCache();
+	protected transient Cache cache;
 
 	private static final String DEFAULT_TAB_TITLE = "Default";
 	private final String panelTabTitleLbl;
@@ -95,22 +70,16 @@ public abstract class DetailPanel extends JPanel
 	/** Track if the panel is currently in the process of updating */
 	private AtomicBoolean isUpdating = new AtomicBoolean(false);
 
-	/** Event handlers for sending events */
-	private final transient DatasetEventHandler dh = new DatasetEventHandler(this);
-	private final transient DatasetUpdateEventHandler duh = new DatasetUpdateEventHandler(this);
-	private final transient UserActionEventHandler sh = new UserActionEventHandler(this);
-
 	/** Perform cosmetic operations on datasets - renaming, changing colours etc. */
 	protected final transient CosmeticHandler cosmeticHandler = new CosmeticHandler(this);
 
 	private boolean isCellUpdateMade = false; // for editing panels to batch UI update requests
 
-	public DetailPanel(@NonNull final InputSupplier context) {
-		this(context, DEFAULT_TAB_TITLE);
+	protected DetailPanel() {
+		this(DEFAULT_TAB_TITLE);
 	}
 
-	public DetailPanel(@NonNull final InputSupplier context, @NonNull final String title) {
-		inputSupplier = context;
+	protected DetailPanel(@NonNull final String title) {
 		panelTabTitleLbl = title;
 
 		uiController = UIController.getInstance();
@@ -174,23 +143,9 @@ public abstract class DetailPanel extends JPanel
 		return DatasetListManager.getInstance().getSelectedDatasets();
 	}
 
-	/**
-	 * Get the chart cache for the panel
-	 * 
-	 * @return
-	 */
-	public synchronized Cache getChartCache() {
-		return this.chartCache;
-	}
-
 	@Override
 	public synchronized boolean isUpdating() {
-
-		if (this.isUpdating.get()) {
-			return true;
-		}
-
-		return false;
+		return isUpdating.get();
 	}
 
 	protected synchronized void setUpdating(boolean b) {
@@ -239,12 +194,12 @@ public abstract class DetailPanel extends JPanel
 	private synchronized void updateSize(Container container) {
 		for (Component c : container.getComponents()) {
 			if (c instanceof ExportableChartPanel && c.isShowing()) {
-				this.refreshChartCache();
+				this.refreshCache();
 				return;
 			}
 
-			if (c instanceof Container) {
-				updateSize((Container) c);
+			if (c instanceof Container con) {
+				updateSize(con);
 			}
 
 		}
@@ -320,125 +275,12 @@ public abstract class DetailPanel extends JPanel
 	}
 
 	/**
-	 * Fetch the chart with the given options from the cache, and display it in the
-	 * target ChartPanel. If the chart is not in the cache, a SwingWorker will be
-	 * created to render the chart and display it once complete. Note that this
-	 * requires the options to have been created with a setTarget() value.
+	 * Get the chart cache for the panel
 	 * 
-	 * @param options
-	 */
-	protected synchronized void setChart(@NonNull ChartOptions options) {
-		if (chartCache.has(options)) {
-			JFreeChart chart = chartCache.get(options);
-			if (options.getTarget() != null)
-				options.getTarget().setChart(chart);
-
-		} else { // No cached chart
-			// Make a background worker to generate the chart and
-			// update the target chart panel when done
-			ChartFactoryWorker worker = new ChartFactoryWorker(options);
-			ThreadManager.getInstance().submit(worker);
-		}
-	}
-
-	/**
-	 * Fetch the table model with the given options from the cache, and display it
-	 * in the target JTable. If the model is not in the cache, a SwingWorker will be
-	 * created to render the model and display it once complete. Note that this
-	 * requires the options to have been created with a setTarget() value.
-	 * 
-	 * @param options
-	 */
-	protected synchronized void setTable(TableOptions options) {
-		if (chartCache.has(options)) {
-			TableModel model = getTableCache().get(options);
-
-			if (options.getTarget() != null) {
-				options.getTarget().setModel(model);
-			}
-
-		} else { // No cached chart
-
-			// Make a background worker to generate the chart and
-			// update the target chart panel when done
-			TableFactoryWorker worker = new TableFactoryWorker(options);
-
-			ThreadManager.getInstance().submit(worker);
-		}
-	}
-
-	/**
-	 * Fetch the desired chart, either from the cache, or by creating it
-	 * 
-	 * @param options
 	 * @return
-	 * @throws Exception
 	 */
-//	protected synchronized JFreeChart getChart(@NonNull ChartOptions options) {
-//		if (chartCache.has(options)) {
-//			LOGGER.fine("Fetching cached chart in " + this.getPanelTitle());
-//			return chartCache.get(options);
-//		}
-//
-//		// Otherwise, no cached chart
-//
-//		try {
-//			LOGGER.fine("Creating worker to make chart in " + this.getPanelTitle());
-//			ChartFactoryWorker worker = new ChartFactoryWorker(options);
-//			ThreadManager.getInstance().submit(worker);
-//		} catch (Exception e) {
-//			LOGGER.log(Level.WARNING, "Error creating chart: " + this.getClass().getSimpleName());
-//			LOGGER.log(Loggable.STACK, this.getClass().getName() + ": Error creating chart", e);
-//			return AbstractChartFactory.createErrorChart();
-//		}
-//
-//	}
-
-	/**
-	 * Fetch the desired table, either from the cache, or by creating it
-	 * 
-	 * @param options
-	 * @return
-	 * @throws Exception
-	 */
-	protected synchronized TableModel getTable(TableOptions options) {
-
-		TableModel model;
-		if (getTableCache().has(options)) {
-			model = getTableCache().get(options);
-		} else {
-			try {
-				model = createPanelTableType(options);
-			} catch (Exception e) {
-				LOGGER.log(Level.WARNING, "Error creating table: " + this.getClass().getSimpleName());
-				LOGGER.log(Loggable.STACK, this.getClass().getName() + ": Error creating table", e);
-				model = AbstractTableCreator.createBlankTable();
-			}
-			getTableCache().add(options, model);
-		}
-		return model;
-	}
-
-	/**
-	 * This should be overridden to create the appropriate tables for caching
-	 * 
-	 * @param options the table options
-	 * @return null unless overridden
-	 * @throws Exception
-	 */
-	protected TableModel createPanelTableType(@NonNull TableOptions options) {
-		return null;
-	}
-
-	/**
-	 * This should be overridden to create the appropriate charts for caching
-	 * 
-	 * @param options the chart options
-	 * @return null unless overridden
-	 * @throws Exception
-	 */
-	protected JFreeChart createPanelChartType(@NonNull ChartOptions options) {
-		return null;
+	public synchronized Cache getCache() {
+		return this.cache;
 	}
 
 	/**
@@ -447,8 +289,9 @@ public abstract class DetailPanel extends JPanel
 	 * @param list
 	 */
 	@Override
-	public synchronized void clearChartCache() {
-		this.getChartCache().clear();
+	public synchronized void clearCache() {
+		if (cache != null)
+			cache.clear();
 	}
 
 	/**
@@ -457,13 +300,15 @@ public abstract class DetailPanel extends JPanel
 	 * @param list
 	 */
 	@Override
-	public synchronized void clearChartCache(final List<IAnalysisDataset> list) {
-		getChartCache().clear(list);
+	public synchronized void clearCache(final List<IAnalysisDataset> list) {
+		if (cache != null)
+			cache.clear(list);
 	}
 
 	@Override
-	public synchronized void clearChartCache(final IAnalysisDataset dataset) {
-		getChartCache().clear(dataset);
+	public synchronized void clearCache(final IAnalysisDataset dataset) {
+		if (cache != null)
+			cache.clear(dataset);
 	}
 
 	/**
@@ -472,9 +317,9 @@ public abstract class DetailPanel extends JPanel
 	 * @param list
 	 */
 	@Override
-	public synchronized void refreshChartCache() {
+	public synchronized void refreshCache() {
 		Runnable r = () -> {
-			clearChartCache();
+			clearCache();
 			update(getDatasets());
 		};
 		ThreadManager.getInstance().execute(r);
@@ -489,9 +334,9 @@ public abstract class DetailPanel extends JPanel
 	 * @param list
 	 */
 	@Override
-	public synchronized void refreshChartCache(final IAnalysisDataset dataset) {
+	public synchronized void refreshCache(final IAnalysisDataset dataset) {
 		Runnable r = () -> {
-			clearChartCache(dataset);
+			clearCache(dataset);
 			if (getDatasets().stream().anyMatch(d -> dataset.getId().equals(d.getId())))
 				update(getDatasets());
 		};
@@ -507,301 +352,13 @@ public abstract class DetailPanel extends JPanel
 	 * @param list
 	 */
 	@Override
-	public synchronized void refreshChartCache(final List<IAnalysisDataset> list) {
+	public synchronized void refreshCache(final List<IAnalysisDataset> list) {
 		Runnable r = () -> {
-			clearChartCache(list);
+			clearCache(list);
 			if (getDatasets().stream().anyMatch(d -> list.contains(d)))
 				update(getDatasets());
 		};
 		ThreadManager.getInstance().execute(r);
-	}
-
-	public synchronized Cache getTableCache() {
-		return this.tableCache;
-	}
-
-	/**
-	 * Remove all tables from the cache
-	 * 
-	 * @param list
-	 */
-	@Override
-	public synchronized void clearTableCache() {
-		getTableCache().clear();
-	}
-
-	/**
-	 * Remove all tables from the cache containing datasets in the given list, so
-	 * they will be recalculated
-	 * 
-	 * @param list
-	 */
-	@Override
-	public synchronized void clearTableCache(final List<IAnalysisDataset> list) {
-		getTableCache().clear(list);
-	}
-
-	/**
-	 * Remove all charts from the cache and trigger an update
-	 * 
-	 * @param list
-	 */
-	@Override
-	public synchronized void refreshTableCache() {
-		clearTableCache();
-		update(getDatasets());
-	}
-
-	/**
-	 * Remove all tables from the cache containing datasets in the given list, so
-	 * they will be recalculated
-	 * 
-	 * @param list
-	 */
-	@Override
-	public synchronized void refreshTableCache(final List<IAnalysisDataset> list) {
-		clearTableCache(list);
-		this.update(getDatasets());
-	}
-
-	/**
-	 * Set the given table to use a custom table renderer. The renderer will be used
-	 * for every column except the first.
-	 * 
-	 * @param table
-	 */
-	protected synchronized void setRenderer(@NonNull JTable table, @NonNull TableCellRenderer renderer) {
-		int columns = table.getColumnModel().getColumnCount();
-		if (columns > 1) {
-			for (int i = 1; i < columns; i++) {
-				table.getColumnModel().getColumn(i).setCellRenderer(renderer);
-			}
-		}
-	}
-
-	@Override
-	public synchronized void addUserActionEventListener(EventListener l) {
-		sh.addListener(l);
-	}
-
-	@Override
-	public synchronized void removeUserActionEventListener(EventListener l) {
-		sh.removeListener(l);
-	}
-
-	@Override
-	public synchronized void addDatasetEventListener(EventListener l) {
-		dh.addListener(l);
-	}
-
-	@Override
-	public synchronized void removeDatasetEventListener(EventListener l) {
-		dh.removeListener(l);
-	}
-
-	@Override
-	public synchronized void addDatasetUpdateEventListener(EventListener l) {
-		duh.addListener(l);
-	}
-
-	@Override
-	public synchronized void removeDatasetUpdateEventListener(EventListener l) {
-		duh.removeListener(l);
-	}
-
-	@Override
-	public DatasetEventHandler getDatasetEventHandler() {
-		return dh;
-	}
-
-	@Override
-	public DatasetUpdateEventHandler getDatasetUpdateEventHandler() {
-		return duh;
-	}
-
-	@Override
-	public UserActionEventHandler getSignalChangeEventHandler() {
-		return sh;
-	}
-
-	@Override
-	public void eventReceived(DatasetEvent event) {
-	}
-
-	@Override
-	public void eventReceived(UserActionEvent event) {
-
-	}
-
-	/**
-	 * Charting can be an intensive process, especially with background images being
-	 * imported for outline charts. This worker will keep the chart generation off
-	 * the EDT
-	 * 
-	 * @author bms41
-	 *
-	 */
-	protected class ChartFactoryWorker extends SwingWorker<JFreeChart, Void>
-			implements CancellableRunnable, InterfaceUpdater {
-
-		private final ChartOptions options;
-
-		public ChartFactoryWorker(final ChartOptions o) {
-			options = o;
-		}
-
-		@Override
-		protected synchronized JFreeChart doInBackground() throws Exception {
-
-			try {
-				if (options.hasTarget()) {
-					options.getTarget().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-					options.getTarget().setChart(AbstractChartFactory.createLoadingChart());
-				}
-
-				JFreeChart chart = createPanelChartType(options);
-				chartCache.add(options, chart);
-
-				return chart;
-			} catch (Exception e) {
-				LOGGER.log(Level.WARNING, "Error creating chart");
-				LOGGER.log(Loggable.STACK, "Error creating chart", e);
-				return null;
-			}
-
-		}
-
-		@Override
-		public synchronized void done() {
-
-			try {
-				if (options.hasTarget()) {
-					options.getTarget().setChart(get());
-					options.getTarget().setCursor(Cursor.getDefaultCursor());
-				}
-			} catch (InterruptedException e) {
-				LOGGER.log(Level.WARNING, "Interruption to charting in " + DetailPanel.this.getClass().getName());
-				LOGGER.log(Loggable.STACK, "Interruption to charting", e);
-				Thread.currentThread().interrupt();
-			} catch (ExecutionException e) {
-				LOGGER.log(Level.WARNING, "Excecution error in charting in " + DetailPanel.this.getClass().getName());
-				LOGGER.log(Loggable.STACK, "Excecution error charting", e);
-			}
-		}
-
-		@Override
-		public void cancel() {
-			this.cancel(true);
-		}
-
-	}
-
-	/**
-	 * Tables can also be an intensive process, especially with venn comparisons.
-	 * This worker will keep the model generation off the EDT
-	 * 
-	 * @author bms41
-	 *
-	 */
-	protected class TableFactoryWorker extends SwingWorker<TableModel, Void>
-			implements CancellableRunnable, InterfaceUpdater {
-
-		private final TableOptions options;
-
-		public TableFactoryWorker(@NonNull final TableOptions o) {
-			options = o;
-		}
-
-		@Override
-		protected synchronized TableModel doInBackground() throws Exception {
-
-			try {
-				if (options.hasTarget())
-					options.getTarget().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-
-				TableModel model = createPanelTableType(options);
-				tableCache.add(options, model);
-
-				return model;
-			} catch (Exception e) {
-				LOGGER.log(Level.WARNING, "Error creating table model");
-				LOGGER.log(Loggable.STACK, "Error creating table model", e);
-				return null;
-			}
-
-		}
-
-		@Override
-		public synchronized void done() {
-
-			try {
-				JTable table = options.getTarget();
-				if (table != null) {
-					TableModel model = get();
-					if (model != null) {
-						table.setModel(model);
-						setRenderers();
-						if (table instanceof ExportableTable) {
-							((ExportableTable) table).updateRowHeights();
-						}
-					}
-					table.setCursor(Cursor.getDefaultCursor());
-				}
-			} catch (InterruptedException e) {
-				LOGGER.log(Level.WARNING, "Interruption to table creation in " + DetailPanel.this.getClass().getName());
-				LOGGER.log(Loggable.STACK, "Error in table worker", e);
-				Thread.currentThread().interrupt();
-			} catch (ExecutionException e) {
-				LOGGER.log(Level.WARNING,
-						"Excecution error in table creation in " + DetailPanel.this.getClass().getName());
-				LOGGER.log(Loggable.STACK, "Error in table worker", e);
-			}
-		}
-
-		@Override
-		public void cancel() {
-			LOGGER.fine("Cancelling detail panel table update");
-			this.cancel(true);
-		}
-
-		private synchronized void setRenderers() {
-			JTable table = options.getTarget();
-
-			if (table.getRowCount() == 0)
-				return;
-
-			int columns = table.getColumnModel().getColumnCount();
-
-			for (int i : options.getRendererColumns()) {
-
-				TableCellRenderer renderer = options.getRenderer(i);
-
-				if (i == TableOptions.FIRST_COLUMN) {
-
-					table.getColumnModel().getColumn(0).setCellRenderer(renderer);
-					continue;
-				}
-
-				if (i == TableOptions.ALL_COLUMNS) {
-					for (int j = 0; j < columns; j++) {
-						table.getColumnModel().getColumn(j).setCellRenderer(renderer);
-					}
-					continue;
-				}
-
-				if (i == TableOptions.ALL_EXCEPT_FIRST_COLUMN) {
-					for (int j = 1; j < columns; j++) {
-						table.getColumnModel().getColumn(j).setCellRenderer(renderer);
-					}
-					continue;
-				}
-
-				table.getColumnModel().getColumn(i).setCellRenderer(renderer);
-
-			}
-
-		}
-
 	}
 
 	/*
@@ -813,14 +370,7 @@ public abstract class DetailPanel extends JPanel
 	 * super.setChartsAndTablesLoading()
 	 */
 	@Override
-	public synchronized void setChartsAndTablesLoading() {
-	}
-
-	@Override
-	public void eventReceived(DatasetUpdateEvent e) {
-		// Signal sub panels to update
-		duh.fireDatasetUpdateEvent(e.getDatasets());
-		this.update(e.getDatasets());
+	public synchronized void setLoading() {
 	}
 
 	@Override

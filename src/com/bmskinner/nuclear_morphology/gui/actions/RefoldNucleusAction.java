@@ -26,7 +26,6 @@ import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.ConsensusAveragingMethod;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -46,14 +45,14 @@ public class RefoldNucleusAction extends SingleDatasetResultAction {
 	 * Refold the given selected dataset
 	 */
 	public RefoldNucleusAction(@NonNull IAnalysisDataset dataset, @NonNull final ProgressBarAcceptor acceptor,
-			@NonNull final EventHandler eh, CountDownLatch doneSignal) {
-		super(dataset, PROGRESS_LBL, acceptor, eh);
+			 CountDownLatch doneSignal) {
+		super(dataset, PROGRESS_LBL, acceptor);
 		this.setLatch(doneSignal);
 	}
 
 	public RefoldNucleusAction(@NonNull List<IAnalysisDataset> list, @NonNull final ProgressBarAcceptor acceptor,
-			@NonNull final EventHandler eh, CountDownLatch doneSignal) {
-		super(list, PROGRESS_LBL, acceptor, eh);
+			 CountDownLatch doneSignal) {
+		super(list, PROGRESS_LBL, acceptor);
 		this.setLatch(doneSignal);
 	}
 
@@ -62,7 +61,6 @@ public class RefoldNucleusAction extends SingleDatasetResultAction {
 		this.setProgressBarIndeterminate();
 
 		try {
-//            boolean override = GlobalOptions.getInstance().getBoolean(GlobalOptions.REFOLD_OVERRIDE_KEY);
 
 			IAnalysisMethod m = new ConsensusAveragingMethod(dataset);
 			int progressLength = PROGRESS_BAR_LENGTH;
@@ -102,7 +100,7 @@ public class RefoldNucleusAction extends SingleDatasetResultAction {
 			} else {
 				// otherwise analyse the next item in the list
 				cancel(); // remove progress bar
-				Runnable task = new RefoldNucleusAction(getRemainingDatasetsToProcess(), progressAcceptors.get(0), eh,
+				Runnable task = new RefoldNucleusAction(getRemainingDatasetsToProcess(), progressAcceptors.get(0),
 						getLatch().get());
 				task.run();
 			}

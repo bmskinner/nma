@@ -26,6 +26,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.swing.table.TableModel;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
@@ -92,7 +93,7 @@ public class ChartCache implements Cache {
 	}
 
 	@Override
-	public void clear(IAnalysisDataset dataset) {
+	public void clear(@Nullable IAnalysisDataset dataset) {
 
 		// Make a list of the options that need removal
 		// These are the options that contain the dataset
@@ -112,7 +113,7 @@ public class ChartCache implements Cache {
 	}
 
 	@Override
-	public synchronized void clear(List<IAnalysisDataset> list) {
+	public synchronized void clear(@Nullable List<IAnalysisDataset> list) {
 
 		// If the list is malformed, clear everything
 		if (list == null || list.isEmpty()) {

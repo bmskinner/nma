@@ -33,9 +33,7 @@ import org.jfree.chart.entity.XYItemEntity;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
-import com.bmskinner.nuclear_morphology.gui.components.BorderTagEvent;
-import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
-import com.bmskinner.nuclear_morphology.gui.events.DatasetUpdateEvent;
+import com.bmskinner.nuclear_morphology.gui.events.LandmarkUpdateEvent;
 
 public class BorderTagDualChartPanel extends DualChartPanel {
 
@@ -98,7 +96,7 @@ public class BorderTagDualChartPanel extends DualChartPanel {
 			JMenuItem item = new JMenuItem(tag.toString());
 
 			item.addActionListener(e -> {
-				fireBorderTagEvent(new BorderTagEvent(item, tag, activeProfileIndex));
+				fireLandmarkUpdateEvent(new LandmarkUpdateEvent(item, tag, activeProfileIndex));
 			});
 			popupMenu.add(item);
 		}
@@ -123,24 +121,11 @@ public class BorderTagDualChartPanel extends DualChartPanel {
 				item.setForeground(Color.DARK_GRAY);
 
 				item.addActionListener(e -> {
-					fireBorderTagEvent(new BorderTagEvent(item, tag, activeProfileIndex));
+					fireLandmarkUpdateEvent(new LandmarkUpdateEvent(item, tag, activeProfileIndex));
 				});
 				popupMenu.add(item);
 			}
 
 		}
 	}
-
-	@Override
-	public void eventReceived(DatasetEvent event) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void eventReceived(DatasetUpdateEvent event) {
-		// TODO Auto-generated method stub
-
-	}
-
 }

@@ -75,7 +75,8 @@ import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.dialogs.LoadingIconDialog;
-import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
+import com.bmskinner.nuclear_morphology.gui.events.UserActionEvent;
+import com.bmskinner.nuclear_morphology.gui.events.revamp.UserActionController;
 import com.bmskinner.nuclear_morphology.io.XMLReader;
 import com.bmskinner.nuclear_morphology.io.XMLReader.XMLReadingException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -450,7 +451,8 @@ public class RulesetDialog extends LoadingIconDialog implements TreeSelectionLis
 			if (tag.type().equals(LandmarkType.CORE)) {
 				LOGGER.info("Resegmenting dataset");
 
-				fireDatasetEvent(DatasetEvent.REFRESH_MORPHOLOGY, dataset);
+				UserActionController.getInstance().userActionEventReceived(
+						new UserActionEvent(this, UserActionEvent.REFRESH_MORPHOLOGY, List.of(dataset)));
 			} else {
 				LOGGER.fine("Firing refresh cache request for loaded datasets");
 //                fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);

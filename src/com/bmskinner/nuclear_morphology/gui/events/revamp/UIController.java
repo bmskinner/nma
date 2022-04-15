@@ -34,6 +34,8 @@ public class UIController {
 
 	private final List<DatasetAddedListener> datasetAddedListeners = new ArrayList<>();
 
+	private final List<FilePathUpdatedListener> filePathUpdatedListeners = new ArrayList<>();
+
 	private UIController() {
 	}
 
@@ -137,6 +139,20 @@ public class UIController {
 	public void fireDatasetAdded(@NonNull IAnalysisDataset d) {
 		for (DatasetAddedListener l : datasetAddedListeners)
 			l.datasetAdded(d);
+	}
+
+	public void addFilePathUpdatedListener(FilePathUpdatedListener l) {
+		filePathUpdatedListeners.add(l);
+	}
+
+	public void fireFilePathUpdated(@NonNull List<IAnalysisDataset> datasets) {
+		for (FilePathUpdatedListener l : filePathUpdatedListeners)
+			l.filePathUpdated(datasets);
+	}
+
+	public void fireFilePathUpdated(@NonNull IAnalysisDataset d) {
+		for (FilePathUpdatedListener l : filePathUpdatedListeners)
+			l.filePathUpdated(d);
 	}
 
 }

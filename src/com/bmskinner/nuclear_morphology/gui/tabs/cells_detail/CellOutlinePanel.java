@@ -25,17 +25,12 @@ import java.util.logging.Logger;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import org.eclipse.jdt.annotation.NonNull;
-
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsBuilder;
-import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.components.panels.GenericCheckboxPanel;
-import com.bmskinner.nuclear_morphology.gui.dialogs.collections.ManualCurationDialog;
 import com.bmskinner.nuclear_morphology.gui.events.CellUpdatedEventListener;
-import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.events.SegmentEvent;
 import com.bmskinner.nuclear_morphology.gui.events.SegmentEvent.SegmentUpdateType;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.SwatchUpdatedListener;
@@ -61,8 +56,8 @@ public class CellOutlinePanel extends AbstractCellDetailPanel
 	private GenericCheckboxPanel rotatePanel = new GenericCheckboxPanel("Rotate vertical");
 	private GenericCheckboxPanel warpMeshPanel = new GenericCheckboxPanel("Warp image to consensus shape");
 
-	public CellOutlinePanel(@NonNull InputSupplier context, CellViewModel model) {
-		super(context, model, PANEL_TITLE_LBL);
+	public CellOutlinePanel(CellViewModel model) {
+		super(model, PANEL_TITLE_LBL);
 		// make the chart for each nucleus
 		this.setLayout(new BorderLayout());
 
@@ -158,24 +153,10 @@ public class CellOutlinePanel extends AbstractCellDetailPanel
 	}
 
 	@Override
-	public void refreshChartCache() {
-		clearChartCache();
+	public void refreshCache() {
+		clearCache();
 		imagePanel.createImage();
 		this.update();
-	}
-
-	@Override
-	public void eventReceived(DatasetEvent event) {
-		super.eventReceived(event);
-		// Pass messages upwards
-		if (event.getSource() instanceof ManualCurationDialog)
-			this.getDatasetEventHandler().fireDatasetEvent(new DatasetEvent(this, event));
-
-		if (event.getSource() == imagePanel) {
-			refreshChartCache();
-			getDatasetEventHandler().fireDatasetEvent(new DatasetEvent(this, event));
-		}
-
 	}
 
 	@Override
@@ -200,10 +181,8 @@ public class CellOutlinePanel extends AbstractCellDetailPanel
 					getCellModel().getCell().getPrimaryNucleus().setLocked(true);
 
 					// Recache necessary charts within this panel at once
-					refreshChartCache();
+					refreshCache();
 
-					// Request a refresh of other panels
-					getDatasetEventHandler().fireDatasetEvent(DatasetEvent.RECACHE_CHARTS, getDatasets());
 				} catch (Exception e) {
 					LOGGER.log(Loggable.STACK, "Error updating segment", e);
 				}

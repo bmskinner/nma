@@ -40,87 +40,84 @@ import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
-import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.NucleusImageProber;
-import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
+import com.bmskinner.nuclear_morphology.gui.events.UserActionEvent;
+import com.bmskinner.nuclear_morphology.gui.events.revamp.UserActionController;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Run a new analysis
  */
 public class NewAnalysisAction extends VoidResultAction {
-	
+
 	private static final Logger LOGGER = Logger.getLogger(NewAnalysisAction.class.getName());
 
-    private IAnalysisOptions options;
-    private HashOptions nucleusOptions;
+	private IAnalysisOptions options;
+	private HashOptions nucleusOptions;
 
-    private File folder = null;
+	private File folder = null;
 
-    public static final int NEW_ANALYSIS = 0;
+	public static final int NEW_ANALYSIS = 0;
 
-    private static final @NonNull String PROGRESS_BAR_LABEL = "Nucleus detection";
+	private static final @NonNull String PROGRESS_BAR_LABEL = "Nucleus detection";
 
-    /**
-     * Create a new analysis. The folder of images to analyse will be requested
-     * by a dialog.
-     * 
-     * @param mw
-     *            the main window to which a progress bar will be attached
-     */
-    public NewAnalysisAction(@NonNull ProgressBarAcceptor acceptor, @NonNull EventHandler eh) {
-        this(acceptor, eh, null);
-    }
+	/**
+	 * Create a new analysis. The folder of images to analyse will be requested by a
+	 * dialog.
+	 * 
+	 * @param mw the main window to which a progress bar will be attached
+	 */
+	public NewAnalysisAction(@NonNull ProgressBarAcceptor acceptor) {
+		this(acceptor, null);
+	}
 
-    /**
-     * Create a new analysis, specifying the initial directory of images
-     * 
-     * @param mw
-     *            the main window to which a progress bar will be attached
-     * @param folder
-     *            the folder of images to analyse
-     */
-    public NewAnalysisAction(@NonNull ProgressBarAcceptor acceptor, @NonNull EventHandler eh, final File folder) {
-        super(PROGRESS_BAR_LABEL, acceptor, eh);
-        this.folder = folder;
-        options = OptionsFactory.makeAnalysisOptions();
-        nucleusOptions = OptionsFactory.makeNucleusDetectionOptions(folder).build();
-        options.setDetectionOptions(CellularComponent.NUCLEUS, nucleusOptions);
-    }
+	/**
+	 * Create a new analysis, specifying the initial directory of images
+	 * 
+	 * @param mw     the main window to which a progress bar will be attached
+	 * @param folder the folder of images to analyse
+	 */
+	public NewAnalysisAction(@NonNull ProgressBarAcceptor acceptor, final File folder) {
+		super(PROGRESS_BAR_LABEL, acceptor);
+		this.folder = folder;
+		options = OptionsFactory.makeAnalysisOptions();
+		nucleusOptions = OptionsFactory.makeNucleusDetectionOptions(folder).build();
+		options.setDetectionOptions(CellularComponent.NUCLEUS, nucleusOptions);
+	}
 
-    @Override
-    public void run() {
+	@Override
+	public void run() {
 
-        this.setProgressBarIndeterminate();
+		this.setProgressBarIndeterminate();
 
-        if (folder == null) {
-            if (!getImageDirectory()) {
-                LOGGER.fine("Could not get image directory");
-                cancel();
-                return;
-            }
-        }
+		if (folder == null) {
+			if (!getImageDirectory()) {
+				LOGGER.fine("Could not get image directory");
+				cancel();
+				return;
+			}
+		}
 
-        LOGGER.fine("Creating for " + folder.getAbsolutePath());
+		LOGGER.fine("Creating for " + folder.getAbsolutePath());
 
-        NucleusImageProber analysisSetup = new NucleusImageProber(folder, options);
+		NucleusImageProber analysisSetup = new NucleusImageProber(folder, options);
 
-        if (analysisSetup.isOk()) {
+		if (analysisSetup.isOk()) {
 
-        	Optional<HashOptions> op = options.getDetectionOptions(CellularComponent.NUCLEUS);
-            if(!op.isPresent()){
-            	cancel();
-            	return;
-            }
+			Optional<HashOptions> op = options.getDetectionOptions(CellularComponent.NUCLEUS);
+			if (!op.isPresent()) {
+				cancel();
+				return;
+			}
 
-            File directory = new File(op.get().getString(HashOptions.DETECTION_FOLDER));
+			File directory = new File(op.get().getString(HashOptions.DETECTION_FOLDER));
 
-            LOGGER.info("Directory: " + directory.getName());
+			LOGGER.info("Directory: " + directory.getName());
 
-            Instant inst = Instant.ofEpochMilli(options.getAnalysisTime());
+			Instant inst = Instant.ofEpochMilli(options.getAnalysisTime());
 			LocalDateTime anTime = LocalDateTime.ofInstant(inst, ZoneOffset.systemDefault());
 			String outputFolderName = anTime.format(DateTimeFormatter.ofPattern("YYYY-MM-dd_HH-mm-ss"));
 
@@ -130,65 +127,66 @@ public class NewAnalysisAction extends VoidResultAction {
 				worker.addPropertyChangeListener(this);
 				ThreadManager.getInstance().submit(worker);
 			} catch (AnalysisMethodException e) {
-				LOGGER.info("Unable to run detection: "+e.getMessage());
+				LOGGER.info("Unable to run detection: " + e.getMessage());
 			} finally {
 				analysisSetup.dispose();
-			} 
+			}
 
-        } else {
-            analysisSetup.dispose();
-            LOGGER.fine("Analysis cancelled");
-            this.cancel();
-        }
-    }
+		} else {
+			analysisSetup.dispose();
+			LOGGER.fine("Analysis cancelled");
+			this.cancel();
+		}
+	}
 
-    @Override
-    public void finished() {
+	@Override
+	public void finished() {
 
-        try {
-            IAnalysisResult r = worker.get();
-            List<IAnalysisDataset> datasets = r.getDatasets();
+		try {
+			IAnalysisResult r = worker.get();
+			List<IAnalysisDataset> datasets = r.getDatasets();
 
-            if (datasets == null || datasets.isEmpty()) {
-                LOGGER.info("No datasets returned");
-            } else {
-                getDatasetEventHandler().fireDatasetEvent(DatasetEvent.MORPHOLOGY_ANALYSIS_ACTION, datasets);
-            }
+			if (datasets == null || datasets.isEmpty()) {
+				LOGGER.info("No datasets returned");
+			} else {
+				UserActionController.getInstance().userActionEventReceived(
+						new UserActionEvent(this, UserActionEvent.MORPHOLOGY_ANALYSIS_ACTION, datasets));
+			}
 
-        } catch (InterruptedException e) {
-            LOGGER.warning("Interruption to swing worker");
-            LOGGER.log(Loggable.STACK, "Interruption to swing worker", e);
-        } catch (ExecutionException e) {
-            LOGGER.warning("Execution error in swing worker");
-            LOGGER.log(Loggable.STACK, "Execution error in swing worker", e);
-        }
+		} catch (InterruptedException e) {
+			LOGGER.warning("Interruption to swing worker");
+			LOGGER.log(Loggable.STACK, "Interruption to swing worker", e);
+		} catch (ExecutionException e) {
+			LOGGER.warning("Execution error in swing worker");
+			LOGGER.log(Loggable.STACK, "Execution error in swing worker", e);
+		}
 
-        super.finished();
-    }
+		super.finished();
+	}
 
-    private boolean getImageDirectory() {
+	private boolean getImageDirectory() {
 
-        File defaultDir = GlobalOptions.getInstance().getDefaultDir();
+		File defaultDir = GlobalOptions.getInstance().getDefaultDir();
 
-        JFileChooser fc = new JFileChooser(defaultDir); // if null, will be home
-                                                        // dir
+		JFileChooser fc = new JFileChooser(defaultDir); // if null, will be home
+														// dir
 
-        fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+		fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 
-        int returnVal = fc.showOpenDialog(fc);
-        if (returnVal != 0) {
-            return false; // user cancelled
-        }
+		int returnVal = fc.showOpenDialog(fc);
+		if (returnVal != 0) {
+			return false; // user cancelled
+		}
 
-        File file = fc.getSelectedFile();
+		File file = fc.getSelectedFile();
 
-        if (!file.isDirectory())
-            return false;
+		if (!file.isDirectory())
+			return false;
 
-        folder = file;
+		folder = file;
 
-        nucleusOptions.setString(HashOptions.DETECTION_FOLDER, file.getAbsolutePath());
-        return true;
-    }
+		nucleusOptions.setString(HashOptions.DETECTION_FOLDER, file.getAbsolutePath());
+		return true;
+	}
 
 }

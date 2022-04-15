@@ -17,6 +17,7 @@
 package com.bmskinner.nuclear_morphology.gui.actions;
 
 import java.io.File;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -33,12 +34,12 @@ import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisWorker;
 import com.bmskinner.nuclear_morphology.components.Version.UnsupportedVersionException;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
-import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
+import com.bmskinner.nuclear_morphology.gui.events.UserActionEvent;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.UIController;
+import com.bmskinner.nuclear_morphology.gui.events.revamp.UserActionController;
 import com.bmskinner.nuclear_morphology.io.DatasetImportMethod;
 import com.bmskinner.nuclear_morphology.io.Io.Importer;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -61,8 +62,8 @@ public class ImportDatasetAction extends VoidResultAction {
 	 * 
 	 * @param mw the main window to which a progress bar will be attached
 	 */
-	public ImportDatasetAction(@NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh) {
-		this(acceptor, eh, null);
+	public ImportDatasetAction(@NonNull final ProgressBarAcceptor acceptor) {
+		this(acceptor, null);
 	}
 
 	/**
@@ -72,9 +73,8 @@ public class ImportDatasetAction extends VoidResultAction {
 	 * @param mw   the main window to which a progress bar will be attached
 	 * @param file the dataset file to open
 	 */
-	public ImportDatasetAction(@NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh,
-			@Nullable File file) {
-		super(PROGRESS_BAR_LABEL, acceptor, eh);
+	public ImportDatasetAction(@NonNull final ProgressBarAcceptor acceptor, @Nullable File file) {
+		super(PROGRESS_BAR_LABEL, acceptor);
 		this.file = file == null ? selectFile() : file;
 	}
 
@@ -186,7 +186,8 @@ public class ImportDatasetAction extends VoidResultAction {
 
 			// Save newly converted datasets
 			if (r.getBoolean(DatasetImportMethod.WAS_CONVERTED_BOOL)) {
-				getDatasetEventHandler().fireDatasetEvent(DatasetEvent.SAVE, dataset);
+				UserActionController.getInstance()
+						.userActionEventReceived(new UserActionEvent(this, UserActionEvent.SAVE, List.of(dataset)));
 			}
 
 		} catch (InterruptedException e) {

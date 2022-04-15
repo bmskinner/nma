@@ -22,14 +22,12 @@ import java.awt.event.ActionEvent;
 import java.util.List;
 import java.util.logging.Logger;
 
-import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
-import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.ScaleUpdatedListener;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.SwatchUpdatedListener;
 import com.bmskinner.nuclear_morphology.gui.tabs.BoxplotsTabPanel;
@@ -44,8 +42,8 @@ public class NuclearBoxplotsPanel extends BoxplotsTabPanel implements ScaleUpdat
 
 	private static final Logger LOGGER = Logger.getLogger(NuclearBoxplotsPanel.class.getName());
 
-	public NuclearBoxplotsPanel(@NonNull InputSupplier context) {
-		super(context, CellularComponent.NUCLEUS);
+	public NuclearBoxplotsPanel() {
+		super(CellularComponent.NUCLEUS);
 
 		Dimension preferredSize = new Dimension(200, 300);
 
@@ -104,8 +102,8 @@ public class NuclearBoxplotsPanel extends BoxplotsTabPanel implements ScaleUpdat
 	}
 
 	@Override
-	public synchronized void setChartsAndTablesLoading() {
-		super.setChartsAndTablesLoading();
+	public synchronized void setLoading() {
+		super.setLoading();
 
 		for (Measurement stat : Measurement.getNucleusStats()) {
 			ExportableChartPanel panel = chartPanels.get(stat.toString());
@@ -116,12 +114,12 @@ public class NuclearBoxplotsPanel extends BoxplotsTabPanel implements ScaleUpdat
 
 	@Override
 	public void scaleUpdated(List<IAnalysisDataset> datasets) {
-		refreshChartCache(datasets);
+		refreshCache(datasets);
 	}
 
 	@Override
 	public void scaleUpdated(IAnalysisDataset dataset) {
-		refreshChartCache(dataset);
+		refreshCache(dataset);
 	}
 
 	@Override

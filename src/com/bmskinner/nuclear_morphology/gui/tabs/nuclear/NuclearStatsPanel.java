@@ -25,130 +25,120 @@ import javax.swing.JScrollPane;
 import javax.swing.table.TableModel;
 
 import org.eclipse.jdt.annotation.NonNull;
-import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
-import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
+import com.bmskinner.nuclear_morphology.gui.tabs.TableDetailPanel;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.visualisation.datasets.AnalysisDatasetTableCreator;
 import com.bmskinner.nuclear_morphology.visualisation.datasets.tables.AbstractTableCreator;
-import com.bmskinner.nuclear_morphology.visualisation.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.visualisation.options.TableOptions;
 import com.bmskinner.nuclear_morphology.visualisation.options.TableOptionsBuilder;
 
 @SuppressWarnings("serial")
-public class NuclearStatsPanel extends DetailPanel {
-	
+public class NuclearStatsPanel extends TableDetailPanel {
+
 	private static final Logger LOGGER = Logger.getLogger(NuclearStatsPanel.class.getName());
 
-    private static final String PANEL_TITLE_LBL = "Average stats";
-    private ExportableTable tablePopulationStats;
+	private static final String PANEL_TITLE_LBL = "Average stats";
+	private ExportableTable tablePopulationStats;
 
-    public NuclearStatsPanel(@NonNull InputSupplier context) {
-        super(context);
+	public NuclearStatsPanel() {
+		super();
 
-        this.setLayout(new BorderLayout());
+		this.setLayout(new BorderLayout());
 
-        JScrollPane statsPanel = createStatsPanel();
+		JScrollPane statsPanel = createStatsPanel();
 
-        JPanel headerPanel = new JPanel(new FlowLayout());
+		JPanel headerPanel = new JPanel(new FlowLayout());
 
-        this.add(headerPanel, BorderLayout.NORTH);
+		this.add(headerPanel, BorderLayout.NORTH);
 
-        this.add(statsPanel, BorderLayout.CENTER);
+		this.add(statsPanel, BorderLayout.CENTER);
 
-    }
-    
-    @Override
-    public String getPanelTitle(){
-        return PANEL_TITLE_LBL;
-    }
+	}
 
-    @Override
-    protected JFreeChart createPanelChartType(ChartOptions options) {
-        return null;
-    }
+	@Override
+	public String getPanelTitle() {
+		return PANEL_TITLE_LBL;
+	}
 
-    @Override
-    protected TableModel createPanelTableType(TableOptions options) {
+	@Override
+	protected TableModel createPanelTableType(TableOptions options) {
 
-        return new AnalysisDatasetTableCreator(options).createNucleusStatsTable();
-    }
+		return new AnalysisDatasetTableCreator(options).createNucleusStatsTable();
+	}
 
-    @Override
-    protected void updateSingle() {
-        LOGGER.finest( "Passing to update multiple");
-        updateMultiple();
-    }
+	@Override
+	protected void updateSingle() {
+		LOGGER.finest("Passing to update multiple");
+		updateMultiple();
+	}
 
-    @Override
-    protected void updateMultiple() {
-        super.updateMultiple();
-        LOGGER.finest( "Updating analysis stats panel");
-        updateStatsPanel();
-        LOGGER.finest( "Updated analysis stats panel");
-    }
+	@Override
+	protected void updateMultiple() {
+		super.updateMultiple();
+		LOGGER.finest("Updating analysis stats panel");
+		updateStatsPanel();
+		LOGGER.finest("Updated analysis stats panel");
+	}
 
-    @Override
-    protected void updateNull() {
-        super.updateNull();
-        LOGGER.finest( "Passing to update multiple");
-        updateMultiple();
-    }
+	@Override
+	protected void updateNull() {
+		super.updateNull();
+		LOGGER.finest("Passing to update multiple");
+		updateMultiple();
+	}
 
-    @Override
-    public void setChartsAndTablesLoading() {
-        super.setChartsAndTablesLoading();
-        tablePopulationStats.setModel(AbstractTableCreator.createLoadingTable());
-    }
+	@Override
+	public void setLoading() {
+		super.setLoading();
+		tablePopulationStats.setModel(AbstractTableCreator.createLoadingTable());
+	}
 
-    /**
-     * Update the stats panel with data from the given datasets
-     * 
-     * @param list the datasets
-     */
-    private void updateStatsPanel() {
+	/**
+	 * Update the stats panel with data from the given datasets
+	 * 
+	 * @param list the datasets
+	 */
+	private void updateStatsPanel() {
 
-        LOGGER.finest( "Updating stats panel");
+		LOGGER.finest("Updating stats panel");
 
-        TableOptions options = new TableOptionsBuilder().setDatasets(getDatasets())
-                .setScale(GlobalOptions.getInstance().getScale())
-                .setTarget(tablePopulationStats)
-                .build();
+		TableOptions options = new TableOptionsBuilder().setDatasets(getDatasets())
+				.setScale(GlobalOptions.getInstance().getScale()).setTarget(tablePopulationStats).build();
 
-        setTable(options);
-        LOGGER.finest( "Set table model");
+		setTable(options);
+		LOGGER.finest("Set table model");
 
-    }
+	}
 
-    private JScrollPane createStatsPanel() {
-        JScrollPane scrollPane = new JScrollPane();
-        try {
+	private JScrollPane createStatsPanel() {
+		JScrollPane scrollPane = new JScrollPane();
+		try {
 
-            JPanel panel = new JPanel();
+			JPanel panel = new JPanel();
 
-            panel.setLayout(new BorderLayout(0, 0));
+			panel.setLayout(new BorderLayout(0, 0));
 
-            tablePopulationStats = new ExportableTable();
-            panel.add(tablePopulationStats, BorderLayout.CENTER);
-            tablePopulationStats.setEnabled(false);
+			tablePopulationStats = new ExportableTable();
+			panel.add(tablePopulationStats, BorderLayout.CENTER);
+			tablePopulationStats.setEnabled(false);
 
-            scrollPane.setViewportView(panel);
-            scrollPane.setColumnHeaderView(tablePopulationStats.getTableHeader());
+			scrollPane.setViewportView(panel);
+			scrollPane.setColumnHeaderView(tablePopulationStats.getTableHeader());
 
-            TableOptions options = new TableOptionsBuilder().setDatasets(null)
-                    .build();
+			TableOptions options = new TableOptionsBuilder().setDatasets(null).build();
 
-            TableModel model = new AnalysisDatasetTableCreator(options).createNucleusStatsTable();
+			TableModel model = new AnalysisDatasetTableCreator(options).createNucleusStatsTable();
 
-            tablePopulationStats.setModel(model);
+			tablePopulationStats.setModel(model);
 
-        } catch (Exception e) {
-            LOGGER.warning("Error making nuclear stats panel");
-            LOGGER.log(Loggable.STACK, "Error creating stats panel", e);
-        }
-        return scrollPane;
-    }
+		} catch (Exception e) {
+			LOGGER.warning("Error making nuclear stats panel");
+			LOGGER.log(Loggable.STACK, "Error creating stats panel", e);
+		}
+		return scrollPane;
+	}
 }

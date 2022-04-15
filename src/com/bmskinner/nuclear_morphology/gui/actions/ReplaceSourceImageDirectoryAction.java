@@ -22,7 +22,6 @@ import java.util.logging.Logger;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 
@@ -33,8 +32,8 @@ public class ReplaceSourceImageDirectoryAction extends SingleDatasetResultAction
 	private static final @NonNull String PROGRESS_BAR_LABEL = "Replacing images";
 
 	public ReplaceSourceImageDirectoryAction(@NonNull final IAnalysisDataset dataset,
-			@NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh) {
-		super(dataset, PROGRESS_BAR_LABEL, acceptor, eh);
+			@NonNull final ProgressBarAcceptor acceptor) {
+		super(dataset, PROGRESS_BAR_LABEL, acceptor);
 		this.setProgressBarIndeterminate();
 	}
 
@@ -44,7 +43,7 @@ public class ReplaceSourceImageDirectoryAction extends SingleDatasetResultAction
 		if (!dataset.hasMergeSources()) {
 
 			try {
-				File folder = eh.getInputSupplier().requestFolder("Select new directory of images...");
+				File folder = is.requestFolder("Select new directory of images...");
 				LOGGER.info("Updating folder to " + folder.getAbsolutePath());
 
 				dataset.updateSourceImageDirectory(folder);
@@ -65,6 +64,5 @@ public class ReplaceSourceImageDirectoryAction extends SingleDatasetResultAction
 	public void finished() {
 		// Do not use super.finished(), or it will trigger another save action
 		cancel();
-		getDatasetEventHandler().removeListener(eh);
 	}
 }

@@ -47,10 +47,9 @@ import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.actions.NewAnalysisAction;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter.ColourSwatch;
 import com.bmskinner.nuclear_morphology.gui.dialogs.VersionHelpDialog;
-import com.bmskinner.nuclear_morphology.gui.events.DatasetEventHandler;
 import com.bmskinner.nuclear_morphology.gui.events.UserActionEvent;
-import com.bmskinner.nuclear_morphology.gui.events.UserActionEventHandler;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.UIController;
+import com.bmskinner.nuclear_morphology.gui.events.revamp.UserActionController;
 import com.bmskinner.nuclear_morphology.io.Io;
 import com.bmskinner.nuclear_morphology.io.UpdateChecker;
 
@@ -94,8 +93,6 @@ public class MainWindowMenuBar extends JMenuBar {
 	private static final String SAVE_DATASETS_LBL = "Save datasets";
 	private static final String OPEN_CONFIG_FILE_LBL = "Open config file";
 
-	final private UserActionEventHandler sh;
-	final private DatasetEventHandler dh;
 	final private MainView mw;
 
 	final private JPanel monitorPanel;
@@ -114,7 +111,7 @@ public class MainWindowMenuBar extends JMenuBar {
 
 		public JMenuItem createSignalChangeMenuItem(String label, String action, @Nullable String tooltip) {
 			JMenuItem item = new JMenuItem(label);
-			item.addActionListener(e -> sh.fireUserActionEvent(action));
+//			item.addActionListener(e -> sh.fireUserActionEvent(action));
 			if (tooltip != null)
 				item.setToolTipText(tooltip);
 			return item;
@@ -124,11 +121,6 @@ public class MainWindowMenuBar extends JMenuBar {
 	public MainWindowMenuBar(MainView mw) {
 		super();
 		this.mw = mw;
-		sh = new UserActionEventHandler(this);
-		sh.addListener(mw.getEventHandler());
-
-		dh = new DatasetEventHandler(this);
-		dh.addListener(mw.getEventHandler());
 
 		add(createFileMenu());
 		add(createViewMenu());
@@ -167,7 +159,8 @@ public class MainWindowMenuBar extends JMenuBar {
 
 		JMenuItem i1 = new JMenuItem(NEW_ANALYSIS_CUSTOM_LBL);
 		i1.setToolTipText(NEW_ANALYSIS_CUSTOM_TOOLTIP);
-		i1.addActionListener(e -> new NewAnalysisAction(mw.getProgressAcceptor(), mw.getEventHandler()).run());
+		i1.addActionListener(
+				e -> new NewAnalysisAction(UserActionController.getInstance().getProgressBarAcceptor()).run());
 		newMenu.add(i1);
 
 		newMenu.add(fact.createSignalChangeMenuItem(NEW_ANALYSIS_SAVED_LBL, UserActionEvent.IMPORT_WORKFLOW_PREFIX,

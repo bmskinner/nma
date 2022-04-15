@@ -27,7 +27,6 @@ import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.MergeSourceExtractionMethod;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.UIController;
@@ -42,9 +41,8 @@ public class MergeSourceExtractionAction extends MultiDatasetResultAction {
 	/**
 	 * Refold the given selected dataset
 	 */
-	public MergeSourceExtractionAction(List<IAnalysisDataset> datasets, @NonNull final ProgressBarAcceptor acceptor,
-			@NonNull final EventHandler eh) {
-		super(datasets, PROGRESS_BAR_LABEL, acceptor, eh);
+	public MergeSourceExtractionAction(List<IAnalysisDataset> datasets, @NonNull final ProgressBarAcceptor acceptor) {
+		super(datasets, PROGRESS_BAR_LABEL, acceptor);
 	}
 
 	@Override

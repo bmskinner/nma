@@ -58,18 +58,19 @@ import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileExcept
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult.Aggregation;
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult.Normalisation;
-import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 import com.bmskinner.nuclear_morphology.gui.components.panels.SignalGroupSelectionPanel;
 import com.bmskinner.nuclear_morphology.gui.components.panels.WrappedLabel;
 import com.bmskinner.nuclear_morphology.gui.dialogs.SettingsDialog;
 import com.bmskinner.nuclear_morphology.gui.dialogs.collections.ShellOverviewDialog;
-import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
+import com.bmskinner.nuclear_morphology.gui.events.UserActionEvent;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.NuclearSignalUpdatedListener;
+import com.bmskinner.nuclear_morphology.gui.events.revamp.UserActionController;
+import com.bmskinner.nuclear_morphology.gui.tabs.ChartDetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
+import com.bmskinner.nuclear_morphology.gui.tabs.TableDetailPanel;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.reports.DemoReportGenerator;
-import com.bmskinner.nuclear_morphology.visualisation.charts.AbstractChartFactory;
 import com.bmskinner.nuclear_morphology.visualisation.charts.ShellChartFactory;
 import com.bmskinner.nuclear_morphology.visualisation.charts.panels.ExportableChartPanel;
 import com.bmskinner.nuclear_morphology.visualisation.datasets.AnalysisDatasetTableCreator;
@@ -88,7 +89,7 @@ import com.bmskinner.nuclear_morphology.visualisation.options.TableOptionsBuilde
  *
  */
 @SuppressWarnings("serial")
-public class SignalShellsPanel extends DetailPanel implements ActionListener, NuclearSignalUpdatedListener {
+public class SignalShellsPanel extends DetailPanel implements ActionListener {
 
 	private static final Logger LOGGER = Logger.getLogger(SignalShellsPanel.class.getName());
 
@@ -108,8 +109,6 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener, Nu
 	private static final String SHOW_RANDOM_TOOLTIP = "Show a random distribution of signals in the consensus nucleus";
 	private static final String SHOW_NUCLEI_TOOLTIP = "Show nuclei in the dataset with shells annotated";
 
-	private ExportableChartPanel chartPanel;
-
 	private JRadioButton withinSignalsBtn = new JRadioButton(WITHIN_SIGNALS_LBL);
 	private JRadioButton withinNucleiBtn = new JRadioButton(WITHIN_NUCLEI_LBL);
 	private ButtonGroup coverageGroup = new ButtonGroup();
@@ -123,11 +122,12 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener, Nu
 	private JCheckBox dapiNormalise = new JCheckBox(DAPI_NORM_LBL, true);
 	private JCheckBox showRandomCheckbox = new JCheckBox(SHOW_RANDOM_LBL, false);
 
-	protected ExportableTable overallTable;
-	protected ExportableTable pairwiseTable;
+	private ShellChartPanel shellChartPanel;
+	private ShellOverallTablePanel shellOverallTablePanel;
+	private ShellPairwiseTablePanel shellPairwiseTablePanel;
 
-	public SignalShellsPanel(@NonNull InputSupplier context) {
-		super(context, PANEL_TITLE_LBL);
+	public SignalShellsPanel() {
+		super(PANEL_TITLE_LBL);
 		this.setLayout(new BorderLayout());
 
 		JPanel header = createHeader();
@@ -135,8 +135,6 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener, Nu
 
 		this.add(mainPanel, BorderLayout.CENTER);
 		this.add(header, BorderLayout.NORTH);
-
-		uiController.addNuclearSignalUpdatedListener(this);
 
 		this.updateSize();
 	}
@@ -161,7 +159,7 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener, Nu
 
 		JPanel panel = new JPanel(new GridBagLayout());
 
-		JPanel shellBarPanel = createShellBarPanel();
+		shellChartPanel = new ShellChartPanel();
 		JPanel westPanel = createWestPanel();
 
 		// Set layout for west panel
@@ -184,7 +182,7 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener, Nu
 		constraints.gridwidth = 4;
 		constraints.weightx = 0.5;
 
-		panel.add(shellBarPanel, constraints);
+		panel.add(shellChartPanel, constraints);
 
 		return panel;
 	}
@@ -197,11 +195,11 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener, Nu
 	private JPanel createWestPanel() {
 		JPanel panel = new JPanel(new BorderLayout());
 
-		JPanel tablePanel = createOverallTablePanel();
-		JPanel pairwisePanel = createPairwiseTablePanel();
+		shellOverallTablePanel = new ShellOverallTablePanel();
+		shellPairwiseTablePanel = new ShellPairwiseTablePanel();
 
-		panel.add(tablePanel, BorderLayout.NORTH);
-		panel.add(pairwisePanel, BorderLayout.CENTER);
+		panel.add(shellOverallTablePanel, BorderLayout.NORTH);
+		panel.add(shellPairwiseTablePanel, BorderLayout.CENTER);
 
 		return panel;
 
@@ -215,9 +213,9 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener, Nu
 	private JPanel createHeader() {
 		JPanel panel = new JPanel();
 
-		newAnalysis.addActionListener(e -> {
-			this.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.RUN_SHELL_ANALYSIS, activeDataset());
-		});
+		newAnalysis.addActionListener(e -> UserActionController.getInstance()
+				.userActionEventReceived(new UserActionEvent(this, UserActionEvent.RUN_SHELL_ANALYSIS, getDatasets())));
+
 		newAnalysis.setToolTipText(RUN_ANALYSIS_TOOLTIP);
 
 		panel.add(newAnalysis);
@@ -246,7 +244,9 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener, Nu
 		showRandomCheckbox.setToolTipText(SHOW_RANDOM_TOOLTIP);
 		panel.add(showRandomCheckbox);
 
-		showNuclei.addActionListener(e -> {
+		showNuclei.addActionListener(e ->
+
+		{
 			new ShellOverviewDialog(activeDataset());
 		});
 		showNuclei.setToolTipText(SHOW_NUCLEI_TOOLTIP);
@@ -275,106 +275,8 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener, Nu
 		return panel;
 	}
 
-	/**
-	 * Create the table panel
-	 * 
-	 * @return
-	 */
-	private JPanel createOverallTablePanel() {
-		JPanel tablePanel = new JPanel(new BorderLayout());
-
-		JTextArea textArea = new WrappedLabel(
-				"Comparisons to random distribution by chi-square with Bonferroni correction");
-
-		tablePanel.add(textArea, BorderLayout.NORTH);
-		TableModel model = AnalysisDatasetTableCreator.createBlankTable();
-		overallTable = new ExportableTable(model);
-		overallTable.setEnabled(false);
-
-		JScrollPane scrollPane = new JScrollPane();
-		scrollPane.setViewportView(overallTable);
-		scrollPane.setColumnHeaderView(overallTable.getTableHeader());
-		Dimension size = new Dimension(200, 150);
-		tablePanel.setMinimumSize(size);
-		tablePanel.setPreferredSize(size);
-		tablePanel.add(scrollPane, BorderLayout.CENTER);
-		return tablePanel;
-	}
-
-	/**
-	 * Create the table panel
-	 * 
-	 * @return
-	 */
-	private JPanel createPairwiseTablePanel() {
-		JPanel tablePanel = new JPanel(new BorderLayout());
-		Dimension size = new Dimension(200, 150);
-
-		JTextArea textArea = new WrappedLabel(
-				"Pairwise comparisons of shell results by chi-square with Bonferroni correction");
-
-		tablePanel.add(textArea, BorderLayout.NORTH);
-		TableModel model = AnalysisDatasetTableCreator.createBlankTable();
-		pairwiseTable = new ExportableTable(model);
-		pairwiseTable.setEnabled(false);
-
-		JScrollPane scrollPane = new JScrollPane();
-		scrollPane.setViewportView(pairwiseTable);
-		scrollPane.setColumnHeaderView(pairwiseTable.getTableHeader());
-
-		tablePanel.setMinimumSize(size);
-		tablePanel.setPreferredSize(size);
-		tablePanel.add(scrollPane, BorderLayout.CENTER);
-		return tablePanel;
-	}
-
-	/**
-	 * Create the panel holding the shell bar chart
-	 * 
-	 * @return
-	 */
-	private JPanel createShellBarPanel() {
-		JPanel panel = new JPanel(new BorderLayout());
-		ChartOptions options = new ChartOptionsBuilder().build();
-		JFreeChart chart = new ShellChartFactory(options).createEmptyShellChart();
-		chartPanel = new ExportableChartPanel(chart);
-
-		panel.add(chartPanel, BorderLayout.CENTER);
-
-		return panel;
-	}
-
-	private synchronized void updateChartAndTable() {
-
-		Aggregation agg = withinNucleiBtn.isSelected() ? Aggregation.BY_NUCLEUS : Aggregation.BY_SIGNAL;
-		Normalisation norm = dapiNormalise.isSelected() ? Normalisation.DAPI : Normalisation.NONE;
-
-		boolean showRandom = showRandomCheckbox.isSelected();
-
-		ChartOptions barChartOptions = new ChartOptionsBuilder().setDatasets(getDatasets()).setTarget(chartPanel)
-				.setShowAnnotations(showRandom) // proxy fpr random
-				.setAggregation(agg).setNormalisation(norm).build();
-
-		setChart(barChartOptions);
-
-		TableOptions tableOptions = new TableOptionsBuilder().setDatasets(getDatasets()).setAggregation(agg)
-				.setNormalisation(norm).setTarget(overallTable)
-//                .setRenderer(P_VALUE_COLUMN, new PValueTableCellRenderer())
-				.build();
-		setTable(tableOptions);
-
-		TableOptions pairwiseOptions = new TableOptionsBuilder().setDatasets(getDatasets()).setAggregation(agg)
-				.setNormalisation(norm).setTarget(pairwiseTable)
-//                .setRenderer(PAIRWISE_P_VALUE_COLUMN, new PValueTableCellRenderer())
-				.build();
-
-		setTable(pairwiseOptions);
-
-	}
-
 	@Override
 	protected synchronized void updateSingle() {
-		updateChartAndTable();
 		setEnabled(false);
 		if (activeDataset() == null)
 			return;
@@ -392,52 +294,18 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener, Nu
 		showNuclei.setEnabled(false);
 		filterBtn.setEnabled(false);
 		reportBtn.setEnabled(false);
-		updateChartAndTable();
-
 	}
 
 	@Override
 	protected synchronized void updateNull() {
 		setEnabled(false);
-		updateChartAndTable();
-
-	}
-
-	@Override
-	public synchronized void setChartsAndTablesLoading() {
-		super.setChartsAndTablesLoading();
-		chartPanel.setChart(AbstractChartFactory.createLoadingChart());
-		overallTable.setModel(AbstractTableCreator.createLoadingTable());
-		pairwiseTable.setModel(AbstractTableCreator.createLoadingTable());
-
-	}
-
-	@Override
-	protected synchronized JFreeChart createPanelChartType(@NonNull ChartOptions options) {
-		return new ShellChartFactory(options).createShellChart();
-
-	}
-
-	@Override
-	protected synchronized TableModel createPanelTableType(@NonNull TableOptions options) {
-		if (options.getTarget() == pairwiseTable)
-			return new NuclearSignalTableCreator(options).createPairwiseShellChiSquareTable();
-		return new NuclearSignalTableCreator(options).createShellChiSquareTable();
 	}
 
 	@Override
 	public synchronized void actionPerformed(ActionEvent arg0) {
-		updateChartAndTable();
-	}
-
-	@Override
-	public void nuclearSignalUpdated(List<IAnalysisDataset> datasets) {
-		refreshChartCache(datasets);
-	}
-
-	@Override
-	public void nuclearSignalUpdated(IAnalysisDataset dataset) {
-		refreshChartCache(dataset);
+		shellChartPanel.update();
+		shellOverallTablePanel.update();
+		shellPairwiseTablePanel.update();
 	}
 
 	private class ShellFilteringSetupDialog extends SettingsDialog {
@@ -553,5 +421,238 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener, Nu
 			this.addLabelTextRows(labels, fields, layout, optionsPanel);
 			getContentPane().add(optionsPanel, BorderLayout.CENTER);
 		}
+	}
+
+	public class ShellChartPanel extends ChartDetailPanel implements NuclearSignalUpdatedListener {
+
+		private ExportableChartPanel chartPanel;
+
+		public ShellChartPanel() {
+			super(PANEL_TITLE_LBL);
+			this.setLayout(new BorderLayout());
+			add(createShellBarPanel(), BorderLayout.CENTER);
+
+			uiController.addNuclearSignalUpdatedListener(this);
+		}
+
+		/**
+		 * Create the panel holding the shell bar chart
+		 * 
+		 * @return
+		 */
+		private JPanel createShellBarPanel() {
+			JPanel panel = new JPanel(new BorderLayout());
+			ChartOptions options = new ChartOptionsBuilder().build();
+			JFreeChart chart = new ShellChartFactory(options).createEmptyShellChart();
+			chartPanel = new ExportableChartPanel(chart);
+
+			panel.add(chartPanel, BorderLayout.CENTER);
+
+			return panel;
+		}
+
+		@Override
+		protected synchronized void updateSingle() {
+			updateChart();
+			setEnabled(false);
+
+		}
+
+		@Override
+		protected synchronized void updateMultiple() {
+			updateChart();
+
+		}
+
+		@Override
+		protected synchronized void updateNull() {
+			setEnabled(false);
+			updateChart();
+
+		}
+
+		private synchronized void updateChart() {
+			Aggregation agg = withinNucleiBtn.isSelected() ? Aggregation.BY_NUCLEUS : Aggregation.BY_SIGNAL;
+			Normalisation norm = dapiNormalise.isSelected() ? Normalisation.DAPI : Normalisation.NONE;
+			boolean showRandom = showRandomCheckbox.isSelected();
+
+			ChartOptions barChartOptions = new ChartOptionsBuilder().setDatasets(getDatasets()).setTarget(chartPanel)
+					.setShowAnnotations(showRandom) // proxy fpr random
+					.setAggregation(agg).setNormalisation(norm).build();
+
+			setChart(barChartOptions);
+		}
+
+		@Override
+		protected JFreeChart createPanelChartType(@NonNull ChartOptions options) {
+			return new ShellChartFactory(options).createShellChart();
+		}
+
+		@Override
+		public void nuclearSignalUpdated(List<IAnalysisDataset> datasets) {
+			refreshCache(datasets);
+		}
+
+		@Override
+		public void nuclearSignalUpdated(IAnalysisDataset dataset) {
+			refreshCache(dataset);
+		}
+	}
+
+	public class ShellOverallTablePanel extends TableDetailPanel {
+
+		protected ExportableTable table;
+
+		public ShellOverallTablePanel() {
+			super(PANEL_TITLE_LBL);
+			this.setLayout(new BorderLayout());
+			add(createOverallTablePanel(), BorderLayout.CENTER);
+		}
+
+		/**
+		 * Create the table panel
+		 * 
+		 * @return
+		 */
+		private JPanel createOverallTablePanel() {
+			JPanel tablePanel = new JPanel(new BorderLayout());
+
+			JTextArea textArea = new WrappedLabel(
+					"Comparisons to random distribution by chi-square with Bonferroni correction");
+
+			tablePanel.add(textArea, BorderLayout.NORTH);
+			TableModel model = AnalysisDatasetTableCreator.createBlankTable();
+			table = new ExportableTable(model);
+			table.setEnabled(false);
+
+			JScrollPane scrollPane = new JScrollPane();
+			scrollPane.setViewportView(table);
+			scrollPane.setColumnHeaderView(table.getTableHeader());
+			Dimension size = new Dimension(200, 150);
+			tablePanel.setMinimumSize(size);
+			tablePanel.setPreferredSize(size);
+			tablePanel.add(scrollPane, BorderLayout.CENTER);
+			return tablePanel;
+		}
+
+		@Override
+		protected TableModel createPanelTableType(@NonNull TableOptions options) {
+			return new NuclearSignalTableCreator(options).createShellChiSquareTable();
+		}
+
+		@Override
+		protected synchronized void updateSingle() {
+			updateTable();
+			setEnabled(false);
+
+		}
+
+		@Override
+		protected synchronized void updateMultiple() {
+			updateTable();
+
+		}
+
+		@Override
+		protected synchronized void updateNull() {
+			setEnabled(false);
+			updateTable();
+
+		}
+
+		@Override
+		public synchronized void setLoading() {
+			super.setLoading();
+			table.setModel(AbstractTableCreator.createLoadingTable());
+		}
+
+		private synchronized void updateTable() {
+			Aggregation agg = withinNucleiBtn.isSelected() ? Aggregation.BY_NUCLEUS : Aggregation.BY_SIGNAL;
+			Normalisation norm = dapiNormalise.isSelected() ? Normalisation.DAPI : Normalisation.NONE;
+			TableOptions tableOptions = new TableOptionsBuilder().setDatasets(getDatasets()).setAggregation(agg)
+					.setNormalisation(norm).setTarget(table).build();
+
+			setTable(tableOptions);
+		}
+
+	}
+
+	public class ShellPairwiseTablePanel extends TableDetailPanel {
+
+		protected ExportableTable table;
+
+		public ShellPairwiseTablePanel() {
+			super(PANEL_TITLE_LBL);
+			this.setLayout(new BorderLayout());
+			add(createPairwiseTablePanel(), BorderLayout.CENTER);
+		}
+
+		/**
+		 * Create the table panel
+		 * 
+		 * @return
+		 */
+		private JPanel createPairwiseTablePanel() {
+			JPanel tablePanel = new JPanel(new BorderLayout());
+			Dimension size = new Dimension(200, 150);
+
+			JTextArea textArea = new WrappedLabel(
+					"Pairwise comparisons of shell results by chi-square with Bonferroni correction");
+
+			tablePanel.add(textArea, BorderLayout.NORTH);
+			TableModel model = AnalysisDatasetTableCreator.createBlankTable();
+			table = new ExportableTable(model);
+			table.setEnabled(false);
+
+			JScrollPane scrollPane = new JScrollPane();
+			scrollPane.setViewportView(table);
+			scrollPane.setColumnHeaderView(table.getTableHeader());
+
+			tablePanel.setMinimumSize(size);
+			tablePanel.setPreferredSize(size);
+			tablePanel.add(scrollPane, BorderLayout.CENTER);
+			return tablePanel;
+		}
+
+		@Override
+		protected TableModel createPanelTableType(@NonNull TableOptions options) {
+			return new NuclearSignalTableCreator(options).createPairwiseShellChiSquareTable();
+		}
+
+		@Override
+		protected synchronized void updateSingle() {
+			updateTable();
+			setEnabled(false);
+
+		}
+
+		@Override
+		protected synchronized void updateMultiple() {
+			updateTable();
+
+		}
+
+		@Override
+		protected synchronized void updateNull() {
+			setEnabled(false);
+			updateTable();
+		}
+
+		@Override
+		public synchronized void setLoading() {
+			super.setLoading();
+			table.setModel(AbstractTableCreator.createLoadingTable());
+		}
+
+		private synchronized void updateTable() {
+			Aggregation agg = withinNucleiBtn.isSelected() ? Aggregation.BY_NUCLEUS : Aggregation.BY_SIGNAL;
+			Normalisation norm = dapiNormalise.isSelected() ? Normalisation.DAPI : Normalisation.NONE;
+
+			TableOptions pairwiseOptions = new TableOptionsBuilder().setDatasets(getDatasets()).setAggregation(agg)
+					.setNormalisation(norm).setTarget(table).build();
+
+			setTable(pairwiseOptions);
+		}
+
 	}
 }

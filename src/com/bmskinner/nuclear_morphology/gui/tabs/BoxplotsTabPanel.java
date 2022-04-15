@@ -29,18 +29,15 @@ import java.util.logging.Logger;
 import javax.swing.BoxLayout;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.table.TableModel;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
-import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.visualisation.charts.AbstractChartFactory;
 import com.bmskinner.nuclear_morphology.visualisation.charts.ViolinChartFactory;
 import com.bmskinner.nuclear_morphology.visualisation.charts.panels.ExportableChartPanel;
 import com.bmskinner.nuclear_morphology.visualisation.options.ChartOptions;
-import com.bmskinner.nuclear_morphology.visualisation.options.TableOptions;
 
 /**
  * Base class for multiple violin plots arranged horizontally
@@ -49,7 +46,7 @@ import com.bmskinner.nuclear_morphology.visualisation.options.TableOptions;
  *
  */
 @SuppressWarnings("serial")
-public abstract class BoxplotsTabPanel extends DetailPanel implements ActionListener {
+public abstract class BoxplotsTabPanel extends ChartDetailPanel implements ActionListener {
 
 	private static final Logger LOGGER = Logger.getLogger(BoxplotsTabPanel.class.getName());
 
@@ -69,8 +66,8 @@ public abstract class BoxplotsTabPanel extends DetailPanel implements ActionList
 	 * @param context
 	 * @param component
 	 */
-	public BoxplotsTabPanel(@NonNull InputSupplier context, String component) {
-		this(context, component, PANEL_TITLE_LBL);
+	protected BoxplotsTabPanel(String component) {
+		this(component, PANEL_TITLE_LBL);
 	}
 
 	/**
@@ -79,8 +76,8 @@ public abstract class BoxplotsTabPanel extends DetailPanel implements ActionList
 	 * @param context
 	 * @param component
 	 */
-	public BoxplotsTabPanel(@NonNull InputSupplier context, String component, String panelTitle) {
-		super(context, panelTitle);
+	protected BoxplotsTabPanel(String component, String panelTitle) {
+		super(panelTitle);
 		this.component = component;
 		this.setLayout(new BorderLayout());
 
@@ -109,8 +106,8 @@ public abstract class BoxplotsTabPanel extends DetailPanel implements ActionList
 	}
 
 	@Override
-	public synchronized void setChartsAndTablesLoading() {
-		super.setChartsAndTablesLoading();
+	public synchronized void setLoading() {
+		super.setLoading();
 		for (ExportableChartPanel p : chartPanels.values()) {
 			p.setChart(AbstractChartFactory.createLoadingChart());
 		}
@@ -120,11 +117,6 @@ public abstract class BoxplotsTabPanel extends DetailPanel implements ActionList
 	@Override
 	protected synchronized JFreeChart createPanelChartType(@NonNull ChartOptions options) {
 		return new ViolinChartFactory(options).createStatisticPlot(component);
-	}
-
-	@Override
-	protected synchronized TableModel createPanelTableType(@NonNull TableOptions options) {
-		return null;
 	}
 
 	@Override

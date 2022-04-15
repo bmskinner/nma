@@ -21,13 +21,11 @@ import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.util.logging.Logger;
 
-import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
-import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.SwatchUpdatedListener;
 import com.bmskinner.nuclear_morphology.gui.tabs.BoxplotsTabPanel;
 import com.bmskinner.nuclear_morphology.visualisation.charts.AbstractChartFactory;
@@ -49,8 +47,8 @@ public class NuclearGlcmPanel extends BoxplotsTabPanel implements SwatchUpdatedL
 	private static final Logger LOGGER = Logger.getLogger(NuclearGlcmPanel.class.getName());
 	private static final String PANEL_TITLE_LBL = "GLCM";
 
-	public NuclearGlcmPanel(@NonNull InputSupplier context) {
-		super(context, CellularComponent.NUCLEUS, PANEL_TITLE_LBL);
+	public NuclearGlcmPanel() {
+		super(CellularComponent.NUCLEUS, PANEL_TITLE_LBL);
 
 		Dimension preferredSize = new Dimension(200, 300);
 
@@ -105,8 +103,8 @@ public class NuclearGlcmPanel extends BoxplotsTabPanel implements SwatchUpdatedL
 	}
 
 	@Override
-	public synchronized void setChartsAndTablesLoading() {
-		super.setChartsAndTablesLoading();
+	public synchronized void setLoading() {
+		super.setLoading();
 
 		for (Measurement stat : Measurement.getGlcmStats()) {
 			ExportableChartPanel panel = chartPanels.get(stat.toString());

@@ -35,7 +35,7 @@ import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.NuclearSignalUpdatedListener;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.UIController;
-import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
+import com.bmskinner.nuclear_morphology.gui.tabs.TableDetailPanel;
 import com.bmskinner.nuclear_morphology.visualisation.datasets.SignalTableCell;
 import com.bmskinner.nuclear_morphology.visualisation.datasets.tables.AbstractTableCreator;
 import com.bmskinner.nuclear_morphology.visualisation.datasets.tables.NuclearSignalTableCreator;
@@ -43,14 +43,14 @@ import com.bmskinner.nuclear_morphology.visualisation.options.TableOptions;
 import com.bmskinner.nuclear_morphology.visualisation.options.TableOptionsBuilder;
 
 @SuppressWarnings("serial")
-public class SignalsAnalysisPanel extends DetailPanel implements NuclearSignalUpdatedListener {
+public class SignalsAnalysisPanel extends TableDetailPanel implements NuclearSignalUpdatedListener {
 
 	private static final String PANEL_TITLE_LBL = "Detection settings";
 	private ExportableTable table; // table for analysis parameters
 	private JScrollPane scrollPane;
 
-	public SignalsAnalysisPanel(@NonNull InputSupplier context) {
-		super(context, PANEL_TITLE_LBL);
+	public SignalsAnalysisPanel() {
+		super(PANEL_TITLE_LBL);
 		this.setLayout(new BorderLayout());
 		uiController.addNuclearSignalUpdatedListener(this);
 
@@ -146,8 +146,8 @@ public class SignalsAnalysisPanel extends DetailPanel implements NuclearSignalUp
 	}
 
 	@Override
-	public void setChartsAndTablesLoading() {
-		super.setChartsAndTablesLoading();
+	public void setLoading() {
+		super.setLoading();
 		table.setModel(AbstractTableCreator.createLoadingTable());
 
 	}
@@ -159,12 +159,12 @@ public class SignalsAnalysisPanel extends DetailPanel implements NuclearSignalUp
 
 	@Override
 	public void nuclearSignalUpdated(List<IAnalysisDataset> datasets) {
-		refreshChartCache(datasets);
+		refreshCache(datasets);
 	}
 
 	@Override
 	public void nuclearSignalUpdated(IAnalysisDataset dataset) {
-		refreshChartCache(dataset);
+		refreshCache(dataset);
 	}
 
 }

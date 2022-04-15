@@ -49,8 +49,8 @@ public class SegmentWilcoxonPanel extends AbstractPairwiseDetailPanel {
 	
     private static final String PANEL_TITLE_LBL = "Wilcoxon stats";
     
-    public SegmentWilcoxonPanel(@NonNull InputSupplier context) {
-        super(context);
+    public SegmentWilcoxonPanel() {
+        super();
     }
     
     @Override

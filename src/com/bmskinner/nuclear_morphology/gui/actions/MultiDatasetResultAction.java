@@ -22,7 +22,6 @@ import java.util.List;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 
 /**
@@ -35,14 +34,12 @@ import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
  */
 public abstract class MultiDatasetResultAction extends VoidResultAction {
 
-    protected final @NonNull List<IAnalysisDataset> datasets = new ArrayList<>();
+	protected final @NonNull List<IAnalysisDataset> datasets = new ArrayList<>();
 
-    public MultiDatasetResultAction(@NonNull final List<IAnalysisDataset> datasets, @NonNull final String barMessage,
-    		@NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh) {
-        super(barMessage, acceptor, eh);
-        if (datasets == null)
-            throw new IllegalArgumentException("Cannot have null dataset list");
-        this.datasets.addAll(datasets);
-    }
+	protected MultiDatasetResultAction(@NonNull final List<IAnalysisDataset> datasets, @NonNull final String barMessage,
+			@NonNull final ProgressBarAcceptor acceptor) {
+		super(barMessage, acceptor);
+		this.datasets.addAll(datasets);
+	}
 
 }

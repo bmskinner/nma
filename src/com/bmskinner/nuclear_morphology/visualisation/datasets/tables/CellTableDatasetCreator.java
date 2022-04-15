@@ -41,8 +41,6 @@ import com.bmskinner.nuclear_morphology.components.options.MissingOptionExceptio
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
-import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
-import com.bmskinner.nuclear_morphology.components.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult;
@@ -63,134 +61,102 @@ import com.bmskinner.nuclear_morphology.visualisation.options.DisplayOptions;
  *
  */
 public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
-	
+
 	private static final Logger LOGGER = Logger.getLogger(CellTableDatasetCreator.class.getName());
 
-    public CellTableDatasetCreator(final DisplayOptions options, final ICell c) {
-        super(options, c);
-    }
+	public CellTableDatasetCreator(final DisplayOptions options, final ICell c) {
+		super(options, c);
+	}
 
-    /**
-     * Create a table of stats for the given cell.
-     * 
-     * @return a table model
-     */
-    public TableModel createCellInfoTable() {
+	/**
+	 * Create a table of stats for the given cell.
+	 * 
+	 * @return a table model
+	 */
+	public TableModel createCellInfoTable() {
 
-        if (!options.hasDatasets())
-            return AbstractTableCreator.createBlankTable();
+		if (!options.hasDatasets())
+			return AbstractTableCreator.createBlankTable();
 
-        if (options.isMultipleDatasets())
-            return AbstractTableCreator.createBlankTable();
-        
-        try {
+		if (options.isMultipleDatasets())
+			return AbstractTableCreator.createBlankTable();
 
-        	IAnalysisDataset d = options.firstDataset();
-        	DefaultTableModel model = new DefaultTableModel();
+		if (!options.hasCell())
+			return AbstractTableCreator.createBlankTable();
 
-        	List<Object> fieldNames = new ArrayList<>(0);
-        	List<Object> rowData = new ArrayList<>(0);
+		try {
 
-        	// find the collection with the most channels
-        	// this defines the number of rows
+			IAnalysisDataset d = options.firstDataset();
+			DefaultTableModel model = new DefaultTableModel();
 
-        	if (cell.hasCytoplasm()) {
-        		addCytoplasmDataToTable(fieldNames, rowData, cell, d);
-        	}
+			List<Object> fieldNames = new ArrayList<>(0);
+			List<Object> rowData = new ArrayList<>(0);
 
-        	fieldNames.add("Number of nuclei");
-        	rowData.add(cell.getMeasurement(Measurement.CELL_NUCLEUS_COUNT));
+			// find the collection with the most channels
+			// this defines the number of rows
 
-        	int nucleusNumber = 0;
-        	for (Nucleus n : cell.getNuclei()) {
-        		nucleusNumber++;
-        		fieldNames.add("Nucleus " + nucleusNumber);
-        		rowData.add("");
-        		addNuclearDataToTable(fieldNames, rowData, n, d);
+			if (cell.hasCytoplasm()) {
+				addCytoplasmDataToTable(fieldNames, rowData, cell, d);
+			}
 
-        	}
+			fieldNames.add("Number of nuclei");
+			rowData.add(cell.getMeasurement(Measurement.CELL_NUCLEUS_COUNT));
 
-        	model.addColumn("", fieldNames.toArray(new Object[0]));
-        	model.addColumn("Info", rowData.toArray(new Object[0]));
+			int nucleusNumber = 0;
+			for (Nucleus n : cell.getNuclei()) {
+				nucleusNumber++;
+				fieldNames.add("Nucleus " + nucleusNumber);
+				rowData.add("");
+				addNuclearDataToTable(fieldNames, rowData, n, d);
 
-        	return model;
-        } catch(MissingOptionException e) {
-        	LOGGER.log(Loggable.STACK, "Error creating table model", e);
-        	return AbstractTableCreator.createBlankTable();
-        }
-    }
+			}
 
-    public TableModel createCellSegmentsTable() {
-        if (!options.hasDatasets()) {
-            return AbstractTableCreator.createBlankTable();
-        }
+			model.addColumn("", fieldNames.toArray(new Object[0]));
+			model.addColumn("Info", rowData.toArray(new Object[0]));
 
-        if (options.isMultipleDatasets()) {
-            return AbstractTableCreator.createBlankTable();
-        }
+			return model;
+		} catch (MissingOptionException e) {
+			LOGGER.log(Loggable.STACK, "Error creating table model", e);
+			return AbstractTableCreator.createBlankTable();
+		}
+	}
 
-        IAnalysisDataset d = options.firstDataset();
-        DefaultTableModel model = new DefaultTableModel();
+	/**
+	 * Create a table model showing the distances between all signals in a cell
+	 * 
+	 * @param options
+	 * @return
+	 */
+	public TableModel createPairwiseSignalDistanceTable() {
 
-        List<Object> fieldNames = new ArrayList<Object>(0);
-        List<Object> rowData = new ArrayList<Object>(0);
+		if (!options.isSingleDataset()) {
+			return AbstractTableCreator.createBlankTable();
+		}
 
-        try {
-            ISegmentedProfile p = cell.getPrimaryNucleus().getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
+		IAnalysisDataset d = options.firstDataset();
+		DefaultTableModel model = new DefaultTableModel();
 
-            for (IProfileSegment s : p.getSegments()) {
-                fieldNames.add(s.getName());
-                rowData.add(s.getStartIndex() + "-" + s.getEndIndex());
+		List<Object> columnNames = new ArrayList<Object>(0);
 
-            }
+		ISignalCollection sc = cell.getPrimaryNucleus().getSignalCollection();
 
-            model.addColumn("Segment", fieldNames.toArray(new Object[0]));
-            model.addColumn("Range (of " + p.size() + ")", rowData.toArray(new Object[0]));
-
-        } catch (MissingLandmarkException | MissingProfileException | ProfileException e) {
-            return AbstractTableCreator.createBlankTable();
-        }
-
-        return model;
-
-    }
-
-    /**
-     * Create a table model showing the distances between all signals in a cell
-     * 
-     * @param options
-     * @return
-     */
-    public TableModel createPairwiseSignalDistanceTable() {
-
-        if (!options.isSingleDataset()) {
-            return AbstractTableCreator.createBlankTable();
-        }
-
-        IAnalysisDataset d = options.firstDataset();
-        DefaultTableModel model = new DefaultTableModel();
-
-        List<Object> columnNames = new ArrayList<Object>(0);
-
-        ISignalCollection sc = cell.getPrimaryNucleus().getSignalCollection();
-
-        if (sc.numberOfSignals() == 0) {
-            return AbstractTableCreator.createBlankTable();
-        }
-        DecimalFormat df = new DecimalFormat(DEFAULT_DECIMAL_FORMAT);
+		if (sc.numberOfSignals() == 0) {
+			return AbstractTableCreator.createBlankTable();
+		}
+		DecimalFormat df = new DecimalFormat(DEFAULT_DECIMAL_FORMAT);
 		// Make the first column, of names
 		for (UUID id : sc.getSignalGroupIds()) {
 
-		    String signalName = d.getCollection().getSignalGroup(id).get().getGroupName();
+			String signalName = d.getCollection().getSignalGroup(id).get().getGroupName();
 
-		    List<INuclearSignal> signalsRow = sc.getSignals(id);
-		    int sigNumber = 0;
+			List<INuclearSignal> signalsRow = sc.getSignals(id);
+			int sigNumber = 0;
 
-		    for (INuclearSignal row : signalsRow) {
+			for (INuclearSignal row : signalsRow) {
 
-		        columnNames.add(signalName + "_Sig_" + sigNumber);
-		        sigNumber++;
-		    }
+				columnNames.add(signalName + "_Sig_" + sigNumber);
+				sigNumber++;
+			}
 
 		}
 		model.addColumn(Labels.Signals.SIGNAL_LABEL_SINGULAR, columnNames.toArray(new Object[0]));
@@ -203,237 +169,235 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 
 		for (UUID id : sc.getSignalGroupIds()) {
 
-		    String signalName = d.getCollection().getSignalGroup(id).get().getGroupName();
+			String signalName = d.getCollection().getSignalGroup(id).get().getGroupName();
 
-		    List<INuclearSignal> signalsRow = sc.getSignals(id);
-		    int sigNumber = 0;
-		    for (INuclearSignal row : signalsRow) {
-		        String colName = signalName + "_Sig_" + sigNumber;
-		        List<Object> colData = new ArrayList<Object>(0);
+			List<INuclearSignal> signalsRow = sc.getSignals(id);
+			int sigNumber = 0;
+			for (INuclearSignal row : signalsRow) {
+				String colName = signalName + "_Sig_" + sigNumber;
+				List<Object> colData = new ArrayList<Object>(0);
 
-		        double[] colValues = matrix[col];
-		        for (double value : colValues) {
-		            colData.add(df.format(value));
-		        }
+				double[] colValues = matrix[col];
+				for (double value : colValues) {
+					colData.add(df.format(value));
+				}
 
-		        model.addColumn(colName, colData.toArray(new Object[0]));
-		        col++;
-		        sigNumber++;
-		    }
+				model.addColumn(colName, colData.toArray(new Object[0]));
+				col++;
+				sigNumber++;
+			}
 		}
 
-        return model;
-    }
+		return model;
+	}
 
-    /*
-     * 
-     * PRIVATE METHODS
-     * 
-     */
+	/*
+	 * 
+	 * PRIVATE METHODS
+	 * 
+	 */
 
-    private void addCytoplasmDataToTable(List<Object> fieldNames, List<Object> rowData, ICell c, IAnalysisDataset d) {
-        fieldNames.add("Cytoplasm");
-        rowData.add("");
+	private void addCytoplasmDataToTable(List<Object> fieldNames, List<Object> rowData, ICell c, IAnalysisDataset d) {
+		fieldNames.add("Cytoplasm");
+		rowData.add("");
 
-        ICytoplasm cyto = c.getCytoplasm();
+		ICytoplasm cyto = c.getCytoplasm();
 		DecimalFormat df = new DecimalFormat(DEFAULT_DECIMAL_FORMAT);
 		for (Measurement stat : Measurement.getComponentStats()) {
-		    fieldNames.add(stat.label(GlobalOptions.getInstance().getScale()));
+			fieldNames.add(stat.label(GlobalOptions.getInstance().getScale()));
 
-		    double value = cyto.getMeasurement(stat, GlobalOptions.getInstance().getScale());
-		    rowData.add(df.format(value));
+			double value = cyto.getMeasurement(stat, GlobalOptions.getInstance().getScale());
+			rowData.add(df.format(value));
 		}
 
-    }
+	}
 
-    private void addNuclearDataToTable(List<Object> fieldNames, List<Object> rowData, Nucleus n, IAnalysisDataset d) throws MissingOptionException {
+	private void addNuclearDataToTable(List<Object> fieldNames, List<Object> rowData, Nucleus n, IAnalysisDataset d)
+			throws MissingOptionException {
 
-        fieldNames.add(Labels.Cells.SOURCE_FILE_LABEL);
-        rowData.add(n.getSourceFile());
+		fieldNames.add(Labels.Cells.SOURCE_FILE_LABEL);
+		rowData.add(n.getSourceFile());
 
-        fieldNames.add(Labels.Cells.SOURCE_FILE_NAME_LABEL);
-        rowData.add(n.getSourceFileName());
+		fieldNames.add(Labels.Cells.SOURCE_FILE_NAME_LABEL);
+		rowData.add(n.getSourceFileName());
 
-        fieldNames.add(Labels.Cells.SOURCE_CHANNEL_LABEL);
-        rowData.add(n.getChannel());
+		fieldNames.add(Labels.Cells.SOURCE_CHANNEL_LABEL);
+		rowData.add(n.getChannel());
 
-        fieldNames.add(Labels.Cells.ANGLE_WINDOW_PROP_LABEL);
-        rowData.add(n.getWindowProportion());
+		fieldNames.add(Labels.Cells.ANGLE_WINDOW_PROP_LABEL);
+		rowData.add(n.getWindowProportion());
 
-        fieldNames.add(Labels.Cells.ANGLE_WINDOW_SIZE_LABEL);
-        rowData.add(n.getWindowSize());
+		fieldNames.add(Labels.Cells.ANGLE_WINDOW_SIZE_LABEL);
+		rowData.add(n.getWindowSize());
 
-        fieldNames.add(Labels.Cells.SCALE_LABEL);
-        rowData.add(n.getScale());
+		fieldNames.add(Labels.Cells.SCALE_LABEL);
+		rowData.add(n.getScale());
 
-        addNuclearStatisticsToTable(fieldNames, rowData, n);
-        
-        DecimalFormat df = new DecimalFormat(DEFAULT_DECIMAL_FORMAT);
+		addNuclearStatisticsToTable(fieldNames, rowData, n);
 
-        fieldNames.add("Original bounding width");
-        rowData.add(df.format(n.getWidth()));
+		DecimalFormat df = new DecimalFormat(DEFAULT_DECIMAL_FORMAT);
 
-        fieldNames.add("Original bounding height");
-        rowData.add(df.format(n.getHeight()));
+		fieldNames.add("Original bounding width");
+		rowData.add(df.format(n.getWidth()));
 
-        fieldNames.add("Nucleus CoM");
-        rowData.add(n.getCentreOfMass().toString());
+		fieldNames.add("Original bounding height");
+		rowData.add(df.format(n.getHeight()));
 
-        fieldNames.add("Original CoM");
-        rowData.add(n.getOriginalCentreOfMass().toString());
+		fieldNames.add("Nucleus CoM");
+		rowData.add(n.getCentreOfMass().toString());
 
-        fieldNames.add("Original nucleus position");
-        rowData.add("x: " + n.getXBase() + " : y: " + n.getYBase());
+		fieldNames.add("Original CoM");
+		rowData.add(n.getOriginalCentreOfMass().toString());
 
-        fieldNames.add("Current nucleus position");
-        rowData.add("x: " + df.format(n.getMinX()) + " : y: " + df.format(n.getMinY()));
-        
-        for (Landmark tag : n.getLandmarks().keySet()) {
-        	fieldNames.add(tag);
-        	if (n.hasLandmark(tag)) {
+		fieldNames.add("Original nucleus position");
+		rowData.add("x: " + n.getXBase() + " : y: " + n.getYBase());
 
-        		try {
-        			IPoint p = n.getBorderPoint(tag);
-        			int index = n.getIndexRelativeTo(Landmark.REFERENCE_POINT, n.getBorderIndex(tag));
-        			rowData.add(p.toString() + " at profile index " + index);
-        		} catch (MissingLandmarkException e) {
-        			LOGGER.fine("Tag not present: " + tag);
-        			rowData.add("Missing tag");
-        		}
+		fieldNames.add("Current nucleus position");
+		rowData.add("x: " + df.format(n.getMinX()) + " : y: " + df.format(n.getMinY()));
 
-        	} else {
-        		rowData.add("N/A");
-        	}
-        }
+		for (Landmark tag : n.getLandmarks().keySet()) {
+			fieldNames.add(tag);
+			if (n.hasLandmark(tag)) {
 
-        
-        try {
-        	ISegmentedProfile sp = n.getProfile(ProfileType.ANGLE.ANGLE, Landmark.REFERENCE_POINT);
-        	for(IProfileSegment s : sp.getOrderedSegments()) {
-        		fieldNames.add(s.getName());
-        		rowData.add(s.toString());
-        	}
-        } catch(Exception e) {
-        	LOGGER.log(Level.SEVERE, "Cannot get segmented cell profile", e);
-        	fieldNames.add("Segments");
-        	rowData.add("N/A");
-        }
+				try {
+					IPoint p = n.getBorderPoint(tag);
+					int index = n.getIndexRelativeTo(Landmark.REFERENCE_POINT, n.getBorderIndex(tag));
+					rowData.add(p.toString() + " at profile index " + index);
+				} catch (MissingLandmarkException e) {
+					LOGGER.fine("Tag not present: " + tag);
+					rowData.add("Missing tag");
+				}
 
+			} else {
+				rowData.add("N/A");
+			}
+		}
 
-        addNuclearSignalsToTable(fieldNames, rowData, n, d);
-    }
+		try {
+			ISegmentedProfile sp = n.getProfile(ProfileType.ANGLE.ANGLE, Landmark.REFERENCE_POINT);
+			for (IProfileSegment s : sp.getOrderedSegments()) {
+				fieldNames.add(s.getName());
+				rowData.add(s.toString());
+			}
+		} catch (Exception e) {
+			LOGGER.log(Level.SEVERE, "Cannot get segmented cell profile", e);
+			fieldNames.add("Segments");
+			rowData.add("N/A");
+		}
 
-    /**
-     * Add the nuclear statistic information to a cell table
-     * 
-     * @param fieldNames
-     * @param rowData
-     * @param n
-     */
-    private void addNuclearStatisticsToTable(List<Object> fieldNames, List<Object> rowData, Nucleus n) {
+		addNuclearSignalsToTable(fieldNames, rowData, n, d);
+	}
 
-        DecimalFormat df = new DecimalFormat(DEFAULT_DECIMAL_FORMAT);
-        for (Measurement stat : Measurement.getNucleusStats()) {
+	/**
+	 * Add the nuclear statistic information to a cell table
+	 * 
+	 * @param fieldNames
+	 * @param rowData
+	 * @param n
+	 */
+	private void addNuclearStatisticsToTable(List<Object> fieldNames, List<Object> rowData, Nucleus n) {
 
-            if (!stat.equals(Measurement.VARIABILITY)) {
+		DecimalFormat df = new DecimalFormat(DEFAULT_DECIMAL_FORMAT);
+		for (Measurement stat : Measurement.getNucleusStats()) {
 
-                fieldNames.add(stat.label(GlobalOptions.getInstance().getScale()));
+			if (!stat.equals(Measurement.VARIABILITY)) {
 
-                double value = n.getMeasurement(stat, GlobalOptions.getInstance().getScale());
-                rowData.add(df.format(value));
-            }
+				fieldNames.add(stat.label(GlobalOptions.getInstance().getScale()));
 
-        }
+				double value = n.getMeasurement(stat, GlobalOptions.getInstance().getScale());
+				rowData.add(df.format(value));
+			}
 
-    }
+		}
 
-    /**
-     * Add the nuclear signal information to a cell table
-     * 
-     * @param fieldNames
-     * @param rowData
-     * @param n
-     *            the nucleus
-     * @param d
-     *            the source dataset for the nucleus
-     * @throws MissingOptionException 
-     */
-    private void addNuclearSignalsToTable(List<Object> fieldNames, List<Object> rowData, Nucleus n,
-            IAnalysisDataset d) throws MissingOptionException {
+	}
 
-        int j = 0;
+	/**
+	 * Add the nuclear signal information to a cell table
+	 * 
+	 * @param fieldNames
+	 * @param rowData
+	 * @param n          the nucleus
+	 * @param d          the source dataset for the nucleus
+	 * @throws MissingOptionException
+	 */
+	private void addNuclearSignalsToTable(List<Object> fieldNames, List<Object> rowData, Nucleus n, IAnalysisDataset d)
+			throws MissingOptionException {
 
-        for (UUID signalGroup : d.getCollection().getSignalGroupIDs()) {
+		int j = 0;
 
-            if (signalGroup.equals(IShellResult.RANDOM_SIGNAL_ID))
-                continue;
+		for (UUID signalGroup : d.getCollection().getSignalGroupIDs()) {
 
-            try {
-                Optional<ISignalGroup> g = d.getCollection().getSignalGroup(signalGroup);
-                if(!g.isPresent())
-                	continue;
-                Optional<IAnalysisOptions> datasetOptionsOptional = d.getAnalysisOptions();
-                if(!datasetOptionsOptional.isPresent())
-                	continue;
-                HashOptions signalOptions = datasetOptionsOptional.get().getNuclearSignalOptions(signalGroup).orElseThrow(MissingOptionException::new);
+			if (signalGroup.equals(IShellResult.RANDOM_SIGNAL_ID))
+				continue;
 
-                fieldNames.add("");
-                rowData.add("");
-                Optional<Color> c = g.get().getGroupColour();
-                Color colour = c.isPresent() ? c.get() : ColourSelecter.getColor(j);
+			try {
+				Optional<ISignalGroup> g = d.getCollection().getSignalGroup(signalGroup);
+				if (!g.isPresent())
+					continue;
+				Optional<IAnalysisOptions> datasetOptionsOptional = d.getAnalysisOptions();
+				if (!datasetOptionsOptional.isPresent())
+					continue;
+				HashOptions signalOptions = datasetOptionsOptional.get().getNuclearSignalOptions(signalGroup)
+						.orElseThrow(MissingOptionException::new);
 
-                SignalTableCell tableCell = new SignalTableCell(signalGroup, g.get().getGroupName(), colour);
+				fieldNames.add("");
+				rowData.add("");
+				Optional<Color> c = g.get().getGroupColour();
+				Color colour = c.isPresent() ? c.get() : ColourSelecter.getColor(j);
 
-                fieldNames.add("Signal group");
-                rowData.add(tableCell);
+				SignalTableCell tableCell = new SignalTableCell(signalGroup, g.get().getGroupName(), colour);
 
-                fieldNames.add("Source image");
-                rowData.add(n.getSignalCollection().getSourceFile(signalGroup));
+				fieldNames.add("Signal group");
+				rowData.add(tableCell);
 
-                fieldNames.add("Source channel");
-                rowData.add(signalOptions==null?Labels.NA:signalOptions.getInt(HashOptions.CHANNEL));
+				fieldNames.add("Source image");
+				rowData.add(n.getSignalCollection().getSourceFile(signalGroup));
 
-                fieldNames.add("Number of signals");
-                rowData.add(n.getSignalCollection().numberOfSignals(signalGroup));
+				fieldNames.add("Source channel");
+				rowData.add(signalOptions == null ? Labels.NA : signalOptions.getInt(HashOptions.CHANNEL));
 
-                for (INuclearSignal s : n.getSignalCollection().getSignals(signalGroup)) {
-                    addSignalStatisticsToTable(fieldNames, rowData, s);
-                }
-            } finally {
-                j++;
-            }
+				fieldNames.add("Number of signals");
+				rowData.add(n.getSignalCollection().numberOfSignals(signalGroup));
 
-        }
+				for (INuclearSignal s : n.getSignalCollection().getSignals(signalGroup)) {
+					addSignalStatisticsToTable(fieldNames, rowData, s);
+				}
+			} finally {
+				j++;
+			}
 
-    }
+		}
 
-    /**
-     * Add the nuclear signal statistics to a cell table
-     * 
-     * @param fieldNames
-     * @param rowData
-     * @param s
-     */
-    private void addSignalStatisticsToTable(List<Object> fieldNames, List<Object> rowData, INuclearSignal s) {
-    	DecimalFormat df = new DecimalFormat(DEFAULT_DECIMAL_FORMAT);
-        for (Measurement stat : Measurement.getSignalStats()) {
+	}
 
-            fieldNames.add(stat.label(GlobalOptions.getInstance().getScale()));
+	/**
+	 * Add the nuclear signal statistics to a cell table
+	 * 
+	 * @param fieldNames
+	 * @param rowData
+	 * @param s
+	 */
+	private void addSignalStatisticsToTable(List<Object> fieldNames, List<Object> rowData, INuclearSignal s) {
+		DecimalFormat df = new DecimalFormat(DEFAULT_DECIMAL_FORMAT);
+		for (Measurement stat : Measurement.getSignalStats()) {
 
-            double value = s.getMeasurement(stat, GlobalOptions.getInstance().getScale());
+			fieldNames.add(stat.label(GlobalOptions.getInstance().getScale()));
 
-            rowData.add(df.format(value));
-        }
+			double value = s.getMeasurement(stat, GlobalOptions.getInstance().getScale());
 
-        fieldNames.add("Signal CoM");
-        rowData.add(s.getCentreOfMass().toString());
+			rowData.add(df.format(value));
+		}
 
-        fieldNames.add("Original CoM");
-        rowData.add(s.getOriginalCentreOfMass().toString());
+		fieldNames.add("Signal CoM");
+		rowData.add(s.getCentreOfMass().toString());
 
-        // fieldNames.add("First border point");
-        // rowData.add(s.getBorderPoint(0).toString());
+		fieldNames.add("Original CoM");
+		rowData.add(s.getOriginalCentreOfMass().toString());
 
-    }
+		// fieldNames.add("First border point");
+		// rowData.add(s.getBorderPoint(0).toString());
+
+	}
 
 }

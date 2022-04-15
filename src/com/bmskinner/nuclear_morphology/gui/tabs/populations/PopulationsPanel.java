@@ -43,9 +43,6 @@ import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.IClusterGroup;
 import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace;
 import com.bmskinner.nuclear_morphology.core.DatasetListManager;
-import com.bmskinner.nuclear_morphology.core.InputSupplier;
-import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
-import com.bmskinner.nuclear_morphology.gui.events.UserActionEvent;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.DatasetAddedListener;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.SwatchUpdatedListener;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
@@ -85,15 +82,14 @@ public class PopulationsPanel extends DetailPanel implements DatasetAddedListene
 		}
 	}
 
-	public PopulationsPanel(@NonNull InputSupplier context) {
-		super(context);
+	public PopulationsPanel() {
+		super();
 		this.setLayout(new BorderLayout());
 
 		this.setMinimumSize(new Dimension(100, 100));
 
 		populationPopup = new PopulationListPopupMenu();
 		populationPopup.setEnabled(false);
-		populationPopup.addSignalChangeListener(this);
 
 		treeTable = createTreeTable();
 
@@ -167,7 +163,7 @@ public class PopulationsPanel extends DetailPanel implements DatasetAddedListene
 	}
 
 	@Override
-	public synchronized void setChartsAndTablesLoading() {
+	public synchronized void setLoading() {
 		// No charts or tables to load
 	}
 
@@ -331,7 +327,6 @@ public class PopulationsPanel extends DetailPanel implements DatasetAddedListene
 
 		DatasetDeleter deleter = new DatasetDeleter(getInputSupplier());
 		deleter.deleteDatasets(datasets);
-		getDatasetEventHandler().fireDatasetEvent(DatasetEvent.CLEAR_CACHE, datasets);
 		update();
 		treeTable.getColumnModel().getColumn(PopulationTreeTable.COLUMN_NAME).setHeaderValue("Dataset (0)");
 		treeTable.getColumnModel().getColumn(PopulationTreeTable.COLUMN_CELL_COUNT).setHeaderValue("Cells (0)");
@@ -471,29 +466,23 @@ public class PopulationsPanel extends DetailPanel implements DatasetAddedListene
 
 	}
 
-	@Override
-	public void eventReceived(UserActionEvent event) {
-
-		switch (event.type()) {
-		// catch any signals that affect the datasets directly
-		case UserActionEvent.MOVE_DATASET_DOWN_ACTION:
-			moveDataset(true);
-			break;
-		case UserActionEvent.MOVE_DATASET_UP_ACTION:
-			moveDataset(false);
-			break;
-		case UserActionEvent.DELETE_DATASET:
-			deleteSelectedDatasets();
-			break;
-		default: {
-			// Pass on events from the popup menu
-			if (event.sourceName().equals(PopulationListPopupMenu.SOURCE_COMPONENT))
-				getSignalChangeEventHandler().fireUserActionEvent(event.type());
-			break;
-		}
-		}
-
-	}
+//	@Override
+//	public void eventReceived(UserActionEvent event) {
+//
+//		switch (event.type()) {
+//		// catch any signals that affect the datasets directly
+//		case UserActionEvent.MOVE_DATASET_DOWN_ACTION:
+//			moveDataset(true);
+//			break;
+//		case UserActionEvent.MOVE_DATASET_UP_ACTION:
+//			moveDataset(false);
+//			break;
+//		case UserActionEvent.DELETE_DATASET:
+//			deleteSelectedDatasets();
+//			break;
+//		}
+//
+//	}
 
 	@Override
 	public void datasetSelectionUpdated(IAnalysisDataset d) {

@@ -81,15 +81,6 @@ public class NuclearMorphologyAnalysis {
 	}
 
 	/**
-	 * Get this program instance
-	 * 
-	 * @return
-	 */
-	public static NuclearMorphologyAnalysis getInstance() {
-		return instance;
-	}
-
-	/**
 	 * Log the program status handlers and files and configure the logging options
 	 * 
 	 */

@@ -23,13 +23,13 @@ import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.components.AnnotatedNucleusPanel;
 import com.bmskinner.nuclear_morphology.gui.dialogs.SubAnalysisSetupDialog;
-import com.bmskinner.nuclear_morphology.gui.events.DatasetEvent;
+import com.bmskinner.nuclear_morphology.gui.events.UserActionEvent;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.UIController;
+import com.bmskinner.nuclear_morphology.gui.events.revamp.UserActionController;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 public class ManualClusterAction extends SingleDatasetResultAction {
@@ -38,9 +38,8 @@ public class ManualClusterAction extends SingleDatasetResultAction {
 
 	private static final @NonNull String PROGRESS_BAR_LABEL = "Clustering cells";
 
-	public ManualClusterAction(IAnalysisDataset dataset, @NonNull ProgressBarAcceptor acceptor,
-			@NonNull EventHandler eh) {
-		super(dataset, PROGRESS_BAR_LABEL, acceptor, eh);
+	public ManualClusterAction(IAnalysisDataset dataset, @NonNull ProgressBarAcceptor acceptor) {
+		super(dataset, PROGRESS_BAR_LABEL, acceptor);
 	}
 
 	@Override
@@ -48,12 +47,12 @@ public class ManualClusterAction extends SingleDatasetResultAction {
 
 		try {
 			int maxGroups = dataset.getCollection().getCells().size() - 1; // more would be silly, fewer restrictive
-			int groups = eh.getInputSupplier().requestInt("Number of groups", 2, 2, maxGroups, 1);
+			int groups = is.requestInt("Number of groups", 2, 2, maxGroups, 1);
 
 			List<String> groupNames = new ArrayList<>();
 
 			for (int i = 1; i <= groups; i++) {
-				String name = eh.getInputSupplier().requestString("Name for group " + i);
+				String name = is.requestString("Name for group " + i);
 				groupNames.add(name);
 			}
 
@@ -61,7 +60,8 @@ public class ManualClusterAction extends SingleDatasetResultAction {
 
 			// blocks until closed
 			if (mc.isReadyToRun()) {
-				getDatasetEventHandler().fireDatasetEvent(DatasetEvent.SAVE, dataset);
+				UserActionController.getInstance()
+						.userActionEventReceived(new UserActionEvent(this, UserActionEvent.SAVE, List.of(dataset)));
 				UIController.getInstance().fireDatasetAdded(dataset);
 			}
 			cancel();

@@ -27,7 +27,6 @@ import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetProfilingMethod;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.core.DatasetListManager;
-import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.UIController;
@@ -47,25 +46,25 @@ public class RunProfilingAction extends SingleDatasetResultAction {
 	private static final @NonNull String PROGRESS_BAR_LABEL = "Profiling";
 
 	public RunProfilingAction(@NonNull final IAnalysisDataset dataset, int downFlag,
-			@NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh) {
-		super(dataset, PROGRESS_BAR_LABEL, acceptor, eh, downFlag);
+			@NonNull final ProgressBarAcceptor acceptor) {
+		super(dataset, PROGRESS_BAR_LABEL, acceptor, downFlag);
 	}
 
 	public RunProfilingAction(@NonNull final List<IAnalysisDataset> list, int downFlag,
-			@NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh) {
-		super(list, PROGRESS_BAR_LABEL, acceptor, eh, downFlag);
+			@NonNull final ProgressBarAcceptor acceptor) {
+		super(list, PROGRESS_BAR_LABEL, acceptor, downFlag);
 	}
 
 	public RunProfilingAction(@NonNull final IAnalysisDataset dataset, int downFlag,
-			@NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh, CountDownLatch latch) {
-		super(dataset, PROGRESS_BAR_LABEL, acceptor, eh, downFlag);
+			@NonNull final ProgressBarAcceptor acceptor, CountDownLatch latch) {
+		super(dataset, PROGRESS_BAR_LABEL, acceptor, downFlag);
 		this.setLatch(latch);
 
 	}
 
 	public RunProfilingAction(@NonNull final List<IAnalysisDataset> list, int downFlag,
-			@NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh, CountDownLatch latch) {
-		super(list, PROGRESS_BAR_LABEL, acceptor, eh, downFlag);
+			@NonNull final ProgressBarAcceptor acceptor, CountDownLatch latch) {
+		super(list, PROGRESS_BAR_LABEL, acceptor, downFlag);
 		this.setLatch(latch);
 
 	}
@@ -112,7 +111,6 @@ public class RunProfilingAction extends SingleDatasetResultAction {
 			if (!hasRemainingDatasetsToProcess()) {
 
 				cancel();
-				getDatasetEventHandler().removeListener(eh);
 				countdownLatch();
 
 			} else {
@@ -120,7 +118,7 @@ public class RunProfilingAction extends SingleDatasetResultAction {
 				cancel(); // remove progress bar
 
 				Runnable p = new RunProfilingAction(getRemainingDatasetsToProcess(), downFlag, progressAcceptors.get(0),
-						eh, getLatch().get());
+						getLatch().get());
 				p.run();
 
 			}
