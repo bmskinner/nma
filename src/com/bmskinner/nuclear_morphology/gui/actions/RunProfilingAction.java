@@ -76,10 +76,8 @@ public class RunProfilingAction extends SingleDatasetResultAction {
 
 	private void runNewAnalysis() {
 		try {
-			String message = "Profiling: " + dataset.getName();
-			LOGGER.fine("Beginning profliling action");
 
-			this.setProgressMessage(message);
+			this.setProgressMessage("Profiling: " + dataset.getName());
 			IAnalysisMethod method = new DatasetProfilingMethod(dataset);
 			worker = new DefaultAnalysisWorker(method);
 

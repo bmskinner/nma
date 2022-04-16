@@ -26,18 +26,13 @@ import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.LandmarkType;
 import com.bmskinner.nuclear_morphology.components.profiles.SegmentationHandler;
 import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
-import com.bmskinner.nuclear_morphology.gui.events.LandmarkUpdateEvent;
-import com.bmskinner.nuclear_morphology.gui.events.LandmarkUpdateEventListener;
-import com.bmskinner.nuclear_morphology.gui.events.SegmentEvent;
-import com.bmskinner.nuclear_morphology.gui.events.SegmentEventListener;
 import com.bmskinner.nuclear_morphology.gui.events.UserActionEvent;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.UserActionController;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.EditingTabPanel;
 
 @SuppressWarnings("serial")
-public abstract class AbstractEditingPanel extends DetailPanel
-		implements SegmentEventListener, LandmarkUpdateEventListener, EditingTabPanel {
+public abstract class AbstractEditingPanel extends DetailPanel implements EditingTabPanel {
 
 	private static final Logger LOGGER = Logger.getLogger(AbstractEditingPanel.class.getName());
 
@@ -137,13 +132,4 @@ public abstract class AbstractEditingPanel extends DetailPanel
 				.userActionEventReceived(new UserActionEvent(this, UserActionEvent.REFRESH_MORPHOLOGY, getDatasets()));
 
 	}
-
-	@Override
-	public void landmarkUpdateEventReceived(LandmarkUpdateEvent event) {
-	}
-
-	@Override
-	public void segmentEventReceived(SegmentEvent event) {
-	}
-
 }

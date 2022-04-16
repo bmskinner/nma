@@ -65,7 +65,6 @@ public class CellOutlinePanel extends AbstractCellDetailPanel
 		add(header, BorderLayout.NORTH);
 
 		imagePanel = new InteractiveCellPanel(this);
-		imagePanel.addSegmentEventListener(this);
 
 		add(imagePanel, BorderLayout.CENTER);
 	}
@@ -159,7 +158,7 @@ public class CellOutlinePanel extends AbstractCellDetailPanel
 		this.update();
 	}
 
-	@Override
+//	@Override
 	public void segmentEventReceived(SegmentEvent event) {
 
 		if (event.type.equals(SegmentUpdateType.MOVE_START_INDEX)) {

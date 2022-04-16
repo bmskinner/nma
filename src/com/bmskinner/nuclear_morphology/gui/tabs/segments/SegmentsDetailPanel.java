@@ -18,12 +18,8 @@ package com.bmskinner.nuclear_morphology.gui.tabs.segments;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 
-import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
-import javax.swing.border.EmptyBorder;
 
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 
@@ -32,62 +28,30 @@ public class SegmentsDetailPanel extends DetailPanel {
 
 	private static final String PANEL_TITLE_LBL = "Nuclear segments";
 
-	private JTabbedPane tabPanel;
-
 	public SegmentsDetailPanel() {
 		super();
 		this.setLayout(new BorderLayout());
 
-		tabPanel = new JTabbedPane(JTabbedPane.TOP);
-		tabPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
+		JTabbedPane tabPanel = new JTabbedPane(JTabbedPane.TOP);
 
-		DetailPanel segmentProfilePanel = new SegmentProfilePanel();
 		DetailPanel segmentBoxplotsPanel = new SegmentBoxplotsPanel();
 		DetailPanel segmentWilcoxonPanel = new SegmentWilcoxonPanel();
 		DetailPanel segmentMagnitudePanel = new SegmentMagnitudePanel();
-		DetailPanel segmentStatsPanel = new SegmentStatsPanel();
+//		DetailPanel segmentStatsPanel = new SegmentStatsPanel();
 
 		Dimension minimumChartSize = new Dimension(100, 100);
 
-		segmentProfilePanel.setMinimumSize(minimumChartSize);
-		segmentProfilePanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		segmentBoxplotsPanel.setMinimumSize(minimumChartSize);
 		segmentWilcoxonPanel.setMinimumSize(minimumChartSize);
 		segmentMagnitudePanel.setMinimumSize(minimumChartSize);
-		segmentStatsPanel.setMinimumSize(minimumChartSize);
-		segmentStatsPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
+//		segmentStatsPanel.setMinimumSize(minimumChartSize);
 
+//		tabPanel.addTab(segmentStatsPanel.getPanelTitle(), segmentStatsPanel);
 		tabPanel.addTab(segmentBoxplotsPanel.getPanelTitle(), segmentBoxplotsPanel);
 		tabPanel.addTab(segmentWilcoxonPanel.getPanelTitle(), segmentWilcoxonPanel);
 		tabPanel.addTab(segmentMagnitudePanel.getPanelTitle(), segmentMagnitudePanel);
 
-		JPanel mainPanel = new JPanel(new GridBagLayout());
-		GridBagConstraints constraints = new GridBagConstraints();
-		constraints.fill = GridBagConstraints.BOTH;
-		constraints.gridx = 0;
-		constraints.gridy = 0;
-		constraints.gridheight = 1;
-		constraints.gridwidth = 1;
-		constraints.weightx = 1;
-		constraints.weighty = 0.5;
-		constraints.anchor = GridBagConstraints.CENTER;
-
-		mainPanel.add(segmentStatsPanel, constraints);
-
-		constraints.gridx = 0;
-		constraints.gridy = 1;
-		constraints.gridheight = 1;
-		constraints.gridwidth = 1;
-		constraints.weighty = 1;
-		mainPanel.add(segmentProfilePanel, constraints);
-
-		constraints.gridx = 1;
-		constraints.gridy = 0;
-		constraints.gridheight = 2;
-		constraints.gridwidth = 1;
-		mainPanel.add(tabPanel, constraints);
-
-		this.add(mainPanel, BorderLayout.CENTER);
+		this.add(tabPanel, BorderLayout.CENTER);
 
 	}
 

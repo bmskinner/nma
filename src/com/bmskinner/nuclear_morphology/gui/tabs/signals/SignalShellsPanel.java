@@ -73,13 +73,13 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.reports.DemoReportGenerator;
 import com.bmskinner.nuclear_morphology.visualisation.charts.ShellChartFactory;
 import com.bmskinner.nuclear_morphology.visualisation.charts.panels.ExportableChartPanel;
-import com.bmskinner.nuclear_morphology.visualisation.datasets.AnalysisDatasetTableCreator;
-import com.bmskinner.nuclear_morphology.visualisation.datasets.tables.AbstractTableCreator;
-import com.bmskinner.nuclear_morphology.visualisation.datasets.tables.NuclearSignalTableCreator;
 import com.bmskinner.nuclear_morphology.visualisation.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.visualisation.options.ChartOptionsBuilder;
 import com.bmskinner.nuclear_morphology.visualisation.options.TableOptions;
 import com.bmskinner.nuclear_morphology.visualisation.options.TableOptionsBuilder;
+import com.bmskinner.nuclear_morphology.visualisation.tables.AbstractTableCreator;
+import com.bmskinner.nuclear_morphology.visualisation.tables.AnalysisDatasetTableCreator;
+import com.bmskinner.nuclear_morphology.visualisation.tables.NuclearSignalTableCreator;
 
 /**
  * Holds information on shell analysis results, and allows new shell analyses to

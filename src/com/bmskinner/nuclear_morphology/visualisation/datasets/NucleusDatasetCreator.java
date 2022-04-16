@@ -103,7 +103,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 	 */
 	public BoxAndWhiskerCategoryDataset createBoxplotDataset() throws ChartDatasetCreationException {
 		List<IAnalysisDataset> datasets = options.getDatasets();
-		Measurement stat = options.getStat();
+		Measurement stat = options.getMeasurement();
 		MeasurementScale scale = options.getScale();
 		ExportableBoxAndWhiskerCategoryDataset ds = new ExportableBoxAndWhiskerCategoryDataset();
 
@@ -126,7 +126,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 	 */
 	public BoxAndWhiskerCategoryDataset createSegmentStatDataset() throws ChartDatasetCreationException {
 
-		Measurement stat = options.getStat();
+		Measurement stat = options.getMeasurement();
 
 		if (stat.equals(Measurement.LENGTH)) {
 			return createSegmentLengthDataset(options.getDatasets(), options.getSegPosition(), options.getScale());

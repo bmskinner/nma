@@ -21,11 +21,11 @@ import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 
+import org.eclipse.jdt.annotation.Nullable;
 import org.jfree.chart.ChartMouseEvent;
 import org.jfree.chart.ChartMouseListener;
 import org.jfree.chart.entity.XYItemEntity;
@@ -34,6 +34,7 @@ import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.gui.events.LandmarkUpdateEvent;
+import com.bmskinner.nuclear_morphology.gui.events.revamp.UserActionController;
 
 public class BorderTagDualChartPanel extends DualChartPanel {
 
@@ -72,21 +73,10 @@ public class BorderTagDualChartPanel extends DualChartPanel {
 		chartPanel.setDomainZoomable(false);
 	}
 
-	public void createBorderTagPopup(ICell cell) {
-		Set<Landmark> set = cell.getPrimaryNucleus().getLandmarks().keySet();
-		List<Landmark> list = new ArrayList<Landmark>(set);
-		makePopup(list);
-
-	}
-
-	public synchronized void createBorderTagPopup(IAnalysisDataset dataset) {
+	public synchronized void createLandmarkPopup(@Nullable IAnalysisDataset dataset, @Nullable ICell c) {
 		if (dataset == null)
 			return;
 		List<Landmark> list = dataset.getCollection().getProfileCollection().getLandmarks();
-		makePopup(list);
-	}
-
-	private void makePopup(List<Landmark> list) {
 		popupMenu = new JPopupMenu("Popup");
 
 		Collections.sort(list);
@@ -96,7 +86,8 @@ public class BorderTagDualChartPanel extends DualChartPanel {
 			JMenuItem item = new JMenuItem(tag.toString());
 
 			item.addActionListener(e -> {
-				fireLandmarkUpdateEvent(new LandmarkUpdateEvent(item, tag, activeProfileIndex));
+				UserActionController.getInstance().landmarkUpdateEventReceived(
+						new LandmarkUpdateEvent(item, dataset, c, tag, activeProfileIndex));
 			});
 			popupMenu.add(item);
 		}
@@ -121,7 +112,8 @@ public class BorderTagDualChartPanel extends DualChartPanel {
 				item.setForeground(Color.DARK_GRAY);
 
 				item.addActionListener(e -> {
-					fireLandmarkUpdateEvent(new LandmarkUpdateEvent(item, tag, activeProfileIndex));
+					UserActionController.getInstance().landmarkUpdateEventReceived(
+							new LandmarkUpdateEvent(item, dataset, c, tag, activeProfileIndex));
 				});
 				popupMenu.add(item);
 			}

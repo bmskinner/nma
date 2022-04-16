@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package com.bmskinner.nuclear_morphology.visualisation.datasets.tables;
+package com.bmskinner.nuclear_morphology.visualisation.tables;
 
 import java.text.DecimalFormat;
 import java.util.List;
@@ -73,7 +73,7 @@ public class ScatterTableDatasetCreator extends AbstractTableCreator {
             return createBlankTable();
         }
 
-        Measurement firstStat = options.getStat();
+        Measurement firstStat = options.getMeasurement();
 
         for (Measurement stat : options.getStats()) {
             if (!stat.getClass().equals(firstStat.getClass())) {

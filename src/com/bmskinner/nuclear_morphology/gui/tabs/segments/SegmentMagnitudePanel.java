@@ -24,137 +24,135 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.table.TableModel;
 
-import org.eclipse.jdt.annotation.NonNull;
-
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 import com.bmskinner.nuclear_morphology.gui.components.renderers.PairwiseTableCellRenderer;
 import com.bmskinner.nuclear_morphology.gui.tabs.AbstractPairwiseDetailPanel;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
-import com.bmskinner.nuclear_morphology.visualisation.datasets.AnalysisDatasetTableCreator;
-import com.bmskinner.nuclear_morphology.visualisation.datasets.tables.AbstractTableCreator;
 import com.bmskinner.nuclear_morphology.visualisation.options.TableOptions;
 import com.bmskinner.nuclear_morphology.visualisation.options.TableOptionsBuilder;
+import com.bmskinner.nuclear_morphology.visualisation.tables.AbstractTableCreator;
+import com.bmskinner.nuclear_morphology.visualisation.tables.AnalysisDatasetTableCreator;
 
 @SuppressWarnings("serial")
 public class SegmentMagnitudePanel extends AbstractPairwiseDetailPanel {
-	
+
 	private static final Logger LOGGER = Logger.getLogger(SegmentMagnitudePanel.class.getName());
 
-    private static final String PANEL_TITLE_LBL = "Magnitude";
-    
-    public SegmentMagnitudePanel() {
-        super();
-    }
-    
-    @Override
-    public String getPanelTitle(){
-        return PANEL_TITLE_LBL;
-    }
+	private static final String PANEL_TITLE_LBL = "Magnitude";
 
-    /**
-     * Create the info panel
-     * 
-     * @return
-     */
-    @Override
-    protected JPanel createInfoPanel() {
-        JPanel infoPanel = new JPanel();
-        infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
-        infoPanel.add(new JLabel("Pairwise magnitude comparisons between populations"));
-        infoPanel.add(new JLabel("Row median value as a proportion of column median value"));
-        return infoPanel;
-    }
+	public SegmentMagnitudePanel() {
+		super();
+	}
 
-    @Override
-    protected synchronized void updateSingle() {
-        tablePanel = createTablePanel();
-        scrollPane.setColumnHeaderView(null);
+	@Override
+	public String getPanelTitle() {
+		return PANEL_TITLE_LBL;
+	}
 
-        JPanel labelPanel = new JPanel();
-        labelPanel.add(new JLabel(Labels.SINGLE_DATASET, JLabel.CENTER));
-        tablePanel.add(labelPanel);
-        scrollPane.setViewportView(tablePanel);
-        tablePanel.repaint();
+	/**
+	 * Create the info panel
+	 * 
+	 * @return
+	 */
+	@Override
+	protected JPanel createInfoPanel() {
+		JPanel infoPanel = new JPanel();
+		infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
+		infoPanel.add(new JLabel("Pairwise magnitude comparisons between populations"));
+		infoPanel.add(new JLabel("Row median value as a proportion of column median value"));
+		return infoPanel;
+	}
 
-    }
+	@Override
+	protected synchronized void updateSingle() {
+		tablePanel = createTablePanel();
+		scrollPane.setColumnHeaderView(null);
 
-    @Override
-    protected synchronized void updateMultiple() {
-        tablePanel = createTablePanel();
-        scrollPane.setColumnHeaderView(null);
+		JPanel labelPanel = new JPanel();
+		labelPanel.add(new JLabel(Labels.SINGLE_DATASET, JLabel.CENTER));
+		tablePanel.add(labelPanel);
+		scrollPane.setViewportView(tablePanel);
+		tablePanel.repaint();
 
-        if (IProfileSegment.segmentCountsMatch(getDatasets())) {
+	}
 
-            List<IProfileSegment> segments;
-            try {
-                segments = activeDataset().getCollection().getProfileCollection().getSegments(Landmark.REFERENCE_POINT);
-            } catch (MissingLandmarkException | ProfileException e) {
-                LOGGER.warning("Cannot get segments");
-                LOGGER.log(Loggable.STACK, "Cannot get segments", e);
-                return;
-            }
+	@Override
+	protected synchronized void updateMultiple() {
+		tablePanel = createTablePanel();
+		scrollPane.setColumnHeaderView(null);
 
-            for (Measurement stat : Measurement.getSegmentStats()) {
+		if (IProfileSegment.segmentCountsMatch(getDatasets())) {
 
-                // Get each segment as a boxplot
-                for (IProfileSegment seg : segments) {
-                    String segName = seg.getName();
+			List<IProfileSegment> segments;
+			try {
+				segments = activeDataset().getCollection().getProfileCollection().getSegments(Landmark.REFERENCE_POINT);
+			} catch (MissingLandmarkException | ProfileException e) {
+				LOGGER.warning("Cannot get segments");
+				LOGGER.log(Loggable.STACK, "Cannot get segments", e);
+				return;
+			}
 
-                    ExportableTable table = new ExportableTable(AbstractTableCreator.createLoadingTable());
+			for (Measurement stat : Measurement.getSegmentStats()) {
 
-                    TableOptions options = new TableOptionsBuilder().setDatasets(getDatasets()).addStatistic(stat)
-                            .setSegPosition(seg.getPosition()).setTarget(table)
-                            .setColumnRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN, new PairwiseTableCellRenderer()).build();
+				// Get each segment as a boxplot
+				for (IProfileSegment seg : segments) {
+					String segName = seg.getName();
 
-                    addWilconxonTable(tablePanel, table, stat.toString() + " - " + segName);
-                    scrollPane.setColumnHeaderView(table.getTableHeader());
-                    setTable(options);
+					ExportableTable table = new ExportableTable(AbstractTableCreator.createLoadingTable());
 
-                }
+					TableOptions options = new TableOptionsBuilder().setDatasets(getDatasets()).addStatistic(stat)
+							.setSegPosition(seg.getPosition()).setTarget(table)
+							.setColumnRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN, new PairwiseTableCellRenderer())
+							.build();
 
-            }
-            tablePanel.revalidate();
+					addWilconxonTable(tablePanel, table, segName + ": " + stat.toString());
+					scrollPane.setColumnHeaderView(table.getTableHeader());
+					setTable(options);
 
-        } else {
+				}
 
-            JPanel labelPanel = new JPanel();
-            // Separate so we can use a flow layout for the label
-            labelPanel.add(new JLabel(Labels.INCONSISTENT_SEGMENT_NUMBER, JLabel.CENTER));
-            tablePanel.add(labelPanel);
-        }
+			}
+			tablePanel.revalidate();
 
-        scrollPane.setViewportView(tablePanel);
-        tablePanel.repaint();
+		} else {
 
-    }
+			JPanel labelPanel = new JPanel();
+			// Separate so we can use a flow layout for the label
+			labelPanel.add(new JLabel(Labels.INCONSISTENT_SEGMENT_NUMBER, JLabel.CENTER));
+			tablePanel.add(labelPanel);
+		}
 
-    @Override
-    protected synchronized void updateNull() {
-        tablePanel = createTablePanel();
-        scrollPane.setColumnHeaderView(null);
+		scrollPane.setViewportView(tablePanel);
+		tablePanel.repaint();
 
-        JPanel labelPanel = new JPanel();
-        // Separate so we can use a flow layout for the label
-        labelPanel.add(new JLabel(Labels.NO_DATA_LOADED, JLabel.CENTER));
-        tablePanel.add(labelPanel);
+	}
 
-        scrollPane.setViewportView(tablePanel);
-        tablePanel.repaint();
+	@Override
+	protected synchronized void updateNull() {
+		tablePanel = createTablePanel();
+		scrollPane.setColumnHeaderView(null);
 
-    }
+		JPanel labelPanel = new JPanel();
+		// Separate so we can use a flow layout for the label
+		labelPanel.add(new JLabel(Labels.NO_DATA_LOADED, JLabel.CENTER));
+		tablePanel.add(labelPanel);
 
-    @Override
-    protected TableModel createPanelTableType(TableOptions options) {
-        return new AnalysisDatasetTableCreator(options)
-                .createMagnitudeStatisticTable(CellularComponent.NUCLEAR_BORDER_SEGMENT);
-    }
+		scrollPane.setViewportView(tablePanel);
+		tablePanel.repaint();
+
+	}
+
+	@Override
+	protected TableModel createPanelTableType(TableOptions options) {
+		return new AnalysisDatasetTableCreator(options)
+				.createMagnitudeStatisticTable(CellularComponent.NUCLEAR_BORDER_SEGMENT);
+	}
 
 }

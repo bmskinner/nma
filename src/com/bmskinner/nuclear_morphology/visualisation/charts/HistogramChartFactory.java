@@ -171,7 +171,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
             return createSignalDensityStatsChart();
         }
 
-        Measurement stat = options.getStat();
+        Measurement stat = options.getMeasurement();
 
         List<HistogramDataset> list;
         try {
@@ -260,7 +260,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
             return createErrorChart();
         }
 
-        String xLabel = options.getStat().label(options.getScale());
+        String xLabel = options.getMeasurement().label(options.getScale());
         JFreeChart chart = ChartFactory.createXYLineChart(null, xLabel, "Probability", list.get(0),
                 PlotOrientation.VERTICAL, true, true, false);
 

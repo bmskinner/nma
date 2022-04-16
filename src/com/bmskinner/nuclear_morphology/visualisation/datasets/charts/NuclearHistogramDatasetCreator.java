@@ -62,7 +62,7 @@ public class NuclearHistogramDatasetCreator extends HistogramDatasetCreator {
     public HistogramDataset createNuclearStatsHistogramDataset() throws ChartDatasetCreationException {
         HistogramDataset ds = new HistogramDataset();
 
-        LOGGER.finest( "Creating histogram dataset: " + options.getStat());
+        LOGGER.finest( "Creating histogram dataset: " + options.getMeasurement());
         if (!options.hasDatasets()) {
             return ds;
         }
@@ -71,7 +71,7 @@ public class NuclearHistogramDatasetCreator extends HistogramDatasetCreator {
 
             ICellCollection collection = dataset.getCollection();
 
-            Measurement stat = options.getStat();
+            Measurement stat = options.getMeasurement();
             double[] values = collection.getRawValues(stat, CellularComponent.NUCLEUS, options.getScale());
 
             double[] minMaxStep = findMinAndMaxForHistogram(values);
@@ -109,7 +109,7 @@ public class NuclearHistogramDatasetCreator extends HistogramDatasetCreator {
         }
 
         List<IAnalysisDataset> list = options.getDatasets();
-        Measurement stat = options.getStat();
+        Measurement stat = options.getMeasurement();
         MeasurementScale scale = options.getScale();
 
         int[] minMaxRange = calculateMinAndMaxRange(list, stat, CellularComponent.NUCLEUS, scale);
@@ -162,7 +162,7 @@ public class NuclearHistogramDatasetCreator extends HistogramDatasetCreator {
     public HistogramDataset createSegmentLengthHistogramDataset() throws ChartDatasetCreationException {
         HistogramDataset ds = new HistogramDataset();
 
-        LOGGER.finest( "Creating histogram dataset: " + options.getStat());
+        LOGGER.finest( "Creating histogram dataset: " + options.getMeasurement());
 
         if (!options.hasDatasets()) {
             return ds;

@@ -21,6 +21,7 @@ import java.awt.BorderLayout;
 import javax.swing.JTabbedPane;
 
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
+import com.bmskinner.nuclear_morphology.gui.tabs.cells_detail.IndividualCellDetailPanel;
 
 /**
  * Shows aggregate stats for the cells in datasets
@@ -32,18 +33,18 @@ import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 @SuppressWarnings("serial")
 public class CellsDetailPanel extends DetailPanel {
 
-	private static final String PANEL_TITLE_LBL = "Cell charts";
-
-	private JTabbedPane tabPane;
+	private static final String PANEL_TITLE_LBL = "Cells";
 
 	public CellsDetailPanel() {
 		super(PANEL_TITLE_LBL);
 
 		this.setLayout(new BorderLayout());
-		tabPane = new JTabbedPane(JTabbedPane.TOP);
+		JTabbedPane tabPane = new JTabbedPane(JTabbedPane.TOP);
 
 		DetailPanel boxplotPanel = new CellsBoxplotsPanel();
+		DetailPanel cellDetailPanel = new IndividualCellDetailPanel();
 
+		tabPane.addTab(cellDetailPanel.getPanelTitle(), cellDetailPanel);
 		tabPane.addTab(boxplotPanel.getPanelTitle(), boxplotPanel);
 
 		this.add(tabPane, BorderLayout.CENTER);

@@ -98,7 +98,7 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
      */
     private ViolinCategoryDataset createCellStatisticViolinDataset() {
         List<IAnalysisDataset> datasets = options.getDatasets();
-        Measurement stat = options.getStat();
+        Measurement stat = options.getMeasurement();
         MeasurementScale scale = options.getScale();
         ViolinCategoryDataset ds = new ViolinCategoryDataset();
 
@@ -130,7 +130,7 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
      */
     private ViolinCategoryDataset createNucleusStatisticViolinDataset() {
         List<IAnalysisDataset> datasets = options.getDatasets();
-        Measurement stat = options.getStat();
+        Measurement stat = options.getMeasurement();
         MeasurementScale scale = options.getScale();
         ViolinCategoryDataset ds = new ViolinCategoryDataset();
 
@@ -162,7 +162,7 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
     private ViolinCategoryDataset createSignalStatisticViolinDataset() {
 
         List<IAnalysisDataset> datasets = options.getDatasets();
-        Measurement stat = options.getStat();
+        Measurement stat = options.getMeasurement();
         MeasurementScale scale = options.getScale();
         ViolinCategoryDataset ds = new ViolinCategoryDataset();
         for (@NonNull IAnalysisDataset d : datasets) {
@@ -208,7 +208,7 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 
         LOGGER.finest( "Making segment statistic dataset");
 
-        Measurement stat = options.getStat();
+        Measurement stat = options.getMeasurement();
 
         if (stat.equals(Measurement.LENGTH)) {
             return createSegmentLengthDataset(options.getDatasets(), options.getSegPosition());

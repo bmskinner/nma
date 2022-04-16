@@ -91,7 +91,7 @@ public interface DisplayOptions {
      * 
      * @return
      */
-    public Measurement getStat();
+    public Measurement getMeasurement();
 
     /**
      * Get the saved stats

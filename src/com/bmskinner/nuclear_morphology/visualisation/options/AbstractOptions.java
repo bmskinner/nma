@@ -145,7 +145,7 @@ public abstract class AbstractOptions extends com.bmskinner.nuclear_morphology.c
     }
 
     @Override
-    public Measurement getStat() {
+    public Measurement getMeasurement() {
         return stats.get(0);
     }
 

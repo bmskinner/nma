@@ -43,11 +43,11 @@ import com.bmskinner.nuclear_morphology.gui.components.renderers.JTextAreaCellRe
 import com.bmskinner.nuclear_morphology.gui.events.UserActionEvent;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.UserActionController;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
-import com.bmskinner.nuclear_morphology.visualisation.datasets.AnalysisDatasetTableCreator;
-import com.bmskinner.nuclear_morphology.visualisation.datasets.tables.AbstractTableCreator;
 import com.bmskinner.nuclear_morphology.visualisation.options.AbstractOptions;
 import com.bmskinner.nuclear_morphology.visualisation.options.TableOptions;
 import com.bmskinner.nuclear_morphology.visualisation.options.TableOptionsBuilder;
+import com.bmskinner.nuclear_morphology.visualisation.tables.AbstractTableCreator;
+import com.bmskinner.nuclear_morphology.visualisation.tables.AnalysisDatasetTableCreator;
 
 /**
  * This panel shows any merge sources for a merged dataset, and the analysis

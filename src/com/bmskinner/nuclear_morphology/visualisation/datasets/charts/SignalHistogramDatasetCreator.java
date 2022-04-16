@@ -105,7 +105,7 @@ public class SignalHistogramDatasetCreator extends HistogramDatasetCreator {
     public List<DefaultXYDataset> createSignalDensityHistogramDataset() throws ChartDatasetCreationException {
 
         List<IAnalysisDataset> list = options.getDatasets();
-        Measurement stat = options.getStat();
+        Measurement stat = options.getMeasurement();
         MeasurementScale scale = options.getScale();
 
         List<DefaultXYDataset> result = new ArrayList<DefaultXYDataset>();

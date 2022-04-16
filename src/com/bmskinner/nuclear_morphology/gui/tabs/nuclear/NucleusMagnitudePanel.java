@@ -37,9 +37,9 @@ import com.bmskinner.nuclear_morphology.gui.components.panels.WrappedLabel;
 import com.bmskinner.nuclear_morphology.gui.components.renderers.PairwiseTableCellRenderer;
 import com.bmskinner.nuclear_morphology.gui.dialogs.RandomSamplingDialog;
 import com.bmskinner.nuclear_morphology.gui.tabs.AbstractPairwiseDetailPanel;
-import com.bmskinner.nuclear_morphology.visualisation.datasets.AnalysisDatasetTableCreator;
 import com.bmskinner.nuclear_morphology.visualisation.options.TableOptions;
 import com.bmskinner.nuclear_morphology.visualisation.options.TableOptionsBuilder;
+import com.bmskinner.nuclear_morphology.visualisation.tables.AnalysisDatasetTableCreator;
 
 @SuppressWarnings("serial")
 public class NucleusMagnitudePanel extends AbstractPairwiseDetailPanel {

@@ -20,28 +20,30 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.text.NumberFormat;
+import java.util.List;
 
 import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import javax.swing.table.TableModel;
 
-import org.eclipse.jdt.annotation.NonNull;
-
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
-import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
+import com.bmskinner.nuclear_morphology.gui.events.revamp.ScaleUpdatedListener;
+import com.bmskinner.nuclear_morphology.gui.events.revamp.SwatchUpdatedListener;
+import com.bmskinner.nuclear_morphology.gui.events.revamp.UIController;
 import com.bmskinner.nuclear_morphology.gui.tabs.TableDetailPanel;
 import com.bmskinner.nuclear_morphology.stats.SignificanceTest;
-import com.bmskinner.nuclear_morphology.visualisation.datasets.AnalysisDatasetTableCreator;
-import com.bmskinner.nuclear_morphology.visualisation.datasets.tables.AbstractTableCreator;
 import com.bmskinner.nuclear_morphology.visualisation.options.TableOptions;
 import com.bmskinner.nuclear_morphology.visualisation.options.TableOptionsBuilder;
+import com.bmskinner.nuclear_morphology.visualisation.tables.AbstractTableCreator;
+import com.bmskinner.nuclear_morphology.visualisation.tables.AnalysisDatasetTableCreator;
 
-public class SegmentStatsPanel extends TableDetailPanel {
+public class SegmentStatsPanel extends TableDetailPanel implements ScaleUpdatedListener, SwatchUpdatedListener {
 
-	private static final String PANEL_TITLE_LBL = "Segment stats";
+	private static final String PANEL_TITLE_LBL = "Measurements";
 
 	private static final long serialVersionUID = 1L;
 	private ExportableTable table; // individual segment stats
@@ -63,6 +65,9 @@ public class SegmentStatsPanel extends TableDetailPanel {
 		scrollPane.setColumnHeaderView(table.getTableHeader());
 
 		this.add(scrollPane, BorderLayout.CENTER);
+
+		UIController.getInstance().addScaleUpdatedListener(this);
+		UIController.getInstance().addSwatchUpdatedListener(this);
 	}
 
 	@Override
@@ -168,6 +173,26 @@ public class SegmentStatsPanel extends TableDetailPanel {
 			l.setBackground(colour);
 			return l;
 		}
+	}
+
+	@Override
+	public void scaleUpdated(List<IAnalysisDataset> datasets) {
+		refreshCache(datasets);
+	}
+
+	@Override
+	public void scaleUpdated(IAnalysisDataset dataset) {
+		refreshCache(dataset);
+	}
+
+	@Override
+	public void scaleUpdated() {
+		update();
+	}
+
+	@Override
+	public void swatchUpdated() {
+		update();
 	}
 
 }

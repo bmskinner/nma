@@ -80,7 +80,7 @@ public class ScatterChartFactory extends AbstractChartFactory {
         if (options.getStats().size() != 2)
             return createTextAnnotatedEmptyChart("Only one variable selected");
 
-        Measurement firstStat = options.getStat();
+        Measurement firstStat = options.getMeasurement();
 
         for (Measurement stat : options.getStats()) {
             if (!stat.getClass().equals(firstStat.getClass())) {

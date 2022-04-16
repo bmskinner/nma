@@ -18,30 +18,31 @@ package com.bmskinner.nuclear_morphology.gui.tabs.nuclear;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.util.List;
 import java.util.logging.Logger;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.table.TableModel;
 
-import org.eclipse.jdt.annotation.NonNull;
-
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
-import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
+import com.bmskinner.nuclear_morphology.gui.events.revamp.ScaleUpdatedListener;
+import com.bmskinner.nuclear_morphology.gui.events.revamp.UIController;
 import com.bmskinner.nuclear_morphology.gui.tabs.TableDetailPanel;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
-import com.bmskinner.nuclear_morphology.visualisation.datasets.AnalysisDatasetTableCreator;
-import com.bmskinner.nuclear_morphology.visualisation.datasets.tables.AbstractTableCreator;
 import com.bmskinner.nuclear_morphology.visualisation.options.TableOptions;
 import com.bmskinner.nuclear_morphology.visualisation.options.TableOptionsBuilder;
+import com.bmskinner.nuclear_morphology.visualisation.tables.AbstractTableCreator;
+import com.bmskinner.nuclear_morphology.visualisation.tables.AnalysisDatasetTableCreator;
 
 @SuppressWarnings("serial")
-public class NuclearStatsPanel extends TableDetailPanel {
+public class NuclearStatsPanel extends TableDetailPanel implements ScaleUpdatedListener {
 
 	private static final Logger LOGGER = Logger.getLogger(NuclearStatsPanel.class.getName());
 
-	private static final String PANEL_TITLE_LBL = "Average stats";
+	private static final String PANEL_TITLE_LBL = "Measurements";
 	private ExportableTable tablePopulationStats;
 
 	public NuclearStatsPanel() {
@@ -56,6 +57,8 @@ public class NuclearStatsPanel extends TableDetailPanel {
 		this.add(headerPanel, BorderLayout.NORTH);
 
 		this.add(statsPanel, BorderLayout.CENTER);
+
+		UIController.getInstance().addScaleUpdatedListener(this);
 
 	}
 
@@ -140,5 +143,20 @@ public class NuclearStatsPanel extends TableDetailPanel {
 			LOGGER.log(Loggable.STACK, "Error creating stats panel", e);
 		}
 		return scrollPane;
+	}
+
+	@Override
+	public void scaleUpdated(List<IAnalysisDataset> datasets) {
+		update(datasets); // no need to recache, we will keep existing charts
+	}
+
+	@Override
+	public void scaleUpdated(IAnalysisDataset dataset) {
+		update(List.of(dataset));
+	}
+
+	@Override
+	public void scaleUpdated() {
+		update();
 	}
 }

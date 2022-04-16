@@ -27,11 +27,8 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 
-import org.eclipse.jdt.annotation.NonNull;
-
-import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.components.panels.WrappedLabel;
-import com.bmskinner.nuclear_morphology.visualisation.datasets.tables.AbstractTableCreator;
+import com.bmskinner.nuclear_morphology.visualisation.tables.AbstractTableCreator;
 
 @SuppressWarnings("serial")
 public abstract class AbstractPairwiseDetailPanel extends TableDetailPanel {
@@ -72,7 +69,7 @@ public abstract class AbstractPairwiseDetailPanel extends TableDetailPanel {
 		JPanel infoPanel = new JPanel();
 		infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
 
-		String infoString = "Pairwise comparisons between populations using Mann-Whitney U test\n"
+		String infoString = "Pairwise comparisons between populations using Mann-Whitney U test (aka Wilcoxon rank sum test)\n"
 				+ "Above the diagonal: Mann-Whitney U statistics\n" + "Below the diagonal: p-values\n"
 				+ "Significant values at 5% and 1% levels after Bonferroni correction are highlighted in yellow and green";
 

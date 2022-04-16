@@ -14,6 +14,13 @@ import com.bmskinner.nuclear_morphology.gui.actions.RunSegmentationAction;
 import com.bmskinner.nuclear_morphology.gui.actions.SingleDatasetResultAction;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.UIController;
 
+/**
+ * A runnable linking the main actions of an analysis: profiling, segmentation,
+ * refolding and saving.
+ * 
+ * @author ben
+ *
+ */
 public class MorphologyAnalysis implements Runnable {
 
 	private static final Logger LOGGER = Logger.getLogger(MorphologyAnalysis.class.getName());
@@ -21,6 +28,12 @@ public class MorphologyAnalysis implements Runnable {
 	private final List<IAnalysisDataset> datasets;
 	private final ProgressBarAcceptor pa;
 
+	/**
+	 * Create with datasets to analyse and an acceptor for progress bars
+	 * 
+	 * @param datasets
+	 * @param pa
+	 */
 	public MorphologyAnalysis(List<IAnalysisDataset> datasets, ProgressBarAcceptor pa) {
 		this.datasets = datasets;
 		this.pa = pa;
@@ -35,7 +48,7 @@ public class MorphologyAnalysis implements Runnable {
 		final CountDownLatch saveLatch = new CountDownLatch(1);
 
 		new Thread(() -> { // run profiling
-			LOGGER.finer("Starting profiling action");
+			LOGGER.fine("Starting profiling");
 			new RunProfilingAction(datasets, SingleDatasetResultAction.NO_FLAG, pa, profileLatch).run();
 
 		}).start();
@@ -43,7 +56,7 @@ public class MorphologyAnalysis implements Runnable {
 		new Thread(() -> { // wait for profiling and run segmentation
 			try {
 				profileLatch.await();
-				LOGGER.finer("Starting segmentation action");
+				LOGGER.fine("Starting segmentation");
 				new RunSegmentationAction(datasets, MorphologyAnalysisMode.NEW, SingleDatasetResultAction.NO_FLAG, pa,
 						segmentLatch).run();
 			} catch (InterruptedException e) {

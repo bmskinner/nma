@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -41,72 +42,72 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  *
  */
 public abstract class CellFinder extends AbstractFinder<Collection<ICell>> {
-	
+
 	private static final Logger LOGGER = Logger.getLogger(CellFinder.class.getName());
 
-    /**
-     * Construct the finder using an options
-     * 
-     * @param op the options for cell detection
-     */
-    protected CellFinder(@NonNull final IAnalysisOptions op) {
-        super(op);
+	/**
+	 * Construct the finder using an options
+	 * 
+	 * @param op the options for cell detection
+	 */
+	protected CellFinder(@NonNull final IAnalysisOptions op) {
+		super(op);
 
-    }
+	}
 
-    @Override
-    public Collection<ICell> findInFolder(@NonNull final File folder) throws ImageImportException {
+	@Override
+	public Collection<ICell> findInFolder(@NonNull final File folder) throws ImageImportException {
 
-    	final Queue<ICell> list = new ConcurrentLinkedQueue<>();
-    	File[] arr = folder.listFiles();
-    	if (arr == null)
-    		return list;
-    	
-    	// single threaded for use in testing only
-    	for(File f : arr) {
-    		if(Thread.interrupted())
-    			continue;
-    		if(f.isDirectory())
-    			continue;
-    		if (!ImageImporter.fileIsImportable(f))
-    			continue;
-    		try {
-    			list.addAll(findInImage(f));
-    		} catch (ImageImportException e) {
-    			LOGGER.log(Loggable.STACK, "Error searching image", e);
-    		}
-    		LOGGER.finer("Found images in "+f.getName());
-    	}
+		final Queue<ICell> list = new ConcurrentLinkedQueue<>();
+		File[] arr = folder.listFiles();
+		if (arr == null)
+			return list;
 
-    	// Submitted to the FJP::commonPool, which is thread limited by the ThreadManger
-//    	Stream.of(arr).parallel().forEach(f -> {
-//
+		// single threaded for use in testing only
+//    	for(File f : arr) {
 //    		if(Thread.interrupted())
-//    			return;
+//    			continue;
 //    		if(f.isDirectory())
-//    			return;
+//    			continue;
 //    		if (!ImageImporter.fileIsImportable(f))
-//    			return;
+//    			continue;
 //    		try {
 //    			list.addAll(findInImage(f));
 //    		} catch (ImageImportException e) {
 //    			LOGGER.log(Loggable.STACK, "Error searching image", e);
 //    		}
-//    		LOGGER.fine("Found images in "+f.getName());
-//    	});
-    	return list;
-    }
-    
-    public static boolean isValid(@NonNull HashOptions o, @NonNull CellularComponent c) {
-        if(c.getMeasurement(Measurement.AREA) < o.getInt(HashOptions.MIN_SIZE_PIXELS))
-            return false;
-        if(c.getMeasurement(Measurement.AREA) > o.getInt(HashOptions.MAX_SIZE_PIXELS))
-            return false;
-        if(c.getMeasurement(Measurement.CIRCULARITY) < o.getDouble(HashOptions.MIN_CIRC))
-            return false;
-        if(c.getMeasurement(Measurement.CIRCULARITY) > o.getDouble(HashOptions.MAX_CIRC))
-            return false;
-        return true;
-    }
+//    		LOGGER.finer("Found images in "+f.getName());
+//    	}
+
+		// Submitted to the FJP::commonPool, which is thread limited by the ThreadManger
+		Stream.of(arr).parallel().forEach(f -> {
+
+			if (Thread.interrupted())
+				return;
+			if (f.isDirectory())
+				return;
+			if (!ImageImporter.fileIsImportable(f))
+				return;
+			try {
+				list.addAll(findInImage(f));
+			} catch (ImageImportException e) {
+				LOGGER.log(Loggable.STACK, "Error searching image", e);
+			}
+			LOGGER.finer("Found images in " + f.getName());
+		});
+		return list;
+	}
+
+	public static boolean isValid(@NonNull HashOptions o, @NonNull CellularComponent c) {
+		if (c.getMeasurement(Measurement.AREA) < o.getInt(HashOptions.MIN_SIZE_PIXELS))
+			return false;
+		if (c.getMeasurement(Measurement.AREA) > o.getInt(HashOptions.MAX_SIZE_PIXELS))
+			return false;
+		if (c.getMeasurement(Measurement.CIRCULARITY) < o.getDouble(HashOptions.MIN_CIRC))
+			return false;
+		if (c.getMeasurement(Measurement.CIRCULARITY) > o.getDouble(HashOptions.MAX_CIRC))
+			return false;
+		return true;
+	}
 
 }

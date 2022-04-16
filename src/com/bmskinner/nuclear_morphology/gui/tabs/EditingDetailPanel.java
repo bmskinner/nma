@@ -21,8 +21,6 @@ import java.util.logging.Logger;
 
 import javax.swing.JTabbedPane;
 
-import com.bmskinner.nuclear_morphology.gui.tabs.cells_detail.IndividualCellDetailPanel;
-
 /**
  * Tab pane; holding panels to edit datasets
  * 
@@ -45,7 +43,7 @@ public class EditingDetailPanel extends DetailPanel {
 		tabPane = new JTabbedPane();
 		this.add(tabPane, BorderLayout.CENTER);
 
-		DetailPanel cellDetailPanel = new IndividualCellDetailPanel();
+//		DetailPanel cellDetailPanel = new IndividualCellDetailPanel();
 //		DetailPanel segmentsEditingPanel = new SegmentsEditingPanel(context);
 //		DetailPanel borderTagEditingPanel = new BorderTagEditingPanel(context);
 
@@ -53,7 +51,7 @@ public class EditingDetailPanel extends DetailPanel {
 //		this.addUserActionEventListener(segmentsEditingPanel);
 //		this.addUserActionEventListener(borderTagEditingPanel);
 
-		tabPane.addTab(cellDetailPanel.getPanelTitle(), cellDetailPanel);
+//		tabPane.addTab(cellDetailPanel.getPanelTitle(), cellDetailPanel);
 
 		/*
 		 * Signals come from the segment panel to this container Signals can be sent to

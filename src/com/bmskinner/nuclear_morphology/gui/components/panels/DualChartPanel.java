@@ -25,8 +25,6 @@ import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.gui.events.ChartSetEventListener;
-import com.bmskinner.nuclear_morphology.gui.events.LandmarkUpdateEvent;
-import com.bmskinner.nuclear_morphology.gui.events.LandmarkUpdateEventListener;
 import com.bmskinner.nuclear_morphology.gui.events.SegmentEvent;
 import com.bmskinner.nuclear_morphology.gui.events.SegmentEvent.SegmentUpdateType;
 import com.bmskinner.nuclear_morphology.gui.events.SegmentEventListener;
@@ -178,20 +176,6 @@ public abstract class DualChartPanel implements SegmentEventListener, ChartSetEv
 			// c.setCursor(Cursor.getDefaultCursor());
 			// }
 			// this.setCursor(Cursor.getDefaultCursor());
-		}
-	}
-
-	public synchronized void addBorderTagEventListener(LandmarkUpdateEventListener l) {
-		listeners.add(l);
-	}
-
-	public synchronized void removeBorderTagEventListener(LandmarkUpdateEventListener l) {
-		listeners.remove(l);
-	}
-
-	protected synchronized void fireLandmarkUpdateEvent(LandmarkUpdateEvent e) {
-		for (Object l : listeners) {
-			((LandmarkUpdateEventListener) l).landmarkUpdateEventReceived(e);
 		}
 	}
 

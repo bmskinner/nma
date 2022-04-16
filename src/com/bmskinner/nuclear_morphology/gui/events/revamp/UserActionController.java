@@ -11,6 +11,9 @@ import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
+import com.bmskinner.nuclear_morphology.components.profiles.LandmarkType;
+import com.bmskinner.nuclear_morphology.components.profiles.SegmentationHandler;
 import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace;
 import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace.BioSample;
 import com.bmskinner.nuclear_morphology.core.DatasetListManager;
@@ -56,6 +59,8 @@ import com.bmskinner.nuclear_morphology.gui.actions.ShellAnalysisAction;
 import com.bmskinner.nuclear_morphology.gui.actions.SingleDatasetResultAction;
 import com.bmskinner.nuclear_morphology.gui.dialogs.collections.AbstractCellCollectionDialog;
 import com.bmskinner.nuclear_morphology.gui.dialogs.collections.ManualCurationDialog;
+import com.bmskinner.nuclear_morphology.gui.events.LandmarkUpdateEvent;
+import com.bmskinner.nuclear_morphology.gui.events.LandmarkUpdateEventListener;
 import com.bmskinner.nuclear_morphology.gui.events.UserActionEvent;
 import com.bmskinner.nuclear_morphology.gui.runnables.MorphologyAnalysis;
 
@@ -66,14 +71,17 @@ import com.bmskinner.nuclear_morphology.gui.runnables.MorphologyAnalysis;
  * @since 2.0.0
  *
  */
-public class UserActionController implements UserActionEventListener, ConsensusUpdateEventListener {
+public class UserActionController
+		implements UserActionEventListener, ConsensusUpdateEventListener, LandmarkUpdateEventListener {
 
 	private static final Logger LOGGER = Logger.getLogger(UserActionController.class.getName());
 
 	private static final UserActionController instance = new UserActionController();
 
-	private ProgressBarAcceptor acceptor;
+	/** A place for progress bars to be displayed */
+	private ProgressBarAcceptor acceptor = null;
 
+	/** A source to request user input */
 	private final InputSupplier is = new DefaultInputSupplier();
 
 	private UserActionController() {
@@ -93,7 +101,6 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 
 	@Override
 	public void userActionEventReceived(UserActionEvent e) {
-		LOGGER.fine("Heard event of type " + e.type());
 		Runnable r = create(e);
 		if (r != null)
 			ThreadManager.getInstance().execute(r);
@@ -590,6 +597,30 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 			dataset.getCollection().offsetConsensus(com.getX(), com.getY());
 			UIController.getInstance().fireConsensusNucleusChanged(dataset);
 		}
+	}
+
+	@Override
+	public void landmarkUpdateEventReceived(LandmarkUpdateEvent event) {
+		if (event.getDatasets().isEmpty())
+			return;
+
+		IAnalysisDataset d = event.getDatasets().get(0);
+
+		if (d.getCollection().isVirtual() && Landmark.REFERENCE_POINT.equals(event.getLandmark())) {
+			LOGGER.warning("Cannot update core border tag for a child dataset");
+			return;
+		}
+
+		SegmentationHandler sh = new SegmentationHandler(d);
+		sh.setBorderTag(event.getLandmark(), event.getNewIndex());
+
+		if (LandmarkType.CORE.equals(event.getLandmark().type())) {
+			UserActionController.getInstance().userActionEventReceived(
+					new UserActionEvent(this, UserActionEvent.SEGMENTATION_ACTION, event.getDatasets()));
+		} else {
+			UIController.getInstance().fireProfilesUpdated(d);
+		}
+
 	}
 
 }

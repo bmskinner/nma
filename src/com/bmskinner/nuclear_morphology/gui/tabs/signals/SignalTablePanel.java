@@ -27,10 +27,10 @@ import com.bmskinner.nuclear_morphology.gui.events.revamp.UIController;
 import com.bmskinner.nuclear_morphology.gui.tabs.TableDetailPanel;
 import com.bmskinner.nuclear_morphology.visualisation.charts.panels.ExportableChartPanel;
 import com.bmskinner.nuclear_morphology.visualisation.datasets.SignalTableCell;
-import com.bmskinner.nuclear_morphology.visualisation.datasets.tables.AbstractTableCreator;
-import com.bmskinner.nuclear_morphology.visualisation.datasets.tables.NuclearSignalTableCreator;
 import com.bmskinner.nuclear_morphology.visualisation.options.TableOptions;
 import com.bmskinner.nuclear_morphology.visualisation.options.TableOptionsBuilder;
+import com.bmskinner.nuclear_morphology.visualisation.tables.AbstractTableCreator;
+import com.bmskinner.nuclear_morphology.visualisation.tables.NuclearSignalTableCreator;
 
 public class SignalTablePanel extends TableDetailPanel
 		implements ChartSetEventListener, ConsensusUpdatedListener, NuclearSignalUpdatedListener {

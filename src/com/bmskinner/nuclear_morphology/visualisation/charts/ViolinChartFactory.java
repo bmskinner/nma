@@ -144,7 +144,7 @@ public class ViolinChartFactory extends AbstractChartFactory {
             return createEmptyChart();
         }
 
-        JFreeChart chart = createViolinChart(null, null, options.getStat().label(options.getScale()), ds, false);
+        JFreeChart chart = createViolinChart(null, null, options.getMeasurement().label(options.getScale()), ds, false);
 
         CategoryPlot plot = chart.getCategoryPlot();
         ViolinRenderer renderer = (ViolinRenderer) plot.getRenderer();
@@ -188,7 +188,7 @@ public class ViolinChartFactory extends AbstractChartFactory {
             }
 
 
-        JFreeChart chart = createViolinChart(null, null, options.getStat().label(options.getScale()), ds, false);
+        JFreeChart chart = createViolinChart(null, null, options.getMeasurement().label(options.getScale()), ds, false);
 
         CategoryPlot plot = chart.getCategoryPlot();
         ViolinRenderer renderer = (ViolinRenderer) plot.getRenderer();
@@ -239,7 +239,7 @@ public class ViolinChartFactory extends AbstractChartFactory {
             return createEmptyChart();
         }
 
-        JFreeChart chart = createViolinChart(null, null, options.getStat().label(options.getScale()), ds, false);
+        JFreeChart chart = createViolinChart(null, null, options.getMeasurement().label(options.getScale()), ds, false);
 
         CategoryPlot plot = chart.getCategoryPlot();
 
@@ -297,7 +297,7 @@ public class ViolinChartFactory extends AbstractChartFactory {
             }
         }
 
-        JFreeChart chart = createViolinChart(null, null, options.getStat().label(options.getScale()), ds, false);
+        JFreeChart chart = createViolinChart(null, null, options.getMeasurement().label(options.getScale()), ds, false);
 
         CategoryPlot plot = chart.getCategoryPlot();
         ViolinRenderer renderer = (ViolinRenderer) plot.getRenderer();

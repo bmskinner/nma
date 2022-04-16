@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package com.bmskinner.nuclear_morphology.visualisation.datasets.tables;
+package com.bmskinner.nuclear_morphology.visualisation.tables;
 
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
@@ -34,33 +34,35 @@ import com.bmskinner.nuclear_morphology.visualisation.options.TableOptions;
  */
 public abstract class AbstractTableCreator extends AbstractDatasetCreator<TableOptions> {
 
-    /**
-     * Create with a set of table options
-     */
-    public AbstractTableCreator(@NonNull final TableOptions o) {
-        super(o);
-    }
+	/**
+	 * Create with a set of table options
+	 */
+	protected AbstractTableCreator(@NonNull final TableOptions o) {
+		super(o);
+	}
 
-    /**
-     * Create an empty table declaring no data is loaded
-     * 
-     * @return
-     */
-    @NonNull public static TableModel createBlankTable() {
-        DefaultTableModel model = new DefaultTableModel();
-        model.addColumn(Labels.NO_DATA_LOADED);
-        return model;
-    }
+	/**
+	 * Create an empty table declaring no data is loaded
+	 * 
+	 * @return
+	 */
+	@NonNull
+	public static TableModel createBlankTable() {
+		DefaultTableModel model = new DefaultTableModel();
+		model.addColumn(Labels.NO_DATA_LOADED);
+		return model;
+	}
 
-    /**
-     * Create an empty table declaring no data is loaded
-     * 
-     * @return
-     */
-    @NonNull public static TableModel createLoadingTable() {
-        DefaultTableModel model = new DefaultTableModel();
-        model.addColumn(Labels.LOADING_DATA);
-        return model;
-    }
+	/**
+	 * Create an empty table declaring no data is loaded
+	 * 
+	 * @return
+	 */
+	@NonNull
+	public static TableModel createLoadingTable() {
+		DefaultTableModel model = new DefaultTableModel();
+		model.addColumn(Labels.LOADING_DATA);
+		return model;
+	}
 
 }

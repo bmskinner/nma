@@ -16,8 +16,13 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.events;
 
-import java.util.EventObject;
+import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
+
+import com.bmskinner.nuclear_morphology.components.cells.ICell;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 
 /**
@@ -29,20 +34,23 @@ import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
  *
  */
 @SuppressWarnings("serial")
-public class LandmarkUpdateEvent extends EventObject {
+public class LandmarkUpdateEvent extends UserActionEvent {
 
 	private Landmark lm;
 	private int newIndex;
+	private ICell c;
 
 	/**
-	 * Create an event from a source, with the given message
+	 * Create an event from a source class, with the given message and datasets to
+	 * process
 	 * 
-	 * @param source the source of the datasets
-	 * @param lm    the affected border tag
-	 * @param newIndex  the affected index
+	 * @param source
+	 * @param type
 	 */
-	public LandmarkUpdateEvent(Object source, Landmark lm, int newIndex) {
-		super(source);
+	public LandmarkUpdateEvent(@NonNull Object source, IAnalysisDataset dataset, @Nullable ICell cell, Landmark lm,
+			int newIndex) {
+		super(source, "LandmarkUpdate", List.of(dataset), null);
+		this.c = cell;
 		this.lm = lm;
 		this.newIndex = newIndex;
 	}
@@ -53,6 +61,10 @@ public class LandmarkUpdateEvent extends EventObject {
 
 	public int getNewIndex() {
 		return newIndex;
+	}
+
+	public @Nullable ICell getCell() {
+		return c;
 	}
 
 }

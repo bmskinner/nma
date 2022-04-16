@@ -200,7 +200,7 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
     private NuclearSignalBoxAndWhiskerDataset createMultiDatasetSignalStatisticBoxplotDataset() {
 
     	NuclearSignalBoxAndWhiskerDataset result = new NuclearSignalBoxAndWhiskerDataset();
-        Measurement stat = options.getStat();
+        Measurement stat = options.getMeasurement();
 
         for (IAnalysisDataset d : options.getDatasets()) {
 

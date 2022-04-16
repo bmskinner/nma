@@ -44,7 +44,7 @@ import com.bmskinner.nuclear_morphology.visualisation.charts.ViolinChartFactory;
 import com.bmskinner.nuclear_morphology.visualisation.charts.ViolinRenderer;
 import com.bmskinner.nuclear_morphology.visualisation.charts.panels.ExportableChartPanel;
 import com.bmskinner.nuclear_morphology.visualisation.datasets.ViolinCategoryDataset;
-import com.bmskinner.nuclear_morphology.visualisation.datasets.tables.AbstractTableCreator;
+import com.bmskinner.nuclear_morphology.visualisation.tables.AbstractTableCreator;
 
 import ij.process.ImageProcessor;
 

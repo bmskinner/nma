@@ -18,8 +18,8 @@ import com.bmskinner.nuclear_morphology.gui.CancellableRunnable;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.visualisation.TableCache;
-import com.bmskinner.nuclear_morphology.visualisation.datasets.tables.AbstractTableCreator;
 import com.bmskinner.nuclear_morphology.visualisation.options.TableOptions;
+import com.bmskinner.nuclear_morphology.visualisation.tables.AbstractTableCreator;
 
 public abstract class TableDetailPanel extends DetailPanel {
 
