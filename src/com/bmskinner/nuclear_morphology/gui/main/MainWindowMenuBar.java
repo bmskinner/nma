@@ -16,6 +16,7 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.main;
 
+import java.awt.Component;
 import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -23,6 +24,9 @@ import java.awt.Window;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -38,16 +42,21 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButtonMenuItem;
 
-import org.eclipse.jdt.annotation.Nullable;
-
 import com.bmskinner.nuclear_morphology.components.Version;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
+import com.bmskinner.nuclear_morphology.gui.ContextEnabled;
+import com.bmskinner.nuclear_morphology.gui.Labels;
+import com.bmskinner.nuclear_morphology.gui.MenuFactory;
+import com.bmskinner.nuclear_morphology.gui.MenuFactory.ContextualMenu;
+import com.bmskinner.nuclear_morphology.gui.MenuFactory.ContextualMenuItem;
 import com.bmskinner.nuclear_morphology.gui.actions.NewAnalysisAction;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter.ColourSwatch;
 import com.bmskinner.nuclear_morphology.gui.dialogs.VersionHelpDialog;
 import com.bmskinner.nuclear_morphology.gui.events.UserActionEvent;
+import com.bmskinner.nuclear_morphology.gui.events.revamp.DatasetSelectionUpdatedListener;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.UIController;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.UserActionController;
 import com.bmskinner.nuclear_morphology.io.Io;
@@ -59,7 +68,7 @@ import com.bmskinner.nuclear_morphology.io.UpdateChecker;
  * @author Ben Skinner
  *
  */
-public class MainWindowMenuBar extends JMenuBar {
+public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdatedListener {
 
 	private static final Logger LOGGER = Logger.getLogger(MainWindowMenuBar.class.getName());
 
@@ -73,9 +82,22 @@ public class MainWindowMenuBar extends JMenuBar {
 	private static final String NEW_ANALYSIS_SAVED_LBL = "Use saved detection options";
 	private static final String NEW_ANALYSIS_SAVED_TOOLTIP = "Use options saved in a file for automatic nucleus detection";
 	private static final String NEW_WORKSPACE_LBL = "New workspace";
+	private static final String NEW_WORKSPACE_TOOLTIP = "Create a new workspace";
+
 	private static final String OPEN_MENU_LBL = "Open";
 	private static final String OPEN_DATASET_LBL = "Open dataset";
+	private static final String OPEN_DATASET_TOOLTIP = "Open a saved dataset";
 	private static final String OPEN_WORKSPACE_LBL = "Open workspace";
+	private static final String OPEN_WORKSPACE_TOOLTIP = "Open a saved workspace";
+
+	private static final String DATASETS_MENU_LBL = "Dataset";
+
+	private static final String SAVE_DATASETS_LBL = "Save datasets";
+	private static final String SAVE_DATASETS_TOOLTIP = "Save all open datasets";
+	private static final String SAVE_WORKSPACES_LBL = "Save workspaces";
+	private static final String SAVE_WORKSPACES_TOOLTIP = "Save all open workspaces";
+
+	private static final String EXIT_LBL = "Exit";
 
 	private static final String VIEW_MENU_LBL = "View";
 	private static final String CHECK_FOR_UPDATES_ITEM_LBL = "Check for updates";
@@ -88,35 +110,13 @@ public class MainWindowMenuBar extends JMenuBar {
 	private static final String SWATCH_ITEM_LBL = "Swatch";
 	private static final String SCALE_ITEM_LBL = "Scale";
 
-	private static final String EXIT_LBL = "Exit";
-	private static final String SAVE_WORKSPACES_LBL = "Save workspaces";
-	private static final String SAVE_DATASETS_LBL = "Save datasets";
 	private static final String OPEN_CONFIG_FILE_LBL = "Open config file";
 
-	final private MainView mw;
+	private final MainView mw;
 
-	final private JPanel monitorPanel;
-
-	private JMenu contextMenu;
+	private final JPanel monitorPanel;
 
 	private MenuFactory fact = new MenuFactory();
-
-	private class MenuFactory {
-		public MenuFactory() {
-		}
-
-		public JMenuItem createSignalChangeMenuItem(String label, String action) {
-			return createSignalChangeMenuItem(label, action, null);
-		}
-
-		public JMenuItem createSignalChangeMenuItem(String label, String action, @Nullable String tooltip) {
-			JMenuItem item = new JMenuItem(label);
-//			item.addActionListener(e -> sh.fireUserActionEvent(action));
-			if (tooltip != null)
-				item.setToolTipText(tooltip);
-			return item;
-		}
-	}
 
 	public MainWindowMenuBar(MainView mw) {
 		super();
@@ -124,12 +124,15 @@ public class MainWindowMenuBar extends JMenuBar {
 
 		add(createFileMenu());
 		add(createViewMenu());
+		add(createDatasetMenu());
+
 		add(createHelpMenu());
-		contextMenu = createDatasetMenu();
 
 		add(Box.createGlue());
 		monitorPanel = createMonitorPanel();
 		add(monitorPanel);
+		UIController.getInstance().addDatasetSelectionUpdatedListener(this);
+		updateSelectionContext(new ArrayList<>());
 	}
 
 	private JPanel createMonitorPanel() {
@@ -152,10 +155,10 @@ public class MainWindowMenuBar extends JMenuBar {
 		return monitorPanel;
 	}
 
-	private JMenu createFileMenu() {
-		JMenu menu = new JMenu(FILE_MENU_LBL);
+	private ContextualMenu createFileMenu() {
+		ContextualMenu menu = fact.makeMenu(FILE_MENU_LBL, ContextEnabled.ALWAYS_ACTIVE);
 
-		JMenu newMenu = new JMenu(NEW_ANALYSIS_MENU_LBL);
+		ContextualMenu newMenu = fact.makeMenu(NEW_ANALYSIS_MENU_LBL, ContextEnabled.ALWAYS_ACTIVE);
 
 		JMenuItem i1 = new JMenuItem(NEW_ANALYSIS_CUSTOM_LBL);
 		i1.setToolTipText(NEW_ANALYSIS_CUSTOM_TOOLTIP);
@@ -163,21 +166,39 @@ public class MainWindowMenuBar extends JMenuBar {
 				e -> new NewAnalysisAction(UserActionController.getInstance().getProgressBarAcceptor()).run());
 		newMenu.add(i1);
 
-		newMenu.add(fact.createSignalChangeMenuItem(NEW_ANALYSIS_SAVED_LBL, UserActionEvent.IMPORT_WORKFLOW_PREFIX,
-				NEW_ANALYSIS_SAVED_TOOLTIP));
+		newMenu.add(fact.makeItem(NEW_ANALYSIS_SAVED_LBL, UserActionEvent.IMPORT_WORKFLOW_PREFIX,
+				ContextEnabled.ALWAYS_ACTIVE, NEW_ANALYSIS_SAVED_TOOLTIP));
+
+		newMenu.add(fact.makeItem(NEW_WORKSPACE_LBL, UserActionEvent.NEW_WORKSPACE, ContextEnabled.ALWAYS_ACTIVE,
+				NEW_WORKSPACE_TOOLTIP));
+
 		menu.add(newMenu);
+		// End of File>New
 
-		menu.add(fact.createSignalChangeMenuItem(NEW_WORKSPACE_LBL, UserActionEvent.NEW_WORKSPACE));
+		// Start of File>Open
 
-		JMenu openMenu = new JMenu(OPEN_MENU_LBL);
+		ContextualMenu openMenu = fact.makeMenu(OPEN_MENU_LBL, ContextEnabled.ALWAYS_ACTIVE);
 
-		openMenu.add(fact.createSignalChangeMenuItem(OPEN_DATASET_LBL, UserActionEvent.IMPORT_DATASET_PREFIX));
-		openMenu.add(fact.createSignalChangeMenuItem(OPEN_WORKSPACE_LBL, UserActionEvent.IMPORT_WORKSPACE_PREFIX));
+		openMenu.add(fact.makeItem(OPEN_DATASET_LBL, UserActionEvent.IMPORT_DATASET_PREFIX,
+				ContextEnabled.ALWAYS_ACTIVE, OPEN_DATASET_TOOLTIP));
+
+		openMenu.add(fact.makeItem(OPEN_WORKSPACE_LBL, UserActionEvent.IMPORT_WORKSPACE_PREFIX,
+				ContextEnabled.ALWAYS_ACTIVE, OPEN_WORKSPACE_TOOLTIP));
+
 		menu.add(openMenu);
 
-		menu.add(fact.createSignalChangeMenuItem(SAVE_DATASETS_LBL, UserActionEvent.SAVE_ALL_DATASETS));
-		menu.add(fact.createSignalChangeMenuItem(SAVE_WORKSPACES_LBL, UserActionEvent.EXPORT_WORKSPACE));
+		// End of File>Open
+		ContextualMenuItem saveData = fact.makeItem(SAVE_DATASETS_LBL, UserActionEvent.SAVE_ALL_DATASETS,
+				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_CHILD_DATASET, SAVE_DATASETS_TOOLTIP);
+		menu.add(saveData);
 
+		ContextualMenuItem saveWork = fact.makeItem(SAVE_WORKSPACES_LBL, UserActionEvent.EXPORT_WORKSPACE,
+				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_CHILD_DATASET,
+				SAVE_WORKSPACES_TOOLTIP);
+
+		menu.add(saveWork);
+
+		// Exit event routed through the main window close listener
 		JMenuItem exit = new JMenuItem(EXIT_LBL);
 		exit.addActionListener(e -> {
 			for (WindowListener l : mw.getWindowListeners()) {
@@ -190,8 +211,8 @@ public class MainWindowMenuBar extends JMenuBar {
 		return menu;
 	}
 
-	private JMenu createViewMenu() {
-		JMenu menu = new JMenu(VIEW_MENU_LBL);
+	private ContextualMenu createViewMenu() {
+		ContextualMenu menu = fact.makeMenu(VIEW_MENU_LBL, ContextEnabled.ALWAYS_ACTIVE);
 
 		JMenu scaleMenu = new JMenu(SCALE_ITEM_LBL);
 
@@ -255,8 +276,8 @@ public class MainWindowMenuBar extends JMenuBar {
 		return menu;
 	}
 
-	private JMenu createHelpMenu() {
-		JMenu menu = new JMenu(HELP_MENU_LBL);
+	private ContextualMenu createHelpMenu() {
+		ContextualMenu menu = fact.makeMenu(HELP_MENU_LBL, ContextEnabled.ALWAYS_ACTIVE);
 
 		JMenuItem aboutItem = new JMenuItem(ABOUT_ITEM_LBL);
 		aboutItem.addActionListener(e -> new VersionHelpDialog(mw));
@@ -308,8 +329,116 @@ public class MainWindowMenuBar extends JMenuBar {
 		return menu;
 	}
 
-	private JMenu createDatasetMenu() {
-		return new JMenu("Dataset");
+	private ContextualMenu createDatasetMenu() {
+		ContextualMenu menu = fact.makeMenu(DATASETS_MENU_LBL, ContextEnabled.ONLY_DATASETS);
+
+		ContextualMenu addSubMenu = fact.makeMenu(Labels.Populations.ADD,
+				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_SINGLE_OBJECT);
+
+		addSubMenu.add(fact.makeItem(Labels.Populations.ADD_NUCLEAR_SIGNAL_LBL, UserActionEvent.ADD_NUCLEAR_SIGNAL,
+				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_SINGLE_OBJECT,
+				Labels.Populations.ADD_NUCLEAR_SIGNAL_TIP));
+
+		addSubMenu.add(fact.makeItem(Labels.Populations.POST_FISH_MAPPING_LBL, UserActionEvent.POST_FISH_MAPPING,
+				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_SINGLE_OBJECT));
+
+		addSubMenu.add(fact.makeItem(Labels.Populations.ADD_CHILD_CELLS_LBL, UserActionEvent.RELOCATE_CELLS,
+				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_CHILD_DATASET
+						| ContextEnabled.ACTIVE_ON_SINGLE_OBJECT));
+
+		addSubMenu.add(fact.makeItem(Labels.Populations.ADD_CLUSTER_FILE_LBL, UserActionEvent.CLUSTER_FROM_FILE,
+				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_CHILD_DATASET
+						| ContextEnabled.ACTIVE_ON_SINGLE_OBJECT));
+
+		menu.add(addSubMenu);
+
+		menu.addSeparator();
+
+		menu.add(fact.makeItem(Labels.Populations.CURATE_LBL, UserActionEvent.CURATE_DATASET,
+				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_CHILD_DATASET
+						| ContextEnabled.ACTIVE_ON_SINGLE_OBJECT));
+
+		menu.add(fact.makeItem(Labels.Populations.CHANGE_SCALE_LBL, UserActionEvent.CHANGE_SCALE,
+				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_SINGLE_OBJECT));
+
+		menu.add(fact.makeItem(Labels.Populations.MERGE_LBL, UserActionEvent.MERGE_DATASETS_ACTION,
+				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_CHILD_DATASET
+						| ContextEnabled.ACTIVE_ON_MULTI_OBJECTS));
+
+		menu.add(fact.makeItem(Labels.Populations.ARITHMETIC_LBL, UserActionEvent.DATASET_ARITHMETIC,
+				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_CHILD_DATASET
+						| ContextEnabled.ACTIVE_ON_MULTI_OBJECTS));
+
+		menu.addSeparator();
+
+		menu.add(createExportMenu());
+
+		return menu;
+	}
+
+	private ContextualMenu createExportMenu() {
+		ContextualMenu exportMenu = fact.makeMenu(Labels.Populations.EXPORT,
+				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_CHILD_DATASET
+						| ContextEnabled.ACTIVE_ON_MULTI_OBJECTS | ContextEnabled.ACTIVE_ON_SINGLE_OBJECT);
+
+		exportMenu.add(fact.makeItem(Labels.Populations.EXPORT_STATS, UserActionEvent.EXPORT_STATS,
+				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_CHILD_DATASET
+						| ContextEnabled.ACTIVE_ON_MULTI_OBJECTS | ContextEnabled.ACTIVE_ON_SINGLE_OBJECT));
+		exportMenu.add(fact.makeItem(Labels.Populations.EXPORT_PROFILES, UserActionEvent.EXPORT_PROFILES,
+				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_CHILD_DATASET
+						| ContextEnabled.ACTIVE_ON_MULTI_OBJECTS | ContextEnabled.ACTIVE_ON_SINGLE_OBJECT));
+		exportMenu.add(fact.makeItem(Labels.Populations.EXPORT_OUTLINES, UserActionEvent.EXPORT_OUTLINES,
+				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_CHILD_DATASET
+						| ContextEnabled.ACTIVE_ON_MULTI_OBJECTS | ContextEnabled.ACTIVE_ON_SINGLE_OBJECT));
+
+		exportMenu.addSeparator();
+
+		exportMenu.add(fact.makeItem(Labels.Populations.EXPORT_SIGNALS, UserActionEvent.EXPORT_SIGNALS,
+				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_CHILD_DATASET
+						| ContextEnabled.ACTIVE_ON_MULTI_OBJECTS | ContextEnabled.ACTIVE_ON_SINGLE_OBJECT));
+		exportMenu.add(fact.makeItem(Labels.Populations.EXPORT_SHELLS, UserActionEvent.EXPORT_SHELLS,
+				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_CHILD_DATASET
+						| ContextEnabled.ACTIVE_ON_MULTI_OBJECTS | ContextEnabled.ACTIVE_ON_SINGLE_OBJECT));
+
+		exportMenu.addSeparator();
+
+		exportMenu.add(fact.makeItem(Labels.Populations.EXPORT_CELL_IMAGES, UserActionEvent.EXPORT_SINGLE_CELL_IMAGES,
+				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_CHILD_DATASET
+						| ContextEnabled.ACTIVE_ON_MULTI_OBJECTS | ContextEnabled.ACTIVE_ON_SINGLE_OBJECT));
+
+		exportMenu.add(fact.makeItem(Labels.Populations.EXPORT_CELL_LOCS, UserActionEvent.EXPORT_CELL_LOCS,
+				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_CHILD_DATASET
+						| ContextEnabled.ACTIVE_ON_MULTI_OBJECTS | ContextEnabled.ACTIVE_ON_SINGLE_OBJECT));
+
+		exportMenu.addSeparator();
+
+		exportMenu.add(fact.makeItem(Labels.Populations.EXPORT_OPTIONS, UserActionEvent.EXPORT_OPTIONS,
+				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_CHILD_DATASET
+						| ContextEnabled.ACTIVE_ON_MULTI_OBJECTS | ContextEnabled.ACTIVE_ON_SINGLE_OBJECT));
+
+		exportMenu.add(fact.makeItem(Labels.Populations.EXPORT_RULESETS, UserActionEvent.EXPORT_RULESETS,
+				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_CHILD_DATASET
+						| ContextEnabled.ACTIVE_ON_MULTI_OBJECTS | ContextEnabled.ACTIVE_ON_SINGLE_OBJECT));
+
+		return exportMenu;
+	}
+
+	@Override
+	public void datasetSelectionUpdated(List<IAnalysisDataset> datasets) {
+		updateSelectionContext(datasets);
+	}
+
+	@Override
+	public void datasetSelectionUpdated(IAnalysisDataset dataset) {
+		updateSelectionContext(List.of(dataset));
+	}
+
+	private void updateSelectionContext(Collection<?> obj) {
+		for (Component c : this.getComponents()) {
+			if (c instanceof ContextEnabled con) {
+				con.updateSelectionContext(obj);
+			}
+		}
 	}
 
 }

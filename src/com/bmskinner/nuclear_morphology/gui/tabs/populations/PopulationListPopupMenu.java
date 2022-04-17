@@ -27,48 +27,28 @@ import com.bmskinner.nuclear_morphology.components.datasets.IClusterGroup;
 import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace;
 import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace.BioSample;
 import com.bmskinner.nuclear_morphology.core.DatasetListManager;
+import com.bmskinner.nuclear_morphology.gui.AbstractPopupMenu;
 import com.bmskinner.nuclear_morphology.gui.ContextEnabled;
 import com.bmskinner.nuclear_morphology.gui.Labels;
+import com.bmskinner.nuclear_morphology.gui.MenuFactory;
+import com.bmskinner.nuclear_morphology.gui.MenuFactory.ContextualMenu;
+import com.bmskinner.nuclear_morphology.gui.MenuFactory.ContextualMenuItem;
 import com.bmskinner.nuclear_morphology.gui.events.UserActionEvent;
-import com.bmskinner.nuclear_morphology.gui.tabs.populations.AbstractPopupMenu.MenuFactory.PopupMenu;
-import com.bmskinner.nuclear_morphology.gui.tabs.populations.AbstractPopupMenu.MenuFactory.PopupMenuItem;
 
 @SuppressWarnings("serial")
 public class PopulationListPopupMenu extends AbstractPopupMenu {
 
-	private PopupMenuItem moveUpMenuItem;
-	private PopupMenuItem moveDownMenuItem;
+	private ContextualMenuItem moveUpMenuItem;
+	private ContextualMenuItem moveDownMenuItem;
 
-	private PopupMenuItem changeScaleItem;
-	private PopupMenuItem mergeMenuItem;
-	private PopupMenuItem curateMenuItem;
-	private PopupMenuItem deleteMenuItem;
-	private PopupMenuItem booleanMenuItem;
-	private PopupMenuItem extractMenuItem;
+//	private ContextualMenuItem deleteMenuItem;
 
-	private PopupMenu workspaceSubMenu;
-	private PopupMenu biosampleSubMenu;
+	private ContextualMenu workspaceSubMenu;
+	private ContextualMenu biosampleSubMenu;
 
-	private PopupMenu exportSubMenu;
-	private PopupMenuItem exportStatsMenuItem;
-	private PopupMenuItem exportProfilesMenuItem;
-	private PopupMenuItem exportOutlinesMenuItem;
-	private PopupMenuItem exportSignalsItem;
-	private PopupMenuItem exportShellsItem;
-	private PopupMenuItem saveCellsMenuItem;
-	private PopupMenuItem exportOptionsMenuItem;
-	private PopupMenuItem exportRulesetsMenuItem;
-	private PopupMenuItem exportCellImagesItem;
+	private ContextualMenuItem saveMenuItem;
 
-	private PopupMenuItem saveMenuItem;
-
-	private PopupMenuItem replaceFolderMenuItem;
-
-	private PopupMenu addSubMenu;
-	private PopupMenuItem addNuclearSignalMenuItem;
-	private PopupMenuItem fishRemappinglMenuItem;
-	private PopupMenuItem relocateMenuItem;
-	private PopupMenuItem clusterFileMenuItem;
+	private ContextualMenuItem replaceFolderMenuItem;
 
 	public PopulationListPopupMenu() {
 		super();
@@ -102,102 +82,37 @@ public class PopulationListPopupMenu extends AbstractPopupMenu {
 				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_SINGLE_OBJECT);
 		createBiosampleMenu(null);
 
-		mergeMenuItem = fact.makeItem(Labels.Populations.MERGE_LBL, UserActionEvent.MERGE_DATASETS_ACTION,
-				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_CHILD_DATASET
-						| ContextEnabled.ACTIVE_ON_MULTI_OBJECTS);
+//		mergeMenuItem = fact.makeItem(Labels.Populations.MERGE_LBL, UserActionEvent.MERGE_DATASETS_ACTION,
+//				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_CHILD_DATASET
+//						| ContextEnabled.ACTIVE_ON_MULTI_OBJECTS);
 
-		curateMenuItem = fact.makeItem(Labels.Populations.CURATE_LBL, UserActionEvent.CURATE_DATASET,
-				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_CHILD_DATASET
-						| ContextEnabled.ACTIVE_ON_SINGLE_OBJECT);
+//		curateMenuItem = fact.makeItem(Labels.Populations.CURATE_LBL, UserActionEvent.CURATE_DATASET,
+//				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_CHILD_DATASET
+//						| ContextEnabled.ACTIVE_ON_SINGLE_OBJECT);
 
-		deleteMenuItem = fact.makeItem(Labels.Populations.DELETE_LBL, UserActionEvent.DELETE_DATASET,
-				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_CHILD_DATASET
-						| ContextEnabled.ACTIVE_ON_SINGLE_OBJECT | ContextEnabled.ACTIVE_ON_MULTI_OBJECTS);
+//		deleteMenuItem = fact.makeItem(Labels.Populations.DELETE_LBL, UserActionEvent.DELETE_DATASET,
+//				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_CHILD_DATASET
+//						| ContextEnabled.ACTIVE_ON_SINGLE_OBJECT | ContextEnabled.ACTIVE_ON_MULTI_OBJECTS);
 
-		booleanMenuItem = fact.makeItem(Labels.Populations.ARITHMETIC_LBL, UserActionEvent.DATASET_ARITHMETIC,
-				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_CHILD_DATASET
-						| ContextEnabled.ACTIVE_ON_MULTI_OBJECTS);
+//		booleanMenuItem = fact.makeItem(Labels.Populations.ARITHMETIC_LBL, UserActionEvent.DATASET_ARITHMETIC,
+//				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_CHILD_DATASET
+//						| ContextEnabled.ACTIVE_ON_MULTI_OBJECTS);
 
-		extractMenuItem = fact.makeItem(Labels.Populations.EXTRACT_CELLS_LBL, UserActionEvent.EXTRACT_SUBSET,
-				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_CHILD_DATASET
-						| ContextEnabled.ACTIVE_ON_SINGLE_OBJECT);
+//		extractMenuItem = fact.makeItem(Labels.Populations.EXTRACT_CELLS_LBL, UserActionEvent.EXTRACT_SUBSET,
+//				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_CHILD_DATASET
+//						| ContextEnabled.ACTIVE_ON_SINGLE_OBJECT);
+//
+//		changeScaleItem = fact.makeItem(Labels.Populations.CHANGE_SCALE_LBL, UserActionEvent.CHANGE_SCALE,
+//				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_CHILD_DATASET
+//						| ContextEnabled.ACTIVE_ON_MULTI_OBJECTS | ContextEnabled.ACTIVE_ON_SINGLE_OBJECT);
 
-		changeScaleItem = fact.makeItem(Labels.Populations.CHANGE_SCALE_LBL, UserActionEvent.CHANGE_SCALE,
-				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_CHILD_DATASET
-						| ContextEnabled.ACTIVE_ON_MULTI_OBJECTS | ContextEnabled.ACTIVE_ON_SINGLE_OBJECT);
+//		relocateMenuItem = fact.makeItem(Labels.Populations.ADD_CHILD_CELLS_LBL, UserActionEvent.RELOCATE_CELLS,
+//				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_CHILD_DATASET
+//						| ContextEnabled.ACTIVE_ON_SINGLE_OBJECT);
 
-		relocateMenuItem = fact.makeItem(Labels.Populations.ADD_CHILD_CELLS_LBL, UserActionEvent.RELOCATE_CELLS,
-				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_CHILD_DATASET
-						| ContextEnabled.ACTIVE_ON_SINGLE_OBJECT);
-
-		exportSubMenu = fact.makeMenu(Labels.Populations.EXPORT,
-				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_CHILD_DATASET
-						| ContextEnabled.ACTIVE_ON_MULTI_OBJECTS | ContextEnabled.ACTIVE_ON_SINGLE_OBJECT);
-
-		exportStatsMenuItem = fact.makeItem(Labels.Populations.EXPORT_STATS, UserActionEvent.EXPORT_STATS,
-				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_CHILD_DATASET
-						| ContextEnabled.ACTIVE_ON_MULTI_OBJECTS | ContextEnabled.ACTIVE_ON_SINGLE_OBJECT);
-		exportProfilesMenuItem = fact.makeItem(Labels.Populations.EXPORT_PROFILES, UserActionEvent.EXPORT_PROFILES,
-				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_CHILD_DATASET
-						| ContextEnabled.ACTIVE_ON_MULTI_OBJECTS | ContextEnabled.ACTIVE_ON_SINGLE_OBJECT);
-		exportOutlinesMenuItem = fact.makeItem(Labels.Populations.EXPORT_OUTLINES, UserActionEvent.EXPORT_OUTLINES,
-				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_CHILD_DATASET
-						| ContextEnabled.ACTIVE_ON_MULTI_OBJECTS | ContextEnabled.ACTIVE_ON_SINGLE_OBJECT);
-		exportSignalsItem = fact.makeItem(Labels.Populations.EXPORT_SIGNALS, UserActionEvent.EXPORT_SIGNALS,
-				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_CHILD_DATASET
-						| ContextEnabled.ACTIVE_ON_MULTI_OBJECTS | ContextEnabled.ACTIVE_ON_SINGLE_OBJECT);
-		exportShellsItem = fact.makeItem(Labels.Populations.EXPORT_SHELLS, UserActionEvent.EXPORT_SHELLS,
-				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_CHILD_DATASET
-						| ContextEnabled.ACTIVE_ON_MULTI_OBJECTS | ContextEnabled.ACTIVE_ON_SINGLE_OBJECT);
-		saveCellsMenuItem = fact.makeItem(Labels.Populations.EXPORT_CELL_LOCS, UserActionEvent.EXPORT_CELL_LOCS,
-				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_CHILD_DATASET
-						| ContextEnabled.ACTIVE_ON_MULTI_OBJECTS | ContextEnabled.ACTIVE_ON_SINGLE_OBJECT);
-		exportOptionsMenuItem = fact.makeItem(Labels.Populations.EXPORT_OPTIONS, UserActionEvent.EXPORT_OPTIONS,
-				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_CHILD_DATASET
-						| ContextEnabled.ACTIVE_ON_MULTI_OBJECTS | ContextEnabled.ACTIVE_ON_SINGLE_OBJECT);
-
-		exportRulesetsMenuItem = fact.makeItem(Labels.Populations.EXPORT_RULESETS, UserActionEvent.EXPORT_RULESETS,
-				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_CHILD_DATASET
-						| ContextEnabled.ACTIVE_ON_MULTI_OBJECTS | ContextEnabled.ACTIVE_ON_SINGLE_OBJECT);
-
-		exportCellImagesItem = fact.makeItem(Labels.Populations.EXPORT_CELL_IMAGES,
-				UserActionEvent.EXPORT_SINGLE_CELL_IMAGES,
-				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_CHILD_DATASET
-						| ContextEnabled.ACTIVE_ON_MULTI_OBJECTS | ContextEnabled.ACTIVE_ON_SINGLE_OBJECT);
-
-		exportSubMenu.add(exportStatsMenuItem);
-		exportSubMenu.add(exportProfilesMenuItem);
-		exportSubMenu.add(exportOutlinesMenuItem);
-		exportSubMenu.add(exportSignalsItem);
-		exportSubMenu.add(exportShellsItem);
-		exportSubMenu.add(saveCellsMenuItem);
-		exportSubMenu.add(exportOptionsMenuItem);
-		exportSubMenu.add(exportRulesetsMenuItem);
-		exportSubMenu.add(exportCellImagesItem);
-
-		addNuclearSignalMenuItem = fact.makeItem(Labels.Populations.ADD_NUCLEAR_SIGNAL_LBL,
-				UserActionEvent.ADD_NUCLEAR_SIGNAL,
-				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_SINGLE_OBJECT);
-		addNuclearSignalMenuItem.setToolTipText(Labels.Populations.ADD_NUCLEAR_SIGNAL_TIP);
-
-		fishRemappinglMenuItem = fact.makeItem(Labels.Populations.POST_FISH_MAPPING_LBL,
-				UserActionEvent.POST_FISH_MAPPING,
-				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_SINGLE_OBJECT);
-
-		clusterFileMenuItem = fact.makeItem(Labels.Populations.ADD_CLUSTER_FILE_LBL, UserActionEvent.CLUSTER_FROM_FILE,
-				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_CHILD_DATASET
-						| ContextEnabled.ACTIVE_ON_SINGLE_OBJECT);
-
-		addSubMenu = fact.makeMenu(Labels.Populations.ADD,
-				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_SINGLE_OBJECT);
-		addSubMenu.add(addNuclearSignalMenuItem);
-		addSubMenu.add(fishRemappinglMenuItem);
-		addSubMenu.add(relocateMenuItem);
-		addSubMenu.add(clusterFileMenuItem);
-
-		replaceFolderMenuItem = fact.makeItem(Labels.Populations.CHANGE_FOLDER_LBL,
-				UserActionEvent.CHANGE_NUCLEUS_IMAGE_FOLDER,
-				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_SINGLE_OBJECT);
+//		replaceFolderMenuItem = fact.makeItem(Labels.Populations.CHANGE_FOLDER_LBL,
+//				UserActionEvent.CHANGE_NUCLEUS_IMAGE_FOLDER,
+//				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_SINGLE_OBJECT);
 
 	}
 
@@ -206,31 +121,26 @@ public class PopulationListPopupMenu extends AbstractPopupMenu {
 
 		addMoveMenuItems();
 
-		addSeparator();
+//		addSeparator();
 
-		add(workspaceSubMenu);
+//		add(workspaceSubMenu);
 //    	add(biosampleSubMenu);
 
-		addSeparator();
+//		addSeparator();
 
-		add(mergeMenuItem);
-		add(deleteMenuItem);
-		add(booleanMenuItem);
-		add(curateMenuItem);
+//		add(mergeMenuItem);
+//		add(deleteMenuItem);
+//		add(booleanMenuItem);
+//		add(curateMenuItem);
 
-		addSeparator();
+//		addSeparator();
 
-		add(saveMenuItem);
+//		add(saveMenuItem);
 
-		addSeparator();
+//		addSeparator();
 
-		add(replaceFolderMenuItem);
-		add(exportSubMenu);
-		add(changeScaleItem);
+//		add(replaceFolderMenuItem);
 
-		addSeparator();
-
-		add(addSubMenu);
 	}
 
 	private void createWorkspaceMenu(@Nullable IAnalysisDataset d) {
@@ -306,33 +216,33 @@ public class PopulationListPopupMenu extends AbstractPopupMenu {
 		biosampleSubMenu.removeAll();
 		createBiosampleMenu(d);
 
-		setAddNuclearSignalEnabled(d.isRoot());
-		setFishRemappingEnabled(d.isRoot());
+//		setAddNuclearSignalEnabled(d.isRoot());
+//		setFishRemappingEnabled(d.isRoot());
 
-		setDeleteString(d.isRoot() ? Labels.Populations.CLOSE_LBL : Labels.Populations.DELETE_LBL);
+//		setDeleteString(d.isRoot() ? Labels.Populations.CLOSE_LBL : Labels.Populations.DELETE_LBL);
 	}
 
 	protected void updateSelectionContext(IClusterGroup group) {
 		moveUpMenuItem.setEnabled(true);
 		moveDownMenuItem.setEnabled(true);
-		setDeleteString(Labels.Populations.DELETE_LBL);
+//		setDeleteString(Labels.Populations.DELETE_LBL);
 	}
 
 	protected void updateSelectionContext(IWorkspace workspace) {
 		moveUpMenuItem.setEnabled(true);
 		moveDownMenuItem.setEnabled(true);
-		setDeleteString(Labels.Populations.DELETE_LBL);
+//		setDeleteString(Labels.Populations.DELETE_LBL);
 	}
 
-	protected void setDeleteString(String s) {
-		deleteMenuItem.setText(s);
-	}
+//	protected void setDeleteString(String s) {
+//		deleteMenuItem.setText(s);
+//	}
 
-	protected void setAddNuclearSignalEnabled(boolean b) {
-		addNuclearSignalMenuItem.setEnabled(b);
-	}
-
-	protected void setFishRemappingEnabled(boolean b) {
-		this.fishRemappinglMenuItem.setEnabled(b);
-	}
+//	protected void setAddNuclearSignalEnabled(boolean b) {
+//		addNuclearSignalMenuItem.setEnabled(b);
+//	}
+//
+//	protected void setFishRemappingEnabled(boolean b) {
+//		this.fishRemappinglMenuItem.setEnabled(b);
+//	}
 }

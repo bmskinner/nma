@@ -18,26 +18,76 @@ package com.bmskinner.nuclear_morphology.gui;
 
 import java.util.Collection;
 
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.datasets.IClusterGroup;
+import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace;
+
 /**
- * Interface for components that have their enabled state driven 
- * by the number and type of selected objects. Components should specify a
- * bitmask describing the combinations of objects they will respond to. 
+ * Interface for components that have their enabled state driven by the number
+ * and type of selected objects. Components should specify a bitmask describing
+ * the combinations of objects they will respond to.
+ * 
  * @author bms41
  * @since 1.14.0
  *
  */
 public interface ContextEnabled {
-	
-	int ACTIVE_ON_ROOT_DATASET  = 1;
+
+	int ACTIVE_ON_ROOT_DATASET = 1;
 	int ACTIVE_ON_CHILD_DATASET = 2;
 	int ACTIVE_ON_CLUSTER_GROUP = 4;
-	int ACTIVE_ON_WORKSPACE     = 8;
+	int ACTIVE_ON_WORKSPACE = 8;
 	int ACTIVE_ON_SINGLE_OBJECT = 16;
 	int ACTIVE_ON_MULTI_OBJECTS = 32;
-	
-	 /**
-     * Tell the menu items to update their state based on the selected items
-     * @param nItems the number of selected items
-     */
-	void updateSelectionContext(Collection<Object> objects);
+//	int ACTIVE_ON_TWO_DATASETS = 64;
+
+	int ALWAYS_ACTIVE = ACTIVE_ON_ROOT_DATASET + ACTIVE_ON_CHILD_DATASET + ACTIVE_ON_CLUSTER_GROUP + ACTIVE_ON_WORKSPACE
+			+ ACTIVE_ON_SINGLE_OBJECT + ACTIVE_ON_MULTI_OBJECTS;
+
+	int ONLY_DATASETS = ACTIVE_ON_ROOT_DATASET + ACTIVE_ON_CHILD_DATASET + ACTIVE_ON_SINGLE_OBJECT
+			+ ACTIVE_ON_MULTI_OBJECTS;
+
+	/**
+	 * Tell the menu items to update their state based on the selected items
+	 * 
+	 */
+	void updateSelectionContext(Collection<? extends Object> objects);
+
+	/**
+	 * Test if the item should be active for the given objects
+	 * 
+	 * @param objects
+	 */
+	static boolean matchesSelectionContext(Collection<? extends Object> objects, int context) {
+
+		if ((context & ALWAYS_ACTIVE) == ALWAYS_ACTIVE)
+			return true;
+
+		if (objects.isEmpty())
+			return false;
+
+		if (objects.size() == 1 && ((context & ACTIVE_ON_SINGLE_OBJECT) != ACTIVE_ON_SINGLE_OBJECT))
+			return false;
+
+		if (objects.size() > 1 && ((context & ACTIVE_ON_MULTI_OBJECTS) != ACTIVE_ON_MULTI_OBJECTS))
+			return false;
+
+		boolean enabled = true;
+
+		for (Object o : objects) {
+			if (o instanceof IAnalysisDataset d) {
+				if (d.isRoot())
+					enabled &= ((context & ACTIVE_ON_ROOT_DATASET) == ACTIVE_ON_ROOT_DATASET);
+				else
+					enabled &= ((context & ACTIVE_ON_CHILD_DATASET) == ACTIVE_ON_CHILD_DATASET);
+			}
+
+			// Allow cluster groups and workspaces to be ignored in multi selections
+			if (o instanceof IClusterGroup)
+				enabled |= ((context & ACTIVE_ON_CLUSTER_GROUP) == ACTIVE_ON_CLUSTER_GROUP);
+			if (o instanceof IWorkspace)
+				enabled |= ((context & ACTIVE_ON_WORKSPACE) == ACTIVE_ON_WORKSPACE);
+		}
+		return enabled;
+	}
 }

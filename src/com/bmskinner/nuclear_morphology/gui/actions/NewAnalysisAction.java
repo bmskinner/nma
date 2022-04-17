@@ -55,9 +55,6 @@ public class NewAnalysisAction extends VoidResultAction {
 
 	private static final Logger LOGGER = Logger.getLogger(NewAnalysisAction.class.getName());
 
-	private IAnalysisOptions options;
-	private HashOptions nucleusOptions;
-
 	private File folder = null;
 
 	public static final int NEW_ANALYSIS = 0;
@@ -83,23 +80,21 @@ public class NewAnalysisAction extends VoidResultAction {
 	public NewAnalysisAction(@NonNull ProgressBarAcceptor acceptor, final File folder) {
 		super(PROGRESS_BAR_LABEL, acceptor);
 		this.folder = folder;
-		options = OptionsFactory.makeAnalysisOptions();
-		nucleusOptions = OptionsFactory.makeNucleusDetectionOptions(folder).build();
-		options.setDetectionOptions(CellularComponent.NUCLEUS, nucleusOptions);
 	}
 
 	@Override
 	public void run() {
+		if (folder == null && !getImageDirectory()) {
+			LOGGER.fine("Could not get image directory");
+			cancel();
+			return;
+		}
+
+		IAnalysisOptions options = OptionsFactory.makeAnalysisOptions();
+		HashOptions nucleusOptions = OptionsFactory.makeNucleusDetectionOptions(this.folder).build();
+		options.setDetectionOptions(CellularComponent.NUCLEUS, nucleusOptions);
 
 		this.setProgressBarIndeterminate();
-
-		if (folder == null) {
-			if (!getImageDirectory()) {
-				LOGGER.fine("Could not get image directory");
-				cancel();
-				return;
-			}
-		}
 
 		LOGGER.fine("Creating for " + folder.getAbsolutePath());
 
@@ -184,8 +179,6 @@ public class NewAnalysisAction extends VoidResultAction {
 			return false;
 
 		folder = file;
-
-		nucleusOptions.setString(HashOptions.DETECTION_FOLDER, file.getAbsolutePath());
 		return true;
 	}
 
