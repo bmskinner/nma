@@ -34,7 +34,6 @@ import java.util.stream.DoubleStream;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
-import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
@@ -689,33 +688,6 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 	}
 
 	/**
-	 * Create an empty table to display.
-	 * 
-	 * @param list
-	 * @return
-	 */
-//	private DefaultTableModel makeEmptyWilcoxonTable(@Nullable List<IAnalysisDataset> list) {
-//		DefaultTableModel model = new DefaultTableModel();
-//
-//		if (list == null) {
-//			Object[] columnData = { EMPTY_STRING };
-//			model.addColumn("Population", columnData);
-//			model.addColumn("", columnData);
-//		} else {
-//
-//			// set rows
-//			Object[] columnData = new Object[list.size()];
-//			int row = 0;
-//			for (IAnalysisDataset dataset : list) {
-//				columnData[row] = dataset.getName();
-//				row++;
-//			}
-//			model.addColumn(Labels.DATASET, columnData);
-//		}
-//		return model;
-//	}
-
-	/**
 	 * Carry out pairwise wilcoxon rank-sum test on the given stat of the given
 	 * datasets
 	 * 
@@ -810,17 +782,17 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 				if (dataset.getId().equals(d2.getId()))
 					continue;
 
+				long idVal = WilcoxDatasetResult.toId(dataset, d2);
+				if (results.stream().anyMatch(w -> w.id() == idVal)) {
+					continue; // don't do reciprocal comparison
+				}
+
 				IProfileSegment medianSeg2 = d2.getCollection().getProfileCollection()
 						.getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN).getSegments()
 						.get(options.getSegPosition());
 
 				double[] d2Values = d2.getCollection().getRawValues(Measurement.LENGTH,
 						CellularComponent.NUCLEAR_BORDER_SEGMENT, MeasurementScale.PIXELS, medianSeg2.getID());
-
-				long idVal = WilcoxDatasetResult.toId(dataset, d2);
-				if (results.stream().anyMatch(w -> w.id() == idVal)) {
-					continue; // don't do reciprocal comparison
-				}
 
 				WilcoxonRankSumResult wilcox = Stats.runWilcoxonTest(d1Values, d2Values, nComparisons);
 				results.add(new WilcoxDatasetResult(idVal, wilcox));
@@ -872,11 +844,8 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 					.getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN).getSegments()
 					.get(options.getSegPosition());
 
-			double[] d1Values = d1.getCollection().getRawValues(Measurement.LENGTH,
-					CellularComponent.NUCLEAR_BORDER_SEGMENT, MeasurementScale.PIXELS, medianSeg1.getID());
-
-			DescriptiveStatistics ds1 = new DescriptiveStatistics(d1Values);
-			double v1 = ds1.getPercentile(Stats.MEDIAN);
+			double v1 = d1.getCollection().getMedian(Measurement.LENGTH, CellularComponent.NUCLEAR_BORDER_SEGMENT,
+					MeasurementScale.PIXELS, medianSeg1.getID());
 
 			for (IAnalysisDataset d2 : options.getDatasets()) {
 
@@ -887,11 +856,8 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 						.getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN).getSegments()
 						.get(options.getSegPosition());
 
-				double[] d2Values = d2.getCollection().getRawValues(Measurement.LENGTH,
-						CellularComponent.NUCLEAR_BORDER_SEGMENT, MeasurementScale.PIXELS, medianSeg2.getID());
-
-				DescriptiveStatistics ds2 = new DescriptiveStatistics(d2Values);
-				double v2 = ds2.getPercentile(Stats.MEDIAN);
+				double v2 = d2.getCollection().getMedian(Measurement.LENGTH, CellularComponent.NUCLEAR_BORDER_SEGMENT,
+						MeasurementScale.PIXELS, medianSeg2.getID());
 
 				results.add(new MagnitudeDatasetResult(d1, d2, v1 / v2));
 			}

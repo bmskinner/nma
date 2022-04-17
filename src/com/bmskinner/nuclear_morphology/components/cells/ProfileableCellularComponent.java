@@ -248,19 +248,6 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 		throw new MissingLandmarkException("Tag " + tag + " is not present");
 	}
 
-	/**
-	 * Replace the tags in the object with the given tag map
-	 * 
-	 * @param m
-	 */
-	private void setLandmarks(Map<Landmark, Integer> m) {
-		if (isLocked)
-			return;
-		profileLandmarks.clear();
-		for (Entry<Landmark, Integer> entry : m.entrySet())
-			profileLandmarks.put(entry.getKey(), entry.getValue());
-	}
-
 	@Override
 	public void setLandmark(@NonNull Landmark lm, int newLmIndex)
 			throws MissingProfileException, ProfileException, MissingLandmarkException {

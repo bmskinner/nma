@@ -38,107 +38,106 @@ import ij.process.FloatPolygon;
  * @since 1.13.3
  *
  */
-public class DefaultConsensusNucleus extends DefaultNucleus implements Consensus  {
-	
+public class DefaultConsensusNucleus extends DefaultNucleus implements Consensus {
+
 	private static final Logger LOGGER = Logger.getLogger(DefaultConsensusNucleus.class.getName());
-    
-    private double xOffset = 0;
-    private double yOffset = 0;
-    private double rOffset = 0;
 
-    /**
-     * Create from a nucleus. Offsets will be zero.
-     * @param n
-     * @throws UnprofilableObjectException
-     * @throws ComponentCreationException 
-     */
-    public DefaultConsensusNucleus(Nucleus n) throws UnprofilableObjectException, ComponentCreationException {
-        super(n);
-    }
-    
-    /**
-     * Create from another consensus. Offsets will be copied
-     * @param n
-     * @throws UnprofilableObjectException
-     * @throws ComponentCreationException 
-     */
-    public DefaultConsensusNucleus(Consensus n) throws UnprofilableObjectException, ComponentCreationException {
-        super(n);
-        xOffset = n.currentOffset().getX();
-        yOffset = n.currentOffset().getY();
-        rOffset = n.currentRotation();
-    }
-    
-    /**
-     * Construct from an XML element. Use for 
-     * unmarshalling. The element should conform
-     * to the specification in {@link XmlSerializable}.
-     * @param e the XML element containing the data.
-     */
-    public DefaultConsensusNucleus(Element e) throws ComponentCreationException {
-    	super(e);
+	private double xOffset = 0;
+	private double yOffset = 0;
+	private double rOffset = 0;
 
-    	if(e.getChild("Offset")!=null) {
-    		xOffset = Double.valueOf(e.getChild("Offset").getAttributeValue("x"));
-    		yOffset = Double.valueOf(e.getChild("Offset").getAttributeValue("y"));
-    		rOffset = Double.valueOf(e.getChild("Offset").getAttributeValue("r"));
-    	}
-    }
-    
-    
-    @Override
+	/**
+	 * Create from a nucleus. Offsets will be zero.
+	 * 
+	 * @param n
+	 * @throws UnprofilableObjectException
+	 * @throws ComponentCreationException
+	 */
+	public DefaultConsensusNucleus(Nucleus n) throws UnprofilableObjectException, ComponentCreationException {
+		super(n);
+	}
+
+	/**
+	 * Create from another consensus. Offsets will be copied
+	 * 
+	 * @param n
+	 * @throws UnprofilableObjectException
+	 * @throws ComponentCreationException
+	 */
+	public DefaultConsensusNucleus(Consensus n) throws UnprofilableObjectException, ComponentCreationException {
+		super(n);
+		xOffset = n.currentOffset().getX();
+		yOffset = n.currentOffset().getY();
+		rOffset = n.currentRotation();
+	}
+
+	/**
+	 * Construct from an XML element. Use for unmarshalling. The element should
+	 * conform to the specification in {@link XmlSerializable}.
+	 * 
+	 * @param e the XML element containing the data.
+	 */
+	public DefaultConsensusNucleus(Element e) throws ComponentCreationException {
+		super(e);
+
+		if (e.getChild("Offset") != null) {
+			xOffset = Double.valueOf(e.getChild("Offset").getAttributeValue("x"));
+			yOffset = Double.valueOf(e.getChild("Offset").getAttributeValue("y"));
+			rOffset = Double.valueOf(e.getChild("Offset").getAttributeValue("r"));
+		}
+	}
+
+	@Override
 	public Element toXmlElement() {
-    	Element e = super.toXmlElement().setName("ConsensusNucleus");
-    	
-    	e.addContent(new Element("Offset")
-    			.setAttribute("x", String.valueOf(xOffset))
-    			.setAttribute("y", String.valueOf(yOffset))
-    			.setAttribute("r", String.valueOf(rOffset)));
+		Element e = super.toXmlElement().setName("ConsensusNucleus");
+
+		e.addContent(new Element("Offset").setAttribute("x", String.valueOf(xOffset))
+				.setAttribute("y", String.valueOf(yOffset)).setAttribute("r", String.valueOf(rOffset)));
 		return e;
 	}
-    
-    @Override
+
+	@Override
 	public void offset(double xOffset, double yOffset) {
-    	this.xOffset = xOffset;
-    	this.yOffset = yOffset;
-    }
-    
-    @Override
+		this.xOffset = xOffset;
+		this.yOffset = yOffset;
+	}
+
+	@Override
 	public void addRotation(double angle) {
-    	this.rOffset = angle;
-    }
-    
-    @Override
+		this.rOffset = angle;
+	}
+
+	@Override
 	public double currentRotation() {
-    	return rOffset;
-    }
+		return rOffset;
+	}
 
-    @Override
-    public FloatPolygon toOriginalPolygon() {
-        // There is no original position for a consensus
-        return toPolygon();
-    }
+	@Override
+	public FloatPolygon toOriginalPolygon() {
+		// There is no original position for a consensus
+		return toPolygon();
+	}
 
-    @Override
-    public Shape toOriginalShape() {
-        // There is no original position for a consensus
-        return toShape();
-    }
-    
-    
-    @Override
-    public Nucleus getOrientedNucleus() throws MissingLandmarkException, ComponentCreationException {
-    	Nucleus n = super.getOrientedNucleus();
-    	n.rotate(rOffset);
-    	n.offset(xOffset, yOffset);
-    	return n;
-    }
-    
+	@Override
+	public Shape toOriginalShape() {
+		// There is no original position for a consensus
+		return toShape();
+	}
+
+	@Override
+	public Nucleus getOrientedNucleus() throws MissingLandmarkException, ComponentCreationException {
+		Nucleus n = this.duplicate();
+		n.orient();
+		n.rotate(rOffset);
+		n.offset(xOffset, yOffset);
+		return n;
+	}
+
 	@Override
 	public IPoint currentOffset() {
 		return new FloatPoint(xOffset, yOffset);
 	}
-	
+
 	@Override
 	public Consensus duplicate() {
 		try {
@@ -152,13 +151,13 @@ public class DefaultConsensusNucleus extends DefaultNucleus implements Consensus
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append(super.toString()+"\n");
-		
-		sb.append("Offset: "+xOffset+"-"+yOffset+"\n");
-		sb.append("Rotation: "+rOffset);
+		sb.append(super.toString() + "\n");
+
+		sb.append("Offset: " + xOffset + "-" + yOffset + "\n");
+		sb.append("Rotation: " + rOffset);
 		return sb.toString();
 	}
-	
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -181,6 +180,4 @@ public class DefaultConsensusNucleus extends DefaultNucleus implements Consensus
 				&& Double.doubleToLongBits(yOffset) == Double.doubleToLongBits(other.yOffset);
 	}
 
-	
-	
 }

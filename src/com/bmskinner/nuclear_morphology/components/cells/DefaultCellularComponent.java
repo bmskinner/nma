@@ -46,6 +46,8 @@ import com.bmskinner.nuclear_morphology.components.MissingComponentException;
 import com.bmskinner.nuclear_morphology.components.generic.FloatPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.measure.DefaultMeasurement;
+import com.bmskinner.nuclear_morphology.components.measure.DoubleEquation;
+import com.bmskinner.nuclear_morphology.components.measure.LineEquation;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileException;
@@ -67,268 +69,268 @@ import ij.process.FloatPolygon;
  *
  */
 public abstract class DefaultCellularComponent implements CellularComponent {
-	
+
 //	private static final String SOURCE_IMAGE_IS_NOT_AVAILABLE = "Source image is not available";
 
 	private static final String XML_COM = "CoM";
 
 	private static final Logger LOGGER = Logger.getLogger(DefaultCellularComponent.class.getName());
-    
-    /** The pixel spacing between border points after roi interpolation */
+
+	/** The pixel spacing between border points after roi interpolation */
 	private static final int INTERPOLATION_INTERVAL_PIXELS = 1;
-		
-    private final UUID id;
-    
-    /** The lowest x position in the object bounding box */
-    private final int xBase;
-    
-    /** The lowest y position in the object bounding box */
-    private final int yBase;
 
-    /** The current centre of the object. */
-    private IPoint centreOfMass;
+	private final UUID id;
 
-    /** The original centre of the object in its source image. */
-    private final IPoint originalCentreOfMass;
+	/** The lowest x position in the object bounding box */
+	private final int xBase;
 
-    /** The measurements stored for this object */
-    private Map<Measurement, Double> measurements = new HashMap<>();
+	/** The lowest y position in the object bounding box */
+	private final int yBase;
 
-    /**
-     * The source file the component was detected in. This is detected on
-     * dataset loading as a relative path from the nmd
-     */
-    private File sourceFile;
+	/** The current centre of the object. */
+	private IPoint centreOfMass;
 
-    /** The RGB channel in which this component was detected */
-    private final int channel;
+	/** The original centre of the object in its source image. */
+	private final IPoint originalCentreOfMass;
 
-    /**
-     * The length of a micron in pixels. Allows conversion between pixels and SI
-     * units. Set to 1 by default.
-     * @see CellularComponent#setScale()
-     */
-    private double scale = CellularComponent.DEFAULT_SCALE;
+	/** The measurements stored for this object */
+	private Map<Measurement, Double> measurements = new HashMap<>();
 
-    /** The points within the roi from which the object was detected  */
-    private final int[] xpoints; 
-    private final int[] ypoints;
-    
-    /** Whether the x and y points should be reversed when making the border */
-    private boolean isReversed = false;
+	/**
+	 * The source file the component was detected in. This is detected on dataset
+	 * loading as a relative path from the nmd
+	 */
+	private File sourceFile;
 
-    /** The complete border list interpolated from the roi */
-    private IPoint[] borderList = new IPoint[0];
+	/** The RGB channel in which this component was detected */
+	private final int channel;
 
-    /** Cached object shapes. */
+	/**
+	 * The length of a micron in pixels. Allows conversion between pixels and SI
+	 * units. Set to 1 by default.
+	 * 
+	 * @see CellularComponent#setScale()
+	 */
+	private double scale = CellularComponent.DEFAULT_SCALE;
+
+	/** The points within the roi from which the object was detected */
+	private final int[] xpoints;
+	private final int[] ypoints;
+
+	/** Whether the x and y points should be reversed when making the border */
+	private boolean isReversed = false;
+
+	/** The complete border list interpolated from the roi */
+	private IPoint[] borderList = new IPoint[0];
+
+	/** Cached object shapes. */
 //    private ShapeCache shapeCache = new ShapeCache();
 
-    /** The object bounding box */
-    private Rectangle2D bounds;
+	/** The object bounding box */
+	private Rectangle2D bounds;
 
-    /**
-     * Construct with an ROI, a source image and channel, and the original
-     * position in the source image. It sets the immutable original centre of
-     * mass, and the mutable current centre of mass. It also assigns a random ID
-     * to the component.
-     * 
-     * @param roi the roi of the object
-     * @param centerOfMass the original centre of mass of the component
-     * @param source the image file the component was found in
-     * @param channel the RGB channel the component was found in
-     * @param position the bounding position of the component in the original image
-     */
-    protected DefaultCellularComponent(@NonNull Roi roi, @NonNull IPoint centreOfMass, File source, int channel, 
-    		int x, int y) {
-    	this(roi, centreOfMass, source, channel, x, y, UUID.randomUUID() );
-    }
-    
-    /**
-     * Construct with an ROI, a source image and channel, and the original
-     * position in the source image. It sets the immutable original centre of
-     * mass, and the mutable current centre of mass. It also assigns a random ID
-     * to the component.
-     * 
-     * @param roi the roi of the object
-     * @param centerOfMass the original centre of mass of the component
-     * @param source the image file the component was found in
-     * @param channel the RGB channel the component was found in
-     * @param position the bounding position of the component in the original image
-     * @param id the id of the component. Only use when deserialising!
-     */
-    protected DefaultCellularComponent(@NonNull Roi roi, @NonNull IPoint centreOfMass, 
-    		File source, int channel, int x, int y, @Nullable UUID id) {
-        
-        // Sanity check: is the CoM inside the roi
-    	if(!doesRoiMatchCom(roi, centreOfMass))
-    		throw new IllegalArgumentException("Centre of mass is not inside ROI");
-        
-        this.originalCentreOfMass = new FloatPoint(centreOfMass);
-        this.centreOfMass = new FloatPoint(centreOfMass);
-        this.id = id==null ? UUID.randomUUID() : id;
-        this.sourceFile = source;
-        this.channel = channel;
-        this.xBase = x;
-        this.yBase = y;
+	/**
+	 * Construct with an ROI, a source image and channel, and the original position
+	 * in the source image. It sets the immutable original centre of mass, and the
+	 * mutable current centre of mass. It also assigns a random ID to the component.
+	 * 
+	 * @param roi          the roi of the object
+	 * @param centerOfMass the original centre of mass of the component
+	 * @param source       the image file the component was found in
+	 * @param channel      the RGB channel the component was found in
+	 * @param position     the bounding position of the component in the original
+	 *                     image
+	 */
+	protected DefaultCellularComponent(@NonNull Roi roi, @NonNull IPoint centreOfMass, File source, int channel, int x,
+			int y) {
+		this(roi, centreOfMass, source, channel, x, y, UUID.randomUUID());
+	}
 
-        // Store the original points of the roi. From these, a smooth polygon can be
-        // reconstructed.
-        Polygon polygon = roi.getPolygon();
+	/**
+	 * Construct with an ROI, a source image and channel, and the original position
+	 * in the source image. It sets the immutable original centre of mass, and the
+	 * mutable current centre of mass. It also assigns a random ID to the component.
+	 * 
+	 * @param roi          the roi of the object
+	 * @param centerOfMass the original centre of mass of the component
+	 * @param source       the image file the component was found in
+	 * @param channel      the RGB channel the component was found in
+	 * @param position     the bounding position of the component in the original
+	 *                     image
+	 * @param id           the id of the component. Only use when deserialising!
+	 */
+	protected DefaultCellularComponent(@NonNull Roi roi, @NonNull IPoint centreOfMass, File source, int channel, int x,
+			int y, @Nullable UUID id) {
 
-        // The polygon may have empty indices in its arrays
-        // so resize these by copying the values to new
-        // arrays
-        this.xpoints = Arrays.copyOfRange(polygon.xpoints, 0, polygon.npoints);
-        this.ypoints = Arrays.copyOfRange(polygon.ypoints, 0, polygon.npoints);
+		// Sanity check: is the CoM inside the roi
+		if (!doesRoiMatchCom(roi, centreOfMass))
+			throw new IllegalArgumentException("Centre of mass is not inside ROI");
 
-        makeBorderList();
-    }   
+		this.originalCentreOfMass = new FloatPoint(centreOfMass);
+		this.centreOfMass = new FloatPoint(centreOfMass);
+		this.id = id == null ? UUID.randomUUID() : id;
+		this.sourceFile = source;
+		this.channel = channel;
+		this.xBase = x;
+		this.yBase = y;
 
-    /**
-     * Defensively duplicate a component. The ID is kept consistent.
-     * 
-     * @param a the template component
-     */
-    protected DefaultCellularComponent(@NonNull CellularComponent a) {
-        this.id = UUID.fromString(a.getID().toString());
-        this.xBase = a.getXBase();
-        this.yBase = a.getYBase();
-        this.originalCentreOfMass = a.getOriginalCentreOfMass().duplicate();
-        this.centreOfMass = a.getCentreOfMass().duplicate();
-        this.sourceFile = new File(a.getSourceFile().getPath());
-        this.channel = a.getChannel();
-        this.scale = a.getScale();
+		// Store the original points of the roi. From these, a smooth polygon can be
+		// reconstructed.
+		Polygon polygon = roi.getPolygon();
 
-        for(Measurement stat : a.getMeasurements()) {
-        	setMeasurement(stat, a.getMeasurement(stat, MeasurementScale.PIXELS));
-        }
+		// The polygon may have empty indices in its arrays
+		// so resize these by copying the values to new
+		// arrays
+		this.xpoints = Arrays.copyOfRange(polygon.xpoints, 0, polygon.npoints);
+		this.ypoints = Arrays.copyOfRange(polygon.ypoints, 0, polygon.npoints);
 
-        if ( !(a instanceof DefaultCellularComponent))
-        	throw new IllegalArgumentException("Input is incorrect class: "+a.getClass().getName());
+		makeBorderList();
+	}
 
-        DefaultCellularComponent other = (DefaultCellularComponent) a;
+	/**
+	 * Defensively duplicate a component. The ID is kept consistent.
+	 * 
+	 * @param a the template component
+	 */
+	protected DefaultCellularComponent(@NonNull CellularComponent a) {
+		this.id = UUID.fromString(a.getID().toString());
+		this.xBase = a.getXBase();
+		this.yBase = a.getYBase();
+		this.originalCentreOfMass = a.getOriginalCentreOfMass().duplicate();
+		this.centreOfMass = a.getCentreOfMass().duplicate();
+		this.sourceFile = new File(a.getSourceFile().getPath());
+		this.channel = a.getChannel();
+		this.scale = a.getScale();
 
-        this.xpoints = Arrays.copyOf(other.xpoints, other.xpoints.length);
-        this.ypoints = Arrays.copyOf(other.ypoints, other.ypoints.length);
-        this.isReversed = a.isReversed();
+		for (Measurement stat : a.getMeasurements()) {
+			setMeasurement(stat, a.getMeasurement(stat, MeasurementScale.PIXELS));
+		}
 
-        makeBorderList();
-    }
-    
-    /**
-     * Construct from an XML element. Use for 
-     * unmarshalling. The element should conform
-     * to the specification in {@link XmlSerializable}.
-     * @param e the XML element containing the data.
-     */
-    protected DefaultCellularComponent(Element e) {
-    	id = UUID.fromString(e.getAttributeValue("id"));
-    	    	
-    	xBase = Integer.parseInt(e.getChild("Base").getAttributeValue("x"));
-        yBase = Integer.parseInt(e.getChild("Base").getAttributeValue("y"));
-    	    	
-    	centreOfMass = new FloatPoint(Float.parseFloat(e.getChild(XML_COM).getAttributeValue("x")), 
-    			Float.parseFloat(e.getChild(XML_COM).getAttributeValue("y")));
-    	
-    	originalCentreOfMass = new FloatPoint(Float.parseFloat(e.getChild("OriginalCentreOfMass").getAttributeValue("x")), 
-    			Float.parseFloat(e.getChild(XML_COM).getAttributeValue("y")));
+		if (!(a instanceof DefaultCellularComponent))
+			throw new IllegalArgumentException("Input is incorrect class: " + a.getClass().getName());
 
+		DefaultCellularComponent other = (DefaultCellularComponent) a;
 
-    	// Add measurements
-    	for(Element el : e.getChildren("Measurement")) {
-    		Measurement m = new DefaultMeasurement(el);
-    		measurements.put(m, Double.parseDouble(el.getAttributeValue("value")));
-    	}
-    	
-    	sourceFile = new File(e.getChildText("SourceFile"));
-    	channel = Integer.parseInt(e.getChildText("Channel"));
-    	scale   = Double.parseDouble(e.getChildText("Scale"));
-    	
-    	xpoints = XMLReader.parseIntArray(e.getChildText("xpoints"));
-    	ypoints = XMLReader.parseIntArray(e.getChildText("ypoints"));
-    	isReversed = e.getChild("xpoints").getAttributeValue("reverse")!=null;
+		this.xpoints = Arrays.copyOf(other.xpoints, other.xpoints.length);
+		this.ypoints = Arrays.copyOf(other.ypoints, other.ypoints.length);
+		this.isReversed = a.isReversed();
 
-    	makeBorderList();
-    }
-    
-    /**
-     * Create the border list from the stored int[] points. Move the centre of
-     * mass to any stored position.
-     * 
-     * @param roi
-     */
-    private void makeBorderList() {
+		makeBorderList();
+	}
 
-        // Make a copy of the int[] points otherwise creating a polygon roi
-        // will reset them to 0,0 coordinates
-        int[] xcopy = Arrays.copyOf(xpoints, xpoints.length);
-        int[] ycopy = Arrays.copyOf(ypoints, ypoints.length);
-        
-        if(isReversed) {
-        	xcopy = ArrayUtils.reverse(xcopy);
-        	ycopy = ArrayUtils.reverse(ycopy);
-        }
-        
-        PolygonRoi roi = new PolygonRoi(xcopy, ycopy, xcopy.length, Roi.TRACED_ROI);
+	/**
+	 * Construct from an XML element. Use for unmarshalling. The element should
+	 * conform to the specification in {@link XmlSerializable}.
+	 * 
+	 * @param e the XML element containing the data.
+	 */
+	protected DefaultCellularComponent(Element e) {
+		id = UUID.fromString(e.getAttributeValue("id"));
 
-        // Creating the border list will set everything to the original image
-        // position.
-        // Move the border list back over the CoM if needed.
-        IPoint oldCoM = centreOfMass.duplicate();
-        centreOfMass = originalCentreOfMass.duplicate();
+		xBase = Integer.parseInt(e.getChild("Base").getAttributeValue("x"));
+		yBase = Integer.parseInt(e.getChild("Base").getAttributeValue("y"));
 
-        // convert the roi positions to border points
-        roi.fitSplineForStraightening(); // this prevents the resulting border differing in length between invokations
+		centreOfMass = new FloatPoint(Float.parseFloat(e.getChild(XML_COM).getAttributeValue("x")),
+				Float.parseFloat(e.getChild(XML_COM).getAttributeValue("y")));
 
-        FloatPolygon smoothed = roi.getInterpolatedPolygon(INTERPOLATION_INTERVAL_PIXELS, true);
-        
-        borderList = new IPoint[smoothed.npoints];   
-        for (int i = 0; i < smoothed.npoints; i++)
-            borderList[i] = new FloatPoint(smoothed.xpoints[i], smoothed.ypoints[i]);
-        
-        moveCentreOfMass(oldCoM);
-        updateBounds();
-    }
-    
-    
-    /**
-     * Test if the provided centre of mass is within the
-     * the given roi
-     * @param roi
-     * @param com
-     * @return
-     */
-    private boolean doesRoiMatchCom(Roi roi, IPoint com){
-    	Polygon polygon = roi.getPolygon();
-        Rectangle2D rect = polygon.getBounds().getFrame();
-        return rect.contains(com.getX(), com.getY());
-    }
+		originalCentreOfMass = new FloatPoint(
+				Float.parseFloat(e.getChild("OriginalCentreOfMass").getAttributeValue("x")),
+				Float.parseFloat(e.getChild(XML_COM).getAttributeValue("y")));
 
-    private void updateBounds() {
-        double xMax = -Double.MAX_VALUE;
-        double xMin = Double.MAX_VALUE;
-        double yMax = -Double.MAX_VALUE;
-        double yMin = Double.MAX_VALUE;
+		// Add measurements
+		for (Element el : e.getChildren("Measurement")) {
+			Measurement m = new DefaultMeasurement(el);
+			measurements.put(m, Double.parseDouble(el.getAttributeValue("value")));
+		}
 
-        for (IPoint p : borderList) {
-            xMax = p.getX() > xMax ? p.getX() : xMax;
-            xMin = p.getX() < xMin ? p.getX() : xMin;
-            yMax = p.getY() > yMax ? p.getY() : yMax;
-            yMin = p.getY() < yMin ? p.getY() : yMin;
-        }
+		sourceFile = new File(e.getChildText("SourceFile"));
+		channel = Integer.parseInt(e.getChildText("Channel"));
+		scale = Double.parseDouble(e.getChildText("Scale"));
 
-        double w  = xMax - xMin;
-        double h = yMax - yMin;
-        
-        bounds = new Rectangle2D.Double(xMin, yMin, w, h);
-    }
+		xpoints = XMLReader.parseIntArray(e.getChildText("xpoints"));
+		ypoints = XMLReader.parseIntArray(e.getChildText("ypoints"));
+		isReversed = e.getChild("xpoints").getAttributeValue("reverse") != null;
 
-    @Override
-    public @NonNull UUID getID() {
-        return id;
-    }
+		makeBorderList();
+	}
 
-    @Override
+	/**
+	 * Create the border list from the stored int[] points. Move the centre of mass
+	 * to any stored position.
+	 * 
+	 * @param roi
+	 */
+	private void makeBorderList() {
+
+		// Make a copy of the int[] points otherwise creating a polygon roi
+		// will reset them to 0,0 coordinates
+		int[] xcopy = Arrays.copyOf(xpoints, xpoints.length);
+		int[] ycopy = Arrays.copyOf(ypoints, ypoints.length);
+
+		if (isReversed) {
+			xcopy = ArrayUtils.reverse(xcopy);
+			ycopy = ArrayUtils.reverse(ycopy);
+		}
+
+		PolygonRoi roi = new PolygonRoi(xcopy, ycopy, xcopy.length, Roi.TRACED_ROI);
+
+		// Creating the border list will set everything to the original image
+		// position.
+		// Move the border list back over the CoM if needed.
+		IPoint oldCoM = centreOfMass.duplicate();
+		centreOfMass = originalCentreOfMass.duplicate();
+
+		// convert the roi positions to border points
+		roi.fitSplineForStraightening(); // this prevents the resulting border differing in length between invokations
+
+		FloatPolygon smoothed = roi.getInterpolatedPolygon(INTERPOLATION_INTERVAL_PIXELS, true);
+
+		borderList = new IPoint[smoothed.npoints];
+		for (int i = 0; i < smoothed.npoints; i++)
+			borderList[i] = new FloatPoint(smoothed.xpoints[i], smoothed.ypoints[i]);
+
+		moveCentreOfMass(oldCoM);
+		updateBounds();
+	}
+
+	/**
+	 * Test if the provided centre of mass is within the the given roi
+	 * 
+	 * @param roi
+	 * @param com
+	 * @return
+	 */
+	private boolean doesRoiMatchCom(Roi roi, IPoint com) {
+		Polygon polygon = roi.getPolygon();
+		Rectangle2D rect = polygon.getBounds().getFrame();
+		return rect.contains(com.getX(), com.getY());
+	}
+
+	private void updateBounds() {
+		double xMax = -Double.MAX_VALUE;
+		double xMin = Double.MAX_VALUE;
+		double yMax = -Double.MAX_VALUE;
+		double yMin = Double.MAX_VALUE;
+
+		for (IPoint p : borderList) {
+			xMax = p.getX() > xMax ? p.getX() : xMax;
+			xMin = p.getX() < xMin ? p.getX() : xMin;
+			yMax = p.getY() > yMax ? p.getY() : yMax;
+			yMin = p.getY() < yMin ? p.getY() : yMin;
+		}
+
+		double w = xMax - xMin;
+		double h = yMax - yMin;
+
+		bounds = new Rectangle2D.Double(xMin, yMin, w, h);
+	}
+
+	@Override
+	public @NonNull UUID getID() {
+		return id;
+	}
+
+	@Override
 	public int getXBase() {
 		return xBase;
 	}
@@ -349,639 +351,642 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	}
 
 	@Override
-    public IPoint getOriginalBase() {
-        return new FloatPoint(xBase, yBase);
-    }
-    
-    @Override
-    public IPoint getBase() {
-        return new FloatPoint(bounds.getMinX(), bounds.getMinY());
-    }
+	public IPoint getOriginalBase() {
+		return new FloatPoint(xBase, yBase);
+	}
 
-    /**
-     * Get the source folder for images
-     * 
-     * @return
-     */
-    @Override
-    public File getSourceFolder() {
-        return sourceFile.getParentFile();
-    }
-    
-    @Override
+	@Override
+	public IPoint getBase() {
+		return new FloatPoint(bounds.getMinX(), bounds.getMinY());
+	}
+
+	/**
+	 * Get the source folder for images
+	 * 
+	 * @return
+	 */
+	@Override
+	public File getSourceFolder() {
+		return sourceFile.getParentFile();
+	}
+
+	@Override
 	public void setSourceFolder(@NonNull File sourceFolder) {
-        File newFile = new File(sourceFolder, sourceFile.getName());
-        sourceFile = newFile;
-    }
+		File newFile = new File(sourceFolder, sourceFile.getName());
+		sourceFile = newFile;
+	}
 
-    /**
-     * Get the absolute path to the source image on the current computer. Merges
-     * the dynamic image folder with the image name
-     * 
-     * @return
-     */
-    @Override
-    public File getSourceFile() {
-        return sourceFile;
-    }
-    
-    @Override
-   	public void setSourceFile(@NonNull File sourceFile) {
-           this.sourceFile = sourceFile;
-       }
+	/**
+	 * Get the absolute path to the source image on the current computer. Merges the
+	 * dynamic image folder with the image name
+	 * 
+	 * @return
+	 */
+	@Override
+	public File getSourceFile() {
+		return sourceFile;
+	}
 
-    @Override
-    public String getSourceFileName() {
-        return sourceFile.getName();
-    }
+	@Override
+	public void setSourceFile(@NonNull File sourceFile) {
+		this.sourceFile = sourceFile;
+	}
 
-    @Override
-    public String getSourceFileNameWithoutExtension() {
+	@Override
+	public String getSourceFileName() {
+		return sourceFile.getName();
+	}
 
-        String trimmed = "";
+	@Override
+	public String getSourceFileNameWithoutExtension() {
 
-        int i = getSourceFileName().lastIndexOf('.');
-        if (i > 0) {
-            trimmed = getSourceFileName().substring(0, i);
-        }
-        return trimmed;
-    }
+		String trimmed = "";
 
-    @Override
+		int i = getSourceFileName().lastIndexOf('.');
+		if (i > 0) {
+			trimmed = getSourceFileName().substring(0, i);
+		}
+		return trimmed;
+	}
+
+	@Override
 	public int getChannel() {
-        return channel;
-    }
+		return channel;
+	}
 
-    @Override
+	@Override
 	public double getScale() {
-        return this.scale;
-    }
+		return this.scale;
+	}
 
-    @Override
+	@Override
 	public void setScale(double scale) {
-        this.scale = scale;
-    }
+		this.scale = scale;
+	}
 
-    @Override
-    public synchronized double getMeasurement( @NonNull final Measurement stat) {
-        return this.getMeasurement(stat, MeasurementScale.PIXELS);
-    }
+	@Override
+	public synchronized double getMeasurement(@NonNull final Measurement stat) {
+		return this.getMeasurement(stat, MeasurementScale.PIXELS);
+	}
 
-    @Override
-    public synchronized double getMeasurement(@NonNull final Measurement stat,  @NonNull final MeasurementScale measurementScale) {
-        if (!this.measurements.containsKey(stat)) {
-        	 setMeasurement(stat, ComponentMeasurer.calculate(stat, this));
-        }
-        return stat.convert(measurements.get(stat), this.scale, measurementScale);
-    }
+	@Override
+	public synchronized double getMeasurement(@NonNull final Measurement stat,
+			@NonNull final MeasurementScale measurementScale) {
+		if (!this.measurements.containsKey(stat)) {
+			setMeasurement(stat, ComponentMeasurer.calculate(stat, this));
+		}
+		return stat.convert(measurements.get(stat), this.scale, measurementScale);
+	}
 
-    @Override
-    public synchronized void setMeasurement(@NonNull final Measurement stat, double d) {
-        measurements.put(stat, d);
-    }
-    
-    @Override
-    public synchronized void clearMeasurement(@NonNull final Measurement stat) {
-    	measurements.remove(stat);
-    }
+	@Override
+	public synchronized void setMeasurement(@NonNull final Measurement stat, double d) {
+		measurements.put(stat, d);
+	}
 
-    @Override
-    public List<Measurement> getMeasurements() {
-    	List<Measurement> result = new ArrayList<>();
-    	result.addAll(measurements.keySet());
-    	return result;
-    }
-    
-    @Override
+	@Override
+	public synchronized void clearMeasurement(@NonNull final Measurement stat) {
+		measurements.remove(stat);
+	}
+
+	@Override
+	public List<Measurement> getMeasurements() {
+		List<Measurement> result = new ArrayList<>();
+		result.addAll(measurements.keySet());
+		return result;
+	}
+
+	@Override
 	public void clearMeasurements() {
-    	measurements.clear();
-    }
+		measurements.clear();
+	}
 
-    @Override
+	@Override
 	public IPoint getCentreOfMass() {
-        return centreOfMass;
-    }
+		return centreOfMass;
+	}
 
-    @Override
+	@Override
 	public IPoint getOriginalCentreOfMass() {
-        return new FloatPoint(originalCentreOfMass);
-    }
+		return new FloatPoint(originalCentreOfMass);
+	}
 
-    @Override
+	@Override
 	public int getBorderLength() {
-        return borderList.length;
-    }
+		return borderList.length;
+	}
 
-    @Override
+	@Override
 	public IPoint getBorderPoint(int i) {
-        return borderList[i];
-    }
+		return borderList[i];
+	}
 
-    @Override
+	@Override
 	public IPoint getOriginalBorderPoint(int i) {
-        IPoint p = getBorderPoint(i);
+		IPoint p = getBorderPoint(i);
 
-        double diffX = p.getX() - centreOfMass.getX();
-        double diffY = p.getY() - centreOfMass.getY();
-        
-        // Offset to the original position
-        return new FloatPoint(originalCentreOfMass.getX() + diffX,
-                originalCentreOfMass.getY() + diffY);
-    }
-    
-    @Override
-    public boolean isReversed() {
-    	return isReversed;
-    }
+		double diffX = p.getX() - centreOfMass.getX();
+		double diffY = p.getY() - centreOfMass.getY();
 
-    @Override
+		// Offset to the original position
+		return new FloatPoint(originalCentreOfMass.getX() + diffX, originalCentreOfMass.getY() + diffY);
+	}
+
+	@Override
+	public boolean isReversed() {
+		return isReversed;
+	}
+
+	@Override
 	public int getBorderIndex(@NonNull IPoint p) {
-        for(int i=0; i<borderList.length; i++) {
-        	IPoint n = borderList[i];
-        	if(n.overlapsPerfectly(p))
-        		return i;
-        }
-        return -1; // default if no match found
-    }
+		for (int i = 0; i < borderList.length; i++) {
+			IPoint n = borderList[i];
+			if (n.overlapsPerfectly(p))
+				return i;
+		}
+		return -1; // default if no match found
+	}
 
-    @Override
+	@Override
 	public List<IPoint> getBorderList() {
-        return List.of(borderList);
-    }
+		return List.of(borderList);
+	}
 
-    @Override
+	@Override
 	public List<IPoint> getOriginalBorderList() {
-        List<IPoint> result = new ArrayList<>(borderList.length);
+		List<IPoint> result = new ArrayList<>(borderList.length);
 
-        double diffX = originalCentreOfMass.getX() - centreOfMass.getX();
-        double diffY = originalCentreOfMass.getY() - centreOfMass.getY();
+		double diffX = originalCentreOfMass.getX() - centreOfMass.getX();
+		double diffY = originalCentreOfMass.getY() - centreOfMass.getY();
 
-        // Offset to the original position
-        for (IPoint p : borderList) {
-            result.add(new FloatPoint(p.getX() + diffX, p.getY() + diffY));
-        }
-        return result;
-    }
+		// Offset to the original position
+		for (IPoint p : borderList) {
+			result.add(new FloatPoint(p.getX() + diffX, p.getY() + diffY));
+		}
+		return result;
+	}
 
-    /**
-     * Check if a given point lies within the nucleus
-     * 
-     * @param p
-     * @return
-     */
-    @Override
+	/**
+	 * Check if a given point lies within the nucleus
+	 * 
+	 * @param p
+	 * @return
+	 */
+	@Override
 	public boolean containsPoint(IPoint p) {
-        // Fast check - is the point within the bounding rectangle?
-        if (!bounds.contains(p.toPoint2D()))
-            return false;
-        // Check detailed position
-        return(this.toPolygon().contains((float) p.getX(), (float) p.getY()));
-    }
+		// Fast check - is the point within the bounding rectangle?
+		if (!bounds.contains(p.toPoint2D()))
+			return false;
+		// Check detailed position
+		return (this.toPolygon().contains((float) p.getX(), (float) p.getY()));
+	}
 
-    /**
-     * Check if a given point lies within the nucleus
-     * 
-     * @param p
-     * @return
-     */
-    @Override
+	/**
+	 * Check if a given point lies within the nucleus
+	 * 
+	 * @param p
+	 * @return
+	 */
+	@Override
 	public boolean containsPoint(int x, int y) {
-        return this.toShape().contains(x, y);
-    }
+		return this.toShape().contains(x, y);
+	}
 
-    /**
-     * Check if a given point in the original source image lies within the
-     * nucleus
-     * 
-     * @param p
-     * @return
-     */
-    @Override
+	/**
+	 * Check if a given point in the original source image lies within the nucleus
+	 * 
+	 * @param p
+	 * @return
+	 */
+	@Override
 	public boolean containsOriginalPoint(IPoint p) {
-        return this.toOriginalPolygon().contains((float) p.getX(), (float) p.getY());
-    }
+		return this.toOriginalPolygon().contains((float) p.getX(), (float) p.getY());
+	}
 
-    /**
-     * Check if a given point lies within the nucleus
-     * 
-     * @param p
-     * @return
-     */
-    public boolean containsOriginalPoint(int x, int y) {
+	/**
+	 * Check if a given point lies within the nucleus
+	 * 
+	 * @param p
+	 * @return
+	 */
+	public boolean containsOriginalPoint(int x, int y) {
 
-        // Fast check - is the point within the bounding rectangle moved to the
-        // original position?
-        Rectangle r = new Rectangle(xBase, yBase, (int)getWidth(), (int)getHeight());
-        if (!r.contains(x, y))
-            return false;
-        return this.toOriginalShape().contains(x, y);
-    }
+		// Fast check - is the point within the bounding rectangle moved to the
+		// original position?
+		Rectangle r = new Rectangle(xBase, yBase, (int) getWidth(), (int) getHeight());
+		if (!r.contains(x, y))
+			return false;
+		return this.toOriginalShape().contains(x, y);
+	}
 
-    @Override
+	@Override
 	public double getMaxX() {
-        return bounds.getMaxX();
-    }
+		return bounds.getMaxX();
+	}
 
-    @Override
+	@Override
 	public double getMinX() {
-        return bounds.getMinX();
-    }
+		return bounds.getMinX();
+	}
 
-    @Override
+	@Override
 	public double getMaxY() {
-        return bounds.getMaxY();
-    }
+		return bounds.getMaxY();
+	}
 
-    @Override
+	@Override
 	public double getMinY() {
-        return bounds.getMinY();
-    }
-    
-    @Override
-	public void flipHorizontal() {
-    	flipHorizontal(centreOfMass);
-    }
+		return bounds.getMinY();
+	}
 
-    @Override
+	@Override
+	public void flipHorizontal() {
+		flipHorizontal(centreOfMass);
+	}
+
+	@Override
 	public void flipHorizontal(final @NonNull IPoint p) {
 
-        double xCentre = p.getX();
+		double xCentre = p.getX();
 
-        for (IPoint n : borderList) {
-            double dx = xCentre - n.getX();
-            double xNew = xCentre + dx;
-            n.setX(xNew);
-        }
-    }
-    
-    @Override
+		for (IPoint n : borderList) {
+			double dx = xCentre - n.getX();
+			double xNew = xCentre + dx;
+			n.setX(xNew);
+		}
+	}
+
+	@Override
 	public void flipVertical() {
-    	flipVertical(centreOfMass);
-    }
-    
-    @Override
+		flipVertical(centreOfMass);
+	}
+
+	@Override
 	public void flipVertical(final @NonNull IPoint p) {
 
-        double yCentre = p.getY();
+		double yCentre = p.getY();
 
-        for (IPoint n : borderList) {
-            double dy = yCentre - n.getY();
-            double yNew = yCentre + dy;
-            n.setY(yNew);
-        }
-    }
+		for (IPoint n : borderList) {
+			double dy = yCentre - n.getY();
+			double yNew = yCentre + dy;
+			n.setY(yNew);
+		}
+	}
 
-    /**
-     * Translate the XY coordinates of each border point so that the nuclear
-     * centre of mass is at the given point
-     * 
-     * @param point the new centre of mass
-     */
-    @Override
+	/**
+	 * Translate the XY coordinates of each border point so that the nuclear centre
+	 * of mass is at the given point
+	 * 
+	 * @param point the new centre of mass
+	 */
+	@Override
 	public void moveCentreOfMass(@NonNull IPoint point) {
 
-        // get the difference between the x and y positions
-        // of the points as offsets to apply
-        double xOffset = point.getX() - centreOfMass.getX();
-        double yOffset = point.getY() - centreOfMass.getY();
+		// get the difference between the x and y positions
+		// of the points as offsets to apply
+		double xOffset = point.getX() - centreOfMass.getX();
+		double yOffset = point.getY() - centreOfMass.getY();
 
-        offset(xOffset, yOffset);
-    }
+		offset(xOffset, yOffset);
+	}
 
-    /**
-     * Translate the XY coordinates of the object
-     * 
-     * @param xOffset the amount to move in the x-axis
-     * @param yOffset the amount to move in the y-axis
-     */
-    @Override
+	/**
+	 * Translate the XY coordinates of the object
+	 * 
+	 * @param xOffset the amount to move in the x-axis
+	 * @param yOffset the amount to move in the y-axis
+	 */
+	@Override
 	public void offset(double xOffset, double yOffset) {
 
-        /// update each border point
-        for (int i = 0; i < borderList.length; i++) {
-            IPoint p = borderList[i];
-            p.offset(xOffset, yOffset);
-        }
+		/// update each border point
+		for (int i = 0; i < borderList.length; i++) {
+			IPoint p = borderList[i];
+			p.offset(xOffset, yOffset);
+		}
 
-        this.centreOfMass.offset(xOffset, yOffset);
-        updateBounds();
+		this.centreOfMass.offset(xOffset, yOffset);
+		updateBounds();
 
-    }
+	}
 
-    @Override
+	@Override
 	public void reverse() throws MissingComponentException, ProfileException {
-        isReversed = !isReversed;
-        makeBorderList(); // Recreate the border list from the new key points
-    }
+		isReversed = !isReversed;
+		makeBorderList(); // Recreate the border list from the new key points
+	}
 
-    /**
-     * Turn the list of border points into a closed polygon.
-     * 
-     * @return
-     */
-    @Override
+	/**
+	 * Turn the list of border points into a closed polygon.
+	 * 
+	 * @return
+	 */
+	@Override
 	public FloatPolygon toPolygon() {
-        return toOffsetPolygon(0, 0);
-    }
+		return toOffsetPolygon(0, 0);
+	}
 
-    /**
-     * Turn the list of border points into a polygon. The points are at the
-     * original position in a source image.
-     * 
-     * @see Imageable#getPosition()
-     * @return
-     */
-    @Override
+	/**
+	 * Turn the list of border points into a polygon. The points are at the original
+	 * position in a source image.
+	 * 
+	 * @see Imageable#getPosition()
+	 * @return
+	 */
+	@Override
 	public FloatPolygon toOriginalPolygon() {
 
-        double diffX = originalCentreOfMass.getX() - centreOfMass.getX();
-        double diffY = originalCentreOfMass.getY() - centreOfMass.getY();
+		double diffX = originalCentreOfMass.getX() - centreOfMass.getX();
+		double diffY = originalCentreOfMass.getY() - centreOfMass.getY();
 
-        return toOffsetPolygon((float) diffX, (float) diffY);
-    }
+		return toOffsetPolygon((float) diffX, (float) diffY);
+	}
 
-    /**
-     * Make an offset polygon from the border list of this object
-     * 
-     * @return
-     */
-    private FloatPolygon toOffsetPolygon(float xOffset, float yOffset) {
-        float[] xpoints = new float[borderList.length + 1];
-        float[] ypoints = new float[borderList.length + 1];
+	/**
+	 * Make an offset polygon from the border list of this object
+	 * 
+	 * @return
+	 */
+	private FloatPolygon toOffsetPolygon(float xOffset, float yOffset) {
+		float[] xpoints = new float[borderList.length + 1];
+		float[] ypoints = new float[borderList.length + 1];
 
-        for (int i = 0; i < borderList.length; i++) {
-            IPoint p = borderList[i];
-            xpoints[i] = (float) p.getX() + xOffset;
-            ypoints[i] = (float) p.getY() + yOffset;
-        }
+		for (int i = 0; i < borderList.length; i++) {
+			IPoint p = borderList[i];
+			xpoints[i] = (float) p.getX() + xOffset;
+			ypoints[i] = (float) p.getY() + yOffset;
+		}
 
-        // Ensure the polygon is closed
-        xpoints[borderList.length] = (float) borderList[0].getX() + xOffset;
-        ypoints[borderList.length] = (float) borderList[0].getY() + yOffset;
+		// Ensure the polygon is closed
+		xpoints[borderList.length] = (float) borderList[0].getX() + xOffset;
+		ypoints[borderList.length] = (float) borderList[0].getY() + yOffset;
 
-        return new FloatPolygon(xpoints, ypoints);
-    }
+		return new FloatPolygon(xpoints, ypoints);
+	}
 
-    @Override
+	@Override
 	public Shape toShape() {
-        // Converts whatever coordinates are in the border to a shape
-        return toOffsetShape(0, 0);
-    }
+		// Converts whatever coordinates are in the border to a shape
+		return toOffsetShape(0, 0);
+	}
 
-    @Override
+	@Override
 	public Shape toShape(MeasurementScale scale) {
 
-        // Converts whatever coordinates are in the border
-        // to a shape
-        return toOffsetShape(0, 0, scale);
-    }
+		// Converts whatever coordinates are in the border
+		// to a shape
+		return toOffsetShape(0, 0, scale);
+	}
 
-    @Override
+	@Override
 	public Shape toOriginalShape() {
 
-        // Calculate the difference between the original CoM and the new CoM
-        // and apply this offset
+		// Calculate the difference between the original CoM and the new CoM
+		// and apply this offset
 
-        double diffX = originalCentreOfMass.getX() - centreOfMass.getX();
-        double diffY = originalCentreOfMass.getY() - centreOfMass.getY();
+		double diffX = originalCentreOfMass.getX() - centreOfMass.getX();
+		double diffY = originalCentreOfMass.getY() - centreOfMass.getY();
 
-        return toOffsetShape(diffX, diffY);
-    }
+		return toOffsetShape(diffX, diffY);
+	}
 
-    @Override
-    public Roi toRoi() {
-    	Roi r = new PolygonRoi(xpoints, ypoints, xpoints.length, Roi.POLYGON);
-    	r.setLocation(0, 0);
-    	return r;
-    }
+	@Override
+	public Roi toRoi() {
+		Roi r = new PolygonRoi(xpoints, ypoints, xpoints.length, Roi.POLYGON);
+		r.setLocation(0, 0);
+		return r;
+	}
 
-    @Override
-    public Roi toOriginalRoi() {
-        return new PolygonRoi(xpoints, ypoints, xpoints.length, Roi.POLYGON);
-    }
+	@Override
+	public Roi toOriginalRoi() {
+		return new PolygonRoi(xpoints, ypoints, xpoints.length, Roi.POLYGON);
+	}
 
-    private Shape toOffsetShape(double xOffset, double yOffset) {
-        return this.toOffsetShape(xOffset, yOffset, MeasurementScale.PIXELS);
-    }
+	private Shape toOffsetShape(double xOffset, double yOffset) {
+		return this.toOffsetShape(xOffset, yOffset, MeasurementScale.PIXELS);
+	}
 
-    /**
-     * Create a shape from the border of the object with the given translation
-     * and at the given scale
-     * 
-     * @param xOffset
-     * @param yOffset
-     * @param scale
-     * @return
-     */
-    private Shape toOffsetShape(double xOffset, double yOffset, MeasurementScale scale) {
+	/**
+	 * Create a shape from the border of the object with the given translation and
+	 * at the given scale
+	 * 
+	 * @param xOffset
+	 * @param yOffset
+	 * @param scale
+	 * @return
+	 */
+	private Shape toOffsetShape(double xOffset, double yOffset, MeasurementScale scale) {
 
-        if (borderList.length==0)
-            throw new IllegalArgumentException("Border list is empty");
+		if (borderList.length == 0)
+			throw new IllegalArgumentException("Border list is empty");
 
 //        if (shapeCache.has(xOffset, yOffset, scale)) {
 //            return shapeCache.get(xOffset, yOffset, scale);
 //        }
 
-        double sc = scale.equals(MeasurementScale.MICRONS) ? this.scale : 1;
+		double sc = scale.equals(MeasurementScale.MICRONS) ? this.scale : 1;
 
-        Path2D.Double path = new Path2D.Double();
+		Path2D.Double path = new Path2D.Double();
 
-        IPoint first = borderList[0];
-        path.moveTo((first.getX() + xOffset) / sc, (first.getY() + yOffset) / sc);
+		IPoint first = borderList[0];
+		path.moveTo((first.getX() + xOffset) / sc, (first.getY() + yOffset) / sc);
 
-        for(int i=1; i<borderList.length; i++)
-            path.lineTo((borderList[i].getX() + xOffset) / sc, (borderList[i].getY() + yOffset) / sc);
-        
-        path.closePath();
+		for (int i = 1; i < borderList.length; i++)
+			path.lineTo((borderList[i].getX() + xOffset) / sc, (borderList[i].getY() + yOffset) / sc);
 
+		path.closePath();
 
 //        shapeCache.add(xOffset, yOffset, scale, path);
 
-        return path;
+		return path;
 
-    }
+	}
 
-    @Override
-    public int wrapIndex(int i) {
-        return CellularComponent.wrapIndex(i, this.getBorderLength());
-    }
-    
-    @Override
-    public double wrapIndex(double d) {
-        return CellularComponent.wrapIndex(d, this.getBorderLength());
-    }
+	@Override
+	public int wrapIndex(int i) {
+		return CellularComponent.wrapIndex(i, this.getBorderLength());
+	}
 
-    /*
-     * For two NucleusBorderPoints in a Nucleus, find the point that lies
-     * halfway between them Used for obtaining a consensus between potential
-     * tail positions. Ensure we choose the smaller distance
-     */
-    @Override
+	@Override
+	public double wrapIndex(double d) {
+		return CellularComponent.wrapIndex(d, this.getBorderLength());
+	}
+
+	/*
+	 * For two NucleusBorderPoints in a Nucleus, find the point that lies halfway
+	 * between them Used for obtaining a consensus between potential tail positions.
+	 * Ensure we choose the smaller distance
+	 */
+	@Override
 	public int getPositionBetween(@NonNull IPoint pointA, @NonNull IPoint pointB) {
 
-        int a = 0;
-        int b = 0;
-        // find the indices that correspond on the array
-        for (int i = 0; i < this.getBorderLength(); i++) {
-            if (this.getBorderPoint(i).overlaps(pointA)) {
-                a = i;
-            }
-            if (this.getBorderPoint(i).overlaps(pointB)) {
-                b = i;
-            }
-        }
+		int a = 0;
+		int b = 0;
+		// find the indices that correspond on the array
+		for (int i = 0; i < this.getBorderLength(); i++) {
+			if (this.getBorderPoint(i).overlaps(pointA)) {
+				a = i;
+			}
+			if (this.getBorderPoint(i).overlaps(pointB)) {
+				b = i;
+			}
+		}
 
-        // find the higher and lower index of a and b
-        int maxIndex = a > b ? a : b;
-        int minIndex = a > b ? b : a;
+		// find the higher and lower index of a and b
+		int maxIndex = a > b ? a : b;
+		int minIndex = a > b ? b : a;
 
-        // there are two midpoints between any points on a ring; we want to take
-        // the
-        // midpoint that is in the smaller segment.
+		// there are two midpoints between any points on a ring; we want to take
+		// the
+		// midpoint that is in the smaller segment.
 
-        int difference1 = maxIndex - minIndex;
-        int difference2 = this.getBorderLength() - difference1;
+		int difference1 = maxIndex - minIndex;
+		int difference2 = this.getBorderLength() - difference1;
 
-        // get the midpoint
-        int mid1 = this.wrapIndex((int) Math.floor(((double)difference1 / 2) + minIndex));
-        int mid2 = this.wrapIndex((int) Math.floor(((double)difference2 / 2) + maxIndex));
+		// get the midpoint
+		int mid1 = this.wrapIndex((int) Math.floor(((double) difference1 / 2) + minIndex));
+		int mid2 = this.wrapIndex((int) Math.floor(((double) difference2 / 2) + maxIndex));
 
-        return difference1 < difference2 ? mid1 : mid2;
-    }
-
-    @Override
-	public IPoint findOppositeBorder(@NonNull IPoint p) {
-        // Find the point that is closest to 180 degrees across the CoM
-    	double distToCom = p.getLengthTo(centreOfMass);
-    	
-    	// Checking the angle of every point via atan2 is expensive.
-    	// We can filter out most of the points beforehand.
-    	return Arrays.stream(borderList)
-    			.filter(point->point.getLengthTo(p)>distToCom)
-    			.min(Comparator.comparing(point->180-centreOfMass.findSmallestAngle(p, point) ))
-    			.orElse(null); // TODO: backup solution?
-    }
-
-    @Override
-    public IPoint findOrthogonalBorderPoint(@NonNull IPoint a) {
-        return Arrays.stream(borderList)
-                .min(Comparator.comparing(point-> Math.abs(90-centreOfMass.findSmallestAngle(a, point)) ))
-                .get();
-    }
-
-    @Override
-    public IPoint findClosestBorderPoint(@NonNull IPoint p) {
-        return Arrays.stream(borderList)
-                .min(Comparator.comparing(point->point.getLengthTo(p) ))
-                .get();
-    }
-    
-    @Override
-    public String toString() {
-    	String newLine = System.getProperty("line.separator");
-    	StringBuilder builder = new StringBuilder("ID: "+id.toString()+newLine);
-    	builder.append(String.format("X bounds: %s-%s", 
-    			this.getBase().getX(),
-    			this.getBase().getX()+ this.getWidth()));
-    	builder.append(newLine);
-    	builder.append(String.format("Y bounds: %s-%s", 
-    			this.getBase().getY(), 
-    			this.getBase().getY()+this.getHeight()));
-    	builder.append(newLine);
-    	
-    	builder.append("Border "+borderList.length+": ");
-    	builder.append(Arrays.deepToString(borderList));
-    	
-    	builder.append(newLine);
-    	
-    	builder.append("CoM: "+centreOfMass);
-    	builder.append(newLine);
-    	builder.append("Original CoM: "+originalCentreOfMass);
-    	builder.append(newLine);
-    	builder.append("Source file: "+sourceFile);
-    	builder.append(newLine);
-    	builder.append("Channel: "+channel);
-    	builder.append(newLine);
-    	builder.append("Scale: "+scale);
-    	builder.append(newLine);
-    	builder.append("isReversed: "+isReversed);
-    	builder.append(newLine);
-    	builder.append("xpoints: "+Arrays.toString(xpoints));
-    	builder.append(newLine);
-    	builder.append("ypoints: "+Arrays.toString(ypoints));
-    	builder.append(newLine);
-
-    	// Sort by measurement name
-    	builder.append("Measurements: "+newLine);
-    	List<Measurement> mes = new ArrayList<>(measurements.keySet());
-    	mes.sort((c1, c2)->c1.name().compareTo(c2.name()));
-
-    	for(Measurement entry : mes) {
-    		builder.append(entry.toString()+": "+measurements.get(entry).toString()+newLine);
-    	}
-
-    	return builder.toString();
-    }
-    
-    @Override
-	public Element toXmlElement() {
-    	Element e = new Element("Component")
-    			.setAttribute("id", id.toString());
-    	
-    	e.addContent(new Element("Base")
-    			.setAttribute("x", String.valueOf(xBase))
-    			.setAttribute("y", String.valueOf(yBase)));
-    	    	    	
-    	e.addContent(new Element(XML_COM)
-    			.setAttribute("x", String.valueOf(centreOfMass.getX()))
-    			.setAttribute("y", String.valueOf(centreOfMass.getY())));
-    	
-    	e.addContent(new Element("OriginalCentreOfMass")
-    			.setAttribute("x", String.valueOf(originalCentreOfMass.getX()))
-    			.setAttribute("y", String.valueOf(originalCentreOfMass.getY())));
-
-    	for(Entry<Measurement, Double> entry : measurements.entrySet()) {
-    		e.addContent(entry.getKey().toXmlElement()
-    				.setAttribute("value", entry.getValue().toString()));
-    	}
-    	
-    	e.addContent(new Element("SourceFile").setText(sourceFile.toString()));
-    	e.addContent(new Element("Channel").setText(String.valueOf(channel)));
-    	e.addContent(new Element("Scale").setText(String.valueOf(scale)));
-    	
-    	Element xEl = new Element("xpoints").setText(Arrays.toString(xpoints));
-    	if(isReversed)
-    		xEl.setAttribute("reverse", "true");	// don't waste space
-    	e.addContent(xEl);
-    	
-    	e.addContent(new Element("ypoints").setText(Arrays.toString(ypoints)));    	
-    	return e;
+		return difference1 < difference2 ? mid1 : mid2;
 	}
-        
-    
-	
+
+	@Override
+	public IPoint findOppositeBorder(@NonNull IPoint p) {
+		// Find the point that is closest to 180 degrees across the CoM
+		double distToCom = p.getLengthTo(centreOfMass);
+
+		/*
+		 * Draw a line from the point through the CoM. Find all points that lie on /
+		 * close to the line Test angle of these points.
+		 */
+		LineEquation eq = new DoubleEquation(p, centreOfMass);
+
+		return Arrays.stream(borderList).filter(point -> point.getLengthTo(p) > distToCom).min((p1, p2) -> {
+			double d1 = eq.getClosestDistanceToPoint(p1);
+			double d2 = eq.getClosestDistanceToPoint(p2);
+			if (d1 < d2)
+				return -1;
+			if (d1 == d2)
+				return 0;
+			return 1;
+
+		})
+//				.min((p1, p2) -> eq.getClosestDistanceToPoint(p1) < eq.getClosestDistanceToPoint(p2) ? -1 : 1)
+				.orElse(null);
+
+		// Checking the angle of every point via atan2 is expensive.
+		// We can filter out most of the points beforehand.
+
+		// TODO: cheaper solution?
+//		return Arrays.stream(borderList).filter(point -> point.getLengthTo(p) > distToCom)
+//				.min(Comparator.comparing(point -> 180 - centreOfMass.findSmallestAngle(p, point))).orElse(null);
+	}
+
+	@Override
+	public IPoint findOrthogonalBorderPoint(@NonNull IPoint a) {
+		return Arrays.stream(borderList)
+				.min(Comparator.comparing(point -> Math.abs(90 - centreOfMass.findSmallestAngle(a, point)))).get();
+	}
+
+	@Override
+	public IPoint findClosestBorderPoint(@NonNull IPoint p) {
+		return Arrays.stream(borderList).min(Comparator.comparing(point -> point.getLengthTo(p))).get();
+	}
+
+	@Override
+	public String toString() {
+		String newLine = System.getProperty("line.separator");
+		StringBuilder builder = new StringBuilder("ID: " + id.toString() + newLine);
+		builder.append(
+				String.format("X bounds: %s-%s", this.getBase().getX(), this.getBase().getX() + this.getWidth()));
+		builder.append(newLine);
+		builder.append(
+				String.format("Y bounds: %s-%s", this.getBase().getY(), this.getBase().getY() + this.getHeight()));
+		builder.append(newLine);
+
+		builder.append("Border " + borderList.length + ": ");
+		builder.append(Arrays.deepToString(borderList));
+
+		builder.append(newLine);
+
+		builder.append("CoM: " + centreOfMass);
+		builder.append(newLine);
+		builder.append("Original CoM: " + originalCentreOfMass);
+		builder.append(newLine);
+		builder.append("Source file: " + sourceFile);
+		builder.append(newLine);
+		builder.append("Channel: " + channel);
+		builder.append(newLine);
+		builder.append("Scale: " + scale);
+		builder.append(newLine);
+		builder.append("isReversed: " + isReversed);
+		builder.append(newLine);
+		builder.append("xpoints: " + Arrays.toString(xpoints));
+		builder.append(newLine);
+		builder.append("ypoints: " + Arrays.toString(ypoints));
+		builder.append(newLine);
+
+		// Sort by measurement name
+		builder.append("Measurements: " + newLine);
+		List<Measurement> mes = new ArrayList<>(measurements.keySet());
+		mes.sort((c1, c2) -> c1.name().compareTo(c2.name()));
+
+		for (Measurement entry : mes) {
+			builder.append(entry.toString() + ": " + measurements.get(entry).toString() + newLine);
+		}
+
+		return builder.toString();
+	}
+
+	@Override
+	public Element toXmlElement() {
+		Element e = new Element("Component").setAttribute("id", id.toString());
+
+		e.addContent(
+				new Element("Base").setAttribute("x", String.valueOf(xBase)).setAttribute("y", String.valueOf(yBase)));
+
+		e.addContent(new Element(XML_COM).setAttribute("x", String.valueOf(centreOfMass.getX())).setAttribute("y",
+				String.valueOf(centreOfMass.getY())));
+
+		e.addContent(new Element("OriginalCentreOfMass").setAttribute("x", String.valueOf(originalCentreOfMass.getX()))
+				.setAttribute("y", String.valueOf(originalCentreOfMass.getY())));
+
+		for (Entry<Measurement, Double> entry : measurements.entrySet()) {
+			e.addContent(entry.getKey().toXmlElement().setAttribute("value", entry.getValue().toString()));
+		}
+
+		e.addContent(new Element("SourceFile").setText(sourceFile.toString()));
+		e.addContent(new Element("Channel").setText(String.valueOf(channel)));
+		e.addContent(new Element("Scale").setText(String.valueOf(scale)));
+
+		Element xEl = new Element("xpoints").setText(Arrays.toString(xpoints));
+		if (isReversed)
+			xEl.setAttribute("reverse", "true"); // don't waste space
+		e.addContent(xEl);
+
+		e.addContent(new Element("ypoints").setText(Arrays.toString(ypoints)));
+		return e;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + Arrays.hashCode(xpoints);
 		result = prime * result + Arrays.hashCode(ypoints);
-		
-		// We use this rather than hashing the file directly in case 
-		// the file path does not exist
-		int fileHash = 1;
-		try {
-			fileHash = Objects.hash(sourceFile.getCanonicalFile());
-		} catch (IOException e) {
-			LOGGER.fine("Unable to get source file hash");
-		}
-		
-		result = prime * result + fileHash;
-		
-		result = prime * result
-				+ Objects.hash(centreOfMass, 
-						channel, id, originalCentreOfMass, 
-						scale, measurements, xBase, yBase);
+
+		// We use this rather than hashing the file directly in case
+		// the file path does not exist. However, this is an expensive
+		// operation hitting the file system and should be avoided.
+//		int fileHash = 1;
+//		try {
+//			fileHash = Objects.hash(sourceFile.getCanonicalFile());
+//		} catch (IOException e) {
+//			LOGGER.fine("Unable to get source file hash");
+//		}
+//		result = prime * result + fileHash;
+
+		result = prime * result + Objects.hash(centreOfMass, sourceFile, channel, id, originalCentreOfMass, scale,
+				measurements, xBase, yBase);
 		return result;
 	}
 
@@ -994,7 +999,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		if (getClass() != obj.getClass())
 			return false;
 		DefaultCellularComponent other = (DefaultCellularComponent) obj;
-		
+
 		// We use this rather than File.equals in case the file
 		// does not exist (which would return false)
 		boolean isSameFile = true;
@@ -1003,67 +1008,58 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		} catch (IOException e) {
 			LOGGER.fine("Unable to compare source files");
 		}
-		
-		if(measurements.size()!=other.measurements.size())
+
+		if (measurements.size() != other.measurements.size())
 			return false;
-		for(Entry<Measurement, Double> e : measurements.entrySet()) {
-			if(!e.getValue().equals(other.measurements.get(e.getKey()))) {
+		for (Entry<Measurement, Double> e : measurements.entrySet()) {
+			if (!e.getValue().equals(other.measurements.get(e.getKey()))) {
 				return false;
 			}
 		}
-		
-		return Objects.equals(centreOfMass, other.centreOfMass) 
-				&& isSameFile
-				&& channel == other.channel
-				&& Objects.equals(id, other.id) 
-				&& Objects.equals(originalCentreOfMass, other.originalCentreOfMass)
-				&& Objects.equals(xBase, other.xBase)
-				&& Objects.equals(yBase, other.yBase)
+
+		return Objects.equals(centreOfMass, other.centreOfMass) && isSameFile && channel == other.channel
+				&& Objects.equals(id, other.id) && Objects.equals(originalCentreOfMass, other.originalCentreOfMass)
+				&& Objects.equals(xBase, other.xBase) && Objects.equals(yBase, other.yBase)
 				&& Double.doubleToLongBits(scale) == Double.doubleToLongBits(other.scale)
-				&& Arrays.equals(xpoints, other.xpoints) 
-				&& Arrays.equals(ypoints, other.ypoints);
+				&& Arrays.equals(xpoints, other.xpoints) && Arrays.equals(ypoints, other.ypoints);
 	}
 
-    /*
-     * ############################################# 
-     * Methods implementing the Rotatable interface 
-     * #############################################
-     */
+	/*
+	 * ############################################# Methods implementing the
+	 * Rotatable interface #############################################
+	 */
 
-
-    @Override
+	@Override
 	public void rotatePointToBottom(@NonNull IPoint bottomPoint) {
-        this.alignPointsOnVertical(centreOfMass, bottomPoint);
-    }
-    
-    @Override
-   	public void rotatePointToLeft(IPoint leftPoint) {
-           this.alignPointsOnHorizontal(leftPoint, centreOfMass);
-       }
-    
-    
-    
-    @Override
-    public void rotate(double angle) {
-        if (angle != 0) {
-        	double rad = Math.toRadians(-angle); 
-        	AffineTransform tf = AffineTransform.getRotateInstance(rad, centreOfMass.getX(), centreOfMass.getY());
-            for (IPoint p : borderList) {
-            	Point2D result = tf.transform(p.toPoint2D(), null);
-                p.set(result);
-            }
-        }
-        updateBounds();
-//        shapeCache.clear();
-    }
+		this.alignPointsOnVertical(centreOfMass, bottomPoint);
+	}
 
-    /**
-     * Cache the shapes of the object in various positions
-     * 
-     * @author bms41
-     * @since 1.13.4
-     *
-     */
+	@Override
+	public void rotatePointToLeft(IPoint leftPoint) {
+		this.alignPointsOnHorizontal(leftPoint, centreOfMass);
+	}
+
+	@Override
+	public void rotate(double angle) {
+		if (angle != 0) {
+			double rad = Math.toRadians(-angle);
+			AffineTransform tf = AffineTransform.getRotateInstance(rad, centreOfMass.getX(), centreOfMass.getY());
+			for (IPoint p : borderList) {
+				Point2D result = tf.transform(p.toPoint2D(), null);
+				p.set(result);
+			}
+		}
+		updateBounds();
+//        shapeCache.clear();
+	}
+
+	/**
+	 * Cache the shapes of the object in various positions
+	 * 
+	 * @author bms41
+	 * @since 1.13.4
+	 *
+	 */
 //    private class ShapeCache {
 //
 //        public class Key {

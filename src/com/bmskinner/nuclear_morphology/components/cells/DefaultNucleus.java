@@ -19,7 +19,6 @@ package com.bmskinner.nuclear_morphology.components.cells;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -31,13 +30,14 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.jdom2.Element;
 
-import com.bmskinner.nuclear_morphology.analysis.signals.SignalAnalyser;
 import com.bmskinner.nuclear_morphology.components.ComponentOrienter;
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
-import com.bmskinner.nuclear_morphology.components.UnavailableBorderPointException;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
+import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
+import com.bmskinner.nuclear_morphology.components.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.UnprofilableObjectException;
 import com.bmskinner.nuclear_morphology.components.rules.OrientationMark;
 import com.bmskinner.nuclear_morphology.components.rules.PriorityAxis;
@@ -46,7 +46,6 @@ import com.bmskinner.nuclear_morphology.components.signals.DefaultSignalCollecti
 import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalCollection;
 import com.bmskinner.nuclear_morphology.io.XmlSerializable;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.utility.AngleTools;
 
 import ij.gui.Roi;
@@ -60,138 +59,135 @@ import ij.gui.Roi;
  *
  */
 public class DefaultNucleus extends ProfileableCellularComponent implements Nucleus {
-	
+
 	private static final Logger LOGGER = Logger.getLogger(DefaultNucleus.class.getName());
-    
-    private static final String XML_NUCLEUS_NUMBER = "number";
-    private static final String XML_ORIENTATION = "Orientation";
-    private static final String XML_PRIORITY_AXIS = "axis";
-    private static final String XML_SIGNAL_COLLECTION = "SignalCollection";
-    
 
-    /** The number of the nucleus in its image, for display */
-    private int nucleusNumber;
-    
-    /** Store the landmarks to be used for orientation */
-    private Map<@NonNull OrientationMark, Landmark> orientationMarks = new EnumMap<>(OrientationMark.class);
+	private static final String XML_NUCLEUS_NUMBER = "number";
+	private static final String XML_ORIENTATION = "Orientation";
+	private static final String XML_PRIORITY_AXIS = "axis";
+	private static final String XML_SIGNAL_COLLECTION = "SignalCollection";
 
-    private PriorityAxis priorityAxis = PriorityAxis.Y;
-    
-    /** FISH signals in the nucleus */
-    private ISignalCollection signalCollection = new DefaultSignalCollection();
-    
+	/** The number of the nucleus in its image, for display */
+	private int nucleusNumber;
+
+	/** Store the landmarks to be used for orientation */
+	private Map<@NonNull OrientationMark, Landmark> orientationMarks = new EnumMap<>(OrientationMark.class);
+
+	private PriorityAxis priorityAxis = PriorityAxis.Y;
+
+	/** FISH signals in the nucleus */
+	private ISignalCollection signalCollection = new DefaultSignalCollection();
+
+	private Nucleus orientedlNucleus = null;
+
 	/**
-     * Construct with an ROI, a source image and channel, and the original
-     * position in the source image. It sets the immutable original centre of
-     * mass, and the mutable current centre of mass. It also assigns a random ID
-     * to the component.
-     * 
-     * @param roi the roi of the object
-     * @param centerOfMass the original centre of mass of the component
-     * @param source the image file the component was found in
-     * @param channel the RGB channel the component was found in
-     * @param position the bounding position of the component in the original image
-     * @param id the id of the component. Only use when deserialising!
-     */
-    public DefaultNucleus(@NonNull Roi roi, @NonNull IPoint centreOfMass, File source, 
-    		int channel, int x, int y, int number, @Nullable UUID id, RuleSetCollection rsc) {
-        super(roi, centreOfMass, source, channel, x, y, id);
-        this.nucleusNumber = number;
-        
-        for(OrientationMark s : OrientationMark.values()) {
-        	if(rsc.getLandmark(s).isPresent()) {
-        		orientationMarks.put(s, rsc.getLandmark(s).get());
-        	}
-        }
-        
-        priorityAxis = rsc.getPriorityAxis().orElse(PriorityAxis.Y);        
-    }
+	 * Construct with an ROI, a source image and channel, and the original position
+	 * in the source image. It sets the immutable original centre of mass, and the
+	 * mutable current centre of mass. It also assigns a random ID to the component.
+	 * 
+	 * @param roi          the roi of the object
+	 * @param centerOfMass the original centre of mass of the component
+	 * @param source       the image file the component was found in
+	 * @param channel      the RGB channel the component was found in
+	 * @param position     the bounding position of the component in the original
+	 *                     image
+	 * @param id           the id of the component. Only use when deserialising!
+	 */
+	public DefaultNucleus(@NonNull Roi roi, @NonNull IPoint centreOfMass, File source, int channel, int x, int y,
+			int number, @Nullable UUID id, RuleSetCollection rsc) {
+		super(roi, centreOfMass, source, channel, x, y, id);
+		this.nucleusNumber = number;
 
-    /**
-     * Construct with an ROI, a source image and channel, and the original
-     * position in the source image
-     * 
-     * @param roi
-     * @param f
-     * @param channel
-     * @param position
-     * @param centreOfMass
-     */
-    public DefaultNucleus(@NonNull Roi roi, @NonNull IPoint centreOfMass, @NonNull File f, 
-    		int channel, int x, int y, int number, RuleSetCollection rsc) {
-        this(roi, centreOfMass, f, channel, x, y, number, null, rsc);
-    }
+		for (OrientationMark s : OrientationMark.values()) {
+			if (rsc.getLandmark(s).isPresent()) {
+				orientationMarks.put(s, rsc.getLandmark(s).get());
+			}
+		}
 
-    /**
-     * Construct from a template Nucleus
-     * 
-     * @param n the template
-     * @throws UnprofilableObjectException
-     * @throws ComponentCreationException 
-     */
-    protected DefaultNucleus(@NonNull Nucleus n) throws UnprofilableObjectException, ComponentCreationException {
-        super(n);
-        nucleusNumber = n.getNucleusNumber();
-        signalCollection = n.getSignalCollection().duplicate();
-        
-        for(OrientationMark s : OrientationMark.values()) {
-        	if(n.getLandmark(s)!=null)
-        		orientationMarks.put(s, n.getLandmark(s));
-        }
+		priorityAxis = rsc.getPriorityAxis().orElse(PriorityAxis.Y);
+	}
 
-        priorityAxis = n.getPriorityAxis();
-    }
+	/**
+	 * Construct with an ROI, a source image and channel, and the original position
+	 * in the source image
+	 * 
+	 * @param roi
+	 * @param f
+	 * @param channel
+	 * @param position
+	 * @param centreOfMass
+	 */
+	public DefaultNucleus(@NonNull Roi roi, @NonNull IPoint centreOfMass, @NonNull File f, int channel, int x, int y,
+			int number, RuleSetCollection rsc) {
+		this(roi, centreOfMass, f, channel, x, y, number, null, rsc);
+	}
 
-    /**
-     * Construct from an XML element. Use for 
-     * unmarshalling. The element should conform
-     * to the specification in {@link XmlSerializable}.
-     * @param e the XML element containing the data.
-     */
-    public DefaultNucleus(Element e) throws ComponentCreationException {
-    	super(e);
-    	nucleusNumber = Integer.valueOf(e.getAttributeValue(XML_NUCLEUS_NUMBER));
-    	
-    	for(Element el : e.getChildren(XML_ORIENTATION)) {
-    		OrientationMark name = OrientationMark.valueOf(el.getAttributeValue("name"));
-    		Landmark l = this.getLandmarks().keySet().stream()
-    				.filter(lm->lm.getName().equals(el.getAttributeValue("value")))
-    				.findFirst().get();
-    		orientationMarks.put(name, l);
-    	}
-    	priorityAxis = PriorityAxis.valueOf(e.getAttributeValue(XML_PRIORITY_AXIS));
-    	signalCollection = new DefaultSignalCollection(e.getChild(XML_SIGNAL_COLLECTION));
-    }
+	/**
+	 * Construct from a template Nucleus
+	 * 
+	 * @param n the template
+	 * @throws UnprofilableObjectException
+	 * @throws ComponentCreationException
+	 */
+	protected DefaultNucleus(@NonNull Nucleus n) throws UnprofilableObjectException, ComponentCreationException {
+		super(n);
+		nucleusNumber = n.getNucleusNumber();
+		signalCollection = n.getSignalCollection().duplicate();
 
-    @Override
+		for (OrientationMark s : OrientationMark.values()) {
+			if (n.getLandmark(s) != null)
+				orientationMarks.put(s, n.getLandmark(s));
+		}
+
+		priorityAxis = n.getPriorityAxis();
+	}
+
+	/**
+	 * Construct from an XML element. Use for unmarshalling. The element should
+	 * conform to the specification in {@link XmlSerializable}.
+	 * 
+	 * @param e the XML element containing the data.
+	 */
+	public DefaultNucleus(Element e) throws ComponentCreationException {
+		super(e);
+		nucleusNumber = Integer.valueOf(e.getAttributeValue(XML_NUCLEUS_NUMBER));
+
+		for (Element el : e.getChildren(XML_ORIENTATION)) {
+			OrientationMark name = OrientationMark.valueOf(el.getAttributeValue("name"));
+			Landmark l = this.getLandmarks().keySet().stream()
+					.filter(lm -> lm.getName().equals(el.getAttributeValue("value"))).findFirst().get();
+			orientationMarks.put(name, l);
+		}
+		priorityAxis = PriorityAxis.valueOf(e.getAttributeValue(XML_PRIORITY_AXIS));
+		signalCollection = new DefaultSignalCollection(e.getChild(XML_SIGNAL_COLLECTION));
+	}
+
+	@Override
 	public Element toXmlElement() {
-		Element e = super.toXmlElement()
-				.setName("Nucleus")
-				.setAttribute(XML_PRIORITY_AXIS, priorityAxis.toString())
+		Element e = super.toXmlElement().setName("Nucleus").setAttribute(XML_PRIORITY_AXIS, priorityAxis.toString())
 				.setAttribute(XML_NUCLEUS_NUMBER, String.valueOf(nucleusNumber));
-				
-		for(Entry<OrientationMark, Landmark> entry : orientationMarks.entrySet()) {
-			e.addContent(new Element(XML_ORIENTATION)
-					.setAttribute("name", entry.getKey().name())
-					.setAttribute("value", entry.getValue().toString()));
+
+		for (Entry<OrientationMark, Landmark> entry : orientationMarks.entrySet()) {
+			e.addContent(new Element(XML_ORIENTATION).setAttribute("name", entry.getKey().name()).setAttribute("value",
+					entry.getValue().toString()));
 		}
 
 		e.addContent(signalCollection.toXmlElement());
-		
+
 		return e;
 	}
-    
-    @Override
-    public Nucleus duplicate() {
-    	try {
-    		return new DefaultNucleus(this);
-    	} catch (UnprofilableObjectException | ComponentCreationException e) {
-    		LOGGER.severe("Could not duplicate cell: "+e.getMessage());
-    	}
-    	return null;
-    }
-    
-    @Override
+
+	@Override
+	public Nucleus duplicate() {
+		try {
+			return new DefaultNucleus(this);
+		} catch (UnprofilableObjectException | ComponentCreationException e) {
+			LOGGER.severe("Could not duplicate cell: " + e.getMessage());
+		}
+		return null;
+	}
+
+	@Override
 	public @Nullable Landmark getLandmark(OrientationMark s) {
 		return orientationMarks.get(s);
 	}
@@ -200,11 +196,11 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
 	public @Nullable PriorityAxis getPriorityAxis() {
 		return priorityAxis;
 	}
-    
-    @Override
-    public void createProfiles(double proportion) throws ComponentCreationException {
 
-        super.createProfiles(proportion);
+	@Override
+	public void createProfiles(double proportion) throws ComponentCreationException {
+
+		super.createProfiles(proportion);
 
 //        try {
 //        	// If creating profiles has changed landmarks, we 
@@ -215,199 +211,219 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
 //        } catch (UnavailableBorderPointException e) {
 //        	throw new ComponentCreationException(e);
 //        }
-    }
+	}
 
-    @Override
-    public int getNucleusNumber() {
-        return nucleusNumber;
-    }
+	@Override
+	public int getNucleusNumber() {
+		return nucleusNumber;
+	}
 
-    @Override
-    public String getNameAndNumber() {
-        return getSourceFileName() + "-" + getNucleusNumber();
-    }
+	@Override
+	public String getNameAndNumber() {
+		return getSourceFileName() + "-" + getNucleusNumber();
+	}
 
-    @Override
-    public String getPathAndNumber() {
-        return getSourceFile() + File.separator + nucleusNumber;
-    }
+	@Override
+	public String getPathAndNumber() {
+		return getSourceFile() + File.separator + nucleusNumber;
+	}
 
-    @Override
-    public void setScale(double scale) {
-        super.setScale(scale);
+	@Override
+	public void setScale(double scale) {
+		super.setScale(scale);
 
-        for (INuclearSignal s : this.getSignalCollection().getAllSignals()) {
-            s.setScale(scale);
-        }
-    }
-        
-    protected void setSignals(ISignalCollection collection) {
-        signalCollection = collection;
-    }
+		for (INuclearSignal s : this.getSignalCollection().getAllSignals()) {
+			s.setScale(scale);
+		}
+	}
 
-    @Override
+	protected void setSignals(ISignalCollection collection) {
+		signalCollection = collection;
+	}
+
+	@Override
 	public ISignalCollection getSignalCollection() {
-        return signalCollection;
-    }
+		return signalCollection;
+	}
 
-    public void updateSignalAngle(UUID channel, int signal, double angle) {
-        signalCollection.getSignals(channel).get(signal).setMeasurement(Measurement.ANGLE, angle);
-    }
+	public void updateSignalAngle(UUID channel, int signal, double angle) {
+		signalCollection.getSignals(channel).get(signal).setMeasurement(Measurement.ANGLE, angle);
+	}
 
-    // do not move this into SignalCollection - it is overridden in
-    // RodentSpermNucleus
-    @Override
+	// do not move this into SignalCollection - it is overridden in
+	// RodentSpermNucleus
+	@Override
 	public void calculateSignalAnglesFromPoint(@NonNull IPoint p) {
-    	
-        for (UUID signalGroup : signalCollection.getSignalGroupIds()) {
 
-            if (signalCollection.hasSignal(signalGroup)) {
-                for (INuclearSignal s : signalCollection.getSignals(signalGroup)) {
+		for (UUID signalGroup : signalCollection.getSignalGroupIds()) {
 
-                    double angle = this.getCentreOfMass().findAbsoluteAngle(p, s.getCentreOfMass());
-                    s.setMeasurement(Measurement.ANGLE, angle);
-                }
-            }
-        }
-    }
+			if (signalCollection.hasSignal(signalGroup)) {
+				for (INuclearSignal s : signalCollection.getSignals(signalGroup)) {
 
-    @Override
-    public Nucleus getOrientedNucleus() throws MissingLandmarkException, ComponentCreationException {
-        // Make an exact copy of the nucleus
-        Nucleus verticalNucleus = this.duplicate();
-        verticalNucleus.orient();
-        return verticalNucleus;
-    }
+					double angle = this.getCentreOfMass().findAbsoluteAngle(p, s.getCentreOfMass());
+					s.setMeasurement(Measurement.ANGLE, angle);
+				}
+			}
+		}
+	}
 
-    @Override
-    public void moveCentreOfMass(@NonNull IPoint point) {
-        double diffX = point.getX() - getCentreOfMass().getX();
-        double diffY = point.getY() - getCentreOfMass().getY();
-        offset(diffX, diffY);
-    }
+	@Override
+	public void setLandmark(@NonNull Landmark lm, int newLmIndex)
+			throws MissingProfileException, MissingLandmarkException, ProfileException {
+		super.setLandmark(lm, newLmIndex);
 
-    @Override
-    public void offset(double xOffset, double yOffset) {
+		// If any of the updated landmarks affect
+		// the orientation, clear the cached data
+		if (orientationMarks.values().contains(lm))
+			orientedlNucleus = null;
+	}
 
-        super.offset(xOffset, yOffset);
+	@Override
+	public void setSegments(@NonNull List<IProfileSegment> segs) throws MissingLandmarkException, ProfileException {
+		super.setSegments(segs);
 
-        // Move signals within the nucleus
-        if (signalCollection != null) {
-            for (INuclearSignal s : this.signalCollection.getAllSignals()) {
-                s.offset(xOffset, yOffset);
-            }
-        }
-    }
+		// New segments must be drawn when we get the nucleus
+		orientedlNucleus = null;
+	}
 
-    /*
-     * ############################################# 
-     * Methods implementing the Rotatable interface
-     * #############################################
-     */
+	@Override
+	public Nucleus getOrientedNucleus() throws MissingLandmarkException, ComponentCreationException {
+		// Make an exact copy of the nucleus
+		// and cache
+		if (orientedlNucleus == null) {
+			orientedlNucleus = this.duplicate();
+			orientedlNucleus.orient();
+		}
+		return orientedlNucleus;
+	}
 
-    @Override
-    public void orient() throws MissingLandmarkException {
-    	ComponentOrienter.orient(this);
-    }
+	@Override
+	public void moveCentreOfMass(@NonNull IPoint point) {
+		double diffX = point.getX() - getCentreOfMass().getX();
+		double diffY = point.getY() - getCentreOfMass().getY();
+		offset(diffX, diffY);
+	}
 
-    @Override
+	@Override
+	public void offset(double xOffset, double yOffset) {
+
+		super.offset(xOffset, yOffset);
+
+		// Move signals within the nucleus
+		if (signalCollection != null) {
+			for (INuclearSignal s : this.signalCollection.getAllSignals()) {
+				s.offset(xOffset, yOffset);
+			}
+		}
+	}
+
+	/*
+	 * ############################################# Methods implementing the
+	 * Rotatable interface #############################################
+	 */
+
+	@Override
+	public void orient() throws MissingLandmarkException {
+		ComponentOrienter.orient(this);
+	}
+
+	@Override
 	public List<OrientationMark> getOrientationMarks() {
 		List<OrientationMark> result = new ArrayList<>();
 		result.addAll(orientationMarks.keySet());
 		return result;
 	}
-    
-    @Override
-    public void flipHorizontal(@NonNull IPoint p) {
-        super.flipHorizontal(p);
 
-        for (UUID id : signalCollection.getSignalGroupIds()) {
-            signalCollection.getSignals(id).stream().forEach(s -> s.flipHorizontal(p));
-        }
+	@Override
+	public void flipHorizontal(@NonNull IPoint p) {
+		super.flipHorizontal(p);
 
-    }
-    
-    @Override
-    public void flipVertical(@NonNull IPoint p) {
-        super.flipVertical(p);
+		for (UUID id : signalCollection.getSignalGroupIds()) {
+			signalCollection.getSignals(id).stream().forEach(s -> s.flipHorizontal(p));
+		}
 
-        for (UUID id : signalCollection.getSignalGroupIds()) {
-            signalCollection.getSignals(id).stream().forEach(s -> s.flipVertical(p));
-        }
+	}
 
-    }
+	@Override
+	public void flipVertical(@NonNull IPoint p) {
+		super.flipVertical(p);
 
-    @Override
-    public void rotate(double angle) {
+		for (UUID id : signalCollection.getSignalGroupIds()) {
+			signalCollection.getSignals(id).stream().forEach(s -> s.flipVertical(p));
+		}
 
-        super.rotate(angle);
+	}
 
-        if (angle != 0) {
+	@Override
+	public void rotate(double angle) {
 
-            for (UUID id : signalCollection.getSignalGroupIds()) {
+		super.rotate(angle);
 
-                signalCollection.getSignals(id).parallelStream().forEach(s -> {
+		if (angle != 0) {
 
-                    s.rotate(angle);
+			for (UUID id : signalCollection.getSignalGroupIds()) {
 
-                    // get the new signal centre of mass based on the nucleus rotation
+				signalCollection.getSignals(id).parallelStream().forEach(s -> {
 
-                    IPoint p = AngleTools.rotateAboutPoint(s.getCentreOfMass(), getCentreOfMass(), angle);
-                    s.moveCentreOfMass(p);
-                });
+					s.rotate(angle);
 
-            }
-        }
-    }
+					// get the new signal centre of mass based on the nucleus rotation
 
-    /*
-     * ############################################# 
-     * Object methods
-     * #############################################
-     */
+					IPoint p = AngleTools.rotateAboutPoint(s.getCentreOfMass(), getCentreOfMass(), angle);
+					s.moveCentreOfMass(p);
+				});
 
-    /**
-     * Describes the nucleus state
-     * 
-     * @return
-     */
-    @Override
+			}
+		}
+	}
+
+	/*
+	 * ############################################# Object methods
+	 * #############################################
+	 */
+
+	/**
+	 * Describes the nucleus state
+	 * 
+	 * @return
+	 */
+	@Override
 	public String toString() {
-        String newLine = System.getProperty("line.separator");
-        StringBuilder builder = new StringBuilder(super.toString()+newLine);
+		String newLine = System.getProperty("line.separator");
+		StringBuilder builder = new StringBuilder(super.toString() + newLine);
 
-        builder.append("Name: "+this.getNameAndNumber());
-        builder.append(newLine);
-        builder.append("Signals: "+this.getSignalCollection().toString());
-        builder.append(newLine);
-        return builder.toString();
-    }
+		builder.append("Name: " + this.getNameAndNumber());
+		builder.append(newLine);
+		builder.append("Signals: " + this.getSignalCollection().toString());
+		builder.append(newLine);
+		return builder.toString();
+	}
 
-    @Override
-    public int compareTo(Nucleus n) {
+	@Override
+	public int compareTo(Nucleus n) {
 
-        int number = this.getNucleusNumber();
-        String name = this.getSourceFileNameWithoutExtension();
+		int number = this.getNucleusNumber();
+		String name = this.getSourceFileNameWithoutExtension();
 
-        // Compare on image name.
-        // If that is equal, compare on nucleus number
+		// Compare on image name.
+		// If that is equal, compare on nucleus number
 
-        int byName = name.compareTo(n.getSourceFileNameWithoutExtension());
+		int byName = name.compareTo(n.getSourceFileNameWithoutExtension());
 
-        if (byName == 0) {
+		if (byName == 0) {
 
-            if (number < n.getNucleusNumber()) {
-                return -1;
-            } else if (number > n.getNucleusNumber()) {
-                return 1;
-            } else {
-                return 0;
-            }
+			if (number < n.getNucleusNumber()) {
+				return -1;
+			} else if (number > n.getNucleusNumber()) {
+				return 1;
+			} else {
+				return 0;
+			}
 
-        }
+		}
 		return byName;
 
-    }
+	}
 
 	@Override
 	public int hashCode() {
@@ -428,9 +444,7 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
 			return false;
 		DefaultNucleus other = (DefaultNucleus) obj;
 
-		return nucleusNumber == other.nucleusNumber 
-				&& Objects.equals(orientationMarks, other.orientationMarks)
-				&& priorityAxis == other.priorityAxis 
-				&& Objects.equals(signalCollection, other.signalCollection);
+		return nucleusNumber == other.nucleusNumber && Objects.equals(orientationMarks, other.orientationMarks)
+				&& priorityAxis == other.priorityAxis && Objects.equals(signalCollection, other.signalCollection);
 	}
 }
