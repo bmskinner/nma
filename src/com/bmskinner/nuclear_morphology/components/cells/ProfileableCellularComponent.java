@@ -141,8 +141,10 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 
 		try {
 
+			// When duplicating components we can copy the existing profiles
 			for (ProfileType type : ProfileType.values()) {
-				profileMap.put(type, ProfileCreator.createProfile(this, type));
+				profileMap.put(type, c.getProfile(type).duplicate());
+//				profileMap.put(type, ProfileCreator.createProfile(this, type));
 			}
 
 			segments.clear();
@@ -370,6 +372,15 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 
 		// offset the profile to start at the desired landmark
 		return profile.startFrom(lmIndex);
+	}
+
+	@Override
+	public IProfile getUnsegmentedProfile(@NonNull ProfileType type, @NonNull Landmark lm)
+			throws ProfileException, MissingLandmarkException {
+		if (!this.hasLandmark(lm))
+			throw new MissingLandmarkException("Landmark " + lm + " not present");
+		int lmIndex = profileLandmarks.get(lm);
+		return profileMap.get(type).startFrom(lmIndex);
 	}
 
 	@Override

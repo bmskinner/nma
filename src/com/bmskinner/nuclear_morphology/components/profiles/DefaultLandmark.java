@@ -18,6 +18,7 @@ package com.bmskinner.nuclear_morphology.components.profiles;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -29,80 +30,77 @@ import org.eclipse.jdt.annotation.NonNull;
  */
 public class DefaultLandmark implements Landmark {
 
-    private static final long serialVersionUID = 1L;
-        
-    private final String    name;
-    private final LandmarkType type;
+	private static final long serialVersionUID = 1L;
 
-    /**
-     * Create a new landmark with the given name and type
-     * @param name
-     * @param type
-     */
-    public DefaultLandmark(@NonNull final String name, @NonNull final LandmarkType type) {
-        this.type = type;
-        this.name = name;
-    }
+	private final String name;
+	private final LandmarkType type;
 
-    @Override
-    public String getName() {
-        return name;
-    }
+	/**
+	 * Create a new landmark with the given name and type
+	 * 
+	 * @param name
+	 * @param type
+	 */
+	public DefaultLandmark(@NonNull final String name, @NonNull final LandmarkType type) {
+		this.type = type;
+		this.name = name;
+	}
 
-    @Override
-    public LandmarkType type() {
-        return type;
-    }
+	@Override
+	public String getName() {
+		return name;
+	}
 
-    @Override
-    public String toString() {
-        return name;
-    }
+	@Override
+	public LandmarkType type() {
+		return type;
+	}
 
-    public static DefaultLandmark[] values(LandmarkType type) {
+	@Override
+	public String toString() {
+		return name;
+	}
 
-        List<Landmark> list = new ArrayList<>();
-        for (Landmark o : Landmark.defaultValues()) {
-            if (o.type().equals(type)) {
-                list.add(o);
-            }
-        }
+	public static DefaultLandmark[] values(LandmarkType type) {
 
-        return list.toArray(new DefaultLandmark[0]);
+		List<Landmark> list = new ArrayList<>();
+		for (Landmark o : Landmark.defaultValues()) {
+			if (o.type().equals(type)) {
+				list.add(o);
+			}
+		}
 
-    }
+		return list.toArray(new DefaultLandmark[0]);
 
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((name == null) ? 0 : name.hashCode());
-        result = prime * result + ((type == null) ? 0 : type.hashCode());
-        return result;
-    }
+	}
 
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        DefaultLandmark other = (DefaultLandmark) obj;
-        if (name == null) {
-            if (other.name != null)
-                return false;
-        } else if (!name.equals(other.name))
-            return false;
-        if (type != other.type)
-            return false;
-        return true;
-    }
+	@Override
+	public int hashCode() {
+		return Objects.hash(name, type);
+	}
 
-    @Override
-    public int compareTo(Landmark tag) {
-        return name.compareTo(tag.getName());
-    }
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		DefaultLandmark other = (DefaultLandmark) obj;
+		if (name == null) {
+			if (other.name != null)
+				return false;
+		} else if (!name.equals(other.name))
+			return false;
+		if (type != other.type)
+			return false;
+		return true;
+	}
+
+	@Override
+	public int compareTo(Landmark tag) {
+		return name.compareTo(tag.getName());
+	}
 
 }
