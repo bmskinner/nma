@@ -53,6 +53,7 @@ import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
 
 /**
  * Tests for implementations of the ICellCollection interface
+ * 
  * @author ben
  * @since 1.14.0
  *
@@ -62,57 +63,52 @@ public class ICellCollectionTest {
 	private static final int N_CELLS = 10;
 
 	private ICellCollection collection;
-	
+
 	@Rule
-    public final ExpectedException exception = ExpectedException.none();
+	public final ExpectedException exception = ExpectedException.none();
 
 	@Parameter(0)
 	public Class<? extends ICellCollection> source;
-	
+
 	@Before
 	public void setUp() throws Exception {
 		collection = createInstance(source);
-		
+
 	}
 
 	/**
 	 * Create an instance of the class under test
+	 * 
 	 * @param source the class to create
 	 * @return
-	 * @throws Exception 
+	 * @throws Exception
 	 */
 	public static ICellCollection createInstance(Class<? extends ICellCollection> source) throws Exception {
-		IAnalysisDataset d = new TestDatasetBuilder(ComponentTester.RNG_SEED)
-				.cellCount(N_CELLS)
-				.ofType(RuleSetCollection.roundRuleSetCollection())
-				.withMaxSizeVariation(10)
-				.randomOffsetProfiles(true)
-				.addSignalsInChannel(0)
-				.segmented().build();
-		if(source==DefaultCellCollection.class){
+		IAnalysisDataset d = new TestDatasetBuilder(ComponentTester.RNG_SEED).cellCount(N_CELLS)
+				.ofType(RuleSetCollection.roundRuleSetCollection()).withMaxSizeVariation(10).randomOffsetProfiles(true)
+				.addSignalsInChannel(0).segmented().build();
+		if (source == DefaultCellCollection.class) {
 			return d.getCollection();
 		}
-		
-		if(source==VirtualDataset.class){
-			VirtualDataset v = new VirtualDataset(d,TestDatasetBuilder.TEST_DATASET_NAME, 
+
+		if (source == VirtualDataset.class) {
+			VirtualDataset v = new VirtualDataset(d, TestDatasetBuilder.TEST_DATASET_NAME,
 					TestDatasetBuilder.TEST_DATASET_UUID, d.getCollection());
 			return v;
 		}
 
-		throw new Exception("Unable to create instance of "+source);
+		throw new Exception("Unable to create instance of " + source);
 	}
 
 	@Parameters
 	public static Iterable<Class<? extends ICellCollection>> arguments() {
-		return Arrays.asList(DefaultCellCollection.class,
-				VirtualDataset.class);
+		return Arrays.asList(DefaultCellCollection.class, VirtualDataset.class);
 	}
-	
+
 	@Test
 	public void testGetID() {
 		assertEquals(TestDatasetBuilder.TEST_DATASET_UUID, collection.getId());
 	}
-
 
 	@Test
 	public void testSetName() {
@@ -126,7 +122,6 @@ public class ICellCollectionTest {
 		assertEquals(TestDatasetBuilder.TEST_DATASET_NAME, collection.getName());
 	}
 
-
 	@Test
 	public void testGetCells() {
 		List<ICell> cells = collection.getCells();
@@ -135,7 +130,7 @@ public class ICellCollectionTest {
 
 	@Test
 	public void testGetCellsFile() {
-		Set<ICell> cells = collection.getCells( new File(TestDatasetBuilder.TEST_DATASET_IMAGE_FOLDER));
+		Set<ICell> cells = collection.getCells(new File(TestDatasetBuilder.TEST_DATASET_IMAGE_FOLDER));
 		assertEquals(N_CELLS, cells.size());
 	}
 
@@ -147,18 +142,18 @@ public class ICellCollectionTest {
 	@Test
 	public void testGetCellIDs() {
 		Set<UUID> ids = collection.getCellIDs();
-		assertTrue(collection.streamCells().allMatch(c->ids.contains(c.getId())));
+		assertTrue(collection.streamCells().allMatch(c -> ids.contains(c.getId())));
 	}
 
 	@Test
 	public void testGetNuclei() {
-		Set<Nucleus> cells = collection.getNuclei();
+		List<Nucleus> cells = collection.getNuclei();
 		assertEquals(N_CELLS, cells.size());
 	}
 
 	@Test
 	public void testGetNucleiFile() {
-		Set<ICell> cells = collection.getCells( new File(TestDatasetBuilder.TEST_DATASET_IMAGE_FOLDER));
+		Set<ICell> cells = collection.getCells(new File(TestDatasetBuilder.TEST_DATASET_IMAGE_FOLDER));
 		assertEquals(N_CELLS, cells.size());
 	}
 
@@ -172,7 +167,7 @@ public class ICellCollectionTest {
 		ICell cell = mock(ICell.class);
 		UUID id = UUID.fromString("00000000-0000-0000-0000-000000000001");
 		when(cell.getId()).thenReturn(id);
-		if(collection.isVirtual())
+		if (collection.isVirtual())
 			exception.expect(IllegalArgumentException.class);
 		collection.addCell(cell);
 		assertTrue(collection.contains(id));
@@ -180,7 +175,7 @@ public class ICellCollectionTest {
 
 	@Test
 	public void testGetCell() {
-		for(UUID id : collection.getCellIDs())
+		for (UUID id : collection.getCellIDs())
 			assertEquals(id, collection.getCell(id).getId());
 	}
 
@@ -189,14 +184,13 @@ public class ICellCollectionTest {
 		ICell c = collection.streamCells().findFirst().get();
 		assertTrue(collection.contains(c));
 		collection.removeCell(c);
-		
+
 		List<ICell> cells = collection.getCells();
-		assertEquals(N_CELLS-1, cells.size());
-				
-		assertEquals(N_CELLS-1, collection.size());
+		assertEquals(N_CELLS - 1, cells.size());
+
+		assertEquals(N_CELLS - 1, collection.size());
 		assertFalse(collection.contains(c));
-		
-		
+
 	}
 
 	@Test
@@ -220,10 +214,10 @@ public class ICellCollectionTest {
 		ICell c = collection.streamCells().findFirst().get();
 		assertTrue(collection.contains(c));
 	}
-	
+
 	@Test
 	public void testContainsICellReturnsFalseOnNullInput() {
-		assertFalse(collection.contains((ICell)null));
+		assertFalse(collection.contains((ICell) null));
 	}
 
 	@Test
@@ -235,14 +229,14 @@ public class ICellCollectionTest {
 
 	@Test
 	public void testContainsUUIDReturnsFalseOnNullInput() {
-		assertFalse(collection.contains((UUID)null));
+		assertFalse(collection.contains((UUID) null));
 	}
-	
+
 	@Test
 	public void testContainsUUIDReturnsFalseOnUUIDNotPresent() {
 		assertFalse(collection.contains(TestDatasetBuilder.RED_SIGNAL_GROUP));
 	}
-	
+
 	@Test
 	public void testContainsExact() {
 		ICell c = collection.streamCells().findFirst().get();
@@ -271,13 +265,12 @@ public class ICellCollectionTest {
 
 	@Test
 	public void testGetProfileCollection() {
-		assertTrue(collection.getProfileCollection()!=null);
+		assertTrue(collection.getProfileCollection() != null);
 	}
-
 
 	@Test
 	public void testGetSignalGroupIDs() {
-		assertTrue(collection.getSignalGroupIDs().size()==1);
+		assertTrue(collection.getSignalGroupIDs().size() == 1);
 		assertTrue(collection.hasSignalGroup(TestDatasetBuilder.RED_SIGNAL_GROUP));
 	}
 
@@ -291,9 +284,9 @@ public class ICellCollectionTest {
 	@Test
 	public void testAddSignalGroup() {
 		ISignalGroup group = mock(ISignalGroup.class);
-		when( group.getGroupName()).thenReturn("A test group");
-		when( group.getId()).thenReturn(TestDatasetBuilder.GREEN_SIGNAL_GROUP);
-		
+		when(group.getGroupName()).thenReturn("A test group");
+		when(group.getId()).thenReturn(TestDatasetBuilder.GREEN_SIGNAL_GROUP);
+
 		assertFalse(collection.hasSignalGroup(TestDatasetBuilder.GREEN_SIGNAL_GROUP));
 		collection.addSignalGroup(group);
 		assertTrue(collection.hasSignalGroup(TestDatasetBuilder.GREEN_SIGNAL_GROUP));
@@ -301,7 +294,7 @@ public class ICellCollectionTest {
 
 	@Test
 	public void testGetMaxProfileLength() {
-		int exp = collection.streamCells().mapToInt(c->{
+		int exp = collection.streamCells().mapToInt(c -> {
 			try {
 				return c.getPrimaryNucleus().getProfile(ProfileType.ANGLE).size();
 			} catch (MissingProfileException | ProfileException | MissingLandmarkException e) {
@@ -313,65 +306,67 @@ public class ICellCollectionTest {
 
 	@Test
 	public void testSetConsensus() throws Exception {
-		// Run consensus averaging on the collection. Wrap in a new dataset. 
-		IAnalysisDataset d = new DefaultAnalysisDataset(collection, 
+		// Run consensus averaging on the collection. Wrap in a new dataset.
+		IAnalysisDataset d = new DefaultAnalysisDataset(collection,
 				new File(TestDatasetBuilder.TEST_DATASET_IMAGE_FOLDER));
-		d.setAnalysisOptions(OptionsFactory.makeDefaultRoundAnalysisOptions(new File(TestDatasetBuilder.TEST_DATASET_IMAGE_FOLDER).getAbsoluteFile()));
+		d.setAnalysisOptions(OptionsFactory.makeDefaultRoundAnalysisOptions(
+				new File(TestDatasetBuilder.TEST_DATASET_IMAGE_FOLDER).getAbsoluteFile()));
 
 		assertFalse(collection.hasConsensus());
 		new ConsensusAveragingMethod(d).call();
-		
-		
+
 		assertTrue("Collection should have consensus", collection.hasConsensus());
 	}
-	
+
 	@Test
 	public void testGetConsensusOrientsVertically() throws Exception {
-		
+
 		// Ensure TV and BV are set
 		ProfileManager manager = collection.getProfileManager();
 		manager.updateLandmark(Landmark.TOP_VERTICAL, 0);
 		manager.updateLandmark(Landmark.BOTTOM_VERTICAL, 10);
-		
-		// Run consensus averaging on the collection. Wrap in a new dataset. 
+
+		// Run consensus averaging on the collection. Wrap in a new dataset.
 		// Analysis options will not be copied - create anew
 		File testFolder = new File(TestDatasetBuilder.TEST_DATASET_IMAGE_FOLDER);
 		IAnalysisDataset d = new DefaultAnalysisDataset(collection, testFolder);
 		d.setAnalysisOptions(OptionsFactory.makeDefaultRodentAnalysisOptions(testFolder));
-		
-		new ConsensusAveragingMethod(d).call();		
-		
+
+		new ConsensusAveragingMethod(d).call();
+
 		// Test that the consensus has the same indexes as the template
 		// collection
 		Nucleus n = d.getCollection().getConsensus();
 		IPoint tv = n.getBorderPoint(Landmark.TOP_VERTICAL);
 		IPoint bv = n.getBorderPoint(Landmark.BOTTOM_VERTICAL);
-		assertTrue("Points should be vertical for tv="+tv+" bv="+bv, ComponentTester.areVertical(tv, bv));
+		assertTrue("Points should be vertical for tv=" + tv + " bv=" + bv, ComponentTester.areVertical(tv, bv));
 
 		// Now test that updating the TV to any index still allows orientation
-		
-		assertTrue(n.getBorderLength()<d.getCollection().getMedianArrayLength());
-		
-		int bIndex=0; // so that it never overlaps TV in the loop
+
+		assertTrue(n.getBorderLength() < d.getCollection().getMedianArrayLength());
+
+		int bIndex = 0; // so that it never overlaps TV in the loop
 		// Start from 3 so that the smaller consensus profile does not get
 		// the TV assigned to index 0 when interpolating
-		for(int tIndex=1; tIndex < d.getCollection().getMedianArrayLength(); tIndex++) {
+		for (int tIndex = 1; tIndex < d.getCollection().getMedianArrayLength(); tIndex++) {
 			manager.updateLandmark(Landmark.TOP_VERTICAL, tIndex);
 			manager.updateLandmark(Landmark.BOTTOM_VERTICAL, bIndex);
-			
+
 			assertNotEquals("TV and BV should not have the same index in the median", bIndex, tIndex);
-			assertEquals("Median TV should be", tIndex, collection.getProfileCollection().getLandmarkIndex(Landmark.TOP_VERTICAL));
-			assertEquals("Median BV should be", bIndex, collection.getProfileCollection().getLandmarkIndex(Landmark.BOTTOM_VERTICAL));
-			
+			assertEquals("Median TV should be", tIndex,
+					collection.getProfileCollection().getLandmarkIndex(Landmark.TOP_VERTICAL));
+			assertEquals("Median BV should be", bIndex,
+					collection.getProfileCollection().getLandmarkIndex(Landmark.BOTTOM_VERTICAL));
+
 			// Check that the update has been made to the consensus
 			n = d.getCollection().getConsensus();
 			int nTIndex = n.getBorderIndex(Landmark.TOP_VERTICAL);
 			int nBIndex = n.getBorderIndex(Landmark.BOTTOM_VERTICAL);
-			if(nTIndex==nBIndex)
-				continue; // we can't test if they end up on the same index due to differences in perimeter 
-						  // versus the median
+			if (nTIndex == nBIndex)
+				continue; // we can't test if they end up on the same index due to differences in
+							// perimeter
+							// versus the median
 //			assertNotEquals("TV index and BV index should not be the same index in consensus nucleus", nTIndex, nBIndex);
-			
 
 			List<JPanel> panels = new ArrayList<>();
 			panels.add(ChartFactoryTest.makeConsensusChartPanel(d));
@@ -379,42 +374,39 @@ public class ICellCollectionTest {
 			n = collection.getConsensus(); // is aligned vertically
 			tv = n.getBorderPoint(Landmark.TOP_VERTICAL);
 			bv = n.getBorderPoint(Landmark.BOTTOM_VERTICAL);
-			
 
 			assertNotEquals("TV and BV should not be the same point in consensus nucleus", tv, bv);
-			
+
 			boolean areVertical = ComponentTester.areVertical(tv, bv);
-			if(!areVertical)
-				ChartFactoryTest.showCharts(panels, "TV: "+tIndex+" BV "+bIndex);
-			assertTrue("Points should be vertical for tv="+tv+" bv="+bv, areVertical);
+			if (!areVertical)
+				ChartFactoryTest.showCharts(panels, "TV: " + tIndex + " BV " + bIndex);
+			assertTrue("Points should be vertical for tv=" + tv + " bv=" + bv, areVertical);
 		}
-		
-	}
-		
-	@Test 
-	public void testFilterCollection() throws Exception {
-		double medianArea = collection.getMedian(Measurement.AREA, CellularComponent.NUCLEUS,
-				MeasurementScale.PIXELS);
-		
-		FilteringOptions op = new CellCollectionFilterBuilder()
-        		.add(Measurement.AREA, CellularComponent.NUCLEUS, 
-        				MeasurementScale.PIXELS, medianArea, medianArea*10)
-        		.build();
-		
-        ICellCollection c = CellCollectionFilterer.filter(collection, op);
-		
-		assertTrue("Filtering in "+source.getSimpleName(), c.getNucleusCount()<collection.getNucleusCount());
+
 	}
 
-	@Test 
+	@Test
+	public void testFilterCollection() throws Exception {
+		double medianArea = collection.getMedian(Measurement.AREA, CellularComponent.NUCLEUS, MeasurementScale.PIXELS);
+
+		FilteringOptions op = new CellCollectionFilterBuilder()
+				.add(Measurement.AREA, CellularComponent.NUCLEUS, MeasurementScale.PIXELS, medianArea, medianArea * 10)
+				.build();
+
+		ICellCollection c = CellCollectionFilterer.filter(collection, op);
+
+		assertTrue("Filtering in " + source.getSimpleName(), c.getNucleusCount() < collection.getNucleusCount());
+	}
+
+	@Test
 	public void testGetDifferenceToMedian() throws MissingLandmarkException {
-		
-		for(Nucleus n :collection.getNuclei()) {
+
+		for (Nucleus n : collection.getNuclei()) {
 			double d = collection.getNormalisedDifferenceToMedian(Landmark.REFERENCE_POINT, n);
 			assertNotEquals(Double.NaN, d);
 			assertNotEquals(Statistical.ERROR_CALCULATING_STAT, d);
 		}
-		
+
 	}
-	
+
 }
