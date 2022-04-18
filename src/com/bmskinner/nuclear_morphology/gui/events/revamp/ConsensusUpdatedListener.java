@@ -28,4 +28,10 @@ public interface ConsensusUpdatedListener {
 	 */
 	void consensusUpdated(IAnalysisDataset dataset);
 
+	/**
+	 * Inform the listener that whether consensus nuclei should be filled or not has
+	 * changed
+	 */
+	void consensusFillStateUpdated();
+
 }

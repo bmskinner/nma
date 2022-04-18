@@ -254,48 +254,50 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 	 */
 	public TableModel createAnalysisParametersTable() {
 
-		if (!options.hasDatasets()) {
-			return createBlankTable();
-		}
+		return new AnalysisParametersTableModel(options.getDatasets());
 
-		DefaultTableModel model = new DefaultTableModel();
-		List<Object> columnList = new ArrayList<>();
-		columnList.add(Labels.AnalysisParameters.IMAGE_PREPROCESSING);
-		columnList.add(Labels.AnalysisParameters.NUCLEUS_DETECTION);
-		columnList.add(Labels.AnalysisParameters.NUCLEUS_SIZE);
-		columnList.add(Labels.AnalysisParameters.NUCLEUS_CIRCULARITY);
-		columnList.add(Labels.AnalysisParameters.RUN_TIME);
-		columnList.add(Labels.AnalysisParameters.COLLECTION_SOURCE);
-		columnList.add(Labels.AnalysisParameters.NUCLEUS_TYPE);
-		columnList.add(Labels.AnalysisParameters.PROFILE_WINDOW);
-		columnList.add(Labels.AnalysisParameters.SOFTWARE_VERSION);
-
-		if (options.getBoolean(AbstractOptions.SHOW_RECOVER_MERGE_SOURCE_KEY))
-			columnList.add(Labels.Merges.RECOVER_SOURCE);
-		model.addColumn(EMPTY_STRING, columnList.toArray());
-
-		List<IAnalysisDataset> list = options.getDatasets();
-
-		for (IAnalysisDataset dataset : list) {
-
-			// only display if there are options available
-			// This may not be the case for a merged dataset or its children
-			if (dataset.hasAnalysisOptions()) {
-
-				// Do not provide an options as an argument here.
-				// This will cause the existing dataset options to be used
-				List<Object> collectionData = createAnalysisParametersColumn(dataset, null);
-
-				model.addColumn(dataset.getCollection().getName(), collectionData.toArray());
-
-			} else {
-				LOGGER.fine("No analysis options in dataset " + dataset.getName() + ", treating as merge");
-				List<Object> collectionData = createAnalysisParametersMergeColumn(dataset);
-				model.addColumn(dataset.getCollection().getName(), collectionData.toArray());
-			}
-		}
-
-		return model;
+//		if (!options.hasDatasets()) {
+//			return createBlankTable();
+//		}
+//
+//		DefaultTableModel model = new DefaultTableModel();
+//		List<Object> columnList = new ArrayList<>();
+//		columnList.add(Labels.AnalysisParameters.IMAGE_PREPROCESSING);
+//		columnList.add(Labels.AnalysisParameters.NUCLEUS_DETECTION);
+//		columnList.add(Labels.AnalysisParameters.NUCLEUS_SIZE);
+//		columnList.add(Labels.AnalysisParameters.NUCLEUS_CIRCULARITY);
+//		columnList.add(Labels.AnalysisParameters.RUN_TIME);
+//		columnList.add(Labels.AnalysisParameters.COLLECTION_SOURCE);
+//		columnList.add(Labels.AnalysisParameters.NUCLEUS_TYPE);
+//		columnList.add(Labels.AnalysisParameters.PROFILE_WINDOW);
+//		columnList.add(Labels.AnalysisParameters.SOFTWARE_VERSION);
+//
+//		if (options.getBoolean(AbstractOptions.SHOW_RECOVER_MERGE_SOURCE_KEY))
+//			columnList.add(Labels.Merges.RECOVER_SOURCE);
+//		model.addColumn(EMPTY_STRING, columnList.toArray());
+//
+//		List<IAnalysisDataset> list = options.getDatasets();
+//
+//		for (IAnalysisDataset dataset : list) {
+//
+//			// only display if there are options available
+//			// This may not be the case for a merged dataset or its children
+//			if (dataset.hasAnalysisOptions()) {
+//
+//				// Do not provide an options as an argument here.
+//				// This will cause the existing dataset options to be used
+//				List<Object> collectionData = createAnalysisParametersColumn(dataset, null);
+//
+//				model.addColumn(dataset.getCollection().getName(), collectionData.toArray());
+//
+//			} else {
+//				LOGGER.fine("No analysis options in dataset " + dataset.getName() + ", treating as merge");
+//				List<Object> collectionData = createAnalysisParametersMergeColumn(dataset);
+//				model.addColumn(dataset.getCollection().getName(), collectionData.toArray());
+//			}
+//		}
+//
+//		return model;
 	}
 
 	/**

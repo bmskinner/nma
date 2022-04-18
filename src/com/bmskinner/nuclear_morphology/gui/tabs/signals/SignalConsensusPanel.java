@@ -297,6 +297,11 @@ public class SignalConsensusPanel extends ChartDetailPanel
 	}
 
 	@Override
+	public void consensusFillStateUpdated() {
+		// We only use outlines here, so no effect needed
+	}
+
+	@Override
 	public void nuclearSignalUpdated(List<IAnalysisDataset> datasets) {
 		refreshCache(datasets);
 	}

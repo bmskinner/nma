@@ -7,9 +7,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.logging.Logger;
 
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.TableModel;
@@ -21,7 +18,6 @@ import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledExcep
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 import com.bmskinner.nuclear_morphology.gui.events.ChartSetEventListener;
-import com.bmskinner.nuclear_morphology.gui.events.revamp.ConsensusUpdatedListener;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.NuclearSignalUpdatedListener;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.UIController;
 import com.bmskinner.nuclear_morphology.gui.tabs.TableDetailPanel;
@@ -32,30 +28,17 @@ import com.bmskinner.nuclear_morphology.visualisation.options.TableOptionsBuilde
 import com.bmskinner.nuclear_morphology.visualisation.tables.AbstractTableCreator;
 import com.bmskinner.nuclear_morphology.visualisation.tables.NuclearSignalTableCreator;
 
-public class SignalTablePanel extends TableDetailPanel
-		implements ChartSetEventListener, ConsensusUpdatedListener, NuclearSignalUpdatedListener {
+public class SignalTablePanel extends TableDetailPanel implements ChartSetEventListener, NuclearSignalUpdatedListener {
 
-	private static final Logger LOGGER = Logger.getLogger(SignalsOverviewPanel.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(SignalTablePanel.class.getName());
 
 	private static final String PANEL_TITLE_LBL = "Signal stats";
 
 	/** signal stats */
 	private ExportableTable statsTable;
 
-	/** Signal visibility checkbox panel */
-	private JPanel checkboxPanel;
-
-	/** Launch signal warping */
-	private JButton warpButton;
-
-	/** Launch signal merging */
-	private JButton mergeButton;
-
 	/** Show signal radius or just CoM */
 	boolean isShowAnnotations = false;
-
-	/** Messages to clarify when UI is disabled */
-	private JLabel headerText;
 
 	/**
 	 * Create with an input supplier
@@ -87,8 +70,7 @@ public class SignalTablePanel extends TableDetailPanel
 
 		statsTable.addMouseListener(new SignalStatsTableMouseListener());
 
-		JScrollPane scrollPane = new JScrollPane(statsTable);
-		return scrollPane;
+		return new JScrollPane(statsTable);
 	}
 
 	/**
@@ -102,6 +84,10 @@ public class SignalTablePanel extends TableDetailPanel
 
 		private SignalStatsTableMouseListener() {
 			super();
+		}
+
+		private SignalTableCell getSignalGroupFromTable(JTable table, int row, int column) {
+			return (SignalTableCell) table.getModel().getValueAt(row, column);
 		}
 
 		private boolean isSignalIdRow(JTable table, int row) {
@@ -133,8 +119,6 @@ public class SignalTablePanel extends TableDetailPanel
 				if (result != 0) {
 					d.getCollection().getSignalManager().removeSignalGroup(signalGroup);
 					UIController.getInstance().fireNuclearSignalUpdated(d);
-
-//			getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
 				}
 
 			} catch (RequestCancelledException e1) {
@@ -166,47 +150,29 @@ public class SignalTablePanel extends TableDetailPanel
 
 	}
 
-	private SignalTableCell getSignalGroupFromTable(JTable table, int row, int column) {
-		return (SignalTableCell) table.getModel().getValueAt(row, column);
+	@Override
+	protected synchronized void updateSingle() {
+		updateMultiple();
 	}
 
-	/**
-	 * Update the signal stats with the given datasets
-	 * 
-	 * @param list the datasets
-	 * @throws Exception
-	 */
-	private void updateSignalStatsPanel() {
+	@Override
+	protected synchronized void updateMultiple() {
 
 		TableOptions options = new TableOptionsBuilder().setDatasets(getDatasets()).setTarget(statsTable)
 				.setColumnRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN, new SignalTableCellRenderer()).build();
-
 		setTable(options);
-
 	}
 
 	@Override
-	protected void updateSingle() {
+	protected synchronized void updateNull() {
 		updateMultiple();
 
 	}
 
 	@Override
-	protected void updateMultiple() {
-		updateSignalStatsPanel();
-	}
-
-	@Override
-	protected void updateNull() {
-		updateMultiple();
-
-	}
-
-	@Override
-	public void setLoading() {
+	public synchronized void setLoading() {
 		super.setLoading();
 		statsTable.setModel(AbstractTableCreator.createLoadingTable());
-
 	}
 
 	@Override
@@ -221,16 +187,6 @@ public class SignalTablePanel extends TableDetailPanel
 	}
 
 	@Override
-	public void consensusUpdated(List<IAnalysisDataset> datasets) {
-		refreshCache(datasets);
-	}
-
-	@Override
-	public void consensusUpdated(IAnalysisDataset dataset) {
-		refreshCache(dataset);
-	}
-
-	@Override
 	public void nuclearSignalUpdated(List<IAnalysisDataset> datasets) {
 		refreshCache(datasets);
 	}
@@ -239,4 +195,5 @@ public class SignalTablePanel extends TableDetailPanel
 	public void nuclearSignalUpdated(IAnalysisDataset dataset) {
 		refreshCache(dataset);
 	}
+
 }

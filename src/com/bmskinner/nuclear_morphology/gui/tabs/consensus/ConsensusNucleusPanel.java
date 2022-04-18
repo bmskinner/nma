@@ -347,7 +347,7 @@ public class ConsensusNucleusPanel extends ChartDetailPanel
 
 	@Override
 	public void stateChanged(ChangeEvent arg0) {
-		this.update(getDatasets());
+		update(getDatasets());
 	}
 
 	@Override
@@ -378,6 +378,11 @@ public class ConsensusNucleusPanel extends ChartDetailPanel
 	@Override
 	public void swatchUpdated() {
 		update();
+	}
+
+	@Override
+	public void consensusFillStateUpdated() {
+		refreshCache();
 	}
 
 }

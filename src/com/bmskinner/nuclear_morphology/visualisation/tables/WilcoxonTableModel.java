@@ -28,6 +28,7 @@ public class WilcoxonTableModel extends AbstractTableModel {
 
 	public WilcoxonTableModel(@Nullable List<IAnalysisDataset> datasets, @Nullable List<WilcoxDatasetResult> results) {
 
+		super();
 		if (datasets == null || datasets.isEmpty() || results == null || results.isEmpty()) {
 			colNames = new String[] { EMPTY_STRING };
 			rowData = new String[1][colNames.length];

@@ -57,6 +57,11 @@ public class UIController {
 			l.consensusUpdated(d);
 	}
 
+	public void fireConsensusNucleusFillStateChanged() {
+		for (ConsensusUpdatedListener l : consensusListeners)
+			l.consensusFillStateUpdated();
+	}
+
 	public void addNuclearSignalUpdatedListener(NuclearSignalUpdatedListener l) {
 		nuclearSignalListeners.add(l);
 	}

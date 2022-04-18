@@ -106,8 +106,7 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 	private static final String HELP_MENU_LBL = "Help";
 	private static final String TASK_MONITOR_ITEM_LBL = "Task monitor";
 	private static final String FILL_CONSENSUS_ITEM_LBL = "Fill consensus";
-	private static final String ANTIALIAS_ITEM_LBL = "Antialias charts";
-	private static final String SWATCH_ITEM_LBL = "Swatch";
+	private static final String SWATCH_ITEM_LBL = "Colour palette";
 	private static final String SCALE_ITEM_LBL = "Scale";
 
 	private static final String OPEN_CONFIG_FILE_LBL = "Open config file";
@@ -253,21 +252,13 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 		}
 		menu.add(swatchMenu);
 
-//		JCheckBoxMenuItem fillConsensusItem = new JCheckBoxMenuItem(FILL_CONSENSUS_ITEM_LBL,
-//				GlobalOptions.getInstance().isFillConsensus());
-//		fillConsensusItem.addActionListener(e -> {
-//			GlobalOptions.getInstance().setFillConsensus(fillConsensusItem.isSelected());
-//			ih.fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
-//		});
-//		menu.add(fillConsensusItem);
-//
-//		JCheckBoxMenuItem antialiasItem = new JCheckBoxMenuItem(ANTIALIAS_ITEM_LBL,
-//				GlobalOptions.getInstance().isAntiAlias());
-//		fillConsensusItem.addActionListener(e -> {
-//			GlobalOptions.getInstance().setAntiAlias(antialiasItem.isSelected());
-//			ih.fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
-//		});
-//		menu.add(antialiasItem);
+		JCheckBoxMenuItem fillConsensusItem = new JCheckBoxMenuItem(FILL_CONSENSUS_ITEM_LBL,
+				GlobalOptions.getInstance().isFillConsensus());
+		fillConsensusItem.addActionListener(e -> {
+			GlobalOptions.getInstance().setFillConsensus(fillConsensusItem.isSelected());
+			UIController.getInstance().fireConsensusNucleusFillStateChanged();
+		});
+		menu.add(fillConsensusItem);
 
 		JCheckBoxMenuItem monitorItem = new JCheckBoxMenuItem(TASK_MONITOR_ITEM_LBL, false);
 		monitorItem.addActionListener(e -> monitorPanel.setVisible(!monitorPanel.isVisible()));
