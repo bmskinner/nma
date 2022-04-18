@@ -17,7 +17,10 @@
 package com.bmskinner.nuclear_morphology.analysis.profiles;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -31,7 +34,6 @@ import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 /**
@@ -50,6 +52,7 @@ public class RepresentativeMedianFinder {
 
 	private static final Logger LOGGER = Logger.getLogger(RepresentativeMedianFinder.class.getName());
 
+	private static final int SAMPLE_LIMIT = 2000;
 	private final ICellCollection collection;
 	private final List<Nucleus> nuclei;
 
@@ -60,7 +63,50 @@ public class RepresentativeMedianFinder {
 	 */
 	public RepresentativeMedianFinder(@NonNull ICellCollection c) {
 		collection = c;
-		nuclei = new ArrayList<>(collection.getNuclei());
+		// We need consistent ordering, but a random sample of at least
+		// 200 nuclei (if present) should be enough
+//		nuclei = getSubList(new ArrayList<>(collection.getNuclei()));
+		nuclei = conventionalSelectN(new ArrayList<>(collection.getNuclei()), SAMPLE_LIMIT);
+	}
+
+	/**
+	 * Get a random subset of the collection's nuclei, to a maximum of
+	 * {@code SAMPLE_LIMIT}
+	 * 
+	 * @param n
+	 * @return
+	 */
+	private List<Nucleus> getSubList(List<Nucleus> n) {
+		if (n.size() <= SAMPLE_LIMIT)
+			return n;
+		Collections.shuffle(n);
+		return n.subList(0, 200);
+	}
+
+	/**
+	 * Get a random sample from a collection of the given size. Uses Knuth's
+	 * Algorithm S
+	 * 
+	 * @see https://stackoverflow.com/questions/28651908/perform-operation-on-n-random-distinct-elements-from-collection-using-streams-ap/28655112#28655112
+	 * @param <E>
+	 * @param coll
+	 * @param remain
+	 * @return
+	 */
+	private static <E> List<E> conventionalSelectN(Collection<? extends E> coll, int remain) {
+		assert remain <= coll.size();
+		int total = coll.size();
+		List<E> result = new ArrayList<>(remain);
+		Random random = new Random();
+
+		for (E e : coll) {
+			if (random.nextInt(total--) < remain) {
+				remain--;
+				result.add(e);
+			}
+		}
+
+		return result;
 	}
 
 	/**
@@ -93,48 +139,6 @@ public class RepresentativeMedianFinder {
 	}
 
 	/**
-	 * Find the median from the subset of the dataset with greatest similarity to
-	 * the existing collection median
-	 * 
-	 * @return
-	 * @throws MissingLandmarkException
-	 * @throws MissingProfileException
-	 * @throws ProfileException
-	 */
-	public IProfile findCollectionMedian() throws MissingLandmarkException, MissingProfileException, ProfileException {
-
-		try {
-
-			IProfile template = collection.getProfileCollection().getProfile(ProfileType.ANGLE,
-					Landmark.REFERENCE_POINT, Stats.MEDIAN);
-
-			float[] differences = calculateDistancesToTemplate(template);
-
-			// The column with the lowest stdev has the largest number of similar nuclei
-			int index = findIndexOfLowestValue(differences);
-			float lowest = differences[index];
-			LOGGER.finer("Lowest difference index is " + index + " with value " + lowest);
-
-			// Get this best profile
-			IProfile bestProfile = nuclei.get(index).getUnsegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
-
-			List<IProfile> profiles = findBestProfiles(bestProfile);
-
-			// We can't build a median out of zero profiles
-
-			// Subset the collection to nuclei with a difference lower than the lower
-			// quartile of the variability
-			// Return the median profile of this subset
-			return buildMedianFromProfiles(profiles, collection.getMedianArrayLength());
-
-		} catch (MissingLandmarkException | MissingProfileException | ProfileException e) {
-			LOGGER.log(Loggable.STACK, "Error creating matrix, returning default median", e);
-			return collection.getProfileCollection().getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT,
-					Stats.MEDIAN);
-		}
-	}
-
-	/**
 	 * Find the profiles in the collection that have a below median difference to
 	 * the target profile
 	 * 
@@ -144,7 +148,7 @@ public class RepresentativeMedianFinder {
 	 * @throws MissingProfileException
 	 * @throws ProfileException
 	 */
-	public List<IProfile> findBestProfiles(@NonNull IProfile target)
+	private List<IProfile> findBestProfiles(@NonNull IProfile target)
 			throws MissingLandmarkException, MissingProfileException, ProfileException {
 		float[] differences = calculateDistancesToTemplate(target);
 		float medianDiff = Stats.quartile(differences, Stats.MEDIAN);
@@ -194,7 +198,7 @@ public class RepresentativeMedianFinder {
 
 	private float[] calculateDistancesToTemplate(IProfile template)
 			throws MissingLandmarkException, MissingProfileException, ProfileException {
-		float[] result = new float[collection.getNucleusCount()];
+		float[] result = new float[nuclei.size()];
 		for (int i = 0; i < result.length; i++) {
 			result[i] = (float) nuclei.get(i).getUnsegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT)
 					.absoluteSquareDifference(template);
@@ -224,13 +228,16 @@ public class RepresentativeMedianFinder {
 //		}
 
 		// Handle the two diagonals of the matrix simultaneously
-		for (int i = 0, k = nuclei.size() - 1; i < nuclei.size() / 2; i++, k--) {
+		for (int i = 0; i < nuclei.size(); i++) {
 			IProfile pI = nuclei.get(i).getUnsegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
-			for (int j = 0, m = nuclei.size() - 1; j < nuclei.size() / 2; j++, m--) {
-				float v = (float) pI.absoluteSquareDifference(
-						nuclei.get(j).getUnsegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT));
-				matrix[i][j] = v;
-				matrix[m][k] = v;
+			for (int j = 0; j < nuclei.size(); j++) {
+				if (j <= i) {
+					matrix[i][j] = matrix[j][i];
+				} else {
+					float v = (float) pI.absoluteSquareDifference(
+							nuclei.get(j).getUnsegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT));
+					matrix[i][j] = v;
+				}
 			}
 		}
 		return matrix;
