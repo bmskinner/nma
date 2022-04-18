@@ -193,6 +193,11 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	 * @param a the template component
 	 */
 	protected DefaultCellularComponent(@NonNull CellularComponent a) {
+
+		if (!(a instanceof DefaultCellularComponent))
+			throw new IllegalArgumentException("Input is incorrect class: " + a.getClass().getName());
+		DefaultCellularComponent other = (DefaultCellularComponent) a;
+
 		this.id = UUID.fromString(a.getID().toString());
 		this.xBase = a.getXBase();
 		this.yBase = a.getYBase();
@@ -206,16 +211,18 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 			setMeasurement(stat, a.getMeasurement(stat, MeasurementScale.PIXELS));
 		}
 
-		if (!(a instanceof DefaultCellularComponent))
-			throw new IllegalArgumentException("Input is incorrect class: " + a.getClass().getName());
-
-		DefaultCellularComponent other = (DefaultCellularComponent) a;
-
 		this.xpoints = Arrays.copyOf(other.xpoints, other.xpoints.length);
 		this.ypoints = Arrays.copyOf(other.ypoints, other.ypoints.length);
 		this.isReversed = a.isReversed();
 
-		makeBorderList();
+		borderList = new IPoint[other.borderList.length];
+
+		for (int i = 0; i < borderList.length; i++)
+			borderList[i] = other.borderList[i].duplicate();
+
+		updateBounds();
+
+//		makeBorderList();
 	}
 
 	/**
