@@ -28,9 +28,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.table.TableModel;
 
-import org.eclipse.jdt.annotation.NonNull;
-
-import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 import com.bmskinner.nuclear_morphology.gui.tabs.TableDetailPanel;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -44,7 +41,7 @@ public class VennDetailPanel extends TableDetailPanel {
 	private static final Logger LOGGER = Logger.getLogger(VennDetailPanel.class.getName());
 
 	private static final String PANEL_TITLE_LBL = "Venn";
-	private static final String HEADER_LBL = "Shows the percentage of each row's cells shared with each column";
+	private static final String HEADER_LBL = "Shows the percentage of cells in each dataset column shared with each other dataset";
 	private JPanel mainPanel = new JPanel();
 
 	private ExportableTable vennTable;

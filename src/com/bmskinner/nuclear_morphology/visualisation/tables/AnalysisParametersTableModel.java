@@ -9,8 +9,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.table.AbstractTableModel;
-
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
@@ -20,14 +18,9 @@ import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.io.Io;
 
-public class AnalysisParametersTableModel extends AbstractTableModel {
+public class AnalysisParametersTableModel extends DatasetTableModel {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 8838655134490670910L;
-
-	protected static final String EMPTY_STRING = "";
 
 	private static final List<String> DEFAULT_ROW_NAMES = List.of(Labels.AnalysisParameters.IMAGE_PREPROCESSING,
 			Labels.AnalysisParameters.NUCLEUS_DETECTION, Labels.AnalysisParameters.NUCLEUS_SIZE,
@@ -89,19 +82,13 @@ public class AnalysisParametersTableModel extends AbstractTableModel {
 		}
 	}
 
-	private void makeEmptyTable() {
+	@Override
+	protected void makeEmptyTable() {
 		colNames = new String[] { EMPTY_STRING };
 		rowData = new String[1][colNames.length];
 		for (int c = 0; c < colNames.length; c++) {
 			rowData[0][c] = EMPTY_STRING;
 		}
-	}
-
-	private String[] makeColNames(@NonNull List<IAnalysisDataset> datasets) {
-		List<String> names = new ArrayList<>();
-		names.add(EMPTY_STRING);
-		names.addAll(datasets.stream().map(IAnalysisDataset::getName).toList());
-		return names.toArray(new String[0]);
 	}
 
 	private String createImagePreprocessingString(@NonNull IAnalysisDataset dataset) {

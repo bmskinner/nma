@@ -16,12 +16,7 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.visualisation.tables;
 
-import java.io.File;
 import java.text.DecimalFormat;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -62,7 +57,6 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.ConfidenceInterval;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 import com.bmskinner.nuclear_morphology.stats.Stats.WilcoxonRankSumResult;
-import com.bmskinner.nuclear_morphology.visualisation.options.AbstractOptions;
 import com.bmskinner.nuclear_morphology.visualisation.options.TableOptions;
 
 /**
@@ -317,8 +311,8 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 				List<IAnalysisDataset> l = new ArrayList<>(dataset.getAllMergeSources());
 
 				Optional<IAnalysisOptions> o = l.get(0).getAnalysisOptions();
-				if (o.isPresent())
-					dataList = createAnalysisParametersColumn(dataset, o.get());
+//				if (o.isPresent())
+//					dataList = createAnalysisParametersColumn(dataset, o.get());
 
 			} else {
 				return makeStringList(Labels.NA_MERGE, 9);
@@ -343,131 +337,47 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 	 *                null.
 	 * @return
 	 */
-	private List<Object> createAnalysisParametersColumn(@NonNull IAnalysisDataset dataset,
-			@Nullable IAnalysisOptions options) {
-
-		int numberOfRows = 9;
-		List<Object> dataList = new ArrayList<>();
-		Optional<IAnalysisOptions> optOptions = dataset.getAnalysisOptions();
-		if (options == null && !optOptions.isPresent())
-			return makeStringList("Error - no options present", numberOfRows);
-
-		// If no options were supplied, use the dataset's own options
-		options = options == null ? optOptions.get() : options;
-		String folder;
-
-		Optional<HashOptions> nO = options.getDetectionOptions(CellularComponent.NUCLEUS);
-
-		if (!nO.isPresent()) {
-			LOGGER.log(Loggable.STACK, "No nucleus options in dataset " + dataset.getName());
-			return makeStringList("Error", numberOfRows);
-		}
-
-		if (dataset.hasMergeSources()) {
-			folder = Labels.NA_MERGE;
-		} else {
-			File optionsFolder = new File(nO.get().getString(HashOptions.DETECTION_FOLDER));
-			folder = optionsFolder.getAbsolutePath();
-		}
-
-		dataList.add(createImagePreprocessingString(nO.get()));
-		dataList.add(createNucleusEdgeDetectionString(nO.get()));
-		dataList.add(createNucleusSizeFilterString(nO.get()));
-		dataList.add(createNucleusCircFilterString(nO.get()));
-		dataList.add(createAnalysisRunTimeString(options));
-		dataList.add(folder);
-		dataList.add(options.getRuleSetCollection().getName());
-		dataList.add(options.getProfileWindowProportion());
-		dataList.add(dataset.getVersionCreated().toString());
-
-		if (this.options.getBoolean(AbstractOptions.SHOW_RECOVER_MERGE_SOURCE_KEY))
-			dataList.add(dataset);
-		return dataList;
-	}
-
-	private String createImagePreprocessingString(@Nullable HashOptions options) {
-		StringBuilder builder = new StringBuilder();
-		if (options == null) {
-			builder.append(Labels.NA);
-			return builder.toString();
-		}
-
-		if (options.getBoolean(HashOptions.IS_USE_KUWAHARA))
-			builder.append("Kuwahara kernel: " + options.getInt(HashOptions.KUWAHARA_RADIUS_INT) + Io.NEWLINE);
-		if (options.getBoolean(HashOptions.IS_USE_FLATTENING))
-			builder.append("Flattening threshold: " + options.getInt(HashOptions.FLATTENING_THRESHOLD_INT));
-		return builder.toString();
-	}
-
-	private String createNucleusEdgeDetectionString(@Nullable HashOptions nucleusOptions) {
-		StringBuilder builder = new StringBuilder();
-		if (nucleusOptions == null)
-			return builder.toString();
-
-		boolean isCanny = nucleusOptions.getBoolean(HashOptions.IS_USE_CANNY);
-		if (isCanny) {
-			builder.append("Canny edge detection" + Io.NEWLINE);
-
-			if (nucleusOptions.getBoolean(HashOptions.CANNY_IS_AUTO_THRESHOLD)) {
-				builder.append("Auto-threshold" + Io.NEWLINE);
-			} else {
-				builder.append(
-						"Low threshold: " + nucleusOptions.getFloat(HashOptions.CANNY_LOW_THRESHOLD_FLT) + Io.NEWLINE);
-				builder.append("High threshold: " + nucleusOptions.getFloat(HashOptions.CANNY_HIGH_THRESHOLD_FLT)
-						+ Io.NEWLINE);
-			}
-			builder.append(
-					"Kernel radius: " + nucleusOptions.getFloat(HashOptions.CANNY_KERNEL_RADIUS_FLT) + Io.NEWLINE);
-			builder.append("Kernel width: " + nucleusOptions.getInt(HashOptions.CANNY_KERNEL_WIDTH_INT) + Io.NEWLINE);
-			builder.append("Closing radius: " + nucleusOptions.getInt(HashOptions.CANNY_CLOSING_RADIUS_INT));
-		} else {
-			builder.append("Threshold: " + nucleusOptions.getInt(HashOptions.THRESHOLD));
-		}
-		return builder.toString();
-	}
-
-	private String createNucleusSizeFilterString(@Nullable HashOptions nucleusOptions) {
-		StringBuilder builder = new StringBuilder();
-		if (nucleusOptions == null) {
-			builder.append(Labels.NA);
-			return builder.toString();
-		}
-		builder.append("Min pixels: " + nucleusOptions.getInt(HashOptions.MIN_SIZE_PIXELS) + Io.NEWLINE + "Max pixels: "
-				+ nucleusOptions.getInt(HashOptions.MAX_SIZE_PIXELS));
-		return builder.toString();
-	}
-
-	private String createNucleusCircFilterString(@Nullable HashOptions nucleusOptions) {
-		StringBuilder builder = new StringBuilder();
-		DecimalFormat formatter = new DecimalFormat("#.##");
-		if (nucleusOptions == null) {
-			builder.append(Labels.NA);
-			return builder.toString();
-		}
-		builder.append("Min: " + formatter.format(nucleusOptions.getDouble(HashOptions.MIN_CIRC)) + Io.NEWLINE + "Max: "
-				+ formatter.format(nucleusOptions.getDouble(HashOptions.MAX_CIRC)));
-		return builder.toString();
-	}
-
-	private String createAnalysisRunTimeString(@Nullable IAnalysisOptions analysisOptions) {
-		StringBuilder builder = new StringBuilder();
-		if (analysisOptions == null) {
-			builder.append(Labels.NA);
-			return builder.toString();
-		}
-		long analysisTime = analysisOptions.getAnalysisTime();
-		if (analysisTime > 0) { // stored from 1.14.0
-			Instant inst = Instant.ofEpochMilli(analysisTime);
-			LocalDateTime anTime = LocalDateTime.ofInstant(inst, ZoneOffset.systemDefault());
-
-			String date = anTime.format(DateTimeFormatter.ofPattern("dd MMMM YYYY"));
-			String time = anTime.format(DateTimeFormatter.ofPattern("HH:mm:ss"));
-			builder.append(date + Io.NEWLINE + time);
-		} else { // fall back to folder name method
-			builder.append(Labels.NA);
-		}
-		return builder.toString();
-	}
+//	private List<Object> createAnalysisParametersColumn(@NonNull IAnalysisDataset dataset,
+//			@Nullable IAnalysisOptions options) {
+//
+//		int numberOfRows = 9;
+//		List<Object> dataList = new ArrayList<>();
+//		Optional<IAnalysisOptions> optOptions = dataset.getAnalysisOptions();
+//		if (options == null && !optOptions.isPresent())
+//			return makeStringList("Error - no options present", numberOfRows);
+//
+//		// If no options were supplied, use the dataset's own options
+//		options = options == null ? optOptions.get() : options;
+//		String folder;
+//
+//		Optional<HashOptions> nO = options.getDetectionOptions(CellularComponent.NUCLEUS);
+//
+//		if (!nO.isPresent()) {
+//			LOGGER.log(Loggable.STACK, "No nucleus options in dataset " + dataset.getName());
+//			return makeStringList("Error", numberOfRows);
+//		}
+//
+//		if (dataset.hasMergeSources()) {
+//			folder = Labels.NA_MERGE;
+//		} else {
+//			File optionsFolder = new File(nO.get().getString(HashOptions.DETECTION_FOLDER));
+//			folder = optionsFolder.getAbsolutePath();
+//		}
+//
+//		dataList.add(createImagePreprocessingString(nO.get()));
+//		dataList.add(createNucleusEdgeDetectionString(nO.get()));
+//		dataList.add(createNucleusSizeFilterString(nO.get()));
+//		dataList.add(createNucleusCircFilterString(nO.get()));
+//		dataList.add(createAnalysisRunTimeString(options));
+//		dataList.add(folder);
+//		dataList.add(options.getRuleSetCollection().getName());
+//		dataList.add(options.getProfileWindowProportion());
+//		dataList.add(dataset.getVersionCreated().toString());
+//
+//		if (this.options.getBoolean(AbstractOptions.SHOW_RECOVER_MERGE_SOURCE_KEY))
+//			dataList.add(dataset);
+//		return dataList;
+//	}
 
 	private List<Object> makeStringList(String s, int rows) {
 		List<Object> dataList = new ArrayList<>();
@@ -475,9 +385,6 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 			dataList.add(s);
 		}
 		return dataList;
-//    	Object[] err = new Object[rows];
-//        Arrays.fill(err, 0, rows-1, "Error");
-//        return err;
 	}
 
 	/**
@@ -492,67 +399,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 		if (!options.hasDatasets()) {
 			return createBlankTable();
 		}
-
-		final String NUCLEUS_LABEL = "Nuclei";
-		final String[] valueLabels = { " median", " mean", " S.E.M.", " C.o.V.", " 95% CI" };
-
-		DefaultTableModel model = new DefaultTableModel();
-
-		List<IAnalysisDataset> list = options.getDatasets();
-
-		List<Object> columnData = new ArrayList<>();
-		columnData.add(NUCLEUS_LABEL);
-		for (Measurement stat : Measurement.getNucleusStats()) {
-			for (String value : valueLabels) {
-				String unitLabel = stat.isDimensionless() ? ""
-						: " (" + Measurement.units(options.getScale(), stat.getDimension()) + ")";
-				columnData.add(stat + value + unitLabel);
-			}
-		}
-
-		model.addColumn(EMPTY_STRING, columnData.toArray());
-
-		for (IAnalysisDataset dataset : list) {
-			List<Object> datasetData = createDatasetStatsTableColumn(dataset, options.getScale());
-			model.addColumn(dataset.getName(), datasetData.toArray());
-		}
-
-		return model;
-	}
-
-	private List<Object> createDatasetStatsTableColumn(@NonNull IAnalysisDataset dataset, MeasurementScale scale) {
-
-		// format the numbers and make into a tablemodel
-		DecimalFormat pf = new DecimalFormat(DEFAULT_PROBABILITY_FORMAT);
-
-		ICellCollection collection = dataset.getCollection();
-
-		List<Object> datasetData = new ArrayList<>();
-
-		datasetData.add(collection.size());
-
-		DecimalFormat df = new DecimalFormat(DEFAULT_DECIMAL_FORMAT);
-		for (Measurement stat : Measurement.getNucleusStats()) {
-			double[] stats = collection.getRawValues(stat, CellularComponent.NUCLEUS, scale);
-
-			double mean = DoubleStream.of(stats).average().orElse(0);
-			double sem = Stats.stderr(stats);
-			double cv = Stats.stdev(stats) / mean;
-
-			double median = Stats.quartile(stats, Stats.MEDIAN);
-
-			ConfidenceInterval ci = new ConfidenceInterval(stats, 0.95);
-			String ciString = df.format(mean) + " ± " + df.format(ci.getSize().doubleValue());
-
-			datasetData.add(df.format(median));
-			datasetData.add(df.format(mean));
-			datasetData.add(df.format(sem));
-			datasetData.add(df.format(cv));
-			datasetData.add(ciString);
-		}
-
-		return datasetData;
-
+		return new NucleusMeasurementsTableModel(options.getDatasets());
 	}
 
 	public TableModel createVennTable() {
@@ -565,48 +412,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 			return createBlankTable();
 		}
 
-		DefaultTableModel model = new DefaultTableModel();
-
-		List<IAnalysisDataset> list = options.getDatasets();
-
-		// set rows
-		Object[] columnData = new Object[list.size()];
-		int row = 0;
-		for (IAnalysisDataset dataset : list) {
-			columnData[row++] = dataset.getName();
-		}
-		model.addColumn(Labels.DATASET, columnData);
-
-		DecimalFormat df = new DecimalFormat(DEFAULT_DECIMAL_FORMAT);
-
-		for (IAnalysisDataset dataset : list) {
-
-			Object[] popData = new Object[list.size()];
-
-			int i = 0;
-			for (IAnalysisDataset dataset2 : list) {
-
-				String valueString = "";
-
-				if (!dataset2.getId().equals(dataset.getId())) {
-
-					int shared = dataset.getCollection().countShared(dataset2);
-
-					int d2size = dataset2.getCollection().size();
-
-					double pct = ((double) shared / (double) d2size) * 100;
-					if (d2size == 0) {
-						pct = 0;
-					}
-
-					valueString = df.format(pct) + "%";
-				}
-
-				popData[i++] = valueString;
-			}
-			model.addColumn(dataset.getName(), popData);
-		}
-		return model;
+		return new VennTableModel(options.getDatasets());
 	}
 
 	/**
