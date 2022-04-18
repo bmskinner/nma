@@ -55,11 +55,11 @@
 			</testResource>
 		</testResources>
 
-		
+
 		<pluginManagement>
 			<plugins>
-			
-			<!-- Tell eclipse how to handle the timestamp plugin -->
+
+				<!-- Tell eclipse how to handle the timestamp plugin -->
 				<plugin>
 					<groupId>org.eclipse.m2e</groupId>
 					<artifactId>lifecycle-mapping</artifactId>
@@ -227,7 +227,7 @@
 						</configuration>
 					</execution>
 
-				<!-- Copy jpackage script from templates into scripts -->
+					<!-- Copy jpackage script from templates into scripts -->
 					<execution>
 						<id>jpackage-script</id>
 						<phase>process-resources</phase>
@@ -258,8 +258,8 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.5.1</version>
 				<configuration>
-					<source>1.8</source>
-					<target>1.8</target>
+					<source>16</source>
+					<target>16</target>
 				</configuration>
 			</plugin>
 
@@ -274,27 +274,6 @@
 					<excludes>
 					</excludes>
 				</configuration>
-			</plugin>
-			
-			<!-- Copy project dependencies to new folder -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-dependency-plugin</artifactId>
-				<version>2.5.1</version>
-				<executions>
-					<execution>
-						<id>copy-dependencies</id>
-						<phase>package</phase>
-						<goals>
-							<goal>copy-dependencies</goal>
-						</goals>
-						<configuration>
-							<!-- exclude junit, we need runtime dependency only -->
-							<includeScope>runtime</includeScope>
-							<outputDirectory>${project.build.directory}/lib</outputDirectory>
-						</configuration>
-					</execution>
-				</executions>
 			</plugin>
 
 			<!-- Create a jar with the dependencies included as a standalone version -->
@@ -325,49 +304,21 @@
 				</executions>
 			</plugin>
 
-
-			<!-- Use Launch4J to create an exe file for Windows standalone version -->
-
+			<!-- Run a bat file to jpackage the jar into an appimage -->
 			<plugin>
-				<groupId>com.akathist.maven.plugins.launch4j</groupId>
-				<artifactId>launch4j-maven-plugin</artifactId>
-				<version>2.1.2</version>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>exec-maven-plugin</artifactId>
+				<version>1.2.1</version>
 				<executions>
 					<execution>
-						<id>l4j-gui</id>
-						<phase>package</phase>
+						<id>make-appimage</id>
+						<phase>verify</phase>
 						<goals>
-							<goal>launch4j</goal>
+							<goal>exec</goal>
 						</goals>
 						<configuration>
-							<headerType>gui</headerType>
-							<jar>${project.build.directory}/standalone/${jar.finalName}_standalone.jar</jar>
-							<outfile>${project.build.directory}/${jar.finalName}.exe</outfile>
-							<downloadUrl>http://java.com/download</downloadUrl>
-							<classPath>
-								<mainClass>com.bmskinner.nuclear_morphology.core.Nuclear_Morphology_Analysis</mainClass>
-							</classPath>
-							<jre>
-								<bundledJre64Bit>false</bundledJre64Bit>
-								<bundledJreAsFallback>false</bundledJreAsFallback>
-								<minVersion>1.8.0</minVersion>
-								<jdkPreference>preferJdk</jdkPreference>
-								<runtimeBits>64/32</runtimeBits>
-								<initialHeapPercent>5</initialHeapPercent>
-								<maxHeapPercent>80</maxHeapPercent>
-							</jre>
-							<versionInfo>
-								<fileVersion>${project.version}.0</fileVersion>
-								<txtFileVersion>${project.version}${version.suffix}</txtFileVersion>
-								<fileDescription>Biological analysis software for nuclear shape</fileDescription>
-								<productVersion>${project.version}.0</productVersion>
-								<txtProductVersion>${project.version}${version.suffix}</txtProductVersion>
-								<productName>${project.full.name}</productName>
-								<originalFilename>${jar.finalName}.exe</originalFilename>
-								<copyright>Ben Skinner ${project.inceptionYear}-${build.year}</copyright>
-								<internalName>${project.full.name}</internalName>
-								<language>ENGLISH_UK</language>
-							</versionInfo>
+							<executable>${project.basedir}/scripts/packageAppImage.bat</executable>
+							<workingDirectory>${project.basedir}/scripts</workingDirectory>
 						</configuration>
 					</execution>
 				</executions>
@@ -378,25 +329,6 @@
 
 	<reporting>
 		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-checkstyle-plugin</artifactId>
-				<version>3.1.2</version>
-				<reportSets>
-					<reportSet>
-						<reports>
-							<report>checkstyle</report>
-						</reports>
-					</reportSet>
-				</reportSets>
-			</plugin>
-
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-pmd-plugin</artifactId>
-				<version>3.16.0</version>
-			</plugin>
-
 		</plugins>
 	</reporting>
 
