@@ -64,8 +64,7 @@ public class DefaultProfile implements IProfile {
 	 * @param p the profile to copy
 	 */
 	public DefaultProfile(@NonNull final IProfile p) {
-		if (p instanceof DefaultProfile) {
-			DefaultProfile other = (DefaultProfile) p;
+		if (p instanceof DefaultProfile other) {
 			this.array = Arrays.copyOf(other.array, other.array.length);
 		} else {
 			this.array = p.toFloatArray();
@@ -83,10 +82,8 @@ public class DefaultProfile implements IProfile {
 
 		if (length < 1)
 			throw new IllegalArgumentException("Profile length cannot be less than 1");
-
 		this.array = new float[length];
-		for (int i = 0; i < this.array.length; i++)
-			array[i] = value;
+		Arrays.fill(array, value);
 	}
 
 	/**
@@ -258,49 +255,27 @@ public class DefaultProfile implements IProfile {
 	 * @param length the new length
 	 * @return
 	 */
-	private static float[] interpolate(float[] array2, int length) {
-		if (array2.length == length)
-			return array2;
+	private static float[] interpolate(float[] a, int length) {
+		if (a.length == length)
+			return a;
 
 		float[] result = new float[length];
 
+		float r = (float) a.length / length; // ratio of size difference
+
 		for (int i = 0; i < length; i++) {
-			float fraction = ((float) i / (float) length); // get the fractional index
-			result[i] = getInterpolatedValue(array2, fraction);
+			float j = i * r; // index to copy from
+			int j0 = (int) j;
+			if (j0 == a.length)
+				j0 = 0;
+			int j1 = j0 + 1;
+			if (j1 == a.length)
+				j1 = 0;
+			float f = j - j0;
+			result[i] = a[j0] + ((a[j1] - a[j0]) * f);
 		}
 		return result;
-	}
 
-	/**
-	 * Get the interpolated value at the given fraction along the given array
-	 * 
-	 * @param a
-	 * @param fraction the fraction, from 0-1
-	 * @return
-	 */
-	private static float getInterpolatedValue(float[] a, float fraction) {
-		if (fraction == 0)
-			return a[0];
-		if (fraction == 1)
-			return a[a.length - 1];
-
-		double index = fraction * a.length;
-
-		int i0 = (int) index;
-		// Get the integer portion and find the bounding indices
-
-		if (i0 == a.length) // only wrap possible if fraction is range 0-1
-			i0 = 0;
-
-		int i1 = i0 + 1;
-		if (i1 == a.length) // only wrap possible if fraction is range 0-1
-			i1 = 0;
-
-		// Find the fraction between the indices
-		double f = index - i0;
-
-		// Calculate the linear interpolation
-		return (float) (a[i0] + ((a[i1] - a[i0]) * f));
 	}
 
 	@Override
@@ -318,7 +293,7 @@ public class DefaultProfile implements IProfile {
 
 	@Override
 	public IProfile startFrom(int j) throws ProfileException {
-		if (j < 0)
+		if (j < 0 || j >= array.length)
 			j = wrapIndex(j, array.length);
 		float[] newArray = new float[array.length];
 		System.arraycopy(array, j, newArray, 0, array.length - j);
