@@ -276,9 +276,6 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
 					continue;
 				}
 
-				String secondaryName = options.firstDataset().getCollection().getSignalGroup(secondaryID).get()
-						.getGroupName();
-
 				List<Double> values = ps.getValues(primaryID, secondaryID);
 
 				if (values == null) {

@@ -47,11 +47,12 @@ public class NucleusMeasurementsTableModel extends DatasetTableModel {
 
 		rowData = new String[rowCount][colCount];
 		for (int r = 0; r < rowCount; r += DEFAULT_ROW_NAMES.size()) {
-			Measurement m = stats.get(r % DEFAULT_ROW_NAMES.size());
+			Measurement m = stats.get(r / DEFAULT_ROW_NAMES.size());
+
 			for (int c = 0; c < colCount; c++) {
 				if (c == 0) {
 					for (int k = 0; k < rowNames.size(); k++)
-						rowData[k][c] = rowNames.get(k);
+						rowData[k][0] = rowNames.get(k);
 					continue;
 				}
 

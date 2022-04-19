@@ -31,13 +31,13 @@ import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.SingleDatasetAnalysisMethod;
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.UnavailableBorderPointException;
+import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.cells.Nucleus;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.datasets.VirtualDataset;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
-import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.signals.DefaultSignalGroup;
 import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalCollection;
@@ -49,192 +49,193 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Method to detect nuclear signals in a dataset
+ * 
  * @author bms41
  * @since 1.13.4
  *
  */
 public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
-	
+
 	private static final Logger LOGGER = Logger.getLogger(SignalDetectionMethod.class.getName());
 
-    protected final HashOptions options;
-    protected final File folder;
-    protected final int channel;
+	protected final HashOptions options;
+	protected final File folder;
+	protected final int channel;
 
-    /**
-     * For use when running on an existing dataset
-     * 
-     * @param d the dataset to add signals to
-     * @param options the analysis options
-     * @param group the signal group to add signals to
-     * @throws UnavailableSignalGroupException if the group is not present in the dataset
-     */
+	/**
+	 * For use when running on an existing dataset
+	 * 
+	 * @param d       the dataset to add signals to
+	 * @param options the analysis options
+	 * @param group   the signal group to add signals to
+	 * @throws UnavailableSignalGroupException if the group is not present in the
+	 *                                         dataset
+	 */
 
-    public SignalDetectionMethod(@NonNull final IAnalysisDataset d, @NonNull final HashOptions options) {
-        super(d);
-        
-        if(!d.getAnalysisOptions().isPresent())
-        	throw new IllegalArgumentException("No analysis options in dataset");
-        
-        if(!options.hasString(HashOptions.SIGNAL_DETECTION_MODE_KEY))
-        	throw new IllegalArgumentException("Signal options are not complete");
+	public SignalDetectionMethod(@NonNull final IAnalysisDataset d, @NonNull final HashOptions options) {
+		super(d);
 
-        this.options = options.duplicate();
-        this.folder  = options.getFile(HashOptions.DETECTION_FOLDER).getAbsoluteFile();
-        this.channel = options.getInt(HashOptions.CHANNEL);
+		if (!d.getAnalysisOptions().isPresent())
+			throw new IllegalArgumentException("No analysis options in dataset");
 
-        // Create a signal group in the dataset
-        ISignalGroup group = new DefaultSignalGroup(options.getString(HashOptions.SIGNAL_GROUP_NAME), 
-        		options.getUUID(HashOptions.SIGNAL_GROUP_ID));
-        // Set the default colour for the signal group
-        Color colour = ColourSelecter.getSignalColour(options.getInt(HashOptions.CHANNEL));
-        group.setGroupColour(colour);
-        
-        dataset.getCollection().addSignalGroup(group);
+		if (!options.hasString(HashOptions.SIGNAL_DETECTION_MODE_KEY))
+			throw new IllegalArgumentException("Signal options are not complete");
 
-        dataset.getAnalysisOptions().get().setNuclearSignalDetectionOptions(options);
-    }
+		this.options = options.duplicate();
+		this.folder = options.getFile(HashOptions.DETECTION_FOLDER).getAbsoluteFile();
+		this.channel = options.getInt(HashOptions.CHANNEL);
 
-    @Override
-    public IAnalysisResult call() throws Exception {
-        run();
-        postDetectionFilter();
-        return new DefaultAnalysisResult(dataset);
-    }
+		// Create a signal group in the dataset
+		ISignalGroup group = new DefaultSignalGroup(options.getString(HashOptions.SIGNAL_GROUP_NAME),
+				options.getUUID(HashOptions.SIGNAL_GROUP_ID));
+		// Set the default colour for the signal group
+		Color colour = ColourSelecter.getSignalColour(options.getInt(HashOptions.CHANNEL));
+		group.setGroupColour(colour);
 
-    protected void run() {
+		dataset.getCollection().addSignalGroup(group);
 
-    	LOGGER.fine("Beginning signal detection in channel " + channel);
+		dataset.getAnalysisOptions().get().setNuclearSignalDetectionOptions(options);
+	}
 
-    	int originalMinThreshold = options.getInt(HashOptions.THRESHOLD);
+	@Override
+	public IAnalysisResult call() throws Exception {
+		run();
+		postDetectionFilter();
+		return new DefaultAnalysisResult(dataset);
+	}
 
-    	SignalFinder finder = new SignalFinder(dataset.getAnalysisOptions().get(), options, dataset.getCollection());
+	protected void run() {
 
-    	dataset.getCollection().getCells().forEach(c-> detectInCell(c, finder, originalMinThreshold));
-    }
-    
-    
-    private void detectInCell(ICell c, SignalFinder finder, int originalMinThreshold){
-        // reset the min threshold for each cell
-        options.setInt(HashOptions.THRESHOLD, originalMinThreshold);
-        
-        for(Nucleus n : c.getNuclei())
-        	detectInNucleus(n, finder);
+		LOGGER.fine("Beginning signal detection in channel " + channel);
 
-        fireProgressEvent();
-    }
+		int originalMinThreshold = options.getInt(HashOptions.THRESHOLD);
 
-    
-    private void detectInNucleus(Nucleus n, SignalFinder finder){
+		SignalFinder finder = new SignalFinder(dataset.getAnalysisOptions().get(), options, dataset.getCollection());
 
-        LOGGER.finer( "Looking for signals associated with nucleus " + n.getSourceFileName() + "-"
-                + n.getNucleusNumber());
+		dataset.getCollection().getCells().forEach(c -> detectInCell(c, finder, originalMinThreshold));
+	}
 
-        // get the image in the folder with the same name as the
-        // nucleus source image
-        File imageFile = new File(folder, n.getSourceFileName());
-        LOGGER.finer( "Source file: " + imageFile.getAbsolutePath());
+	private void detectInCell(ICell c, SignalFinder finder, int originalMinThreshold) {
+		// reset the min threshold for each cell
+		options.setInt(HashOptions.THRESHOLD, originalMinThreshold);
 
-        try {
+		for (Nucleus n : c.getNuclei())
+			detectInNucleus(n, finder);
 
-            List<INuclearSignal> signals = finder.findInImage(imageFile, n);
-            
-            // No need to add a group to a nucleus if there were no signals
-            if(!signals.isEmpty()) {
+		fireProgressEvent();
+	}
 
-            	ISignalCollection signalCollection = n.getSignalCollection();
-            	signalCollection.addSignalGroup(signals, 
-            			options.getUUID(HashOptions.SIGNAL_GROUP_ID));
+	private void detectInNucleus(Nucleus n, SignalFinder finder) {
 
-            	// Measure the detected signals in the nucleus
-            	SignalAnalyser s = new SignalAnalyser();
-            	s.calculateSignalDistancesFromCoM(n);
-            	s.calculateFractionalSignalDistancesFromCoM(n);
+		LOGGER.finer(
+				"Looking for signals associated with nucleus " + n.getSourceFileName() + "-" + n.getNucleusNumber());
 
-            	LOGGER.finer("Calculating signal angles");
+		// get the image in the folder with the same name as the
+		// nucleus source image
+		File imageFile = new File(folder, n.getSourceFileName());
+		LOGGER.finer("Source file: " + imageFile.getAbsolutePath());
 
-            	if (n.hasLandmark(Landmark.ORIENTATION_POINT)) {
-            		n.calculateSignalAnglesFromPoint(n.getBorderPoint(Landmark.ORIENTATION_POINT));
-            	} else {
-            		n.calculateSignalAnglesFromPoint(n.getBorderPoint(Landmark.REFERENCE_POINT));
-            	}
+		try {
 
-            }
-        } catch (ImageImportException | UnavailableBorderPointException | MissingLandmarkException e) {
-            LOGGER.warning("Cannot open " + imageFile.getAbsolutePath());
-            LOGGER.log(Loggable.STACK, "Cannot load image", e);
-        }
-    }
-    
-    private void postDetectionFilter() {
+			List<INuclearSignal> signals = finder.findInImage(imageFile, n);
 
-        List<ICellCollection> signalPopulations = dividePopulationBySignals(dataset.getCollection(), 
-        		options.getUUID(HashOptions.SIGNAL_GROUP_ID));
+			// No need to add a group to a nucleus if there were no signals
+			if (!signals.isEmpty()) {
 
-        List<IAnalysisDataset> list = new ArrayList<>();
+				ISignalCollection signalCollection = n.getSignalCollection();
+				signalCollection.addSignalGroup(signals, options.getUUID(HashOptions.SIGNAL_GROUP_ID));
 
-        for (ICellCollection collection : signalPopulations) {
-            LOGGER.finer( "Processing " + collection.getName());
-            processSubPopulation(collection);
-            LOGGER.finer( "Processed " + collection.getName());
-            list.add(dataset.getChildDataset(collection.getId()));
-        }
+				// Measure the detected signals in the nucleus
+				SignalAnalyser s = new SignalAnalyser();
+				s.calculateSignalDistancesFromCoM(n);
+				s.calculateFractionalSignalDistancesFromCoM(n);
 
-        LOGGER.fine("Finished processing sub-populations");
-    }
+				LOGGER.finer("Calculating signal angles");
+				s.calculateSignalAngles(n);
 
-    /**
-     * Create child datasets for signal populations and perform basic analyses
-     * 
-     * @param collection
-     */
-    private void processSubPopulation(@NonNull ICellCollection collection) {
+//				if (n.hasLandmark(Landmark.ORIENTATION_POINT)) {
+//					n.calculateSignalAnglesFromPoint(n.getBorderPoint(Landmark.ORIENTATION_POINT));
+//				} else {
+//					n.calculateSignalAnglesFromPoint(n.getBorderPoint(Landmark.REFERENCE_POINT));
+//				}
 
-        try {
-            LOGGER.finer( "Creating new analysis dataset for " + collection.getName());
-
-            VirtualDataset subDataset = new VirtualDataset(dataset, collection.getName());
-            subDataset.addAll(collection);
-
-            dataset.addChildDataset(subDataset);
-            dataset.getCollection().getProfileManager().copySegmentsAndLandmarksTo(subDataset);
-
-        } catch (Exception e) {
-            LOGGER.log(Loggable.STACK, "Error processing signal group", e);
-        }
-    }
-
-    /**
-     * Create two child populations for the given dataset: one with signals in
-     * the given group, and one without signals
-     * 
-     * @param r the collection to split
-     * @param signalGroup the signal group to split on
-     * @return a list of new collections
-     */
-    private List<ICellCollection> dividePopulationBySignals(@NonNull ICellCollection r, @NonNull UUID signalGroup) {
-
-        List<ICellCollection> signalPopulations = new ArrayList<>();
-        LOGGER.fine("Dividing population by signals...");
-
-        Optional<ISignalGroup> og = r.getSignalGroup(signalGroup);
-        
-        if(!og.isPresent())
-        	return signalPopulations;
-        ISignalGroup group = og.get();
-        
-        group.setVisible(true);
-
-        List<ICell> list = r.getSignalManager().getCellsWithNuclearSignals(signalGroup, true);
-		
-		if (!list.isEmpty()) {
-		    LOGGER.fine("Signal group " + group.getGroupName() + ": found nuclei with signals");
-		    ICellCollection listCollection = new VirtualDataset(dataset,
-		            group.getGroupName() + "_with_signals", UUID.randomUUID());
-		    listCollection.addAll(list);
-		    signalPopulations.add(listCollection);
+			}
+		} catch (ImageImportException | UnavailableBorderPointException | MissingLandmarkException
+				| ComponentCreationException e) {
+			LOGGER.warning("Cannot open " + imageFile.getAbsolutePath());
+			LOGGER.log(Loggable.STACK, "Cannot load image", e);
 		}
-        return signalPopulations;
-    }
+	}
+
+	private void postDetectionFilter() {
+
+		List<ICellCollection> signalPopulations = dividePopulationBySignals(dataset.getCollection(),
+				options.getUUID(HashOptions.SIGNAL_GROUP_ID));
+
+		List<IAnalysisDataset> list = new ArrayList<>();
+
+		for (ICellCollection collection : signalPopulations) {
+			LOGGER.finer("Processing " + collection.getName());
+			processSubPopulation(collection);
+			LOGGER.finer("Processed " + collection.getName());
+			list.add(dataset.getChildDataset(collection.getId()));
+		}
+
+		LOGGER.fine("Finished processing sub-populations");
+	}
+
+	/**
+	 * Create child datasets for signal populations and perform basic analyses
+	 * 
+	 * @param collection
+	 */
+	private void processSubPopulation(@NonNull ICellCollection collection) {
+
+		try {
+			LOGGER.finer("Creating new analysis dataset for " + collection.getName());
+
+			VirtualDataset subDataset = new VirtualDataset(dataset, collection.getName());
+			subDataset.addAll(collection);
+
+			dataset.addChildDataset(subDataset);
+			dataset.getCollection().getProfileManager().copySegmentsAndLandmarksTo(subDataset);
+
+		} catch (Exception e) {
+			LOGGER.log(Loggable.STACK, "Error processing signal group", e);
+		}
+	}
+
+	/**
+	 * Create two child populations for the given dataset: one with signals in the
+	 * given group, and one without signals
+	 * 
+	 * @param r           the collection to split
+	 * @param signalGroup the signal group to split on
+	 * @return a list of new collections
+	 */
+	private List<ICellCollection> dividePopulationBySignals(@NonNull ICellCollection r, @NonNull UUID signalGroup) {
+
+		List<ICellCollection> signalPopulations = new ArrayList<>();
+		LOGGER.fine("Dividing population by signals...");
+
+		Optional<ISignalGroup> og = r.getSignalGroup(signalGroup);
+
+		if (!og.isPresent())
+			return signalPopulations;
+		ISignalGroup group = og.get();
+
+		group.setVisible(true);
+
+		List<ICell> list = r.getSignalManager().getCellsWithNuclearSignals(signalGroup, true);
+
+		if (!list.isEmpty()) {
+			LOGGER.fine("Signal group " + group.getGroupName() + ": found nuclei with signals");
+			ICellCollection listCollection = new VirtualDataset(dataset, group.getGroupName() + "_with_signals",
+					UUID.randomUUID());
+			listCollection.addAll(list);
+			signalPopulations.add(listCollection);
+		}
+		return signalPopulations;
+	}
 
 }

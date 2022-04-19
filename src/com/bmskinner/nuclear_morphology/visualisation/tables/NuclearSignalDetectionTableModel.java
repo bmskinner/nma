@@ -62,7 +62,7 @@ public class NuclearSignalDetectionTableModel extends DatasetTableModel {
 		for (int c = 0; c < colCount; c++) {
 			if (c == 0) {
 				for (int r = 1; r < rowCount; r++)
-					rowData[r][0] = ROW_NAMES.get(r - 1 % ROW_NAMES.size());
+					rowData[r][0] = ROW_NAMES.get((r - 1) % ROW_NAMES.size());
 				continue;
 			}
 

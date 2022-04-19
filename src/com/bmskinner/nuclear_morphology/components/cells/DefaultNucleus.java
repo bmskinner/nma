@@ -78,7 +78,7 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
 	/** FISH signals in the nucleus */
 	private ISignalCollection signalCollection = new DefaultSignalCollection();
 
-	private Nucleus orientedlNucleus = null;
+	private Nucleus orientedNucleus = null;
 
 	/**
 	 * Construct with an ROI, a source image and channel, and the original position
@@ -199,18 +199,7 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
 
 	@Override
 	public void createProfiles(double proportion) throws ComponentCreationException {
-
 		super.createProfiles(proportion);
-
-//        try {
-//        	// If creating profiles has changed landmarks, we 
-//        	// should update signal data
-//            SignalAnalyser s = new SignalAnalyser();
-//            s.calculateSignalDistancesFromCoM(this);
-//            s.calculateFractionalSignalDistancesFromCoM(this);
-//        } catch (UnavailableBorderPointException e) {
-//        	throw new ComponentCreationException(e);
-//        }
 	}
 
 	@Override
@@ -252,20 +241,30 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
 
 	// do not move this into SignalCollection - it is overridden in
 	// RodentSpermNucleus
-	@Override
-	public void calculateSignalAnglesFromPoint(@NonNull IPoint p) {
-
-		for (UUID signalGroup : signalCollection.getSignalGroupIds()) {
-
-			if (signalCollection.hasSignal(signalGroup)) {
-				for (INuclearSignal s : signalCollection.getSignals(signalGroup)) {
-
-					double angle = this.getCentreOfMass().findAbsoluteAngle(p, s.getCentreOfMass());
-					s.setMeasurement(Measurement.ANGLE, angle);
-				}
-			}
-		}
-	}
+//	@Override
+//	public void calculateSignalAnglesFromPoint(@NonNull IPoint p) {
+//
+//		try {
+//			getOrientedNucleus();
+//		} catch (MissingLandmarkException | ComponentCreationException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//
+//		for (UUID signalGroup : signalCollection.getSignalGroupIds()) {
+//
+//			if (signalCollection.hasSignal(signalGroup)) {
+//				for (INuclearSignal s : signalCollection.getSignals(signalGroup)) {
+//
+//					double angle = this.getCentreOfMass().findAbsoluteAngle(p, s.getCentreOfMass());
+//					if (orientedNucleus.getFlipState().h()) // account for horizontal flip
+//						s.setMeasurement(Measurement.ANGLE, 180 - angle);
+//					else
+//						s.setMeasurement(Measurement.ANGLE, angle);
+//				}
+//			}
+//		}
+//	}
 
 	@Override
 	public void setLandmark(@NonNull Landmark lm, int newLmIndex)
@@ -275,7 +274,7 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
 		// If any of the updated landmarks affect
 		// the orientation, clear the cached data
 		if (orientationMarks.values().contains(lm))
-			orientedlNucleus = null;
+			orientedNucleus = null;
 	}
 
 	@Override
@@ -283,18 +282,18 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
 		super.setSegments(segs);
 
 		// New segments must be drawn when we get the nucleus
-		orientedlNucleus = null;
+		orientedNucleus = null;
 	}
 
 	@Override
 	public Nucleus getOrientedNucleus() throws MissingLandmarkException, ComponentCreationException {
 		// Make an exact copy of the nucleus
 		// and cache
-		if (orientedlNucleus == null) {
-			orientedlNucleus = this.duplicate();
-			orientedlNucleus.orient();
+		if (orientedNucleus == null) {
+			orientedNucleus = this.duplicate();
+			orientedNucleus.orient();
 		}
-		return orientedlNucleus;
+		return orientedNucleus;
 	}
 
 	@Override
@@ -376,11 +375,6 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
 			}
 		}
 	}
-
-	/*
-	 * ############################################# Object methods
-	 * #############################################
-	 */
 
 	/**
 	 * Describes the nucleus state

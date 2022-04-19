@@ -148,12 +148,6 @@ public class DummyRodentSpermNucleus extends DummyCellularComponent implements N
 	}
 
 	@Override
-	public void calculateSignalAnglesFromPoint(@NonNull IPoint p) {
-		nucleus.calculateSignalAnglesFromPoint(p);
-
-	}
-
-	@Override
 	public ISignalCollection getSignalCollection() {
 		return nucleus.getSignalCollection();
 	}
@@ -270,26 +264,22 @@ public class DummyRodentSpermNucleus extends DummyCellularComponent implements N
 
 	@Override
 	public List<OrientationMark> getOrientationMarks() {
-		// TODO Auto-generated method stub
-		return null;
+		return nucleus.getOrientationMarks();
 	}
 
 	@Override
 	public @Nullable Landmark getLandmark(OrientationMark landmark) {
-		// TODO Auto-generated method stub
-		return null;
+		return nucleus.getLandmark(landmark);
 	}
 
 	@Override
 	public @Nullable PriorityAxis getPriorityAxis() {
-		// TODO Auto-generated method stub
-		return null;
+		return nucleus.getPriorityAxis();
 	}
 
 	@Override
-	public void orient() {
-		// TODO Auto-generated method stub
-
+	public void orient() throws MissingLandmarkException {
+		nucleus.orient();
 	}
 
 }

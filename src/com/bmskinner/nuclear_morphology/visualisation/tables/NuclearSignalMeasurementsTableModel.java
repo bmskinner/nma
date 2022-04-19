@@ -63,11 +63,11 @@ public class NuclearSignalMeasurementsTableModel extends DatasetTableModel {
 		rowData = new Object[rowCount][colCount];
 		rowData[0][0] = Labels.Signals.NUMBER_OF_SIGNAL_GROUPS;
 
-		// Make the first column of row names
 		for (int c = 0; c < colCount; c++) {
+			// Make the first column of row names
 			if (c == 0) {
 				for (int r = 1; r < rowCount; r++)
-					rowData[r][0] = rowNames.get(r - 1 % rowNames.size());
+					rowData[r][0] = rowNames.get((r - 1) % rowNames.size());
 				continue;
 			}
 

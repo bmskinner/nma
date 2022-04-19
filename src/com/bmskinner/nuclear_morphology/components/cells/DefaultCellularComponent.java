@@ -620,6 +620,11 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 			double xNew = xCentre + dx;
 			n.setX(xNew);
 		}
+
+		// Also update the CoM
+		double dx = xCentre - centreOfMass.getX();
+		double xNew = xCentre + dx;
+		centreOfMass.setX(xNew);
 	}
 
 	@Override
@@ -637,6 +642,11 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 			double yNew = yCentre + dy;
 			n.setY(yNew);
 		}
+
+		// Also update the CoM
+		double dy = yCentre - centreOfMass.getY();
+		double yNew = yCentre + dy;
+		centreOfMass.setY(yNew);
 	}
 
 	/**
