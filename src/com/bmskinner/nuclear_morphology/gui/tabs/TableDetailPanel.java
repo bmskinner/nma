@@ -1,7 +1,7 @@
 package com.bmskinner.nuclear_morphology.gui.tabs;
 
 import java.awt.Cursor;
-import java.util.concurrent.ExecutionException;
+import java.awt.EventQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -59,6 +59,13 @@ public abstract class TableDetailPanel extends DetailPanel {
 
 			if (options.getTarget() != null) {
 				options.getTarget().setModel(model);
+				setRenderers(options);
+//				options.getTarget().updateRowHeights();
+				if (options.getTarget() instanceof ExportableTable) {
+					EventQueue.invokeLater(() -> ((ExportableTable) options.getTarget()).updateRowHeights());
+
+				}
+
 			}
 
 		} else { // No cached chart
@@ -111,6 +118,42 @@ public abstract class TableDetailPanel extends DetailPanel {
 		return model;
 	}
 
+	private static void setRenderers(TableOptions options) {
+		JTable table = options.getTarget();
+
+		if (table.getRowCount() == 0)
+			return;
+
+		int columns = table.getColumnModel().getColumnCount();
+
+		for (int i : options.getRendererColumns()) {
+
+			TableCellRenderer renderer = options.getRenderer(i);
+
+			if (i == TableOptions.FIRST_COLUMN) {
+
+				table.getColumnModel().getColumn(0).setCellRenderer(renderer);
+				continue;
+			}
+
+			if (i == TableOptions.ALL_COLUMNS) {
+				for (int j = 0; j < columns; j++) {
+					table.getColumnModel().getColumn(j).setCellRenderer(renderer);
+				}
+				continue;
+			}
+
+			if (i == TableOptions.ALL_EXCEPT_FIRST_COLUMN) {
+				for (int j = 1; j < columns; j++) {
+					table.getColumnModel().getColumn(j).setCellRenderer(renderer);
+				}
+				continue;
+			}
+
+			table.getColumnModel().getColumn(i).setCellRenderer(renderer);
+		}
+	}
+
 	/**
 	 * Tables can also be an intensive process, especially with venn comparisons.
 	 * This worker will keep the model generation off the EDT
@@ -148,74 +191,14 @@ public abstract class TableDetailPanel extends DetailPanel {
 
 		@Override
 		public synchronized void done() {
-
-			try {
-				JTable table = options.getTarget();
-				if (table != null) {
-					TableModel model = get();
-					if (model != null) {
-						table.setModel(model);
-						setRenderers();
-						if (table instanceof ExportableTable) {
-							((ExportableTable) table).updateRowHeights();
-						}
-					}
-					table.setCursor(Cursor.getDefaultCursor());
-				}
-			} catch (InterruptedException e) {
-				LOGGER.log(Level.WARNING,
-						"Interruption to table creation in " + TableDetailPanel.this.getClass().getName());
-				LOGGER.log(Loggable.STACK, "Error in table worker", e);
-				Thread.currentThread().interrupt();
-			} catch (ExecutionException e) {
-				LOGGER.log(Level.WARNING,
-						"Excecution error in table creation in " + TableDetailPanel.this.getClass().getName());
-				LOGGER.log(Loggable.STACK, "Error in table worker", e);
-			}
+			options.getTarget().setCursor(Cursor.getDefaultCursor());
+			setTable(options);
 		}
 
 		@Override
 		public void cancel() {
 			LOGGER.fine("Cancelling detail panel table update");
 			this.cancel(true);
-		}
-
-		private synchronized void setRenderers() {
-			JTable table = options.getTarget();
-
-			if (table.getRowCount() == 0)
-				return;
-
-			int columns = table.getColumnModel().getColumnCount();
-
-			for (int i : options.getRendererColumns()) {
-
-				TableCellRenderer renderer = options.getRenderer(i);
-
-				if (i == TableOptions.FIRST_COLUMN) {
-
-					table.getColumnModel().getColumn(0).setCellRenderer(renderer);
-					continue;
-				}
-
-				if (i == TableOptions.ALL_COLUMNS) {
-					for (int j = 0; j < columns; j++) {
-						table.getColumnModel().getColumn(j).setCellRenderer(renderer);
-					}
-					continue;
-				}
-
-				if (i == TableOptions.ALL_EXCEPT_FIRST_COLUMN) {
-					for (int j = 1; j < columns; j++) {
-						table.getColumnModel().getColumn(j).setCellRenderer(renderer);
-					}
-					continue;
-				}
-
-				table.getColumnModel().getColumn(i).setCellRenderer(renderer);
-
-			}
-
 		}
 
 	}

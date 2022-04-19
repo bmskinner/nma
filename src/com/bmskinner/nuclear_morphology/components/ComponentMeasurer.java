@@ -158,7 +158,6 @@ public final class ComponentMeasurer {
 			LOGGER.log(Loggable.STACK, "Error getting consensus", e);
 			return Statistical.ERROR_CALCULATING_STAT;
 		}
-
 		return Statistical.ERROR_CALCULATING_STAT;
 	}
 

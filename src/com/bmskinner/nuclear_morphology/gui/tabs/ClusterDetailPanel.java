@@ -21,6 +21,7 @@ import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.util.List;
 import java.util.logging.Logger;
 
 import javax.swing.BorderFactory;
@@ -44,6 +45,8 @@ import com.bmskinner.nuclear_morphology.gui.components.renderers.JTextAreaCellRe
 import com.bmskinner.nuclear_morphology.gui.dialogs.ClusterTreeDialog;
 import com.bmskinner.nuclear_morphology.gui.dialogs.TsneDialog;
 import com.bmskinner.nuclear_morphology.gui.events.UserActionEvent;
+import com.bmskinner.nuclear_morphology.gui.events.revamp.ClusterGroupsUpdatedListener;
+import com.bmskinner.nuclear_morphology.gui.events.revamp.UIController;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.UserActionController;
 import com.bmskinner.nuclear_morphology.visualisation.options.TableOptions;
 import com.bmskinner.nuclear_morphology.visualisation.options.TableOptionsBuilder;
@@ -59,7 +62,7 @@ import com.bmskinner.nuclear_morphology.visualisation.tables.AnalysisDatasetTabl
  *
  */
 @SuppressWarnings("serial")
-public class ClusterDetailPanel extends TableDetailPanel {
+public class ClusterDetailPanel extends TableDetailPanel implements ClusterGroupsUpdatedListener {
 
 	private static final Logger LOGGER = Logger.getLogger(ClusterDetailPanel.class.getName());
 
@@ -95,6 +98,8 @@ public class ClusterDetailPanel extends TableDetailPanel {
 		this.add(statusPanel, BorderLayout.NORTH);
 
 		setEnabled(false);
+
+		UIController.getInstance().addClusterGroupsUpdatedListener(this);
 
 	}
 
@@ -320,6 +325,16 @@ public class ClusterDetailPanel extends TableDetailPanel {
 			setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 			return this;
 		}
+	}
+
+	@Override
+	public void clusterGroupsUpdated(List<IAnalysisDataset> datasets) {
+		refreshCache(datasets);
+	}
+
+	@Override
+	public void clusterGroupsUpdated(IAnalysisDataset dataset) {
+		refreshCache(dataset);
 	}
 
 }

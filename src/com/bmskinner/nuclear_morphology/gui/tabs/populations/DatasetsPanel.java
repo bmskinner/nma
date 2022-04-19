@@ -56,11 +56,11 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  *
  */
 @SuppressWarnings("serial")
-public class PopulationsPanel extends DetailPanel implements DatasetAddedListener, SwatchUpdatedListener {
+public class DatasetsPanel extends DetailPanel implements DatasetAddedListener, SwatchUpdatedListener {
 
-	private static final Logger LOGGER = Logger.getLogger(PopulationsPanel.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(DatasetsPanel.class.getName());
 
-	private static final String PANEL_TITLE_LBL = "Populations";
+	private static final String PANEL_TITLE_LBL = "Datasets";
 
 	private final PopulationTreeTable treeTable;
 
@@ -77,12 +77,12 @@ public class PopulationsPanel extends DetailPanel implements DatasetAddedListene
 	private boolean ctrlPressed = false;
 
 	public boolean isCtrlPressed() {
-		synchronized (PopulationsPanel.class) {
+		synchronized (DatasetsPanel.class) {
 			return ctrlPressed;
 		}
 	}
 
-	public PopulationsPanel() {
+	public DatasetsPanel() {
 		super();
 		this.setLayout(new BorderLayout());
 
@@ -98,7 +98,7 @@ public class PopulationsPanel extends DetailPanel implements DatasetAddedListene
 		// Track when the Ctrl key is down
 		KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(ke -> {
 
-			synchronized (PopulationsPanel.class) {
+			synchronized (DatasetsPanel.class) {
 				switch (ke.getID()) {
 				case KeyEvent.KEY_PRESSED:
 					if (ke.getKeyCode() == KeyEvent.VK_CONTROL)
@@ -516,13 +516,7 @@ public class PopulationsPanel extends DetailPanel implements DatasetAddedListene
 	 * @param dataset
 	 */
 	private synchronized void addDataset(final List<IAnalysisDataset> datasets) {
-		IAnalysisDataset last = null;
-		for (IAnalysisDataset dataset : datasets) {
-			LOGGER.fine("Adding dataset " + dataset.getName() + ": " + dataset.hashCode());
-			DatasetListManager.getInstance().addDataset(dataset);
-			last = dataset;
-		}
-		update(List.of(last));
+		update(List.of(datasets.get(datasets.size() - 1)));
 		// This will also trigger a dataset update event as the dataset
 		// is selected, so don't trigger another update here.
 	}

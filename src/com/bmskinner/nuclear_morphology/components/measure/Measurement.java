@@ -259,11 +259,16 @@ public interface Measurement extends XmlSerializable {
 		return list;
 	}
 
+	/**
+	 * Get measurement types that are active for a whole cell.
+	 * 
+	 * @return
+	 */
 	static List<Measurement> getCellStats() {
 		List<Measurement> list = new ArrayList<>();
-		list.add(CELL_NUCLEUS_COUNT);
-		list.add(CELL_NUCLEAR_AREA);
-		list.add(CELL_NUCLEAR_RATIO);
+//		list.add(CELL_NUCLEUS_COUNT);
+//		list.add(CELL_NUCLEAR_AREA);
+//		list.add(CELL_NUCLEAR_RATIO);
 		return list;
 	}
 

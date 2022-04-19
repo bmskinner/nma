@@ -153,7 +153,6 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
 
 		try (InputStream is = new FileInputStream(file);) {
 			byte[] b = is.readNBytes(4);
-			LOGGER.fine(Arrays.toString(b));
 			return Arrays.equals(b, NMD_V1_SIGNATURE);
 		} catch (IOException e) {
 			LOGGER.log(Loggable.STACK, "Error reading first bytes of file", e);

@@ -148,7 +148,7 @@ public abstract class DetailPanel extends JPanel
 		return isUpdating.get();
 	}
 
-	protected synchronized void setUpdating(boolean b) {
+	protected void setUpdating(boolean b) {
 		this.isUpdating.set(b);
 	}
 

@@ -38,11 +38,11 @@ import com.bmskinner.nuclear_morphology.gui.tabs.EditingDetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.ImagesTabPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.MergesDetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.TabPanel;
-import com.bmskinner.nuclear_morphology.gui.tabs.cells.CellsDetailPanel;
+import com.bmskinner.nuclear_morphology.gui.tabs.cells_detail.IndividualCellDetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.comparisons.ComparisonDetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.consensus.ConsensusNucleusPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.nuclear.NuclearStatisticsPanel;
-import com.bmskinner.nuclear_morphology.gui.tabs.populations.PopulationsPanel;
+import com.bmskinner.nuclear_morphology.gui.tabs.populations.DatasetsPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.profiles.NucleusProfilesPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.segments.SegmentsDetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.signals.SignalsDetailPanel;
@@ -132,7 +132,7 @@ public class DockableMainWindow extends AbstractMainWindow {
 			// ---------------
 			// Create the consensus chart
 			// ---------------
-			PopulationsPanel populationsPanel = new PopulationsPanel();
+			DatasetsPanel populationsPanel = new DatasetsPanel();
 			ConsensusNucleusPanel consensusNucleusPanel = new ConsensusNucleusPanel();
 			detailPanels.add(consensusNucleusPanel);
 
@@ -187,7 +187,7 @@ public class DockableMainWindow extends AbstractMainWindow {
 		// Create the top level tabs in the UI
 		DetailPanel analysisDetailPanel = new AnalysisDetailPanel();
 		DetailPanel nucleusProfilesPanel = new NucleusProfilesPanel(); // the angle profiles
-		DetailPanel cellsDetailPanel = new CellsDetailPanel();
+		DetailPanel cellsDetailPanel = new IndividualCellDetailPanel();
 		DetailPanel nuclearChartsPanel = new NuclearStatisticsPanel();
 		DetailPanel signalsDetailPanel = new SignalsDetailPanel();
 		DetailPanel clusterDetailPanel = new ClusterDetailPanel();
@@ -227,37 +227,7 @@ public class DockableMainWindow extends AbstractMainWindow {
 		}
 
 		tabDock.setSelectedDockable(tabDock.getDockable(0));
-//		tabDock.getTabbedPane().addChangeListener(e -> { // listen for tab switches and update charts if cells have been
-//															// edited
-//			boolean isUpdate = false;
-//			for (TabPanel t : detailPanels) {
-//				isUpdate |= t.hasCellUpdate();
-//			}
-//
-//			if (isUpdate) {
-//				recacheCharts();
-//				for (TabPanel t : detailPanels) {
-//					t.setCellUpdate(false);
-//				}
-//			}
-//		});
 		return tabDock;
 
 	}
-
-	/**
-	 * Set the event listeners for each tab panel
-	 */
-//	@Override
-//	protected void createEventHandling() {
-//
-//		this.addDatasetUpdateEventListener(logPanel);
-//
-//		populationsPanel.addDatasetEventListener(eh);
-//
-//		for (TabPanel d : detailPanels) {
-//			d.addDatasetEventListener(eh);
-//			this.addDatasetUpdateEventListener(d);
-//		}
-//	}
 }

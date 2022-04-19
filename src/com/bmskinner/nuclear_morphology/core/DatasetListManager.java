@@ -33,6 +33,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace;
+import com.bmskinner.nuclear_morphology.gui.events.revamp.DatasetAddedListener;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.UIController;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -44,7 +45,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  * @author bms41
  *
  */
-public final class DatasetListManager {
+public final class DatasetListManager implements DatasetAddedListener {
 
 	private static final Logger LOGGER = Logger.getLogger(DatasetListManager.class.getName());
 
@@ -53,8 +54,9 @@ public final class DatasetListManager {
 
 	/**
 	 * The list of root datasets currently loaded. The order of datasets within the
-	 * list can be used to determine the order of root datasets within the
-	 * populations panel.
+	 * list is used to determine the order of root datasets within the populations
+	 * panel. Note that we do not use a hashset because the hashcodes of datasets
+	 * can change frequently.
 	 */
 	private List<IAnalysisDataset> list = new CopyOnWriteArrayList<>();
 
@@ -75,6 +77,7 @@ public final class DatasetListManager {
 	private final Map<UUID, Integer> workspaceHashcodeMap = new ConcurrentHashMap<>();
 
 	private DatasetListManager() {
+
 	}
 
 	/**
@@ -381,6 +384,7 @@ public final class DatasetListManager {
 		if (d.isRoot() && !list.contains(d)) {
 			list.add(d);
 			datasetHashcodeMap.put(d.getId(), d.hashCode());
+			LOGGER.fine("Added dataset  " + d.getName() + ": " + d.hashCode());
 		}
 	}
 
@@ -597,6 +601,17 @@ public final class DatasetListManager {
 				result.add(w);
 		}
 		return result;
+	}
+
+	@Override
+	public void datasetAdded(List<IAnalysisDataset> datasets) {
+		for (IAnalysisDataset d : datasets)
+			addDataset(d);
+	}
+
+	@Override
+	public void datasetAdded(IAnalysisDataset dataset) {
+		addDataset(dataset);
 	}
 
 }

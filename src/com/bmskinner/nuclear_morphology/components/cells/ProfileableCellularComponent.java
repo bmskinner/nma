@@ -143,8 +143,8 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 
 			// When duplicating components we can copy the existing profiles
 			for (ProfileType type : ProfileType.values()) {
-				profileMap.put(type, c.getProfile(type).duplicate());
-//				profileMap.put(type, ProfileCreator.createProfile(this, type));
+				profileMap.put(type, c.getUnsegmentedProfile(type, Landmark.REFERENCE_POINT)
+						.startFrom(-c.getBorderIndex(Landmark.REFERENCE_POINT)));
 			}
 
 			segments.clear();

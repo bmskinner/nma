@@ -109,24 +109,24 @@ public class ExportableTable extends JTable {
 	public boolean isCellEditable(int row, int column) {
 		if (isGlobalEditable)
 			return super.isCellEditable(row, column);
-		else
-			return false;
+		return false;
 	}
 
 	/**
-	 * Ensure rows are high enough to fill all texte
+	 * Ensure rows are high enough to fill all text. Get the bounding box for each
+	 * cell and set row height to the maximum cell height in that row
 	 */
 	public void updateRowHeights() {
 		for (int row = 0; row < getRowCount(); row++) {
-			int rowHeight = 0;
+			int h = 0;
 			for (int col = 0; col < getColumnCount(); col++) {
 				Component comp = prepareRenderer(getCellRenderer(row, col), row, col);
 				Dimension d = comp.getPreferredSize();
 				comp.setSize(new Dimension(this.getColumnModel().getColumn(col).getWidth(), d.height));
 				d = comp.getPreferredSize();
-				rowHeight = Math.max(rowHeight, d.height);
+				h = Math.max(h, d.height);
 			}
-			setRowHeight(row, rowHeight);
+			setRowHeight(row, h);
 		}
 	}
 

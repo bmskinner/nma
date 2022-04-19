@@ -24,7 +24,6 @@ import java.util.logging.Logger;
 
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
-import javax.swing.JTabbedPane;
 import javax.swing.border.EmptyBorder;
 
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
@@ -35,27 +34,15 @@ public class IndividualCellDetailPanel extends DetailPanel {
 
 	private static final Logger LOGGER = Logger.getLogger(IndividualCellDetailPanel.class.getName());
 
-	private JTabbedPane tabPane;
+//	private JTabbedPane tabPane;
 
 	private static final String PANEL_TITLE_LBL = "Cells";
 
 	/** Cells in the active dataset */
-	protected CellsListPanel cellsListPanel;
-
-	/** View and cell profiles */
-	protected CellProfilesPanel cellBorderTagPanel;
-
-	/** View and modify cell landmarks */
-	protected CellOutlinePanel outlinePanel;
-
-	/** View cell info */
-	protected CellStatsPanel cellStatsPanel;
+	private CellsListPanel cellsListPanel;
 
 	/** Choose image channels to display */
-	protected ComponentListPanel signalListPanel;
-
-	/** View pairwise distances for signals */
-	protected CellSignalStatsPanel cellsignalStatsPanel;
+	private ComponentListPanel signalListPanel;
 
 	/** Track the cell on display */
 	private CellViewModel model = new CellViewModel(null, null);
@@ -70,17 +57,12 @@ public class IndividualCellDetailPanel extends DetailPanel {
 			this.setLayout(new BorderLayout());
 			JPanel westPanel = createCellandSignalListPanels();
 
-			tabPane = new JTabbedPane(JTabbedPane.LEFT);
-			tabPane.add(cellStatsPanel.getPanelTitle(), cellStatsPanel);
-			tabPane.add(cellBorderTagPanel.getPanelTitle(), cellBorderTagPanel);
-
-			tabPane.add(outlinePanel.getPanelTitle(), outlinePanel);
-			tabPane.add(cellsignalStatsPanel.getPanelTitle(), cellsignalStatsPanel);
-			tabPane.setSelectedComponent(outlinePanel);
+			CellOutlinePanel outlinePanel = new CellOutlinePanel(model); // the outline of the cell
+			model.addView(outlinePanel);
 
 			JSplitPane sp = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 			sp.setLeftComponent(westPanel);
-			sp.setRightComponent(tabPane);
+			sp.setRightComponent(outlinePanel);
 			sp.setResizeWeight(0.25);
 			add(sp, BorderLayout.CENTER);
 
@@ -96,16 +78,7 @@ public class IndividualCellDetailPanel extends DetailPanel {
 	}
 
 	private void createSubPanels() {
-		cellBorderTagPanel = new CellProfilesPanel(model);
-		outlinePanel = new CellOutlinePanel(model); // the outline of the cell
-		// and detected objects
-		cellStatsPanel = new CellStatsPanel(model); // the stats table
-		cellsignalStatsPanel = new CellSignalStatsPanel(model);
 
-		model.addView(cellBorderTagPanel);
-		model.addView(outlinePanel);
-		model.addView(cellStatsPanel);
-		model.addView(cellsignalStatsPanel);
 	}
 
 	private JPanel createCellandSignalListPanels() {

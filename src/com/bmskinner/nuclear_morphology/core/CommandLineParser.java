@@ -163,9 +163,10 @@ public class CommandLineParser {
 				LOGGER.log(Level.SEVERE, "Unable to set look and feel", e);
 			}
 
-			// Ensure instances created
+			// Ensure singleton instances created
 			UserActionController.getInstance();
-			UIController.getInstance();
+			DatasetListManager dlm = DatasetListManager.getInstance();
+			UIController.getInstance().addDatasetAddedListener(dlm);
 
 			DockableMainWindow mw = new DockableMainWindow();
 			mw.setVisible(true);

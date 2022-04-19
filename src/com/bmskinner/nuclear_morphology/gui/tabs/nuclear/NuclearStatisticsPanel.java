@@ -43,7 +43,6 @@ public class NuclearStatisticsPanel extends DetailPanel {
 		DetailPanel nucleusMagnitudePanel = new NucleusMagnitudePanel();
 
 		DetailPanel nuclearScatterChartPanel = new NuclearScatterChartPanel();
-		DetailPanel nuclearGlcmPanel = new NuclearGlcmPanel();
 
 		addPanel(nuclearStatsPanel);
 		addPanel(boxplotPanel);
@@ -51,8 +50,10 @@ public class NuclearStatisticsPanel extends DetailPanel {
 		addPanel(nucleusMagnitudePanel);
 		addPanel(nuclearScatterChartPanel);
 
-		if (GlobalOptions.getInstance().getBoolean(GlobalOptions.IS_GLCM_INTERFACE_KEY))
+		if (GlobalOptions.getInstance().getBoolean(GlobalOptions.IS_GLCM_INTERFACE_KEY)) {
+			DetailPanel nuclearGlcmPanel = new NuclearGlcmPanel();
 			addPanel(nuclearGlcmPanel);
+		}
 
 		this.add(tabPane, BorderLayout.CENTER);
 	}

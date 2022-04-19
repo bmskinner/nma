@@ -63,6 +63,7 @@ public class ManualClusterAction extends SingleDatasetResultAction {
 				UserActionController.getInstance()
 						.userActionEventReceived(new UserActionEvent(this, UserActionEvent.SAVE, List.of(dataset)));
 				UIController.getInstance().fireDatasetAdded(dataset);
+				UIController.getInstance().fireClusterGroupsUpdated(dataset);
 			}
 			cancel();
 		} catch (RequestCancelledException e1) {

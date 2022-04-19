@@ -36,6 +36,8 @@ public class UIController {
 
 	private final List<FilePathUpdatedListener> filePathUpdatedListeners = new ArrayList<>();
 
+	private final List<ClusterGroupsUpdatedListener> clusterGroupsUpdatedListeners = new ArrayList<>();
+
 	private UIController() {
 	}
 
@@ -158,6 +160,20 @@ public class UIController {
 	public void fireFilePathUpdated(@NonNull IAnalysisDataset d) {
 		for (FilePathUpdatedListener l : filePathUpdatedListeners)
 			l.filePathUpdated(d);
+	}
+
+	public void addClusterGroupsUpdatedListener(ClusterGroupsUpdatedListener l) {
+		clusterGroupsUpdatedListeners.add(l);
+	}
+
+	public void fireClusterGroupsUpdated(@NonNull List<IAnalysisDataset> datasets) {
+		for (ClusterGroupsUpdatedListener l : clusterGroupsUpdatedListeners)
+			l.clusterGroupsUpdated(datasets);
+	}
+
+	public void fireClusterGroupsUpdated(@NonNull IAnalysisDataset d) {
+		for (ClusterGroupsUpdatedListener l : clusterGroupsUpdatedListeners)
+			l.clusterGroupsUpdated(d);
 	}
 
 }

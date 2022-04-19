@@ -90,7 +90,7 @@ public class MorphologyAnalysis implements Runnable {
 		new Thread(() -> { // wait for save and recache charts
 			try {
 				saveLatch.await();
-				LOGGER.fine("Starting recache action");
+				LOGGER.finer("Adding new dataset");
 				UIController.getInstance().fireDatasetAdded(datasets);
 			} catch (InterruptedException e) {
 				Thread.currentThread().interrupt();
