@@ -109,7 +109,7 @@ public abstract class ChartFactoryTest {
 			// show the profile corresponding to the chart
 			ChartOptions profileOptions = new ChartOptionsBuilder().setDatasets(d)
 					.setCell(cell)
-					.setTag(Landmark.REFERENCE_POINT)
+					.setLandmark(Landmark.REFERENCE_POINT)
 					.setShowMarkers(true)
 					.setShowAnnotations(true)
 					.setProfileType(ProfileType.ANGLE)

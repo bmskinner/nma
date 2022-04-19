@@ -151,7 +151,7 @@ public class CellProfilesPanel extends ChartDetailPanel
 			} else {
 
 				ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets()).setCell(model.getCell())
-						.setNormalised(false).setAlignment(ProfileAlignment.LEFT).setTag(Landmark.REFERENCE_POINT)
+						.setNormalised(false).setAlignment(ProfileAlignment.LEFT).setLandmark(Landmark.REFERENCE_POINT)
 						.setShowMarkers(true).setProfileType(type).setSwatch(GlobalOptions.getInstance().getSwatch())
 						.setShowAnnotations(false).setShowPoints(true).setShowXAxis(false).setShowYAxis(false)
 						.setTarget(chartPanel).build();

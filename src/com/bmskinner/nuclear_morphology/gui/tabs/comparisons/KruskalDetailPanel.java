@@ -105,7 +105,7 @@ public class KruskalDetailPanel extends ChartDetailPanel {
 	private void updateChartPanel() {
 
 		ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets()).setNormalised(true)
-				.setAlignment(ProfileAlignment.LEFT).setTag(Landmark.REFERENCE_POINT).setShowMarkers(true)
+				.setAlignment(ProfileAlignment.LEFT).setLandmark(Landmark.REFERENCE_POINT).setShowMarkers(true)
 				.setProfileType(ProfileType.ANGLE).setTarget(chartPanel).build();
 
 		setChart(options);

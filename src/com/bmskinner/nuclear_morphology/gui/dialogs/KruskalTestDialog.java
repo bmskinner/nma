@@ -125,7 +125,7 @@ public class KruskalTestDialog extends LoadingIconDialog {
         list.add(dataset2);
 
         ChartOptions options = new ChartOptionsBuilder().setDatasets(list).setNormalised(true)
-                .setAlignment(ProfileAlignment.LEFT).setTag(Landmark.REFERENCE_POINT).setShowMarkers(false)
+                .setAlignment(ProfileAlignment.LEFT).setLandmark(Landmark.REFERENCE_POINT).setShowMarkers(false)
                 .setProfileType(ProfileType.ANGLE).build();
 
         JFreeChart chart = new MorphologyChartFactory(options).makeKruskalWallisChart();

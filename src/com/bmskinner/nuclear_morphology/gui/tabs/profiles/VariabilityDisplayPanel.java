@@ -135,11 +135,11 @@ public class VariabilityDisplayPanel extends ChartDetailPanel
 	protected void updateSingle() {
 
 		this.setEnabled(true);
-		boolean showMarkers = profileMarkersOptionsPanel.showMarkers();
+		boolean showMarkers = profileMarkersOptionsPanel.isShowAnnotations();
 		ProfileType type = profileCollectionTypeSettingsPanel.getSelected();
 
 		ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets()).setNormalised(true)
-				.setAlignment(ProfileAlignment.LEFT).setTag(Landmark.REFERENCE_POINT).setShowMarkers(showMarkers)
+				.setAlignment(ProfileAlignment.LEFT).setLandmark(Landmark.REFERENCE_POINT).setShowMarkers(showMarkers)
 //				.setModalityPosition((Double) pvalueSpinner.getValue())
 				.setSwatch(GlobalOptions.getInstance().getSwatch()).setProfileType(type).setTarget(chartPanel).build();
 

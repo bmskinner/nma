@@ -99,7 +99,7 @@ public class ChartOptionsBuilder {
         return this;
     }
 
-    public ChartOptionsBuilder setTag(Landmark tag) {
+    public ChartOptionsBuilder setLandmark(Landmark tag) {
         options.setTag(tag);
         return this;
     }

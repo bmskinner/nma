@@ -69,20 +69,26 @@ public class CellImagePainter implements ImagePainter {
 
 		try {
 
-			AffineTransform at = createScaleTransform(originalWidth, originalHeight, w, h);
+			// A transform to convert from original image coordinates to the final screen
+			// coordinates
+
+//			Values vals = calcRotatedImageDimensions(w, h);
+//			double w2 = Math.cos(vals.rads) * originalWidth;
+//			double h2 = Math.cos(vals.rads) * originalHeight;
+//			AffineTransform at = createAspectPreservingScaleTransform((int) w2, (int) h2, w, h);
+
+			AffineTransform at = createAspectPreservingScaleTransform(originalWidth, originalHeight, w, h);
 
 			if (isOriented) {
-
 				// If the image has been rotated, we will need to scale the points drawn down
 				// by a ratio of the new image dimensions
-				Values val = calcNewImageDimensions(w, h);
-				double r = h / (((h * Math.cos(val.rads)) + (w * Math.sin(val.rads))));
-//				AffineTransform pat = AffineTransform.getScaleInstance(r, r);
 
-				AffineTransform tat = createTransform(originalWidth, originalHeight);
+				AffineTransform tat = createMainTransform(originalWidth, originalHeight);
 				at.concatenate(tat);
+//				pat.concatenate(tat);
+
 //				pat.concatenate(at);
-//				at = pat;
+//				at = tat;
 			}
 
 			BufferedImage output = new BufferedImage(input.getWidth(), input.getHeight(), BufferedImage.TYPE_INT_ARGB);
@@ -208,14 +214,15 @@ public class CellImagePainter implements ImagePainter {
 
 		try {
 
-			Values val = calcNewImageDimensions(input.getWidth(), input.getHeight());
+			Values val = calcRotatedImageDimensions(input.getWidth(), input.getHeight());
 
+			// Make a new canvas for the rotated image with white background
 			BufferedImage output = new BufferedImage(val.w, val.h, BufferedImage.TYPE_INT_RGB);
 			Graphics2D graphics = output.createGraphics();
 			graphics.setPaint(Color.WHITE);
 			graphics.fillRect(0, 0, output.getWidth(), output.getHeight());
 
-			AffineTransform at = createTransform(input.getWidth(), input.getHeight());
+			AffineTransform at = createMainTransform(input.getWidth(), input.getHeight());
 			AffineTransformOp op = new AffineTransformOp(at, AffineTransformOp.TYPE_BILINEAR);
 
 			op.filter(input, output);
@@ -228,7 +235,9 @@ public class CellImagePainter implements ImagePainter {
 	}
 
 	/**
-	 * Create the transform needed to scale an image preserving aspect ratio
+	 * Create the transform needed to scale an image preserving aspect ratio.
+	 * Converts from the original image dimensionms to the dimensions that will fill
+	 * a given area.
 	 * 
 	 * @param w    the original width
 	 * @param h    the original height
@@ -236,8 +245,8 @@ public class CellImagePainter implements ImagePainter {
 	 * @param maxH the maximum height
 	 * @return
 	 */
-	private AffineTransform createScaleTransform(int w, int h, double maxW, double maxH) {
-		double r = calculateScaleRatio(w, h, maxW, maxH);
+	private AffineTransform createAspectPreservingScaleTransform(int w, int h, double maxW, double maxH) {
+		double r = calculateAspectPreservingScaleRatio(w, h, maxW, maxH);
 		return AffineTransform.getScaleInstance(r, r);
 	}
 
@@ -250,7 +259,7 @@ public class CellImagePainter implements ImagePainter {
 	 * @param maxH
 	 * @return
 	 */
-	private double calculateScaleRatio(int w, int h, double maxW, double maxH) {
+	private double calculateAspectPreservingScaleRatio(int w, int h, double maxW, double maxH) {
 		double r = maxW / w;
 		if (r * h > maxH)
 			r = maxH / h;
@@ -263,16 +272,25 @@ public class CellImagePainter implements ImagePainter {
 	 * @author ben
 	 *
 	 */
-	public record Values(double rads, int w, int h) {
+	public record Values(double rads, int w, int h, double ratio) {
 	}
 
-	private Values calcNewImageDimensions(int w, int h) throws MissingLandmarkException {
+	/**
+	 * Calculate the dimensions of an image of given dimensions after rotating the
+	 * nucleus it contains to be oriented
+	 * 
+	 * @param w
+	 * @param h
+	 * @return
+	 * @throws MissingLandmarkException
+	 */
+	private Values calcRotatedImageDimensions(int w, int h) throws MissingLandmarkException {
 		double angle = 360 - ComponentOrienter.calcAngleToAlignVertically(cell.getPrimaryNucleus());
 		double rads = Math.toRadians(angle);
 		double sin = Math.abs(Math.sin(rads)), cos = Math.abs(Math.cos(rads));
-		int newWidth = (int) Math.floor(w * cos + h * sin);
-		int newHeight = (int) Math.floor(h * cos + w * sin);
-		return new Values(rads, newWidth, newHeight);
+		double newWidth = Math.floor(w * cos + h * sin);
+		double newHeight = Math.floor(h * cos + w * sin);
+		return new Values(rads, (int) newWidth, (int) newHeight, w / newWidth);
 	}
 
 	/**
@@ -285,17 +303,21 @@ public class CellImagePainter implements ImagePainter {
 	 * @throws MissingLandmarkException
 	 * @throws ComponentCreationException
 	 */
-	private AffineTransform createTransform(int w, int h) throws MissingLandmarkException, ComponentCreationException {
+	private AffineTransform createMainTransform(int w, int h)
+			throws MissingLandmarkException, ComponentCreationException {
 
-		Values p = calcNewImageDimensions(w, h);
+		// Figure out how large the new image will be
+		// so we can add a translation to paint the image
+		// in the centre.
+
+		Values p = calcRotatedImageDimensions(w, h);
 		int newWidth = p.w;
 		int newHeight = p.h;
 
 		int x = (newWidth - w) / 2;
 		int y = (newHeight - h) / 2;
 
-		// Create the rotation transform
-
+		// Create the rotation transform about the centre of the image
 		AffineTransform at = new AffineTransform();
 		at.setToRotation(p.rads, x + (w / 2), y + (h / 2));
 		at.translate(x, y);
@@ -330,8 +352,8 @@ public class CellImagePainter implements ImagePainter {
 	 * @return
 	 */
 	private BufferedImage scalePreservingAspect(BufferedImage input, double maxW, double maxH) {
-		double r = calculateScaleRatio(input.getWidth(), input.getHeight(), maxW, maxH);
-		AffineTransform at = createScaleTransform(input.getWidth(), input.getHeight(), maxW, maxH);
+		double r = calculateAspectPreservingScaleRatio(input.getWidth(), input.getHeight(), maxW, maxH);
+		AffineTransform at = createAspectPreservingScaleTransform(input.getWidth(), input.getHeight(), maxW, maxH);
 		BufferedImage output = new BufferedImage((int) (input.getWidth() * r), (int) (input.getHeight() * r),
 				BufferedImage.TYPE_INT_ARGB);
 		return new AffineTransformOp(at, AffineTransformOp.TYPE_BICUBIC).filter(input, output);

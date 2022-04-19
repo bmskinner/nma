@@ -24,11 +24,11 @@ import java.util.logging.Logger;
 import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.annotations.XYLineAnnotation;
 import org.jfree.chart.annotations.XYTextAnnotation;
 import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.Plot;
 import org.jfree.chart.plot.PlotOrientation;
-import org.jfree.chart.plot.ValueMarker;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.data.xy.XYDataset;
@@ -177,45 +177,13 @@ public abstract class AbstractChartFactory {
 	 * @param tag   the tag to use for colour selection
 	 * @param value the domain axis value to draw at
 	 */
-	protected void addDomainMarkerToXYPlot(final XYPlot plot, final Landmark tag, final double value) {
-		Color colour = chooseTagColour(tag);
-		plot.addDomainMarker(new ValueMarker(value, colour, ChartComponents.MARKER_STROKE));
-	}
-
-	/**
-	 * Draw domain markers for the given border tag at the given position
-	 * 
-	 * @param plot  the plot
-	 * @param tag   the tag to use for colour selection
-	 * @param value the domain axis value to draw at
-	 */
-	protected void addDomainMarkerToXYPlot(final XYPlot plot, final Landmark tag, final int value) {
-		Color colour = chooseTagColour(tag);
-		plot.addDomainMarker(new ValueMarker(value, colour, ChartComponents.MARKER_STROKE));
-	}
-
-	/**
-	 * Get the appropriate colour for rendering tag markers
-	 * 
-	 * @param tag the tag to be rendered
-	 * @return the colour for the tag, or black if the tag was null or unknown
-	 */
-	private Color chooseTagColour(final Landmark tag) {
-		Color colour = Color.BLACK;
-
-		if (tag.equals(Landmark.ORIENTATION_POINT))
-			colour = Color.BLUE;
-		if (tag.equals(Landmark.REFERENCE_POINT))
-			colour = Color.ORANGE;
-		if (tag.getName().equals(Landmark.TOP_VERTICAL.toString()))
-			colour = Color.GRAY;
-		if (tag.getName().equals(Landmark.BOTTOM_VERTICAL.toString()))
-			colour = Color.GRAY;
-		if (tag.getName().equals(Landmark.LEFT_HORIZONTAL.toString()))
-			colour = Color.GRAY;
-		if (tag.getName().equals(Landmark.RIGHT_HORIZONTAL.toString()))
-			colour = Color.GRAY;
-		return colour;
+	protected void addDomainMarkerToXYPlot(final XYPlot plot, final Landmark tag, final double value, double yval) {
+//		Color colour = chooseTagColour(tag);
+		double range = plot.getRangeAxis().getRange().getLength();
+		double minY = plot.getRangeAxis().getRange().getLowerBound();
+		plot.addAnnotation(new XYTextAnnotation(tag.getName(), value, minY + (range * 0.1)), false);
+		plot.addAnnotation(new XYLineAnnotation(value, minY + (range * 0.15), value, yval,
+				ChartComponents.MARKER_STROKE, Color.GRAY));
 	}
 
 	/**

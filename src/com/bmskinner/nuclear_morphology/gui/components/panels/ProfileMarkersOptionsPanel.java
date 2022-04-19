@@ -21,46 +21,47 @@ import javax.swing.JCheckBox;
 @SuppressWarnings("serial")
 public class ProfileMarkersOptionsPanel extends EnumeratedOptionsPanel {
 
-    private JCheckBox checkBox       = new JCheckBox("Show tags");
-    private JCheckBox showNucleiBox  = new JCheckBox("Show nuclear profiles");
+	private JCheckBox checkBox = new JCheckBox("Show annotations");
+	private JCheckBox showNucleiBox = new JCheckBox("Show nuclear profiles");
 
-    public ProfileMarkersOptionsPanel() {
-        super();
+	public ProfileMarkersOptionsPanel() {
+		super();
 
-        // checkbox to select raw or normalised profiles
-        checkBox.setSelected(true);
-        checkBox.addActionListener(this);
-        this.add(checkBox);
+		// checkbox to select raw or normalised profiles
+		checkBox.setSelected(true);
+		checkBox.addActionListener(this);
+		this.add(checkBox);
 
-        // checkbox to show or hide individual nucleus profiles
-        showNucleiBox.setSelected(true);
-        showNucleiBox.addActionListener(this);
-        this.add(showNucleiBox);
+		// checkbox to show or hide individual nucleus profiles
+		showNucleiBox.setSelected(true);
+		showNucleiBox.addActionListener(this);
+		this.add(showNucleiBox);
 
-    }
+	}
 
-    /**
-     * Test if the options panel is set to show profile markers
-     * 
-     * @return
-     */
-    public boolean showMarkers() {
-        return this.checkBox.isSelected();
-    }
+	/**
+	 * Test if the options panel is set to show profile markers
+	 * 
+	 * @return
+	 */
+	public boolean isShowAnnotations() {
+		return this.checkBox.isSelected();
+	}
 
-    /**
-     * Test if the options panel is set to hide raw profiles
-     * 
-     * @return
-     */
-    public boolean isShowNuclei() {
-        return showNucleiBox.isSelected();
-    }
+	/**
+	 * Test if the options panel is set to hide raw profiles
+	 * 
+	 * @return
+	 */
+	public boolean isShowNuclei() {
+		return showNucleiBox.isSelected();
+	}
 
-    public void setEnabled(boolean b) {
+	@Override
+	public void setEnabled(boolean b) {
 
-        this.checkBox.setEnabled(b);
-        this.showNucleiBox.setEnabled(b);
-    }
+		this.checkBox.setEnabled(b);
+		this.showNucleiBox.setEnabled(b);
+	}
 
 }

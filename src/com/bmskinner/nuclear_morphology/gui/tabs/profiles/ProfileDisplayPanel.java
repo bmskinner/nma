@@ -80,14 +80,12 @@ public class ProfileDisplayPanel extends AbstractProfileDisplayPanel {
 
 		boolean normalised = profileAlignmentOptionsPanel.isNormalised();
 		ProfileAlignment alignment = normalised ? ProfileAlignment.LEFT : profileAlignmentOptionsPanel.getSelected();
-		// BorderTagObject tag = borderTagOptionsPanel.getSelected();
-		boolean showMarkers = profileMarkersOptionsPanel.showMarkers();
+
+		boolean showMarkers = profileMarkersOptionsPanel.isShowAnnotations();
 		boolean hideProfiles = profileMarkersOptionsPanel.isShowNuclei();
 
-		// log("Creating options: normalised: "+normalised);
-
 		ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets()).setNormalised(normalised)
-				.setAlignment(alignment).setTag(Landmark.REFERENCE_POINT).setShowMarkers(showMarkers)
+				.setAlignment(alignment).setLandmark(Landmark.REFERENCE_POINT).setShowAnnotations(showMarkers)
 				.setShowProfiles(hideProfiles).setSwatch(GlobalOptions.getInstance().getSwatch()).setProfileType(type)
 				.setTarget(chartPanel).build();
 		return options;

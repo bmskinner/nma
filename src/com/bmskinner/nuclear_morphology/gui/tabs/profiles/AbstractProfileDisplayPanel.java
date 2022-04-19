@@ -109,7 +109,6 @@ public abstract class AbstractProfileDisplayPanel extends ChartDetailPanel
 				}
 
 				plot.getDomainAxis().setRange(0, length);
-				return;
 			}
 		};
 		// Disable entity collection for profiles - too much data

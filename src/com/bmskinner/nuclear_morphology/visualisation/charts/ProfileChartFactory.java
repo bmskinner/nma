@@ -57,22 +57,23 @@ import com.bmskinner.nuclear_morphology.visualisation.datasets.ProfileDatasetCre
 import com.bmskinner.nuclear_morphology.visualisation.options.ChartOptions;
 
 /**
- * Create profile charts. The majority of methods are private, preferring explicit options
- * to have been set in the ChartOptions provided.
+ * Create profile charts. The majority of methods are private, preferring
+ * explicit options to have been set in the ChartOptions provided.
+ * 
  * @author bms41
  * @since 1.14.0
  *
  */
 public class ProfileChartFactory extends AbstractChartFactory {
-	
+
 	private static final Logger LOGGER = Logger.getLogger(ProfileChartFactory.class.getName());
-	
+
 	private static final String IQR_AXIS_LBL = "IQR";
 	private static final String POSITION_AXIS_LBL = "Position";
 	private static final double DEFAULT_POSITION_AXIS_MIN = 0;
 	private static final double DEFAULT_ANGLE_AXIS_MIN = 0;
 	private static final double DEFAULT_ANGLE_AXIS_MAX = 360;
-	
+
 	private static final int DEFAULT_EMPTY_PROFILE_LENGTH = 1000;
 
 	public ProfileChartFactory(@NonNull final ChartOptions o) {
@@ -88,14 +89,13 @@ public class ProfileChartFactory extends AbstractChartFactory {
 		return createEmptyChart(ProfileType.ANGLE);
 	}
 
-
 	/**
 	 * Create an empty chart to display when no datasets are selected
 	 * 
 	 * @return
 	 */
 	public static synchronized JFreeChart createEmptyChart(ProfileType type) {
-		if(type==null)
+		if (type == null)
 			return createEmptyChart();
 
 		JFreeChart chart = createBaseXYChart();
@@ -125,9 +125,9 @@ public class ProfileChartFactory extends AbstractChartFactory {
 			return createEmptyChart(options.getType());
 
 		// A single cell is selected
-		if(options.isSingleDataset() && options.getCell() != null)
+		if (options.isSingleDataset() && options.getCell() != null)
 			return makeIndividualNucleusProfileChart();
-		
+
 		if (options.isSingleDataset())
 			return makeSingleDatasetProfileChart();
 
@@ -135,7 +135,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
 			return makeMultiDatasetProfileChart();
 		return createEmptyChart(options.getType());
 	}
-	
+
 	private JFreeChart makeIndividualNucleusProfileChart() {
 		Nucleus n = options.getCell().getPrimaryNucleus();
 		ProfileChartDataset ds;
@@ -146,14 +146,14 @@ public class ProfileChartFactory extends AbstractChartFactory {
 			return createErrorChart();
 		}
 		JFreeChart chart = makeProfileChart(ds, options.getCell().getPrimaryNucleus().getBorderLength());
-		
+
 		// Add markers
 		if (options.isShowMarkers())
 			addBorderTagMarkers(n, chart.getXYPlot());
-		
+
 		// Add segment name annotations
 		if (options.isShowAnnotations()) {
-			LOGGER.finest( "Adding segment annotations");
+			LOGGER.finest("Adding segment annotations");
 			try {
 				ISegmentedProfile profile = n.getProfile(options.getType(), options.getTag());
 				addSegmentTextAnnotations(profile, chart.getXYPlot());
@@ -168,6 +168,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
 	/**
 	 * Create a segmented profile chart from a given XYDataset. Set the series
 	 * colours for each component. Draw lines on the offset indexes
+	 * 
 	 * @return a chart
 	 */
 	private JFreeChart makeSingleDatasetProfileChart() {
@@ -180,14 +181,13 @@ public class ProfileChartFactory extends AbstractChartFactory {
 //			if (options.getType().equals(ProfileType.FRANKEN)) {
 //				ds = new ProfileDatasetCreator(options).createProfileDataset(); //TODO: replace if needed
 //			} else {
-				ds = new ProfileDatasetCreator(options).createProfileDataset();
+			ds = new ProfileDatasetCreator(options).createProfileDataset();
 //			}
 		} catch (ChartDatasetCreationException e) {
 			LOGGER.log(Loggable.STACK, "Error making profile dataset", e);
 			return createErrorChart();
 		}
 
-		
 		int length = options.isShowProfiles() ? collection.getMaxProfileLength() : collection.getMedianArrayLength();
 		length = options.isNormalised() ? ds.getMaxDomainValue() : length; // default if normalised
 
@@ -196,13 +196,17 @@ public class ProfileChartFactory extends AbstractChartFactory {
 		// mark the reference and orientation points
 
 		XYPlot plot = chart.getXYPlot();
-		
-		if (options.isShowMarkers()) {
+
+		if (options.isShowAnnotations()) {
 
 			for (Landmark tag : collection.getProfileCollection().getLandmarks()) {
+				if (Landmark.REFERENCE_POINT.equals(tag))
+					continue;
 
 				try {
 					int index = collection.getProfileCollection().getLandmarkIndex(tag);
+					double yVal = collection.getProfileCollection()
+							.getProfile(options.getType(), Landmark.REFERENCE_POINT, Stats.MEDIAN).get(index);
 
 					// get the offset from to the current draw point
 					int offset = collection.getProfileCollection().getLandmarkIndex(options.getTag());
@@ -221,63 +225,63 @@ public class ProfileChartFactory extends AbstractChartFactory {
 						indexToDraw += amountToAdd;
 					}
 
-					addDomainMarkerToXYPlot(plot, tag, indexToDraw);
+					addDomainMarkerToXYPlot(plot, tag, indexToDraw, yVal);
 
-				} catch (MissingLandmarkException e) {
+				} catch (MissingLandmarkException | MissingProfileException | ProfileException e) {
 					LOGGER.fine("Tag not present in profile: " + tag);
 				}
 
 			}
 		}
-		
+
 		// Add segment name annotations
 		if (options.isShowAnnotations() && collection.getProfileCollection().hasSegments()) {
 			try {
-				ISegmentedProfile profile = collection.getProfileCollection().getSegmentedProfile(options.getType(), options.getTag(), Stats.MEDIAN);
+				ISegmentedProfile profile = collection.getProfileCollection().getSegmentedProfile(options.getType(),
+						options.getTag(), Stats.MEDIAN);
 				addSegmentTextAnnotations(profile, plot);
 			} catch (ProfileException | MissingComponentException e) {
 				LOGGER.log(Loggable.STACK, "Error adding segment annotations", e);
 				return createErrorChart();
 			}
 		}
-				
+
 		applyDefaultAxisOptions(chart);
 		return chart;
 	}
-	
-	 /**
-     * Create a profile chart for multiple datasets. Shows medians and iqrs for each
-     * dataset.
-     * 
-     * @return a chart
-     */
-    private JFreeChart makeMultiDatasetProfileChart() {
 
-    	ProfileChartDataset profiles;
-    	try {
-    		profiles = new ProfileDatasetCreator(options).createProfileDataset();
-    	} catch (ChartDatasetCreationException e) {
-    		LOGGER.log(Loggable.STACK, "Unable to create profile dataset", e);
-    		return createErrorChart();
-    	}
-    	    	
-    	// Set x-axis length
-    	int xLength = profiles.getMaxDomainValue();
-    	if (!options.isNormalised())	
-    		xLength = options.getDatasets().stream()
-    		.mapToInt(d->d.getCollection() .getMedianArrayLength())
-    		.max().orElse(profiles.getMaxDomainValue());
+	/**
+	 * Create a profile chart for multiple datasets. Shows medians and iqrs for each
+	 * dataset.
+	 * 
+	 * @return a chart
+	 */
+	private JFreeChart makeMultiDatasetProfileChart() {
+
+		ProfileChartDataset profiles;
+		try {
+			profiles = new ProfileDatasetCreator(options).createProfileDataset();
+		} catch (ChartDatasetCreationException e) {
+			LOGGER.log(Loggable.STACK, "Unable to create profile dataset", e);
+			return createErrorChart();
+		}
+
+		// Set x-axis length
+		int xLength = profiles.getMaxDomainValue();
+		if (!options.isNormalised())
+			xLength = options.getDatasets().stream().mapToInt(d -> d.getCollection().getMedianArrayLength()).max()
+					.orElse(profiles.getMaxDomainValue());
 
 		JFreeChart chart = makeProfileChart(profiles, xLength);
 		applyDefaultAxisOptions(chart);
 		return chart;
-    }
+	}
 
 	/**
 	 * Create a profile chart from a given chart dataset. Set the series colours for
 	 * each component
 	 * 
-	 * @param ds the chart dataset of profiles
+	 * @param ds      the chart dataset of profiles
 	 * @param xLength the maximum of the x-axis
 	 * @return a chart
 	 */
@@ -287,13 +291,14 @@ public class ProfileChartFactory extends AbstractChartFactory {
 		XYPlot plot = chart.getXYPlot();
 		plot.setDataset(0, ds.getLines()); // line charts are always in dataset 0
 
-		for(int i=0; i<ds.getDatasetCount(); i++) { // IQR range charts are added above
-			plot.setDataset(i+1, ds.getRanges(i));
+		for (int i = 0; i < ds.getDatasetCount(); i++) { // IQR range charts are added above
+			plot.setDataset(i + 1, ds.getRanges(i));
 		}
-		
+
 		plot.getRangeAxis().setAutoRange(false);
-		plot.getRangeAxis().setRange(DEFAULT_ANGLE_AXIS_MIN, options.getType()==ProfileType.ANGLE?DEFAULT_ANGLE_AXIS_MAX:ds.maxRangeValue());
-		
+		plot.getRangeAxis().setRange(DEFAULT_ANGLE_AXIS_MIN,
+				options.getType() == ProfileType.ANGLE ? DEFAULT_ANGLE_AXIS_MAX : ds.maxRangeValue());
+
 		plot.getDomainAxis().setAutoRange(false);
 		// Start the x-axis at -1 so tags can be seen clearly
 		plot.getDomainAxis().setRange(DEFAULT_PROFILE_START_INDEX, xLength);
@@ -306,58 +311,61 @@ public class ProfileChartFactory extends AbstractChartFactory {
 		plot.setRenderer(0, lineRenderer);
 
 		// Format the line charts
-		for (int i=0; i<ds.getLines().getSeriesCount(); i++) {
+		for (int i = 0; i < ds.getLines().getSeriesCount(); i++) {
 			lineRenderer.setSeriesVisibleInLegend(i, false);
 
 			String name = ds.getLines().getSeriesKey(i).toString();
-			int index   = ds.getLines().getDatasetIndex(name);
-			
+			int index = ds.getLines().getDatasetIndex(name);
+
 			lineRenderer.setSeriesStroke(i, chooseSeriesStroke(name));
-			
-			if (name.startsWith(ProfileDatasetCreator.SEGMENT_SERIES_PREFIX)) { // segments must be coloured separate to profiles
+
+			if (name.startsWith(ProfileDatasetCreator.SEGMENT_SERIES_PREFIX)) { // segments must be coloured separate to
+																				// profiles
 				int segIndex = findSegmentIndex(name);
-				lineRenderer.setSeriesPaint(i,  chooseSeriesColour(name, segIndex, options.getSwatch()));
+				lineRenderer.setSeriesPaint(i, chooseSeriesColour(name, segIndex, options.getSwatch()));
 			} else {
-				lineRenderer.setSeriesPaint(i,  chooseSeriesColour(name, index, options.getSwatch()));
+				lineRenderer.setSeriesPaint(i, chooseSeriesColour(name, index, options.getSwatch()));
 			}
-			
+
 			lineRenderer.setSeriesShape(i, ChartComponents.DEFAULT_POINT_SHAPE);
 		}
-		
+
 		// Format the range charts
-		for (int i = 0; i<ds.getDatasetCount(); i++) {
+		for (int i = 0; i < ds.getDatasetCount(); i++) {
 			// make a semi-transparent colour
-			Paint profileColour = options.getDatasets().get(i).getDatasetColour().orElse(ColourSelecter.getColor(i, options.getSwatch()));
+			Paint profileColour = options.getDatasets().get(i).getDatasetColour()
+					.orElse(ColourSelecter.getColor(i, options.getSwatch()));
 			Paint colour = ColourSelecter.getTransparentColour((Color) profileColour, true, 128);
 			XYDifferenceRenderer rangeRenderer = new XYDifferenceRenderer(colour, colour, false);
 			rangeRenderer.setDefaultToolTipGenerator(null);
-			plot.setRenderer(i+1, rangeRenderer);
-			for (int series = 0; series<ds.getRanges(i).getSeriesCount(); series++) {
+			plot.setRenderer(i + 1, rangeRenderer);
+			for (int series = 0; series < ds.getRanges(i).getSeriesCount(); series++) {
 				rangeRenderer.setSeriesPaint(series, colour);
 				rangeRenderer.setSeriesVisibleInLegend(series, false);
 
 			}
-		}		
+		}
 		return chart;
 	}
-	
+
 	private int findSegmentIndex(String name) {
-		String regex = ProfileDatasetCreator.SEGMENT_SERIES_PREFIX+"(\\d+)_?.*";
+		String regex = ProfileDatasetCreator.SEGMENT_SERIES_PREFIX + "(\\d+)_?.*";
 		Pattern p = Pattern.compile(regex);
 		Matcher matcher = p.matcher(name);
-		if(matcher.matches())
+		if (matcher.matches())
 			return Integer.parseInt(matcher.group(1));
 		return 0;
 	}
-	
+
 	/**
 	 * Choose a stroke based on the given series name. Defaults to
 	 * {@link ChartComponents#PROFILE_STROKE}
+	 * 
 	 * @param name the series name
 	 * @return the stroke
 	 */
 	private Stroke chooseSeriesStroke(final String name) {
-		if(name==null)
+		if (name == null)
 			return ChartComponents.PROFILE_STROKE;
 		if (name.startsWith(ProfileDatasetCreator.SEGMENT_SERIES_PREFIX))
 			return ChartComponents.SEGMENT_STROKE;
@@ -371,22 +379,23 @@ public class ProfileChartFactory extends AbstractChartFactory {
 			return ChartComponents.PROFILE_STROKE;
 		return ChartComponents.PROFILE_STROKE;
 	}
-	
+
 	/**
 	 * Choose a colour based on the given series name. Defaults to
 	 * {@link ColourSelecter#getColor(int, ColourSwatch)}
-	 * @param name the series name
-	 * @param index the index of the series
+	 * 
+	 * @param name   the series name
+	 * @param index  the index of the series
 	 * @param swatch the colour swatch to select from
 	 * @return the colour
 	 */
 	private Color chooseSeriesColour(final String name, final int index, final ColourSwatch swatch) {
-		if(name==null)
+		if (name == null)
 			return ColourSelecter.getColor(index, swatch);
 		if (name.startsWith(ProfileDatasetCreator.SEGMENT_SERIES_PREFIX))
 			return ColourSelecter.getColor(index, swatch);
 		if (name.startsWith(ProfileDatasetCreator.MEDIAN_SERIES_PREFIX))
-			return ColourSelecter.getColor(index, swatch);//.darker();
+			return ColourSelecter.getColor(index, swatch);// .darker();
 		if (name.startsWith(ProfileDatasetCreator.NUCLEUS_SERIES_PREFIX))
 			return Color.LIGHT_GRAY;
 		if (name.startsWith(ProfileDatasetCreator.QUARTILE_SERIES_PREFIX))
@@ -398,7 +407,8 @@ public class ProfileChartFactory extends AbstractChartFactory {
 
 	/**
 	 * Add domain markers for each tag in the taggable
-	 * @param n the taggable object
+	 * 
+	 * @param n    the taggable object
 	 * @param plot the plot to draw the domain markers on
 	 */
 	protected void addBorderTagMarkers(@NonNull Taggable n, @NonNull XYPlot plot) {
@@ -412,7 +422,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
 
 				// adjust the index to the offset
 				index = n.wrapIndex(index - offset);
-				addDomainMarkerToXYPlot(plot, tag, (double) index);
+				addDomainMarkerToXYPlot(plot, tag, index, 180);
 
 			} catch (MissingLandmarkException e) {
 				LOGGER.log(Loggable.STACK, "Border tag not available", e);
@@ -422,11 +432,15 @@ public class ProfileChartFactory extends AbstractChartFactory {
 
 	/**
 	 * Add annotations of segment names from the given profile to the plot
+	 * 
 	 * @param profile
 	 * @param plot
 	 */
 	protected void addSegmentTextAnnotations(ISegmentedProfile profile, XYPlot plot) {
+		double range = plot.getRangeAxis().getRange().getLength();
+		double minY = plot.getRangeAxis().getRange().getLowerBound();
 		double xMax = plot.getDomainAxis().getRange().getUpperBound();
+
 		for (IProfileSegment seg : profile.getOrderedSegments()) {
 
 			int midPoint = seg.getMidpointIndex();
@@ -434,7 +448,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
 			double x = midPoint;
 			if (options.isNormalised())
 				x = ((double) midPoint / (double) seg.getProfileLength()) * xMax;
-			XYTextAnnotation segmentAnnotation = new XYTextAnnotation(seg.getName(), x, 320);
+			XYTextAnnotation segmentAnnotation = new XYTextAnnotation(seg.getName(), x, minY + (range * 0.9));
 
 			Paint colour = ColourSelecter.getColor(seg.getPosition());
 
@@ -442,60 +456,61 @@ public class ProfileChartFactory extends AbstractChartFactory {
 			plot.addAnnotation(segmentAnnotation);
 		}
 	}
-	
-	
-    /**
-     * Create a chart showing the variability of the profile; i.e
-     * the size of the IQR at each point along the profile.
-     * @return
-     */
-    public JFreeChart createVariabilityChart() {
 
-        if (!options.hasDatasets())
-            return ProfileChartFactory.createEmptyChart(options.getType());
+	/**
+	 * Create a chart showing the variability of the profile; i.e the size of the
+	 * IQR at each point along the profile.
+	 * 
+	 * @return
+	 */
+	public JFreeChart createVariabilityChart() {
 
-        try {
-            if (options.isSingleDataset())
-                return makeSingleVariabilityChart();
-            return makeMultiVariabilityChart();
-        } catch (Exception e) {
-            return createErrorChart();
-        }
-    }
+		if (!options.hasDatasets())
+			return ProfileChartFactory.createEmptyChart(options.getType());
 
-    /**
-     * Create a variabillity chart showing the IQR for a single dataset. Segment
-     * colours are applied.
-     */
-    private JFreeChart makeSingleVariabilityChart() {
-    	ProfileChartDataset ds;
-        try {
-            ds = new ProfileDatasetCreator(options).createProfileVariabilityDataset();
-        } catch (ChartDatasetCreationException e) {
-            return createErrorChart();
-        }
+		try {
+			if (options.isSingleDataset())
+				return makeSingleVariabilityChart();
+			return makeMultiVariabilityChart();
+		} catch (Exception e) {
+			return createErrorChart();
+		}
+	}
 
-        JFreeChart chart = makeProfileChart(ds, ds.getMaxDomainValue());
-        XYPlot plot = chart.getXYPlot();
-        plot.getRangeAxis().setLabel(IQR_AXIS_LBL);
-        plot.getRangeAxis().setAutoRange(true);
-        applyDefaultAxisOptions(chart);
-        return chart;
-    }
+	/**
+	 * Create a variabillity chart showing the IQR for a single dataset. Segment
+	 * colours are applied.
+	 */
+	private JFreeChart makeSingleVariabilityChart() {
+		ProfileChartDataset ds;
+		try {
+			ds = new ProfileDatasetCreator(options).createProfileVariabilityDataset();
+		} catch (ChartDatasetCreationException e) {
+			return createErrorChart();
+		}
 
-    /**
-     * Create a variability chart showing the IQR for a multiple datasets.
-     * @throws ChartDatasetCreationException 
-     */
-    private JFreeChart makeMultiVariabilityChart() throws ChartDatasetCreationException  {
-    	ProfileChartDataset ds = new ProfileDatasetCreator(options).createProfileVariabilityDataset();
+		JFreeChart chart = makeProfileChart(ds, ds.getMaxDomainValue());
+		XYPlot plot = chart.getXYPlot();
+		plot.getRangeAxis().setLabel(IQR_AXIS_LBL);
+		plot.getRangeAxis().setAutoRange(true);
+		applyDefaultAxisOptions(chart);
+		return chart;
+	}
 
-    	JFreeChart chart = makeProfileChart(ds, ds.getMaxDomainValue());
-        XYPlot plot = chart.getXYPlot();
+	/**
+	 * Create a variability chart showing the IQR for a multiple datasets.
+	 * 
+	 * @throws ChartDatasetCreationException
+	 */
+	private JFreeChart makeMultiVariabilityChart() throws ChartDatasetCreationException {
+		ProfileChartDataset ds = new ProfileDatasetCreator(options).createProfileVariabilityDataset();
 
-        plot.getRangeAxis().setAutoRange(true);
-        plot.getRangeAxis().setLabel(IQR_AXIS_LBL);
-        applyDefaultAxisOptions(chart);
-        return chart;
-    }
+		JFreeChart chart = makeProfileChart(ds, ds.getMaxDomainValue());
+		XYPlot plot = chart.getXYPlot();
+
+		plot.getRangeAxis().setAutoRange(true);
+		plot.getRangeAxis().setLabel(IQR_AXIS_LBL);
+		applyDefaultAxisOptions(chart);
+		return chart;
+	}
 }

@@ -71,7 +71,7 @@ public class OutlineTestChartFactory extends ChartFactoryTest {
 			// show the profile corresponding to the chart
 			ChartOptions profileOptions = new ChartOptionsBuilder().setDatasets(dataset)
 					.setCell(cell)
-					.setTag(Landmark.REFERENCE_POINT)
+					.setLandmark(Landmark.REFERENCE_POINT)
 					.setShowMarkers(true)
 					.setShowAnnotations(true)
 					.setProfileType(ProfileType.ANGLE)
