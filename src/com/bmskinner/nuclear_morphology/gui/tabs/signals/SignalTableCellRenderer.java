@@ -19,6 +19,7 @@ package com.bmskinner.nuclear_morphology.gui.tabs.signals;
 import java.awt.Color;
 import java.util.logging.Logger;
 
+import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.components.renderers.ConsistentRowTableCellRenderer;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.visualisation.datasets.SignalTableCell;
@@ -32,47 +33,45 @@ import com.bmskinner.nuclear_morphology.visualisation.datasets.SignalTableCell;
  */
 @SuppressWarnings("serial")
 public class SignalTableCellRenderer extends ConsistentRowTableCellRenderer {
-	
+
 	private static final Logger LOGGER = Logger.getLogger(SignalTableCellRenderer.class.getName());
 
 	@Override
-    public java.awt.Component getTableCellRendererComponent(javax.swing.JTable table, java.lang.Object value,
-            boolean isSelected, boolean hasFocus, int row, int column) {
+	public java.awt.Component getTableCellRendererComponent(javax.swing.JTable table, java.lang.Object value,
+			boolean isSelected, boolean hasFocus, int row, int column) {
 
-        super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+		super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 
-        Color colour = Color.WHITE;
+		Color colour = Color.WHITE;
 
-        try {
-            if (row < table.getModel().getRowCount() - 1) {
+		try {
+			if (row < table.getModel().getRowCount() - 1) {
 
-                int nextRow = row + 1;
+				int nextRow = row + 1;
 
-                if (nextRow < table.getModel().getRowCount()) { // ignore if no data
+				if (nextRow < table.getModel().getRowCount()) { // ignore if no data
 
-                    // get the value in the first column of the row below
-                    String nextRowHeader = table.getModel().getValueAt(nextRow, 0).toString();
-                    Object nextRowValue  = table.getModel().getValueAt(nextRow, column);
-                	// Check if the signal block has a signal group by
-                	// looking at the next row
-                    if (nextRowHeader.equals("Signal group") &&
-                    		nextRowValue != null && 
-                    		!nextRowValue.toString().equals("") &&
-                    		nextRowValue instanceof SignalTableCell) {
+					// get the value in the first column of the row below
+					String nextRowHeader = table.getModel().getValueAt(nextRow, 0).toString();
+					Object nextRowValue = table.getModel().getValueAt(nextRow, column);
+					// Check if the signal block has a signal group by
+					// looking at the next row
+					if (nextRowHeader.equals(Labels.Signals.SIGNAL_GROUP_LABEL) && nextRowValue != null
+							&& !nextRowValue.toString().equals("") && nextRowValue instanceof SignalTableCell) {
 
-                    	SignalTableCell cell = (SignalTableCell) nextRowValue;
-                    	colour = cell.getColor();
-                    }
-                    
-                }
-            }
-        } catch (Exception e) {
-        	LOGGER.log(Loggable.STACK, "Error in signal renderer", e);
-            colour = Color.WHITE;
-        }
+						SignalTableCell cell = (SignalTableCell) nextRowValue;
+						colour = cell.getColor();
+					}
 
-        setBackground(colour);
+				}
+			}
+		} catch (Exception e) {
+			LOGGER.log(Loggable.STACK, "Error in signal renderer", e);
+			colour = Color.WHITE;
+		}
 
-        return this;
-    }
+		setBackground(colour);
+
+		return this;
+	}
 }

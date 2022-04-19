@@ -16,34 +16,21 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.visualisation.tables;
 
-import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.logging.Logger;
-import java.util.stream.DoubleStream;
 
-import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
-import com.bmskinner.nuclear_morphology.analysis.classification.ClusteringMethod;
-import com.bmskinner.nuclear_morphology.analysis.classification.PrincipalComponentAnalysis;
-import com.bmskinner.nuclear_morphology.analysis.classification.TsneMethod;
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
-import com.bmskinner.nuclear_morphology.components.datasets.IClusterGroup;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
-import com.bmskinner.nuclear_morphology.components.measure.MeasurementDimension;
 import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
-import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
@@ -52,9 +39,7 @@ import com.bmskinner.nuclear_morphology.components.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.core.DatasetListManager;
 import com.bmskinner.nuclear_morphology.gui.Labels;
-import com.bmskinner.nuclear_morphology.io.Io;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
-import com.bmskinner.nuclear_morphology.stats.ConfidenceInterval;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 import com.bmskinner.nuclear_morphology.stats.Stats.WilcoxonRankSumResult;
 import com.bmskinner.nuclear_morphology.visualisation.options.TableOptions;
@@ -74,170 +59,6 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 	 */
 	public AnalysisDatasetTableCreator(@NonNull final TableOptions o) {
 		super(o);
-	}
-
-	public TableModel createMedianProfileStatisticTable() {
-
-		if (!options.hasDatasets()) {
-			return createBlankTable();
-		}
-
-		if (options.isSingleDataset()) {
-			return createMedianProfileSegmentStatsTable(options.firstDataset(), options.getScale());
-		}
-
-		if (options.isMultipleDatasets()) {
-			return createMultiDatasetMedianProfileSegmentStatsTable();
-		}
-
-		return createBlankTable();
-	}
-
-	/**
-	 * Create a table of segment stats for median profile of the given dataset.
-	 * 
-	 * @param dataset the AnalysisDataset to include
-	 * @return a table model
-	 * @throws Exception
-	 */
-	private TableModel createMedianProfileSegmentStatsTable(@Nullable IAnalysisDataset dataset,
-			MeasurementScale scale) {
-
-		DefaultTableModel model = new DefaultTableModel();
-
-		if (dataset == null) {
-			model.addColumn(Labels.NO_DATA_LOADED);
-
-		} else {
-			ICellCollection collection = dataset.getCollection();
-			// check which reference point to use
-			Landmark point = Landmark.REFERENCE_POINT;
-
-			// get mapping from ordered segments to segment names
-			List<IProfileSegment> segments;
-			try {
-				segments = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, point, Stats.MEDIAN)
-						.getOrderedSegments();
-			} catch (MissingLandmarkException | ProfileException | MissingProfileException e) {
-				LOGGER.log(Loggable.STACK, "Error getting median profile", e);
-				return createBlankTable();
-			}
-
-			// create the row names
-			Object[] fieldNames = { " ", "Mean length (" + Measurement.units(scale, MeasurementDimension.LENGTH) + ")",
-					"Mean length 95% CI (" + Measurement.units(scale, MeasurementDimension.LENGTH) + ")",
-					"Length std err. (" + Measurement.units(scale, MeasurementDimension.LENGTH) + ")" };
-
-			model.addColumn(EMPTY_STRING, fieldNames);
-
-			DecimalFormat df = new DecimalFormat(DEFAULT_DECIMAL_FORMAT);
-
-			for (IProfileSegment segment : segments) {
-
-				List<Object> rowData = new ArrayList<>();
-
-				rowData.add("");
-
-				double[] meanLengths = collection.getRawValues(Measurement.LENGTH,
-						CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, segment.getID());
-
-				double mean = DoubleStream.of(meanLengths).average().orElse(0);
-
-				double sem = Stats.stderr(meanLengths);
-
-				ConfidenceInterval ci = new ConfidenceInterval(meanLengths, 0.95);
-
-				rowData.add(df.format(mean));
-				rowData.add(df.format(ci.getLower().doubleValue()) + " - " + df.format(ci.getUpper().doubleValue()));
-				rowData.add(df.format(sem));
-
-				model.addColumn(segment.getName(), rowData.toArray(new Object[0]));
-			}
-		}
-		return model;
-	}
-
-	/**
-	 * Create a table of segment stats for median profile of the given dataset.
-	 * 
-	 * @param dataset the AnalysisDataset to include
-	 * @return a table model
-	 */
-	private TableModel createMultiDatasetMedianProfileSegmentStatsTable() {
-
-		if (!options.hasDatasets()) {
-			return createBlankTable();
-		}
-
-		DefaultTableModel model = new DefaultTableModel();
-
-		// If the datasets have different segment counts, show error message
-		if (!IProfileSegment.segmentCountsMatch(options.getDatasets())) {
-			model.addColumn(Labels.INCONSISTENT_SEGMENT_NUMBER);
-			return model;
-		}
-
-		MeasurementScale scale = options.getScale();
-
-		List<Object> colNames = new ArrayList<>();
-
-		// assumes all datasets have the same number of segments
-		List<IProfileSegment> segments;
-		try {
-			segments = options.firstDataset().getCollection().getProfileCollection()
-					.getSegments(Landmark.REFERENCE_POINT);
-		} catch (MissingLandmarkException | ProfileException e1) {
-			LOGGER.log(Loggable.STACK, "Error getting segments from profile collection", e1);
-			return createBlankTable();
-		}
-
-		// Add the dataset names column
-		colNames.add(Labels.DATASET);
-
-		List<Object> colours = new ArrayList<>();
-		colours.add(" ");
-
-		for (IProfileSegment segment : segments) {
-			colNames.add(segment.getName());
-			colours.add(EMPTY_STRING); // Add the segment colours columns
-		}
-
-		model.setColumnIdentifiers(colNames.toArray());
-		model.addRow(colours.toArray(new Object[0]));
-
-		// Add the segment stats columns
-		DecimalFormat df = new DecimalFormat(DEFAULT_DECIMAL_FORMAT);
-
-		for (IAnalysisDataset dataset : options.getDatasets()) {
-
-			ICellCollection collection = dataset.getCollection();
-
-			try {
-				List<IProfileSegment> segs = collection.getProfileCollection()
-						.getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN)
-						.getOrderedSegments();
-
-				List<Object> rowData = new ArrayList<>();
-				rowData.add(dataset.getName() + " mean length (" + Measurement.units(scale, MeasurementDimension.LENGTH)
-						+ ")");
-
-				for (IProfileSegment segment : segs) {
-
-					double[] meanLengths = collection.getRawValues(Measurement.LENGTH,
-							CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, segment.getID());
-					double mean = DoubleStream.of(meanLengths).average().orElse(0);
-
-					ConfidenceInterval ci = new ConfidenceInterval(meanLengths, 0.95);
-					rowData.add(df.format(mean) + " ± " + df.format(ci.getSize().doubleValue()));
-				}
-				model.addRow(rowData.toArray(new Object[0]));
-			} catch (MissingLandmarkException | ProfileException | MissingProfileException e) {
-				LOGGER.log(Loggable.STACK, "Error getting median profile", e);
-				return createBlankTable();
-			}
-		}
-
-		return model;
 	}
 
 	/**
@@ -431,68 +252,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 			return createBlankTable();
 		}
 
-		DefaultTableModel model = new DefaultTableModel();
-
-		Object[] columnNames = new Object[] { "Dataset 1", "Unique %", "Unique", "Shared %", "Shared", "Shared %",
-				"Unique", "Unique %", "Dataset 2" };
-		model.setColumnIdentifiers(columnNames);
-
-		List<IAnalysisDataset> list = options.getDatasets();
-		// Track the pairwase comparisons performed to avoid duplicates
-		Map<UUID, List<UUID>> existingMatches = new HashMap<>();
-
-		// add columns
-		DecimalFormat df = new DecimalFormat(DEFAULT_DECIMAL_FORMAT);
-		for (IAnalysisDataset dataset1 : list) {
-
-			List<UUID> set1List = new ArrayList<>();
-			existingMatches.put(dataset1.getId(), set1List);
-
-			for (IAnalysisDataset dataset2 : list) {
-
-				// Ignore self-self matches
-				if (!dataset2.getId().equals(dataset1.getId())) {
-
-					set1List.add(dataset2.getId());
-
-					if (existingMatches.get(dataset2.getId()) != null
-							&& existingMatches.get(dataset2.getId()).contains(dataset1.getId())) {
-						continue;
-					}
-
-					Object[] popData = new Object[9];
-
-					popData[0] = dataset1;
-					popData[8] = dataset2;
-
-					// compare the number of shared nucleus ids
-					int shared = dataset1.getCollection().countShared(dataset2);
-
-					popData[4] = shared;
-
-					int unique1 = dataset1.getCollection().size() - shared;
-					int unique2 = dataset2.getCollection().size() - shared;
-					popData[2] = unique1;
-					popData[6] = unique2;
-
-					double uniquePct1 = ((double) unique1 / (double) dataset1.getCollection().size()) * 100;
-					double uniquePct2 = ((double) unique2 / (double) dataset2.getCollection().size()) * 100;
-
-					popData[1] = df.format(uniquePct1);
-					popData[7] = df.format(uniquePct2);
-
-					double sharedpct1 = ((double) shared / (double) dataset1.getCollection().size()) * 100;
-					double sharedpct2 = ((double) shared / (double) dataset2.getCollection().size()) * 100;
-
-					popData[3] = df.format(sharedpct1);
-					popData[5] = df.format(sharedpct2);
-
-					model.addRow(popData);
-				}
-			}
-		}
-		LOGGER.finer("Created venn pairwise table model");
-		return model;
+		return new VennDetailedTableModel(options.getDatasets());
 	}
 
 	/**
@@ -610,6 +370,38 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 	}
 
 	/**
+	 * Generate a table of magnitude difference between datasets
+	 * 
+	 * @param options the table options
+	 * @return a tablemodel for display
+	 */
+	public TableModel createMagnitudeStatisticTable(@Nullable String component) {
+
+		if (!options.hasDatasets()) {
+			return new MagnitudeTableModel(null, null);
+		}
+
+		try {
+
+			if (CellularComponent.NUCLEUS.equals(component)) {
+				List<MagnitudeDatasetResult> results = calculateNuclearMagnitudes();
+				return new MagnitudeTableModel(options.getDatasets(), results);
+			}
+
+			if (CellularComponent.NUCLEAR_BORDER_SEGMENT.equals(component)) {
+				List<MagnitudeDatasetResult> results = calculateSegmentMagnitudes();
+				return new MagnitudeTableModel(options.getDatasets(), results);
+			}
+		} catch (Exception e) {
+			LOGGER.log(Loggable.STACK, "Error creating magnitude table", e);
+			return createBlankTable();
+		}
+
+		return new MagnitudeTableModel(null, null);
+
+	}
+
+	/**
 	 * Calculate magnitude differences between datasets
 	 * 
 	 * @return
@@ -674,38 +466,6 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 	}
 
 	/**
-	 * Generate a table of magnitude difference between datasets
-	 * 
-	 * @param options the table options
-	 * @return a tablemodel for display
-	 */
-	public TableModel createMagnitudeStatisticTable(@Nullable String component) {
-
-		if (!options.hasDatasets()) {
-			return new MagnitudeTableModel(null, null);
-		}
-
-		try {
-
-			if (CellularComponent.NUCLEUS.equals(component)) {
-				List<MagnitudeDatasetResult> results = calculateNuclearMagnitudes();
-				return new MagnitudeTableModel(options.getDatasets(), results);
-			}
-
-			if (CellularComponent.NUCLEAR_BORDER_SEGMENT.equals(component)) {
-				List<MagnitudeDatasetResult> results = calculateSegmentMagnitudes();
-				return new MagnitudeTableModel(options.getDatasets(), results);
-			}
-		} catch (Exception e) {
-			LOGGER.log(Loggable.STACK, "Error creating magnitude table", e);
-			return createBlankTable();
-		}
-
-		return new MagnitudeTableModel(null, null);
-
-	}
-
-	/**
 	 * Get the options used for creating cluster groups
 	 * 
 	 * @return
@@ -719,147 +479,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 		if (options.getDatasets().stream().noneMatch(IAnalysisDataset::hasClusters))
 			return createBlankTable();
 
-		// Make the table model
-		DefaultTableModel model = new DefaultTableModel();
-
-		List<Object> columnList = new ArrayList<>();
-		columnList.add(Labels.Clusters.CLUSTER_GROUP);
-		columnList.add(Labels.Clusters.CLUSTER_FOUND);
-		columnList.add(Labels.Clusters.CLUSTER_PARAMS);
-		columnList.add(Labels.Clusters.CLUSTER_DIM_RED);
-		columnList.add(Labels.Clusters.CLUSTER_DIM_PLOT);
-		columnList.add(Labels.Clusters.CLUSTER_METHOD);
-		columnList.add(Labels.Clusters.TREE);
-
-		model.addColumn(EMPTY_STRING, columnList.toArray());
-
-		List<IAnalysisDataset> list = options.getDatasets();
-
-		// format the numbers and make into a tablemodel
-		for (IAnalysisDataset dataset : list) {
-			List<IClusterGroup> clusterGroups = dataset.getClusterGroups();
-
-			for (IClusterGroup g : clusterGroups) {
-				List<Object> dataList = new ArrayList<>();
-				dataList.add(g);
-				dataList.add(String.valueOf(g.size()));
-				dataList.add(createClusterParameterString(g));
-				dataList.add(createDimensionalReductionString(g));
-				dataList.add(createDimensionalPlotString(g));
-				dataList.add(createClusterMethodString(g));
-				dataList.add(g.hasTree() ? Labels.Clusters.CLUSTER_SHOW_TREE : Labels.NA);
-				model.addColumn(dataset.getName(), dataList.toArray());
-			}
-		}
-		return model;
+		return new ClusterGroupTableModel(options.getDatasets());
 	}
 
-	private String createDimensionalPlotString(IClusterGroup group) {
-		StringBuilder builder = new StringBuilder();
-		Optional<HashOptions> opn = group.getOptions();
-
-		if (!opn.isPresent()) {
-			builder.append(Labels.NA);
-			return builder.toString();
-		}
-
-		HashOptions op = opn.get();
-		if (op.getBoolean(HashOptions.CLUSTER_USE_TSNE_KEY) || op.getBoolean(HashOptions.CLUSTER_USE_PCA_KEY)) {
-			builder.append(Labels.Clusters.VIEW_PLOT);
-		}
-
-		String s = builder.toString();
-		if (s.equals(EMPTY_STRING))
-			return Labels.NA;
-		return s;
-	}
-
-	private String createClusterParameterString(IClusterGroup group) {
-		StringBuilder builder = new StringBuilder();
-		Optional<HashOptions> opn = group.getOptions();
-
-		if (!opn.isPresent()) {
-			builder.append(Labels.NA);
-			return builder.toString();
-		}
-
-		HashOptions op = opn.get();
-
-		for (ProfileType t : ProfileType.displayValues())
-			if (op.getBoolean(t.toString()))
-				builder.append(t + Io.NEWLINE);
-
-		for (Measurement stat : Measurement.getNucleusStats())
-			if (op.getBoolean(stat.toString()))
-				builder.append(stat.toString() + Io.NEWLINE);
-
-		for (String s : op.getStringKeys()) {
-			try {
-				UUID id = UUID.fromString(s);
-				if (op.getBoolean(id.toString()))
-					builder.append("Segment_" + id.toString() + Io.NEWLINE);
-			} catch (IllegalArgumentException e) {
-				// not a UUID, skip
-			}
-		}
-
-		String s = builder.toString();
-		if (s.equals(EMPTY_STRING))
-			return Labels.NA;
-		return s;
-	}
-
-	private String createDimensionalReductionString(IClusterGroup group) {
-		StringBuilder builder = new StringBuilder();
-		Optional<HashOptions> opn = group.getOptions();
-
-		if (!opn.isPresent()) {
-			builder.append(Labels.NA);
-			return builder.toString();
-		}
-
-		HashOptions op = opn.get();
-		if (op.getBoolean(HashOptions.CLUSTER_USE_TSNE_KEY)) {
-			builder.append(Labels.Clusters.TSNE + Io.NEWLINE);
-			builder.append(
-					Labels.Clusters.TSNE_PERPLEXITY + ": " + op.getDouble(TsneMethod.PERPLEXITY_KEY) + Io.NEWLINE);
-			builder.append(Labels.Clusters.TSNE_MAX_ITER + ": " + op.getInt(TsneMethod.MAX_ITERATIONS_KEY));
-		}
-
-		if (op.getBoolean(HashOptions.CLUSTER_USE_PCA_KEY)) {
-			builder.append(Labels.Clusters.PCA + Io.NEWLINE);
-			builder.append(Labels.Clusters.PCA_VARIANCE + ": "
-					+ op.getDouble(PrincipalComponentAnalysis.PROPORTION_VARIANCE_KEY) + Io.NEWLINE);
-			builder.append(
-					Labels.Clusters.PCA_NUM_PCS + ": " + op.getInt(HashOptions.CLUSTER_NUM_PCS_KEY) + Io.NEWLINE);
-		}
-
-		String s = builder.toString();
-		if (s.equals(EMPTY_STRING))
-			return Labels.NA;
-		return s;
-	}
-
-	private String createClusterMethodString(IClusterGroup group) {
-		StringBuilder builder = new StringBuilder();
-		Optional<HashOptions> opn = group.getOptions();
-
-		if (!opn.isPresent()) {
-			builder.append(Labels.NA);
-			return builder.toString();
-		}
-
-		HashOptions op = opn.get();
-
-		ClusteringMethod method = ClusteringMethod.valueOf(op.getString(HashOptions.CLUSTER_METHOD_KEY));
-		builder.append(method + Io.NEWLINE);
-		if (method.equals(ClusteringMethod.EM)) {
-			builder.append(op.getInt(HashOptions.CLUSTER_EM_ITERATIONS_KEY) + " iterations" + Io.NEWLINE);
-		}
-
-		if (method.equals(ClusteringMethod.HIERARCHICAL)) {
-			builder.append("Distance: " + op.getString(HashOptions.CLUSTER_HIERARCHICAL_METHOD_KEY) + Io.NEWLINE);
-		}
-		return builder.toString();
-	}
 }

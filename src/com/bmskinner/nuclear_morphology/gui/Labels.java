@@ -127,7 +127,7 @@ public class Labels {
 	 */
 	public static class Signals {
 		public static final String SIGNAL_COLOUR_LABEL = "  "; // whitespace that will not be collapsed
-		public static final String SIGNAL_GROUP_LABEL = "Signal group";
+		public static final String SIGNAL_GROUP_LABEL = "Signal group name";
 		public static final String NUMBER_OF_SIGNAL_GROUPS = "Number of signal groups";
 		public static final String SIGNALS_LABEL = "Signals";
 		public static final String SIGNAL_LABEL_SINGULAR = "Signal";
@@ -137,6 +137,12 @@ public class Labels {
 		public static final String NO_SIGNAL_GROUPS = "No signal groups in datasets";
 		public static final String CHOOSE_SIGNAL_COLOUR = "Choose signal color";
 		public static final String SIGNAL_SOURCE_LABEL = "Source (double click to change)";
+		public static final String MIN_CIRC_LBL = "Min circularity";
+		public static final String MAX_CIRC_LBL = "Max circularity";
+		public static final String MIN_SIZE_LBL = "Min size (pixels)";
+		public static final String MAX_SIZE_LBL = "Max fraction";
+		public static final String DETECTION_MODE_LBL = "Detection mode";
+		public static final String THRESHOLD_LBL = "Threshold";
 		public static final String SIGNAL_CHANNEL_LABEL = "Channel";
 		public static final String WARP_BTN_LBL = "Warp signals";
 		public static final String SHOW_SIGNAL_RADII_LBL = "Show signal radii";

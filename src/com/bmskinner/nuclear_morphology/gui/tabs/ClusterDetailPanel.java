@@ -52,6 +52,7 @@ import com.bmskinner.nuclear_morphology.visualisation.options.TableOptions;
 import com.bmskinner.nuclear_morphology.visualisation.options.TableOptionsBuilder;
 import com.bmskinner.nuclear_morphology.visualisation.tables.AbstractTableCreator;
 import com.bmskinner.nuclear_morphology.visualisation.tables.AnalysisDatasetTableCreator;
+import com.bmskinner.nuclear_morphology.visualisation.tables.ClusterGroupTableModel;
 
 /**
  * This panel shows any cluster groups that have been created, and the
@@ -84,7 +85,7 @@ public class ClusterDetailPanel extends TableDetailPanel implements ClusterGroup
 	private JPanel statusPanel = new JPanel(new BorderLayout());
 
 	private JPanel mainPanel;
-	private ExportableTable clusterDetailsTable;
+	private ExportableTable table;
 
 	public ClusterDetailPanel() {
 		super();
@@ -123,7 +124,7 @@ public class ClusterDetailPanel extends TableDetailPanel implements ClusterGroup
 		TableCellRenderer buttonRenderer = new JButtonRenderer();
 		TableCellRenderer textRenderer = new JTextAreaCellRenderer(false);
 
-		clusterDetailsTable = new ExportableTable(optionsModel) {
+		table = new ExportableTable(optionsModel) {
 
 			@Override
 			public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -145,26 +146,26 @@ public class ClusterDetailPanel extends TableDetailPanel implements ClusterGroup
 
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				int row = clusterDetailsTable.rowAtPoint(e.getPoint());
-				int col = clusterDetailsTable.columnAtPoint(e.getPoint());
+				int row = table.rowAtPoint(e.getPoint());
+				int col = table.columnAtPoint(e.getPoint());
 				if (col == 0)
 					return;
 
-				IClusterGroup group = (IClusterGroup) clusterDetailsTable.getValueAt(0, col);
-				// find the dataset with this cluster group
-				IAnalysisDataset d = getDatasets().stream().filter(t -> t.hasClusterGroup(group)).findFirst()
-						.orElse(null);
+				ClusterGroupTableModel model = (ClusterGroupTableModel) table.getModel();
 
-				if (clusterDetailsTable.getValueAt(row, 0).equals(Labels.Clusters.TREE)
-						&& !clusterDetailsTable.getValueAt(row, col).equals(Labels.NA)) {
+				IClusterGroup group = model.getClusterGroup(table.convertColumnIndexToModel(col));
+				IAnalysisDataset d = model.getDataset(table.convertColumnIndexToModel(col));
+
+				if (table.getValueAt(row, 0).equals(Labels.Clusters.TREE)
+						&& !table.getValueAt(row, col).equals(Labels.NA)) {
 					Runnable r = () -> {
 						new ClusterTreeDialog(d, group);
 					};
 					new Thread(r).start();
 				}
 
-				if (clusterDetailsTable.getValueAt(row, 0).equals(Labels.Clusters.CLUSTER_DIM_PLOT)
-						&& !clusterDetailsTable.getValueAt(row, col).equals(Labels.NA)) {
+				if (table.getValueAt(row, 0).equals(Labels.Clusters.CLUSTER_DIM_PLOT)
+						&& !table.getValueAt(row, col).equals(Labels.NA)) {
 					Runnable r = () -> {
 						new TsneDialog(d, group);
 					};
@@ -195,16 +196,16 @@ public class ClusterDetailPanel extends TableDetailPanel implements ClusterGroup
 
 		};
 
-		clusterDetailsTable.addMouseListener(mouseListener);
+		table.addMouseListener(mouseListener);
 
-		clusterDetailsTable.setRowSelectionAllowed(false);
+		table.setRowSelectionAllowed(false);
 
-		JScrollPane scrollPane = new JScrollPane(clusterDetailsTable);
+		JScrollPane scrollPane = new JScrollPane(table);
 
 		JPanel tablePanel = new JPanel(new BorderLayout());
 
 		tablePanel.add(scrollPane, BorderLayout.CENTER);
-		tablePanel.add(clusterDetailsTable.getTableHeader(), BorderLayout.NORTH);
+		tablePanel.add(table.getTableHeader(), BorderLayout.NORTH);
 
 		panel.add(tablePanel);
 		return panel;
@@ -265,8 +266,7 @@ public class ClusterDetailPanel extends TableDetailPanel implements ClusterGroup
 	protected synchronized void updateMultiple() {
 		setEnabled(true);
 
-		TableOptions options = new TableOptionsBuilder().setDatasets(getDatasets()).setTarget(clusterDetailsTable)
-				.build();
+		TableOptions options = new TableOptionsBuilder().setDatasets(getDatasets()).setTarget(table).build();
 
 		setTable(options);
 

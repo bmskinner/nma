@@ -17,8 +17,6 @@ public class NucleusMeasurementsTableModel extends DatasetTableModel {
 
 	private static final long serialVersionUID = 6546268613206621371L;
 
-	/** Default format for numbers */
-
 	private static final List<String> DEFAULT_ROW_NAMES = List.of(" median", " mean", " S.E.M.", " C.o.V.", " 95% CI");
 
 	private String[] colNames;
