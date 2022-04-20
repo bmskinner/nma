@@ -17,6 +17,8 @@
 package com.bmskinner.nuclear_morphology.components.signals;
 
 import java.awt.Color;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
@@ -39,82 +41,83 @@ import com.bmskinner.nuclear_morphology.io.XmlSerializable;
 public class DefaultSignalGroup implements ISignalGroup {
 
 	private static final Logger LOGGER = Logger.getLogger(DefaultSignalGroup.class.getName());
-    
-    private UUID			  id;
-    private String            groupName        = "";
-    private boolean           isVisible        = true;
-    private Color             groupColour      = null;
-    
-    private IShellResult      shellResult      = null;
-        
-    // Space to store warped signals from this signal group against a template consensus
-    private IWarpedSignal	 warpedSignals     = null;
-    
-    /**
-     * Default constructor
-     */
-    public DefaultSignalGroup(@NonNull String name, @NonNull UUID id) {
-    	this.id = id;
-        groupName = name;
-    }
-    
-    /**
-     * Construct from an XML element. Use for 
-     * unmarshalling. The element should conform
-     * to the specification in {@link XmlSerializable}.
-     * @param e the XML element containing the data.
-     * @throws ComponentCreationException 
-     */
-    public DefaultSignalGroup(@NonNull Element e) throws ComponentCreationException {    	
-    	id = UUID.fromString(e.getAttributeValue("id"));
-    	groupName = e.getAttributeValue("name");
-    	isVisible = Boolean.parseBoolean(e.getAttributeValue("isVisible"));
-    	groupColour = Color.decode(e.getAttributeValue("colour"));
 
-    	if(e.getChild("ShellResult")!=null)
-    		shellResult = new DefaultShellResult(e.getChild("ShellResult"));
+	private UUID id;
+	private String groupName = "";
+	private boolean isVisible = true;
+	private Color groupColour = null;
 
-    	if(e.getChild("WarpedSignal")!=null) 
-    		warpedSignals = new ShortWarpedSignal(e.getChild("WarpedSignal"));	
-    }
+	private IShellResult shellResult = null;
 
+	// Space to store warped signals from this signal group against a template
+	// consensus
+	private List<IWarpedSignal> warpedSignals = new ArrayList<>();
+
+	/**
+	 * Default constructor
+	 */
+	public DefaultSignalGroup(@NonNull String name, @NonNull UUID id) {
+		this.id = id;
+		groupName = name;
+	}
+
+	/**
+	 * Construct from an XML element. Use for unmarshalling. The element should
+	 * conform to the specification in {@link XmlSerializable}.
+	 * 
+	 * @param e the XML element containing the data.
+	 * @throws ComponentCreationException
+	 */
+	public DefaultSignalGroup(@NonNull Element e) throws ComponentCreationException {
+		id = UUID.fromString(e.getAttributeValue("id"));
+		groupName = e.getAttributeValue("name");
+		isVisible = Boolean.parseBoolean(e.getAttributeValue("isVisible"));
+		groupColour = Color.decode(e.getAttributeValue("colour"));
+
+		if (e.getChild("ShellResult") != null)
+			shellResult = new DefaultShellResult(e.getChild("ShellResult"));
+
+		for (Element e1 : e.getChildren("WarpedSignals")) {
+			warpedSignals.add(DefaultWarpedSignal.of(e1));
+		}
+	}
 
 	@Override
 	public Element toXmlElement() {
-		Element e = new Element("SignalGroup")
-				.setAttribute("id", id.toString())
-				.setAttribute("name", groupName)
+		Element e = new Element("SignalGroup").setAttribute("id", id.toString()).setAttribute("name", groupName)
 				.setAttribute("isVisible", String.valueOf(isVisible));
-		
-		if(groupColour!=null)
-		e = e.setAttribute("colour", String.valueOf(groupColour.getRGB()));
-		
-		if(shellResult!=null)
+
+		if (groupColour != null)
+			e = e.setAttribute("colour", String.valueOf(groupColour.getRGB()));
+
+		if (shellResult != null)
 			e = e.addContent(shellResult.toXmlElement().setAttribute("id", id.toString()));
-		
-		if(warpedSignals!=null)
-			e = e.addContent(warpedSignals.toXmlElement());
+
+		for (IWarpedSignal s : warpedSignals) {
+			e.addContent(s.toXmlElement());
+		}
 
 		return e;
-	} 
+	}
 
-    /**
-     * Construct from an existing group, duplicating the values in the template
-     * group.
-     * 
-     * @param s
-     */
-    public DefaultSignalGroup(@NonNull ISignalGroup s) {
+	/**
+	 * Construct from an existing group, duplicating the values in the template
+	 * group.
+	 * 
+	 * @param s
+	 */
+	public DefaultSignalGroup(@NonNull ISignalGroup s) {
 
-    	shellResult = null;
-        groupName = s.getGroupName();
-        isVisible = s.isVisible();
-        groupColour = s.getGroupColour().isPresent() ? s.getGroupColour().get() : null;
-        warpedSignals = s.getWarpedSignals().orElse(null);
-    }
-    
-    
-    
+		shellResult = null;
+		groupName = s.getGroupName();
+		isVisible = s.isVisible();
+		groupColour = s.getGroupColour().isPresent() ? s.getGroupColour().get() : null;
+
+		for (IWarpedSignal w : s.getWarpedSignals()) {
+			warpedSignals.add(w.duplicate());
+		}
+	}
+
 	@Override
 	public UUID getId() {
 		return id;
@@ -124,88 +127,84 @@ public class DefaultSignalGroup implements ISignalGroup {
 	public ISignalGroup duplicate() {
 		return new DefaultSignalGroup(this);
 	}
-	
+
 	@Override
 	public boolean hasWarpedSignals() {
-		return warpedSignals!=null;
-	}
-    
-	@Override
-	public Optional<IWarpedSignal> getWarpedSignals() {
-		return Optional.ofNullable(warpedSignals);
+		return !warpedSignals.isEmpty();
 	}
 
 	@Override
-	public void setWarpedSignals(@NonNull IWarpedSignal result) {
-		warpedSignals = result;
+	public List<IWarpedSignal> getWarpedSignals() {
+		return warpedSignals;
 	}
 
-    @Override
-    public Optional<IShellResult> getShellResult() {
-        return Optional.ofNullable(shellResult);
-    }
+	@Override
+	public void addWarpedSignal(@NonNull IWarpedSignal result) {
+		warpedSignals.add(result);
+	}
 
-    @Override
-    public void setShellResult(@NonNull IShellResult shellResult) {
-        this.shellResult = shellResult;
-    }
-    
-    @Override
-    public void clearShellResult() {
-    	shellResult = null;
-    }
+	@Override
+	public Optional<IShellResult> getShellResult() {
+		return Optional.ofNullable(shellResult);
+	}
 
-    @Override
-    public boolean hasShellResult() {
-        return(shellResult != null);
-    }
+	@Override
+	public void setShellResult(@NonNull IShellResult shellResult) {
+		this.shellResult = shellResult;
+	}
 
-    @Override
-    public String getGroupName() {
-        return groupName;
-    }
+	@Override
+	public void clearShellResult() {
+		shellResult = null;
+	}
 
-    @Override
-    public void setGroupName(@NonNull String groupName) {
-        this.groupName = groupName;
-    }
+	@Override
+	public boolean hasShellResult() {
+		return (shellResult != null);
+	}
 
-    @Override
-    public boolean isVisible() {
-        return isVisible;
-    }
+	@Override
+	public String getGroupName() {
+		return groupName;
+	}
 
-    @Override
-    public void setVisible(boolean isVisible) {
-        this.isVisible = isVisible;
-    }
+	@Override
+	public void setGroupName(@NonNull String groupName) {
+		this.groupName = groupName;
+	}
 
-    @Override
-    public boolean hasColour() {
-        return groupColour != null;
-    }
+	@Override
+	public boolean isVisible() {
+		return isVisible;
+	}
 
-    @Override
-    public Optional<Color> getGroupColour() {
-        return Optional.ofNullable(groupColour);
-    }
+	@Override
+	public void setVisible(boolean isVisible) {
+		this.isVisible = isVisible;
+	}
 
-    @Override
-    public void setGroupColour(@NonNull Color groupColour) {
-        this.groupColour = groupColour;
-    }
+	@Override
+	public boolean hasColour() {
+		return groupColour != null;
+	}
 
-    @Override
-    public String toString() {
-    	StringBuilder sb = new StringBuilder();
-    	sb.append(groupName+"\n")
-    	.append(groupColour+"\n")
-    	.append(id.toString()+"\n")
-    	.append(isVisible+"\n")
-    	.append(shellResult+"\n")
-    	.append(warpedSignals);
-        return sb.toString();
-    }
+	@Override
+	public Optional<Color> getGroupColour() {
+		return Optional.ofNullable(groupColour);
+	}
+
+	@Override
+	public void setGroupColour(@NonNull Color groupColour) {
+		this.groupColour = groupColour;
+	}
+
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(groupName + "\n").append(groupColour + "\n").append(id.toString() + "\n").append(isVisible + "\n")
+				.append(shellResult + "\n").append(warpedSignals);
+		return sb.toString();
+	}
 
 	@Override
 	public int hashCode() {
@@ -214,7 +213,7 @@ public class DefaultSignalGroup implements ISignalGroup {
 		result = prime * result + ((groupColour == null) ? 0 : groupColour.hashCode());
 		result = prime * result + ((shellResult == null) ? 0 : shellResult.hashCode());
 		result = prime * result + ((warpedSignals == null) ? 0 : warpedSignals.hashCode());
-		
+
 		return result;
 //		return Objects.hash(groupColour, groupName, id, isVisible, shellResult, warpedSignals);
 	}
@@ -228,14 +227,9 @@ public class DefaultSignalGroup implements ISignalGroup {
 		if (getClass() != obj.getClass())
 			return false;
 		DefaultSignalGroup other = (DefaultSignalGroup) obj;
-		return Objects.equals(groupColour, other.groupColour) 
-				&& Objects.equals(groupName, other.groupName)
-				&& Objects.equals(id, other.id) 
-				&& isVisible == other.isVisible
-				&& Objects.equals(shellResult, other.shellResult) 
-				&& Objects.equals(warpedSignals, other.warpedSignals);
+		return Objects.equals(groupColour, other.groupColour) && Objects.equals(groupName, other.groupName)
+				&& Objects.equals(id, other.id) && isVisible == other.isVisible
+				&& Objects.equals(shellResult, other.shellResult) && Objects.equals(warpedSignals, other.warpedSignals);
 	}
-    
-	
-     
+
 }

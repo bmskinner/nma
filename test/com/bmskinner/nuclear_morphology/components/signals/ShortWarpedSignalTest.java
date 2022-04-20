@@ -35,7 +35,7 @@ public class ShortWarpedSignalTest  extends ComponentTester {
 		Element e = signal.toXmlElement();				
 		IWarpedSignal test = new ShortWarpedSignal(e);
 		
-		WarpedSignalKey k = signal.getWarpedSignalKeys().stream().findFirst().get();
+		DefaultWarpedSignal k = signal.getWarpedSignalKeys().stream().findFirst().get();
 		
 		testDuplicatesByField("Warped signal", signal, test);
 		assertEquals(signal, test);

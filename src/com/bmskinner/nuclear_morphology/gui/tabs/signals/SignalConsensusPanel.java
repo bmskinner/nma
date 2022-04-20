@@ -15,7 +15,6 @@ import javax.swing.JPanel;
 import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
-import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult;
@@ -26,8 +25,6 @@ import com.bmskinner.nuclear_morphology.gui.events.ChartSetEventListener;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.ConsensusUpdatedListener;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.NuclearSignalUpdatedListener;
 import com.bmskinner.nuclear_morphology.gui.tabs.ChartDetailPanel;
-import com.bmskinner.nuclear_morphology.gui.tabs.signals.warping.SignalWarpingDialog;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.visualisation.charts.AbstractChartFactory;
 import com.bmskinner.nuclear_morphology.visualisation.charts.OutlineChartFactory;
 import com.bmskinner.nuclear_morphology.visualisation.charts.panels.ConsensusNucleusChartPanel;
@@ -49,9 +46,6 @@ public class SignalConsensusPanel extends ChartDetailPanel
 
 	/** Signal visibility checkbox panel */
 	private JPanel checkboxPanel;
-
-	/** Launch signal warping */
-	private JButton warpButton;
 
 	/** Launch signal merging */
 	private JButton mergeButton;
@@ -112,18 +106,6 @@ public class SignalConsensusPanel extends ChartDetailPanel
 		JPanel panel = new JPanel();
 
 		panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
-
-		warpButton = new JButton(Labels.Signals.WARP_BTN_LBL);
-		warpButton.setToolTipText(Labels.Signals.WARP_BTN_TOOLTIP);
-		warpButton.addActionListener(e -> {
-			try {
-				new SignalWarpingDialog(getDatasets(), this);
-			} catch (MissingLandmarkException e1) {
-				LOGGER.log(Loggable.STACK, "Cannot orient consensus", e);
-			}
-		});
-		warpButton.setEnabled(false);
-		panel.add(warpButton);
 
 		mergeButton = new JButton(Labels.Signals.MERGE_BTN_LBL);
 		mergeButton.addActionListener(e -> {
@@ -190,10 +172,10 @@ public class SignalConsensusPanel extends ChartDetailPanel
 			consensusAndCheckboxPanel.repaint();
 			consensusAndCheckboxPanel.setVisible(true);
 
-			if (activeDataset() != null && activeDataset().getCollection().hasConsensus()
-					&& activeDataset().getCollection().getSignalManager().hasSignals()) {
-				warpButton.setEnabled(true);
-			}
+//			if (activeDataset() != null && activeDataset().getCollection().hasConsensus()
+//					&& activeDataset().getCollection().getSignalManager().hasSignals()) {
+//				warpButton.setEnabled(true);
+//			}
 
 			if (activeDataset().getCollection().getSignalManager().getSignalGroupCount() > 1)
 				mergeButton.setEnabled(true);
@@ -224,15 +206,15 @@ public class SignalConsensusPanel extends ChartDetailPanel
 					text = "Segments do not match between datasets";
 				}
 
-				if (hasSignals && segmentsMatch) {
-					warpButton.setEnabled(true);
-				} else {
-					warpButton.setEnabled(false);
-					headerText.setText(text);
-				}
+//				if (hasSignals && segmentsMatch) {
+//					warpButton.setEnabled(true);
+//				} else {
+//					warpButton.setEnabled(false);
+//					headerText.setText(text);
+//				}
 
 			} else {
-				warpButton.setEnabled(false);
+//				warpButton.setEnabled(false);
 				headerText.setText("Datasets do not all have consensus");
 			}
 		}

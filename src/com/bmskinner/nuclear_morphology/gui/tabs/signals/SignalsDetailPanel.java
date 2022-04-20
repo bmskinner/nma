@@ -56,6 +56,7 @@ public class SignalsDetailPanel extends DetailPanel {
 			DetailPanel detectionSettingsPanel = new SignalsAnalysisPanel();
 			DetailPanel signalScatterChartPanel = new SignalScatterChartPanel();
 			DetailPanel colocalistionPanel = new SignalsColocalisationPanel();
+			DetailPanel warpingPanel = new SignalWarpingMainPanel();
 
 			signalsTabPane.addTab(overviewPanel.getPanelTitle(), overviewPanel);
 			signalsTabPane.addTab(detectionSettingsPanel.getPanelTitle(), detectionSettingsPanel);
@@ -65,6 +66,7 @@ public class SignalsDetailPanel extends DetailPanel {
 			signalsTabPane.addTab(signalScatterChartPanel.getPanelTitle(), signalScatterChartPanel);
 			signalsTabPane.addTab(shellsPanel.getPanelTitle(), shellsPanel);
 			signalsTabPane.addTab(colocalistionPanel.getPanelTitle(), colocalistionPanel);
+			signalsTabPane.addTab(warpingPanel.getPanelTitle(), warpingPanel);
 
 			this.add(signalsTabPane, BorderLayout.CENTER);
 

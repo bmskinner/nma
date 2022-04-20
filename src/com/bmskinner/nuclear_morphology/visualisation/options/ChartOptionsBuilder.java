@@ -37,6 +37,8 @@ import com.bmskinner.nuclear_morphology.gui.RotationMode;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter.ColourSwatch;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 
+import ij.process.ImageProcessor;
+
 /**
  * Builder for a ChartOptions object. This simplifies the creation of the
  * options when not all parameters need to be set. It also makes it easier to
@@ -47,224 +49,230 @@ import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOp
  */
 public class ChartOptionsBuilder {
 
-    private DefaultChartOptions options;
+	private DefaultChartOptions options;
 
-    public ChartOptionsBuilder() {
-        options = new DefaultChartOptions((List<IAnalysisDataset>) null);
-    }
+	public ChartOptionsBuilder() {
+		options = new DefaultChartOptions((List<IAnalysisDataset>) null);
+	}
 
-    public ChartOptionsBuilder setDatasets(List<IAnalysisDataset> list) {
-        options.setDatasets(list);
-        return this;
-    }
+	public ChartOptionsBuilder setDatasets(List<IAnalysisDataset> list) {
+		options.setDatasets(list);
+		return this;
+	}
 
-    public ChartOptionsBuilder setDatasets(IAnalysisDataset dataset) {
-        List<IAnalysisDataset> list = new ArrayList<IAnalysisDataset>();
-        list.add(dataset);
-        return this.setDatasets(list);
-    }
+	public ChartOptionsBuilder setDatasets(IAnalysisDataset dataset) {
+		List<IAnalysisDataset> list = new ArrayList<IAnalysisDataset>();
+		list.add(dataset);
+		return this.setDatasets(list);
+	}
 
-    public ChartOptionsBuilder setSwatch(ColourSwatch swatch) {
-        options.setSwatch(swatch);
-        return this;
-    }
+	public ChartOptionsBuilder setSwatch(ColourSwatch swatch) {
+		options.setSwatch(swatch);
+		return this;
+	}
 
-    public ChartOptionsBuilder setTarget(ChartPanel target) {
-        options.setTarget(target);
-        return this;
-    }
+	public ChartOptionsBuilder setTarget(ChartPanel target) {
+		options.setTarget(target);
+		return this;
+	}
 
-    public ChartOptionsBuilder setNormalised(boolean b) {
-        options.setNormalised(b);
-        return this;
-    }
+	public ChartOptionsBuilder setNormalised(boolean b) {
+		options.setNormalised(b);
+		return this;
+	}
 
-    public ChartOptionsBuilder setSegID(UUID id) {
-        options.setSegID(id);
-        return this;
-    }
+	public ChartOptionsBuilder setSegID(UUID id) {
+		options.setSegID(id);
+		return this;
+	}
 
-    public ChartOptionsBuilder setModalityPosition(double modalityPosition) {
-        options.setModalityPosition(modalityPosition);
-        return this;
-    }
+	public ChartOptionsBuilder setModalityPosition(double modalityPosition) {
+		options.setModalityPosition(modalityPosition);
+		return this;
+	}
 
-    public ChartOptionsBuilder setSegPosition(int segPosition) {
-        options.setSegPosition(segPosition);
-        return this;
-    }
+	public ChartOptionsBuilder setSegPosition(int segPosition) {
+		options.setSegPosition(segPosition);
+		return this;
+	}
 
-    public ChartOptionsBuilder setAlignment(ProfileAlignment alignment) {
-        options.setAlignment(alignment);
-        return this;
-    }
+	public ChartOptionsBuilder setAlignment(ProfileAlignment alignment) {
+		options.setAlignment(alignment);
+		return this;
+	}
 
-    public ChartOptionsBuilder setLandmark(Landmark tag) {
-        options.setTag(tag);
-        return this;
-    }
+	public ChartOptionsBuilder setLandmark(Landmark tag) {
+		options.setTag(tag);
+		return this;
+	}
 
-    public ChartOptionsBuilder setShowMarkers(boolean b) {
-        options.setShowMarkers(b);
-        return this;
-    }
+	public ChartOptionsBuilder setShowMarkers(boolean b) {
+		options.setShowMarkers(b);
+		return this;
+	}
 
-    public ChartOptionsBuilder setShowProfiles(boolean b) {
-        options.setShowProfiles(b);
-        return this;
-    }
+	public ChartOptionsBuilder setShowProfiles(boolean b) {
+		options.setShowProfiles(b);
+		return this;
+	}
 
-    public ChartOptionsBuilder setShowPoints(boolean b) {
-        options.setShowPoints(b);
-        return this;
-    }
+	public ChartOptionsBuilder setShowPoints(boolean b) {
+		options.setShowPoints(b);
+		return this;
+	}
 
-    public ChartOptionsBuilder setShowLines(boolean b) {
-        options.setShowLines(b);
-        return this;
-    }
-    
-    public ChartOptionsBuilder setShowIQR(boolean b) {
-        options.setShowIQR(b);
-        return this;
-    }
+	public ChartOptionsBuilder setShowLines(boolean b) {
+		options.setShowLines(b);
+		return this;
+	}
 
-    public ChartOptionsBuilder setShowAnnotations(boolean showAnnotations) {
-        options.setShowAnnotations(showAnnotations);
-        return this;
-    }
+	public ChartOptionsBuilder setShowIQR(boolean b) {
+		options.setShowIQR(b);
+		return this;
+	}
 
-    public ChartOptionsBuilder setProfileType(ProfileType type) {
-        options.setType(type);
-        return this;
-    }
+	public ChartOptionsBuilder setShowAnnotations(boolean showAnnotations) {
+		options.setShowAnnotations(showAnnotations);
+		return this;
+	}
 
-    public ChartOptionsBuilder setSignalGroup(UUID group) {
-        options.setSignalGroup(group);
-        return this;
-    }
+	public ChartOptionsBuilder setProfileType(ProfileType type) {
+		options.setType(type);
+		return this;
+	}
 
-    public ChartOptionsBuilder setUseDensity(boolean b) {
-        options.setUseDensity(b);
-        return this;
-    }
+	public ChartOptionsBuilder setSignalGroup(UUID group) {
+		options.setSignalGroup(group);
+		return this;
+	}
 
-    public ChartOptionsBuilder addStatistic(Measurement s) {
-        options.addStat(s);
-        return this;
-    }
+	public ChartOptionsBuilder setUseDensity(boolean b) {
+		options.setUseDensity(b);
+		return this;
+	}
 
-    public ChartOptionsBuilder setScale(MeasurementScale s) {
-        options.setScale(s);
-        return this;
-    }
+	public ChartOptionsBuilder addStatistic(Measurement s) {
+		options.addStat(s);
+		return this;
+	}
 
-    public ChartOptionsBuilder setShowMesh(boolean b) {
-        options.setShowMesh(b);
-        return this;
-    }
+	public ChartOptionsBuilder setScale(MeasurementScale s) {
+		options.setScale(s);
+		return this;
+	}
 
-    public ChartOptionsBuilder setMeshSize(int i) {
-        options.setMeshSize(i);
-        return this;
-    }
+	public ChartOptionsBuilder setShowMesh(boolean b) {
+		options.setShowMesh(b);
+		return this;
+	}
 
-    public ChartOptionsBuilder setShowBounds(boolean b) {
-        options.setShowBounds(b);
-        return this;
-    }
-    
-    public ChartOptionsBuilder setShowMeshVertices(boolean b) {
-        options.setShowMeshVertices(b);
-        return this;
-    }
+	public ChartOptionsBuilder setMeshSize(int i) {
+		options.setMeshSize(i);
+		return this;
+	}
 
-    public ChartOptionsBuilder setShowMeshEdges(boolean b) {
-        options.setShowMeshEdges(b);
-        return this;
-    }
+	public ChartOptionsBuilder setShowBounds(boolean b) {
+		options.setShowBounds(b);
+		return this;
+	}
 
-    public ChartOptionsBuilder setShowMeshFaces(boolean b) {
-        options.setShowMeshFaces(b);
-        return this;
-    }
+	public ChartOptionsBuilder setShowMeshVertices(boolean b) {
+		options.setShowMeshVertices(b);
+		return this;
+	}
 
-    public ChartOptionsBuilder setStraightenMesh(boolean b) {
-        options.setStraightenMesh(b);
-        return this;
-    }
+	public ChartOptionsBuilder setShowMeshEdges(boolean b) {
+		options.setShowMeshEdges(b);
+		return this;
+	}
 
-    public ChartOptionsBuilder setShowXAxis(boolean b) {
-        options.setShowXAxis(b);
-        return this;
-    }
+	public ChartOptionsBuilder setShowMeshFaces(boolean b) {
+		options.setShowMeshFaces(b);
+		return this;
+	}
 
-    public ChartOptionsBuilder setShowYAxis(boolean b) {
-        options.setShowYAxis(b);
-        return this;
-    }
+	public ChartOptionsBuilder setStraightenMesh(boolean b) {
+		options.setStraightenMesh(b);
+		return this;
+	}
 
-    public ChartOptionsBuilder setInvertXAxis(boolean b) {
-        options.setInvertXAxis(b);
-        return this;
-    }
+	public ChartOptionsBuilder setShowXAxis(boolean b) {
+		options.setShowXAxis(b);
+		return this;
+	}
 
-    public ChartOptionsBuilder setInvertYAxis(boolean b) {
-        options.setInvertYAxis(b);
-        return this;
-    }
+	public ChartOptionsBuilder setShowYAxis(boolean b) {
+		options.setShowYAxis(b);
+		return this;
+	}
 
-    public ChartOptionsBuilder setRotationMode(RotationMode r) {
-        options.setRotateMode(r);
-        return this;
-    }
+	public ChartOptionsBuilder setInvertXAxis(boolean b) {
+		options.setInvertXAxis(b);
+		return this;
+	}
 
-    public ChartOptionsBuilder setCell(ICell c) {
-        options.setCell(c);
-        return this;
-    }
+	public ChartOptionsBuilder setInvertYAxis(boolean b) {
+		options.setInvertYAxis(b);
+		return this;
+	}
 
-    public ChartOptionsBuilder addCellularComponent(CellularComponent c) {
-        options.addComponent(c);
-        return this;
-    }
+	public ChartOptionsBuilder setRotationMode(RotationMode r) {
+		options.setRotateMode(r);
+		return this;
+	}
 
-    public ChartOptionsBuilder setShowWarp(boolean b) {
-        options.setShowWarp(b);
-        return this;
-    }
+	public ChartOptionsBuilder setCell(ICell c) {
+		options.setCell(c);
+		return this;
+	}
 
-    public ChartOptionsBuilder setShowBorderTags(boolean b) {
-        options.setShowBorderTags(b);
-        return this;
-    }
+	public ChartOptionsBuilder addCellularComponent(CellularComponent c) {
+		options.addComponent(c);
+		return this;
+	}
 
-    public ChartOptionsBuilder setShowSignals(boolean b) {
-        options.setShowSignals(b);
-        return this;
-    }
+	public ChartOptionsBuilder setShowWarp(boolean b) {
+		options.setShowWarp(b);
+		return this;
+	}
 
-    public ChartOptionsBuilder setAggregation(Aggregation c) {
-        options.setAggregation(c);
-        return this;
-    }
-    
-    public ChartOptionsBuilder setNormalisation(Normalisation c) {
-        options.setNormalisation(c);
-        return this;
-    }
-    
-    public ChartOptionsBuilder setShrinkType(ShrinkType t) {
-        options.setShrinkType(t);
-        return this;
-    }
+	public ChartOptionsBuilder setShowBorderTags(boolean b) {
+		options.setShowBorderTags(b);
+		return this;
+	}
 
-    /**
-     * Create the options object
-     * @return
-     */
-    public @NonNull ChartOptions build() {
-        return options;
-    }
+	public ChartOptionsBuilder setShowSignals(boolean b) {
+		options.setShowSignals(b);
+		return this;
+	}
+
+	public ChartOptionsBuilder setAggregation(Aggregation c) {
+		options.setAggregation(c);
+		return this;
+	}
+
+	public ChartOptionsBuilder setNormalisation(Normalisation c) {
+		options.setNormalisation(c);
+		return this;
+	}
+
+	public ChartOptionsBuilder setShrinkType(ShrinkType t) {
+		options.setShrinkType(t);
+		return this;
+	}
+
+	public ChartOptionsBuilder setWarpImage(ImageProcessor ip) {
+		options.setWarpImage(ip);
+		return this;
+	}
+
+	/**
+	 * Create the options object
+	 * 
+	 * @return
+	 */
+	public @NonNull ChartOptions build() {
+		return options;
+	}
 
 }

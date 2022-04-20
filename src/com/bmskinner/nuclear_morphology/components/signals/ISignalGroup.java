@@ -17,6 +17,7 @@
 package com.bmskinner.nuclear_morphology.components.signals;
 
 import java.awt.Color;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -34,109 +35,110 @@ import com.bmskinner.nuclear_morphology.io.XmlSerializable;
  *
  */
 public interface ISignalGroup extends XmlSerializable {
-	
+
 	UUID getId();
-	
+
 	/**
 	 * Create a copy of this signal group
+	 * 
 	 * @return
 	 */
 	ISignalGroup duplicate();
-	
+
 	/**
 	 * Test if the group has warp results
+	 * 
 	 * @return true if warped signals are present, false otherwise
 	 */
 	boolean hasWarpedSignals();
-	
+
 	/**
-     * Get the warped signals for the group, if present
-     * 
-     * @return
-     */
-    Optional<IWarpedSignal> getWarpedSignals();
+	 * Get the warped signals for the group, if present
+	 * 
+	 * @return
+	 */
+	List<IWarpedSignal> getWarpedSignals();
 
-    /**
-     * Set the group warped signals
-     * 
-     * @param result
-     */
-    void setWarpedSignals(@NonNull IWarpedSignal result);
-    
-    /**
-     * Get the shell result for the group, if present
-     * 
-     * @return
-     */
-    Optional<IShellResult> getShellResult();
+	/**
+	 * Set the group warped signals
+	 * 
+	 * @param result
+	 */
+	void addWarpedSignal(@NonNull IWarpedSignal result);
 
-    /**
-     * Set the group shell result
-     * 
-     * @param result
-     */
-    void setShellResult(@NonNull IShellResult result);
-    
-    
-    /**
-     * Remove the shell result if present
-     */
-    void clearShellResult();
+	/**
+	 * Get the shell result for the group, if present
+	 * 
+	 * @return
+	 */
+	Optional<IShellResult> getShellResult();
 
-    /**
-     * Test if a shell result is available
-     * 
-     * @return
-     */
-    boolean hasShellResult();
+	/**
+	 * Set the group shell result
+	 * 
+	 * @param result
+	 */
+	void setShellResult(@NonNull IShellResult result);
 
-    /**
-     * Get the name of the signal group
-     * 
-     * @return
-     */
-    String getGroupName();
+	/**
+	 * Remove the shell result if present
+	 */
+	void clearShellResult();
 
-    /**
-     * Set the name of the signal group
-     * 
-     * @param groupName
-     */
-    void setGroupName(@NonNull String groupName);
+	/**
+	 * Test if a shell result is available
+	 * 
+	 * @return
+	 */
+	boolean hasShellResult();
 
-    /**
-     * Test if the signals in this group are visible in charts
-     * 
-     * @return
-     */
-    boolean isVisible();
+	/**
+	 * Get the name of the signal group
+	 * 
+	 * @return
+	 */
+	String getGroupName();
 
-    /**
-     * Set whether the signals in this group are visible in charts
-     * 
-     * @return
-     */
-    void setVisible(boolean isVisible);
+	/**
+	 * Set the name of the signal group
+	 * 
+	 * @param groupName
+	 */
+	void setGroupName(@NonNull String groupName);
 
-    /**
-     * Test if a custom colour has been set for this group
-     * 
-     * @return
-     */
-    boolean hasColour();
+	/**
+	 * Test if the signals in this group are visible in charts
+	 * 
+	 * @return
+	 */
+	boolean isVisible();
 
-    /**
-     * Get the colour for this signal group, if set
-     * 
-     * @return the colour, or null if not present
-     */
-    Optional<Color> getGroupColour();
+	/**
+	 * Set whether the signals in this group are visible in charts
+	 * 
+	 * @return
+	 */
+	void setVisible(boolean isVisible);
 
-    /**
-     * Set the signal colour for this group
-     * 
-     * @param groupColour
-     */
-    void setGroupColour(@NonNull Color groupColour);
+	/**
+	 * Test if a custom colour has been set for this group
+	 * 
+	 * @return
+	 */
+	boolean hasColour();
+
+	/**
+	 * Get the colour for this signal group, if set
+	 * 
+	 * @return the colour, or null if not present
+	 */
+	Optional<Color> getGroupColour();
+
+	/**
+	 * Set the signal colour for this group
+	 * 
+	 * @param groupColour
+	 */
+	void setGroupColour(@NonNull Color groupColour);
 
 }
