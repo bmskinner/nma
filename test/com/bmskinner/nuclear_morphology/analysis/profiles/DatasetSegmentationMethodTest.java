@@ -216,7 +216,7 @@ public class DatasetSegmentationMethodTest extends AbstractProfileMethodTest {
     	
     	IAnalysisDataset d = new NucleusDetectionMethod(TestResources.UNIT_TEST_FOLDER.getAbsoluteFile(), op).call().getFirstDataset();
     	new DatasetProfilingMethod(d).call();    	
-    	new DatasetSegmentationMethod(d, MorphologyAnalysisMode.NEW).call();
+    	new DatasetSegmentationMethod(d, MorphologyAnalysisMode.SEGMENT_FROM_SCRATCH).call();
     	testSegmentationIsConsistent(d);
 	}
 

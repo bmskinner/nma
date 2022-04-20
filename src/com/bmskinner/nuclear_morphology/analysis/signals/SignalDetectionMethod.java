@@ -146,12 +146,9 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
 				signalCollection.addSignalGroup(signals, options.getUUID(HashOptions.SIGNAL_GROUP_ID));
 
 				// Measure the detected signals in the nucleus
-				SignalAnalyser s = new SignalAnalyser();
-				s.calculateSignalDistancesFromCoM(n);
-				s.calculateFractionalSignalDistancesFromCoM(n);
-
-				LOGGER.finer("Calculating signal angles");
-				s.calculateSignalAngles(n);
+				SignalAnalyser.calculateSignalDistancesFromCoM(n);
+				SignalAnalyser.calculateFractionalSignalDistancesFromCoM(n);
+				SignalAnalyser.calculateSignalAngles(n);
 
 //				if (n.hasLandmark(Landmark.ORIENTATION_POINT)) {
 //					n.calculateSignalAnglesFromPoint(n.getBorderPoint(Landmark.ORIENTATION_POINT));

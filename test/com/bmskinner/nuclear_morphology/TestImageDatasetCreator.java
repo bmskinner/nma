@@ -197,7 +197,7 @@ public class TestImageDatasetCreator {
     	IAnalysisDataset d = new NucleusDetectionMethod(testFolder, op).call().getFirstDataset();
         
         new DatasetProfilingMethod(d)
-	    	.then(new DatasetSegmentationMethod(d, MorphologyAnalysisMode.NEW))
+	    	.then(new DatasetSegmentationMethod(d, MorphologyAnalysisMode.SEGMENT_FROM_SCRATCH))
 	    	.then(op.getRuleSetCollection().equals(RuleSetCollection.roundRuleSetCollection())
 	    			? new ConsensusAveragingMethod(d) //TODO: replace once new refold method is available
 	    		    : new ConsensusAveragingMethod(d))
@@ -260,7 +260,7 @@ public class TestImageDatasetCreator {
     	HashOptions clusterOptions = OptionsFactory.makeDefaultClusteringOptions().build();
 
     	new DatasetProfilingMethod(d)
-    	.then(new DatasetSegmentationMethod(d, MorphologyAnalysisMode.NEW))
+    	.then(new DatasetSegmentationMethod(d, MorphologyAnalysisMode.SEGMENT_FROM_SCRATCH))
     	.then(op.getRuleSetCollection().equals(RuleSetCollection.roundRuleSetCollection())
     			? new ConsensusAveragingMethod(d) //TODO: temp replacement before the new ProfileRefoldMethod is written
     					: new ConsensusAveragingMethod(d))

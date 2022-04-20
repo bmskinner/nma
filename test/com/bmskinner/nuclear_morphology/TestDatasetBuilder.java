@@ -136,7 +136,7 @@ public class TestDatasetBuilder {
 		if(segment || profile)
 			new DatasetProfilingMethod(d).call();
 		if(segment)
-			new DatasetSegmentationMethod(d, MorphologyAnalysisMode.NEW).call();
+			new DatasetSegmentationMethod(d, MorphologyAnalysisMode.SEGMENT_FROM_SCRATCH).call();
 		
 		if(nClusters>0) {	
 			HashOptions o = OptionsFactory.makeDefaultClusteringOptions()

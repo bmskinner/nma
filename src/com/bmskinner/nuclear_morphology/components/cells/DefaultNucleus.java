@@ -45,6 +45,7 @@ import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.components.signals.DefaultSignalCollection;
 import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalCollection;
+import com.bmskinner.nuclear_morphology.components.signals.NuclearSignalAddedListener;
 import com.bmskinner.nuclear_morphology.io.XmlSerializable;
 import com.bmskinner.nuclear_morphology.utility.AngleTools;
 
@@ -58,7 +59,7 @@ import ij.gui.Roi;
  * @since 1.13.3
  *
  */
-public class DefaultNucleus extends ProfileableCellularComponent implements Nucleus {
+public class DefaultNucleus extends ProfileableCellularComponent implements Nucleus, NuclearSignalAddedListener {
 
 	private static final Logger LOGGER = Logger.getLogger(DefaultNucleus.class.getName());
 
@@ -103,7 +104,7 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
 				orientationMarks.put(s, rsc.getLandmark(s).get());
 			}
 		}
-
+		signalCollection.addNuclearSignalAddedListener(this);
 		priorityAxis = rsc.getPriorityAxis().orElse(PriorityAxis.Y);
 	}
 
@@ -133,6 +134,7 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
 		super(n);
 		nucleusNumber = n.getNucleusNumber();
 		signalCollection = n.getSignalCollection().duplicate();
+		signalCollection.addNuclearSignalAddedListener(this);
 
 		for (OrientationMark s : OrientationMark.values()) {
 			if (n.getLandmark(s) != null)
@@ -160,6 +162,7 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
 		}
 		priorityAxis = PriorityAxis.valueOf(e.getAttributeValue(XML_PRIORITY_AXIS));
 		signalCollection = new DefaultSignalCollection(e.getChild(XML_SIGNAL_COLLECTION));
+		signalCollection.addNuclearSignalAddedListener(this);
 	}
 
 	@Override
@@ -227,7 +230,8 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
 	}
 
 	protected void setSignals(ISignalCollection collection) {
-		signalCollection = collection;
+		signalCollection = collection.duplicate();
+		signalCollection.addNuclearSignalAddedListener(this);
 	}
 
 	@Override
@@ -293,6 +297,7 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
 			orientedNucleus = this.duplicate();
 			orientedNucleus.orient();
 		}
+
 		return orientedNucleus;
 	}
 
@@ -440,5 +445,10 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
 
 		return nucleusNumber == other.nucleusNumber && Objects.equals(orientationMarks, other.orientationMarks)
 				&& priorityAxis == other.priorityAxis && Objects.equals(signalCollection, other.signalCollection);
+	}
+
+	@Override
+	public void nuclearSignalAdded() {
+		orientedNucleus = null; // we need to clear it so signals will be duplicated with it
 	}
 }

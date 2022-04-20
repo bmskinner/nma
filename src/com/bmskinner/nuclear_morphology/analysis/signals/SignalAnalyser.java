@@ -67,10 +67,15 @@ public class SignalAnalyser {
 		ISignalCollection sc = n.getSignalCollection();
 		ISignalCollection sco = oriented.getSignalCollection();
 
+		assert (sco.size() == sc.size());
+
 		for (UUID signalGroup : sc.getSignalGroupIds()) {
 
 			if (sc.hasSignal(signalGroup)) {
 				List<INuclearSignal> sso = sco.getSignals(signalGroup); // signals oriented
+
+				// All signals should have copied
+				assert (sso.size() == sc.getSignals(signalGroup).size());
 
 				for (INuclearSignal s : sc.getSignals(signalGroup)) {
 
