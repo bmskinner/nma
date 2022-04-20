@@ -92,8 +92,10 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 
 	private static final String DATASETS_MENU_LBL = "Dataset";
 
-	private static final String SAVE_DATASETS_LBL = "Save datasets";
-	private static final String SAVE_DATASETS_TOOLTIP = "Save all open datasets";
+	private static final String SAVE_DATASETS_LBL = "Save selected";
+	private static final String SAVE_DATASETS_TOOLTIP = "Save selected datasets";
+	private static final String SAVE_ALL_DATASETS_LBL = "Save all";
+	private static final String SAVE_ALL_DATASETS_TOOLTIP = "Save all datasets";
 	private static final String SAVE_WORKSPACES_LBL = "Save workspaces";
 	private static final String SAVE_WORKSPACES_TOOLTIP = "Save all open workspaces";
 
@@ -187,9 +189,13 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 		menu.add(openMenu);
 
 		// End of File>Open
-		ContextualMenuItem saveData = fact.makeItem(SAVE_DATASETS_LBL, UserActionEvent.SAVE_ALL_DATASETS,
+		ContextualMenuItem saveData = fact.makeItem(SAVE_DATASETS_LBL, UserActionEvent.SAVE_SELECTED_DATASETS,
 				ContextEnabled.ONLY_DATASETS, SAVE_DATASETS_TOOLTIP);
 		menu.add(saveData);
+
+		ContextualMenuItem saveAllData = fact.makeItem(SAVE_ALL_DATASETS_LBL, UserActionEvent.SAVE_ALL_DATASETS,
+				ContextEnabled.ONLY_DATASETS, SAVE_ALL_DATASETS_TOOLTIP);
+		menu.add(saveAllData);
 
 		ContextualMenuItem saveWork = fact.makeItem(SAVE_WORKSPACES_LBL, UserActionEvent.EXPORT_WORKSPACE,
 				ContextEnabled.ALWAYS_ACTIVE, SAVE_WORKSPACES_TOOLTIP);

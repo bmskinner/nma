@@ -74,6 +74,7 @@ import com.bmskinner.nuclear_morphology.gui.events.SegmentStartIndexUpdateEvent;
 import com.bmskinner.nuclear_morphology.gui.events.SegmentUnmergeEvent;
 import com.bmskinner.nuclear_morphology.gui.events.UserActionEvent;
 import com.bmskinner.nuclear_morphology.gui.runnables.MorphologyAnalysis;
+import com.bmskinner.nuclear_morphology.gui.runnables.SaveAllDatasets;
 
 /**
  * Controller for all user actions
@@ -244,8 +245,11 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 		if (event.type().equals(UserActionEvent.EXPORT_TPS_DATASET))
 			return new ExportTPSAction(selectedDataset, acceptor);
 
-//		if (event.type().equals(UserActionEvent.SAVE_ALL_DATASETS))
-//			return () -> saveRootDatasets();
+		if (event.type().equals(UserActionEvent.SAVE_ALL_DATASETS))
+			return new SaveAllDatasets(DatasetListManager.getInstance().getRootDatasets(), acceptor);
+
+		if (event.type().equals(UserActionEvent.SAVE_SELECTED_DATASETS))
+			return new SaveAllDatasets(selectedDatasets, acceptor);
 
 		if (event.type().equals(UserActionEvent.CURATE_DATASET))
 			return () -> {

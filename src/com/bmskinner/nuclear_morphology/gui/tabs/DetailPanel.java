@@ -249,6 +249,7 @@ public abstract class DetailPanel extends JPanel
 			}
 		} finally {
 			setUpdating(false);
+			setAnalysing(false);
 		}
 	}
 

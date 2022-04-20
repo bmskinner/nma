@@ -25,6 +25,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nuclear_morphology.components.MissingComponentException;
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
+import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.DatasetValidator;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -254,6 +255,16 @@ public class SegmentationHandler {
 
 			// Update the median profile
 			dataset.getCollection().getProfileManager().updateMedianProfileSegmentIndex(true, id, index);
+
+			// Get the updated profile
+			ISegmentedProfile newProfile = dataset.getCollection().getProfileCollection()
+					.getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);
+
+			// Apply the updated profile to the cells
+			for (ICell c : dataset.getCollection()) {
+				c.getPrimaryNucleus().setSegments(IProfileSegment.scaleSegments(newProfile.getSegments(),
+						c.getPrimaryNucleus().getBorderLength()));
+			}
 
 			for (IAnalysisDataset child : dataset.getAllChildDatasets()) {
 

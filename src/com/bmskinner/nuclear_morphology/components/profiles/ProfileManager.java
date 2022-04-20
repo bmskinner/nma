@@ -577,8 +577,8 @@ public class ProfileManager {
 	 * Update the given median profile index in the given segment to a new value
 	 * 
 	 * @param start
-	 * @param segName
-	 * @param index
+	 * @param id    the id of the segment to update
+	 * @param index the median profile index for the new segment start
 	 * @throws UnsegmentedProfileException
 	 * @throws ProfileException
 	 * @throws MissingComponentException
@@ -600,22 +600,23 @@ public class ProfileManager {
 		// update it
 
 		// TODO: this looks dangerous - RP could be changed
-		if (start) {
-			if (seg.getStartIndex() == collection.getProfileCollection().getLandmarkIndex(Landmark.ORIENTATION_POINT)) {
-				collection.getProfileCollection().setLandmark(Landmark.ORIENTATION_POINT, index);
-			}
-
-			if (seg.getStartIndex() == collection.getProfileCollection().getLandmarkIndex(Landmark.REFERENCE_POINT)) {
-				collection.getProfileCollection().setLandmark(Landmark.REFERENCE_POINT, index);
-			}
-		}
+//		if (start) {
+//			if (seg.getStartIndex() == collection.getProfileCollection().getLandmarkIndex(Landmark.ORIENTATION_POINT)) {
+//				collection.getProfileCollection().setLandmark(Landmark.ORIENTATION_POINT, index);
+//			}
+//
+//			if (seg.getStartIndex() == collection.getProfileCollection().getLandmarkIndex(Landmark.REFERENCE_POINT)) {
+//				collection.getProfileCollection().setLandmark(Landmark.REFERENCE_POINT, index);
+//			}
+//		}
 
 		// Move the appropriate segment endpoint
 		try {
 			if (oldProfile.update(seg, newStart, newEnd)) {
 				collection.getProfileCollection().setSegments(oldProfile.getSegments());
-
-				LOGGER.finest("Segments added, refresh the charts");
+				if (collection.hasConsensus())
+					collection.getRawConsensus().setSegments(IProfileSegment.scaleSegments(oldProfile.getSegments(),
+							collection.getRawConsensus().getBorderLength()));
 
 			} else {
 				LOGGER.warning("Updating " + seg.getStartIndex() + " to index " + index + " failed");

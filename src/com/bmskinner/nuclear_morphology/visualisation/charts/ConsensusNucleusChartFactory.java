@@ -27,16 +27,19 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
+import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
+import com.bmskinner.nuclear_morphology.components.cells.Nucleus;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.mesh.DefaultMesh;
 import com.bmskinner.nuclear_morphology.components.mesh.Mesh;
 import com.bmskinner.nuclear_morphology.components.mesh.MeshCreationException;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.visualisation.ChartComponents;
@@ -338,6 +341,43 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 			return createEmptyChart();
 
 		JFreeChart c = makeSegmentedConsensusChart(options.firstDataset());
+
+		try {
+
+			DefaultXYDataset landmarkData = new DefaultXYDataset();
+
+			Nucleus n = options.firstDataset().getCollection().getConsensus();
+
+			for (Landmark lm : n.getLandmarks().keySet()) {
+
+				// Point at the landmark coordinate
+				double[][] data = new double[2][1];
+				data[0][0] = n.getBorderPoint(lm).getX();
+				data[1][0] = n.getBorderPoint(lm).getY();
+				landmarkData.addSeries(lm.toString(), data);
+
+				// Line from the landmark to outside
+
+			}
+
+			c.getXYPlot().setDataset(1, landmarkData);
+
+			// Set the renderer for landmarks
+			XYLineAndShapeRenderer lmRend = new XYLineAndShapeRenderer();
+			for (int lmSeries = 0; lmSeries < landmarkData.getSeriesCount(); lmSeries++) {
+				lmRend.setSeriesLinesVisible(lmSeries, false);
+				lmRend.setSeriesShapesVisible(lmSeries, true);
+				lmRend.setSeriesVisibleInLegend(lmSeries, Boolean.FALSE);
+				lmRend.setSeriesStroke(lmSeries, new BasicStroke(3));
+				lmRend.setSeriesPaint(lmSeries, Color.GRAY);
+				lmRend.setSeriesShape(lmSeries, ChartComponents.DEFAULT_POINT_SHAPE);
+			}
+
+			c.getXYPlot().setRenderer(1, lmRend);
+
+		} catch (Exception e) {
+			LOGGER.fine("Unable to annotate landmarks: " + e.getMessage());
+		}
 
 		return c;
 
