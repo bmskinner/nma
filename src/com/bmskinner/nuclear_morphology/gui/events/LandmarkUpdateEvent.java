@@ -16,10 +16,7 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.events;
 
-import java.util.List;
-
-import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.jdt.annotation.Nullable;
+import java.util.EventObject;
 
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
@@ -34,37 +31,49 @@ import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
  *
  */
 @SuppressWarnings("serial")
-public class LandmarkUpdateEvent extends UserActionEvent {
+public class LandmarkUpdateEvent extends EventObject {
 
-	private Landmark lm;
-	private int newIndex;
-	private ICell c;
+	public Landmark lm;
+	public IAnalysisDataset dataset = null;
+	public int newIndex;
+	public ICell cell = null;
 
 	/**
-	 * Create an event from a source class, with the given message and datasets to
-	 * process
+	 * Create an event from a source, with the given message
 	 * 
-	 * @param source
-	 * @param type
+	 * @param source        the source of the datasets
+	 * @param id            the the segment to be updated
+	 * @param newStartIndex the new index to apply via the update type
+	 * @param type          the type of segment update to perform
 	 */
-	public LandmarkUpdateEvent(@NonNull Object source, IAnalysisDataset dataset, @Nullable ICell cell, Landmark lm,
-			int newIndex) {
-		super(source, "LandmarkUpdate", List.of(dataset), null);
-		this.c = cell;
+	public LandmarkUpdateEvent(final Object source, final IAnalysisDataset dataset, final Landmark lm,
+			final int newIndex) {
+		super(source);
 		this.lm = lm;
 		this.newIndex = newIndex;
+		this.dataset = dataset;
 	}
 
-	public Landmark getLandmark() {
-		return lm;
+	/**
+	 * Create an event from a source, with the given message
+	 * 
+	 * @param source        the source of the datasets
+	 * @param id            the the segment to be updated
+	 * @param newStartIndex the new index to apply via the update type
+	 * @param type          the type of segment update to perform
+	 */
+	public LandmarkUpdateEvent(final Object source, final ICell cell, final Landmark lm, final int newIndex) {
+		super(source);
+		this.lm = lm;
+		this.newIndex = newIndex;
+		this.cell = cell;
 	}
 
-	public int getNewIndex() {
-		return newIndex;
+	public boolean isDataset() {
+		return dataset != null;
 	}
 
-	public @Nullable ICell getCell() {
-		return c;
+	public boolean isCell() {
+		return cell != null;
 	}
-
 }

@@ -92,7 +92,7 @@ public class BasicAnalysisPipeline {
         exportOptions.setInt(Io.PROFILE_SAMPLES_KEY, 100);
         
         new DatasetProfilingMethod(obs)
-        	.then(new DatasetSegmentationMethod(obs, MorphologyAnalysisMode.NEW))
+        	.then(new DatasetSegmentationMethod(obs, MorphologyAnalysisMode.SEGMENT_FROM_SCRATCH))
         	.then(new DatasetExportMethod(obs, saveFile))
         	.then(new DatasetStatsExporter(statsFile, obs, exportOptions))
         	.call();

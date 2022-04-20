@@ -134,7 +134,7 @@ public class ConsensusNucleusChartPanel extends ExportableChartPanel {
 
 				if (n != null) {
 					c = ColourSelecter.getTransparentColour((Color) c, true, 128);
-					ShapeOverlayObject o = new ShapeOverlayObject(n.toShape(scale), null, null, c);
+					ShapeOverlayObject o = new ShapeOverlayObject(n.toShape(scale), 0, 0, null, null, c);
 					consensusOverlay.addShape(o, n);
 				}
 			}

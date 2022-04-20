@@ -53,8 +53,6 @@ public class SegmentationHandler {
 	 * @param d
 	 */
 	public SegmentationHandler(final IAnalysisDataset d) {
-		if (!d.isRoot())
-			throw new IllegalArgumentException("Cannot create segment handler for non-root dataset");
 		dataset = d;
 	}
 
@@ -70,8 +68,6 @@ public class SegmentationHandler {
 	public synchronized void mergeSegments(@NonNull UUID segID1, @NonNull UUID segID2)
 			throws ProfileException, MissingComponentException {
 
-		LOGGER.fine("Requested merge of segments " + segID1 + " and " + segID2 + " in dataset " + dataset.getName());
-
 		if (!dataset.isRoot()) {
 			LOGGER.fine("Cannot merge segments in a virtual collection");
 			return;
@@ -80,19 +76,18 @@ public class SegmentationHandler {
 		// Don't mess with a broken dataset
 		DatasetValidator dv = new DatasetValidator();
 		if (!dv.validate(dataset)) {
-			LOGGER.warning(SEGMENTS_ARE_OUT_OF_SYNC_WITH_MEDIAN_LBL);
-			LOGGER.warning("Canceling merge");
+			LOGGER.warning("Cancelling merge: " + SEGMENTS_ARE_OUT_OF_SYNC_WITH_MEDIAN_LBL);
 			return;
 		}
 
 		// Give the new merged segment a new ID
 		final UUID newID = UUID.randomUUID();
 
-		ISegmentedProfile medianProfile = null;
+		LOGGER.fine("Merging segments " + segID1 + " and " + segID2 + " in dataset " + dataset.getName()
+				+ " to new segment " + newID);
 
-		LOGGER.fine("Merging segments in root dataset " + dataset.getName());
-		medianProfile = dataset.getCollection().getProfileCollection().getSegmentedProfile(ProfileType.ANGLE,
-				Landmark.REFERENCE_POINT, Stats.MEDIAN);
+		ISegmentedProfile medianProfile = dataset.getCollection().getProfileCollection()
+				.getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);
 
 		IProfileSegment seg1 = medianProfile.getSegment(segID1);
 		IProfileSegment seg2 = medianProfile.getSegment(segID2);
@@ -100,17 +95,10 @@ public class SegmentationHandler {
 		boolean ok = dataset.getCollection().getProfileManager().testSegmentsMergeable(seg1, seg2);
 
 		if (ok) {
-			dataset.getCollection().getProfileManager().mergeSegments(seg1, seg2, newID);
+			dataset.getCollection().getProfileManager().mergeSegments(segID1, segID2, newID);
 
 			for (IAnalysisDataset child : dataset.getAllChildDatasets()) {
-
-				ISegmentedProfile childProfile = child.getCollection().getProfileCollection()
-						.getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);
-
-				IProfileSegment childSeg1 = childProfile.getSegment(segID1);
-				IProfileSegment childSeg2 = childProfile.getSegment(segID2);
-
-				child.getCollection().getProfileManager().mergeSegments(childSeg1, childSeg2, newID);
+				child.getCollection().getProfileManager().mergeSegments(segID1, segID2, newID);
 			}
 		} else {
 			LOGGER.warning("Segments are not mergable");
@@ -185,8 +173,6 @@ public class SegmentationHandler {
 	 */
 	public synchronized void splitSegment(@NonNull UUID segID) {
 
-		LOGGER.fine("Requested split of segment " + segID + " in dataset " + dataset.getName());
-
 		if (!dataset.isRoot()) {
 			LOGGER.fine("Cannot split segments in a virtual collection");
 			return;
@@ -195,8 +181,7 @@ public class SegmentationHandler {
 		// Don't mess with a broken dataset
 		DatasetValidator dv = new DatasetValidator();
 		if (!dv.validate(dataset)) {
-			LOGGER.warning(SEGMENTS_ARE_OUT_OF_SYNC_WITH_MEDIAN_LBL);
-			LOGGER.warning("Canceling segment split");
+			LOGGER.warning("Canceling segment split: " + SEGMENTS_ARE_OUT_OF_SYNC_WITH_MEDIAN_LBL);
 			return;
 		}
 
@@ -210,29 +195,32 @@ public class SegmentationHandler {
 			UUID newID1 = UUID.randomUUID();
 			UUID newID2 = UUID.randomUUID();
 
-			LOGGER.fine("Splitting segment in root dataset " + dataset.getName());
+			LOGGER.fine("Splitting segment " + segID + " in root dataset " + dataset.getName() + " into new segments "
+					+ newID1 + " and " + newID2);
 			boolean ok = dataset.getCollection().getProfileManager().splitSegment(seg, newID1, newID2);
 
 			if (ok) {
 				// Child datasets should all be virtual
 				for (IAnalysisDataset child : dataset.getAllChildDatasets()) {
 					LOGGER.fine("Splitting segment in " + child.getName());
-					child.getCollection().getProfileManager().splitSegment(seg, newID1, newID2);
+					boolean cOk = child.getCollection().getProfileManager().splitSegment(seg, newID1, newID2);
+					if (!cOk)
+						LOGGER.warning("Splitting segment failed for child dataset " + child.getName());
 				}
 			} else {
 				LOGGER.warning("Splitting segment cancelled");
-			}
-
-			if (!dv.validate(dataset)) {
-				LOGGER.warning("Splitting segment failed; resulting dataset did not validate");
-				for (String s : dv.getErrors())
-					LOGGER.warning(s);
 			}
 
 		} catch (ProfileException | MissingComponentException e) {
 			LOGGER.warning("Error splitting segments");
 			LOGGER.log(Loggable.STACK, e.getMessage(), e);
 
+		}
+
+		if (!dv.validate(dataset)) {
+			LOGGER.warning("Splitting segment failed; resulting dataset did not validate");
+			for (String s : dv.getErrors())
+				LOGGER.warning(s);
 		}
 	}
 
@@ -254,7 +242,7 @@ public class SegmentationHandler {
 					.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN).getFractionOfIndex(index);
 
 			// Update the median profile
-			dataset.getCollection().getProfileManager().updateMedianProfileSegmentIndex(true, id, index);
+			dataset.getCollection().getProfileManager().updateMedianProfileSegmentStartIndex(id, index);
 
 			// Get the updated profile
 			ISegmentedProfile newProfile = dataset.getCollection().getProfileCollection()
@@ -274,7 +262,7 @@ public class SegmentationHandler {
 				int childIndex = child.getCollection().getProfileCollection()
 						.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN).getIndexOfFraction(prop);
 
-				child.getCollection().getProfileManager().updateMedianProfileSegmentIndex(true, id, childIndex);
+				child.getCollection().getProfileManager().updateMedianProfileSegmentStartIndex(id, childIndex);
 			}
 
 			// Lock all the segments except the one to change
@@ -296,17 +284,17 @@ public class SegmentationHandler {
 	 * @param tag
 	 * @param newTagIndex
 	 */
-	public synchronized void setBorderTag(Landmark tag, int index) {
+	public synchronized void setLandmark(Landmark tag, int index) {
 
 		if (tag == null)
 			throw new IllegalArgumentException("Tag is null");
 
 		LOGGER.fine("Requested " + tag + " set to index " + index + " in dataset " + dataset.getName());
 
-		if (dataset.getCollection().isVirtual()) {
-			LOGGER.fine("Cannot update tag in virtual collection");
-			return;
-		}
+//		if (dataset.getCollection().isVirtual()) {
+//			LOGGER.fine("Cannot update tag in virtual collection");
+//			return;
+//		}
 		try {
 			// Try updating to an existing tag index. If this
 			// succeeds, do nothing else

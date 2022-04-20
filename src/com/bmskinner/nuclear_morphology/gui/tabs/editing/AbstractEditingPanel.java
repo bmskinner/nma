@@ -86,7 +86,7 @@ public abstract class AbstractEditingPanel extends DetailPanel implements Editin
 		setAnalysing(true);
 
 		SegmentationHandler sh = new SegmentationHandler(activeDataset());
-		sh.setBorderTag(tag, newTagIndex);
+		sh.setLandmark(tag, newTagIndex);
 
 		refreshCache(); // immediate visualisation of result
 
@@ -129,7 +129,7 @@ public abstract class AbstractEditingPanel extends DetailPanel implements Editin
 		refreshEditingPanelCharts();
 
 		UserActionController.getInstance()
-				.userActionEventReceived(new UserActionEvent(this, UserActionEvent.REFRESH_MORPHOLOGY, getDatasets()));
+				.userActionEventReceived(new UserActionEvent(this, UserActionEvent.APPLY_MEDIAN_TO_NUCLEI, getDatasets()));
 
 	}
 }

@@ -39,183 +39,181 @@ import org.jfree.chart.ui.RectangleEdge;
 
 public class ShapeOverlay extends AbstractOverlay implements Overlay, PropertyChangeListener, Serializable {
 
-    private static final long          serialVersionUID = 1L;
-    protected List<ShapeOverlayObject> shapes;
+	private static final long serialVersionUID = 1L;
+	protected List<ShapeOverlayObject> shapes;
 
-    /**
-     * Default constructor.
-     */
-    public ShapeOverlay() {
-        super();
-        this.shapes = new ArrayList<ShapeOverlayObject>();
-    }
+	/**
+	 * Default constructor.
+	 */
+	public ShapeOverlay() {
+		super();
+		this.shapes = new ArrayList<ShapeOverlayObject>();
+	}
 
-    /**
-     * Adds a shape
-     *
-     * @param shape
-     *            the shape.
-     */
-    public void addShape(ShapeOverlayObject shape) {
-        if (shape == null) {
-            throw new IllegalArgumentException("Null 'shape' argument.");
-        }
-        this.shapes.add(shape);
-        shape.addPropertyChangeListener(this);
-        fireOverlayChanged();
-    }
+	/**
+	 * Default constructor.
+	 */
+	public ShapeOverlay(ShapeOverlayObject shape) {
+		this();
+		addShape(shape);
+	}
 
-    public void removeshape(ShapeOverlayObject shape) {
-        if (shape == null) {
-            throw new IllegalArgumentException("Null 'shape' argument.");
-        }
-        if (this.shapes.remove(shape)) {
-            shape.removePropertyChangeListener(this);
-            fireOverlayChanged();
-        }
-    }
+	/**
+	 * Adds a shape
+	 *
+	 * @param shape the shape.
+	 */
+	public void addShape(ShapeOverlayObject shape) {
+		if (shape == null) {
+			throw new IllegalArgumentException("Null 'shape' argument.");
+		}
+		this.shapes.add(shape);
+		shape.addPropertyChangeListener(this);
+		fireOverlayChanged();
+	}
 
-    public synchronized void clearShapes() {
-        if (this.shapes.isEmpty()) {
-            return; // nothing to do
-        }
-        List<ShapeOverlayObject> shapes = getShapes();
-        for (int i = 0; i < shapes.size(); i++) {
-            ShapeOverlayObject c = (ShapeOverlayObject) shapes.get(i);
-            this.shapes.remove(c);
-            c.removePropertyChangeListener(this);
-        }
-        fireOverlayChanged();
-    }
+	public void removeshape(ShapeOverlayObject shape) {
+		if (shape == null) {
+			throw new IllegalArgumentException("Null 'shape' argument.");
+		}
+		if (this.shapes.remove(shape)) {
+			shape.removePropertyChangeListener(this);
+			fireOverlayChanged();
+		}
+	}
 
-    public synchronized List<ShapeOverlayObject> getShapes() {
-        return new ArrayList<ShapeOverlayObject>(this.shapes);
-    }
+	public synchronized void clearShapes() {
+		if (this.shapes.isEmpty()) {
+			return; // nothing to do
+		}
+		List<ShapeOverlayObject> shapes = getShapes();
+		for (int i = 0; i < shapes.size(); i++) {
+			ShapeOverlayObject c = shapes.get(i);
+			this.shapes.remove(c);
+			c.removePropertyChangeListener(this);
+		}
+		fireOverlayChanged();
+	}
 
-    @Override
-    public void propertyChange(PropertyChangeEvent arg0) {
-        fireOverlayChanged();
-    }
+	public synchronized List<ShapeOverlayObject> getShapes() {
+		return new ArrayList<ShapeOverlayObject>(this.shapes);
+	}
 
-    /**
-     * Paints the crosshairs in the layer.
-     *
-     * @param g2
-     *            the graphics target.
-     * @param chartPanel
-     *            the chart panel.
-     */
-    @Override
-    public void paintOverlay(Graphics2D g2, ChartPanel chartPanel) {
-        Shape savedClip = g2.getClip();
-        Rectangle2D dataArea = chartPanel.getChartRenderingInfo().getPlotInfo().getDataArea();
-        g2.clip(dataArea);
+	@Override
+	public void propertyChange(PropertyChangeEvent arg0) {
+		fireOverlayChanged();
+	}
 
-        JFreeChart chart = chartPanel.getChart();
-        XYPlot plot = (XYPlot) chart.getPlot();
-        ValueAxis xAxis = plot.getDomainAxis();
-        ValueAxis yAxis = plot.getRangeAxis();
+	/**
+	 * Paints the crosshairs in the layer.
+	 *
+	 * @param g2         the graphics target.
+	 * @param chartPanel the chart panel.
+	 */
+	@Override
+	public void paintOverlay(Graphics2D g2, ChartPanel chartPanel) {
+		Shape savedClip = g2.getClip();
+		Rectangle2D dataArea = chartPanel.getChartRenderingInfo().getPlotInfo().getDataArea();
+		g2.clip(dataArea);
 
-        RectangleEdge xAxisEdge = plot.getDomainAxisEdge();
-        RectangleEdge yAxisEdge = plot.getRangeAxisEdge();
+		JFreeChart chart = chartPanel.getChart();
+		XYPlot plot = (XYPlot) chart.getPlot();
+		ValueAxis xAxis = plot.getDomainAxis();
+		ValueAxis yAxis = plot.getRangeAxis();
 
-        Iterator<ShapeOverlayObject> iterator = this.shapes.iterator();
+		RectangleEdge xAxisEdge = plot.getDomainAxisEdge();
+		RectangleEdge yAxisEdge = plot.getRangeAxisEdge();
 
-        while (iterator.hasNext()) {
-            ShapeOverlayObject object = (ShapeOverlayObject) iterator.next();
+		Iterator<ShapeOverlayObject> iterator = this.shapes.iterator();
 
-            if (object.isVisible()) {
+		while (iterator.hasNext()) {
+			ShapeOverlayObject object = iterator.next();
 
-                // Need to find the coordinates to draw the shape
+			if (object.isVisible()) {
 
-                double x = object.getShape().getBounds2D().getX();
-                x += (object.getShape().getBounds2D().getWidth() / 2); // get
-                                                                       // the x
-                                                                       // midpoint
-                double xx = xAxis.valueToJava2D(x, dataArea, xAxisEdge);
+				// Need to find the coordinates to draw the shape
 
-                double y = object.getShape().getBounds2D().getY();
-                y += (object.getShape().getBounds2D().getHeight() / 2); // get
-                                                                        // the y
-                                                                        // midpoint
-                double yy = yAxis.valueToJava2D(y, dataArea, yAxisEdge);
+				double x = object.getXValue();// x midpoint
+//				x -= (object.getShape().getBounds2D().getWidth() / 2); // get
+//																		// the x
+//																		// midpoint
+				double xx = xAxis.valueToJava2D(x, dataArea, xAxisEdge);
 
-                // Need to scale the shape as well
-                double w = object.getShape().getBounds2D().getWidth();
-                double ww = xAxis.lengthToJava2D(w, dataArea, xAxisEdge) / w;
+				double y = object.getYValue();
+//				y -= (object.getShape().getBounds2D().getHeight() / 2); // get
+//																		// the y
+//																		// midpoint
+				double yy = yAxis.valueToJava2D(y, dataArea, yAxisEdge);
 
-                double h = object.getShape().getBounds2D().getHeight();
-                double hh = yAxis.lengthToJava2D(h, dataArea, yAxisEdge) / h;
+				// Need to scale the shape as well
+				double w = object.getShape().getBounds2D().getWidth();
+				double ww = xAxis.lengthToJava2D(w, dataArea, xAxisEdge) / w;
 
-                drawShape(g2, dataArea, xx, yy, ww, hh, object);
-            }
-        }
-        g2.setClip(savedClip);
-    }
+				double h = object.getShape().getBounds2D().getHeight();
+				double hh = yAxis.lengthToJava2D(h, dataArea, yAxisEdge) / h;
 
-    /**
-     * Draws a shape on the plot.
-     *
-     * @param g2
-     *            the graphics target.
-     * @param dataArea
-     *            the data area.
-     * @param y
-     *            the y-value in Java2D space.
-     * @param shape
-     *            the overlay object
-     */
-    protected void drawShape(Graphics2D g2, Rectangle2D dataArea, double x, double y, double w, double h,
-            ShapeOverlayObject shape) {
+				drawShape(g2, dataArea, xx, yy, ww, hh, object);
+			}
+		}
+		g2.setClip(savedClip);
+	}
 
-        // if (y >= dataArea.getMinY() && y <= dataArea.getMaxY()
-        // && x >= dataArea.getMinX() && x <= dataArea.getMaxX()) {
+	/**
+	 * Draws a shape on the plot.
+	 *
+	 * @param g2       the graphics target.
+	 * @param dataArea the data area.
+	 * @param y        the y-value in Java2D space.
+	 * @param shape    the overlay object
+	 */
+	protected void drawShape(Graphics2D g2, Rectangle2D dataArea, double x, double y, double w, double h,
+			ShapeOverlayObject shape) {
 
-        Paint savedPaint = g2.getPaint();
-        Stroke savedStroke = g2.getStroke();
+		Paint savedPaint = g2.getPaint();
+		Stroke savedStroke = g2.getStroke();
 
-        Shape s = getJavaCoordinatesShape(x, y, w, h, shape);
+		Shape s = getJavaCoordinatesShape(x, y, w, h, shape);
 
-        if (shape.getOutline() != null) {
-            g2.setPaint(shape.getOutline());
-            g2.setStroke(shape.getStroke());
-            g2.draw(s);
-        }
+		if (shape.getOutline() != null) {
+			g2.setPaint(shape.getOutline());
+			g2.setStroke(shape.getStroke());
+			g2.draw(s);
+		}
 
-        if (shape.getFill() != null) {
-            g2.setPaint(shape.getFill());
-            g2.fill(s);
-        }
+		if (shape.getFill() != null) {
+			g2.setPaint(shape.getFill());
+			g2.fill(s);
+		}
 
-        g2.setPaint(savedPaint);
-        g2.setStroke(savedStroke);
-        // }
-    }
+		g2.setPaint(savedPaint);
+		g2.setStroke(savedStroke);
+		// }
+	}
 
-    protected Shape getJavaCoordinatesShape(double xCentre, double yCentre, double w, double h,
-            ShapeOverlayObject shape) {
+	protected Shape getJavaCoordinatesShape(double xCentre, double yCentre, double w, double h,
+			ShapeOverlayObject shape) {
 
-        Shape s = shape.getShape();
+		Shape s = shape.getShape();
 
-        // transforms are performed 'last in, first out'
-        AffineTransform aft = new AffineTransform();
+		// transforms are performed 'last in, first out'
+		AffineTransform aft = new AffineTransform();
 
-        aft.concatenate(AffineTransform.getTranslateInstance(xCentre, yCentre));
-        aft.concatenate(AffineTransform.getScaleInstance(w, h));
+		aft.concatenate(AffineTransform.getTranslateInstance(xCentre, yCentre));
+		aft.concatenate(AffineTransform.getScaleInstance(w, h));
 
-        aft.concatenate(AffineTransform.getRotateInstance(Math.PI)); // 180
-                                                                     // degree
-                                                                     // rotate
-        aft.concatenate(AffineTransform.getScaleInstance(-1, 1)); // flip
-                                                                  // hozizontal
+		aft.concatenate(AffineTransform.getRotateInstance(Math.PI)); // 180
+																		// degree
+																		// rotate
+		aft.concatenate(AffineTransform.getScaleInstance(-1, 1)); // flip
+																	// hozizontal
 
-        aft.concatenate(AffineTransform.getTranslateInstance(0, 0)); // move to
-                                                                     // origin
-                                                                     // for
-                                                                     // rotation
+		aft.concatenate(AffineTransform.getTranslateInstance(0, 0)); // move to
+																		// origin
+																		// for
+																		// rotation
 
-        Shape newShape = aft.createTransformedShape(s);
+		Shape newShape = aft.createTransformedShape(s);
 
-        return newShape;
-    }
+		return newShape;
+	}
 }

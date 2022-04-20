@@ -452,7 +452,7 @@ public class RulesetDialog extends LoadingIconDialog implements TreeSelectionLis
 				LOGGER.info("Resegmenting dataset");
 
 				UserActionController.getInstance().userActionEventReceived(
-						new UserActionEvent(this, UserActionEvent.REFRESH_MORPHOLOGY, List.of(dataset)));
+						new UserActionEvent(this, UserActionEvent.APPLY_MEDIAN_TO_NUCLEI, List.of(dataset)));
 			} else {
 				LOGGER.fine("Firing refresh cache request for loaded datasets");
 //                fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);

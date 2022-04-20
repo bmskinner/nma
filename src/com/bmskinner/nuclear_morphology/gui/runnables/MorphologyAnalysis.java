@@ -57,7 +57,7 @@ public class MorphologyAnalysis implements Runnable {
 			try {
 				profileLatch.await();
 				LOGGER.fine("Starting segmentation");
-				new RunSegmentationAction(datasets, MorphologyAnalysisMode.NEW, SingleDatasetResultAction.NO_FLAG, pa,
+				new RunSegmentationAction(datasets, MorphologyAnalysisMode.SEGMENT_FROM_SCRATCH, SingleDatasetResultAction.NO_FLAG, pa,
 						segmentLatch).run();
 			} catch (InterruptedException e) {
 				Thread.currentThread().interrupt();

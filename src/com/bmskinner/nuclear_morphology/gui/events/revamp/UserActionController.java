@@ -336,11 +336,11 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 			return new RelocateFromFileAction(selectedDataset, acceptor, new CountDownLatch(1));
 
 		if (event.type().equals(UserActionEvent.SEGMENTATION_ACTION))
-			return new RunSegmentationAction(selectedDatasets, MorphologyAnalysisMode.NEW,
+			return new RunSegmentationAction(selectedDatasets, MorphologyAnalysisMode.SEGMENT_FROM_SCRATCH,
 					SingleDatasetResultAction.NO_FLAG, acceptor);
 
-		if (event.type().equals(UserActionEvent.REFRESH_MORPHOLOGY))
-			return new RunSegmentationAction(selectedDatasets, MorphologyAnalysisMode.REFRESH,
+		if (event.type().equals(UserActionEvent.APPLY_MEDIAN_TO_NUCLEI))
+			return new RunSegmentationAction(selectedDatasets, MorphologyAnalysisMode.APPLY_MEDIAN_TO_NUCLEI,
 					SingleDatasetResultAction.NO_FLAG, acceptor);
 
 		if (event.type().equals(UserActionEvent.SAVE)) {
@@ -366,8 +366,8 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 
 					try {
 						profileLatch.await();
-						new RunSegmentationAction(selectedDatasets, MorphologyAnalysisMode.NEW, 0, acceptor,
-								segmentLatch).run();
+						new RunSegmentationAction(selectedDatasets, MorphologyAnalysisMode.SEGMENT_FROM_SCRATCH, 0,
+								acceptor, segmentLatch).run();
 					} catch (InterruptedException e) {
 						Thread.currentThread().interrupt();
 						return;
@@ -616,22 +616,22 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 
 	@Override
 	public void landmarkUpdateEventReceived(LandmarkUpdateEvent event) {
-		if (event.getDatasets().isEmpty())
+		if (event.dataset == null)
 			return;
 
-		IAnalysisDataset d = event.getDatasets().get(0);
+		IAnalysisDataset d = event.dataset;
 
-		if (d.getCollection().isVirtual() && Landmark.REFERENCE_POINT.equals(event.getLandmark())) {
+		if (d.getCollection().isVirtual() && Landmark.REFERENCE_POINT.equals(event.lm)) {
 			LOGGER.warning("Cannot update core border tag for a child dataset");
 			return;
 		}
 
 		SegmentationHandler sh = new SegmentationHandler(d);
-		sh.setBorderTag(event.getLandmark(), event.getNewIndex());
+		sh.setLandmark(event.lm, event.newIndex);
 
-		if (LandmarkType.CORE.equals(event.getLandmark().type())) {
+		if (LandmarkType.CORE.equals(event.lm.type())) {
 			UserActionController.getInstance().userActionEventReceived(
-					new UserActionEvent(this, UserActionEvent.SEGMENTATION_ACTION, event.getDatasets()));
+					new UserActionEvent(this, UserActionEvent.SEGMENTATION_ACTION, List.of(event.dataset)));
 		} else {
 			UIController.getInstance().fireProfilesUpdated(d);
 		}
@@ -644,7 +644,7 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 		if (event.isDataset()) {
 			SegmentationHandler sh = new SegmentationHandler(event.dataset);
 			sh.updateSegmentStartIndexAction(event.id, event.index);
-			UIController.getInstance().fireProfilesUpdated(event.dataset);
+			userActionEventReceived(new UserActionEvent(this, UserActionEvent.APPLY_MEDIAN_TO_NUCLEI));
 		}
 
 	}

@@ -41,6 +41,7 @@ import com.bmskinner.nuclear_morphology.components.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.events.ChartSetEventListener;
+import com.bmskinner.nuclear_morphology.gui.events.revamp.ProfilesUpdatedListener;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.ScaleUpdatedListener;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.SwatchUpdatedListener;
 import com.bmskinner.nuclear_morphology.gui.tabs.BoxplotsTabPanel;
@@ -52,8 +53,8 @@ import com.bmskinner.nuclear_morphology.visualisation.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.visualisation.options.ChartOptionsBuilder;
 
 @SuppressWarnings("serial")
-public class SegmentBoxplotsPanel extends BoxplotsTabPanel
-		implements ActionListener, ChartSetEventListener, ScaleUpdatedListener, SwatchUpdatedListener {
+public class SegmentBoxplotsPanel extends BoxplotsTabPanel implements ActionListener, ChartSetEventListener,
+		ScaleUpdatedListener, SwatchUpdatedListener, ProfilesUpdatedListener {
 
 	private static final Logger LOGGER = Logger.getLogger(SegmentBoxplotsPanel.class.getName());
 
@@ -72,6 +73,7 @@ public class SegmentBoxplotsPanel extends BoxplotsTabPanel
 
 		uiController.addScaleUpdatedListener(this);
 		uiController.addSwatchUpdatedListener(this);
+		uiController.addProfilesUpdatedListener(this);
 
 	}
 
@@ -169,5 +171,15 @@ public class SegmentBoxplotsPanel extends BoxplotsTabPanel
 	@Override
 	public void swatchUpdated() {
 		update(getDatasets());
+	}
+
+	@Override
+	public void profilesUpdated(List<IAnalysisDataset> datasets) {
+		refreshCache(datasets);
+	}
+
+	@Override
+	public void profilesUpdated(IAnalysisDataset dataset) {
+		refreshCache(dataset);
 	}
 }

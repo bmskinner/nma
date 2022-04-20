@@ -31,6 +31,7 @@ import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.events.UserActionEvent;
+import com.bmskinner.nuclear_morphology.gui.events.revamp.UIController;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.UserActionController;
 
 /**
@@ -43,7 +44,7 @@ public class RunSegmentationAction extends SingleDatasetResultAction {
 
 	private static final Logger LOGGER = Logger.getLogger(RunSegmentationAction.class.getName());
 
-	private MorphologyAnalysisMode mode = MorphologyAnalysisMode.NEW;
+	private MorphologyAnalysisMode mode = MorphologyAnalysisMode.SEGMENT_FROM_SCRATCH;
 
 	private static final String PROGRESS_LBL = "Segmentation analysis";
 	private IAnalysisDataset source = null;
@@ -80,7 +81,7 @@ public class RunSegmentationAction extends SingleDatasetResultAction {
 		super(dataset, "Copying morphology to " + dataset.getName(), acceptor);
 		this.downFlag = downFlag;
 		setLatch(latch);
-		this.mode = MorphologyAnalysisMode.COPY;
+		this.mode = MorphologyAnalysisMode.COPY_FROM_OTHER_DATASET;
 		this.source = source;
 	}
 
@@ -95,7 +96,7 @@ public class RunSegmentationAction extends SingleDatasetResultAction {
 			@NonNull final ProgressBarAcceptor acceptor, CountDownLatch latch) {
 		super(list, PROGRESS_LBL, acceptor);
 		this.downFlag = downFlag;
-		this.mode = MorphologyAnalysisMode.COPY;
+		this.mode = MorphologyAnalysisMode.COPY_FROM_OTHER_DATASET;
 		this.source = source;
 		setLatch(latch);
 	}
@@ -103,11 +104,17 @@ public class RunSegmentationAction extends SingleDatasetResultAction {
 	@Override
 	public void run() {
 		setProgressBarIndeterminate();
+
 		switch (mode) {
-		case COPY:
+		case COPY_FROM_OTHER_DATASET:
 			runCopyAnalysis();
 			return;
-		case NEW:
+		case SEGMENT_FROM_SCRATCH:
+			runNewAnalysis();
+			return;
+		case APPLY_MEDIAN_TO_NUCLEI:
+			runApplyMedianToNuclei();
+			return;
 		default:
 			runNewAnalysis();
 			return;
@@ -127,6 +134,10 @@ public class RunSegmentationAction extends SingleDatasetResultAction {
 			finished();
 		}
 
+	}
+
+	private void runApplyMedianToNuclei() {
+		runAnalysis("Updating segmentation: " + dataset.getName());
 	}
 
 	private void runNewAnalysis() {
@@ -160,6 +171,7 @@ public class RunSegmentationAction extends SingleDatasetResultAction {
 				// call the finish
 				if (!hasRemainingDatasetsToProcess()) {
 					countdownLatch();
+					UIController.getInstance().fireProfilesUpdated(dataset);
 					UserActionController.getInstance().userActionEventReceived(
 							new UserActionEvent(this, UserActionEvent.SELECT_ONE_DATASET, List.of(dataset)));
 					RunSegmentationAction.super.finished();
@@ -169,7 +181,7 @@ public class RunSegmentationAction extends SingleDatasetResultAction {
 					// otherwise analyse the next item in the list
 					cancel(); // remove progress bar
 
-					Runnable task = mode.equals(MorphologyAnalysisMode.COPY)
+					Runnable task = mode.equals(MorphologyAnalysisMode.COPY_FROM_OTHER_DATASET)
 							? new RunSegmentationAction(getRemainingDatasetsToProcess(), source, downFlag,
 									progressAcceptors.get(0), getLatch().get())
 							: new RunSegmentationAction(getRemainingDatasetsToProcess(), mode, downFlag,

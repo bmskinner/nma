@@ -61,7 +61,7 @@ public class DatasetMergeMethodTest {
 
 		// Run new profiling on the merged dataset
 		new DatasetProfilingMethod(result).call();
-		new DatasetSegmentationMethod(result, MorphologyAnalysisMode.NEW).call();
+		new DatasetSegmentationMethod(result, MorphologyAnalysisMode.SEGMENT_FROM_SCRATCH).call();
 	}
 
 	@Test
@@ -99,7 +99,7 @@ public class DatasetMergeMethodTest {
 		
 		// Run new profiling on the merged dataset
 		new DatasetProfilingMethod(result).call();
-		new DatasetSegmentationMethod(result, MorphologyAnalysisMode.NEW).call();
+		new DatasetSegmentationMethod(result, MorphologyAnalysisMode.SEGMENT_FROM_SCRATCH).call();
 				
 		// Are landmark positions properly restored?
 		for(Nucleus n : d1.getCollection().getNuclei()) {

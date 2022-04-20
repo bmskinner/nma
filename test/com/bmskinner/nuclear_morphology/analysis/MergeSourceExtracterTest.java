@@ -89,7 +89,7 @@ public class MergeSourceExtracterTest {
     	IAnalysisDataset merged = dm.call().getFirstDataset();
     	
     	new DatasetProfilingMethod(merged)
-    	.then(new DatasetSegmentationMethod(merged, MorphologyAnalysisMode.NEW))
+    	.then(new DatasetSegmentationMethod(merged, MorphologyAnalysisMode.SEGMENT_FROM_SCRATCH))
     	.then(new DatasetExportMethod(merged, f3))
     	.call();
     	DatasetValidator dv = new DatasetValidator();

@@ -100,11 +100,8 @@ public class UserActionEvent extends EventObject {
 	 */
 	public static final String COPY_PROFILE_SEGMENTATION = "Copy profile segmentation";
 
-	/**
-	 * Rerun the segmentation on the given datasets, without trying to add as a new
-	 * population.
-	 */
-	public static final String REFRESH_MORPHOLOGY = "Refresh morphology";
+	/** Keep the current median segmentation, and update nuclei to match */
+	public static final String APPLY_MEDIAN_TO_NUCLEI = "Refresh morphology";
 
 	/**
 	 * Run new profiling and segmentation on the given datasets. Do not attempt to

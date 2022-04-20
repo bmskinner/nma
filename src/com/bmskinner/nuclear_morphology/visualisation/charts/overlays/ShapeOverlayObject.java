@@ -24,37 +24,61 @@ import java.awt.Stroke;
 
 public class ShapeOverlayObject extends OverlayObject {
 
-    Shape shape = null;
+	private double xValue;
+	private double yValue;
+	Shape shape = null;
 
-    public ShapeOverlayObject(Shape shape) {
-        this(shape, new BasicStroke(1f), Color.BLACK, null);
-    }
+	public ShapeOverlayObject(Shape shape, double xValue, double yValue) {
+		this(shape, xValue, yValue, new BasicStroke(1f), Color.BLACK, null);
+	}
 
-    public ShapeOverlayObject(Shape shape, Stroke stroke, Paint outline) {
-        this(shape, stroke, outline, null);
-    }
+	public ShapeOverlayObject(Shape shape, double xValue, double yValue, Stroke stroke, Paint outline) {
+		this(shape, xValue, yValue, stroke, outline, null);
+	}
 
-    public ShapeOverlayObject(Shape shape, Stroke stroke, Paint outline, Paint fill) {
-        super(stroke, outline, fill);
-        this.shape = shape;
-    }
+	public ShapeOverlayObject(Shape shape, double xValue, double yValue, Stroke stroke, Paint outline, Paint fill) {
+		super(stroke, outline, fill);
+		this.shape = shape;
+		this.xValue = xValue;
+		this.yValue = yValue;
+	}
 
-    public Shape getShape() {
-        return shape;
-    }
+	public Shape getShape() {
+		return shape;
+	}
 
-    public void setShape(Shape shape) {
-        this.shape = shape;
-    }
+	public void setShape(Shape shape) {
+		this.shape = shape;
+	}
 
-    @Override
-    public boolean contains(int x, int y) {
-        return shape.contains(y, y);
-    }
+	@Override
+	public boolean contains(int x, int y) {
+		return shape.contains(y, y);
+	}
 
-    @Override
-    public boolean contains(double x, double y) {
-        return shape.contains(y, y);
-    }
+	@Override
+	public boolean contains(double x, double y) {
+		return shape.contains(y, y);
+	}
+
+	public double getXValue() {
+		return xValue;
+	}
+
+	public void setXValue(double value) {
+		double oldValue = this.xValue;
+		this.xValue = value;
+		this.pcs.firePropertyChange("xValue", oldValue, value);
+	}
+
+	public double getYValue() {
+		return yValue;
+	}
+
+	public void setYValue(double value) {
+		double oldValue = this.yValue;
+		this.yValue = value;
+		this.pcs.firePropertyChange("yValue", oldValue, value);
+	}
 
 }

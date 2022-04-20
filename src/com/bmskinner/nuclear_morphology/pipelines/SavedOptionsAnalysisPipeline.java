@@ -186,7 +186,7 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod impleme
 		List<IAnalysisDataset> datasets = new NucleusDetectionMethod(outputFolder, options).call().getDatasets();
 		for(IAnalysisDataset dataset : datasets) {
 			methodsToRun.add(new DatasetProfilingMethod(dataset));
-			methodsToRun.add(new DatasetSegmentationMethod(dataset, MorphologyAnalysisMode.NEW));	
+			methodsToRun.add(new DatasetSegmentationMethod(dataset, MorphologyAnalysisMode.SEGMENT_FROM_SCRATCH));	
 		}
 		return datasets;
 

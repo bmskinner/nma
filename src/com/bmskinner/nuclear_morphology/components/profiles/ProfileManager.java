@@ -24,7 +24,6 @@ import java.util.UUID;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.jdt.annotation.Nullable;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.NoDetectedIndexException;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder;
@@ -576,14 +575,14 @@ public class ProfileManager {
 	/**
 	 * Update the given median profile index in the given segment to a new value
 	 * 
-	 * @param start
+	 * @param start whether the start index or end index of the segment is updated
 	 * @param id    the id of the segment to update
 	 * @param index the median profile index for the new segment start
 	 * @throws UnsegmentedProfileException
 	 * @throws ProfileException
 	 * @throws MissingComponentException
 	 */
-	public void updateMedianProfileSegmentIndex(boolean start, UUID id, int index)
+	public void updateMedianProfileSegmentStartIndex(UUID id, int index)
 			throws ProfileException, MissingComponentException {
 
 		ISegmentedProfile oldProfile = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE,
@@ -591,33 +590,19 @@ public class ProfileManager {
 
 		IProfileSegment seg = oldProfile.getSegment(id);
 
-		// Check if the start or end of the segment is updated, and select the
-		// new endpoints appropriately
-		int newStart = start ? index : seg.getStartIndex();
-		int newEnd = start ? seg.getEndIndex() : index;
+		// Select the new endpoints for the segment
+		int newStart = index;
+		int newEnd = seg.getEndIndex();
 
-		// if the segment is the orientation point or reference point boundary,
-		// update it
+		// if the segment start is on the RP, we must move the RP as well
+		if (seg.getStartIndex() == collection.getProfileCollection().getLandmarkIndex(Landmark.REFERENCE_POINT)) {
+			collection.getProfileCollection().setLandmark(Landmark.REFERENCE_POINT, index);
+		}
 
-		// TODO: this looks dangerous - RP could be changed
-//		if (start) {
-//			if (seg.getStartIndex() == collection.getProfileCollection().getLandmarkIndex(Landmark.ORIENTATION_POINT)) {
-//				collection.getProfileCollection().setLandmark(Landmark.ORIENTATION_POINT, index);
-//			}
-//
-//			if (seg.getStartIndex() == collection.getProfileCollection().getLandmarkIndex(Landmark.REFERENCE_POINT)) {
-//				collection.getProfileCollection().setLandmark(Landmark.REFERENCE_POINT, index);
-//			}
-//		}
-
-		// Move the appropriate segment endpoint
+		// Move the boundaries in the median profile.
 		try {
 			if (oldProfile.update(seg, newStart, newEnd)) {
 				collection.getProfileCollection().setSegments(oldProfile.getSegments());
-				if (collection.hasConsensus())
-					collection.getRawConsensus().setSegments(IProfileSegment.scaleSegments(oldProfile.getSegments(),
-							collection.getRawConsensus().getBorderLength()));
-
 			} else {
 				LOGGER.warning("Updating " + seg.getStartIndex() + " to index " + index + " failed");
 			}
@@ -665,7 +650,7 @@ public class ProfileManager {
 	 * @throws ProfileException            if the update fails
 	 * @throws MissingComponentException
 	 */
-	public void mergeSegments(@NonNull IProfileSegment seg1, @NonNull IProfileSegment seg2, @NonNull UUID newID)
+	public void mergeSegments(@NonNull UUID seg1, @NonNull UUID seg2, @NonNull UUID newID)
 			throws ProfileException, MissingComponentException {
 		// Note - we can't do the root check here. It must be at the segmentation
 		// handler level
@@ -675,11 +660,11 @@ public class ProfileManager {
 				Landmark.REFERENCE_POINT, Stats.MEDIAN);
 
 		// Only try the merge if both segments are present in the profile
-		if (!medianProfile.hasSegment(seg1.getID()))
-			throw new ProfileException("Median profile does not have segment 1 with ID " + seg1.getID());
+		if (!medianProfile.hasSegment(seg1))
+			throw new ProfileException("Median profile does not have segment 1 with ID " + seg1);
 
-		if (!medianProfile.hasSegment(seg2.getID()))
-			throw new ProfileException("Median profile does not have segment 2 with ID " + seg2.getID());
+		if (!medianProfile.hasSegment(seg2))
+			throw new ProfileException("Median profile does not have segment 2 with ID " + seg2);
 
 		// Note - validation is run in segmentation handler
 
@@ -717,37 +702,21 @@ public class ProfileManager {
 	 * @throws ProfileException
 	 * @throws MissingComponentException
 	 */
-	private void mergeSegments(@NonNull Taggable p, @NonNull IProfileSegment seg1, @NonNull IProfileSegment seg2,
-			@NonNull UUID newID) throws ProfileException, MissingComponentException {
+	private void mergeSegments(@NonNull Taggable p, @NonNull UUID seg1, @NonNull UUID seg2, @NonNull UUID newID)
+			throws ProfileException, MissingComponentException {
 		ISegmentedProfile profile = p.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
 
 		// Only try the merge if both segments are present in the profile
-		if (!profile.hasSegment(seg1.getID()))
-			throw new ProfileException(
-					p.getClass().getSimpleName() + " profile does not have segment 1 with ID " + seg1.getID());
+		if (!profile.hasSegment(seg1))
+			throw new ProfileException(p.getClass().getSimpleName() + ":" + p.getID()
+					+ " profile does not have segment 1 with ID " + seg1);
 
-		if (!profile.hasSegment(seg2.getID()))
-			throw new ProfileException(
-					p.getClass().getSimpleName() + " profile does not have segment 2 with ID " + seg2.getID());
+		if (!profile.hasSegment(seg2))
+			throw new ProfileException(p.getClass().getSimpleName() + ":" + p.getID()
+					+ " profile does not have segment 2 with ID " + seg2);
 
-		profile.mergeSegments(seg1.getID(), seg2.getID(), newID);
+		profile.mergeSegments(seg1, seg2, newID);
 		p.setSegments(profile.getSegments());
-	}
-
-	/**
-	 * Split the given segment into two segmnets. The split is made at the given
-	 * index. The new segment ids are generated randomly
-	 * 
-	 * @param segName
-	 * @return
-	 * @throws MissingComponentException
-	 * @throws UnsegmentedProfileException
-	 * @throws ProfileException
-	 * @throws Exception
-	 */
-	public boolean splitSegment(IProfileSegment seg)
-			throws ProfileException, UnsegmentedProfileException, MissingComponentException {
-		return splitSegment(seg, null, null);
 	}
 
 	/**
@@ -763,7 +732,7 @@ public class ProfileManager {
 	 * @throws MissingComponentException   if the reference point tag is missing, or
 	 *                                     the segment is missing
 	 */
-	public boolean splitSegment(@NonNull IProfileSegment seg, @Nullable UUID newID1, @Nullable UUID newID2)
+	public boolean splitSegment(@NonNull IProfileSegment seg, @NonNull UUID newID1, @NonNull UUID newID2)
 			throws ProfileException, UnsegmentedProfileException, MissingComponentException {
 
 		ISegmentedProfile medianProfile = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE,
@@ -774,30 +743,27 @@ public class ProfileManager {
 		seg = medianProfile.getSegment(seg.getID());
 		int index = seg.getMidpointIndex();
 
-		if (!seg.contains(index))
+		if (!seg.contains(index)) {
+			LOGGER.warning("Segment cannot be split: does not contain index " + index);
 			return false;
+		}
 
 		double proportion = seg.getIndexProportion(index);
 
 		// Validate that all nuclei have segments long enough to be split
 		if (!isCollectionSplittable(seg.getID(), proportion)) {
-			LOGGER.warning("Segment cannot be split: profile failed testing");
+			LOGGER.warning("Segment cannot be split: not all nuclei have splittable segment");
 			return false;
 		}
 
 		// split the two segments in the median
-		@NonNull
-		UUID nId1 = newID1 == null ? java.util.UUID.randomUUID() : newID1;
-		@NonNull
-		UUID nId2 = newID2 == null ? java.util.UUID.randomUUID() : newID2;
-		medianProfile.splitSegment(seg, index, nId1, nId2);
+		medianProfile.splitSegment(seg, index, newID1, newID2);
 
 		// put the new segment pattern back with the appropriate offset
 		collection.getProfileCollection().setSegments(medianProfile.getSegments());
 
 		/*
-		 * With the median profile segments unmerged, also split the segments in the
-		 * individual nuclei. Requires proportional alignment
+		 * Split the segments in the individual nuclei. Requires proportional alignment
 		 */
 		if (collection.isReal()) {
 			for (Nucleus n : collection.getNuclei()) {
@@ -824,8 +790,8 @@ public class ProfileManager {
 	 * @throws ProfileException
 	 * @throws MissingComponentException
 	 */
-	private void splitNucleusSegment(Nucleus n, UUID segId, double proportion, UUID newId1, UUID newId2)
-			throws ProfileException, MissingComponentException {
+	private void splitNucleusSegment(@NonNull Nucleus n, @NonNull UUID segId, double proportion, @NonNull UUID newId1,
+			@NonNull UUID newId2) throws ProfileException, MissingComponentException {
 		boolean wasLocked = n.isLocked();
 		n.setLocked(false); // not destructive
 		splitSegment(n, segId, proportion, newId1, newId2);
@@ -884,8 +850,20 @@ public class ProfileManager {
 
 	}
 
-	private void splitSegment(Taggable t, UUID idToSplit, double proportion, UUID newID1, UUID newID2)
-			throws ProfileException, MissingComponentException {
+	/**
+	 * Split a segment in the given taggable object. The segment will be split at
+	 * the proportion given.
+	 * 
+	 * @param t          the object containing the segment
+	 * @param idToSplit  the id of the segment to be split
+	 * @param proportion the proportion of the segment length at which to split
+	 * @param newID1     the id for the first new segment
+	 * @param newID2     the id for the second new segment
+	 * @throws ProfileException
+	 * @throws MissingComponentException
+	 */
+	private void splitSegment(@NonNull Taggable t, @NonNull UUID idToSplit, double proportion, @NonNull UUID newID1,
+			@NonNull UUID newID2) throws ProfileException, MissingComponentException {
 
 		ISegmentedProfile profile = t.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
 		IProfileSegment nSeg = profile.getSegment(idToSplit);

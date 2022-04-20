@@ -1,12 +1,19 @@
 package com.bmskinner.nuclear_morphology.gui.tabs.editing;
 
+import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.Graphics2D;
+import java.awt.font.FontRenderContext;
+import java.awt.font.TextLayout;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
@@ -27,6 +34,7 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.ui.RectangleEdge;
+import org.jfree.chart.util.ShapeUtils;
 
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
@@ -46,6 +54,7 @@ import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.gui.dialogs.AngleWindowSizeExplorer;
+import com.bmskinner.nuclear_morphology.gui.events.LandmarkUpdateEvent;
 import com.bmskinner.nuclear_morphology.gui.events.ProfileWindowProportionUpdateEvent;
 import com.bmskinner.nuclear_morphology.gui.events.SegmentMergeEvent;
 import com.bmskinner.nuclear_morphology.gui.events.SegmentSplitEvent;
@@ -56,7 +65,6 @@ import com.bmskinner.nuclear_morphology.gui.events.revamp.ConsensusUpdatedListen
 import com.bmskinner.nuclear_morphology.gui.events.revamp.ProfilesUpdatedListener;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.ScaleUpdatedListener;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.SwatchUpdatedListener;
-import com.bmskinner.nuclear_morphology.gui.events.revamp.UIController;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.UserActionController;
 import com.bmskinner.nuclear_morphology.gui.tabs.ChartDetailPanel;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -65,6 +73,8 @@ import com.bmskinner.nuclear_morphology.visualisation.ChartComponents;
 import com.bmskinner.nuclear_morphology.visualisation.charts.ConsensusNucleusChartFactory;
 import com.bmskinner.nuclear_morphology.visualisation.charts.overlays.EllipticalOverlay;
 import com.bmskinner.nuclear_morphology.visualisation.charts.overlays.EllipticalOverlayObject;
+import com.bmskinner.nuclear_morphology.visualisation.charts.overlays.ShapeOverlay;
+import com.bmskinner.nuclear_morphology.visualisation.charts.overlays.ShapeOverlayObject;
 import com.bmskinner.nuclear_morphology.visualisation.charts.panels.ConsensusNucleusChartPanel;
 import com.bmskinner.nuclear_morphology.visualisation.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.visualisation.options.ChartOptionsBuilder;
@@ -86,11 +96,15 @@ public class DatasetEditingPanel extends ChartDetailPanel implements ConsensusUp
 
 	private ConsensusNucleusChartPanel chartPanel;
 
-	private EllipticalOverlay lmOverlay = new EllipticalOverlay(new EllipticalOverlayObject(Double.NaN, 2, Double.NaN,
-			2, ChartComponents.MARKER_STROKE, Color.DARK_GRAY, Color.DARK_GRAY));
+	private ShapeOverlayObject lmDiamond = new ShapeOverlayObject(ShapeUtils.createDiamond(1), Double.NaN, Double.NaN,
+			ChartComponents.MARKER_STROKE, Color.DARK_GRAY, Color.DARK_GRAY);
+	private ShapeOverlay lmOverlay = new ShapeOverlay(lmDiamond);
+
+//	private EllipticalOverlay lmOverlay = new EllipticalOverlay(new EllipticalOverlayObject(Double.NaN, 2, Double.NaN,
+//			2, ChartComponents.MARKER_STROKE, Color.DARK_GRAY, Color.DARK_GRAY));
 
 	private EllipticalOverlay bOverlay = new EllipticalOverlay(new EllipticalOverlayObject(Double.NaN, 2, Double.NaN, 2,
-			ChartComponents.MARKER_STROKE, Color.CYAN, Color.CYAN));
+			ChartComponents.MARKER_STROKE, Color.decode("#0066CC"), Color.decode("#0066CC")));
 
 	private static final String STR_SEGMENT_PROFILE = "Resegment all cells";
 	private static final String STR_MERGE_SEGMENT = "Merge segments";
@@ -114,10 +128,10 @@ public class DatasetEditingPanel extends ChartDetailPanel implements ConsensusUp
 
 		setButtonsEnabled(false);
 
-		UIController.getInstance().addConsensusUpdatedListener(this);
-		UIController.getInstance().addScaleUpdatedListener(this);
-		UIController.getInstance().addSwatchUpdatedListener(this);
-		UIController.getInstance().addProfilesUpdatedListener(this);
+		uiController.addConsensusUpdatedListener(this);
+		uiController.addScaleUpdatedListener(this);
+		uiController.addSwatchUpdatedListener(this);
+		uiController.addProfilesUpdatedListener(this);
 	}
 
 	private JPanel createHeader() {
@@ -261,7 +275,7 @@ public class DatasetEditingPanel extends ChartDetailPanel implements ConsensusUp
 			windowSizeButton.setEnabled(false);
 			buttonStateLbl.setText("Cannot merge, unmerge pr split child dataset segments - try the root dataset");
 		} else {
-			buttonStateLbl.setText(" ");
+			buttonStateLbl.setText("Click a point on the border to update landmarks or segments");
 		}
 	}
 
@@ -446,6 +460,10 @@ public class DatasetEditingPanel extends ChartDetailPanel implements ConsensusUp
 
 	@Override
 	public void chartMouseClicked(ChartMouseEvent event) {
+
+		if (!activeDataset().getCollection().hasConsensus())
+			return;
+
 		// Get the mouse location on the chart
 		Rectangle2D dataArea = this.chartPanel.getScreenDataArea();
 		JFreeChart chart = event.getChart();
@@ -456,7 +474,6 @@ public class DatasetEditingPanel extends ChartDetailPanel implements ConsensusUp
 		double y = yAxis.java2DToValue(event.getTrigger().getY(), dataArea, RectangleEdge.LEFT);
 
 		double range = Math.min(xAxis.getRange().getLength(), yAxis.getRange().getLength());
-		double size = range / 100;
 		try {
 
 			// Get the closest border point, and set the overlay if close enough
@@ -464,7 +481,7 @@ public class DatasetEditingPanel extends ChartDetailPanel implements ConsensusUp
 
 			IPoint clicked = new FloatPoint(x, y);
 
-			Optional<IPoint> bp = n.getBorderList().stream().filter(p -> p.getLengthTo(clicked) < range / 90)
+			Optional<IPoint> bp = n.getBorderList().stream().filter(p -> p.getLengthTo(clicked) < range / 50)
 					.min((p1, p2) -> p1.getLengthTo(clicked) < p2.getLengthTo(clicked) ? -1 : 1);
 
 			if (bp.isPresent()) {
@@ -475,18 +492,22 @@ public class DatasetEditingPanel extends ChartDetailPanel implements ConsensusUp
 			}
 
 		} catch (Exception e) {
-			// TODO
+			LOGGER.fine("Unable to create popup menu: " + e.getMessage());
 		}
 	}
 
 	private synchronized JPopupMenu createPopup(IPoint point) {
 		JPopupMenu popupMenu = new JPopupMenu("Popup");
 
+//		if (!activeDataset().isRoot()) {
+//			popupMenu.add("Cannot edit a child dataset");
+//		} else {
 		addSegmentsToPopup(popupMenu, point);
 
 		popupMenu.addSeparator();
 
-//		addTagsToPopup(popupMenu, point);
+		addLandmarksToPopup(popupMenu, point);
+//		}
 
 		return popupMenu;
 	}
@@ -524,24 +545,25 @@ public class DatasetEditingPanel extends ChartDetailPanel implements ConsensusUp
 			prevItem.setBorderPainted(true);
 
 			prevItem.addActionListener(e -> {
+				setAnalysing(true);
 				LOGGER.fine(String.format("Updating segment %s start to %d", seg.getID(), medianIndex));
 				UserActionController.getInstance().segmentStartIndexUpdateEventReceived(
 						new SegmentStartIndexUpdateEvent(this, activeDataset(), seg.getID(), medianIndex));
-				setAnalysing(true);
 			});
 			popupMenu.add(prevItem);
 
 			popupMenu.add(Box.createVerticalStrut(2)); // stop borders touching
 
 			JMenuItem nextItem = new JMenuItem("Extend " + next.getName() + " to here");
-			nextItem.setBorder(BorderFactory.createLineBorder(ColourSelecter.getColor(next.getPosition()), 3));
+			nextItem.setBorder(BorderFactory.createLineBorder(ColourSelecter.getColor(next.getPosition()), 2));
 			nextItem.setBorderPainted(true);
 
 			nextItem.addActionListener(e -> {
 				LOGGER.fine(String.format("Updating segment %s start to %d", next.getID(), medianIndex));
+				setAnalysing(true);
 				UserActionController.getInstance().segmentStartIndexUpdateEventReceived(
 						new SegmentStartIndexUpdateEvent(this, activeDataset(), next.getID(), medianIndex));
-				setAnalysing(true);
+
 			});
 			popupMenu.add(nextItem);
 		} catch (MissingProfileException | MissingLandmarkException | ProfileException | ComponentCreationException e) {
@@ -554,59 +576,54 @@ public class DatasetEditingPanel extends ChartDetailPanel implements ConsensusUp
 	 * 
 	 * @param popupMenu
 	 */
-//	private void addTagsToPopup(JPopupMenu popupMenu, IPoint point) {
-//		List<Landmark> tags = dataset.getCollection().getProfileCollection().getLandmarks();
-//
-//		Collections.sort(tags);
-//
-//		for (Landmark tag : tags) {
-//			// Colour the menu item by tag colour
-//			JMenuItem item = new JMenuItem("Move " + tag.toString().toLowerCase() + " here");
-//			item.setBorder(BorderFactory.createLineBorder(ColourSelecter.getColour(tag), 3));
-//			item.setBackground(ColourSelecter.getColour(tag).darker());
-//			item.setBorderPainted(true);
-//			item.setForeground(Color.WHITE);
-//			item.setOpaque(true);
-//
-//			item.addActionListener(a -> {
-//				int pIndex = cell.getPrimaryNucleus().getBorderIndex(point);
-//				updateTag(tag, pIndex);
-//				repaint();
-//			});
-//			popupMenu.add(item);
-//			popupMenu.add(Box.createVerticalStrut(2)); // stop borders touching
-//		}
-//
-//		// Find border tags with rulesets that have not been assigned in the median
-//		List<Landmark> unassignedTags = new ArrayList<>();
-//		for (Landmark tag : Landmark.defaultValues()) {
-//			if (!tags.contains(tag)) {
-//				unassignedTags.add(tag);
-//			}
-//		}
-//
-//		if (!unassignedTags.isEmpty()) {
-//			Collections.sort(unassignedTags);
-//
-//			popupMenu.addSeparator();
-//
-//			for (Landmark tag : unassignedTags) {
-//				JMenuItem item = new JMenuItem("Set " + tag.toString().toLowerCase() + " here");
-//				item.setForeground(Color.DARK_GRAY);
-//
-//				item.addActionListener(a -> {
-//					int pIndex = cell.getPrimaryNucleus().getBorderIndex(point);
-//					updateTag(tag, pIndex);
-//				});
-//				popupMenu.add(item);
-//			}
-//		}
-//	}
+	private void addLandmarksToPopup(JPopupMenu popupMenu, IPoint point) {
+		try {
+			Nucleus n = activeDataset().getCollection().getConsensus();
+
+			// Indexes in the consensus
+			int rawIndex = n.getBorderIndex(point);
+			int rpIndex = n.getBorderIndex(Landmark.REFERENCE_POINT);
+
+			// Get the index of the clicked point in the RP-indexed consensus profile
+			int index = n.wrapIndex(rawIndex - rpIndex);
+
+			// Convert to the index in the dataset median profile (may have different
+			// length)
+			double fIndex = index / (float) n.getBorderLength();
+			int medianIndex = (int) (activeDataset().getCollection().getMedianArrayLength() * fIndex);
+
+			List<Landmark> tags = activeDataset().getCollection().getProfileCollection().getLandmarks();
+
+			Collections.sort(tags);
+
+			for (Landmark tag : tags) {
+				if (Landmark.REFERENCE_POINT.equals(tag))
+					continue;
+				// Colour the menu item by tag colour
+				JMenuItem item = new JMenuItem("Move " + tag.toString().toLowerCase() + " here");
+				item.setBorder(BorderFactory.createLineBorder(ColourSelecter.getColour(tag), 2));
+				item.setBackground(ColourSelecter.getColour(tag).darker());
+				item.setBorderPainted(true);
+				item.setForeground(Color.WHITE);
+				item.setOpaque(true);
+
+				item.addActionListener(a -> {
+					setAnalysing(true);
+					UserActionController.getInstance().landmarkUpdateEventReceived(
+							new LandmarkUpdateEvent(this, activeDataset(), tag, medianIndex));
+				});
+				popupMenu.add(item);
+				popupMenu.add(Box.createVerticalStrut(2)); // stop borders touching
+			}
+		} catch (MissingLandmarkException | ComponentCreationException e) {
+			LOGGER.log(Loggable.STACK, "Cannot create landmark popup", e);
+		}
+	}
 
 	@Override
 	public void chartMouseMoved(ChartMouseEvent event) {
 
-		if (activeDataset() == null)
+		if (this.isMultipleDatasets() || !this.hasDatasets())
 			return;
 
 		setBorderPointHighlight(event);
@@ -615,6 +632,10 @@ public class DatasetEditingPanel extends ChartDetailPanel implements ConsensusUp
 	}
 
 	private void setBorderPointHighlight(ChartMouseEvent event) {
+
+		if (!activeDataset().getCollection().hasConsensus())
+			return;
+
 		// Get the mouse location on the chart
 		Rectangle2D dataArea = this.chartPanel.getScreenDataArea();
 		JFreeChart chart = event.getChart();
@@ -633,7 +654,7 @@ public class DatasetEditingPanel extends ChartDetailPanel implements ConsensusUp
 
 			IPoint clicked = new FloatPoint(x, y);
 
-			Optional<IPoint> bp = n.getBorderList().stream().filter(p -> p.getLengthTo(clicked) < range / 90)
+			Optional<IPoint> bp = n.getBorderList().stream().filter(p -> p.getLengthTo(clicked) < range / 50)
 					.min((p1, p2) -> p1.getLengthTo(clicked) < p2.getLengthTo(clicked) ? -1 : 1);
 
 			if (bp.isPresent()) {
@@ -648,11 +669,15 @@ public class DatasetEditingPanel extends ChartDetailPanel implements ConsensusUp
 			}
 
 		} catch (Exception e) {
-			// TODO
+			LOGGER.fine("Unable to draw border highlights: " + e.getMessage());
 		}
 	}
 
 	private void setLandmarkHighlight(ChartMouseEvent event) {
+
+		if (!activeDataset().getCollection().hasConsensus())
+			return;
+
 		// Get the mouse location on the chart
 		Rectangle2D dataArea = this.chartPanel.getScreenDataArea();
 		JFreeChart chart = event.getChart();
@@ -663,7 +688,8 @@ public class DatasetEditingPanel extends ChartDetailPanel implements ConsensusUp
 		double y = yAxis.java2DToValue(event.getTrigger().getY(), dataArea, RectangleEdge.LEFT);
 
 		double range = Math.min(xAxis.getRange().getLength(), yAxis.getRange().getLength());
-		double size = range / 100;
+		int textSize = (int) (range / 30);
+		double distanceLimit = range / 20;
 		try {
 
 			// Get the closest landmarks, and set the overlay if close enough
@@ -672,19 +698,38 @@ public class DatasetEditingPanel extends ChartDetailPanel implements ConsensusUp
 			IPoint clicked = new FloatPoint(x, y);
 			for (Landmark lm : n.getLandmarks().keySet()) {
 				IPoint lmPoint = n.getBorderPoint(lm);
-				if (clicked.getLengthTo(lmPoint) < range / 20) {
-					lmOverlay.getEllipse().setXValue(lmPoint.getX());
-					lmOverlay.getEllipse().setYValue(lmPoint.getY());
+
+				if (clicked.getLengthTo(lmPoint) < distanceLimit) {
+					changeLandmarkOverlay(lm.toString(), lmPoint.getX() + (textSize / 2), lmPoint.getY(), textSize);
+					lmOverlay.getShapes().get(0).setXValue(lmPoint.getX());
+					lmOverlay.getShapes().get(0).setYValue(lmPoint.getY());
 					break;
 				}
-				lmOverlay.getEllipse().setXValue(Double.NaN);
-				lmOverlay.getEllipse().setYValue(Double.NaN);
-				lmOverlay.getEllipse().setXRadius(size);
-				lmOverlay.getEllipse().setYRadius(size);
+				lmOverlay.getShapes().get(0).setXValue(Double.NaN);
+				lmOverlay.getShapes().get(0).setYValue(Double.NaN);
+				if (lmOverlay.getShapes().size() > 1) {
+					lmOverlay.getShapes().get(1).setXValue(Double.NaN);
+					lmOverlay.getShapes().get(1).setYValue(Double.NaN);
+				}
 			}
 		} catch (Exception e) {
-			// TODO
+			LOGGER.fine("Unable to draw landmark highlights: " + e.getMessage());
 		}
+	}
+
+	private void changeLandmarkOverlay(String text, double x, double y, int size) {
+		if (lmOverlay.getShapes().size() >= 2) {
+			lmOverlay.clearShapes();
+			lmOverlay.addShape(lmDiamond);
+		}
+
+		Graphics2D g = (Graphics2D) chartPanel.getGraphics();
+		Font font = new Font(Font.SANS_SERIF, Font.PLAIN, size);
+		FontRenderContext frc = g.getFontRenderContext();
+		TextLayout layout = new TextLayout(text, font, frc);
+		lmOverlay.addShape(new ShapeOverlayObject(layout.getOutline(AffineTransform.getScaleInstance(1, -1)), x, y,
+				new BasicStroke(0), Color.DARK_GRAY, Color.DARK_GRAY));
+
 	}
 
 }
