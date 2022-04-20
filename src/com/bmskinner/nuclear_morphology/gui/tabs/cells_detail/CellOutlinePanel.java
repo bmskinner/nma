@@ -31,8 +31,7 @@ import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsBuilder;
 import com.bmskinner.nuclear_morphology.gui.components.panels.GenericCheckboxPanel;
 import com.bmskinner.nuclear_morphology.gui.events.CellUpdatedEventListener;
-import com.bmskinner.nuclear_morphology.gui.events.SegmentEvent;
-import com.bmskinner.nuclear_morphology.gui.events.SegmentEvent.SegmentUpdateType;
+import com.bmskinner.nuclear_morphology.gui.events.SegmentStartIndexUpdateEvent;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.SwatchUpdatedListener;
 import com.bmskinner.nuclear_morphology.gui.tabs.cells_detail.InteractiveCellPanel.CellDisplayOptions;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -159,35 +158,33 @@ public class CellOutlinePanel extends AbstractCellDetailPanel
 	}
 
 //	@Override
-	public void segmentEventReceived(SegmentEvent event) {
+	public void segmentEventReceived(SegmentStartIndexUpdateEvent event) {
 
-		if (event.type.equals(SegmentUpdateType.MOVE_START_INDEX)) {
+		// Wrap in a runnable to avoid occasional hanging. Did it help?
+		Runnable r = () -> {
+			try {
 
-			// Wrap in a runnable to avoid occasional hanging. Did it help?
-			Runnable r = () -> {
-				try {
+				LOGGER.fine("Updating segment start index to " + event.index);
+				// This is a manual change, so disable any lock
+				getCellModel().getCell().getPrimaryNucleus().setLocked(false);
 
-					LOGGER.fine("Updating segment start index to " + event.index);
-					// This is a manual change, so disable any lock
-					getCellModel().getCell().getPrimaryNucleus().setLocked(false);
+				// Carry out the update
+				activeDataset().getCollection().getProfileManager()
+						.updateCellSegmentStartIndex(getCellModel().getCell(), event.id, event.index);
 
-					// Carry out the update
-					activeDataset().getCollection().getProfileManager()
-							.updateCellSegmentStartIndex(getCellModel().getCell(), event.id, event.index);
+				// even if no lock was previously set, there should be one now a manual
+				// adjustment was made
+				getCellModel().getCell().getPrimaryNucleus().setLocked(true);
 
-					// even if no lock was previously set, there should be one now a manual
-					// adjustment was made
-					getCellModel().getCell().getPrimaryNucleus().setLocked(true);
+				// Recache necessary charts within this panel at once
+				refreshCache();
 
-					// Recache necessary charts within this panel at once
-					refreshCache();
+			} catch (Exception e) {
+				LOGGER.log(Loggable.STACK, "Error updating segment", e);
+			}
+		};
+		new Thread(r).start();
 
-				} catch (Exception e) {
-					LOGGER.log(Loggable.STACK, "Error updating segment", e);
-				}
-			};
-			new Thread(r).start();
-		}
 	}
 
 	@Override

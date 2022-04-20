@@ -1536,8 +1536,11 @@ public class DefaultCellCollection implements ICellCollection {
 			IProfile q25 = getProfile(type, tag, Stats.LOWER_QUARTILE);
 			IProfile q75 = getProfile(type, tag, Stats.UPPER_QUARTILE);
 
-			if (q25 == null || q75 == null)
-				throw new ProfileException("Could not create q25 or q75 profile");
+			if (q25 == null)
+				throw new ProfileException("Could not create q25 profile; was null");
+
+			if (q75 == null)
+				throw new ProfileException("Could not create q75 profile; was null");
 
 			return q75.subtract(q25);
 		}

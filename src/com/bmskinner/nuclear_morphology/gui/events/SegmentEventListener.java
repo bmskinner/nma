@@ -18,5 +18,39 @@ package com.bmskinner.nuclear_morphology.gui.events;
 
 public interface SegmentEventListener {
 
-    public void segmentEventReceived(SegmentEvent event);
+	/**
+	 * Inform listeners that a segment start index has been updated in a dataset or
+	 * in a single cell
+	 * 
+	 * @param event
+	 */
+	void segmentStartIndexUpdateEventReceived(SegmentStartIndexUpdateEvent event);
+
+	/**
+	 * Inform listeners that segments should be merged in a dataset
+	 * 
+	 * @param event
+	 */
+	void segmentMergeEventReceived(SegmentMergeEvent event);
+
+	/**
+	 * Inform listeners that segments should be unmerged in a dataset
+	 * 
+	 * @param event
+	 */
+	void segmentUnmergeEventReceived(SegmentUnmergeEvent event);
+
+	/**
+	 * Inform listeners that segments should be split in a dataset
+	 * 
+	 * @param event
+	 */
+	void segmentSplitEventReceived(SegmentSplitEvent event);
+
+	/**
+	 * Inform listeners that the profile window proportion in a dataset has changed
+	 * 
+	 * @param event
+	 */
+	void profileWindowProportionUpdateEventReceived(ProfileWindowProportionUpdateEvent event);
 }

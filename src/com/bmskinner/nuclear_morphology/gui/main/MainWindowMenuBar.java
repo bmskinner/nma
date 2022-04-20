@@ -188,12 +188,11 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 
 		// End of File>Open
 		ContextualMenuItem saveData = fact.makeItem(SAVE_DATASETS_LBL, UserActionEvent.SAVE_ALL_DATASETS,
-				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_CHILD_DATASET, SAVE_DATASETS_TOOLTIP);
+				ContextEnabled.ONLY_DATASETS, SAVE_DATASETS_TOOLTIP);
 		menu.add(saveData);
 
 		ContextualMenuItem saveWork = fact.makeItem(SAVE_WORKSPACES_LBL, UserActionEvent.EXPORT_WORKSPACE,
-				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_CHILD_DATASET,
-				SAVE_WORKSPACES_TOOLTIP);
+				ContextEnabled.ALWAYS_ACTIVE, SAVE_WORKSPACES_TOOLTIP);
 
 		menu.add(saveWork);
 

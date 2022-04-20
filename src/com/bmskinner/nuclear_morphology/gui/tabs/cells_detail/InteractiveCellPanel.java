@@ -57,9 +57,8 @@ import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.gui.components.panels.MagnifiableImagePanel;
 import com.bmskinner.nuclear_morphology.gui.events.CellUpdatedEventListener;
 import com.bmskinner.nuclear_morphology.gui.events.CelllUpdateEventHandler;
-import com.bmskinner.nuclear_morphology.gui.events.SegmentEvent;
-import com.bmskinner.nuclear_morphology.gui.events.SegmentEvent.SegmentUpdateType;
 import com.bmskinner.nuclear_morphology.gui.events.SegmentEventListener;
+import com.bmskinner.nuclear_morphology.gui.events.SegmentStartIndexUpdateEvent;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.visualisation.image.CellImagePainter;
 import com.bmskinner.nuclear_morphology.visualisation.image.ImagePainter;
@@ -183,11 +182,11 @@ public class InteractiveCellPanel extends JPanel {
 	 * @param type  the update type. Types are specified as static ints in
 	 *              SegmentEvent
 	 */
-	protected synchronized void fireSegmentEvent(UUID id, int index, SegmentUpdateType type) {
-		SegmentEvent e = new SegmentEvent(this, id, index, type);
+	protected synchronized void fireSegmentStartIndexUpdateEvent(UUID id, int index) {
+		SegmentStartIndexUpdateEvent e = new SegmentStartIndexUpdateEvent(this, cell, id, index);
 
 		for (SegmentEventListener l : listeners) {
-			l.segmentEventReceived(e);
+			l.segmentStartIndexUpdateEventReceived(e);
 		}
 	}
 
@@ -292,7 +291,7 @@ public class InteractiveCellPanel extends JPanel {
 
 				prevItem.addActionListener(e -> {
 					LOGGER.fine(String.format("Updating segment %s start to %d", next.getID(), index));
-					fireSegmentEvent(seg.getID(), index, SegmentUpdateType.MOVE_START_INDEX);
+					fireSegmentStartIndexUpdateEvent(seg.getID(), index);
 					cellUpdateHandler.fireCelllUpdateEvent(cell, dataset);
 					createImage();
 				});
@@ -306,7 +305,7 @@ public class InteractiveCellPanel extends JPanel {
 
 				nextItem.addActionListener(e -> {
 					LOGGER.fine(String.format("Updating segment %s start to %d", next.getID(), index));
-					fireSegmentEvent(next.getID(), index, SegmentUpdateType.MOVE_START_INDEX);
+					fireSegmentStartIndexUpdateEvent(next.getID(), index);
 					cellUpdateHandler.fireCelllUpdateEvent(cell, dataset);
 					createImage();
 				});

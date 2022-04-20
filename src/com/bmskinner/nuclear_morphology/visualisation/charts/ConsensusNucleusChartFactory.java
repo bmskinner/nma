@@ -330,6 +330,19 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 
 	}
 
+	public JFreeChart makeEditableConsensusChart() {
+		if (!hasConsensusNucleus())
+			return createEmptyChart();
+
+		if (options.isMultipleDatasets())
+			return createEmptyChart();
+
+		JFreeChart c = makeSegmentedConsensusChart(options.firstDataset());
+
+		return c;
+
+	}
+
 	/**
 	 * Format the series colours for a consensus nucleus.
 	 * 

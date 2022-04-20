@@ -40,6 +40,7 @@ import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.events.UserActionEvent;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.ConsensusUpdatedListener;
+import com.bmskinner.nuclear_morphology.gui.events.revamp.ProfilesUpdatedListener;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.ScaleUpdatedListener;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.SwatchUpdatedListener;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.UserActionController;
@@ -51,8 +52,8 @@ import com.bmskinner.nuclear_morphology.visualisation.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.visualisation.options.ChartOptionsBuilder;
 
 @SuppressWarnings("serial")
-public class ConsensusNucleusPanel extends ChartDetailPanel
-		implements ChangeListener, ConsensusUpdatedListener, ScaleUpdatedListener, SwatchUpdatedListener {
+public class ConsensusNucleusPanel extends ChartDetailPanel implements ChangeListener, ConsensusUpdatedListener,
+		ScaleUpdatedListener, SwatchUpdatedListener, ProfilesUpdatedListener {
 
 	private static final Logger LOGGER = Logger.getLogger(ConsensusNucleusPanel.class.getName());
 
@@ -101,6 +102,7 @@ public class ConsensusNucleusPanel extends ChartDetailPanel
 		uiController.addConsensusUpdatedListener(this);
 		uiController.addSwatchUpdatedListener(this);
 		uiController.addScaleUpdatedListener(this);
+		uiController.addProfilesUpdatedListener(this);
 	}
 
 	@Override
@@ -383,6 +385,17 @@ public class ConsensusNucleusPanel extends ChartDetailPanel
 	@Override
 	public void consensusFillStateUpdated() {
 		refreshCache();
+	}
+
+	@Override
+	public void profilesUpdated(List<IAnalysisDataset> datasets) {
+		refreshCache(datasets);
+
+	}
+
+	@Override
+	public void profilesUpdated(IAnalysisDataset dataset) {
+		refreshCache(dataset);
 	}
 
 }

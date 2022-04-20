@@ -34,13 +34,13 @@ import com.bmskinner.nuclear_morphology.gui.events.revamp.UserActionController;
 import com.bmskinner.nuclear_morphology.gui.tabs.AnalysisDetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.ClusterDetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
-import com.bmskinner.nuclear_morphology.gui.tabs.EditingDetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.ImagesTabPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.MergesDetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.TabPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.cells_detail.IndividualCellDetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.comparisons.ComparisonDetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.consensus.ConsensusNucleusPanel;
+import com.bmskinner.nuclear_morphology.gui.tabs.editing.DatasetEditingPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.nuclear.NuclearStatisticsPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.populations.DatasetsPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.profiles.NucleusProfilesPanel;
@@ -194,7 +194,7 @@ public class DockableMainWindow extends AbstractMainWindow {
 		DetailPanel mergesDetailPanel = new MergesDetailPanel();
 		DetailPanel segmentsDetailPanel = new SegmentsDetailPanel();
 		DetailPanel comparisonsPanel = new ComparisonDetailPanel();
-		DetailPanel editingDetailPanel = new EditingDetailPanel();
+		DetailPanel editingDetailPanel = new DatasetEditingPanel();
 		DetailPanel imagesTabPanel = new ImagesTabPanel();
 
 		detailPanels.add(analysisDetailPanel);

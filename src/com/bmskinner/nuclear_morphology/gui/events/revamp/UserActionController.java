@@ -7,12 +7,17 @@ import java.util.concurrent.CountDownLatch;
 import java.util.logging.Logger;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMethod.MorphologyAnalysisMode;
+import com.bmskinner.nuclear_morphology.components.MissingComponentException;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
+import com.bmskinner.nuclear_morphology.components.cells.Nucleus;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.LandmarkType;
+import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
+import com.bmskinner.nuclear_morphology.components.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.SegmentationHandler;
 import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace;
 import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace.BioSample;
@@ -61,6 +66,12 @@ import com.bmskinner.nuclear_morphology.gui.dialogs.collections.AbstractCellColl
 import com.bmskinner.nuclear_morphology.gui.dialogs.collections.ManualCurationDialog;
 import com.bmskinner.nuclear_morphology.gui.events.LandmarkUpdateEvent;
 import com.bmskinner.nuclear_morphology.gui.events.LandmarkUpdateEventListener;
+import com.bmskinner.nuclear_morphology.gui.events.ProfileWindowProportionUpdateEvent;
+import com.bmskinner.nuclear_morphology.gui.events.SegmentEventListener;
+import com.bmskinner.nuclear_morphology.gui.events.SegmentMergeEvent;
+import com.bmskinner.nuclear_morphology.gui.events.SegmentSplitEvent;
+import com.bmskinner.nuclear_morphology.gui.events.SegmentStartIndexUpdateEvent;
+import com.bmskinner.nuclear_morphology.gui.events.SegmentUnmergeEvent;
 import com.bmskinner.nuclear_morphology.gui.events.UserActionEvent;
 import com.bmskinner.nuclear_morphology.gui.runnables.MorphologyAnalysis;
 
@@ -71,8 +82,8 @@ import com.bmskinner.nuclear_morphology.gui.runnables.MorphologyAnalysis;
  * @since 2.0.0
  *
  */
-public class UserActionController
-		implements UserActionEventListener, ConsensusUpdateEventListener, LandmarkUpdateEventListener {
+public class UserActionController implements UserActionEventListener, ConsensusUpdateEventListener,
+		LandmarkUpdateEventListener, SegmentEventListener {
 
 	private static final Logger LOGGER = Logger.getLogger(UserActionController.class.getName());
 
@@ -621,6 +632,62 @@ public class UserActionController
 			UIController.getInstance().fireProfilesUpdated(d);
 		}
 
+	}
+
+	@Override
+	public void segmentStartIndexUpdateEventReceived(SegmentStartIndexUpdateEvent event) {
+
+		if (event.isDataset()) {
+			SegmentationHandler sh = new SegmentationHandler(event.dataset);
+			sh.updateSegmentStartIndexAction(event.id, event.index);
+			UIController.getInstance().fireProfilesUpdated(event.dataset);
+		}
+
+	}
+
+	@Override
+	public void segmentMergeEventReceived(SegmentMergeEvent event) {
+		try {
+			SegmentationHandler sh = new SegmentationHandler(event.dataset);
+			sh.mergeSegments(event.id1, event.id2);
+			UIController.getInstance().fireProfilesUpdated(event.dataset);
+		} catch (ProfileException | MissingComponentException e) {
+			LOGGER.warning("Could not merge segments: " + e.getMessage());
+		}
+	}
+
+	@Override
+	public void segmentUnmergeEventReceived(SegmentUnmergeEvent event) {
+		SegmentationHandler sh = new SegmentationHandler(event.dataset);
+		sh.unmergeSegments(event.id);
+		UIController.getInstance().fireProfilesUpdated(event.dataset);
+	}
+
+	@Override
+	public void segmentSplitEventReceived(SegmentSplitEvent event) {
+		SegmentationHandler sh = new SegmentationHandler(event.dataset);
+		sh.splitSegment(event.id);
+		UIController.getInstance().fireProfilesUpdated(event.dataset);
+	}
+
+	@Override
+	public void profileWindowProportionUpdateEventReceived(ProfileWindowProportionUpdateEvent event) {
+
+		try {
+			// Update cells
+			for (Nucleus n : event.dataset.getCollection().getNuclei())
+				n.setWindowProportion(event.window);
+
+			// recalculate profiles
+			event.dataset.getCollection().getProfileCollection().calculateProfiles();
+			Optional<IAnalysisOptions> op = event.dataset.getAnalysisOptions();
+			if (op.isPresent())
+				op.get().setAngleWindowProportion(event.window);
+
+			UIController.getInstance().fireProfilesUpdated(event.dataset);
+		} catch (ProfileException | MissingLandmarkException | MissingProfileException e) {
+			LOGGER.warning("Unable to update profile window proportion: " + e.getMessage());
+		}
 	}
 
 }
