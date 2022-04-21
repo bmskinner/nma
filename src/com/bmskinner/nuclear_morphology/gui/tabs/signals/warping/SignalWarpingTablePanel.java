@@ -95,7 +95,7 @@ public class SignalWarpingTablePanel extends TableDetailPanel implements Nuclear
 			int[] selectedRow = table.getSelectedRows();
 			if (table.getModel()instanceof SignalWarpingTableModel model) {
 				List<IWarpedSignal> images = new ArrayList<>();
-				for (int i = 0; i < selectedRow.length; i++) {
+				for (int i : selectedRow) {
 					images.add(model.getWarpedSignal(i));
 				}
 				fireWarpedSignalSelectionChanged(images);

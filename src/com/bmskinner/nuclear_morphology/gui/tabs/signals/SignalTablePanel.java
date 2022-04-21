@@ -14,11 +14,13 @@ import javax.swing.table.TableModel;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 import com.bmskinner.nuclear_morphology.gui.events.ChartSetEventListener;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.NuclearSignalUpdatedListener;
+import com.bmskinner.nuclear_morphology.gui.events.revamp.ScaleUpdatedListener;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.UIController;
 import com.bmskinner.nuclear_morphology.gui.tabs.TableDetailPanel;
 import com.bmskinner.nuclear_morphology.visualisation.charts.panels.ExportableChartPanel;
@@ -28,7 +30,10 @@ import com.bmskinner.nuclear_morphology.visualisation.options.TableOptionsBuilde
 import com.bmskinner.nuclear_morphology.visualisation.tables.AbstractTableCreator;
 import com.bmskinner.nuclear_morphology.visualisation.tables.NuclearSignalTableCreator;
 
-public class SignalTablePanel extends TableDetailPanel implements ChartSetEventListener, NuclearSignalUpdatedListener {
+public class SignalTablePanel extends TableDetailPanel
+		implements ChartSetEventListener, NuclearSignalUpdatedListener, ScaleUpdatedListener {
+
+	private static final long serialVersionUID = 1L;
 
 	private static final Logger LOGGER = Logger.getLogger(SignalTablePanel.class.getName());
 
@@ -54,6 +59,7 @@ public class SignalTablePanel extends TableDetailPanel implements ChartSetEventL
 		add(scrollPane, BorderLayout.CENTER);
 
 		uiController.addNuclearSignalUpdatedListener(this);
+		uiController.addScaleUpdatedListener(this);
 
 	}
 
@@ -159,6 +165,7 @@ public class SignalTablePanel extends TableDetailPanel implements ChartSetEventL
 	protected synchronized void updateMultiple() {
 
 		TableOptions options = new TableOptionsBuilder().setDatasets(getDatasets()).setTarget(statsTable)
+				.setScale(GlobalOptions.getInstance().getScale())
 				.setColumnRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN, new SignalTableCellRenderer()).build();
 		setTable(options);
 	}
@@ -194,6 +201,21 @@ public class SignalTablePanel extends TableDetailPanel implements ChartSetEventL
 	@Override
 	public void nuclearSignalUpdated(IAnalysisDataset dataset) {
 		refreshCache(dataset);
+	}
+
+	@Override
+	public void scaleUpdated(List<IAnalysisDataset> datasets) {
+		refreshCache(datasets);
+	}
+
+	@Override
+	public void scaleUpdated(IAnalysisDataset dataset) {
+		refreshCache(dataset);
+	}
+
+	@Override
+	public void scaleUpdated() {
+		update();
 	}
 
 }
