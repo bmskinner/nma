@@ -31,6 +31,7 @@ import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.signals.IWarpedSignal;
 import com.bmskinner.nuclear_morphology.io.Io;
 import com.bmskinner.nuclear_morphology.visualisation.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.visualisation.options.TableOptions;
@@ -113,7 +114,7 @@ public class ChartCache implements Cache {
 	}
 
 	@Override
-	public synchronized void clear(@Nullable List<IAnalysisDataset> list) {
+	public synchronized void clear(@Nullable List<?> list) {
 
 		// If the list is malformed, clear everything
 		if (list == null || list.isEmpty()) {
@@ -125,11 +126,23 @@ public class ChartCache implements Cache {
 		// These are the options that contain the datasets in the list
 		Set<ChartOptions> toRemove = new HashSet<>();
 
-		// Find the options with the datasets
-		for (IAnalysisDataset d : list) {
-			for (ChartOptions op : chartMap.keySet()) {
-				if (op.hasDatasets() && op.getDatasets().contains(d)) {
-					toRemove.add(op);
+		if (list.get(0) instanceof IAnalysisDataset) {
+			// Find the options with the datasets
+			for (Object d : list) {
+				for (ChartOptions op : chartMap.keySet()) {
+					if (op.hasDatasets() && op.getDatasets().contains(d)) {
+						toRemove.add(op);
+					}
+				}
+			}
+		}
+
+		if (list.get(0) instanceof IWarpedSignal) {
+			for (Object d : list) {
+				for (ChartOptions op : chartMap.keySet()) {
+					if (op.getWarpedSignals().contains(d)) {
+						toRemove.add(op);
+					}
 				}
 			}
 		}
@@ -161,6 +174,16 @@ public class ChartCache implements Cache {
 	@Override
 	public TableModel get(final TableOptions options) {
 		return null;
+	}
+
+	@Override
+	public void clear(ChartOptions options) {
+		chartMap.remove(options);
+	}
+
+	@Override
+	public void clear(TableOptions options) {
+		// No action
 	}
 
 }

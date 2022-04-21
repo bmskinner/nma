@@ -39,6 +39,8 @@ public interface ContextEnabled {
 	int ACTIVE_ON_WORKSPACE = 8;
 	int ACTIVE_ON_SINGLE_OBJECT = 16;
 	int ACTIVE_ON_MULTI_OBJECTS = 32;
+	int ACTIVE_WITH_CONSENSUS = 64;
+	int ACTIVE_WITH_SIGNALS = 128;
 //	int ACTIVE_ON_TWO_DATASETS = 64;
 
 	int ALWAYS_ACTIVE = ACTIVE_ON_ROOT_DATASET + ACTIVE_ON_CHILD_DATASET + ACTIVE_ON_CLUSTER_GROUP + ACTIVE_ON_WORKSPACE
@@ -80,6 +82,12 @@ public interface ContextEnabled {
 					enabled &= ((context & ACTIVE_ON_ROOT_DATASET) == ACTIVE_ON_ROOT_DATASET);
 				else
 					enabled &= ((context & ACTIVE_ON_CHILD_DATASET) == ACTIVE_ON_CHILD_DATASET);
+
+				if (((context & ACTIVE_WITH_CONSENSUS) == ACTIVE_WITH_CONSENSUS))
+					enabled &= d.getCollection().hasConsensus();
+
+				if (((context & ACTIVE_WITH_SIGNALS) == ACTIVE_WITH_SIGNALS))
+					enabled &= d.getCollection().getSignalManager().hasSignals();
 			}
 
 			// Allow cluster groups and workspaces to be ignored in multi selections

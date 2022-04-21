@@ -1,19 +1,3 @@
-/*******************************************************************************
- * Copyright (C) 2018 Ben Skinner
- * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- ******************************************************************************/
 package com.bmskinner.nuclear_morphology.analysis.signals;
 
 import java.awt.Rectangle;
@@ -22,18 +6,19 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.ExecutionException;
 import java.util.logging.Logger;
-
-import javax.swing.SwingWorker;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nuclear_morphology.analysis.IAnalysisWorker;
+import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
+import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
+import com.bmskinner.nuclear_morphology.analysis.SingleDatasetAnalysisMethod;
+import com.bmskinner.nuclear_morphology.components.MissingComponentException;
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.cells.Nucleus;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.mesh.DefaultMesh;
 import com.bmskinner.nuclear_morphology.components.mesh.DefaultMeshImage;
 import com.bmskinner.nuclear_morphology.components.mesh.Mesh;
@@ -44,7 +29,11 @@ import com.bmskinner.nuclear_morphology.components.mesh.UncomparableMeshImageExc
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
+import com.bmskinner.nuclear_morphology.components.signals.DefaultWarpedSignal;
+import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
+import com.bmskinner.nuclear_morphology.components.signals.IWarpedSignal;
 import com.bmskinner.nuclear_morphology.components.signals.SignalManager;
+import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.gui.tabs.signals.warping.SignalWarpingRunSettings;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
@@ -54,26 +43,15 @@ import com.bmskinner.nuclear_morphology.visualisation.image.ImageFilterer;
 
 import ij.process.ImageProcessor;
 
-/**
- * Warps signals from nuclei in a collection onto a target nucleus using meshes.
- * This is implemented as a SwingWorker that returns the merged overlay of all
- * the signals in the collection
- * 
- * @author ben
- * @since 1.13.6
- *
- */
-public class SignalWarper extends SwingWorker<ImageProcessor, Integer> {
+public class SignalWarpingMethod extends SingleDatasetAnalysisMethod {
 
-	private static final Logger LOGGER = Logger.getLogger(SignalWarper.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(SignalWarpingMethod.class.getName());
 
-	public static final boolean STRAIGHTEN_MESH = true;
-	public static final boolean REGULAR_MESH = false;
-
+	/** The minimum value signals must have to be included */
 	public static final int DEFAULT_MIN_SIGNAL_THRESHOLD = 0;
 
 	/** The options for the analysis */
-	private SignalWarpingRunSettings warpingOptions;
+	protected final SignalWarpingRunSettings options;
 
 	/** The number of cell images to be merged */
 	private int totalCells;
@@ -81,30 +59,19 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> {
 	/** The mesh images are warped onto */
 	private final Mesh meshConsensus;
 
-	/**
-	 * Construct with settings object.
-	 * 
-	 * @param warpingOptions
-	 */
-	public SignalWarper(@NonNull final SignalWarpingRunSettings warpingOptions) {
-
-		this.warpingOptions = warpingOptions;
+	public SignalWarpingMethod(@NonNull final IAnalysisDataset d, @NonNull final SignalWarpingRunSettings options) {
+		super(d);
+		this.options = options;
 
 		// Count the number of cells to include
-		SignalManager m = warpingOptions.templateDataset().getCollection().getSignalManager();
-		List<ICell> cells = warpingOptions.getBoolean(SignalWarpingRunSettings.IS_ONLY_CELLS_WITH_SIGNALS_KEY)
-				? m.getCellsWithNuclearSignals(warpingOptions.signalId(), true)
-				: warpingOptions.templateDataset().getCollection().getCells();
+		SignalManager m = dataset.getCollection().getSignalManager();
+		List<ICell> cells = options.getBoolean(SignalWarpingRunSettings.IS_ONLY_CELLS_WITH_SIGNALS_KEY)
+				? m.getCellsWithNuclearSignals(options.signalId(), true)
+				: dataset.getCollection().getCells();
 		totalCells = cells.size();
-		LOGGER.fine(String.format("Created signal warper for %s signal group %s with %s cells, min threshold %s ",
-				warpingOptions.templateDataset().getName(), warpingOptions.signalId(), totalCells,
-				warpingOptions.getInt(SignalWarpingRunSettings.MIN_THRESHOLD_KEY)));
-
 		try {
 
-			Nucleus target = warpingOptions.targetDataset().getCollection().getConsensus(); // Issue here when using
-																							// '.duplicate()' - causes
-																							// image sizing issue
+			Nucleus target = options.targetDataset().getCollection().getConsensus().duplicate();
 
 			// Create the consensus mesh to warp each cell onto
 			meshConsensus = new DefaultMesh(target);
@@ -112,45 +79,35 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> {
 			LOGGER.log(Loggable.STACK, "Error creating mesh", e2);
 			throw new IllegalArgumentException("Could not create mesh", e2);
 		}
+
 	}
 
 	@Override
-	protected ImageProcessor doInBackground() throws Exception {
+	public IAnalysisResult call() throws Exception {
+		fireUpdateProgressTotalLength(totalCells);
+		run();
+		return new DefaultAnalysisResult(dataset);
+	}
 
-		LOGGER.finer("Running warper");
-
+	public void run() throws Exception {
 		List<ImageProcessor> warpedImages = generateImages();
-		return ImageFilterer.addByteImages(warpedImages);
-	}
 
-	public SignalWarpingRunSettings getOptions() {
-		return warpingOptions;
-	}
+		// A 16-bit image
+		ImageProcessor finalImage = ImageFilterer.addByteImages(warpedImages);
 
-	@Override
-	protected void process(List<Integer> chunks) {
-		for (Integer i : chunks) {
-			int percent = (int) ((double) i / (double) totalCells * 100);
-			if (percent >= 0 && percent <= 100)
-				setProgress(percent);
-		}
-	}
+		ISignalGroup sg = dataset.getCollection().getSignalGroup(options.signalId())
+				.orElseThrow(MissingComponentException::new);
 
-	@Override
-	public void done() {
-		try {
-			if (this.get() != null) {
-				firePropertyChange("Finished", getProgress(), IAnalysisWorker.FINISHED);
-			} else {
-				firePropertyChange("Error", getProgress(), IAnalysisWorker.ERROR);
-			}
-		} catch (InterruptedException e) {
-			LOGGER.log(Loggable.STACK, "Interruption error in worker", e);
-			firePropertyChange("Error", getProgress(), IAnalysisWorker.ERROR);
-		} catch (ExecutionException e) {
-			LOGGER.log(Loggable.STACK, "Execution error in worker", e);
-			firePropertyChange("Error", getProgress(), IAnalysisWorker.ERROR);
-		}
+		IWarpedSignal ws = new DefaultWarpedSignal(options.targetDataset().getCollection().getConsensus().duplicate(),
+				options.targetDataset().getName(), options.templateDataset().getId(),
+				options.getBoolean(SignalWarpingRunSettings.IS_ONLY_CELLS_WITH_SIGNALS_KEY),
+				options.getInt(SignalWarpingRunSettings.MIN_THRESHOLD_KEY),
+				options.getBoolean(SignalWarpingRunSettings.IS_BINARISE_SIGNALS_KEY),
+				options.getBoolean(SignalWarpingRunSettings.IS_NORMALISE_TO_COUNTERSTAIN_KEY),
+				IWarpedSignal.toArray(finalImage), finalImage.getWidth(),
+				sg.getGroupColour().orElse(ColourSelecter.getSignalColour(0)), 255);
+
+		sg.addWarpedSignal(ws);
 	}
 
 	/**
@@ -160,18 +117,17 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> {
 	 * 
 	 */
 	private List<ImageProcessor> generateImages() throws MissingOptionException {
-		LOGGER.finer("Generating warped images for " + warpingOptions.templateDataset().getName());
+		LOGGER.finer("Generating warped images for " + options.templateDataset().getName());
 		final List<ImageProcessor> warpedImages = Collections.synchronizedList(new ArrayList<>());
 
-		List<ICell> cells = getCells(
-				warpingOptions.getBoolean(SignalWarpingRunSettings.IS_ONLY_CELLS_WITH_SIGNALS_KEY));
+		List<ICell> cells = getCells(options.getBoolean(SignalWarpingRunSettings.IS_ONLY_CELLS_WITH_SIGNALS_KEY));
 
 		for (ICell c : cells) {
 			for (Nucleus n : c.getNuclei()) {
 				LOGGER.finer("Drawing signals for " + n.getNameAndNumber());
 				ImageProcessor nImage = generateNucleusImage(n);
 				warpedImages.add(nImage);
-				publish(warpedImages.size());
+				fireProgressEvent();
 			}
 		}
 		return warpedImages;
@@ -202,14 +158,14 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> {
 
 			ImageProcessor ip = getNucleusImageProcessor(n);
 
-			if (warpingOptions.getInt(SignalWarpingRunSettings.MIN_THRESHOLD_KEY) > 0)
-				ip = new ImageFilterer(ip)
-						.setBlackLevel(warpingOptions.getInt(SignalWarpingRunSettings.MIN_THRESHOLD_KEY)).toProcessor();
+			if (options.getInt(SignalWarpingRunSettings.MIN_THRESHOLD_KEY) > 0)
+				ip = new ImageFilterer(ip).setBlackLevel(options.getInt(SignalWarpingRunSettings.MIN_THRESHOLD_KEY))
+						.toProcessor();
 
-			if (warpingOptions.getBoolean(SignalWarpingRunSettings.IS_BINARISE_SIGNALS_KEY))
-				ip.threshold(warpingOptions.getInt(SignalWarpingRunSettings.MIN_THRESHOLD_KEY));
+			if (options.getBoolean(SignalWarpingRunSettings.IS_BINARISE_SIGNALS_KEY))
+				ip.threshold(options.getInt(SignalWarpingRunSettings.MIN_THRESHOLD_KEY));
 
-			if (warpingOptions.getBoolean(SignalWarpingRunSettings.IS_NORMALISE_TO_COUNTERSTAIN_KEY)) {
+			if (options.getBoolean(SignalWarpingRunSettings.IS_NORMALISE_TO_COUNTERSTAIN_KEY)) {
 				ip = new ImageFilterer(ip).normaliseToCounterStain(ImageImporter.importFullImageTo8bit(n))
 						.toProcessor();
 
@@ -227,7 +183,7 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> {
 
 		} catch (IllegalArgumentException | MeshCreationException | UncomparableMeshImageException
 				| MeshImageCreationException | UnloadableImageException e) {
-			LOGGER.log(Loggable.STACK, e.getMessage(), e);
+			LOGGER.fine("Could not create warped image for " + n.getNameAndNumber() + ": " + e.getMessage());
 			return createEmptyProcessor();
 		}
 
@@ -245,9 +201,9 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> {
 		try {
 			// Get the image with the signal
 			ImageProcessor ip;
-			if (n.getSignalCollection().hasSignal(warpingOptions.signalId())) { // if there is no signal, getImage will
-																				// throw exception
-				ip = n.getSignalCollection().getImage(warpingOptions.signalId());
+			if (n.getSignalCollection().hasSignal(options.signalId())) { // if there is no signal, getImage will throw
+																			// exception
+				ip = n.getSignalCollection().getImage(options.signalId());
 				ip.invert(); // image is imported as white background. Need black background.
 			} else {
 				// We need to get the file in which no signals were detected
@@ -285,17 +241,17 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> {
 		// be correct, since the analysis options are mostly blank. We need
 		// to find the correct source dataset, and take the analysis options
 		// from that dataset.
-		if (warpingOptions.templateDataset().hasMergeSources()) {
+		if (options.templateDataset().hasMergeSources()) {
 
-			return warpingOptions.templateDataset().getAllMergeSources().stream()
-					.filter(d -> d.getCollection().contains(n)).findFirst().get().getAnalysisOptions().get()
-					.getNuclearSignalOptions(warpingOptions.signalId()).orElseThrow(MissingOptionException::new);
+			return options.templateDataset().getAllMergeSources().stream().filter(d -> d.getCollection().contains(n))
+					.findFirst().get().getAnalysisOptions().get().getNuclearSignalOptions(options.signalId())
+					.orElseThrow(MissingOptionException::new);
 		} else {
 
-			Optional<IAnalysisOptions> analysisOptions = warpingOptions.templateDataset().getAnalysisOptions();
+			Optional<IAnalysisOptions> analysisOptions = options.templateDataset().getAnalysisOptions();
 
 			if (analysisOptions.isPresent()) {
-				return analysisOptions.get().getNuclearSignalOptions(warpingOptions.signalId())
+				return analysisOptions.get().getNuclearSignalOptions(options.signalId())
 						.orElseThrow(MissingOptionException::new);
 
 			}
@@ -312,17 +268,16 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> {
 	 */
 	private List<ICell> getCells(boolean withSignalsOnly) {
 
-		SignalManager m = warpingOptions.templateDataset().getCollection().getSignalManager();
+		SignalManager m = options.templateDataset().getCollection().getSignalManager();
 		List<ICell> cells;
 		if (withSignalsOnly) {
 			LOGGER.finer("Only fetching cells with signals");
-			cells = m.getCellsWithNuclearSignals(warpingOptions.signalId(), true);
+			cells = m.getCellsWithNuclearSignals(options.signalId(), true);
 		} else {
 			LOGGER.finer("Fetching all cells");
-			cells = warpingOptions.templateDataset().getCollection().getCells();
+			cells = options.templateDataset().getCollection().getCells();
 
 		}
 		return cells;
 	}
-
 }

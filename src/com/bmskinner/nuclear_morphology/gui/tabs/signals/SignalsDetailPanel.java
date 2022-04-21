@@ -22,6 +22,7 @@ import java.util.logging.Logger;
 import javax.swing.JTabbedPane;
 
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
+import com.bmskinner.nuclear_morphology.gui.tabs.signals.warping.SignalWarpingMainPanel;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**

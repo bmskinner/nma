@@ -9,7 +9,7 @@ import org.junit.runners.Suite.SuiteClasses;
 	DefaultShellResultTest.class, 
 	DefaultSignalCollectionTest.class,
 	DefaultSignalGroupTest.class, 
-	ShortWarpedSignalTest.class,
+	DefaultWarpedSignalTest.class,
 	ShellCountTest.class,
 	ShellKeyTest.class})
 public class ComponentSignalsTestSuite {

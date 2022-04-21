@@ -100,6 +100,10 @@ public class Labels {
 		public static final String ADD = "Add...";
 		public static final String ADD_NUCLEAR_SIGNAL_LBL = "Add nuclear signal";
 		public static final String ADD_NUCLEAR_SIGNAL_TIP = "Run on root datasets only";
+
+		public static final String WARP_BTN_LBL = "Warped signals";
+		public static final String WARP_BTN_TOOLTIP = "Requires single dataset with consensus nucleus and signals";
+
 		public static final String POST_FISH_MAPPING_LBL = "Post-FISH mapping";
 		public static final String ADD_CHILD_CELLS_LBL = "Child collection from file";
 		public static final String ADD_CLUSTER_FILE_LBL = "Cluster group from file";
@@ -144,10 +148,9 @@ public class Labels {
 		public static final String DETECTION_MODE_LBL = "Detection mode";
 		public static final String THRESHOLD_LBL = "Threshold";
 		public static final String SIGNAL_CHANNEL_LABEL = "Channel";
-		public static final String WARP_BTN_LBL = "Warp signals";
+
 		public static final String SHOW_SIGNAL_RADII_LBL = "Show signal radii";
 		public static final String MERGE_BTN_LBL = "Merge signal groups";
-		public static final String WARP_BTN_TOOLTIP = "Requires consensus nucleus refolded, at least one dataset with signals, and all datasets to have matching segments";
 
 		/*
 		 * signal detection
@@ -193,16 +196,16 @@ public class Labels {
 		 *
 		 */
 		public class Warper {
-			public static final String TABLE_HEADER_SOURCE_DATASET = "Source dataset";
-			public static final String TABLE_HEADER_SOURCE_SIGNALS = "Source signals";
+			public static final String TABLE_HEADER_SOURCE_DATASET = "Dataset";
+			public static final String TABLE_HEADER_SOURCE_SIGNALS = "Signals";
 			public static final String TABLE_HEADER_SIGNALS_ONLY = "Only cells with signals?";
 			public static final String TABLE_HEADER_BINARISED = "Binarised";
 			public static final String TABLE_HEADER_NORMALISED = "Normalised";
-			public static final String TABLE_HEADER_TARGET_SHAPE = "Target shape";
+			public static final String TABLE_HEADER_TARGET_SHAPE = "Target";
 			public static final String TABLE_HEADER_KEY_COLUMN = "Keys";
 			public static final String TABLE_HEADER_N_CELLS = "Cells";
 			public static final String TABLE_HEADER_THRESHOLD = "Threshold";
-			public static final String TABLE_HEADER_COLOUR_COLUMN = "Pseudocolour";
+			public static final String TABLE_HEADER_COLOUR_COLUMN = "Colour";
 			public static final String TABLE_HEADER_DELETE_COLUMN = "Delete";
 
 		}

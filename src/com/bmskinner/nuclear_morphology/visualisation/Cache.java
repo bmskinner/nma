@@ -42,12 +42,12 @@ public interface Cache {
 	void clear();
 
 	/**
-	 * Remove caches containing any of the given datasets. These will be
-	 * recalculated at next call
+	 * Remove caches containing any of the given objects. These will be recalculated
+	 * at next call
 	 * 
 	 * @param list
 	 */
-	void clear(@Nullable List<IAnalysisDataset> list);
+	void clear(@NonNull List<?> list);
 
 	/**
 	 * Remove caches containing any of the given dataset. These will be recalculated
@@ -75,5 +75,19 @@ public interface Cache {
 	void add(@NonNull ChartOptions options, @NonNull JFreeChart chart);
 
 	void add(@NonNull TableOptions options, @NonNull TableModel model);
+
+	/**
+	 * Remove the cached chart for the given options if present
+	 * 
+	 * @param options
+	 */
+	void clear(ChartOptions options);
+
+	/**
+	 * Remove the cached table for the given options if present
+	 * 
+	 * @param options
+	 */
+	void clear(TableOptions options);
 
 }

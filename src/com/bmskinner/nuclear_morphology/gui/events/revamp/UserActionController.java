@@ -61,6 +61,7 @@ import com.bmskinner.nuclear_morphology.gui.actions.RunGLCMAction;
 import com.bmskinner.nuclear_morphology.gui.actions.RunProfilingAction;
 import com.bmskinner.nuclear_morphology.gui.actions.RunSegmentationAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ShellAnalysisAction;
+import com.bmskinner.nuclear_morphology.gui.actions.SignalWarpingAction;
 import com.bmskinner.nuclear_morphology.gui.actions.SingleDatasetResultAction;
 import com.bmskinner.nuclear_morphology.gui.dialogs.collections.AbstractCellCollectionDialog;
 import com.bmskinner.nuclear_morphology.gui.dialogs.collections.ManualCurationDialog;
@@ -391,6 +392,9 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 		if (event.type().equals(UserActionEvent.RUN_SHELL_ANALYSIS)) {
 			return new ShellAnalysisAction(selectedDataset, acceptor);
 		}
+
+		if (event.type().equals(UserActionEvent.SIGNAL_WARPING))
+			return new SignalWarpingAction(selectedDataset, acceptor);
 
 		if (event.type().equals(UserActionEvent.COPY_PROFILE_SEGMENTATION)) {
 			// copy the profile segmentation from one dataset to another

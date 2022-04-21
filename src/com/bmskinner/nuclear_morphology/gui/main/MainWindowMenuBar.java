@@ -328,12 +328,17 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 	private ContextualMenu createDatasetMenu() {
 		ContextualMenu menu = fact.makeMenu(DATASETS_MENU_LBL, ContextEnabled.ONLY_DATASETS);
 
-		ContextualMenu addSubMenu = fact.makeMenu(Labels.Populations.ADD,
-				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_SINGLE_OBJECT);
+		ContextualMenu addSubMenu = fact.makeMenu(Labels.Populations.ADD, ContextEnabled.ACTIVE_ON_ROOT_DATASET
+				| ContextEnabled.ACTIVE_ON_CHILD_DATASET | ContextEnabled.ACTIVE_ON_SINGLE_OBJECT);
 
 		addSubMenu.add(fact.makeItem(Labels.Populations.ADD_NUCLEAR_SIGNAL_LBL, UserActionEvent.ADD_NUCLEAR_SIGNAL,
 				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_SINGLE_OBJECT,
 				Labels.Populations.ADD_NUCLEAR_SIGNAL_TIP));
+
+		addSubMenu.add(fact.makeItem(Labels.Populations.WARP_BTN_LBL, UserActionEvent.SIGNAL_WARPING,
+				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_SINGLE_OBJECT
+						| ContextEnabled.ACTIVE_WITH_CONSENSUS | ContextEnabled.ACTIVE_WITH_SIGNALS,
+				Labels.Populations.WARP_BTN_TOOLTIP));
 
 		addSubMenu.add(fact.makeItem(Labels.Populations.POST_FISH_MAPPING_LBL, UserActionEvent.POST_FISH_MAPPING,
 				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_SINGLE_OBJECT));

@@ -16,6 +16,7 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.signals;
 
+import java.awt.Color;
 import java.nio.ByteBuffer;
 import java.nio.ShortBuffer;
 import java.util.UUID;
@@ -95,7 +96,7 @@ public interface IWarpedSignal extends XmlSerializable {
 	}
 
 	/**
-	 * Create a byte processor from the given array
+	 * Create an 8-bit byte processor from the given array
 	 * 
 	 * @param arr
 	 * @return
@@ -107,7 +108,7 @@ public interface IWarpedSignal extends XmlSerializable {
 	}
 
 	/**
-	 * Create a short processor from the given array
+	 * Create a 16-bit short processor from the given array
 	 * 
 	 * @param arr
 	 * @return
@@ -127,7 +128,9 @@ public interface IWarpedSignal extends XmlSerializable {
 
 	Nucleus target();
 
-	UUID templateId();
+	UUID source();
+
+	String targetName();
 
 	boolean isCellsWithSignals();
 
@@ -140,6 +143,20 @@ public interface IWarpedSignal extends XmlSerializable {
 	int imageWidth();
 
 	byte[] image();
+
+	ImageProcessor toImage();
+
+	Color colour();
+
+	void setColour(Color c);
+
+	int displayThreshold();
+
+	void setDisplayThreshold(int i);
+
+	boolean isPseudoColour();
+
+	void setPseudoColour(boolean b);
 
 	// /**
 //	 * Defines the signal group which was warped

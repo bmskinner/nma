@@ -36,7 +36,7 @@ import com.bmskinner.nuclear_morphology.visualisation.options.DisplayOptions;
 import com.bmskinner.nuclear_morphology.visualisation.options.TableOptions;
 
 public class TableCache implements Cache {
-	private Map<TableOptions, TableModel> tableMap = new HashMap<TableOptions, TableModel>();
+	private Map<TableOptions, TableModel> tableMap = new HashMap<>();
 
 	public TableCache() {
 
@@ -66,7 +66,7 @@ public class TableCache implements Cache {
 	 */
 	@Override
 	public void purge() {
-		tableMap = new HashMap<TableOptions, TableModel>();
+		tableMap = new HashMap<>();
 	}
 
 	/**
@@ -105,7 +105,7 @@ public class TableCache implements Cache {
 	 * @param list
 	 */
 	@Override
-	public synchronized void clear(@Nullable List<IAnalysisDataset> list) {
+	public synchronized void clear(@Nullable List<?> list) {
 
 		if (list == null || list.isEmpty()) {
 			purge();
@@ -115,17 +115,29 @@ public class TableCache implements Cache {
 		Set<DisplayOptions> toRemove = new HashSet<>();
 
 		// Find the options with the datasets
-		for (IAnalysisDataset d : list) {
-			for (DisplayOptions op : tableMap.keySet()) {
+		if (list.get(0) instanceof IAnalysisDataset) {
+			for (Object d : list) {
+				for (TableOptions op : tableMap.keySet()) {
 
-				if (!op.hasDatasets()) {
-					continue;
-				}
-				if (op.getDatasets().contains(d)) {
-					toRemove.add(op);
+					if (!op.hasDatasets()) {
+						continue;
+					}
+					if (op.getDatasets().contains(d)) {
+						toRemove.add(op);
+					}
 				}
 			}
 		}
+
+//		if (list.get(0) instanceof IWarpedSignal) {
+//			for (Object d : list) {
+//				for (TableOptions op : tableMap.keySet()) {
+//					if (op.getWarpedSignals().contains(d)) {
+//						toRemove.add(op);
+//					}
+//				}
+//			}
+//		}
 
 		// Remove the options with the datasets
 		for (DisplayOptions op : toRemove) {
@@ -163,5 +175,15 @@ public class TableCache implements Cache {
 			}
 		}
 
+	}
+
+	@Override
+	public void clear(ChartOptions options) {
+		// No action
+	}
+
+	@Override
+	public void clear(TableOptions options) {
+		tableMap.remove(options);
 	}
 }

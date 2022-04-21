@@ -57,6 +57,8 @@ public class UserActionEvent extends EventObject {
 	public static final String NEW_WORKSPACE = "NewWorkspace";
 
 	public static final String ADD_NUCLEAR_SIGNAL = "AddNuclearSignalAction";
+	public static final String SIGNAL_WARPING = "SignalWarpingAction";
+
 	public static final String CLUSTER_FROM_FILE = "AddClusterFromFileAction";
 
 	public static final String DATASET_ARITHMETIC = "DatasetArithmeticAction";

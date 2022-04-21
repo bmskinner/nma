@@ -13,6 +13,7 @@ import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
 
 /**
  * Store settings for a signal warping
+ * 
  * @author ben
  * @since 1.19.4
  *
@@ -20,31 +21,31 @@ import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
 public class SignalWarpingRunSettings extends DefaultOptions {
 
 	private static final long serialVersionUID = 1L;
-	
+
 	public static final String IS_ONLY_CELLS_WITH_SIGNALS_KEY = "Only cells with signals";
 	public static final String IS_BINARISE_SIGNALS_KEY = "Binarise signals";
 	public static final String MIN_THRESHOLD_KEY = "Min threshold";
 	public static final String IS_NORMALISE_TO_COUNTERSTAIN_KEY = "Normalise to counterstain";
-	
+
 	private final IAnalysisDataset d1;
 	private final IAnalysisDataset d2;
 	private final UUID signalId;
 
 	/**
 	 * Create settings object.
-	 * @param d1 the source dataset for signals
-	 * @param d2 the dataset with the target consensus shape
+	 * 
+	 * @param d1       the source dataset for signals
+	 * @param d2       the dataset with the target consensus shape
 	 * @param signalId the signal group to be warped
 	 */
-	public SignalWarpingRunSettings(@NonNull IAnalysisDataset d1, 
-			@NonNull IAnalysisDataset d2, 
+	public SignalWarpingRunSettings(@NonNull IAnalysisDataset d1, @NonNull IAnalysisDataset d2,
 			@NonNull UUID signalId) {
 		super();
-		this.d1=d1;
-		this.d2=d2;
+		this.d1 = d1;
+		this.d2 = d2;
 		this.signalId = signalId;
 	}
-	
+
 	public IAnalysisDataset templateDataset() {
 		return d1;
 	}
@@ -52,18 +53,17 @@ public class SignalWarpingRunSettings extends DefaultOptions {
 	public IAnalysisDataset targetDataset() {
 		return d2;
 	}
-	
+
 	public Nucleus targetShape() throws MissingLandmarkException, ComponentCreationException {
 		return d2.getCollection().getConsensus();
 	}
-	
+
 	public UUID signalId() {
 		return signalId;
 	}
-	
+
 	public ISignalGroup templateSignalGroup() {
-		return templateDataset().getCollection()
-				.getSignalGroup(signalId).get();
+		return templateDataset().getCollection().getSignalGroup(signalId).get();
 	}
 
 	@Override
@@ -102,6 +102,5 @@ public class SignalWarpingRunSettings extends DefaultOptions {
 			return false;
 		return true;
 	}
-	
-	
+
 }

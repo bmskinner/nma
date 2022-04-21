@@ -33,11 +33,10 @@ import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult.Aggregation;
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult.Normalisation;
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult.ShrinkType;
+import com.bmskinner.nuclear_morphology.components.signals.IWarpedSignal;
 import com.bmskinner.nuclear_morphology.gui.RotationMode;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter.ColourSwatch;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
-
-import ij.process.ImageProcessor;
 
 /**
  * Builder for a ChartOptions object. This simplifies the creation of the
@@ -261,8 +260,8 @@ public class ChartOptionsBuilder {
 		return this;
 	}
 
-	public ChartOptionsBuilder setWarpImage(ImageProcessor ip) {
-		options.setWarpImage(ip);
+	public ChartOptionsBuilder setWarpedSignals(List<IWarpedSignal> ws) {
+		options.setWarpedSignals(ws);
 		return this;
 	}
 

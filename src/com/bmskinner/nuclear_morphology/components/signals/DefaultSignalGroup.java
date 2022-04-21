@@ -77,8 +77,8 @@ public class DefaultSignalGroup implements ISignalGroup {
 		if (e.getChild("ShellResult") != null)
 			shellResult = new DefaultShellResult(e.getChild("ShellResult"));
 
-		for (Element e1 : e.getChildren("WarpedSignals")) {
-			warpedSignals.add(DefaultWarpedSignal.of(e1));
+		for (Element e1 : e.getChildren("WarpedSignal")) {
+			warpedSignals.add(new DefaultWarpedSignal(e1));
 		}
 	}
 

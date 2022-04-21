@@ -26,10 +26,9 @@ import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
+import com.bmskinner.nuclear_morphology.components.signals.IWarpedSignal;
 import com.bmskinner.nuclear_morphology.gui.RotationMode;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
-
-import ij.process.ImageProcessor;
 
 /*
  * Hold the drawing options for a chart. Can store options for profile
@@ -77,7 +76,7 @@ public class DefaultChartOptions extends AbstractOptions implements ChartOptions
 	private final List<CellularComponent> component = new ArrayList<>();
 	private boolean showWarp = false;
 
-	private ImageProcessor warpImage = null;
+	private List<IWarpedSignal> ws = new ArrayList<>();
 
 	private ChartPanel target = null;
 
@@ -377,13 +376,13 @@ public class DefaultChartOptions extends AbstractOptions implements ChartOptions
 		this.showSignals = showSignals;
 	}
 
-	public void setWarpImage(ImageProcessor image) {
-		this.warpImage = image;
+	public void setWarpedSignals(List<IWarpedSignal> ws) {
+		this.ws = ws;
 	}
 
 	@Override
-	public ImageProcessor getWarpImage() {
-		return warpImage;
+	public List<IWarpedSignal> getWarpedSignals() {
+		return ws;
 	}
 
 	@Override
@@ -446,7 +445,7 @@ public class DefaultChartOptions extends AbstractOptions implements ChartOptions
 		result = prime * result + (showSignals ? 1231 : 1237);
 		result = prime * result + (showBorderTags ? 1231 : 1237);
 
-		result = prime * result + ((warpImage == null) ? 0 : warpImage.hashCode());
+		result = prime * result + ((ws == null) ? 0 : ws.hashCode());
 
 		return result;
 	}
@@ -531,10 +530,10 @@ public class DefaultChartOptions extends AbstractOptions implements ChartOptions
 		if (showBorderTags != other.showBorderTags)
 			return false;
 
-		if (warpImage == null) {
-			if (other.warpImage != null)
+		if (ws == null) {
+			if (other.ws != null)
 				return false;
-		} else if (!warpImage.equals(other.warpImage))
+		} else if (!ws.equals(other.ws))
 			return false;
 		return true;
 	}

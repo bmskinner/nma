@@ -23,11 +23,9 @@ import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -43,7 +41,6 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.chart.ui.Layer;
-import org.jfree.data.general.DatasetUtils;
 import org.jfree.data.xy.XYDataset;
 
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
@@ -215,63 +212,71 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		return chart;
 	}
 
-	/**
-	 * Draw the given images onto a consensus outline nucleus.
-	 * 
-	 * @param image the image processor to be drawn
-	 * @return
-	 */
-	public JFreeChart makeSignalWarpChart() {
-
-		ImageProcessor image = options.getWarpImage();
-		// Create the outline of the nucleus
-		JFreeChart chart = new ConsensusNucleusChartFactory(options).makeNucleusBareOutlineChart();
-
-		XYPlot plot = chart.getXYPlot();
-
-		LOGGER.fine("Creating outline datasets");
-		// Make outline of the components to draw
-		List<XYDataset> outlineDatasets = new ArrayList<>();
-		try {
-			for (CellularComponent c : options.getComponent()) {
-				outlineDatasets.add(new NucleusDatasetCreator(options).createBareNucleusOutline(c));
-			}
-			LOGGER.fine(String.format("Image bounds: %s x %s", image.getWidth(), image.getHeight()));
-		} catch (ChartDatasetCreationException e) {
-			LOGGER.log(Level.SEVERE, "Error creating outline", e);
-			return createErrorChart();
-		}
-
-		// Calculate the offset at which to draw the image since
-		// the plot area is larger than the image to be drawn
-		double xChartMin = Double.MAX_VALUE;
-		double yChartMin = Double.MAX_VALUE;
-		for (XYDataset ds : outlineDatasets) {
-			xChartMin = Math.min(xChartMin, DatasetUtils.findMinimumDomainValue(ds).doubleValue());
-			yChartMin = Math.min(yChartMin, DatasetUtils.findMinimumRangeValue(ds).doubleValue());
-		}
-
-		// Get the max bounding box size for the consensus nuclei,
-		// to find the offsets for the images created
-		int xOffset = (int) Math.round(-xChartMin);
-		int yOffset = (int) Math.round(-yChartMin);
-
-		LOGGER.finer("Adding image as annotation with offset " + xOffset + " - " + yOffset);
-		drawImageAsAnnotation(image, plot, 255, -xOffset, -yOffset, options.isShowBounds());
-
-		// Set the colour of the nucleus outline
-		plot.getRenderer().setDefaultPaint(Color.BLACK);
-		plot.getRenderer().setDefaultSeriesVisible(true);
-		for (int i = 0; i < outlineDatasets.size(); i++) {
-			plot.setDataset(i, outlineDatasets.get(i));
-			plot.getRenderer().setSeriesPaint(i, Color.black);
-			plot.getRenderer().setSeriesVisible(i, true);
-		}
-
-		applyDefaultAxisOptions(chart);
-
-		return chart;
-	}
+//	public JFreeChart makeSignalWarpChart(List<IWarpedSignal> ws) {
+//
+//		if (options.isSingleDataset()) {
+//			return makeIndividualSignalWarpChart(ws);
+//		}
+//		return createEmptyChart();
+//	}
+//
+//	/**
+//	 * Draw the given images onto a consensus outline nucleus.
+//	 * 
+//	 * @param image the image processor to be drawn
+//	 * @return
+//	 */
+//	public JFreeChart makeIndividualSignalWarpChart(List<IWarpedSignal> ws) {
+//
+//		ImageProcessor image = options.getWarpImage();
+//		// Create the outline of the nucleus
+//		JFreeChart chart = new ConsensusNucleusChartFactory(options).makeNucleusBareOutlineChart();
+//
+//		XYPlot plot = chart.getXYPlot();
+//
+//		LOGGER.fine("Creating outline datasets");
+//		// Make outline of the components to draw
+//		List<XYDataset> outlineDatasets = new ArrayList<>();
+//		try {
+//			for (CellularComponent c : options.getComponent()) {
+//				outlineDatasets.add(new NucleusDatasetCreator(options).createBareNucleusOutline(c));
+//			}
+//			LOGGER.fine(String.format("Image bounds: %s x %s", image.getWidth(), image.getHeight()));
+//		} catch (ChartDatasetCreationException e) {
+//			LOGGER.log(Level.SEVERE, "Error creating outline", e);
+//			return createErrorChart();
+//		}
+//
+//		// Calculate the offset at which to draw the image since
+//		// the plot area is larger than the image to be drawn
+//		double xChartMin = Double.MAX_VALUE;
+//		double yChartMin = Double.MAX_VALUE;
+//		for (XYDataset ds : outlineDatasets) {
+//			xChartMin = Math.min(xChartMin, DatasetUtils.findMinimumDomainValue(ds).doubleValue());
+//			yChartMin = Math.min(yChartMin, DatasetUtils.findMinimumRangeValue(ds).doubleValue());
+//		}
+//
+//		// Get the max bounding box size for the consensus nuclei,
+//		// to find the offsets for the images created
+//		int xOffset = (int) Math.round(-xChartMin);
+//		int yOffset = (int) Math.round(-yChartMin);
+//
+//		LOGGER.finer("Adding image as annotation with offset " + xOffset + " - " + yOffset);
+//		drawImageAsAnnotation(image, plot, 255, -xOffset, -yOffset, options.isShowBounds());
+//
+//		// Set the colour of the nucleus outline
+//		plot.getRenderer().setDefaultPaint(Color.BLACK);
+//		plot.getRenderer().setDefaultSeriesVisible(true);
+//		for (int i = 0; i < outlineDatasets.size(); i++) {
+//			plot.setDataset(i, outlineDatasets.get(i));
+//			plot.getRenderer().setSeriesPaint(i, Color.black);
+//			plot.getRenderer().setSeriesVisible(i, true);
+//		}
+//
+//		applyDefaultAxisOptions(chart);
+//
+//		return chart;
+//	}
 
 //	private JFreeChart makeSignalWarpChart() {
 //
@@ -755,7 +760,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 	 * @param yOffset a position to move the image 0,0 to
 	 * @return
 	 */
-	private void drawImageAsAnnotation(ImageProcessor ip, XYPlot plot, int alpha, int xOffset, int yOffset,
+	protected void drawImageAsAnnotation(ImageProcessor ip, XYPlot plot, int alpha, int xOffset, int yOffset,
 			boolean showBounds) {
 		plot.setBackgroundPaint(Color.WHITE);
 		plot.getRangeAxis().setInverted(false);
@@ -812,7 +817,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 	 * @param alpha
 	 * @return
 	 */
-	private void drawImageAsAnnotation(ImageProcessor ip, XYPlot plot, int alpha) {
+	protected void drawImageAsAnnotation(ImageProcessor ip, XYPlot plot, int alpha) {
 		drawImageAsAnnotation(ip, plot, alpha, 0, 0, false);
 	}
 
@@ -823,7 +828,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 	 * @param ip
 	 * @return
 	 */
-	private JFreeChart drawImageAsAnnotation(ImageProcessor ip) {
+	protected JFreeChart drawImageAsAnnotation(ImageProcessor ip) {
 		return drawImageAsAnnotation(ip, 255);
 	}
 
@@ -835,7 +840,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 	 * @param alpha
 	 * @return
 	 */
-	private JFreeChart drawImageAsAnnotation(ImageProcessor ip, int alpha) {
+	protected JFreeChart drawImageAsAnnotation(ImageProcessor ip, int alpha) {
 
 		JFreeChart chart = ChartFactory.createXYLineChart(null, null, null, null, PlotOrientation.VERTICAL, true, true,
 				false);
@@ -853,7 +858,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 	 * @param component the component in the cell to annotate
 	 * @param isRGB     if the annotation should be RGB or greyscale
 	 */
-	private static void drawImageAsAnnotation(@NonNull XYPlot plot, @NonNull ICell cell,
+	protected static void drawImageAsAnnotation(@NonNull XYPlot plot, @NonNull ICell cell,
 			@NonNull CellularComponent component, boolean isRGB) {
 
 		if (component == null || cell == null || plot == null)
