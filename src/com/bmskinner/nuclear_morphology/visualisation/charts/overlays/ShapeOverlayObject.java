@@ -21,26 +21,44 @@ import java.awt.Color;
 import java.awt.Paint;
 import java.awt.Shape;
 import java.awt.Stroke;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.GeneralPath;
 
 public class ShapeOverlayObject extends OverlayObject {
 
-	private double xValue;
-	private double yValue;
 	Shape shape = null;
 
-	public ShapeOverlayObject(Shape shape, double xValue, double yValue) {
-		this(shape, xValue, yValue, new BasicStroke(1f), Color.BLACK, null);
+	public static Shape createDiamond(float s, double x, double y) {
+		AffineTransform at = AffineTransform.getTranslateInstance(x, y);
+		final GeneralPath p0 = new GeneralPath();
+		p0.moveTo(0f, -s);
+		p0.lineTo(s, 0f);
+		p0.lineTo(0f, s);
+		p0.lineTo(-s, 0f);
+		p0.closePath();
+
+		return at.createTransformedShape(p0);
 	}
 
-	public ShapeOverlayObject(Shape shape, double xValue, double yValue, Stroke stroke, Paint outline) {
-		this(shape, xValue, yValue, stroke, outline, null);
+	public ShapeOverlayObject(Shape shape) {
+		this(shape, new BasicStroke(1f), Color.BLACK, null);
 	}
 
-	public ShapeOverlayObject(Shape shape, double xValue, double yValue, Stroke stroke, Paint outline, Paint fill) {
+	public ShapeOverlayObject(Shape shape, Stroke stroke, Paint outline) {
+		this(shape, stroke, outline, null);
+	}
+
+	/**
+	 * Create a shape overlay at the given coordinates
+	 * 
+	 * @param shape   the shape to draw
+	 * @param stroke  the stroke
+	 * @param outline the outline colour
+	 * @param fill    the fill colour
+	 */
+	public ShapeOverlayObject(Shape shape, Stroke stroke, Paint outline, Paint fill) {
 		super(stroke, outline, fill);
 		this.shape = shape;
-		this.xValue = xValue;
-		this.yValue = yValue;
 	}
 
 	public Shape getShape() {
@@ -60,25 +78,4 @@ public class ShapeOverlayObject extends OverlayObject {
 	public boolean contains(double x, double y) {
 		return shape.contains(y, y);
 	}
-
-	public double getXValue() {
-		return xValue;
-	}
-
-	public void setXValue(double value) {
-		double oldValue = this.xValue;
-		this.xValue = value;
-		this.pcs.firePropertyChange("xValue", oldValue, value);
-	}
-
-	public double getYValue() {
-		return yValue;
-	}
-
-	public void setYValue(double value) {
-		double oldValue = this.yValue;
-		this.yValue = value;
-		this.pcs.firePropertyChange("yValue", oldValue, value);
-	}
-
 }

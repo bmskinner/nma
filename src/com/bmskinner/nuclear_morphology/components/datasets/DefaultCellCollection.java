@@ -423,7 +423,7 @@ public class DefaultCellCollection implements ICellCollection {
 	@Override
 	public void offsetConsensus(double xOffset, double yOffset) {
 		if (consensusNucleus != null)
-			consensusNucleus.offset(xOffset, yOffset);
+			consensusNucleus.setOffset(xOffset, yOffset);
 	}
 
 	@Override

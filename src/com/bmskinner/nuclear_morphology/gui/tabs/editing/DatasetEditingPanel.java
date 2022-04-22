@@ -34,7 +34,6 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.ui.RectangleEdge;
-import org.jfree.chart.util.ShapeUtils;
 
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
@@ -96,12 +95,7 @@ public class DatasetEditingPanel extends ChartDetailPanel implements ConsensusUp
 
 	private ConsensusNucleusChartPanel chartPanel;
 
-	private ShapeOverlayObject lmDiamond = new ShapeOverlayObject(ShapeUtils.createDiamond(1), Double.NaN, Double.NaN,
-			ChartComponents.MARKER_STROKE, Color.DARK_GRAY, Color.DARK_GRAY);
-	private ShapeOverlay lmOverlay = new ShapeOverlay(lmDiamond);
-
-//	private EllipticalOverlay lmOverlay = new EllipticalOverlay(new EllipticalOverlayObject(Double.NaN, 2, Double.NaN,
-//			2, ChartComponents.MARKER_STROKE, Color.DARK_GRAY, Color.DARK_GRAY));
+	private ShapeOverlay lmOverlay = new ShapeOverlay();
 
 	private EllipticalOverlay bOverlay = new EllipticalOverlay(new EllipticalOverlayObject(Double.NaN, 2, Double.NaN, 2,
 			ChartComponents.MARKER_STROKE, Color.decode("#0066CC"), Color.decode("#0066CC")));
@@ -696,20 +690,12 @@ public class DatasetEditingPanel extends ChartDetailPanel implements ConsensusUp
 			Nucleus n = activeDataset().getCollection().getConsensus();
 
 			IPoint clicked = new FloatPoint(x, y);
+			lmOverlay.clearShapes();
 			for (Landmark lm : n.getLandmarks().keySet()) {
 				IPoint lmPoint = n.getBorderPoint(lm);
 
 				if (clicked.getLengthTo(lmPoint) < distanceLimit) {
-					changeLandmarkOverlay(lm.toString(), lmPoint.getX() + (textSize / 2), lmPoint.getY(), textSize);
-					lmOverlay.getShapes().get(0).setXValue(lmPoint.getX());
-					lmOverlay.getShapes().get(0).setYValue(lmPoint.getY());
-					break;
-				}
-				lmOverlay.getShapes().get(0).setXValue(Double.NaN);
-				lmOverlay.getShapes().get(0).setYValue(Double.NaN);
-				if (lmOverlay.getShapes().size() > 1) {
-					lmOverlay.getShapes().get(1).setXValue(Double.NaN);
-					lmOverlay.getShapes().get(1).setYValue(Double.NaN);
+					changeLandmarkOverlay(lm.toString(), lmPoint.getX(), lmPoint.getY(), textSize);
 				}
 			}
 		} catch (Exception e) {
@@ -718,17 +704,25 @@ public class DatasetEditingPanel extends ChartDetailPanel implements ConsensusUp
 	}
 
 	private void changeLandmarkOverlay(String text, double x, double y, int size) {
-		if (lmOverlay.getShapes().size() >= 2) {
-			lmOverlay.clearShapes();
-			lmOverlay.addShape(lmDiamond);
-		}
+
+		lmOverlay.clearShapes();
+		lmOverlay.addShape(new ShapeOverlayObject(ShapeOverlayObject.createDiamond(1, x, y),
+				ChartComponents.MARKER_STROKE, Color.DARK_GRAY, Color.DARK_GRAY));
 
 		Graphics2D g = (Graphics2D) chartPanel.getGraphics();
 		Font font = new Font(Font.SANS_SERIF, Font.PLAIN, size);
 		FontRenderContext frc = g.getFontRenderContext();
 		TextLayout layout = new TextLayout(text, font, frc);
-		lmOverlay.addShape(new ShapeOverlayObject(layout.getOutline(AffineTransform.getScaleInstance(1, -1)), x, y,
-				new BasicStroke(0), Color.DARK_GRAY, Color.DARK_GRAY));
+
+		AffineTransform txt = new AffineTransform();
+
+		txt.concatenate(AffineTransform.getTranslateInstance(x + layout.getBounds().getWidth() / 1.5, y));
+		txt.concatenate(AffineTransform.getScaleInstance(1, -1));
+		txt.concatenate(AffineTransform.getTranslateInstance(-layout.getBounds().getCenterX(),
+				-layout.getBounds().getCenterY()));
+
+		lmOverlay.addShape(
+				new ShapeOverlayObject(layout.getOutline(txt), new BasicStroke(0), Color.DARK_GRAY, Color.DARK_GRAY));
 
 	}
 

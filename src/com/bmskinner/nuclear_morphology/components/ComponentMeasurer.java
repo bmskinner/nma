@@ -75,23 +75,6 @@ public final class ComponentMeasurer {
 		return Statistical.ERROR_CALCULATING_STAT;
 	}
 
-	private static double calculateCellNuclearArea(ICell c) {
-		double i = 0;
-		for (Nucleus n : c.getNuclei()) {
-			i += n.getMeasurement(Measurement.AREA);
-		}
-		return i;
-	}
-
-	private static double calculateCellNuclearRatio(ICell c) {
-		if (c.hasCytoplasm()) {
-			double cy = c.getCytoplasm().getMeasurement(Measurement.AREA);
-			double n = c.getMeasurement(Measurement.CELL_NUCLEAR_AREA);
-			return n / cy;
-		}
-		return Statistical.ERROR_CALCULATING_STAT;
-	}
-
 	/**
 	 * Calculate a measurement for a component. If the measurement type is not valid
 	 * for the component, Statistical.STAT_NOT_CALCULATED will be returned.
@@ -192,6 +175,23 @@ public final class ComponentMeasurer {
 			LOGGER.warning("Unable to caculate distance from CoM to border");
 		}
 		return bestDistance;
+	}
+
+	private static double calculateCellNuclearArea(ICell c) {
+		double i = 0;
+		for (Nucleus n : c.getNuclei()) {
+			i += n.getMeasurement(Measurement.AREA);
+		}
+		return i;
+	}
+
+	private static double calculateCellNuclearRatio(ICell c) {
+		if (c.hasCytoplasm()) {
+			double cy = c.getCytoplasm().getMeasurement(Measurement.AREA);
+			double n = c.getMeasurement(Measurement.CELL_NUCLEAR_AREA);
+			return n / cy;
+		}
+		return Statistical.ERROR_CALCULATING_STAT;
 	}
 
 	/**

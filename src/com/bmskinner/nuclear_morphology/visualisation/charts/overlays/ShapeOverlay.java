@@ -47,7 +47,7 @@ public class ShapeOverlay extends AbstractOverlay implements Overlay, PropertyCh
 	 */
 	public ShapeOverlay() {
 		super();
-		this.shapes = new ArrayList<ShapeOverlayObject>();
+		this.shapes = new ArrayList<>();
 	}
 
 	/**
@@ -96,7 +96,7 @@ public class ShapeOverlay extends AbstractOverlay implements Overlay, PropertyCh
 	}
 
 	public synchronized List<ShapeOverlayObject> getShapes() {
-		return new ArrayList<ShapeOverlayObject>(this.shapes);
+		return new ArrayList<>(this.shapes);
 	}
 
 	@Override
@@ -133,24 +133,37 @@ public class ShapeOverlay extends AbstractOverlay implements Overlay, PropertyCh
 
 				// Need to find the coordinates to draw the shape
 
-				double x = object.getXValue();// x midpoint
-//				x -= (object.getShape().getBounds2D().getWidth() / 2); // get
-//																		// the x
-//																		// midpoint
+				double x = object.getShape().getBounds2D().getCenterX();
 				double xx = xAxis.valueToJava2D(x, dataArea, xAxisEdge);
 
-				double y = object.getYValue();
-//				y -= (object.getShape().getBounds2D().getHeight() / 2); // get
-//																		// the y
-//																		// midpoint
+				double y = object.getShape().getBounds2D().getCenterY();
 				double yy = yAxis.valueToJava2D(y, dataArea, yAxisEdge);
 
 				// Need to scale the shape as well
+				// We include a division by the original width to preserve
+				// aspect ratios in the final rendered shape
 				double w = object.getShape().getBounds2D().getWidth();
 				double ww = xAxis.lengthToJava2D(w, dataArea, xAxisEdge) / w;
 
 				double h = object.getShape().getBounds2D().getHeight();
 				double hh = yAxis.lengthToJava2D(h, dataArea, yAxisEdge) / h;
+
+//				System.out.println("Input correct :" + x + ", " + y);
+//				System.out.println("Java2D correct: " + xx + ", " + yy);
+
+				// The xx and yy positions are correct at this point
+//				Shape s = ShapeOverlayObject.createDiamond((float) ww, xx, yy);
+//				g2.setPaint(Color.orange);
+//				g2.fill(s);
+
+				// Running this confirms that the affine transforms are correct
+				// so long as the input shape has the correct xx and yy coordinates
+//				Shape s2 = getJavaCoordinatesShape(xx, yy, ww, hh, s);
+//				System.out.println("Java2D affine :" + s2.getBounds2D().getCenterX() + ", "
+//						+ s2.getBounds2D().getCenterY() + " w: " + s2.getBounds2D().getWidth());
+
+//				g2.setPaint(Color.BLUE);
+//				g2.fill(s2);
 
 				drawShape(g2, dataArea, xx, yy, ww, hh, object);
 			}
@@ -163,7 +176,10 @@ public class ShapeOverlay extends AbstractOverlay implements Overlay, PropertyCh
 	 *
 	 * @param g2       the graphics target.
 	 * @param dataArea the data area.
+	 * @param x        the x-value in Java2D space.
 	 * @param y        the y-value in Java2D space.
+	 * @param w        the width of the object in Java2D space.
+	 * @param h        the height of the object in Java2D space.
 	 * @param shape    the overlay object
 	 */
 	protected void drawShape(Graphics2D g2, Rectangle2D dataArea, double x, double y, double w, double h,
@@ -171,8 +187,11 @@ public class ShapeOverlay extends AbstractOverlay implements Overlay, PropertyCh
 
 		Paint savedPaint = g2.getPaint();
 		Stroke savedStroke = g2.getStroke();
+//		System.out.println("Draw pre affine :" + shape.getShape().getBounds2D().getCenterX() + ", "
+//				+ shape.getShape().getBounds2D().getCenterY());
 
-		Shape s = getJavaCoordinatesShape(x, y, w, h, shape);
+		Shape s = getJavaCoordinatesShape(x, y, w, h, shape.getShape());
+//		System.out.println("Draw post affine :" + s.getBounds2D().getCenterX() + ", " + s.getBounds2D().getCenterY());
 
 		if (shape.getOutline() != null) {
 			g2.setPaint(shape.getOutline());
@@ -187,33 +206,42 @@ public class ShapeOverlay extends AbstractOverlay implements Overlay, PropertyCh
 
 		g2.setPaint(savedPaint);
 		g2.setStroke(savedStroke);
-		// }
+
 	}
 
-	protected Shape getJavaCoordinatesShape(double xCentre, double yCentre, double w, double h,
-			ShapeOverlayObject shape) {
-
-		Shape s = shape.getShape();
+	/**
+	 * Convert the given shape for drawing on a Graphics object. Flips the shape
+	 * horizontally, rotate 180 degrees, then scale according to the given width and
+	 * height.
+	 * 
+	 * @param xCentre
+	 * @param yCentre
+	 * @param w
+	 * @param h
+	 * @param shape
+	 * @return
+	 */
+	protected Shape getJavaCoordinatesShape(double xCentre, double yCentre, double w, double h, Shape s) {
 
 		// transforms are performed 'last in, first out'
 		AffineTransform aft = new AffineTransform();
 
+//		// Move back to original position after rotation and scaling
 		aft.concatenate(AffineTransform.getTranslateInstance(xCentre, yCentre));
+//
+//		// Ensure the objects are scaled appropriately
 		aft.concatenate(AffineTransform.getScaleInstance(w, h));
+//
+//		// 180 degree rotate
+		aft.concatenate(AffineTransform.getRotateInstance(Math.PI));
+//
+//		// Flip horizontal
+		aft.concatenate(AffineTransform.getScaleInstance(-1, 1));
+//
+		// Move to origin
+		aft.concatenate(
+				AffineTransform.getTranslateInstance(-s.getBounds2D().getCenterX(), -s.getBounds2D().getCenterY()));
 
-		aft.concatenate(AffineTransform.getRotateInstance(Math.PI)); // 180
-																		// degree
-																		// rotate
-		aft.concatenate(AffineTransform.getScaleInstance(-1, 1)); // flip
-																	// hozizontal
-
-		aft.concatenate(AffineTransform.getTranslateInstance(0, 0)); // move to
-																		// origin
-																		// for
-																		// rotation
-
-		Shape newShape = aft.createTransformedShape(s);
-
-		return newShape;
+		return aft.createTransformedShape(s);
 	}
 }

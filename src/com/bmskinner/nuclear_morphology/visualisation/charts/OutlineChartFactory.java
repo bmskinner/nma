@@ -76,7 +76,7 @@ import com.bmskinner.nuclear_morphology.visualisation.ChartComponents;
 import com.bmskinner.nuclear_morphology.visualisation.datasets.CellDataset;
 import com.bmskinner.nuclear_morphology.visualisation.datasets.ChartDatasetCreationException;
 import com.bmskinner.nuclear_morphology.visualisation.datasets.ComponentOutlineDataset;
-import com.bmskinner.nuclear_morphology.visualisation.datasets.NuclearSignalDatasetCreator;
+import com.bmskinner.nuclear_morphology.visualisation.datasets.NuclearSignalXYDataset;
 import com.bmskinner.nuclear_morphology.visualisation.datasets.NucleusDatasetCreator;
 import com.bmskinner.nuclear_morphology.visualisation.datasets.NucleusMeshXYDataset;
 import com.bmskinner.nuclear_morphology.visualisation.datasets.OutlineDataset;
@@ -129,10 +129,6 @@ public class OutlineChartFactory extends AbstractChartFactory {
 				return createTextAnnotatedEmptyChart(NO_CONSENSUS_ERROR_LBL);
 			}
 
-//			if (options.isShowWarp()) {
-//				LOGGER.finer("Warp chart for signal outline chart");
-//                return makeSignalWarpChart();
-//			}
 			LOGGER.finer("Signal CoM for signal outline chart");
 			return makeSignalCoMNucleusOutlineChart();
 		} catch (ChartCreationException e) {
@@ -153,7 +149,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 	 */
 	private JFreeChart makeSignalCoMNucleusOutlineChart() throws ChartCreationException {
 
-		XYDataset signalCoMs = new NuclearSignalDatasetCreator(options).createSignalCoMDataset();
+		NuclearSignalXYDataset signalCoMs = new NuclearSignalXYDataset(options.firstDataset());
 
 		JFreeChart chart = new ConsensusNucleusChartFactory(options).makeNucleusOutlineChart();
 
@@ -187,8 +183,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 
 			if (options.isShowAnnotations()) { // transparent ellipse surrounding CoM
 				for (UUID signalGroup : options.firstDataset().getCollection().getSignalManager().getSignalGroupIDs()) {
-					List<Shape> shapes = new NuclearSignalDatasetCreator(options)
-							.createSignalRadiusDataset(options.firstDataset(), signalGroup);
+					List<Shape> shapes = signalCoMs.createSignalRadii(signalGroup);
 
 					int signalCount = shapes.size();
 
@@ -200,9 +195,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 						Paint colour = g.get().getGroupColour().orElse(ColourSelecter.getColor(j++));
 						for (Shape s : shapes) {
 							XYShapeAnnotation an = new XYShapeAnnotation(s, null, null,
-									ColourSelecter.getTransparentColour((Color) colour, true, alpha)); // layer
-							// transparent
-							// signals
+									ColourSelecter.getTransparentColour((Color) colour, true, alpha));
 							plot.addAnnotation(an);
 						}
 					}
@@ -211,157 +204,6 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		}
 		return chart;
 	}
-
-//	public JFreeChart makeSignalWarpChart(List<IWarpedSignal> ws) {
-//
-//		if (options.isSingleDataset()) {
-//			return makeIndividualSignalWarpChart(ws);
-//		}
-//		return createEmptyChart();
-//	}
-//
-//	/**
-//	 * Draw the given images onto a consensus outline nucleus.
-//	 * 
-//	 * @param image the image processor to be drawn
-//	 * @return
-//	 */
-//	public JFreeChart makeIndividualSignalWarpChart(List<IWarpedSignal> ws) {
-//
-//		ImageProcessor image = options.getWarpImage();
-//		// Create the outline of the nucleus
-//		JFreeChart chart = new ConsensusNucleusChartFactory(options).makeNucleusBareOutlineChart();
-//
-//		XYPlot plot = chart.getXYPlot();
-//
-//		LOGGER.fine("Creating outline datasets");
-//		// Make outline of the components to draw
-//		List<XYDataset> outlineDatasets = new ArrayList<>();
-//		try {
-//			for (CellularComponent c : options.getComponent()) {
-//				outlineDatasets.add(new NucleusDatasetCreator(options).createBareNucleusOutline(c));
-//			}
-//			LOGGER.fine(String.format("Image bounds: %s x %s", image.getWidth(), image.getHeight()));
-//		} catch (ChartDatasetCreationException e) {
-//			LOGGER.log(Level.SEVERE, "Error creating outline", e);
-//			return createErrorChart();
-//		}
-//
-//		// Calculate the offset at which to draw the image since
-//		// the plot area is larger than the image to be drawn
-//		double xChartMin = Double.MAX_VALUE;
-//		double yChartMin = Double.MAX_VALUE;
-//		for (XYDataset ds : outlineDatasets) {
-//			xChartMin = Math.min(xChartMin, DatasetUtils.findMinimumDomainValue(ds).doubleValue());
-//			yChartMin = Math.min(yChartMin, DatasetUtils.findMinimumRangeValue(ds).doubleValue());
-//		}
-//
-//		// Get the max bounding box size for the consensus nuclei,
-//		// to find the offsets for the images created
-//		int xOffset = (int) Math.round(-xChartMin);
-//		int yOffset = (int) Math.round(-yChartMin);
-//
-//		LOGGER.finer("Adding image as annotation with offset " + xOffset + " - " + yOffset);
-//		drawImageAsAnnotation(image, plot, 255, -xOffset, -yOffset, options.isShowBounds());
-//
-//		// Set the colour of the nucleus outline
-//		plot.getRenderer().setDefaultPaint(Color.BLACK);
-//		plot.getRenderer().setDefaultSeriesVisible(true);
-//		for (int i = 0; i < outlineDatasets.size(); i++) {
-//			plot.setDataset(i, outlineDatasets.get(i));
-//			plot.getRenderer().setSeriesPaint(i, Color.black);
-//			plot.getRenderer().setSeriesVisible(i, true);
-//		}
-//
-//		applyDefaultAxisOptions(chart);
-//
-//		return chart;
-//	}
-
-//	private JFreeChart makeSignalWarpChart() {
-//
-//		IAnalysisDataset dataset = options.firstDataset();
-//
-//		// Create the outline of the consensus
-//		JFreeChart chart = new ConsensusNucleusChartFactory(options).makeNucleusOutlineChart();
-//
-//		XYPlot plot = chart.getXYPlot();
-//
-//		// Get consensus mesh.
-//		Nucleus consensus;
-//		Mesh meshConsensus;
-//		try {
-//			meshConsensus = new DefaultMesh(dataset.getCollection().getConsensus());
-//			consensus = dataset.getCollection().getConsensus();
-//		} catch (MeshCreationException | MissingLandmarkException | ComponentCreationException e) {
-//			LOGGER.log(Loggable.STACK, "Error creating consensus mesh", e);
-//			return createErrorChart();
-//		}
-//
-//		// Get the bounding box size for the consensus, to find the offsets for
-//		// the images created
-//		int w = (int) (consensus.getWidth() * 1.2);
-//		int h = (int) (consensus.getHeight() * 1.2);
-//
-//		int xOffset = w >> 1;
-//		int yOffset = h >> 1;
-//
-//		SignalManager m = dataset.getCollection().getSignalManager();
-//		List<ICell> cells = m.getCellsWithNuclearSignals(options.getSignalGroup(), true);
-//
-//		for (ICell cell : cells) {
-//			LOGGER.fine("Drawing signals for cell " + cell.getPrimaryNucleus().getNameAndNumber());
-//			// Get each nucleus. Make a mesh.
-//			Mesh cellMesh;
-//			try {
-//				cellMesh = new DefaultMesh(cell.getPrimaryNucleus(), meshConsensus);
-//			} catch (MeshCreationException e1) {
-//				LOGGER.fine("Cannot make mesh for " + cell.getPrimaryNucleus().getNameAndNumber());
-//				LOGGER.log(Loggable.STACK, ERROR_CREATING_MESH_MSG, e1);
-//				return createErrorChart();
-//			}
-//
-//			// Get the image with the signal
-//			ImageProcessor ip;
-//			try {
-//				ImageProcessor warped;
-//				try {
-//					ip = cell.getPrimaryNucleus().getSignalCollection().getImage(options.getSignalGroup());
-//
-//					// Create NucleusMeshImage from nucleus.
-//					MeshImage im = new DefaultMeshImage(cellMesh, ip);
-//
-//					// Draw NucleusMeshImage onto consensus mesh.
-//					warped = im.drawImage(meshConsensus);
-//				} catch (UncomparableMeshImageException | MeshImageCreationException e) {
-//					LOGGER.fine("Cannot make mesh for " + cell.getPrimaryNucleus().getNameAndNumber());
-//					LOGGER.log(Loggable.STACK, ERROR_CREATING_MESH_MSG, e);
-//					return createErrorChart();
-//				}
-//
-//				drawImageAsAnnotation(warped, plot, 20, -xOffset, -yOffset, options.isShowBounds());
-//
-//			} catch (UnloadableImageException e) {
-//				LOGGER.warning("Unable to load signal image for signal group " + options.getSignalGroup() + " in cell "
-//						+ cell.getPrimaryNucleus().getNameAndNumber());
-//				LOGGER.log(Loggable.STACK, "Unable to load signal image for signal group " + options.getSignalGroup()
-//						+ " in cell " + cell.getPrimaryNucleus().getNameAndNumber(), e);
-//			}
-//
-//		}
-//		XYDataset ds;
-//		try {
-//			ds = new NucleusDatasetCreator(options).createBareNucleusOutline(dataset);
-//		} catch (ChartDatasetCreationException e) {
-//			LOGGER.log(Loggable.STACK, "Error creating outline", e);
-//			return createErrorChart();
-//		}
-//		plot.setDataset(0, ds);
-//		plot.getRenderer(0).setDefaultPaint(Color.BLACK);
-//		plot.getRenderer(0).setDefaultSeriesVisible(true);
-//		applyDefaultAxisOptions(chart);
-//		return chart;
-//	}
 
 	/**
 	 * Create a chart with the outline of the given cell

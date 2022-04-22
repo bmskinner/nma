@@ -592,8 +592,7 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 	@Override
 	public void consensusTranslationUpdateReceived(IAnalysisDataset dataset, double x, double y) {
 		if (dataset.getCollection().hasConsensus()) {
-			IPoint com = dataset.getCollection().getRawConsensus().getCentreOfMass();
-			dataset.getCollection().offsetConsensus(com.getX() + x, com.getY() + y);
+			dataset.getCollection().offsetConsensus(x, y);
 			UIController.getInstance().fireConsensusNucleusChanged(dataset);
 		}
 	}
@@ -602,8 +601,7 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 	public void consensusTranslationResetReceived(List<IAnalysisDataset> datasets) {
 		for (IAnalysisDataset d : datasets) {
 			if (d.getCollection().hasConsensus()) {
-				IPoint com = d.getCollection().getRawConsensus().getCentreOfMass();
-				d.getCollection().offsetConsensus(com.getX(), com.getY());
+				d.getCollection().offsetConsensus(0, 0);
 			}
 		}
 		UIController.getInstance().fireConsensusNucleusChanged(datasets);

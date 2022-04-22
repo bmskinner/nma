@@ -314,7 +314,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 
 		ICellCollection collection = dataset.getCollection();
 		try {
-			XYDataset ds = new NucleusDatasetCreator(options).createSegmentedNucleusOutline(collection);
+			XYDataset ds = new NucleusDatasetCreator(options).createSegmentedConsensusOutline(collection);
 
 			JFreeChart chart = makeConsensusChart(ds);
 			double max = getConsensusChartRange(dataset.getCollection().getConsensus());

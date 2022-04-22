@@ -291,18 +291,6 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 	}
 
 	/**
-	 * Get the scale of the nucleus; the lowest absolute x or y limit
-	 * 
-	 * @param n
-	 * @return
-	 */
-	private double getScaleForIQRRange(@NonNull Nucleus n) {
-		double min = Math.min(n.getMinX(), n.getMinY());
-		double max = Math.max(n.getMaxX(), n.getMaxY());
-		return Math.min(Math.abs(min), Math.abs(max));
-	}
-
-	/**
 	 * Create an outline of the consensus nucleus, and apply segments as separate
 	 * series
 	 * 
@@ -310,7 +298,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 	 * @return
 	 * @throws Exception
 	 */
-	public XYDataset createSegmentedNucleusOutline(@NonNull ICellCollection collection)
+	public XYDataset createSegmentedConsensusOutline(@NonNull ICellCollection collection)
 			throws ChartDatasetCreationException {
 		FloatXYDataset ds = new FloatXYDataset();
 
@@ -452,7 +440,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 	 */
 	public XYDataset createMultiNucleusOutline() throws ChartDatasetCreationException {
 
-		ComponentOutlineDataset<Nucleus> ds = new ComponentOutlineDataset<Nucleus>();
+		ComponentOutlineDataset<Nucleus> ds = new ComponentOutlineDataset<>();
 
 		List<IAnalysisDataset> list = options.getDatasets();
 		MeasurementScale scale = options.getScale();

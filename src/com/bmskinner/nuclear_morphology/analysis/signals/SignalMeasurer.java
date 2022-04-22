@@ -26,6 +26,7 @@ import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.UnavailableBorderPointException;
 import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.cells.Nucleus;
+import com.bmskinner.nuclear_morphology.components.generic.FloatPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.measure.DoubleEquation;
 import com.bmskinner.nuclear_morphology.components.measure.LineEquation;
@@ -40,9 +41,9 @@ import com.bmskinner.nuclear_morphology.components.signals.ISignalCollection;
  * @author bms41
  *
  */
-public class SignalAnalyser {
+public class SignalMeasurer {
 
-	private static final Logger LOGGER = Logger.getLogger(SignalAnalyser.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(SignalMeasurer.class.getName());
 
 	/**
 	 * Measure signal angles. Accounts for orientation by measuring in the oriented
@@ -57,17 +58,16 @@ public class SignalAnalyser {
 
 		Nucleus oriented = n.getOrientedNucleus();
 
-		IPoint p = oriented.getCentreOfMass();
-		p.setY(p.getY() - 10); // we want to measure the absolute angle from below the CoM
-//
+		// we want to measure the absolute angle from below the CoM
+		IPoint com = oriented.getCentreOfMass();
+		IPoint p = new FloatPoint(com.getX(), com.getY() - 10);
+
 //		IPoint p = oriented.hasLandmark(Landmark.ORIENTATION_POINT)
 //				? oriented.getBorderPoint(Landmark.ORIENTATION_POINT)
 //				: oriented.getBorderPoint(Landmark.REFERENCE_POINT);
 
 		ISignalCollection sc = n.getSignalCollection();
 		ISignalCollection sco = oriented.getSignalCollection();
-
-		assert (sco.size() == sc.size());
 
 		for (UUID signalGroup : sc.getSignalGroupIds()) {
 
@@ -83,7 +83,10 @@ public class SignalAnalyser {
 
 					// Measure angle in the oriented signal, than save the measurement in the real
 					// signal
-					double angle = oriented.getCentreOfMass().findAbsoluteAngle(p, s1.getCentreOfMass());
+
+					double angle = 360 - oriented.getCentreOfMass().findAbsoluteAngle(p, s1.getCentreOfMass());
+//					LOGGER.fine("Nucleus " + n.getNameAndNumber() + "CoM\t" + oriented.getCentreOfMass()
+//							+ "\tsignal CoM\t" + s1.getCentreOfMass() + "\tversus\t" + p + "\t: angle " + angle);
 					s.setMeasurement(Measurement.ANGLE, angle);
 				}
 			}

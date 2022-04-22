@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nuclear_morphology.analysis.signals.SignalAnalyser;
+import com.bmskinner.nuclear_morphology.analysis.signals.SignalMeasurer;
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
@@ -510,8 +510,7 @@ public class SignalManager {
 		LOGGER.finer("Recalcalculating signal angles");
 		for (Nucleus n : collection.getNuclei()) {
 			try {
-				SignalAnalyser.calculateSignalAngles(n);
-//                n.calculateSignalAnglesFromPoint(n.getBorderPoint(Landmark.ORIENTATION_POINT));
+				SignalMeasurer.calculateSignalAngles(n);
 			} catch (MissingLandmarkException | ComponentCreationException e) {
 				LOGGER.finer("Cannot calculate signal angles");
 			}

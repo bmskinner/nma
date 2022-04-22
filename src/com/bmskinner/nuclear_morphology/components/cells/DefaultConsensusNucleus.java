@@ -97,10 +97,16 @@ public class DefaultConsensusNucleus extends DefaultNucleus implements Consensus
 	}
 
 	@Override
-	public void offset(double xOffset, double yOffset) {
+	public void setOffset(double xOffset, double yOffset) {
 		this.xOffset = xOffset;
 		this.yOffset = yOffset;
 	}
+
+//	@Override
+//	public void offset(double xOffset, double yOffset) {
+//		this.xOffset = xOffset;
+//		this.yOffset = yOffset;
+//	}
 
 	@Override
 	public void addRotation(double angle) {

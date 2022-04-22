@@ -681,7 +681,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 			p.offset(xOffset, yOffset);
 		}
 
-		this.centreOfMass.offset(xOffset, yOffset);
+		centreOfMass.offset(xOffset, yOffset);
 		updateBounds();
 
 	}

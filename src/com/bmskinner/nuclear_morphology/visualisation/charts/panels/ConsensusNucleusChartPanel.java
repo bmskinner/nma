@@ -40,7 +40,7 @@ import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.UserActionController;
 import com.bmskinner.nuclear_morphology.io.Io;
 import com.bmskinner.nuclear_morphology.io.SVGWriter;
-import com.bmskinner.nuclear_morphology.visualisation.charts.overlays.ComponentOverlay;
+import com.bmskinner.nuclear_morphology.visualisation.charts.overlays.ShapeOverlay;
 import com.bmskinner.nuclear_morphology.visualisation.charts.overlays.ShapeOverlayObject;
 import com.bmskinner.nuclear_morphology.visualisation.datasets.ComponentOutlineDataset;
 
@@ -63,7 +63,7 @@ public class ConsensusNucleusChartPanel extends ExportableChartPanel {
 
 	private boolean fillConsensus = true;
 
-	private ComponentOverlay consensusOverlay = null;
+	private ShapeOverlay consensusOverlay = null;
 
 	private UserActionController uac = UserActionController.getInstance();
 
@@ -74,7 +74,7 @@ public class ConsensusNucleusChartPanel extends ExportableChartPanel {
 		this.setPopupMenu(popup);
 		this.validate();
 		this.setFixedAspectRatio(true);
-		consensusOverlay = new ComponentOverlay();
+		consensusOverlay = new ShapeOverlay();
 		this.addOverlay(consensusOverlay);
 
 	}
@@ -113,6 +113,7 @@ public class ConsensusNucleusChartPanel extends ExportableChartPanel {
 			if (!GlobalOptions.getInstance().isFillConsensus())
 				return;
 
+			// Per panel override in case this panel should always be outline only
 			if (!fillConsensus)
 				return;
 
@@ -134,8 +135,10 @@ public class ConsensusNucleusChartPanel extends ExportableChartPanel {
 
 				if (n != null) {
 					c = ColourSelecter.getTransparentColour((Color) c, true, 128);
-					ShapeOverlayObject o = new ShapeOverlayObject(n.toShape(scale), 0, 0, null, null, c);
-					consensusOverlay.addShape(o, n);
+
+					ShapeOverlayObject o = new ShapeOverlayObject(n.toShape(scale), null, null, c);
+//					consensusOverlay.addShape(o, n);
+					consensusOverlay.addShape(o);
 				}
 			}
 

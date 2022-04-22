@@ -16,9 +16,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult;
-import com.bmskinner.nuclear_morphology.components.signals.SignalManager;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.components.ImageThumbnailGenerator;
 import com.bmskinner.nuclear_morphology.gui.events.ChartSetEventListener;
@@ -174,11 +172,6 @@ public class SignalConsensusPanel extends ChartDetailPanel
 			consensusAndCheckboxPanel.repaint();
 			consensusAndCheckboxPanel.setVisible(true);
 
-//			if (activeDataset() != null && activeDataset().getCollection().hasConsensus()
-//					&& activeDataset().getCollection().getSignalManager().hasSignals()) {
-//				warpButton.setEnabled(true);
-//			}
-
 			if (activeDataset().getCollection().getSignalManager().getSignalGroupCount() > 1)
 				mergeButton.setEnabled(true);
 
@@ -186,39 +179,6 @@ public class SignalConsensusPanel extends ChartDetailPanel
 
 		if (isMultipleDatasets()) {
 			mergeButton.setEnabled(false);
-			if (IAnalysisDataset.haveConsensusNuclei(getDatasets())) {
-
-				// Check at least one of the selected datasets has signals
-				String text = "";
-
-				boolean hasSignals = false;
-				for (IAnalysisDataset d : getDatasets()) {
-
-					SignalManager m = d.getCollection().getSignalManager();
-					if (m.hasSignals()) {
-						hasSignals = true;
-						break;
-					}
-				}
-
-				// Segments need to match for mesh creation
-				boolean segmentsMatch = IProfileSegment.segmentCountsMatch(getDatasets());
-
-				if (!segmentsMatch) {
-					text = "Segments do not match between datasets";
-				}
-
-//				if (hasSignals && segmentsMatch) {
-//					warpButton.setEnabled(true);
-//				} else {
-//					warpButton.setEnabled(false);
-//					headerText.setText(text);
-//				}
-
-			} else {
-//				warpButton.setEnabled(false);
-				headerText.setText("Datasets do not all have consensus");
-			}
 		}
 	}
 
