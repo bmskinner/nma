@@ -123,20 +123,19 @@ public class ConsensusNucleusChartPanel extends ExportableChartPanel {
 			if (!(chart.getXYPlot().getDataset() instanceof ComponentOutlineDataset))
 				return;
 
-			ComponentOutlineDataset ds = (ComponentOutlineDataset) chart.getXYPlot().getDataset();
+			int n = chart.getXYPlot().getDatasetCount();
 
-			for (int series = 0; series < ds.getSeriesCount(); series++) {
+			for (int series = 0; series < n; series++) {
 
-				Comparable seriesKey = ds.getSeriesKey(series);
+				ComponentOutlineDataset ds = (ComponentOutlineDataset) chart.getXYPlot().getDataset(series);
 
-				CellularComponent n = ds.getComponent(seriesKey);
+				CellularComponent comp = ds.getComponent();
+				Paint c = chart.getXYPlot().getRenderer(series).getSeriesPaint(0);
 
-				Paint c = chart.getXYPlot().getRenderer().getSeriesPaint(series);
-
-				if (n != null) {
+				if (comp != null) {
 					c = ColourSelecter.getTransparentColour((Color) c, true, 128);
 
-					ShapeOverlayObject o = new ShapeOverlayObject(n.toShape(scale), null, null, c);
+					ShapeOverlayObject o = new ShapeOverlayObject(comp.toShape(scale), null, null, c);
 					consensusOverlay.addShape(o);
 				}
 			}

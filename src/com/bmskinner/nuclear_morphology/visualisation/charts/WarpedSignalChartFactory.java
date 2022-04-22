@@ -19,7 +19,7 @@ import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.cells.Nucleus;
 import com.bmskinner.nuclear_morphology.components.signals.IWarpedSignal;
 import com.bmskinner.nuclear_morphology.visualisation.datasets.ChartDatasetCreationException;
-import com.bmskinner.nuclear_morphology.visualisation.datasets.NucleusDatasetCreator;
+import com.bmskinner.nuclear_morphology.visualisation.datasets.ComponentOutlineDataset;
 import com.bmskinner.nuclear_morphology.visualisation.image.ImageFilterer;
 import com.bmskinner.nuclear_morphology.visualisation.options.ChartOptions;
 
@@ -70,7 +70,7 @@ public class WarpedSignalChartFactory extends OutlineChartFactory {
 
 		try {
 			for (CellularComponent c : components) {
-				outlineDatasets.add(new NucleusDatasetCreator(options).createBareNucleusOutline(c));
+				outlineDatasets.add(new ComponentOutlineDataset(c, false, options.getScale()));
 			}
 			LOGGER.finer(String.format("Image bounds: %s x %s", image.getWidth(), image.getHeight()));
 		} catch (ChartDatasetCreationException e) {

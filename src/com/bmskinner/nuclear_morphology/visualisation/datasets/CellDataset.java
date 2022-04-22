@@ -34,63 +34,53 @@ import com.bmskinner.nuclear_morphology.components.cells.ICell;
  */
 public class CellDataset {
 
-    private ICell                       cell;
-    private Map<String, OutlineDataset<?>> outlines = new HashMap<>();
+	private ICell cell;
+	private Map<String, ComponentOutlineDataset> outlines = new HashMap<>();
 
-    private Map<String, XYDataset> tags = new HashMap<>();
+	private Map<String, XYDataset> lms = new HashMap<>();
 
-    private Map<String, XYDataset> lobes = new HashMap<>();
+	public CellDataset(ICell cell) {
+		this.cell = cell;
+	}
 
-    public CellDataset(ICell cell) {
-        this.cell = cell;
-    }
+	public ICell getCell() {
+		return cell;
+	}
 
-    public ICell getCell() {
-        return cell;
-    }
+	public void addOutline(String key, ComponentOutlineDataset ds) {
+		outlines.put(key, ds);
+	}
 
-    public void addOutline(String key, OutlineDataset<?> ds) {
-        outlines.put(key, ds);
-    }
+	public void addLandmark(String key, XYDataset ds) {
+		lms.put(key, ds);
+	}
 
-    public void addTags(String key, XYDataset ds) {
-        tags.put(key, ds);
-    }
+	public Collection<ComponentOutlineDataset> getDatasets() {
+		return outlines.values();
+	}
 
-    public void addLobes(String key, OutlineDataset<?> ds) {
-        outlines.put(key, ds);
-    }
+	public int getDatasetCount() {
+		return outlines.size() + lms.size();
+	}
 
-    public Collection<OutlineDataset<?>> getDatasets() {
-        return outlines.values();
-    }
+	public Set<String> getKeys() {
+		Set<String> keys = new HashSet<>();
 
-    public int getDatasetCount() {
-        return outlines.size() + tags.size() + lobes.size();
-    }
+		keys.addAll(outlines.keySet());
+		keys.addAll(lms.keySet());
+		return keys;
+	}
 
-    public Set<String> getKeys() {
-        Set<String> keys = new HashSet<>();
+	public XYDataset getDataset(String key) {
+		if (outlines.containsKey(key)) {
+			return outlines.get(key);
+		}
 
-        keys.addAll(outlines.keySet());
-        keys.addAll(tags.keySet());
-        keys.addAll(lobes.keySet());
-        return keys;
-    }
+		if (lms.containsKey(key)) {
+			return lms.get(key);
+		}
 
-    public XYDataset getDataset(String key) {
-        if (outlines.containsKey(key)) {
-            return outlines.get(key);
-        }
-
-        if (tags.containsKey(key)) {
-            return tags.get(key);
-        }
-
-        if (lobes.containsKey(key)) {
-            return lobes.get(key);
-        }
-        throw new IllegalArgumentException("Key not present: " + key);
-    }
+		throw new IllegalArgumentException("Key not present: " + key);
+	}
 
 }

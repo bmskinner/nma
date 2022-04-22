@@ -19,6 +19,7 @@ package com.bmskinner.nuclear_morphology.visualisation.charts;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Paint;
+import java.util.List;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -45,6 +46,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.visualisation.ChartComponents;
 import com.bmskinner.nuclear_morphology.visualisation.datasets.AbstractDatasetCreator;
 import com.bmskinner.nuclear_morphology.visualisation.datasets.ChartDatasetCreationException;
+import com.bmskinner.nuclear_morphology.visualisation.datasets.ComponentOutlineDataset;
 import com.bmskinner.nuclear_morphology.visualisation.datasets.NucleusDatasetCreator;
 import com.bmskinner.nuclear_morphology.visualisation.options.ChartOptions;
 
@@ -181,9 +183,11 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 
 		XYDataset ds;
 		try {
-			ds = new NucleusDatasetCreator(options).createBareNucleusOutline(component);
+
+			ds = new ComponentOutlineDataset(component, false, options.getScale());
+
 		} catch (ChartDatasetCreationException e) {
-			LOGGER.log(Loggable.STACK, "Error creating boxplot", e);
+			LOGGER.log(Loggable.STACK, "Error creating outline", e);
 			return createErrorChart();
 		}
 		JFreeChart chart = makeConsensusChart(ds);
@@ -233,7 +237,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 
 		XYDataset ds;
 		try {
-			ds = new NucleusDatasetCreator(options).createBareNucleusOutline(component);
+			ds = new ComponentOutlineDataset(component, false, options.getScale());
 		} catch (ChartDatasetCreationException e) {
 			LOGGER.log(Loggable.STACK, "Error creating annotated nucleus outline: " + e.getMessage(), e);
 			return createErrorChart();
@@ -420,8 +424,12 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 	private JFreeChart makeMultipleConsensusChart() {
 		// multiple nuclei
 		try {
-			XYDataset ds = new NucleusDatasetCreator(options).createMultiNucleusOutline();
-			JFreeChart chart = makeConsensusChart(ds);
+			List<ComponentOutlineDataset> ls = new NucleusDatasetCreator(options).createMultiNucleusOutline();
+
+			JFreeChart chart = makeConsensusChart(ls.get(0));
+			for (int i = 1; i < ls.size(); i++) {
+				chart.getXYPlot().setDataset(i, ls.get(i));
+			}
 
 			formatConsensusChart(chart);
 
@@ -432,12 +440,18 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 			plot.getDomainAxis().setRange(-max, max);
 			plot.getRangeAxis().setRange(-max, max);
 
-			for (int i = 0; i < plot.getSeriesCount(); i++) {
-				plot.getRenderer().setSeriesVisibleInLegend(i, false);
-				plot.getRenderer().setSeriesStroke(i, ChartComponents.MARKER_STROKE);
+			for (int d = 0; d < ls.size(); d++) {
+				XYLineAndShapeRenderer rend = new XYLineAndShapeRenderer();
+				for (int i = 0; i < plot.getSeriesCount(); i++) {
 
-				Paint colour = options.getDatasets().get(i).getDatasetColour().orElse(ColourSelecter.getColor(i));
-				plot.getRenderer().setSeriesPaint(i, colour);
+					Paint colour = options.getDatasets().get(d).getDatasetColour().orElse(ColourSelecter.getColor(d));
+					rend.setSeriesLinesVisible(i, true);
+					rend.setSeriesShapesVisible(i, false);
+					rend.setSeriesVisibleInLegend(i, false);
+					rend.setSeriesStroke(i, ChartComponents.MARKER_STROKE);
+					rend.setSeriesPaint(i, colour);
+					plot.setRenderer(d, rend);
+				}
 			}
 			return chart;
 

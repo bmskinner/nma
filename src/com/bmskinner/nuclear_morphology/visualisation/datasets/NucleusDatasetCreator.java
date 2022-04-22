@@ -58,7 +58,6 @@ import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 import com.bmskinner.nuclear_morphology.visualisation.options.ChartOptions;
-import com.bmskinner.nuclear_morphology.visualisation.options.DefaultChartOptions;
 
 import weka.estimators.KernelEstimator;
 
@@ -251,30 +250,30 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 	 * @param dataset
 	 * @return
 	 */
-	public XYDataset createBareNucleusOutline(@NonNull CellularComponent n) throws ChartDatasetCreationException {
-		ComponentOutlineDataset<CellularComponent> ds = new ComponentOutlineDataset<>();
+//	public XYDataset createBareNucleusOutline(@NonNull CellularComponent n) throws ChartDatasetCreationException {
+//		ComponentOutlineDataset ds = new ComponentOutlineDataset();
 
-		double[] xpoints = new double[n.getBorderLength() + 1];
-		double[] ypoints = new double[n.getBorderLength() + 1];
-
-		try {
-			for (int i = 0; i < n.getBorderLength(); i++) {
-				IPoint p = n.getBorderPoint(i);
-				xpoints[i] = p.getX();
-				ypoints[i] = p.getY();
-			}
-			// complete the line
-			xpoints[n.getBorderLength()] = xpoints[0];
-			ypoints[n.getBorderLength()] = ypoints[0];
-		} catch (UnavailableBorderPointException e) {
-			throw new ChartDatasetCreationException(UNABLE_TO_GET_BORDER_POINT_ERROR, e);
-		} // get the border points in the segment
-
-		double[][] data = { xpoints, ypoints };
-		ds.addSeries("Outline", data);
-		ds.setComponent(0, n);
-		return ds;
-	}
+//		double[] xpoints = new double[n.getBorderLength() + 1];
+//		double[] ypoints = new double[n.getBorderLength() + 1];
+//
+//		try {
+//			for (int i = 0; i < n.getBorderLength(); i++) {
+//				IPoint p = n.getBorderPoint(i);
+//				xpoints[i] = p.getX();
+//				ypoints[i] = p.getY();
+//			}
+//			// complete the line
+//			xpoints[n.getBorderLength()] = xpoints[0];
+//			ypoints[n.getBorderLength()] = ypoints[0];
+//		} catch (UnavailableBorderPointException e) {
+//			throw new ChartDatasetCreationException(UNABLE_TO_GET_BORDER_POINT_ERROR, e);
+//		} // get the border points in the segment
+//
+//		double[][] data = { xpoints, ypoints };
+//		ds.addSeries("Outline", data);
+//		ds.setComponent(0, n);
+//		return ds;
+//	}
 
 	/**
 	 * Get the outline of the consensus nucleus. No segmentation, no IQR
@@ -284,7 +283,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 	 */
 	public XYDataset createBareNucleusOutline(@NonNull IAnalysisDataset dataset) throws ChartDatasetCreationException {
 		try {
-			return createBareNucleusOutline(dataset.getCollection().getConsensus());
+			return new ComponentOutlineDataset(dataset.getCollection().getConsensus(), false, options.getScale());
 		} catch (MissingLandmarkException | ComponentCreationException e) {
 			throw new ChartDatasetCreationException(e);
 		}
@@ -383,51 +382,33 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 	 * @return a dataset for charting
 	 * 
 	 */
-	public List<ComponentOutlineDataset<CellularComponent>> createSignalOutlines(@NonNull ICell cell,
-			@NonNull IAnalysisDataset dataset) throws ChartDatasetCreationException {
+	public List<ComponentOutlineDataset> createSignalOutlines(@NonNull ICell cell, @NonNull IAnalysisDataset dataset)
+			throws ChartDatasetCreationException {
 
-		List<ComponentOutlineDataset<CellularComponent>> result = new ArrayList<>();
-		List<IAnalysisDataset> datasets = new ArrayList<>();
-		datasets.add(dataset);
+		List<ComponentOutlineDataset> result = new ArrayList<>();
+		try {
 
-		Nucleus nucleus = cell.getPrimaryNucleus();
+			Nucleus nucleus = cell.getPrimaryNucleus();
 
-		LOGGER.finest("Attempting to create signal outlines for " + nucleus.getNameAndNumber());
+			for (UUID signalGroup : nucleus.getSignalCollection().getSignalGroupIds()) {
 
-		for (UUID signalGroup : nucleus.getSignalCollection().getSignalGroupIds()) {
-
-			if (!nucleus.getSignalCollection().hasSignal(signalGroup)) {
-				continue;
-			}
-
-			Optional<ISignalGroup> group = dataset.getCollection().getSignalGroup(signalGroup);
-
-			if (!group.isPresent())
-				continue;
-
-			if (group.get().isVisible()) {
-
-				ComponentOutlineDataset<CellularComponent> groupDataset = new ComponentOutlineDataset<>();
-				int signalNumber = 0;
-
-				for (INuclearSignal signal : nucleus.getSignalCollection().getSignals(signalGroup)) {
-
-					String seriesKey = CellularComponent.NUCLEAR_SIGNAL + "_" + signalGroup + "_signal_" + signalNumber;
-					LOGGER.finest("Adding signal to dataset: " + seriesKey);
-					OutlineDatasetCreator dc = new OutlineDatasetCreator(new DefaultChartOptions(datasets), signal);
-					try {
-						dc.addOutline(groupDataset, seriesKey, false);
-
-					} catch (ChartDatasetCreationException e) {
-						LOGGER.log(Loggable.STACK, "Unable to add signal " + seriesKey + " to dataset", e);
-					}
-					signalNumber++;
+				if (!nucleus.getSignalCollection().hasSignal(signalGroup)) {
+					continue;
 				}
-				result.add(groupDataset);
 
-			} else {
-				LOGGER.finest("Not adding " + group + ": not set as visible");
+				Optional<ISignalGroup> group = dataset.getCollection().getSignalGroup(signalGroup);
+
+				if (!group.isPresent())
+					continue;
+
+				if (group.get().isVisible()) {
+					for (INuclearSignal signal : nucleus.getSignalCollection().getSignals(signalGroup)) {
+						result.add(new ComponentOutlineDataset(signal, false, options.getScale()));
+					}
+				}
 			}
+		} catch (ChartDatasetCreationException e) {
+			LOGGER.log(Loggable.STACK, "Unable to add signal to dataset", e);
 		}
 		return result;
 	}
@@ -436,63 +417,27 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 	 * Given a list of analysis datasets, get the outlines of the consensus nuclei
 	 * they contain
 	 * 
-	 * @return a chartable dataset
+	 * @return chartable datasets
 	 */
-	public XYDataset createMultiNucleusOutline() throws ChartDatasetCreationException {
+	public List<ComponentOutlineDataset> createMultiNucleusOutline() throws ChartDatasetCreationException {
 
-		ComponentOutlineDataset<Nucleus> ds = new ComponentOutlineDataset<>();
+		List<ComponentOutlineDataset> result = new ArrayList<>();
 
-		List<IAnalysisDataset> list = options.getDatasets();
 		MeasurementScale scale = options.getScale();
 
-		int i = 0;
-		for (IAnalysisDataset dataset : list) {
+		for (IAnalysisDataset dataset : options.getDatasets()) {
 			ICellCollection collection = dataset.getCollection();
-
-			String seriesKey = CellularComponent.NUCLEUS + "_" + i + "_" + collection.getName();
 
 			if (collection.hasConsensus()) {
 				try {
-					Nucleus n = collection.getConsensus();
-					double consensusScale = n.getScale();
-					double[] xpoints = new double[n.getBorderLength()];
-					double[] ypoints = new double[n.getBorderLength()];
-
-					int j = 0;
-
-					for (IPoint p : n.getBorderList()) {
-
-						double x = p.getX();
-						double y = p.getY();
-
-						if (scale.equals(MeasurementScale.MICRONS)) {
-
-							x = Measurement.lengthToMicrons(x, consensusScale);
-							y = Measurement.lengthToMicrons(y, consensusScale);
-						}
-
-						xpoints[j] = x;
-						ypoints[j] = y;
-						j++;
-					}
-
-					double[][] data = { xpoints, ypoints };
-					ds.addSeries(seriesKey, data);
-					ds.setComponent(seriesKey, n);
-
-				} catch (MissingLandmarkException | ComponentCreationException e) {
-					throw new ChartDatasetCreationException("Cannot orient consensus", e);
+					result.add(new ComponentOutlineDataset(collection.getConsensus(), false, scale));
+				} catch (ChartDatasetCreationException | MissingLandmarkException | ComponentCreationException e) {
+					throw new ChartDatasetCreationException();
 				}
-			} else {
-				double[][] data = { { 0 }, { 0 } }; // make an empty series if
-				// no consensus
-				ds.addSeries(seriesKey, data);
 			}
-			i++;
 
 		}
-
-		return ds;
+		return result;
 	}
 
 	/**

@@ -16,48 +16,134 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.visualisation.datasets;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 import org.jfree.data.xy.DefaultXYDataset;
 
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
+import com.bmskinner.nuclear_morphology.components.Taggable;
+import com.bmskinner.nuclear_morphology.components.UnavailableBorderPointException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.generic.IPoint;
+import com.bmskinner.nuclear_morphology.components.measure.Measurement;
+import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
+import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
+import com.bmskinner.nuclear_morphology.components.profiles.ProfileException;
+import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 
 /**
- * Holds the outline of a cellular component
+ * Holds the outlines of cellular components
  * 
  * @author ben
- *
- * @param <E> the component class to be drawn
  */
 @SuppressWarnings("serial")
-public class ComponentOutlineDataset<E extends CellularComponent> extends DefaultXYDataset
-        implements OutlineDataset<E> {
+public class ComponentOutlineDataset extends DefaultXYDataset {
 
-    Map<Comparable, E> components = new HashMap<>();
+	private static final String UNABLE_TO_GET_BORDER_POINT_ERROR = "Unable to get border point";
 
-    /**
-     * Set the component for the given series
-     * 
-     * @param i
-     * @param n
-     */
-    public void setComponent(Comparable seriesKey, E n) {
-        components.put(seriesKey, n);
-    }
+	private final CellularComponent c;
+	private final MeasurementScale scale;
 
-    /**
-     * Get the component for the given series
-     * 
-     * @param i
-     * @return
-     */
-    public E getComponent(Comparable seriesKey) {
-        return components.get(seriesKey);
-    }
+	public ComponentOutlineDataset(CellularComponent c, boolean showSegmented, MeasurementScale scale)
+			throws ChartDatasetCreationException {
+		this.c = c;
+		this.scale = scale;
+		if (showSegmented) {
+			createWithSegments();
+		} else {
+			createWithoutSegments();
+		}
 
-    public boolean hasComponent(Comparable seriesKey) {
-        return components.containsKey(seriesKey);
-    }
+	}
 
+	private void createWithSegments() throws ChartDatasetCreationException {
+		if (!(c instanceof Taggable)) {
+			createWithoutSegments();
+			return;
+		}
+
+		Taggable t = (Taggable) c;
+		try {
+			List<IProfileSegment> segmentList = t.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT).getSegments();
+
+			if (!segmentList.isEmpty()) { // only draw if there are segments
+
+				for (IProfileSegment seg : segmentList) {
+
+					// If we make the array the length of the segment,
+					// there will be a gap between the segment end and the
+					// next segment start. Include a position for the next
+					// segment start as well
+					double[] xpoints = new double[seg.length() + 1];
+					double[] ypoints = new double[seg.length() + 1];
+
+					int segmentPosition = seg.getPosition();
+
+					for (int j = 0; j <= seg.length(); j++) {
+						int index = seg.getStartIndex() + j;
+						int offsetIndex = t.getIndexRelativeTo(Landmark.REFERENCE_POINT, index);
+
+						/*
+						 * Note that the original border point is used here to avoid mismatches with the
+						 * border tags drawn in other methods.
+						 */
+						IPoint p = t.getOriginalBorderPoint(offsetIndex);
+						double x = p.getX();
+						double y = p.getY();
+
+						if (MeasurementScale.MICRONS.equals(scale)) {
+							x = Measurement.lengthToMicrons(p.getX(), c.getScale());
+							y = Measurement.lengthToMicrons(p.getY(), c.getScale());
+						}
+						xpoints[j] = x;
+						ypoints[j] = y;
+					}
+
+					double[][] data = { xpoints, ypoints };
+
+					String seriesKey = "Seg_" + segmentPosition + "_" + t.getID();
+					addSeries(seriesKey, data);
+				}
+			} else {
+				createWithoutSegments();
+			}
+		} catch (ProfileException | MissingLandmarkException | MissingProfileException
+				| UnavailableBorderPointException e) {
+			throw new ChartDatasetCreationException("Cannot get profile", e);
+		}
+	}
+
+	private void createWithoutSegments() throws ChartDatasetCreationException {
+		double[] xpoints = new double[c.getBorderLength() + 1];
+		double[] ypoints = new double[c.getBorderLength() + 1];
+
+		try {
+			for (int i = 0; i < c.getBorderLength(); i++) {
+				IPoint p = c.getBorderPoint(i);
+				double x = p.getX();
+				double y = p.getY();
+
+				if (MeasurementScale.MICRONS.equals(scale)) {
+					x = Measurement.lengthToMicrons(p.getX(), c.getScale());
+					y = Measurement.lengthToMicrons(p.getY(), c.getScale());
+				}
+				xpoints[i] = x;
+				ypoints[i] = y;
+			}
+
+			// complete the line
+			xpoints[c.getBorderLength()] = xpoints[0];
+			ypoints[c.getBorderLength()] = ypoints[0];
+
+		} catch (UnavailableBorderPointException e) {
+			throw new ChartDatasetCreationException(UNABLE_TO_GET_BORDER_POINT_ERROR, e);
+		}
+		addSeries(c.getID(), new double[][] { xpoints, ypoints });
+	}
+
+	public CellularComponent getComponent() {
+		return c;
+	}
 }

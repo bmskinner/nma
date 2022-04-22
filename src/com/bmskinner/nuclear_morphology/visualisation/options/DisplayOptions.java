@@ -23,6 +23,7 @@ import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
+import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult.Aggregation;
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult.Normalisation;
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult.ShrinkType;
@@ -35,132 +36,133 @@ import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter.ColourSwat
  * @author bms41
  *
  */
-public interface DisplayOptions {
+public interface DisplayOptions extends HashOptions {
 
-    /**
-     * Get the datasets to display data for
-     * 
-     * @return
-     */
-    List<IAnalysisDataset> getDatasets();
+	/**
+	 * Get the datasets to display data for
+	 * 
+	 * @return
+	 */
+	List<IAnalysisDataset> getDatasets();
 
-    /**
-     * Get the colour swatch to use when colouring datasets.
-     * 
-     * @return
-     */
-    public ColourSwatch getSwatch();
+	/**
+	 * Get the colour swatch to use when colouring datasets.
+	 * 
+	 * @return
+	 */
+	public ColourSwatch getSwatch();
 
-    /**
-     * Check if the dataset list contains datasets
-     * 
-     * @return
-     */
-    public boolean hasDatasets();
+	/**
+	 * Check if the dataset list contains datasets
+	 * 
+	 * @return
+	 */
+	public boolean hasDatasets();
 
-    /**
-     * Get the number of datasets set.
-     * 
-     * @return the dataset count
-     */
-    public int datasetCount();
+	/**
+	 * Get the number of datasets set.
+	 * 
+	 * @return the dataset count
+	 */
+	public int datasetCount();
 
-    /**
-     * Check if the dataset list has one or many datasets
-     * 
-     * @return
-     */
-    public boolean isSingleDataset();
+	/**
+	 * Check if the dataset list has one or many datasets
+	 * 
+	 * @return
+	 */
+	public boolean isSingleDataset();
 
-    /**
-     * Check if the dataset list has > 1 dataset
-     * 
-     * @return
-     */
-    public boolean isMultipleDatasets();
+	/**
+	 * Check if the dataset list has > 1 dataset
+	 * 
+	 * @return
+	 */
+	public boolean isMultipleDatasets();
 
-    /**
-     * Fetch the first dataset in the list
-     * 
-     * @return
-     */
-    public IAnalysisDataset firstDataset();
+	/**
+	 * Fetch the first dataset in the list
+	 * 
+	 * @return
+	 */
+	public IAnalysisDataset firstDataset();
 
-    /**
-     * Get the first statistic in the list
-     * 
-     * @return
-     */
-    public Measurement getMeasurement();
+	/**
+	 * Get the first statistic in the list
+	 * 
+	 * @return
+	 */
+	public Measurement getMeasurement();
 
-    /**
-     * Get the saved stats
-     * 
-     * @return
-     */
-    public List<Measurement> getStats();
+	/**
+	 * Get the saved stats
+	 * 
+	 * @return
+	 */
+	public List<Measurement> getStats();
 
-    /**
-     * Get the statistic at the given index
-     * 
-     * @param index
-     * @return
-     */
-    public Measurement getStat(int index);
+	/**
+	 * Get the statistic at the given index
+	 * 
+	 * @param index
+	 * @return
+	 */
+	public Measurement getStat(int index);
 
-    /**
-     * Get the ID of the segment to display data for
-     * 
-     * @return
-     */
-    public UUID getSegID();
+	/**
+	 * Get the ID of the segment to display data for
+	 * 
+	 * @return
+	 */
+	public UUID getSegID();
 
-    /**
-     * Get the position of the segment to display data for
-     * 
-     * @return
-     */
-    public int getSegPosition();
+	/**
+	 * Get the position of the segment to display data for
+	 * 
+	 * @return
+	 */
+	public int getSegPosition();
 
-    /**
-     * Get the scale of the data to use in charts or tables
-     * 
-     * @return
-     */
-    public MeasurementScale getScale();
+	/**
+	 * Get the scale of the data to use in charts or tables
+	 * 
+	 * @return
+	 */
+	public MeasurementScale getScale();
 
-    /**
-     * Get the cell data should be drawn for
-     * 
-     * @return
-     */
-    ICell getCell();
+	/**
+	 * Get the cell data should be drawn for
+	 * 
+	 * @return
+	 */
+	ICell getCell();
 
-    /**
-     * Check if a cell is set to display in an outline chart
-     * 
-     * @return
-     */
-    boolean hasCell();
-    
-    /**
-     * Get the shrinking type used to create shells
-     * @return
-     */
-    ShrinkType getShrinkType();
+	/**
+	 * Check if a cell is set to display in an outline chart
+	 * 
+	 * @return
+	 */
+	boolean hasCell();
 
-    /**
-     * Get the signal aggregation for shell analysis
-     * 
-     * @return
-     */
-    Aggregation getAggregation();
-    
-    /**
-     * Get the signal normalisation method for shell analysis
-     * 
-     * @return
-     */
-    Normalisation getNormalisation();
+	/**
+	 * Get the shrinking type used to create shells
+	 * 
+	 * @return
+	 */
+	ShrinkType getShrinkType();
+
+	/**
+	 * Get the signal aggregation for shell analysis
+	 * 
+	 * @return
+	 */
+	Aggregation getAggregation();
+
+	/**
+	 * Get the signal normalisation method for shell analysis
+	 * 
+	 * @return
+	 */
+	Normalisation getNormalisation();
 
 }

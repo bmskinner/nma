@@ -23,6 +23,7 @@ import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -34,9 +35,7 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.chart.annotations.XYAnnotation;
 import org.jfree.chart.annotations.XYShapeAnnotation;
 import org.jfree.chart.annotations.XYTextAnnotation;
-import org.jfree.chart.labels.StandardXYToolTipGenerator;
 import org.jfree.chart.plot.PlotOrientation;
-import org.jfree.chart.plot.ValueMarker;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
@@ -60,12 +59,13 @@ import com.bmskinner.nuclear_morphology.components.mesh.MeshImage;
 import com.bmskinner.nuclear_morphology.components.mesh.MeshImageCreationException;
 import com.bmskinner.nuclear_morphology.components.mesh.MeshVertex;
 import com.bmskinner.nuclear_morphology.components.mesh.UncomparableMeshImageException;
-import com.bmskinner.nuclear_morphology.components.profiles.DefaultLandmark;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
+import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
+import com.bmskinner.nuclear_morphology.components.signals.ISignalCollection;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
 import com.bmskinner.nuclear_morphology.gui.RotationMode;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
@@ -73,14 +73,11 @@ import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.visualisation.ChartComponents;
-import com.bmskinner.nuclear_morphology.visualisation.datasets.CellDataset;
 import com.bmskinner.nuclear_morphology.visualisation.datasets.ChartDatasetCreationException;
 import com.bmskinner.nuclear_morphology.visualisation.datasets.ComponentOutlineDataset;
 import com.bmskinner.nuclear_morphology.visualisation.datasets.NuclearSignalXYDataset;
 import com.bmskinner.nuclear_morphology.visualisation.datasets.NucleusDatasetCreator;
 import com.bmskinner.nuclear_morphology.visualisation.datasets.NucleusMeshXYDataset;
-import com.bmskinner.nuclear_morphology.visualisation.datasets.OutlineDataset;
-import com.bmskinner.nuclear_morphology.visualisation.datasets.OutlineDatasetCreator;
 import com.bmskinner.nuclear_morphology.visualisation.image.ImageConverter;
 import com.bmskinner.nuclear_morphology.visualisation.options.ChartOptions;
 
@@ -222,22 +219,14 @@ public class OutlineChartFactory extends AbstractChartFactory {
 
 			if (options.isShowMesh()) {
 				if (options.firstDataset().getCollection().hasConsensus()) {
+					Mesh mesh1 = options.getRotateMode().equals(RotationMode.ACTUAL)
+							? new DefaultMesh(options.getCell().getPrimaryNucleus())
+							: new DefaultMesh(options.getCell().getPrimaryNucleus().getOrientedNucleus());
 
-					try {
+					Mesh mesh2 = new DefaultMesh(options.firstDataset().getCollection().getConsensus(), mesh1);
 
-						Mesh mesh1 = options.getRotateMode().equals(RotationMode.ACTUAL)
-								? new DefaultMesh(options.getCell().getPrimaryNucleus())
-								: new DefaultMesh(options.getCell().getPrimaryNucleus().getOrientedNucleus());
-
-						Mesh mesh2 = new DefaultMesh(options.firstDataset().getCollection().getConsensus(), mesh1);
-
-						Mesh result = mesh1.comparison(mesh2);
-						return createMeshChart(result, 0.5);
-
-					} catch (MeshCreationException | MissingLandmarkException | ComponentCreationException e) {
-						LOGGER.log(Loggable.STACK, ERROR_CREATING_MESH_MSG, e);
-						return createErrorChart();
-					}
+					Mesh result = mesh1.comparison(mesh2);
+					return createMeshChart(result, 0.5);
 
 				}
 				return createEmptyChart();
@@ -247,46 +236,27 @@ public class OutlineChartFactory extends AbstractChartFactory {
 			if (options.isShowWarp()) {
 				if (options.firstDataset().getCollection().hasConsensus()) {
 
-					try {
+					Mesh mesh1 = new DefaultMesh(options.getCell().getPrimaryNucleus());
+					Mesh mesh2 = new DefaultMesh(options.firstDataset().getCollection().getConsensus(), mesh1);
 
-						Mesh mesh1 = new DefaultMesh(options.getCell().getPrimaryNucleus());
-						Mesh mesh2 = new DefaultMesh(options.firstDataset().getCollection().getConsensus(), mesh1);
+					ImageProcessor nucleusIP = ImageImporter
+							.importFullImageTo24bit(options.getCell().getPrimaryNucleus());
 
-						ImageProcessor nucleusIP = ImageImporter
-								.importFullImageTo24bit(options.getCell().getPrimaryNucleus());
+					// Create a mesh image from the nucleus
+					MeshImage im = new DefaultMeshImage(mesh1, nucleusIP);
 
-						// Create a mesh image from the nucleus
-						MeshImage im = new DefaultMeshImage(mesh1, nucleusIP);
+					// Draw the image onto the shape described by the
+					// consensus nucleus
+					ImageProcessor ip = im.drawImage(mesh2);
 
-						// Draw the image onto the shape described by the
-						// consensus nucleus
-						ImageProcessor ip = im.drawImage(mesh2);
-
-						return drawImageAsAnnotation(ip);
-
-					} catch (MeshImageCreationException e) {
-						LOGGER.fine(
-								"Cannot create mesh for " + options.getCell().getPrimaryNucleus().getNameAndNumber());
-						LOGGER.log(Loggable.STACK, ERROR_CREATING_MESH_MSG, e);
-						return createErrorChart();
-					} catch (UncomparableMeshImageException e) {
-						LOGGER.fine(
-								"Cannot compare mesh for " + options.getCell().getPrimaryNucleus().getNameAndNumber());
-						LOGGER.log(Loggable.STACK, "Error comparing mesh", e);
-						return createErrorChart();
-					} catch (MeshCreationException e) {
-						LOGGER.log(Loggable.STACK, ERROR_CREATING_MESH_MSG, e);
-						return createErrorChart();
-					} catch (MissingLandmarkException | ComponentCreationException e) {
-						LOGGER.log(Loggable.STACK, "Cannot orient consensus", e);
-						return createErrorChart();
-					}
+					return drawImageAsAnnotation(ip);
 
 				}
 				return createEmptyChart();
 			}
 			return makeStandardCellOutlineChart();
-		} catch (ChartCreationException e) {
+		} catch (ChartCreationException | MissingLandmarkException | MeshCreationException | ComponentCreationException
+				| MeshImageCreationException | UncomparableMeshImageException e) {
 			LOGGER.warning("Error creating cell outline chart");
 			LOGGER.log(Loggable.STACK, "Error creating cell outline chart", e);
 			return createErrorChart();
@@ -296,72 +266,55 @@ public class OutlineChartFactory extends AbstractChartFactory {
 
 	private JFreeChart makeBareCellOutlineChart() throws ChartCreationException {
 
-		if (!options.hasCell()) {
-			LOGGER.finest("No cell to draw");
+		if (!options.hasCell())
 			return ConsensusNucleusChartFactory.createEmptyChart();
-		}
+		try {
+			JFreeChart chart = createBaseXYChart();
 
-		JFreeChart chart = createBaseXYChart();
-		ComponentOutlineDataset<CellularComponent> ds = new ComponentOutlineDataset<>();
+			List<ComponentOutlineDataset> result = new ArrayList<>();
 
-		ICell cell = options.getCell();
+			ICell cell = options.getCell();
 
-		if (cell.hasCytoplasm()) {
+			if (cell.hasCytoplasm())
+				result.add(new ComponentOutlineDataset(cell.getCytoplasm(), false, options.getScale()));
 
-			try {
-				new OutlineDatasetCreator(options, cell.getCytoplasm()).addOutline(ds, false);
-			} catch (ChartDatasetCreationException e) {
-				LOGGER.log(Loggable.STACK, "Error making cytoplasm outline", e);
-				return createErrorChart();
+			if (cell.hasNucleus()) {
+				for (Nucleus n : cell.getNuclei())
+					result.add(new ComponentOutlineDataset(n, true, options.getScale()));
 			}
 
-		}
+			XYPlot plot = chart.getXYPlot();
+			for (int i = 0; i < result.size(); i++) {
+				plot.setDataset(result.get(i));
+				plot.setRenderer(i, new XYLineAndShapeRenderer(options.isShowLines(), options.isShowPoints()));
 
-		if (cell.hasNucleus()) {
-
-			for (Nucleus n : cell.getNuclei()) {
-
-				try {
-					new OutlineDatasetCreator(options, n).addOutline(ds, false);
-				} catch (ChartDatasetCreationException e) {
-					LOGGER.log(Loggable.STACK, "Error making nucleus outline", e);
-					return createErrorChart();
+				int seriesCount = plot.getDataset(i).getSeriesCount();
+				for (int j = 0; j < seriesCount; j++) {
+					plot.getRenderer(i).setSeriesVisibleInLegend(j, Boolean.FALSE);
+					plot.getRenderer(i).setSeriesStroke(j, new BasicStroke(3));
+					plot.getRenderer(i).setSeriesPaint(j, Color.BLACK);
 				}
-
 			}
 
+			// Add a background image to the plot
+			clearShapeAnnotations(plot);
+
+			if (options.hasComponent()) {
+				int w = options.getInt("ImageWidth");
+				int h = options.getInt("ImagHeight");
+				drawImageAsAnnotation(plot, options.getCell(), options.getComponent().get(0), true, w, h);
+			}
+			applyDefaultAxisOptions(chart);
+			return chart;
+		} catch (ChartDatasetCreationException e) {
+			LOGGER.log(Loggable.STACK, "Error making cytoplasm outline", e);
+			return createErrorChart();
 		}
-
-		XYPlot plot = chart.getXYPlot();
-		plot.setDataset(ds);
-
-		plot.setRenderer(new XYLineAndShapeRenderer(options.isShowLines(), options.isShowPoints()));
-
-		int seriesCount = plot.getSeriesCount();
-
-		for (int i = 0; i < seriesCount; i++) {
-			plot.getRenderer().setSeriesVisibleInLegend(i, Boolean.FALSE);
-			plot.getRenderer().setSeriesStroke(i, new BasicStroke(3));
-			plot.getRenderer().setSeriesPaint(i, Color.BLACK);
-		}
-
-		// Add a background image to the plot
-		clearShapeAnnotations(plot);
-
-		if (options.hasComponent()) {
-			drawImageAsAnnotation(plot, options.getCell(), options.getComponent().get(0), true);
-		}
-		applyDefaultAxisOptions(chart);
-		return chart;
-
 	}
 
 	/**
 	 * Get a chart contaning the details of the given cell from the given dataset
 	 * 
-	 * @param cell       the cell to draw
-	 * @param dataset    the dataset the cell came from
-	 * @param rotateMode the orientation of the image
 	 * @return
 	 * @throws Exception
 	 */
@@ -373,87 +326,34 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		if (!options.hasDatasets())
 			return ConsensusNucleusChartFactory.createEmptyChart();
 
-		ICell cell = options.getCell();
-		IAnalysisDataset dataset = options.firstDataset();
-
 		try {
+			ICell cell = options.getCell();
+			IAnalysisDataset dataset = options.firstDataset();
+
 			if (options.getRotateMode().equals(RotationMode.VERTICAL)) {
 				Nucleus n = cell.getPrimaryNucleus().getOrientedNucleus();
 				cell = new DefaultCell(n);
 			}
-		} catch (MissingLandmarkException | ComponentCreationException e) {
-			LOGGER.log(Loggable.STACK, "Error getting consensus", e);
-			return createErrorChart();
-		}
 
-		CellDataset cellDataset = new CellDataset(cell);
+			List<ComponentOutlineDataset> cellDatasets = new ArrayList<>();
 
-		/*
-		 * Get the cytoplasm outline dataset
-		 */
-		if (cell.hasCytoplasm()) {
-			try {
+			/* Get the cytoplasm outline dataset */
+			if (cell.hasCytoplasm())
+				cellDatasets.add(new ComponentOutlineDataset(cell.getCytoplasm(), false, options.getScale()));
 
-				OutlineDataset<CellularComponent> cytoDataset = new OutlineDatasetCreator(options, cell.getCytoplasm())
-						.createOutline(false);
-				cellDataset.addOutline(CellularComponent.CYTOPLASM, cytoDataset);
-
-			} catch (ChartDatasetCreationException e) {
-
-				throw new ChartCreationException("Unable to get cytoplasm outline", e);
-
-			}
-		}
-
-		/*
-		 * Get the nucleus outline dataset
-		 */
-		try {
-
+			/* Get the nucleus outline dataset */
 			for (Nucleus n : cell.getNuclei()) {
+				cellDatasets.add(new ComponentOutlineDataset(n, true, options.getScale()));
 
-				OutlineDataset<CellularComponent> nDataset = new OutlineDatasetCreator(options, n).createOutline(true);
-				cellDataset.addOutline(CellularComponent.NUCLEUS + "_" + n.getID(), nDataset);
-
-				if (options.isShowBorderTags()) {
-					XYDataset tags = new NucleusDatasetCreator(options).createNucleusIndexTags(n);
-					cellDataset.addTags("Tags_" + n.getID(), tags);
+				if (options.isShowSignals() && cell.getPrimaryNucleus().getSignalCollection().hasSignal()) {
+					cellDatasets.addAll(new NucleusDatasetCreator(options).createSignalOutlines(cell, dataset));
 				}
-
-				if (options.isShowSignals()) {
-					LOGGER.finest("Displaying signals on chart");
-					if (cell.getPrimaryNucleus().getSignalCollection().hasSignal()) {
-
-						List<ComponentOutlineDataset<CellularComponent>> signalsDatasets = new NucleusDatasetCreator(
-								options).createSignalOutlines(cell, dataset);
-
-						LOGGER.finest(
-								"Fetched signal outline datasets for " + cell.getPrimaryNucleus().getNameAndNumber());
-
-						for (OutlineDataset<CellularComponent> d : signalsDatasets) {
-
-							for (int series = 0; series < d.getSeriesCount(); series++) {
-								String seriesKey = d.getSeriesKey(series).toString();
-
-								LOGGER.finest("Adding outline for " + seriesKey + " to dataset hash");
-
-								cellDataset.addOutline(seriesKey, d);
-							}
-						}
-					}
-				}
-
-				LOGGER.finest("Created nucleus outline");
 			}
 
-		} catch (ChartDatasetCreationException e) {
-
+			return renderCellDataset(cellDatasets);
+		} catch (ChartDatasetCreationException | MissingLandmarkException | ComponentCreationException e) {
 			throw new ChartCreationException("Unable to get nucleus outline", e);
-
 		}
-
-		return renderCellDataset(cellDataset, options);
-
 	}
 
 	/**
@@ -463,7 +363,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 	 * @param options
 	 * @return
 	 */
-	private JFreeChart renderCellDataset(CellDataset cellDataset, ChartOptions options) {
+	private JFreeChart renderCellDataset(List<ComponentOutlineDataset> cellDatasets) {
 
 		JFreeChart chart = createBaseXYChart();
 		XYPlot plot = chart.getXYPlot();
@@ -476,14 +376,13 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		}
 
 		// set the rendering options for each dataset type
-		int i = 0;
-		for (String key : cellDataset.getKeys()) {
+		for (int i = 0; i < cellDatasets.size(); i++) {
 
-			XYDataset ds = cellDataset.getDataset(key);
+			ComponentOutlineDataset ds = cellDatasets.get(i);
 			plot.setDataset(i, ds);
 
-			boolean showLines = key.startsWith(CellularComponent.NUCLEAR_LOBE) || options.isShowLines();
-			boolean showPoints = !key.startsWith(CellularComponent.NUCLEAR_LOBE) && options.isShowPoints();
+			boolean showLines = true;
+			boolean showPoints = false;
 			XYLineAndShapeRenderer rend = new XYLineAndShapeRenderer(showLines, showPoints);
 			plot.setRenderer(i, rend);
 
@@ -492,61 +391,25 @@ public class OutlineChartFactory extends AbstractChartFactory {
 			int seriesCount = ds.getSeriesCount();
 
 			for (int series = 0; series < seriesCount; series++) {
-
-				// all datasets use the same stroke
 				rend.setSeriesStroke(series, ChartComponents.MARKER_STROKE);
 				rend.setSeriesVisibleInLegend(series, true);
 
-				String name = ds.getSeriesKey(series).toString();
-
 				/* Segmented nucleus outline */
-				if (key.startsWith(CellularComponent.NUCLEUS)) {
-					int colourIndex = getIndexFromLabel(name);
-					Paint colour = ColourSelecter.getColor(colourIndex);
-					rend.setSeriesPaint(series, colour);
+				if (ds.getComponent() instanceof Nucleus) {
+					int colourIndex = getIndexFromLabel((String) ds.getSeriesKey(series));
+					rend.setSeriesPaint(series, ColourSelecter.getColor(colourIndex));
 				}
 
-				if (key.startsWith(CellularComponent.NUCLEAR_LOBE)) {
-					rend.setSeriesPaint(series, ColourSelecter.DEFAULT_LOBE_OUTLINE);
-				}
+				/* Nuclear signals */
+				if (ds.getComponent() instanceof INuclearSignal) {
 
-				/*
-				 * Cytoplasm outline
-				 */
-				if (key.startsWith(CellularComponent.CYTOPLASM)) {
-					rend.setSeriesPaint(series, ColourSelecter.DEFAULT_CELL_OUTLINE);
-				}
+					ISignalCollection sc = options.getCell().getPrimaryNucleus().getSignalCollection();
+					UUID signalId = (UUID) ds.getSeriesKey(series);
+					Optional<UUID> signalGroup = sc.getSignalGroupIds().stream()
+							.filter(sg -> sc.getSignals(sg).stream().anyMatch(s -> s.getID().equals(signalId)))
+							.findFirst();
 
-				/*
-				 * Border tags
-				 */
-
-				if (key.startsWith("Tags_")) {
-					rend.setSeriesPaint(i, Color.BLACK);
-
-					String tagName = name.replace("Tag_", "");
-
-					if (tagName.equals(DefaultLandmark.ORIENTATION_POINT.toString())) {
-						rend.setSeriesPaint(series, Color.BLUE);
-					}
-					if (tagName.equals(DefaultLandmark.REFERENCE_POINT.toString())) {
-						rend.setSeriesPaint(series, Color.ORANGE);
-					}
-					if (tagName.equals(DefaultLandmark.TOP_VERTICAL.toString())) {
-						rend.setSeriesPaint(series, Color.GRAY);
-					}
-					if (tagName.equals(DefaultLandmark.BOTTOM_VERTICAL.toString())) {
-						rend.setSeriesPaint(series, Color.GRAY);
-					}
-
-				}
-
-				/*
-				 * Nuclear signals
-				 */
-				if (key.startsWith(CellularComponent.NUCLEAR_SIGNAL)) {
-
-					UUID seriesGroup = getSignalGroupFromLabel(key);
+					UUID seriesGroup = signalGroup.get();
 
 					Optional<ISignalGroup> g = options.firstDataset().getCollection().getSignalGroup(seriesGroup);
 					if (g.isPresent()) {
@@ -560,22 +423,14 @@ public class OutlineChartFactory extends AbstractChartFactory {
 			// Add a background image to the plot
 			clearShapeAnnotations(plot);
 
-			ICell cell = cellDataset.getCell();
+			int w = options.getInt("ImageWidth");
+			int h = options.getInt("ImageHeight");
+
 			if (options.getRotateMode().equals(RotationMode.ACTUAL)) {
-
-				if (cell.hasCytoplasm()) { // if there is a cytoplasm, probably
-											// H&E for now. Otherwise
-											// fluorescence
-					drawImageAsAnnotation(plot, cell, cell.getCytoplasm(), true);
-				} else {
-					drawImageAsAnnotation(plot, cell, options.getComponent().get(0), false);
-				}
-
+				drawImageAsAnnotation(plot, options.getCell(), options.getComponent().get(0), false, w, h);
 			}
-
-			i++;
-
 		}
+
 		applyDefaultAxisOptions(chart);
 		return chart;
 	}
@@ -701,116 +556,48 @@ public class OutlineChartFactory extends AbstractChartFactory {
 	 * @param isRGB     if the annotation should be RGB or greyscale
 	 */
 	protected static void drawImageAsAnnotation(@NonNull XYPlot plot, @NonNull ICell cell,
-			@NonNull CellularComponent component, boolean isRGB) {
-
-		if (component == null || cell == null || plot == null)
-			return;
-
-		ImageProcessor openProcessor;
+			@NonNull CellularComponent component, boolean isRGB, int w, int h) {
 		try {
+
 			ImageConverter ic = new ImageConverter(ImageImporter.importFullImageTo8bit(component)).invert();
-			openProcessor = ic.convertToRGBGreyscale().toProcessor();
-		} catch (UnloadableImageException e) {
-			return;
-		}
+			ImageProcessor openProcessor = ic.convertToRGBGreyscale().toProcessor();
+			// .resizeKeepingAspect(w, h)
 
-		XYItemRenderer rend = plot.getRenderer(0); // index zero should be the
-													// nucleus outline dataset
+			XYItemRenderer rend = plot.getRenderer(0); // index zero should be the
+														// nucleus outline dataset
 
-		int xBase = component.getXBase();
-		int yBase = component.getYBase();
+			int xBase = component.getXBase();
+			int yBase = component.getYBase();
 
-		int padding = 10; // a border of pixels beyond the cell boundary
-		int wideW = (int) component.getWidth() + (padding * 2);
-		int wideH = (int) component.getHeight() + (padding * 2);
-		int wideX = xBase - padding;
-		int wideY = yBase - padding;
+			int padding = 10; // a border of pixels beyond the cell boundary
+			int wideW = (int) component.getWidth() + (padding * 2);
+			int wideH = (int) component.getHeight() + (padding * 2);
+			int wideX = xBase - padding;
+			int wideY = yBase - padding;
 
-		wideX = wideX < 0 ? 0 : wideX;
-		wideY = wideY < 0 ? 0 : wideY;
+			wideX = wideX < 0 ? 0 : wideX;
+			wideY = wideY < 0 ? 0 : wideY;
 
-		openProcessor.setRoi(wideX, wideY, wideW, wideH);
-		openProcessor = openProcessor.crop();
+			openProcessor.setRoi(wideX, wideY, wideW, wideH);
+			openProcessor = openProcessor.crop();
 
-		for (int x = 0; x < openProcessor.getWidth(); x++) {
-			for (int y = 0; y < openProcessor.getHeight(); y++) {
+			for (int x = 0; x < openProcessor.getWidth(); x++) {
+				for (int y = 0; y < openProcessor.getHeight(); y++) {
 
-				int pixel = openProcessor.get(x, y);
-				Color col = new Color(pixel);
-				// Ensure the 'pixels' overlap to avoid lines of background
-				// colour seeping through
-				Rectangle2D r = new Rectangle2D.Double(xBase + x - padding - 0.6, yBase + y - padding - 0.6, 1.2, 1.2);
-				XYShapeAnnotation a = new XYShapeAnnotation(r, null, null, col);
+					int pixel = openProcessor.get(x, y);
+					Color col = new Color(pixel);
+					// Ensure the 'pixels' overlap to avoid lines of background
+					// colour seeping through
+					Rectangle2D r = new Rectangle2D.Double(xBase + x - padding - 0.6, yBase + y - padding - 0.6, 1.2,
+							1.2);
+					XYShapeAnnotation a = new XYShapeAnnotation(r, null, null, col);
 
-				rend.addAnnotation(a, Layer.BACKGROUND);
-			}
-		}
-	}
-
-	/**
-	 * Create a chart with the outlines of all the nuclei within a dataset. The
-	 * options should only contain a single dataset
-	 * 
-	 * @return
-	 */
-	public JFreeChart createVerticalNucleiChart() {
-
-		if (!options.hasDatasets())
-			return createEmptyChart();
-		if (options.isMultipleDatasets())
-			return createMultipleDatasetVerticalNucleiChart();
-		return createEmptyChart();
-	}
-
-	/**
-	 * Create the chart with the outlines of all the nuclei within a single dataset.
-	 * 
-	 * @param options
-	 * @return
-	 * @throws Exception
-	 */
-	private JFreeChart createMultipleDatasetVerticalNucleiChart() {
-
-		JFreeChart chart = createBaseXYChart();
-		XYPlot plot = chart.getXYPlot();
-
-		plot.addRangeMarker(new ValueMarker(0, Color.LIGHT_GRAY, ChartComponents.PROFILE_STROKE));
-		plot.addDomainMarker(new ValueMarker(0, Color.LIGHT_GRAY, ChartComponents.PROFILE_STROKE));
-
-		StandardXYToolTipGenerator tooltip = new StandardXYToolTipGenerator();
-
-		int i = 0;
-		int datasetNumber = 0;
-		for (IAnalysisDataset dataset : options.getDatasets()) {
-			Paint colour = dataset.getDatasetColour().orElse(ColourSelecter.getColor(datasetNumber++));
-
-			XYLineAndShapeRenderer r = new XYLineAndShapeRenderer(true, false);
-			r.setDefaultSeriesVisibleInLegend(false);
-			r.setDefaultStroke(ChartComponents.PROFILE_STROKE);
-			r.setSeriesPaint(0, colour);
-			r.setDefaultToolTipGenerator(tooltip);
-
-			for (Nucleus n : dataset.getCollection().getNuclei()) {
-				try {
-					Nucleus verticalNucleus = n.getOrientedNucleus();
-
-					OutlineDatasetCreator dc = new OutlineDatasetCreator(options, verticalNucleus);
-
-					XYDataset nucleusDataset = dc.createOutline(false);
-					plot.setDataset(i, nucleusDataset);
-					plot.setRenderer(i, r);
-
-				} catch (ChartDatasetCreationException | MissingLandmarkException | ComponentCreationException e) {
-					LOGGER.warning("Cannot create data for dataset " + dataset.getName());
-					LOGGER.log(Loggable.STACK, "Error getting chart data", e);
-				} finally {
-					i++;
+					rend.addAnnotation(a, Layer.BACKGROUND);
 				}
-
 			}
+		} catch (UnloadableImageException e) {
+			// No action needed, no image drawn
 		}
-		applyDefaultAxisOptions(chart);
-		return chart;
 	}
 
 	/**

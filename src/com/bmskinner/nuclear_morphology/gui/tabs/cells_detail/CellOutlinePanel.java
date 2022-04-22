@@ -29,12 +29,18 @@ import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsBuilder;
+import com.bmskinner.nuclear_morphology.gui.RotationMode;
 import com.bmskinner.nuclear_morphology.gui.components.panels.GenericCheckboxPanel;
 import com.bmskinner.nuclear_morphology.gui.events.CellUpdatedEventListener;
 import com.bmskinner.nuclear_morphology.gui.events.SegmentStartIndexUpdateEvent;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.SwatchUpdatedListener;
 import com.bmskinner.nuclear_morphology.gui.tabs.cells_detail.InteractiveCellPanel.CellDisplayOptions;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
+import com.bmskinner.nuclear_morphology.visualisation.charts.AbstractChartFactory;
+import com.bmskinner.nuclear_morphology.visualisation.charts.OutlineChartFactory;
+import com.bmskinner.nuclear_morphology.visualisation.charts.panels.ExportableChartPanel;
+import com.bmskinner.nuclear_morphology.visualisation.options.ChartOptions;
+import com.bmskinner.nuclear_morphology.visualisation.options.ChartOptionsBuilder;
 
 /**
  * Display panel for cell outlines, including segments and landmarks
@@ -50,7 +56,9 @@ public class CellOutlinePanel extends AbstractCellDetailPanel
 
 	private static final String PANEL_TITLE_LBL = "Outline";
 
-	private InteractiveCellPanel imagePanel;
+//	private InteractiveCellPanel imagePanel;
+
+	private ExportableChartPanel chartPanel;
 
 	private GenericCheckboxPanel rotatePanel = new GenericCheckboxPanel("Rotate vertical");
 	private GenericCheckboxPanel warpMeshPanel = new GenericCheckboxPanel("Warp image to consensus shape");
@@ -63,9 +71,12 @@ public class CellOutlinePanel extends AbstractCellDetailPanel
 		JPanel header = makeHeader();
 		add(header, BorderLayout.NORTH);
 
-		imagePanel = new InteractiveCellPanel(this);
+		chartPanel = new ExportableChartPanel(AbstractChartFactory.createEmptyChart());
+		chartPanel.setFixedAspectRatio(true);
+		add(chartPanel, BorderLayout.CENTER);
 
-		add(imagePanel, BorderLayout.CENTER);
+//		imagePanel = new InteractiveCellPanel(this);
+//		add(imagePanel, BorderLayout.CENTER);
 	}
 
 	private JPanel makeHeader() {
@@ -113,7 +124,8 @@ public class CellOutlinePanel extends AbstractCellDetailPanel
 	public synchronized void update() {
 
 		if (this.isMultipleDatasets() || !this.hasDatasets()) {
-			imagePanel.setNull();
+//			imagePanel.setNull();
+			chartPanel.setChart(AbstractChartFactory.createEmptyChart());
 			return;
 		}
 
@@ -124,7 +136,22 @@ public class CellOutlinePanel extends AbstractCellDetailPanel
 				.withValue(CellDisplayOptions.WARP_IMAGE, warpMeshPanel.isSelected())
 				.withValue(CellDisplayOptions.ROTATE_VERTICAL, rotatePanel.isSelected()).build();
 
-		imagePanel.setCell(activeDataset(), cell, component, displayOptions);
+		RotationMode rm = rotatePanel.isSelected() ? RotationMode.VERTICAL : RotationMode.ACTUAL;
+
+		// We want to scale the cell image to fit the panel
+		// when creating the chart
+		int w = chartPanel.getWidth();
+		int h = chartPanel.getHeight();
+
+		ChartOptions options = new ChartOptionsBuilder().setCell(cell).setDatasets(activeDataset())
+				.addCellularComponent(component).setRotationMode(rm).setShowWarp(warpMeshPanel.isSelected()).build();
+
+		options.setInt("ImageWidth", w);
+		options.setInt("ImageHeight", h);
+
+		chartPanel.setChart(new OutlineChartFactory(options).makeCellOutlineChart());
+
+//		imagePanel.setCell(activeDataset(), cell, component, displayOptions);
 
 		updateSettingsPanels();
 	}
@@ -146,14 +173,15 @@ public class CellOutlinePanel extends AbstractCellDetailPanel
 
 	@Override
 	protected void updateNull() {
-		imagePanel.setNull();
+		chartPanel.setChart(AbstractChartFactory.createEmptyChart());
+//		imagePanel.setNull();
 		updateSettingsPanels();
 	}
 
 	@Override
 	public void refreshCache() {
 		clearCache();
-		imagePanel.createImage();
+//		imagePanel.createImage();
 		this.update();
 	}
 
