@@ -24,7 +24,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.jdom2.Element;
 
 import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
-import com.bmskinner.nuclear_morphology.components.cells.DefaultConsensusNucleus;
+import com.bmskinner.nuclear_morphology.components.cells.DefaultNucleus;
 import com.bmskinner.nuclear_morphology.components.cells.Nucleus;
 import com.bmskinner.nuclear_morphology.io.XmlSerializable;
 import com.bmskinner.nuclear_morphology.utility.StringUtils;
@@ -72,7 +72,7 @@ public class DefaultWarpedSignal implements XmlSerializable, IWarpedSignal {
 
 		Nucleus c = null;
 		for (Element el : e.getChild("TargetShape").getChildren()) {
-			c = new DefaultConsensusNucleus(el);
+			c = new DefaultNucleus(el);
 		}
 
 		if (c == null)

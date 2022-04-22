@@ -378,6 +378,13 @@ public class ProfileManagerTest {
 	@Test
 	public void testMergeSegments() throws Exception {
 
+		// Virtual collections can be passed into the profile manager
+		// because we need to merge within their profile collections,
+		// but the cells they contain are only merged when invoking from
+		// a root dataset. Don't bother testing, it would only be inconsistent.
+		if (collection.isVirtual())
+			return;
+
 		// Get the median profile with segments
 		ISegmentedProfile profile = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE,
 				Landmark.REFERENCE_POINT, Stats.MEDIAN);
@@ -396,7 +403,8 @@ public class ProfileManagerTest {
 
 		// Confirm the collection is valid before merging
 		DatasetValidator dv = new DatasetValidator();
-		assertTrue(dv.validate(collection));
+		dv.validate(collection);
+		assertTrue("Dataset is not valid before merging: " + dv.getSummary(), dv.validate(collection));
 
 		assertTrue("Segments should be mergeable", manager.testSegmentsMergeable(seg1, seg2));
 
@@ -404,7 +412,7 @@ public class ProfileManagerTest {
 		manager.mergeSegments(segId1, segId2, newId);
 
 		dv.validate(collection);
-		assertTrue(dv.validate(collection));
+		assertTrue("Dataset is not valid after merging: " + dv.getSummary(), dv.validate(collection));
 
 		List<UUID> newIds = collection.getProfileCollection().getSegmentIDs();
 
@@ -439,26 +447,31 @@ public class ProfileManagerTest {
 
 	@Test
 	public void testUnmergeSegments() throws Exception {
+
+		// Virtual collections can be passed into the profile manager
+		// because we need to merge within their profile collections,
+		// but the cells they contain are only merged when invoking from
+		// a root dataset. Don't bother testing, it would only be inconsistent.
+		if (collection.isVirtual())
+			return;
+
 		ISegmentedProfile profile = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE,
 				Landmark.REFERENCE_POINT, Stats.MEDIAN);
 		List<UUID> segIds = profile.getSegmentIDs();
 		UUID newId = UUID.randomUUID();
-		UUID segId1 = profile.getOrderedSegments().get(1).getID();
-		UUID segId2 = profile.getOrderedSegments().get(2).getID();
-
-		if (collection.isVirtual())
-			return;
+		UUID segId1 = profile.getSegments().get(1).getID();
+		UUID segId2 = profile.getSegments().get(2).getID();
 
 		DatasetValidator dv = new DatasetValidator();
 		boolean b = dv.validate(collection);
 
-		assertTrue(source.getSimpleName(), b);
+		assertTrue(source.getSimpleName() + " should validate: " + dv.getErrors(), b);
 
-		manager.mergeSegments(segId2, segId2, newId);
+		manager.mergeSegments(segId1, segId2, newId);
 
 		b = dv.validate(collection);
 
-		assertTrue(source.getSimpleName() + " should validate", b);
+		assertTrue(source.getSimpleName() + " should validate: " + dv.getErrors(), b);
 		manager.unmergeSegments(newId); // only testable for real collection here, because merging is a noop
 
 		List<UUID> newIds = collection.getProfileCollection().getSegmentIDs();
