@@ -62,6 +62,7 @@ public class SignalWarpingTablePanel extends TableDetailPanel implements Nuclear
 	private JButton exportWithoutButton;
 
 	private final JLabel ssimLabel = new JLabel("");
+	private final JButton ssimBtn = new JButton("Full MS-SSIM*");
 
 	private List<WarpedSignalSelectionChangeListener> listeners = new ArrayList<>();
 
@@ -238,14 +239,15 @@ public class SignalWarpingTablePanel extends TableDetailPanel implements Nuclear
 	private JPanel createMSSSIMPanel() {
 		JPanel panel = new JPanel();
 		panel.setLayout(new FlowLayout(FlowLayout.LEFT));
-		JButton comparisonBtn = new JButton("Full MS-SSIM*");
-		comparisonBtn.addActionListener(
+
+		ssimBtn.addActionListener(
 
 				e -> new StructuralSimilarityComparisonDialog(
 						DatasetListManager.getInstance().getAllDatasets().stream().toList()));
 
 		ssimLabel.setMinimumSize(new Dimension(100, 10));
-		panel.add(comparisonBtn);
+		ssimBtn.setEnabled(false);
+		panel.add(ssimBtn);
 		panel.add(ssimLabel);
 
 		return panel;
@@ -271,6 +273,7 @@ public class SignalWarpingTablePanel extends TableDetailPanel implements Nuclear
 		isPseudocolourBox.setEnabled(false);
 		thresholdSlider.setEnabled(false);
 		ssimLabel.setText("");
+		ssimBtn.setEnabled(true);
 	}
 
 	private TableOptions makeOptions() {
@@ -283,6 +286,7 @@ public class SignalWarpingTablePanel extends TableDetailPanel implements Nuclear
 		isPseudocolourBox.setEnabled(false);
 		thresholdSlider.setEnabled(false);
 		ssimLabel.setText("");
+		ssimBtn.setEnabled(true);
 		setTable(makeOptions());
 	}
 
@@ -291,6 +295,7 @@ public class SignalWarpingTablePanel extends TableDetailPanel implements Nuclear
 		isPseudocolourBox.setEnabled(false);
 		thresholdSlider.setEnabled(false);
 		ssimLabel.setText("");
+		ssimBtn.setEnabled(false);
 		table.setModel(AbstractTableCreator.createBlankTable());
 	}
 

@@ -1,17 +1,20 @@
 package com.bmskinner.nuclear_morphology.gui.actions;
 
 import java.awt.BorderLayout;
-import java.awt.FlowLayout;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.GridBagLayout;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
-import javax.swing.BoxLayout;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerModel;
 import javax.swing.SpinnerNumberModel;
+import javax.swing.border.EmptyBorder;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -72,11 +75,9 @@ public class SignalWarpingAction extends SingleDatasetResultAction {
 		private static final String BINARISE_LBL = "Binarise";
 		private static final String NORMALISE_LBL = "Normalise to counterstain";
 
-		private static final String SOURCE_DATASET_TOOLTIP = "Which dataset should signals come from?";
 		private static final String TARGET_DATASET_TOOLTIP = "Which dataset consensus should we warp onto?";
 		private static final String SIGNAL_GROUP_TOOLTIP = "Which signal group to warp?";
 		private static final String INCLUDE_CELLS_TOOLTIP = "Tick to use only cells with explicit signals detected";
-		private static final String RUN_TOOLTIP = "Run the signal warping";
 		private static final String MIN_THRESHOLD_TOOLTIP = "Threshold images to this value before warping";
 		private static final String BINARISE_TOOLTIP = "Binarise images so intra-image intensities are not included";
 		private static final String NORMALISE_TOOLTIP = "Normalise signal against the counterstain before warping";
@@ -136,22 +137,21 @@ public class SignalWarpingAction extends SingleDatasetResultAction {
 
 		private JPanel createOptionsPanel() {
 			JPanel panel = new JPanel();
-			panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+			GridBagLayout layout = new GridBagLayout();
+			panel.setLayout(layout);
+			panel.setBorder(new EmptyBorder(5, 5, 5, 5));
 
-			JPanel help1Panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-			JPanel upperPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-			JPanel help2Panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-			JPanel midPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-			JPanel help3Panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-			JPanel lowerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-			JPanel runPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+			List<JLabel> labels = new ArrayList<>();
+			List<Component> fields = new ArrayList<>();
 
 			List<IAnalysisDataset> targets = chooseCompatibleTargetDatasets();
 			datasetBoxTwo = new DatasetSelectionPanel(targets);
 			datasetBoxTwo.setToolTipText(TARGET_DATASET_TOOLTIP);
 			datasetBoxTwo.setSelectedDataset(targets.get(0));
+			datasetBoxTwo.setMinimumSize(new Dimension(50, 10));
 
 			signalBox = new SignalGroupSelectionPanel(dataset);
+			signalBox.setMinimumSize(new Dimension(50, 10));
 			signalBox.setToolTipText(SIGNAL_GROUP_TOOLTIP);
 			if (!signalBox.hasSelection())
 				signalBox.setEnabled(false);
@@ -170,7 +170,7 @@ public class SignalWarpingAction extends SingleDatasetResultAction {
 				}
 			});
 
-			cellsWithSignalsBox = new JCheckBox(INCLUDE_CELLS_LBL, false);
+			cellsWithSignalsBox = new JCheckBox("", false);
 			cellsWithSignalsBox.setToolTipText(INCLUDE_CELLS_TOOLTIP);
 
 			// Set the initial value to the signal detection threshold of the initial
@@ -183,37 +183,31 @@ public class SignalWarpingAction extends SingleDatasetResultAction {
 			minThresholdSpinner = new JSpinner(minThresholdModel);
 			minThresholdSpinner.setToolTipText(MIN_THRESHOLD_TOOLTIP);
 
-			binariseBox = new JCheckBox(BINARISE_LBL, false);
+			binariseBox = new JCheckBox("", false);
 			binariseBox.setToolTipText(BINARISE_TOOLTIP);
 
-			normaliseBox = new JCheckBox(NORMALISE_LBL, false);
+			normaliseBox = new JCheckBox("", false);
 			normaliseBox.setToolTipText(NORMALISE_TOOLTIP);
 
-			help1Panel.add(new JLabel(SOURCE_HELP));
+			labels.add(new JLabel(SIGNAL_GROUP_LBL));
+			fields.add(signalBox);
 
-			upperPanel.add(new JLabel(SIGNAL_GROUP_LBL));
-			upperPanel.add(signalBox);
+			labels.add(new JLabel(MIN_THRESHOLD_LBL));
+			fields.add(minThresholdSpinner);
 
-			help2Panel.add(new JLabel(IMAGE_HELP));
+			labels.add(new JLabel(BINARISE_LBL));
+			fields.add(binariseBox);
 
-			midPanel.add(new JLabel(MIN_THRESHOLD_LBL));
-			midPanel.add(minThresholdSpinner);
-			midPanel.add(binariseBox);
-			midPanel.add(cellsWithSignalsBox);
-			midPanel.add(normaliseBox);
+			labels.add(new JLabel(NORMALISE_LBL));
+			fields.add(normaliseBox);
 
-			help3Panel.add(new JLabel(TARGET_HELP));
+			labels.add(new JLabel(INCLUDE_CELLS_LBL));
+			fields.add(cellsWithSignalsBox);
 
-			lowerPanel.add(new JLabel(TARGET_DATASET_LBL));
-			lowerPanel.add(datasetBoxTwo);
+			labels.add(new JLabel(TARGET_DATASET_LBL));
+			fields.add(datasetBoxTwo);
 
-			panel.add(help1Panel);
-			panel.add(upperPanel);
-			panel.add(help2Panel);
-			panel.add(midPanel);
-			panel.add(help3Panel);
-			panel.add(lowerPanel);
-			panel.add(runPanel);
+			addLabelTextRows(labels, fields, layout, panel);
 
 			return panel;
 		}

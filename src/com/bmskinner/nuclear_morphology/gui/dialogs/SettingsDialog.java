@@ -156,19 +156,32 @@ public abstract class SettingsDialog extends JDialog {
 		c.anchor = GridBagConstraints.EAST;
 		int numLabels = labels.length;
 
+		Dimension prefSize = new Dimension(10, 5);
+		for (Component comp : fields) {
+			if (comp.getPreferredSize().height > prefSize.height)
+				prefSize.height = comp.getPreferredSize().height;
+
+			if (comp.getPreferredSize().width > prefSize.width)
+				prefSize.width = comp.getPreferredSize().width;
+		}
+
+		for (Component comp : fields)
+			comp.setPreferredSize(prefSize);
+
+		Dimension minSize = new Dimension(10, 5);
+		Dimension maxSize = new Dimension(Short.MAX_VALUE, 10);
+
 		for (int i = 0; i < numLabels; i++) {
 			c.gridwidth = 1; // next-to-last
 			c.fill = GridBagConstraints.NONE; // reset to default
 			c.weightx = 0.0; // reset to default
 			container.add(labels[i], c);
 
-			Dimension minSize = new Dimension(10, 5);
-			Dimension prefSize = new Dimension(10, 5);
-			Dimension maxSize = new Dimension(Short.MAX_VALUE, 5);
 			c.gridwidth = GridBagConstraints.RELATIVE; // next-to-last
 			c.fill = GridBagConstraints.NONE; // reset to default
 			c.weightx = 0.0; // reset to default
-			container.add(new Box.Filler(minSize, prefSize, maxSize), c);
+
+			container.add(new Box.Filler(minSize, minSize, maxSize), c);
 
 			c.gridwidth = GridBagConstraints.REMAINDER; // end row
 			c.fill = GridBagConstraints.HORIZONTAL;

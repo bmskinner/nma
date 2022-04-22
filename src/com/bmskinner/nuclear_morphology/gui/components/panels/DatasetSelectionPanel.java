@@ -33,56 +33,54 @@ import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 @SuppressWarnings("serial")
 public class DatasetSelectionPanel extends EnumeratedOptionsPanel {
 
-    JComboBox<IAnalysisDataset> box;
+	private JComboBox<IAnalysisDataset> box = new JComboBox<>();
 
-    public DatasetSelectionPanel(List<IAnalysisDataset> datasets) {
-        box = new JComboBox<IAnalysisDataset>();
-        for (IAnalysisDataset d : datasets) {
-            box.addItem(d);
-        }
+	public DatasetSelectionPanel(List<IAnalysisDataset> datasets) {
 
-        box.setSelectedItem(datasets.get(0));
+		for (IAnalysisDataset d : datasets) {
+			box.addItem(d);
+		}
 
-        box.addActionListener(this);
+		box.setSelectedItem(datasets.get(0));
 
-        this.add(box);
-    }
+		box.addActionListener(this);
+		this.add(box);
+	}
 
-    public IAnalysisDataset getSelectedDataset() {
-        return (IAnalysisDataset) box.getSelectedItem();
-    }
+	public IAnalysisDataset getSelectedDataset() {
+		return (IAnalysisDataset) box.getSelectedItem();
+	}
 
-    @Override
-    public void setEnabled(boolean b) {
-        super.setEnabled(b);
-        box.setEnabled(b);
-    }
-    
-    
-    /**
-     * Clear the selection. 
-     */
-    public void setSelectionNull(){
-        List<ActionListener> oldListeners = new ArrayList<>(listeners);
-        listeners.clear();
-        box.setSelectedIndex(-1);
-        listeners = oldListeners;
-    }
+	@Override
+	public void setEnabled(boolean b) {
+		super.setEnabled(b);
+		box.setEnabled(b);
+	}
 
-    public void setSelectionIndex(int i) {
+	/**
+	 * Clear the selection.
+	 */
+	public void setSelectionNull() {
+		List<ActionListener> oldListeners = new ArrayList<>(listeners);
+		listeners.clear();
+		box.setSelectedIndex(-1);
+		listeners = oldListeners;
+	}
 
-        if (i > box.getItemCount() - 1) {
-            return;
-        }
-        if (i < 0) {
-            return;
-        }
-        box.setSelectedItem(i);
-    }
+	public void setSelectionIndex(int i) {
 
-    public void setSelectedDataset(IAnalysisDataset d) {
+		if (i > box.getItemCount() - 1) {
+			return;
+		}
+		if (i < 0) {
+			return;
+		}
+		box.setSelectedItem(i);
+	}
 
-        box.setSelectedItem(d);
-    }
+	public void setSelectedDataset(IAnalysisDataset d) {
+
+		box.setSelectedItem(d);
+	}
 
 }

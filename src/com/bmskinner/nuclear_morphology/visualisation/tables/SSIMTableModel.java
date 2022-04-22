@@ -1,5 +1,6 @@
 package com.bmskinner.nuclear_morphology.visualisation.tables;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,6 +18,8 @@ public class SSIMTableModel extends DatasetTableModel {
 
 	/** The MS-SSIM calculator */
 	private MultiScaleStructuralSimilarityIndex msi = new MultiScaleStructuralSimilarityIndex();
+
+	private static final DecimalFormat SSIM_FORMAT = new DecimalFormat("#0.0000");
 
 	private String[][] rowData;
 
@@ -73,10 +76,10 @@ public class SSIMTableModel extends DatasetTableModel {
 			rowData[r][4] = p.t1.s.targetName();
 
 			MSSIMScore score = msi.calculateMSSIM(p.t1().s().toImage(), p.t2().s().toImage());
-			rowData[r][5] = String.valueOf(score.luminance);
-			rowData[r][6] = String.valueOf(score.contrast);
-			rowData[r][7] = String.valueOf(score.structure);
-			rowData[r][8] = String.valueOf(score.msSsimIndex);
+			rowData[r][5] = SSIM_FORMAT.format(score.luminance);
+			rowData[r][6] = SSIM_FORMAT.format(score.contrast);
+			rowData[r][7] = SSIM_FORMAT.format(score.structure);
+			rowData[r][8] = SSIM_FORMAT.format(score.msSsimIndex);
 		}
 
 	}
