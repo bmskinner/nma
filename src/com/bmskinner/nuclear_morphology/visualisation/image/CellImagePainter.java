@@ -48,6 +48,7 @@ public class CellImagePainter implements ImagePainter {
 	private static final Logger LOGGER = Logger.getLogger(CellImagePainter.class.getName());
 
 	private ICell cell;
+	private CellularComponent component; // the source for images
 	private int originalWidth;
 	private int originalHeight;
 	private boolean isOriented;
@@ -57,9 +58,10 @@ public class CellImagePainter implements ImagePainter {
 	 * 
 	 * @param cell
 	 */
-	public CellImagePainter(@NonNull ICell cell, boolean isOrient) {
+	public CellImagePainter(@NonNull ICell cell, @NonNull CellularComponent component, boolean isOrient) {
 		this.cell = cell;
 		this.isOriented = isOrient;
+		this.component = component;
 	}
 
 	@Override
@@ -204,8 +206,7 @@ public class CellImagePainter implements ImagePainter {
 	@Override
 	public BufferedImage paintRaw(int w, int h) {
 
-		Nucleus n = cell.getPrimaryNucleus();
-		BufferedImage input = ImageImporter.importCroppedImageTo24bit(cell, n).getBufferedImage();
+		BufferedImage input = ImageImporter.importCroppedImageTo24bit(cell, component).getBufferedImage();
 		originalWidth = input.getWidth();
 		originalHeight = input.getHeight();
 

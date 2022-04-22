@@ -53,6 +53,7 @@ import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 import com.bmskinner.nuclear_morphology.gui.components.panels.WrappedLabel;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.ScaleUpdatedListener;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.SwatchUpdatedListener;
+import com.bmskinner.nuclear_morphology.gui.events.revamp.UIController;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.visualisation.charts.AbstractChartFactory;
 import com.bmskinner.nuclear_morphology.visualisation.charts.ScatterChartFactory;
@@ -86,7 +87,7 @@ public abstract class AbstractScatterPanel extends DetailPanel {
 
 	protected JPanel headerPanel; // hold buttons
 
-	private AbstractScatterChartPanel chartPanel;
+	private AbstractScatterChartPanel scatterPanel;
 	private AbstractScatterCorrelationPanel rhoPanel;
 
 	protected JButton gateButton;
@@ -101,11 +102,11 @@ public abstract class AbstractScatterPanel extends DetailPanel {
 		this.setLayout(new BorderLayout());
 
 		headerPanel = createHeader();
-
 		this.add(headerPanel, BorderLayout.NORTH);
-		chartPanel = new AbstractScatterChartPanel(component);
+
+		scatterPanel = new AbstractScatterChartPanel(component);
 		rhoPanel = new AbstractScatterCorrelationPanel(component);
-		add(chartPanel, BorderLayout.CENTER);
+		add(scatterPanel, BorderLayout.CENTER);
 		add(rhoPanel, BorderLayout.WEST);
 	}
 
@@ -122,15 +123,22 @@ public abstract class AbstractScatterPanel extends DetailPanel {
 				component.equals(CellularComponent.NUCLEAR_SIGNAL) ? Measurement.FRACT_DISTANCE_FROM_COM
 						: Measurement.VARIABILITY); // default if present
 
-		statABox.addActionListener(e -> update(getDatasets()));
-		statBBox.addActionListener(e -> update(getDatasets()));
+		statABox.addActionListener(e -> {
+			scatterPanel.update(getDatasets());
+			rhoPanel.update(getDatasets());
+		});
+
+		statBBox.addActionListener(e -> {
+			scatterPanel.update(getDatasets());
+			rhoPanel.update(getDatasets());
+		});
 
 		statABox.setEnabled(false);
 		statBBox.setEnabled(false);
 
 		gateButton = new JButton(FILTER_BTN_LBL);
 		gateButton.setToolTipText(FILTER_BTN_TOOLTIP);
-		gateButton.addActionListener(e -> chartPanel.gateOnVisible());
+		gateButton.addActionListener(e -> scatterPanel.gateOnVisible());
 		gateButton.setEnabled(false);
 
 		JPanel panel = new JPanel(new FlowLayout());
@@ -145,21 +153,9 @@ public abstract class AbstractScatterPanel extends DetailPanel {
 	}
 
 	@Override
-	public synchronized void refreshCache() {
-		rhoPanel.refreshCache();
-		chartPanel.refreshCache();
-	}
-
-	@Override
-	public synchronized void refreshCache(IAnalysisDataset d) {
-		rhoPanel.refreshCache(d);
-		chartPanel.refreshCache(d);
-	}
-
-	@Override
 	public synchronized void refreshCache(List<IAnalysisDataset> l) {
 		rhoPanel.refreshCache(l);
-		chartPanel.refreshCache(l);
+		scatterPanel.refreshCache(l);
 	}
 
 	private class AbstractScatterChartPanel extends ChartDetailPanel
@@ -171,11 +167,6 @@ public abstract class AbstractScatterPanel extends DetailPanel {
 			super();
 
 			this.setLayout(new BorderLayout());
-
-			headerPanel = createHeader();
-
-			this.add(headerPanel, BorderLayout.NORTH);
-
 			JFreeChart chart = ScatterChartFactory.createEmptyChart();
 
 			chartPanel = new ExportableChartPanel(chart);
@@ -246,6 +237,7 @@ public abstract class AbstractScatterPanel extends DetailPanel {
 					d.getCollection().getProfileManager().copySegmentsAndLandmarksTo(virt);
 					d.getCollection().getSignalManager().copySignalGroupsTo(virt);
 					d.addChildCollection(virt);
+					UIController.getInstance().fireDatasetAdded(d);
 				} catch (CollectionFilteringException | ProfileException | MissingProfileException e1) {
 					LOGGER.log(Loggable.STACK, "Unable to filter collection for " + d.getName(), e1);
 				}
@@ -261,8 +253,7 @@ public abstract class AbstractScatterPanel extends DetailPanel {
 			Measurement statB = (Measurement) statBBox.getSelectedItem();
 
 			ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets()).addStatistic(statA)
-					.addStatistic(statB).setScale(GlobalOptions.getInstance().getScale())
-					.setSwatch(GlobalOptions.getInstance().getSwatch()).setTarget(chartPanel).build();
+					.addStatistic(statB).setTarget(chartPanel).build();
 
 			setChart(options);
 
@@ -297,22 +288,22 @@ public abstract class AbstractScatterPanel extends DetailPanel {
 
 		@Override
 		public void swatchUpdated() {
-			refreshCache();
+			update();
 		}
 
 		@Override
 		public void scaleUpdated(List<IAnalysisDataset> datasets) {
-			refreshCache(datasets);
+			update(datasets);
 		}
 
 		@Override
 		public void scaleUpdated(IAnalysisDataset dataset) {
-			refreshCache(dataset);
+			update(List.of(dataset));
 		}
 
 		@Override
 		public void scaleUpdated() {
-			refreshCache();
+			update();
 		}
 	}
 
@@ -363,7 +354,7 @@ public abstract class AbstractScatterPanel extends DetailPanel {
 			Measurement statB = (Measurement) statBBox.getSelectedItem();
 
 			TableOptions tableOptions = new TableOptionsBuilder().setDatasets(getDatasets()).addStatistic(statA)
-					.addStatistic(statB).setScale(GlobalOptions.getInstance().getScale()).setTarget(rhoTable).build();
+					.addStatistic(statB).setTarget(rhoTable).build();
 
 			setTable(tableOptions);
 		}
@@ -390,17 +381,17 @@ public abstract class AbstractScatterPanel extends DetailPanel {
 
 		@Override
 		public void scaleUpdated(List<IAnalysisDataset> datasets) {
-			refreshCache(datasets);
+			update(datasets);
 		}
 
 		@Override
 		public void scaleUpdated(IAnalysisDataset dataset) {
-			refreshCache(dataset);
+			update(List.of(dataset));
 		}
 
 		@Override
 		public void scaleUpdated() {
-			refreshCache();
+			update();
 		}
 	}
 }

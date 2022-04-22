@@ -34,6 +34,7 @@ import com.bmskinner.nuclear_morphology.components.signals.IShellResult.Aggregat
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult.Normalisation;
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult.ShrinkType;
 import com.bmskinner.nuclear_morphology.components.signals.IWarpedSignal;
+import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.RotationMode;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter.ColourSwatch;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
@@ -50,8 +51,14 @@ public class ChartOptionsBuilder {
 
 	private DefaultChartOptions options;
 
+	/**
+	 * Create a builder. This has options initilised with the current global scale
+	 * and swatch
+	 */
 	public ChartOptionsBuilder() {
 		options = new DefaultChartOptions((List<IAnalysisDataset>) null);
+		options.setScale(GlobalOptions.getInstance().getScale());
+		options.setSwatch(GlobalOptions.getInstance().getSwatch());
 	}
 
 	public ChartOptionsBuilder setDatasets(List<IAnalysisDataset> list) {

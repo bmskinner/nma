@@ -30,7 +30,7 @@ import com.bmskinner.nuclear_morphology.gui.events.revamp.UIController;
 @SuppressWarnings("serial")
 public class MeasurementUnitSettingsPanel extends EnumeratedOptionsPanel {
 
-	private Map<MeasurementScale, JRadioButton> map = new HashMap<MeasurementScale, JRadioButton>();
+	private Map<MeasurementScale, JRadioButton> map = new HashMap<>();
 
 	/**
 	 * Create a panel with all available MeasurementScales as radio buttons

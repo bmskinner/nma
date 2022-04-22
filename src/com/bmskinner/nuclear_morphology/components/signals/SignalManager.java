@@ -479,8 +479,10 @@ public class SignalManager {
 	public void copySignalGroupsTo(@NonNull final ICellCollection target) {
 
 		for (UUID id : collection.getSignalGroupIDs()) {
-			ISignalGroup newGroup;
-			newGroup = collection.getSignalGroup(id).get().duplicate();
+			ISignalGroup newGroup = collection.getSignalGroup(id).get().duplicate();
+			// Shell and warping results are specific to the dataset they were created in
+			newGroup.clearShellResult();
+			newGroup.clearWarpedSignals();
 			target.addSignalGroup(newGroup);
 		}
 	}

@@ -108,6 +108,7 @@ public class DefaultSignalGroup implements ISignalGroup {
 	 */
 	public DefaultSignalGroup(@NonNull ISignalGroup s) {
 
+		id = s.getId();
 		shellResult = null;
 		groupName = s.getGroupName();
 		isVisible = s.isVisible();
@@ -141,6 +142,11 @@ public class DefaultSignalGroup implements ISignalGroup {
 	@Override
 	public void addWarpedSignal(@NonNull IWarpedSignal result) {
 		warpedSignals.add(result);
+	}
+
+	@Override
+	public void clearWarpedSignals() {
+		warpedSignals.clear();
 	}
 
 	@Override

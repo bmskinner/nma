@@ -28,6 +28,8 @@ import javax.swing.ListModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.cells.ICytoplasm;
 import com.bmskinner.nuclear_morphology.components.cells.Nucleus;
@@ -37,10 +39,17 @@ import com.bmskinner.nuclear_morphology.components.signals.ISignalCollection;
 @SuppressWarnings("serial")
 public class ComponentListPanel extends AbstractCellDetailPanel implements ListSelectionListener {
 
+	public record SelectableComponent(@NonNull String name, @NonNull CellularComponent component) {
+		@Override
+		public String toString() {
+			return name;
+		}
+	}
+
 	private static final Logger LOGGER = Logger.getLogger(ComponentListPanel.class.getName());
 
 	private static final String PANEL_TITLE_LBL = "Components";
-	private JList<ComponentListCell> list;
+	private JList<SelectableComponent> list;
 	private JScrollPane scrollPane;
 	private String prevComponent = "";
 
@@ -52,10 +61,9 @@ public class ComponentListPanel extends AbstractCellDetailPanel implements ListS
 		scrollPane = new JScrollPane();
 
 		list = new JList<>();
-		ListModel<ComponentListCell> objectModel = createListModel();
+		ListModel<SelectableComponent> objectModel = createListModel();
 
 		list.setModel(objectModel);
-		list.addListSelectionListener(this);
 		list.setEnabled(false);
 
 		scrollPane.setViewportView(list);
@@ -71,40 +79,32 @@ public class ComponentListPanel extends AbstractCellDetailPanel implements ListS
 	 * 
 	 * @return
 	 */
-	private ListModel<ComponentListCell> createListModel() {
-		DefaultListModel<ComponentListCell> model = new DefaultListModel<>();
+	private ListModel<SelectableComponent> createListModel() {
+		DefaultListModel<SelectableComponent> model = new DefaultListModel<>();
 
 		if (this.getCellModel().hasCell()) {
 
-			Nucleus n = getCellModel().getCell().getPrimaryNucleus();
 			// Every cell has a nucleus
-			ComponentListCell nucleusCell = new ComponentListCell(CellularComponent.NUCLEUS, n);
+			Nucleus n = getCellModel().getCell().getPrimaryNucleus();
+			model.addElement(new SelectableComponent(CellularComponent.NUCLEUS, n));
 
-			model.addElement(nucleusCell);
-
-			// Cytoplasm
 			if (getCellModel().getCell().hasCytoplasm()) {
 				ICytoplasm cyto = getCellModel().getCell().getCytoplasm();
-				ComponentListCell cytoCell = new ComponentListCell(CellularComponent.CYTOPLASM, cyto);
-				model.addElement(cytoCell);
+				model.addElement(new SelectableComponent(CellularComponent.CYTOPLASM, cyto));
 			}
 
 			ISignalCollection signalCollection = n.getSignalCollection();
 
 			// Add signals groups present
 			for (UUID signalGroupId : signalCollection.getSignalGroupIds()) {
-
+				String signalGroupName = activeDataset().getCollection().getSignalGroup(signalGroupId).get()
+						.getGroupName();
 				if (signalCollection.hasSignal(signalGroupId)) {
 
 					// Since all we want is a single component within the
 					// collection, just take the first signal
 					INuclearSignal signal = signalCollection.getSignals(signalGroupId).get(0);
-					String signalGroupName;
-					signalGroupName = activeDataset().getCollection().getSignalGroup(signalGroupId).get()
-							.getGroupName();
-
-					ComponentListCell signalCell = new ComponentListCell(signalGroupName, signal);
-					model.addElement(signalCell);
+					model.addElement(new SelectableComponent(signalGroupName, signal));
 				}
 			}
 		}
@@ -113,19 +113,21 @@ public class ComponentListPanel extends AbstractCellDetailPanel implements ListS
 
 	@Override
 	public void update() {
+//		LOGGER.fine("Removing selection listeners");
+		for (var l : list.getListSelectionListeners())
+			list.removeListSelectionListener(l);
 
-		LOGGER.finest("Updating component list for cell");
-		list.removeListSelectionListener(this);
-		ListModel<ComponentListCell> model = createListModel();
+		ListModel<SelectableComponent> model = createListModel();
 		list.setModel(model);
 
+		// When the dataset changes, we need to set the selected index to match the
+		// previous selection
 		if (this.getCellModel().hasCell()) {
-			LOGGER.finest("Cell is not null");
 
 			// Check if the new cell has the same component as the last
 			int selectedIndex = 0;
 			for (int i = 0; i < model.getSize(); i++) {
-				ComponentListCell tableCell = list.getModel().getElementAt(i);
+				SelectableComponent tableCell = list.getModel().getElementAt(i);
 				if (tableCell.toString().equals(prevComponent)) {
 					selectedIndex = i;
 				}
@@ -138,42 +140,39 @@ public class ComponentListPanel extends AbstractCellDetailPanel implements ListS
 																					// string
 			this.getCellModel().setComponent(getSelectedComponent());
 			list.setEnabled(true);
+			list.addListSelectionListener(this);
 		} else {
 			list.setEnabled(false);
 		}
-		list.addListSelectionListener(this);
 
 	}
 
-	private ComponentListCell getSelectedRow() {
-		ComponentListCell tableCell = null;
+	private SelectableComponent getSelectedRow() {
 		int row = list.getSelectedIndex();
-		LOGGER.finer("Selected component row " + row);
 		if (row >= 0) { // -1 if nothing selected
-			tableCell = list.getModel().getElementAt(row);
+			return list.getModel().getElementAt(row);
 		}
-		return tableCell;
+		return null;
 	}
 
 	private CellularComponent getSelectedComponent() {
 		int row = list.getSelectedIndex();
-		CellularComponent c = null;
+
 		if (row >= 0) { // -1 if nothing selected
-			ComponentListCell tableCell = getSelectedRow();
-			c = tableCell.getComponent();
+			return getSelectedRow().component;
 		}
-		return c;
+		return null;
 	}
 
 	@Override
 	public void valueChanged(ListSelectionEvent e) {
+		if (e.getValueIsAdjusting())
+			return;
 
-		LOGGER.finest("Component selection changed");
-		ComponentListCell cell = getSelectedRow();
+		SelectableComponent cell = getSelectedRow();
 		if (cell != null) {
-			prevComponent = cell.toString(); // set the new component string
-			CellularComponent c = cell.getComponent();
-			this.getCellModel().setComponent(c);
+			prevComponent = cell.name; // set the new component string
+			this.getCellModel().setComponent(cell.component());
 		}
 
 	}

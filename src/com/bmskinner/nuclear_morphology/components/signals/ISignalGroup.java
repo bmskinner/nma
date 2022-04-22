@@ -67,6 +67,11 @@ public interface ISignalGroup extends XmlSerializable {
 	void addWarpedSignal(@NonNull IWarpedSignal result);
 
 	/**
+	 * Remove any warped signals present
+	 */
+	void clearWarpedSignals();
+
+	/**
 	 * Get the shell result for the group, if present
 	 * 
 	 * @return

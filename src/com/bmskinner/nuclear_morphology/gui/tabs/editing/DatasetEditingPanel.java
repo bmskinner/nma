@@ -305,7 +305,7 @@ public class DatasetEditingPanel extends ChartDetailPanel implements ConsensusUp
 
 			// Put the names of the mergable segments into a list
 
-			List<IProfileSegment> segList = medianProfile.getOrderedSegments();
+			List<IProfileSegment> segList = medianProfile.getSegments();
 			for (int i = 0; i < segList.size() - 1; i++) { // Do not allow merges across the RP
 				IProfileSegment seg = segList.get(i);
 				SegMergeItem item = new SegMergeItem(seg, seg.nextSegment());

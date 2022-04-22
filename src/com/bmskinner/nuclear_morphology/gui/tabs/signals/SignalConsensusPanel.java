@@ -126,6 +126,8 @@ public class SignalConsensusPanel extends ChartDetailPanel
 		if (isSingleDataset()) {
 
 			for (UUID signalGroup : activeDataset().getCollection().getSignalGroupIDs()) {
+				if (signalGroup == null)
+					continue;
 
 				if (signalGroup.equals(IShellResult.RANDOM_SIGNAL_ID))
 					continue;

@@ -163,7 +163,7 @@ public class InteractiveCellPanel extends JPanel {
 	private ImagePainter createPainter() {
 		if (displayOptions.getBoolean(CellDisplayOptions.WARP_IMAGE))
 			return new WarpedCellPainter(dataset, cell);
-		return new CellImagePainter(cell, displayOptions.getBoolean(CellDisplayOptions.ROTATE_VERTICAL));
+		return new CellImagePainter(cell, component, displayOptions.getBoolean(CellDisplayOptions.ROTATE_VERTICAL));
 	}
 
 	public synchronized void addSegmentEventListener(SegmentEventListener l) {

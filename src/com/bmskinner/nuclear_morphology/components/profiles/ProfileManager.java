@@ -669,7 +669,9 @@ public class ProfileManager {
 		// Note - validation is run in segmentation handler
 
 		// merge the two segments in the median
+
 		medianProfile.mergeSegments(seg1, seg2, newID);
+
 		// put the new segment pattern back with the appropriate offset
 		collection.getProfileCollection().setSegments(medianProfile.getSegments());
 
@@ -677,11 +679,13 @@ public class ProfileManager {
 		 * With the median profile segments merged, also merge the segments in the
 		 * individual nuclei
 		 */
-		for (Nucleus n : collection.getNuclei()) {
-			boolean wasLocked = n.isLocked();
-			n.setLocked(false); // Merging segments is not destructive
-			mergeSegments(n, seg1, seg2, newID);
-			n.setLocked(wasLocked);
+		if (collection.isReal()) {
+			for (Nucleus n : collection.getNuclei()) {
+				boolean wasLocked = n.isLocked();
+				n.setLocked(false); // Merging segments is not destructive
+				mergeSegments(n, seg1, seg2, newID);
+				n.setLocked(wasLocked);
+			}
 		}
 
 		/* Update the consensus if present */
@@ -702,18 +706,18 @@ public class ProfileManager {
 	 * @throws ProfileException
 	 * @throws MissingComponentException
 	 */
-	private void mergeSegments(@NonNull Taggable p, @NonNull UUID seg1, @NonNull UUID seg2, @NonNull UUID newID)
+	private void mergeSegments(@NonNull Nucleus p, @NonNull UUID seg1, @NonNull UUID seg2, @NonNull UUID newID)
 			throws ProfileException, MissingComponentException {
 		ISegmentedProfile profile = p.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
 
 		// Only try the merge if both segments are present in the profile
 		if (!profile.hasSegment(seg1))
-			throw new ProfileException(p.getClass().getSimpleName() + ":" + p.getID()
-					+ " profile does not have segment 1 with ID " + seg1);
+			throw new ProfileException(p.getNameAndNumber() + " profile does not have segment 1 with ID " + seg1
+					+ ". Profile is " + profile);
 
 		if (!profile.hasSegment(seg2))
-			throw new ProfileException(p.getClass().getSimpleName() + ":" + p.getID()
-					+ " profile does not have segment 2 with ID " + seg2);
+			throw new ProfileException(p.getNameAndNumber() + " profile does not have segment 2 with ID " + seg2
+					+ ". Profile is " + profile);
 
 		profile.mergeSegments(seg1, seg2, newID);
 		p.setSegments(profile.getSegments());

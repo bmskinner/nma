@@ -31,6 +31,7 @@ import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult.Aggregation;
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult.Normalisation;
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult.ShrinkType;
+import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter.ColourSwatch;
 
 /**
@@ -42,86 +43,87 @@ import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter.ColourSwat
  */
 public class TableOptionsBuilder {
 
-    private DefaultTableOptions options;
+	private DefaultTableOptions options;
 
-    public TableOptionsBuilder() {
-        options = new DefaultTableOptions(null);
-    }
+	public TableOptionsBuilder() {
+		options = new DefaultTableOptions(null);
+		options.setScale(GlobalOptions.getInstance().getScale());
+	}
 
-    public TableOptionsBuilder setDatasets(@Nullable List<IAnalysisDataset> list) {
-        options.setDatasets(list);
-        return this;
-    }
+	public TableOptionsBuilder setDatasets(@Nullable List<IAnalysisDataset> list) {
+		options.setDatasets(list);
+		return this;
+	}
 
-    public TableOptionsBuilder addStatistic(Measurement s) {
-        options.addStat(s);
-        return this;
-    }
+	public TableOptionsBuilder addStatistic(Measurement s) {
+		options.addStat(s);
+		return this;
+	}
 
-    public TableOptionsBuilder setSegID(UUID segID) {
-        options.setSegID(segID);
-        return this;
-    }
+	public TableOptionsBuilder setSegID(UUID segID) {
+		options.setSegID(segID);
+		return this;
+	}
 
-    public TableOptionsBuilder setSegPosition(int segPosition) {
-        options.setSegPosition(segPosition);
-        return this;
-    }
+	public TableOptionsBuilder setSegPosition(int segPosition) {
+		options.setSegPosition(segPosition);
+		return this;
+	}
 
-    public TableOptionsBuilder setScale(MeasurementScale s) {
-        options.setScale(s);
-        return this;
-    }
+	public TableOptionsBuilder setScale(MeasurementScale s) {
+		options.setScale(s);
+		return this;
+	}
 
-    public TableOptionsBuilder setCell(ICell cell) {
-        options.setCell(cell);
-        return this;
-    }
+	public TableOptionsBuilder setCell(ICell cell) {
+		options.setCell(cell);
+		return this;
+	}
 
-    public TableOptionsBuilder setSwatch(ColourSwatch swatch) {
-        options.setSwatch(swatch);
-        return this;
-    }
+	public TableOptionsBuilder setSwatch(ColourSwatch swatch) {
+		options.setSwatch(swatch);
+		return this;
+	}
 
-    public TableOptionsBuilder setTarget(JTable target) {
-        options.setTarget(target);
-        return this;
-    }
+	public TableOptionsBuilder setTarget(JTable target) {
+		options.setTarget(target);
+		return this;
+	}
 
-    /**
-     * Set the table renderer to use
-     * 
-     * @param column the column to apply the renderer to
-     * @param r the renderer
-     * @return
-     */
-    public TableOptionsBuilder setColumnRenderer(int column, TableCellRenderer r) {
-        options.setRenderer(column, r);
-        return this;
-    }
-    
-    public TableOptionsBuilder setAggregation(Aggregation c) {
-        options.setAggregation(c);
-        return this;
-    }
-    
-    public TableOptionsBuilder setNormalisation(Normalisation c) {
-        options.setNormalisation(c);
-        return this;
-    }
-    
-    public TableOptionsBuilder setNormalised(boolean b){
-    	options.setNormalised(b);
-    	return this;
-    }
-    
-    public TableOptionsBuilder setShrinkType(ShrinkType t) {
-        options.setShrinkType(t);
-        return this;
-    }
+	/**
+	 * Set the table renderer to use
+	 * 
+	 * @param column the column to apply the renderer to
+	 * @param r      the renderer
+	 * @return
+	 */
+	public TableOptionsBuilder setColumnRenderer(int column, TableCellRenderer r) {
+		options.setRenderer(column, r);
+		return this;
+	}
 
-    public TableOptions build() {
-        return options;
+	public TableOptionsBuilder setAggregation(Aggregation c) {
+		options.setAggregation(c);
+		return this;
+	}
 
-    }
+	public TableOptionsBuilder setNormalisation(Normalisation c) {
+		options.setNormalisation(c);
+		return this;
+	}
+
+	public TableOptionsBuilder setNormalised(boolean b) {
+		options.setNormalised(b);
+		return this;
+	}
+
+	public TableOptionsBuilder setShrinkType(ShrinkType t) {
+		options.setShrinkType(t);
+		return this;
+	}
+
+	public TableOptions build() {
+		return options;
+
+	}
 }
