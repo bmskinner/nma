@@ -448,7 +448,7 @@ public class DefaultCellCollection implements ICellCollection {
 	}
 
 	@Override
-	public synchronized Set<File> getImageFiles() {
+	public Set<File> getImageFiles() {
 		return getNuclei().stream().map(Nucleus::getSourceFile).collect(Collectors.toSet());
 	}
 
@@ -457,7 +457,7 @@ public class DefaultCellCollection implements ICellCollection {
 	 * 
 	 * @return
 	 */
-	private synchronized int[] getArrayLengths() {
+	private int[] getArrayLengths() {
 		return getNuclei().stream().mapToInt(Nucleus::getBorderLength).toArray();
 	}
 
@@ -477,28 +477,28 @@ public class DefaultCellCollection implements ICellCollection {
 	}
 
 	@Override
-	public synchronized Set<ICell> getCells(@NonNull File imageFile) {
+	public Set<ICell> getCells(@NonNull File imageFile) {
 		return cells.stream().filter(c -> c.getPrimaryNucleus().getSourceFile().equals(imageFile))
 				.collect(Collectors.toSet());
 	}
 
 	@Override
-	public synchronized boolean hasCells(@NonNull File imageFile) {
+	public boolean hasCells(@NonNull File imageFile) {
 		return getCells(imageFile).size() > 0;
 	}
 
 	@Override
-	public synchronized boolean hasNuclei(@NonNull File imageFile) {
+	public boolean hasNuclei(@NonNull File imageFile) {
 		return getNuclei(imageFile).size() > 0;
 	}
 
 	@Override
-	public synchronized List<Nucleus> getNuclei() {
+	public List<Nucleus> getNuclei() {
 		return cells.stream().flatMap(c -> c.getNuclei().stream()).toList();
 	}
 
 	@Override
-	public synchronized Set<Nucleus> getNuclei(@NonNull File imageFile) {
+	public Set<Nucleus> getNuclei(@NonNull File imageFile) {
 		return getNuclei().stream().filter(n -> n.getSourceFile().equals(imageFile)).collect(Collectors.toSet());
 	}
 
@@ -1305,7 +1305,7 @@ public class DefaultCellCollection implements ICellCollection {
 		}
 
 		@Override
-		public IProfile getProfile(@NonNull ProfileType type, @NonNull Landmark tag, int quartile)
+		public synchronized IProfile getProfile(@NonNull ProfileType type, @NonNull Landmark tag, int quartile)
 				throws MissingLandmarkException, ProfileException, MissingProfileException {
 			if (!this.hasLandmark(tag))
 				throw new MissingLandmarkException("Tag is not present: " + tag.toString());

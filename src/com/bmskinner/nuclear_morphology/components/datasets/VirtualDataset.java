@@ -313,18 +313,18 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
 	}
 
 	@Override
-	public synchronized List<ICell> getCells() {
+	public List<ICell> getCells() {
 		return parentDataset.getCollection().getCells().parallelStream().filter(c -> cellIDs.contains(c.getId()))
 				.collect(Collectors.toList());
 	}
 
 	@Override
-	public synchronized Stream<ICell> streamCells() {
+	public Stream<ICell> streamCells() {
 		return getCells().stream();
 	}
 
 	@Override
-	public synchronized Set<ICell> getCells(@NonNull File f) {
+	public Set<ICell> getCells(@NonNull File f) {
 		return stream().filter(c -> c.getPrimaryNucleus().getSourceFile().equals(f)).collect(Collectors.toSet());
 	}
 
@@ -339,12 +339,12 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
 	}
 
 	@Override
-	public synchronized Set<UUID> getCellIDs() {
+	public Set<UUID> getCellIDs() {
 		return new HashSet<>(cellIDs);
 	}
 
 	@Override
-	public synchronized List<Nucleus> getNuclei() {
+	public List<Nucleus> getNuclei() {
 		return parentDataset.getCollection().getCells().parallelStream().filter(c -> cellIDs.contains(c.getId()))
 				.flatMap(c -> c.getNuclei().stream()).toList();
 	}
@@ -355,7 +355,7 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
 	}
 
 	@Override
-	public synchronized Set<Nucleus> getNuclei(@NonNull File imageFile) {
+	public Set<Nucleus> getNuclei(@NonNull File imageFile) {
 
 		return cellIDs.stream().map(id -> parentDataset.getCollection().getCell(id))
 				.flatMap(c -> c.getNuclei().stream()).filter(n -> n.getSourceFile().equals(imageFile))
@@ -518,9 +518,7 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
 		if (!parentDataset.getCollection().hasSignalGroup(signalGroup))
 			return Optional.empty();
 
-		// Override the shell storage to point to this collection, not the shell
-		// result
-		// This SignalGroup is never saved to file, so does not need serialising
+//TODO: replace this with a serialisable version
 		@SuppressWarnings("serial")
 		ISignalGroup result = new DefaultSignalGroup(parentDataset.getCollection().getSignalGroup(signalGroup).get()) {
 
@@ -656,7 +654,7 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
 	 * @param d2
 	 * @return
 	 */
-	private synchronized int countSharedNuclei(ICellCollection d2) {
+	private int countSharedNuclei(ICellCollection d2) {
 
 		if (d2 == this)
 			return cellIDs.size();
@@ -713,12 +711,12 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
 	 */
 
 	@Override
-	public void clear(Measurement stat, String component) {
+	public void clear(@NonNull Measurement stat, @NonNull String component) {
 		statsCache.clear(stat, component, null);
 	}
 
 	@Override
-	public void clear(Measurement stat, String component, UUID id) {
+	public void clear(@NonNull Measurement stat, @NonNull String component, @NonNull UUID id) {
 		statsCache.clear(stat, component, id);
 	}
 
@@ -728,7 +726,7 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
 	}
 
 	@Override
-	public synchronized double getMedian(@NonNull Measurement stat, String component, MeasurementScale scale) {
+	public double getMedian(@NonNull Measurement stat, String component, MeasurementScale scale) {
 		if (this.size() == 0) {
 			return 0;
 		}
@@ -764,12 +762,12 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
 	}
 
 	@Override
-	public synchronized double getMin(@NonNull Measurement stat, String component, MeasurementScale scale) {
+	public double getMin(@NonNull Measurement stat, String component, MeasurementScale scale) {
 		return getMinStatistic(stat, component, scale, null);
 	}
 
 	@Override
-	public synchronized double getMin(@NonNull Measurement stat, String component, MeasurementScale scale, UUID id) {
+	public double getMin(@NonNull Measurement stat, String component, MeasurementScale scale, UUID id) {
 
 		// Handle old segment andSignalStatistic enums
 		if (CellularComponent.NUCLEAR_SIGNAL.equals(component)) {
@@ -794,7 +792,7 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
 	}
 
 	@Override
-	public synchronized double getMax(@NonNull Measurement stat, String component, MeasurementScale scale, UUID id) {
+	public double getMax(@NonNull Measurement stat, String component, MeasurementScale scale, UUID id) {
 
 		// Handle old segment andSignalStatistic enums
 		if (CellularComponent.NUCLEAR_SIGNAL.equals(component)) {
@@ -807,7 +805,7 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
 		return getMaxStatistic(stat, component, scale, id);
 	}
 
-	private synchronized double getMaxStatistic(Measurement stat, String component, MeasurementScale scale, UUID id) {
+	private double getMaxStatistic(Measurement stat, String component, MeasurementScale scale, UUID id) {
 
 		double[] values = getRawValues(stat, component, scale, id);
 		return Arrays.stream(values).max().orElse(Statistical.ERROR_CALCULATING_STAT);
@@ -974,27 +972,6 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
 		}
 	}
 
-//	@Override
-//	public String toString() {
-//
-//		String newLine = System.getProperty("line.separator");
-//
-//		StringBuilder b = new StringBuilder("Collection:" + getName() + newLine)
-//				.append("Class: "+this.getClass().getSimpleName()+newLine)
-//				.append("Nuclei: " + this.getNucleusCount() + newLine)
-//				.append("Parent dataset: "+parentDataset.getCollection().getName()+newLine)
-//				.append("Profile collections:" + newLine)
-//				.append(profileCollection.toString()+newLine);
-//
-//
-//		if(this.hasConsensus()){
-//			b.append("Consensus:" + newLine);
-//			b.append(getConsensus().toString()+newLine);
-//		}
-//
-//		return b.toString();
-//	}
-
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -1002,19 +979,6 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
 		result = prime * result + Objects.hash(cellIDs, consensusNucleus, name, profileCollection, shellResults, uuid);
 		return result;
 	}
-
-//	@Override
-//	public int hashCode() {
-//		final int prime = 31;
-//		int result = 1;
-//		result = prime * result + ((cellIDs == null) ? 0 : cellIDs.hashCode());
-//		result = prime * result + ((consensusNucleus == null) ? 0 : consensusNucleus.hashCode());
-//		result = prime * result + ((name == null) ? 0 : name.hashCode());
-//		result = prime * result + ((profileCollection == null) ? 0 : profileCollection.hashCode());
-//		result = prime * result + ((shellResults == null) ? 0 : shellResults.hashCode());
-//		result = prime * result + ((uuid == null) ? 0 : uuid.hashCode());
-//		return result;
-//	}
 
 	@Override
 	public boolean equals(Object obj) {
@@ -1399,7 +1363,7 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
 		}
 
 		@Override
-		public IProfile getProfile(@NonNull ProfileType type, @NonNull Landmark tag, int quartile)
+		public synchronized IProfile getProfile(@NonNull ProfileType type, @NonNull Landmark tag, int quartile)
 				throws MissingLandmarkException, ProfileException, MissingProfileException {
 			if (!this.hasLandmark(tag))
 				throw new MissingLandmarkException("Tag is not present: " + tag.toString());

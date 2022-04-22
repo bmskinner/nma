@@ -33,22 +33,22 @@ import com.bmskinner.nuclear_morphology.core.GlobalOptions;
  *
  */
 public class OptionsFactory {
-	
+
 	/**
 	 * We only use static methods
 	 */
-	private OptionsFactory() {}
+	private OptionsFactory() {
+	}
 
-    /**
-     * Create the default options type for nucleus detection
-     * 
-     * @param folder the folder to be searched
-     * @return
-     */
+	/**
+	 * Create the default options type for nucleus detection
+	 * 
+	 * @param folder the folder to be searched
+	 * @return
+	 */
 	public static OptionsBuilder makeNucleusDetectionOptions(File folder) {
-		
-		return new OptionsBuilder()
-				.withValue(HashOptions.DETECTION_FOLDER, folder.getAbsolutePath())
+
+		return new OptionsBuilder().withValue(HashOptions.DETECTION_FOLDER, folder.getAbsolutePath())
 				.withValue(HashOptions.MIN_SIZE_PIXELS, HashOptions.DEFAULT_MIN_NUCLEUS_SIZE)
 				.withValue(HashOptions.MAX_SIZE_PIXELS, HashOptions.DEFAULT_MAX_NUCLEUS_SIZE)
 				.withValue(HashOptions.MIN_CIRC, HashOptions.DEFAULT_MIN_NUCLEUS_CIRC)
@@ -60,16 +60,15 @@ public class OptionsFactory {
 				.withValue(HashOptions.IS_RGB, HashOptions.DEFAULT_IS_RGB)
 				.setAll(OptionsFactory.makeCannyOptions().build())
 				.setAll(OptionsFactory.makePreprocessingOptions().build());
-    }
+	}
 
-    /**
-     * Create the default options type for Canny edge detection
-     * 
-     * @return
-     */
+	/**
+	 * Create the default options type for Canny edge detection
+	 * 
+	 * @return
+	 */
 	public static OptionsBuilder makeCannyOptions() {
-		return new OptionsBuilder()
-				.withValue(HashOptions.IS_USE_CANNY, HashOptions.DEFAULT_IS_USE_CANNY)
+		return new OptionsBuilder().withValue(HashOptions.IS_USE_CANNY, HashOptions.DEFAULT_IS_USE_CANNY)
 				.withValue(HashOptions.CANNY_IS_AUTO_THRESHOLD, HashOptions.DEFAULT_IS_CANNY_AUTO_THRESHOLD)
 
 				.withValue(HashOptions.CANNY_LOW_THRESHOLD_FLT, HashOptions.DEFAULT_CANNY_LOW_THRESHOLD)
@@ -82,14 +81,13 @@ public class OptionsFactory {
 				.withValue(HashOptions.CANNY_IS_ADD_BORDER, HashOptions.DEFAULT_IS_CANNY_ADD_BORDER);
 	}
 
-    /**
-     * Create the default options type for image preprocessing
-     * 
-     * @return
-     */
+	/**
+	 * Create the default options type for image preprocessing
+	 * 
+	 * @return
+	 */
 	public static OptionsBuilder makePreprocessingOptions() {
-		return new OptionsBuilder()
-				.withValue(HashOptions.IS_USE_GAUSSIAN, HashOptions.DEFAULT_USE_GAUSSIAN)
+		return new OptionsBuilder().withValue(HashOptions.IS_USE_GAUSSIAN, HashOptions.DEFAULT_USE_GAUSSIAN)
 				.withValue(HashOptions.IS_USE_KUWAHARA, HashOptions.DEFAULT_USE_KUWAHARA)
 				.withValue(HashOptions.IS_USE_ROLLING_BALL, HashOptions.DEFAULT_USE_ROLLING_BALL)
 				.withValue(HashOptions.IS_USE_FLATTENING, HashOptions.DEFAULT_IS_USE_FLATTENNING)
@@ -100,24 +98,23 @@ public class OptionsFactory {
 				.withValue(HashOptions.FLATTENING_THRESHOLD_INT, HashOptions.DEFAULT_FLATTEN_THRESHOLD)
 				.withValue(HashOptions.RAISING_THRESHOLD_INT, HashOptions.DEFAULT_RAISE_THRESHOLD);
 
-
 //		withValue(HashOptions.MIN_HUE, HashOptions.DEFAULT_MIN_HUE);
 //		withValue(HashOptions.MAX_HUE, HashOptions.DEFAULT_MAX_HUE);
 //		withValue(HashOptions.MIN_SAT, HashOptions.DEFAULT_MIN_SAT);
 //		withValue(HashOptions.MAX_SAT, HashOptions.DEFAULT_MAX_SAT);
 //		withValue(HashOptions.MIN_BRI, HashOptions.DEFAULT_MIN_BRI);
 //		withValue(HashOptions.MAX_BRI, HashOptions.DEFAULT_MAX_BRI);
-    }
+	}
 
-    /**
-     * Create the default options type for nuclear signal detection
-     * 
-     * @param folder the folder to be searched
-     * @return
-     */
-	public static OptionsBuilder makeNuclearSignalOptions(File folder) {		
+	/**
+	 * Create the default options type for nuclear signal detection
+	 * 
+	 * @param folder the folder to be searched
+	 * @return
+	 */
+	public static OptionsBuilder makeNuclearSignalOptions(File folder) {
 		return new OptionsBuilder()
-				.withValue(HashOptions.DETECTION_FOLDER, folder.getAbsolutePath())
+				.withValue(HashOptions.DETECTION_FOLDER, folder == null ? "" : folder.getAbsolutePath())
 				.withValue(HashOptions.SIGNAL_MAX_FRACTION, HashOptions.DEFAULT_SIGNAL_MAX_FRACTION)
 				.withValue(HashOptions.SIGNAL_DETECTION_MODE_KEY, HashOptions.DEFAULT_SIGNAL_DETECTION_METHOD.name())
 				.withValue(HashOptions.MIN_SIZE_PIXELS, HashOptions.DEFAULT_SIGNAL_MIN_SIZE)
@@ -127,121 +124,118 @@ public class OptionsFactory {
 				.withValue(HashOptions.THRESHOLD, HashOptions.DEFAULT_SIGNAL_THRESHOLD)
 				.withValue(HashOptions.SCALE, GlobalOptions.getInstance().getImageScale());
 	}
-	
+
 	/**
 	 * Create the default options for shell analysis
+	 * 
 	 * @return
 	 */
 	public static OptionsBuilder makeShellAnalysisOptions() {
-		return new OptionsBuilder()
-				.withValue(HashOptions.SHELL_COUNT_INT, HashOptions.DEFAULT_SHELL_COUNT)
+		return new OptionsBuilder().withValue(HashOptions.SHELL_COUNT_INT, HashOptions.DEFAULT_SHELL_COUNT)
 				.withValue(HashOptions.SHELL_EROSION_METHOD_KEY, HashOptions.DEFAULT_EROSION_METHOD.name());
 	}
 
+	/**
+	 * Create the default analysis options type
+	 * 
+	 * @return
+	 */
+	public static IAnalysisOptions makeAnalysisOptions() {
+		return new DefaultAnalysisOptions();
+	}
 
-    /**
-     * Create the default analysis options type
-     * 
-     * @return
-     */
-    public static IAnalysisOptions makeAnalysisOptions() {
-        return new DefaultAnalysisOptions();
-    }
+	/**
+	 * Create the default analysis options type based on a template
+	 * 
+	 * @param template the template options
+	 * @return
+	 */
+	public static IAnalysisOptions makeAnalysisOptions(IAnalysisOptions template) {
+		return new DefaultAnalysisOptions(template);
+	}
 
-    /**
-     * Create the default analysis options type based on a template
-     * 
-     * @param template
-     *            the template options
-     * @return
-     */
-    public static IAnalysisOptions makeAnalysisOptions(IAnalysisOptions template) {
-        return new DefaultAnalysisOptions(template);
-    }
-    
-    /**
-     * Create the default analysis options for rodent sperm detection
-     * @param testFolder the folder of images to analyse
-     * @return the options
-     */
-    public static IAnalysisOptions makeDefaultRodentAnalysisOptions(File testFolder) {
-    	IAnalysisOptions op = makeAnalysisOptions();
-        op.setDetectionOptions(CellularComponent.NUCLEUS, 
-        		OptionsFactory.makeNucleusDetectionOptions(testFolder)
-        		.build());
-        op.setRuleSetCollection(RuleSetCollection.mouseSpermRuleSetCollection());
-        return op;
-    }
-    
-    /**
-     * Create the default analysis options for pig sperm detection
-     * @param testFolder the folder of images to analyse
-     * @return the options
-     */
-    public static IAnalysisOptions makeDefaultPigAnalysisOptions(File testFolder) {
-    	IAnalysisOptions op = OptionsFactory.makeAnalysisOptions();
-        
-        HashOptions nop = OptionsFactory.makeNucleusDetectionOptions(testFolder)
-        		.withValue(HashOptions.MIN_CIRC, 0.1)
-        		.withValue(HashOptions.MAX_CIRC, 0.9)
-        		.build();
-    
-        op.setDetectionOptions(CellularComponent.NUCLEUS, nop);
-        op.setRuleSetCollection(RuleSetCollection.pigSpermRuleSetCollection());
-        return op;
-    }
-    
-    /**
-     * Create the default analysis options for round nucleus detection
-     * @param testFolder the folder of images to analyse
-     * @return the options
-     */
-    public static IAnalysisOptions makeDefaultRoundAnalysisOptions(File testFolder) {
-    	IAnalysisOptions op = OptionsFactory.makeAnalysisOptions();
-        
-        HashOptions nop = OptionsFactory.makeNucleusDetectionOptions(testFolder)
-        		.withValue(HashOptions.MIN_CIRC, 0.6)
-        		.withValue(HashOptions.MAX_CIRC, 0.9)
-        		.build();
-        
-        op.setDetectionOptions(CellularComponent.NUCLEUS, nop);
-        op.setRuleSetCollection(RuleSetCollection.roundRuleSetCollection());
-        return op;
-    }
+	/**
+	 * Create the default analysis options for rodent sperm detection
+	 * 
+	 * @param testFolder the folder of images to analyse
+	 * @return the options
+	 */
+	public static IAnalysisOptions makeDefaultRodentAnalysisOptions(File testFolder) {
+		IAnalysisOptions op = makeAnalysisOptions();
+		op.setDetectionOptions(CellularComponent.NUCLEUS,
+				OptionsFactory.makeNucleusDetectionOptions(testFolder).build());
+		op.setRuleSetCollection(RuleSetCollection.mouseSpermRuleSetCollection());
+		return op;
+	}
 
-    /**
-     * Create an instance of the default clustering options using
-     * {@link HashOptions#DEFAULT_CLUSTER_METHOD}
-     * @return
-     */
-    public static OptionsBuilder makeDefaultClusteringOptions() {
-    	OptionsBuilder ob = new OptionsBuilder()
-    			.withValue(HashOptions.CLUSTER_METHOD_KEY, HashOptions.DEFAULT_CLUSTER_METHOD.name())
-    			.withValue(HashOptions.CLUSTER_HIERARCHICAL_METHOD_KEY, HashOptions.DEFAULT_HIERARCHICAL_METHOD.name())
+	/**
+	 * Create the default analysis options for pig sperm detection
+	 * 
+	 * @param testFolder the folder of images to analyse
+	 * @return the options
+	 */
+	public static IAnalysisOptions makeDefaultPigAnalysisOptions(File testFolder) {
+		IAnalysisOptions op = OptionsFactory.makeAnalysisOptions();
 
-    			.withValue(HashOptions.CLUSTER_USE_SIMILARITY_MATRIX_KEY, HashOptions.DEFAULT_USE_SIMILARITY_MATRIX)
-    			.withValue(HashOptions.CLUSTER_INCLUDE_MESH_KEY, HashOptions.DEFAULT_INCLUDE_MESH)
-    			.withValue(HashOptions.CLUSTER_USE_TSNE_KEY, HashOptions.DEFAULT_USE_TSNE)
+		HashOptions nop = OptionsFactory.makeNucleusDetectionOptions(testFolder).withValue(HashOptions.MIN_CIRC, 0.1)
+				.withValue(HashOptions.MAX_CIRC, 0.9).build();
 
-    			.withValue(HashOptions.CLUSTER_EM_ITERATIONS_KEY, HashOptions.DEFAULT_EM_ITERATIONS)
-    			.withValue(HashOptions.CLUSTER_MANUAL_CLUSTER_NUMBER_KEY, HashOptions.DEFAULT_MANUAL_CLUSTER_NUMBER);
+		op.setDetectionOptions(CellularComponent.NUCLEUS, nop);
+		op.setRuleSetCollection(RuleSetCollection.pigSpermRuleSetCollection());
+		return op;
+	}
 
-    	for (Measurement stat : Measurement.getRoundNucleusStats())
-    		ob = ob.withValue(stat.toString(), false);
+	/**
+	 * Create the default analysis options for round nucleus detection
+	 * 
+	 * @param testFolder the folder of images to analyse
+	 * @return the options
+	 */
+	public static IAnalysisOptions makeDefaultRoundAnalysisOptions(File testFolder) {
+		IAnalysisOptions op = OptionsFactory.makeAnalysisOptions();
 
-    	ob = ob.withValue(HashOptions.DEFAULT_PROFILE_TYPE.toString(), HashOptions.DEFAULT_INCLUDE_PROFILE);
-    	return ob;
-    }
-    
-    /**
-     * Create an instance of the default profile tSNE options
-     * @return
-     */
-    public static OptionsBuilder makeDefaultTsneOptions() {
-    	return new OptionsBuilder()
-    			.withValue(TsneMethod.PERPLEXITY_KEY, 5)
-    			.withValue(TsneMethod.MAX_ITERATIONS_KEY, 1000)
-    			.withValue(TsneMethod.PROFILE_TYPE_KEY, ProfileType.ANGLE.toString());
-    }
+		HashOptions nop = OptionsFactory.makeNucleusDetectionOptions(testFolder).withValue(HashOptions.MIN_CIRC, 0.6)
+				.withValue(HashOptions.MAX_CIRC, 0.9).build();
+
+		op.setDetectionOptions(CellularComponent.NUCLEUS, nop);
+		op.setRuleSetCollection(RuleSetCollection.roundRuleSetCollection());
+		return op;
+	}
+
+	/**
+	 * Create an instance of the default clustering options using
+	 * {@link HashOptions#DEFAULT_CLUSTER_METHOD}
+	 * 
+	 * @return
+	 */
+	public static OptionsBuilder makeDefaultClusteringOptions() {
+		OptionsBuilder ob = new OptionsBuilder()
+				.withValue(HashOptions.CLUSTER_METHOD_KEY, HashOptions.DEFAULT_CLUSTER_METHOD.name())
+				.withValue(HashOptions.CLUSTER_HIERARCHICAL_METHOD_KEY, HashOptions.DEFAULT_HIERARCHICAL_METHOD.name())
+
+				.withValue(HashOptions.CLUSTER_USE_SIMILARITY_MATRIX_KEY, HashOptions.DEFAULT_USE_SIMILARITY_MATRIX)
+				.withValue(HashOptions.CLUSTER_INCLUDE_MESH_KEY, HashOptions.DEFAULT_INCLUDE_MESH)
+				.withValue(HashOptions.CLUSTER_USE_TSNE_KEY, HashOptions.DEFAULT_USE_TSNE)
+
+				.withValue(HashOptions.CLUSTER_EM_ITERATIONS_KEY, HashOptions.DEFAULT_EM_ITERATIONS)
+				.withValue(HashOptions.CLUSTER_MANUAL_CLUSTER_NUMBER_KEY, HashOptions.DEFAULT_MANUAL_CLUSTER_NUMBER);
+
+		for (Measurement stat : Measurement.getRoundNucleusStats())
+			ob = ob.withValue(stat.toString(), false);
+
+		ob = ob.withValue(HashOptions.DEFAULT_PROFILE_TYPE.toString(), HashOptions.DEFAULT_INCLUDE_PROFILE);
+		return ob;
+	}
+
+	/**
+	 * Create an instance of the default profile tSNE options
+	 * 
+	 * @return
+	 */
+	public static OptionsBuilder makeDefaultTsneOptions() {
+		return new OptionsBuilder().withValue(TsneMethod.PERPLEXITY_KEY, 5)
+				.withValue(TsneMethod.MAX_ITERATIONS_KEY, 1000)
+				.withValue(TsneMethod.PROFILE_TYPE_KEY, ProfileType.ANGLE.toString());
+	}
 
 }
