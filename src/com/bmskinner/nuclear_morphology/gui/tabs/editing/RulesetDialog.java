@@ -81,7 +81,7 @@ import com.bmskinner.nuclear_morphology.io.XMLReader;
 import com.bmskinner.nuclear_morphology.io.XMLReader.XMLReadingException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
-import com.bmskinner.nuclear_morphology.visualisation.charts.MorphologyChartFactory;
+import com.bmskinner.nuclear_morphology.visualisation.charts.AbstractChartFactory;
 import com.bmskinner.nuclear_morphology.visualisation.charts.ProfileChartFactory;
 import com.bmskinner.nuclear_morphology.visualisation.charts.panels.ExportableChartPanel;
 import com.bmskinner.nuclear_morphology.visualisation.options.ChartOptions;
@@ -505,14 +505,13 @@ public class RulesetDialog extends LoadingIconDialog implements TreeSelectionLis
 		LOGGER.finest("Creating chart for " + t);
 		JFreeChart chart = ProfileChartFactory.createEmptyChart(ProfileType.ANGLE);
 		ChartOptions options = new DefaultChartOptions((IAnalysisDataset) null);
-		MorphologyChartFactory chf = new MorphologyChartFactory(options);
 		IProfile p = dataset.getCollection().getProfileCollection().getProfile(ProfileType.ANGLE,
 				Landmark.REFERENCE_POINT, Stats.MEDIAN);
 
 		BooleanProfile limits = ProfileIndexFinder.getMatchingProfile(dataset.getCollection(),
 				getRulesetsForTag(t, collection));
 
-		chart = chf.createBooleanProfileChart(p, limits);
+		chart = new ProfileChartFactory(options).createBooleanProfileChart(p, limits);
 		return chart;
 	}
 
@@ -550,7 +549,7 @@ public class RulesetDialog extends LoadingIconDialog implements TreeSelectionLis
 
 			try {
 				ChartOptions options = new DefaultChartOptions((IAnalysisDataset) null);
-				MorphologyChartFactory chf = new MorphologyChartFactory(options);
+				ProfileChartFactory chf = new ProfileChartFactory(options);
 
 				if (rule != null) {
 					IProfile p = dataset.getCollection().getProfileCollection().getProfile(ruleSet.getType(),
@@ -570,7 +569,7 @@ public class RulesetDialog extends LoadingIconDialog implements TreeSelectionLis
 
 			} catch (Exception e) {
 				LOGGER.log(Loggable.STACK, "Error creating profile chart: " + e.getMessage(), e);
-				return MorphologyChartFactory.createErrorChart();
+				return AbstractChartFactory.createErrorChart();
 			}
 		}
 
@@ -592,14 +591,14 @@ public class RulesetDialog extends LoadingIconDialog implements TreeSelectionLis
 	private JFreeChart createChartForSelectedTableRow() {
 		int row = borderTagTable.getSelectedRow();
 		if (row < 0)
-			return MorphologyChartFactory.createEmptyChart();
+			return AbstractChartFactory.createEmptyChart();
 		Landmark t = (Landmark) borderTagTable.getValueAt(row, 0);
 		String collection = (String) borderTagTable.getValueAt(row, 1);
 		try {
 			return createChart(t, collection);
 		} catch (MissingLandmarkException | MissingProfileException | ProfileException e) {
 			LOGGER.log(Loggable.STACK, "Unable to make chart: " + e.getMessage(), e);
-			return MorphologyChartFactory.createErrorChart();
+			return AbstractChartFactory.createErrorChart();
 		}
 	}
 

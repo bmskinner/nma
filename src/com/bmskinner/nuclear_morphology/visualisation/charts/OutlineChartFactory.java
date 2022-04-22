@@ -22,7 +22,6 @@ import java.awt.Paint;
 import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Path2D;
-import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -30,20 +29,14 @@ import java.util.UUID;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
-import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.annotations.XYAnnotation;
 import org.jfree.chart.annotations.XYShapeAnnotation;
 import org.jfree.chart.annotations.XYTextAnnotation;
-import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
-import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.chart.ui.Layer;
-import org.jfree.data.xy.XYDataset;
 
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
-import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.cells.DefaultCell;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
@@ -70,7 +63,6 @@ import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
 import com.bmskinner.nuclear_morphology.gui.RotationMode;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
-import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.visualisation.ChartComponents;
 import com.bmskinner.nuclear_morphology.visualisation.datasets.ChartDatasetCreationException;
@@ -78,10 +70,8 @@ import com.bmskinner.nuclear_morphology.visualisation.datasets.ComponentOutlineD
 import com.bmskinner.nuclear_morphology.visualisation.datasets.NuclearSignalXYDataset;
 import com.bmskinner.nuclear_morphology.visualisation.datasets.NucleusDatasetCreator;
 import com.bmskinner.nuclear_morphology.visualisation.datasets.NucleusMeshXYDataset;
-import com.bmskinner.nuclear_morphology.visualisation.image.ImageConverter;
 import com.bmskinner.nuclear_morphology.visualisation.options.ChartOptions;
 
-import ij.process.ColorProcessor;
 import ij.process.ImageProcessor;
 
 /**
@@ -433,171 +423,6 @@ public class OutlineChartFactory extends AbstractChartFactory {
 
 		applyDefaultAxisOptions(chart);
 		return chart;
-	}
-
-	/**
-	 * Remove the XYShapeAnnotations from this image This will leave all other
-	 * annotation types.
-	 */
-	private static void clearShapeAnnotations(XYPlot plot) {
-		for (Object a : plot.getAnnotations()) {
-			if (a.getClass() == XYShapeAnnotation.class) {
-				plot.removeAnnotation((XYAnnotation) a);
-			}
-		}
-	}
-
-	/**
-	 * Create a chart with an image drawn as an annotation in the background layer.
-	 * 
-	 * @param ip      the image
-	 * @param plot    the plot to draw on
-	 * @param alpha   the opacity (0-255)
-	 * @param xOffset a position to move the image 0,0 to
-	 * @param yOffset a position to move the image 0,0 to
-	 * @return
-	 */
-	protected void drawImageAsAnnotation(ImageProcessor ip, XYPlot plot, int alpha, int xOffset, int yOffset,
-			boolean showBounds) {
-		plot.setBackgroundPaint(Color.WHITE);
-		plot.getRangeAxis().setInverted(false);
-
-		// Make a dataset to allow the autoscale to work even if no other datasets are
-		// present
-		// Hide the dataset from visibility
-		XYDataset bounds = new NucleusDatasetCreator(options).createAnnotationRectangleDataset(ip.getWidth(),
-				ip.getHeight());
-		plot.setDataset(0, bounds);
-		XYItemRenderer rend = plot.getRenderer(0);
-		rend.setDefaultSeriesVisible(false);
-
-		plot.getDomainAxis().setRange(0, ip.getWidth());
-		plot.getRangeAxis().setRange(0, ip.getHeight());
-
-		for (int x = 0; x < ip.getWidth(); x++) {
-			for (int y = 0; y < ip.getHeight(); y++) {
-
-				int pixel = ip.get(x, y);
-				Color col = null;
-
-				if (ip instanceof ColorProcessor) {
-					if (pixel < 16777215) {
-						col = new Color(pixel);
-						col = ColourSelecter.getTransparentColour(col, true, alpha);
-					}
-
-				} else {
-					if (pixel < 255) // Ignore anything that is not signal - the background is already white
-						col = new Color(pixel, pixel, pixel, alpha);
-				}
-
-				if (col == null && showBounds) // Draw red pixels at bounds
-					col = new Color(255, 0, 0, alpha);
-
-				if (col != null) {
-					// Ensure the 'pixels' overlap to avoid lines of background
-					// colour seeping through
-					Rectangle2D r = new Rectangle2D.Double(x + xOffset - 0.1, y + yOffset - 0.1, 1.2, 1.2);
-					XYShapeAnnotation a = new XYShapeAnnotation(r, null, null, col);
-
-					rend.addAnnotation(a, Layer.BACKGROUND);
-				}
-			}
-		}
-	}
-
-	/**
-	 * Create a chart with an image drawn as an annotation in the background layer.
-	 * The image pixels are fully opaque
-	 * 
-	 * @param ip
-	 * @param alpha
-	 * @return
-	 */
-	protected void drawImageAsAnnotation(ImageProcessor ip, XYPlot plot, int alpha) {
-		drawImageAsAnnotation(ip, plot, alpha, 0, 0, false);
-	}
-
-	/**
-	 * Create a chart with an image drawn as an annotation in the background layer.
-	 * The image pixels are fully opaque
-	 * 
-	 * @param ip
-	 * @return
-	 */
-	protected JFreeChart drawImageAsAnnotation(ImageProcessor ip) {
-		return drawImageAsAnnotation(ip, 255);
-	}
-
-	/**
-	 * Create a chart with an image drawn as an annotation in the background layer.
-	 * The image pixels have the given alpha transparency value
-	 * 
-	 * @param ip
-	 * @param alpha
-	 * @return
-	 */
-	protected JFreeChart drawImageAsAnnotation(ImageProcessor ip, int alpha) {
-
-		JFreeChart chart = ChartFactory.createXYLineChart(null, null, null, null, PlotOrientation.VERTICAL, true, true,
-				false);
-
-		XYPlot plot = chart.getXYPlot();
-		drawImageAsAnnotation(ip, plot, alpha);
-		return chart;
-	}
-
-	/**
-	 * Draw the greyscale image from the given channel on the plot
-	 * 
-	 * @param plot      the plot to annotate
-	 * @param cell      the cell to annotate
-	 * @param component the component in the cell to annotate
-	 * @param isRGB     if the annotation should be RGB or greyscale
-	 */
-	protected static void drawImageAsAnnotation(@NonNull XYPlot plot, @NonNull ICell cell,
-			@NonNull CellularComponent component, boolean isRGB, int w, int h) {
-		try {
-
-			ImageConverter ic = new ImageConverter(ImageImporter.importFullImageTo8bit(component)).invert();
-			ImageProcessor openProcessor = ic.convertToRGBGreyscale().toProcessor();
-			// .resizeKeepingAspect(w, h)
-
-			XYItemRenderer rend = plot.getRenderer(0); // index zero should be the
-														// nucleus outline dataset
-
-			int xBase = component.getXBase();
-			int yBase = component.getYBase();
-
-			int padding = 10; // a border of pixels beyond the cell boundary
-			int wideW = (int) component.getWidth() + (padding * 2);
-			int wideH = (int) component.getHeight() + (padding * 2);
-			int wideX = xBase - padding;
-			int wideY = yBase - padding;
-
-			wideX = wideX < 0 ? 0 : wideX;
-			wideY = wideY < 0 ? 0 : wideY;
-
-			openProcessor.setRoi(wideX, wideY, wideW, wideH);
-			openProcessor = openProcessor.crop();
-
-			for (int x = 0; x < openProcessor.getWidth(); x++) {
-				for (int y = 0; y < openProcessor.getHeight(); y++) {
-
-					int pixel = openProcessor.get(x, y);
-					Color col = new Color(pixel);
-					// Ensure the 'pixels' overlap to avoid lines of background
-					// colour seeping through
-					Rectangle2D r = new Rectangle2D.Double(xBase + x - padding - 0.6, yBase + y - padding - 0.6, 1.2,
-							1.2);
-					XYShapeAnnotation a = new XYShapeAnnotation(r, null, null, col);
-
-					rend.addAnnotation(a, Layer.BACKGROUND);
-				}
-			}
-		} catch (UnloadableImageException e) {
-			// No action needed, no image drawn
-		}
 	}
 
 	/**

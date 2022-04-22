@@ -24,12 +24,17 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.annotations.XYTextAnnotation;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.plot.ValueMarker;
 import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.xy.DefaultXYItemRenderer;
 import org.jfree.chart.renderer.xy.XYDifferenceRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.general.DatasetUtils;
+import org.jfree.data.xy.XYDataset;
 
 import com.bmskinner.nuclear_morphology.components.MissingComponentException;
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
@@ -39,6 +44,8 @@ import com.bmskinner.nuclear_morphology.components.cells.Nucleus;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.measure.MeasurementDimension;
+import com.bmskinner.nuclear_morphology.components.profiles.BooleanProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
@@ -52,6 +59,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 import com.bmskinner.nuclear_morphology.visualisation.ChartComponents;
 import com.bmskinner.nuclear_morphology.visualisation.datasets.ChartDatasetCreationException;
+import com.bmskinner.nuclear_morphology.visualisation.datasets.NucleusDatasetCreator;
 import com.bmskinner.nuclear_morphology.visualisation.datasets.ProfileDatasetCreator;
 import com.bmskinner.nuclear_morphology.visualisation.datasets.ProfileDatasetCreator.ProfileChartDataset;
 import com.bmskinner.nuclear_morphology.visualisation.options.ChartOptions;
@@ -136,6 +144,48 @@ public class ProfileChartFactory extends AbstractChartFactory {
 		return createEmptyChart(options.getType());
 	}
 
+	/**
+	 * Create a chart showing the effect of a boolean profile on a profile
+	 * 
+	 * @param p
+	 * @param limits
+	 * @return
+	 */
+	public JFreeChart createBooleanProfileChart(IProfile p, BooleanProfile limits) {
+
+		XYDataset ds;
+		try {
+			ds = new NucleusDatasetCreator(options).createBooleanProfileDataset(p, limits);
+		} catch (ChartDatasetCreationException e) {
+			return createErrorChart();
+		}
+
+		JFreeChart chart = ChartFactory.createXYLineChart(null, POSITION_AXIS_LBL, "Angle", ds,
+				PlotOrientation.VERTICAL, true, true, false);
+
+		XYPlot plot = chart.getXYPlot();
+
+		plot.setBackgroundPaint(Color.WHITE);
+
+		plot.addRangeMarker(new ValueMarker(180, Color.BLACK, ChartComponents.MARKER_STROKE));
+
+		DefaultXYItemRenderer rend = new DefaultXYItemRenderer();
+		rend.setDefaultShapesVisible(true);
+		rend.setDefaultShape(ChartComponents.DEFAULT_POINT_SHAPE);
+		rend.setSeriesPaint(0, Color.BLACK);
+		rend.setSeriesVisibleInLegend(0, false);
+		rend.setSeriesPaint(1, Color.LIGHT_GRAY);
+		rend.setSeriesVisibleInLegend(1, false);
+		rend.setSeriesLinesVisible(0, false);
+		rend.setSeriesShape(0, ChartComponents.DEFAULT_POINT_SHAPE);
+		rend.setSeriesLinesVisible(1, false);
+		rend.setSeriesShape(1, ChartComponents.DEFAULT_POINT_SHAPE);
+
+		plot.setRenderer(rend);
+
+		return chart;
+	}
+
 	private JFreeChart makeIndividualNucleusProfileChart() {
 		Nucleus n = options.getCell().getPrimaryNucleus();
 		ProfileChartDataset ds;
@@ -178,11 +228,9 @@ public class ProfileChartFactory extends AbstractChartFactory {
 		ICellCollection collection = dataset.getCollection();
 
 		try {
-//			if (options.getType().equals(ProfileType.FRANKEN)) {
-//				ds = new ProfileDatasetCreator(options).createProfileDataset(); //TODO: replace if needed
-//			} else {
+
 			ds = new ProfileDatasetCreator(options).createProfileDataset();
-//			}
+
 		} catch (ChartDatasetCreationException e) {
 			LOGGER.log(Loggable.STACK, "Error making profile dataset", e);
 			return createErrorChart();

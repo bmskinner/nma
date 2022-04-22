@@ -37,7 +37,6 @@ import com.bmskinner.nuclear_morphology.gui.events.revamp.ProfilesUpdatedListene
 import com.bmskinner.nuclear_morphology.gui.events.revamp.SwatchUpdatedListener;
 import com.bmskinner.nuclear_morphology.gui.tabs.ChartDetailPanel;
 import com.bmskinner.nuclear_morphology.visualisation.charts.AbstractChartFactory;
-import com.bmskinner.nuclear_morphology.visualisation.charts.MorphologyChartFactory;
 import com.bmskinner.nuclear_morphology.visualisation.charts.panels.ExportableChartPanel;
 
 @SuppressWarnings("serial")
@@ -60,7 +59,7 @@ public abstract class AbstractProfileDisplayPanel extends ChartDetailPanel
 		this.type = type;
 
 		this.setLayout(new BorderLayout());
-		JFreeChart rawChart = MorphologyChartFactory.createEmptyChart();
+		JFreeChart rawChart = AbstractChartFactory.createEmptyChart();
 		chartPanel = makeProfileChartPanel(rawChart);
 
 		chartPanel.setMinimumDrawWidth(0);

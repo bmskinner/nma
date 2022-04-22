@@ -35,7 +35,6 @@ import com.bmskinner.nuclear_morphology.gui.events.revamp.ScaleUpdatedListener;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.SwatchUpdatedListener;
 import com.bmskinner.nuclear_morphology.gui.tabs.BoxplotsTabPanel;
 import com.bmskinner.nuclear_morphology.visualisation.charts.AbstractChartFactory;
-import com.bmskinner.nuclear_morphology.visualisation.charts.MorphologyChartFactory;
 import com.bmskinner.nuclear_morphology.visualisation.charts.panels.ExportableChartPanel;
 import com.bmskinner.nuclear_morphology.visualisation.charts.panels.ViolinChartPanel;
 import com.bmskinner.nuclear_morphology.visualisation.options.ChartOptions;
@@ -122,7 +121,7 @@ public class CellsBoxplotsPanel extends BoxplotsTabPanel
 
 		for (Measurement stat : Measurement.getCellStats()) {
 			ExportableChartPanel panel = chartPanels.get(stat.toString());
-			panel.setChart(MorphologyChartFactory.createLoadingChart());
+			panel.setChart(AbstractChartFactory.createLoadingChart());
 
 		}
 	}

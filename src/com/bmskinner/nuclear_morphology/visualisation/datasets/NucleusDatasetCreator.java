@@ -17,30 +17,24 @@
 package com.bmskinner.nuclear_morphology.visualisation.datasets;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNull;
-import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
 import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.XYDataset;
 
-import com.bmskinner.nuclear_morphology.components.MissingComponentException;
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.UnavailableBorderPointException;
-import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.cells.Nucleus;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
-import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.mesh.Mesh;
 import com.bmskinner.nuclear_morphology.components.mesh.MeshEdge;
@@ -56,7 +50,6 @@ import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
-import com.bmskinner.nuclear_morphology.stats.Stats;
 import com.bmskinner.nuclear_morphology.visualisation.options.ChartOptions;
 
 import weka.estimators.KernelEstimator;
@@ -89,191 +82,6 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 		ds.addSeries("Bounds", data, 0);
 		return ds;
 	}
-
-	/**
-	 * Get a boxplot dataset for the given statistic for each collection
-	 * 
-	 * @return
-	 * @throws ChartDatasetCreationException
-	 */
-	public BoxAndWhiskerCategoryDataset createBoxplotDataset() throws ChartDatasetCreationException {
-		List<IAnalysisDataset> datasets = options.getDatasets();
-		Measurement stat = options.getMeasurement();
-		MeasurementScale scale = options.getScale();
-		ExportableBoxAndWhiskerCategoryDataset ds = new ExportableBoxAndWhiskerCategoryDataset();
-
-		for (int i = 0; i < datasets.size(); i++) {
-			ICellCollection c = datasets.get(i).getCollection();
-
-			double[] stats = c.getRawValues(stat, CellularComponent.NUCLEUS, scale);
-			List<Double> list = Arrays.stream(stats).boxed().collect(Collectors.toList());
-			ds.add(list, c.getName() + "_" + i, stat.toString());
-		}
-
-		return ds;
-	}
-
-	/**
-	 * Create a box and whisker dataset for the desired segment statistic
-	 * 
-	 * @return
-	 * @throws ChartDatasetCreationException
-	 */
-	public BoxAndWhiskerCategoryDataset createSegmentStatDataset() throws ChartDatasetCreationException {
-
-		Measurement stat = options.getMeasurement();
-
-		if (stat.equals(Measurement.LENGTH)) {
-			return createSegmentLengthDataset(options.getDatasets(), options.getSegPosition(), options.getScale());
-		}
-
-		return null;
-
-	}
-
-	/**
-	 * Get the lengths of the given segment in the collections
-	 * 
-	 * @return
-	 * @throws ChartDatasetCreationException
-	 */
-	public BoxAndWhiskerCategoryDataset createSegmentLengthDataset(List<IAnalysisDataset> collections, int segPosition,
-			MeasurementScale scale) throws ChartDatasetCreationException {
-
-		ExportableBoxAndWhiskerCategoryDataset dataset = new ExportableBoxAndWhiskerCategoryDataset();
-
-		for (int i = 0; i < collections.size(); i++) {
-
-			ICellCollection collection = collections.get(i).getCollection();
-
-			IProfileSegment medianSeg;
-			try {
-				medianSeg = collection.getProfileCollection()
-						.getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN).getSegments()
-						.get(options.getSegPosition());
-				// .getSegmentAt(segPosition);
-			} catch (MissingLandmarkException | ProfileException | MissingProfileException e) {
-				LOGGER.log(Loggable.STACK, "Error getting profile from tag", e);
-				throw new ChartDatasetCreationException(UNABLE_TO_GET_MEDIAN_PROFILE_ERROR, e);
-			}
-
-			List<Double> list = new ArrayList<>(0);
-
-			for (Nucleus n : collection.getNuclei()) {
-				double length = 0;
-
-				try {
-
-					IProfileSegment seg = n.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT)
-							.getSegment(medianSeg.getID());
-
-					if (seg != null) {
-						int indexLength = seg.length();
-						double proportionPerimeter = (double) indexLength / (double) seg.getProfileLength();
-						length = n.getMeasurement(Measurement.PERIMETER, scale) * proportionPerimeter;
-
-					}
-
-				} catch (ProfileException | MissingComponentException e) {
-					LOGGER.warning("Cannot get segment length for " + n.getNameAndNumber());
-					LOGGER.log(Loggable.STACK, "Error getting profile", e);
-
-				}
-
-				list.add(length);
-			}
-
-			dataset.add(list, IProfileSegment.SEGMENT_PREFIX + segPosition + "_" + i,
-					IProfileSegment.SEGMENT_PREFIX + segPosition);
-		}
-		return dataset;
-	}
-
-	/**
-	 * Get the variability of each segment in terms of length difference to the
-	 * median profile segment
-	 * 
-	 * @param datasets
-	 * @return
-	 * @throws Exception
-	 */
-	public BoxAndWhiskerCategoryDataset createSegmentVariabillityDataset(@NonNull List<IAnalysisDataset> datasets)
-			throws ChartDatasetCreationException {
-
-		if (datasets == null || datasets.isEmpty()) {
-			return null;
-		}
-		ExportableBoxAndWhiskerCategoryDataset dataset = new ExportableBoxAndWhiskerCategoryDataset();
-
-		for (int i = 0; i < datasets.size(); i++) {
-
-			ICellCollection collection = datasets.get(i).getCollection();
-
-			List<IProfileSegment> segments;
-			try {
-				segments = collection.getProfileCollection()
-						.getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN)
-						.getOrderedSegments();
-
-				for (IProfileSegment medianSeg : segments) {
-
-					int medianSegmentLength = medianSeg.length();
-
-					List<Integer> list = new ArrayList<>(0);
-
-					for (Nucleus n : collection.getNuclei()) {
-						IProfileSegment seg = n.getProfile(ProfileType.ANGLE).getSegment(medianSeg.getName());
-
-						int differenceToMedian = 0;
-						// if seg is null, catch before we throw an error
-						if (seg != null) {
-							differenceToMedian = medianSegmentLength - seg.length();
-						}
-
-						list.add(differenceToMedian);
-					}
-
-					dataset.add(list, medianSeg.getName(), collection.getName());
-				}
-
-			} catch (ProfileException | MissingComponentException e) {
-				LOGGER.log(Loggable.STACK, "Error getting profile from tag", e);
-				throw new ChartDatasetCreationException(UNABLE_TO_GET_MEDIAN_PROFILE_ERROR, e);
-			}
-		}
-		return dataset;
-	}
-
-	/**
-	 * Get the outline of the consensus nucleus. No segmentation, no IQR
-	 * 
-	 * @param dataset
-	 * @return
-	 */
-//	public XYDataset createBareNucleusOutline(@NonNull CellularComponent n) throws ChartDatasetCreationException {
-//		ComponentOutlineDataset ds = new ComponentOutlineDataset();
-
-//		double[] xpoints = new double[n.getBorderLength() + 1];
-//		double[] ypoints = new double[n.getBorderLength() + 1];
-//
-//		try {
-//			for (int i = 0; i < n.getBorderLength(); i++) {
-//				IPoint p = n.getBorderPoint(i);
-//				xpoints[i] = p.getX();
-//				ypoints[i] = p.getY();
-//			}
-//			// complete the line
-//			xpoints[n.getBorderLength()] = xpoints[0];
-//			ypoints[n.getBorderLength()] = ypoints[0];
-//		} catch (UnavailableBorderPointException e) {
-//			throw new ChartDatasetCreationException(UNABLE_TO_GET_BORDER_POINT_ERROR, e);
-//		} // get the border points in the segment
-//
-//		double[][] data = { xpoints, ypoints };
-//		ds.addSeries("Outline", data);
-//		ds.setComponent(0, n);
-//		return ds;
-//	}
 
 	/**
 	 * Get the outline of the consensus nucleus. No segmentation, no IQR

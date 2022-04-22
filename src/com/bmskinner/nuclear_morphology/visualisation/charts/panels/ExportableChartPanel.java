@@ -52,7 +52,6 @@ import com.bmskinner.nuclear_morphology.gui.components.FileSelector;
 import com.bmskinner.nuclear_morphology.gui.events.ChartSetEventListener;
 import com.bmskinner.nuclear_morphology.io.Io;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
-import com.bmskinner.nuclear_morphology.visualisation.charts.panels.CoupledProfileOutlineChartPanel.BorderPointEventListener;
 import com.bmskinner.nuclear_morphology.visualisation.datasets.ExportableBoxAndWhiskerCategoryDataset;
 import com.bmskinner.nuclear_morphology.visualisation.datasets.FloatXYDataset;
 import com.bmskinner.nuclear_morphology.visualisation.datasets.ShellResultDataset;
@@ -601,14 +600,6 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 	}
 
 	public synchronized void removeChartSetEventListener(ChartSetEventListener l) {
-		listeners.remove(l);
-	}
-
-	public void addBorderPointEventListener(BorderPointEventListener l) {
-		listeners.add(l);
-	}
-
-	public synchronized void removeBorderPointEventListener(BorderPointEventListener l) {
 		listeners.remove(l);
 	}
 

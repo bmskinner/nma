@@ -35,11 +35,9 @@ import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellAnalysisMet
 import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellDetector;
 import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellDetector.Shell;
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
-import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
-import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult;
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult.Aggregation;
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult.Normalisation;
@@ -54,54 +52,6 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
 
 	public NuclearSignalDatasetCreator(@NonNull final ChartOptions o) {
 		super(o);
-	}
-
-	/**
-	 * Create a boxplot dataset for signal statistics
-	 * 
-	 * @return a boxplot dataset
-	 * @throws Exception
-	 */
-	public NuclearSignalBoxAndWhiskerDataset createSignalStatisticBoxplotDataset() {
-		return createMultiDatasetSignalStatisticBoxplotDataset();
-	}
-
-	/**
-	 * Create a boxplot dataset for signal statistics for a single analysis dataset
-	 * 
-	 * @return a boxplot dataset
-	 * @throws ChartDatasetCreationException
-	 */
-	private NuclearSignalBoxAndWhiskerDataset createMultiDatasetSignalStatisticBoxplotDataset() {
-
-		NuclearSignalBoxAndWhiskerDataset result = new NuclearSignalBoxAndWhiskerDataset();
-		Measurement stat = options.getMeasurement();
-
-		for (IAnalysisDataset d : options.getDatasets()) {
-
-			ICellCollection collection = d.getCollection();
-
-			for (UUID signalGroup : collection.getSignalManager().getSignalGroupIDs()) {
-
-				double[] values = collection.getSignalManager().getSignalStatistics(stat, options.getScale(),
-						signalGroup);
-				/*
-				 * For charting, use offset angles, otherwise the boxplots will fail on wrapped
-				 * signals
-				 */
-				if (stat.equals(Measurement.ANGLE)) {
-					values = collection.getSignalManager().getOffsetSignalAngles(signalGroup);
-				}
-
-				List<Double> list = new ArrayList<>();
-				for (double value : values) {
-					list.add(value);
-				}
-
-				result.add(signalGroup, list, CellularComponent.NUCLEAR_SIGNAL, collection.getName());
-			}
-		}
-		return result;
 	}
 
 	/**

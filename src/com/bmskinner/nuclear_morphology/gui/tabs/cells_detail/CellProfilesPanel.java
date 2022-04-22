@@ -43,7 +43,6 @@ import com.bmskinner.nuclear_morphology.gui.events.revamp.ProfilesUpdatedListene
 import com.bmskinner.nuclear_morphology.gui.events.revamp.SwatchUpdatedListener;
 import com.bmskinner.nuclear_morphology.gui.tabs.ChartDetailPanel;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
-import com.bmskinner.nuclear_morphology.visualisation.charts.MorphologyChartFactory;
 import com.bmskinner.nuclear_morphology.visualisation.charts.ProfileChartFactory;
 import com.bmskinner.nuclear_morphology.visualisation.charts.panels.ExportableChartPanel;
 import com.bmskinner.nuclear_morphology.visualisation.options.ChartOptions;
@@ -145,7 +144,7 @@ public class CellProfilesPanel extends ChartDetailPanel
 			ProfileType type = profileOptions.getSelected();
 
 			if (!model.hasCell()) {
-				chartPanel.setChart(MorphologyChartFactory.createEmptyChart());
+				chartPanel.setChart(ProfileChartFactory.createEmptyChart());
 				buttonsPanel.setEnabled(false);
 
 			} else {
@@ -163,7 +162,7 @@ public class CellProfilesPanel extends ChartDetailPanel
 
 		} catch (Exception e) {
 			LOGGER.log(Loggable.STACK, "Error updating cell panel", e);
-			chartPanel.setChart(MorphologyChartFactory.createErrorChart());
+			chartPanel.setChart(ProfileChartFactory.createErrorChart());
 			buttonsPanel.setEnabled(false);
 		}
 
@@ -172,7 +171,7 @@ public class CellProfilesPanel extends ChartDetailPanel
 	@Override
 	public void setLoading() {
 		super.setLoading();
-		chartPanel.setChart(MorphologyChartFactory.createLoadingChart());
+		chartPanel.setChart(ProfileChartFactory.createLoadingChart());
 	}
 
 	@Override

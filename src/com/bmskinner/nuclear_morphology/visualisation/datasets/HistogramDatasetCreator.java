@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package com.bmskinner.nuclear_morphology.visualisation.datasets.charts;
+package com.bmskinner.nuclear_morphology.visualisation.datasets;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,9 +29,6 @@ import org.jfree.data.xy.XYDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
-import com.bmskinner.nuclear_morphology.visualisation.datasets.AbstractDatasetCreator;
-import com.bmskinner.nuclear_morphology.visualisation.datasets.ChartDatasetCreationException;
-import com.bmskinner.nuclear_morphology.visualisation.datasets.NucleusDatasetCreator;
 import com.bmskinner.nuclear_morphology.visualisation.options.ChartOptions;
 
 import weka.estimators.KernelEstimator;
