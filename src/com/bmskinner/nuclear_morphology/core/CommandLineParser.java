@@ -133,7 +133,6 @@ public class CommandLineParser {
 	 * Load the program user interface
 	 */
 	private void runWithGUI() {
-		LOGGER.config("Launching GUI");
 		try {
 			Runnable r = new RunWithGui();
 			EventQueue.invokeLater(r);
@@ -157,7 +156,7 @@ public class CommandLineParser {
 			try {
 				String lAndF = UIManager.getSystemLookAndFeelClassName();
 				UIManager.setLookAndFeel(lAndF);
-				LOGGER.config("Set look and feel to " + UIManager.getLookAndFeel().getName());
+				LOGGER.config("Set UI look and feel to " + UIManager.getLookAndFeel().getName());
 
 			} catch (Exception e) {
 				LOGGER.log(Level.SEVERE, "Unable to set look and feel", e);
