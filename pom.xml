@@ -206,27 +206,6 @@
 					</execution>
 
 					<!-- Copy Bitbucket upload script from templates into scripts -->
-					<execution>
-						<id>bitbucket-upload</id>
-						<phase>process-resources</phase>
-						<goals>
-							<goal>copy-resources</goal>
-						</goals>
-						<configuration>
-							<outputDirectory>${project.scripts.directory}</outputDirectory>
-							<resources>
-								<resource>
-									<directory>${project.template.directory}</directory>
-									<includes>
-										<include>UploadJar.bat</include>
-									</includes>
-									<filtering>true</filtering>
-								</resource>
-							</resources>
-							<encoding>UTF-8</encoding>
-						</configuration>
-					</execution>
-
 					<!-- Copy jpackage script from templates into scripts -->
 					<execution>
 						<id>jpackage-script</id>
@@ -241,6 +220,9 @@
 									<directory>${project.template.directory}</directory>
 									<includes>
 										<include>packageAppImage.bat</include>
+										<include>packageAppImage.sh</include>
+										<include>packageDMG.sh</include>
+										<include>UploadJar.bat</include>
 									</includes>
 									<filtering>true</filtering>
 								</resource>
