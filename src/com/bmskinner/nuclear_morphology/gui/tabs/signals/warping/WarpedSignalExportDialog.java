@@ -2,9 +2,12 @@ package com.bmskinner.nuclear_morphology.gui.tabs.signals.warping;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.FlowLayout;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import javax.swing.BorderFactory;
@@ -15,35 +18,41 @@ import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.SwingConstants;
 
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.cells.Nucleus;
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.generic.FloatPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.signals.IWarpedSignal;
+import com.bmskinner.nuclear_morphology.core.DatasetListManager;
 import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nuclear_morphology.gui.DefaultInputSupplier;
 import com.bmskinner.nuclear_morphology.gui.dialogs.SettingsDialog;
 import com.bmskinner.nuclear_morphology.io.Io;
+import com.bmskinner.nuclear_morphology.visualisation.image.ImageAnnotator;
 import com.bmskinner.nuclear_morphology.visualisation.image.ImageConverter;
 import com.bmskinner.nuclear_morphology.visualisation.image.ImageFilterer;
 
 import ij.IJ;
 import ij.ImagePlus;
 import ij.plugin.RGBStackMerge;
+import ij.process.ByteProcessor;
+import ij.process.ColorProcessor;
 import ij.process.ImageProcessor;
 
 public class WarpedSignalExportDialog extends SettingsDialog {
 
 	private static final Logger LOGGER = Logger.getLogger(WarpedSignalExportDialog.class.getName());
 
-	private final List<IWarpedSignal> signals = new ArrayList<>();
-
 	private static final String TITLE = "Export warped image";
 
-	private static final String[] COLOUR_PAIRS = { "Red-Green", "Blue-Yellow", "Green-Magenta" };
+	private static final String[] COLOUR_PAIRS = { "Red-Green", "Blue-Yellow", "Green-Magenta", "Existing" };
 
 	private static final boolean IS_MODAL = true;
+
+	private final List<IWarpedSignal> signals = new ArrayList<>();
 
 	/** Show pseudocolours of warped images */
 	private JCheckBox isIncludeConsensus;
@@ -62,9 +71,17 @@ public class WarpedSignalExportDialog extends SettingsDialog {
 
 		this.signals.addAll(signals);
 
-		JPanel panel = new JPanel();
+		JPanel infoPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+		infoPanel.add(new JLabel("<html>Select a colour pair for signals; the preset options will<br>"
+				+ " remain distinct even if the current signal pseudocolours are similar."
+				+ "<br>Use your own colours with the 'Existing' option.</html>", SwingConstants.CENTER));
 
-		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+		JPanel btnpanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+
+		JPanel headerPanel = new JPanel();
+		headerPanel.setLayout(new BoxLayout(headerPanel, BoxLayout.Y_AXIS));
+		headerPanel.add(infoPanel);
+		headerPanel.add(btnpanel);
 
 		isIncludeConsensus = new JCheckBox("Include consensus");
 		isIncludeConsensus.setSelected(true);
@@ -78,18 +95,22 @@ public class WarpedSignalExportDialog extends SettingsDialog {
 		exportBtn = new JButton("Export");
 		exportBtn.addActionListener(e -> export());
 
-		panel.add(colourPairsBox);
-		panel.add(isIncludeConsensus);
-		panel.add(imgLbl);
-		panel.add(exportBtn);
+		btnpanel.add(colourPairsBox);
+		btnpanel.add(isIncludeConsensus);
+		btnpanel.add(exportBtn);
 
-		panel.setBorder(BorderFactory.createEmptyBorder());
+		btnpanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 
 		makeImage(true);
 
-		imgLbl.setIcon(new ImageIcon(warpedImage.getBufferedImage()));
+		JPanel imgPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+		imgPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 
-		add(panel, BorderLayout.CENTER);
+		imgLbl.setIcon(new ImageIcon(warpedImage.getBufferedImage()));
+		imgPanel.add(imgLbl);
+
+		add(headerPanel, BorderLayout.NORTH);
+		add(imgPanel, BorderLayout.CENTER);
 
 		this.setLocationRelativeTo(null);
 
@@ -104,10 +125,17 @@ public class WarpedSignalExportDialog extends SettingsDialog {
 	}
 
 	private void export() {
+
 		try {
 			boolean doSave = true;
 
-			File saveFile = new DefaultInputSupplier().requestFileSave(null, warpedImage.getTitle(),
+			Set<IAnalysisDataset> datasets = new HashSet<>();
+			for (IWarpedSignal s : signals)
+				datasets.add(DatasetListManager.getInstance().getDataset(s.sourceDatasetId()));
+
+			File defaultFolder = IAnalysisDataset.commonPathOfFiles(datasets);
+
+			File saveFile = new DefaultInputSupplier().requestFileSave(defaultFolder, warpedImage.getTitle(),
 					Io.TIFF_FILE_EXTENSION_NODOT);
 			if (saveFile.exists()) {
 				doSave = new DefaultInputSupplier().requestApproval("Overwrite existing file?", "Overwrite?");
@@ -129,47 +157,31 @@ public class WarpedSignalExportDialog extends SettingsDialog {
 	 * @throws RequestCancelledException
 	 */
 	private void makeImage(boolean includeConsensus) {
-		if (signals.size() == 2) {
-
-			int colourOption = colourPairsBox.getSelectedIndex();
-
-			if (colourOption == 3) {
-				// If they want to use their own colours...
-//				imp = createDualChannelDisplayImageForExport(includeConsensus);
+		int colourOption = colourPairsBox.getSelectedIndex();
+		// If they want to use their own colours...
+		if (colourOption == 3) {
+			if (signals.size() == 1) {
+				warpedImage = createSingleCustomImage(includeConsensus);
+			} else {
+				warpedImage = createDualCustomImage(includeConsensus);
 			}
 
-			int c1 = colourOption == 0 ? 0 : colourOption == 1 ? 2 : 1;
-
-			int c2 = colourOption == 0 ? 1 : colourOption == 1 ? 6 : 5;
-			warpedImage = createDualChannelImage(c1, c2, includeConsensus);
-
-		} else {
-			warpedImage = createSingleChannelImage(includeConsensus);
 		}
 
-	}
+		// Use the given preset
+		if (colourOption < 3) {
+			if (signals.size() == 1) {
 
-	/**
-	 * Add a consensus nucleus to the current display image
-	 * 
-	 * @return
-	 */
-	private ImagePlus createSingleChannelImage(boolean includeConsensus) {
-		IWarpedSignal s = signals.get(0);
-		ImageProcessor ip = s.toImage();
+				int c1 = colourOption == 0 ? 0 : colourOption == 1 ? 2 : 1;
+				warpedImage = createSinglePresetImage(c1, includeConsensus);
+			} else {
 
-		String imageName = s.sourceDatasetName() + "-" + s.sourceSignalGroupName() + "_on_" + s.targetName();
+				int c1 = colourOption == 0 ? 0 : colourOption == 1 ? 2 : 1;
+				int c2 = colourOption == 0 ? 1 : colourOption == 1 ? 6 : 5;
+				warpedImage = createDualPresetImage(c1, c2, includeConsensus);
+			}
 
-		// Add a border so we don't drop outline pixels at the edge
-		int buffer = 10;
-		ip = ImageConverter.expandCanvas(ip, buffer, Color.white);
-
-		List<Nucleus> targets = List.of(s.target());
-
-		if (includeConsensus)
-			return drawConsensusOnImage(ip, targets, Color.black, imageName);
-		ip.flipVertical();
-		return new ImagePlus(imageName, ip);
+		}
 	}
 
 	/**
@@ -199,7 +211,7 @@ public class WarpedSignalExportDialog extends SettingsDialog {
 	 * @param colour2 the index of the colour for image 2 in { R, G, B, W, C, M, Y }
 	 * @return
 	 */
-	private ImagePlus createDualChannelImage(int colour1, int colour2, boolean includeConsensus) {
+	private ImagePlus createDualPresetImage(int colour1, int colour2, boolean includeConsensus) {
 
 		IWarpedSignal s0 = signals.get(0);
 		IWarpedSignal s1 = signals.get(1);
@@ -235,32 +247,75 @@ public class WarpedSignalExportDialog extends SettingsDialog {
 		return new ImagePlus(imageName, ip3);
 	}
 
-//	/**
-//	 * Create a dual channel image for export with the consensus drawn atop, using
-//	 * the display image rather than recolouring to sensible values
-//	 * 
-//	 * @return
-//	 */
-//	private ImagePlus createDualChannelDisplayImageForExport(boolean includeConsensus) {
-//		ImageProcessor ip = model.getDisplayImage(displayOptions);
-//		int buffer = 10;
-//		ip = ImageConverter.expandCanvas(ip, buffer, Color.white);
-//		List<WarpedImageKey> keys = new ArrayList<>(model.getSelectedKeys());
-//
-//		WarpedImageKey key0 = keys.get(0);
-//		WarpedImageKey key1 = keys.get(1);
-//
-//		List<Nucleus> targets = keys.stream().map(k -> k.getTarget().duplicate()).distinct()
-//				.collect(Collectors.toList());
-//
-//		String imageName = key0.getTemplate().getName() + "_" + key0.getSignalGroupName() + "_"
-//				+ key1.getTemplate().getName() + "_" + key1.getSignalGroupName();
-//
-//		if (includeConsensus)
-//			return drawConsensusOnImage(ip, targets, Color.black, imageName);
-//		ip.flipVertical();
-//		return new ImagePlus(imageName, ip);
-//	}
+	/**
+	 * Add a consensus nucleus to the current display image
+	 * 
+	 * @return
+	 */
+	private ImagePlus createSinglePresetImage(int colour1, boolean includeConsensus) {
+		IWarpedSignal s = signals.get(0);
+		ByteProcessor ip = s.toImage().convertToByteProcessor();
+
+		ColorProcessor ip2 = new ColorProcessor(ip.getWidth(), ip.getHeight());
+		ip2.setChannel(colour1 + 1, ip);
+
+		String imageName = s.sourceDatasetName() + "-" + s.sourceSignalGroupName() + "_on_" + s.targetName();
+
+		// Add a border so we don't drop outline pixels at the edge
+		int buffer = 10;
+		ImageProcessor ip3 = ImageConverter.expandCanvas(ip2, buffer, Color.black);
+
+		List<Nucleus> targets = List.of(s.target());
+
+		if (includeConsensus)
+			return drawConsensusOnImage(ip3, targets, Color.white, imageName);
+		ip3.flipVertical();
+		return new ImagePlus(imageName, ip3);
+	}
+
+	/**
+	 * Add a consensus nucleus to the current display image
+	 * 
+	 * @return
+	 */
+	private ImagePlus createSingleCustomImage(boolean includeConsensus) {
+		IWarpedSignal s = signals.get(0);
+		ImageProcessor ip = ImageAnnotator.createMergedWarpedSignals(signals);
+		int buffer = 10;
+		ip = ImageConverter.expandCanvas(ip, buffer, Color.white);
+		List<Nucleus> targets = signals.stream().map(IWarpedSignal::target).distinct().toList();
+
+		String imageName = s.sourceDatasetName() + "-" + s.sourceSignalGroupName() + "_on_" + s.targetName();
+
+		if (includeConsensus)
+			return drawConsensusOnImage(ip, targets, Color.black, imageName);
+		ip.flipVertical();
+		return new ImagePlus(imageName, ip);
+	}
+
+	/**
+	 * Create a dual channel image for export with the consensus drawn atop, using
+	 * the display image rather than recolouring to sensible values
+	 * 
+	 * @return
+	 */
+	private ImagePlus createDualCustomImage(boolean includeConsensus) {
+		IWarpedSignal s0 = signals.get(0);
+		IWarpedSignal s1 = signals.get(1);
+
+		ImageProcessor ip = ImageAnnotator.createMergedWarpedSignals(signals);
+		int buffer = 10;
+		ip = ImageConverter.expandCanvas(ip, buffer, Color.white);
+		List<Nucleus> targets = signals.stream().map(IWarpedSignal::target).distinct().toList();
+
+		String imageName = s0.sourceDatasetName() + "-" + s0.sourceSignalGroupName() + "_vs_" + s1.sourceDatasetName()
+				+ "-" + s1.sourceSignalGroupName() + "_on_" + s0.targetName();
+
+		if (includeConsensus)
+			return drawConsensusOnImage(ip, targets, Color.black, imageName);
+		ip.flipVertical();
+		return new ImagePlus(imageName, ip);
+	}
 
 	private ImagePlus drawConsensusOnImage(ImageProcessor ip, List<Nucleus> targets, Color colour, String imageName) {
 

@@ -44,7 +44,7 @@ public class DefaultWarpedSignal implements XmlSerializable, IWarpedSignal {
 	private final String sourceDatasetName;
 	private final String sourceSignalGroupName;
 
-	private final UUID source;
+	private final UUID sourceDatasetId;
 	private final boolean isCellsWithSignals;
 	private final int threshold;
 	private final boolean isBinarised;
@@ -62,7 +62,7 @@ public class DefaultWarpedSignal implements XmlSerializable, IWarpedSignal {
 		this.targetName = targetName;
 		this.sourceDatasetName = sourceDatasetName;
 		this.sourceSignalGroupName = sourceSignalGroupName;
-		this.source = source;
+		this.sourceDatasetId = source;
 		this.isCellsWithSignals = isCellsWithSignals;
 		this.isNormalised = isNormalised;
 		this.isBinarised = isBinarised;
@@ -85,7 +85,7 @@ public class DefaultWarpedSignal implements XmlSerializable, IWarpedSignal {
 
 		this.target = c;
 		targetName = e.getAttributeValue("targetName");
-		source = UUID.fromString(e.getAttributeValue("source"));
+		sourceDatasetId = UUID.fromString(e.getAttributeValue("source"));
 		sourceDatasetName = e.getAttributeValue("sourceDataset");
 		sourceSignalGroupName = e.getAttributeValue("sourceSignal");
 
@@ -102,7 +102,7 @@ public class DefaultWarpedSignal implements XmlSerializable, IWarpedSignal {
 	@Override
 	public IWarpedSignal duplicate() {
 		return new DefaultWarpedSignal(this.target.duplicate(), this.targetName, this.sourceDatasetName,
-				this.sourceSignalGroupName, this.source, isCellsWithSignals, this.threshold, this.isBinarised,
+				this.sourceSignalGroupName, this.sourceDatasetId, isCellsWithSignals, this.threshold, this.isBinarised,
 				this.isNormalised, this.image, this.imageWidth, this.pseudoColour, this.displayThreshold);
 	}
 
@@ -112,7 +112,7 @@ public class DefaultWarpedSignal implements XmlSerializable, IWarpedSignal {
 		e.setAttribute("targetName", targetName);
 		e.setAttribute("sourceDataset", sourceDatasetName);
 		e.setAttribute("sourceSignal", sourceSignalGroupName);
-		e.setAttribute("source", source.toString());
+		e.setAttribute("source", sourceDatasetId.toString());
 		e.setAttribute("threshold", String.valueOf(threshold));
 		e.setAttribute("isSignalsOnly", String.valueOf(isCellsWithSignals));
 		e.setAttribute("isBinarised", String.valueOf(isBinarised));
@@ -147,8 +147,8 @@ public class DefaultWarpedSignal implements XmlSerializable, IWarpedSignal {
 	}
 
 	@Override
-	public UUID source() {
-		return source;
+	public UUID sourceDatasetId() {
+		return sourceDatasetId;
 	}
 
 	@Override

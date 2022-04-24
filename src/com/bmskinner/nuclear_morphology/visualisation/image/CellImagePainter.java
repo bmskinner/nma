@@ -2,8 +2,10 @@ package com.bmskinner.nuclear_morphology.visualisation.image;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+import java.awt.Shape;
 import java.awt.Stroke;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
@@ -31,7 +33,6 @@ import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.rules.PriorityAxis;
 import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
@@ -66,46 +67,47 @@ public class CellImagePainter implements ImagePainter {
 
 	@Override
 	public BufferedImage paintDecorated(int w, int h) {
-
-		BufferedImage input = paintRaw(w, h);
-
 		try {
+
+//			BufferedImage input = ImageImporter.importFullImageTo24bit(cell.getPrimaryNucleus()).getBufferedImage();
+
+			Nucleus n = isOriented ? cell.getPrimaryNucleus().getOrientedNucleus() : cell.getPrimaryNucleus();
+//			originalWidth = input.getWidth();
+//			originalHeight = input.getHeight();
+
+			// Scale to full image size
+//			AffineTransform at = createMainTransform(input.getWidth(), input.getHeight());
+//			at.concatenate(AffineTransform.getScaleInstance(rr, rr));
+
+			BufferedImage output = paintRaw(w, h);
 
 			// A transform to convert from original image coordinates to the final screen
 			// coordinates
+//			AffineTransform at = new AffineTransform();
+//			AffineTransform at = createAspectPreservingScaleTransform(originalWidth, originalHeight, w, h);
 
-//			Values vals = calcRotatedImageDimensions(w, h);
-//			double w2 = Math.cos(vals.rads) * originalWidth;
-//			double h2 = Math.cos(vals.rads) * originalHeight;
-//			AffineTransform at = createAspectPreservingScaleTransform((int) w2, (int) h2, w, h);
+//			if (isOriented) {
+			// If the image has been rotated, we will need to scale the points drawn down
+			// by a ratio of the new image dimensions
+//				at.concatenate(createMainTransform(originalWidth, originalHeight));
 
-			AffineTransform at = createAspectPreservingScaleTransform(originalWidth, originalHeight, w, h);
+//				tat.concatenate(at);
 
-			if (isOriented) {
-				// If the image has been rotated, we will need to scale the points drawn down
-				// by a ratio of the new image dimensions
-
-				AffineTransform tat = createMainTransform(originalWidth, originalHeight);
-				at.concatenate(tat);
-//				pat.concatenate(tat);
-
-//				pat.concatenate(at);
 //				at = tat;
-			}
+//			}
 
-			BufferedImage output = new BufferedImage(input.getWidth(), input.getHeight(), BufferedImage.TYPE_INT_ARGB);
-			Graphics2D g2 = output.createGraphics();
-			g2.drawImage(input, 0, 0, null);
-			paintNucleus(output, at);
-			paintSignals(output, at);
+//			BufferedImage output = new BufferedImage(input.getWidth(), input.getHeight(), BufferedImage.TYPE_INT_ARGB);
+//			Graphics2D g2 = output.createGraphics();
+//			g2.drawImage(input, 0, 0, null);
+//			paintNucleus(output, at);
+//			paintSignals(output, at);
 
 			return output;
-		} catch (MissingProfileException | ProfileException | UnavailableBorderPointException | MissingLandmarkException
-				| ComponentCreationException e) {
+		} catch (MissingLandmarkException | ComponentCreationException e) {
 			LOGGER.log(Level.FINE, "Unable to paint cell", e);
 		}
 
-		return input;
+		return null;
 	}
 
 	private void paintNucleus(BufferedImage output, AffineTransform at) throws MissingProfileException,
@@ -203,52 +205,158 @@ public class CellImagePainter implements ImagePainter {
 		g2.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, saved);
 	}
 
+	/**
+	 * Paint the image and scale to the given final dimensions
+	 */
 	@Override
 	public BufferedImage paintRaw(int w, int h) {
 
-		BufferedImage input = ImageImporter.importCroppedImageTo24bit(cell, component).getBufferedImage();
+		BufferedImage input = ImageImporter.importFullImageTo24bit(cell.getPrimaryNucleus()).getBufferedImage();
 		originalWidth = input.getWidth();
 		originalHeight = input.getHeight();
 
-		if (!isOriented)
-			return scalePreservingAspect(input, w, h);
-
 		try {
+			if (!isOriented) {
+				input = ImageImporter.importCroppedImageTo24bit(cell, component).getBufferedImage();
+				originalWidth = input.getWidth();
+				originalHeight = input.getHeight();
+				return scalePreservingAspect(input, w, h);
+			}
 
-			Values val = calcRotatedImageDimensions(input.getWidth(), input.getHeight());
+			Values vals = calcRotatedImageDimensions(originalWidth, originalHeight);
 
-			// Make a new canvas for the rotated image with white background
-			BufferedImage output = new BufferedImage(val.w, val.h, BufferedImage.TYPE_INT_RGB);
+			AffineTransform at = createMainTransform(originalWidth, originalHeight);
+
+			// rotate the image around the nucleus CoM
+			// This is just used as a proxy for calculating image size
+			AffineTransformOp op = new AffineTransformOp(at, AffineTransformOp.TYPE_BILINEAR);
+			BufferedImage mid = op.filter(input, null);
+
+			// Copy to a new image with white background
+			BufferedImage output = new BufferedImage(mid.getWidth(), mid.getHeight(), BufferedImage.TYPE_INT_RGB);
 			Graphics2D graphics = output.createGraphics();
 			graphics.setPaint(Color.WHITE);
 			graphics.fillRect(0, 0, output.getWidth(), output.getHeight());
-
-			AffineTransform at = createMainTransform(input.getWidth(), input.getHeight());
-			AffineTransformOp op = new AffineTransformOp(at, AffineTransformOp.TYPE_BILINEAR);
-
 			op.filter(input, output);
 
-			return scalePreservingAspect(output, w, h);
+			// Crop the image to cell dimensions
+			Shape s = cell.getPrimaryNucleus().toShape();
+			Shape t = at.createTransformedShape(s);
+
+			BufferedImage img = output.getSubimage(
+					(int) Math.max(0, t.getBounds2D().getMinX() - CellularComponent.COMPONENT_BUFFER),
+					(int) Math.max(0, t.getBounds2D().getMinY() - CellularComponent.COMPONENT_BUFFER),
+					(int) t.getBounds2D().getWidth() + CellularComponent.COMPONENT_BUFFER * 2,
+					(int) t.getBounds2D().getHeight() + CellularComponent.COMPONENT_BUFFER * 2);
+
+			BufferedImage copyOfImage = new BufferedImage(img.getWidth(), img.getHeight(), BufferedImage.TYPE_INT_RGB);
+			Graphics g = copyOfImage.createGraphics();
+			g.drawImage(img, 0, 0, null);
+//			return copyOfImage;
+			return scalePreservingAspect(copyOfImage, w, h);
 		} catch (Exception e) {
-			//
+			LOGGER.log(Level.SEVERE, "Unable to paint: " + e.getMessage(), e);
 		}
+
+//		BufferedImage input = ImageImporter.importCroppedImageTo24bit(cell, component).getBufferedImage();
+//		originalWidth = input.getWidth();
+//		originalHeight = input.getHeight();
 		return input;
+//		return scalePreservingAspect(input, w, h);
 	}
 
 	/**
-	 * Create the transform needed to scale an image preserving aspect ratio.
-	 * Converts from the original image dimensionms to the dimensions that will fill
-	 * a given area.
+	 * Tuple for result of rotation calculation
 	 * 
-	 * @param w    the original width
-	 * @param h    the original height
-	 * @param maxW the maximum width
-	 * @param maxH the maximum height
-	 * @return
+	 * @author ben
+	 *
 	 */
-	private AffineTransform createAspectPreservingScaleTransform(int w, int h, double maxW, double maxH) {
-		double r = calculateAspectPreservingScaleRatio(w, h, maxW, maxH);
-		return AffineTransform.getScaleInstance(r, r);
+	public record Values(double rads, int w, int h, double ratio) {
+	}
+
+	/**
+	 * Calculate the dimensions of an image of given dimensions after rotating the
+	 * nucleus it contains to be oriented
+	 * 
+	 * @param w the width of the object to rotate
+	 * @param h the height of the object to rotate
+	 * @return
+	 * @throws MissingLandmarkException
+	 */
+	private Values calcRotatedImageDimensions(int w, int h) throws MissingLandmarkException {
+		double angle = 360 - ComponentOrienter.calcAngleToAlignVertically(cell.getPrimaryNucleus());
+		double rads = Math.toRadians(angle);
+		double sin = Math.abs(Math.sin(rads)), cos = Math.abs(Math.cos(rads));
+		double newWidth = Math.floor(w * cos + h * sin);
+		double newHeight = Math.floor(h * cos + w * sin);
+		return new Values(rads, (int) newWidth, (int) newHeight, w / newWidth);
+	}
+
+	/**
+	 * Create the transform needed to rotate, flip and translate coordinates from
+	 * original nucleus to oriented
+	 * 
+	 * @param w the output image height
+	 * @param h the output image width
+	 * @return
+	 * @throws MissingLandmarkException
+	 * @throws ComponentCreationException
+	 */
+	private AffineTransform createMainTransform(int w, int h)
+			throws MissingLandmarkException, ComponentCreationException {
+
+		AffineTransform at = new AffineTransform();
+		if (isOriented) {
+
+			// The point to rotate about
+			IPoint com = cell.getPrimaryNucleus().getCentreOfMass();
+			Values vals = calcRotatedImageDimensions(w, h);
+
+			at.concatenate(AffineTransform.getTranslateInstance(com.getX(), com.getY()));
+			at.concatenate(AffineTransform.getScaleInstance(1, -1));
+			if (ComponentOrienter.isFlipNeeded(cell.getPrimaryNucleus())) {
+				at.concatenate(AffineTransform.getScaleInstance(-1, 1));
+			}
+			at.concatenate(AffineTransform.getRotateInstance(vals.rads));
+			at.concatenate(AffineTransform.getTranslateInstance(-com.getX(), -com.getY()));
+		}
+		return at;
+
+		// Figure out how large the new image will be
+		// so we can add a translation to paint the image
+		// in the centre.
+
+//		Values p = calcRotatedImageDimensions(w, h);
+//		int newWidth = p.w;
+//		int newHeight = p.h;
+//
+//		int x = (newWidth - w) / 2;
+//		int y = (newHeight - h) / 2;
+//
+//		// Create the rotation transform about the centre of the image
+//		AffineTransform at = new AffineTransform();
+//		at.setToRotation(p.rads, x + (w / 2), y + (h / 2));
+//		at.translate(x, y);
+//
+//		// Create the flipping transform
+//		AffineTransform at2 = new AffineTransform();
+//		at2.scale(1, -1); // flip vertical
+//		at2.translate(0, -newHeight);
+//
+//		if (ComponentOrienter.isFlipNeeded(cell.getPrimaryNucleus())) {
+//			if (PriorityAxis.Y.equals(cell.getPrimaryNucleus().getPriorityAxis())) {
+//				at2.scale(-1, 1); // flip horizontal
+//				at2.translate(-newWidth, 0);
+//			} else {
+//				at2.scale(1, -1); // flip vertical
+//				at2.translate(0, -newHeight);
+//			}
+//		}
+//
+//		// Concatenate them in reverse order
+//		at2.concatenate(at);
+//		return at2;
+
 	}
 
 	/**
@@ -268,80 +376,19 @@ public class CellImagePainter implements ImagePainter {
 	}
 
 	/**
-	 * Tuple for result of rotation calculation
+	 * Create the transform needed to scale an image preserving aspect ratio.
+	 * Converts from the original image dimensionms to the dimensions that will fill
+	 * a given area.
 	 * 
-	 * @author ben
-	 *
-	 */
-	public record Values(double rads, int w, int h, double ratio) {
-	}
-
-	/**
-	 * Calculate the dimensions of an image of given dimensions after rotating the
-	 * nucleus it contains to be oriented
-	 * 
-	 * @param w
-	 * @param h
+	 * @param w    the original width
+	 * @param h    the original height
+	 * @param maxW the maximum width
+	 * @param maxH the maximum height
 	 * @return
-	 * @throws MissingLandmarkException
 	 */
-	private Values calcRotatedImageDimensions(int w, int h) throws MissingLandmarkException {
-		double angle = 360 - ComponentOrienter.calcAngleToAlignVertically(cell.getPrimaryNucleus());
-		double rads = Math.toRadians(angle);
-		double sin = Math.abs(Math.sin(rads)), cos = Math.abs(Math.cos(rads));
-		double newWidth = Math.floor(w * cos + h * sin);
-		double newHeight = Math.floor(h * cos + w * sin);
-		return new Values(rads, (int) newWidth, (int) newHeight, w / newWidth);
-	}
-
-	/**
-	 * Create the transform needed to rotate, flip and translate the image to a
-	 * rotated state.
-	 * 
-	 * @param w the original image height
-	 * @param h the original image widht
-	 * @return
-	 * @throws MissingLandmarkException
-	 * @throws ComponentCreationException
-	 */
-	private AffineTransform createMainTransform(int w, int h)
-			throws MissingLandmarkException, ComponentCreationException {
-
-		// Figure out how large the new image will be
-		// so we can add a translation to paint the image
-		// in the centre.
-
-		Values p = calcRotatedImageDimensions(w, h);
-		int newWidth = p.w;
-		int newHeight = p.h;
-
-		int x = (newWidth - w) / 2;
-		int y = (newHeight - h) / 2;
-
-		// Create the rotation transform about the centre of the image
-		AffineTransform at = new AffineTransform();
-		at.setToRotation(p.rads, x + (w / 2), y + (h / 2));
-		at.translate(x, y);
-
-		// Create the flipping transform
-		AffineTransform at2 = new AffineTransform();
-		at2.scale(1, -1); // flip vertical
-		at2.translate(0, -newHeight);
-
-		if (ComponentOrienter.isFlipNeeded(cell.getPrimaryNucleus())) {
-			if (PriorityAxis.Y.equals(cell.getPrimaryNucleus().getPriorityAxis())) {
-				at2.scale(-1, 1); // flip horizontal
-				at2.translate(-newWidth, 0);
-			} else {
-				at2.scale(1, -1); // flip vertical
-				at2.translate(0, -newHeight);
-			}
-		}
-
-		// Concatenate them in reverse order
-		at2.concatenate(at);
-		return at2;
-
+	private AffineTransform createAspectPreservingScaleTransform(int w, int h, double maxW, double maxH) {
+		double r = calculateAspectPreservingScaleRatio(w, h, maxW, maxH);
+		return AffineTransform.getScaleInstance(r, r);
 	}
 
 	/**

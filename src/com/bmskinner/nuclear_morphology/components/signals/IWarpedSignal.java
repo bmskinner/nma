@@ -128,7 +128,7 @@ public interface IWarpedSignal extends XmlSerializable {
 
 	Nucleus target();
 
-	UUID source();
+	UUID sourceDatasetId();
 
 	String targetName();
 

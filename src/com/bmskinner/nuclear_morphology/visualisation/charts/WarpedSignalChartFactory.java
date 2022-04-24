@@ -2,10 +2,7 @@ package com.bmskinner.nuclear_morphology.visualisation.charts;
 
 import java.awt.Color;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -20,7 +17,7 @@ import com.bmskinner.nuclear_morphology.components.cells.Nucleus;
 import com.bmskinner.nuclear_morphology.components.signals.IWarpedSignal;
 import com.bmskinner.nuclear_morphology.visualisation.datasets.ChartDatasetCreationException;
 import com.bmskinner.nuclear_morphology.visualisation.datasets.ComponentOutlineDataset;
-import com.bmskinner.nuclear_morphology.visualisation.image.ImageFilterer;
+import com.bmskinner.nuclear_morphology.visualisation.image.ImageAnnotator;
 import com.bmskinner.nuclear_morphology.visualisation.options.ChartOptions;
 
 import ij.process.ImageProcessor;
@@ -38,8 +35,7 @@ public class WarpedSignalChartFactory extends OutlineChartFactory {
 	}
 
 	public JFreeChart makeSignalWarpChart() {
-
-		ImageProcessor image = createDisplayImage();
+		ImageProcessor image = ImageAnnotator.createMergedWarpedSignals(options.getWarpedSignals());
 		return makeSignalWarpChart(image);
 	}
 
@@ -131,94 +127,5 @@ public class WarpedSignalChartFactory extends OutlineChartFactory {
 	private synchronized boolean isCommonTargetSelected() {
 		Nucleus t = options.getWarpedSignals().stream().findFirst().get().target();
 		return options.getWarpedSignals().stream().allMatch(s -> s.target().getID().equals(t.getID()));
-	}
-
-	/**
-	 * Create an image for display. This applies thresholding and pseudocolouring
-	 * options.
-	 * 
-	 * @return
-	 */
-	private synchronized ImageProcessor createDisplayImage() {
-
-		if (options.getWarpedSignals().isEmpty())
-			return ImageFilterer.createWhiteByteProcessor(100, 100);
-
-		// Recolour each of the grey images according to the stored colours
-		List<ImageProcessor> recoloured = isCommonTargetSelected() ? recolourImagesWithSameTarget()
-				: recolourImagesWithDifferentTargets();
-
-		if (recoloured.size() == 1)
-			return recoloured.get(0);
-
-		// If multiple images are in the list, make an blend of their RGB
-		// values so territories can be compared
-		try {
-			ImageProcessor ip1 = recoloured.get(0);
-			for (int i = 1; i < recoloured.size(); i++) {
-				// Weighting by fractions reduces intensity across the image
-				// Weighting by integer multiples washes the image out.
-				// Since there is little benefit to 3 or more blended,
-				// just keep equal weighting
-//        		float weight1 = i/(i+1);
-//        		float weight2 = 1-weight1; 
-
-				ip1 = ImageFilterer.blendImages(ip1, 1, recoloured.get(i), 1);
-			}
-			return ip1;
-
-		} catch (Exception e) {
-			LOGGER.log(Level.SEVERE, "Error averaging images", e);
-			return ImageFilterer.createWhiteByteProcessor(100, 100);
-		}
-	}
-
-	private synchronized List<ImageProcessor> recolourImagesWithSameTarget() {
-		List<ImageProcessor> recoloured = new ArrayList<>();
-		for (IWarpedSignal k : options.getWarpedSignals()) {
-			// The image from the warper is greyscale. Change to use the signal colour
-			ImageProcessor bp = k.toImage().convertToByteProcessor();
-			bp.invert();
-
-			ImageProcessor recol = bp;
-			if (k.isPseudoColour())
-				recol = ImageFilterer.recolorImage(bp, k.colour());
-			else
-				recol = bp.convertToColorProcessor();
-
-			recol.setMinAndMax(0, k.displayThreshold());
-			recoloured.add(recol);
-		}
-		return recoloured;
-	}
-
-	private synchronized List<ImageProcessor> recolourImagesWithDifferentTargets() {
-
-		List<ImageProcessor> images = ImageFilterer
-				.fitToCommonCanvas(options.getWarpedSignals().stream().map(IWarpedSignal::toImage).toList());
-
-		Map<IWarpedSignal, ImageProcessor> map = new HashMap<>();
-		for (int i = 0; i < images.size(); i++)
-			map.put(options.getWarpedSignals().get(i), images.get(i));
-
-		List<ImageProcessor> recoloured = new ArrayList<>();
-
-		for (Entry<IWarpedSignal, ImageProcessor> e : map.entrySet()) {
-
-			// The image from the warper is greyscale. Change to use the signal colour
-			ImageProcessor bp = e.getValue().convertToByteProcessor();
-			bp.invert();
-
-			ImageProcessor recol = bp;
-			if (e.getKey().isPseudoColour())
-				recol = ImageFilterer.recolorImage(bp, e.getKey().colour());
-			else
-				recol = bp.convertToColorProcessor();
-
-			recol.setMinAndMax(0, e.getKey().displayThreshold());
-			recoloured.add(recol);
-
-		}
-		return recoloured;
 	}
 }

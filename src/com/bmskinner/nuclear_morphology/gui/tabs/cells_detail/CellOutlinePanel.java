@@ -57,7 +57,6 @@ public class CellOutlinePanel extends AbstractCellDetailPanel
 	private static final String PANEL_TITLE_LBL = "Outline";
 
 //	private InteractiveCellPanel imagePanel;
-
 	private ExportableChartPanel chartPanel;
 
 	private GenericCheckboxPanel rotatePanel = new GenericCheckboxPanel("Rotate vertical");
@@ -145,10 +144,8 @@ public class CellOutlinePanel extends AbstractCellDetailPanel
 
 		ChartOptions options = new ChartOptionsBuilder().setCell(cell).setDatasets(activeDataset())
 				.addCellularComponent(component).setRotationMode(rm).setShowWarp(warpMeshPanel.isSelected()).build();
-
 		options.setInt("ImageWidth", w);
 		options.setInt("ImageHeight", h);
-
 		chartPanel.setChart(new OutlineChartFactory(options).makeCellOutlineChart());
 
 //		imagePanel.setCell(activeDataset(), cell, component, displayOptions);

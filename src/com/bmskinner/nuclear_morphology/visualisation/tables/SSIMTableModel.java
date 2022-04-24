@@ -43,7 +43,7 @@ public class SSIMTableModel extends DatasetTableModel {
 		for (IAnalysisDataset d : datasets) {
 			for (ISignalGroup s : d.getCollection().getSignalGroups()) {
 				for (IWarpedSignal w : s.getWarpedSignals()) {
-					if (!w.source().equals(d.getId()))
+					if (!w.sourceDatasetId().equals(d.getId()))
 						continue;
 					allSignals.add(new SignalTuple(d, s, w));
 				}
