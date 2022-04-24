@@ -47,7 +47,6 @@ import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalCollection;
 import com.bmskinner.nuclear_morphology.components.signals.NuclearSignalAddedListener;
 import com.bmskinner.nuclear_morphology.io.XmlSerializable;
-import com.bmskinner.nuclear_morphology.utility.AngleTools;
 
 import ij.gui.Roi;
 
@@ -201,11 +200,6 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
 	}
 
 	@Override
-	public void createProfiles(double proportion) throws ComponentCreationException {
-		super.createProfiles(proportion);
-	}
-
-	@Override
 	public int getNucleusNumber() {
 		return nucleusNumber;
 	}
@@ -342,19 +336,16 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
 	public void flipHorizontal(@NonNull IPoint p) {
 		super.flipHorizontal(p);
 
-		for (UUID id : signalCollection.getSignalGroupIds()) {
-			signalCollection.getSignals(id).stream().forEach(s -> s.flipHorizontal(p));
-		}
-
+		for (INuclearSignal s : signalCollection.getAllSignals())
+			s.flipHorizontal(p);
 	}
 
 	@Override
 	public void flipVertical(@NonNull IPoint p) {
 		super.flipVertical(p);
 
-		for (UUID id : signalCollection.getSignalGroupIds()) {
-			signalCollection.getSignals(id).stream().forEach(s -> s.flipVertical(p));
-		}
+		for (INuclearSignal s : signalCollection.getAllSignals())
+			s.flipVertical(p);
 
 	}
 
@@ -362,22 +353,22 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
 	public void rotate(double angle) {
 
 		super.rotate(angle);
-
 		if (angle != 0) {
+			// Rotate signals around the nucleus CoM
+			for (INuclearSignal s : signalCollection.getAllSignals())
+				s.rotate(angle, getCentreOfMass());
 
-			for (UUID id : signalCollection.getSignalGroupIds()) {
+		}
+	}
 
-				signalCollection.getSignals(id).parallelStream().forEach(s -> {
+	@Override
+	public void rotate(double angle, IPoint anchor) {
+		super.rotate(angle, anchor);
+		if (angle != 0) {
+			// Rotate signals
+			for (INuclearSignal s : signalCollection.getAllSignals())
+				s.rotate(angle, anchor);
 
-					s.rotate(angle);
-
-					// get the new signal centre of mass based on the nucleus rotation
-
-					IPoint p = AngleTools.rotateAboutPoint(s.getCentreOfMass(), getCentreOfMass(), angle);
-					s.moveCentreOfMass(p);
-				});
-
-			}
 		}
 	}
 

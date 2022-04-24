@@ -1058,100 +1058,28 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 
 	@Override
 	public void rotate(double angle) {
+		rotate(angle, centreOfMass);
+//		if (angle != 0) {
+//			double rad = Math.toRadians(-angle);
+//			AffineTransform tf = AffineTransform.getRotateInstance(rad, centreOfMass.getX(), centreOfMass.getY());
+//			for (IPoint p : borderList) {
+//				Point2D result = tf.transform(p.toPoint2D(), null);
+//				p.set(result);
+//			}
+//		}
+//		updateBounds();
+	}
+
+	@Override
+	public void rotate(double angle, IPoint anchor) {
 		if (angle != 0) {
 			double rad = Math.toRadians(-angle);
-			AffineTransform tf = AffineTransform.getRotateInstance(rad, centreOfMass.getX(), centreOfMass.getY());
+			AffineTransform tf = AffineTransform.getRotateInstance(rad, anchor.getX(), anchor.getY());
 			for (IPoint p : borderList) {
 				Point2D result = tf.transform(p.toPoint2D(), null);
 				p.set(result);
 			}
 		}
 		updateBounds();
-//        shapeCache.clear();
 	}
-
-	/**
-	 * Cache the shapes of the object in various positions
-	 * 
-	 * @author bms41
-	 * @since 1.13.4
-	 *
-	 */
-//    private class ShapeCache {
-//
-//        public class Key {
-//            final double           xOffset;
-//            final double           yOffset;
-//            final MeasurementScale scale;
-//
-//            public Key(final double x, final double y, final MeasurementScale s) {
-//                xOffset = x;
-//                yOffset = y;
-//                scale = s;
-//            }
-//
-//            @Override
-//            public int hashCode() {
-//                final int prime = 31;
-//                int result = 1;
-//                result = prime * result + getOuterType().hashCode();
-//                result = prime * result + ((scale == null) ? 0 : scale.hashCode());
-//                long temp;
-//                temp = Double.doubleToLongBits(xOffset);
-//                result = prime * result + (int) (temp ^ (temp >>> 32));
-//                temp = Double.doubleToLongBits(yOffset);
-//                result = prime * result + (int) (temp ^ (temp >>> 32));
-//                return result;
-//            }
-//
-//            @Override
-//            public boolean equals(Object obj) {
-//                if (this == obj)
-//                    return true;
-//                if (obj == null)
-//                    return false;
-//                if (getClass() != obj.getClass())
-//                    return false;
-//                Key other = (Key) obj;
-//                if (!getOuterType().equals(other.getOuterType()))
-//                    return false;
-//                if (scale != other.scale)
-//                    return false;
-//                if (Double.doubleToLongBits(xOffset) != Double.doubleToLongBits(other.xOffset))
-//                    return false;
-//                if (Double.doubleToLongBits(yOffset) != Double.doubleToLongBits(other.yOffset))
-//                    return false;
-//                return true;
-//            }
-//
-//            private ShapeCache getOuterType() {
-//                return ShapeCache.this;
-//            }
-//
-//        }
-//
-//        private Map<Key, Shape> cache = new HashMap<>();
-//
-//        public ShapeCache() {
-//        }
-//
-//        public void add(double x, double y, MeasurementScale s, Shape shape) {
-//            Key key = new Key(x, y, s);
-//            cache.put(key, shape);
-//        }
-//
-//        public Shape get(double x, double y, MeasurementScale s) {
-//            Key key = new Key(x, y, s);
-//            return cache.get(key);
-//        }
-//
-//        public boolean has(double x, double y, MeasurementScale s) {
-//            Key key = new Key(x, y, s);
-//            return cache.containsKey(key);
-//        }
-//
-//        public void clear() {
-//            cache.clear();
-//        }
-//    }
 }

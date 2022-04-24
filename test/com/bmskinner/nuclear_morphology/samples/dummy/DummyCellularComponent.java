@@ -21,12 +21,13 @@ import ij.process.FloatPolygon;
 
 /**
  * Provide methods for a dummy component
+ * 
  * @author ben
  *
  */
 @SuppressWarnings("serial")
 public class DummyCellularComponent implements CellularComponent {
-	
+
 	protected CellularComponent component;
 
 	@Override
@@ -37,6 +38,11 @@ public class DummyCellularComponent implements CellularComponent {
 	@Override
 	public void rotate(double angle) {
 		component.rotate(angle);
+	}
+
+	@Override
+	public void rotate(double angle, IPoint anchor) {
+		component.rotate(angle, anchor);
 	}
 
 	@Override
@@ -58,7 +64,7 @@ public class DummyCellularComponent implements CellularComponent {
 //	public Mask getSourceBooleanMask() {
 //		return component.getSourceBooleanMask();
 //	}
-	
+
 	@Override
 	public Shape toShape(MeasurementScale scale) {
 		return component.toShape(scale);
@@ -78,8 +84,6 @@ public class DummyCellularComponent implements CellularComponent {
 	public IPoint getBase() {
 		return component.getBase();
 	}
-	
-	
 
 	@Override
 	public int getXBase() {
@@ -105,7 +109,7 @@ public class DummyCellularComponent implements CellularComponent {
 	public @NonNull UUID getID() {
 		return component.getID();
 	}
-	
+
 	@Override
 	public double getMeasurement(@NonNull Measurement stat, @NonNull MeasurementScale scale) {
 		return component.getMeasurement(stat, scale);
@@ -113,7 +117,7 @@ public class DummyCellularComponent implements CellularComponent {
 
 	@Override
 	public double getMeasurement(@NonNull Measurement stat) {
-	    return component.getMeasurement(stat);
+		return component.getMeasurement(stat);
 	}
 
 	@Override
@@ -133,7 +137,7 @@ public class DummyCellularComponent implements CellularComponent {
 
 	@Override
 	public void setScale(double scale) {
-	    component.setScale(scale);
+		component.setScale(scale);
 	}
 
 	@Override
@@ -205,17 +209,17 @@ public class DummyCellularComponent implements CellularComponent {
 	public double getMinY() {
 		return component.getMinY();
 	}
-	
+
 	@Override
 	public void flipHorizontal() {
-		component.flipHorizontal(component.getCentreOfMass());		
+		component.flipHorizontal(component.getCentreOfMass());
 	}
 
 	@Override
 	public void flipHorizontal(@NonNull IPoint p) {
-		component.flipHorizontal(p);		
+		component.flipHorizontal(p);
 	}
-	
+
 	@Override
 	public void moveCentreOfMass(@NonNull IPoint point) {
 		component.moveCentreOfMass(point);
@@ -230,7 +234,7 @@ public class DummyCellularComponent implements CellularComponent {
 	public int wrapIndex(int i) {
 		return component.wrapIndex(i);
 	}
-	
+
 	@Override
 	public FloatPolygon toPolygon() {
 		return component.toPolygon();
@@ -298,7 +302,7 @@ public class DummyCellularComponent implements CellularComponent {
 
 	@Override
 	public void setSourceFile(@NonNull File sourceFile) {
-		component.setSourceFile(sourceFile);		
+		component.setSourceFile(sourceFile);
 	}
 
 	@Override
@@ -310,14 +314,15 @@ public class DummyCellularComponent implements CellularComponent {
 	public CellularComponent duplicate() {
 		return component.duplicate();
 	}
-	
+
 	@Override
 	public void reverse() throws MissingComponentException, ProfileException {
-	    component.reverse();
+		component.reverse();
 	}
-	
-	public String toString(){
-	    return component.toString();
+
+	@Override
+	public String toString() {
+		return component.toString();
 	}
 
 	@Override
@@ -340,19 +345,19 @@ public class DummyCellularComponent implements CellularComponent {
 	@Override
 	public void rotatePointToLeft(IPoint leftPoint) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void flipVertical(@NonNull IPoint centre) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void flipVertical() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -363,7 +368,7 @@ public class DummyCellularComponent implements CellularComponent {
 	@Override
 	public void clearMeasurements() {
 		component.clearMeasurements();
-		
+
 	}
 
 }
