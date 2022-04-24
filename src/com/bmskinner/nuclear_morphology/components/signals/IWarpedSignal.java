@@ -132,6 +132,10 @@ public interface IWarpedSignal extends XmlSerializable {
 
 	String targetName();
 
+	String sourceSignalGroupName();
+
+	String sourceDatasetName();
+
 	boolean isCellsWithSignals();
 
 	boolean isNormalised();

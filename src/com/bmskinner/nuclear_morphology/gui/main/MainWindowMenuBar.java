@@ -336,8 +336,9 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 				Labels.Populations.ADD_NUCLEAR_SIGNAL_TIP));
 
 		addSubMenu.add(fact.makeItem(Labels.Populations.WARP_BTN_LBL, UserActionEvent.SIGNAL_WARPING,
-				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_SINGLE_OBJECT
-						| ContextEnabled.ACTIVE_WITH_CONSENSUS | ContextEnabled.ACTIVE_WITH_SIGNALS,
+				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_CHILD_DATASET
+						| ContextEnabled.ACTIVE_ON_SINGLE_OBJECT | ContextEnabled.ACTIVE_WITH_CONSENSUS
+						| ContextEnabled.ACTIVE_WITH_SIGNALS,
 				Labels.Populations.WARP_BTN_TOOLTIP));
 
 		addSubMenu.add(fact.makeItem(Labels.Populations.POST_FISH_MAPPING_LBL, UserActionEvent.POST_FISH_MAPPING,

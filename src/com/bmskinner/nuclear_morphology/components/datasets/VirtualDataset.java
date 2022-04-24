@@ -61,8 +61,10 @@ import com.bmskinner.nuclear_morphology.components.profiles.UnsegmentedProfileEx
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.components.signals.DefaultShellResult;
 import com.bmskinner.nuclear_morphology.components.signals.DefaultSignalGroup;
+import com.bmskinner.nuclear_morphology.components.signals.DefaultWarpedSignal;
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
+import com.bmskinner.nuclear_morphology.components.signals.IWarpedSignal;
 import com.bmskinner.nuclear_morphology.components.signals.SignalManager;
 import com.bmskinner.nuclear_morphology.io.XmlSerializable;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -96,10 +98,12 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
 	private Consensus consensusNucleus;
 
 	/**
-	 * Store shell results separately to allow separate shell analysis between
-	 * parentDataset.getCollection() and child datasets
+	 * Store shell results and warped signals separately to allow separate analysis
+	 * between parentDataset.getCollection() and child datasets
 	 */
 	private Map<UUID, IShellResult> shellResults = new HashMap<>(0);
+
+	private Map<UUID, List<IWarpedSignal>> warpedSignals = new HashMap<>(0);
 
 	/*
 	 * TRANSIENT FIELDS
@@ -167,8 +171,8 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
 		if (e.getChild("ConsensusNucleus") != null)
 			consensusNucleus = new DefaultConsensusNucleus(e.getChild("ConsensusNucleus"));
 
-		for (Element el : e.getChildren("CellId"))
-			cellIDs.add(UUID.fromString(el.getText()));
+		for (Element el : e.getChildren("Cell"))
+			cellIDs.add(UUID.fromString(el.getAttributeValue("id")));
 
 		// Shells are not stored in signal groups for child datasets
 		// becuase signal groups can only be added to root datasets
@@ -177,6 +181,15 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
 			IShellResult s = new DefaultShellResult(el);
 			shellResults.put(id, s);
 		}
+		// Warped signals are not stored in signal groups for child datasets
+		// becuase signal groups can only be added to root datasets
+		for (Element el : e.getChildren("WarpedSignal")) {
+			UUID id = UUID.fromString(el.getAttributeValue("id"));
+			IWarpedSignal s = new DefaultWarpedSignal(el);
+			warpedSignals.computeIfAbsent(id, k -> new ArrayList<>());
+			warpedSignals.get(id).add(s);
+		}
+
 	}
 
 	/**
@@ -198,6 +211,12 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
 		for (Entry<UUID, IShellResult> e : v.shellResults.entrySet()) {
 			shellResults.put(e.getKey(), e.getValue().duplicate());
 		}
+		for (Entry<UUID, List<IWarpedSignal>> c : v.warpedSignals.entrySet()) {
+			warpedSignals.computeIfAbsent(c.getKey(), k -> new ArrayList<>());
+			for (IWarpedSignal s : c.getValue())
+				warpedSignals.get(c.getKey()).add(s.duplicate());
+		}
+
 	}
 
 	@Override
@@ -212,10 +231,15 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
 			e.addContent(consensusNucleus.toXmlElement());
 
 		for (UUID c : cellIDs)
-			e.addContent(new Element("CellId").setText(c.toString()));
+			e.addContent(new Element("Cell").setAttribute("id", c.toString()));
 
 		for (Entry<UUID, IShellResult> c : shellResults.entrySet()) {
 			e.addContent(c.getValue().toXmlElement().setAttribute("id", c.getKey().toString()));
+		}
+
+		for (Entry<UUID, List<IWarpedSignal>> c : warpedSignals.entrySet()) {
+			for (IWarpedSignal s : c.getValue())
+				e.addContent(s.toXmlElement().setAttribute("id", c.getKey().toString()));
 		}
 
 		return e;
@@ -518,9 +542,31 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
 		if (!parentDataset.getCollection().hasSignalGroup(signalGroup))
 			return Optional.empty();
 
-//TODO: replace this with a serialisable version
 		@SuppressWarnings("serial")
 		ISignalGroup result = new DefaultSignalGroup(parentDataset.getCollection().getSignalGroup(signalGroup).get()) {
+
+			@Override
+			public boolean hasWarpedSignals() {
+				return !warpedSignals.get(signalGroup).isEmpty();
+			}
+
+			@Override
+			public List<IWarpedSignal> getWarpedSignals() {
+				if (!warpedSignals.containsKey(signalGroup))
+					return new ArrayList<>();
+				return warpedSignals.get(signalGroup);
+			}
+
+			@Override
+			public void addWarpedSignal(@NonNull IWarpedSignal result) {
+				warpedSignals.computeIfAbsent(signalGroup, s -> new ArrayList<>());
+				warpedSignals.get(signalGroup).add(result);
+			}
+
+			@Override
+			public void clearWarpedSignals() {
+				warpedSignals.clear();
+			}
 
 			@Override
 			public void setShellResult(@NonNull IShellResult result) {
@@ -559,7 +605,13 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
 
 	@Override
 	public Collection<ISignalGroup> getSignalGroups() {
-		return parentDataset.getCollection().getSignalGroups();
+		List<ISignalGroup> result = new ArrayList<>();
+
+		for (UUID id : this.getSignalGroupIDs())
+			if (getSignalGroup(id).isPresent())
+				result.add(getSignalGroup(id).get());
+
+		return result;
 	}
 
 	@Override

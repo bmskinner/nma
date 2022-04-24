@@ -27,7 +27,7 @@ public class DefaultWarpedSignalTest extends ComponentTester {
 
 		ByteProcessor ip = new ByteProcessor(50, 50);
 		ip.set(128);
-		signal = new DefaultWarpedSignal(n, "test", UUID.randomUUID(), false, 70, false, false,
+		signal = new DefaultWarpedSignal(n, "test", "test", "test", UUID.randomUUID(), false, 70, false, false,
 				IWarpedSignal.toArray(ip), ip.getWidth(), Color.RED, 255);
 	}
 

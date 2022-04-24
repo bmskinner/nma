@@ -34,7 +34,7 @@ public class SignalWarpingTableModel extends DatasetTableModel {
 		int rowCount = 0;
 		for (IAnalysisDataset d : datasets) {
 			for (ISignalGroup s : d.getCollection().getSignalGroups()) {
-				rowCount += s.getWarpedSignals().stream().filter(w -> w.source().equals(d.getId())).count();
+				rowCount += s.getWarpedSignals().stream().count(); // .filter(w -> w.source().equals(d.getId()))
 			}
 		}
 
@@ -45,8 +45,8 @@ public class SignalWarpingTableModel extends DatasetTableModel {
 		for (IAnalysisDataset d : datasets) {
 			for (ISignalGroup s : d.getCollection().getSignalGroups()) {
 				for (IWarpedSignal w : s.getWarpedSignals()) {
-					if (!w.source().equals(d.getId()))
-						continue;
+//					if (!w.source().equals(d.getId()))
+//						continue;
 					ws[r] = w;
 					rowData[r][0] = d.getName();
 					rowData[r][1] = s.getGroupName();

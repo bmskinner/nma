@@ -99,7 +99,8 @@ public class SignalWarpingMethod extends SingleDatasetAnalysisMethod {
 				.orElseThrow(MissingComponentException::new);
 
 		IWarpedSignal ws = new DefaultWarpedSignal(options.targetDataset().getCollection().getConsensus().duplicate(),
-				options.targetDataset().getName(), options.templateDataset().getId(),
+				options.targetDataset().getName(), dataset.getName(), sg.getGroupName(),
+				options.templateDataset().getId(),
 				options.getBoolean(SignalWarpingRunSettings.IS_ONLY_CELLS_WITH_SIGNALS_KEY),
 				options.getInt(SignalWarpingRunSettings.MIN_THRESHOLD_KEY),
 				options.getBoolean(SignalWarpingRunSettings.IS_BINARISE_SIGNALS_KEY),

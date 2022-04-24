@@ -31,6 +31,7 @@ public class SignalWarpingChartPanel extends ChartDetailPanel
 
 		JFreeChart chart = OutlineChartFactory.createEmptyChart();
 		chartPanel = new ConsensusNucleusChartPanel(chart);
+		chartPanel.setFillConsensus(false);
 		add(chartPanel, BorderLayout.CENTER);
 	}
 

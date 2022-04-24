@@ -41,6 +41,9 @@ import ij.process.ImageProcessor;
 public class DefaultWarpedSignal implements XmlSerializable, IWarpedSignal {
 	private final Nucleus target;
 	private final String targetName;
+	private final String sourceDatasetName;
+	private final String sourceSignalGroupName;
+
 	private final UUID source;
 	private final boolean isCellsWithSignals;
 	private final int threshold;
@@ -52,11 +55,13 @@ public class DefaultWarpedSignal implements XmlSerializable, IWarpedSignal {
 	private boolean isShowPseudoColour = true;
 	private int displayThreshold = 255; // show all by default
 
-	public DefaultWarpedSignal(@NonNull Nucleus target, String targetName, UUID source, boolean isCellsWithSignals,
-			int threshold, boolean isBinarised, boolean isNormalised, byte[] image, int imageWidth, Color pseudoColour,
-			int displayThreshold) {
+	public DefaultWarpedSignal(@NonNull Nucleus target, String targetName, String sourceDatasetName,
+			String sourceSignalGroupName, UUID source, boolean isCellsWithSignals, int threshold, boolean isBinarised,
+			boolean isNormalised, byte[] image, int imageWidth, Color pseudoColour, int displayThreshold) {
 		this.target = target;
 		this.targetName = targetName;
+		this.sourceDatasetName = sourceDatasetName;
+		this.sourceSignalGroupName = sourceSignalGroupName;
 		this.source = source;
 		this.isCellsWithSignals = isCellsWithSignals;
 		this.isNormalised = isNormalised;
@@ -81,6 +86,9 @@ public class DefaultWarpedSignal implements XmlSerializable, IWarpedSignal {
 		this.target = c;
 		targetName = e.getAttributeValue("targetName");
 		source = UUID.fromString(e.getAttributeValue("source"));
+		sourceDatasetName = e.getAttributeValue("sourceDataset");
+		sourceSignalGroupName = e.getAttributeValue("sourceSignal");
+
 		isCellsWithSignals = Boolean.valueOf(e.getAttributeValue("isSignalsOnly"));
 		threshold = Integer.valueOf(e.getAttributeValue("threshold"));
 		isNormalised = Boolean.valueOf(e.getAttributeValue("isNormalised"));
@@ -93,15 +101,17 @@ public class DefaultWarpedSignal implements XmlSerializable, IWarpedSignal {
 
 	@Override
 	public IWarpedSignal duplicate() {
-		return new DefaultWarpedSignal(this.target.duplicate(), this.targetName, this.source, isCellsWithSignals,
-				this.threshold, this.isBinarised, this.isNormalised, this.image, this.imageWidth, this.pseudoColour,
-				this.displayThreshold);
+		return new DefaultWarpedSignal(this.target.duplicate(), this.targetName, this.sourceDatasetName,
+				this.sourceSignalGroupName, this.source, isCellsWithSignals, this.threshold, this.isBinarised,
+				this.isNormalised, this.image, this.imageWidth, this.pseudoColour, this.displayThreshold);
 	}
 
 	@Override
 	public Element toXmlElement() {
 		Element e = new Element("WarpedSignal");
 		e.setAttribute("targetName", targetName);
+		e.setAttribute("sourceDataset", sourceDatasetName);
+		e.setAttribute("sourceSignal", sourceSignalGroupName);
 		e.setAttribute("source", source.toString());
 		e.setAttribute("threshold", String.valueOf(threshold));
 		e.setAttribute("isSignalsOnly", String.valueOf(isCellsWithSignals));
@@ -124,6 +134,16 @@ public class DefaultWarpedSignal implements XmlSerializable, IWarpedSignal {
 	@Override
 	public String targetName() {
 		return targetName;
+	}
+
+	@Override
+	public String sourceSignalGroupName() {
+		return sourceSignalGroupName;
+	}
+
+	@Override
+	public String sourceDatasetName() {
+		return sourceDatasetName;
 	}
 
 	@Override

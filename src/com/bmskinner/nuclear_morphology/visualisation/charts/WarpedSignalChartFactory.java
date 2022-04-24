@@ -52,11 +52,14 @@ public class WarpedSignalChartFactory extends OutlineChartFactory {
 	private JFreeChart makeSignalWarpChart(ImageProcessor image) {
 
 		// Create the outline of the nucleus
-		JFreeChart chart = new ConsensusNucleusChartFactory(options).makeNucleusBareOutlineChart();
+		JFreeChart chart = createEmptyChart();
+
+//		JFreeChart chart = new ConsensusNucleusChartFactory(options).makeNucleusBareOutlineChart();
 
 		XYPlot plot = chart.getXYPlot();
 
 		LOGGER.finer("Creating outline datasets");
+
 		// Make outline of the components to draw
 		List<XYDataset> outlineDatasets = new ArrayList<>();
 

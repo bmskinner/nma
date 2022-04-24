@@ -46,8 +46,7 @@ public class SignalWarpingTablePanel extends TableDetailPanel implements Nuclear
 	private ExportableTable table;
 	private static final String PSEUDOCOLOUR_LBL = "Pseudocolour signals";
 	private static final String THRESHOLD_LBL = "Threshold";
-	private static final String EXPORT_WITH_LBL = "Export with consensus";
-	private static final String EXPORT_WITHOUT_LBL = "Export without consensus";
+	private static final String EXPORT_LBL = "Export image";
 
 	private static final String PSEUDOCOLOUR_TOOLTIP = "Peudocoloured signals using the signal group colour";
 	private static final String THRESHOLD_TOOLTIP = "Threshold the display to remove fainter signal";
@@ -58,8 +57,8 @@ public class SignalWarpingTablePanel extends TableDetailPanel implements Nuclear
 
 	/** Adjust thresholds of warped images */
 	private JSlider thresholdSlider;
-	private JButton exportWithButton;
-	private JButton exportWithoutButton;
+
+	private JButton exportButton;
 
 	private final JLabel ssimLabel = new JLabel("");
 	private final JButton ssimBtn = new JButton("Full MS-SSIM*");
@@ -127,6 +126,8 @@ public class SignalWarpingTablePanel extends TableDetailPanel implements Nuclear
 				thresholdSlider.setEnabled(false);
 			}
 
+			exportButton.setEnabled(selectedRow.length >= 1);
+
 		});
 
 		// Handle mouse events
@@ -153,16 +154,6 @@ public class SignalWarpingTablePanel extends TableDetailPanel implements Nuclear
 							// No action, user cancelled
 						}
 					}
-
-//						// Click the delete button
-//						if (col == model.getColumnIndex(Labels.Signals.Warper.TABLE_HEADER_DELETE_COLUMN)) {
-//							try {
-//								controller.deleteWarpedSignal(row);
-//							} catch (MissingLandmarkException | ComponentCreationException e1) {
-//								LOGGER.log(Loggable.STACK, "Cannot orient consensus", e);
-//							}
-//							controller.displayBlankChart();
-//						}
 				}
 			}
 		});
@@ -223,22 +214,19 @@ public class SignalWarpingTablePanel extends TableDetailPanel implements Nuclear
 		thresholdSlider.setEnabled(false);
 		panel.add(thresholdSlider);
 
-		exportWithButton = new JButton(EXPORT_WITH_LBL);
-		exportWithButton.setToolTipText(EXPORT_TOOLTIP);
-		exportWithButton.setEnabled(false);
-//		exportWithButton.addActionListener(e -> controller.exportImage(WITH_CONSENSUS));
-
-		exportWithoutButton = new JButton(EXPORT_WITHOUT_LBL);
-		exportWithoutButton.setToolTipText(EXPORT_TOOLTIP);
-		exportWithoutButton.setEnabled(false);
-//		exportWithoutButton.addActionListener(e -> controller.exportImage(WITHOUT_CONSENSUS));
-
 		return panel;
 	}
 
 	private JPanel createMSSSIMPanel() {
 		JPanel panel = new JPanel();
 		panel.setLayout(new FlowLayout(FlowLayout.LEFT));
+
+		exportButton = new JButton(EXPORT_LBL);
+		exportButton.setToolTipText(EXPORT_TOOLTIP);
+		exportButton.setEnabled(false);
+		exportButton.addActionListener(e -> new WarpedSignalExportDialog(getSelectedImages(table.getSelectedRows())));
+
+		panel.add(exportButton);
 
 		ssimBtn.addActionListener(
 
