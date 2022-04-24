@@ -258,6 +258,19 @@
 				</configuration>
 			</plugin>
 
+			<!-- Configure the jar creation to include automatic module -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<configuration>
+					<archive>
+						<manifestEntries>
+							<Automatic-Module-Name>com.bmskinner.nuclear_morphology</Automatic-Module-Name>
+						</manifestEntries>
+					</archive>
+				</configuration>
+			</plugin>
+
 			<!-- Create a jar with the dependencies included as a standalone version -->
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
