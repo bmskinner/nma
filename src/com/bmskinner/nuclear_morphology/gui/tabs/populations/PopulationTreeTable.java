@@ -41,260 +41,227 @@ import com.bmskinner.nuclear_morphology.gui.tabs.populations.DatasetsPanel.TreeS
 
 @SuppressWarnings("serial")
 public class PopulationTreeTable extends JXTreeTable {
-	
+
 	private static final Logger LOGGER = Logger.getLogger(PopulationTreeTable.class.getName());
 
-    /**
-     * The column index for the dataset name
-     */
-    public static final int COLUMN_NAME = 0;
+	/** The column index for the dataset name */
+	public static final int COLUMN_NAME = 0;
 
-    /**
-     * The column index for the dataset cell count
-     */
-    public static final int COLUMN_CELL_COUNT = 1;
+	/** The column index for the dataset cell count */
+	public static final int COLUMN_CELL_COUNT = 1;
 
-    /**
-     * The column index for the dataset chart colour
-     */
-    public static final int COLUMN_COLOUR = 2;
+	/** The column index for the dataset chart colour */
+	public static final int COLUMN_COLOUR = 2;
 
-    /**
-     * The default width for the name column
-     */
-    public static final int DEFAULT_NAME_COLUMN_WIDTH = 120;
+	/** The default width for the name column */
+	public static final int DEFAULT_NAME_COLUMN_WIDTH = 120;
 
-    /**
-     * The default width for the colour column
-     */
-    public static final int DEFAULT_COLOUR_COLUMN_WIDTH = 5;
+	/** The default width for the colour column */
+	public static final int DEFAULT_COLOUR_COLUMN_WIDTH = 5;
 
-    private TreeSelectionHandler treeListener;
+	private TreeSelectionHandler treeListener;
 
-    public PopulationTreeTable() {
-        super();
-        setDefaults();
-    }
+	public PopulationTreeTable() {
+		super();
+		setDefaults();
+	}
 
-    public PopulationTreeTable(TreeTableModel model) {
-        super(model);
-        setDefaults();
-    }
+	public PopulationTreeTable(TreeTableModel model) {
+		super(model);
+		setDefaults();
+	}
 
-    @Override
-    public boolean isCellEditable(int row, int column) {
-        return false;
-    }
+	@Override
+	public boolean isCellEditable(int row, int column) {
+		return false;
+	}
 
-    private void setDefaults() {
-        setEnabled(true);
-        setCellSelectionEnabled(false);
-        setColumnSelectionAllowed(false);
-        getTableHeader().setReorderingAllowed(false);
-        setRowSelectionAllowed(true);
-        setAutoCreateColumnsFromModel(false);
-        getColumnModel().getColumn(PopulationTreeTable.COLUMN_COLOUR)
-                .setCellRenderer(new PopulationTableCellRenderer());
-        getColumnModel().getColumn(PopulationTreeTable.COLUMN_NAME).setPreferredWidth(DEFAULT_NAME_COLUMN_WIDTH);
-        getColumnModel().getColumn(PopulationTreeTable.COLUMN_COLOUR).setPreferredWidth(DEFAULT_COLOUR_COLUMN_WIDTH);
-    }
+	private void setDefaults() {
+		setEnabled(true);
+		setCellSelectionEnabled(false);
+		setColumnSelectionAllowed(false);
+		getTableHeader().setReorderingAllowed(false);
+		setRowSelectionAllowed(true);
+		setAutoCreateColumnsFromModel(false);
+		getColumnModel().getColumn(PopulationTreeTable.COLUMN_COLOUR)
+				.setCellRenderer(new PopulationTableCellRenderer());
+		getColumnModel().getColumn(PopulationTreeTable.COLUMN_NAME).setPreferredWidth(DEFAULT_NAME_COLUMN_WIDTH);
+		getColumnModel().getColumn(PopulationTreeTable.COLUMN_COLOUR).setPreferredWidth(DEFAULT_COLOUR_COLUMN_WIDTH);
+	}
 
-    public void setTreeSelectionListener(TreeSelectionHandler t) {
-        treeListener = t;
-    }
+	public void setTreeSelectionListener(TreeSelectionHandler t) {
+		treeListener = t;
+	}
 
-    /**
-     * Get the index of the given dataset in the table model
-     * 
-     * @return the index
-     */
-    public int getRowIndex(@NonNull IAnalysisDataset dataset) {
+	/**
+	 * Get the index of the given dataset in the table model
+	 * 
+	 * @return the index
+	 */
+	public int getRowIndex(@NonNull IAnalysisDataset dataset) {
 
-        for (int row = 0; row < this.getRowCount(); row++) {
+		for (int row = 0; row < this.getRowCount(); row++) {
+			if (getValueAt(row, COLUMN_NAME)instanceof IAnalysisDataset d) {
+				UUID targetID = d.getId();
+				if (dataset.getId().equals(targetID)) {
+					return row;
+				}
+			}
+		}
+		return -1; // no dataset found
 
-            Object rowObject = this.getValueAt(row, COLUMN_NAME);
+	}
 
-            if (rowObject instanceof IAnalysisDataset) {
-                UUID targetID = ((IAnalysisDataset) rowObject).getId();
-                if (dataset.getId().equals(targetID)) {
-                    return row;
-                }
-            }
-        }
-        return -1; // no dataset found
+	/**
+	 * Select the given datasets in the tree table
+	 * 
+	 * @param dataset the dataset to select
+	 */
+	public void selectDatasets(@NonNull List<IAnalysisDataset> list) {
+		Map<Integer, Integer> selectedIndexes = new HashMap<>(0);
+		int selectedIndexOrder = 0;
+		for (IAnalysisDataset dataset : list) {
+			int index = getRowIndex(dataset);
 
-    }
+			selectedIndexes.put(index, selectedIndexOrder++);
 
-    /**
-     * Select the given datasets in the tree table
-     * 
-     * @param dataset the dataset to select
-     */
-    public void selectDatasets(@NonNull List<IAnalysisDataset> list) {
-        Map<Integer, Integer> selectedIndexes = new HashMap<Integer, Integer>(0);
-        int selectedIndexOrder = 0;
-        for (IAnalysisDataset dataset : list) {
-            int index = getRowIndex(dataset);
+			ListSelectionModel selectionModel = getSelectionModel();
 
-            selectedIndexes.put(index, selectedIndexOrder++);
+			TreeSelectionModel treeSelectionModel = getTreeSelectionModel();
 
-            ListSelectionModel selectionModel = getSelectionModel();
+			// if we don't remove the listener, the clearing will trigger an update
+			treeSelectionModel.removeTreeSelectionListener(treeListener);
 
-            TreeSelectionModel treeSelectionModel = getTreeSelectionModel();
+			// if the new selection is the same
+			// as the old, the charts will not recache
+			selectionModel.clearSelection();
 
-         // if we don't remove the listener, the clearing will trigger an update
-            treeSelectionModel.removeTreeSelectionListener(treeListener); 
-            
-         // if the new selection is the same
-         // as the old, the charts will not recache
-            selectionModel.clearSelection(); 
+			treeSelectionModel.addTreeSelectionListener(treeListener);
 
-            treeSelectionModel.addTreeSelectionListener(treeListener);
+			selectionModel.addSelectionInterval(index, index); // this will
+																// trigger a
+																// chart update
 
-            selectionModel.addSelectionInterval(index, index); // this will
-                                                               // trigger a
-                                                               // chart update
+		}
 
-        }
+		PopulationTableCellRenderer rend = (PopulationTableCellRenderer) getColumnModel().getColumn(COLUMN_COLOUR)
+				.getCellRenderer();
+		rend.update(selectedIndexes);
+	}
 
-        PopulationTableCellRenderer rend = (PopulationTableCellRenderer) getColumnModel().getColumn(COLUMN_COLOUR)
-                .getCellRenderer();
-        rend.update(selectedIndexes);
-    }
+	/**
+	 * Get the nodes for all selected datasets
+	 * 
+	 * @return
+	 */
+	public List<PopulationTreeTableNode> getSelectedNodes() {
 
-    /**
-     * Get the names of the datasets in this table
-     * 
-     * @return
-     */
-    public List<String> getDatasetNames() {
-        List<String> result = new ArrayList<>();
-        for (int i = 0; i < getRowCount(); i++) {
-            String s = getValueAt(i, PopulationTreeTable.COLUMN_NAME).toString();
-            result.add(s);
-        }
-        return result;
-    }
+		List<PopulationTreeTableNode> result = new ArrayList<>();
+		TreePath[] paths = getTreeSelectionModel().getSelectionPaths();
+		for (TreePath p : paths) {
+			PopulationTreeTableNode n = (PopulationTreeTableNode) p.getLastPathComponent();
+			result.add(n);
+		}
+		return result;
+	}
 
-    /**
-     * Get the nodes for all selected datasets
-     * 
-     * @return
-     */
-    public List<PopulationTreeTableNode> getSelectedNodes() {
+	/**
+	 * Find the datasets which are collapsed in the tree
+	 * 
+	 * @return
+	 */
+	public List<Object> getCollapsedRows() {
+		List<Object> collapsedRows = new ArrayList<>();
+		for (int row = 0; row < getRowCount(); row++) {
+			if (!isExpanded(row)) {
 
-        List<PopulationTreeTableNode> result = new ArrayList<>();
-        TreePath[] paths = getTreeSelectionModel().getSelectionPaths();
-        for (TreePath p : paths) {
-            PopulationTreeTableNode n = (PopulationTreeTableNode) p.getLastPathComponent();
-            result.add(n);
-        }
-        return result;
-    }
+				Object columnOneObject = getModel().getValueAt(row, PopulationTreeTable.COLUMN_NAME);
+				collapsedRows.add(columnOneObject);
+			}
+		}
+		LOGGER.finest("Got all collapsed rows");
+		return collapsedRows;
+	}
 
-    /**
-     * Find the datasets which are collapsed in the tree
-     * 
-     * @return
-     */
-    public List<Object> getCollapsedRows() {
-        List<Object> collapsedRows = new ArrayList<>();
-        for (int row = 0; row < getRowCount(); row++) {
-            if (!isExpanded(row)) {
+	/**
+	 * Set the dataset rows with the given IDs to be collapsed
+	 * 
+	 * @param collapsedRows
+	 */
+	public void setCollapsedRows(List<Object> collapsedRows) {
+		if (DatasetListManager.getInstance().hasDatasets()) {
 
-                Object columnOneObject = getModel().getValueAt(row, PopulationTreeTable.COLUMN_NAME);
-                collapsedRows.add(columnOneObject);
-            }
-        }
-        LOGGER.finest( "Got all collapsed rows");
-        return collapsedRows;
-    }
+			LOGGER.finest("Expanding rows");
+			for (int row = 0; row < getRowCount(); row++) {
 
-    /**
-     * Set the dataset rows with the given IDs to be collapsed
-     * 
-     * @param collapsedRows
-     */
-    public void setCollapsedRows(List<Object> collapsedRows) {
-        if (DatasetListManager.getInstance().hasDatasets()) {
+				Object columnOneObject = getModel().getValueAt(row, PopulationTreeTable.COLUMN_NAME);
 
-            LOGGER.finest( "Expanding rows");
-            for (int row = 0; row < getRowCount(); row++) {
+				if (collapsedRows.contains(columnOneObject)) {
+					collapseRow(row);
+				} else {
+					expandRow(row);
+				}
+			}
+		}
+	}
 
-                Object columnOneObject = getModel().getValueAt(row, PopulationTreeTable.COLUMN_NAME);
+	/**
+	 * Test if the given row of the table has a dataset
+	 * 
+	 * @param rowIndex
+	 * @return
+	 */
+	public boolean isDataset(int rowIndex) {
+		Object columnOneObject = getModel().getValueAt(rowIndex, PopulationTreeTable.COLUMN_NAME);
+		return columnOneObject instanceof IAnalysisDataset;
+	}
 
-                if (collapsedRows.contains(columnOneObject)) {
-                    collapseRow(row);
-                } else {
-                    expandRow(row);
-                }
-            }
-        }
-    }
+	public boolean isClusterGroup(int rowIndex) {
+		Object columnOneObject = getModel().getValueAt(rowIndex, PopulationTreeTable.COLUMN_NAME);
+		return columnOneObject instanceof IClusterGroup;
+	}
 
-    /**
-     * Test if the given row of the table has a dataset
-     * 
-     * @param rowIndex
-     * @return
-     */
-    public boolean isDataset(int rowIndex) {
-        Object columnOneObject = getModel().getValueAt(rowIndex, PopulationTreeTable.COLUMN_NAME);
-        return columnOneObject instanceof IAnalysisDataset;
-    }
-    
-    public boolean isClusterGroup(int rowIndex) {
-        Object columnOneObject = getModel().getValueAt(rowIndex, PopulationTreeTable.COLUMN_NAME);
-        return columnOneObject instanceof IClusterGroup;
-    }
-    
-    public boolean isWorkspace(int rowIndex) {
-        Object columnOneObject = getModel().getValueAt(rowIndex, PopulationTreeTable.COLUMN_NAME);
-        return columnOneObject instanceof IWorkspace;
-    }
+	public boolean isWorkspace(int rowIndex) {
+		Object columnOneObject = getModel().getValueAt(rowIndex, PopulationTreeTable.COLUMN_NAME);
+		return columnOneObject instanceof IWorkspace;
+	}
 
-    /**
-     * Get the dataset at the given row, or null if no dataset is present
-     * 
-     * @param rowIndex
-     * @return
-     */
-    public @Nullable IAnalysisDataset getDatasetAtRow(int rowIndex) {
-        Object columnOneObject = getModel().getValueAt(rowIndex, PopulationTreeTable.COLUMN_NAME);
+	/**
+	 * Get the dataset at the given row, or null if no dataset is present
+	 * 
+	 * @param rowIndex
+	 * @return
+	 */
+	public @Nullable IAnalysisDataset getDatasetAtRow(int rowIndex) {
+		Object columnOneObject = getModel().getValueAt(rowIndex, PopulationTreeTable.COLUMN_NAME);
+		if (columnOneObject instanceof IAnalysisDataset d)
+			return d;
+		return null;
+	}
 
-        if (columnOneObject instanceof IAnalysisDataset) {
-            return (IAnalysisDataset) columnOneObject; // row i, column 0
-        }
-        return null;
-    }
+	/**
+	 * Get the ClusterGroup at the given row, or null if no group is present
+	 * 
+	 * @param rowIndex
+	 * @return
+	 */
+	public @Nullable IClusterGroup getClusterGroupAtRow(int rowIndex) {
+		Object columnOneObject = getModel().getValueAt(rowIndex, PopulationTreeTable.COLUMN_NAME);
+		if (columnOneObject instanceof DefaultClusterGroup c)
+			return c;
+		return null;
+	}
 
-    /**
-     * Get the ClusterGroup at the given row, or null if no group is present
-     * 
-     * @param rowIndex
-     * @return
-     */
-    public @Nullable IClusterGroup getClusterGroupAtRow(int rowIndex) {
-        Object columnOneObject = getModel().getValueAt(rowIndex, PopulationTreeTable.COLUMN_NAME);
-
-        if (columnOneObject instanceof DefaultClusterGroup) {
-            return (IClusterGroup) columnOneObject; // row i, column 0
-        }
-        return null;
-    }
-    
-    /**
-     * Get the IWorkspace at the given row, or null if no workspace is present
-     * 
-     * @param rowIndex
-     * @return
-     */
-    public @Nullable IWorkspace getWorkspaceAtRow(int rowIndex){
-        Object columnOneObject = getModel().getValueAt(rowIndex, PopulationTreeTable.COLUMN_NAME);
-
-        if (columnOneObject instanceof IWorkspace) {
-            return (IWorkspace) columnOneObject; // row i, column 0
-        }
-        return null;
-    }
+	/**
+	 * Get the IWorkspace at the given row, or null if no workspace is present
+	 * 
+	 * @param rowIndex
+	 * @return
+	 */
+	public @Nullable IWorkspace getWorkspaceAtRow(int rowIndex) {
+		Object columnOneObject = getModel().getValueAt(rowIndex, PopulationTreeTable.COLUMN_NAME);
+		if (columnOneObject instanceof IWorkspace w)
+			return w;
+		return null;
+	}
 }

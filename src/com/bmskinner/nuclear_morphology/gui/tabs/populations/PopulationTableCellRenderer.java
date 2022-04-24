@@ -29,8 +29,8 @@ import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 
 /**
- * Allows for cell background to be coloured based on position in the
- * population list
+ * Allows for cell background to be coloured based on position in the population
+ * list
  * 
  * @author ben
  *
@@ -38,49 +38,46 @@ import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 @SuppressWarnings("serial")
 public class PopulationTableCellRenderer extends DefaultTableCellRenderer {
 
-    /**
-     * Stores the row index of a cell that was selected as a key, and the order
-     * in which it was selected as a value
-     */
-    private Map<Integer, Integer> indexList = new HashMap<>();
+	/**
+	 * Stores the row index of a cell that was selected as a key, and the order in
+	 * which it was selected as a value
+	 */
+	private Map<Integer, Integer> indexList = new HashMap<>();
 
-    public PopulationTableCellRenderer(Map<Integer, Integer> list) {
-        super();
-        this.indexList = list;
-    }
+	public PopulationTableCellRenderer(Map<Integer, Integer> list) {
+		super();
+		this.indexList = list;
+	}
 
-    public PopulationTableCellRenderer() {
-        super();
-    }
+	public PopulationTableCellRenderer() {
+		super();
+	}
 
-    public void update(Map<Integer, Integer> list) {
-        indexList = list;
-    }
+	public void update(Map<Integer, Integer> list) {
+		indexList = list;
+	}
 
-    @Override
-    public Component getTableCellRendererComponent(JTable table, Object value,
-            boolean isSelected, boolean hasFocus, int row, int column) {
+	@Override
+	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
+			int row, int column) {
 
-        Component l = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-        
-        l.setBackground(Color.WHITE); // only colour the selected rows
+		Component l = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 
-        if (indexList.containsKey(row)) {
+		l.setBackground(Color.WHITE); // only colour the selected rows
+		if (indexList.containsKey(row)) {
 
-            // check if the row is a cluster group
-            Object columnOneObject = table.getModel().getValueAt(row, PopulationTreeTable.COLUMN_NAME);
+			// check if the row is a cluster group
+			Object columnOneObject = table.getModel().getValueAt(row, PopulationTreeTable.COLUMN_NAME);
 
-            if (columnOneObject instanceof IAnalysisDataset) {
+			if (columnOneObject instanceof IAnalysisDataset) {
 
-                IAnalysisDataset dataset = (IAnalysisDataset) columnOneObject;
-                Paint colour = dataset.getDatasetColour().orElse(ColourSelecter.getColor(indexList.get(row)));
+				IAnalysisDataset dataset = (IAnalysisDataset) columnOneObject;
+				Paint colour = dataset.getDatasetColour().orElse(ColourSelecter.getColor(indexList.get(row)));
 
-                l.setBackground((Color) colour);
-            }
-
-        }
-
-        // Return the JLabel which renders the cell.
-        return l;
-    }
+				l.setBackground((Color) colour);
+			}
+		}
+		// Return the JLabel which renders the cell.
+		return l;
+	}
 }
