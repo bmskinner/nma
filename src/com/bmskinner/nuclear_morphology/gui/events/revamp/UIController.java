@@ -7,6 +7,7 @@ import java.util.logging.Logger;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.datasets.IClusterGroup;
 
 /**
  * Control dispatch of updates to UI panels
@@ -174,6 +175,11 @@ public class UIController {
 	public void fireClusterGroupsUpdated(@NonNull IAnalysisDataset d) {
 		for (ClusterGroupsUpdatedListener l : clusterGroupsUpdatedListeners)
 			l.clusterGroupsUpdated(d);
+	}
+
+	public void fireClusterGroupAdded(@NonNull IAnalysisDataset d, IClusterGroup g) {
+		for (ClusterGroupsUpdatedListener l : clusterGroupsUpdatedListeners)
+			l.clusterGroupAdded(d, g);
 	}
 
 }

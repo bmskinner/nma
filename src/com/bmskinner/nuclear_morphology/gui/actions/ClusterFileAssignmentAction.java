@@ -77,8 +77,7 @@ public class ClusterFileAssignmentAction extends SingleDatasetResultAction {
 			ClusterAnalysisResult r = (ClusterAnalysisResult) worker.get();
 			int size = r.getGroup().size();
 			LOGGER.info("Found " + size + " clusters");
-			UIController.getInstance().fireDatasetAdded(r.getDatasets());
-			UIController.getInstance().fireClusterGroupsUpdated(dataset);
+			UIController.getInstance().fireClusterGroupAdded(dataset, r.getGroup());
 		} catch (InterruptedException | ExecutionException e) {
 			LOGGER.warning("Error clustering");
 			LOGGER.log(Loggable.STACK, "Error clustering", e);

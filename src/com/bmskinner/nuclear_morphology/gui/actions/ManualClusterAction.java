@@ -62,7 +62,7 @@ public class ManualClusterAction extends SingleDatasetResultAction {
 			if (mc.isReadyToRun()) {
 				UserActionController.getInstance()
 						.userActionEventReceived(new UserActionEvent(this, UserActionEvent.SAVE, List.of(dataset)));
-				UIController.getInstance().fireDatasetAdded(dataset);
+
 				UIController.getInstance().fireClusterGroupsUpdated(dataset);
 			}
 			cancel();
@@ -200,6 +200,7 @@ public class ManualClusterAction extends SingleDatasetResultAction {
 
 			}
 			dataset.addClusterGroup(group);
+			UIController.getInstance().fireClusterGroupAdded(dataset, group);
 			readyToRun = true;
 		}
 

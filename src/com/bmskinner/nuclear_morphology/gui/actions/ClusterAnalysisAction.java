@@ -138,6 +138,9 @@ public class ClusterAnalysisAction extends SingleDatasetResultAction {
 			ClusterAnalysisResult r = (ClusterAnalysisResult) worker.get();
 			int size = r.getGroup().size();
 			LOGGER.info("Found " + size + " clusters");
+
+			UIController.getInstance().fireClusterGroupAdded(dataset, r.getGroup());
+
 		} catch (InterruptedException | ExecutionException e) {
 			LOGGER.warning("Error clustering");
 			LOGGER.log(Loggable.STACK, "Error clustering", e);
@@ -146,8 +149,6 @@ public class ClusterAnalysisAction extends SingleDatasetResultAction {
 
 		UserActionController.getInstance()
 				.userActionEventReceived(new UserActionEvent(this, UserActionEvent.SAVE, List.of(dataset)));
-		UIController.getInstance().fireDatasetAdded(dataset);
-		UIController.getInstance().fireClusterGroupsUpdated(dataset);
 		super.finished();
 	}
 }

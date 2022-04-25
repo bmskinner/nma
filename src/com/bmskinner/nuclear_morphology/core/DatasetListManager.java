@@ -283,12 +283,13 @@ public final class DatasetListManager implements DatasetAddedListener {
 		IAnalysisDataset result = null;
 
 		for (IAnalysisDataset root : this.getRootDatasets()) {
+			if (root.hasDirectChild(d))
+				return root;
 
 			if (root.hasAnyChild(d)) {
 
 				// Get the child of the root dataset which is a parent
 				// to the input dataset
-
 				for (IAnalysisDataset parent : root.getAllChildDatasets()) {
 					if (parent.hasDirectChild(d)) {
 						return parent;
@@ -326,9 +327,8 @@ public final class DatasetListManager implements DatasetAddedListener {
 	 */
 	public final synchronized boolean hasDataset(@NonNull UUID id) {
 		for (IAnalysisDataset d : list) {
-			if (d.getId().equals(id)) {
+			if (d.getId().equals(id))
 				return true;
-			}
 
 			for (IAnalysisDataset child : d.getAllChildDatasets()) {
 				if (child.getId().equals(id)) {

@@ -3,11 +3,12 @@ package com.bmskinner.nuclear_morphology.gui.events.revamp;
 import java.util.List;
 
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.datasets.IClusterGroup;
 
 public interface ClusterGroupsUpdatedListener {
 
 	/**
-	 * Inform the listener the given datasets have been selected for display
+	 * Inform the listener the given datasets have updated cluster groups
 	 * 
 	 * @param datasets
 	 */
@@ -19,5 +20,13 @@ public interface ClusterGroupsUpdatedListener {
 	 * @param datasets
 	 */
 	void clusterGroupsUpdated(IAnalysisDataset dataset);
+
+	/**
+	 * Inform listeners that the dataset has added the given group
+	 * 
+	 * @param dataset
+	 * @param group
+	 */
+	void clusterGroupAdded(IAnalysisDataset dataset, IClusterGroup group);
 
 }

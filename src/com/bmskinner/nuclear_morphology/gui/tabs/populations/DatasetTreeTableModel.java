@@ -40,34 +40,65 @@ public class DatasetTreeTableModel extends AbstractTreeTableModel {
 	 * 
 	 * @param dataset
 	 */
-	public void addDataset(@NonNull IAnalysisDataset dataset) {
+	public TreePath addDataset(@NonNull IAnalysisDataset dataset) {
 
 		if (hasNode(dataset))
-			return; // ignore datasets already present in the model
+			return null; // ignore datasets already present in the model
 
-		LOGGER.finer("Adding dataset " + dataset.getName() + " to population model");
+		LOGGER.fine("Adding dataset " + dataset.getName() + " to population model");
 
 		// If dataset is root, parent will be the same dataset
 		IAnalysisDataset parent = DatasetListManager.getInstance().getParent(dataset);
+		if (parent == null) {
+			LOGGER.fine("No parent dataset found for " + dataset.getName());
+			return null;
+		}
+
 		MutableTreeTableNode parentNode = dataset.isRoot() ? (MutableTreeTableNode) getRoot() : getNode(parent);
 
-		MutableTreeTableNode newNode = createNodes(dataset);
+		MutableTreeTableNode newNode = createNode(dataset);
 		int newIndex = parentNode.getChildCount();
 		parentNode.insert(newNode, newIndex);
 		modelSupport.fireChildAdded(new TreePath(getPathToRoot(parentNode)), newIndex, newNode);
+		return new TreePath(getPathToRoot(newNode));
 	}
 
-	public void addWorkspace(@NonNull IWorkspace ws) {
+	/**
+	 * @param group
+	 * @return the path to the new node, or null if no new node was created
+	 */
+	public TreePath addClusterGroup(@NonNull IClusterGroup group) {
+
+		if (hasNode(group))
+			return null; // ignore groups already present in the model
+
+		for (IAnalysisDataset d : DatasetListManager.getInstance().getAllDatasets()) {
+			if (d.hasClusterGroup(group)) {
+				LOGGER.fine("Adding group " + group.getName() + " to population model");
+				MutableTreeTableNode parentNode = getNode(d);
+				MutableTreeTableNode newNode = createNode(group);
+				int newIndex = parentNode.getChildCount();
+				parentNode.insert(newNode, newIndex);
+				TreePath newPath = new TreePath(getPathToRoot(parentNode));
+				modelSupport.fireChildAdded(newPath, newIndex, newNode);
+				return new TreePath(getPathToRoot(newNode));
+			}
+		}
+		return null;
+	}
+
+	public TreePath addWorkspace(@NonNull IWorkspace ws) {
 
 		if (this.getNode(ws) != null)
-			return; // ignore workspaces already present
+			return null; // ignore workspaces already present
 
 		LOGGER.finer("Adding workspace " + ws.getName() + " to population model");
 		MutableTreeTableNode parentNode = (MutableTreeTableNode) this.getRoot();
-		MutableTreeTableNode newNode = createNodes(ws);
+		MutableTreeTableNode newNode = createNode(ws);
 		int newIndex = parentNode.getChildCount();
 		parentNode.insert(newNode, newIndex);
 		modelSupport.fireChildAdded(new TreePath(getPathToRoot(parentNode)), newIndex, newNode);
+		return new TreePath(getPathToRoot(newNode));
 	}
 
 	/**
@@ -78,29 +109,40 @@ public class DatasetTreeTableModel extends AbstractTreeTableModel {
 	 * @param dataset the dataset to add
 	 * @return
 	 */
-	private MutableTreeTableNode createNodes(@NonNull IAnalysisDataset dataset) {
+	private MutableTreeTableNode createNode(@NonNull IClusterGroup group) {
+		ClusterGroupTreeTableNode n = new ClusterGroupTreeTableNode(group);
+		for (UUID clusterID : group.getUUIDs()) {
+			IAnalysisDataset clusterDataset = DatasetListManager.getInstance().getDataset(clusterID);
+			MutableTreeTableNode childNode = createNode(clusterDataset);
+			n.add(childNode);
+		}
+		return n;
+	}
+
+	/**
+	 * Create a node in the tree table, recursively adding all the children of the
+	 * given dataset id. If the child of a dataset is not already in the names list,
+	 * add it
+	 * 
+	 * @param dataset the dataset to add
+	 * @return
+	 */
+	private MutableTreeTableNode createNode(@NonNull IAnalysisDataset dataset) {
 		DatasetTreeTableNode n = new DatasetTreeTableNode(dataset);
 
 		// Add cluster groups separately
 		Set<UUID> clusterIDs = new HashSet<>(); // track the child datasets in clusters, so they are not added twice
-
 		for (IClusterGroup group : dataset.getClusterGroups()) {
-			ClusterGroupTreeTableNode cgNode = new ClusterGroupTreeTableNode(group);
+			clusterIDs.addAll(group.getUUIDs());
+			MutableTreeTableNode cgNode = createNode(group);
 			n.add(cgNode);
-
-			for (UUID clusterID : group.getUUIDs()) {
-				IAnalysisDataset clusterDataset = DatasetListManager.getInstance().getDataset(clusterID);
-				MutableTreeTableNode childNode = createNodes(clusterDataset);
-				cgNode.add(childNode);
-				clusterIDs.add(clusterID);
-			}
 
 		}
 
 		// Add remaining child datasets not in clusters
 		for (IAnalysisDataset childDataset : dataset.getChildDatasets()) {
 			if (!clusterIDs.contains(childDataset.getId())) {
-				MutableTreeTableNode childNode = createNodes(childDataset);
+				MutableTreeTableNode childNode = createNode(childDataset);
 				n.add(childNode);
 			}
 		}
@@ -115,13 +157,13 @@ public class DatasetTreeTableModel extends AbstractTreeTableModel {
 	 * @param dataset the dataset to add
 	 * @return
 	 */
-	private MutableTreeTableNode createNodes(@NonNull IWorkspace ws) {
+	private MutableTreeTableNode createNode(@NonNull IWorkspace ws) {
 		WorkspaceTreeTableNode n = new WorkspaceTreeTableNode(ws);
 
 		Set<File> files = ws.getFiles();
 		for (IAnalysisDataset d : DatasetListManager.getInstance().getRootDatasets()) {
 			if (files.contains(d.getSavePath())) {
-				n.add(createNodes(d));
+				n.add(createNode(d));
 			}
 		}
 

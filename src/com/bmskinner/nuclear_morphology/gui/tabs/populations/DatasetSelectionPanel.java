@@ -2,30 +2,29 @@ package com.bmskinner.nuclear_morphology.gui.tabs.populations;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.KeyboardFocusManager;
-import java.awt.event.KeyEvent;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.logging.Logger;
 
 import javax.swing.JScrollPane;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
+import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.datasets.IClusterGroup;
 import com.bmskinner.nuclear_morphology.core.DatasetListManager;
+import com.bmskinner.nuclear_morphology.gui.CtrlPressedListener;
+import com.bmskinner.nuclear_morphology.gui.events.revamp.ClusterGroupsUpdatedListener;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.DatasetAddedListener;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.SwatchUpdatedListener;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
-public class DatasetSelectionPanel extends DetailPanel implements DatasetAddedListener, SwatchUpdatedListener {
+public class DatasetSelectionPanel extends DetailPanel
+		implements DatasetAddedListener, SwatchUpdatedListener, ClusterGroupsUpdatedListener {
 
 	private static final Logger LOGGER = Logger.getLogger(DatasetsPanel.class.getName());
 
@@ -35,13 +34,7 @@ public class DatasetSelectionPanel extends DetailPanel implements DatasetAddedLi
 
 	private final TreeSelectionHandler treeListener = new TreeSelectionHandler();
 
-	private boolean ctrlPressed = false;
-
-	public boolean isCtrlPressed() {
-		synchronized (DatasetSelectionPanel.class) {
-			return ctrlPressed;
-		}
-	}
+	private CtrlPressedListener ctrlPress = new CtrlPressedListener(this);
 
 	public DatasetSelectionPanel() {
 		super();
@@ -52,33 +45,11 @@ public class DatasetSelectionPanel extends DetailPanel implements DatasetAddedLi
 		treeTable = new DatasetTreeTable(model);
 		treeTable.getTreeSelectionModel().addTreeSelectionListener(treeListener);
 
-		JScrollPane populationScrollPane = new JScrollPane(treeTable);
-
-		// Track when the Ctrl key is down
-		KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(ke -> {
-
-			synchronized (DatasetsPanel.class) {
-				switch (ke.getID()) {
-				case KeyEvent.KEY_PRESSED:
-					if (ke.getKeyCode() == KeyEvent.VK_CONTROL)
-						ctrlPressed = true;
-					break;
-				case KeyEvent.KEY_RELEASED:
-					if (ke.getKeyCode() == KeyEvent.VK_CONTROL)
-						ctrlPressed = false;
-					break;
-				default:
-					break;
-				}
-
-				return false;
-			}
-		});
-
-		this.add(populationScrollPane, BorderLayout.CENTER);
+		add(new JScrollPane(treeTable), BorderLayout.CENTER);
 
 		uiController.addDatasetAddedListener(this);
 		uiController.addSwatchUpdatedListener(this);
+		uiController.addClusterGroupsUpdatedListener(this);
 	}
 
 	@Override
@@ -113,17 +84,32 @@ public class DatasetSelectionPanel extends DetailPanel implements DatasetAddedLi
 	 * @param dataset
 	 */
 	private synchronized void addDataset(final List<IAnalysisDataset> datasets) {
-		for (IAnalysisDataset d : datasets)
-			model.addDataset(d);
-
-//		update(List.of(datasets.get(datasets.size() - 1)));
-		// This will also trigger a dataset update event as the dataset
-		// is selected, so don't trigger another update here.
+		for (IAnalysisDataset d : datasets) {
+			TreePath path = model.addDataset(d);
+			treeTable.expandPath(path);
+		}
 	}
 
 	@Override
 	public void swatchUpdated() {
 		update(getDatasets());
+	}
+
+	@Override
+	public void clusterGroupsUpdated(List<IAnalysisDataset> datasets) {
+		// No action
+	}
+
+	@Override
+	public void clusterGroupsUpdated(IAnalysisDataset dataset) {
+		// No action
+	}
+
+	@Override
+	public void clusterGroupAdded(IAnalysisDataset dataset, IClusterGroup group) {
+		// Update the model
+		TreePath path = model.addClusterGroup(group);
+		treeTable.expandPath(path);
 	}
 
 	/**
@@ -141,13 +127,19 @@ public class DatasetSelectionPanel extends DetailPanel implements DatasetAddedLi
 		@Override
 		public void valueChanged(TreeSelectionEvent e) {
 			try {
-				if (!isCtrlPressed())
+
+				if (!ctrlPress.isCtrlPressed())
 					datasetSelectionOrder.clear();
 
-				// Track the datasets currently selected
+				// Find the selected rows
 				TreeSelectionModel lsm = (TreeSelectionModel) e.getSource();
 
-				datasetSelectionOrder.addAll(getSelectedDatasets(lsm));
+				// Track the order in which the rows are selected
+				setSelectedDatasets(lsm);
+//
+//				LOGGER.fine("Selection order:");
+//				for (IAnalysisDataset d : datasetSelectionOrder)
+//					LOGGER.fine(d.toString());
 
 				DatasetListManager.getInstance().setSelectedDatasets(datasetSelectionOrder);
 
@@ -165,21 +157,24 @@ public class DatasetSelectionPanel extends DetailPanel implements DatasetAddedLi
 		 * @return a map of which indexes are selected: table index : dataset index in
 		 *         the selection order
 		 */
-		private List<IAnalysisDataset> getSelectedDatasets(TreeSelectionModel lsm) {
+		private void setSelectedDatasets(TreeSelectionModel lsm) {
 
-			List<IAnalysisDataset> datasets = new ArrayList<>();
-
+			// Add all the datasets in the selection to a new list
 			int[] selectedRows = lsm.getSelectionRows();
+			List<IAnalysisDataset> datasets = new ArrayList<>();
 			for (int i = 0; i < selectedRows.length; i++) {
-				LOGGER.fine("Selected row " + selectedRows[i]);
-				if (treeTable.getValueAt(selectedRows[i], 0)instanceof IAnalysisDataset d)
+//				LOGGER.fine("Selected row " + selectedRows[i]);
+				if (treeTable.getValueAt(selectedRows[i], 0)instanceof IAnalysisDataset d) {
 					datasets.add(d);
+					if (!datasetSelectionOrder.contains(d))
+						datasetSelectionOrder.add(d);
+				}
 			}
 
-			// Ctrl deselect happened - a dataset has been deselected
-			// and must be removed from the datasetSelectionOrder map
+			// If ctrl deselect happened - a dataset is deselected
+			// and must be removed from the datasetSelectionOrder list
 			if (datasetSelectionOrder.size() > datasets.size()) {
-				// Go through tree table and check for deselected dataset
+				// Go through tree table and check for the deselected dataset
 				Iterator<IAnalysisDataset> it = datasetSelectionOrder.iterator();
 
 				while (it.hasNext()) {
@@ -188,79 +183,7 @@ public class DatasetSelectionPanel extends DetailPanel implements DatasetAddedLi
 						it.remove();
 				}
 			}
-			return datasets;
-
 		}
-
-		private Map<Integer, Integer> getSelectedIndexes(TreeSelectionModel lsm) {
-			Map<Integer, Integer> selectedIndexes = new HashMap<>();
-			List<IAnalysisDataset> datasets = new ArrayList<>();
-
-			int[] selectedRows = lsm.getSelectionRows();
-			for (int i = 0; i < selectedRows.length; i++) {
-				LOGGER.fine("Selected row " + selectedRows[i]);
-				if (treeTable.getValueAt(selectedRows[i], 0)instanceof IAnalysisDataset d) {
-					datasets.add(d);
-
-					datasetSelectionOrder.add(d);
-
-					int selectionIndex = 0;
-					for (IAnalysisDataset an : datasetSelectionOrder) {
-						if (an == d) {
-							selectedIndexes.put(i, selectionIndex);
-							break;
-						}
-						selectionIndex++;
-					}
-				}
-			}
-
-			// Ctrl deselect happened - a dataset has been deselected
-			// and must be removed from the datasetSelectionOrder map
-			if (datasetSelectionOrder.size() > datasets.size()) {
-				// Go through tree table and check for deselected dataset
-				Iterator<IAnalysisDataset> it = datasetSelectionOrder.iterator();
-
-				while (it.hasNext()) {
-					IAnalysisDataset d = it.next();
-					if (!datasets.contains(d)) {
-						it.remove();
-					}
-				}
-
-				// Adjust the indexes of the remaining datasets
-				fixDiscontinuousPositions(selectedIndexes);
-
-			}
-			return selectedIndexes;
-
-		}
-
-		private Map<Integer, Integer> fixDiscontinuousPositions(Map<Integer, Integer> selectedIndexes) {
-			// Find a discontinuity in the indexes - one value is missing
-			List<Integer> values = new ArrayList<>(selectedIndexes.values());
-			Collections.sort(values);
-
-			int prev = -1;
-			for (int i : values) {
-				if (i - prev > 1) {
-					// a value was skipped
-					for (Entry<Integer, Integer> entry : selectedIndexes.entrySet()) {
-						int k = entry.getKey();
-						int j = entry.getValue();
-						if (j == i) { // this is the entry that is too high
-							selectedIndexes.put(k, j - 1); // Move index down by
-							// 1
-						}
-					}
-					fixDiscontinuousPositions(selectedIndexes); // there will now be a new
-					// discontinuity. Fix until end of list
-				}
-				prev = i;
-			}
-			return selectedIndexes;
-		}
-
 	}
 
 }

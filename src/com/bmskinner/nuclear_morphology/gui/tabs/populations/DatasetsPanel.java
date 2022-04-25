@@ -525,4 +525,5 @@ public class DatasetsPanel extends DetailPanel implements DatasetAddedListener, 
 	public void swatchUpdated() {
 		update(getDatasets());
 	}
+
 }

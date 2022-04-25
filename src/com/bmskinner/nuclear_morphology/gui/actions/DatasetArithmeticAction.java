@@ -145,7 +145,8 @@ public class DatasetArithmeticAction extends MultiDatasetResultAction {
 				try {
 					root.getCollection().getProfileManager().copySegmentsAndLandmarksTo(newCollection);
 					root.addChildCollection(newCollection);
-					UIController.getInstance().fireDatasetAdded(root);
+					IAnalysisDataset d = root.getChildDataset(newCollection.getId());
+					UIController.getInstance().fireDatasetAdded(d);
 				} catch (ProfileException | MissingProfileException e) {
 					LOGGER.warning("Error: unable to complete operation");
 					LOGGER.log(Loggable.STACK, "Error copying profile offsets", e);

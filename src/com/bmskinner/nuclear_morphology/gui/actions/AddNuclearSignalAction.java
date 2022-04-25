@@ -18,12 +18,14 @@ package com.bmskinner.nuclear_morphology.gui.actions;
 
 import java.io.File;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
+import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalDetectionMethod;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
@@ -103,9 +105,15 @@ public class AddNuclearSignalAction extends SingleDatasetResultAction {
 	public void finished() {
 		LOGGER.finer("Finished signal detection");
 		cleanup(); // remove the property change listener
-		UIController.getInstance().fireDatasetAdded(dataset);
+		try {
+			IAnalysisResult r = worker.get();
 
-//        getDatasetEventHandler().fireDatasetEvent(UserActionEvent.RECACHE_CHARTS, dataset);
+			UIController.getInstance().fireDatasetAdded(r.getFirstDataset());
+
+		} catch (InterruptedException | ExecutionException e) {
+			LOGGER.warning("Error getting signal dataset");
+			Thread.currentThread().interrupt();
+		}
 		cancel();
 	}
 

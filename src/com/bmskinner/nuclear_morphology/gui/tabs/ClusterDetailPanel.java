@@ -337,4 +337,9 @@ public class ClusterDetailPanel extends TableDetailPanel implements ClusterGroup
 		refreshCache(dataset);
 	}
 
+	@Override
+	public void clusterGroupAdded(IAnalysisDataset dataset, IClusterGroup group) {
+		refreshCache(dataset);
+	}
+
 }

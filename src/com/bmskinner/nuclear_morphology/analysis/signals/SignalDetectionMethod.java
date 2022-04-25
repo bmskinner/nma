@@ -18,7 +18,6 @@ package com.bmskinner.nuclear_morphology.analysis.signals;
 
 import java.awt.Color;
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -43,6 +42,7 @@ import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalCollection;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.signals.UnavailableSignalGroupException;
+import com.bmskinner.nuclear_morphology.core.DatasetListManager;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -100,8 +100,10 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
 	@Override
 	public IAnalysisResult call() throws Exception {
 		run();
-		postDetectionFilter();
-		return new DefaultAnalysisResult(dataset);
+		Optional<IAnalysisDataset> r = postDetectionFilter();
+		if (r.isEmpty())
+			return new DefaultAnalysisResult(dataset);
+		return new DefaultAnalysisResult(r.get());
 	}
 
 	protected void run() {
@@ -149,13 +151,6 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
 				SignalMeasurer.calculateSignalDistancesFromCoM(n);
 				SignalMeasurer.calculateFractionalSignalDistancesFromCoM(n);
 				SignalMeasurer.calculateSignalAngles(n);
-
-//				if (n.hasLandmark(Landmark.ORIENTATION_POINT)) {
-//					n.calculateSignalAnglesFromPoint(n.getBorderPoint(Landmark.ORIENTATION_POINT));
-//				} else {
-//					n.calculateSignalAnglesFromPoint(n.getBorderPoint(Landmark.REFERENCE_POINT));
-//				}
-
 			}
 		} catch (ImageImportException | UnavailableBorderPointException | MissingLandmarkException
 				| ComponentCreationException e) {
@@ -164,21 +159,17 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
 		}
 	}
 
-	private void postDetectionFilter() {
+	private Optional<IAnalysisDataset> postDetectionFilter() {
 
-		List<ICellCollection> signalPopulations = dividePopulationBySignals(dataset.getCollection(),
+		Optional<ICellCollection> c = dividePopulationBySignals(dataset.getCollection(),
 				options.getUUID(HashOptions.SIGNAL_GROUP_ID));
 
-		List<IAnalysisDataset> list = new ArrayList<>();
+		if (c.isEmpty())
+			return Optional.empty();
 
-		for (ICellCollection collection : signalPopulations) {
-			LOGGER.finer("Processing " + collection.getName());
-			processSubPopulation(collection);
-			LOGGER.finer("Processed " + collection.getName());
-			list.add(dataset.getChildDataset(collection.getId()));
-		}
-
-		LOGGER.fine("Finished processing sub-populations");
+		ICellCollection signalPopulation = c.get();
+		LOGGER.finer("Processing " + signalPopulation.getName());
+		return Optional.of(processSubPopulation(signalPopulation));
 	}
 
 	/**
@@ -186,7 +177,7 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
 	 * 
 	 * @param collection
 	 */
-	private void processSubPopulation(@NonNull ICellCollection collection) {
+	private IAnalysisDataset processSubPopulation(@NonNull ICellCollection collection) {
 
 		try {
 			LOGGER.finer("Creating new analysis dataset for " + collection.getName());
@@ -196,9 +187,11 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
 
 			dataset.addChildDataset(subDataset);
 			dataset.getCollection().getProfileManager().copySegmentsAndLandmarksTo(subDataset);
-
+			assert DatasetListManager.getInstance().hasDataset(subDataset.getId());
+			return dataset.getChildDataset(subDataset.getId());
 		} catch (Exception e) {
 			LOGGER.log(Loggable.STACK, "Error processing signal group", e);
+			return null;
 		}
 	}
 
@@ -210,15 +203,15 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
 	 * @param signalGroup the signal group to split on
 	 * @return a list of new collections
 	 */
-	private List<ICellCollection> dividePopulationBySignals(@NonNull ICellCollection r, @NonNull UUID signalGroup) {
+	private Optional<ICellCollection> dividePopulationBySignals(@NonNull ICellCollection r, @NonNull UUID signalGroup) {
 
-		List<ICellCollection> signalPopulations = new ArrayList<>();
 		LOGGER.fine("Dividing population by signals...");
 
 		Optional<ISignalGroup> og = r.getSignalGroup(signalGroup);
 
 		if (!og.isPresent())
-			return signalPopulations;
+			return Optional.empty();
+
 		ISignalGroup group = og.get();
 
 		group.setVisible(true);
@@ -230,9 +223,9 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
 			ICellCollection listCollection = new VirtualDataset(dataset, group.getGroupName() + "_with_signals",
 					UUID.randomUUID());
 			listCollection.addAll(list);
-			signalPopulations.add(listCollection);
+			return Optional.of(listCollection);
 		}
-		return signalPopulations;
+		return Optional.empty();
 	}
 
 }
