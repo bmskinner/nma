@@ -42,7 +42,7 @@ import com.bmskinner.nuclear_morphology.gui.tabs.comparisons.ComparisonDetailPan
 import com.bmskinner.nuclear_morphology.gui.tabs.consensus.ConsensusNucleusPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.editing.DatasetEditingPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.nuclear.NuclearStatisticsPanel;
-import com.bmskinner.nuclear_morphology.gui.tabs.populations.DatasetsPanel;
+import com.bmskinner.nuclear_morphology.gui.tabs.populations.DatasetSelectionPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.profiles.NucleusProfilesPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.segments.SegmentsDetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.signals.SignalsDetailPanel;
@@ -132,7 +132,7 @@ public class DockableMainWindow extends AbstractMainWindow {
 			// ---------------
 			// Create the consensus chart
 			// ---------------
-			DatasetsPanel populationsPanel = new DatasetsPanel();
+			DatasetSelectionPanel populationsPanel = new DatasetSelectionPanel();
 			ConsensusNucleusPanel consensusNucleusPanel = new ConsensusNucleusPanel();
 			detailPanels.add(consensusNucleusPanel);
 
