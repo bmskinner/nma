@@ -45,7 +45,7 @@ public class DatasetMergeMethodTest {
 		for(Nucleus n : d1.getCollection().getNuclei()) {
 			Map<Landmark, Integer> tags = n.getLandmarks();
 			for(Landmark tag : tags.keySet()) {
-				if(Landmark.REFERENCE_POINT.equals(tag))
+				if(OrientationMark.REFERENCE.equals(tag))
 					continue;
 				n.setLandmark(tag, n.getBorderIndex(tag)+10);
 			}
@@ -83,7 +83,7 @@ public class DatasetMergeMethodTest {
 		for(Nucleus n : d1.getCollection().getNuclei()) {
 			Map<Landmark, Integer> tags = n.getLandmarks();
 			for(Landmark tag : tags.keySet()) {
-				if(Landmark.REFERENCE_POINT.equals(tag))
+				if(OrientationMark.REFERENCE.equals(tag))
 					continue;
 				n.setLandmark(tag, n.getBorderIndex(tag)+10);
 			}
@@ -106,7 +106,7 @@ public class DatasetMergeMethodTest {
 			Nucleus test = result.getCollection().getNucleus(n.getID()).get();
 			Map<Landmark, Integer> tags = n.getLandmarks();
 			for(Landmark tag : tags.keySet()) {
-				if(Landmark.REFERENCE_POINT.equals(tag))
+				if(OrientationMark.REFERENCE.equals(tag))
 					continue;
 				assertEquals(tag.toString(), 
 						tags.get(tag).intValue(), 

@@ -64,7 +64,7 @@ public class SignalMeasurer {
 
 //		IPoint p = oriented.hasLandmark(Landmark.ORIENTATION_POINT)
 //				? oriented.getBorderPoint(Landmark.ORIENTATION_POINT)
-//				: oriented.getBorderPoint(Landmark.REFERENCE_POINT);
+//				: oriented.getBorderPoint(OrientationMark.REFERENCE);
 
 		ISignalCollection sc = n.getSignalCollection();
 		ISignalCollection sco = oriented.getSignalCollection();

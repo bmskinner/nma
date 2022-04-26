@@ -439,7 +439,7 @@ public class DefaultMesh implements Mesh {
     	LOGGER.finest( "Determining vertex proportions");
 
     	try {
-    		List<IProfileSegment> segments = component.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT).getOrderedSegments();
+    		List<IProfileSegment> segments = component.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE).getOrderedSegments();
 
     		for(int segNumber=0; segNumber<segments.size(); segNumber++) {
     			IProfileSegment seg = segments.get(segNumber);
@@ -479,7 +479,7 @@ public class DefaultMesh implements Mesh {
     private void createPeripheralVertices() throws MeshCreationException {
         LOGGER.finest( "Creating peripheral vertices");
         try {
-            List<IProfileSegment> list = component.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT).getOrderedSegments();
+            List<IProfileSegment> list = component.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE).getOrderedSegments();
 
             Set<Integer> segs = segmentVertexProportions.keySet();
             for (int segIndex : segs) {
@@ -504,7 +504,7 @@ public class DefaultMesh implements Mesh {
 
                     // Since the segments have been offset to the RP, correct back to the actual nucleus index
                     int correctedIndex = CellularComponent
-                            .wrapIndex(index + component.getBorderIndex(Landmark.REFERENCE_POINT), segment.getProfileLength());
+                            .wrapIndex(index + component.getBorderIndex(OrientationMark.REFERENCE), segment.getProfileLength());
 
                     LOGGER.finest( "Fetching point at index " + correctedIndex);
 

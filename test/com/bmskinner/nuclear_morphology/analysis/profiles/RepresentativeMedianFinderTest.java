@@ -31,7 +31,7 @@ public class RepresentativeMedianFinderTest extends AbstractProfileMethodTest {
 				.baseHeight(40).baseWidth(40).segmented().build();
 		
 		ISegmentedProfile template = d.getCollection()
-				.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);
+				.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE, Stats.MEDIAN);
 
 				
 		RepresentativeMedianFinder finder = new RepresentativeMedianFinder(d.getCollection());
@@ -61,7 +61,7 @@ public class RepresentativeMedianFinderTest extends AbstractProfileMethodTest {
 				.segmented().build();
 		
 		ISegmentedProfile template = d.getCollection()
-				.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);
+				.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE, Stats.MEDIAN);
 
 				
 		RepresentativeMedianFinder finder = new RepresentativeMedianFinder(d.getCollection());
@@ -80,7 +80,7 @@ public class RepresentativeMedianFinderTest extends AbstractProfileMethodTest {
 					.randomOffsetProfiles(false)
 					.profiled().build();
 			ISegmentedProfile template = dataset.getCollection()
-					.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);
+					.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE, Stats.MEDIAN);
 
 			RepresentativeMedianFinder finder = new RepresentativeMedianFinder(dataset.getCollection());
 			
@@ -99,7 +99,7 @@ public class RepresentativeMedianFinderTest extends AbstractProfileMethodTest {
 					.randomOffsetProfiles(false)
 					.profiled().build();
 			ISegmentedProfile template = dataset.getCollection()
-					.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);
+					.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE, Stats.MEDIAN);
 
 					
 			RepresentativeMedianFinder finder = new RepresentativeMedianFinder(dataset.getCollection());

@@ -33,10 +33,10 @@ import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
-import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
+import com.bmskinner.nuclear_morphology.components.rules.OrientationMark;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
@@ -239,7 +239,7 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 
             ICellCollection collection = datasets.get(i).getCollection();
             try {
-                IProfileSegment medianSeg = collection.getProfileCollection().getSegmentAt(Landmark.REFERENCE_POINT,
+                IProfileSegment medianSeg = collection.getProfileCollection().getSegmentAt(OrientationMark.REFERENCE,
                         segPosition);
 
                 List<Number> list = new ArrayList<>();
@@ -248,7 +248,7 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 
                 	try {
 
-                		IProfileSegment seg = n.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT).getSegment(medianSeg.getID());
+                		IProfileSegment seg = n.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE).getSegment(medianSeg.getID());
 
                 		double length = 0;
                 		int indexLength = seg.length();
@@ -300,7 +300,7 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
             IProfileSegment medianSeg;
             try {
                 medianSeg = collection.getProfileCollection()
-                        .getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN)
+                        .getSegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE, Stats.MEDIAN)
                         .getSegments().get(options.getSegPosition());
 //                        .getSegmentAt(segPosition);
             } catch (MissingLandmarkException | ProfileException | MissingProfileException e) {
@@ -314,7 +314,7 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 
             	try {
 
-            		ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
+            		ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE);
 
             		IProfileSegment seg = profile.getSegment(medianSeg.getID());
 

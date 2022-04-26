@@ -43,9 +43,9 @@ import com.bmskinner.nuclear_morphology.components.mesh.MeshCreationException;
 import com.bmskinner.nuclear_morphology.components.mesh.MeshFace;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
-import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
+import com.bmskinner.nuclear_morphology.components.rules.OrientationMark;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import weka.clusterers.HierarchicalClusterer;
@@ -395,7 +395,7 @@ public class TreeBuildingMethod extends CellClusteringMethod {
         	if(options.getBoolean(t.toString()))    {	
         		LOGGER.finer("Adding attribute for "+t.toString());
         		// Interpolate the profile to the median length
-                IProfile p = n.getProfile(t, Landmark.REFERENCE_POINT);
+                IProfile p = n.getProfile(t, OrientationMark.REFERENCE);
 
                 for (int i = 0; i < pointsToSample; i++) {
                     Attribute att = attributes.get(attNumber);
@@ -410,7 +410,7 @@ public class TreeBuildingMethod extends CellClusteringMethod {
                 Attribute att = attributes.get(attNumber++);
                 
                 if(Measurement.VARIABILITY.equals(stat)) {
-                	 inst.setValue(att, collection.getNormalisedDifferenceToMedian(Landmark.REFERENCE_POINT, n));
+                	 inst.setValue(att, collection.getNormalisedDifferenceToMedian(OrientationMark.REFERENCE, n));
                 } else {
                 	inst.setValue(att, n.getMeasurement(stat, MeasurementScale.MICRONS));
                 }

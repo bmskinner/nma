@@ -16,8 +16,6 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.profiles;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -61,18 +59,18 @@ public class DefaultLandmark implements Landmark {
 		return name;
 	}
 
-	public static DefaultLandmark[] values(LandmarkType type) {
-
-		List<Landmark> list = new ArrayList<>();
-		for (Landmark o : Landmark.defaultValues()) {
-			if (o.type().equals(type)) {
-				list.add(o);
-			}
-		}
-
-		return list.toArray(new DefaultLandmark[0]);
-
-	}
+//	public static DefaultLandmark[] values(LandmarkType type) {
+//
+//		List<Landmark> list = new ArrayList<>();
+//		for (Landmark o : Landmark.defaultValues()) {
+//			if (o.type().equals(type)) {
+//				list.add(o);
+//			}
+//		}
+//
+//		return list.toArray(new DefaultLandmark[0]);
+//
+//	}
 
 	@Override
 	public int hashCode() {

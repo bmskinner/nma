@@ -175,6 +175,18 @@ public class DummyRodentSpermNucleus extends DummyCellularComponent implements N
 	}
 
 	@Override
+	public ISegmentedProfile getProfile(@NonNull ProfileType type, @NonNull OrientationMark om)
+			throws ProfileException, MissingLandmarkException, MissingProfileException {
+		return nucleus.getProfile(type, om);
+	}
+
+	@Override
+	public IProfile getUnsegmentedProfile(@NonNull ProfileType type, @NonNull OrientationMark om)
+			throws ProfileException, MissingLandmarkException, MissingProfileException {
+		return nucleus.getUnsegmentedProfile(type, om);
+	}
+
+	@Override
 	public int getWindowSize() {
 		return nucleus.getWindowSize();
 	}

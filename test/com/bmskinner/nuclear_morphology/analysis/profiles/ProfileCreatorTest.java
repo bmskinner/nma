@@ -47,7 +47,7 @@ public class ProfileCreatorTest {
 			for(ProfileType t : ProfileType.values())
 				assertEquals(t+" should match", exp.get(t), 
 						ProfileCreator.createProfile(dup.getPrimaryNucleus(), t)
-						.startFrom(dup.getPrimaryNucleus().getBorderIndex(Landmark.REFERENCE_POINT)));
+						.startFrom(dup.getPrimaryNucleus().getBorderIndex(OrientationMark.REFERENCE)));
 			
 		}
 	}
@@ -74,7 +74,7 @@ public class ProfileCreatorTest {
 			for(ProfileType t : ProfileType.values()) {
 				exp.put(t, new DefaultProfile(n.getProfile(t)));
 				denovo.put(t, ProfileCreator.createProfile(n, t)
-						.startFrom(n.getBorderIndex(Landmark.REFERENCE_POINT)));
+						.startFrom(n.getBorderIndex(OrientationMark.REFERENCE)));
 			}
 			
 			Nucleus dup = new DefaultCell(e).getPrimaryNucleus();
@@ -89,10 +89,10 @@ public class ProfileCreatorTest {
 				
 				assertEquals(t+" should match denovo", denovo.get(t), 
 						ProfileCreator.createProfile(dup, t)
-						.startFrom(dup.getBorderIndex(Landmark.REFERENCE_POINT)));
+						.startFrom(dup.getBorderIndex(OrientationMark.REFERENCE)));
 				assertEquals(t+" should match stored", exp.get(t), 
 						ProfileCreator.createProfile(dup, t)
-						.startFrom(dup.getBorderIndex(Landmark.REFERENCE_POINT)));
+						.startFrom(dup.getBorderIndex(OrientationMark.REFERENCE)));
 			}
 			
 		}

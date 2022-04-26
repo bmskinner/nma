@@ -38,10 +38,10 @@ import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
-import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
+import com.bmskinner.nuclear_morphology.components.rules.OrientationMark;
 
 import weka.attributeSelection.PrincipalComponents;
 import weka.core.Attribute;
@@ -190,7 +190,7 @@ public class PrincipalComponentAnalysis extends SingleDatasetAnalysisMethod {
 
         for(ProfileType t : ProfileType.displayValues()) {
         	if (options.getBoolean(t.toString())) {
-        		IProfile p = n.getProfile(t, Landmark.REFERENCE_POINT);
+        		IProfile p = n.getProfile(t, OrientationMark.REFERENCE);
         		for (int i = 0; i < pointsToSample; i++) {
         			Attribute att = (Attribute) attributes.elementAt(i);
         			inst.setValue(att, p.get(i * windowProportion));

@@ -32,6 +32,7 @@ import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
+import com.bmskinner.nuclear_morphology.components.rules.OrientationMark;
 
 /**
  * Objects implementing this interface can have Landmarks assigned to points
@@ -87,7 +88,20 @@ public interface Taggable extends CellularComponent {
 	 * @throws MissingLandmarkException
 	 * @throws MissingProfileException
 	 */
-	ISegmentedProfile getProfile(@NonNull ProfileType type, @NonNull Landmark tag)
+	ISegmentedProfile getProfile(@NonNull ProfileType type, @NonNull Landmark lm)
+			throws ProfileException, MissingLandmarkException, MissingProfileException;
+
+	/**
+	 * Get a copy of the profile offset to start at the given point
+	 * 
+	 * @param type profile type to fetch
+	 * @param om   the tag to offset the profile to
+	 * @return a copy of the segmented profile
+	 * @throws ProfileException
+	 * @throws MissingLandmarkException
+	 * @throws MissingProfileException
+	 */
+	ISegmentedProfile getProfile(@NonNull ProfileType type, @NonNull OrientationMark om)
 			throws ProfileException, MissingLandmarkException, MissingProfileException;
 
 	/**
@@ -100,6 +114,19 @@ public interface Taggable extends CellularComponent {
 	 */
 	IProfile getUnsegmentedProfile(@NonNull ProfileType type, @NonNull Landmark lm)
 			throws ProfileException, MissingLandmarkException;
+
+	/**
+	 * Get a copy of the profile offset to start at the given point
+	 * 
+	 * @param type profile type to fetch
+	 * @param om   the landmark to offset the profile to
+	 * @return a copy of the unsegmented profile
+	 * @throws ProfileException
+	 * @throws MissingLandmarkException
+	 * @throws MissingProfileException
+	 */
+	IProfile getUnsegmentedProfile(@NonNull ProfileType type, @NonNull OrientationMark om)
+			throws ProfileException, MissingLandmarkException, MissingProfileException;
 
 	/**
 	 * Set segments from the reference point. The first segment must begin at index
@@ -174,7 +201,7 @@ public interface Taggable extends CellularComponent {
 	 * @return the index of the point translated back to the original border list
 	 * @throws MissingLandmarkException if the reference tag is not present
 	 */
-	int getIndexRelativeTo(@NonNull Landmark reference, int index) throws MissingLandmarkException;
+	int getIndexRelativeTo(@NonNull OrientationMark reference, int index) throws MissingLandmarkException;
 
 	/**
 	 * Get the index of the border point with the given tag.
@@ -183,7 +210,7 @@ public interface Taggable extends CellularComponent {
 	 * @return the index of the border point with the tag
 	 * @throws MissingLandmarkException if the tag is not present in the object
 	 */
-	int getBorderIndex(@NonNull Landmark tag) throws MissingLandmarkException;
+	int getBorderIndex(@NonNull OrientationMark tag) throws MissingLandmarkException;
 
 	/**
 	 * Get a copy of the border point mapped to the given tag
@@ -193,7 +220,7 @@ public interface Taggable extends CellularComponent {
 	 * @throws IndexOutOfBoundsException
 	 * @throws MissingLandmarkException
 	 */
-	IPoint getBorderPoint(@NonNull Landmark tag) throws MissingLandmarkException;
+	IPoint getBorderPoint(@NonNull OrientationMark tag) throws MissingLandmarkException;
 
 	/**
 	 * Get the tag at the given raw index in the border list
@@ -210,7 +237,7 @@ public interface Taggable extends CellularComponent {
 	 * @param landmark the landmark to test
 	 * @return true if the landmark is present, false otherwise
 	 */
-	boolean hasLandmark(@NonNull Landmark landmark);
+	boolean hasLandmark(@NonNull OrientationMark landmark);
 
 	/**
 	 * Set the index of the given landmark. Has no effect if this object is locked.
@@ -221,8 +248,19 @@ public interface Taggable extends CellularComponent {
 	 * @throws MissingProfileException
 	 * @throws MissingLandmarkException
 	 */
-
 	void setLandmark(@NonNull Landmark tag, int i)
+			throws IndexOutOfBoundsException, MissingProfileException, ProfileException, MissingLandmarkException;
+
+	/**
+	 * Set the index of the given landmark. Has no effect if this object is locked.
+	 * 
+	 * @param tag the tag
+	 * @param i   the index of the border point to set the tag at
+	 * @throws ProfileException
+	 * @throws MissingProfileException
+	 * @throws MissingLandmarkException
+	 */
+	void setOrientationMark(@NonNull OrientationMark tag, int i)
 			throws IndexOutOfBoundsException, MissingProfileException, ProfileException, MissingLandmarkException;
 
 	/**
@@ -232,5 +270,20 @@ public interface Taggable extends CellularComponent {
 	 * @return
 	 */
 	Map<Landmark, Integer> getLandmarks();
+
+	/**
+	 * Get the indexes of orientation marks within the border of this object
+	 * 
+	 * @return
+	 */
+	Map<OrientationMark, Integer> getOrientationMarkMap();
+
+	/**
+	 * Get the landmark corresponding to the given orientation point
+	 * 
+	 * @param om
+	 * @return
+	 */
+	Landmark getLandmark(OrientationMark om);
 
 }

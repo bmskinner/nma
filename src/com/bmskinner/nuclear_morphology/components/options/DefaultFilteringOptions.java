@@ -178,7 +178,7 @@ public class DefaultFilteringOptions extends DefaultOptions implements Filtering
 	private boolean nucleusMatches(Key k, Nucleus n, ICellCollection collection, boolean isMin){
 		try {
 			if(k.stat.equals(Measurement.VARIABILITY)) {
-				double v = collection.getNormalisedDifferenceToMedian(Landmark.REFERENCE_POINT, n);
+				double v = collection.getNormalisedDifferenceToMedian(OrientationMark.REFERENCE, n);
 				return isMin ? v>=minima.get(k) : v<=maxima.get(k);
 			}
 				

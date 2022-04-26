@@ -72,7 +72,7 @@ public class OutlineTestChartFactory extends ChartFactoryTest {
 
 			// show the profile corresponding to the chart
 			ChartOptions profileOptions = new ChartOptionsBuilder().setDatasets(dataset).setCell(cell)
-					.setLandmark(Landmark.REFERENCE_POINT).setShowMarkers(true).setShowAnnotations(true)
+					.setLandmark(OrientationMark.REFERENCE).setShowMarkers(true).setShowAnnotations(true)
 					.setProfileType(ProfileType.ANGLE).build();
 			JPanel profile = makeChartPanel(new ProfileChartFactory(profileOptions).createProfileChart(),
 					profileOptions, "Profile", false);

@@ -39,7 +39,7 @@ import org.jfree.data.xy.XYDataset;
 
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
-import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
+import com.bmskinner.nuclear_morphology.components.rules.OrientationMark;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
@@ -189,11 +189,12 @@ public abstract class AbstractChartFactory {
 	 * @param tag   the tag to use for colour selection
 	 * @param value the domain axis value to draw at
 	 */
-	protected void addDomainMarkerToXYPlot(final XYPlot plot, final Landmark tag, final double value, double yval) {
+	protected void addDomainMarkerToXYPlot(final XYPlot plot, final OrientationMark tag, final double value,
+			double yval) {
 //		Color colour = chooseTagColour(tag);
 		double range = plot.getRangeAxis().getRange().getLength();
 		double minY = plot.getRangeAxis().getRange().getLowerBound();
-		plot.addAnnotation(new XYTextAnnotation(tag.getName(), value, minY + (range * 0.1)), false);
+		plot.addAnnotation(new XYTextAnnotation(tag.name(), value, minY + (range * 0.1)), false);
 		plot.addAnnotation(new XYLineAnnotation(value, minY + (range * 0.15), value, yval,
 				ChartComponents.MARKER_STROKE, Color.GRAY));
 	}

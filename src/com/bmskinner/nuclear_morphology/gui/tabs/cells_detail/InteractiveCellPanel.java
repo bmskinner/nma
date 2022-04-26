@@ -47,10 +47,10 @@ import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
-import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
+import com.bmskinner.nuclear_morphology.components.rules.OrientationMark;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.ImageClickListener;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
@@ -231,13 +231,13 @@ public class InteractiveCellPanel extends JPanel {
 
 		}
 
-		private synchronized void updateTag(Landmark tag, int newIndex) {
+		private synchronized void updateTag(OrientationMark tag, int newIndex) {
 
 			ThreadManager.getInstance().execute(() -> {
 				cell.getPrimaryNucleus().setLocked(false);
 
 				try {
-					cell.getPrimaryNucleus().setLandmark(tag, newIndex);
+					cell.getPrimaryNucleus().setOrientationMark(tag, newIndex);
 				} catch (IndexOutOfBoundsException | MissingProfileException | MissingLandmarkException
 						| ProfileException e) {
 					LOGGER.log(Level.SEVERE, "Unable to set landmark in cell", e);
@@ -274,7 +274,7 @@ public class InteractiveCellPanel extends JPanel {
 			try {
 				int rawIndex = cell.getPrimaryNucleus().getBorderIndex(point);
 
-				int rpIndex = cell.getPrimaryNucleus().getBorderIndex(Landmark.REFERENCE_POINT);
+				int rpIndex = cell.getPrimaryNucleus().getBorderIndex(OrientationMark.REFERENCE);
 
 				// Get the index of the clicked point in the RP-indexed profile
 				int index = cell.getPrimaryNucleus().wrapIndex(rawIndex - rpIndex);
@@ -321,11 +321,11 @@ public class InteractiveCellPanel extends JPanel {
 		 * @param popupMenu
 		 */
 		private void addTagsToPopup(JPopupMenu popupMenu, IPoint point) {
-			List<Landmark> tags = dataset.getCollection().getProfileCollection().getLandmarks();
+			List<OrientationMark> tags = dataset.getCollection().getProfileCollection().getOrientationMarks();
 
 			Collections.sort(tags);
 
-			for (Landmark tag : tags) {
+			for (OrientationMark tag : tags) {
 				// Colour the menu item by tag colour
 				JMenuItem item = new JMenuItem("Move " + tag.toString().toLowerCase() + " here");
 				item.setBorder(BorderFactory.createLineBorder(ColourSelecter.getColour(tag), 3));
@@ -344,19 +344,19 @@ public class InteractiveCellPanel extends JPanel {
 			}
 
 			// Find border tags with rulesets that have not been assigned in the median
-			List<Landmark> unassignedTags = new ArrayList<>();
-			for (Landmark tag : Landmark.defaultValues()) {
-				if (!tags.contains(tag)) {
-					unassignedTags.add(tag);
-				}
-			}
+			List<OrientationMark> unassignedTags = new ArrayList<>();
+//			for (OrientationMark tag : Landmark.defaultValues()) {
+//				if (!tags.contains(tag)) {
+//					unassignedTags.add(tag);
+//				}
+//			}
 
 			if (!unassignedTags.isEmpty()) {
 				Collections.sort(unassignedTags);
 
 				popupMenu.addSeparator();
 
-				for (Landmark tag : unassignedTags) {
+				for (OrientationMark tag : unassignedTags) {
 					JMenuItem item = new JMenuItem("Set " + tag.toString().toLowerCase() + " here");
 					item.setForeground(Color.DARK_GRAY);
 

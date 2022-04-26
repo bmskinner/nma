@@ -821,7 +821,7 @@ public class DefaultCellCollection implements ICellCollection {
 		}
 
 		if (Measurement.VARIABILITY.equals(stat)) {
-			result = this.getNormalisedDifferencesToMedianFromPoint(Landmark.REFERENCE_POINT);
+			result = this.getNormalisedDifferencesToMedianFromPoint(OrientationMark.REFERENCE);
 		} else {
 			result = this.getNuclei().parallelStream().mapToDouble(n -> n.getMeasurement(stat, scale)).toArray();
 		}
@@ -851,7 +851,7 @@ public class DefaultCellCollection implements ICellCollection {
 		result = getNuclei().parallelStream().mapToDouble(n -> {
 			IProfileSegment segment;
 			try {
-				segment = n.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT).getSegment(id);
+				segment = n.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE).getSegment(id);
 			} catch (ProfileException | MissingComponentException e) {
 				LOGGER.log(Loggable.STACK, String.format(
 						"Error getting segment %s from nucleus %s in DefaultCellCollection::getSegmentStatistics", id,
@@ -926,7 +926,7 @@ public class DefaultCellCollection implements ICellCollection {
 //				for (Nucleus n : t.getNuclei()) {
 //
 //					double value = stat.equals(Measurement.VARIABILITY)
-//							? getNormalisedDifferenceToMedian(Landmark.REFERENCE_POINT, n) : n.getStatistic(stat, scale);
+//							? getNormalisedDifferenceToMedian(OrientationMark.REFERENCE, n) : n.getStatistic(stat, scale);
 //
 //							if (value < lower) {
 //								return false;
@@ -1228,7 +1228,7 @@ public class DefaultCellCollection implements ICellCollection {
 		 * default.
 		 */
 		public DefaultProfileCollection() {
-			indexes.put(Landmark.REFERENCE_POINT, ZERO_INDEX);
+			indexes.put(OrientationMark.REFERENCE, ZERO_INDEX);
 		}
 
 		/**
@@ -1407,7 +1407,7 @@ public class DefaultCellCollection implements ICellCollection {
 		@Override
 		public void setLandmark(@NonNull Landmark tag, int newIndex) {
 			// Cannot move the RP from zero
-			if (tag.equals(Landmark.REFERENCE_POINT))
+			if (tag.equals(OrientationMark.REFERENCE))
 				return;
 			cache.remove(tag);
 			indexes.put(tag, newIndex);
@@ -1430,7 +1430,7 @@ public class DefaultCellCollection implements ICellCollection {
 			 * means the indexes must be moved forwards appropriately. Hence, add a positive
 			 * offset.
 			 */
-			int offset = getLandmarkIndex(Landmark.REFERENCE_POINT);
+			int offset = getLandmarkIndex(OrientationMark.REFERENCE);
 
 			for (IProfileSegment s : n) {
 				s.offset(offset);
@@ -1465,7 +1465,7 @@ public class DefaultCellCollection implements ICellCollection {
 			IProfileAggregate agg = new DefaultProfileAggregate(length, DefaultCellCollection.this.size());
 
 			for (Nucleus n : DefaultCellCollection.this.getNuclei())
-				agg.addValues(n.getProfile(type, Landmark.REFERENCE_POINT));
+				agg.addValues(n.getProfile(type, OrientationMark.REFERENCE));
 			return agg;
 
 		}
@@ -1481,7 +1481,7 @@ public class DefaultCellCollection implements ICellCollection {
 		 */
 		private IProfileAggregate createProfileAggregateOfDifferentLength(@NonNull ProfileType type, int length)
 				throws ProfileException, MissingLandmarkException, MissingProfileException {
-			indexes.put(Landmark.REFERENCE_POINT, ZERO_INDEX);
+			indexes.put(OrientationMark.REFERENCE, ZERO_INDEX);
 
 			// We have no profile to use to interpolate segments.
 			// Create an arbitrary profile with the original length.
@@ -1498,7 +1498,7 @@ public class DefaultCellCollection implements ICellCollection {
 			IProfileAggregate agg = new DefaultProfileAggregate(length, DefaultCellCollection.this.size());
 
 			for (Nucleus n : DefaultCellCollection.this.getNuclei())
-				agg.addValues(n.getProfile(type, Landmark.REFERENCE_POINT));
+				agg.addValues(n.getProfile(type, OrientationMark.REFERENCE));
 
 			setSegments(interpolatedSegments);
 
@@ -1517,7 +1517,7 @@ public class DefaultCellCollection implements ICellCollection {
 			// Show segments from RP
 			try {
 				builder.append("Segments from RP:" + newLine);
-				for (IProfileSegment s : this.getSegments(Landmark.REFERENCE_POINT)) {
+				for (IProfileSegment s : this.getSegments(OrientationMark.REFERENCE)) {
 					builder.append(s.toString() + newLine);
 				}
 

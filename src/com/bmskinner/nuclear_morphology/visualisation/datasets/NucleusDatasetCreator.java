@@ -43,10 +43,10 @@ import com.bmskinner.nuclear_morphology.components.profiles.BooleanProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
-import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
+import com.bmskinner.nuclear_morphology.components.rules.OrientationMark;
 import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -112,7 +112,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 		try {
 
 			Nucleus n = collection.getConsensus();
-			ISegmentedProfile angleProfile = n.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
+			ISegmentedProfile angleProfile = n.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE);
 
 			// At this point, the angle profile and the iqr profile should be in sync
 			// The following set of checks confirms this.
@@ -143,7 +143,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 						"Cannot make segmented nucleus outline: too few series in chart dataset");
 		} catch (ProfileException | MissingLandmarkException | MissingProfileException | UnavailableBorderPointException
 				| ComponentCreationException e) {
-			LOGGER.log(Loggable.STACK, "Error getting nucleus angle profile from " + Landmark.REFERENCE_POINT, e);
+			LOGGER.log(Loggable.STACK, "Error getting nucleus angle profile from " + OrientationMark.REFERENCE, e);
 			throw new ChartDatasetCreationException("Cannot make segmented nucleus outline", e);
 		}
 		return ds;
@@ -161,7 +161,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 
 		FloatXYDataset ds = new FloatXYDataset();
 		try {
-			for (Landmark tag : nucleus.getLandmarks().keySet()) {
+			for (OrientationMark tag : nucleus.getOrientationMarks()) {
 				IPoint tagPoint;
 
 				int tagIndex = nucleus.getBorderIndex(tag);

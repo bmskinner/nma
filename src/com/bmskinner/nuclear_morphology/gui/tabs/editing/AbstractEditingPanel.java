@@ -22,9 +22,8 @@ import java.util.logging.Logger;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
-import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
-import com.bmskinner.nuclear_morphology.components.profiles.LandmarkType;
 import com.bmskinner.nuclear_morphology.components.profiles.SegmentationHandler;
+import com.bmskinner.nuclear_morphology.components.rules.OrientationMark;
 import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nuclear_morphology.gui.events.UserActionEvent;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.UserActionController;
@@ -71,10 +70,10 @@ public abstract class AbstractEditingPanel extends DetailPanel implements Editin
 	 * @param newTagIndex
 	 */
 	@Override
-	public void setBorderTagAction(@NonNull Landmark tag, int newTagIndex) {
+	public void setBorderTagAction(@NonNull OrientationMark tag, int newTagIndex) {
 		if (activeDataset() == null)
 			return;
-		if (activeDataset().getCollection().isVirtual() && tag.equals(Landmark.REFERENCE_POINT)) {
+		if (activeDataset().getCollection().isVirtual() && tag.equals(OrientationMark.REFERENCE)) {
 			LOGGER.warning("Cannot update core border tag for a child dataset");
 			return;
 		}
@@ -90,7 +89,7 @@ public abstract class AbstractEditingPanel extends DetailPanel implements Editin
 
 		refreshCache(); // immediate visualisation of result
 
-		if (tag.type().equals(LandmarkType.CORE)) {
+		if (OrientationMark.REFERENCE.equals(tag)) {
 			UserActionController.getInstance().userActionEventReceived(
 					new UserActionEvent(this, UserActionEvent.SEGMENTATION_ACTION, getDatasets()));
 		} else {
@@ -128,8 +127,8 @@ public abstract class AbstractEditingPanel extends DetailPanel implements Editin
 
 		refreshEditingPanelCharts();
 
-		UserActionController.getInstance()
-				.userActionEventReceived(new UserActionEvent(this, UserActionEvent.APPLY_MEDIAN_TO_NUCLEI, getDatasets()));
+		UserActionController.getInstance().userActionEventReceived(
+				new UserActionEvent(this, UserActionEvent.APPLY_MEDIAN_TO_NUCLEI, getDatasets()));
 
 	}
 }

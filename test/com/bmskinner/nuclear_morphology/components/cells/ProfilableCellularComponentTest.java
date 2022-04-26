@@ -56,11 +56,11 @@ public class ProfilableCellularComponentTest {
 
 		// Test setting RP to every position in the profile on an existing cell
 		for(int rpIndex=0; rpIndex<n.getBorderLength(); rpIndex++) {
-			n.setLandmark(Landmark.REFERENCE_POINT, rpIndex);	
+			n.setLandmark(OrientationMark.REFERENCE, rpIndex);	
 
 			// A profile starting from RP will have RP at index zero.
 			// One segment should start at index 0
-			ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
+			ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE);
 			boolean rpIsOk = isRPOnSegmentBoundary(profile, rpIndex);
 			assertTrue("One segment should start at zero in a profile offset to start at RP", rpIsOk);
 		}
@@ -82,11 +82,11 @@ public class ProfilableCellularComponentTest {
 		for(int rpIndex=0; rpIndex<n.getBorderLength(); rpIndex++) {
 			c = TestComponentFactory.roundCell(50, 50, 50, 50, 0, 10, RuleSetCollection.roundRuleSetCollection());
 			n = c.getPrimaryNucleus();
-			n.setLandmark(Landmark.REFERENCE_POINT, rpIndex);	
+			n.setLandmark(OrientationMark.REFERENCE, rpIndex);	
 			
 			// A profile starting from RP will have RP at index zero.
 			// One segment should start at index 0
-			ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
+			ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE);
 			boolean rpIsOk = isRPOnSegmentBoundary(profile, rpIndex);
 			assertTrue("One segment should start at zero in a profile offset to start at RP", rpIsOk);
 		}
@@ -108,21 +108,21 @@ public class ProfilableCellularComponentTest {
 		for(int rpIndex=1; rpIndex<n.getBorderLength(); rpIndex++) {
 			c = TestComponentFactory.roundCell(50, 50, 50, 50, 0, 10, RuleSetCollection.roundRuleSetCollection());
 			n = c.getPrimaryNucleus();
-			int oldRpIndex = n.getBorderIndex(Landmark.REFERENCE_POINT);
+			int oldRpIndex = n.getBorderIndex(OrientationMark.REFERENCE);
 			
-			n.setLandmark(Landmark.REFERENCE_POINT, rpIndex);	
+			n.setLandmark(OrientationMark.REFERENCE, rpIndex);	
 			
 			// A profile starting from RP will have RP at index zero.
 			// One segment should start at index 0
-			ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
+			ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE);
 			boolean rpIsOk = isRPOnSegmentBoundary(profile, rpIndex);
 			assertTrue("One segment should start at zero in a profile offset to start at RP", rpIsOk);
 			
 			// Set back to zero landmark
-			n.setLandmark(Landmark.REFERENCE_POINT, oldRpIndex);	
+			n.setLandmark(OrientationMark.REFERENCE, oldRpIndex);	
 			// A profile starting from RP will have RP at index zero.
 			// One segment should start at index 0
-			profile = n.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
+			profile = n.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE);
 			rpIsOk = isRPOnSegmentBoundary(profile, oldRpIndex);
 			assertTrue("One segment should start at zero in a profile offset to start at RP", rpIsOk);
 			
@@ -145,19 +145,19 @@ public class ProfilableCellularComponentTest {
 	public void testSetSegmentStartLock() throws Exception {
 		ICell c = TestComponentFactory.roundCell(50, 50, 50, 50, 0, 10, RuleSetCollection.roundRuleSetCollection());
 		Nucleus n = c.getPrimaryNucleus();
-		ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
+		ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE);
 
 		// Get the first segment in the profile
 		UUID segId = profile.getSegmentIDs().stream().findFirst().get();
 		
 		// Check that the lock succeeded
 		n.setSegmentStartLock(true, segId);
-		ISegmentedProfile p2 = n.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
+		ISegmentedProfile p2 = n.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE);
 		assertTrue(p2.getSegment(segId).isLocked());
 		
 		// Check unlocking succeeded
 		n.setSegmentStartLock(false, segId);
-		ISegmentedProfile p3 = n.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
+		ISegmentedProfile p3 = n.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE);
 		assertFalse(p3.getSegment(segId).isLocked());
 	}
 	
@@ -169,7 +169,7 @@ public class ProfilableCellularComponentTest {
 	public void testGetProfileReturnsLinkedSegments() throws Exception {
 		ICell c = TestComponentFactory.roundCell(50, 50, 50, 50, 0, 10, RuleSetCollection.roundRuleSetCollection());
 		Nucleus n = c.getPrimaryNucleus();
-		ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
+		ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE);
 		
 		Field f = profile.getClass().getDeclaredField("segments");	
 		f.setAccessible(true);	

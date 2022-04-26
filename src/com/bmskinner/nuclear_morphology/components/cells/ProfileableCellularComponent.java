@@ -18,6 +18,7 @@ package com.bmskinner.nuclear_morphology.components.cells;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -51,6 +52,7 @@ import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileExcept
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.components.profiles.UnprofilableObjectException;
+import com.bmskinner.nuclear_morphology.components.rules.OrientationMark;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.gui.Roi;
@@ -78,6 +80,9 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 
 	/** The indexes of landmarks in the profiles and border list */
 	private Map<Landmark, Integer> profileLandmarks = new HashMap<>();
+
+	/** Store the landmarks to be used for orientation */
+	private Map<@NonNull OrientationMark, Landmark> orientationMarks = new EnumMap<>(OrientationMark.class);
 
 	/** allow locking of segments and landmarks */
 	private boolean isLocked = false;
@@ -118,7 +123,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 	protected ProfileableCellularComponent(@NonNull Roi roi, @NonNull IPoint centreOfMass, File source, int channel,
 			int x, int y, @Nullable UUID id) {
 		super(roi, centreOfMass, source, channel, x, y, id);
-		profileLandmarks.put(Landmark.REFERENCE_POINT, 0);
+		profileLandmarks.put(OrientationMark.REFERENCE, 0);
 	}
 
 	/**
@@ -143,12 +148,12 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 
 			// When duplicating components we can copy the existing profiles
 			for (ProfileType type : ProfileType.values()) {
-				profileMap.put(type, c.getUnsegmentedProfile(type, Landmark.REFERENCE_POINT)
-						.startFrom(-c.getBorderIndex(Landmark.REFERENCE_POINT)));
+				profileMap.put(type, c.getUnsegmentedProfile(type, OrientationMark.REFERENCE)
+						.startFrom(-c.getBorderIndex(OrientationMark.REFERENCE)));
 			}
 
 			segments.clear();
-			segments.addAll(c.getProfile(ProfileType.ANGLE).startFrom(-c.getBorderIndex(Landmark.REFERENCE_POINT))
+			segments.addAll(c.getProfile(ProfileType.ANGLE).startFrom(-c.getBorderIndex(OrientationMark.REFERENCE))
 					.getSegments()); // getSegments creates a copy, no need to duplicate again
 			IProfileSegment.linkSegments(segments);
 
@@ -261,7 +266,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 					String.format("Index %s is out of bounds for border length %s", newLmIndex, getBorderLength()));
 
 		// If not the RP, set and return
-		if (!Landmark.REFERENCE_POINT.equals(lm)) {
+		if (!OrientationMark.REFERENCE.equals(lm)) {
 			profileLandmarks.put(lm, newLmIndex);
 			return;
 		}
@@ -354,7 +359,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 			throws MissingProfileException, ProfileException, MissingLandmarkException {
 		if (!this.hasProfile(type))
 			throw new MissingProfileException("Cannot get profile type " + type);
-		return getProfile(type, Landmark.REFERENCE_POINT);
+		return getProfile(type, OrientationMark.REFERENCE);
 	}
 
 	@Override
@@ -395,7 +400,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 			throw new ProfileException("Cannot set segments: no boundary at index 0: " + segs.get(0).toString());
 
 		// fetch the index of the RP (the zero of the input profile)
-		int rpIndex = profileLandmarks.get(Landmark.REFERENCE_POINT);
+		int rpIndex = profileLandmarks.get(OrientationMark.REFERENCE);
 
 		// add the RP offset so the segments match the absolute RP
 		segments.clear();
@@ -424,7 +429,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 		super.reverse();
 
 		// Recreate profiles for new outline
-		ISegmentedProfile oldAngleProfile = this.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
+		ISegmentedProfile oldAngleProfile = this.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE);
 
 		for (ProfileType t : ProfileType.values()) {
 			IProfile p = ProfileCreator.createProfile(this, t);
@@ -448,13 +453,13 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 		// Update positions of landmarks
 
 		// The RP needs to be moved to the first segment start index
-		this.profileLandmarks.put(Landmark.REFERENCE_POINT, segments.get(0).getStartIndex());
+		this.profileLandmarks.put(OrientationMark.REFERENCE, segments.get(0).getStartIndex());
 
 		// Other landmarks are usually not set at the point we reverse borders
 		// BUT if they are present find the best guess given that the border
 		// length may have changed
 		for (Entry<Landmark, Integer> entry : profileLandmarks.entrySet()) {
-			if (Landmark.REFERENCE_POINT.equals(entry.getKey()))
+			if (OrientationMark.REFERENCE.equals(entry.getKey()))
 				continue;
 			int index = entry.getValue();
 

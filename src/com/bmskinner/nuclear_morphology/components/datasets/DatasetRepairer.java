@@ -50,7 +50,7 @@ public class DatasetRepairer {
 
 			UUID seg0Id = d.getCollection()
 					.getProfileCollection()
-					.getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN)
+					.getSegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE, Stats.MEDIAN)
 					.getSegmentContaining(0)
 					.getID();
 
@@ -86,7 +86,7 @@ public class DatasetRepairer {
 		if(wasLocked)
 			n.setLocked(false);
 		try {
-			int rpIndex = n.getBorderIndex(Landmark.REFERENCE_POINT);
+			int rpIndex = n.getBorderIndex(OrientationMark.REFERENCE);
 			ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE);
 			IProfileSegment s  = profile.getSegment(expectedRPSegmentStart);
 			int segStart = s.getStartIndex();
@@ -95,7 +95,7 @@ public class DatasetRepairer {
 				// We can't just set RP since setting RP will update segments by the same amount
 				// Need to copy the profile and segments as is, then reload them after the RP has been changed
 				LOGGER.finest("RP at "+rpIndex+"; expected at "+segStart);
-				n.setLandmark(Landmark.REFERENCE_POINT, segStart);
+				n.setLandmark(OrientationMark.REFERENCE, segStart);
 				LOGGER.finest(n.getNameAndNumber()+": updated RP to index "+segStart);
 //				n.setProfile(ProfileType.ANGLE, profile);
 			}

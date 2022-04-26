@@ -45,10 +45,10 @@ import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
-import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
+import com.bmskinner.nuclear_morphology.components.rules.OrientationMark;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
@@ -246,7 +246,7 @@ public class DatasetEditingPanel extends ChartDetailPanel implements ConsensusUp
 		ISegmentedProfile medianProfile;
 		try {
 			medianProfile = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE,
-					Landmark.REFERENCE_POINT, Stats.MEDIAN);
+					OrientationMark.REFERENCE, Stats.MEDIAN);
 		} catch (MissingLandmarkException | ProfileException | MissingProfileException e) {
 			LOGGER.log(Loggable.STACK, "Error getting profile", e);
 			setButtonsEnabled(false);
@@ -293,7 +293,7 @@ public class DatasetEditingPanel extends ChartDetailPanel implements ConsensusUp
 
 		try {
 			ISegmentedProfile medianProfile = activeDataset().getCollection().getProfileCollection()
-					.getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);
+					.getSegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE, Stats.MEDIAN);
 
 			List<SegMergeItem> names = new ArrayList<>();
 
@@ -331,7 +331,7 @@ public class DatasetEditingPanel extends ChartDetailPanel implements ConsensusUp
 
 		try {
 			ISegmentedProfile medianProfile = activeDataset().getCollection().getProfileCollection()
-					.getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);
+					.getSegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE, Stats.MEDIAN);
 
 			List<IProfileSegment> names = new ArrayList<>();
 
@@ -359,7 +359,7 @@ public class DatasetEditingPanel extends ChartDetailPanel implements ConsensusUp
 	private void splitAction() {
 		try {
 			ISegmentedProfile medianProfile = activeDataset().getCollection().getProfileCollection()
-					.getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);
+					.getSegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE, Stats.MEDIAN);
 			IProfileSegment[] nameArray = medianProfile.getSegments().toArray(new IProfileSegment[0]);
 
 			String[] options = Arrays.stream(nameArray).map(IProfileSegment::getName).toArray(String[]::new);
@@ -519,7 +519,7 @@ public class DatasetEditingPanel extends ChartDetailPanel implements ConsensusUp
 
 			// Indexes in the consensus
 			int rawIndex = n.getBorderIndex(point);
-			int rpIndex = n.getBorderIndex(Landmark.REFERENCE_POINT);
+			int rpIndex = n.getBorderIndex(OrientationMark.REFERENCE);
 
 			// Get the index of the clicked point in the RP-indexed consensus profile
 			int index = n.wrapIndex(rawIndex - rpIndex);
@@ -576,7 +576,7 @@ public class DatasetEditingPanel extends ChartDetailPanel implements ConsensusUp
 
 			// Indexes in the consensus
 			int rawIndex = n.getBorderIndex(point);
-			int rpIndex = n.getBorderIndex(Landmark.REFERENCE_POINT);
+			int rpIndex = n.getBorderIndex(OrientationMark.REFERENCE);
 
 			// Get the index of the clicked point in the RP-indexed consensus profile
 			int index = n.wrapIndex(rawIndex - rpIndex);
@@ -586,12 +586,12 @@ public class DatasetEditingPanel extends ChartDetailPanel implements ConsensusUp
 			double fIndex = index / (float) n.getBorderLength();
 			int medianIndex = (int) (activeDataset().getCollection().getMedianArrayLength() * fIndex);
 
-			List<Landmark> tags = activeDataset().getCollection().getProfileCollection().getLandmarks();
+			List<OrientationMark> tags = activeDataset().getCollection().getProfileCollection().getOrientationMarks();
 
 			Collections.sort(tags);
 
-			for (Landmark tag : tags) {
-				if (Landmark.REFERENCE_POINT.equals(tag))
+			for (OrientationMark tag : tags) {
+				if (OrientationMark.REFERENCE.equals(tag))
 					continue;
 				// Colour the menu item by tag colour
 				JMenuItem item = new JMenuItem("Move " + tag.toString().toLowerCase() + " here");
@@ -691,7 +691,7 @@ public class DatasetEditingPanel extends ChartDetailPanel implements ConsensusUp
 
 			IPoint clicked = new FloatPoint(x, y);
 			lmOverlay.clearShapes();
-			for (Landmark lm : n.getLandmarks().keySet()) {
+			for (OrientationMark lm : n.getOrientationMarks()) {
 				IPoint lmPoint = n.getBorderPoint(lm);
 
 				if (clicked.getLengthTo(lmPoint) < distanceLimit) {

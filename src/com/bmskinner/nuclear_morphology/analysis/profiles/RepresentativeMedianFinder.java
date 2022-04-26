@@ -30,10 +30,10 @@ import com.bmskinner.nuclear_morphology.components.cells.Nucleus;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.profiles.DefaultProfileAggregate;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
-import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
+import com.bmskinner.nuclear_morphology.components.rules.OrientationMark;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 /**
@@ -127,7 +127,7 @@ public class RepresentativeMedianFinder {
 		int index = findIndexOfLowestValue(deviations);
 
 		// Get this best profile
-		IProfile bestProfile = nuclei.get(index).getUnsegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
+		IProfile bestProfile = nuclei.get(index).getUnsegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE);
 
 		// Find the other nuclei in the collection that are similar to this one
 		List<IProfile> profiles = findBestProfiles(bestProfile);
@@ -155,13 +155,13 @@ public class RepresentativeMedianFinder {
 
 		if (nuclei.size() <= 2 || medianDiff == 0) { // too few profiles or all identical
 			for (Nucleus n : nuclei)
-				result.add(n.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT));
+				result.add(n.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE));
 			return result;
 		}
 
 		for (int i = 0; i < differences.length; i++) {
 			if (differences[i] < medianDiff)
-				result.add(nuclei.get(i).getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT));
+				result.add(nuclei.get(i).getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE));
 		}
 		return result;
 	}
@@ -199,7 +199,7 @@ public class RepresentativeMedianFinder {
 			throws MissingLandmarkException, MissingProfileException, ProfileException {
 		float[] result = new float[nuclei.size()];
 		for (int i = 0; i < result.length; i++) {
-			result[i] = (float) nuclei.get(i).getUnsegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT)
+			result[i] = (float) nuclei.get(i).getUnsegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE)
 					.absoluteSquareDifference(template);
 		}
 		return result;
@@ -219,22 +219,22 @@ public class RepresentativeMedianFinder {
 		float[][] matrix = new float[nuclei.size()][nuclei.size()];
 
 //		for (int i = 0; i < nuclei.size(); i++) {
-//			IProfile pI = nuclei.get(i).getUnsegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
+//			IProfile pI = nuclei.get(i).getUnsegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE);
 //			for (int j = 0; j < nuclei.size(); j++) {
 //				matrix[i][j] = (float) pI.absoluteSquareDifference(
-//						nuclei.get(j).getUnsegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT));
+//						nuclei.get(j).getUnsegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE));
 //			}
 //		}
 
 		// Handle the two diagonals of the matrix simultaneously
 		for (int i = 0; i < nuclei.size(); i++) {
-			IProfile pI = nuclei.get(i).getUnsegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
+			IProfile pI = nuclei.get(i).getUnsegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE);
 			for (int j = 0; j < nuclei.size(); j++) {
 				if (j <= i) {
 					matrix[i][j] = matrix[j][i];
 				} else {
 					float v = (float) pI.absoluteSquareDifference(
-							nuclei.get(j).getUnsegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT));
+							nuclei.get(j).getUnsegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE));
 					matrix[i][j] = v;
 				}
 			}

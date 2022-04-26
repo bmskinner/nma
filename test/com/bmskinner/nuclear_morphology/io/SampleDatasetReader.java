@@ -118,7 +118,7 @@ public class SampleDatasetReader {
     	IAnalysisDataset d = openTestRodentDataset();
     	
     	for(ProfileType t : ProfileType.values()) {
-    		d.getCollection().getProfileCollection().getProfile(t, Landmark.REFERENCE_POINT, 50);
+    		d.getCollection().getProfileCollection().getProfile(t, OrientationMark.REFERENCE, 50);
     	}
 
     }

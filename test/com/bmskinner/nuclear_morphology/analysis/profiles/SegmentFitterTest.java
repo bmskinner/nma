@@ -67,7 +67,7 @@ public class SegmentFitterTest {
 		assertTrue("Tempalte should have multiple segments", d.getCollection().getProfileManager().getSegmentCount()>1);
 		
 		ISegmentedProfile source = d.getCollection().getProfileCollection()
-				.getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);
+				.getSegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE, Stats.MEDIAN);
 		
 		// Create the fitter
 		fitter = new SegmentFitter(source);

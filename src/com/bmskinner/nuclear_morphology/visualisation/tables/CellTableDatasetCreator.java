@@ -40,8 +40,8 @@ import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
-import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
+import com.bmskinner.nuclear_morphology.components.rules.OrientationMark;
 import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalCollection;
@@ -255,13 +255,13 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 		fieldNames.add("Current nucleus position");
 		rowData.add("x: " + df.format(n.getMinX()) + " : y: " + df.format(n.getMinY()));
 
-		for (Landmark tag : n.getLandmarks().keySet()) {
+		for (OrientationMark tag : n.getOrientationMarks()) {
 			fieldNames.add(tag);
 			if (n.hasLandmark(tag)) {
 
 				try {
 					IPoint p = n.getBorderPoint(tag);
-					int index = n.getIndexRelativeTo(Landmark.REFERENCE_POINT, n.getBorderIndex(tag));
+					int index = n.getIndexRelativeTo(OrientationMark.REFERENCE, n.getBorderIndex(tag));
 					rowData.add(p.toString() + " at profile index " + index);
 				} catch (MissingLandmarkException e) {
 					LOGGER.fine("Tag not present: " + tag);
@@ -274,7 +274,7 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 		}
 
 		try {
-			ISegmentedProfile sp = n.getProfile(ProfileType.ANGLE.ANGLE, Landmark.REFERENCE_POINT);
+			ISegmentedProfile sp = n.getProfile(ProfileType.ANGLE.ANGLE, OrientationMark.REFERENCE);
 			for (IProfileSegment s : sp.getOrderedSegments()) {
 				fieldNames.add(s.getName());
 				rowData.add(s.toString());

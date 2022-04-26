@@ -25,47 +25,49 @@ import javax.swing.JRadioButton;
 import com.bmskinner.nuclear_morphology.components.profiles.DefaultLandmark;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.LandmarkType;
+import com.bmskinner.nuclear_morphology.components.rules.OrientationMark;
 
 @SuppressWarnings("serial")
 public class BorderTagOptionsPanel extends EnumeratedOptionsPanel {
 
-    private Map<Landmark, JRadioButton> map = new HashMap<>();
+	private Map<Landmark, JRadioButton> map = new HashMap<>();
 
-    public BorderTagOptionsPanel() {
+	public BorderTagOptionsPanel() {
 
-        super();
-        final ButtonGroup group = new ButtonGroup();
+		super();
+		final ButtonGroup group = new ButtonGroup();
 
-        for (DefaultLandmark type : DefaultLandmark.values(LandmarkType.CORE)) {
-            JRadioButton button = new JRadioButton(type.toString());
-            button.setActionCommand(type.toString());
-            button.addActionListener(this);
-            this.add(button);
-            group.add(button);
-            map.put(type, button);
-        }
-        // Set the default
-        map.get(Landmark.REFERENCE_POINT).setSelected(true);
+		for (DefaultLandmark type : DefaultLandmark.values(LandmarkType.CORE)) {
+			JRadioButton button = new JRadioButton(type.toString());
+			button.setActionCommand(type.toString());
+			button.addActionListener(this);
+			this.add(button);
+			group.add(button);
+			map.put(type, button);
+		}
+		// Set the default
+		map.get(OrientationMark.REFERENCE).setSelected(true);
 
-    }
+	}
 
-    public void setEnabled(boolean b) {
-        for (Landmark type : DefaultLandmark.values(LandmarkType.CORE))
-            map.get(type).setEnabled(b);
-    }
+	@Override
+	public void setEnabled(boolean b) {
+		for (Landmark type : DefaultLandmark.values(LandmarkType.CORE))
+			map.get(type).setEnabled(b);
+	}
 
-    /**
-     * Get the selected profile type, or null
-     * 
-     * @return
-     */
-    public Landmark getSelected() {
-        for (Landmark type : DefaultLandmark.values(LandmarkType.CORE)) {
-            JRadioButton button = map.get(type);
-            if (button.isSelected())
-                return type;
-        }
-        return null;
-    }
+	/**
+	 * Get the selected profile type, or null
+	 * 
+	 * @return
+	 */
+	public Landmark getSelected() {
+		for (Landmark type : DefaultLandmark.values(LandmarkType.CORE)) {
+			JRadioButton button = map.get(type);
+			if (button.isSelected())
+				return type;
+		}
+		return null;
+	}
 
 }

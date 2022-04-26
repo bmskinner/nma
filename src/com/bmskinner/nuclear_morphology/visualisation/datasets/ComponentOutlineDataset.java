@@ -28,10 +28,10 @@ import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
-import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
+import com.bmskinner.nuclear_morphology.components.rules.OrientationMark;
 
 /**
  * Holds the outlines of cellular components
@@ -66,7 +66,7 @@ public class ComponentOutlineDataset extends DefaultXYDataset {
 
 		Taggable t = (Taggable) c;
 		try {
-			List<IProfileSegment> segmentList = t.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT).getSegments();
+			List<IProfileSegment> segmentList = t.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE).getSegments();
 
 			if (!segmentList.isEmpty()) { // only draw if there are segments
 
@@ -83,7 +83,7 @@ public class ComponentOutlineDataset extends DefaultXYDataset {
 
 					for (int j = 0; j <= seg.length(); j++) {
 						int index = seg.getStartIndex() + j;
-						int offsetIndex = t.getIndexRelativeTo(Landmark.REFERENCE_POINT, index);
+						int offsetIndex = t.getIndexRelativeTo(OrientationMark.REFERENCE, index);
 
 						/*
 						 * Note that the original border point is used here to avoid mismatches with the

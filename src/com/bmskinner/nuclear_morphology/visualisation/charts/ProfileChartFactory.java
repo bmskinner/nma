@@ -48,10 +48,10 @@ import com.bmskinner.nuclear_morphology.components.profiles.BooleanProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
-import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
+import com.bmskinner.nuclear_morphology.components.rules.OrientationMark;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter.ColourSwatch;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
@@ -247,14 +247,14 @@ public class ProfileChartFactory extends AbstractChartFactory {
 
 		if (options.isShowAnnotations()) {
 
-			for (Landmark tag : collection.getProfileCollection().getLandmarks()) {
-				if (Landmark.REFERENCE_POINT.equals(tag))
+			for (OrientationMark tag : collection.getProfileCollection().getOrientationMarks()) {
+				if (OrientationMark.REFERENCE.equals(tag))
 					continue;
 
 				try {
 					int index = collection.getProfileCollection().getLandmarkIndex(tag);
 					double yVal = collection.getProfileCollection()
-							.getProfile(options.getType(), Landmark.REFERENCE_POINT, Stats.MEDIAN).get(index);
+							.getProfile(options.getType(), OrientationMark.REFERENCE, Stats.MEDIAN).get(index);
 
 					// get the offset from to the current draw point
 					int offset = collection.getProfileCollection().getLandmarkIndex(options.getTag());
@@ -460,7 +460,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
 	 * @param plot the plot to draw the domain markers on
 	 */
 	protected void addBorderTagMarkers(@NonNull Taggable n, @NonNull XYPlot plot) {
-		for (Landmark tag : n.getLandmarks().keySet()) {
+		for (OrientationMark tag : n.getOrientationMarkMap().keySet()) {
 			try {
 				// get the index of the tag
 				int index = n.getBorderIndex(tag);

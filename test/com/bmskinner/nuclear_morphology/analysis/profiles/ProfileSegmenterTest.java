@@ -29,7 +29,7 @@ public class ProfileSegmenterTest extends ComponentTester {
 	private void segmentMedianProfile(IAnalysisDataset d) throws MissingLandmarkException, MissingProfileException, ProfileException, Exception {
 		IProfile median = d.getCollection()
 				.getProfileCollection()
-				.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);
+				.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE, Stats.MEDIAN);
 		
 		ProfileSegmenter segmenter = new ProfileSegmenter(median);
 				

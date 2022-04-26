@@ -45,7 +45,7 @@ public class ConsensusAveragingMethodTest {
 		m.updateLandmark(Landmark.BOTTOM_VERTICAL, 10);
 		
 		//Expected landmarks
-		Landmark[] lms = { Landmark.REFERENCE_POINT, Landmark.TOP_VERTICAL, Landmark.BOTTOM_VERTICAL};
+		Landmark[] lms = { OrientationMark.REFERENCE, Landmark.TOP_VERTICAL, Landmark.BOTTOM_VERTICAL};
 		
 		// Check landmarks are present in the profile collection
 		for(Landmark l : lms) {

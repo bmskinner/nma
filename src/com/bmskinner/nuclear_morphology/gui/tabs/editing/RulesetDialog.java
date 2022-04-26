@@ -64,10 +64,10 @@ import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.profiles.BooleanProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
-import com.bmskinner.nuclear_morphology.components.profiles.LandmarkType;
 import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
+import com.bmskinner.nuclear_morphology.components.rules.OrientationMark;
 import com.bmskinner.nuclear_morphology.components.rules.Rule;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSet;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
@@ -286,16 +286,16 @@ public class RulesetDialog extends LoadingIconDialog implements TreeSelectionLis
 				return false;
 			}
 		};
-		List<Landmark> tagList = new ArrayList<>();
+		List<OrientationMark> tagList = new ArrayList<>();
 		List<String> tagCollection = new ArrayList<>();
 
 		// Dataset tags
-		tagList.addAll(d.getCollection().getProfileCollection().getLandmarks());
+		tagList.addAll(d.getCollection().getProfileCollection().getOrientationMarks());
 		tagCollection.addAll(tagList.stream().map(t -> dataset.getName()).collect(Collectors.toList()));
 
 		// Custom tags
 		for (Entry<String, RuleSetCollection> entry : customCollections.entrySet()) {
-			tagList.addAll(entry.getValue().getLandmarks());
+			tagList.addAll(entry.getValue().getOrientionMarks());
 			tagCollection.addAll(
 					entry.getValue().getLandmarks().stream().map(t -> entry.getKey()).collect(Collectors.toList()));
 		}
@@ -318,7 +318,8 @@ public class RulesetDialog extends LoadingIconDialog implements TreeSelectionLis
 		if (borderTagTable.getSelectedRow() < 0) {
 			root = new DefaultMutableTreeNode("");
 		} else {
-			Landmark selectedTag = (Landmark) borderTagTable.getValueAt(borderTagTable.getSelectedRow(), 0);
+			OrientationMark selectedTag = (OrientationMark) borderTagTable.getValueAt(borderTagTable.getSelectedRow(),
+					0);
 			String collection = (String) borderTagTable.getValueAt(borderTagTable.getSelectedRow(), 1);
 			root = createTagNodes(selectedTag, collection);
 		}
@@ -340,7 +341,7 @@ public class RulesetDialog extends LoadingIconDialog implements TreeSelectionLis
 	 *                   dataset.
 	 * @return
 	 */
-	private DefaultMutableTreeNode createTagNodes(@NonNull Landmark tag, @NonNull String collection) {
+	private DefaultMutableTreeNode createTagNodes(@NonNull OrientationMark tag, @NonNull String collection) {
 		LOGGER.finest("Adding nodes for " + tag);
 
 		// Get the appropriate RulesetCollection
@@ -365,7 +366,7 @@ public class RulesetDialog extends LoadingIconDialog implements TreeSelectionLis
 	 *                   dataset.
 	 * @return the rulesets for the tag
 	 */
-	private List<RuleSet> getRulesetsForTag(@NonNull Landmark t, @NonNull String collection) {
+	private List<RuleSet> getRulesetsForTag(@NonNull OrientationMark t, @NonNull String collection) {
 		if (collection == null || collection.equals(dataset.getName())) {
 			RuleSetCollection datasetCollection = dataset.getCollection().getRuleSetCollection();
 			if (datasetCollection.hasRulesets(t))
@@ -399,16 +400,16 @@ public class RulesetDialog extends LoadingIconDialog implements TreeSelectionLis
 
 			// If the reference point is in the collection, handle it first
 			// TODO: this will eventually cause threading issues with large datasets
-			if (rsc.getLandmarks().contains(Landmark.REFERENCE_POINT)) {
-				if (rsc.hasRulesets(Landmark.REFERENCE_POINT)) {
-					dataset.getCollection().getRuleSetCollection().setRuleSets(Landmark.REFERENCE_POINT,
-							rsc.getRuleSets(Landmark.REFERENCE_POINT));
-					updateBorderTagAction(Landmark.REFERENCE_POINT);
+			if (rsc.getLandmarks().contains(OrientationMark.REFERENCE)) {
+				if (rsc.hasRulesets(OrientationMark.REFERENCE)) {
+					dataset.getCollection().getRuleSetCollection().setRuleSets(OrientationMark.REFERENCE,
+							rsc.getRuleSets(OrientationMark.REFERENCE));
+					updateBorderTagAction(OrientationMark.REFERENCE);
 				}
 			}
 
-			for (Landmark tag : rsc.getLandmarks()) {
-				if (tag.equals(Landmark.REFERENCE_POINT))
+			for (OrientationMark tag : rsc.getOrientionMarks()) {
+				if (tag.equals(OrientationMark.REFERENCE))
 					continue;
 				LOGGER.fine("Testing existence of tag " + tag);
 				if (rsc.hasRulesets(tag)) {
@@ -424,7 +425,7 @@ public class RulesetDialog extends LoadingIconDialog implements TreeSelectionLis
 		}
 	}
 
-	private void updateBorderTagAction(Landmark tag) {
+	private void updateBorderTagAction(OrientationMark tag) {
 
 		if (tag != null) {
 			try {
@@ -448,7 +449,7 @@ public class RulesetDialog extends LoadingIconDialog implements TreeSelectionLis
 				e.printStackTrace();
 			}
 
-			if (tag.type().equals(LandmarkType.CORE)) {
+			if (OrientationMark.REFERENCE.equals(tag)) {
 				LOGGER.info("Resegmenting dataset");
 
 				UserActionController.getInstance().userActionEventReceived(
@@ -469,7 +470,7 @@ public class RulesetDialog extends LoadingIconDialog implements TreeSelectionLis
 	 * @param tagNode
 	 * @param ruleSet
 	 */
-	private void addNodesForRuleSet(DefaultMutableTreeNode tagNode, RuleSet ruleSet, Landmark tag) {
+	private void addNodesForRuleSet(DefaultMutableTreeNode tagNode, RuleSet ruleSet, OrientationMark tag) {
 		RuleNodeData profileData = new RuleNodeData(tag, ruleSet, null);
 		DefaultMutableTreeNode profileNode = new DefaultMutableTreeNode(profileData);
 		tagNode.add(profileNode);
@@ -500,13 +501,13 @@ public class RulesetDialog extends LoadingIconDialog implements TreeSelectionLis
 	 * @throws MissingProfileException
 	 * @throws ProfileException
 	 */
-	private JFreeChart createChart(@NonNull Landmark t, @NonNull String collection)
+	private JFreeChart createChart(@NonNull OrientationMark t, @NonNull String collection)
 			throws MissingLandmarkException, MissingProfileException, ProfileException {
 		LOGGER.finest("Creating chart for " + t);
 		JFreeChart chart = ProfileChartFactory.createEmptyChart(ProfileType.ANGLE);
 		ChartOptions options = new DefaultChartOptions((IAnalysisDataset) null);
 		IProfile p = dataset.getCollection().getProfileCollection().getProfile(ProfileType.ANGLE,
-				Landmark.REFERENCE_POINT, Stats.MEDIAN);
+				OrientationMark.REFERENCE, Stats.MEDIAN);
 
 		BooleanProfile limits = ProfileIndexFinder.getMatchingProfile(dataset.getCollection(),
 				getRulesetsForTag(t, collection));
@@ -531,9 +532,9 @@ public class RulesetDialog extends LoadingIconDialog implements TreeSelectionLis
 	public class RuleNodeData {
 		private RuleSet ruleSet = null;
 		private Rule rule = null;
-		private Landmark tag = null;
+		private OrientationMark tag = null;
 
-		public RuleNodeData(@NonNull Landmark tag, @Nullable RuleSet ruleSet, @Nullable Rule rule) {
+		public RuleNodeData(@NonNull OrientationMark tag, @Nullable RuleSet ruleSet, @Nullable Rule rule) {
 			;
 			this.tag = tag;
 			this.ruleSet = ruleSet;
@@ -553,14 +554,14 @@ public class RulesetDialog extends LoadingIconDialog implements TreeSelectionLis
 
 				if (rule != null) {
 					IProfile p = dataset.getCollection().getProfileCollection().getProfile(ruleSet.getType(),
-							Landmark.REFERENCE_POINT, Stats.MEDIAN);
+							OrientationMark.REFERENCE, Stats.MEDIAN);
 					BooleanProfile b = ProfileIndexFinder.getMatchingIndexes(p, rule);
 					return chf.createBooleanProfileChart(p, b);
 				}
 
 				if (ruleSet != null) {
 					IProfile p = dataset.getCollection().getProfileCollection().getProfile(ruleSet.getType(),
-							Landmark.REFERENCE_POINT, Stats.MEDIAN);
+							OrientationMark.REFERENCE, Stats.MEDIAN);
 					BooleanProfile b = ProfileIndexFinder.getMatchingIndexes(p, ruleSet);
 					return chf.createBooleanProfileChart(p, b);
 				}
@@ -592,7 +593,7 @@ public class RulesetDialog extends LoadingIconDialog implements TreeSelectionLis
 		int row = borderTagTable.getSelectedRow();
 		if (row < 0)
 			return AbstractChartFactory.createEmptyChart();
-		Landmark t = (Landmark) borderTagTable.getValueAt(row, 0);
+		OrientationMark t = (OrientationMark) borderTagTable.getValueAt(row, 0);
 		String collection = (String) borderTagTable.getValueAt(row, 1);
 		try {
 			return createChart(t, collection);

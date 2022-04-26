@@ -402,7 +402,7 @@ public class ICellCollectionTest {
 	public void testGetDifferenceToMedian() throws MissingLandmarkException {
 
 		for (Nucleus n : collection.getNuclei()) {
-			double d = collection.getNormalisedDifferenceToMedian(Landmark.REFERENCE_POINT, n);
+			double d = collection.getNormalisedDifferenceToMedian(OrientationMark.REFERENCE, n);
 			assertNotEquals(Double.NaN, d);
 			assertNotEquals(Statistical.ERROR_CALCULATING_STAT, d);
 		}

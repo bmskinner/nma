@@ -208,7 +208,7 @@ public class DatasetValidator {
 
 		for(ICell c : collection) {
 			for (Nucleus n : c.getNuclei()) {
-				if(!n.hasLandmark(Landmark.REFERENCE_POINT)) {
+				if(!n.hasLandmark(OrientationMark.REFERENCE)) {
 					errorList.add(String.format("Nucleus %s does not have RP", n.getNameAndNumber()));
 					errorCells.add(c);
 					withErrors++;
@@ -244,14 +244,14 @@ public class DatasetValidator {
 		IProfileCollection pc = d.getCollection().getProfileCollection();
 		for (ProfileType type : ProfileType.values()) {
 			try {
-				pc.getProfile(type, Landmark.REFERENCE_POINT, Stats.MEDIAN);
+				pc.getProfile(type, OrientationMark.REFERENCE, Stats.MEDIAN);
 			} catch (MissingProfileException | MissingLandmarkException | ProfileException e) {
 				summaryList.add(String.format("Root dataset %s does not have %s", d.getName(), type));
 				withErrors++;
 			}
 			
 			try {
-				pc.getSegmentedProfile(type, Landmark.REFERENCE_POINT, Stats.MEDIAN);
+				pc.getSegmentedProfile(type, OrientationMark.REFERENCE, Stats.MEDIAN);
 			} catch (MissingProfileException | MissingLandmarkException | ProfileException e) {
 				summaryList.add(String.format("Root dataset %s does not have segmented %s", d.getName(), type));
 				withErrors++;
@@ -262,14 +262,14 @@ public class DatasetValidator {
 			for (IAnalysisDataset child : children) {
 				IProfileCollection childPc = child.getCollection().getProfileCollection();
 				try {
-					childPc.getProfile(type, Landmark.REFERENCE_POINT, Stats.MEDIAN);
+					childPc.getProfile(type, OrientationMark.REFERENCE, Stats.MEDIAN);
 				} catch (MissingProfileException | MissingLandmarkException | ProfileException e) {
 					summaryList.add(String.format("Child dataset %s does not have %s", child.getName(), type));
 					withErrors++;
 				}
 				
 				try {
-					childPc.getSegmentedProfile(type, Landmark.REFERENCE_POINT, Stats.MEDIAN);
+					childPc.getSegmentedProfile(type, OrientationMark.REFERENCE, Stats.MEDIAN);
 				} catch (MissingProfileException | MissingLandmarkException | ProfileException e) {
 					summaryList.add(String.format("Child dataset %s does not have segmented %s", child.getName(), type));
 					withErrors++;
@@ -361,11 +361,11 @@ public class DatasetValidator {
 				int rpIsOk = 0;
 				
 				try {
-					int rpIndex = n.getBorderIndex(Landmark.REFERENCE_POINT);
+					int rpIndex = n.getBorderIndex(OrientationMark.REFERENCE);
 					
 					// A profile starting from RP will have RP at index zero.
 					// One segment should start at index 0
-					ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
+					ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE);
 					LOGGER.finer("Testing RP "+rpIndex+" on profile "+profile.toString());
 					for(IProfileSegment s : profile.getSegments()){
 						if(s.getStartIndex()==0)
@@ -465,7 +465,7 @@ public class DatasetValidator {
 		ISegmentedProfile medianProfile;
 		try {
 			medianProfile = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE,
-					Landmark.REFERENCE_POINT, Stats.MEDIAN);
+					OrientationMark.REFERENCE, Stats.MEDIAN);
 		} catch (MissingLandmarkException | MissingProfileException | ProfileException e) {
 			errorList.add("Unable to fetch median profile for collection");
 			return 1;
@@ -517,7 +517,7 @@ public class DatasetValidator {
 		boolean hasSegments = expectedSegments.size()>0;
 		ISegmentedProfile p;
 		try {
-			p = n.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
+			p = n.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE);
 			if(p.hasSegments()!=hasSegments) {
 				errorList.add(String.format("Profile collection segments is %s; nucleus is %s", hasSegments, p.hasSegments()));
 				errorCount++;

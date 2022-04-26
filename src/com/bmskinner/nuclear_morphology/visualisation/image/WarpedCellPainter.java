@@ -3,7 +3,6 @@ package com.bmskinner.nuclear_morphology.visualisation.image;
 import java.awt.image.BufferedImage;
 import java.util.logging.Logger;
 
-import com.bmskinner.nuclear_morphology.components.Imageable;
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;

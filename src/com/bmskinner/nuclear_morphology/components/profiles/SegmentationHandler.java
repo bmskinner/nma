@@ -28,6 +28,7 @@ import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationExcept
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.DatasetValidator;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.rules.OrientationMark;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
@@ -87,7 +88,7 @@ public class SegmentationHandler {
 				+ " to new segment " + newID);
 
 		ISegmentedProfile medianProfile = dataset.getCollection().getProfileCollection()
-				.getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);
+				.getSegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE, Stats.MEDIAN);
 
 		IProfileSegment seg1 = medianProfile.getSegment(segID1);
 		IProfileSegment seg2 = medianProfile.getSegment(segID2);
@@ -137,7 +138,7 @@ public class SegmentationHandler {
 		try {
 
 			ISegmentedProfile medianProfile = dataset.getCollection().getProfileCollection()
-					.getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);
+					.getSegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE, Stats.MEDIAN);
 
 			IProfileSegment seg = medianProfile.getSegment(segID);
 
@@ -188,7 +189,7 @@ public class SegmentationHandler {
 		try {
 
 			ISegmentedProfile medianProfile = dataset.getCollection().getProfileCollection()
-					.getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);
+					.getSegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE, Stats.MEDIAN);
 
 			IProfileSegment seg = medianProfile.getSegment(segID);
 
@@ -239,14 +240,14 @@ public class SegmentationHandler {
 		try {
 
 			double prop = dataset.getCollection().getProfileCollection()
-					.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN).getFractionOfIndex(index);
+					.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE, Stats.MEDIAN).getFractionOfIndex(index);
 
 			// Update the median profile
 			dataset.getCollection().getProfileManager().updateMedianProfileSegmentStartIndex(id, index);
 
 			// Get the updated profile
 			ISegmentedProfile newProfile = dataset.getCollection().getProfileCollection()
-					.getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);
+					.getSegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE, Stats.MEDIAN);
 
 			// Apply the updated profile to the cells
 			for (ICell c : dataset.getCollection()) {
@@ -260,7 +261,8 @@ public class SegmentationHandler {
 				// index
 
 				int childIndex = child.getCollection().getProfileCollection()
-						.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN).getIndexOfFraction(prop);
+						.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE, Stats.MEDIAN)
+						.getIndexOfFraction(prop);
 
 				child.getCollection().getProfileManager().updateMedianProfileSegmentStartIndex(id, childIndex);
 			}
@@ -284,7 +286,7 @@ public class SegmentationHandler {
 	 * @param tag
 	 * @param newTagIndex
 	 */
-	public synchronized void setLandmark(Landmark tag, int index) {
+	public synchronized void setLandmark(OrientationMark tag, int index) {
 
 		if (tag == null)
 			throw new IllegalArgumentException("Tag is null");
@@ -303,7 +305,7 @@ public class SegmentationHandler {
 
 			// Otherwise, find the best fit for each child dataset
 			double prop = dataset.getCollection().getProfileCollection()
-					.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN).getFractionOfIndex(index);
+					.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE, Stats.MEDIAN).getFractionOfIndex(index);
 
 			dataset.getCollection().getProfileManager().updateLandmark(tag, index);
 
@@ -311,7 +313,8 @@ public class SegmentationHandler {
 
 				// Update each child median profile to the same proportional index
 				int childIndex = child.getCollection().getProfileCollection()
-						.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN).getIndexOfFraction(prop);
+						.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE, Stats.MEDIAN)
+						.getIndexOfFraction(prop);
 
 				child.getCollection().getProfileManager().updateLandmark(tag, childIndex);
 			}
@@ -339,11 +342,11 @@ public class SegmentationHandler {
 	 * @throws ProfileException
 	 * @throws ComponentCreationException
 	 */
-	private synchronized boolean couldUpdateTagToExistingTagIndex(Landmark tag, int index)
+	private synchronized boolean couldUpdateTagToExistingTagIndex(OrientationMark tag, int index)
 			throws MissingLandmarkException, MissingProfileException, ProfileException, IndexOutOfBoundsException,
 			ComponentCreationException {
-		List<Landmark> tags = dataset.getCollection().getProfileCollection().getLandmarks();
-		for (Landmark existingTag : tags) {
+		List<OrientationMark> tags = dataset.getCollection().getProfileCollection().getOrientationMarks();
+		for (OrientationMark existingTag : tags) {
 			if (existingTag.equals(tag))
 				continue;
 			int existingTagIndex = dataset.getCollection().getProfileCollection().getLandmarkIndex(existingTag);

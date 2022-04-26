@@ -24,8 +24,8 @@ import org.jfree.chart.ChartPanel;
 
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
+import com.bmskinner.nuclear_morphology.components.rules.OrientationMark;
 import com.bmskinner.nuclear_morphology.components.signals.IWarpedSignal;
 import com.bmskinner.nuclear_morphology.gui.RotationMode;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
@@ -39,7 +39,7 @@ public class DefaultChartOptions extends AbstractOptions implements ChartOptions
 
 	private boolean normalised = false;
 	private ProfileAlignment alignment = ProfileAlignment.LEFT;
-	private Landmark tag = Landmark.REFERENCE_POINT;
+	private OrientationMark tag = OrientationMark.REFERENCE;
 	private boolean showMarkers = false;
 	private boolean hideProfiles = false;
 	private boolean isShowIQR = true;
@@ -138,11 +138,11 @@ public class DefaultChartOptions extends AbstractOptions implements ChartOptions
 	}
 
 	@Override
-	public Landmark getTag() {
+	public OrientationMark getTag() {
 		return tag;
 	}
 
-	public void setTag(Landmark tag) {
+	public void setTag(OrientationMark tag) {
 		this.tag = tag;
 	}
 

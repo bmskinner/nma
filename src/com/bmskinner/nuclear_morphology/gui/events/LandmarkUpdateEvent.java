@@ -20,7 +20,7 @@ import java.util.EventObject;
 
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
+import com.bmskinner.nuclear_morphology.components.rules.OrientationMark;
 
 /**
  * Landmark update events indicate a change to the position of a landmark in a
@@ -33,7 +33,7 @@ import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 @SuppressWarnings("serial")
 public class LandmarkUpdateEvent extends EventObject {
 
-	public Landmark lm;
+	public OrientationMark lm;
 	public IAnalysisDataset dataset = null;
 	public int newIndex;
 	public ICell cell = null;
@@ -46,7 +46,7 @@ public class LandmarkUpdateEvent extends EventObject {
 	 * @param newStartIndex the new index to apply via the update type
 	 * @param type          the type of segment update to perform
 	 */
-	public LandmarkUpdateEvent(final Object source, final IAnalysisDataset dataset, final Landmark lm,
+	public LandmarkUpdateEvent(final Object source, final IAnalysisDataset dataset, final OrientationMark lm,
 			final int newIndex) {
 		super(source);
 		this.lm = lm;
@@ -62,7 +62,7 @@ public class LandmarkUpdateEvent extends EventObject {
 	 * @param newStartIndex the new index to apply via the update type
 	 * @param type          the type of segment update to perform
 	 */
-	public LandmarkUpdateEvent(final Object source, final ICell cell, final Landmark lm, final int newIndex) {
+	public LandmarkUpdateEvent(final Object source, final ICell cell, final OrientationMark lm, final int newIndex) {
 		super(source);
 		this.lm = lm;
 		this.newIndex = newIndex;

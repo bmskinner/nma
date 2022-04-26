@@ -29,10 +29,10 @@ import com.bmskinner.nuclear_morphology.components.cells.Nucleus;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
-import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
+import com.bmskinner.nuclear_morphology.components.rules.OrientationMark;
 import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
@@ -131,7 +131,7 @@ public class CellImagePainter implements ImagePainter {
 			IProfileSegment seg = segs.get(i);
 
 			for (int j = 0; j <= seg.length(); j++) {
-				int k = n.wrapIndex(seg.getStartIndex() + j + n.getBorderIndex(Landmark.REFERENCE_POINT) - 1);
+				int k = n.wrapIndex(seg.getStartIndex() + j + n.getBorderIndex(OrientationMark.REFERENCE) - 1);
 				IPoint p = n.getBorderPoint(k).minus(n.getBase()).plus(CellularComponent.COMPONENT_BUFFER);
 
 				Point2D p2 = at.transform(p.toPoint2D(), null);
@@ -155,7 +155,7 @@ public class CellImagePainter implements ImagePainter {
 		// Draw the landmarks
 		g2.setStroke(new BasicStroke(5));
 
-		for (Landmark lm : n.getLandmarks().keySet()) {
+		for (OrientationMark lm : n.getOrientationMarks()) {
 			IPoint lp = n.getBorderPoint(lm).minus(n.getBase()).plus(CellularComponent.COMPONENT_BUFFER);
 			Point2D lp2 = at.transform(lp.toPoint2D(), null);
 			x = lp2.getX();
@@ -463,7 +463,7 @@ public class CellImagePainter implements ImagePainter {
 				g2.setColor(Color.CYAN);
 
 				// Highlight the border depending on what border tags are present
-				for (Landmark lm : cell.getPrimaryNucleus().getLandmarks().keySet()) {
+				for (OrientationMark lm : cell.getPrimaryNucleus().getOrientationMarks()) {
 					IPoint lp = cell.getPrimaryNucleus().getBorderPoint(lm).minus(cell.getPrimaryNucleus().getBase())
 							.plus(CellularComponent.COMPONENT_BUFFER);
 					if (cellX >= lp.getX() - 0.4 && cellX <= lp.getX() + 0.4 && cellY >= lp.getY() - 0.4

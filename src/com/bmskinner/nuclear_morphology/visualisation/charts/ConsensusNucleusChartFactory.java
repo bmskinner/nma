@@ -40,7 +40,7 @@ import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.mesh.DefaultMesh;
 import com.bmskinner.nuclear_morphology.components.mesh.Mesh;
 import com.bmskinner.nuclear_morphology.components.mesh.MeshCreationException;
-import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
+import com.bmskinner.nuclear_morphology.components.rules.OrientationMark;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.visualisation.ChartComponents;
@@ -352,7 +352,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 
 			Nucleus n = options.firstDataset().getCollection().getConsensus();
 
-			for (Landmark lm : n.getLandmarks().keySet()) {
+			for (OrientationMark lm : n.getOrientationMarks()) {
 
 				// Point at the landmark coordinate
 				double[][] data = new double[2][1];

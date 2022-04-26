@@ -132,7 +132,7 @@
 //											// must get absolute indexes
 //
 //		ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets()).setNormalised(normaliseProfile)
-//				.setAlignment(ProfileAlignment.LEFT).setTag(Landmark.REFERENCE_POINT).setShowMarkers(true)
+//				.setAlignment(ProfileAlignment.LEFT).setTag(OrientationMark.REFERENCE).setShowMarkers(true)
 //				.setProfileType(ProfileType.ANGLE).setShowProfiles(false).setShowIQR(false).setShowPoints(true)
 //				.setSwatch(GlobalOptions.getInstance().getSwatch()).setShowAnnotations(false).setShowXAxis(false)
 //				.setShowYAxis(false).setTarget(dualPanel.getMainPanel()).build();
@@ -146,7 +146,7 @@
 //		 */
 //
 //		ChartOptions rangeOptions = new ChartOptionsBuilder().setDatasets(getDatasets()).setNormalised(normaliseProfile)
-//				.setAlignment(ProfileAlignment.LEFT).setTag(Landmark.REFERENCE_POINT).setShowMarkers(true)
+//				.setAlignment(ProfileAlignment.LEFT).setTag(OrientationMark.REFERENCE).setShowMarkers(true)
 //				.setProfileType(ProfileType.ANGLE).setShowProfiles(false).setShowIQR(false)
 //				.setSwatch(GlobalOptions.getInstance().getSwatch()).setShowPoints(false).setShowAnnotations(false)
 //				.setShowXAxis(false).setShowYAxis(false).setTarget(dualPanel.getRangePanel()).build();

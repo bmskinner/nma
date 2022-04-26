@@ -19,6 +19,7 @@ package com.bmskinner.nuclear_morphology.components.cells;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -34,10 +35,13 @@ import com.bmskinner.nuclear_morphology.components.ComponentOrienter;
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
+import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileException;
+import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.components.profiles.UnprofilableObjectException;
 import com.bmskinner.nuclear_morphology.components.rules.OrientationMark;
 import com.bmskinner.nuclear_morphology.components.rules.PriorityAxis;
@@ -190,8 +194,75 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
 	}
 
 	@Override
+	public int getIndexRelativeTo(@NonNull OrientationMark om, int index) throws MissingLandmarkException {
+		Landmark lm = getLandmark(om);
+		if (lm == null)
+			throw new MissingLandmarkException("Cannot find landmark for " + om);
+		return getIndexRelativeTo(lm, index);
+	}
+
+	@Override
+	public int getBorderIndex(@NonNull OrientationMark om) throws MissingLandmarkException {
+		Landmark lm = getLandmark(om);
+		if (lm == null)
+			throw new MissingLandmarkException("Cannot find landmark for " + om);
+		return getBorderIndex(lm);
+	}
+
+	@Override
+	public IPoint getBorderPoint(@NonNull OrientationMark om) throws MissingLandmarkException {
+		Landmark lm = getLandmark(om);
+		if (lm == null)
+			throw new MissingLandmarkException("Cannot find landmark for " + om);
+		return getBorderPoint(lm);
+	}
+
+	@Override
+	public void setOrientationMark(@NonNull OrientationMark om, int i)
+			throws IndexOutOfBoundsException, MissingProfileException, ProfileException, MissingLandmarkException {
+		Landmark lm = getLandmark(om);
+		if (lm == null)
+			throw new MissingLandmarkException("Cannot find landmark for " + om);
+		setLandmark(lm, i);
+	}
+
+	@Override
+	public Map<OrientationMark, Integer> getOrientationMarkMap() {
+		Map<Landmark, Integer> lMap = getLandmarks();
+		Map<OrientationMark, Integer> result = new HashMap<>();
+		for (Entry<OrientationMark, Landmark> entry : orientationMarks.entrySet()) {
+			result.put(entry.getKey(), lMap.get(entry.getValue()));
+		}
+		return result;
+	}
+
+	@Override
 	public @Nullable Landmark getLandmark(OrientationMark s) {
 		return orientationMarks.get(s);
+	}
+
+	@Override
+	public boolean hasLandmark(@NonNull OrientationMark landmark) {
+		// TODO Auto-generated method stub
+		return orientationMarks.containsKey(landmark);
+	}
+
+	@Override
+	public ISegmentedProfile getProfile(@NonNull ProfileType type, @NonNull OrientationMark om)
+			throws ProfileException, MissingLandmarkException, MissingProfileException {
+		Landmark lm = getLandmark(om);
+		if (lm == null)
+			throw new MissingLandmarkException("Cannot find landmark for " + om);
+		return super.getProfile(type, lm);
+	}
+
+	@Override
+	public IProfile getUnsegmentedProfile(@NonNull ProfileType type, @NonNull OrientationMark om)
+			throws ProfileException, MissingLandmarkException, MissingProfileException {
+		Landmark lm = getLandmark(om);
+		if (lm == null)
+			throw new MissingLandmarkException("Cannot find landmark for " + om);
+		return super.getUnsegmentedProfile(type, lm);
 	}
 
 	@Override

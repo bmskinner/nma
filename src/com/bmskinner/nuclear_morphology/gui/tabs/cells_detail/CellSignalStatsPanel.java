@@ -30,7 +30,7 @@ import javax.swing.table.TableModel;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
+import com.bmskinner.nuclear_morphology.components.rules.OrientationMark;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 import com.bmskinner.nuclear_morphology.gui.tabs.TableDetailPanel;
@@ -183,7 +183,7 @@ public class CellSignalStatsPanel extends TableDetailPanel implements CellEditin
 	}
 
 	@Override
-	public void setBorderTagAction(@NonNull Landmark tag, int newTagIndex) {
+	public void setBorderTagAction(@NonNull OrientationMark tag, int newTagIndex) {
 		// TODO Auto-generated method stub
 
 	}

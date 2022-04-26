@@ -33,10 +33,10 @@ import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
-import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
+import com.bmskinner.nuclear_morphology.components.rules.OrientationMark;
 import com.bmskinner.nuclear_morphology.core.DatasetListManager;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -339,7 +339,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 		for (IAnalysisDataset dataset : options.getDatasets()) {
 
 			IProfileSegment medianSeg1 = dataset.getCollection().getProfileCollection()
-					.getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN).getSegments()
+					.getSegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE, Stats.MEDIAN).getSegments()
 					.get(options.getSegPosition());
 
 			double[] d1Values = dataset.getCollection().getRawValues(Measurement.LENGTH,
@@ -356,7 +356,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 				}
 
 				IProfileSegment medianSeg2 = d2.getCollection().getProfileCollection()
-						.getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN).getSegments()
+						.getSegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE, Stats.MEDIAN).getSegments()
 						.get(options.getSegPosition());
 
 				double[] d2Values = d2.getCollection().getRawValues(Measurement.LENGTH,
@@ -441,7 +441,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 		for (IAnalysisDataset d1 : options.getDatasets()) {
 
 			IProfileSegment medianSeg1 = d1.getCollection().getProfileCollection()
-					.getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN).getSegments()
+					.getSegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE, Stats.MEDIAN).getSegments()
 					.get(options.getSegPosition());
 
 			double v1 = d1.getCollection().getMedian(Measurement.LENGTH, CellularComponent.NUCLEAR_BORDER_SEGMENT,
@@ -453,7 +453,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 					continue;
 
 				IProfileSegment medianSeg2 = d2.getCollection().getProfileCollection()
-						.getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN).getSegments()
+						.getSegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE, Stats.MEDIAN).getSegments()
 						.get(options.getSegPosition());
 
 				double v2 = d2.getCollection().getMedian(Measurement.LENGTH, CellularComponent.NUCLEAR_BORDER_SEGMENT,
