@@ -1069,16 +1069,10 @@ public class DefaultCellCollection implements ICellCollection {
 		if (getClass() != obj.getClass())
 			return false;
 		DefaultCellCollection other = (DefaultCellCollection) obj;
-		if (uuid == null) {
-			if (other.uuid != null)
-				return false;
-		} else if (!uuid.equals(other.uuid))
+		if (!uuid.equals(other.uuid))
 			return false;
 
-		if (name == null) {
-			if (other.name != null)
-				return false;
-		} else if (!name.equals(other.name))
+		if (!name.equals(other.name))
 			return false;
 
 		if (consensusNucleus == null) {
@@ -1089,10 +1083,7 @@ public class DefaultCellCollection implements ICellCollection {
 		if (!cells.equals(other.cells))
 			return false;
 
-		if (profileCollection == null) {
-			if (other.profileCollection != null)
-				return false;
-		} else if (!profileCollection.equals(other.profileCollection))
+		if (!profileCollection.equals(other.profileCollection))
 			return false;
 		if (ruleSets == null) {
 			if (other.ruleSets != null)
@@ -1188,10 +1179,10 @@ public class DefaultCellCollection implements ICellCollection {
 		}
 
 		@Override
-		public int getLandmarkIndex(@NonNull OrientationMark pointType) throws MissingLandmarkException {
-			if (indexes.containsKey(pointType))
-				return indexes.get(pointType);
-			throw new MissingLandmarkException(pointType + " is not present in this profile collection");
+		public int getLandmarkIndex(@NonNull OrientationMark om) throws MissingLandmarkException {
+			if (indexes.containsKey(om))
+				return indexes.get(om);
+			throw new MissingLandmarkException(om + " is not present in this profile collection");
 		}
 
 		@Override
@@ -1204,26 +1195,26 @@ public class DefaultCellCollection implements ICellCollection {
 		}
 
 		@Override
-		public boolean hasLandmark(@NonNull OrientationMark tag) {
-			return indexes.keySet().contains(tag);
+		public boolean hasLandmark(@NonNull OrientationMark om) {
+			return indexes.keySet().contains(om);
 		}
 
 		@Override
-		public synchronized IProfile getProfile(@NonNull ProfileType type, @NonNull OrientationMark tag, int quartile)
+		public synchronized IProfile getProfile(@NonNull ProfileType type, @NonNull OrientationMark om, int quartile)
 				throws MissingLandmarkException, ProfileException, MissingProfileException {
-			if (!this.hasLandmark(tag))
-				throw new MissingLandmarkException("Tag is not present: " + tag.toString());
+			if (!this.hasLandmark(om))
+				throw new MissingLandmarkException("Orientation point is not present: " + om.toString());
 
-			if (!cache.hasProfile(type, quartile, tag)) {
+			if (!cache.hasProfile(type, quartile, om)) {
 				IProfileAggregate agg = createProfileAggregate(type, DefaultCellCollection.this.getMedianArrayLength());
 
 				IProfile p = agg.getQuartile(quartile);
-				int offset = indexes.get(tag);
+				int offset = indexes.get(om);
 				p = p.startFrom(offset);
-				cache.addProfile(type, quartile, tag, p);
+				cache.addProfile(type, quartile, om, p);
 			}
 
-			return cache.getProfile(type, quartile, tag);
+			return cache.getProfile(type, quartile, om);
 		}
 
 		@Override
@@ -1435,11 +1426,11 @@ public class DefaultCellCollection implements ICellCollection {
 		}
 
 		@Override
-		public IProfile getIQRProfile(@NonNull ProfileType type, @NonNull OrientationMark tag)
+		public IProfile getIQRProfile(@NonNull ProfileType type, @NonNull OrientationMark om)
 				throws MissingLandmarkException, ProfileException, MissingProfileException {
 
-			IProfile q25 = getProfile(type, tag, Stats.LOWER_QUARTILE);
-			IProfile q75 = getProfile(type, tag, Stats.UPPER_QUARTILE);
+			IProfile q25 = getProfile(type, om, Stats.LOWER_QUARTILE);
+			IProfile q75 = getProfile(type, om, Stats.UPPER_QUARTILE);
 
 			if (q25 == null)
 				throw new ProfileException("Could not create q25 profile; was null");
@@ -1476,8 +1467,8 @@ public class DefaultCellCollection implements ICellCollection {
 			}
 
 			for (Entry<OrientationMark, Integer> entry : indexes.entrySet()) {
-				e.addContent(new Element("Landmark").setAttribute("name", entry.getKey().toString())
-						.setAttribute("index", String.valueOf(entry.getValue())));
+				e.addContent(new Element("Orient").setAttribute("name", entry.getKey().toString()).setAttribute("index",
+						String.valueOf(entry.getValue())));
 			}
 
 			return e;

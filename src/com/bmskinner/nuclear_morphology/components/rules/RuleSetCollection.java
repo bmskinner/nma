@@ -36,7 +36,6 @@ import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationExcept
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.profiles.DefaultLandmark;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
-import com.bmskinner.nuclear_morphology.components.profiles.LandmarkType;
 import com.bmskinner.nuclear_morphology.io.XMLReader.XMLReadingException;
 import com.bmskinner.nuclear_morphology.io.XmlSerializable;
 
@@ -133,8 +132,7 @@ public class RuleSetCollection implements XmlSerializable {
 		for (Element t : e.getChildren(XML_LANDMARK)) {
 
 			String lmName = t.getAttributeValue(XML_NAME);
-			LandmarkType lmType = LandmarkType.valueOf(t.getAttributeValue(XML_TYPE));
-			Landmark l = Landmark.of(lmName, lmType);
+			Landmark l = new DefaultLandmark(lmName);
 
 			List<RuleSet> rules = new ArrayList<>();
 			for (Element r : t.getChildren(XML_RULESET)) {
@@ -254,6 +252,17 @@ public class RuleSetCollection implements XmlSerializable {
 	 * @param om
 	 * @param r
 	 */
+	public List<RuleSet> getRuleSets(@NonNull Landmark l) {
+		return map.get(l);
+
+	}
+
+	/**
+	 * Get the rulesets for the given tag
+	 * 
+	 * @param om
+	 * @param r
+	 */
 	public List<RuleSet> getRuleSets(@NonNull OrientationMark om) {
 		if (orientationMarks.containsKey(om)) {
 			Landmark l = orientationMarks.get(om);
@@ -267,9 +276,9 @@ public class RuleSetCollection implements XmlSerializable {
 	 * 
 	 * @return
 	 */
-//	public Set<Landmark> getLandmarks() {
-//		return map.keySet();
-//	}
+	public Set<Landmark> getLandmarks() {
+		return map.keySet();
+	}
 
 	public Set<OrientationMark> getOrientionMarks() {
 		return orientationMarks.keySet();
@@ -333,8 +342,8 @@ public class RuleSetCollection implements XmlSerializable {
 		}
 
 		for (Entry<Landmark, List<RuleSet>> entry : map.entrySet()) {
-			Element tagElement = new Element(XML_LANDMARK).setAttribute(XML_NAME, entry.getKey().getName())
-					.setAttribute(XML_TYPE, entry.getKey().type().toString());
+			Element tagElement = new Element(XML_LANDMARK).setAttribute(XML_NAME, entry.getKey().getName());
+//					.setAttribute(XML_TYPE, entry.getKey().type().toString());
 			for (RuleSet rs : entry.getValue())
 				tagElement.addContent(rs.toXmlElement());
 			rootElement.addContent(tagElement);
@@ -373,10 +382,10 @@ public class RuleSetCollection implements XmlSerializable {
 	 */
 	public static RuleSetCollection mouseSpermRuleSetCollection() {
 
-		Landmark rp = new DefaultLandmark("Tip of hook", LandmarkType.CORE);
-		Landmark tv = new DefaultLandmark("Ventral upper", LandmarkType.EXTENDED);
-		Landmark bv = new DefaultLandmark("Ventral lower", LandmarkType.EXTENDED);
-		Landmark op = new DefaultLandmark("Tail socket", LandmarkType.EXTENDED);
+		Landmark rp = new DefaultLandmark("Tip of hook");
+		Landmark tv = new DefaultLandmark("Ventral upper");
+		Landmark bv = new DefaultLandmark("Ventral lower");
+		Landmark op = new DefaultLandmark("Tail socket");
 
 		RuleSetCollection r = new RuleSetCollection("Mouse sperm", rp, rp, null, tv, bv, null, op, PriorityAxis.Y,
 				RuleApplicationType.VIA_MEDIAN);
@@ -401,9 +410,9 @@ public class RuleSetCollection implements XmlSerializable {
 	 */
 	public static RuleSetCollection pigSpermRuleSetCollection() {
 
-		Landmark rp = new DefaultLandmark("Tail socket", LandmarkType.CORE);
-		Landmark lh = new DefaultLandmark("Body left", LandmarkType.EXTENDED);
-		Landmark rh = new DefaultLandmark("Body right", LandmarkType.EXTENDED);
+		Landmark rp = new DefaultLandmark("Tail socket");
+		Landmark lh = new DefaultLandmark("Body left");
+		Landmark rh = new DefaultLandmark("Body right");
 
 		RuleSetCollection r = new RuleSetCollection("Pig sperm", rp, lh, rh, null, null, null, rp, PriorityAxis.X,
 				RuleApplicationType.VIA_MEDIAN);
@@ -425,7 +434,7 @@ public class RuleSetCollection implements XmlSerializable {
 	 */
 	public static RuleSetCollection roundRuleSetCollection() {
 
-		Landmark rp = new DefaultLandmark("Longest axis", LandmarkType.CORE);
+		Landmark rp = new DefaultLandmark("Longest axis");
 
 		RuleSetCollection r = new RuleSetCollection("Round", rp, null, null, null, rp, null, rp, PriorityAxis.Y,
 				RuleApplicationType.VIA_MEDIAN);

@@ -283,4 +283,11 @@ public class DummyRodentSpermNucleus extends DummyCellularComponent implements N
 		return nucleus.getOrientationMarkMap();
 	}
 
+	@Override
+	public void setLandmark(@NonNull Landmark tag, int i)
+			throws IndexOutOfBoundsException, MissingProfileException, ProfileException, MissingLandmarkException {
+		// TODO Auto-generated method stub
+
+	}
+
 }

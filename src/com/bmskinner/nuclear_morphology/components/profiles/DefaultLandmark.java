@@ -31,7 +31,6 @@ public class DefaultLandmark implements Landmark {
 	private static final long serialVersionUID = 1L;
 
 	private final String name;
-	private final LandmarkType type;
 
 	/**
 	 * Create a new landmark with the given name and type
@@ -39,8 +38,7 @@ public class DefaultLandmark implements Landmark {
 	 * @param name
 	 * @param type
 	 */
-	public DefaultLandmark(@NonNull final String name, @NonNull final LandmarkType type) {
-		this.type = type;
+	public DefaultLandmark(@NonNull final String name) {
 		this.name = name;
 	}
 
@@ -50,31 +48,13 @@ public class DefaultLandmark implements Landmark {
 	}
 
 	@Override
-	public LandmarkType type() {
-		return type;
-	}
-
-	@Override
 	public String toString() {
 		return name;
 	}
 
-//	public static DefaultLandmark[] values(LandmarkType type) {
-//
-//		List<Landmark> list = new ArrayList<>();
-//		for (Landmark o : Landmark.defaultValues()) {
-//			if (o.type().equals(type)) {
-//				list.add(o);
-//			}
-//		}
-//
-//		return list.toArray(new DefaultLandmark[0]);
-//
-//	}
-
 	@Override
 	public int hashCode() {
-		return Objects.hash(name, type);
+		return Objects.hash(name);
 	}
 
 	@Override
@@ -90,8 +70,6 @@ public class DefaultLandmark implements Landmark {
 			if (other.name != null)
 				return false;
 		} else if (!name.equals(other.name))
-			return false;
-		if (type != other.type)
 			return false;
 		return true;
 	}

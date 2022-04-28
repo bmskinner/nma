@@ -68,21 +68,24 @@ public class ProfileIndexFinder {
 	 * @param rsc
 	 */
 	public static void assignLandmarks(@NonNull Nucleus n, @NonNull RuleSetCollection rsc) {
-		for (OrientationMark om : rsc.getOrientionMarks()) {
-//			LOGGER.fine(() -> "Locating " + om);
 
+		for (Landmark lm : rsc.getLandmarks()) {
 			try {
-				for (RuleSet rule : rsc.getRuleSets(om)) {
+				List<RuleSet> rulesets = rsc.getRuleSets(lm);
+				if (rulesets.isEmpty())
+					LOGGER.finer(n.getNameAndNumber() + ": No ruleset found for " + lm);
+				for (RuleSet rule : rulesets) {
 					IProfile p = n.getProfile(rule.getType());
 					int index = identifyIndex(p, rule);
-					n.setLandmark(om, index);
+					LOGGER.finer(n.getNameAndNumber() + ": Setting " + lm + " to " + index);
+					n.setLandmark(lm, index);
 				}
 			} catch (MissingProfileException e) {
 				LOGGER.log(Loggable.STACK, "Error getting profile type", e);
 			} catch (NoDetectedIndexException e) {
-//				LOGGER.fine("Unable to detect " + om + " in nucleus, setting to zero");
+				LOGGER.finer(n.getNameAndNumber() + ": Unable to detect " + lm + " in nucleus, setting to zero");
 				try {
-					n.setLandmark(om, 0);
+					n.setLandmark(lm, 0);
 				} catch (IndexOutOfBoundsException | MissingProfileException | MissingLandmarkException
 						| ProfileException e1) {
 					LOGGER.log(Loggable.STACK, "Error setting landmark to zero", e);
@@ -284,7 +287,7 @@ public class ProfileIndexFinder {
 			return identifyIndex(collection, list);
 		} catch (NoDetectedIndexException e) {
 			// No index was found for the collection, fall back
-			LOGGER.fine(lm + ": no index for '" + l
+			LOGGER.fine("Orientation point " + lm + ": no index for '" + l
 					+ "' found in median using default rules; falling back on longest diameter");
 			return identifyIndex(collection, List.of(RuleSet.roundRPRuleSet()));
 		}

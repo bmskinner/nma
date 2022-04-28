@@ -18,8 +18,6 @@ package com.bmskinner.nuclear_morphology.components.profiles;
 
 import java.io.Serializable;
 
-import org.eclipse.jdt.annotation.NonNull;
-
 /**
  * This interface accesses the tagged points around the periphery of an object.
  * Default tags are provided.
@@ -44,9 +42,13 @@ public interface Landmark extends Comparable<Landmark>, Serializable {
 	 * @param name the name of the tag.
 	 * @return a tag with the given name
 	 */
-	static Landmark of(@NonNull String name, @NonNull LandmarkType type) {
-		return new DefaultLandmark(name, type);
-	}
+//	static Landmark of(@NonNull String name, @NonNull LandmarkType type) {
+//		return new DefaultLandmark(name, type);
+//	}
+
+//	static Landmark of(@NonNull String name) {
+//		return new DefaultLandmark(name);
+//	}
 
 	/**
 	 * Get the default built-in landmark types
@@ -70,6 +72,6 @@ public interface Landmark extends Comparable<Landmark>, Serializable {
 	 * 
 	 * @return
 	 */
-	LandmarkType type();
+//	LandmarkType type();
 
 }

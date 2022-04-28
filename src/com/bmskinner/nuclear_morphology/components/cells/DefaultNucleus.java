@@ -81,9 +81,10 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
 	 * @param position     the bounding position of the component in the original
 	 *                     image
 	 * @param id           the id of the component. Only use when deserialising!
+	 * @throws ComponentCreationException
 	 */
 	public DefaultNucleus(@NonNull Roi roi, @NonNull IPoint centreOfMass, File source, int channel, int x, int y,
-			int number, @Nullable UUID id, RuleSetCollection rsc) {
+			int number, @Nullable UUID id, RuleSetCollection rsc) throws ComponentCreationException {
 		super(roi, centreOfMass, source, channel, x, y, id, rsc);
 		this.nucleusNumber = number;
 		signalCollection.addNuclearSignalAddedListener(this);
@@ -98,9 +99,10 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
 	 * @param channel
 	 * @param position
 	 * @param centreOfMass
+	 * @throws ComponentCreationException
 	 */
 	public DefaultNucleus(@NonNull Roi roi, @NonNull IPoint centreOfMass, @NonNull File f, int channel, int x, int y,
-			int number, RuleSetCollection rsc) {
+			int number, RuleSetCollection rsc) throws ComponentCreationException {
 		this(roi, centreOfMass, f, channel, x, y, number, null, rsc);
 	}
 

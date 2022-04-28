@@ -1348,7 +1348,7 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
 		 */
 		public DefaultProfileCollection(Element e) {
 
-			for (Element el : e.getChildren("Landmark")) {
+			for (Element el : e.getChildren("Orient")) {
 				indexes.put(OrientationMark.valueOf(el.getAttributeValue("name")),
 						Integer.parseInt(el.getAttributeValue("index")));
 			}
@@ -1678,8 +1678,8 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
 			}
 
 			for (Entry<OrientationMark, Integer> entry : indexes.entrySet()) {
-				e.addContent(new Element("Landmark").setAttribute("name", entry.getKey().toString())
-						.setAttribute("index", String.valueOf(entry.getValue())));
+				e.addContent(new Element("Orient").setAttribute("name", entry.getKey().toString()).setAttribute("index",
+						String.valueOf(entry.getValue())));
 			}
 
 			return e;

@@ -41,6 +41,7 @@ import com.bmskinner.nuclear_morphology.components.Taggable;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.profiles.DefaultLandmark;
 import com.bmskinner.nuclear_morphology.components.profiles.DefaultProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.DefaultSegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
@@ -48,7 +49,6 @@ import com.bmskinner.nuclear_morphology.components.profiles.IProfileCollection;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
-import com.bmskinner.nuclear_morphology.components.profiles.LandmarkType;
 import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
@@ -108,9 +108,10 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 	 * @param channel      the RGB channel the component was found in
 	 * @param position     the bounding position of the component in the original
 	 *                     image
+	 * @throws ComponentCreationException
 	 */
 	protected ProfileableCellularComponent(@NonNull Roi roi, @NonNull IPoint centreOfMass, File source, int channel,
-			int x, int y, @NonNull RuleSetCollection rsc) {
+			int x, int y, @NonNull RuleSetCollection rsc) throws ComponentCreationException {
 		this(roi, centreOfMass, source, channel, x, y, null, rsc);
 	}
 
@@ -126,18 +127,21 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 	 * @param position     the bounding position of the component in the original
 	 *                     image
 	 * @param id           the id of the component. Only use when deserialising!
+	 * @throws ComponentCreationException
 	 */
 	protected ProfileableCellularComponent(@NonNull Roi roi, @NonNull IPoint centreOfMass, File source, int channel,
-			int x, int y, @Nullable UUID id, @NonNull RuleSetCollection rsc) {
+			int x, int y, @Nullable UUID id, @NonNull RuleSetCollection rsc) throws ComponentCreationException {
 		super(roi, centreOfMass, source, channel, x, y, id);
 
 		for (@NonNull
 		OrientationMark s : rsc.getOrientionMarks()) {
-			orientationMarks.put(s, rsc.getLandmark(s).get());
+			Landmark l = rsc.getLandmark(s).orElseThrow(ComponentCreationException::new);
+//			LOGGER.fine("Adding " + s + ": " + l);
+			orientationMarks.put(s, l);
 		}
 
 		priorityAxis = rsc.getPriorityAxis().orElse(PriorityAxis.Y);
-		profileLandmarks.put(rsc.getLandmark(OrientationMark.REFERENCE).get(), 0);
+		profileLandmarks.put(orientationMarks.get(OrientationMark.REFERENCE), 0);
 	}
 
 	/**
@@ -191,8 +195,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 		isLocked = e.getAttributeValue("locked") != null;
 
 		for (Element el : e.getChildren("Landmark")) {
-			profileLandmarks.put(
-					Landmark.of(el.getAttributeValue("name"), LandmarkType.valueOf(el.getAttributeValue("type"))),
+			profileLandmarks.put(new DefaultLandmark(el.getAttributeValue("name")),
 					Integer.parseInt(el.getAttributeValue("index")));
 		}
 
@@ -249,6 +252,15 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 
 	@Override
 	public void setLandmark(@NonNull OrientationMark om, int newLmIndex)
+			throws MissingProfileException, MissingLandmarkException, ProfileException {
+		Landmark land = orientationMarks.get(om);
+		if (land == null)
+			throw new MissingLandmarkException("Cannot find landmark for " + om);
+		setLandmark(land, newLmIndex);
+	}
+
+	@Override
+	public void setLandmark(@NonNull Landmark land, int newLmIndex)
 			throws MissingProfileException, ProfileException, MissingLandmarkException {
 		if (isLocked)
 			return;
@@ -257,13 +269,10 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 			throw new IllegalArgumentException(
 					String.format("Index %s is out of bounds for border length %s", newLmIndex, getBorderLength()));
 
-		Landmark land = orientationMarks.get(om);
-
-		if (land == null)
-			throw new MissingLandmarkException("Cannot find landmark for " + om);
-
 		// If not the RP, set and return
-		if (!OrientationMark.REFERENCE.equals(om)) {
+		Landmark rp = orientationMarks.get(OrientationMark.REFERENCE);
+
+		if (!rp.equals(land)) {
 			profileLandmarks.put(land, newLmIndex);
 			return;
 		}
@@ -272,6 +281,8 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 		// boundary is at the RP. We do this by moving the existing
 		// segments along until the old RP boundary segment is at the new RP.
 		int oldRP = profileLandmarks.get(land);
+
+//		LOGGER.fine("Setting RP to " + newLmIndex + " from " + oldRP);
 
 		// This profile has segments starting from the old RP
 		ISegmentedProfile p = new DefaultSegmentedProfile(profileMap.get(ProfileType.ANGLE), segments);
@@ -289,6 +300,13 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 			segments.add(s.duplicate());
 		}
 		profileLandmarks.put(land, newLmIndex);
+
+		// At this point the RP should be on a segment boundary
+		boolean isOk = false;
+		for (IProfileSegment s : segments)
+			if (s.getStartIndex() == newLmIndex)
+				isOk = true;
+		assert (isOk);
 	}
 
 	@Override
@@ -453,6 +471,13 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 			segments.add(s.offset(rpIndex));
 		}
 		IProfileSegment.linkSegments(segments);
+
+		// At this point the RP should be on a segment boundary
+		boolean isOk = false;
+		for (IProfileSegment s : segments)
+			if (s.getStartIndex() == rpIndex)
+				isOk = true;
+		assert (isOk);
 	}
 
 	@Override
@@ -518,6 +543,13 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 			// due to RP shift
 			profileLandmarks.put(lm, newIndex);
 		}
+
+		// At this point the RP should be on a segment boundary
+		boolean isOk = false;
+		for (IProfileSegment s : segments)
+			if (s.getStartIndex() == profileLandmarks.get(rp))
+				isOk = true;
+		assert (isOk);
 	}
 
 	@Override
@@ -534,7 +566,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 
 		for (Entry<Landmark, Integer> entry : profileLandmarks.entrySet()) {
 			e.addContent(new Element("Landmark").setAttribute("name", entry.getKey().toString())
-					.setAttribute("type", entry.getKey().type().toString())
+//					.setAttribute("type", entry.getKey().type().toString())
 					.setAttribute("index", String.valueOf(entry.getValue())));
 		}
 

@@ -67,11 +67,11 @@ public class DummySegmentedCellularComponent extends ProfileableCellularComponen
 	public static final double PERIMETER = 347.02;
 	public static final double MIN_DIAMETER = 53.14;
 
-	public DummySegmentedCellularComponent() {
+	public DummySegmentedCellularComponent() throws ComponentCreationException {
 		this("default");
 	}
 
-	public DummySegmentedCellularComponent(String name) {
+	public DummySegmentedCellularComponent(String name) throws ComponentCreationException {
 		super(ROI, COM, IMAGE_FILE, IMAGE_CHANNEL, 105, 35, RuleSetCollection.roundRuleSetCollection());
 		setMeasurement(Measurement.AREA, AREA);
 		setMeasurement(Measurement.PERIMETER, PERIMETER);
@@ -88,7 +88,13 @@ public class DummySegmentedCellularComponent extends ProfileableCellularComponen
 
 	@Override
 	public CellularComponent duplicate() {
-		return new DummySegmentedCellularComponent(name);
+		try {
+			return new DummySegmentedCellularComponent(name);
+		} catch (ComponentCreationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 	@Override

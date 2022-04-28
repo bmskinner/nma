@@ -62,6 +62,8 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 
 	public static final int MAX_COERCION_ATTEMPTS = 50;
 
+	private DatasetValidator dv = new DatasetValidator();
+
 	/**
 	 * Create a profiler for the given dataset
 	 * 
@@ -75,7 +77,6 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 	public IAnalysisResult call() throws Exception {
 		run();
 
-		DatasetValidator dv = new DatasetValidator();
 		if (!dv.validate(dataset))
 			throw new AnalysisMethodException(
 					"Unable to validate dataset after profiling: " + dv.getSummary() + "\n" + dv.getErrors());
@@ -174,6 +175,10 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 	private void runViaMedian() throws Exception {
 		ICellCollection collection = dataset.getCollection();
 
+		if (!dv.validate(dataset))
+			throw new ProfileException(
+					"Dataset does not validate before finding RP: " + dv.getSummary() + dv.getErrors());
+
 		// Find and update the RP
 		identifyRP(collection);
 
@@ -251,6 +256,10 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 			LOGGER.fine("Unable to coerce RP to index zero");
 
 //		LOGGER.fine( "Best RP in final median is located at index " + rpIndex);
+
+		if (!dv.validate(dataset))
+			throw new ProfileException(
+					"Dataset does not validate after finding RP: " + dv.getSummary() + dv.getErrors());
 	}
 
 	/**

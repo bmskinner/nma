@@ -251,6 +251,9 @@ public interface Taggable extends CellularComponent, Orientable {
 	void setLandmark(@NonNull OrientationMark tag, int i)
 			throws IndexOutOfBoundsException, MissingProfileException, ProfileException, MissingLandmarkException;
 
+	void setLandmark(@NonNull Landmark tag, int i)
+			throws IndexOutOfBoundsException, MissingProfileException, ProfileException, MissingLandmarkException;
+
 	/**
 	 * Set the index of the given landmark. Has no effect if this object is locked.
 	 * 

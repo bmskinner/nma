@@ -202,6 +202,52 @@ public class DatasetValidator {
 		return false;
 	}
 
+	public boolean validate(@NonNull ICell c) {
+		errorList.clear();
+		errorCells.clear();
+		summaryList.clear();
+		Nucleus n = c.getPrimaryNucleus();
+
+		if (!c.getPrimaryNucleus().hasLandmark(OrientationMark.REFERENCE)) {
+			errorList.add(String.format("Nucleus %s does not have RP", c.getPrimaryNucleus().getNameAndNumber()));
+			errorCells.add(c);
+		}
+
+		int rpIsOk = 0;
+
+		try {
+			int rpIndex = n.getBorderIndex(OrientationMark.REFERENCE);
+
+			// A profile starting from RP will have RP at index zero.
+			// One segment should start at index 0
+			ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE);
+			LOGGER.finer("Testing RP " + rpIndex + " on profile " + profile.toString());
+			for (IProfileSegment s : profile.getSegments()) {
+				if (s.getStartIndex() == 0)
+					rpIsOk++;
+			}
+
+			if (rpIsOk == 0) {
+				errorList.add(String.format("Nucleus %s does not have RP at a segment boundary: RP at %s, profile %s",
+						n.getNameAndNumber(), rpIndex, profile.toString()));
+				errorCells.add(c);
+			}
+
+		} catch (MissingLandmarkException e) {
+			errorList.add(String.format("Nucleus %s does not have an RP set", n.getNameAndNumber()));
+			errorCells.add(c);
+		} catch (MissingProfileException e) {
+			errorList.add(String.format("Nucleus %s does not have an angle profile", n.getNameAndNumber()));
+			errorCells.add(c);
+		} catch (ProfileException e) {
+			errorList.add(String.format("Nucleus %s had an error finding segments: %s", n.getNameAndNumber(),
+					e.getMessage()));
+			errorCells.add(c);
+		}
+
+		return errorCells.isEmpty();
+	}
+
 	private int checkAllNucleiHaveProfiles(@NonNull IAnalysisDataset d) {
 		return checkAllNucleiHaveProfiles(d.getCollection());
 	}
