@@ -83,15 +83,18 @@ public class Labels {
 		public static final String MERGE_LBL = "Merge";
 
 		public static final String ARITHMETIC_LBL = "Boolean";
-		public static final String DELETE_LBL = "Delete";
-		public static final String CLOSE_LBL = "Close";
+		public static final String DELETE_LBL = "Delete (child)";
+		public static final String DELETE_TOOLTIP = "Delete the selected child datasets";
+
+		public static final String CLOSE_LBL = "Close (root)";
+		public static final String CLOSE_TOOLTIP = "Close the selected root datasets";
 		public static final String CURATE_LBL = "Curate";
 
 		public static final String CHANGE_FOLDER_LBL = "Change folder";
 
 		public static final String EXTRACT_CELLS_LBL = "Extract cells";
 
-		public static final String ADD_TO_WORKSPACE_LBL = "Workspace...";
+		public static final String ADD_TO_WORKSPACE_LBL = "Add to workspace...";
 		public static final String ADD_TO_BIOSAMPLE_LBL = "Biosample...";
 		public static final String ADD_TO_NEW_LBL = "Add to new";
 		public static final String ADD_TO_LBL_PREFIX = "Add to ";

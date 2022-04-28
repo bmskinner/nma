@@ -8,6 +8,7 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.IClusterGroup;
+import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace;
 
 /**
  * Control dispatch of updates to UI panels
@@ -34,6 +35,8 @@ public class UIController {
 	private final List<DatasetSelectionUpdatedListener> datasetSelectionListeners = new ArrayList<>();
 
 	private final List<DatasetAddedListener> datasetAddedListeners = new ArrayList<>();
+
+	private final List<WorkspaceAddedListener> workspaceAddedListeners = new ArrayList<>();
 
 	private final List<FilePathUpdatedListener> filePathUpdatedListeners = new ArrayList<>();
 
@@ -147,6 +150,35 @@ public class UIController {
 	public void fireDatasetAdded(@NonNull IAnalysisDataset d) {
 		for (DatasetAddedListener l : datasetAddedListeners)
 			l.datasetAdded(d);
+	}
+
+	public void fireDatasetDeleted(@NonNull List<IAnalysisDataset> datasets) {
+		for (DatasetAddedListener l : datasetAddedListeners)
+			l.datasetDeleted(datasets);
+	}
+
+	public void addWorkspaceAddedListener(WorkspaceAddedListener l) {
+		workspaceAddedListeners.add(l);
+	}
+
+	public void fireWorkspaceAdded(@NonNull IWorkspace ws) {
+		for (WorkspaceAddedListener l : workspaceAddedListeners)
+			l.workspaceAdded(ws);
+	}
+
+	public void fireWorkspaceDeleted(@NonNull IWorkspace ws) {
+		for (WorkspaceAddedListener l : workspaceAddedListeners)
+			l.workspaceDeleted(ws);
+	}
+
+	public void fireDatasetAdded(@NonNull IWorkspace ws, IAnalysisDataset d) {
+		for (WorkspaceAddedListener l : workspaceAddedListeners)
+			l.datasetAdded(ws, d);
+	}
+
+	public void fireDatasetRemoved(@NonNull IWorkspace ws, IAnalysisDataset d) {
+		for (WorkspaceAddedListener l : workspaceAddedListeners)
+			l.datasetRemoved(ws, d);
 	}
 
 	public void addFilePathUpdatedListener(FilePathUpdatedListener l) {

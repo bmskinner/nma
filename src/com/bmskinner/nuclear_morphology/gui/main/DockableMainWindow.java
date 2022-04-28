@@ -24,6 +24,7 @@ import java.awt.Toolkit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.border.EmptyBorder;
@@ -108,66 +109,30 @@ public class DockableMainWindow extends AbstractMainWindow {
 			contentPane.setLayout(new BorderLayout(2, 2));
 			setContentPane(contentPane);
 
-			// ---------------
 			// Create the log panel
-			// ---------------
-
 			FloatDockModel dockModel = new FloatDockModel();
 			dockModel.addOwner("frame0", this);
 			DockingManager.setDockModel(dockModel);
 			SingleDockFactory floatFactory = new SingleDockFactory();
 			dockModel.getFloatDock(this).setChildDockFactory(floatFactory); // ensure floating docks are not converted
 																			// to tab docks
-
 			LogPanel logPanel = new LogPanel();
-			UserActionController.getInstance().setProgressBarAcceptor(logPanel);
-
-			LogPanelHandler textHandler = new LogPanelHandler(logPanel);
-			textHandler.setLevel(Level.INFO);
-			textHandler.setFormatter(new LogPanelFormatter());
-
-			// Add to the root program logger
-			Logger.getLogger(Loggable.PROJECT_LOGGER).addHandler(textHandler);
-
-			// ---------------
-			// Create the consensus chart
-			// ---------------
+			logPanel.setBorder(BorderFactory.createEmptyBorder());
 			DatasetSelectionPanel populationsPanel = new DatasetSelectionPanel();
+			populationsPanel.setBorder(BorderFactory.createEmptyBorder());
 			ConsensusNucleusPanel consensusNucleusPanel = new ConsensusNucleusPanel();
+			consensusNucleusPanel.setBorder(BorderFactory.createEmptyBorder());
+
 			detailPanels.add(consensusNucleusPanel);
 
-			JSplitPane logAndPopulations = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, logPanel, populationsPanel);
+			JPanel topPanel = createTopPanel(logPanel, populationsPanel, consensusNucleusPanel);
 
-			// Provide minimum sizes for the two components in the split pane
-			Dimension minimumSize = new Dimension(300, 200);
-			logPanel.setMinimumSize(minimumSize);
-			populationsPanel.setMinimumSize(minimumSize);
-			// ---------------
-			// Make the top row panel
-			// ---------------
-			JPanel topRow = new JPanel();
-
-			GridBagConstraints c = new GridBagConstraints();
-			c.gridwidth = GridBagConstraints.RELATIVE; // next-to-last element
-			c.fill = GridBagConstraints.BOTH; // fill both axes of container
-			c.weightx = 1.0; // maximum weighting
-			c.weighty = 1.0;
-
-			topRow.setLayout(new GridBagLayout());
-			topRow.add(logAndPopulations, c);
-
-			c.gridwidth = GridBagConstraints.REMAINDER; // last element in row
-			c.weightx = 0.5; // allow padding on x axis
-			c.weighty = 1.0; // max weighting on y axis
-			c.fill = GridBagConstraints.BOTH; // fill to bounds where possible
-			topRow.add(consensusNucleusPanel, c);
 			TabDock tabDock = createTabs();
 			dockModel.addRootDock("tabdock", tabDock, this);
 
-			// ---------------
 			// Add the top and bottom rows to the main panel
-			// ---------------
-			JSplitPane panelMain = new JSplitPane(JSplitPane.VERTICAL_SPLIT, topRow, tabDock);
+			JSplitPane panelMain = new JSplitPane(JSplitPane.VERTICAL_SPLIT, topPanel, tabDock);
+			panelMain.setBorder(BorderFactory.createEmptyBorder());
 			contentPane.add(panelMain, BorderLayout.CENTER);
 
 			this.pack();
@@ -175,6 +140,51 @@ public class DockableMainWindow extends AbstractMainWindow {
 		} catch (Exception e) {
 			LOGGER.log(Level.SEVERE, "Error initialising main view: " + e.getMessage(), e);
 		}
+	}
+
+	private JPanel createTopPanel(LogPanel logPanel, DatasetSelectionPanel populationsPanel,
+			ConsensusNucleusPanel consensusNucleusPanel) {
+
+		// Provide minimum sizes for the components
+		Dimension minimumSize = new Dimension(300, 200);
+		logPanel.setMinimumSize(minimumSize);
+		populationsPanel.setMinimumSize(minimumSize);
+		consensusNucleusPanel.setMaximumSize(minimumSize);
+
+		// Set up the log panel
+		UserActionController.getInstance().setProgressBarAcceptor(logPanel);
+		LogPanelHandler textHandler = new LogPanelHandler(logPanel);
+		textHandler.setLevel(Level.INFO);
+		textHandler.setFormatter(new LogPanelFormatter());
+		Logger.getLogger(Loggable.PROJECT_LOGGER).addHandler(textHandler);
+
+		// Create a container for the datasets and consensus panels
+		JPanel dataPanel = new JPanel();
+		dataPanel.setBorder(BorderFactory.createEmptyBorder());
+		dataPanel.setLayout(new GridBagLayout());
+		GridBagConstraints c = new GridBagConstraints();
+		c.gridwidth = 1;
+		c.fill = GridBagConstraints.BOTH; // fill both axes of container
+		c.weightx = 1.0; // maximum weighting
+		c.weighty = 1.0;
+		c.gridx = 0;
+		c.gridy = 0;
+
+		dataPanel.add(populationsPanel, c);
+
+		c.gridx = 1;
+		c.weightx = 0.5;
+
+		dataPanel.add(consensusNucleusPanel, c);
+
+		// Create split pane to separate log panel from others
+		JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, logPanel, dataPanel);
+		splitPane.setBorder(BorderFactory.createEmptyBorder());
+
+		JPanel topRow = new JPanel(new BorderLayout());
+		topRow.setBorder(BorderFactory.createEmptyBorder());
+		topRow.add(splitPane);
+		return topRow;
 	}
 
 	/**

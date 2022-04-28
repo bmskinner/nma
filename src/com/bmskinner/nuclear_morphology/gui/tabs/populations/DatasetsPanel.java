@@ -325,8 +325,8 @@ public class DatasetsPanel extends DetailPanel implements DatasetAddedListener, 
 		if (datasets.isEmpty())
 			return;
 
-		DatasetDeleter deleter = new DatasetDeleter(getInputSupplier());
-		deleter.deleteDatasets(datasets);
+//		DatasetDeleter deleter = new DatasetDeleter(getInputSupplier());
+//		deleter.deleteDatasets(datasets);
 		update();
 		treeTable.getColumnModel().getColumn(PopulationTreeTable.COLUMN_NAME).setHeaderValue("Dataset (0)");
 		treeTable.getColumnModel().getColumn(PopulationTreeTable.COLUMN_CELL_COUNT).setHeaderValue("Cells (0)");
@@ -524,6 +524,12 @@ public class DatasetsPanel extends DetailPanel implements DatasetAddedListener, 
 	@Override
 	public void swatchUpdated() {
 		update(getDatasets());
+	}
+
+	@Override
+	public void datasetDeleted(List<IAnalysisDataset> datasets) {
+		// TODO Auto-generated method stub
+
 	}
 
 }

@@ -614,4 +614,10 @@ public final class DatasetListManager implements DatasetAddedListener {
 		addDataset(dataset);
 	}
 
+	@Override
+	public void datasetDeleted(List<IAnalysisDataset> datasets) {
+		// No action here
+
+	}
+
 }

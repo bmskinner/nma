@@ -90,6 +90,8 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 	private static final String OPEN_WORKSPACE_LBL = "Open workspace";
 	private static final String OPEN_WORKSPACE_TOOLTIP = "Open a saved workspace";
 
+	private static final String WORKSPACE_MENU_LBL = "Workspace";
+
 	private static final String DATASETS_MENU_LBL = "Dataset";
 
 	private static final String SAVE_DATASETS_LBL = "Save selected";
@@ -126,6 +128,8 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 		add(createFileMenu());
 		add(createViewMenu());
 		add(createDatasetMenu());
+
+		add(createWorkspaceMenu());
 
 		add(createHelpMenu());
 
@@ -169,12 +173,11 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 
 		newMenu.add(fact.makeItem(NEW_ANALYSIS_SAVED_LBL, UserActionEvent.IMPORT_WORKFLOW_PREFIX,
 				ContextEnabled.ALWAYS_ACTIVE, NEW_ANALYSIS_SAVED_TOOLTIP));
-
-		newMenu.add(fact.makeItem(NEW_WORKSPACE_LBL, UserActionEvent.NEW_WORKSPACE, ContextEnabled.ALWAYS_ACTIVE,
-				NEW_WORKSPACE_TOOLTIP));
-
 		menu.add(newMenu);
 		// End of File>New
+
+		menu.add(fact.makeItem(NEW_WORKSPACE_LBL, UserActionEvent.NEW_WORKSPACE, ContextEnabled.ALWAYS_ACTIVE,
+				NEW_WORKSPACE_TOOLTIP));
 
 		// Start of File>Open
 
@@ -212,6 +215,15 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 		});
 		menu.add(exit);
 
+		return menu;
+	}
+
+	private ContextualMenu createWorkspaceMenu() {
+		ContextualMenu menu = fact.makeMenu(WORKSPACE_MENU_LBL,
+				ContextEnabled.ACTIVE_ON_WORKSPACE | ContextEnabled.ACTIVE_ON_SINGLE_OBJECT);
+
+		menu.add(fact.makeItem(Labels.Populations.ADD_TO_WORKSPACE_LBL, UserActionEvent.ADD_WORKSPACE,
+				ContextEnabled.ACTIVE_ON_WORKSPACE | ContextEnabled.ACTIVE_ON_SINGLE_OBJECT));
 		return menu;
 	}
 
@@ -370,6 +382,16 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 		menu.add(fact.makeItem(Labels.Populations.ARITHMETIC_LBL, UserActionEvent.DATASET_ARITHMETIC,
 				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_CHILD_DATASET
 						| ContextEnabled.ACTIVE_ON_MULTI_OBJECTS));
+
+		menu.add(fact.makeItem(
+				Labels.Populations.DELETE_LBL, UserActionEvent.DELETE_DATASET, ContextEnabled.ACTIVE_ON_CHILD_DATASET
+						| ContextEnabled.ACTIVE_ON_SINGLE_OBJECT | ContextEnabled.ACTIVE_ON_MULTI_OBJECTS,
+				Labels.Populations.DELETE_TOOLTIP));
+
+		menu.add(fact.makeItem(
+				Labels.Populations.CLOSE_LBL, UserActionEvent.DELETE_DATASET, ContextEnabled.ACTIVE_ON_ROOT_DATASET
+						| ContextEnabled.ACTIVE_ON_SINGLE_OBJECT | ContextEnabled.ACTIVE_ON_MULTI_OBJECTS,
+				Labels.Populations.CLOSE_TOOLTIP));
 
 		menu.addSeparator();
 

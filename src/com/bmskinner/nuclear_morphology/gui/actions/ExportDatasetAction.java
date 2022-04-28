@@ -76,8 +76,7 @@ public class ExportDatasetAction extends SingleDatasetResultAction {
 		if (chooseSaveLocation) {
 
 			try {
-				saveFile = is.requestFileSave(dataset.getSavePath().getParentFile(),
-						dataset.getName(), "nmd");
+				saveFile = is.requestFileSave(dataset.getSavePath().getParentFile(), dataset.getName(), "nmd");
 			} catch (RequestCancelledException e) {
 				cancel();
 				return;
@@ -114,7 +113,7 @@ public class ExportDatasetAction extends SingleDatasetResultAction {
 
 	@Override
 	public void finished() {
-
+		LOGGER.fine("Finished export action");
 		Thread thr = new Thread(() -> {
 
 			// update the stored hashcode for the dataset
@@ -122,6 +121,7 @@ public class ExportDatasetAction extends SingleDatasetResultAction {
 
 			// if no list was provided, or no more entries remain, finish
 			if (!hasRemainingDatasetsToProcess()) {
+				LOGGER.fine("Counting down latch");
 				countdownLatch();
 				ExportDatasetAction.super.finished();
 			} else { // otherwise analyse the next item in the list

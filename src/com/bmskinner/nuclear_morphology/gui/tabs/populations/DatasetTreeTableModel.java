@@ -26,7 +26,7 @@ public class DatasetTreeTableModel extends AbstractTreeTableModel {
 
 	private static final Logger LOGGER = Logger.getLogger(DatasetTreeTableModel.class.getName());
 
-	private static final String[] COL_NAMES = { "Dataset", "Cell(s)", "" };
+	private static final String[] COL_NAMES = { "Dataset (0)", "Cells (0)", "" };
 
 	public DatasetTreeTableModel() {
 		// The root node is never seen in the UI
@@ -45,8 +45,6 @@ public class DatasetTreeTableModel extends AbstractTreeTableModel {
 		if (hasNode(dataset))
 			return null; // ignore datasets already present in the model
 
-		LOGGER.fine("Adding dataset " + dataset.getName() + " to population model");
-
 		// If dataset is root, parent will be the same dataset
 		IAnalysisDataset parent = DatasetListManager.getInstance().getParent(dataset);
 		if (parent == null) {
@@ -59,8 +57,9 @@ public class DatasetTreeTableModel extends AbstractTreeTableModel {
 		MutableTreeTableNode newNode = createNode(dataset);
 		int newIndex = parentNode.getChildCount();
 		parentNode.insert(newNode, newIndex);
-		modelSupport.fireChildAdded(new TreePath(getPathToRoot(parentNode)), newIndex, newNode);
-		return new TreePath(getPathToRoot(newNode));
+		TreePath path = new TreePath(getPathToRoot(parentNode));
+		modelSupport.fireChildAdded(path, newIndex, newNode);
+		return path;
 	}
 
 	/**
@@ -74,7 +73,6 @@ public class DatasetTreeTableModel extends AbstractTreeTableModel {
 
 		for (IAnalysisDataset d : DatasetListManager.getInstance().getAllDatasets()) {
 			if (d.hasClusterGroup(group)) {
-				LOGGER.fine("Adding group " + group.getName() + " to population model");
 				MutableTreeTableNode parentNode = getNode(d);
 				MutableTreeTableNode newNode = createNode(group);
 				int newIndex = parentNode.getChildCount();
@@ -92,7 +90,6 @@ public class DatasetTreeTableModel extends AbstractTreeTableModel {
 		if (this.getNode(ws) != null)
 			return null; // ignore workspaces already present
 
-		LOGGER.finer("Adding workspace " + ws.getName() + " to population model");
 		MutableTreeTableNode parentNode = (MutableTreeTableNode) this.getRoot();
 		MutableTreeTableNode newNode = createNode(ws);
 		int newIndex = parentNode.getChildCount();
@@ -102,11 +99,32 @@ public class DatasetTreeTableModel extends AbstractTreeTableModel {
 	}
 
 	/**
+	 * Remove node containing the given object if present
+	 * 
+	 * @param obj
+	 */
+	public void removeNode(Object obj) {
+		if (hasNode(obj)) {
+			MutableTreeTableNode node = getNode(obj);
+			TreeTableNode parent = node.getParent();
+			int nodeIndex = getIndexOfChild(parent, node);
+			TreePath parentPath = new TreePath(getPathToRoot(parent));
+			node.removeFromParent();
+			modelSupport.fireChildRemoved(parentPath, nodeIndex, node);
+
+			// Once cluster groups have no child datasets in them, they can be removed
+			if (parent.getUserObject() instanceof IClusterGroup && parent.getChildCount() == 0) {
+				removeNode(parent.getUserObject());
+			}
+		}
+	}
+
+	/**
 	 * Create a node in the tree table, recursively adding all the children of the
 	 * given dataset id. If the child of a dataset is not already in the names list,
 	 * add it
 	 * 
-	 * @param dataset the dataset to add
+	 * @param group the group to add as a node
 	 * @return
 	 */
 	private MutableTreeTableNode createNode(@NonNull IClusterGroup group) {
@@ -171,17 +189,23 @@ public class DatasetTreeTableModel extends AbstractTreeTableModel {
 	}
 
 	/**
-	 * Test if the given dataset is within a node of the model
+	 * Test if the given object is within a node of the model
 	 * 
-	 * @param dataset the dataset to test
+	 * @param obj the object to test
 	 * @return true if the dataset is in a node, false otherwise
 	 */
 	private boolean hasNode(@NonNull Object obj) {
-		Enumeration<? extends MutableTreeTableNode> en = ((MutableTreeTableNode) root).children();
+		return hasNode((MutableTreeTableNode) root, obj);
+	}
+
+	private static boolean hasNode(MutableTreeTableNode node, Object obj) {
+		Enumeration<? extends MutableTreeTableNode> en = node.children();
 
 		while (en.hasMoreElements()) {
 			MutableTreeTableNode p = en.nextElement();
 			if (p != null && obj == p.getUserObject())
+				return true;
+			if (hasNode(p, obj))
 				return true;
 		}
 		return false;
@@ -195,12 +219,19 @@ public class DatasetTreeTableModel extends AbstractTreeTableModel {
 	 * @return
 	 */
 	private MutableTreeTableNode getNode(@NonNull Object obj) {
-		Enumeration<? extends MutableTreeTableNode> en = ((MutableTreeTableNode) root).children();
+		return getNode((MutableTreeTableNode) root, obj);
+	}
+
+	private static MutableTreeTableNode getNode(MutableTreeTableNode node, Object obj) {
+		Enumeration<? extends MutableTreeTableNode> en = node.children();
 
 		while (en.hasMoreElements()) {
 			MutableTreeTableNode p = en.nextElement();
 			if (p != null && obj == p.getUserObject())
 				return p;
+			MutableTreeTableNode n = getNode(p, obj);
+			if (n != null)
+				return n;
 		}
 		return null;
 	}
@@ -274,7 +305,7 @@ public class DatasetTreeTableModel extends AbstractTreeTableModel {
 	 *         node is not found.
 	 * @throws NullPointerException if {@code aNode} is {@code null}
 	 */
-	public MutableTreeTableNode[] getPathToRoot(MutableTreeTableNode aNode) {
+	public TreeTableNode[] getPathToRoot(TreeTableNode aNode) {
 		List<TreeTableNode> path = new ArrayList<>();
 		TreeTableNode node = aNode;
 

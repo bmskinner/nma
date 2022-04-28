@@ -6,6 +6,7 @@ import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.logging.Logger;
 
+import com.bmskinner.nuclear_morphology.analysis.DatasetDeleter;
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMethod.MorphologyAnalysisMode;
 import com.bmskinner.nuclear_morphology.components.MissingComponentException;
 import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
@@ -21,6 +22,7 @@ import com.bmskinner.nuclear_morphology.components.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.SegmentationHandler;
 import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace;
 import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace.BioSample;
+import com.bmskinner.nuclear_morphology.components.workspaces.WorkspaceFactory;
 import com.bmskinner.nuclear_morphology.core.DatasetListManager;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
@@ -135,15 +137,9 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 			return new MorphologyAnalysis(event.getDatasets(), acceptor);
 
 		if (event.type().startsWith(UserActionEvent.IMPORT_WORKFLOW_PREFIX)) {
+			// If no image folder specified it will be requested in workflow
 			String s = event.type().replace(UserActionEvent.IMPORT_WORKFLOW_PREFIX, "");
-
-			// No image folder specified; will be requested in workflow
-			if (s.equals(""))
-				return new ImportWorkflowAction(acceptor);
-
-			// Image folder specified
-			File f = new File(s);
-			return new ImportWorkflowAction(acceptor, f);
+			return s.equals("") ? new ImportWorkflowAction(acceptor) : new ImportWorkflowAction(acceptor, new File(s));
 		}
 
 		if (event.type().startsWith(UserActionEvent.IMPORT_DATASET_PREFIX)) {
@@ -176,8 +172,20 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 			};
 		}
 
-//		if (event.type().equals(UserActionEvent.NEW_WORKSPACE))
-//			return () -> createWorkspace();
+		if (event.type().equals(UserActionEvent.NEW_WORKSPACE)) {
+			return () -> {
+				try {
+					String workspaceName = is.requestString("New workspace name");
+					IWorkspace w = WorkspaceFactory.createWorkspace(workspaceName);
+					DatasetListManager.getInstance().addWorkspace(w);
+					LOGGER.info("New workspace created: " + workspaceName);
+					UIController.getInstance().fireWorkspaceAdded(w);
+
+				} catch (RequestCancelledException e) {
+					// no action needed
+				}
+			};
+		}
 
 		if (event.type().equals(UserActionEvent.EXPORT_WORKSPACE))
 			return new ExportWorkspaceAction(DatasetListManager.getInstance().getWorkspaces(), acceptor);
@@ -269,10 +277,10 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 				IWorkspace ws = DatasetListManager.getInstance().getWorkspaces().stream()
 						.filter(w -> w.getName().equals(workspaceName)).findFirst()
 						.orElseThrow(IllegalArgumentException::new);
-				for (IAnalysisDataset d : DatasetListManager.getInstance().getRootParents(selectedDatasets))
+				for (IAnalysisDataset d : DatasetListManager.getInstance().getRootParents(selectedDatasets)) {
 					ws.remove(d);
-//				fireDatasetEvent(new UserActionEvent(this, UserActionEvent.ADD_WORKSPACE,
-//						UserActionController.class.getName(), new ArrayList<>()));
+					UIController.getInstance().fireDatasetRemoved(ws, d);
+				}
 			};
 
 		if (event.type().startsWith(UserActionEvent.ADD_TO_WORKSPACE_PREFIX))
@@ -282,10 +290,10 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 						.filter(w -> w.getName().equals(workspaceName)).findFirst()
 						.orElseThrow(IllegalArgumentException::new);
 
-				for (IAnalysisDataset d : DatasetListManager.getInstance().getRootParents(selectedDatasets))
+				for (IAnalysisDataset d : DatasetListManager.getInstance().getRootParents(selectedDatasets)) {
 					ws.add(d);
-//				fireDatasetEvent(new UserActionEvent(this, UserActionEvent.ADD_WORKSPACE,
-//						UserActionController.class.getName(), new ArrayList<>()));
+					UIController.getInstance().fireDatasetAdded(ws, d);
+				}
 			};
 
 		if (event.type().startsWith(UserActionEvent.NEW_BIOSAMPLE_PREFIX))
@@ -487,6 +495,12 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 				}).start();
 			};
 
+		}
+
+		if (UserActionEvent.DELETE_DATASET.equals(event.type())) {
+
+			DatasetDeleter deleter = new DatasetDeleter(selectedDatasets);
+			ThreadManager.getInstance().submit(deleter);
 		}
 
 		return null;

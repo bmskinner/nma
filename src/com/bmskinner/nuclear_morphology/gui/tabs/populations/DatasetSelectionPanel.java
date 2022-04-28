@@ -2,29 +2,36 @@ package com.bmskinner.nuclear_morphology.gui.tabs.populations;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Logger;
 
+import javax.swing.BorderFactory;
 import javax.swing.JScrollPane;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
+import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.IClusterGroup;
+import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace;
 import com.bmskinner.nuclear_morphology.core.DatasetListManager;
 import com.bmskinner.nuclear_morphology.gui.CtrlPressedListener;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.ClusterGroupsUpdatedListener;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.DatasetAddedListener;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.SwatchUpdatedListener;
+import com.bmskinner.nuclear_morphology.gui.events.revamp.WorkspaceAddedListener;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 public class DatasetSelectionPanel extends DetailPanel
-		implements DatasetAddedListener, SwatchUpdatedListener, ClusterGroupsUpdatedListener {
+		implements DatasetAddedListener, SwatchUpdatedListener, ClusterGroupsUpdatedListener, WorkspaceAddedListener {
 
 	private static final Logger LOGGER = Logger.getLogger(DatasetsPanel.class.getName());
 
@@ -44,12 +51,16 @@ public class DatasetSelectionPanel extends DetailPanel
 
 		treeTable = new DatasetTreeTable(model);
 		treeTable.getTreeSelectionModel().addTreeSelectionListener(treeListener);
+		treeTable.addMouseListener(new DatasetMouseAdapter());
+		treeTable.setBorder(BorderFactory.createEmptyBorder());
 
-		add(new JScrollPane(treeTable), BorderLayout.CENTER);
+		JScrollPane js = new JScrollPane(treeTable);
+		add(js, BorderLayout.CENTER);
 
 		uiController.addDatasetAddedListener(this);
 		uiController.addSwatchUpdatedListener(this);
 		uiController.addClusterGroupsUpdatedListener(this);
+		uiController.addWorkspaceAddedListener(this);
 	}
 
 	@Override
@@ -78,6 +89,36 @@ public class DatasetSelectionPanel extends DetailPanel
 		addDataset(List.of(dataset));
 	}
 
+	@Override
+	public void datasetDeleted(List<IAnalysisDataset> datasets) {
+		for (IAnalysisDataset d : datasets)
+			model.removeNode(d);
+	}
+
+	@Override
+	public void workspaceAdded(IWorkspace ws) {
+		TreePath path = model.addWorkspace(ws);
+		expandAll(path);
+	}
+
+	@Override
+	public void workspaceDeleted(IWorkspace ws) {
+		model.removeNode(ws);
+	}
+
+	@Override
+	public void datasetAdded(IWorkspace ws, IAnalysisDataset d) {
+		// TODO Auto-generated method stub
+//		model.get
+
+	}
+
+	@Override
+	public void datasetRemoved(IWorkspace ws, IAnalysisDataset d) {
+		// TODO Auto-generated method stub
+
+	}
+
 	/**
 	 * Add the given dataset and all its children to the populations panel
 	 * 
@@ -86,8 +127,20 @@ public class DatasetSelectionPanel extends DetailPanel
 	private synchronized void addDataset(final List<IAnalysisDataset> datasets) {
 		for (IAnalysisDataset d : datasets) {
 			TreePath path = model.addDataset(d);
-			treeTable.expandPath(path);
+			expandAll(path);
 		}
+	}
+
+	private void expandAll(TreePath parent) {
+		// Traverse children
+		TreeNode node = (TreeNode) parent.getLastPathComponent();
+		if (node.getChildCount() >= 0) {
+			for (Enumeration<?> e = node.children(); e.hasMoreElements();) {
+				TreeNode n = (TreeNode) e.nextElement();
+				expandAll(parent.pathByAddingChild(n));
+			}
+		}
+		treeTable.expandPath(parent);
 	}
 
 	@Override
@@ -110,6 +163,40 @@ public class DatasetSelectionPanel extends DetailPanel
 		// Update the model
 		TreePath path = model.addClusterGroup(group);
 		treeTable.expandPath(path);
+	}
+
+	private class DatasetMouseAdapter extends MouseAdapter {
+
+		@Override
+		public void mouseClicked(MouseEvent e) {
+
+			int row = treeTable.rowAtPoint((e.getPoint()));
+			int col = treeTable.columnAtPoint(e.getPoint());
+
+			Object o = treeTable.getModel().getValueAt(row, 0);
+
+			if (e.getButton() == MouseEvent.BUTTON1 && e.getClickCount() == DOUBLE_CLICK) {
+				if (o instanceof IClusterGroup g)
+					cosmeticHandler.renameClusterGroup(g);
+				if (o instanceof IAnalysisDataset d)
+					datasetClicked(d, row, col);
+				if (o instanceof IWorkspace w)
+					cosmeticHandler.renameWorkspace(w);
+			}
+
+			if (e.getButton() == MouseEvent.BUTTON3) {
+				// No actions yet
+			}
+		}
+
+		private void datasetClicked(IAnalysisDataset d, int row, int column) {
+			if (column == 0)
+				cosmeticHandler.renameDataset(d);
+
+			if (column == 2)
+				cosmeticHandler.changeDatasetColour(d);
+		}
+
 	}
 
 	/**
@@ -136,10 +223,15 @@ public class DatasetSelectionPanel extends DetailPanel
 
 				// Track the order in which the rows are selected
 				setSelectedDatasets(lsm);
-//
-//				LOGGER.fine("Selection order:");
-//				for (IAnalysisDataset d : datasetSelectionOrder)
-//					LOGGER.fine(d.toString());
+
+				// Update table header with number of selected cells
+				int cellCount = datasetSelectionOrder.stream().map(d -> d.getCollection().size()).reduce(0,
+						Integer::sum);
+
+				treeTable.getColumnModel().getColumn(0)
+						.setHeaderValue(String.format("Dataset (%d)", datasetSelectionOrder.size()));
+
+				treeTable.getColumnModel().getColumn(1).setHeaderValue(String.format("Cells (%d)", cellCount));
 
 				DatasetListManager.getInstance().setSelectedDatasets(datasetSelectionOrder);
 
