@@ -430,6 +430,7 @@ public interface ICellCollection
 	 * @return the variabililty score of the object
 	 * @throws MissingLandmarkException if the tag is not present
 	 */
-	double getNormalisedDifferenceToMedian(OrientationMark pointType, Taggable t) throws MissingLandmarkException;
+	double getNormalisedDifferenceToMedian(@NonNull OrientationMark pointType, Taggable t)
+			throws MissingLandmarkException;
 
 }

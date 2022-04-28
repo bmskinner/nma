@@ -74,7 +74,7 @@ public class RuleSetCollection implements XmlSerializable {
 	private final Map<Landmark, List<RuleSet>> map = new HashMap<>();
 
 	/** Store the landmarks to be used for orientation */
-	private final Map<OrientationMark, Landmark> orientationMarks = new EnumMap<>(OrientationMark.class);
+	private final Map<@NonNull OrientationMark, Landmark> orientationMarks = new EnumMap<>(OrientationMark.class);
 
 	/** Track which measurements should be performed for these nuclei */
 	private final Set<Measurement> validMeasurements = new HashSet<>();
@@ -178,7 +178,8 @@ public class RuleSetCollection implements XmlSerializable {
 	 * @return
 	 */
 	public boolean isAsymmetricX() {
-		return map.containsKey(OrientationMark.LEFT) || map.containsKey(OrientationMark.RIGHT);
+		return orientationMarks.containsKey(OrientationMark.LEFT)
+				|| orientationMarks.containsKey(OrientationMark.RIGHT);
 	}
 
 	/**
@@ -187,7 +188,8 @@ public class RuleSetCollection implements XmlSerializable {
 	 * @return
 	 */
 	public boolean isAsymmetricY() {
-		return map.containsKey(OrientationMark.TOP) || map.containsKey(OrientationMark.BOTTOM);
+		return orientationMarks.containsKey(OrientationMark.TOP)
+				|| orientationMarks.containsKey(OrientationMark.BOTTOM);
 	}
 
 	/**
@@ -212,12 +214,14 @@ public class RuleSetCollection implements XmlSerializable {
 	 * 
 	 * @param tag
 	 */
-	public void clearRuleSets(@NonNull Landmark tag) {
-		map.put(tag, new ArrayList<>());
+	public void clearRuleSets(@NonNull OrientationMark tag) {
+		Landmark lm = orientationMarks.get(tag);
+		map.put(lm, new ArrayList<>());
 	}
 
-	public List<RuleSet> removeRuleSets(@NonNull Landmark tag) {
-		return map.remove(tag);
+	public List<RuleSet> removeRuleSets(@NonNull OrientationMark tag) {
+		Landmark lm = orientationMarks.get(tag);
+		return map.remove(lm);
 	}
 
 	/**
@@ -226,20 +230,10 @@ public class RuleSetCollection implements XmlSerializable {
 	 * @param tag
 	 * @param r
 	 */
-	public void addRuleSet(@NonNull Landmark tag, @NonNull RuleSet r) {
-		map.computeIfAbsent(tag, k -> new ArrayList<>());
-		map.get(tag).add(r);
-	}
-
-	/**
-	 * Replace existing RuleSets for the given tag with the list
-	 * 
-	 * @param tag
-	 * @param list
-	 */
-	public void setRuleSets(@NonNull Landmark tag, @NonNull List<RuleSet> list) {
-		map.put(tag, new ArrayList<>());
-		map.get(tag).addAll(list);
+	public void addRuleSet(@NonNull OrientationMark tag, @NonNull RuleSet r) {
+		Landmark lm = orientationMarks.get(tag);
+		map.computeIfAbsent(lm, k -> new ArrayList<>());
+		map.get(lm).add(r);
 	}
 
 	/**
@@ -257,13 +251,13 @@ public class RuleSetCollection implements XmlSerializable {
 	/**
 	 * Get the rulesets for the given tag
 	 * 
-	 * @param tag
+	 * @param om
 	 * @param r
 	 */
-	public List<RuleSet> getRuleSets(@NonNull OrientationMark tag) {
-		if (orientationMarks.containsKey(tag)) {
-			Landmark l = orientationMarks.get(tag);
-			return map.get(tag);
+	public List<RuleSet> getRuleSets(@NonNull OrientationMark om) {
+		if (orientationMarks.containsKey(om)) {
+			Landmark l = orientationMarks.get(om);
+			return map.get(l);
 		}
 		return new ArrayList<>();
 	}
@@ -273,25 +267,12 @@ public class RuleSetCollection implements XmlSerializable {
 	 * 
 	 * @return
 	 */
-	public Set<Landmark> getLandmarks() {
-		return map.keySet();
-	}
+//	public Set<Landmark> getLandmarks() {
+//		return map.keySet();
+//	}
 
 	public Set<OrientationMark> getOrientionMarks() {
 		return orientationMarks.keySet();
-	}
-
-	/**
-	 * Test if the collection has rulesets for the given tag
-	 * 
-	 * @param tag the tag to check
-	 * @return true if rulesets are present, false otherwise
-	 */
-	public boolean hasRulesets(@NonNull Landmark tag) {
-		if (map.containsKey(tag)) {
-			return !map.get(tag).isEmpty();
-		}
-		return false;
 	}
 
 	/**
@@ -342,30 +323,20 @@ public class RuleSetCollection implements XmlSerializable {
 		if (priorityAxis != null)
 			rootElement.setAttribute(XML_PRIORITY_AXIS, priorityAxis.toString());
 
-		// Add the landmark rule definitions
-//		for (Landmark t : getLandmarks()) {
-//			Element tagElement = new Element(XML_LANDMARK).setAttribute(XML_NAME, t.getName()).setAttribute(XML_TYPE,
-//					t.type().toString());
-//
-//			for (RuleSet rs : getRuleSets(t)) {
-//				tagElement.addContent(rs.toXmlElement());
-//			}
-//			rootElement.addContent(tagElement);
-//		}
-
 		// Add any orientation landmarks
 		for (Entry<OrientationMark, Landmark> entry : orientationMarks.entrySet()) {
 
 			rootElement.addContent(new Element("Orient").setAttribute("name", entry.getKey().name())
 					.setAttribute("value", entry.getValue().toString()));
+//			LOGGER.fine("Fetching " + entry.getKey() + ": " + orientationMarks.get(entry.getKey()));
 
-			Element tagElement = new Element(XML_LANDMARK).setAttribute(XML_NAME, entry.getValue().getName())
-					.setAttribute(XML_TYPE, entry.getValue().type().toString());
+		}
 
-			for (RuleSet rs : getRuleSets(entry.getKey())) {
+		for (Entry<Landmark, List<RuleSet>> entry : map.entrySet()) {
+			Element tagElement = new Element(XML_LANDMARK).setAttribute(XML_NAME, entry.getKey().getName())
+					.setAttribute(XML_TYPE, entry.getKey().type().toString());
+			for (RuleSet rs : entry.getValue())
 				tagElement.addContent(rs.toXmlElement());
-			}
-
 			rootElement.addContent(tagElement);
 		}
 
@@ -410,10 +381,10 @@ public class RuleSetCollection implements XmlSerializable {
 		RuleSetCollection r = new RuleSetCollection("Mouse sperm", rp, rp, null, tv, bv, null, op, PriorityAxis.Y,
 				RuleApplicationType.VIA_MEDIAN);
 
-		r.addRuleSet(rp, RuleSet.mouseSpermRPRuleSet());
-		r.addRuleSet(op, RuleSet.mouseSpermOPRuleSet());
-		r.addRuleSet(tv, RuleSet.mouseSpermTVRuleSet());
-		r.addRuleSet(bv, RuleSet.mouseSpermBVRuleSet());
+		r.addRuleSet(OrientationMark.REFERENCE, RuleSet.mouseSpermRPRuleSet());
+		r.addRuleSet(OrientationMark.Y, RuleSet.mouseSpermOPRuleSet());
+		r.addRuleSet(OrientationMark.TOP, RuleSet.mouseSpermTVRuleSet());
+		r.addRuleSet(OrientationMark.BOTTOM, RuleSet.mouseSpermBVRuleSet());
 
 		for (Measurement m : Measurement.getRoundNucleusStats())
 			r.addMeasurableValue(m);
@@ -437,9 +408,9 @@ public class RuleSetCollection implements XmlSerializable {
 		RuleSetCollection r = new RuleSetCollection("Pig sperm", rp, lh, rh, null, null, null, rp, PriorityAxis.X,
 				RuleApplicationType.VIA_MEDIAN);
 
-		r.addRuleSet(rp, RuleSet.pigSpermRPRuleSet());
-		r.addRuleSet(lh, RuleSet.pigSpermLHRuleSet());
-		r.addRuleSet(rh, RuleSet.pigSpermRHRuleSet());
+		r.addRuleSet(OrientationMark.REFERENCE, RuleSet.pigSpermRPRuleSet());
+		r.addRuleSet(OrientationMark.LEFT, RuleSet.pigSpermLHRuleSet());
+		r.addRuleSet(OrientationMark.RIGHT, RuleSet.pigSpermRHRuleSet());
 
 		for (Measurement m : Measurement.getRoundNucleusStats())
 			r.addMeasurableValue(m);
@@ -459,7 +430,7 @@ public class RuleSetCollection implements XmlSerializable {
 		RuleSetCollection r = new RuleSetCollection("Round", rp, null, null, null, rp, null, rp, PriorityAxis.Y,
 				RuleApplicationType.VIA_MEDIAN);
 
-		r.addRuleSet(rp, RuleSet.roundRPRuleSet());
+		r.addRuleSet(OrientationMark.REFERENCE, RuleSet.roundRPRuleSet());
 
 		for (Measurement m : Measurement.getRoundNucleusStats())
 			r.addMeasurableValue(m);

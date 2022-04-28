@@ -51,13 +51,12 @@ import com.bmskinner.nuclear_morphology.components.profiles.IProfileAggregate;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileCollection;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
-import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
-import com.bmskinner.nuclear_morphology.components.profiles.LandmarkType;
 import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileManager;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.components.profiles.UnsegmentedProfileException;
+import com.bmskinner.nuclear_morphology.components.rules.OrientationMark;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.components.signals.DefaultShellResult;
 import com.bmskinner.nuclear_morphology.components.signals.DefaultSignalGroup;
@@ -643,7 +642,7 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
 	 * @throws MissingProfileException
 	 */
 	@Override
-	public Nucleus getNucleusMostSimilarToMedian(Landmark pointType)
+	public Nucleus getNucleusMostSimilarToMedian(OrientationMark pointType)
 			throws ProfileException, MissingLandmarkException, MissingProfileException {
 		List<Nucleus> list = this.getNuclei();
 
@@ -950,7 +949,7 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
 	 * @param pointType the point to fetch profiles from
 	 * @return an array of normalised differences
 	 */
-	private synchronized double[] getNormalisedDifferencesToMedianFromPoint(Landmark pointType) {
+	private synchronized double[] getNormalisedDifferencesToMedianFromPoint(OrientationMark pointType) {
 
 		IProfile medianProfile;
 		try {
@@ -1003,7 +1002,7 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
 	}
 
 	@Override
-	public double getNormalisedDifferenceToMedian(Landmark pointType, Taggable t) {
+	public double getNormalisedDifferenceToMedian(OrientationMark pointType, Taggable t) {
 		IProfile medianProfile;
 		try {
 			medianProfile = profileCollection.getProfile(ProfileType.ANGLE, pointType, Stats.MEDIAN)
@@ -1325,7 +1324,7 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
 	public class DefaultProfileCollection implements IProfileCollection {
 
 		/** indexes of landmarks in the median profile with RP at zero */
-		private Map<Landmark, Integer> indexes = new HashMap<>();
+		private Map<OrientationMark, Integer> indexes = new HashMap<>();
 
 		/** segments in the median profile with RP at zero */
 		private List<IProfileSegment> segments = new ArrayList<>();
@@ -1350,8 +1349,7 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
 		public DefaultProfileCollection(Element e) {
 
 			for (Element el : e.getChildren("Landmark")) {
-				indexes.put(
-						Landmark.of(el.getAttributeValue("name"), LandmarkType.valueOf(el.getAttributeValue("type"))),
+				indexes.put(OrientationMark.valueOf(el.getAttributeValue("name")),
 						Integer.parseInt(el.getAttributeValue("index")));
 			}
 
@@ -1367,7 +1365,7 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
 		 * @param p
 		 */
 		private DefaultProfileCollection(DefaultProfileCollection p) {
-			for (Landmark t : p.indexes.keySet())
+			for (OrientationMark t : p.indexes.keySet())
 				indexes.put(t, p.indexes.get(t));
 
 			for (IProfileSegment s : p.segments)
@@ -1394,28 +1392,28 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
 		}
 
 		@Override
-		public int getLandmarkIndex(@NonNull Landmark pointType) throws MissingLandmarkException {
+		public int getLandmarkIndex(@NonNull OrientationMark pointType) throws MissingLandmarkException {
 			if (indexes.containsKey(pointType))
 				return indexes.get(pointType);
 			throw new MissingLandmarkException(pointType + " is not present in this profile collection");
 		}
 
 		@Override
-		public List<Landmark> getLandmarks() {
-			List<Landmark> result = new ArrayList<>();
-			for (Landmark s : indexes.keySet()) {
+		public List<OrientationMark> getOrientationMarks() {
+			List<OrientationMark> result = new ArrayList<>();
+			for (OrientationMark s : indexes.keySet()) {
 				result.add(s);
 			}
 			return result;
 		}
 
 		@Override
-		public boolean hasLandmark(@NonNull Landmark tag) {
+		public boolean hasLandmark(@NonNull OrientationMark tag) {
 			return indexes.keySet().contains(tag);
 		}
 
 		@Override
-		public synchronized IProfile getProfile(@NonNull ProfileType type, @NonNull Landmark tag, int quartile)
+		public synchronized IProfile getProfile(@NonNull ProfileType type, @NonNull OrientationMark tag, int quartile)
 				throws MissingLandmarkException, ProfileException, MissingProfileException {
 			if (!this.hasLandmark(tag))
 				throw new MissingLandmarkException("Tag is not present: " + tag.toString());
@@ -1433,8 +1431,8 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
 		}
 
 		@Override
-		public ISegmentedProfile getSegmentedProfile(@NonNull ProfileType type, @NonNull Landmark tag, int quartile)
-				throws MissingLandmarkException, ProfileException, MissingProfileException {
+		public ISegmentedProfile getSegmentedProfile(@NonNull ProfileType type, @NonNull OrientationMark tag,
+				int quartile) throws MissingLandmarkException, ProfileException, MissingProfileException {
 
 			if (quartile < 0 || quartile > 100)
 				throw new IllegalArgumentException("Quartile must be between 0-100");
@@ -1451,7 +1449,7 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
 		public void calculateProfiles() throws MissingLandmarkException, MissingProfileException, ProfileException {
 			cache.clear();
 			for (ProfileType t : ProfileType.values()) {
-				for (Landmark lm : indexes.keySet()) {
+				for (OrientationMark lm : indexes.keySet()) {
 					getProfile(t, lm, Stats.MEDIAN);
 					getProfile(t, lm, Stats.LOWER_QUARTILE);
 					getProfile(t, lm, Stats.UPPER_QUARTILE);
@@ -1471,13 +1469,14 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
 		}
 
 		@Override
-		public synchronized IProfileSegment getSegmentAt(@NonNull Landmark tag, int position)
+		public synchronized IProfileSegment getSegmentAt(@NonNull OrientationMark tag, int position)
 				throws MissingLandmarkException {
 			return this.getSegments(tag).get(position);
 		}
 
 		@Override
-		public synchronized List<IProfileSegment> getSegments(@NonNull Landmark tag) throws MissingLandmarkException {
+		public synchronized List<IProfileSegment> getSegments(@NonNull OrientationMark tag)
+				throws MissingLandmarkException {
 
 			// this must be negative offset for segments
 			// since we are moving the pointIndex back to the beginning
@@ -1501,7 +1500,7 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
 		}
 
 		@Override
-		public IProfileSegment getSegmentContaining(@NonNull Landmark tag)
+		public IProfileSegment getSegmentContaining(@NonNull OrientationMark tag)
 				throws ProfileException, MissingLandmarkException {
 			List<IProfileSegment> segments = this.getSegments(tag);
 
@@ -1515,7 +1514,7 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
 		}
 
 		@Override
-		public void setLandmark(@NonNull Landmark tag, int newIndex) {
+		public void setLandmark(@NonNull OrientationMark tag, int newIndex) {
 			// Cannot move the RP from zero
 			if (tag.equals(OrientationMark.REFERENCE))
 				return;
@@ -1621,7 +1620,7 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
 			String newLine = System.getProperty("line.separator");
 			StringBuilder builder = new StringBuilder();
 			builder.append("Point types:" + newLine);
-			for (Entry<Landmark, Integer> e : indexes.entrySet()) {
+			for (Entry<OrientationMark, Integer> e : indexes.entrySet()) {
 				builder.append(e.getKey() + ": " + e.getValue() + newLine);
 			}
 
@@ -1641,7 +1640,7 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
 		}
 
 		@Override
-		public IProfile getIQRProfile(@NonNull ProfileType type, @NonNull Landmark tag)
+		public IProfile getIQRProfile(@NonNull ProfileType type, @NonNull OrientationMark tag)
 				throws MissingLandmarkException, ProfileException, MissingProfileException {
 
 			IProfile q25 = getProfile(type, tag, Stats.LOWER_QUARTILE);
@@ -1678,9 +1677,8 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
 				e.addContent(s.toXmlElement());
 			}
 
-			for (Entry<Landmark, Integer> entry : indexes.entrySet()) {
+			for (Entry<OrientationMark, Integer> entry : indexes.entrySet()) {
 				e.addContent(new Element("Landmark").setAttribute("name", entry.getKey().toString())
-						.setAttribute("type", entry.getKey().type().toString())
 						.setAttribute("index", String.valueOf(entry.getValue())));
 			}
 
@@ -1706,15 +1704,15 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
 			private class ProfileKey {
 				private final ProfileType type;
 				private final double quartile;
-				private final Landmark tag;
+				private final OrientationMark tag;
 
-				public ProfileKey(final ProfileType type, final double quartile, final Landmark tag) {
+				public ProfileKey(final ProfileType type, final double quartile, final OrientationMark tag) {
 					this.type = type;
 					this.quartile = quartile;
 					this.tag = tag;
 				}
 
-				public boolean has(Landmark t) {
+				public boolean has(OrientationMark t) {
 					return tag.equals(t);
 				}
 
@@ -1786,23 +1784,23 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
 			 * @param tag      the tag
 			 * @param profile  the profile to save
 			 */
-			public void addProfile(final ProfileType type, final double quartile, final Landmark tag,
+			public void addProfile(final ProfileType type, final double quartile, final OrientationMark tag,
 					IProfile profile) {
 				ProfileKey key = new ProfileKey(type, quartile, tag);
 				map.put(key, profile);
 			}
 
-			public boolean hasProfile(final ProfileType type, final double quartile, final Landmark tag) {
+			public boolean hasProfile(final ProfileType type, final double quartile, final OrientationMark tag) {
 				ProfileKey key = new ProfileKey(type, quartile, tag);
 				return map.containsKey(key);
 			}
 
-			public IProfile getProfile(final ProfileType type, final double quartile, final Landmark tag) {
+			public IProfile getProfile(final ProfileType type, final double quartile, final OrientationMark tag) {
 				ProfileKey key = new ProfileKey(type, quartile, tag);
 				return map.get(key);
 			}
 
-			public void remove(final ProfileType type, final double quartile, final Landmark tag) {
+			public void remove(final ProfileType type, final double quartile, final OrientationMark tag) {
 				ProfileKey key = new ProfileKey(type, quartile, tag);
 				map.remove(key);
 			}
@@ -1814,7 +1812,7 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
 				map.clear();
 			}
 
-			public void remove(final Landmark t) {
+			public void remove(final OrientationMark t) {
 
 				Iterator<ProfileKey> it = map.keySet().iterator();
 				while (it.hasNext()) {
@@ -1840,7 +1838,7 @@ public class VirtualDataset extends AbstractAnalysisDataset implements IAnalysis
 		}
 
 		@Override
-		public double getProportionOfIndex(@NonNull Landmark tag) throws MissingLandmarkException {
+		public double getProportionOfIndex(@NonNull OrientationMark tag) throws MissingLandmarkException {
 			return getProportionOfIndex(getLandmarkIndex(tag));
 		}
 

@@ -44,10 +44,12 @@ import com.bmskinner.nuclear_morphology.components.cells.Nucleus;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.measure.MeasurementDimension;
+import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.components.profiles.BooleanProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
@@ -273,10 +275,13 @@ public class ProfileChartFactory extends AbstractChartFactory {
 						indexToDraw += amountToAdd;
 					}
 
-					addDomainMarkerToXYPlot(plot, tag, indexToDraw, yVal);
+					Landmark lm = dataset.getAnalysisOptions().orElseThrow(MissingOptionException::new)
+							.getRuleSetCollection().getLandmark(tag).orElseThrow(MissingLandmarkException::new);
+					addDomainMarkerToXYPlot(plot, lm, indexToDraw, yVal);
 
-				} catch (MissingLandmarkException | MissingProfileException | ProfileException e) {
-					LOGGER.fine("Tag not present in profile: " + tag);
+				} catch (MissingLandmarkException | MissingProfileException | ProfileException
+						| MissingOptionException e) {
+					LOGGER.fine("Landmark not present in profile: " + tag);
 				}
 
 			}
@@ -470,7 +475,8 @@ public class ProfileChartFactory extends AbstractChartFactory {
 
 				// adjust the index to the offset
 				index = n.wrapIndex(index - offset);
-				addDomainMarkerToXYPlot(plot, tag, index, 180);
+				Landmark lm = n.getLandmark(tag);
+				addDomainMarkerToXYPlot(plot, lm, index, 180);
 
 			} catch (MissingLandmarkException e) {
 				LOGGER.log(Loggable.STACK, "Border tag not available", e);

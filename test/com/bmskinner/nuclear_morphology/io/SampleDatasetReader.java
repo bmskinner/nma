@@ -33,8 +33,8 @@ import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.components.Version;
 import com.bmskinner.nuclear_morphology.components.Version.UnsupportedVersionException;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
+import com.bmskinner.nuclear_morphology.components.rules.OrientationMark;
 
 /**
  * Provides a simple access point to open datasets for testing classes

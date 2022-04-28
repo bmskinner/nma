@@ -1,6 +1,7 @@
 package com.bmskinner.nuclear_morphology.samples.dummy;
 
 import java.io.File;
+import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -18,6 +19,7 @@ import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileExcept
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.components.rules.OrientationMark;
+import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
@@ -70,7 +72,7 @@ public class DummySegmentedCellularComponent extends ProfileableCellularComponen
 	}
 
 	public DummySegmentedCellularComponent(String name) {
-		super(ROI, COM, IMAGE_FILE, IMAGE_CHANNEL, 105, 35);
+		super(ROI, COM, IMAGE_FILE, IMAGE_CHANNEL, 105, 35, RuleSetCollection.roundRuleSetCollection());
 		setMeasurement(Measurement.AREA, AREA);
 		setMeasurement(Measurement.PERIMETER, PERIMETER);
 		setMeasurement(Measurement.MIN_DIAMETER, MIN_DIAMETER);
@@ -107,6 +109,18 @@ public class DummySegmentedCellularComponent extends ProfileableCellularComponen
 	public Landmark getLandmark(OrientationMark om) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public List<OrientationMark> getOrientationMarks() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void orient() throws MissingLandmarkException {
+		// TODO Auto-generated method stub
+
 	}
 
 }

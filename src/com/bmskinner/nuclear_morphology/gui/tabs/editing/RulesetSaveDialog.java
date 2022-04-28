@@ -33,8 +33,6 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 
-import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
-import com.bmskinner.nuclear_morphology.components.profiles.LandmarkType;
 import com.bmskinner.nuclear_morphology.components.rules.OrientationMark;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSet;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
@@ -87,7 +85,7 @@ public class RulesetSaveDialog extends SettingsDialog {
 
 		for (Entry<String, RuleSetCollection> entry : customCollections.entrySet()) {
 			main.add(new JLabel(entry.getKey()), c);
-			for (Landmark t : entry.getValue().getLandmarks()) {
+			for (OrientationMark t : entry.getValue().getOrientionMarks()) {
 				c.gridy++;
 				main.add(new RuleSetPanel(entry.getKey(), t), c);
 
@@ -160,7 +158,7 @@ public class RulesetSaveDialog extends SettingsDialog {
 		}
 
 		public OrientationMark getTag() {
-			return Landmark.of(text.getText(), LandmarkType.EXTENDED);
+			return OrientationMark.valueOf(text.getText());
 		}
 	}
 }

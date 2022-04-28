@@ -28,10 +28,10 @@ import com.bmskinner.nuclear_morphology.components.cells.Nucleus;
 import com.bmskinner.nuclear_morphology.components.generic.FloatPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
-import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
+import com.bmskinner.nuclear_morphology.components.rules.OrientationMark;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
@@ -332,14 +332,15 @@ public final class ComponentMeasurer {
 	 */
 	private static double calculateHookLength(@NonNull Nucleus n) throws ComponentCreationException {
 
-		if (!n.hasLandmark(Landmark.TOP_VERTICAL) || !n.hasLandmark(Landmark.BOTTOM_VERTICAL)) {
+		if (!n.hasLandmark(OrientationMark.TOP) || !n.hasLandmark(OrientationMark.TOP)
+				|| !n.hasLandmark(OrientationMark.Y)) {
 			return Statistical.MISSING_LANDMARK;
 		}
 
 		try {
 			// Get the oriented nucleus
 			Nucleus t = n.getOrientedNucleus();
-			double vertX = t.getBorderPoint(Landmark.TOP_VERTICAL).getX();
+			double vertX = t.getBorderPoint(OrientationMark.TOP).getX();
 
 			/* Find the x values in the bounding box of the vertical nucleus. */
 			FloatPolygon p = t.toPolygon();
@@ -360,14 +361,15 @@ public final class ComponentMeasurer {
 	 */
 	private static double calculateBodyWidth(@NonNull Nucleus n) throws ComponentCreationException {
 
-		if (!n.hasLandmark(Landmark.TOP_VERTICAL) || !n.hasLandmark(Landmark.BOTTOM_VERTICAL)) {
+		if (!n.hasLandmark(OrientationMark.TOP) || !n.hasLandmark(OrientationMark.TOP)
+				|| !n.hasLandmark(OrientationMark.Y)) {
 			return Statistical.MISSING_LANDMARK;
 		}
 
 		try {
 			// Get the oriented nucleus
 			Nucleus t = n.getOrientedNucleus();
-			double vertX = t.getBorderPoint(Landmark.TOP_VERTICAL).getX();
+			double vertX = t.getBorderPoint(OrientationMark.TOP).getX();
 
 			/* Find the x values in the bounding box of the vertical nucleus. */
 			FloatPolygon p = t.toPolygon();

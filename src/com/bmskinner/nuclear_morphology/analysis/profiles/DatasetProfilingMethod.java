@@ -17,7 +17,6 @@
 package com.bmskinner.nuclear_morphology.analysis.profiles;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -38,7 +37,6 @@ import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
-import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
@@ -147,9 +145,7 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 					// Fall back to zero index, correct manually
 				}
 				if (!n.isLocked()) {
-					Optional<Landmark> l = collection.getRuleSetCollection().getLandmark(t);
-					if (l.isPresent())
-						n.setLandmark(l.get(), index);
+					n.setLandmark(t, index);
 				} else {
 					LOGGER.fine("Nucleus " + n.getNameAndNumber() + " is locked, not changing " + t);
 				}
@@ -279,12 +275,8 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 
 		for (OrientationMark om : lms) {
 			// Don't identify the RP again
-			if (OrientationMark.REFERENCE.equals(om)) {
+			if (OrientationMark.REFERENCE.equals(om))
 				continue;
-			}
-
-			Landmark lm = dataset.getAnalysisOptions().get().getRuleSetCollection().getLandmark(om)
-					.orElseThrow(MissingLandmarkException::new);
 
 			int index = ProfileIndexFinder.identifyIndex(collection, om);
 

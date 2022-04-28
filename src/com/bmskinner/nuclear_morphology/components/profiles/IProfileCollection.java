@@ -85,7 +85,7 @@ public interface IProfileCollection extends XmlSerializable {
 	 * @return the proportion of the landmark along the profile, from 0-1
 	 * @throws MissingLandmarkException if the landmark is not present
 	 */
-	double getProportionOfIndex(@NonNull Landmark landmark) throws MissingLandmarkException;
+	double getProportionOfIndex(@NonNull OrientationMark landmark) throws MissingLandmarkException;
 
 	/**
 	 * Get the index closest to the given proportion along the profile
@@ -95,7 +95,7 @@ public interface IProfileCollection extends XmlSerializable {
 	 */
 	int getIndexOfProportion(double proportion);
 
-	List<Landmark> getLandmarks();
+//	List<Landmark> getLandmarks();
 
 	/**
 	 * Get all the orientation marks attached to this profile collection

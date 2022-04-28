@@ -122,13 +122,13 @@ public class ProfileManager {
 
 			Nucleus template = source.getNucleus(n.getID()).get();
 
-			Map<Landmark, Integer> tags = template.getLandmarks();
-			for (Entry<Landmark, Integer> entry : tags.entrySet()) {
+			Map<OrientationMark, Integer> tags = template.getOrientationMarkMap();
+			for (Entry<OrientationMark, Integer> entry : tags.entrySet()) {
 
 				// RP should never change in re-segmentation, so don't
 				// affect it here. This would risk moving RP off a
 				// segment boundary
-				if (entry.getKey().equals(OrientationMark.REFERENCE))
+				if (OrientationMark.REFERENCE.equals(entry.getKey()))
 					continue;
 				n.setLandmark(entry.getKey(), entry.getValue());
 			}
@@ -167,14 +167,14 @@ public class ProfileManager {
 	 * @throws MissingProfileException
 	 * @throws IndexOutOfBoundsException
 	 */
-	private void createNewLandmark(@NonNull Landmark lm)
+	private void createNewLandmark(@NonNull OrientationMark lm)
 			throws IndexOutOfBoundsException, MissingProfileException, MissingLandmarkException, ProfileException {
 		LOGGER.finer("Landmark does not exist and will be created in each nucleus");
 		for (Nucleus n : collection.getNuclei()) {
-			n.setLandmark(lm, n.getBorderIndex(OrientationMark.REFERENCE));
+			n.setOrientationMark(lm, n.getBorderIndex(OrientationMark.REFERENCE));
 		}
 		if (collection.hasConsensus())
-			collection.getRawConsensus().setLandmark(lm,
+			collection.getRawConsensus().setOrientationMark(lm,
 					collection.getRawConsensus().getBorderIndex(OrientationMark.REFERENCE));
 	}
 
@@ -191,11 +191,11 @@ public class ProfileManager {
 	 * @throws IndexOutOfBoundsException
 	 * @throws ComponentCreationException
 	 */
-	private boolean canUpdateLandmarkIndexToExistingLandmark(@NonNull Landmark lm, int newIndex)
+	private boolean canUpdateLandmarkIndexToExistingLandmark(@NonNull OrientationMark lm, int newIndex)
 			throws MissingLandmarkException, IndexOutOfBoundsException, MissingProfileException, ProfileException,
 			ComponentCreationException {
-		List<Landmark> tags = collection.getProfileCollection().getLandmarks();
-		for (Landmark existingTag : tags) {
+		List<OrientationMark> tags = collection.getProfileCollection().getOrientationMarks();
+		for (OrientationMark existingTag : tags) {
 			if (existingTag.equals(lm))
 				continue;
 			int existingTagIndex = collection.getProfileCollection().getLandmarkIndex(existingTag);
@@ -205,19 +205,16 @@ public class ProfileManager {
 				// update nuclei - allow possible parallel processing
 				for (Nucleus n : collection.getNuclei()) {
 					int existingIndex = n.getBorderIndex(existingTag);
-					n.setLandmark(lm, existingIndex);
-					if (lm.equals(Landmark.TOP_VERTICAL) || lm.equals(Landmark.BOTTOM_VERTICAL)) {
-						n.clearMeasurements();
-						setOpUsingTvBv(n);
-					}
+					n.setOrientationMark(lm, existingIndex);
+					n.clearMeasurements();
+
 				}
 
 				// Update consensus
 				if (collection.hasConsensus()) {
 					Nucleus n = collection.getRawConsensus();
 					int existingIndex = n.getBorderIndex(existingTag);
-					n.setLandmark(lm, existingIndex);
-					setOpUsingTvBv(n);
+					n.setOrientationMark(lm, existingIndex);
 				}
 
 				// Update signals as needed
@@ -240,7 +237,7 @@ public class ProfileManager {
 	 * @throws ComponentCreationException
 	 * @throws IndexOutOfBoundsException
 	 */
-	private void updateExtendedBorderTagIndex(@NonNull Landmark lm, int index) throws ProfileException,
+	private void updateExtendedBorderTagIndex(@NonNull OrientationMark lm, int index) throws ProfileException,
 			MissingLandmarkException, MissingProfileException, IndexOutOfBoundsException, ComponentCreationException {
 
 		try {
@@ -271,38 +268,13 @@ public class ProfileManager {
 		if (collection.hasConsensus()) {
 			Nucleus n = collection.getRawConsensus();
 			int newIndex = n.getProfile(ProfileType.ANGLE).findBestFitOffset(median);
-			n.setLandmark(lm, newIndex);
-//			setOpUsingTvBv(n);
+			n.setOrientationMark(lm, newIndex);
 		}
 
 		// Update signals as needed
 		collection.getSignalManager().recalculateSignalAngles();
 
 	}
-
-	/**
-	 * If the TV and BV are present, move the OP to a more sensible position for
-	 * signal angle measurement: the border point directly below the centre of mass.
-	 * 
-	 * @param n the nucleus to alter
-	 * @throws ProfileException
-	 * @throws MissingLandmarkException
-	 * @throws MissingProfileException
-	 * @throws IndexOutOfBoundsException
-	 * @throws ComponentCreationException
-	 */
-//	private void setOpUsingTvBv(@NonNull final Nucleus n) throws IndexOutOfBoundsException, MissingProfileException,
-//			MissingLandmarkException, ProfileException, ComponentCreationException {
-//		// also update the OP to be directly below the CoM in vertically oriented
-//		// nucleus
-//		if (n.hasLandmark(Landmark.TOP_VERTICAL) && n.hasLandmark(Landmark.BOTTOM_VERTICAL)) {
-//			Nucleus vertN = n.getOrientedNucleus();
-//			IPoint bottom = vertN.getBorderList().stream().filter(p -> p.getY() < vertN.getCentreOfMass().getY())
-//					.min(Comparator.comparing(p -> Math.abs(p.getX() - vertN.getCentreOfMass().getX()))).get();
-//			int newOp = vertN.getBorderIndex(bottom);
-//			n.setLandmark(Landmark.ORIENTATION_POINT, newOp);
-//		}
-//	}
 
 	/**
 	 * If a core border tag is moved, segment boundaries must be moved. It is left
@@ -319,7 +291,7 @@ public class ProfileManager {
 	 * @throws IndexOutOfBoundsException
 	 * @throws SegmentUpdateException
 	 */
-	private void updateCoreBorderTagIndex(@NonNull Landmark tag, int index)
+	private void updateCoreBorderTagIndex(@NonNull OrientationMark tag, int index)
 			throws MissingLandmarkException, ProfileException, MissingProfileException, UnsegmentedProfileException,
 			IndexOutOfBoundsException, ComponentCreationException {
 
@@ -419,7 +391,7 @@ public class ProfileManager {
 			// Use proportional indexes to allow for a changed aggregate length
 			// Note: only the RP must be at a segment boundary. Some mismatches may occur
 
-			for (Landmark key : sourcePC.getLandmarks()) {
+			for (OrientationMark key : sourcePC.getOrientationMarks()) {
 				double prop = sourcePC.getProportionOfIndex(key);
 				int adj = destPC.getIndexOfProportion(prop);
 				destPC.setLandmark(key, adj);
@@ -513,13 +485,12 @@ public class ProfileManager {
 			if (profile.update(seg, newStart, newEnd)) {
 				n.setSegments(profile.getSegments());
 
-				/*
-				 * Check the landmarks - if they overlap the old index replace them.
-				 */
+				/* Check the landmarks - if they overlap the old index replace them */
 				int rawIndex = n.getIndexRelativeTo(OrientationMark.REFERENCE, index);
-
-				Landmark landmarkToUpdate = n.getBorderTag(rawOldIndex);
-				n.setLandmark(landmarkToUpdate, rawIndex);
+				for (Entry<OrientationMark, Integer> entry : n.getOrientationMarkMap().entrySet()) {
+					if (entry.getValue().intValue() == rawOldIndex)
+						n.setOrientationMark(entry.getKey(), rawIndex);
+				}
 				n.clearMeasurements();
 
 			} else {
@@ -588,14 +559,11 @@ public class ProfileManager {
 		}
 
 		// check the boundaries of the segment - we do not want to merge across the RP
-		for (Landmark tag : DefaultLandmark.values(LandmarkType.CORE)) {
-
-			// Find the position of the border tag in the median profile
-			int tagIndex = collection.getProfileCollection().getLandmarkIndex(tag);
-			if (seg1.getEndIndex() == tagIndex || seg2.getStartIndex() == tagIndex) {
-				return false;
-			}
+		int tagIndex = collection.getProfileCollection().getLandmarkIndex(OrientationMark.REFERENCE);
+		if (seg1.getEndIndex() == tagIndex || seg2.getStartIndex() == tagIndex) {
+			return false;
 		}
+
 		return true;
 	}
 

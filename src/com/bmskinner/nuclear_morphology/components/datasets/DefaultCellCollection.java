@@ -73,13 +73,12 @@ import com.bmskinner.nuclear_morphology.components.profiles.IProfileAggregate;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileCollection;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
-import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
-import com.bmskinner.nuclear_morphology.components.profiles.LandmarkType;
 import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileManager;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.components.profiles.UnsegmentedProfileException;
+import com.bmskinner.nuclear_morphology.components.rules.OrientationMark;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.components.signals.DefaultSignalGroup;
 import com.bmskinner.nuclear_morphology.components.signals.IShellResult;
@@ -101,12 +100,15 @@ public class DefaultCellCollection implements ICellCollection {
 	private static final Logger LOGGER = Logger.getLogger(DefaultCellCollection.class.getName());
 
 	/** Unique collection id */
+	@NonNull
 	private final UUID uuid;
 
 	/** The name of the collection */
+	@NonNull
 	private String name;
 
 	/** Aggregated profiles from cells, plus medians */
+	@NonNull
 	private IProfileCollection profileCollection = new DefaultProfileCollection();
 
 	/** Refolded consensus nucleus */
@@ -119,6 +121,7 @@ public class DefaultCellCollection implements ICellCollection {
 	 * Groups of nuclear signals, with detection and display settings, Note that
 	 * actual signals are stored within cells
 	 */
+	@NonNull
 	private final Set<ISignalGroup> signalGroups = new HashSet<>(0);
 
 	/** Rules used to identify border points */
@@ -128,13 +131,18 @@ public class DefaultCellCollection implements ICellCollection {
 	 * Cache statistics from the cells in the collection. This should be updated if
 	 * a cell is added or lost
 	 */
-	private StatsCache statsCache = new StatsCache();
+	@NonNull
+	private final StatsCache statsCache = new StatsCache();
 
 	/** cache the number of shared cells with other datasets */
-	private VennCache vennCache = new VennCache();
+	@NonNull
+	private final VennCache vennCache = new VennCache();
 
-	private SignalManager signalManager = new SignalManager(this);
-	private ProfileManager profileManager = new ProfileManager(this);
+	@NonNull
+	private final SignalManager signalManager = new SignalManager(this);
+
+	@NonNull
+	private final ProfileManager profileManager = new ProfileManager(this);
 
 	/**
 	 * Constructor
@@ -147,7 +155,7 @@ public class DefaultCellCollection implements ICellCollection {
 	public DefaultCellCollection(@NonNull RuleSetCollection ruleSets, @Nullable String name, @Nullable UUID id) {
 
 		this.uuid = id == null ? UUID.randomUUID() : id;
-		this.name = name;
+		this.name = name == null ? "unnamed" : name;
 		this.ruleSets = ruleSets;
 	}
 
@@ -157,7 +165,7 @@ public class DefaultCellCollection implements ICellCollection {
 	 * @param template the dataset to base on for folders and type
 	 * @param name     the collection name
 	 */
-	public DefaultCellCollection(IAnalysisDataset template, String name) {
+	public DefaultCellCollection(@NonNull IAnalysisDataset template, String name) {
 		this(template.getCollection(), name);
 	}
 
@@ -167,7 +175,7 @@ public class DefaultCellCollection implements ICellCollection {
 	 * @param template
 	 * @param name
 	 */
-	public DefaultCellCollection(ICellCollection template, String name) {
+	public DefaultCellCollection(@NonNull ICellCollection template, String name) {
 		this(template.getRuleSetCollection(), name, null);
 	}
 
@@ -530,13 +538,13 @@ public class DefaultCellCollection implements ICellCollection {
 	 * sum-of-squares difference, rooted and divided by the nuclear perimeter. Each
 	 * profile is normalised to {@link ICellCollection#FIXED_PROFILE_LENGTH}
 	 * 
-	 * @param pointType the tag to zero profiles against
+	 * @param om the tag to zero profiles against
 	 * @return an array of normalised differences
 	 */
-	private synchronized double[] getNormalisedDifferencesToMedianFromPoint(Landmark pointType) {
+	private synchronized double[] getNormalisedDifferencesToMedianFromPoint(OrientationMark om) {
 		IProfile medianProfile;
 		try {
-			medianProfile = this.getProfileCollection().getProfile(ProfileType.ANGLE, pointType, Stats.MEDIAN)
+			medianProfile = this.getProfileCollection().getProfile(ProfileType.ANGLE, om, Stats.MEDIAN)
 					.interpolate(FIXED_PROFILE_LENGTH);
 		} catch (MissingComponentException | ProfileException e) {
 			LOGGER.warning("Cannot get median profile for collection");
@@ -549,7 +557,7 @@ public class DefaultCellCollection implements ICellCollection {
 		return getNuclei().stream().mapToDouble(n -> {
 			try {
 
-				IProfile angleProfile = n.getProfile(ProfileType.ANGLE, pointType);
+				IProfile angleProfile = n.getProfile(ProfileType.ANGLE, om);
 				double diff = angleProfile.absoluteSquareDifference(medianProfile, FIXED_PROFILE_LENGTH);
 				return Math.sqrt(diff / FIXED_PROFILE_LENGTH); // differences in degrees, rather than square degrees
 
@@ -564,57 +572,27 @@ public class DefaultCellCollection implements ICellCollection {
 	 * Get the perimeter normalised veriabililty of a nucleus angle profile compared
 	 * to the median profile of the collection
 	 * 
-	 * @param pointType the tag to use as index 0
-	 * @param c         the cell to test
+	 * @param om the tag to use as index 0
+	 * @param c  the cell to test
 	 * @return the variabililty score of the nucleus
 	 * @throws Exception
 	 */
 	@Override
-	public double getNormalisedDifferenceToMedian(Landmark pointType, Taggable t) {
-		IProfile medianProfile;
-		try {
-			medianProfile = profileCollection.getProfile(ProfileType.ANGLE, pointType, Stats.MEDIAN)
-					.interpolate(FIXED_PROFILE_LENGTH);
-		} catch (MissingLandmarkException | ProfileException | MissingProfileException e) {
-			LOGGER.log(Loggable.STACK, "Error getting median profile for collection", e);
-			return 0;
-		}
+	public double getNormalisedDifferenceToMedian(@NonNull OrientationMark om, Taggable t) {
 
 		try {
-			IProfile angleProfile = t.getProfile(ProfileType.ANGLE, pointType);
+			IProfile medianProfile = profileCollection.getProfile(ProfileType.ANGLE, om, Stats.MEDIAN)
+					.interpolate(FIXED_PROFILE_LENGTH);
+
+			IProfile angleProfile = t.getProfile(ProfileType.ANGLE, om);
 
 			double diff = angleProfile.absoluteSquareDifference(medianProfile, FIXED_PROFILE_LENGTH);
 			return Math.sqrt(diff / FIXED_PROFILE_LENGTH); // use the differences in degrees divided by the pixel
 															// interplation length
-		} catch (ProfileException | MissingComponentException e) {
-			LOGGER.log(Loggable.STACK, "Error getting nucleus profile", e);
+		} catch (MissingLandmarkException | ProfileException | MissingProfileException e) {
+			LOGGER.log(Loggable.STACK, "Error getting median profile for collection", e);
 			return 0;
 		}
-	}
-
-	/**
-	 * Get the distances between two border tags for each nucleus
-	 * 
-	 * @param pointTypeA
-	 * @param pointTypeB
-	 * @return
-	 */
-	public double[] getPointToPointDistances(Landmark pointTypeA, Landmark pointTypeB) {
-		int count = this.getNucleusCount();
-		double[] result = new double[count];
-		int i = 0;
-		for (Nucleus n : this.getNuclei()) {
-			try {
-				result[i] = n.getBorderPoint(pointTypeA).getLengthTo(n.getBorderPoint(pointTypeB));
-			} catch (MissingLandmarkException e) {
-				LOGGER.log(Loggable.STACK, "Tag not present: " + pointTypeA + " or " + pointTypeB, e);
-				result[i] = 0;
-			} finally {
-				i++;
-			}
-
-		}
-		return result;
 	}
 
 	/**
@@ -626,7 +604,7 @@ public class DefaultCellCollection implements ICellCollection {
 	 * @throws MissingProfileException
 	 */
 	@Override
-	public Nucleus getNucleusMostSimilarToMedian(Landmark pointType)
+	public Nucleus getNucleusMostSimilarToMedian(OrientationMark pointType)
 			throws ProfileException, MissingLandmarkException, MissingProfileException {
 
 		List<Nucleus> list = this.getNuclei();
@@ -662,12 +640,12 @@ public class DefaultCellCollection implements ICellCollection {
 	 */
 
 	@Override
-	public void clear(Measurement stat, String component) {
+	public void clear(@NonNull Measurement stat, @NonNull String component) {
 		statsCache.clear(stat, component, null);
 	}
 
 	@Override
-	public void clear(Measurement stat, String component, UUID id) {
+	public void clear(@NonNull Measurement stat, @NonNull String component, @NonNull UUID id) {
 		statsCache.clear(stat, component, id);
 	}
 
@@ -876,79 +854,6 @@ public class DefaultCellCollection implements ICellCollection {
 					errorCount.get()));
 		return result;
 	}
-
-	/*
-	 * 
-	 * METHODS IMPLEMENTING THE FILTERABLE INTERFACE
-	 * 
-	 */
-
-//	@Override
-//	public ICellCollection filter(@NonNull Predicate<ICell> predicate) {
-//
-//		String newName = "Filtered_" + predicate.toString();
-//
-//		ICellCollection subCollection = new DefaultCellCollection(this, newName);
-//
-//		List<ICell> list = cells.parallelStream().filter(predicate).collect(Collectors.toList());
-//
-//		for (ICell cell : list)
-//			subCollection.addCell(cell);
-//
-//		if (subCollection.size() == 0) {
-//			LOGGER.warning("No cells in collection");
-//			return subCollection;
-//		}
-//
-//		try {
-//			subCollection.createProfileCollection();
-//			this.getProfileManager().copySegmentsAndLandmarksTo(subCollection);
-//			this.getSignalManager().copySignalGroupsTo(subCollection);
-//
-//		} catch (ProfileException e) {
-//			LOGGER.warning("Error copying collection offsets");
-//			LOGGER.log(Loggable.STACK, "Error in offsetting", e);
-//		}
-//
-//		return subCollection;
-//	}
-
-//	@Override
-//	public ICellCollection filterCollection(@NonNull Measurement stat, MeasurementScale scale, 
-//			double lower,
-//			double upper) {
-//		DecimalFormat df = new DecimalFormat("#.##");
-//
-//		Predicate<ICell> pred = new Predicate<ICell>() {
-//			@Override
-//			public boolean test(ICell t) {
-//
-//				for (Nucleus n : t.getNuclei()) {
-//
-//					double value = stat.equals(Measurement.VARIABILITY)
-//							? getNormalisedDifferenceToMedian(OrientationMark.REFERENCE, n) : n.getStatistic(stat, scale);
-//
-//							if (value < lower) {
-//								return false;
-//							}
-//
-//							if (value > upper) {
-//								return false;
-//							}
-//
-//				}
-//				return true;
-//			}
-//
-//			@Override
-//			public String toString() {
-//				return stat.toString() + "_" + df.format(lower) + "-" + df.format(upper);
-//			}
-//
-//		};
-//
-//		return filter(pred);
-//	}
 
 	@Override
 	public void setSourceFolder(@NonNull File newFolder) {
@@ -1215,7 +1120,7 @@ public class DefaultCellCollection implements ICellCollection {
 	public class DefaultProfileCollection implements IProfileCollection {
 
 		/** indexes of landmarks in the median profile with RP at zero */
-		private Map<Landmark, Integer> indexes = new HashMap<>();
+		private Map<OrientationMark, Integer> indexes = new HashMap<>();
 
 		/** segments in the median profile with RP at zero */
 		private List<IProfileSegment> segments = new ArrayList<>();
@@ -1239,9 +1144,8 @@ public class DefaultCellCollection implements ICellCollection {
 		 */
 		public DefaultProfileCollection(Element e) {
 
-			for (Element el : e.getChildren("Landmark")) {
-				indexes.put(
-						Landmark.of(el.getAttributeValue("name"), LandmarkType.valueOf(el.getAttributeValue("type"))),
+			for (Element el : e.getChildren("Orient")) {
+				indexes.put(OrientationMark.valueOf(el.getAttributeValue("name")),
 						Integer.parseInt(el.getAttributeValue("index")));
 			}
 
@@ -1257,7 +1161,7 @@ public class DefaultCellCollection implements ICellCollection {
 		 * @param p
 		 */
 		private DefaultProfileCollection(DefaultProfileCollection p) {
-			for (Landmark t : p.indexes.keySet())
+			for (OrientationMark t : p.indexes.keySet())
 				indexes.put(t, p.indexes.get(t));
 
 			for (IProfileSegment s : p.segments)
@@ -1284,28 +1188,28 @@ public class DefaultCellCollection implements ICellCollection {
 		}
 
 		@Override
-		public int getLandmarkIndex(@NonNull Landmark pointType) throws MissingLandmarkException {
+		public int getLandmarkIndex(@NonNull OrientationMark pointType) throws MissingLandmarkException {
 			if (indexes.containsKey(pointType))
 				return indexes.get(pointType);
 			throw new MissingLandmarkException(pointType + " is not present in this profile collection");
 		}
 
 		@Override
-		public List<Landmark> getLandmarks() {
-			List<Landmark> result = new ArrayList<>();
-			for (Landmark s : indexes.keySet()) {
+		public List<OrientationMark> getOrientationMarks() {
+			List<OrientationMark> result = new ArrayList<>();
+			for (OrientationMark s : indexes.keySet()) {
 				result.add(s);
 			}
 			return result;
 		}
 
 		@Override
-		public boolean hasLandmark(@NonNull Landmark tag) {
+		public boolean hasLandmark(@NonNull OrientationMark tag) {
 			return indexes.keySet().contains(tag);
 		}
 
 		@Override
-		public synchronized IProfile getProfile(@NonNull ProfileType type, @NonNull Landmark tag, int quartile)
+		public synchronized IProfile getProfile(@NonNull ProfileType type, @NonNull OrientationMark tag, int quartile)
 				throws MissingLandmarkException, ProfileException, MissingProfileException {
 			if (!this.hasLandmark(tag))
 				throw new MissingLandmarkException("Tag is not present: " + tag.toString());
@@ -1323,8 +1227,8 @@ public class DefaultCellCollection implements ICellCollection {
 		}
 
 		@Override
-		public ISegmentedProfile getSegmentedProfile(@NonNull ProfileType type, @NonNull Landmark tag, int quartile)
-				throws MissingLandmarkException, ProfileException, MissingProfileException {
+		public ISegmentedProfile getSegmentedProfile(@NonNull ProfileType type, @NonNull OrientationMark tag,
+				int quartile) throws MissingLandmarkException, ProfileException, MissingProfileException {
 
 			if (quartile < 0 || quartile > 100)
 				throw new IllegalArgumentException("Quartile must be between 0-100");
@@ -1341,7 +1245,7 @@ public class DefaultCellCollection implements ICellCollection {
 		public void calculateProfiles() throws MissingLandmarkException, MissingProfileException, ProfileException {
 			cache.clear();
 			for (ProfileType t : ProfileType.values()) {
-				for (Landmark lm : indexes.keySet()) {
+				for (OrientationMark lm : indexes.keySet()) {
 					getProfile(t, lm, Stats.MEDIAN);
 					getProfile(t, lm, Stats.LOWER_QUARTILE);
 					getProfile(t, lm, Stats.UPPER_QUARTILE);
@@ -1361,13 +1265,14 @@ public class DefaultCellCollection implements ICellCollection {
 		}
 
 		@Override
-		public synchronized IProfileSegment getSegmentAt(@NonNull Landmark tag, int position)
+		public synchronized IProfileSegment getSegmentAt(@NonNull OrientationMark tag, int position)
 				throws MissingLandmarkException {
 			return this.getSegments(tag).get(position);
 		}
 
 		@Override
-		public synchronized List<IProfileSegment> getSegments(@NonNull Landmark tag) throws MissingLandmarkException {
+		public synchronized List<IProfileSegment> getSegments(@NonNull OrientationMark tag)
+				throws MissingLandmarkException {
 
 			// this must be negative offset for segments
 			// since we are moving the pointIndex back to the beginning
@@ -1391,12 +1296,12 @@ public class DefaultCellCollection implements ICellCollection {
 		}
 
 		@Override
-		public IProfileSegment getSegmentContaining(@NonNull Landmark tag)
+		public IProfileSegment getSegmentContaining(@NonNull OrientationMark tag)
 				throws ProfileException, MissingLandmarkException {
-			List<IProfileSegment> segments = this.getSegments(tag);
+			List<IProfileSegment> segs = this.getSegments(tag);
 
 			IProfileSegment result = null;
-			for (IProfileSegment seg : segments) {
+			for (IProfileSegment seg : segs) {
 				if (seg.contains(ZERO_INDEX))
 					return seg;
 			}
@@ -1405,12 +1310,12 @@ public class DefaultCellCollection implements ICellCollection {
 		}
 
 		@Override
-		public void setLandmark(@NonNull Landmark tag, int newIndex) {
+		public void setLandmark(@NonNull OrientationMark om, int newIndex) {
 			// Cannot move the RP from zero
-			if (tag.equals(OrientationMark.REFERENCE))
+			if (OrientationMark.REFERENCE.equals(om))
 				return;
-			cache.remove(tag);
-			indexes.put(tag, newIndex);
+			cache.remove(om);
+			indexes.put(om, newIndex);
 
 		}
 
@@ -1510,7 +1415,7 @@ public class DefaultCellCollection implements ICellCollection {
 			String newLine = System.getProperty("line.separator");
 			StringBuilder builder = new StringBuilder();
 			builder.append("Point types:" + newLine);
-			for (Entry<Landmark, Integer> e : indexes.entrySet()) {
+			for (Entry<OrientationMark, Integer> e : indexes.entrySet()) {
 				builder.append(e.getKey() + ": " + e.getValue() + newLine);
 			}
 
@@ -1530,7 +1435,7 @@ public class DefaultCellCollection implements ICellCollection {
 		}
 
 		@Override
-		public IProfile getIQRProfile(@NonNull ProfileType type, @NonNull Landmark tag)
+		public IProfile getIQRProfile(@NonNull ProfileType type, @NonNull OrientationMark tag)
 				throws MissingLandmarkException, ProfileException, MissingProfileException {
 
 			IProfile q25 = getProfile(type, tag, Stats.LOWER_QUARTILE);
@@ -1570,9 +1475,8 @@ public class DefaultCellCollection implements ICellCollection {
 				e.addContent(s.toXmlElement());
 			}
 
-			for (Entry<Landmark, Integer> entry : indexes.entrySet()) {
+			for (Entry<OrientationMark, Integer> entry : indexes.entrySet()) {
 				e.addContent(new Element("Landmark").setAttribute("name", entry.getKey().toString())
-						.setAttribute("type", entry.getKey().type().toString())
 						.setAttribute("index", String.valueOf(entry.getValue())));
 			}
 
@@ -1598,16 +1502,16 @@ public class DefaultCellCollection implements ICellCollection {
 			private class ProfileKey {
 				private final ProfileType type;
 				private final double quartile;
-				private final Landmark tag;
+				private final OrientationMark tag;
 
-				public ProfileKey(final ProfileType type, final double quartile, final Landmark tag) {
+				public ProfileKey(final ProfileType type, final double quartile, final OrientationMark tag) {
 
 					this.type = type;
 					this.quartile = quartile;
 					this.tag = tag;
 				}
 
-				public boolean has(Landmark t) {
+				public boolean has(OrientationMark t) {
 					return tag.equals(t);
 				}
 
@@ -1680,25 +1584,20 @@ public class DefaultCellCollection implements ICellCollection {
 			 * @param tag      the tag
 			 * @param profile  the profile to save
 			 */
-			public void addProfile(final ProfileType type, final double quartile, final Landmark tag,
+			public void addProfile(final ProfileType type, final double quartile, final OrientationMark tag,
 					IProfile profile) {
 				ProfileKey key = new ProfileKey(type, quartile, tag);
 				map.put(key, profile);
 			}
 
-			public boolean hasProfile(final ProfileType type, final double quartile, final Landmark tag) {
+			public boolean hasProfile(final ProfileType type, final double quartile, final OrientationMark tag) {
 				ProfileKey key = new ProfileKey(type, quartile, tag);
 				return map.containsKey(key);
 			}
 
-			public IProfile getProfile(final ProfileType type, final double quartile, final Landmark tag) {
+			public IProfile getProfile(final ProfileType type, final double quartile, final OrientationMark tag) {
 				ProfileKey key = new ProfileKey(type, quartile, tag);
 				return map.get(key);
-			}
-
-			public void remove(final ProfileType type, final double quartile, final Landmark tag) {
-				ProfileKey key = new ProfileKey(type, quartile, tag);
-				map.remove(key);
 			}
 
 			/**
@@ -1708,7 +1607,7 @@ public class DefaultCellCollection implements ICellCollection {
 				map.clear();
 			}
 
-			public void remove(final Landmark t) {
+			public void remove(final OrientationMark t) {
 
 				Iterator<ProfileKey> it = map.keySet().iterator();
 				while (it.hasNext()) {
@@ -1734,7 +1633,7 @@ public class DefaultCellCollection implements ICellCollection {
 		}
 
 		@Override
-		public double getProportionOfIndex(@NonNull Landmark tag) throws MissingLandmarkException {
+		public double getProportionOfIndex(@NonNull OrientationMark tag) throws MissingLandmarkException {
 			return getProportionOfIndex(getLandmarkIndex(tag));
 		}
 

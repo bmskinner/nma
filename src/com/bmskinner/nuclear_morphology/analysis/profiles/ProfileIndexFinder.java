@@ -16,9 +16,7 @@
  ******************************************************************************/
 package com.bmskinner.nuclear_morphology.analysis.profiles;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -71,24 +69,20 @@ public class ProfileIndexFinder {
 	 */
 	public static void assignLandmarks(@NonNull Nucleus n, @NonNull RuleSetCollection rsc) {
 		for (OrientationMark om : rsc.getOrientionMarks()) {
-			LOGGER.finer(() -> "Locating " + om);
+//			LOGGER.fine(() -> "Locating " + om);
 
 			try {
 				for (RuleSet rule : rsc.getRuleSets(om)) {
 					IProfile p = n.getProfile(rule.getType());
 					int index = identifyIndex(p, rule);
-					Optional<Landmark> ol = rsc.getLandmark(om);
-					if (ol.isPresent())
-						n.setLandmark(ol.get(), index);
+					n.setLandmark(om, index);
 				}
 			} catch (MissingProfileException e) {
 				LOGGER.log(Loggable.STACK, "Error getting profile type", e);
 			} catch (NoDetectedIndexException e) {
-				LOGGER.finer("Unable to detect " + om + " in nucleus, setting to zero");
+//				LOGGER.fine("Unable to detect " + om + " in nucleus, setting to zero");
 				try {
-					Optional<Landmark> ol = rsc.getLandmark(om);
-					if (ol.isPresent())
-						n.setLandmark(ol.get(), 0);
+					n.setLandmark(om, 0);
 				} catch (IndexOutOfBoundsException | MissingProfileException | MissingLandmarkException
 						| ProfileException e1) {
 					LOGGER.log(Loggable.STACK, "Error setting landmark to zero", e);
@@ -281,6 +275,8 @@ public class ProfileIndexFinder {
 
 		List<RuleSet> list = collection.getRuleSetCollection().getRuleSets(lm);
 
+		Landmark l = collection.getRuleSetCollection().getLandmark(lm).get();
+
 		if (list == null || list.isEmpty())
 			throw new IllegalArgumentException(RULESET_EMPTY_ERROR);
 
@@ -288,10 +284,9 @@ public class ProfileIndexFinder {
 			return identifyIndex(collection, list);
 		} catch (NoDetectedIndexException e) {
 			// No index was found for the collection, fall back
-			LOGGER.fine(lm + ": no index found using default rules; falling back on longest diameter");
-			List<RuleSet> rules = new ArrayList<>();
-			rules.add(RuleSet.roundRPRuleSet());
-			return identifyIndex(collection, rules);
+			LOGGER.fine(lm + ": no index for '" + l
+					+ "' found in median using default rules; falling back on longest diameter");
+			return identifyIndex(collection, List.of(RuleSet.roundRPRuleSet()));
 		}
 	}
 

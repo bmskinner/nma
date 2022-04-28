@@ -18,7 +18,6 @@ package com.bmskinner.nuclear_morphology.analysis.profiles;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.logging.Logger;
@@ -67,20 +66,6 @@ public class RepresentativeMedianFinder {
 		// 200 nuclei (if present) should be enough
 //		nuclei = getSubList(new ArrayList<>(collection.getNuclei()));
 		nuclei = conventionalSelectN(new ArrayList<>(collection.getNuclei()), SAMPLE_LIMIT);
-	}
-
-	/**
-	 * Get a random subset of the collection's nuclei, to a maximum of
-	 * {@code SAMPLE_LIMIT}
-	 * 
-	 * @param n
-	 * @return
-	 */
-	private List<Nucleus> getSubList(List<Nucleus> n) {
-		if (n.size() <= SAMPLE_LIMIT)
-			return n;
-		Collections.shuffle(n);
-		return n.subList(0, 200);
 	}
 
 	/**
