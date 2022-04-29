@@ -51,6 +51,7 @@ import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.profiles.DefaultProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileCollection;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
@@ -96,7 +97,8 @@ public class AngleWindowSizeExplorer extends LoadingIconDialog implements Change
 
 		this.add(createSettingsPanel(), BorderLayout.NORTH);
 
-		chartPanel = new ExportableChartPanel(ProfileChartFactory.createEmptyChart(ProfileType.ANGLE));
+		chartPanel = new ExportableChartPanel(
+				ProfileChartFactory.createEmptyChart(ProfileType.ANGLE));
 		this.add(chartPanel, BorderLayout.CENTER);
 
 	}
@@ -114,14 +116,16 @@ public class AngleWindowSizeExplorer extends LoadingIconDialog implements Change
 
 		Dimension dim = new Dimension(80, 20);
 
-		SpinnerNumberModel minSpinnerModel = new SpinnerNumberModel(windowSizeActual - 0.02d, windowSizeMin,
+		SpinnerNumberModel minSpinnerModel = new SpinnerNumberModel(windowSizeActual - 0.02d,
+				windowSizeMin,
 				windowSizeMax, 0.001d);
 		windowSizeMinSpinner = new JSpinner(minSpinnerModel);
 		windowSizeMinSpinner.setPreferredSize(dim);
 		windowSizeMinSpinner.addChangeListener(this);
 		windowSizeMinSpinner.setToolTipText("Minimum window size");
 
-		SpinnerNumberModel maxSpinnerModel = new SpinnerNumberModel(windowSizeActual + 0.02d, windowSizeMin,
+		SpinnerNumberModel maxSpinnerModel = new SpinnerNumberModel(windowSizeActual + 0.02d,
+				windowSizeMin,
 				windowSizeMax, 0.001d);
 		windowSizeMaxSpinner = new JSpinner(maxSpinnerModel);
 		windowSizeMaxSpinner.setPreferredSize(dim);
@@ -214,7 +218,8 @@ public class AngleWindowSizeExplorer extends LoadingIconDialog implements Change
 				LOGGER.finest("Calculating " + i + "...");
 				final double j = i;
 				// make a duplicate collection
-				final ICellCollection duplicateCollection = new DefaultCellCollection(dataset.getCollection(), "test");
+				final ICellCollection duplicateCollection = new DefaultCellCollection(
+						dataset.getCollection(), "test");
 
 				// put each cell into the new collection
 				for (ICell c : dataset.getCollection()) {
@@ -229,17 +234,20 @@ public class AngleWindowSizeExplorer extends LoadingIconDialog implements Change
 				IProfileCollection pc = duplicateCollection.getProfileCollection();
 				pc.calculateProfiles();
 
-				for (OrientationMark tag : dataset.getCollection().getProfileCollection().getOrientationMarks()) {
-					pc.setLandmark(tag, dataset.getCollection().getProfileCollection().getLandmarkIndex(tag));
+				for (Landmark tag : dataset.getCollection().getProfileCollection().getLandmarks()) {
+					pc.setLandmark(tag,
+							dataset.getCollection().getProfileCollection().getLandmarkIndex(tag));
 				}
 
 				// get the profile median
-				IProfile median = pc.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE, Stats.MEDIAN);
+				IProfile median = pc.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE,
+						Stats.MEDIAN);
 
 				// add to the chart
 				updateChart(median, i);
 			}
-		} catch (MissingLandmarkException | MissingProfileException | ProfileException | ComponentCreationException e) {
+		} catch (MissingLandmarkException | MissingProfileException | ProfileException
+				| ComponentCreationException e) {
 			LOGGER.warning("Error making profile collections");
 			LOGGER.log(Loggable.STACK, e.getMessage(), e);
 		}
@@ -253,7 +261,8 @@ public class AngleWindowSizeExplorer extends LoadingIconDialog implements Change
 		int datasetCount = plot.getDatasetCount();
 		DefaultXYDataset ds = new DefaultXYDataset();
 
-		IProfile xpoints = createXPositions(profile, (int) plot.getDomainAxis().getRange().getUpperBound());
+		IProfile xpoints = createXPositions(profile,
+				(int) plot.getDomainAxis().getRange().getUpperBound());
 		double[][] data = { xpoints.toDoubleArray(), profile.toDoubleArray() };
 
 		DecimalFormat df = new DecimalFormat("#0.000");

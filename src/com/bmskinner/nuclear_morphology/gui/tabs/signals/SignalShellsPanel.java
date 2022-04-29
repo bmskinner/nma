@@ -50,6 +50,7 @@ import org.jfree.chart.JFreeChart;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.CellCollectionFilterer.CollectionFilteringException;
 import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellResultCellFilterer;
 import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellResultCellFilterer.ShellResultFilterOperation;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.datasets.VirtualDataset;
@@ -214,7 +215,8 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
 		JPanel panel = new JPanel();
 
 		newAnalysis.addActionListener(e -> UserActionController.getInstance()
-				.userActionEventReceived(new UserActionEvent(this, UserActionEvent.RUN_SHELL_ANALYSIS, getDatasets())));
+				.userActionEventReceived(new UserActionEvent(this,
+						UserActionEvent.RUN_SHELL_ANALYSIS, getDatasets())));
 
 		newAnalysis.setToolTipText(RUN_ANALYSIS_TOOLTIP);
 
@@ -333,7 +335,8 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
 		 * @param mw
 		 * @param title
 		 */
-		protected ShellFilteringSetupDialog(@NonNull final IAnalysisDataset dataset, @NonNull final String title) {
+		protected ShellFilteringSetupDialog(@NonNull final IAnalysisDataset dataset,
+				@NonNull final String title) {
 			super(true);
 			this.dataset = dataset;
 			createUI();
@@ -366,8 +369,10 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
 				dataset.addChildCollection(virt);
 
 				// TODO: alert populations panel that there is a new dataset
-			} catch (ProfileException | CollectionFilteringException | MissingProfileException e1) {
-				LOGGER.log(Loggable.STACK, "Unable to filter collection for " + dataset.getName(), e1);
+			} catch (ProfileException | CollectionFilteringException | MissingProfileException
+					| MissingLandmarkException e1) {
+				LOGGER.log(Loggable.STACK, "Unable to filter collection for " + dataset.getName(),
+						e1);
 			}
 		}
 
@@ -396,14 +401,17 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
 			labels.add(new JLabel("Signal group"));
 			fields.add(groupPanel);
 
-			JComboBox<ShellResultFilterOperation> typeBox = new JComboBox<>(ShellResultFilterOperation.values());
+			JComboBox<ShellResultFilterOperation> typeBox = new JComboBox<>(
+					ShellResultFilterOperation.values());
 			typeBox.setSelectedItem(ShellResultFilterOperation.SPECIFIC_SHELL_IS_LESS_THAN);
-			typeBox.addActionListener(e -> op = (ShellResultFilterOperation) typeBox.getSelectedItem());
+			typeBox.addActionListener(
+					e -> op = (ShellResultFilterOperation) typeBox.getSelectedItem());
 
 			labels.add(new JLabel("Filtering operation"));
 			fields.add(typeBox);
 
-			SpinnerNumberModel sModel = new SpinnerNumberModel(0, 0, collection.getSignalManager().getShellCount() - 1,
+			SpinnerNumberModel sModel = new SpinnerNumberModel(0, 0,
+					collection.getSignalManager().getShellCount() - 1,
 					1);
 			JSpinner spinner = new JSpinner(sModel);
 			spinner.addChangeListener(e -> shell = (int) sModel.getValue());
@@ -472,11 +480,14 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
 		}
 
 		private synchronized void updateChart() {
-			Aggregation agg = withinNucleiBtn.isSelected() ? Aggregation.BY_NUCLEUS : Aggregation.BY_SIGNAL;
-			Normalisation norm = dapiNormalise.isSelected() ? Normalisation.DAPI : Normalisation.NONE;
+			Aggregation agg = withinNucleiBtn.isSelected() ? Aggregation.BY_NUCLEUS
+					: Aggregation.BY_SIGNAL;
+			Normalisation norm = dapiNormalise.isSelected() ? Normalisation.DAPI
+					: Normalisation.NONE;
 			boolean showRandom = showRandomCheckbox.isSelected();
 
-			ChartOptions barChartOptions = new ChartOptionsBuilder().setDatasets(getDatasets()).setTarget(chartPanel)
+			ChartOptions barChartOptions = new ChartOptionsBuilder().setDatasets(getDatasets())
+					.setTarget(chartPanel)
 					.setShowAnnotations(showRandom) // proxy fpr random
 					.setAggregation(agg).setNormalisation(norm).build();
 
@@ -567,9 +578,12 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
 		}
 
 		private synchronized void updateTable() {
-			Aggregation agg = withinNucleiBtn.isSelected() ? Aggregation.BY_NUCLEUS : Aggregation.BY_SIGNAL;
-			Normalisation norm = dapiNormalise.isSelected() ? Normalisation.DAPI : Normalisation.NONE;
-			TableOptions tableOptions = new TableOptionsBuilder().setDatasets(getDatasets()).setAggregation(agg)
+			Aggregation agg = withinNucleiBtn.isSelected() ? Aggregation.BY_NUCLEUS
+					: Aggregation.BY_SIGNAL;
+			Normalisation norm = dapiNormalise.isSelected() ? Normalisation.DAPI
+					: Normalisation.NONE;
+			TableOptions tableOptions = new TableOptionsBuilder().setDatasets(getDatasets())
+					.setAggregation(agg)
 					.setNormalisation(norm).setTarget(table).build();
 
 			setTable(tableOptions);
@@ -645,10 +659,13 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
 		}
 
 		private synchronized void updateTable() {
-			Aggregation agg = withinNucleiBtn.isSelected() ? Aggregation.BY_NUCLEUS : Aggregation.BY_SIGNAL;
-			Normalisation norm = dapiNormalise.isSelected() ? Normalisation.DAPI : Normalisation.NONE;
+			Aggregation agg = withinNucleiBtn.isSelected() ? Aggregation.BY_NUCLEUS
+					: Aggregation.BY_SIGNAL;
+			Normalisation norm = dapiNormalise.isSelected() ? Normalisation.DAPI
+					: Normalisation.NONE;
 
-			TableOptions pairwiseOptions = new TableOptionsBuilder().setDatasets(getDatasets()).setAggregation(agg)
+			TableOptions pairwiseOptions = new TableOptionsBuilder().setDatasets(getDatasets())
+					.setAggregation(agg)
 					.setNormalisation(norm).setTarget(table).build();
 
 			setTable(pairwiseOptions);

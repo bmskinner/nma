@@ -40,6 +40,7 @@ import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
+import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
@@ -90,8 +91,10 @@ public class NewAnalysisAction extends VoidResultAction {
 			return;
 		}
 
-		IAnalysisOptions options = OptionsFactory.makeAnalysisOptions();
-		HashOptions nucleusOptions = OptionsFactory.makeNucleusDetectionOptions(this.folder).build();
+		IAnalysisOptions options = OptionsFactory
+				.makeAnalysisOptions(RuleSetCollection.mouseSpermRuleSetCollection());
+		HashOptions nucleusOptions = OptionsFactory.makeNucleusDetectionOptions(this.folder)
+				.build();
 		options.setDetectionOptions(CellularComponent.NUCLEUS, nucleusOptions);
 
 		this.setProgressBarIndeterminate();
@@ -114,7 +117,8 @@ public class NewAnalysisAction extends VoidResultAction {
 
 			Instant inst = Instant.ofEpochMilli(options.getAnalysisTime());
 			LocalDateTime anTime = LocalDateTime.ofInstant(inst, ZoneOffset.systemDefault());
-			String outputFolderName = anTime.format(DateTimeFormatter.ofPattern("YYYY-MM-dd_HH-mm-ss"));
+			String outputFolderName = anTime
+					.format(DateTimeFormatter.ofPattern("YYYY-MM-dd_HH-mm-ss"));
 
 			try {
 				IAnalysisMethod m = new NucleusDetectionMethod(outputFolderName, options);
@@ -145,7 +149,8 @@ public class NewAnalysisAction extends VoidResultAction {
 				LOGGER.info("No datasets returned");
 			} else {
 				UserActionController.getInstance().userActionEventReceived(
-						new UserActionEvent(this, UserActionEvent.MORPHOLOGY_ANALYSIS_ACTION, datasets));
+						new UserActionEvent(this, UserActionEvent.MORPHOLOGY_ANALYSIS_ACTION,
+								datasets));
 			}
 
 		} catch (InterruptedException e) {

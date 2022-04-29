@@ -14,6 +14,7 @@ import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.SegmentationHandler;
@@ -126,8 +127,10 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 	 */
 	private synchronized Runnable create(final UserActionEvent event) {
 
-		final List<IAnalysisDataset> selectedDatasets = DatasetListManager.getInstance().getSelectedDatasets();
-		final IAnalysisDataset selectedDataset = selectedDatasets.isEmpty() ? null : selectedDatasets.get(0);
+		final List<IAnalysisDataset> selectedDatasets = DatasetListManager.getInstance()
+				.getSelectedDatasets();
+		final IAnalysisDataset selectedDataset = selectedDatasets.isEmpty() ? null
+				: selectedDatasets.get(0);
 
 		// The full pipeline for a new analysis
 		if (UserActionEvent.MORPHOLOGY_ANALYSIS_ACTION.equals(event.type()))
@@ -179,7 +182,8 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 //			return () -> createWorkspace();
 
 		if (event.type().equals(UserActionEvent.EXPORT_WORKSPACE))
-			return new ExportWorkspaceAction(DatasetListManager.getInstance().getWorkspaces(), acceptor);
+			return new ExportWorkspaceAction(DatasetListManager.getInstance().getWorkspaces(),
+					acceptor);
 
 		if (selectedDataset == null)
 			return null;
@@ -246,7 +250,8 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 			return new ExportTPSAction(selectedDataset, acceptor);
 
 		if (event.type().equals(UserActionEvent.SAVE_ALL_DATASETS))
-			return new SaveAllDatasets(DatasetListManager.getInstance().getRootDatasets(), acceptor);
+			return new SaveAllDatasets(DatasetListManager.getInstance().getRootDatasets(),
+					acceptor);
 
 		if (event.type().equals(UserActionEvent.SAVE_SELECTED_DATASETS))
 			return new SaveAllDatasets(selectedDatasets, acceptor);
@@ -256,7 +261,8 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 				Runnable r = () -> {
 					AbstractCellCollectionDialog d = new ManualCurationDialog(selectedDataset);
 				};
-				new Thread(r).start();// separate from the UI and method threads - we must not block them
+				new Thread(r).start();// separate from the UI and method threads - we must not block
+										// them
 			};
 
 		if (event.type().equals(UserActionEvent.EXPORT_CELL_LOCS))
@@ -264,11 +270,13 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 
 		if (event.type().startsWith(UserActionEvent.REMOVE_FROM_WORKSPACE_PREFIX))
 			return () -> {
-				String workspaceName = event.type().replace(UserActionEvent.REMOVE_FROM_WORKSPACE_PREFIX, "");
+				String workspaceName = event.type()
+						.replace(UserActionEvent.REMOVE_FROM_WORKSPACE_PREFIX, "");
 				IWorkspace ws = DatasetListManager.getInstance().getWorkspaces().stream()
 						.filter(w -> w.getName().equals(workspaceName)).findFirst()
 						.orElseThrow(IllegalArgumentException::new);
-				for (IAnalysisDataset d : DatasetListManager.getInstance().getRootParents(selectedDatasets))
+				for (IAnalysisDataset d : DatasetListManager.getInstance()
+						.getRootParents(selectedDatasets))
 					ws.remove(d);
 //				fireDatasetEvent(new UserActionEvent(this, UserActionEvent.ADD_WORKSPACE,
 //						UserActionController.class.getName(), new ArrayList<>()));
@@ -276,12 +284,14 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 
 		if (event.type().startsWith(UserActionEvent.ADD_TO_WORKSPACE_PREFIX))
 			return () -> {
-				String workspaceName = event.type().replace(UserActionEvent.ADD_TO_WORKSPACE_PREFIX, "");
+				String workspaceName = event.type().replace(UserActionEvent.ADD_TO_WORKSPACE_PREFIX,
+						"");
 				IWorkspace ws = DatasetListManager.getInstance().getWorkspaces().stream()
 						.filter(w -> w.getName().equals(workspaceName)).findFirst()
 						.orElseThrow(IllegalArgumentException::new);
 
-				for (IAnalysisDataset d : DatasetListManager.getInstance().getRootParents(selectedDatasets))
+				for (IAnalysisDataset d : DatasetListManager.getInstance()
+						.getRootParents(selectedDatasets))
 					ws.add(d);
 //				fireDatasetEvent(new UserActionEvent(this, UserActionEvent.ADD_WORKSPACE,
 //						UserActionController.class.getName(), new ArrayList<>()));
@@ -292,7 +302,8 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 				LOGGER.fine("Creating new biosample");
 				try {
 					String bsName = is.requestString("New biosample name");
-					List<IWorkspace> workspaces = DatasetListManager.getInstance().getWorkspaces(selectedDataset);
+					List<IWorkspace> workspaces = DatasetListManager.getInstance()
+							.getWorkspaces(selectedDataset);
 					for (IWorkspace w : workspaces) {
 						w.addBioSample(bsName);
 						BioSample bs = w.getBioSample(bsName);
@@ -308,9 +319,11 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 
 		if (event.type().startsWith(UserActionEvent.REMOVE_FROM_BIOSAMPLE_PREFIX))
 			return () -> {
-				String bsName = event.type().replace(UserActionEvent.REMOVE_FROM_BIOSAMPLE_PREFIX, "");
+				String bsName = event.type().replace(UserActionEvent.REMOVE_FROM_BIOSAMPLE_PREFIX,
+						"");
 				LOGGER.fine("Removing dataset from biosample " + bsName);
-				List<IWorkspace> workspaces = DatasetListManager.getInstance().getWorkspaces(selectedDataset);
+				List<IWorkspace> workspaces = DatasetListManager.getInstance()
+						.getWorkspaces(selectedDataset);
 				for (IWorkspace w : workspaces) {
 					BioSample b = w.getBioSample(bsName);
 					if (b != null)
@@ -323,7 +336,8 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 			return () -> {
 				String bsName = event.type().replace(UserActionEvent.ADD_TO_BIOSAMPLE_PREFIX, "");
 				LOGGER.fine("Adding dataset to biosample " + bsName);
-				List<IWorkspace> workspaces = DatasetListManager.getInstance().getWorkspaces(selectedDataset);
+				List<IWorkspace> workspaces = DatasetListManager.getInstance()
+						.getWorkspaces(selectedDataset);
 				for (IWorkspace w : workspaces) {
 					BioSample b = w.getBioSample(bsName);
 					if (b != null)
@@ -336,11 +350,13 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 			return new RelocateFromFileAction(selectedDataset, acceptor, new CountDownLatch(1));
 
 		if (event.type().equals(UserActionEvent.SEGMENTATION_ACTION))
-			return new RunSegmentationAction(selectedDatasets, MorphologyAnalysisMode.SEGMENT_FROM_SCRATCH,
+			return new RunSegmentationAction(selectedDatasets,
+					MorphologyAnalysisMode.SEGMENT_FROM_SCRATCH,
 					SingleDatasetResultAction.NO_FLAG, acceptor);
 
 		if (event.type().equals(UserActionEvent.APPLY_MEDIAN_TO_NUCLEI))
-			return new RunSegmentationAction(selectedDatasets, MorphologyAnalysisMode.APPLY_MEDIAN_TO_NUCLEI,
+			return new RunSegmentationAction(selectedDatasets,
+					MorphologyAnalysisMode.APPLY_MEDIAN_TO_NUCLEI,
 					SingleDatasetResultAction.NO_FLAG, acceptor);
 
 		if (event.type().equals(UserActionEvent.SAVE)) {
@@ -358,15 +374,17 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 				final CountDownLatch profileLatch = new CountDownLatch(1);
 				final CountDownLatch segmentLatch = new CountDownLatch(1);
 				new Thread(() -> {
-					new RunProfilingAction(selectedDatasets, SingleDatasetResultAction.NO_FLAG, acceptor, profileLatch)
-							.run();
+					new RunProfilingAction(selectedDatasets, SingleDatasetResultAction.NO_FLAG,
+							acceptor, profileLatch)
+									.run();
 				}).start();
 
 				new Thread(() -> {
 
 					try {
 						profileLatch.await();
-						new RunSegmentationAction(selectedDatasets, MorphologyAnalysisMode.SEGMENT_FROM_SCRATCH, 0,
+						new RunSegmentationAction(selectedDatasets,
+								MorphologyAnalysisMode.SEGMENT_FROM_SCRATCH, 0,
 								acceptor, segmentLatch).run();
 					} catch (InterruptedException e) {
 						Thread.currentThread().interrupt();
@@ -405,7 +423,8 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 				final CountDownLatch segmentLatch = new CountDownLatch(1);
 				new Thread(() -> { // wait for profiling and run segmentation
 					LOGGER.fine("Starting segmentation action");
-					new RunSegmentationAction(selectedDatasets, source, SingleDatasetResultAction.NO_FLAG, acceptor,
+					new RunSegmentationAction(selectedDatasets, source,
+							SingleDatasetResultAction.NO_FLAG, acceptor,
 							segmentLatch).run();
 				}).start();
 
@@ -444,7 +463,8 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 			return () -> {
 				final CountDownLatch latch = new CountDownLatch(1);
 				new Thread(() -> {
-					new RunProfilingAction(selectedDatasets, SingleDatasetResultAction.NO_FLAG, acceptor, latch).run();
+					new RunProfilingAction(selectedDatasets, SingleDatasetResultAction.NO_FLAG,
+							acceptor, latch).run();
 				}).start();
 
 				new Thread(() -> { // wait for profiling to complete and recache charts
@@ -472,7 +492,8 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 			return () -> {
 				final CountDownLatch refoldLatch = new CountDownLatch(1);
 				new Thread(() -> { // run refolding
-					Runnable task = new RefoldNucleusAction(selectedDatasets, acceptor, refoldLatch);
+					Runnable task = new RefoldNucleusAction(selectedDatasets, acceptor,
+							refoldLatch);
 					task.run();
 				}).start();
 
@@ -508,7 +529,8 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 			// Get the first dataset scale
 			Optional<IAnalysisOptions> d0Options = selectedDatasets.get(0).getAnalysisOptions();
 			if (d0Options.isPresent()) {
-				Optional<HashOptions> d0NucleusOptions = d0Options.get().getNucleusDetectionOptions();
+				Optional<HashOptions> d0NucleusOptions = d0Options.get()
+						.getNucleusDetectionOptions();
 				if (d0NucleusOptions.isPresent()) {
 					d0scale = d0NucleusOptions.get().getDouble(HashOptions.SCALE);
 				}
@@ -519,7 +541,8 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 			boolean allMatch = selectedDatasets.stream().allMatch(d -> {
 				Optional<IAnalysisOptions> dOptions = d.getAnalysisOptions();
 				if (dOptions.isPresent()) {
-					Optional<HashOptions> dNucleusOptions = dOptions.get().getNucleusDetectionOptions();
+					Optional<HashOptions> dNucleusOptions = dOptions.get()
+							.getNucleusDetectionOptions();
 					if (dNucleusOptions.isPresent()) {
 						return dNucleusOptions.get().getDouble(HashOptions.SCALE) == d0scaleFinal;
 					}
@@ -530,7 +553,8 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 				currentScale = d0scale;
 
 			// request the new scale
-			double scale = new DefaultInputSupplier().requestDouble("Pixels per micron", currentScale, 1d, 100000d, 1d);
+			double scale = new DefaultInputSupplier().requestDouble("Pixels per micron",
+					currentScale, 1d, 100000d, 1d);
 			if (scale > 0) { // don't allow a scale to cause divide by zero errors
 				selectedDatasets.stream().forEach(d -> d.setScale(scale));
 				UIController.getInstance().fireScaleUpdated(selectedDatasets);
@@ -545,7 +569,8 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 	public void consensusRotationUpdateReceived(List<IAnalysisDataset> datasets, double rotation) {
 		for (IAnalysisDataset d : datasets) {
 			if (d.getCollection().hasConsensus()) {
-				d.getCollection().rotateConsensus(d.getCollection().currentConsensusRotation() - rotation);
+				d.getCollection()
+						.rotateConsensus(d.getCollection().currentConsensusRotation() - rotation);
 			}
 		}
 		UIController.getInstance().fireConsensusNucleusChanged(datasets);
@@ -554,7 +579,8 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 	@Override
 	public void consensusRotationUpdateReceived(IAnalysisDataset dataset, double rotation) {
 		if (dataset.getCollection().hasConsensus()) {
-			dataset.getCollection().rotateConsensus(dataset.getCollection().currentConsensusRotation() - rotation);
+			dataset.getCollection()
+					.rotateConsensus(dataset.getCollection().currentConsensusRotation() - rotation);
 			UIController.getInstance().fireConsensusNucleusChanged(dataset);
 		}
 	}
@@ -578,7 +604,8 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 	}
 
 	@Override
-	public void consensusTranslationUpdateReceived(List<IAnalysisDataset> datasets, double x, double y) {
+	public void consensusTranslationUpdateReceived(List<IAnalysisDataset> datasets, double x,
+			double y) {
 		for (IAnalysisDataset d : datasets) {
 			if (d.getCollection().hasConsensus()) {
 				IPoint com = d.getCollection().getRawConsensus().getCentreOfMass();
@@ -622,7 +649,9 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 
 		IAnalysisDataset d = event.dataset;
 
-		if (d.getCollection().isVirtual() && OrientationMark.REFERENCE.equals(event.lm)) {
+		Landmark rp = d.getCollection().getRuleSetCollection()
+				.getLandmark(OrientationMark.REFERENCE).get();
+		if (d.getCollection().isVirtual() && rp.equals(event.lm)) {
 			LOGGER.warning("Cannot update core border tag for a child dataset");
 			return;
 		}
@@ -630,9 +659,10 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 		SegmentationHandler sh = new SegmentationHandler(d);
 		sh.setLandmark(event.lm, event.newIndex);
 
-		if (OrientationMark.REFERENCE.equals(event.lm)) {
+		if (rp.equals(event.lm)) {
 			UserActionController.getInstance().userActionEventReceived(
-					new UserActionEvent(this, UserActionEvent.SEGMENTATION_ACTION, List.of(event.dataset)));
+					new UserActionEvent(this, UserActionEvent.SEGMENTATION_ACTION,
+							List.of(event.dataset)));
 		} else {
 			UIController.getInstance().fireProfilesUpdated(d);
 		}
@@ -645,7 +675,8 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 		if (event.isDataset()) {
 			SegmentationHandler sh = new SegmentationHandler(event.dataset);
 			sh.updateSegmentStartIndexAction(event.id, event.index);
-			userActionEventReceived(new UserActionEvent(this, UserActionEvent.APPLY_MEDIAN_TO_NUCLEI));
+			userActionEventReceived(
+					new UserActionEvent(this, UserActionEvent.APPLY_MEDIAN_TO_NUCLEI));
 		}
 
 	}
@@ -676,7 +707,8 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 	}
 
 	@Override
-	public void profileWindowProportionUpdateEventReceived(ProfileWindowProportionUpdateEvent event) {
+	public void profileWindowProportionUpdateEventReceived(
+			ProfileWindowProportionUpdateEvent event) {
 
 		try {
 			// Update cells

@@ -34,6 +34,7 @@ import javax.swing.SpinnerNumberModel;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
@@ -59,7 +60,8 @@ public class ExtractRandomCellsAction extends SingleDatasetResultAction {
 
 	private static final String PROGRESS_LBL = "Extract cells";
 
-	public ExtractRandomCellsAction(IAnalysisDataset dataset, @NonNull final ProgressBarAcceptor acceptor) {
+	public ExtractRandomCellsAction(IAnalysisDataset dataset,
+			@NonNull final ProgressBarAcceptor acceptor) {
 		super(dataset, PROGRESS_LBL, acceptor);
 		this.setProgressBarIndeterminate();
 	}
@@ -82,7 +84,7 @@ public class ExtractRandomCellsAction extends SingleDatasetResultAction {
 
 				try {
 					dataset.getCollection().getProfileManager().copySegmentsAndLandmarksTo(c);
-				} catch (ProfileException | MissingProfileException e) {
+				} catch (ProfileException | MissingProfileException | MissingLandmarkException e) {
 					LOGGER.warning("Error copying collection offsets");
 					LOGGER.log(Loggable.STACK, "Error in offsetting", e);
 				}
@@ -141,7 +143,8 @@ public class ExtractRandomCellsAction extends SingleDatasetResultAction {
 			List<JLabel> labels = new ArrayList<JLabel>();
 			List<Component> fields = new ArrayList<Component>();
 
-			spinner = new JSpinner(new SpinnerNumberModel(1, 1, dataset.getCollection().getNucleusCount(), 1));
+			spinner = new JSpinner(
+					new SpinnerNumberModel(1, 1, dataset.getCollection().getNucleusCount(), 1));
 			labels.add(new JLabel("Number of cells"));
 			fields.add(spinner);
 

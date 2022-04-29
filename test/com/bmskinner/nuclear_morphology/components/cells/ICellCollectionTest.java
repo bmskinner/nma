@@ -83,9 +83,13 @@ public class ICellCollectionTest {
 	 * @return
 	 * @throws Exception
 	 */
-	public static ICellCollection createInstance(Class<? extends ICellCollection> source) throws Exception {
-		IAnalysisDataset d = new TestDatasetBuilder(ComponentTester.RNG_SEED).cellCount(N_CELLS)
-				.ofType(RuleSetCollection.roundRuleSetCollection()).withMaxSizeVariation(10).randomOffsetProfiles(true)
+	public static ICellCollection createInstance(Class<? extends ICellCollection> source)
+			throws Exception {
+		IAnalysisDataset d = new TestDatasetBuilder(ComponentTester.RNG_SEED)
+				.cellCount(N_CELLS)
+				.ofType(RuleSetCollection.mouseSpermRuleSetCollection())
+				.withMaxSizeVariation(10)
+				.randomOffsetProfiles(true)
 				.addSignalsInChannel(0).segmented().build();
 		if (source == DefaultCellCollection.class) {
 			return d.getCollection();
@@ -130,7 +134,8 @@ public class ICellCollectionTest {
 
 	@Test
 	public void testGetCellsFile() {
-		Set<ICell> cells = collection.getCells(new File(TestDatasetBuilder.TEST_DATASET_IMAGE_FOLDER));
+		Set<ICell> cells = collection
+				.getCells(new File(TestDatasetBuilder.TEST_DATASET_IMAGE_FOLDER));
 		assertEquals(N_CELLS, cells.size());
 	}
 
@@ -153,7 +158,8 @@ public class ICellCollectionTest {
 
 	@Test
 	public void testGetNucleiFile() {
-		Set<ICell> cells = collection.getCells(new File(TestDatasetBuilder.TEST_DATASET_IMAGE_FOLDER));
+		Set<ICell> cells = collection
+				.getCells(new File(TestDatasetBuilder.TEST_DATASET_IMAGE_FOLDER));
 		assertEquals(N_CELLS, cells.size());
 	}
 
@@ -309,7 +315,7 @@ public class ICellCollectionTest {
 		// Run consensus averaging on the collection. Wrap in a new dataset.
 		IAnalysisDataset d = new DefaultAnalysisDataset(collection,
 				new File(TestDatasetBuilder.TEST_DATASET_IMAGE_FOLDER));
-		d.setAnalysisOptions(OptionsFactory.makeDefaultRoundAnalysisOptions(
+		d.setAnalysisOptions(OptionsFactory.makeDefaultRodentAnalysisOptions(
 				new File(TestDatasetBuilder.TEST_DATASET_IMAGE_FOLDER).getAbsoluteFile()));
 
 		assertFalse(collection.hasConsensus());
@@ -323,8 +329,11 @@ public class ICellCollectionTest {
 
 		// Ensure TV and BV are set
 		ProfileManager manager = collection.getProfileManager();
-		manager.updateLandmark(OrientationMark.TOP, 0);
-		manager.updateLandmark(OrientationMark.BOTTOM, 10);
+		manager.updateLandmark(
+				collection.getRuleSetCollection().getLandmark(OrientationMark.TOP).get(),
+				0);
+		manager.updateLandmark(
+				collection.getRuleSetCollection().getLandmark(OrientationMark.BOTTOM).get(), 10);
 
 		// Run consensus averaging on the collection. Wrap in a new dataset.
 		// Analysis options will not be copied - create anew
@@ -339,7 +348,8 @@ public class ICellCollectionTest {
 		Nucleus n = d.getCollection().getConsensus();
 		IPoint tv = n.getBorderPoint(OrientationMark.TOP);
 		IPoint bv = n.getBorderPoint(OrientationMark.BOTTOM);
-		assertTrue("Points should be vertical for tv=" + tv + " bv=" + bv, ComponentTester.areVertical(tv, bv));
+		assertTrue("Points should be vertical for tv=" + tv + " bv=" + bv,
+				ComponentTester.areVertical(tv, bv));
 
 		// Now test that updating the TV to any index still allows orientation
 
@@ -349,10 +359,15 @@ public class ICellCollectionTest {
 		// Start from 3 so that the smaller consensus profile does not get
 		// the TV assigned to index 0 when interpolating
 		for (int tIndex = 1; tIndex < d.getCollection().getMedianArrayLength(); tIndex++) {
-			manager.updateLandmark(OrientationMark.TOP, tIndex);
-			manager.updateLandmark(OrientationMark.BOTTOM, bIndex);
+			manager.updateLandmark(
+					collection.getRuleSetCollection().getLandmark(OrientationMark.TOP).get(),
+					tIndex);
+			manager.updateLandmark(
+					collection.getRuleSetCollection().getLandmark(OrientationMark.BOTTOM).get(),
+					bIndex);
 
-			assertNotEquals("TV and BV should not have the same index in the median", bIndex, tIndex);
+			assertNotEquals("TV and BV should not have the same index in the median", bIndex,
+					tIndex);
 			assertEquals("Median TV should be", tIndex,
 					collection.getProfileCollection().getLandmarkIndex(OrientationMark.TOP));
 			assertEquals("Median BV should be", bIndex,
@@ -387,15 +402,18 @@ public class ICellCollectionTest {
 
 	@Test
 	public void testFilterCollection() throws Exception {
-		double medianArea = collection.getMedian(Measurement.AREA, CellularComponent.NUCLEUS, MeasurementScale.PIXELS);
+		double medianArea = collection.getMedian(Measurement.AREA, CellularComponent.NUCLEUS,
+				MeasurementScale.PIXELS);
 
 		FilteringOptions op = new CellCollectionFilterBuilder()
-				.add(Measurement.AREA, CellularComponent.NUCLEUS, MeasurementScale.PIXELS, medianArea, medianArea * 10)
+				.add(Measurement.AREA, CellularComponent.NUCLEUS, MeasurementScale.PIXELS,
+						medianArea, medianArea * 10)
 				.build();
 
 		ICellCollection c = CellCollectionFilterer.filter(collection, op);
 
-		assertTrue("Filtering in " + source.getSimpleName(), c.getNucleusCount() < collection.getNucleusCount());
+		assertTrue("Filtering in " + source.getSimpleName(),
+				c.getNucleusCount() < collection.getNucleusCount());
 	}
 
 	@Test

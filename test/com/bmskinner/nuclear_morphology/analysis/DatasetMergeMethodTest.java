@@ -20,19 +20,23 @@ import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMet
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMethod.MorphologyAnalysisMode;
 import com.bmskinner.nuclear_morphology.components.cells.Nucleus;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.rules.OrientationMark;
 import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
 
 public class DatasetMergeMethodTest {
 
-	public static final String MERGED_DATASET_FILE = TestResources.DATASET_FOLDER + "Merge_of_merge.nmd";
+	public static final String MERGED_DATASET_FILE = TestResources.DATASET_FOLDER
+			+ "Merge_of_merge.nmd";
 
 	@Test
 	public void testMergedDatasetCanBeProfiled() throws Exception {
-		IAnalysisDataset d1 = new TestDatasetBuilder(123).withNucleusShape(TestComponentShape.SQUARE).cellCount(10)
+		IAnalysisDataset d1 = new TestDatasetBuilder(123)
+				.withNucleusShape(TestComponentShape.SQUARE).cellCount(10)
 				.segmented().build();
 
-		IAnalysisDataset d2 = new TestDatasetBuilder(456).withNucleusShape(TestComponentShape.SQUARE).cellCount(10)
+		IAnalysisDataset d2 = new TestDatasetBuilder(456)
+				.withNucleusShape(TestComponentShape.SQUARE).cellCount(10)
 				.segmented().build();
 
 		// Move all OrientationMarks in d1 except RP by a fixed distance
@@ -41,7 +45,7 @@ public class DatasetMergeMethodTest {
 			for (OrientationMark tag : tags.keySet()) {
 				if (OrientationMark.REFERENCE.equals(tag))
 					continue;
-				n.setOrientationMark(tag, n.getBorderIndex(tag) + 10);
+				n.setOrientationMark(tag, n.wrapIndex(n.getBorderIndex(tag) + 10));
 			}
 		}
 
@@ -51,7 +55,8 @@ public class DatasetMergeMethodTest {
 		DatasetMergeMethod dm = new DatasetMergeMethod(list, new File("Empty path"));
 		IAnalysisDataset result = dm.call().getFirstDataset();
 		assertNotNull("Merged dataset should not be null", result);
-		assertEquals("Merged dataset should have correct cell count", 20, result.getCollection().size());
+		assertEquals("Merged dataset should have correct cell count", 20,
+				result.getCollection().size());
 
 		// Run new profiling on the merged dataset
 		new DatasetProfilingMethod(result).call();
@@ -59,19 +64,25 @@ public class DatasetMergeMethodTest {
 	}
 
 	@Test
-	public void testTagsAreCopiedAfterResegmentation() throws Exception {
+	public void testLandmarksArePresentInMergedDatasetAfterResegmentation() throws Exception {
 
-		IAnalysisDataset d1 = new TestDatasetBuilder(123).withNucleusShape(TestComponentShape.SQUARE).cellCount(10)
+		// Make two different datasets
+		IAnalysisDataset d1 = new TestDatasetBuilder(123)
+				.withNucleusShape(TestComponentShape.SQUARE)
+				.cellCount(10)
 				.segmented().build();
 
-		IAnalysisDataset d2 = new TestDatasetBuilder(456).withNucleusShape(TestComponentShape.SQUARE).cellCount(10)
+		IAnalysisDataset d2 = new TestDatasetBuilder(456)
+				.withNucleusShape(TestComponentShape.SQUARE)
+				.cellCount(10)
 				.segmented().build();
 
 		// Move all OrientationMarks in d1 except RP by a fixed distance
 		for (Nucleus n : d1.getCollection().getNuclei()) {
 			Map<OrientationMark, Integer> tags = n.getOrientationMarkMap();
 			for (OrientationMark tag : tags.keySet()) {
-				if (OrientationMark.REFERENCE.equals(tag))
+				Landmark lm = n.getLandmark(tag);
+				if (n.getLandmark(OrientationMark.REFERENCE).equals(lm))
 					continue;
 				n.setOrientationMark(tag, n.getBorderIndex(tag) + 10);
 			}
@@ -83,7 +94,8 @@ public class DatasetMergeMethodTest {
 		DatasetMergeMethod dm = new DatasetMergeMethod(list, new File("Empty path"));
 		IAnalysisDataset result = dm.call().getFirstDataset();
 		assertNotNull("Merged dataset should not be null", result);
-		assertEquals("Merged dataset should have correct cell count", 20, result.getCollection().size());
+		assertEquals("Merged dataset should have correct cell count", 20,
+				result.getCollection().size());
 
 		// Run new profiling on the merged dataset
 		new DatasetProfilingMethod(result).call();
@@ -92,12 +104,8 @@ public class DatasetMergeMethodTest {
 		// Are OrientationMark positions properly restored?
 		for (Nucleus n : d1.getCollection().getNuclei()) {
 			Nucleus test = result.getCollection().getNucleus(n.getID()).get();
-			Map<OrientationMark, Integer> tags = n.getOrientationMarkMap();
-			for (OrientationMark tag : tags.keySet()) {
-				if (OrientationMark.REFERENCE.equals(tag))
-					continue;
-				assertEquals(tag.toString(), tags.get(tag).intValue(), test.getBorderIndex(tag));
-			}
+			for (OrientationMark tag : n.getOrientationMarks())
+				assertTrue(test.hasLandmark(tag));
 		}
 	}
 

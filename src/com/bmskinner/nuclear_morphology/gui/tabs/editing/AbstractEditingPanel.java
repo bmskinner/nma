@@ -22,6 +22,7 @@ import java.util.logging.Logger;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.SegmentationHandler;
 import com.bmskinner.nuclear_morphology.components.rules.OrientationMark;
 import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
@@ -54,7 +55,8 @@ public abstract class AbstractEditingPanel extends DetailPanel implements Editin
 
 			try {
 				int result = getInputSupplier().requestOptionAllVisible(options, 0,
-						"Some cells have been manually segmented. Keep manual values?", "Keep manual values?");
+						"Some cells have been manually segmented. Keep manual values?",
+						"Keep manual values?");
 				if (result != 0)
 					collection.setCellsLocked(false);
 			} catch (RequestCancelledException e) {
@@ -70,7 +72,7 @@ public abstract class AbstractEditingPanel extends DetailPanel implements Editin
 	 * @param newTagIndex
 	 */
 	@Override
-	public void setBorderTagAction(@NonNull OrientationMark tag, int newTagIndex) {
+	public void setBorderTagAction(@NonNull Landmark tag, int newTagIndex) {
 		if (activeDataset() == null)
 			return;
 		if (activeDataset().getCollection().isVirtual() && tag.equals(OrientationMark.REFERENCE)) {

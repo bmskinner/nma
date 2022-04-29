@@ -32,6 +32,7 @@ import org.jfree.chart.JFreeChart;
 import com.bmskinner.nuclear_morphology.components.MissingComponentException;
 import com.bmskinner.nuclear_morphology.components.cells.Nucleus;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.components.rules.OrientationMark;
@@ -149,10 +150,14 @@ public class CellProfilesPanel extends ChartDetailPanel
 
 			} else {
 
-				ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets()).setCell(model.getCell())
-						.setNormalised(false).setAlignment(ProfileAlignment.LEFT).setLandmark(OrientationMark.REFERENCE)
-						.setShowMarkers(true).setProfileType(type).setSwatch(GlobalOptions.getInstance().getSwatch())
-						.setShowAnnotations(false).setShowPoints(true).setShowXAxis(false).setShowYAxis(false)
+				ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets())
+						.setCell(model.getCell())
+						.setNormalised(false).setAlignment(ProfileAlignment.LEFT)
+						.setLandmark(OrientationMark.REFERENCE)
+						.setShowMarkers(true).setProfileType(type)
+						.setSwatch(GlobalOptions.getInstance().getSwatch())
+						.setShowAnnotations(false).setShowPoints(true).setShowXAxis(false)
+						.setShowYAxis(false)
 						.setTarget(chartPanel).build();
 
 				setChart(options);
@@ -207,7 +212,7 @@ public class CellProfilesPanel extends ChartDetailPanel
 	}
 
 	@Override
-	public void setBorderTagAction(@NonNull OrientationMark tag, int newTagIndex) {
+	public void setBorderTagAction(@NonNull Landmark tag, int newTagIndex) {
 		// TODO Auto-generated method stub
 
 	}

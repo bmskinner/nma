@@ -48,6 +48,7 @@ import javax.swing.SwingConstants;
 
 import org.virion.jam.controlpanels.BasicControlPalette;
 
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.cells.Nucleus;
 import com.bmskinner.nuclear_morphology.components.datasets.DefaultClusterGroup;
@@ -116,7 +117,8 @@ public class ClusterTreeDialog extends MessagingDialog {
 			this.setLayout(new BorderLayout());
 			this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 			this.viewer = new DraggableTreeViewer(
-					new BasicControlPalette(0, BasicControlPalette.DisplayMode.INITIALLY_CLOSED, true),
+					new BasicControlPalette(0, BasicControlPalette.DisplayMode.INITIALLY_CLOSED,
+							true),
 					SwingConstants.LEFT);
 
 			viewer.addMouseListener(new MouseClusterSelectionAdapter());
@@ -177,8 +179,9 @@ public class ClusterTreeDialog extends MessagingDialog {
 					Taxon t = topTree.getTaxon(n);
 					ICell c = getCell(t).get();
 					t.setAttribute("Cell", c);
-					n.setAttribute("ShortName", c.getPrimaryNucleus().getSourceFolder().getName() + "/"
-							+ c.getPrimaryNucleus().getNameAndNumber());
+					n.setAttribute("ShortName",
+							c.getPrimaryNucleus().getSourceFolder().getName() + "/"
+									+ c.getPrimaryNucleus().getNameAndNumber());
 				}
 			}
 		} catch (IOException e) {
@@ -241,7 +244,8 @@ public class ClusterTreeDialog extends MessagingDialog {
 
 		if (isUUID && id != null)
 			return Optional.of(dataset.getCollection().getCell(id));
-		return dataset.getCollection().streamCells().filter(c -> hasMatchingNucleusName(t.getName(), c)).findFirst();
+		return dataset.getCollection().streamCells()
+				.filter(c -> hasMatchingNucleusName(t.getName(), c)).findFirst();
 	}
 
 	private boolean hasMatchingNucleusName(String name, ICell c) {
@@ -302,7 +306,8 @@ public class ClusterTreeDialog extends MessagingDialog {
 	}
 
 	private void updateNodePainter() {
-		VariableNodePainter painter = new VariableNodePainter("Cluster", viewer.getTreePane().getTree(),
+		VariableNodePainter painter = new VariableNodePainter("Cluster",
+				viewer.getTreePane().getTree(),
 				PainterIntent.TIP);
 		painter.setBorder(Color.BLACK, new BasicStroke(2f));
 		viewer.getTreePane().setTaxonLabelPainter(painter);
@@ -407,7 +412,8 @@ public class ClusterTreeDialog extends MessagingDialog {
 		if (name.equals(nucleusName)) // 'C:\bla\image.tiff-image.tiff-1'
 			return true;
 
-		nucleusName = nucleus.getSourceFolder().getAbsolutePath() + "-" + nucleus.getNameAndNumber();
+		nucleusName = nucleus.getSourceFolder().getAbsolutePath() + "-"
+				+ nucleus.getNameAndNumber();
 
 		if (name.equals(nucleusName))
 			return true;
@@ -490,7 +496,7 @@ public class ClusterTreeDialog extends MessagingDialog {
 
 				try {
 					dataset.getCollection().getProfileManager().copySegmentsAndLandmarksTo(c);
-				} catch (ProfileException | MissingProfileException e) {
+				} catch (ProfileException | MissingProfileException | MissingLandmarkException e) {
 					LOGGER.warning("Error copying collection offsets");
 					LOGGER.log(Loggable.STACK, "Error in offsetting", e);
 				}
@@ -540,7 +546,8 @@ public class ClusterTreeDialog extends MessagingDialog {
 		newOptions.setInt(HashOptions.CLUSTER_MANUAL_CLUSTER_NUMBER_KEY, list.size());
 
 		int clusterNumber = dataset.getMaxClusterGroupNumber() + 1;
-		IClusterGroup newGroup = new DefaultClusterGroup(IClusterGroup.CLUSTER_GROUP_PREFIX + "_" + clusterNumber,
+		IClusterGroup newGroup = new DefaultClusterGroup(
+				IClusterGroup.CLUSTER_GROUP_PREFIX + "_" + clusterNumber,
 				newOptions, group.getTree());
 		return newGroup;
 	}
@@ -580,7 +587,8 @@ public class ClusterTreeDialog extends MessagingDialog {
 			d.getCollection().getCells().forEach(c -> cellIDsFound.add(c.getId()));
 		}
 
-		return dataset.getCollection().streamCells().allMatch(c -> cellIDsFound.contains(c.getId()));
+		return dataset.getCollection().streamCells()
+				.allMatch(c -> cellIDsFound.contains(c.getId()));
 	}
 
 	/*
@@ -606,7 +614,8 @@ public class ClusterTreeDialog extends MessagingDialog {
 
 			// Offer to make a cluster group
 			try {
-				boolean join = new DefaultInputSupplier().requestApproval("Join the new clusters into a cluster group?",
+				boolean join = new DefaultInputSupplier().requestApproval(
+						"Join the new clusters into a cluster group?",
 						"Create cluster group");
 
 				if (join) {

@@ -53,9 +53,11 @@ public class TestComponentFactory {
 	 * @return
 	 * @throws ComponentCreationException
 	 */
-	public static ICell rectangularCell(int w, int h, int xBase, int yBase, double rotation, int fixedStartOffset,
+	public static ICell rectangularCell(int w, int h, int xBase, int yBase, double rotation,
+			int fixedStartOffset,
 			RuleSetCollection rsc) throws ComponentCreationException {
-		return new DefaultCell(rectangularNucleus(w, h, xBase, yBase, rotation, fixedStartOffset, rsc));
+		return new DefaultCell(
+				rectangularNucleus(w, h, xBase, yBase, rotation, fixedStartOffset, rsc));
 	}
 
 	/**
@@ -70,7 +72,8 @@ public class TestComponentFactory {
 	 * @return
 	 * @throws ComponentCreationException
 	 */
-	public static ICell roundCell(int w, int h, int xBase, int yBase, double rotation, int fixedStartOffset,
+	public static ICell roundCell(int w, int h, int xBase, int yBase, double rotation,
+			int fixedStartOffset,
 			RuleSetCollection rsc) throws ComponentCreationException {
 		return new DefaultCell(roundNucleus(w, h, xBase, yBase, rotation, fixedStartOffset, rsc));
 	}
@@ -85,7 +88,8 @@ public class TestComponentFactory {
 	 * @return a Nucleus
 	 * @throws ComponentCreationException
 	 */
-	public static Nucleus rectangularNucleus(int w, int h, int xBase, int yBase, double rotation, int fixedStartOffset,
+	public static Nucleus rectangularNucleus(int w, int h, int xBase, int yBase, double rotation,
+			int fixedStartOffset,
 			RuleSetCollection rsc) throws ComponentCreationException {
 
 		if (fixedStartOffset < 0 || fixedStartOffset >= (w + h) * 2)
@@ -117,11 +121,12 @@ public class TestComponentFactory {
 
 		// Note - the roi interpolation will smooth corners
 		n.createProfiles(Taggable.DEFAULT_PROFILE_WINDOW_PROPORTION);
-		ProfileIndexFinder.assignLandmarks(n, RuleSetCollection.roundRuleSetCollection());
+		ProfileIndexFinder.assignLandmarks(n, rsc);
 		return n;
 	}
 
-	public static Nucleus roundNucleus(int w, int h, int xBase, int yBase, double rotation, int fixedStartOffset,
+	public static Nucleus roundNucleus(int w, int h, int xBase, int yBase, double rotation,
+			int fixedStartOffset,
 			RuleSetCollection rsc) throws ComponentCreationException {
 		if (fixedStartOffset < 0 || fixedStartOffset >= (w + h) * 2)
 			throw new ComponentCreationException(
@@ -148,11 +153,12 @@ public class TestComponentFactory {
 		// Note - the roi interpolation will smooth corners
 		n.createProfiles(Taggable.DEFAULT_PROFILE_WINDOW_PROPORTION);
 //		LOGGER.fine("Assigning landmarks to new nucleus");
-		ProfileIndexFinder.assignLandmarks(n, RuleSetCollection.roundRuleSetCollection());
+		ProfileIndexFinder.assignLandmarks(n, rsc);
 		return n;
 	}
 
-	private static Nucleus createNucleus(Roi roi, IPoint com, File f, int channel, int x, int y, int number,
+	private static Nucleus createNucleus(Roi roi, IPoint com, File f, int channel, int x, int y,
+			int number,
 			RuleSetCollection rsc) throws ComponentCreationException {
 		Nucleus n = new DefaultNucleus(roi, com, f, 0, x, y, 0, rsc);
 		return n;
@@ -168,7 +174,8 @@ public class TestComponentFactory {
 	 * @param channel       the signal channel
 	 * @return
 	 */
-	public static INuclearSignal createSignal(CellularComponent c, double maxProportion, int channel) {
+	public static INuclearSignal createSignal(CellularComponent c, double maxProportion,
+			int channel) {
 		Roi templateRoi = c.toOriginalRoi();
 
 		int w = (int) (templateRoi.getFloatWidth() * maxProportion);
@@ -259,18 +266,22 @@ public class TestComponentFactory {
 		new DefaultCell(rectangularNucleus(TestDatasetBuilder.DEFAULT_BASE_WIDTH,
 				TestDatasetBuilder.DEFAULT_BASE_HEIGHT, TestDatasetBuilder.DEFAULT_X_BASE,
 				TestDatasetBuilder.DEFAULT_Y_BASE, TestDatasetBuilder.DEFAULT_ROTATION,
-				TestDatasetBuilder.DEFAULT_BORDER_OFFSET, RuleSetCollection.roundRuleSetCollection()));
+				TestDatasetBuilder.DEFAULT_BORDER_OFFSET,
+				RuleSetCollection.roundRuleSetCollection()));
 	}
 
 	@Test
 	public void testCellCreatedWithVariableBorderOffset() throws ComponentCreationException {
-		int max = (TestDatasetBuilder.DEFAULT_BASE_WIDTH + TestDatasetBuilder.DEFAULT_BASE_HEIGHT) * 2;
+		int max = (TestDatasetBuilder.DEFAULT_BASE_WIDTH + TestDatasetBuilder.DEFAULT_BASE_HEIGHT)
+				* 2;
 
 		for (int offset = 0; offset < max; offset++) {
 			new DefaultCell(
-					rectangularNucleus(TestDatasetBuilder.DEFAULT_BASE_WIDTH, TestDatasetBuilder.DEFAULT_BASE_HEIGHT,
+					rectangularNucleus(TestDatasetBuilder.DEFAULT_BASE_WIDTH,
+							TestDatasetBuilder.DEFAULT_BASE_HEIGHT,
 							TestDatasetBuilder.DEFAULT_X_BASE, TestDatasetBuilder.DEFAULT_Y_BASE,
-							TestDatasetBuilder.DEFAULT_ROTATION, offset, RuleSetCollection.roundRuleSetCollection()));
+							TestDatasetBuilder.DEFAULT_ROTATION, offset,
+							RuleSetCollection.roundRuleSetCollection()));
 
 		}
 

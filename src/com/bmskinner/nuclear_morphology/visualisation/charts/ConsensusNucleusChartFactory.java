@@ -40,6 +40,7 @@ import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.mesh.DefaultMesh;
 import com.bmskinner.nuclear_morphology.components.mesh.Mesh;
 import com.bmskinner.nuclear_morphology.components.mesh.MeshCreationException;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.rules.OrientationMark;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -55,7 +56,8 @@ import com.bmskinner.nuclear_morphology.visualisation.options.ChartOptions;
  */
 public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 
-	private static final Logger LOGGER = Logger.getLogger(ConsensusNucleusChartFactory.class.getName());
+	private static final Logger LOGGER = Logger
+			.getLogger(ConsensusNucleusChartFactory.class.getName());
 
 	private static final String MULTIPLE_DATASETS_NO_CONSENSUS_ERROR = "No consensus in dataset(s)";
 
@@ -114,7 +116,8 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 			return createEmptyChart();
 
 		if (options.isMultipleDatasets()) {
-			boolean oneHasConsensus = options.getDatasets().stream().anyMatch(d -> d.getCollection().hasConsensus());
+			boolean oneHasConsensus = options.getDatasets().stream()
+					.anyMatch(d -> d.getCollection().hasConsensus());
 			if (oneHasConsensus)
 				return makeMultipleConsensusChart();
 			return createTextAnnotatedEmptyChart(MULTIPLE_DATASETS_NO_CONSENSUS_ERROR);
@@ -239,7 +242,8 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 		try {
 			ds = new ComponentOutlineDataset(component, false, options.getScale());
 		} catch (ChartDatasetCreationException e) {
-			LOGGER.log(Loggable.STACK, "Error creating annotated nucleus outline: " + e.getMessage(), e);
+			LOGGER.log(Loggable.STACK,
+					"Error creating annotated nucleus outline: " + e.getMessage(), e);
 			return createErrorChart();
 		}
 		JFreeChart chart = makeConsensusChart(ds);
@@ -296,7 +300,8 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 	 * @throws MissingLandmarkException
 	 * @throws ComponentCreationException
 	 */
-	private double getConsensusChartRange() throws MissingLandmarkException, ComponentCreationException {
+	private double getConsensusChartRange()
+			throws MissingLandmarkException, ComponentCreationException {
 
 		double max = 1;
 		for (IAnalysisDataset dataset : options.getDatasets()) {
@@ -318,7 +323,8 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 
 		ICellCollection collection = dataset.getCollection();
 		try {
-			XYDataset ds = new NucleusDatasetCreator(options).createSegmentedConsensusOutline(collection);
+			XYDataset ds = new NucleusDatasetCreator(options)
+					.createSegmentedConsensusOutline(collection);
 
 			JFreeChart chart = makeConsensusChart(ds);
 			double max = getConsensusChartRange(dataset.getCollection().getConsensus());
@@ -330,8 +336,10 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 			formatConsensusChartSeries(plot);
 
 			return chart;
-		} catch (ChartDatasetCreationException | MissingLandmarkException | ComponentCreationException e) {
-			LOGGER.fine("Unable to make segmented outline, creating base outline instead: " + e.getMessage());
+		} catch (ChartDatasetCreationException | MissingLandmarkException
+				| ComponentCreationException e) {
+			LOGGER.fine("Unable to make segmented outline, creating base outline instead: "
+					+ e.getMessage());
 			return makeNucleusOutlineChart();
 		}
 
@@ -348,17 +356,19 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 
 		try {
 
+			// Add landmark locations
 			DefaultXYDataset landmarkData = new DefaultXYDataset();
 
 			Nucleus n = options.firstDataset().getCollection().getConsensus();
 
-			for (OrientationMark lm : n.getOrientationMarks()) {
+			for (OrientationMark om : n.getOrientationMarks()) {
 
 				// Point at the landmark coordinate
 				double[][] data = new double[2][1];
-				data[0][0] = n.getBorderPoint(lm).getX();
-				data[1][0] = n.getBorderPoint(lm).getY();
-				landmarkData.addSeries(lm.toString(), data);
+				data[0][0] = n.getBorderPoint(om).getX();
+				data[1][0] = n.getBorderPoint(om).getY();
+				Landmark l = n.getLandmark(om);
+				landmarkData.addSeries(l.toString(), data);
 
 				// Line from the landmark to outside
 
@@ -424,7 +434,8 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 	private JFreeChart makeMultipleConsensusChart() {
 		// multiple nuclei
 		try {
-			List<ComponentOutlineDataset> ls = new NucleusDatasetCreator(options).createMultiNucleusOutline();
+			List<ComponentOutlineDataset> ls = new NucleusDatasetCreator(options)
+					.createMultiNucleusOutline();
 
 			JFreeChart chart = makeConsensusChart(ls.get(0));
 			for (int i = 1; i < ls.size(); i++) {
@@ -444,7 +455,8 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 				XYLineAndShapeRenderer rend = new XYLineAndShapeRenderer();
 				for (int i = 0; i < plot.getSeriesCount(); i++) {
 
-					Paint colour = options.getDatasets().get(d).getDatasetColour().orElse(ColourSelecter.getColor(d));
+					Paint colour = options.getDatasets().get(d).getDatasetColour()
+							.orElse(ColourSelecter.getColor(d));
 					rend.setSeriesLinesVisible(i, true);
 					rend.setSeriesShapesVisible(i, false);
 					rend.setSeriesVisibleInLegend(i, false);
@@ -455,7 +467,8 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 			}
 			return chart;
 
-		} catch (ChartDatasetCreationException | MissingLandmarkException | ComponentCreationException e) {
+		} catch (ChartDatasetCreationException | MissingLandmarkException
+				| ComponentCreationException e) {
 			LOGGER.log(Loggable.STACK, "Error making consensus dataset", e);
 			return createErrorChart();
 		}

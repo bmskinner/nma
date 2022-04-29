@@ -23,6 +23,7 @@ import java.util.logging.Logger;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.nucleus.CellCollectionFilterer;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.datasets.DefaultAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
@@ -53,7 +54,8 @@ public class DatasetArithmeticAction extends MultiDatasetResultAction {
 
 	private File saveFile;
 
-	public DatasetArithmeticAction(@NonNull List<IAnalysisDataset> list, @NonNull ProgressBarAcceptor acceptor) {
+	public DatasetArithmeticAction(@NonNull List<IAnalysisDataset> list,
+			@NonNull ProgressBarAcceptor acceptor) {
 		super(list, PROGRESS_LBL, acceptor);
 		this.setProgressBarIndeterminate();
 	}
@@ -83,7 +85,8 @@ public class DatasetArithmeticAction extends MultiDatasetResultAction {
 
 				switch (operation) {
 				case AND: // present in both
-					newCollection = CellCollectionFilterer.and(datasetOne.getCollection(), datasetTwo.getCollection());
+					newCollection = CellCollectionFilterer.and(datasetOne.getCollection(),
+							datasetTwo.getCollection());
 
 					newCollection.setSharedCount(datasetOne.getCollection(), newCollection.size());
 					newCollection.setSharedCount(datasetTwo.getCollection(), newCollection.size());
@@ -92,7 +95,8 @@ public class DatasetArithmeticAction extends MultiDatasetResultAction {
 					datasetTwo.getCollection().setSharedCount(newCollection, newCollection.size());
 					break;
 				case NOT: // present in one, not present in two
-					newCollection = CellCollectionFilterer.not(datasetOne.getCollection(), datasetTwo.getCollection());
+					newCollection = CellCollectionFilterer.not(datasetOne.getCollection(),
+							datasetTwo.getCollection());
 
 					newCollection.setSharedCount(datasetOne.getCollection(), newCollection.size());
 					newCollection.setSharedCount(datasetTwo.getCollection(), 0);
@@ -102,16 +106,22 @@ public class DatasetArithmeticAction extends MultiDatasetResultAction {
 
 					break;
 				case OR: // present in either (merge)
-					newCollection = CellCollectionFilterer.or(datasetOne.getCollection(), datasetTwo.getCollection());
-					newCollection.setSharedCount(datasetOne.getCollection(), datasetOne.getCollection().size());
-					newCollection.setSharedCount(datasetTwo.getCollection(), datasetTwo.getCollection().size());
+					newCollection = CellCollectionFilterer.or(datasetOne.getCollection(),
+							datasetTwo.getCollection());
+					newCollection.setSharedCount(datasetOne.getCollection(),
+							datasetOne.getCollection().size());
+					newCollection.setSharedCount(datasetTwo.getCollection(),
+							datasetTwo.getCollection().size());
 
-					datasetOne.getCollection().setSharedCount(newCollection, datasetOne.getCollection().size());
-					datasetTwo.getCollection().setSharedCount(newCollection, datasetTwo.getCollection().size());
+					datasetOne.getCollection().setSharedCount(newCollection,
+							datasetOne.getCollection().size());
+					datasetTwo.getCollection().setSharedCount(newCollection,
+							datasetTwo.getCollection().size());
 
 					break;
 				case XOR: // present in either but not both
-					newCollection = CellCollectionFilterer.xor(datasetOne.getCollection(), datasetTwo.getCollection());
+					newCollection = CellCollectionFilterer.xor(datasetOne.getCollection(),
+							datasetTwo.getCollection());
 					break;
 				default:
 					break;
@@ -141,13 +151,15 @@ public class DatasetArithmeticAction extends MultiDatasetResultAction {
 
 			if (newCollection instanceof VirtualDataset) {
 
-				IAnalysisDataset root = DatasetListManager.getInstance().getRootParent(newCollection);
+				IAnalysisDataset root = DatasetListManager.getInstance()
+						.getRootParent(newCollection);
 				try {
-					root.getCollection().getProfileManager().copySegmentsAndLandmarksTo(newCollection);
+					root.getCollection().getProfileManager()
+							.copySegmentsAndLandmarksTo(newCollection);
 					root.addChildCollection(newCollection);
 					IAnalysisDataset d = root.getChildDataset(newCollection.getId());
 					UIController.getInstance().fireDatasetAdded(d);
-				} catch (ProfileException | MissingProfileException e) {
+				} catch (ProfileException | MissingProfileException | MissingLandmarkException e) {
 					LOGGER.warning("Error: unable to complete operation");
 					LOGGER.log(Loggable.STACK, "Error copying profile offsets", e);
 				}
@@ -155,7 +167,8 @@ public class DatasetArithmeticAction extends MultiDatasetResultAction {
 			} else {
 				newDataset = new DefaultAnalysisDataset(newCollection, saveFile);
 				UserActionController.getInstance().userActionEventReceived(
-						new UserActionEvent(this, UserActionEvent.MORPHOLOGY_ANALYSIS_ACTION, List.of(newDataset)));
+						new UserActionEvent(this, UserActionEvent.MORPHOLOGY_ANALYSIS_ACTION,
+								List.of(newDataset)));
 			}
 		} else {
 			LOGGER.info("No populations returned");

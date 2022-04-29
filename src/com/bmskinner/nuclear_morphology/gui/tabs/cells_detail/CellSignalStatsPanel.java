@@ -30,7 +30,7 @@ import javax.swing.table.TableModel;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nuclear_morphology.components.rules.OrientationMark;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 import com.bmskinner.nuclear_morphology.gui.tabs.TableDetailPanel;
@@ -102,9 +102,11 @@ public class CellSignalStatsPanel extends TableDetailPanel implements CellEditin
 			return;
 		}
 
-		TableOptions options = new TableOptionsBuilder().setDatasets(getDatasets()).setCell(model.getCell())
+		TableOptions options = new TableOptionsBuilder().setDatasets(getDatasets())
+				.setCell(model.getCell())
 				.setScale(GlobalOptions.getInstance().getScale()).setTarget(table)
-				.setColumnRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN, new CellSignalColocalisationRenderer())
+				.setColumnRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN,
+						new CellSignalColocalisationRenderer())
 				.build();
 
 		try {
@@ -143,7 +145,8 @@ public class CellSignalStatsPanel extends TableDetailPanel implements CellEditin
 	protected TableModel createPanelTableType(@NonNull TableOptions options) {
 
 		if (model.hasCell()) {
-			return new CellTableDatasetCreator(options, model.getCell()).createPairwiseSignalDistanceTable();
+			return new CellTableDatasetCreator(options, model.getCell())
+					.createPairwiseSignalDistanceTable();
 		} else {
 			return AbstractTableCreator.createBlankTable();
 		}
@@ -155,7 +158,8 @@ public class CellSignalStatsPanel extends TableDetailPanel implements CellEditin
 	private class CellSignalColocalisationRenderer extends DefaultTableCellRenderer {
 
 		@Override
-		public java.awt.Component getTableCellRendererComponent(javax.swing.JTable table, java.lang.Object value,
+		public java.awt.Component getTableCellRendererComponent(javax.swing.JTable table,
+				java.lang.Object value,
 				boolean isSelected, boolean hasFocus, int row, int column) {
 
 			// Cells are by default rendered as a JLabel.
@@ -183,7 +187,7 @@ public class CellSignalStatsPanel extends TableDetailPanel implements CellEditin
 	}
 
 	@Override
-	public void setBorderTagAction(@NonNull OrientationMark tag, int newTagIndex) {
+	public void setBorderTagAction(@NonNull Landmark tag, int newTagIndex) {
 		// TODO Auto-generated method stub
 
 	}

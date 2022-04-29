@@ -10,6 +10,7 @@ import java.util.UUID;
 import org.junit.Test;
 
 import com.bmskinner.nuclear_morphology.TestDatasetBuilder;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.Statistical;
 import com.bmskinner.nuclear_morphology.components.cells.Nucleus;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
@@ -30,27 +31,41 @@ public class ConsensusAveragingMethodTest {
 
 	@Test
 	public void testConsensusHasSameLandmarksAsCollection() throws Exception {
-		IAnalysisDataset d = new TestDatasetBuilder(123).cellCount(10)
-				.ofType(RuleSetCollection.roundRuleSetCollection()).withMaxSizeVariation(10).randomOffsetProfiles(true)
-				.addSignalsInChannel(0).segmented().build();
+
+		IAnalysisDataset d = new TestDatasetBuilder(123)
+				.cellCount(10)
+				.ofType(RuleSetCollection.mouseSpermRuleSetCollection())
+				.withMaxSizeVariation(10)
+				.randomOffsetProfiles(true)
+				.addSignalsInChannel(0)
+				.segmented()
+				.build();
 
 		assertFalse("Collection should not yet have consensus", d.getCollection().hasConsensus());
 
 		// Add new landmarks
 		ProfileManager m = d.getCollection().getProfileManager();
-		m.updateLandmark(OrientationMark.TOP, 0);
-		m.updateLandmark(OrientationMark.BOTTOM, 10);
+		m.updateLandmark(d.getCollection().getRuleSetCollection().getLandmark(OrientationMark.TOP)
+				.orElseThrow(MissingLandmarkException::new), 0);
+		m.updateLandmark(
+				d.getCollection().getRuleSetCollection().getLandmark(OrientationMark.BOTTOM)
+						.orElseThrow(MissingLandmarkException::new),
+				10);
 
 		// Expected landmarks
-		OrientationMark[] lms = { OrientationMark.REFERENCE, OrientationMark.TOP, OrientationMark.BOTTOM };
+		OrientationMark[] lms = { OrientationMark.REFERENCE, OrientationMark.TOP,
+				OrientationMark.BOTTOM };
 
 		// Check landmarks are present in the profile collection
 		for (OrientationMark l : lms) {
-			assertTrue(l + " should be present", d.getCollection().getProfileCollection().hasLandmark(l));
+			assertTrue(l + " should be present",
+					d.getCollection().getProfileCollection().hasLandmark(l));
 		}
 
 		// Make the consensus
 		new ConsensusAveragingMethod(d).call();
+
+		assertTrue("Consensus should be created", d.getCollection().hasConsensus());
 
 		// Check that the landmarks are present in the consensus
 
@@ -62,9 +77,14 @@ public class ConsensusAveragingMethodTest {
 
 	@Test
 	public void testConsensusHasSameSegmentsAsCollection() throws Exception {
-		IAnalysisDataset d = new TestDatasetBuilder(123).cellCount(10)
-				.ofType(RuleSetCollection.roundRuleSetCollection()).withMaxSizeVariation(10).randomOffsetProfiles(true)
-				.addSignalsInChannel(0).segmented().build();
+		IAnalysisDataset d = new TestDatasetBuilder(123)
+				.cellCount(10)
+				.ofType(RuleSetCollection.roundRuleSetCollection())
+				.withMaxSizeVariation(10)
+				.randomOffsetProfiles(true)
+				.addSignalsInChannel(0)
+				.segmented()
+				.build();
 
 		assertFalse("Collection should not yet have consensus", d.getCollection().hasConsensus());
 
@@ -78,7 +98,8 @@ public class ConsensusAveragingMethodTest {
 
 		Nucleus n = d.getCollection().getConsensus();
 
-		assertEquals("Segment count should match", segs.size(), n.getProfile(ProfileType.ANGLE).getSegmentCount());
+		assertEquals("Segment count should match", segs.size(),
+				n.getProfile(ProfileType.ANGLE).getSegmentCount());
 		for (UUID id : segs) {
 			assertTrue(id + " should be present", n.getProfile(ProfileType.ANGLE).hasSegment(id));
 		}
@@ -87,7 +108,8 @@ public class ConsensusAveragingMethodTest {
 	@Test
 	public void testConsensusHasSameScaleAsCollection() throws Exception {
 		IAnalysisDataset d = new TestDatasetBuilder(123).cellCount(10)
-				.ofType(RuleSetCollection.roundRuleSetCollection()).withMaxSizeVariation(10).randomOffsetProfiles(true)
+				.ofType(RuleSetCollection.roundRuleSetCollection()).withMaxSizeVariation(10)
+				.randomOffsetProfiles(true)
 				.addSignalsInChannel(0).segmented().build();
 
 		double scale = 20;
@@ -106,7 +128,8 @@ public class ConsensusAveragingMethodTest {
 	@Test
 	public void testConsensusHasMeasurements() throws Exception {
 		IAnalysisDataset d = new TestDatasetBuilder(123).cellCount(10)
-				.ofType(RuleSetCollection.roundRuleSetCollection()).withMaxSizeVariation(10).randomOffsetProfiles(true)
+				.ofType(RuleSetCollection.roundRuleSetCollection()).withMaxSizeVariation(10)
+				.randomOffsetProfiles(true)
 				.addSignalsInChannel(0).segmented().build();
 
 		double scale = 20;

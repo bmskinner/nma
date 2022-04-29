@@ -51,268 +51,273 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  *
  */
 public class CellRelocationMethod extends SingleDatasetAnalysisMethod {
-	
+
 	private static final Logger LOGGER = Logger.getLogger(CellRelocationMethod.class.getName());
 
-    private static final String TAB          = "\\t";
-    private static final String UUID_KEY     = "UUID";
-    private static final String NAME_KEY     = "Name";
-    private static final String CHILD_OF_KEY = "ChildOf";
+	private static final String TAB = "\\t";
+	private static final String UUID_KEY = "UUID";
+	private static final String NAME_KEY = "Name";
+	private static final String CHILD_OF_KEY = "ChildOf";
 
-    private File inputFile = null;
+	private File inputFile = null;
 
-    /**
-     * Construct with a dataset and a file containing cell locations
-     * 
-     * @param dataset
-     * @param file
-     */
-    public CellRelocationMethod(final IAnalysisDataset dataset, final File file) {
-        super(dataset);
-        this.inputFile = file;
-    }
+	/**
+	 * Construct with a dataset and a file containing cell locations
+	 * 
+	 * @param dataset
+	 * @param file
+	 */
+	public CellRelocationMethod(final IAnalysisDataset dataset, final File file) {
+		super(dataset);
+		this.inputFile = file;
+	}
 
-    @Override
-    public IAnalysisResult call() throws CellRelocationException {
-        run();
-        IAnalysisResult r = new DefaultAnalysisResult(dataset);
-        return r;
-    }
+	@Override
+	public IAnalysisResult call() throws CellRelocationException {
+		run();
+		IAnalysisResult r = new DefaultAnalysisResult(dataset);
+		return r;
+	}
 
-    private void run() {
+	private void run() {
 
-        try {
-            findCells();
-        } catch (Exception e) {
-            LOGGER.warning("Error selecting cells");
-            LOGGER.log(Loggable.STACK, "Error selecting cells", e);
-        }
-    }
+		try {
+			findCells();
+		} catch (Exception e) {
+			LOGGER.warning("Error selecting cells");
+			LOGGER.log(Loggable.STACK, "Error selecting cells", e);
+		}
+	}
 
-    private void findCells() {
-        Set<UUID> newDatasets;
-        try {
-            newDatasets = parsePathList();
-        } catch (CellRelocationException | ProfileException | MissingLandmarkException | MissingProfileException e) {
-            LOGGER.log(Loggable.STACK, "Error relocating cells", e);
-            return;
-        }
+	private void findCells() {
+		Set<UUID> newDatasets;
+		try {
+			newDatasets = parsePathList();
+		} catch (CellRelocationException | ProfileException | MissingLandmarkException
+				| MissingProfileException e) {
+			LOGGER.log(Loggable.STACK, "Error relocating cells", e);
+			return;
+		}
 
-        if (newDatasets.size() > 0) {
+		if (newDatasets.size() > 0) {
 
-            try {
+			try {
 
-                for (UUID id : newDatasets) {
+				for (UUID id : newDatasets) {
 
-                    if (!id.equals(dataset.getId())) {
-                        dataset.getCollection().getProfileManager()
-                                .copySegmentsAndLandmarksTo(dataset.getChildDataset(id).getCollection());
+					if (!id.equals(dataset.getId())) {
+						dataset.getCollection().getProfileManager()
+								.copySegmentsAndLandmarksTo(
+										dataset.getChildDataset(id).getCollection());
 
-                    }
-                }
-            } catch (ProfileException | MissingProfileException e) {
-                LOGGER.warning("Unable to profile new collections");
-                LOGGER.log(Loggable.STACK, "Unable to profile new collections", e);
-                return;
-            }
-        }
+					}
+				}
+			} catch (ProfileException | MissingProfileException | MissingLandmarkException e) {
+				LOGGER.warning("Unable to profile new collections");
+				LOGGER.log(Loggable.STACK, "Unable to profile new collections", e);
+				return;
+			}
+		}
 
-    }
+	}
 
-    private Set<UUID> parsePathList() throws CellRelocationException, ProfileException, MissingLandmarkException, MissingProfileException {
-        Scanner scanner;
-        try {
-            scanner = new Scanner(inputFile);
-        } catch (FileNotFoundException e) {
-            throw new CellRelocationException("Input file does not exist", e);
-        }
+	private Set<UUID> parsePathList() throws CellRelocationException, ProfileException,
+			MissingLandmarkException, MissingProfileException {
+		Scanner scanner;
+		try {
+			scanner = new Scanner(inputFile);
+		} catch (FileNotFoundException e) {
+			throw new CellRelocationException("Input file does not exist", e);
+		}
 
-        UUID activeID = null;
-        String activeName = null;
+		UUID activeID = null;
+		String activeName = null;
 
-        Map<UUID, IAnalysisDataset> map = new HashMap<>();
+		Map<UUID, IAnalysisDataset> map = new HashMap<>();
 
-        int cellCount = 0;
-        while (scanner.hasNextLine()) {
+		int cellCount = 0;
+		while (scanner.hasNextLine()) {
 
-            /*
-             * File format: UUID 57320dbb-bcde-49e3-ba31-5b76329356fe Name
-             * Testing ChildOf 57320dbb-bcde-49e3-ba31-5b76329356fe
-             * J:\Protocols\Scripts and macros\Testing\s75.tiff
-             * 602.0585522824504-386.38060239306236
-             */
+			/*
+			 * File format: UUID 57320dbb-bcde-49e3-ba31-5b76329356fe Name Testing ChildOf
+			 * 57320dbb-bcde-49e3-ba31-5b76329356fe J:\Protocols\Scripts and
+			 * macros\Testing\s75.tiff 602.0585522824504-386.38060239306236
+			 */
 
-            String line = scanner.nextLine();
-            if (line.startsWith(UUID_KEY)) {
-                /*  New dataset found */
-                activeID = UUID.fromString(line.split(TAB)[1]);
+			String line = scanner.nextLine();
+			if (line.startsWith(UUID_KEY)) {
+				/* New dataset found */
+				activeID = UUID.fromString(line.split(TAB)[1]);
 
-                if (dataset.getId().equals(activeID) || dataset.hasDirectChild(activeID)) {
-                    // the dataset already exists with this id - we must fail
-                    scanner.close();
-                    LOGGER.warning("Dataset in cell file already exists");
-                    LOGGER.warning("Cancelling relocation");
-                    throw new CellRelocationException("Dataset already exists");
-                }
+				if (dataset.getId().equals(activeID) || dataset.hasDirectChild(activeID)) {
+					// the dataset already exists with this id - we must fail
+					scanner.close();
+					LOGGER.warning("Dataset in cell file already exists");
+					LOGGER.warning("Cancelling relocation");
+					throw new CellRelocationException("Dataset already exists");
+				}
 
-                continue;
-            }
+				continue;
+			}
 
-            if (line.startsWith(NAME_KEY)) {
-                /* Name of new dataset  */
+			if (line.startsWith(NAME_KEY)) {
+				/* Name of new dataset */
 
-                activeName = line.split(TAB)[1];
+				activeName = line.split(TAB)[1];
 
-                if(activeID==null)
-                	continue;
-                IAnalysisDataset d = new VirtualDataset(dataset, activeName, activeID);
+				if (activeID == null)
+					continue;
+				IAnalysisDataset d = new VirtualDataset(dataset, activeName, activeID);
 
+				Optional<IAnalysisOptions> op = dataset.getAnalysisOptions();
+				if (op.isPresent())
+					d.setAnalysisOptions(op.get());
 
-                Optional<IAnalysisOptions> op = dataset.getAnalysisOptions();
-                if(op.isPresent())
-                	d.setAnalysisOptions(op.get());
+				map.put(activeID, d);
+				continue;
+			}
 
-                map.put(activeID, d);
-                continue;
-            }
+			if (line.startsWith(CHILD_OF_KEY)) {
+				/* Parent dataset */
+				UUID parentID = UUID.fromString(line.split(TAB)[1]);
 
-            if (line.startsWith(CHILD_OF_KEY)) {
-                /*  Parent dataset */
-                UUID parentID = UUID.fromString(line.split(TAB)[1]);
+				if (parentID.equals(activeID)) {
+					dataset.addChildDataset(map.get(activeID));
+				} else {
+					map.get(parentID).addChildDataset(map.get(activeID));
+				}
+				continue;
+			}
 
-                if (parentID.equals(activeID)) {
-                    dataset.addChildDataset(map.get(activeID));
-                } else {
-                    map.get(parentID).addChildDataset(map.get(activeID));
-                }
-                continue;
-            }
+			/* No header line, so must be a cell for the current dataset */
+			Optional<ICell> cell = getCellFromLine(line);
+			if (cell.isPresent()) {
+				map.get(activeID).getCollection().addCell(cell.get());
+				cellCount++;
+			} else {
+				LOGGER.fine("Cell not found: " + line);
+			}
+		}
 
-            /* No header line, so must be a cell for the current dataset  */
-            Optional<ICell> cell = getCellFromLine(line);
-            if (cell.isPresent()) {
-                map.get(activeID).getCollection().addCell(cell.get());
-                cellCount++;
-            } else {
-            	LOGGER.fine("Cell not found: "+line);
-            }
-        }
-        
-        LOGGER.info(map.get(activeID).getCollection().size()+" cells out of "+ cellCount+" relocated");
+		LOGGER.info(map.get(activeID).getCollection().size() + " cells out of " + cellCount
+				+ " relocated");
 
-        if(cellCount==0 && activeID!=null) {
-        	LOGGER.warning("No cells in dataset "+map.get(activeID).getName());
-        	dataset.deleteChild(activeID);
-        	map.remove(activeID);
-        }
-        
-        // Make the profile collections for the new datasets
-        for (IAnalysisDataset d : map.values()) {
-            d.getCollection().getProfileCollection().calculateProfiles();
-        }
+		if (cellCount == 0 && activeID != null) {
+			LOGGER.warning("No cells in dataset " + map.get(activeID).getName());
+			dataset.deleteChild(activeID);
+			map.remove(activeID);
+		}
 
-        scanner.close();
-        return map.keySet();
-    }
+		// Make the profile collections for the new datasets
+		for (IAnalysisDataset d : map.values()) {
+			d.getCollection().getProfileCollection().calculateProfiles();
+		}
 
-    /**
-     * Given a line from the cell file, return a matching cell from the current 
-     * dataset
-     * @param line
-     * @return
-     * @throws CellRelocationException
-     */
-    private Optional<ICell> getCellFromLine(String line) throws CellRelocationException {
-        LOGGER.fine("Processing line: " + line);
+		scanner.close();
+		return map.keySet();
+	}
 
-        // Line format is FilePath\tPosition as x-y
-        // Build a file name based on the current image folder and the stored filename
-        // Note - we don't need the file to exist for the assignment to work
-        Optional<IAnalysisOptions> analysisOptions = dataset.getAnalysisOptions();
-        if(analysisOptions.isPresent()) {
-        	Optional<HashOptions> nucleusOptions = analysisOptions.get()
-        			.getDetectionOptions(CellularComponent.NUCLEUS);
-        	
-        	if(nucleusOptions.isPresent()) {
-        		File currentImageDirectory = new File(nucleusOptions.get().getString(HashOptions.DETECTION_FOLDER));
+	/**
+	 * Given a line from the cell file, return a matching cell from the current
+	 * dataset
+	 * 
+	 * @param line
+	 * @return
+	 * @throws CellRelocationException
+	 */
+	private Optional<ICell> getCellFromLine(String line) throws CellRelocationException {
+		LOGGER.fine("Processing line: " + line);
 
-        		File savedFile = getFile(line);
-        		// Get the image name and substitute the parent dataset path.
-        		savedFile = new File(currentImageDirectory, savedFile.getName());
-        		LOGGER.fine("New path: "+savedFile.getAbsolutePath());
-        		
-        		if(!savedFile.exists()) {
-        			LOGGER.warning("File does not exist: "+savedFile.getAbsolutePath());
-        			return Optional.empty();
-        		}
+		// Line format is FilePath\tPosition as x-y
+		// Build a file name based on the current image folder and the stored filename
+		// Note - we don't need the file to exist for the assignment to work
+		Optional<IAnalysisOptions> analysisOptions = dataset.getAnalysisOptions();
+		if (analysisOptions.isPresent()) {
+			Optional<HashOptions> nucleusOptions = analysisOptions.get()
+					.getDetectionOptions(CellularComponent.NUCLEUS);
 
-        		// get position
-        		IPoint com = getPosition(line);
+			if (nucleusOptions.isPresent()) {
+				File currentImageDirectory = new File(
+						nucleusOptions.get().getString(HashOptions.DETECTION_FOLDER));
 
-        		return copyCellFromRoot(savedFile, com);
-        	} else {
-        		throw new CellRelocationException("No nuclear detection options - cannot check directory path");
-        	}
-        } else {
-        	throw new CellRelocationException("No analysis options - cannot check directory path");
-        }
-    }
+				File savedFile = getFile(line);
+				// Get the image name and substitute the parent dataset path.
+				savedFile = new File(currentImageDirectory, savedFile.getName());
+				LOGGER.fine("New path: " + savedFile.getAbsolutePath());
 
-    /**
-     * Make a new cell based on the cell in the root dataset with the given
-     * location in an image file
-     * 
-     * @param f
-     * @param com
-     * @return
-     */
-    private Optional<ICell> copyCellFromRoot(File f, IPoint com) {
-        // find the nucleus
-        Set<ICell> cells = this.dataset.getCollection().getCells(f);
-        for (ICell c : cells) {
-            for (Nucleus n : c.getNuclei()) {
-                if (n.containsOriginalPoint(com)) {
-                    return Optional.of(c);
-                }
-            }
-        }
-        return Optional.empty();
-    }
+				if (!savedFile.exists()) {
+					LOGGER.warning("File does not exist: " + savedFile.getAbsolutePath());
+					return Optional.empty();
+				}
 
-    private File getFile(String line) {
-        String[] array = line.split(TAB);
-        return new File(array[0]);
-    }
+				// get position
+				IPoint com = getPosition(line);
 
-    private IPoint getPosition(String line) {
-        String[] array = line.split(TAB);
-        String position = array[1];
+				return copyCellFromRoot(savedFile, com);
+			} else {
+				throw new CellRelocationException(
+						"No nuclear detection options - cannot check directory path");
+			}
+		} else {
+			throw new CellRelocationException("No analysis options - cannot check directory path");
+		}
+	}
 
-        String[] posArray = position.split("-");
+	/**
+	 * Make a new cell based on the cell in the root dataset with the given location
+	 * in an image file
+	 * 
+	 * @param f
+	 * @param com
+	 * @return
+	 */
+	private Optional<ICell> copyCellFromRoot(File f, IPoint com) {
+		// find the nucleus
+		Set<ICell> cells = this.dataset.getCollection().getCells(f);
+		for (ICell c : cells) {
+			for (Nucleus n : c.getNuclei()) {
+				if (n.containsOriginalPoint(com)) {
+					return Optional.of(c);
+				}
+			}
+		}
+		return Optional.empty();
+	}
 
-        double x = Double.parseDouble(posArray[0]);
-        double y = Double.parseDouble(posArray[1]);
-        return new FloatPoint(x, y);
-    }
+	private File getFile(String line) {
+		String[] array = line.split(TAB);
+		return new File(array[0]);
+	}
 
-    public class CellRelocationException extends Exception {
-        private static final long serialVersionUID = 1L;
+	private IPoint getPosition(String line) {
+		String[] array = line.split(TAB);
+		String position = array[1];
 
-        public CellRelocationException() {
-            super();
-        }
+		String[] posArray = position.split("-");
 
-        public CellRelocationException(String message) {
-            super(message);
-        }
+		double x = Double.parseDouble(posArray[0]);
+		double y = Double.parseDouble(posArray[1]);
+		return new FloatPoint(x, y);
+	}
 
-        public CellRelocationException(String message, Throwable cause) {
-            super(message, cause);
-        }
+	public class CellRelocationException extends Exception {
+		private static final long serialVersionUID = 1L;
 
-        public CellRelocationException(Throwable cause) {
-            super(cause);
-        }
-    }
+		public CellRelocationException() {
+			super();
+		}
+
+		public CellRelocationException(String message) {
+			super(message);
+		}
+
+		public CellRelocationException(String message, Throwable cause) {
+			super(message, cause);
+		}
+
+		public CellRelocationException(Throwable cause) {
+			super(cause);
+		}
+	}
 
 }

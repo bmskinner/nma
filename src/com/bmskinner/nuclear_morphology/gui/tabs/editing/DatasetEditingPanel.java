@@ -45,6 +45,7 @@ import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
@@ -78,7 +79,8 @@ import com.bmskinner.nuclear_morphology.visualisation.charts.panels.ConsensusNuc
 import com.bmskinner.nuclear_morphology.visualisation.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.visualisation.options.ChartOptionsBuilder;
 
-public class DatasetEditingPanel extends ChartDetailPanel implements ConsensusUpdatedListener, ScaleUpdatedListener,
+public class DatasetEditingPanel extends ChartDetailPanel
+		implements ConsensusUpdatedListener, ScaleUpdatedListener,
 		SwatchUpdatedListener, ProfilesUpdatedListener, ChartMouseListener {
 	private static final Logger LOGGER = Logger.getLogger(DatasetEditingPanel.class.getName());
 
@@ -97,7 +99,8 @@ public class DatasetEditingPanel extends ChartDetailPanel implements ConsensusUp
 
 	private ShapeOverlay lmOverlay = new ShapeOverlay();
 
-	private EllipticalOverlay bOverlay = new EllipticalOverlay(new EllipticalOverlayObject(Double.NaN, 2, Double.NaN, 2,
+	private EllipticalOverlay bOverlay = new EllipticalOverlay(new EllipticalOverlayObject(
+			Double.NaN, 2, Double.NaN, 2,
 			ChartComponents.MARKER_STROKE, Color.decode("#0066CC"), Color.decode("#0066CC")));
 
 	private static final String STR_SEGMENT_PROFILE = "Resegment all cells";
@@ -153,9 +156,11 @@ public class DatasetEditingPanel extends ChartDetailPanel implements ConsensusUp
 						"This will resegment the dataset. Manually updated segments will be lost. Continue?",
 						"Continue?");
 				if (ok) {
-					activeDataset().getCollection().getProfileManager().setLockOnAllNucleusSegments(false);
+					activeDataset().getCollection().getProfileManager()
+							.setLockOnAllNucleusSegments(false);
 					UserActionController.getInstance().userActionEventReceived(
-							new UserActionEvent(this, UserActionEvent.SEGMENTATION_ACTION, List.of(activeDataset())));
+							new UserActionEvent(this, UserActionEvent.SEGMENTATION_ACTION,
+									List.of(activeDataset())));
 				}
 			} catch (RequestCancelledException e1) {
 			}
@@ -193,8 +198,10 @@ public class DatasetEditingPanel extends ChartDetailPanel implements ConsensusUp
 		super.updateSingle();
 
 		ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets())
-				.setScale(GlobalOptions.getInstance().getScale()).setSwatch(GlobalOptions.getInstance().getSwatch())
-				.setShowAnnotations(false).setShowXAxis(false).setShowYAxis(false).setTarget(chartPanel).build();
+				.setScale(GlobalOptions.getInstance().getScale())
+				.setSwatch(GlobalOptions.getInstance().getSwatch())
+				.setShowAnnotations(false).setShowXAxis(false).setShowYAxis(false)
+				.setTarget(chartPanel).build();
 
 		configureButtons(options);
 		setChart(options);
@@ -258,7 +265,8 @@ public class DatasetEditingPanel extends ChartDetailPanel implements ConsensusUp
 
 		// Check if there are any merged segments
 		// If there are no merged segments, don't allow unmerging
-		unmergeButton.setEnabled(medianProfile.getSegments().stream().anyMatch(s -> s.hasMergeSources()));
+		unmergeButton.setEnabled(
+				medianProfile.getSegments().stream().anyMatch(s -> s.hasMergeSources()));
 
 		// set child dataset options
 		if (!options.firstDataset().isRoot()) {
@@ -267,7 +275,8 @@ public class DatasetEditingPanel extends ChartDetailPanel implements ConsensusUp
 			splitButton.setEnabled(false);
 			updatewindowButton.setEnabled(false);
 			windowSizeButton.setEnabled(false);
-			buttonStateLbl.setText("Cannot merge, unmerge pr split child dataset segments - try the root dataset");
+			buttonStateLbl.setText(
+					"Cannot merge, unmerge pr split child dataset segments - try the root dataset");
 		} else {
 			buttonStateLbl.setText("Click a point on the border to update landmarks or segments");
 		}
@@ -293,7 +302,8 @@ public class DatasetEditingPanel extends ChartDetailPanel implements ConsensusUp
 
 		try {
 			ISegmentedProfile medianProfile = activeDataset().getCollection().getProfileCollection()
-					.getSegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE, Stats.MEDIAN);
+					.getSegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE,
+							Stats.MEDIAN);
 
 			List<SegMergeItem> names = new ArrayList<>();
 
@@ -308,11 +318,13 @@ public class DatasetEditingPanel extends ChartDetailPanel implements ConsensusUp
 
 			String[] nameArray = names.stream().map(e -> e.toString()).toArray(String[]::new);
 
-			int mergeOption = getInputSupplier().requestOption(nameArray, "Choose segments to merge", "Merge");
+			int mergeOption = getInputSupplier().requestOption(nameArray,
+					"Choose segments to merge", "Merge");
 			SegMergeItem item = names.get(mergeOption);
 			this.setAnalysing(true);
 			UserActionController.getInstance().segmentMergeEventReceived(
-					new SegmentMergeEvent(this, activeDataset(), item.one.getID(), item.two.getID()));
+					new SegmentMergeEvent(this, activeDataset(), item.one.getID(),
+							item.two.getID()));
 
 		} catch (RequestCancelledException e) {
 			LOGGER.fine("User cancelled segment merge request");
@@ -331,7 +343,8 @@ public class DatasetEditingPanel extends ChartDetailPanel implements ConsensusUp
 
 		try {
 			ISegmentedProfile medianProfile = activeDataset().getCollection().getProfileCollection()
-					.getSegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE, Stats.MEDIAN);
+					.getSegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE,
+							Stats.MEDIAN);
 
 			List<IProfileSegment> names = new ArrayList<>();
 
@@ -342,9 +355,11 @@ public class DatasetEditingPanel extends ChartDetailPanel implements ConsensusUp
 				}
 			}
 			IProfileSegment[] nameArray = names.toArray(new IProfileSegment[0]);
-			String[] options = Arrays.stream(nameArray).map(s -> s.getName()).toArray(String[]::new);
+			String[] options = Arrays.stream(nameArray).map(s -> s.getName())
+					.toArray(String[]::new);
 
-			int option = getInputSupplier().requestOption(options, "Choose merged segment to unmerge",
+			int option = getInputSupplier().requestOption(options,
+					"Choose merged segment to unmerge",
 					"Unmerge segment");
 			this.setAnalysing(true);
 			UserActionController.getInstance().segmentUnmergeEventReceived(
@@ -359,16 +374,21 @@ public class DatasetEditingPanel extends ChartDetailPanel implements ConsensusUp
 	private void splitAction() {
 		try {
 			ISegmentedProfile medianProfile = activeDataset().getCollection().getProfileCollection()
-					.getSegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE, Stats.MEDIAN);
-			IProfileSegment[] nameArray = medianProfile.getSegments().toArray(new IProfileSegment[0]);
+					.getSegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE,
+							Stats.MEDIAN);
+			IProfileSegment[] nameArray = medianProfile.getSegments()
+					.toArray(new IProfileSegment[0]);
 
-			String[] options = Arrays.stream(nameArray).map(IProfileSegment::getName).toArray(String[]::new);
+			String[] options = Arrays.stream(nameArray).map(IProfileSegment::getName)
+					.toArray(String[]::new);
 
-			int option = getInputSupplier().requestOptionAllVisible(options, "Choose segment to split",
+			int option = getInputSupplier().requestOptionAllVisible(options,
+					"Choose segment to split",
 					STR_SPLIT_SEGMENT);
 			this.setAnalysing(true);
 			UserActionController.getInstance()
-					.segmentSplitEventReceived(new SegmentSplitEvent(this, activeDataset(), nameArray[option].getID()));
+					.segmentSplitEventReceived(new SegmentSplitEvent(this, activeDataset(),
+							nameArray[option].getID()));
 		} catch (RequestCancelledException e) {
 			LOGGER.fine("User cancelled segment split request");
 		} catch (MissingLandmarkException | MissingProfileException | ProfileException e1) {
@@ -384,7 +404,8 @@ public class DatasetEditingPanel extends ChartDetailPanel implements ConsensusUp
 			windowSizeActual = op.get().getProfileWindowProportion();
 
 		try {
-			double windowSize = getInputSupplier().requestDouble("Select new window size", windowSizeActual, 0.01, 0.1,
+			double windowSize = getInputSupplier().requestDouble("Select new window size",
+					windowSizeActual, 0.01, 0.1,
 					0.01);
 			this.setAnalysing(true);
 			UserActionController.getInstance().profileWindowProportionUpdateEventReceived(
@@ -475,7 +496,8 @@ public class DatasetEditingPanel extends ChartDetailPanel implements ConsensusUp
 
 			IPoint clicked = new FloatPoint(x, y);
 
-			Optional<IPoint> bp = n.getBorderList().stream().filter(p -> p.getLengthTo(clicked) < range / 50)
+			Optional<IPoint> bp = n.getBorderList().stream()
+					.filter(p -> p.getLengthTo(clicked) < range / 50)
 					.min((p1, p2) -> p1.getLengthTo(clicked) < p2.getLengthTo(clicked) ? -1 : 1);
 
 			if (bp.isPresent()) {
@@ -527,7 +549,8 @@ public class DatasetEditingPanel extends ChartDetailPanel implements ConsensusUp
 			// Convert to the index in the dataset median profile (may have different
 			// length)
 			double fIndex = index / (float) n.getBorderLength();
-			int medianIndex = (int) (activeDataset().getCollection().getMedianArrayLength() * fIndex);
+			int medianIndex = (int) (activeDataset().getCollection().getMedianArrayLength()
+					* fIndex);
 
 			// Get the relevant segments
 			IProfileSegment seg = n.getProfile(ProfileType.ANGLE).getSegmentContaining(rawIndex);
@@ -535,32 +558,39 @@ public class DatasetEditingPanel extends ChartDetailPanel implements ConsensusUp
 			IProfileSegment next = seg.nextSegment();
 
 			JMenuItem prevItem = new JMenuItem("Extend " + prev.getName() + " to here");
-			prevItem.setBorder(BorderFactory.createLineBorder(ColourSelecter.getColor(prev.getPosition()), 3));
+			prevItem.setBorder(
+					BorderFactory.createLineBorder(ColourSelecter.getColor(prev.getPosition()), 3));
 			prevItem.setBorderPainted(true);
 
 			prevItem.addActionListener(e -> {
 				setAnalysing(true);
-				LOGGER.fine(String.format("Updating segment %s start to %d", seg.getID(), medianIndex));
+				LOGGER.fine(
+						String.format("Updating segment %s start to %d", seg.getID(), medianIndex));
 				UserActionController.getInstance().segmentStartIndexUpdateEventReceived(
-						new SegmentStartIndexUpdateEvent(this, activeDataset(), seg.getID(), medianIndex));
+						new SegmentStartIndexUpdateEvent(this, activeDataset(), seg.getID(),
+								medianIndex));
 			});
 			popupMenu.add(prevItem);
 
 			popupMenu.add(Box.createVerticalStrut(2)); // stop borders touching
 
 			JMenuItem nextItem = new JMenuItem("Extend " + next.getName() + " to here");
-			nextItem.setBorder(BorderFactory.createLineBorder(ColourSelecter.getColor(next.getPosition()), 2));
+			nextItem.setBorder(
+					BorderFactory.createLineBorder(ColourSelecter.getColor(next.getPosition()), 2));
 			nextItem.setBorderPainted(true);
 
 			nextItem.addActionListener(e -> {
-				LOGGER.fine(String.format("Updating segment %s start to %d", next.getID(), medianIndex));
+				LOGGER.fine(String.format("Updating segment %s start to %d", next.getID(),
+						medianIndex));
 				setAnalysing(true);
 				UserActionController.getInstance().segmentStartIndexUpdateEventReceived(
-						new SegmentStartIndexUpdateEvent(this, activeDataset(), next.getID(), medianIndex));
+						new SegmentStartIndexUpdateEvent(this, activeDataset(), next.getID(),
+								medianIndex));
 
 			});
 			popupMenu.add(nextItem);
-		} catch (MissingProfileException | MissingLandmarkException | ProfileException | ComponentCreationException e) {
+		} catch (MissingProfileException | MissingLandmarkException | ProfileException
+				| ComponentCreationException e) {
 			LOGGER.log(Loggable.STACK, "Cannot create segment popup", e);
 		}
 	}
@@ -584,19 +614,27 @@ public class DatasetEditingPanel extends ChartDetailPanel implements ConsensusUp
 			// Convert to the index in the dataset median profile (may have different
 			// length)
 			double fIndex = index / (float) n.getBorderLength();
-			int medianIndex = (int) (activeDataset().getCollection().getMedianArrayLength() * fIndex);
+			int medianIndex = (int) (activeDataset().getCollection().getMedianArrayLength()
+					* fIndex);
 
-			List<OrientationMark> tags = activeDataset().getCollection().getProfileCollection().getOrientationMarks();
+			List<Landmark> tags = activeDataset().getCollection().getProfileCollection()
+					.getLandmarks();
+
+			List<OrientationMark> marks = activeDataset().getCollection().getProfileCollection()
+					.getOrientationMarks();
 
 			Collections.sort(tags);
+			Landmark rp = activeDataset().getCollection().getProfileCollection()
+					.getLandmark(OrientationMark.REFERENCE);
 
-			for (OrientationMark tag : tags) {
-				if (OrientationMark.REFERENCE.equals(tag))
+			for (Landmark tag : tags) {
+				if (rp.equals(tag))
 					continue;
+
 				// Colour the menu item by tag colour
 				JMenuItem item = new JMenuItem("Move " + tag.toString().toLowerCase() + " here");
-				item.setBorder(BorderFactory.createLineBorder(ColourSelecter.getColour(tag), 2));
-				item.setBackground(ColourSelecter.getColour(tag).darker());
+//				item.setBorder(BorderFactory.createLineBorder(ColourSelecter.getColour(tag), 2));
+				item.setBackground(Color.DARK_GRAY);
 				item.setBorderPainted(true);
 				item.setForeground(Color.WHITE);
 				item.setOpaque(true);
@@ -648,7 +686,8 @@ public class DatasetEditingPanel extends ChartDetailPanel implements ConsensusUp
 
 			IPoint clicked = new FloatPoint(x, y);
 
-			Optional<IPoint> bp = n.getBorderList().stream().filter(p -> p.getLengthTo(clicked) < range / 50)
+			Optional<IPoint> bp = n.getBorderList().stream()
+					.filter(p -> p.getLengthTo(clicked) < range / 50)
 					.min((p1, p2) -> p1.getLengthTo(clicked) < p2.getLengthTo(clicked) ? -1 : 1);
 
 			if (bp.isPresent()) {
@@ -693,9 +732,10 @@ public class DatasetEditingPanel extends ChartDetailPanel implements ConsensusUp
 			lmOverlay.clearShapes();
 			for (OrientationMark lm : n.getOrientationMarks()) {
 				IPoint lmPoint = n.getBorderPoint(lm);
+				Landmark l = n.getLandmark(lm);
 
 				if (clicked.getLengthTo(lmPoint) < distanceLimit) {
-					changeLandmarkOverlay(lm.toString(), lmPoint.getX(), lmPoint.getY(), textSize);
+					changeLandmarkOverlay(l.toString(), lmPoint.getX(), lmPoint.getY(), textSize);
 				}
 			}
 		} catch (Exception e) {
@@ -716,13 +756,15 @@ public class DatasetEditingPanel extends ChartDetailPanel implements ConsensusUp
 
 		AffineTransform txt = new AffineTransform();
 
-		txt.concatenate(AffineTransform.getTranslateInstance(x + layout.getBounds().getWidth() / 1.5, y));
+		txt.concatenate(
+				AffineTransform.getTranslateInstance(x + layout.getBounds().getWidth() / 1.5, y));
 		txt.concatenate(AffineTransform.getScaleInstance(1, -1));
 		txt.concatenate(AffineTransform.getTranslateInstance(-layout.getBounds().getCenterX(),
 				-layout.getBounds().getCenterY()));
 
 		lmOverlay.addShape(
-				new ShapeOverlayObject(layout.getOutline(txt), new BasicStroke(0), Color.DARK_GRAY, Color.DARK_GRAY));
+				new ShapeOverlayObject(layout.getOutline(txt), new BasicStroke(0), Color.DARK_GRAY,
+						Color.DARK_GRAY));
 
 	}
 

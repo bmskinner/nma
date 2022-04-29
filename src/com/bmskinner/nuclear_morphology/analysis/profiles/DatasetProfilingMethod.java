@@ -37,6 +37,7 @@ import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
+import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
@@ -79,7 +80,8 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 
 		if (!dv.validate(dataset))
 			throw new AnalysisMethodException(
-					"Unable to validate dataset after profiling: " + dv.getSummary() + "\n" + dv.getErrors());
+					"Unable to validate dataset after profiling: " + dv.getSummary() + "\n"
+							+ dv.getErrors());
 		return new DefaultAnalysisResult(dataset);
 	}
 
@@ -101,11 +103,13 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 	 */
 	private void run() throws Exception {
 		if (!dataset.hasAnalysisOptions()) {
-			LOGGER.warning("Unable to run profiling method, no analysis options in dataset " + dataset.getName());
+			LOGGER.warning("Unable to run profiling method, no analysis options in dataset "
+					+ dataset.getName());
 			return;
 		}
 
-		RuleApplicationType ruleType = dataset.getAnalysisOptions().get().getRuleSetCollection().getApplicationType();
+		RuleApplicationType ruleType = dataset.getAnalysisOptions().get().getRuleSetCollection()
+				.getApplicationType();
 
 		if (RuleApplicationType.VIA_MEDIAN.equals(ruleType))
 			runViaMedian();
@@ -121,20 +125,25 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 	 * 
 	 * @throws Exception
 	 */
-	private void runPerNucleus() throws ProfileException, MissingProfileException, MissingLandmarkException {
+	private void runPerNucleus()
+			throws ProfileException, MissingProfileException, MissingLandmarkException {
 		ICellCollection collection = dataset.getCollection();
 
 		collection.getProfileCollection().calculateProfiles();
 
 		// Reference points are assigned in each nucleus on creation
 		// Create a median from the current reference points in the nuclei
-		collection.getProfileCollection().getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE, Stats.MEDIAN);
+		collection.getProfileCollection().getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE,
+				Stats.MEDIAN);
 
 		// For each tag in the dataset ruleset collection, identify the tag in nuclei
-		Set<OrientationMark> tags = collection.getRuleSetCollection().getOrientionMarks();
+		Set<Landmark> tags = collection.getRuleSetCollection().getLandmarks();
 
-		for (OrientationMark t : tags) {
-			if (OrientationMark.REFERENCE.equals(t)) // Already set
+		Landmark rp = collection.getRuleSetCollection().getLandmark(OrientationMark.REFERENCE)
+				.orElseThrow(MissingLandmarkException::new);
+
+		for (Landmark t : tags) {
+			if (rp.equals(t)) // Already set
 				continue;
 			List<RuleSet> ruleSets = collection.getRuleSetCollection().getRuleSets(t);
 			for (Nucleus n : collection.getNuclei()) {
@@ -142,16 +151,19 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 				try {
 					index = ProfileIndexFinder.identifyIndex(n, ruleSets);
 				} catch (NoDetectedIndexException e) {
-					LOGGER.fine("Cannot identify " + t + " in nucleus " + n.getNucleusNumber() + ", using index 0");
+					LOGGER.fine("Cannot identify " + t + " in nucleus " + n.getNucleusNumber()
+							+ ", using index 0");
 					// Fall back to zero index, correct manually
 				}
 				if (!n.isLocked()) {
 					n.setLandmark(t, index);
 				} else {
-					LOGGER.fine("Nucleus " + n.getNameAndNumber() + " is locked, not changing " + t);
+					LOGGER.fine(
+							"Nucleus " + n.getNameAndNumber() + " is locked, not changing " + t);
 				}
 
-				for (Measurement m : dataset.getAnalysisOptions().get().getRuleSetCollection().getMeasurableValues()) {
+				for (Measurement m : dataset.getAnalysisOptions().get().getRuleSetCollection()
+						.getMeasurableValues()) {
 					n.setMeasurement(m, ComponentMeasurer.calculate(m, n));
 				}
 			}
@@ -177,7 +189,8 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 
 		if (!dv.validate(dataset))
 			throw new ProfileException(
-					"Dataset does not validate before finding RP: " + dv.getSummary() + dv.getErrors());
+					"Dataset does not validate before finding RP: " + dv.getSummary()
+							+ dv.getErrors());
 
 		// Find and update the RP
 		identifyRP(collection);
@@ -189,7 +202,8 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 		// in each nucleus since some measurements use the landmarks
 		// for orientation
 		for (Nucleus n : dataset.getCollection().getNuclei()) {
-			for (Measurement m : dataset.getAnalysisOptions().get().getRuleSetCollection().getMeasurableValues()) {
+			for (Measurement m : dataset.getAnalysisOptions().get().getRuleSetCollection()
+					.getMeasurableValues()) {
 				n.setMeasurement(m, ComponentMeasurer.calculate(m, n));
 			}
 		}
@@ -197,7 +211,8 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 		// Clear all calculated median values in the collection and
 		// recalculate. This ensures any values dependent on landmarks
 		// (e.g. bounding dimensions) are correct
-		for (Measurement m : dataset.getAnalysisOptions().get().getRuleSetCollection().getMeasurableValues()) {
+		for (Measurement m : dataset.getAnalysisOptions().get().getRuleSetCollection()
+				.getMeasurableValues()) {
 			collection.clear(m, CellularComponent.NUCLEUS);
 			// Force recalculation
 			collection.getMedian(m, CellularComponent.NUCLEUS, MeasurementScale.PIXELS);
@@ -217,19 +232,24 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 	 * @throws IndexOutOfBoundsException
 	 */
 	private synchronized void identifyRP(@NonNull ICellCollection collection)
-			throws MissingLandmarkException, MissingProfileException, ProfileException, NoDetectedIndexException,
+			throws MissingLandmarkException, MissingProfileException, ProfileException,
+			NoDetectedIndexException,
 			IndexOutOfBoundsException, ComponentCreationException {
 		// Build the profile collection based on the current RP
 		// positions in each nucleus
 		collection.getProfileCollection().calculateProfiles();
 
 		// Create a median from the current reference points in the nuclei
-		IProfile median = collection.getProfileCollection().getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE,
+		IProfile median = collection.getProfileCollection().getProfile(ProfileType.ANGLE,
+				OrientationMark.REFERENCE,
 				Stats.MEDIAN);
+
+		Landmark rp = collection.getRuleSetCollection().getLandmark(OrientationMark.REFERENCE)
+				.orElseThrow(MissingLandmarkException::new);
 
 		// RP index *should be* zero in the median profile at this point
 		// Check this before updating nuclei
-		int rpIndex = ProfileIndexFinder.identifyIndex(collection, OrientationMark.REFERENCE);
+		int rpIndex = ProfileIndexFinder.identifyIndex(collection, rp);
 
 		// Offset the median profile to place the RP at zero
 		// This does not affect the actual median profile
@@ -237,7 +257,8 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 
 		// Using the template we created, update the position of the RP
 		// in each nucleus.
-		collection.getProfileManager().updateLandmarkToMedianBestFit(OrientationMark.REFERENCE, ProfileType.ANGLE,
+		collection.getProfileManager().updateLandmarkToMedianBestFit(rp,
+				ProfileType.ANGLE,
 				templateProfile);
 
 		// Regenerate the profile aggregates based on the new RP positions
@@ -245,7 +266,7 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 		collection.getProfileCollection().calculateProfiles();
 
 		// Test if the recalculated profile aggregate naturally puts the RP at zero
-		rpIndex = ProfileIndexFinder.identifyIndex(collection, OrientationMark.REFERENCE);
+		rpIndex = ProfileIndexFinder.identifyIndex(collection, rp);
 
 		int coercionCounter = 0;
 		while (rpIndex != 0 && coercionCounter++ < MAX_COERCION_ATTEMPTS) {
@@ -259,7 +280,8 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 
 		if (!dv.validate(dataset))
 			throw new ProfileException(
-					"Dataset does not validate after finding RP: " + dv.getSummary() + dv.getErrors());
+					"Dataset does not validate after finding RP: " + dv.getSummary()
+							+ dv.getErrors());
 	}
 
 	/**
@@ -275,16 +297,21 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 	 * @throws IndexOutOfBoundsException
 	 */
 	private synchronized void identifyOtherLandmarks(ICellCollection collection)
-			throws MissingLandmarkException, MissingProfileException, ProfileException, NoDetectedIndexException,
+			throws MissingLandmarkException, MissingProfileException, ProfileException,
+			NoDetectedIndexException,
 			IndexOutOfBoundsException, ComponentCreationException {
 		// Identify the border tags in the median profile
 
 		// Which landmarks do we care about? Those defined in the dataset options.
-		Set<OrientationMark> lms = dataset.getAnalysisOptions().get().getRuleSetCollection().getOrientionMarks();
+		Set<Landmark> lms = dataset.getAnalysisOptions().get().getRuleSetCollection()
+				.getLandmarks();
 
-		for (OrientationMark om : lms) {
+		Landmark rp = collection.getRuleSetCollection().getLandmark(OrientationMark.REFERENCE)
+				.orElseThrow(MissingLandmarkException::new);
+
+		for (Landmark om : lms) {
 			// Don't identify the RP again
-			if (OrientationMark.REFERENCE.equals(om))
+			if (rp.equals(om))
 				continue;
 
 			int index = ProfileIndexFinder.identifyIndex(collection, om);
@@ -293,10 +320,12 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 			collection.getProfileManager().updateLandmarkInProfileCollection(om, index);
 
 			// Create a median from the current landmark
-			IProfile lmMedian = collection.getProfileCollection().getProfile(ProfileType.ANGLE, om, Stats.MEDIAN);
+			IProfile lmMedian = collection.getProfileCollection().getProfile(ProfileType.ANGLE, om,
+					Stats.MEDIAN);
 
 			// Find the best position for the landmark in each nucleus
-			collection.getProfileManager().updateLandmarkToMedianBestFit(om, ProfileType.ANGLE, lmMedian);
+			collection.getProfileManager().updateLandmarkToMedianBestFit(om, ProfileType.ANGLE,
+					lmMedian);
 		}
 	}
 
@@ -312,22 +341,29 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 	 * @throws ComponentCreationException
 	 * @throws IndexOutOfBoundsException
 	 */
-	private int coerceRPToZero(ICellCollection collection) throws NoDetectedIndexException, MissingLandmarkException,
-			MissingProfileException, ProfileException, IndexOutOfBoundsException, ComponentCreationException {
+	private int coerceRPToZero(ICellCollection collection)
+			throws NoDetectedIndexException, MissingLandmarkException,
+			MissingProfileException, ProfileException, IndexOutOfBoundsException,
+			ComponentCreationException {
+
+		Landmark rp = collection.getRuleSetCollection().getLandmark(OrientationMark.REFERENCE)
+				.orElseThrow(MissingLandmarkException::new);
 
 		// check the RP index in the median
-		int rpIndex = ProfileIndexFinder.identifyIndex(collection, OrientationMark.REFERENCE);
+		int rpIndex = ProfileIndexFinder.identifyIndex(collection, rp);
 
 		// If RP is not at zero, update
 		if (rpIndex != 0) {
-			IProfile median = collection.getProfileCollection().getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE,
+			IProfile median = collection.getProfileCollection().getProfile(ProfileType.ANGLE,
+					OrientationMark.REFERENCE,
 					Stats.MEDIAN);
 
 			// Get the median offset to the better start index
 			IProfile templateProfile = median.startFrom(rpIndex);
 
 			// Update the offsets in the profile collection to the new RP
-			collection.getProfileManager().updateLandmarkToMedianBestFit(OrientationMark.REFERENCE, ProfileType.ANGLE,
+			collection.getProfileManager().updateLandmarkToMedianBestFit(rp,
+					ProfileType.ANGLE,
 					templateProfile);
 
 			// At this stage we don't need to preserve the profile collection
@@ -336,7 +372,7 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 
 			// Find the effects of the offsets on the RP
 			// It should be found at zero
-			rpIndex = ProfileIndexFinder.identifyIndex(collection, OrientationMark.REFERENCE);
+			rpIndex = ProfileIndexFinder.identifyIndex(collection, rp);
 		}
 
 		return rpIndex;

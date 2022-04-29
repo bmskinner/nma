@@ -40,7 +40,8 @@ public interface IProfileCollection extends XmlSerializable {
 	 * If a profile is created without segments, this is the ID of the default
 	 * segment spanning the entire profile.
 	 */
-	static final @NonNull UUID DEFAULT_SEGMENT_ID = UUID.fromString("11111111-2222-3333-4444-555566667777");
+	static final @NonNull UUID DEFAULT_SEGMENT_ID = UUID
+			.fromString("11111111-2222-3333-4444-555566667777");
 
 	/**
 	 * Create a copy of the collection
@@ -57,7 +58,8 @@ public interface IProfileCollection extends XmlSerializable {
 	 * @throws MissingProfileException
 	 * @throws MissingLandmarkException
 	 */
-	void calculateProfiles() throws MissingLandmarkException, MissingProfileException, ProfileException;
+	void calculateProfiles()
+			throws MissingLandmarkException, MissingProfileException, ProfileException;
 
 	/**
 	 * Get the index of the landmark in the profile, zeroed on the reference point
@@ -67,6 +69,15 @@ public interface IProfileCollection extends XmlSerializable {
 	 * @throws MissingLandmarkException if the landmark is not present
 	 */
 	int getLandmarkIndex(@NonNull OrientationMark landmark) throws MissingLandmarkException;
+
+	/**
+	 * Get the index of the landmark in the profile, zeroed on the reference point
+	 * 
+	 * @param landmark the landmark to find
+	 * @return the index of the landmark
+	 * @throws MissingLandmarkException if the landmark is not present
+	 */
+	int getLandmarkIndex(@NonNull Landmark lm) throws MissingLandmarkException;
 
 	/**
 	 * Get the proportion of the index along the profile, zeroed on the reference
@@ -88,6 +99,16 @@ public interface IProfileCollection extends XmlSerializable {
 	double getProportionOfIndex(@NonNull OrientationMark landmark) throws MissingLandmarkException;
 
 	/**
+	 * Get the proportion of the landmark along the profile, zeroed on the reference
+	 * point
+	 * 
+	 * @param landmark the landmark to find
+	 * @return the proportion of the landmark along the profile, from 0-1
+	 * @throws MissingLandmarkException if the landmark is not present
+	 */
+	double getProportionOfIndex(@NonNull Landmark landmark) throws MissingLandmarkException;
+
+	/**
 	 * Get the index closest to the given proportion along the profile
 	 * 
 	 * @param proportion the proportion along the profile from 0-1
@@ -95,7 +116,12 @@ public interface IProfileCollection extends XmlSerializable {
 	 */
 	int getIndexOfProportion(double proportion);
 
-//	List<Landmark> getLandmarks();
+	/**
+	 * Get all the landmarks attached to this profile collection
+	 * 
+	 * @return
+	 */
+	List<Landmark> getLandmarks();
 
 	/**
 	 * Get all the orientation marks attached to this profile collection
@@ -111,6 +137,14 @@ public interface IProfileCollection extends XmlSerializable {
 	 * @return
 	 */
 	boolean hasLandmark(@NonNull OrientationMark landmark);
+
+	/**
+	 * Get the landmark corresponding to the given orientation mark
+	 * 
+	 * @param om
+	 * @return
+	 */
+	Landmark getLandmark(@NonNull OrientationMark om);
 
 //	/**
 //	 * Get or calculate the requested profile.
@@ -136,6 +170,19 @@ public interface IProfileCollection extends XmlSerializable {
 	 * @throws ProfileException
 	 */
 	IProfile getProfile(@NonNull ProfileType type, @NonNull OrientationMark landmark, int quartile)
+			throws MissingLandmarkException, ProfileException, MissingProfileException;
+
+	/**
+	 * Get or calculate the requested profile.
+	 * 
+	 * @param type     the type of profile to fetch
+	 * @param landmark the landmark to use as index zero
+	 * @param quartile the collection quartile to return (0-100)
+	 * @return the quartile profile from the given landmark
+	 * @throws MissingLandmarkException when the landmark is not present
+	 * @throws ProfileException
+	 */
+	IProfile getProfile(@NonNull ProfileType type, @NonNull Landmark landmark, int quartile)
 			throws MissingLandmarkException, ProfileException, MissingProfileException;
 
 	/**
@@ -165,7 +212,8 @@ public interface IProfileCollection extends XmlSerializable {
 	 * @throws UnsegmentedProfileException when no segments are available for the
 	 *                                     profile
 	 */
-	ISegmentedProfile getSegmentedProfile(@NonNull ProfileType type, @NonNull OrientationMark landmark, int quartile)
+	ISegmentedProfile getSegmentedProfile(@NonNull ProfileType type,
+			@NonNull OrientationMark landmark, int quartile)
 			throws MissingLandmarkException, ProfileException, MissingProfileException;
 
 	/**
@@ -231,7 +279,7 @@ public interface IProfileCollection extends XmlSerializable {
 	 * @param lm       the landmark to set - RP will have no effect
 	 * @param newIndex the index of the landmark in the profile from RP
 	 */
-	void setLandmark(@NonNull OrientationMark lm, int newIndex);
+	void setLandmark(@NonNull Landmark lm, int newIndex);
 
 	/**
 	 * Set the segments in the profile collection to the given list, where the
@@ -242,4 +290,5 @@ public interface IProfileCollection extends XmlSerializable {
 	 * @throws MissingLandmarkException
 	 */
 	void setSegments(@NonNull List<IProfileSegment> segments) throws MissingLandmarkException;
+
 }
