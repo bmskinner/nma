@@ -18,6 +18,7 @@ package com.bmskinner.nuclear_morphology.gui.actions;
 
 import java.io.File;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -63,7 +64,7 @@ public class ImportDatasetAction extends VoidResultAction {
 	 * @param mw the main window to which a progress bar will be attached
 	 */
 	public ImportDatasetAction(@NonNull final ProgressBarAcceptor acceptor) {
-		this(acceptor, null);
+		this(acceptor, null, null);
 	}
 
 	/**
@@ -73,8 +74,11 @@ public class ImportDatasetAction extends VoidResultAction {
 	 * @param mw   the main window to which a progress bar will be attached
 	 * @param file the dataset file to open
 	 */
-	public ImportDatasetAction(@NonNull final ProgressBarAcceptor acceptor, @Nullable File file) {
+	public ImportDatasetAction(@NonNull final ProgressBarAcceptor acceptor, @Nullable File file,
+			@Nullable CountDownLatch latch) {
 		super(PROGRESS_BAR_LABEL, acceptor);
+		if (latch != null)
+			setLatch(latch);
 		this.file = file == null ? selectFile() : file;
 	}
 
@@ -93,7 +97,8 @@ public class ImportDatasetAction extends VoidResultAction {
 						try {
 
 							if (this.get() != null) {
-								firePropertyChange(FINISHED_MSG, getProgress(), IAnalysisWorker.FINISHED);
+								firePropertyChange(FINISHED_MSG, getProgress(),
+										IAnalysisWorker.FINISHED);
 
 							} else {
 								firePropertyChange(ERROR_MSG, getProgress(), IAnalysisWorker.ERROR);
@@ -109,7 +114,8 @@ public class ImportDatasetAction extends VoidResultAction {
 						} catch (ExecutionException e) {
 
 							if (e.getCause() instanceof UnsupportedVersionException) {
-								firePropertyChange(FINISHED_MSG, getProgress(), IAnalysisWorker.FINISHED);
+								firePropertyChange(FINISHED_MSG, getProgress(),
+										IAnalysisWorker.FINISHED);
 								return;
 							}
 
@@ -176,28 +182,34 @@ public class ImportDatasetAction extends VoidResultAction {
 
 	@Override
 	public void finished() {
+
 		setProgressBarVisible(false);
-		IAnalysisDataset dataset;
 		try {
 
 			IAnalysisResult r = worker.get();
 
-			dataset = r.getFirstDataset();
+			IAnalysisDataset dataset = r.getFirstDataset();
 
 			// Save newly converted datasets
 			if (r.getBoolean(DatasetImportMethod.WAS_CONVERTED_BOOL)) {
 				UserActionController.getInstance()
-						.userActionEventReceived(new UserActionEvent(this, UserActionEvent.SAVE, List.of(dataset)));
+						.userActionEventReceived(
+								new UserActionEvent(this, UserActionEvent.SAVE, List.of(dataset)));
 			}
 
+			LOGGER.fine("Opened dataset: " + dataset.getName());
+
+			UIController.getInstance().fireDatasetAdded(dataset);
+
 		} catch (InterruptedException e) {
-			LOGGER.warning("Unable to open file '" + file.getAbsolutePath() + "': " + e.getMessage());
-			return;
+			LOGGER.warning(
+					"Unable to open file '" + file.getAbsolutePath() + "': " + e.getMessage());
 		} catch (ExecutionException e) {
 			if (e.getCause()instanceof UnsupportedVersionException e2) {
 				if (e2.getDetectedVersion() != null) {
-					LOGGER.warning(file.getName() + " was created in version " + e2.getDetectedVersion()
-							+ " which is too old to open");
+					LOGGER.warning(
+							file.getName() + " was created in version " + e2.getDetectedVersion()
+									+ " which is too old to open");
 				} else {
 					LOGGER.warning(file.getName()
 							+ " was created in an older version of the software which is no longer supported");
@@ -206,12 +218,12 @@ public class ImportDatasetAction extends VoidResultAction {
 			}
 
 			LOGGER.warning("Unable to open '" + file.getAbsolutePath() + "': " + e.getMessage());
-			return;
+		} finally {
+			if (getLatch().isPresent())
+				getLatch().get().countDown();
+			super.finished();
 		}
-		LOGGER.fine("Opened dataset: " + dataset.getName());
 
-		UIController.getInstance().fireDatasetAdded(dataset);
-		super.finished();
 	}
 
 }

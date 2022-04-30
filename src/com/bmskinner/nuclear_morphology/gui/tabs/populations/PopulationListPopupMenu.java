@@ -25,7 +25,6 @@ import org.eclipse.jdt.annotation.Nullable;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.IClusterGroup;
 import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace;
-import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace.BioSample;
 import com.bmskinner.nuclear_morphology.core.DatasetListManager;
 import com.bmskinner.nuclear_morphology.gui.AbstractPopupMenu;
 import com.bmskinner.nuclear_morphology.gui.ContextEnabled;
@@ -63,24 +62,28 @@ public class PopulationListPopupMenu extends AbstractPopupMenu {
 	public void createButtons() {
 
 		MenuFactory fact = new MenuFactory();
-		saveMenuItem = fact.makeItem(Labels.Populations.SAVE_AS_LBL, UserActionEvent.SAVE_SELECTED_DATASET,
+		saveMenuItem = fact.makeItem(Labels.Populations.SAVE_AS_LBL,
+				UserActionEvent.SAVE_SELECTED_DATASET,
 				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_SINGLE_OBJECT);
 
-		moveUpMenuItem = fact.makeItem(Labels.Populations.MOVE_UP_LBL, UserActionEvent.MOVE_DATASET_UP_ACTION,
+		moveUpMenuItem = fact.makeItem(Labels.Populations.MOVE_UP_LBL,
+				UserActionEvent.MOVE_DATASET_UP_ACTION,
 				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_CHILD_DATASET
 						| ContextEnabled.ACTIVE_ON_SINGLE_OBJECT);
-		moveDownMenuItem = fact.makeItem(Labels.Populations.MOVE_DOWN_LBL, UserActionEvent.MOVE_DATASET_DOWN_ACTION,
+		moveDownMenuItem = fact.makeItem(Labels.Populations.MOVE_DOWN_LBL,
+				UserActionEvent.MOVE_DATASET_DOWN_ACTION,
 				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_CHILD_DATASET
 						| ContextEnabled.ACTIVE_ON_SINGLE_OBJECT);
 
 		workspaceSubMenu = fact.makeMenu(Labels.Populations.ADD_TO_WORKSPACE_LBL,
 				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_CHILD_DATASET
-						| ContextEnabled.ACTIVE_ON_SINGLE_OBJECT | ContextEnabled.ACTIVE_ON_MULTI_OBJECTS);
+						| ContextEnabled.ACTIVE_ON_SINGLE_OBJECT
+						| ContextEnabled.ACTIVE_ON_MULTI_OBJECTS);
 
 		createWorkspaceMenu(null);
 		biosampleSubMenu = fact.makeMenu(Labels.Populations.ADD_TO_BIOSAMPLE_LBL,
 				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_SINGLE_OBJECT);
-		createBiosampleMenu(null);
+//		createBiosampleMenu(null);
 
 //		mergeMenuItem = fact.makeItem(Labels.Populations.MERGE_LBL, UserActionEvent.MERGE_DATASETS_ACTION,
 //				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_CHILD_DATASET
@@ -149,40 +152,42 @@ public class PopulationListPopupMenu extends AbstractPopupMenu {
 		MenuFactory fact = new MenuFactory();
 		List<IWorkspace> workspaces = DatasetListManager.getInstance().getWorkspaces();
 		for (IWorkspace w : workspaces) {
-			String name = w.has(d) ? Labels.Populations.REMOVE_FROM_LBL_PREFIX : Labels.Populations.ADD_TO_LBL_PREFIX;
+			String name = w.has(d) ? Labels.Populations.REMOVE_FROM_LBL_PREFIX
+					: Labels.Populations.ADD_TO_LBL_PREFIX;
 			String action = w.has(d) ? UserActionEvent.REMOVE_FROM_WORKSPACE_PREFIX
-					: UserActionEvent.ADD_TO_WORKSPACE_PREFIX;
+					: UserActionEvent.ADD_TO_WORKSPACE;
 			workspaceSubMenu.add(fact.makeItem(name + w.getName(), action + w.getName(),
 					ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_CHILD_DATASET
-							| ContextEnabled.ACTIVE_ON_SINGLE_OBJECT | ContextEnabled.ACTIVE_ON_MULTI_OBJECTS));
+							| ContextEnabled.ACTIVE_ON_SINGLE_OBJECT
+							| ContextEnabled.ACTIVE_ON_MULTI_OBJECTS));
 		}
 	}
 
-	private void createBiosampleMenu(@Nullable IAnalysisDataset d) {
-		if (d == null || !DatasetListManager.getInstance().isInWorkspace(d)) {
-			biosampleSubMenu.setEnabled(false);
-			return;
-		}
-
-		List<IWorkspace> workspaces = DatasetListManager.getInstance().getWorkspaces(d);
-
-		MenuFactory fact = new MenuFactory();
-
-		biosampleSubMenu.add(fact.makeItem(Labels.Populations.ADD_TO_NEW_LBL, UserActionEvent.NEW_BIOSAMPLE_PREFIX,
-				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_SINGLE_OBJECT));
-		biosampleSubMenu.addSeparator();
-
-		for (IWorkspace w : workspaces) {
-			for (BioSample bs : w.getBioSamples()) {
-				String name = bs.hasDataset(d.getSavePath()) ? Labels.Populations.REMOVE_FROM_LBL_PREFIX
-						: Labels.Populations.ADD_TO_LBL_PREFIX;
-				String action = bs.hasDataset(d.getSavePath()) ? UserActionEvent.REMOVE_FROM_BIOSAMPLE_PREFIX
-						: UserActionEvent.ADD_TO_BIOSAMPLE_PREFIX;
-				biosampleSubMenu.add(fact.makeItem(name + bs.getName(), action + bs.getName(),
-						ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_SINGLE_OBJECT));
-			}
-		}
-	}
+//	private void createBiosampleMenu(@Nullable IAnalysisDataset d) {
+//		if (d == null || !DatasetListManager.getInstance().isInWorkspace(d)) {
+//			biosampleSubMenu.setEnabled(false);
+//			return;
+//		}
+//
+//		List<IWorkspace> workspaces = DatasetListManager.getInstance().getWorkspaces(d);
+//
+//		MenuFactory fact = new MenuFactory();
+//
+//		biosampleSubMenu.add(fact.makeItem(Labels.Populations.ADD_TO_NEW_LBL, UserActionEvent.NEW_BIOSAMPLE_PREFIX,
+//				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_SINGLE_OBJECT));
+//		biosampleSubMenu.addSeparator();
+//
+//		for (IWorkspace w : workspaces) {
+//			for (BioSample bs : w.getBioSamples()) {
+//				String name = bs.hasDataset(d.getSavePath()) ? Labels.Populations.REMOVE_FROM_LBL_PREFIX
+//						: Labels.Populations.ADD_TO_LBL_PREFIX;
+//				String action = bs.hasDataset(d.getSavePath()) ? UserActionEvent.REMOVE_FROM_BIOSAMPLE_PREFIX
+//						: UserActionEvent.ADD_TO_BIOSAMPLE_PREFIX;
+//				biosampleSubMenu.add(fact.makeItem(name + bs.getName(), action + bs.getName(),
+//						ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_SINGLE_OBJECT));
+//			}
+//		}
+//	}
 
 	/**
 	 * Tell the menu items to update their state based on the selected items
@@ -214,7 +219,7 @@ public class PopulationListPopupMenu extends AbstractPopupMenu {
 		createWorkspaceMenu(d);
 
 		biosampleSubMenu.removeAll();
-		createBiosampleMenu(d);
+//		createBiosampleMenu(d);
 
 //		setAddNuclearSignalEnabled(d.isRoot());
 //		setFishRemappingEnabled(d.isRoot());

@@ -18,15 +18,16 @@ package com.bmskinner.nuclear_morphology.io;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
-import org.jdom2.Attribute;
 import org.jdom2.Document;
 import org.jdom2.Element;
 
 import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace;
-import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace.BioSample;
+import com.bmskinner.nuclear_morphology.core.DatasetListManager;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Saves a workspace to a *.wrk file
@@ -36,60 +37,45 @@ import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace.BioSamp
  *
  */
 public class WorkspaceExporter extends XMLWriter implements Io {
-	
+
 	private static final Logger LOGGER = Logger.getLogger(WorkspaceExporter.class.getName());
 
 	public static void exportWorkspace(@NonNull final IWorkspace w) {
 
-        File exportFile = w.getSaveFile();
-        if(exportFile==null)
-        	return;
-        if (exportFile.exists())
-            exportFile.delete();
-        
-        try {
-            //root element
-            Element rootElement = new Element(IWorkspace.WORKSPACE_ELEMENT);
-            
-            Element workspaceName = new Element(IWorkspace.WORKSPACE_NAME);
-            workspaceName.setText(w.getName());
-            rootElement.addContent(workspaceName);
-            
-            // Add datasets
-            Element datasetsElement = new Element(IWorkspace.DATASETS_ELEMENT);
-            for(File f : w.getFiles()) {
-            	Element dataset = new Element("dataset");
-            	Element datasetPath = new Element(IWorkspace.DATASET_PATH);
+		try {
 
-            	datasetPath.setText(f.getAbsolutePath());
-            	dataset.addContent(datasetPath);
-            	datasetsElement.addContent(dataset);
-            }
-            rootElement.addContent(datasetsElement);
-            
-            // Add biosamples
-            Element biosamplesElement = new Element(IWorkspace.BIOSAMPLES_ELEMENT);
-            for(BioSample b : w.getBioSamples()) {
-            	Element sampleElement = new Element("biosample");
-            	sampleElement.setAttribute(new Attribute(IWorkspace.BIOSAMPLES_NAME_KEY, b.getName()));
-            	
-            	for(File f : b.getDatasets()) {
-            		Element pathElement = new Element(IWorkspace.BIOSAMPLES_DATASET_KEY);
-            		pathElement.setText(f.getAbsolutePath());
-            		sampleElement.addContent(pathElement);
-            	}
-            	biosamplesElement.addContent(sampleElement);
-            }
-            
-            rootElement.addContent(biosamplesElement);
-            
-            Document doc = new Document(rootElement);
+			File exportFile = w.getSaveFile();
+			if (exportFile == null)
+				return;
+			if (exportFile.exists())
+				Files.delete(exportFile.toPath());
 
-            writeXML(doc, exportFile);
-         } catch(IOException e) {
-            e.printStackTrace();
-         }
+			// root element
+			Element rootElement = new Element(IWorkspace.WORKSPACE_ELEMENT)
+					.setAttribute(IWorkspace.WORKSPACE_NAME, w.getName());
 
-    }
+			// Add datasets
+			Element datasetsElement = new Element(IWorkspace.DATASETS_ELEMENT);
+			for (File f : w.getFiles()) {
+				Element dataset = new Element("dataset");
+				Element datasetPath = new Element(IWorkspace.DATASET_PATH);
+
+				datasetPath.setText(f.getAbsolutePath());
+				dataset.addContent(datasetPath);
+				datasetsElement.addContent(dataset);
+			}
+			rootElement.addContent(datasetsElement);
+
+			Document doc = new Document(rootElement);
+
+			writeXML(doc, exportFile);
+
+			// Confirm save
+			DatasetListManager.getInstance().updateHashCode(w);
+		} catch (IOException e) {
+			LOGGER.log(Loggable.STACK, "Unable to export workspace", e);
+		}
+
+	}
 
 }

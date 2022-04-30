@@ -41,7 +41,9 @@ import com.bmskinner.nuclear_morphology.core.DatasetListManager;
 import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
+import com.bmskinner.nuclear_morphology.gui.events.UserActionEvent;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.UIController;
+import com.bmskinner.nuclear_morphology.gui.events.revamp.UserActionController;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.utility.FileUtils;
 
@@ -85,11 +87,12 @@ public class CosmeticHandler {
 					initialScale = nOp.get().getDouble(HashOptions.SCALE);
 			}
 
-			double scale = parent.getInputSupplier().requestDouble(Labels.Cells.CHOOSE_NEW_SCALE_LBL, initialScale, 1,
+			double scale = parent.getInputSupplier().requestDouble(
+					Labels.Cells.CHOOSE_NEW_SCALE_LBL, initialScale, 1,
 					100000, 1);
 			dataset.setScale(scale);
 		} catch (RequestCancelledException e) {
-			return;
+			// User cancelled, no action
 		}
 	}
 
@@ -105,11 +108,12 @@ public class CosmeticHandler {
 		Paint oldColour = dataset.getDatasetColour().orElse(ColourSelecter.getColor(row));
 
 		try {
-			Color newColor = parent.getInputSupplier().requestColor("Choose dataset colour", (Color) oldColour);
+			Color newColor = parent.getInputSupplier().requestColor("Choose dataset colour",
+					(Color) oldColour);
 			dataset.setDatasetColour(newColor);
 
 		} catch (RequestCancelledException e) {
-			return;
+			// User cancelled, no action
 		}
 	}
 
@@ -122,10 +126,11 @@ public class CosmeticHandler {
 		ICellCollection collection = dataset.getCollection();
 
 		try {
-			String newName = parent.getInputSupplier().requestString(CHOOSE_A_NEW_NAME_LBL, collection.getName());
+			String newName = parent.getInputSupplier().requestString(CHOOSE_A_NEW_NAME_LBL,
+					collection.getName());
 			collection.setName(newName);
-//			parent.getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
 		} catch (RequestCancelledException e) {
+			// User cancelled, no action
 		}
 	}
 
@@ -137,11 +142,11 @@ public class CosmeticHandler {
 	public void renameClusterGroup(@NonNull IClusterGroup group) {
 
 		try {
-			String newName = parent.getInputSupplier().requestString(CHOOSE_A_NEW_NAME_LBL, group.getName());
+			String newName = parent.getInputSupplier().requestString(CHOOSE_A_NEW_NAME_LBL,
+					group.getName());
 			group.setName(newName);
-//			parent.getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
 		} catch (RequestCancelledException e) {
-			return;
+			// User cancelled, no action
 		}
 	}
 
@@ -153,11 +158,16 @@ public class CosmeticHandler {
 	public void renameWorkspace(@NonNull IWorkspace workspace) {
 
 		try {
-			String newName = parent.getInputSupplier().requestString(CHOOSE_A_NEW_NAME_LBL, workspace.getName());
+			String newName = parent.getInputSupplier().requestString(CHOOSE_A_NEW_NAME_LBL,
+					workspace.getName());
 			workspace.setName(newName);
-//			parent.getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
+
+			// Automatically save workspace
+			UserActionController.getInstance().userActionEventReceived(
+					new UserActionEvent(this, UserActionEvent.SAVE_WORKSPACE));
+
 		} catch (RequestCancelledException e) {
-			return;
+			// User cancelled, no action
 		}
 	}
 
@@ -177,7 +187,8 @@ public class CosmeticHandler {
 
 			Color oldColour = d.getCollection().getSignalGroup(signalGroupId).get().getGroupColour()
 					.orElse(Color.YELLOW);
-			Color newColor = parent.getInputSupplier().requestColor(Labels.Signals.CHOOSE_SIGNAL_COLOUR, oldColour);
+			Color newColor = parent.getInputSupplier()
+					.requestColor(Labels.Signals.CHOOSE_SIGNAL_COLOUR, oldColour);
 
 			d.getCollection().getSignalGroup(signalGroupId).get().setGroupColour(newColor);
 		} catch (RequestCancelledException e) {
@@ -199,7 +210,8 @@ public class CosmeticHandler {
 		String oldName = group.getGroupName();
 
 		try {
-			String newName = parent.getInputSupplier().requestString(CHOOSE_A_NEW_NAME_LBL, oldName);
+			String newName = parent.getInputSupplier().requestString(CHOOSE_A_NEW_NAME_LBL,
+					oldName);
 			group.setGroupName(newName);
 		} catch (RequestCancelledException e) {
 		}
@@ -220,9 +232,11 @@ public class CosmeticHandler {
 			File currentFolder = d.getAnalysisOptions().orElseThrow(MissingOptionException::new)
 					.getNuclearSignalOptions(signalGroup).orElseThrow(MissingOptionException::new)
 					.getFile(HashOptions.DETECTION_FOLDER);
-			File newFolder = parent.getInputSupplier().requestFolder(FileUtils.extantComponent(currentFolder));
+			File newFolder = parent.getInputSupplier()
+					.requestFolder(FileUtils.extantComponent(currentFolder));
 
-			d.getCollection().getSignalManager().updateSignalSourceFolder(signalGroup, newFolder.getAbsoluteFile());
+			d.getCollection().getSignalManager().updateSignalSourceFolder(signalGroup,
+					newFolder.getAbsoluteFile());
 		} catch (RequestCancelledException e) {
 			// user cancelled, ignore
 		} catch (MissingOptionException e) {
@@ -240,7 +254,8 @@ public class CosmeticHandler {
 	public void updateNucleusSource(@NonNull IAnalysisDataset d, File image) {
 
 		try {
-			File folder = parent.getInputSupplier().requestFolder(FileUtils.extantComponent(image.getParentFile()));
+			File folder = parent.getInputSupplier()
+					.requestFolder(FileUtils.extantComponent(image.getParentFile()));
 
 			Set<ICell> cells = d.getCollection().getCells(image);
 
@@ -249,6 +264,7 @@ public class CosmeticHandler {
 					n.setSourceFolder(folder);
 			UIController.getInstance().fireFilePathUpdated(d);
 		} catch (RequestCancelledException e) {
+			// User cancelled, no action
 		}
 
 	}
@@ -261,13 +277,16 @@ public class CosmeticHandler {
 	public void updateNucleusSource(@NonNull IAnalysisDataset d) {
 
 		try {
-			File currentFolder = d.getAnalysisOptions().get().getDetectionOptions(CellularComponent.NUCLEUS).get()
+			File currentFolder = d.getAnalysisOptions().get()
+					.getDetectionOptions(CellularComponent.NUCLEUS).get()
 					.getFile(HashOptions.DETECTION_FOLDER);
-			File newFolder = parent.getInputSupplier().requestFolder(FileUtils.extantComponent(currentFolder));
+			File newFolder = parent.getInputSupplier()
+					.requestFolder(FileUtils.extantComponent(currentFolder));
 
 			d.getCollection().setSourceFolder(newFolder);
 			UIController.getInstance().fireFilePathUpdated(d);
 		} catch (RequestCancelledException e) {
+			// User cancelled, no action
 		}
 
 	}

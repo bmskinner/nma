@@ -31,7 +31,8 @@ import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 public class DatasetSelectionPanel extends DetailPanel
-		implements DatasetAddedListener, SwatchUpdatedListener, ClusterGroupsUpdatedListener, WorkspaceAddedListener {
+		implements DatasetAddedListener, SwatchUpdatedListener, ClusterGroupsUpdatedListener,
+		WorkspaceAddedListener {
 
 	private static final Logger LOGGER = Logger.getLogger(DatasetsPanel.class.getName());
 
@@ -108,9 +109,8 @@ public class DatasetSelectionPanel extends DetailPanel
 
 	@Override
 	public void datasetAdded(IWorkspace ws, IAnalysisDataset d) {
-		// TODO Auto-generated method stub
-//		model.get
-
+		TreePath path = model.addDatasetToWorkspace(ws, d);
+		expandAll(path);
 	}
 
 	@Override
@@ -225,13 +225,16 @@ public class DatasetSelectionPanel extends DetailPanel
 				setSelectedDatasets(lsm);
 
 				// Update table header with number of selected cells
-				int cellCount = datasetSelectionOrder.stream().map(d -> d.getCollection().size()).reduce(0,
-						Integer::sum);
+				int cellCount = datasetSelectionOrder.stream().map(d -> d.getCollection().size())
+						.reduce(0,
+								Integer::sum);
 
 				treeTable.getColumnModel().getColumn(0)
-						.setHeaderValue(String.format("Dataset (%d)", datasetSelectionOrder.size()));
+						.setHeaderValue(
+								String.format("Dataset (%d)", datasetSelectionOrder.size()));
 
-				treeTable.getColumnModel().getColumn(1).setHeaderValue(String.format("Cells (%d)", cellCount));
+				treeTable.getColumnModel().getColumn(1)
+						.setHeaderValue(String.format("Cells (%d)", cellCount));
 
 				DatasetListManager.getInstance().setSelectedDatasets(datasetSelectionOrder);
 

@@ -30,7 +30,6 @@ import org.jdom2.input.SAXBuilder;
 
 import com.bmskinner.nuclear_morphology.components.workspaces.DefaultWorkspace;
 import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace;
-import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace.BioSample;
 import com.bmskinner.nuclear_morphology.io.Io.Importer;
 
 /**
@@ -41,23 +40,24 @@ import com.bmskinner.nuclear_morphology.io.Io.Importer;
  *
  */
 public class WorkspaceImporter implements Importer {
-	
+
 	private static final Logger LOGGER = Logger.getLogger(WorkspaceImporter.class.getName());
-		
-    /**
-     * Open the workspace format created by software from version 1.14.0.
-     * This is based on XML encoding to allow extra fields such as BioSamples
-     * to be included.
-     * @author bms41
-     * @throws IOException 
-     * @throws JDOMException 
-     * @since 1.14.0
-     *
-     */
+
+	/**
+	 * Open the workspace format created by software from version 1.14.0. This is
+	 * based on XML encoding to allow extra fields such as BioSamples to be
+	 * included.
+	 * 
+	 * @author bms41
+	 * @throws IOException
+	 * @throws JDOMException
+	 * @since 1.14.0
+	 *
+	 */
 
 	public static IWorkspace importWorkspace(File file) throws JDOMException, IOException {
 
-		LOGGER.fine("Attempting to read workspace file: "+file.getAbsolutePath());
+		LOGGER.fine("Attempting to read workspace file: " + file.getAbsolutePath());
 
 		SAXBuilder saxBuilder = new SAXBuilder();
 		saxBuilder.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
@@ -66,39 +66,22 @@ public class WorkspaceImporter implements Importer {
 		Document document = saxBuilder.build(file);
 
 		Element workspaceElement = document.getRootElement();
-		String workspaceName =  workspaceElement.getChild(IWorkspace.WORKSPACE_NAME).getText();
+		String name = workspaceElement.getAttributeValue(IWorkspace.WORKSPACE_NAME);
 
-		IWorkspace w = new DefaultWorkspace(file, workspaceName);
+		IWorkspace w = new DefaultWorkspace(file, name);
 
-		Element datasetElement =  workspaceElement.getChild(IWorkspace.DATASETS_ELEMENT);
-		Element sampleElement  =  workspaceElement.getChild(IWorkspace.BIOSAMPLES_ELEMENT);
+		Element datasetElement = workspaceElement.getChild(IWorkspace.DATASETS_ELEMENT);
+		Element sampleElement = workspaceElement.getChild(IWorkspace.BIOSAMPLES_ELEMENT);
 
 		List<Element> datasets = datasetElement.getChildren();
 
-
-		for(Element dataset : datasets) {
+		for (Element dataset : datasets) {
 			String path = dataset.getChild(IWorkspace.DATASET_PATH).getText();
 			File f = new File(path);
-			LOGGER.fine("Workspace has dataset file: "+f.getAbsolutePath());
+			LOGGER.fine("Workspace has dataset file: " + f.getAbsolutePath());
 			w.add(f);
 		}
 
-
-
-		List<Element> biosamples = sampleElement.getChildren();
-		for(Element sample : biosamples) {
-			String name = sample.getAttributeValue(IWorkspace.BIOSAMPLES_NAME_KEY);
-
-			w.addBioSample(name);
-			List<Element> sampleDatasets = sample.getChildren(IWorkspace.BIOSAMPLES_DATASET_KEY);
-			for(Element d : sampleDatasets) {
-				String datasetId =  d.getValue();
-				File f = new File(datasetId);
-				BioSample bs = w.getBioSample(name);
-				if(bs!=null)
-					bs.addDataset(f);
-			}
-		}
 		return w;
 	}
 

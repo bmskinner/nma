@@ -117,7 +117,7 @@ public final class DatasetListManager implements DatasetAddedListener {
 	 * @return
 	 */
 	@Nullable
-	public final synchronized IAnalysisDataset getActiveDataset() {
+	public final IAnalysisDataset getActiveDataset() {
 		return selected.isEmpty() ? null : selected.get(0);
 	}
 
@@ -126,7 +126,7 @@ public final class DatasetListManager implements DatasetAddedListener {
 	 * 
 	 * @return
 	 */
-	public final synchronized List<IAnalysisDataset> getSelectedDatasets() {
+	public final List<IAnalysisDataset> getSelectedDatasets() {
 		List<IAnalysisDataset> result = new ArrayList<>();
 		result.addAll(selected);
 		return result;
@@ -543,6 +543,7 @@ public final class DatasetListManager implements DatasetAddedListener {
 	public final synchronized void addWorkspace(@NonNull IWorkspace w) {
 		workspaces.add(w);
 		workspaceHashcodeMap.put(w.getId(), w.hashCode());
+		UIController.getInstance().fireWorkspaceAdded(w);
 	}
 
 	/**

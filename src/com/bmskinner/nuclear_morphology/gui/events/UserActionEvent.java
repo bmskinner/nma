@@ -53,7 +53,7 @@ public class UserActionEvent extends EventObject {
 	public static final String IMPORT_WORKFLOW_PREFIX = "Flow|";
 
 	public static final String IMPORT_WORKSPACE_PREFIX = "Wrk|";
-	public static final String EXPORT_WORKSPACE = "ExportWorkspace";
+	public static final String SAVE_WORKSPACE = "ExportWorkspace";
 	public static final String NEW_WORKSPACE = "NewWorkspace";
 
 	public static final String ADD_NUCLEAR_SIGNAL = "AddNuclearSignalAction";
@@ -81,12 +81,13 @@ public class UserActionEvent extends EventObject {
 	public static final String MOVE_DATASET_DOWN_ACTION = "MoveDatasetDownAction";
 
 	public static final String NEW_WORKSPACE_PREFIX = "NewWorkspace|";
-	public static final String ADD_TO_WORKSPACE_PREFIX = "AddToWorkspace|";
+	public static final String ADD_TO_WORKSPACE = "AddToWorkspace";
+	public static final String ADD_WORKSPACE = "Add workspace";
 	public static final String REMOVE_FROM_WORKSPACE_PREFIX = "RemoveFromWorkspace|";
 
-	public static final String NEW_BIOSAMPLE_PREFIX = "NewBioSample|";
-	public static final String ADD_TO_BIOSAMPLE_PREFIX = "AddToBioSample|";
-	public static final String REMOVE_FROM_BIOSAMPLE_PREFIX = "RemoveFromBioSample|";
+//	public static final String NEW_BIOSAMPLE_PREFIX = "NewBioSample|";
+//	public static final String ADD_TO_BIOSAMPLE_PREFIX = "AddToBioSample|";
+//	public static final String REMOVE_FROM_BIOSAMPLE_PREFIX = "RemoveFromBioSample|";
 
 	/** Profile and segment */
 	public static final String MORPHOLOGY_ANALYSIS_ACTION = "Morphology analysis action";
@@ -122,7 +123,6 @@ public class UserActionEvent extends EventObject {
 
 	public static final String SAVE = "Save selected";
 	public static final String SAVE_AS = "Save as new file";
-	public static final String ADD_WORKSPACE = "Add workspace";
 	public static final String RESEGMENT = "Resegment dataset";
 
 	/**
@@ -159,7 +159,8 @@ public class UserActionEvent extends EventObject {
 	 * @param source
 	 * @param type
 	 */
-	public UserActionEvent(@NonNull Object source, @NonNull String message, List<IAnalysisDataset> datasets) {
+	public UserActionEvent(@NonNull Object source, @NonNull String message,
+			List<IAnalysisDataset> datasets) {
 		this(source, message, datasets, null);
 	}
 
@@ -170,7 +171,8 @@ public class UserActionEvent extends EventObject {
 	 * @param source
 	 * @param type
 	 */
-	public UserActionEvent(@NonNull Object source, @NonNull String message, List<IAnalysisDataset> datasets,
+	public UserActionEvent(@NonNull Object source, @NonNull String message,
+			List<IAnalysisDataset> datasets,
 			IAnalysisDataset second) {
 		super(source);
 		this.message = message;

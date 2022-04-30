@@ -32,43 +32,50 @@ import com.bmskinner.nuclear_morphology.utility.FileUtils;
 
 /**
  * Action to export workspaces
+ * 
  * @author bms41
  * @since 1.13.4
  *
  */
 public class ExportWorkspaceAction extends VoidResultAction {
-	
+
 	private static final Logger LOGGER = Logger.getLogger(ExportWorkspaceAction.class.getName());
 
-    private static final String PROGRESS_LBL = "Saving workspace";
+	private static final String PROGRESS_LBL = "Saving workspace";
 
-    private final List<IWorkspace> workspaces = new ArrayList<>();
+	private final List<IWorkspace> workspaces = new ArrayList<>();
 
-    public ExportWorkspaceAction(@NonNull final IWorkspace workspace, @NonNull final ProgressBarAcceptor acceptor) {
-        super(PROGRESS_LBL, acceptor);
-        workspaces.add(workspace);
-    }
-    
-    public ExportWorkspaceAction(@NonNull final List<IWorkspace> list, @NonNull final ProgressBarAcceptor acceptor) {
-        super(PROGRESS_LBL, acceptor);
-        workspaces.addAll(list);
-    }
+	public ExportWorkspaceAction(@NonNull final IWorkspace workspace,
+			@NonNull final ProgressBarAcceptor acceptor) {
+		super(PROGRESS_LBL, acceptor);
+		workspaces.add(workspace);
+	}
 
-    @Override
-    public void run() {
-    	for(IWorkspace w : workspaces) {
-    	 LOGGER.info("Saving workspace "+w.getName()+"...");
-            if(w.getSaveFile()==null) {
-                try {
-                	File defaultFolder = w.getFiles().size()>0 ? FileUtils.commonPathOfFiles(w.getFiles()) : null;
-                    File f = is.requestFileSave(defaultFolder, w.getName(), Io.WRK_FILE_EXTENSION_NODOT);
-                    w.setSaveFile(f);
-                } catch(RequestCancelledException e) {
-                    continue;
-                }
-            }
-            WorkspaceExporter.exportWorkspace(w);
-    	}
-        this.cancel();
-    }
+	public ExportWorkspaceAction(@NonNull final List<IWorkspace> list,
+			@NonNull final ProgressBarAcceptor acceptor) {
+		super(PROGRESS_LBL, acceptor);
+		workspaces.addAll(list);
+	}
+
+	@Override
+	public void run() {
+		for (IWorkspace w : workspaces) {
+
+			if (w.getSaveFile() == null) {
+				try {
+					File defaultFolder = w.getFiles().size() > 0
+							? FileUtils.commonPathOfFiles(w.getFiles())
+							: null;
+					File f = is.requestFileSave(defaultFolder, w.getName(),
+							Io.WRK_FILE_EXTENSION_NODOT);
+					w.setSaveFile(f);
+				} catch (RequestCancelledException e) {
+					continue;
+				}
+			}
+			WorkspaceExporter.exportWorkspace(w);
+			LOGGER.fine("Saved workspace '" + w.getName() + "'");
+		}
+		this.cancel();
+	}
 }

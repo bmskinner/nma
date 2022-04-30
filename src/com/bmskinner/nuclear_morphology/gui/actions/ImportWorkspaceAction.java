@@ -18,6 +18,7 @@ package com.bmskinner.nuclear_morphology.gui.actions;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.concurrent.CountDownLatch;
 import java.util.logging.Logger;
 
 import javax.swing.JFileChooser;
@@ -27,10 +28,12 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.jdom2.JDOMException;
 
+import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace;
 import com.bmskinner.nuclear_morphology.core.DatasetListManager;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
+import com.bmskinner.nuclear_morphology.gui.events.revamp.UIController;
 import com.bmskinner.nuclear_morphology.io.Io.Importer;
 import com.bmskinner.nuclear_morphology.io.WorkspaceImporter;
 
@@ -76,11 +79,21 @@ public class ImportWorkspaceAction extends VoidResultAction {
 				DatasetListManager.getInstance().addWorkspace(w);
 
 				for (File dataFile : w.getFiles()) {
-					new ImportDatasetAction(progressAcceptors.get(0), dataFile).run();
+					CountDownLatch l = new CountDownLatch(1);
+					new ImportDatasetAction(progressAcceptors.get(0), dataFile, l).run();
+					l.await();
+
+					// Find the dataset just added from file name
+					IAnalysisDataset added = DatasetListManager.getInstance().getRootDatasets()
+							.stream()
+							.filter(d -> d.getSavePath().equals(dataFile)).findFirst()
+							.orElseThrow(IllegalArgumentException::new);
+
+					UIController.getInstance().fireDatasetAdded(w, added);
 				}
 
 				setProgressMessage(PROGRESS_BAR_LABEL);
-			} catch (JDOMException | IOException e) {
+			} catch (JDOMException | IOException | InterruptedException e) {
 				LOGGER.warning("Unable to read workspace file:" + e.getMessage());
 				cancel();
 			}

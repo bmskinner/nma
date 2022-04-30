@@ -52,7 +52,8 @@ public class DatasetTreeTableModel extends AbstractTreeTableModel {
 			return null;
 		}
 
-		MutableTreeTableNode parentNode = dataset.isRoot() ? (MutableTreeTableNode) getRoot() : getNode(parent);
+		MutableTreeTableNode parentNode = dataset.isRoot() ? (MutableTreeTableNode) getRoot()
+				: getNode(parent);
 
 		MutableTreeTableNode newNode = createNode(dataset);
 		int newIndex = parentNode.getChildCount();
@@ -99,6 +100,59 @@ public class DatasetTreeTableModel extends AbstractTreeTableModel {
 	}
 
 	/**
+	 * Add the given root dataset to a workspace. Moves the node containing the
+	 * dataset into the workspace node
+	 * 
+	 * @param ws
+	 * @param d
+	 * @return the path to the workspace
+	 */
+	public TreePath addDatasetToWorkspace(@NonNull IWorkspace ws, @NonNull IAnalysisDataset d) {
+		MutableTreeTableNode wsNode = getNode(ws);
+		MutableTreeTableNode dsNode = getNode(d);
+
+		if (wsNode == null || dsNode == null)
+			return null;
+
+		removeNodeFromParent(dsNode);
+		insertNodeInto(dsNode, wsNode, 0);
+
+		return new TreePath(getPathToRoot(wsNode));
+	}
+
+	/**
+	 * Invoked this to insert newChild at location index in parents children. This
+	 * will then message nodesWereInserted to create the appropriate event. This is
+	 * the preferred way to add children as it will create the appropriate event.
+	 */
+	public void insertNodeInto(MutableTreeTableNode newChild,
+			MutableTreeTableNode parent, int index) {
+		parent.insert(newChild, index);
+
+		modelSupport.fireChildAdded(new TreePath(getPathToRoot(parent)), index,
+				newChild);
+	}
+
+	/**
+	 * Message this to remove node from its parent. This will message
+	 * nodesWereRemoved to create the appropriate event. This is the preferred way
+	 * to remove a node as it handles the event creation for you.
+	 */
+	public void removeNodeFromParent(MutableTreeTableNode node) {
+		MutableTreeTableNode parent = (MutableTreeTableNode) node.getParent();
+
+		if (parent == null) {
+			throw new IllegalArgumentException("node does not have a parent.");
+		}
+
+		int index = parent.getIndex(node);
+		node.removeFromParent();
+
+		modelSupport.fireChildRemoved(new TreePath(getPathToRoot(parent)),
+				index, node);
+	}
+
+	/**
 	 * Remove node containing the given object if present
 	 * 
 	 * @param obj
@@ -116,6 +170,11 @@ public class DatasetTreeTableModel extends AbstractTreeTableModel {
 			if (parent.getUserObject() instanceof IClusterGroup && parent.getChildCount() == 0) {
 				removeNode(parent.getUserObject());
 			}
+
+			// If the node is a root dataset in a workspace, and there are no more
+			// other datasets in that workspace, remove the workspace node
+			if (parent instanceof WorkspaceTreeTableNode && parent.getChildCount() == 0)
+				removeNode(parent.getUserObject());
 		}
 	}
 
@@ -130,7 +189,8 @@ public class DatasetTreeTableModel extends AbstractTreeTableModel {
 	private MutableTreeTableNode createNode(@NonNull IClusterGroup group) {
 		ClusterGroupTreeTableNode n = new ClusterGroupTreeTableNode(group);
 		for (UUID clusterID : group.getUUIDs()) {
-			IAnalysisDataset clusterDataset = DatasetListManager.getInstance().getDataset(clusterID);
+			IAnalysisDataset clusterDataset = DatasetListManager.getInstance()
+					.getDataset(clusterID);
 			MutableTreeTableNode childNode = createNode(clusterDataset);
 			n.add(childNode);
 		}
@@ -149,7 +209,8 @@ public class DatasetTreeTableModel extends AbstractTreeTableModel {
 		DatasetTreeTableNode n = new DatasetTreeTableNode(dataset);
 
 		// Add cluster groups separately
-		Set<UUID> clusterIDs = new HashSet<>(); // track the child datasets in clusters, so they are not added twice
+		Set<UUID> clusterIDs = new HashSet<>(); // track the child datasets in clusters, so they are
+												// not added twice
 		for (IClusterGroup group : dataset.getClusterGroups()) {
 			clusterIDs.addAll(group.getUUIDs());
 			MutableTreeTableNode cgNode = createNode(group);
@@ -274,14 +335,16 @@ public class DatasetTreeTableModel extends AbstractTreeTableModel {
 	@Override
 	public Object getChild(Object parent, int index) {
 		if (!isValidTreeTableNode(parent))
-			throw new IllegalArgumentException("Parent must be a TreeTableNode managed by this model");
+			throw new IllegalArgumentException(
+					"Parent must be a TreeTableNode managed by this model");
 		return ((TreeTableNode) parent).getChildAt(index);
 	}
 
 	@Override
 	public int getChildCount(Object parent) {
 		if (!isValidTreeTableNode(parent))
-			throw new IllegalArgumentException("Parent must be a TreeTableNode managed by this model");
+			throw new IllegalArgumentException(
+					"Parent must be a TreeTableNode managed by this model");
 
 		return ((TreeTableNode) parent).getChildCount();
 	}

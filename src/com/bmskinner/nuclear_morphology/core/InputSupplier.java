@@ -25,29 +25,32 @@ import org.eclipse.jdt.annotation.Nullable;
 import com.bmskinner.nuclear_morphology.gui.DefaultInputSupplier;
 
 /**
- * Interface to allow different user interaction interfaces. Provides methods
- * to request user input.
+ * Interface to allow different user interaction interfaces. Provides methods to
+ * request user input.
+ * 
  * @author bms41
  * @since 1.14.0
  *
  */
 public interface InputSupplier {
-	
+
 	static InputSupplier getDefault() {
 		return new DefaultInputSupplier();
 	}
-	
+
 	/**
 	 * Request a string input
+	 * 
 	 * @param message the message to provide to the user
 	 * @return
 	 * @throws RequestCancelledException
 	 */
 	String requestString(@NonNull String message) throws RequestCancelledException;
-	
+
 	/**
 	 * Request a string input
-	 * @param message the message to provide to the user
+	 * 
+	 * @param message       the message to provide to the user
 	 * @param existingValue the current value for the input
 	 * @return
 	 * @throws RequestCancelledException
@@ -56,19 +59,21 @@ public interface InputSupplier {
 
 	/**
 	 * Request an int input
+	 * 
 	 * @param messsage the message to provide to the user
 	 * @return
 	 * @throws RequestCancelledException
 	 */
 	int requestInt(@NonNull String messsage) throws RequestCancelledException;
-	
+
 	/**
 	 * Request an int input
+	 * 
 	 * @param message the message to provide to the user
-	 * @param start the initial value (if using a spinner)
-	 * @param min the min value (if using a spinner)
-	 * @param max the max value (if using a spinner)
-	 * @param step the step size  (if using a spinner)
+	 * @param start   the initial value (if using a spinner)
+	 * @param min     the min value (if using a spinner)
+	 * @param max     the max value (if using a spinner)
+	 * @param step    the step size (if using a spinner)
 	 * @return
 	 * @throws RequestCancelledException
 	 */
@@ -76,172 +81,196 @@ public interface InputSupplier {
 
 	/**
 	 * Request a double input
+	 * 
 	 * @param message the message to provide to the user
 	 * @return
 	 * @throws RequestCancelledException
 	 */
 	double requestDouble(@NonNull String message) throws RequestCancelledException;
-	
+
 	/**
 	 * Request a double input
+	 * 
 	 * @param message the message to provide to the user
-	 * @param start the initial value (if using a spinner)
-	 * @param min the min value (if using a spinner)
-	 * @param max the max value (if using a spinner)
-	 * @param step the step size  (if using a spinner)
+	 * @param start   the initial value (if using a spinner)
+	 * @param min     the min value (if using a spinner)
+	 * @param max     the max value (if using a spinner)
+	 * @param step    the step size (if using a spinner)
 	 * @return
 	 * @throws RequestCancelledException
 	 */
-	double requestDouble(@NonNull String message, double start, double min, double max, double step) throws RequestCancelledException;
-	
+	double requestDouble(@NonNull String message, double start, double min, double max, double step)
+			throws RequestCancelledException;
+
 	/**
-	 * Request a colour input. It is the responsibility of implementing classes to return a valid Color
-	 * object.
-	 * @param message the message to provide to the user
+	 * Request a colour input. It is the responsibility of implementing classes to
+	 * return a valid Color object.
+	 * 
+	 * @param message  the message to provide to the user
 	 * @param oldColor the optional old colour to provide
 	 * @return the new colour
 	 * @throws RequestCancelledException
 	 */
 	Color requestColor(@NonNull String message, @Nullable Color oldColor) throws RequestCancelledException;
-	
-	
+
 	/**
 	 * Request a file input.
+	 * 
 	 * @return
 	 * @throws RequestCancelledException
 	 */
 	File requestFile() throws RequestCancelledException;
-	
+
 	/**
-	 * Request a folder input. The starting directory will be the default system folder.
+	 * Request a folder input. The starting directory will be the default system
+	 * folder.
+	 * 
 	 * @return
 	 * @throws RequestCancelledException
 	 */
 	File requestFolder() throws RequestCancelledException;
-	
+
 	/**
 	 * Request a folder input.
+	 * 
 	 * @param defaultFolder the default folder
 	 * @return
 	 * @throws RequestCancelledException
 	 */
 	File requestFolder(@Nullable File defaultFolder) throws RequestCancelledException;
-	
+
 	/**
 	 * Request a folder input.
+	 * 
 	 * @param message the title bar message
 	 * @return
 	 * @throws RequestCancelledException
 	 */
 	File requestFolder(@Nullable String message) throws RequestCancelledException;
-	
+
 	/**
 	 * Request a folder input.
-	 * @param message the title bar message
+	 * 
+	 * @param message       the title bar message
 	 * @param defaultFolder the default folder
 	 * @return
 	 * @throws RequestCancelledException
 	 */
 	File requestFolder(@Nullable String message, @Nullable File defaultFolder) throws RequestCancelledException;
-	
+
 	/**
 	 * Request a file input.
+	 * 
 	 * @param defaultFolder the default folder
 	 * @return
 	 * @throws RequestCancelledException
 	 */
 	File requestFile(@Nullable File defaultFolder) throws RequestCancelledException;
-	
+
 	/**
 	 * Request a file input with an extension filter
-	 * @param defaultFolder the default folder
-	 * @param extension the file extension filter
+	 * 
+	 * @param defaultFolder    the default folder
+	 * @param extension        the file extension filter
 	 * @param extensionMessage the textual description of the file extension
 	 * @return
 	 * @throws RequestCancelledException
 	 */
-	File requestFile(@Nullable String message, @Nullable File defaultFolder, @Nullable String extension, @Nullable String extensionMessage) throws RequestCancelledException;
-	
+	File requestFile(@Nullable String message, @Nullable File defaultFolder, @Nullable String extension,
+			@Nullable String extensionMessage) throws RequestCancelledException;
+
 	/**
 	 * Request a file to save to, with the default name and extension.
+	 * 
 	 * @param defaultFolder the default folder
-	 * @param name the file name
-	 * @param extension the file extension, with no '.'
+	 * @param name          the file name
+	 * @param extension     the file extension, with no '.'
 	 * @return the selected file
 	 * @throws RequestCancelledException
 	 */
 	File requestFileSave(@Nullable File defaultFolder, String name, String extension) throws RequestCancelledException;
-	
+
 	/**
-	 * Request the user to choose between a set of options. The default option
-	 * will be the  first item in the options provided.
+	 * Request the user to choose between a set of options. The default option will
+	 * be the first item in the options provided.
+	 * 
 	 * @param options the options to choose between
 	 * @param message the message to provide to the user
 	 * @return the chosen option
 	 */
-	int requestOption( String[] options, String message) throws RequestCancelledException;
-	
+	int requestOption(Object[] options, String message) throws RequestCancelledException;
+
 	/**
-	 * Request the user to choose between a set of options. The default option
-	 * will be the  first item in the options provided.
+	 * Request the user to choose between a set of options. The default option will
+	 * be the first item in the options provided.
+	 * 
 	 * @param options the options to choose between
 	 * @param message the message to provide to the user
-	 * @param title a title to provide on dialog boxes
+	 * @param title   a title to provide on dialog boxes
 	 * @return the chosen option
 	 */
-	int requestOption( String[] options, String message, String title) throws RequestCancelledException;
-	
+	int requestOption(Object[] options, String message, String title) throws RequestCancelledException;
+
 	/**
 	 * Request the user to choose between a set of options
-	 * @param options the options to choose between
+	 * 
+	 * @param options       the options to choose between
 	 * @param defaultOption the index of the default option
-	 * @param message the message to provide to the user
-	 * @param title a title to provide on dialog boxes
+	 * @param message       the message to provide to the user
+	 * @param title         a title to provide on dialog boxes
 	 * @return the chosen option
 	 */
-	int requestOption( String[] options, int defaultOption, String message, String title) throws RequestCancelledException;
-	
+	int requestOption(Object[] options, int defaultOption, String message, String title)
+			throws RequestCancelledException;
+
 	/**
 	 * Request the user to choose between a set of options
-	 * @param options the options to choose between
+	 * 
+	 * @param options       the options to choose between
 	 * @param defaultOption the index of the default option
-	 * @param message the message to provide to the user
+	 * @param message       the message to provide to the user
 	 * @return the chosen option
 	 */
-	int requestOption( String[] options, int defaultOption, String message) throws RequestCancelledException;
-	
+	int requestOption(Object[] options, int defaultOption, String message) throws RequestCancelledException;
+
 	/**
-	 * Request the user to choose between a set of options. All the options will be on screen. The default option
-	 * will be the  first item in the options provided.
+	 * Request the user to choose between a set of options. All the options will be
+	 * on screen. The default option will be the first item in the options provided.
+	 * 
 	 * @param options the options to choose between
 	 * @param message the message to provide to the user
-	 * @param title a title to provide on dialog boxes
+	 * @param title   a title to provide on dialog boxes
 	 * @return the chosen option
 	 */
-	int requestOptionAllVisible(String[] options, String message, String title) throws RequestCancelledException;
-	
+	int requestOptionAllVisible(Object[] options, String message, String title) throws RequestCancelledException;
+
 	/**
-	 * Request the user to choose between a set of options. All the options will be on screen.
-	 * @param options the options to choose between
+	 * Request the user to choose between a set of options. All the options will be
+	 * on screen.
+	 * 
+	 * @param options       the options to choose between
 	 * @param defaultOption the index of the default option
-	 * @param message the message to provide to the user
-	 * @param title a title to provide on dialog boxes
+	 * @param message       the message to provide to the user
+	 * @param title         a title to provide on dialog boxes
 	 * @return the chosen option
 	 */
-	int requestOptionAllVisible( String[] options, int defaultOption, String message, String title) throws RequestCancelledException;
-	
+	int requestOptionAllVisible(Object[] options, int defaultOption, String message, String title)
+			throws RequestCancelledException;
+
 	/**
-	 * Request the user to approve an action. Responds yes (true), no (false) or 
+	 * Request the user to approve an action. Responds yes (true), no (false) or
 	 * excepts on cancel.
+	 * 
 	 * @param message the message to provide to the user
-	 * @param title a title to provide on dialog boxes
+	 * @param title   a title to provide on dialog boxes
 	 * @return
-	 * @throws RequestCancelledException 
+	 * @throws RequestCancelledException
 	 */
 	boolean requestApproval(String message, String title) throws RequestCancelledException;
-		
+
 	/**
 	 * Exception thrown when the user cancels the input request
+	 * 
 	 * @author bms41
 	 * @since 1.14.0
 	 *
