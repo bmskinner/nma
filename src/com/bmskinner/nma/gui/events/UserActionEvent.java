@@ -83,7 +83,7 @@ public class UserActionEvent extends EventObject {
 	public static final String NEW_WORKSPACE_PREFIX = "NewWorkspace|";
 	public static final String ADD_TO_WORKSPACE = "AddToWorkspace";
 	public static final String ADD_WORKSPACE = "Add workspace";
-	public static final String REMOVE_FROM_WORKSPACE_PREFIX = "RemoveFromWorkspace|";
+	public static final String REMOVE_FROM_WORKSPACE = "RemoveFromWorkspace";
 
 //	public static final String NEW_BIOSAMPLE_PREFIX = "NewBioSample|";
 //	public static final String ADD_TO_BIOSAMPLE_PREFIX = "AddToBioSample|";

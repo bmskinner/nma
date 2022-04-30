@@ -1,10 +1,13 @@
 package com.bmskinner.nma.gui.events.revamp;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.logging.Logger;
+
+import javax.swing.JOptionPane;
 
 import com.bmskinner.nma.analysis.DatasetDeleter;
 import com.bmskinner.nma.analysis.profiles.DatasetSegmentationMethod.MorphologyAnalysisMode;
@@ -281,6 +284,11 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 				addToWorkspace(selectedDatasets);
 			};
 
+		if (event.type().startsWith(UserActionEvent.REMOVE_FROM_WORKSPACE))
+			return () -> {
+				removeFromWorkspace(selectedDatasets);
+			};
+
 		if (event.type().equals(UserActionEvent.RELOCATE_CELLS))
 			return new RelocateFromFileAction(selectedDataset, acceptor, new CountDownLatch(1));
 
@@ -420,6 +428,14 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 			IWorkspace[] wks = DatasetListManager.getInstance().getWorkspaces()
 					.toArray(new IWorkspace[0]);
 
+			if (wks.length == 0) {
+				JOptionPane.showMessageDialog(null,
+						"No workspaces are open. Create or open a workspace first.",
+						"Cannot add to workspace",
+						JOptionPane.WARNING_MESSAGE, null);
+				return;
+			}
+
 			int i = is.requestOption(wks, "Choose workspace to add dataset to",
 					"Choose workspace");
 
@@ -427,6 +443,39 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 					.getRootParents(selectedDatasets)) {
 				wks[i].add(d);
 				UIController.getInstance().fireDatasetAdded(wks[i], d);
+			}
+
+			// Automatically save workspaces
+			userActionEventReceived(new UserActionEvent(this, UserActionEvent.SAVE_WORKSPACE));
+
+		} catch (RequestCancelledException e) {
+			// No action, user cancelled
+		}
+	}
+
+	private void removeFromWorkspace(final List<IAnalysisDataset> selectedDatasets) {
+		try {
+
+			List<IWorkspace> ws = new ArrayList<>();
+			for (IAnalysisDataset d : selectedDatasets)
+				ws.addAll(DatasetListManager.getInstance().getWorkspaces(d));
+
+			IWorkspace[] wks = ws.toArray(new IWorkspace[0]);
+
+			if (wks.length == 0) {
+				JOptionPane.showMessageDialog(null, "Dataset does not belong to an open workspace",
+						"Cannot remove from workspace",
+						JOptionPane.WARNING_MESSAGE, null);
+				return;
+			}
+
+			int i = is.requestOption(wks, "Choose workspace to remove dataset from",
+					"Choose workspace");
+
+			for (IAnalysisDataset d : DatasetListManager.getInstance()
+					.getRootParents(selectedDatasets)) {
+				wks[i].remove(d);
+				UIController.getInstance().fireDatasetRemoved(wks[i], d);
 			}
 
 			// Automatically save workspaces

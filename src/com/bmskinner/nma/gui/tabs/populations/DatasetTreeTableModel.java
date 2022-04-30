@@ -121,6 +121,29 @@ public class DatasetTreeTableModel extends AbstractTreeTableModel {
 	}
 
 	/**
+	 * Add the given root dataset to a workspace. Moves the node containing the
+	 * dataset into the workspace node
+	 * 
+	 * @param ws
+	 * @param d
+	 * @return the path to the workspace
+	 */
+	public TreePath removeDatasetFromWorkspace(@NonNull IWorkspace ws,
+			@NonNull IAnalysisDataset d) {
+		MutableTreeTableNode root = (MutableTreeTableNode) this.getRoot();
+		MutableTreeTableNode wsNode = getNode(ws);
+		MutableTreeTableNode dsNode = getNode(d);
+
+		if (wsNode == null || dsNode == null)
+			return null;
+
+		removeNodeFromParent(dsNode);
+		insertNodeInto(dsNode, root, root.getChildCount());
+
+		return new TreePath(getPathToRoot(dsNode));
+	}
+
+	/**
 	 * Invoked this to insert newChild at location index in parents children. This
 	 * will then message nodesWereInserted to create the appropriate event. This is
 	 * the preferred way to add children as it will create the appropriate event.

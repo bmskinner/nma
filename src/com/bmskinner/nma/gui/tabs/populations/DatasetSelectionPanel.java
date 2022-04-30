@@ -115,8 +115,8 @@ public class DatasetSelectionPanel extends DetailPanel
 
 	@Override
 	public void datasetRemoved(IWorkspace ws, IAnalysisDataset d) {
-		// TODO Auto-generated method stub
-
+		TreePath path = model.removeDatasetFromWorkspace(ws, d);
+		expandAll(path);
 	}
 
 	/**

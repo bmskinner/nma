@@ -18,14 +18,10 @@ package com.bmskinner.nma.gui.tabs.populations;
 
 import java.awt.Component;
 import java.util.Collection;
-import java.util.List;
-
-import org.eclipse.jdt.annotation.Nullable;
 
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.datasets.IClusterGroup;
 import com.bmskinner.nma.components.workspaces.IWorkspace;
-import com.bmskinner.nma.core.DatasetListManager;
 import com.bmskinner.nma.gui.AbstractPopupMenu;
 import com.bmskinner.nma.gui.ContextEnabled;
 import com.bmskinner.nma.gui.Labels;
@@ -80,9 +76,9 @@ public class PopulationListPopupMenu extends AbstractPopupMenu {
 						| ContextEnabled.ACTIVE_ON_SINGLE_OBJECT
 						| ContextEnabled.ACTIVE_ON_MULTI_OBJECTS);
 
-		createWorkspaceMenu(null);
-		biosampleSubMenu = fact.makeMenu(Labels.Populations.ADD_TO_BIOSAMPLE_LBL,
-				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_SINGLE_OBJECT);
+//		createWorkspaceMenu(null);
+//		biosampleSubMenu = fact.makeMenu(Labels.Populations.ADD_TO_BIOSAMPLE_LBL,
+//				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_SINGLE_OBJECT);
 //		createBiosampleMenu(null);
 
 //		mergeMenuItem = fact.makeItem(Labels.Populations.MERGE_LBL, UserActionEvent.MERGE_DATASETS_ACTION,
@@ -146,22 +142,22 @@ public class PopulationListPopupMenu extends AbstractPopupMenu {
 
 	}
 
-	private void createWorkspaceMenu(@Nullable IAnalysisDataset d) {
-		if (d == null)
-			return;
-		MenuFactory fact = new MenuFactory();
-		List<IWorkspace> workspaces = DatasetListManager.getInstance().getWorkspaces();
-		for (IWorkspace w : workspaces) {
-			String name = w.has(d) ? Labels.Populations.REMOVE_FROM_LBL_PREFIX
-					: Labels.Populations.ADD_TO_LBL_PREFIX;
-			String action = w.has(d) ? UserActionEvent.REMOVE_FROM_WORKSPACE_PREFIX
-					: UserActionEvent.ADD_TO_WORKSPACE;
-			workspaceSubMenu.add(fact.makeItem(name + w.getName(), action + w.getName(),
-					ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_CHILD_DATASET
-							| ContextEnabled.ACTIVE_ON_SINGLE_OBJECT
-							| ContextEnabled.ACTIVE_ON_MULTI_OBJECTS));
-		}
-	}
+//	private void createWorkspaceMenu(@Nullable IAnalysisDataset d) {
+//		if (d == null)
+//			return;
+//		MenuFactory fact = new MenuFactory();
+//		List<IWorkspace> workspaces = DatasetListManager.getInstance().getWorkspaces();
+//		for (IWorkspace w : workspaces) {
+//			String name = w.has(d) ? Labels.Populations.REMOVE_FROM_LBL_PREFIX
+//					: Labels.Populations.ADD_TO_LBL_PREFIX;
+//			String action = w.has(d) ? UserActionEvent.REMOVE_FROM_WORKSPACE_PREFIX
+//					: UserActionEvent.ADD_TO_WORKSPACE;
+//			workspaceSubMenu.add(fact.makeItem(name + w.getName(), action + w.getName(),
+//					ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_CHILD_DATASET
+//							| ContextEnabled.ACTIVE_ON_SINGLE_OBJECT
+//							| ContextEnabled.ACTIVE_ON_MULTI_OBJECTS));
+//		}
+//	}
 
 //	private void createBiosampleMenu(@Nullable IAnalysisDataset d) {
 //		if (d == null || !DatasetListManager.getInstance().isInWorkspace(d)) {
@@ -216,7 +212,7 @@ public class PopulationListPopupMenu extends AbstractPopupMenu {
 
 	protected void updateSelectionContext(IAnalysisDataset d) {
 		workspaceSubMenu.removeAll();
-		createWorkspaceMenu(d);
+//		createWorkspaceMenu(d);
 
 		biosampleSubMenu.removeAll();
 //		createBiosampleMenu(d);

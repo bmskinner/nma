@@ -94,8 +94,9 @@ public class Labels {
 
 		public static final String EXTRACT_CELLS_LBL = "Extract cells";
 
-		public static final String ADD_TO_WORKSPACE_LBL = "Add to workspace...";
-		public static final String ADD_TO_BIOSAMPLE_LBL = "Biosample...";
+		public static final String ADD_TO_WORKSPACE_LBL = "Add to workspace";
+		public static final String REMOVE_FROM_WORKSPACE_LBL = "Remove from workspace";
+
 		public static final String ADD_TO_NEW_LBL = "Add to new";
 		public static final String ADD_TO_LBL_PREFIX = "Add to ";
 		public static final String REMOVE_FROM_LBL_PREFIX = "Remove from ";
@@ -133,7 +134,8 @@ public class Labels {
 	 *
 	 */
 	public static class Signals {
-		public static final String SIGNAL_COLOUR_LABEL = "  "; // whitespace that will not be collapsed
+		public static final String SIGNAL_COLOUR_LABEL = "  "; // whitespace that will not be
+																// collapsed
 		public static final String SIGNAL_GROUP_LABEL = "Signal group name";
 		public static final String NUMBER_OF_SIGNAL_GROUPS = "Number of signal groups";
 		public static final String SIGNALS_LABEL = "Signals";
@@ -164,9 +166,11 @@ public class Labels {
 				+ "(intensity 255), and tries to find objects meeting <br>"
 				+ "size and shape criteria. If no objects are found, <br>"
 				+ "pixels with intensity 254 or above are considered. <br>"
-				+ "This recurses until either a signal is found, <br>" + "or the signal threshold is reached.<br><br>"
+				+ "This recurses until either a signal is found, <br>"
+				+ "or the signal threshold is reached.<br><br>"
 				+ "This will detect <i>locations</i> of signals surrounded by <br>"
-				+ "bright background, but will not detect signal <i>sizes</i> <br>" + "accurately</html>";
+				+ "bright background, but will not detect signal <i>sizes</i> <br>"
+				+ "accurately</html>";
 
 		public static final String ADAPTIVE_THRESHOLDING_RADIO_LABEL = "<html>Experimental. Attempts to distinguish<br>"
 				+ "signal fom background based on the pixel<br>" + "intensity histogram.</html>";
