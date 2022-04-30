@@ -32,12 +32,13 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.jdom2.Element;
 
+import com.bmskinner.nma.components.Version;
 import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.profiles.DefaultLandmark;
 import com.bmskinner.nma.components.profiles.Landmark;
-import com.bmskinner.nma.io.XmlSerializable;
 import com.bmskinner.nma.io.XMLReader.XMLReadingException;
+import com.bmskinner.nma.io.XmlSerializable;
 
 /**
  * This holds the rulesets for identifying each of the landmarks in a profile.
@@ -53,14 +54,19 @@ import com.bmskinner.nma.io.XMLReader.XMLReadingException;
  */
 public class RuleSetCollection implements XmlSerializable {
 
-	private static final String XML_PRIORITY_AXIS = "PriorityAxis";
+	private static final String XML_VALUE = "value";
 
-	private static final String XML_RULE_APPLICATION_TYPE = "RuleApplicationType";
+	private static final String XML_MEASUREMENT = "Measurement";
+
+	private static final String XML_ORIENT = "Orient";
+
+	private static final String XML_PRIORITY_AXIS = "axis";
+
+	private static final String XML_RULE_APPLICATION_TYPE = "application";
+	private static final String XML_RULE_VERSION = "version";
 
 	private static final String XML_RULE_SET_COLLECTION = "RuleSetCollection";
 	private static final String XML_RULESET = "Ruleset";
-
-	private static final String XML_TYPE = "type";
 
 	private static final String XML_LANDMARK = "Landmark";
 
@@ -73,7 +79,8 @@ public class RuleSetCollection implements XmlSerializable {
 	private final Map<Landmark, List<RuleSet>> map = new HashMap<>();
 
 	/** Store the landmarks to be used for orientation */
-	private final Map<@NonNull OrientationMark, Landmark> orientationMarks = new EnumMap<>(OrientationMark.class);
+	private final Map<@NonNull OrientationMark, Landmark> orientationMarks = new EnumMap<>(
+			OrientationMark.class);
 
 	/** Track which measurements should be performed for these nuclei */
 	private final Set<Measurement> validMeasurements = new HashSet<>();
@@ -87,8 +94,10 @@ public class RuleSetCollection implements XmlSerializable {
 	 * preferentially by nuclei for orientation
 	 */
 	public RuleSetCollection(@NonNull String name, @NonNull Landmark rp, @Nullable Landmark left,
-			@Nullable Landmark right, @Nullable Landmark top, @Nullable Landmark bottom, @Nullable Landmark seondaryX,
-			@Nullable Landmark seondaryY, @Nullable PriorityAxis priorityAxis, RuleApplicationType type) {
+			@Nullable Landmark right, @Nullable Landmark top, @Nullable Landmark bottom,
+			@Nullable Landmark seondaryX,
+			@Nullable Landmark seondaryY, @Nullable PriorityAxis priorityAxis,
+			RuleApplicationType type) {
 		this.name = name;
 
 		orientationMarks.put(OrientationMark.REFERENCE, rp);
@@ -115,6 +124,27 @@ public class RuleSetCollection implements XmlSerializable {
 		this.ruleApplicationType = type;
 	}
 
+	protected RuleSetCollection(RuleSetCollection rsc) {
+		name = rsc.name;
+
+		for (Entry<Landmark, List<RuleSet>> entry : rsc.map.entrySet()) {
+			map.computeIfAbsent(entry.getKey(), v -> new ArrayList<>());
+			for (RuleSet rs : entry.getValue())
+				map.get(entry.getKey()).add(rs.duplicate());
+		}
+
+		for (Entry<OrientationMark, Landmark> entry : rsc.orientationMarks.entrySet()) {
+			orientationMarks.put(entry.getKey(), entry.getValue());
+		}
+
+		for (Measurement m : rsc.validMeasurements) {
+			validMeasurements.add(m);
+		}
+
+		priorityAxis = rsc.priorityAxis;
+		ruleApplicationType = rsc.ruleApplicationType;
+	}
+
 	/**
 	 * Construct from an XML element. Use for unmarshalling. The element should
 	 * conform to the specification in {@link XmlSerializable}.
@@ -126,7 +156,8 @@ public class RuleSetCollection implements XmlSerializable {
 	public RuleSetCollection(Element e) throws ComponentCreationException {
 		name = e.getAttributeValue(XML_NAME);
 		priorityAxis = PriorityAxis.valueOf(e.getAttributeValue(XML_PRIORITY_AXIS));
-		ruleApplicationType = RuleApplicationType.valueOf(e.getAttributeValue(XML_RULE_APPLICATION_TYPE));
+		ruleApplicationType = RuleApplicationType
+				.valueOf(e.getAttributeValue(XML_RULE_APPLICATION_TYPE));
 
 		// Add the rulesets
 		for (Element t : e.getChildren(XML_LANDMARK)) {
@@ -142,15 +173,21 @@ public class RuleSetCollection implements XmlSerializable {
 		}
 
 		// Add the orientation landmarks
-		for (Element om : e.getChildren("Orient")) {
-			orientationMarks.put(OrientationMark.valueOf(om.getAttributeValue("name")), map.keySet().stream()
-					.filter(l -> l.getName().equals(om.getAttributeValue("value"))).findFirst().orElse(null));
+		for (Element om : e.getChildren(XML_ORIENT)) {
+			orientationMarks.put(OrientationMark.valueOf(om.getAttributeValue(XML_NAME)),
+					map.keySet().stream()
+							.filter(l -> l.getName().equals(om.getAttributeValue(XML_VALUE)))
+							.findFirst().orElse(null));
 		}
 
-		for (Element m : e.getChildren("Measurement")) {
+		for (Element m : e.getChildren(XML_MEASUREMENT)) {
 			validMeasurements.add(Measurement.of(m.getText()));
 		}
 
+	}
+
+	public RuleSetCollection duplicate() {
+		return new RuleSetCollection(this);
 	}
 
 	public String getName() {
@@ -326,8 +363,10 @@ public class RuleSetCollection implements XmlSerializable {
 	@Override
 	public Element toXmlElement() {
 
-		Element rootElement = new Element(XML_RULE_SET_COLLECTION).setAttribute(XML_NAME, getName())
-				.setAttribute(XML_RULE_APPLICATION_TYPE, getApplicationType().toString());
+		Element rootElement = new Element(XML_RULE_SET_COLLECTION)
+				.setAttribute(XML_NAME, getName())
+				.setAttribute(XML_RULE_APPLICATION_TYPE, getApplicationType().toString())
+				.setAttribute(XML_RULE_VERSION, Version.currentVersion().toString());
 
 		if (priorityAxis != null)
 			rootElement.setAttribute(XML_PRIORITY_AXIS, priorityAxis.toString());
@@ -335,22 +374,23 @@ public class RuleSetCollection implements XmlSerializable {
 		// Add any orientation landmarks
 		for (Entry<OrientationMark, Landmark> entry : orientationMarks.entrySet()) {
 
-			rootElement.addContent(new Element("Orient").setAttribute("name", entry.getKey().name())
-					.setAttribute("value", entry.getValue().toString()));
-//			LOGGER.fine("Fetching " + entry.getKey() + ": " + orientationMarks.get(entry.getKey()));
-
+			rootElement
+					.addContent(
+							new Element(XML_ORIENT)
+									.setAttribute(XML_NAME, entry.getKey().name())
+									.setAttribute(XML_VALUE, entry.getValue().toString()));
 		}
 
 		for (Entry<Landmark, List<RuleSet>> entry : map.entrySet()) {
-			Element tagElement = new Element(XML_LANDMARK).setAttribute(XML_NAME, entry.getKey().getName());
-//					.setAttribute(XML_TYPE, entry.getKey().type().toString());
+			Element tagElement = new Element(XML_LANDMARK).setAttribute(XML_NAME,
+					entry.getKey().getName());
 			for (RuleSet rs : entry.getValue())
 				tagElement.addContent(rs.toXmlElement());
 			rootElement.addContent(tagElement);
 		}
 
 		for (Measurement m : validMeasurements) {
-			rootElement.addContent(new Element("Measurement").setText(m.name()));
+			rootElement.addContent(new Element(XML_MEASUREMENT).setText(m.name()));
 		}
 
 		return rootElement;
@@ -371,7 +411,8 @@ public class RuleSetCollection implements XmlSerializable {
 			return false;
 		RuleSetCollection other = (RuleSetCollection) obj;
 		return Objects.equals(map, other.map) && Objects.equals(name, other.name)
-				&& Objects.equals(orientationMarks, other.orientationMarks) && priorityAxis == other.priorityAxis
+				&& Objects.equals(orientationMarks, other.orientationMarks)
+				&& priorityAxis == other.priorityAxis
 				&& ruleApplicationType == other.ruleApplicationType;
 	}
 
@@ -387,7 +428,8 @@ public class RuleSetCollection implements XmlSerializable {
 		Landmark bv = new DefaultLandmark("Ventral lower");
 		Landmark op = new DefaultLandmark("Tail socket");
 
-		RuleSetCollection r = new RuleSetCollection("Mouse sperm", rp, rp, null, tv, bv, null, op, PriorityAxis.Y,
+		RuleSetCollection r = new RuleSetCollection("Mouse sperm", rp, rp, null, tv, bv, null, op,
+				PriorityAxis.Y,
 				RuleApplicationType.VIA_MEDIAN);
 
 		r.addRuleSet(OrientationMark.REFERENCE, RuleSet.mouseSpermRPRuleSet());
@@ -414,7 +456,8 @@ public class RuleSetCollection implements XmlSerializable {
 		Landmark lh = new DefaultLandmark("Body left");
 		Landmark rh = new DefaultLandmark("Body right");
 
-		RuleSetCollection r = new RuleSetCollection("Pig sperm", rp, lh, rh, null, null, null, rp, PriorityAxis.X,
+		RuleSetCollection r = new RuleSetCollection("Pig sperm", rp, lh, rh, null, null, null, rp,
+				PriorityAxis.X,
 				RuleApplicationType.VIA_MEDIAN);
 
 		r.addRuleSet(OrientationMark.REFERENCE, RuleSet.pigSpermRPRuleSet());
@@ -436,7 +479,8 @@ public class RuleSetCollection implements XmlSerializable {
 
 		Landmark rp = new DefaultLandmark("Longest axis");
 
-		RuleSetCollection r = new RuleSetCollection("Round", rp, null, null, null, rp, null, rp, PriorityAxis.Y,
+		RuleSetCollection r = new RuleSetCollection("Round", rp, null, null, null, rp, null, rp,
+				PriorityAxis.Y,
 				RuleApplicationType.VIA_MEDIAN);
 
 		r.addRuleSet(OrientationMark.REFERENCE, RuleSet.roundRPRuleSet());

@@ -8,8 +8,9 @@ import java.util.logging.Logger;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
-import com.bmskinner.nma.core.ThreadManager;
+import com.bmskinner.nma.components.rules.RuleSetCollection;
 import com.bmskinner.nma.core.InputSupplier.RequestCancelledException;
+import com.bmskinner.nma.core.ThreadManager;
 import com.bmskinner.nma.gui.ProgressBarAcceptor;
 import com.bmskinner.nma.gui.components.FileSelector;
 import com.bmskinner.nma.io.Io;
@@ -28,7 +29,8 @@ public class ExportRuleSetsAction extends MultiDatasetResultAction {
 
 	private static final String PROGRESS_LBL = "Exporting options";
 
-	public ExportRuleSetsAction(@NonNull List<IAnalysisDataset> datasets, @NonNull final ProgressBarAcceptor acceptor) {
+	public ExportRuleSetsAction(@NonNull List<IAnalysisDataset> datasets,
+			@NonNull final ProgressBarAcceptor acceptor) {
 		super(datasets, PROGRESS_LBL, acceptor);
 	}
 
@@ -46,8 +48,9 @@ public class ExportRuleSetsAction extends MultiDatasetResultAction {
 
 			Runnable r = () -> {
 
+				RuleSetCollection rsc = datasets.get(0).getCollection().getRuleSetCollection();
 				try {
-					XMLWriter.writeXML(datasets.get(0).getCollection().getRuleSetCollection().toXmlElement(), file);
+					XMLWriter.writeXML(rsc.toXmlElement(), file);
 				} catch (IOException e) {
 					LOGGER.warning("Unable to write rulesets to file");
 				}
@@ -64,11 +67,13 @@ public class ExportRuleSetsAction extends MultiDatasetResultAction {
 					for (IAnalysisDataset d : datasets) {
 						File f = new File(folder, d.getName() + Io.XML_FILE_EXTENSION);
 						try {
-							XMLWriter.writeXML(d.getCollection().getRuleSetCollection().toXmlElement(), f);
+							XMLWriter.writeXML(
+									d.getCollection().getRuleSetCollection().toXmlElement(), f);
 						} catch (IOException e) {
 							LOGGER.warning("Unable to write rulesets to file");
 						}
-						LOGGER.info(String.format("Exported %s rulesets to %s", d.getName(), f.getAbsolutePath()));
+						LOGGER.info(String.format("Exported %s rulesets to %s", d.getName(),
+								f.getAbsolutePath()));
 					}
 					cancel();
 				};

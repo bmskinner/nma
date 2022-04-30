@@ -16,7 +16,6 @@
  ******************************************************************************/
 package com.bmskinner.nma.components.rules;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -32,90 +31,98 @@ import com.bmskinner.nma.io.XmlSerializable;
  * @author bms41
  *
  */
-public class Rule implements Serializable, XmlSerializable {
+public class Rule implements XmlSerializable {
 
-    private static final String XML_VALUE = "Value";
+	private static final String XML_VALUE = "Value";
 
 	private static final String XML_RULE = "Rule";
 
 	private static final String XML_TYPE = "type";
 
-	private static final long  serialVersionUID = 1L;
-    
-    private final RuleType     type;
+	private final RuleType type;
 
-    private final List<Double> values = new ArrayList<>();
+	private final List<Double> values = new ArrayList<>();
 
-    public Rule(RuleType type, double value) {
+	public Rule(RuleType type, double value) {
 
-        this.type = type;
-        this.values.add(value);
-    }
+		this.type = type;
+		this.values.add(value);
+	}
 
-    public Rule(RuleType type, boolean value) {
+	public Rule(RuleType type, boolean value) {
 
-        this.type = type;
-        double v = value ? 1d : 0d;
-        this.values.add(v);
-    }
-    
-    /**
-     * Construct from an XML element. Use for 
-     * unmarshalling. The element should conform
-     * to the specification in {@link XmlSerializable}.
-     * @param e the XML element containing the data.
-     */
-    public Rule(@NonNull Element e) {
-    	RuleType rt = RuleType.valueOf(e.getAttributeValue(XML_TYPE));
+		this.type = type;
+		double v = value ? 1d : 0d;
+		this.values.add(v);
+	}
+
+	protected Rule(Rule r) {
+		type = r.type;
+		for (Double d : r.values)
+			values.add(d.doubleValue());
+	}
+
+	/**
+	 * Construct from an XML element. Use for unmarshalling. The element should
+	 * conform to the specification in {@link XmlSerializable}.
+	 * 
+	 * @param e the XML element containing the data.
+	 */
+	public Rule(@NonNull Element e) {
+		RuleType rt = RuleType.valueOf(e.getAttributeValue(XML_TYPE));
 		this.type = rt;
-        
-		for(Element c : e.getChildren(XML_VALUE)) {
+
+		for (Element c : e.getChildren(XML_VALUE)) {
 			addValue(Double.parseDouble(c.getValue()));
 		}
-    }
+	}
 
-    public void addValue(double d) {
-        values.add(d);
-    }
+	public Rule duplicate() {
+		return new Rule(this);
+	}
 
-    /**
-     * Get the first value in the rule
-     * 
-     * @return
-     */
-    public double getValue() {
-        return values.get(0);
-    }
+	public void addValue(double d) {
+		values.add(d);
+	}
 
-    public double getValue(int index) {
-        return values.get(index);
-    }
+	/**
+	 * Get the first value in the rule
+	 * 
+	 * @return
+	 */
+	public double getValue() {
+		return values.get(0);
+	}
 
-    public int valueCount() {
-        return values.size();
-    }
+	public double getValue(int index) {
+		return values.get(index);
+	}
 
-    public boolean getBooleanValue() {
-        return getBooleanValue(0);
-    }
+	public int valueCount() {
+		return values.size();
+	}
 
-    public boolean getBooleanValue(int index) {
-        return(values.get(index) == 1d);
-    }
+	public boolean getBooleanValue() {
+		return getBooleanValue(0);
+	}
 
-    public RuleType getType() {
-        return type;
-    }
+	public boolean getBooleanValue(int index) {
+		return (values.get(index) == 1d);
+	}
 
-    @Override
-    public String toString() {
-        StringBuilder b = new StringBuilder();
-        b.append(type);
-        for (Double d : values) {
-            b.append(" : "+ d);
-        }
-        return b.toString();
-    }
+	public RuleType getType() {
+		return type;
+	}
+
+	@Override
+	public String toString() {
+		StringBuilder b = new StringBuilder();
+		b.append(type);
+		for (Double d : values) {
+			b.append(" : " + d);
+		}
+		return b.toString();
+	}
 
 	@Override
 	public int hashCode() {
@@ -133,44 +140,43 @@ public class Rule implements Serializable, XmlSerializable {
 		Rule other = (Rule) obj;
 		return type == other.type && Objects.equals(values, other.values);
 	}
-	
+
 	@Override
 	public Element toXmlElement() {
 
 		Element e = new Element(XML_RULE).setAttribute(XML_TYPE, getType().toString());
-		
-		for(int i=0; i<valueCount(); i++) {
+
+		for (int i = 0; i < valueCount(); i++) {
 			e.addContent(new Element(XML_VALUE).setText(String.valueOf(getValue(i))));
 		}
 		return e;
 	}
 
 	/**
-     * A type of instruction to follow
-     * 
-     * @author bms41
-     *
-     */
-    public enum RuleType {
-    	
-    	IS_ZERO_INDEX,
+	 * A type of instruction to follow
+	 * 
+	 * @author bms41
+	 *
+	 */
+	public enum RuleType {
 
-        IS_MINIMUM, IS_MAXIMUM,
+		IS_ZERO_INDEX,
 
-        IS_LOCAL_MINIMUM, IS_LOCAL_MAXIMUM,
+		IS_MINIMUM, IS_MAXIMUM,
 
-        VALUE_IS_LESS_THAN, VALUE_IS_MORE_THAN,
+		IS_LOCAL_MINIMUM, IS_LOCAL_MAXIMUM,
 
-        INDEX_IS_LESS_THAN, INDEX_IS_MORE_THAN,
+		VALUE_IS_LESS_THAN, VALUE_IS_MORE_THAN,
 
-        IS_CONSTANT_REGION,
+		INDEX_IS_LESS_THAN, INDEX_IS_MORE_THAN,
 
-        FIRST_TRUE, LAST_TRUE,
+		IS_CONSTANT_REGION,
 
-        INDEX_IS_WITHIN_FRACTION_OF, INDEX_IS_OUTSIDE_FRACTION_OF,
+		FIRST_TRUE, LAST_TRUE,
 
-        INVERT;
-    	
+		INDEX_IS_WITHIN_FRACTION_OF, INDEX_IS_OUTSIDE_FRACTION_OF,
 
-    }
+		INVERT;
+
+	}
 }

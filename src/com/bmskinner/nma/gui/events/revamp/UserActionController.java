@@ -180,7 +180,7 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 					String workspaceName = is.requestString("New workspace name");
 					IWorkspace w = WorkspaceFactory.createWorkspace(workspaceName);
 					DatasetListManager.getInstance().addWorkspace(w);
-					LOGGER.info("New workspace created: " + workspaceName);
+					LOGGER.fine("New workspace created: " + workspaceName);
 					UIController.getInstance().fireWorkspaceAdded(w);
 
 				} catch (RequestCancelledException e) {

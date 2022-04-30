@@ -27,8 +27,8 @@ import com.bmskinner.nma.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nma.analysis.IAnalysisMethod;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.core.DatasetListManager;
-import com.bmskinner.nma.core.ThreadManager;
 import com.bmskinner.nma.core.InputSupplier.RequestCancelledException;
+import com.bmskinner.nma.core.ThreadManager;
 import com.bmskinner.nma.gui.ProgressBarAcceptor;
 import com.bmskinner.nma.io.DatasetExportMethod;
 
@@ -65,7 +65,8 @@ public class ExportDatasetAction extends SingleDatasetResultAction {
 	 * @param chooseSaveLocation save to the default dataset save file, or choose
 	 *                           another location
 	 */
-	public ExportDatasetAction(@NonNull IAnalysisDataset dataset, @NonNull final ProgressBarAcceptor acceptor,
+	public ExportDatasetAction(@NonNull IAnalysisDataset dataset,
+			@NonNull final ProgressBarAcceptor acceptor,
 			CountDownLatch doneSignal, boolean chooseSaveLocation) {
 		super(dataset, PROGRESS_BAR_LABEL, acceptor);
 		if (doneSignal != null)
@@ -76,7 +77,8 @@ public class ExportDatasetAction extends SingleDatasetResultAction {
 		if (chooseSaveLocation) {
 
 			try {
-				saveFile = is.requestFileSave(dataset.getSavePath().getParentFile(), dataset.getName(), "nmd");
+				saveFile = is.requestFileSave(dataset.getSavePath().getParentFile(),
+						dataset.getName(), "nmd");
 			} catch (RequestCancelledException e) {
 				cancel();
 				return;
@@ -87,7 +89,8 @@ public class ExportDatasetAction extends SingleDatasetResultAction {
 
 	}
 
-	public ExportDatasetAction(List<IAnalysisDataset> list, @NonNull final ProgressBarAcceptor acceptor,
+	public ExportDatasetAction(List<IAnalysisDataset> list,
+			@NonNull final ProgressBarAcceptor acceptor,
 			CountDownLatch doneSignal) {
 		super(list, PROGRESS_BAR_LABEL, acceptor);
 		this.setLatch(doneSignal);
@@ -100,7 +103,6 @@ public class ExportDatasetAction extends SingleDatasetResultAction {
 	public void run() {
 
 		if (saveFile != null) {
-			LOGGER.info("Saving as " + saveFile.getAbsolutePath() + "...");
 			long length = saveFile.exists() ? saveFile.length() : 0;
 			IAnalysisMethod m = new DatasetExportMethod(dataset, saveFile);
 			worker = new DefaultAnalysisWorker(m, length);
@@ -113,7 +115,7 @@ public class ExportDatasetAction extends SingleDatasetResultAction {
 
 	@Override
 	public void finished() {
-		LOGGER.fine("Finished export action");
+		LOGGER.info("Saved as '" + saveFile.getName() + "'");
 		Thread thr = new Thread(() -> {
 
 			// update the stored hashcode for the dataset
@@ -121,13 +123,13 @@ public class ExportDatasetAction extends SingleDatasetResultAction {
 
 			// if no list was provided, or no more entries remain, finish
 			if (!hasRemainingDatasetsToProcess()) {
-				LOGGER.fine("Counting down latch");
 				countdownLatch();
 				ExportDatasetAction.super.finished();
 			} else { // otherwise analyse the next item in the list
 				cancel(); // remove progress bar
-				new ExportDatasetAction(getRemainingDatasetsToProcess(), progressAcceptors.get(0), getLatch().get())
-						.run();
+				new ExportDatasetAction(getRemainingDatasetsToProcess(), progressAcceptors.get(0),
+						getLatch().get())
+								.run();
 			}
 		});
 

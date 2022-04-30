@@ -133,14 +133,16 @@ public class DatasetSelectionPanel extends DetailPanel
 
 	private void expandAll(TreePath parent) {
 		// Traverse children
-		TreeNode node = (TreeNode) parent.getLastPathComponent();
-		if (node.getChildCount() >= 0) {
-			for (Enumeration<?> e = node.children(); e.hasMoreElements();) {
-				TreeNode n = (TreeNode) e.nextElement();
-				expandAll(parent.pathByAddingChild(n));
+		if (parent != null) {
+			TreeNode node = (TreeNode) parent.getLastPathComponent();
+			if (node.getChildCount() >= 0) {
+				for (Enumeration<?> e = node.children(); e.hasMoreElements();) {
+					TreeNode n = (TreeNode) e.nextElement();
+					expandAll(parent.pathByAddingChild(n));
+				}
 			}
+			treeTable.expandPath(parent);
 		}
-		treeTable.expandPath(parent);
 	}
 
 	@Override

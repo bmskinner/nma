@@ -19,13 +19,16 @@ package com.bmskinner.nma.gui.actions;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
-import com.bmskinner.nma.core.ThreadManager;
+import com.bmskinner.nma.components.options.HashOptions;
+import com.bmskinner.nma.components.options.IAnalysisOptions;
 import com.bmskinner.nma.core.InputSupplier.RequestCancelledException;
+import com.bmskinner.nma.core.ThreadManager;
 import com.bmskinner.nma.gui.ProgressBarAcceptor;
 import com.bmskinner.nma.gui.components.FileSelector;
 import com.bmskinner.nma.io.Io;
@@ -44,7 +47,8 @@ public class ExportOptionsAction extends MultiDatasetResultAction {
 
 	private static final String PROGRESS_LBL = "Exporting options";
 
-	public ExportOptionsAction(@NonNull List<IAnalysisDataset> datasets, @NonNull final ProgressBarAcceptor acceptor) {
+	public ExportOptionsAction(@NonNull List<IAnalysisDataset> datasets,
+			@NonNull final ProgressBarAcceptor acceptor) {
 		super(datasets, PROGRESS_LBL, acceptor);
 	}
 
@@ -61,8 +65,25 @@ public class ExportOptionsAction extends MultiDatasetResultAction {
 			}
 
 			Runnable r = () -> {
+
+				Optional<IAnalysisOptions> opt = datasets.get(0).getAnalysisOptions();
+				if (opt.isEmpty())
+					return;
+
+				// Remove any folders from the export
+				// The point of this is to make a reusable analysis,
+				// not replicate existing datasets
+				IAnalysisOptions op = opt.get().duplicate();
+				for (String s : op.getDetectionOptionTypes()) {
+					op.getDetectionOptions(s).get().remove(HashOptions.DETECTION_FOLDER);
+				}
+
+				// Also remove the analysis time so we don't use the same output folder
+				op.clearAnalysisTime();
+
 				try {
-					XMLWriter.writeXML(datasets.get(0).getAnalysisOptions().get().toXmlElement(), file);
+					XMLWriter.writeXML(op.toXmlElement(),
+							file);
 				} catch (IOException e) {
 					LOGGER.warning("Unable to write options to file");
 				}
@@ -82,14 +103,14 @@ public class ExportOptionsAction extends MultiDatasetResultAction {
 						} catch (IOException e) {
 							LOGGER.warning("Unable to write options to file");
 						}
-						LOGGER.info(String.format("Exported %s options to %s", d.getName(), f.getAbsolutePath()));
+						LOGGER.info(String.format("Exported %s options to %s", d.getName(),
+								f.getAbsolutePath()));
 					}
 					cancel();
 				};
 				ThreadManager.getInstance().submit(r);
 			} catch (RequestCancelledException e) {
 				cancel();
-				return;
 			}
 
 		}
