@@ -36,8 +36,8 @@ import org.jfree.data.Range;
 
 import com.bmskinner.nma.analysis.nucleus.CellCollectionFilterBuilder;
 import com.bmskinner.nma.analysis.nucleus.CellCollectionFilterer;
-import com.bmskinner.nma.analysis.nucleus.FilteringOptions;
 import com.bmskinner.nma.analysis.nucleus.CellCollectionFilterer.CollectionFilteringException;
+import com.bmskinner.nma.analysis.nucleus.FilteringOptions;
 import com.bmskinner.nma.analysis.nucleus.FilteringOptions.FilterMatchType;
 import com.bmskinner.nma.components.MissingLandmarkException;
 import com.bmskinner.nma.components.cells.CellularComponent;
@@ -242,7 +242,7 @@ public abstract class AbstractScatterPanel extends DetailPanel {
 					d.getCollection().getProfileManager().copySegmentsAndLandmarksTo(virt);
 					d.getCollection().getSignalManager().copySignalGroupsTo(virt);
 					d.addChildCollection(virt);
-					UIController.getInstance().fireDatasetAdded(d);
+					UIController.getInstance().fireDatasetAdded(d.getChildDataset(virt.getId()));
 				} catch (CollectionFilteringException | ProfileException | MissingProfileException
 						| MissingLandmarkException e1) {
 					LOGGER.log(Loggable.STACK, "Unable to filter collection for " + d.getName(),
