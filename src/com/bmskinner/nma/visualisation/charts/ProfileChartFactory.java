@@ -197,7 +197,8 @@ public class ProfileChartFactory extends AbstractChartFactory {
 			LOGGER.log(Loggable.STACK, "Error creating profile chart", e);
 			return createErrorChart();
 		}
-		JFreeChart chart = makeProfileChart(ds, options.getCell().getPrimaryNucleus().getBorderLength());
+		JFreeChart chart = makeProfileChart(ds,
+				options.getCell().getPrimaryNucleus().getBorderLength());
 
 		// Add markers
 		if (options.isShowMarkers())
@@ -238,7 +239,8 @@ public class ProfileChartFactory extends AbstractChartFactory {
 			return createErrorChart();
 		}
 
-		int length = options.isShowProfiles() ? collection.getMaxProfileLength() : collection.getMedianArrayLength();
+		int length = options.isShowProfiles() ? collection.getMaxProfileLength()
+				: collection.getMedianArrayLength();
 		length = options.isNormalised() ? ds.getMaxDomainValue() : length; // default if normalised
 
 		JFreeChart chart = makeProfileChart(ds, length);
@@ -246,51 +248,60 @@ public class ProfileChartFactory extends AbstractChartFactory {
 		// mark the reference and orientation points
 
 		XYPlot plot = chart.getXYPlot();
+		try {
+			if (options.isShowAnnotations()) {
 
-		if (options.isShowAnnotations()) {
+				Landmark rp = dataset.getAnalysisOptions().orElseThrow(MissingOptionException::new)
+						.getRuleSetCollection().getLandmark(OrientationMark.REFERENCE)
+						.orElseThrow(MissingLandmarkException::new);
 
-			for (OrientationMark tag : collection.getProfileCollection().getOrientationMarks()) {
-				if (OrientationMark.REFERENCE.equals(tag))
-					continue;
+				for (Landmark lm : collection.getProfileCollection().getLandmarks()) {
 
-				try {
-					int index = collection.getProfileCollection().getLandmarkIndex(tag);
+					// Skip RP, it's always at the end of the profile
+					if (rp.equals(lm))
+						continue;
+
+					int index = collection.getProfileCollection().getLandmarkIndex(lm);
 					double yVal = collection.getProfileCollection()
-							.getProfile(options.getType(), OrientationMark.REFERENCE, Stats.MEDIAN).get(index);
+							.getProfile(options.getType(), OrientationMark.REFERENCE, Stats.MEDIAN)
+							.get(index);
 
 					// get the offset from to the current draw point
-					int offset = collection.getProfileCollection().getLandmarkIndex(options.getTag());
+					int offset = collection.getProfileCollection()
+							.getLandmarkIndex(options.getTag());
 
 					// adjust the index to the offset
-					index = CellularComponent.wrapIndex(index - offset, collection.getMedianArrayLength());
+					index = CellularComponent.wrapIndex(index - offset,
+							collection.getMedianArrayLength());
 
-					double indexToDraw = index; // convert to a double to allow normalised positioning
+					double indexToDraw = index; // convert to a double to allow normalised
+												// positioning
 
-					if (options.isNormalised()) // set to the proportion of the point along the profile
-						indexToDraw = ((indexToDraw / collection.getMedianArrayLength()) * ds.getMaxDomainValue());
+					if (options.isNormalised()) // set to the proportion of the point along the
+												// profile
+						indexToDraw = ((indexToDraw / collection.getMedianArrayLength())
+								* ds.getMaxDomainValue());
 
-					if (options.getAlignment().equals(ProfileAlignment.RIGHT) && !options.isNormalised()) {
+					if (options.getAlignment().equals(ProfileAlignment.RIGHT)
+							&& !options.isNormalised()) {
 						int maxX = DatasetUtils.findMaximumDomainValue(ds.getLines()).intValue();
 						int amountToAdd = maxX - collection.getMedianArrayLength();
 						indexToDraw += amountToAdd;
 					}
 
-					Landmark lm = dataset.getAnalysisOptions().orElseThrow(MissingOptionException::new)
-							.getRuleSetCollection().getLandmark(tag).orElseThrow(MissingLandmarkException::new);
 					addDomainMarkerToXYPlot(plot, lm, indexToDraw, yVal);
 
-				} catch (MissingLandmarkException | MissingProfileException | ProfileException
-						| MissingOptionException e) {
-					LOGGER.fine("Landmark not present in profile: " + tag);
 				}
-
 			}
+		} catch (MissingLandmarkException | MissingProfileException | ProfileException
+				| MissingOptionException e) {
+			LOGGER.fine("Landmark not present in profile");
 		}
-
 		// Add segment name annotations
 		if (options.isShowAnnotations() && collection.getProfileCollection().hasSegments()) {
 			try {
-				ISegmentedProfile profile = collection.getProfileCollection().getSegmentedProfile(options.getType(),
+				ISegmentedProfile profile = collection.getProfileCollection().getSegmentedProfile(
+						options.getType(),
 						options.getTag(), Stats.MEDIAN);
 				addSegmentTextAnnotations(profile, plot);
 			} catch (ProfileException | MissingComponentException e) {
@@ -322,7 +333,8 @@ public class ProfileChartFactory extends AbstractChartFactory {
 		// Set x-axis length
 		int xLength = profiles.getMaxDomainValue();
 		if (!options.isNormalised())
-			xLength = options.getDatasets().stream().mapToInt(d -> d.getCollection().getMedianArrayLength()).max()
+			xLength = options.getDatasets().stream()
+					.mapToInt(d -> d.getCollection().getMedianArrayLength()).max()
 					.orElse(profiles.getMaxDomainValue());
 
 		JFreeChart chart = makeProfileChart(profiles, xLength);
@@ -350,7 +362,8 @@ public class ProfileChartFactory extends AbstractChartFactory {
 
 		plot.getRangeAxis().setAutoRange(false);
 		plot.getRangeAxis().setRange(DEFAULT_ANGLE_AXIS_MIN,
-				options.getType() == ProfileType.ANGLE ? DEFAULT_ANGLE_AXIS_MAX : ds.maxRangeValue());
+				options.getType() == ProfileType.ANGLE ? DEFAULT_ANGLE_AXIS_MAX
+						: ds.maxRangeValue());
 
 		plot.getDomainAxis().setAutoRange(false);
 		// Start the x-axis at -1 so tags can be seen clearly
@@ -372,12 +385,16 @@ public class ProfileChartFactory extends AbstractChartFactory {
 
 			lineRenderer.setSeriesStroke(i, chooseSeriesStroke(name));
 
-			if (name.startsWith(ProfileDatasetCreator.SEGMENT_SERIES_PREFIX)) { // segments must be coloured separate to
+			if (name.startsWith(ProfileDatasetCreator.SEGMENT_SERIES_PREFIX)) { // segments must be
+																				// coloured separate
+																				// to
 																				// profiles
 				int segIndex = findSegmentIndex(name);
-				lineRenderer.setSeriesPaint(i, chooseSeriesColour(name, segIndex, options.getSwatch()));
+				lineRenderer.setSeriesPaint(i,
+						chooseSeriesColour(name, segIndex, options.getSwatch()));
 			} else {
-				lineRenderer.setSeriesPaint(i, chooseSeriesColour(name, index, options.getSwatch()));
+				lineRenderer.setSeriesPaint(i,
+						chooseSeriesColour(name, index, options.getSwatch()));
 			}
 
 			lineRenderer.setSeriesShape(i, ChartComponents.DEFAULT_POINT_SHAPE);
@@ -442,7 +459,8 @@ public class ProfileChartFactory extends AbstractChartFactory {
 	 * @param swatch the colour swatch to select from
 	 * @return the colour
 	 */
-	private Color chooseSeriesColour(final String name, final int index, final ColourSwatch swatch) {
+	private Color chooseSeriesColour(final String name, final int index,
+			final ColourSwatch swatch) {
 		if (name == null)
 			return ColourSelecter.getColor(index, swatch);
 		if (name.startsWith(ProfileDatasetCreator.SEGMENT_SERIES_PREFIX))
@@ -502,7 +520,8 @@ public class ProfileChartFactory extends AbstractChartFactory {
 			double x = midPoint;
 			if (options.isNormalised())
 				x = ((double) midPoint / (double) seg.getProfileLength()) * xMax;
-			XYTextAnnotation segmentAnnotation = new XYTextAnnotation(seg.getName(), x, minY + (range * 0.9));
+			XYTextAnnotation segmentAnnotation = new XYTextAnnotation(seg.getName(), x,
+					minY + (range * 0.9));
 
 			Paint colour = ColourSelecter.getColor(seg.getPosition());
 
@@ -557,7 +576,8 @@ public class ProfileChartFactory extends AbstractChartFactory {
 	 * @throws ChartDatasetCreationException
 	 */
 	private JFreeChart makeMultiVariabilityChart() throws ChartDatasetCreationException {
-		ProfileChartDataset ds = new ProfileDatasetCreator(options).createProfileVariabilityDataset();
+		ProfileChartDataset ds = new ProfileDatasetCreator(options)
+				.createProfileVariabilityDataset();
 
 		JFreeChart chart = makeProfileChart(ds, ds.getMaxDomainValue());
 		XYPlot plot = chart.getXYPlot();
