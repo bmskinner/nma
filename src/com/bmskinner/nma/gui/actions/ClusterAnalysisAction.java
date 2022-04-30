@@ -16,7 +16,6 @@
  ******************************************************************************/
 package com.bmskinner.nma.gui.actions;
 
-import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Logger;
 
@@ -139,6 +138,14 @@ public class ClusterAnalysisAction extends SingleDatasetResultAction {
 			int size = r.getGroup().size();
 			LOGGER.info("Found " + size + " clusters");
 
+			UserActionController.getInstance().userActionEventReceived(
+					new UserActionEvent(this, UserActionEvent.REFOLD_CONSENSUS,
+							r.getDatasets()));
+
+			UserActionController.getInstance()
+					.userActionEventReceived(
+							new UserActionEvent(this, UserActionEvent.SAVE, dataset));
+
 			UIController.getInstance().fireClusterGroupAdded(dataset, r.getGroup());
 
 		} catch (InterruptedException | ExecutionException e) {
@@ -147,8 +154,6 @@ public class ClusterAnalysisAction extends SingleDatasetResultAction {
 			Thread.currentThread().interrupt();
 		}
 
-		UserActionController.getInstance()
-				.userActionEventReceived(new UserActionEvent(this, UserActionEvent.SAVE, List.of(dataset)));
 		super.finished();
 	}
 }

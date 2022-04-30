@@ -52,9 +52,11 @@ import com.bmskinner.nma.core.GlobalOptions;
 import com.bmskinner.nma.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nma.gui.components.ExportableTable;
 import com.bmskinner.nma.gui.components.panels.WrappedLabel;
+import com.bmskinner.nma.gui.events.UserActionEvent;
 import com.bmskinner.nma.gui.events.revamp.ScaleUpdatedListener;
 import com.bmskinner.nma.gui.events.revamp.SwatchUpdatedListener;
 import com.bmskinner.nma.gui.events.revamp.UIController;
+import com.bmskinner.nma.gui.events.revamp.UserActionController;
 import com.bmskinner.nma.logging.Loggable;
 import com.bmskinner.nma.visualisation.charts.AbstractChartFactory;
 import com.bmskinner.nma.visualisation.charts.ScatterChartFactory;
@@ -241,7 +243,13 @@ public abstract class AbstractScatterPanel extends DetailPanel {
 
 					d.getCollection().getProfileManager().copySegmentsAndLandmarksTo(virt);
 					d.getCollection().getSignalManager().copySignalGroupsTo(virt);
-					d.addChildCollection(virt);
+					IAnalysisDataset child = d.addChildCollection(virt);
+
+					// Refold child collections by default
+					UserActionController.getInstance().userActionEventReceived(
+							new UserActionEvent(this, UserActionEvent.REFOLD_CONSENSUS,
+									child));
+
 					UIController.getInstance().fireDatasetAdded(d.getChildDataset(virt.getId()));
 				} catch (CollectionFilteringException | ProfileException | MissingProfileException
 						| MissingLandmarkException e1) {

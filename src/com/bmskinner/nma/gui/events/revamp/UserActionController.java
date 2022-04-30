@@ -24,8 +24,8 @@ import com.bmskinner.nma.components.workspaces.IWorkspace;
 import com.bmskinner.nma.components.workspaces.WorkspaceFactory;
 import com.bmskinner.nma.core.DatasetListManager;
 import com.bmskinner.nma.core.InputSupplier;
-import com.bmskinner.nma.core.ThreadManager;
 import com.bmskinner.nma.core.InputSupplier.RequestCancelledException;
+import com.bmskinner.nma.core.ThreadManager;
 import com.bmskinner.nma.gui.DefaultInputSupplier;
 import com.bmskinner.nma.gui.ProgressBarAcceptor;
 import com.bmskinner.nma.gui.actions.AddNuclearSignalAction;
@@ -38,6 +38,11 @@ import com.bmskinner.nma.gui.actions.ExportDatasetAction;
 import com.bmskinner.nma.gui.actions.ExportOptionsAction;
 import com.bmskinner.nma.gui.actions.ExportRuleSetsAction;
 import com.bmskinner.nma.gui.actions.ExportSingleCellImagesAction;
+import com.bmskinner.nma.gui.actions.ExportStatsAction.ExportNuclearOutlinesAction;
+import com.bmskinner.nma.gui.actions.ExportStatsAction.ExportNuclearProfilesAction;
+import com.bmskinner.nma.gui.actions.ExportStatsAction.ExportNuclearStatsAction;
+import com.bmskinner.nma.gui.actions.ExportStatsAction.ExportShellsAction;
+import com.bmskinner.nma.gui.actions.ExportStatsAction.ExportSignalsAction;
 import com.bmskinner.nma.gui.actions.ExportTPSAction;
 import com.bmskinner.nma.gui.actions.ExportWorkspaceAction;
 import com.bmskinner.nma.gui.actions.ExtractRandomCellsAction;
@@ -59,11 +64,6 @@ import com.bmskinner.nma.gui.actions.RunSegmentationAction;
 import com.bmskinner.nma.gui.actions.ShellAnalysisAction;
 import com.bmskinner.nma.gui.actions.SignalWarpingAction;
 import com.bmskinner.nma.gui.actions.SingleDatasetResultAction;
-import com.bmskinner.nma.gui.actions.ExportStatsAction.ExportNuclearOutlinesAction;
-import com.bmskinner.nma.gui.actions.ExportStatsAction.ExportNuclearProfilesAction;
-import com.bmskinner.nma.gui.actions.ExportStatsAction.ExportNuclearStatsAction;
-import com.bmskinner.nma.gui.actions.ExportStatsAction.ExportShellsAction;
-import com.bmskinner.nma.gui.actions.ExportStatsAction.ExportSignalsAction;
 import com.bmskinner.nma.gui.dialogs.collections.AbstractCellCollectionDialog;
 import com.bmskinner.nma.gui.dialogs.collections.ManualCurationDialog;
 import com.bmskinner.nma.gui.events.LandmarkUpdateEvent;
@@ -387,7 +387,7 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 			return () -> {
 				final CountDownLatch refoldLatch = new CountDownLatch(1);
 				new Thread(() -> { // run refolding
-					Runnable task = new RefoldNucleusAction(selectedDatasets, acceptor,
+					Runnable task = new RefoldNucleusAction(event.getDatasets(), acceptor,
 							refoldLatch);
 					task.run();
 				}).start();
@@ -395,6 +395,7 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 				new Thread(() -> { // wait for refolding and recache charts
 					try {
 						refoldLatch.await();
+						UIController.getInstance().fireConsensusNucleusChanged(event.getDatasets());
 					} catch (InterruptedException e) {
 						Thread.currentThread().interrupt();
 						return;

@@ -31,11 +31,13 @@ import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.options.IAnalysisOptions;
-import com.bmskinner.nma.core.ThreadManager;
 import com.bmskinner.nma.core.InputSupplier.RequestCancelledException;
+import com.bmskinner.nma.core.ThreadManager;
 import com.bmskinner.nma.gui.ProgressBarAcceptor;
 import com.bmskinner.nma.gui.dialogs.prober.SignalImageProber;
+import com.bmskinner.nma.gui.events.UserActionEvent;
 import com.bmskinner.nma.gui.events.revamp.UIController;
+import com.bmskinner.nma.gui.events.revamp.UserActionController;
 import com.bmskinner.nma.logging.Loggable;
 
 /**
@@ -50,7 +52,8 @@ public class AddNuclearSignalAction extends SingleDatasetResultAction {
 
 	private static final @NonNull String PROGRESS_BAR_LABEL = "Signal detection";
 
-	public AddNuclearSignalAction(@NonNull IAnalysisDataset dataset, @NonNull ProgressBarAcceptor acceptor) {
+	public AddNuclearSignalAction(@NonNull IAnalysisDataset dataset,
+			@NonNull ProgressBarAcceptor acceptor) {
 		super(dataset, PROGRESS_BAR_LABEL, acceptor);
 	}
 
@@ -107,6 +110,9 @@ public class AddNuclearSignalAction extends SingleDatasetResultAction {
 		cleanup(); // remove the property change listener
 		try {
 			IAnalysisResult r = worker.get();
+			UserActionController.getInstance().userActionEventReceived(
+					new UserActionEvent(this, UserActionEvent.REFOLD_CONSENSUS,
+							r.getFirstDataset()));
 
 			UIController.getInstance().fireDatasetAdded(r.getFirstDataset());
 

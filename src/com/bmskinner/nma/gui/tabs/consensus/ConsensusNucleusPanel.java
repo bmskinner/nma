@@ -52,7 +52,8 @@ import com.bmskinner.nma.visualisation.options.ChartOptions;
 import com.bmskinner.nma.visualisation.options.ChartOptionsBuilder;
 
 @SuppressWarnings("serial")
-public class ConsensusNucleusPanel extends ChartDetailPanel implements ChangeListener, ConsensusUpdatedListener,
+public class ConsensusNucleusPanel extends ChartDetailPanel
+		implements ChangeListener, ConsensusUpdatedListener,
 		ScaleUpdatedListener, SwatchUpdatedListener, ProfilesUpdatedListener {
 
 	private static final Logger LOGGER = Logger.getLogger(ConsensusNucleusPanel.class.getName());
@@ -195,13 +196,15 @@ public class ConsensusNucleusPanel extends ChartDetailPanel implements ChangeLis
 		moveUp.setToolTipText(Labels.Consensus.INCREASE_Y_TOOLTIP);
 
 		moveUp.addActionListener(
-				e -> UserActionController.getInstance().consensusTranslationUpdateReceived(activeDataset(), 0, 1));
+				e -> UserActionController.getInstance()
+						.consensusTranslationUpdateReceived(activeDataset(), 0, 1));
 		panel.add(moveUp, constraints);
 
 		JButton moveDown = new JButton(Labels.Consensus.DECREASE_Y_LBL);
 		moveDown.setToolTipText(Labels.Consensus.DECREASE_Y_TOOLTIP);
 		moveDown.addActionListener(
-				e -> UserActionController.getInstance().consensusTranslationUpdateReceived(activeDataset(), 0, -1));
+				e -> UserActionController.getInstance()
+						.consensusTranslationUpdateReceived(activeDataset(), 0, -1));
 
 		constraints.gridx = 1;
 		constraints.gridy = 2;
@@ -210,7 +213,8 @@ public class ConsensusNucleusPanel extends ChartDetailPanel implements ChangeLis
 		JButton moveLeft = new JButton(Labels.Consensus.DECREASE_X_LBL);
 		moveLeft.setToolTipText(Labels.Consensus.DECREASE_X_TOOLTIP);
 		moveLeft.addActionListener(
-				e -> UserActionController.getInstance().consensusTranslationUpdateReceived(activeDataset(), -1, 0));
+				e -> UserActionController.getInstance()
+						.consensusTranslationUpdateReceived(activeDataset(), -1, 0));
 
 		constraints.gridx = 0;
 		constraints.gridy = 1;
@@ -219,7 +223,8 @@ public class ConsensusNucleusPanel extends ChartDetailPanel implements ChangeLis
 		JButton moveRight = new JButton(Labels.Consensus.INCREASE_X_LBL);
 		moveRight.setToolTipText(Labels.Consensus.INCREASE_X_TOOLTIP);
 		moveRight.addActionListener(
-				e -> UserActionController.getInstance().consensusTranslationUpdateReceived(activeDataset(), 1, 0));
+				e -> UserActionController.getInstance()
+						.consensusTranslationUpdateReceived(activeDataset(), 1, 0));
 
 		constraints.gridx = 2;
 		constraints.gridy = 1;
@@ -228,7 +233,8 @@ public class ConsensusNucleusPanel extends ChartDetailPanel implements ChangeLis
 		JButton moveRst = new JButton(Labels.Consensus.RESET_LBL);
 		moveRst.setToolTipText(Labels.Consensus.RESET_COM_TOOLTIP);
 		moveRst.addActionListener(
-				e -> UserActionController.getInstance().consensusTranslationResetReceived(activeDataset()));
+				e -> UserActionController.getInstance()
+						.consensusTranslationResetReceived(activeDataset()));
 
 		constraints.gridx = 1;
 		constraints.gridy = 1;
@@ -250,7 +256,8 @@ public class ConsensusNucleusPanel extends ChartDetailPanel implements ChangeLis
 		JButton rotateFwd = new JButton(Labels.Consensus.DECREASE_ROTATION_LBL);
 		rotateFwd.setToolTipText(Labels.Consensus.DECREASE_ROTATION_TOOLTIP);
 		rotateFwd.addActionListener(
-				e -> UserActionController.getInstance().consensusRotationUpdateReceived(activeDataset(), 1));
+				e -> UserActionController.getInstance()
+						.consensusRotationUpdateReceived(activeDataset(), 1));
 
 		panel.add(rotateFwd, constraints);
 
@@ -258,7 +265,8 @@ public class ConsensusNucleusPanel extends ChartDetailPanel implements ChangeLis
 		rotateBck.setToolTipText(Labels.Consensus.INCREASE_ROTATION_TOOLTIP);
 
 		rotateBck.addActionListener(
-				e -> UserActionController.getInstance().consensusRotationUpdateReceived(activeDataset(), -1));
+				e -> UserActionController.getInstance()
+						.consensusRotationUpdateReceived(activeDataset(), -1));
 
 		constraints.gridx = 2;
 		constraints.gridy = 0;
@@ -278,7 +286,8 @@ public class ConsensusNucleusPanel extends ChartDetailPanel implements ChangeLis
 
 		JButton refoldBtn = new JButton(Labels.Consensus.RE_REFOLD_LBL);
 		refoldBtn.addActionListener(e -> UserActionController.getInstance().userActionEventReceived(
-				new UserActionEvent(this, UserActionEvent.REFOLD_CONSENSUS, List.of(activeDataset()))));
+				new UserActionEvent(this, UserActionEvent.REFOLD_CONSENSUS,
+						List.of(activeDataset()))));
 
 		constraints.gridwidth = 3;
 		constraints.gridheight = 1;
@@ -303,10 +312,16 @@ public class ConsensusNucleusPanel extends ChartDetailPanel implements ChangeLis
 		showMeshFacesBox.setEnabled(showMeshBox.isSelected());
 
 		ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets())
-				.setScale(GlobalOptions.getInstance().getScale()).setSwatch(GlobalOptions.getInstance().getSwatch())
-				.setShowMesh(showMeshBox.isSelected()).setShowMeshVertices(showMeshVerticesBox.isSelected())
-				.setShowMeshEdges(showMeshEdgesBox.isSelected()).setShowMeshFaces(showMeshFacesBox.isSelected())
-				.setStraightenMesh(false).setShowAnnotations(false).setShowXAxis(false).setShowYAxis(false)
+				.setScale(GlobalOptions.getInstance().getScale())
+				.setSwatch(GlobalOptions.getInstance().getSwatch())
+				.setShowMesh(showMeshBox.isSelected())
+				.setShowMeshVertices(showMeshVerticesBox.isSelected())
+				.setShowMeshEdges(showMeshEdgesBox.isSelected())
+				.setShowMeshFaces(showMeshFacesBox.isSelected())
+				.setStraightenMesh(false)
+				.setShowAnnotations(false)
+				.setShowXAxis(false)
+				.setShowYAxis(false)
 				.setTarget(consensusChartPanel).build();
 
 		setChart(options);
@@ -327,14 +342,17 @@ public class ConsensusNucleusPanel extends ChartDetailPanel implements ChangeLis
 	@Override
 	protected synchronized void updateMultiple() {
 
-		ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets())
-				.setScale(GlobalOptions.getInstance().getScale()).setSwatch(GlobalOptions.getInstance().getSwatch())
+		ChartOptions options = new ChartOptionsBuilder()
+				.setDatasets(getDatasets())
+				.setScale(GlobalOptions.getInstance().getScale())
+				.setSwatch(GlobalOptions.getInstance().getSwatch())
 				.setTarget(consensusChartPanel).build();
 
 		setChart(options);
 
 		// Only show the refold button if no selected datasets have a consensus
-		runRefoldingButton.setVisible(getDatasets().stream().noneMatch(d -> d.getCollection().hasConsensus()));
+		runRefoldingButton.setVisible(
+				getDatasets().stream().noneMatch(d -> d.getCollection().hasConsensus()));
 		offsetsPanel.setVisible(false);
 	}
 

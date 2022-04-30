@@ -153,6 +153,18 @@ public class UserActionEvent extends EventObject {
 	}
 
 	/**
+	 * Create an event from a source class, with the given message and dataset to
+	 * process
+	 * 
+	 * @param source
+	 * @param type
+	 */
+	public UserActionEvent(@NonNull Object source, @NonNull String message,
+			IAnalysisDataset dataset) {
+		this(source, message, List.of(dataset), null);
+	}
+
+	/**
 	 * Create an event from a source class, with the given message and datasets to
 	 * process
 	 * 
