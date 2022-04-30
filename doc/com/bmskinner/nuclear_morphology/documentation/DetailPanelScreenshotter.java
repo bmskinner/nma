@@ -32,11 +32,11 @@ import javax.imageio.ImageIO;
 import javax.swing.JComponent;
 import javax.swing.JTabbedPane;
 
-import com.bmskinner.nuclear_morphology.gui.main.DockableMainWindow;
-import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
-import com.bmskinner.nuclear_morphology.gui.tabs.ImagesTabPanel;
-import com.bmskinner.nuclear_morphology.gui.tabs.cells_detail.CellsListPanel;
-import com.bmskinner.nuclear_morphology.io.Io;
+import com.bmskinner.nma.gui.main.DockableMainWindow;
+import com.bmskinner.nma.gui.tabs.DetailPanel;
+import com.bmskinner.nma.gui.tabs.ImagesTabPanel;
+import com.bmskinner.nma.gui.tabs.cells_detail.CellsListPanel;
+import com.bmskinner.nma.io.Io;
 
 /**
  * Take screenshots of a detail panel and all the sub-panels

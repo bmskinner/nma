@@ -1,0 +1,118 @@
+package com.bmskinner.nma.gui.actions;
+
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.GridBagLayout;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.swing.JCheckBox;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+
+import org.eclipse.jdt.annotation.NonNull;
+
+import com.bmskinner.nma.analysis.DefaultAnalysisWorker;
+import com.bmskinner.nma.analysis.IAnalysisMethod;
+import com.bmskinner.nma.components.datasets.IAnalysisDataset;
+import com.bmskinner.nma.components.options.HashOptions;
+import com.bmskinner.nma.components.options.OptionsBuilder;
+import com.bmskinner.nma.core.ThreadManager;
+import com.bmskinner.nma.gui.ProgressBarAcceptor;
+import com.bmskinner.nma.gui.dialogs.SubAnalysisSetupDialog;
+import com.bmskinner.nma.io.CellImageExportMethod;
+
+/**
+ * Export each nucleus to a separate image
+ * 
+ * @author ben
+ *
+ */
+public class ExportSingleCellImagesAction extends MultiDatasetResultAction {
+
+	private static final String PROGRESS_LBL = "Exporting single cells";
+
+	public ExportSingleCellImagesAction(@NonNull List<IAnalysisDataset> datasets,
+			@NonNull final ProgressBarAcceptor acceptor) {
+		super(datasets, PROGRESS_LBL, acceptor);
+	}
+
+	@Override
+	public void run() {
+		setProgressBarIndeterminate();
+
+		IAnalysisMethod m = new CellImageSetupDialog(datasets).getMethod();
+
+		int nNuclei = datasets.stream().mapToInt(d -> d.getCollection().getNucleusCount()).sum();
+
+		worker = new DefaultAnalysisWorker(m, nNuclei);
+		worker.addPropertyChangeListener(this);
+		ThreadManager.getInstance().submit(worker);
+	}
+
+	@SuppressWarnings("serial")
+	private class CellImageSetupDialog extends SubAnalysisSetupDialog {
+
+		private static final String DIALOG_TITLE = "Cell image export options";
+
+		HashOptions o = new OptionsBuilder().build();
+
+		public CellImageSetupDialog(final @NonNull List<IAnalysisDataset> datasets) {
+			this(datasets, DIALOG_TITLE);
+		}
+
+		/**
+		 * Constructor that does not make panel visible
+		 * 
+		 * @param dataset the dataset
+		 * @param title
+		 */
+		protected CellImageSetupDialog(final @NonNull List<IAnalysisDataset> datasets, final String title) {
+			super(datasets, title);
+			setDefaults();
+			createUI();
+			packAndDisplay();
+		}
+
+		@Override
+		public IAnalysisMethod getMethod() {
+			return new CellImageExportMethod(datasets, o);
+		}
+
+		@Override
+		protected void createUI() {
+
+			getContentPane().add(createHeader(), BorderLayout.NORTH);
+			getContentPane().add(createFooter(), BorderLayout.SOUTH);
+
+			JPanel optionsPanel = new JPanel();
+			GridBagLayout layout = new GridBagLayout();
+			optionsPanel.setLayout(layout);
+
+			List<JLabel> labels = new ArrayList<>();
+			List<Component> fields = new ArrayList<>();
+
+			JCheckBox maskBox = new JCheckBox();
+			maskBox.setSelected(o.getBoolean(CellImageExportMethod.MASK_BACKGROUND));
+			maskBox.addActionListener(e -> o.setBoolean(CellImageExportMethod.MASK_BACKGROUND, maskBox.isSelected()));
+
+			labels.add(new JLabel("Mask background"));
+			fields.add(maskBox);
+
+			this.addLabelTextRows(labels, fields, layout, optionsPanel);
+
+			getContentPane().add(optionsPanel, BorderLayout.CENTER);
+		}
+
+		@Override
+		protected void setDefaults() {
+			o.setBoolean(CellImageExportMethod.MASK_BACKGROUND, CellImageExportMethod.DEAULT_MASK_BACKGROUND);
+		}
+
+		@Override
+		public HashOptions getOptions() {
+			return o;
+		}
+	}
+
+}

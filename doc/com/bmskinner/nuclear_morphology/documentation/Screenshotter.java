@@ -30,14 +30,14 @@ import java.util.List;
 
 import javax.swing.UIManager;
 
-import com.bmskinner.nuclear_morphology.components.Version;
-import com.bmskinner.nuclear_morphology.core.InputSupplier;
-import com.bmskinner.nuclear_morphology.gui.DefaultInputSupplier;
-import com.bmskinner.nuclear_morphology.gui.events.UserActionEvent;
-import com.bmskinner.nuclear_morphology.gui.events.revamp.UserActionController;
-import com.bmskinner.nuclear_morphology.gui.main.DockableMainWindow;
-import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
-import com.bmskinner.nuclear_morphology.gui.tabs.TabPanel;
+import com.bmskinner.nma.components.Version;
+import com.bmskinner.nma.core.InputSupplier;
+import com.bmskinner.nma.gui.DefaultInputSupplier;
+import com.bmskinner.nma.gui.events.UserActionEvent;
+import com.bmskinner.nma.gui.events.revamp.UserActionController;
+import com.bmskinner.nma.gui.main.DockableMainWindow;
+import com.bmskinner.nma.gui.tabs.DetailPanel;
+import com.bmskinner.nma.gui.tabs.TabPanel;
 
 import ij.IJ;
 

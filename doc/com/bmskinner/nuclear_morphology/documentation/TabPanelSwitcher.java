@@ -19,8 +19,8 @@ package com.bmskinner.nuclear_morphology.documentation;
 import java.awt.Component;
 import java.lang.reflect.Field;
 
-import com.bmskinner.nuclear_morphology.gui.main.DockableMainWindow;
-import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
+import com.bmskinner.nma.gui.main.DockableMainWindow;
+import com.bmskinner.nma.gui.tabs.DetailPanel;
 import com.javadocking.dock.TabDock;
 
 /**
