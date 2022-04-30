@@ -12,7 +12,7 @@ import com.bmskinner.nma.gui.actions.RefoldNucleusAction;
 import com.bmskinner.nma.gui.actions.RunProfilingAction;
 import com.bmskinner.nma.gui.actions.RunSegmentationAction;
 import com.bmskinner.nma.gui.actions.SingleDatasetResultAction;
-import com.bmskinner.nma.gui.events.revamp.UIController;
+import com.bmskinner.nma.gui.events.UIController;
 
 /**
  * A runnable linking the main actions of an analysis: profiling, segmentation,

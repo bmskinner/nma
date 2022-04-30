@@ -30,9 +30,9 @@ import com.bmskinner.nma.analysis.profiles.DatasetSegmentationMethod.MorphologyA
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.core.ThreadManager;
 import com.bmskinner.nma.gui.ProgressBarAcceptor;
+import com.bmskinner.nma.gui.events.UIController;
+import com.bmskinner.nma.gui.events.UserActionController;
 import com.bmskinner.nma.gui.events.UserActionEvent;
-import com.bmskinner.nma.gui.events.revamp.UIController;
-import com.bmskinner.nma.gui.events.revamp.UserActionController;
 
 /**
  * Run segmentation on the given datasets

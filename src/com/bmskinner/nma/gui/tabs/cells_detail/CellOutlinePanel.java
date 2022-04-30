@@ -33,7 +33,7 @@ import com.bmskinner.nma.gui.RotationMode;
 import com.bmskinner.nma.gui.components.panels.GenericCheckboxPanel;
 import com.bmskinner.nma.gui.events.CellUpdatedEventListener;
 import com.bmskinner.nma.gui.events.SegmentStartIndexUpdateEvent;
-import com.bmskinner.nma.gui.events.revamp.SwatchUpdatedListener;
+import com.bmskinner.nma.gui.events.SwatchUpdatedListener;
 import com.bmskinner.nma.gui.tabs.cells_detail.InteractiveCellPanel.CellDisplayOptions;
 import com.bmskinner.nma.logging.Loggable;
 import com.bmskinner.nma.visualisation.charts.AbstractChartFactory;

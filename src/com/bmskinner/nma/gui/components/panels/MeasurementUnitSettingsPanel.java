@@ -25,7 +25,7 @@ import javax.swing.JRadioButton;
 
 import com.bmskinner.nma.components.measure.MeasurementScale;
 import com.bmskinner.nma.core.GlobalOptions;
-import com.bmskinner.nma.gui.events.revamp.UIController;
+import com.bmskinner.nma.gui.events.UIController;
 
 @SuppressWarnings("serial")
 public class MeasurementUnitSettingsPanel extends EnumeratedOptionsPanel {

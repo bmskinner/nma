@@ -15,7 +15,7 @@ import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.core.ThreadManager;
 import com.bmskinner.nma.gui.ProgressBarAcceptor;
 import com.bmskinner.nma.gui.dialogs.DatasetMergingDialog;
-import com.bmskinner.nma.gui.events.revamp.UIController;
+import com.bmskinner.nma.gui.events.UIController;
 import com.bmskinner.nma.logging.Loggable;
 
 /**

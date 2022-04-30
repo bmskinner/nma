@@ -41,9 +41,9 @@ import com.bmskinner.nma.core.DatasetListManager;
 import com.bmskinner.nma.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nma.gui.Labels;
 import com.bmskinner.nma.gui.components.ColourSelecter;
+import com.bmskinner.nma.gui.events.UIController;
+import com.bmskinner.nma.gui.events.UserActionController;
 import com.bmskinner.nma.gui.events.UserActionEvent;
-import com.bmskinner.nma.gui.events.revamp.UIController;
-import com.bmskinner.nma.gui.events.revamp.UserActionController;
 import com.bmskinner.nma.logging.Loggable;
 import com.bmskinner.nma.utility.FileUtils;
 

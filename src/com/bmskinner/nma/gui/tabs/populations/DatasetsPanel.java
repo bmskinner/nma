@@ -43,8 +43,8 @@ import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.datasets.IClusterGroup;
 import com.bmskinner.nma.components.workspaces.IWorkspace;
 import com.bmskinner.nma.core.DatasetListManager;
-import com.bmskinner.nma.gui.events.revamp.DatasetAddedListener;
-import com.bmskinner.nma.gui.events.revamp.SwatchUpdatedListener;
+import com.bmskinner.nma.gui.events.DatasetAddedListener;
+import com.bmskinner.nma.gui.events.SwatchUpdatedListener;
 import com.bmskinner.nma.gui.tabs.DetailPanel;
 import com.bmskinner.nma.logging.Loggable;
 

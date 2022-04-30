@@ -35,8 +35,8 @@ import com.bmskinner.nma.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nma.gui.DefaultInputSupplier;
 import com.bmskinner.nma.gui.ProgressBarAcceptor;
 import com.bmskinner.nma.gui.dialogs.DatasetMergingDialog;
+import com.bmskinner.nma.gui.events.UserActionController;
 import com.bmskinner.nma.gui.events.UserActionEvent;
-import com.bmskinner.nma.gui.events.revamp.UserActionController;
 import com.bmskinner.nma.io.Io;
 import com.bmskinner.nma.logging.Loggable;
 

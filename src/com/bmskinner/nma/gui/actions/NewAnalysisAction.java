@@ -45,8 +45,8 @@ import com.bmskinner.nma.core.GlobalOptions;
 import com.bmskinner.nma.core.ThreadManager;
 import com.bmskinner.nma.gui.ProgressBarAcceptor;
 import com.bmskinner.nma.gui.dialogs.prober.NucleusImageProber;
+import com.bmskinner.nma.gui.events.UserActionController;
 import com.bmskinner.nma.gui.events.UserActionEvent;
-import com.bmskinner.nma.gui.events.revamp.UserActionController;
 import com.bmskinner.nma.logging.Loggable;
 
 /**

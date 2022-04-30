@@ -10,8 +10,8 @@ import javax.swing.JMenuItem;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
+import com.bmskinner.nma.gui.events.UserActionController;
 import com.bmskinner.nma.gui.events.UserActionEvent;
-import com.bmskinner.nma.gui.events.revamp.UserActionController;
 
 /**
  * Simplify creation of menu items

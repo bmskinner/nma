@@ -23,8 +23,8 @@ import javax.swing.JTabbedPane;
 
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.profiles.ProfileType;
-import com.bmskinner.nma.gui.events.revamp.ProfilesUpdatedListener;
-import com.bmskinner.nma.gui.events.revamp.SwatchUpdatedListener;
+import com.bmskinner.nma.gui.events.ProfilesUpdatedListener;
+import com.bmskinner.nma.gui.events.SwatchUpdatedListener;
 import com.bmskinner.nma.gui.tabs.DetailPanel;
 
 @SuppressWarnings("serial")

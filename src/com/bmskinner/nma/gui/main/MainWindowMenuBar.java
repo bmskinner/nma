@@ -55,10 +55,10 @@ import com.bmskinner.nma.gui.MenuFactory.ContextualMenuItem;
 import com.bmskinner.nma.gui.actions.NewAnalysisAction;
 import com.bmskinner.nma.gui.components.ColourSelecter.ColourSwatch;
 import com.bmskinner.nma.gui.dialogs.VersionHelpDialog;
+import com.bmskinner.nma.gui.events.DatasetSelectionUpdatedListener;
+import com.bmskinner.nma.gui.events.UIController;
+import com.bmskinner.nma.gui.events.UserActionController;
 import com.bmskinner.nma.gui.events.UserActionEvent;
-import com.bmskinner.nma.gui.events.revamp.DatasetSelectionUpdatedListener;
-import com.bmskinner.nma.gui.events.revamp.UIController;
-import com.bmskinner.nma.gui.events.revamp.UserActionController;
 import com.bmskinner.nma.io.Io;
 import com.bmskinner.nma.io.UpdateChecker;
 

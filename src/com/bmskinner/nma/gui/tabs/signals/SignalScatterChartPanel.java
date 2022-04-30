@@ -20,7 +20,7 @@ import java.util.List;
 
 import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
-import com.bmskinner.nma.gui.events.revamp.NuclearSignalUpdatedListener;
+import com.bmskinner.nma.gui.events.NuclearSignalUpdatedListener;
 import com.bmskinner.nma.gui.tabs.AbstractScatterPanel;
 
 @SuppressWarnings("serial")

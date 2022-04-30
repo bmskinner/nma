@@ -1,4 +1,4 @@
-package com.bmskinner.nma.gui.events.revamp;
+package com.bmskinner.nma.gui.events;
 
 import java.util.List;
 

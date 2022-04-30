@@ -1,4 +1,4 @@
-package com.bmskinner.nma.gui.events.revamp;
+package com.bmskinner.nma.gui.events;
 
 /**
  * Notify the listener that swatch has changed in the given datasets.

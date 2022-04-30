@@ -1,6 +1,4 @@
-package com.bmskinner.nma.gui.events.revamp;
-
-import com.bmskinner.nma.gui.events.UserActionEvent;
+package com.bmskinner.nma.gui.events;
 
 /**
  * Interface for handlers of user actions

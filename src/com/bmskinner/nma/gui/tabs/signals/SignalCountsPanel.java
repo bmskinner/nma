@@ -50,7 +50,7 @@ import com.bmskinner.nma.components.profiles.ProfileException;
 import com.bmskinner.nma.core.GlobalOptions;
 import com.bmskinner.nma.gui.components.panels.SignalGroupSelectionPanel;
 import com.bmskinner.nma.gui.dialogs.SettingsDialog;
-import com.bmskinner.nma.gui.events.revamp.NuclearSignalUpdatedListener;
+import com.bmskinner.nma.gui.events.NuclearSignalUpdatedListener;
 import com.bmskinner.nma.gui.tabs.ChartDetailPanel;
 import com.bmskinner.nma.logging.Loggable;
 import com.bmskinner.nma.visualisation.charts.AbstractChartFactory;

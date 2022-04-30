@@ -28,9 +28,9 @@ import com.bmskinner.nma.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nma.gui.ProgressBarAcceptor;
 import com.bmskinner.nma.gui.components.AnnotatedNucleusPanel;
 import com.bmskinner.nma.gui.dialogs.SubAnalysisSetupDialog;
+import com.bmskinner.nma.gui.events.UIController;
+import com.bmskinner.nma.gui.events.UserActionController;
 import com.bmskinner.nma.gui.events.UserActionEvent;
-import com.bmskinner.nma.gui.events.revamp.UIController;
-import com.bmskinner.nma.gui.events.revamp.UserActionController;
 import com.bmskinner.nma.logging.Loggable;
 
 public class ManualClusterAction extends SingleDatasetResultAction {

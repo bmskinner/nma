@@ -31,7 +31,7 @@ import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.core.ThreadManager;
 import com.bmskinner.nma.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nma.gui.ProgressBarAcceptor;
-import com.bmskinner.nma.gui.events.revamp.UIController;
+import com.bmskinner.nma.gui.events.UIController;
 import com.bmskinner.nma.io.Io.Importer;
 import com.bmskinner.nma.logging.Loggable;
 import com.bmskinner.nma.pipelines.SavedOptionsAnalysisPipeline;

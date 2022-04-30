@@ -26,8 +26,8 @@ import com.bmskinner.nma.components.profiles.Landmark;
 import com.bmskinner.nma.components.profiles.SegmentationHandler;
 import com.bmskinner.nma.components.rules.OrientationMark;
 import com.bmskinner.nma.core.InputSupplier.RequestCancelledException;
+import com.bmskinner.nma.gui.events.UserActionController;
 import com.bmskinner.nma.gui.events.UserActionEvent;
-import com.bmskinner.nma.gui.events.revamp.UserActionController;
 import com.bmskinner.nma.gui.tabs.DetailPanel;
 import com.bmskinner.nma.gui.tabs.EditingTabPanel;
 

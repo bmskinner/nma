@@ -43,7 +43,7 @@ import com.bmskinner.nma.components.profiles.MissingProfileException;
 import com.bmskinner.nma.components.profiles.ProfileException;
 import com.bmskinner.nma.gui.ProgressBarAcceptor;
 import com.bmskinner.nma.gui.dialogs.SettingsDialog;
-import com.bmskinner.nma.gui.events.revamp.UIController;
+import com.bmskinner.nma.gui.events.UIController;
 import com.bmskinner.nma.logging.Loggable;
 
 /**

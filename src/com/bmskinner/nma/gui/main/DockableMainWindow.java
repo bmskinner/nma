@@ -31,7 +31,7 @@ import javax.swing.border.EmptyBorder;
 
 import com.bmskinner.nma.components.Version;
 import com.bmskinner.nma.gui.LogPanel;
-import com.bmskinner.nma.gui.events.revamp.UserActionController;
+import com.bmskinner.nma.gui.events.UserActionController;
 import com.bmskinner.nma.gui.tabs.AnalysisDetailPanel;
 import com.bmskinner.nma.gui.tabs.ClusterDetailPanel;
 import com.bmskinner.nma.gui.tabs.DetailPanel;

@@ -48,7 +48,7 @@ import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.options.MissingOptionException;
 import com.bmskinner.nma.components.signals.ISignalGroup;
 import com.bmskinner.nma.gui.components.SelectableCellIcon;
-import com.bmskinner.nma.gui.events.revamp.UIController;
+import com.bmskinner.nma.gui.events.UIController;
 import com.bmskinner.nma.io.ImageImportWorker;
 import com.bmskinner.nma.io.ImageImporter;
 import com.bmskinner.nma.io.UnloadableImageException;

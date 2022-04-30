@@ -9,7 +9,7 @@ import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.signals.IWarpedSignal;
-import com.bmskinner.nma.gui.events.revamp.ConsensusUpdatedListener;
+import com.bmskinner.nma.gui.events.ConsensusUpdatedListener;
 import com.bmskinner.nma.gui.tabs.ChartDetailPanel;
 import com.bmskinner.nma.visualisation.charts.AbstractChartFactory;
 import com.bmskinner.nma.visualisation.charts.OutlineChartFactory;

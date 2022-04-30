@@ -1,4 +1,4 @@
-package com.bmskinner.nma.gui.events.revamp;
+package com.bmskinner.nma.gui.events;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -69,15 +69,6 @@ import com.bmskinner.nma.gui.actions.SignalWarpingAction;
 import com.bmskinner.nma.gui.actions.SingleDatasetResultAction;
 import com.bmskinner.nma.gui.dialogs.collections.AbstractCellCollectionDialog;
 import com.bmskinner.nma.gui.dialogs.collections.ManualCurationDialog;
-import com.bmskinner.nma.gui.events.LandmarkUpdateEvent;
-import com.bmskinner.nma.gui.events.LandmarkUpdateEventListener;
-import com.bmskinner.nma.gui.events.ProfileWindowProportionUpdateEvent;
-import com.bmskinner.nma.gui.events.SegmentEventListener;
-import com.bmskinner.nma.gui.events.SegmentMergeEvent;
-import com.bmskinner.nma.gui.events.SegmentSplitEvent;
-import com.bmskinner.nma.gui.events.SegmentStartIndexUpdateEvent;
-import com.bmskinner.nma.gui.events.SegmentUnmergeEvent;
-import com.bmskinner.nma.gui.events.UserActionEvent;
 import com.bmskinner.nma.gui.runnables.MorphologyAnalysis;
 import com.bmskinner.nma.gui.runnables.SaveAllDatasets;
 

@@ -1,4 +1,4 @@
-package com.bmskinner.nma.gui.events.revamp;
+package com.bmskinner.nma.gui.events;
 
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.workspaces.IWorkspace;

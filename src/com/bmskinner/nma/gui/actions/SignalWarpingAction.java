@@ -30,7 +30,7 @@ import com.bmskinner.nma.gui.ProgressBarAcceptor;
 import com.bmskinner.nma.gui.components.panels.DatasetSelectionPanel;
 import com.bmskinner.nma.gui.components.panels.SignalGroupSelectionPanel;
 import com.bmskinner.nma.gui.dialogs.SubAnalysisSetupDialog;
-import com.bmskinner.nma.gui.events.revamp.UIController;
+import com.bmskinner.nma.gui.events.UIController;
 import com.bmskinner.nma.gui.tabs.signals.warping.SignalWarpingRunSettings;
 
 public class SignalWarpingAction extends SingleDatasetResultAction {

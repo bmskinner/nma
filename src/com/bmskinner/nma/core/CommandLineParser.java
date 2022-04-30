@@ -23,8 +23,8 @@ import java.util.logging.Logger;
 
 import javax.swing.UIManager;
 
-import com.bmskinner.nma.gui.events.revamp.UIController;
-import com.bmskinner.nma.gui.events.revamp.UserActionController;
+import com.bmskinner.nma.gui.events.UIController;
+import com.bmskinner.nma.gui.events.UserActionController;
 import com.bmskinner.nma.gui.main.DockableMainWindow;
 import com.bmskinner.nma.io.ConfigFileReader;
 import com.bmskinner.nma.pipelines.BasicAnalysisPipeline;

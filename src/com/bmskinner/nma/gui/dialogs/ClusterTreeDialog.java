@@ -66,7 +66,7 @@ import com.bmskinner.nma.gui.components.DraggableTreeViewer;
 import com.bmskinner.nma.gui.components.VariableNodePainter;
 import com.bmskinner.nma.gui.components.panels.ClusterGroupSelectionPanel;
 import com.bmskinner.nma.gui.components.panels.DatasetSelectionPanel;
-import com.bmskinner.nma.gui.events.revamp.UIController;
+import com.bmskinner.nma.gui.events.UIController;
 import com.bmskinner.nma.logging.Loggable;
 
 import jebl.evolution.graphs.Node;

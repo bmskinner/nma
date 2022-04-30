@@ -37,7 +37,7 @@ import com.bmskinner.nma.core.GlobalOptions;
 import com.bmskinner.nma.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nma.gui.DefaultInputSupplier;
 import com.bmskinner.nma.gui.components.ColourSelecter;
-import com.bmskinner.nma.gui.events.revamp.UserActionController;
+import com.bmskinner.nma.gui.events.UserActionController;
 import com.bmskinner.nma.io.Io;
 import com.bmskinner.nma.io.SVGWriter;
 import com.bmskinner.nma.visualisation.charts.overlays.ShapeOverlay;

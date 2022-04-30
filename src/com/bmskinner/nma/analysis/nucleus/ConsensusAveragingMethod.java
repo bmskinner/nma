@@ -51,7 +51,7 @@ import com.bmskinner.nma.components.profiles.ProfileException;
 import com.bmskinner.nma.components.profiles.ProfileType;
 import com.bmskinner.nma.components.profiles.UnprofilableObjectException;
 import com.bmskinner.nma.components.rules.OrientationMark;
-import com.bmskinner.nma.gui.events.revamp.UIController;
+import com.bmskinner.nma.gui.events.UIController;
 import com.bmskinner.nma.logging.Loggable;
 import com.bmskinner.nma.stats.Stats;
 

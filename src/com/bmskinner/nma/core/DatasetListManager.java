@@ -33,8 +33,8 @@ import org.eclipse.jdt.annotation.Nullable;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.datasets.ICellCollection;
 import com.bmskinner.nma.components.workspaces.IWorkspace;
-import com.bmskinner.nma.gui.events.revamp.DatasetAddedListener;
-import com.bmskinner.nma.gui.events.revamp.UIController;
+import com.bmskinner.nma.gui.events.DatasetAddedListener;
+import com.bmskinner.nma.gui.events.UIController;
 import com.bmskinner.nma.logging.Loggable;
 
 /**

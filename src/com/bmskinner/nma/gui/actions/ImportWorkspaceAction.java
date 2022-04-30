@@ -33,7 +33,7 @@ import com.bmskinner.nma.components.workspaces.IWorkspace;
 import com.bmskinner.nma.core.DatasetListManager;
 import com.bmskinner.nma.core.GlobalOptions;
 import com.bmskinner.nma.gui.ProgressBarAcceptor;
-import com.bmskinner.nma.gui.events.revamp.UIController;
+import com.bmskinner.nma.gui.events.UIController;
 import com.bmskinner.nma.io.WorkspaceImporter;
 import com.bmskinner.nma.io.Io.Importer;
 
