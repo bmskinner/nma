@@ -1084,14 +1084,15 @@ public class VirtualDataset extends AbstractAnalysisDataset
 	}
 
 	@Override
-	public void addChildCollection(@NonNull ICellCollection collection) {
+	public IAnalysisDataset addChildCollection(@NonNull ICellCollection collection) {
 		VirtualDataset c = new VirtualDataset(this, collection.getName());
 		c.addAll(collection);
 		addChildDataset(c);
+		return c;
 	}
 
 	@Override
-	public void addChildDataset(@NonNull IAnalysisDataset dataset) {
+	public IAnalysisDataset addChildDataset(@NonNull IAnalysisDataset dataset) {
 		// Ensure no duplicate dataset names
 		// If the name is the same as this dataset, or one of the child datasets,
 		// apply a suffix
@@ -1102,6 +1103,7 @@ public class VirtualDataset extends AbstractAnalysisDataset
 			dataset.setName(newName);
 		}
 		childDatasets.add(dataset);
+		return dataset;
 
 	}
 

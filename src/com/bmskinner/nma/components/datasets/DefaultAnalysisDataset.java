@@ -73,7 +73,8 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 		this.savePath = saveFile;
 	}
 
-	DefaultAnalysisDataset(@NonNull Element e) throws ComponentCreationException, UnsupportedVersionException {
+	DefaultAnalysisDataset(@NonNull Element e)
+			throws ComponentCreationException, UnsupportedVersionException {
 		super(e);
 		savePath = new File(e.getChildText("SaveFile")).getAbsoluteFile();
 		cellCollection = new DefaultCellCollection(e.getChild("CellCollection"));
@@ -136,29 +137,33 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 	}
 
 	@Override
-	public void addChildCollection(@NonNull final ICellCollection collection) {
+	public IAnalysisDataset addChildCollection(@NonNull final ICellCollection collection) {
 		try {
-			VirtualDataset v = new VirtualDataset(this, collection.getName(), collection.getId(), collection);
-			addChildDataset(v);
+			VirtualDataset v = new VirtualDataset(this, collection.getName(), collection.getId(),
+					collection);
+			return addChildDataset(v);
 		} catch (ProfileException | MissingProfileException | MissingLandmarkException e) {
 			LOGGER.log(Loggable.STACK, "Unable to add child collection: " + e.getMessage(), e);
 		}
+		return null;
 	}
 
 	@Override
-	public void addChildDataset(@NonNull final IAnalysisDataset dataset) {
+	public IAnalysisDataset addChildDataset(@NonNull final IAnalysisDataset dataset) {
 
 		if (dataset instanceof VirtualDataset) {
 			// Ensure no duplicate dataset names
 			// If the name is the same as this dataset, or one of the child datasets,
 			// apply a suffix
-			if (getName().equals(dataset.getName()) || childDatasets.stream().map(IAnalysisDataset::getName)
-					.anyMatch(s -> s.equals(dataset.getName()))) {
+			if (getName().equals(dataset.getName())
+					|| childDatasets.stream().map(IAnalysisDataset::getName)
+							.anyMatch(s -> s.equals(dataset.getName()))) {
 				String newName = chooseSuffix(dataset.getName());
 				dataset.setName(newName);
 			}
 		}
 		childDatasets.add(dataset);
+		return dataset;
 	}
 
 	/**
@@ -334,7 +339,8 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 		// Use arrays to avoid concurrent modifications to cluster groups
 		Object[] ids = clusterGroups.parallelStream().map(IClusterGroup::getId).toArray();
 		for (Object id : ids) {
-			IClusterGroup g = clusterGroups.stream().filter(group -> group.getId().equals(id)).findFirst().get();
+			IClusterGroup g = clusterGroups.stream().filter(group -> group.getId().equals(id))
+					.findFirst().get();
 			deleteClusterGroup(g);
 		}
 	}
@@ -355,7 +361,8 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 	public void updateSourceImageDirectory(@NonNull final File expectedImageDirectory) {
 
 		if (!expectedImageDirectory.exists()) {
-			LOGGER.warning(String.format("Requested directory '%s' does not exist", expectedImageDirectory));
+			LOGGER.warning(String.format("Requested directory '%s' does not exist",
+					expectedImageDirectory));
 			return;
 		}
 
@@ -367,7 +374,8 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 			return;
 		}
 
-		Optional<HashOptions> nucleusOptions = analysisOptions.getDetectionOptions(CellularComponent.NUCLEUS);
+		Optional<HashOptions> nucleusOptions = analysisOptions
+				.getDetectionOptions(CellularComponent.NUCLEUS);
 
 		if (!nucleusOptions.isPresent()) {
 			LOGGER.warning("No nucleus detection options to contain image folder");
@@ -380,7 +388,8 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 		String expectedName = new File(filePath).getName();
 
 		if (!expectedImageDirectory.getName().equals(expectedName)) {
-			LOGGER.warning(String.format("Caution: Existing dataset folder '%s' does not match new folder name '%s'",
+			LOGGER.warning(String.format(
+					"Caution: Existing dataset folder '%s' does not match new folder name '%s'",
 					expectedName, expectedImageDirectory.getName()));
 		}
 
@@ -394,7 +403,8 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 		getCollection().setSourceFolder(expectedImageDirectory);
 
 		// Update the analysis options
-		nucleusOptions.get().setString(HashOptions.DETECTION_FOLDER, expectedImageDirectory.getAbsolutePath());
+		nucleusOptions.get().setString(HashOptions.DETECTION_FOLDER,
+				expectedImageDirectory.getAbsolutePath());
 
 		// TODO add unit tests that this completes correctly
 

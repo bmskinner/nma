@@ -79,15 +79,17 @@ public interface IAnalysisDataset extends XmlSerializable {
 	 * contructed to hold it.
 	 * 
 	 * @param collection the collection to add
+	 * @return the newly created dataset
 	 */
-	void addChildCollection(@NonNull ICellCollection collection);
+	IAnalysisDataset addChildCollection(@NonNull ICellCollection collection);
 
 	/**
 	 * Add the given dataset as a child of this dataset
 	 * 
 	 * @param dataset
+	 * @return the newly created dataset
 	 */
-	void addChildDataset(@NonNull IAnalysisDataset dataset);
+	IAnalysisDataset addChildDataset(@NonNull IAnalysisDataset dataset);
 
 	/**
 	 * Get the name of the dataset. Passes through to CellCollection
