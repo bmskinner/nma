@@ -98,7 +98,7 @@
 //                IProfileSegment seg = segs.get(i);
 //
 //                for (int j = 0; j <= seg.length(); j++) {
-//                    int k = n.wrapIndex(seg.getStartIndex() + j + n.getBorderIndex(Landmark.REFERENCE_POINT) -1);
+//                    int k = n.wrapIndex(seg.getStartIndex() + j + n.getBorderIndex(OrientationMark.REFERENCE) -1);
 //                    IPoint p = n.getBorderPoint(k)
 //                    		.minus(n.getBase())
 //                    		.plus(CellularComponent.COMPONENT_BUFFER);

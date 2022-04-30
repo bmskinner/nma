@@ -44,6 +44,7 @@ import com.bmskinner.nuclear_morphology.components.cells.Nucleus;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.measure.MeasurementDimension;
+import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.components.profiles.BooleanProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
@@ -52,6 +53,7 @@ import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
+import com.bmskinner.nuclear_morphology.components.rules.OrientationMark;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter.ColourSwatch;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
@@ -247,14 +249,14 @@ public class ProfileChartFactory extends AbstractChartFactory {
 
 		if (options.isShowAnnotations()) {
 
-			for (Landmark tag : collection.getProfileCollection().getLandmarks()) {
-				if (Landmark.REFERENCE_POINT.equals(tag))
+			for (OrientationMark tag : collection.getProfileCollection().getOrientationMarks()) {
+				if (OrientationMark.REFERENCE.equals(tag))
 					continue;
 
 				try {
 					int index = collection.getProfileCollection().getLandmarkIndex(tag);
 					double yVal = collection.getProfileCollection()
-							.getProfile(options.getType(), Landmark.REFERENCE_POINT, Stats.MEDIAN).get(index);
+							.getProfile(options.getType(), OrientationMark.REFERENCE, Stats.MEDIAN).get(index);
 
 					// get the offset from to the current draw point
 					int offset = collection.getProfileCollection().getLandmarkIndex(options.getTag());
@@ -273,10 +275,13 @@ public class ProfileChartFactory extends AbstractChartFactory {
 						indexToDraw += amountToAdd;
 					}
 
-					addDomainMarkerToXYPlot(plot, tag, indexToDraw, yVal);
+					Landmark lm = dataset.getAnalysisOptions().orElseThrow(MissingOptionException::new)
+							.getRuleSetCollection().getLandmark(tag).orElseThrow(MissingLandmarkException::new);
+					addDomainMarkerToXYPlot(plot, lm, indexToDraw, yVal);
 
-				} catch (MissingLandmarkException | MissingProfileException | ProfileException e) {
-					LOGGER.fine("Tag not present in profile: " + tag);
+				} catch (MissingLandmarkException | MissingProfileException | ProfileException
+						| MissingOptionException e) {
+					LOGGER.fine("Landmark not present in profile: " + tag);
 				}
 
 			}
@@ -460,7 +465,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
 	 * @param plot the plot to draw the domain markers on
 	 */
 	protected void addBorderTagMarkers(@NonNull Taggable n, @NonNull XYPlot plot) {
-		for (Landmark tag : n.getLandmarks().keySet()) {
+		for (OrientationMark tag : n.getOrientationMarkMap().keySet()) {
 			try {
 				// get the index of the tag
 				int index = n.getBorderIndex(tag);
@@ -470,7 +475,8 @@ public class ProfileChartFactory extends AbstractChartFactory {
 
 				// adjust the index to the offset
 				index = n.wrapIndex(index - offset);
-				addDomainMarkerToXYPlot(plot, tag, index, 180);
+				Landmark lm = n.getLandmark(tag);
+				addDomainMarkerToXYPlot(plot, lm, index, 180);
 
 			} catch (MissingLandmarkException e) {
 				LOGGER.log(Loggable.STACK, "Border tag not available", e);

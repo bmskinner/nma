@@ -34,37 +34,39 @@ import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
 
 /**
  * Simplify the creation of test datasets using a builder pattern
+ * 
  * @author bms41
  * @since 1.14.0
  *
  */
 public class TestDatasetBuilder {
-	
+
 	private static final Logger LOGGER = Logger.getLogger(TestDatasetBuilder.class.getName());
-	
+
 	public static final String TEST_DATASET_NAME = "Test";
 	public static final String TEST_DATASET_IMAGE_FOLDER = "Image folder";
-	public static final UUID   TEST_DATASET_UUID = UUID.fromString("99998888-0000-6666-1111-444433332222");
+	public static final UUID TEST_DATASET_UUID = UUID
+			.fromString("99998888-0000-6666-1111-444433332222");
 
-	public static final int DEFAULT_VARIATION   = 0;
-	public static final int DEFAULT_BASE_WIDTH  = 40;
+	public static final int DEFAULT_VARIATION = 0;
+	public static final int DEFAULT_BASE_WIDTH = 40;
 	public static final int DEFAULT_BASE_HEIGHT = 50;
-	public static final int DEFAULT_X_BASE      = 100;
-	public static final int DEFAULT_Y_BASE      = 100;
-	public static final int DEFAULT_ROTATION    = 0;
+	public static final int DEFAULT_X_BASE = 100;
+	public static final int DEFAULT_Y_BASE = 100;
+	public static final int DEFAULT_ROTATION = 0;
 	public static final int DEFAULT_BORDER_OFFSET = 0;
 	public static final int DEFAULT_CHILD_CLUSTERS = 0;
-	public static final int DEFAULT_N_CELLS     = 1;
-	
+	public static final int DEFAULT_N_CELLS = 1;
+
 	/** Should the start index of the border list be randomly offset? */
 	public static final boolean DEFAULT_IS_RANDOM_OFFSET = true;
-	
+
 	public static final boolean DEFAULT_RED_SIGNALS = false;
 	public static final boolean DEFAULT_GREEN_SIGNALS = false;
-	
+
 	/** The default shape for nuclei; a square */
 	public static final TestComponentShape DEFAULT_NUCLEUS_SHAPE = TestComponentShape.SQUARE;
-	
+
 	private IAnalysisDataset d;
 	private RuleSetCollection rsc = RuleSetCollection.roundRuleSetCollection();
 	private int nCells = DEFAULT_N_CELLS;
@@ -75,85 +77,89 @@ public class TestDatasetBuilder {
 	private int h = DEFAULT_BASE_HEIGHT;
 	private int fixedOffset = DEFAULT_BORDER_OFFSET;
 	private int maxRotation = DEFAULT_ROTATION;
-	
+
 	private boolean profile = false;
 	private boolean segment = false;
-	private boolean offset  = DEFAULT_IS_RANDOM_OFFSET;
+	private boolean offset = DEFAULT_IS_RANDOM_OFFSET;
 	private boolean reverse = false;
-	
+
 	private boolean redSignals = DEFAULT_RED_SIGNALS;
 	private boolean greenSignals = DEFAULT_GREEN_SIGNALS;
-	
+
 	private int nClusters = DEFAULT_CHILD_CLUSTERS;
-	
-	public static final UUID RED_SIGNAL_GROUP = UUID.fromString("99998888-7777-6666-5555-444433332222");
-	public static final UUID GREEN_SIGNAL_GROUP = UUID.fromString("88887777-6666-5555-4444-333322221111");
-	
+
+	public static final UUID RED_SIGNAL_GROUP = UUID
+			.fromString("99998888-7777-6666-5555-444433332222");
+	public static final UUID GREEN_SIGNAL_GROUP = UUID
+			.fromString("88887777-6666-5555-4444-333322221111");
+
 	public static final String RED_SIGNAL_GROUP_NAME = "Red";
 	public static final String GREEN_SIGNAL_GROUP_NAME = "Green";
-	
-	
+
 	private TestComponentShape nucleusShape = DEFAULT_NUCLEUS_SHAPE;
-	
+
 	private Random rng;
-	
+
 	public enum TestComponentShape {
 		/** A rectangle */
-		SQUARE, 
-		
+		SQUARE,
+
 		/** An ellipse */
 		ROUND
 	}
-	
+
 	/**
 	 * Construct with a randomly chosen seed
 	 */
 	public TestDatasetBuilder() {
 		this(new Random().nextLong());
 	}
-	
+
 	/**
-	 * Construct with a given seed for the random number
-	 * generator
+	 * Construct with a given seed for the random number generator
+	 * 
 	 * @param seed the seed value
 	 */
 	public TestDatasetBuilder(long seed) {
 		rng = new Random(seed);
 	}
-		
+
 	/**
 	 * Construct a new dataset based on the parameters in this builder.
+	 * 
 	 * @return a new dataset
 	 * @throws Exception
 	 */
-	public @NonNull IAnalysisDataset build() throws Exception {	
-		switch(nucleusShape) {
-		case SQUARE: 
-		default: d = createRectangularDataset(nCells, rsc, maxVariation, w, h, xBase, 
-				yBase, maxRotation, offset, fixedOffset);
+	public @NonNull IAnalysisDataset build() throws Exception {
+		switch (nucleusShape) {
+		case SQUARE:
+		default:
+			d = createRectangularDataset(nCells, rsc, maxVariation, w, h, xBase,
+					yBase, maxRotation, offset, fixedOffset);
 		}
 
-		if(segment || profile)
+		if (profile)
 			new DatasetProfilingMethod(d).call();
-		if(segment)
+		if (segment)
 			new DatasetSegmentationMethod(d, MorphologyAnalysisMode.SEGMENT_FROM_SCRATCH).call();
-		
-		if(nClusters>0) {	
+
+		if (nClusters > 0) {
 			HashOptions o = OptionsFactory.makeDefaultClusteringOptions()
 					.withValue(HashOptions.CLUSTER_MANUAL_CLUSTER_NUMBER_KEY, nClusters)
 					.build();
 			new NucleusClusteringMethod(d, o).call();
 		}
-		
-		for(Measurement m : rsc.getMeasurableValues()) {
+
+		for (Measurement m : rsc.getMeasurableValues()) {
 			d.getCollection().getMedian(m, CellularComponent.NUCLEUS, MeasurementScale.PIXELS);
 		}
-				
+
 		return d;
 	}
-	
+
 	/**
 	 * The new dataset should have a profiling method applied.
+	 * 
 	 * @return this builder
 	 * @throws Exception
 	 */
@@ -161,21 +167,25 @@ public class TestDatasetBuilder {
 		profile = true;
 		return this;
 	}
-	
+
 	/**
-	 * The new dataset should have a segmentation method applied. This
-	 * option sets profiling automatically; i.e. {@code builder.segmented()} is
-	 * equivalent to {@code builder.profiled().segmented()}.
+	 * The new dataset should have a segmentation method applied. This option sets
+	 * profiling automatically; i.e. {@code builder.segmented()} is equivalent to
+	 * {@code builder.profiled().segmented()}.
+	 * 
 	 * @return this builder
 	 * @throws Exception
 	 */
 	public TestDatasetBuilder segmented() throws Exception {
+		profile = true;
 		segment = true;
 		return this;
 	}
-	
+
 	/**
-	 * The shape for the nuclei. The default shape is {@link #DEFAULT_NUCLEUS_SHAPE}.
+	 * The shape for the nuclei. The default shape is
+	 * {@link #DEFAULT_NUCLEUS_SHAPE}.
+	 * 
 	 * @param shape the shape to create.
 	 * @return this builder
 	 * @throws Exception
@@ -184,15 +194,16 @@ public class TestDatasetBuilder {
 		nucleusShape = shape;
 		return this;
 	}
-	
+
 	public TestDatasetBuilder ofType(RuleSetCollection rsc) {
 		this.rsc = rsc;
 		return this;
 	}
-	
+
 	/**
-	 * Set the number of cells in the  dataset. 
-	 * Default value {@link #DEFAULT_N_CELLS}.
+	 * Set the number of cells in the dataset. Default value
+	 * {@link #DEFAULT_N_CELLS}.
+	 * 
 	 * @param i the number of cells
 	 * @return this builder
 	 */
@@ -200,11 +211,11 @@ public class TestDatasetBuilder {
 		nCells = i;
 		return this;
 	}
-	
+
 	/**
-	 * Set the number of child datasets to create
-	 * by clustering
-	 * Default value {@link #DEFAULT_CHILD_CLUSTERS}.
+	 * Set the number of child datasets to create by clustering Default value
+	 * {@link #DEFAULT_CHILD_CLUSTERS}.
+	 * 
 	 * @param i the number of clusters
 	 * @return this builder
 	 */
@@ -212,11 +223,11 @@ public class TestDatasetBuilder {
 		nClusters = i;
 		return this;
 	}
-	
+
 	/**
-	 * Set the maximum amount of variation in size of 
-	 * the nuclei
-	 * Default value {@link #DEFAULT_VARIATION}.
+	 * Set the maximum amount of variation in size of the nuclei Default value
+	 * {@link #DEFAULT_VARIATION}.
+	 * 
 	 * @param i the maximum variation in size
 	 * @return this builder
 	 */
@@ -224,10 +235,11 @@ public class TestDatasetBuilder {
 		maxVariation = i;
 		return this;
 	}
-	
+
 	/**
-	 * Set the minimum x coordinate for nuclei
-	 * Default value {@link #DEFAULT_X_BASE}.
+	 * Set the minimum x coordinate for nuclei Default value
+	 * {@link #DEFAULT_X_BASE}.
+	 * 
 	 * @param i the base x
 	 * @return this builder
 	 */
@@ -235,10 +247,11 @@ public class TestDatasetBuilder {
 		xBase = i;
 		return this;
 	}
-	
+
 	/**
-	 * Set the minimum y coordinate for nuclei
-	 * Default value {@link #DEFAULT_Y_BASE}.
+	 * Set the minimum y coordinate for nuclei Default value
+	 * {@link #DEFAULT_Y_BASE}.
+	 * 
 	 * @param i the base x
 	 * @return this builder
 	 */
@@ -246,10 +259,11 @@ public class TestDatasetBuilder {
 		yBase = i;
 		return this;
 	}
-	
+
 	/**
-	 * Set the starting width for nuclei before any variations are added.
-	 * Default value {@link #DEFAULT_BASE_WIDTH}.
+	 * Set the starting width for nuclei before any variations are added. Default
+	 * value {@link #DEFAULT_BASE_WIDTH}.
+	 * 
 	 * @param i the base width
 	 * @return this builder
 	 */
@@ -257,10 +271,11 @@ public class TestDatasetBuilder {
 		w = i;
 		return this;
 	}
-	
+
 	/**
-	 * Set the starting height for nuclei before any variations are added.
-	 * Default value {@link #DEFAULT_BASE_HEIGHT}.
+	 * Set the starting height for nuclei before any variations are added. Default
+	 * value {@link #DEFAULT_BASE_HEIGHT}.
+	 * 
 	 * @param i the base height
 	 * @return this builder
 	 */
@@ -268,148 +283,178 @@ public class TestDatasetBuilder {
 		h = i;
 		return this;
 	}
-	
+
 	/**
-	 * The maximum random rotation to be applied to a cell after creation.
-	 * This simulates the random orientation of cells in an image. Each cell
-	 * will be rotated by a random value between zero and the given value. If this
-	 * is set to zero, no rotations will be applied. The default value is {@link #DEFAULT_ROTATION}.
-	 * @param i the maximum angle of rotation in degrees. 
+	 * The maximum random rotation to be applied to a cell after creation. This
+	 * simulates the random orientation of cells in an image. Each cell will be
+	 * rotated by a random value between zero and the given value. If this is set to
+	 * zero, no rotations will be applied. The default value is
+	 * {@link #DEFAULT_ROTATION}.
+	 * 
+	 * @param i the maximum angle of rotation in degrees.
 	 * @return this builder
 	 */
 	public TestDatasetBuilder maxRotation(int i) {
 		maxRotation = i;
 		return this;
-	}	
-	
+	}
+
 	/**
-	 * Should the start index of the border list be randomly offset?
-	 * This simulates detected objects, which may not have their borders
-	 * starting in a neat position for segmentation or profiling. The
-	 * default value is {@link #DEFAULT_IS_RANDOM_OFFSET}.
+	 * Should the start index of the border list be randomly offset? This simulates
+	 * detected objects, which may not have their borders starting in a neat
+	 * position for segmentation or profiling. The default value is
+	 * {@link #DEFAULT_IS_RANDOM_OFFSET}.
+	 * 
 	 * @param b should a random offset be applied
 	 * @return this builder
 	 */
 	public TestDatasetBuilder randomOffsetProfiles(boolean b) {
 		offset = b;
 		return this;
-	}	
-	
+	}
+
 	/**
-	 * Set a fixed offset value for the start index of the border list
-	 * in each cell. The default value is {@link #DEFAULT_BORDER_OFFSET}.
-	 * Setting this paramter disables random offsets in profiles.
+	 * Set a fixed offset value for the start index of the border list in each cell.
+	 * The default value is {@link #DEFAULT_BORDER_OFFSET}. Setting this paramter
+	 * disables random offsets in profiles.
+	 * 
 	 * @param i
 	 * @see #randomOffsetProfiles(boolean)
 	 * @return this builder
 	 */
 	public TestDatasetBuilder fixedProfileOffset(int i) {
-		offset=false;
+		offset = false;
 		fixedOffset = i;
 		return this;
-	}	
-	
+	}
+
 	/**
 	 * Create nuclear signals in the given red or green channel.
+	 * 
 	 * @param i the RGB channel to add signals - 0 or 1
 	 * @return this builder
 	 */
 	public TestDatasetBuilder addSignalsInChannel(int i) {
-		if(i==0)
+		if (i == 0)
 			redSignals = true;
-		if(i==1)
+		if (i == 1)
 			greenSignals = true;
 		return this;
-	}	
-	
+	}
+
 	/**
-	 * Create a dataset consisting of rectangular nuclei. Each nucleus has a random width and
-	 * size constrained by the variation factor
-	 * @param nCells the number of cells to create
-	 * @param maxSizeVariation the maximum variation from the base width and height for a cell
-	 * @param baseWidth the starting width for a cell, before variation
-	 * @param baseHeight the starting heigth for a cell, before variation
-	 * @param xBase the starting x position
-	 * @param yBase the starting y position
-	 * @param maxRotationDegrees the maximum rotation to be applied to a cell 
-	 * @param randomOffsetStart should an offset be applied to the border array
-	 * @param fixedStartOffset the offset to apply to the border array if randomOffsetStart is false
+	 * Create a dataset consisting of rectangular nuclei. Each nucleus has a random
+	 * width and size constrained by the variation factor
+	 * 
+	 * @param nCells             the number of cells to create
+	 * @param maxSizeVariation   the maximum variation from the base width and
+	 *                           height for a cell
+	 * @param baseWidth          the starting width for a cell, before variation
+	 * @param baseHeight         the starting heigth for a cell, before variation
+	 * @param xBase              the starting x position
+	 * @param yBase              the starting y position
+	 * @param maxRotationDegrees the maximum rotation to be applied to a cell
+	 * @param randomOffsetStart  should an offset be applied to the border array
+	 * @param fixedStartOffset   the offset to apply to the border array if
+	 *                           randomOffsetStart is false
 	 * @return
 	 * @throws ComponentCreationException
-	 * @throws ProfileException 
-	 * @throws MissingComponentException 
+	 * @throws ProfileException
+	 * @throws MissingComponentException
 	 */
-	private IAnalysisDataset createRectangularDataset(int nCells, RuleSetCollection rsc, int maxSizeVariation, int baseWidth, int baseHeight, int xBase, int yBase, int maxRotationDegrees, boolean randomOffsetStart, int fixedStartOffset) throws ComponentCreationException, MissingComponentException, ProfileException {
-		
-		ICellCollection collection = new DefaultCellCollection(rsc, TEST_DATASET_NAME, TEST_DATASET_UUID);
-		
-		IAnalysisOptions o =  OptionsFactory.makeDefaultRoundAnalysisOptions(new File(TEST_DATASET_IMAGE_FOLDER)
-				.getAbsoluteFile());
-		o.getNucleusDetectionOptions().get().setInt(HashOptions.MIN_SIZE_PIXELS, (baseWidth-maxSizeVariation)*(baseHeight-maxSizeVariation) );
-		o.getNucleusDetectionOptions().get().setInt(HashOptions.MAX_SIZE_PIXELS, (baseWidth+maxSizeVariation)*(baseHeight+maxSizeVariation) );
+	private IAnalysisDataset createRectangularDataset(int nCells, RuleSetCollection rsc,
+			int maxSizeVariation, int baseWidth, int baseHeight, int xBase, int yBase,
+			int maxRotationDegrees, boolean randomOffsetStart, int fixedStartOffset)
+			throws ComponentCreationException, MissingComponentException, ProfileException {
 
-		if(redSignals) {
+		ICellCollection collection = new DefaultCellCollection(rsc, TEST_DATASET_NAME,
+				TEST_DATASET_UUID);
+
+		IAnalysisOptions o = OptionsFactory
+				.makeAnalysisOptions(rsc);
+		HashOptions nop = OptionsFactory
+				.makeNucleusDetectionOptions(new File(TEST_DATASET_IMAGE_FOLDER)
+						.getAbsoluteFile())
+				.withValue(HashOptions.MIN_CIRC, 0.1)
+				.withValue(HashOptions.MAX_CIRC, 0.9)
+				.withValue(HashOptions.MIN_SIZE_PIXELS,
+						(baseWidth - maxSizeVariation) * (baseHeight - maxSizeVariation))
+				.withValue(HashOptions.MAX_SIZE_PIXELS,
+						(baseWidth + maxSizeVariation) * (baseHeight + maxSizeVariation))
+				.build();
+
+		o.setDetectionOptions(CellularComponent.NUCLEUS, nop);
+
+		if (redSignals) {
 			ISignalGroup g = new DefaultSignalGroup(RED_SIGNAL_GROUP_NAME, RED_SIGNAL_GROUP);
 			g.setGroupColour(Color.red);
 			collection.addSignalGroup(g);
-			HashOptions n = OptionsFactory.makeNuclearSignalOptions(new File(TEST_DATASET_IMAGE_FOLDER))
+			HashOptions n = OptionsFactory
+					.makeNuclearSignalOptions(new File(TEST_DATASET_IMAGE_FOLDER))
 					.withValue(HashOptions.SIGNAL_GROUP_ID, RED_SIGNAL_GROUP.toString())
 					.withValue(HashOptions.SIGNAL_GROUP_NAME, RED_SIGNAL_GROUP_NAME)
 					.build();
 			o.setNuclearSignalDetectionOptions(n);
 		}
-		
-		if(greenSignals) {
+
+		if (greenSignals) {
 			ISignalGroup g = new DefaultSignalGroup(GREEN_SIGNAL_GROUP_NAME, GREEN_SIGNAL_GROUP);
 			g.setGroupColour(Color.GREEN);
 			collection.addSignalGroup(g);
-			HashOptions n = OptionsFactory.makeNuclearSignalOptions(new File(TEST_DATASET_IMAGE_FOLDER))
+			HashOptions n = OptionsFactory
+					.makeNuclearSignalOptions(new File(TEST_DATASET_IMAGE_FOLDER))
 					.withValue(HashOptions.SIGNAL_GROUP_ID, GREEN_SIGNAL_GROUP.toString())
 					.withValue(HashOptions.SIGNAL_GROUP_NAME, GREEN_SIGNAL_GROUP_NAME)
 					.build();
 			o.setNuclearSignalDetectionOptions(n);
 		}
 
-		for(int i=0; i<nCells; i++) {
-			
-			int wVar = (int)(rng.nextDouble()*maxSizeVariation);
-			int hVar = (int)(rng.nextDouble()*maxSizeVariation);
-			int width = (rng.nextDouble()<0.5)?baseWidth-wVar:baseWidth+wVar;
-			int height = (rng.nextDouble()<0.5)?baseHeight-hVar:baseHeight+hVar;
-			double degreeRot = (rng.nextDouble()*maxRotationDegrees);
-			
-			int borderLength = (width+height)*2;
-			int borderOffset = randomOffsetStart ? (int) (rng.nextDouble()*borderLength) : fixedStartOffset;
-			
-			ICell cell = createCell(width, height, degreeRot, borderOffset, rsc);	
-						
+		for (int i = 0; i < nCells; i++) {
+
+			int wVar = (int) (rng.nextDouble() * maxSizeVariation);
+			int hVar = (int) (rng.nextDouble() * maxSizeVariation);
+			int width = (rng.nextDouble() < 0.5) ? baseWidth - wVar : baseWidth + wVar;
+			int height = (rng.nextDouble() < 0.5) ? baseHeight - hVar : baseHeight + hVar;
+			double degreeRot = (rng.nextDouble() * maxRotationDegrees);
+
+			int borderLength = (width + height) * 2;
+			int borderOffset = randomOffsetStart ? (int) (rng.nextDouble() * borderLength)
+					: fixedStartOffset;
+
+			ICell cell = createCell(width, height, degreeRot, borderOffset, rsc);
+
 			collection.addCell(cell);
-			
-			
-			if(redSignals) {
-				INuclearSignal s = TestComponentFactory.createSignal(cell.getPrimaryNucleus(), 0.2, 0);
+
+			if (redSignals) {
+				INuclearSignal s = TestComponentFactory.createSignal(cell.getPrimaryNucleus(), 0.2,
+						0);
 				cell.getPrimaryNucleus().getSignalCollection().addSignal(s, RED_SIGNAL_GROUP);
 			}
-			
-			if(greenSignals) {
-				INuclearSignal s = TestComponentFactory.createSignal(cell.getPrimaryNucleus(), 0.2, 1);
+
+			if (greenSignals) {
+				INuclearSignal s = TestComponentFactory.createSignal(cell.getPrimaryNucleus(), 0.2,
+						1);
 				cell.getPrimaryNucleus().getSignalCollection().addSignal(s, GREEN_SIGNAL_GROUP);
 			}
-			
+
 		}
-		
-		IAnalysisDataset d = new DefaultAnalysisDataset(collection, new File(TEST_DATASET_IMAGE_FOLDER).getAbsoluteFile());
+
+		IAnalysisDataset d = new DefaultAnalysisDataset(collection,
+				new File(TEST_DATASET_IMAGE_FOLDER).getAbsoluteFile());
 		d.setAnalysisOptions(o);
 
 		return d;
 	}
 
-	private ICell createCell(int width, int height, double degreeRot, int borderOffset, RuleSetCollection rsc) throws ComponentCreationException {
-		switch(nucleusShape) {
-			case SQUARE: return  TestComponentFactory.rectangularCell(width, height, xBase, yBase, degreeRot, 
+	private ICell createCell(int width, int height, double degreeRot, int borderOffset,
+			RuleSetCollection rsc) throws ComponentCreationException {
+		switch (nucleusShape) {
+		case SQUARE:
+			return TestComponentFactory.rectangularCell(width, height, xBase, yBase, degreeRot,
 					borderOffset, rsc);
-			case ROUND:
-			default: return  TestComponentFactory.roundCell(width, height, xBase, yBase, degreeRot, 
+		case ROUND:
+		default:
+			return TestComponentFactory.roundCell(width, height, xBase, yBase, degreeRot,
 					borderOffset, rsc);
 
 		}

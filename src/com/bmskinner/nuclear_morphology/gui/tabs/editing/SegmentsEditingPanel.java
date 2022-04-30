@@ -200,7 +200,7 @@
 //		ISegmentedProfile profile = null;
 //
 //		ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets()).setNormalised(true)
-//				.setAlignment(ProfileAlignment.LEFT).setShowIQR(false).setTag(Landmark.REFERENCE_POINT)
+//				.setAlignment(ProfileAlignment.LEFT).setShowIQR(false).setTag(OrientationMark.REFERENCE)
 //				.setShowMarkers(false).setProfileType(ProfileType.ANGLE)
 //				.setSwatch(GlobalOptions.getInstance().getSwatch()).setShowProfiles(false).setShowPoints(true)
 //				.setShowXAxis(false).setShowYAxis(false).setTarget(dualPanel.getMainPanel()).build();
@@ -215,7 +215,7 @@
 //		 */
 //
 //		ChartOptions rangeOptions = new ChartOptionsBuilder().setDatasets(getDatasets()).setNormalised(true)
-//				.setAlignment(ProfileAlignment.LEFT).setShowIQR(false).setTag(Landmark.REFERENCE_POINT)
+//				.setAlignment(ProfileAlignment.LEFT).setShowIQR(false).setTag(OrientationMark.REFERENCE)
 //				.setShowMarkers(false).setProfileType(ProfileType.ANGLE)
 //				.setSwatch(GlobalOptions.getInstance().getSwatch()).setShowProfiles(false).setShowPoints(false)
 //				.setShowXAxis(false).setShowYAxis(false).setTarget(dualPanel.getRangePanel()).build();
@@ -224,7 +224,7 @@
 //
 //		try {
 //			profile = activeDataset().getCollection().getProfileCollection().getSegmentedProfile(ProfileType.ANGLE,
-//					Landmark.REFERENCE_POINT, Stats.MEDIAN);
+//					OrientationMark.REFERENCE, Stats.MEDIAN);
 //		} catch (MissingLandmarkException | ProfileException | MissingProfileException e) {
 //			LOGGER.log(Loggable.STACK, "Error getting profile", e);
 //
@@ -288,7 +288,7 @@
 //		ISegmentedProfile medianProfile;
 //		try {
 //			medianProfile = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE,
-//					Landmark.REFERENCE_POINT, Stats.MEDIAN);
+//					OrientationMark.REFERENCE, Stats.MEDIAN);
 //		} catch (MissingLandmarkException | ProfileException | MissingProfileException e) {
 //			LOGGER.log(Loggable.STACK, "Error getting profile", e);
 //			setButtonsEnabled(false);
@@ -366,7 +366,7 @@
 //		try {
 //			ICellCollection collection = activeDataset().getCollection();
 //			ISegmentedProfile medianProfile = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE,
-//					Landmark.REFERENCE_POINT, Stats.MEDIAN);
+//					OrientationMark.REFERENCE, Stats.MEDIAN);
 //
 //			SegmentsEditingPanel.this.setAnalysing(true);
 //

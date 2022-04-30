@@ -32,7 +32,7 @@ import com.bmskinner.nuclear_morphology.components.cells.Nucleus;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
-import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
+import com.bmskinner.nuclear_morphology.components.rules.OrientationMark;
 import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
 
 /**
@@ -178,7 +178,7 @@ public class DefaultFilteringOptions extends DefaultOptions implements Filtering
 	private boolean nucleusMatches(Key k, Nucleus n, ICellCollection collection, boolean isMin){
 		try {
 			if(k.stat.equals(Measurement.VARIABILITY)) {
-				double v = collection.getNormalisedDifferenceToMedian(Landmark.REFERENCE_POINT, n);
+				double v = collection.getNormalisedDifferenceToMedian(OrientationMark.REFERENCE, n);
 				return isMin ? v>=minima.get(k) : v<=maxima.get(k);
 			}
 				

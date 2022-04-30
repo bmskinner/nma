@@ -53,10 +53,10 @@ import com.bmskinner.nuclear_morphology.components.mesh.MeshImageCreationExcepti
 import com.bmskinner.nuclear_morphology.components.mesh.MeshVertex;
 import com.bmskinner.nuclear_morphology.components.mesh.UncomparableMeshImageException;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
-import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
+import com.bmskinner.nuclear_morphology.components.rules.OrientationMark;
 import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalCollection;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
@@ -499,7 +499,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 
 			try {
 				List<IProfileSegment> segments = options.firstDataset().getCollection().getConsensus()
-						.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT).getSegments();
+						.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE).getSegments();
 
 				for (int i = 0; i < segments.size(); i++) {
 					IProfileSegment s = segments.get(i);

@@ -39,6 +39,7 @@ import com.bmskinner.nuclear_morphology.analysis.nucleus.CellCollectionFilterer;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.CellCollectionFilterer.CollectionFilteringException;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.FilteringOptions;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.FilteringOptions.FilterMatchType;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
@@ -47,7 +48,6 @@ import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
-import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.components.panels.SignalGroupSelectionPanel;
 import com.bmskinner.nuclear_morphology.gui.dialogs.SettingsDialog;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.NuclearSignalUpdatedListener;
@@ -102,7 +102,8 @@ public class SignalCountsPanel extends ChartDetailPanel implements NuclearSignal
 	private JPanel createHeader() {
 		JPanel panel = new JPanel();
 		filterBtn.addActionListener(e -> {
-			SignalCountFilteringSetupDialog dialog = new SignalCountFilteringSetupDialog(activeDataset());
+			SignalCountFilteringSetupDialog dialog = new SignalCountFilteringSetupDialog(
+					activeDataset());
 			if (dialog.isReadyToRun())
 				dialog.filter();
 		});
@@ -114,7 +115,8 @@ public class SignalCountsPanel extends ChartDetailPanel implements NuclearSignal
 	@Override
 	protected void updateSingle() {
 		updateMultiple();
-		if (activeDataset() != null && activeDataset().getCollection().getSignalManager().hasSignals())
+		if (activeDataset() != null
+				&& activeDataset().getCollection().getSignalManager().hasSignals())
 			filterBtn.setEnabled(true);
 	}
 
@@ -122,7 +124,8 @@ public class SignalCountsPanel extends ChartDetailPanel implements NuclearSignal
 	protected void updateMultiple() {
 		filterBtn.setEnabled(false);
 		ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets())
-				.addStatistic(Measurement.NUCLEUS_SIGNAL_COUNT).setScale(GlobalOptions.getInstance().getScale())
+				.addStatistic(Measurement.NUCLEUS_SIGNAL_COUNT)
+				.setScale(GlobalOptions.getInstance().getScale())
 				.setSwatch(GlobalOptions.getInstance().getSwatch()).setTarget(chartPanel).build();
 
 		setChart(options);
@@ -143,7 +146,8 @@ public class SignalCountsPanel extends ChartDetailPanel implements NuclearSignal
 
 	@Override
 	protected JFreeChart createPanelChartType(@NonNull ChartOptions options) {
-		return new ViolinChartFactory(options).createStatisticPlot(CellularComponent.NUCLEAR_SIGNAL);
+		return new ViolinChartFactory(options)
+				.createStatisticPlot(CellularComponent.NUCLEAR_SIGNAL);
 	}
 
 	private class SignalCountFilteringSetupDialog extends SettingsDialog {
@@ -170,7 +174,8 @@ public class SignalCountsPanel extends ChartDetailPanel implements NuclearSignal
 		 * @param mw
 		 * @param title
 		 */
-		protected SignalCountFilteringSetupDialog(final @NonNull IAnalysisDataset dataset, final String title) {
+		protected SignalCountFilteringSetupDialog(final @NonNull IAnalysisDataset dataset,
+				final String title) {
 			super(true);
 			this.dataset = dataset;
 			setTitle(title);
@@ -188,23 +193,29 @@ public class SignalCountsPanel extends ChartDetailPanel implements NuclearSignal
 
 		public void filter() {
 
-			FilteringOptions options = new CellCollectionFilterBuilder().setMatchType(FilterMatchType.ALL_MATCH)
-					.add(Measurement.NUCLEUS_SIGNAL_COUNT, CellularComponent.NUCLEUS, groupPanel.getSelectedID(),
+			FilteringOptions options = new CellCollectionFilterBuilder()
+					.setMatchType(FilterMatchType.ALL_MATCH)
+					.add(Measurement.NUCLEUS_SIGNAL_COUNT, CellularComponent.NUCLEUS,
+							groupPanel.getSelectedID(),
 							minSignals, maxSignals)
 					.build();
 
 			try {
-				ICellCollection filtered = CellCollectionFilterer.filter(dataset.getCollection(), options);
+				ICellCollection filtered = CellCollectionFilterer.filter(dataset.getCollection(),
+						options);
 				ICellCollection virt = new VirtualDataset(dataset, filtered.getName());
 				filtered.getCells().forEach(c -> virt.addCell(c));
-				virt.setName("Filtered_signal_count_" + groupPanel.getSelectedGroup().getGroupName());
+				virt.setName(
+						"Filtered_signal_count_" + groupPanel.getSelectedGroup().getGroupName());
 
 				dataset.getCollection().getProfileManager().copySegmentsAndLandmarksTo(virt);
 				dataset.addChildCollection(virt);
 
 				// TODO: fire a dataset added update
-			} catch (CollectionFilteringException | ProfileException | MissingProfileException e1) {
-				LOGGER.log(Loggable.STACK, "Unable to filter collection for " + dataset.getName(), e1);
+			} catch (CollectionFilteringException | ProfileException | MissingProfileException
+					| MissingLandmarkException e1) {
+				LOGGER.log(Loggable.STACK, "Unable to filter collection for " + dataset.getName(),
+						e1);
 			}
 		}
 
@@ -231,7 +242,8 @@ public class SignalCountsPanel extends ChartDetailPanel implements NuclearSignal
 			fields.add(groupPanel);
 
 			int max = dataset.getCollection().getNuclei().stream()
-					.flatMap(n -> n.getSignalCollection().getSignals().stream()).mapToInt(l -> l.size()).max()
+					.flatMap(n -> n.getSignalCollection().getSignals().stream())
+					.mapToInt(l -> l.size()).max()
 					.orElse(0);
 
 			maxSignals = max;

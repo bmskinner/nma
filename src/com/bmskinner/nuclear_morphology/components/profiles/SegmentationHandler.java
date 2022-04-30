@@ -28,6 +28,8 @@ import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationExcept
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.DatasetValidator;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment.SegmentUpdateException;
+import com.bmskinner.nuclear_morphology.components.rules.OrientationMark;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
@@ -83,11 +85,12 @@ public class SegmentationHandler {
 		// Give the new merged segment a new ID
 		final UUID newID = UUID.randomUUID();
 
-		LOGGER.fine("Merging segments " + segID1 + " and " + segID2 + " in dataset " + dataset.getName()
-				+ " to new segment " + newID);
+		LOGGER.fine(
+				"Merging segments " + segID1 + " and " + segID2 + " in dataset " + dataset.getName()
+						+ " to new segment " + newID);
 
 		ISegmentedProfile medianProfile = dataset.getCollection().getProfileCollection()
-				.getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);
+				.getSegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE, Stats.MEDIAN);
 
 		IProfileSegment seg1 = medianProfile.getSegment(segID1);
 		IProfileSegment seg2 = medianProfile.getSegment(segID2);
@@ -137,7 +140,8 @@ public class SegmentationHandler {
 		try {
 
 			ISegmentedProfile medianProfile = dataset.getCollection().getProfileCollection()
-					.getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);
+					.getSegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE,
+							Stats.MEDIAN);
 
 			IProfileSegment seg = medianProfile.getSegment(segID);
 
@@ -188,24 +192,29 @@ public class SegmentationHandler {
 		try {
 
 			ISegmentedProfile medianProfile = dataset.getCollection().getProfileCollection()
-					.getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);
+					.getSegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE,
+							Stats.MEDIAN);
 
 			IProfileSegment seg = medianProfile.getSegment(segID);
 
 			UUID newID1 = UUID.randomUUID();
 			UUID newID2 = UUID.randomUUID();
 
-			LOGGER.fine("Splitting segment " + segID + " in root dataset " + dataset.getName() + " into new segments "
+			LOGGER.fine("Splitting segment " + segID + " in root dataset " + dataset.getName()
+					+ " into new segments "
 					+ newID1 + " and " + newID2);
-			boolean ok = dataset.getCollection().getProfileManager().splitSegment(seg, newID1, newID2);
+			boolean ok = dataset.getCollection().getProfileManager().splitSegment(seg, newID1,
+					newID2);
 
 			if (ok) {
 				// Child datasets should all be virtual
 				for (IAnalysisDataset child : dataset.getAllChildDatasets()) {
 					LOGGER.fine("Splitting segment in " + child.getName());
-					boolean cOk = child.getCollection().getProfileManager().splitSegment(seg, newID1, newID2);
+					boolean cOk = child.getCollection().getProfileManager().splitSegment(seg,
+							newID1, newID2);
 					if (!cOk)
-						LOGGER.warning("Splitting segment failed for child dataset " + child.getName());
+						LOGGER.warning(
+								"Splitting segment failed for child dataset " + child.getName());
 				}
 			} else {
 				LOGGER.warning("Splitting segment cancelled");
@@ -234,24 +243,29 @@ public class SegmentationHandler {
 	 */
 	public synchronized void updateSegmentStartIndexAction(UUID id, int index) {
 
-		LOGGER.fine("Requested update of segment " + id + " to index " + index + " in dataset " + dataset.getName());
+		LOGGER.fine("Requested update of segment " + id + " to index " + index + " in dataset "
+				+ dataset.getName());
 
 		try {
 
 			double prop = dataset.getCollection().getProfileCollection()
-					.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN).getFractionOfIndex(index);
+					.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE, Stats.MEDIAN)
+					.getFractionOfIndex(index);
 
 			// Update the median profile
-			dataset.getCollection().getProfileManager().updateMedianProfileSegmentStartIndex(id, index);
+			dataset.getCollection().getProfileManager().updateMedianProfileSegmentStartIndex(id,
+					index);
 
 			// Get the updated profile
 			ISegmentedProfile newProfile = dataset.getCollection().getProfileCollection()
-					.getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);
+					.getSegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE,
+							Stats.MEDIAN);
 
 			// Apply the updated profile to the cells
 			for (ICell c : dataset.getCollection()) {
-				c.getPrimaryNucleus().setSegments(IProfileSegment.scaleSegments(newProfile.getSegments(),
-						c.getPrimaryNucleus().getBorderLength()));
+				c.getPrimaryNucleus()
+						.setSegments(IProfileSegment.scaleSegments(newProfile.getSegments(),
+								c.getPrimaryNucleus().getBorderLength()));
 			}
 
 			for (IAnalysisDataset child : dataset.getAllChildDatasets()) {
@@ -260,16 +274,18 @@ public class SegmentationHandler {
 				// index
 
 				int childIndex = child.getCollection().getProfileCollection()
-						.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN).getIndexOfFraction(prop);
+						.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE, Stats.MEDIAN)
+						.getIndexOfFraction(prop);
 
-				child.getCollection().getProfileManager().updateMedianProfileSegmentStartIndex(id, childIndex);
+				child.getCollection().getProfileManager().updateMedianProfileSegmentStartIndex(id,
+						childIndex);
 			}
 
 			// Lock all the segments except the one to change
 			dataset.getCollection().getProfileManager().setLockOnAllNucleusSegments(true);
 			dataset.getCollection().getProfileManager().setLockOnSegment(id, false);
 
-		} catch (ProfileException | MissingComponentException e) {
+		} catch (ProfileException | MissingComponentException | SegmentUpdateException e) {
 			LOGGER.warning("Error updating index of segments");
 			LOGGER.log(Loggable.STACK, e.getMessage(), e);
 
@@ -278,7 +294,7 @@ public class SegmentationHandler {
 	}
 
 	/**
-	 * Update the border tag in the median profile to the given index, and update
+	 * Update the landmark in the median profile to the given index, and update
 	 * individual nuclei to match.
 	 * 
 	 * @param tag
@@ -289,12 +305,9 @@ public class SegmentationHandler {
 		if (tag == null)
 			throw new IllegalArgumentException("Tag is null");
 
-		LOGGER.fine("Requested " + tag + " set to index " + index + " in dataset " + dataset.getName());
+		LOGGER.fine(
+				"Requested " + tag + " set to index " + index + " in dataset " + dataset.getName());
 
-//		if (dataset.getCollection().isVirtual()) {
-//			LOGGER.fine("Cannot update tag in virtual collection");
-//			return;
-//		}
 		try {
 			// Try updating to an existing tag index. If this
 			// succeeds, do nothing else
@@ -303,7 +316,8 @@ public class SegmentationHandler {
 
 			// Otherwise, find the best fit for each child dataset
 			double prop = dataset.getCollection().getProfileCollection()
-					.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN).getFractionOfIndex(index);
+					.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE, Stats.MEDIAN)
+					.getFractionOfIndex(index);
 
 			dataset.getCollection().getProfileManager().updateLandmark(tag, index);
 
@@ -311,12 +325,14 @@ public class SegmentationHandler {
 
 				// Update each child median profile to the same proportional index
 				int childIndex = child.getCollection().getProfileCollection()
-						.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN).getIndexOfFraction(prop);
+						.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE, Stats.MEDIAN)
+						.getIndexOfFraction(prop);
 
 				child.getCollection().getProfileManager().updateLandmark(tag, childIndex);
 			}
 
-		} catch (IndexOutOfBoundsException | ProfileException | MissingLandmarkException | MissingProfileException e) {
+		} catch (IndexOutOfBoundsException | ProfileException | MissingLandmarkException
+				| MissingProfileException e) {
 			LOGGER.warning("Unable to update border tag index");
 			LOGGER.log(Loggable.STACK, "Profiling error", e);
 		} catch (Exception e) {
@@ -340,13 +356,16 @@ public class SegmentationHandler {
 	 * @throws ComponentCreationException
 	 */
 	private synchronized boolean couldUpdateTagToExistingTagIndex(Landmark tag, int index)
-			throws MissingLandmarkException, MissingProfileException, ProfileException, IndexOutOfBoundsException,
+			throws MissingLandmarkException, MissingProfileException, ProfileException,
+			IndexOutOfBoundsException,
 			ComponentCreationException {
-		List<Landmark> tags = dataset.getCollection().getProfileCollection().getLandmarks();
-		for (Landmark existingTag : tags) {
+		List<OrientationMark> tags = dataset.getCollection().getProfileCollection()
+				.getOrientationMarks();
+		for (OrientationMark existingTag : tags) {
 			if (existingTag.equals(tag))
 				continue;
-			int existingTagIndex = dataset.getCollection().getProfileCollection().getLandmarkIndex(existingTag);
+			int existingTagIndex = dataset.getCollection().getProfileCollection()
+					.getLandmarkIndex(existingTag);
 			if (index == existingTagIndex) {
 				dataset.getCollection().getProfileManager().updateLandmark(tag, existingTagIndex);
 				for (IAnalysisDataset child : dataset.getAllChildDatasets()) {

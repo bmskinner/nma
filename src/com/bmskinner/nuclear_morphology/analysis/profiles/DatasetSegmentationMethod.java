@@ -40,10 +40,10 @@ import com.bmskinner.nuclear_morphology.components.profiles.IProfileCollection;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
-import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
+import com.bmskinner.nuclear_morphology.components.rules.OrientationMark;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 /**
@@ -142,7 +142,7 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 
 	private IAnalysisResult applyMedianToNuclei() throws Exception {
 		ISegmentedProfile median = dataset.getCollection().getProfileCollection().getSegmentedProfile(ProfileType.ANGLE,
-				Landmark.REFERENCE_POINT, Stats.MEDIAN);
+				OrientationMark.REFERENCE, Stats.MEDIAN);
 
 		if (median.getSegmentCount() <= 0) {
 			throw new AnalysisMethodException("Error finding segments in median profile");
@@ -287,7 +287,7 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 			boolean wasLocked = n.isLocked();
 			n.setLocked(false);
 
-			IProfile nucleusProfile = n.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
+			IProfile nucleusProfile = n.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE);
 			ISegmentedProfile segProfile = fitter.fit(nucleusProfile);
 			n.setSegments(segProfile.getSegments());
 
@@ -295,7 +295,7 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 				throw new ProfileException("Segments could not be fitted to nucleus");
 
 			if (template.getSegmentCount() == 1) {
-				ISegmentedProfile test = n.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
+				ISegmentedProfile test = n.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE);
 				IProfileSegment seg = test.getSegment(IProfileCollection.DEFAULT_SEGMENT_ID);
 				if (seg.getStartIndex() != 0) {
 					throw new ProfileException("Single segment does not start at RP in nucleus");

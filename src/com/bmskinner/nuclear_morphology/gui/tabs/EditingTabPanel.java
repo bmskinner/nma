@@ -31,30 +31,29 @@ import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
  */
 public interface EditingTabPanel extends TabPanel {
 
-    /**
-     * Check the lock state of all cells in the dataset being
-     * edited. If a lock has been set, get confirmation from the 
-     * user whether cells should be unlocked for editing, or kept
-     * locked and protected from impending changes.
-     */
-    void checkCellLock();
+	/**
+	 * Check the lock state of all cells in the dataset being edited. If a lock has
+	 * been set, get confirmation from the user whether cells should be unlocked for
+	 * editing, or kept locked and protected from impending changes.
+	 */
+	void checkCellLock();
 
-    /**
-     * Update the border tag in the median profile to the given index, and
-     * update individual nuclei to match.
-     * 
-     * @param tag
-     * @param newTagIndex
-     */
-    void setBorderTagAction(@NonNull Landmark tag, int newTagIndex);
+	/**
+	 * Update the border tag in the median profile to the given index, and update
+	 * individual nuclei to match.
+	 * 
+	 * @param tag
+	 * @param newTagIndex
+	 */
+	void setBorderTagAction(@NonNull Landmark tag, int newTagIndex);
 
-    /**
-     * Update the start index of the given segment to the given index in the
-     * median profile, and update individual nuclei to match
-     * 
-     * @param id
-     * @param index
-     * @throws Exception
-     */
-    void updateSegmentStartIndexAction(@NonNull UUID id, int index) throws Exception;
+	/**
+	 * Update the start index of the given segment to the given index in the median
+	 * profile, and update individual nuclei to match
+	 * 
+	 * @param id
+	 * @param index
+	 * @throws Exception
+	 */
+	void updateSegmentStartIndexAction(@NonNull UUID id, int index) throws Exception;
 }

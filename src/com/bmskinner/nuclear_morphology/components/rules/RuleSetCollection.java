@@ -34,15 +34,15 @@ import org.jdom2.Element;
 
 import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
+import com.bmskinner.nuclear_morphology.components.profiles.DefaultLandmark;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
-import com.bmskinner.nuclear_morphology.components.profiles.LandmarkType;
-import com.bmskinner.nuclear_morphology.io.XmlSerializable;
 import com.bmskinner.nuclear_morphology.io.XMLReader.XMLReadingException;
+import com.bmskinner.nuclear_morphology.io.XmlSerializable;
 
 /**
  * This holds the rulesets for identifying each of the landmarks in a profile.
- * Multiple RuleSets can be combined for each tag, allowing multiple
- * profile types to be used. Designed to be stored within a cell collection.
+ * Multiple RuleSets can be combined for each tag, allowing multiple profile
+ * types to be used. Designed to be stored within a cell collection.
  * 
  * It also stores which landmarks should be used for orientation of the nucleus.
  * This replaces the v1.x.x series of dedicated classes for each type of nucleus
@@ -52,7 +52,7 @@ import com.bmskinner.nuclear_morphology.io.XMLReader.XMLReadingException;
  *
  */
 public class RuleSetCollection implements XmlSerializable {
-	
+
 	private static final String XML_PRIORITY_AXIS = "PriorityAxis";
 
 	private static final String XML_RULE_APPLICATION_TYPE = "RuleApplicationType";
@@ -67,137 +67,139 @@ public class RuleSetCollection implements XmlSerializable {
 	private static final String XML_NAME = "name";
 
 	private static final Logger LOGGER = Logger.getLogger(RuleSetCollection.class.getName());
-    
-    private final String name;
 
-    private final Map<Landmark, List<RuleSet>> map = new HashMap<>();
-    
-    /** Store the landmarks to be used for orientation */
-    private final Map<OrientationMark, Landmark> orientationMarks = new EnumMap<>(OrientationMark.class);
-    
-    /** Track which measurements should be performed for these nuclei */
-    private final Set<Measurement> validMeasurements = new HashSet<>();
-            
-    private final PriorityAxis priorityAxis;
-    
-    private final RuleApplicationType ruleApplicationType;
-    
-    /**
-     * Create a new empty collection. Specify the landmarks that should
-     * be used preferentially by nuclei for orientation
-     */
-    public RuleSetCollection(@NonNull String name, @Nullable Landmark left, @Nullable Landmark right, 
-    		@Nullable Landmark top, @Nullable Landmark bottom, @Nullable Landmark seondaryX,
-    		@Nullable Landmark seondaryY, @Nullable PriorityAxis priorityAxis, RuleApplicationType type) {
-    	this.name = name;
-    	
-    	if(left!=null)
-    		orientationMarks.put(OrientationMark.LEFT, left);
+	private final String name;
 
-    	if(right!=null)
-    		orientationMarks.put(OrientationMark.RIGHT, right);
+	private final Map<Landmark, List<RuleSet>> map = new HashMap<>();
 
-    	if(top!=null)
-    		orientationMarks.put(OrientationMark.TOP, top);
+	/** Store the landmarks to be used for orientation */
+	private final Map<@NonNull OrientationMark, Landmark> orientationMarks = new EnumMap<>(OrientationMark.class);
 
-    	if(bottom!=null)
-    		orientationMarks.put(OrientationMark.BOTTOM, bottom);
+	/** Track which measurements should be performed for these nuclei */
+	private final Set<Measurement> validMeasurements = new HashSet<>();
 
-    	if(seondaryX!=null)
-    		orientationMarks.put(OrientationMark.X, seondaryX);
+	private final PriorityAxis priorityAxis;
 
-    	if(seondaryY!=null)
-    		orientationMarks.put(OrientationMark.Y, seondaryY);
+	private final RuleApplicationType ruleApplicationType;
 
-    	this.priorityAxis = priorityAxis;
-    	this.ruleApplicationType = type;
-    }
-    
-    /**
-     * Construct from an XML element. Use for 
-     * unmarshalling. The element should conform
-     * to the specification in {@link XmlSerializable}.
-     * @param e the XML element containing the data.
-     * @throws XMLReadingException 
-     * @throws ComponentCreationException 
-     */
-    public RuleSetCollection(Element e) throws ComponentCreationException {
-    	name = e.getAttributeValue(XML_NAME);
-    	priorityAxis = PriorityAxis.valueOf(e.getAttributeValue(XML_PRIORITY_AXIS));
-    	ruleApplicationType = RuleApplicationType.valueOf(e.getAttributeValue(XML_RULE_APPLICATION_TYPE));
-    	
-    	// Add the rulesets
-    	for(Element t : e.getChildren(XML_LANDMARK)) {
-    		
-    		String lmName = t.getAttributeValue(XML_NAME);
-    		LandmarkType lmType = LandmarkType.valueOf(t.getAttributeValue(XML_TYPE));
-    		Landmark l = Landmark.of(lmName, lmType);
-    		
-    		List<RuleSet> rules = new ArrayList<>();
-    		for(Element r : t.getChildren(XML_RULESET)) {
-    			rules.add(new RuleSet(r));
-    		}
-    		map.put(l, rules);
-    	}
-    	
-    	// Add the orientation landmarks
-    	for(Element om : e.getChildren("Orient")) {
-    		orientationMarks.put(OrientationMark.valueOf(om.getAttributeValue("name")), 
-    				map.keySet().stream()
-    				.filter(l->l.getName().equals(om.getAttributeValue("value")))
-    				.findFirst().orElse(null));
-    	}
-    	
-    	for(Element m : e.getChildren("Measurement")) {
-    		validMeasurements.add(Measurement.of(m.getText()));
-    	}
-    	
+	/**
+	 * Create a new empty collection. Specify the landmarks that should be used
+	 * preferentially by nuclei for orientation
+	 */
+	public RuleSetCollection(@NonNull String name, @NonNull Landmark rp, @Nullable Landmark left,
+			@Nullable Landmark right, @Nullable Landmark top, @Nullable Landmark bottom, @Nullable Landmark seondaryX,
+			@Nullable Landmark seondaryY, @Nullable PriorityAxis priorityAxis, RuleApplicationType type) {
+		this.name = name;
 
-    }
+		orientationMarks.put(OrientationMark.REFERENCE, rp);
 
-    public String getName() {
-    	return name;
-    }
-    
-    public Set<Measurement> getMeasurableValues(){
-    	return validMeasurements;
-    }
-    
-    public void addMeasurableValue(Measurement m) {
-    	validMeasurements.add(m);
-    }
-    
-    public RuleApplicationType getApplicationType() {
-    	return ruleApplicationType;
-    }
-    
-    /**
-     * Test if the rules specify a preferred landmark
-     * to the left or right of the CoM
-     * @return
-     */
-    public boolean isAsymmetricX() {
-    	return map.containsKey(OrientationMark.LEFT) || map.containsKey(OrientationMark.RIGHT);
-    }
-    
-    /**
-     * Test if the rules specify a preferred landmark
-     * above or below the CoM
-     * @return
-     */
-    public boolean isAsymmetricY() {
-    	return map.containsKey(OrientationMark.TOP) || map.containsKey(OrientationMark.BOTTOM);
-    }
-    
-    /**
-     * Test if there is asymmetry in either axis
-     * @return
-     */
-    public boolean isAsymmetric() {
-    	return isAsymmetricX() || isAsymmetricY();
-    }
-    
-    public Optional<Landmark> getLandmark(OrientationMark s) {
+		if (left != null)
+			orientationMarks.put(OrientationMark.LEFT, left);
+
+		if (right != null)
+			orientationMarks.put(OrientationMark.RIGHT, right);
+
+		if (top != null)
+			orientationMarks.put(OrientationMark.TOP, top);
+
+		if (bottom != null)
+			orientationMarks.put(OrientationMark.BOTTOM, bottom);
+
+		if (seondaryX != null)
+			orientationMarks.put(OrientationMark.X, seondaryX);
+
+		if (seondaryY != null)
+			orientationMarks.put(OrientationMark.Y, seondaryY);
+
+		this.priorityAxis = priorityAxis;
+		this.ruleApplicationType = type;
+	}
+
+	/**
+	 * Construct from an XML element. Use for unmarshalling. The element should
+	 * conform to the specification in {@link XmlSerializable}.
+	 * 
+	 * @param e the XML element containing the data.
+	 * @throws XMLReadingException
+	 * @throws ComponentCreationException
+	 */
+	public RuleSetCollection(Element e) throws ComponentCreationException {
+		name = e.getAttributeValue(XML_NAME);
+		priorityAxis = PriorityAxis.valueOf(e.getAttributeValue(XML_PRIORITY_AXIS));
+		ruleApplicationType = RuleApplicationType.valueOf(e.getAttributeValue(XML_RULE_APPLICATION_TYPE));
+
+		// Add the rulesets
+		for (Element t : e.getChildren(XML_LANDMARK)) {
+
+			String lmName = t.getAttributeValue(XML_NAME);
+			Landmark l = new DefaultLandmark(lmName);
+
+			List<RuleSet> rules = new ArrayList<>();
+			for (Element r : t.getChildren(XML_RULESET)) {
+				rules.add(new RuleSet(r));
+			}
+			map.put(l, rules);
+		}
+
+		// Add the orientation landmarks
+		for (Element om : e.getChildren("Orient")) {
+			orientationMarks.put(OrientationMark.valueOf(om.getAttributeValue("name")), map.keySet().stream()
+					.filter(l -> l.getName().equals(om.getAttributeValue("value"))).findFirst().orElse(null));
+		}
+
+		for (Element m : e.getChildren("Measurement")) {
+			validMeasurements.add(Measurement.of(m.getText()));
+		}
+
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public Set<Measurement> getMeasurableValues() {
+		return validMeasurements;
+	}
+
+	public void addMeasurableValue(Measurement m) {
+		validMeasurements.add(m);
+	}
+
+	public RuleApplicationType getApplicationType() {
+		return ruleApplicationType;
+	}
+
+	/**
+	 * Test if the rules specify a preferred landmark to the left or right of the
+	 * CoM
+	 * 
+	 * @return
+	 */
+	public boolean isAsymmetricX() {
+		return orientationMarks.containsKey(OrientationMark.LEFT)
+				|| orientationMarks.containsKey(OrientationMark.RIGHT);
+	}
+
+	/**
+	 * Test if the rules specify a preferred landmark above or below the CoM
+	 * 
+	 * @return
+	 */
+	public boolean isAsymmetricY() {
+		return orientationMarks.containsKey(OrientationMark.TOP)
+				|| orientationMarks.containsKey(OrientationMark.BOTTOM);
+	}
+
+	/**
+	 * Test if there is asymmetry in either axis
+	 * 
+	 * @return
+	 */
+	public boolean isAsymmetric() {
+		return isAsymmetricX() || isAsymmetricY();
+	}
+
+	public Optional<Landmark> getLandmark(OrientationMark s) {
 		return Optional.ofNullable(orientationMarks.get(s));
 	}
 
@@ -205,131 +207,156 @@ public class RuleSetCollection implements XmlSerializable {
 		return Optional.ofNullable(priorityAxis);
 	}
 
-    /**
-     * Remove all the RuleSets for the given tag
-     * 
-     * @param tag
-     */
-    public void clearRuleSets(@NonNull Landmark tag) {
-        map.put(tag, new ArrayList<>());
-    }
-    
-    public List<RuleSet> removeRuleSets(@NonNull Landmark tag) {
-    	return map.remove(tag);
-    }
+	/**
+	 * Remove all the RuleSets for the given tag
+	 * 
+	 * @param tag
+	 */
+	public void clearRuleSets(@NonNull OrientationMark tag) {
+		Landmark lm = orientationMarks.get(tag);
+		map.put(lm, new ArrayList<>());
+	}
 
-    /**
-     * Add a ruleset for the given tag
-     * 
-     * @param tag
-     * @param r
-     */
-    public void addRuleSet(@NonNull Landmark tag, @NonNull RuleSet r) {
-    	map.computeIfAbsent(tag, k -> new ArrayList<>());
-    	map.get(tag).add(r);
-    }
+	public List<RuleSet> removeRuleSets(@NonNull OrientationMark tag) {
+		Landmark lm = orientationMarks.get(tag);
+		return map.remove(lm);
+	}
 
-    /**
-     * Replace existing RuleSets for the given tag with the list
-     * 
-     * @param tag
-     * @param list
-     */
-    public void setRuleSets(@NonNull Landmark tag, @NonNull List<RuleSet> list) {
-        map.put(tag, new ArrayList<>());
-        map.get(tag).addAll(list);
-    }
+	/**
+	 * Add a ruleset for the given tag
+	 * 
+	 * @param tag
+	 * @param r
+	 */
+	public void addRuleSet(@NonNull OrientationMark tag, @NonNull RuleSet r) {
+		Landmark lm = orientationMarks.get(tag);
+		map.computeIfAbsent(lm, k -> new ArrayList<>());
+		map.get(lm).add(r);
+	}
 
-    /**
-     * Get the rulesets for the given tag
-     * 
-     * @param tag
-     * @param r
-     */
-    public List<RuleSet> getRuleSets(@NonNull Landmark tag) {
-        return map.get(tag);
-    }
+	/**
+	 * Replace existing RuleSets for the given tag with the list
+	 * 
+	 * @param tag
+	 * @param list
+	 */
+	public void setRuleSets(@NonNull OrientationMark tag, @NonNull List<RuleSet> list) {
+		Landmark lm = orientationMarks.get(tag);
+		map.put(lm, new ArrayList<>());
+		map.get(lm).addAll(list);
+	}
 
-    /**
-     * Get the landmarks that are defined in this rule set collection
-     * @return
-     */
-    public Set<Landmark> getLandmarks() {
-        return map.keySet();
-    }
+	/**
+	 * Get the rulesets for the given tag
+	 * 
+	 * @param om
+	 * @param r
+	 */
+	public List<RuleSet> getRuleSets(@NonNull Landmark l) {
+		return map.get(l);
 
-    /**
-     * Test if the collection has rulesets for the given tag
-     * @param tag the tag to check
-     * @return true if rulesets are present, false otherwise
-     */
-    public boolean hasRulesets(@NonNull Landmark tag) {
-    	if(map.containsKey(tag)) {
-    		return !map.get(tag).isEmpty();
-    	}
-    	return false;
-    }
+	}
 
-    /**
-     * Test if the collection is empty
-     * @return
-     */
-    public boolean isEmpty() {
-        return map.isEmpty();
-    }
+	/**
+	 * Get the rulesets for the given tag
+	 * 
+	 * @param om
+	 * @param r
+	 */
+	public List<RuleSet> getRuleSets(@NonNull OrientationMark om) {
+		if (orientationMarks.containsKey(om)) {
+			Landmark l = orientationMarks.get(om);
+			return map.get(l);
+		}
+		return new ArrayList<>();
+	}
 
-    @Override
+	/**
+	 * Get the landmarks that are defined in this rule set collection
+	 * 
+	 * @return
+	 */
+	public Set<Landmark> getLandmarks() {
+		return map.keySet();
+	}
+
+	public Set<OrientationMark> getOrientionMarks() {
+		return orientationMarks.keySet();
+	}
+
+	/**
+	 * Test if the collection has rulesets for the given tag
+	 * 
+	 * @param tag the tag to check
+	 * @return true if rulesets are present, false otherwise
+	 */
+	public boolean hasRulesets(@NonNull OrientationMark om) {
+		if (!orientationMarks.containsKey(om))
+			return false;
+
+		if (map.containsKey(orientationMarks.get(om)))
+			return false;
+
+		return !map.get(orientationMarks.get(om)).isEmpty();
+	}
+
+	/**
+	 * Test if the collection is empty
+	 * 
+	 * @return
+	 */
+	public boolean isEmpty() {
+		return map.isEmpty();
+	}
+
+	@Override
 	public String toString() {
-        StringBuilder b = new StringBuilder();
-        b.append("RuleSets:\n");
-        for(Entry<Landmark, List<RuleSet>> entry : map.entrySet()) {
-            b.append(entry.getKey() + ":\n");
-            for (RuleSet r : entry.getValue()) {
-                b.append(r.toString() + "\n");
-            }
-        }
-
-        return b.toString();
-    }
-    
-    public Element toXmlElement() {
-    	
-    	Element rootElement = new Element(XML_RULE_SET_COLLECTION)
-    			.setAttribute(XML_NAME, getName())
-    			.setAttribute(XML_RULE_APPLICATION_TYPE, getApplicationType().toString());
-    	
-    	if(priorityAxis!=null)
-			rootElement.setAttribute(XML_PRIORITY_AXIS, priorityAxis.toString());
-    	
-    	// Add the landmark rule definitions 
-		for(Landmark t : getLandmarks()) {
-			Element tagElement = new Element(XML_LANDMARK)
-					.setAttribute(XML_NAME, t.getName())
-					.setAttribute(XML_TYPE, t.type().toString());
-			
-			for(RuleSet rs : getRuleSets(t)) {
-				tagElement.addContent(rs.toXmlElement());
+		StringBuilder b = new StringBuilder();
+		b.append("RuleSets:\n");
+		for (Entry<Landmark, List<RuleSet>> entry : map.entrySet()) {
+			b.append(entry.getKey() + ":\n");
+			for (RuleSet r : entry.getValue()) {
+				b.append(r.toString() + "\n");
 			}
+		}
+
+		return b.toString();
+	}
+
+	@Override
+	public Element toXmlElement() {
+
+		Element rootElement = new Element(XML_RULE_SET_COLLECTION).setAttribute(XML_NAME, getName())
+				.setAttribute(XML_RULE_APPLICATION_TYPE, getApplicationType().toString());
+
+		if (priorityAxis != null)
+			rootElement.setAttribute(XML_PRIORITY_AXIS, priorityAxis.toString());
+
+		// Add any orientation landmarks
+		for (Entry<OrientationMark, Landmark> entry : orientationMarks.entrySet()) {
+
+			rootElement.addContent(new Element("Orient").setAttribute("name", entry.getKey().name())
+					.setAttribute("value", entry.getValue().toString()));
+//			LOGGER.fine("Fetching " + entry.getKey() + ": " + orientationMarks.get(entry.getKey()));
+
+		}
+
+		for (Entry<Landmark, List<RuleSet>> entry : map.entrySet()) {
+			Element tagElement = new Element(XML_LANDMARK).setAttribute(XML_NAME, entry.getKey().getName());
+//					.setAttribute(XML_TYPE, entry.getKey().type().toString());
+			for (RuleSet rs : entry.getValue())
+				tagElement.addContent(rs.toXmlElement());
 			rootElement.addContent(tagElement);
 		}
-				
-		// Add any orientation landmarks
-    	for(Entry<OrientationMark, Landmark> entry : orientationMarks.entrySet()) {
-    		rootElement.addContent(new Element("Orient")
-    				.setAttribute("name", entry.getKey().name())
-    				.setAttribute("value", entry.getValue().toString()));
-    	}
-    	
-    	for(Measurement m : validMeasurements) {
-    		rootElement.addContent(new Element("Measurement").setText(m.name()));
-    	}
+
+		for (Measurement m : validMeasurements) {
+			rootElement.addContent(new Element("Measurement").setText(m.name()));
+		}
 
 		return rootElement;
-    }
+	}
 
-	
-
-    @Override
+	@Override
 	public int hashCode() {
 		return Objects.hash(map, name, orientationMarks, priorityAxis, ruleApplicationType);
 	}
@@ -349,62 +376,73 @@ public class RuleSetCollection implements XmlSerializable {
 	}
 
 	/**
-     * Create a RuleSetCollection for mouse sperm nuclei
-     * 
-     * @return
-     */
-    public static RuleSetCollection mouseSpermRuleSetCollection() {
-        RuleSetCollection r = new RuleSetCollection("Mouse sperm", Landmark.REFERENCE_POINT, null,
-        		Landmark.TOP_VERTICAL, Landmark.BOTTOM_VERTICAL,
-        		null, Landmark.ORIENTATION_POINT, PriorityAxis.Y, RuleApplicationType.VIA_MEDIAN);
+	 * Create a RuleSetCollection for mouse sperm nuclei
+	 * 
+	 * @return
+	 */
+	public static RuleSetCollection mouseSpermRuleSetCollection() {
 
-        r.addRuleSet(Landmark.REFERENCE_POINT, RuleSet.mouseSpermRPRuleSet());
-        r.addRuleSet(Landmark.ORIENTATION_POINT, RuleSet.mouseSpermOPRuleSet());
-        r.addRuleSet(Landmark.TOP_VERTICAL, RuleSet.mouseSpermTVRuleSet());
-        r.addRuleSet(Landmark.BOTTOM_VERTICAL, RuleSet.mouseSpermBVRuleSet());
-        
-        for(Measurement m : Measurement.getRoundNucleusStats())
-        	r.addMeasurableValue(m);
-        
-        r.addMeasurableValue(Measurement.BODY_WIDTH);
-        r.addMeasurableValue(Measurement.HOOK_LENGTH);
-        return r;
-    }
+		Landmark rp = new DefaultLandmark("Tip of hook");
+		Landmark tv = new DefaultLandmark("Ventral upper");
+		Landmark bv = new DefaultLandmark("Ventral lower");
+		Landmark op = new DefaultLandmark("Tail socket");
 
-    /**
-     * Create a RuleSetCollection for pig sperm nuclei
-     * 
-     * @return
-     */
-    public static RuleSetCollection pigSpermRuleSetCollection() {
-        RuleSetCollection r = new RuleSetCollection("Pig sperm", Landmark.LEFT_HORIZONTAL, 
-        		Landmark.RIGHT_HORIZONTAL, null, null,
-        		null, Landmark.REFERENCE_POINT, PriorityAxis.X, RuleApplicationType.VIA_MEDIAN);
+		RuleSetCollection r = new RuleSetCollection("Mouse sperm", rp, rp, null, tv, bv, null, op, PriorityAxis.Y,
+				RuleApplicationType.VIA_MEDIAN);
 
-        r.addRuleSet(Landmark.REFERENCE_POINT, RuleSet.pigSpermRPRuleSet());
-        r.addRuleSet(Landmark.ORIENTATION_POINT, RuleSet.pigSpermOPRuleSet());
-        r.addRuleSet(Landmark.LEFT_HORIZONTAL, RuleSet.pigSpermLHRuleSet());
-        r.addRuleSet(Landmark.RIGHT_HORIZONTAL, RuleSet.pigSpermRHRuleSet());
-        
-        for(Measurement m : Measurement.getRoundNucleusStats())
-        	r.addMeasurableValue(m);
-        
-        return r;
-    }
+		r.addRuleSet(OrientationMark.REFERENCE, RuleSet.mouseSpermRPRuleSet());
+		r.addRuleSet(OrientationMark.Y, RuleSet.mouseSpermOPRuleSet());
+		r.addRuleSet(OrientationMark.TOP, RuleSet.mouseSpermTVRuleSet());
+		r.addRuleSet(OrientationMark.BOTTOM, RuleSet.mouseSpermBVRuleSet());
 
-    /**
-     * Create a RuleSetCollection for round nuclei
-     * 
-     * @return
-     */
-    public static RuleSetCollection roundRuleSetCollection() {
-        RuleSetCollection r = new RuleSetCollection("Round", null, null, null, Landmark.REFERENCE_POINT,
-        		null, Landmark.REFERENCE_POINT, PriorityAxis.Y, RuleApplicationType.VIA_MEDIAN);
+		for (Measurement m : Measurement.getRoundNucleusStats())
+			r.addMeasurableValue(m);
 
-        r.addRuleSet(Landmark.REFERENCE_POINT, RuleSet.roundRPRuleSet());
-        
-        for(Measurement m : Measurement.getRoundNucleusStats())
-        	r.addMeasurableValue(m);
-        return r;
-    }
+		r.addMeasurableValue(Measurement.BODY_WIDTH);
+		r.addMeasurableValue(Measurement.HOOK_LENGTH);
+		return r;
+	}
+
+	/**
+	 * Create a RuleSetCollection for pig sperm nuclei
+	 * 
+	 * @return
+	 */
+	public static RuleSetCollection pigSpermRuleSetCollection() {
+
+		Landmark rp = new DefaultLandmark("Tail socket");
+		Landmark lh = new DefaultLandmark("Body left");
+		Landmark rh = new DefaultLandmark("Body right");
+
+		RuleSetCollection r = new RuleSetCollection("Pig sperm", rp, lh, rh, null, null, null, rp, PriorityAxis.X,
+				RuleApplicationType.VIA_MEDIAN);
+
+		r.addRuleSet(OrientationMark.REFERENCE, RuleSet.pigSpermRPRuleSet());
+		r.addRuleSet(OrientationMark.LEFT, RuleSet.pigSpermLHRuleSet());
+		r.addRuleSet(OrientationMark.RIGHT, RuleSet.pigSpermRHRuleSet());
+
+		for (Measurement m : Measurement.getRoundNucleusStats())
+			r.addMeasurableValue(m);
+
+		return r;
+	}
+
+	/**
+	 * Create a RuleSetCollection for round nuclei
+	 * 
+	 * @return
+	 */
+	public static RuleSetCollection roundRuleSetCollection() {
+
+		Landmark rp = new DefaultLandmark("Longest axis");
+
+		RuleSetCollection r = new RuleSetCollection("Round", rp, null, null, null, rp, null, rp, PriorityAxis.Y,
+				RuleApplicationType.VIA_MEDIAN);
+
+		r.addRuleSet(OrientationMark.REFERENCE, RuleSet.roundRPRuleSet());
+
+		for (Measurement m : Measurement.getRoundNucleusStats())
+			r.addMeasurableValue(m);
+		return r;
+	}
 }

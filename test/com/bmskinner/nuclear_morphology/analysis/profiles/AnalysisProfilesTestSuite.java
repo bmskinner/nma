@@ -6,20 +6,15 @@ import org.junit.runners.Suite.SuiteClasses;
 
 /**
  * Runs all test classes in the analysis.profiles package
+ * 
  * @author ben
  * @since 1.14.0
  *
  */
 @RunWith(Suite.class)
-@SuiteClasses({ 
-	DatasetProfilingMethodTest.class, 
-	DatasetSegmentationMethodTest.class, 
-	IterativeSegmentFitterTest.class,
-	ProfileCreatorTest.class,
-	ProfileOffsetterTest.class, 
-	ProfileSegmenterTest.class,
-	RepresentativeMedianFinderTest.class, 
-	SegmentFitterTest.class })
+@SuiteClasses({ DatasetProfilingMethodTest.class, DatasetSegmentationMethodTest.class, IterativeSegmentFitterTest.class,
+		ProfileCreatorTest.class, ProfileSegmenterTest.class, RepresentativeMedianFinderTest.class,
+		SegmentFitterTest.class })
 public class AnalysisProfilesTestSuite {
 
 }

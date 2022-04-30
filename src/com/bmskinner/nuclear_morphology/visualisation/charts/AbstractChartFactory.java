@@ -190,7 +190,6 @@ public abstract class AbstractChartFactory {
 	 * @param value the domain axis value to draw at
 	 */
 	protected void addDomainMarkerToXYPlot(final XYPlot plot, final Landmark tag, final double value, double yval) {
-//		Color colour = chooseTagColour(tag);
 		double range = plot.getRangeAxis().getRange().getLength();
 		double minY = plot.getRangeAxis().getRange().getLowerBound();
 		plot.addAnnotation(new XYTextAnnotation(tag.getName(), value, minY + (range * 0.1)), false);

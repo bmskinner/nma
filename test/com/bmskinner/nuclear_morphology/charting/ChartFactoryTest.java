@@ -19,8 +19,8 @@ import org.junit.Before;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
-import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
+import com.bmskinner.nuclear_morphology.components.rules.OrientationMark;
 import com.bmskinner.nuclear_morphology.visualisation.charts.ConsensusNucleusChartFactory;
 import com.bmskinner.nuclear_morphology.visualisation.charts.ProfileChartFactory;
 import com.bmskinner.nuclear_morphology.visualisation.charts.panels.ExportableChartPanel;
@@ -109,7 +109,7 @@ public abstract class ChartFactoryTest {
 			// show the profile corresponding to the chart
 			ChartOptions profileOptions = new ChartOptionsBuilder().setDatasets(d)
 					.setCell(cell)
-					.setLandmark(Landmark.REFERENCE_POINT)
+					.setLandmark(OrientationMark.REFERENCE)
 					.setShowMarkers(true)
 					.setShowAnnotations(true)
 					.setProfileType(ProfileType.ANGLE)

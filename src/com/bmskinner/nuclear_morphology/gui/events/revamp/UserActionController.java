@@ -16,10 +16,10 @@ import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
-import com.bmskinner.nuclear_morphology.components.profiles.LandmarkType;
 import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.SegmentationHandler;
+import com.bmskinner.nuclear_morphology.components.rules.OrientationMark;
 import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace;
 import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace.BioSample;
 import com.bmskinner.nuclear_morphology.components.workspaces.WorkspaceFactory;
@@ -637,7 +637,9 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 
 		IAnalysisDataset d = event.dataset;
 
-		if (d.getCollection().isVirtual() && Landmark.REFERENCE_POINT.equals(event.lm)) {
+		Landmark rp = d.getCollection().getRuleSetCollection().getLandmark(OrientationMark.REFERENCE).get();
+
+		if (d.getCollection().isVirtual() && rp.equals(event.lm)) {
 			LOGGER.warning("Cannot update core border tag for a child dataset");
 			return;
 		}
@@ -645,7 +647,7 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 		SegmentationHandler sh = new SegmentationHandler(d);
 		sh.setLandmark(event.lm, event.newIndex);
 
-		if (LandmarkType.CORE.equals(event.lm.type())) {
+		if (rp.equals(event.lm)) {
 			UserActionController.getInstance().userActionEventReceived(
 					new UserActionEvent(this, UserActionEvent.SEGMENTATION_ACTION, List.of(event.dataset)));
 		} else {

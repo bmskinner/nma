@@ -19,9 +19,9 @@ import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
-import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
+import com.bmskinner.nuclear_morphology.components.rules.OrientationMark;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.jujutsu.tsne.TSneConfiguration;
 import com.jujutsu.tsne.barneshut.BHTSne;
@@ -119,7 +119,7 @@ public class TsneMethod  extends SingleDatasetAnalysisMethod {
 				if(!options.getBoolean(t.toString()))
 					continue;
 				
-				IProfile p = n.getProfile(t, Landmark.REFERENCE_POINT);
+				IProfile p = n.getProfile(t, OrientationMark.REFERENCE);
 				for (int k = 0; k < 100; k++) {
 					double idx = ((double) k) / 100d;
 					matrix[i][j++] = p.get(idx);
@@ -133,11 +133,11 @@ public class TsneMethod  extends SingleDatasetAnalysisMethod {
 				matrix[i][j++] = n.getMeasurement(stat);
 			}
 			
-			for (IProfileSegment s : dataset.getCollection().getProfileCollection().getSegments(Landmark.REFERENCE_POINT)) {
+			for (IProfileSegment s : dataset.getCollection().getProfileCollection().getSegments(OrientationMark.REFERENCE)) {
 				if(!options.getBoolean(s.getID().toString()))
 					continue;
 				
-				IProfileSegment seg = n.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT).getSegment(s.getID());
+				IProfileSegment seg = n.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE).getSegment(s.getID());
                 double proportionPerimeter = (double) seg.length() / (double) seg.getProfileLength();
 				matrix[i][j++] = n.getMeasurement(Measurement.PERIMETER) * proportionPerimeter;
 			}
@@ -160,7 +160,7 @@ public class TsneMethod  extends SingleDatasetAnalysisMethod {
 				dimensions+=100;
 		
 		try {
-			for (IProfileSegment s : dataset.getCollection().getProfileCollection().getSegments(Landmark.REFERENCE_POINT))
+			for (IProfileSegment s : dataset.getCollection().getProfileCollection().getSegments(OrientationMark.REFERENCE))
 				if(options.getBoolean(s.getID().toString()))
 					dimensions++;
 			

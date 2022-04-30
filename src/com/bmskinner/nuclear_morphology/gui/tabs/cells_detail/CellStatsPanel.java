@@ -62,7 +62,8 @@ import com.bmskinner.nuclear_morphology.visualisation.tables.CellTableDatasetCre
  *
  */
 @SuppressWarnings("serial")
-public class CellStatsPanel extends TableDetailPanel implements CellEditingTabPanel, FilePathUpdatedListener {
+public class CellStatsPanel extends TableDetailPanel
+		implements CellEditingTabPanel, FilePathUpdatedListener {
 
 	private static final Logger LOGGER = Logger.getLogger(CellStatsPanel.class.getName());
 
@@ -106,7 +107,8 @@ public class CellStatsPanel extends TableDetailPanel implements CellEditingTabPa
 					if (rowName.equals("")) {
 						String nextRowName = table.getModel().getValueAt(row + 1, 0).toString();
 						if (nextRowName.equals(Labels.Signals.SIGNAL_GROUP_LABEL)) {
-							SignalTableCell cell = (SignalTableCell) table.getModel().getValueAt(row + 1, 1);
+							SignalTableCell cell = (SignalTableCell) table.getModel()
+									.getValueAt(row + 1, 1);
 							ch.changeSignalColour(activeDataset(), cell.getID());
 						}
 					}
@@ -140,7 +142,8 @@ public class CellStatsPanel extends TableDetailPanel implements CellEditingTabPa
 
 		scaleButton = new JButton("Change scale");
 		scaleButton.addActionListener(e -> UserActionController.getInstance()
-				.userActionEventReceived(new UserActionEvent(this, UserActionEvent.CHANGE_SCALE, getDatasets())));
+				.userActionEventReceived(
+						new UserActionEvent(this, UserActionEvent.CHANGE_SCALE, getDatasets())));
 
 		sourceButton = new JButton("Show source image");
 		sourceButton.addActionListener(e -> showCellImage());
@@ -169,7 +172,8 @@ public class CellStatsPanel extends TableDetailPanel implements CellEditingTabPa
 			return;
 		}
 
-		TableOptions options = new TableOptionsBuilder().setDatasets(getDatasets()).setCell(model.getCell())
+		TableOptions options = new TableOptionsBuilder().setDatasets(getDatasets())
+				.setCell(model.getCell())
 				.setScale(GlobalOptions.getInstance().getScale()).setTarget(table)
 				.setColumnRenderer(TableOptions.ALL_COLUMNS, new StatsTableCellRenderer()).build();
 
@@ -212,10 +216,12 @@ public class CellStatsPanel extends TableDetailPanel implements CellEditingTabPa
 		private static final long serialVersionUID = 1L;
 
 		@Override
-		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
+		public Component getTableCellRendererComponent(JTable table, Object value,
+				boolean isSelected, boolean hasFocus,
 				int row, int column) {
 
-			Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+			Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus,
+					row, column);
 
 			Color bg = Color.WHITE;
 			Color fg = Color.BLACK;
@@ -237,7 +243,8 @@ public class CellStatsPanel extends TableDetailPanel implements CellEditingTabPa
 
 				if (nextRowHeader.equals(Labels.Signals.SIGNAL_GROUP_LABEL)) {
 					// colour this cell preemptively based on the signal group in the next row
-					SignalTableCell tableCell = (SignalTableCell) table.getModel().getValueAt(nextRow, 1);
+					SignalTableCell tableCell = (SignalTableCell) table.getModel()
+							.getValueAt(nextRow, 1);
 					bg = tableCell.getColor();
 				}
 			}

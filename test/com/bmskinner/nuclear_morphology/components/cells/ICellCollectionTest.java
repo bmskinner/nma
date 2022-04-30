@@ -43,11 +43,11 @@ import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
-import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileManager;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
+import com.bmskinner.nuclear_morphology.components.rules.OrientationMark;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
 
@@ -83,9 +83,13 @@ public class ICellCollectionTest {
 	 * @return
 	 * @throws Exception
 	 */
-	public static ICellCollection createInstance(Class<? extends ICellCollection> source) throws Exception {
-		IAnalysisDataset d = new TestDatasetBuilder(ComponentTester.RNG_SEED).cellCount(N_CELLS)
-				.ofType(RuleSetCollection.roundRuleSetCollection()).withMaxSizeVariation(10).randomOffsetProfiles(true)
+	public static ICellCollection createInstance(Class<? extends ICellCollection> source)
+			throws Exception {
+		IAnalysisDataset d = new TestDatasetBuilder(ComponentTester.RNG_SEED)
+				.cellCount(N_CELLS)
+				.ofType(RuleSetCollection.mouseSpermRuleSetCollection())
+				.withMaxSizeVariation(10)
+				.randomOffsetProfiles(true)
 				.addSignalsInChannel(0).segmented().build();
 		if (source == DefaultCellCollection.class) {
 			return d.getCollection();
@@ -130,7 +134,8 @@ public class ICellCollectionTest {
 
 	@Test
 	public void testGetCellsFile() {
-		Set<ICell> cells = collection.getCells(new File(TestDatasetBuilder.TEST_DATASET_IMAGE_FOLDER));
+		Set<ICell> cells = collection
+				.getCells(new File(TestDatasetBuilder.TEST_DATASET_IMAGE_FOLDER));
 		assertEquals(N_CELLS, cells.size());
 	}
 
@@ -153,7 +158,8 @@ public class ICellCollectionTest {
 
 	@Test
 	public void testGetNucleiFile() {
-		Set<ICell> cells = collection.getCells(new File(TestDatasetBuilder.TEST_DATASET_IMAGE_FOLDER));
+		Set<ICell> cells = collection
+				.getCells(new File(TestDatasetBuilder.TEST_DATASET_IMAGE_FOLDER));
 		assertEquals(N_CELLS, cells.size());
 	}
 
@@ -309,7 +315,7 @@ public class ICellCollectionTest {
 		// Run consensus averaging on the collection. Wrap in a new dataset.
 		IAnalysisDataset d = new DefaultAnalysisDataset(collection,
 				new File(TestDatasetBuilder.TEST_DATASET_IMAGE_FOLDER));
-		d.setAnalysisOptions(OptionsFactory.makeDefaultRoundAnalysisOptions(
+		d.setAnalysisOptions(OptionsFactory.makeDefaultRodentAnalysisOptions(
 				new File(TestDatasetBuilder.TEST_DATASET_IMAGE_FOLDER).getAbsoluteFile()));
 
 		assertFalse(collection.hasConsensus());
@@ -323,8 +329,11 @@ public class ICellCollectionTest {
 
 		// Ensure TV and BV are set
 		ProfileManager manager = collection.getProfileManager();
-		manager.updateLandmark(Landmark.TOP_VERTICAL, 0);
-		manager.updateLandmark(Landmark.BOTTOM_VERTICAL, 10);
+		manager.updateLandmark(
+				collection.getRuleSetCollection().getLandmark(OrientationMark.TOP).get(),
+				0);
+		manager.updateLandmark(
+				collection.getRuleSetCollection().getLandmark(OrientationMark.BOTTOM).get(), 10);
 
 		// Run consensus averaging on the collection. Wrap in a new dataset.
 		// Analysis options will not be copied - create anew
@@ -337,9 +346,10 @@ public class ICellCollectionTest {
 		// Test that the consensus has the same indexes as the template
 		// collection
 		Nucleus n = d.getCollection().getConsensus();
-		IPoint tv = n.getBorderPoint(Landmark.TOP_VERTICAL);
-		IPoint bv = n.getBorderPoint(Landmark.BOTTOM_VERTICAL);
-		assertTrue("Points should be vertical for tv=" + tv + " bv=" + bv, ComponentTester.areVertical(tv, bv));
+		IPoint tv = n.getBorderPoint(OrientationMark.TOP);
+		IPoint bv = n.getBorderPoint(OrientationMark.BOTTOM);
+		assertTrue("Points should be vertical for tv=" + tv + " bv=" + bv,
+				ComponentTester.areVertical(tv, bv));
 
 		// Now test that updating the TV to any index still allows orientation
 
@@ -349,19 +359,24 @@ public class ICellCollectionTest {
 		// Start from 3 so that the smaller consensus profile does not get
 		// the TV assigned to index 0 when interpolating
 		for (int tIndex = 1; tIndex < d.getCollection().getMedianArrayLength(); tIndex++) {
-			manager.updateLandmark(Landmark.TOP_VERTICAL, tIndex);
-			manager.updateLandmark(Landmark.BOTTOM_VERTICAL, bIndex);
+			manager.updateLandmark(
+					collection.getRuleSetCollection().getLandmark(OrientationMark.TOP).get(),
+					tIndex);
+			manager.updateLandmark(
+					collection.getRuleSetCollection().getLandmark(OrientationMark.BOTTOM).get(),
+					bIndex);
 
-			assertNotEquals("TV and BV should not have the same index in the median", bIndex, tIndex);
+			assertNotEquals("TV and BV should not have the same index in the median", bIndex,
+					tIndex);
 			assertEquals("Median TV should be", tIndex,
-					collection.getProfileCollection().getLandmarkIndex(Landmark.TOP_VERTICAL));
+					collection.getProfileCollection().getLandmarkIndex(OrientationMark.TOP));
 			assertEquals("Median BV should be", bIndex,
-					collection.getProfileCollection().getLandmarkIndex(Landmark.BOTTOM_VERTICAL));
+					collection.getProfileCollection().getLandmarkIndex(OrientationMark.BOTTOM));
 
 			// Check that the update has been made to the consensus
 			n = d.getCollection().getConsensus();
-			int nTIndex = n.getBorderIndex(Landmark.TOP_VERTICAL);
-			int nBIndex = n.getBorderIndex(Landmark.BOTTOM_VERTICAL);
+			int nTIndex = n.getBorderIndex(OrientationMark.TOP);
+			int nBIndex = n.getBorderIndex(OrientationMark.BOTTOM);
 			if (nTIndex == nBIndex)
 				continue; // we can't test if they end up on the same index due to differences in
 							// perimeter
@@ -372,8 +387,8 @@ public class ICellCollectionTest {
 			panels.add(ChartFactoryTest.makeConsensusChartPanel(d));
 
 			n = collection.getConsensus(); // is aligned vertically
-			tv = n.getBorderPoint(Landmark.TOP_VERTICAL);
-			bv = n.getBorderPoint(Landmark.BOTTOM_VERTICAL);
+			tv = n.getBorderPoint(OrientationMark.TOP);
+			bv = n.getBorderPoint(OrientationMark.BOTTOM);
 
 			assertNotEquals("TV and BV should not be the same point in consensus nucleus", tv, bv);
 
@@ -387,22 +402,25 @@ public class ICellCollectionTest {
 
 	@Test
 	public void testFilterCollection() throws Exception {
-		double medianArea = collection.getMedian(Measurement.AREA, CellularComponent.NUCLEUS, MeasurementScale.PIXELS);
+		double medianArea = collection.getMedian(Measurement.AREA, CellularComponent.NUCLEUS,
+				MeasurementScale.PIXELS);
 
 		FilteringOptions op = new CellCollectionFilterBuilder()
-				.add(Measurement.AREA, CellularComponent.NUCLEUS, MeasurementScale.PIXELS, medianArea, medianArea * 10)
+				.add(Measurement.AREA, CellularComponent.NUCLEUS, MeasurementScale.PIXELS,
+						medianArea, medianArea * 10)
 				.build();
 
 		ICellCollection c = CellCollectionFilterer.filter(collection, op);
 
-		assertTrue("Filtering in " + source.getSimpleName(), c.getNucleusCount() < collection.getNucleusCount());
+		assertTrue("Filtering in " + source.getSimpleName(),
+				c.getNucleusCount() < collection.getNucleusCount());
 	}
 
 	@Test
 	public void testGetDifferenceToMedian() throws MissingLandmarkException {
 
 		for (Nucleus n : collection.getNuclei()) {
-			double d = collection.getNormalisedDifferenceToMedian(Landmark.REFERENCE_POINT, n);
+			double d = collection.getNormalisedDifferenceToMedian(OrientationMark.REFERENCE, n);
 			assertNotEquals(Double.NaN, d);
 			assertNotEquals(Statistical.ERROR_CALCULATING_STAT, d);
 		}

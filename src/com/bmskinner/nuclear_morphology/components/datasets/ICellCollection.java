@@ -35,10 +35,10 @@ import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationExcept
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.cells.Nucleus;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileCollection;
-import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileManager;
+import com.bmskinner.nuclear_morphology.components.rules.OrientationMark;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.signals.SignalManager;
@@ -367,7 +367,7 @@ public interface ICellCollection
 	 * @throws MissingLandmarkException
 	 * @throws MissingProfileException
 	 */
-	Nucleus getNucleusMostSimilarToMedian(Landmark referencePoint)
+	Nucleus getNucleusMostSimilarToMedian(OrientationMark referencePoint)
 			throws ProfileException, MissingLandmarkException, MissingProfileException;
 
 	/**
@@ -430,6 +430,7 @@ public interface ICellCollection
 	 * @return the variabililty score of the object
 	 * @throws MissingLandmarkException if the tag is not present
 	 */
-	double getNormalisedDifferenceToMedian(Landmark pointType, Taggable t) throws MissingLandmarkException;
+	double getNormalisedDifferenceToMedian(@NonNull OrientationMark pointType, Taggable t)
+			throws MissingLandmarkException;
 
 }

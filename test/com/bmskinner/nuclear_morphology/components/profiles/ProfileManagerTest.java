@@ -31,7 +31,9 @@ import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.datasets.VirtualDataset;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
+import com.bmskinner.nuclear_morphology.components.rules.OrientationMark;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.logging.ConsoleFormatter;
 import com.bmskinner.nuclear_morphology.logging.ConsoleHandler;
@@ -78,9 +80,11 @@ public class ProfileManagerTest {
 	 * @return
 	 * @throws Exception
 	 */
-	public static ICellCollection createInstance(Class<? extends ICellCollection> source) throws Exception {
+	public static ICellCollection createInstance(Class<? extends ICellCollection> source)
+			throws Exception {
 		IAnalysisDataset d = new TestDatasetBuilder(RNG_SEED).cellCount(10)
-				.ofType(RuleSetCollection.roundRuleSetCollection()).randomOffsetProfiles(true).segmented().build();
+				.ofType(RuleSetCollection.roundRuleSetCollection()).randomOffsetProfiles(true)
+				.segmented().build();
 
 		if (source == DefaultCellCollection.class) {
 			return d.getCollection();
@@ -115,13 +119,14 @@ public class ProfileManagerTest {
 		File testFolder = TestResources.MOUSE_INPUT_FOLDER.getAbsoluteFile();
 		IAnalysisOptions op = OptionsFactory.makeDefaultRodentAnalysisOptions(testFolder);
 
-		IAnalysisDataset d = new NucleusDetectionMethod(TestResources.UNIT_TEST_FOLDER.getAbsoluteFile(), op).call()
-				.getFirstDataset();
+		IAnalysisDataset d = new NucleusDetectionMethod(
+				TestResources.UNIT_TEST_FOLDER.getAbsoluteFile(), op).call()
+						.getFirstDataset();
 		d.getCollection().getProfileCollection().calculateProfiles();
 
 		// Create a median from the current reference points in the nuclei
 		IProfile median = d.getCollection().getProfileCollection().getProfile(ProfileType.ANGLE,
-				Landmark.REFERENCE_POINT, Stats.MEDIAN);
+				OrientationMark.REFERENCE, Stats.MEDIAN);
 
 		double diff = 0;
 		for (Nucleus n : d.getCollection().getNuclei()) {
@@ -130,14 +135,16 @@ public class ProfileManagerTest {
 
 		// Run the fit. Each nucleus should now have the best possible fit
 		// to the median profile
-		d.getCollection().getProfileManager().updateLandmarkToMedianBestFit(Landmark.REFERENCE_POINT, ProfileType.ANGLE,
+		Landmark rp = d.getCollection().getRuleSetCollection()
+				.getLandmark(OrientationMark.REFERENCE).orElseThrow(MissingOptionException::new);
+		d.getCollection().getProfileManager().updateLandmarkToMedianBestFit(rp, ProfileType.ANGLE,
 				median);
 
 		// Update profile collection
 		collection.getProfileCollection().calculateProfiles();
 
 		IProfile newMedian = d.getCollection().getProfileCollection().getProfile(ProfileType.ANGLE,
-				Landmark.REFERENCE_POINT, Stats.MEDIAN);
+				OrientationMark.REFERENCE, Stats.MEDIAN);
 
 		double postDiff = 0;
 		for (Nucleus n : d.getCollection().getNuclei()) {
@@ -160,7 +167,7 @@ public class ProfileManagerTest {
 		assertTrue("Test collection should have multiple segments",
 				collection.getProfileManager().getSegmentCount() > 1);
 		for (Nucleus n : collection.getNuclei()) {
-			ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
+			ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE);
 			assertTrue("Test nucleus should have multiple segments", profile.getSegmentCount() > 1);
 		}
 	}
@@ -171,8 +178,9 @@ public class ProfileManagerTest {
 	 */
 	@Test
 	public void testSetLockTrueOnSegment() throws Exception {
-		ISegmentedProfile profile = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE,
-				Landmark.REFERENCE_POINT, Stats.MEDIAN);
+		ISegmentedProfile profile = collection.getProfileCollection().getSegmentedProfile(
+				ProfileType.ANGLE,
+				OrientationMark.REFERENCE, Stats.MEDIAN);
 		UUID segId1 = profile.getSegments().get(1).getID();
 
 		// Ensure that all segments are unlocked
@@ -192,7 +200,8 @@ public class ProfileManagerTest {
 			for (Nucleus n : c.getNuclei()) {
 				ISegmentedProfile p = n.getProfile(ProfileType.ANGLE);
 				for (IProfileSegment s : p.getSegments()) {
-					assertEquals("Segment lock state error: " + segId1, s.getID().equals(segId1), s.isLocked());
+					assertEquals("Segment lock state error: " + segId1, s.getID().equals(segId1),
+							s.isLocked());
 				}
 			}
 		}
@@ -205,8 +214,9 @@ public class ProfileManagerTest {
 	 */
 	@Test
 	public void testSetLockFalseOnSegments() throws Exception {
-		ISegmentedProfile profile = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE,
-				Landmark.REFERENCE_POINT, Stats.MEDIAN);
+		ISegmentedProfile profile = collection.getProfileCollection().getSegmentedProfile(
+				ProfileType.ANGLE,
+				OrientationMark.REFERENCE, Stats.MEDIAN);
 		UUID segId1 = profile.getSegments().get(1).getID();
 
 		// Ensure that all segments are locked
@@ -226,7 +236,8 @@ public class ProfileManagerTest {
 			for (Nucleus n : c.getNuclei()) {
 				ISegmentedProfile p = n.getProfile(ProfileType.ANGLE);
 				for (IProfileSegment s : p.getSegments()) {
-					assertEquals("Segment lock state error: " + segId1, s.getID().equals(segId1), !s.isLocked());
+					assertEquals("Segment lock state error: " + segId1, s.getID().equals(segId1),
+							!s.isLocked());
 				}
 			}
 		}
@@ -292,8 +303,9 @@ public class ProfileManagerTest {
 	@Test
 	public void testTestSegmentsMergeable() throws Exception {
 
-		ISegmentedProfile profile = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE,
-				Landmark.REFERENCE_POINT, Stats.MEDIAN);
+		ISegmentedProfile profile = collection.getProfileCollection().getSegmentedProfile(
+				ProfileType.ANGLE,
+				OrientationMark.REFERENCE, Stats.MEDIAN);
 
 		List<UUID> segIds = profile.getSegmentIDs();
 		for (int i = 0; i < segIds.size(); i++) {
@@ -303,14 +315,20 @@ public class ProfileManagerTest {
 				UUID segId2 = segIds.get(j);
 				IProfileSegment seg2 = profile.getSegment(segId2);
 				if (i == j)
-					assertFalse("Merging " + seg1.toString() + " and " + seg2.toString() + " should fail",
+					assertFalse(
+							"Merging " + seg1.toString() + " and " + seg2.toString()
+									+ " should fail",
 							manager.testSegmentsMergeable(seg1, seg2));
 				else {
 					if (i == j - 1)
-						assertTrue("Merging " + seg1.toString() + " and " + seg2.toString() + " should succeed",
+						assertTrue(
+								"Merging " + seg1.toString() + " and " + seg2.toString()
+										+ " should succeed",
 								manager.testSegmentsMergeable(seg1, seg2));
 					else
-						assertFalse("Merging " + seg1.toString() + " and " + seg2.toString() + " should fail",
+						assertFalse(
+								"Merging " + seg1.toString() + " and " + seg2.toString()
+										+ " should fail",
 								manager.testSegmentsMergeable(seg1, seg2));
 				}
 			}
@@ -323,7 +341,7 @@ public class ProfileManagerTest {
 		assertTrue(dv.validate(collection));
 		// Merge on one nucleus will take it out of sync
 		Nucleus n = collection.streamCells().findFirst().get().getPrimaryNucleus();
-		ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
+		ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE);
 		UUID segId1 = profile.getSegments().get(1).getID();
 		UUID segId2 = profile.getSegments().get(2).getID();
 		profile.mergeSegments(segId1, segId2, UUID.randomUUID());
@@ -343,7 +361,7 @@ public class ProfileManagerTest {
 		for (Nucleus n : collection.getNuclei()) {
 
 			// Get the profile
-			ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
+			ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE);
 			List<UUID> segs = profile.getSegmentIDs();
 
 			// Choose the segments to merge
@@ -359,7 +377,8 @@ public class ProfileManagerTest {
 			n.setSegments(profile.getSegments());
 
 			// Get the profile back out from the nucleus
-			ISegmentedProfile newProfile = n.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
+			ISegmentedProfile newProfile = n.getProfile(ProfileType.ANGLE,
+					OrientationMark.REFERENCE);
 
 			assertEquals("Profiles should match", profile, newProfile);
 
@@ -386,8 +405,9 @@ public class ProfileManagerTest {
 			return;
 
 		// Get the median profile with segments
-		ISegmentedProfile profile = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE,
-				Landmark.REFERENCE_POINT, Stats.MEDIAN);
+		ISegmentedProfile profile = collection.getProfileCollection().getSegmentedProfile(
+				ProfileType.ANGLE,
+				OrientationMark.REFERENCE, Stats.MEDIAN);
 
 		assertTrue(profile.getSegmentCount() > 1);
 
@@ -404,7 +424,8 @@ public class ProfileManagerTest {
 		// Confirm the collection is valid before merging
 		DatasetValidator dv = new DatasetValidator();
 		dv.validate(collection);
-		assertTrue("Dataset is not valid before merging: " + dv.getSummary(), dv.validate(collection));
+		assertTrue("Dataset is not valid before merging: " + dv.getSummary(),
+				dv.validate(collection));
 
 		assertTrue("Segments should be mergeable", manager.testSegmentsMergeable(seg1, seg2));
 
@@ -412,7 +433,8 @@ public class ProfileManagerTest {
 		manager.mergeSegments(segId1, segId2, newId);
 
 		dv.validate(collection);
-		assertTrue("Dataset is not valid after merging: " + dv.getSummary(), dv.validate(collection));
+		assertTrue("Dataset is not valid after merging: " + dv.getSummary(),
+				dv.validate(collection));
 
 		List<UUID> newIds = collection.getProfileCollection().getSegmentIDs();
 
@@ -423,7 +445,8 @@ public class ProfileManagerTest {
 		assertFalse(newIds.contains(segId2));
 
 		IProfileSegment mergedSegment = collection.getProfileCollection()
-				.getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN).getSegment(newId);
+				.getSegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE, Stats.MEDIAN)
+				.getSegment(newId);
 		assertTrue(mergedSegment.hasMergeSources());
 		assertTrue(mergedSegment.hasMergeSource(segId1));
 		assertTrue(mergedSegment.hasMergeSource(segId2));
@@ -431,7 +454,8 @@ public class ProfileManagerTest {
 		// If this is a virtual collection, merging is not possible
 		if (collection.isReal()) {
 			for (Nucleus n : collection.getNuclei()) {
-				ISegmentedProfile nucleusProfile = n.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
+				ISegmentedProfile nucleusProfile = n.getProfile(ProfileType.ANGLE,
+						OrientationMark.REFERENCE);
 				List<UUID> nucleusIds = nucleusProfile.getSegmentIDs();
 				assertEquals(newIds.size(), nucleusIds.size());
 				assertTrue(newIds.contains(newId));
@@ -439,8 +463,10 @@ public class ProfileManagerTest {
 				assertFalse(newIds.contains(segId2));
 				IProfileSegment mergedSeg = nucleusProfile.getSegment(newId);
 				assertTrue("Merged segment should have merge sources", mergedSeg.hasMergeSources());
-				assertTrue("Merged segment should have merge source 1", mergedSeg.hasMergeSource(segId1));
-				assertTrue("Merged segment should have merge source 2", mergedSeg.hasMergeSource(segId2));
+				assertTrue("Merged segment should have merge source 1",
+						mergedSeg.hasMergeSource(segId1));
+				assertTrue("Merged segment should have merge source 2",
+						mergedSeg.hasMergeSource(segId2));
 			}
 		}
 	}
@@ -455,8 +481,9 @@ public class ProfileManagerTest {
 		if (collection.isVirtual())
 			return;
 
-		ISegmentedProfile profile = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE,
-				Landmark.REFERENCE_POINT, Stats.MEDIAN);
+		ISegmentedProfile profile = collection.getProfileCollection().getSegmentedProfile(
+				ProfileType.ANGLE,
+				OrientationMark.REFERENCE, Stats.MEDIAN);
 		List<UUID> segIds = profile.getSegmentIDs();
 		UUID newId = UUID.randomUUID();
 		UUID segId1 = profile.getSegments().get(1).getID();
@@ -472,7 +499,8 @@ public class ProfileManagerTest {
 		b = dv.validate(collection);
 
 		assertTrue(source.getSimpleName() + " should validate: " + dv.getErrors(), b);
-		manager.unmergeSegments(newId); // only testable for real collection here, because merging is a noop
+		manager.unmergeSegments(newId); // only testable for real collection here, because merging
+										// is a noop
 
 		List<UUID> newIds = collection.getProfileCollection().getSegmentIDs();
 		assertEquals(segIds.size(), newIds.size());
@@ -483,7 +511,8 @@ public class ProfileManagerTest {
 		assertTrue(source.getSimpleName(), dv.validate(collection));
 
 		for (Nucleus n : collection.getNuclei()) {
-			ISegmentedProfile nucleusProfile = n.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
+			ISegmentedProfile nucleusProfile = n.getProfile(ProfileType.ANGLE,
+					OrientationMark.REFERENCE);
 			List<UUID> nucleusIds = nucleusProfile.getSegmentIDs();
 			assertEquals(segIds.size(), nucleusIds.size());
 			assertFalse(newIds.contains(newId));

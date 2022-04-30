@@ -34,15 +34,15 @@ import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationExcept
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.cells.Nucleus;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.datasets.VirtualDataset;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
+import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
+import com.bmskinner.nuclear_morphology.components.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.signals.DefaultSignalGroup;
 import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalCollection;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.signals.UnavailableSignalGroupException;
-import com.bmskinner.nuclear_morphology.core.DatasetListManager;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -72,7 +72,8 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
 	 *                                         dataset
 	 */
 
-	public SignalDetectionMethod(@NonNull final IAnalysisDataset d, @NonNull final HashOptions options) {
+	public SignalDetectionMethod(@NonNull final IAnalysisDataset d,
+			@NonNull final HashOptions options) {
 		super(d);
 
 		if (!d.getAnalysisOptions().isPresent())
@@ -86,7 +87,8 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
 		this.channel = options.getInt(HashOptions.CHANNEL);
 
 		// Create a signal group in the dataset
-		ISignalGroup group = new DefaultSignalGroup(options.getString(HashOptions.SIGNAL_GROUP_NAME),
+		ISignalGroup group = new DefaultSignalGroup(
+				options.getString(HashOptions.SIGNAL_GROUP_NAME),
 				options.getUUID(HashOptions.SIGNAL_GROUP_ID));
 		// Set the default colour for the signal group
 		Color colour = ColourSelecter.getSignalColour(options.getInt(HashOptions.CHANNEL));
@@ -100,10 +102,10 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
 	@Override
 	public IAnalysisResult call() throws Exception {
 		run();
-		Optional<IAnalysisDataset> r = postDetectionFilter();
-		if (r.isEmpty())
+		Optional<IAnalysisDataset> signalChild = Optional.ofNullable(makeSignalChildDataset());
+		if (signalChild.isEmpty())
 			return new DefaultAnalysisResult(dataset);
-		return new DefaultAnalysisResult(r.get());
+		return new DefaultAnalysisResult(signalChild.get());
 	}
 
 	protected void run() {
@@ -112,9 +114,11 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
 
 		int originalMinThreshold = options.getInt(HashOptions.THRESHOLD);
 
-		SignalFinder finder = new SignalFinder(dataset.getAnalysisOptions().get(), options, dataset.getCollection());
+		SignalFinder finder = new SignalFinder(dataset.getAnalysisOptions().get(), options,
+				dataset.getCollection());
 
-		dataset.getCollection().getCells().forEach(c -> detectInCell(c, finder, originalMinThreshold));
+		dataset.getCollection().getCells()
+				.forEach(c -> detectInCell(c, finder, originalMinThreshold));
 	}
 
 	private void detectInCell(ICell c, SignalFinder finder, int originalMinThreshold) {
@@ -130,7 +134,8 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
 	private void detectInNucleus(Nucleus n, SignalFinder finder) {
 
 		LOGGER.finer(
-				"Looking for signals associated with nucleus " + n.getSourceFileName() + "-" + n.getNucleusNumber());
+				"Looking for signals associated with nucleus " + n.getSourceFileName() + "-"
+						+ n.getNucleusNumber());
 
 		// get the image in the folder with the same name as the
 		// nucleus source image
@@ -145,7 +150,8 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
 			if (!signals.isEmpty()) {
 
 				ISignalCollection signalCollection = n.getSignalCollection();
-				signalCollection.addSignalGroup(signals, options.getUUID(HashOptions.SIGNAL_GROUP_ID));
+				signalCollection.addSignalGroup(signals,
+						options.getUUID(HashOptions.SIGNAL_GROUP_ID));
 
 				// Measure the detected signals in the nucleus
 				SignalMeasurer.calculateSignalDistancesFromCoM(n);
@@ -159,73 +165,38 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
 		}
 	}
 
-	private Optional<IAnalysisDataset> postDetectionFilter() {
-
-		Optional<ICellCollection> c = dividePopulationBySignals(dataset.getCollection(),
-				options.getUUID(HashOptions.SIGNAL_GROUP_ID));
-
-		if (c.isEmpty())
-			return Optional.empty();
-
-		ICellCollection signalPopulation = c.get();
-		LOGGER.finer("Processing " + signalPopulation.getName());
-		return Optional.of(processSubPopulation(signalPopulation));
-	}
-
 	/**
 	 * Create child datasets for signal populations and perform basic analyses
 	 * 
 	 * @param collection
+	 * @throws ProfileException
+	 * @throws MissingProfileException
+	 * @throws MissingLandmarkException
 	 */
-	private IAnalysisDataset processSubPopulation(@NonNull ICellCollection collection) {
+	private IAnalysisDataset makeSignalChildDataset()
+			throws MissingProfileException, ProfileException, MissingLandmarkException {
 
-		try {
-			LOGGER.finer("Creating new analysis dataset for " + collection.getName());
-
-			VirtualDataset subDataset = new VirtualDataset(dataset, collection.getName());
-			subDataset.addAll(collection);
-
-			dataset.addChildDataset(subDataset);
-			dataset.getCollection().getProfileManager().copySegmentsAndLandmarksTo(subDataset);
-			assert DatasetListManager.getInstance().hasDataset(subDataset.getId());
-			return dataset.getChildDataset(subDataset.getId());
-		} catch (Exception e) {
-			LOGGER.log(Loggable.STACK, "Error processing signal group", e);
-			return null;
-		}
-	}
-
-	/**
-	 * Create two child populations for the given dataset: one with signals in the
-	 * given group, and one without signals
-	 * 
-	 * @param r           the collection to split
-	 * @param signalGroup the signal group to split on
-	 * @return a list of new collections
-	 */
-	private Optional<ICellCollection> dividePopulationBySignals(@NonNull ICellCollection r, @NonNull UUID signalGroup) {
-
-		LOGGER.fine("Dividing population by signals...");
-
-		Optional<ISignalGroup> og = r.getSignalGroup(signalGroup);
+		Optional<ISignalGroup> og = dataset.getCollection()
+				.getSignalGroup(options.getUUID(HashOptions.SIGNAL_GROUP_ID));
 
 		if (!og.isPresent())
-			return Optional.empty();
+			return null;
 
 		ISignalGroup group = og.get();
-
 		group.setVisible(true);
 
-		List<ICell> list = r.getSignalManager().getCellsWithNuclearSignals(signalGroup, true);
+		List<ICell> collection = dataset.getCollection().getSignalManager()
+				.getCellsWithNuclearSignals(options.getUUID(HashOptions.SIGNAL_GROUP_ID), true);
 
-		if (!list.isEmpty()) {
-			LOGGER.fine("Signal group " + group.getGroupName() + ": found nuclei with signals");
-			ICellCollection listCollection = new VirtualDataset(dataset, group.getGroupName() + "_with_signals",
-					UUID.randomUUID());
-			listCollection.addAll(list);
-			return Optional.of(listCollection);
-		}
-		return Optional.empty();
+		if (collection.isEmpty())
+			return null;
+
+		VirtualDataset subDataset = new VirtualDataset(dataset,
+				og.get().getGroupName() + "_with_signals", UUID.randomUUID());
+		subDataset.addAll(collection);
+
+		dataset.addChildDataset(subDataset);
+		dataset.getCollection().getProfileManager().copySegmentsAndLandmarksTo(subDataset);
+		return dataset.getChildDataset(subDataset.getId());
 	}
-
 }

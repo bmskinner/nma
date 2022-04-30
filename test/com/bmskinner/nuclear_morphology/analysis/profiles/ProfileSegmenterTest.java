@@ -10,10 +10,10 @@ import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
-import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
+import com.bmskinner.nuclear_morphology.components.rules.OrientationMark;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
@@ -29,7 +29,7 @@ public class ProfileSegmenterTest extends ComponentTester {
 	private void segmentMedianProfile(IAnalysisDataset d) throws MissingLandmarkException, MissingProfileException, ProfileException, Exception {
 		IProfile median = d.getCollection()
 				.getProfileCollection()
-				.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);
+				.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE, Stats.MEDIAN);
 		
 		ProfileSegmenter segmenter = new ProfileSegmenter(median);
 				

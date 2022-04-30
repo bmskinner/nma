@@ -33,6 +33,7 @@ import com.bmskinner.nuclear_morphology.components.cells.ComponentCreationExcept
 import com.bmskinner.nuclear_morphology.components.cells.DefaultCell;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.cells.Nucleus;
+import com.bmskinner.nuclear_morphology.components.datasets.DatasetValidator;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.options.HashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
@@ -46,196 +47,184 @@ import ij.gui.Roi;
 import ij.process.ImageProcessor;
 
 public class FluorescentNucleusFinder extends CellFinder {
-	
+
 	private static final Logger LOGGER = Logger.getLogger(FluorescentNucleusFinder.class.getName());
 
-    private final NucleusBuilderFactory factory;
-    private final @NonNull HashOptions nuclOptions;
-    private final FinderDisplayType displayType;
-    
-    public FluorescentNucleusFinder(@NonNull final IAnalysisOptions op, @NonNull FinderDisplayType t) {
-        super(op);
-        displayType = t;
-        
-        if(op.getRuleSetCollection()==null)
-        	throw new IllegalArgumentException("No ruleset provided");
-        
-        nuclOptions = options.getDetectionOptions(CellularComponent.NUCLEUS)
-        		.orElseThrow(() -> new IllegalArgumentException("No nucleus options"));
-        
-        factory = ComponentBuilderFactory.createNucleusBuilderFactory(op.getRuleSetCollection(), 
-        		options.getProfileWindowProportion(),
-        		nuclOptions.getDouble(HashOptions.SCALE));
-    }
+	private final NucleusBuilderFactory factory;
+	private final @NonNull HashOptions nuclOptions;
+	private final FinderDisplayType displayType;
 
-    @Override
-    public List<ICell> findInImage(@NonNull final File imageFile) throws ImageImportException {
-    	List<ICell> list = new ArrayList<>();
+	public FluorescentNucleusFinder(@NonNull final IAnalysisOptions op, @NonNull FinderDisplayType t) {
+		super(op);
+		displayType = t;
 
-    	try {
-    		if(FinderDisplayType.PREVIEW.equals(displayType)) {
-    			// Get all objects and annotate if passing filters
-    			list = detectNucleusPreview(imageFile);
-    		}
-    		
-    		if(FinderDisplayType.PIPELINE.equals(displayType)) {
-    			// Get only objects matching filters
-    			list = detectNucleusPipeline(imageFile);
-    		}
-    	} finally {
-    		fireProgressEvent();
-    	}        
-    	return list;
-    }
-    
-    private List<ICell> detectNucleusPipeline(@NonNull final File imageFile)
-    		throws ImageImportException {
-    	List<Nucleus> list = new ArrayList<>();
-    	
-        ImageImporter importer = new ImageImporter(imageFile);
+		if (op.getRuleSetCollection() == null)
+			throw new IllegalArgumentException("No ruleset provided");
 
-        ImageProcessor ip = importer.importImage(nuclOptions.getInt(HashOptions.CHANNEL));
+		nuclOptions = options.getDetectionOptions(CellularComponent.NUCLEUS)
+				.orElseThrow(() -> new IllegalArgumentException("No nucleus options"));
 
-        ImageFilterer filt = new ImageFilterer(ip.duplicate());
-        if (nuclOptions.getBoolean(HashOptions.IS_USE_KUWAHARA)) {
-            filt.kuwaharaFilter(nuclOptions.getInt(HashOptions.KUWAHARA_RADIUS_INT));
-        }
+		factory = ComponentBuilderFactory.createNucleusBuilderFactory(op.getRuleSetCollection(),
+				options.getProfileWindowProportion(), nuclOptions.getDouble(HashOptions.SCALE));
+	}
 
-        if (nuclOptions.getBoolean(HashOptions.IS_USE_FLATTENING)) {
-            filt.setMaximumPixelValue(nuclOptions.getInt(HashOptions.FLATTENING_THRESHOLD_INT));
-        }
+	@Override
+	public List<ICell> findInImage(@NonNull final File imageFile) throws ImageImportException {
+		List<ICell> list = new ArrayList<>();
 
-        
-        if (nuclOptions.getBoolean(HashOptions.IS_USE_CANNY)) {
-            filt.cannyEdgeDetection(nuclOptions);
-            filt.close(nuclOptions.getInt(HashOptions.CANNY_CLOSING_RADIUS_INT));
+		try {
+			if (FinderDisplayType.PREVIEW.equals(displayType)) {
+				// Get all objects and annotate if passing filters
+				list = detectNucleusPreview(imageFile);
+			}
 
-        } else {
-            filt.threshold(nuclOptions.getInt(HashOptions.THRESHOLD));
-        }
+			if (FinderDisplayType.PIPELINE.equals(displayType)) {
+				// Get only objects matching filters
+				list = detectNucleusPipeline(imageFile);
+			}
+		} finally {
+			fireProgressEvent();
+		}
+		return list;
+	}
 
-        LOGGER.finer("Detecting ROIs in "+imageFile.getName());
-        GenericDetector gd = new GenericDetector();
+	private List<ICell> detectNucleusPipeline(@NonNull final File imageFile) throws ImageImportException {
+		List<Nucleus> list = new ArrayList<>();
 
-        gd.setSize(nuclOptions.getInt(HashOptions.MIN_SIZE_PIXELS), nuclOptions.getInt(HashOptions.MAX_SIZE_PIXELS)); 
+		ImageImporter importer = new ImageImporter(imageFile);
 
-        ImageProcessor img = filt.toProcessor();
+		ImageProcessor ip = importer.importImage(nuclOptions.getInt(HashOptions.CHANNEL));
 
-        Map<Roi, IPoint> rois = gd.getRois(img.duplicate());
-        LOGGER.finer(()->"Image: "+imageFile.getName()+": "+rois.size()+" rois");
-        
-        for(Entry<Roi, IPoint> entry : rois.entrySet()) {
-            try {
-            	
-            	Nucleus n = factory.newBuilder()
-                    	.fromRoi(entry.getKey())
-                    	.withFile(imageFile)
-                    	.withChannel(nuclOptions.getInt(HashOptions.CHANNEL))
-                    	.withCoM(entry.getValue())
-                    	.build();
-            			
-            	list.add(n);
-            } catch(ComponentCreationException e) {
-            	LOGGER.log(Loggable.STACK, "Unable to create nucleus from roi: "+e.getMessage()+"; skipping", e);
-            }
-        }
-        LOGGER.finer(()->"Detected nuclei in "+imageFile.getName());
-        
+		ImageFilterer filt = new ImageFilterer(ip.duplicate());
+		if (nuclOptions.getBoolean(HashOptions.IS_USE_KUWAHARA)) {
+			filt.kuwaharaFilter(nuclOptions.getInt(HashOptions.KUWAHARA_RADIUS_INT));
+		}
+
+		if (nuclOptions.getBoolean(HashOptions.IS_USE_FLATTENING)) {
+			filt.setMaximumPixelValue(nuclOptions.getInt(HashOptions.FLATTENING_THRESHOLD_INT));
+		}
+
+		if (nuclOptions.getBoolean(HashOptions.IS_USE_CANNY)) {
+			filt.cannyEdgeDetection(nuclOptions);
+			filt.close(nuclOptions.getInt(HashOptions.CANNY_CLOSING_RADIUS_INT));
+
+		} else {
+			filt.threshold(nuclOptions.getInt(HashOptions.THRESHOLD));
+		}
+
+		LOGGER.finer("Detecting ROIs in " + imageFile.getName());
+		GenericDetector gd = new GenericDetector();
+
+		gd.setSize(nuclOptions.getInt(HashOptions.MIN_SIZE_PIXELS), nuclOptions.getInt(HashOptions.MAX_SIZE_PIXELS));
+
+		ImageProcessor img = filt.toProcessor();
+
+		Map<Roi, IPoint> rois = gd.getRois(img.duplicate());
+		LOGGER.finer(() -> "Image: " + imageFile.getName() + ": " + rois.size() + " rois");
+
+		for (Entry<Roi, IPoint> entry : rois.entrySet()) {
+			try {
+
+				Nucleus n = factory.newBuilder().fromRoi(entry.getKey()).withFile(imageFile)
+						.withChannel(nuclOptions.getInt(HashOptions.CHANNEL)).withCoM(entry.getValue()).build();
+
+				list.add(n);
+			} catch (ComponentCreationException e) {
+				LOGGER.log(Loggable.STACK, "Unable to create nucleus from roi: " + e.getMessage() + "; skipping", e);
+			}
+		}
+		LOGGER.finer(() -> "Detected nuclei in " + imageFile.getName());
+
 		List<ICell> result = new ArrayList<>();
 		for (Nucleus n : list) {
 			if (isValid(nuclOptions, n)) {
+				ICell c = new DefaultCell(n);
+				DatasetValidator dv = new DatasetValidator();
+				if (!dv.validate(c))
+					LOGGER.fine("Error in cell " + n.getNameAndNumber() + ": " + dv.getSummary() + dv.getErrors());
 				result.add(new DefaultCell(n));
 			}
 		}
-        return result;
-    }
+		return result;
+	}
 
-    private List<ICell> detectNucleusPreview(@NonNull final File imageFile)
-            throws ImageImportException {
+	private List<ICell> detectNucleusPreview(@NonNull final File imageFile) throws ImageImportException {
 
-        List<Nucleus> list = new ArrayList<>();
+		List<Nucleus> list = new ArrayList<>();
 
-        ImageImporter importer = new ImageImporter(imageFile);
-        
-        ImageProcessor ip = importer.importImage(nuclOptions.getInt(HashOptions.CHANNEL));
+		ImageImporter importer = new ImageImporter(imageFile);
 
-        ImageFilterer filt = new ImageFilterer(ip.duplicate());
-        if (nuclOptions.getBoolean(HashOptions.IS_USE_KUWAHARA)) {
-            filt.kuwaharaFilter(nuclOptions.getInt(HashOptions.KUWAHARA_RADIUS_INT));
-            if (hasDetectionListeners()) {
-            	ip = filt.toProcessor().duplicate();
-            	ip.invert();
-            	fireDetectionEvent(ip.duplicate(), "Kuwahara filter");
-            }
-        }
+		ImageProcessor ip = importer.importImage(nuclOptions.getInt(HashOptions.CHANNEL));
 
-        if (nuclOptions.getBoolean(HashOptions.IS_USE_FLATTENING)) {
-            filt.setMaximumPixelValue(nuclOptions.getInt(HashOptions.FLATTENING_THRESHOLD_INT));
-            if (hasDetectionListeners()) {
-            	ip = filt.toProcessor().duplicate();
-            	ip.invert();
-            	fireDetectionEvent(ip.duplicate(), "Chromocentre flattening");
-            }
-        }
+		ImageFilterer filt = new ImageFilterer(ip.duplicate());
+		if (nuclOptions.getBoolean(HashOptions.IS_USE_KUWAHARA)) {
+			filt.kuwaharaFilter(nuclOptions.getInt(HashOptions.KUWAHARA_RADIUS_INT));
+			if (hasDetectionListeners()) {
+				ip = filt.toProcessor().duplicate();
+				ip.invert();
+				fireDetectionEvent(ip.duplicate(), "Kuwahara filter");
+			}
+		}
 
-        if (nuclOptions.getBoolean(HashOptions.IS_USE_CANNY)) {
-            filt.cannyEdgeDetection(nuclOptions);
-            if (hasDetectionListeners()) {
-            	ip = filt.toProcessor().duplicate();
-            	ip.invert();
-            	fireDetectionEvent(ip.duplicate(), "Edge detection");
-            }
+		if (nuclOptions.getBoolean(HashOptions.IS_USE_FLATTENING)) {
+			filt.setMaximumPixelValue(nuclOptions.getInt(HashOptions.FLATTENING_THRESHOLD_INT));
+			if (hasDetectionListeners()) {
+				ip = filt.toProcessor().duplicate();
+				ip.invert();
+				fireDetectionEvent(ip.duplicate(), "Chromocentre flattening");
+			}
+		}
 
-            filt.close(nuclOptions.getInt(HashOptions.CANNY_CLOSING_RADIUS_INT));
-            if (hasDetectionListeners()) {
-            	ip = filt.toProcessor().duplicate();
-            	ip.invert();
-            	fireDetectionEvent(ip.duplicate(), "Gap closing");
-            }
-        } else {
-            filt.threshold(nuclOptions.getInt(HashOptions.THRESHOLD));
-            if (hasDetectionListeners()) {
-            	ip = filt.toProcessor().duplicate();
-            	ip.invert();
-            	fireDetectionEvent(ip.duplicate(), "Thresholded");
-            }
-        }
+		if (nuclOptions.getBoolean(HashOptions.IS_USE_CANNY)) {
+			filt.cannyEdgeDetection(nuclOptions);
+			if (hasDetectionListeners()) {
+				ip = filt.toProcessor().duplicate();
+				ip.invert();
+				fireDetectionEvent(ip.duplicate(), "Edge detection");
+			}
 
-        GenericDetector gd = new GenericDetector();
-        
-        // Display passing and failing size nuclei
-   		ImageProcessor original = importer
-   				.importImageAndInvert(nuclOptions.getInt(HashOptions.CHANNEL))
-   				.convertToRGB();
-        
-        // do not use the minimum nucleus size - we want the roi outlined in red
-        gd.setSize(MIN_PROFILABLE_OBJECT_SIZE, original.getWidth() * original.getHeight()); 
+			filt.close(nuclOptions.getInt(HashOptions.CANNY_CLOSING_RADIUS_INT));
+			if (hasDetectionListeners()) {
+				ip = filt.toProcessor().duplicate();
+				ip.invert();
+				fireDetectionEvent(ip.duplicate(), "Gap closing");
+			}
+		} else {
+			filt.threshold(nuclOptions.getInt(HashOptions.THRESHOLD));
+			if (hasDetectionListeners()) {
+				ip = filt.toProcessor().duplicate();
+				ip.invert();
+				fireDetectionEvent(ip.duplicate(), "Thresholded");
+			}
+		}
 
-        ImageProcessor img = filt.toProcessor();
+		GenericDetector gd = new GenericDetector();
 
-        
-        Map<Roi, IPoint> rois = gd.getRois(img.duplicate());
-        LOGGER.finer(()->"Image: "+imageFile.getName()+": "+rois.size()+" rois");
-        
-        for(Entry<Roi, IPoint> entry : rois.entrySet()) {
-            try {
-            	list.add(factory.newBuilder()
-                    	.fromRoi(entry.getKey())
-                    	.withFile(imageFile)
-                    	.withChannel(nuclOptions.getInt(HashOptions.CHANNEL))
-                    	.withCoM(entry.getValue())
-                    	.build());
-            } catch(ComponentCreationException e) {
-            	LOGGER.log(Loggable.STACK, "Unable to create nucleus from roi: "+e.getMessage()+"; skipping", e);
-            }
-        }
-        LOGGER.finer(()->"Detected nuclei in "+imageFile.getName());
-        
+		// Display passing and failing size nuclei
+		ImageProcessor original = importer.importImageAndInvert(nuclOptions.getInt(HashOptions.CHANNEL)).convertToRGB();
+
+		// do not use the minimum nucleus size - we want the roi outlined in red
+		gd.setSize(MIN_PROFILABLE_OBJECT_SIZE, original.getWidth() * original.getHeight());
+
+		ImageProcessor img = filt.toProcessor();
+
+		Map<Roi, IPoint> rois = gd.getRois(img.duplicate());
+		LOGGER.finer(() -> "Image: " + imageFile.getName() + ": " + rois.size() + " rois");
+
+		for (Entry<Roi, IPoint> entry : rois.entrySet()) {
+			try {
+				list.add(factory.newBuilder().fromRoi(entry.getKey()).withFile(imageFile)
+						.withChannel(nuclOptions.getInt(HashOptions.CHANNEL)).withCoM(entry.getValue()).build());
+			} catch (ComponentCreationException e) {
+				LOGGER.log(Loggable.STACK, "Unable to create nucleus from roi: " + e.getMessage() + "; skipping", e);
+			}
+		}
+		LOGGER.finer(() -> "Detected nuclei in " + imageFile.getName());
 
 		ImageAnnotator ann = new ImageAnnotator(original);
 
 		for (Nucleus n : list) {
-			Color colour = isValid(nuclOptions,n) ? Color.ORANGE : Color.RED;
+			Color colour = isValid(nuclOptions, n) ? Color.ORANGE : Color.RED;
 			ann.drawBorder(n, colour);
 		}
 		fireDetectionEvent(ann.toProcessor().duplicate(), "Detected objects");
@@ -244,14 +233,14 @@ public class FluorescentNucleusFinder extends CellFinder {
 			ann.annotateStats(n, Color.ORANGE, Color.BLUE);
 		}
 		fireDetectionEvent(ann.toProcessor().duplicate(), "Annotated objects");
-		
+
 		List<ICell> result = new ArrayList<>();
 		for (Nucleus n : list) {
-			if (isValid(nuclOptions,n)) {
+			if (isValid(nuclOptions, n)) {
 				result.add(new DefaultCell(n));
 			}
 		}
-        return result;
-    }
+		return result;
+	}
 
 }

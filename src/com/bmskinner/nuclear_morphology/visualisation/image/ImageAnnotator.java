@@ -45,10 +45,10 @@ import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
-import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
+import com.bmskinner.nuclear_morphology.components.rules.OrientationMark;
 import com.bmskinner.nuclear_morphology.components.signals.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.signals.ISignalCollection;
 import com.bmskinner.nuclear_morphology.components.signals.IWarpedSignal;
@@ -77,13 +77,13 @@ public class ImageAnnotator extends AbstractImageFilterer {
 	/** Converts resized images to original image dimensions */
 	private double scale = 1;
 
-	private static final Map<Landmark, Color> DEFAULT_TAG_COLOURS = new HashMap<>();
+	private static final Map<OrientationMark, Color> DEFAULT_TAG_COLOURS = new HashMap<>();
 
 	static {
-		DEFAULT_TAG_COLOURS.put(Landmark.REFERENCE_POINT, Color.ORANGE);
-		DEFAULT_TAG_COLOURS.put(Landmark.ORIENTATION_POINT, Color.BLUE);
-		DEFAULT_TAG_COLOURS.put(Landmark.TOP_VERTICAL, Color.GREEN);
-		DEFAULT_TAG_COLOURS.put(Landmark.BOTTOM_VERTICAL, Color.GREEN);
+		DEFAULT_TAG_COLOURS.put(OrientationMark.REFERENCE, Color.ORANGE);
+		DEFAULT_TAG_COLOURS.put(OrientationMark.Y, Color.BLUE);
+		DEFAULT_TAG_COLOURS.put(OrientationMark.TOP, Color.GREEN);
+		DEFAULT_TAG_COLOURS.put(OrientationMark.BOTTOM, Color.GREEN);
 	}
 
 	public ImageAnnotator(final ImageProcessor ip) {
@@ -97,7 +97,7 @@ public class ImageAnnotator extends AbstractImageFilterer {
 	 * @param t the tag to get a colour for
 	 * @return the defined colour, or a default colour
 	 */
-	private Color getDefaultColour(Landmark t) {
+	private Color getDefaultColour(OrientationMark t) {
 		if (DEFAULT_TAG_COLOURS.containsKey(t))
 			return DEFAULT_TAG_COLOURS.get(t);
 		return Color.PINK;
@@ -220,15 +220,15 @@ public class ImageAnnotator extends AbstractImageFilterer {
 //            }
 //            
 //            // Colour the border points for segments    
-//            ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
+//            ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE);
 //            if (profile.hasSegments()) { 
 //
 //            	for(IProfileSegment seg : profile.getOrderedSegments()) {
 //            		Paint color = ColourSelecter.getColor(seg.getPosition(), GlobalOptions.getInstance().getSwatch());
 //            		Iterator<Integer> it = seg.iterator();
-//            		int lastIndex = n.getOffsetBorderIndex(Landmark.REFERENCE_POINT, seg.getEndIndex());
+//            		int lastIndex = n.getOffsetBorderIndex(OrientationMark.REFERENCE, seg.getEndIndex());
 //            		while(it.hasNext()) {
-//            			int index = n.getOffsetBorderIndex(Landmark.REFERENCE_POINT, it.next());
+//            			int index = n.getOffsetBorderIndex(OrientationMark.REFERENCE, it.next());
 //        				IPoint p = n.getBorderPoint(index).plus(Imageable.COMPONENT_BUFFER);
 //            			try {
 //            				
@@ -241,7 +241,7 @@ public class ImageAnnotator extends AbstractImageFilterer {
 //            	}
 //            	
 //            	// Draw the RP again because it will be drawn over by the final segment
-//            	IPoint rp = n.getBorderPoint(Landmark.REFERENCE_POINT).plus(Imageable.COMPONENT_BUFFER);
+//            	IPoint rp = n.getBorderPoint(OrientationMark.REFERENCE).plus(Imageable.COMPONENT_BUFFER);
 //            	annotatePoint(rp, ColourSelecter.getColor(0), 3);
 //            }
 //            annotatePoint(n.getCentreOfMass().plus(Imageable.COMPONENT_BUFFER), Color.PINK, RP_POINT_SIZE);
@@ -254,15 +254,15 @@ public class ImageAnnotator extends AbstractImageFilterer {
 	public ImageAnnotator drawSegments(@NonNull Nucleus n) {
 		try {
 			// // Colour the border points for segments
-			ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
+			ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE);
 			if (profile.hasSegments()) {
 
 				for (IProfileSegment seg : profile.getOrderedSegments()) {
 					Paint color = ColourSelecter.getColor(seg.getPosition(), GlobalOptions.getInstance().getSwatch());
 					Iterator<Integer> it = seg.iterator();
-					int lastIndex = n.getIndexRelativeTo(Landmark.REFERENCE_POINT, seg.getEndIndex());
+					int lastIndex = n.getIndexRelativeTo(OrientationMark.REFERENCE, seg.getEndIndex());
 					while (it.hasNext()) {
-						int index = n.getIndexRelativeTo(Landmark.REFERENCE_POINT, it.next());
+						int index = n.getIndexRelativeTo(OrientationMark.REFERENCE, it.next());
 						IPoint p = n.getBorderPoint(index);
 						// since segments overlap, draw the last index larger so the next segment can
 						// overlay
@@ -288,7 +288,7 @@ public class ImageAnnotator extends AbstractImageFilterer {
 		annotateCoM(n);
 		drawSegments(n);
 		annotateSignals(n);
-		for (Landmark lm : n.getLandmarks().keySet())
+		for (OrientationMark lm : n.getOrientationMarks())
 			drawLandmark(lm, n);
 
 		return this;
@@ -416,7 +416,7 @@ public class ImageAnnotator extends AbstractImageFilterer {
 	 * @param n
 	 * @return
 	 */
-	private ImageAnnotator drawLandmark(Landmark lm, @NonNull Nucleus n) {
+	private ImageAnnotator drawLandmark(OrientationMark lm, @NonNull Nucleus n) {
 		try {
 			return annotatePoint(n.getBorderPoint(lm), getDefaultColour(lm));
 		} catch (MissingLandmarkException e) {

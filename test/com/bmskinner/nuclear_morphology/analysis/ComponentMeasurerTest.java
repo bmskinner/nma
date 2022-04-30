@@ -21,7 +21,7 @@ import com.bmskinner.nuclear_morphology.components.cells.Nucleus;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
-import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
+import com.bmskinner.nuclear_morphology.components.rules.OrientationMark;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
 
@@ -36,8 +36,8 @@ public class ComponentMeasurerTest {
 
 		int midpoint = n.getBorderLength() / 2;
 
-		n.setLandmark(Landmark.TOP_VERTICAL, 0);
-		n.setLandmark(Landmark.BOTTOM_VERTICAL, midpoint);
+		n.setOrientationMark(OrientationMark.TOP, 0);
+		n.setOrientationMark(OrientationMark.BOTTOM, midpoint);
 
 		assertFalse("Hook length calculation should not be error",
 				Statistical.ERROR_CALCULATING_STAT == ComponentMeasurer.calculate(Measurement.HOOK_LENGTH, n));
@@ -52,8 +52,8 @@ public class ComponentMeasurerTest {
 
 		int midpoint = n.getBorderLength() / 2;
 
-		n.setLandmark(Landmark.TOP_VERTICAL, 0);
-		n.setLandmark(Landmark.BOTTOM_VERTICAL, midpoint);
+		n.setOrientationMark(OrientationMark.TOP, 0);
+		n.setOrientationMark(OrientationMark.BOTTOM, midpoint);
 
 		assertFalse("Body width calculation should not be error",
 				Statistical.ERROR_CALCULATING_STAT == ComponentMeasurer.calculate(Measurement.BODY_WIDTH, n));
@@ -65,8 +65,8 @@ public class ComponentMeasurerTest {
 
 		Nucleus n = dataset.getCollection().getCells().get(0).getPrimaryNucleus();
 
-		assertTrue(n.hasLandmark(Landmark.TOP_VERTICAL));
-		assertTrue(n.hasLandmark(Landmark.BOTTOM_VERTICAL));
+		assertTrue(n.hasLandmark(OrientationMark.TOP));
+		assertTrue(n.hasLandmark(OrientationMark.BOTTOM));
 
 		assertFalse("Hook length calculation should not be error",
 				Statistical.ERROR_CALCULATING_STAT == ComponentMeasurer.calculate(Measurement.HOOK_LENGTH, n));
@@ -78,8 +78,8 @@ public class ComponentMeasurerTest {
 
 		Nucleus n = dataset.getCollection().getCells().get(0).getPrimaryNucleus();
 
-		assertTrue(n.hasLandmark(Landmark.TOP_VERTICAL));
-		assertTrue(n.hasLandmark(Landmark.BOTTOM_VERTICAL));
+		assertTrue(n.hasLandmark(OrientationMark.TOP));
+		assertTrue(n.hasLandmark(OrientationMark.BOTTOM));
 
 		assertFalse("Body width calculation should not be error",
 				Statistical.ERROR_CALCULATING_STAT == ComponentMeasurer.calculate(Measurement.BODY_WIDTH, n));

@@ -37,103 +37,107 @@ import com.bmskinner.nuclear_morphology.components.cells.DefaultNucleus;
 import com.bmskinner.nuclear_morphology.components.cells.Nucleus;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
-import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
+import com.bmskinner.nuclear_morphology.components.rules.OrientationMark;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 
 /**
  * Tests for implementations of the Nucleus interface
+ * 
  * @author ben
  *
  */
 @RunWith(Parameterized.class)
 public class NucleusTest {
-	
+
 	private Nucleus nucleus;
-	
+
 	@Parameter(0)
 	public Class<? extends Nucleus> source;
-	
+
 	@Before
-    public void setUp() throws Exception {
+	public void setUp() throws Exception {
 		nucleus = createInstance(source);
-    }
-	
+	}
+
 	/**
 	 * Create an instance of the class under test
+	 * 
 	 * @param source the class to create
 	 * @return
-	 * @throws Exception 
+	 * @throws Exception
 	 */
 	public static Nucleus createInstance(Class<? extends Nucleus> source) throws Exception {
 
-		if(source==DefaultNucleus.class){
-			return TestComponentFactory.rectangularNucleus(100, 100, 20, 20, 0, 20, RuleSetCollection.mouseSpermRuleSetCollection());
+		if (source == DefaultNucleus.class) {
+			return TestComponentFactory.rectangularNucleus(100, 100, 20, 20, 0, 20,
+					RuleSetCollection.mouseSpermRuleSetCollection());
 		}
 
-		throw new Exception("Unable to create instance of "+source);
+		throw new Exception("Unable to create instance of " + source);
 	}
-	
-    @Parameters
-    public static Iterable<Class<? extends Nucleus>> arguments() {
+
+	@Parameters
+	public static Iterable<Class<? extends Nucleus>> arguments() {
 
 		// Since the objects created here persist throughout all tests,
 		// we're making class references. The actual objects under test
 		// are created fresh from the appropriate class.
 		return Arrays.asList(DefaultNucleus.class);
 	}
-	
+
 	/**
-	 * The minimum diameter is expressed as a fraction of the max diameter.
-	 * For a square the max diameter is the diagonal. 
+	 * The minimum diameter is expressed as a fraction of the max diameter. For a
+	 * square the max diameter is the diagonal.
+	 * 
 	 * @throws Exception
 	 */
 	@Test
 	public void testMinDiameter() throws Exception {
-		double max = Math.sqrt(100*100*2);
-		double expected = 100/max;
+		double max = Math.sqrt(100 * 100 * 2);
+		double expected = 100 / max;
 		double epsilon = 0.01; // the amount of difference permitted
 		assertEquals(expected, nucleus.getMeasurement(Measurement.MIN_DIAMETER), epsilon);
 	}
-		
+
 	@Test
 	public void testCentreOfMass() throws ComponentCreationException {
 		int expectedX = 70;
-		int expectedY = 70;				
+		int expectedY = 70;
 		assertEquals("X int values", expectedX, nucleus.getCentreOfMass().getXAsInt());
 		assertEquals("Y int values", expectedY, nucleus.getCentreOfMass().getYAsInt());
 	}
-	
+
 	@Test
 	public void testAlignVertical() throws Exception {
-		nucleus.setLandmark(Landmark.TOP_VERTICAL, 10);
-		nucleus.setLandmark(Landmark.BOTTOM_VERTICAL, 20);
-		assertTrue(nucleus.hasLandmark(Landmark.TOP_VERTICAL));
-		assertTrue(nucleus.hasLandmark(Landmark.BOTTOM_VERTICAL));
-		
-		IPoint tvPre = nucleus.getBorderPoint(Landmark.TOP_VERTICAL);
-		IPoint bvPre = nucleus.getBorderPoint(Landmark.BOTTOM_VERTICAL);
-		assertFalse(Math.abs(tvPre.getX()-bvPre.getX())<1);
-		
+		nucleus.setOrientationMark(OrientationMark.TOP, 10);
+		nucleus.setOrientationMark(OrientationMark.BOTTOM, 20);
+		assertTrue(nucleus.hasLandmark(OrientationMark.TOP));
+		assertTrue(nucleus.hasLandmark(OrientationMark.BOTTOM));
+
+		IPoint tvPre = nucleus.getBorderPoint(OrientationMark.TOP);
+		IPoint bvPre = nucleus.getBorderPoint(OrientationMark.BOTTOM);
+		assertFalse(Math.abs(tvPre.getX() - bvPre.getX()) < 1);
+
 		nucleus.orient();
-		IPoint tv = nucleus.getBorderPoint(Landmark.TOP_VERTICAL);
-		IPoint bv = nucleus.getBorderPoint(Landmark.BOTTOM_VERTICAL);
-		
+		IPoint tv = nucleus.getBorderPoint(OrientationMark.TOP);
+		IPoint bv = nucleus.getBorderPoint(OrientationMark.BOTTOM);
+
 		assertEquals(tv.getX(), bv.getX(), 0.0);
-		assertTrue(tv.getY()>bv.getY());
+		assertTrue(tv.getY() > bv.getY());
 	}
-	
+
 	@Test
 	public void testGetVerticalNucleusIsIdenticalToAlignVertical() throws Exception {
-		nucleus.setLandmark(Landmark.TOP_VERTICAL, 10);
-		nucleus.setLandmark(Landmark.BOTTOM_VERTICAL, 20);
+		nucleus.setOrientationMark(OrientationMark.TOP, 10);
+		nucleus.setOrientationMark(OrientationMark.BOTTOM, 20);
 		Nucleus vert = nucleus.getOrientedNucleus();
-		
+
 		nucleus.orient();
-		IPoint tv = nucleus.getBorderPoint(Landmark.TOP_VERTICAL);
-		IPoint bv = nucleus.getBorderPoint(Landmark.BOTTOM_VERTICAL);
-		IPoint vTv = vert.getBorderPoint(Landmark.TOP_VERTICAL);
-		IPoint vBv = vert.getBorderPoint(Landmark.BOTTOM_VERTICAL);
-		
+		IPoint tv = nucleus.getBorderPoint(OrientationMark.TOP);
+		IPoint bv = nucleus.getBorderPoint(OrientationMark.BOTTOM);
+		IPoint vTv = vert.getBorderPoint(OrientationMark.TOP);
+		IPoint vBv = vert.getBorderPoint(OrientationMark.BOTTOM);
+
 		assertEquals("Top vertical", tv, vTv);
 		assertEquals("Bottom vertical", bv, vBv);
 	}

@@ -39,6 +39,7 @@ import com.bmskinner.nuclear_morphology.analysis.nucleus.CellCollectionFilterer;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.CellCollectionFilterer.CollectionFilteringException;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.FilteringOptions;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.FilteringOptions.FilterMatchType;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.datasets.ICellCollection;
@@ -120,7 +121,8 @@ public abstract class AbstractScatterPanel extends DetailPanel {
 		statBBox = new JComboBox<>(Measurement.getStats(component));
 
 		statABox.setSelectedItem(
-				component.equals(CellularComponent.NUCLEAR_SIGNAL) ? Measurement.FRACT_DISTANCE_FROM_COM
+				component.equals(CellularComponent.NUCLEAR_SIGNAL)
+						? Measurement.FRACT_DISTANCE_FROM_COM
 						: Measurement.VARIABILITY); // default if present
 
 		statABox.addActionListener(e -> {
@@ -219,15 +221,18 @@ public abstract class AbstractScatterPanel extends DetailPanel {
 			Measurement statA = (Measurement) statABox.getSelectedItem();
 			Measurement statB = (Measurement) statBBox.getSelectedItem();
 
-			FilteringOptions options = new CellCollectionFilterBuilder().setMatchType(FilterMatchType.ALL_MATCH)
+			FilteringOptions options = new CellCollectionFilterBuilder()
+					.setMatchType(FilterMatchType.ALL_MATCH)
 					.add(statA, component, scale, domain.getLowerBound(), domain.getUpperBound())
-					.add(statB, component, scale, range.getLowerBound(), range.getUpperBound()).build();
+					.add(statB, component, scale, range.getLowerBound(), range.getUpperBound())
+					.build();
 
 			for (IAnalysisDataset d : getDatasets()) {
 				try {
 
 					// Get the filtered cells as a real collection
-					ICellCollection filtered = CellCollectionFilterer.filter(d.getCollection(), options);
+					ICellCollection filtered = CellCollectionFilterer.filter(d.getCollection(),
+							options);
 
 					// Put them into a virtual collection
 					ICellCollection virt = new VirtualDataset(d, filtered.getName());
@@ -238,8 +243,10 @@ public abstract class AbstractScatterPanel extends DetailPanel {
 					d.getCollection().getSignalManager().copySignalGroupsTo(virt);
 					d.addChildCollection(virt);
 					UIController.getInstance().fireDatasetAdded(d);
-				} catch (CollectionFilteringException | ProfileException | MissingProfileException e1) {
-					LOGGER.log(Loggable.STACK, "Unable to filter collection for " + d.getName(), e1);
+				} catch (CollectionFilteringException | ProfileException | MissingProfileException
+						| MissingLandmarkException e1) {
+					LOGGER.log(Loggable.STACK, "Unable to filter collection for " + d.getName(),
+							e1);
 				}
 			}
 
@@ -252,7 +259,8 @@ public abstract class AbstractScatterPanel extends DetailPanel {
 			Measurement statA = (Measurement) statABox.getSelectedItem();
 			Measurement statB = (Measurement) statBBox.getSelectedItem();
 
-			ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets()).addStatistic(statA)
+			ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets())
+					.addStatistic(statA)
 					.addStatistic(statB).setTarget(chartPanel).build();
 
 			setChart(options);
@@ -307,7 +315,8 @@ public abstract class AbstractScatterPanel extends DetailPanel {
 		}
 	}
 
-	private class AbstractScatterCorrelationPanel extends TableDetailPanel implements ScaleUpdatedListener {
+	private class AbstractScatterCorrelationPanel extends TableDetailPanel
+			implements ScaleUpdatedListener {
 
 		private static final String SPEARMAN_LBL = "Spearman's rank correlation coefficients";
 
@@ -353,7 +362,8 @@ public abstract class AbstractScatterPanel extends DetailPanel {
 			Measurement statA = (Measurement) statABox.getSelectedItem();
 			Measurement statB = (Measurement) statBBox.getSelectedItem();
 
-			TableOptions tableOptions = new TableOptionsBuilder().setDatasets(getDatasets()).addStatistic(statA)
+			TableOptions tableOptions = new TableOptionsBuilder().setDatasets(getDatasets())
+					.addStatistic(statA)
 					.addStatistic(statB).setTarget(rhoTable).build();
 
 			setTable(tableOptions);

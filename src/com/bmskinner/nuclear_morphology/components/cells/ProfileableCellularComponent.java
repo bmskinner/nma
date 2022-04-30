@@ -18,6 +18,7 @@ package com.bmskinner.nuclear_morphology.components.cells;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +27,7 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
@@ -39,6 +41,7 @@ import com.bmskinner.nuclear_morphology.components.Taggable;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.profiles.DefaultLandmark;
 import com.bmskinner.nuclear_morphology.components.profiles.DefaultProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.DefaultSegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
@@ -46,11 +49,13 @@ import com.bmskinner.nuclear_morphology.components.profiles.IProfileCollection;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
-import com.bmskinner.nuclear_morphology.components.profiles.LandmarkType;
 import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.components.profiles.UnprofilableObjectException;
+import com.bmskinner.nuclear_morphology.components.rules.OrientationMark;
+import com.bmskinner.nuclear_morphology.components.rules.PriorityAxis;
+import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.gui.Roi;
@@ -64,11 +69,15 @@ import ij.gui.Roi;
  * @since 1.13.3
  *
  */
-public abstract class ProfileableCellularComponent extends DefaultCellularComponent implements Taggable {
+public abstract class ProfileableCellularComponent extends DefaultCellularComponent
+		implements Taggable {
 
 	private static final String XML_WINDOW_PROPORTION = "window";
+	private static final String XML_ORIENTATION = "Orientation";
+	private static final String XML_PRIORITY_AXIS = "axis";
 
-	private static final Logger LOGGER = Logger.getLogger(ProfileableCellularComponent.class.getName());
+	private static final Logger LOGGER = Logger
+			.getLogger(ProfileableCellularComponent.class.getName());
 
 	/** The proportion of the perimeter to use for profiling */
 	private double windowProportion = IAnalysisOptions.DEFAULT_WINDOW_PROPORTION;
@@ -78,6 +87,12 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 
 	/** The indexes of landmarks in the profiles and border list */
 	private Map<Landmark, Integer> profileLandmarks = new HashMap<>();
+
+	/** Store the landmarks to be used for orientation */
+	protected Map<@NonNull OrientationMark, Landmark> orientationMarks = new EnumMap<>(
+			OrientationMark.class);
+
+	private PriorityAxis priorityAxis = PriorityAxis.Y;
 
 	/** allow locking of segments and landmarks */
 	private boolean isLocked = false;
@@ -96,10 +111,12 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 	 * @param channel      the RGB channel the component was found in
 	 * @param position     the bounding position of the component in the original
 	 *                     image
+	 * @throws ComponentCreationException
 	 */
-	protected ProfileableCellularComponent(@NonNull Roi roi, @NonNull IPoint centreOfMass, File source, int channel,
-			int x, int y) {
-		this(roi, centreOfMass, source, channel, x, y, null);
+	protected ProfileableCellularComponent(@NonNull Roi roi, @NonNull IPoint centreOfMass,
+			File source, int channel,
+			int x, int y, @NonNull RuleSetCollection rsc) throws ComponentCreationException {
+		this(roi, centreOfMass, source, channel, x, y, null, rsc);
 	}
 
 	/**
@@ -114,11 +131,22 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 	 * @param position     the bounding position of the component in the original
 	 *                     image
 	 * @param id           the id of the component. Only use when deserialising!
+	 * @throws ComponentCreationException
 	 */
-	protected ProfileableCellularComponent(@NonNull Roi roi, @NonNull IPoint centreOfMass, File source, int channel,
-			int x, int y, @Nullable UUID id) {
+	protected ProfileableCellularComponent(@NonNull Roi roi, @NonNull IPoint centreOfMass,
+			File source, int channel,
+			int x, int y, @Nullable UUID id, @NonNull RuleSetCollection rsc)
+			throws ComponentCreationException {
 		super(roi, centreOfMass, source, channel, x, y, id);
-		profileLandmarks.put(Landmark.REFERENCE_POINT, 0);
+
+		for (@NonNull
+		OrientationMark s : rsc.getOrientionMarks()) {
+			Landmark l = rsc.getLandmark(s).orElseThrow(ComponentCreationException::new);
+			orientationMarks.put(s, l);
+		}
+
+		priorityAxis = rsc.getPriorityAxis().orElse(PriorityAxis.Y);
+		profileLandmarks.put(orientationMarks.get(OrientationMark.REFERENCE), 0);
 	}
 
 	/**
@@ -128,14 +156,22 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 	 * @param c
 	 * @throws UnprofilableObjectException
 	 */
-	protected ProfileableCellularComponent(@NonNull final Taggable c) throws ComponentCreationException {
+	protected ProfileableCellularComponent(@NonNull final Taggable c)
+			throws ComponentCreationException {
 		super(c);
 
 		this.windowProportion = c.getWindowProportion();
 
+		for (OrientationMark s : OrientationMark.values()) {
+			if (c.getLandmark(s) != null)
+				orientationMarks.put(s, c.getLandmark(s));
+		}
+
 		profileLandmarks.clear();
-		for (Entry<Landmark, Integer> entry : c.getLandmarks().entrySet())
-			profileLandmarks.put(entry.getKey(), entry.getValue());
+		for (Entry<OrientationMark, Integer> entry : c.getOrientationMarkMap().entrySet())
+			profileLandmarks.put(orientationMarks.get(entry.getKey()), entry.getValue());
+
+		priorityAxis = c.getPriorityAxis();
 
 		this.isLocked = c.isLocked();
 
@@ -143,12 +179,13 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 
 			// When duplicating components we can copy the existing profiles
 			for (ProfileType type : ProfileType.values()) {
-				profileMap.put(type, c.getUnsegmentedProfile(type, Landmark.REFERENCE_POINT)
-						.startFrom(-c.getBorderIndex(Landmark.REFERENCE_POINT)));
+				profileMap.put(type, c.getUnsegmentedProfile(type, OrientationMark.REFERENCE)
+						.startFrom(-c.getBorderIndex(OrientationMark.REFERENCE)));
 			}
 
 			segments.clear();
-			segments.addAll(c.getProfile(ProfileType.ANGLE).startFrom(-c.getBorderIndex(Landmark.REFERENCE_POINT))
+			segments.addAll(c.getProfile(ProfileType.ANGLE)
+					.startFrom(-c.getBorderIndex(OrientationMark.REFERENCE))
 					.getSegments()); // getSegments creates a copy, no need to duplicate again
 			IProfileSegment.linkSegments(segments);
 
@@ -165,10 +202,18 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 		isLocked = e.getAttributeValue("locked") != null;
 
 		for (Element el : e.getChildren("Landmark")) {
-			profileLandmarks.put(
-					Landmark.of(el.getAttributeValue("name"), LandmarkType.valueOf(el.getAttributeValue("type"))),
+			profileLandmarks.put(new DefaultLandmark(el.getAttributeValue("name")),
 					Integer.parseInt(el.getAttributeValue("index")));
 		}
+
+		for (Element el : e.getChildren(XML_ORIENTATION)) {
+			OrientationMark name = OrientationMark.valueOf(el.getAttributeValue("name"));
+			Landmark l = profileLandmarks.keySet().stream()
+					.filter(lm -> lm.getName().equals(el.getAttributeValue("value"))).findFirst()
+					.get();
+			orientationMarks.put(name, l);
+		}
+		priorityAxis = PriorityAxis.valueOf(e.getAttributeValue(XML_PRIORITY_AXIS));
 
 		try {
 			for (Element el : e.getChildren("Segment")) {
@@ -181,7 +226,8 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 			}
 
 		} catch (ProfileException e1) {
-			throw new ComponentCreationException("Unable to link segments in object constructor", e1);
+			throw new ComponentCreationException("Unable to link segments in object constructor",
+					e1);
 		}
 
 		// Note - do not call initialise here since subclasses
@@ -202,77 +248,62 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 			// Any existing segments should be completely cleared on new initialisation
 			segments.clear();
 			segments.add(
-					new DefaultProfileSegment(0, 0, this.getBorderLength(), IProfileCollection.DEFAULT_SEGMENT_ID));
+					new DefaultProfileSegment(0, 0, this.getBorderLength(),
+							IProfileCollection.DEFAULT_SEGMENT_ID));
 		} catch (ProfileException e) {
-			throw new ComponentCreationException("Could not calculate profiles due to " + e.getMessage(), e);
+			throw new ComponentCreationException(
+					"Could not calculate profiles due to " + e.getMessage(), e);
 		}
 	}
 
-	public IPoint getPoint(@NonNull Landmark tag) throws MissingLandmarkException {
-		int index = this.getBorderIndex(tag);
-		return this.getBorderPoint(index);
+	@Override
+	public @Nullable PriorityAxis getPriorityAxis() {
+		return priorityAxis;
 	}
 
 	@Override
-	public IPoint getBorderPoint(@NonNull Landmark tag) throws MissingLandmarkException {
-		int borderIndex = this.getBorderIndex(tag);
+	public void setLandmark(@NonNull OrientationMark om, int newLmIndex)
+			throws MissingProfileException, MissingLandmarkException, ProfileException {
+		Landmark land = orientationMarks.get(om);
 
-		if (borderIndex < 0 || borderIndex >= this.getBorderLength())
-			throw new MissingLandmarkException(
-					String.format("Landmark '%s' saved at index %s is not within profile (length %s)", tag, borderIndex,
-							this.getBorderLength()));
-
-		return getBorderPoint(borderIndex);
+		if (land == null)
+			throw new MissingLandmarkException("Cannot find landmark for '" + om + "' (we have "
+					+ profileLandmarks.entrySet().stream()
+							.map(e -> e.getKey().toString() + " - " + String.valueOf(e.getValue()))
+							.collect(Collectors.joining(", "))
+					+ ")");
+		setLandmark(land, newLmIndex);
 	}
 
 	@Override
-	public Map<Landmark, Integer> getLandmarks() {
-		Map<Landmark, Integer> result = new HashMap<>();
-		for (Landmark b : profileLandmarks.keySet()) {
-			result.put(b, profileLandmarks.get(b));
-		}
-		return result;
-	}
-
-	@Override
-	public Landmark getBorderTag(int index) {
-		for (Entry<Landmark, Integer> entry : profileLandmarks.entrySet()) {
-			if (entry.getValue() == index)
-				return entry.getKey();
-		}
-		return null;
-	}
-
-	@Override
-	public int getBorderIndex(@NonNull Landmark tag) throws MissingLandmarkException {
-		if (profileLandmarks.containsKey(tag))
-			return profileLandmarks.get(tag);
-		throw new MissingLandmarkException("Tag " + tag + " is not present");
-	}
-
-	@Override
-	public void setLandmark(@NonNull Landmark lm, int newLmIndex)
+	public void setLandmark(@NonNull Landmark land, int newLmIndex)
 			throws MissingProfileException, ProfileException, MissingLandmarkException {
 		if (isLocked)
 			return;
 
 		if (newLmIndex < 0 || newLmIndex >= this.getBorderLength())
 			throw new IllegalArgumentException(
-					String.format("Index %s is out of bounds for border length %s", newLmIndex, getBorderLength()));
+					String.format("Index %s is out of bounds for border length %s", newLmIndex,
+							getBorderLength()));
 
 		// If not the RP, set and return
-		if (!Landmark.REFERENCE_POINT.equals(lm)) {
-			profileLandmarks.put(lm, newLmIndex);
+		Landmark rp = orientationMarks.get(OrientationMark.REFERENCE);
+
+		if (!rp.equals(land)) {
+			profileLandmarks.put(land, newLmIndex);
 			return;
 		}
 
 		// On assignment of the RP, ensure that a segment
 		// boundary is at the RP. We do this by moving the existing
 		// segments along until the old RP boundary segment is at the new RP.
-		int oldRP = profileLandmarks.get(lm);
+		int oldRP = profileLandmarks.get(land);
+
+//		LOGGER.fine("Setting RP to " + newLmIndex + " from " + oldRP);
 
 		// This profile has segments starting from the old RP
-		ISegmentedProfile p = new DefaultSegmentedProfile(profileMap.get(ProfileType.ANGLE), segments);
+		ISegmentedProfile p = new DefaultSegmentedProfile(profileMap.get(ProfileType.ANGLE),
+				segments);
 
 		/*
 		 * There is at least one segment starting at the original RP index. When the
@@ -286,17 +317,123 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 		for (IProfileSegment s : p.getSegments()) {
 			segments.add(s.duplicate());
 		}
-		profileLandmarks.put(lm, newLmIndex);
+		profileLandmarks.put(land, newLmIndex);
+
+		// At this point the RP should be on a segment boundary
+		boolean isOk = false;
+		for (IProfileSegment s : segments)
+			if (s.getStartIndex() == newLmIndex)
+				isOk = true;
+		assert (isOk);
 	}
 
 	@Override
-	public boolean hasLandmark(@NonNull Landmark tag) {
-		return this.profileLandmarks.containsKey(tag);
+	public int getIndexRelativeTo(@NonNull OrientationMark om, int index)
+			throws MissingLandmarkException {
+		return wrapIndex(index + getBorderIndex(om));
 	}
 
 	@Override
-	public int getIndexRelativeTo(@NonNull Landmark reference, int index) throws MissingLandmarkException {
-		return wrapIndex(index + this.getBorderIndex(reference));
+	public int getBorderIndex(@NonNull OrientationMark om) throws MissingLandmarkException {
+		Landmark lm = getLandmark(om);
+		if (lm == null)
+			throw new MissingLandmarkException("Cannot find landmark for " + om);
+		return getBorderIndex(lm);
+	}
+
+	@Override
+	public int getBorderIndex(@NonNull Landmark lm) throws MissingLandmarkException {
+
+		if (profileLandmarks.containsKey(lm) && profileLandmarks.get(lm) != null)
+			return profileLandmarks.get(lm);
+
+		throw new MissingLandmarkException("Landmark '" + lm + "' has no index set (we have "
+				+ profileLandmarks.entrySet().stream()
+						.map(e -> e.getKey().toString() + " - " + String.valueOf(e.getValue()))
+						.collect(Collectors.joining(", "))
+				+ ")");
+	}
+
+	@Override
+	public IPoint getBorderPoint(@NonNull Landmark lm) throws MissingLandmarkException {
+		return getBorderPoint(getBorderIndex(lm));
+	}
+
+	@Override
+	public IPoint getBorderPoint(@NonNull OrientationMark om) throws MissingLandmarkException {
+		int borderIndex = this.getBorderIndex(om);
+
+		if (borderIndex < 0 || borderIndex >= this.getBorderLength())
+			throw new MissingLandmarkException(
+					String.format(
+							"Landmark '%s' saved at index %s is not within profile (length %s)", om,
+							borderIndex,
+							this.getBorderLength()));
+
+		return getBorderPoint(borderIndex);
+	}
+
+	@Override
+	public void setOrientationMark(@NonNull OrientationMark om, int i)
+			throws IndexOutOfBoundsException, MissingProfileException, ProfileException,
+			MissingLandmarkException {
+		setLandmark(om, i);
+	}
+
+	@Override
+	public Map<OrientationMark, Integer> getOrientationMarkMap() {
+		Map<OrientationMark, Integer> result = new HashMap<>();
+		for (Entry<@NonNull OrientationMark, Landmark> entry : orientationMarks.entrySet()) {
+			result.put(entry.getKey(), profileLandmarks.get(entry.getValue()));
+		}
+		return result;
+	}
+
+	@Override
+	public @Nullable Landmark getLandmark(OrientationMark s) {
+		return orientationMarks.get(s);
+	}
+
+	@Override
+	public boolean hasLandmark(@NonNull OrientationMark landmark) {
+		return orientationMarks.containsKey(landmark);
+	}
+
+	@Override
+	public @NonNull ISegmentedProfile getProfile(@NonNull ProfileType type,
+			@NonNull OrientationMark om)
+			throws MissingLandmarkException, MissingProfileException, ProfileException {
+		Landmark lm = getLandmark(om);
+		if (lm == null)
+			throw new MissingLandmarkException("Cannot find landmark for " + om);
+		return getProfile(type, lm);
+	}
+
+	@Override
+	public @NonNull ISegmentedProfile getProfile(@NonNull ProfileType type, @NonNull Landmark lm)
+			throws ProfileException, MissingLandmarkException, MissingProfileException {
+
+		// fetch the index of the pointType (the zero index of the profile to return)
+		if (profileLandmarks.get(lm) == null)
+			throw new MissingLandmarkException("Cannot find index for " + lm);
+
+		int lmIndex = profileLandmarks.get(lm);
+
+		// Get the raw profile
+		ISegmentedProfile profile = new DefaultSegmentedProfile(profileMap.get(type), segments);
+
+		// offset the profile to start at the desired landmark
+		return profile.startFrom(lmIndex);
+	}
+
+	@Override
+	public IProfile getUnsegmentedProfile(@NonNull ProfileType type, @NonNull OrientationMark om)
+			throws ProfileException, MissingLandmarkException, MissingProfileException {
+		Landmark lm = getLandmark(om);
+		if (lm == null)
+			throw new MissingLandmarkException("Cannot find landmark for " + om);
+		int lmIndex = profileLandmarks.get(lm);
+		return profileMap.get(type).startFrom(lmIndex);
 	}
 
 	/*
@@ -316,7 +453,8 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 
 	@Override
 	public int getWindowSize() {
-		return Math.max(1, (int) Math.ceil(getMeasurement(Measurement.PERIMETER) * windowProportion));
+		return Math.max(1,
+				(int) Math.ceil(getMeasurement(Measurement.PERIMETER) * windowProportion));
 	}
 
 	@Override
@@ -327,7 +465,8 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 	@Override
 	public void setWindowProportion(double d) {
 		if (d <= 0 || d >= 1)
-			throw new IllegalArgumentException("Angle window proportion must be higher than 0 and less than 1");
+			throw new IllegalArgumentException(
+					"Angle window proportion must be higher than 0 and less than 1");
 
 		if (isLocked)
 			return;
@@ -354,37 +493,12 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 			throws MissingProfileException, ProfileException, MissingLandmarkException {
 		if (!this.hasProfile(type))
 			throw new MissingProfileException("Cannot get profile type " + type);
-		return getProfile(type, Landmark.REFERENCE_POINT);
+		return getProfile(type, OrientationMark.REFERENCE);
 	}
 
 	@Override
-	public ISegmentedProfile getProfile(@NonNull ProfileType type, @NonNull Landmark lm)
-			throws ProfileException, MissingLandmarkException, MissingProfileException {
-
-		if (!this.hasLandmark(lm))
-			throw new MissingLandmarkException("Landmark " + lm + " not present");
-
-		// fetch the index of the pointType (the zero index of the profile to return)
-		int lmIndex = profileLandmarks.get(lm);
-
-		// Get the raw profile
-		ISegmentedProfile profile = new DefaultSegmentedProfile(profileMap.get(type), segments);
-
-		// offset the profile to start at the desired landmark
-		return profile.startFrom(lmIndex);
-	}
-
-	@Override
-	public IProfile getUnsegmentedProfile(@NonNull ProfileType type, @NonNull Landmark lm)
-			throws ProfileException, MissingLandmarkException {
-		if (!this.hasLandmark(lm))
-			throw new MissingLandmarkException("Landmark " + lm + " not present");
-		int lmIndex = profileLandmarks.get(lm);
-		return profileMap.get(type).startFrom(lmIndex);
-	}
-
-	@Override
-	public void setSegments(@NonNull List<IProfileSegment> segs) throws MissingLandmarkException, ProfileException {
+	public void setSegments(@NonNull List<IProfileSegment> segs)
+			throws MissingLandmarkException, ProfileException {
 
 		if (isLocked) {
 			LOGGER.finer("Cannot set profile segments: object is locked");
@@ -392,10 +506,11 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 		}
 
 		if (segs.get(0).getStartIndex() != 0)
-			throw new ProfileException("Cannot set segments: no boundary at index 0: " + segs.get(0).toString());
+			throw new ProfileException(
+					"Cannot set segments: no boundary at index 0: " + segs.get(0).toString());
 
 		// fetch the index of the RP (the zero of the input profile)
-		int rpIndex = profileLandmarks.get(Landmark.REFERENCE_POINT);
+		int rpIndex = profileLandmarks.get(getLandmark(OrientationMark.REFERENCE));
 
 		// add the RP offset so the segments match the absolute RP
 		segments.clear();
@@ -403,6 +518,13 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 			segments.add(s.offset(rpIndex));
 		}
 		IProfileSegment.linkSegments(segments);
+
+		// At this point the RP should be on a segment boundary
+		boolean isOk = false;
+		for (IProfileSegment s : segments)
+			if (s.getStartIndex() == rpIndex)
+				isOk = true;
+		assert (isOk);
 	}
 
 	@Override
@@ -424,7 +546,8 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 		super.reverse();
 
 		// Recreate profiles for new outline
-		ISegmentedProfile oldAngleProfile = this.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
+		ISegmentedProfile oldAngleProfile = this.getProfile(ProfileType.ANGLE,
+				OrientationMark.REFERENCE);
 
 		for (ProfileType t : ProfileType.values()) {
 			IProfile p = ProfileCreator.createProfile(this, t);
@@ -448,13 +571,15 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 		// Update positions of landmarks
 
 		// The RP needs to be moved to the first segment start index
-		this.profileLandmarks.put(Landmark.REFERENCE_POINT, segments.get(0).getStartIndex());
+		Landmark rp = orientationMarks.get(OrientationMark.REFERENCE);
+		this.profileLandmarks.put(rp, segments.get(0).getStartIndex());
 
 		// Other landmarks are usually not set at the point we reverse borders
 		// BUT if they are present find the best guess given that the border
 		// length may have changed
 		for (Entry<Landmark, Integer> entry : profileLandmarks.entrySet()) {
-			if (Landmark.REFERENCE_POINT.equals(entry.getKey()))
+			Landmark lm = entry.getKey();
+			if (rp.equals(lm))
 				continue;
 			int index = entry.getValue();
 
@@ -464,13 +589,22 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 
 			// update the landmark map directly to avoid segmentation changes
 			// due to RP shift
-			profileLandmarks.put(entry.getKey(), newIndex);
+			profileLandmarks.put(lm, newIndex);
 		}
+
+		// At this point the RP should be on a segment boundary
+		boolean isOk = false;
+		for (IProfileSegment s : segments)
+			if (s.getStartIndex() == profileLandmarks.get(rp))
+				isOk = true;
+		assert (isOk);
 	}
 
 	@Override
 	public Element toXmlElement() {
-		Element e = super.toXmlElement().setAttribute(XML_WINDOW_PROPORTION, String.valueOf(windowProportion));
+		Element e = super.toXmlElement()
+				.setAttribute(XML_WINDOW_PROPORTION, String.valueOf(windowProportion))
+				.setAttribute(XML_PRIORITY_AXIS, priorityAxis.toString());
 
 		if (isLocked)
 			e.setAttribute("locked", "true");
@@ -481,8 +615,14 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 
 		for (Entry<Landmark, Integer> entry : profileLandmarks.entrySet()) {
 			e.addContent(new Element("Landmark").setAttribute("name", entry.getKey().toString())
-					.setAttribute("type", entry.getKey().type().toString())
 					.setAttribute("index", String.valueOf(entry.getValue())));
+		}
+
+		for (@NonNull
+		Entry<OrientationMark, Landmark> entry : orientationMarks.entrySet()) {
+			e.addContent(new Element(XML_ORIENTATION).setAttribute("name", entry.getKey().name())
+					.setAttribute("value",
+							entry.getValue().toString()));
 		}
 
 		return e;
@@ -492,7 +632,9 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + Objects.hash(isLocked, profileLandmarks, profileMap, segments, windowProportion);
+		result = prime * result
+				+ Objects.hash(isLocked, profileLandmarks, profileMap, segments, orientationMarks,
+						priorityAxis, windowProportion);
 		return result;
 	}
 
@@ -514,9 +656,13 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 				return false;
 		}
 
-		return isLocked == other.isLocked && Objects.equals(profileLandmarks, other.profileLandmarks)
+		return isLocked == other.isLocked
+				&& Objects.equals(profileLandmarks, other.profileLandmarks)
 				&& Objects.equals(segments, other.segments)
-				&& Double.doubleToLongBits(windowProportion) == Double.doubleToLongBits(other.windowProportion);
+				&& Objects.equals(priorityAxis, other.priorityAxis)
+				&& Objects.equals(orientationMarks, other.orientationMarks)
+				&& Double.doubleToLongBits(windowProportion) == Double
+						.doubleToLongBits(other.windowProportion);
 	}
 
 	@Override

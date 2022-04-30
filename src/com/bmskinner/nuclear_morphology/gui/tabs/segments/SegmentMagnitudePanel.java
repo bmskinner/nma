@@ -28,8 +28,8 @@ import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.measure.Measurement;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
-import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileException;
+import com.bmskinner.nuclear_morphology.components.rules.OrientationMark;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 import com.bmskinner.nuclear_morphology.gui.components.renderers.PairwiseTableCellRenderer;
@@ -92,7 +92,7 @@ public class SegmentMagnitudePanel extends AbstractPairwiseDetailPanel {
 
 			List<IProfileSegment> segments;
 			try {
-				segments = activeDataset().getCollection().getProfileCollection().getSegments(Landmark.REFERENCE_POINT);
+				segments = activeDataset().getCollection().getProfileCollection().getSegments(OrientationMark.REFERENCE);
 			} catch (MissingLandmarkException | ProfileException e) {
 				LOGGER.warning("Cannot get segments");
 				LOGGER.log(Loggable.STACK, "Cannot get segments", e);

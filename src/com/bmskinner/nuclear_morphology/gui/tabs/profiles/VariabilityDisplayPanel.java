@@ -26,8 +26,8 @@ import javax.swing.JPanel;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
+import com.bmskinner.nuclear_morphology.components.rules.OrientationMark;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileMarkersOptionsPanel;
@@ -139,7 +139,7 @@ public class VariabilityDisplayPanel extends ChartDetailPanel
 		ProfileType type = profileCollectionTypeSettingsPanel.getSelected();
 
 		ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets()).setNormalised(true)
-				.setAlignment(ProfileAlignment.LEFT).setLandmark(Landmark.REFERENCE_POINT).setShowMarkers(showMarkers)
+				.setAlignment(ProfileAlignment.LEFT).setLandmark(OrientationMark.REFERENCE).setShowMarkers(showMarkers)
 //				.setModalityPosition((Double) pvalueSpinner.getValue())
 				.setSwatch(GlobalOptions.getInstance().getSwatch()).setProfileType(type).setTarget(chartPanel).build();
 

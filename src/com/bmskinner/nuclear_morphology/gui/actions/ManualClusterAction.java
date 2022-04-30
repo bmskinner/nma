@@ -13,6 +13,7 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.classification.ClusteringMethod;
+import com.bmskinner.nuclear_morphology.components.MissingLandmarkException;
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.DefaultClusterGroup;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
@@ -46,7 +47,8 @@ public class ManualClusterAction extends SingleDatasetResultAction {
 	public void run() {
 
 		try {
-			int maxGroups = dataset.getCollection().getCells().size() - 1; // more would be silly, fewer restrictive
+			int maxGroups = dataset.getCollection().getCells().size() - 1; // more would be silly,
+																			// fewer restrictive
 			int groups = is.requestInt("Number of groups", 2, 2, maxGroups, 1);
 
 			List<String> groupNames = new ArrayList<>();
@@ -61,7 +63,8 @@ public class ManualClusterAction extends SingleDatasetResultAction {
 			// blocks until closed
 			if (mc.isReadyToRun()) {
 				UserActionController.getInstance()
-						.userActionEventReceived(new UserActionEvent(this, UserActionEvent.SAVE, List.of(dataset)));
+						.userActionEventReceived(
+								new UserActionEvent(this, UserActionEvent.SAVE, List.of(dataset)));
 
 				UIController.getInstance().fireClusterGroupsUpdated(dataset);
 			}
@@ -119,7 +122,8 @@ public class ManualClusterAction extends SingleDatasetResultAction {
 
 		private final List<ICell> cells;
 
-		public ManualClusteringDialog(@NonNull final IAnalysisDataset dataset, List<String> groupNames) {
+		public ManualClusteringDialog(@NonNull final IAnalysisDataset dataset,
+				List<String> groupNames) {
 			super(dataset, "Manual clustering");
 			this.groupNames = groupNames;
 			cells = new ArrayList<>(dataset.getCollection().getCells());
@@ -169,7 +173,8 @@ public class ManualClusterAction extends SingleDatasetResultAction {
 					.withValue(HashOptions.CLUSTER_METHOD_KEY, ClusteringMethod.MANUAL.toString())
 					.withValue(HashOptions.CLUSTER_INCLUDE_PROFILE_KEY, false).build();
 
-			IClusterGroup group = new DefaultClusterGroup(IClusterGroup.CLUSTER_GROUP_PREFIX + "_" + clusterNumber, op);
+			IClusterGroup group = new DefaultClusterGroup(
+					IClusterGroup.CLUSTER_GROUP_PREFIX + "_" + clusterNumber, op);
 
 			for (int i = 0; i < groups.size(); i++) {
 
@@ -179,8 +184,10 @@ public class ManualClusterAction extends SingleDatasetResultAction {
 				if (coll.hasCells()) {
 
 					try {
-						dataset.getCollection().getProfileManager().copySegmentsAndLandmarksTo(coll);
-					} catch (ProfileException | MissingProfileException e) {
+						dataset.getCollection().getProfileManager()
+								.copySegmentsAndLandmarksTo(coll);
+					} catch (ProfileException | MissingProfileException
+							| MissingLandmarkException e) {
 						LOGGER.warning("Error copying collection offsets");
 						LOGGER.log(Loggable.STACK, "Error in offsetting", e);
 					}

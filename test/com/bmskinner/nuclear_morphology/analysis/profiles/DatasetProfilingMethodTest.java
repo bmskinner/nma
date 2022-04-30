@@ -29,8 +29,8 @@ import com.bmskinner.nuclear_morphology.components.measure.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
-import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
+import com.bmskinner.nuclear_morphology.components.rules.OrientationMark;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
@@ -110,7 +110,7 @@ public class DatasetProfilingMethodTest extends AbstractProfileMethodTest {
 				// Check the collection
 				IProfile median = dataset.getCollection()
 						.getProfileCollection()
-						.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);
+						.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE, Stats.MEDIAN);
 				assertTrue(median!=null);
 				
 				if(globalMedian==null)
@@ -155,7 +155,7 @@ public class DatasetProfilingMethodTest extends AbstractProfileMethodTest {
 			// Check the collection
 			IProfile median = dataset.getCollection()
 					.getProfileCollection()
-					.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);
+					.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE, Stats.MEDIAN);
 			assertTrue(median!=null);
 
 			if(globalMedian==null)
@@ -173,15 +173,15 @@ public class DatasetProfilingMethodTest extends AbstractProfileMethodTest {
 
 		IProfile median = dataset.getCollection()
 				.getProfileCollection()
-				.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);
+				.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE, Stats.MEDIAN);
 		
 		IProfile q1 = dataset.getCollection()
 				.getProfileCollection()
-				.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.LOWER_QUARTILE);
+				.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE, Stats.LOWER_QUARTILE);
 		
 		IProfile q3 = dataset.getCollection()
 				.getProfileCollection()
-				.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.LOWER_QUARTILE);
+				.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE, Stats.LOWER_QUARTILE);
 		
 		assertTrue(equals(median.toFloatArray(), q1.toFloatArray(), 0.0001f));
 		assertTrue(equals(median.toFloatArray(), q3.toFloatArray(), 0.0001f));
@@ -194,15 +194,15 @@ public class DatasetProfilingMethodTest extends AbstractProfileMethodTest {
 
 		IProfile median = dataset.getCollection()
 				.getProfileCollection()
-				.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);
+				.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE, Stats.MEDIAN);
 		
 		IProfile q1 = dataset.getCollection()
 				.getProfileCollection()
-				.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.LOWER_QUARTILE);
+				.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE, Stats.LOWER_QUARTILE);
 		
 		IProfile q3 = dataset.getCollection()
 				.getProfileCollection()
-				.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.LOWER_QUARTILE);
+				.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE, Stats.LOWER_QUARTILE);
 		
 		assertTrue(equals(median.toFloatArray(), q1.toFloatArray(), 0.0001f));
 		assertTrue(equals(median.toFloatArray(), q3.toFloatArray(), 0.0001f));

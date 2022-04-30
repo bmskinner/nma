@@ -10,8 +10,8 @@ import org.eclipse.jdt.annotation.Nullable;
 
 import com.bmskinner.nuclear_morphology.components.cells.ICell;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
+import com.bmskinner.nuclear_morphology.components.rules.OrientationMark;
 import com.bmskinner.nuclear_morphology.visualisation.charts.OutlineChartFactory;
 import com.bmskinner.nuclear_morphology.visualisation.charts.ProfileChartFactory;
 import com.bmskinner.nuclear_morphology.visualisation.options.ChartOptions;
@@ -72,7 +72,7 @@ public class OutlineTestChartFactory extends ChartFactoryTest {
 
 			// show the profile corresponding to the chart
 			ChartOptions profileOptions = new ChartOptionsBuilder().setDatasets(dataset).setCell(cell)
-					.setLandmark(Landmark.REFERENCE_POINT).setShowMarkers(true).setShowAnnotations(true)
+					.setLandmark(OrientationMark.REFERENCE).setShowMarkers(true).setShowAnnotations(true)
 					.setProfileType(ProfileType.ANGLE).build();
 			JPanel profile = makeChartPanel(new ProfileChartFactory(profileOptions).createProfileChart(),
 					profileOptions, "Profile", false);

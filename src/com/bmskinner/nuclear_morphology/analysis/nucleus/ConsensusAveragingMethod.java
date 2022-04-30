@@ -46,11 +46,11 @@ import com.bmskinner.nuclear_morphology.components.options.MissingOptionExceptio
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
-import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.MissingProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
 import com.bmskinner.nuclear_morphology.components.profiles.UnprofilableObjectException;
+import com.bmskinner.nuclear_morphology.components.rules.OrientationMark;
 import com.bmskinner.nuclear_morphology.gui.events.revamp.UIController;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
@@ -83,17 +83,16 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
 		return new DefaultAnalysisResult(dataset);
 	}
 
-	private void run() throws MissingComponentException, UnprofilableObjectException, ComponentCreationException,
+	private void run() throws MissingComponentException, UnprofilableObjectException,
+			ComponentCreationException,
 			ProfileException, MissingOptionException {
 		LOGGER.finer("Running consensus averaging on " + dataset.getName());
 
-		try {
-			List<IPoint> border = calculatePointAverage();
-			Consensus refoldNucleus = makeConsensus(border);
-			dataset.getCollection().setConsensus(refoldNucleus);
-		} catch (Exception e) {
-			LOGGER.log(Loggable.STACK, "Error getting points for consensus nucleus", e);
-		}
+		List<IPoint> border = calculatePointAverage();
+		Consensus refoldNucleus = makeConsensus(border);
+
+		dataset.getCollection().setConsensus(refoldNucleus);
+
 		UIController.getInstance().fireConsensusNucleusChanged(dataset);
 	}
 
@@ -105,16 +104,20 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
 	 * @throws MissingProfileException
 	 * @throws MissingLandmarkException
 	 */
-	private void setLandmarks(Nucleus n) throws MissingLandmarkException, MissingProfileException, ProfileException {
+	private void setLandmarks(Nucleus n)
+			throws MissingLandmarkException, MissingProfileException, ProfileException {
 		// Add all landmarks from the profile collection
 		// This will include any not present inthe ruleset collection that
 		// were added manually
-		for (Landmark l : dataset.getCollection().getProfileCollection().getLandmarks()) {
-			IProfile median = dataset.getCollection().getProfileCollection().getProfile(ProfileType.ANGLE, l,
-					Stats.MEDIAN);
+		for (OrientationMark l : dataset.getCollection().getProfileCollection()
+				.getOrientationMarks()) {
+
+			IProfile median = dataset.getCollection().getProfileCollection().getProfile(
+					ProfileType.ANGLE, l, Stats.MEDIAN);
+
 			int newIndex = n.getProfile(ProfileType.ANGLE).findBestFitOffset(median);
 			LOGGER.finer(() -> String.format("Setting %s in consensus to %s ", l, newIndex));
-			n.setLandmark(l, newIndex);
+			n.setOrientationMark(l, newIndex);
 		}
 
 	}
@@ -127,18 +130,17 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
 	 * @throws MissingProfileException
 	 * @throws MissingLandmarkException
 	 */
-	private void setSegments(Nucleus n) throws MissingLandmarkException, MissingProfileException, ProfileException {
+	private void setSegments(Nucleus n)
+			throws MissingLandmarkException, MissingProfileException, ProfileException {
 		// Add segments to the new nucleus profile
 		if (dataset.getCollection().getProfileCollection().hasSegments()) {
-			ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
+			ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE);
+
 			List<IProfileSegment> segs = dataset.getCollection().getProfileCollection()
-					.getSegments(Landmark.REFERENCE_POINT);
+					.getSegments(OrientationMark.REFERENCE);
+
 			List<IProfileSegment> newSegs = IProfileSegment.scaleSegments(segs, profile.size());
-			LOGGER.finest(profile.toString());
-			for (IProfileSegment s : segs)
-				LOGGER.finest(s.toString());
-			for (IProfileSegment s : newSegs)
-				LOGGER.finest(s.toString());
+
 			profile.setSegments(newSegs);
 			n.setSegments(profile.getSegments());
 		}
@@ -152,8 +154,10 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
 	 * @throws MissingProfileException
 	 * @throws MissingLandmarkException
 	 */
-	private Consensus makeConsensus(List<IPoint> list) throws UnprofilableObjectException, ComponentCreationException,
-			MissingLandmarkException, ProfileException, MissingProfileException, MissingOptionException {
+	private Consensus makeConsensus(List<IPoint> list)
+			throws UnprofilableObjectException, ComponentCreationException,
+			MissingLandmarkException, ProfileException, MissingProfileException,
+			MissingOptionException {
 
 		// Decide on the best scale for the consensus,
 		// and scale the points back into pixel coordinates
@@ -164,10 +168,16 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
 
 		// Create a nucleus with the same rulesets as the dataset
 		IAnalysisOptions op = dataset.getAnalysisOptions().orElseThrow(MissingOptionException::new);
+
 		Nucleus n = ComponentBuilderFactory
-				.createNucleusBuilderFactory(op.getRuleSetCollection(), op.getProfileWindowProportion(), scale)
-				.newBuilder().fromPoints(list).withFile(new File(EMPTY_FILE)).withCoM(new FloatPoint(0, 0))
-				.withChannel(0).build();
+				.createNucleusBuilderFactory(op.getRuleSetCollection(),
+						op.getProfileWindowProportion(), scale)
+				.newBuilder()
+				.fromPoints(list)
+				.withFile(new File(EMPTY_FILE))
+				.withCoM(new FloatPoint(0, 0))
+				.withChannel(0)
+				.build();
 
 		// Add landmarks and segments from the profile collection
 		setLandmarks(n);
@@ -195,12 +205,14 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
 		// options
 		Optional<IAnalysisOptions> analysisOptions = dataset.getAnalysisOptions();
 		if (analysisOptions.isPresent()) {
-			Optional<HashOptions> nucleusOptions = analysisOptions.get().getNucleusDetectionOptions();
+			Optional<HashOptions> nucleusOptions = analysisOptions.get()
+					.getNucleusDetectionOptions();
 			if (nucleusOptions.isPresent()) {
 				if (nucleusOptions.get().hasDouble(HashOptions.SCALE))
 					scale = nucleusOptions.get().getDouble(HashOptions.SCALE);
 			} else {
-				LOGGER.fine("No nucleus detection options present, unable to find pixel scale for consensus");
+				LOGGER.fine(
+						"No nucleus detection options present, unable to find pixel scale for consensus");
 			}
 		} else {
 			LOGGER.fine("No analysis options present, unable to find pixel scale for consensus");
@@ -208,7 +220,8 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
 
 		// The scale is not set at the dataset level. Choose the scale of the
 		// first nucleus in the dataset.
-		return dataset.getCollection().stream().map(ICell::getPrimaryNucleus).findFirst().get().getScale();
+		return dataset.getCollection().stream().map(ICell::getPrimaryNucleus).findFirst().get()
+				.getScale();
 
 	}
 
@@ -224,7 +237,7 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
 
 				Nucleus v = n.getOrientedNucleus();
 				v.moveCentreOfMass(zeroCoM);
-				IProfile p = v.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
+				IProfile p = v.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE);
 
 				for (int i = 0; i < PROFILE_LENGTH; i++) {
 
@@ -235,7 +248,8 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
 					List<IPoint> list = perimeterPoints.get(fractionOfPerimeter);
 
 					int indexInProfile = p.getIndexOfFraction(fractionOfPerimeter);
-					int borderIndex = v.getIndexRelativeTo(Landmark.REFERENCE_POINT, indexInProfile);
+					int borderIndex = v.getIndexRelativeTo(OrientationMark.REFERENCE,
+							indexInProfile);
 					IPoint point = v.getBorderPoint(borderIndex);
 					list.add(point);
 				}
@@ -253,7 +267,8 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
 			List<IPoint> list = perimeterPoints.get(d);
 			IPoint avg = calculateMedianPoint(list);
 
-			if (averagedPoints.isEmpty() || !averagedPoints.get(averagedPoints.size() - 1).equals(avg)) {
+			if (averagedPoints.isEmpty()
+					|| !averagedPoints.get(averagedPoints.size() - 1).equals(avg)) {
 				averagedPoints.add(avg);
 			}
 			fireProgressEvent();

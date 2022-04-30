@@ -22,8 +22,8 @@ import java.util.UUID;
 import org.jfree.chart.ChartPanel;
 
 import com.bmskinner.nuclear_morphology.components.cells.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
+import com.bmskinner.nuclear_morphology.components.rules.OrientationMark;
 import com.bmskinner.nuclear_morphology.components.signals.IWarpedSignal;
 import com.bmskinner.nuclear_morphology.gui.RotationMode;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
@@ -79,7 +79,7 @@ public interface ChartOptions extends DisplayOptions {
 	 * 
 	 * @return
 	 */
-	Landmark getTag();
+	OrientationMark getTag();
 
 	/**
 	 * Check if markers should be displayed on profile panels at border tag

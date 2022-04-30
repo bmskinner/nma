@@ -15,13 +15,13 @@ import com.bmskinner.nuclear_morphology.TestDatasetBuilder;
 import com.bmskinner.nuclear_morphology.charting.ChartFactoryTest;
 import com.bmskinner.nuclear_morphology.components.cells.Nucleus;
 import com.bmskinner.nuclear_morphology.components.datasets.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.profiles.DefaultSegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfile;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileCollection;
 import com.bmskinner.nuclear_morphology.components.profiles.IProfileSegment;
 import com.bmskinner.nuclear_morphology.components.profiles.ISegmentedProfile;
-import com.bmskinner.nuclear_morphology.components.profiles.Landmark;
 import com.bmskinner.nuclear_morphology.components.profiles.ProfileType;
-import com.bmskinner.nuclear_morphology.components.profiles.DefaultSegmentedProfile;
+import com.bmskinner.nuclear_morphology.components.rules.OrientationMark;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
@@ -45,7 +45,7 @@ public class IterativeSegmentFitterTest extends ComponentTester {
 				.baseHeight(40).baseWidth(40).profiled().build();
 		
 		ISegmentedProfile template = d.getCollection()
-				.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);
+				.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE, Stats.MEDIAN);
 		
 		ISegmentedProfile target = template.duplicate();
 		
@@ -61,7 +61,7 @@ public class IterativeSegmentFitterTest extends ComponentTester {
 				.baseHeight(40).baseWidth(40).segmented().build();
 		
 		ISegmentedProfile template = d.getCollection()
-				.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);
+				.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE, Stats.MEDIAN);
 		
 		
 		ISegmentedProfile target = template.duplicate();
@@ -97,7 +97,7 @@ public class IterativeSegmentFitterTest extends ComponentTester {
 				.build();
 		
 		ISegmentedProfile template = d1.getCollection()
-				.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);
+				.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE, Stats.MEDIAN);
 		
 		IAnalysisDataset d2 = new TestDatasetBuilder(RNG_SEED)
 				.cellCount(1)
@@ -109,7 +109,7 @@ public class IterativeSegmentFitterTest extends ComponentTester {
 				.build();
 		
 		ISegmentedProfile target = d2.getCollection()
-				.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN);
+				.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE, Stats.MEDIAN);
 
 				
 		fitter = new IterativeSegmentFitter(template.duplicate());
@@ -133,14 +133,14 @@ public class IterativeSegmentFitterTest extends ComponentTester {
 				.baseHeight(40).baseWidth(40).profiled().build();
 		
 		ISegmentedProfile singleSegmentProfile = new DefaultSegmentedProfile(d.getCollection().getProfileCollection()
-				.getSegmentedProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT, Stats.MEDIAN));
+				.getSegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE, Stats.MEDIAN));
 		
 		assertEquals(1, singleSegmentProfile.getSegmentCount());
 		
 		fitter = new IterativeSegmentFitter(singleSegmentProfile);
 		
 		for(Nucleus n : d.getCollection().getNuclei()) {
-			IProfile nucleusProfile  = n.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
+			IProfile nucleusProfile  = n.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE);
 			ISegmentedProfile segProfile = fitter.fit(nucleusProfile);
 			n.setSegments(segProfile.getSegments());
 			if(segProfile.getSegmentCount()!=singleSegmentProfile.getSegmentCount())
@@ -148,7 +148,7 @@ public class IterativeSegmentFitterTest extends ComponentTester {
 			
 			assertEquals("Single segment before adding to nucleus", 0, segProfile.getSegment(IProfileCollection.DEFAULT_SEGMENT_ID).getStartIndex());	
 						
-			ISegmentedProfile test  = n.getProfile(ProfileType.ANGLE, Landmark.REFERENCE_POINT);
+			ISegmentedProfile test  = n.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE);
 			IProfileSegment seg = test.getSegment(IProfileCollection.DEFAULT_SEGMENT_ID);
 			assertEquals("Single segment start fetched from nucleus", 0, seg.getStartIndex());			
 		}
