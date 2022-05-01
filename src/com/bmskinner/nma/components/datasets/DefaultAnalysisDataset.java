@@ -78,6 +78,7 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 		super(e);
 		savePath = new File(e.getChildText("SaveFile")).getAbsoluteFile();
 		cellCollection = new DefaultCellCollection(e.getChild("CellCollection"));
+
 	}
 
 	/**
@@ -103,15 +104,9 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 	@Override
 	public Element toXmlElement() {
 		Element e = super.toXmlElement();
-
-		e.addContent(cellCollection.toXmlElement());
-
-		for (UUID i : mergeSources)
-			e.addContent(new Element("MergeSource").setText(i.toString()));
-
 		e.addContent(new Element("SaveFile").setText(savePath.getPath()));
 
-		e.addContent(analysisOptions.toXmlElement());
+		e.addContent(cellCollection.toXmlElement());
 
 		return e;
 	}

@@ -115,7 +115,7 @@ public class UserActionEvent extends EventObject {
 	public static final String REFOLD_CONSENSUS = "Refold consensus";
 	public static final String SELECT_DATASETS = "Select multiple datasets";
 	public static final String SELECT_ONE_DATASET = "Select single dataset";
-	public static final String EXTRACT_SOURCE = "Extract source";
+	public static final String EXTRACT_MERGE_SOURCE = "Extract source";
 	public static final String CLUSTER = "Cluster";
 	public static final String MANUAL_CLUSTER = "Manual cluster";
 	public static final String BUILD_TREE = "Build tree";

@@ -62,7 +62,7 @@ public class MergesDetailPanel extends TableDetailPanel {
 
 	private static final Logger LOGGER = Logger.getLogger(MergesDetailPanel.class.getName());
 
-	private ExportableTable sourceParametersTable;
+	private ExportableTable table;
 	private JLabel headerLabel = new JLabel(Labels.NULL_DATASETS);
 
 	private static final String RECOVER_BUTTON_TEXT = "Recover source";
@@ -98,7 +98,7 @@ public class MergesDetailPanel extends TableDetailPanel {
 		TableCellRenderer buttonRenderer = new JButtonRenderer();
 		TableCellRenderer textRenderer = new JTextAreaCellRenderer();
 
-		sourceParametersTable = new ExportableTable() {
+		table = new ExportableTable() {
 			@Override
 			public TableCellRenderer getCellRenderer(int row, int column) {
 				if ((this.getValueAt(row, 0).equals(Labels.Merges.RECOVER_SOURCE)) && column > 0) {
@@ -112,17 +112,21 @@ public class MergesDetailPanel extends TableDetailPanel {
 
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				int row = sourceParametersTable.rowAtPoint(e.getPoint());
-				int col = sourceParametersTable.columnAtPoint(e.getPoint());
+				int row = table.rowAtPoint(e.getPoint());
+				int col = table.columnAtPoint(e.getPoint());
 				if (col == 0)
 					return;
 
-				if (sourceParametersTable.getValueAt(row, 0).equals(Labels.Merges.RECOVER_SOURCE)
-						&& sourceParametersTable.getValueAt(row, col) != null) {
-					IAnalysisDataset mergeSource = (IAnalysisDataset) sourceParametersTable.getValueAt(row, col);
+				if (table.getValueAt(row, 0).equals(Labels.Merges.RECOVER_SOURCE)
+						&& table.getValueAt(row, col) != null) {
+					IAnalysisDataset mergeSource = (IAnalysisDataset) table
+							.getValueAt(row, col);
+					LOGGER.fine(
+							String.format("Extracting merge source '%s'", mergeSource.getName()));
 
 					UserActionController.getInstance().userActionEventReceived(
-							new UserActionEvent(this, UserActionEvent.EXTRACT_SOURCE, List.of(mergeSource)));
+							new UserActionEvent(this, UserActionEvent.EXTRACT_MERGE_SOURCE,
+									List.of(mergeSource)));
 				}
 			}
 
@@ -147,17 +151,17 @@ public class MergesDetailPanel extends TableDetailPanel {
 			}
 
 		};
-		sourceParametersTable.addMouseListener(mouseListener);
-		sourceParametersTable.setModel(AbstractTableCreator.createBlankTable());
+		table.addMouseListener(mouseListener);
+		table.setModel(AbstractTableCreator.createBlankTable());
 
-		sourceParametersTable.setEnabled(false);
-		sourceParametersTable.setDefaultRenderer(Object.class, new JTextAreaCellRenderer());
-		JScrollPane scrollPane = new JScrollPane(sourceParametersTable);
+		table.setEnabled(false);
+		table.setDefaultRenderer(Object.class, new JTextAreaCellRenderer());
+		JScrollPane scrollPane = new JScrollPane(table);
 
 		JPanel tablePanel = new JPanel(new BorderLayout());
 
 		tablePanel.add(scrollPane, BorderLayout.CENTER);
-		tablePanel.add(sourceParametersTable.getTableHeader(), BorderLayout.NORTH);
+		tablePanel.add(table.getTableHeader(), BorderLayout.NORTH);
 
 		panel.add(tablePanel);
 		return panel;
@@ -166,7 +170,7 @@ public class MergesDetailPanel extends TableDetailPanel {
 	@Override
 	public synchronized void setLoading() {
 		super.setLoading();
-		sourceParametersTable.setModel(AbstractTableCreator.createLoadingTable());
+		table.setModel(AbstractTableCreator.createLoadingTable());
 	}
 
 	private JPanel createHeaderPanel() {
@@ -180,14 +184,16 @@ public class MergesDetailPanel extends TableDetailPanel {
 	protected synchronized void updateSingle() {
 
 		headerLabel.setText(
-				Labels.SINGLE_DATASET + " with " + activeDataset().getAllMergeSources().size() + " merge sources");
+				Labels.SINGLE_DATASET + " with " + activeDataset().getAllMergeSources().size()
+						+ " merge sources");
 
 		List<IAnalysisDataset> mergeSources = new ArrayList<>(activeDataset().getAllMergeSources());
 
-		TableOptions options = new TableOptionsBuilder().setDatasets(mergeSources).setTarget(sourceParametersTable)
+		TableOptions options = new TableOptionsBuilder()
+				.setDatasets(mergeSources)
+				.setTarget(table)
+				.setBoolean(AbstractOptions.IS_MERGE_SOURCE_OPTIONS_TABLE, true)
 				.build();
-
-		options.setBoolean(AbstractOptions.SHOW_RECOVER_MERGE_SOURCE_KEY, true);
 		setTable(options);
 
 	}
@@ -200,7 +206,7 @@ public class MergesDetailPanel extends TableDetailPanel {
 
 	@Override
 	protected synchronized void updateNull() {
-		sourceParametersTable.setModel(AbstractTableCreator.createBlankTable());
+		table.setModel(AbstractTableCreator.createBlankTable());
 		headerLabel.setText(Labels.NULL_DATASETS);
 	}
 
@@ -219,9 +225,11 @@ public class MergesDetailPanel extends TableDetailPanel {
 	 */
 	private class JButtonRenderer extends JButton implements TableCellRenderer {
 		@Override
-		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
+		public Component getTableCellRendererComponent(JTable table, Object value,
+				boolean isSelected, boolean hasFocus,
 				int row, int column) {
-			String text = value == null ? "" : value instanceof IAnalysisDataset ? RECOVER_BUTTON_TEXT : "";
+			String text = value == null ? ""
+					: value instanceof IAnalysisDataset ? RECOVER_BUTTON_TEXT : "";
 			setText(text);
 			setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 			return this;

@@ -122,10 +122,8 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 	 */
 	private synchronized Runnable create(final UserActionEvent event) {
 
-		final List<IAnalysisDataset> selectedDatasets = DatasetListManager.getInstance()
-				.getSelectedDatasets();
-		final IAnalysisDataset selectedDataset = selectedDatasets.isEmpty() ? null
-				: selectedDatasets.get(0);
+		final IAnalysisDataset selectedDataset = DatasetListManager.getInstance()
+				.getActiveDataset();
 
 		// The full pipeline for a new analysis
 		if (UserActionEvent.MORPHOLOGY_ANALYSIS_ACTION.equals(event.type()))
@@ -187,66 +185,51 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 			return new ExportWorkspaceAction(DatasetListManager.getInstance().getWorkspaces(),
 					acceptor);
 
-		if (selectedDataset == null)
-			return null;
-
 		if (event.type().equals(UserActionEvent.DATASET_ARITHMETIC))
-			return new DatasetArithmeticAction(selectedDatasets, acceptor);
+			return new DatasetArithmeticAction(event.getDatasets(), acceptor);
 
 		if (event.type().equals(UserActionEvent.EXTRACT_SUBSET))
 			return new ExtractRandomCellsAction(selectedDataset, acceptor);
-
-		if (event.type().equals(UserActionEvent.CHANGE_NUCLEUS_IMAGE_FOLDER))
-			return new ReplaceSourceImageDirectoryAction(selectedDataset, acceptor);
-
-		if (event.type().equals(UserActionEvent.ADD_NUCLEAR_SIGNAL))
-			return new AddNuclearSignalAction(selectedDataset, acceptor);
 
 		if (event.type().equals(UserActionEvent.CLUSTER_FROM_FILE))
 			return new ClusterFileAssignmentAction(selectedDataset, acceptor);
 
 		if (event.type().equals(UserActionEvent.POST_FISH_MAPPING))
-			return new FishRemappingAction(selectedDatasets, acceptor);
+			return new FishRemappingAction(event.getDatasets(), acceptor);
 
 		if (event.type().equals(UserActionEvent.EXPORT_STATS))
-			return new ExportNuclearStatsAction(selectedDatasets, acceptor);
+			return new ExportNuclearStatsAction(event.getDatasets(), acceptor);
 
 		if (event.type().equals(UserActionEvent.EXPORT_PROFILES))
-			return new ExportNuclearProfilesAction(selectedDatasets, acceptor);
+			return new ExportNuclearProfilesAction(event.getDatasets(), acceptor);
 
 		if (event.type().equals(UserActionEvent.EXPORT_OUTLINES))
-			return new ExportNuclearOutlinesAction(selectedDatasets, acceptor);
+			return new ExportNuclearOutlinesAction(event.getDatasets(), acceptor);
 
 		if (event.type().equals(UserActionEvent.EXPORT_SIGNALS))
-			return new ExportSignalsAction(selectedDatasets, acceptor);
+			return new ExportSignalsAction(event.getDatasets(), acceptor);
 
 		if (event.type().equals(UserActionEvent.EXPORT_SHELLS))
-			return new ExportShellsAction(selectedDatasets, acceptor);
+			return new ExportShellsAction(event.getDatasets(), acceptor);
 
 		if (event.type().equals(UserActionEvent.EXPORT_OPTIONS))
-			return new ExportOptionsAction(selectedDatasets, acceptor);
+			return new ExportOptionsAction(event.getDatasets(), acceptor);
 
 		if (event.type().equals(UserActionEvent.EXPORT_RULESETS))
-			return new ExportRuleSetsAction(selectedDatasets, acceptor);
+			return new ExportRuleSetsAction(event.getDatasets(), acceptor);
 
 		if (event.type().equals(UserActionEvent.EXPORT_SINGLE_CELL_IMAGES))
-			return new ExportSingleCellImagesAction(selectedDatasets, acceptor);
+			return new ExportSingleCellImagesAction(event.getDatasets(), acceptor);
 
 		if (event.type().equals(UserActionEvent.MERGE_DATASETS_ACTION))
-			return new MergeCollectionAction(selectedDatasets, acceptor);
+			return new MergeCollectionAction(event.getDatasets(), acceptor);
 
 		if (event.type().equals(UserActionEvent.MERGE_SIGNALS_ACTION)) {
 			return new MergeSignalsAction(selectedDataset, acceptor);
 		}
 
 		if (event.type().equals(UserActionEvent.CHANGE_SCALE))
-			return () -> setScale(selectedDatasets);
-
-		if (event.type().equals(UserActionEvent.SAVE_SELECTED_DATASET))
-			return new ExportDatasetAction(selectedDataset, acceptor, null, true);
-
-		if (event.type().equals(UserActionEvent.EXPORT_XML_DATASET))
-			return new ExportDatasetAction(selectedDataset, acceptor, null, true);
+			return () -> setScale(event.getDatasets());
 
 		if (event.type().equals(UserActionEvent.EXPORT_TPS_DATASET))
 			return new ExportTPSAction(selectedDataset, acceptor);
@@ -256,7 +239,7 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 					acceptor);
 
 		if (event.type().equals(UserActionEvent.SAVE_SELECTED_DATASETS))
-			return new SaveAllDatasets(selectedDatasets, acceptor);
+			return new SaveAllDatasets(event.getDatasets(), acceptor);
 
 		if (event.type().equals(UserActionEvent.CURATE_DATASET))
 			return () -> {
@@ -268,44 +251,34 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 			};
 
 		if (event.type().equals(UserActionEvent.EXPORT_CELL_LOCS))
-			return new ExportCellLocationsAction(selectedDatasets, acceptor);
+			return new ExportCellLocationsAction(event.getDatasets(), acceptor);
 
 		if (event.type().startsWith(UserActionEvent.ADD_TO_WORKSPACE))
 			return () -> {
-				addToWorkspace(selectedDatasets);
+				addToWorkspace(event.getDatasets());
 			};
 
 		if (event.type().startsWith(UserActionEvent.REMOVE_FROM_WORKSPACE))
 			return () -> {
-				removeFromWorkspace(selectedDatasets);
+				removeFromWorkspace(event.getDatasets());
 			};
 
-		if (event.type().equals(UserActionEvent.RELOCATE_CELLS))
-			return new RelocateFromFileAction(selectedDataset, acceptor, new CountDownLatch(1));
-
 		if (event.type().equals(UserActionEvent.SEGMENTATION_ACTION))
-			return new RunSegmentationAction(selectedDatasets,
+			return new RunSegmentationAction(event.getDatasets(),
 					MorphologyAnalysisMode.SEGMENT_FROM_SCRATCH,
 					SingleDatasetResultAction.NO_FLAG, acceptor);
 
 		if (event.type().equals(UserActionEvent.APPLY_MEDIAN_TO_NUCLEI))
-			return new RunSegmentationAction(selectedDatasets,
+			return new RunSegmentationAction(event.getDatasets(),
 					MorphologyAnalysisMode.APPLY_MEDIAN_TO_NUCLEI,
 					SingleDatasetResultAction.NO_FLAG, acceptor);
 
 		if (event.type().equals(UserActionEvent.SAVE)) {
 			return () -> {
 				final CountDownLatch latch = new CountDownLatch(1);
-				new ExportDatasetAction(selectedDatasets, acceptor, latch).run();
+				new ExportDatasetAction(event.getDatasets(), acceptor, latch).run();
 			};
 		}
-
-		if (event.type().equals(UserActionEvent.RUN_SHELL_ANALYSIS)) {
-			return new ShellAnalysisAction(selectedDataset, acceptor);
-		}
-
-		if (event.type().equals(UserActionEvent.SIGNAL_WARPING))
-			return new SignalWarpingAction(selectedDataset, acceptor);
 
 		if (event.type().equals(UserActionEvent.COPY_PROFILE_SEGMENTATION)) {
 			// copy the profile segmentation from one dataset to another
@@ -317,7 +290,7 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 				final CountDownLatch segmentLatch = new CountDownLatch(1);
 				new Thread(() -> { // wait for profiling and run segmentation
 					LOGGER.fine("Starting segmentation action");
-					new RunSegmentationAction(selectedDatasets, source,
+					new RunSegmentationAction(event.getDatasets(), source,
 							SingleDatasetResultAction.NO_FLAG, acceptor,
 							segmentLatch).run();
 				}).start();
@@ -326,7 +299,7 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 					try {
 						segmentLatch.await();
 						LOGGER.fine("Adding datasets");
-						UIController.getInstance().fireDatasetAdded(selectedDatasets);
+						UIController.getInstance().fireDatasetAdded(event.getDatasets());
 					} catch (InterruptedException e) {
 						Thread.currentThread().interrupt();
 						return;
@@ -348,16 +321,11 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 		if (event.type().equals(UserActionEvent.CLUSTER_FROM_FILE))
 			return new ClusterFileAssignmentAction(selectedDataset, acceptor);
 
-		if (event.type().equals(UserActionEvent.BUILD_TREE)) {
-			LOGGER.fine("Building a tree from dataset");
-			return new BuildHierarchicalTreeAction(selectedDataset, acceptor);
-		}
-
 		if (event.type().equals(UserActionEvent.RECALCULATE_MEDIAN)) {
 			return () -> {
 				final CountDownLatch latch = new CountDownLatch(1);
 				new Thread(() -> {
-					new RunProfilingAction(selectedDatasets, SingleDatasetResultAction.NO_FLAG,
+					new RunProfilingAction(event.getDatasets(), SingleDatasetResultAction.NO_FLAG,
 							acceptor, latch).run();
 				}).start();
 
@@ -375,12 +343,12 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 		if (event.type().equals(UserActionEvent.RUN_GLCM_ANALYSIS)) {
 			return () -> {
 				final CountDownLatch latch = new CountDownLatch(1);
-				new RunGLCMAction(selectedDatasets, latch, acceptor).run();
+				new RunGLCMAction(event.getDatasets(), latch, acceptor).run();
 			};
 		}
 
-		if (event.type().equals(UserActionEvent.EXTRACT_SOURCE))
-			return new MergeSourceExtractionAction(selectedDatasets, acceptor);
+		if (event.type().equals(UserActionEvent.EXTRACT_MERGE_SOURCE))
+			return new MergeSourceExtractionAction(event.getDatasets(), acceptor);
 
 		if (event.type().equals(UserActionEvent.REFOLD_CONSENSUS)) {
 			return () -> {
@@ -406,9 +374,38 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 
 		if (UserActionEvent.DELETE_DATASET.equals(event.type())) {
 
-			DatasetDeleter deleter = new DatasetDeleter(selectedDatasets);
+			DatasetDeleter deleter = new DatasetDeleter(event.getDatasets());
 			ThreadManager.getInstance().submit(deleter);
 		}
+
+		if (selectedDataset == null)
+			return null;
+
+		if (event.type().equals(UserActionEvent.RELOCATE_CELLS))
+			return new RelocateFromFileAction(selectedDataset, acceptor, new CountDownLatch(1));
+
+		if (event.type().equals(UserActionEvent.BUILD_TREE)) {
+			return new BuildHierarchicalTreeAction(selectedDataset, acceptor);
+		}
+
+		if (event.type().equals(UserActionEvent.RUN_SHELL_ANALYSIS)) {
+			return new ShellAnalysisAction(selectedDataset, acceptor);
+		}
+
+		if (event.type().equals(UserActionEvent.SIGNAL_WARPING))
+			return new SignalWarpingAction(selectedDataset, acceptor);
+
+		if (event.type().equals(UserActionEvent.SAVE_SELECTED_DATASET))
+			return new ExportDatasetAction(selectedDataset, acceptor, null, true);
+
+		if (event.type().equals(UserActionEvent.EXPORT_XML_DATASET))
+			return new ExportDatasetAction(selectedDataset, acceptor, null, true);
+
+		if (event.type().equals(UserActionEvent.CHANGE_NUCLEUS_IMAGE_FOLDER))
+			return new ReplaceSourceImageDirectoryAction(selectedDataset, acceptor);
+
+		if (event.type().equals(UserActionEvent.ADD_NUCLEAR_SIGNAL))
+			return new AddNuclearSignalAction(selectedDataset, acceptor);
 
 		return null;
 	}

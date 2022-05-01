@@ -59,7 +59,7 @@ public abstract class AbstractOptions extends DefaultOptions implements DisplayO
 	private ShrinkType shrinkType = ShrinkType.AREA;
 
 	public static final String IS_NORMALISED_KEY = "Is normalised";
-	public static final String SHOW_RECOVER_MERGE_SOURCE_KEY = "Enable recover merge sources";
+	public static final String IS_MERGE_SOURCE_OPTIONS_TABLE = "Enable recover merge sources";
 
 	/**
 	 * Create with a list of datasets.

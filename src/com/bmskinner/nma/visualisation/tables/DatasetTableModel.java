@@ -3,6 +3,7 @@ package com.bmskinner.nma.visualisation.tables;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.swing.table.AbstractTableModel;
 
@@ -11,9 +12,8 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 
 public abstract class DatasetTableModel extends AbstractTableModel {
-	/**
-	 * 
-	 */
+	private static final Logger LOGGER = Logger.getLogger(DatasetTableModel.class.getName());
+
 	private static final long serialVersionUID = 5043678811874502686L;
 	protected static final String EMPTY_STRING = "";
 	protected static final String DEFAULT_DECIMAL_FORMAT = "#0.00";

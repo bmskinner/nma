@@ -122,6 +122,11 @@ public class TableOptionsBuilder {
 		return this;
 	}
 
+	public TableOptionsBuilder setBoolean(String key, boolean b) {
+		options.setBoolean(key, b);
+		return this;
+	}
+
 	public TableOptions build() {
 		return options;
 
