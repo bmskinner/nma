@@ -68,7 +68,7 @@ public class ImageableTest {
 //	@Test
 //	public void testComponentIsOffsetInSeahorseImage() throws Exception {
 //		
-//		File testFolder = new File(TestResources.IMAGE_FOLDER_NAME+"issues/offsets/").getAbsoluteFile();
+//		File testFolder = new File(TestResources.IMAGE_FOLDER_BASE+"issues/offsets/").getAbsoluteFile();
 //    	
 //		IAnalysisOptions op = OptionsFactory.makeAnalysisOptions();
 //		op.setRuleSetCollection(RuleSetCollection.roundRuleSetCollection());
@@ -84,7 +84,7 @@ public class ImageableTest {
 //		op.setDetectionOptions(CellularComponent.NUCLEUS, nOp);
 //		op.setAngleWindowProportion(0.03);
 //
-//    	File saveFile = new File(TestResources.IMAGE_FOLDER_NAME+"issues/offsets/offsets.nmd").getAbsoluteFile();
+//    	File saveFile = new File(TestResources.IMAGE_FOLDER_BASE+"issues/offsets/offsets.nmd").getAbsoluteFile();
 //    	IAnalysisDataset d = TestImageDatasetCreator.createTestDataset(testFolder, op, false);
 //    	TestImageDatasetCreator.saveTestDataset(d, saveFile);
 //    	

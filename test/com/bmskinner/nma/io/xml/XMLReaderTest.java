@@ -16,44 +16,47 @@ import com.bmskinner.nma.components.options.IAnalysisOptions;
 import com.bmskinner.nma.components.options.OptionsFactory;
 import com.bmskinner.nma.components.rules.RuleSetCollection;
 import com.bmskinner.nma.io.XMLReader;
-import com.bmskinner.nma.io.XMLWriter;
 import com.bmskinner.nma.io.XMLReader.XMLReadingException;
+import com.bmskinner.nma.io.XMLWriter;
 
 public class XMLReaderTest {
 
 	@Test
-	public void testReadRuleSets() throws IOException, XMLReadingException, ComponentCreationException {
+	public void testReadRuleSets()
+			throws IOException, XMLReadingException, ComponentCreationException {
 		RuleSetCollection r = RuleSetCollection.mouseSpermRuleSetCollection();
-		File f = new File(TestResources.IMAGE_FOLDER, "Ruleset.xml");
-		
+		File f = new File(TestResources.DATASET_FOLDER, "Ruleset.xml");
+
 		XMLWriter.writeXML(r.toXmlElement(), f);
-		
+
 		RuleSetCollection test = XMLReader.readRulesetCollection(f);
 		assertEquals(r, test);
 	}
-	
+
 	@Test
 	public void testReadOptions() throws IOException, XMLReadingException {
 		HashOptions o = OptionsFactory.makeDefaultClusteringOptions().build();
-		File f = new File(TestResources.IMAGE_FOLDER, "Options.xml");
-		
+		File f = new File(TestResources.DATASET_FOLDER, "Options.xml");
+
 		XMLWriter.writeXML(o.toXmlElement(), f);
-		
+
 		HashOptions test = XMLReader.readOptions(f);
 		assertEquals(o, test);
 	}
-	
+
 	@Test
-	public void testReadAnalysisOptions() throws IOException, XMLReadingException, ComponentCreationException {
-		IAnalysisOptions o = OptionsFactory.makeDefaultRodentAnalysisOptions(TestResources.IMAGE_FOLDER);
-		File f = new File(TestResources.IMAGE_FOLDER, "AnalysisOptions.xml");
-		
+	public void testReadAnalysisOptions()
+			throws IOException, XMLReadingException, ComponentCreationException {
+		IAnalysisOptions o = OptionsFactory
+				.makeDefaultRodentAnalysisOptions(TestResources.DATASET_FOLDER);
+		File f = new File(TestResources.DATASET_FOLDER, "AnalysisOptions.xml");
+
 		XMLWriter.writeXML(o.toXmlElement(), f);
-		
+
 		IAnalysisOptions test = XMLReader.readAnalysisOptions(f);
 		assertEquals(o, test);
 	}
-	
+
 	@Test
 	public void testReadAnalysisDataset() throws Exception {
 		IAnalysisDataset d = new TestDatasetBuilder(123).cellCount(20)
@@ -62,14 +65,14 @@ public class XMLReaderTest {
 				.randomOffsetProfiles(true)
 				.numberOfClusters(2)
 				.segmented().build();
-		File f = new File(TestResources.IMAGE_FOLDER, "AnalysisDataset.nmd");
-		
+		File f = new File(TestResources.DATASET_FOLDER, "AnalysisDataset.nmd");
+
 		XMLWriter.writeXML(d.toXmlElement(), f);
-		
+
 		IAnalysisDataset test = XMLReader.readDataset(f);
 		assertEquals(d, test);
 	}
-	
+
 	@Test
 	public void testReadAnalysisDatasetWithSignals() throws Exception {
 		IAnalysisDataset d = new TestDatasetBuilder(123).cellCount(20)
@@ -80,10 +83,10 @@ public class XMLReaderTest {
 				.addSignalsInChannel(1)
 				.numberOfClusters(2)
 				.segmented().build();
-		File f = new File(TestResources.IMAGE_FOLDER, "AnalysisDatasetSignals.nmd");
-		
+		File f = new File(TestResources.DATASET_FOLDER, "AnalysisDatasetSignals.nmd");
+
 		XMLWriter.writeXML(d.toXmlElement(), f);
-		
+
 		IAnalysisDataset test = XMLReader.readDataset(f);
 		assertEquals(d, test);
 	}

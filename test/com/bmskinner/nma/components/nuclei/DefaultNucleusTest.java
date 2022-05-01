@@ -37,9 +37,12 @@ public class DefaultNucleusTest {
 
 	@Before
 	public void setUp() throws Exception {
-		IAnalysisDataset d = new TestDatasetBuilder(ComponentTester.RNG_SEED).cellCount(ComponentTester.N_CELLS)
-				.ofType(RuleSetCollection.roundRuleSetCollection()).withMaxSizeVariation(1).randomOffsetProfiles(true)
-				.numberOfClusters(ComponentTester.N_CHILD_DATASETS).addSignalsInChannel(0).addSignalsInChannel(1)
+		IAnalysisDataset d = new TestDatasetBuilder(ComponentTester.RNG_SEED)
+				.cellCount(ComponentTester.N_CELLS)
+				.ofType(RuleSetCollection.roundRuleSetCollection()).withMaxSizeVariation(1)
+				.randomOffsetProfiles(true)
+				.numberOfClusters(ComponentTester.N_CHILD_DATASETS).addSignalsInChannel(0)
+				.addSignalsInChannel(1)
 				.segmented().build();
 		nucleus = d.getCollection().getCells().stream().findFirst().get().getPrimaryNucleus();
 	}
@@ -108,7 +111,8 @@ public class DefaultNucleusTest {
 	public void testXmlSerializesForRealNuclei() throws Exception {
 		File testFolder = TestResources.MOUSE_INPUT_FOLDER.getAbsoluteFile();
 		IAnalysisOptions op = OptionsFactory.makeDefaultRodentAnalysisOptions(testFolder);
-		IAnalysisDataset d = TestImageDatasetCreator.createTestDataset(TestResources.IMAGE_FOLDER, op, false);
+		IAnalysisDataset d = TestImageDatasetCreator
+				.createTestDataset(TestResources.MOUSE_OUTPUT_FOLDER, op, false);
 
 		for (Nucleus n : d.getCollection().getNuclei()) {
 			Element e = n.toXmlElement();

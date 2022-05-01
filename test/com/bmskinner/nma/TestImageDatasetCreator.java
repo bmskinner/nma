@@ -69,7 +69,6 @@ public class TestImageDatasetCreator {
 	@BeforeClass
 	public static void removeUnitTestFolders() throws IOException {
 		deleteContents(TestResources.DATASET_FOLDER);
-		deleteContents(TestResources.IMAGE_FOLDER);
 
 		deleteContents(TestResources.MOUSE_OUTPUT_FOLDER);
 		deleteContents(TestResources.PIG_OUTPUT_FOLDER);
@@ -112,7 +111,7 @@ public class TestImageDatasetCreator {
 
 		File testFolder = TestResources.MOUSE_INPUT_FOLDER.getAbsoluteFile();
 		IAnalysisOptions op = OptionsFactory.makeDefaultRodentAnalysisOptions(testFolder);
-		IAnalysisDataset d = createTestDataset(TestResources.IMAGE_FOLDER, op, false);
+		IAnalysisDataset d = createTestDataset(TestResources.MOUSE_OUTPUT_FOLDER, op, false);
 		saveTestDataset(d, TestResources.MOUSE_TEST_DATASET);
 		testUnmarshalling(d, TestResources.MOUSE_TEST_DATASET);
 	}
@@ -122,7 +121,7 @@ public class TestImageDatasetCreator {
 
 		File testFolder = TestResources.PIG_INPUT_FOLDER.getAbsoluteFile();
 		IAnalysisOptions op = OptionsFactory.makeDefaultPigAnalysisOptions(testFolder);
-		IAnalysisDataset d = createTestDataset(TestResources.IMAGE_FOLDER, op, false);
+		IAnalysisDataset d = createTestDataset(TestResources.PIG_OUTPUT_FOLDER, op, false);
 		saveTestDataset(d, TestResources.PIG_TEST_DATASET);
 		testUnmarshalling(d, TestResources.PIG_TEST_DATASET);
 	}
@@ -132,7 +131,7 @@ public class TestImageDatasetCreator {
 
 		File testFolder = TestResources.ROUND_INPUT_FOLDER.getAbsoluteFile();
 		IAnalysisOptions op = OptionsFactory.makeDefaultRoundAnalysisOptions(testFolder);
-		IAnalysisDataset d = createTestDataset(TestResources.IMAGE_FOLDER, op, false);
+		IAnalysisDataset d = createTestDataset(TestResources.ROUND_OUTPUT_FOLDER, op, false);
 		saveTestDataset(d, TestResources.ROUND_TEST_DATASET);
 		testUnmarshalling(d, TestResources.ROUND_TEST_DATASET);
 	}
@@ -141,7 +140,7 @@ public class TestImageDatasetCreator {
 	public void createMultipleSource1Dataset() throws Exception {
 		IAnalysisOptions op = OptionsFactory
 				.makeDefaultRodentAnalysisOptions(TestResources.MULTIPLE_SOURCE_1_FOLDER);
-		IAnalysisDataset d = createTestDataset(TestResources.IMAGE_FOLDER, op, false);
+		IAnalysisDataset d = createTestDataset(TestResources.MULTIPLE_SOURCE_1_FOLDER, op, false);
 		saveTestDataset(d, TestResources.MULTIPLE1_TEST_DATASET);
 		testUnmarshalling(d, TestResources.MULTIPLE1_TEST_DATASET);
 	}
@@ -150,7 +149,7 @@ public class TestImageDatasetCreator {
 	public void createMultipleSource2Dataset() throws Exception {
 		IAnalysisOptions op = OptionsFactory
 				.makeDefaultRodentAnalysisOptions(TestResources.MULTIPLE_SOURCE_2_FOLDER);
-		IAnalysisDataset d = createTestDataset(TestResources.IMAGE_FOLDER, op, false);
+		IAnalysisDataset d = createTestDataset(TestResources.MULTIPLE_SOURCE_2_FOLDER, op, false);
 		saveTestDataset(d, TestResources.MULTIPLE2_TEST_DATASET);
 		testUnmarshalling(d, TestResources.MULTIPLE2_TEST_DATASET);
 	}
@@ -159,7 +158,7 @@ public class TestImageDatasetCreator {
 	public void createMouseWithClustersDataset() throws Exception {
 		IAnalysisOptions op = OptionsFactory
 				.makeDefaultRodentAnalysisOptions(TestResources.MOUSE_CLUSTERS_INPUT_FOLDER);
-		IAnalysisDataset d = createTestDataset(TestResources.IMAGE_FOLDER, op, true);
+		IAnalysisDataset d = createTestDataset(TestResources.MOUSE_OUTPUT_FOLDER, op, true);
 		saveTestDataset(d, TestResources.MOUSE_CLUSTERS_DATASET);
 		testUnmarshalling(d, TestResources.MOUSE_CLUSTERS_DATASET);
 	}
@@ -168,7 +167,7 @@ public class TestImageDatasetCreator {
 	public void createPigWithClustersDataset() throws Exception {
 		IAnalysisOptions op = OptionsFactory
 				.makeDefaultPigAnalysisOptions(TestResources.PIG_CLUSTERS_INPUT_FOLDER);
-		IAnalysisDataset d = createTestDataset(TestResources.IMAGE_FOLDER, op, true);
+		IAnalysisDataset d = createTestDataset(TestResources.PIG_OUTPUT_FOLDER, op, true);
 		saveTestDataset(d, TestResources.PIG_CLUSTERS_DATASET);
 		testUnmarshalling(d, TestResources.PIG_CLUSTERS_DATASET);
 	}
@@ -177,7 +176,7 @@ public class TestImageDatasetCreator {
 	public void createRoundWithClustersDataset() throws Exception {
 		IAnalysisOptions op = OptionsFactory
 				.makeDefaultRoundAnalysisOptions(TestResources.ROUND_CLUSTERS_INPUT_FOLDER);
-		IAnalysisDataset d = createTestDataset(TestResources.IMAGE_FOLDER, op, true);
+		IAnalysisDataset d = createTestDataset(TestResources.ROUND_OUTPUT_FOLDER, op, true);
 		saveTestDataset(d, TestResources.ROUND_CLUSTERS_DATASET);
 		testUnmarshalling(d, TestResources.ROUND_CLUSTERS_DATASET);
 	}
@@ -302,12 +301,12 @@ public class TestImageDatasetCreator {
 	 */
 	public static IAnalysisDataset createTestDataset(File outputFolder, IAnalysisOptions op,
 			boolean makeClusters) throws Exception {
-		if (!outputFolder.exists())
-			Files.createDirectories(outputFolder.getAbsoluteFile().toPath());
-
-		if (!outputFolder.exists())
-			throw new IllegalArgumentException(
-					"Output folder does not exist: " + outputFolder.getAbsolutePath());
+//		if (!outputFolder.exists())
+//			Files.createDirectories(outputFolder.getAbsoluteFile().toPath());
+//
+//		if (!outputFolder.exists())
+//			throw new IllegalArgumentException(
+//					"Output folder does not exist: " + outputFolder.getAbsolutePath());
 
 		File inputFolder = op.getNucleusDetectionFolder().get();
 		if (!inputFolder.exists())

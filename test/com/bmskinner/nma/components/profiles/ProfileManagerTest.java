@@ -33,14 +33,6 @@ import com.bmskinner.nma.components.datasets.VirtualDataset;
 import com.bmskinner.nma.components.options.IAnalysisOptions;
 import com.bmskinner.nma.components.options.MissingOptionException;
 import com.bmskinner.nma.components.options.OptionsFactory;
-import com.bmskinner.nma.components.profiles.IProfile;
-import com.bmskinner.nma.components.profiles.IProfileSegment;
-import com.bmskinner.nma.components.profiles.ISegmentedProfile;
-import com.bmskinner.nma.components.profiles.Landmark;
-import com.bmskinner.nma.components.profiles.MissingProfileException;
-import com.bmskinner.nma.components.profiles.ProfileException;
-import com.bmskinner.nma.components.profiles.ProfileManager;
-import com.bmskinner.nma.components.profiles.ProfileType;
 import com.bmskinner.nma.components.rules.OrientationMark;
 import com.bmskinner.nma.components.rules.RuleSetCollection;
 import com.bmskinner.nma.logging.ConsoleFormatter;
@@ -128,7 +120,7 @@ public class ProfileManagerTest {
 		IAnalysisOptions op = OptionsFactory.makeDefaultRodentAnalysisOptions(testFolder);
 
 		IAnalysisDataset d = new NucleusDetectionMethod(
-				TestResources.IMAGE_FOLDER.getAbsoluteFile(), op).call()
+				TestResources.MOUSE_OUTPUT_FOLDER.getAbsoluteFile(), op).call()
 						.getFirstDataset();
 		d.getCollection().getProfileCollection().calculateProfiles();
 

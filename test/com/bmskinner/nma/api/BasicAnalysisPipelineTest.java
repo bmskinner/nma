@@ -43,61 +43,71 @@ import com.bmskinner.nma.io.SampleDatasetReader;
 import ij.Prefs;
 
 /**
- * Test the detection methods to ensure new analyses match previously 
- * saved datasets. The test sets should have been created using the 
+ * Test the detection methods to ensure new analyses match previously saved
+ * datasets. The test sets should have been created using the
  * {@link TestImageDatasetCreator} before these tests are invoked.
+ * 
  * @author bms41
  * @since 1.13.8
  *
  */
 public class BasicAnalysisPipelineTest extends AnalysisPipelineTest {
-	
+
+	@Override
 	@Before
-	public void setUp(){		
+	public void setUp() {
 		Prefs.setThreads(2); // Attempt to avoid issue 162
 	}
 
 	@Test
-	public void testMouseDatasetMatchesSavedDataset() throws Exception{
+	public void testMouseDatasetMatchesSavedDataset() throws Exception {
 		IAnalysisDataset exp = SampleDatasetReader.openDataset(TestResources.MOUSE_TEST_DATASET);
-		IAnalysisOptions op = OptionsFactory.makeDefaultRodentAnalysisOptions(TestResources.MOUSE_INPUT_FOLDER);
+		IAnalysisOptions op = OptionsFactory
+				.makeDefaultRodentAnalysisOptions(TestResources.MOUSE_INPUT_FOLDER);
 
-		IAnalysisDataset obs = TestImageDatasetCreator.createTestDataset(TestResources.IMAGE_FOLDER, op, false);
-		testDatasetEquality(exp, obs);       
+		IAnalysisDataset obs = TestImageDatasetCreator
+				.createTestDataset(TestResources.MOUSE_OUTPUT_FOLDER, op, false);
+		testDatasetEquality(exp, obs);
 	}
 
 	@Test
-	public void testPigDatasetMatchesSavedDataset() throws Exception{
+	public void testPigDatasetMatchesSavedDataset() throws Exception {
 		IAnalysisDataset exp = SampleDatasetReader.openDataset(TestResources.PIG_TEST_DATASET);
-		IAnalysisOptions op = OptionsFactory.makeDefaultPigAnalysisOptions(TestResources.PIG_INPUT_FOLDER);
+		IAnalysisOptions op = OptionsFactory
+				.makeDefaultPigAnalysisOptions(TestResources.PIG_INPUT_FOLDER);
 
-		IAnalysisDataset obs = TestImageDatasetCreator.createTestDataset(TestResources.IMAGE_FOLDER, op, false);
-		testDatasetEquality(exp, obs);       
+		IAnalysisDataset obs = TestImageDatasetCreator.createTestDataset(
+				TestResources.PIG_OUTPUT_FOLDER,
+				op, false);
+		testDatasetEquality(exp, obs);
 	}
 
 	@Test
-	public void testRoundDatasetMatchesSavedDataset() throws Exception{
+	public void testRoundDatasetMatchesSavedDataset() throws Exception {
 		IAnalysisDataset exp = SampleDatasetReader.openDataset(TestResources.ROUND_TEST_DATASET);
-		IAnalysisOptions op = OptionsFactory.makeDefaultRoundAnalysisOptions(TestResources.ROUND_INPUT_FOLDER);
+		IAnalysisOptions op = OptionsFactory
+				.makeDefaultRoundAnalysisOptions(TestResources.ROUND_INPUT_FOLDER);
 
-		IAnalysisDataset obs = TestImageDatasetCreator.createTestDataset(TestResources.IMAGE_FOLDER, op, false);
-		testDatasetEquality(exp, obs);       
+		IAnalysisDataset obs = TestImageDatasetCreator.createTestDataset(
+				TestResources.ROUND_OUTPUT_FOLDER,
+				op, false);
+		testDatasetEquality(exp, obs);
 	}
-	
-	
-
 
 	/**
 	 * Check if the two datasets match.
+	 * 
 	 * @param exp the expected (reference) dataset
 	 * @param obs the observed (newly created) dataset
 	 */
-	private void testDatasetEquality(@NonNull IAnalysisDataset exp, @NonNull IAnalysisDataset obs) throws Exception{
+	private void testDatasetEquality(@NonNull IAnalysisDataset exp, @NonNull IAnalysisDataset obs)
+			throws Exception {
 		assertEquals("Dataset name", exp.getName(), obs.getName());
 
-		//    	assertEquals("Options",exp.getAnalysisOptions(), obs.getAnalysisOptions());
+		// assertEquals("Options",exp.getAnalysisOptions(), obs.getAnalysisOptions());
 
-		assertEquals("Number of images", exp.getCollection().getImageFiles().size(), obs.getCollection().getImageFiles().size());
+		assertEquals("Number of images", exp.getCollection().getImageFiles().size(),
+				obs.getCollection().getImageFiles().size());
 
 		List<Nucleus> expN = new ArrayList<>(exp.getCollection().getNuclei());
 		List<Nucleus> obsN = new ArrayList<>(obs.getCollection().getNuclei());
@@ -105,19 +115,21 @@ public class BasicAnalysisPipelineTest extends AnalysisPipelineTest {
 		Collections.sort(expN);
 		Collections.sort(obsN);
 
-		for(int i=0; i<expN.size(); i++)
-			assertEquals("Nucleus file name for: "+expN.get(i).getNameAndNumber(), expN.get(i).getSourceFileName(), obsN.get(i).getSourceFileName());
+		for (int i = 0; i < expN.size(); i++)
+			assertEquals("Nucleus file name for: " + expN.get(i).getNameAndNumber(),
+					expN.get(i).getSourceFileName(), obsN.get(i).getSourceFileName());
 
-		assertEquals("Detected nuclei", exp.getCollection().getNucleusCount(), obs.getCollection().getNucleusCount());
-
-
+		assertEquals("Detected nuclei", exp.getCollection().getNucleusCount(),
+				obs.getCollection().getNucleusCount());
 
 		// Check the stats are the same
-		for(Measurement s : Measurement.getStats(CellularComponent.NUCLEUS)){
-			double eMed = exp.getCollection().getMedian(s, CellularComponent.NUCLEUS, MeasurementScale.PIXELS);
-			double oMed = obs.getCollection().getMedian(s, CellularComponent.NUCLEUS, MeasurementScale.PIXELS);
+		for (Measurement s : Measurement.getStats(CellularComponent.NUCLEUS)) {
+			double eMed = exp.getCollection().getMedian(s, CellularComponent.NUCLEUS,
+					MeasurementScale.PIXELS);
+			double oMed = obs.getCollection().getMedian(s, CellularComponent.NUCLEUS,
+					MeasurementScale.PIXELS);
 
-			assertEquals("Stats should be equal: " +s.toString(), eMed, oMed, 0.3);
+			assertEquals("Stats should be equal: " + s.toString(), eMed, oMed, 0.3);
 		}
 	}
 }

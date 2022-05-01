@@ -13,18 +13,19 @@ import com.bmskinner.nma.io.Io;
  */
 public class TestResources {
 
-	public static final File IMAGE_FOLDER_NAME = new File("test/samples/images/");
-	public static final File DATASET_FOLDERNAME = new File("test/samples/datasets/");
+	/** Base folder for test images */
+	private static final File IMAGE_FOLDER_BASE = new File("test/samples/images/");
 
-	public static final String UNIT_TEST_FOLDERNAME = "UnitTest_" + Version.currentVersion();
+	/**
+	 * Base folder for general output files - use DATASET_FOLDER for actual storage
+	 */
+	private static final File DATASET_FOLDER_BASE = new File("test/samples/datasets/");
 
-	public static final File IMAGE_FOLDER = new File(IMAGE_FOLDER_NAME,
+	private static final String UNIT_TEST_FOLDERNAME = "UnitTest_" + Version.currentVersion();
+
+	/** Folder for saving general output files */
+	public static final File DATASET_FOLDER = new File(DATASET_FOLDER_BASE,
 			UNIT_TEST_FOLDERNAME);
-
-	public static final File DATASET_FOLDER = new File(DATASET_FOLDERNAME,
-			UNIT_TEST_FOLDERNAME);
-
-	public static final String SLASH = "/";
 
 	public static final String MOUSE = "Mouse";
 	public static final String PIG = "Pig";
@@ -36,11 +37,11 @@ public class TestResources {
 	public static final String WITH_CLUSTERS = "_with_clusters";
 	public static final String WITH_SIGNALS = "_with_signals";
 
-	public static final File MOUSE_INPUT_FOLDER = new File(IMAGE_FOLDER_NAME.getAbsolutePath(),
+	public static final File MOUSE_INPUT_FOLDER = new File(IMAGE_FOLDER_BASE.getAbsolutePath(),
 			MOUSE);
 
-	public static final File PIG_INPUT_FOLDER = new File(IMAGE_FOLDER_NAME.getAbsolutePath(), PIG);
-	public static final File ROUND_INPUT_FOLDER = new File(IMAGE_FOLDER_NAME.getAbsolutePath(),
+	public static final File PIG_INPUT_FOLDER = new File(IMAGE_FOLDER_BASE.getAbsolutePath(), PIG);
+	public static final File ROUND_INPUT_FOLDER = new File(IMAGE_FOLDER_BASE.getAbsolutePath(),
 			ROUND);
 
 	public static final File MOUSE_OUTPUT_FOLDER = new File(MOUSE_INPUT_FOLDER,
@@ -49,38 +50,38 @@ public class TestResources {
 	public static final File ROUND_OUTPUT_FOLDER = new File(ROUND_INPUT_FOLDER,
 			UNIT_TEST_FOLDERNAME);
 
-	public static final File MULTIPLE_BASE_FOLDER = new File(IMAGE_FOLDER_NAME, "Multiple/");
+	public static final File MULTIPLE_BASE_FOLDER = new File(IMAGE_FOLDER_BASE, "Multiple");
 	public static final File MULTIPLE_SOURCE_1_FOLDER = new File(MULTIPLE_BASE_FOLDER, MULTIPLE1);
 	public static final File MULTIPLE_SOURCE_2_FOLDER = new File(MULTIPLE_BASE_FOLDER, MULTIPLE2);
 	public static final File MULTIPLE_BASE_OUTPUT_FOLDER = new File(MULTIPLE_BASE_FOLDER,
 			UNIT_TEST_FOLDERNAME);
 
-	public static final File MOUSE_SIGNALS_INPUT_FOLDER = new File(IMAGE_FOLDER_NAME,
+	public static final File MOUSE_SIGNALS_INPUT_FOLDER = new File(IMAGE_FOLDER_BASE,
 			MOUSE + WITH_SIGNALS);
 	public static final File MOUSE_SIGNALS_OUTPUT_FOLDER = new File(MOUSE_SIGNALS_INPUT_FOLDER,
 			UNIT_TEST_FOLDERNAME);
 
-	public static final File PIG_SIGNALS_INPUT_FOLDER = new File(IMAGE_FOLDER_NAME,
+	public static final File PIG_SIGNALS_INPUT_FOLDER = new File(IMAGE_FOLDER_BASE,
 			PIG + WITH_SIGNALS);
 	public static final File PIG_SIGNALS_OUTPUT_FOLDER = new File(PIG_SIGNALS_INPUT_FOLDER,
 			UNIT_TEST_FOLDERNAME);
 
-	public static final File ROUND_SIGNALS_INPUT_FOLDER = new File(IMAGE_FOLDER_NAME,
+	public static final File ROUND_SIGNALS_INPUT_FOLDER = new File(IMAGE_FOLDER_BASE,
 			ROUND + WITH_SIGNALS);
 	public static final File ROUND_SIGNALS_OUTPUT_FOLDER = new File(ROUND_SIGNALS_INPUT_FOLDER,
 			UNIT_TEST_FOLDERNAME);
 
-	public static final File MOUSE_CLUSTERS_INPUT_FOLDER = new File(IMAGE_FOLDER_NAME,
+	public static final File MOUSE_CLUSTERS_INPUT_FOLDER = new File(IMAGE_FOLDER_BASE,
 			MOUSE + WITH_CLUSTERS);
 	public static final File MOUSE_CLUSTERS_OUTPUT_FOLDER = new File(MOUSE_CLUSTERS_INPUT_FOLDER,
 			UNIT_TEST_FOLDERNAME);
 
-	public static final File PIG_CLUSTERS_INPUT_FOLDER = new File(IMAGE_FOLDER_NAME,
+	public static final File PIG_CLUSTERS_INPUT_FOLDER = new File(IMAGE_FOLDER_BASE,
 			PIG + WITH_CLUSTERS);
 	public static final File PIG_CLUSTERS_OUTPUT_FOLDER = new File(PIG_CLUSTERS_INPUT_FOLDER,
 			UNIT_TEST_FOLDERNAME);
 
-	public static final File ROUND_CLUSTERS_INPUT_FOLDER = new File(IMAGE_FOLDER_NAME,
+	public static final File ROUND_CLUSTERS_INPUT_FOLDER = new File(IMAGE_FOLDER_BASE,
 			ROUND + WITH_CLUSTERS);
 	public static final File ROUND_CLUSTERS_OUTPUT_FOLDER = new File(ROUND_CLUSTERS_INPUT_FOLDER,
 			UNIT_TEST_FOLDERNAME);
@@ -116,11 +117,14 @@ public class TestResources {
 	public static final File MULTIPLE_SOURCE_2_DATASET = new File(MULTIPLE_BASE_OUTPUT_FOLDER,
 			MULTIPLE2 + Io.SAVE_FILE_EXTENSION);
 
-	public static final String GLCM_SAMPLE_IMAGE = IMAGE_FOLDER_NAME + SLASH + "GLCM" + SLASH
-			+ "s61.tiff-3_b43854f1-95c5-4810-bbac-a467ef5dd0ed.tiff";
+	public static final File GLCM_FOLDER = new File(IMAGE_FOLDER_BASE, "GLCM");
 
-	public static final File WARPING_FOLDER = new File(IMAGE_FOLDER_NAME, "Warping");
-	public static final String WARPING_NORMALISATION_IMAGE = WARPING_FOLDER + SLASH
-			+ "Gradient.tiff";
+	public static final File GLCM_SAMPLE_IMAGE = new File(GLCM_FOLDER,
+			"s61.tiff-3_b43854f1-95c5-4810-bbac-a467ef5dd0ed.tiff");
+
+	public static final File WARPING_FOLDER = new File(IMAGE_FOLDER_BASE, "Warping");
+
+	public static final File WARPING_NORMALISATION_IMAGE = new File(WARPING_FOLDER,
+			"Gradient.tiff");
 
 }
