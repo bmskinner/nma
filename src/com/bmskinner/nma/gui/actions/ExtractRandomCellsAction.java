@@ -37,7 +37,6 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nma.components.MissingLandmarkException;
 import com.bmskinner.nma.components.cells.ICell;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
-import com.bmskinner.nma.components.datasets.ICellCollection;
 import com.bmskinner.nma.components.datasets.VirtualDataset;
 import com.bmskinner.nma.components.profiles.MissingProfileException;
 import com.bmskinner.nma.components.profiles.ProfileException;
@@ -77,28 +76,25 @@ public class ExtractRandomCellsAction extends SingleDatasetResultAction {
 
 			List<ICell> subList = cells.subList(0, dialog.getCellCount());
 
-			ICellCollection c = new VirtualDataset(dataset, "Random_selection");
-			c.addAll(subList);
-
-			if (c.hasCells()) {
+			if (!subList.isEmpty()) {
 
 				try {
-					dataset.getCollection().getProfileManager().copySegmentsAndLandmarksTo(c);
+					IAnalysisDataset c = new VirtualDataset(dataset, "Random_selection", null,
+							subList);
+
+					IAnalysisDataset d = dataset.addChildDataset(c);
+
+					// set shared counts
+					c.getCollection().setSharedCount(dataset.getCollection(),
+							c.getCollection().size());
+					dataset.getCollection().setSharedCount(c.getCollection(),
+							c.getCollection().size());
+
+					UIController.getInstance().fireDatasetAdded(d);
 				} catch (ProfileException | MissingProfileException | MissingLandmarkException e) {
 					LOGGER.warning("Error copying collection offsets");
 					LOGGER.log(Loggable.STACK, "Error in offsetting", e);
 				}
-
-				dataset.addChildCollection(c);
-
-				// attach the clusters to their parent collection
-				IAnalysisDataset d = dataset.getChildDataset(c.getId());
-
-				// set shared counts
-				c.setSharedCount(dataset.getCollection(), c.size());
-				dataset.getCollection().setSharedCount(c, c.size());
-
-				UIController.getInstance().fireDatasetAdded(d);
 			}
 
 		} else {
@@ -140,8 +136,8 @@ public class ExtractRandomCellsAction extends SingleDatasetResultAction {
 			GridBagLayout layout = new GridBagLayout();
 			panel.setLayout(layout);
 
-			List<JLabel> labels = new ArrayList<JLabel>();
-			List<Component> fields = new ArrayList<Component>();
+			List<JLabel> labels = new ArrayList<>();
+			List<Component> fields = new ArrayList<>();
 
 			spinner = new JSpinner(
 					new SpinnerNumberModel(1, 1, dataset.getCollection().getNucleusCount(), 1));

@@ -80,11 +80,13 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
 
 		if (!Importer.isSuitableImportFile(f)) {
 			LOGGER.warning(INVALID_FILE_ERROR);
-			throw new IllegalArgumentException(INVALID_FILE_ERROR);
+			throw new IllegalArgumentException(Importer.whyIsUnsuitableImportFile(f));
 		}
 
-		if (!(f.getName().endsWith(SAVE_FILE_EXTENSION) || f.getName().endsWith(BACKUP_FILE_EXTENSION))) {
-			LOGGER.warning("File is not nmd or bak format or has been renamed: " + f.getAbsolutePath());
+		if (!(f.getName().endsWith(SAVE_FILE_EXTENSION)
+				|| f.getName().endsWith(BACKUP_FILE_EXTENSION))) {
+			LOGGER.warning(
+					"File is not nmd or bak format or has been renamed: " + f.getAbsolutePath());
 			throw new IllegalArgumentException(
 					"File is not nmd or bak format or has been renamed: " + f.getAbsolutePath());
 		}
@@ -113,7 +115,8 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
 		run();
 
 		if (dataset == null)
-			throw new UnloadableDatasetException(String.format("Could not load file '%s'", file.getAbsolutePath()));
+			throw new UnloadableDatasetException(
+					String.format("Could not load file '%s'", file.getAbsolutePath()));
 
 		DefaultAnalysisResult r = new DefaultAnalysisResult(dataset);
 		r.setBoolean(WAS_CONVERTED_BOOL, wasConverted);
@@ -127,7 +130,8 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
 
 		// Deserialise whatever is in the file
 
-		try (InputStream is = new FileInputStream(file); CountedInputStream cis = new CountedInputStream(is);) {
+		try (InputStream is = new FileInputStream(file);
+				CountedInputStream cis = new CountedInputStream(is);) {
 
 			cis.addCountListener((l) -> fireProgressEvent(l));
 			SAXBuilder saxBuilder = new SAXBuilder();
@@ -135,7 +139,8 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
 			saxBuilder.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
 			Document doc = saxBuilder.build(cis);
 //    		LOGGER.fine("Built XML document");
-			fireIndeterminateState(); // TODO: hook the indeterminate state to the end of file reading,
+			fireIndeterminateState(); // TODO: hook the indeterminate state to the end of file
+										// reading,
 			// rather than after the document is built - takes a long time with large
 			// datasets
 			dataset = DatasetCreator.createRoot(doc.getRootElement());
@@ -145,7 +150,8 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
 
 		} catch (ComponentCreationException | IOException | JDOMException e) {
 			LOGGER.fine("Error reading XML: " + e.getMessage());
-			throw new UnloadableDatasetException("Cannot read as XML dataset: " + file.getAbsolutePath(), e);
+			throw new UnloadableDatasetException(
+					"Cannot read as XML dataset: " + file.getAbsolutePath(), e);
 		}
 	}
 
@@ -182,7 +188,8 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
 
 			LOGGER.warning("The dataset is not properly segmented");
 			LOGGER.warning("Curated datasets and groups have been saved");
-			LOGGER.warning("Redetect cells and import the ." + Importer.LOC_FILE_EXTENSION + " file");
+			LOGGER.warning(
+					"Redetect cells and import the ." + Importer.LOC_FILE_EXTENSION + " file");
 
 			new CellFileExporter(dataset).call();
 			throw new AnalysisMethodException("Unable to validate or repair dataset");
@@ -198,7 +205,8 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
 	 */
 	private void cleanLockFilesInDir(File dir) throws IOException {
 
-		FilenameFilter filter = (folder, name) -> name.toLowerCase().endsWith(Io.LOCK_FILE_EXTENSION);
+		FilenameFilter filter = (folder, name) -> name.toLowerCase()
+				.endsWith(Io.LOCK_FILE_EXTENSION);
 
 		File[] files = dir.listFiles(filter);
 

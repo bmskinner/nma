@@ -29,90 +29,96 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nma.analysis.detection.Finder;
 import com.bmskinner.nma.analysis.detection.FishRemappingFinder;
+import com.bmskinner.nma.components.MissingLandmarkException;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.datasets.ICellCollection;
 import com.bmskinner.nma.components.options.IAnalysisOptions;
 import com.bmskinner.nma.components.options.MissingOptionException;
+import com.bmskinner.nma.components.profiles.MissingProfileException;
+import com.bmskinner.nma.components.profiles.ProfileException;
 
 @SuppressWarnings("serial")
 public class FishRemappingProber extends IntegratedImageProber {
-	
+
 	private static final Logger LOGGER = Logger.getLogger(FishRemappingProber.class.getName());
 
-    private static final String DIALOG_TITLE_BAR_LBL = "Post-FISH mapping";
-    private static final String PROCEED_LBL          = "Finished selection";
+	private static final String DIALOG_TITLE_BAR_LBL = "Post-FISH mapping";
+	private static final String PROCEED_LBL = "Finished selection";
 
-    final IAnalysisDataset       dataset;
-    final List<IAnalysisDataset> newList = new ArrayList<>();
+	final IAnalysisDataset dataset;
+	final List<IAnalysisDataset> newList = new ArrayList<>();
 
-    /**
-     * Create with a dataset (from which nuclei will be drawn) and a folder of
-     * images to be analysed
-     * 
-     * @param dataset the analysis dataset
-     * @param folder the folder of images
-     */
-    public FishRemappingProber(@NonNull final IAnalysisDataset dataset, @NonNull final File fishImageDir) {
-    	this.dataset = dataset;
+	/**
+	 * Create with a dataset (from which nuclei will be drawn) and a folder of
+	 * images to be analysed
+	 * 
+	 * @param dataset the analysis dataset
+	 * @param folder  the folder of images
+	 */
+	public FishRemappingProber(@NonNull final IAnalysisDataset dataset,
+			@NonNull final File fishImageDir) {
+		this.dataset = dataset;
 
+		Optional<IAnalysisOptions> analysisOptions = dataset.getAnalysisOptions();
+		if (analysisOptions.isPresent()) {
+			// make the panel
+			Finder<?> finder = new FishRemappingFinder(dataset.getAnalysisOptions().get(),
+					fishImageDir);
 
-    	Optional<IAnalysisOptions> analysisOptions = dataset.getAnalysisOptions();
-    	if(analysisOptions.isPresent()) {
-    		// make the panel
-    		Finder<?> finder = new FishRemappingFinder(dataset.getAnalysisOptions().get(), fishImageDir);
-
-    		try {
+			try {
 				imageProberPanel = new FishRemappingProberPanel(dataset, finder, this);
 			} catch (MissingOptionException e) {
 				LOGGER.warning("No options in dataset");
 				this.dispose();
 			}
 
-    		imageProberPanel.setSize(imageProberPanel.getPreferredSize());
+			imageProberPanel.setSize(imageProberPanel.getPreferredSize());
 
-    		JPanel footerPanel = createFooter();
-    		this.setOkButtonText(PROCEED_LBL);
+			JPanel footerPanel = createFooter();
+			this.setOkButtonText(PROCEED_LBL);
 
-    		this.add(imageProberPanel, BorderLayout.CENTER);
-    		this.add(footerPanel, BorderLayout.SOUTH);
+			this.add(imageProberPanel, BorderLayout.CENTER);
+			this.add(footerPanel, BorderLayout.SOUTH);
 
-    		this.setTitle(DIALOG_TITLE_BAR_LBL);
+			this.setTitle(DIALOG_TITLE_BAR_LBL);
 
+			this.pack();
+			this.setModal(true);
+			this.setLocationRelativeTo(null); // centre on screen
+			this.setVisible(true);
+		} else {
+			this.dispose();
+		}
+	}
 
+	@Override
+	protected void okButtonClicked() {
 
-    		this.pack();
-    		this.setModal(true);
-    		this.setLocationRelativeTo(null); // centre on screen
-    		this.setVisible(true);
-    	} else {
-    		this.dispose();
-    	}
-    }
+		List<ICellCollection> subs = ((FishRemappingProberPanel) imageProberPanel)
+				.getSubCollections();
 
-    @Override
-    protected void okButtonClicked() {
+		if (subs.isEmpty()) {
 
-        List<ICellCollection> subs = ((FishRemappingProberPanel) imageProberPanel).getSubCollections();
+			return;
+		}
 
-        if (subs.isEmpty()) {
+		for (ICellCollection sub : subs) {
 
-            return;
-        }
+			if (sub.hasCells()) {
+				try {
+					IAnalysisDataset subDataset = dataset.addChildCollection(sub);
+					newList.add(subDataset);
+				} catch (MissingProfileException | MissingLandmarkException | ProfileException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 
-        for (ICellCollection sub : subs) {
+			}
+		}
+	}
 
-            if (sub.hasCells()) {
-
-                dataset.addChildCollection(sub);
-
-                final IAnalysisDataset subDataset = dataset.getChildDataset(sub.getId());
-                newList.add(subDataset);
-            }
-        }
-    }
-
-    public List<IAnalysisDataset> getNewDatasets() {
-        return newList;
-    }
+	public List<IAnalysisDataset> getNewDatasets() {
+		return newList;
+	}
 
 }

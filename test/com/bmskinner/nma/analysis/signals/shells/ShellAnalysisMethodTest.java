@@ -19,38 +19,46 @@
 
 package com.bmskinner.nma.analysis.signals.shells;
 
+import static org.junit.Assert.assertTrue;
+
 import org.junit.Before;
 import org.junit.Test;
 
 import com.bmskinner.nma.TestDatasetBuilder;
 import com.bmskinner.nma.TestDatasetBuilder.TestComponentShape;
-import com.bmskinner.nma.analysis.signals.shells.ShellAnalysisMethod;
+import com.bmskinner.nma.TestResources;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.options.OptionsFactory;
 import com.bmskinner.nma.components.rules.RuleSetCollection;
+import com.bmskinner.nma.io.SampleDatasetReader;
 
 public class ShellAnalysisMethodTest {
-    
-	private static final long SEED = 1234;
-    private IAnalysisDataset d;
-    
-    @Before
-    public void setUp() throws Exception{
-        d = new TestDatasetBuilder(SEED).cellCount(10)
-        		.withMaxSizeVariation(20)
-        		.maxRotation(90)
-        		.xBase(50).yBase(50)
-        		.baseWidth(50).baseHeight(50)
-        		.ofType(RuleSetCollection.roundRuleSetCollection())
-        		.withNucleusShape(TestComponentShape.SQUARE)
-        		.addSignalsInChannel(0)
-        		.addSignalsInChannel(1)
-        		.build();
-    }
 
-    @Test
-    public void test() throws Exception {
-    	new ShellAnalysisMethod(d, OptionsFactory.makeShellAnalysisOptions().build()).call();
-    }
+	private static final long SEED = 1234;
+	private IAnalysisDataset d;
+
+	@Before
+	public void setUp() throws Exception {
+		d = new TestDatasetBuilder(SEED).cellCount(10)
+				.withMaxSizeVariation(20)
+				.maxRotation(90)
+				.xBase(50).yBase(50)
+				.baseWidth(50).baseHeight(50)
+				.ofType(RuleSetCollection.roundRuleSetCollection())
+				.withNucleusShape(TestComponentShape.SQUARE)
+				.addSignalsInChannel(0)
+				.addSignalsInChannel(1)
+				.build();
+	}
+
+	@Test
+	public void test() throws Exception {
+		IAnalysisDataset d = SampleDatasetReader.openDataset(TestResources.ROUND_SIGNALS_DATASET);
+
+		new ShellAnalysisMethod(d, OptionsFactory.makeShellAnalysisOptions().build()).call();
+
+		assertTrue("Signal groups should have shell results",
+				d.getCollection().getSignalGroups().stream().allMatch(s -> s.hasShellResult()));
+	}
 
 }

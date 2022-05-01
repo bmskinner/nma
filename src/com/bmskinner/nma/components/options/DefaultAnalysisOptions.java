@@ -110,8 +110,9 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
 			detectionOptions.put(name,
 					new DefaultOptions(i.getChild(XML_OPTIONS)));
 
-			detectionFolders.put(name,
-					new File(i.getAttributeValue(XML_FOLDER)));
+			if (i.getAttribute(XML_FOLDER) != null)
+				detectionFolders.put(name,
+						new File(i.getAttributeValue(XML_FOLDER)));
 		}
 
 		windowProp = Double.valueOf(e.getAttributeValue(XML_PROFILE_WINDOW));
@@ -341,13 +342,16 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
 
 		e.addContent(rulesets.toXmlElement());
 
-		// Add the detection options
+		// Add the detection options, including folder if set
 		for (Entry<String, HashOptions> entry : detectionOptions.entrySet()) {
-			e.addContent(new Element(XML_DETECTION)
-					.setAttribute(XML_NAME, entry.getKey())
-					.setAttribute(XML_FOLDER,
-							detectionFolders.get(entry.getKey()).getAbsolutePath())
-					.addContent(entry.getValue().toXmlElement()));
+			Element el = new Element(XML_DETECTION)
+					.setAttribute(XML_NAME, entry.getKey());
+			if (detectionFolders.get(entry.getKey()) != null) {
+				el.setAttribute(XML_FOLDER,
+						detectionFolders.get(entry.getKey()).getAbsolutePath());
+			}
+			el.addContent(entry.getValue().toXmlElement());
+			e.addContent(el);
 		}
 
 		// Add the secondary options

@@ -17,7 +17,6 @@ import com.bmskinner.nma.components.MissingLandmarkException;
 import com.bmskinner.nma.components.cells.ICell;
 import com.bmskinner.nma.components.datasets.DefaultClusterGroup;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
-import com.bmskinner.nma.components.datasets.ICellCollection;
 import com.bmskinner.nma.components.datasets.IClusterGroup;
 import com.bmskinner.nma.components.datasets.VirtualDataset;
 import com.bmskinner.nma.components.options.HashOptions;
@@ -104,13 +103,8 @@ public class ManualClusterAction extends SingleDatasetResultAction {
 			 * @param name
 			 * @return
 			 */
-			public ICellCollection toCollection(String name) {
-				ICellCollection coll = new VirtualDataset(dataset, name);
-
-				for (ICell c : selectedCells) {
-					coll.addCell(c);
-				}
-				return coll;
+			public List<ICell> getCells() {
+				return selectedCells;
 			}
 		}
 
@@ -178,31 +172,29 @@ public class ManualClusterAction extends SingleDatasetResultAction {
 
 			for (int i = 0; i < groups.size(); i++) {
 
-				ICellCollection coll = groups.get(i)
-						.toCollection("Manual_cluster_" + i + "_" + groups.get(i).groupName);
+				List<ICell> cells = groups.get(i).getCells();
 
-				if (coll.hasCells()) {
+				if (!cells.isEmpty()) {
 
 					try {
-						dataset.getCollection().getProfileManager()
-								.copySegmentsAndLandmarksTo(coll);
+
+						IAnalysisDataset c = new VirtualDataset(dataset,
+								group.getName() + "_Cluster_" + i, null,
+								cells);
+
+						IAnalysisDataset d = dataset.addChildDataset(c);
+
+						// set shared counts
+						c.getCollection().setSharedCount(dataset.getCollection(),
+								c.getCollection().size());
+						dataset.getCollection().setSharedCount(c.getCollection(),
+								c.getCollection().size());
+
 					} catch (ProfileException | MissingProfileException
 							| MissingLandmarkException e) {
 						LOGGER.warning("Error copying collection offsets");
 						LOGGER.log(Loggable.STACK, "Error in offsetting", e);
 					}
-
-					group.addDataset(coll);
-					coll.setName(group.getName() + "_" + coll.getName());
-
-					dataset.addChildCollection(coll);
-
-					// attach the clusters to their parent collection
-					IAnalysisDataset clusterDataset = dataset.getChildDataset(coll.getId());
-
-					// set shared counts
-					coll.setSharedCount(dataset.getCollection(), coll.size());
-					dataset.getCollection().setSharedCount(coll, coll.size());
 				}
 
 			}

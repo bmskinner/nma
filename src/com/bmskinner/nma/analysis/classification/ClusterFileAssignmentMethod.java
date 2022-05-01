@@ -188,7 +188,7 @@ public class ClusterFileAssignmentMethod extends SingleDatasetAnalysisMethod {
 	private IClusterGroup assignClusters() {
 		LOGGER.fine("Assigning clusters");
 
-		Map<Integer, ICellCollection> clusterMap = new HashMap<>();
+		Map<Integer, List<ICell>> clusterMap = new HashMap<>();
 
 		int clusterNumber = dataset.getMaxClusterGroupNumber() + 1;
 
@@ -205,9 +205,7 @@ public class ClusterFileAssignmentMethod extends SingleDatasetAnalysisMethod {
 		long nClusters = cellMap.values().stream().distinct().count();
 		LOGGER.fine("Creating " + nClusters + " child datasets");
 		for (int i = 1; i <= nClusters; i++) {
-			ICellCollection clusterCollection = new VirtualDataset(dataset,
-					"Cluster_" + i, UUID.randomUUID());
-			clusterMap.put(i, clusterCollection);
+			clusterMap.put(i, new ArrayList<>());
 		}
 
 		// Get dataset cells not in the map file
@@ -230,7 +228,7 @@ public class ClusterFileAssignmentMethod extends SingleDatasetAnalysisMethod {
 			// nuclei. Cluster number starts from 1, so there is no cluster zero
 			// to assign to. Put these in the unmapped collection
 			if (clusterMap.containsKey(cluster)) {
-				clusterMap.get(cluster).addCell(cell);
+				clusterMap.get(cluster).add(cell);
 			} else {
 				LOGGER.fine("No cluster defined for " + entry.getKey().toString() + ": expected "
 						+ cluster);
@@ -239,38 +237,34 @@ public class ClusterFileAssignmentMethod extends SingleDatasetAnalysisMethod {
 		}
 
 		// Add unmapped cells to a final cluster
-		ICellCollection clusterCollection = new VirtualDataset(dataset,
-				"Unmapped", UUID.randomUUID());
-		clusterCollection.addAll(unmappedCells);
-		clusterMap.put((int) nClusters + 1, clusterCollection);
+		clusterMap.put((int) nClusters + 1, unmappedCells);
 
 		// Assign profiles to the new cluster collections
 		int cellsInClusters = 0;
-		for (int i = 1; i <= clusterMap.size(); i++) {
 
-			ICellCollection c = clusterMap.get(i);
+		for (Entry<Integer, List<ICell>> entry : clusterMap.entrySet()) {
 
-			cellsInClusters += c.size();
+			cellsInClusters += entry.getValue().size();
 
-			if (c.hasCells()) {
+			if (!entry.getValue().isEmpty()) {
 
 				try {
-					dataset.getCollection().getProfileManager().copySegmentsAndLandmarksTo(c);
+
+					ICellCollection c = new VirtualDataset(dataset,
+							group.getName() + "_Cluster_" + entry.getKey(), UUID.randomUUID(),
+							entry.getValue());
+					IAnalysisDataset clusterDataset = dataset.addChildCollection(c);
+
+					group.addDataset(clusterDataset);
+
+					// set shared counts
+					c.setSharedCount(dataset.getCollection(), c.size());
+					dataset.getCollection().setSharedCount(c, c.size());
+
 				} catch (ProfileException | MissingProfileException | MissingLandmarkException e) {
 					LOGGER.log(Loggable.STACK,
 							"Error copying segments or landmarks from " + dataset.getName(), e);
 				}
-
-				group.addDataset(c);
-				c.setName(group.getName() + "_" + c.getName());
-				dataset.addChildCollection(c);
-
-				// attach the clusters to their parent collection
-				IAnalysisDataset clusterDataset = dataset.getChildDataset(c.getId());
-
-				// set shared counts
-				c.setSharedCount(dataset.getCollection(), c.size());
-				dataset.getCollection().setSharedCount(c, c.size());
 
 			}
 

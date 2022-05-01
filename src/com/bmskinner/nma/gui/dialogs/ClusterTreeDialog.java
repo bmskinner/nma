@@ -491,19 +491,15 @@ public class ClusterTreeDialog extends MessagingDialog {
 
 		for (ICellCollection c : clusterList) {
 			if (c.hasCells()) {
-
-				dataset.addChildCollection(c);
-
 				try {
-					dataset.getCollection().getProfileManager().copySegmentsAndLandmarksTo(c);
+					IAnalysisDataset clusterDataset = dataset.addChildCollection(c);
+					list.add(clusterDataset);
+
 				} catch (ProfileException | MissingProfileException | MissingLandmarkException e) {
 					LOGGER.warning("Error copying collection offsets");
 					LOGGER.log(Loggable.STACK, "Error in offsetting", e);
 				}
 
-				IAnalysisDataset clusterDataset = dataset.getChildDataset(c.getId());
-
-				list.add(clusterDataset);
 			}
 		}
 

@@ -9,6 +9,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.junit.Test;
 
@@ -215,11 +216,13 @@ public class DatasetMergeMethodTest {
 				.getFirstDataset();
 
 		// Profile, segment, save and reopen
-		IAnalysisDataset d3 = new DatasetProfilingMethod(merged)
+		new DatasetProfilingMethod(merged)
 				.then(new DatasetSegmentationMethod(merged,
 						MorphologyAnalysisMode.SEGMENT_FROM_SCRATCH))
 				.then(new DatasetExportMethod(merged, f3))
-				.then(new DatasetImportMethod(f3))
+				.call();
+
+		IAnalysisDataset d3 = new DatasetImportMethod(f3)
 				.call().getFirstDataset();
 
 		ComponentTester.testDuplicatesByField("Merged dataset should be equal after unmarshalling",
@@ -253,6 +256,12 @@ public class DatasetMergeMethodTest {
 				merged.getCollection().getSignalManager().hasSignals());
 		assertTrue("Merged dataset should have single signal group",
 				merged.getCollection().getSignalGroupIDs().size() == 1);
+
+		// the merged signal id is randomly chosen by the merger, find what was picked
+		UUID mergedSignalId = merged.getCollection().getSignalGroupIDs().stream()
+				.findAny().get();
+		assertTrue("Merged dataset should have options for the merged signal group",
+				merged.getAnalysisOptions().get().hasSignalDetectionOptions(mergedSignalId));
 	}
 
 	@Test
@@ -266,18 +275,21 @@ public class DatasetMergeMethodTest {
 		IAnalysisDataset d2 = SampleDatasetReader.openDataset(f2);
 
 		PairedSignalGroups ps = new PairedSignalGroups();
-		ps.add(d1.getId(), TestImageDatasetCreator.RED_SIGNAL_ID, d2.getId(),
-				TestImageDatasetCreator.RED_SIGNAL_ID);
+		ps.add(d1.getId(), TestImageDatasetCreator.RED_SIGNAL_ID,
+				d2.getId(), TestImageDatasetCreator.RED_SIGNAL_ID);
 
 		// Merge resegment and save the dataset
 		IAnalysisDataset merged = new DatasetMergeMethod(List.of(d1, d2), f3, ps).call()
 				.getFirstDataset();
 
-		IAnalysisDataset d3 = new DatasetProfilingMethod(merged)
+		// Profile, segment, save and reopen
+		new DatasetProfilingMethod(merged)
 				.then(new DatasetSegmentationMethod(merged,
 						MorphologyAnalysisMode.SEGMENT_FROM_SCRATCH))
 				.then(new DatasetExportMethod(merged, f3))
-				.then(new DatasetImportMethod(f3))
+				.call();
+
+		IAnalysisDataset d3 = new DatasetImportMethod(f3)
 				.call().getFirstDataset();
 
 		ComponentTester.testDuplicatesByField("Merged dataset should be equal after unmarshalling",

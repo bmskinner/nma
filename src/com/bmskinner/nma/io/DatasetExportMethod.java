@@ -59,25 +59,18 @@ public class DatasetExportMethod extends SingleDatasetAnalysisMethod {
 	}
 
 	@Override
-	public IAnalysisResult call() {
+	public IAnalysisResult call() throws Exception {
 		run();
 		return new DefaultAnalysisResult(dataset);
 	}
 
-	protected void run() {
+	protected void run() throws Exception {
+		boolean isOk = false;
+		backupExistingSaveFile();
+		isOk = saveAnalysisDatasetToXML(dataset, saveFile);
 
-		try {
-
-			boolean isOk = false;
-			backupExistingSaveFile();
-			isOk = saveAnalysisDatasetToXML(dataset, saveFile);
-
-			if (!isOk)
-				LOGGER.warning("Save was unsucessful");
-
-		} catch (Exception e) {
-			LOGGER.log(Loggable.STACK, "Unable to save dataset", e);
-		}
+		if (!isOk)
+			LOGGER.warning("Save was unsucessful");
 	}
 
 	/**
@@ -86,8 +79,10 @@ public class DatasetExportMethod extends SingleDatasetAnalysisMethod {
 	 * @param dataset  the dataset to save
 	 * @param saveFile the file to save to
 	 * @return
+	 * @throws IOException
 	 */
-	public boolean saveAnalysisDatasetToXML(IAnalysisDataset dataset, File saveFile) {
+	public boolean saveAnalysisDatasetToXML(IAnalysisDataset dataset, File saveFile)
+			throws IOException {
 		boolean ok = true;
 		LOGGER.fine("Saving XML dataset to " + saveFile.getAbsolutePath());
 
@@ -106,18 +101,18 @@ public class DatasetExportMethod extends SingleDatasetAnalysisMethod {
 					saveFile.getParentFile().getName()));
 		Document doc = new Document(dataset.toXmlElement());
 
-		try (
-				OutputStream os = new FileOutputStream(saveFile);
-				CountedOutputStream cos = new CountedOutputStream(os);) {
-			cos.addCountListener((l) -> fireProgressEvent(l));
-			XMLOutputter xmlOutput = new XMLOutputter();
-			xmlOutput.setFormat(Format.getPrettyFormat());
-			xmlOutput.output(doc, cos);
-		} catch (IOException e) {
-			LOGGER.log(Loggable.STACK, String.format("Unable to write to file %s: %s",
-					saveFile.getAbsolutePath(), e.getMessage()), e);
-			ok = false;
-		}
+//		try (
+		OutputStream os = new FileOutputStream(saveFile);
+		CountedOutputStream cos = new CountedOutputStream(os);
+		cos.addCountListener((l) -> fireProgressEvent(l));
+		XMLOutputter xmlOutput = new XMLOutputter();
+		xmlOutput.setFormat(Format.getPrettyFormat());
+		xmlOutput.output(doc, cos);
+//		} catch (IOException e) {
+//			LOGGER.log(Loggable.STACK, String.format("Unable to write to file %s: %s",
+//					saveFile.getAbsolutePath(), e.getMessage()), e);
+//			ok = false;
+//		}
 		return ok;
 	}
 

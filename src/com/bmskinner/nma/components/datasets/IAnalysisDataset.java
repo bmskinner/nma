@@ -27,9 +27,12 @@ import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nma.components.MissingLandmarkException;
 import com.bmskinner.nma.components.Version;
 import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.options.IAnalysisOptions;
+import com.bmskinner.nma.components.profiles.MissingProfileException;
+import com.bmskinner.nma.components.profiles.ProfileException;
 import com.bmskinner.nma.components.rules.RuleSetCollection;
 import com.bmskinner.nma.io.XmlSerializable;
 import com.bmskinner.nma.utility.FileUtils;
@@ -80,8 +83,12 @@ public interface IAnalysisDataset extends XmlSerializable {
 	 * 
 	 * @param collection the collection to add
 	 * @return the newly created dataset
+	 * @throws ProfileException
+	 * @throws MissingLandmarkException
+	 * @throws MissingProfileException
 	 */
-	IAnalysisDataset addChildCollection(@NonNull ICellCollection collection);
+	IAnalysisDataset addChildCollection(@NonNull ICellCollection collection)
+			throws MissingProfileException, MissingLandmarkException, ProfileException;
 
 	/**
 	 * Add the given dataset as a child of this dataset

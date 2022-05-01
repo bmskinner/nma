@@ -157,12 +157,12 @@ public class VirtualDataset extends AbstractAnalysisDataset
 	 * @throws MissingLandmarkException
 	 */
 	public VirtualDataset(@NonNull IAnalysisDataset parent, String name, @Nullable UUID id,
-			ICellCollection cells)
+			Collection<ICell> cells)
 			throws ProfileException, MissingProfileException, MissingLandmarkException {
 		this(parent, name, id);
 		addAll(cells);
 		profileCollection.calculateProfiles();
-		cells.getProfileManager().copySegmentsAndLandmarksTo(this);
+		parent.getCollection().getProfileManager().copySegmentsAndLandmarksTo(this);
 	}
 
 	public VirtualDataset(@NonNull Element e)
@@ -289,7 +289,7 @@ public class VirtualDataset extends AbstractAnalysisDataset
 
 	@Override
 	public boolean addAll(Collection<? extends ICell> c) {
-		return cellIDs.addAll(c.stream().map(cell -> cell.getId()).collect(Collectors.toSet()));
+		return cellIDs.addAll(c.stream().map(ICell::getId).collect(Collectors.toSet()));
 	}
 
 	@Override
@@ -1084,9 +1084,9 @@ public class VirtualDataset extends AbstractAnalysisDataset
 	}
 
 	@Override
-	public IAnalysisDataset addChildCollection(@NonNull ICellCollection collection) {
-		VirtualDataset c = new VirtualDataset(this, collection.getName());
-		c.addAll(collection);
+	public IAnalysisDataset addChildCollection(@NonNull ICellCollection collection)
+			throws MissingProfileException, MissingLandmarkException, ProfileException {
+		VirtualDataset c = new VirtualDataset(this, collection.getName(), null, collection);
 		addChildDataset(c);
 		return c;
 	}

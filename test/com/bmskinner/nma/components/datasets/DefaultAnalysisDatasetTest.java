@@ -43,10 +43,13 @@ import com.bmskinner.nma.analysis.nucleus.CellCollectionFilterBuilder;
 import com.bmskinner.nma.analysis.nucleus.CellCollectionFilterer;
 import com.bmskinner.nma.analysis.nucleus.CellCollectionFilterer.CollectionFilteringException;
 import com.bmskinner.nma.analysis.nucleus.FilteringOptions;
+import com.bmskinner.nma.components.MissingLandmarkException;
 import com.bmskinner.nma.components.Version;
 import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.measure.MeasurementScale;
+import com.bmskinner.nma.components.profiles.MissingProfileException;
+import com.bmskinner.nma.components.profiles.ProfileException;
 import com.bmskinner.nma.components.rules.RuleSetCollection;
 import com.bmskinner.nma.gui.components.ColourSelecter;
 import com.bmskinner.nma.logging.ConsoleFormatter;
@@ -165,7 +168,8 @@ public class DefaultAnalysisDatasetTest extends ComponentTester {
 	}
 
 	@Test
-	public void testGetChildCount() throws CollectionFilteringException {
+	public void testGetChildCount() throws CollectionFilteringException, MissingProfileException,
+			MissingLandmarkException, ProfileException {
 		assertEquals(N_CHILD_DATASETS, d.getChildCount());
 
 		double defaultArea = d.getCollection().getMedian(Measurement.AREA,
