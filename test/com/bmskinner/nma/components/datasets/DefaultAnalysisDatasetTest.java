@@ -41,14 +41,10 @@ import com.bmskinner.nma.TestDatasetBuilder;
 import com.bmskinner.nma.TestResources;
 import com.bmskinner.nma.analysis.nucleus.CellCollectionFilterBuilder;
 import com.bmskinner.nma.analysis.nucleus.CellCollectionFilterer;
-import com.bmskinner.nma.analysis.nucleus.FilteringOptions;
 import com.bmskinner.nma.analysis.nucleus.CellCollectionFilterer.CollectionFilteringException;
+import com.bmskinner.nma.analysis.nucleus.FilteringOptions;
 import com.bmskinner.nma.components.Version;
 import com.bmskinner.nma.components.cells.CellularComponent;
-import com.bmskinner.nma.components.datasets.DatasetCreator;
-import com.bmskinner.nma.components.datasets.DefaultAnalysisDataset;
-import com.bmskinner.nma.components.datasets.IAnalysisDataset;
-import com.bmskinner.nma.components.datasets.ICellCollection;
 import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.measure.MeasurementScale;
 import com.bmskinner.nma.components.rules.RuleSetCollection;
@@ -73,7 +69,8 @@ public class DefaultAnalysisDatasetTest extends ComponentTester {
 	private IAnalysisDataset d;
 	private static final UUID CHILD_ID_1 = UUID.fromString("00000000-0000-0000-0000-000000000001");
 	private static final UUID CHILD_ID_2 = UUID.fromString("00000000-0000-0000-0000-000000000002");
-	private static final UUID CHILD_ID_NULL = UUID.fromString("00000000-0000-0000-0000-000000000000");
+	private static final UUID CHILD_ID_NULL = UUID
+			.fromString("00000000-0000-0000-0000-000000000000");
 
 	static {
 		Prefs.setThreads(2); // Attempt to avoid issue 162
@@ -90,8 +87,13 @@ public class DefaultAnalysisDatasetTest extends ComponentTester {
 
 	@Before
 	public void loadDataset() throws Exception {
-		d = new TestDatasetBuilder(RNG_SEED).cellCount(N_CELLS).ofType(RuleSetCollection.roundRuleSetCollection())
-				.withMaxSizeVariation(10).randomOffsetProfiles(true).numberOfClusters(N_CHILD_DATASETS).segmented()
+		d = new TestDatasetBuilder(RNG_SEED)
+				.cellCount(N_CELLS)
+				.ofType(RuleSetCollection.roundRuleSetCollection())
+				.withMaxSizeVariation(10)
+				.randomOffsetProfiles(true)
+				.numberOfClusters(N_CHILD_DATASETS)
+				.segmented()
 				.build();
 	}
 
@@ -105,11 +107,13 @@ public class DefaultAnalysisDatasetTest extends ComponentTester {
 	@Test
 	public void testAddChildCollection() throws Exception {
 
-		double defaultArea = d.getCollection().getMedian(Measurement.AREA, CellularComponent.NUCLEUS,
+		double defaultArea = d.getCollection().getMedian(Measurement.AREA,
+				CellularComponent.NUCLEUS,
 				MeasurementScale.PIXELS);
 
 		FilteringOptions op = new CellCollectionFilterBuilder()
-				.add(Measurement.AREA, CellularComponent.NUCLEUS, MeasurementScale.PIXELS, defaultArea, defaultArea * 2)
+				.add(Measurement.AREA, CellularComponent.NUCLEUS, MeasurementScale.PIXELS,
+						defaultArea, defaultArea * 2)
 				.build();
 
 		ICellCollection c = CellCollectionFilterer.filter(d.getCollection(), op);
@@ -125,16 +129,19 @@ public class DefaultAnalysisDatasetTest extends ComponentTester {
 
 	@Test
 	public void testAddChildDataset() throws Exception {
-		double defaultArea = d.getCollection().getMedian(Measurement.AREA, CellularComponent.NUCLEUS,
+		double defaultArea = d.getCollection().getMedian(Measurement.AREA,
+				CellularComponent.NUCLEUS,
 				MeasurementScale.PIXELS);
 
 		FilteringOptions op = new CellCollectionFilterBuilder()
-				.add(Measurement.AREA, CellularComponent.NUCLEUS, MeasurementScale.PIXELS, defaultArea, defaultArea * 2)
+				.add(Measurement.AREA, CellularComponent.NUCLEUS, MeasurementScale.PIXELS,
+						defaultArea, defaultArea * 2)
 				.build();
 
 		ICellCollection c = CellCollectionFilterer.filter(d.getCollection(), op);
 
-		IAnalysisDataset ch = new DefaultAnalysisDataset(c, new File(TestDatasetBuilder.TEST_DATASET_IMAGE_FOLDER));
+		IAnalysisDataset ch = new DefaultAnalysisDataset(c,
+				new File(TestDatasetBuilder.TEST_DATASET_IMAGE_FOLDER));
 		UUID id = ch.getId();
 
 		assertTrue("Filtered collection should contain cells", c.size() > 0);
@@ -161,11 +168,13 @@ public class DefaultAnalysisDatasetTest extends ComponentTester {
 	public void testGetChildCount() throws CollectionFilteringException {
 		assertEquals(N_CHILD_DATASETS, d.getChildCount());
 
-		double defaultArea = d.getCollection().getMedian(Measurement.AREA, CellularComponent.NUCLEUS,
+		double defaultArea = d.getCollection().getMedian(Measurement.AREA,
+				CellularComponent.NUCLEUS,
 				MeasurementScale.PIXELS);
 
 		FilteringOptions op = new CellCollectionFilterBuilder()
-				.add(Measurement.AREA, CellularComponent.NUCLEUS, MeasurementScale.PIXELS, defaultArea, defaultArea * 2)
+				.add(Measurement.AREA, CellularComponent.NUCLEUS, MeasurementScale.PIXELS,
+						defaultArea, defaultArea * 2)
 				.build();
 
 		ICellCollection c = CellCollectionFilterer.filter(d.getCollection(), op);

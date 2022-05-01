@@ -46,10 +46,9 @@ public class OptionsFactory {
 	 * @param folder the folder to be searched
 	 * @return
 	 */
-	public static OptionsBuilder makeNucleusDetectionOptions(File folder) {
+	public static OptionsBuilder makeNucleusDetectionOptions() {
 
 		return new OptionsBuilder()
-				.withValue(HashOptions.DETECTION_FOLDER, folder.getAbsolutePath())
 				.withValue(HashOptions.MIN_SIZE_PIXELS, HashOptions.DEFAULT_MIN_NUCLEUS_SIZE)
 				.withValue(HashOptions.MAX_SIZE_PIXELS, HashOptions.DEFAULT_MAX_NUCLEUS_SIZE)
 				.withValue(HashOptions.MIN_CIRC, HashOptions.DEFAULT_MIN_NUCLEUS_CIRC)
@@ -118,10 +117,8 @@ public class OptionsFactory {
 	 * @param folder the folder to be searched
 	 * @return
 	 */
-	public static OptionsBuilder makeNuclearSignalOptions(File folder) {
+	public static OptionsBuilder makeNuclearSignalOptions() {
 		return new OptionsBuilder()
-				.withValue(HashOptions.DETECTION_FOLDER,
-						folder == null ? "" : folder.getAbsolutePath())
 				.withValue(HashOptions.SIGNAL_MAX_FRACTION, HashOptions.DEFAULT_SIGNAL_MAX_FRACTION)
 				.withValue(HashOptions.SIGNAL_DETECTION_MODE_KEY,
 						HashOptions.DEFAULT_SIGNAL_DETECTION_METHOD.name())
@@ -174,8 +171,9 @@ public class OptionsFactory {
 	 */
 	public static IAnalysisOptions makeDefaultRodentAnalysisOptions(File testFolder) {
 		IAnalysisOptions op = makeAnalysisOptions(RuleSetCollection.mouseSpermRuleSetCollection());
+		op.setDetectionFolder(CellularComponent.NUCLEUS, testFolder.getAbsoluteFile());
 		op.setDetectionOptions(CellularComponent.NUCLEUS,
-				OptionsFactory.makeNucleusDetectionOptions(testFolder).build());
+				OptionsFactory.makeNucleusDetectionOptions().build());
 		return op;
 	}
 
@@ -188,8 +186,8 @@ public class OptionsFactory {
 	public static IAnalysisOptions makeDefaultPigAnalysisOptions(File testFolder) {
 		IAnalysisOptions op = OptionsFactory
 				.makeAnalysisOptions(RuleSetCollection.pigSpermRuleSetCollection());
-
-		HashOptions nop = OptionsFactory.makeNucleusDetectionOptions(testFolder)
+		op.setDetectionFolder(CellularComponent.NUCLEUS, testFolder.getAbsoluteFile());
+		HashOptions nop = OptionsFactory.makeNucleusDetectionOptions()
 				.withValue(HashOptions.MIN_CIRC, 0.1)
 				.withValue(HashOptions.MAX_CIRC, 0.9).build();
 
@@ -206,8 +204,8 @@ public class OptionsFactory {
 	public static IAnalysisOptions makeDefaultRoundAnalysisOptions(File testFolder) {
 		IAnalysisOptions op = OptionsFactory
 				.makeAnalysisOptions(RuleSetCollection.roundRuleSetCollection());
-
-		HashOptions nop = OptionsFactory.makeNucleusDetectionOptions(testFolder)
+		op.setDetectionFolder(CellularComponent.NUCLEUS, testFolder.getAbsoluteFile());
+		HashOptions nop = OptionsFactory.makeNucleusDetectionOptions()
 				.withValue(HashOptions.MIN_CIRC, 0.6)
 				.withValue(HashOptions.MAX_CIRC, 0.9).build();
 

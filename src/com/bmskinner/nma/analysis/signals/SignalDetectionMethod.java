@@ -73,7 +73,7 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
 	 */
 
 	public SignalDetectionMethod(@NonNull final IAnalysisDataset d,
-			@NonNull final HashOptions options) {
+			@NonNull final HashOptions options, @NonNull File folder) {
 		super(d);
 
 		if (!d.getAnalysisOptions().isPresent())
@@ -83,7 +83,7 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
 			throw new IllegalArgumentException("Signal options are not complete");
 
 		this.options = options.duplicate();
-		this.folder = options.getFile(HashOptions.DETECTION_FOLDER).getAbsoluteFile();
+		this.folder = folder;
 		this.channel = options.getInt(HashOptions.CHANNEL);
 
 		// Create a signal group in the dataset
@@ -97,6 +97,8 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
 		dataset.getCollection().addSignalGroup(group);
 
 		dataset.getAnalysisOptions().get().setNuclearSignalDetectionOptions(options);
+		dataset.getAnalysisOptions().get().setNuclearSignalDetectionFolder(
+				options.getUUID(HashOptions.SIGNAL_GROUP_ID), folder);
 	}
 
 	@Override

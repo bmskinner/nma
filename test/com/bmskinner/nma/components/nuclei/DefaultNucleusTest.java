@@ -108,7 +108,7 @@ public class DefaultNucleusTest {
 	public void testXmlSerializesForRealNuclei() throws Exception {
 		File testFolder = TestResources.MOUSE_INPUT_FOLDER.getAbsoluteFile();
 		IAnalysisOptions op = OptionsFactory.makeDefaultRodentAnalysisOptions(testFolder);
-		IAnalysisDataset d = TestImageDatasetCreator.createTestDataset(TestResources.UNIT_TEST_FOLDER, op, false);
+		IAnalysisDataset d = TestImageDatasetCreator.createTestDataset(TestResources.IMAGE_FOLDER, op, false);
 
 		for (Nucleus n : d.getCollection().getNuclei()) {
 			Element e = n.toXmlElement();

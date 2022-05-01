@@ -47,8 +47,8 @@ import com.bmskinner.nma.components.options.MissingOptionException;
 import com.bmskinner.nma.components.signals.SignalManager;
 import com.bmskinner.nma.gui.tabs.signals.warping.SignalWarpingRunSettings;
 import com.bmskinner.nma.io.ImageImporter;
-import com.bmskinner.nma.io.UnloadableImageException;
 import com.bmskinner.nma.io.ImageImporter.ImageImportException;
+import com.bmskinner.nma.io.UnloadableImageException;
 import com.bmskinner.nma.logging.Loggable;
 import com.bmskinner.nma.visualisation.image.ImageFilterer;
 
@@ -92,19 +92,28 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> {
 
 		// Count the number of cells to include
 		SignalManager m = warpingOptions.templateDataset().getCollection().getSignalManager();
-		List<ICell> cells = warpingOptions.getBoolean(SignalWarpingRunSettings.IS_ONLY_CELLS_WITH_SIGNALS_KEY)
-				? m.getCellsWithNuclearSignals(warpingOptions.signalId(), true)
-				: warpingOptions.templateDataset().getCollection().getCells();
+		List<ICell> cells = warpingOptions
+				.getBoolean(SignalWarpingRunSettings.IS_ONLY_CELLS_WITH_SIGNALS_KEY)
+						? m.getCellsWithNuclearSignals(warpingOptions.signalId(), true)
+						: warpingOptions.templateDataset().getCollection().getCells();
 		totalCells = cells.size();
-		LOGGER.fine(String.format("Created signal warper for %s signal group %s with %s cells, min threshold %s ",
+		LOGGER.fine(String.format(
+				"Created signal warper for %s signal group %s with %s cells, min threshold %s ",
 				warpingOptions.templateDataset().getName(), warpingOptions.signalId(), totalCells,
 				warpingOptions.getInt(SignalWarpingRunSettings.MIN_THRESHOLD_KEY)));
 
 		try {
 
-			Nucleus target = warpingOptions.targetDataset().getCollection().getConsensus(); // Issue here when using
-																							// '.duplicate()' - causes
-																							// image sizing issue
+			Nucleus target = warpingOptions.targetDataset().getCollection().getConsensus(); // Issue
+																							// here
+																							// when
+																							// using
+																							// '.duplicate()'
+																							// -
+																							// causes
+																							// image
+																							// sizing
+																							// issue
 
 			// Create the consensus mesh to warp each cell onto
 			meshConsensus = new DefaultMesh(target);
@@ -204,13 +213,17 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> {
 
 			if (warpingOptions.getInt(SignalWarpingRunSettings.MIN_THRESHOLD_KEY) > 0)
 				ip = new ImageFilterer(ip)
-						.setBlackLevel(warpingOptions.getInt(SignalWarpingRunSettings.MIN_THRESHOLD_KEY)).toProcessor();
+						.setBlackLevel(
+								warpingOptions.getInt(SignalWarpingRunSettings.MIN_THRESHOLD_KEY))
+						.toProcessor();
 
 			if (warpingOptions.getBoolean(SignalWarpingRunSettings.IS_BINARISE_SIGNALS_KEY))
 				ip.threshold(warpingOptions.getInt(SignalWarpingRunSettings.MIN_THRESHOLD_KEY));
 
-			if (warpingOptions.getBoolean(SignalWarpingRunSettings.IS_NORMALISE_TO_COUNTERSTAIN_KEY)) {
-				ip = new ImageFilterer(ip).normaliseToCounterStain(ImageImporter.importFullImageTo8bit(n))
+			if (warpingOptions
+					.getBoolean(SignalWarpingRunSettings.IS_NORMALISE_TO_COUNTERSTAIN_KEY)) {
+				ip = new ImageFilterer(ip)
+						.normaliseToCounterStain(ImageImporter.importFullImageTo8bit(n))
 						.toProcessor();
 
 				// The actual floating point values may not be visible to the human eye
@@ -240,12 +253,15 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> {
 	 * @return the nucleus image
 	 * @throws MissingOptionException
 	 */
-	private ImageProcessor getNucleusImageProcessor(@NonNull Nucleus n) throws MissingOptionException {
+	private ImageProcessor getNucleusImageProcessor(@NonNull Nucleus n)
+			throws MissingOptionException {
 
 		try {
 			// Get the image with the signal
 			ImageProcessor ip;
-			if (n.getSignalCollection().hasSignal(warpingOptions.signalId())) { // if there is no signal, getImage will
+			if (n.getSignalCollection().hasSignal(warpingOptions.signalId())) { // if there is no
+																				// signal, getImage
+																				// will
 																				// throw exception
 				ip = n.getSignalCollection().getImage(warpingOptions.signalId());
 				ip.invert(); // image is imported as white background. Need black background.
@@ -256,9 +272,11 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> {
 				HashOptions signalOptions = getSignalOptions(n);
 
 				if (signalOptions != null) {
-					File imageFolder = signalOptions.getFile(HashOptions.DETECTION_FOLDER);
+					File imageFolder = warpingOptions.templateDataset().getAnalysisOptions().get()
+							.getDetectionFolder(warpingOptions.signalId().toString()).get();
 					File imageFile = new File(imageFolder, n.getSourceFileName());
-					ip = new ImageImporter(imageFile).importImage(signalOptions.getInt(HashOptions.CHANNEL));
+					ip = new ImageImporter(imageFile)
+							.importImage(signalOptions.getInt(HashOptions.CHANNEL));
 
 				} else {
 					return createEmptyProcessor();
@@ -288,11 +306,14 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> {
 		if (warpingOptions.templateDataset().hasMergeSources()) {
 
 			return warpingOptions.templateDataset().getAllMergeSources().stream()
-					.filter(d -> d.getCollection().contains(n)).findFirst().get().getAnalysisOptions().get()
-					.getNuclearSignalOptions(warpingOptions.signalId()).orElseThrow(MissingOptionException::new);
+					.filter(d -> d.getCollection().contains(n)).findFirst().get()
+					.getAnalysisOptions().get()
+					.getNuclearSignalOptions(warpingOptions.signalId())
+					.orElseThrow(MissingOptionException::new);
 		} else {
 
-			Optional<IAnalysisOptions> analysisOptions = warpingOptions.templateDataset().getAnalysisOptions();
+			Optional<IAnalysisOptions> analysisOptions = warpingOptions.templateDataset()
+					.getAnalysisOptions();
 
 			if (analysisOptions.isPresent()) {
 				return analysisOptions.get().getNuclearSignalOptions(warpingOptions.signalId())

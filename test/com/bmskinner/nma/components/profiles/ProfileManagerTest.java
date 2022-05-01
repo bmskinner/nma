@@ -128,7 +128,7 @@ public class ProfileManagerTest {
 		IAnalysisOptions op = OptionsFactory.makeDefaultRodentAnalysisOptions(testFolder);
 
 		IAnalysisDataset d = new NucleusDetectionMethod(
-				TestResources.UNIT_TEST_FOLDER.getAbsoluteFile(), op).call()
+				TestResources.IMAGE_FOLDER.getAbsoluteFile(), op).call()
 						.getFirstDataset();
 		d.getCollection().getProfileCollection().calculateProfiles();
 

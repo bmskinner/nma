@@ -12,23 +12,29 @@ import java.util.Map;
 
 import org.junit.Test;
 
+import com.bmskinner.nma.ComponentTester;
 import com.bmskinner.nma.TestDatasetBuilder;
-import com.bmskinner.nma.TestResources;
 import com.bmskinner.nma.TestDatasetBuilder.TestComponentShape;
-import com.bmskinner.nma.analysis.DatasetMergeMethod;
+import com.bmskinner.nma.TestImageDatasetCreator;
+import com.bmskinner.nma.TestResources;
 import com.bmskinner.nma.analysis.profiles.DatasetProfilingMethod;
 import com.bmskinner.nma.analysis.profiles.DatasetSegmentationMethod;
 import com.bmskinner.nma.analysis.profiles.DatasetSegmentationMethod.MorphologyAnalysisMode;
+import com.bmskinner.nma.analysis.signals.PairedSignalGroups;
+import com.bmskinner.nma.components.cells.ICell;
 import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.profiles.Landmark;
 import com.bmskinner.nma.components.rules.OrientationMark;
+import com.bmskinner.nma.io.DatasetExportMethod;
+import com.bmskinner.nma.io.DatasetImportMethod;
 import com.bmskinner.nma.io.SampleDatasetReader;
 
 public class DatasetMergeMethodTest {
 
-	public static final String MERGED_DATASET_FILE = TestResources.DATASET_FOLDER
-			+ "Merge_of_merge.nmd";
+	public static final String MERGED_DATASET_FILE = "Merge_of_datasets.nmd";
+
+	public static final String MERGED_SIGNAL_DATASET_FILE = "Merge_of_signals.nmd";
 
 	@Test
 	public void testMergedDatasetCanBeProfiled() throws Exception {
@@ -53,15 +59,17 @@ public class DatasetMergeMethodTest {
 		List<IAnalysisDataset> list = List.of(d1, d2);
 
 		// Merge and resegment the datasets
-		DatasetMergeMethod dm = new DatasetMergeMethod(list, new File("Empty path"));
-		IAnalysisDataset result = dm.call().getFirstDataset();
+		IAnalysisDataset result = new DatasetMergeMethod(list, new File("Empty path")).call()
+				.getFirstDataset();
 		assertNotNull("Merged dataset should not be null", result);
 		assertEquals("Merged dataset should have correct cell count", 20,
 				result.getCollection().size());
 
 		// Run new profiling on the merged dataset
-		new DatasetProfilingMethod(result).call();
-		new DatasetSegmentationMethod(result, MorphologyAnalysisMode.SEGMENT_FROM_SCRATCH).call();
+		new DatasetProfilingMethod(result)
+				.then(new DatasetSegmentationMethod(result,
+						MorphologyAnalysisMode.SEGMENT_FROM_SCRATCH))
+				.call();
 	}
 
 	@Test
@@ -121,7 +129,7 @@ public class DatasetMergeMethodTest {
 	public void testConsensusIsRemovedInMergeSource() throws Exception {
 		File f1 = TestResources.MOUSE_CLUSTERS_DATASET;
 		File f2 = TestResources.MOUSE_TEST_DATASET;
-		File f3 = new File(MERGED_DATASET_FILE);
+		File f3 = new File(TestResources.DATASET_FOLDER, MERGED_DATASET_FILE);
 
 		// Open the template datasets
 		IAnalysisDataset d1 = SampleDatasetReader.openDataset(f1);
@@ -141,6 +149,144 @@ public class DatasetMergeMethodTest {
 		for (IAnalysisDataset d : merged.getMergeSources()) {
 			assertFalse(d.getCollection().hasConsensus());
 		}
+	}
+
+	/**
+	 * Test that when datasets are merged the merge sources contain the correct
+	 * cells
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void testMergedDatasetsContainAllCells() throws Exception {
+		File f1 = TestResources.MOUSE_CLUSTERS_DATASET;
+		File f2 = TestResources.MOUSE_TEST_DATASET;
+		File f3 = new File(TestResources.DATASET_FOLDER, MERGED_DATASET_FILE);
+
+		// Open the template datasets
+		IAnalysisDataset d1 = SampleDatasetReader.openDataset(f1);
+		IAnalysisDataset d2 = SampleDatasetReader.openDataset(f2);
+
+		// Merge the datasets
+		IAnalysisDataset merged = new DatasetMergeMethod(List.of(d1, d2), f3).call()
+				.getFirstDataset();
+
+		// Profile, segment, save and reopen
+		merged = new DatasetProfilingMethod(merged)
+				.then(new DatasetSegmentationMethod(merged,
+						MorphologyAnalysisMode.SEGMENT_FROM_SCRATCH))
+				.call().getFirstDataset();
+
+		for (ICell c : d1.getCollection())
+			assertTrue(merged.getCollection().contains(c));
+
+		for (ICell c : d2.getCollection())
+			assertTrue(merged.getCollection().contains(c));
+
+		assertTrue("Merged dataset should have options", merged.hasAnalysisOptions());
+
+		assertEquals("Merged nucleus options should match input dataset 1",
+				d1.getAnalysisOptions().get().getNucleusDetectionOptions(),
+				merged.getAnalysisOptions().get().getNucleusDetectionOptions());
+		assertEquals("Merged nucleus options should match input dataset 2",
+				d2.getAnalysisOptions().get().getNucleusDetectionOptions(),
+				merged.getAnalysisOptions().get().getNucleusDetectionOptions());
+
+	}
+
+	/**
+	 * Test that when datasets are merged and saved, the merge sources contain the
+	 * correct data
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void testMergedDatasetsAreUnmarshalled() throws Exception {
+		File f1 = TestResources.MOUSE_CLUSTERS_DATASET;
+		File f2 = TestResources.MOUSE_TEST_DATASET;
+		File f3 = new File(TestResources.DATASET_FOLDER, MERGED_DATASET_FILE);
+
+		// Open the template datasets
+		IAnalysisDataset d1 = SampleDatasetReader.openDataset(f1);
+		IAnalysisDataset d2 = SampleDatasetReader.openDataset(f2);
+
+		// Merge the datasets
+		IAnalysisDataset merged = new DatasetMergeMethod(List.of(d1, d2), f3).call()
+				.getFirstDataset();
+
+		// Profile, segment, save and reopen
+		IAnalysisDataset d3 = new DatasetProfilingMethod(merged)
+				.then(new DatasetSegmentationMethod(merged,
+						MorphologyAnalysisMode.SEGMENT_FROM_SCRATCH))
+				.then(new DatasetExportMethod(merged, f3))
+				.then(new DatasetImportMethod(f3))
+				.call().getFirstDataset();
+
+		ComponentTester.testDuplicatesByField("Merged dataset should be equal after unmarshalling",
+				merged, d3);
+	}
+
+	@Test
+	public void testMergedDatasetsMergeSignals() throws Exception {
+		File f1 = TestResources.MOUSE_SIGNALS_DATASET;
+		File f2 = TestResources.MOUSE_SIGNALS_DATASET;
+		File f3 = new File(TestResources.DATASET_FOLDER, MERGED_SIGNAL_DATASET_FILE);
+
+		// Open the template datasets
+		IAnalysisDataset d1 = SampleDatasetReader.openDataset(f1);
+		IAnalysisDataset d2 = SampleDatasetReader.openDataset(f2);
+
+		PairedSignalGroups ps = new PairedSignalGroups();
+		ps.add(d1.getId(), TestImageDatasetCreator.RED_SIGNAL_ID, d2.getId(),
+				TestImageDatasetCreator.RED_SIGNAL_ID);
+
+		// Merge resegment the dataset
+		IAnalysisDataset merged = new DatasetMergeMethod(List.of(d1, d2), f3, ps).call()
+				.getFirstDataset();
+
+		merged = new DatasetProfilingMethod(merged)
+				.then(new DatasetSegmentationMethod(merged,
+						MorphologyAnalysisMode.SEGMENT_FROM_SCRATCH))
+				.call().getFirstDataset();
+
+		assertTrue("Merged dataset should have signals",
+				merged.getCollection().getSignalManager().hasSignals());
+		assertTrue("Merged dataset should have single signal group",
+				merged.getCollection().getSignalGroupIDs().size() == 1);
+	}
+
+	@Test
+	public void testMergedDatasetsWithSignalsAreUnmarshalled() throws Exception {
+		File f1 = TestResources.MOUSE_SIGNALS_DATASET;
+		File f2 = TestResources.MOUSE_SIGNALS_DATASET;
+		File f3 = new File(TestResources.DATASET_FOLDER, MERGED_SIGNAL_DATASET_FILE);
+
+		// Open the template datasets
+		IAnalysisDataset d1 = SampleDatasetReader.openDataset(f1);
+		IAnalysisDataset d2 = SampleDatasetReader.openDataset(f2);
+
+		PairedSignalGroups ps = new PairedSignalGroups();
+		ps.add(d1.getId(), TestImageDatasetCreator.RED_SIGNAL_ID, d2.getId(),
+				TestImageDatasetCreator.RED_SIGNAL_ID);
+
+		// Merge resegment and save the dataset
+		IAnalysisDataset merged = new DatasetMergeMethod(List.of(d1, d2), f3, ps).call()
+				.getFirstDataset();
+
+		IAnalysisDataset d3 = new DatasetProfilingMethod(merged)
+				.then(new DatasetSegmentationMethod(merged,
+						MorphologyAnalysisMode.SEGMENT_FROM_SCRATCH))
+				.then(new DatasetExportMethod(merged, f3))
+				.then(new DatasetImportMethod(f3))
+				.call().getFirstDataset();
+
+		ComponentTester.testDuplicatesByField("Merged dataset should be equal after unmarshalling",
+				merged, d3);
+
+		assertTrue("Merged dataset should have signals",
+				merged.getCollection().getSignalManager().hasSignals());
+		assertTrue("Merged dataset should have single signal group",
+				merged.getCollection().getSignalGroupIDs().size() == 1);
 	}
 
 }

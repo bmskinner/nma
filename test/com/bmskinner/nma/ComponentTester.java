@@ -43,7 +43,8 @@ public abstract class ComponentTester extends FloatArrayTester {
 	private static final Logger LOGGER = Logger.getLogger(ComponentTester.class.getName());
 
 	/** Classes that we have custom code to inspect **/
-	private static final List<Class> SPECIAL_CLASSES = List.of(HashMap.class, ConcurrentHashMap.class,
+	private static final List<Class> SPECIAL_CLASSES = List.of(HashMap.class,
+			ConcurrentHashMap.class,
 			LinkedHashMap.class, Map.class, HashSet.class, ArrayList.class);
 
 	/**
@@ -104,7 +105,8 @@ public abstract class ComponentTester extends FloatArrayTester {
 	 * @param fieldsToSkip skip fields in the object with these names
 	 * @throws Exception
 	 */
-	public static void testDuplicatesByField(String msg, Object original, Object dup, Set<String> fieldsToSkip)
+	public static void testDuplicatesByField(String msg, Object original, Object dup,
+			Set<String> fieldsToSkip)
 			throws Exception {
 
 		for (Field f : getInheritedPrivateFields(dup.getClass())) {
@@ -142,11 +144,13 @@ public abstract class ComponentTester extends FloatArrayTester {
 			if (f.getType().equals(Class.forName(
 					"com.bmskinner.nma.components.datasets.VirtualDataset$DefaultProfileCollection$ProfileCache")))
 				continue;
-			if (f.getType().equals(Class.forName("com.bmskinner.nma.components.measure.StatsCache")))
+			if (f.getType()
+					.equals(Class.forName("com.bmskinner.nma.components.measure.StatsCache")))
 				continue;
 			if (f.getType().equals(Class.forName("com.bmskinner.nma.components.measure.VennCache")))
 				continue;
-			if (f.getType().equals(Class.forName("com.bmskinner.nma.components.signals.SignalManager")))
+			if (f.getType()
+					.equals(Class.forName("com.bmskinner.nma.components.signals.SignalManager")))
 				continue;
 			if (f.getType()
 					.equals(Class.forName("com.bmskinner.nma.components.profiles.ProfileManager")))
@@ -166,14 +170,17 @@ public abstract class ComponentTester extends FloatArrayTester {
 
 					if (oClass.equals(Map.class) || oClass.equals(ConcurrentHashMap.class)
 							|| oClass.equals(LinkedHashMap.class) || oClass.equals(HashMap.class)) {
-						testHashMapsByField(msg + "->" + f.getName(), f, (Map) oValue, (Map) dValue);
+						testHashMapsByField(msg + "->" + f.getName(), f, (Map) oValue,
+								(Map) dValue);
 					}
 
 					if (oClass.equals(HashSet.class)) {
-						testHashSetsByField(msg + "->" + f.getName(), f, (HashSet) oValue, (HashSet) dValue);
+						testHashSetsByField(msg + "->" + f.getName(), f, (HashSet) oValue,
+								(HashSet) dValue);
 					}
 					if (oClass.equals(ArrayList.class)) {
-						testListEqualityByField(msg + "->" + f.getName(), f, (List) oValue, (List) dValue,
+						testListEqualityByField(msg + "->" + f.getName(), f, (List) oValue,
+								(List) dValue,
 								fieldsToSkip);
 					}
 
@@ -182,19 +189,25 @@ public abstract class ComponentTester extends FloatArrayTester {
 					// Don't try to compare classes I didn't write
 					// and don't try to unpack enums. In these cases, just
 					// do a direct equality test
-					if (f.getType().getName().startsWith("com.bmskinner.nma") && !f.getType().isEnum()) {
+					if (f.getType().getName().startsWith("com.bmskinner.nma")
+							&& !f.getType().isEnum()) {
 						try {
-							testDuplicatesByField(msg + "->" + f.getName(), oValue, dValue, fieldsToSkip);
+							testDuplicatesByField(msg + "->" + f.getName(), oValue, dValue,
+									fieldsToSkip);
 						} catch (StackOverflowError e) {
-							String msg2 = "Field '" + f.getName() + "' of type " + f.getType().getName() + " and class "
-									+ oClass.getName() + " had a stack overflow on value: " + oValue + " Expected: "
+							String msg2 = "Field '" + f.getName() + "' of type "
+									+ f.getType().getName() + " and class "
+									+ oClass.getName() + " had a stack overflow on value: " + oValue
+									+ " Expected: "
 									+ original + " Found: " + dup;
 							fail(msg + " " + msg2);
 						}
 					} else {
-						String msg2 = "Field '" + f.getName() + "' of type " + f.getType().getName() + " and class "
+						String msg2 = "Field '" + f.getName() + "' of type " + f.getType().getName()
+								+ " and class "
 								+ oClass.getName() + " does not match in original object "
-								+ original.getClass().getSimpleName() + ": " + "Expected: " + original + "Found: "
+								+ original.getClass().getSimpleName() + ": " + "Expected: "
+								+ original + "Found: "
 								+ dup;
 						assertThat(msg + " " + msg2, dValue, equalTo(oValue));
 					}
@@ -203,18 +216,22 @@ public abstract class ComponentTester extends FloatArrayTester {
 
 		}
 
-		assertEquals(msg + " Equals method in " + original.getClass().getSimpleName(), original, dup);
+		assertEquals(msg + " Equals method in " + original.getClass().getSimpleName(), original,
+				dup);
 	}
 
 	// Issue with arrays in hashmaps: Object.hashcode()
 	// depends on reference, so is not equal between two
 	// arrays. Need to use Arrays.hashcode().
 	private static void testHashMapsByField(String msg, Field f, Map o, Map d) {
-		assertTrue(msg + " Hashmaps should not both be null in " + f.getName(), o != null && d != null);
-		assertEquals(msg + " Maps should contain same number of elements in field '" + f.getName() + "'; original: " + o
+		assertTrue(msg + " Hashmaps should not both be null in " + f.getName(),
+				o != null && d != null);
+		assertEquals(msg + " Maps should contain same number of elements in field '" + f.getName()
+				+ "'; original: " + o
 				+ " duplicate: " + d, o.size(), d.size());
 
-		List<Class> arrayClasses = List.of(byte[].class, float[].class, long[].class, int[].class, double[].class);
+		List<Class> arrayClasses = List.of(byte[].class, float[].class, long[].class, int[].class,
+				double[].class);
 
 		for (Object e : o.keySet()) {
 			Object v0 = o.get(e);
@@ -248,9 +265,11 @@ public abstract class ComponentTester extends FloatArrayTester {
 					oHash += Arrays.hashCode((float[]) v0);
 					dHash += Arrays.hashCode((float[]) v1);
 				}
-				assertEquals(msg + " Hashes should match for key '" + e + "' in " + f.getName(), oHash, dHash);
+				assertEquals(msg + " Hashes should match for key '" + e + "' in " + f.getName(),
+						oHash, dHash);
 			} else {
-				assertEquals(msg + " Map entries for key '" + e + "' in '" + f.getName() + "' should be equal", v0, v1);
+				assertEquals(msg + " Map entries for key '" + e + "' in '" + f.getName()
+						+ "' should be equal", v0, v1);
 				assertTrue(msg + " Map should contain duplicated object", o.containsKey(e));
 			}
 		}
@@ -274,10 +293,14 @@ public abstract class ComponentTester extends FloatArrayTester {
 	 * @param d the duplicate list
 	 * @throws Exception
 	 */
-	private static void testListEqualityByField(String msg, Field f, List o, List d, Set<String> fieldsToSkip)
+	private static void testListEqualityByField(String msg, Field f, List o, List d,
+			Set<String> fieldsToSkip)
 			throws Exception {
-		assertTrue(msg + " Field '" + f.getName() + "' lists should not both be null", o != null && d != null);
-		assertEquals(msg + " Field '" + f.getName() + "' lists should contain same number of elements", o.size(),
+		assertTrue(msg + " Field '" + f.getName() + "' lists should not both be null",
+				o != null && d != null);
+		assertEquals(
+				msg + " Field '" + f.getName() + "' lists should contain same number of elements",
+				o.size(),
 				d.size());
 		fieldsToSkip.add("prevSegment"); // these will overflow in segmented profiles
 		fieldsToSkip.add("nextSegment");
@@ -285,22 +308,26 @@ public abstract class ComponentTester extends FloatArrayTester {
 			if (o.get(i).getClass().getName().startsWith("com.bmskinner.nma")) {
 				testDuplicatesByField(msg, o.get(i), d.get(i), fieldsToSkip);
 			} else {
-				assertEquals(msg + " Field '" + f.getName() + "' element " + i + " should be equal", o.get(i),
+				assertEquals(msg + " Field '" + f.getName() + "' element " + i + " should be equal",
+						o.get(i),
 						d.get(i));
 			}
 		}
-		assertTrue(msg + " Field '" + f.getName() + "' all elements should be shared in list", o.containsAll(d));
+		assertTrue(msg + " Field '" + f.getName() + "' all elements should be shared in list",
+				o.containsAll(d));
 	}
 
 	/**
 	 * Test if the fields of two objects have the same hashcodes. Skips cache
 	 * classes which are not used in hashcode methods.
 	 * 
-	 * @param original
-	 * @param dup
+	 * @param msg      a message to report if the test fails
+	 * @param original the original object
+	 * @param dup      the duplicate object
 	 * @throws Exception
 	 */
-	public static void testDuplicatesByField(String msg, Object original, Object dup) throws Exception {
+	public static void testDuplicatesByField(String msg, Object original, Object dup)
+			throws Exception {
 		Set<String> fieldsToSkip = new HashSet<>();
 		testDuplicatesByField(msg, original, dup, fieldsToSkip);
 	}

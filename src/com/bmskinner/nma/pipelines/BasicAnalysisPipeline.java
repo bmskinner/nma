@@ -29,7 +29,6 @@ import com.bmskinner.nma.analysis.nucleus.NucleusDetectionMethod;
 import com.bmskinner.nma.analysis.profiles.DatasetProfilingMethod;
 import com.bmskinner.nma.analysis.profiles.DatasetSegmentationMethod;
 import com.bmskinner.nma.analysis.profiles.DatasetSegmentationMethod.MorphologyAnalysisMode;
-import com.bmskinner.nma.components.Version;
 import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.options.DefaultOptions;
@@ -41,61 +40,65 @@ import com.bmskinner.nma.io.DatasetStatsExporter;
 import com.bmskinner.nma.io.Io;
 
 /**
- * A test pipeline to be run from the command line. Analyse a folder with default
- * settings, save the nmd, and export a nuclear stats file
+ * A test pipeline to be run from the command line. Analyse a folder with
+ * default settings, save the nmd, and export a nuclear stats file
+ * 
  * @author bms41
  * @since 1.14.0
  *
  */
 public class BasicAnalysisPipeline {
-	
-	private static final Logger LOGGER = Logger.getLogger(BasicAnalysisPipeline.class.getName());
-	
-	public BasicAnalysisPipeline(@NonNull final File folder) throws Exception {
-		
-    	IAnalysisOptions op = OptionsFactory.makeDefaultRodentAnalysisOptions(folder);
 
-    	Instant inst = Instant.ofEpochMilli(op.getAnalysisTime());
+	private static final Logger LOGGER = Logger.getLogger(BasicAnalysisPipeline.class.getName());
+
+	public BasicAnalysisPipeline(@NonNull final File folder) throws Exception {
+
+		IAnalysisOptions op = OptionsFactory.makeDefaultRodentAnalysisOptions(folder);
+
+		Instant inst = Instant.ofEpochMilli(op.getAnalysisTime());
 		LocalDateTime anTime = LocalDateTime.ofInstant(inst, ZoneOffset.systemDefault());
 		String outputFolderName = anTime.format(DateTimeFormatter.ofPattern("YYYY-MM-dd_HH-mm-ss"));
-    	File outFolder = new File(folder, outputFolderName);
-    	outFolder.mkdirs();
-    	File saveFile = new File(outFolder, folder.getName()+Io.SAVE_FILE_EXTENSION);
-    	runNewAnalysis(folder.getAbsolutePath(), op, saveFile);
+		File outFolder = new File(folder, outputFolderName);
+		outFolder.mkdirs();
+		File saveFile = new File(outFolder, folder.getName() + Io.SAVE_FILE_EXTENSION);
+		runNewAnalysis(folder.getAbsolutePath(), op, saveFile);
 	}
 
-	
 	/**
-     * Run a new analysis on the images using the given options.
-     * @param folder the name of the output folder for the nmd file
-     * @param op the detection options
-     * @param saveFile the full path to the nmd file
-     * @return the new dataset
-     * @throws Exception
-     */
-    private void runNewAnalysis(String folder, IAnalysisOptions op, File saveFile) throws Exception {
-        
-        if(!op.getDetectionOptions(CellularComponent.NUCLEUS)
-        		.orElseThrow(()->new IllegalArgumentException("Non nucleus detection options"))
-        		.getFile(HashOptions.DETECTION_FOLDER).exists())
-            throw new IllegalArgumentException("Detection folder does not exist");
-        
-        LOGGER.info("Analysing folder:"+folder);
+	 * Run a new analysis on the images using the given options.
+	 * 
+	 * @param folder   the name of the output folder for the nmd file
+	 * @param op       the detection options
+	 * @param saveFile the full path to the nmd file
+	 * @return the new dataset
+	 * @throws Exception
+	 */
+	private void runNewAnalysis(String folder, IAnalysisOptions op, File saveFile)
+			throws Exception {
 
-        File statsFile = new File(saveFile.getParentFile(), saveFile.getName()+Io.TAB_FILE_EXTENSION);
-        LOGGER.info("Saving to :"+statsFile.getAbsolutePath());
-        
-        IAnalysisDataset obs = new NucleusDetectionMethod(folder, op)
-        		.call().getFirstDataset();
-        
-        HashOptions exportOptions = new DefaultOptions();
-        exportOptions.setInt(Io.PROFILE_SAMPLES_KEY, 100);
-        
-        new DatasetProfilingMethod(obs)
-        	.then(new DatasetSegmentationMethod(obs, MorphologyAnalysisMode.SEGMENT_FROM_SCRATCH))
-        	.then(new DatasetExportMethod(obs, saveFile))
-        	.then(new DatasetStatsExporter(statsFile, obs, exportOptions))
-        	.call();
-    }
+		if (!op.getDetectionFolder(CellularComponent.NUCLEUS)
+				.orElseThrow(() -> new IllegalArgumentException("Non nucleus detection options"))
+				.exists())
+			throw new IllegalArgumentException("Detection folder does not exist");
+
+		LOGGER.info("Analysing folder:" + folder);
+
+		File statsFile = new File(saveFile.getParentFile(),
+				saveFile.getName() + Io.TAB_FILE_EXTENSION);
+		LOGGER.info("Saving to :" + statsFile.getAbsolutePath());
+
+		IAnalysisDataset obs = new NucleusDetectionMethod(folder, op)
+				.call().getFirstDataset();
+
+		HashOptions exportOptions = new DefaultOptions();
+		exportOptions.setInt(Io.PROFILE_SAMPLES_KEY, 100);
+
+		new DatasetProfilingMethod(obs)
+				.then(new DatasetSegmentationMethod(obs,
+						MorphologyAnalysisMode.SEGMENT_FROM_SCRATCH))
+				.then(new DatasetExportMethod(obs, saveFile))
+				.then(new DatasetStatsExporter(statsFile, obs, exportOptions))
+				.call();
+	}
 
 }

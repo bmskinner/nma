@@ -29,100 +29,105 @@ import org.junit.Test;
 
 import com.bmskinner.nma.TestResources;
 import com.bmskinner.nma.analysis.IAnalysisMethod;
-import com.bmskinner.nma.analysis.IAnalysisResult;
 import com.bmskinner.nma.components.Version;
 import com.bmskinner.nma.components.Version.UnsupportedVersionException;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.profiles.ProfileType;
 import com.bmskinner.nma.components.rules.OrientationMark;
-import com.bmskinner.nma.io.DatasetImportMethod;
-import com.bmskinner.nma.io.XMLReader;
 
 /**
  * Provides a simple access point to open datasets for testing classes
+ * 
  * @author bms41
  * @since 1.13.8
  *
  */
-public class SampleDatasetReader {   
-    
-    /**
-     * Open the default rodent testing dataset
-     * @return
-     * @throws Exception
-     */
-    public static final IAnalysisDataset openTestRodentDataset() throws Exception {
-        return openDataset(TestResources.MOUSE_TEST_DATASET);
-    }
-    
-    /**
-     * Open the default pig testing dataset
-     * @return
-     * @throws Exception
-     */
-    public static final IAnalysisDataset openTestPigDataset() throws Exception {
-        return openDataset(TestResources.PIG_TEST_DATASET);
-    }
-    
-    /**
-     * Open the default round testing dataset
-     * @return
-     * @throws Exception
-     */
-    public static final IAnalysisDataset openTestRoundDataset() throws Exception {
-        return openDataset(TestResources.ROUND_TEST_DATASET);
-    }
-    
-    /**
-     * Open the default mouse signals testing dataset
-     * @return
-     * @throws Exception
-     */
-    public static final IAnalysisDataset openTestMouseSignalsDataset() throws Exception {
-        return openDataset(TestResources.MOUSE_SIGNALS_DATASET);
-    }
-        
-    /**
-     * Open the dataset in the given file.
-     * @param f the file to open
-     * @return the dataset
-     * @throws Exception
-     */
-    public static IAnalysisDataset openDataset(@NonNull File f) throws Exception {
-        return openDataset(f, null);
-    }
-    
-    public static IAnalysisDataset openXMLDataset(@NonNull File f) throws Exception {
-    	IAnalysisDataset d = XMLReader.readDataset(f);
-    	if(!Version.versionIsSupported(d.getVersionCreated()))
-    		throw new UnsupportedVersionException(d.getVersionCreated());
-    	return d;
-    }
-    
-    /**
-     * Open the dataset in the given file. Also provide a map of signal images.
-     * @param f the file to open
-     * @param signalMap a map of signal ids to folders. Can be null,
-     * @return the dataset
-     * @throws Exception
-     */
-    public static IAnalysisDataset openDataset(@NonNull File f, @Nullable Map<UUID, File> signalMap) throws Exception {        
-        if(!f.exists())
-            throw new IllegalArgumentException("File does not exist: "+f.getAbsolutePath()); 
-        IAnalysisMethod m = signalMap==null ? new DatasetImportMethod(f) : new DatasetImportMethod(f, signalMap);
-        IAnalysisResult r = m.call();
-        return r.getFirstDataset();
-    }
-    
+public class SampleDatasetReader {
 
-    @Test
-    public void testUnmarshalledDatasetHasProfilesCreated() throws Exception {
-    	IAnalysisDataset d = openTestRodentDataset();
-    	
-    	for(ProfileType t : ProfileType.values()) {
-    		d.getCollection().getProfileCollection().getProfile(t, OrientationMark.REFERENCE, 50);
-    	}
+	/**
+	 * Open the default rodent testing dataset
+	 * 
+	 * @return
+	 * @throws Exception
+	 */
+	public static final IAnalysisDataset openTestRodentDataset() throws Exception {
+		return openDataset(TestResources.MOUSE_TEST_DATASET);
+	}
 
-    }
+	/**
+	 * Open the default pig testing dataset
+	 * 
+	 * @return
+	 * @throws Exception
+	 */
+	public static final IAnalysisDataset openTestPigDataset() throws Exception {
+		return openDataset(TestResources.PIG_TEST_DATASET);
+	}
+
+	/**
+	 * Open the default round testing dataset
+	 * 
+	 * @return
+	 * @throws Exception
+	 */
+	public static final IAnalysisDataset openTestRoundDataset() throws Exception {
+		return openDataset(TestResources.ROUND_TEST_DATASET);
+	}
+
+	/**
+	 * Open the default mouse signals testing dataset
+	 * 
+	 * @return
+	 * @throws Exception
+	 */
+	public static final IAnalysisDataset openTestMouseSignalsDataset() throws Exception {
+		return openDataset(TestResources.MOUSE_SIGNALS_DATASET);
+	}
+
+	/**
+	 * Open the dataset in the given file. A convenience wrapper around the
+	 * DatasetImportMethod
+	 * 
+	 * @param f the file to open
+	 * @return the dataset
+	 * @throws Exception
+	 */
+	public static IAnalysisDataset openDataset(@NonNull File f) throws Exception {
+		return openDataset(f, null);
+	}
+
+	public static IAnalysisDataset openXMLDataset(@NonNull File f) throws Exception {
+		IAnalysisDataset d = XMLReader.readDataset(f);
+		if (!Version.versionIsSupported(d.getVersionCreated()))
+			throw new UnsupportedVersionException(d.getVersionCreated());
+		return d;
+	}
+
+	/**
+	 * Open the dataset in the given file. Also provide a map of signal images.
+	 * 
+	 * @param f         the file to open
+	 * @param signalMap a map of signal ids to folders. Can be null,
+	 * @return the dataset
+	 * @throws Exception
+	 */
+	public static IAnalysisDataset openDataset(@NonNull File f, @Nullable Map<UUID, File> signalMap)
+			throws Exception {
+		if (!f.exists())
+			throw new IllegalArgumentException("File does not exist: " + f.getAbsolutePath());
+		IAnalysisMethod m = signalMap == null ? new DatasetImportMethod(f)
+				: new DatasetImportMethod(f, signalMap);
+		return m.call().getFirstDataset();
+	}
+
+	@Test
+	public void testUnmarshalledDatasetHasProfilesCreated() throws Exception {
+		IAnalysisDataset d = openTestRodentDataset();
+
+		for (ProfileType t : ProfileType.values()) {
+			d.getCollection().getProfileCollection().getProfile(t, OrientationMark.REFERENCE, 50);
+		}
+
+	}
 
 }

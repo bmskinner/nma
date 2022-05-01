@@ -27,7 +27,6 @@ import com.bmskinner.nma.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nma.analysis.IAnalysisMethod;
 import com.bmskinner.nma.analysis.IAnalysisResult;
 import com.bmskinner.nma.analysis.signals.SignalDetectionMethod;
-import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.options.IAnalysisOptions;
@@ -63,9 +62,9 @@ public class AddNuclearSignalAction extends SingleDatasetResultAction {
 			File defaultDir = null;
 			Optional<IAnalysisOptions> op = dataset.getAnalysisOptions();
 			if (op.isPresent()) {
-				Optional<HashOptions> im = op.get().getDetectionOptions(CellularComponent.NUCLEUS);
-				if (im.isPresent())
-					defaultDir = im.get().getFile(HashOptions.DETECTION_FOLDER);
+				Optional<File> of = op.get().getNucleusDetectionFolder();
+				if (of.isPresent())
+					defaultDir = of.get();
 			}
 
 			File folder = null;
@@ -84,7 +83,7 @@ public class AddNuclearSignalAction extends SingleDatasetResultAction {
 
 				HashOptions options = analysisSetup.getOptions();
 
-				IAnalysisMethod m = new SignalDetectionMethod(dataset, options);
+				IAnalysisMethod m = new SignalDetectionMethod(dataset, options, folder);
 
 				String name = options.getString(HashOptions.SIGNAL_GROUP_NAME);
 

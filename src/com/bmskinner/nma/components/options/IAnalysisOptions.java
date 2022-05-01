@@ -16,6 +16,7 @@
  ******************************************************************************/
 package com.bmskinner.nma.components.options;
 
+import java.io.File;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -60,12 +61,36 @@ public interface IAnalysisOptions extends XmlSerializable {
 	Optional<HashOptions> getDetectionOptions(String key);
 
 	/**
+	 * Get the detection folder for the given component
+	 * 
+	 * @param key the component to detect
+	 * @return the detection options for the component
+	 */
+	Optional<File> getDetectionFolder(String key);
+
+	/**
+	 * Set the given detection folder
+	 * 
+	 * @param key    a value from CellularComponent, or a group id
+	 * @param folder
+	 */
+	void setDetectionFolder(String key, File folder);
+
+	/**
 	 * Fetch the options used to detect the nucleus, if present. This is a shortcut
 	 * for {@code IAnalysisOptions::getDetectionOptions(CellularComponent.NUCLEUS)}
 	 * 
 	 * @return
 	 */
 	Optional<HashOptions> getNucleusDetectionOptions();
+
+	/**
+	 * Fetch the folder used to detect the nucleus, if present. This is a shortcut
+	 * for {@code IAnalysisOptions::getDetectionFolder(CellularComponent.NUCLEUS)}
+	 * 
+	 * @return
+	 */
+	Optional<File> getNucleusDetectionFolder();
 
 	/**
 	 * Get the type of detection options stored
@@ -145,6 +170,14 @@ public interface IAnalysisOptions extends XmlSerializable {
 	void setNuclearSignalDetectionOptions(HashOptions options);
 
 	/**
+	 * Set the detection folder for a nuclear signal
+	 * 
+	 * @param id
+	 * @param folder
+	 */
+	void setNuclearSignalDetectionFolder(@NonNull UUID id, File folder);
+
+	/**
 	 * Check if the given type name is already present
 	 * 
 	 * @param type the name to check
@@ -193,4 +226,5 @@ public interface IAnalysisOptions extends XmlSerializable {
 	 * @param o
 	 */
 	void set(@NonNull IAnalysisOptions o);
+
 }

@@ -373,8 +373,7 @@ public class TestDatasetBuilder {
 		IAnalysisOptions o = OptionsFactory
 				.makeAnalysisOptions(rsc);
 		HashOptions nop = OptionsFactory
-				.makeNucleusDetectionOptions(new File(TEST_DATASET_IMAGE_FOLDER)
-						.getAbsoluteFile())
+				.makeNucleusDetectionOptions()
 				.withValue(HashOptions.MIN_CIRC, 0.1)
 				.withValue(HashOptions.MAX_CIRC, 0.9)
 				.withValue(HashOptions.MIN_SIZE_PIXELS,
@@ -383,6 +382,8 @@ public class TestDatasetBuilder {
 						(baseWidth + maxSizeVariation) * (baseHeight + maxSizeVariation))
 				.build();
 
+		o.setDetectionFolder(CellularComponent.NUCLEUS,
+				new File(TEST_DATASET_IMAGE_FOLDER).getAbsoluteFile());
 		o.setDetectionOptions(CellularComponent.NUCLEUS, nop);
 
 		if (redSignals) {
@@ -390,10 +391,12 @@ public class TestDatasetBuilder {
 			g.setGroupColour(Color.red);
 			collection.addSignalGroup(g);
 			HashOptions n = OptionsFactory
-					.makeNuclearSignalOptions(new File(TEST_DATASET_IMAGE_FOLDER))
+					.makeNuclearSignalOptions()
 					.withValue(HashOptions.SIGNAL_GROUP_ID, RED_SIGNAL_GROUP.toString())
 					.withValue(HashOptions.SIGNAL_GROUP_NAME, RED_SIGNAL_GROUP_NAME)
 					.build();
+			o.setNuclearSignalDetectionFolder(RED_SIGNAL_GROUP,
+					new File(TEST_DATASET_IMAGE_FOLDER).getAbsoluteFile());
 			o.setNuclearSignalDetectionOptions(n);
 		}
 
@@ -402,10 +405,12 @@ public class TestDatasetBuilder {
 			g.setGroupColour(Color.GREEN);
 			collection.addSignalGroup(g);
 			HashOptions n = OptionsFactory
-					.makeNuclearSignalOptions(new File(TEST_DATASET_IMAGE_FOLDER))
+					.makeNuclearSignalOptions()
 					.withValue(HashOptions.SIGNAL_GROUP_ID, GREEN_SIGNAL_GROUP.toString())
 					.withValue(HashOptions.SIGNAL_GROUP_NAME, GREEN_SIGNAL_GROUP_NAME)
 					.build();
+			o.setNuclearSignalDetectionFolder(GREEN_SIGNAL_GROUP,
+					new File(TEST_DATASET_IMAGE_FOLDER).getAbsoluteFile());
 			o.setNuclearSignalDetectionOptions(n);
 		}
 

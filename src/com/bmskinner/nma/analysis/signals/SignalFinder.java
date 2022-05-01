@@ -26,7 +26,6 @@ import java.util.logging.Logger;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nma.analysis.detection.AbstractFinder;
-import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.datasets.ICellCollection;
 import com.bmskinner.nma.components.measure.Measurement;
@@ -65,7 +64,8 @@ public class SignalFinder extends AbstractFinder<List<INuclearSignal>> {
 	 * @param signalOptions   the signal group analysis options
 	 * @param collection      the cell collection to detect within
 	 */
-	public SignalFinder(@NonNull IAnalysisOptions analysisOptions, @NonNull HashOptions signalOptions,
+	public SignalFinder(@NonNull IAnalysisOptions analysisOptions,
+			@NonNull HashOptions signalOptions,
 			@NonNull ICellCollection collection) {
 		super(analysisOptions);
 		this.signalOptions = signalOptions;
@@ -122,7 +122,8 @@ public class SignalFinder extends AbstractFinder<List<INuclearSignal>> {
 		ImageProcessor greyProcessor = stack.getProcessor(stackNumber);
 
 		// Convert to an RGB processor for annotation
-		ImageProcessor ip = new ImageConverter(greyProcessor).convertToRGBGreyscale().invert().toProcessor();
+		ImageProcessor ip = new ImageConverter(greyProcessor).convertToRGBGreyscale().invert()
+				.toProcessor();
 
 		ImageProcessor ap = ip.duplicate();
 
@@ -136,8 +137,7 @@ public class SignalFinder extends AbstractFinder<List<INuclearSignal>> {
 		// name
 
 		String imageName = imageFile.getName();
-		File dapiFolder = options.getDetectionOptions(CellularComponent.NUCLEUS).get()
-				.getFile(HashOptions.DETECTION_FOLDER);
+		File dapiFolder = options.getNucleusDetectionFolder().get();
 
 		File dapiFile = new File(dapiFolder, imageName);
 
@@ -185,7 +185,8 @@ public class SignalFinder extends AbstractFinder<List<INuclearSignal>> {
 	 * @return
 	 * @throws ImageImportException
 	 */
-	public List<INuclearSignal> findInImage(@NonNull File imageFile, @NonNull Nucleus n) throws ImageImportException {
+	public List<INuclearSignal> findInImage(@NonNull File imageFile, @NonNull Nucleus n)
+			throws ImageImportException {
 
 		SignalDetector sd = new SignalDetector(signalOptions);
 
@@ -197,8 +198,10 @@ public class SignalFinder extends AbstractFinder<List<INuclearSignal>> {
 				if (isValid(s, n))
 					list.add(s);
 		} catch (IllegalArgumentException e) {
-			LOGGER.warning("Unable to find images in image " + imageFile.getAbsolutePath() + ": " + e.getMessage());
-			LOGGER.log(Loggable.STACK, "Error in detector with image " + imageFile.getAbsolutePath(), e);
+			LOGGER.warning("Unable to find images in image " + imageFile.getAbsolutePath() + ": "
+					+ e.getMessage());
+			LOGGER.log(Loggable.STACK,
+					"Error in detector with image " + imageFile.getAbsolutePath(), e);
 		}
 		return list;
 	}
@@ -211,7 +214,8 @@ public class SignalFinder extends AbstractFinder<List<INuclearSignal>> {
 	 * @param an            the annotator
 	 * @param annotateStats should the stats be drawn on the image
 	 */
-	protected void drawSignals(@NonNull Nucleus n, @NonNull List<INuclearSignal> list, @NonNull ImageAnnotator an,
+	protected void drawSignals(@NonNull Nucleus n, @NonNull List<INuclearSignal> list,
+			@NonNull ImageAnnotator an,
 			boolean annotateStats) {
 
 		an.drawBorder(n, Color.BLUE);
@@ -232,8 +236,10 @@ public class SignalFinder extends AbstractFinder<List<INuclearSignal>> {
 	 * @return
 	 */
 	private boolean isValid(@NonNull INuclearSignal s, @NonNull Nucleus n) {
-		return (s.getMeasurement(Measurement.AREA) >= signalOptions.getInt(HashOptions.MIN_SIZE_PIXELS)
-				&& s.getMeasurement(Measurement.AREA) <= (signalOptions.getDouble(HashOptions.SIGNAL_MAX_FRACTION)
+		return (s.getMeasurement(Measurement.AREA) >= signalOptions
+				.getInt(HashOptions.MIN_SIZE_PIXELS)
+				&& s.getMeasurement(Measurement.AREA) <= (signalOptions
+						.getDouble(HashOptions.SIGNAL_MAX_FRACTION)
 						* n.getMeasurement(Measurement.AREA)));
 	}
 

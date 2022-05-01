@@ -379,7 +379,7 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 
 		// Check that the folders have the same name - if the files have
 		// just been copied between computers, this should be true
-		String filePath = nucleusOptions.get().getString(HashOptions.DETECTION_FOLDER);
+		String filePath = analysisOptions.getNucleusDetectionFolder().get().getAbsolutePath();
 		String expectedName = new File(filePath).getName();
 
 		if (!expectedImageDirectory.getName().equals(expectedName)) {
@@ -398,8 +398,8 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 		getCollection().setSourceFolder(expectedImageDirectory);
 
 		// Update the analysis options
-		nucleusOptions.get().setString(HashOptions.DETECTION_FOLDER,
-				expectedImageDirectory.getAbsolutePath());
+		analysisOptions.setDetectionFolder(CellularComponent.NUCLEUS,
+				expectedImageDirectory.getAbsoluteFile());
 
 		// TODO add unit tests that this completes correctly
 

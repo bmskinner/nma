@@ -36,31 +36,34 @@ import com.bmskinner.nma.components.signals.ISignalGroup;
 
 /**
  * Method to merge signals groups within a single dataaset
+ * 
  * @author bs19022
  * @since 1.16.1
  *
  */
 public class SignalGroupMergeMethod extends SingleDatasetAnalysisMethod {
-	
+
 	private static final Logger LOGGER = Logger.getGlobal();
-	
+
 	private static final int MAX_PROGRESS = 100;
-    private static final int MILLISECONDS_TO_SLEEP = 10;
-	
+	private static final int MILLISECONDS_TO_SLEEP = 10;
+
 	private PairedSignalGroups pairedSignalGroups;
 
 	/**
 	 * Create the method
-	 * @param dataset the dataset with signals to be merged
+	 * 
+	 * @param dataset            the dataset with signals to be merged
 	 * @param pairedSignalGroups the signal groups to be merged
 	 */
-	public SignalGroupMergeMethod(@NonNull IAnalysisDataset dataset, @NonNull PairedSignalGroups pairedSignalGroups) {
+	public SignalGroupMergeMethod(@NonNull IAnalysisDataset dataset,
+			@NonNull PairedSignalGroups pairedSignalGroups) {
 		super(dataset);
-		
-		if(dataset.getCollection().getSignalManager().getSignalGroupCount()<2)
-        	throw new IllegalArgumentException("Must have two or more signal groups to merge");
+
+		if (dataset.getCollection().getSignalManager().getSignalGroupCount() < 2)
+			throw new IllegalArgumentException("Must have two or more signal groups to merge");
 		this.pairedSignalGroups = pairedSignalGroups;
-		
+
 	}
 
 	@Override
@@ -69,45 +72,46 @@ public class SignalGroupMergeMethod extends SingleDatasetAnalysisMethod {
 		spinWheels(MAX_PROGRESS, MILLISECONDS_TO_SLEEP);
 		return new DefaultAnalysisResult(dataset);
 	}
-	
-	private void mergeSignalGroups() {
-        if (pairedSignalGroups == null || pairedSignalGroups.isEmpty()) {
-            LOGGER.finer( "No signal groups to merge");
-            return;
-        }
-		LOGGER.fine("Pairs to merge: "+pairedSignalGroups.toString());
-        
-        // For each set of mergeable signals, make a new signal group
-        for(Entry<DatasetSignalId, Set<DatasetSignalId>> entry : pairedSignalGroups.entrySet()) {
-        	
-        	// Create merged group name
-        	DatasetSignalId initialId = entry.getKey();
-        	StringBuilder sb = new StringBuilder();
-        	
-        	Set<DatasetSignalId> idSet = entry.getValue();
-        	idSet.add(initialId);
-        	        	
-        	for(DatasetSignalId id : idSet) {
-        		ISignalGroup signalGroup = dataset.getCollection().getSignalGroup(id.s).get();
-        		sb.append(signalGroup.getGroupName()+"_");
-        	}
-        	sb.append("merged");
-        	DefaultSignalGroup newGroup = new DefaultSignalGroup(sb.toString(), UUID.randomUUID());
-        	
-        	// Duplicate the signals into the new signal group
-        	dataset.getCollection().addSignalGroup(newGroup);
-        	for(Nucleus n : dataset.getCollection().getNuclei()) {
-        		for(DatasetSignalId id : idSet) {
-        			List<INuclearSignal> signals = n.getSignalCollection().getSignals(id.s);
-        			for(INuclearSignal s : signals) {
-        				n.getSignalCollection().addSignal(s.duplicate(), newGroup.getId());
-        			}
-        		}
-        	}
 
-        }    
-        
-       
-    }
+	private void mergeSignalGroups() {
+		if (pairedSignalGroups == null || pairedSignalGroups.isEmpty()) {
+			LOGGER.finer("No signal groups to merge");
+			return;
+		}
+		LOGGER.fine("Pairs to merge: " + pairedSignalGroups.toString());
+
+		// For each set of mergeable signals, make a new signal group
+		for (Entry<DatasetSignalId, Set<DatasetSignalId>> entry : pairedSignalGroups.entrySet()) {
+
+			// Create merged group name
+			DatasetSignalId initialId = entry.getKey();
+			StringBuilder sb = new StringBuilder();
+
+			Set<DatasetSignalId> idSet = entry.getValue();
+			idSet.add(initialId);
+
+			for (DatasetSignalId id : idSet) {
+				ISignalGroup signalGroup = dataset.getCollection().getSignalGroup(id.signalId())
+						.get();
+				sb.append(signalGroup.getGroupName() + "_");
+			}
+			sb.append("merged");
+			DefaultSignalGroup newGroup = new DefaultSignalGroup(sb.toString(), UUID.randomUUID());
+
+			// Duplicate the signals into the new signal group
+			dataset.getCollection().addSignalGroup(newGroup);
+			for (Nucleus n : dataset.getCollection().getNuclei()) {
+				for (DatasetSignalId id : idSet) {
+					List<INuclearSignal> signals = n.getSignalCollection()
+							.getSignals(id.signalId());
+					for (INuclearSignal s : signals) {
+						n.getSignalCollection().addSignal(s.duplicate(), newGroup.getId());
+					}
+				}
+			}
+
+		}
+
+	}
 
 }

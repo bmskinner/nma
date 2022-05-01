@@ -130,7 +130,7 @@ public class SavedOptionsAnalysisPipelineTest extends AnalysisPipelineTest {
 //	@Test
 //	public void testMultipleImageFoldersAbortWhenNoImagesDetected() throws Exception {
 //		File testFolder   = TestResources.MULTIPLE_BASE_FOLDER;
-//		File xmlFile      = new File(TestResources.IMAGE_FOLDER, "Multiple_with_DAPI_signals.xml");
+//		File xmlFile      = new File(TestResources.IMAGE_FOLDER_NAME, "Multiple_with_DAPI_signals.xml");
 //		
 //		// Check the input files exist
 //		assertTrue("Input image folder"+testFolder.getAbsolutePath(), testFolder.exists());

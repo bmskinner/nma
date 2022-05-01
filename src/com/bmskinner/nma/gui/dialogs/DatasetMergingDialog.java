@@ -48,221 +48,232 @@ import com.bmskinner.nma.gui.components.panels.SignalGroupSelectionPanel;
  */
 @SuppressWarnings("serial")
 public class DatasetMergingDialog extends LoadingIconDialog {
-	
+
 	private static final Logger LOGGER = Logger.getLogger(DatasetMergingDialog.class.getName());
 
-    private static final String SIGNAL_GROUP_COL_LBL = "Signal group";
+	private static final String SIGNAL_GROUP_COL_LBL = "Signal group";
 
 	private List<IAnalysisDataset> datasets;
 
-    private DatasetSelectionPanel datasetBoxOne;
-    private DatasetSelectionPanel datasetBoxTwo;
+	private DatasetSelectionPanel datasetBoxOne;
+	private DatasetSelectionPanel datasetBoxTwo;
 
-    private SignalGroupSelectionPanel signalBoxOne;
-    private SignalGroupSelectionPanel signalBoxTwo;
+	private SignalGroupSelectionPanel signalBoxOne;
+	private SignalGroupSelectionPanel signalBoxTwo;
 
-    private JTable matchTable;
+	private JTable matchTable;
 
-    private JButton mergeButton;
-    private JButton setEqualButton;
-    
-    private JButton inferButton;
+	private JButton mergeButton;
+	private JButton setEqualButton;
 
-    // Store the ids of signal groups that should be merged
-    private PairedSignalGroups pairedSignalGroups = new PairedSignalGroups();
+	private JButton inferButton;
 
-    public DatasetMergingDialog(List<IAnalysisDataset> datasets) {
-        this.datasets = datasets;
-        createUI();
+	// Store the ids of signal groups that should be merged
+	private PairedSignalGroups pairedSignalGroups = new PairedSignalGroups();
 
-        this.setModal(true);
-        this.pack();
-        centerOnScreen();
-        this.setVisible(true);
-        LOGGER.finest( "Created dataset merging dialog");
-    }
+	public DatasetMergingDialog(List<IAnalysisDataset> datasets) {
+		this.datasets = datasets;
+		createUI();
 
-    /**
-     * Get any matched signal groups. Can be empty.
-     * @return
-     */
-    public PairedSignalGroups getPairedSignalGroups() {
-        return this.pairedSignalGroups;
-    }
+		this.setModal(true);
+		this.pack();
+		centerOnScreen();
+		this.setVisible(true);
+		LOGGER.finest("Created dataset merging dialog");
+	}
 
-    private void createUI() {
+	/**
+	 * Get any matched signal groups. Can be empty.
+	 * 
+	 * @return
+	 */
+	public PairedSignalGroups getPairedSignalGroups() {
+		return this.pairedSignalGroups;
+	}
 
-        this.setLayout(new BorderLayout());
-        this.setTitle("Merge datasets");
+	private void createUI() {
 
-        JPanel header = createHeader();
-        this.add(header, BorderLayout.NORTH);
+		this.setLayout(new BorderLayout());
+		this.setTitle("Merge datasets");
 
-        JScrollPane scrollPanel = new JScrollPane();
-        matchTable = new JTable(createTableModel());
-        scrollPanel.setViewportView(matchTable);
-        this.add(scrollPanel, BorderLayout.CENTER);
+		JPanel header = createHeader();
+		this.add(header, BorderLayout.NORTH);
 
-        JPanel footer = createFooter();
-        this.add(footer, BorderLayout.SOUTH);
-    }
+		JScrollPane scrollPanel = new JScrollPane();
+		matchTable = new JTable(createTableModel());
+		scrollPanel.setViewportView(matchTable);
+		this.add(scrollPanel, BorderLayout.CENTER);
 
-    private JPanel createFooter() {
-        JPanel panel = new JPanel(new FlowLayout());
+		JPanel footer = createFooter();
+		this.add(footer, BorderLayout.SOUTH);
+	}
 
-        mergeButton = new JButton("Merge");
-        mergeButton.addActionListener(e->{
-        	LOGGER.info("Signal pairing complete");
-            LOGGER.fine("Merged pairs: "+pairedSignalGroups.toString());
-            this.setVisible(false);
-        });
+	private JPanel createFooter() {
+		JPanel panel = new JPanel(new FlowLayout());
 
-        panel.add(mergeButton);
-        return panel;
-    }
+		mergeButton = new JButton("Merge");
+		mergeButton.addActionListener(e -> {
+			LOGGER.info("Signal pairing complete");
+			LOGGER.fine("Merged pairs: " + pairedSignalGroups.toString());
+			this.setVisible(false);
+		});
 
-    private JPanel createHeader() {
-        JPanel headerPanel = new JPanel();
-        headerPanel.setLayout(new BoxLayout(headerPanel, BoxLayout.Y_AXIS));
+		panel.add(mergeButton);
+		return panel;
+	}
 
-        JPanel upperPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        JPanel middlePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+	private JPanel createHeader() {
+		JPanel headerPanel = new JPanel();
+		headerPanel.setLayout(new BoxLayout(headerPanel, BoxLayout.Y_AXIS));
 
-        upperPanel.add(new JLabel("Datasets have signals. Choose which signal groups (if any) to merge"));
+		JPanel upperPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		JPanel middlePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 
-        datasetBoxOne = new DatasetSelectionPanel(datasets);
-        datasetBoxTwo = new DatasetSelectionPanel(datasets);
-        
-        IAnalysisDataset d0 = datasets.get(0);
-        IAnalysisDataset d1 = datasets.size()>1 ? datasets.get(1) : datasets.get(0);
+		upperPanel.add(
+				new JLabel("Datasets have signals. Choose which signal groups (if any) to merge"));
 
-        datasetBoxOne.setSelectedDataset(d0);
-        datasetBoxTwo.setSelectedDataset(d1);
+		datasetBoxOne = new DatasetSelectionPanel(datasets);
+		datasetBoxTwo = new DatasetSelectionPanel(datasets);
 
-        datasetBoxOne.addActionListener(e->signalBoxOne.setDataset(datasetBoxOne.getSelectedDataset()));
-        datasetBoxTwo.addActionListener(e->signalBoxTwo.setDataset(datasetBoxTwo.getSelectedDataset()));
+		IAnalysisDataset d0 = datasets.get(0);
+		IAnalysisDataset d1 = datasets.size() > 1 ? datasets.get(1) : datasets.get(0);
 
-        signalBoxOne = new SignalGroupSelectionPanel(d0);
-        signalBoxTwo = new SignalGroupSelectionPanel(d1);
+		datasetBoxOne.setSelectedDataset(d0);
+		datasetBoxTwo.setSelectedDataset(d1);
 
-        setEqualButton = new JButton("Set equal");
-        setEqualButton.addActionListener(e->{
-        	pairedSignalGroups.add(datasetBoxOne.getSelectedDataset().getId(), 
-        			signalBoxOne.getSelectedID(), 
-        			datasetBoxTwo.getSelectedDataset().getId(), 
-        			signalBoxTwo.getSelectedID());
-            updateTable();
-        });
-        
-        inferButton = new JButton("Infer from group names");
-        inferButton.addActionListener(e->{
-        	LOGGER.info("Inferring pairs from signal group names");
-        	inferPairs();
-        	updateTable();
-        });
-        
-        bottomPanel.add(inferButton);
-        
-        middlePanel.add(datasetBoxOne);
-        middlePanel.add(signalBoxOne);
-        middlePanel.add(setEqualButton);
-        middlePanel.add(signalBoxTwo);
-        middlePanel.add(datasetBoxTwo);
+		datasetBoxOne.addActionListener(
+				e -> signalBoxOne.setDataset(datasetBoxOne.getSelectedDataset()));
+		datasetBoxTwo.addActionListener(
+				e -> signalBoxTwo.setDataset(datasetBoxTwo.getSelectedDataset()));
 
-        headerPanel.add(upperPanel);
-        headerPanel.add(middlePanel);
-        headerPanel.add(bottomPanel);
-        return headerPanel;
-    }
+		signalBoxOne = new SignalGroupSelectionPanel(d0);
+		signalBoxTwo = new SignalGroupSelectionPanel(d1);
 
-    private TableModel createTableModel() {
+		setEqualButton = new JButton("Set equal");
+		setEqualButton.addActionListener(e -> {
+			pairedSignalGroups.add(datasetBoxOne.getSelectedDataset().getId(),
+					signalBoxOne.getSelectedID(),
+					datasetBoxTwo.getSelectedDataset().getId(),
+					signalBoxTwo.getSelectedID());
+			updateTable();
+		});
 
-        DefaultTableModel model = new DefaultTableModel();
+		inferButton = new JButton("Infer from group names");
+		inferButton.addActionListener(e -> {
+			LOGGER.info("Inferring pairs from signal group names");
+			inferPairs();
+			updateTable();
+		});
 
-        Object[] columns = { SIGNAL_GROUP_COL_LBL, SIGNAL_GROUP_COL_LBL };
+		bottomPanel.add(inferButton);
 
-        model.setColumnIdentifiers(columns);
+		middlePanel.add(datasetBoxOne);
+		middlePanel.add(signalBoxOne);
+		middlePanel.add(setEqualButton);
+		middlePanel.add(signalBoxTwo);
+		middlePanel.add(datasetBoxTwo);
 
-        return model;
+		headerPanel.add(upperPanel);
+		headerPanel.add(middlePanel);
+		headerPanel.add(bottomPanel);
+		return headerPanel;
+	}
 
-    }
+	private TableModel createTableModel() {
 
-    private void updateTable() {
+		DefaultTableModel model = new DefaultTableModel();
 
-        DefaultTableModel model = new DefaultTableModel();
+		Object[] columns = { SIGNAL_GROUP_COL_LBL, SIGNAL_GROUP_COL_LBL };
 
-        Object[] columns = { SIGNAL_GROUP_COL_LBL, SIGNAL_GROUP_COL_LBL };
+		model.setColumnIdentifiers(columns);
 
-        model.setColumnIdentifiers(columns);
+		return model;
 
-        for (DatasetSignalId id1 : pairedSignalGroups.keySet()) {
-		    String col1 = "";
-		    for (IAnalysisDataset d : datasets) {
-		        if (d.getId().equals(id1.d) && d.getCollection().getSignalManager().hasSignals(id1.s)) {
-		            col1 = d.getName() + " : " + d.getCollection().getSignalGroup(id1.s).get().getGroupName();
-		        }
-		    }
-		    Set<DatasetSignalId> idList = pairedSignalGroups.get(id1);
-		    for (DatasetSignalId id2 : idList) {
-		        String col2 = "";
-		        for (IAnalysisDataset d : datasets) {
-		        	if(d.getId().equals(id2.d) && d.getCollection().getSignalManager().hasSignals(id2.s)) {
-		                col2 = d.getName() + " : " + d.getCollection().getSignalGroup(id2.s).get().getGroupName();
-		            }
-		        }
+	}
 
-		        Object[] row = { col1, col2 };
-		        model.addRow(row);
-		    }
+	private void updateTable() {
+
+		DefaultTableModel model = new DefaultTableModel();
+
+		Object[] columns = { SIGNAL_GROUP_COL_LBL, SIGNAL_GROUP_COL_LBL };
+
+		model.setColumnIdentifiers(columns);
+
+		for (DatasetSignalId id1 : pairedSignalGroups.keySet()) {
+			String col1 = "";
+			for (IAnalysisDataset d : datasets) {
+				if (d.getId().equals(id1.datasetId())
+						&& d.getCollection().getSignalManager().hasSignals(id1.signalId())) {
+					col1 = d.getName() + " : "
+							+ d.getCollection().getSignalGroup(id1.signalId()).get().getGroupName();
+				}
+			}
+			Set<DatasetSignalId> idList = pairedSignalGroups.get(id1);
+			for (DatasetSignalId id2 : idList) {
+				String col2 = "";
+				for (IAnalysisDataset d : datasets) {
+					if (d.getId().equals(id2.datasetId())
+							&& d.getCollection().getSignalManager().hasSignals(id2.signalId())) {
+						col2 = d.getName() + " : " + d.getCollection()
+								.getSignalGroup(id2.signalId()).get().getGroupName();
+					}
+				}
+
+				Object[] row = { col1, col2 };
+				model.addRow(row);
+			}
 
 		}
 		matchTable.setModel(model);
 
-    }
-    
-    /**
-     * Infer which signal groups should be merged based on their names.
-     * Signal groups with identical names will be added to the paired list.
-     * 
-     */
-    private void inferPairs() {
-    	
-    	List<String> signalGroupNames = datasets.stream()
-    			.flatMap(d->d.getCollection().getSignalGroups().stream())
-    			.map(g->g.getGroupName())
-    			.distinct()
-    			.collect(Collectors.toList());
-    	
-    	
-    	// For each name, find matching datasets
-    	for(String groupName : signalGroupNames) {
-    		
-    		List<IAnalysisDataset> matchingDatasets = datasets.stream().filter(d->d.getCollection()
-    				.getSignalGroups()
-    				.stream().anyMatch(g->g.getGroupName()
-    						.equals(groupName))).collect(Collectors.toList());
-    		
-    		IAnalysisDataset d1 = matchingDatasets.get(0);
-    		
-    		// Get the id from d1
-    		UUID u1 = null;
-    		for(UUID u : d1.getCollection().getSignalGroupIDs()) {
-    			if(d1.getCollection().getSignalGroup(u).get().getGroupName().equals(groupName))
-    				u1 = u;
-    		}
-    		
-    		
-    		for(IAnalysisDataset d2 : matchingDatasets) {
-    			if(u1==null) continue;
-    			if(d1==d2) continue;
+	}
 
-    			// Get the id from d2
-        		for(UUID u2 : d2.getCollection().getSignalGroupIDs()) {
-        			if(d2.getCollection().getSignalGroup(u2).get().getGroupName().equals(groupName))
-        				pairedSignalGroups.add(d1.getId(), u1, d2.getId(), u2);
-        		}
-    		}
-    	}   
-    }
+	/**
+	 * Infer which signal groups should be merged based on their names. Signal
+	 * groups with identical names will be added to the paired list.
+	 * 
+	 */
+	private void inferPairs() {
+
+		List<String> signalGroupNames = datasets.stream()
+				.flatMap(d -> d.getCollection().getSignalGroups().stream())
+				.map(g -> g.getGroupName())
+				.distinct()
+				.collect(Collectors.toList());
+
+		// For each name, find matching datasets
+		for (String groupName : signalGroupNames) {
+
+			List<IAnalysisDataset> matchingDatasets = datasets.stream()
+					.filter(d -> d.getCollection()
+							.getSignalGroups()
+							.stream().anyMatch(g -> g.getGroupName()
+									.equals(groupName)))
+					.collect(Collectors.toList());
+
+			IAnalysisDataset d1 = matchingDatasets.get(0);
+
+			// Get the id from d1
+			UUID u1 = null;
+			for (UUID u : d1.getCollection().getSignalGroupIDs()) {
+				if (d1.getCollection().getSignalGroup(u).get().getGroupName().equals(groupName))
+					u1 = u;
+			}
+
+			for (IAnalysisDataset d2 : matchingDatasets) {
+				if (u1 == null)
+					continue;
+				if (d1 == d2)
+					continue;
+
+				// Get the id from d2
+				for (UUID u2 : d2.getCollection().getSignalGroupIDs()) {
+					if (d2.getCollection().getSignalGroup(u2).get().getGroupName()
+							.equals(groupName))
+						pairedSignalGroups.add(d1.getId(), u1, d2.getId(), u2);
+				}
+			}
+		}
+	}
 }

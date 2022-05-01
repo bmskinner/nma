@@ -10,7 +10,6 @@ import org.junit.Test;
 
 import com.bmskinner.nma.TestResources;
 import com.bmskinner.nma.components.workspaces.IWorkspace;
-import com.bmskinner.nma.io.WorkspaceImporter;
 
 public class WorkspaceImporterTest {
 
@@ -20,6 +19,6 @@ public class WorkspaceImporterTest {
 		IWorkspace w = WorkspaceImporter.importWorkspace(f);
 
 		assertEquals(TestResources.MOUSE, w.getName());
-		assertEquals(1, w.getBioSamples().size());
-	}	
+		assertEquals("Test workspace should have 1 file", 1, w.getFiles().size());
+	}
 }

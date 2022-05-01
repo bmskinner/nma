@@ -108,27 +108,15 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 
 	private IAnalysisDataset run() throws Exception {
 
-		if (!datasetsAreValidToMerge())
+		if (!datasetsCanBeMerged())
 			return null;
 
-		LOGGER.fine("Finding new file name");
-
 		// Set the names for the new collection
-		File newDatasetFolder = saveFile.getParentFile();
-		File newDatasetFile = saveFile;
-
 		// ensure the new file name is valid
-		newDatasetFile = checkName(newDatasetFile);
+		saveFile = checkName(saveFile).getAbsoluteFile();
+		String newDatasetName = saveFile.getName().replace(Io.SAVE_FILE_EXTENSION, "");
 
-		String newDatasetName = newDatasetFile.getName().replace(Io.SAVE_FILE_EXTENSION, "");
-		LOGGER.fine("Checked new file names");
-
-		// make a new collection
-		ICellCollection newCollection = new DefaultCellCollection(
-				datasets.get(0).getCollection().getRuleSetCollection(),
-				newDatasetName, UUID.randomUUID());
-
-		IAnalysisDataset newDataset = performMerge(newCollection);
+		IAnalysisDataset newDataset = performMerge(newDatasetName);
 
 		spinWheels(MAX_PROGRESS, MILLISECONDS_TO_SLEEP);
 
@@ -140,7 +128,7 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 	 * 
 	 * @return true if the datasets can be merged, false otherwise
 	 */
-	private boolean datasetsAreValidToMerge() {
+	private boolean datasetsCanBeMerged() {
 		if (datasets.size() <= 1) {
 			LOGGER.warning("Must have multiple datasets to merge");
 			return false;
@@ -155,25 +143,14 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 		}
 
 		// check all collections are of the same type
-		if (!nucleiHaveSameType()) {
-			LOGGER.warning("Cannot merge collections of different nucleus type");
-			return false;
-		}
-		return true;
-	}
-
-	/**
-	 * Check if the nucleus classes of all datasets match. Cannot merge collections
-	 * with different classes
-	 * 
-	 * @return true if all collection have the same nucleus type, false otherwise
-	 */
-	private boolean nucleiHaveSameType() {
 		RuleSetCollection testClass = datasets.get(0).getCollection().getRuleSetCollection();
 		for (IAnalysisDataset d : datasets) {
-			if (!d.getCollection().getRuleSetCollection().equals(testClass))
+			if (!d.getCollection().getRuleSetCollection().equals(testClass)) {
+				LOGGER.warning("Cannot merge collections with different rulesets");
 				return false;
+			}
 		}
+
 		return true;
 	}
 
@@ -189,10 +166,16 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 	 * @throws MissingLandmarkException
 	 * @throws ComponentCreationException
 	 */
-	private IAnalysisDataset performMerge(@NonNull ICellCollection newCollection)
+	private IAnalysisDataset performMerge(@NonNull String newDatasetName)
 			throws MissingOptionException, ProfileException, MissingLandmarkException,
 			ComponentCreationException {
 
+		// make a new collection
+		ICellCollection newCollection = new DefaultCellCollection(
+				datasets.get(0).getCollection().getRuleSetCollection(),
+				newDatasetName, UUID.randomUUID());
+
+		// Add cells from each source dataset
 		for (IAnalysisDataset d : datasets) {
 
 			for (ICell c : d.getCollection()) {
@@ -251,7 +234,7 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 			throws MissingOptionException {
 
 		// Use an empty file since there are multiple folders in the merge
-		HashOptions nucleus = OptionsFactory.makeNucleusDetectionOptions(new File("")).build();
+		HashOptions nucleus = OptionsFactory.makeNucleusDetectionOptions().build();
 
 		IAnalysisDataset d1 = datasets.get(0);
 		IAnalysisOptions d1Options = d1.getAnalysisOptions()
@@ -275,7 +258,7 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 
 		// Merge signal group options
 		for (UUID signalGroupId : newDataset.getCollection().getSignalGroupIDs()) {
-			HashOptions signal = OptionsFactory.makeNuclearSignalOptions((File) null)
+			HashOptions signal = OptionsFactory.makeNuclearSignalOptions()
 					.withValue(HashOptions.SIGNAL_GROUP_ID, signalGroupId.toString()).build();
 			mergedOptions.setNuclearSignalDetectionOptions(signal);
 			// TODO: Merge the signal detection options
@@ -455,7 +438,7 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 			UUID newID = entry.getValue();
 			LOGGER.finer("New group id to merge into: " + newID);
 
-			newCollection.getSignalManager().updateSignalGroupID(oldId.s, newID);
+			newCollection.getSignalManager().updateSignalGroupID(oldId.signalId(), newID);
 		}
 
 	}

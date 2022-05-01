@@ -93,7 +93,8 @@ public class NewAnalysisAction extends VoidResultAction {
 
 		IAnalysisOptions options = OptionsFactory
 				.makeAnalysisOptions(RuleSetCollection.mouseSpermRuleSetCollection());
-		HashOptions nucleusOptions = OptionsFactory.makeNucleusDetectionOptions(this.folder)
+		options.setDetectionFolder(CellularComponent.NUCLEUS, this.folder);
+		HashOptions nucleusOptions = OptionsFactory.makeNucleusDetectionOptions()
 				.build();
 		options.setDetectionOptions(CellularComponent.NUCLEUS, nucleusOptions);
 

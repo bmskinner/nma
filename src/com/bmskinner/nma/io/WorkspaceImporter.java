@@ -71,7 +71,6 @@ public class WorkspaceImporter implements Importer {
 		IWorkspace w = new DefaultWorkspace(file, name);
 
 		Element datasetElement = workspaceElement.getChild(IWorkspace.DATASETS_ELEMENT);
-		Element sampleElement = workspaceElement.getChild(IWorkspace.BIOSAMPLES_ELEMENT);
 
 		List<Element> datasets = datasetElement.getChildren();
 

@@ -36,8 +36,8 @@ import com.bmskinner.nma.components.signals.SignalManager;
 import com.bmskinner.nma.gui.components.ColourSelecter;
 import com.bmskinner.nma.gui.tabs.signals.warping.SignalWarpingRunSettings;
 import com.bmskinner.nma.io.ImageImporter;
-import com.bmskinner.nma.io.UnloadableImageException;
 import com.bmskinner.nma.io.ImageImporter.ImageImportException;
+import com.bmskinner.nma.io.UnloadableImageException;
 import com.bmskinner.nma.logging.Loggable;
 import com.bmskinner.nma.visualisation.image.ImageFilterer;
 
@@ -59,15 +59,17 @@ public class SignalWarpingMethod extends SingleDatasetAnalysisMethod {
 	/** The mesh images are warped onto */
 	private final Mesh meshConsensus;
 
-	public SignalWarpingMethod(@NonNull final IAnalysisDataset d, @NonNull final SignalWarpingRunSettings options) {
+	public SignalWarpingMethod(@NonNull final IAnalysisDataset d,
+			@NonNull final SignalWarpingRunSettings options) {
 		super(d);
 		this.options = options;
 
 		// Count the number of cells to include
 		SignalManager m = dataset.getCollection().getSignalManager();
-		List<ICell> cells = options.getBoolean(SignalWarpingRunSettings.IS_ONLY_CELLS_WITH_SIGNALS_KEY)
-				? m.getCellsWithNuclearSignals(options.signalId(), true)
-				: dataset.getCollection().getCells();
+		List<ICell> cells = options
+				.getBoolean(SignalWarpingRunSettings.IS_ONLY_CELLS_WITH_SIGNALS_KEY)
+						? m.getCellsWithNuclearSignals(options.signalId(), true)
+						: dataset.getCollection().getCells();
 		totalCells = cells.size();
 		try {
 
@@ -98,7 +100,8 @@ public class SignalWarpingMethod extends SingleDatasetAnalysisMethod {
 		ISignalGroup sg = dataset.getCollection().getSignalGroup(options.signalId())
 				.orElseThrow(MissingComponentException::new);
 
-		IWarpedSignal ws = new DefaultWarpedSignal(options.targetDataset().getCollection().getConsensus().duplicate(),
+		IWarpedSignal ws = new DefaultWarpedSignal(
+				options.targetDataset().getCollection().getConsensus().duplicate(),
 				options.targetDataset().getName(), dataset.getName(), sg.getGroupName(),
 				options.templateDataset().getId(),
 				options.getBoolean(SignalWarpingRunSettings.IS_ONLY_CELLS_WITH_SIGNALS_KEY),
@@ -121,7 +124,8 @@ public class SignalWarpingMethod extends SingleDatasetAnalysisMethod {
 		LOGGER.finer("Generating warped images for " + options.templateDataset().getName());
 		final List<ImageProcessor> warpedImages = Collections.synchronizedList(new ArrayList<>());
 
-		List<ICell> cells = getCells(options.getBoolean(SignalWarpingRunSettings.IS_ONLY_CELLS_WITH_SIGNALS_KEY));
+		List<ICell> cells = getCells(
+				options.getBoolean(SignalWarpingRunSettings.IS_ONLY_CELLS_WITH_SIGNALS_KEY));
 
 		for (ICell c : cells) {
 			for (Nucleus n : c.getNuclei()) {
@@ -160,14 +164,16 @@ public class SignalWarpingMethod extends SingleDatasetAnalysisMethod {
 			ImageProcessor ip = getNucleusImageProcessor(n);
 
 			if (options.getInt(SignalWarpingRunSettings.MIN_THRESHOLD_KEY) > 0)
-				ip = new ImageFilterer(ip).setBlackLevel(options.getInt(SignalWarpingRunSettings.MIN_THRESHOLD_KEY))
+				ip = new ImageFilterer(ip)
+						.setBlackLevel(options.getInt(SignalWarpingRunSettings.MIN_THRESHOLD_KEY))
 						.toProcessor();
 
 			if (options.getBoolean(SignalWarpingRunSettings.IS_BINARISE_SIGNALS_KEY))
 				ip.threshold(options.getInt(SignalWarpingRunSettings.MIN_THRESHOLD_KEY));
 
 			if (options.getBoolean(SignalWarpingRunSettings.IS_NORMALISE_TO_COUNTERSTAIN_KEY)) {
-				ip = new ImageFilterer(ip).normaliseToCounterStain(ImageImporter.importFullImageTo8bit(n))
+				ip = new ImageFilterer(ip)
+						.normaliseToCounterStain(ImageImporter.importFullImageTo8bit(n))
 						.toProcessor();
 
 				// The actual floating point values may not be visible to the human eye
@@ -184,7 +190,8 @@ public class SignalWarpingMethod extends SingleDatasetAnalysisMethod {
 
 		} catch (IllegalArgumentException | MeshCreationException | UncomparableMeshImageException
 				| MeshImageCreationException | UnloadableImageException e) {
-			LOGGER.fine("Could not create warped image for " + n.getNameAndNumber() + ": " + e.getMessage());
+			LOGGER.fine("Could not create warped image for " + n.getNameAndNumber() + ": "
+					+ e.getMessage());
 			return createEmptyProcessor();
 		}
 
@@ -197,12 +204,14 @@ public class SignalWarpingMethod extends SingleDatasetAnalysisMethod {
 	 * @return the nucleus image
 	 * @throws MissingOptionException
 	 */
-	private ImageProcessor getNucleusImageProcessor(@NonNull Nucleus n) throws MissingOptionException {
+	private ImageProcessor getNucleusImageProcessor(@NonNull Nucleus n)
+			throws MissingOptionException {
 
 		try {
 			// Get the image with the signal
 			ImageProcessor ip;
-			if (n.getSignalCollection().hasSignal(options.signalId())) { // if there is no signal, getImage will throw
+			if (n.getSignalCollection().hasSignal(options.signalId())) { // if there is no signal,
+																			// getImage will throw
 																			// exception
 				ip = n.getSignalCollection().getImage(options.signalId());
 				ip.invert(); // image is imported as white background. Need black background.
@@ -213,9 +222,11 @@ public class SignalWarpingMethod extends SingleDatasetAnalysisMethod {
 				HashOptions signalOptions = getSignalOptions(n);
 
 				if (signalOptions != null) {
-					File imageFolder = signalOptions.getFile(HashOptions.DETECTION_FOLDER);
+					File imageFolder = options.templateDataset().getAnalysisOptions().get()
+							.getDetectionFolder(options.signalId().toString()).get();
 					File imageFile = new File(imageFolder, n.getSourceFileName());
-					ip = new ImageImporter(imageFile).importImage(signalOptions.getInt(HashOptions.CHANNEL));
+					ip = new ImageImporter(imageFile)
+							.importImage(signalOptions.getInt(HashOptions.CHANNEL));
 
 				} else {
 					return createEmptyProcessor();
@@ -244,12 +255,15 @@ public class SignalWarpingMethod extends SingleDatasetAnalysisMethod {
 		// from that dataset.
 		if (options.templateDataset().hasMergeSources()) {
 
-			return options.templateDataset().getAllMergeSources().stream().filter(d -> d.getCollection().contains(n))
-					.findFirst().get().getAnalysisOptions().get().getNuclearSignalOptions(options.signalId())
+			return options.templateDataset().getAllMergeSources().stream()
+					.filter(d -> d.getCollection().contains(n))
+					.findFirst().get().getAnalysisOptions().get()
+					.getNuclearSignalOptions(options.signalId())
 					.orElseThrow(MissingOptionException::new);
 		} else {
 
-			Optional<IAnalysisOptions> analysisOptions = options.templateDataset().getAnalysisOptions();
+			Optional<IAnalysisOptions> analysisOptions = options.templateDataset()
+					.getAnalysisOptions();
 
 			if (analysisOptions.isPresent()) {
 				return analysisOptions.get().getNuclearSignalOptions(options.signalId())

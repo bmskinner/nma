@@ -132,7 +132,7 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
 		Optional<HashOptions> op = templateOptions.getDetectionOptions(CellularComponent.NUCLEUS);
 
 		// Detect the nuclei in the folders selected
-		File filePath = op.get().getFile(HashOptions.DETECTION_FOLDER);
+		File filePath = templateOptions.getNucleusDetectionFolder().get();
 		processFolder(filePath);
 
 		LOGGER.fine("Detected nuclei in " + filePath.getAbsolutePath());
@@ -157,11 +157,11 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
 	 */
 	private int countTotalImagesToAnalyse() {
 
-		Optional<HashOptions> op = templateOptions.getDetectionOptions(CellularComponent.NUCLEUS);
+		Optional<HashOptions> op = templateOptions.getNucleusDetectionOptions();
 		if (!op.isPresent())
 			return 0;
 
-		File folder = new File(op.get().getString(HashOptions.DETECTION_FOLDER));
+		File folder = templateOptions.getNucleusDetectionFolder().get();
 		int totalImages = countSuitableImages(folder);
 		fireUpdateProgressTotalLength(totalImages);
 		LOGGER.info(String.format("Analysing %d images", totalImages));
@@ -192,8 +192,7 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
 			// Ensure the actual folder of images is set in the analysis options, not a root
 			// folder
 			IAnalysisOptions datasetOptions = templateOptions.duplicate();
-			datasetOptions.getDetectionOptions(CellularComponent.NUCLEUS).get()
-					.setString(HashOptions.DETECTION_FOLDER, folder.getAbsolutePath());
+			datasetOptions.setDetectionFolder(CellularComponent.NUCLEUS, folder.getAbsoluteFile());
 			dataset.setAnalysisOptions(datasetOptions);
 
 			try {

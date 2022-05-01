@@ -189,9 +189,7 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod
 
 	private List<IAnalysisDataset> createNucleusDetectionMethod(@NonNull IAnalysisOptions options,
 			File imageFolder) throws Exception {
-		options.getDetectionOptions(CellularComponent.NUCLEUS)
-				.orElseThrow(MissingOptionException::new)
-				.setFile(HashOptions.DETECTION_FOLDER, imageFolder);
+		options.setDetectionFolder(CellularComponent.NUCLEUS, imageFolder);
 		List<IAnalysisDataset> datasets = new NucleusDetectionMethod(outputFolder, options).call()
 				.getDatasets();
 		for (IAnalysisDataset dataset : datasets) {
@@ -263,8 +261,7 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod
 				HashOptions signalOptions = datasetOptions.getNuclearSignalOptions(signalGroupId)
 						.orElseThrow(MissingOptionException::new);
 
-				signalOptions.setFile(HashOptions.DETECTION_FOLDER, imageFolder);
-				methodsToRun.add(new SignalDetectionMethod(dataset, signalOptions));
+				methodsToRun.add(new SignalDetectionMethod(dataset, signalOptions, imageFolder));
 				if (checkShell) {
 					if (signalOptions.hasBoolean(HashOptions.SHELL_COUNT_INT))
 						shellOptions = signalOptions;

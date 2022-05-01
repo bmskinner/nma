@@ -24,7 +24,7 @@ public class XMLReaderTest {
 	@Test
 	public void testReadRuleSets() throws IOException, XMLReadingException, ComponentCreationException {
 		RuleSetCollection r = RuleSetCollection.mouseSpermRuleSetCollection();
-		File f = new File(TestResources.UNIT_TEST_FOLDER, "Ruleset.xml");
+		File f = new File(TestResources.IMAGE_FOLDER, "Ruleset.xml");
 		
 		XMLWriter.writeXML(r.toXmlElement(), f);
 		
@@ -35,7 +35,7 @@ public class XMLReaderTest {
 	@Test
 	public void testReadOptions() throws IOException, XMLReadingException {
 		HashOptions o = OptionsFactory.makeDefaultClusteringOptions().build();
-		File f = new File(TestResources.UNIT_TEST_FOLDER, "Options.xml");
+		File f = new File(TestResources.IMAGE_FOLDER, "Options.xml");
 		
 		XMLWriter.writeXML(o.toXmlElement(), f);
 		
@@ -45,8 +45,8 @@ public class XMLReaderTest {
 	
 	@Test
 	public void testReadAnalysisOptions() throws IOException, XMLReadingException, ComponentCreationException {
-		IAnalysisOptions o = OptionsFactory.makeDefaultRodentAnalysisOptions(TestResources.UNIT_TEST_FOLDER);
-		File f = new File(TestResources.UNIT_TEST_FOLDER, "AnalysisOptions.xml");
+		IAnalysisOptions o = OptionsFactory.makeDefaultRodentAnalysisOptions(TestResources.IMAGE_FOLDER);
+		File f = new File(TestResources.IMAGE_FOLDER, "AnalysisOptions.xml");
 		
 		XMLWriter.writeXML(o.toXmlElement(), f);
 		
@@ -62,7 +62,7 @@ public class XMLReaderTest {
 				.randomOffsetProfiles(true)
 				.numberOfClusters(2)
 				.segmented().build();
-		File f = new File(TestResources.UNIT_TEST_FOLDER, "AnalysisDataset.nmd");
+		File f = new File(TestResources.IMAGE_FOLDER, "AnalysisDataset.nmd");
 		
 		XMLWriter.writeXML(d.toXmlElement(), f);
 		
@@ -80,7 +80,7 @@ public class XMLReaderTest {
 				.addSignalsInChannel(1)
 				.numberOfClusters(2)
 				.segmented().build();
-		File f = new File(TestResources.UNIT_TEST_FOLDER, "AnalysisDatasetSignals.nmd");
+		File f = new File(TestResources.IMAGE_FOLDER, "AnalysisDatasetSignals.nmd");
 		
 		XMLWriter.writeXML(d.toXmlElement(), f);
 		

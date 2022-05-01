@@ -26,11 +26,7 @@ import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
-import org.eclipse.jdt.annotation.NonNull;
-
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
-import com.bmskinner.nma.components.options.HashOptions;
-import com.bmskinner.nma.core.InputSupplier;
 import com.bmskinner.nma.gui.Labels;
 import com.bmskinner.nma.gui.components.ExportableTable;
 import com.bmskinner.nma.gui.events.NuclearSignalUpdatedListener;
@@ -73,14 +69,16 @@ public class SignalsAnalysisPanel extends TableDetailPanel implements NuclearSig
 
 					if (rowName.equals(Labels.Signals.SIGNAL_SOURCE_LABEL)) {
 
-						SignalTableCell signalGroup = getSignalGroupFromTable(table, row - 2, column);
+						SignalTableCell signalGroup = getSignalGroupFromTable(table, row - 2,
+								column);
 						if (signalGroup != null) {
 
 							cosmeticHandler.updateSignalSource(d, signalGroup.getID());
 							UIController.getInstance().fireNuclearSignalUpdated(d);
 							SignalTableCell newValue = new SignalTableCell(signalGroup.getID(),
-									d.getAnalysisOptions().get().getNuclearSignalOptions(signalGroup.getID()).get()
-											.getFile(HashOptions.DETECTION_FOLDER).getAbsolutePath(),
+									d.getAnalysisOptions().get()
+											.getDetectionFolder(signalGroup.getID().toString())
+											.get().getAbsolutePath(),
 									signalGroup.getColor());
 							table.getModel().setValueAt(newValue, row, column);
 							table.repaint();
@@ -97,7 +95,8 @@ public class SignalsAnalysisPanel extends TableDetailPanel implements NuclearSig
 
 					String nextRowName = table.getModel().getValueAt(row + 1, 0).toString();
 					if (nextRowName.equals(Labels.Signals.SIGNAL_GROUP_LABEL)) {
-						SignalTableCell signalGroup = getSignalGroupFromTable(table, row + 1, column);
+						SignalTableCell signalGroup = getSignalGroupFromTable(table, row + 1,
+								column);
 						if (signalGroup != null) {
 							cosmeticHandler.changeSignalColour(d, signalGroup.getID());
 							UIController.getInstance().fireNuclearSignalUpdated(d);
@@ -123,7 +122,8 @@ public class SignalsAnalysisPanel extends TableDetailPanel implements NuclearSig
 	protected void updateSingle() {
 
 		TableOptions options = new TableOptionsBuilder().setDatasets(getDatasets()).setTarget(table)
-				.setColumnRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN, new SignalDetectionSettingsTableCellRenderer())
+				.setColumnRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN,
+						new SignalDetectionSettingsTableCellRenderer())
 				.build();
 
 		setTable(options);

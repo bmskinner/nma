@@ -44,54 +44,60 @@ import com.bmskinner.nma.logging.Loggable;
  */
 @SuppressWarnings("serial")
 public class CopyNucleusDetectionSettingsFromOpenDatasetPanel extends CopyFromOpenDatasetPanel {
-	
-	private static final Logger LOGGER = Logger.getLogger(CopyNucleusDetectionSettingsFromOpenDatasetPanel.class.getName());
 
-    /**
-     * Create with an analysis options and the detection options to copy to
-     * @param parent
-     * @param op
-     */
-    public CopyNucleusDetectionSettingsFromOpenDatasetPanel(IAnalysisOptions parent, HashOptions op) {
-        super(parent, op);
-    }
-    
+	private static final Logger LOGGER = Logger
+			.getLogger(CopyNucleusDetectionSettingsFromOpenDatasetPanel.class.getName());
+
+	/**
+	 * Create with an analysis options and the detection options to copy to
+	 * 
+	 * @param parent
+	 * @param op
+	 */
+	public CopyNucleusDetectionSettingsFromOpenDatasetPanel(IAnalysisOptions parent,
+			HashOptions op) {
+		super(parent, op);
+	}
+
 	@Override
 	protected ActionListener createCopyActionListener() {
 		return (e) -> {
 			IAnalysisDataset[] nameArray = DatasetListManager.getInstance()
-            		.getRootDatasets()
-                    .toArray(new IAnalysisDataset[0]);
+					.getRootDatasets()
+					.toArray(new IAnalysisDataset[0]);
 
-            IAnalysisDataset sourceDataset = (IAnalysisDataset) JOptionPane.showInputDialog(null,
-                    CHOOSE_DATASET_MSG_LBL, CHOOSE_DATASET_TTL_LBL, JOptionPane.QUESTION_MESSAGE, null, nameArray,
-                    nameArray[0]);
+			IAnalysisDataset sourceDataset = (IAnalysisDataset) JOptionPane.showInputDialog(null,
+					CHOOSE_DATASET_MSG_LBL, CHOOSE_DATASET_TTL_LBL, JOptionPane.QUESTION_MESSAGE,
+					null, nameArray,
+					nameArray[0]);
 
-            if (sourceDataset != null) {
+			if (sourceDataset != null) {
 
-            	LOGGER.fine("Copying options from dataset: " + sourceDataset.getName());
+				LOGGER.fine("Copying options from dataset: " + sourceDataset.getName());
 
-            	// Ensure the folder is not overwritten by the new options
-            	File folder = new File(options.getString(HashOptions.DETECTION_FOLDER));
-            	Optional<IAnalysisOptions> op = sourceDataset.getAnalysisOptions();
-            	if(op.isPresent()){
-            		Optional<HashOptions> srcOptions = op.get().getDetectionOptions(CellularComponent.NUCLEUS);
-            		options.set(srcOptions.get());
-            		options.setString(HashOptions.DETECTION_FOLDER, folder.getAbsolutePath());
-                    parent.setRuleSetCollection(op.get().getRuleSetCollection());
-            	}
+				// Ensure the folder is not overwritten by the new options
+				File folder = new File(options.getString(HashOptions.DETECTION_FOLDER));
+				Optional<IAnalysisOptions> op = sourceDataset.getAnalysisOptions();
+				if (op.isPresent()) {
+					op.get().setDetectionFolder(CellularComponent.NUCLEUS,
+							folder.getAbsoluteFile());
+					Optional<HashOptions> srcOptions = op.get()
+							.getDetectionOptions(CellularComponent.NUCLEUS);
+					options.set(srcOptions.get());
+					parent.setRuleSetCollection(op.get().getRuleSetCollection());
+				}
 
-                fireOptionsChangeEvent();
-            }
+				fireOptionsChangeEvent();
+			}
 		};
 	}
 
 	@Override
 	protected ActionListener createOpenActionListener() {
 		return (e) -> {
-			File folder = new File(options.getString(HashOptions.DETECTION_FOLDER));
-			File f = FileSelector.chooseOptionsImportFile(folder);
-			if(f==null)
+
+			File f = FileSelector.chooseOptionsImportFile(null);
+			if (f == null)
 				return;
 
 			try {
@@ -99,9 +105,7 @@ public class CopyNucleusDetectionSettingsFromOpenDatasetPanel extends CopyFromOp
 				options.set(o.getDetectionOptions(CellularComponent.NUCLEUS).get());
 				parent.setRuleSetCollection(o.getRuleSetCollection());
 				parent.setAngleWindowProportion(o.getProfileWindowProportion());
-				
-				// Ensure folder is not overwritted when other options were copied
-				options.setString(HashOptions.DETECTION_FOLDER, folder.getAbsolutePath());
+
 				fireOptionsChangeEvent();
 
 			} catch (XMLReadingException | ComponentCreationException e1) {

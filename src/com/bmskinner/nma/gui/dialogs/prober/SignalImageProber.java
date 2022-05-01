@@ -46,93 +46,92 @@ import com.bmskinner.nma.logging.Loggable;
  */
 @SuppressWarnings("serial")
 public class SignalImageProber extends IntegratedImageProber {
-	
+
 	private static final Logger LOGGER = Logger.getLogger(SignalImageProber.class.getName());
 
-    private static final String DIALOG_TITLE_BAR_LBL = "Signal detection settings";
-    private static final String NEW_NAME_LBL         = "Enter a signal group name";
+	private static final String DIALOG_TITLE_BAR_LBL = "Signal detection settings";
+	private static final String NEW_NAME_LBL = "Enter a signal group name";
 
-    private final HashOptions options;
-    private final IAnalysisDataset dataset;
+	private final HashOptions options;
+	private final IAnalysisDataset dataset;
 
-    /**
-     * Create with a dataset (from which nuclei will be drawn) and a folder of
-     * images to be analysed
-     * 
-     * @param dataset the analysis dataset
-     * @param folder the folder of images
-     */
-    public SignalImageProber(@NonNull final IAnalysisDataset dataset, @NonNull final File folder) {
-        this.dataset = dataset;
-        options = OptionsFactory.makeNuclearSignalOptions(folder).build();
-        
-        Optional<IAnalysisOptions> op = dataset.getAnalysisOptions();
-        if(!op.isPresent())
-        	throw new IllegalArgumentException("Dataset has no options");
-        
-        Optional<HashOptions> nOp = op.get().getDetectionOptions(CellularComponent.NUCLEUS);
-        
-        if(!nOp.isPresent())
-        	throw new IllegalArgumentException("Dataset has no nucleus options");
+	/**
+	 * Create with a dataset (from which nuclei will be drawn) and a folder of
+	 * images to be analysed
+	 * 
+	 * @param dataset the analysis dataset
+	 * @param folder  the folder of images
+	 */
+	public SignalImageProber(@NonNull final IAnalysisDataset dataset, @NonNull final File folder) {
+		this.dataset = dataset;
+		options = OptionsFactory.makeNuclearSignalOptions().build();
 
-        options.setDouble(HashOptions.SCALE, nOp.get().getDouble(HashOptions.SCALE));
+		Optional<IAnalysisOptions> op = dataset.getAnalysisOptions();
+		if (!op.isPresent())
+			throw new IllegalArgumentException("Dataset has no options");
 
+		Optional<HashOptions> nOp = op.get().getDetectionOptions(CellularComponent.NUCLEUS);
 
-        try {
+		if (!nOp.isPresent())
+			throw new IllegalArgumentException("Dataset has no nucleus options");
 
-            // make the panel
-            optionsSettingsPanel = new SignalDetectionSettingsPanel(options);
+		options.setDouble(HashOptions.SCALE, nOp.get().getDouble(HashOptions.SCALE));
 
-            Finder<?> finder = new SignalFinder(op.get(), options, dataset.getCollection());
-            imageProberPanel = new GenericImageProberPanel(folder, finder, this);
-            JPanel footerPanel = createFooter();
+		try {
 
-            this.add(optionsSettingsPanel, BorderLayout.WEST);
-            this.add(imageProberPanel, BorderLayout.CENTER);
-            this.add(footerPanel, BorderLayout.SOUTH);
+			// make the panel
+			optionsSettingsPanel = new SignalDetectionSettingsPanel(options);
 
-            this.setTitle(DIALOG_TITLE_BAR_LBL);
+			Finder<?> finder = new SignalFinder(op.get(), options, dataset.getCollection());
+			imageProberPanel = new GenericImageProberPanel(folder, finder, this);
+			JPanel footerPanel = createFooter();
 
-            optionsSettingsPanel.addProberReloadEventListener(imageProberPanel);
-            imageProberPanel.addPanelUpdatingEventListener(optionsSettingsPanel);
+			this.add(optionsSettingsPanel, BorderLayout.WEST);
+			this.add(imageProberPanel, BorderLayout.CENTER);
+			this.add(footerPanel, BorderLayout.SOUTH);
 
-        } catch (Exception e) {
-            LOGGER.warning("Error launching analysis window");
-            LOGGER.log(Loggable.STACK, e.getMessage(), e);
-            this.dispose();
-        }
+			this.setTitle(DIALOG_TITLE_BAR_LBL);
 
-        this.pack();
-        this.setModal(true);
-        this.setLocationRelativeTo(null); // centre on screen
-        this.setVisible(true);
-    }
+			optionsSettingsPanel.addProberReloadEventListener(imageProberPanel);
+			imageProberPanel.addPanelUpdatingEventListener(optionsSettingsPanel);
 
-    public HashOptions getOptions() {
-        return options;
-    }
+		} catch (Exception e) {
+			LOGGER.warning("Error launching analysis window");
+			LOGGER.log(Loggable.STACK, e.getMessage(), e);
+			this.dispose();
+		}
 
-    @Override
-    protected void okButtonClicked() {
+		this.pack();
+		this.setModal(true);
+		this.setLocationRelativeTo(null); // centre on screen
+		this.setVisible(true);
+	}
 
-        String name = getGroupName();
-        UUID id = UUID.randomUUID();
-        
-        options.setString(HashOptions.SIGNAL_GROUP_NAME, name);
-        options.setString(HashOptions.SIGNAL_GROUP_ID, id.toString());
-    }
+	public HashOptions getOptions() {
+		return options;
+	}
 
-    /**
-     * Get the name of a signal group If blank, requests a new name
-     * 
-     * @return a valid name
-     */
-    private String getGroupName() {
+	@Override
+	protected void okButtonClicked() {
+
+		String name = getGroupName();
+		UUID id = UUID.randomUUID();
+
+		options.setString(HashOptions.SIGNAL_GROUP_NAME, name);
+		options.setString(HashOptions.SIGNAL_GROUP_ID, id.toString());
+	}
+
+	/**
+	 * Get the name of a signal group If blank, requests a new name
+	 * 
+	 * @return a valid name
+	 */
+	private String getGroupName() {
 		try {
 			return inputSupplier.requestString(NEW_NAME_LBL);
 		} catch (RequestCancelledException e) {
 			return getGroupName(); // no, you will provide a name
 		}
-    }
+	}
 
 }

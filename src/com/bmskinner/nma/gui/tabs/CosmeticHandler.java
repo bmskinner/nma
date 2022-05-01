@@ -230,8 +230,8 @@ public class CosmeticHandler {
 		try {
 
 			File currentFolder = d.getAnalysisOptions().orElseThrow(MissingOptionException::new)
-					.getNuclearSignalOptions(signalGroup).orElseThrow(MissingOptionException::new)
-					.getFile(HashOptions.DETECTION_FOLDER);
+					.getDetectionFolder(signalGroup.toString())
+					.orElseThrow(MissingOptionException::new);
 			File newFolder = parent.getInputSupplier()
 					.requestFolder(FileUtils.extantComponent(currentFolder));
 
@@ -278,8 +278,7 @@ public class CosmeticHandler {
 
 		try {
 			File currentFolder = d.getAnalysisOptions().get()
-					.getDetectionOptions(CellularComponent.NUCLEUS).get()
-					.getFile(HashOptions.DETECTION_FOLDER);
+					.getNucleusDetectionFolder().get();
 			File newFolder = parent.getInputSupplier()
 					.requestFolder(FileUtils.extantComponent(currentFolder));
 

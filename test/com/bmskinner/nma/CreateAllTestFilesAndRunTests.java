@@ -18,27 +18,28 @@ import com.bmskinner.nma.logging.Loggable;
 import com.bmskinner.nma.utility.UtilityTestSuite;
 
 /**
- * This suite runs the test file creators, then runs the
- * tests that depend on them
+ * This suite runs the test file creators, then runs the tests that depend on
+ * them
+ * 
  * @author ben
  * @since 1.14.0
  *
  */
 @RunWith(Suite.class)
-@SuiteClasses({ 
-	TestImageDatasetCreator.class, // make test datasets for subsequent tests to read 
-	AnalysisTestSuite.class,
-	ApiTestSuite.class,
-	ComponentTestSuite.class,
-	IoTestSuite.class,
-	UtilityTestSuite.class
-	})
+@SuiteClasses({
+		TestImageDatasetCreator.class, // make test datasets for subsequent tests to read
+		AnalysisTestSuite.class,
+		ApiTestSuite.class,
+		ComponentTestSuite.class,
+		IoTestSuite.class,
+		UtilityTestSuite.class
+})
 public class CreateAllTestFilesAndRunTests {
-	
+
 	static final Logger LOGGER = Logger.getLogger(Loggable.PROJECT_LOGGER);
-	
+
 	static {
-		for(Handler h : LOGGER.getHandlers())
+		for (Handler h : LOGGER.getHandlers())
 			LOGGER.removeHandler(h);
 		Handler h = new ConsoleHandler(new ConsoleFormatter());
 		LOGGER.setLevel(Level.FINE);

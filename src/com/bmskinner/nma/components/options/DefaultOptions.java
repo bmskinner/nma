@@ -16,7 +16,6 @@
  ******************************************************************************/
 package com.bmskinner.nma.components.options;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -222,16 +221,6 @@ public class DefaultOptions implements HashOptions {
 	@Override
 	public void setString(String k, String v) {
 		stringMap.put(k, v);
-	}
-
-	@Override
-	public File getFile(String s) {
-		return new File(stringMap.get(s));
-	}
-
-	@Override
-	public void setFile(String s, File f) {
-		stringMap.put(s, f.getAbsolutePath());
 	}
 
 	@Override
