@@ -326,6 +326,23 @@ public class DefaultOptions implements HashOptions {
 	}
 
 	@Override
+	public void set(String key, Object value) {
+		if (value instanceof Integer i)
+			setInt(key, i);
+		if (value instanceof Float i)
+			setFloat(key, i);
+		if (value instanceof Double i)
+			setDouble(key, i);
+		if (value instanceof Boolean i)
+			setBoolean(key, i);
+		if (value instanceof String i)
+			setString(key, i);
+		if (value instanceof HashOptions i)
+			setSubOptions(key, i);
+
+	}
+
+	@Override
 	public Map<String, Object> getEntries() {
 		Map<String, Object> result = new HashMap<>();
 		addEntries(intMap, result);
