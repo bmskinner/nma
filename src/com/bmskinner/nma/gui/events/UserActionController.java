@@ -214,7 +214,8 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 					acceptor);
 
 		if (event.type().equals(UserActionEvent.SAVE_SELECTED_DATASETS))
-			return new SaveAllDatasets(event.getDatasets(), acceptor);
+			return new SaveAllDatasets(DatasetListManager.getInstance().getSelectedDatasets(),
+					acceptor);
 
 		if (event.type().equals(UserActionEvent.CURATE_DATASET))
 			return () -> {
@@ -349,7 +350,8 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 
 		if (UserActionEvent.DELETE_DATASET.equals(event.type())) {
 
-			DatasetDeleter deleter = new DatasetDeleter(event.getDatasets());
+			DatasetDeleter deleter = new DatasetDeleter(
+					DatasetListManager.getInstance().getSelectedDatasets());
 			ThreadManager.getInstance().submit(deleter);
 		}
 

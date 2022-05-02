@@ -18,10 +18,12 @@ package com.bmskinner.nma.gui.actions;
 
 import java.io.File;
 import java.util.Optional;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 
 import com.bmskinner.nma.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nma.analysis.IAnalysisMethod;
@@ -53,7 +55,13 @@ public class AddNuclearSignalAction extends SingleDatasetResultAction {
 
 	public AddNuclearSignalAction(@NonNull IAnalysisDataset dataset,
 			@NonNull ProgressBarAcceptor acceptor) {
+		this(dataset, acceptor, null);
+	}
+
+	public AddNuclearSignalAction(@NonNull IAnalysisDataset dataset,
+			@NonNull ProgressBarAcceptor acceptor, @Nullable CountDownLatch latch) {
 		super(dataset, PROGRESS_BAR_LABEL, acceptor);
+		setLatch(latch);
 	}
 
 	@Override
@@ -72,7 +80,7 @@ public class AddNuclearSignalAction extends SingleDatasetResultAction {
 			try {
 				folder = is.requestFolder("Choose FISH signal image folder", defaultDir);
 			} catch (RequestCancelledException e) {
-				cancel();
+				super.finished();
 				return;
 			}
 
@@ -93,11 +101,11 @@ public class AddNuclearSignalAction extends SingleDatasetResultAction {
 				worker.addPropertyChangeListener(this);
 				ThreadManager.getInstance().submit(worker);
 			} else {
-				this.cancel();
+				super.finished();
 			}
 
 		} catch (Exception e) {
-			this.cancel();
+			super.finished();
 			LOGGER.warning("Error in signal detection");
 			LOGGER.log(Loggable.STACK, "Error in signal detection", e);
 		}
@@ -113,13 +121,18 @@ public class AddNuclearSignalAction extends SingleDatasetResultAction {
 					new UserActionEvent(this, UserActionEvent.REFOLD_CONSENSUS,
 							r.getFirstDataset()));
 
+			// Add the new signal group
 			UIController.getInstance().fireDatasetAdded(r.getFirstDataset());
+
+			// Update the signals in the root dataset
+			UIController.getInstance().fireNuclearSignalUpdated(dataset);
 
 		} catch (InterruptedException | ExecutionException e) {
 			LOGGER.warning("Error getting signal dataset");
 			Thread.currentThread().interrupt();
+		} finally {
+			super.finished();
 		}
-		cancel();
 	}
 
 }
