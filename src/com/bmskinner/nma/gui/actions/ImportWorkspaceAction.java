@@ -17,43 +17,27 @@
 package com.bmskinner.nma.gui.actions;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
 import java.util.logging.Logger;
 
-import javax.swing.JFileChooser;
-import javax.swing.filechooser.FileNameExtensionFilter;
-
 import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.jdt.annotation.Nullable;
-import org.jdom2.JDOMException;
+import org.jdom2.Document;
 
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
+import com.bmskinner.nma.components.workspaces.DefaultWorkspace;
 import com.bmskinner.nma.components.workspaces.IWorkspace;
 import com.bmskinner.nma.core.DatasetListManager;
-import com.bmskinner.nma.core.GlobalOptions;
 import com.bmskinner.nma.gui.ProgressBarAcceptor;
 import com.bmskinner.nma.gui.events.UIController;
-import com.bmskinner.nma.io.WorkspaceImporter;
-import com.bmskinner.nma.io.Io.Importer;
+import com.bmskinner.nma.io.GenericFileImporter;
 
 public class ImportWorkspaceAction extends VoidResultAction {
 
 	private static final Logger LOGGER = Logger.getLogger(ImportWorkspaceAction.class.getName());
 
+	private final Document doc;
 	private final File file;
 	private static final @NonNull String PROGRESS_BAR_LABEL = "Opening workspace...";
-	private static final String DEFAULT_FILE_TYPE = "Nuclear morphology workspace";
-
-	/**
-	 * Create an import action for the given main window. This will create a dialog
-	 * asking for the file to open.
-	 * 
-	 * @param mw the main window to which a progress bar will be attached
-	 */
-	public ImportWorkspaceAction(@NonNull final ProgressBarAcceptor acceptor) {
-		this(acceptor, null);
-	}
 
 	/**
 	 * Create an import action for the given main window. Specify the file to be
@@ -62,25 +46,32 @@ public class ImportWorkspaceAction extends VoidResultAction {
 	 * @param mw   the main window to which a progress bar will be attached
 	 * @param file the workspace file to open
 	 */
-	public ImportWorkspaceAction(@NonNull final ProgressBarAcceptor acceptor, @Nullable File file) {
+	public ImportWorkspaceAction(@NonNull final ProgressBarAcceptor acceptor,
+			@NonNull Document doc, @NonNull File file) {
 		super(PROGRESS_BAR_LABEL, acceptor);
+		this.doc = doc;
 		this.file = file;
 	}
 
 	@Override
 	public void run() {
 		setProgressBarIndeterminate();
-		File f = file == null ? selectFile() : file;
-		if (f != null) {
+		setProgressMessage(PROGRESS_BAR_LABEL);
 
-			IWorkspace w;
-			try {
-				w = WorkspaceImporter.importWorkspace(f);
+		try {
+
+			if (doc != null) {
+				IWorkspace w = new DefaultWorkspace(file, doc.getRootElement());
 				DatasetListManager.getInstance().addWorkspace(w);
 
 				for (File dataFile : w.getFiles()) {
+					if (!dataFile.exists())
+						continue;
+
+					// Try to load the dataset and wait for success
 					CountDownLatch l = new CountDownLatch(1);
-					new ImportDatasetAction(progressAcceptors.get(0), dataFile, l).run();
+					new GenericFileImporter(dataFile, progressAcceptors.get(0), l,
+							IWorkspace.XML_WORKSPACE).run();
 					l.await();
 
 					// Find the dataset just added from file name
@@ -92,40 +83,12 @@ public class ImportWorkspaceAction extends VoidResultAction {
 					UIController.getInstance().fireDatasetAdded(w, added);
 				}
 
-				setProgressMessage(PROGRESS_BAR_LABEL);
-			} catch (JDOMException | IOException | InterruptedException e) {
-				LOGGER.warning("Unable to read workspace file:" + e.getMessage());
-				cancel();
 			}
+		} catch (InterruptedException e) {
+			LOGGER.fine("Import workspace interrupted: " + e.getMessage());
+		} finally {
+			super.finished();
 		}
-		cancel();
+
 	}
-
-	/**
-	 * Get the file to be loaded
-	 * 
-	 * @return
-	 */
-	private File selectFile() {
-
-		FileNameExtensionFilter filter = new FileNameExtensionFilter(DEFAULT_FILE_TYPE,
-				Importer.WRK_FILE_EXTENSION_NODOT);
-
-		File defaultDir = GlobalOptions.getInstance().getDefaultDir();
-		JFileChooser fc = new JFileChooser("Select a workspace file...");
-		if (defaultDir.exists()) {
-			fc = new JFileChooser(defaultDir);
-		}
-		fc.setFileFilter(filter);
-
-		int returnVal = fc.showOpenDialog(fc);
-		if (returnVal != 0)
-			return null;
-		File file = fc.getSelectedFile();
-
-		if (file.isDirectory())
-			return null;
-		return file;
-	}
-
 }

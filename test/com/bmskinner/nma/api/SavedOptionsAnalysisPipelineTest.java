@@ -62,7 +62,7 @@ public class SavedOptionsAnalysisPipelineTest extends AnalysisPipelineTest {
 		new SavedOptionsAnalysisPipeline(imageFolder, xmlFile, outputFolder).call();
 		assertTrue("Analysis output folder "+outputFolder.getAbsolutePath(), outputFolder.exists());
 		
-		File expectedFile = new File(outputFolder, imageFolder.getName()+Io.SAVE_FILE_EXTENSION);
+		File expectedFile = new File(outputFolder, imageFolder.getName()+Io.NMD_FILE_EXTENSION);
 		assertTrue("Output file should exist: "+expectedFile.getAbsolutePath(), expectedFile.exists());
 		assertTrue(validateDataset(expectedFile));
 	}
@@ -137,8 +137,8 @@ public class SavedOptionsAnalysisPipelineTest extends AnalysisPipelineTest {
 //		assertTrue("XML options file"+xmlFile.getAbsolutePath(), xmlFile.exists());
 //		
 //		// Remove expected output files if they exist
-//		File expectedFile1 = new File(TestResources.DATASET_FOLDER, TestResources.MULTIPLE1 + Io.SAVE_FILE_EXTENSION);
-//		File expectedFile2 = new File(TestResources.DATASET_FOLDER, TestResources.MULTIPLE2 + Io.SAVE_FILE_EXTENSION);
+//		File expectedFile1 = new File(TestResources.DATASET_FOLDER, TestResources.MULTIPLE1 + Io.NMD_FILE_EXTENSION);
+//		File expectedFile2 = new File(TestResources.DATASET_FOLDER, TestResources.MULTIPLE2 + Io.NMD_FILE_EXTENSION);
 //		
 //		expectedFile1.delete();
 //		expectedFile2.delete();

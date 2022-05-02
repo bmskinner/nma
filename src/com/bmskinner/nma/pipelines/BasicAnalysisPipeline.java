@@ -60,8 +60,8 @@ public class BasicAnalysisPipeline {
 		String outputFolderName = anTime.format(DateTimeFormatter.ofPattern("YYYY-MM-dd_HH-mm-ss"));
 		File outFolder = new File(folder, outputFolderName);
 		outFolder.mkdirs();
-		File saveFile = new File(outFolder, folder.getName() + Io.SAVE_FILE_EXTENSION);
-		runNewAnalysis(folder.getAbsolutePath(), op, saveFile);
+		File saveFile = new File(outFolder, folder.getName() + Io.NMD_FILE_EXTENSION);
+		runNewAnalysis(folder, op, saveFile);
 	}
 
 	/**
@@ -73,7 +73,7 @@ public class BasicAnalysisPipeline {
 	 * @return the new dataset
 	 * @throws Exception
 	 */
-	private void runNewAnalysis(String folder, IAnalysisOptions op, File saveFile)
+	private void runNewAnalysis(File folder, IAnalysisOptions op, File saveFile)
 			throws Exception {
 
 		if (!op.getDetectionFolder(CellularComponent.NUCLEUS)

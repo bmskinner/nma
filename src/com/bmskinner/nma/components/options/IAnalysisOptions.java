@@ -35,6 +35,8 @@ import com.bmskinner.nma.io.XmlSerializable;
  */
 public interface IAnalysisOptions extends XmlSerializable {
 
+	String XML_ANALYSIS_OPTIONS = "AnalysisOptions";
+
 	// Standard detection keys are in CellularComponent
 	String SIGNAL_GROUP = "SignalGroup_";
 

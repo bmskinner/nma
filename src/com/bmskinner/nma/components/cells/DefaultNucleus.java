@@ -53,7 +53,8 @@ import ij.gui.Roi;
  * @since 1.13.3
  *
  */
-public class DefaultNucleus extends ProfileableCellularComponent implements Nucleus, NuclearSignalAddedListener {
+public class DefaultNucleus extends ProfileableCellularComponent
+		implements Nucleus, NuclearSignalAddedListener {
 
 	private static final Logger LOGGER = Logger.getLogger(DefaultNucleus.class.getName());
 
@@ -83,8 +84,10 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
 	 * @param id           the id of the component. Only use when deserialising!
 	 * @throws ComponentCreationException
 	 */
-	public DefaultNucleus(@NonNull Roi roi, @NonNull IPoint centreOfMass, File source, int channel, int x, int y,
-			int number, @Nullable UUID id, RuleSetCollection rsc) throws ComponentCreationException {
+	public DefaultNucleus(@NonNull Roi roi, @NonNull IPoint centreOfMass, File source, int channel,
+			int x, int y,
+			int number, @Nullable UUID id, RuleSetCollection rsc)
+			throws ComponentCreationException {
 		super(roi, centreOfMass, source, channel, x, y, id, rsc);
 		this.nucleusNumber = number;
 		signalCollection.addNuclearSignalAddedListener(this);
@@ -101,7 +104,8 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
 	 * @param centreOfMass
 	 * @throws ComponentCreationException
 	 */
-	public DefaultNucleus(@NonNull Roi roi, @NonNull IPoint centreOfMass, @NonNull File f, int channel, int x, int y,
+	public DefaultNucleus(@NonNull Roi roi, @NonNull IPoint centreOfMass, @NonNull File f,
+			int channel, int x, int y,
 			int number, RuleSetCollection rsc) throws ComponentCreationException {
 		this(roi, centreOfMass, f, channel, x, y, number, null, rsc);
 	}
@@ -113,7 +117,8 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
 	 * @throws UnprofilableObjectException
 	 * @throws ComponentCreationException
 	 */
-	protected DefaultNucleus(@NonNull Nucleus n) throws UnprofilableObjectException, ComponentCreationException {
+	protected DefaultNucleus(@NonNull Nucleus n)
+			throws UnprofilableObjectException, ComponentCreationException {
 		super(n);
 		nucleusNumber = n.getNucleusNumber();
 		signalCollection = n.getSignalCollection().duplicate();
@@ -192,33 +197,6 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
 		signalCollection.getSignals(channel).get(signal).setMeasurement(Measurement.ANGLE, angle);
 	}
 
-	// do not move this into SignalCollection - it is overridden in
-	// RodentSpermNucleus
-//	@Override
-//	public void calculateSignalAnglesFromPoint(@NonNull IPoint p) {
-//
-//		try {
-//			getOrientedNucleus();
-//		} catch (MissingLandmarkException | ComponentCreationException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//
-//		for (UUID signalGroup : signalCollection.getSignalGroupIds()) {
-//
-//			if (signalCollection.hasSignal(signalGroup)) {
-//				for (INuclearSignal s : signalCollection.getSignals(signalGroup)) {
-//
-//					double angle = this.getCentreOfMass().findAbsoluteAngle(p, s.getCentreOfMass());
-//					if (orientedNucleus.getFlipState().h()) // account for horizontal flip
-//						s.setMeasurement(Measurement.ANGLE, 180 - angle);
-//					else
-//						s.setMeasurement(Measurement.ANGLE, angle);
-//				}
-//			}
-//		}
-//	}
-
 	@Override
 	public void setLandmark(@NonNull OrientationMark lm, int newLmIndex)
 			throws MissingProfileException, MissingLandmarkException, ProfileException {
@@ -231,7 +209,8 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
 	}
 
 	@Override
-	public void setSegments(@NonNull List<IProfileSegment> segs) throws MissingLandmarkException, ProfileException {
+	public void setSegments(@NonNull List<IProfileSegment> segs)
+			throws MissingLandmarkException, ProfileException {
 		super.setSegments(segs);
 
 		// New segments must be drawn when we get the nucleus
@@ -239,7 +218,16 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
 	}
 
 	@Override
-	public Nucleus getOrientedNucleus() throws MissingLandmarkException, ComponentCreationException {
+	public void clearMeasurements() {
+		super.clearMeasurements();
+
+		// Ensure recalculation is on a fresh nucleus
+		orientedNucleus = null;
+	}
+
+	@Override
+	public Nucleus getOrientedNucleus()
+			throws MissingLandmarkException, ComponentCreationException {
 		// Make an exact copy of the nucleus
 		// and cache
 		if (orientedNucleus == null) {
@@ -389,7 +377,8 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
 			return false;
 		DefaultNucleus other = (DefaultNucleus) obj;
 
-		return nucleusNumber == other.nucleusNumber && Objects.equals(signalCollection, other.signalCollection);
+		return nucleusNumber == other.nucleusNumber
+				&& Objects.equals(signalCollection, other.signalCollection);
 	}
 
 	@Override

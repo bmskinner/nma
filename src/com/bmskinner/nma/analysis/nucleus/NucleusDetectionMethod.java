@@ -71,21 +71,6 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
 	private final List<IAnalysisDataset> datasets = new ArrayList<>();
 
 	/**
-	 * Construct a detector on the given folder, and output the results to a new
-	 * folder in the image directory, with the given name. The source image
-	 * directory is taken from the nucleus detection options
-	 * 
-	 * @param outputFolder the name of the folder to store results
-	 * @param options      the options to detect with
-	 * @throws AnalysisMethodException
-	 */
-	public NucleusDetectionMethod(@NonNull String outputFolder, @NonNull IAnalysisOptions options)
-			throws AnalysisMethodException {
-		this(new File(options.getDetectionOptions(CellularComponent.NUCLEUS).get()
-				.getString(HashOptions.DETECTION_FOLDER), outputFolder), options);
-	}
-
-	/**
 	 * Construct a detector with the given options and output the results to the
 	 * given output folder
 	 * 
@@ -187,7 +172,7 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
 
 			File folder = entry.getKey();
 			IAnalysisDataset dataset = new DefaultAnalysisDataset(collection,
-					new File(outputFolder, collection.getName() + Io.SAVE_FILE_EXTENSION));
+					new File(outputFolder, collection.getName() + Io.NMD_FILE_EXTENSION));
 
 			// Ensure the actual folder of images is set in the analysis options, not a root
 			// folder

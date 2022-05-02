@@ -35,6 +35,8 @@ public class UserActionEvent extends EventObject {
 
 	public static final String POST_FISH_MAPPING = "PostFISHRemappingAction";
 
+	public static final String GENERIC_FILE_IMPORT = "FileImport";
+
 	public static final String EXPORT_STATS = "ExportStatsAction";
 	public static final String EXPORT_PROFILES = "ExportProfilesAction";
 	public static final String EXPORT_OUTLINES = "ExportOutlinesAction";

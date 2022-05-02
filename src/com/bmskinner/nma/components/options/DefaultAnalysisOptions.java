@@ -43,8 +43,6 @@ import com.bmskinner.nma.io.Io;
  */
 public class DefaultAnalysisOptions implements IAnalysisOptions {
 
-	private static final String XML_ANALYSIS_OPTIONS = "AnalysisOptions";
-
 	private static final String XML_SECONDARY = "Secondary";
 
 	private static final String XML_RULE_SET_COLLECTION = "RuleSetCollection";

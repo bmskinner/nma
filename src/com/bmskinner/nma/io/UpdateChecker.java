@@ -36,7 +36,7 @@ public class UpdateChecker {
 	 * @return the latest version found. Will be the current version on error.
 	 */
 	public static Version fetchLatestVersion() {
-		Version latestVersion = Version.v_1_13_0;
+		Version latestVersion = new Version(1, 13, 0);
 		try {
 
 			Pattern p = Pattern.compile(NAME_PATTERN);

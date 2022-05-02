@@ -173,16 +173,6 @@ public class RuleSet implements XmlSerializable {
 
 	/**
 	 * Create a RuleSet that describes how to find the RP in pig sperm nuclear
-	 * profiles
-	 * 
-	 * @return
-	 */
-	public static RuleSet pigSpermRPBackupRuleSet() {
-		return new RuleSetBuilder(ProfileType.ANGLE).valueIsMoreThan(180).isMaximum().build();
-	}
-
-	/**
-	 * Create a RuleSet that describes how to find the RP in pig sperm nuclear
 	 * profiles with poorly identifiable tails
 	 * 
 	 * @return
@@ -195,12 +185,6 @@ public class RuleSet implements XmlSerializable {
 				.build();
 	}
 
-	public static RuleSet pigSpermOPRuleSet() {
-		return new RuleSetBuilder(ProfileType.ANGLE)
-				.isZeroIndex()
-				.build();
-	}
-
 	/**
 	 * Create a RuleSet that describes how to find the min diameter left point in
 	 * pig sperm
@@ -209,7 +193,6 @@ public class RuleSet implements XmlSerializable {
 	 */
 	public static RuleSet pigSpermLHRuleSet() {
 		return new RuleSetBuilder(ProfileType.DIAMETER)
-				.valueIsLessThan(0.6)
 				.indexIsLessThan(0.5)
 				.isMinimum()
 				.build();
@@ -223,7 +206,6 @@ public class RuleSet implements XmlSerializable {
 	 */
 	public static RuleSet pigSpermRHRuleSet() {
 		return new RuleSetBuilder(ProfileType.DIAMETER)
-				.valueIsLessThan(0.6)
 				.indexIsMoreThan(0.5)
 				.isMinimum()
 				.build();

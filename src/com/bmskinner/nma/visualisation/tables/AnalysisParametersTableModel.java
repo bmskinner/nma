@@ -1,6 +1,5 @@
 package com.bmskinner.nma.visualisation.tables;
 
-import java.io.File;
 import java.text.DecimalFormat;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -96,7 +95,7 @@ public class AnalysisParametersTableModel extends DatasetTableModel {
 			case 2 -> createNucleusSizeFilterString(options);
 			case 3 -> createNucleusCircFilterString(options);
 			case 4 -> createAnalysisRunTimeString(mainOptions);
-			case 5 -> createSourceFolderString(options);
+			case 5 -> createSourceFolderString(mainOptions);
 			case 6 -> mainOptions.getRuleSetCollection().getName();
 			case 7 -> String.valueOf(mainOptions.getProfileWindowProportion());
 			case 8 -> datasets.get(c - 1).getVersionCreated().toString();
@@ -217,8 +216,8 @@ public class AnalysisParametersTableModel extends DatasetTableModel {
 		return builder.toString();
 	}
 
-	private String createSourceFolderString(@NonNull HashOptions options) {
-		return new File(options.getString(HashOptions.DETECTION_FOLDER)).getAbsolutePath();
+	private String createSourceFolderString(@NonNull IAnalysisOptions options) {
+		return options.getNucleusDetectionFolder().get().getAbsolutePath();
 	}
 
 	@Override

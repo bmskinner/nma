@@ -31,116 +31,115 @@ import com.bmskinner.nma.logging.Loggable;
  * @since 1.13.4
  *
  */
-public class DefaultAnalysisWorker extends SwingWorker<IAnalysisResult, Long> implements IAnalysisWorker {
-	
+public class DefaultAnalysisWorker extends SwingWorker<IAnalysisResult, Long>
+		implements IAnalysisWorker {
+
 	private static final String ERROR_PROPERTY = "Error";
 
 	private static final Logger LOGGER = Logger.getLogger(DefaultAnalysisWorker.class.getName());
 
-    private long progressTotal;     // the maximum value for the progress bar
-    private long progressCount = 0; // the current value for the progress bar
+	private long progressTotal; // the maximum value for the progress bar
+	private long progressCount = 0; // the current value for the progress bar
 
-    protected final IAnalysisMethod method;
+	protected final IAnalysisMethod method;
 
-    /**
-     * Construct with a method. The progress bar total will be set to -1 - i.e.
-     * the bar will remain indeterminate until the method completes
-     * 
-     * @param m the method to run
-     */
-    public DefaultAnalysisWorker(final IAnalysisMethod m) {
-        this(m, -1);
-    }
+	/**
+	 * Construct with a method. The progress bar total will be set to -1 - i.e. the
+	 * bar will remain indeterminate until the method completes
+	 * 
+	 * @param m the method to run
+	 */
+	public DefaultAnalysisWorker(final IAnalysisMethod m) {
+		this(m, -1);
+	}
 
-    /**
-     * Construct with a method and a total for the progress bar.
-     * 
-     * @param m the method to run
-     * @param progress the length of the progress bar. If negative, the bar will be indeterminate.
-     */
-    public DefaultAnalysisWorker(final IAnalysisMethod m, final long progress) {
-        method = m;
-        method.addProgressListener(this);
-        progressTotal = progress;
-    }
+	/**
+	 * Construct with a method and a total for the progress bar.
+	 * 
+	 * @param m        the method to run
+	 * @param progress the length of the progress bar. If negative, the bar will be
+	 *                 indeterminate.
+	 */
+	public DefaultAnalysisWorker(final IAnalysisMethod m, final long progress) {
+		method = m;
+		method.addProgressListener(this);
+		progressTotal = progress;
+	}
 
-    @Override
-    protected final IAnalysisResult doInBackground() throws Exception {
+	@Override
+	protected final IAnalysisResult doInBackground() throws Exception {
 
-        // Set the bar
-        fireIndeterminate();
+		// Set the bar
+		fireIndeterminate();
 
-        // do the analysis and wait for the result
-        return method.call();
-    }
+		// do the analysis and wait for the result
+		return method.call();
+	}
 
-    @Override
-    public final void progressEventReceived(final ProgressEvent event) {
+	@Override
+	public final void progressEventReceived(final ProgressEvent event) {
 
-        if(this.isCancelled())
-            method.cancel();
-        
-        if (event.getMessage() == ProgressEvent.SET_TOTAL_PROGRESS) {
-        	progressTotal = event.getValue();
-        	return;
-        }
+		if (this.isCancelled())
+			method.cancel();
 
-        if (event.getMessage() == ProgressEvent.SET_INDETERMINATE) {
-        	fireIndeterminate();
-        	return;
-        }
+		if (event.getMessage() == ProgressEvent.SET_TOTAL_PROGRESS) {
+			progressTotal = event.getValue();
+			return;
+		}
 
-        if(event.getMessage() == ProgressEvent.INCREASE_BY_VALUE)
-        	progressCount = event.getValue();
-        else
-        	progressCount++;
+		if (event.getMessage() == ProgressEvent.SET_INDETERMINATE) {
+			fireIndeterminate();
+			return;
+		}
 
-        if (progressTotal >= 0)
-        	publish(progressCount);
-    }
+		if (event.getMessage() == ProgressEvent.INCREASE_BY_VALUE)
+			progressCount = event.getValue();
+		else
+			progressCount++;
 
-    @Override
-    protected final void process(List<Long> integers) {
-        long amount = integers.get(integers.size() - 1);
-        int percent = (int) ((double) amount / (double) progressTotal * 100);
-        if (percent >= 0 && percent <= 100) {
-            setProgress(percent); // the integer representation of the percent
-        }
-    }
+		if (progressTotal >= 0)
+			publish(progressCount);
+	}
 
-    private void fireIndeterminate() {
-        firePropertyChange(IAnalysisWorker.INDETERMINATE_MSG, getProgress(), IAnalysisWorker.INDETERMINATE);
-    }
+	@Override
+	protected final void process(List<Long> integers) {
+		long amount = integers.get(integers.size() - 1);
+		int percent = (int) ((double) amount / (double) progressTotal * 100);
+		if (percent >= 0 && percent <= 100) {
+			setProgress(percent); // the integer representation of the percent
+		}
+	}
 
-    @Override
-    public void done() {
-        try {
+	private void fireIndeterminate() {
+		firePropertyChange(IAnalysisWorker.INDETERMINATE_MSG, getProgress(),
+				IAnalysisWorker.INDETERMINATE);
+	}
 
-            if (this.get() != null) {
-                firePropertyChange(FINISHED_MSG, getProgress(), IAnalysisWorker.FINISHED);
+	@Override
+	public void done() {
+		try {
 
-            } else {
-                firePropertyChange(ERROR_MSG, getProgress(), IAnalysisWorker.ERROR);
-            }
+			if (this.get() != null) {
+				firePropertyChange(FINISHED_MSG, getProgress(), IAnalysisWorker.FINISHED);
 
-        } catch (StackOverflowError e) {
-            LOGGER.warning("Stack overflow detected! Close the software and restart.");
-            LOGGER.log(Loggable.STACK, "Stack overflow in worker", e);
-            firePropertyChange(ERROR_PROPERTY, getProgress(), IAnalysisWorker.ERROR);
-        } catch (InterruptedException e) {
-            LOGGER.warning("Task was interrupted: " + e.getMessage());
-            LOGGER.log(Loggable.STACK, "Interruption to swing worker", e);
-            firePropertyChange(ERROR_PROPERTY, getProgress(), IAnalysisWorker.ERROR);
-            Thread.currentThread().interrupt();
-        } catch (ExecutionException e) {
-            LOGGER.warning("Error completing task: " + e.getMessage());
-            LOGGER.log(Loggable.STACK, "Execution error in swing worker", e);
-            Throwable cause = e.getCause();
-            LOGGER.warning("Causing error: " + cause.getMessage());
-            LOGGER.log(Loggable.STACK, "Causing error: ", cause);
-            firePropertyChange(ERROR_PROPERTY, getProgress(), IAnalysisWorker.ERROR);
-        }
+			} else {
+				firePropertyChange(ERROR_MSG, getProgress(), IAnalysisWorker.ERROR);
+			}
 
-    }
+		} catch (StackOverflowError e) {
+			LOGGER.warning("Stack overflow detected! Close the software and restart.");
+			LOGGER.log(Loggable.STACK, "Stack overflow in worker", e);
+			firePropertyChange(ERROR_PROPERTY, getProgress(), IAnalysisWorker.ERROR);
+		} catch (InterruptedException e) {
+			LOGGER.warning("Task was interrupted: " + e.getMessage());
+			LOGGER.log(Loggable.STACK, "Interruption to swing worker", e);
+			firePropertyChange(ERROR_PROPERTY, getProgress(), IAnalysisWorker.ERROR);
+			Thread.currentThread().interrupt();
+		} catch (ExecutionException e) {
+			LOGGER.warning("Error completing task: " + e.getCause().getMessage());
+			firePropertyChange(ERROR_PROPERTY, getProgress(), IAnalysisWorker.ERROR);
+		}
+
+	}
 
 }

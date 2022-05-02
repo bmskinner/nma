@@ -453,16 +453,13 @@ public class RuleSetCollection implements XmlSerializable {
 	public static RuleSetCollection pigSpermRuleSetCollection() {
 
 		Landmark rp = new DefaultLandmark("Tail socket");
-		Landmark lh = new DefaultLandmark("Body left");
-		Landmark rh = new DefaultLandmark("Body right");
 
-		RuleSetCollection r = new RuleSetCollection("Pig sperm", rp, lh, rh, null, null, null, rp,
-				PriorityAxis.X,
+		RuleSetCollection r = new RuleSetCollection("Pig sperm", rp, null, null, null, null, null,
+				rp,
+				PriorityAxis.Y,
 				RuleApplicationType.VIA_MEDIAN);
 
 		r.addRuleSet(OrientationMark.REFERENCE, RuleSet.pigSpermRPRuleSet());
-		r.addRuleSet(OrientationMark.LEFT, RuleSet.pigSpermLHRuleSet());
-		r.addRuleSet(OrientationMark.RIGHT, RuleSet.pigSpermRHRuleSet());
 
 		for (Measurement m : Measurement.getRoundNucleusStats())
 			r.addMeasurableValue(m);

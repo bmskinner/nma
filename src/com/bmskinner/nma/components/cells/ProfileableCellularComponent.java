@@ -299,8 +299,6 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 		// segments along until the old RP boundary segment is at the new RP.
 		int oldRP = profileLandmarks.get(land);
 
-//		LOGGER.fine("Setting RP to " + newLmIndex + " from " + oldRP);
-
 		// This profile has segments starting from the old RP
 		ISegmentedProfile p = new DefaultSegmentedProfile(profileMap.get(ProfileType.ANGLE),
 				segments);
@@ -435,11 +433,6 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 		int lmIndex = profileLandmarks.get(lm);
 		return profileMap.get(type).startFrom(lmIndex);
 	}
-
-	/*
-	 * ############################################# Methods implementing the
-	 * Profileable interface #############################################
-	 */
 
 	@Override
 	public boolean isLocked() {

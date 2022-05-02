@@ -122,7 +122,7 @@ public class DatasetExportMethod extends SingleDatasetAnalysisMethod {
 			return;
 
 		File backupFile = new File(saveFile.getParent(),
-				saveFile.getName().replaceAll(Io.SAVE_FILE_EXTENSION,
+				saveFile.getName().replaceAll(Io.NMD_FILE_EXTENSION,
 						Io.BACKUP_FILE_EXTENSION));
 		try {
 			copyFile(saveFile, backupFile);

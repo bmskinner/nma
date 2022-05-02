@@ -28,7 +28,6 @@ import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.profiles.Landmark;
 import com.bmskinner.nma.components.rules.OrientationMark;
 import com.bmskinner.nma.io.DatasetExportMethod;
-import com.bmskinner.nma.io.DatasetImportMethod;
 import com.bmskinner.nma.io.SampleDatasetReader;
 
 public class DatasetMergeMethodTest {
@@ -222,8 +221,7 @@ public class DatasetMergeMethodTest {
 				.then(new DatasetExportMethod(merged, f3))
 				.call();
 
-		IAnalysisDataset d3 = new DatasetImportMethod(f3)
-				.call().getFirstDataset();
+		IAnalysisDataset d3 = SampleDatasetReader.openDataset(f3);
 
 		ComponentTester.testDuplicatesByField("Merged dataset should be equal after unmarshalling",
 				merged, d3);
@@ -289,8 +287,7 @@ public class DatasetMergeMethodTest {
 				.then(new DatasetExportMethod(merged, f3))
 				.call();
 
-		IAnalysisDataset d3 = new DatasetImportMethod(f3)
-				.call().getFirstDataset();
+		IAnalysisDataset d3 = SampleDatasetReader.openDataset(f3);
 
 		ComponentTester.testDuplicatesByField("Merged dataset should be equal after unmarshalling",
 				merged, d3);

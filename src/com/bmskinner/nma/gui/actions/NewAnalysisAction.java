@@ -106,23 +106,22 @@ public class NewAnalysisAction extends VoidResultAction {
 
 		if (analysisSetup.isOk()) {
 
-			Optional<HashOptions> op = options.getDetectionOptions(CellularComponent.NUCLEUS);
-			if (!op.isPresent()) {
+			Optional<File> detectionFolder = options.getDetectionFolder(CellularComponent.NUCLEUS);
+			if (!detectionFolder.isPresent()) {
 				cancel();
 				return;
 			}
 
-			File directory = new File(op.get().getString(HashOptions.DETECTION_FOLDER));
-
-			LOGGER.info("Directory: " + directory.getName());
+			LOGGER.info("Directory: " + detectionFolder.get().getName());
 
 			Instant inst = Instant.ofEpochMilli(options.getAnalysisTime());
 			LocalDateTime anTime = LocalDateTime.ofInstant(inst, ZoneOffset.systemDefault());
-			String outputFolderName = anTime
-					.format(DateTimeFormatter.ofPattern("YYYY-MM-dd_HH-mm-ss"));
+
+			File outputFolder = new File(detectionFolder.get(), anTime
+					.format(DateTimeFormatter.ofPattern("YYYY-MM-dd_HH-mm-ss")));
 
 			try {
-				IAnalysisMethod m = new NucleusDetectionMethod(outputFolderName, options);
+				IAnalysisMethod m = new NucleusDetectionMethod(outputFolder, options);
 				worker = new DefaultAnalysisWorker(m);
 				worker.addPropertyChangeListener(this);
 				ThreadManager.getInstance().submit(worker);

@@ -23,7 +23,6 @@ import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.jdom2.Document;
-import org.jdom2.Element;
 
 import com.bmskinner.nma.components.workspaces.IWorkspace;
 import com.bmskinner.nma.core.DatasetListManager;
@@ -50,23 +49,7 @@ public class WorkspaceExporter extends XMLWriter implements Io {
 			if (exportFile.exists())
 				Files.delete(exportFile.toPath());
 
-			// root element
-			Element rootElement = new Element(IWorkspace.WORKSPACE_ELEMENT)
-					.setAttribute(IWorkspace.WORKSPACE_NAME, w.getName());
-
-			// Add datasets
-			Element datasetsElement = new Element(IWorkspace.DATASETS_ELEMENT);
-			for (File f : w.getFiles()) {
-				Element dataset = new Element("dataset");
-				Element datasetPath = new Element(IWorkspace.DATASET_PATH);
-
-				datasetPath.setText(f.getAbsolutePath());
-				dataset.addContent(datasetPath);
-				datasetsElement.addContent(dataset);
-			}
-			rootElement.addContent(datasetsElement);
-
-			Document doc = new Document(rootElement);
+			Document doc = new Document(w.toXmlElement());
 
 			writeXML(doc, exportFile);
 

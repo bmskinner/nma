@@ -47,6 +47,8 @@ import com.bmskinner.nma.utility.FileUtils;
  */
 public interface IAnalysisDataset extends XmlSerializable {
 
+	String XML_ANALYSIS_DATASET = "AnalysisDataset";
+
 	/**
 	 * Get the ID of the dataset
 	 * 

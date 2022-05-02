@@ -620,19 +620,15 @@ public class DatasetEditingPanel extends ChartDetailPanel
 			List<Landmark> tags = activeDataset().getCollection().getProfileCollection()
 					.getLandmarks();
 
-			List<OrientationMark> marks = activeDataset().getCollection().getProfileCollection()
-					.getOrientationMarks();
-
 			Collections.sort(tags);
+
 			Landmark rp = activeDataset().getCollection().getProfileCollection()
 					.getLandmark(OrientationMark.REFERENCE);
 
-			for (Landmark tag : tags) {
-				if (rp.equals(tag))
-					continue;
+			for (Landmark lm : tags) {
 
 				// Colour the menu item by tag colour
-				JMenuItem item = new JMenuItem("Move " + tag.toString().toLowerCase() + " here");
+				JMenuItem item = new JMenuItem("Move " + lm.toString().toLowerCase() + " here");
 //				item.setBorder(BorderFactory.createLineBorder(ColourSelecter.getColour(tag), 2));
 				item.setBackground(Color.DARK_GRAY);
 				item.setBorderPainted(true);
@@ -642,7 +638,7 @@ public class DatasetEditingPanel extends ChartDetailPanel
 				item.addActionListener(a -> {
 					setAnalysing(true);
 					UserActionController.getInstance().landmarkUpdateEventReceived(
-							new LandmarkUpdateEvent(this, activeDataset(), tag, medianIndex));
+							new LandmarkUpdateEvent(this, activeDataset(), lm, medianIndex));
 				});
 				popupMenu.add(item);
 				popupMenu.add(Box.createVerticalStrut(2)); // stop borders touching

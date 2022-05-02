@@ -38,8 +38,8 @@ import com.bmskinner.nma.components.profiles.ProfileType;
 import com.bmskinner.nma.components.rules.OrientationMark;
 import com.bmskinner.nma.core.GlobalOptions;
 import com.bmskinner.nma.gui.Labels;
-import com.bmskinner.nma.gui.components.panels.ProfileTypeOptionsPanel;
 import com.bmskinner.nma.gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
+import com.bmskinner.nma.gui.components.panels.ProfileTypeOptionsPanel;
 import com.bmskinner.nma.gui.events.ProfilesUpdatedListener;
 import com.bmskinner.nma.gui.events.SwatchUpdatedListener;
 import com.bmskinner.nma.gui.tabs.ChartDetailPanel;
@@ -126,7 +126,7 @@ public class CellProfilesPanel extends ChartDetailPanel
 				model.updateViews();
 
 				// Trigger refresh of dataset median profile and charts
-				activeDataset().getCollection().getProfileManager().recalculateProfileAggregates();
+				activeDataset().getCollection().getProfileCollection().calculateProfiles();
 			} catch (ProfileException | MissingComponentException e) {
 				LOGGER.log(Loggable.STACK, "Error recalculating profile aggregate", e);
 			}

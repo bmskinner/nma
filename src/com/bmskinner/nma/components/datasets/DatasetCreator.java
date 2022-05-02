@@ -11,36 +11,40 @@ import com.bmskinner.nma.components.profiles.MissingProfileException;
 import com.bmskinner.nma.components.profiles.ProfileException;
 
 /**
- * Handle dataset creation from XML to ensure any linking
- * of child datasests and profile collections is properly
- * handled
+ * Handle dataset creation from XML to ensure any linking of child datasests and
+ * profile collections is properly handled
+ * 
  * @author ben
  * @since 2.0.0
  *
  */
 public class DatasetCreator {
-	
+
 	private static final Logger LOGGER = Logger.getLogger(DatasetCreator.class.getName());
-	
-	private DatasetCreator() {}
-	
+
+	private DatasetCreator() {
+	}
+
 	/**
 	 * Create from a root XML element
+	 * 
 	 * @param e
 	 * @return
 	 * @throws ComponentCreationException
-	 * @throws UnsupportedVersionException 
-	 * @throws ProfileException 
+	 * @throws UnsupportedVersionException
+	 * @throws ProfileException
 	 */
-	public static IAnalysisDataset createRoot(Element e) throws ComponentCreationException, UnsupportedVersionException {
+	public static IAnalysisDataset createRoot(Element e)
+			throws ComponentCreationException, UnsupportedVersionException {
 		IAnalysisDataset d = new DefaultAnalysisDataset(e);
 		try {
 			d.getCollection().getProfileCollection().calculateProfiles();
 
-			for(IAnalysisDataset c : d.getAllChildDatasets())
+			for (IAnalysisDataset c : d.getAllChildDatasets())
 				c.getCollection().getProfileCollection().calculateProfiles();
 
-		} catch(ProfileException | MissingLandmarkException | MissingProfileException e1) {
+		} catch (NullPointerException | ProfileException | MissingLandmarkException
+				| MissingProfileException e1) {
 			throw new ComponentCreationException(e1);
 		}
 

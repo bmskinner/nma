@@ -300,10 +300,7 @@ public class SegmentationHandler {
 	 * @param tag
 	 * @param newTagIndex
 	 */
-	public synchronized void setLandmark(Landmark tag, int index) {
-
-		if (tag == null)
-			throw new IllegalArgumentException("Tag is null");
+	public synchronized void setLandmark(@NonNull Landmark tag, int index) {
 
 		LOGGER.fine(
 				"Requested " + tag + " set to index " + index + " in dataset " + dataset.getName());

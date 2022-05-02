@@ -17,7 +17,6 @@
 package com.bmskinner.nma.components.profiles;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.logging.Logger;
@@ -88,6 +87,19 @@ public class ProfileManager {
 			// Update measurements - many are based on orientation
 			n.clearMeasurements();
 		}
+
+		// Update the consensus nucleus
+		if (collection.hasConsensus()) {
+			// Get the nucleus profile starting at the landmark
+			// Find the best offset needed to make it match the median profile
+			int offset = collection.getRawConsensus().getProfile(type, lm)
+					.findBestFitOffset(median);
+
+			// Update the landmark position to the original index plus the offset
+			collection.getRawConsensus().setLandmark(lm, collection.getRawConsensus()
+					.wrapIndex(collection.getRawConsensus().getBorderIndex(lm) + offset));
+
+		}
 	}
 
 	/**
@@ -102,40 +114,6 @@ public class ProfileManager {
 		// rulesets
 		index = CellularComponent.wrapIndex(index, collection.getMedianArrayLength());
 		collection.getProfileCollection().setLandmark(lm, index);
-	}
-
-	/**
-	 * Copy the tag index from cells in the given source collection to cells with
-	 * the same ID in this collection. This is intended to be use to ensure tag
-	 * indexes are consistent between cells after a collection has been duplicated
-	 * (e.g. after a merge of datasets)
-	 * 
-	 * @param source the collection to take tag indexes from
-	 * @throws ProfileException
-	 * @throws MissingLandmarkException
-	 * @throws MissingProfileException
-	 * @throws IndexOutOfBoundsException
-	 */
-	public void copyTagIndexesToCells(@NonNull ICellCollection source)
-			throws IndexOutOfBoundsException, MissingProfileException, MissingLandmarkException,
-			ProfileException {
-		for (Nucleus n : collection.getNuclei()) {
-			if (!source.contains(n))
-				continue;
-
-			Nucleus template = source.getNucleus(n.getID()).get();
-
-			Map<OrientationMark, Integer> tags = template.getOrientationMarkMap();
-			for (Entry<OrientationMark, Integer> entry : tags.entrySet()) {
-
-				// RP should never change in re-segmentation, so don't
-				// affect it here. This would risk moving RP off a
-				// segment boundary
-				if (OrientationMark.REFERENCE.equals(entry.getKey()))
-					continue;
-				n.setLandmark(entry.getKey(), entry.getValue());
-			}
-		}
 	}
 
 	/**
@@ -160,7 +138,7 @@ public class ProfileManager {
 		if (rp.equals(lm)) {
 			updateReferencePointIndex(index);
 		} else {
-			updateOrientationMark(lm, index);
+			updateNonReferencePoint(lm, index);
 		}
 	}
 
@@ -180,7 +158,7 @@ public class ProfileManager {
 	private boolean canUpdateLandmarkIndexToExistingLandmark(@NonNull Landmark lm,
 			int newIndex)
 			throws MissingLandmarkException, IndexOutOfBoundsException, MissingProfileException,
-			ProfileException, ComponentCreationException {
+			ProfileException {
 
 		List<OrientationMark> tags = collection.getProfileCollection().getOrientationMarks();
 		for (OrientationMark existingTag : tags) {
@@ -214,9 +192,9 @@ public class ProfileManager {
 	}
 
 	/**
-	 * Update the landmarks that don't need resegmenting
+	 * Update the landmarks other than the RP
 	 * 
-	 * @param lm    the extended tag to be updated
+	 * @param lm    the landmark to be updated
 	 * @param index the new index of the tag in the median, relative to the current
 	 *              RP
 	 * @throws ProfileException
@@ -225,7 +203,7 @@ public class ProfileManager {
 	 * @throws ComponentCreationException
 	 * @throws IndexOutOfBoundsException
 	 */
-	private void updateOrientationMark(@NonNull Landmark lm, int index)
+	private void updateNonReferencePoint(@NonNull Landmark lm, int index)
 			throws ProfileException,
 			MissingLandmarkException, MissingProfileException, IndexOutOfBoundsException,
 			ComponentCreationException {
@@ -261,10 +239,9 @@ public class ProfileManager {
 	}
 
 	/**
-	 * If a core border tag is moved, segment boundaries must be moved. It is left
-	 * to calling classes to perform a resegmentation of the dataset.
+	 * If the RP is moved, segment boundaries must be moved. It is left to calling
+	 * classes to perform a resegmentation of the dataset.
 	 * 
-	 * @param tag   the core tag to be updated
 	 * @param index the new index of the tag in the median, relative to the current
 	 *              RP
 	 * @throws ProfileException
@@ -277,7 +254,6 @@ public class ProfileManager {
 	 */
 	private void updateReferencePointIndex(int index)
 			throws MissingLandmarkException, ProfileException, MissingProfileException,
-			UnsegmentedProfileException,
 			IndexOutOfBoundsException, ComponentCreationException {
 
 		LOGGER.finer("Updating RP index");
@@ -287,38 +263,28 @@ public class ProfileManager {
 				ProfileType.ANGLE,
 				OrientationMark.REFERENCE, Stats.MEDIAN);
 
-		moveRp(index, oldMedian);
-
-		// Update signals as needed
-		collection.getSignalManager().recalculateSignalAngles();
-	}
-
-	/**
-	 * Move the RP index in nuclei. Update segments flanking the RP without moving
-	 * any other segments.
-	 * 
-	 * @param newRpIndex the new index for the RP relative to the old RP
-	 * @param oldMedian  the old median profile zeroed on the old RP
-	 * @throws ProfileException
-	 * @throws MissingProfileException
-	 * @throws MissingLandmarkException
-	 * @throws ComponentCreationException
-	 * @throws IndexOutOfBoundsException
-	 */
-	private void moveRp(int newRpIndex, @NonNull ISegmentedProfile oldMedian)
-			throws ProfileException,
-			MissingProfileException, MissingLandmarkException, IndexOutOfBoundsException,
-			ComponentCreationException {
 		// This is the median we will use to update individual nuclei
-		ISegmentedProfile newMedian = oldMedian.startFrom(newRpIndex);
+		ISegmentedProfile newMedian = oldMedian.startFrom(index);
 
 		Landmark rp = collection.getRuleSetCollection().getLandmark(OrientationMark.REFERENCE)
 				.orElseThrow(MissingLandmarkException::new);
 
+		// Update the nuclei to match the new median
 		updateLandmarkToMedianBestFit(rp, ProfileType.ANGLE, newMedian);
+
+		// Ensure landmarks in the profile collection are offset to preserve their
+		// positions
+		for (Landmark lm : collection.getProfileCollection().getLandmarks()) {
+			int oldIndex = collection.getProfileCollection().getLandmarkIndex(lm);
+			collection.getProfileCollection().setLandmark(lm, CellularComponent
+					.wrapIndex(oldIndex - index, collection.getMedianArrayLength()));
+		}
 
 		// Rebuild the profile aggregate in the collection
 		collection.getProfileCollection().calculateProfiles();
+
+		// Update signals as needed
+		collection.getSignalManager().recalculateSignalAngles();
 	}
 
 	/**
@@ -336,23 +302,6 @@ public class ProfileManager {
 					"Error getting segment count from collection " + collection.getName(), e);
 			return 0;
 		}
-	}
-
-	/**
-	 * Regenerate the profile aggregate in each of the profile types of the
-	 * collection. The length is set to the angle profile length. The zero index of
-	 * the profile aggregate is the RP.
-	 * 
-	 * @throws ProfileException
-	 * @throws MissingProfileException
-	 * @throws MissingLandmarkException
-	 * 
-	 * @throws Exception
-	 */
-	public void recalculateProfileAggregates()
-			throws ProfileException, MissingLandmarkException, MissingProfileException {
-		collection.getProfileCollection().calculateProfiles();
-
 	}
 
 	/**
@@ -542,7 +491,7 @@ public class ProfileManager {
 	 * @return true if the merge is possible, false otherwise
 	 * @throws MissingLandmarkException
 	 */
-	public boolean testSegmentsMergeable(IProfileSegment seg1, IProfileSegment seg2)
+	boolean testSegmentsMergeable(IProfileSegment seg1, IProfileSegment seg2)
 			throws MissingLandmarkException {
 
 		if (!seg1.nextSegment().getID().equals(seg2.getID())) {
@@ -570,7 +519,7 @@ public class ProfileManager {
 	 * @throws ProfileException            if the update fails
 	 * @throws MissingComponentException
 	 */
-	public void mergeSegments(@NonNull UUID seg1, @NonNull UUID seg2, @NonNull UUID newID)
+	void mergeSegments(@NonNull UUID seg1, @NonNull UUID seg2, @NonNull UUID newID)
 			throws ProfileException, MissingComponentException {
 		// Note - we can't do the root check here. It must be at the segmentation
 		// handler level
@@ -654,7 +603,7 @@ public class ProfileManager {
 	 * @param seg    the segment to split
 	 * @param newID1 the id for the first new segment. Can be null.
 	 * @param newID2 the id for the second new segment. Can be null.
-	 * @return
+	 * @return true if the split succeeded, false otherwise
 	 * @throws UnsegmentedProfileException
 	 * @throws ProfileException
 	 * @throws MissingComponentException   if the reference point tag is missing, or
@@ -696,9 +645,8 @@ public class ProfileManager {
 		 * Split the segments in the individual nuclei. Requires proportional alignment
 		 */
 		if (collection.isReal()) {
-			for (Nucleus n : collection.getNuclei()) {
+			for (Nucleus n : collection.getNuclei())
 				splitNucleusSegment(n, seg.getID(), proportion, newID1, newID2);
-			}
 		}
 
 		/* Update the consensus if present */
@@ -744,6 +692,9 @@ public class ProfileManager {
 	private boolean isCollectionSplittable(@NonNull UUID id, double proportion)
 			throws ProfileException, MissingComponentException, UnsegmentedProfileException {
 
+		if (collection.isVirtual())
+			return false;
+
 		ISegmentedProfile medianProfile = collection.getProfileCollection().getSegmentedProfile(
 				ProfileType.ANGLE,
 				OrientationMark.REFERENCE, Stats.MEDIAN);
@@ -762,11 +713,8 @@ public class ProfileManager {
 			}
 		}
 
-		if (collection.isReal()) {
-			return collection.getNuclei().parallelStream()
-					.allMatch(n -> isSplittable(n, id, proportion));
-		}
-		return true;
+		return collection.getNuclei().parallelStream()
+				.allMatch(n -> isSplittable(n, id, proportion));
 	}
 
 	private boolean isSplittable(Taggable t, UUID id, double proportion) {
@@ -811,13 +759,13 @@ public class ProfileManager {
 	/**
 	 * Unmerge the given segment into two segments
 	 * 
-	 * @param seg the segment to unmerge
+	 * @param segId the segment to unmerge
 	 * @return
 	 * @throws UnsegmentedProfileException
 	 * @throws ProfileException
 	 * @throws MissingComponentException
 	 */
-	public void unmergeSegments(@NonNull UUID segId)
+	void unmergeSegments(@NonNull UUID segId)
 			throws ProfileException, UnsegmentedProfileException, MissingComponentException {
 
 		ISegmentedProfile medianProfile = collection.getProfileCollection().getSegmentedProfile(
@@ -843,26 +791,24 @@ public class ProfileManager {
 		 * individual nuclei
 		 */
 		if (collection.isReal()) {
-			for (Nucleus n : collection.getNuclei()) {
-				boolean wasLocked = n.isLocked();
-				n.setLocked(false);
+			for (Nucleus n : collection.getNuclei())
 				unmergeSegments(n, segId);
-				n.setLocked(wasLocked);
-			}
 		}
 
 		/* Update the consensus if present */
 		if (collection.hasConsensus()) {
-			Nucleus n = collection.getRawConsensus();
-			unmergeSegments(n, segId);
+			unmergeSegments(collection.getRawConsensus(), segId);
 		}
 	}
 
 	private void unmergeSegments(@NonNull Taggable t, @NonNull UUID id)
 			throws ProfileException, MissingComponentException {
+		boolean wasLocked = t.isLocked();
+		t.setLocked(false);
 		ISegmentedProfile profile = t.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE);
 		profile.unmergeSegment(id);
 		t.setSegments(profile.getSegments());
+		t.setLocked(wasLocked);
 	}
 
 }

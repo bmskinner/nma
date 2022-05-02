@@ -237,20 +237,18 @@ public abstract class AbstractScatterPanel extends DetailPanel {
 							options);
 
 					// Put them into a virtual collection
-					ICellCollection virt = new VirtualDataset(d, filtered.getName());
-					filtered.getCells().forEach(c -> virt.addCell(c));
-					virt.setName("Filtered_" + statA + "_" + statB);
+					IAnalysisDataset virt = new VirtualDataset(d, "Filtered_" + statA + "_" + statB,
+							null,
+							filtered);
 
-					d.getCollection().getProfileManager().copySegmentsAndLandmarksTo(virt);
-					d.getCollection().getSignalManager().copySignalGroupsTo(virt);
-					IAnalysisDataset child = d.addChildCollection(virt);
+					IAnalysisDataset child = d.addChildDataset(virt);
 
 					// Refold child collections by default
 					UserActionController.getInstance().userActionEventReceived(
 							new UserActionEvent(this, UserActionEvent.REFOLD_CONSENSUS,
 									child));
 
-					UIController.getInstance().fireDatasetAdded(d.getChildDataset(virt.getId()));
+					UIController.getInstance().fireDatasetAdded(child);
 				} catch (CollectionFilteringException | ProfileException | MissingProfileException
 						| MissingLandmarkException e1) {
 					LOGGER.log(Loggable.STACK, "Unable to filter collection for " + d.getName(),

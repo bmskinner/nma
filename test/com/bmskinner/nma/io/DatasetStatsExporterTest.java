@@ -15,15 +15,12 @@ import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.profiles.IProfileSegment;
 import com.bmskinner.nma.components.rules.OrientationMark;
 import com.bmskinner.nma.components.rules.RuleSetCollection;
-import com.bmskinner.nma.io.DatasetStatsExporter;
-import com.bmskinner.nma.io.Io;
 
 public class DatasetStatsExporterTest {
 
-    
 	@Test
 	public void testSegmentsInterpolated() throws Exception {
-		
+
 		IAnalysisDataset d = new TestDatasetBuilder()
 				.cellCount(1)
 				.baseHeight(500)
@@ -31,32 +28,38 @@ public class DatasetStatsExporterTest {
 				.ofType(RuleSetCollection.roundRuleSetCollection())
 				.segmented()
 				.build();
-		
+
 		// Ensure profiles are longer than 1000
 		int length = d.getCollection().getMedianArrayLength();
-		assertTrue(length>1000);
-		
+		assertTrue(length > 1000);
+
 		// Decrease the length of the segments to below minimum regular length
-		while(d.getCollection().getProfileCollection().getSegments(OrientationMark.REFERENCE).get(0).length()>IProfileSegment.MINIMUM_SEGMENT_LENGTH*0.7){
-			IProfileSegment seg = d.getCollection().getProfileCollection().getSegments(OrientationMark.REFERENCE).get(0);
-			boolean b = d.getCollection().getProfileManager().splitSegment(seg, UUID.randomUUID(), UUID.randomUUID());
-			if(!b)
-				fail("Unable to split "+seg);
+		while (d.getCollection().getProfileCollection().getSegments(OrientationMark.REFERENCE)
+				.get(0).length() > IProfileSegment.MINIMUM_SEGMENT_LENGTH * 0.7) {
+
+			IProfileSegment seg = d.getCollection().getProfileCollection()
+					.getSegments(OrientationMark.REFERENCE).get(0);
+
+			boolean b = d.getCollection()
+					.getProfileManager().splitSegment(seg, UUID.randomUUID(), UUID.randomUUID());
+			if (!b)
+				fail("Unable to split " + seg);
 
 		}
-		
+
 		// Seg 0 is smaller than regular minimum length
 		// Segment 0 is still longer than the minimum interpolatable length
-		assertTrue(d.getCollection().getProfileCollection().getSegments(OrientationMark.REFERENCE).get(0).length()<IProfileSegment.MINIMUM_SEGMENT_LENGTH);
-		
+		assertTrue(d.getCollection().getProfileCollection().getSegments(OrientationMark.REFERENCE)
+				.get(0).length() < IProfileSegment.MINIMUM_SEGMENT_LENGTH);
+
 		// Interpolation length should be chosen to be at least the current length
-		// If this operation fails, the interpolation logic did not succeed 
-		
+		// If this operation fails, the interpolation logic did not succeed
+
 		HashOptions op = new DefaultOptions();
 		op.setInt(Io.PROFILE_SAMPLES_KEY, 10);
-		
+
 		File outFile = new File("test");
-		
+
 		DatasetStatsExporter dse = new DatasetStatsExporter(outFile, d, op);
 		StringBuilder outLine = new StringBuilder();
 		dse.append(d, outLine);

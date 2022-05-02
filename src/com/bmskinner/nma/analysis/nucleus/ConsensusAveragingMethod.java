@@ -46,6 +46,7 @@ import com.bmskinner.nma.components.options.MissingOptionException;
 import com.bmskinner.nma.components.profiles.IProfile;
 import com.bmskinner.nma.components.profiles.IProfileSegment;
 import com.bmskinner.nma.components.profiles.ISegmentedProfile;
+import com.bmskinner.nma.components.profiles.Landmark;
 import com.bmskinner.nma.components.profiles.MissingProfileException;
 import com.bmskinner.nma.components.profiles.ProfileException;
 import com.bmskinner.nma.components.profiles.ProfileType;
@@ -109,15 +110,13 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
 		// Add all landmarks from the profile collection
 		// This will include any not present inthe ruleset collection that
 		// were added manually
-		for (OrientationMark l : dataset.getCollection().getProfileCollection()
-				.getOrientationMarks()) {
+		for (Landmark l : dataset.getCollection().getProfileCollection().getLandmarks()) {
 
 			IProfile median = dataset.getCollection().getProfileCollection().getProfile(
 					ProfileType.ANGLE, l, Stats.MEDIAN);
 
 			int newIndex = n.getProfile(ProfileType.ANGLE).findBestFitOffset(median);
-			LOGGER.finer(() -> String.format("Setting %s in consensus to %s ", l, newIndex));
-			n.setOrientationMark(l, newIndex);
+			n.setLandmark(l, newIndex);
 		}
 
 	}
@@ -199,7 +198,6 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
 	 * @return
 	 */
 	private double choosePixelToMicronScale() {
-		double scale = 1;
 
 		// Easiest option - the scale is consistent across the dataset, and is in the
 		// options
@@ -209,7 +207,7 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
 					.getNucleusDetectionOptions();
 			if (nucleusOptions.isPresent()) {
 				if (nucleusOptions.get().hasDouble(HashOptions.SCALE))
-					scale = nucleusOptions.get().getDouble(HashOptions.SCALE);
+					return nucleusOptions.get().getDouble(HashOptions.SCALE);
 			} else {
 				LOGGER.fine(
 						"No nucleus detection options present, unable to find pixel scale for consensus");

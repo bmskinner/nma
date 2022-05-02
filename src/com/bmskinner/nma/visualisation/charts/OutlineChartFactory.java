@@ -35,6 +35,7 @@ import org.jfree.chart.annotations.XYTextAnnotation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.chart.ui.Layer;
+import org.jfree.data.xy.DefaultXYDataset;
 
 import com.bmskinner.nma.components.MissingLandmarkException;
 import com.bmskinner.nma.components.cells.ComponentCreationException;
@@ -53,6 +54,7 @@ import com.bmskinner.nma.components.mesh.MeshImageCreationException;
 import com.bmskinner.nma.components.mesh.MeshVertex;
 import com.bmskinner.nma.components.mesh.UncomparableMeshImageException;
 import com.bmskinner.nma.components.profiles.IProfileSegment;
+import com.bmskinner.nma.components.profiles.Landmark;
 import com.bmskinner.nma.components.profiles.MissingProfileException;
 import com.bmskinner.nma.components.profiles.ProfileException;
 import com.bmskinner.nma.components.profiles.ProfileType;
@@ -154,7 +156,8 @@ public class OutlineChartFactory extends AbstractChartFactory {
 				String name = (String) signalCoMs.getSeriesKey(series);
 				UUID seriesGroup = getSignalGroupFromLabel(name);
 
-				Optional<ISignalGroup> g = options.firstDataset().getCollection().getSignalGroup(seriesGroup);
+				Optional<ISignalGroup> g = options.firstDataset().getCollection()
+						.getSignalGroup(seriesGroup);
 				if (g.isPresent()) {
 					Paint colour = g.get().getGroupColour().orElse(ColourSelecter.getColor(series));
 					rend.setSeriesPaint(series, colour);
@@ -169,7 +172,8 @@ public class OutlineChartFactory extends AbstractChartFactory {
 			int j = 0;
 
 			if (options.isShowAnnotations()) { // transparent ellipse surrounding CoM
-				for (UUID signalGroup : options.firstDataset().getCollection().getSignalManager().getSignalGroupIDs()) {
+				for (UUID signalGroup : options.firstDataset().getCollection().getSignalManager()
+						.getSignalGroupIDs()) {
 					List<Shape> shapes = signalCoMs.createSignalRadii(signalGroup);
 
 					int signalCount = shapes.size();
@@ -177,12 +181,15 @@ public class OutlineChartFactory extends AbstractChartFactory {
 					int alpha = (int) Math.floor(255 / ((double) signalCount)) + 20;
 					alpha = alpha < 1 ? 1 : alpha > 156 ? 156 : alpha;
 
-					Optional<ISignalGroup> g = options.firstDataset().getCollection().getSignalGroup(signalGroup);
+					Optional<ISignalGroup> g = options.firstDataset().getCollection()
+							.getSignalGroup(signalGroup);
 					if (g.isPresent()) {
-						Paint colour = g.get().getGroupColour().orElse(ColourSelecter.getColor(j++));
+						Paint colour = g.get().getGroupColour()
+								.orElse(ColourSelecter.getColor(j++));
 						for (Shape s : shapes) {
 							XYShapeAnnotation an = new XYShapeAnnotation(s, null, null,
-									ColourSelecter.getTransparentColour((Color) colour, true, alpha));
+									ColourSelecter.getTransparentColour((Color) colour, true,
+											alpha));
 							plot.addAnnotation(an);
 						}
 					}
@@ -211,9 +218,11 @@ public class OutlineChartFactory extends AbstractChartFactory {
 				if (options.firstDataset().getCollection().hasConsensus()) {
 					Mesh mesh1 = options.getRotateMode().equals(RotationMode.ACTUAL)
 							? new DefaultMesh(options.getCell().getPrimaryNucleus())
-							: new DefaultMesh(options.getCell().getPrimaryNucleus().getOrientedNucleus());
+							: new DefaultMesh(
+									options.getCell().getPrimaryNucleus().getOrientedNucleus());
 
-					Mesh mesh2 = new DefaultMesh(options.firstDataset().getCollection().getConsensus(), mesh1);
+					Mesh mesh2 = new DefaultMesh(
+							options.firstDataset().getCollection().getConsensus(), mesh1);
 
 					Mesh result = mesh1.comparison(mesh2);
 					return createMeshChart(result, 0.5);
@@ -227,7 +236,8 @@ public class OutlineChartFactory extends AbstractChartFactory {
 				if (options.firstDataset().getCollection().hasConsensus()) {
 
 					Mesh mesh1 = new DefaultMesh(options.getCell().getPrimaryNucleus());
-					Mesh mesh2 = new DefaultMesh(options.firstDataset().getCollection().getConsensus(), mesh1);
+					Mesh mesh2 = new DefaultMesh(
+							options.firstDataset().getCollection().getConsensus(), mesh1);
 
 					ImageProcessor nucleusIP = ImageImporter
 							.importFullImageTo24bit(options.getCell().getPrimaryNucleus());
@@ -245,7 +255,8 @@ public class OutlineChartFactory extends AbstractChartFactory {
 				return createEmptyChart();
 			}
 			return makeStandardCellOutlineChart();
-		} catch (ChartCreationException | MissingLandmarkException | MeshCreationException | ComponentCreationException
+		} catch (ChartCreationException | MissingLandmarkException | MeshCreationException
+				| ComponentCreationException
 				| MeshImageCreationException | UncomparableMeshImageException e) {
 			LOGGER.warning("Error creating cell outline chart");
 			LOGGER.log(Loggable.STACK, "Error creating cell outline chart", e);
@@ -266,7 +277,8 @@ public class OutlineChartFactory extends AbstractChartFactory {
 			ICell cell = options.getCell();
 
 			if (cell.hasCytoplasm())
-				result.add(new ComponentOutlineDataset(cell.getCytoplasm(), false, options.getScale()));
+				result.add(new ComponentOutlineDataset(cell.getCytoplasm(), false,
+						options.getScale()));
 
 			if (cell.hasNucleus()) {
 				for (Nucleus n : cell.getNuclei())
@@ -276,7 +288,8 @@ public class OutlineChartFactory extends AbstractChartFactory {
 			XYPlot plot = chart.getXYPlot();
 			for (int i = 0; i < result.size(); i++) {
 				plot.setDataset(result.get(i));
-				plot.setRenderer(i, new XYLineAndShapeRenderer(options.isShowLines(), options.isShowPoints()));
+				plot.setRenderer(i,
+						new XYLineAndShapeRenderer(options.isShowLines(), options.isShowPoints()));
 
 				int seriesCount = plot.getDataset(i).getSeriesCount();
 				for (int j = 0; j < seriesCount; j++) {
@@ -292,7 +305,8 @@ public class OutlineChartFactory extends AbstractChartFactory {
 			if (options.hasComponent()) {
 				int w = options.getInt("ImageWidth");
 				int h = options.getInt("ImagHeight");
-				drawImageAsAnnotation(plot, options.getCell(), options.getComponent().get(0), true, w, h);
+				drawImageAsAnnotation(plot, options.getCell(), options.getComponent().get(0), true,
+						w, h);
 			}
 			applyDefaultAxisOptions(chart);
 			return chart;
@@ -329,19 +343,23 @@ public class OutlineChartFactory extends AbstractChartFactory {
 
 			/* Get the cytoplasm outline dataset */
 			if (cell.hasCytoplasm())
-				cellDatasets.add(new ComponentOutlineDataset(cell.getCytoplasm(), false, options.getScale()));
+				cellDatasets.add(new ComponentOutlineDataset(cell.getCytoplasm(), false,
+						options.getScale()));
 
 			/* Get the nucleus outline dataset */
 			for (Nucleus n : cell.getNuclei()) {
 				cellDatasets.add(new ComponentOutlineDataset(n, true, options.getScale()));
 
-				if (options.isShowSignals() && cell.getPrimaryNucleus().getSignalCollection().hasSignal()) {
-					cellDatasets.addAll(new NucleusDatasetCreator(options).createSignalOutlines(cell, dataset));
+				if (options.isShowSignals()
+						&& cell.getPrimaryNucleus().getSignalCollection().hasSignal()) {
+					cellDatasets.addAll(
+							new NucleusDatasetCreator(options).createSignalOutlines(cell, dataset));
 				}
 			}
 
 			return renderCellDataset(cellDatasets);
-		} catch (ChartDatasetCreationException | MissingLandmarkException | ComponentCreationException e) {
+		} catch (ChartDatasetCreationException | MissingLandmarkException
+				| ComponentCreationException e) {
 			throw new ChartCreationException("Unable to get nucleus outline", e);
 		}
 	}
@@ -393,32 +411,73 @@ public class OutlineChartFactory extends AbstractChartFactory {
 				/* Nuclear signals */
 				if (ds.getComponent() instanceof INuclearSignal) {
 
-					ISignalCollection sc = options.getCell().getPrimaryNucleus().getSignalCollection();
+					ISignalCollection sc = options.getCell().getPrimaryNucleus()
+							.getSignalCollection();
 					UUID signalId = (UUID) ds.getSeriesKey(series);
 					Optional<UUID> signalGroup = sc.getSignalGroupIds().stream()
-							.filter(sg -> sc.getSignals(sg).stream().anyMatch(s -> s.getID().equals(signalId)))
+							.filter(sg -> sc.getSignals(sg).stream()
+									.anyMatch(s -> s.getID().equals(signalId)))
 							.findFirst();
 
 					UUID seriesGroup = signalGroup.get();
 
-					Optional<ISignalGroup> g = options.firstDataset().getCollection().getSignalGroup(seriesGroup);
+					Optional<ISignalGroup> g = options.firstDataset().getCollection()
+							.getSignalGroup(seriesGroup);
 					if (g.isPresent()) {
-						Paint colour = g.get().getGroupColour().orElse(ColourSelecter.getColor(series));
+						Paint colour = g.get().getGroupColour()
+								.orElse(ColourSelecter.getColor(series));
 						rend.setSeriesPaint(series, colour);
 					}
 				}
 
 			}
 
-			// Add a background image to the plot
-			clearShapeAnnotations(plot);
+		}
 
-			int w = options.getInt("ImageWidth");
-			int h = options.getInt("ImageHeight");
+		try {
+			// Add landmark locations
+			DefaultXYDataset landmarkData = new DefaultXYDataset();
 
-			if (options.getRotateMode().equals(RotationMode.ACTUAL)) {
-				drawImageAsAnnotation(plot, options.getCell(), options.getComponent().get(0), false, w, h);
+			Nucleus n = options.getCell().getPrimaryNucleus();
+
+			for (OrientationMark om : n.getOrientationMarks()) {
+
+				// Point at the landmark coordinate
+				double[][] data = new double[2][1];
+				data[0][0] = n.getBorderPoint(om).getX();
+				data[1][0] = n.getBorderPoint(om).getY();
+				Landmark l = n.getLandmark(om);
+				landmarkData.addSeries(l.toString(), data);
 			}
+
+			int lmDataIndex = plot.getDatasetCount() + 1;
+			plot.setDataset(lmDataIndex, landmarkData);
+
+			// Set the renderer for landmarks
+			XYLineAndShapeRenderer lmRend = new XYLineAndShapeRenderer();
+			for (int lmSeries = 0; lmSeries < landmarkData.getSeriesCount(); lmSeries++) {
+				lmRend.setSeriesLinesVisible(lmSeries, false);
+				lmRend.setSeriesShapesVisible(lmSeries, true);
+				lmRend.setSeriesVisibleInLegend(lmSeries, Boolean.FALSE);
+				lmRend.setSeriesStroke(lmSeries, new BasicStroke(3));
+				lmRend.setSeriesPaint(lmSeries, Color.GRAY);
+				lmRend.setSeriesShape(lmSeries, ChartComponents.DEFAULT_POINT_SHAPE);
+			}
+
+			plot.setRenderer(lmDataIndex, lmRend);
+		} catch (Exception e) {
+			return createErrorChart();
+		}
+
+		// Add a background image to the plot
+		clearShapeAnnotations(plot);
+
+		int w = options.getInt("ImageWidth");
+		int h = options.getInt("ImageHeight");
+
+		if (options.getRotateMode().equals(RotationMode.ACTUAL)) {
+			drawImageAsAnnotation(plot, options.getCell(), options.getComponent().get(0), false, w,
+					h);
 		}
 
 		applyDefaultAxisOptions(chart);
@@ -442,7 +501,8 @@ public class OutlineChartFactory extends AbstractChartFactory {
 
 		if (options.isShowMeshVertices()) {
 			try {
-				NucleusMeshXYDataset dataset = new NucleusDatasetCreator(options).createNucleusMeshVertexDataset(mesh);
+				NucleusMeshXYDataset dataset = new NucleusDatasetCreator(options)
+						.createNucleusMeshVertexDataset(mesh);
 				XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer(false, true);
 				renderer.setDefaultSeriesVisibleInLegend(false);
 
@@ -468,7 +528,8 @@ public class OutlineChartFactory extends AbstractChartFactory {
 
 		if (options.isShowMeshEdges()) {
 			try {
-				NucleusMeshXYDataset dataset = new NucleusDatasetCreator(options).createNucleusMeshEdgeDataset(mesh);
+				NucleusMeshXYDataset dataset = new NucleusDatasetCreator(options)
+						.createNucleusMeshEdgeDataset(mesh);
 				XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer(true, false);
 				renderer.setDefaultSeriesVisibleInLegend(false);
 				renderer.setDefaultStroke(ChartComponents.MARKER_STROKE);
@@ -498,7 +559,8 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		if (options.isShowMeshFaces()) {
 
 			try {
-				List<IProfileSegment> segments = options.firstDataset().getCollection().getConsensus()
+				List<IProfileSegment> segments = options.firstDataset().getCollection()
+						.getConsensus()
 						.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE).getSegments();
 
 				for (int i = 0; i < segments.size(); i++) {
@@ -534,14 +596,16 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		if (options.isShowAnnotations()) {
 
 			for (MeshVertex v : mesh.getPeripheralVertices()) {
-				XYTextAnnotation annotation = new XYTextAnnotation(v.getName(), v.getPosition().getX() - 1,
+				XYTextAnnotation annotation = new XYTextAnnotation(v.getName(),
+						v.getPosition().getX() - 1,
 						v.getPosition().getY());
 				annotation.setPaint(Color.BLACK);
 				plot.addAnnotation(annotation);
 			}
 
 			for (MeshVertex v : mesh.getInternalVertices()) {
-				XYTextAnnotation annotation = new XYTextAnnotation(v.getName(), v.getPosition().getX() - 1,
+				XYTextAnnotation annotation = new XYTextAnnotation(v.getName(),
+						v.getPosition().getX() - 1,
 						v.getPosition().getY());
 				annotation.setPaint(Color.BLACK);
 				plot.addAnnotation(annotation);
@@ -550,7 +614,8 @@ public class OutlineChartFactory extends AbstractChartFactory {
 			if (options.isShowMeshEdges()) {
 
 				for (MeshEdge v : mesh.getEdges()) {
-					XYTextAnnotation annotation = new XYTextAnnotation(v.getName(), v.getMidpoint().getX(),
+					XYTextAnnotation annotation = new XYTextAnnotation(v.getName(),
+							v.getMidpoint().getX(),
 							v.getMidpoint().getY() + 1);
 					annotation.setPaint(Color.BLUE);
 					plot.addAnnotation(annotation);
@@ -559,7 +624,8 @@ public class OutlineChartFactory extends AbstractChartFactory {
 
 			if (options.isShowMeshFaces()) {
 				for (MeshFace f : mesh.getFaces()) {
-					XYTextAnnotation annotation = new XYTextAnnotation(f.getName(), f.getMidpoint().getX(),
+					XYTextAnnotation annotation = new XYTextAnnotation(f.getName(),
+							f.getMidpoint().getX(),
 							f.getMidpoint().getY());
 					annotation.setPaint(Color.GREEN);
 					plot.addAnnotation(annotation);

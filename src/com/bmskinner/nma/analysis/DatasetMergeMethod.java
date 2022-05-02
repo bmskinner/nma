@@ -114,7 +114,7 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 		// Set the names for the new collection
 		// ensure the new file name is valid
 		saveFile = checkName(saveFile).getAbsoluteFile();
-		String newDatasetName = saveFile.getName().replace(Io.SAVE_FILE_EXTENSION, "");
+		String newDatasetName = saveFile.getName().replace(Io.NMD_FILE_EXTENSION, "");
 
 		IAnalysisDataset newDataset = performMerge(newDatasetName);
 
@@ -452,12 +452,12 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 	 */
 	private File checkName(File name) {
 		String fileName = name.getName();
-		String datasetName = fileName.replace(Io.SAVE_FILE_EXTENSION, "");
+		String datasetName = fileName.replace(Io.NMD_FILE_EXTENSION, "");
 
-		File newFile = new File(name.getParentFile(), datasetName + Io.SAVE_FILE_EXTENSION);
+		File newFile = new File(name.getParentFile(), datasetName + Io.NMD_FILE_EXTENSION);
 		if (name.exists()) {
 			datasetName += "_1";
-			newFile = new File(name.getParentFile(), datasetName + Io.SAVE_FILE_EXTENSION);
+			newFile = new File(name.getParentFile(), datasetName + Io.NMD_FILE_EXTENSION);
 			newFile = checkName(newFile);
 		}
 		return newFile;

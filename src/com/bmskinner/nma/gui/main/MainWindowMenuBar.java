@@ -45,6 +45,7 @@ import javax.swing.JRadioButtonMenuItem;
 import com.bmskinner.nma.components.Version;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.measure.MeasurementScale;
+import com.bmskinner.nma.components.workspaces.IWorkspace;
 import com.bmskinner.nma.core.GlobalOptions;
 import com.bmskinner.nma.core.ThreadManager;
 import com.bmskinner.nma.gui.ContextEnabled;
@@ -56,6 +57,7 @@ import com.bmskinner.nma.gui.actions.NewAnalysisAction;
 import com.bmskinner.nma.gui.components.ColourSelecter.ColourSwatch;
 import com.bmskinner.nma.gui.dialogs.VersionHelpDialog;
 import com.bmskinner.nma.gui.events.DatasetSelectionUpdatedListener;
+import com.bmskinner.nma.gui.events.FileImportEventListener.FileImportEvent;
 import com.bmskinner.nma.gui.events.UIController;
 import com.bmskinner.nma.gui.events.UserActionController;
 import com.bmskinner.nma.gui.events.UserActionEvent;
@@ -185,11 +187,19 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 
 		ContextualMenu openMenu = fact.makeMenu(OPEN_MENU_LBL, ContextEnabled.ALWAYS_ACTIVE);
 
-		openMenu.add(fact.makeItem(OPEN_DATASET_LBL, UserActionEvent.IMPORT_DATASET_PREFIX,
-				ContextEnabled.ALWAYS_ACTIVE, OPEN_DATASET_TOOLTIP));
+		JMenuItem o1 = fact.new ContextualMenuItem(OPEN_DATASET_LBL, "",
+				ContextEnabled.ALWAYS_ACTIVE, OPEN_DATASET_TOOLTIP);
+		o1.addActionListener(e -> UserActionController.getInstance()
+				.fileImportRequested(new FileImportEvent(this, null,
+						IAnalysisDataset.XML_ANALYSIS_DATASET, null)));
+		openMenu.add(o1);
 
-		openMenu.add(fact.makeItem(OPEN_WORKSPACE_LBL, UserActionEvent.IMPORT_WORKSPACE_PREFIX,
-				ContextEnabled.ALWAYS_ACTIVE, OPEN_WORKSPACE_TOOLTIP));
+		JMenuItem o2 = fact.new ContextualMenuItem(OPEN_WORKSPACE_LBL, "",
+				ContextEnabled.ALWAYS_ACTIVE, OPEN_WORKSPACE_TOOLTIP);
+		o2.addActionListener(e -> UserActionController.getInstance()
+				.fileImportRequested(new FileImportEvent(this, null,
+						IWorkspace.XML_WORKSPACE, null)));
+		openMenu.add(o2);
 
 		menu.add(openMenu);
 

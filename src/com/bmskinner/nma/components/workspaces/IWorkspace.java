@@ -17,7 +17,6 @@
 package com.bmskinner.nma.components.workspaces;
 
 import java.io.File;
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -25,6 +24,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
+import com.bmskinner.nma.io.XmlSerializable;
 
 /**
  * A workspace is a collection of nmd files that can be reopened together. This
@@ -34,175 +34,100 @@ import com.bmskinner.nma.components.datasets.IAnalysisDataset;
  * @since 1.13.3
  *
  */
-public interface IWorkspace {
-	
-	static final String WORKSPACE_ELEMENT  = "workspace";
-	static final String WORKSPACE_NAME     = "name";
-	static final String DATASETS_ELEMENT   = "datasets";
-	static final String DATASET_PATH       = "path";
-	static final String BIOSAMPLES_ELEMENT = "biosamples";
-	static final String BIOSAMPLES_NAME_KEY    = "name";
-	static final String BIOSAMPLES_DATASET_KEY = "dataset";
-	
+public interface IWorkspace extends XmlSerializable {
+
+	static final String XML_WORKSPACE = "workspace";
+	static final String WORKSPACE_NAME = "name";
+	static final String DATASETS_ELEMENT = "datasets";
+	static final String DATASET_PATH = "path";
+//	static final String BIOSAMPLES_ELEMENT = "biosamples";
+//	static final String BIOSAMPLES_NAME_KEY = "name";
+//	static final String BIOSAMPLES_DATASET_KEY = "dataset";
+
 	/**
 	 * Get the UUID of the workspace
+	 * 
 	 * @return
 	 */
 	UUID getId();
-	
-    /**
-     * Set the display name of the workspace
-     * @param s
-     */
-    void setName(@NonNull final String s);
-    
-    /**
-     * Get the display name of the workspace
-     * @return
-     */
-    @NonNull String getName();
-        
-    /**
-     * Add the given dataset to the workspace
-     * @param d the dataset to add
-     */
-    void add(@NonNull final IAnalysisDataset d);
 
-    /**
-     * Add the given file to the workspace
-     * @param f the file
-     */
-    void add(@NonNull final File f);
+	/**
+	 * Set the display name of the workspace
+	 * 
+	 * @param s
+	 */
+	void setName(@NonNull final String s);
 
-    
-    /**
-     * Remove the given dataset from the workspace
-     * @param d the dataset to remove
-     */
-    void remove(@NonNull final IAnalysisDataset d);
+	/**
+	 * Get the display name of the workspace
+	 * 
+	 * @return
+	 */
+	@NonNull
+	String getName();
 
-    /**
-     * Remove the given file from the workspace
-     * @param f the file to remove
-     */
-    void remove(@NonNull final File f);
-    
-    /**
-     * Test if the given dataset is in the workspace
-     * @param d
-     * @return true if the dataset is in the workspace
-     */
-    boolean has(@NonNull final IAnalysisDataset d);
+	/**
+	 * Add the given dataset to the workspace
+	 * 
+	 * @param d the dataset to add
+	 */
+	void add(@NonNull final IAnalysisDataset d);
 
-    /**
-     * Save the workspace
-     */
-    void save();
+	/**
+	 * Add the given file to the workspace
+	 * 
+	 * @param f the file
+	 */
+	void add(@NonNull final File f);
 
-    /**
-     * Get the files in the workspace
-     * @return
-     */
-    @NonNull Set<File> getFiles();
+	/**
+	 * Remove the given dataset from the workspace
+	 * 
+	 * @param d the dataset to remove
+	 */
+	void remove(@NonNull final IAnalysisDataset d);
 
-    /**
-     * Set the save path of the workspace
-     * @param f
-     */
-    void setSaveFile(@NonNull final File f);
+	/**
+	 * Remove the given file from the workspace
+	 * 
+	 * @param f the file to remove
+	 */
+	void remove(@NonNull final File f);
 
-    /**
-     * Get the save file of the workspace
-     * @return
-     */
-    @Nullable File getSaveFile();
-        
-    /**
-     * This describes the information available for 
-     * biological samples. Individual datasets can belong
-     * to the same biological sample. For example, different
-     * animals of a wild-type.
-     * @author bms41
-     * @since 1.13.8
-     *
-     */
-    public interface BioSample {
-        
-        /**
-         * Get the name of the sample
-         */
-        String getName();
-        
-        /**
-         * Get the datasets in the sample
-         */
-        List<File> getDatasets();
-        
-        /**
-         * Add a dataset to the sample
-         * @param dataset
-         */
-       void addDataset(IAnalysisDataset dataset);
-        
-        /**
-         * Add a dataset to the sample
-         * @param dataset
-         */
-       void addDataset(File dataset);
-        
-        /**
-         * Remove the dataset from the sample
-         * @param dataset
-         */
-        void removeDataset(File dataset);
-        
-        /**
-         * Remove the dataset from the sample
-         * @param dataset
-         */
-        void removeDataset(IAnalysisDataset dataset);
-        
-        /**
-         * Test if the given dataset is in the sample
-         * @param dataset
-         * @return
-         */
-        boolean hasDataset(File dataset);
-        
-        /**
-         * Test if the given dataset is in the sample
-         * @param dataset
-         * @return
-         */
-        boolean hasDataset(IAnalysisDataset dataset);
-        
-    }
-       
-    /**
-     * Get the samples in the workspace
-     * @return
-     */
-    @NonNull Set<BioSample> getBioSamples();
-    
-    /**
-     * Add a new sample to the workspace
-     * @param name
-     */
-    void addBioSample(@NonNull final String name);
-    
-    /**
-     * Get the biosample associated with the given dataset
-     * @param dataset
-     * @return
-     */
-    @Nullable BioSample getBioSample(@NonNull final IAnalysisDataset dataset);
-    
-    /**
-     * Get the biosample with the given name
-     * @param dataset
-     * @return
-     */
-    @Nullable BioSample getBioSample(@NonNull final String name);
+	/**
+	 * Test if the given dataset is in the workspace
+	 * 
+	 * @param d
+	 * @return true if the dataset is in the workspace
+	 */
+	boolean has(@NonNull final IAnalysisDataset d);
 
+	/**
+	 * Save the workspace
+	 */
+	void save();
+
+	/**
+	 * Get the files in the workspace
+	 * 
+	 * @return
+	 */
+	@NonNull
+	Set<File> getFiles();
+
+	/**
+	 * Set the save path of the workspace
+	 * 
+	 * @param f
+	 */
+	void setSaveFile(@NonNull final File f);
+
+	/**
+	 * Get the save file of the workspace
+	 * 
+	 * @return
+	 */
+	@Nullable
+	File getSaveFile();
 
 }

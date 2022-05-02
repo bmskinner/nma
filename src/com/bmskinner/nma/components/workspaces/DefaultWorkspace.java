@@ -22,6 +22,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.jdom2.Element;
 
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.io.Io.Importer;
@@ -36,122 +37,125 @@ import com.bmskinner.nma.io.Io.Importer;
  */
 public class DefaultWorkspace implements IWorkspace {
 
-    private Set<File> datasets = new LinkedHashSet<>();
-    private Set<BioSample> samples = new LinkedHashSet<>();
+	private Set<File> datasets = new LinkedHashSet<>();
 
-    private File saveFile = null;
-    private String name;
-    private UUID id = UUID.randomUUID();
+	private File saveFile = null;
+	private String name;
+	private UUID id = UUID.randomUUID();
 
-    public DefaultWorkspace(@NonNull final File f) {
-        this.saveFile = f;
-        this.name = f.getName().replace(Importer.WRK_FILE_EXTENSION, "");
-    }
-    
-    public DefaultWorkspace(@NonNull final String name) {
-        this.name = name;
-    }
-    
-    public DefaultWorkspace(@NonNull final File f, @NonNull final String name) {
-    	this(f);
-        this.name = name;
-    }
-    
-    @Override
+	public DefaultWorkspace(@NonNull final File f) {
+		this.saveFile = f;
+		this.name = f.getName().replace(Importer.WRK_FILE_EXTENSION, "");
+	}
+
+	public DefaultWorkspace(@NonNull final String name) {
+		this.name = name;
+	}
+
+	public DefaultWorkspace(@NonNull final File f, @NonNull final String name) {
+		this(f);
+		this.name = name;
+	}
+
+	public DefaultWorkspace(@NonNull File f, @NonNull Element e) {
+		name = e.getAttributeValue(IWorkspace.WORKSPACE_NAME);
+		saveFile = f;
+
+		Element datasetElement = e.getChild(IWorkspace.DATASETS_ELEMENT);
+
+		for (Element dataset : datasetElement.getChildren()) {
+			String path = dataset.getChild(IWorkspace.DATASET_PATH).getText();
+			add(new File(path));
+		}
+	}
+
+	@Override
+	public Element toXmlElement() {
+		// root element
+		Element rootElement = new Element(IWorkspace.XML_WORKSPACE)
+				.setAttribute(IWorkspace.WORKSPACE_NAME, name);
+
+		// Add datasets
+		Element datasetsElement = new Element(IWorkspace.DATASETS_ELEMENT);
+		for (File f : getFiles()) {
+			Element dataset = new Element("dataset");
+			Element datasetPath = new Element(IWorkspace.DATASET_PATH);
+
+			datasetPath.setText(f.getAbsolutePath());
+			dataset.addContent(datasetPath);
+			datasetsElement.addContent(dataset);
+		}
+		rootElement.addContent(datasetsElement);
+		return rootElement;
+	}
+
+	@Override
 	public UUID getId() {
-    	return id;
-    }
-    
-    @Override
-	public void setName(@NonNull String s){
-        this.name = s;
-    }
-    
-    @Override
+		return id;
+	}
+
+	@Override
+	public void setName(@NonNull String s) {
+		this.name = s;
+	}
+
+	@Override
 	public @NonNull String getName() {
-    	return name;
-    }
+		return name;
+	}
 
-    @Override
-    public void add(final @NonNull IAnalysisDataset d) {
-        if (d.isRoot())
-            datasets.add(d.getSavePath());
+	@Override
+	public void add(final @NonNull IAnalysisDataset d) {
+		if (d.isRoot())
+			datasets.add(d.getSavePath());
+	}
 
-        // TODO: warn or get root
-    }
+	@Override
+	public void add(final @NonNull File f) {
+		datasets.add(f);
+	}
 
-    @Override
-    public void add(final @NonNull File f) {
-        datasets.add(f);
-    }
+	@Override
+	public void remove(final @NonNull IAnalysisDataset d) {
+		datasets.remove(d.getSavePath());
+	}
 
-    @Override
-    public void remove(final @NonNull IAnalysisDataset d) {
-        datasets.remove(d.getSavePath());
-        samples.stream().forEach(b->b.removeDataset(d));
-    }
+	@Override
+	public void remove(@NonNull File f) {
+		datasets.remove(f);
+	}
 
-    @Override
-    public void remove(@NonNull File f) {
-        datasets.remove(f);
-        samples.stream().forEach(b->b.removeDataset(f));
-    }
-    
-    @Override
-    public boolean has(final @NonNull IAnalysisDataset d) {
-        return datasets.contains(d.getSavePath());
-    }
+	@Override
+	public boolean has(final @NonNull IAnalysisDataset d) {
+		return datasets.contains(d.getSavePath());
+	}
 
-    @Override
-    public @NonNull Set<File> getFiles() {
-        return datasets;
-    }
+	@Override
+	public @NonNull Set<File> getFiles() {
+		return datasets;
+	}
 
-    @Override
-    public void setSaveFile(@NonNull File f) {
-        saveFile = f;
+	@Override
+	public void setSaveFile(@NonNull File f) {
+		saveFile = f;
 
-    }
+	}
 
-    @Override
-    public @NonNull File getSaveFile() {
-        return saveFile;
-    }
+	@Override
+	public @NonNull File getSaveFile() {
+		return saveFile;
+	}
 
-    @Override
-    public void save() {
-        // TODO Auto-generated method stub
+	@Override
+	public void save() {
+		// TODO Auto-generated method stub
 
-    }
+	}
 
-    @Override
-    public void addBioSample(@NonNull String name) {
-        for(BioSample s : samples){
-            if(s.getName().equals(name))
-                return;
-        }
-        samples.add(new DefaultBioSample(name)); 
-    }
-
-    @Override
-    public BioSample getBioSample(@NonNull IAnalysisDataset d) {
-        return samples.stream().filter( s-> s.hasDataset(d.getSavePath())).findFirst().orElse(null);
-    }
-    
-    @Override
-    public BioSample getBioSample(@NonNull String name) {
-        return samples.stream().filter( s-> s.getName().equals(name)).findFirst().orElse(null);
-    }
-
-    @Override
-    public @NonNull Set<BioSample> getBioSamples() {
-        return samples;
-    }
-    
-    @Override
-    public String toString(){
-        return name;
-    }
+	@Override
+	public String toString() {
+		return name;
+	}
 
 	@Override
 	public int hashCode() {
@@ -160,7 +164,6 @@ public class DefaultWorkspace implements IWorkspace {
 		result = prime * result + ((datasets == null) ? 0 : datasets.hashCode());
 		result = prime * result + ((id == null) ? 0 : id.hashCode());
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		result = prime * result + ((samples == null) ? 0 : samples.hashCode());
 		result = prime * result + ((saveFile == null) ? 0 : saveFile.hashCode());
 		return result;
 	}
@@ -189,11 +192,6 @@ public class DefaultWorkspace implements IWorkspace {
 				return false;
 		} else if (!name.equals(other.name))
 			return false;
-		if (samples == null) {
-			if (other.samples != null)
-				return false;
-		} else if (!samples.equals(other.samples))
-			return false;
 		if (saveFile == null) {
 			if (other.saveFile != null)
 				return false;
@@ -201,7 +199,5 @@ public class DefaultWorkspace implements IWorkspace {
 			return false;
 		return true;
 	}
-    
-    
 
 }

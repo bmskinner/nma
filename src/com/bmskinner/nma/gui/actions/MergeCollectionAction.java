@@ -74,7 +74,7 @@ public class MergeCollectionAction extends MultiDatasetResultAction {
 
 		try {
 			File saveFile = new DefaultInputSupplier().requestFileSave(dir, DEFAULT_DATASET_NAME,
-					Io.SAVE_FILE_EXTENSION_NODOT);
+					Io.NMD_FILE_EXTENSION_NODOT);
 
 			IAnalysisMethod m;
 

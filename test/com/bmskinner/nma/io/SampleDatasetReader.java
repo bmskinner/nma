@@ -115,8 +115,12 @@ public class SampleDatasetReader {
 			throws Exception {
 		if (!f.exists())
 			throw new IllegalArgumentException("File does not exist: " + f.getAbsolutePath());
-		IAnalysisMethod m = signalMap == null ? new DatasetImportMethod(f)
-				: new DatasetImportMethod(f, signalMap);
+
+		XMLImportMethod g = new XMLImportMethod(f);
+		g.call();
+
+		IAnalysisMethod m = signalMap == null ? new DatasetImportMethod(g.getXMLDocument())
+				: new DatasetImportMethod(g.getXMLDocument(), signalMap);
 		return m.call().getFirstDataset();
 	}
 

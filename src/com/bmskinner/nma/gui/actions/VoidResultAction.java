@@ -28,6 +28,7 @@ import java.util.concurrent.CountDownLatch;
 import javax.swing.JProgressBar;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 
 import com.bmskinner.nma.analysis.IAnalysisWorker;
 import com.bmskinner.nma.core.InputSupplier;
@@ -46,7 +47,8 @@ public abstract class VoidResultAction implements PropertyChangeListener, Runnab
 	protected IAnalysisWorker worker = null;
 	protected int downFlag = 0; // flags for next action
 
-	protected List<JProgressBar> progressBars = new ArrayList<>(); // jcomponents can't be shared across components
+	protected List<JProgressBar> progressBars = new ArrayList<>(); // jcomponents can't be shared
+																	// across components
 	protected List<ProgressBarAcceptor> progressAcceptors = new ArrayList<>();
 
 	private Optional<CountDownLatch> latch = Optional.empty(); // allow threads to wait
@@ -65,7 +67,8 @@ public abstract class VoidResultAction implements PropertyChangeListener, Runnab
 		createProgressBar(barMessage);
 	}
 
-	protected VoidResultAction(@NonNull String barMessage, @NonNull List<ProgressBarAcceptor> acceptors) {
+	protected VoidResultAction(@NonNull String barMessage,
+			@NonNull List<ProgressBarAcceptor> acceptors) {
 		progressAcceptors.addAll(acceptors);
 		createProgressBar(barMessage);
 	}
@@ -92,8 +95,8 @@ public abstract class VoidResultAction implements PropertyChangeListener, Runnab
 		}
 	}
 
-	protected void setLatch(@NonNull final CountDownLatch latch) {
-		this.latch = Optional.of(latch);
+	protected void setLatch(@Nullable final CountDownLatch latch) {
+		this.latch = Optional.ofNullable(latch);
 	}
 
 	protected Optional<CountDownLatch> getLatch() {
@@ -132,7 +135,6 @@ public abstract class VoidResultAction implements PropertyChangeListener, Runnab
 	 */
 	public void cancel() {
 		removeProgressBar();
-//		dh.removeListener(eh);
 	}
 
 	protected void setProgressBarVisible(boolean b) {
@@ -186,8 +188,10 @@ public abstract class VoidResultAction implements PropertyChangeListener, Runnab
 	 * The method run when the analysis has completed
 	 */
 	public void finished() {
-		worker.removePropertyChangeListener(this);
+		if (worker != null)
+			worker.removePropertyChangeListener(this);
 		cancel();
+		countdownLatch();
 	}
 
 	/**

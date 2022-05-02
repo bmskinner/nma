@@ -70,8 +70,6 @@ public abstract class AbstractAnalysisDataset implements IAnalysisDataset {
 
 	private static final String XML_VERSION_CREATED = "VersionCreated";
 
-	private static final String XML_ANALYSIS_DATASET = "AnalysisDataset";
-
 	/** The software version in which the dataset was created */
 	protected final Version versionCreated;
 

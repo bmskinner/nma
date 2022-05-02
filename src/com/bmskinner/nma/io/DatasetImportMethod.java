@@ -17,29 +17,17 @@
 package com.bmskinner.nma.io;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.logging.Logger;
 
-import javax.xml.XMLConstants;
-
 import org.jdom2.Document;
-import org.jdom2.JDOMException;
-import org.jdom2.input.SAXBuilder;
 
 import com.bmskinner.nma.analysis.AbstractAnalysisMethod;
 import com.bmskinner.nma.analysis.AnalysisMethodException;
 import com.bmskinner.nma.analysis.DefaultAnalysisResult;
 import com.bmskinner.nma.analysis.IAnalysisResult;
-import com.bmskinner.nma.components.Version.UnsupportedVersionException;
-import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.datasets.DatasetCreator;
 import com.bmskinner.nma.components.datasets.DatasetRepairer;
 import com.bmskinner.nma.components.datasets.DatasetValidator;
@@ -60,7 +48,7 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
 
 	private static final byte[] NMD_V1_SIGNATURE = new byte[] { -84, -19, 0, 5 };
 
-	private final File file;
+	private final Document doc;
 	private IAnalysisDataset dataset = null;
 	private boolean wasConverted = false;
 	public static final int WAS_CONVERTED_BOOL = 0;
@@ -75,23 +63,10 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
 	 * 
 	 * @param f the saved dataset file
 	 */
-	public DatasetImportMethod(final File f) {
+	public DatasetImportMethod(final Document doc) {
 		super();
 
-		if (!Importer.isSuitableImportFile(f)) {
-			LOGGER.warning(INVALID_FILE_ERROR);
-			throw new IllegalArgumentException(Importer.whyIsUnsuitableImportFile(f));
-		}
-
-		if (!(f.getName().endsWith(SAVE_FILE_EXTENSION)
-				|| f.getName().endsWith(BACKUP_FILE_EXTENSION))) {
-			LOGGER.warning(
-					"File is not nmd or bak format or has been renamed: " + f.getAbsolutePath());
-			throw new IllegalArgumentException(
-					"File is not nmd or bak format or has been renamed: " + f.getAbsolutePath());
-		}
-
-		this.file = f;
+		this.doc = doc;
 	}
 
 	/**
@@ -101,68 +76,38 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
 	 * @param f
 	 * @param signalFiles a map of signal group to folder of signals
 	 */
-	public DatasetImportMethod(final File f, final Map<UUID, File> signalFiles) {
-		this(f);
+	public DatasetImportMethod(final Document doc, final Map<UUID, File> signalFiles) {
+		this(doc);
 		signalFileMap = Optional.of(signalFiles);
 	}
 
 	@Override
 	public IAnalysisResult call() throws Exception {
 
-		if (isOldNmdFormat())
-			throw new UnsupportedVersionException(null);
-
 		run();
 
 		if (dataset == null)
 			throw new UnloadableDatasetException(
-					String.format("Could not load file '%s'", file.getAbsolutePath()));
+					String.format("Could not load document"));
 
 		DefaultAnalysisResult r = new DefaultAnalysisResult(dataset);
 		r.setBoolean(WAS_CONVERTED_BOOL, wasConverted);
 		return r;
 	}
 
-	private void run() throws Exception {
+	private void run() throws UnloadableDatasetException {
 
-		// Clean up old log lock files. Legacy.
-		cleanLockFilesInDir(file.getParentFile());
-
-		// Deserialise whatever is in the file
-
-		try (InputStream is = new FileInputStream(file);
-				CountedInputStream cis = new CountedInputStream(is);) {
-
-			cis.addCountListener((l) -> fireProgressEvent(l));
-			SAXBuilder saxBuilder = new SAXBuilder();
-			saxBuilder.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
-			saxBuilder.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
-			Document doc = saxBuilder.build(cis);
-//    		LOGGER.fine("Built XML document");
+		try {
 			fireIndeterminateState(); // TODO: hook the indeterminate state to the end of file
 										// reading,
 			// rather than after the document is built - takes a long time with large
 			// datasets
 			dataset = DatasetCreator.createRoot(doc.getRootElement());
 			validateDataset();
-		} catch (UnsupportedVersionException e) {
-			throw (e);
 
-		} catch (ComponentCreationException | IOException | JDOMException e) {
-			LOGGER.fine("Error reading XML: " + e.getMessage());
-			throw new UnloadableDatasetException(
-					"Cannot read as XML dataset: " + file.getAbsolutePath(), e);
-		}
-	}
-
-	public boolean isOldNmdFormat() {
-
-		try (InputStream is = new FileInputStream(file);) {
-			byte[] b = is.readNBytes(4);
-			return Arrays.equals(b, NMD_V1_SIGNATURE);
-		} catch (IOException e) {
-			LOGGER.log(Loggable.STACK, "Error reading first bytes of file", e);
-			return false;
+		} catch (Exception e) {
+			LOGGER.log(Loggable.STACK, "Error in dataset import", e);
+			throw new UnloadableDatasetException("Not valid XML dataset for this version", e);
 		}
 	}
 
@@ -194,27 +139,6 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
 			new CellFileExporter(dataset).call();
 			throw new AnalysisMethodException("Unable to validate or repair dataset");
 		}
-	}
-
-	/**
-	 * Older version of the program did not always close log handlers properly, so
-	 * lck files may have proliferated. Kill them with fire.
-	 * 
-	 * @param dir the directory to clean
-	 * @throws IOException
-	 */
-	private void cleanLockFilesInDir(File dir) throws IOException {
-
-		FilenameFilter filter = (folder, name) -> name.toLowerCase()
-				.endsWith(Io.LOCK_FILE_EXTENSION);
-
-		File[] files = dir.listFiles(filter);
-
-		if (files == null)
-			return;
-
-		for (File lockFile : files)
-			Files.delete(lockFile.toPath());
 	}
 
 	public class UnloadableDatasetException extends Exception {

@@ -28,14 +28,14 @@ import com.bmskinner.nma.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nma.analysis.IAnalysisMethod;
 import com.bmskinner.nma.analysis.IAnalysisResult;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
-import com.bmskinner.nma.core.ThreadManager;
 import com.bmskinner.nma.core.InputSupplier.RequestCancelledException;
+import com.bmskinner.nma.core.ThreadManager;
 import com.bmskinner.nma.gui.ProgressBarAcceptor;
 import com.bmskinner.nma.gui.events.UIController;
 import com.bmskinner.nma.io.Io.Importer;
 import com.bmskinner.nma.logging.Loggable;
-import com.bmskinner.nma.pipelines.SavedOptionsAnalysisPipeline;
 import com.bmskinner.nma.pipelines.AnalysisPipeline.AnalysisPipelineException;
+import com.bmskinner.nma.pipelines.SavedOptionsAnalysisPipeline;
 
 public class ImportWorkflowAction extends VoidResultAction {
 
@@ -46,23 +46,14 @@ public class ImportWorkflowAction extends VoidResultAction {
 	private static final String DEFAULT_FILE_TYPE = "Nuclear morphology workflow";
 
 	/**
-	 * Create an import action for the given main window. This will create a dialog
-	 * asking for the file to open.
-	 * 
-	 * @param mw the main window to which a progress bar will be attached
-	 */
-	public ImportWorkflowAction(@NonNull final ProgressBarAcceptor acceptor) {
-		this(acceptor, null);
-	}
-
-	/**
 	 * Create an import action for the given main window. Specify the file to be
 	 * opened.
 	 * 
 	 * @param mw   the main window to which a progress bar will be attached
 	 * @param file the workspace file to open
 	 */
-	public ImportWorkflowAction(@NonNull final ProgressBarAcceptor acceptor, @Nullable File file) {
+	public ImportWorkflowAction(@NonNull final ProgressBarAcceptor acceptor,
+			@Nullable File file) {
 		super(PROGRESS_BAR_LABEL, acceptor);
 		this.file = file;
 	}
@@ -74,7 +65,8 @@ public class ImportWorkflowAction extends VoidResultAction {
 
 		try {
 			if (file == null)
-				file = is.requestFile("Choose analysis options", null, Importer.XML_FILE_EXTENSION_NODOT,
+				file = is.requestFile("Choose analysis options", null,
+						Importer.XML_FILE_EXTENSION_NODOT,
 						"Analysis options file");
 
 			File folder = is.requestFolder("Choose image folder", file.getParentFile());
@@ -85,9 +77,10 @@ public class ImportWorkflowAction extends VoidResultAction {
 			worker.addPropertyChangeListener(this);
 			ThreadManager.getInstance().submit(worker);
 
-		} catch (RequestCancelledException | AnalysisPipelineException e) {
-			LOGGER.warning("Cancelled workflow; " + e.getMessage());
-			cancel();
+		} catch (RequestCancelledException e) {
+			super.finished();
+		} catch (AnalysisPipelineException e) {
+			LOGGER.warning("Error in workflow: " + e.getMessage());
 		}
 	}
 

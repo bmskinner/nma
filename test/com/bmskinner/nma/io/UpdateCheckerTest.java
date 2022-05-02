@@ -6,7 +6,6 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 import com.bmskinner.nma.components.Version;
-import com.bmskinner.nma.io.UpdateChecker;
 
 public class UpdateCheckerTest {
 
@@ -14,10 +13,10 @@ public class UpdateCheckerTest {
 	public void testUpdateSiteFound() {
 		assertFalse(UpdateChecker.isUpdateAvailable(Version.currentVersion()));
 	}
-	
+
 	@Test
 	public void testUpdateFoundForOlderVersion() {
-		assertTrue(UpdateChecker.isUpdateAvailable(Version.v_1_13_0));
+		assertTrue(UpdateChecker.isUpdateAvailable(new Version(1, 13, 0)));
 	}
-	
+
 }

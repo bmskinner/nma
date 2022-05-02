@@ -28,9 +28,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
+import com.bmskinner.nma.gui.events.FileImportEventListener.FileImportEvent;
 import com.bmskinner.nma.gui.events.UserActionController;
 import com.bmskinner.nma.gui.events.UserActionEvent;
-import com.bmskinner.nma.io.Io.Importer;
 import com.bmskinner.nma.logging.Loggable;
 
 @SuppressWarnings("serial")
@@ -61,26 +61,15 @@ public class MainDragAndDropTarget extends DropTarget {
 						fileList.add(file);
 				}
 
-				// Open the files - we process *.nmd, *.bak, *.wrk,and *.xml files
-
 				for (File f : fileList) {
 					LOGGER.fine("Checking dropped file");
-					if (f.getName().endsWith(Importer.SAVE_FILE_EXTENSION)
-							|| f.getName().endsWith(Importer.BACKUP_FILE_EXTENSION))
-						UserActionController.getInstance().userActionEventReceived(
-								new UserActionEvent(this, UserActionEvent.IMPORT_DATASET_PREFIX + f.getAbsolutePath()));
-
-					if (f.getName().endsWith(Importer.WRK_FILE_EXTENSION))
-						UserActionController.getInstance().userActionEventReceived(new UserActionEvent(this,
-								UserActionEvent.IMPORT_WORKSPACE_PREFIX + f.getAbsolutePath()));
-
-					if (f.getName().endsWith(Importer.XML_FILE_EXTENSION))
-						UserActionController.getInstance().userActionEventReceived(new UserActionEvent(this,
-								UserActionEvent.IMPORT_WORKFLOW_PREFIX + f.getAbsolutePath()));
+					UserActionController.getInstance()
+							.fileImportRequested(new FileImportEvent(this, f, null, null));
 
 					if (f.isDirectory())
 						UserActionController.getInstance().userActionEventReceived(
-								new UserActionEvent(this, UserActionEvent.NEW_ANALYSIS_PREFIX + f.getAbsolutePath()));
+								new UserActionEvent(this,
+										UserActionEvent.NEW_ANALYSIS_PREFIX + f.getAbsolutePath()));
 				}
 			}
 

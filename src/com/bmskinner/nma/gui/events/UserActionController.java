@@ -71,6 +71,7 @@ import com.bmskinner.nma.gui.dialogs.collections.AbstractCellCollectionDialog;
 import com.bmskinner.nma.gui.dialogs.collections.ManualCurationDialog;
 import com.bmskinner.nma.gui.runnables.MorphologyAnalysis;
 import com.bmskinner.nma.gui.runnables.SaveAllDatasets;
+import com.bmskinner.nma.io.GenericFileImporter;
 
 /**
  * Controller for all user actions
@@ -80,7 +81,7 @@ import com.bmskinner.nma.gui.runnables.SaveAllDatasets;
  *
  */
 public class UserActionController implements UserActionEventListener, ConsensusUpdateEventListener,
-		LandmarkUpdateEventListener, SegmentEventListener {
+		LandmarkUpdateEventListener, SegmentEventListener, FileImportEventListener {
 
 	private static final Logger LOGGER = Logger.getLogger(UserActionController.class.getName());
 
@@ -128,32 +129,6 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 		// The full pipeline for a new analysis
 		if (UserActionEvent.MORPHOLOGY_ANALYSIS_ACTION.equals(event.type()))
 			return new MorphologyAnalysis(event.getDatasets(), acceptor);
-
-		if (event.type().startsWith(UserActionEvent.IMPORT_WORKFLOW_PREFIX)) {
-			// If no image folder specified it will be requested in workflow
-			String s = event.type().replace(UserActionEvent.IMPORT_WORKFLOW_PREFIX, "");
-			return s.equals("") ? new ImportWorkflowAction(acceptor)
-					: new ImportWorkflowAction(acceptor, new File(s));
-		}
-
-		if (event.type().startsWith(UserActionEvent.IMPORT_DATASET_PREFIX)) {
-			String s = event.type().replace(UserActionEvent.IMPORT_DATASET_PREFIX, "");
-			if (s.equals(""))
-				return new ImportDatasetAction(acceptor);
-			File f = new File(s);
-			return new ImportDatasetAction(acceptor, f, null);
-		}
-
-		if (event.type().startsWith(UserActionEvent.IMPORT_WORKSPACE_PREFIX))
-			return () -> {
-				String s = event.type().replace(UserActionEvent.IMPORT_WORKSPACE_PREFIX, "");
-				if (s.equals("")) {
-					new ImportWorkspaceAction(acceptor).run();
-					return;
-				}
-				File f = new File(s);
-				new ImportWorkspaceAction(acceptor, f).run();
-			};
 
 		if (event.type().startsWith(UserActionEvent.NEW_ANALYSIS_PREFIX)) {
 			return () -> {
@@ -688,6 +663,33 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 		} catch (ProfileException | MissingLandmarkException | MissingProfileException e) {
 			LOGGER.warning("Unable to update profile window proportion: " + e.getMessage());
 		}
+	}
+
+	@Override
+	public void fileImportRequested(FileImportEvent f) {
+		ThreadManager.getInstance()
+				.execute(new GenericFileImporter(f.file(), acceptor, null, f.type()));
+
+	}
+
+	@Override
+	public void fileImported(FileImportEvent f) {
+
+		if (IAnalysisDataset.XML_ANALYSIS_DATASET.equals(f.type())) {
+			ThreadManager.getInstance()
+					.execute(new ImportDatasetAction(acceptor, f.document(), null));
+		}
+
+		if (IWorkspace.XML_WORKSPACE.equals(f.type())) {
+			ThreadManager.getInstance()
+					.execute(new ImportWorkspaceAction(acceptor, f.document(), f.file()));
+		}
+
+		if (IAnalysisOptions.XML_ANALYSIS_OPTIONS.equals(f.type())) {
+			ThreadManager.getInstance()
+					.execute(new ImportWorkflowAction(acceptor, f.file()));
+		}
+
 	}
 
 }

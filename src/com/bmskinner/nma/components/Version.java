@@ -37,10 +37,9 @@ public class Version implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	/**
-	 * The fields for setting the version. Version will be stored in
-	 * AnalysisDatasets. Backwards compatability should be maintained between bugfix
-	 * increments, but is not guaranteed between revision or major version
-	 * increments.
+	 * The fields for setting the version. Backwards compatability should be
+	 * maintained between revision increments and minor verions, but is not
+	 * guaranteed between major version increments.
 	 */
 	public static final int VERSION_MAJOR = 2;
 	public static final int VERSION_MINOR = 0;
@@ -51,29 +50,6 @@ public class Version implements Serializable {
 	private final int revision;
 
 	private static final String SEPARATOR = ".";
-
-	// Some versions to compare features against
-	public static final Version v_1_13_0 = new Version(1, 13, 0);
-	public static final Version v_1_13_1 = new Version(1, 13, 1);
-	public static final Version v_1_13_2 = new Version(1, 13, 2);
-	public static final Version v_1_13_3 = new Version(1, 13, 3);
-	public static final Version v_1_13_4 = new Version(1, 13, 4);
-	public static final Version v_1_13_5 = new Version(1, 13, 5);
-	public static final Version v_1_13_6 = new Version(1, 13, 6);
-	public static final Version v_1_13_7 = new Version(1, 13, 7);
-	public static final Version v_1_13_8 = new Version(1, 13, 8);
-	public static final Version v_1_14_0 = new Version(1, 14, 0);
-	public static final Version v_1_15_0 = new Version(1, 15, 0);
-	public static final Version v_1_15_1 = new Version(1, 15, 1);
-	public static final Version v_1_15_2 = new Version(1, 15, 2);
-	public static final Version v_1_15_3 = new Version(1, 15, 3);
-	public static final Version v_1_15_4 = new Version(1, 15, 4);
-	public static final Version v_1_16_0 = new Version(1, 16, 0);
-	public static final Version v_1_17_0 = new Version(1, 17, 0);
-	public static final Version v_1_17_1 = new Version(1, 17, 1);
-	public static final Version v_1_18_0 = new Version(1, 18, 0);
-	public static final Version v_1_18_1 = new Version(1, 18, 1);
-	public static final Version v_1_19_0 = new Version(1, 19, 0);
 
 	public Version(final int major, final int minor, final int revision) {
 		this.major = major;
@@ -124,7 +100,8 @@ public class Version implements Serializable {
 	public static Version parseString(@NonNull final String s) {
 		String[] parts = s.split("\\" + SEPARATOR);
 		if (parts.length == 3) {
-			return new Version(Integer.valueOf(parts[0]), Integer.valueOf(parts[1]), Integer.valueOf(parts[2]));
+			return new Version(Integer.valueOf(parts[0]), Integer.valueOf(parts[1]),
+					Integer.valueOf(parts[2]));
 		}
 		throw new IllegalArgumentException("Input string is not a version format");
 	}
@@ -144,7 +121,8 @@ public class Version implements Serializable {
 			return true;
 		}
 
-		if (this.major == v.getMajor() && this.minor == v.getMinor() && this.revision < v.getRevision()) {
+		if (this.major == v.getMajor() && this.minor == v.getMinor()
+				&& this.revision < v.getRevision()) {
 			return true;
 		}
 		return false;
@@ -209,21 +187,15 @@ public class Version implements Serializable {
 	 */
 	public static boolean versionIsSupported(@NonNull Version version) {
 
-		if (version == null)
-			return false;
-
 		// major version MUST be the same
 		if (version.getMajor() != VERSION_MAJOR)
-			return false;
-
-		// Minor versions are compatible from version 1.13.6 onwards
-		if (version.isOlderThan(v_1_13_0))
 			return false;
 
 		return true;
 	}
 
-	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+	private void readObject(java.io.ObjectInputStream in)
+			throws IOException, ClassNotFoundException {
 
 		in.defaultReadObject();
 
