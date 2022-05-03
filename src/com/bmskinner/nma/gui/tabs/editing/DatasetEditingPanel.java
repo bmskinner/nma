@@ -515,15 +515,11 @@ public class DatasetEditingPanel extends ChartDetailPanel
 	private synchronized JPopupMenu createPopup(IPoint point) {
 		JPopupMenu popupMenu = new JPopupMenu("Popup");
 
-//		if (!activeDataset().isRoot()) {
-//			popupMenu.add("Cannot edit a child dataset");
-//		} else {
 		addSegmentsToPopup(popupMenu, point);
 
 		popupMenu.addSeparator();
 
 		addLandmarksToPopup(popupMenu, point);
-//		}
 
 		return popupMenu;
 	}

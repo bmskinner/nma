@@ -601,9 +601,29 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 		sh.setLandmark(event.lm, event.newIndex);
 
 		if (rp.equals(event.lm)) {
-			UserActionController.getInstance().userActionEventReceived(
-					new UserActionEvent(this, UserActionEvent.SEGMENTATION_ACTION,
-							List.of(event.dataset)));
+
+			Runnable r = () -> {
+				final CountDownLatch segmentLatch = new CountDownLatch(1);
+
+				new Thread(() -> { // run segmentation
+					new RunSegmentationAction(event.dataset,
+							MorphologyAnalysisMode.SEGMENT_FROM_SCRATCH,
+							SingleDatasetResultAction.NO_FLAG, acceptor,
+							segmentLatch).run();
+				}).start();
+
+				new Thread(() -> { // wait for segmentation and run refolding
+					try {
+						segmentLatch.await();
+						new RefoldNucleusAction(event.dataset, acceptor, null).run();
+					} catch (InterruptedException e) {
+						Thread.currentThread().interrupt();
+						return;
+					}
+				}).start();
+
+			};
+			ThreadManager.getInstance().execute(r);
 		} else {
 			UIController.getInstance().fireProfilesUpdated(d);
 		}
