@@ -164,6 +164,13 @@ public interface IAnalysisOptions extends XmlSerializable {
 	Optional<HashOptions> getNuclearSignalOptions(@NonNull UUID signalGroup);
 
 	/**
+	 * Fetch the folder used to detect the nuclear signal, if present.
+	 * 
+	 * @return
+	 */
+	Optional<File> getNuclearSignalDetectionFolder(@NonNull UUID signalGroup);
+
+	/**
 	 * Set signal detection options
 	 * 
 	 * @param key

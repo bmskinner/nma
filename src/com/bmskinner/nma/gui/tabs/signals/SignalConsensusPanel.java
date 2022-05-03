@@ -22,6 +22,8 @@ import com.bmskinner.nma.gui.components.ImageThumbnailGenerator;
 import com.bmskinner.nma.gui.events.ChartSetEventListener;
 import com.bmskinner.nma.gui.events.ConsensusUpdatedListener;
 import com.bmskinner.nma.gui.events.NuclearSignalUpdatedListener;
+import com.bmskinner.nma.gui.events.UserActionController;
+import com.bmskinner.nma.gui.events.UserActionEvent;
 import com.bmskinner.nma.gui.tabs.ChartDetailPanel;
 import com.bmskinner.nma.visualisation.charts.AbstractChartFactory;
 import com.bmskinner.nma.visualisation.charts.OutlineChartFactory;
@@ -88,7 +90,8 @@ public class SignalConsensusPanel extends ChartDetailPanel
 		panel.add(chartPanel, BorderLayout.CENTER);
 		chartPanel.setFillConsensus(false);
 
-		chartPanel.addChartMouseListener(new ImageThumbnailGenerator(chartPanel, ImageThumbnailGenerator.COLOUR_RGB));
+		chartPanel.addChartMouseListener(
+				new ImageThumbnailGenerator(chartPanel, ImageThumbnailGenerator.COLOUR_RGB));
 
 		checkboxPanel = createSignalCheckboxPanel();
 
@@ -107,13 +110,14 @@ public class SignalConsensusPanel extends ChartDetailPanel
 
 		mergeButton = new JButton(Labels.Signals.MERGE_BTN_LBL);
 		mergeButton.addActionListener(e -> {
-			LOGGER.finer("Firing merge signal action request");
-//			getSignalChangeEventHandler().fireUserActionEvent(UserActionEvent.MERGE_SIGNALS_ACTION);
+			UserActionController.getInstance().userActionEventReceived(new UserActionEvent(this,
+					UserActionEvent.MERGE_SIGNALS_ACTION, activeDataset()));
 		});
 		mergeButton.setEnabled(false);
 		panel.add(mergeButton);
 
-		JCheckBox showAnnotationsBox = new JCheckBox(Labels.Signals.SHOW_SIGNAL_RADII_LBL, isShowAnnotations);
+		JCheckBox showAnnotationsBox = new JCheckBox(Labels.Signals.SHOW_SIGNAL_RADII_LBL,
+				isShowAnnotations);
 		showAnnotationsBox.addActionListener(e -> {
 			isShowAnnotations = showAnnotationsBox.isSelected();
 			refreshCache(getDatasets());
@@ -131,9 +135,11 @@ public class SignalConsensusPanel extends ChartDetailPanel
 					continue;
 
 				// get the status within each dataset
-				boolean visible = activeDataset().getCollection().getSignalGroup(signalGroup).get().isVisible();
+				boolean visible = activeDataset().getCollection().getSignalGroup(signalGroup).get()
+						.isVisible();
 
-				String name = activeDataset().getCollection().getSignalManager().getSignalGroupName(signalGroup);
+				String name = activeDataset().getCollection().getSignalManager()
+						.getSignalGroupName(signalGroup);
 
 				// make a checkbox for each signal group in the dataset
 				JCheckBox box = new JCheckBox(name, visible);
@@ -142,7 +148,8 @@ public class SignalConsensusPanel extends ChartDetailPanel
 				box.setEnabled(activeDataset().getCollection().hasConsensus());
 
 				box.addActionListener(e -> {
-					activeDataset().getCollection().getSignalGroup(signalGroup).get().setVisible(box.isSelected());
+					activeDataset().getCollection().getSignalGroup(signalGroup).get()
+							.setVisible(box.isSelected());
 					uiController.fireNuclearSignalUpdated(activeDataset());
 				});
 				panel.add(box);
@@ -172,7 +179,9 @@ public class SignalConsensusPanel extends ChartDetailPanel
 			consensusAndCheckboxPanel.repaint();
 			consensusAndCheckboxPanel.setVisible(true);
 
-			if (activeDataset().getCollection().getSignalManager().getSignalGroupCount() > 1)
+			// Only allow merge in root datasets
+			if (activeDataset().isRoot()
+					&& activeDataset().getCollection().getSignalManager().getSignalGroupCount() > 1)
 				mergeButton.setEnabled(true);
 
 		}
@@ -188,8 +197,11 @@ public class SignalConsensusPanel extends ChartDetailPanel
 		// so we must invalidate the cache whenever they change
 		this.clearCache(getDatasets());
 
-		ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets()).setShowWarp(false)
-				.setTarget(chartPanel).setShowAnnotations(isShowAnnotations).build();
+		ChartOptions options = new ChartOptionsBuilder()
+				.setDatasets(getDatasets())
+				.setShowWarp(false)
+				.setTarget(chartPanel)
+				.setShowAnnotations(isShowAnnotations).build();
 
 		setChart(options);
 	}

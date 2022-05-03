@@ -238,8 +238,9 @@ public class DatasetMergeMethodTest {
 		IAnalysisDataset d2 = SampleDatasetReader.openDataset(f2);
 
 		PairedSignalGroups ps = new PairedSignalGroups();
-		ps.add(d1.getId(), TestImageDatasetCreator.RED_SIGNAL_ID, d2.getId(),
-				TestImageDatasetCreator.RED_SIGNAL_ID);
+		ps.add(d1, d1.getCollection().getSignalGroup(TestImageDatasetCreator.RED_SIGNAL_ID).get(),
+				d2,
+				d2.getCollection().getSignalGroup(TestImageDatasetCreator.RED_SIGNAL_ID).get());
 
 		// Merge resegment the dataset
 		IAnalysisDataset merged = new DatasetMergeMethod(List.of(d1, d2), f3, ps).call()
@@ -273,8 +274,9 @@ public class DatasetMergeMethodTest {
 		IAnalysisDataset d2 = SampleDatasetReader.openDataset(f2);
 
 		PairedSignalGroups ps = new PairedSignalGroups();
-		ps.add(d1.getId(), TestImageDatasetCreator.RED_SIGNAL_ID,
-				d2.getId(), TestImageDatasetCreator.RED_SIGNAL_ID);
+		ps.add(d1, d1.getCollection().getSignalGroup(TestImageDatasetCreator.RED_SIGNAL_ID).get(),
+				d2,
+				d2.getCollection().getSignalGroup(TestImageDatasetCreator.RED_SIGNAL_ID).get());
 
 		// Merge resegment and save the dataset
 		IAnalysisDataset merged = new DatasetMergeMethod(List.of(d1, d2), f3, ps).call()

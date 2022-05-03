@@ -30,8 +30,8 @@ import com.bmskinner.nma.analysis.IAnalysisResult;
 import com.bmskinner.nma.analysis.signals.PairedSignalGroups;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.core.GlobalOptions;
-import com.bmskinner.nma.core.ThreadManager;
 import com.bmskinner.nma.core.InputSupplier.RequestCancelledException;
+import com.bmskinner.nma.core.ThreadManager;
 import com.bmskinner.nma.gui.DefaultInputSupplier;
 import com.bmskinner.nma.gui.ProgressBarAcceptor;
 import com.bmskinner.nma.gui.dialogs.DatasetMergingDialog;
@@ -54,7 +54,8 @@ public class MergeCollectionAction extends MultiDatasetResultAction {
 	private static final @NonNull String DEFAULT_DATASET_NAME = "Merge_of_datasets";
 	private static final int NUMBER_OF_STEPS = 100;
 
-	public MergeCollectionAction(final List<IAnalysisDataset> datasets, @NonNull final ProgressBarAcceptor acceptor) {
+	public MergeCollectionAction(@NonNull final List<IAnalysisDataset> datasets,
+			@NonNull final ProgressBarAcceptor acceptor) {
 		super(datasets, PROGRESS_BAR_LABEL, acceptor);
 	}
 
@@ -62,7 +63,7 @@ public class MergeCollectionAction extends MultiDatasetResultAction {
 	public void run() {
 
 		if (!datasetsAreMergeable()) {
-			cancel();
+			super.finished();
 			return;
 		}
 
@@ -94,7 +95,7 @@ public class MergeCollectionAction extends MultiDatasetResultAction {
 			ThreadManager.getInstance().submit(worker);
 
 		} catch (RequestCancelledException e) {
-			cancel();
+			super.finished();
 		}
 	}
 

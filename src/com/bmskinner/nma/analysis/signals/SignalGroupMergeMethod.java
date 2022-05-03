@@ -17,10 +17,10 @@
 package com.bmskinner.nma.analysis.signals;
 
 import java.util.List;
-import java.util.Map.Entry;
-import java.util.Set;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -30,9 +30,12 @@ import com.bmskinner.nma.analysis.SingleDatasetAnalysisMethod;
 import com.bmskinner.nma.analysis.signals.PairedSignalGroups.DatasetSignalId;
 import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
+import com.bmskinner.nma.components.options.HashOptions;
+import com.bmskinner.nma.components.options.IAnalysisOptions;
+import com.bmskinner.nma.components.options.MissingOptionException;
+import com.bmskinner.nma.components.options.OptionsBuilder;
 import com.bmskinner.nma.components.signals.DefaultSignalGroup;
 import com.bmskinner.nma.components.signals.INuclearSignal;
-import com.bmskinner.nma.components.signals.ISignalGroup;
 
 /**
  * Method to merge signals groups within a single dataaset
@@ -69,6 +72,7 @@ public class SignalGroupMergeMethod extends SingleDatasetAnalysisMethod {
 	@Override
 	public IAnalysisResult call() throws Exception {
 		mergeSignalGroups();
+		mergeSignalOptions();
 		spinWheels(MAX_PROGRESS, MILLISECONDS_TO_SLEEP);
 		return new DefaultAnalysisResult(dataset);
 	}
@@ -78,38 +82,68 @@ public class SignalGroupMergeMethod extends SingleDatasetAnalysisMethod {
 			LOGGER.finer("No signal groups to merge");
 			return;
 		}
-		LOGGER.fine("Pairs to merge: " + pairedSignalGroups.toString());
 
 		// For each set of mergeable signals, make a new signal group
-		for (Entry<DatasetSignalId, Set<DatasetSignalId>> entry : pairedSignalGroups.entrySet()) {
+		for (UUID newSignalId : pairedSignalGroups.getMergedSignalGroups()) {
+
+			List<DatasetSignalId> ids = pairedSignalGroups.get(newSignalId);
 
 			// Create merged group name
-			DatasetSignalId initialId = entry.getKey();
-			StringBuilder sb = new StringBuilder();
+			String newName = ids.stream().map(i -> i.signalId().getGroupName())
+					.collect(Collectors.joining("_")) + "_merged";
 
-			Set<DatasetSignalId> idSet = entry.getValue();
-			idSet.add(initialId);
-
-			for (DatasetSignalId id : idSet) {
-				ISignalGroup signalGroup = dataset.getCollection().getSignalGroup(id.signalId())
-						.get();
-				sb.append(signalGroup.getGroupName() + "_");
-			}
-			sb.append("merged");
-			DefaultSignalGroup newGroup = new DefaultSignalGroup(sb.toString(), UUID.randomUUID());
+			DefaultSignalGroup newGroup = new DefaultSignalGroup(newName, newSignalId);
 
 			// Duplicate the signals into the new signal group
 			dataset.getCollection().addSignalGroup(newGroup);
 			for (Nucleus n : dataset.getCollection().getNuclei()) {
-				for (DatasetSignalId id : idSet) {
+				for (DatasetSignalId id : ids) {
 					List<INuclearSignal> signals = n.getSignalCollection()
-							.getSignals(id.signalId());
+							.getSignals(id.signalId().getId());
 					for (INuclearSignal s : signals) {
-						n.getSignalCollection().addSignal(s.duplicate(), newGroup.getId());
+						n.getSignalCollection().addSignal(s.duplicate(), newSignalId);
 					}
 				}
 			}
 
+		}
+
+	}
+
+	private void mergeSignalOptions() throws MissingOptionException {
+		// For each set of mergeable signals, make a new signal group
+		for (UUID newSignalId : pairedSignalGroups.getMergedSignalGroups()) {
+
+			HashOptions mergedOptions = new OptionsBuilder()
+					.withValue(HashOptions.SIGNAL_GROUP_ID, newSignalId.toString()).build();
+
+			// Get the first signal options
+			List<DatasetSignalId> ids = pairedSignalGroups.get(newSignalId);
+			HashOptions template = ids.get(0).datasetId().getAnalysisOptions()
+					.orElseThrow(MissingOptionException::new)
+					.getNuclearSignalOptions(ids.get(0).signalId().getId())
+					.orElseThrow(MissingOptionException::new);
+
+			// Check every key in the options. If any are the same across all signaal
+			// groups, keep them
+			for (String s : template.getKeys()) {
+				Object result = template.getValue(s);
+				boolean canAdd = true;
+				for (DatasetSignalId d : pairedSignalGroups.get(newSignalId)) {
+					IAnalysisOptions dOptions = d.datasetId().getAnalysisOptions()
+							.orElseThrow(MissingOptionException::new);
+					HashOptions nOptions = dOptions.getNuclearSignalOptions(d.signalId().getId())
+							.orElseThrow(MissingOptionException::new);
+					canAdd &= Objects.equals(result, nOptions.getValue(s));
+				}
+
+				if (canAdd)
+					mergedOptions.set(s, result);
+			}
+
+			// Add the final options to the dataset
+			dataset.getAnalysisOptions().orElseThrow(MissingOptionException::new)
+					.setNuclearSignalDetectionOptions(mergedOptions);
 		}
 
 	}

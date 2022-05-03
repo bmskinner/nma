@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -17,6 +18,8 @@ import org.eclipse.jdt.annotation.NonNull;
  *
  */
 public class FileUtils {
+
+	private static final Logger LOGGER = Logger.getLogger(FileUtils.class.getName());
 
 	/**
 	 * Private constructor, all methods are static
@@ -55,6 +58,9 @@ public class FileUtils {
 
 		boolean breakLoop = false;
 		List<String> common = new ArrayList<>();
+		if (folders.length == 0 || folders[0] == null)
+			return new File(System.getProperty("user.home"));
+
 		for (int col = 0; col < folders[0].length; col++) {
 
 			if (breakLoop)
@@ -72,6 +78,7 @@ public class FileUtils {
 				common.add(s);
 		}
 
+		// Make the final path from the common elements
 		StringBuilder commonPath = new StringBuilder();
 		for (int i = 0; i < common.size(); i++) {
 			commonPath.append(common.get(i));

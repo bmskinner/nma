@@ -57,7 +57,7 @@ public class MergeSignalsAction extends SingleDatasetResultAction {
 
 			if (pairs.isEmpty()) {
 				LOGGER.fine("No signal pairs chosen for merging, cancelling");
-				cancel();
+				super.finished();
 			} else {
 				LOGGER.fine("Fetched signal pairs to merge");
 				IAnalysisMethod m = new SignalGroupMergeMethod(dataset, pairs);
@@ -67,7 +67,8 @@ public class MergeSignalsAction extends SingleDatasetResultAction {
 				ThreadManager.getInstance().submit(worker);
 			}
 		} catch (Exception e) {
-			cancel();
+			LOGGER.fine("Error in signal merging action: " + e.getMessage());
+			super.finished();
 		}
 	}
 
@@ -82,6 +83,7 @@ public class MergeSignalsAction extends SingleDatasetResultAction {
 			return;
 		}
 		UIController.getInstance().fireDatasetAdded(dataset);
+		UIController.getInstance().fireNuclearSignalUpdated(dataset);
 		super.finished();
 	}
 

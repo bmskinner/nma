@@ -35,78 +35,81 @@ import com.bmskinner.nma.visualisation.datasets.SignalTableCell;
  */
 @SuppressWarnings("serial")
 public class SignalDetectionSettingsTableCellRenderer extends ConsistentRowTableCellRenderer {
-	
-	private static final Logger LOGGER = Logger.getLogger(SignalDetectionSettingsTableCellRenderer.class.getName());
 
-    public java.awt.Component getTableCellRendererComponent(JTable table, Object value,
-            boolean isSelected, boolean hasFocus, int row, int column) {
+	private static final Logger LOGGER = Logger
+			.getLogger(SignalDetectionSettingsTableCellRenderer.class.getName());
 
-    	JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-    	
-        Color bg = Color.WHITE;
+	@Override
+	public java.awt.Component getTableCellRendererComponent(JTable table, Object value,
+			boolean isSelected, boolean hasFocus, int row, int column) {
 
-        String header = getFirstColumnText(row, table);
+		JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus,
+				row, column);
 
-        // Highlight consistent rows
-        if (isRowConsistentAcrossColumns(table, row))
-        	bg = ConsistentRowTableCellRenderer.CONSISTENT_CELL_COLOUR;
-        
+		Color bg = Color.WHITE;
 
-        Color fg = chooseForegroundColour(header, value);        
-        
-        try {
+		String header = getFirstColumnText(row, table);
 
-            // Set colour of signal groups
+		// Highlight consistent rows
+		if (isRowConsistentAcrossColumns(table, row))
+			bg = ConsistentRowTableCellRenderer.CONSISTENT_CELL_COLOUR;
 
-            if (row < table.getModel().getRowCount() - 1) {
+		Color fg = chooseForegroundColour(header, value);
 
-                // get the value in the first column of the row below
-            	 String nextRowHeader = getFirstColumnText(row+1, table);
+		try {
+
+			// Set colour of signal groups
+
+			if (row < table.getModel().getRowCount() - 1) {
+
+				// get the value in the first column of the row below
+				String nextRowHeader = getFirstColumnText(row + 1, table);
 //                String nextRowHeader = table.getModel().getValueAt(row + 1, 0).toString();
 
-                int signalGroupCount = Integer.valueOf(table.getModel().getValueAt(0, column).toString());
+				int signalGroupCount = Integer
+						.valueOf(table.getModel().getValueAt(0, column).toString());
 
-                if (nextRowHeader.equals(Labels.Signals.SIGNAL_GROUP_LABEL)) {
+				if (nextRowHeader.equals(Labels.Signals.SIGNAL_GROUP_LABEL)) {
 
-                    if (signalGroupCount > 0) {
-                        // we want to colour this cell preemptively
-                        // get the signal table cell from the table
-                        String nextRowValue = table.getModel().getValueAt(row + 1, column).toString();
-                        if (!nextRowValue.equals("")) {
-                            SignalTableCell cell = (SignalTableCell) table.getModel().getValueAt(row + 1, column);
+					if (signalGroupCount > 0) {
+						// we want to colour this cell preemptively
+						// get the signal table cell from the table
+						Object val = table.getModel().getValueAt(row + 1, column);
+						if (val != null && !val.toString().equals("")) {
+							SignalTableCell cell = (SignalTableCell) table.getModel()
+									.getValueAt(row + 1, column);
 
-                            bg = cell.getColor();
-                        }
+							bg = cell.getColor();
+						}
 
-                    } else {
-                    	bg = Color.WHITE; // don't allow consitentcy colours
-                                              // in the signal group line
-                    }
+					} else {
+						bg = Color.WHITE; // don't allow consitentcy colours
+											// in the signal group line
+					}
 
-                }
-            }
+				}
+			}
 
-        } catch (Exception e) {
-            LOGGER.log(Loggable.STACK, "Error in signal detection table renderer", e);
-        }
-        
-        l.setBackground(bg);
-        l.setForeground(fg);
-        return l;
-    }
-    
-    private Color chooseForegroundColour(String header, Object value) {
-    	if(header.equals(Labels.Signals.SIGNAL_SOURCE_LABEL)) {
-    		if(value==null)
-    			return Color.RED;
+		} catch (Exception e) {
+			LOGGER.log(Loggable.STACK, "Error in signal detection table renderer", e);
+		}
 
-    		File signalFolder = new File(value.toString());
-    		if(!signalFolder.exists())
-    			return Color.RED;
+		l.setBackground(bg);
+		l.setForeground(fg);
+		return l;
+	}
 
-        }
-    	return Color.BLACK;
-    }
-    
+	private Color chooseForegroundColour(String header, Object value) {
+		if (header.equals(Labels.Signals.SIGNAL_SOURCE_LABEL)) {
+			if (value == null)
+				return Color.RED;
+
+			File signalFolder = new File(value.toString());
+			if (!signalFolder.exists())
+				return Color.RED;
+
+		}
+		return Color.BLACK;
+	}
 
 }

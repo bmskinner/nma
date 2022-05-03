@@ -1,6 +1,7 @@
 package com.bmskinner.nma.visualisation.tables;
 
 import java.awt.Color;
+import java.io.File;
 import java.text.DecimalFormat;
 import java.util.Collection;
 import java.util.List;
@@ -25,10 +26,13 @@ public class NuclearSignalDetectionTableModel extends DatasetTableModel {
 
 	private static final long serialVersionUID = 1l;
 
-	private static final Logger LOGGER = Logger.getLogger(NuclearSignalDetectionTableModel.class.getName());
+	private static final Logger LOGGER = Logger
+			.getLogger(NuclearSignalDetectionTableModel.class.getName());
 
-	private static final List<String> ROW_NAMES = List.of(EMPTY_STRING, Labels.Signals.SIGNAL_GROUP_LABEL,
-			Labels.Signals.SIGNAL_CHANNEL_LABEL, Labels.Signals.SIGNAL_SOURCE_LABEL, Labels.Signals.THRESHOLD_LBL,
+	private static final List<String> ROW_NAMES = List.of(EMPTY_STRING,
+			Labels.Signals.SIGNAL_GROUP_LABEL,
+			Labels.Signals.SIGNAL_CHANNEL_LABEL, Labels.Signals.SIGNAL_SOURCE_LABEL,
+			Labels.Signals.THRESHOLD_LBL,
 			Labels.Signals.MIN_SIZE_LBL, Labels.Signals.MAX_SIZE_LBL, Labels.Signals.MIN_CIRC_LBL,
 			Labels.Signals.MAX_CIRC_LBL, Labels.Signals.DETECTION_MODE_LBL);
 
@@ -44,7 +48,8 @@ public class NuclearSignalDetectionTableModel extends DatasetTableModel {
 
 		// find the collection with the most channels
 		// this defines the number of rows
-		int maxChannels = datasets.stream().mapToInt(d -> d.getCollection().getSignalManager().getSignalGroupCount())
+		int maxChannels = datasets.stream()
+				.mapToInt(d -> d.getCollection().getSignalManager().getSignalGroupCount())
 				.max().orElse(0);
 
 		if (maxChannels == 0) {
@@ -97,15 +102,21 @@ public class NuclearSignalDetectionTableModel extends DatasetTableModel {
 				HashOptions ns = op.get().getNuclearSignalOptions(signalGroup)
 						.orElseThrow(IllegalArgumentException::new);
 				Object signalThreshold = ns.getString(HashOptions.SIGNAL_DETECTION_MODE_KEY)
-						.equals(SignalDetectionMode.FORWARD.name()) ? ns.getInt(HashOptions.THRESHOLD) : "Variable";
+						.equals(SignalDetectionMode.FORWARD.name())
+								? ns.getInt(HashOptions.THRESHOLD)
+								: "Variable";
+
+				Optional<File> folder = op.get().getNuclearSignalDetectionFolder(signalGroup);
 
 				rowData[baseIndex + 0][c] = Labels.Signals.SIGNAL_COLOUR_LABEL;
 				rowData[baseIndex + 1][c] = cell;
 				rowData[baseIndex + 2][c] = ns.getInt(HashOptions.CHANNEL);
-				rowData[baseIndex + 3][c] = ns.getString(HashOptions.DETECTION_FOLDER);
+				rowData[baseIndex + 3][c] = folder.isPresent() ? folder.get().getAbsoluteFile()
+						: Labels.NA_MERGE;
 				rowData[baseIndex + 4][c] = signalThreshold;
 				rowData[baseIndex + 5][c] = ns.getInt(HashOptions.MIN_SIZE_PIXELS);
-				rowData[baseIndex + 6][c] = df.format(ns.getDouble(HashOptions.SIGNAL_MAX_FRACTION));
+				rowData[baseIndex + 6][c] = df
+						.format(ns.getDouble(HashOptions.SIGNAL_MAX_FRACTION));
 				rowData[baseIndex + 7][c] = df.format(ns.getDouble(HashOptions.MIN_CIRC));
 				rowData[baseIndex + 8][c] = df.format(ns.getDouble(HashOptions.MAX_CIRC));
 				rowData[baseIndex + 9][c] = ns.getString(HashOptions.SIGNAL_DETECTION_MODE_KEY);
@@ -121,7 +132,8 @@ public class NuclearSignalDetectionTableModel extends DatasetTableModel {
 			if (signalGroupNumber < signalGroupsInDataset) {
 
 				// There will be empty rows in the table. Fill the blanks
-				for (int i = signalGroupNumber * ROW_NAMES.size() + 1; i <= signalGroupsInDataset; i++) {
+				for (int i = signalGroupNumber * ROW_NAMES.size()
+						+ 1; i <= signalGroupsInDataset; i++) {
 					rowData[i][c] = EMPTY_STRING;
 
 				}
@@ -131,7 +143,8 @@ public class NuclearSignalDetectionTableModel extends DatasetTableModel {
 
 	}
 
-	private void addMergedSignalData(List<Object> rowData, IAnalysisDataset dataset, int signalGroupCount,
+	private void addMergedSignalData(List<Object> rowData, IAnalysisDataset dataset,
+			int signalGroupCount,
 			int rowsPerSignalGroup) {
 		ICellCollection collection = dataset.getCollection();
 		Collection<ISignalGroup> signalGroups = collection.getSignalManager().getSignalGroups();
@@ -177,7 +190,8 @@ public class NuclearSignalDetectionTableModel extends DatasetTableModel {
 	 * @param rowsPerSignalGroup the number of rows each signal group requires
 	 * @throws MissingOptionException
 	 */
-	private void addNonMergedSignalData(List<Object> rowData, IAnalysisDataset dataset, int signalGroupCount,
+	private void addNonMergedSignalData(List<Object> rowData, IAnalysisDataset dataset,
+			int signalGroupCount,
 			int rowsPerSignalGroup) throws MissingOptionException {
 
 		ICellCollection collection = dataset.getCollection();
@@ -203,9 +217,11 @@ public class NuclearSignalDetectionTableModel extends DatasetTableModel {
 				continue;
 			}
 
-			HashOptions ns = op.get().getNuclearSignalOptions(signalGroup).orElseThrow(MissingOptionException::new);
+			HashOptions ns = op.get().getNuclearSignalOptions(signalGroup)
+					.orElseThrow(MissingOptionException::new);
 			Object signalThreshold = ns.getString(HashOptions.SIGNAL_DETECTION_MODE_KEY)
-					.equals(SignalDetectionMode.FORWARD.name()) ? ns.getInt(HashOptions.THRESHOLD) : "Variable";
+					.equals(SignalDetectionMode.FORWARD.name()) ? ns.getInt(HashOptions.THRESHOLD)
+							: "Variable";
 
 			DecimalFormat df = new DecimalFormat(DEFAULT_DECIMAL_FORMAT);
 

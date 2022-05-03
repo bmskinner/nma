@@ -19,7 +19,6 @@ package com.bmskinner.nma.gui.dialogs;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -36,6 +35,7 @@ import javax.swing.table.TableModel;
 import com.bmskinner.nma.analysis.signals.PairedSignalGroups;
 import com.bmskinner.nma.analysis.signals.PairedSignalGroups.DatasetSignalId;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
+import com.bmskinner.nma.components.signals.ISignalGroup;
 import com.bmskinner.nma.gui.components.panels.DatasetSelectionPanel;
 import com.bmskinner.nma.gui.components.panels.SignalGroupSelectionPanel;
 
@@ -79,7 +79,6 @@ public class DatasetMergingDialog extends LoadingIconDialog {
 		this.pack();
 		centerOnScreen();
 		this.setVisible(true);
-		LOGGER.finest("Created dataset merging dialog");
 	}
 
 	/**
@@ -113,8 +112,6 @@ public class DatasetMergingDialog extends LoadingIconDialog {
 
 		mergeButton = new JButton("Merge");
 		mergeButton.addActionListener(e -> {
-			LOGGER.info("Signal pairing complete");
-			LOGGER.fine("Merged pairs: " + pairedSignalGroups.toString());
 			this.setVisible(false);
 		});
 
@@ -152,10 +149,10 @@ public class DatasetMergingDialog extends LoadingIconDialog {
 
 		setEqualButton = new JButton("Set equal");
 		setEqualButton.addActionListener(e -> {
-			pairedSignalGroups.add(datasetBoxOne.getSelectedDataset().getId(),
-					signalBoxOne.getSelectedID(),
-					datasetBoxTwo.getSelectedDataset().getId(),
-					signalBoxTwo.getSelectedID());
+			pairedSignalGroups.add(datasetBoxOne.getSelectedDataset(),
+					signalBoxOne.getSelectedGroup(),
+					datasetBoxTwo.getSelectedDataset(),
+					signalBoxTwo.getSelectedGroup());
 			updateTable();
 		});
 
@@ -200,30 +197,15 @@ public class DatasetMergingDialog extends LoadingIconDialog {
 
 		model.setColumnIdentifiers(columns);
 
-		for (DatasetSignalId id1 : pairedSignalGroups.keySet()) {
-			String col1 = "";
-			for (IAnalysisDataset d : datasets) {
-				if (d.getId().equals(id1.datasetId())
-						&& d.getCollection().getSignalManager().hasSignals(id1.signalId())) {
-					col1 = d.getName() + " : "
-							+ d.getCollection().getSignalGroup(id1.signalId()).get().getGroupName();
-				}
-			}
-			Set<DatasetSignalId> idList = pairedSignalGroups.get(id1);
-			for (DatasetSignalId id2 : idList) {
-				String col2 = "";
-				for (IAnalysisDataset d : datasets) {
-					if (d.getId().equals(id2.datasetId())
-							&& d.getCollection().getSignalManager().hasSignals(id2.signalId())) {
-						col2 = d.getName() + " : " + d.getCollection()
-								.getSignalGroup(id2.signalId()).get().getGroupName();
-					}
-				}
+		for (UUID newSignalGroup : pairedSignalGroups.getMergedSignalGroups()) {
 
+			List<DatasetSignalId> pairs = pairedSignalGroups.get(newSignalGroup).stream().toList();
+			String col1 = pairs.get(0).datasetId().toString();
+			for (int i = 1; i < pairs.size(); i++) {
+				String col2 = pairs.get(i).toString();
 				Object[] row = { col1, col2 };
 				model.addRow(row);
 			}
-
 		}
 		matchTable.setModel(model);
 
@@ -255,9 +237,10 @@ public class DatasetMergingDialog extends LoadingIconDialog {
 			IAnalysisDataset d1 = matchingDatasets.get(0);
 
 			// Get the id from d1
-			UUID u1 = null;
-			for (UUID u : d1.getCollection().getSignalGroupIDs()) {
-				if (d1.getCollection().getSignalGroup(u).get().getGroupName().equals(groupName))
+			ISignalGroup u1 = null;
+			for (ISignalGroup u : d1.getCollection().getSignalGroups()) {
+				if (d1.getCollection().getSignalGroup(u.getId()).get().getGroupName()
+						.equals(groupName))
 					u1 = u;
 			}
 
@@ -268,10 +251,10 @@ public class DatasetMergingDialog extends LoadingIconDialog {
 					continue;
 
 				// Get the id from d2
-				for (UUID u2 : d2.getCollection().getSignalGroupIDs()) {
-					if (d2.getCollection().getSignalGroup(u2).get().getGroupName()
+				for (ISignalGroup u2 : d2.getCollection().getSignalGroups()) {
+					if (d2.getCollection().getSignalGroup(u2.getId()).get().getGroupName()
 							.equals(groupName))
-						pairedSignalGroups.add(d1.getId(), u1, d2.getId(), u2);
+						pairedSignalGroups.add(d1, u1, d2, u2);
 				}
 			}
 		}

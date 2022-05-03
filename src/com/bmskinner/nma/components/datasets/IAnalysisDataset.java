@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -46,6 +47,8 @@ import com.bmskinner.nma.utility.FileUtils;
  *
  */
 public interface IAnalysisDataset extends XmlSerializable {
+
+	static final Logger LOGGER = Logger.getLogger(IAnalysisDataset.class.getName());
 
 	String XML_ANALYSIS_DATASET = "AnalysisDataset";
 
@@ -535,9 +538,6 @@ public interface IAnalysisDataset extends XmlSerializable {
 	 *         directory before using this.
 	 */
 	static File commonPathOfFiles(@NonNull Collection<IAnalysisDataset> datasets) {
-//		if (datasets.size() == 1)
-//			return datasets.get(0).getSavePath().getParentFile();
-
 		List<File> files = new ArrayList<>(datasets.size());
 		for (IAnalysisDataset d : datasets) {
 			files.add(d.getSavePath().getParentFile());

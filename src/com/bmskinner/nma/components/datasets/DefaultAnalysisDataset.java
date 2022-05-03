@@ -55,6 +55,8 @@ import com.bmskinner.nma.logging.Loggable;
  */
 public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements IAnalysisDataset {
 
+	private static final String XML_SAVE_FILE = "SaveFile";
+
 	private static final Logger LOGGER = Logger.getLogger(DefaultAnalysisDataset.class.getName());
 
 	/** The cell collection for this dataset */
@@ -76,7 +78,7 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 	DefaultAnalysisDataset(@NonNull Element e)
 			throws ComponentCreationException, UnsupportedVersionException {
 		super(e);
-		savePath = new File(e.getChildText("SaveFile")).getAbsoluteFile();
+		savePath = new File(e.getChildText(XML_SAVE_FILE)).getAbsoluteFile();
 		cellCollection = new DefaultCellCollection(e.getChild("CellCollection"));
 
 	}
@@ -104,7 +106,7 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 	@Override
 	public Element toXmlElement() {
 		Element e = super.toXmlElement();
-		e.addContent(new Element("SaveFile").setText(savePath.getPath()));
+		e.addContent(new Element(XML_SAVE_FILE).setText(savePath.getPath()));
 
 		e.addContent(cellCollection.toXmlElement());
 

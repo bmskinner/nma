@@ -250,6 +250,11 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
 	}
 
 	@Override
+	public Optional<File> getNuclearSignalDetectionFolder(@NonNull UUID id) {
+		return getDetectionFolder(SIGNAL_GROUP + id.toString());
+	}
+
+	@Override
 	public long getAnalysisTime() {
 		return analysisTime;
 	}

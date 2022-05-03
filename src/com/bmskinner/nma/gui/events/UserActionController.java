@@ -197,7 +197,8 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 			return new ExportSingleCellImagesAction(event.getDatasets(), acceptor);
 
 		if (event.type().equals(UserActionEvent.MERGE_DATASETS_ACTION))
-			return new MergeCollectionAction(event.getDatasets(), acceptor);
+			return new MergeCollectionAction(DatasetListManager.getInstance().getSelectedDatasets(),
+					acceptor);
 
 		if (event.type().equals(UserActionEvent.MERGE_SIGNALS_ACTION)) {
 			return new MergeSignalsAction(selectedDataset, acceptor);
@@ -231,7 +232,7 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 
 		if (event.type().startsWith(UserActionEvent.ADD_TO_WORKSPACE))
 			return () -> {
-				addToWorkspace(event.getDatasets());
+				addToWorkspace(DatasetListManager.getInstance().getSelectedDatasets());
 			};
 
 		if (event.type().startsWith(UserActionEvent.REMOVE_FROM_WORKSPACE))
