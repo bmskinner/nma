@@ -275,9 +275,13 @@ public class ProfileManager {
 		// Ensure landmarks in the profile collection are offset to preserve their
 		// positions
 		for (Landmark lm : collection.getProfileCollection().getLandmarks()) {
+
+			// Index relative to the old reference point
 			int oldIndex = collection.getProfileCollection().getLandmarkIndex(lm);
-			collection.getProfileCollection().setLandmark(lm, CellularComponent
-					.wrapIndex(oldIndex - index, collection.getMedianArrayLength()));
+
+			int newIndex = CellularComponent
+					.wrapIndex(oldIndex - index, collection.getMedianArrayLength());
+			collection.getProfileCollection().setLandmark(lm, newIndex);
 		}
 
 		// Rebuild the profile aggregate in the collection

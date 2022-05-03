@@ -108,15 +108,31 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
 	private void setLandmarks(Nucleus n)
 			throws MissingLandmarkException, MissingProfileException, ProfileException {
 		// Add all landmarks from the profile collection
-		// This will include any not present inthe ruleset collection that
-		// were added manually
+
+		// Landmarks were originally found via rulesets when the nucleus was created in
+		// the builder. We need to replace this with something more reflective of the
+		// collection.
+
+		// Set the RP, so we can offset everything from there
+		Landmark rp = dataset.getCollection().getProfileCollection()
+				.getLandmark(OrientationMark.REFERENCE);
+		n.setLandmark(rp, 0);
+
+		IProfile rpMedian = dataset.getCollection().getProfileCollection().getProfile(
+				ProfileType.ANGLE, rp, Stats.MEDIAN);
+		int rpIndex = n.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE)
+				.findBestFitOffset(rpMedian);
+
 		for (Landmark l : dataset.getCollection().getProfileCollection().getLandmarks()) {
+			if (rp.equals(l))
+				continue;
 
 			IProfile median = dataset.getCollection().getProfileCollection().getProfile(
 					ProfileType.ANGLE, l, Stats.MEDIAN);
 
-			int newIndex = n.getProfile(ProfileType.ANGLE).findBestFitOffset(median);
-			n.setLandmark(l, newIndex);
+			int newIndex = n.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE)
+					.findBestFitOffset(median);
+			n.setLandmark(l, n.wrapIndex(newIndex + rpIndex));
 		}
 
 	}
@@ -175,7 +191,7 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
 				.fromPoints(list)
 				.withFile(new File(EMPTY_FILE))
 				.withCoM(new FloatPoint(0, 0))
-				.withChannel(0)
+//				.withChannel(0)
 				.build();
 
 		// Add landmarks and segments from the profile collection

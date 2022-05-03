@@ -39,7 +39,6 @@ import org.jfree.data.xy.XYDataset;
 import com.bmskinner.nma.components.MissingComponentException;
 import com.bmskinner.nma.components.MissingLandmarkException;
 import com.bmskinner.nma.components.Taggable;
-import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.datasets.ICellCollection;
@@ -257,25 +256,13 @@ public class ProfileChartFactory extends AbstractChartFactory {
 
 				for (Landmark lm : collection.getProfileCollection().getLandmarks()) {
 
-					// Skip RP, it's always at the end of the profile
+					// Skip RP, it's always at the start of the profile
 					if (rp.equals(lm))
 						continue;
 
 					int index = collection.getProfileCollection().getLandmarkIndex(lm);
-					double yVal = collection.getProfileCollection()
-							.getProfile(options.getType(), OrientationMark.REFERENCE, Stats.MEDIAN)
-							.get(index);
 
-					// get the offset from to the current draw point
-					int offset = collection.getProfileCollection()
-							.getLandmarkIndex(options.getTag());
-
-					// adjust the index to the offset
-					index = CellularComponent.wrapIndex(index - offset,
-							collection.getMedianArrayLength());
-
-					double indexToDraw = index; // convert to a double to allow normalised
-												// positioning
+					double indexToDraw = index;
 
 					if (options.isNormalised()) // set to the proportion of the point along the
 												// profile
@@ -288,6 +275,10 @@ public class ProfileChartFactory extends AbstractChartFactory {
 						int amountToAdd = maxX - collection.getMedianArrayLength();
 						indexToDraw += amountToAdd;
 					}
+
+					double yVal = collection.getProfileCollection()
+							.getProfile(options.getType(), OrientationMark.REFERENCE, Stats.MEDIAN)
+							.get(index);
 
 					addDomainMarkerToXYPlot(plot, lm, indexToDraw, yVal);
 

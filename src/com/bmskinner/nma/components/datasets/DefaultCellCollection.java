@@ -1400,6 +1400,7 @@ public class DefaultCellCollection implements ICellCollection {
 
 			if (rp.equals(lm))
 				return;
+
 			cache.remove(lm);
 			landmarks.put(lm, newIndex);
 
@@ -1439,8 +1440,9 @@ public class DefaultCellCollection implements ICellCollection {
 			if (length <= 0)
 				throw new IllegalArgumentException(
 						"Requested profile aggregate length is zero or negative");
-
 			cache.clear();
+			Landmark lm = getLandmark(OrientationMark.REFERENCE);
+			landmarks.put(lm, ZERO_INDEX);
 
 			// If there are segments, not just the default segment, and the segment
 			// profile length is different to the required length. Interpolation needed.
@@ -1477,6 +1479,7 @@ public class DefaultCellCollection implements ICellCollection {
 		private IProfileAggregate createProfileAggregateOfDifferentLength(@NonNull ProfileType type,
 				int length)
 				throws ProfileException, MissingLandmarkException, MissingProfileException {
+			cache.clear();
 			Landmark lm = getLandmark(OrientationMark.REFERENCE);
 			landmarks.put(lm, ZERO_INDEX);
 
@@ -1576,6 +1579,45 @@ public class DefaultCellCollection implements ICellCollection {
 						.setAttribute(XML_INDEX_ATTRIBUTE, String.valueOf(entry.getValue())));
 			}
 			return e;
+		}
+
+		@Override
+		public double getProportionOfIndex(int index) {
+			int length = DefaultCellCollection.this.getMedianArrayLength();
+			if (index < 0 || index >= length)
+				throw new IllegalArgumentException("Index out of bounds: " + index);
+			if (index == 0)
+				return 0;
+			if (index == length - 1)
+				return 1;
+			return (double) index / (double) (length - 1);
+		}
+
+		@Override
+		public double getProportionOfIndex(@NonNull OrientationMark tag)
+				throws MissingLandmarkException {
+			return getProportionOfIndex(getLandmarkIndex(tag));
+		}
+
+		@Override
+		public double getProportionOfIndex(@NonNull Landmark tag)
+				throws MissingLandmarkException {
+			return getProportionOfIndex(getLandmarkIndex(tag));
+		}
+
+		@Override
+		public int getIndexOfProportion(double proportion) {
+			if (proportion < 0 || proportion > 1)
+				throw new IllegalArgumentException("Proportion must be between 0-1: " + proportion);
+			if (proportion == 0)
+				return 0;
+
+			int length = DefaultCellCollection.this.getMedianArrayLength();
+			if (proportion == 1)
+				return length - 1;
+
+			double desiredDistanceFromStart = length * proportion;
+			return (int) desiredDistanceFromStart;
 		}
 
 		/**
@@ -1720,44 +1762,5 @@ public class DefaultCellCollection implements ICellCollection {
 			}
 		}
 
-		@Override
-		public double getProportionOfIndex(int index) {
-			int length = DefaultCellCollection.this.getMedianArrayLength();
-			if (index < 0 || index >= length)
-				throw new IllegalArgumentException("Index out of bounds: " + index);
-			if (index == 0)
-				return 0;
-			if (index == length - 1)
-				return 1;
-			return (double) index / (double) (length - 1);
-		}
-
-		@Override
-		public double getProportionOfIndex(@NonNull OrientationMark tag)
-				throws MissingLandmarkException {
-			return getProportionOfIndex(getLandmarkIndex(tag));
-		}
-
-		@Override
-		public double getProportionOfIndex(@NonNull Landmark tag)
-				throws MissingLandmarkException {
-			return getProportionOfIndex(getLandmarkIndex(tag));
-		}
-
-		@Override
-		public int getIndexOfProportion(double proportion) {
-			if (proportion < 0 || proportion > 1)
-				throw new IllegalArgumentException("Proportion must be between 0-1: " + proportion);
-			if (proportion == 0)
-				return 0;
-
-			int length = DefaultCellCollection.this.getMedianArrayLength();
-			if (proportion == 1)
-				return length - 1;
-
-			double desiredDistanceFromStart = length * proportion;
-			int target = (int) desiredDistanceFromStart;
-			return target;
-		}
 	}
 }
