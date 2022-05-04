@@ -191,8 +191,8 @@ public class CellOutlinePanel extends AbstractCellDetailPanel
 				.setDatasets(activeDataset())
 				.addCellularComponent(component).setRotationMode(rm)
 				.setShowWarp(warpMeshPanel.isSelected())
-				.setShowXAxis(false)
-				.setShowYAxis(false)
+//				.setShowXAxis(false)
+//				.setShowYAxis(false)
 				.build();
 
 		chartPanel.setChart(new OutlineChartFactory(options).makeCellOutlineChart());

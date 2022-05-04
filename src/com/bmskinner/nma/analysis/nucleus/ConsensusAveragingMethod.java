@@ -250,6 +250,7 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
 			for (Nucleus n : dataset.getCollection().getNuclei()) {
 
 				Nucleus v = n.getOrientedNucleus();
+				IPoint oldCoM = v.getCentreOfMass().duplicate();
 				v.moveCentreOfMass(zeroCoM);
 				IProfile p = v.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE);
 
@@ -265,8 +266,10 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
 					int borderIndex = v.getIndexRelativeTo(OrientationMark.REFERENCE,
 							indexInProfile);
 					IPoint point = v.getBorderPoint(borderIndex);
-					list.add(point);
+					list.add(point.duplicate());
 				}
+				// Put the oriented nucleus back where it belongs
+				v.moveCentreOfMass(oldCoM);
 			}
 		} catch (Exception e1) {
 			LOGGER.log(Loggable.STACK, "Error calculating perimeter points in nuclei", e1);

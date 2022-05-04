@@ -249,23 +249,17 @@ public class DefaultNucleus extends ProfileableCellularComponent
 	}
 
 	@Override
-	public void moveCentreOfMass(@NonNull IPoint point) {
-		double diffX = point.getX() - getCentreOfMass().getX();
-		double diffY = point.getY() - getCentreOfMass().getY();
-		offset(diffX, diffY);
-	}
-
-	@Override
 	public void offset(double xOffset, double yOffset) {
 
 		super.offset(xOffset, yOffset);
 
 		// Move signals within the nucleus
-		if (signalCollection != null) {
+		// Note that offset is called in the constructor when unmarshalling, so we need
+		// to null check
+		if (signalCollection != null)
 			for (INuclearSignal s : this.signalCollection.getAllSignals()) {
 				s.offset(xOffset, yOffset);
 			}
-		}
 	}
 
 	/*

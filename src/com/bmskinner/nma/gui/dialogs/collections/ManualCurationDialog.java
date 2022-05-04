@@ -86,15 +86,7 @@ public class ManualCurationDialog extends AbstractCellCollectionDialog {
 	 * @since 1.15.0
 	 *
 	 */
-	private class ComponentSelectionItem {
-		public final UUID uuid;
-		public final String displayName;
-
-		public ComponentSelectionItem(String s, UUID id) {
-			this.uuid = id;
-			this.displayName = s;
-		}
-
+	private record ComponentSelectionItem(String displayName, UUID id) {
 		@Override
 		public String toString() {
 			return displayName;
@@ -312,12 +304,13 @@ public class ManualCurationDialog extends AbstractCellCollectionDialog {
 		}
 
 		private ImageProcessor importNucleus(ICell c) throws UnloadableImageException {
-			ImageProcessor ip = ImageImporter.importCroppedImageTo24bit(c.getPrimaryNucleus());
+			ImageProcessor ip = ImageImporter.importFullImageTo24bit(c.getPrimaryNucleus());
 			ImageAnnotator an = new ImageAnnotator(ip);
 			for (Nucleus n : c.getNuclei()) {
-				an = an.annotateSegments(n, n);
+				an = an.drawSegments(n);
 			}
-			ip = an.toProcessor();
+
+			ip = an.crop(c).toProcessor();
 			return flipAndScaleImage(c, ip);
 		}
 
@@ -345,11 +338,10 @@ public class ManualCurationDialog extends AbstractCellCollectionDialog {
 			ip.invert();
 			ImageAnnotator an = new ImageAnnotator(ip);
 			an.convertToColorProcessor();
-			an.crop(c.getPrimaryNucleus());
 			for (Nucleus n : c.getNuclei()) {
 				an = an.annotateSegments(n, n);
 			}
-			ip = an.toProcessor();
+			ip = an.crop(c).toProcessor();
 			return flipAndScaleImage(c, ip);
 		}
 
@@ -379,7 +371,7 @@ public class ManualCurationDialog extends AbstractCellCollectionDialog {
 					ip = importNucleus(c);
 
 				if (component instanceof ComponentSelectionItem comp) {
-					ip = importSignal(comp.uuid, c);
+					ip = importSignal(comp.id, c);
 				}
 
 				return new SelectableCellIcon(ip, c);

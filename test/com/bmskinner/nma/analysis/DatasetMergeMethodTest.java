@@ -259,8 +259,9 @@ public class DatasetMergeMethodTest {
 		// the merged signal id is randomly chosen by the merger, find what was picked
 		UUID mergedSignalId = merged.getCollection().getSignalGroupIDs().stream()
 				.findAny().get();
-		assertTrue("Merged dataset should have options for the merged signal group",
-				merged.getAnalysisOptions().get().hasSignalDetectionOptions(mergedSignalId));
+		assertTrue(
+				"Merged dataset should have options for the merged signal group " + mergedSignalId,
+				merged.getAnalysisOptions().get().hasNuclearSignalDetectionOptions(mergedSignalId));
 	}
 
 	@Test

@@ -83,7 +83,8 @@ public interface Measurement extends XmlSerializable {
 	@NonNull
 	Measurement PERIMETER = new DefaultMeasurement(Names.PERIMETER, MeasurementDimension.LENGTH);
 	@NonNull
-	Measurement MIN_DIAMETER = new DefaultMeasurement(Names.MIN_DIAMETER, MeasurementDimension.LENGTH);
+	Measurement MIN_DIAMETER = new DefaultMeasurement(Names.MIN_DIAMETER,
+			MeasurementDimension.LENGTH);
 	@NonNull
 	Measurement ELLIPTICITY = new DefaultMeasurement(Names.ELLIPTICITY, MeasurementDimension.NONE);
 	@NonNull
@@ -97,31 +98,42 @@ public interface Measurement extends XmlSerializable {
 	@NonNull
 	Measurement REGULARITY = new DefaultMeasurement(Names.REGULARITY, MeasurementDimension.NONE);
 	@NonNull
-	Measurement BOUNDING_HEIGHT = new DefaultMeasurement(Names.BOUNDING_HEIGHT, MeasurementDimension.LENGTH);
+	Measurement BOUNDING_HEIGHT = new DefaultMeasurement(Names.BOUNDING_HEIGHT,
+			MeasurementDimension.LENGTH);
 	@NonNull
-	Measurement BOUNDING_WIDTH = new DefaultMeasurement(Names.BOUNDING_WIDTH, MeasurementDimension.LENGTH);
+	Measurement BOUNDING_WIDTH = new DefaultMeasurement(Names.BOUNDING_WIDTH,
+			MeasurementDimension.LENGTH);
 	@NonNull
-	Measurement HOOK_LENGTH = new DefaultMeasurement(Names.HOOK_LENGTH, MeasurementDimension.LENGTH);
+	Measurement HOOK_LENGTH = new DefaultMeasurement(Names.HOOK_LENGTH,
+			MeasurementDimension.LENGTH);
 	@NonNull
 	Measurement BODY_WIDTH = new DefaultMeasurement(Names.BODY_WIDTH, MeasurementDimension.LENGTH);
 
 	// Stats for the whole cell, aggregated across sub-components
 	@NonNull
-	Measurement CELL_NUCLEUS_COUNT = new DefaultMeasurement(Names.CELL_NUCLEUS_COUNT, MeasurementDimension.NONE);
+	Measurement CELL_NUCLEUS_COUNT = new DefaultMeasurement(Names.CELL_NUCLEUS_COUNT,
+			MeasurementDimension.NONE);
 	@NonNull
-	Measurement CELL_NUCLEAR_AREA = new DefaultMeasurement(Names.CELL_NUCLEAR_AREA, MeasurementDimension.AREA);
+	Measurement CELL_NUCLEAR_AREA = new DefaultMeasurement(Names.CELL_NUCLEAR_AREA,
+			MeasurementDimension.AREA);
 	@NonNull
-	Measurement CELL_NUCLEAR_RATIO = new DefaultMeasurement(Names.CELL_NUCLEAR_RATIO, MeasurementDimension.NONE);
+	Measurement CELL_NUCLEAR_RATIO = new DefaultMeasurement(Names.CELL_NUCLEAR_RATIO,
+			MeasurementDimension.NONE);
 
 	// Signal count in nuclei
 	@NonNull
-	Measurement NUCLEUS_SIGNAL_COUNT = new DefaultMeasurement(Names.NUCLEUS_SIGNAL_COUNT, MeasurementDimension.NONE);
+	Measurement NUCLEUS_SIGNAL_COUNT = new DefaultMeasurement(Names.NUCLEUS_SIGNAL_COUNT,
+			MeasurementDimension.NONE);
 
-	// Signal statistics
+	/**
+	 * The angle of the signal, calculated clockwise from a points directly below
+	 * the centre of mass of the nucleus
+	 */
 	@NonNull
 	Measurement ANGLE = new DefaultMeasurement(Names.ANGLE, MeasurementDimension.ANGLE);
 	@NonNull
-	Measurement DISTANCE_FROM_COM = new DefaultMeasurement(Names.DISTANCE_FROM_COM, MeasurementDimension.LENGTH);
+	Measurement DISTANCE_FROM_COM = new DefaultMeasurement(Names.DISTANCE_FROM_COM,
+			MeasurementDimension.LENGTH);
 	@NonNull
 	Measurement FRACT_DISTANCE_FROM_COM = new DefaultMeasurement(Names.FRACT_DISTANCE_FROM_COM,
 			MeasurementDimension.NONE);
@@ -130,7 +142,8 @@ public interface Measurement extends XmlSerializable {
 	@NonNull
 	Measurement LENGTH = new DefaultMeasurement(Names.LENGTH, MeasurementDimension.LENGTH);
 	@NonNull
-	Measurement DISPLACEMENT = new DefaultMeasurement(Names.DISPLACEMENT, MeasurementDimension.ANGLE);
+	Measurement DISPLACEMENT = new DefaultMeasurement(Names.DISPLACEMENT,
+			MeasurementDimension.ANGLE);
 
 	// Special stats. These should not be included in default charts - they are used
 	// as hidden data stores
@@ -144,7 +157,8 @@ public interface Measurement extends XmlSerializable {
 	@NonNull
 	Measurement PCA_2 = new DefaultMeasurement(Names.PCA_2, MeasurementDimension.NONE);
 	@NonNull
-	Measurement PCA_N = new DefaultMeasurement(Names.PCA_N, MeasurementDimension.NONE); // Number of PCs
+	Measurement PCA_N = new DefaultMeasurement(Names.PCA_N, MeasurementDimension.NONE); // Number of
+																						// PCs
 
 	/**
 	 * Get stats for the given component. Use the keys in {@link CellularComponent}
@@ -349,11 +363,13 @@ public interface Measurement extends XmlSerializable {
 		List<Measurement> result = new ArrayList<>();
 
 		// Get measurements in first dataset
-		Set<Measurement> d1 = datasets.get(0).getCollection().getRuleSetCollection().getMeasurableValues();
+		Set<Measurement> d1 = datasets.get(0).getCollection().getRuleSetCollection()
+				.getMeasurableValues();
 		for (Measurement m : d1) {
 			// Keep if they are in all other datasets
 			if (datasets.stream()
-					.allMatch(d -> d.getCollection().getRuleSetCollection().getMeasurableValues().contains(m)))
+					.allMatch(d -> d.getCollection().getRuleSetCollection().getMeasurableValues()
+							.contains(m)))
 				result.add(m);
 		}
 		return result;
@@ -448,7 +464,8 @@ public interface Measurement extends XmlSerializable {
 	 * @param dim    the dimension of the statistic
 	 * @return the converted value
 	 */
-	static double convert(double value, double factor, MeasurementScale scale, MeasurementDimension dim) {
+	static double convert(double value, double factor, MeasurementScale scale,
+			MeasurementDimension dim) {
 		switch (scale) {
 		case MICRONS: {
 			switch (dim) {
