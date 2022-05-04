@@ -44,7 +44,8 @@ public class SegmentStartIndexUpdateEvent extends EventObject {
 	 * @param newStartIndex the new index to apply via the update type
 	 * @param type          the type of segment update to perform
 	 */
-	public SegmentStartIndexUpdateEvent(final Object source, final IAnalysisDataset dataset, final UUID id,
+	public SegmentStartIndexUpdateEvent(final Object source, final IAnalysisDataset dataset,
+			final UUID id,
 			final int newStartIndex) {
 		super(source);
 		this.id = id;
@@ -60,15 +61,18 @@ public class SegmentStartIndexUpdateEvent extends EventObject {
 	 * @param newStartIndex the new index to apply via the update type
 	 * @param type          the type of segment update to perform
 	 */
-	public SegmentStartIndexUpdateEvent(final Object source, final ICell cell, final UUID id, final int newStartIndex) {
+	public SegmentStartIndexUpdateEvent(final Object source, final IAnalysisDataset dataset,
+			final ICell cell, final UUID id,
+			final int newStartIndex) {
 		super(source);
+		this.dataset = dataset;
 		this.id = id;
 		this.index = newStartIndex;
 		this.cell = cell;
 	}
 
 	public boolean isDataset() {
-		return dataset != null;
+		return cell == null;
 	}
 
 	public boolean isCell() {

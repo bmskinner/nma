@@ -134,9 +134,8 @@ public class DummyRodentSpermNucleus extends DummyCellularComponent implements N
 	}
 
 	public DummyRodentSpermNucleus(String name) throws ComponentCreationException {
-		component = new DefaultNucleus(ROI, COM, IMAGE_FILE, IMAGE_CHANNEL, 105, 35,
-				component_NUMBER,
-				RuleSetCollection.mouseSpermRuleSetCollection());
+		component = new DefaultNucleus(ROI, COM, IMAGE_FILE, IMAGE_CHANNEL,
+				component_NUMBER, RuleSetCollection.mouseSpermRuleSetCollection());
 		nucleus = (Nucleus) component;
 		nucleus.offset(COM.getX(), COM.getY());
 		createProfiles(PROFILE_WINDOW);

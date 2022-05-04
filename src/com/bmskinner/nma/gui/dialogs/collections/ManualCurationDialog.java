@@ -51,8 +51,8 @@ import com.bmskinner.nma.gui.components.SelectableCellIcon;
 import com.bmskinner.nma.gui.events.UIController;
 import com.bmskinner.nma.io.ImageImportWorker;
 import com.bmskinner.nma.io.ImageImporter;
-import com.bmskinner.nma.io.UnloadableImageException;
 import com.bmskinner.nma.io.ImageImporter.ImageImportException;
+import com.bmskinner.nma.io.UnloadableImageException;
 import com.bmskinner.nma.visualisation.image.ImageAnnotator;
 import com.bmskinner.nma.visualisation.image.ImageFilterer;
 
@@ -132,14 +132,16 @@ public class ManualCurationDialog extends AbstractCellCollectionDialog {
 
 		List<Object> components = new ArrayList<>();
 
-		boolean hasCytoplasm = dataset.getCollection().getCells().stream().anyMatch(ICell::hasCytoplasm);
+		boolean hasCytoplasm = dataset.getCollection().getCells().stream()
+				.anyMatch(ICell::hasCytoplasm);
 		if (hasCytoplasm) // Only add cytoplasm option if present in at least one cell
 			components.add(CellularComponent.CYTOPLASM);
 
 		components.add(CellularComponent.NUCLEUS);
 		for (UUID signalGroupId : dataset.getCollection().getSignalGroupIDs()) {
 			ISignalGroup sg = dataset.getCollection().getSignalGroup(signalGroupId).get();
-			components.add(new ComponentSelectionItem(NUCLEAR_SIGNAL_LBL + sg.getGroupName(), signalGroupId));
+			components.add(new ComponentSelectionItem(NUCLEAR_SIGNAL_LBL + sg.getGroupName(),
+					signalGroupId));
 		}
 
 		JComboBox<Object> componntBox = new JComboBox<>(components.toArray(new Object[0]));
@@ -198,7 +200,8 @@ public class ManualCurationDialog extends AbstractCellCollectionDialog {
 	protected void createUI() {
 
 		this.setLayout(new BorderLayout());
-		this.setTitle(String.format("Showing %s cells in %s", dataset.getCollection().size(), dataset.getName()));
+		this.setTitle(String.format("Showing %s cells in %s", dataset.getCollection().size(),
+				dataset.getName()));
 
 		int cellCount = dataset.getCollection().size();
 
@@ -226,9 +229,11 @@ public class ManualCurationDialog extends AbstractCellCollectionDialog {
 					int row = table.rowAtPoint(pnt);
 					int col = table.columnAtPoint(pnt);
 					model.toggleSelected(row, col);
-					setTitle(String.format("Showing %s cells in %s: %s selected", dataset.getCollection().size(),
+					setTitle(String.format("Showing %s cells in %s: %s selected",
+							dataset.getCollection().size(),
 							dataset.getName(), model.selectedCount()));
-					table.repaint(table.getCellRect(row, col, true)); // need to trigger otherwise it will only update
+					table.repaint(table.getCellRect(row, col, true)); // need to trigger otherwise
+																		// it will only update
 																		// on the next click
 				}
 			}
@@ -268,7 +273,8 @@ public class ManualCurationDialog extends AbstractCellCollectionDialog {
 		 * @param rotate    if true, cells are rotated to vertical
 		 * @param component the component of the cell to display
 		 */
-		public CellImportWorker(IAnalysisDataset dataset, TableModel model, boolean rotate, Object component) {
+		public CellImportWorker(IAnalysisDataset dataset, TableModel model, boolean rotate,
+				Object component) {
 			super(dataset, model, rotate);
 			this.component = component;
 		}
@@ -286,7 +292,8 @@ public class ManualCurationDialog extends AbstractCellCollectionDialog {
 				ip = ImageFilterer.orientImage(ip, c.getPrimaryNucleus());
 			}
 			// Rescale the resulting image
-			ip = new ImageFilterer(ip).resizeKeepingAspect(ROW_IMAGE_HEIGHT, ROW_IMAGE_HEIGHT).toProcessor();
+			ip = new ImageFilterer(ip).resizeKeepingAspect(ROW_IMAGE_HEIGHT, ROW_IMAGE_HEIGHT)
+					.toProcessor();
 			return ip;
 		}
 
@@ -314,9 +321,11 @@ public class ManualCurationDialog extends AbstractCellCollectionDialog {
 			return flipAndScaleImage(c, ip);
 		}
 
-		private ImageProcessor importSignal(UUID signal, ICell c) throws ImageImportException, MissingOptionException {
+		private ImageProcessor importSignal(UUID signal, ICell c)
+				throws ImageImportException, MissingOptionException {
 
-			HashOptions signalOptions = dataset.getAnalysisOptions().get().getNuclearSignalOptions(signal)
+			HashOptions signalOptions = dataset.getAnalysisOptions().get()
+					.getNuclearSignalOptions(signal)
 					.orElseThrow(MissingOptionException::new);
 
 			if (signalOptions == null)
@@ -331,7 +340,8 @@ public class ManualCurationDialog extends AbstractCellCollectionDialog {
 				return ImageFilterer.createWhiteColorProcessor(150, 150);
 			}
 
-			ImageProcessor ip = new ImageImporter(signalFile).importImage(signalOptions.getInt(HashOptions.CHANNEL));
+			ImageProcessor ip = new ImageImporter(signalFile)
+					.importImage(signalOptions.getInt(HashOptions.CHANNEL));
 			ip.invert();
 			ImageAnnotator an = new ImageAnnotator(ip);
 			an.convertToColorProcessor();
@@ -368,9 +378,8 @@ public class ManualCurationDialog extends AbstractCellCollectionDialog {
 				if (CellularComponent.NUCLEUS.equals(component.toString()))
 					ip = importNucleus(c);
 
-				if (component instanceof ComponentSelectionItem) {
-					UUID signalId = ((ComponentSelectionItem) component).uuid;
-					ip = importSignal(signalId, c);
+				if (component instanceof ComponentSelectionItem comp) {
+					ip = importSignal(comp.uuid, c);
 				}
 
 				return new SelectableCellIcon(ip, c);

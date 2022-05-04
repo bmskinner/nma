@@ -114,9 +114,9 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 	 * @throws ComponentCreationException
 	 */
 	protected ProfileableCellularComponent(@NonNull Roi roi, @NonNull IPoint centreOfMass,
-			File source, int channel,
-			int x, int y, @NonNull RuleSetCollection rsc) throws ComponentCreationException {
-		this(roi, centreOfMass, source, channel, x, y, null, rsc);
+			File source, int channel, @NonNull RuleSetCollection rsc)
+			throws ComponentCreationException {
+		this(roi, centreOfMass, source, channel, null, rsc);
 	}
 
 	/**
@@ -134,10 +134,9 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 	 * @throws ComponentCreationException
 	 */
 	protected ProfileableCellularComponent(@NonNull Roi roi, @NonNull IPoint centreOfMass,
-			File source, int channel,
-			int x, int y, @Nullable UUID id, @NonNull RuleSetCollection rsc)
+			File source, int channel, @Nullable UUID id, @NonNull RuleSetCollection rsc)
 			throws ComponentCreationException {
-		super(roi, centreOfMass, source, channel, x, y, id);
+		super(roi, centreOfMass, source, channel, id);
 
 		for (@NonNull
 		OrientationMark s : rsc.getOrientionMarks()) {

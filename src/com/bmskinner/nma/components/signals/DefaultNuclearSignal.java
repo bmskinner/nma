@@ -37,62 +37,64 @@ import ij.gui.Roi;
  *
  */
 public class DefaultNuclearSignal extends DefaultCellularComponent implements INuclearSignal {
-	
+
 	private static final String XML_SIGNAL = "Signal";
 
 	private static final String XML_CLOSEST_BORDER = "ClosestBorder";
 
-    private int closestNuclearBorderPoint;
+	private int closestNuclearBorderPoint;
 
-    public DefaultNuclearSignal(@NonNull Roi roi, @NonNull IPoint centreOfMass, @NonNull File f, int channel, int x, int y, @NonNull UUID id) {
-        super(roi, centreOfMass, f, channel, x, y, id);
-    }
-    
-    public DefaultNuclearSignal(@NonNull Roi roi, @NonNull IPoint centreOfMass, @NonNull File f, int channel, int x, int y) {
-        super(roi, centreOfMass, f, channel, x, y);
-    }
+	public DefaultNuclearSignal(@NonNull Roi roi, @NonNull IPoint centreOfMass, @NonNull File f,
+			int channel, @NonNull UUID id) {
+		super(roi, centreOfMass, f, channel, id);
+	}
 
-    /**
-     * Create a copy of the given signal
-     * 
-     * @param n
-     */
-    private DefaultNuclearSignal(@NonNull INuclearSignal n) {
-        super(n);
-        this.closestNuclearBorderPoint = n.getClosestBorderPoint();
-    }
-    
-    
-    /**
-     * Construct from an XML element. Use for 
-     * unmarshalling. The element should conform
-     * to the specification in {@link XmlSerializable}.
-     * @param e the XML element containing the data.
-     */
-    public DefaultNuclearSignal(Element e) {
-    	super(e);
-    	closestNuclearBorderPoint = Integer.valueOf(e.getChildText(XML_CLOSEST_BORDER));
-    }
-    
-    @Override
-    public INuclearSignal duplicate() {
-    	return new DefaultNuclearSignal(this);
-    }
+	public DefaultNuclearSignal(@NonNull Roi roi, @NonNull IPoint centreOfMass, @NonNull File f,
+			int channel) {
+		super(roi, centreOfMass, f, channel);
+	}
 
-    @Override
-    public int getClosestBorderPoint() {
-        return this.closestNuclearBorderPoint;
-    }
+	/**
+	 * Create a copy of the given signal
+	 * 
+	 * @param n
+	 */
+	private DefaultNuclearSignal(@NonNull INuclearSignal n) {
+		super(n);
+		this.closestNuclearBorderPoint = n.getClosestBorderPoint();
+	}
 
-    @Override
-    public void setClosestBorderPoint(int p) {
-        this.closestNuclearBorderPoint = p;
-    }
+	/**
+	 * Construct from an XML element. Use for unmarshalling. The element should
+	 * conform to the specification in {@link XmlSerializable}.
+	 * 
+	 * @param e the XML element containing the data.
+	 */
+	public DefaultNuclearSignal(Element e) {
+		super(e);
+		closestNuclearBorderPoint = Integer.valueOf(e.getChildText(XML_CLOSEST_BORDER));
+	}
+
+	@Override
+	public INuclearSignal duplicate() {
+		return new DefaultNuclearSignal(this);
+	}
+
+	@Override
+	public int getClosestBorderPoint() {
+		return this.closestNuclearBorderPoint;
+	}
+
+	@Override
+	public void setClosestBorderPoint(int p) {
+		this.closestNuclearBorderPoint = p;
+	}
 
 	@Override
 	public Element toXmlElement() {
 		Element e = super.toXmlElement().setName(XML_SIGNAL);
-		e.addContent(new Element(XML_CLOSEST_BORDER).setText(String.valueOf(closestNuclearBorderPoint)));
+		e.addContent(
+				new Element(XML_CLOSEST_BORDER).setText(String.valueOf(closestNuclearBorderPoint)));
 		return e;
 	}
 

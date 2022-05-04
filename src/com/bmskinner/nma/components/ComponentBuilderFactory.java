@@ -148,7 +148,8 @@ public class ComponentBuilderFactory {
 				Rectangle bounds = roi.getBounds();
 
 				if (original == null)
-					original = new int[] { (int) roi.getXBase(), (int) roi.getYBase(), (int) bounds.getWidth(),
+					original = new int[] { (int) roi.getXBase(), (int) roi.getYBase(),
+							(int) bounds.getWidth(),
 							(int) bounds.getHeight() };
 
 				if (id == null)
@@ -156,8 +157,7 @@ public class ComponentBuilderFactory {
 
 				int number = nucleusCount++;
 
-				Nucleus n = new DefaultNucleus(roi, com, file, channel, (int) roi.getXBase(), (int) roi.getYBase(),
-						number, rsc);
+				Nucleus n = new DefaultNucleus(roi, com, file, channel, number, rsc);
 
 				if (isOffset) {
 					IPoint offsetCoM = new FloatPoint(com.getX() - (int) roi.getXBase(),
@@ -280,12 +280,11 @@ public class ComponentBuilderFactory {
 				return this;
 			}
 
-			public INuclearSignal build() throws ComponentCreationException {
+			public INuclearSignal build() {
 				if (id == null)
 					id = UUID.randomUUID();
 
-				INuclearSignal s = new DefaultNuclearSignal(roi, com, file, channel, (int) roi.getXBase(),
-						(int) roi.getYBase(), id);
+				INuclearSignal s = new DefaultNuclearSignal(roi, com, file, channel, id);
 
 				s.setScale(scale);
 
@@ -302,7 +301,8 @@ public class ComponentBuilderFactory {
 	 * @param prop  the window proportion
 	 * @param scale the scale
 	 */
-	public static NucleusBuilderFactory createNucleusBuilderFactory(@NonNull RuleSetCollection rsc, double prop,
+	public static NucleusBuilderFactory createNucleusBuilderFactory(@NonNull RuleSetCollection rsc,
+			double prop,
 			double scale) {
 		return new NucleusBuilderFactory(rsc, prop, scale);
 	}

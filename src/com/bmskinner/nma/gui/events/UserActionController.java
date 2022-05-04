@@ -640,6 +640,17 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 					new UserActionEvent(this, UserActionEvent.APPLY_MEDIAN_TO_NUCLEI));
 		}
 
+		if (event.isCell()) {
+			try {
+				event.dataset.getCollection().getProfileManager()
+						.updateCellSegmentStartIndex(event.cell, event.id, event.index);
+
+				UIController.getInstance().fireCellUpdatedEvent(event.dataset, event.cell);
+			} catch (ProfileException | MissingComponentException e) {
+				LOGGER.warning("Cannot update segment start index");
+			}
+		}
+
 	}
 
 	@Override

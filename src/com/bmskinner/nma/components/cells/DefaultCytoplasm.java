@@ -34,37 +34,37 @@ import ij.gui.Roi;
  */
 public class DefaultCytoplasm extends DefaultCellularComponent implements ICytoplasm {
 
-    public DefaultCytoplasm(@NonNull Roi roi, @NonNull IPoint centreOfMass, File f, int channel, int x, int y, int w, int h, @NonNull UUID id) {
-        super(roi, centreOfMass, f, channel, x, y, id);
-    }
+	public DefaultCytoplasm(@NonNull Roi roi, @NonNull IPoint centreOfMass, File f, int channel,
+			@NonNull UUID id) {
+		super(roi, centreOfMass, f, channel, id);
+	}
 
-    
-    /**
-     * Construct with an ROI, a source image and channel, and the original
-     * position in the source image
-     * 
-     * @param roi
-     * @param f
-     * @param channel
-     * @param position
-     * @param centreOfMass
-     */
-    public DefaultCytoplasm(@NonNull Roi roi, @NonNull IPoint centreOfMass, File f, int channel, int x, int y, int w, int h) {
-        super(roi, centreOfMass, f, channel, x, y);
-    }
+	/**
+	 * Construct with an ROI, a source image and channel, and the original position
+	 * in the source image
+	 * 
+	 * @param roi
+	 * @param f
+	 * @param channel
+	 * @param position
+	 * @param centreOfMass
+	 */
+	public DefaultCytoplasm(@NonNull Roi roi, @NonNull IPoint centreOfMass, File f, int channel) {
+		super(roi, centreOfMass, f, channel);
+	}
 
-    protected DefaultCytoplasm(ICytoplasm n) {
-        super(n);
-    }
+	protected DefaultCytoplasm(ICytoplasm n) {
+		super(n);
+	}
 
-    @Override
-    public ICytoplasm duplicate() {
-        return new DefaultCytoplasm(this);
-    }
+	@Override
+	public ICytoplasm duplicate() {
+		return new DefaultCytoplasm(this);
+	}
 
-    @Override
-    public int compareTo(ICytoplasm o) {
-        return 0;
-    }
+	@Override
+	public int compareTo(ICytoplasm o) {
+		return 0;
+	}
 
 }

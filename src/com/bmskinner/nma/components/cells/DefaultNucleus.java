@@ -85,10 +85,9 @@ public class DefaultNucleus extends ProfileableCellularComponent
 	 * @throws ComponentCreationException
 	 */
 	public DefaultNucleus(@NonNull Roi roi, @NonNull IPoint centreOfMass, File source, int channel,
-			int x, int y,
 			int number, @Nullable UUID id, RuleSetCollection rsc)
 			throws ComponentCreationException {
-		super(roi, centreOfMass, source, channel, x, y, id, rsc);
+		super(roi, centreOfMass, source, channel, id, rsc);
 		this.nucleusNumber = number;
 		signalCollection.addNuclearSignalAddedListener(this);
 	}
@@ -105,9 +104,8 @@ public class DefaultNucleus extends ProfileableCellularComponent
 	 * @throws ComponentCreationException
 	 */
 	public DefaultNucleus(@NonNull Roi roi, @NonNull IPoint centreOfMass, @NonNull File f,
-			int channel, int x, int y,
-			int number, RuleSetCollection rsc) throws ComponentCreationException {
-		this(roi, centreOfMass, f, channel, x, y, number, null, rsc);
+			int channel, int number, RuleSetCollection rsc) throws ComponentCreationException {
+		this(roi, centreOfMass, f, channel, number, null, rsc);
 	}
 
 	/**
@@ -290,18 +288,6 @@ public class DefaultNucleus extends ProfileableCellularComponent
 		for (INuclearSignal s : signalCollection.getAllSignals())
 			s.flipVertical(p);
 
-	}
-
-	@Override
-	public void rotate(double angle) {
-
-		super.rotate(angle);
-		if (angle != 0) {
-			// Rotate signals around the nucleus CoM
-			for (INuclearSignal s : signalCollection.getAllSignals())
-				s.rotate(angle, getCentreOfMass());
-
-		}
 	}
 
 	@Override

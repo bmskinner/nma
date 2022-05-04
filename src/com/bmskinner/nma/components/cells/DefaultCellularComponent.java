@@ -17,7 +17,6 @@
 package com.bmskinner.nma.components.cells;
 
 import java.awt.Polygon;
-import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Path2D;
@@ -72,6 +71,28 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 
 //	private static final String SOURCE_IMAGE_IS_NOT_AVAILABLE = "Source image is not available";
 
+	private static final String XML_REVERSE = "reverse";
+
+	private static final String XML_YPOINTS = "ypoints";
+
+	private static final String XML_XPOINTS = "xpoints";
+
+	private static final String XML_SCALE = "Scale";
+
+	private static final String XML_CHANNEL = "Channel";
+
+	private static final String XML_SOURCE_FILE = "SourceFile";
+
+	private static final String XML_COMPONENT = "Component";
+
+	private static final String XML_ORIGINAL_CENTRE_OF_MASS = "OriginalCentreOfMass";
+
+	private static final String XML_Y = "y";
+
+	private static final String XML_X = "x";
+
+	private static final String XML_ID = "id";
+
 	private static final String XML_COM = "CoM";
 
 	private static final Logger LOGGER = Logger.getLogger(DefaultCellularComponent.class.getName());
@@ -80,12 +101,6 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	private static final int INTERPOLATION_INTERVAL_PIXELS = 1;
 
 	private final UUID id;
-
-	/** The lowest x position in the object bounding box */
-	private final int xBase;
-
-	/** The lowest y position in the object bounding box */
-	private final int yBase;
 
 	/** The current centre of the object. */
 	private IPoint centreOfMass;
@@ -123,9 +138,6 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	/** The complete border list interpolated from the roi */
 	private IPoint[] borderList = new IPoint[0];
 
-	/** Cached object shapes. */
-//    private ShapeCache shapeCache = new ShapeCache();
-
 	/** The object bounding box */
 	private Rectangle2D bounds;
 
@@ -141,9 +153,9 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	 * @param position     the bounding position of the component in the original
 	 *                     image
 	 */
-	protected DefaultCellularComponent(@NonNull Roi roi, @NonNull IPoint centreOfMass, File source, int channel, int x,
-			int y) {
-		this(roi, centreOfMass, source, channel, x, y, UUID.randomUUID());
+	protected DefaultCellularComponent(@NonNull Roi roi, @NonNull IPoint centreOfMass, File source,
+			int channel) {
+		this(roi, centreOfMass, source, channel, UUID.randomUUID());
 	}
 
 	/**
@@ -159,8 +171,8 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	 *                     image
 	 * @param id           the id of the component. Only use when deserialising!
 	 */
-	protected DefaultCellularComponent(@NonNull Roi roi, @NonNull IPoint centreOfMass, File source, int channel, int x,
-			int y, @Nullable UUID id) {
+	protected DefaultCellularComponent(@NonNull Roi roi, @NonNull IPoint centreOfMass, File source,
+			int channel, @Nullable UUID id) {
 
 		// Sanity check: is the CoM inside the roi
 		if (!doesRoiMatchCom(roi, centreOfMass))
@@ -171,8 +183,6 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		this.id = id == null ? UUID.randomUUID() : id;
 		this.sourceFile = source;
 		this.channel = channel;
-		this.xBase = x;
-		this.yBase = y;
 
 		// Store the original points of the roi. From these, a smooth polygon can be
 		// reconstructed.
@@ -195,12 +205,11 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	protected DefaultCellularComponent(@NonNull CellularComponent a) {
 
 		if (!(a instanceof DefaultCellularComponent))
-			throw new IllegalArgumentException("Input is incorrect class: " + a.getClass().getName());
+			throw new IllegalArgumentException(
+					"Input is incorrect class: " + a.getClass().getName());
 		DefaultCellularComponent other = (DefaultCellularComponent) a;
 
 		this.id = UUID.fromString(a.getID().toString());
-		this.xBase = a.getXBase();
-		this.yBase = a.getYBase();
 		this.originalCentreOfMass = a.getOriginalCentreOfMass().duplicate();
 		this.centreOfMass = a.getCentreOfMass().duplicate();
 		this.sourceFile = new File(a.getSourceFile().getPath());
@@ -221,8 +230,6 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 			borderList[i] = other.borderList[i].duplicate();
 
 		updateBounds();
-
-//		makeBorderList();
 	}
 
 	/**
@@ -232,17 +239,14 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	 * @param e the XML element containing the data.
 	 */
 	protected DefaultCellularComponent(Element e) {
-		id = UUID.fromString(e.getAttributeValue("id"));
+		id = UUID.fromString(e.getAttributeValue(XML_ID));
 
-		xBase = Integer.parseInt(e.getChild("Base").getAttributeValue("x"));
-		yBase = Integer.parseInt(e.getChild("Base").getAttributeValue("y"));
-
-		centreOfMass = new FloatPoint(Float.parseFloat(e.getChild(XML_COM).getAttributeValue("x")),
-				Float.parseFloat(e.getChild(XML_COM).getAttributeValue("y")));
+		centreOfMass = new FloatPoint(Float.parseFloat(e.getChild(XML_COM).getAttributeValue(XML_X)),
+				Float.parseFloat(e.getChild(XML_COM).getAttributeValue(XML_Y)));
 
 		originalCentreOfMass = new FloatPoint(
-				Float.parseFloat(e.getChild("OriginalCentreOfMass").getAttributeValue("x")),
-				Float.parseFloat(e.getChild(XML_COM).getAttributeValue("y")));
+				Float.parseFloat(e.getChild(XML_ORIGINAL_CENTRE_OF_MASS).getAttributeValue(XML_X)),
+				Float.parseFloat(e.getChild(XML_COM).getAttributeValue(XML_Y)));
 
 		// Add measurements
 		for (Element el : e.getChildren("Measurement")) {
@@ -250,13 +254,13 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 			measurements.put(m, Double.parseDouble(el.getAttributeValue("value")));
 		}
 
-		sourceFile = new File(e.getChildText("SourceFile"));
-		channel = Integer.parseInt(e.getChildText("Channel"));
-		scale = Double.parseDouble(e.getChildText("Scale"));
+		sourceFile = new File(e.getChildText(XML_SOURCE_FILE));
+		channel = Integer.parseInt(e.getChildText(XML_CHANNEL));
+		scale = Double.parseDouble(e.getChildText(XML_SCALE));
 
-		xpoints = XMLReader.parseIntArray(e.getChildText("xpoints"));
-		ypoints = XMLReader.parseIntArray(e.getChildText("ypoints"));
-		isReversed = e.getChild("xpoints").getAttributeValue("reverse") != null;
+		xpoints = XMLReader.parseIntArray(e.getChildText(XML_XPOINTS));
+		ypoints = XMLReader.parseIntArray(e.getChildText(XML_YPOINTS));
+		isReversed = e.getChild(XML_XPOINTS).getAttributeValue(XML_REVERSE) != null;
 
 		makeBorderList();
 	}
@@ -288,7 +292,8 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		centreOfMass = originalCentreOfMass.duplicate();
 
 		// convert the roi positions to border points
-		roi.fitSplineForStraightening(); // this prevents the resulting border differing in length between invokations
+		roi.fitSplineForStraightening(); // this prevents the resulting border differing in length
+											// between invokations
 
 		FloatPolygon smoothed = roi.getInterpolatedPolygon(INTERPOLATION_INTERVAL_PIXELS, true);
 
@@ -339,12 +344,12 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 
 	@Override
 	public int getXBase() {
-		return xBase;
+		return (int) bounds.getMinX();
 	}
 
 	@Override
 	public int getYBase() {
-		return yBase;
+		return (int) bounds.getMinY();
 	}
 
 	@Override
@@ -359,7 +364,9 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 
 	@Override
 	public IPoint getOriginalBase() {
-		return new FloatPoint(xBase, yBase);
+		int x = Arrays.stream(xpoints).min().getAsInt();
+		int y = Arrays.stream(ypoints).min().getAsInt();
+		return new FloatPoint(x, y);
 	}
 
 	@Override
@@ -495,7 +502,8 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		double diffY = p.getY() - centreOfMass.getY();
 
 		// Offset to the original position
-		return new FloatPoint(originalCentreOfMass.getX() + diffX, originalCentreOfMass.getY() + diffY);
+		return new FloatPoint(originalCentreOfMass.getX() + diffX,
+				originalCentreOfMass.getY() + diffY);
 	}
 
 	@Override
@@ -576,13 +584,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	 * @return
 	 */
 	public boolean containsOriginalPoint(int x, int y) {
-
-		// Fast check - is the point within the bounding rectangle moved to the
-		// original position?
-		Rectangle r = new Rectangle(xBase, yBase, (int) getWidth(), (int) getHeight());
-		if (!r.contains(x, y))
-			return false;
-		return this.toOriginalShape().contains(x, y);
+		return this.toOriginalPolygon().contains(x, y);
 	}
 
 	@Override
@@ -625,6 +627,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		double dx = xCentre - centreOfMass.getX();
 		double xNew = xCentre + dx;
 		centreOfMass.setX(xNew);
+		updateBounds();
 	}
 
 	@Override
@@ -647,6 +650,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		double dy = yCentre - centreOfMass.getY();
 		double yNew = yCentre + dy;
 		centreOfMass.setY(yNew);
+		updateBounds();
 	}
 
 	/**
@@ -796,10 +800,6 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		if (borderList.length == 0)
 			throw new IllegalArgumentException("Border list is empty");
 
-//        if (shapeCache.has(xOffset, yOffset, scale)) {
-//            return shapeCache.get(xOffset, yOffset, scale);
-//        }
-
 		double sc = scale.equals(MeasurementScale.MICRONS) ? this.scale : 1;
 
 		Path2D.Double path = new Path2D.Double();
@@ -808,12 +808,10 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		path.moveTo((first.getX() + xOffset) / sc, (first.getY() + yOffset) / sc);
 
 		for (int i = 1; i < borderList.length; i++)
-			path.lineTo((borderList[i].getX() + xOffset) / sc, (borderList[i].getY() + yOffset) / sc);
+			path.lineTo((borderList[i].getX() + xOffset) / sc,
+					(borderList[i].getY() + yOffset) / sc);
 
 		path.closePath();
-
-//        shapeCache.add(xOffset, yOffset, scale, path);
-
 		return path;
 
 	}
@@ -877,36 +875,32 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		 */
 		LineEquation eq = new DoubleEquation(p, centreOfMass);
 
-		return Arrays.stream(borderList).filter(point -> point.getLengthTo(p) > distToCom).min((p1, p2) -> {
-			double d1 = eq.getClosestDistanceToPoint(p1);
-			double d2 = eq.getClosestDistanceToPoint(p2);
-			if (d1 < d2)
-				return -1;
-			if (d1 == d2)
-				return 0;
-			return 1;
+		return Arrays.stream(borderList).filter(point -> point.getLengthTo(p) > distToCom)
+				.min((p1, p2) -> {
+					double d1 = eq.getClosestDistanceToPoint(p1);
+					double d2 = eq.getClosestDistanceToPoint(p2);
+					if (d1 < d2)
+						return -1;
+					if (d1 == d2)
+						return 0;
+					return 1;
 
-		})
-//				.min((p1, p2) -> eq.getClosestDistanceToPoint(p1) < eq.getClosestDistanceToPoint(p2) ? -1 : 1)
+				})
 				.orElse(null);
-
-		// Checking the angle of every point via atan2 is expensive.
-		// We can filter out most of the points beforehand.
-
-		// TODO: cheaper solution?
-//		return Arrays.stream(borderList).filter(point -> point.getLengthTo(p) > distToCom)
-//				.min(Comparator.comparing(point -> 180 - centreOfMass.findSmallestAngle(p, point))).orElse(null);
 	}
 
 	@Override
 	public IPoint findOrthogonalBorderPoint(@NonNull IPoint a) {
 		return Arrays.stream(borderList)
-				.min(Comparator.comparing(point -> Math.abs(90 - centreOfMass.findSmallestAngle(a, point)))).get();
+				.min(Comparator.comparing(
+						point -> Math.abs(90 - centreOfMass.findSmallestAngle(a, point))))
+				.get();
 	}
 
 	@Override
 	public IPoint findClosestBorderPoint(@NonNull IPoint p) {
-		return Arrays.stream(borderList).min(Comparator.comparing(point -> point.getLengthTo(p))).get();
+		return Arrays.stream(borderList).min(Comparator.comparing(point -> point.getLengthTo(p)))
+				.get();
 	}
 
 	@Override
@@ -914,10 +908,12 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		String newLine = System.getProperty("line.separator");
 		StringBuilder builder = new StringBuilder("ID: " + id.toString() + newLine);
 		builder.append(
-				String.format("X bounds: %s-%s", this.getBase().getX(), this.getBase().getX() + this.getWidth()));
+				String.format("X bounds: %s-%s", this.getBase().getX(),
+						this.getBase().getX() + this.getWidth()));
 		builder.append(newLine);
 		builder.append(
-				String.format("Y bounds: %s-%s", this.getBase().getY(), this.getBase().getY() + this.getHeight()));
+				String.format("Y bounds: %s-%s", this.getBase().getY(),
+						this.getBase().getY() + this.getHeight()));
 		builder.append(newLine);
 
 		builder.append("Border " + borderList.length + ": ");
@@ -956,31 +952,31 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 
 	@Override
 	public Element toXmlElement() {
-		Element e = new Element("Component").setAttribute("id", id.toString());
+		Element e = new Element(XML_COMPONENT).setAttribute(XML_ID, id.toString());
 
-		e.addContent(
-				new Element("Base").setAttribute("x", String.valueOf(xBase)).setAttribute("y", String.valueOf(yBase)));
+		e.addContent(new Element(XML_COM).setAttribute(XML_X, String.valueOf(centreOfMass.getX()))
+				.setAttribute(XML_Y,
+						String.valueOf(centreOfMass.getY())));
 
-		e.addContent(new Element(XML_COM).setAttribute("x", String.valueOf(centreOfMass.getX())).setAttribute("y",
-				String.valueOf(centreOfMass.getY())));
-
-		e.addContent(new Element("OriginalCentreOfMass").setAttribute("x", String.valueOf(originalCentreOfMass.getX()))
-				.setAttribute("y", String.valueOf(originalCentreOfMass.getY())));
+		e.addContent(new Element(XML_ORIGINAL_CENTRE_OF_MASS)
+				.setAttribute(XML_X, String.valueOf(originalCentreOfMass.getX()))
+				.setAttribute(XML_Y, String.valueOf(originalCentreOfMass.getY())));
 
 		for (Entry<Measurement, Double> entry : measurements.entrySet()) {
-			e.addContent(entry.getKey().toXmlElement().setAttribute("value", entry.getValue().toString()));
+			e.addContent(entry.getKey().toXmlElement().setAttribute("value",
+					entry.getValue().toString()));
 		}
 
-		e.addContent(new Element("SourceFile").setText(sourceFile.toString()));
-		e.addContent(new Element("Channel").setText(String.valueOf(channel)));
-		e.addContent(new Element("Scale").setText(String.valueOf(scale)));
+		e.addContent(new Element(XML_SOURCE_FILE).setText(sourceFile.toString()));
+		e.addContent(new Element(XML_CHANNEL).setText(String.valueOf(channel)));
+		e.addContent(new Element(XML_SCALE).setText(String.valueOf(scale)));
 
-		Element xEl = new Element("xpoints").setText(Arrays.toString(xpoints));
+		Element xEl = new Element(XML_XPOINTS).setText(Arrays.toString(xpoints));
 		if (isReversed)
-			xEl.setAttribute("reverse", "true"); // don't waste space
+			xEl.setAttribute(XML_REVERSE, "true"); // don't waste space
 		e.addContent(xEl);
 
-		e.addContent(new Element("ypoints").setText(Arrays.toString(ypoints)));
+		e.addContent(new Element(XML_YPOINTS).setText(Arrays.toString(ypoints)));
 		return e;
 	}
 
@@ -991,19 +987,9 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		result = prime * result + Arrays.hashCode(xpoints);
 		result = prime * result + Arrays.hashCode(ypoints);
 
-		// We use this rather than hashing the file directly in case
-		// the file path does not exist. However, this is an expensive
-		// operation hitting the file system and should be avoided.
-//		int fileHash = 1;
-//		try {
-//			fileHash = Objects.hash(sourceFile.getCanonicalFile());
-//		} catch (IOException e) {
-//			LOGGER.fine("Unable to get source file hash");
-//		}
-//		result = prime * result + fileHash;
-
-		result = prime * result + Objects.hash(centreOfMass, sourceFile, channel, id, originalCentreOfMass, scale,
-				measurements, xBase, yBase);
+		result = prime * result
+				+ Objects.hash(centreOfMass, sourceFile, channel, id, originalCentreOfMass, scale,
+						measurements);
 		return result;
 	}
 
@@ -1034,9 +1020,11 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 			}
 		}
 
-		return Objects.equals(centreOfMass, other.centreOfMass) && isSameFile && channel == other.channel
-				&& Objects.equals(id, other.id) && Objects.equals(originalCentreOfMass, other.originalCentreOfMass)
-				&& Objects.equals(xBase, other.xBase) && Objects.equals(yBase, other.yBase)
+		return Objects.equals(centreOfMass, other.centreOfMass) && isSameFile
+				&& channel == other.channel
+				&& Objects.equals(id, other.id)
+				&& Objects.equals(originalCentreOfMass, other.originalCentreOfMass)
+//				&& Objects.equals(xBase, other.xBase) && Objects.equals(yBase, other.yBase)
 				&& Double.doubleToLongBits(scale) == Double.doubleToLongBits(other.scale)
 				&& Arrays.equals(xpoints, other.xpoints) && Arrays.equals(ypoints, other.ypoints);
 	}
@@ -1059,22 +1047,14 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	@Override
 	public void rotate(double angle) {
 		rotate(angle, centreOfMass);
-//		if (angle != 0) {
-//			double rad = Math.toRadians(-angle);
-//			AffineTransform tf = AffineTransform.getRotateInstance(rad, centreOfMass.getX(), centreOfMass.getY());
-//			for (IPoint p : borderList) {
-//				Point2D result = tf.transform(p.toPoint2D(), null);
-//				p.set(result);
-//			}
-//		}
-//		updateBounds();
 	}
 
 	@Override
 	public void rotate(double angle, IPoint anchor) {
 		if (angle != 0) {
 			double rad = Math.toRadians(-angle);
-			AffineTransform tf = AffineTransform.getRotateInstance(rad, anchor.getX(), anchor.getY());
+			AffineTransform tf = AffineTransform.getRotateInstance(rad, anchor.getX(),
+					anchor.getY());
 			for (IPoint p : borderList) {
 				Point2D result = tf.transform(p.toPoint2D(), null);
 				p.set(result);

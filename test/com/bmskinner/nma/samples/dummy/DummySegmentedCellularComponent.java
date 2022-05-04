@@ -99,7 +99,7 @@ public class DummySegmentedCellularComponent extends ProfileableCellularComponen
 	}
 
 	public DummySegmentedCellularComponent(String name) throws ComponentCreationException {
-		super(ROI, COM, IMAGE_FILE, IMAGE_CHANNEL, 105, 35,
+		super(ROI, COM, IMAGE_FILE, IMAGE_CHANNEL,
 				RuleSetCollection.roundRuleSetCollection());
 		setMeasurement(Measurement.AREA, AREA);
 		setMeasurement(Measurement.PERIMETER, PERIMETER);

@@ -90,6 +90,9 @@ public class OutlineChartFactory extends AbstractChartFactory {
 
 	protected static final String NO_CONSENSUS_ERROR_LBL = "No consensus nucleus in dataset";
 
+	private static final boolean SEGMENTED = true;
+	private static final boolean NOT_SEGMENTED = false;
+
 	public OutlineChartFactory(@NonNull ChartOptions o) {
 		super(o);
 	}
@@ -303,10 +306,9 @@ public class OutlineChartFactory extends AbstractChartFactory {
 			clearShapeAnnotations(plot);
 
 			if (options.hasComponent()) {
-				int w = options.getInt("ImageWidth");
-				int h = options.getInt("ImagHeight");
-				drawImageAsAnnotation(plot, options.getCell(), options.getComponent().get(0), true,
-						w, h);
+
+				drawImageAsAnnotation(plot, options.getCell(), options.getComponent().get(0),
+						options.getRotateMode());
 			}
 			applyDefaultAxisOptions(chart);
 			return chart;
@@ -343,12 +345,12 @@ public class OutlineChartFactory extends AbstractChartFactory {
 
 			/* Get the cytoplasm outline dataset */
 			if (cell.hasCytoplasm())
-				cellDatasets.add(new ComponentOutlineDataset(cell.getCytoplasm(), false,
+				cellDatasets.add(new ComponentOutlineDataset(cell.getCytoplasm(), NOT_SEGMENTED,
 						options.getScale()));
 
 			/* Get the nucleus outline dataset */
 			for (Nucleus n : cell.getNuclei()) {
-				cellDatasets.add(new ComponentOutlineDataset(n, true, options.getScale()));
+				cellDatasets.add(new ComponentOutlineDataset(n, SEGMENTED, options.getScale()));
 
 				if (options.isShowSignals()
 						&& cell.getPrimaryNucleus().getSignalCollection().hasSignal()) {
@@ -438,7 +440,9 @@ public class OutlineChartFactory extends AbstractChartFactory {
 			// Add landmark locations
 			DefaultXYDataset landmarkData = new DefaultXYDataset();
 
-			Nucleus n = options.getCell().getPrimaryNucleus();
+			Nucleus n = RotationMode.VERTICAL.equals(options.getRotateMode())
+					? options.getCell().getPrimaryNucleus().getOrientedNucleus()
+					: options.getCell().getPrimaryNucleus();
 
 			for (OrientationMark om : n.getOrientationMarks()) {
 
@@ -472,13 +476,8 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		// Add a background image to the plot
 		clearShapeAnnotations(plot);
 
-		int w = options.getInt("ImageWidth");
-		int h = options.getInt("ImageHeight");
-
-		if (options.getRotateMode().equals(RotationMode.ACTUAL)) {
-			drawImageAsAnnotation(plot, options.getCell(), options.getComponent().get(0), false, w,
-					h);
-		}
+		drawImageAsAnnotation(plot, options.getCell(), options.getComponent().get(0),
+				options.getRotateMode());
 
 		applyDefaultAxisOptions(chart);
 		return chart;

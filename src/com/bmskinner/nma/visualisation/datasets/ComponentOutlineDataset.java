@@ -46,7 +46,8 @@ public class ComponentOutlineDataset extends DefaultXYDataset {
 	private final CellularComponent c;
 	private final MeasurementScale scale;
 
-	public ComponentOutlineDataset(CellularComponent c, boolean showSegmented, MeasurementScale scale)
+	public ComponentOutlineDataset(CellularComponent c, boolean showSegmented,
+			MeasurementScale scale)
 			throws ChartDatasetCreationException {
 		this.c = c;
 		this.scale = scale;
@@ -66,7 +67,9 @@ public class ComponentOutlineDataset extends DefaultXYDataset {
 
 		Taggable t = (Taggable) c;
 		try {
-			List<IProfileSegment> segmentList = t.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE).getSegments();
+			List<IProfileSegment> segmentList = t
+					.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE)
+					.getSegments();
 
 			if (!segmentList.isEmpty()) { // only draw if there are segments
 
@@ -86,8 +89,8 @@ public class ComponentOutlineDataset extends DefaultXYDataset {
 						int offsetIndex = t.getIndexRelativeTo(OrientationMark.REFERENCE, index);
 
 						/*
-						 * Note that the original border point is used here to avoid mismatches with the
-						 * border tags drawn in other methods.
+						 * Note that the original border point is used here to avoid mismatches with
+						 * the border tags drawn in other methods.
 						 */
 						IPoint p = t.getOriginalBorderPoint(offsetIndex);
 						double x = p.getX();

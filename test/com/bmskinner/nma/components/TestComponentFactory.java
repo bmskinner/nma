@@ -9,7 +9,6 @@ import org.junit.Test;
 
 import com.bmskinner.nma.TestDatasetBuilder;
 import com.bmskinner.nma.analysis.profiles.ProfileIndexFinder;
-import com.bmskinner.nma.components.Taggable;
 import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.cells.DefaultCell;
@@ -117,7 +116,7 @@ public class TestComponentFactory {
 		IPoint com = new FloatPoint(xBase + (w / 2), yBase + (h / 2));
 
 		File f = new File(TestDatasetBuilder.TEST_DATASET_IMAGE_FOLDER);
-		Nucleus n = createNucleus(roi, com, f, 0, xBase, yBase, 0, rsc);
+		Nucleus n = createNucleus(roi, com, f, 0, 0, rsc);
 		n.rotate(rotation);
 
 		// Note - the roi interpolation will smooth corners
@@ -147,7 +146,7 @@ public class TestComponentFactory {
 
 		File f = new File(TestDatasetBuilder.TEST_DATASET_IMAGE_FOLDER);
 
-		Nucleus n = createNucleus(roi, com, f, 0, xBase, yBase, 0, rsc);
+		Nucleus n = createNucleus(roi, com, f, 0, 0, rsc);
 		n.rotate(rotation);
 
 //		LOGGER.fine("Initialising new nucleus");
@@ -158,10 +157,9 @@ public class TestComponentFactory {
 		return n;
 	}
 
-	private static Nucleus createNucleus(Roi roi, IPoint com, File f, int channel, int x, int y,
-			int number,
+	private static Nucleus createNucleus(Roi roi, IPoint com, File f, int channel, int number,
 			RuleSetCollection rsc) throws ComponentCreationException {
-		Nucleus n = new DefaultNucleus(roi, com, f, 0, x, y, 0, rsc);
+		Nucleus n = new DefaultNucleus(roi, com, f, 0, 0, rsc);
 		return n;
 	}
 
@@ -201,7 +199,7 @@ public class TestComponentFactory {
 
 		File f = new File("empty file");
 
-		return new DefaultNuclearSignal(roi, com, f, channel, xBase, yBase);
+		return new DefaultNuclearSignal(roi, com, f, channel);
 	}
 
 	/**

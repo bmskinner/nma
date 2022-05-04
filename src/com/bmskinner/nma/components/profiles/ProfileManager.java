@@ -438,8 +438,8 @@ public class ProfileManager {
 			}
 		} catch (SegmentUpdateException e) {
 			LOGGER.warning(
-					String.format("Updating %s start index from %s to %s failed", seg.getName(),
-							seg.getStartIndex(), index));
+					String.format("Updating %s start index from %s to %s failed: %s", seg.getName(),
+							seg.getStartIndex(), index, e.getMessage()));
 		}
 	}
 

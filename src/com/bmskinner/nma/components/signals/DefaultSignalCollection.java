@@ -36,9 +36,9 @@ import com.bmskinner.nma.components.generic.IPoint;
 import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.measure.MeasurementScale;
 import com.bmskinner.nma.io.ImageImporter;
+import com.bmskinner.nma.io.ImageImporter.ImageImportException;
 import com.bmskinner.nma.io.UnloadableImageException;
 import com.bmskinner.nma.io.XmlSerializable;
-import com.bmskinner.nma.io.ImageImporter.ImageImportException;
 import com.bmskinner.nma.logging.Loggable;
 
 import ij.process.ImageProcessor;
@@ -105,7 +105,8 @@ public class DefaultSignalCollection implements ISignalCollection {
 		for (Entry<UUID, List<INuclearSignal>> entry : collection.entrySet()) {
 
 			for (INuclearSignal s : entry.getValue()) {
-				e.addContent(new Element(XML_SIGNALS).setAttribute(XML_SIGNALGROUP_ID, entry.getKey().toString())
+				e.addContent(new Element(XML_SIGNALS)
+						.setAttribute(XML_SIGNALGROUP_ID, entry.getKey().toString())
 						.addContent(s.toXmlElement()));
 			}
 		}
@@ -155,10 +156,7 @@ public class DefaultSignalCollection implements ISignalCollection {
 
 	@Override
 	public void addSignal(@NonNull INuclearSignal n, @NonNull UUID signalGroup) {
-		if (collection.get(signalGroup) == null) {
-			List<INuclearSignal> list = new ArrayList<>();
-			collection.put(signalGroup, list);
-		}
+		collection.computeIfAbsent(signalGroup, k -> new ArrayList<>());
 		collection.get(signalGroup).add(n);
 		fireNuclearSignalAdded();
 	}
@@ -176,9 +174,9 @@ public class DefaultSignalCollection implements ISignalCollection {
 
 	@Override
 	public List<List<INuclearSignal>> getSignals() {
-		List<List<INuclearSignal>> result = new ArrayList<List<INuclearSignal>>(0);
-		for (UUID signalGroup : this.getSignalGroupIds()) {
-			result.add(getSignals(signalGroup));
+		List<List<INuclearSignal>> result = new ArrayList<>();
+		for (Entry<UUID, List<INuclearSignal>> entry : collection.entrySet()) {
+			result.add(entry.getValue());
 		}
 		return result;
 	}
@@ -186,8 +184,8 @@ public class DefaultSignalCollection implements ISignalCollection {
 	@Override
 	public List<INuclearSignal> getAllSignals() {
 		List<INuclearSignal> result = new ArrayList<>(0);
-		for (UUID signalGroup : this.getSignalGroupIds()) {
-			result.addAll(getSignals(signalGroup));
+		for (Entry<UUID, List<INuclearSignal>> entry : collection.entrySet()) {
+			result.addAll(entry.getValue());
 		}
 		return result;
 	}
@@ -196,7 +194,7 @@ public class DefaultSignalCollection implements ISignalCollection {
 	public List<INuclearSignal> getSignals(@NonNull UUID signalGroup) {
 		if (this.hasSignal(signalGroup))
 			return this.collection.get(signalGroup);
-		return new ArrayList<>(0);
+		return new ArrayList<>();
 	}
 
 	@Override
@@ -274,7 +272,8 @@ public class DefaultSignalCollection implements ISignalCollection {
 	}
 
 	@Override
-	public List<Double> getStatistics(@NonNull Measurement stat, MeasurementScale scale, @NonNull UUID signalGroup) {
+	public List<Double> getStatistics(@NonNull Measurement stat, MeasurementScale scale,
+			@NonNull UUID signalGroup) {
 		List<INuclearSignal> list = getSignals(signalGroup);
 		List<Double> result = new ArrayList<Double>(0);
 		for (int i = 0; i < list.size(); i++) {
@@ -284,7 +283,8 @@ public class DefaultSignalCollection implements ISignalCollection {
 	}
 
 	@Override
-	public ImageProcessor getImage(@NonNull final UUID signalGroup) throws UnloadableImageException {
+	public ImageProcessor getImage(@NonNull final UUID signalGroup)
+			throws UnloadableImageException {
 
 		File f = this.getSourceFile(signalGroup);
 
@@ -298,7 +298,8 @@ public class DefaultSignalCollection implements ISignalCollection {
 		try {
 			return new ImageImporter(f).importImageAndInvert(c);
 		} catch (ImageImportException e) {
-			LOGGER.log(Loggable.STACK, "Error importing image source file " + f.getAbsolutePath(), e);
+			LOGGER.log(Loggable.STACK, "Error importing image source file " + f.getAbsolutePath(),
+					e);
 			throw new UnloadableImageException("Unable to load signal image", e);
 		}
 	}
@@ -336,7 +337,8 @@ public class DefaultSignalCollection implements ISignalCollection {
 							for (INuclearSignal col : signalsCol) {
 								IPoint bCoM = col.getCentreOfMass();
 								double value = aCoM.getLengthTo(bCoM);
-								value = Measurement.DISTANCE_FROM_COM.convert(value, col.getScale(), scale);
+								value = Measurement.DISTANCE_FROM_COM.convert(value, col.getScale(),
+										scale);
 								matrix[matrixRow][matrixCol] = value;
 								matrixCol++;
 							}
@@ -360,9 +362,9 @@ public class DefaultSignalCollection implements ISignalCollection {
 	@Override
 	public List<PairwiseSignalDistanceValue> calculateSignalColocalisation(MeasurementScale scale) {
 
-		List<PairwiseSignalDistanceValue> result = new ArrayList<PairwiseSignalDistanceValue>();
+		List<PairwiseSignalDistanceValue> result = new ArrayList<>();
 
-		Set<UUID> completeIDs = new HashSet<UUID>();
+		Set<UUID> completeIDs = new HashSet<>();
 
 		for (UUID id1 : this.getSignalGroupIds()) {
 
@@ -421,14 +423,15 @@ public class DefaultSignalCollection implements ISignalCollection {
 	 * @return a list of the pixel distances between paired signals
 	 */
 	@Override
-	public List<Colocalisation<INuclearSignal>> calculateColocalisation(@NonNull UUID id1, @NonNull UUID id2) {
+	public List<Colocalisation<INuclearSignal>> calculateColocalisation(@NonNull UUID id1,
+			@NonNull UUID id2) {
 
 		if (id1.equals(id2)) {
 			throw new IllegalArgumentException("Signal IDs are the same");
 		}
 
-		Set<INuclearSignal> d1 = new HashSet<INuclearSignal>(this.getSignals(id1));
-		Set<INuclearSignal> d2 = new HashSet<INuclearSignal>(this.getSignals(id2));
+		Set<INuclearSignal> d1 = new HashSet<>(this.getSignals(id1));
+		Set<INuclearSignal> d2 = new HashSet<>(this.getSignals(id2));
 
 		List<Colocalisation<INuclearSignal>> result = findColocalisingSignals(d1, d2);
 
@@ -444,10 +447,11 @@ public class DefaultSignalCollection implements ISignalCollection {
 	 * @param scale the measurement scale
 	 * @return a list of best colocalising signals
 	 */
-	private List<Colocalisation<INuclearSignal>> findColocalisingSignals(@NonNull Set<INuclearSignal> d1,
+	private List<Colocalisation<INuclearSignal>> findColocalisingSignals(
+			@NonNull Set<INuclearSignal> d1,
 			@NonNull Set<INuclearSignal> d2) {
 
-		List<Colocalisation<INuclearSignal>> result = new ArrayList<Colocalisation<INuclearSignal>>();
+		List<Colocalisation<INuclearSignal>> result = new ArrayList<>();
 
 		if (d2.isEmpty() || d1.isEmpty()) {
 			return result;
@@ -482,7 +486,8 @@ public class DefaultSignalCollection implements ISignalCollection {
 
 		if (chosen1 != null && chosen2 != null) {
 
-			Colocalisation<INuclearSignal> col = new Colocalisation<INuclearSignal>(chosen1, chosen2);
+			Colocalisation<INuclearSignal> col = new Colocalisation<INuclearSignal>(chosen1,
+					chosen2);
 			d1.remove(chosen1);
 			d2.remove(chosen2);
 			result.add(col);
@@ -501,7 +506,8 @@ public class DefaultSignalCollection implements ISignalCollection {
 		StringBuilder b = new StringBuilder("Signal groups: " + size() + "\n");
 
 		for (UUID group : collection.keySet()) {
-			b.append(group + ": Channel " + getSourceChannel(group) + "; File: " + getSourceFile(group) + "; size "
+			b.append(group + ": Channel " + getSourceChannel(group) + "; File: "
+					+ getSourceFile(group) + "; size "
 					+ numberOfSignals(group));
 			b.append("\n");
 			for (INuclearSignal s : getSignals(group)) {
@@ -547,9 +553,6 @@ public class DefaultSignalCollection implements ISignalCollection {
 				return false;
 		}
 
-//		return Objects.equals(collection, other.collection);
-//		} else if (!collection.equals(other.collection))
-//			return false;
 		return true;
 	}
 

@@ -59,7 +59,8 @@ public class CellImagePainter implements ImagePainter {
 	 * 
 	 * @param cell
 	 */
-	public CellImagePainter(@NonNull ICell cell, @NonNull CellularComponent component, boolean isOrient) {
+	public CellImagePainter(@NonNull ICell cell, @NonNull CellularComponent component,
+			boolean isOrient) {
 		this.cell = cell;
 		this.isOriented = isOrient;
 		this.component = component;
@@ -71,13 +72,8 @@ public class CellImagePainter implements ImagePainter {
 
 //			BufferedImage input = ImageImporter.importFullImageTo24bit(cell.getPrimaryNucleus()).getBufferedImage();
 
-			Nucleus n = isOriented ? cell.getPrimaryNucleus().getOrientedNucleus() : cell.getPrimaryNucleus();
-//			originalWidth = input.getWidth();
-//			originalHeight = input.getHeight();
-
-			// Scale to full image size
-//			AffineTransform at = createMainTransform(input.getWidth(), input.getHeight());
-//			at.concatenate(AffineTransform.getScaleInstance(rr, rr));
+			Nucleus n = isOriented ? cell.getPrimaryNucleus().getOrientedNucleus()
+					: cell.getPrimaryNucleus();
 
 			BufferedImage output = paintRaw(w, h);
 
@@ -110,15 +106,18 @@ public class CellImagePainter implements ImagePainter {
 		return null;
 	}
 
-	private void paintNucleus(BufferedImage output, AffineTransform at) throws MissingProfileException,
+	private void paintNucleus(BufferedImage output, AffineTransform at)
+			throws MissingProfileException,
 			MissingLandmarkException, ProfileException, UnavailableBorderPointException {
 		Nucleus n = cell.getPrimaryNucleus();
 		Graphics2D g2 = output.createGraphics();
 		Object saved = g2.getRenderingHint(RenderingHints.KEY_STROKE_CONTROL);
-		g2.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_NORMALIZE);
+		g2.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL,
+				RenderingHints.VALUE_STROKE_NORMALIZE);
 
 		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-		g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+		g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
+				RenderingHints.VALUE_INTERPOLATION_BICUBIC);
 
 		g2.setStroke(new BasicStroke(3));
 
@@ -131,8 +130,10 @@ public class CellImagePainter implements ImagePainter {
 			IProfileSegment seg = segs.get(i);
 
 			for (int j = 0; j <= seg.length(); j++) {
-				int k = n.wrapIndex(seg.getStartIndex() + j + n.getBorderIndex(OrientationMark.REFERENCE) - 1);
-				IPoint p = n.getBorderPoint(k).minus(n.getBase()).plus(CellularComponent.COMPONENT_BUFFER);
+				int k = n.wrapIndex(
+						seg.getStartIndex() + j + n.getBorderIndex(OrientationMark.REFERENCE) - 1);
+				IPoint p = n.getBorderPoint(k).minus(n.getBase())
+						.plus(CellularComponent.COMPONENT_BUFFER);
 
 				Point2D p2 = at.transform(p.toPoint2D(), null);
 
@@ -144,7 +145,8 @@ public class CellImagePainter implements ImagePainter {
 		}
 
 		// Draw centre of mass
-		IPoint com = n.getCentreOfMass().minus(n.getBase()).plus(CellularComponent.COMPONENT_BUFFER);
+		IPoint com = n.getCentreOfMass().minus(n.getBase())
+				.plus(CellularComponent.COMPONENT_BUFFER);
 		Point2D com2 = at.transform(com.toPoint2D(), null);
 
 		double x = com2.getX();
@@ -156,7 +158,8 @@ public class CellImagePainter implements ImagePainter {
 		g2.setStroke(new BasicStroke(5));
 
 		for (OrientationMark lm : n.getOrientationMarks()) {
-			IPoint lp = n.getBorderPoint(lm).minus(n.getBase()).plus(CellularComponent.COMPONENT_BUFFER);
+			IPoint lp = n.getBorderPoint(lm).minus(n.getBase())
+					.plus(CellularComponent.COMPONENT_BUFFER);
 			Point2D lp2 = at.transform(lp.toPoint2D(), null);
 			x = lp2.getX();
 			y = lp2.getY();
@@ -167,12 +170,14 @@ public class CellImagePainter implements ImagePainter {
 		g2.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, saved);
 	}
 
-	private void paintSignals(BufferedImage output, AffineTransform at) throws UnavailableBorderPointException {
+	private void paintSignals(BufferedImage output, AffineTransform at)
+			throws UnavailableBorderPointException {
 		Nucleus n = cell.getPrimaryNucleus();
 		Graphics2D g2 = output.createGraphics();
 		Object saved = g2.getRenderingHint(RenderingHints.KEY_STROKE_CONTROL);
 		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-		g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+		g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
+				RenderingHints.VALUE_INTERPOLATION_BICUBIC);
 
 		g2.setStroke(new BasicStroke(3));
 
@@ -182,7 +187,8 @@ public class CellImagePainter implements ImagePainter {
 				g2.setColor(ColourSelecter.getColor(2));
 
 				for (int j = 0; j < s.getBorderLength(); j++) {
-					IPoint p = s.getBorderPoint(j).minus(n.getBase()).plus(CellularComponent.COMPONENT_BUFFER);
+					IPoint p = s.getBorderPoint(j).minus(n.getBase())
+							.plus(CellularComponent.COMPONENT_BUFFER);
 
 					Point2D p2 = at.transform(p.toPoint2D(), null);
 
@@ -192,7 +198,8 @@ public class CellImagePainter implements ImagePainter {
 				}
 
 				// Draw signal CoM
-				IPoint com = s.getCentreOfMass().minus(n.getBase()).plus(CellularComponent.COMPONENT_BUFFER);
+				IPoint com = s.getCentreOfMass().minus(n.getBase())
+						.plus(CellularComponent.COMPONENT_BUFFER);
 				Point2D com2 = at.transform(com.toPoint2D(), null);
 
 				double x = com2.getX();
@@ -210,18 +217,20 @@ public class CellImagePainter implements ImagePainter {
 	 */
 	@Override
 	public BufferedImage paintRaw(int w, int h) {
-
-		BufferedImage input = ImageImporter.importFullImageTo24bit(cell.getPrimaryNucleus()).getBufferedImage();
-		originalWidth = input.getWidth();
-		originalHeight = input.getHeight();
-
 		try {
+
 			if (!isOriented) {
-				input = ImageImporter.importCroppedImageTo24bit(cell, component).getBufferedImage();
+				BufferedImage input = ImageImporter.importCroppedImageTo24bit(cell, component)
+						.getBufferedImage();
 				originalWidth = input.getWidth();
 				originalHeight = input.getHeight();
 				return scalePreservingAspect(input, w, h);
 			}
+
+			BufferedImage input = ImageImporter.importFullImageTo24bit(cell.getPrimaryNucleus())
+					.getBufferedImage();
+			originalWidth = input.getWidth();
+			originalHeight = input.getHeight();
 
 			Values vals = calcRotatedImageDimensions(originalWidth, originalHeight);
 
@@ -233,7 +242,8 @@ public class CellImagePainter implements ImagePainter {
 			BufferedImage mid = op.filter(input, null);
 
 			// Copy to a new image with white background
-			BufferedImage output = new BufferedImage(mid.getWidth(), mid.getHeight(), BufferedImage.TYPE_INT_RGB);
+			BufferedImage output = new BufferedImage(mid.getWidth(), mid.getHeight(),
+					BufferedImage.TYPE_INT_RGB);
 			Graphics2D graphics = output.createGraphics();
 			graphics.setPaint(Color.WHITE);
 			graphics.fillRect(0, 0, output.getWidth(), output.getHeight());
@@ -244,25 +254,27 @@ public class CellImagePainter implements ImagePainter {
 			Shape t = at.createTransformedShape(s);
 
 			BufferedImage img = output.getSubimage(
-					(int) Math.max(0, t.getBounds2D().getMinX() - CellularComponent.COMPONENT_BUFFER),
-					(int) Math.max(0, t.getBounds2D().getMinY() - CellularComponent.COMPONENT_BUFFER),
+					(int) Math.max(0,
+							t.getBounds2D().getMinX() - CellularComponent.COMPONENT_BUFFER),
+					(int) Math.max(0,
+							t.getBounds2D().getMinY() - CellularComponent.COMPONENT_BUFFER),
 					(int) t.getBounds2D().getWidth() + CellularComponent.COMPONENT_BUFFER * 2,
 					(int) t.getBounds2D().getHeight() + CellularComponent.COMPONENT_BUFFER * 2);
 
-			BufferedImage copyOfImage = new BufferedImage(img.getWidth(), img.getHeight(), BufferedImage.TYPE_INT_RGB);
+			BufferedImage copyOfImage = new BufferedImage(img.getWidth(), img.getHeight(),
+					BufferedImage.TYPE_INT_RGB);
 			Graphics g = copyOfImage.createGraphics();
 			g.drawImage(img, 0, 0, null);
 //			return copyOfImage;
 			return scalePreservingAspect(copyOfImage, w, h);
 		} catch (Exception e) {
 			LOGGER.log(Level.SEVERE, "Unable to paint: " + e.getMessage(), e);
+			BufferedImage input = ImageImporter.importCroppedImageTo24bit(cell, component)
+					.getBufferedImage();
+			originalWidth = input.getWidth();
+			originalHeight = input.getHeight();
+			return scalePreservingAspect(input, w, h);
 		}
-
-//		BufferedImage input = ImageImporter.importCroppedImageTo24bit(cell, component).getBufferedImage();
-//		originalWidth = input.getWidth();
-//		originalHeight = input.getHeight();
-		return input;
-//		return scalePreservingAspect(input, w, h);
 	}
 
 	/**
@@ -386,7 +398,8 @@ public class CellImagePainter implements ImagePainter {
 	 * @param maxH the maximum height
 	 * @return
 	 */
-	private AffineTransform createAspectPreservingScaleTransform(int w, int h, double maxW, double maxH) {
+	private AffineTransform createAspectPreservingScaleTransform(int w, int h, double maxW,
+			double maxH) {
 		double r = calculateAspectPreservingScaleRatio(w, h, maxW, maxH);
 		return AffineTransform.getScaleInstance(r, r);
 	}
@@ -400,15 +413,19 @@ public class CellImagePainter implements ImagePainter {
 	 * @return
 	 */
 	private BufferedImage scalePreservingAspect(BufferedImage input, double maxW, double maxH) {
-		double r = calculateAspectPreservingScaleRatio(input.getWidth(), input.getHeight(), maxW, maxH);
-		AffineTransform at = createAspectPreservingScaleTransform(input.getWidth(), input.getHeight(), maxW, maxH);
-		BufferedImage output = new BufferedImage((int) (input.getWidth() * r), (int) (input.getHeight() * r),
+		double r = calculateAspectPreservingScaleRatio(input.getWidth(), input.getHeight(), maxW,
+				maxH);
+		AffineTransform at = createAspectPreservingScaleTransform(input.getWidth(),
+				input.getHeight(), maxW, maxH);
+		BufferedImage output = new BufferedImage((int) (input.getWidth() * r),
+				(int) (input.getHeight() * r),
 				BufferedImage.TYPE_INT_ARGB);
 		return new AffineTransformOp(at, AffineTransformOp.TYPE_BICUBIC).filter(input, output);
 	}
 
 	@Override
-	public BufferedImage paintMagnified(BufferedImage smallInput, BufferedImage largeInput, int cx, int cy,
+	public BufferedImage paintMagnified(BufferedImage smallInput, BufferedImage largeInput, int cx,
+			int cy,
 			int smallRadius, int bigRadius) {
 
 		// the destination rectangle that will be painted to in the output
@@ -434,9 +451,11 @@ public class CellImagePainter implements ImagePainter {
 
 		// Find the cell border point under the cursor
 		Optional<IPoint> point = cell.getPrimaryNucleus().getBorderList().stream()
-				.map(p -> p.minus(cell.getPrimaryNucleus().getBase()).plus(CellularComponent.COMPONENT_BUFFER))
+				.map(p -> p.minus(cell.getPrimaryNucleus().getBase())
+						.plus(CellularComponent.COMPONENT_BUFFER))
 				.filter(p -> {
-					return cellX >= p.getX() - 0.4 && cellX <= p.getX() + 0.4 && cellY >= p.getY() - 0.4
+					return cellX >= p.getX() - 0.4 && cellX <= p.getX() + 0.4
+							&& cellY >= p.getY() - 0.4
 							&& cellY <= p.getY() + 0.4;
 
 				}).findFirst();
@@ -447,7 +466,8 @@ public class CellImagePainter implements ImagePainter {
 		Graphics2D g2 = output.createGraphics();
 		g2.drawImage(smallInput, 0, 0, null);
 		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-		g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+		g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
+				RenderingHints.VALUE_INTERPOLATION_BICUBIC);
 
 		// Choose the region of the large image to copy
 		g2.drawImage(largeInput, dx1, dy1, dx2, dy2, sx1, sy1, sx2, sy2, null);
@@ -464,9 +484,11 @@ public class CellImagePainter implements ImagePainter {
 
 				// Highlight the border depending on what border tags are present
 				for (OrientationMark lm : cell.getPrimaryNucleus().getOrientationMarks()) {
-					IPoint lp = cell.getPrimaryNucleus().getBorderPoint(lm).minus(cell.getPrimaryNucleus().getBase())
+					IPoint lp = cell.getPrimaryNucleus().getBorderPoint(lm)
+							.minus(cell.getPrimaryNucleus().getBase())
 							.plus(CellularComponent.COMPONENT_BUFFER);
-					if (cellX >= lp.getX() - 0.4 && cellX <= lp.getX() + 0.4 && cellY >= lp.getY() - 0.4
+					if (cellX >= lp.getX() - 0.4 && cellX <= lp.getX() + 0.4
+							&& cellY >= lp.getY() - 0.4
 							&& cellY <= lp.getY() + 0.4) {
 						g2.setColor(ColourSelecter.getColour(lm));
 					}

@@ -95,10 +95,9 @@ public class CellOutlinePanel extends AbstractCellDetailPanel
 
 	private static final String PANEL_TITLE_LBL = "Outline";
 
-//	private InteractiveCellPanel imagePanel;
 	private ExportableChartPanel chartPanel;
 
-	private GenericCheckboxPanel rotatePanel = new GenericCheckboxPanel("Rotate vertical");
+	private GenericCheckboxPanel rotatePanel = new GenericCheckboxPanel("Orient");
 	private GenericCheckboxPanel warpMeshPanel = new GenericCheckboxPanel(
 			"Warp image to consensus shape");
 
@@ -123,8 +122,8 @@ public class CellOutlinePanel extends AbstractCellDetailPanel
 		chartPanel.addChartMouseListener(this);
 		add(chartPanel, BorderLayout.CENTER);
 
-//		imagePanel = new InteractiveCellPanel(this);
-//		add(imagePanel, BorderLayout.CENTER);
+		uiController.addCellUpdatedEventListener(this);
+
 	}
 
 	private JPanel makeHeader() {
@@ -145,6 +144,12 @@ public class CellOutlinePanel extends AbstractCellDetailPanel
 		panel.add(warpMeshPanel);
 
 		return panel;
+	}
+
+	@Override
+	public void cellUpdatedEventReceived(CellUpdatedEvent event) {
+		update();
+		setAnalysing(false);
 	}
 
 	private synchronized void updateSettingsPanels() {
@@ -173,7 +178,6 @@ public class CellOutlinePanel extends AbstractCellDetailPanel
 	public synchronized void update() {
 
 		if (this.isMultipleDatasets() || !this.hasDatasets()) {
-//			imagePanel.setNull();
 			chartPanel.setChart(AbstractChartFactory.createEmptyChart());
 			return;
 		}
@@ -183,22 +187,16 @@ public class CellOutlinePanel extends AbstractCellDetailPanel
 
 		RotationMode rm = rotatePanel.isSelected() ? RotationMode.VERTICAL : RotationMode.ACTUAL;
 
-		// We want to scale the cell image to fit the panel
-		// when creating the chart
-		int w = chartPanel.getWidth();
-		int h = chartPanel.getHeight();
-
 		ChartOptions options = new ChartOptionsBuilder()
 				.setCell(cell)
 				.setDatasets(activeDataset())
 				.addCellularComponent(component).setRotationMode(rm)
 				.setShowWarp(warpMeshPanel.isSelected())
+				.setShowXAxis(false)
+				.setShowYAxis(false)
 				.build();
-		options.setInt("ImageWidth", w);
-		options.setInt("ImageHeight", h);
-		chartPanel.setChart(new OutlineChartFactory(options).makeCellOutlineChart());
 
-//		imagePanel.setCell(activeDataset(), cell, component, displayOptions);
+		chartPanel.setChart(new OutlineChartFactory(options).makeCellOutlineChart());
 
 		updateSettingsPanels();
 	}
@@ -221,46 +219,13 @@ public class CellOutlinePanel extends AbstractCellDetailPanel
 	@Override
 	protected void updateNull() {
 		chartPanel.setChart(AbstractChartFactory.createEmptyChart());
-//		imagePanel.setNull();
 		updateSettingsPanels();
 	}
 
 	@Override
 	public void refreshCache() {
 		clearCache();
-//		imagePanel.createImage();
 		this.update();
-	}
-
-//	@Override
-	public void segmentEventReceived(SegmentStartIndexUpdateEvent event) {
-
-		// Wrap in a runnable to avoid occasional hanging.
-		Runnable r = () -> {
-			try {
-
-				LOGGER.fine("Updating segment start index to " + event.index);
-				// This is a manual change, so disable any lock
-				getCellModel().getCell().getPrimaryNucleus().setLocked(false);
-
-				// Carry out the update
-				activeDataset().getCollection().getProfileManager()
-						.updateCellSegmentStartIndex(getCellModel().getCell(), event.id,
-								event.index);
-
-				// even if no lock was previously set, there should be one now a manual
-				// adjustment was made
-				getCellModel().getCell().getPrimaryNucleus().setLocked(true);
-
-				// Recache necessary charts within this panel at once
-				refreshCache();
-
-			} catch (Exception e) {
-				LOGGER.log(Loggable.STACK, "Error updating segment", e);
-			}
-		};
-		new Thread(r).start();
-
 	}
 
 	@Override
@@ -270,9 +235,6 @@ public class CellOutlinePanel extends AbstractCellDetailPanel
 
 	@Override
 	public void chartMouseClicked(ChartMouseEvent event) {
-
-		if (!activeDataset().getCollection().hasConsensus())
-			return;
 
 		// Get the mouse location on the chart
 		Rectangle2D dataArea = this.chartPanel.getScreenDataArea();
@@ -285,9 +247,11 @@ public class CellOutlinePanel extends AbstractCellDetailPanel
 
 		double range = Math.min(xAxis.getRange().getLength(), yAxis.getRange().getLength());
 		try {
+			Nucleus n = rotatePanel.isSelected()
+					? getCellModel().getCell().getPrimaryNucleus().getOrientedNucleus()
+					: getCellModel().getCell().getPrimaryNucleus();
 
 			// Get the closest border point, and set the overlay if close enough
-			Nucleus n = activeDataset().getCollection().getConsensus();
 
 			IPoint clicked = new FloatPoint(x, y);
 
@@ -310,15 +274,11 @@ public class CellOutlinePanel extends AbstractCellDetailPanel
 	private synchronized JPopupMenu createPopup(IPoint point) {
 		JPopupMenu popupMenu = new JPopupMenu("Popup");
 
-//		if (!activeDataset().isRoot()) {
-//			popupMenu.add("Cannot edit a child dataset");
-//		} else {
 		addSegmentsToPopup(popupMenu, point);
 
 		popupMenu.addSeparator();
 
 		addLandmarksToPopup(popupMenu, point);
-//		}
 
 		return popupMenu;
 	}
@@ -331,8 +291,9 @@ public class CellOutlinePanel extends AbstractCellDetailPanel
 	 */
 	private void addSegmentsToPopup(JPopupMenu popupMenu, IPoint point) {
 		try {
-
-			Nucleus n = activeDataset().getCollection().getConsensus();
+			Nucleus n = rotatePanel.isSelected()
+					? getCellModel().getCell().getPrimaryNucleus().getOrientedNucleus()
+					: getCellModel().getCell().getPrimaryNucleus();
 
 			// Indexes in the consensus
 			int rawIndex = n.getBorderIndex(point);
@@ -340,12 +301,6 @@ public class CellOutlinePanel extends AbstractCellDetailPanel
 
 			// Get the index of the clicked point in the RP-indexed consensus profile
 			int index = n.wrapIndex(rawIndex - rpIndex);
-
-			// Convert to the index in the dataset median profile (may have different
-			// length)
-			double fIndex = index / (float) n.getBorderLength();
-			int medianIndex = (int) (activeDataset().getCollection().getMedianArrayLength()
-					* fIndex);
 
 			// Get the relevant segments
 			IProfileSegment seg = n.getProfile(ProfileType.ANGLE).getSegmentContaining(rawIndex);
@@ -359,11 +314,12 @@ public class CellOutlinePanel extends AbstractCellDetailPanel
 
 			prevItem.addActionListener(e -> {
 				setAnalysing(true);
-				LOGGER.fine(
-						String.format("Updating segment %s start to %d", seg.getID(), medianIndex));
 				UserActionController.getInstance().segmentStartIndexUpdateEventReceived(
-						new SegmentStartIndexUpdateEvent(this, activeDataset(), seg.getID(),
-								medianIndex));
+						new SegmentStartIndexUpdateEvent(this,
+								activeDataset(),
+								getCellModel().getCell(),
+								seg.getID(),
+								index));
 			});
 			popupMenu.add(prevItem);
 
@@ -375,12 +331,13 @@ public class CellOutlinePanel extends AbstractCellDetailPanel
 			nextItem.setBorderPainted(true);
 
 			nextItem.addActionListener(e -> {
-				LOGGER.fine(String.format("Updating segment %s start to %d", next.getID(),
-						medianIndex));
 				setAnalysing(true);
 				UserActionController.getInstance().segmentStartIndexUpdateEventReceived(
-						new SegmentStartIndexUpdateEvent(this, activeDataset(), next.getID(),
-								medianIndex));
+						new SegmentStartIndexUpdateEvent(this,
+								activeDataset(),
+								getCellModel().getCell(),
+								next.getID(),
+								index));
 
 			});
 			popupMenu.add(nextItem);
@@ -397,7 +354,9 @@ public class CellOutlinePanel extends AbstractCellDetailPanel
 	 */
 	private void addLandmarksToPopup(JPopupMenu popupMenu, IPoint point) {
 		try {
-			Nucleus n = activeDataset().getCollection().getConsensus();
+			Nucleus n = rotatePanel.isSelected()
+					? getCellModel().getCell().getPrimaryNucleus().getOrientedNucleus()
+					: getCellModel().getCell().getPrimaryNucleus();
 
 			// Indexes in the consensus
 			int rawIndex = n.getBorderIndex(point);
@@ -405,12 +364,6 @@ public class CellOutlinePanel extends AbstractCellDetailPanel
 
 			// Get the index of the clicked point in the RP-indexed consensus profile
 			int index = n.wrapIndex(rawIndex - rpIndex);
-
-			// Convert to the index in the dataset median profile (may have different
-			// length)
-			double fIndex = index / (float) n.getBorderLength();
-			int medianIndex = (int) (activeDataset().getCollection().getMedianArrayLength()
-					* fIndex);
 
 			List<Landmark> tags = activeDataset().getCollection().getProfileCollection()
 					.getLandmarks();
@@ -433,7 +386,7 @@ public class CellOutlinePanel extends AbstractCellDetailPanel
 				item.addActionListener(a -> {
 					setAnalysing(true);
 					UserActionController.getInstance().landmarkUpdateEventReceived(
-							new LandmarkUpdateEvent(this, activeDataset(), lm, medianIndex));
+							new LandmarkUpdateEvent(this, getCellModel().getCell(), lm, index));
 				});
 				popupMenu.add(item);
 				popupMenu.add(Box.createVerticalStrut(2)); // stop borders touching
@@ -470,7 +423,9 @@ public class CellOutlinePanel extends AbstractCellDetailPanel
 		try {
 
 			// Get the closest border point, and set the overlay if close enough
-			Nucleus n = this.getCellModel().getCell().getPrimaryNucleus();
+			Nucleus n = rotatePanel.isSelected()
+					? getCellModel().getCell().getPrimaryNucleus().getOrientedNucleus()
+					: getCellModel().getCell().getPrimaryNucleus();
 
 			IPoint clicked = new FloatPoint(x, y);
 
@@ -496,9 +451,6 @@ public class CellOutlinePanel extends AbstractCellDetailPanel
 
 	private void setLandmarkHighlight(ChartMouseEvent event) {
 
-		if (!activeDataset().getCollection().hasConsensus())
-			return;
-
 		// Get the mouse location on the chart
 		Rectangle2D dataArea = this.chartPanel.getScreenDataArea();
 		JFreeChart chart = event.getChart();
@@ -514,7 +466,9 @@ public class CellOutlinePanel extends AbstractCellDetailPanel
 		try {
 
 			// Get the closest landmarks, and set the overlay if close enough
-			Nucleus n = this.getCellModel().getCell().getPrimaryNucleus();
+			Nucleus n = rotatePanel.isSelected()
+					? getCellModel().getCell().getPrimaryNucleus().getOrientedNucleus()
+					: getCellModel().getCell().getPrimaryNucleus();
 
 			IPoint clicked = new FloatPoint(x, y);
 			lmOverlay.clearShapes();
@@ -551,8 +505,8 @@ public class CellOutlinePanel extends AbstractCellDetailPanel
 				-layout.getBounds().getCenterY()));
 
 		lmOverlay.addShape(
-				new ShapeOverlayObject(layout.getOutline(txt), new BasicStroke(0), Color.DARK_GRAY,
-						Color.DARK_GRAY));
+				new ShapeOverlayObject(layout.getOutline(txt), new BasicStroke(0), Color.BLACK,
+						Color.BLUE));
 
 	}
 }

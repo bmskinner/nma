@@ -6,9 +6,11 @@ import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nma.components.cells.ICell;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.datasets.IClusterGroup;
 import com.bmskinner.nma.components.workspaces.IWorkspace;
+import com.bmskinner.nma.gui.events.CellUpdatedEventListener.CellUpdatedEvent;
 
 /**
  * Control dispatch of updates to UI panels
@@ -41,6 +43,8 @@ public class UIController {
 	private final List<FilePathUpdatedListener> filePathUpdatedListeners = new ArrayList<>();
 
 	private final List<ClusterGroupsUpdatedListener> clusterGroupsUpdatedListeners = new ArrayList<>();
+
+	private final List<CellUpdatedEventListener> cellUpdatedListeners = new ArrayList<>();
 
 	private UIController() {
 	}
@@ -212,6 +216,15 @@ public class UIController {
 	public void fireClusterGroupAdded(@NonNull IAnalysisDataset d, IClusterGroup g) {
 		for (ClusterGroupsUpdatedListener l : clusterGroupsUpdatedListeners)
 			l.clusterGroupAdded(d, g);
+	}
+
+	public void addCellUpdatedEventListener(CellUpdatedEventListener l) {
+		cellUpdatedListeners.add(l);
+	}
+
+	public void fireCellUpdatedEvent(@NonNull IAnalysisDataset d, ICell c) {
+		for (CellUpdatedEventListener l : cellUpdatedListeners)
+			l.cellUpdatedEventReceived(new CellUpdatedEvent(this, c, d));
 	}
 
 }
