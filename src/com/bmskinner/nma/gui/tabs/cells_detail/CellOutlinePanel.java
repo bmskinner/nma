@@ -64,7 +64,6 @@ import com.bmskinner.nma.gui.RotationMode;
 import com.bmskinner.nma.gui.components.ColourSelecter;
 import com.bmskinner.nma.gui.components.panels.GenericCheckboxPanel;
 import com.bmskinner.nma.gui.events.CellUpdatedEventListener;
-import com.bmskinner.nma.gui.events.LandmarkUpdateEvent;
 import com.bmskinner.nma.gui.events.SegmentStartIndexUpdateEvent;
 import com.bmskinner.nma.gui.events.SwatchUpdatedListener;
 import com.bmskinner.nma.gui.events.UserActionController;
@@ -295,15 +294,16 @@ public class CellOutlinePanel extends AbstractCellDetailPanel
 					? getCellModel().getCell().getPrimaryNucleus().getOrientedNucleus()
 					: getCellModel().getCell().getPrimaryNucleus();
 
-			// Indexes in the consensus
+			// Indexes in the nucleus.
 			int rawIndex = n.getBorderIndex(point);
 			int rpIndex = n.getBorderIndex(OrientationMark.REFERENCE);
 
-			// Get the index of the clicked point in the RP-indexed consensus profile
+			// Get the index of the clicked point in the RP-indexed profile
 			int index = n.wrapIndex(rawIndex - rpIndex);
 
 			// Get the relevant segments
-			IProfileSegment seg = n.getProfile(ProfileType.ANGLE).getSegmentContaining(rawIndex);
+			IProfileSegment seg = n.getProfile(ProfileType.ANGLE).getSegmentContaining(index);
+//			LOGGER.fine("Index " + index + " Clicked in segment " + seg);
 			IProfileSegment prev = seg.prevSegment();
 			IProfileSegment next = seg.nextSegment();
 
@@ -319,7 +319,7 @@ public class CellOutlinePanel extends AbstractCellDetailPanel
 								activeDataset(),
 								getCellModel().getCell(),
 								seg.getID(),
-								index));
+								index - 1)); // Subtract 1 to adjust for drawing overlaps
 			});
 			popupMenu.add(prevItem);
 
@@ -337,7 +337,7 @@ public class CellOutlinePanel extends AbstractCellDetailPanel
 								activeDataset(),
 								getCellModel().getCell(),
 								next.getID(),
-								index));
+								index - 1));
 
 			});
 			popupMenu.add(nextItem);
@@ -360,18 +360,11 @@ public class CellOutlinePanel extends AbstractCellDetailPanel
 
 			// Indexes in the consensus
 			int rawIndex = n.getBorderIndex(point);
-			int rpIndex = n.getBorderIndex(OrientationMark.REFERENCE);
-
-			// Get the index of the clicked point in the RP-indexed consensus profile
-			int index = n.wrapIndex(rawIndex - rpIndex);
 
 			List<Landmark> tags = activeDataset().getCollection().getProfileCollection()
 					.getLandmarks();
 
 			Collections.sort(tags);
-
-			Landmark rp = activeDataset().getCollection().getProfileCollection()
-					.getLandmark(OrientationMark.REFERENCE);
 
 			for (Landmark lm : tags) {
 
@@ -384,9 +377,13 @@ public class CellOutlinePanel extends AbstractCellDetailPanel
 				item.setOpaque(true);
 
 				item.addActionListener(a -> {
-					setAnalysing(true);
-					UserActionController.getInstance().landmarkUpdateEventReceived(
-							new LandmarkUpdateEvent(this, getCellModel().getCell(), lm, index));
+					try {
+						getCellModel().getCell().getPrimaryNucleus().setLandmark(lm, rawIndex);
+						update();
+					} catch (IndexOutOfBoundsException | MissingProfileException
+							| MissingLandmarkException | ProfileException e) {
+						LOGGER.log(Loggable.STACK, "Cannot update landmark", e);
+					}
 				});
 				popupMenu.add(item);
 				popupMenu.add(Box.createVerticalStrut(2)); // stop borders touching

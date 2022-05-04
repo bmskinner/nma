@@ -86,7 +86,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 	private final List<IProfileSegment> segments = new ArrayList<>();
 
 	/** The indexes of landmarks in the profiles and border list */
-	private Map<Landmark, Integer> profileLandmarks = new HashMap<>();
+	protected Map<Landmark, Integer> profileLandmarks = new HashMap<>();
 
 	/** Store the landmarks to be used for orientation */
 	protected Map<@NonNull OrientationMark, Landmark> orientationMarks = new EnumMap<>(

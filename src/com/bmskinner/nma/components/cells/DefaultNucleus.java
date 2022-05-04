@@ -32,6 +32,7 @@ import com.bmskinner.nma.components.MissingLandmarkException;
 import com.bmskinner.nma.components.generic.IPoint;
 import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.profiles.IProfileSegment;
+import com.bmskinner.nma.components.profiles.Landmark;
 import com.bmskinner.nma.components.profiles.MissingProfileException;
 import com.bmskinner.nma.components.profiles.ProfileException;
 import com.bmskinner.nma.components.profiles.UnprofilableObjectException;
@@ -203,6 +204,17 @@ public class DefaultNucleus extends ProfileableCellularComponent
 		// If any of the updated landmarks affect
 		// the orientation, clear the cached data
 		if (orientationMarks.containsKey(lm))
+			orientedNucleus = null;
+	}
+
+	@Override
+	public void setLandmark(@NonNull Landmark lm, int newLmIndex)
+			throws MissingProfileException, MissingLandmarkException, ProfileException {
+		super.setLandmark(lm, newLmIndex);
+
+		// In case any of the updated landmarks affect
+		// the orientation, clear the cached data
+		if (profileLandmarks.containsKey(lm))
 			orientedNucleus = null;
 	}
 

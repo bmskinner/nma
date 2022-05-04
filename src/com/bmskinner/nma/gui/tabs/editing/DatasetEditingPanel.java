@@ -564,7 +564,7 @@ public class DatasetEditingPanel extends ChartDetailPanel
 						String.format("Updating segment %s start to %d", seg.getID(), medianIndex));
 				UserActionController.getInstance().segmentStartIndexUpdateEventReceived(
 						new SegmentStartIndexUpdateEvent(this, activeDataset(), seg.getID(),
-								medianIndex));
+								medianIndex - 1));
 			});
 			popupMenu.add(prevItem);
 
@@ -581,7 +581,7 @@ public class DatasetEditingPanel extends ChartDetailPanel
 				setAnalysing(true);
 				UserActionController.getInstance().segmentStartIndexUpdateEventReceived(
 						new SegmentStartIndexUpdateEvent(this, activeDataset(), next.getID(),
-								medianIndex));
+								medianIndex - 1));
 
 			});
 			popupMenu.add(nextItem);
@@ -618,9 +618,6 @@ public class DatasetEditingPanel extends ChartDetailPanel
 
 			Collections.sort(tags);
 
-			Landmark rp = activeDataset().getCollection().getProfileCollection()
-					.getLandmark(OrientationMark.REFERENCE);
-
 			for (Landmark lm : tags) {
 
 				// Colour the menu item by tag colour
@@ -634,7 +631,7 @@ public class DatasetEditingPanel extends ChartDetailPanel
 				item.addActionListener(a -> {
 					setAnalysing(true);
 					UserActionController.getInstance().landmarkUpdateEventReceived(
-							new LandmarkUpdateEvent(this, activeDataset(), lm, medianIndex));
+							new LandmarkUpdateEvent(this, activeDataset(), lm, medianIndex - 1));
 				});
 				popupMenu.add(item);
 				popupMenu.add(Box.createVerticalStrut(2)); // stop borders touching
