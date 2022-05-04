@@ -211,10 +211,6 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
 	public Set<UUID> getNuclearSignalGroups() {
 		Set<UUID> result = new HashSet<>();
 		for (String s : detectionOptions.keySet()) {
-			if (s.equals(CellularComponent.NUCLEUS) || s.equals(CellularComponent.CYTOPLASM)
-					|| s.equalsIgnoreCase(CellularComponent.SPERM_TAIL))
-				continue;
-
 			try {
 				if (s.startsWith(SIGNAL_GROUP)) {
 					UUID id = UUID.fromString(s.replace(SIGNAL_GROUP, ""));
@@ -229,14 +225,12 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
 
 	@Override
 	public Optional<HashOptions> getNuclearSignalOptions(@NonNull UUID signalGroup) {
-		return Optional.ofNullable(
-				getDetectionOptions(SIGNAL_GROUP + signalGroup.toString()).orElse(null));
+		return getDetectionOptions(SIGNAL_GROUP + signalGroup.toString());
 	}
 
 	@Override
-	public boolean hasSignalDetectionOptions(@NonNull UUID signalGroup) {
-		String key = SIGNAL_GROUP + signalGroup.toString();
-		return hasDetectionOptions(key);
+	public boolean hasNuclearSignalDetectionOptions(@NonNull UUID signalGroup) {
+		return hasDetectionOptions(SIGNAL_GROUP + signalGroup.toString());
 	}
 
 	@Override

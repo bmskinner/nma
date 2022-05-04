@@ -237,11 +237,14 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 	}
 
 	private void mergeSignalOptions(IAnalysisDataset newDataset) throws MissingOptionException {
+
+		if (pairedSignalGroups == null)
+			return;
+
 		// For each set of mergeable signals, make a new signal group
 		for (UUID newSignalId : pairedSignalGroups.getMergedSignalGroups()) {
 
-			HashOptions mergedOptions = new OptionsBuilder()
-					.withValue(HashOptions.SIGNAL_GROUP_ID, newSignalId.toString()).build();
+			HashOptions mergedOptions = new OptionsBuilder().build();
 
 			// Get the first signal options
 			List<DatasetSignalId> ids = pairedSignalGroups.get(newSignalId);
@@ -266,6 +269,9 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 				if (canAdd)
 					mergedOptions.set(s, result);
 			}
+
+			// Ensure the new options have the correct id
+			mergedOptions.set(HashOptions.SIGNAL_GROUP_ID, newSignalId.toString());
 
 			// Add the final options to the dataset
 			newDataset.getAnalysisOptions().orElseThrow(MissingOptionException::new)

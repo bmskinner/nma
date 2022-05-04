@@ -192,7 +192,7 @@ public interface IAnalysisOptions extends XmlSerializable {
 	 * @param type the name to check
 	 * @return present or not
 	 */
-	boolean hasSignalDetectionOptions(@NonNull UUID signalGroup);
+	boolean hasNuclearSignalDetectionOptions(@NonNull UUID signalGroup);
 
 	/**
 	 * Get the time the analysis was conducted
