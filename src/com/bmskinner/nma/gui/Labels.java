@@ -125,6 +125,7 @@ public class Labels {
 		public static final String EXPORT_RULESETS = "Landmark rulesets";
 		public static final String EXPORT_XML_DATASET = "XML format dataset";
 		public static final String EXPORT_CELL_IMAGES = "Single cell images";
+		public static final String EXPORT_CONSENSUS = "Consensus nuclei as SVG";
 	}
 
 	/**

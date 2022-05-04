@@ -46,6 +46,7 @@ import com.bmskinner.nma.components.Version;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.measure.MeasurementScale;
 import com.bmskinner.nma.components.workspaces.IWorkspace;
+import com.bmskinner.nma.core.DatasetListManager;
 import com.bmskinner.nma.core.GlobalOptions;
 import com.bmskinner.nma.core.ThreadManager;
 import com.bmskinner.nma.gui.ContextEnabled;
@@ -473,6 +474,16 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 						| ContextEnabled.ACTIVE_ON_SINGLE_OBJECT));
 
 		exportMenu.addSeparator();
+
+		JMenuItem consensus = fact.new ContextualMenuItem(Labels.Populations.EXPORT_CONSENSUS, "",
+				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_CHILD_DATASET
+						| ContextEnabled.ACTIVE_ON_MULTI_OBJECTS
+						| ContextEnabled.ACTIVE_ON_SINGLE_OBJECT,
+				null);
+		consensus.addActionListener(e -> UserActionController.getInstance()
+				.consensusSVGExportRequestReceived(
+						DatasetListManager.getInstance().getSelectedDatasets()));
+		exportMenu.add(consensus);
 
 		exportMenu.add(fact.makeItem(Labels.Populations.EXPORT_CELL_IMAGES,
 				UserActionEvent.EXPORT_SINGLE_CELL_IMAGES,

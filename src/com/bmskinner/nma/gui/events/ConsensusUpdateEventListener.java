@@ -74,4 +74,11 @@ public interface ConsensusUpdateEventListener {
 	 * @param dataset
 	 */
 	void consensusTranslationResetReceived(IAnalysisDataset dataset);
+
+	/**
+	 * Alert the listener that consensus nuclei should be exported
+	 * 
+	 * @param datasets
+	 */
+	void consensusSVGExportRequestReceived(List<IAnalysisDataset> datasets);
 }

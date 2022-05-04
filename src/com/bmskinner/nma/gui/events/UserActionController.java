@@ -15,7 +15,9 @@ import com.bmskinner.nma.components.MissingComponentException;
 import com.bmskinner.nma.components.MissingLandmarkException;
 import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
+import com.bmskinner.nma.components.datasets.ICellCollection;
 import com.bmskinner.nma.components.generic.IPoint;
+import com.bmskinner.nma.components.measure.MeasurementScale;
 import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.options.IAnalysisOptions;
 import com.bmskinner.nma.components.profiles.Landmark;
@@ -72,6 +74,8 @@ import com.bmskinner.nma.gui.dialogs.collections.ManualCurationDialog;
 import com.bmskinner.nma.gui.runnables.MorphologyAnalysis;
 import com.bmskinner.nma.gui.runnables.SaveAllDatasets;
 import com.bmskinner.nma.io.GenericFileImporter;
+import com.bmskinner.nma.io.Io;
+import com.bmskinner.nma.io.SVGWriter;
 
 /**
  * Controller for all user actions
@@ -583,10 +587,18 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 	}
 
 	@Override
-	public void landmarkUpdateEventReceived(LandmarkUpdateEvent event) {
-		if (event.dataset == null)
-			return;
+	public void consensusSVGExportRequestReceived(List<IAnalysisDataset> datasets) {
+		exportConsensusNuclei(datasets);
+	}
 
+	@Override
+	public void landmarkUpdateEventReceived(LandmarkUpdateEvent event) {
+		if (event.dataset != null)
+			updateLandmarkInDataset(event);
+
+	}
+
+	private void updateLandmarkInDataset(LandmarkUpdateEvent event) {
 		IAnalysisDataset d = event.dataset;
 
 		Landmark rp = d.getCollection().getRuleSetCollection()
@@ -627,7 +639,6 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 		} else {
 			UIController.getInstance().fireProfilesUpdated(d);
 		}
-
 	}
 
 	@Override
@@ -637,7 +648,8 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 			SegmentationHandler sh = new SegmentationHandler(event.dataset);
 			sh.updateSegmentStartIndexAction(event.id, event.index);
 			userActionEventReceived(
-					new UserActionEvent(this, UserActionEvent.APPLY_MEDIAN_TO_NUCLEI));
+					new UserActionEvent(this, UserActionEvent.APPLY_MEDIAN_TO_NUCLEI,
+							event.dataset));
 		}
 
 		if (event.isCell()) {
@@ -645,9 +657,10 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 				event.dataset.getCollection().getProfileManager()
 						.updateCellSegmentStartIndex(event.cell, event.id, event.index);
 
-				UIController.getInstance().fireCellUpdatedEvent(event.dataset, event.cell);
 			} catch (ProfileException | MissingComponentException e) {
-				LOGGER.warning("Cannot update segment start index");
+				LOGGER.warning("Cannot update this segment start index");
+			} finally {
+				UIController.getInstance().fireCellUpdatedEvent(event.dataset, event.cell);
 			}
 		}
 
@@ -724,6 +737,48 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 					.execute(new ImportWorkflowAction(acceptor, f.file()));
 		}
 
+	}
+
+	private void exportConsensusNuclei(List<IAnalysisDataset> datasets) {
+
+		if (datasets.isEmpty())
+			return;
+
+		if (datasets.stream().map(IAnalysisDataset::getCollection)
+				.noneMatch(ICellCollection::hasConsensus))
+			return;
+
+		String defaultFileName = datasets.size() > 1
+				? "Outlines"
+				: datasets.get(0).getName();
+		File defaultFolder = IAnalysisDataset.commonPathOfFiles(datasets);
+
+		try {
+			File exportFile = new DefaultInputSupplier().requestFileSave(defaultFolder,
+					defaultFileName,
+					Io.SVG_FILE_EXTENSION_NODOT);
+
+			// If the file exists, confirm before overwriting
+			if (exportFile.exists()) {
+				if (!new DefaultInputSupplier().requestApproval("Overwrite existing file?",
+						"Confirm overwrite"))
+					return;
+			}
+
+			SVGWriter wr = new SVGWriter(exportFile);
+
+			String[] scaleChoices = new String[] { MeasurementScale.MICRONS.toString(),
+					MeasurementScale.PIXELS.toString() };
+
+			int scaleChoice = new DefaultInputSupplier().requestOption(scaleChoices,
+					"Choose scale");
+
+			MeasurementScale scale = scaleChoice == 0 ? MeasurementScale.MICRONS
+					: MeasurementScale.PIXELS;
+			wr.exportConsensusOutlines(datasets, scale);
+		} catch (RequestCancelledException e) {
+			// User cancelled
+		}
 	}
 
 }
