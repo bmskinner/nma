@@ -249,7 +249,7 @@ public class ImageAnnotator extends AbstractImageFilterer {
 
 		// add an adjustment for the buffer, and for the location within the nucleus
 
-		IPoint base = shell.getSource().getBase().plus(Imageable.COMPONENT_BUFFER).minus(diff);
+		IPoint base = shell.getSource().getBase().minus(diff);
 
 		roi.setLocation(base.getX(), base.getY());
 		annotateRoi(roi, colour, 1);
@@ -653,7 +653,7 @@ public class ImageAnnotator extends AbstractImageFilterer {
 			List<INuclearSignal> signals = signalCollection.getSignals(signalId);
 
 			for (INuclearSignal s : signals) {
-				IPoint base = s.getBase().plus(Imageable.COMPONENT_BUFFER);
+				IPoint base = s.getBase();
 
 				FloatPolygon p = s.toPolygon();
 				PolygonRoi roi = new PolygonRoi(p, PolygonRoi.POLYGON);

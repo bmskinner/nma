@@ -148,9 +148,9 @@ public class ShellOverviewDialog extends AbstractCellCollectionDialog {
 		ImageProcessor ip;
 
 		if (c.hasCytoplasm()) {
-			ip = ImageImporter.importCroppedImageTo24bit(c.getCytoplasm());
+			ip = ImageImporter.importFullImageTo24bit(c.getCytoplasm());
 		} else {
-			ip = ImageImporter.importCroppedImageTo24bit(c.getPrimaryNucleus());
+			ip = ImageImporter.importFullImageTo24bit(c.getPrimaryNucleus());
 		}
 
 		if (!dataset.getCollection().getSignalManager().hasShellResult())
@@ -188,7 +188,7 @@ public class ShellOverviewDialog extends AbstractCellCollectionDialog {
 			}
 		}
 
-		ip = an.toProcessor();
+		ip = an.crop(c).toProcessor();
 
 		return ip;
 	}
