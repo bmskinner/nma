@@ -196,11 +196,11 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 		List<ComponentOutlineDataset> result = new ArrayList<>();
 		try {
 
-			Nucleus nucleus = cell.getPrimaryNucleus();
+			Nucleus n = cell.getPrimaryNucleus();
 
-			for (UUID signalGroup : nucleus.getSignalCollection().getSignalGroupIds()) {
+			for (UUID signalGroup : n.getSignalCollection().getSignalGroupIds()) {
 
-				if (!nucleus.getSignalCollection().hasSignal(signalGroup)) {
+				if (!n.getSignalCollection().hasSignal(signalGroup)) {
 					continue;
 				}
 
@@ -210,7 +210,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 					continue;
 
 				if (group.get().isVisible()) {
-					for (INuclearSignal signal : nucleus.getSignalCollection().getSignals(signalGroup)) {
+					for (INuclearSignal signal : n.getSignalCollection().getSignals(signalGroup)) {
 						result.add(new ComponentOutlineDataset(signal, false, options.getScale()));
 					}
 				}

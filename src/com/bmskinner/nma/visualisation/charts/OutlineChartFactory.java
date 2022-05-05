@@ -35,7 +35,6 @@ import org.jfree.chart.annotations.XYTextAnnotation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.chart.ui.Layer;
-import org.jfree.data.xy.DefaultXYDataset;
 
 import com.bmskinner.nma.components.MissingLandmarkException;
 import com.bmskinner.nma.components.cells.ComponentCreationException;
@@ -54,7 +53,6 @@ import com.bmskinner.nma.components.mesh.MeshImageCreationException;
 import com.bmskinner.nma.components.mesh.MeshVertex;
 import com.bmskinner.nma.components.mesh.UncomparableMeshImageException;
 import com.bmskinner.nma.components.profiles.IProfileSegment;
-import com.bmskinner.nma.components.profiles.Landmark;
 import com.bmskinner.nma.components.profiles.MissingProfileException;
 import com.bmskinner.nma.components.profiles.ProfileException;
 import com.bmskinner.nma.components.profiles.ProfileType;
@@ -72,6 +70,7 @@ import com.bmskinner.nma.visualisation.datasets.ComponentOutlineDataset;
 import com.bmskinner.nma.visualisation.datasets.NuclearSignalXYDataset;
 import com.bmskinner.nma.visualisation.datasets.NucleusDatasetCreator;
 import com.bmskinner.nma.visualisation.datasets.NucleusMeshXYDataset;
+import com.bmskinner.nma.visualisation.datasets.PointDataset;
 import com.bmskinner.nma.visualisation.options.ChartOptions;
 
 import ij.process.ImageProcessor;
@@ -199,6 +198,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 				}
 			}
 		}
+		applyDefaultAxisOptions(chart);
 		return chart;
 	}
 
@@ -438,37 +438,37 @@ public class OutlineChartFactory extends AbstractChartFactory {
 
 		try {
 			// Add landmark locations
-			DefaultXYDataset landmarkData = new DefaultXYDataset();
+			PointDataset lmData = new PointDataset();
 
 			Nucleus n = RotationMode.VERTICAL.equals(options.getRotateMode())
 					? options.getCell().getPrimaryNucleus().getOrientedNucleus()
 					: options.getCell().getPrimaryNucleus();
 
-			for (OrientationMark om : n.getOrientationMarks()) {
-
-				// Point at the landmark coordinate
-				double[][] data = new double[2][1];
-				data[0][0] = n.getBorderPoint(om).getX();
-				data[1][0] = n.getBorderPoint(om).getY();
-				Landmark l = n.getLandmark(om);
-				landmarkData.addSeries(l.toString(), data);
-			}
+			for (OrientationMark om : n.getOrientationMarks())
+				lmData.addPoint(n.getLandmark(om).toString(), n.getBorderPoint(om));
 
 			int lmDataIndex = plot.getDatasetCount() + 1;
-			plot.setDataset(lmDataIndex, landmarkData);
+			plot.setDataset(lmDataIndex, lmData);
 
-			// Set the renderer for landmarks
-			XYLineAndShapeRenderer lmRend = new XYLineAndShapeRenderer();
-			for (int lmSeries = 0; lmSeries < landmarkData.getSeriesCount(); lmSeries++) {
-				lmRend.setSeriesLinesVisible(lmSeries, false);
-				lmRend.setSeriesShapesVisible(lmSeries, true);
-				lmRend.setSeriesVisibleInLegend(lmSeries, Boolean.FALSE);
-				lmRend.setSeriesStroke(lmSeries, new BasicStroke(3));
-				lmRend.setSeriesPaint(lmSeries, Color.GRAY);
-				lmRend.setSeriesShape(lmSeries, ChartComponents.DEFAULT_POINT_SHAPE);
-			}
+			// Add nucleus CoM
+			PointDataset ncomData = new PointDataset();
+			ncomData.addPoint(n.getNameAndNumber(), n.getCentreOfMass());
+			int ncomDataIndex = plot.getDatasetCount() + 1;
+			plot.setDataset(ncomDataIndex, ncomData);
 
-			plot.setRenderer(lmDataIndex, lmRend);
+			// Add signal CoMs
+			PointDataset comData = new PointDataset();
+			for (INuclearSignal s : n.getSignalCollection().getAllSignals())
+				comData.addPoint(s.getID().toString(), s.getCentreOfMass());
+
+			int comDataIndex = plot.getDatasetCount() + 1;
+			plot.setDataset(plot.getDatasetCount() + 1, comData);
+
+			// Set renderers
+			plot.setRenderer(lmDataIndex, lmData.getRenderer(Color.GRAY));
+			plot.setRenderer(ncomDataIndex, ncomData.getRenderer(Color.PINK));
+			plot.setRenderer(comDataIndex, comData.getRenderer(Color.RED));
+
 		} catch (Exception e) {
 			return createErrorChart();
 		}

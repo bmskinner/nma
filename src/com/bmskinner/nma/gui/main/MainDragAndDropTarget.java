@@ -62,14 +62,17 @@ public class MainDragAndDropTarget extends DropTarget {
 				}
 
 				for (File f : fileList) {
-					LOGGER.fine("Checking dropped file");
-					UserActionController.getInstance()
-							.fileImportRequested(new FileImportEvent(this, f, null, null));
 
-					if (f.isDirectory())
+					if (f.isDirectory()) {
 						UserActionController.getInstance().userActionEventReceived(
 								new UserActionEvent(this,
 										UserActionEvent.NEW_ANALYSIS_PREFIX + f.getAbsolutePath()));
+					} else {
+						LOGGER.fine("Checking dropped file");
+						UserActionController.getInstance()
+								.fileImportRequested(new FileImportEvent(this, f, null, null));
+					}
+
 				}
 			}
 

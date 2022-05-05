@@ -201,6 +201,8 @@ public class SignalConsensusPanel extends ChartDetailPanel
 				.setDatasets(getDatasets())
 				.setShowWarp(false)
 				.setTarget(chartPanel)
+				.setShowXAxis(true)
+				.setShowYAxis(true)
 				.setShowAnnotations(isShowAnnotations).build();
 
 		setChart(options);

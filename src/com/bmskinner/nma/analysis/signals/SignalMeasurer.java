@@ -62,10 +62,6 @@ public class SignalMeasurer {
 		IPoint com = oriented.getCentreOfMass();
 		IPoint p = new FloatPoint(com.getX(), com.getY() - 10);
 
-//		IPoint p = oriented.hasLandmark(Landmark.ORIENTATION_POINT)
-//				? oriented.getBorderPoint(Landmark.ORIENTATION_POINT)
-//				: oriented.getBorderPoint(OrientationMark.REFERENCE);
-
 		ISignalCollection sc = n.getSignalCollection();
 		ISignalCollection sco = oriented.getSignalCollection();
 
@@ -79,14 +75,15 @@ public class SignalMeasurer {
 
 				for (INuclearSignal s : sc.getSignals(signalGroup)) {
 
-					INuclearSignal s1 = sso.stream().filter(ss -> ss.getID().equals(s.getID())).findFirst().get();
+					INuclearSignal s1 = sso.stream().filter(ss -> ss.getID().equals(s.getID()))
+							.findFirst().get();
 
 					// Measure angle in the oriented signal, than save the measurement in the real
 					// signal
+					double angle = oriented.getCentreOfMass().findAbsoluteAngle(p,
+							s1.getCentreOfMass());
 
-					double angle = 360 - oriented.getCentreOfMass().findAbsoluteAngle(p, s1.getCentreOfMass());
-//					LOGGER.fine("Nucleus " + n.getNameAndNumber() + "CoM\t" + oriented.getCentreOfMass()
-//							+ "\tsignal CoM\t" + s1.getCentreOfMass() + "\tversus\t" + p + "\t: angle " + angle);
+//					LOGGER.fine(n.getNameAndNumber() + ": " + angle);
 					s.setMeasurement(Measurement.ANGLE, angle);
 				}
 			}
@@ -139,7 +136,8 @@ public class SignalMeasurer {
 					double x = n.getBorderPoint(j).getX();
 					double y = n.getBorderPoint(j).getY();
 					double yOnLine = eq.getY(x);
-					double distanceToSignal = n.getBorderPoint(j).getLengthTo(signal.getCentreOfMass()); // fetch
+					double distanceToSignal = n.getBorderPoint(j)
+							.getLengthTo(signal.getCentreOfMass()); // fetch
 
 					double deltaY = Math.abs(y - yOnLine);
 					// find the point closest to the line; this could find
@@ -154,7 +152,8 @@ public class SignalMeasurer {
 				}
 				IPoint borderPoint = n.getBorderPoint(minDeltaYIndex);
 				double nucleusCoMToBorder = borderPoint.getLengthTo(n.getCentreOfMass());
-				double signalCoMToNucleusCoM = n.getCentreOfMass().getLengthTo(signal.getCentreOfMass());
+				double signalCoMToNucleusCoM = n.getCentreOfMass()
+						.getLengthTo(signal.getCentreOfMass());
 				double fractionalDistance = Math.min(signalCoMToNucleusCoM / nucleusCoMToBorder, 1);
 				signal.setMeasurement(Measurement.FRACT_DISTANCE_FROM_COM, fractionalDistance);
 			}
@@ -166,7 +165,8 @@ public class SignalMeasurer {
 	 * Go through the signals in the nucleus, and find the point on the nuclear ROI
 	 * that is closest to the signal centre of mass.
 	 */
-	private static void calculateClosestBorderToSignals(@NonNull Nucleus n) throws UnavailableBorderPointException {
+	private static void calculateClosestBorderToSignals(@NonNull Nucleus n)
+			throws UnavailableBorderPointException {
 		ISignalCollection signalCollection = n.getSignalCollection();
 		for (List<INuclearSignal> signals : signalCollection.getSignals()) {
 

@@ -5,6 +5,7 @@ import java.awt.geom.Ellipse2D;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -19,7 +20,6 @@ import com.bmskinner.nma.components.generic.FloatPoint;
 import com.bmskinner.nma.components.generic.IPoint;
 import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.signals.INuclearSignal;
-import com.bmskinner.nma.utility.AngleTools;
 
 /**
  * An XY dataset mapping signals and nuclei to their XY coordinates
@@ -29,11 +29,14 @@ import com.bmskinner.nma.utility.AngleTools;
  */
 public class NuclearSignalXYDataset extends ComponentXYDataset<Nucleus> {
 
+	private static final Logger LOGGER = Logger.getLogger(NuclearSignalXYDataset.class.getName());
+
 	private List<List<INuclearSignal>> signalList = new ArrayList<>();
 
 	private IAnalysisDataset d;
 
-	public NuclearSignalXYDataset(@NonNull IAnalysisDataset d) throws ChartDatasetCreationException {
+	public NuclearSignalXYDataset(@NonNull IAnalysisDataset d)
+			throws ChartDatasetCreationException {
 		super();
 		this.d = d;
 		ICellCollection collection = d.getCollection();
@@ -45,7 +48,8 @@ public class NuclearSignalXYDataset extends ComponentXYDataset<Nucleus> {
 
 					if (d.getCollection().getSignalGroup(uuid).get().isVisible()) {
 
-						List<INuclearSignal> signals = collection.getSignalManager().getSignals(uuid);
+						List<INuclearSignal> signals = collection.getSignalManager()
+								.getSignals(uuid);
 						double[] xpoints = new double[signals.size()];
 						double[] ypoints = new double[signals.size()];
 
@@ -74,7 +78,8 @@ public class NuclearSignalXYDataset extends ComponentXYDataset<Nucleus> {
 						}
 						double[][] data = { xpoints, ypoints };
 
-						addSeries(CellularComponent.NUCLEAR_SIGNAL + "_" + uuid, data, signalList, nucleusList);
+						addSeries(CellularComponent.NUCLEAR_SIGNAL + "_" + uuid, data, signalList,
+								nucleusList);
 
 					}
 				}
@@ -84,7 +89,8 @@ public class NuclearSignalXYDataset extends ComponentXYDataset<Nucleus> {
 		}
 	}
 
-	public List<Shape> createSignalRadii(@NonNull UUID signalGroup) throws ChartDatasetCreationException {
+	public List<Shape> createSignalRadii(@NonNull UUID signalGroup)
+			throws ChartDatasetCreationException {
 
 		ICellCollection collection = d.getCollection();
 		List<Shape> result = new ArrayList<>();
@@ -101,7 +107,8 @@ public class NuclearSignalXYDataset extends ComponentXYDataset<Nucleus> {
 					// Provide an offset from the centre
 					double offset = n.getMeasurement(Measurement.RADIUS);
 
-					result.add(new Ellipse2D.Double(p.getX() - offset, p.getY() - offset, offset * 2, offset * 2));
+					result.add(new Ellipse2D.Double(p.getX() - offset, p.getY() - offset,
+							offset * 2, offset * 2));
 				}
 			} catch (MissingLandmarkException | ComponentCreationException e) {
 				throw new ChartDatasetCreationException(e);
@@ -127,15 +134,24 @@ public class NuclearSignalXYDataset extends ComponentXYDataset<Nucleus> {
 		double fractionalDistance = n.getMeasurement(Measurement.FRACT_DISTANCE_FROM_COM);
 
 		// determine the distance to the border at this angle
-		double distanceToBorder = ComponentMeasurer.getDistanceFromCoMToBorderAtAngle(outline, angle);
+		double distanceToBorder = ComponentMeasurer.getDistanceFromCoMToBorderAtAngle(outline,
+				angle).getLengthTo(outline.getCentreOfMass());
+
+//		return ComponentMeasurer.getDistanceFromCoMToBorderAtAngle(outline,
+//				angle);
 
 		// convert to fractional distance to signal
 		double distanceFromCoM = distanceToBorder * fractionalDistance;
 
-		// adjust X and Y because we are counting angles from the vertical axis
-		// but the angle tools returns angles against the x-axis
-		double signalX = AngleTools.getXComponentOfAngle(distanceFromCoM, angle - 90);
-		double signalY = AngleTools.getYComponentOfAngle(distanceFromCoM, angle - 90);
+		LOGGER.fine(angle + " distance: " + distanceToBorder);
+
+		// adjust angle because we are counting angles from the negative y axis
+		// i.e. 90 degrees clockwise to the positive x axis
+		// Angles are also plotted anti-clockwise, so subtract our clockwise angle from
+		// 360
+		double signalX = Math.cos(Math.toRadians(360 - angle - 90)) * distanceFromCoM; // x
+																						// component
+		double signalY = Math.sin(Math.toRadians(360 - angle - 90)) * distanceFromCoM;// y component
 		return new FloatPoint(signalX, signalY);
 	}
 

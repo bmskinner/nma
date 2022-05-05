@@ -241,7 +241,8 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	protected DefaultCellularComponent(Element e) {
 		id = UUID.fromString(e.getAttributeValue(XML_ID));
 
-		centreOfMass = new FloatPoint(Float.parseFloat(e.getChild(XML_COM).getAttributeValue(XML_X)),
+		centreOfMass = new FloatPoint(
+				Float.parseFloat(e.getChild(XML_COM).getAttributeValue(XML_X)),
 				Float.parseFloat(e.getChild(XML_COM).getAttributeValue(XML_Y)));
 
 		originalCentreOfMass = new FloatPoint(
@@ -288,8 +289,8 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		// Creating the border list will set everything to the original image
 		// position.
 		// Move the border list back over the CoM if needed.
-		IPoint oldCoM = centreOfMass.duplicate();
-		centreOfMass = originalCentreOfMass.duplicate();
+//		IPoint oldCoM = centreOfMass.duplicate();
+//		centreOfMass = originalCentreOfMass.duplicate();
 
 		// convert the roi positions to border points
 		roi.fitSplineForStraightening(); // this prevents the resulting border differing in length
@@ -301,7 +302,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		for (int i = 0; i < smoothed.npoints; i++)
 			borderList[i] = new FloatPoint(smoothed.xpoints[i], smoothed.ypoints[i]);
 
-		moveCentreOfMass(oldCoM);
+//		moveCentreOfMass(oldCoM);
 		updateBounds();
 	}
 
@@ -1059,6 +1060,8 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 				Point2D result = tf.transform(p.toPoint2D(), null);
 				p.set(result);
 			}
+			Point2D newCoM = tf.transform(centreOfMass.toPoint2D(), null);
+			centreOfMass.set(newCoM);
 		}
 		updateBounds();
 	}

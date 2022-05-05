@@ -153,28 +153,30 @@ public final class ComponentMeasurer {
 	 * @return the distance from the closest border point at the requested angle to
 	 *         the CoM
 	 */
-	public static double getDistanceFromCoMToBorderAtAngle(Taggable t, double angle) {
+	public static IPoint getDistanceFromCoMToBorderAtAngle(Taggable t, double angle) {
 
-		double bestDiff = 180;
-		double bestDistance = 180;
+		double bestDiff = Double.MAX_VALUE;
+		IPoint com = t.getCentreOfMass();
+		IPoint ref = new FloatPoint(com.getX(), com.getY() - 10);
 
+		IPoint bestPoint = com;
 		try {
 			for (int i = 0; i < t.getBorderLength(); i++) {
 				IPoint p = t.getBorderPoint(i);
-				double distance = p.getLengthTo(t.getCentreOfMass());
-				double pAngle = t.getCentreOfMass().findSmallestAngle(p, new FloatPoint(0, -10));
-				if (p.getX() < 0)
-					pAngle = 360 - pAngle;
+				double pAngle = com.findAbsoluteAngle(ref, p);
 
 				if (Math.abs(angle - pAngle) < bestDiff) {
 					bestDiff = Math.abs(angle - pAngle);
-					bestDistance = distance;
+					bestPoint = p;
+
 				}
 			}
+//			LOGGER.fine(angle + ": " + bestPoint);
+			return bestPoint;
 		} catch (UnavailableBorderPointException e) {
 			LOGGER.warning("Unable to caculate distance from CoM to border");
 		}
-		return bestDistance;
+		return null;
 	}
 
 	private static double calculateCellNuclearArea(ICell c) {
@@ -330,7 +332,8 @@ public final class ComponentMeasurer {
 	 * @param n
 	 * @throws ComponentCreationException
 	 */
-	private static double calculateHookLength(@NonNull Nucleus n) throws ComponentCreationException {
+	private static double calculateHookLength(@NonNull Nucleus n)
+			throws ComponentCreationException {
 
 		if (!n.hasLandmark(OrientationMark.TOP) || !n.hasLandmark(OrientationMark.TOP)
 				|| !n.hasLandmark(OrientationMark.Y)) {

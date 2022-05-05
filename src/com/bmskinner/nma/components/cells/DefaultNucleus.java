@@ -177,7 +177,7 @@ public class DefaultNucleus extends ProfileableCellularComponent
 	public void setScale(double scale) {
 		super.setScale(scale);
 
-		for (INuclearSignal s : this.getSignalCollection().getAllSignals()) {
+		for (INuclearSignal s : signalCollection.getAllSignals()) {
 			s.setScale(scale);
 		}
 	}
@@ -256,10 +256,11 @@ public class DefaultNucleus extends ProfileableCellularComponent
 		// Move signals within the nucleus
 		// Note that offset is called in the constructor when unmarshalling, so we need
 		// to null check
-		if (signalCollection != null)
-			for (INuclearSignal s : this.signalCollection.getAllSignals()) {
-				s.offset(xOffset, yOffset);
-			}
+//		if (signalCollection != null)
+		for (INuclearSignal s : this.signalCollection.getAllSignals()) {
+			s.offset(xOffset, yOffset);
+			assert (s.containsPoint(s.getCentreOfMass()));
+		}
 	}
 
 	/*
