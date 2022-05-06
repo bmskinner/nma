@@ -247,7 +247,19 @@ public class SegmentationHandler {
 				+ dataset.getName());
 
 		try {
+//			Don't update segment boundaries at the reference point. This should only be performed by moving the RP directly
+			IProfileSegment segToUpdate = dataset.getCollection().getProfileCollection()
+					.getSegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE,
+							Stats.MEDIAN)
+					.getSegment(id);
 
+			if (segToUpdate.getStartIndex() == dataset.getCollection().getProfileCollection()
+					.getLandmarkIndex(OrientationMark.REFERENCE)) {
+				LOGGER.fine("Cannot move segment boundary that is at reference point");
+				return;
+			}
+
+			// Get the updated profile
 			double prop = dataset.getCollection().getProfileCollection()
 					.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE, Stats.MEDIAN)
 					.getFractionOfIndex(index);

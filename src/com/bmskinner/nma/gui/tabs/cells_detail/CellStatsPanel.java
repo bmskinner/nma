@@ -24,7 +24,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.List;
-import java.util.UUID;
 import java.util.logging.Logger;
 
 import javax.swing.JButton;
@@ -33,10 +32,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.TableModel;
 
-import org.eclipse.jdt.annotation.NonNull;
-
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
-import com.bmskinner.nma.components.profiles.Landmark;
 import com.bmskinner.nma.core.GlobalOptions;
 import com.bmskinner.nma.gui.Labels;
 import com.bmskinner.nma.gui.components.ExportableTable;
@@ -258,18 +254,6 @@ public class CellStatsPanel extends TableDetailPanel
 
 	@Override
 	public void checkCellLock() {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void setBorderTagAction(@NonNull Landmark tag, int newTagIndex) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void updateSegmentStartIndexAction(@NonNull UUID id, int index) throws Exception {
 		// TODO Auto-generated method stub
 
 	}

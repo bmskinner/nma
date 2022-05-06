@@ -643,73 +643,86 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 
 	@Override
 	public void segmentStartIndexUpdateEventReceived(SegmentStartIndexUpdateEvent event) {
+		Runnable r = () -> {
+			if (event.isDataset()) {
 
-		if (event.isDataset()) {
-			SegmentationHandler sh = new SegmentationHandler(event.dataset);
-			sh.updateSegmentStartIndexAction(event.id, event.index);
-			userActionEventReceived(
-					new UserActionEvent(this, UserActionEvent.APPLY_MEDIAN_TO_NUCLEI,
-							event.dataset));
-		}
-
-		if (event.isCell()) {
-			try {
-				event.dataset.getCollection().getProfileManager()
-						.updateCellSegmentStartIndex(event.cell, event.id, event.index);
-
-			} catch (ProfileException | MissingComponentException e) {
-				LOGGER.warning("Cannot update this segment start index");
-			} finally {
-				UIController.getInstance().fireCellUpdatedEvent(event.dataset, event.cell);
+				SegmentationHandler sh = new SegmentationHandler(event.dataset);
+				sh.updateSegmentStartIndexAction(event.id, event.index);
+				userActionEventReceived(
+						new UserActionEvent(this, UserActionEvent.APPLY_MEDIAN_TO_NUCLEI,
+								event.dataset));
 			}
-		}
 
+			if (event.isCell()) {
+				try {
+					event.dataset.getCollection().getProfileManager()
+							.updateCellSegmentStartIndex(event.cell, event.id, event.index);
+
+				} catch (ProfileException | MissingComponentException e) {
+					LOGGER.warning("Cannot update this segment start index");
+				} finally {
+					UIController.getInstance().fireCellUpdatedEvent(event.dataset, event.cell);
+				}
+			}
+		};
+		ThreadManager.getInstance().execute(r);
 	}
 
 	@Override
 	public void segmentMergeEventReceived(SegmentMergeEvent event) {
-		try {
-			SegmentationHandler sh = new SegmentationHandler(event.dataset);
-			sh.mergeSegments(event.id1, event.id2);
-			UIController.getInstance().fireProfilesUpdated(event.dataset);
-		} catch (ProfileException | MissingComponentException e) {
-			LOGGER.warning("Could not merge segments: " + e.getMessage());
-		}
+		Runnable r = () -> {
+			try {
+				SegmentationHandler sh = new SegmentationHandler(event.dataset);
+				sh.mergeSegments(event.id1, event.id2);
+				UIController.getInstance().fireProfilesUpdated(event.dataset);
+			} catch (ProfileException | MissingComponentException e) {
+				LOGGER.warning("Could not merge segments: " + e.getMessage());
+			}
+		};
+		ThreadManager.getInstance().execute(r);
 	}
 
 	@Override
 	public void segmentUnmergeEventReceived(SegmentUnmergeEvent event) {
-		SegmentationHandler sh = new SegmentationHandler(event.dataset);
-		sh.unmergeSegments(event.id);
-		UIController.getInstance().fireProfilesUpdated(event.dataset);
+		Runnable r = () -> {
+			SegmentationHandler sh = new SegmentationHandler(event.dataset);
+			sh.unmergeSegments(event.id);
+			UIController.getInstance().fireProfilesUpdated(event.dataset);
+		};
+		ThreadManager.getInstance().execute(r);
 	}
 
 	@Override
 	public void segmentSplitEventReceived(SegmentSplitEvent event) {
-		SegmentationHandler sh = new SegmentationHandler(event.dataset);
-		sh.splitSegment(event.id);
-		UIController.getInstance().fireProfilesUpdated(event.dataset);
+		Runnable r = () -> {
+			SegmentationHandler sh = new SegmentationHandler(event.dataset);
+			sh.splitSegment(event.id);
+			UIController.getInstance().fireProfilesUpdated(event.dataset);
+		};
+		ThreadManager.getInstance().execute(r);
 	}
 
 	@Override
 	public void profileWindowProportionUpdateEventReceived(
 			ProfileWindowProportionUpdateEvent event) {
+		Runnable r = () -> {
+			try {
+				// Update cells
+				for (Nucleus n : event.dataset.getCollection().getNuclei())
+					n.setWindowProportion(event.window);
 
-		try {
-			// Update cells
-			for (Nucleus n : event.dataset.getCollection().getNuclei())
-				n.setWindowProportion(event.window);
+				// recalculate profiles
+				event.dataset.getCollection().getProfileCollection().calculateProfiles();
+				Optional<IAnalysisOptions> op = event.dataset.getAnalysisOptions();
+				if (op.isPresent())
+					op.get().setAngleWindowProportion(event.window);
 
-			// recalculate profiles
-			event.dataset.getCollection().getProfileCollection().calculateProfiles();
-			Optional<IAnalysisOptions> op = event.dataset.getAnalysisOptions();
-			if (op.isPresent())
-				op.get().setAngleWindowProportion(event.window);
-
-			UIController.getInstance().fireProfilesUpdated(event.dataset);
-		} catch (ProfileException | MissingLandmarkException | MissingProfileException e) {
-			LOGGER.warning("Unable to update profile window proportion: " + e.getMessage());
-		}
+				UIController.getInstance().fireProfilesUpdated(event.dataset);
+			} catch (ProfileException | MissingLandmarkException | MissingProfileException e) {
+				LOGGER.warning("Unable to update profile window proportion: " + e.getMessage());
+			}
+		};
+		ThreadManager.getInstance().execute(r);
 	}
 
 	@Override

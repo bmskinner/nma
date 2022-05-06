@@ -18,7 +18,6 @@ package com.bmskinner.nma.gui.tabs.cells_detail;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -30,7 +29,6 @@ import javax.swing.table.TableModel;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nma.components.profiles.Landmark;
 import com.bmskinner.nma.core.GlobalOptions;
 import com.bmskinner.nma.gui.components.ExportableTable;
 import com.bmskinner.nma.gui.tabs.TableDetailPanel;
@@ -182,18 +180,6 @@ public class CellSignalStatsPanel extends TableDetailPanel implements CellEditin
 
 	@Override
 	public void checkCellLock() {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void setBorderTagAction(@NonNull Landmark tag, int newTagIndex) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void updateSegmentStartIndexAction(@NonNull UUID id, int index) throws Exception {
 		// TODO Auto-generated method stub
 
 	}

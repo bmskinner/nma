@@ -16,12 +16,6 @@
  ******************************************************************************/
 package com.bmskinner.nma.gui.tabs;
 
-import java.util.UUID;
-
-import org.eclipse.jdt.annotation.NonNull;
-
-import com.bmskinner.nma.components.profiles.Landmark;
-
 /**
  * Methods for editing datasets via a tab panel
  * 
@@ -45,7 +39,7 @@ public interface EditingTabPanel extends TabPanel {
 	 * @param tag
 	 * @param newTagIndex
 	 */
-	void setBorderTagAction(@NonNull Landmark tag, int newTagIndex);
+//	void setBorderTagAction(@NonNull Landmark tag, int newTagIndex);
 
 	/**
 	 * Update the start index of the given segment to the given index in the median
@@ -55,5 +49,5 @@ public interface EditingTabPanel extends TabPanel {
 	 * @param index
 	 * @throws Exception
 	 */
-	void updateSegmentStartIndexAction(@NonNull UUID id, int index) throws Exception;
+//	void updateSegmentStartIndexAction(@NonNull UUID id, int index) throws Exception;
 }

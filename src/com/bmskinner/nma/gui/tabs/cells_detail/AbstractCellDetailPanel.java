@@ -16,16 +16,54 @@
  ******************************************************************************/
 package com.bmskinner.nma.gui.tabs.cells_detail;
 
-import com.bmskinner.nma.gui.tabs.editing.AbstractEditingPanel;
+import java.util.logging.Logger;
+
+import com.bmskinner.nma.components.datasets.ICellCollection;
+import com.bmskinner.nma.core.InputSupplier.RequestCancelledException;
+import com.bmskinner.nma.gui.tabs.DetailPanel;
 
 @SuppressWarnings("serial")
-public abstract class AbstractCellDetailPanel extends AbstractEditingPanel implements CellEditingTabPanel {
-
+public abstract class AbstractCellDetailPanel extends DetailPanel
+		implements CellEditingTabPanel {
+	private static final Logger LOGGER = Logger.getLogger(AbstractCellDetailPanel.class.getName());
 	private CellViewModel model;
 
 	public AbstractCellDetailPanel(final CellViewModel model, String title) {
 		super(title);
 		this.model = model;
+	}
+
+	/**
+	 * Check if any of the cells in the active collection are locked for editing. If
+	 * so, ask the user whether to unlock all cells, or leave cells locked.
+	 */
+	@Override
+	public void checkCellLock() {
+		if (activeDataset() == null)
+			return;
+		ICellCollection collection = activeDataset().getCollection();
+
+		if (collection.hasLockedCells()) {
+			String[] options = { "Keep manual values", "Overwrite manual values" };
+
+			try {
+				int result = getInputSupplier().requestOptionAllVisible(options, 0,
+						"Some cells have been manually segmented. Keep manual values?",
+						"Keep manual values?");
+				if (result != 0)
+					collection.setCellsLocked(false);
+			} catch (RequestCancelledException e) {
+			} // no action
+		}
+	}
+
+	/**
+	 * This triggers a general chart recache for the active dataset and all its
+	 * children, but performs the recache on the currnt tab first so results are
+	 * showed at once
+	 */
+	protected void refreshEditingPanelCharts() {
+		this.refreshCache();
 	}
 
 	/**

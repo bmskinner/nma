@@ -20,7 +20,6 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.FlowLayout;
 import java.util.List;
-import java.util.UUID;
 import java.util.logging.Logger;
 
 import javax.swing.JButton;
@@ -32,7 +31,6 @@ import org.jfree.chart.JFreeChart;
 import com.bmskinner.nma.components.MissingComponentException;
 import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
-import com.bmskinner.nma.components.profiles.Landmark;
 import com.bmskinner.nma.components.profiles.ProfileException;
 import com.bmskinner.nma.components.profiles.ProfileType;
 import com.bmskinner.nma.components.rules.OrientationMark;
@@ -207,18 +205,6 @@ public class CellProfilesPanel extends ChartDetailPanel
 
 	@Override
 	public void checkCellLock() {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void setBorderTagAction(@NonNull Landmark tag, int newTagIndex) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void updateSegmentStartIndexAction(@NonNull UUID id, int index) throws Exception {
 		// TODO Auto-generated method stub
 
 	}
