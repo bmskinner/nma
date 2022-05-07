@@ -16,6 +16,7 @@
  ******************************************************************************/
 package com.bmskinner.nma.visualisation.charts.panels;
 
+import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
@@ -24,6 +25,7 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -47,7 +49,11 @@ import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYZDataset;
+import org.jfree.svg.SVGGraphics2D;
+import org.jfree.svg.SVGUtils;
 
+import com.bmskinner.nma.core.InputSupplier.RequestCancelledException;
+import com.bmskinner.nma.gui.DefaultInputSupplier;
 import com.bmskinner.nma.gui.components.FileSelector;
 import com.bmskinner.nma.gui.events.ChartSetEventListener;
 import com.bmskinner.nma.io.Io;
@@ -72,6 +78,7 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 	private static final Logger LOGGER = Logger.getLogger(ExportableChartPanel.class.getName());
 
 	private static final String EXPORT_LBL = "Export data";
+	private static final String EXPORT_SVG = "Save as SVG";
 	private static final String COPY_LBL = "Copy data";
 
 	protected final List<Object> listeners = new ArrayList<>();
@@ -106,6 +113,11 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 		exportItem.addActionListener(e -> export());
 		exportItem.setEnabled(true);
 		popup.add(exportItem);
+
+		JMenuItem exportSvgItem = new JMenuItem(EXPORT_SVG);
+		exportSvgItem.addActionListener(e -> exportSVG());
+		exportSvgItem.setEnabled(true);
+		popup.add(exportSvgItem);
 
 		// Ensure that the chart text and images are redrawn to
 		// a proper aspect ratio when the panel is resized
@@ -241,7 +253,8 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 
 			double aspectRatio = chartWidth / chartHeight;
 
-			LOGGER.finest("Plot w: " + chartWidth + "; h: " + chartHeight + "; asp: " + aspectRatio);
+			LOGGER.finest(
+					"Plot w: " + chartWidth + "; h: " + chartHeight + "; asp: " + aspectRatio);
 
 			// start with impossible values, before finding the real chart
 			// values
@@ -354,7 +367,8 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 				XYPlot plot = getChart().getXYPlot();
 				if (plot.getDataset() instanceof XYZDataset)
 					return getHeatMapData();
-				if (plot.getDataset() instanceof FloatXYDataset || plot.getDataset() instanceof DefaultXYDataset)
+				if (plot.getDataset() instanceof FloatXYDataset
+						|| plot.getDataset() instanceof DefaultXYDataset)
 					return getXYData();
 				if (plot.getDataset() instanceof HistogramDataset)
 					return getHistogramData();
@@ -397,6 +411,23 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 				LOGGER.log(Loggable.STACK, "Error exporting", e);
 			}
 		}).start();
+	}
+
+	private void exportSVG() {
+		JFreeChart chart = this.getChart();
+		SVGGraphics2D g2 = new SVGGraphics2D(this.getWidth(), this.getHeight());
+		Rectangle r = new Rectangle(0, 0, this.getWidth(), this.getHeight());
+		chart.draw(g2, r);
+		try {
+			File file = new DefaultInputSupplier().requestFile();
+			SVGUtils.writeToSVG(file, g2.getSVGElement());
+
+		} catch (RequestCancelledException e) {
+			return;
+		} catch (IOException e) {
+			LOGGER.fine("Unable to export chart");
+		}
+
 	}
 
 	private String getHeatMapData() throws ClassCastException {
@@ -465,7 +496,8 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 		String xAxisName = plot.getDomainAxis().getLabel();
 		String yAxisName = plot.getRangeAxis().getLabel();
 
-		StringBuilder builder = new StringBuilder("Series" + Io.TAB + xAxisName + Io.TAB + yAxisName + Io.NEWLINE);
+		StringBuilder builder = new StringBuilder(
+				"Series" + Io.TAB + xAxisName + Io.TAB + yAxisName + Io.NEWLINE);
 		DecimalFormat df = new DecimalFormat("#0.00");
 
 		for (int dataset = 0; dataset < plot.getDatasetCount(); dataset++) {
@@ -480,7 +512,8 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 					double x = ds.getXValue(series, i);
 					double y = ds.getYValue(series, i);
 
-					builder.append(seriesName + Io.TAB + df.format(x) + Io.TAB + df.format(y) + Io.NEWLINE);
+					builder.append(seriesName + Io.TAB + df.format(x) + Io.TAB + df.format(y)
+							+ Io.NEWLINE);
 				}
 			}
 		}
@@ -494,11 +527,13 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 		StringBuilder builder = new StringBuilder();
 		DecimalFormat df = new DecimalFormat("#0.000");
 
-		builder.append("Row_name" + Io.TAB + "Column_name" + Io.TAB + "ValueType" + Io.TAB + "Value" + Io.NEWLINE);
+		builder.append("Row_name" + Io.TAB + "Column_name" + Io.TAB + "ValueType" + Io.TAB + "Value"
+				+ Io.NEWLINE);
 
 		for (int dataset = 0; dataset < plot.getDatasetCount(); dataset++) {
 
-			DefaultBoxAndWhiskerCategoryDataset ds = (DefaultBoxAndWhiskerCategoryDataset) plot.getDataset(dataset);
+			DefaultBoxAndWhiskerCategoryDataset ds = (DefaultBoxAndWhiskerCategoryDataset) plot
+					.getDataset(dataset);
 
 			if (ds instanceof ExportableBoxAndWhiskerCategoryDataset) {
 
@@ -512,7 +547,8 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 						if (number != null)
 							value = number.doubleValue();
 
-						List rawData = ((ExportableBoxAndWhiskerCategoryDataset) ds).getRawData(rowName, columnName);
+						List rawData = ((ExportableBoxAndWhiskerCategoryDataset) ds)
+								.getRawData(rowName, columnName);
 						if (rawData == null)
 							continue;
 
@@ -520,21 +556,27 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 
 						builder.append(rowName + Io.TAB + columnName + Io.TAB + "Min_value" + Io.TAB
 								+ df.format(rawData.get(0)) + Io.NEWLINE);
-						builder.append(rowName + Io.TAB + columnName + Io.TAB + "Lower_whisker" + Io.TAB
+						builder.append(rowName + Io.TAB + columnName + Io.TAB + "Lower_whisker"
+								+ Io.TAB
 								+ df.format(ds.getMinRegularValue(row, column)) + Io.NEWLINE);
-						builder.append(rowName + Io.TAB + columnName + Io.TAB + "Lower_quartile" + Io.TAB
-								+ df.format(ds.getQ1Value(row, column)) + Io.NEWLINE);
-						builder.append(rowName + Io.TAB + columnName + Io.TAB + "Median" + Io.TAB + df.format(value)
+						builder.append(
+								rowName + Io.TAB + columnName + Io.TAB + "Lower_quartile" + Io.TAB
+										+ df.format(ds.getQ1Value(row, column)) + Io.NEWLINE);
+						builder.append(rowName + Io.TAB + columnName + Io.TAB + "Median" + Io.TAB
+								+ df.format(value)
 								+ Io.NEWLINE);
-						builder.append(rowName + Io.TAB + columnName + Io.TAB + "Upper_quartile" + Io.TAB
-								+ df.format(ds.getQ3Value(row, column)) + Io.NEWLINE);
-						builder.append(rowName + Io.TAB + columnName + Io.TAB + "Upper_whisker" + Io.TAB
+						builder.append(
+								rowName + Io.TAB + columnName + Io.TAB + "Upper_quartile" + Io.TAB
+										+ df.format(ds.getQ3Value(row, column)) + Io.NEWLINE);
+						builder.append(rowName + Io.TAB + columnName + Io.TAB + "Upper_whisker"
+								+ Io.TAB
 								+ df.format(ds.getMaxRegularValue(row, column)) + Io.NEWLINE);
 						builder.append(rowName + Io.TAB + columnName + Io.TAB + "Max_value" + Io.TAB
 								+ df.format(rawData.get(rawData.size() - 1)) + Io.NEWLINE);
 
 						for (Object o : rawData)
-							builder.append(rowName + Io.TAB + columnName + Io.TAB + "Raw_value" + Io.TAB + o.toString()
+							builder.append(rowName + Io.TAB + columnName + Io.TAB + "Raw_value"
+									+ Io.TAB + o.toString()
 									+ Io.NEWLINE);
 
 					}

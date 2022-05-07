@@ -12,7 +12,6 @@ import com.bmskinner.nma.components.rules.RuleSetCollection;
 import com.bmskinner.nma.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nma.core.ThreadManager;
 import com.bmskinner.nma.gui.ProgressBarAcceptor;
-import com.bmskinner.nma.gui.components.FileSelector;
 import com.bmskinner.nma.io.Io;
 import com.bmskinner.nma.io.XMLWriter;
 
@@ -37,31 +36,27 @@ public class ExportRuleSetsAction extends MultiDatasetResultAction {
 	@Override
 	public void run() {
 		setProgressBarIndeterminate();
+		try {
+			File folder = is.requestFolder(IAnalysisDataset.commonPathOfFiles(datasets));
 
-		if (datasets.size() == 1) {
-			File file = FileSelector.chooseOptionsExportFile(datasets.get(0));
+			if (datasets.size() == 1) {
 
-			if (file == null) {
-				cancel();
-				return;
-			}
+				File file = new File(folder, datasets.get(0).getName() + Io.XML_FILE_EXTENSION);
 
-			Runnable r = () -> {
+				Runnable r = () -> {
 
-				RuleSetCollection rsc = datasets.get(0).getCollection().getRuleSetCollection();
-				try {
-					XMLWriter.writeXML(rsc.toXmlElement(), file);
-				} catch (IOException e) {
-					LOGGER.warning("Unable to write rulesets to file");
-				}
-				cancel();
-			};
-			ThreadManager.getInstance().submit(r);
-		} else {
+					RuleSetCollection rsc = datasets.get(0).getCollection().getRuleSetCollection();
+					try {
+						XMLWriter.writeXML(rsc.toXmlElement(), file);
+					} catch (IOException e) {
+						LOGGER.warning("Unable to write rulesets to file");
+					}
+					super.finished();
+				};
+				ThreadManager.getInstance().submit(r);
+			} else {
 
-			// More than one dataset, choose folder only
-			try {
-				File folder = is.requestFolder(IAnalysisDataset.commonPathOfFiles(datasets));
+				// More than one dataset, choose folder only
 				Runnable r = () -> {
 
 					for (IAnalysisDataset d : datasets) {
@@ -75,12 +70,12 @@ public class ExportRuleSetsAction extends MultiDatasetResultAction {
 						LOGGER.info(String.format("Exported %s rulesets to %s", d.getName(),
 								f.getAbsolutePath()));
 					}
-					cancel();
+					super.finished();
 				};
 				ThreadManager.getInstance().submit(r);
-			} catch (RequestCancelledException e) {
-				cancel();
 			}
+		} catch (RequestCancelledException e) {
+			super.finished();
 		}
 	}
 }

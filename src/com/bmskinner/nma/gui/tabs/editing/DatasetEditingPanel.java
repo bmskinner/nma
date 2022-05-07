@@ -316,7 +316,7 @@ public class DatasetEditingPanel extends ChartDetailPanel
 				names.add(item);
 			}
 
-			String[] nameArray = names.stream().map(e -> e.toString()).toArray(String[]::new);
+			String[] nameArray = names.stream().map(SegMergeItem::toString).toArray(String[]::new);
 
 			int mergeOption = getInputSupplier().requestOption(nameArray,
 					"Choose segments to merge", "Merge");
@@ -355,7 +355,7 @@ public class DatasetEditingPanel extends ChartDetailPanel
 				}
 			}
 			IProfileSegment[] nameArray = names.toArray(new IProfileSegment[0]);
-			String[] options = Arrays.stream(nameArray).map(s -> s.getName())
+			String[] options = Arrays.stream(nameArray).map(IProfileSegment::getName)
 					.toArray(String[]::new);
 
 			int option = getInputSupplier().requestOption(options,
