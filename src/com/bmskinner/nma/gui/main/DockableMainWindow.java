@@ -21,10 +21,12 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Toolkit;
+import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.border.EmptyBorder;
@@ -79,7 +81,7 @@ public class DockableMainWindow extends AbstractMainWindow {
 	 */
 	public DockableMainWindow() {
 		super();
-
+		loadImageIcon();
 		createWindowListeners();
 
 		createUI();
@@ -92,6 +94,13 @@ public class DockableMainWindow extends AbstractMainWindow {
 			LOGGER.info("New version " + latestVersion + " available");
 		}
 
+	}
+
+	private void loadImageIcon() {
+		ClassLoader cl = this.getClass().getClassLoader();
+		URL url = cl.getResource("icons/icon.png");
+		ImageIcon icon = new ImageIcon(url);
+		setIconImage(icon.getImage());
 	}
 
 	/**
@@ -114,7 +123,8 @@ public class DockableMainWindow extends AbstractMainWindow {
 			dockModel.addOwner("frame0", this);
 			DockingManager.setDockModel(dockModel);
 			SingleDockFactory floatFactory = new SingleDockFactory();
-			dockModel.getFloatDock(this).setChildDockFactory(floatFactory); // ensure floating docks are not converted
+			dockModel.getFloatDock(this).setChildDockFactory(floatFactory); // ensure floating docks
+																			// are not converted
 																			// to tab docks
 			LogPanel logPanel = new LogPanel();
 			logPanel.setBorder(BorderFactory.createEmptyBorder());
@@ -232,7 +242,8 @@ public class DockableMainWindow extends AbstractMainWindow {
 
 			DetailPanel p = (DetailPanel) t;
 			p.setMaximumSize(Toolkit.getDefaultToolkit().getScreenSize());
-			Dockable d = new DefaultDockable(p.getPanelTitle(), p, p.getPanelTitle(), null, DockingMode.ALL);
+			Dockable d = new DefaultDockable(p.getPanelTitle(), p, p.getPanelTitle(), null,
+					DockingMode.ALL);
 			tabDock.addDockable(d, new Position(i++));
 		}
 

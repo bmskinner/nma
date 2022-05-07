@@ -52,6 +52,7 @@ public abstract class AbstractMainWindow extends JFrame implements MainView {
 	 */
 	protected AbstractMainWindow() {
 		setTitle(PROGRAM_TITLE_BAR_LBL);
+
 	}
 
 	/**
