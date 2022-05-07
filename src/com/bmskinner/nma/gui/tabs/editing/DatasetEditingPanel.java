@@ -200,7 +200,9 @@ public class DatasetEditingPanel extends ChartDetailPanel
 		ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets())
 				.setScale(GlobalOptions.getInstance().getScale())
 				.setSwatch(GlobalOptions.getInstance().getSwatch())
-				.setShowAnnotations(false).setShowXAxis(false).setShowYAxis(false)
+				.setShowAnnotations(false)
+				.setShowXAxis(false)
+				.setShowYAxis(false)
 				.setTarget(chartPanel).build();
 
 		configureButtons(options);

@@ -79,8 +79,13 @@ public class SignalWarpingChartPanel extends ChartDetailPanel
 		if (images.isEmpty()) {
 			chartPanel.setChart(AbstractChartFactory.createEmptyChart());
 		} else {
-			ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets()).setShowXAxis(false)
-					.setShowYAxis(false).setShowBounds(false).setTarget(chartPanel).setWarpedSignals(images).build();
+			ChartOptions options = new ChartOptionsBuilder()
+					.setDatasets(getDatasets())
+					.setShowXAxis(false)
+					.setShowYAxis(false)
+					.setShowBounds(false)
+					.setTarget(chartPanel)
+					.setWarpedSignals(images).build();
 			setChart(options);
 		}
 	}
@@ -90,8 +95,13 @@ public class SignalWarpingChartPanel extends ChartDetailPanel
 		if (images.isEmpty()) {
 			chartPanel.setChart(AbstractChartFactory.createEmptyChart());
 		} else {
-			ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets()).setShowXAxis(false)
-					.setShowYAxis(false).setShowBounds(false).setTarget(chartPanel).setWarpedSignals(images).build();
+			ChartOptions options = new ChartOptionsBuilder()
+					.setDatasets(getDatasets())
+					.setShowXAxis(false)
+					.setShowYAxis(false)
+					.setShowBounds(false)
+					.setTarget(chartPanel)
+					.setWarpedSignals(images).build();
 
 			this.cache.clear(images);
 			setChart(options);
