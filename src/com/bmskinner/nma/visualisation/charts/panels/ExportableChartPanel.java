@@ -16,6 +16,7 @@
  ******************************************************************************/
 package com.bmskinner.nma.visualisation.charts.panels;
 
+import java.awt.Component;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
@@ -52,6 +53,8 @@ import org.jfree.data.xy.XYZDataset;
 import org.jfree.svg.SVGGraphics2D;
 import org.jfree.svg.SVGUtils;
 
+import com.bmskinner.nma.components.datasets.IAnalysisDataset;
+import com.bmskinner.nma.core.DatasetListManager;
 import com.bmskinner.nma.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nma.gui.DefaultInputSupplier;
 import com.bmskinner.nma.gui.components.FileSelector;
@@ -78,7 +81,7 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 	private static final Logger LOGGER = Logger.getLogger(ExportableChartPanel.class.getName());
 
 	private static final String EXPORT_LBL = "Export data";
-	private static final String EXPORT_SVG = "Save as SVG";
+	private static final String EXPORT_SVG = "SVG...";
 	private static final String COPY_LBL = "Copy data";
 
 	protected final List<Object> listeners = new ArrayList<>();
@@ -117,7 +120,12 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 		JMenuItem exportSvgItem = new JMenuItem(EXPORT_SVG);
 		exportSvgItem.addActionListener(e -> exportSVG());
 		exportSvgItem.setEnabled(true);
-		popup.add(exportSvgItem);
+
+		// Put the SVG export with the other save as items
+		for (Component c : popup.getComponents()) {
+			if (c instanceof JMenuItem t && t.getText().equals("Save as"))
+				t.add(exportSvgItem);
+		}
 
 		// Ensure that the chart text and images are redrawn to
 		// a proper aspect ratio when the panel is resized
@@ -413,17 +421,29 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 		}).start();
 	}
 
+	/**
+	 * Export the chart in this panel as SVG
+	 */
 	private void exportSVG() {
 		JFreeChart chart = this.getChart();
 		SVGGraphics2D g2 = new SVGGraphics2D(this.getWidth(), this.getHeight());
 		Rectangle r = new Rectangle(0, 0, this.getWidth(), this.getHeight());
 		chart.draw(g2, r);
 		try {
-			File file = new DefaultInputSupplier().requestFile();
+			File file = new DefaultInputSupplier().requestFileSave(
+					IAnalysisDataset.commonPathOfFiles(
+							DatasetListManager.getInstance().getSelectedDatasets()),
+					"Chart export", Io.SVG_FILE_EXTENSION_NODOT);
+
+			if (file.exists()
+					&& !new DefaultInputSupplier().requestApproval("File exists. Overwrite?",
+							"Overwrite existing file?"))
+				return;
 			SVGUtils.writeToSVG(file, g2.getSVGElement());
+			LOGGER.info("Chart saved as '" + file.getName() + "'");
 
 		} catch (RequestCancelledException e) {
-			return;
+			// User cancelled, no action
 		} catch (IOException e) {
 			LOGGER.fine("Unable to export chart");
 		}

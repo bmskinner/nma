@@ -163,19 +163,11 @@ public class ConsensusNucleusChartPanel extends ExportableChartPanel {
 				e -> uac.consensusTranslationResetReceived(
 						DatasetListManager.getInstance().getActiveDataset()));
 
-		JMenuItem exportSvgItem = new JMenuItem(EXPORT_SVG_LBL);
-		exportSvgItem.addActionListener(e -> UserActionController.getInstance()
-				.consensusSVGExportRequestReceived(
-						DatasetListManager.getInstance().getSelectedDatasets()));
-
 		popup.add(rotateItem);
 		popup.add(resetItem);
 		popup.addSeparator();
 		popup.add(offsetItem);
 		popup.add(resetOffsetItem);
-		popup.addSeparator();
-		popup.add(exportSvgItem);
-
 		return popup;
 	}
 
