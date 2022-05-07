@@ -372,8 +372,9 @@ public class ProfileManagerTest {
 
 			// Merge the segments and assign to the nucleus
 			profile.mergeSegments(segId1, segId2, newId);
-			assertTrue(profile.hasSegment(newId));
-			assertTrue(profile.getSegment(newId).hasMergeSources());
+			assertTrue("Profile should have merged segment", profile.hasSegment(newId));
+			assertTrue("Segment should have merge sources",
+					profile.getSegment(newId).hasMergeSources());
 			n.setSegments(profile.getSegments());
 
 			// Get the profile back out from the nucleus

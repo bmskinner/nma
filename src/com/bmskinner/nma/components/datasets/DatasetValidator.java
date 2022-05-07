@@ -112,19 +112,22 @@ public class DatasetValidator {
 
 		int profileErrors = checkAllNucleiHaveProfiles(collection);
 		if (profileErrors != 0) {
-			summaryList.add(String.format("Error in nucleus profiling for %s nuclei", profileErrors));
+			summaryList
+					.add(String.format("Error in nucleus profiling for %s nuclei", profileErrors));
 			errors++;
 		}
 
 		int segErrors = checkSegmentsAreConsistentInAllCells(collection);
 		if (segErrors != 0) {
-			summaryList.add(String.format("Error in segmentation between cells: %s errors", segErrors));
+			summaryList.add(
+					String.format("Error in segmentation between cells: %s errors", segErrors));
 			errors++;
 		}
 
 		int rpBoundaryErrors = checkNucleiHaveRPOnASegmentBoundary(collection);
 		if (rpBoundaryErrors != 0) {
-			summaryList.add(String.format("Error in RP/segment placement in %s cells", rpBoundaryErrors));
+			summaryList.add(
+					String.format("Error in RP/segment placement in %s cells", rpBoundaryErrors));
 			errors++;
 		}
 
@@ -133,7 +136,8 @@ public class DatasetValidator {
 			return true;
 		}
 
-		summaryList.add(String.format("collection failed validation: %s out of %s cells have errors", errorCells.size(),
+		summaryList.add(String.format(
+				"collection failed validation: %s out of %s cells have errors", errorCells.size(),
 				collection.size()));
 		return false;
 	}
@@ -159,13 +163,15 @@ public class DatasetValidator {
 
 		int profileErrors = checkAllNucleiHaveProfiles(d);
 		if (profileErrors != 0) {
-			summaryList.add(String.format("Error in nucleus profiling for %s nuclei", profileErrors));
+			summaryList
+					.add(String.format("Error in nucleus profiling for %s nuclei", profileErrors));
 			errors++;
 		}
 
 		int pcErrors = checkChildDatasetsHaveProfileCollections(d);
 		if (pcErrors != 0) {
-			summaryList.add(String.format("Error in child dataset profiling for %s profiles", pcErrors));
+			summaryList.add(
+					String.format("Error in child dataset profiling for %s profiles", pcErrors));
 			errors++;
 		}
 
@@ -177,19 +183,22 @@ public class DatasetValidator {
 
 		int childErrors = checkChildDatasetsHaveBorderTagsPresentInRoot(d);
 		if (childErrors != 0) {
-			summaryList.add("There are " + childErrors + " errors in segmentation between child datasets");
+			summaryList.add(
+					"There are " + childErrors + " errors in segmentation between child datasets");
 			errors++;
 		}
 
 		int segErrors = checkSegmentsAreConsistentInAllCells(d);
 		if (segErrors != 0) {
-			summaryList.add(String.format("Error in segmentation between cells: %s errors", segErrors));
+			summaryList.add(
+					String.format("Error in segmentation between cells: %s errors", segErrors));
 			errors++;
 		}
 
 		int rpBoundaryErrors = checkNucleiHaveRPOnASegmentBoundary(d);
 		if (rpBoundaryErrors != 0) {
-			summaryList.add(String.format("Error in RP/segment placement in %s cells", rpBoundaryErrors));
+			summaryList.add(
+					String.format("Error in RP/segment placement in %s cells", rpBoundaryErrors));
 			errors++;
 		}
 
@@ -197,7 +206,8 @@ public class DatasetValidator {
 			summaryList.add("Dataset OK");
 			return true;
 		}
-		summaryList.add(String.format("Dataset failed validation: %s out of %s cells have errors", errorCells.size(),
+		summaryList.add(String.format("Dataset failed validation: %s out of %s cells have errors",
+				errorCells.size(),
 				d.getCollection().getCells().size()));
 		return false;
 	}
@@ -209,7 +219,8 @@ public class DatasetValidator {
 		Nucleus n = c.getPrimaryNucleus();
 
 		if (!c.getPrimaryNucleus().hasLandmark(OrientationMark.REFERENCE)) {
-			errorList.add(String.format("Nucleus %s does not have RP", c.getPrimaryNucleus().getNameAndNumber()));
+			errorList.add(String.format("Nucleus %s does not have RP",
+					c.getPrimaryNucleus().getNameAndNumber()));
 			errorCells.add(c);
 		}
 
@@ -228,19 +239,23 @@ public class DatasetValidator {
 			}
 
 			if (rpIsOk == 0) {
-				errorList.add(String.format("Nucleus %s does not have RP at a segment boundary: RP at %s, profile %s",
+				errorList.add(String.format(
+						"Nucleus %s does not have RP at a segment boundary: RP at %s, profile %s",
 						n.getNameAndNumber(), rpIndex, profile.toString()));
 				errorCells.add(c);
 			}
 
 		} catch (MissingLandmarkException e) {
-			errorList.add(String.format("Nucleus %s does not have an RP set", n.getNameAndNumber()));
+			errorList
+					.add(String.format("Nucleus %s does not have an RP set", n.getNameAndNumber()));
 			errorCells.add(c);
 		} catch (MissingProfileException e) {
-			errorList.add(String.format("Nucleus %s does not have an angle profile", n.getNameAndNumber()));
+			errorList.add(String.format("Nucleus %s does not have an angle profile",
+					n.getNameAndNumber()));
 			errorCells.add(c);
 		} catch (ProfileException e) {
-			errorList.add(String.format("Nucleus %s had an error finding segments: %s", n.getNameAndNumber(),
+			errorList.add(String.format("Nucleus %s had an error finding segments: %s",
+					n.getNameAndNumber(),
 					e.getMessage()));
 			errorCells.add(c);
 		}
@@ -258,7 +273,8 @@ public class DatasetValidator {
 		for (ICell c : collection) {
 			for (Nucleus n : c.getNuclei()) {
 				if (!n.hasLandmark(OrientationMark.REFERENCE)) {
-					errorList.add(String.format("Nucleus %s does not have RP", n.getNameAndNumber()));
+					errorList.add(
+							String.format("Nucleus %s does not have RP", n.getNameAndNumber()));
 					errorCells.add(c);
 					withErrors++;
 				}
@@ -275,8 +291,10 @@ public class DatasetValidator {
 				for (Nucleus n : c.getNuclei()) {
 					try {
 						n.getProfile(type);
-					} catch (MissingProfileException | ProfileException | MissingLandmarkException e) {
-						errorList.add(String.format("Nucleus %s does not have %s profile", n.getNameAndNumber(), type));
+					} catch (MissingProfileException | ProfileException
+							| MissingLandmarkException e) {
+						errorList.add(String.format("Nucleus %s does not have %s profile",
+								n.getNameAndNumber(), type));
 						errorCells.add(c);
 						withErrors++;
 					}
@@ -295,14 +313,16 @@ public class DatasetValidator {
 			try {
 				pc.getProfile(type, OrientationMark.REFERENCE, Stats.MEDIAN);
 			} catch (MissingProfileException | MissingLandmarkException | ProfileException e) {
-				summaryList.add(String.format("Root dataset %s does not have %s", d.getName(), type));
+				summaryList
+						.add(String.format("Root dataset %s does not have %s", d.getName(), type));
 				withErrors++;
 			}
 
 			try {
 				pc.getSegmentedProfile(type, OrientationMark.REFERENCE, Stats.MEDIAN);
 			} catch (MissingProfileException | MissingLandmarkException | ProfileException e) {
-				summaryList.add(String.format("Root dataset %s does not have segmented %s", d.getName(), type));
+				summaryList.add(String.format("Root dataset %s does not have segmented %s",
+						d.getName(), type));
 				withErrors++;
 			}
 
@@ -311,7 +331,8 @@ public class DatasetValidator {
 				try {
 					childPc.getProfile(type, OrientationMark.REFERENCE, Stats.MEDIAN);
 				} catch (MissingProfileException | MissingLandmarkException | ProfileException e) {
-					summaryList.add(String.format("Child dataset %s does not have %s", child.getName(), type));
+					summaryList.add(String.format("Child dataset %s does not have %s",
+							child.getName(), type));
 					withErrors++;
 				}
 
@@ -319,7 +340,8 @@ public class DatasetValidator {
 					childPc.getSegmentedProfile(type, OrientationMark.REFERENCE, Stats.MEDIAN);
 				} catch (MissingProfileException | MissingLandmarkException | ProfileException e) {
 					summaryList
-							.add(String.format("Child dataset %s does not have segmented %s", child.getName(), type));
+							.add(String.format("Child dataset %s does not have segmented %s",
+									child.getName(), type));
 					withErrors++;
 				}
 			}
@@ -339,14 +361,16 @@ public class DatasetValidator {
 		List<IAnalysisDataset> children = d.getAllChildDatasets();
 		int withErrors = 0;
 
-		List<OrientationMark> rootTags = d.getCollection().getProfileCollection().getOrientationMarks();
+		List<OrientationMark> rootTags = d.getCollection().getProfileCollection()
+				.getOrientationMarks();
 		for (ICell c : d.getCollection()) {
 			for (Nucleus n : c.getNuclei()) {
 				for (OrientationMark t : rootTags) {
 					if (!n.hasLandmark(t)) {
 						withErrors++;
-						errorList.add(String.format("Nucleus %s does not have root collection tag %s",
-								n.getNameAndNumber(), t));
+						errorList.add(
+								String.format("Nucleus %s does not have root collection tag %s",
+										n.getNameAndNumber(), t));
 						errorCells.add(c);
 					}
 				}
@@ -359,7 +383,8 @@ public class DatasetValidator {
 				for (OrientationMark t : rootTags) {
 					if (!d.getCollection().getConsensus().hasLandmark(t)) {
 						withErrors++;
-						errorList.add(String.format("Consensus nucleus does not have root collection tag %s", t));
+						errorList.add(String.format(
+								"Consensus nucleus does not have root collection tag %s", t));
 					}
 				}
 			} catch (MissingLandmarkException | ComponentCreationException e) {
@@ -369,10 +394,12 @@ public class DatasetValidator {
 
 		for (IAnalysisDataset child : children) {
 			for (OrientationMark t : rootTags) {
-				if (!child.getCollection().getProfileCollection().getOrientationMarks().contains(t)) {
+				if (!child.getCollection().getProfileCollection().getOrientationMarks()
+						.contains(t)) {
 					withErrors++;
 					errorList.add(
-							String.format("Child dataset %s does not have root collection tag %s", child.getName(), t));
+							String.format("Child dataset %s does not have root collection tag %s",
+									child.getName(), t));
 				}
 			}
 
@@ -417,7 +444,8 @@ public class DatasetValidator {
 
 					// A profile starting from RP will have RP at index zero.
 					// One segment should start at index 0
-					ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE);
+					ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE,
+							OrientationMark.REFERENCE);
 					LOGGER.finer("Testing RP " + rpIndex + " on profile " + profile.toString());
 					for (IProfileSegment s : profile.getSegments()) {
 						if (s.getStartIndex() == 0)
@@ -426,22 +454,26 @@ public class DatasetValidator {
 
 					if (rpIsOk == 0) {
 						errorList.add(
-								String.format("Nucleus %s does not have RP at a segment boundary: RP at %s, profile %s",
+								String.format(
+										"Nucleus %s does not have RP at a segment boundary: RP at %s, profile %s",
 										n.getNameAndNumber(), rpIndex, profile.toString()));
 						errorCells.add(c);
 						allErrors++;
 					}
 
 				} catch (MissingLandmarkException e) {
-					errorList.add(String.format("Nucleus %s does not have an RP set", n.getNameAndNumber()));
+					errorList.add(String.format("Nucleus %s does not have an RP set",
+							n.getNameAndNumber()));
 					errorCells.add(c);
 					allErrors++;
 				} catch (MissingProfileException e) {
-					errorList.add(String.format("Nucleus %s does not have an angle profile", n.getNameAndNumber()));
+					errorList.add(String.format("Nucleus %s does not have an angle profile",
+							n.getNameAndNumber()));
 					errorCells.add(c);
 					allErrors++;
 				} catch (ProfileException e) {
-					errorList.add(String.format("Nucleus %s had an error finding segments: %s", n.getNameAndNumber(),
+					errorList.add(String.format("Nucleus %s had an error finding segments: %s",
+							n.getNameAndNumber(),
 							e.getMessage()));
 					errorCells.add(c);
 					allErrors++;
@@ -470,7 +502,8 @@ public class DatasetValidator {
 			List<UUID> childList = child.getCollection().getProfileCollection().getSegmentIDs();
 
 			if (idList.size() != childList.size()) {
-				summaryList.add(String.format("Root dataset %s segments; child dataset has %s", idList.size(),
+				summaryList.add(String.format("Root dataset %s segments; child dataset has %s",
+						idList.size(),
 						childList.size()));
 				numErrors++;
 			}
@@ -541,7 +574,8 @@ public class DatasetValidator {
 
 		if (collection.hasConsensus()) {
 			try {
-				int consensusErrors = checkSegmentation(collection.getConsensus(), idList, medianProfile);
+				int consensusErrors = checkSegmentation(collection.getConsensus(), idList,
+						medianProfile);
 				if (consensusErrors > 0)
 					errorList.add("Segmentation error in consensus");
 				errorCount += consensusErrors;
@@ -565,7 +599,8 @@ public class DatasetValidator {
 	 * @param expectedSegments the expected segment ids
 	 * @return the number of errors found
 	 */
-	private int checkSegmentation(Taggable n, List<UUID> expectedSegments, ISegmentedProfile medianProfile) {
+	private int checkSegmentation(Taggable n, List<UUID> expectedSegments,
+			ISegmentedProfile medianProfile) {
 
 		int errorCount = 0;
 		boolean hasSegments = expectedSegments.size() > 0;
@@ -573,7 +608,8 @@ public class DatasetValidator {
 		try {
 			p = n.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE);
 			if (p.hasSegments() != hasSegments) {
-				errorList.add(String.format("Profile collection segments is %s; nucleus is %s", hasSegments,
+				errorList.add(String.format("Profile collection segments is %s; nucleus is %s",
+						hasSegments,
 						p.hasSegments()));
 				errorCount++;
 			}
@@ -589,7 +625,8 @@ public class DatasetValidator {
 			// Check all nucleus segments are in root dataset
 			for (UUID id : childList) {
 				if (!expectedSegments.contains(id) && !id.equals(n.getID())) {
-					errorList.add(String.format("Nucleus %s has segment %s not found in parent", n.getID(), id));
+					errorList.add(String.format("Nucleus %s has segment %s not found in parent",
+							n.getID(), id));
 					errorCount++;
 				}
 			}
@@ -598,7 +635,8 @@ public class DatasetValidator {
 
 			for (UUID id : expectedSegments) {
 				if (!childList.contains(id)) {
-					errorList.add(String.format("Profile collection segment %s not found in object %s", id, n.getID()));
+					errorList.add(String.format(
+							"Profile collection segment %s not found in object %s", id, n.getID()));
 					errorCount++;
 				}
 			}
@@ -611,14 +649,15 @@ public class DatasetValidator {
 						continue;
 					IProfileSegment s2 = p.getSegment(id2);
 					if (s1.overlapsBeyondEndpoints(s2)) {
-						errorList.add(String.format("%s overlaps %s in object %s", s1.getDetail(), s2.getDetail(),
+						errorList.add(String.format("%s overlaps %s in object %s", s1.getDetail(),
+								s2.getDetail(),
 								n.getID()));
 						errorCount++;
 					}
 
 				}
 			}
-
+			// Check all the merge sources from the median profile are present
 			for (UUID id : medianProfile.getSegmentIDs()) {
 				IProfileSegment medianSeg = medianProfile.getSegment(id);
 				IProfileSegment objectSeg = p.getSegment(id);
@@ -634,16 +673,17 @@ public class DatasetValidator {
 				}
 				for (IProfileSegment obj : objectSeg.getMergeSources()) {
 					if (!medianSeg.hasMergeSource(obj.getID())) {
-						errorList.add(String.format("Median segment %s does not have merge source %s from nucleus %s",
+						errorList.add(String.format(
+								"Median segment %s does not have merge source %s from nucleus %s",
 								medianSeg.getName(), obj.getID(), n.getID()));
 						errorCount++;
 					}
-
 				}
 			}
 
 		} catch (ProfileException | MissingComponentException e) {
-			errorList.add(String.format("Error getting segments for object %s: %s", n.getID(), e.getMessage()));
+			errorList.add(String.format("Error getting segments for object %s: %s", n.getID(),
+					e.getMessage()));
 			errorCount++;
 		}
 		return errorCount;

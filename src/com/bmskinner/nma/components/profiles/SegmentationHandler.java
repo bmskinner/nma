@@ -235,74 +235,74 @@ public class SegmentationHandler {
 
 	/**
 	 * Update the start index of the given segment to the given index in the median
-	 * profile, and update individual nuclei to match.
+	 * profile, and update individual nuclei to match. Removes any segment merge
+	 * sources to prevent scaling issues.
 	 * 
 	 * @param id
 	 * @param index
+	 * @throws ProfileException
+	 * @throws MissingComponentException
+	 * @throws MissingProfileException
+	 * @throws SegmentUpdateException
 	 * @throws Exception
 	 */
-	public synchronized void updateSegmentStartIndexAction(UUID id, int index) {
+	public synchronized void updateSegmentStartIndexAction(UUID id, int index)
+			throws MissingProfileException, MissingComponentException, ProfileException,
+			SegmentUpdateException {
 
 		LOGGER.fine("Requested update of segment " + id + " to index " + index + " in dataset "
 				+ dataset.getName());
 
-		try {
 //			Don't update segment boundaries at the reference point. This should only be performed by moving the RP directly
-			IProfileSegment segToUpdate = dataset.getCollection().getProfileCollection()
-					.getSegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE,
-							Stats.MEDIAN)
-					.getSegment(id);
+		IProfileSegment segToUpdate = dataset.getCollection().getProfileCollection()
+				.getSegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE,
+						Stats.MEDIAN)
+				.getSegment(id);
 
-			if (segToUpdate.getStartIndex() == dataset.getCollection().getProfileCollection()
-					.getLandmarkIndex(OrientationMark.REFERENCE)) {
-				LOGGER.fine("Cannot move segment boundary that is at reference point");
-				return;
-			}
-
-			// Get the updated profile
-			double prop = dataset.getCollection().getProfileCollection()
-					.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE, Stats.MEDIAN)
-					.getFractionOfIndex(index);
-
-			// Update the median profile
-			dataset.getCollection().getProfileManager().updateMedianProfileSegmentStartIndex(id,
-					index);
-
-			// Get the updated profile
-			ISegmentedProfile newProfile = dataset.getCollection().getProfileCollection()
-					.getSegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE,
-							Stats.MEDIAN);
-
-			// Apply the updated profile to the cells
-			for (ICell c : dataset.getCollection()) {
-				c.getPrimaryNucleus()
-						.setSegments(IProfileSegment.scaleSegments(newProfile.getSegments(),
-								c.getPrimaryNucleus().getBorderLength()));
-			}
-
-			for (IAnalysisDataset child : dataset.getAllChildDatasets()) {
-
-				// Update each child median profile to the same proportional
-				// index
-
-				int childIndex = child.getCollection().getProfileCollection()
-						.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE, Stats.MEDIAN)
-						.getIndexOfFraction(prop);
-
-				child.getCollection().getProfileManager().updateMedianProfileSegmentStartIndex(id,
-						childIndex);
-			}
-
-			// Lock all the segments except the one to change
-			dataset.getCollection().getProfileManager().setLockOnAllNucleusSegments(true);
-			dataset.getCollection().getProfileManager().setLockOnSegment(id, false);
-
-		} catch (ProfileException | MissingComponentException | SegmentUpdateException e) {
-			LOGGER.warning("Error updating index of segments");
-			LOGGER.log(Loggable.STACK, e.getMessage(), e);
-
+		if (segToUpdate.getStartIndex() == dataset.getCollection().getProfileCollection()
+				.getLandmarkIndex(OrientationMark.REFERENCE)) {
+			LOGGER.fine("Cannot move segment boundary that is at reference point");
+			return;
 		}
 
+		// Get the updated profile
+		double prop = dataset.getCollection().getProfileCollection()
+				.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE, Stats.MEDIAN)
+				.getFractionOfIndex(index);
+
+		// Update the median profile
+		dataset.getCollection().getProfileManager().updateMedianProfileSegmentStartIndex(id,
+				index);
+
+		// Get the updated profile
+		ISegmentedProfile newProfile = dataset.getCollection().getProfileCollection()
+				.getSegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE,
+						Stats.MEDIAN);
+
+		// Apply the updated profile to the cells
+		for (ICell c : dataset.getCollection()) {
+			List<IProfileSegment> newSegs = IProfileSegment.scaleSegments(
+					newProfile.getSegments(), c.getPrimaryNucleus().getBorderLength());
+			IProfileSegment.linkSegments(newSegs);
+			c.getPrimaryNucleus().setSegments(newSegs);
+		}
+
+		for (IAnalysisDataset child : dataset.getAllChildDatasets()) {
+
+			// Update each child median profile to the same proportional
+			// index
+
+			int childIndex = child.getCollection().getProfileCollection()
+					.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE, Stats.MEDIAN)
+					.getIndexOfFraction(prop);
+
+			child.getCollection().getProfileManager().updateMedianProfileSegmentStartIndex(id,
+					childIndex);
+		}
+
+		// Lock all the segments except the one to change
+		dataset.getCollection().getProfileManager().setLockOnAllNucleusSegments(true);
+		dataset.getCollection().getProfileManager().setLockOnSegment(id, false);
 	}
 
 	/**

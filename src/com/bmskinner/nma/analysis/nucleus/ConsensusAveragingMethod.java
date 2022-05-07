@@ -45,6 +45,7 @@ import com.bmskinner.nma.components.options.IAnalysisOptions;
 import com.bmskinner.nma.components.options.MissingOptionException;
 import com.bmskinner.nma.components.profiles.IProfile;
 import com.bmskinner.nma.components.profiles.IProfileSegment;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.components.profiles.ISegmentedProfile;
 import com.bmskinner.nma.components.profiles.Landmark;
 import com.bmskinner.nma.components.profiles.MissingProfileException;
@@ -86,7 +87,7 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
 
 	private void run() throws MissingComponentException, UnprofilableObjectException,
 			ComponentCreationException,
-			ProfileException, MissingOptionException {
+			ProfileException, MissingOptionException, SegmentUpdateException {
 		LOGGER.finer("Running consensus averaging on " + dataset.getName());
 
 		List<IPoint> border = calculatePointAverage();
@@ -144,9 +145,11 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
 	 * @throws ProfileException
 	 * @throws MissingProfileException
 	 * @throws MissingLandmarkException
+	 * @throws SegmentUpdateException
 	 */
 	private void setSegments(Nucleus n)
-			throws MissingLandmarkException, MissingProfileException, ProfileException {
+			throws MissingLandmarkException, MissingProfileException, ProfileException,
+			SegmentUpdateException {
 		// Add segments to the new nucleus profile
 		if (dataset.getCollection().getProfileCollection().hasSegments()) {
 			ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE);
@@ -155,6 +158,7 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
 					.getSegments(OrientationMark.REFERENCE);
 
 			List<IProfileSegment> newSegs = IProfileSegment.scaleSegments(segs, profile.size());
+			IProfileSegment.linkSegments(newSegs);
 
 			profile.setSegments(newSegs);
 			n.setSegments(profile.getSegments());
@@ -168,11 +172,12 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
 	 * @throws ProfileException
 	 * @throws MissingProfileException
 	 * @throws MissingLandmarkException
+	 * @throws SegmentUpdateException
 	 */
 	private Consensus makeConsensus(List<IPoint> list)
 			throws UnprofilableObjectException, ComponentCreationException,
 			MissingLandmarkException, ProfileException, MissingProfileException,
-			MissingOptionException {
+			MissingOptionException, SegmentUpdateException {
 
 		// Decide on the best scale for the consensus,
 		// and scale the points back into pixel coordinates

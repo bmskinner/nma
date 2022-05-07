@@ -45,13 +45,23 @@ import com.bmskinner.nma.components.rules.OrientationMark;
 public class SampleDatasetReader {
 
 	/**
-	 * Open the default rodent testing dataset
+	 * Open the default mouse testing dataset
 	 * 
 	 * @return
 	 * @throws Exception
 	 */
 	public static final IAnalysisDataset openTestRodentDataset() throws Exception {
 		return openDataset(TestResources.MOUSE_TEST_DATASET);
+	}
+
+	/**
+	 * Open the default mouse testing dataset with clusters
+	 * 
+	 * @return
+	 * @throws Exception
+	 */
+	public static final IAnalysisDataset openTestRodenClusterDataset() throws Exception {
+		return openDataset(TestResources.MOUSE_CLUSTERS_DATASET);
 	}
 
 	/**

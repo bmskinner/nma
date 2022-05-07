@@ -1,6 +1,7 @@
 package com.bmskinner.nma.components.profiles;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -18,13 +19,18 @@ import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 
 import com.bmskinner.nma.TestDatasetBuilder;
+import com.bmskinner.nma.analysis.classification.NucleusClusteringMethod;
 import com.bmskinner.nma.components.cells.ICell;
 import com.bmskinner.nma.components.datasets.DatasetValidator;
 import com.bmskinner.nma.components.datasets.DefaultAnalysisDataset;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.datasets.VirtualDataset;
+import com.bmskinner.nma.components.measure.Measurement;
+import com.bmskinner.nma.components.options.HashOptions;
+import com.bmskinner.nma.components.options.OptionsFactory;
 import com.bmskinner.nma.components.rules.OrientationMark;
 import com.bmskinner.nma.components.rules.RuleSetCollection;
+import com.bmskinner.nma.io.SampleDatasetReader;
 import com.bmskinner.nma.logging.ConsoleFormatter;
 import com.bmskinner.nma.logging.ConsoleHandler;
 import com.bmskinner.nma.logging.Loggable;
@@ -71,8 +77,10 @@ public class SegmentationHandlerTest {
 	 */
 	public static IAnalysisDataset createInstance(Class<? extends IAnalysisDataset> source)
 			throws Exception {
-		IAnalysisDataset d = new TestDatasetBuilder(RNG_SEED).cellCount(10)
-				.ofType(RuleSetCollection.roundRuleSetCollection()).randomOffsetProfiles(true)
+		IAnalysisDataset d = new TestDatasetBuilder(RNG_SEED)
+				.cellCount(10)
+				.ofType(RuleSetCollection.roundRuleSetCollection())
+				.randomOffsetProfiles(true)
 				.segmented().build();
 
 		if (source == DefaultAnalysisDataset.class) {
@@ -90,6 +98,14 @@ public class SegmentationHandlerTest {
 			}
 			return v;
 		}
+
+		// Ensure the dataset has child datasets
+		HashOptions o = OptionsFactory.makeDefaultClusteringOptions()
+				.withValue(Measurement.AREA.toString(), true)
+				.withValue(HashOptions.CLUSTER_MANUAL_CLUSTER_NUMBER_KEY, 2)
+				.build();
+
+		new NucleusClusteringMethod(d, o).call();
 
 		throw new Exception("Unable to create instance of " + source);
 	}
@@ -165,23 +181,75 @@ public class SegmentationHandlerTest {
 
 		sh.mergeSegments(seg0.getID(), seg1.getID());
 
-		assertEquals("Segment should be merged", profile.getSegmentCount() - 1,
-				dataset.getCollection().getProfileManager().getSegmentCount());
+		if (dataset.isRoot()) {
+			assertEquals("Segment should be merged", profile.getSegmentCount() - 1,
+					dataset.getCollection().getProfileManager().getSegmentCount());
+
+			// Get the id of the newly added segment
+			UUID newSegId = dataset.getCollection().getProfileCollection().getSegmentIDs().stream()
+					.filter(
+							id -> !profile.getSegmentIDs().contains(id))
+					.findFirst().orElseThrow(Exception::new);
+
+			ISegmentedProfile newProfile = dataset.getCollection().getProfileCollection()
+					.getSegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE,
+							Stats.MEDIAN);
+			IProfileSegment newSeg = newProfile.getSegment(newSegId);
+			assertTrue(newSeg.hasMergeSources());
+
+			sh.updateSegmentStartIndexAction(newSegId, newSeg.getStartIndex() + 10);
+			if (!dv.validate(dataset))
+				fail("Dataset should validate: " + dv.getSummary() + " " + dv.getErrors());
+		}
+
+	}
+
+	/**
+	 * Check that if a merged segment has a start index update, the merge source
+	 * segments are cleared
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void testUpdateSegmentStartIndexCorrectlyHandlesMergedSegmentInRealDataset()
+			throws Exception {
+		IAnalysisDataset d = SampleDatasetReader.openTestRodenClusterDataset();
+
+		ISegmentedProfile profile = d.getCollection().getProfileCollection()
+				.getSegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE, Stats.MEDIAN);
+
+		SegmentationHandler s = new SegmentationHandler(d);
+
+		// Merge two segments that are not at the RP
+		IProfileSegment s0 = d.getCollection().getProfileCollection()
+				.getSegmentContaining(OrientationMark.REFERENCE);
+		IProfileSegment s1 = s0.nextSegment();
+		IProfileSegment s2 = s1.nextSegment();
+
+		s.mergeSegments(s1.getID(), s2.getID());
 
 		// Get the id of the newly added segment
-		UUID newSegId = dataset.getCollection().getProfileCollection().getSegmentIDs().stream()
+		UUID newSegId = d.getCollection().getProfileCollection().getSegmentIDs().stream()
 				.filter(
 						id -> !profile.getSegmentIDs().contains(id))
 				.findFirst().orElseThrow(Exception::new);
 
-		ISegmentedProfile newProfile = dataset.getCollection().getProfileCollection()
-				.getSegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE, Stats.MEDIAN);
+		ISegmentedProfile newProfile = d.getCollection().getProfileCollection()
+				.getSegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE,
+						Stats.MEDIAN);
 		IProfileSegment newSeg = newProfile.getSegment(newSegId);
 		assertTrue(newSeg.hasMergeSources());
 
-		sh.updateSegmentStartIndexAction(newSegId, newSeg.getStartIndex() + 10);
+		s.updateSegmentStartIndexAction(newSegId, newSeg.getStartIndex() + 20);
 		if (!dv.validate(dataset))
 			fail("Dataset should validate: " + dv.getSummary() + " " + dv.getErrors());
+
+		// check if the merge sources were cleared properly
+		newProfile = d.getCollection().getProfileCollection()
+				.getSegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE,
+						Stats.MEDIAN);
+		newSeg = newProfile.getSegment(newSegId);
+		assertFalse(newSeg.hasMergeSources());
 
 	}
 

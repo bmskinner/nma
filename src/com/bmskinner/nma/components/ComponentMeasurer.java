@@ -171,7 +171,6 @@ public final class ComponentMeasurer {
 
 				}
 			}
-//			LOGGER.fine(angle + ": " + bestPoint);
 			return bestPoint;
 		} catch (UnavailableBorderPointException e) {
 			LOGGER.warning("Unable to caculate distance from CoM to border");

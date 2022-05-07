@@ -462,6 +462,7 @@ public class ProfileManager {
 				OrientationMark.REFERENCE, Stats.MEDIAN);
 
 		IProfileSegment seg = oldProfile.getSegment(id);
+		seg.clearMergeSources();
 
 		// Select the new endpoints for the segment
 		int newStart = index;

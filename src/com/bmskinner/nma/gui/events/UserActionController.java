@@ -20,6 +20,7 @@ import com.bmskinner.nma.components.generic.IPoint;
 import com.bmskinner.nma.components.measure.MeasurementScale;
 import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.options.IAnalysisOptions;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.components.profiles.Landmark;
 import com.bmskinner.nma.components.profiles.MissingProfileException;
 import com.bmskinner.nma.components.profiles.ProfileException;
@@ -645,12 +646,15 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 	public void segmentStartIndexUpdateEventReceived(SegmentStartIndexUpdateEvent event) {
 		Runnable r = () -> {
 			if (event.isDataset()) {
-
-				SegmentationHandler sh = new SegmentationHandler(event.dataset);
-				sh.updateSegmentStartIndexAction(event.id, event.index);
-				userActionEventReceived(
-						new UserActionEvent(this, UserActionEvent.APPLY_MEDIAN_TO_NUCLEI,
-								event.dataset));
+				try {
+					SegmentationHandler sh = new SegmentationHandler(event.dataset);
+					sh.updateSegmentStartIndexAction(event.id, event.index);
+					userActionEventReceived(
+							new UserActionEvent(this, UserActionEvent.APPLY_MEDIAN_TO_NUCLEI,
+									event.dataset));
+				} catch (ProfileException | MissingComponentException | SegmentUpdateException e) {
+					LOGGER.warning("Cannot update this segment start index");
+				}
 			}
 
 			if (event.isCell()) {

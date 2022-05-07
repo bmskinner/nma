@@ -38,11 +38,11 @@ import com.bmskinner.nma.components.profiles.DefaultSegmentedProfile;
 import com.bmskinner.nma.components.profiles.IProfile;
 import com.bmskinner.nma.components.profiles.IProfileCollection;
 import com.bmskinner.nma.components.profiles.IProfileSegment;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.components.profiles.ISegmentedProfile;
 import com.bmskinner.nma.components.profiles.MissingProfileException;
 import com.bmskinner.nma.components.profiles.ProfileException;
 import com.bmskinner.nma.components.profiles.ProfileType;
-import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.components.rules.OrientationMark;
 import com.bmskinner.nma.stats.Stats;
 
@@ -61,7 +61,8 @@ import com.bmskinner.nma.stats.Stats;
  */
 public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 
-	private static final Logger LOGGER = Logger.getLogger(DatasetSegmentationMethod.class.getName());
+	private static final Logger LOGGER = Logger
+			.getLogger(DatasetSegmentationMethod.class.getName());
 
 	private ICellCollection sourceCollection = null;
 
@@ -88,7 +89,8 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 	 * @param mode    the analysis mode to run
 	 * @throws AnalysisMethodException
 	 */
-	public DatasetSegmentationMethod(@NonNull IAnalysisDataset dataset, @NonNull MorphologyAnalysisMode mode)
+	public DatasetSegmentationMethod(@NonNull IAnalysisDataset dataset,
+			@NonNull MorphologyAnalysisMode mode)
 			throws AnalysisMethodException {
 		super(dataset);
 		if (!dataset.isRoot())
@@ -106,7 +108,8 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 	 * @param source  the collection to copy segment patterns from
 	 * @throws AnalysisMethodException
 	 */
-	public DatasetSegmentationMethod(@NonNull IAnalysisDataset dataset, @NonNull ICellCollection source)
+	public DatasetSegmentationMethod(@NonNull IAnalysisDataset dataset,
+			@NonNull ICellCollection source)
 			throws AnalysisMethodException {
 		this(dataset, MorphologyAnalysisMode.COPY_FROM_OTHER_DATASET);
 		this.sourceCollection = source;
@@ -125,7 +128,8 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 		// Ensure hook statistics are generated appropriately
 		for (Nucleus n : dataset.getCollection().getNuclei()) {
 			// Initialise all measurements that do not already exist
-			for (Measurement m : dataset.getAnalysisOptions().orElseThrow(MissingOptionException::new)
+			for (Measurement m : dataset.getAnalysisOptions()
+					.orElseThrow(MissingOptionException::new)
 					.getRuleSetCollection().getMeasurableValues()) {
 				n.getMeasurement(m);
 			}
@@ -141,8 +145,9 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 	}
 
 	private IAnalysisResult applyMedianToNuclei() throws Exception {
-		ISegmentedProfile median = dataset.getCollection().getProfileCollection().getSegmentedProfile(ProfileType.ANGLE,
-				OrientationMark.REFERENCE, Stats.MEDIAN);
+		ISegmentedProfile median = dataset.getCollection().getProfileCollection()
+				.getSegmentedProfile(ProfileType.ANGLE,
+						OrientationMark.REFERENCE, Stats.MEDIAN);
 
 		if (median.getSegmentCount() <= 0) {
 			throw new AnalysisMethodException("Error finding segments in median profile");
@@ -154,17 +159,26 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 		assignSegmentsToNuclei(median);// fit the segments to nuclei
 
 		// Consensus nucleus should reflect the median profile directly
-		if (collection.hasConsensus())
-			collection.getRawConsensus().setSegments(IProfileSegment.scaleSegments(median.getSegments(),
-					collection.getRawConsensus().getBorderLength()));
+		if (collection.hasConsensus()) {
+			List<IProfileSegment> newSegs = IProfileSegment.scaleSegments(median.getSegments(),
+					collection.getRawConsensus().getBorderLength());
+			IProfileSegment.linkSegments(newSegs);
+			collection.getRawConsensus().setSegments(newSegs);
+		}
 
 		// Copy segmentation to child datasets and their consensus nuclei
 		if (dataset.hasChildren()) {
 			for (IAnalysisDataset child : dataset.getAllChildDatasets()) {
-				dataset.getCollection().getProfileManager().copySegmentsAndLandmarksTo(child.getCollection());
-				if (child.getCollection().hasConsensus())
-					child.getCollection().getRawConsensus().setSegments(IProfileSegment.scaleSegments(
-							median.getSegments(), child.getCollection().getRawConsensus().getBorderLength()));
+				dataset.getCollection().getProfileManager()
+						.copySegmentsAndLandmarksTo(child.getCollection());
+				if (child.getCollection().hasConsensus()) {
+					List<IProfileSegment> newSegs = IProfileSegment.scaleSegments(
+							median.getSegments(),
+							child.getCollection().getRawConsensus().getBorderLength());
+					IProfileSegment.linkSegments(newSegs);
+					child.getCollection().getRawConsensus()
+							.setSegments(newSegs);
+				}
 
 			}
 		}
@@ -209,7 +223,8 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 		if (dataset.hasChildren()) {
 			for (IAnalysisDataset child : dataset.getAllChildDatasets()) {
 				child.getCollection().setConsensus(null);
-				dataset.getCollection().getProfileManager().copySegmentsAndLandmarksTo(child.getCollection());
+				dataset.getCollection().getProfileManager()
+						.copySegmentsAndLandmarksTo(child.getCollection());
 			}
 		}
 		return new DefaultAnalysisResult(dataset);
