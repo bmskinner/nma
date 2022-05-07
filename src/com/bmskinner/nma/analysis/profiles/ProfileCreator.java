@@ -34,7 +34,6 @@ import com.bmskinner.nma.components.profiles.DefaultProfile;
 import com.bmskinner.nma.components.profiles.IProfile;
 import com.bmskinner.nma.components.profiles.ProfileException;
 import com.bmskinner.nma.components.profiles.ProfileType;
-import com.bmskinner.nma.logging.Loggable;
 import com.bmskinner.nma.stats.Stats;
 import com.bmskinner.nma.utility.AngleTools;
 
@@ -46,213 +45,218 @@ import com.bmskinner.nma.utility.AngleTools;
  *
  */
 public class ProfileCreator {
-	
+
 	private static final Logger LOGGER = Logger.getLogger(ProfileCreator.class.getName());
-	
-	
-	private ProfileCreator() {} //no constructor, static access only
 
-    /**
-     * Create a profile for the desired profile type on the template object
-     * 
-     * @param type the profile type
-     * @return a profile of the requested type.
-     * @throws ProfileException
-     */
-    public static IProfile createProfile(@NonNull Taggable target, @NonNull ProfileType type) throws ProfileException {
-        try {
-            switch (type) {
-	            case ANGLE:        return calculateAngleProfile(target);
-	            case DIAMETER:     return calculateDiameterProfile(target);
-	            case RADIUS:       return calculateRadiusProfile(target);
-	            case ZAHN_ROSKIES: return calculateZahnRoskiesProfile(target);
-	            default:           return calculateAngleProfile(target);
-            }
-        } catch (UnavailableBorderPointException e) {
-        	LOGGER.warning("Cannot create profile "+e.getMessage());
-            throw new ProfileException("Cannot create profile " + type, e);
-        }
-    }
+	private ProfileCreator() {
+	} // no constructor, static access only
 
-    /**
-     * Calculate an angle profile for the given object. The profile 
-     * starts at the first border index in the object
-     * @param target
-     * @return
-     * @throws UnavailableBorderPointException
-     * @throws ProfileException
-     */
-    private static IProfile calculateAngleProfile(@NonNull Taggable target) throws UnavailableBorderPointException, ProfileException {
+	/**
+	 * Create a profile for the desired profile type on the template object
+	 * 
+	 * @param type the profile type
+	 * @return a profile of the requested type.
+	 * @throws ProfileException
+	 */
+	public static IProfile createProfile(@NonNull Taggable target, @NonNull ProfileType type)
+			throws ProfileException {
+		try {
+			switch (type) {
+			case ANGLE:
+				return calculateAngleProfile(target);
+			case DIAMETER:
+				return calculateDiameterProfile(target);
+			case RADIUS:
+				return calculateRadiusProfile(target);
+			case ZAHN_ROSKIES:
+				return calculateZahnRoskiesProfile(target);
+			default:
+				return calculateAngleProfile(target);
+			}
+		} catch (UnavailableBorderPointException e) {
+			LOGGER.warning("Cannot create profile " + e.getMessage());
+			throw new ProfileException("Cannot create profile " + type, e);
+		}
+	}
 
-        float[] angles = new float[target.getBorderLength()];
+	/**
+	 * Calculate an angle profile for the given object. The profile starts at the
+	 * first border index in the object
+	 * 
+	 * @param target
+	 * @return
+	 * @throws UnavailableBorderPointException
+	 * @throws ProfileException
+	 */
+	private static IProfile calculateAngleProfile(@NonNull Taggable target)
+			throws UnavailableBorderPointException, ProfileException {
 
-        Shape s = target.toShape();
+		float[] angles = new float[target.getBorderLength()];
 
-        List<IPoint> borderList = target.getBorderList();
+		Shape s = target.toShape();
 
-        if (borderList == null)
-            throw new UnavailableBorderPointException("Null border list in target");
+		List<IPoint> borderList = target.getBorderList();
 
-        int windowSize = target.getWindowSize();
+		if (borderList == null)
+			throw new UnavailableBorderPointException("Null border list in target");
 
-        for(int index=0; index<borderList.size(); index++) {
+		int windowSize = target.getWindowSize();
 
-        	IPoint point       = borderList.get(index);
-        	IPoint pointBefore = borderList.get(target.wrapIndex(index+windowSize));
-        	IPoint pointAfter  = borderList.get(target.wrapIndex(index-windowSize));
+		for (int index = 0; index < borderList.size(); index++) {
 
-            // Find the smallest angle between the points
-            float angle = (float) point.findSmallestAngle(pointBefore, pointAfter);
-            
-            // Is the measured angle is inside or outside the object?
-            // Take the midpoint between the before and after points.
-            // If it is within the ROI, the angle is the interior angle
-            // if no, 360-min is the interior angle
-            float midX = (float) ((pointBefore.getX() + pointAfter.getX()) / 2);
-            float midY = (float) ((pointBefore.getY() + pointAfter.getY()) / 2);
-            angles[index] = s.contains(midX, midY) ? angle : 360 - angle;
-        }
+			IPoint point = borderList.get(index);
+			IPoint pointBefore = borderList.get(target.wrapIndex(index + windowSize));
+			IPoint pointAfter = borderList.get(target.wrapIndex(index - windowSize));
 
-        return new DefaultProfile(angles);
-    }
+			// Find the smallest angle between the points
+			float angle = (float) point.findSmallestAngle(pointBefore, pointAfter);
 
-    /**
-     * Calculate a modified ZR profile. This uses the same window size as the
-     * angle profile, so is not a true ZR transform.
-     * 
-     * @return
-     * @throws ProfileException 
-     * @throws UnavailableBorderPointException
-     * @throws MissingLandmarkException
-     */
-    private static IProfile calculateZahnRoskiesProfile(@NonNull Taggable target) throws ProfileException {
+			// Is the measured angle is inside or outside the object?
+			// Take the midpoint between the before and after points.
+			// If it is within the ROI, the angle is the interior angle
+			// if no, 360-min is the interior angle
+			float midX = (float) ((pointBefore.getX() + pointAfter.getX()) / 2);
+			float midY = (float) ((pointBefore.getY() + pointAfter.getY()) / 2);
+			angles[index] = s.contains(midX, midY) ? angle : 360 - angle;
+		}
 
-        float[] profile = new float[target.getBorderLength()];
-        int index = 0;
+		return new DefaultProfile(angles);
+	}
 
-        Iterator<IPoint> it = target.getBorderList().iterator();
-        while (it.hasNext()) {
+	/**
+	 * Calculate a modified ZR profile. This uses the same window size as the angle
+	 * profile, so is not a true ZR transform.
+	 * 
+	 * @return
+	 * @throws ProfileException
+	 * @throws UnavailableBorderPointException
+	 * @throws MissingLandmarkException
+	 */
+	private static IProfile calculateZahnRoskiesProfile(@NonNull Taggable target) {
 
-            IPoint point = it.next();
+		float[] profile = new float[target.getBorderLength()];
+		int index = 0;
 
-        	IPoint prev = target.getBorderList().get(CellularComponent.wrapIndex(index+1, target.getBorderLength()));
-        	IPoint next = target.getBorderList().get(CellularComponent.wrapIndex(index-1, target.getBorderLength()));
+		Iterator<IPoint> it = target.getBorderList().iterator();
+		while (it.hasNext()) {
 
+			IPoint point = it.next();
 
-            // Get the equation between the first two points
-            LineEquation eq = new DoubleEquation(prev, point);
+			IPoint prev = target.getBorderList()
+					.get(CellularComponent.wrapIndex(index + 1, target.getBorderLength()));
+			IPoint next = target.getBorderList()
+					.get(CellularComponent.wrapIndex(index - 1, target.getBorderLength()));
 
-            // Move out along line
-            IPoint p = eq.getPointOnLine(point, point.getLengthTo(prev)); 
+			// Get the equation between the first two points
+			LineEquation eq = new DoubleEquation(prev, point);
 
-            // Don't go the wrong way along the line
-            if (p.getLengthTo(prev) < point.getLengthTo(prev))
-                p = eq.getPointOnLine(point, -point.getLengthTo(prev));
+			// Move out along line
+			IPoint p = eq.getPointOnLine(point, point.getLengthTo(prev));
 
-            // Get the angle between the points
-            double rad = AngleTools.angleBetweenLines(point, p, point, next);
+			// Don't go the wrong way along the line
+			if (p.getLengthTo(prev) < point.getLengthTo(prev))
+				p = eq.getPointOnLine(point, -point.getLengthTo(prev));
 
-            double angle = Math.toDegrees(rad);
+			// Get the angle between the points
+			double rad = AngleTools.angleBetweenLines(point, p, point, next);
 
-            if (angle > 180)
-                angle = -180 + (angle - 180);
+			double angle = Math.toDegrees(rad);
 
-            if (angle < -180)
-                angle = 180 + (angle + 180);
+			if (angle > 180)
+				angle = -180 + (angle - 180);
 
-            profile[index++] = (float) angle;
+			if (angle < -180)
+				angle = 180 + (angle + 180);
 
-        }
+			profile[index++] = (float) angle;
 
-        // invert if needed
+		}
 
-        if (profile[0] < 0) {
-            for (int i = 0; i < profile.length; i++) {
-                profile[i] = 0 - profile[i];
-            }
-        }
-        
-        // Make a new profile. If possible, use the internal segmentation type of the component
-        return new DefaultProfile(profile);
-    }
+		// invert if needed
 
-    private static IProfile calculateDiameterProfile(@NonNull Taggable target) throws UnavailableBorderPointException, ProfileException {
+		if (profile[0] < 0) {
+			for (int i = 0; i < profile.length; i++) {
+				profile[i] = 0 - profile[i];
+			}
+		}
 
-        float[] profile = new float[target.getBorderLength()];
-        
-        try {
-        	List<IPoint> points = target.getBorderList();
-        	for(int index=0; index<points.size(); index++) {
-        		try {
-        			IPoint point = points.get(index);
-        			IPoint opp   = target.findOppositeBorder(point);
-        			profile[index] = (float) point.getLengthTo(opp);
-        		} catch(Exception e) {
-        			LOGGER.log(Loggable.STACK, "Error finding opposite border in index "+index, e);
-        			profile[index] = 0;
-        		}
-        	}
-        } catch(Exception e) {
-        	LOGGER.log(Loggable.STACK, "Error creating diameter profile", e);
-        	LOGGER.warning("profile length "+profile.length);
-        }
-        
-        // Normalise to the the max diameter
-        double max = Stats.max(profile);
-        IProfile p = new DefaultProfile(profile);
+		// Make a new profile. If possible, use the internal segmentation type of the
+		// component
+		return new DefaultProfile(profile);
+	}
 
-        return new DefaultProfile(p.divide(max));
-    }
+	private static IProfile calculateDiameterProfile(@NonNull Taggable target)
+			throws UnavailableBorderPointException {
 
-    private static IProfile calculateRadiusProfile(@NonNull Taggable target) throws ProfileException {
+		float[] profile = new float[target.getBorderLength()];
 
-        float[] profile = new float[target.getBorderLength()];
+		List<IPoint> points = target.getBorderList();
+		for (int index = 0; index < points.size(); index++) {
+			IPoint point = points.get(index);
+			IPoint opp = target.findOppositeBorder(point);
+			profile[index] = (float) point.getLengthTo(opp);
+		}
 
-        int index = 0;
-        Iterator<IPoint> it = target.getBorderList().iterator();
-        while (it.hasNext()) {
+		// Normalise to the the max diameter
+		double max = Stats.max(profile);
+		IProfile p = new DefaultProfile(profile);
 
-            IPoint point = it.next();
-            profile[index++] = (float) point.getLengthTo(target.getCentreOfMass());
+		return new DefaultProfile(p.divide(max));
+	}
 
-        }
-        
-     // Normalise to the the max diameter
-        double max = Stats.max(profile);
-        IProfile p = new DefaultProfile(profile);
-        return new DefaultProfile(p.divide(max));
-    }
+	private static IProfile calculateRadiusProfile(@NonNull Taggable target)
+			throws ProfileException {
 
-    /**
-     * Calculate the distance between points separated by the window size
-     * 
-     * @return
-     * @throws UnavailableBorderPointException
-     * @throws ProfileException 
-     */
-    public static IProfile calculatePointToPointDistanceProfile(@NonNull Taggable target) throws UnavailableBorderPointException, ProfileException {
-        float[] profile = new float[target.getBorderLength()];
+		float[] profile = new float[target.getBorderLength()];
 
-        int index = 0;
-        Iterator<IPoint> it = target.getBorderList().iterator();
+		int index = 0;
+		Iterator<IPoint> it = target.getBorderList().iterator();
+		while (it.hasNext()) {
 
-        int pointOffset = target.getWindowSize();
+			IPoint point = it.next();
+			profile[index++] = (float) point.getLengthTo(target.getCentreOfMass());
 
-        if (pointOffset == 0) {
-            throw new UnavailableBorderPointException("Window size has not been set in Profilable object");
-        }
+		}
 
-        while (it.hasNext()) {
+		// Normalise to the the max diameter
+		double max = Stats.max(profile);
+		IProfile p = new DefaultProfile(profile);
+		return new DefaultProfile(p.divide(max));
+	}
 
-            IPoint point = it.next();
+	/**
+	 * Calculate the distance between points separated by the window size
+	 * 
+	 * @return
+	 * @throws UnavailableBorderPointException
+	 * @throws ProfileException
+	 */
+	public static IProfile calculatePointToPointDistanceProfile(@NonNull Taggable target)
+			throws UnavailableBorderPointException {
+		float[] profile = new float[target.getBorderLength()];
 
-            IPoint prev = target.getBorderList().get(CellularComponent.wrapIndex(index+1, target.getBorderLength()));
-            double distance = point.getLengthTo(prev);
+		int index = 0;
+		Iterator<IPoint> it = target.getBorderList().iterator();
 
-            profile[index] = (float) distance;
-            index++;
-        }
-        return new DefaultProfile(profile);
-    }
+		int pointOffset = target.getWindowSize();
+
+		if (pointOffset == 0) {
+			throw new UnavailableBorderPointException(
+					"Window size has not been set in Profilable object");
+		}
+
+		while (it.hasNext()) {
+
+			IPoint point = it.next();
+
+			IPoint prev = target.getBorderList()
+					.get(CellularComponent.wrapIndex(index + 1, target.getBorderLength()));
+			double distance = point.getLengthTo(prev);
+
+			profile[index] = (float) distance;
+			index++;
+		}
+		return new DefaultProfile(profile);
+	}
 
 }

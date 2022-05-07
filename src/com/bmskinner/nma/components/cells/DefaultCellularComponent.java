@@ -45,8 +45,6 @@ import com.bmskinner.nma.components.MissingComponentException;
 import com.bmskinner.nma.components.generic.FloatPoint;
 import com.bmskinner.nma.components.generic.IPoint;
 import com.bmskinner.nma.components.measure.DefaultMeasurement;
-import com.bmskinner.nma.components.measure.DoubleEquation;
-import com.bmskinner.nma.components.measure.LineEquation;
 import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.measure.MeasurementScale;
 import com.bmskinner.nma.components.profiles.ProfileException;
@@ -870,24 +868,15 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		// Find the point that is closest to 180 degrees across the CoM
 		double distToCom = p.getLengthTo(centreOfMass);
 
-		/*
-		 * Draw a line from the point through the CoM. Find all points that lie on /
-		 * close to the line Test angle of these points.
-		 */
-		LineEquation eq = new DoubleEquation(p, centreOfMass);
-
-		return Arrays.stream(borderList).filter(point -> point.getLengthTo(p) > distToCom)
-				.min((p1, p2) -> {
-					double d1 = eq.getClosestDistanceToPoint(p1);
-					double d2 = eq.getClosestDistanceToPoint(p2);
-					if (d1 < d2)
-						return -1;
-					if (d1 == d2)
-						return 0;
-					return 1;
-
-				})
-				.orElse(null);
+		// Look for the point at which the direct distance between the two points is
+		// closest to the sum of their respective distances to the centre of mass
+		return Arrays.stream(borderList)
+				.filter(point -> point.getLengthTo(p) > distToCom)
+				.min(Comparator
+						.comparing(point -> Math.abs(point.getLengthTo(centreOfMass)
+								+ distToCom
+								- point.getLengthTo(p))))
+				.orElseThrow(IllegalArgumentException::new);
 	}
 
 	@Override

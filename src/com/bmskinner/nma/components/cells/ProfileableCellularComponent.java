@@ -225,7 +225,8 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 			}
 
 		} catch (ProfileException e1) {
-			throw new ComponentCreationException("Unable to link segments in object constructor",
+			throw new ComponentCreationException(
+					"Unable to create profiles or segments in cellular component constructor",
 					e1);
 		}
 
