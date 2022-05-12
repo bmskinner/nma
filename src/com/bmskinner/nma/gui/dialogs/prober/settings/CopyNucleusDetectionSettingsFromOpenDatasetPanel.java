@@ -76,7 +76,8 @@ public class CopyNucleusDetectionSettingsFromOpenDatasetPanel extends CopyFromOp
 				LOGGER.fine("Copying options from dataset: " + sourceDataset.getName());
 
 				// Ensure the folder is not overwritten by the new options
-				File folder = new File(options.getString(HashOptions.DETECTION_FOLDER));
+				File folder = parent.getNucleusDetectionFolder().get();
+//				File folder = new File(options.getString(HashOptions.DETECTION_FOLDER));
 				Optional<IAnalysisOptions> op = sourceDataset.getAnalysisOptions();
 				if (op.isPresent()) {
 					op.get().setDetectionFolder(CellularComponent.NUCLEUS,
