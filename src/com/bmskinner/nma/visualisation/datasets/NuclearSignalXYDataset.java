@@ -143,8 +143,6 @@ public class NuclearSignalXYDataset extends ComponentXYDataset<Nucleus> {
 		// convert to fractional distance to signal
 		double distanceFromCoM = distanceToBorder * fractionalDistance;
 
-		LOGGER.fine(angle + " distance: " + distanceToBorder);
-
 		// adjust angle because we are counting angles from the negative y axis
 		// i.e. 90 degrees clockwise to the positive x axis
 		// Angles are also plotted anti-clockwise, so subtract our clockwise angle from

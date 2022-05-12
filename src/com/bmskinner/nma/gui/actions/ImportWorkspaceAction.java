@@ -17,6 +17,7 @@
 package com.bmskinner.nma.gui.actions;
 
 import java.io.File;
+import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.logging.Logger;
 
@@ -71,16 +72,25 @@ public class ImportWorkspaceAction extends VoidResultAction {
 					// Try to load the dataset and wait for success
 					CountDownLatch l = new CountDownLatch(1);
 					new GenericFileImporter(dataFile, progressAcceptors.get(0), l,
-							IWorkspace.XML_WORKSPACE).run();
+							IAnalysisDataset.XML_ANALYSIS_DATASET).run();
 					l.await();
 
-					// Find the dataset just added from file name
-					IAnalysisDataset added = DatasetListManager.getInstance().getRootDatasets()
-							.stream()
-							.filter(d -> d.getSavePath().equals(dataFile)).findFirst()
-							.orElseThrow(IllegalArgumentException::new);
+					// TODO: We actually search for the dataset before it is
+					// added to the manager. We need to wait a bit longer or add another latch
+					Thread.sleep(5000); // this currently resolves the issue on small datasets
 
-					UIController.getInstance().fireDatasetAdded(w, added);
+					// Find the dataset just added from file name
+					Optional<IAnalysisDataset> added = DatasetListManager.getInstance()
+							.getRootDatasets()
+							.stream()
+							.filter(d -> d.getSavePath().equals(dataFile)).findFirst();
+
+					if (added.isEmpty()) {
+						LOGGER.fine("Dataset not found to add to workspace");
+						continue;
+					}
+
+					UIController.getInstance().fireDatasetAdded(w, added.get());
 				}
 
 			}

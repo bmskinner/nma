@@ -20,6 +20,7 @@ import java.io.File;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
@@ -28,9 +29,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
-import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
-import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.options.IAnalysisOptions;
 import com.bmskinner.nma.core.GlobalOptions;
 import com.bmskinner.nma.io.Io;
@@ -44,6 +43,8 @@ import com.bmskinner.nma.io.Io.Importer;
  *
  */
 public class FileSelector {
+
+	private static final Logger LOGGER = Logger.getLogger(FileSelector.class.getName());
 
 	private FileSelector() {
 	}
@@ -75,6 +76,7 @@ public class FileSelector {
 	public static @Nullable File chooseStatsExportFile(@NonNull List<IAnalysisDataset> datasets,
 			@Nullable String suffix) {
 
+//		LOGGER.fine(datasets.size() + " datasets to export");
 		File dir = null;
 		suffix = suffix == null ? "stats" : suffix;
 		String defaultName = "";
@@ -83,11 +85,13 @@ public class FileSelector {
 			defaultName = datasets.get(0).getName() + "_" + suffix + Io.TAB_FILE_EXTENSION;
 		} else {
 			dir = IAnalysisDataset.commonPathOfFiles(datasets);
+
 			if (!dir.exists() || !dir.isDirectory()) {
 				dir = GlobalOptions.getInstance().getDefaultDir();
 				defaultName = "Multiple_" + suffix + "_export" + Io.TAB_FILE_EXTENSION;
 			}
 		}
+
 		FileNameExtensionFilter filter = new FileNameExtensionFilter("Table export file", "txt");
 
 		File file = chooseSaveFile(dir, filter, defaultName);

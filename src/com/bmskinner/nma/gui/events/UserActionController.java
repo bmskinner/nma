@@ -175,31 +175,40 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 			return new ClusterFileAssignmentAction(selectedDataset, acceptor);
 
 		if (event.type().equals(UserActionEvent.POST_FISH_MAPPING))
-			return new FishRemappingAction(event.getDatasets(), acceptor);
+			return new FishRemappingAction(DatasetListManager.getInstance().getSelectedDatasets(),
+					acceptor);
 
 		if (event.type().equals(UserActionEvent.EXPORT_STATS))
-			return new ExportNuclearStatsAction(event.getDatasets(), acceptor);
+			return new ExportNuclearStatsAction(
+					DatasetListManager.getInstance().getSelectedDatasets(), acceptor);
 
 		if (event.type().equals(UserActionEvent.EXPORT_PROFILES))
-			return new ExportNuclearProfilesAction(event.getDatasets(), acceptor);
+			return new ExportNuclearProfilesAction(
+					DatasetListManager.getInstance().getSelectedDatasets(), acceptor);
 
 		if (event.type().equals(UserActionEvent.EXPORT_OUTLINES))
-			return new ExportNuclearOutlinesAction(event.getDatasets(), acceptor);
+			return new ExportNuclearOutlinesAction(
+					DatasetListManager.getInstance().getSelectedDatasets(), acceptor);
 
 		if (event.type().equals(UserActionEvent.EXPORT_SIGNALS))
-			return new ExportSignalsAction(event.getDatasets(), acceptor);
+			return new ExportSignalsAction(DatasetListManager.getInstance().getSelectedDatasets(),
+					acceptor);
 
 		if (event.type().equals(UserActionEvent.EXPORT_SHELLS))
-			return new ExportShellsAction(event.getDatasets(), acceptor);
+			return new ExportShellsAction(DatasetListManager.getInstance().getSelectedDatasets(),
+					acceptor);
 
 		if (event.type().equals(UserActionEvent.EXPORT_OPTIONS))
-			return new ExportOptionsAction(event.getDatasets(), acceptor);
+			return new ExportOptionsAction(DatasetListManager.getInstance().getSelectedDatasets(),
+					acceptor);
 
 		if (event.type().equals(UserActionEvent.EXPORT_RULESETS))
-			return new ExportRuleSetsAction(event.getDatasets(), acceptor);
+			return new ExportRuleSetsAction(DatasetListManager.getInstance().getSelectedDatasets(),
+					acceptor);
 
 		if (event.type().equals(UserActionEvent.EXPORT_SINGLE_CELL_IMAGES))
-			return new ExportSingleCellImagesAction(event.getDatasets(), acceptor);
+			return new ExportSingleCellImagesAction(
+					DatasetListManager.getInstance().getSelectedDatasets(), acceptor);
 
 		if (event.type().equals(UserActionEvent.MERGE_DATASETS_ACTION))
 			return new MergeCollectionAction(DatasetListManager.getInstance().getSelectedDatasets(),

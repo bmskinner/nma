@@ -59,7 +59,8 @@ public abstract class ExportStatsAction extends MultiDatasetResultAction {
 
 	private static final Logger LOGGER = Logger.getLogger(ExportStatsAction.class.getName());
 
-	public ExportStatsAction(@NonNull final List<IAnalysisDataset> datasets, @NonNull final String label,
+	public ExportStatsAction(@NonNull final List<IAnalysisDataset> datasets,
+			@NonNull final String label,
 			@NonNull final ProgressBarAcceptor acceptor) {
 		super(datasets, label, acceptor);
 	}
@@ -93,7 +94,8 @@ public abstract class ExportStatsAction extends MultiDatasetResultAction {
 					return;
 				}
 
-				IAnalysisMethod m = new DatasetStatsExporter(file, datasets, optionsPanel.getOptions());
+				IAnalysisMethod m = new DatasetStatsExporter(file, datasets,
+						optionsPanel.getOptions());
 				worker = new DefaultAnalysisWorker(m, datasets.size());
 				worker.addPropertyChangeListener(this);
 				this.setProgressMessage("Exporting stats");
@@ -146,7 +148,8 @@ public abstract class ExportStatsAction extends MultiDatasetResultAction {
 						1); // step
 				JSpinner spinner = new JSpinner(model);
 
-				spinner.addChangeListener(e -> addIntToOptions(spinner, options, Io.PROFILE_SAMPLES_KEY));
+				spinner.addChangeListener(
+						e -> addIntToOptions(spinner, options, Io.PROFILE_SAMPLES_KEY));
 				labels.add(new JLabel(PROFILE_SAMPLE_LBL));
 				fields.add(spinner);
 				addLabelTextRows(labels, fields, layout, panel);

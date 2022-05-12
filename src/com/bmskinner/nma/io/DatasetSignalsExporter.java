@@ -121,7 +121,7 @@ public class DatasetSignalsExporter extends StatsExporter {
 			ISignalGroup signalGroup = d.getCollection().getSignalGroup(signalGroupId).get();
 			String groupName = signalGroup.getGroupName();
 			String groupFolder = d.getAnalysisOptions().get()
-					.getDetectionFolder(signalGroupId.toString())
+					.getNuclearSignalDetectionFolder(signalGroupId)
 					.orElseThrow(MissingOptionException::new)
 					.getAbsolutePath();
 
