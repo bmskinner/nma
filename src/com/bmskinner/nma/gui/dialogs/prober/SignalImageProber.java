@@ -80,7 +80,7 @@ public class SignalImageProber extends IntegratedImageProber {
 		try {
 
 			// make the panel
-			optionsSettingsPanel = new SignalDetectionSettingsPanel(options);
+			optionsSettingsPanel = new SignalDetectionSettingsPanel(folder, op.get(), options);
 
 			Finder<?> finder = new SignalFinder(op.get(), options, dataset.getCollection());
 			imageProberPanel = new GenericImageProberPanel(folder, finder, this);

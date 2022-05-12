@@ -10,6 +10,8 @@ import java.util.logging.Logger;
 
 import javax.swing.JOptionPane;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.options.HashOptions;
@@ -33,29 +35,26 @@ public class CopySignalDetectionSettingsFromOpenDatasetPanel extends CopyFromOpe
 	private static final Logger LOGGER = Logger
 			.getLogger(CopySignalDetectionSettingsFromOpenDatasetPanel.class.getName());
 
+	private final File folder;
+
 	/**
 	 * Create with an analysis options and the detection options to copy to
 	 * 
 	 * @param parent
 	 * @param op
 	 */
-	public CopySignalDetectionSettingsFromOpenDatasetPanel(HashOptions op) {
-		super(null, op);
+	public CopySignalDetectionSettingsFromOpenDatasetPanel(@NonNull File folder,
+			@NonNull IAnalysisOptions parent,
+			@NonNull HashOptions op) {
+		super(parent, op);
+		this.folder = folder;
 	}
 
 	@Override
 	protected ActionListener createCopyActionListener() {
 		return (e) -> {
 
-			final class Pair {
-				IAnalysisDataset d;
-				UUID signalGroupId;
-
-				public Pair(IAnalysisDataset d, UUID signalGroupId) {
-					this.d = d;
-					this.signalGroupId = signalGroupId;
-				}
-
+			final record Pair(IAnalysisDataset d, UUID signalGroupId) {
 				@Override
 				public String toString() {
 					return d.getName() + " - "
@@ -81,18 +80,17 @@ public class CopySignalDetectionSettingsFromOpenDatasetPanel extends CopyFromOpe
 			if (choice != null) {
 
 				LOGGER.fine("Copying options from: " + choice);
-				File folder = new File(options.getString(HashOptions.DETECTION_FOLDER));
 
 				if (choice.d.getAnalysisOptions().isPresent()) {
 					Optional<HashOptions> op = choice.d.getAnalysisOptions().get()
-							.getNuclearSignalOptions(choice.signalGroupId);
+							.getNuclearSignalOptions(choice.signalGroupId());
 					if (op.isPresent()) {
 						options.set(op.get());
 					}
 				}
 
 				// Ensure folder is not overwritten when other options were copied
-				parent.setNuclearSignalDetectionFolder(choice.signalGroupId,
+				parent.setNuclearSignalDetectionFolder(choice.signalGroupId(),
 						folder.getAbsoluteFile());
 
 				fireOptionsChangeEvent();
