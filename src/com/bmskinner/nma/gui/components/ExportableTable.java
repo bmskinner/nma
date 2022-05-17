@@ -36,6 +36,8 @@ import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
 
+import com.bmskinner.nma.core.InputSupplier.RequestCancelledException;
+import com.bmskinner.nma.gui.DefaultInputSupplier;
 import com.bmskinner.nma.io.Io;
 import com.bmskinner.nma.io.Io.Exporter;
 
@@ -122,7 +124,8 @@ public class ExportableTable extends JTable {
 			for (int col = 0; col < getColumnCount(); col++) {
 				Component comp = prepareRenderer(getCellRenderer(row, col), row, col);
 				Dimension d = comp.getPreferredSize();
-				comp.setSize(new Dimension(this.getColumnModel().getColumn(col).getWidth(), d.height));
+				comp.setSize(
+						new Dimension(this.getColumnModel().getColumn(col).getWidth(), d.height));
 				d = comp.getPreferredSize();
 				h = Math.max(h, d.height);
 			}
@@ -255,13 +258,15 @@ public class ExportableTable extends JTable {
 
 		private void export() {
 
-			File saveFile = FileSelector.chooseTableExportFile();
-
-			if (saveFile != null) {
+			try {
+				File saveFile = new DefaultInputSupplier().requestFileSave(null, "Table export",
+						"txt");
 				String string = makeExportString();
 				Exporter.writeString(string, saveFile);
-			}
 
+			} catch (RequestCancelledException e) {
+				// User cancelled
+			}
 		}
 
 		private void copy() {

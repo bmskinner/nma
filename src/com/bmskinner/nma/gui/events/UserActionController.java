@@ -175,43 +175,38 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 			return new ClusterFileAssignmentAction(selectedDataset, acceptor);
 
 		if (event.type().equals(UserActionEvent.POST_FISH_MAPPING))
-			return new FishRemappingAction(DatasetListManager.getInstance().getSelectedDatasets(),
-					acceptor);
+			return new FishRemappingAction(event.getDatasets(), acceptor);
 
 		if (event.type().equals(UserActionEvent.EXPORT_STATS))
-			return new ExportNuclearStatsAction(
-					DatasetListManager.getInstance().getSelectedDatasets(), acceptor);
+			return new ExportNuclearStatsAction(event.getDatasets(), acceptor);
 
 		if (event.type().equals(UserActionEvent.EXPORT_PROFILES))
-			return new ExportNuclearProfilesAction(
-					DatasetListManager.getInstance().getSelectedDatasets(), acceptor);
+			return new ExportNuclearProfilesAction(event.getDatasets(), acceptor);
 
 		if (event.type().equals(UserActionEvent.EXPORT_OUTLINES))
-			return new ExportNuclearOutlinesAction(
-					DatasetListManager.getInstance().getSelectedDatasets(), acceptor);
+			return new ExportNuclearOutlinesAction(event.getDatasets(), acceptor);
 
 		if (event.type().equals(UserActionEvent.EXPORT_SIGNALS))
-			return new ExportSignalsAction(DatasetListManager.getInstance().getSelectedDatasets(),
+			return new ExportSignalsAction(event.getDatasets(),
 					acceptor);
 
 		if (event.type().equals(UserActionEvent.EXPORT_SHELLS))
-			return new ExportShellsAction(DatasetListManager.getInstance().getSelectedDatasets(),
+			return new ExportShellsAction(event.getDatasets(),
 					acceptor);
 
 		if (event.type().equals(UserActionEvent.EXPORT_OPTIONS))
-			return new ExportOptionsAction(DatasetListManager.getInstance().getSelectedDatasets(),
+			return new ExportOptionsAction(event.getDatasets(),
 					acceptor);
 
 		if (event.type().equals(UserActionEvent.EXPORT_RULESETS))
-			return new ExportRuleSetsAction(DatasetListManager.getInstance().getSelectedDatasets(),
+			return new ExportRuleSetsAction(event.getDatasets(),
 					acceptor);
 
 		if (event.type().equals(UserActionEvent.EXPORT_SINGLE_CELL_IMAGES))
-			return new ExportSingleCellImagesAction(
-					DatasetListManager.getInstance().getSelectedDatasets(), acceptor);
+			return new ExportSingleCellImagesAction(event.getDatasets(), acceptor);
 
 		if (event.type().equals(UserActionEvent.MERGE_DATASETS_ACTION))
-			return new MergeCollectionAction(DatasetListManager.getInstance().getSelectedDatasets(),
+			return new MergeCollectionAction(event.getDatasets(),
 					acceptor);
 
 		if (event.type().equals(UserActionEvent.MERGE_SIGNALS_ACTION)) {
@@ -229,7 +224,7 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 					acceptor);
 
 		if (event.type().equals(UserActionEvent.SAVE_SELECTED_DATASETS))
-			return new SaveAllDatasets(DatasetListManager.getInstance().getSelectedDatasets(),
+			return new SaveAllDatasets(event.getDatasets(),
 					acceptor);
 
 		if (event.type().equals(UserActionEvent.CURATE_DATASET))
@@ -246,7 +241,7 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 
 		if (event.type().startsWith(UserActionEvent.ADD_TO_WORKSPACE))
 			return () -> {
-				addToWorkspace(DatasetListManager.getInstance().getSelectedDatasets());
+				addToWorkspace(event.getDatasets());
 			};
 
 		if (event.type().startsWith(UserActionEvent.REMOVE_FROM_WORKSPACE))
@@ -365,8 +360,7 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 
 		if (UserActionEvent.DELETE_DATASET.equals(event.type())) {
 
-			DatasetDeleter deleter = new DatasetDeleter(
-					DatasetListManager.getInstance().getSelectedDatasets());
+			DatasetDeleter deleter = new DatasetDeleter(event.getDatasets());
 			ThreadManager.getInstance().submit(deleter);
 		}
 

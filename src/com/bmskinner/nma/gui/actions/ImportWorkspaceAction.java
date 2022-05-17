@@ -17,20 +17,24 @@
 package com.bmskinner.nma.gui.actions;
 
 import java.io.File;
-import java.util.Optional;
-import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.jdom2.Document;
 
+import com.bmskinner.nma.analysis.DefaultAnalysisWorker;
+import com.bmskinner.nma.analysis.IAnalysisMethod;
+import com.bmskinner.nma.analysis.IAnalysisResult;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.workspaces.DefaultWorkspace;
 import com.bmskinner.nma.components.workspaces.IWorkspace;
 import com.bmskinner.nma.core.DatasetListManager;
+import com.bmskinner.nma.core.ThreadManager;
 import com.bmskinner.nma.gui.ProgressBarAcceptor;
 import com.bmskinner.nma.gui.events.UIController;
-import com.bmskinner.nma.io.GenericFileImporter;
+import com.bmskinner.nma.io.DatasetImportMethod;
+import com.bmskinner.nma.io.XMLImportMethod;
 
 public class ImportWorkspaceAction extends VoidResultAction {
 
@@ -70,27 +74,29 @@ public class ImportWorkspaceAction extends VoidResultAction {
 						continue;
 
 					// Try to load the dataset and wait for success
-					CountDownLatch l = new CountDownLatch(1);
-					new GenericFileImporter(dataFile, progressAcceptors.get(0), l,
-							IAnalysisDataset.XML_ANALYSIS_DATASET).run();
-					l.await();
+					// First read the XML file
+					XMLImportMethod method = new XMLImportMethod(dataFile);
+					worker = new DefaultAnalysisWorker(method);
+					ThreadManager.getInstance().execute(worker);
 
-					// TODO: We actually search for the dataset before it is
-					// added to the manager. We need to wait a bit longer or add another latch
-					Thread.sleep(5000); // this currently resolves the issue on small datasets
+					try {
+						IAnalysisResult r = worker.get();
 
-					// Find the dataset just added from file name
-					Optional<IAnalysisDataset> added = DatasetListManager.getInstance()
-							.getRootDatasets()
-							.stream()
-							.filter(d -> d.getSavePath().equals(dataFile)).findFirst();
+						// Now unmarshall the XML file into a dataset
+						Document datasetDoc = method.getXMLDocument();
+						IAnalysisMethod importMethod = new DatasetImportMethod(datasetDoc);
+						worker = new DefaultAnalysisWorker(importMethod);
+						ThreadManager.getInstance().execute(worker);
 
-					if (added.isEmpty()) {
-						LOGGER.fine("Dataset not found to add to workspace");
-						continue;
+						r = worker.get();
+						IAnalysisDataset d = r.getFirstDataset();
+						LOGGER.fine("Imported " + d.getName());
+						UIController.getInstance().fireDatasetAdded(d);
+						UIController.getInstance().fireDatasetAdded(w, d);
+
+					} catch (ExecutionException e) {
+						LOGGER.warning("Unable to import dataset: " + e.getMessage());
 					}
-
-					UIController.getInstance().fireDatasetAdded(w, added.get());
 				}
 
 			}

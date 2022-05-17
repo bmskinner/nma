@@ -10,6 +10,7 @@ import javax.swing.JMenuItem;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
+import com.bmskinner.nma.core.DatasetListManager;
 import com.bmskinner.nma.gui.events.UserActionController;
 import com.bmskinner.nma.gui.events.UserActionEvent;
 
@@ -31,6 +32,10 @@ public class MenuFactory {
 	 *
 	 */
 	public class ContextualMenu extends JMenu implements ContextEnabled {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
 		private final int context;
 
 		/**
@@ -75,6 +80,10 @@ public class MenuFactory {
 	 *
 	 */
 	public class ContextualMenuItem extends JMenuItem implements ContextEnabled {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
 		private final int context;
 
 		/**
@@ -84,13 +93,16 @@ public class MenuFactory {
 		 * @param event   the action to call
 		 * @param context the selection states under which the item is enabled
 		 */
-		public ContextualMenuItem(@NonNull String title, @NonNull String event, int context, @Nullable String tooltip) {
+		public ContextualMenuItem(@NonNull String title, @NonNull String event, int context,
+				@Nullable String tooltip) {
 			super(title);
 			this.context = context;
 			this.setToolTipText(tooltip);
 
 			addActionListener(
-					e -> UserActionController.getInstance().userActionEventReceived(new UserActionEvent(this, event)));
+					e -> UserActionController.getInstance()
+							.userActionEventReceived(new UserActionEvent(this, event,
+									DatasetListManager.getInstance().getSelectedDatasets())));
 		}
 
 		/**
