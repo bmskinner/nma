@@ -17,7 +17,9 @@
 package com.bmskinner.nma.io;
 
 import java.io.File;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -42,7 +44,6 @@ import com.bmskinner.nma.components.profiles.ProfileException;
 import com.bmskinner.nma.components.profiles.ProfileType;
 import com.bmskinner.nma.components.rules.OrientationMark;
 import com.bmskinner.nma.logging.Loggable;
-import com.bmskinner.nma.stats.Stats;
 
 /**
  * Export all the stats from a dataset to a text file for downstream analysis
@@ -69,27 +70,35 @@ public class DatasetStatsExporter extends StatsExporter {
 	/** The length to which profiles should be normalised */
 	private final int normProfileLength;
 
+	private final List<Measurement> measurements;
+
 	/**
 	 * Create specifying the folder stats will be exported into
 	 * 
 	 * @param folder
 	 */
-	public DatasetStatsExporter(@NonNull File file, @NonNull List<IAnalysisDataset> list, HashOptions options) {
+	public DatasetStatsExporter(@NonNull File file, @NonNull List<IAnalysisDataset> list,
+			HashOptions options) {
 		super(file, list);
 		segCount = list.get(0).getCollection().getProfileManager().getSegmentCount();
 		if (list.size() == 1) {
 			isIncludeSegments = true;
 		} else {
 			isIncludeSegments = list.stream()
-					.allMatch(d -> d.getCollection().getProfileManager().getSegmentCount() == segCount);
+					.allMatch(d -> d.getCollection().getProfileManager()
+							.getSegmentCount() == segCount);
 		}
 		profileSamples = options.getInt(Io.PROFILE_SAMPLES_KEY);
 
 		// Only include if present in all cells of all datasets
-		isIncludeGlcm = list.stream().allMatch(d -> d.getCollection().getCells().stream().noneMatch(c -> c
-				.getPrimaryNucleus().getMeasurement(GLCMParameter.SUM.toStat()) == Statistical.ERROR_CALCULATING_STAT));
+		isIncludeGlcm = list.stream()
+				.allMatch(d -> d.getCollection().getCells().stream().noneMatch(c -> c
+						.getPrimaryNucleus().getMeasurement(
+								GLCMParameter.SUM.toStat()) == Statistical.ERROR_CALCULATING_STAT));
 
 		normProfileLength = chooseNormalisedProfileLength();
+
+		measurements = chooseMeasurementsToExport();
 	}
 
 	/**
@@ -97,16 +106,36 @@ public class DatasetStatsExporter extends StatsExporter {
 	 * 
 	 * @param folder
 	 */
-	public DatasetStatsExporter(@NonNull File file, @NonNull IAnalysisDataset dataset, HashOptions options) {
+	public DatasetStatsExporter(@NonNull File file, @NonNull IAnalysisDataset dataset,
+			HashOptions options) {
 		super(file, dataset);
 		segCount = dataset.getCollection().getProfileManager().getSegmentCount();
 		isIncludeSegments = true;
 		profileSamples = options.getInt(Io.PROFILE_SAMPLES_KEY);
 
-		isIncludeGlcm = dataset.getCollection().getCells().stream().noneMatch(c -> c.getPrimaryNucleus()
-				.getMeasurement(GLCMParameter.SUM.toStat()) == Statistical.ERROR_CALCULATING_STAT);
+		isIncludeGlcm = dataset.getCollection().getCells().stream()
+				.noneMatch(c -> c.getPrimaryNucleus()
+						.getMeasurement(
+								GLCMParameter.SUM.toStat()) == Statistical.ERROR_CALCULATING_STAT);
 
 		normProfileLength = chooseNormalisedProfileLength();
+
+		measurements = chooseMeasurementsToExport();
+	}
+
+	/**
+	 * Not all datasets may have the same measurement. Take the union of all
+	 * possible measurements.
+	 * 
+	 * @return
+	 */
+	private List<Measurement> chooseMeasurementsToExport() {
+		Set<Measurement> result = new HashSet<>();
+		for (IAnalysisDataset d : datasets) {
+			result.addAll(d.getAnalysisOptions().get().getRuleSetCollection()
+					.getMeasurableValues());
+		}
+		return result.stream().toList();
 	}
 
 	/**
@@ -119,9 +148,10 @@ public class DatasetStatsExporter extends StatsExporter {
 
 		outLine.append("Dataset\tFile\tCellID\tComponent\tFolder\tImage\tCentre_of_mass\t");
 
-		for (Measurement s : Measurement.getNucleusStats()) {
+		for (Measurement s : measurements) {
 
-			String label = s.label(MeasurementScale.PIXELS).replace(" ", "_").replace("(", "_").replace(")", "")
+			String label = s.label(MeasurementScale.PIXELS).replace(" ", "_").replace("(", "_")
+					.replace(")", "")
 					.replace("__", "_");
 			outLine.append(label + TAB);
 
@@ -129,7 +159,8 @@ public class DatasetStatsExporter extends StatsExporter {
 														// measurements when
 														// length or area
 
-				label = s.label(MeasurementScale.MICRONS).replace(" ", "_").replace("(", "_").replace(")", "")
+				label = s.label(MeasurementScale.MICRONS).replace(" ", "_").replace("(", "_")
+						.replace(")", "")
 						.replace("__", "_");
 
 				outLine.append(label + TAB);
@@ -139,7 +170,8 @@ public class DatasetStatsExporter extends StatsExporter {
 
 		if (isIncludeGlcm) {
 			for (Measurement s : Measurement.getGlcmStats()) {
-				String label = s.label(MeasurementScale.PIXELS).replace(" ", "_").replace("__", "_");
+				String label = s.label(MeasurementScale.PIXELS).replace(" ", "_").replace("__",
+						"_");
 				outLine.append("GLCM_" + label + TAB);
 			}
 		}
@@ -150,10 +182,6 @@ public class DatasetStatsExporter extends StatsExporter {
 				for (int i = 0; i < profileSamples; i++) {
 					outLine.append(label + "_" + i + TAB);
 				}
-			}
-			// Frankenprofile separately
-			for (int i = 0; i < profileSamples; i++) {
-				outLine.append("Franken_profile_" + i + TAB);
 			}
 		}
 
@@ -185,19 +213,23 @@ public class DatasetStatsExporter extends StatsExporter {
 	 * @throws ProfileException
 	 */
 	@Override
-	protected void append(@NonNull IAnalysisDataset d, @NonNull StringBuilder outLine) throws Exception {
-		ISegmentedProfile medianProfile = d.getCollection().getProfileCollection()
-				.getSegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE, Stats.MEDIAN);
+	protected void append(@NonNull IAnalysisDataset d, @NonNull StringBuilder outLine)
+			throws Exception {
+
 		for (ICell cell : d.getCollection().getCells()) {
 
 			if (cell.hasNucleus()) {
 
 				for (Nucleus n : cell.getNuclei()) {
 
-					outLine.append(d.getName() + TAB).append(d.getSavePath() + TAB).append(cell.getId() + TAB)
+					outLine.append(d.getName() + TAB)
+							.append(d.getSavePath() + TAB)
+							.append(cell.getId() + TAB)
 							.append(CellularComponent.NUCLEUS + "_" + n.getNameAndNumber() + TAB)
-							.append(n.getSourceFolder() + TAB).append(n.getSourceFileName() + TAB)
+							.append(n.getSourceFolder() + TAB)
+							.append(n.getSourceFileName() + TAB)
 							.append(n.getOriginalCentreOfMass().toString() + TAB);
+
 					appendNucleusStats(outLine, d, n);
 
 					if (isIncludeProfiles) {
@@ -220,16 +252,18 @@ public class DatasetStatsExporter extends StatsExporter {
 		}
 	}
 
-	private void appendNucleusStats(StringBuilder outLine, IAnalysisDataset d, CellularComponent c) {
+	private void appendNucleusStats(StringBuilder outLine, IAnalysisDataset d,
+			CellularComponent c) {
 
-		for (Measurement s : d.getAnalysisOptions().get().getRuleSetCollection().getMeasurableValues()) {
+		for (Measurement s : measurements) {
 			double varP = 0;
 			double varM = 0;
 
 			if (s.equals(Measurement.VARIABILITY)) {
 
 				try {
-					varP = d.getCollection().getNormalisedDifferenceToMedian(OrientationMark.REFERENCE, (Taggable) c);
+					varP = d.getCollection().getNormalisedDifferenceToMedian(
+							OrientationMark.REFERENCE, (Taggable) c);
 					varM = varP;
 				} catch (MissingLandmarkException e) {
 					LOGGER.log(Loggable.STACK, "Landmark not present in component", e);
@@ -285,16 +319,20 @@ public class DatasetStatsExporter extends StatsExporter {
 		double varM = 0;
 
 		ISegmentedProfile p = c.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE);
-		ISegmentedProfile normalisedProfile = p.interpolate(normProfileLength); // Allows point indexes
+		ISegmentedProfile normalisedProfile = p.interpolate(normProfileLength); // Allows point
+																				// indexes
 		List<IProfileSegment> segs = p.getOrderedSegments();
 
 		for (IProfileSegment segment : segs) {
 			if (segment != null) {
 				// Add the length of the segment
 				int indexLength = segment.length();
-				double fractionOfPerimeter = (double) indexLength / (double) segment.getProfileLength();
-				varP = fractionOfPerimeter * c.getMeasurement(Measurement.PERIMETER, MeasurementScale.PIXELS);
-				varM = fractionOfPerimeter * c.getMeasurement(Measurement.PERIMETER, MeasurementScale.MICRONS);
+				double fractionOfPerimeter = (double) indexLength
+						/ (double) segment.getProfileLength();
+				varP = fractionOfPerimeter
+						* c.getMeasurement(Measurement.PERIMETER, MeasurementScale.PIXELS);
+				varM = fractionOfPerimeter
+						* c.getMeasurement(Measurement.PERIMETER, MeasurementScale.MICRONS);
 				outLine.append(varP + TAB);
 				outLine.append(varM + TAB);
 
@@ -329,12 +367,14 @@ public class DatasetStatsExporter extends StatsExporter {
 				for (Nucleus n : d.getCollection().getNuclei()) {
 					int l = n.getProfile(ProfileType.ANGLE).size();
 					if (l > profileLength)
-						profileLength = (int) Math.ceil(l / DEFAULT_PROFILE_LENGTH) * DEFAULT_PROFILE_LENGTH;
+						profileLength = (int) Math.ceil(l / DEFAULT_PROFILE_LENGTH)
+								* DEFAULT_PROFILE_LENGTH;
 				}
 			}
 		} catch (MissingProfileException | ProfileException | MissingLandmarkException e) {
 			LOGGER.log(Loggable.STACK, "Unable to get profile: " + e.getMessage(), e);
-			LOGGER.fine("Unable to get a profile, defaulting to default profile length of " + DEFAULT_PROFILE_LENGTH);
+			LOGGER.fine("Unable to get a profile, defaulting to default profile length of "
+					+ DEFAULT_PROFILE_LENGTH);
 		}
 		return profileLength;
 	}

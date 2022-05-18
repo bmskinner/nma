@@ -26,66 +26,65 @@ import com.bmskinner.nma.components.measure.MeasurementDimension;
  *
  */
 public enum ProfileType {
-    ANGLE("Angle profile", "Angle", MeasurementDimension.ANGLE), 
-//    FRANKEN("Franken profile", "Angle", MeasurementDimension.ANGLE), 
-    DIAMETER("Diameter profile", "Distance across CoM", MeasurementDimension.LENGTH), 
-    RADIUS("Radius profile", "Distance from CoM", MeasurementDimension.LENGTH),
-    ZAHN_ROSKIES("Zahn-Roskies profile", "Angle delta", MeasurementDimension.NONE);
+	ANGLE("Angle profile", "Angle", MeasurementDimension.ANGLE),
+	DIAMETER("Diameter profile", "Distance across CoM", MeasurementDimension.LENGTH),
+	RADIUS("Radius profile", "Distance from CoM", MeasurementDimension.LENGTH),
+	ZAHN_ROSKIES("Zahn-Roskies profile", "Angle delta", MeasurementDimension.NONE);
 
-    private String             name;
-    private String             label;
-    private MeasurementDimension dimension;
+	private String name;
+	private String label;
+	private MeasurementDimension dimension;
 
-    /**
-     * Constructor
-     * 
-     * @param name the name of the profile for display
-     * @param label the label to use on chart axes with this profile
-     * @param dimension the statistical dimension the profile covers
-     */
-    ProfileType(String name, String label, MeasurementDimension dimension) {
-        this.name = name;
-        this.label = label;
-        this.dimension = dimension;
-    }
+	/**
+	 * Constructor
+	 * 
+	 * @param name      the name of the profile for display
+	 * @param label     the label to use on chart axes with this profile
+	 * @param dimension the statistical dimension the profile covers
+	 */
+	ProfileType(String name, String label, MeasurementDimension dimension) {
+		this.name = name;
+		this.label = label;
+		this.dimension = dimension;
+	}
 
-    @Override
+	@Override
 	public String toString() {
-        return this.name;
-    }
+		return this.name;
+	}
 
-    public String getLabel() {
-        return this.label;
-    }
+	public String getLabel() {
+		return this.label;
+	}
 
-    public static ProfileType fromString(String s) {
-        for (ProfileType p : ProfileType.values()) {
-            if (s.equals(p.name)) {
-                return p;
-            }
-        }
-        return null;
-    }
+	public static ProfileType fromString(String s) {
+		for (ProfileType p : ProfileType.values()) {
+			if (s.equals(p.name)) {
+				return p;
+			}
+		}
+		return null;
+	}
 
-    public MeasurementDimension getDimension() {
-        return this.dimension;
-    }
+	public MeasurementDimension getDimension() {
+		return this.dimension;
+	}
 
-    /**
-     * The profile types that should be exported to file
-     * 
-     * @return
-     */
-    public static ProfileType[] exportValues() {
-    	return new ProfileType[] { ANGLE, DIAMETER, RADIUS };
-    }
+	/**
+	 * The profile types that should be exported to file
+	 * 
+	 * @return
+	 */
+	public static ProfileType[] exportValues() {
+		return new ProfileType[] { ANGLE, DIAMETER, RADIUS };
+	}
 
-    /**
-     * The profile types that should be displayed in the GUI
-     * 
-     * @return
-     */
-    public static ProfileType[] displayValues() {
-    	return new ProfileType[] { ANGLE, DIAMETER, RADIUS };
-    }
+	/**
+	 * The profile types that should be displayed in the GUI
+	 * 
+	 * @return
+	 */
+	public static ProfileType[] displayValues() {
+		return new ProfileType[] { ANGLE, DIAMETER, RADIUS };
+	}
 }
