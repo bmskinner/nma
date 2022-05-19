@@ -16,6 +16,7 @@
  ******************************************************************************/
 package com.bmskinner.nma.gui.actions;
 
+import java.io.File;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
@@ -45,21 +46,26 @@ public class ImportDatasetAction extends VoidResultAction {
 	private static final Logger LOGGER = Logger.getLogger(ImportDatasetAction.class.getName());
 
 	private final Document doc;
+	private final File file;
 	private static final @NonNull String PROGRESS_BAR_LABEL = "Building dataset...";
 
 	/**
 	 * Create an import action for the given main window. Specify the file to be
 	 * opened.
 	 * 
-	 * @param mw   the main window to which a progress bar will be attached
-	 * @param file the dataset file to open
+	 * @param acceptor the progress bar acceptor
+	 * @param doc      the XML document to unmarshall
+	 * @param file     the dataset file that was opened
+	 * @param latch    a countdown if needed
 	 */
 	public ImportDatasetAction(@NonNull final ProgressBarAcceptor acceptor, @NonNull Document doc,
+			@NonNull File origin,
 			@Nullable CountDownLatch latch) {
 		super(PROGRESS_BAR_LABEL, acceptor);
 		if (latch != null)
 			setLatch(latch);
 		this.doc = doc;
+		this.file = origin;
 	}
 
 	@Override
@@ -97,6 +103,9 @@ public class ImportDatasetAction extends VoidResultAction {
 			IAnalysisResult r = worker.get();
 
 			IAnalysisDataset dataset = r.getFirstDataset();
+
+			// Update the save file to the file we just opened, in case it has moved
+			dataset.setSavePath(file);
 
 			// Save newly converted datasets
 			if (r.getBoolean(DatasetImportMethod.WAS_CONVERTED_BOOL)) {

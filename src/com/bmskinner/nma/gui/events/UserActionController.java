@@ -744,7 +744,7 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 
 		if (IAnalysisDataset.XML_ANALYSIS_DATASET.equals(f.type())) {
 			ThreadManager.getInstance()
-					.execute(new ImportDatasetAction(acceptor, f.document(), null));
+					.execute(new ImportDatasetAction(acceptor, f.document(), f.file(), null));
 		}
 
 		if (IWorkspace.XML_WORKSPACE.equals(f.type())) {

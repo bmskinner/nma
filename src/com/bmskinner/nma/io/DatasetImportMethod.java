@@ -103,6 +103,7 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
 			// rather than after the document is built - takes a long time with large
 			// datasets
 			dataset = DatasetCreator.createRoot(doc.getRootElement());
+
 			validateDataset();
 
 		} catch (Exception e) {

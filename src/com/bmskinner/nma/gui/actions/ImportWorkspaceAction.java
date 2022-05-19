@@ -90,6 +90,9 @@ public class ImportWorkspaceAction extends VoidResultAction {
 
 						r = worker.get();
 						IAnalysisDataset d = r.getFirstDataset();
+						// Update the save file to the file we just opened, in case it has moved
+						d.setSavePath(dataFile);
+
 						LOGGER.fine("Imported " + d.getName());
 						UIController.getInstance().fireDatasetAdded(d);
 						UIController.getInstance().fireDatasetAdded(w, d);
