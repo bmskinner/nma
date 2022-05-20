@@ -496,7 +496,7 @@ public class ProfileManager {
 	 * @return true if the merge is possible, false otherwise
 	 * @throws MissingLandmarkException
 	 */
-	boolean testSegmentsMergeable(IProfileSegment seg1, IProfileSegment seg2)
+	public boolean testSegmentsMergeable(IProfileSegment seg1, IProfileSegment seg2)
 			throws MissingLandmarkException {
 
 		if (!seg1.nextSegment().getID().equals(seg2.getID())) {
@@ -524,7 +524,7 @@ public class ProfileManager {
 	 * @throws ProfileException            if the update fails
 	 * @throws MissingComponentException
 	 */
-	void mergeSegments(@NonNull UUID seg1, @NonNull UUID seg2, @NonNull UUID newID)
+	public void mergeSegments(@NonNull UUID seg1, @NonNull UUID seg2, @NonNull UUID newID)
 			throws ProfileException, MissingComponentException {
 		// Note - we can't do the root check here. It must be at the segmentation
 		// handler level
@@ -770,7 +770,7 @@ public class ProfileManager {
 	 * @throws ProfileException
 	 * @throws MissingComponentException
 	 */
-	void unmergeSegments(@NonNull UUID segId)
+	public void unmergeSegments(@NonNull UUID segId)
 			throws ProfileException, UnsegmentedProfileException, MissingComponentException {
 
 		ISegmentedProfile medianProfile = collection.getProfileCollection().getSegmentedProfile(

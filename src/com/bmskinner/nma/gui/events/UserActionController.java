@@ -20,12 +20,8 @@ import com.bmskinner.nma.components.generic.IPoint;
 import com.bmskinner.nma.components.measure.MeasurementScale;
 import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.options.IAnalysisOptions;
-import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
-import com.bmskinner.nma.components.profiles.Landmark;
 import com.bmskinner.nma.components.profiles.MissingProfileException;
 import com.bmskinner.nma.components.profiles.ProfileException;
-import com.bmskinner.nma.components.profiles.SegmentationHandler;
-import com.bmskinner.nma.components.rules.OrientationMark;
 import com.bmskinner.nma.components.workspaces.IWorkspace;
 import com.bmskinner.nma.components.workspaces.WorkspaceFactory;
 import com.bmskinner.nma.core.DatasetListManager;
@@ -67,9 +63,14 @@ import com.bmskinner.nma.gui.actions.ReplaceSourceImageDirectoryAction;
 import com.bmskinner.nma.gui.actions.RunGLCMAction;
 import com.bmskinner.nma.gui.actions.RunProfilingAction;
 import com.bmskinner.nma.gui.actions.RunSegmentationAction;
+import com.bmskinner.nma.gui.actions.SegmentMergeAction;
+import com.bmskinner.nma.gui.actions.SegmentSplitAction;
+import com.bmskinner.nma.gui.actions.SegmentUnmergeAction;
 import com.bmskinner.nma.gui.actions.ShellAnalysisAction;
 import com.bmskinner.nma.gui.actions.SignalWarpingAction;
 import com.bmskinner.nma.gui.actions.SingleDatasetResultAction;
+import com.bmskinner.nma.gui.actions.UpdateLandmarkAction;
+import com.bmskinner.nma.gui.actions.UpdateSegmentIndexAction;
 import com.bmskinner.nma.gui.dialogs.collections.AbstractCellCollectionDialog;
 import com.bmskinner.nma.gui.dialogs.collections.ManualCurationDialog;
 import com.bmskinner.nma.gui.runnables.MorphologyAnalysis;
@@ -597,70 +598,24 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 
 	@Override
 	public void landmarkUpdateEventReceived(LandmarkUpdateEvent event) {
-		if (event.dataset != null)
-			updateLandmarkInDataset(event);
-
-	}
-
-	private void updateLandmarkInDataset(LandmarkUpdateEvent event) {
-		IAnalysisDataset d = event.dataset;
-
-		Landmark rp = d.getCollection().getRuleSetCollection()
-				.getLandmark(OrientationMark.REFERENCE).get();
-
-		if (d.getCollection().isVirtual() && rp.equals(event.lm)) {
-			LOGGER.warning("Cannot update core border tag for a child dataset");
-			return;
-		}
-
-		SegmentationHandler sh = new SegmentationHandler(d);
-		sh.setLandmark(event.lm, event.newIndex);
-
-		if (rp.equals(event.lm)) {
-
-			Runnable r = () -> {
-				final CountDownLatch segmentLatch = new CountDownLatch(1);
-
-				new Thread(() -> { // run segmentation
-					new RunSegmentationAction(event.dataset,
-							MorphologyAnalysisMode.SEGMENT_FROM_SCRATCH,
-							SingleDatasetResultAction.NO_FLAG, acceptor,
-							segmentLatch).run();
-				}).start();
-
-				new Thread(() -> { // wait for segmentation and run refolding
-					try {
-						segmentLatch.await();
-						new RefoldNucleusAction(event.dataset, acceptor, null).run();
-					} catch (InterruptedException e) {
-						Thread.currentThread().interrupt();
-						return;
-					}
-				}).start();
-
-			};
-			ThreadManager.getInstance().execute(r);
-		} else {
-			UIController.getInstance().fireProfilesUpdated(d);
+		if (event.dataset != null) {
+			ThreadManager.getInstance().execute(
+					new UpdateLandmarkAction(event.dataset, event.lm, event.newIndex, acceptor));
 		}
 	}
 
 	@Override
 	public void segmentStartIndexUpdateEventReceived(SegmentStartIndexUpdateEvent event) {
-		Runnable r = () -> {
-			if (event.isDataset()) {
-				try {
-					SegmentationHandler sh = new SegmentationHandler(event.dataset);
-					sh.updateSegmentStartIndexAction(event.id, event.index);
-					userActionEventReceived(
-							new UserActionEvent(this, UserActionEvent.APPLY_MEDIAN_TO_NUCLEI,
-									event.dataset));
-				} catch (ProfileException | MissingComponentException | SegmentUpdateException e) {
-					LOGGER.warning("Cannot update this segment start index");
-				}
-			}
 
-			if (event.isCell()) {
+		if (event.isDataset()) {
+			ThreadManager.getInstance().execute(
+					new UpdateSegmentIndexAction(event.dataset, event.id, event.index,
+							acceptor));
+
+		}
+
+		if (event.isCell()) {
+			Runnable r = () -> {
 				try {
 					event.dataset.getCollection().getProfileManager()
 							.updateCellSegmentStartIndex(event.cell, event.id, event.index);
@@ -670,43 +625,33 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 				} finally {
 					UIController.getInstance().fireCellUpdatedEvent(event.dataset, event.cell);
 				}
-			}
-		};
-		ThreadManager.getInstance().execute(r);
+			};
+			ThreadManager.getInstance().execute(r);
+		}
 	}
 
 	@Override
 	public void segmentMergeEventReceived(SegmentMergeEvent event) {
-		Runnable r = () -> {
-			try {
-				SegmentationHandler sh = new SegmentationHandler(event.dataset);
-				sh.mergeSegments(event.id1, event.id2);
-				UIController.getInstance().fireProfilesUpdated(event.dataset);
-			} catch (ProfileException | MissingComponentException e) {
-				LOGGER.warning("Could not merge segments: " + e.getMessage());
-			}
-		};
-		ThreadManager.getInstance().execute(r);
+		if (event.dataset != null) {
+			ThreadManager.getInstance().execute(
+					new SegmentMergeAction(event.dataset, event.id1, event.id2, acceptor));
+		}
 	}
 
 	@Override
 	public void segmentUnmergeEventReceived(SegmentUnmergeEvent event) {
-		Runnable r = () -> {
-			SegmentationHandler sh = new SegmentationHandler(event.dataset);
-			sh.unmergeSegments(event.id);
-			UIController.getInstance().fireProfilesUpdated(event.dataset);
-		};
-		ThreadManager.getInstance().execute(r);
+		if (event.dataset != null) {
+			ThreadManager.getInstance().execute(
+					new SegmentUnmergeAction(event.dataset, event.id, acceptor));
+		}
 	}
 
 	@Override
 	public void segmentSplitEventReceived(SegmentSplitEvent event) {
-		Runnable r = () -> {
-			SegmentationHandler sh = new SegmentationHandler(event.dataset);
-			sh.splitSegment(event.id);
-			UIController.getInstance().fireProfilesUpdated(event.dataset);
-		};
-		ThreadManager.getInstance().execute(r);
+		if (event.dataset != null) {
+			ThreadManager.getInstance().execute(
+					new SegmentSplitAction(event.dataset, event.id, acceptor));
+		}
 	}
 
 	@Override

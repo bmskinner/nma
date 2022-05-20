@@ -20,6 +20,8 @@ import org.junit.runners.Parameterized.Parameters;
 
 import com.bmskinner.nma.TestDatasetBuilder;
 import com.bmskinner.nma.analysis.classification.NucleusClusteringMethod;
+import com.bmskinner.nma.analysis.profiles.SegmentMergeMethod;
+import com.bmskinner.nma.analysis.profiles.UpdateSegmentIndexMethod;
 import com.bmskinner.nma.components.cells.ICell;
 import com.bmskinner.nma.components.datasets.DatasetValidator;
 import com.bmskinner.nma.components.datasets.DefaultAnalysisDataset;
@@ -39,7 +41,6 @@ import com.bmskinner.nma.stats.Stats;
 @RunWith(Parameterized.class)
 public class SegmentationHandlerTest {
 	private static final Logger LOGGER = Logger.getLogger(Loggable.PROJECT_LOGGER);
-	private SegmentationHandler sh;
 	private IAnalysisDataset dataset;
 	private DatasetValidator dv = new DatasetValidator();
 
@@ -65,7 +66,6 @@ public class SegmentationHandlerTest {
 	@Before
 	public void setUp() throws Exception {
 		dataset = createInstance(source);
-		sh = new SegmentationHandler(dataset);
 	}
 
 	/**
@@ -125,7 +125,7 @@ public class SegmentationHandlerTest {
 		int oldIndex = rpSeg.getStartIndex();
 
 		// Should not complete -this is at the RP
-		sh.updateSegmentStartIndexAction(rpSeg.getID(), oldIndex + 10);
+		new UpdateSegmentIndexMethod(dataset, rpSeg.getID(), oldIndex + 10).call();
 
 		IProfileSegment rpSegNew = dataset.getCollection().getProfileCollection()
 				.getSegmentContaining(OrientationMark.REFERENCE);
@@ -152,8 +152,8 @@ public class SegmentationHandlerTest {
 
 			int oldIndex = seg.getStartIndex();
 
-			// Should not complete -this is at the RP
-			sh.updateSegmentStartIndexAction(seg.getID(), oldIndex + 10);
+			// Should not complete - this is at the RP
+			new UpdateSegmentIndexMethod(dataset, seg.getID(), oldIndex + 10).call();
 
 			IProfileSegment segNew = dataset.getCollection().getProfileCollection()
 					.getSegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE, Stats.MEDIAN)
@@ -179,7 +179,7 @@ public class SegmentationHandlerTest {
 		IProfileSegment seg0 = profile.getSegmentContaining(profile.size() / 2);
 		IProfileSegment seg1 = seg0.nextSegment();
 
-		sh.mergeSegments(seg0.getID(), seg1.getID());
+		new SegmentMergeMethod(dataset, seg0.getID(), seg1.getID()).call();
 
 		if (dataset.isRoot()) {
 			assertEquals("Segment should be merged", profile.getSegmentCount() - 1,
@@ -196,8 +196,8 @@ public class SegmentationHandlerTest {
 							Stats.MEDIAN);
 			IProfileSegment newSeg = newProfile.getSegment(newSegId);
 			assertTrue(newSeg.hasMergeSources());
+			new UpdateSegmentIndexMethod(dataset, newSegId, newSeg.getStartIndex() + 10).call();
 
-			sh.updateSegmentStartIndexAction(newSegId, newSeg.getStartIndex() + 10);
 			if (!dv.validate(dataset))
 				fail("Dataset should validate: " + dv.getSummary() + " " + dv.getErrors());
 		}
@@ -218,15 +218,13 @@ public class SegmentationHandlerTest {
 		ISegmentedProfile profile = d.getCollection().getProfileCollection()
 				.getSegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE, Stats.MEDIAN);
 
-		SegmentationHandler s = new SegmentationHandler(d);
-
 		// Merge two segments that are not at the RP
 		IProfileSegment s0 = d.getCollection().getProfileCollection()
 				.getSegmentContaining(OrientationMark.REFERENCE);
 		IProfileSegment s1 = s0.nextSegment();
 		IProfileSegment s2 = s1.nextSegment();
 
-		s.mergeSegments(s1.getID(), s2.getID());
+		new SegmentMergeMethod(dataset, s1.getID(), s2.getID()).call();
 
 		// Get the id of the newly added segment
 		UUID newSegId = d.getCollection().getProfileCollection().getSegmentIDs().stream()
@@ -240,7 +238,8 @@ public class SegmentationHandlerTest {
 		IProfileSegment newSeg = newProfile.getSegment(newSegId);
 		assertTrue(newSeg.hasMergeSources());
 
-		s.updateSegmentStartIndexAction(newSegId, newSeg.getStartIndex() + 20);
+		new UpdateSegmentIndexMethod(dataset, newSegId, newSeg.getStartIndex() + 20).call();
+
 		if (!dv.validate(dataset))
 			fail("Dataset should validate: " + dv.getSummary() + " " + dv.getErrors());
 
