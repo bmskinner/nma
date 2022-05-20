@@ -10,13 +10,12 @@ import java.util.UUID;
 import org.junit.Test;
 
 import com.bmskinner.nma.TestDatasetBuilder;
-import com.bmskinner.nma.analysis.nucleus.ConsensusAveragingMethod;
 import com.bmskinner.nma.components.MissingLandmarkException;
 import com.bmskinner.nma.components.Statistical;
+import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.measure.Measurement;
-import com.bmskinner.nma.components.profiles.ProfileManager;
 import com.bmskinner.nma.components.profiles.ProfileType;
 import com.bmskinner.nma.components.rules.OrientationMark;
 import com.bmskinner.nma.components.rules.RuleSetCollection;
@@ -45,13 +44,15 @@ public class ConsensusAveragingMethodTest {
 		assertFalse("Collection should not yet have consensus", d.getCollection().hasConsensus());
 
 		// Add new landmarks
-		ProfileManager m = d.getCollection().getProfileManager();
-		m.updateLandmark(d.getCollection().getRuleSetCollection().getLandmark(OrientationMark.TOP)
-				.orElseThrow(MissingLandmarkException::new), 0);
-		m.updateLandmark(
+		d.getCollection().getProfileCollection().setLandmark(
+				d.getCollection().getRuleSetCollection().getLandmark(OrientationMark.TOP)
+						.orElseThrow(MissingLandmarkException::new),
+				CellularComponent.wrapIndex(0, d.getCollection().getMedianArrayLength()));
+
+		d.getCollection().getProfileCollection().setLandmark(
 				d.getCollection().getRuleSetCollection().getLandmark(OrientationMark.BOTTOM)
 						.orElseThrow(MissingLandmarkException::new),
-				10);
+				CellularComponent.wrapIndex(10, d.getCollection().getMedianArrayLength()));
 
 		// Expected landmarks
 		OrientationMark[] lms = { OrientationMark.REFERENCE, OrientationMark.TOP,

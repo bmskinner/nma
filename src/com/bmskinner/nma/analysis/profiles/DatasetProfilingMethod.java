@@ -175,7 +175,8 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 			} catch (NoDetectedIndexException e) {
 				LOGGER.fine("Cannot identify " + t + " in median, using index 0");
 			}
-			collection.getProfileManager().updateLandmarkInProfileCollection(t, medianIndex);
+			collection.getProfileCollection().setLandmark(t,
+					CellularComponent.wrapIndex(medianIndex, collection.getMedianArrayLength()));
 		}
 	}
 
@@ -257,7 +258,7 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 
 		// Using the template we created, update the position of the RP
 		// in each nucleus.
-		collection.getProfileManager().updateLandmarkToMedianBestFit(rp,
+		updateLandmarkToMedianBestFit(collection, rp,
 				ProfileType.ANGLE,
 				templateProfile);
 
@@ -317,14 +318,15 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 			int index = ProfileIndexFinder.identifyIndex(collection, om);
 
 			// Add the index to the median profiles
-			collection.getProfileManager().updateLandmarkInProfileCollection(om, index);
+			collection.getProfileCollection().setLandmark(om,
+					CellularComponent.wrapIndex(index, collection.getMedianArrayLength()));
 
 			// Create a median from the current landmark
 			IProfile lmMedian = collection.getProfileCollection().getProfile(ProfileType.ANGLE, om,
 					Stats.MEDIAN);
 
 			// Find the best position for the landmark in each nucleus
-			collection.getProfileManager().updateLandmarkToMedianBestFit(om, ProfileType.ANGLE,
+			updateLandmarkToMedianBestFit(collection, om, ProfileType.ANGLE,
 					lmMedian);
 		}
 	}
@@ -362,7 +364,7 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 			IProfile templateProfile = median.startFrom(rpIndex);
 
 			// Update the offsets in the profile collection to the new RP
-			collection.getProfileManager().updateLandmarkToMedianBestFit(rp,
+			updateLandmarkToMedianBestFit(collection, rp,
 					ProfileType.ANGLE,
 					templateProfile);
 
@@ -376,5 +378,55 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 		}
 
 		return rpIndex;
+	}
+
+	/**
+	 * Update the given tag in each nucleus of the collection to the index with a
+	 * best fit of the profile to the given median profile
+	 * 
+	 * @param lm     the landmark to fit
+	 * @param type   the profile type to fit against
+	 * @param median the template profile to offset against
+	 * @throws ProfileException
+	 * @throws MissingProfileException
+	 * @throws MissingLandmarkException
+	 * @throws ComponentCreationException
+	 * @throws IndexOutOfBoundsException
+	 * @throws
+	 */
+	private void updateLandmarkToMedianBestFit(@NonNull ICellCollection collection,
+			@NonNull Landmark lm,
+			@NonNull ProfileType type,
+			@NonNull IProfile median)
+			throws MissingProfileException, ProfileException, MissingLandmarkException,
+			IndexOutOfBoundsException, ComponentCreationException {
+
+		for (Nucleus n : collection.getNuclei()) {
+			if (n.isLocked())
+				continue;
+
+			// Get the nucleus profile starting at the landmark
+			// Find the best offset needed to make it match the median profile
+			int offset = n.getProfile(type, lm).findBestFitOffset(median);
+
+			// Update the landmark position to the original index plus the offset
+			n.setLandmark(lm, n.wrapIndex(n.getBorderIndex(lm) + offset));
+
+			// Update measurements - many are based on orientation
+			n.clearMeasurements();
+		}
+
+		// Update the consensus nucleus
+		if (collection.hasConsensus()) {
+			// Get the nucleus profile starting at the landmark
+			// Find the best offset needed to make it match the median profile
+			int offset = collection.getRawConsensus().getProfile(type, lm)
+					.findBestFitOffset(median);
+
+			// Update the landmark position to the original index plus the offset
+			collection.getRawConsensus().setLandmark(lm, collection.getRawConsensus()
+					.wrapIndex(collection.getRawConsensus().getBorderIndex(lm) + offset));
+
+		}
 	}
 }

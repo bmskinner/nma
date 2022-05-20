@@ -10,12 +10,16 @@ import com.bmskinner.nma.analysis.DefaultAnalysisResult;
 import com.bmskinner.nma.analysis.IAnalysisResult;
 import com.bmskinner.nma.analysis.SingleDatasetAnalysisMethod;
 import com.bmskinner.nma.components.MissingComponentException;
+import com.bmskinner.nma.components.Taggable;
+import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.datasets.DatasetValidator;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
+import com.bmskinner.nma.components.datasets.ICellCollection;
 import com.bmskinner.nma.components.profiles.IProfileSegment;
 import com.bmskinner.nma.components.profiles.ISegmentedProfile;
 import com.bmskinner.nma.components.profiles.ProfileException;
 import com.bmskinner.nma.components.profiles.ProfileType;
+import com.bmskinner.nma.components.profiles.UnsegmentedProfileException;
 import com.bmskinner.nma.components.rules.OrientationMark;
 import com.bmskinner.nma.stats.Stats;
 
@@ -42,7 +46,7 @@ public class SegmentUnmergeMethod extends SingleDatasetAnalysisMethod {
 	 * @param seg0Id  the first segment to merge
 	 * @param seg1Id  the second segment to merge
 	 */
-	public SegmentUnmergeMethod(IAnalysisDataset dataset, @NonNull UUID segId) {
+	public SegmentUnmergeMethod(@NonNull IAnalysisDataset dataset, @NonNull UUID segId) {
 		super(dataset);
 		this.segId = segId;
 	}
@@ -86,15 +90,70 @@ public class SegmentUnmergeMethod extends SingleDatasetAnalysisMethod {
 		}
 
 		// Unmerge in the dataset
-		dataset.getCollection().getProfileManager().unmergeSegments(segId);
+		unmergeSegments(dataset.getCollection(), segId);
 		fireProgressEvent();
 
 		// Unmerge children
 		for (IAnalysisDataset child : dataset.getAllChildDatasets()) {
-			child.getCollection().getProfileManager().unmergeSegments(segId);
+			unmergeSegments(child.getCollection(), segId);
 			fireProgressEvent();
 		}
 
+	}
+
+	/**
+	 * Unmerge the given segment into two segments
+	 * 
+	 * @param segId the segment to unmerge
+	 * @return
+	 * @throws UnsegmentedProfileException
+	 * @throws ProfileException
+	 * @throws MissingComponentException
+	 */
+	private void unmergeSegments(@NonNull ICellCollection collection, @NonNull UUID segId)
+			throws ProfileException, UnsegmentedProfileException, MissingComponentException {
+
+		ISegmentedProfile medianProfile = collection.getProfileCollection().getSegmentedProfile(
+				ProfileType.ANGLE,
+				OrientationMark.REFERENCE, Stats.MEDIAN);
+
+		// Get the segments to merge
+		IProfileSegment test = medianProfile.getSegment(segId);
+		if (!test.hasMergeSources()) {
+			LOGGER.fine("Segment has no merge sources - cannot unmerge");
+			return;
+		}
+
+		// unmerge the two segments in the median - this is only a copy of the profile
+		// collection
+		medianProfile.unmergeSegment(segId);
+
+		// put the new segment pattern back with the appropriate offset
+		collection.getProfileCollection().setSegments(medianProfile.getSegments());
+
+		/*
+		 * With the median profile segments unmerged, also unmerge the segments in the
+		 * individual nuclei
+		 */
+		if (collection.isReal()) {
+			for (Nucleus n : collection.getNuclei())
+				unmergeSegments(n, segId);
+		}
+
+		/* Update the consensus if present */
+		if (collection.hasConsensus()) {
+			unmergeSegments(collection.getRawConsensus(), segId);
+		}
+	}
+
+	private void unmergeSegments(@NonNull Taggable t, @NonNull UUID id)
+			throws ProfileException, MissingComponentException {
+		boolean wasLocked = t.isLocked();
+		t.setLocked(false);
+		ISegmentedProfile profile = t.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE);
+		profile.unmergeSegment(id);
+		t.setSegments(profile.getSegments());
+		t.setLocked(wasLocked);
 	}
 
 }

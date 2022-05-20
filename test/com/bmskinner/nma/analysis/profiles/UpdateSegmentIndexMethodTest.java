@@ -1,4 +1,4 @@
-package com.bmskinner.nma.components.profiles;
+package com.bmskinner.nma.analysis.profiles;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -20,8 +20,6 @@ import org.junit.runners.Parameterized.Parameters;
 
 import com.bmskinner.nma.TestDatasetBuilder;
 import com.bmskinner.nma.analysis.classification.NucleusClusteringMethod;
-import com.bmskinner.nma.analysis.profiles.SegmentMergeMethod;
-import com.bmskinner.nma.analysis.profiles.UpdateSegmentIndexMethod;
 import com.bmskinner.nma.components.cells.ICell;
 import com.bmskinner.nma.components.datasets.DatasetValidator;
 import com.bmskinner.nma.components.datasets.DefaultAnalysisDataset;
@@ -30,8 +28,10 @@ import com.bmskinner.nma.components.datasets.VirtualDataset;
 import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.options.OptionsFactory;
+import com.bmskinner.nma.components.profiles.IProfileSegment;
+import com.bmskinner.nma.components.profiles.ISegmentedProfile;
+import com.bmskinner.nma.components.profiles.ProfileType;
 import com.bmskinner.nma.components.rules.OrientationMark;
-import com.bmskinner.nma.components.rules.RuleSetCollection;
 import com.bmskinner.nma.io.SampleDatasetReader;
 import com.bmskinner.nma.logging.ConsoleFormatter;
 import com.bmskinner.nma.logging.ConsoleHandler;
@@ -39,7 +39,8 @@ import com.bmskinner.nma.logging.Loggable;
 import com.bmskinner.nma.stats.Stats;
 
 @RunWith(Parameterized.class)
-public class SegmentationHandlerTest {
+public class UpdateSegmentIndexMethodTest {
+
 	private static final Logger LOGGER = Logger.getLogger(Loggable.PROJECT_LOGGER);
 	private IAnalysisDataset dataset;
 	private DatasetValidator dv = new DatasetValidator();
@@ -75,17 +76,16 @@ public class SegmentationHandlerTest {
 	 * @return
 	 * @throws Exception
 	 */
+	/**
+	 * Create an instance of the class under test
+	 * 
+	 * @param source the class to create
+	 * @return
+	 * @throws Exception
+	 */
 	public static IAnalysisDataset createInstance(Class<? extends IAnalysisDataset> source)
 			throws Exception {
-		IAnalysisDataset d = new TestDatasetBuilder(RNG_SEED)
-				.cellCount(10)
-				.ofType(RuleSetCollection.roundRuleSetCollection())
-				.randomOffsetProfiles(true)
-				.segmented().build();
-
-		if (source == DefaultAnalysisDataset.class) {
-			return d;
-		}
+		IAnalysisDataset d = SampleDatasetReader.openTestMouseClusterDataset();
 
 		if (source == VirtualDataset.class) {
 			VirtualDataset v = new VirtualDataset(d, TestDatasetBuilder.TEST_DATASET_NAME,
@@ -96,18 +96,19 @@ public class SegmentationHandlerTest {
 			for (ICell c : d.getCollection().getCells()) {
 				v.addCell(c);
 			}
-			return v;
+
+			// Ensure this child dataset has child datasets
+			HashOptions o = OptionsFactory.makeDefaultClusteringOptions()
+					.withValue(Measurement.AREA.toString(), true)
+					.withValue(HashOptions.CLUSTER_MANUAL_CLUSTER_NUMBER_KEY, 2)
+					.build();
+
+			new NucleusClusteringMethod(v, o).call();
+
+			d = v;
 		}
 
-		// Ensure the dataset has child datasets
-		HashOptions o = OptionsFactory.makeDefaultClusteringOptions()
-				.withValue(Measurement.AREA.toString(), true)
-				.withValue(HashOptions.CLUSTER_MANUAL_CLUSTER_NUMBER_KEY, 2)
-				.build();
-
-		new NucleusClusteringMethod(d, o).call();
-
-		throw new Exception("Unable to create instance of " + source);
+		return d;
 	}
 
 	/**
@@ -213,7 +214,7 @@ public class SegmentationHandlerTest {
 	@Test
 	public void testUpdateSegmentStartIndexCorrectlyHandlesMergedSegmentInRealDataset()
 			throws Exception {
-		IAnalysisDataset d = SampleDatasetReader.openTestRodenClusterDataset();
+		IAnalysisDataset d = SampleDatasetReader.openTestMouseClusterDataset();
 
 		ISegmentedProfile profile = d.getCollection().getProfileCollection()
 				.getSegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE, Stats.MEDIAN);
@@ -251,5 +252,4 @@ public class SegmentationHandlerTest {
 		assertFalse(newSeg.hasMergeSources());
 
 	}
-
 }

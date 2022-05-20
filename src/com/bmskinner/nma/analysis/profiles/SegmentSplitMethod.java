@@ -10,13 +10,18 @@ import com.bmskinner.nma.analysis.DefaultAnalysisResult;
 import com.bmskinner.nma.analysis.IAnalysisResult;
 import com.bmskinner.nma.analysis.SingleDatasetAnalysisMethod;
 import com.bmskinner.nma.components.MissingComponentException;
+import com.bmskinner.nma.components.Taggable;
+import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.datasets.DatasetValidator;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
+import com.bmskinner.nma.components.datasets.ICellCollection;
 import com.bmskinner.nma.components.profiles.IProfileSegment;
 import com.bmskinner.nma.components.profiles.ISegmentedProfile;
 import com.bmskinner.nma.components.profiles.ProfileException;
 import com.bmskinner.nma.components.profiles.ProfileType;
+import com.bmskinner.nma.components.profiles.UnsegmentedProfileException;
 import com.bmskinner.nma.components.rules.OrientationMark;
+import com.bmskinner.nma.logging.Loggable;
 import com.bmskinner.nma.stats.Stats;
 
 /**
@@ -82,7 +87,7 @@ public class SegmentSplitMethod extends SingleDatasetAnalysisMethod {
 
 		LOGGER.fine(String.format("Splitting segment %s in root '%s' into %s and %s", segId,
 				dataset.getName(), newID1, newID2));
-		boolean ok = dataset.getCollection().getProfileManager().splitSegment(seg, newID1,
+		boolean ok = splitSegment(dataset.getCollection(), seg, newID1,
 				newID2);
 		fireProgressEvent();
 
@@ -92,7 +97,7 @@ public class SegmentSplitMethod extends SingleDatasetAnalysisMethod {
 				LOGGER.fine(
 						String.format("Splitting segment  %s in child '%s'", seg.getID(),
 								child.getName()));
-				boolean cOk = child.getCollection().getProfileManager().splitSegment(seg,
+				boolean cOk = splitSegment(child.getCollection(), seg,
 						newID1, newID2);
 				fireProgressEvent();
 				if (!cOk)
@@ -103,6 +108,173 @@ public class SegmentSplitMethod extends SingleDatasetAnalysisMethod {
 		} else {
 			LOGGER.warning(String.format("Splitting segment in '%s' failed", dataset.getName()));
 		}
+
+	}
+
+	/**
+	 * Split the given segment into two segments. The split is made at the given
+	 * index
+	 * 
+	 * @param seg    the segment to split
+	 * @param newID1 the id for the first new segment. Can be null.
+	 * @param newID2 the id for the second new segment. Can be null.
+	 * @return true if the split succeeded, false otherwise
+	 * @throws UnsegmentedProfileException
+	 * @throws ProfileException
+	 * @throws MissingComponentException   if the reference point tag is missing, or
+	 *                                     the segment is missing
+	 */
+	private boolean splitSegment(@NonNull ICellCollection collection, @NonNull IProfileSegment seg,
+			@NonNull UUID newID1,
+			@NonNull UUID newID2)
+			throws ProfileException, UnsegmentedProfileException, MissingComponentException {
+
+		ISegmentedProfile medianProfile = collection.getProfileCollection().getSegmentedProfile(
+				ProfileType.ANGLE,
+				OrientationMark.REFERENCE, Stats.MEDIAN);
+
+		// Replace the segment with the actual median profile segment - eg when
+		// updating child datasets
+		seg = medianProfile.getSegment(seg.getID());
+		int index = seg.getMidpointIndex();
+
+		if (!seg.contains(index)) {
+			LOGGER.warning("Segment cannot be split: does not contain index " + index);
+			return false;
+		}
+
+		double proportion = seg.getIndexProportion(index);
+
+		// Validate that all nuclei have segments long enough to be split
+		// This only applies to real datasets - we never touch the nuclei in virtual
+		// datasets
+		if (collection.isReal() && !isCollectionSplittable(collection, seg.getID(), proportion)) {
+			LOGGER.warning(String.format(
+					"Segment %s cannot be split in '%s': not all nuclei have splittable segment",
+					seg.getID(), collection.getName()));
+			return false;
+
+		}
+
+		// split the two segments in the median
+		medianProfile.splitSegment(seg, index, newID1, newID2);
+
+		// put the new segment pattern back with the appropriate offset
+		collection.getProfileCollection().setSegments(medianProfile.getSegments());
+
+		/*
+		 * Split the segments in the individual nuclei. Requires proportional alignment
+		 */
+		if (collection.isReal()) {
+			for (Nucleus n : collection.getNuclei())
+				splitNucleusSegment(n, seg.getID(), proportion, newID1, newID2);
+		}
+
+		/* Update the consensus if present */
+		if (collection.hasConsensus()) {
+			Nucleus n = collection.getRawConsensus();
+			splitNucleusSegment(n, seg.getID(), proportion, newID1, newID2);
+		}
+		return true;
+	}
+
+	/**
+	 * Split the segment in the given nucleus, preserving lock state
+	 * 
+	 * @param n          the nucleus
+	 * @param segId      the segment to split
+	 * @param proportion the proportion of the segment to split at (0-1)
+	 * @param newId1     the first new segment id
+	 * @param newId2     the second new segment id
+	 * @throws ProfileException
+	 * @throws MissingComponentException
+	 */
+	private void splitNucleusSegment(@NonNull Nucleus n, @NonNull UUID segId, double proportion,
+			@NonNull UUID newId1,
+			@NonNull UUID newId2) throws ProfileException, MissingComponentException {
+		boolean wasLocked = n.isLocked();
+		n.setLocked(false); // not destructive
+		splitSegment(n, segId, proportion, newId1, newId2);
+		n.setLocked(wasLocked);
+	}
+
+	/**
+	 * Test all the nuclei of the collection to see if all segments can be split
+	 * before we carry out the split.
+	 * 
+	 * @param id         the segment to test
+	 * @param proportion the proportion of the segment at which to split, from 0-1
+	 * @return true if the segment can be split at the index equivalent to the
+	 *         proportion, false otherwise
+	 * @throws ProfileException
+	 * @throws MissingComponentException
+	 * @throws UnsegmentedProfileException
+	 */
+	private boolean isCollectionSplittable(@NonNull ICellCollection collection, @NonNull UUID id,
+			double proportion)
+			throws ProfileException, MissingComponentException, UnsegmentedProfileException {
+
+		if (collection.isVirtual())
+			return false;
+
+		ISegmentedProfile medianProfile = collection.getProfileCollection().getSegmentedProfile(
+				ProfileType.ANGLE,
+				OrientationMark.REFERENCE, Stats.MEDIAN);
+
+		int index = medianProfile.getSegment(id).getProportionalIndex(proportion);
+
+		if (!medianProfile.isSplittable(id, index)) {
+			return false;
+		}
+
+		// check consensus //TODO replace with remove consensus
+		if (collection.hasConsensus()) {
+			Nucleus n = collection.getRawConsensus();
+			if (!isSplittable(n, id, proportion)) {
+				return false;
+			}
+		}
+
+		return collection.getNuclei().parallelStream()
+				.allMatch(n -> isSplittable(n, id, proportion));
+	}
+
+	private boolean isSplittable(Taggable t, UUID id, double proportion) {
+
+		try {
+			ISegmentedProfile profile = t.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE);
+			IProfileSegment nSeg = profile.getSegment(id);
+			int targetIndex = nSeg.getProportionalIndex(proportion);
+			return profile.isSplittable(id, targetIndex);
+		} catch (MissingComponentException | ProfileException e) {
+			LOGGER.log(Loggable.STACK, "Error getting profile", e);
+			return false;
+		}
+
+	}
+
+	/**
+	 * Split a segment in the given taggable object. The segment will be split at
+	 * the proportion given.
+	 * 
+	 * @param t          the object containing the segment
+	 * @param idToSplit  the id of the segment to be split
+	 * @param proportion the proportion of the segment length at which to split
+	 * @param newID1     the id for the first new segment
+	 * @param newID2     the id for the second new segment
+	 * @throws ProfileException
+	 * @throws MissingComponentException
+	 */
+	private void splitSegment(@NonNull Taggable t, @NonNull UUID idToSplit, double proportion,
+			@NonNull UUID newID1,
+			@NonNull UUID newID2) throws ProfileException, MissingComponentException {
+
+		ISegmentedProfile profile = t.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE);
+		IProfileSegment nSeg = profile.getSegment(idToSplit);
+
+		int targetIndex = nSeg.getProportionalIndex(proportion);
+		profile.splitSegment(nSeg, targetIndex, newID1, newID2);
+		t.setSegments(profile.getSegments());
 
 	}
 

@@ -34,9 +34,6 @@ import com.bmskinner.nma.analysis.nucleus.FilteringOptions;
 import com.bmskinner.nma.charting.ChartFactoryTest;
 import com.bmskinner.nma.components.MissingLandmarkException;
 import com.bmskinner.nma.components.Statistical;
-import com.bmskinner.nma.components.cells.CellularComponent;
-import com.bmskinner.nma.components.cells.ICell;
-import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.datasets.DefaultAnalysisDataset;
 import com.bmskinner.nma.components.datasets.DefaultCellCollection;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
@@ -48,7 +45,6 @@ import com.bmskinner.nma.components.measure.MeasurementScale;
 import com.bmskinner.nma.components.options.OptionsFactory;
 import com.bmskinner.nma.components.profiles.MissingProfileException;
 import com.bmskinner.nma.components.profiles.ProfileException;
-import com.bmskinner.nma.components.profiles.ProfileManager;
 import com.bmskinner.nma.components.profiles.ProfileType;
 import com.bmskinner.nma.components.rules.OrientationMark;
 import com.bmskinner.nma.components.rules.RuleSetCollection;
@@ -331,12 +327,15 @@ public class ICellCollectionTest {
 	public void testGetConsensusOrientsVertically() throws Exception {
 
 		// Ensure TV and BV are set
-		ProfileManager manager = collection.getProfileManager();
-		manager.updateLandmark(
-				collection.getRuleSetCollection().getLandmark(OrientationMark.TOP).get(),
-				0);
-		manager.updateLandmark(
-				collection.getRuleSetCollection().getLandmark(OrientationMark.BOTTOM).get(), 10);
+		collection.getProfileCollection().setLandmark(
+				collection.getRuleSetCollection().getLandmark(OrientationMark.TOP)
+						.orElseThrow(MissingLandmarkException::new),
+				CellularComponent.wrapIndex(0, collection.getMedianArrayLength()));
+
+		collection.getProfileCollection().setLandmark(
+				collection.getRuleSetCollection().getLandmark(OrientationMark.BOTTOM)
+						.orElseThrow(MissingLandmarkException::new),
+				CellularComponent.wrapIndex(10, collection.getMedianArrayLength()));
 
 		// Run consensus averaging on the collection. Wrap in a new dataset.
 		// Analysis options will not be copied - create anew
@@ -362,12 +361,16 @@ public class ICellCollectionTest {
 		// Start from 3 so that the smaller consensus profile does not get
 		// the TV assigned to index 0 when interpolating
 		for (int tIndex = 1; tIndex < d.getCollection().getMedianArrayLength(); tIndex++) {
-			manager.updateLandmark(
-					collection.getRuleSetCollection().getLandmark(OrientationMark.TOP).get(),
-					tIndex);
-			manager.updateLandmark(
-					collection.getRuleSetCollection().getLandmark(OrientationMark.BOTTOM).get(),
-					bIndex);
+
+			collection.getProfileCollection().setLandmark(
+					collection.getRuleSetCollection().getLandmark(OrientationMark.TOP)
+							.orElseThrow(MissingLandmarkException::new),
+					CellularComponent.wrapIndex(tIndex, collection.getMedianArrayLength()));
+
+			collection.getProfileCollection().setLandmark(
+					collection.getRuleSetCollection().getLandmark(OrientationMark.BOTTOM)
+							.orElseThrow(MissingLandmarkException::new),
+					CellularComponent.wrapIndex(bIndex, collection.getMedianArrayLength()));
 
 			assertNotEquals("TV and BV should not have the same index in the median", bIndex,
 					tIndex);

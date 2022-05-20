@@ -12,9 +12,19 @@ import org.junit.runners.Suite.SuiteClasses;
  *
  */
 @RunWith(Suite.class)
-@SuiteClasses({ DatasetProfilingMethodTest.class, DatasetSegmentationMethodTest.class, IterativeSegmentFitterTest.class,
-		ProfileCreatorTest.class, ProfileSegmenterTest.class, RepresentativeMedianFinderTest.class,
-		SegmentFitterTest.class })
+@SuiteClasses({ DatasetProfilingMethodTest.class,
+		DatasetSegmentationMethodTest.class,
+		IterativeSegmentFitterTest.class,
+		ProfileCreatorTest.class,
+		ProfileSegmenterTest.class,
+		RepresentativeMedianFinderTest.class,
+		SegmentFitterTest.class,
+		SegmentMergeMethodTest.class,
+		SegmentUnmergeMethodTest.class,
+		SegmentSplitMethodTest.class,
+		UpdateLandmarkMethodTest.class,
+		UpdateSegmentIndexMethodTest.class
+})
 public class AnalysisProfilesTestSuite {
 
 }

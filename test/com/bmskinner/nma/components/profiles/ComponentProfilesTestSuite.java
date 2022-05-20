@@ -13,8 +13,7 @@ import org.junit.runners.Suite.SuiteClasses;
 		IProfileTester.class,
 		ISegmentedProfileTest.class,
 		ProfileManagerTest.class,
-		DefaultSegmentedProfileTest.class,
-		SegmentationHandlerTest.class })
+		DefaultSegmentedProfileTest.class })
 public class ComponentProfilesTestSuite {
 
 }

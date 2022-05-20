@@ -1,14 +1,13 @@
 package com.bmskinner.nma.io;
 
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import java.io.File;
-import java.util.UUID;
 
 import org.junit.Test;
 
 import com.bmskinner.nma.TestDatasetBuilder;
+import com.bmskinner.nma.analysis.profiles.SegmentSplitMethod;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.options.DefaultOptions;
 import com.bmskinner.nma.components.options.HashOptions;
@@ -40,11 +39,7 @@ public class DatasetStatsExporterTest {
 			IProfileSegment seg = d.getCollection().getProfileCollection()
 					.getSegments(OrientationMark.REFERENCE).get(0);
 
-			boolean b = d.getCollection()
-					.getProfileManager().splitSegment(seg, UUID.randomUUID(), UUID.randomUUID());
-			if (!b)
-				fail("Unable to split " + seg);
-
+			new SegmentSplitMethod(d, seg.getID()).call();
 		}
 
 		// Seg 0 is smaller than regular minimum length
