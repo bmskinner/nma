@@ -41,7 +41,7 @@ public class SegmentSplitMethod extends SingleDatasetAnalysisMethod {
 	 * @param dataset the dataset to update
 	 * @param seg0Id  the segment to split
 	 */
-	public SegmentSplitMethod(IAnalysisDataset dataset, @NonNull UUID segId) {
+	public SegmentSplitMethod(@NonNull IAnalysisDataset dataset, @NonNull UUID segId) {
 		super(dataset);
 		this.segId = segId;
 	}
@@ -52,7 +52,7 @@ public class SegmentSplitMethod extends SingleDatasetAnalysisMethod {
 
 		if (!dv.validate(dataset))
 			throw new AnalysisMethodException(
-					"Unable to validate dataset after merging segments: "
+					"Unable to validate dataset after splitting segments: "
 							+ dv.getSummary() + "\n"
 							+ dv.getErrors());
 		return new DefaultAnalysisResult(dataset);
@@ -60,12 +60,12 @@ public class SegmentSplitMethod extends SingleDatasetAnalysisMethod {
 
 	private void run() throws ProfileException, MissingComponentException {
 		if (!dataset.isRoot()) {
-			LOGGER.fine("Cannot split segments in a virtual collection");
+			LOGGER.fine(String.format("'%s': Cannot split segments in a virtual dataset",
+					dataset.getName()));
 			return;
 		}
 
 		// Don't mess with a broken dataset
-		DatasetValidator dv = new DatasetValidator();
 		if (!dv.validate(dataset)) {
 			LOGGER.warning("Canceling segment split: " + SEGMENTS_ARE_OUT_OF_SYNC_WITH_MEDIAN_LBL);
 			return;
@@ -80,9 +80,8 @@ public class SegmentSplitMethod extends SingleDatasetAnalysisMethod {
 		UUID newID1 = UUID.randomUUID();
 		UUID newID2 = UUID.randomUUID();
 
-		LOGGER.fine("Splitting segment " + segId + " in root dataset " + dataset.getName()
-				+ " into new segments "
-				+ newID1 + " and " + newID2);
+		LOGGER.fine(String.format("Splitting segment %s in root '%s' into %s and %s", segId,
+				dataset.getName(), newID1, newID2));
 		boolean ok = dataset.getCollection().getProfileManager().splitSegment(seg, newID1,
 				newID2);
 		fireProgressEvent();
@@ -90,16 +89,19 @@ public class SegmentSplitMethod extends SingleDatasetAnalysisMethod {
 		if (ok) {
 			// Child datasets should all be virtual
 			for (IAnalysisDataset child : dataset.getAllChildDatasets()) {
-				LOGGER.fine("Splitting segment in " + child.getName());
+				LOGGER.fine(
+						String.format("Splitting segment  %s in child '%s'", seg.getID(),
+								child.getName()));
 				boolean cOk = child.getCollection().getProfileManager().splitSegment(seg,
 						newID1, newID2);
 				fireProgressEvent();
 				if (!cOk)
 					LOGGER.warning(
-							"Splitting segment failed for child dataset " + child.getName());
+							String.format("Splitting segment %s failed in child '%s'", seg.getID(),
+									child.getName()));
 			}
 		} else {
-			LOGGER.warning("Splitting segment cancelled");
+			LOGGER.warning(String.format("Splitting segment in '%s' failed", dataset.getName()));
 		}
 
 	}

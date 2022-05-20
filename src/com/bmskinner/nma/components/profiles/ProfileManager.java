@@ -635,9 +635,14 @@ public class ProfileManager {
 		double proportion = seg.getIndexProportion(index);
 
 		// Validate that all nuclei have segments long enough to be split
-		if (!isCollectionSplittable(seg.getID(), proportion)) {
-			LOGGER.warning("Segment cannot be split: not all nuclei have splittable segment");
+		// This only applies to real datasets - we never touch the nuclei in virtual
+		// datasets
+		if (collection.isReal() && !isCollectionSplittable(seg.getID(), proportion)) {
+			LOGGER.warning(String.format(
+					"Segment %s cannot be split in '%s': not all nuclei have splittable segment",
+					seg.getID(), collection.getName()));
 			return false;
+
 		}
 
 		// split the two segments in the median
