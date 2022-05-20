@@ -29,7 +29,7 @@ public class DefaultMeshTest {
 	
 	@Test
 	public void testMouseDatasetGeneratesMeshForAllNuclei() throws Exception {
-		IAnalysisDataset d = SampleDatasetReader.openTestRodentDataset();
+		IAnalysisDataset d = SampleDatasetReader.openTestMouseDataset();
 		testDatasetGeneratesMeshForAllNuclei(d);
 	}
 	
@@ -47,7 +47,7 @@ public class DefaultMeshTest {
 	
 	@Test
 	public void testMouseDatasetGeneratesMeshForAllVerticalNuclei() throws Exception {
-		IAnalysisDataset d = SampleDatasetReader.openTestRodentDataset();
+		IAnalysisDataset d = SampleDatasetReader.openTestMouseDataset();
 		testDatasetGeneratesMeshForAllVerticalNuclei(d);
 	}
 	

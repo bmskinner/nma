@@ -58,7 +58,7 @@ public class NucleusClusteringMethodTest {
 
 	@Before
 	public void setUp() throws Exception {
-		dataset = SampleDatasetReader.openTestRodentDataset();
+		dataset = SampleDatasetReader.openTestMouseDataset();
 	}
 
 	/**

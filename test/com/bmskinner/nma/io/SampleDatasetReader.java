@@ -50,7 +50,7 @@ public class SampleDatasetReader {
 	 * @return
 	 * @throws Exception
 	 */
-	public static final IAnalysisDataset openTestRodentDataset() throws Exception {
+	public static final IAnalysisDataset openTestMouseDataset() throws Exception {
 		return openDataset(TestResources.MOUSE_TEST_DATASET);
 	}
 
@@ -60,7 +60,7 @@ public class SampleDatasetReader {
 	 * @return
 	 * @throws Exception
 	 */
-	public static final IAnalysisDataset openTestRodenClusterDataset() throws Exception {
+	public static final IAnalysisDataset openTestMouseClusterDataset() throws Exception {
 		return openDataset(TestResources.MOUSE_CLUSTERS_DATASET);
 	}
 
@@ -136,7 +136,7 @@ public class SampleDatasetReader {
 
 	@Test
 	public void testUnmarshalledDatasetHasProfilesCreated() throws Exception {
-		IAnalysisDataset d = openTestRodentDataset();
+		IAnalysisDataset d = openTestMouseDataset();
 
 		for (ProfileType t : ProfileType.values()) {
 			d.getCollection().getProfileCollection().getProfile(t, OrientationMark.REFERENCE, 50);

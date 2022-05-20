@@ -14,7 +14,7 @@ public class DefaultCellularComponentTest {
 	@Test
 	public void testXmlSerializes() throws Exception {
 		
-		Nucleus n = SampleDatasetReader.openTestRodentDataset()
+		Nucleus n = SampleDatasetReader.openTestMouseDataset()
 				.getCollection().stream()
 				.findFirst().orElseThrow(Exception::new)
 				.getPrimaryNucleus();

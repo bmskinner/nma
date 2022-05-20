@@ -13,7 +13,7 @@ public class WorkspaceExporterTest {
 
 	@Test
 	public void testDatasetExported() throws Exception {
-		IAnalysisDataset d = SampleDatasetReader.openTestRodentDataset();
+		IAnalysisDataset d = SampleDatasetReader.openTestMouseDataset();
 
 		IWorkspace w = WorkspaceFactory.createWorkspace(d);
 

@@ -147,7 +147,7 @@ public class GLCMTest {
 	public void testRunningOnComponent() throws Exception {
 		GLCM glcm = new GLCM();
 
-		IAnalysisDataset d = SampleDatasetReader.openTestRodentDataset();
+		IAnalysisDataset d = SampleDatasetReader.openTestMouseDataset();
 
 		for (ICell cell : d.getCollection()) {
 			ImageProcessor ip = ImageImporter.importCroppedImageTo24bit(cell.getPrimaryNucleus())
@@ -167,7 +167,7 @@ public class GLCMTest {
 		options.setString(GLCM.ANGLE_KEY, GLCMStepAngle.ALL.toString());
 		GLCM glcm = new GLCM(options);
 
-		IAnalysisDataset d = SampleDatasetReader.openTestRodentDataset();
+		IAnalysisDataset d = SampleDatasetReader.openTestMouseDataset();
 
 		for (ICell cell : d.getCollection()) {
 			ImageProcessor ip = ImageImporter.importCroppedImageTo24bit(cell.getPrimaryNucleus())

@@ -61,7 +61,7 @@ public class ComponentMeasurerTest {
 
 	@Test
 	public void testHookLengthCalculatedInMouseSperm() throws Exception {
-		IAnalysisDataset dataset = SampleDatasetReader.openTestRodentDataset();
+		IAnalysisDataset dataset = SampleDatasetReader.openTestMouseDataset();
 
 		Nucleus n = dataset.getCollection().getCells().get(0).getPrimaryNucleus();
 
@@ -74,7 +74,7 @@ public class ComponentMeasurerTest {
 
 	@Test
 	public void testBodyWidthCalculatedInMouseSperm() throws Exception {
-		IAnalysisDataset dataset = SampleDatasetReader.openTestRodentDataset();
+		IAnalysisDataset dataset = SampleDatasetReader.openTestMouseDataset();
 
 		Nucleus n = dataset.getCollection().getCells().get(0).getPrimaryNucleus();
 
