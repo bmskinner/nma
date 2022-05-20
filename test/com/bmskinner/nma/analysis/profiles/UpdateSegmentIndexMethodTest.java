@@ -12,7 +12,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
@@ -63,6 +65,9 @@ public class UpdateSegmentIndexMethodTest {
 	public static Iterable<Class<? extends IAnalysisDataset>> arguments() {
 		return Arrays.asList(DefaultAnalysisDataset.class, VirtualDataset.class);
 	}
+
+	@Rule
+	public final ExpectedException exception = ExpectedException.none();
 
 	@Before
 	public void setUp() throws Exception {
@@ -148,19 +153,23 @@ public class UpdateSegmentIndexMethodTest {
 
 		for (IProfileSegment seg : dataset.getCollection().getProfileCollection()
 				.getSegments(OrientationMark.REFERENCE)) {
-			if (seg.getID().equals(rpSeg.getID()))
-				continue;
 
 			int oldIndex = seg.getStartIndex();
 
-			// Should not complete - this is at the RP
-			new UpdateSegmentIndexMethod(dataset, seg.getID(), oldIndex + 10).call();
+			new UpdateSegmentIndexMethod(dataset, seg.getID(), oldIndex + 5).call();
 
 			IProfileSegment segNew = dataset.getCollection().getProfileCollection()
 					.getSegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE, Stats.MEDIAN)
 					.getSegment(seg.getID());
 
-			assertEquals("Segment index should update", oldIndex + 10, segNew.getStartIndex());
+			// Should not complete if at the RP
+			if (seg.getID().equals(rpSeg.getID())) {
+				assertEquals("Segment index should update", oldIndex, segNew.getStartIndex());
+			} else {
+
+				assertEquals("Segment index should update", oldIndex + 5, segNew.getStartIndex());
+
+			}
 			assertTrue("Dataset should validate", dv.validate(dataset));
 		}
 
@@ -214,42 +223,40 @@ public class UpdateSegmentIndexMethodTest {
 	@Test
 	public void testUpdateSegmentStartIndexCorrectlyHandlesMergedSegmentInRealDataset()
 			throws Exception {
-		IAnalysisDataset d = SampleDatasetReader.openTestMouseClusterDataset();
-
-		ISegmentedProfile profile = d.getCollection().getProfileCollection()
-				.getSegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE, Stats.MEDIAN);
 
 		// Merge two segments that are not at the RP
-		IProfileSegment s0 = d.getCollection().getProfileCollection()
+		IProfileSegment s0 = dataset.getCollection().getProfileCollection()
 				.getSegmentContaining(OrientationMark.REFERENCE);
 		IProfileSegment s1 = s0.nextSegment();
 		IProfileSegment s2 = s1.nextSegment();
 
-		new SegmentMergeMethod(dataset, s1.getID(), s2.getID()).call();
+		UUID newSegId = UUID.randomUUID();
 
-		// Get the id of the newly added segment
-		UUID newSegId = d.getCollection().getProfileCollection().getSegmentIDs().stream()
-				.filter(
-						id -> !profile.getSegmentIDs().contains(id))
-				.findFirst().orElseThrow(Exception::new);
+		new SegmentMergeMethod(dataset, s1.getID(), s2.getID(), newSegId).call();
 
-		ISegmentedProfile newProfile = d.getCollection().getProfileCollection()
+		ISegmentedProfile newProfile = dataset.getCollection().getProfileCollection()
 				.getSegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE,
 						Stats.MEDIAN);
-		IProfileSegment newSeg = newProfile.getSegment(newSegId);
-		assertTrue(newSeg.hasMergeSources());
 
-		new UpdateSegmentIndexMethod(dataset, newSegId, newSeg.getStartIndex() + 20).call();
+		if (dataset.isRoot()) {
+			IProfileSegment newSeg = newProfile.getSegment(newSegId);
+			assertTrue(newSeg.hasMergeSources());
+			new UpdateSegmentIndexMethod(dataset, newSegId, newSeg.getStartIndex() + 20).call();
 
-		if (!dv.validate(dataset))
-			fail("Dataset should validate: " + dv.getSummary() + " " + dv.getErrors());
+			if (!dv.validate(dataset))
+				fail("Dataset should validate: " + dv.getSummary() + " " + dv.getErrors());
 
-		// check if the merge sources were cleared properly
-		newProfile = d.getCollection().getProfileCollection()
-				.getSegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE,
-						Stats.MEDIAN);
-		newSeg = newProfile.getSegment(newSegId);
-		assertFalse(newSeg.hasMergeSources());
+			// check if the merge sources were cleared properly
+			newProfile = dataset.getCollection().getProfileCollection()
+					.getSegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE,
+							Stats.MEDIAN);
+			newSeg = newProfile.getSegment(newSegId);
+			assertFalse(newSeg.hasMergeSources());
+		}
+
+		else {
+			assertFalse(newProfile.hasSegment(newSegId));
+		}
 
 	}
 }

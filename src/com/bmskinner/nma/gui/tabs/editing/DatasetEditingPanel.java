@@ -631,6 +631,8 @@ public class DatasetEditingPanel extends ChartDetailPanel
 				item.setOpaque(true);
 
 				item.addActionListener(a -> {
+					LOGGER.fine(String.format("Request update of %s to %d (%d)", lm, index,
+							medianIndex));
 					setAnalysing(true);
 					UserActionController.getInstance().landmarkUpdateEventReceived(
 							new LandmarkUpdateEvent(this, activeDataset(), lm, medianIndex - 1));

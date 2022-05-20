@@ -117,7 +117,7 @@ public class UpdateLandmarkMethodTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void testRPUpdatedOnce() throws Exception {
+	public void testRPUpdateAlsoUpdatesOtherLandmarks() throws Exception {
 
 		Nucleus firstNucleus = dataset.getCollection().stream().findFirst().get()
 				.getPrimaryNucleus();

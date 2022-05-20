@@ -254,18 +254,25 @@ public class UpdateLandmarkMethod extends SingleDatasetAnalysisMethod {
 				.orElseThrow(MissingLandmarkException::new);
 
 		// Update the nuclei to match the new median
-		updateLandmarkToMedianBestFit(collection, rp, ProfileType.ANGLE, newMedian);
+		updateNucleiLandmarkToBestFit(collection, rp, ProfileType.ANGLE, newMedian);
 
 		// Ensure landmarks in the profile collection are offset to preserve their
 		// positions
-		for (Landmark lm : collection.getProfileCollection().getLandmarks()) {
+
+		// TODO: consider what happens if profiles are reversed
+
+		for (Landmark l : collection.getProfileCollection().getLandmarks()) {
+			if (l.equals(rp))
+				continue;
 
 			// Index relative to the old reference point
-			int oldIndex = collection.getProfileCollection().getLandmarkIndex(lm);
+			int oldIndex = collection.getProfileCollection().getLandmarkIndex(l);
 
 			int newIndex = CellularComponent
 					.wrapIndex(oldIndex - index, collection.getMedianArrayLength());
-			collection.getProfileCollection().setLandmark(lm, newIndex);
+
+			LOGGER.fine(String.format("Moving %s from %d to %d", l, oldIndex, newIndex));
+			collection.getProfileCollection().setLandmark(l, newIndex);
 		}
 
 		// Rebuild the profile aggregate in the collection using the existing landmarks
@@ -310,7 +317,7 @@ public class UpdateLandmarkMethod extends SingleDatasetAnalysisMethod {
 		IProfile median = collection.getProfileCollection().getProfile(ProfileType.ANGLE, lm,
 				Stats.MEDIAN);
 
-		updateLandmarkToMedianBestFit(collection, lm, ProfileType.ANGLE, median);
+		updateNucleiLandmarkToBestFit(collection, lm, ProfileType.ANGLE, median);
 
 		/* Set the landmark in the consensus profile */
 		if (collection.hasConsensus()) {
@@ -328,9 +335,9 @@ public class UpdateLandmarkMethod extends SingleDatasetAnalysisMethod {
 	 * Update the given tag in each nucleus of the collection to the index with a
 	 * best fit of the profile to the given median profile
 	 * 
-	 * @param lm     the landmark to fit
-	 * @param type   the profile type to fit against
-	 * @param median the template profile to offset against
+	 * @param lm       the landmark to fit
+	 * @param type     the profile type to fit against
+	 * @param template the template profile to offset against
 	 * @throws ProfileException
 	 * @throws MissingProfileException
 	 * @throws MissingLandmarkException
@@ -338,10 +345,8 @@ public class UpdateLandmarkMethod extends SingleDatasetAnalysisMethod {
 	 * @throws IndexOutOfBoundsException
 	 * @throws
 	 */
-	private void updateLandmarkToMedianBestFit(@NonNull ICellCollection collection,
-			@NonNull Landmark lm,
-			@NonNull ProfileType type,
-			@NonNull IProfile median)
+	private void updateNucleiLandmarkToBestFit(@NonNull ICellCollection collection,
+			@NonNull Landmark lm, @NonNull ProfileType type, @NonNull IProfile template)
 			throws MissingProfileException, ProfileException, MissingLandmarkException,
 			IndexOutOfBoundsException, ComponentCreationException {
 
@@ -351,7 +356,7 @@ public class UpdateLandmarkMethod extends SingleDatasetAnalysisMethod {
 
 			// Get the nucleus profile starting at the landmark
 			// Find the best offset needed to make it match the median profile
-			int offset = n.getProfile(type, lm).findBestFitOffset(median);
+			int offset = n.getProfile(type, lm).findBestFitOffset(template);
 
 			// Update the landmark position to the original index plus the offset
 			n.setLandmark(lm, n.wrapIndex(n.getBorderIndex(lm) + offset));
@@ -365,7 +370,7 @@ public class UpdateLandmarkMethod extends SingleDatasetAnalysisMethod {
 			// Get the nucleus profile starting at the landmark
 			// Find the best offset needed to make it match the median profile
 			int offset = collection.getRawConsensus().getProfile(type, lm)
-					.findBestFitOffset(median);
+					.findBestFitOffset(template);
 
 			// Update the landmark position to the original index plus the offset
 			collection.getRawConsensus().setLandmark(lm, collection.getRawConsensus()

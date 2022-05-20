@@ -33,7 +33,6 @@ import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.options.OptionsFactory;
 import com.bmskinner.nma.components.profiles.IProfileSegment;
 import com.bmskinner.nma.components.profiles.ISegmentedProfile;
-import com.bmskinner.nma.components.profiles.ProfileException;
 import com.bmskinner.nma.components.profiles.ProfileType;
 import com.bmskinner.nma.components.rules.OrientationMark;
 import com.bmskinner.nma.io.SampleDatasetReader;
@@ -236,34 +235,34 @@ public class SegmentMergeMethodTest {
 		}
 	}
 
-	@Test
-	public void testTestSegmentsMergeable() throws Exception {
-
-		ISegmentedProfile profile = dataset.getCollection().getProfileCollection()
-				.getSegmentedProfile(
-						ProfileType.ANGLE,
-						OrientationMark.REFERENCE, Stats.MEDIAN);
-
-		List<UUID> segIds = profile.getSegmentIDs();
-		for (int i = 0; i < segIds.size(); i++) {
-			UUID segId1 = segIds.get(i);
-			IProfileSegment seg1 = profile.getSegment(segId1);
-			for (int j = 0; j < segIds.size(); j++) {
-				UUID segId2 = segIds.get(j);
-				IProfileSegment seg2 = profile.getSegment(segId2);
-				if (i == j) {
-					exception.expect(ProfileException.class);
-					new SegmentMergeMethod(dataset, segId1, segId2).call();
-				} else {
-					if (i == j - 1)
-						new SegmentMergeMethod(dataset, segId1, segId2).call();
-					else {
-						exception.expect(ProfileException.class);
-						new SegmentMergeMethod(dataset, segId1, segId2).call();
-					}
-				}
-			}
-		}
-	}
+//	@Test
+//	public void testTestSegmentsMergeable() throws Exception {
+//
+//		ISegmentedProfile profile = dataset.getCollection().getProfileCollection()
+//				.getSegmentedProfile(
+//						ProfileType.ANGLE,
+//						OrientationMark.REFERENCE, Stats.MEDIAN);
+//
+//		List<UUID> segIds = profile.getSegmentIDs();
+//		for (int i = 0; i < segIds.size(); i++) {
+//			UUID segId1 = segIds.get(i);
+//			IProfileSegment seg1 = profile.getSegment(segId1);
+//			for (int j = 0; j < segIds.size(); j++) {
+//				UUID segId2 = segIds.get(j);
+//				IProfileSegment seg2 = profile.getSegment(segId2);
+//				if (i == j) {
+//					exception.expect(ProfileException.class);
+//					new SegmentMergeMethod(dataset, segId1, segId2).call();
+//				} else {
+//					if (i == j - 1)
+//						new SegmentMergeMethod(dataset, segId1, segId2).call();
+//					else {
+//						exception.expect(ProfileException.class);
+//						new SegmentMergeMethod(dataset, segId1, segId2).call();
+//					}
+//				}
+//			}
+//		}
+//	}
 
 }
