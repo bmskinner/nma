@@ -361,6 +361,7 @@ public class UpdateLandmarkMethod extends SingleDatasetAnalysisMethod {
 
 			// Update measurements - many are based on orientation
 			n.clearMeasurements();
+			fireProgressEvent();
 		}
 
 		// Update the consensus nucleus
@@ -373,7 +374,7 @@ public class UpdateLandmarkMethod extends SingleDatasetAnalysisMethod {
 			// Update the landmark position to the original index plus the offset
 			collection.getRawConsensus().setLandmark(lm, collection.getRawConsensus()
 					.wrapIndex(collection.getRawConsensus().getBorderIndex(lm) + offset));
-
+			fireProgressEvent();
 		}
 	}
 }

@@ -121,6 +121,7 @@ public class UpdateSegmentIndexMethod extends SingleDatasetAnalysisMethod {
 					newProfile.getSegments(), n.getBorderLength());
 			IProfileSegment.linkSegments(newSegs);
 			n.setSegments(newSegs);
+			fireProgressEvent();
 		}
 
 		for (IAnalysisDataset child : dataset.getAllChildDatasets()) {
@@ -143,6 +144,7 @@ public class UpdateSegmentIndexMethod extends SingleDatasetAnalysisMethod {
 						newProfile.getSegments(), n.getBorderLength());
 				IProfileSegment.linkSegments(newSegs);
 				n.setSegments(newSegs);
+				fireProgressEvent();
 			}
 
 			fireProgressEvent();

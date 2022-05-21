@@ -64,7 +64,13 @@ public class SegmentMergeAction extends SingleDatasetResultAction {
 	public void run() {
 
 		IAnalysisMethod m = new SegmentMergeMethod(dataset, seg0Id, seg1Id);
-		worker = new DefaultAnalysisWorker(m, dataset.getAllChildDatasets().size() + 1);
+
+		// Each nucleus, plus the profile collection, plus consensus nuclei
+		// plus the main dataset plus one so the bar does not appear to hang
+		// on complete
+		int progressSteps = dataset.getCollection().size()
+				+ (dataset.getAllChildDatasets().size() * 2) + 2;
+		worker = new DefaultAnalysisWorker(m, progressSteps);
 
 		this.setProgressMessage("Merging segments: " + dataset.getName());
 		worker.addPropertyChangeListener(this);

@@ -193,6 +193,7 @@ public class SegmentMergeMethod extends SingleDatasetAnalysisMethod {
 				n.setLocked(false); // Merging segments is not destructive
 				mergeSegments(n, seg1, seg2, newID);
 				n.setLocked(wasLocked);
+				fireProgressEvent();
 			}
 		}
 
@@ -200,6 +201,7 @@ public class SegmentMergeMethod extends SingleDatasetAnalysisMethod {
 		if (collection.hasConsensus()) {
 			Nucleus n = collection.getRawConsensus();
 			mergeSegments(n, seg1, seg2, newID);
+			fireProgressEvent();
 		}
 	}
 

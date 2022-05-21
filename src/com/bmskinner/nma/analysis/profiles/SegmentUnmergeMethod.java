@@ -154,6 +154,7 @@ public class SegmentUnmergeMethod extends SingleDatasetAnalysisMethod {
 		profile.unmergeSegment(id);
 		t.setSegments(profile.getSegments());
 		t.setLocked(wasLocked);
+		fireProgressEvent();
 	}
 
 }

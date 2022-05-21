@@ -58,8 +58,13 @@ public class UpdateSegmentIndexAction extends SingleDatasetResultAction {
 	public void run() {
 
 		IAnalysisMethod m = new UpdateSegmentIndexMethod(dataset, segmentId, newIndex);
-		worker = new DefaultAnalysisWorker(m,
-				dataset.getAllChildDatasets().size() + dataset.getCollection().size());
+
+		// Each nucleus, plus the profile collection, plus consensus nuclei
+		// plus the main dataset plus one so the bar does not appear to hang
+		// on complete
+		int progressSteps = dataset.getCollection().size()
+				+ (dataset.getAllChildDatasets().size() * 2) + 2;
+		worker = new DefaultAnalysisWorker(m, progressSteps);
 
 		this.setProgressMessage("Updating segment: " + dataset.getName());
 		worker.addPropertyChangeListener(this);

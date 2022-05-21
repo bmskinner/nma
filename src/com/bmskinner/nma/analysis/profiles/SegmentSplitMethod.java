@@ -196,6 +196,7 @@ public class SegmentSplitMethod extends SingleDatasetAnalysisMethod {
 		n.setLocked(false); // not destructive
 		splitSegment(n, segId, proportion, newId1, newId2);
 		n.setLocked(wasLocked);
+		fireProgressEvent();
 	}
 
 	/**
