@@ -253,14 +253,12 @@ public class UpdateLandmarkMethod extends SingleDatasetAnalysisMethod {
 		Landmark rp = collection.getRuleSetCollection().getLandmark(OrientationMark.REFERENCE)
 				.orElseThrow(MissingLandmarkException::new);
 
-		// Update the nuclei to match the new median
-		updateNucleiLandmarkToBestFit(collection, rp, ProfileType.ANGLE, newMedian);
+		// Update the nuclei to match the new median in root datasets
+		if (collection.isReal())
+			updateNucleiLandmarkToBestFit(collection, rp, ProfileType.ANGLE, newMedian);
 
 		// Ensure landmarks in the profile collection are offset to preserve their
 		// positions
-
-		// TODO: consider what happens if profiles are reversed
-
 		for (Landmark l : collection.getProfileCollection().getLandmarks()) {
 			if (l.equals(rp))
 				continue;
