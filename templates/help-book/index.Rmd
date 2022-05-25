@@ -1,0 +1,24 @@
+--- 
+title: "Nuclear Morphology Analysis"
+author: "Ben Skinner"
+date: "`r Sys.Date()`"
+site: bookdown::bookdown_site
+output: bookdown::gitbook
+documentclass: book
+bibliography: [book.bib, packages.bib]
+biblio-style: apalike
+link-citations: yes
+github-repo: rstudio/bookdown-demo
+description: "User guide for Nuclear Morphology Analysis"
+---
+
+# Introduction
+
+This is the help and documentation for Nuclear Morphology Analysis, scientific image analysis software for studying nuclear morphology and nuclear organisation in cells with asymmetric nuclei.
+
+```{r include=FALSE}
+# automatically create a bib database for R packages
+knitr::write_bib(c(
+  .packages(), 'bookdown', 'knitr', 'rmarkdown', 'tidyverse'
+), 'packages.bib')
+```

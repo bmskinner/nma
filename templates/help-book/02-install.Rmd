@@ -1,0 +1,11 @@
+# Installation
+
+Here is a review of existing methods.
+
+## Windows
+
+
+## Linux
+
+
+## Mac

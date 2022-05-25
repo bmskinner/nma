@@ -1,0 +1,348 @@
+# User interface guide {#ui-guide}
+
+This section gives an overall guide to the elements of the user interface and the actions that can be performed in each section.
+
+## Main menu bar {#main-menu}
+
+The following menu options are available:
+
+### File {#file-menu}
+
+Option | Action
+-------|--------
+New analysis > Use custom detection options  | [Create a new morphology analysis](https://bitbucket.org/bmskinner/nuclear_morphology/wiki/methods/Creating%20a%20new%20analysis)
+New analysis > Use custom detection options  | Run an analysis on images using saved detection options
+New workspace | Create a [workspace ](https://bitbucket.org/bmskinner/nuclear_morphology/wiki/data/Workspaces) to enable opening datasets in one batch
+Open > Open dataset | [Open a saved .nmd dataset](https://bitbucket.org/bmskinner/nuclear_morphology/wiki/methods/Opening%20a%20saved%20dataset)
+Open > Open workspace | Open a [workspace ](https://bitbucket.org/bmskinner/nuclear_morphology/wiki/data/Workspaces)
+Save selected | Save the datasets currently selected in the populations panel
+Save all | Save all open datasets
+
+### View  {#view-menu}
+
+Option | Action
+-------|--------
+Scale | Choose the display units for charts and tables. `Pixels` is the default unless overridden in the configuration file. Displaying measurements in `Microns` requires the image scale to be set for the dataset.
+Colour palette | set the colour palette to use for colouring datasets and drawing segments in profiles. These swatches are:       `Regular` - a set of bright exciting colours; `No colour` - all colours are black; `Accessible` - a set of colours chosen to be distinguishable in three major types of color blindness: deutranopia, protanopia and tritanopia 
+Fill consensus | fill consensus nuclei with a semi-transparent version of the dataset colour, rather than just showing an outline
+Task monitor | Toggle the task queue and memory and displays. The first shows the queue of tasks waiting to be performed (e.g. drawing charts, running analyses). The second shows the amount of memory being used by the program. Free memory is green. Memory reserved by the Java Virtual Machine is orange, and memory actually in use is red. The percentage displays the memory actually in use (the red section). Hover the mouse over the monitor to see the total available memory (or look at the log file).
+
+### Dataset {#dataset-menu}
+
+Option | Action
+-------|-------
+Add... | Submenu with options for adding new data to a dataset; see below
+[Curate](https://bitbucket.org/bmskinner/nuclear_morphology/wiki/methods/Manually%20curate%20cells) | Go through cells one by one, and mark them as keep or reject. Desired cells are saved as a child dataset.
+Set scale | Set the image scale for the dataset in pixels per micron
+Merge | Combine the cells from the selected datasets into one new dataset, and run a new morphology analysis.
+[Boolean](https://bitbucket.org/bmskinner/nuclear_morphology/wiki/methods/Boolean%20operations) | Perform boolean algebra between this dataset and another dataset.
+Add to workspace... | Allows datasets to be added to an existing [workspace](https://bitbucket.org/bmskinner/nuclear_morphology/wiki/data/Workspaces)
+Remove from workspace... | Allows datasets to be removed from a [workspace](https://bitbucket.org/bmskinner/nuclear_morphology/wiki/data/Workspaces)
+Delete (child) | Delete a child dataset from its parent. Only available if the selected dataset is a child dataset. This change is not saved to file automatically.
+Close (root) | Close a root dataset. Only available if the selected dataset is a root dataset.  You will be prompted to save any changes.
+Export... | Submenu with options for exporting data; see below
+
+
+#### The Add submenu {#add-menu}
+
+Option | Action
+-------|-------
+Add nuclear signal | Detect nuclear signals in a set of images, and add them to the nuclei in the dataset
+[Post-FISH mapping](https://bitbucket.org/bmskinner/nuclear_morphology/wiki/methods/Post-FISH%20remapping) | Assign pre-FISH nuclei to categories based on FISH image data
+Warped signals | Begin signal warping for a root dataset with nuclear signals
+Child collection from file | Create a child dataset based on the nuclei saved in a ```.cell``` file (these can be created via the Export submenu)
+Cluster group from file | Create a child dataset based on clusters defined in a text file in tab separated format: ```Cell_UUID	Cluster_number```
+
+#### The Export submenu {#export-menu}
+
+This sub-menu contains commands for getting data out of the software for running your own downstream analyses.
+
+Details are described [here](https://bitbucket.org/bmskinner/nuclear_morphology/wiki/methods/Exporting%20raw%20data)
+
+Option | Action
+-------|----------
+Nuclear measurements | The measured values for each nucleus, plus normalised profiles
+Full nuclear profiles | The non-normalised angle profile values for each nucleus. Since there are a different number of values in each nucleus, they are combined into a single column, separated by commas for later parsing
+Full nuclear outlines | The X and Y coordinates of each border point in the outline of each nucleus. Since there are a different number of values in each nucleus, they are combined into a single column. XY pairs are separated by commas for later parsing. Within each pair, X and Y values are separated by a pipe  (`|`) e.g. `12.4|3.6,12.9|4.0`.
+Nuclear signal measurements | The measured values for each nuclear signal
+Nuclear signal shells | The measured nuclear signal in each shell, following shell analysis
+Consensus nuclei as SVG | The consensus nuclear outlines of the selected datasets in SVG format
+Cell locations within images | The XY coordinates of nucleus centres-of-mass within their source image
+Dataset analysis options | The options used to analyse this dataset in XML format. This can be used directly to set up subsequent analyses
+Single cell images | Export each nucleus as a separate image to a folder in the same directory as the `nmd` file. You will be given the option to mask out background; if this is selected, any pixels not within the nucleus will be set to black.
+Cell locations within images | The image name and centre of mass of each nucleus
+Dataset analysis options | The options used to detect nuclei in the selected dataset. Can be used as an input to replicate the same analysis on another folder of images.
+Landmark rulesets | The rules used to detect landmarks, so you can make your own detection rules
+
+
+### Help {#help-menu}
+
+Option | Action
+-------|--------
+Show documentation | open this file
+Check for updates | Check if an updated version is available for download
+Open config file | Open the configuration file in the default text editor. Allows you to set some default options (e.g. image scale, scale display, default folders)
+Open config directory | Open the folder containing the program log files, configuration options and landmark detection rulesets
+About | Version and license information 
+
+## Populations panel {#populations-panel}
+
+The populations panel holds the list of datasets currently loaded, and allows sub-analyses to be run on them.
+The width of the populations panel can be adjusted using the slider between the log panel and the populations panel.
+
+![populations_panel.png](https://bitbucket.org/repo/eA585a/images/2366104558-populations_panel.png)
+
+It lists the name of the dataset, the number of cells it contains, and the colour the dataset is represented by in multi-dataset displays. The header of the table shows the total selected number of datasets and cells.
+
+Info | Image
+-----|------
+Two types of dataset can be represented: root datasets and child datasets. A root dataset is the top-level dataset in the tree; it is not a child of any other dataset. Child datasets have a parent dataset; either a root dataset, or another child dataset. | ![root_and_child.png](https://bitbucket.org/repo/eA585a/images/3570275142-root_and_child.png)
+The name of the dataset can be changed by double clicking the 'name' cell. If a proposed name exists in the panel already, the software will prompt you to choose a different name. | ![rename_collection.png](https://bitbucket.org/repo/eA585a/images/2617437421-rename_collection.png)
+The colour of the dataset for multi-dataset displays (e.g. profiles, boxplots, consensus nucleus outlines) can be set by double clicking the colour cell. By default, a colour is selected based on the position of the dataset in the list of all selected datasets: the first is blue, the second yellow, the third green etc. The default colour pattern is the same as the segment pattern colours. The default colour is overridden if a colour has been explicitly set. The colour will be remembered if the dataset is saved before the program is closed. | ![change_dataset_colour.png](https://bitbucket.org/repo/eA585a/images/2827573362-change_dataset_colour.png)
+
+
+## Consensus panel {#consensus-panel}
+
+The consensus panel displays available consensus nuclei for selected datasets. The chart will keep a fixed square aspect ratio. The height of the chart can be adjusted by dragging the slider between the top half of the window (log panel, populations panel, consensus panel) and the bottom half (tab panel); the chart will expand to fit.
+
+The consensus nucleus is generated by sampling the coordinates of each vertically-oriented nucleus at equivalent proportions around the perimeter, and taking the median of the X and Y values at each point to be the consensus value at that point.
+
+```{r, out.width="50%", out.height="50%", fig.align='center', echo=F}
+knitr::include_graphics("img/Consensus_panel.png")
+```
+
+If a single dataset is selected, the display shows the segmented outline of the nucleus. If multiple datasets are selected, the outline and fill is shown in the dataset's preferred colour:
+
+```{r, out.width="100%", out.height="100%", fig.align='center', echo=F}
+knitr::include_graphics("img/Consensus_multiple_datasets.png")
+```
+
+### Adjusting the consensus nucleus {#consensus-adjust}
+
+When a single dataset is selected, options are available to adjust the rotation and position of the consensus nucleus. In the figure above, the controls are shown on the right of the consensus panel.
+
+Control|Action
+-------|-------
+```+r, -r``` | rotate 1 degree clockwise or anti-clockwise about the centre of mass
+```!``` | reset the rotation to use the landmarks in the ruleset for orientation
+```+x, -x, +y, -y``` | adjust the position of the nucleus by one pixel in the given direction
+```!``` | reset the centre of mass to position 0,0.
+
+Rotation and offsets can also be applied in exact amounts using the options at the bottom of the right-click menu: `Rotate by..` and `Offset...`
+
+![consensus_popup_menu.png](https://bitbucket.org/repo/eA585a/images/751057011-consensus_popup_menu.png)
+
+
+## Analysis info tab {#analysis-info-tab}
+
+This contains the analysis parameters used to detect nuclei. If multiple datasets are selected, the background to each row will be green if all datasets have the same value, otherwise, the row will be white.
+
+## Images tab
+
+Shows the images in which nuclei have been detected. The detected nuclei are highlighted with a yellow outline.
+
+If image files have been moved, you can relocate them by double clicking the image folder and choosing the updated folder location.
+
+## Cells tab
+
+This displays information on individual cells within a dataset. On the left is a list of all cells within the population. 
+
+The image channels with detected features (nucleus, FISH signals) can be switched between using the box on the lower left, under the cell list.
+
+When a cell is selected, the source image will be displayed, with annotations for the centre of mass, segments, landmarks, and any FISH signals.
+
+The orientation of the nuclei can be toggled using the `Orient` checkbox between actual (the same orientation as in the original image), and oriented (aligned according to the dataset rulesets).
+
+Here is the outline displaying the image with the nucleus:
+
+```{r, out.width="48%", out.height="48%", fig.show='hold', echo=F}
+knitr::include_graphics("img/Cell_panel_regular.png")
+knitr::include_graphics("img/Cell_panel_oriented.png")
+```
+
+The centre of mass is a pink diamond.
+The landmarks are grey diamonds on the nuclear outline. Hover the mouse over them to see their names.
+
+Segment boundaries and landmark positions can be updated. When you hover the mouse over the outline, a blue dot will be displayed. Click at any point to set it as a landmark or segment start location:
+
+```{r, out.width="100%", out.height="100%", fig.show='hold', echo=F}
+knitr::include_graphics("img/gifs/Edit_cell.gif")
+```
+
+This is a dataset with a FISH signal, showing the nucleus and signal channels. The outline and centre of mass of the FISH signal is shown in red:
+
+```{r, out.width="48%", out.height="48%", fig.show='hold', echo=F}
+knitr::include_graphics("img/Cell_panel_FISH_nucleus.png")
+knitr::include_graphics("img/Cell_panel_FISH_signal.png")
+```
+
+## Nuclear charts tab {#nuclear-charts-tab}
+
+Measurements of nuclei within and between selected datasets
+
+Tab | Contains
+-----|------
+Measurements | Mean, median, standard error of the mean, coefficient of variation and 95% confidence intervals for nuclear measurements
+Violin plots | This tab shows information on [nuclear measurements](#measurements) for selected datasets in a series of violin and boxplots. The colour of each series in the boxplot reflects the dataset colour in the [populations panel](#populations-panel). To change colours, double click the dataset colour in the populations panel. ![Nuclear_charts_violin.png](img/Nuclear_charts_violin.png)
+Wilcoxon | This tab shows the results of pairwise Wilcoxon rank sum tests (a.k.a. Mann-Whitney U-tests) of population medians for each of the nuclear parameters, with Bonferroni correction for multiple testing. P-values significant at the 5% and 1% are highlighted in yellow and green respectively
+Magnitude | This shows the pairwise magnitude differences between datasets, to give a feel for the biological significance of any differences detected between samples. If a single dataset is selected, the 'Random sampling' button is active, and opens the random sampler.
+Scatter | Allows comparisons between two parameters, via the drop down lists. The Spearman's rank correlation coefficient for each selected dataset is given in the table to the left. The nuclei can be [filtered](https://bitbucket.org/bmskinner/nuclear_morphology/wiki/methods/Filter%20a%20collection) using the 'Filter visible' button. ![Nuclear_charts_scatter.png](img/Nuclear_charts_scatter.png)
+
+## Nuclear profiles tab {#nuclear-profiles-tab}
+
+The profiles tab displays the morphological profiles calculated for datasets. It contains the following tabs:
+
++----------------+--------------------------------------------------------------+
+| Tab            | Contains                                                     |
++================+==============================================================+
+| Angle profile  | Calculated by measuring the angle between the three border points from the point `window size` pixels behind to this point, to the point `window size` pixels ahead of this point.
++----------------+--------------------------------------------------------------+
+| Diameter profile | The distance from each border point, through the centre of mass of the nucleus, to the opposite border. Expressed as a fraction of the maximum diameter.
++----------------+--------------------------------------------------------------+
+| Radius profile | The distance of each border point from the centre of mass
++----------------+--------------------------------------------------------------+
+| Variability    | The variability plot shows the size of the interquartile range along the median profile, and therefore shows the regions of the profile that are most variable within the dataset. The drop-down list at the top allows the variabilty of each profile type to be selected
++----------------+--------------------------------------------------------------+
+
+
+If a single dataset is selected in the [populations panel](#populations-panel), the profile tab displays the profiles for all nuclei in the dataset in light grey, the segmented median profile in the chosen palette colours, and the interquartile range about the median in dark grey.
+
+If multiple datasets are  selected in the populations panel, the profile tab displays the median profile in the chosen dataset colour, and the interquartile range about the median in alighter shade of the dataset colour. 
+
+At the top of the chart are display options:
+
+- `Normalised`: when ticked, all profiles are stretched to the same length. When unticked, nucleus profiles are shown at their actual length, corresponding to the perimeter length of the nucleus (the median profile length is set to the median of the lengths of the nuclei in the dataset)
+ - `Left`: if the displayed dataset(s) are not normalised, they are aligned to the left edge of the chart
+- `Right`: if the displayed dataset(s) are not normalised, they are aligned to the right edge of the chart
+- `Show annotations`: if selected, show segment and landmark names (only applies when a single dataset is selected)
+- `Show nuclear profiles`: if selected, show individual nucleus profiles (only applies when a single dataset is selected)
+
+## Nuclear signals tab {#nuclear-signals-tab}
+
+This tab displays information relating to FISH signals.
+
+### Overview {#nuclear-signals-overview-tab}
+
+This shows a table with average information about each signal group that has been detected, and a chart with the outline of the consensus nucleus (if refolded) and approximate positions of each signal.
+
+The signals from each nucleus are drawn as a dot at the centre of mass of each signal. Tick the 'Show signal radii' option to draw a translucent circle on each signal with an equal area to the measured signal. Hover the mouse over a signal to show the nucleus image from which it was detected.
+
+Note - a more accurate mapping of signals onto the consensus can be achieved using signal warping.
+
+Signal groups within a dataset can be merged together using the 'Merge signal groups' button. Merged signal groups do not affect the original signal groups - they duplicate the original signals and add them to a new group.
+
+### Detection settings {#nuclear-signals-detection-tab}
+
+This shows the settings that were used to detect each signal group in the dataset. Double click the signal group colour to change the colour.
+
+### Signal counts {#nuclear-signals-counts-tab}
+
+Displays the number of signals detected per nucleus. Datasets can be filtered to select nuclei with a given number of signals using the 'Filter nuclei' button.
+
+### Violin plots {#nuclear-signals-violin-tab}
+
+This shows violin and boxplots for each of the [signal measurements](#signal-measurements).
+
+### Scatter  {#nuclear-signals-scatter-tab}
+
+This allows scatter plot comparisons between signal measurements, with Spearman's rank correlation coefficients shown at the left. As with all scatter panels, the datasets can be filtered on visible values using the 'Filter visible' button.
+
+### Shells  {#nuclear-signals-shells-tab}
+
+Display and run shell analysis.
+
+### Colocalisation  {#nuclear-signals-colocalisation-tab}
+
+This shows the distances between closest signal pairs. For each signal group within a dataset, signal pairs are calculated using the following method:
+
+1) Signals within a nucleus are identified
+
+2) The distances between all signals of different groups is calculated as the distance between the centres of mass.
+
+3) The pair with the shortest distance is recorded and removed.
+
+4) The process repeats with the remaining signals
+
+5) Any remaining unpaired signals are ignored and the paired distances are reported.
+
+### Warping  {#nuclear-signals-warping-tab}
+
+Displays the results of signal warping.
+
+## Nuclear segments tab {#nuclear-segments-tab}
+
+The segments tab displays information on the segments within the median profile of the selected dataset(s).
+
+The violin plots tab shows the range of segment lengths in the desired scale for all selected populations. If multiple datasets are selected, they must have the same number of segments for a meaningful comparison to be made.
+
+The Wilcoxon and Magnitude tabs show the Wilcoxon rank-sum testsfor pairwise comparisons between datasets for each segment, and the pairwise magnitude differences.
+
+## Comparisons tab {#comparisons-tab}
+
+The Venn tab compares overlaps in nuclei between datasets, presented as a table.It is primarily designed to allow comparison of different child datasets after filtering or clustering.
+
+Detailed Venn presents the Venn data in a pairwise format, with more detailed breakdown of the numbers of shared and unshared nuclei.
+
+## Clusters tab {#clusters-tab}
+
+The clusters panel allows clustering and tree-building to be run on a dataset, and shows information on clustering analyses that have been run previously. When cluster groups are available, the analysis parameters for the groups are shown in the table.
+
+```{r, out.width="100%", out.height="100%", fig.show='hold', echo=F}
+knitr::include_graphics("img/Clusters_panel_overview.png")
+```
+
+There are three ways to generate clusters:
+
+- Manually
+- Automatically using a clustering algorithm
+- [Importing clusters created in another program](https://bitbucket.org/bmskinner/nuclear_morphology/wiki/methods/Manually%20assign%20clusters.md)
+
+### Manual clustering
+
+Allows nuclei to be manually assigned to clusters. Choose the number of clusters you want to make, and each nucleus will be displayed for you to put in a cluster.
+
+### Automatic clustering
+
+Allows nuclei to be assigned to clusters based on their shape, or other measurements. To run a new clustering analysis, click 'Cluster automatically'.
+
+```{r, out.width="100%", out.height="100%", fig.show='hold', echo=F}
+knitr::include_graphics("img/gifs/Cluster_automatic.gif")
+```
+
+The default clustering is on the profile angles within each nucleus. Checkboxes allow selection of other nucleus parameters.
+
+Dimensionality reduction can be optionally applied before clustering. PCA and tSNE are provided; however, it is recommended that for full analysis you run these in your preferred stats package. An example of how to perform clustering and dimensionality reduction using R is shown in [this page](https://bitbucket.org/bmskinner/nuclear_morphology/wiki/methods/Running%20a%20tSNE%20in%20R).
+
+Clustering can be performed using [hierarchical clustering](https://en.wikipedia.org/wiki/Hierarchical_clustering) or [expectation maximisation](https://en.wikipedia.org/wiki/Expectation%E2%80%93maximization_algorithm) clustering.
+
+Once cluster is complete, if hierarchical clustering was selected, a 'Show tree' button will be available. Clicking this button will launch the tree viewer.
+
+```{r, out.width="100%", out.height="100%", fig.show='hold', echo=F}
+knitr::include_graphics("img/Clusters_tree_view.png")
+```
+
+The tree can be highlighted to show cluster memberships. The first dropdown list selects individual clusters to highlight. The second selects cluster groups to highlight. If the dataset has merge sources, these can be applied as a highlight using the "Show merge sources" button.
+
+The [Newick format](https://en.wikipedia.org/wiki/Newick_format) for the cluster tree can be copied using the 'Copy Newick', for use in other tree editing software.
+
+## Merges tab {#merges-tab}
+
+If a dataset is a merge of other datasets, this panel displays the source datasets.
+
+To merge datasets, select them in the [populations panel](#populations-panel), select `Dataset > Merge'. You will be asked to select a place to save the new merged dataset. The merge will run, and a new morphological analysis will be carried out on the merged dataset.
+
+When a merged dataset is selected, the merges tab displays the analysis options for each of the merge sources. Matching values are highlighted in green for each row.
+
+To recover a source dataset back out of a merged dataset, click the appropriate 'Recover source' button, at the bottom of the panel.
+
+## Editing tab {#editing-tab}
+
+This allows segments and landmarks to be updated within root datasets. The consensus nucleus is displayed, with annotations for the landmarks. The landmarks are grey diamonds on the nuclear outline. Hover the mouse over them to see their names.
+
+Segment boundaries and landmark positions can be updated. When you hover the mouse over the outline, a blue dot will be displayed. Click at any point to set it as a landmark or segment start location. All cells will be updated to their best fit to the new location:
+
+```{r, out.width="100%", out.height="100%", fig.show='hold', echo=F}
+knitr::include_graphics("img/gifs/Edit_dataset.gif")
+```
+
+If you want to merge or split segments, use the buttons at the top of the panel. Merged segments can be unmerged; the unmerge button will be greyed out unless there are merged segments available.
