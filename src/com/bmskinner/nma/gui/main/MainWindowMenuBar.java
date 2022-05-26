@@ -394,7 +394,7 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 						| ContextEnabled.ACTIVE_ON_SINGLE_OBJECT));
 
 		menu.add(fact.makeItem(Labels.Populations.CHANGE_SCALE_LBL, UserActionEvent.CHANGE_SCALE,
-				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_SINGLE_OBJECT));
+				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_MULTI_OBJECTS));
 
 		menu.add(fact.makeItem(Labels.Populations.MERGE_LBL, UserActionEvent.MERGE_DATASETS_ACTION,
 				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_CHILD_DATASET
