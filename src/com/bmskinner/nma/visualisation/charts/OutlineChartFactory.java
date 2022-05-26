@@ -217,24 +217,6 @@ public class OutlineChartFactory extends AbstractChartFactory {
 			if (!options.isShowAnnotations())
 				return makeBareCellOutlineChart();
 
-			if (options.isShowMesh()) {
-				if (options.firstDataset().getCollection().hasConsensus()) {
-					Mesh mesh1 = options.getRotateMode().equals(RotationMode.ACTUAL)
-							? new DefaultMesh(options.getCell().getPrimaryNucleus())
-							: new DefaultMesh(
-									options.getCell().getPrimaryNucleus().getOrientedNucleus());
-
-					Mesh mesh2 = new DefaultMesh(
-							options.firstDataset().getCollection().getConsensus(), mesh1);
-
-					Mesh result = mesh1.comparison(mesh2);
-					return createMeshChart(result, 0.5);
-
-				}
-				return createEmptyChart();
-
-			}
-
 			if (options.isShowWarp()) {
 				if (options.firstDataset().getCollection().hasConsensus()) {
 
@@ -243,7 +225,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 							options.firstDataset().getCollection().getConsensus(), mesh1);
 
 					ImageProcessor nucleusIP = ImageImporter
-							.importFullImageTo24bit(options.getCell().getPrimaryNucleus());
+							.importFullImageTo24bit(options.getComponent().get(0));
 
 					// Create a mesh image from the nucleus
 					MeshImage im = new DefaultMeshImage(mesh1, nucleusIP);
