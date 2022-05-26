@@ -59,6 +59,7 @@ public class OptionsFactory {
 				.withValue(HashOptions.IS_NORMALISE_CONTRAST,
 						HashOptions.DEFAULT_NORMALISE_CONTRAST)
 				.withValue(HashOptions.IS_RGB, HashOptions.DEFAULT_IS_RGB)
+				.withValue(HashOptions.IS_USE_WATERSHED, false)
 				.setAll(OptionsFactory.makeCannyOptions().build())
 				.setAll(OptionsFactory.makePreprocessingOptions().build());
 	}

@@ -16,13 +16,15 @@
  ******************************************************************************/
 package com.bmskinner.nma.gui.dialogs.prober.settings;
 
-import java.awt.BorderLayout;
-import java.awt.FlowLayout;
+import java.awt.GridBagLayout;
 import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Logger;
 
+import javax.swing.JCheckBox;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
-import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 
@@ -31,61 +33,78 @@ import com.bmskinner.nma.logging.Loggable;
 
 @SuppressWarnings("serial")
 public class ThresholdSettingsPanel extends DetectionSettingsPanel {
-	
+
 	private static final Logger LOGGER = Logger.getLogger(ThresholdSettingsPanel.class.getName());
 
-    private static final Integer MIN_RANGE = Integer.valueOf(0);
-    private static final Integer MAX_RANGE = Integer.valueOf(255);
-    private static final Integer STEP      = Integer.valueOf(1);
+	private static final Integer MIN_RANGE = Integer.valueOf(0);
+	private static final Integer MAX_RANGE = Integer.valueOf(255);
+	private static final Integer STEP = Integer.valueOf(1);
 
-    private static final String THRESHOLD_LBL = "Threshold";
+	private static final String THRESHOLD_LBL = "Threshold";
+	private static final String WATERSHED_LBL = "Watershed";
 
-    private JSpinner thresholdSpinner;
+	private JSpinner thresholdSpinner;
+	private JCheckBox watershedBtn = new JCheckBox();
 
-    public ThresholdSettingsPanel(final HashOptions options) {
-        super(options);
+	public ThresholdSettingsPanel(final HashOptions options) {
+		super(options);
 
-        this.add(createPanel(), BorderLayout.CENTER);
+		createPanel();
+	}
 
-    }
+	private void createPanel() {
+		this.setLayout(new GridBagLayout());
 
-    private JPanel createPanel() {
-        JPanel panel = new JPanel(new FlowLayout());
+		thresholdSpinner = new JSpinner(
+				new SpinnerNumberModel(Integer.valueOf(options.getInt(HashOptions.THRESHOLD)),
+						MIN_RANGE, MAX_RANGE, STEP));
 
-        thresholdSpinner = new JSpinner(
-                new SpinnerNumberModel(Integer.valueOf(options.getInt(HashOptions.THRESHOLD)), MIN_RANGE, MAX_RANGE, STEP));
+		thresholdSpinner.addChangeListener(e -> {
+			try {
+				thresholdSpinner.commitEdit();
+				options.setInt(HashOptions.THRESHOLD,
+						((Integer) thresholdSpinner.getValue()).intValue());
+				fireOptionsChangeEvent();
+			} catch (ParseException e1) {
+				LOGGER.warning("Parsing error in JSpinner");
+				LOGGER.log(Loggable.STACK, "Parsing error in JSpinner", e1);
+			}
+		});
 
-        JLabel lbl = new JLabel(THRESHOLD_LBL);
+		watershedBtn.addActionListener(e -> {
+			options.setBoolean(HashOptions.IS_USE_WATERSHED, watershedBtn.isSelected());
+			fireOptionsChangeEvent();
+		});
 
-        panel.add(lbl);
-        panel.add(thresholdSpinner);
+		List<JLabel> labelList = new ArrayList<>();
+		List<JComponent> fieldList = new ArrayList<>();
 
-        thresholdSpinner.addChangeListener(e -> {
-            try {
-                thresholdSpinner.commitEdit();
-                options.setInt(HashOptions.THRESHOLD, ((Integer) thresholdSpinner.getValue()).intValue());
-                fireOptionsChangeEvent();
-            } catch (ParseException e1) {
-                LOGGER.warning("Parsing error in JSpinner");
-                LOGGER.log(Loggable.STACK, "Parsing error in JSpinner", e1);
-            }
-        });
+		labelList.add(new JLabel(THRESHOLD_LBL));
+		labelList.add(new JLabel(WATERSHED_LBL));
 
-        return panel;
-    }
+		JLabel[] labels = labelList.toArray(new JLabel[0]);
 
-    @Override
-    protected void update() {
-        super.update();
-        isUpdating = true;
-        thresholdSpinner.setValue(options.getInt(HashOptions.THRESHOLD));
-        isUpdating = false;
-    }
+		fieldList.add(thresholdSpinner);
+		fieldList.add(watershedBtn);
 
-    @Override
-    public void setEnabled(boolean b) {
-        super.setEnabled(b);
-        thresholdSpinner.setEnabled(b);
+		JComponent[] fields = fieldList.toArray(new JComponent[0]);
 
-    }
+		addLabelTextRows(labels, fields, this);
+	}
+
+	@Override
+	protected void update() {
+		super.update();
+		isUpdating = true;
+		thresholdSpinner.setValue(options.getInt(HashOptions.THRESHOLD));
+		watershedBtn.setSelected(options.getBoolean(HashOptions.IS_USE_WATERSHED));
+		isUpdating = false;
+	}
+
+	@Override
+	public void setEnabled(boolean b) {
+		super.setEnabled(b);
+		thresholdSpinner.setEnabled(b);
+		watershedBtn.setEnabled(b);
+	}
 }

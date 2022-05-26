@@ -54,7 +54,8 @@ public class FluorescentNucleusFinder extends CellFinder {
 	private final @NonNull HashOptions nuclOptions;
 	private final FinderDisplayType displayType;
 
-	public FluorescentNucleusFinder(@NonNull final IAnalysisOptions op, @NonNull FinderDisplayType t) {
+	public FluorescentNucleusFinder(@NonNull final IAnalysisOptions op,
+			@NonNull FinderDisplayType t) {
 		super(op);
 		displayType = t;
 
@@ -88,7 +89,8 @@ public class FluorescentNucleusFinder extends CellFinder {
 		return list;
 	}
 
-	private List<ICell> detectNucleusPipeline(@NonNull final File imageFile) throws ImageImportException {
+	private List<ICell> detectNucleusPipeline(@NonNull final File imageFile)
+			throws ImageImportException {
 		List<Nucleus> list = new ArrayList<>();
 
 		ImageImporter importer = new ImageImporter(imageFile);
@@ -112,10 +114,15 @@ public class FluorescentNucleusFinder extends CellFinder {
 			filt.threshold(nuclOptions.getInt(HashOptions.THRESHOLD));
 		}
 
+		if (nuclOptions.getBoolean(HashOptions.IS_USE_WATERSHED)) {
+			filt.watershed();
+		}
+
 		LOGGER.finer("Detecting ROIs in " + imageFile.getName());
 		GenericDetector gd = new GenericDetector();
 
-		gd.setSize(nuclOptions.getInt(HashOptions.MIN_SIZE_PIXELS), nuclOptions.getInt(HashOptions.MAX_SIZE_PIXELS));
+		gd.setSize(nuclOptions.getInt(HashOptions.MIN_SIZE_PIXELS),
+				nuclOptions.getInt(HashOptions.MAX_SIZE_PIXELS));
 
 		ImageProcessor img = filt.toProcessor();
 
@@ -126,11 +133,13 @@ public class FluorescentNucleusFinder extends CellFinder {
 			try {
 
 				Nucleus n = factory.newBuilder().fromRoi(entry.getKey()).withFile(imageFile)
-						.withChannel(nuclOptions.getInt(HashOptions.CHANNEL)).withCoM(entry.getValue()).build();
+						.withChannel(nuclOptions.getInt(HashOptions.CHANNEL))
+						.withCoM(entry.getValue()).build();
 
 				list.add(n);
 			} catch (ComponentCreationException e) {
-				LOGGER.log(Loggable.STACK, "Unable to create nucleus from roi: " + e.getMessage() + "; skipping", e);
+				LOGGER.log(Loggable.STACK,
+						"Unable to create nucleus from roi: " + e.getMessage() + "; skipping", e);
 			}
 		}
 		LOGGER.finer(() -> "Detected nuclei in " + imageFile.getName());
@@ -141,14 +150,16 @@ public class FluorescentNucleusFinder extends CellFinder {
 				ICell c = new DefaultCell(n);
 				DatasetValidator dv = new DatasetValidator();
 				if (!dv.validate(c))
-					LOGGER.fine("Error in cell " + n.getNameAndNumber() + ": " + dv.getSummary() + dv.getErrors());
+					LOGGER.fine("Error in cell " + n.getNameAndNumber() + ": " + dv.getSummary()
+							+ dv.getErrors());
 				result.add(new DefaultCell(n));
 			}
 		}
 		return result;
 	}
 
-	private List<ICell> detectNucleusPreview(@NonNull final File imageFile) throws ImageImportException {
+	private List<ICell> detectNucleusPreview(@NonNull final File imageFile)
+			throws ImageImportException {
 
 		List<Nucleus> list = new ArrayList<>();
 
@@ -189,6 +200,7 @@ public class FluorescentNucleusFinder extends CellFinder {
 				ip.invert();
 				fireDetectionEvent(ip.duplicate(), "Gap closing");
 			}
+
 		} else {
 			filt.threshold(nuclOptions.getInt(HashOptions.THRESHOLD));
 			if (hasDetectionListeners()) {
@@ -198,10 +210,20 @@ public class FluorescentNucleusFinder extends CellFinder {
 			}
 		}
 
+		if (nuclOptions.getBoolean(HashOptions.IS_USE_WATERSHED)) {
+			filt.watershed();
+			if (hasDetectionListeners()) {
+				ip = filt.toProcessor().duplicate();
+				ip.invert();
+				fireDetectionEvent(ip.duplicate(), "Watershed");
+			}
+		}
+
 		GenericDetector gd = new GenericDetector();
 
 		// Display passing and failing size nuclei
-		ImageProcessor original = importer.importImageAndInvert(nuclOptions.getInt(HashOptions.CHANNEL)).convertToRGB();
+		ImageProcessor original = importer
+				.importImageAndInvert(nuclOptions.getInt(HashOptions.CHANNEL)).convertToRGB();
 
 		// do not use the minimum nucleus size - we want the roi outlined in red
 		gd.setSize(MIN_PROFILABLE_OBJECT_SIZE, original.getWidth() * original.getHeight());
@@ -214,9 +236,11 @@ public class FluorescentNucleusFinder extends CellFinder {
 		for (Entry<Roi, IPoint> entry : rois.entrySet()) {
 			try {
 				list.add(factory.newBuilder().fromRoi(entry.getKey()).withFile(imageFile)
-						.withChannel(nuclOptions.getInt(HashOptions.CHANNEL)).withCoM(entry.getValue()).build());
+						.withChannel(nuclOptions.getInt(HashOptions.CHANNEL))
+						.withCoM(entry.getValue()).build());
 			} catch (ComponentCreationException e) {
-				LOGGER.log(Loggable.STACK, "Unable to create nucleus from roi: " + e.getMessage() + "; skipping", e);
+				LOGGER.log(Loggable.STACK,
+						"Unable to create nucleus from roi: " + e.getMessage() + "; skipping", e);
 			}
 		}
 		LOGGER.finer(() -> "Detected nuclei in " + imageFile.getName());

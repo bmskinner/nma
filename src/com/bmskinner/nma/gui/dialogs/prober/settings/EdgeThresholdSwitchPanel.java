@@ -40,41 +40,41 @@ import com.bmskinner.nma.components.options.HashOptions;
  */
 @SuppressWarnings("serial")
 public class EdgeThresholdSwitchPanel extends DetectionSettingsPanel implements ActionListener {
-	
+
 	private static final Logger LOGGER = Logger.getLogger(EdgeThresholdSwitchPanel.class.getName());
 
-    private static final String THRESHOLD_LBL = "Threshold";
-    private static final String EDGE_LBL      = "Edge detection";
+	private static final String THRESHOLD_LBL = "Threshold";
+	private static final String EDGE_LBL = "Edge detection";
 
-    private JPanel cardPanel;
+	private JPanel cardPanel;
 
-    private JRadioButton thresholdBtn = new JRadioButton(THRESHOLD_LBL);
-    private JRadioButton edgeBtn      = new JRadioButton(EDGE_LBL);
-    private ButtonGroup  group        = new ButtonGroup();
+	private JRadioButton thresholdBtn = new JRadioButton(THRESHOLD_LBL);
+	private JRadioButton edgeBtn = new JRadioButton(EDGE_LBL);
+	private ButtonGroup group = new ButtonGroup();
 
-    public EdgeThresholdSwitchPanel(final HashOptions options) {
-        super(options);
-        this.add(createPanel(), BorderLayout.CENTER);
+	public EdgeThresholdSwitchPanel(final HashOptions options) {
+		super(options);
+		this.add(createPanel(), BorderLayout.CENTER);
 
-    }
+	}
 
-    private JPanel createPanel() {
+	private JPanel createPanel() {
 
-        JPanel panel = new JPanel();
+		JPanel panel = new JPanel();
 
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 
-        JPanel switchPanel = makeSwitchPanel();
-        cardPanel = makeCardPanel();
+		JPanel switchPanel = makeSwitchPanel();
+		cardPanel = makeCardPanel();
 
-        panel.add(switchPanel);
-        panel.add(cardPanel);
+		panel.add(switchPanel);
+		panel.add(cardPanel);
 
-        return panel;
-    }
+		return panel;
+	}
 
-    private JPanel makeCardPanel() {
-        JPanel cardPanel = new JPanel(new CardLayout());
+	private JPanel makeCardPanel() {
+		JPanel cardPanel = new JPanel(new CardLayout());
 
 		SettingsPanel cannyPanel = new CannySettingsPanel(options);
 		SettingsPanel thresholdPanel = new ThresholdSettingsPanel(options);
@@ -87,77 +87,76 @@ public class EdgeThresholdSwitchPanel extends DetectionSettingsPanel implements 
 		CardLayout cl = (CardLayout) (cardPanel.getLayout());
 		cl.show(cardPanel, EDGE_LBL);
 
-        return cardPanel;
-    }
+		return cardPanel;
+	}
 
-    /**
-     * A panel with the radio buttons to choose edge detection or threshold for
-     * the nucleus
-     * 
-     * @return
-     */
-    private JPanel makeSwitchPanel() {
-        JPanel panel = new JPanel(new FlowLayout());
+	/**
+	 * A panel with the radio buttons to choose edge detection or threshold for the
+	 * nucleus
+	 * 
+	 * @return
+	 */
+	private JPanel makeSwitchPanel() {
+		JPanel panel = new JPanel(new FlowLayout());
 
-        thresholdBtn.setSelected(false);
-        edgeBtn.setSelected(true);
-        thresholdBtn.setActionCommand(THRESHOLD_LBL);
-        edgeBtn.setActionCommand(EDGE_LBL);
+		thresholdBtn.setSelected(false);
+		edgeBtn.setSelected(true);
+		thresholdBtn.setActionCommand(THRESHOLD_LBL);
+		edgeBtn.setActionCommand(EDGE_LBL);
 
-        // Group the radio buttons.
-        group.add(thresholdBtn);
-        group.add(edgeBtn);
+		// Group the radio buttons.
+		group.add(thresholdBtn);
+		group.add(edgeBtn);
 
-        thresholdBtn.addActionListener(this);
-        edgeBtn.addActionListener(this);
+		thresholdBtn.addActionListener(this);
+		edgeBtn.addActionListener(this);
 
-        panel.add(thresholdBtn);
-        panel.add(edgeBtn);
+		panel.add(thresholdBtn);
+		panel.add(edgeBtn);
 
-        return panel;
-    }
+		return panel;
+	}
 
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        if (e.getActionCommand().equals(THRESHOLD_LBL)) {
-            options.setBoolean(HashOptions.IS_USE_CANNY, false);
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		if (e.getActionCommand().equals(THRESHOLD_LBL)) {
+			options.setBoolean(HashOptions.IS_USE_CANNY, false);
 
-            CardLayout cl = (CardLayout) (cardPanel.getLayout());
-            cl.show(cardPanel, THRESHOLD_LBL);
+			CardLayout cl = (CardLayout) (cardPanel.getLayout());
+			cl.show(cardPanel, THRESHOLD_LBL);
 
-        }
+		}
 
-        if (e.getActionCommand().equals(EDGE_LBL)) {
-            options.setBoolean(HashOptions.IS_USE_CANNY, true);
-            CardLayout cl = (CardLayout) (cardPanel.getLayout());
-            cl.show(cardPanel, EDGE_LBL);
-        }
-        fireOptionsChangeEvent();
+		if (e.getActionCommand().equals(EDGE_LBL)) {
+			options.setBoolean(HashOptions.IS_USE_CANNY, true);
+			CardLayout cl = (CardLayout) (cardPanel.getLayout());
+			cl.show(cardPanel, EDGE_LBL);
+		}
+		fireOptionsChangeEvent();
 
-    }
+	}
 
-    @Override
-    public void update() {
-        super.update();
-        boolean showCanny = options.getBoolean(HashOptions.IS_USE_CANNY);
+	@Override
+	public void update() {
+		super.update();
+		boolean showCanny = options.getBoolean(HashOptions.IS_USE_CANNY);
 
-        CardLayout cl = (CardLayout) (cardPanel.getLayout());
+		CardLayout cl = (CardLayout) (cardPanel.getLayout());
 
-        if (showCanny) {
-        	edgeBtn.setSelected(true);
-            cl.show(cardPanel, EDGE_LBL);
-        } else {
-        	thresholdBtn.setSelected(true);
-            cl.show(cardPanel, THRESHOLD_LBL);
-        }
+		if (showCanny) {
+			edgeBtn.setSelected(true);
+			cl.show(cardPanel, EDGE_LBL);
+		} else {
+			thresholdBtn.setSelected(true);
+			cl.show(cardPanel, THRESHOLD_LBL);
+		}
+	}
 
-    }
+	@Override
+	public void setEnabled(boolean b) {
+		super.setEnabled(b);
+		thresholdBtn.setEnabled(b);
+		edgeBtn.setEnabled(b);
 
-    @Override
-    public void setEnabled(boolean b) {
-        super.setEnabled(b);
-        thresholdBtn.setEnabled(b);
-        edgeBtn.setEnabled(b);
-
-    }
+	}
 }
