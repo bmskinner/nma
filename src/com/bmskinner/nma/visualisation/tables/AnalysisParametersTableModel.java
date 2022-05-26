@@ -174,6 +174,11 @@ public class AnalysisParametersTableModel extends DatasetTableModel {
 		} else {
 			builder.append("Threshold: " + options.getInt(HashOptions.THRESHOLD));
 		}
+
+		if (options.getBoolean(HashOptions.IS_USE_WATERSHED)) {
+			builder.append(Io.NEWLINE + "Watershed applied");
+		}
+
 		return builder.toString();
 	}
 
