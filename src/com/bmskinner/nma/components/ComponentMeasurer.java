@@ -35,6 +35,7 @@ import com.bmskinner.nma.components.rules.OrientationMark;
 import com.bmskinner.nma.logging.Loggable;
 import com.bmskinner.nma.stats.Stats;
 
+import ij.gui.Roi;
 import ij.process.FloatPolygon;
 
 /**
@@ -267,6 +268,11 @@ public final class ComponentMeasurer {
 	 * @return the area of the component
 	 */
 	private static double calculateArea(@NonNull final CellularComponent c) {
+		Roi r = c.toOriginalRoi();
+		if (r == null) {
+			LOGGER.fine("Could not convert component to roi");
+			return Statistical.ERROR_CALCULATING_STAT;
+		}
 		return Stats.area(c.toOriginalRoi());
 	}
 

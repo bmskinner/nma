@@ -336,13 +336,11 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
 					signalChannel);
 			long[] totalCounterIntensity = shellDetector.findPixelIntensities(n);
 
-			counter.addShellData(CountType.COUNTERSTAIN, c, n, totalCounterIntensity); // the
-																						// counterstain
-																						// within
-																						// the
-																						// nucleus
-			counter.addShellData(CountType.SIGNAL, c, n, totalSignalIntensity); // the pixels within
-																				// the whole nucleus
+			// Nuclear counterstain
+			counter.addShellData(CountType.COUNTERSTAIN, c, n, totalCounterIntensity);
+
+			// Pixels in signals
+			counter.addShellData(CountType.SIGNAL, c, n, totalSignalIntensity);
 
 			long[] random = new RandomDistribution(n, shellDetector,
 					RandomDistribution.DEFAULT_ITERATIONS).getCounts();

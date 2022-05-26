@@ -64,7 +64,8 @@ public class ShellAnalysisAction extends SingleDatasetResultAction {
 	 * @param dataset
 	 * @param mw
 	 */
-	public ShellAnalysisAction(@NonNull final IAnalysisDataset dataset, @NonNull final ProgressBarAcceptor acceptor) {
+	public ShellAnalysisAction(@NonNull final IAnalysisDataset dataset,
+			@NonNull final ProgressBarAcceptor acceptor) {
 		super(dataset, PROGRESS_BAR_LABEL, acceptor);
 	}
 
@@ -106,7 +107,8 @@ public class ShellAnalysisAction extends SingleDatasetResultAction {
 			return false;
 		}
 
-		double circ = dataset.getCollection().getMin(Measurement.CIRCULARITY, CellularComponent.NUCLEUS,
+		double circ = dataset.getCollection().getMin(Measurement.CIRCULARITY,
+				CellularComponent.NUCLEUS,
 				MeasurementScale.PIXELS);
 
 		if (circ < ShellAnalysisMethod.MINIMUM_CIRCULARITY) {
@@ -135,7 +137,8 @@ public class ShellAnalysisAction extends SingleDatasetResultAction {
 		 * @param dataset the dataset
 		 * @param title
 		 */
-		protected ShellAnalysisSetupDialog(final @NonNull IAnalysisDataset dataset, final String title) {
+		protected ShellAnalysisSetupDialog(final @NonNull IAnalysisDataset dataset,
+				final String title) {
 			super(dataset, title);
 			setDefaults();
 			createUI();
@@ -168,14 +171,17 @@ public class ShellAnalysisAction extends SingleDatasetResultAction {
 			JComboBox<ShrinkType> typeBox = new JComboBox<>(ShrinkType.values());
 			typeBox.setSelectedItem(HashOptions.DEFAULT_EROSION_METHOD);
 			typeBox.addActionListener(
-					e -> o.setString(HashOptions.SHELL_EROSION_METHOD_KEY, typeBox.getSelectedItem().toString()));
+					e -> o.setString(HashOptions.SHELL_EROSION_METHOD_KEY,
+							typeBox.getSelectedItem().toString()));
 
 			labels.add(new JLabel("Erosion method"));
 			fields.add(typeBox);
 
-			SpinnerNumberModel sModel = new SpinnerNumberModel(HashOptions.DEFAULT_SHELL_COUNT, 2, 10, 1);
+			SpinnerNumberModel sModel = new SpinnerNumberModel(HashOptions.DEFAULT_SHELL_COUNT, 2,
+					10, 1);
 			JSpinner spinner = new JSpinner(sModel);
-			spinner.addChangeListener(e -> o.setInt(HashOptions.SHELL_COUNT_INT, (int) sModel.getValue()));
+			spinner.addChangeListener(
+					e -> o.setInt(HashOptions.SHELL_COUNT_INT, (int) sModel.getValue()));
 
 			labels.add(new JLabel("Number of shells"));
 			fields.add(spinner);
@@ -187,7 +193,8 @@ public class ShellAnalysisAction extends SingleDatasetResultAction {
 
 		@Override
 		protected void setDefaults() {
-			// TODO Auto-generated method stub
+			o.setInt(HashOptions.SHELL_COUNT_INT, 5);
+			o.setString(HashOptions.SHELL_EROSION_METHOD_KEY, ShrinkType.AREA.toString());
 		}
 	}
 }
