@@ -42,6 +42,8 @@ import com.bmskinner.nma.components.datasets.ICellCollection;
 import com.bmskinner.nma.components.datasets.VirtualDataset;
 import com.bmskinner.nma.components.generic.FloatPoint;
 import com.bmskinner.nma.components.generic.IPoint;
+import com.bmskinner.nma.components.measure.Measurement;
+import com.bmskinner.nma.components.measure.MeasurementScale;
 import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.options.IAnalysisOptions;
 import com.bmskinner.nma.components.signals.DefaultShellResult;
@@ -104,6 +106,18 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
 				() -> String.format("Performing %s shell analysis with %s shells on dataset %s...",
 						options.getString(HashOptions.SHELL_EROSION_METHOD_KEY),
 						options.getInt(HashOptions.SHELL_COUNT_INT), collection.getName()));
+
+		// Check that all nuclei can (probably) be eroded
+		int shellCount = options.getInt(HashOptions.SHELL_COUNT_INT);
+		for (Nucleus n : dataset.getCollection().getNuclei()) {
+			double nArea = n.getMeasurement(Measurement.AREA, MeasurementScale.PIXELS);
+			if (nArea / shellCount < MINIMUM_AREA_PER_SHELL) {
+				LOGGER.warning(String.format(
+						"At least one nucleus (%s) is too small for the desired shell count (%d). Try fewer shells",
+						n.getNameAndNumber(), shellCount));
+				return;
+			}
+		}
 
 		// If this is a child, and the parent already has the data, just copy it
 		if (collection.isVirtual()) {

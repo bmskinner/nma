@@ -59,6 +59,7 @@ public class UserActionEvent extends EventObject {
 	public static final String NEW_WORKSPACE = "NewWorkspace";
 
 	public static final String ADD_NUCLEAR_SIGNAL = "AddNuclearSignalAction";
+	public static final String RUN_SHELL_ANALYSIS = "Run shell analysis";
 	public static final String SIGNAL_WARPING = "SignalWarpingAction";
 
 	public static final String CLUSTER_FROM_FILE = "AddClusterFromFileAction";
@@ -132,7 +133,6 @@ public class UserActionEvent extends EventObject {
 	 * the positions of border tags using built in rules. Does not recache charts.
 	 */
 	public static final String RECALCULATE_MEDIAN = "Recalculate median profiles";
-	public static final String RUN_SHELL_ANALYSIS = "Run shell analysis";
 
 	public static final String RUN_GLCM_ANALYSIS = "Run GLCM analysis";
 

@@ -105,6 +105,9 @@ public class Labels {
 		public static final String ADD_NUCLEAR_SIGNAL_LBL = "Add nuclear signal";
 		public static final String ADD_NUCLEAR_SIGNAL_TIP = "Run on root datasets only";
 
+		public static final String ADD_SHELLS_SIGNAL_LBL = "Run shell analysis";
+		public static final String ADD_SHELLS_SIGNAL_TIP = "Run on root datasets only";
+
 		public static final String WARP_BTN_LBL = "Warped signals";
 		public static final String WARP_BTN_TOOLTIP = "Requires single dataset with consensus nucleus and signals";
 

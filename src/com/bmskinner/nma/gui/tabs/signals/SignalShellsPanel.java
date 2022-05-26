@@ -65,8 +65,6 @@ import com.bmskinner.nma.gui.components.panels.WrappedLabel;
 import com.bmskinner.nma.gui.dialogs.SettingsDialog;
 import com.bmskinner.nma.gui.dialogs.collections.ShellOverviewDialog;
 import com.bmskinner.nma.gui.events.NuclearSignalUpdatedListener;
-import com.bmskinner.nma.gui.events.UserActionController;
-import com.bmskinner.nma.gui.events.UserActionEvent;
 import com.bmskinner.nma.gui.tabs.ChartDetailPanel;
 import com.bmskinner.nma.gui.tabs.DetailPanel;
 import com.bmskinner.nma.gui.tabs.TableDetailPanel;
@@ -98,13 +96,13 @@ public class SignalShellsPanel extends DetailPanel
 	private static final String PANEL_TITLE_LBL = "Shells";
 	private static final String WITHIN_SIGNALS_LBL = "Within signals";
 	private static final String WITHIN_NUCLEI_LBL = "Within nuclei";
-	private static final String RUN_ANALYSIS_LBL = "Run new";
+//	private static final String RUN_ANALYSIS_LBL = "Run new";
 	private static final String DAPI_NORM_LBL = "DAPI normalise";
 	private static final String SHOW_RANDOM_LBL = "Show random";
 	private static final String SHOW_SHELLS_LBL = "Show nuclei";
 	private static final String FILTER_LBL = "Filter nuclei";
 
-	private static final String RUN_ANALYSIS_TOOLTIP = "Run a shell analysis on all signal groups, replacing any existing analysis";
+//	private static final String RUN_ANALYSIS_TOOLTIP = "Run a shell analysis on all signal groups, replacing any existing analysis";
 	private static final String WITHIN_SIGNALS_TOOLTIP = "Analyse only pixels that are within defined signals";
 	private static final String WITHIN_NUCLEI_TOOLTIP = "Analyse any pixels that are within the nucleus";
 	private static final String DAPI_NORM_TOOLTIP = "Apply a correction for nuclear flattening based on the DNA counterstain";
@@ -115,7 +113,7 @@ public class SignalShellsPanel extends DetailPanel
 	private JRadioButton withinNucleiBtn = new JRadioButton(WITHIN_NUCLEI_LBL);
 	private ButtonGroup coverageGroup = new ButtonGroup();
 
-	private JButton newAnalysis = new JButton(RUN_ANALYSIS_LBL);
+//	private JButton newAnalysis = new JButton(RUN_ANALYSIS_LBL);
 	private JButton showNuclei = new JButton(SHOW_SHELLS_LBL);
 
 	private JButton filterBtn = new JButton(FILTER_LBL);
@@ -144,7 +142,7 @@ public class SignalShellsPanel extends DetailPanel
 
 	@Override
 	public void setEnabled(boolean b) {
-		newAnalysis.setEnabled(b);
+//		newAnalysis.setEnabled(b);
 		withinNucleiBtn.setEnabled(b);
 		withinSignalsBtn.setEnabled(b);
 		dapiNormalise.setEnabled(b);
@@ -216,13 +214,13 @@ public class SignalShellsPanel extends DetailPanel
 	private JPanel createHeader() {
 		JPanel panel = new JPanel();
 
-		newAnalysis.addActionListener(e -> UserActionController.getInstance()
-				.userActionEventReceived(new UserActionEvent(this,
-						UserActionEvent.RUN_SHELL_ANALYSIS, getDatasets())));
+//		newAnalysis.addActionListener(e -> UserActionController.getInstance()
+//				.userActionEventReceived(new UserActionEvent(this,
+//						UserActionEvent.RUN_SHELL_ANALYSIS, getDatasets())));
 
-		newAnalysis.setToolTipText(RUN_ANALYSIS_TOOLTIP);
+//		newAnalysis.setToolTipText(RUN_ANALYSIS_TOOLTIP);
 
-		panel.add(newAnalysis);
+//		panel.add(newAnalysis);
 
 		// Add the coverage options
 
@@ -285,7 +283,7 @@ public class SignalShellsPanel extends DetailPanel
 		if (activeDataset() == null)
 			return;
 		if (activeDataset().getCollection().getSignalManager().hasSignals()) {
-			newAnalysis.setEnabled(true);
+//			newAnalysis.setEnabled(true);
 			if (activeDataset().getCollection().getSignalManager().hasShellResult())
 				setEnabled(true);
 		}

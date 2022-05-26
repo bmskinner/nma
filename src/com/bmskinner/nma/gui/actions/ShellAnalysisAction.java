@@ -19,8 +19,10 @@ package com.bmskinner.nma.gui.actions;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.GridBagLayout;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -53,6 +55,8 @@ import com.bmskinner.nma.gui.events.UIController;
  *
  */
 public class ShellAnalysisAction extends SingleDatasetResultAction {
+
+	private static final Logger LOGGER = Logger.getLogger(ShellAnalysisAction.class.getName());
 
 	private static final String CIRC_ERROR_MESSAGE = "Min nucleus circularity is too low to make shells";
 	private static final String AREA_ERROR_MESSAGE = "Min nucleus area is too small to break into shells";
@@ -189,10 +193,17 @@ public class ShellAnalysisAction extends SingleDatasetResultAction {
 			fields.add(typeBox);
 
 			SpinnerNumberModel sModel = new SpinnerNumberModel(HashOptions.DEFAULT_SHELL_COUNT, 2,
-					10, 1);
+					20, 1);
 			JSpinner spinner = new JSpinner(sModel);
-			spinner.addChangeListener(
-					e -> o.setInt(HashOptions.SHELL_COUNT_INT, (int) sModel.getValue()));
+			spinner.addChangeListener(e -> {
+				try {
+					spinner.commitEdit();
+					o.setInt(HashOptions.SHELL_COUNT_INT, (int) sModel.getValue());
+				} catch (ParseException e1) {
+					LOGGER.fine("Error parsing shell count");
+				}
+
+			});
 
 			labels.add(new JLabel("Number of shells"));
 			fields.add(spinner);

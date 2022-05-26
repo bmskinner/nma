@@ -363,6 +363,11 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_SINGLE_OBJECT,
 				Labels.Populations.ADD_NUCLEAR_SIGNAL_TIP));
 
+		addSubMenu.add(fact.makeItem(Labels.Populations.ADD_SHELLS_SIGNAL_LBL,
+				UserActionEvent.RUN_SHELL_ANALYSIS,
+				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_SINGLE_OBJECT,
+				Labels.Populations.ADD_SHELLS_SIGNAL_TIP));
+
 		addSubMenu.add(fact.makeItem(Labels.Populations.WARP_BTN_LBL,
 				UserActionEvent.SIGNAL_WARPING,
 				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_CHILD_DATASET
