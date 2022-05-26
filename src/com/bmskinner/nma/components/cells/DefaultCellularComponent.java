@@ -870,13 +870,14 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 
 		// Look for the point at which the direct distance between the two points is
 		// closest to the sum of their respective distances to the centre of mass
-		return Arrays.stream(borderList)
+		IPoint opp = Arrays.stream(borderList)
 				.filter(point -> point.getLengthTo(p) > distToCom)
 				.min(Comparator
 						.comparing(point -> Math.abs(point.getLengthTo(centreOfMass)
 								+ distToCom
 								- point.getLengthTo(p))))
-				.orElseThrow(IllegalArgumentException::new);
+				.orElse(p);
+		return opp;
 	}
 
 	@Override
