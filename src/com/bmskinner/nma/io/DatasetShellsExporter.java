@@ -134,7 +134,7 @@ public class DatasetShellsExporter extends StatsExporter {
 			ISignalGroup signalGroup = groupOptn.get();
 			String groupName = signalGroup.getGroupName();
 			String groupFolder = d.getAnalysisOptions().get()
-					.getDetectionFolder(signalGroupId.toString())
+					.getNuclearSignalDetectionFolder(signalGroupId)
 					.orElseThrow(MissingOptionException::new).getAbsolutePath();
 			Optional<IShellResult> oShellResult = signalGroup.getShellResult();
 			if (!oShellResult.isPresent())

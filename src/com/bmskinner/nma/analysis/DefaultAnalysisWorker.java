@@ -137,6 +137,7 @@ public class DefaultAnalysisWorker extends SwingWorker<IAnalysisResult, Long>
 			Thread.currentThread().interrupt();
 		} catch (ExecutionException e) {
 			LOGGER.warning("Error completing task: " + e.getCause().getMessage());
+			LOGGER.log(Loggable.STACK, "Analysis worker failed", e.getCause());
 			firePropertyChange(ERROR_PROPERTY, getProgress(), IAnalysisWorker.ERROR);
 		}
 
