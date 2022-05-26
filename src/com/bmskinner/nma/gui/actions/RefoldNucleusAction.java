@@ -25,6 +25,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nma.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nma.analysis.IAnalysisMethod;
 import com.bmskinner.nma.analysis.nucleus.ConsensusAveragingMethod;
+import com.bmskinner.nma.analysis.nucleus.ConsensusSimilarityMethod;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.core.ThreadManager;
 import com.bmskinner.nma.gui.ProgressBarAcceptor;
@@ -38,20 +39,22 @@ public class RefoldNucleusAction extends SingleDatasetResultAction {
 
 	private static final Logger LOGGER = Logger.getLogger(RefoldNucleusAction.class.getName());
 
-	private static final @NonNull String PROGRESS_LBL = "Refolding";
+	private static final @NonNull String PROGRESS_LBL = "Creating consensus";
 	private static final int PROGRESS_BAR_LENGTH = 100;
 
 	/**
 	 * Refold the given selected dataset
 	 */
-	public RefoldNucleusAction(@NonNull IAnalysisDataset dataset, @NonNull final ProgressBarAcceptor acceptor,
-			 CountDownLatch doneSignal) {
+	public RefoldNucleusAction(@NonNull IAnalysisDataset dataset,
+			@NonNull final ProgressBarAcceptor acceptor,
+			CountDownLatch doneSignal) {
 		super(dataset, PROGRESS_LBL, acceptor);
 		this.setLatch(doneSignal);
 	}
 
-	public RefoldNucleusAction(@NonNull List<IAnalysisDataset> list, @NonNull final ProgressBarAcceptor acceptor,
-			 CountDownLatch doneSignal) {
+	public RefoldNucleusAction(@NonNull List<IAnalysisDataset> list,
+			@NonNull final ProgressBarAcceptor acceptor,
+			CountDownLatch doneSignal) {
 		super(list, PROGRESS_LBL, acceptor);
 		this.setLatch(doneSignal);
 	}
@@ -68,10 +71,13 @@ public class RefoldNucleusAction extends SingleDatasetResultAction {
 			// variability.
 			// In these cases, or if the program config file has been set to override, use
 			// the old profile method.
-//            if (override){
-//                m = new ProfileRefoldMethod(dataset);
-//                progressLength = ProfileRefoldMethod.MAX_ITERATIONS;
-//            }
+
+			boolean override = dataset.getAnalysisOptions().get().getRuleSetCollection().getName()
+					.equals("Round");
+			if (override) {
+				m = new ConsensusSimilarityMethod(dataset);
+				progressLength = 2;
+			}
 
 			worker = new DefaultAnalysisWorker(m, progressLength);
 			worker.addPropertyChangeListener(this);
@@ -100,7 +106,8 @@ public class RefoldNucleusAction extends SingleDatasetResultAction {
 			} else {
 				// otherwise analyse the next item in the list
 				cancel(); // remove progress bar
-				Runnable task = new RefoldNucleusAction(getRemainingDatasetsToProcess(), progressAcceptors.get(0),
+				Runnable task = new RefoldNucleusAction(getRemainingDatasetsToProcess(),
+						progressAcceptors.get(0),
 						getLatch().get());
 				task.run();
 			}
