@@ -196,7 +196,6 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
 				.fromPoints(list)
 				.withFile(new File(EMPTY_FILE))
 				.withCoM(new FloatPoint(0, 0))
-//				.withChannel(0)
 				.build();
 
 		// Add landmarks and segments from the profile collection
