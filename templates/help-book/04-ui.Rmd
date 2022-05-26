@@ -10,7 +10,7 @@ The following menu options are available:
 
 Option | Action
 -------|--------
-New analysis > Use custom detection options  | [Create a new morphology analysis](https://bitbucket.org/bmskinner/nuclear_morphology/wiki/methods/Creating%20a%20new%20analysis)
+New analysis > Use custom detection options  | [Create a new morphology analysis](#new-analysis)
 New analysis > Use custom detection options  | Run an analysis on images using saved detection options
 New workspace | Create a [workspace ](https://bitbucket.org/bmskinner/nuclear_morphology/wiki/data/Workspaces) to enable opening datasets in one batch
 Open > Open dataset | [Open a saved .nmd dataset](https://bitbucket.org/bmskinner/nuclear_morphology/wiki/methods/Opening%20a%20saved%20dataset)
@@ -49,15 +49,14 @@ Option | Action
 -------|-------
 Add nuclear signal | Detect nuclear signals in a set of images, and add them to the nuclei in the dataset
 [Post-FISH mapping](https://bitbucket.org/bmskinner/nuclear_morphology/wiki/methods/Post-FISH%20remapping) | Assign pre-FISH nuclei to categories based on FISH image data
+Shell analysis ofsignals | Begin a shell analysis of signals in the selected dataset
 Warped signals | Begin signal warping for a root dataset with nuclear signals
 Child collection from file | Create a child dataset based on the nuclei saved in a ```.cell``` file (these can be created via the Export submenu)
 Cluster group from file | Create a child dataset based on clusters defined in a text file in tab separated format: ```Cell_UUID	Cluster_number```
 
 #### The Export submenu {#export-menu}
 
-This sub-menu contains commands for getting data out of the software for running your own downstream analyses.
-
-Details are described [here](https://bitbucket.org/bmskinner/nuclear_morphology/wiki/methods/Exporting%20raw%20data)
+This sub-menu contains commands for getting data out of the software for running your own downstream analyses. Further details are described [here](#export-data-method)
 
 Option | Action
 -------|----------
@@ -137,13 +136,13 @@ Rotation and offsets can also be applied in exact amounts using the options at t
 
 This contains the analysis parameters used to detect nuclei. If multiple datasets are selected, the background to each row will be green if all datasets have the same value, otherwise, the row will be white.
 
-## Images tab
+## Images tab {#images-tab}
 
 Shows the images in which nuclei have been detected. The detected nuclei are highlighted with a yellow outline.
 
 If image files have been moved, you can relocate them by double clicking the image folder and choosing the updated folder location.
 
-## Cells tab
+## Cells tab {#cells-tab}
 
 This displays information on individual cells within a dataset. On the left is a list of all cells within the population. 
 
@@ -231,6 +230,10 @@ Note - a more accurate mapping of signals onto the consensus can be achieved usi
 
 Signal groups within a dataset can be merged together using the 'Merge signal groups' button. Merged signal groups do not affect the original signal groups - they duplicate the original signals and add them to a new group.
 
+```{r, out.width="100%", out.height="100%", fig.show='hold', fig.align='center', echo=F}
+knitr::include_graphics("img/Nuclear_signals_1_overview.png")
+```
+
 ### Detection settings {#nuclear-signals-detection-tab}
 
 This shows the settings that were used to detect each signal group in the dataset. Double click the signal group colour to change the colour.
@@ -249,7 +252,13 @@ This allows scatter plot comparisons between signal measurements, with Spearman'
 
 ### Shells  {#nuclear-signals-shells-tab}
 
-Display and run shell analysis.
+Displays the resuls of shell analysis. Shell analysis can be run via 'Dataset' > 'Add' > 'Shell analysis of signals'. 
+
+If the selected datasets contain a single signal group, the chart will display a bar chart of the percentge signal detected in each shell. If multiple signal groups with shell results are present, the chart will instead show a heat map, in which the intensity of each square corresponds to the percentage signal in each shell. You can think of it as looking at the bar charts from above.
+
+The upper table shows whether the shell results are significantly different to a random distribution via a chi square test.
+
+The lower table shows pairwise comparisons between any shell results in the selected datasets, again by chi square. The pairwise tests require the shell results to have the same number of shells. 
 
 ### Colocalisation  {#nuclear-signals-colocalisation-tab}
 
