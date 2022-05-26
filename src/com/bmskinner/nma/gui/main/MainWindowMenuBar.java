@@ -360,12 +360,15 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 
 		addSubMenu.add(fact.makeItem(Labels.Populations.ADD_NUCLEAR_SIGNAL_LBL,
 				UserActionEvent.ADD_NUCLEAR_SIGNAL,
-				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_SINGLE_OBJECT,
+				ContextEnabled.ACTIVE_ON_ROOT_DATASET
+						| ContextEnabled.ACTIVE_ON_SINGLE_OBJECT,
 				Labels.Populations.ADD_NUCLEAR_SIGNAL_TIP));
 
 		addSubMenu.add(fact.makeItem(Labels.Populations.ADD_SHELLS_SIGNAL_LBL,
 				UserActionEvent.RUN_SHELL_ANALYSIS,
-				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_SINGLE_OBJECT,
+				ContextEnabled.ACTIVE_ON_ROOT_DATASET
+						| ContextEnabled.ACTIVE_ON_SINGLE_OBJECT
+						| ContextEnabled.ACTIVE_WITH_SIGNALS,
 				Labels.Populations.ADD_SHELLS_SIGNAL_TIP));
 
 		addSubMenu.add(fact.makeItem(Labels.Populations.WARP_BTN_LBL,
@@ -378,16 +381,19 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 
 		addSubMenu.add(fact.makeItem(Labels.Populations.POST_FISH_MAPPING_LBL,
 				UserActionEvent.POST_FISH_MAPPING,
-				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_SINGLE_OBJECT));
+				ContextEnabled.ACTIVE_ON_ROOT_DATASET
+						| ContextEnabled.ACTIVE_ON_SINGLE_OBJECT));
 
 		addSubMenu.add(fact.makeItem(Labels.Populations.ADD_CHILD_CELLS_LBL,
 				UserActionEvent.RELOCATE_CELLS,
-				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_CHILD_DATASET
+				ContextEnabled.ACTIVE_ON_ROOT_DATASET
+						| ContextEnabled.ACTIVE_ON_CHILD_DATASET
 						| ContextEnabled.ACTIVE_ON_SINGLE_OBJECT));
 
 		addSubMenu.add(fact.makeItem(Labels.Populations.ADD_CLUSTER_FILE_LBL,
 				UserActionEvent.CLUSTER_FROM_FILE,
-				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_CHILD_DATASET
+				ContextEnabled.ACTIVE_ON_ROOT_DATASET
+						| ContextEnabled.ACTIVE_ON_CHILD_DATASET
 						| ContextEnabled.ACTIVE_ON_SINGLE_OBJECT));
 
 		menu.add(addSubMenu);
@@ -395,14 +401,17 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 		menu.addSeparator();
 
 		menu.add(fact.makeItem(Labels.Populations.CURATE_LBL, UserActionEvent.CURATE_DATASET,
-				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_CHILD_DATASET
+				ContextEnabled.ACTIVE_ON_ROOT_DATASET
+						| ContextEnabled.ACTIVE_ON_CHILD_DATASET
 						| ContextEnabled.ACTIVE_ON_SINGLE_OBJECT));
 
 		menu.add(fact.makeItem(Labels.Populations.CHANGE_SCALE_LBL, UserActionEvent.CHANGE_SCALE,
-				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_MULTI_OBJECTS));
+				ContextEnabled.ACTIVE_ON_ROOT_DATASET
+						| ContextEnabled.ACTIVE_ON_MULTI_OBJECTS));
 
 		menu.add(fact.makeItem(Labels.Populations.MERGE_LBL, UserActionEvent.MERGE_DATASETS_ACTION,
-				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_CHILD_DATASET
+				ContextEnabled.ACTIVE_ON_ROOT_DATASET
+						| ContextEnabled.ACTIVE_ON_CHILD_DATASET
 						| ContextEnabled.ACTIVE_ON_MULTI_OBJECTS));
 
 		menu.add(
@@ -415,12 +424,14 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 
 		menu.add(fact.makeItem(Labels.Populations.ADD_TO_WORKSPACE_LBL,
 				UserActionEvent.ADD_TO_WORKSPACE,
-				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_SINGLE_OBJECT
+				ContextEnabled.ACTIVE_ON_ROOT_DATASET
+						| ContextEnabled.ACTIVE_ON_SINGLE_OBJECT
 						| ContextEnabled.ACTIVE_ON_MULTI_OBJECTS));
 
 		menu.add(fact.makeItem(Labels.Populations.REMOVE_FROM_WORKSPACE_LBL,
 				UserActionEvent.REMOVE_FROM_WORKSPACE,
-				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_SINGLE_OBJECT
+				ContextEnabled.ACTIVE_ON_ROOT_DATASET
+						| ContextEnabled.ACTIVE_ON_SINGLE_OBJECT
 						| ContextEnabled.ACTIVE_ON_MULTI_OBJECTS));
 
 		menu.add(fact.makeItem(
