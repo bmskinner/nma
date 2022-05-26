@@ -44,7 +44,8 @@ import com.bmskinner.nma.visualisation.options.TableOptions;
 
 public class NuclearSignalTableCreator extends AbstractTableCreator {
 
-	private static final Logger LOGGER = Logger.getLogger(NuclearSignalTableCreator.class.getName());
+	private static final Logger LOGGER = Logger
+			.getLogger(NuclearSignalTableCreator.class.getName());
 
 	/**
 	 * Create with a set of table options
@@ -96,7 +97,8 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
 		DecimalFormat lowFormat = new DecimalFormat("0.00E00");
 		DecimalFormat pFormat = new DecimalFormat(DEFAULT_PROBABILITY_FORMAT);
 
-		Object[] columnNames = { Labels.DATASET, Labels.Signals.SIGNAL_GROUP_LABEL, Labels.Signals.AVERAGE_POSITION,
+		Object[] columnNames = { Labels.DATASET, Labels.Signals.SIGNAL_GROUP_LABEL,
+				Labels.Signals.AVERAGE_POSITION,
 				Labels.Stats.PROBABILITY };
 
 		model.setColumnIdentifiers(columnNames);
@@ -106,9 +108,11 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
 
 		for (IAnalysisDataset d : options.getDatasets()) {
 
-			Optional<ISignalGroup> randomGroup = d.getCollection().getSignalGroup(IShellResult.RANDOM_SIGNAL_ID);
+			Optional<ISignalGroup> randomGroup = d.getCollection()
+					.getSignalGroup(IShellResult.RANDOM_SIGNAL_ID);
 			Optional<IShellResult> random = randomGroup.isPresent()
-					? d.getCollection().getSignalGroup(IShellResult.RANDOM_SIGNAL_ID).get().getShellResult()
+					? d.getCollection().getSignalGroup(IShellResult.RANDOM_SIGNAL_ID).get()
+							.getShellResult()
 					: Optional.empty();
 
 			for (UUID signalGroup : d.getCollection().getSignalManager().getSignalGroupIDs()) {
@@ -119,11 +123,14 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
 
 					String groupName = group.getGroupName();
 
-					double mean = r.get().getOverallShell(options.getAggregation(), options.getNormalisation());
+					double mean = r.get().getOverallShell(options.getAggregation(),
+							options.getNormalisation());
 					double pval = 1;
 					if (random.isPresent()) {
-						ShellDistributionTester tester = new ShellDistributionTester(r.get(), random.get());
-						pval = tester.test(options.getAggregation(), options.getNormalisation()).getPValue();
+						ShellDistributionTester tester = new ShellDistributionTester(r.get(),
+								random.get());
+						pval = tester.test(options.getAggregation(), options.getNormalisation())
+								.getPValue();
 					}
 
 					String key = d.getId().toString() + groupName;
@@ -139,7 +146,8 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
 			double d = (double) values[3];
 			d *= nComparisons; // Bonferroni correction
 			d = Math.min(d, 1);
-			values[3] = d < 0.001 ? lowFormat.format(d) : pFormat.format(d); // Choose the most readable format
+			values[3] = d < 0.001 ? lowFormat.format(d) : pFormat.format(d); // Choose the most
+																				// readable format
 			model.addRow(values);
 		}
 		return model;
@@ -185,7 +193,8 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
 
 				for (IAnalysisDataset d2 : options.getDatasets()) {
 
-					for (UUID signalGroup2 : d2.getCollection().getSignalManager().getSignalGroupIDs()) {
+					for (UUID signalGroup2 : d2.getCollection().getSignalManager()
+							.getSignalGroupIDs()) {
 						if (d1 == d2 && signalGroup1 == signalGroup2)
 							continue;
 
@@ -194,17 +203,27 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
 						if (!r2.isPresent())
 							continue;
 
+						if (r1.get().getNumberOfShells() != r2.get().getNumberOfShells()) {
+							continue;
+						}
+
 						String groupName2 = group2.getGroupName();
 
-						ShellDistributionTester tester = new ShellDistributionTester(r1.get(), r2.get());
-						double pval = tester.test(options.getAggregation(), options.getNormalisation()).getPValue();
+						ShellDistributionTester tester = new ShellDistributionTester(r1.get(),
+								r2.get());
+						double pval = tester
+								.test(options.getAggregation(), options.getNormalisation())
+								.getPValue();
 
-						String k1 = d1.getId().toString() + signalGroup1.toString() + d2.getId().toString()
+						String k1 = d1.getId().toString() + signalGroup1.toString()
+								+ d2.getId().toString()
 								+ signalGroup2.toString();
-						String k2 = d2.getId().toString() + signalGroup2.toString() + d1.getId().toString()
+						String k2 = d2.getId().toString() + signalGroup2.toString()
+								+ d1.getId().toString()
 								+ signalGroup1.toString();
 
-						Object[] rowData = { d1.getName(), groupName1, d2.getName(), groupName2, pval };
+						Object[] rowData = { d1.getName(), groupName1, d2.getName(), groupName2,
+								pval };
 
 						if (valuesAdded.containsKey(k2)) {
 							double prevPValue = (double) valuesAdded.get(k2)[4];
@@ -248,7 +267,8 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
 
 		// DecimalFormat pFormat = new DecimalFormat("#0.00");
 
-		PairwiseSignalDistanceCollection ps = options.firstDataset().getCollection().getSignalManager()
+		PairwiseSignalDistanceCollection ps = options.firstDataset().getCollection()
+				.getSignalManager()
 				.calculateSignalColocalisation(options.getScale());
 
 		List<Object> firstColumnData = new ArrayList<Object>();
@@ -257,7 +277,8 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
 		ids.addAll(ps.getIDs());
 
 		for (UUID primaryID : ps.getIDs()) {
-			String primaryName = options.firstDataset().getCollection().getSignalGroup(primaryID).get().getGroupName();
+			String primaryName = options.firstDataset().getCollection().getSignalGroup(primaryID)
+					.get().getGroupName();
 			firstColumnData.add(primaryName);
 		}
 		DecimalFormat df = new DecimalFormat(DEFAULT_DECIMAL_FORMAT);
@@ -267,7 +288,8 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
 
 			List<Object> columnData = new ArrayList<Object>();
 
-			String primaryName = options.firstDataset().getCollection().getSignalGroup(primaryID).get().getGroupName();
+			String primaryName = options.firstDataset().getCollection().getSignalGroup(primaryID)
+					.get().getGroupName();
 
 			for (UUID secondaryID : ps.getIDs()) {
 
