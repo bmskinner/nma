@@ -44,6 +44,7 @@ import com.bmskinner.nma.components.signals.IShellResult.ShrinkType;
 import com.bmskinner.nma.core.ThreadManager;
 import com.bmskinner.nma.gui.ProgressBarAcceptor;
 import com.bmskinner.nma.gui.dialogs.SubAnalysisSetupDialog;
+import com.bmskinner.nma.gui.events.UIController;
 
 /**
  * Prepare and run a shell analysis on the provided dataset.
@@ -89,6 +90,16 @@ public class ShellAnalysisAction extends SingleDatasetResultAction {
 		} else {
 			this.cancel();
 		}
+	}
+
+	@Override
+	public void finished() {
+		cleanup(); // remove the property change listener
+
+		// Update the signal charts
+		UIController.getInstance().fireNuclearSignalUpdated(dataset);
+
+		super.finished();
 	}
 
 	/**

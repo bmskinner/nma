@@ -90,7 +90,8 @@ import com.bmskinner.nma.visualisation.tables.NuclearSignalTableCreator;
  *
  */
 @SuppressWarnings("serial")
-public class SignalShellsPanel extends DetailPanel implements ActionListener {
+public class SignalShellsPanel extends DetailPanel
+		implements ActionListener, NuclearSignalUpdatedListener {
 
 	private static final Logger LOGGER = Logger.getLogger(SignalShellsPanel.class.getName());
 
@@ -138,6 +139,7 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
 		this.add(header, BorderLayout.NORTH);
 
 		this.updateSize();
+		uiController.addNuclearSignalUpdatedListener(this);
 	}
 
 	@Override
@@ -308,6 +310,16 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
 		shellChartPanel.update();
 		shellOverallTablePanel.update();
 		shellPairwiseTablePanel.update();
+	}
+
+	@Override
+	public void nuclearSignalUpdated(List<IAnalysisDataset> datasets) {
+		refreshCache(datasets);
+	}
+
+	@Override
+	public void nuclearSignalUpdated(IAnalysisDataset dataset) {
+		refreshCache(dataset);
 	}
 
 	private class ShellFilteringSetupDialog extends SettingsDialog {
