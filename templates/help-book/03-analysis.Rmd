@@ -163,7 +163,75 @@ Operation | Condition
 
 ## Clustering nuclei {#clustering-method}
 
-See the [Clusters tab](#clusters-tab).
+We often want to explore the variation in nuclei within a dataset; perhaps there are two or more distinct groups of shapes to find. To do this, we can perform clustering, based on the profiles or other measured values.
+
+Clustering is performed through the [Clusters tab](#clusters-tab). There are three ways to generate clusters:
+
+- Manually
+- Automatically, using a clustering algorithm
+- Importing a file containing clusters 
+
+### Manual clustering
+
+Allows nuclei to be manually assigned to clusters. Choose the number of clusters you want to make, and each nucleus will be displayed for you to put in a cluster.
+
+```{r, out.width="100%", out.height="100%", fig.show='hold', echo=F}
+knitr::include_graphics("img/gifs/Cluster_manual.gif")
+```
+
+### Automatic clustering
+
+Allows nuclei to be assigned to clusters based on their shape, or other measurements. To run a new clustering analysis, click 'Cluster automatically'.
+
+```{r, out.width="100%", out.height="100%", fig.show='hold', echo=F}
+knitr::include_graphics("img/gifs/Cluster_automatic.gif")
+```
+
+The default clustering is on the profile angles within each nucleus. Checkboxes allow selection of other nuclear parameters.
+
+#### Dimensionality reduction
+
+Dimensionality reduction can be optionally applied before clustering. PCA and tSNE are provided; however, for reproducibile analysis it is recommended that you export the measurements and run these in your preferred stats package. tSNE especially makes use of a random number generator, and so generates a slightly different plot every time you run it. This can be controlled with fixed seeds in stats programs like R.
+
+If dimensionality reduction was applied, after clustering is complete, the first two dimensions can be viewed in a scatter plot by clicking the `View plot` button in the cluster parameters table.
+
+#### Clustering method
+
+Clustering can be performed using [hierarchical clustering](https://en.wikipedia.org/wiki/Hierarchical_clustering) or [expectation maximisation](https://en.wikipedia.org/wiki/Expectation%E2%80%93maximization_algorithm) clustering.
+
+Once clustering is complete, if hierarchical clustering was selected, a `Show tree` button will be available. Clicking this button will launch the tree viewer.
+
+```{r, out.width="100%", out.height="100%", fig.show='hold', echo=F}
+knitr::include_graphics("img/Clusters_tree_view.png")
+```
+
+The tree can be highlighted to show cluster memberships. The first dropdown list selects individual clusters to highlight. The second selects cluster groups to highlight. If the dataset has merge sources, these can be applied as a highlight using the "Show merge sources" button.
+
+The [Newick format](https://en.wikipedia.org/wiki/Newick_format) for the cluster tree can be copied using the 'Copy Newick', for use in other tree editing software.
+
+### Importing clusters
+
+Sometimes you may want to run clustering on exported data, for example in R, and then use NMA to create the average shape of each cluster. To do this, we can import a file that maps each cell to a cluster.
+
+The R code snippet below demonstrates how to create a cluster file from within R:
+
+```{r, eval=F, echo=T}
+# This assumes you have created a column "ClusterID" in your data frame
+# with the cluster assignments. The ClusterID column should contain
+# only integers from 1.
+# Syntax is CellID<\t>ClusterID
+  map.data <- sample.data %>% dplyr::select(CellID, ClusterID)
+
+  write.table(map.data, file = "cluster_map.tsv", sep = "\t", row.names = F, col.names = F, quote = F)
+```
+
+The mapping file created should be a tab-separated file, containing the cell id, and the cluster number to which the cell is assigned. No column headers are needed.
+
+The clustering tab has an option `Import from file`, which allows you to link cells to cluster groups. Select your mapping file, and the clusters will be applied as a new cluster group.
+
+```{r, out.width="100%", out.height="100%", fig.show='hold', echo=F}
+knitr::include_graphics("img/gifs/Import_clusters.gif")
+```
 
 ## Detecting FISH signals {#detect-signals-method}
 

@@ -315,40 +315,6 @@ The clusters panel allows clustering and tree-building to be run on a dataset, a
 knitr::include_graphics("img/Clusters_panel_overview.png")
 ```
 
-There are three ways to generate clusters:
-
-- Manually
-- Automatically using a clustering algorithm
-- [Importing clusters created in another program](https://bitbucket.org/bmskinner/nuclear_morphology/wiki/methods/Manually%20assign%20clusters.md)
-
-### Manual clustering
-
-Allows nuclei to be manually assigned to clusters. Choose the number of clusters you want to make, and each nucleus will be displayed for you to put in a cluster.
-
-### Automatic clustering
-
-Allows nuclei to be assigned to clusters based on their shape, or other measurements. To run a new clustering analysis, click 'Cluster automatically'.
-
-```{r, out.width="100%", out.height="100%", fig.show='hold', echo=F}
-knitr::include_graphics("img/gifs/Cluster_automatic.gif")
-```
-
-The default clustering is on the profile angles within each nucleus. Checkboxes allow selection of other nucleus parameters.
-
-Dimensionality reduction can be optionally applied before clustering. PCA and tSNE are provided; however, it is recommended that for full analysis you run these in your preferred stats package. An example of how to perform clustering and dimensionality reduction using R is shown in [this page](https://bitbucket.org/bmskinner/nuclear_morphology/wiki/methods/Running%20a%20tSNE%20in%20R).
-
-Clustering can be performed using [hierarchical clustering](https://en.wikipedia.org/wiki/Hierarchical_clustering) or [expectation maximisation](https://en.wikipedia.org/wiki/Expectation%E2%80%93maximization_algorithm) clustering.
-
-Once cluster is complete, if hierarchical clustering was selected, a 'Show tree' button will be available. Clicking this button will launch the tree viewer.
-
-```{r, out.width="100%", out.height="100%", fig.show='hold', echo=F}
-knitr::include_graphics("img/Clusters_tree_view.png")
-```
-
-The tree can be highlighted to show cluster memberships. The first dropdown list selects individual clusters to highlight. The second selects cluster groups to highlight. If the dataset has merge sources, these can be applied as a highlight using the "Show merge sources" button.
-
-The [Newick format](https://en.wikipedia.org/wiki/Newick_format) for the cluster tree can be copied using the 'Copy Newick', for use in other tree editing software.
-
 ## Merges tab {#merges-tab}
 
 If a selected dataset is a merge of other datasets, this panel displays the analysis parameters of the source datasets. As with the main analysis info tab, matching values are highlighted in green for each row. It also allows you to extract the source datasets back out of the merge. See also [merge instructions](#merge-method).
