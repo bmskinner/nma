@@ -30,8 +30,8 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.core.DatasetListManager;
 import com.bmskinner.nma.core.InputSupplier;
-import com.bmskinner.nma.core.ThreadManager;
 import com.bmskinner.nma.core.InputSupplier.RequestCancelledException;
+import com.bmskinner.nma.core.ThreadManager;
 import com.bmskinner.nma.gui.DefaultInputSupplier;
 import com.bmskinner.nma.gui.actions.ExportDatasetAction;
 import com.bmskinner.nma.gui.events.UIController;
@@ -80,6 +80,7 @@ public class DatasetDeleter extends MultipleDatasetAnalysisMethod {
 			deleteDatasetsInList(list);
 			DatasetListManager.getInstance().refreshClusters();
 			UIController.getInstance().fireDatasetDeleted(datasets);
+
 		} catch (Exception e) {
 			LOGGER.warning("Error deleting dataset");
 			LOGGER.log(Loggable.STACK, "Error deleting dataset", e);
@@ -87,14 +88,16 @@ public class DatasetDeleter extends MultipleDatasetAnalysisMethod {
 		return new DefaultAnalysisResult(datasets);
 	}
 
-	private void saveRootDatasets(List<IAnalysisDataset> datasets, CountDownLatch c) throws InterruptedException {
+	private void saveRootDatasets(List<IAnalysisDataset> datasets, CountDownLatch c)
+			throws InterruptedException {
 
 		for (IAnalysisDataset d : datasets) {
 			if (d.isRoot() && DatasetListManager.getInstance().hashCodeChanged(d)) {
 
 				try {
 					String[] buttonLabels = { DISPOSE_LBL, SAVE_LBL };
-					int option = is.requestOptionAllVisible(buttonLabels, String.format(WARNING_LBL, d.getName()),
+					int option = is.requestOptionAllVisible(buttonLabels,
+							String.format(WARNING_LBL, d.getName()),
 							TITLE_LBL);
 					if (option == 0) // don't save
 						continue;

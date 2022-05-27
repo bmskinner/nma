@@ -26,8 +26,10 @@ public class ClusterGroupTableModel extends DatasetTableModel {
 
 	private static final Logger LOGGER = Logger.getLogger(ClusterGroupTableModel.class.getName());
 
-	private static final List<String> ROW_NAMES = List.of(Labels.Clusters.CLUSTER_GROUP, Labels.Clusters.CLUSTER_FOUND,
-			Labels.Clusters.CLUSTER_PARAMS, Labels.Clusters.CLUSTER_DIM_RED, Labels.Clusters.CLUSTER_DIM_PLOT,
+	private static final List<String> ROW_NAMES = List.of(Labels.Clusters.CLUSTER_GROUP,
+			Labels.Clusters.CLUSTER_FOUND,
+			Labels.Clusters.CLUSTER_PARAMS, Labels.Clusters.CLUSTER_DIM_RED,
+			Labels.Clusters.CLUSTER_DIM_PLOT,
 			Labels.Clusters.CLUSTER_METHOD, Labels.Clusters.TREE);
 
 	private IAnalysisDataset[] colNames;
@@ -96,7 +98,8 @@ public class ClusterGroupTableModel extends DatasetTableModel {
 		}
 
 		HashOptions op = opn.get();
-		if (op.getBoolean(HashOptions.CLUSTER_USE_TSNE_KEY) || op.getBoolean(HashOptions.CLUSTER_USE_PCA_KEY)) {
+		if (op.getBoolean(HashOptions.CLUSTER_USE_TSNE_KEY)
+				|| op.getBoolean(HashOptions.CLUSTER_USE_PCA_KEY)) {
 			builder.append(Labels.Clusters.VIEW_PLOT);
 		}
 
@@ -154,16 +157,20 @@ public class ClusterGroupTableModel extends DatasetTableModel {
 		if (op.getBoolean(HashOptions.CLUSTER_USE_TSNE_KEY)) {
 			builder.append(Labels.Clusters.TSNE + Io.NEWLINE);
 			builder.append(
-					Labels.Clusters.TSNE_PERPLEXITY + ": " + op.getDouble(TsneMethod.PERPLEXITY_KEY) + Io.NEWLINE);
-			builder.append(Labels.Clusters.TSNE_MAX_ITER + ": " + op.getInt(TsneMethod.MAX_ITERATIONS_KEY));
+					Labels.Clusters.TSNE_PERPLEXITY + ": " + op.getDouble(TsneMethod.PERPLEXITY_KEY)
+							+ Io.NEWLINE);
+			builder.append(Labels.Clusters.TSNE_MAX_ITER + ": "
+					+ op.getInt(TsneMethod.MAX_ITERATIONS_KEY));
 		}
 
 		if (op.getBoolean(HashOptions.CLUSTER_USE_PCA_KEY)) {
 			builder.append(Labels.Clusters.PCA + Io.NEWLINE);
 			builder.append(Labels.Clusters.PCA_VARIANCE + ": "
-					+ op.getDouble(PrincipalComponentAnalysis.PROPORTION_VARIANCE_KEY) + Io.NEWLINE);
+					+ op.getDouble(PrincipalComponentAnalysis.PROPORTION_VARIANCE_KEY)
+					+ Io.NEWLINE);
 			builder.append(
-					Labels.Clusters.PCA_NUM_PCS + ": " + op.getInt(HashOptions.CLUSTER_NUM_PCS_KEY) + Io.NEWLINE);
+					Labels.Clusters.PCA_NUM_PCS + ": " + op.getInt(HashOptions.CLUSTER_NUM_PCS_KEY)
+							+ Io.NEWLINE);
 		}
 
 		String s = builder.toString();
@@ -183,14 +190,16 @@ public class ClusterGroupTableModel extends DatasetTableModel {
 
 		HashOptions op = opn.get();
 
-		ClusteringMethod method = ClusteringMethod.valueOf(op.getString(HashOptions.CLUSTER_METHOD_KEY));
+		ClusteringMethod method = ClusteringMethod.from(op);
 		builder.append(method + Io.NEWLINE);
-		if (method.equals(ClusteringMethod.EM)) {
-			builder.append(op.getInt(HashOptions.CLUSTER_EM_ITERATIONS_KEY) + " iterations" + Io.NEWLINE);
+		if (ClusteringMethod.EM.equals(method)) {
+			builder.append(
+					op.getInt(HashOptions.CLUSTER_EM_ITERATIONS_KEY) + " iterations" + Io.NEWLINE);
 		}
 
-		if (method.equals(ClusteringMethod.HIERARCHICAL)) {
-			builder.append("Distance: " + op.getString(HashOptions.CLUSTER_HIERARCHICAL_METHOD_KEY) + Io.NEWLINE);
+		if (ClusteringMethod.HIERARCHICAL.equals(method)) {
+			builder.append("Distance: " + op.getString(HashOptions.CLUSTER_HIERARCHICAL_METHOD_KEY)
+					+ Io.NEWLINE);
 		}
 		return builder.toString();
 	}

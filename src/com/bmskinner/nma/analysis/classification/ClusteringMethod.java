@@ -6,34 +6,28 @@ import com.bmskinner.nma.components.options.HashOptions;
  * The available types of clustering for the Weka clusterer
  */
 public enum ClusteringMethod {
-    EM("Expectation maximisation", 0),
-    HIERARCHICAL("Hierarchical", 1),
-    MANUAL("Manual", 2);
+	EM("Expectation maximisation"),
+	HIERARCHICAL("Hierarchical"),
+	MANUAL("Manual");
 
-    private final String name;
-    private final int    code;
+	private final String name;
 
-    ClusteringMethod(String name, int code) {
-        this.name = name;
-        this.code = code;
-    }
+	ClusteringMethod(String name) {
+		this.name = name;
+	}
 
-    @Override
+	@Override
 	public String toString() {
-        return this.name;
-    }
+		return this.name;
+	}
 
-    public int code() {
-        return this.code;
-    }
-    
-    /**
-     * If the given options contains a clustering method
-     * key, get the value
-     * @param o
-     * @return
-     */
-    public static ClusteringMethod from(HashOptions o) {
-    	return ClusteringMethod.valueOf(o.getString(HashOptions.CLUSTER_METHOD_KEY));
-    }
+	/**
+	 * If the given options contains a clustering method key, get the value
+	 * 
+	 * @param o
+	 * @return
+	 */
+	public static ClusteringMethod from(HashOptions o) {
+		return ClusteringMethod.valueOf(o.getString(HashOptions.CLUSTER_METHOD_KEY).toUpperCase());
+	}
 }

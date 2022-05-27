@@ -23,10 +23,10 @@ import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.measure.MeasurementDimension;
 import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.profiles.IProfileSegment;
-import com.bmskinner.nma.components.profiles.Landmark;
 import com.bmskinner.nma.components.profiles.ProfileException;
 import com.bmskinner.nma.components.profiles.ProfileType;
 import com.bmskinner.nma.components.rules.OrientationMark;
+import com.bmskinner.nma.core.GlobalOptions;
 import com.bmskinner.nma.logging.Loggable;
 
 /**
@@ -64,7 +64,9 @@ public class ParameterSelectionPanel extends OptionsPanel {
 		paramPanel.add(Box.createHorizontalGlue());
 		paramPanel.add(stats);
 		paramPanel.add(Box.createHorizontalGlue());
-		paramPanel.add(texture);
+
+		if (GlobalOptions.getInstance().getBoolean(GlobalOptions.IS_GLCM_INTERFACE_KEY))
+			paramPanel.add(texture);
 
 		panel.add(paramPanel);
 		panel.setBorder(BorderFactory.createTitledBorder("Parameters"));
@@ -194,7 +196,8 @@ public class ParameterSelectionPanel extends OptionsPanel {
 					.getSegments(OrientationMark.REFERENCE)) {
 				JCheckBox box = new JCheckBox();
 				box.setForeground(Color.DARK_GRAY);
-				box.addChangeListener(e -> options.setBoolean(s.getID().toString(), box.isSelected()));
+				box.addChangeListener(
+						e -> options.setBoolean(s.getID().toString(), box.isSelected()));
 				box.setSelected(options.getBoolean(s.getID().toString()));
 				JLabel label = new JLabel("Length of " + s.getName());
 				labels.add(label);

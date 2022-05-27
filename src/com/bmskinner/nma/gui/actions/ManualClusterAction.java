@@ -61,11 +61,7 @@ public class ManualClusterAction extends SingleDatasetResultAction {
 
 			// blocks until closed
 			if (mc.isReadyToRun()) {
-				UserActionController.getInstance()
-						.userActionEventReceived(
-								new UserActionEvent(this, UserActionEvent.SAVE, List.of(dataset)));
-
-				UIController.getInstance().fireClusterGroupsUpdated(dataset);
+//				UIController.getInstance().fireClusterGroupsUpdated(dataset);
 			}
 			cancel();
 		} catch (RequestCancelledException e1) {
@@ -80,11 +76,11 @@ public class ManualClusterAction extends SingleDatasetResultAction {
 
 		public class ManualGroup {
 
-			private List<ICell> selectedCells = new ArrayList<>(96);
-			public final String groupName;
+			public final List<ICell> selectedCells = new ArrayList<>();
+			public final String clusterName;
 
 			public ManualGroup(String name) {
-				groupName = name;
+				clusterName = name;
 			}
 
 			/**
@@ -96,21 +92,11 @@ public class ManualClusterAction extends SingleDatasetResultAction {
 			public void addCell(ICell c) {
 				selectedCells.add(c);
 			}
-
-			/**
-			 * Create a new virtual collection from the cells in the group
-			 * 
-			 * @param name
-			 * @return
-			 */
-			public List<ICell> getCells() {
-				return selectedCells;
-			}
 		}
 
 		/** Nuclei assigned to groups */
 		private List<ManualGroup> groups = new ArrayList<>();
-		List<String> groupNames = new ArrayList<>();
+		List<String> clusterNames = new ArrayList<>();
 		private List<JButton> buttons = new ArrayList<>();
 		private int cellNumber = 0;
 
@@ -119,7 +105,7 @@ public class ManualClusterAction extends SingleDatasetResultAction {
 		public ManualClusteringDialog(@NonNull final IAnalysisDataset dataset,
 				List<String> groupNames) {
 			super(dataset, "Manual clustering");
-			this.groupNames = groupNames;
+			this.clusterNames = groupNames;
 			cells = new ArrayList<>(dataset.getCollection().getCells());
 			Collections.shuffle(cells); // random ordering
 			createGroups();
@@ -140,11 +126,11 @@ public class ManualClusterAction extends SingleDatasetResultAction {
 
 		@Override
 		protected void createUI() {
-			this.panel = new AnnotatedNucleusPanel();
+			this.panel = new AnnotatedNucleusPanel(true);
 			openCell(0);
 			this.setLayout(new BorderLayout());
 			this.add(panel, BorderLayout.CENTER);
-			this.add(createGroupPanel(groupNames), BorderLayout.SOUTH);
+			this.add(createGroupPanel(clusterNames), BorderLayout.SOUTH);
 		}
 
 		@Override
@@ -153,8 +139,8 @@ public class ManualClusterAction extends SingleDatasetResultAction {
 		}
 
 		protected void createGroups() {
-			for (int i = 0; i < groupNames.size(); i++) {
-				groups.add(new ManualGroup(groupNames.get(i)));
+			for (int i = 0; i < clusterNames.size(); i++) {
+				groups.add(new ManualGroup(clusterNames.get(i)));
 			}
 		}
 
@@ -165,30 +151,38 @@ public class ManualClusterAction extends SingleDatasetResultAction {
 
 			HashOptions op = new OptionsBuilder()
 					.withValue(HashOptions.CLUSTER_METHOD_KEY, ClusteringMethod.MANUAL.toString())
-					.withValue(HashOptions.CLUSTER_INCLUDE_PROFILE_KEY, false).build();
+					.withValue(HashOptions.CLUSTER_INCLUDE_PROFILE_KEY, false)
+					.build();
 
 			IClusterGroup group = new DefaultClusterGroup(
 					IClusterGroup.CLUSTER_GROUP_PREFIX + "_" + clusterNumber, op);
 
+			List<IAnalysisDataset> childDatasets = new ArrayList<>();
+
 			for (int i = 0; i < groups.size(); i++) {
 
-				List<ICell> cells = groups.get(i).getCells();
+				List<ICell> cells = groups.get(i).selectedCells;
 
 				if (!cells.isEmpty()) {
 
 					try {
 
 						IAnalysisDataset c = new VirtualDataset(dataset,
-								group.getName() + "_Cluster_" + i, null,
+								group.getName() + "_" + groups.get(i).clusterName, null,
 								cells);
 
 						IAnalysisDataset d = dataset.addChildDataset(c);
+
+						childDatasets.add(d);
 
 						// set shared counts
 						c.getCollection().setSharedCount(dataset.getCollection(),
 								c.getCollection().size());
 						dataset.getCollection().setSharedCount(c.getCollection(),
 								c.getCollection().size());
+						LOGGER.fine("Added dataset " + d.getName());
+
+						group.addDataset(d);
 
 					} catch (ProfileException | MissingProfileException
 							| MissingLandmarkException e) {
@@ -199,7 +193,17 @@ public class ManualClusterAction extends SingleDatasetResultAction {
 
 			}
 			dataset.addClusterGroup(group);
+
+			UserActionController.getInstance().userActionEventReceived(
+					new UserActionEvent(this, UserActionEvent.REFOLD_CONSENSUS,
+							childDatasets));
+
+			UserActionController.getInstance()
+					.userActionEventReceived(
+							new UserActionEvent(this, UserActionEvent.SAVE, dataset));
+
 			UIController.getInstance().fireClusterGroupAdded(dataset, group);
+
 			readyToRun = true;
 		}
 
@@ -208,8 +212,6 @@ public class ManualClusterAction extends SingleDatasetResultAction {
 			if (i == cells.size()) {
 				LOGGER.fine("Finished manual clustering");
 				addCollections();
-
-//        		fireInterfaceEvent(InterfaceMethod.REFRESH_POPULATIONS);
 				dispose();
 				return;
 			}
@@ -219,7 +221,7 @@ public class ManualClusterAction extends SingleDatasetResultAction {
 				boolean annotateCellImage = false;
 				panel.showOnlyCell(c, annotateCellImage);
 			} catch (Exception e) {
-				e.printStackTrace();
+				LOGGER.fine("Error displaying cell in manual clustering: " + e.getMessage());
 			}
 
 			int count = cellNumber + 1;

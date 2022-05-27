@@ -32,53 +32,53 @@ import com.bmskinner.nma.logging.Loggable;
  */
 @SuppressWarnings("serial")
 public class CellImageDialog extends LoadingIconDialog {
-	
+
 	private static final Logger LOGGER = Logger.getLogger(CellImageDialog.class.getName());
 
-    private AnnotatedNucleusPanel panel;
+	private AnnotatedNucleusPanel panel;
 
-    public CellImageDialog(ICell cell) {
-        super();
+	public CellImageDialog(ICell cell) {
+		super();
 
-        // Assume cytoplasm==RGB for now
-        if (cell.hasCytoplasm()) {
+		// Assume cytoplasm==RGB for now
+		if (cell.hasCytoplasm()) {
 
-            if (!cell.getCytoplasm().getSourceFile().exists()) {
-                LOGGER.warning("Cannot load image: source file not present");
-                this.dispose();
-            }
+			if (!cell.getCytoplasm().getSourceFile().exists()) {
+				LOGGER.warning("Cannot load image: source file not present");
+				this.dispose();
+			}
 
-        }
+		}
 
-        if (cell.hasNucleus()) {
-            for(Nucleus n : cell.getNuclei()){
-                if (!n.getSourceFile().exists()) {
-                    LOGGER.warning("Cannot load image: source file not present");
-                    this.dispose();
-                }
-            }
-            
-        }
+		if (cell.hasNucleus()) {
+			for (Nucleus n : cell.getNuclei()) {
+				if (!n.getSourceFile().exists()) {
+					LOGGER.warning("Cannot load image: source file not present");
+					this.dispose();
+				}
+			}
 
-        this.panel = new AnnotatedNucleusPanel();
+		}
 
-        this.setLayout(new BorderLayout());
-        this.add(panel, BorderLayout.CENTER);
-        this.setTitle(cell.getPrimaryNucleus().getNameAndNumber());
+		this.panel = new AnnotatedNucleusPanel(false);
 
-        this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+		this.setLayout(new BorderLayout());
+		this.add(panel, BorderLayout.CENTER);
+		this.setTitle(cell.getPrimaryNucleus().getNameAndNumber());
 
-        try {
-            panel.showCell(cell);
+		this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
-        } catch (Exception e) {
-            LOGGER.warning("Cannot make cell image dialog");
-            LOGGER.log(Loggable.STACK, "Error making dialog", e);
-        }
-        this.setModal(false);
-        this.pack();
-        this.centerOnScreen();
-        this.setVisible(true);
-    }
+		try {
+			panel.showCell(cell);
+
+		} catch (Exception e) {
+			LOGGER.warning("Cannot make cell image dialog");
+			LOGGER.log(Loggable.STACK, "Error making dialog", e);
+		}
+		this.setModal(false);
+		this.pack();
+		this.centerOnScreen();
+		this.setVisible(true);
+	}
 
 }

@@ -205,16 +205,18 @@ public final class DatasetListManager implements DatasetAddedListener {
 	 * remove any cluster groups with no member datasets.
 	 */
 	public synchronized void refreshClusters() {
-		try {
-			if (this.hasDatasets()) {
-				for (IAnalysisDataset rootDataset : this.getRootDatasets()) {
-					rootDataset.refreshClusterGroups();
-					for (IAnalysisDataset child : rootDataset.getAllChildDatasets()) {
-						child.refreshClusterGroups();
-					}
 
+		try {
+
+			if (this.hasDatasets()) {
+
+				List<IAnalysisDataset> allDatasets = this.getAllDatasets().stream().toList();
+				for (IAnalysisDataset dataset : allDatasets) {
+					dataset.refreshClusterGroups();
 				}
+				UIController.getInstance().fireClusterGroupsUpdated(allDatasets);
 			}
+
 		} catch (Exception e) {
 			LOGGER.log(Loggable.STACK, "Error refreshing clusters", e);
 		}
