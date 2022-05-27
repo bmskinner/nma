@@ -26,7 +26,7 @@ public class Labels {
 
 	public static final String DATASET = "Dataset";
 	public static final String NA = "N/A";
-	public static final String NA_MERGE = "N/A - merge";
+	public static final String NA_MERGE = "N/A - dataset is a merge";
 	public static final String NUCLEI = "nuclei";
 
 	public static final String REQUIRES_CONSENSUS_LBL = "Requires consensus nucleus";

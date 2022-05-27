@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
@@ -95,7 +96,7 @@ public class AnalysisParametersTableModel extends DatasetTableModel {
 			case 2 -> createNucleusSizeFilterString(options);
 			case 3 -> createNucleusCircFilterString(options);
 			case 4 -> createAnalysisRunTimeString(mainOptions);
-			case 5 -> createSourceFolderString(mainOptions);
+			case 5 -> createSourceFolderString(datasets.get(c - 1), mainOptions);
 			case 6 -> mainOptions.getRuleSetCollection().getName();
 			case 7 -> String.valueOf(mainOptions.getProfileWindowProportion());
 			case 8 -> datasets.get(c - 1).getVersionCreated().toString();
@@ -221,7 +222,14 @@ public class AnalysisParametersTableModel extends DatasetTableModel {
 		return builder.toString();
 	}
 
-	private String createSourceFolderString(@NonNull IAnalysisOptions options) {
+	private String createSourceFolderString(@NonNull IAnalysisDataset dataset,
+			@NonNull IAnalysisOptions options) {
+		if (dataset.hasMergeSources()) {
+			return dataset.getAllMergeSources().stream()
+					.map(d -> d.getAnalysisOptions().get())
+					.map(o -> o.getNucleusDetectionFolder().get().getAbsolutePath())
+					.collect(Collectors.joining(Io.NEWLINE));
+		}
 		return options.getNucleusDetectionFolder().get().getAbsolutePath();
 	}
 
