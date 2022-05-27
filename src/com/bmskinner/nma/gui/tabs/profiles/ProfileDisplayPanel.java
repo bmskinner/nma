@@ -79,14 +79,18 @@ public class ProfileDisplayPanel extends AbstractProfileDisplayPanel {
 	private ChartOptions makeOptions() {
 
 		boolean normalised = profileAlignmentOptionsPanel.isNormalised();
-		ProfileAlignment alignment = normalised ? ProfileAlignment.LEFT : profileAlignmentOptionsPanel.getSelected();
+		ProfileAlignment alignment = normalised ? ProfileAlignment.LEFT
+				: profileAlignmentOptionsPanel.getSelected();
 
 		boolean showMarkers = profileMarkersOptionsPanel.isShowAnnotations();
 		boolean hideProfiles = profileMarkersOptionsPanel.isShowNuclei();
 
-		ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets()).setNormalised(normalised)
-				.setAlignment(alignment).setLandmark(OrientationMark.REFERENCE).setShowAnnotations(showMarkers)
-				.setShowProfiles(hideProfiles).setSwatch(GlobalOptions.getInstance().getSwatch()).setProfileType(type)
+		ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets())
+				.setNormalised(normalised)
+				.setAlignment(alignment).setLandmark(OrientationMark.REFERENCE)
+				.setShowAnnotations(showMarkers)
+				.setShowProfiles(hideProfiles).setSwatch(GlobalOptions.getInstance().getSwatch())
+				.setProfileType(type)
 				.setTarget(chartPanel).build();
 		return options;
 	}
@@ -102,7 +106,12 @@ public class ProfileDisplayPanel extends AbstractProfileDisplayPanel {
 	}
 
 	@Override
-	public void swatchUpdated() {
+	public void globalPaletteUpdated() {
 		update(getDatasets());
+	}
+
+	@Override
+	public void colourUpdated(IAnalysisDataset dataset) {
+		refreshCache(dataset);
 	}
 }

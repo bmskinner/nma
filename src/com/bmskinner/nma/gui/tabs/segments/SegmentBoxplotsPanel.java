@@ -53,7 +53,8 @@ import com.bmskinner.nma.visualisation.options.ChartOptions;
 import com.bmskinner.nma.visualisation.options.ChartOptionsBuilder;
 
 @SuppressWarnings("serial")
-public class SegmentBoxplotsPanel extends BoxplotsTabPanel implements ActionListener, ChartSetEventListener,
+public class SegmentBoxplotsPanel extends BoxplotsTabPanel
+		implements ActionListener, ChartSetEventListener,
 		ScaleUpdatedListener, SwatchUpdatedListener, ProfilesUpdatedListener {
 
 	private static final Logger LOGGER = Logger.getLogger(SegmentBoxplotsPanel.class.getName());
@@ -119,8 +120,10 @@ public class SegmentBoxplotsPanel extends BoxplotsTabPanel implements ActionList
 				mainPanel.add(chartPanel);
 
 				ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets())
-						.addStatistic(Measurement.LENGTH).setScale(GlobalOptions.getInstance().getScale())
-						.setSwatch(GlobalOptions.getInstance().getSwatch()).setSegPosition(seg.getPosition())
+						.addStatistic(Measurement.LENGTH)
+						.setScale(GlobalOptions.getInstance().getScale())
+						.setSwatch(GlobalOptions.getInstance().getSwatch())
+						.setSegPosition(seg.getPosition())
 						.setTarget(chartPanel).build();
 
 				setChart(options);
@@ -169,8 +172,13 @@ public class SegmentBoxplotsPanel extends BoxplotsTabPanel implements ActionList
 	}
 
 	@Override
-	public void swatchUpdated() {
+	public void globalPaletteUpdated() {
 		update(getDatasets());
+	}
+
+	@Override
+	public void colourUpdated(IAnalysisDataset dataset) {
+		refreshCache(dataset);
 	}
 
 	@Override

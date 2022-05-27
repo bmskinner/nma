@@ -396,8 +396,13 @@ public class ConsensusNucleusPanel extends ChartDetailPanel
 	}
 
 	@Override
-	public void swatchUpdated() {
+	public void globalPaletteUpdated() {
 		update();
+	}
+
+	@Override
+	public void colourUpdated(IAnalysisDataset dataset) {
+		refreshCache(dataset);
 	}
 
 	@Override

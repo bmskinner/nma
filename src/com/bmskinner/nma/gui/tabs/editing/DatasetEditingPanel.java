@@ -460,8 +460,13 @@ public class DatasetEditingPanel extends ChartDetailPanel
 	}
 
 	@Override
-	public void swatchUpdated() {
+	public void globalPaletteUpdated() {
 		update();
+	}
+
+	@Override
+	public void colourUpdated(IAnalysisDataset dataset) {
+		// No action - we never display dataset colours in this chart
 	}
 
 	@Override

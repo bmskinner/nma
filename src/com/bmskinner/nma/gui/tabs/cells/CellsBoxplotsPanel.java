@@ -100,8 +100,10 @@ public class CellsBoxplotsPanel extends BoxplotsTabPanel
 
 			ExportableChartPanel panel = chartPanels.get(stat.toString());
 
-			ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets()).addStatistic(stat)
-					.setScale(GlobalOptions.getInstance().getScale()).setSwatch(GlobalOptions.getInstance().getSwatch())
+			ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets())
+					.addStatistic(stat)
+					.setScale(GlobalOptions.getInstance().getScale())
+					.setSwatch(GlobalOptions.getInstance().getSwatch())
 					.setTarget(panel).build();
 
 			setChart(options);
@@ -142,7 +144,12 @@ public class CellsBoxplotsPanel extends BoxplotsTabPanel
 	}
 
 	@Override
-	public void swatchUpdated() {
+	public void globalPaletteUpdated() {
 		update(getDatasets());
+	}
+
+	@Override
+	public void colourUpdated(IAnalysisDataset dataset) {
+		refreshCache(dataset);
 	}
 }

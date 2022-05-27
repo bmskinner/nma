@@ -52,6 +52,7 @@ import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.cells.ICell;
 import com.bmskinner.nma.components.cells.Nucleus;
+import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.generic.FloatPoint;
 import com.bmskinner.nma.components.generic.IPoint;
 import com.bmskinner.nma.components.profiles.IProfileSegment;
@@ -229,8 +230,13 @@ public class CellOutlinePanel extends AbstractCellDetailPanel
 	}
 
 	@Override
-	public void swatchUpdated() {
+	public void globalPaletteUpdated() {
 		update(getDatasets());
+	}
+
+	@Override
+	public void colourUpdated(IAnalysisDataset dataset) {
+		refreshCache(dataset);
 	}
 
 	@Override

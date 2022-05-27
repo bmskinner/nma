@@ -111,6 +111,7 @@ public class CosmeticHandler {
 			Color newColor = parent.getInputSupplier().requestColor("Choose dataset colour",
 					(Color) oldColour);
 			dataset.setDatasetColour(newColor);
+			UIController.getInstance().fireDatasetColourUpdated(dataset);
 
 		} catch (RequestCancelledException e) {
 			// User cancelled, no action

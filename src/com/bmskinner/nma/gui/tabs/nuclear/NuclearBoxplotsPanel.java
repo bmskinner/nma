@@ -38,7 +38,8 @@ import com.bmskinner.nma.visualisation.options.ChartOptions;
 import com.bmskinner.nma.visualisation.options.ChartOptionsBuilder;
 
 @SuppressWarnings("serial")
-public class NuclearBoxplotsPanel extends BoxplotsTabPanel implements ScaleUpdatedListener, SwatchUpdatedListener {
+public class NuclearBoxplotsPanel extends BoxplotsTabPanel
+		implements ScaleUpdatedListener, SwatchUpdatedListener {
 
 	private static final Logger LOGGER = Logger.getLogger(NuclearBoxplotsPanel.class.getName());
 
@@ -85,8 +86,10 @@ public class NuclearBoxplotsPanel extends BoxplotsTabPanel implements ScaleUpdat
 
 			ExportableChartPanel panel = chartPanels.get(stat.toString());
 
-			ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets()).addStatistic(stat)
-					.setScale(GlobalOptions.getInstance().getScale()).setSwatch(GlobalOptions.getInstance().getSwatch())
+			ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets())
+					.addStatistic(stat)
+					.setScale(GlobalOptions.getInstance().getScale())
+					.setSwatch(GlobalOptions.getInstance().getSwatch())
 					.setTarget(panel).build();
 
 			setChart(options);
@@ -128,8 +131,13 @@ public class NuclearBoxplotsPanel extends BoxplotsTabPanel implements ScaleUpdat
 	}
 
 	@Override
-	public void swatchUpdated() {
+	public void globalPaletteUpdated() {
 		update(getDatasets());
+	}
+
+	@Override
+	public void colourUpdated(IAnalysisDataset dataset) {
+		refreshCache(dataset);
 	}
 
 }

@@ -28,7 +28,8 @@ import com.bmskinner.nma.gui.events.SwatchUpdatedListener;
 import com.bmskinner.nma.gui.tabs.DetailPanel;
 
 @SuppressWarnings("serial")
-public class NucleusProfilesPanel extends DetailPanel implements ProfilesUpdatedListener, SwatchUpdatedListener {
+public class NucleusProfilesPanel extends DetailPanel
+		implements ProfilesUpdatedListener, SwatchUpdatedListener {
 
 	JTabbedPane tabPanel;
 
@@ -65,7 +66,12 @@ public class NucleusProfilesPanel extends DetailPanel implements ProfilesUpdated
 	}
 
 	@Override
-	public void swatchUpdated() {
+	public void globalPaletteUpdated() {
 		update(getDatasets());
+	}
+
+	@Override
+	public void colourUpdated(IAnalysisDataset dataset) {
+		refreshCache(dataset);
 	}
 }

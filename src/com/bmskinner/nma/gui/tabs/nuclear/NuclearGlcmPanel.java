@@ -24,6 +24,7 @@ import java.util.logging.Logger;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nma.components.cells.CellularComponent;
+import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.core.GlobalOptions;
 import com.bmskinner.nma.gui.events.SwatchUpdatedListener;
@@ -86,8 +87,10 @@ public class NuclearGlcmPanel extends BoxplotsTabPanel implements SwatchUpdatedL
 
 			ExportableChartPanel panel = chartPanels.get(stat.toString());
 
-			ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets()).addStatistic(stat)
-					.setScale(GlobalOptions.getInstance().getScale()).setSwatch(GlobalOptions.getInstance().getSwatch())
+			ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets())
+					.addStatistic(stat)
+					.setScale(GlobalOptions.getInstance().getScale())
+					.setSwatch(GlobalOptions.getInstance().getSwatch())
 					.setTarget(panel).build();
 
 			setChart(options);
@@ -114,7 +117,12 @@ public class NuclearGlcmPanel extends BoxplotsTabPanel implements SwatchUpdatedL
 	}
 
 	@Override
-	public void swatchUpdated() {
+	public void globalPaletteUpdated() {
 		update(getDatasets());
+	}
+
+	@Override
+	public void colourUpdated(IAnalysisDataset dataset) {
+		refreshCache(dataset);
 	}
 }

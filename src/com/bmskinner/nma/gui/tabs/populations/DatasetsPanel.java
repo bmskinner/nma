@@ -56,7 +56,8 @@ import com.bmskinner.nma.logging.Loggable;
  *
  */
 @SuppressWarnings("serial")
-public class DatasetsPanel extends DetailPanel implements DatasetAddedListener, SwatchUpdatedListener {
+public class DatasetsPanel extends DetailPanel
+		implements DatasetAddedListener, SwatchUpdatedListener {
 
 	private static final Logger LOGGER = Logger.getLogger(DatasetsPanel.class.getName());
 
@@ -141,8 +142,10 @@ public class DatasetsPanel extends DetailPanel implements DatasetAddedListener, 
 	@Override
 	public synchronized void update() {
 
-		int nameColWidth = treeTable.getColumnModel().getColumn(PopulationTreeTable.COLUMN_NAME).getWidth();
-		int colourColWidth = treeTable.getColumnModel().getColumn(PopulationTreeTable.COLUMN_COLOUR).getWidth();
+		int nameColWidth = treeTable.getColumnModel().getColumn(PopulationTreeTable.COLUMN_NAME)
+				.getWidth();
+		int colourColWidth = treeTable.getColumnModel().getColumn(PopulationTreeTable.COLUMN_COLOUR)
+				.getWidth();
 
 		/*
 		 * Determine the ids of collapsed datasets, and store them
@@ -158,8 +161,10 @@ public class DatasetsPanel extends DetailPanel implements DatasetAddedListener, 
 		 */
 		treeTable.setCollapsedRows(collapsedRows);
 
-		treeTable.getColumnModel().getColumn(PopulationTreeTable.COLUMN_NAME).setWidth(nameColWidth);
-		treeTable.getColumnModel().getColumn(PopulationTreeTable.COLUMN_COLOUR).setWidth(colourColWidth);
+		treeTable.getColumnModel().getColumn(PopulationTreeTable.COLUMN_NAME)
+				.setWidth(nameColWidth);
+		treeTable.getColumnModel().getColumn(PopulationTreeTable.COLUMN_COLOUR)
+				.setWidth(colourColWidth);
 	}
 
 	@Override
@@ -202,7 +207,8 @@ public class DatasetsPanel extends DetailPanel implements DatasetAddedListener, 
 
 			private void clusterGroupClicked(IClusterGroup g, int row, int column) {
 				cosmeticHandler.renameClusterGroup(g);
-				table.getModel().setValueAt(g, row, column); // ensure column length supports name by triggering update
+				table.getModel().setValueAt(g, row, column); // ensure column length supports name
+																// by triggering update
 			}
 
 			private void workspaceClicked(IWorkspace w, int row, int column) {
@@ -216,7 +222,8 @@ public class DatasetsPanel extends DetailPanel implements DatasetAddedListener, 
 
 				case PopulationTreeTable.COLUMN_NAME: {
 					cosmeticHandler.renameDataset(d);
-					table.getModel().setValueAt(d, row, column); // ensure column length supports name
+					table.getModel().setValueAt(d, row, column); // ensure column length supports
+																	// name
 					break;
 				}
 
@@ -303,7 +310,8 @@ public class DatasetsPanel extends DetailPanel implements DatasetAddedListener, 
 	}
 
 	private synchronized void deleteSelectedDatasets() {
-		final List<IAnalysisDataset> datasets = DatasetListManager.getInstance().getSelectedDatasets();
+		final List<IAnalysisDataset> datasets = DatasetListManager.getInstance()
+				.getSelectedDatasets();
 		final List<PopulationTreeTableNode> nodes = treeTable.getSelectedNodes();
 
 		// Check if cluster groups need removing
@@ -314,7 +322,8 @@ public class DatasetsPanel extends DetailPanel implements DatasetAddedListener, 
 				if (n.hasClusterGroup()) {
 					IClusterGroup g = n.getGroup();
 					for (UUID childID : g.getUUIDs()) {
-						IAnalysisDataset child = DatasetListManager.getInstance().getDataset(childID);
+						IAnalysisDataset child = DatasetListManager.getInstance()
+								.getDataset(childID);
 						datasets.add(child);
 					}
 
@@ -328,8 +337,10 @@ public class DatasetsPanel extends DetailPanel implements DatasetAddedListener, 
 //		DatasetDeleter deleter = new DatasetDeleter(getInputSupplier());
 //		deleter.deleteDatasets(datasets);
 		update();
-		treeTable.getColumnModel().getColumn(PopulationTreeTable.COLUMN_NAME).setHeaderValue("Dataset (0)");
-		treeTable.getColumnModel().getColumn(PopulationTreeTable.COLUMN_CELL_COUNT).setHeaderValue("Cells (0)");
+		treeTable.getColumnModel().getColumn(PopulationTreeTable.COLUMN_NAME)
+				.setHeaderValue("Dataset (0)");
+		treeTable.getColumnModel().getColumn(PopulationTreeTable.COLUMN_CELL_COUNT)
+				.setHeaderValue("Cells (0)");
 		DatasetListManager.getInstance().setSelectedDatasets(new ArrayList<>());
 	}
 
@@ -356,9 +367,11 @@ public class DatasetsPanel extends DetailPanel implements DatasetAddedListener, 
 				PopulationTableCellRenderer rend = new PopulationTableCellRenderer(selectedIndexes);
 
 				// Update the table headers
-				treeTable.getColumnModel().getColumn(PopulationTreeTable.COLUMN_COLOUR).setCellRenderer(rend);
+				treeTable.getColumnModel().getColumn(PopulationTreeTable.COLUMN_COLOUR)
+						.setCellRenderer(rend);
 				treeTable.getColumnModel().getColumn(PopulationTreeTable.COLUMN_NAME)
-						.setHeaderValue(String.format("Dataset (%d)", datasetSelectionOrder.size()));
+						.setHeaderValue(
+								String.format("Dataset (%d)", datasetSelectionOrder.size()));
 				treeTable.getColumnModel().getColumn(PopulationTreeTable.COLUMN_CELL_COUNT)
 						.setHeaderValue(String.format("Cells (%d)", getCellTotal()));
 
@@ -439,7 +452,8 @@ public class DatasetsPanel extends DetailPanel implements DatasetAddedListener, 
 			return selectedIndexes;
 		}
 
-		private Map<Integer, Integer> fixDiscontinuousPositions(Map<Integer, Integer> selectedIndexes) {
+		private Map<Integer, Integer> fixDiscontinuousPositions(
+				Map<Integer, Integer> selectedIndexes) {
 			// Find a discontinuity in the indexes - one value is missing
 			List<Integer> values = new ArrayList<>(selectedIndexes.values());
 			Collections.sort(values);
@@ -522,8 +536,14 @@ public class DatasetsPanel extends DetailPanel implements DatasetAddedListener, 
 	}
 
 	@Override
-	public void swatchUpdated() {
+	public void globalPaletteUpdated() {
 		update(getDatasets());
+	}
+
+	@Override
+	public void colourUpdated(IAnalysisDataset dataset) {
+		// No action - the colour change has already had effect because
+		// it was triggered from this panel
 	}
 
 	@Override

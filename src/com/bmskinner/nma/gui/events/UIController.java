@@ -125,7 +125,17 @@ public class UIController {
 
 	public void fireSwatchUpdated() {
 		for (SwatchUpdatedListener l : swatchListeners)
-			l.swatchUpdated();
+			l.globalPaletteUpdated();
+	}
+
+	/**
+	 * Signal that dataset colour has changed for the given dataset
+	 * 
+	 * @param dataset
+	 */
+	public void fireDatasetColourUpdated(IAnalysisDataset dataset) {
+		for (SwatchUpdatedListener l : swatchListeners)
+			l.colourUpdated(dataset);
 	}
 
 	public void addDatasetSelectionUpdatedListener(DatasetSelectionUpdatedListener l) {

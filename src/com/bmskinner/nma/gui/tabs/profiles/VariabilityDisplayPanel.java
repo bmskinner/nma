@@ -29,9 +29,9 @@ import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.profiles.ProfileType;
 import com.bmskinner.nma.components.rules.OrientationMark;
 import com.bmskinner.nma.core.GlobalOptions;
+import com.bmskinner.nma.gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 import com.bmskinner.nma.gui.components.panels.ProfileMarkersOptionsPanel;
 import com.bmskinner.nma.gui.components.panels.ProfileTypeOptionsPanel;
-import com.bmskinner.nma.gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 import com.bmskinner.nma.gui.events.ProfilesUpdatedListener;
 import com.bmskinner.nma.gui.events.SwatchUpdatedListener;
 import com.bmskinner.nma.gui.tabs.ChartDetailPanel;
@@ -138,10 +138,13 @@ public class VariabilityDisplayPanel extends ChartDetailPanel
 		boolean showMarkers = profileMarkersOptionsPanel.isShowAnnotations();
 		ProfileType type = profileCollectionTypeSettingsPanel.getSelected();
 
-		ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets()).setNormalised(true)
-				.setAlignment(ProfileAlignment.LEFT).setLandmark(OrientationMark.REFERENCE).setShowMarkers(showMarkers)
+		ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets())
+				.setNormalised(true)
+				.setAlignment(ProfileAlignment.LEFT).setLandmark(OrientationMark.REFERENCE)
+				.setShowMarkers(showMarkers)
 //				.setModalityPosition((Double) pvalueSpinner.getValue())
-				.setSwatch(GlobalOptions.getInstance().getSwatch()).setProfileType(type).setTarget(chartPanel).build();
+				.setSwatch(GlobalOptions.getInstance().getSwatch()).setProfileType(type)
+				.setTarget(chartPanel).build();
 
 		updateProfiles(options);
 
@@ -183,8 +186,13 @@ public class VariabilityDisplayPanel extends ChartDetailPanel
 	}
 
 	@Override
-	public void swatchUpdated() {
+	public void globalPaletteUpdated() {
 		update(getDatasets());
+	}
+
+	@Override
+	public void colourUpdated(IAnalysisDataset dataset) {
+		refreshCache(dataset);
 	}
 
 }

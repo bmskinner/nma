@@ -301,8 +301,13 @@ public abstract class AbstractScatterPanel extends DetailPanel {
 		}
 
 		@Override
-		public void swatchUpdated() {
+		public void globalPaletteUpdated() {
 			update();
+		}
+
+		@Override
+		public void colourUpdated(IAnalysisDataset dataset) {
+			refreshCache(dataset);
 		}
 
 		@Override
