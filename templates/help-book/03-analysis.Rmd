@@ -207,7 +207,7 @@ The tree can be highlighted to show cluster memberships. The first dropdown list
 
 The [Newick format](https://en.wikipedia.org/wiki/Newick_format) for the cluster tree can be copied using the 'Copy Newick', for use in other tree editing software.
 
-### Importing clusters
+### Importing clusters {#import-cluster-method}
 
 Sometimes you may want to run clustering on exported data, for example in R, and then use NMA to create the average shape of each cluster. To do this, we can import a file that maps each cell to a cluster.
 
@@ -376,6 +376,36 @@ If two warped images with the same target shape are selected, the multi-scale st
 An existing implementation of MS-SSIM is used for this; see the [paper by Renieblas _et al._, 2017](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5527267/).
 
 The MS-SSIM is displayed at the top of the warping tab. More detail can also be found by clicking the 'Full MS-SSIM' button, which will open a new dialog displaying the full breakdown of components making up the MS-SSIM score (luminance, contrast, structure). 
+
+
+## Remapping cells after FISH {#post-fish-mapping-method}
+
+If you have images of nuclei taken before and after FISH, you can use the FISH images to sort pre-FISHED images into groups. This is how we analysed the shapes of X- and Y-bearing sperm separately in [our paper on a Yq-deletion mutant](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6839398/).
+
+- Select the pre-FISH dataset
+- Select `Datasets > Add > Post-FISH mapping`  
+- Choose the folder of FISH images
+
+The FISH images:
+
+- must be RGB images
+- must have the same names as the pre-FISH images (i.e. if you have a pre-FISH image `\Pre FISH Folder\Image1.tiff`, the post-FISH image must have the name `\Post FISH Folder\Image1.tiff`)
+
+A window will display showing the pre- and post-FISH images side by side:
+
+```{r, out.width="100%", out.height="100%", fig.show='hold', fig.align='center', echo=F}
+knitr::include_graphics("img/FISH_remapping_unselected.png")
+```
+
+If a nucleus from the pre-FISH dataset is present in the current pre-FISH image, it will be coloured blue. Clicking on these nuclei with the left button will turn them green; clicking with the right button will turn them red. Clicking a red or green nucleus with either button will deselect them and they will return to blue.
+
+```{r, out.width="100%", out.height="100%", fig.show='hold', fig.align='center', echo=F}
+knitr::include_graphics("img/FISH_remapping_selected.png")
+```
+
+- Continue through the images. Use the next and previous buttons to move through all the images, sorting the pre-FISH nuclei into the group(s) you want based on the information in the post-FISH image. You don't have to assign all nuclei to groups. Once you have finished, click the `Finished selection` button in the bottom right.
+
+- The green and red selected nuclei will be added to new child collections named `SubCollectionLeft` and `SubCollectionRight` respectively.
 
 ## Exporting data {#export-data-method}
 

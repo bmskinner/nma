@@ -35,7 +35,7 @@ Add... | Submenu with options for adding new data to a dataset; [see below](#add
 Curate | Launch the [curation screen](#curating-cells-method), so you can scan through cells one by one, and mark them as keep or reject. Desired cells can be saved as a child dataset.
 Set scale | Set the image scale for the dataset in pixels per micron
 Merge | Combine the cells from the selected datasets into one new dataset, and run a new morphology analysis.
-[Boolean](https://bitbucket.org/bmskinner/nuclear_morphology/wiki/methods/Boolean%20operations) | Perform boolean algebra between this dataset and another dataset.
+[Boolean](#boolean-method) | Perform boolean algebra between this dataset and another dataset.
 Add to workspace... | Allows datasets to be added to an existing [workspace](#workspace-methods)
 Remove from workspace... | Allows datasets to be removed from a [workspace](#workspace-methods)
 Delete (child) | Delete a child dataset from its parent. Only available if the selected dataset is a child dataset. This change is not saved to file automatically.
@@ -47,12 +47,12 @@ Export... | Submenu with options for exporting data; [see below](#export-menu)
 
 Option | Action
 -------|-------
-Add nuclear signal | Detect nuclear signals in a set of images, and add them to the nuclei in the dataset
-[Post-FISH mapping](https://bitbucket.org/bmskinner/nuclear_morphology/wiki/methods/Post-FISH%20remapping) | Assign pre-FISH nuclei to categories based on FISH image data
+Add nuclear signal | [Detect nuclear signals](#detect-signals-method) in a set of images, and add them to the nuclei in the dataset
+Post-FISH mapping | Assign pre-FISH nuclei to categories [based on FISH image data](#post-fish-mapping-method)
 Shell analysis ofsignals | Begin a shell analysis of signals in the selected dataset
-Warped signals | Begin signal warping for a root dataset with nuclear signals
-Child collection from file | Create a child dataset based on the nuclei saved in a ```.cell``` file (these can be created via the Export submenu)
-Cluster group from file | Create a child dataset based on clusters defined in a text file in tab separated format: ```Cell_UUID	Cluster_number```
+Warped signals | Begin [signal warping](#warp-signals-method) for a root dataset with nuclear signals
+Child collection from file | Create a child dataset based on the nuclei saved in a `.cell` file (these can be created via the Export submenu)
+Cluster group from file | Create a child dataset based on [clusters defined in a text file](#import-cluster-method) in tab separated format
 
 #### The Export submenu {#export-menu}
 
@@ -142,10 +142,7 @@ Control|Action
 ```+x, -x, +y, -y``` | adjust the position of the nucleus by one pixel in the given direction
 ```!``` | reset the centre of mass to position 0,0.
 
-Rotation and offsets can also be applied in exact amounts using the options at the bottom of the right-click menu: `Rotate by..` and `Offset...`
-
-![consensus_popup_menu.png](https://bitbucket.org/repo/eA585a/images/751057011-consensus_popup_menu.png)
-
+Rotation and offsets can also be applied in exact amounts using the options at the bottom of the right-click menu on the consensus chart: `Rotate by..` and `Offset...`
 
 ## Analysis info tab {#analysis-info-tab}
 
@@ -200,7 +197,7 @@ Measurements | Mean, median, standard error of the mean, coefficient of variatio
 Violin plots | This tab shows information on [nuclear measurements](#measurements) for selected datasets in a series of violin and boxplots. The colour of each series in the boxplot reflects the dataset colour in the [populations panel](#populations-panel). To change colours, double click the dataset colour in the populations panel. ![Nuclear_charts_violin.png](img/Nuclear_charts_violin.png)
 Wilcoxon | This tab shows the results of pairwise Wilcoxon rank sum tests (a.k.a. Mann-Whitney U-tests) of population medians for each of the nuclear parameters, with Bonferroni correction for multiple testing. P-values significant at the 5% and 1% are highlighted in yellow and green respectively
 Magnitude | This shows the pairwise magnitude differences between datasets, to give a feel for the biological significance of any differences detected between samples. If a single dataset is selected, the 'Random sampling' button is active, and opens the random sampler.
-Scatter | Allows comparisons between two parameters, via the drop down lists. The Spearman's rank correlation coefficient for each selected dataset is given in the table to the left. The nuclei can be [filtered](https://bitbucket.org/bmskinner/nuclear_morphology/wiki/methods/Filter%20a%20collection) using the 'Filter visible' button. ![Nuclear_charts_scatter.png](img/Nuclear_charts_scatter.png)
+Scatter | Allows comparisons between two parameters, via the drop down lists. The Spearman's rank correlation coefficient for each selected dataset is given in the table to the left. The nuclei can be [filtered](#filtering-cells-method) using the 'Filter visible' button. ![Nuclear_charts_scatter.png](img/Nuclear_charts_scatter.png)
 
 ## Nuclear profiles tab {#nuclear-profiles-tab}
 
