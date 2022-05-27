@@ -12,9 +12,9 @@ Option | Action
 -------|--------
 New analysis > Use custom detection options  | Select a folder of images and start a [new morphology analysis](#new-analysis)
 New analysis > Use saved detection options  | Select detection options from a file, and a folder of images to start a new morphology analysis
-New workspace | Create a [workspace](https://bitbucket.org/bmskinner/nuclear_morphology/wiki/data/Workspaces) to enable opening datasets in one batch. 
+New workspace | Create a [workspace](#workspace-methods) to enable opening datasets in one batch. 
 Open > Open dataset | Select a saved dataset in `.nmd` format to open. Note that you can also drag and drop an `.nmd` file into the software to open it.
-Open > Open workspace | Select a saved  [workspace ](https://bitbucket.org/bmskinner/nuclear_morphology/wiki/data/Workspaces) in `.wrk` format to open. Note that you can also drag and drop a `.wrk` file into the software to open it.
+Open > Open workspace | Select a saved  [workspace ](#workspace-methods) in `.wrk` format to open. Note that you can also drag and drop a `.wrk` file into the software to open it.
 Save selected | Save the datasets currently selected in the [populations panel](#populations-panel)
 Save all | Save all open datasets
 
@@ -36,8 +36,8 @@ Curate | Launch the [curation screen](#curating-cells-method), so you can scan t
 Set scale | Set the image scale for the dataset in pixels per micron
 Merge | Combine the cells from the selected datasets into one new dataset, and run a new morphology analysis.
 [Boolean](https://bitbucket.org/bmskinner/nuclear_morphology/wiki/methods/Boolean%20operations) | Perform boolean algebra between this dataset and another dataset.
-Add to workspace... | Allows datasets to be added to an existing [workspace](https://bitbucket.org/bmskinner/nuclear_morphology/wiki/data/Workspaces)
-Remove from workspace... | Allows datasets to be removed from a [workspace](https://bitbucket.org/bmskinner/nuclear_morphology/wiki/data/Workspaces)
+Add to workspace... | Allows datasets to be added to an existing [workspace](#workspace-methods)
+Remove from workspace... | Allows datasets to be removed from a [workspace](#workspace-methods)
 Delete (child) | Delete a child dataset from its parent. Only available if the selected dataset is a child dataset. This change is not saved to file automatically.
 Close (root) | Close a root dataset. Only available if the selected dataset is a root dataset.  You will be prompted to save any changes.
 Export... | Submenu with options for exporting data; [see below](#export-menu)
@@ -351,13 +351,11 @@ The [Newick format](https://en.wikipedia.org/wiki/Newick_format) for the cluster
 
 ## Merges tab {#merges-tab}
 
-If a dataset is a merge of other datasets, this panel displays the source datasets.
+If a selected dataset is a merge of other datasets, this panel displays the analysis parameters of the source datasets. As with the main analysis info tab, matching values are highlighted in green for each row. It also allows you to extract the source datasets back out of the merge. See also [merge instructions](#merge-method).
 
-To merge datasets, select them in the [populations panel](#populations-panel), select `Dataset > Merge'. You will be asked to select a place to save the new merged dataset. The merge will run, and a new morphological analysis will be carried out on the merged dataset.
-
-When a merged dataset is selected, the merges tab displays the analysis options for each of the merge sources. Matching values are highlighted in green for each row.
-
-To recover a source dataset back out of a merged dataset, click the appropriate 'Recover source' button, at the bottom of the panel.
+```{r, out.width="100%", out.height="100%", fig.show='hold', echo=F}
+knitr::include_graphics("img/Merge_panel.png")
+```
 
 ## Editing tab {#editing-tab}
 

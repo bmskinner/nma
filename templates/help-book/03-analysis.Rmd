@@ -136,6 +136,31 @@ For large datasets, it may take some time to load the image for all the nuclei. 
 
 Landmarks and segments can be altered for individual cells, and for the dataset as a whole. For individual cells, see the [cells tab](#cells-tab). To edit segments or landmarks across the entire dataset, see the [editing tab](#editing-tab).
 
+## Merging and combining datasets {#merges-boolean-methods}
+
+### Merging two datasets {#merge-method}
+
+To merge datasets, select them in the [populations panel](#populations-panel), and choose `Dataset > Merge'. You will be asked to choose a file to save the new merged dataset. The merge will run, and a new morphological analysis will be carried out on the merged dataset.
+
+When a merged dataset is selected, the [merges tab](#merges-tab) displays the analysis options for each of the merge sources within the dataset.
+
+To recover a source dataset back out of a merged dataset, click the appropriate `Recover source` button, at the bottom of the panel.
+
+### Boolean logical combinations of datasets {#boolean-method}
+
+These are invoked via `Datasets > Boolean`. They allow a boolean algebraic operation on the cells between two datasets. A new dataset is created containing the cells that meet the criterion. The most common use case is to allow subsetting of datasets using different filtering, clustering or signal child datasets to get a specific combination of cells.
+
+The available options are:
+
+Operation | Condition
+-------|-------
+```AND``` | the cell is present in both datasets
+```OR``` | the cell is present in either dataset (same as [merging datasets](#merge-method))
+```NOT``` | the cell is in dataset one, but not dataset two
+```XOR``` | the cell is in either dataset one or dataset two, but not both
+
+
+
 ## Clustering nuclei {#clustering-method}
 
 See the [Clusters tab](#clusters-tab).
@@ -310,4 +335,42 @@ Single cell images | Export each nucleus as a separate image to a folder in the 
 Dataset analysis options | The options used to analyse this dataset in XML format. This can be used directly to set up subsequent analyses
 Landmark rulesets | The rules used to detect landmarks, so you can modify them for custom nucleus types
 
+## Using workspaces {#workspace-methods}
 
+A workspace is a collection of datasets. Saving a workspace allows the same group of datasets to be reopened in one go. This is useful if you have a lot of `.nmd`` files in different folders that you want to be able to open regularly.
+
+### Creating a workspace {#workspace-create-methods}
+
+- Select `File > New workspace`. You will be asked for a workspace name, and the new empty workspace will be added to the datasets panel. 
+- Select the root dataset(s) you want to add to the workspace, and choose `Datasets > Add to workspace`.
+- Choose from the list which open workspace you want to add the dataset(s) to, and click OK.
+- Once the new workspace contains datasets, you will be asked to choose where to save the workspace file (`.wrk` format).
+
+When you next come to use the program, you can now drag and drop the workspace file to open all the datasets it contains.
+
+### Removing a dataset from a workspace
+
+- Open the workspace
+- Select the dataset you want to remove
+- Choose `Datasets > Remove from workspace`
+- Select the workspace you want to remove the dataset from
+
+The workspace file is automatically saved whenever a change is made.
+
+### Workspace file format {#workspace-file-format}
+
+The workspace file format uses XML. The format simply contains the path to the `.nmd` files, as demonstrated below. Note that if you move the `.nmd` files, the workspace won't be able to load them anymore! You can edit them in a text editor like Notepad if needed.
+
+```{xml}
+<?xml version="1.0" encoding="UTF-8"?>
+<workspace name="Work">
+  <datasets>
+    <dataset>
+      <path>D:\git\Nuclear_Morphology\test\samples\images\Multiple\UnitTest_2.0.0\Multiple_source_1.nmd</path>
+    </dataset>
+    <dataset>
+      <path>D:\git\Nuclear_Morphology\test\samples\images\Multiple\UnitTest_2.0.0\Multiple_source_2.nmd</path>
+    </dataset>
+  </datasets>
+</workspace>
+```
