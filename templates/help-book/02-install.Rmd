@@ -10,8 +10,8 @@ Nuclear Morphology Analysis is designed to be runnable on Windows, Linux and Mac
 
 Option | Link | Info
 -------|------|------
-Portable | [Nuclear_Morphology_Analysis_${project_version}.zip](https://bitbucket.org/bmskinner/nuclear_morphology/downloads/Nuclear_Morphology_Analysis_${project_version}.zip) | Software and Java runtime in a portable format. Unzip the folder wherever you like and run 'Nuclear_Morphology_Analysis.exe'. To remove, just delete the folder.
-Installer | [Nuclear_Morphology_Analysis_${project_version}.msi](https://bitbucket.org/bmskinner/nuclear_morphology/downloads/Nuclear_Morphology_Analysis_${project_version}.msi) | Software and Java runtime in an installer for Windows. This will add the software to your installed programs, and create a start menu entry. May require administrator privileges depending on where you install to.
+Portable | [Nuclear_Morphology_Analysis_${project.version}.zip](https://bitbucket.org/bmskinner/nuclear_morphology/downloads/Nuclear_Morphology_Analysis_${project.version}.zip) | Software and Java runtime in a portable format. Unzip the folder wherever you like and run 'Nuclear_Morphology_Analysis.exe'. To remove, just delete the folder.
+Installer | [Nuclear_Morphology_Analysis_${project.version}.msi](https://bitbucket.org/bmskinner/nuclear_morphology/downloads/Nuclear_Morphology_Analysis_${project.version}.msi) | Software and Java runtime in an installer for Windows. This will add the software to your installed programs, and create a start menu entry. May require administrator privileges depending on where you install to.
 
 ### Linux
 
@@ -26,9 +26,9 @@ Linux portable | link | Software and Java runtime in a portable format. Unzip th
 The software is not available packaged with the Java runtime because I don't have a Mac to package and test on.
 
 - Install Java 16 or higher on your Mac
-- Download [Nuclear_Morphology_Analysis_${project_version}_standalone.jar](https://bitbucket.org/bmskinner/nuclear_morphology/downloads/Nuclear_Morphology_Analysis_${project_version}_standalone.jar) 
+- Download [Nuclear_Morphology_Analysis_${project.version}_standalone.jar](https://bitbucket.org/bmskinner/nuclear_morphology/downloads/Nuclear_Morphology_Analysis_${project.version}_standalone.jar) 
 
-Due to security permissions in recent versions of MacOS (Catalina and above) the program won't have access to user folders if launched by double-clicking the jar file. You should launch from the Terminal; open the Terminal, navigate to the directory containing the jar file, and launch the jar using `java -jar Nuclear_Morphology_Analysis_x.y.z.jar`, changing x, y and z to the appropriate numbers for your version.
+Due to security permissions in recent versions of MacOS (Catalina and above) the program won't have access to user folders if launched by double-clicking the jar file. You should launch from the Terminal; open the Terminal, navigate to the directory containing the jar file, and launch the jar using `java -jar Nuclear_Morphology_Analysis_${project.version}_standalone.jar`.
 
 ## Uninstalling
 
