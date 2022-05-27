@@ -334,3 +334,15 @@ knitr::include_graphics("img/gifs/Edit_dataset.gif")
 ```
 
 If you want to merge or split segments, use the buttons at the top of the panel. Merged segments can be unmerged; the unmerge button will be greyed out unless there are merged segments available.
+
+### Angle window size explorer
+
+If you want to see the effect of changing angle window sizes, click `Explore window size`. This will open a new window that allows the effects of altering the angle profile window size to be simulated across a range of values. No changes will be made to your actual dataset.
+
+Enter the smallest angle window size to test (`0-1`), the largest to test (`0-1`), and the step size between them, then click run. The angle profiles generated for each of the window sizes will be displayed on the chart. The profile colours form a gradient from blue (lowest window size) to red (highest window size):
+
+```{r, out.width="100%", out.height="100%", fig.show='hold', echo=F}
+knitr::include_graphics("img/Window_size_explorer.png")
+```
+
+If you want to change the window size in your actual dataset, click the `Set window size` button.

@@ -51,13 +51,13 @@ Nuclear Morphology Analysis creates a folder in your home directory called `.nma
 - custom rulesets for novel shapes you want to analyse
 - custom program options
 
-You can open the configuration folder via 'Help > Open config directory'.
+You can open the configuration folder via `Help > Open config directory`.
 
 ### Logs
 
 The system state is logged when NMA is started in case debugging is needed. None of the logged data leaves your computer unless you explicitly send it. If you do find a bug or have a problem, you can send the latest log file to me and it may help me track down the problem. There will be up to 5 log files, with `nma.0.log` containing the most recent logs. 
 
-### Rulesets
+### Rulesets {#config-rulesets}
 
 Rulesets are how we identify landmarks in nuclei. The program has default rulesets for mouse sperm, pig sperm and round nuclei.
 These are stored in XML format. If you delete one of the default files, it will be recreated when the program is next launched. 
@@ -97,7 +97,7 @@ It contains one landmark, called `Longest axis`. This is defined as the point wi
 
 The `Measurement` values show the standard measures that will be calculated when nuclei are detected; several of these (e.g. aspect ratio) rely on the nucleus being orientatble, which is why it is important to have at least one landmark that can be used for orientation.
 
-### Custom options
+### Custom options {#config-file}
 
 Custom options are set in the `config.ini` file in the configuration directory. They are in the format `OPTION=VALUE`. The following options can be set, and will take effect when the program is next launched:
 
