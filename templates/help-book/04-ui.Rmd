@@ -10,12 +10,12 @@ The following menu options are available:
 
 Option | Action
 -------|--------
-New analysis > Use custom detection options  | [Create a new morphology analysis](#new-analysis)
-New analysis > Use custom detection options  | Run an analysis on images using saved detection options
-New workspace | Create a [workspace ](https://bitbucket.org/bmskinner/nuclear_morphology/wiki/data/Workspaces) to enable opening datasets in one batch
-Open > Open dataset | [Open a saved .nmd dataset](https://bitbucket.org/bmskinner/nuclear_morphology/wiki/methods/Opening%20a%20saved%20dataset)
-Open > Open workspace | Open a [workspace ](https://bitbucket.org/bmskinner/nuclear_morphology/wiki/data/Workspaces)
-Save selected | Save the datasets currently selected in the populations panel
+New analysis > Use custom detection options  | Select a folder of images and start a [new morphology analysis](#new-analysis)
+New analysis > Use saved detection options  | Select detection options from a file, and a folder of images to start a new morphology analysis
+New workspace | Create a [workspace](https://bitbucket.org/bmskinner/nuclear_morphology/wiki/data/Workspaces) to enable opening datasets in one batch. 
+Open > Open dataset | Select a saved dataset in `.nmd` format to open. Note that you can also drag and drop an `.nmd` file into the software to open it.
+Open > Open workspace | Select a saved  [workspace ](https://bitbucket.org/bmskinner/nuclear_morphology/wiki/data/Workspaces) in `.wrk` format to open. Note that you can also drag and drop a `.wrk` file into the software to open it.
+Save selected | Save the datasets currently selected in the [populations panel](#populations-panel)
 Save all | Save all open datasets
 
 ### View  {#view-menu}
@@ -23,16 +23,16 @@ Save all | Save all open datasets
 Option | Action
 -------|--------
 Scale | Choose the display units for charts and tables. `Pixels` is the default unless overridden in the configuration file. Displaying measurements in `Microns` requires the image scale to be set for the dataset.
-Colour palette | set the colour palette to use for colouring datasets and drawing segments in profiles. These swatches are:       `Regular` - a set of bright exciting colours; `No colour` - all colours are black; `Accessible` - a set of colours chosen to be distinguishable in three major types of color blindness: deutranopia, protanopia and tritanopia 
-Fill consensus | fill consensus nuclei with a semi-transparent version of the dataset colour, rather than just showing an outline
-Task monitor | Toggle the task queue and memory and displays. The first shows the queue of tasks waiting to be performed (e.g. drawing charts, running analyses). The second shows the amount of memory being used by the program. Free memory is green. Memory reserved by the Java Virtual Machine is orange, and memory actually in use is red. The percentage displays the memory actually in use (the red section). Hover the mouse over the monitor to see the total available memory (or look at the log file).
+Colour palette | Set the colour palette to use for colouring datasets and drawing segments in profiles. These palettes are:       `Regular` - a set of bright exciting colours; `No colour` - all colours are black; `Accessible` - a set of colours chosen to be distinguishable in three major types of color blindness: deutranopia, protanopia and tritanopia 
+Fill consensus | Fill consensus nuclei with a semi-transparent version of the dataset colour, rather than just showing an outline
+Task monitor | Toggle the task queue and memory displays. The first shows the queue of tasks waiting to be performed (e.g. drawing charts, running analyses). The second shows the amount of memory being used by the program. Free memory is green. Memory reserved by the Java Virtual Machine is orange, and memory actually in use is red. The percentage displays the memory actually in use (the red section). Hover the mouse over the monitor to see the total available memory (or look at the log file).
 
 ### Dataset {#dataset-menu}
 
 Option | Action
 -------|-------
-Add... | Submenu with options for adding new data to a dataset; see below
-[Curate](https://bitbucket.org/bmskinner/nuclear_morphology/wiki/methods/Manually%20curate%20cells) | Go through cells one by one, and mark them as keep or reject. Desired cells are saved as a child dataset.
+Add... | Submenu with options for adding new data to a dataset; [see below](#add-menu)
+Curate | Launch the [curation screen](#curating-cells-method), so you can scan through cells one by one, and mark them as keep or reject. Desired cells can be saved as a child dataset.
 Set scale | Set the image scale for the dataset in pixels per micron
 Merge | Combine the cells from the selected datasets into one new dataset, and run a new morphology analysis.
 [Boolean](https://bitbucket.org/bmskinner/nuclear_morphology/wiki/methods/Boolean%20operations) | Perform boolean algebra between this dataset and another dataset.
@@ -40,7 +40,7 @@ Add to workspace... | Allows datasets to be added to an existing [workspace](htt
 Remove from workspace... | Allows datasets to be removed from a [workspace](https://bitbucket.org/bmskinner/nuclear_morphology/wiki/data/Workspaces)
 Delete (child) | Delete a child dataset from its parent. Only available if the selected dataset is a child dataset. This change is not saved to file automatically.
 Close (root) | Close a root dataset. Only available if the selected dataset is a root dataset.  You will be prompted to save any changes.
-Export... | Submenu with options for exporting data; see below
+Export... | Submenu with options for exporting data; [see below](#export-menu)
 
 
 #### The Add submenu {#add-menu}
@@ -86,18 +86,33 @@ About | Version and license information
 
 ## Populations panel {#populations-panel}
 
-The populations panel holds the list of datasets currently loaded, and allows sub-analyses to be run on them.
-The width of the populations panel can be adjusted using the slider between the log panel and the populations panel.
+The populations panel shows the datasets currently loaded, and allows you to select combinations of datasets to display. The width of the populations panel can be adjusted using the slider between the log panel and the populations panel.
 
-![populations_panel.png](https://bitbucket.org/repo/eA585a/images/2366104558-populations_panel.png)
+```{r, out.width="100%", out.height="100%", fig.align='center', echo=F}
+knitr::include_graphics("img/Datasets_panel.png")
+```
 
-It lists the name of the dataset, the number of cells it contains, and the colour the dataset is represented by in multi-dataset displays. The header of the table shows the total selected number of datasets and cells.
+It lists the name of the dataset, the number of cells it contains, and the colour the dataset is represented by in charts. The numbers in brackets in the table header shows the total selected number of datasets and cells.
 
-Info | Image
------|------
-Two types of dataset can be represented: root datasets and child datasets. A root dataset is the top-level dataset in the tree; it is not a child of any other dataset. Child datasets have a parent dataset; either a root dataset, or another child dataset. | ![root_and_child.png](https://bitbucket.org/repo/eA585a/images/3570275142-root_and_child.png)
-The name of the dataset can be changed by double clicking the 'name' cell. If a proposed name exists in the panel already, the software will prompt you to choose a different name. | ![rename_collection.png](https://bitbucket.org/repo/eA585a/images/2617437421-rename_collection.png)
-The colour of the dataset for multi-dataset displays (e.g. profiles, boxplots, consensus nucleus outlines) can be set by double clicking the colour cell. By default, a colour is selected based on the position of the dataset in the list of all selected datasets: the first is blue, the second yellow, the third green etc. The default colour pattern is the same as the segment pattern colours. The default colour is overridden if a colour has been explicitly set. The colour will be remembered if the dataset is saved before the program is closed. | ![change_dataset_colour.png](https://bitbucket.org/repo/eA585a/images/2827573362-change_dataset_colour.png)
+Two types of dataset can be represented: root datasets and child datasets. A root dataset is the top-level dataset in the tree; it is not a child of any other dataset. Child datasets have a parent dataset; either a root dataset, or another child dataset. 
+
+### Selecting datasets
+
+Datasets can be selected by:
+
+- clicking and dragging the mouse to select a block of datasets
+- holding down `Shift` and clicking the start and end row of a block of datasets
+- holding down `Ctrl` and clicking individual datasets in the order you want them displayed
+
+### Renaming and recolouring datasets
+
+The name of the dataset can be changed by double clicking the dataset name. If a proposed name exists in the panel already, the software will prompt you to choose a different name.
+
+The colour of the dataset for can be set by double clicking the colour box. By default, a colour is selected based on the position of the dataset in the list of all selected datasets: the first is blue, the second yellow, the third green _etc_. The default colour palette is set via `View > Colour palette`. The default colour is overridden if a colour has been explicitly set. The colour will be saved with the dataset.
+
+```{r, out.width="100%", out.height="100%", fig.align='center', echo=F}
+knitr::include_graphics("img/gifs/Dataset_colour.gif")
+```
 
 
 ## Consensus panel {#consensus-panel}

@@ -1,16 +1,29 @@
-# Running analyses
+# How-to guide
 
-This section describes how to run a basic analysis, and some other common tasks.
+This section describes how to run an analysis, and some of the other common tasks.
 
-## New analysis {#new-analysis}
+## Running a new analysis {#new-analysis}
+
+### Very quick start
+
+- Download and unzip the [folder of test images](https://bitbucket.org/bmskinner/nuclear_morphology/downloads/Testing_mouse_image_set.zip)
+- Open the software
+- Drag the folder of images onto the software
+- Click 'Proceed with detection' to use the default settings (which work fine with these test images)
+
+```{r, out.width="100%", out.height="100%", fig.show='hold', fig.align='center', echo=F}
+knitr::include_graphics("img/gifs/New_analysis.gif")
+```
+
+### A more detailed start
 
 There are several ways to start new morphology analysis:
 
 - By dragging a folder of images onto the software 
 
-- By selecting 'File>New analysis>Use custom detection options' in the menu; you will be then asked to select a folder of images to be analysed. 
+- By selecting 'File > New analysis > Use custom detection options' in the menu; you will be then asked to select a folder of images to be analysed. 
 
-- By selecting 'File>New> analysisUse saved detection options' in the menu; you will be then asked to select a settings file, then a folder of images to be analysed. 
+- By selecting 'File > New analysis > Use saved detection options' in the menu; you will be then asked to select a settings file, and a folder of images to be analysed. 
 
 The guide below uses a testing set of images, which you can download as a [zipped folder](https://bitbucket.org/bmskinner/nuclear_morphology/downloads/Testing_mouse_image_set.zip).
 
@@ -86,12 +99,11 @@ Apply rulesets | A dropdown list to select how the landmarks should be assigned.
 
 When ready, click the 'Proceed with detection' button in the lower right to be begin finding nuclei. A progress bar in the upper left of the screen (above the log panel) shows the progress through the images in the selected folder. If no nuclei are found in any of the images, no datasets will be returned. If nuclei were detected, they will be analysed, and the new population will appear in the populations panel.
 
-```{r, out.width="100%", out.height="100%", fig.show='hold', fig.align='center', echo=F}
-knitr::include_graphics("img/gifs/New_analysis.gif")
-```
+## Curating and filtering nuclei {#curating-filtering-method}
 
+The edge detection and segmentation to find nuclei does not always work perfectly, and so cells can be included in a dataset that have wonky outlines. This can throw off the angle profiling and make datasets look more variable than they truely are. To help avoid this, there are two ways to select only the cells you care about.
 
-## Curating and filtering nuclei {#curating-method}
+### Filtering cells {#filtering-cells-method}
 
 Filtering is a quick way to exclude cells with poor edge detection, or simply to pull out a group of interest to you. Filtering can be performed from the [Nuclear charts scatter tab](#nuclear-charts-tab).
 
@@ -103,6 +115,23 @@ The nuclei can be filtered using the 'Filter visible' button. Zoom to a region o
 knitr::include_graphics("img/gifs/Filter_collection.gif")
 ```
 
+
+### Curating cells {#curating-cells-method}
+
+Manual curation allows you to accept or reject each cell in a dataset. Acceptable cells are copied to a new dataset and reanalysed. The old dataset is not affected. Select a dataset, then choose `Dataset > Curate`. A window will be displayed showing all the nuclei in the dataset oriented.
+
+In the example below, the first four cells in the dataset (`s100.tiff-35` to `s100.tiff-38`) have errors. One is two nuclei overlapping, and the other three have errors in the edge detection. We want to remove these cells from our curated dataset.
+
+```{r, out.width="100%", out.height="100%", fig.show='hold', fig.align='center', echo=F}
+knitr::include_graphics("img/Curation_dialog.png")
+```
+
+Select the nuclei to keep; the table background will turn green for selected nuclei. Use the 'Select all' option as a shortcut if you only need to skip a few nuclei, as in the right image above. You can also deselect the 'Rotate vertical' option to show the nuclei as they appear in their source image.. 
+
+Once you are happy with your selection, click the  `Make new collection from selected` button at the top of the window, and the chosen cells will be added to a new dataset.
+
+For large datasets, it may take some time to load the image for all the nuclei. The loading progress is shown by a loading bar at the bottom of the window.
+
 ## Modifying landmarks and segments  {#updating-landmarks-method}
 
 Landmarks and segments can be altered for individual cells, and for the dataset as a whole. For individual cells, see the [cells tab](#cells-tab). To edit segments or landmarks across the entire dataset, see the [editing tab](#editing-tab).
@@ -113,12 +142,38 @@ See the [Clusters tab](#clusters-tab).
 
 ## Detecting FISH signals {#detect-signals-method}
 
-Once a dataset has been created (either by a new analysis or loading an existing dataset), an attempt can be made to find nuclear signals.
+Once a dataset has been created (either by a new analysis or loading an existing dataset), we can try to find nuclear signals.
 
-- Select 'Dataset > Add > Add nuclear signal'. 
-- You will be asked to choose a folder containing the images with signals. 
-- A detection window will then be displayed, similar to the new analysis setup. 
-- The outlines of nuclei detected previously will be shown in blue, and the detected signals will be outlined in yellow (if they meet filtering criteria) or red (if they fail to meet filtering criteria).
+### Very briefly
+
+- Select 'Dataset > Add > Add nuclear signal'
+- Choose the folder containing the images with signals
+- A detection window will be displayed, similar to the new analysis setup. 
+- Outlines of nuclei detected previously will be shown in blue, and detected signals will be outlined in yellow (if they meet filtering criteria) or red (if they fail to meet filtering criteria)
+- Once happy with the settings, click 'Proceed with detection'
+- Provide a name for the signal group
+
+```{r, out.width="100%", out.height="100%", fig.show='hold', fig.align='center', echo=F}
+knitr::include_graphics("img/gifs/Add_signals.gif")
+```
+
+### More detail
+
+The images containing FISH signals can be, but do not need to be, the same images containing the nuclei. This means you could have images with (_e.g._) DAPI stained nuclei in the blue channel, and FISH signals in the red or green channels. You could also have one folder of RGB or greyscale images with the DAPI stained nuclei, and another folder of RGB or greyscale images with the FISH signals.
+
+The software determines which nucleus a signal belongs to using the image file name. If you use separate folders of images for nuclei and signals, **the signal images must have the same names as the images from which the nuclei were originally found.**.
+
+For example, here is an analysis with separate folders for each. If a nucleus came from the image named `Image 1.tif`, the signal must also be in an image named `Image 1.tif`:
+
+```{}
+Main folder
+  |- DAPI folder
+  |  |- Image 1.tiff
+  |  |- Image 2.tiff
+  |- Red signals folder
+     |- Image 1.tiff
+     |- Image 2.tiff
+```
 
 ### Image
 
@@ -157,13 +212,7 @@ Min and max circ | Circularity measures (see nucleus detection). Default is to a
 
 When ready, click the 'Proceed with detection' button in the lower right to be begin finding signals.
 
-**The images must have the same names as the DAPI images from which the nuclei were originally found.** i.e., if a nucleus came from an image named `P22.tif`, the signal must also be in an image named `P22.tif`
-
 After the signal detection has run, a new child dataset is created for the subset of nuclei with signals detected. Nuclear signals can be viewed in the [Nuclear signals tab](#nuclear-signals-tab).
-
-```{r, out.width="100%", out.height="100%", fig.show='hold', fig.align='center', echo=F}
-knitr::include_graphics("img/gifs/Add_signals.gif")
-```
 
 ## Warping signals {#warp-signals-method}
 
@@ -180,6 +229,13 @@ When warping signals, there are two choices to make:
 - the signal group to be warped - these are the particular nuclei and FISH signals you want to warp
 - the consensus nucleus shape to warp the signals onto; this can be from the same dataset as the signals, or a different dataset
 
+
+### Very briefly
+
+```{r, out.width="100%", out.height="100%", fig.show='hold', fig.align='center', echo=F}
+knitr::include_graphics("img/gifs/Add_warping.gif")
+```
+
 ### How to warp signals
 
 - Ensure that the dataset containing the signals and the dataset with the target consensus shape have the same segmentation pattern. Warping relies on the segments to determine which regions of the nuclei are structurally equivalent, so if the segments don't match, this won't work.
@@ -188,14 +244,13 @@ When warping signals, there are two choices to make:
 
 - The signal warping options will open
 
-```{r, out.width="100%", out.height="100%", fig.show='hold', fig.align='center', echo=F}
+```{r, fig.show='hold', fig.align='center', echo=F}
 knitr::include_graphics("img/Warping_2_options.png")
 ```
 
 Option | Affects
 -----|------
 Signal group | The FISH signal group to use
-
 Min threshold | Threshold signal images before warping; removes any signal below the given threshold. This can help to remove background if the images are very noisy. The default value is the threshold initially used for signal detection.
 Binarise | Should images be converted to binary before warping. This can help avoid skewing due to different signal intensities in the images.
 Normalise to counterstain | Adjusts signal intensity relative to the nuclear counterstain before warping. Can help make faint signals more obvious
@@ -222,10 +277,6 @@ Threshold slider | Apply a minimum threshold to a warped signal to explore the r
 ### Exporting warped signals
 
 Images can be exported using the 'buttons in the display settings panel:'Export image' button. If two warped signals are selected, the default is to assign each warped image a colour designed to highlight similarities and differences between the images. These colours may be different to the image displayed in the warper, which use the signal group pseudocolours. Choose a colour pair you prefer via the drop down list. If you want the exported image to have the consensus nucleus outline, tick the box.
-
-```{r, out.width="100%", out.height="100%", fig.show='hold', fig.align='center', echo=F}
-knitr::include_graphics("img/gifs/Add_warping.gif")
-```
 
 ### Comparing warped images
 

@@ -1,14 +1,26 @@
 --- 
-title: "Nuclear Morphology Analysis"
+title: "Nuclear Morphology Analysis User Guide"
 author: "Ben Skinner"
 date: "`r Sys.Date()`"
 site: bookdown::bookdown_site
-output: bookdown::gitbook
+output: 
+  bookdown::gitbook:
+    css: style.css
+    config:
+      search:
+        engine: lunr
+      sharing:
+        facebook: false
+        twitter: false
+        all: false
+    split_by: section
+  bookdown::markdown_document2:
+    base_format: rmarkdown::md_document
+    variant: gfm
 documentclass: book
 bibliography: [book.bib, packages.bib]
 biblio-style: apalike
 link-citations: yes
-github-repo: rstudio/bookdown-demo
 description: "User guide for Nuclear Morphology Analysis"
 ---
 

@@ -1,20 +1,46 @@
 # Installation and configuration
 
+This section contains information on installing, removing and customising the program.
+
 ## Installing
+
+Nuclear Morphology Analysis is designed to be runnable on Windows, Linux and MacOs.
 
 ### Windows
 
+Option | Link | Info
+-------|------|------
+Portable | [Nuclear_Morphology_Analysis_2.0.0.zip](https://bitbucket.org/bmskinner/nuclear_morphology/downloads/Nuclear_Morphology_Analysis_2.0.0.zip) | Software and Java runtime in a portable format. Unzip the folder wherever you like and run 'Nuclear_Morphology_Analysis.exe'. To remove, just delete the folder.
+Installer | [Nuclear_Morphology_Analysis_2.0.0.msi](https://bitbucket.org/bmskinner/nuclear_morphology/downloads/Nuclear_Morphology_Analysis_2.0.0.msi) | Software and Java runtime in an installer for Windows. This will add the software to your installed programs, and create a start menu entry. May require administrator privileges depending on where you install to.
 
 ### Linux
 
+Software and Java runtime in a portable format built in Debian 10.
+ 
+Option | Link | Info
+-------|------|------
+Linux portable | link | Software and Java runtime in a portable format. Unzip the folder wherever you like and run 'Nuclear_Morphology_Analysis.sh'.
 
-### Mac
+### MacOS
 
+The software is not available packaged with the Java runtime because I don't have a Mac to package and test on.
+
+- Install Java 16 or higher on your Mac
+- Download [Nuclear_Morphology_Analysis_2.0.0_standalone.jar](https://bitbucket.org/bmskinner/nuclear_morphology/downloads/Nuclear_Morphology_Analysis_2.0.0_standalone.jar) 
+
+Due to security permissions in recent versions of MacOS (Catalina and above) the program won't have access to user folders if launched by double-clicking the jar file. You should launch from the Terminal; open the Terminal, navigate to the directory containing the jar file, and launch the jar using `java -jar Nuclear_Morphology_Analysis_x.y.z.jar`, changing x, y and z to the appropriate numbers for your version.
 
 ## Uninstalling
 
-If you installed the portable version, just delete the folder containing the program.
-Nuclear Morphology Analysis also creates a folder in your home directory called `.nma`. You can delete this folder too to remove all traces of the program.
+### Windows installer version
+
+- Go to Programs and Features, find Nuclear Morphology Analysis in the list of installed programs, and click 'Uninstall'
+- Nuclear Morphology Analysis also creates a folder in your home directory called `.nma`. Delete this folder too to remove all traces of the program.
+
+### Portable version
+
+- Delete the folder containing the program.
+- Nuclear Morphology Analysis also creates a folder in your home directory called `.nma`. Delete this folder too to remove all traces of the program.
 
 ## Configuration and user data
 
@@ -24,7 +50,6 @@ Nuclear Morphology Analysis creates a folder in your home directory called `.nma
 - built-in rulesets for shapes we can detect
 - custom rulesets for novel shapes you want to analyse
 - custom program options
-- this help file
 
 You can open the configuration folder via 'Help > Open config directory'.
 
@@ -74,7 +99,7 @@ The `Measurement` values show the standard measures that will be calculated when
 
 ### Custom options
 
-The following options can be set, and will take effect when the program is next launched:
+Custom options are set in the `config.ini` file in the configuration directory. They are in the format `OPTION=VALUE`. The following options can be set, and will take effect when the program is next launched:
 
 Key        | Allowed Values | Effect
 -----------| ---------------|--------------
