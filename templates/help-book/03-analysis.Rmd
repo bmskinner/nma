@@ -163,7 +163,7 @@ Operation | Condition
 
 We often want to explore the variation in nuclei within a dataset; perhaps there are two or more distinct groups of shapes to find. To do this, we can perform clustering, based on the profiles or other measured values.
 
-Clustering is performed through the [Clusters tab](#clusters-tab). There are three ways to generate clusters:
+Clustering is visualised through the [Clusters tab](#clusters-tab). There are three ways to generate clusters:
 
 - Manually
 - Automatically, using a clustering algorithm
@@ -171,7 +171,11 @@ Clustering is performed through the [Clusters tab](#clusters-tab). There are thr
 
 ### Manual clustering
 
-Allows nuclei to be manually assigned to clusters. Choose the number of clusters you want to make, and each nucleus will be displayed for you to put in a cluster.
+Allows nuclei to be manually assigned to clusters. 
+
+- Select `Datasets > Add > Clustering manually`. 
+- Choose the number of clusters you want to make, and their names
+- Each nucleus will be displayed with a button to choose which cluster to put it in
 
 ```{r, out.width="100%", out.height="100%", fig.show='hold', echo=F}
 knitr::include_graphics("img/gifs/Cluster_manual.gif")
@@ -179,7 +183,12 @@ knitr::include_graphics("img/gifs/Cluster_manual.gif")
 
 ### Automatic clustering
 
-Allows nuclei to be assigned to clusters based on their shape, or other measurements. To run a new clustering analysis, click 'Cluster automatically'.
+Allows nuclei to be assigned to clusters based on their shape, or other measurements. 
+
+- Select `Datasets > Add > Clustering automatically`
+- Choose the nuclear parameters to cluster on
+- Choose whether to perform dimensionality reduction
+- Choose the clustering method
 
 ```{r, out.width="100%", out.height="100%", fig.show='hold', echo=F}
 knitr::include_graphics("img/gifs/Cluster_automatic.gif")
@@ -211,24 +220,35 @@ The [Newick format](https://en.wikipedia.org/wiki/Newick_format) for the cluster
 
 Sometimes you may want to run clustering on exported data, for example in R, and then use NMA to create the average shape of each cluster. To do this, we can import a file that maps each cell to a cluster.
 
-The R code snippet below demonstrates how to create a cluster file from within R:
+The R code snippet below demonstrates how to export a cluster file from within R:
 
 ```{r, eval=F, echo=T}
 # This assumes you have created a column "ClusterID" in your data frame
 # with the cluster assignments. The ClusterID column should contain
-# only integers from 1.
-# Syntax is CellID<\t>ClusterID
+# integers from 1.
   map.data <- sample.data %>% dplyr::select(CellID, ClusterID)
 
   write.table(map.data, file = "cluster_map.tsv", sep = "\t", row.names = F, col.names = F, quote = F)
 ```
 
-The mapping file created should be a tab-separated file, containing the cell id, and the cluster number to which the cell is assigned. No column headers are needed.
+The mapping file created should be a tab-separated file, containing the cell id, and the cluster number to which the cell is assigned. No column headers are needed. An example is shown below:
 
-The clustering tab has an option `Import from file`, which allows you to link cells to cluster groups. Select your mapping file, and the clusters will be applied as a new cluster group.
+```{}
+33e148a2-9239-43e4-9116-7fb9cfd3f170	1
+3670723b-185f-4b47-95db-4040b0349d3a	1
+4cf346dd-77a3-4533-9565-cc43ec5db0bd	1
+77709677-65b4-43d6-912c-182858d904db	1
+94701494-ebca-491d-b65d-03ab52478be7	2
+2ffb047a-c4eb-41a0-96ae-05e388b0bfdc	2
+2610caa7-8456-46b6-b26a-6b87f5c42847	2
+8683deb7-0c7c-474c-b895-e34a0cd2ef36	2
+7eeabe40-c860-4244-9910-23ce7af6e76e	2
+```
+
+To add the clusters, select `Datasets > Add > Clustering from file`. Select your mapping file, and the clusters will be applied as a new cluster group.
 
 ```{r, out.width="100%", out.height="100%", fig.show='hold', echo=F}
-knitr::include_graphics("img/gifs/Import_clusters.gif")
+knitr::include_graphics("img/gifs/Cluster_imported.gif")
 ```
 
 ## Detecting FISH signals {#detect-signals-method}
@@ -409,6 +429,14 @@ knitr::include_graphics("img/FISH_remapping_selected.png")
 
 ## Exporting data {#export-data-method}
 
+### Saving the charts or tables
+
+Data from all charts and tables can be copied or saved by right clicking, and selecting either `Copy data` or `Export data`. In either case, the underlying data will be copied in tab separated format, suitable for pasting into Excel or other software.
+
+The charts can be saved as images via right clicking and `Save as...`. When it comes to making pretty figures for papers though, I usually recommend exporting the measurements and drawing your own.
+
+### Exporting all measurements
+
 To export raw data for single or multiple datasets, select the datasets you want to export, and choose `Dataset > Export...`
 
 There are several options available depending on what data you need. If a single dataset is selected, the measurements will be exported to a file of your choice. By default, the file will be in the dataset's folder:
@@ -430,6 +458,64 @@ Consensus nuclei as SVG | The consensus nucleus outlines for all selected datase
 Single cell images | Export each nucleus as a separate image to a folder in the same directory as the `nmd` file. You will be given the option to mask out background; if this is selected, any pixels not within the nucleus will be set to black.
 Dataset analysis options | The options used to analyse this dataset in XML format. This can be used directly to set up subsequent analyses
 Landmark rulesets | The rules used to detect landmarks, so you can modify them for custom nucleus types
+
+### Running downstream analysis on exported data
+
+Once you have exported the data, you can do whatever downstream analysis you wish. This demonstrates a simple example of how to run a tSNE in R, and perform a hierarchical clustering on the result, using the angle profiles from exported nuclear statistics.
+
+```{r, eval=F, echo=T}
+# Demonstration of how to read a sample tsv of morphology data, extract the relevant
+# columns for the angle profile, run a tSNE, cluster, and display the result
+library(tidyverse)
+library(Rtsne)
+library(cluster)
+library(dendextend)
+
+# Read in the input data file
+data <- read.csv("Exported_data.tsv", sep="\t", header=T, stringsAsFactors = F)
+
+# Take just the angle profile columns
+profiles <- data %>% dplyr::select(one_of(paste0("Angle_profile_", seq(0,99,1))))
+  
+# Set the rownames of the data using the cell id and the strain for convenience
+rownames(profiles) <- data$CellID
+
+# Set the random number generator with a seed for reproducilble results
+set.seed(42)
+
+# Run a tSNE on the profile data - the Rtsne function requires a matrix
+# Perplexity should be tuned according to the number of samples you have;
+# a good starting point is 5% of your sample size
+rtsne_out <- Rtsne(as.matrix(profiles), perplexity=20, max_iter=1000)
+tsne.values <- as.data.frame(rtsne_out$Y)
+
+# Display the results as a scatter plot
+ggplot(tsne.values, aes(x=V1, y=V2))+
+  geom_point()
+
+# Cluster the tSNE values using hierarchical clustering
+# The agnes function is agglomerative nesting
+hc <- cluster::agnes(tsne.values, method = "ward")
+
+# Make a dendrogram (tree) from the cluster data
+dend <- as.dendrogram(hc)
+
+# Cut the dendrogram to get 4 separate groups
+clusters <- dendextend::cutree(dend, 4)
+
+# Assign the group names to the original data
+data$agnes <- clusters
+
+# Assign the group names to the tSNE results
+tsne.values$agnes <- clusters
+
+# Plot the tSNE results coloured by cluster
+ggplot(tsne.values, aes(x=V1, y=V2, col=agnes))+
+geom_point()
+
+```
+
+This would also be suitable for generating a [cluster map](#import-cluster-method) to import back into the program
 
 ## Using workspaces {#workspace-methods}
 

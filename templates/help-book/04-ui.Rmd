@@ -309,7 +309,7 @@ Detailed Venn presents the Venn data in a pairwise format, with more detailed br
 The clusters panel allows clustering and tree-building to be run on a dataset, and shows information on clustering analyses that have been run previously. When cluster groups are available, the analysis parameters for the groups are shown in the table.
 
 ```{r, out.width="100%", out.height="100%", fig.show='hold', echo=F}
-knitr::include_graphics("img/Clusters_panel_overview.png")
+knitr::include_graphics("img/Cluster_panel.png")
 ```
 
 ## Merges tab {#merges-tab}
