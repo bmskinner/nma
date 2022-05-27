@@ -31,6 +31,8 @@ import com.bmskinner.nma.core.ThreadManager;
 import com.bmskinner.nma.gui.ProgressBarAcceptor;
 import com.bmskinner.nma.gui.components.FileSelector;
 import com.bmskinner.nma.gui.events.UIController;
+import com.bmskinner.nma.gui.events.UserActionController;
+import com.bmskinner.nma.gui.events.UserActionEvent;
 import com.bmskinner.nma.logging.Loggable;
 
 /**
@@ -42,11 +44,13 @@ import com.bmskinner.nma.logging.Loggable;
  */
 public class ClusterFileAssignmentAction extends SingleDatasetResultAction {
 
-	private static final Logger LOGGER = Logger.getLogger(ClusterFileAssignmentAction.class.getName());
+	private static final Logger LOGGER = Logger
+			.getLogger(ClusterFileAssignmentAction.class.getName());
 
 	private static final @NonNull String PROGRESS_BAR_LABEL = "Assigning clustered cells";
 
-	public ClusterFileAssignmentAction(IAnalysisDataset dataset, @NonNull ProgressBarAcceptor acceptor) {
+	public ClusterFileAssignmentAction(@NonNull IAnalysisDataset dataset,
+			@NonNull ProgressBarAcceptor acceptor) {
 		super(dataset, PROGRESS_BAR_LABEL, acceptor);
 	}
 
@@ -77,6 +81,15 @@ public class ClusterFileAssignmentAction extends SingleDatasetResultAction {
 			ClusterAnalysisResult r = (ClusterAnalysisResult) worker.get();
 			int size = r.getGroup().size();
 			LOGGER.info("Found " + size + " clusters");
+
+			UserActionController.getInstance().userActionEventReceived(
+					new UserActionEvent(this, UserActionEvent.REFOLD_CONSENSUS,
+							r.getDatasets()));
+
+			UserActionController.getInstance()
+					.userActionEventReceived(
+							new UserActionEvent(this, UserActionEvent.SAVE, dataset));
+
 			UIController.getInstance().fireClusterGroupAdded(dataset, r.getGroup());
 		} catch (InterruptedException | ExecutionException e) {
 			LOGGER.warning("Error clustering");

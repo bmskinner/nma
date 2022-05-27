@@ -390,6 +390,18 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 						| ContextEnabled.ACTIVE_ON_CHILD_DATASET
 						| ContextEnabled.ACTIVE_ON_SINGLE_OBJECT));
 
+		addSubMenu.add(fact.makeItem(Labels.Populations.ADD_CLUSTER_MANUAL_LBL,
+				UserActionEvent.CLUSTER_MANUALLY,
+				ContextEnabled.ACTIVE_ON_ROOT_DATASET
+						| ContextEnabled.ACTIVE_ON_CHILD_DATASET
+						| ContextEnabled.ACTIVE_ON_SINGLE_OBJECT));
+
+		addSubMenu.add(fact.makeItem(Labels.Populations.ADD_CLUSTER_AUTO_LBL,
+				UserActionEvent.CLUSTER_AUTOMATICALLY,
+				ContextEnabled.ACTIVE_ON_ROOT_DATASET
+						| ContextEnabled.ACTIVE_ON_CHILD_DATASET
+						| ContextEnabled.ACTIVE_ON_SINGLE_OBJECT));
+
 		addSubMenu.add(fact.makeItem(Labels.Populations.ADD_CLUSTER_FILE_LBL,
 				UserActionEvent.CLUSTER_FROM_FILE,
 				ContextEnabled.ACTIVE_ON_ROOT_DATASET

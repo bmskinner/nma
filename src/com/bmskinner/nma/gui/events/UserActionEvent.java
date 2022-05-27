@@ -62,8 +62,6 @@ public class UserActionEvent extends EventObject {
 	public static final String RUN_SHELL_ANALYSIS = "Run shell analysis";
 	public static final String SIGNAL_WARPING = "SignalWarpingAction";
 
-	public static final String CLUSTER_FROM_FILE = "AddClusterFromFileAction";
-
 	public static final String DATASET_ARITHMETIC = "DatasetArithmeticAction";
 	public static final String CHANGE_NUCLEUS_IMAGE_FOLDER = "ChangeNucleusFolderAction";
 	public static final String EXTRACT_SUBSET = "Extract subset";
@@ -87,10 +85,6 @@ public class UserActionEvent extends EventObject {
 	public static final String ADD_TO_WORKSPACE = "AddToWorkspace";
 	public static final String ADD_WORKSPACE = "Add workspace";
 	public static final String REMOVE_FROM_WORKSPACE = "RemoveFromWorkspace";
-
-//	public static final String NEW_BIOSAMPLE_PREFIX = "NewBioSample|";
-//	public static final String ADD_TO_BIOSAMPLE_PREFIX = "AddToBioSample|";
-//	public static final String REMOVE_FROM_BIOSAMPLE_PREFIX = "RemoveFromBioSample|";
 
 	/** Profile and segment */
 	public static final String MORPHOLOGY_ANALYSIS_ACTION = "Morphology analysis action";
@@ -119,10 +113,10 @@ public class UserActionEvent extends EventObject {
 	public static final String SELECT_DATASETS = "Select multiple datasets";
 	public static final String SELECT_ONE_DATASET = "Select single dataset";
 	public static final String EXTRACT_MERGE_SOURCE = "Extract source";
-	public static final String CLUSTER = "Cluster";
-	public static final String MANUAL_CLUSTER = "Manual cluster";
-	public static final String BUILD_TREE = "Build tree";
-	public static final String TRAIN_CLASSIFIER = "Train classifier";
+
+	public static final String CLUSTER_AUTOMATICALLY = "Cluster automatically";
+	public static final String CLUSTER_MANUALLY = "Manual cluster";
+	public static final String CLUSTER_FROM_FILE = "AddClusterFromFileAction";
 
 	public static final String SAVE = "Save selected";
 	public static final String SAVE_AS = "Save as new file";

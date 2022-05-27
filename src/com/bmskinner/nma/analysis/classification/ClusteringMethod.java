@@ -8,6 +8,7 @@ import com.bmskinner.nma.components.options.HashOptions;
 public enum ClusteringMethod {
 	EM("Expectation maximisation"),
 	HIERARCHICAL("Hierarchical"),
+	IMPORTED("Imported"),
 	MANUAL("Manual");
 
 	private final String name;

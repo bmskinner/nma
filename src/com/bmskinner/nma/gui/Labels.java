@@ -113,7 +113,9 @@ public class Labels {
 
 		public static final String POST_FISH_MAPPING_LBL = "Post-FISH mapping";
 		public static final String ADD_CHILD_CELLS_LBL = "Child collection from file";
-		public static final String ADD_CLUSTER_FILE_LBL = "Cluster group from file";
+		public static final String ADD_CLUSTER_MANUAL_LBL = "Clustering manually";
+		public static final String ADD_CLUSTER_AUTO_LBL = "Clustering automatically";
+		public static final String ADD_CLUSTER_FILE_LBL = "Clustering from file";
 
 		public static final String CHANGE_SCALE_LBL = "Set scale";
 

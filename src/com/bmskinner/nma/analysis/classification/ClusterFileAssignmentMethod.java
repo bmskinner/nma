@@ -85,8 +85,8 @@ public class ClusterFileAssignmentMethod extends SingleDatasetAnalysisMethod {
 		LOGGER.info("Reading map file");
 		readMapFile();
 		LOGGER.fine("Read " + cellMap.size() + " cell ids");
-		IClusterGroup group = assignClusters();
-		return new ClusterAnalysisResult(dataset, group);
+		ClusterAnalysisResult result = assignClusters();
+		return result;
 	}
 
 	/**
@@ -185,7 +185,7 @@ public class ClusterFileAssignmentMethod extends SingleDatasetAnalysisMethod {
 		}
 	}
 
-	private IClusterGroup assignClusters() {
+	private ClusterAnalysisResult assignClusters() {
 		LOGGER.fine("Assigning clusters");
 
 		Map<Integer, List<ICell>> clusterMap = new HashMap<>();
@@ -195,7 +195,9 @@ public class ClusterFileAssignmentMethod extends SingleDatasetAnalysisMethod {
 		// Clusters assigned from file don't have internal options
 		// since we don't know how they were made. Make an empty
 		// options object
-		HashOptions clusterOptions = new OptionsBuilder().build();
+		HashOptions clusterOptions = new OptionsBuilder()
+				.withValue(HashOptions.CLUSTER_METHOD_KEY, ClusteringMethod.IMPORTED.toString())
+				.build();
 
 		IClusterGroup group = new DefaultClusterGroup(
 				IClusterGroup.CLUSTER_GROUP_PREFIX + "_" + clusterNumber,
@@ -216,10 +218,10 @@ public class ClusterFileAssignmentMethod extends SingleDatasetAnalysisMethod {
 		// Add all the cells to clusters
 		for (Entry<UUID, Integer> entry : cellMap.entrySet()) {
 			int cluster = entry.getValue();
-			LOGGER.fine("Assigning " + entry.getKey().toString() + " to cluster " + cluster);
+//			LOGGER.fine("Assigning " + entry.getKey().toString() + " to cluster " + cluster);
 			ICell cell = dataset.getCollection().getCell(entry.getKey());
 			if (cell == null) {
-				LOGGER.fine("Cell not found " + entry.getKey().toString());
+//				LOGGER.fine("Cell not found " + entry.getKey().toString());
 				continue;
 			}
 
@@ -230,8 +232,8 @@ public class ClusterFileAssignmentMethod extends SingleDatasetAnalysisMethod {
 			if (clusterMap.containsKey(cluster)) {
 				clusterMap.get(cluster).add(cell);
 			} else {
-				LOGGER.fine("No cluster defined for " + entry.getKey().toString() + ": expected "
-						+ cluster);
+//				LOGGER.fine("No cluster defined for " + entry.getKey().toString() + ": expected "
+//						+ cluster);
 				unmappedCells.add(cell);
 			}
 		}
@@ -241,6 +243,8 @@ public class ClusterFileAssignmentMethod extends SingleDatasetAnalysisMethod {
 
 		// Assign profiles to the new cluster collections
 		int cellsInClusters = 0;
+
+		List<IAnalysisDataset> result = new ArrayList<>();
 
 		for (Entry<Integer, List<ICell>> entry : clusterMap.entrySet()) {
 
@@ -256,6 +260,7 @@ public class ClusterFileAssignmentMethod extends SingleDatasetAnalysisMethod {
 					IAnalysisDataset clusterDataset = dataset.addChildCollection(c);
 
 					group.addDataset(clusterDataset);
+					result.add(clusterDataset);
 
 					// set shared counts
 					c.setSharedCount(dataset.getCollection(), c.size());
@@ -272,6 +277,7 @@ public class ClusterFileAssignmentMethod extends SingleDatasetAnalysisMethod {
 		dataset.addClusterGroup(group);
 		LOGGER.fine("Clusters contain " + cellsInClusters + " cells compared to "
 				+ dataset.getCollection().size() + " in parent");
-		return group;
+
+		return new ClusterAnalysisResult(result, group);
 	}
 }

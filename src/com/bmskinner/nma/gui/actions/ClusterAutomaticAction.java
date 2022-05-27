@@ -45,13 +45,13 @@ import com.bmskinner.nma.logging.Loggable;
  * @author ben
  *
  */
-public class ClusterAnalysisAction extends SingleDatasetResultAction {
+public class ClusterAutomaticAction extends SingleDatasetResultAction {
 
-	private static final Logger LOGGER = Logger.getLogger(ClusterAnalysisAction.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(ClusterAutomaticAction.class.getName());
 
 	private static final @NonNull String PROGRESS_BAR_LABEL = "Clustering cells";
 
-	public ClusterAnalysisAction(IAnalysisDataset dataset, @NonNull ProgressBarAcceptor acceptor) {
+	public ClusterAutomaticAction(IAnalysisDataset dataset, @NonNull ProgressBarAcceptor acceptor) {
 		super(dataset, PROGRESS_BAR_LABEL, acceptor);
 	}
 
@@ -124,7 +124,7 @@ public class ClusterAnalysisAction extends SingleDatasetResultAction {
 	private void runClustering(HashOptions options) {
 		IAnalysisMethod m2 = new NucleusClusteringMethod(dataset, options);
 		worker = new DefaultAnalysisWorker(m2);
-		worker.addPropertyChangeListener(ClusterAnalysisAction.this);
+		worker.addPropertyChangeListener(ClusterAutomaticAction.this);
 		ThreadManager.getInstance().submit(worker);
 	}
 

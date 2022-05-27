@@ -32,13 +32,13 @@ import com.bmskinner.nma.gui.events.UserActionController;
 import com.bmskinner.nma.gui.events.UserActionEvent;
 import com.bmskinner.nma.logging.Loggable;
 
-public class ManualClusterAction extends SingleDatasetResultAction {
+public class ClusterManualAction extends SingleDatasetResultAction {
 
-	private static final Logger LOGGER = Logger.getLogger(ManualClusterAction.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(ClusterManualAction.class.getName());
 
 	private static final @NonNull String PROGRESS_BAR_LABEL = "Clustering cells";
 
-	public ManualClusterAction(IAnalysisDataset dataset, @NonNull ProgressBarAcceptor acceptor) {
+	public ClusterManualAction(IAnalysisDataset dataset, @NonNull ProgressBarAcceptor acceptor) {
 		super(dataset, PROGRESS_BAR_LABEL, acceptor);
 	}
 

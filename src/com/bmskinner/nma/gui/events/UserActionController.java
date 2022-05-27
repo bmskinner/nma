@@ -32,7 +32,7 @@ import com.bmskinner.nma.gui.DefaultInputSupplier;
 import com.bmskinner.nma.gui.ProgressBarAcceptor;
 import com.bmskinner.nma.gui.actions.AddNuclearSignalAction;
 import com.bmskinner.nma.gui.actions.BuildHierarchicalTreeAction;
-import com.bmskinner.nma.gui.actions.ClusterAnalysisAction;
+import com.bmskinner.nma.gui.actions.ClusterAutomaticAction;
 import com.bmskinner.nma.gui.actions.ClusterFileAssignmentAction;
 import com.bmskinner.nma.gui.actions.DatasetArithmeticAction;
 import com.bmskinner.nma.gui.actions.ExportCellLocationsAction;
@@ -52,7 +52,7 @@ import com.bmskinner.nma.gui.actions.FishRemappingAction;
 import com.bmskinner.nma.gui.actions.ImportDatasetAction;
 import com.bmskinner.nma.gui.actions.ImportWorkflowAction;
 import com.bmskinner.nma.gui.actions.ImportWorkspaceAction;
-import com.bmskinner.nma.gui.actions.ManualClusterAction;
+import com.bmskinner.nma.gui.actions.ClusterManualAction;
 import com.bmskinner.nma.gui.actions.MergeCollectionAction;
 import com.bmskinner.nma.gui.actions.MergeSignalsAction;
 import com.bmskinner.nma.gui.actions.MergeSourceExtractionAction;
@@ -171,9 +171,6 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 
 		if (event.type().equals(UserActionEvent.EXTRACT_SUBSET))
 			return new ExtractRandomCellsAction(selectedDataset, acceptor);
-
-		if (event.type().equals(UserActionEvent.CLUSTER_FROM_FILE))
-			return new ClusterFileAssignmentAction(selectedDataset, acceptor);
 
 		if (event.type().equals(UserActionEvent.POST_FISH_MAPPING))
 			return new FishRemappingAction(event.getDatasets(), acceptor);
@@ -295,18 +292,14 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 			};
 		}
 
-		if (event.type().equals(UserActionEvent.CLUSTER)) {
-			LOGGER.fine("Clustering dataset");
-			return new ClusterAnalysisAction(selectedDataset, acceptor);
-		}
+		if (UserActionEvent.CLUSTER_AUTOMATICALLY.equals(event.type()))
+			return new ClusterAutomaticAction(event.getDatasets().get(0), acceptor);
 
-		if (event.type().equals(UserActionEvent.MANUAL_CLUSTER)) {
-			LOGGER.fine("Manually clustering dataset");
-			return new ManualClusterAction(selectedDataset, acceptor);
-		}
+		if (UserActionEvent.CLUSTER_MANUALLY.equals(event.type()))
+			return new ClusterManualAction(event.getDatasets().get(0), acceptor);
 
-		if (event.type().equals(UserActionEvent.CLUSTER_FROM_FILE))
-			return new ClusterFileAssignmentAction(selectedDataset, acceptor);
+		if (UserActionEvent.CLUSTER_FROM_FILE.equals(event.type()))
+			return new ClusterFileAssignmentAction(event.getDatasets().get(0), acceptor);
 
 		if (event.type().equals(UserActionEvent.RECALCULATE_MEDIAN)) {
 			return () -> {
@@ -371,7 +364,7 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 		if (event.type().equals(UserActionEvent.RELOCATE_CELLS))
 			return new RelocateFromFileAction(selectedDataset, acceptor, new CountDownLatch(1));
 
-		if (event.type().equals(UserActionEvent.BUILD_TREE)) {
+		if (event.type().equals(UserActionEvent.CLUSTER_AUTOMATICALLY)) {
 			return new BuildHierarchicalTreeAction(selectedDataset, acceptor);
 		}
 

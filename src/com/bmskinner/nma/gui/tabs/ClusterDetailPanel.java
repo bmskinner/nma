@@ -18,7 +18,6 @@ package com.bmskinner.nma.gui.tabs;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
-import java.awt.FlowLayout;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.List;
@@ -46,8 +45,6 @@ import com.bmskinner.nma.gui.dialogs.ClusterTreeDialog;
 import com.bmskinner.nma.gui.dialogs.TsneDialog;
 import com.bmskinner.nma.gui.events.ClusterGroupsUpdatedListener;
 import com.bmskinner.nma.gui.events.UIController;
-import com.bmskinner.nma.gui.events.UserActionController;
-import com.bmskinner.nma.gui.events.UserActionEvent;
 import com.bmskinner.nma.visualisation.options.TableOptions;
 import com.bmskinner.nma.visualisation.options.TableOptionsBuilder;
 import com.bmskinner.nma.visualisation.tables.AbstractTableCreator;
@@ -74,12 +71,6 @@ public class ClusterDetailPanel extends TableDetailPanel implements ClusterGroup
 	private static final String NO_CLUSTERS_LBL = "No clusters present";
 	private static final String MAN_CLUSTER_LBL = "Cluster manually";
 	private static final String FILE_CLUSTER_LBL = "Import from file";
-
-	private JButton clusterButton = new JButton(NEW_CLUSTER_LBL);
-	private JButton buildTreeButton = new JButton(NEW_TREE_LBL);
-	private JButton saveClassifierButton = new JButton(NEW_CLASS_LBL);
-	private JButton manualClusterBtn = new JButton(MAN_CLUSTER_LBL);
-	private JButton fileClusterBtn = new JButton(FILE_CLUSTER_LBL);
 
 	private JLabel statusLabel = new JLabel(NO_CLUSTERS_LBL, SwingConstants.CENTER);
 	private JPanel statusPanel = new JPanel(new BorderLayout());
@@ -134,7 +125,8 @@ public class ClusterDetailPanel extends TableDetailPanel implements ClusterGroup
 			@Override
 			public TableCellRenderer getCellRenderer(int row, int column) {
 				if ((this.getValueAt(row, 0).equals(Labels.Clusters.TREE)
-						|| this.getValueAt(row, 0).equals(Labels.Clusters.CLUSTER_DIM_PLOT)) && column > 0
+						|| this.getValueAt(row, 0).equals(Labels.Clusters.CLUSTER_DIM_PLOT))
+						&& column > 0
 						&& !(getValueAt(row, column).equals(Labels.NA))) {
 					return buttonRenderer;
 				}
@@ -220,40 +212,8 @@ public class ClusterDetailPanel extends TableDetailPanel implements ClusterGroup
 	private JPanel createHeader() {
 
 		JPanel panel = new JPanel(new BorderLayout());
-
-		JPanel buttonPanel = new JPanel(new FlowLayout());
-		clusterButton.addActionListener(e -> UserActionController.getInstance()
-				.userActionEventReceived(new UserActionEvent(this, UserActionEvent.CLUSTER, getDatasets())));
-		buildTreeButton.addActionListener(e -> UserActionController.getInstance()
-				.userActionEventReceived(new UserActionEvent(this, UserActionEvent.BUILD_TREE, getDatasets())));
-		saveClassifierButton.addActionListener(e -> UserActionController.getInstance()
-				.userActionEventReceived(new UserActionEvent(this, UserActionEvent.TRAIN_CLASSIFIER, getDatasets())));
-		manualClusterBtn.addActionListener(e -> UserActionController.getInstance()
-				.userActionEventReceived(new UserActionEvent(this, UserActionEvent.MANUAL_CLUSTER, getDatasets())));
-		fileClusterBtn.addActionListener(e -> UserActionController.getInstance()
-				.userActionEventReceived(new UserActionEvent(this, UserActionEvent.CLUSTER_FROM_FILE, getDatasets())));
-
-		saveClassifierButton.setEnabled(false);
-		buildTreeButton.setEnabled(true);
-		manualClusterBtn.setEnabled(true);
-		fileClusterBtn.setEnabled(true);
-		buttonPanel.add(manualClusterBtn);
-		buttonPanel.add(clusterButton);
-		buttonPanel.add(fileClusterBtn);
-
-		panel.add(buttonPanel, BorderLayout.SOUTH);
 		panel.add(statusLabel, BorderLayout.CENTER);
 		return panel;
-	}
-
-	@Override
-	public void setEnabled(boolean b) {
-		super.setEnabled(b);
-		clusterButton.setEnabled(b);
-		buildTreeButton.setEnabled(b);
-		manualClusterBtn.setEnabled(b);
-		fileClusterBtn.setEnabled(b);
-		// saveClassifierButton.setEnabled(b); // not yet enabled
 	}
 
 	@Override
@@ -266,7 +226,8 @@ public class ClusterDetailPanel extends TableDetailPanel implements ClusterGroup
 	protected synchronized void updateMultiple() {
 		setEnabled(true);
 
-		TableOptions options = new TableOptionsBuilder().setDatasets(getDatasets()).setTarget(table).build();
+		TableOptions options = new TableOptionsBuilder().setDatasets(getDatasets()).setTarget(table)
+				.build();
 
 		setTable(options);
 
@@ -287,7 +248,8 @@ public class ClusterDetailPanel extends TableDetailPanel implements ClusterGroup
 					int nGroups = activeDataset().getClusterGroups().size();
 					String plural = nGroups == 1 ? "" : "s";
 					statusLabel.setText(
-							"Dataset has " + activeDataset().getClusterGroups().size() + " cluster group" + plural);
+							"Dataset has " + activeDataset().getClusterGroups().size()
+									+ " cluster group" + plural);
 				}
 			} else { // more than one dataset selected
 				statusLabel.setText(Labels.MULTIPLE_DATASETS);
@@ -317,10 +279,12 @@ public class ClusterDetailPanel extends TableDetailPanel implements ClusterGroup
 	 */
 	private class JButtonRenderer extends JButton implements TableCellRenderer {
 		@Override
-		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
+		public Component getTableCellRendererComponent(JTable table, Object value,
+				boolean isSelected, boolean hasFocus,
 				int row, int column) {
 			String text = value == null ? ""
-					: value instanceof IClusterGroup ? Labels.Clusters.CLUSTER_SHOW_TREE : value.toString();
+					: value instanceof IClusterGroup ? Labels.Clusters.CLUSTER_SHOW_TREE
+							: value.toString();
 			setText(text);
 			setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 			return this;
