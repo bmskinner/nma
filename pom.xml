@@ -231,6 +231,26 @@
 						</configuration>
 					</execution>
 
+					<!-- Copy the readme with version info to the base directory so the 
+						repo is up to date -->
+					<execution>
+						<id>help-book</id>
+						<phase>process-resources</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.basedir}/res/help-book</outputDirectory>
+							<resources>
+								<resource>
+									<directory>${project.template.directory}/help-book</directory>
+									<filtering>true</filtering>
+								</resource>
+							</resources>
+							<encoding>UTF-8</encoding>
+						</configuration>
+					</execution>
+
 				</executions>
 			</plugin>
 

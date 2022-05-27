@@ -23,7 +23,13 @@ import java.awt.FlowLayout;
 import java.awt.Window;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.io.File;
 import java.io.IOException;
+import java.net.JarURLConnection;
+import java.net.URI;
+import java.net.URL;
+import java.nio.file.Files;
+import java.security.CodeSource;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -64,6 +70,8 @@ import com.bmskinner.nma.gui.events.UserActionController;
 import com.bmskinner.nma.gui.events.UserActionEvent;
 import com.bmskinner.nma.io.Io;
 import com.bmskinner.nma.io.UpdateChecker;
+import com.bmskinner.nma.logging.Loggable;
+import com.bmskinner.nma.utility.FileUtils;
 
 /**
  * Menu bar for the main window
@@ -101,8 +109,6 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 	private static final String SAVE_DATASETS_TOOLTIP = "Save selected datasets";
 	private static final String SAVE_ALL_DATASETS_LBL = "Save all";
 	private static final String SAVE_ALL_DATASETS_TOOLTIP = "Save all datasets";
-//	private static final String SAVE_WORKSPACES_LBL = "Save workspaces";
-//	private static final String SAVE_WORKSPACES_TOOLTIP = "Save all open workspaces";
 
 	private static final String EXIT_LBL = "Exit";
 
@@ -131,9 +137,6 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 		add(createFileMenu());
 		add(createViewMenu());
 		add(createDatasetMenu());
-
-//		add(createWorkspaceMenu());
-
 		add(createHelpMenu());
 
 		add(Box.createGlue());
@@ -295,12 +298,54 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 		return menu;
 	}
 
+	private void loadUserGuide() {
+
+		try {
+
+			// Where the files are located in the jar resources
+			final String helpPath = "help_v" + Version.currentVersion().toString();
+
+			// Directory for the help files
+			File outputDir = new File(Io.getConfigDir(), helpPath);
+
+			// The file we will open
+			final URI mainHelpPage = new File(outputDir, "index.html").toURI();
+
+			// Copy the files out of the jar if they don't exist
+			if (!Files.exists(outputDir.toPath())) {
+				Files.createDirectories(outputDir.toPath());
+
+				CodeSource src = getClass().getProtectionDomain().getCodeSource();
+
+				// If this is run from the jar file, copy the help file out
+				if (src != null) {
+					File jarFile = new File(src.getLocation().toURI().getPath());
+
+					LOGGER.fine("Copying help files from jar at: " + jarFile.toString());
+					URL fileSysUrl = new URL(
+							"jar:file:/" + jarFile.getAbsolutePath() + "!/help-book/_book");
+
+					// Create a jar URL connection object
+					JarURLConnection jarURLConn = (JarURLConnection) fileSysUrl.openConnection();
+					FileUtils.copyJarResourcesRecursively(outputDir, jarURLConn);
+				}
+			}
+
+			LOGGER.fine("Opening " + mainHelpPage.toString());
+			Desktop desktop = Desktop.getDesktop();
+			desktop.browse(mainHelpPage);
+
+		} catch (Exception e) {
+			LOGGER.log(Loggable.STACK, "Cannot load user guide: " + e.getMessage(), e);
+		}
+	}
+
 	private ContextualMenu createHelpMenu() {
 		ContextualMenu menu = fact.makeMenu(HELP_MENU_LBL, ContextEnabled.ALWAYS_ACTIVE);
 
-		JMenuItem aboutItem = new JMenuItem(ABOUT_ITEM_LBL);
-		aboutItem.addActionListener(e -> new VersionHelpDialog(mw));
-		menu.add(aboutItem);
+		JMenuItem userGuideItem = new JMenuItem("Open user guide");
+		userGuideItem.addActionListener(e -> loadUserGuide());
+		menu.add(userGuideItem);
 
 		JMenuItem checkItem = new JMenuItem(CHECK_FOR_UPDATES_ITEM_LBL);
 		checkItem.addActionListener(e -> {
@@ -346,6 +391,10 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 			ThreadManager.getInstance().submit(r);
 		});
 		menu.add(logItem);
+
+		JMenuItem aboutItem = new JMenuItem(ABOUT_ITEM_LBL);
+		aboutItem.addActionListener(e -> new VersionHelpDialog(mw));
+		menu.add(aboutItem);
 
 		return menu;
 	}
