@@ -26,7 +26,7 @@ description: "User guide for Nuclear Morphology Analysis"
 
 # Introduction
 
-This is the help and documentation for Nuclear Morphology Analysis, scientific image analysis software for studying nuclear morphology and nuclear organisation in cells with asymmetric nuclei.
+This is the help and documentation for Nuclear Morphology Analysis version ${project.version}, scientific image analysis software for studying nuclear morphology and nuclear organisation in cells with asymmetric nuclei.
 
 ```{r include=FALSE}
 # automatically create a bib database for R packages
