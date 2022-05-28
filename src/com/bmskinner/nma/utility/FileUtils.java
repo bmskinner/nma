@@ -124,7 +124,8 @@ public class FileUtils {
 			return FileUtils.copyStream(new FileInputStream(toCopy),
 					new FileOutputStream(destFile));
 		} catch (final FileNotFoundException e) {
-			e.printStackTrace();
+			LOGGER.fine(String.format("Unable to copy file from %s to %s: %s",
+					toCopy.getAbsolutePath(), destFile.getAbsolutePath(), e.getMessage()));
 		}
 		return false;
 	}
@@ -166,10 +167,13 @@ public class FileUtils {
 	public static boolean copyJarResourcesRecursively(final File destDir,
 			final JarURLConnection jarConnection) throws IOException {
 
+		jarConnection.setUseCaches(false);
 		final JarFile jarFile = jarConnection.getJarFile();
+		LOGGER.fine("Jar file connection to :" + jarFile.getName());
 
 		for (final Enumeration<JarEntry> e = jarFile.entries(); e.hasMoreElements();) {
 			final JarEntry entry = e.nextElement();
+			LOGGER.fine("Jar file entry :" + entry.getName());
 			if (entry.getName().startsWith(jarConnection.getEntryName())) {
 				final String filename = removeStart(entry.getName(), //
 						jarConnection.getEntryName());
@@ -196,15 +200,16 @@ public class FileUtils {
 			final URL originUrl, final File destination) {
 		try {
 			final URLConnection urlConnection = originUrl.openConnection();
-			if (urlConnection instanceof JarURLConnection) {
+			if (urlConnection instanceof JarURLConnection jarUrlConnection) {
 				return FileUtils.copyJarResourcesRecursively(destination,
-						(JarURLConnection) urlConnection);
+						jarUrlConnection);
 			} else {
 				return FileUtils.copyFilesRecusively(new File(originUrl.getPath()),
 						destination);
 			}
 		} catch (final IOException e) {
-			e.printStackTrace();
+			LOGGER.fine(String.format("Unable to copy files from %s to %s: %s",
+					originUrl.toString(), destination.getAbsolutePath(), e.getMessage()));
 		}
 		return false;
 	}
@@ -213,7 +218,8 @@ public class FileUtils {
 		try {
 			return FileUtils.copyStream(is, new FileOutputStream(f));
 		} catch (final FileNotFoundException e) {
-			e.printStackTrace();
+			LOGGER.fine(String.format("Unable to copy stream to %s: %s",
+					f.getAbsolutePath(), e.getMessage()));
 		}
 		return false;
 	}
@@ -230,7 +236,7 @@ public class FileUtils {
 			os.close();
 			return true;
 		} catch (final IOException e) {
-			e.printStackTrace();
+			LOGGER.fine(String.format("Error copying stream: %s", e.getMessage()));
 		}
 		return false;
 	}

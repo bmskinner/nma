@@ -10,7 +10,7 @@
 	<properties>
 		<project.full.name>Nuclear_Morphology_Analysis</project.full.name>
 		<version>${project.version}</version>
-		<version.suffix>_beta_3</version.suffix>
+		<version.suffix>_beta_4</version.suffix>
 		<project.build.sourceEncoding>ISO-8859-1</project.build.sourceEncoding>
 		<jar.finalName>${project.full.name}_${project.version}${version.suffix}</jar.finalName>
 		<project.template.directory>templates</project.template.directory>
@@ -305,9 +305,9 @@
 				<artifactId>maven-jar-plugin</artifactId>
 				<configuration>
 					<archive>
-						<manifestEntries>
+						<!-- <manifestEntries>
 							<Automatic-Module-Name>com.bmskinner.nuclear_morphology</Automatic-Module-Name>
-						</manifestEntries>
+						</manifestEntries> -->
 					</archive>
 				</configuration>
 			</plugin>

@@ -26,7 +26,6 @@ import java.awt.event.WindowListener;
 import java.io.File;
 import java.io.IOException;
 import java.net.JarURLConnection;
-import java.net.URI;
 import java.net.URL;
 import java.nio.file.Files;
 import java.security.CodeSource;
@@ -309,10 +308,11 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 			File outputDir = new File(Io.getConfigDir(), helpPath);
 
 			// The file we will open
-			final URI mainHelpPage = new File(outputDir, "index.html").toURI();
+			final File mainHelpFile = new File(outputDir, "index.html");
 
 			// Copy the files out of the jar if they don't exist
 			if (!Files.exists(outputDir.toPath())) {
+				LOGGER.fine("User guide directory does not exist: " + outputDir.getAbsolutePath());
 				Files.createDirectories(outputDir.toPath());
 
 				CodeSource src = getClass().getProtectionDomain().getCodeSource();
@@ -323,20 +323,28 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 
 					LOGGER.fine("Copying help files from jar at: " + jarFile.toString());
 					URL fileSysUrl = new URL(
-							"jar:file:/" + jarFile.getAbsolutePath() + "!/help-book/_book");
+							"jar:file:" + jarFile.getAbsolutePath() + "!/help-book/_book");
 
 					// Create a jar URL connection object
+					LOGGER.fine("Copying help files from url at: " + fileSysUrl.toString());
 					JarURLConnection jarURLConn = (JarURLConnection) fileSysUrl.openConnection();
 					FileUtils.copyJarResourcesRecursively(outputDir, jarURLConn);
+				} else {
+					LOGGER.fine("Code source is null; is this a jar file?");
 				}
 			}
 
-			LOGGER.fine("Opening " + mainHelpPage.toString());
-			Desktop desktop = Desktop.getDesktop();
-			desktop.browse(mainHelpPage);
+			if (!Files.exists(mainHelpFile.toPath())) {
+				LOGGER.warning("Unable to open user guide;  " + mainHelpFile.getAbsolutePath()
+						+ " does not exist");
+			} else {
+				LOGGER.fine("Opening " + mainHelpFile.toURI().toString());
+				Desktop desktop = Desktop.getDesktop();
+				desktop.browse(mainHelpFile.toURI());
+			}
 
 		} catch (Exception e) {
-			LOGGER.log(Loggable.STACK, "Cannot load user guide: " + e.getMessage(), e);
+			LOGGER.log(Loggable.STACK, "Error extracting user guide: " + e.getMessage(), e);
 		}
 	}
 
