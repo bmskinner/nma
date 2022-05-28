@@ -26,6 +26,10 @@ Nuclear_Morphology.iml
 
 /target/
 
+# Other templates
+templates/icon.ico
+templates/icon.png
+
 # Testing files
 rxrepl.exe
 updateVersion.ps1
