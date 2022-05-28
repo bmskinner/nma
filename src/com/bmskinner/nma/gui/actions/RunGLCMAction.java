@@ -13,6 +13,7 @@ import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.core.EventHandler;
 import com.bmskinner.nma.core.ThreadManager;
 import com.bmskinner.nma.gui.ProgressBarAcceptor;
+import com.bmskinner.nma.gui.events.UIController;
 
 /**
  * Trigger a GLCM calculation
@@ -32,7 +33,8 @@ public class RunGLCMAction extends SingleDatasetResultAction {
 		this.setLatch(latch);
 	}
 
-	public RunGLCMAction(@NonNull IAnalysisDataset dataset, int noFlag, @NonNull ProgressBarAcceptor acceptor,
+	public RunGLCMAction(@NonNull IAnalysisDataset dataset, int noFlag,
+			@NonNull ProgressBarAcceptor acceptor,
 			@NonNull EventHandler eh) {
 		super(dataset, dataset.getName() + ": " + PROGRESS_BAR_LABEL, acceptor);
 	}
@@ -47,14 +49,15 @@ public class RunGLCMAction extends SingleDatasetResultAction {
 
 	@Override
 	public void finished() {
+		UIController.getInstance().fireGLCMDataAdded(List.of(dataset));
 		if (!hasRemainingDatasetsToProcess()) {
 			super.finished();
 			countdownLatch();
-
 		} else {
 			// otherwise analyse the next item in the list
 			cancel(); // remove progress bar
-			new RunGLCMAction(getRemainingDatasetsToProcess(), getLatch().get(), progressAcceptors.get(0)).run();
+			new RunGLCMAction(getRemainingDatasetsToProcess(), getLatch().get(),
+					progressAcceptors.get(0)).run();
 
 		}
 

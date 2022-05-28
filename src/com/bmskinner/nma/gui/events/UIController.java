@@ -46,6 +46,8 @@ public class UIController {
 
 	private final List<CellUpdatedEventListener> cellUpdatedListeners = new ArrayList<>();
 
+	private final List<GLCMUpdateListener> glcmUpdatedListeners = new ArrayList<>();
+
 	private UIController() {
 	}
 
@@ -235,6 +237,15 @@ public class UIController {
 	public void fireCellUpdatedEvent(@NonNull IAnalysisDataset d, ICell c) {
 		for (CellUpdatedEventListener l : cellUpdatedListeners)
 			l.cellUpdatedEventReceived(new CellUpdatedEvent(this, c, d));
+	}
+
+	public void addGlcmUpdatedEventListener(GLCMUpdateListener l) {
+		glcmUpdatedListeners.add(l);
+	}
+
+	public void fireGLCMDataAdded(@NonNull List<IAnalysisDataset> datasets) {
+		for (GLCMUpdateListener l : glcmUpdatedListeners)
+			l.GLCMDataAdded(datasets);
 	}
 
 }

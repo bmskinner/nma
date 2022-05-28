@@ -19,6 +19,7 @@ package com.bmskinner.nma.gui.tabs.nuclear;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
+import java.util.List;
 import java.util.logging.Logger;
 
 import org.jfree.chart.JFreeChart;
@@ -27,6 +28,7 @@ import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.core.GlobalOptions;
+import com.bmskinner.nma.gui.events.GLCMUpdateListener;
 import com.bmskinner.nma.gui.events.SwatchUpdatedListener;
 import com.bmskinner.nma.gui.tabs.BoxplotsTabPanel;
 import com.bmskinner.nma.visualisation.charts.AbstractChartFactory;
@@ -43,7 +45,8 @@ import com.bmskinner.nma.visualisation.options.ChartOptionsBuilder;
  *
  */
 @SuppressWarnings("serial")
-public class NuclearGlcmPanel extends BoxplotsTabPanel implements SwatchUpdatedListener {
+public class NuclearGlcmPanel extends BoxplotsTabPanel
+		implements SwatchUpdatedListener, GLCMUpdateListener {
 
 	private static final Logger LOGGER = Logger.getLogger(NuclearGlcmPanel.class.getName());
 	private static final String PANEL_TITLE_LBL = "GLCM";
@@ -64,6 +67,7 @@ public class NuclearGlcmPanel extends BoxplotsTabPanel implements SwatchUpdatedL
 		}
 		this.add(scrollPane, BorderLayout.CENTER);
 		uiController.addSwatchUpdatedListener(this);
+		uiController.addGlcmUpdatedEventListener(this);
 	}
 
 	@Override
@@ -125,4 +129,10 @@ public class NuclearGlcmPanel extends BoxplotsTabPanel implements SwatchUpdatedL
 	public void colourUpdated(IAnalysisDataset dataset) {
 		refreshCache(dataset);
 	}
+
+	@Override
+	public void GLCMDataAdded(List<IAnalysisDataset> datasets) {
+		refreshCache(datasets);
+	}
+
 }

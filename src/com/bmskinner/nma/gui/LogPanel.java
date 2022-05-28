@@ -60,14 +60,14 @@ import javax.swing.text.StyledEditorKit;
 import javax.swing.text.View;
 import javax.swing.text.ViewFactory;
 
-import com.bmskinner.nma.components.datasets.DatasetRepairer;
 import com.bmskinner.nma.components.datasets.DatasetValidator;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.core.DatasetListManager;
 import com.bmskinner.nma.core.ThreadManager;
+import com.bmskinner.nma.gui.events.UserActionController;
+import com.bmskinner.nma.gui.events.UserActionEvent;
 import com.bmskinner.nma.gui.main.MainDragAndDropTarget;
 import com.bmskinner.nma.gui.tabs.DetailPanel;
-import com.bmskinner.nma.logging.Loggable;
 
 /**
  * The log panel is where logging messages are displayed. It also holds progress
@@ -128,7 +128,8 @@ public class LogPanel extends DetailPanel implements ProgressBarAcceptor {
 		panel.add(progressPanel, BorderLayout.NORTH);
 		panel.add(console, BorderLayout.SOUTH);
 
-		this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_F12, 0),
+		this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(
+				KeyStroke.getKeyStroke(KeyEvent.VK_F12, 0),
 				SHOW_CONSOLE_ACTION);
 		this.getActionMap().put(SHOW_CONSOLE_ACTION, new ShowConsoleAction());
 		return panel;
@@ -166,17 +167,6 @@ public class LogPanel extends DetailPanel implements ProgressBarAcceptor {
 			LOGGER.info(i + "\t" + d.getName() + "\t" + type);
 			i++;
 		}
-	}
-
-	private void killAllTasks() {
-
-		LOGGER.info("Threads running in the JVM:");
-		Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
-		for (Thread t : threadSet) {
-			LOGGER.info("Thread " + t.getId() + ": " + t.getState());
-			t.interrupt();
-		}
-
 	}
 
 	private void listTasks() {
@@ -224,7 +214,7 @@ public class LogPanel extends DetailPanel implements ProgressBarAcceptor {
 	 */
 	@Override
 	public List<JProgressBar> getProgressBars() {
-		List<JProgressBar> result = new ArrayList<JProgressBar>();
+		List<JProgressBar> result = new ArrayList<>();
 		for (Component c : progressPanel.getComponents()) {
 			if (c.getClass().isInstance(JProgressBar.class)) {
 				result.add((JProgressBar) c);
@@ -260,44 +250,10 @@ public class LogPanel extends DetailPanel implements ProgressBarAcceptor {
 		}
 	}
 
-	private void validateDatasets(boolean isDetail) {
-
-		DatasetValidator v = new DatasetValidator();
-		for (IAnalysisDataset d : DatasetListManager.getInstance().getRootDatasets()) {
-			LOGGER.info("Validating " + d.getName() + "...");
-			if (!v.validate(d)) {
-
-				if (isDetail) {
-					for (String s : v.getErrors()) {
-						LOGGER.warning(s);
-					}
-				} else {
-					for (String s : v.getSummary()) {
-						LOGGER.warning(s);
-					}
-					LOGGER.warning("Use 'check detail' for full list of errors");
-				}
-			} else {
-				LOGGER.info("Dataset OK");
-			}
-
-		}
-	}
-
-	private void repairDatasets() {
-
-		DatasetRepairer r = new DatasetRepairer();
-		for (IAnalysisDataset d : DatasetListManager.getInstance().getRootDatasets()) {
-			LOGGER.info("Repairing " + d.getName() + "...");
-			r.repair(d);
-		}
-	}
-
 	@Override
 	public void update(List<IAnalysisDataset> list) {
 		// Does nothing, no datasets are displayed.
 		// Using DetailPanel only for signalling access
-
 	}
 
 	class WrapEditorKit extends StyledEditorKit {
@@ -361,7 +317,6 @@ public class LogPanel extends DetailPanel implements ProgressBarAcceptor {
 	 */
 	private class Console extends JPanel implements ActionListener {
 		private JTextField console = new JTextField();
-//		private Map<String, InterfaceMethod> commandMap = new HashMap<String, InterfaceMethod>();
 
 		private int historyIndex = -1;
 		private List<String> history = new LinkedList<>();
@@ -372,28 +327,15 @@ public class LogPanel extends DetailPanel implements ProgressBarAcceptor {
 		private static final String HIST_CMD = "history";
 		private static final String CHECK_CMD = "check";
 		private static final String CHECK_DETAIL_CMD = "check detail";
-		private static final String REPAIR_BASIC_CMD = "repair"; // fix existing issues without resegmenting
 		private static final String HELP_CMD = "help";
 		private static final String CLEAR_CMD = "clear";
-		private static final String THROW_CMD = "throw";
 		private static final String GLCM_CMD = "glcm";
 		private static final String LIST_CMD = "list";
 		private static final String KILL_CMD = "kill";
-		private static final String REPAIR_CMD = "unfuck"; // start from scratch
 		private static final String TASKS_CMD = "tasks";
-		private static final String HASH_CMD = "check hash";
-		private static final String EXPORT_CMD = "export xml";
-		private static final String EXPORT_TPS = "export tps";
+		private static final String HASH_CMD = "hash";
 
 		private final Map<String, Runnable> runnableCommands = new HashMap<>();
-
-		{
-//			commandMap.put("list selected", InterfaceMethod.LIST_SELECTED_DATASETS);
-//			commandMap.put("recache charts", InterfaceMethod.RECACHE_CHARTS);
-//			commandMap.put("refresh", InterfaceMethod.UPDATE_PANELS);
-//			commandMap.put("nucleus history", InterfaceMethod.DUMP_LOG_INFO);
-//			commandMap.put("info", InterfaceMethod.INFO);
-		}
 
 		public Console() {
 			setLayout(new BorderLayout());
@@ -404,12 +346,14 @@ public class LogPanel extends DetailPanel implements ProgressBarAcceptor {
 			setVisible(false);
 			console.addActionListener(this);
 
-			console.getInputMap(JComponent.WHEN_FOCUSED).put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0),
+			console.getInputMap(JComponent.WHEN_FOCUSED).put(
+					KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0),
 					PREV_HISTORY_ACTION);
 
 			console.getActionMap().put(PREV_HISTORY_ACTION, new PrevHistoryAction());
 
-			console.getInputMap(JComponent.WHEN_FOCUSED).put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0),
+			console.getInputMap(JComponent.WHEN_FOCUSED).put(
+					KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0),
 					NEXT_HISTORY_ACTION);
 			console.getActionMap().put(NEXT_HISTORY_ACTION, new NextHistoryAction());
 		}
@@ -449,47 +393,16 @@ public class LogPanel extends DetailPanel implements ProgressBarAcceptor {
 
 			});
 
-			runnableCommands.put(HELP_CMD, () -> {
-				LOGGER.info("Available commands: ");
-//				for (String key : commandMap.keySet()) {
-//					InterfaceMethod im = commandMap.get(key);
-//					LOGGER.info(" " + key + " - " + im.toString());
-//				}
-				LOGGER.info(" check - validate the open root datasets");
-				LOGGER.info(" list  - list the open root datasets");
-				LOGGER.info(" export xml - export the selected dataset in XML format");
-				LOGGER.info(" export tps - export the selected datasets in TPS format");
-				LOGGER.info(" tasks - list the current task list");
-				LOGGER.info(" " + HASH_CMD + " - print the hashes of the selected datasets");
-			});
-
-			runnableCommands.put(THROW_CMD, () -> {
-				LOGGER.info("Throwing exception");
-				try {
-					throw new IllegalArgumentException("Throwing an exception");
-				} catch (Exception e) {
-					LOGGER.log(Loggable.STACK, "Caught expected exception", e);
-				}
-			});
-
 			runnableCommands.put(CHECK_CMD, () -> validateDatasets(false));
 			runnableCommands.put(CHECK_DETAIL_CMD, () -> validateDatasets(true));
-			runnableCommands.put(REPAIR_BASIC_CMD, () -> repairDatasets());
 			runnableCommands.put(CLEAR_CMD, () -> clear());
 			runnableCommands.put(LIST_CMD, () -> listDatasets());
-			runnableCommands.put(KILL_CMD, () -> killAllTasks());
 			runnableCommands.put(TASKS_CMD, () -> listTasks());
-//			runnableCommands.put(REPAIR_CMD,
-//					() -> getDatasetEventHandler().fireDatasetEvent(DatasetEvent.REFPAIR_SEGMENTATION,
-//							DatasetListManager.getInstance().getSelectedDatasets()));
-//			runnableCommands.put(GLCM_CMD,
-//					() -> getDatasetEventHandler().fireDatasetEvent(DatasetEvent.RUN_GLCM_ANALYSIS,
-//							DatasetListManager.getInstance().getSelectedDatasets()));
-
-//			runnableCommands.put(EXPORT_CMD,
-//					() -> getSignalChangeEventHandler().fireUserActionEvent(UserActionEvent.EXPORT_XML_DATASET));
-//			runnableCommands.put(EXPORT_TPS,
-//					() -> getSignalChangeEventHandler().fireUserActionEvent(UserActionEvent.EXPORT_TPS_DATASET));
+			runnableCommands.put(GLCM_CMD,
+					() -> UserActionController.getInstance()
+							.userActionEventReceived(new UserActionEvent(this,
+									UserActionEvent.RUN_GLCM_ANALYSIS,
+									DatasetListManager.getInstance().getSelectedDatasets())));
 		}
 
 		/**
@@ -497,19 +410,13 @@ public class LogPanel extends DetailPanel implements ProgressBarAcceptor {
 		 * 
 		 * @param command
 		 */
-//		private void runCommand(String command) {
-//			if (commandMap.containsKey(command)) {
-//				getInterfaceEventHandler().fire(InterfaceEvent.of(this, commandMap.get(command)));
-//			} else {
-//
-//				if (runnableCommands.containsKey(command)) {
-//					runnableCommands.get(command).run();
-//				} else {
-//					LOGGER.info("Command not recognised");
-//				}
-//
-//			}
-//		}
+		private void runCommand(String command) {
+			if (runnableCommands.containsKey(command)) {
+				runnableCommands.get(command).run();
+			} else {
+				LOGGER.info(String.format("Command '%s' not recognised", command));
+			}
+		}
 
 		/*
 		 * Listener for the console
@@ -518,11 +425,34 @@ public class LogPanel extends DetailPanel implements ProgressBarAcceptor {
 		public void actionPerformed(ActionEvent e) {
 
 			if (e.getSource().equals(console)) {
-				LOGGER.info(console.getText());
 				history.add(console.getText());
 				historyIndex = history.size();
-//				runCommand(console.getText());
+				runCommand(console.getText());
 				console.setText("");
+			}
+		}
+
+		private void validateDatasets(boolean isDetail) {
+
+			DatasetValidator v = new DatasetValidator();
+			for (IAnalysisDataset d : DatasetListManager.getInstance().getRootDatasets()) {
+				LOGGER.info("Validating " + d.getName() + "...");
+				if (!v.validate(d)) {
+
+					if (isDetail) {
+						for (String s : v.getErrors()) {
+							LOGGER.warning(s);
+						}
+					} else {
+						for (String s : v.getSummary()) {
+							LOGGER.warning(s);
+						}
+						LOGGER.warning("Use 'check detail' for full list of errors");
+					}
+				} else {
+					LOGGER.info("Dataset OK");
+				}
+
 			}
 		}
 
