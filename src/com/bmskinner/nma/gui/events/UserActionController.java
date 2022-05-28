@@ -18,7 +18,6 @@ import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.datasets.ICellCollection;
 import com.bmskinner.nma.components.generic.IPoint;
 import com.bmskinner.nma.components.measure.MeasurementScale;
-import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.options.IAnalysisOptions;
 import com.bmskinner.nma.components.profiles.MissingProfileException;
 import com.bmskinner.nma.components.profiles.ProfileException;
@@ -34,7 +33,9 @@ import com.bmskinner.nma.gui.actions.AddNuclearSignalAction;
 import com.bmskinner.nma.gui.actions.BuildHierarchicalTreeAction;
 import com.bmskinner.nma.gui.actions.ClusterAutomaticAction;
 import com.bmskinner.nma.gui.actions.ClusterFileAssignmentAction;
+import com.bmskinner.nma.gui.actions.ClusterManualAction;
 import com.bmskinner.nma.gui.actions.DatasetArithmeticAction;
+import com.bmskinner.nma.gui.actions.DatasetScaleChangeAction;
 import com.bmskinner.nma.gui.actions.ExportCellLocationsAction;
 import com.bmskinner.nma.gui.actions.ExportDatasetAction;
 import com.bmskinner.nma.gui.actions.ExportOptionsAction;
@@ -52,7 +53,6 @@ import com.bmskinner.nma.gui.actions.FishRemappingAction;
 import com.bmskinner.nma.gui.actions.ImportDatasetAction;
 import com.bmskinner.nma.gui.actions.ImportWorkflowAction;
 import com.bmskinner.nma.gui.actions.ImportWorkspaceAction;
-import com.bmskinner.nma.gui.actions.ClusterManualAction;
 import com.bmskinner.nma.gui.actions.MergeCollectionAction;
 import com.bmskinner.nma.gui.actions.MergeSignalsAction;
 import com.bmskinner.nma.gui.actions.MergeSourceExtractionAction;
@@ -212,7 +212,7 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 		}
 
 		if (event.type().equals(UserActionEvent.CHANGE_SCALE))
-			return () -> setScale(event.getDatasets());
+			return new DatasetScaleChangeAction(event.getDatasets(), acceptor);
 
 		if (event.type().equals(UserActionEvent.EXPORT_TPS_DATASET))
 			return new ExportTPSAction(selectedDataset, acceptor);
@@ -451,59 +451,6 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 
 		} catch (RequestCancelledException e) {
 			// No action, user cancelled
-		}
-	}
-
-	/**
-	 * Set the scale of the given datasets
-	 * 
-	 * @param selectedDatasets
-	 */
-	private synchronized void setScale(final List<IAnalysisDataset> selectedDatasets) {
-		if (selectedDatasets.isEmpty())
-			return;
-
-		try {
-			double d0scale = 1;
-			double currentScale = 1;
-
-			// is there a common scale in the datasets already?
-			// Get the first dataset scale
-			Optional<IAnalysisOptions> d0Options = selectedDatasets.get(0).getAnalysisOptions();
-			if (d0Options.isPresent()) {
-				Optional<HashOptions> d0NucleusOptions = d0Options.get()
-						.getNucleusDetectionOptions();
-				if (d0NucleusOptions.isPresent()) {
-					d0scale = d0NucleusOptions.get().getDouble(HashOptions.SCALE);
-				}
-			}
-
-			// check any other datasets match
-			final double d0scaleFinal = d0scale;
-			boolean allMatch = selectedDatasets.stream().allMatch(d -> {
-				Optional<IAnalysisOptions> dOptions = d.getAnalysisOptions();
-				if (dOptions.isPresent()) {
-					Optional<HashOptions> dNucleusOptions = dOptions.get()
-							.getNucleusDetectionOptions();
-					if (dNucleusOptions.isPresent()) {
-						return dNucleusOptions.get().getDouble(HashOptions.SCALE) == d0scaleFinal;
-					}
-				}
-				return false;
-			});
-			if (allMatch)
-				currentScale = d0scale;
-
-			// request the new scale
-			double scale = new DefaultInputSupplier().requestDouble("Pixels per micron",
-					currentScale, 1d, 100000d, 1d);
-			if (scale > 0) { // don't allow a scale to cause divide by zero errors
-				selectedDatasets.stream().forEach(d -> d.setScale(scale));
-				UIController.getInstance().fireScaleUpdated(selectedDatasets);
-			}
-
-		} catch (RequestCancelledException e) {
-			// No action needed
 		}
 	}
 
