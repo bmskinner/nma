@@ -24,6 +24,7 @@ import com.bmskinner.nma.analysis.profiles.DatasetProfilingMethod;
 import com.bmskinner.nma.analysis.profiles.DatasetSegmentationMethod;
 import com.bmskinner.nma.analysis.profiles.DatasetSegmentationMethod.MorphologyAnalysisMode;
 import com.bmskinner.nma.analysis.signals.SignalDetectionMethod;
+import com.bmskinner.nma.analysis.signals.SignalWarpingMethod;
 import com.bmskinner.nma.analysis.signals.shells.ShellAnalysisMethod;
 import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
@@ -31,6 +32,7 @@ import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.options.IAnalysisOptions;
 import com.bmskinner.nma.components.options.OptionsFactory;
 import com.bmskinner.nma.components.rules.RuleSetCollection;
+import com.bmskinner.nma.gui.tabs.signals.warping.SignalWarpingRunSettings;
 import com.bmskinner.nma.io.DatasetExportMethod;
 import com.bmskinner.nma.io.SampleDatasetReader;
 import com.bmskinner.nma.io.XMLWriter;
@@ -267,6 +269,10 @@ public class TestImageDatasetCreator {
 			assertTrue("Dataset should have red signals",
 					d.getCollection().getSignalManager().getSignalCount(RED_SIGNAL_ID) > 0);
 
+			SignalWarpingRunSettings sw = new SignalWarpingRunSettings(d, d, RED_SIGNAL_ID);
+			sw.setInt(SignalWarpingRunSettings.MIN_THRESHOLD_KEY, 70);
+			new SignalWarpingMethod(d, sw).call();
+
 		}
 
 		if (addGreen) {
@@ -284,6 +290,10 @@ public class TestImageDatasetCreator {
 					d.getCollection().hasSignalGroup(GREEN_SIGNAL_ID));
 			assertTrue("Dataset should have green signals",
 					d.getCollection().getSignalManager().getSignalCount(GREEN_SIGNAL_ID) > 0);
+
+			SignalWarpingRunSettings sw = new SignalWarpingRunSettings(d, d, GREEN_SIGNAL_ID);
+			sw.setInt(SignalWarpingRunSettings.MIN_THRESHOLD_KEY, 70);
+			new SignalWarpingMethod(d, sw).call();
 		}
 
 		new ShellAnalysisMethod(d, OptionsFactory.makeShellAnalysisOptions().build()).call();
@@ -301,12 +311,6 @@ public class TestImageDatasetCreator {
 	 */
 	public static IAnalysisDataset createTestDataset(File outputFolder, IAnalysisOptions op,
 			boolean makeClusters) throws Exception {
-//		if (!outputFolder.exists())
-//			Files.createDirectories(outputFolder.getAbsoluteFile().toPath());
-//
-//		if (!outputFolder.exists())
-//			throw new IllegalArgumentException(
-//					"Output folder does not exist: " + outputFolder.getAbsolutePath());
 
 		File inputFolder = op.getNucleusDetectionFolder().get();
 		if (!inputFolder.exists())
@@ -328,6 +332,8 @@ public class TestImageDatasetCreator {
 				.call();
 
 		if (makeClusters) {
+			for (IAnalysisDataset child : d.getAllChildDatasets())
+				new ConsensusAveragingMethod(child).call();
 			assertFalse("Dataset should have clusters", d.getClusterGroups().isEmpty());
 		}
 		return d;

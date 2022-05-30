@@ -429,6 +429,7 @@ public final class DatasetListManager implements DatasetAddedListener {
 	 * Close all datasets without saving and clear them from memory
 	 */
 	public void clear() {
+		UIController.getInstance().fireDatasetDeleted(rootDatasets);
 		rootDatasets.clear();
 		datasetHashcodeMap.clear();
 		workspaceHashcodeMap.clear();

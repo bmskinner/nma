@@ -38,7 +38,9 @@ import com.bmskinner.nma.logging.Loggable;
  */
 public class NuclearMorphologyAnalysis {
 
-	private static NuclearMorphologyAnalysis instance;
+	private static NuclearMorphologyAnalysis instance = null;
+
+	public CommandLineParser clp = null;
 
 	/** Initialise the logger for the project namespace */
 	private static final Logger LOGGER = Logger.getLogger(Loggable.PROJECT_LOGGER);
@@ -54,10 +56,19 @@ public class NuclearMorphologyAnalysis {
 
 		try {
 			LogManager.getLogManager().readConfiguration(
-					NuclearMorphologyAnalysis.class.getClassLoader().getResourceAsStream("logging.properties"));
+					NuclearMorphologyAnalysis.class.getClassLoader()
+							.getResourceAsStream("logging.properties"));
 		} catch (SecurityException | IOException e) {
 			LOGGER.log(Level.SEVERE, "Unable to make log manager", e);
 		}
+	}
+
+	public static NuclearMorphologyAnalysis getInstance() {
+		if (instance == null) {
+			String[] args = {};
+			instance = new NuclearMorphologyAnalysis(args);
+		}
+		return instance;
 	}
 
 	/**
@@ -68,7 +79,7 @@ public class NuclearMorphologyAnalysis {
 	private NuclearMorphologyAnalysis(String[] args) {
 		configureLogging();
 		configureSettingsFiles();
-		new CommandLineParser(args);
+		clp = new CommandLineParser(args);
 	}
 
 	/**
@@ -89,12 +100,15 @@ public class NuclearMorphologyAnalysis {
 		try {
 			LOGGER.config("Log file location: " + Io.getLogDir().getAbsolutePath());
 
-			GlobalOptions.getInstance().setString(GlobalOptions.LOG_DIRECTORY_KEY, Io.getLogDir().getAbsolutePath());
+			GlobalOptions.getInstance().setString(GlobalOptions.LOG_DIRECTORY_KEY,
+					Io.getLogDir().getAbsolutePath());
 
-			LOGGER.config("OS: " + System.getProperty("os.name") + ", version " + System.getProperty("os.version")
+			LOGGER.config("OS: " + System.getProperty("os.name") + ", version "
+					+ System.getProperty("os.version")
 					+ ", " + System.getProperty("os.arch"));
 			LOGGER.config(
-					"JVM: " + System.getProperty("java.vendor") + ", version " + System.getProperty("java.version"));
+					"JVM: " + System.getProperty("java.vendor") + ", version "
+							+ System.getProperty("java.version"));
 			LOGGER.config("NMA version: " + Version.currentVersion());
 
 			// First invokation of the thread manager will log available resources

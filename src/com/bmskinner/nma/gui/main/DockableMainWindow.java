@@ -73,6 +73,8 @@ public class DockableMainWindow extends AbstractMainWindow {
 
 	private static final Logger LOGGER = Logger.getLogger(DockableMainWindow.class.getName());
 
+	private TabDock tabDock;
+
 	/**
 	 * Create the frame.
 	 * 
@@ -137,7 +139,7 @@ public class DockableMainWindow extends AbstractMainWindow {
 
 			JPanel topPanel = createTopPanel(logPanel, populationsPanel, consensusNucleusPanel);
 
-			TabDock tabDock = createTabs();
+			tabDock = createTabs();
 			dockModel.addRootDock("tabdock", tabDock, this);
 
 			// Add the top and bottom rows to the main panel
@@ -202,7 +204,7 @@ public class DockableMainWindow extends AbstractMainWindow {
 	 */
 	private TabDock createTabs() {
 
-		TabDock tabDock = new TabDock();
+		tabDock = new TabDock();
 
 		// Create the top level tabs in the UI
 		DetailPanel analysisDetailPanel = new AnalysisDetailPanel();

@@ -34,7 +34,7 @@ public class DatasetSelectionPanel extends DetailPanel
 		implements DatasetAddedListener, SwatchUpdatedListener, ClusterGroupsUpdatedListener,
 		WorkspaceAddedListener {
 
-	private static final Logger LOGGER = Logger.getLogger(DatasetsPanel.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(DatasetSelectionPanel.class.getName());
 
 	private final DatasetTreeTable treeTable;
 
@@ -66,17 +66,14 @@ public class DatasetSelectionPanel extends DetailPanel
 
 	@Override
 	public void datasetSelectionUpdated(IAnalysisDataset d) {
-		// no action if dataset selection is not different to current
-//		if (!datasetSelectionOrder.equals(List.of(d))) {
-//			update(List.of(d));
-//		}
+		datasetSelectionUpdated(List.of(d));
 	}
 
 	@Override
 	public void datasetSelectionUpdated(List<IAnalysisDataset> d) {
 		// no action if dataset selection is not different to current
-//		if (!datasetSelectionOrder.equals(d)) {
-//			update(d);
+//		if (!treeListener.datasetSelectionOrder.equals(d)) {
+//			model.get
 //		}
 	}
 

@@ -44,6 +44,14 @@ public class SignalWarpingRunSettings extends DefaultOptions {
 		this.d1 = d1;
 		this.d2 = d2;
 		this.signalId = signalId;
+		setDefaults();
+	}
+
+	private void setDefaults() {
+		setBoolean(IS_BINARISE_SIGNALS_KEY, false);
+		setBoolean(IS_ONLY_CELLS_WITH_SIGNALS_KEY, false);
+		setBoolean(IS_NORMALISE_TO_COUNTERSTAIN_KEY, false);
+		setInt(MIN_THRESHOLD_KEY, 0);
 	}
 
 	public IAnalysisDataset templateDataset() {

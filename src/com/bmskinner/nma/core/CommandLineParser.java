@@ -44,6 +44,8 @@ public class CommandLineParser {
 
 	private static final Logger LOGGER = Logger.getLogger(CommandLineParser.class.getName());
 
+	public DockableMainWindow mw = null;
+
 	/**
 	 * Construct with an array of parameters for the program to interpret
 	 * 
@@ -167,7 +169,7 @@ public class CommandLineParser {
 			DatasetListManager dlm = DatasetListManager.getInstance();
 			UIController.getInstance().addDatasetAddedListener(dlm);
 
-			DockableMainWindow mw = new DockableMainWindow();
+			mw = new DockableMainWindow();
 			mw.setVisible(true);
 		}
 
