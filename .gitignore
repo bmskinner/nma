@@ -8,7 +8,7 @@
 README.md
 bin/*
 doc/*
-res/help-book/*
+res/user-guide/*
 screens/*
 scripts/*
 target/*

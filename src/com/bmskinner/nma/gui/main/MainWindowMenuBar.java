@@ -299,53 +299,67 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 
 	private void loadUserGuide() {
 
-		try {
+		Runnable r = () -> {
 
-			// Where the files are located in the jar resources
-			final String helpPath = "help_v" + Version.currentVersion().toString();
+			try {
 
-			// Directory for the help files
-			File outputDir = new File(Io.getConfigDir(), helpPath);
+				// Where the files are located in the jar resources
+				final String helpPath = "user_guide_v" + Version.currentVersion().toString();
 
-			// The file we will open
-			final File mainHelpFile = new File(outputDir, "index.html");
+				// Directory for the help files
+				File userGuideDir = new File(Io.getConfigDir(), helpPath);
 
-			// Copy the files out of the jar if they don't exist
-			if (!Files.exists(outputDir.toPath())) {
-				LOGGER.fine("User guide directory does not exist: " + outputDir.getAbsolutePath());
-				Files.createDirectories(outputDir.toPath());
+				// The file we will open
+				final File mainHelpFile = new File(userGuideDir, "index.html");
 
-				CodeSource src = getClass().getProtectionDomain().getCodeSource();
+				// Copy the files out of the jar if they don't exist
+				if (!Files.exists(userGuideDir.toPath())) {
+					LOGGER.fine(
+							"User guide directory does not exist: "
+									+ userGuideDir.getAbsolutePath());
+					Files.createDirectories(userGuideDir.toPath());
 
-				// If this is run from the jar file, copy the help file out
-				if (src != null) {
-					File jarFile = new File(src.getLocation().toURI().getPath());
+					CodeSource src = getClass().getProtectionDomain().getCodeSource();
 
-					LOGGER.fine("Copying help files from jar at: " + jarFile.toString());
-					URL fileSysUrl = new URL(
-							"jar:file:" + jarFile.getAbsolutePath() + "!/help-book/_book");
+					// If this is run from the jar file, copy the help file out
+					if (src != null) {
+						File jarFile = new File(src.getLocation().toURI().getPath());
 
-					// Create a jar URL connection object
-					LOGGER.fine("Copying help files from url at: " + fileSysUrl.toString());
-					JarURLConnection jarURLConn = (JarURLConnection) fileSysUrl.openConnection();
-					FileUtils.copyJarResourcesRecursively(outputDir, jarURLConn);
-				} else {
-					LOGGER.fine("Code source is null; is this a jar file?");
+						LOGGER.fine("Copying help files from jar at: " + jarFile.toString());
+						URL fileSysUrl = new URL(
+								"jar:file:" + jarFile.getAbsolutePath() + "!/user-guide/_book");
+
+						// Create a jar URL connection object
+						LOGGER.fine("Copying help files from url at: " + fileSysUrl.toString());
+						JarURLConnection jarURLConn = (JarURLConnection) fileSysUrl
+								.openConnection();
+						FileUtils.copyJarResourcesRecursively(userGuideDir, jarURLConn);
+					} else {
+						LOGGER.fine("Code source is null; is this a jar file?");
+					}
 				}
-			}
 
-			if (!Files.exists(mainHelpFile.toPath())) {
-				LOGGER.warning("Unable to open user guide;  " + mainHelpFile.getAbsolutePath()
-						+ " does not exist");
-			} else {
-				LOGGER.fine("Opening " + mainHelpFile.toURI().toString());
-				Desktop desktop = Desktop.getDesktop();
-				desktop.browse(mainHelpFile.toURI());
-			}
+				if (!Files.exists(mainHelpFile.toPath())) {
+					LOGGER.fine(mainHelpFile.getAbsolutePath()
+							+ " does not exist; re-extracting from jar");
 
-		} catch (Exception e) {
-			LOGGER.log(Loggable.STACK, "Error extracting user guide: " + e.getMessage(), e);
-		}
+					// There may be malformed files present; delete the user guide folder and
+					// extract again
+					org.apache.commons.io.FileUtils.deleteQuietly(userGuideDir);
+					loadUserGuide();
+
+				} else {
+					LOGGER.fine("Opening " + mainHelpFile.toURI().toString());
+					Desktop desktop = Desktop.getDesktop();
+					desktop.browse(mainHelpFile.toURI());
+				}
+
+			} catch (Exception e) {
+				LOGGER.warning("Unable to open user guide; see log for details");
+				LOGGER.log(Loggable.STACK, "Error extracting user guide: " + e.getMessage(), e);
+			}
+		};
+		ThreadManager.getInstance().execute(r);
 	}
 
 	private ContextualMenu createHelpMenu() {

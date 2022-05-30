@@ -240,7 +240,7 @@
 							<goal>copy-resources</goal>
 						</goals>
 						<configuration>
-							<outputDirectory>${project.basedir}/res/help-book</outputDirectory>
+							<outputDirectory>${project.basedir}/res/user-guide</outputDirectory>
 							<resources>
 								<resource>
 									<directory>${project.template.directory}/help-book</directory>
@@ -269,7 +269,7 @@
 						</goals>
 						<configuration>
 							<executable>${project.basedir}/scripts/renderUserGuide.bat</executable>
-							<workingDirectory>${project.basedir}/res/help-book</workingDirectory>
+							<workingDirectory>${project.basedir}/res/user-guide</workingDirectory>
 						</configuration>
 					</execution>
 				</executions>
@@ -305,9 +305,9 @@
 				<artifactId>maven-jar-plugin</artifactId>
 				<configuration>
 					<archive>
-						<!-- <manifestEntries>
+						<manifestEntries>
 							<Automatic-Module-Name>com.bmskinner.nuclear_morphology</Automatic-Module-Name>
-						</manifestEntries> -->
+						</manifestEntries>
 					</archive>
 				</configuration>
 			</plugin>

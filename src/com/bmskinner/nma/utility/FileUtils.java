@@ -169,11 +169,9 @@ public class FileUtils {
 
 		jarConnection.setUseCaches(false);
 		final JarFile jarFile = jarConnection.getJarFile();
-		LOGGER.fine("Jar file connection to :" + jarFile.getName());
 
 		for (final Enumeration<JarEntry> e = jarFile.entries(); e.hasMoreElements();) {
 			final JarEntry entry = e.nextElement();
-			LOGGER.fine("Jar file entry :" + entry.getName());
 			if (entry.getName().startsWith(jarConnection.getEntryName())) {
 				final String filename = removeStart(entry.getName(), //
 						jarConnection.getEntryName());
