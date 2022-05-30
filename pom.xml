@@ -14,6 +14,7 @@
 		<project.build.sourceEncoding>ISO-8859-1</project.build.sourceEncoding>
 		<jar.finalName>${project.full.name}_${project.version}${version.suffix}</jar.finalName>
 		<project.template.directory>templates</project.template.directory>
+		<project.screenshot.directory>screens</project.screenshot.directory>
 		<project.scripts.directory>scripts</project.scripts.directory>
 		<project.wiki.directory>wiki</project.wiki.directory>
 		<maven.build.timestamp.format>yyyy</maven.build.timestamp.format>
@@ -31,25 +32,21 @@
 		<sourceDirectory>src</sourceDirectory>
 		<testSourceDirectory>test</testSourceDirectory>
 
-		<!-- Define resources -->
+		<!-- Define resources to be included in the jar. These will be copied to the target dir
+		in the resources phase of the build -->
 		<resources>
 			<resource>
 				<directory>res</directory>
-				<excludes>
-					<exclude>**/*.java</exclude>
-				</excludes>
-			</resource>
-			<resource>
-				<directory>screens</directory>
-				<excludes>
-					<exclude>**/*.java</exclude>
-				</excludes>
+				<includes>
+					<include>icons/*</include>
+					<include>licenses/*</include>
+					<include>logging.properties</include>
+				</includes>
 			</resource>
 		</resources>
 
 		<pluginManagement>
 			<plugins>
-
 				<!-- Tell eclipse how to handle the timestamp plugin -->
 				<plugin>
 					<groupId>org.eclipse.m2e</groupId>
@@ -131,7 +128,7 @@
 					<!-- Copy the readme with version info to the base directory so the 
 						repo is up to date -->
 					<execution>
-						<id>readme-md</id>
+						<id>create-readme-md</id>
 						<phase>process-resources</phase>
 						<goals>
 							<goal>copy-resources</goal>
@@ -151,32 +148,10 @@
 						</configuration>
 					</execution>
 
-					<!-- Write the version info to the ImageJ plugins config file -->
-					<execution>
-						<id>imagej-plugins-config</id>
-						<phase>process-resources</phase>
-						<goals>
-							<goal>copy-resources</goal>
-						</goals>
-						<configuration>
-							<outputDirectory>src</outputDirectory>
-							<resources>
-								<resource>
-									<directory>${project.template.directory}</directory>
-									<includes>
-										<include>plugins.config</include>
-									</includes>
-									<filtering>true</filtering>
-								</resource>
-							</resources>
-							<encoding>UTF-8</encoding>
-						</configuration>
-					</execution>
-
 					<!-- Copy the wiki pages with version info to the wiki directory so 
 						the wiki is up to date -->
 					<execution>
-						<id>wiki-md</id>
+						<id>create-wiki-md</id>
 						<phase>process-resources</phase>
 						<goals>
 							<goal>copy-resources</goal>
@@ -199,7 +174,7 @@
 					<!-- Copy Bitbucket upload script from templates into scripts -->
 					<!-- Copy jpackage script from templates into scripts -->
 					<execution>
-						<id>jpackage-script</id>
+						<id>create-jpackage-script</id>
 						<phase>process-resources</phase>
 						<goals>
 							<goal>copy-resources</goal>
@@ -225,7 +200,7 @@
 					<!-- Copy the user guide from templates to res, updating the version 
 						information and download links -->
 					<execution>
-						<id>help-book</id>
+						<id>copy-user-guide</id>
 						<phase>process-resources</phase>
 						<goals>
 							<goal>copy-resources</goal>
@@ -234,19 +209,62 @@
 							<outputDirectory>${project.basedir}/res/user-guide</outputDirectory>
 							<resources>
 								<resource>
-									<directory>${project.template.directory}/help-book</directory>
+									<directory>${project.template.directory}/user-guide-template</directory>
 									<filtering>true</filtering>
 								</resource>
 							</resources>
 							<encoding>UTF-8</encoding>
 						</configuration>
 					</execution>
+					
+					<!-- Copy user guide screenshots from screens to res, ready to be included
+					in the user guide rendering -->
+					<execution>
+						<id>take-guide-screenshots</id>
+						<phase>test</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.basedir}/res/user-guide/img</outputDirectory>
+							<resources>
+								<resource>
+									<directory>${project.screenshot.directory}/Mouse.nmd</directory>
+									<includes>
+										<include>Editing.png</include>
+										<include>Nuclear profiles_*.png</include>
+									</includes>
+								</resource>
+								<resource>
+									<directory>${project.screenshot.directory}/Mouse_with_signals.nmd</directory>
+									<includes>
+										<include>Nuclear signals_*.png</include>
+									</includes>
+								</resource>
+								<resource>
+									<directory>${project.screenshot.directory}/Multi</directory>
+									<includes>
+										<include>Images.png</include>
+										<include>Clusters.png</include>
+										<include>Comparisons_*.png</include>
+										<include>Nuclear charts_*.png</include>
+										<include>Nuclear segments_*.png</include>
+									</includes>
+								</resource>
+							</resources>
+							<encoding>UTF-8</encoding>
+						</configuration>
+					</execution>
+					
+					
 
 				</executions>
 			</plugin>
 
-			<!-- Run a bat file render the user guide. This requires Rscritp and pandoc 
-				on the PATH -->
+			<!-- 	Run a bat file to render the user guide. 
+					Copy the rendered files to the target directory so they will be included 
+					in the jar. This must occur after the user guide has been rendered.
+					Requires Rscript and pandoc on the PATH-->
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>exec-maven-plugin</artifactId>
@@ -254,7 +272,7 @@
 				<executions>
 					<execution>
 						<id>render-user-guide</id>
-						<phase>package</phase>
+						<phase>prepare-package</phase>
 						<goals>
 							<goal>exec</goal>
 						</goals>
@@ -265,7 +283,6 @@
 					</execution>
 				</executions>
 			</plugin>
-
 
 			<!-- Compile to desired java version -->
 			<plugin>

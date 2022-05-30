@@ -327,7 +327,7 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 
 						LOGGER.fine("Copying help files from jar at: " + jarFile.toString());
 						URL fileSysUrl = new URL(
-								"jar:file:" + jarFile.getAbsolutePath() + "!/user-guide/_book");
+								"jar:file:" + jarFile.getAbsolutePath() + "!/user-guide");
 
 						// Create a jar URL connection object
 						LOGGER.fine("Copying help files from url at: " + fileSysUrl.toString());

@@ -228,6 +228,10 @@ At the top of the chart are display options:
 - `Show annotations`: if selected, show segment and landmark names (only applies when a single dataset is selected)
 - `Show nuclear profiles`: if selected, show individual nucleus profiles (only applies when a single dataset is selected)
 
+```{r, out.width="100%", out.height="100%", fig.show='hold', fig.align='center', echo=F}
+knitr::include_graphics("img/Nuclear profiles_Angle profile.png")
+```
+
 ## Nuclear signals tab {#nuclear-signals-tab}
 
 This tab displays information relating to FISH signals.
@@ -243,24 +247,40 @@ Note - a more accurate mapping of signals onto the consensus can be achieved usi
 Signal groups within a dataset can be merged together using the 'Merge signal groups' button. Merged signal groups do not affect the original signal groups - they duplicate the original signals and add them to a new group.
 
 ```{r, out.width="100%", out.height="100%", fig.show='hold', fig.align='center', echo=F}
-knitr::include_graphics("img/Nuclear_signals_1_overview.png")
+knitr::include_graphics("img/Nuclear signals_Overview.png")
 ```
 
 ### Detection settings {#nuclear-signals-detection-tab}
 
 This shows the settings that were used to detect each signal group in the dataset. Double click the signal group colour to change the colour.
 
+```{r, out.width="100%", out.height="100%", fig.show='hold', fig.align='center', echo=F}
+knitr::include_graphics("img/Nuclear signals_Detection settings.png")
+```
+
 ### Signal counts {#nuclear-signals-counts-tab}
 
 Displays the number of signals detected per nucleus. Datasets can be filtered to select nuclei with a given number of signals using the 'Filter nuclei' button.
+
+```{r, out.width="100%", out.height="100%", fig.show='hold', fig.align='center', echo=F}
+knitr::include_graphics("img/Nuclear signals_Signal counts.png")
+```
 
 ### Violin plots {#nuclear-signals-violin-tab}
 
 This shows violin and boxplots for each of the [signal measurements](#signal-measurements).
 
+```{r, out.width="100%", out.height="100%", fig.show='hold', fig.align='center', echo=F}
+knitr::include_graphics("img/Nuclear signals_Violin plots.png")
+```
+
 ### Scatter  {#nuclear-signals-scatter-tab}
 
 This allows scatter plot comparisons between signal measurements, with Spearman's rank correlation coefficients shown at the left. As with all scatter panels, the datasets can be filtered on visible values using the 'Filter visible' button.
+
+```{r, out.width="100%", out.height="100%", fig.show='hold', fig.align='center', echo=F}
+knitr::include_graphics("img/Nuclear signals_Scatter.png")
+```
 
 ### Shells  {#nuclear-signals-shells-tab}
 
@@ -271,6 +291,10 @@ If the selected datasets contain a single signal group, the chart will display a
 The upper table shows whether the shell results are significantly different to a random distribution via a chi square test.
 
 The lower table shows pairwise comparisons between any shell results in the selected datasets, again by chi square. The pairwise tests require the shell results to have the same number of shells. 
+
+```{r, out.width="100%", out.height="100%", fig.show='hold', fig.align='center', echo=F}
+knitr::include_graphics("img/Nuclear signals_Shells.png")
+```
 
 ### Colocalisation  {#nuclear-signals-colocalisation-tab}
 
@@ -286,30 +310,75 @@ This shows the distances between closest signal pairs. For each signal group wit
 
 5) Any remaining unpaired signals are ignored and the paired distances are reported.
 
+```{r, out.width="100%", out.height="100%", fig.show='hold', fig.align='center', echo=F}
+knitr::include_graphics("img/Nuclear signals_Colocalisation.png")
+```
+
 ### Warping  {#nuclear-signals-warping-tab}
 
-Displays the results of signal warping.
+Displays the results of [signal warping](#warp-signals-method). The table on the left shows all warped images in the selected datasets, and their options. Click a warped signal to display it in the chart on the right. Select multiple warped signals to create an overlay.
+
+The 'Pseudocolour signals' checkbox allows you to toggle between greyscale signals and the pseudocolour shown in the table. Double click the colour box to change the pseudocolour. Note that this is distinct from the signal group colours in the 'Nuclear signals tab' - you can have the same signal group warped with different options in different colours.
+
+The slider allows thresholding of the warped signal.
+
+The 'Export image' button allows you to save the warped image to a file.
+
+The 'Full MS-SSIM*' button opens a comparator showing the full structural similarity scores between any compatible warped signals in any datasets currently open.
+
+```{r, out.width="100%", out.height="100%", fig.show='hold', fig.align='center', echo=F}
+knitr::include_graphics("img/Nuclear signals_Warping.png")
+```
 
 ## Nuclear segments tab {#nuclear-segments-tab}
 
 The segments tab displays information on the segments within the median profile of the selected dataset(s).
 
+
+### Violin plots tab
+
 The violin plots tab shows the range of segment lengths in the desired scale for all selected populations. If multiple datasets are selected, they must have the same number of segments for a meaningful comparison to be made.
 
-The Wilcoxon and Magnitude tabs show the Wilcoxon rank-sum testsfor pairwise comparisons between datasets for each segment, and the pairwise magnitude differences.
+```{r, out.width="100%", out.height="100%", fig.show='hold', fig.align='center', echo=F}
+knitr::include_graphics("img/Nuclear segments_Violin plots.png")
+```
+
+### Wilcoxon tab
+
+The Wilcoxon tab shows the Wilcoxon rank-sum tests for pairwise comparisons between datasets for each segment.
+
+```{r, out.width="100%", out.height="100%", fig.show='hold', fig.align='center', echo=F}
+knitr::include_graphics("img/Nuclear segments_Wilcoxon.png")
+```
+
+### Magnitude tab
+
+The Magnitude tab shows the the pairwise magnitude differences between datasets for each segment.
+
+```{r, out.width="100%", out.height="100%", fig.show='hold', fig.align='center', echo=F}
+knitr::include_graphics("img/Nuclear segments_Magnitude.png")
+```
 
 ## Comparisons tab {#comparisons-tab}
 
 The Venn tab compares overlaps in nuclei between datasets, presented as a table.It is primarily designed to allow comparison of different child datasets after filtering or clustering.
 
+```{r, out.width="100%", out.height="100%", fig.show='hold', fig.align='center', echo=F}
+knitr::include_graphics("img/Comparisons_Venn.png")
+```
+
 Detailed Venn presents the Venn data in a pairwise format, with more detailed breakdown of the numbers of shared and unshared nuclei.
+
+```{r, out.width="100%", out.height="100%", fig.show='hold', fig.align='center', echo=F}
+knitr::include_graphics("img/Comparisons_Detailed Venn.png")
+```
 
 ## Clusters tab {#clusters-tab}
 
 The clusters panel allows clustering and tree-building to be run on a dataset, and shows information on clustering analyses that have been run previously. When cluster groups are available, the analysis parameters for the groups are shown in the table.
 
 ```{r, out.width="100%", out.height="100%", fig.show='hold', echo=F}
-knitr::include_graphics("img/Cluster_panel.png")
+knitr::include_graphics("img/Clusters.png")
 ```
 
 ## Merges tab {#merges-tab}
