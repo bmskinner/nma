@@ -1,0 +1,3 @@
+REM Upload files to NMA downloads section on Bitbucket
+
+curl -s -u bmskinner -X POST https://api.bitbucket.org/2.0/repositories/bmskinner/nuclear_morphology/downloads -F files=@..\target\Nuclear_Morphology_Analysis_${project.version}_standalone.jar -F files=@..\target\Nuclear_Morphology_Analysis_${project.version}.exe   

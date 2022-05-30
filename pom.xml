@@ -222,7 +222,7 @@
 										<include>packageAppImage.bat</include>
 										<include>packageAppImage.sh</include>
 										<include>packageDMG.sh</include>
-										<include>UploadJar.bat</include>
+										<include>uploadFilesToBitbucket.bat</include>
 									</includes>
 									<filtering>true</filtering>
 								</resource>
