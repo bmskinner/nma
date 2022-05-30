@@ -340,7 +340,8 @@
 				</executions>
 			</plugin>
 
-			<!-- Run a bat file to jpackage the jar into an appimage -->
+			<!-- Run a bat file to package the jar into an appimage
+			 Requires jpackage, jlink and 7z on the PATH -->
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>exec-maven-plugin</artifactId>
@@ -426,11 +427,11 @@
 			<artifactId>org.jfree.svg</artifactId>
 			<version>5.0.1</version>
 		</dependency>
-		<dependency>
-			<groupId>net.sourceforge.jdistlib</groupId>
-			<artifactId>jdistlib</artifactId>
-			<version>0.4.5</version>
-		</dependency>
+<!-- 		<dependency> -->
+<!-- 			<groupId>net.sourceforge.jdistlib</groupId> -->
+<!-- 			<artifactId>jdistlib</artifactId> -->
+<!-- 			<version>0.4.5</version> -->
+<!-- 		</dependency> -->
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
