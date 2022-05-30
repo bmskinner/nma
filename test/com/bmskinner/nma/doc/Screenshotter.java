@@ -31,9 +31,9 @@ import javax.swing.UIManager;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.jdt.annotation.NonNull;
+import org.junit.Test;
 
 import com.bmskinner.nma.TestResources;
-import com.bmskinner.nma.components.Version;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.core.DatasetListManager;
 import com.bmskinner.nma.core.NuclearMorphologyAnalysis;
@@ -60,7 +60,7 @@ public class Screenshotter {
 	/** Sleep time after loading a dataset */
 	private static final int LOAD_TIME_MILLIS = 2000;
 
-	private static final String SCREENSHOT_FOLDER = "screens/" + Version.currentVersion() + "/";
+	private static final String SCREENSHOT_FOLDER = "screens/";
 
 	private final Robot robot;
 
@@ -68,13 +68,19 @@ public class Screenshotter {
 	private final UserActionController uac;
 	private final DatasetListManager dlm;
 
-	private Screenshotter() throws AWTException, InterruptedException {
+	public Screenshotter() throws AWTException, InterruptedException {
 		robot = new Robot();
 		nma = NuclearMorphologyAnalysis.getInstance();
 		Thread.sleep(LOAD_TIME_MILLIS);
 		LOGGER.fine("Getting UAC");
 		uac = UserActionController.getInstance();
 		dlm = DatasetListManager.getInstance();
+	}
+
+	@Test
+	public void testScreenShotsCreated() throws InterruptedException, AWTException, IOException {
+		String[] args = {};
+		main(args);
 	}
 
 	/**
@@ -86,6 +92,7 @@ public class Screenshotter {
 	 * @throws IOException
 	 */
 	public static void main(String[] args) throws InterruptedException, AWTException, IOException {
+
 		IJ.setBackgroundColor(0, 0, 0); // default background is black
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());

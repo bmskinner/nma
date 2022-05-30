@@ -40,21 +40,12 @@
 				</excludes>
 			</resource>
 			<resource>
-				<directory>screenshots</directory>
+				<directory>screens</directory>
 				<excludes>
 					<exclude>**/*.java</exclude>
 				</excludes>
 			</resource>
 		</resources>
-		<testResources>
-			<testResource>
-				<directory>test</directory>
-				<includes>
-					<include>**/*.java</include>
-				</includes>
-			</testResource>
-		</testResources>
-
 
 		<pluginManagement>
 			<plugins>
@@ -231,8 +222,8 @@
 						</configuration>
 					</execution>
 
-					<!-- Copy the user guide from templates to res, updating the 
-						version information and download links -->
+					<!-- Copy the user guide from templates to res, updating the version 
+						information and download links -->
 					<execution>
 						<id>help-book</id>
 						<phase>process-resources</phase>
@@ -253,9 +244,9 @@
 
 				</executions>
 			</plugin>
-			
-			<!-- Run a bat file render the user guide.
-			This requires Rscritp and pandoc on the PATH -->
+
+			<!-- Run a bat file render the user guide. This requires Rscritp and pandoc 
+				on the PATH -->
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>exec-maven-plugin</artifactId>
@@ -286,15 +277,20 @@
 				</configuration>
 			</plugin>
 
-			<!-- Run the test suite -->
+
+			<!-- Run the test suite. This is the screenshotter as a test case, with no other tests run -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<version>2.22.1</version>
 				<configuration>
 					<includes>
+<!-- 						<include>com.bmskinner.nma.TestImageDatasetCreator</include> -->
+						<include>com.bmskinner.nma.doc.Screenshotter</include>
 					</includes>
 					<excludes>
+						<exclude>com.bmskinner.nma.*</exclude>
+						<exclude>com.bmskinner.nma.analysis.*</exclude>
 					</excludes>
 				</configuration>
 			</plugin>
@@ -306,7 +302,7 @@
 				<configuration>
 					<archive>
 						<manifestEntries>
-							<Automatic-Module-Name>com.bmskinner.nuclear_morphology</Automatic-Module-Name>
+							<Automatic-Module-Name>com.bmskinner.nma</Automatic-Module-Name>
 						</manifestEntries>
 					</archive>
 				</configuration>
@@ -340,8 +336,8 @@
 				</executions>
 			</plugin>
 
-			<!-- Run a bat file to package the jar into an appimage
-			 Requires jpackage, jlink and 7z on the PATH -->
+			<!-- Run a bat file to package the jar into an appimage Requires jpackage, 
+				jlink and 7z on the PATH -->
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>exec-maven-plugin</artifactId>
@@ -427,11 +423,11 @@
 			<artifactId>org.jfree.svg</artifactId>
 			<version>5.0.1</version>
 		</dependency>
-<!-- 		<dependency> -->
-<!-- 			<groupId>net.sourceforge.jdistlib</groupId> -->
-<!-- 			<artifactId>jdistlib</artifactId> -->
-<!-- 			<version>0.4.5</version> -->
-<!-- 		</dependency> -->
+		<!-- <dependency> -->
+		<!-- <groupId>net.sourceforge.jdistlib</groupId> -->
+		<!-- <artifactId>jdistlib</artifactId> -->
+		<!-- <version>0.4.5</version> -->
+		<!-- </dependency> -->
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
