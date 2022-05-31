@@ -11,7 +11,6 @@ import org.junit.runners.Suite.SuiteClasses;
 import com.bmskinner.nma.analysis.AnalysisTestSuite;
 import com.bmskinner.nma.api.ApiTestSuite;
 import com.bmskinner.nma.components.ComponentTestSuite;
-import com.bmskinner.nma.doc.Screenshotter;
 import com.bmskinner.nma.io.IoTestSuite;
 import com.bmskinner.nma.logging.ConsoleFormatter;
 import com.bmskinner.nma.logging.ConsoleHandler;
@@ -33,10 +32,9 @@ import com.bmskinner.nma.utility.UtilityTestSuite;
 		ApiTestSuite.class,
 		ComponentTestSuite.class,
 		IoTestSuite.class,
-		UtilityTestSuite.class,
-		Screenshotter.class
+		UtilityTestSuite.class
 })
-public class CreateAllTestFilesAndRunTests {
+public class RunAllTests {
 
 	static final Logger LOGGER = Logger.getLogger(Loggable.PROJECT_LOGGER);
 

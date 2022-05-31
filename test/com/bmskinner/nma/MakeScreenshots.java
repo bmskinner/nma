@@ -8,35 +8,24 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
-import com.bmskinner.nma.analysis.AnalysisTestSuite;
-import com.bmskinner.nma.api.ApiTestSuite;
-import com.bmskinner.nma.components.ComponentTestSuite;
 import com.bmskinner.nma.doc.Screenshotter;
-import com.bmskinner.nma.io.IoTestSuite;
 import com.bmskinner.nma.logging.ConsoleFormatter;
 import com.bmskinner.nma.logging.ConsoleHandler;
 import com.bmskinner.nma.logging.Loggable;
-import com.bmskinner.nma.utility.UtilityTestSuite;
 
 /**
- * This suite runs the test file creators, then runs the tests that depend on
- * them
+ * This suite runs the test file creators, then takes screenshots
  * 
  * @author ben
- * @since 1.14.0
+ * @since 2.0.0
  *
  */
 @RunWith(Suite.class)
 @SuiteClasses({
-		TestImageDatasetCreator.class, // make test datasets for subsequent tests to read
-		AnalysisTestSuite.class,
-		ApiTestSuite.class,
-		ComponentTestSuite.class,
-		IoTestSuite.class,
-		UtilityTestSuite.class,
+		TestImageDatasetCreator.class,
 		Screenshotter.class
 })
-public class CreateAllTestFilesAndRunTests {
+public class MakeScreenshots {
 
 	static final Logger LOGGER = Logger.getLogger(Loggable.PROJECT_LOGGER);
 

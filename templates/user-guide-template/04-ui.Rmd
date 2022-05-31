@@ -189,38 +189,55 @@ knitr::include_graphics("img/Cell_panel_FISH_signal.png")
 
 ## Nuclear charts tab {#nuclear-charts-tab}
 
-Measurements of nuclei within and between selected datasets
+Displays measurements of nuclei within and between selected datasets.
 
-Tab | Contains
------|------
-Measurements | Mean, median, standard error of the mean, coefficient of variation and 95% confidence intervals for nuclear measurements
-Violin plots | This tab shows information on [nuclear measurements](#measurements) for selected datasets in a series of violin and boxplots. The colour of each series in the boxplot reflects the dataset colour in the [populations panel](#populations-panel). To change colours, double click the dataset colour in the populations panel. ![Nuclear_charts_violin.png](img/Nuclear_charts_violin.png)
-Wilcoxon | This tab shows the results of pairwise Wilcoxon rank sum tests (a.k.a. Mann-Whitney U-tests) of population medians for each of the nuclear parameters, with Bonferroni correction for multiple testing. P-values significant at the 5% and 1% are highlighted in yellow and green respectively
-Magnitude | This shows the pairwise magnitude differences between datasets, to give a feel for the biological significance of any differences detected between samples. If a single dataset is selected, the 'Random sampling' button is active, and opens the random sampler.
-Scatter | Allows comparisons between two parameters, via the drop down lists. The Spearman's rank correlation coefficient for each selected dataset is given in the table to the left. The nuclei can be [filtered](#filtering-cells-method) using the 'Filter visible' button. ![Nuclear_charts_scatter.png](img/Nuclear_charts_scatter.png)
+### Measurements tab
+
+Mean, median, standard error of the mean, coefficient of variation and 95% confidence intervals for nuclear measurements. 
+
+```{r, out.width="100%", out.height="100%", fig.show='hold', fig.align='center', echo=F}
+knitr::include_graphics("img/Nuclear charts_Measurements.png")
+```
+
+### Violin plots tab
+
+This tab shows information on [nuclear measurements](#measurements) for selected datasets in a series of violin and boxplots. The colour of each series in the boxplot reflects the dataset colour in the [populations panel](#populations-panel). To change colours, double click the dataset colour in the populations panel. 
+
+```{r, out.width="100%", out.height="100%", fig.show='hold', fig.align='center', echo=F}
+knitr::include_graphics("img/Nuclear charts_Violin plots.png")
+```
+
+### Wilcoxon tab
+
+This tab shows the results of pairwise Wilcoxon rank sum tests (a.k.a. Mann-Whitney U-tests) of population medians for each of the nuclear parameters, with Bonferroni correction for multiple testing. P-values significant at the 5% and 1% are highlighted in yellow and green respectively.
+
+The U statistic is given above the diagonal, and the p-value below the diagonal.
+
+```{r, out.width="100%", out.height="100%", fig.show='hold', fig.align='center', echo=F}
+knitr::include_graphics("img/Nuclear charts_Wilcoxon.png")
+```
+
+### Magnitude tab
+
+This shows the pairwise magnitude differences between datasets, to give a feel for the biological significance of any differences detected between samples.
+
+```{r, out.width="100%", out.height="100%", fig.show='hold', fig.align='center', echo=F}
+knitr::include_graphics("img/Nuclear charts_Magnitude.png")
+```
+
+### Scatter tab
+
+Allows comparisons between two parameters, via the drop down lists. The Spearman's rank correlation coefficient for each selected dataset is given in the table to the left. The nuclei can be [filtered](#filtering-cells-method) using the 'Filter visible' button.
+
+```{r, out.width="100%", out.height="100%", fig.show='hold', fig.align='center', echo=F}
+knitr::include_graphics("img/Nuclear charts_Scatter.png")
+```
 
 ## Nuclear profiles tab {#nuclear-profiles-tab}
 
-The profiles tab displays the morphological profiles calculated for datasets. It contains the following tabs:
+The profiles tab displays the morphological profiles calculated for datasets. 
 
-+----------------+--------------------------------------------------------------+
-| Tab            | Contains                                                     |
-+================+==============================================================+
-| Angle profile  | Calculated by measuring the angle between the three border points from the point `window size` pixels behind to this point, to the point `window size` pixels ahead of this point.
-+----------------+--------------------------------------------------------------+
-| Diameter profile | The distance from each border point, through the centre of mass of the nucleus, to the opposite border. Expressed as a fraction of the maximum diameter.
-+----------------+--------------------------------------------------------------+
-| Radius profile | The distance of each border point from the centre of mass
-+----------------+--------------------------------------------------------------+
-| Variability    | The variability plot shows the size of the interquartile range along the median profile, and therefore shows the regions of the profile that are most variable within the dataset. The drop-down list at the top allows the variabilty of each profile type to be selected
-+----------------+--------------------------------------------------------------+
-
-
-If a single dataset is selected in the [populations panel](#populations-panel), the profile tab displays the profiles for all nuclei in the dataset in light grey, the segmented median profile in the chosen palette colours, and the interquartile range about the median in dark grey.
-
-If multiple datasets are  selected in the populations panel, the profile tab displays the median profile in the chosen dataset colour, and the interquartile range about the median in alighter shade of the dataset colour. 
-
-At the top of the chart are display options:
+At the top of each chart are display options:
 
 - `Normalised`: when ticked, all profiles are stretched to the same length. When unticked, nucleus profiles are shown at their actual length, corresponding to the perimeter length of the nucleus (the median profile length is set to the median of the lengths of the nuclei in the dataset)
  - `Left`: if the displayed dataset(s) are not normalised, they are aligned to the left edge of the chart
@@ -228,8 +245,42 @@ At the top of the chart are display options:
 - `Show annotations`: if selected, show segment and landmark names (only applies when a single dataset is selected)
 - `Show nuclear profiles`: if selected, show individual nucleus profiles (only applies when a single dataset is selected)
 
+If a single dataset is selected in the [populations panel](#populations-panel), the profile tab displays the profiles for all nuclei in the dataset in light grey, the segmented median profile in the chosen palette colours, and the interquartile range about the median in dark grey.
+
+If multiple datasets are  selected in the populations panel, the profile tab displays the median profile in the chosen dataset colour, and the interquartile range about the median in alighter shade of the dataset colour. 
+
+It contains the following tabs:
+
+### Angle profile
+
+Calculated by measuring the angle between the three border points from the point `window size` pixels behind to this point, to the point `window size` pixels ahead of this point.
+
 ```{r, out.width="100%", out.height="100%", fig.show='hold', fig.align='center', echo=F}
 knitr::include_graphics("img/Nuclear profiles_Angle profile.png")
+```
+
+### Diameter profile
+
+The distance from each border point, through the centre of mass of the nucleus, to the opposite border. Expressed as a fraction of the maximum diameter per nucleus.
+
+```{r, out.width="100%", out.height="100%", fig.show='hold', fig.align='center', echo=F}
+knitr::include_graphics("img/Nuclear profiles_Diameter profile.png")
+```
+
+### Radius profile
+ 
+The distance of each border point from the centre of mass. Expressed as a fraction of the maximum radius per nucleus.
+
+```{r, out.width="100%", out.height="100%", fig.show='hold', fig.align='center', echo=F}
+knitr::include_graphics("img/Nuclear profiles_Radius profile.png")
+```
+
+### Variability
+
+The variability plot shows the size of the interquartile range along the median profile, and therefore shows the regions of the profile that are most variable within the dataset. The drop-down list at the top allows the variabilty of each profile type to be selected.
+
+```{r, out.width="100%", out.height="100%", fig.show='hold', fig.align='center', echo=F}
+knitr::include_graphics("img/Nuclear profiles_Variability.png")
 ```
 
 ## Nuclear signals tab {#nuclear-signals-tab}
@@ -298,17 +349,13 @@ knitr::include_graphics("img/Nuclear signals_Shells.png")
 
 ### Colocalisation  {#nuclear-signals-colocalisation-tab}
 
-This shows the distances between closest signal pairs. For each signal group within a dataset, signal pairs are calculated using the following method:
+Only active if there is more than one signal group present in a dataset. This shows the distances between closest signal pairs. For each signal group within a dataset, signal pairs are calculated using the following method:
 
-1) Signals within a nucleus are identified
-
-2) The distances between all signals of different groups is calculated as the distance between the centres of mass.
-
-3) The pair with the shortest distance is recorded and removed.
-
-4) The process repeats with the remaining signals
-
-5) Any remaining unpaired signals are ignored and the paired distances are reported.
+- Signals within a nucleus are identified
+- The distances between all signals of different groups is calculated as the distance between the centres of mass.
+- The pair with the shortest distance is recorded and removed.
+- The process repeats with the remaining signals
+-  Any remaining unpaired signals are ignored and the paired distances are reported.
 
 ```{r, out.width="100%", out.height="100%", fig.show='hold', fig.align='center', echo=F}
 knitr::include_graphics("img/Nuclear signals_Colocalisation.png")
@@ -375,7 +422,7 @@ knitr::include_graphics("img/Comparisons_Detailed Venn.png")
 
 ## Clusters tab {#clusters-tab}
 
-The clusters panel allows clustering and tree-building to be run on a dataset, and shows information on clustering analyses that have been run previously. When cluster groups are available, the analysis parameters for the groups are shown in the table.
+The clusters panel shows information on [clustering](#clustering-method) analyses that have been run previously. When cluster groups are available, the analysis parameters for the groups are shown in the table.
 
 ```{r, out.width="100%", out.height="100%", fig.show='hold', echo=F}
 knitr::include_graphics("img/Clusters.png")
@@ -391,7 +438,7 @@ knitr::include_graphics("img/Merge_panel.png")
 
 ## Editing tab {#editing-tab}
 
-This allows segments and landmarks to be updated within root datasets. The consensus nucleus is displayed, with annotations for the landmarks. The landmarks are grey diamonds on the nuclear outline. Hover the mouse over them to see their names.
+This allows segments and landmarks to be updated within root datasets. The consensus nucleus for the selected dataset is displayed, with annotations for the landmarks. The landmarks are grey diamonds on the nuclear outline. Hover the mouse over them to see their names.
 
 Segment boundaries and landmark positions can be updated. When you hover the mouse over the outline, a blue dot will be displayed. Click at any point to set it as a landmark or segment start location. All cells will be updated to their best fit to the new location:
 

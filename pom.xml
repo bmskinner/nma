@@ -295,15 +295,15 @@
 			</plugin>
 
 
-			<!-- Run the test suite. This is the screenshotter as a test case, with no other tests run -->
+			<!--Take screenshots. The screenshotter is a unit test, and will create the example files.
+				No other tests run in this phase-->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<version>2.22.1</version>
 				<configuration>
 					<includes>
-<!-- 						<include>com.bmskinner.nma.TestImageDatasetCreator</include> -->
-						<include>com.bmskinner.nma.doc.Screenshotter</include>
+						<include>com.bmskinner.nma.MakeScreenshots</include>
 					</includes>
 					<excludes>
 						<exclude>com.bmskinner.nma.*</exclude>
