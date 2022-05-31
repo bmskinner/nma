@@ -559,7 +559,9 @@ public class VirtualDataset extends AbstractAnalysisDataset
 
 			@Override
 			public boolean hasWarpedSignals() {
-				return !warpedSignals.get(signalGroup).isEmpty();
+				if (warpedSignals.containsKey(signalGroup))
+					return !warpedSignals.get(signalGroup).isEmpty();
+				return false;
 			}
 
 			@Override

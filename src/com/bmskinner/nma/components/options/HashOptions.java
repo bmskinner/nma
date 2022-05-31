@@ -191,6 +191,12 @@ public interface HashOptions extends Serializable, XmlSerializable {
 	boolean DEFAULT_USE_PCA = false;
 
 	/**
+	 * Store the original signal ids in merged dataset signal options
+	 * 
+	 */
+	String ORIGINAL_SIGNAL_PREFIX = "Original_signal_id_";
+
+	/**
 	 * Create a copy of this options object
 	 * 
 	 * @return

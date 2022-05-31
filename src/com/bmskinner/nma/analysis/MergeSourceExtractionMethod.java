@@ -36,11 +36,13 @@ import com.bmskinner.nma.components.datasets.DefaultCellCollection;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.datasets.ICellCollection;
 import com.bmskinner.nma.components.datasets.VirtualDataset;
+import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.options.IAnalysisOptions;
 import com.bmskinner.nma.components.options.MissingOptionException;
 import com.bmskinner.nma.components.profiles.MissingProfileException;
 import com.bmskinner.nma.components.profiles.ProfileException;
 import com.bmskinner.nma.components.signals.DefaultSignalGroup;
+import com.bmskinner.nma.components.signals.INuclearSignal;
 import com.bmskinner.nma.components.signals.ISignalGroup;
 import com.bmskinner.nma.logging.Loggable;
 
@@ -136,13 +138,13 @@ public class MergeSourceExtractionMethod extends MultipleDatasetAnalysisMethod {
 			IAnalysisDataset parent = getRootParent(template);
 
 			// Copy the merged dataset segmentation into the new dataset.
-			// This wil match cell segmentations by default, since the cells
+			// This will match cell segmentations by default, since the cells
 			// have been copied from the merged dataset.
 			parent.getCollection().getProfileManager()
 					.copySegmentsAndLandmarksTo(newDataset.getCollection());
 
 			// Copy over the signal collections where appropriate
-			copySignalGroups(templateCollection, newDataset);
+			copySignalGroups(template, newDataset);
 
 			// Child datasets are not present in merge sources
 
@@ -180,28 +182,54 @@ public class MergeSourceExtractionMethod extends MultipleDatasetAnalysisMethod {
 	/**
 	 * Copy any signal groups in the template collection into the new dataset.
 	 * 
-	 * @param templateCollection the collection to copy signal groups from
-	 * @param newDataset         the dataset to copy the signal groups to
+	 * @param template   the virtual dataset to copy signal groups from
+	 * @param newDataset the dataset to copy the signal groups to
 	 * @throws MissingOptionException
 	 * @throws NoSuchElementException if a template signal group is not present
 	 */
-	private void copySignalGroups(ICellCollection templateCollection, IAnalysisDataset newDataset)
+	private void copySignalGroups(IAnalysisDataset template, IAnalysisDataset newDataset)
 			throws MissingOptionException {
-		ICellCollection newCollection = newDataset.getCollection();
-		for (UUID signalGroupId : templateCollection.getSignalGroupIDs()) {
 
-			// We only want to make a signal group if a cell with
-			// the signal
-			// is present in the merge source.
-			boolean addSignalGroup = false;
-			for (Nucleus n : newCollection.getNuclei()) {
-				addSignalGroup |= n.getSignalCollection().hasSignal(signalGroupId);
+		ICellCollection newCollection = newDataset.getCollection();
+
+		// Get the analysis options form the merged dataset
+		IAnalysisOptions mergedOptions = ((VirtualDataset) template).getParent().get()
+				.getAnalysisOptions().get();
+
+		for (UUID signalGroupId : template.getCollection().getSignalGroupIDs()) {
+
+			// Get the signal group options for the signal groups
+			HashOptions ns = mergedOptions
+					.getNuclearSignalOptions(signalGroupId)
+					.orElseThrow(MissingOptionException::new);
+
+			// Get the id saved in the merged dataset options
+			UUID originalId = ns.getUUID(HashOptions.ORIGINAL_SIGNAL_PREFIX + template.getId());
+
+			// We only want to make a signal group if a cell with the signal is present in
+			// the merge source.
+			boolean addSignalGroup = newCollection.stream()
+					.flatMap(c -> c.getNuclei().stream())
+					.anyMatch(n -> n.getSignalCollection().hasSignal(signalGroupId));
+
+			for (Nucleus n : newDataset.getCollection().getNuclei()) {
+				List<INuclearSignal> signals = n.getSignalCollection()
+						.getSignals(signalGroupId);
+				for (INuclearSignal s : signals) {
+					n.getSignalCollection().addSignal(s.duplicate(), originalId);
+				}
 			}
 
 			if (addSignalGroup) {
-				ISignalGroup oldGroup = templateCollection.getSignalGroup(signalGroupId)
+				ISignalGroup oldGroup = template.getCollection().getSignalGroup(signalGroupId)
 						.orElseThrow(MissingOptionException::new);
-				ISignalGroup newGroup = new DefaultSignalGroup(oldGroup);
+				ISignalGroup newGroup = new DefaultSignalGroup(oldGroup.getGroupName(), originalId);
+				if (oldGroup.hasColour())
+					newGroup.setGroupColour(oldGroup.getGroupColour().get());
+				if (oldGroup.hasShellResult())
+					newGroup.setShellResult(oldGroup.getShellResult().get());
+				if (oldGroup.hasWarpedSignals())
+					oldGroup.getWarpedSignals().forEach(w -> newGroup.addWarpedSignal(w));
 				newDataset.getCollection().addSignalGroup(newGroup);
 			}
 		}

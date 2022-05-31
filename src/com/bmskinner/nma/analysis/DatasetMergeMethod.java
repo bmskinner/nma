@@ -253,6 +253,12 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 					.getNuclearSignalOptions(ids.get(0).signalId().getId())
 					.orElseThrow(MissingOptionException::new);
 
+			// Add the original signal ids to the options so we can extradct later
+			for (DatasetSignalId d : pairedSignalGroups.get(newSignalId)) {
+				mergedOptions.setUUID(HashOptions.ORIGINAL_SIGNAL_PREFIX + d.datasetId().getId(),
+						d.signalId().getId());
+			}
+
 			// Check every key in the options. If any are the same across all signaal
 			// groups, keep them
 			for (String s : template.getKeys()) {
