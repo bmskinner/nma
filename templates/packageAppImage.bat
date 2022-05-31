@@ -10,6 +10,6 @@ REM Make folder structure for packaging in Linux
 mkdir ..\target\linux
 mkdir ..\target\linux\standalone
 
-copy ..\scripts\packageAppImage.sh ..\target\linux\packageAppImage.sh
+REM copy ..\scripts\packageAppImage.sh ..\target\linux\packageAppImage.sh
 copy ..\target\standalone\\${jar.finalName}_standalone.jar ..\target\linux\standalone\\${jar.finalName}_standalone.jar
 Xcopy /E /I "../res" "../target/linux/res"
