@@ -280,7 +280,9 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
 			Optional<HashOptions> op = template.getDetectionOptions(key);
 			if (op.isPresent()) {
 				setDetectionOptions(key, op.get().duplicate());
-				detectionFolders.put(key, template.getDetectionFolder(key).get());
+				Optional<File> opFile = template.getDetectionFolder(key);
+				if (opFile.isPresent())
+					detectionFolders.put(key, opFile.get());
 			}
 		}
 

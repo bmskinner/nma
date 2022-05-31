@@ -35,53 +35,58 @@ import com.bmskinner.nma.analysis.IAnalysisMethod;
 import com.bmskinner.nma.analysis.IAnalysisResult;
 import com.bmskinner.nma.components.cells.ICell;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
+import com.bmskinner.nma.gui.dialogs.DatasetArithmeticSetupDialog.BooleanOperation;
 
 /**
  * This class tests the dataset merging functionality
+ * 
  * @author bms41
  * @since 1.13.8
  *
  */
 public class DatasetMergeTest {
-    
-    /**
-     * This test checks that merging of two sample datasets is possible, and that the number
-     * of cells in the merged dataset is the sum of the input datasets. 
-     * @throws Exception 
-     */
-    @Test
-    public void testDatasetMergeIncludesAllCells() throws Exception {
 
-        int cells = 0;
+	/**
+	 * This test checks that merging of two sample datasets is possible, and that
+	 * the number of cells in the merged dataset is the sum of the input datasets.
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void testDatasetMergeIncludesAllCells() throws Exception {
 
-        IAnalysisDataset d1 = SampleDatasetReader.openDataset(TestResources.MULTIPLE_SOURCE_1_DATASET);
-        IAnalysisDataset d2 = SampleDatasetReader.openDataset(TestResources.MULTIPLE_SOURCE_2_DATASET);
+		int cells = 0;
 
-        List<IAnalysisDataset> toMerge = new ArrayList<>();
-        toMerge.add(d1);
-        toMerge.add(d2);
+		IAnalysisDataset d1 = SampleDatasetReader
+				.openDataset(TestResources.MULTIPLE_SOURCE_1_DATASET);
+		IAnalysisDataset d2 = SampleDatasetReader
+				.openDataset(TestResources.MULTIPLE_SOURCE_2_DATASET);
 
-        cells += d1.getCollection().getNucleusCount();
-        cells += d2.getCollection().getNucleusCount();
+		List<IAnalysisDataset> toMerge = new ArrayList<>();
+		toMerge.add(d1);
+		toMerge.add(d2);
 
-        File saveFile = new File(TestResources.MULTIPLE_BASE_FOLDER, "Merge_test.nmd");
-        IAnalysisMethod m = new DatasetMergeMethod(toMerge, saveFile);  
+		cells += d1.getCollection().getNucleusCount();
+		cells += d2.getCollection().getNucleusCount();
 
-        IAnalysisResult r = m.call();
-        IAnalysisDataset d = r.getFirstDataset();
-        assertNotNull("Dataset should be returned from merge method", d);
+		File saveFile = new File(TestResources.MULTIPLE_BASE_FOLDER, "Merge_test.nmd");
+		IAnalysisMethod m = new DatasetMergeMethod(toMerge, BooleanOperation.OR, saveFile);
 
-        assertEquals(d.getCollection().getNucleusCount(), cells);
+		IAnalysisResult r = m.call();
+		IAnalysisDataset d = r.getFirstDataset();
+		assertNotNull("Dataset should be returned from merge method", d);
 
-        for(ICell c : d1.getCollection().getCells()){
-            if(!d.getCollection().contains(c))
-                fail("Missing dataset 1 cell "+c.toString());
-        }
+		assertEquals(d.getCollection().getNucleusCount(), cells);
 
-        for(ICell c : d2.getCollection().getCells()){
-            if(!d.getCollection().contains(c))
-                fail("Missing dataset 2 cell "+c.toString());
-        }
-    }
+		for (ICell c : d1.getCollection().getCells()) {
+			if (!d.getCollection().contains(c))
+				fail("Missing dataset 1 cell " + c.toString());
+		}
+
+		for (ICell c : d2.getCollection().getCells()) {
+			if (!d.getCollection().contains(c))
+				fail("Missing dataset 2 cell " + c.toString());
+		}
+	}
 
 }

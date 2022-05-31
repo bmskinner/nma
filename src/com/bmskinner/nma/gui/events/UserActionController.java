@@ -34,7 +34,7 @@ import com.bmskinner.nma.gui.actions.BuildHierarchicalTreeAction;
 import com.bmskinner.nma.gui.actions.ClusterAutomaticAction;
 import com.bmskinner.nma.gui.actions.ClusterFileAssignmentAction;
 import com.bmskinner.nma.gui.actions.ClusterManualAction;
-import com.bmskinner.nma.gui.actions.DatasetArithmeticAction;
+import com.bmskinner.nma.gui.actions.BooleanOperationAction;
 import com.bmskinner.nma.gui.actions.DatasetScaleChangeAction;
 import com.bmskinner.nma.gui.actions.ExportCellLocationsAction;
 import com.bmskinner.nma.gui.actions.ExportDatasetAction;
@@ -167,7 +167,7 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 					acceptor);
 
 		if (event.type().equals(UserActionEvent.DATASET_ARITHMETIC))
-			return new DatasetArithmeticAction(event.getDatasets(), acceptor);
+			return new BooleanOperationAction(event.getDatasets(), acceptor);
 
 		if (event.type().equals(UserActionEvent.EXTRACT_SUBSET))
 			return new ExtractRandomCellsAction(selectedDataset, acceptor);

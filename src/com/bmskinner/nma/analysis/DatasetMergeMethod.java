@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nma.analysis.nucleus.CellCollectionFilterer;
 import com.bmskinner.nma.analysis.signals.PairedSignalGroups;
 import com.bmskinner.nma.analysis.signals.PairedSignalGroups.DatasetSignalId;
 import com.bmskinner.nma.components.MissingLandmarkException;
@@ -48,6 +49,7 @@ import com.bmskinner.nma.components.profiles.ProfileException;
 import com.bmskinner.nma.components.rules.RuleSetCollection;
 import com.bmskinner.nma.components.signals.DefaultSignalGroup;
 import com.bmskinner.nma.components.signals.INuclearSignal;
+import com.bmskinner.nma.gui.dialogs.DatasetArithmeticSetupDialog.BooleanOperation;
 import com.bmskinner.nma.io.Io;
 
 /**
@@ -65,34 +67,42 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 	/** Describe which signal groups will be merged */
 	private PairedSignalGroups pairedSignalGroups = null;
 
+	private final BooleanOperation operation;
+
 	private static final int MAX_PROGRESS = 100;
 	private static final int MILLISECONDS_TO_SLEEP = 10;
 
 	/**
 	 * Create the merger for the given datasets.
 	 * 
-	 * @param datasets the datasets to be merged
-	 * @param saveFile the file to specify as the new dataset save path. Note, this
-	 *                 method does not save out the file to the save path
+	 * @param datasets  the datasets to be merged
+	 * @param operation the type of boolean operation to perform
+	 * @param saveFile  the file to specify as the new dataset save path. Note, this
+	 *                  method does not save out the file to the save path
 	 */
-	public DatasetMergeMethod(@NonNull List<IAnalysisDataset> datasets, File saveFile) {
-		this(datasets, saveFile, null);
+	public DatasetMergeMethod(@NonNull List<IAnalysisDataset> datasets, BooleanOperation operation,
+			File saveFile) {
+		this(datasets, operation, saveFile, null);
 	}
 
 	/**
 	 * Create the merger for the given datasets.
 	 * 
 	 * @param datasets           the datasets to be merged
+	 * @param operation          the type of boolean operation to perform
 	 * @param saveFile           the file to specify as the new dataset save path.
 	 *                           Note, this method does not save out the file to the
 	 *                           save path
 	 * @param pairedSignalGroups the signal groups which are to be merged
+	 * @param operation          the type of operation to perform on the datasets
 	 */
-	public DatasetMergeMethod(@NonNull List<IAnalysisDataset> datasets, File saveFile,
+	public DatasetMergeMethod(@NonNull List<IAnalysisDataset> datasets, BooleanOperation operation,
+			File saveFile,
 			PairedSignalGroups pairedSignalGroups) {
 		super(datasets);
 		this.saveFile = saveFile;
 		this.pairedSignalGroups = pairedSignalGroups;
+		this.operation = operation;
 	}
 
 	@Override
@@ -102,7 +112,6 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 	}
 
 	private IAnalysisDataset run() throws Exception {
-
 		if (!datasetsCanBeMerged())
 			return null;
 
@@ -111,7 +120,27 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 		saveFile = checkName(saveFile).getAbsoluteFile();
 		String newDatasetName = saveFile.getName().replace(Io.NMD_FILE_EXTENSION, "");
 
-		IAnalysisDataset newDataset = performMerge(newDatasetName);
+		IAnalysisDataset newDataset;
+
+		switch (operation) {
+		case AND:
+			newDataset = performAnd(newDatasetName);
+			break;
+
+		case NOT:
+			newDataset = performNot(newDatasetName);
+			break;
+
+		case XOR:
+			newDataset = performXor(newDatasetName);
+			break;
+
+		case OR:
+		default:
+			newDataset = performMerge(newDatasetName);
+			break;
+
+		}
 
 		spinWheels(MAX_PROGRESS, MILLISECONDS_TO_SLEEP);
 
@@ -147,6 +176,120 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 		}
 
 		return true;
+	}
+
+	private IAnalysisDataset performAnd(@NonNull String newDatasetName)
+			throws MissingOptionException, ProfileException, MissingLandmarkException,
+			ComponentCreationException {
+		// make a new collection
+		ICellCollection newCollection = new DefaultCellCollection(
+				datasets.get(0).getCollection().getRuleSetCollection(),
+				newDatasetName, UUID.randomUUID());
+
+		newCollection = CellCollectionFilterer.and(datasets.get(0).getCollection(),
+				datasets.get(1).getCollection());
+
+		for (Nucleus n : newCollection.getNuclei()) {
+			// Ensure that all nuclei have any existing segments removed
+			// and replaced with the default segment starting at the RP
+			n.setSegments(List.of(new DefaultProfileSegment(0, 0, n.getBorderLength(),
+					IProfileCollection.DEFAULT_SEGMENT_ID)));
+
+		}
+
+		// Replace signal groups
+		mergeSignalGroups(newCollection);
+
+		// create the dataset; has no analysis options at present
+		IAnalysisDataset newDataset = new DefaultAnalysisDataset(newCollection, saveFile);
+
+		// Add the original datasets as merge sources
+		for (IAnalysisDataset d : datasets) {
+			newDataset.addMergeSource(d);
+		}
+
+		IAnalysisOptions mergedOptions = mergeOptions(newDataset);
+		newDataset.setAnalysisOptions(mergedOptions);
+
+		mergeSignalOptions(newDataset);
+
+		return newDataset;
+	}
+
+	private IAnalysisDataset performNot(@NonNull String newDatasetName)
+			throws MissingOptionException, ProfileException, MissingLandmarkException,
+			ComponentCreationException {
+		// make a new collection
+		ICellCollection newCollection = new DefaultCellCollection(
+				datasets.get(0).getCollection().getRuleSetCollection(),
+				newDatasetName, UUID.randomUUID());
+
+		newCollection = CellCollectionFilterer.not(datasets.get(0).getCollection(),
+				datasets.get(1).getCollection());
+
+		for (Nucleus n : newCollection.getNuclei()) {
+			// Ensure that all nuclei have any existing segments removed
+			// and replaced with the default segment starting at the RP
+			n.setSegments(List.of(new DefaultProfileSegment(0, 0, n.getBorderLength(),
+					IProfileCollection.DEFAULT_SEGMENT_ID)));
+
+		}
+
+		// Replace signal groups
+		mergeSignalGroups(newCollection);
+
+		// create the dataset; has no analysis options at present
+		IAnalysisDataset newDataset = new DefaultAnalysisDataset(newCollection, saveFile);
+
+		// Add the original datasets as merge sources
+		for (IAnalysisDataset d : datasets) {
+			newDataset.addMergeSource(d);
+		}
+
+		IAnalysisOptions mergedOptions = mergeOptions(newDataset);
+		newDataset.setAnalysisOptions(mergedOptions);
+
+		mergeSignalOptions(newDataset);
+
+		return newDataset;
+	}
+
+	private IAnalysisDataset performXor(@NonNull String newDatasetName)
+			throws MissingOptionException, ProfileException, MissingLandmarkException,
+			ComponentCreationException {
+		// make a new collection
+		ICellCollection newCollection = new DefaultCellCollection(
+				datasets.get(0).getCollection().getRuleSetCollection(),
+				newDatasetName, UUID.randomUUID());
+
+		newCollection = CellCollectionFilterer.xor(datasets.get(0).getCollection(),
+				datasets.get(1).getCollection());
+
+		for (Nucleus n : newCollection.getNuclei()) {
+			// Ensure that all nuclei have any existing segments removed
+			// and replaced with the default segment starting at the RP
+			n.setSegments(List.of(new DefaultProfileSegment(0, 0, n.getBorderLength(),
+					IProfileCollection.DEFAULT_SEGMENT_ID)));
+
+		}
+
+		// Replace signal groups
+		mergeSignalGroups(newCollection);
+
+		// create the dataset; has no analysis options at present
+		IAnalysisDataset newDataset = new DefaultAnalysisDataset(newCollection, saveFile);
+
+		// Add the original datasets as merge sources
+		for (IAnalysisDataset d : datasets) {
+			newDataset.addMergeSource(d);
+		}
+
+		IAnalysisOptions mergedOptions = mergeOptions(newDataset);
+		newDataset.setAnalysisOptions(mergedOptions);
+
+		mergeSignalOptions(newDataset);
+
+		return newDataset;
 	}
 
 	/**

@@ -38,17 +38,17 @@ public class DatasetArithmeticSetupDialog extends SettingsDialog implements Acti
 
 	private DatasetSelectionPanel boxOne;
 	private DatasetSelectionPanel boxTwo;
-	private JComboBox<DatasetArithmeticOperation> operatorBox;
-	private JLabel operatorDescription = new JLabel(DatasetArithmeticOperation.AND.getDescription());
+	private JComboBox<BooleanOperation> operatorBox;
+	private JLabel operatorDescription = new JLabel(BooleanOperation.AND.getDescription());
 
-	public enum DatasetArithmeticOperation {
+	public enum BooleanOperation {
 		AND("Cells are present in both datasets"), OR("Cells are in either dataset (this merges the datasets)"),
 		NOT("Cells are in dataset one, but not dataset two"),
 		XOR("Cells are in one or other dataset, but not both datasets");
 
 		private String description;
 
-		private DatasetArithmeticOperation(String description) {
+		private BooleanOperation(String description) {
 			this.description = description;
 		}
 
@@ -75,8 +75,8 @@ public class DatasetArithmeticSetupDialog extends SettingsDialog implements Acti
 		return boxTwo.getSelectedDataset();
 	}
 
-	public DatasetArithmeticOperation getOperation() {
-		return (DatasetArithmeticOperation) operatorBox.getSelectedItem();
+	public BooleanOperation getOperation() {
+		return (BooleanOperation) operatorBox.getSelectedItem();
 	}
 
 	private void createGUI(List<IAnalysisDataset> list) {
@@ -101,8 +101,8 @@ public class DatasetArithmeticSetupDialog extends SettingsDialog implements Acti
 			boxTwo.setSelectedDataset(list.get(1));
 		}
 
-		operatorBox = new JComboBox<>(DatasetArithmeticOperation.values());
-		operatorBox.setSelectedItem(DatasetArithmeticOperation.AND);
+		operatorBox = new JComboBox<>(BooleanOperation.values());
+		operatorBox.setSelectedItem(BooleanOperation.AND);
 		operatorBox.setPreferredSize(boxOne.getPreferredSize());
 		operatorBox.addActionListener(this);
 

@@ -24,6 +24,9 @@ import com.bmskinner.nma.io.Io;
 
 public class AnalysisParametersTableModel extends DatasetTableModel {
 
+	public static final boolean MERGES_RECOVERABLE = true;
+	public static final boolean MERGES_NOT_RECOVERABLE = false;
+
 	private static final Logger LOGGER = Logger
 			.getLogger(AnalysisParametersTableModel.class.getName());
 
@@ -39,7 +42,8 @@ public class AnalysisParametersTableModel extends DatasetTableModel {
 	private String[] colNames;
 	private Object[][] rowData;
 
-	public AnalysisParametersTableModel(@Nullable List<IAnalysisDataset> datasets) {
+	public AnalysisParametersTableModel(@Nullable List<IAnalysisDataset> datasets,
+			boolean recoverable) {
 
 		if (datasets == null) {
 			makeEmptyTable();
@@ -50,7 +54,7 @@ public class AnalysisParametersTableModel extends DatasetTableModel {
 		int colCount = colNames.length + 1;
 
 		List<String> rowNames = new ArrayList<>(DEFAULT_ROW_NAMES);
-		if (hasMergeSource(datasets))
+		if (hasMergeSource(datasets) && recoverable)
 			rowNames.add(Labels.Merges.RECOVER_SOURCE);
 
 		int rowCount = rowNames.size();

@@ -212,7 +212,7 @@ public class MergesDetailPanel extends TableDetailPanel {
 
 	@Override
 	protected synchronized TableModel createPanelTableType(@NonNull TableOptions options) {
-		return new AnalysisDatasetTableCreator(options).createAnalysisParametersTable();
+		return new AnalysisDatasetTableCreator(options).createMergeSourceAnalysisParametersTable();
 	}
 
 	/**

@@ -27,107 +27,78 @@ import com.bmskinner.nma.analysis.DatasetMergeMethod;
 import com.bmskinner.nma.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nma.analysis.IAnalysisMethod;
 import com.bmskinner.nma.analysis.IAnalysisResult;
-import com.bmskinner.nma.analysis.signals.PairedSignalGroups;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.core.GlobalOptions;
 import com.bmskinner.nma.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nma.core.ThreadManager;
 import com.bmskinner.nma.gui.DefaultInputSupplier;
 import com.bmskinner.nma.gui.ProgressBarAcceptor;
+import com.bmskinner.nma.gui.dialogs.DatasetArithmeticSetupDialog;
 import com.bmskinner.nma.gui.dialogs.DatasetArithmeticSetupDialog.BooleanOperation;
-import com.bmskinner.nma.gui.dialogs.DatasetMergingDialog;
 import com.bmskinner.nma.gui.events.UserActionController;
 import com.bmskinner.nma.gui.events.UserActionEvent;
 import com.bmskinner.nma.io.Io;
 import com.bmskinner.nma.logging.Loggable;
 
 /**
- * Carry out a merge of datasets
+ * Trigger methods to perform boolean operations on datasets
  * 
- * @author ben
+ * @author Ben Skinner
  *
  */
-public class MergeCollectionAction extends MultiDatasetResultAction {
+public class BooleanOperationAction extends MultiDatasetResultAction {
 
-	private static final Logger LOGGER = Logger.getLogger(MergeCollectionAction.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(BooleanOperationAction.class.getName());
 
-	private static final @NonNull String PROGRESS_BAR_LABEL = "Merging";
-	private static final @NonNull String DEFAULT_DATASET_NAME = "Merge_of_datasets";
+	private static final @NonNull String PROGRESS_LBL = "Dataset arithmetic";
+
 	private static final int NUMBER_OF_STEPS = 100;
+	private static final @NonNull String DEFAULT_DATASET_NAME = "Boolean_of_datasets";
+	private File saveFile;
 
-	public MergeCollectionAction(@NonNull final List<IAnalysisDataset> datasets,
-			@NonNull final ProgressBarAcceptor acceptor) {
-		super(datasets, PROGRESS_BAR_LABEL, acceptor);
+	public BooleanOperationAction(@NonNull List<IAnalysisDataset> list,
+			@NonNull ProgressBarAcceptor acceptor) {
+		super(list, PROGRESS_LBL, acceptor);
+		this.setProgressBarIndeterminate();
 	}
 
 	@Override
 	public void run() {
-
-		if (!datasetsAreMergeable()) {
-			super.finished();
-			return;
-		}
-
-		// Try to find a sensible ancestor dir of the datasets
-		// Otherwise default to the home dir
-		File dir = IAnalysisDataset.commonPathOfFiles(datasets);
-		if (!dir.exists() || !dir.isDirectory())
-			dir = GlobalOptions.getInstance().getDefaultDir();
-
 		try {
-			File saveFile = new DefaultInputSupplier().requestFileSave(dir, DEFAULT_DATASET_NAME,
-					Io.NMD_FILE_EXTENSION_NODOT);
+			// Try to find a sensible ancestor dir of the datasets
+			// Otherwise default to the home dir
+			File dir = IAnalysisDataset.commonPathOfFiles(datasets);
+			if (!dir.exists() || !dir.isDirectory())
+				dir = GlobalOptions.getInstance().getDefaultDir();
 
-			IAnalysisMethod m;
+			/*
+			 * Make a dialog with a dropdown for dataset 1, operator, then dropdown for
+			 * dataset 2
+			 */
 
-			if (hasMoreThanOneSignalGroup()) {
+			DatasetArithmeticSetupDialog dialog = new DatasetArithmeticSetupDialog(datasets);
+			if (dialog.isReadyToRun()) {
 
-				DatasetMergingDialog dialog = new DatasetMergingDialog(datasets);
-				PairedSignalGroups pairs = dialog.getPairedSignalGroups();
-				m = new DatasetMergeMethod(datasets, BooleanOperation.OR, saveFile, pairs);
+				File saveFile = new DefaultInputSupplier().requestFileSave(dir,
+						DEFAULT_DATASET_NAME,
+						Io.NMD_FILE_EXTENSION_NODOT);
 
-			} else {
-				// no signals to merge
-				m = new DatasetMergeMethod(datasets, BooleanOperation.OR, saveFile);
+				IAnalysisDataset datasetOne = dialog.getDatasetOne();
+				IAnalysisDataset datasetTwo = dialog.getDatasetTwo();
+				BooleanOperation operation = dialog.getOperation();
+
+				IAnalysisMethod m = new DatasetMergeMethod(datasets, operation, saveFile);
+
+				worker = new DefaultAnalysisWorker(m, NUMBER_OF_STEPS);
+				worker.addPropertyChangeListener(this);
+				ThreadManager.getInstance().submit(worker);
+
 			}
 
-			worker = new DefaultAnalysisWorker(m, NUMBER_OF_STEPS);
-			worker.addPropertyChangeListener(this);
-			ThreadManager.getInstance().submit(worker);
-
-		} catch (RequestCancelledException e) {
+		} catch (RequestCancelledException e1) {
+			// User request cancelled
 			super.finished();
 		}
-	}
-
-	/**
-	 * Check for signals in >1 dataset
-	 * 
-	 * @return
-	 */
-	private boolean hasMoreThanOneSignalGroup() {
-		int numSignals = 0;
-		for (IAnalysisDataset d : datasets) {
-			if (d.getCollection().getSignalManager().hasSignals())
-				numSignals++;
-		}
-		return numSignals > 1;
-	}
-
-	/**
-	 * Check datasets are valid to be merged
-	 * 
-	 * @param datasets
-	 * @return
-	 */
-	private boolean datasetsAreMergeable() {
-
-		if (datasets.size() == 2 && (datasets.get(0).hasDirectChild(datasets.get(1))
-				|| datasets.get(1).hasDirectChild(datasets.get(0)))) {
-			LOGGER.warning("No. Merging parent and child is silly.");
-			return false;
-		}
-		return true;
 	}
 
 	@Override

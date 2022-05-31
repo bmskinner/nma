@@ -27,6 +27,7 @@ import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.profiles.Landmark;
 import com.bmskinner.nma.components.rules.OrientationMark;
+import com.bmskinner.nma.gui.dialogs.DatasetArithmeticSetupDialog.BooleanOperation;
 import com.bmskinner.nma.io.DatasetExportMethod;
 import com.bmskinner.nma.io.SampleDatasetReader;
 
@@ -59,8 +60,9 @@ public class DatasetMergeMethodTest {
 		List<IAnalysisDataset> list = List.of(d1, d2);
 
 		// Merge and resegment the datasets
-		IAnalysisDataset result = new DatasetMergeMethod(list, new File("Empty path")).call()
-				.getFirstDataset();
+		IAnalysisDataset result = new DatasetMergeMethod(list, BooleanOperation.OR,
+				new File("Empty path")).call()
+						.getFirstDataset();
 		assertNotNull("Merged dataset should not be null", result);
 		assertEquals("Merged dataset should have correct cell count", 20,
 				result.getCollection().size());
@@ -100,7 +102,8 @@ public class DatasetMergeMethodTest {
 		List<IAnalysisDataset> list = List.of(d1, d2);
 
 		// Merge and resegment the datasets
-		DatasetMergeMethod dm = new DatasetMergeMethod(list, new File("Empty path"));
+		DatasetMergeMethod dm = new DatasetMergeMethod(list, BooleanOperation.OR,
+				new File("Empty path"));
 		IAnalysisDataset result = dm.call().getFirstDataset();
 		assertNotNull("Merged dataset should not be null", result);
 		assertEquals("Merged dataset should have correct cell count", 20,
@@ -143,7 +146,7 @@ public class DatasetMergeMethodTest {
 		datasets.add(d2);
 
 		// Merge the datasets
-		DatasetMergeMethod dm = new DatasetMergeMethod(datasets, f3);
+		DatasetMergeMethod dm = new DatasetMergeMethod(datasets, BooleanOperation.OR, f3);
 		IAnalysisDataset merged = dm.call().getFirstDataset();
 
 		for (IAnalysisDataset d : merged.getMergeSources()) {
@@ -168,7 +171,8 @@ public class DatasetMergeMethodTest {
 		IAnalysisDataset d2 = SampleDatasetReader.openDataset(f2);
 
 		// Merge the datasets
-		IAnalysisDataset merged = new DatasetMergeMethod(List.of(d1, d2), f3).call()
+		IAnalysisDataset merged = new DatasetMergeMethod(List.of(d1, d2), BooleanOperation.OR, f3)
+				.call()
 				.getFirstDataset();
 
 		// Profile, segment, save and reopen
@@ -211,7 +215,8 @@ public class DatasetMergeMethodTest {
 		IAnalysisDataset d2 = SampleDatasetReader.openDataset(f2);
 
 		// Merge the datasets
-		IAnalysisDataset merged = new DatasetMergeMethod(List.of(d1, d2), f3).call()
+		IAnalysisDataset merged = new DatasetMergeMethod(List.of(d1, d2), BooleanOperation.OR, f3)
+				.call()
 				.getFirstDataset();
 
 		// Profile, segment, save and reopen
@@ -243,8 +248,9 @@ public class DatasetMergeMethodTest {
 				d2.getCollection().getSignalGroup(TestImageDatasetCreator.RED_SIGNAL_ID).get());
 
 		// Merge resegment the dataset
-		IAnalysisDataset merged = new DatasetMergeMethod(List.of(d1, d2), f3, ps).call()
-				.getFirstDataset();
+		IAnalysisDataset merged = new DatasetMergeMethod(List.of(d1, d2), BooleanOperation.OR, f3,
+				ps).call()
+						.getFirstDataset();
 
 		merged = new DatasetProfilingMethod(merged)
 				.then(new DatasetSegmentationMethod(merged,
@@ -280,8 +286,9 @@ public class DatasetMergeMethodTest {
 				d2.getCollection().getSignalGroup(TestImageDatasetCreator.RED_SIGNAL_ID).get());
 
 		// Merge resegment and save the dataset
-		IAnalysisDataset merged = new DatasetMergeMethod(List.of(d1, d2), f3, ps).call()
-				.getFirstDataset();
+		IAnalysisDataset merged = new DatasetMergeMethod(List.of(d1, d2), BooleanOperation.OR, f3,
+				ps).call()
+						.getFirstDataset();
 
 		// Profile, segment, save and reopen
 		new DatasetProfilingMethod(merged)

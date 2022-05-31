@@ -62,7 +62,7 @@ public class UserActionEvent extends EventObject {
 	public static final String RUN_SHELL_ANALYSIS = "Run shell analysis";
 	public static final String SIGNAL_WARPING = "SignalWarpingAction";
 
-	public static final String DATASET_ARITHMETIC = "DatasetArithmeticAction";
+	public static final String DATASET_ARITHMETIC = "BooleanOperationAction";
 	public static final String CHANGE_NUCLEUS_IMAGE_FOLDER = "ChangeNucleusFolderAction";
 	public static final String EXTRACT_SUBSET = "Extract subset";
 

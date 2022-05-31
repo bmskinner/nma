@@ -74,7 +74,26 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 				&& !hasMergeSource(options.getDatasets()))
 			return createBlankTable();
 
-		return new AnalysisParametersTableModel(options.getDatasets());
+		return new AnalysisParametersTableModel(options.getDatasets(),
+				AnalysisParametersTableModel.MERGES_NOT_RECOVERABLE);
+
+	}
+
+	/**
+	 * Create a table model of analysis parameters from a nucleus collection. If
+	 * null parameter is passed, will create an empty table
+	 * 
+	 * @return
+	 */
+	public TableModel createMergeSourceAnalysisParametersTable() {
+
+		// If we are showing merge sources, ensure there is something to show
+		if (options.getBoolean(AbstractOptions.IS_MERGE_SOURCE_OPTIONS_TABLE)
+				&& !hasMergeSource(options.getDatasets()))
+			return createBlankTable();
+
+		return new AnalysisParametersTableModel(options.getDatasets(),
+				AnalysisParametersTableModel.MERGES_RECOVERABLE);
 
 	}
 
