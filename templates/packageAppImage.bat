@@ -1,12 +1,15 @@
 REM Create the portable app image for Windows
+jpackage --name "Nuclear Morphology Analysis" --app-version ${project.version} --icon ..\res\icons\icon.ico --input ..\target\standalone --dest ..\target\appimage --type app-image --description "Morphometric analysis software" --vendor "Ben Skinner" --copyright "Ben Skinner 2015-${build.year}" --main-jar ${jar.finalName}_standalone.jar --main-class com.bmskinner.nma.core.NuclearMorphologyAnalysis
 
-jpackage --name "Nuclear Morphology Analysis" --app-version ${project.version} --icon ..\res\icons\icon.ico --input ..\target\standalone --dest ..\target\appimage --type app-image --main-jar ${jar.finalName}_standalone.jar --main-class com.bmskinner.nma.core.NuclearMorphologyAnalysis
+REM Zip the app image for Windows portable upload
+7z a -tzip "..\target\Nuclear_Morphology_Analysis-${project.version}-x86_64-windows.zip" "..\target\appimage\Nuclear Morphology Analysis"
 
-REM Zip the app image for upload
-7z a -tzip "..\target\appimage\Nuclear Morphology Analysis.zip" "..\target\appimage\Nuclear Morphology Analysis"
+REM Create windows installer
+jpackage --name "Nuclear Morphology Analysis" --app-version ${project.version} --icon ..\res\icons\icon.ico --input ..\target\standalone --dest ..\target\msi --type msi --description "Morphometric analysis software" --vendor "Ben Skinner" --copyright "Ben Skinner 2015-${build.year}" --win-dir-chooser --win-menu --win-per-user-install --win-menu-group "Nuclear Morphology Analysis" --main-jar ${jar.finalName}_standalone.jar --main-class com.bmskinner.nma.core.NuclearMorphologyAnalysis
+
+copy "..\target\msi\Nuclear Morphology Analysis-${project.version}.msi" "..\target\Nuclear_Morphology_Analysis-${project.version}-x86_64-windows.msi"
 
 REM Make folder structure for packaging in Linux
-
 mkdir ..\target\linux
 mkdir ..\target\linux\standalone
 
