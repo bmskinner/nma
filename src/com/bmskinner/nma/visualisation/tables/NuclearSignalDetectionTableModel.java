@@ -2,8 +2,6 @@ package com.bmskinner.nma.visualisation.tables;
 
 import java.awt.Color;
 import java.io.File;
-import java.text.DecimalFormat;
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -16,13 +14,13 @@ import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.datasets.ICellCollection;
 import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.options.IAnalysisOptions;
-import com.bmskinner.nma.components.options.MissingOptionException;
-import com.bmskinner.nma.components.signals.ISignalGroup;
 import com.bmskinner.nma.gui.Labels;
 import com.bmskinner.nma.gui.components.ColourSelecter;
 import com.bmskinner.nma.visualisation.datasets.SignalTableCell;
 
 public class NuclearSignalDetectionTableModel extends DatasetTableModel {
+
+	private static final String VALUE_MISSING_LBL = "Value missing";
 
 	private static final long serialVersionUID = 1l;
 
@@ -82,6 +80,8 @@ public class NuclearSignalDetectionTableModel extends DatasetTableModel {
 
 			for (UUID signalGroup : collection.getSignalManager().getSignalGroupIDs()) {
 
+				LOGGER.fine("Making for signal group " + signalGroup);
+
 				int baseIndex = signalGroupNumber * ROW_NAMES.size() + 1;
 
 				Color colour = collection.getSignalGroup(signalGroup).get().hasColour()
@@ -99,27 +99,23 @@ public class NuclearSignalDetectionTableModel extends DatasetTableModel {
 					continue;
 				}
 
+				for (String s : op.get().getDetectionOptionTypes()) {
+					LOGGER.fine("Dataset has " + s);
+				}
+
 				HashOptions ns = op.get().getNuclearSignalOptions(signalGroup)
 						.orElseThrow(IllegalArgumentException::new);
-				Object signalThreshold = ns.getString(HashOptions.SIGNAL_DETECTION_MODE_KEY)
-						.equals(SignalDetectionMode.FORWARD.name())
-								? ns.getInt(HashOptions.THRESHOLD)
-								: "Variable";
-
-				Optional<File> folder = op.get().getNuclearSignalDetectionFolder(signalGroup);
 
 				rowData[baseIndex + 0][c] = Labels.Signals.SIGNAL_COLOUR_LABEL;
 				rowData[baseIndex + 1][c] = cell;
-				rowData[baseIndex + 2][c] = ns.getInt(HashOptions.CHANNEL);
-				rowData[baseIndex + 3][c] = folder.isPresent() ? folder.get().getAbsoluteFile()
-						: Labels.NA_MERGE;
-				rowData[baseIndex + 4][c] = signalThreshold;
-				rowData[baseIndex + 5][c] = ns.getInt(HashOptions.MIN_SIZE_PIXELS);
-				rowData[baseIndex + 6][c] = df
-						.format(ns.getDouble(HashOptions.SIGNAL_MAX_FRACTION));
-				rowData[baseIndex + 7][c] = df.format(ns.getDouble(HashOptions.MIN_CIRC));
-				rowData[baseIndex + 8][c] = df.format(ns.getDouble(HashOptions.MAX_CIRC));
-				rowData[baseIndex + 9][c] = ns.getString(HashOptions.SIGNAL_DETECTION_MODE_KEY);
+				rowData[baseIndex + 2][c] = makeChannelLabel(d, ns);
+				rowData[baseIndex + 3][c] = makeSignalThresholdLabel(d, ns, signalGroup);
+				rowData[baseIndex + 4][c] = makeSignalFolderLabel(d, signalGroup, op, ns);
+				rowData[baseIndex + 5][c] = makeMinSizeLabel(d, ns);
+				rowData[baseIndex + 6][c] = makeMaxFractionLabel(d, ns);
+				rowData[baseIndex + 7][c] = makeMinCircLabel(d, ns);
+				rowData[baseIndex + 8][c] = makeMaxCircLabel(d, ns);
+				rowData[baseIndex + 9][c] = makeDetctionModeLabel(d, ns);
 
 				signalGroupNumber++;
 			}
@@ -143,115 +139,88 @@ public class NuclearSignalDetectionTableModel extends DatasetTableModel {
 
 	}
 
-	private void addMergedSignalData(List<Object> rowData, IAnalysisDataset dataset,
-			int signalGroupCount,
-			int rowsPerSignalGroup) {
-		ICellCollection collection = dataset.getCollection();
-		Collection<ISignalGroup> signalGroups = collection.getSignalManager().getSignalGroups();
-
-		int j = 0;
-		for (UUID signalGroup : collection.getSignalManager().getSignalGroupIDs()) {
-
-			try {
-				Optional<Color> c = collection.getSignalGroup(signalGroup).get().getGroupColour();
-				Color colour = c.isPresent() ? c.get() : ColourSelecter.getColor(j);
-
-				SignalTableCell cell = new SignalTableCell(signalGroup,
-						collection.getSignalManager().getSignalGroupName(signalGroup), colour);
-
-				rowData.add(EMPTY_STRING);// empty row for colour
-				rowData.add(cell); // group name
-
-				for (int i = 0; i < rowsPerSignalGroup - 2; i++) { // rest are
-																	// NA
-					rowData.add(Labels.NA + " - merge");
-				}
-
-			} finally {
-				j++;
-			}
-		}
-
-		// Add blank rows for any empty spaces in the table
-		int remaining = signalGroupCount - signalGroups.size();
-		for (int i = 0; i < remaining; i++) {
-			for (int k = 0; k < rowsPerSignalGroup; k++) {
-				rowData.add(EMPTY_STRING);
-			}
-		}
+	private Object makeChannelLabel(IAnalysisDataset d, HashOptions ns) {
+		if (ns.hasInt(HashOptions.CHANNEL))
+			return ns.getInt(HashOptions.CHANNEL);
+		if (d.hasMergeSources())
+			return Labels.NA_MERGE;
+		return VALUE_MISSING_LBL;
 	}
 
-	/**
-	 * Fill a list with rows describing each signal group in a dataset
-	 * 
-	 * @param rowData            the list to add rows to
-	 * @param dataset            the dataset with signals
-	 * @param signalGroupCount   the total number of signal groups in the table
-	 * @param rowsPerSignalGroup the number of rows each signal group requires
-	 * @throws MissingOptionException
-	 */
-	private void addNonMergedSignalData(List<Object> rowData, IAnalysisDataset dataset,
-			int signalGroupCount,
-			int rowsPerSignalGroup) throws MissingOptionException {
+	private Object makeMinSizeLabel(IAnalysisDataset d, HashOptions ns) {
+		if (ns.hasInt(HashOptions.MIN_SIZE_PIXELS))
+			return ns.getInt(HashOptions.MIN_SIZE_PIXELS);
+		if (d.hasMergeSources())
+			return Labels.NA_MERGE;
+		return VALUE_MISSING_LBL;
+	}
 
-		ICellCollection collection = dataset.getCollection();
-		int signalGroupNumber = 0; // Store the number of signal groups
-									// processed from this dataset
+	private Object makeMaxFractionLabel(IAnalysisDataset d, HashOptions ns) {
+		if (ns.hasDouble(HashOptions.SIGNAL_MAX_FRACTION))
+			return df
+					.format(ns.getDouble(HashOptions.SIGNAL_MAX_FRACTION));
+		if (d.hasMergeSources())
+			return Labels.NA_MERGE;
+		return VALUE_MISSING_LBL;
+	}
 
-		int indexInTable = 0;
-		for (UUID signalGroup : collection.getSignalManager().getSignalGroupIDs()) {
+	private Object makeMinCircLabel(IAnalysisDataset d, HashOptions ns) {
+		if (ns.hasDouble(HashOptions.MIN_CIRC))
+			return df
+					.format(ns.getDouble(HashOptions.MIN_CIRC));
+		if (d.hasMergeSources())
+			return Labels.NA_MERGE;
+		return VALUE_MISSING_LBL;
+	}
 
-			signalGroupNumber++;
-			Optional<Color> c = collection.getSignalGroup(signalGroup).get().getGroupColour();
-			Color colour = c.isPresent() ? c.get() : ColourSelecter.getColor(indexInTable);
-			indexInTable++;
+	private Object makeMaxCircLabel(IAnalysisDataset d, HashOptions ns) {
+		if (ns.hasDouble(HashOptions.MAX_CIRC))
+			return df
+					.format(ns.getDouble(HashOptions.MAX_CIRC));
+		if (d.hasMergeSources())
+			return Labels.NA_MERGE;
+		return VALUE_MISSING_LBL;
+	}
 
-			SignalTableCell cell = new SignalTableCell(signalGroup,
-					collection.getSignalManager().getSignalGroupName(signalGroup), colour);
+	private Object makeDetctionModeLabel(IAnalysisDataset d, HashOptions ns) {
+		if (ns.hasString(HashOptions.SIGNAL_DETECTION_MODE_KEY))
+			return ns.getString(HashOptions.SIGNAL_DETECTION_MODE_KEY);
+		if (d.hasMergeSources())
+			return Labels.NA_MERGE;
+		return VALUE_MISSING_LBL;
+	}
 
-			Optional<IAnalysisOptions> op = dataset.getAnalysisOptions();
-			if (!op.isPresent()) {
-				for (int i = 0; i < rowsPerSignalGroup; i++) {
-					rowData.add(EMPTY_STRING);
-				}
-				continue;
-			}
+	private Object makeSignalFolderLabel(IAnalysisDataset d, UUID signalGroup,
+			Optional<IAnalysisOptions> op,
+			HashOptions ns) {
+		Optional<File> folder = op.get().getNuclearSignalDetectionFolder(signalGroup);
+		return folder.isPresent() ? folder.get().getAbsoluteFile()
+				: d.hasMergeSources() ? Labels.NA_MERGE : VALUE_MISSING_LBL;
+	}
 
-			HashOptions ns = op.get().getNuclearSignalOptions(signalGroup)
-					.orElseThrow(MissingOptionException::new);
-			Object signalThreshold = ns.getString(HashOptions.SIGNAL_DETECTION_MODE_KEY)
-					.equals(SignalDetectionMode.FORWARD.name()) ? ns.getInt(HashOptions.THRESHOLD)
-							: "Variable";
+	private Object makeSignalThresholdLabel(IAnalysisDataset d, HashOptions ns, UUID signalGroup) {
+		if (ns.hasString(HashOptions.SIGNAL_DETECTION_MODE_KEY)
+				&& ns.hasInt(HashOptions.THRESHOLD)) {
 
-			DecimalFormat df = new DecimalFormat(DEFAULT_DECIMAL_FORMAT);
+			String mode = ns.getString(HashOptions.SIGNAL_DETECTION_MODE_KEY);
+			return SignalDetectionMode.FORWARD.name().equals(mode)
+					? ns.getInt(HashOptions.THRESHOLD)
+					: d.hasMergeSources() ? Labels.NA_MERGE : "Variable";
+		}
+		if (d.hasMergeSources()) {
+			return Labels.NA_MERGE + " and sources have multiple values";
 
-			rowData.add(Labels.Signals.SIGNAL_COLOUR_LABEL);
-			rowData.add(cell);
-			rowData.add(ns.getInt(HashOptions.CHANNEL));
-			rowData.add(ns.getString(HashOptions.DETECTION_FOLDER));
-			rowData.add(signalThreshold);
-			rowData.add(ns.getInt(HashOptions.MIN_SIZE_PIXELS));
-			rowData.add(df.format(ns.getDouble(HashOptions.SIGNAL_MAX_FRACTION)));
-			rowData.add(df.format(ns.getDouble(HashOptions.MIN_CIRC)));
-			rowData.add(df.format(ns.getDouble(HashOptions.MAX_CIRC)));
-			rowData.add(ns.getString(HashOptions.SIGNAL_DETECTION_MODE_KEY));
-
+			// Note - this does not work because the merged signal group has a different id
+			// to the sources
+//			return "Merge:" + Io.NEWLINE + d.getMergeSources().stream()
+//					.filter(c -> c.getAnalysisOptions().get()
+//							.hasNuclearSignalDetectionOptions(signalGroup))
+//					.map(c -> c.getAnalysisOptions().get().getNuclearSignalOptions(signalGroup))
+//					.map(o -> String.valueOf(o.get().getInt(HashOptions.THRESHOLD)))
+//					.collect(Collectors.joining(Io.NEWLINE));
 		}
 
-		/*
-		 * If the number of signal groups in the dataset is less than the size of the
-		 * table, the remainder should be filled with blank cells
-		 */
-
-		if (signalGroupNumber < signalGroupCount) {
-
-			// There will be empty rows in the table. Fill the blanks
-			for (int i = signalGroupNumber + 1; i <= signalGroupCount; i++) {
-				for (int k = 0; k < rowsPerSignalGroup; k++) {
-					rowData.add(EMPTY_STRING);
-				}
-			}
-		}
+		return VALUE_MISSING_LBL;
 	}
 
 	@Override
