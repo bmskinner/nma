@@ -35,7 +35,7 @@ import com.bmskinner.nma.core.ThreadManager;
 import com.bmskinner.nma.gui.DefaultInputSupplier;
 import com.bmskinner.nma.gui.ProgressBarAcceptor;
 import com.bmskinner.nma.gui.dialogs.DatasetArithmeticSetupDialog.BooleanOperation;
-import com.bmskinner.nma.gui.dialogs.DatasetMergingDialog;
+import com.bmskinner.nma.gui.dialogs.SignalPairMergingDialog;
 import com.bmskinner.nma.gui.events.UserActionController;
 import com.bmskinner.nma.gui.events.UserActionEvent;
 import com.bmskinner.nma.io.Io;
@@ -82,7 +82,7 @@ public class MergeCollectionAction extends MultiDatasetResultAction {
 
 			if (hasMoreThanOneSignalGroup()) {
 
-				DatasetMergingDialog dialog = new DatasetMergingDialog(datasets);
+				SignalPairMergingDialog dialog = new SignalPairMergingDialog(datasets);
 				PairedSignalGroups pairs = dialog.getPairedSignalGroups();
 				m = new DatasetMergeMethod(datasets, BooleanOperation.OR, saveFile, pairs);
 

@@ -47,9 +47,9 @@ import com.bmskinner.nma.gui.components.panels.SignalGroupSelectionPanel;
  *
  */
 @SuppressWarnings("serial")
-public class DatasetMergingDialog extends LoadingIconDialog {
+public class SignalPairMergingDialog extends LoadingIconDialog {
 
-	private static final Logger LOGGER = Logger.getLogger(DatasetMergingDialog.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(SignalPairMergingDialog.class.getName());
 
 	private static final String SIGNAL_GROUP_COL_LBL = "Signal group";
 
@@ -71,7 +71,7 @@ public class DatasetMergingDialog extends LoadingIconDialog {
 	// Store the ids of signal groups that should be merged
 	private PairedSignalGroups pairedSignalGroups = new PairedSignalGroups();
 
-	public DatasetMergingDialog(List<IAnalysisDataset> datasets) {
+	public SignalPairMergingDialog(List<IAnalysisDataset> datasets) {
 		this.datasets = datasets;
 		createUI();
 

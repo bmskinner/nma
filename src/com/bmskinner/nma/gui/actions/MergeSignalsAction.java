@@ -14,7 +14,7 @@ import com.bmskinner.nma.analysis.signals.SignalGroupMergeMethod;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.core.ThreadManager;
 import com.bmskinner.nma.gui.ProgressBarAcceptor;
-import com.bmskinner.nma.gui.dialogs.DatasetMergingDialog;
+import com.bmskinner.nma.gui.dialogs.SignalPairMergingDialog;
 import com.bmskinner.nma.gui.events.UIController;
 import com.bmskinner.nma.logging.Loggable;
 
@@ -52,7 +52,7 @@ public class MergeSignalsAction extends SingleDatasetResultAction {
 			LOGGER.fine("Creating signal selection dialog");
 			List<IAnalysisDataset> datasets = new ArrayList<>();
 			datasets.add(dataset);
-			DatasetMergingDialog dialog = new DatasetMergingDialog(datasets);
+			SignalPairMergingDialog dialog = new SignalPairMergingDialog(datasets);
 			PairedSignalGroups pairs = dialog.getPairedSignalGroups();
 
 			if (pairs.isEmpty()) {

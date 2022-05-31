@@ -42,7 +42,8 @@ public class DatasetArithmeticSetupDialog extends SettingsDialog implements Acti
 	private JLabel operatorDescription = new JLabel(BooleanOperation.AND.getDescription());
 
 	public enum BooleanOperation {
-		AND("Cells are present in both datasets"), OR("Cells are in either dataset (this merges the datasets)"),
+		AND("Cells are present in both datasets"),
+		OR("Cells are in either dataset (this merges the datasets)"),
 		NOT("Cells are in dataset one, but not dataset two"),
 		XOR("Cells are in one or other dataset, but not both datasets");
 

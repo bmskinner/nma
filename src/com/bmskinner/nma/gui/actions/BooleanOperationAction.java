@@ -27,6 +27,7 @@ import com.bmskinner.nma.analysis.DatasetMergeMethod;
 import com.bmskinner.nma.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nma.analysis.IAnalysisMethod;
 import com.bmskinner.nma.analysis.IAnalysisResult;
+import com.bmskinner.nma.analysis.signals.PairedSignalGroups;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.core.GlobalOptions;
 import com.bmskinner.nma.core.InputSupplier.RequestCancelledException;
@@ -35,6 +36,7 @@ import com.bmskinner.nma.gui.DefaultInputSupplier;
 import com.bmskinner.nma.gui.ProgressBarAcceptor;
 import com.bmskinner.nma.gui.dialogs.DatasetArithmeticSetupDialog;
 import com.bmskinner.nma.gui.dialogs.DatasetArithmeticSetupDialog.BooleanOperation;
+import com.bmskinner.nma.gui.dialogs.SignalPairMergingDialog;
 import com.bmskinner.nma.gui.events.UserActionController;
 import com.bmskinner.nma.gui.events.UserActionEvent;
 import com.bmskinner.nma.io.Io;
@@ -53,8 +55,7 @@ public class BooleanOperationAction extends MultiDatasetResultAction {
 	private static final @NonNull String PROGRESS_LBL = "Dataset arithmetic";
 
 	private static final int NUMBER_OF_STEPS = 100;
-	private static final @NonNull String DEFAULT_DATASET_NAME = "Boolean_of_datasets";
-	private File saveFile;
+	private static final @NonNull String DEFAULT_DATASET_NAME = "_of_datasets";
 
 	public BooleanOperationAction(@NonNull List<IAnalysisDataset> list,
 			@NonNull ProgressBarAcceptor acceptor) {
@@ -78,16 +79,22 @@ public class BooleanOperationAction extends MultiDatasetResultAction {
 
 			DatasetArithmeticSetupDialog dialog = new DatasetArithmeticSetupDialog(datasets);
 			if (dialog.isReadyToRun()) {
-
-				File saveFile = new DefaultInputSupplier().requestFileSave(dir,
-						DEFAULT_DATASET_NAME,
-						Io.NMD_FILE_EXTENSION_NODOT);
-
 				IAnalysisDataset datasetOne = dialog.getDatasetOne();
 				IAnalysisDataset datasetTwo = dialog.getDatasetTwo();
 				BooleanOperation operation = dialog.getOperation();
 
-				IAnalysisMethod m = new DatasetMergeMethod(datasets, operation, saveFile);
+				PairedSignalGroups pairs = null;
+
+				if (hasMoreThanOneSignalGroup()) {
+					SignalPairMergingDialog spm = new SignalPairMergingDialog(datasets);
+					pairs = spm.getPairedSignalGroups();
+				}
+
+				File saveFile = new DefaultInputSupplier().requestFileSave(dir,
+						operation.name() + DEFAULT_DATASET_NAME,
+						Io.NMD_FILE_EXTENSION_NODOT);
+
+				IAnalysisMethod m = new DatasetMergeMethod(datasets, operation, saveFile, pairs);
 
 				worker = new DefaultAnalysisWorker(m, NUMBER_OF_STEPS);
 				worker.addPropertyChangeListener(this);
@@ -99,6 +106,20 @@ public class BooleanOperationAction extends MultiDatasetResultAction {
 			// User request cancelled
 			super.finished();
 		}
+	}
+
+	/**
+	 * Check for signals in >1 dataset
+	 * 
+	 * @return
+	 */
+	private boolean hasMoreThanOneSignalGroup() {
+		int numSignals = 0;
+		for (IAnalysisDataset d : datasets) {
+			if (d.getCollection().getSignalManager().hasSignals())
+				numSignals++;
+		}
+		return numSignals > 1;
 	}
 
 	@Override
