@@ -148,11 +148,19 @@ Rotation and offsets can also be applied in exact amounts using the options at t
 
 This contains the analysis parameters used to detect nuclei. If multiple datasets are selected, the background to each row will be green if all datasets have the same value, otherwise, the row will be white.
 
+```{r, out.width="100%", out.height="100%", fig.show='hold', echo=F}
+knitr::include_graphics("img/Analysis info.png")
+```
+
 ## Images tab {#images-tab}
 
 Shows the images in which nuclei have been detected. The detected nuclei are highlighted with a yellow outline.
 
 If image files have been moved, you can relocate them by double clicking the image folder and choosing the updated folder location.
+
+```{r, out.width="100%", out.height="100%", fig.show='hold', echo=F}
+knitr::include_graphics("img/Images.png")
+```
 
 ## Cells tab {#cells-tab}
 
@@ -219,7 +227,7 @@ knitr::include_graphics("img/Nuclear charts_Wilcoxon.png")
 
 ### Magnitude tab
 
-This shows the pairwise magnitude differences between datasets, to give a feel for the biological significance of any differences detected between samples.
+This shows the pairwise magnitude differences between datasets, to give a feel for the biological significance of any differences detected between samples. The value in each cell of the table for each measurement is the median value of the measurement in the dataset of the row, divided by the median value of the measurement in the dataset of the column.
 
 ```{r, out.width="100%", out.height="100%", fig.show='hold', fig.align='center', echo=F}
 knitr::include_graphics("img/Nuclear charts_Magnitude.png")

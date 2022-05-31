@@ -63,7 +63,7 @@ public class TabPanelSwitcher {
 	 * @return true if there is another tab, false otherwise
 	 */
 	public boolean hasNext() {
-		return currentTab < totalTabs - 1;
+		return currentTab <= totalTabs - 1;
 	}
 
 	/**
@@ -72,10 +72,10 @@ public class TabPanelSwitcher {
 	 * @return
 	 */
 	public DetailPanel nextTab() {
-		currentTab++;
 		dock.setSelectedDockable(dock.getDockable(currentTab));
 		Component c = dock.getDockable(currentTab).getContent();
 		DetailPanel d = (DetailPanel) c;
+		currentTab++;
 		return d;
 	}
 
