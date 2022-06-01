@@ -32,8 +32,8 @@
 		<sourceDirectory>src</sourceDirectory>
 		<testSourceDirectory>test</testSourceDirectory>
 
-		<!-- Define resources to be included in the jar. These will be copied to the target dir
-		in the resources phase of the build -->
+		<!-- Define resources to be included in the jar. These will be copied to 
+			the target dir in the resources phase of the build -->
 		<resources>
 			<resource>
 				<directory>res</directory>
@@ -80,6 +80,30 @@
 
 
 		<plugins>
+
+			<!-- Delete contents of directories that are populated from templates -->
+			<plugin>
+				<artifactId>maven-clean-plugin</artifactId>
+				<version>3.2.0</version>
+				<executions>
+					<execution>
+						<phase>clean</phase>
+						<goals>
+							<goal>clean</goal>
+						</goals>
+						<configuration>
+							<filesets>
+								<fileset>
+									<directory>res/user-guide</directory>
+									<includes>
+										<include>**/*</include>
+									</includes>
+								</fileset>
+							</filesets>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 
 			<!-- Create a file in the jar with custom project properties -->
 			<plugin>
@@ -162,7 +186,7 @@
 								<resource>
 									<directory>${project.template.directory}/wiki</directory>
 									<includes>
-										<include>Installation - standalone.md</include>
+										<include>Installation.md</include>
 									</includes>
 									<filtering>true</filtering>
 								</resource>
@@ -216,9 +240,9 @@
 							<encoding>UTF-8</encoding>
 						</configuration>
 					</execution>
-					
-					<!-- Copy user guide screenshots from screens to res, ready to be included
-					in the user guide rendering -->
+
+					<!-- Copy user guide screenshots from screens to res, ready to be included 
+						in the user guide rendering -->
 					<execution>
 						<id>take-guide-screenshots</id>
 						<phase>test</phase>
@@ -256,16 +280,16 @@
 							<encoding>UTF-8</encoding>
 						</configuration>
 					</execution>
-					
-					
+
+
 
 				</executions>
 			</plugin>
 
-			<!-- 	Run a bat file to render the user guide. 
-					Copy the rendered files to the target directory so they will be included 
-					in the jar. This must occur after the user guide has been rendered.
-					Requires Rscript and pandoc on the PATH-->
+			<!-- Run a bat file to render the user guide. Copy the rendered files 
+				to the target directory so they will be included in the jar. This must occur 
+				after the user guide has been rendered. Requires Rscript and pandoc on the 
+				PATH -->
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>exec-maven-plugin</artifactId>
@@ -296,8 +320,8 @@
 			</plugin>
 
 
-			<!--Take screenshots. The screenshotter is a unit test, and will create the example files.
-				No other tests run in this phase-->
+			<!--Take screenshots. The screenshotter is a unit test, and will create 
+				the example files. No other tests run in this phase -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
