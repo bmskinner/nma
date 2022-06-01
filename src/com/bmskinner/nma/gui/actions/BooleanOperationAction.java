@@ -17,6 +17,8 @@
 package com.bmskinner.nma.gui.actions;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Logger;
@@ -32,7 +34,6 @@ import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.core.GlobalOptions;
 import com.bmskinner.nma.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nma.core.ThreadManager;
-import com.bmskinner.nma.gui.DefaultInputSupplier;
 import com.bmskinner.nma.gui.ProgressBarAcceptor;
 import com.bmskinner.nma.gui.dialogs.DatasetArithmeticSetupDialog;
 import com.bmskinner.nma.gui.dialogs.DatasetArithmeticSetupDialog.BooleanOperation;
@@ -88,9 +89,22 @@ public class BooleanOperationAction extends MultiDatasetResultAction {
 					pairs = spm.getPairedSignalGroups();
 				}
 
-				File saveFile = new DefaultInputSupplier().requestFileSave(dir,
+				// Don't accidentally overwrite files
+				File saveFile = is.requestFileSave(dir,
 						operation.name() + DEFAULT_DATASET_NAME,
 						Io.NMD_FILE_EXTENSION_NODOT);
+
+				if (saveFile.exists()) {
+					boolean overwrite = is.requestApproval(
+							"The selected file exists; do you want to overwrite?",
+							"Overwrite file?");
+					if (overwrite) {
+						Files.delete(saveFile.toPath());
+					} else {
+						super.finished();
+						return;
+					}
+				}
 
 				IAnalysisMethod m = new DatasetMergeMethod(datasets, operation, saveFile, pairs);
 
@@ -103,7 +117,7 @@ public class BooleanOperationAction extends MultiDatasetResultAction {
 				super.finished();
 			}
 
-		} catch (RequestCancelledException e1) {
+		} catch (RequestCancelledException | IOException e1) {
 			// User request cancelled
 			super.finished();
 		}
