@@ -171,8 +171,7 @@
 						</configuration>
 					</execution>
 
-					<!-- Copy Bitbucket upload script from templates into scripts -->
-					<!-- Copy jpackage script from templates into scripts -->
+					<!-- Copy script from templates into scripts folder -->
 					<execution>
 						<id>create-jpackage-script</id>
 						<phase>process-resources</phase>
@@ -189,6 +188,7 @@
 										<include>packageAppImage.sh</include>
 										<include>packageDMG.sh</include>
 										<include>uploadFilesToBitbucket.bat</include>
+										<include>renderUserGuide.bat</include>
 									</includes>
 									<filtering>true</filtering>
 								</resource>
