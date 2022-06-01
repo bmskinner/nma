@@ -14,7 +14,7 @@
 		<project.build.sourceEncoding>ISO-8859-1</project.build.sourceEncoding>
 		<jar.finalName>${project.full.name}_${project.version}${version.suffix}</jar.finalName>
 		<project.template.directory>templates</project.template.directory>
-		<project.screenshot.directory>screens</project.screenshot.directory>
+		<project.screenshot.directory>res/screens</project.screenshot.directory>
 		<project.scripts.directory>scripts</project.scripts.directory>
 		<project.wiki.directory>wiki</project.wiki.directory>
 		<maven.build.timestamp.format>yyyy</maven.build.timestamp.format>

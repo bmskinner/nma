@@ -60,7 +60,7 @@ public class Screenshotter {
 	/** Sleep time after loading a dataset */
 	private static final int LOAD_TIME_MILLIS = 2000;
 
-	private static final String SCREENSHOT_FOLDER = "screens/";
+	private static final String SCREENSHOT_FOLDER = "res/screens/";
 
 	private final Robot robot;
 
