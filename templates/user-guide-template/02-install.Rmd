@@ -19,7 +19,7 @@ Software and Java runtime in a portable format built in Debian 10.
  
 Option | Link | Info
 -------|------|------
-Linux portable | [Nuclear_Morphology_Analysis-${project.version}-x86_64-linux.tar.gz](https://bitbucket.org/bmskinner/nuclear_morphology/downloads/Nuclear_Morphology_Analysis-${project.version}-x86_64-linux.tar.gz) | Software and Java runtime in a portable format. Unzip the folder wherever you like and run 'Nuclear_Morphology_Analysis.sh'.
+Linux portable | [Nuclear_Morphology_Analysis-${project.version}-x86_64-linux.tar.gz](https://bitbucket.org/bmskinner/nuclear_morphology/downloads/Nuclear_Morphology_Analysis-${project.version}-x86_64-linux.tar.gz) | Software and Java runtime in a portable format. Unzip the folder wherever you like and run 'launch.sh'. If you have issues with the packaged version, use the standalne jar linked below with your own Java install.
 
 ### MacOS
 
