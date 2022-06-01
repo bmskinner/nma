@@ -465,11 +465,6 @@
 			<artifactId>org.jfree.svg</artifactId>
 			<version>5.0.1</version>
 		</dependency>
-		<!-- <dependency> -->
-		<!-- <groupId>net.sourceforge.jdistlib</groupId> -->
-		<!-- <artifactId>jdistlib</artifactId> -->
-		<!-- <version>0.4.5</version> -->
-		<!-- </dependency> -->
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
