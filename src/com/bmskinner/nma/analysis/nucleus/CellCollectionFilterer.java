@@ -22,6 +22,8 @@ import java.util.function.Predicate;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nma.components.MissingLandmarkException;
 import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.cells.ICell;
@@ -39,106 +41,135 @@ import com.bmskinner.nma.logging.Loggable;
  *
  */
 public class CellCollectionFilterer {
-	
-	private static final Logger LOGGER = Logger.getLogger(CellCollectionFilterer.class.getName());	
-	
+
+	private static final Logger LOGGER = Logger.getLogger(CellCollectionFilterer.class.getName());
+
 	/**
-	 * Create a new collection containing cells that are in both collections.
-	 * The rulesets for the first collection will be applied on the assumption
-	 * that they are the same in both collections
-	 * @param c1 the first collection and source of rulesets for the result
-	 * @param c2 the second collection
+	 * Create a new collection containing cells that are in all collections. The
+	 * rulesets for the first collection will be applied on the assumption that they
+	 * are the same in all collections
+	 * 
+	 * @param collections the collections and source of rulesets for the result
 	 * @return
 	 */
-	public static ICellCollection and(ICellCollection c1, ICellCollection c2) throws ComponentCreationException {			
-		ICellCollection result = new DefaultCellCollection(c1.getRuleSetCollection(), "AND operation", UUID.randomUUID());
-		for(ICell c : c1) {
-			if(c2.contains(c))
+	public static ICellCollection and(@NonNull List<ICellCollection> collections)
+			throws ComponentCreationException {
+		ICellCollection c0 = collections.get(0);
+
+		ICellCollection result = new DefaultCellCollection(c0.getRuleSetCollection(),
+				"AND operation", UUID.randomUUID());
+		for (ICell c : c0) {
+			if (collections.stream().allMatch(col -> col.contains(c)))
 				result.add(c.duplicate());
 		}
 		return result;
 	}
-	
 
 	/**
-	 * Create a new collection containing cells that are in either collection.
-	 * The rulesets for the first collection will be applied on the assumption
-	 * that they are the same in both collections
-	 * @param c1 the first collection and source of rulesets for the result
-	 * @param c2 the second collection
+	 * Create a new collection containing cells that are in any collection. The
+	 * rulesets for the first collection will be applied on the assumption that they
+	 * are the same in both collections
+	 * 
+	 * @param collections the collections and source of rulesets for the result
 	 * @return
-	 * @throws ComponentCreationException 
+	 * @throws ComponentCreationException
 	 */
-	public static ICellCollection or(ICellCollection c1, ICellCollection c2) throws ComponentCreationException {			
-		ICellCollection result = new DefaultCellCollection(c1.getRuleSetCollection(), "OR operation", UUID.randomUUID());
-		for(ICell c : c1)
-			result.add(c.duplicate());
-		for(ICell c : c2)
-			result.add(c.duplicate());		
+	public static ICellCollection or(@NonNull List<ICellCollection> collections)
+			throws ComponentCreationException {
+		ICellCollection c0 = collections.get(0);
+		ICellCollection result = new DefaultCellCollection(c0.getRuleSetCollection(),
+				"OR operation", UUID.randomUUID());
+
+		// Add cells from each source dataset
+		for (ICellCollection d : collections) {
+			for (ICell c : d) {
+				if (!result.contains(c))
+					result.add(c.duplicate());
+			}
+		}
 		return result;
 	}
-	
+
 	/**
-	 * Create a new collection containing cells in collection one that are 
-	 * not in collection two
-	 * The rulesets for the first collection will be applied on the assumption
-	 * that they are the same in both collections
-	 * @param c1 the first collection and source of rulesets for the result
-	 * @param c2 the second collection
+	 * Create a new collection containing cells in the first collection that are not
+	 * in any of the other collections. The rulesets for the first collection will
+	 * be applied on the assumption that they are the same in all collections.
+	 * 
+	 * @param collections the collections and source of rulesets for the result
 	 * @return
-	 * @throws ComponentCreationException 
+	 * @throws ComponentCreationException
 	 */
-	public static ICellCollection not(ICellCollection c1, ICellCollection c2) throws ComponentCreationException {			
-		ICellCollection result = new DefaultCellCollection(c1.getRuleSetCollection(), "NOT operation", UUID.randomUUID());
-		for(ICell c : c1)
-			if(!c2.contains(c))
+	public static ICellCollection not(@NonNull List<ICellCollection> collections)
+			throws ComponentCreationException {
+		ICellCollection c0 = collections.get(0);
+		ICellCollection result = new DefaultCellCollection(c0.getRuleSetCollection(),
+				"NOT operation", UUID.randomUUID());
+
+		List<ICellCollection> otherCollections = collections.subList(1, collections.size());
+
+		// Add cells only if not in any of the other datasets
+		for (ICell c : c0) {
+			if (otherCollections.stream().noneMatch(col -> col.contains(c)))
 				result.add(c.duplicate());
+		}
+
 		return result;
 	}
-	
+
 	/**
-	 * Create a new collection containing cells that are not shared between
-	 * the collection (exclusive or).
-	 * The rulesets for the first collection will be applied on the assumption
-	 * that they are the same in both collections
-	 * @param c1 the first collection and source of rulesets for the result
-	 * @param c2 the second collection
+	 * Create a new collection containing cells that are not shared between the
+	 * collections (exclusive or). The rulesets for the first collection will be
+	 * applied on the assumption that they are the same in both collections
+	 * 
+	 * @param collections the collections and source of rulesets for the result
 	 * @return
-	 * @throws ComponentCreationException 
+	 * @throws ComponentCreationException
 	 */
-	public static ICellCollection xor(ICellCollection c1, ICellCollection c2) throws ComponentCreationException {			
-		ICellCollection result = new DefaultCellCollection(c1.getRuleSetCollection(), "XOR operation", UUID.randomUUID());
-		for(ICell c : c1)
-			if(!c2.contains(c))
-				result.add(c.duplicate());
-		
-		for(ICell c : c2)
-			if(!c1.contains(c))
-				result.add(c.duplicate());		
+	public static ICellCollection xor(@NonNull List<ICellCollection> collections)
+			throws ComponentCreationException {
+		ICellCollection c0 = collections.get(0);
+		ICellCollection result = new DefaultCellCollection(c0.getRuleSetCollection(),
+				"XOR operation", UUID.randomUUID());
+
+		for (ICellCollection d : collections) {
+
+			// Get the collections other than the current collection
+			List<ICellCollection> otherCollections = collections.stream().filter(c -> !c.equals(d))
+					.toList();
+
+			// Add cells that are not in any of the other datasets
+			for (ICell c : d) {
+				if (otherCollections.stream().noneMatch(col -> col.contains(c)))
+					result.add(c.duplicate());
+			}
+		}
 		return result;
 	}
-	
+
 	/**
 	 * Filter the collection using the given filtering options
+	 * 
 	 * @param collection the collection to filter
-	 * @param options the filtering options to use
+	 * @param options    the filtering options to use
 	 * @return the filtered collection
 	 * @throws CollectionFilteringException
 	 */
 	public static ICellCollection filter(ICellCollection collection, FilteringOptions options)
 			throws CollectionFilteringException {
 		return filter(collection, options.getPredicate(collection));
-		
+
 	}
-	
+
 	/**
 	 * Filter the collection using the given cell predicate
+	 * 
 	 * @param collection the collection to filter
-	 * @param pred the predicate determining which cells are valids
+	 * @param pred       the predicate determining which cells are valids
 	 * @return the filtered collection
 	 * @throws CollectionFilteringException
 	 */
-	public static ICellCollection filter(ICellCollection collection, Predicate<ICell> pred) throws CollectionFilteringException {
+	public static ICellCollection filter(ICellCollection collection, Predicate<ICell> pred)
+			throws CollectionFilteringException {
 		String newName = "Filtered_" + pred.toString();
 
 		ICellCollection subCollection = new DefaultCellCollection(collection, newName);
@@ -163,35 +194,35 @@ public class CellCollectionFilterer {
 			LOGGER.warning("Error copying collection offsets");
 			LOGGER.log(Loggable.STACK, "Error in offsetting", e);
 			throw new CollectionFilteringException(e);
-		}		
-        return subCollection;
+		}
+		return subCollection;
 	}
-		
-    /**
-     * Thrown when a cell collection cannot be filtered
-     * 
-     * @author bms41
-     * @since 1.13.3
-     *
-     */
-    public static class CollectionFilteringException extends Exception {
-        private static final long serialVersionUID = 1L;
 
-        public CollectionFilteringException() {
-            super();
-        }
+	/**
+	 * Thrown when a cell collection cannot be filtered
+	 * 
+	 * @author bms41
+	 * @since 1.13.3
+	 *
+	 */
+	public static class CollectionFilteringException extends Exception {
+		private static final long serialVersionUID = 1L;
 
-        public CollectionFilteringException(String message) {
-            super(message);
-        }
+		public CollectionFilteringException() {
+			super();
+		}
 
-        public CollectionFilteringException(String message, Throwable cause) {
-            super(message, cause);
-        }
+		public CollectionFilteringException(String message) {
+			super(message);
+		}
 
-        public CollectionFilteringException(Throwable cause) {
-            super(cause);
-        }
+		public CollectionFilteringException(String message, Throwable cause) {
+			super(message, cause);
+		}
 
-    }
+		public CollectionFilteringException(Throwable cause) {
+			super(cause);
+		}
+
+	}
 }

@@ -79,8 +79,6 @@ public class BooleanOperationAction extends MultiDatasetResultAction {
 
 			DatasetArithmeticSetupDialog dialog = new DatasetArithmeticSetupDialog(datasets);
 			if (dialog.isReadyToRun()) {
-				IAnalysisDataset datasetOne = dialog.getDatasetOne();
-				IAnalysisDataset datasetTwo = dialog.getDatasetTwo();
 				BooleanOperation operation = dialog.getOperation();
 
 				PairedSignalGroups pairs = null;
@@ -100,6 +98,9 @@ public class BooleanOperationAction extends MultiDatasetResultAction {
 				worker.addPropertyChangeListener(this);
 				ThreadManager.getInstance().submit(worker);
 
+			} else {
+				// User cancelled
+				super.finished();
 			}
 
 		} catch (RequestCancelledException e1) {

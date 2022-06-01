@@ -20,8 +20,6 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.GridBagLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,21 +29,19 @@ import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
-import com.bmskinner.nma.gui.components.panels.DatasetSelectionPanel;
+import com.bmskinner.nma.gui.components.panels.WrappedLabel;
 
 @SuppressWarnings("serial")
-public class DatasetArithmeticSetupDialog extends SettingsDialog implements ActionListener {
-
-	private DatasetSelectionPanel boxOne;
-	private DatasetSelectionPanel boxTwo;
+public class DatasetArithmeticSetupDialog extends SettingsDialog {
 	private JComboBox<BooleanOperation> operatorBox;
-	private JLabel operatorDescription = new JLabel(BooleanOperation.AND.getDescription());
+	private WrappedLabel operatorDescription = new WrappedLabel(
+			BooleanOperation.AND.getDescription());
 
 	public enum BooleanOperation {
-		AND("Cells are present in both datasets"),
-		OR("Cells are in either dataset (this merges the datasets)"),
-		NOT("Cells are in dataset one, but not dataset two"),
-		XOR("Cells are in one or other dataset, but not both datasets");
+		AND("Cells are present in all datasets"),
+		OR("Cells are in any dataset (this merges the datasets)"),
+		NOT("Cells are in the first dataset,but not any other datasets"),
+		XOR("Cells are in one dataset, but not shared with another dataset");
 
 		private String description;
 
@@ -62,18 +58,10 @@ public class DatasetArithmeticSetupDialog extends SettingsDialog implements Acti
 		super(true);
 
 		this.setTitle("Dataset boolean options");
-		setSize(450, 300);
 		this.setLocationRelativeTo(null);
 		createGUI(list);
+		this.pack();
 		this.setVisible(true);
-	}
-
-	public IAnalysisDataset getDatasetOne() {
-		return boxOne.getSelectedDataset();
-	}
-
-	public IAnalysisDataset getDatasetTwo() {
-		return boxTwo.getSelectedDataset();
 	}
 
 	public BooleanOperation getOperation() {
@@ -92,36 +80,23 @@ public class DatasetArithmeticSetupDialog extends SettingsDialog implements Acti
 		List<JLabel> labels = new ArrayList<>();
 		List<Component> fields = new ArrayList<>();
 
-		boxOne = new DatasetSelectionPanel(list);
-		boxTwo = new DatasetSelectionPanel(list);
-
-		boxOne.setSelectedDataset(list.get(0));
-		boxTwo.setSelectedDataset(list.get(0));
-
-		if (list.size() == 2) {
-			boxTwo.setSelectedDataset(list.get(1));
-		}
-
 		operatorBox = new JComboBox<>(BooleanOperation.values());
 		operatorBox.setSelectedItem(BooleanOperation.AND);
-		operatorBox.setPreferredSize(boxOne.getPreferredSize());
-		operatorBox.addActionListener(this);
+		operatorBox.addActionListener(
+				e -> {
+					operatorDescription.setText(getOperation().getDescription());
+					operatorDescription.setPreferredSize(null);
+					this.pack();
 
-		labels.add(new JLabel("Dataset one"));
-		fields.add(boxOne);
+				});
 
 		JPanel operatorPanel = new JPanel(new FlowLayout());
 		operatorPanel.add(operatorBox);
 		labels.add(new JLabel("Operation"));
 		fields.add(operatorPanel);
 
-		JPanel descPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-		descPanel.add(operatorDescription);
 		labels.add(new JLabel("Description"));
-		fields.add(descPanel);
-
-		labels.add(new JLabel("Dataset two"));
-		fields.add(boxTwo);
+		fields.add(operatorDescription);
 
 		this.addLabelTextRows(labels, fields, layout, panel);
 
@@ -132,13 +107,6 @@ public class DatasetArithmeticSetupDialog extends SettingsDialog implements Acti
 		this.add(panel, BorderLayout.CENTER);
 
 		this.add(createFooter(), BorderLayout.SOUTH);
-
-	}
-
-	@Override
-	public void actionPerformed(ActionEvent e) {
-
-		operatorDescription.setText(getOperation().getDescription());
 
 	}
 

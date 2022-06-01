@@ -31,10 +31,8 @@ import com.bmskinner.nma.analysis.signals.PairedSignalGroups.DatasetSignalId;
 import com.bmskinner.nma.components.MissingLandmarkException;
 import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.cells.ComponentCreationException;
-import com.bmskinner.nma.components.cells.ICell;
 import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.datasets.DefaultAnalysisDataset;
-import com.bmskinner.nma.components.datasets.DefaultCellCollection;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.datasets.ICellCollection;
 import com.bmskinner.nma.components.options.HashOptions;
@@ -69,7 +67,7 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 
 	private final BooleanOperation operation;
 
-	private static final int MAX_PROGRESS = 100;
+	private static final int MAX_PROGRESS = 50;
 	private static final int MILLISECONDS_TO_SLEEP = 10;
 
 	/**
@@ -120,29 +118,49 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 		saveFile = checkName(saveFile).getAbsoluteFile();
 		String newDatasetName = saveFile.getName().replace(Io.NMD_FILE_EXTENSION, "");
 
-		IAnalysisDataset newDataset;
+		IAnalysisDataset newDataset = switch (operation) {
+		case AND -> performAnd(newDatasetName);
+		case NOT -> performNot(newDatasetName);
 
-		switch (operation) {
-		case AND:
-			newDataset = performAnd(newDatasetName);
-			break;
-
-		case NOT:
-			newDataset = performNot(newDatasetName);
-			break;
-
-		case XOR:
-			newDataset = performXor(newDatasetName);
-			break;
-
-		case OR:
-		default:
-			newDataset = performMerge(newDatasetName);
-			break;
-
-		}
+		case XOR -> performXor(newDatasetName);
+		case OR -> performOr(newDatasetName);
+		};
 
 		spinWheels(MAX_PROGRESS, MILLISECONDS_TO_SLEEP);
+
+		return newDataset;
+	}
+
+	/**
+	 * Given a new collection of merged cells, ensure signal groups and options have
+	 * been applied, and segments are reset.
+	 * 
+	 * @param newCollection
+	 * @return a new dataset containing the cell collection
+	 * @throws MissingOptionException
+	 * @throws MissingLandmarkException
+	 * @throws ProfileException
+	 */
+	private IAnalysisDataset buildDataset(ICellCollection newCollection)
+			throws MissingOptionException, MissingLandmarkException, ProfileException {
+
+		for (Nucleus n : newCollection.getNuclei()) {
+			// Ensure that all nuclei have any existing segments removed
+			// and replaced with the default segment starting at the RP
+			n.setSegments(List.of(new DefaultProfileSegment(0, 0, n.getBorderLength(),
+					IProfileCollection.DEFAULT_SEGMENT_ID)));
+		}
+
+		// Replace signal groups
+		mergeSignalGroups(newCollection);
+
+		// create the dataset; has no analysis options at present
+		IAnalysisDataset newDataset = new DefaultAnalysisDataset(newCollection, saveFile);
+
+		IAnalysisOptions mergedOptions = mergeOptions(newDataset);
+		newDataset.setAnalysisOptions(mergedOptions);
+
+		mergeSignalOptions(newDataset);
 
 		return newDataset;
 	}
@@ -154,14 +172,15 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 	 */
 	private boolean datasetsCanBeMerged() {
 		if (datasets.size() <= 1) {
-			LOGGER.warning("Must have multiple datasets to merge");
+			LOGGER.warning("Must have multiple datasets to operate on");
 			return false;
 		}
 
 		// check we are not merging a parent and child (would just get parent)
-		if (datasets.size() == 2 && (datasets.get(0).hasDirectChild(datasets.get(1))
-				|| datasets.get(1).hasDirectChild(datasets.get(0)))) {
-			LOGGER.warning("Merging parent and child would be silly.");
+		if (operation.equals(BooleanOperation.OR) && datasets.size() == 2
+				&& (datasets.get(0).hasDirectChild(datasets.get(1))
+						|| datasets.get(1).hasDirectChild(datasets.get(0)))) {
+			LOGGER.warning("Merging parent and child would just give the parent.");
 			return false;
 
 		}
@@ -170,7 +189,7 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 		RuleSetCollection testClass = datasets.get(0).getCollection().getRuleSetCollection();
 		for (IAnalysisDataset d : datasets) {
 			if (!d.getCollection().getRuleSetCollection().equals(testClass)) {
-				LOGGER.warning("Cannot merge collections with different rulesets");
+				LOGGER.warning("Cannot merge datasets with different rulesets");
 				return false;
 			}
 		}
@@ -181,115 +200,36 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 	private IAnalysisDataset performAnd(@NonNull String newDatasetName)
 			throws MissingOptionException, ProfileException, MissingLandmarkException,
 			ComponentCreationException {
-		// make a new collection
-		ICellCollection newCollection = new DefaultCellCollection(
-				datasets.get(0).getCollection().getRuleSetCollection(),
-				newDatasetName, UUID.randomUUID());
 
-		newCollection = CellCollectionFilterer.and(datasets.get(0).getCollection(),
-				datasets.get(1).getCollection());
+		List<ICellCollection> collections = datasets.stream().map(IAnalysisDataset::getCollection)
+				.toList();
 
-		for (Nucleus n : newCollection.getNuclei()) {
-			// Ensure that all nuclei have any existing segments removed
-			// and replaced with the default segment starting at the RP
-			n.setSegments(List.of(new DefaultProfileSegment(0, 0, n.getBorderLength(),
-					IProfileCollection.DEFAULT_SEGMENT_ID)));
+		ICellCollection newCollection = CellCollectionFilterer.and(collections);
+		newCollection.setName(newDatasetName);
 
-		}
-
-		// Replace signal groups
-		mergeSignalGroups(newCollection);
-
-		// create the dataset; has no analysis options at present
-		IAnalysisDataset newDataset = new DefaultAnalysisDataset(newCollection, saveFile);
-
-		// Add the original datasets as merge sources
-		for (IAnalysisDataset d : datasets) {
-			newDataset.addMergeSource(d);
-		}
-
-		IAnalysisOptions mergedOptions = mergeOptions(newDataset);
-		newDataset.setAnalysisOptions(mergedOptions);
-
-		mergeSignalOptions(newDataset);
-
-		return newDataset;
+		return buildDataset(newCollection);
 	}
 
 	private IAnalysisDataset performNot(@NonNull String newDatasetName)
 			throws MissingOptionException, ProfileException, MissingLandmarkException,
 			ComponentCreationException {
-		// make a new collection
-		ICellCollection newCollection = new DefaultCellCollection(
-				datasets.get(0).getCollection().getRuleSetCollection(),
-				newDatasetName, UUID.randomUUID());
+		List<ICellCollection> collections = datasets.stream().map(IAnalysisDataset::getCollection)
+				.toList();
 
-		newCollection = CellCollectionFilterer.not(datasets.get(0).getCollection(),
-				datasets.get(1).getCollection());
+		ICellCollection newCollection = CellCollectionFilterer.not(collections);
 
-		for (Nucleus n : newCollection.getNuclei()) {
-			// Ensure that all nuclei have any existing segments removed
-			// and replaced with the default segment starting at the RP
-			n.setSegments(List.of(new DefaultProfileSegment(0, 0, n.getBorderLength(),
-					IProfileCollection.DEFAULT_SEGMENT_ID)));
-
-		}
-
-		// Replace signal groups
-		mergeSignalGroups(newCollection);
-
-		// create the dataset; has no analysis options at present
-		IAnalysisDataset newDataset = new DefaultAnalysisDataset(newCollection, saveFile);
-
-		// Add the original datasets as merge sources
-		for (IAnalysisDataset d : datasets) {
-			newDataset.addMergeSource(d);
-		}
-
-		IAnalysisOptions mergedOptions = mergeOptions(newDataset);
-		newDataset.setAnalysisOptions(mergedOptions);
-
-		mergeSignalOptions(newDataset);
-
-		return newDataset;
+		return buildDataset(newCollection);
 	}
 
 	private IAnalysisDataset performXor(@NonNull String newDatasetName)
 			throws MissingOptionException, ProfileException, MissingLandmarkException,
 			ComponentCreationException {
-		// make a new collection
-		ICellCollection newCollection = new DefaultCellCollection(
-				datasets.get(0).getCollection().getRuleSetCollection(),
-				newDatasetName, UUID.randomUUID());
+		List<ICellCollection> collections = datasets.stream().map(IAnalysisDataset::getCollection)
+				.toList();
 
-		newCollection = CellCollectionFilterer.xor(datasets.get(0).getCollection(),
-				datasets.get(1).getCollection());
+		ICellCollection newCollection = CellCollectionFilterer.xor(collections);
 
-		for (Nucleus n : newCollection.getNuclei()) {
-			// Ensure that all nuclei have any existing segments removed
-			// and replaced with the default segment starting at the RP
-			n.setSegments(List.of(new DefaultProfileSegment(0, 0, n.getBorderLength(),
-					IProfileCollection.DEFAULT_SEGMENT_ID)));
-
-		}
-
-		// Replace signal groups
-		mergeSignalGroups(newCollection);
-
-		// create the dataset; has no analysis options at present
-		IAnalysisDataset newDataset = new DefaultAnalysisDataset(newCollection, saveFile);
-
-		// Add the original datasets as merge sources
-		for (IAnalysisDataset d : datasets) {
-			newDataset.addMergeSource(d);
-		}
-
-		IAnalysisOptions mergedOptions = mergeOptions(newDataset);
-		newDataset.setAnalysisOptions(mergedOptions);
-
-		mergeSignalOptions(newDataset);
-
-		return newDataset;
+		return buildDataset(newCollection);
 	}
 
 	/**
@@ -304,46 +244,22 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 	 * @throws MissingLandmarkException
 	 * @throws ComponentCreationException
 	 */
-	private IAnalysisDataset performMerge(@NonNull String newDatasetName)
+	private IAnalysisDataset performOr(@NonNull String newDatasetName)
 			throws MissingOptionException, ProfileException, MissingLandmarkException,
 			ComponentCreationException {
 
-		// make a new collection
-		ICellCollection newCollection = new DefaultCellCollection(
-				datasets.get(0).getCollection().getRuleSetCollection(),
-				newDatasetName, UUID.randomUUID());
+		List<ICellCollection> collections = datasets.stream().map(IAnalysisDataset::getCollection)
+				.toList();
 
-		// Add cells from each source dataset
-		for (IAnalysisDataset d : datasets) {
-			for (ICell c : d.getCollection()) {
-				if (!newCollection.contains(c))
-					newCollection.add(c.duplicate());
-			}
-		}
+		ICellCollection newCollection = CellCollectionFilterer.or(collections);
+		newCollection.setName(newDatasetName);
 
-		for (Nucleus n : newCollection.getNuclei()) {
-			// Ensure that all nuclei have any existing segments removed
-			// and replaced with the default segment starting at the RP
-			n.setSegments(List.of(new DefaultProfileSegment(0, 0, n.getBorderLength(),
-					IProfileCollection.DEFAULT_SEGMENT_ID)));
-
-		}
-
-		// Replace signal groups
-		mergeSignalGroups(newCollection);
-
-		// create the dataset; has no analysis options at present
-		IAnalysisDataset newDataset = new DefaultAnalysisDataset(newCollection, saveFile);
+		IAnalysisDataset newDataset = buildDataset(newCollection);
 
 		// Add the original datasets as merge sources
 		for (IAnalysisDataset d : datasets) {
 			newDataset.addMergeSource(d);
 		}
-
-		IAnalysisOptions mergedOptions = mergeOptions(newDataset);
-		newDataset.setAnalysisOptions(mergedOptions);
-
-		mergeSignalOptions(newDataset);
 
 		return newDataset;
 	}
