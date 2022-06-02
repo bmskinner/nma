@@ -370,7 +370,7 @@
 							<appendAssemblyId>false</appendAssemblyId>
 							<archive>
 								<manifest>
-									<mainClass>com.bmskinner.nuclear_morphology.core.NuclearMorphologyAnalysis</mainClass>
+									<mainClass>com.bmskinner.nma.core.NuclearMorphologyAnalysis</mainClass>
 								</manifest>
 							</archive>
 						</configuration>
