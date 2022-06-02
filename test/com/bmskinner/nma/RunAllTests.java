@@ -22,7 +22,7 @@ import com.bmskinner.nma.utility.UtilityTestSuite;
  * them
  * 
  * @author ben
- * @since 1.14.0
+ * @since 2.0.0
  *
  */
 @RunWith(Suite.class)
