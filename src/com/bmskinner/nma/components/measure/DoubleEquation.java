@@ -85,18 +85,23 @@ public class DoubleEquation implements LineEquation {
 	public DoubleEquation(Point2D a, Point2D b) {
 
 		if (a == null || b == null) {
-			throw new IllegalArgumentException("Point a or b is null");
+			throw new IllegalArgumentException(
+					"Cannot make line from two points; point a or b is null");
 		}
 
 		if (a.getX() == b.getX() && a.getY() == b.getY()) {
-			throw new IllegalArgumentException("Point a and b are identical: " + a.toString());
+			throw new IllegalArgumentException(
+					"Cannot make line from two points; ooint a and b are identical: "
+							+ a.toString());
 		}
 
 		double aX = a.getX();
 		double bX = b.getX();
 
 		if (Double.isNaN(aX) || Double.isNaN(bX)) {
-			throw new IllegalArgumentException("Point a or b have NaN x: " + a.toString() + ", " + b.toString());
+			throw new IllegalArgumentException(
+					"Cannot make line from two points; point a or b have NaN x: " + a.toString()
+							+ ", " + b.toString());
 		}
 
 		// y=mx+c
@@ -136,7 +141,8 @@ public class DoubleEquation implements LineEquation {
 	@Override
 	public boolean isOnLine(IPoint p) {
 
-		return isVert ? Math.abs(p.getX() - xf) < 0.0000001 : Math.abs(p.getY() - ((m * p.getX()) + c)) < .0000001;
+		return isVert ? Math.abs(p.getX() - xf) < 0.0000001
+				: Math.abs(p.getY() - ((m * p.getX()) + c)) < .0000001;
 	}
 
 	@Override
@@ -209,8 +215,7 @@ public class DoubleEquation implements LineEquation {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * com.bmskinner.nma.components.generic.Equation#getIntercept
+	 * @see com.bmskinner.nma.components.generic.Equation#getIntercept
 	 * (com.bmskinner.nma.components.generic.Equation)
 	 */
 	@Override

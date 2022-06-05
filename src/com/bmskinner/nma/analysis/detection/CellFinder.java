@@ -92,6 +92,9 @@ public abstract class CellFinder extends AbstractFinder<Collection<ICell>> {
 				list.addAll(findInImage(f));
 			} catch (ImageImportException e) {
 				LOGGER.log(Loggable.STACK, "Error searching image", e);
+			} catch (Exception e) {
+				LOGGER.log(Loggable.STACK, "Error detecting cell", e);
+				throw (e);
 			}
 			LOGGER.finer("Found images in " + f.getName());
 		});

@@ -28,8 +28,8 @@ import com.bmskinner.nma.components.measure.MeasurementDimension;
 public enum ProfileType {
 	ANGLE("Angle profile", "Angle", MeasurementDimension.ANGLE),
 	DIAMETER("Diameter profile", "Distance across CoM", MeasurementDimension.LENGTH),
-	RADIUS("Radius profile", "Distance from CoM", MeasurementDimension.LENGTH),
-	ZAHN_ROSKIES("Zahn-Roskies profile", "Angle delta", MeasurementDimension.NONE);
+	RADIUS("Radius profile", "Distance from CoM", MeasurementDimension.LENGTH);
+//	ZAHN_ROSKIES("Zahn-Roskies profile", "Angle delta", MeasurementDimension.NONE);
 
 	private String name;
 	private String label;

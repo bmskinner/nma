@@ -34,6 +34,7 @@ import com.bmskinner.nma.components.profiles.DefaultProfile;
 import com.bmskinner.nma.components.profiles.IProfile;
 import com.bmskinner.nma.components.profiles.ProfileException;
 import com.bmskinner.nma.components.profiles.ProfileType;
+import com.bmskinner.nma.logging.Loggable;
 import com.bmskinner.nma.stats.Stats;
 import com.bmskinner.nma.utility.AngleTools;
 
@@ -68,13 +69,12 @@ public class ProfileCreator {
 				return calculateDiameterProfile(target);
 			case RADIUS:
 				return calculateRadiusProfile(target);
-			case ZAHN_ROSKIES:
-				return calculateZahnRoskiesProfile(target);
 			default:
 				return calculateAngleProfile(target);
 			}
 		} catch (UnavailableBorderPointException e) {
-			LOGGER.warning("Cannot create profile " + e.getMessage());
+			LOGGER.log(Loggable.STACK, "Cannot create profile " + e.getMessage(), e);
+			LOGGER.warning("Cannot create " + type.toString() + "" + e.getMessage());
 			throw new ProfileException("Cannot create profile " + type, e);
 		}
 	}
@@ -135,17 +135,22 @@ public class ProfileCreator {
 	private static IProfile calculateZahnRoskiesProfile(@NonNull Taggable target) {
 
 		float[] profile = new float[target.getBorderLength()];
-		int index = 0;
 
-		Iterator<IPoint> it = target.getBorderList().iterator();
-		while (it.hasNext()) {
+		List<IPoint> border = target.getBorderList();
 
-			IPoint point = it.next();
+		for (int i = 0; i < border.size(); i++) {
 
-			IPoint prev = target.getBorderList()
-					.get(CellularComponent.wrapIndex(index + 1, target.getBorderLength()));
-			IPoint next = target.getBorderList()
-					.get(CellularComponent.wrapIndex(index - 1, target.getBorderLength()));
+			IPoint point = border.get(i);
+
+			IPoint prev = border
+					.get(CellularComponent.wrapIndex(i - 1, target.getBorderLength()));
+			IPoint next = border
+					.get(CellularComponent.wrapIndex(i + 1, target.getBorderLength()));
+
+			if (point.equals(prev)) {
+				profile[i] = 0;
+				continue;
+			}
 
 			// Get the equation between the first two points
 			LineEquation eq = new DoubleEquation(prev, point);
@@ -168,20 +173,18 @@ public class ProfileCreator {
 			if (angle < -180)
 				angle = 180 + (angle + 180);
 
-			profile[index++] = (float) angle;
+			profile[i] = (float) angle;
 
 		}
 
 		// invert if needed
-
 		if (profile[0] < 0) {
 			for (int i = 0; i < profile.length; i++) {
 				profile[i] = 0 - profile[i];
 			}
 		}
 
-		// Make a new profile. If possible, use the internal segmentation type of the
-		// component
+		// Make a new profile
 		return new DefaultProfile(profile);
 	}
 
