@@ -31,6 +31,7 @@ templates/icon.ico
 templates/icon.png
 
 # Testing files
+test/issues/*
 rxrepl.exe
 updateVersion.ps1
 .Rproj.user
