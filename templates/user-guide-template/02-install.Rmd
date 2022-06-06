@@ -111,6 +111,7 @@ Custom options are set in the `config.ini` file in the configuration directory. 
 Key        | Allowed Values | Effect
 -----------| ---------------|--------------
 ``DEFAULT_IMAGE_SCALE`` | A positive number e.g. ``18.0`` | Sets the default scale for converting pixels to microns
+``DEFAULT_RULESET`` | A ruleset file name from the rulesets directory _e.g._ `Mouse sperm` | Sets the default ruleset for landmark detection
 ``DEFAULT_COLOUR_SWATCH`` | ``REGULAR_SWATCH`` ``ACCESSIBLE_SWATCH`` ``NO_SWATCH`` | Sets the default colouring of datasets and segments
 ``DEFAULT_DIR`` | *directory with backslashes escaped* e.g. `C:\\path\\to\\folder`    | Sets the default folder for exporting data
 ``DEFAULT_DISPLAY_SCALE`` | ``PIXELS`` ``MICRONS`` | Sets the default scale to display in charts and tables

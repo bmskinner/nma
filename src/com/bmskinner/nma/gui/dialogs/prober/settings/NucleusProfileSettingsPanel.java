@@ -37,6 +37,7 @@ import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.options.IAnalysisOptions;
+import com.bmskinner.nma.core.GlobalOptions;
 import com.bmskinner.nma.io.Io;
 import com.bmskinner.nma.io.XMLReader;
 import com.bmskinner.nma.io.XMLReader.XMLReadingException;
@@ -51,118 +52,147 @@ import com.bmskinner.nma.logging.Loggable;
  */
 @SuppressWarnings("serial")
 public class NucleusProfileSettingsPanel extends SettingsPanel {
-	
-	private static final Logger LOGGER = Logger.getLogger(NucleusProfileSettingsPanel.class.getName());
 
-    private static final double MIN_PROFILE_PROP  = 0;
-    private static final double MAX_PROFILE_PROP  = 1;
-    private static final double STEP_PROFILE_PROP = 0.01;
+	private static final Logger LOGGER = Logger
+			.getLogger(NucleusProfileSettingsPanel.class.getName());
 
-    private static final String TYPE_LBL           = "Nucleus type";
-    private static final String PROFILE_WINDOW_LBL = "Profile window";
+	private static final double MIN_PROFILE_PROP = 0;
+	private static final double MAX_PROFILE_PROP = 1;
+	private static final double STEP_PROFILE_PROP = 0.01;
 
-    private IAnalysisOptions options;
+	private static final String TYPE_LBL = "Nucleus type";
+	private static final String PROFILE_WINDOW_LBL = "Profile window";
 
-    private JSpinner profileWindow;
+	private IAnalysisOptions options;
 
-    private JComboBox<String> typeBox;
-    
-    public NucleusProfileSettingsPanel(final IAnalysisOptions op) {
-        super();
-        options = op;
-        this.add(createPanel(), BorderLayout.CENTER);
-    }
-    
-    private String[] getAvailableRulesets(){
-    	File[] files = Io.getRulesetDir().listFiles((d, s) -> s.toLowerCase().endsWith(Io.XML_FILE_EXTENSION));
-    	return Arrays.stream(files)
-    			.map(File::getName)
-    			.map(f-> f.replaceAll(Io.XML_FILE_EXTENSION, ""))
-    			.toArray(String[]::new);
-    }
-    
-    private void setRuleset(File f) {
-    	try {
-        	options.setRuleSetCollection(XMLReader.readRulesetCollection(f));
+	private JSpinner profileWindow;
+
+	private JComboBox<String> typeBox;
+
+	public NucleusProfileSettingsPanel(final IAnalysisOptions op) {
+		super();
+		options = op;
+		this.add(createPanel(), BorderLayout.CENTER);
+	}
+
+	private String[] getAvailableRulesets() {
+		File[] files = Io.getRulesetDir()
+				.listFiles((d, s) -> s.toLowerCase().endsWith(Io.XML_FILE_EXTENSION));
+		return Arrays.stream(files)
+				.map(File::getName)
+				.map(f -> f.replaceAll(Io.XML_FILE_EXTENSION, ""))
+				.toArray(String[]::new);
+	}
+
+	private void setRuleset(File f) {
+		try {
+			options.setRuleSetCollection(XMLReader.readRulesetCollection(f));
 		} catch (XMLReadingException | ComponentCreationException e1) {
-			LOGGER.log(Loggable.STACK, e1, () -> "Unable to read XML file: "+f.getAbsolutePath());
+			LOGGER.log(Loggable.STACK, e1, () -> "Unable to read XML file: " + f.getAbsolutePath());
 		}
-    }
+	}
 
-    /**
-     * Create the settings spinners based on the input options
-     */
-    private void createSpinners() {
+	/**
+	 * Create the settings spinners based on the input options
+	 */
+	private void createSpinners() {
 
-        typeBox = new JComboBox<>(getAvailableRulesets());
+		String defaultNucleusType = GlobalOptions.getInstance()
+				.getString(GlobalOptions.DEFAULT_RULESET_KEY);
 
-        typeBox.addActionListener(e -> {
+		LOGGER.finer("Default type: " + defaultNucleusType);
 
-        	Optional<HashOptions> nOptions = options.getDetectionOptions(CellularComponent.NUCLEUS);
-        	if(!nOptions.isPresent())
-        		return;
+		String[] availableRules = getAvailableRulesets();
 
-        	// Rebuild the file name from the cleaned names
-        	File type = new File(Io.getRulesetDir(), (String)typeBox.getSelectedItem()+Io.XML_FILE_EXTENSION);
-        	setRuleset(type);
-        });
-        
-        // Set the default from the order of the dropdown list
-        File defaultRuleset = new File(Io.getRulesetDir(), (String)typeBox.getSelectedItem()+Io.XML_FILE_EXTENSION);
-        setRuleset(defaultRuleset);
+		typeBox = new JComboBox<>(availableRules);
 
-        profileWindow = new JSpinner(new SpinnerNumberModel(options.getProfileWindowProportion(), MIN_PROFILE_PROP,
-                MAX_PROFILE_PROP, STEP_PROFILE_PROP));
+		typeBox.addActionListener(e -> {
 
-        Dimension dim = new Dimension(BOX_WIDTH, BOX_HEIGHT);
-        profileWindow.setPreferredSize(dim);
+			Optional<HashOptions> nOptions = options.getDetectionOptions(CellularComponent.NUCLEUS);
+			if (!nOptions.isPresent())
+				return;
 
-        profileWindow.addChangeListener(e -> {
-            JSpinner j = (JSpinner) e.getSource();
-            try {
-                j.commitEdit();
-                options.setAngleWindowProportion((Double) j.getValue());
-            } catch (Exception e1) {
-                LOGGER.warning("Parsing error in spinner");
-                LOGGER.log(Loggable.STACK, "Parsing error in JSpinner", e1);
-            }
+			// Rebuild the file name from the cleaned names
+			File type = new File(Io.getRulesetDir(),
+					(String) typeBox.getSelectedItem() + Io.XML_FILE_EXTENSION);
+			setRuleset(type);
+		});
 
-        });        
-    }
+		// Check if the default option from the config file is present
+		boolean hasDefault = Arrays.stream(availableRules)
+				.anyMatch(r -> r.equals(defaultNucleusType));
 
-    private JPanel createPanel() {
+		// If a default ruleset is in the config options and the file is present set it
+		if (hasDefault) {
+			LOGGER.finer("Default type found");
+			typeBox.setSelectedItem(defaultNucleusType);
 
-        this.createSpinners();
+			// Set the default from the order of the dropdown list
+			File defaultRuleset = new File(Io.getRulesetDir(),
+					defaultNucleusType + Io.XML_FILE_EXTENSION);
 
-        JPanel panel = new JPanel(new GridBagLayout());
+			setRuleset(defaultRuleset);
+		} else {
+			typeBox.setSelectedIndex(0);
+			// Set the rules to the first element in the list
+			File type = new File(Io.getRulesetDir(),
+					typeBox.getItemAt(0) + Io.XML_FILE_EXTENSION);
+			setRuleset(type);
+		}
 
-        List<JLabel> labels = new ArrayList<>();
-        labels.add(new JLabel(TYPE_LBL));
-        labels.add(new JLabel(PROFILE_WINDOW_LBL));
+		profileWindow = new JSpinner(
+				new SpinnerNumberModel(options.getProfileWindowProportion(), MIN_PROFILE_PROP,
+						MAX_PROFILE_PROP, STEP_PROFILE_PROP));
 
-        List<Component> fields = new ArrayList<>();
+		Dimension dim = new Dimension(BOX_WIDTH, BOX_HEIGHT);
+		profileWindow.setPreferredSize(dim);
 
-        fields.add(typeBox);
-        fields.add(profileWindow);
+		profileWindow.addChangeListener(e -> {
+			JSpinner j = (JSpinner) e.getSource();
+			try {
+				j.commitEdit();
+				options.setAngleWindowProportion((Double) j.getValue());
+			} catch (Exception e1) {
+				LOGGER.warning("Parsing error in spinner");
+				LOGGER.log(Loggable.STACK, "Parsing error in JSpinner", e1);
+			}
 
-        addLabelTextRows(labels, fields, panel);
+		});
+	}
 
-        return panel;
-    }
+	private JPanel createPanel() {
 
-    /**
-     * Update the spinners to current options values
-     */
-    @Override
-    protected void update() {
-        super.update();
-        profileWindow.setValue(options.getProfileWindowProportion());
-    }
+		this.createSpinners();
 
-    @Override
-    public void setEnabled(boolean b) {
-        super.setEnabled(b);
-        profileWindow.setEnabled(b);
-        typeBox.setEnabled(b);
-    }
+		JPanel panel = new JPanel(new GridBagLayout());
+
+		List<JLabel> labels = new ArrayList<>();
+		labels.add(new JLabel(TYPE_LBL));
+		labels.add(new JLabel(PROFILE_WINDOW_LBL));
+
+		List<Component> fields = new ArrayList<>();
+
+		fields.add(typeBox);
+		fields.add(profileWindow);
+
+		addLabelTextRows(labels, fields, panel);
+
+		return panel;
+	}
+
+	/**
+	 * Update the spinners to current options values
+	 */
+	@Override
+	protected void update() {
+		super.update();
+		profileWindow.setValue(options.getProfileWindowProportion());
+	}
+
+	@Override
+	public void setEnabled(boolean b) {
+		super.setEnabled(b);
+		profileWindow.setEnabled(b);
+		typeBox.setEnabled(b);
+	}
 }
