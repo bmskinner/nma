@@ -59,3 +59,8 @@ A Java library for evolutionary biology and bioinformatics, including objects re
 Available from: https://sourceforge.net/p/jebl/wiki/Home/
 License: GNU LESSER GENERAL PUBLIC LICENSE Version 2.1, February 1999
 
+----------
+GLCM
+----------
+Included version is based on Toby Cornish's GLCM_Texture_Too for ImageJ
+Available from: https://github.com/cornish/GLCM-TextureToo
