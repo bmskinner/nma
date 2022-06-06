@@ -17,12 +17,16 @@ Portable | [Nuclear Morphology Analysis-${project.version}-x86_64-windows.zip](h
 Installer | [Nuclear_Morphology_Analysis-${project.version}-x86_64-windows.msi](https://bitbucket.org/bmskinner/nuclear_morphology/downloads/Nuclear_Morphology_Analysis-${project.version}-x86_64-windows.msi) | Software and Java runtime in an installer for Windows. This will add the software to your list of installed programs, and create a start menu entry. May require administrator privileges depending on where you install.
 Standalone Jar file | [Nuclear_Morphology_Analysis_${project.version}_standalone.jar](https://bitbucket.org/bmskinner/nuclear_morphology/downloads/Nuclear_Morphology_Analysis_${project.version}_standalone.jar)  | The jar file with all dependencies for users who want to use their own Java install.
 
+You can also download a set of images suitable for testing the software from [https://bitbucket.org/bmskinner/nuclear_morphology/downloads/Testing_mouse_image_set.zip](https://bitbucket.org/bmskinner/nuclear_morphology/downloads/Testing_mouse_image_set.zip).
+
 ### Linux
  
 Option | Link | Info
 -------|------|------
-Linux portable | [Nuclear_Morphology_Analysis-${project.version}-x86_64-linux.tar.gz](https://bitbucket.org/bmskinner/nuclear_morphology/downloads/Nuclear_Morphology_Analysis-${project.version}-x86_64-linux.tar.gz) | Software and Java runtime in a portable format. Unzip the folder wherever you like and run 'launch.sh'. This version was packaged on Debian 11 with glibc 2.31. If you have issues with the packaged version, use the standalne jar below.
+Linux portable | [Nuclear_Morphology_Analysis-${project.version}-x86_64-linux.tar.gz](https://bitbucket.org/bmskinner/nuclear_morphology/downloads/Nuclear_Morphology_Analysis-${project.version}-x86_64-linux.tar.gz) | Software and Java runtime in a portable format. Unzip the folder wherever you like and run 'launch.sh'. This version was packaged on Debian 11 with glibc 2.31. If you have issues with the packaged version, use the standalone jar below.
 Standalone Jar file | [Nuclear_Morphology_Analysis_${project.version}_standalone.jar](https://bitbucket.org/bmskinner/nuclear_morphology/downloads/Nuclear_Morphology_Analysis_${project.version}_standalone.jar)  | The jar file with all dependencies for users who want to use their own Java install.
+
+You can also download a set of images suitable for testing the software from [https://bitbucket.org/bmskinner/nuclear_morphology/downloads/Testing_mouse_image_set.zip](https://bitbucket.org/bmskinner/nuclear_morphology/downloads/Testing_mouse_image_set.zip).
 
 ### MacOS
 
@@ -32,6 +36,8 @@ The software is not currently available packaged with the Java runtime. You will
 - Download [Nuclear_Morphology_Analysis_${project.version}_standalone.jar](https://bitbucket.org/bmskinner/nuclear_morphology/downloads/Nuclear_Morphology_Analysis_${project.version}_standalone.jar) 
 
 Due to security permissions in recent versions of MacOS (Catalina and above) the program won't have access to user folders if launched by double-clicking the jar file. You should launch from the Terminal; open the Terminal, navigate to the directory containing the jar file, and launch the jar using `java -jar Nuclear_Morphology_Analysis_${project.version}_standalone.jar`.
+
+You can also download a set of images suitable for testing the software from [https://bitbucket.org/bmskinner/nuclear_morphology/downloads/Testing_mouse_image_set.zip](https://bitbucket.org/bmskinner/nuclear_morphology/downloads/Testing_mouse_image_set.zip).
 
 ## Uninstalling
 
