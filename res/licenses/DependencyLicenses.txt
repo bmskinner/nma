@@ -49,3 +49,13 @@ Please, refer to this version as:
 Gabriel Prieto, Margarita Chevalier, Eduardo Guibelalde. "MS_SSIM Index and MS_SSIM* Index as a Java plugin for ImageJ"
 Department of Radiology, Faculty of Medicine. Universidad Complutense. Madrid. SPAIN.
 http://www.ucm.es/info/fismed/MSSIM/MSSIM.htm
+
+----------
+Java Evolutionary Biology Library
+----------
+
+A Java library for evolutionary biology and bioinformatics, including objects representing biomolecular sequences, multiple sequence alignments and phylogenetic trees.
+
+Available from: https://sourceforge.net/p/jebl/wiki/Home/
+License: GNU LESSER GENERAL PUBLIC LICENSE Version 2.1, February 1999
+
