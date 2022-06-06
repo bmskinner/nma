@@ -73,7 +73,7 @@ You can make your own ruleset files and save them in the `rulesets` folder; they
 
 A ruleset needs to describe the landmarks in the nucleus, how we find them, which landmarks we use for orientation of the nucleus, and what measurements we should make. For example, the round nucleus ruleset is the simplest:
 
-``{}
+```{}
 <?xml version="1.0" encoding="UTF-8"?>
 <RuleSetCollection name="Round" application="VIA_MEDIAN" version="2.0.0" axis="Y">
   <Orient name="BOTTOM" value="Longest axis" />
@@ -98,11 +98,61 @@ A ruleset needs to describe the landmarks in the nucleus, how we find them, whic
   <Measurement>Ellipticity</Measurement>
   <Measurement>Circularity</Measurement>
 </RuleSetCollection>
-``
+```
 
 It contains one landmark, called `Longest axis`. This is defined as the point with the maximum value in the diameter profile. The landmark is used to specify three orientation marks: `BOTTOM`, `Y`, and `REFERENCE`. The `REFERENCE` point is the point from which profiles start. `BOTTOM` and `Y` indicate points that should be used to orient the nucleus, by rotating the nucleus such that this point is diretly below the centre of mass. 
 
 The `Measurement` values show the standard measures that will be calculated when nuclei are detected; several of these (e.g. aspect ratio) rely on the nucleus being orientatble, which is why it is important to have at least one landmark that can be used for orientation.
+
+#### Elements
+
+RulesetCollection: the global settings for the ruleset
+
+Name | Values
+-----------|---------------
+name | The name of the ruleset to display
+application | How to apply the rules. Should almost always be `VIA_MEDIAN`
+version | The software version the ruleset was created for
+axis | The axis that should be prioritised when orienting. `Y` to prioritise vertical orientation, `X` to prioritise horizontal orientation
+
+Measurement: the values that can be measured in this nucleus.
+
+Orient: Maps landmarks to features used to orient the nucleus.
+
+Name | Values
+-----------|---------------
+name | The name of the orientation mark. Must be one of `X`, `Y`, `TOP`, `BOTTOM`, `LEFT`, `RIGHT`
+value | The name of the landmark that this mark is associated with. Must be a landmark name specified in a `Landmark` element
+
+Landmark: Describes the features of interest in a nucleus, and the rules used to find them
+
+Name | Values
+-----------|---------------
+name | The name of the landmark
+
+The ruleset for each landmark is composed of one or more rules applied to a profile. Rules are applied in the order written.
+
+Element | Name | Values
+-----------|---------------|---------------
+Ruleset | type | The profile type the rules are to be applied to. One of `Angle profile`, `Radius profile` or `Diameter profile`
+Rule | type | the rule to apply
+Rule | Value | These elements provide the values to each rule as described below.
+
+#### Rule types
+
+These are the valid rule types that can be used. When a rule is applied to a profile, it returns a new profile with a true or false value at every index, corresponding to whether the value in the profile matches the rule or not. This allows rules to be chained to find features of interest; an index excluded from a rule will never be included by a subsequent rule.
+
+Rule | Values | Description
+-----------|---------------|---------------
+`IS_ZERO_INDEX` | `1` or `0` | If 1, finds the point at the first index of a profile. If 0, finds all points except the first index
+`IS_MINIMUM`, `IS_MAXIMUM` | `1` or `0` | If 1, finds the minimum or maximum point in a profile. If 0, finds all points except the minimum or maximum
+`IS_LOCAL_MINIMUM`, `IS_LOCAL_MAXIMUM` | First: `1` or `0`; second: an integer for window size |  If the first value is 1, finds local minima or maxima in a profile. If 0, finds all points except the local minima or maxima. A window size is needed to find minima and maxima; this is provided in the second value as an integer
+`VALUE_IS_LESS_THAN`, `VALUE_IS_MORE_THAN` | A real number | Finds points that are more or less than the given absolute value
+`INDEX_IS_LESS_THAN`, `INDEX_IS_MORE_THAN` | An integer | Finds points that have an index in their profile higher or lower than the value
+`IS_CONSTANT_REGION` | First: the value to find; second: the minimum length of the region; third: the maximum deviation from the desired value | Finds regions with a constant value over at least a given number of indexes. The stringency of the constant calue can be altered.
+`FIRST_TRUE`, `LAST_TRUE` | `1` or `0` | Designed to be applied after a previous rule. If 1, finds the first/last index matching the rule condiions. If 0, finds all except the first index matching the rule conditions
+`INDEX_IS_WITHIN_FRACTION_OF`, `INDEX_IS_OUTSIDE_FRACTION_OF` | A real number between 0 and 1 | Finds indexes that are greater or less than the given fraction of the profile
+
 
 ### Custom options {#config-file}
 
@@ -110,10 +160,10 @@ Custom options are set in the `config.ini` file in the configuration directory. 
 
 Key        | Allowed Values | Effect
 -----------| ---------------|--------------
-`DEFAULT_IMAGE_SCALE` | A positive number e.g. `18.0` | Sets the default scale for converting pixels to microns
+`DEFAULT_IMAGE_SCALE` | A positive number _e.g._ `18.0` | Sets the default scale for converting pixels to microns
 `DEFAULT_RULESET` | A ruleset file name from the rulesets directory _e.g._ `Mouse sperm` | Sets the default ruleset for landmark detection
 `DEFAULT_COLOUR_SWATCH` | `REGULAR_SWATCH` `ACCESSIBLE_SWATCH` `NO_SWATCH` | Sets the default colouring of datasets and segments
-`DEFAULT_DIR` | directory with backslashes escaped e.g. `C:\\path\\to\\folder`    | Sets the default folder for exporting data
+`DEFAULT_DIR` | directory with backslashes escaped _e.g._ `C:\\path\\to\\folder`    | Sets the default folder for exporting data
 `DEFAULT_DISPLAY_SCALE` | `PIXELS` `MICRONS` | Sets the default scale to display in charts and tables
 `REFOLD_OVERRIDE` |  `true` `false`| If true, the 'best-fit nucleus' method will always be used instead of the position averaging method
 `USE_ANTIALIASING` | `true` `false` | Sets the default value for the 'Use anti-aliasing' option. False makes charts faster to render, but not as pretty.
