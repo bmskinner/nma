@@ -54,9 +54,6 @@ public class GlobalOptions extends DefaultOptions {
 
 	public static final String IS_CONVERT_DATASETS_KEY = "CONVERT_DATASETS";
 
-	@Deprecated
-	public static final String IS_DOCKABLE_INTERFACE_KEY = "DOCKABLE_INTERFACE";
-
 	public static final String IS_DEBUG_INTERFACE_KEY = "USE_DEBUG_INTERFACE";
 
 	/** While GLCM is in development, only show the charts via a config flag */
@@ -71,6 +68,8 @@ public class GlobalOptions extends DefaultOptions {
 	public static final String DEFAULT_EXPORT_FORMAT_KEY = "DEFAULT_EXPORT_FORMAT";
 
 	public static final String LOG_DIRECTORY_KEY = "LOG_DIRECTORY";
+
+	public static final String ALLOW_UPDATE_CHECK_KEY = "CHECK_FOR_UPDATES";
 
 	private File defaultDir; // where to fall back to for finding images or
 								// saving files
@@ -117,6 +116,7 @@ public class GlobalOptions extends DefaultOptions {
 		setInt(NUM_IMAGEJ_THREADS_KEY, 2);
 		this.setBoolean(IS_GLCM_INTERFACE_KEY, false);
 		setString(DEFAULT_RULESET_KEY, DEFAULT_RULESET);
+		setBoolean(ALLOW_UPDATE_CHECK_KEY, true);
 	}
 
 	public synchronized MeasurementScale getScale() {

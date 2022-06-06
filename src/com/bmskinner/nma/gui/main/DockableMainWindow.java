@@ -32,6 +32,7 @@ import javax.swing.JSplitPane;
 import javax.swing.border.EmptyBorder;
 
 import com.bmskinner.nma.components.Version;
+import com.bmskinner.nma.core.GlobalOptions;
 import com.bmskinner.nma.gui.LogPanel;
 import com.bmskinner.nma.gui.events.UserActionController;
 import com.bmskinner.nma.gui.tabs.AnalysisDetailPanel;
@@ -71,6 +72,8 @@ import com.javadocking.model.FloatDockModel;
  */
 public class DockableMainWindow extends AbstractMainWindow {
 
+	private static final long serialVersionUID = 1L;
+
 	private static final Logger LOGGER = Logger.getLogger(DockableMainWindow.class.getName());
 
 	private TabDock tabDock;
@@ -90,10 +93,15 @@ public class DockableMainWindow extends AbstractMainWindow {
 
 		this.setJMenuBar(new MainWindowMenuBar(this));
 
-		// Run update check
-		Version latestVersion = UpdateChecker.fetchLatestVersion();
-		if (latestVersion.isNewerThan(Version.currentVersion())) {
-			LOGGER.info("New version " + latestVersion + " available");
+		// Run update check if allowed in config
+		if (GlobalOptions.getInstance().getBoolean(GlobalOptions.ALLOW_UPDATE_CHECK_KEY)) {
+			Version latestVersion = UpdateChecker.fetchLatestVersion();
+			if (latestVersion.isNewerThan(Version.currentVersion())) {
+				LOGGER.info("New version " + latestVersion + " available");
+			}
+		} else {
+			LOGGER.fine(
+					"Skipping update check because config setting CHECK_FOR_UPDATES is false");
 		}
 
 	}

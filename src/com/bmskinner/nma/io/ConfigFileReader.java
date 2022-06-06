@@ -86,6 +86,8 @@ public class ConfigFileReader {
 				String.valueOf(op.getBoolean(GlobalOptions.IS_DEBUG_INTERFACE_KEY)));
 		properties.setProperty(GlobalOptions.IS_GLCM_INTERFACE_KEY,
 				String.valueOf(op.getBoolean(GlobalOptions.IS_GLCM_INTERFACE_KEY)));
+		properties.setProperty(GlobalOptions.ALLOW_UPDATE_CHECK_KEY,
+				String.valueOf(op.getBoolean(GlobalOptions.ALLOW_UPDATE_CHECK_KEY)));
 
 		return properties;
 
@@ -133,6 +135,9 @@ public class ConfigFileReader {
 
 			if (GlobalOptions.NUM_IMAGEJ_THREADS_KEY.equals(key))
 				op.setInt(GlobalOptions.NUM_IMAGEJ_THREADS_KEY, Integer.valueOf(value));
+
+			if (GlobalOptions.ALLOW_UPDATE_CHECK_KEY.equals(key))
+				op.setBoolean(GlobalOptions.ALLOW_UPDATE_CHECK_KEY, Boolean.valueOf(value));
 
 		}
 	}
