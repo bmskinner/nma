@@ -8,7 +8,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nma.analysis.profiles.DatasetSegmentationMethod.MorphologyAnalysisMode;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.gui.ProgressBarAcceptor;
-import com.bmskinner.nma.gui.actions.RefoldNucleusAction;
+import com.bmskinner.nma.gui.actions.CreateConsensusAction;
 import com.bmskinner.nma.gui.actions.RunSegmentationAction;
 import com.bmskinner.nma.gui.actions.SingleDatasetResultAction;
 
@@ -46,7 +46,7 @@ public class SegmentAndRefold implements Runnable {
 		new Thread(() -> { // wait for segmentation and run refolding
 			try {
 				segmentLatch.await();
-				new RefoldNucleusAction(dataset, acceptor, null).run();
+				new CreateConsensusAction(dataset, acceptor, null).run();
 			} catch (InterruptedException e) {
 				LOGGER.warning("Error making consensus in " + dataset.getName());
 				Thread.currentThread().interrupt();

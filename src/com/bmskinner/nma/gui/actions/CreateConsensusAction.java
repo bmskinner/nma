@@ -27,6 +27,7 @@ import com.bmskinner.nma.analysis.IAnalysisMethod;
 import com.bmskinner.nma.analysis.nucleus.ConsensusAveragingMethod;
 import com.bmskinner.nma.analysis.nucleus.ConsensusSimilarityMethod;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
+import com.bmskinner.nma.core.GlobalOptions;
 import com.bmskinner.nma.core.ThreadManager;
 import com.bmskinner.nma.gui.ProgressBarAcceptor;
 import com.bmskinner.nma.logging.Loggable;
@@ -35,9 +36,9 @@ import com.bmskinner.nma.logging.Loggable;
  * Refold the consensus nucleus for the selected dataset using default
  * parameters
  */
-public class RefoldNucleusAction extends SingleDatasetResultAction {
+public class CreateConsensusAction extends SingleDatasetResultAction {
 
-	private static final Logger LOGGER = Logger.getLogger(RefoldNucleusAction.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(CreateConsensusAction.class.getName());
 
 	private static final @NonNull String PROGRESS_LBL = "Creating consensus";
 	private static final int PROGRESS_BAR_LENGTH = 100;
@@ -45,14 +46,14 @@ public class RefoldNucleusAction extends SingleDatasetResultAction {
 	/**
 	 * Refold the given selected dataset
 	 */
-	public RefoldNucleusAction(@NonNull IAnalysisDataset dataset,
+	public CreateConsensusAction(@NonNull IAnalysisDataset dataset,
 			@NonNull final ProgressBarAcceptor acceptor,
 			CountDownLatch doneSignal) {
 		super(dataset, PROGRESS_LBL, acceptor);
 		this.setLatch(doneSignal);
 	}
 
-	public RefoldNucleusAction(@NonNull List<IAnalysisDataset> list,
+	public CreateConsensusAction(@NonNull List<IAnalysisDataset> list,
 			@NonNull final ProgressBarAcceptor acceptor,
 			CountDownLatch doneSignal) {
 		super(list, PROGRESS_LBL, acceptor);
@@ -70,10 +71,11 @@ public class RefoldNucleusAction extends SingleDatasetResultAction {
 			// The averaging method does not work for nuclei that are round, or have extreme
 			// variability.
 			// In these cases, or if the program config file has been set to override, use
-			// the old profile method.
+			// the most similar nucleus to the median
 
 			boolean override = dataset.getAnalysisOptions().get().getRuleSetCollection().getName()
-					.equals("Round");
+					.equals("Round")
+					|| GlobalOptions.getInstance().getBoolean(GlobalOptions.REFOLD_OVERRIDE_KEY);
 			if (override) {
 				m = new ConsensusSimilarityMethod(dataset);
 				progressLength = 2;
@@ -101,12 +103,12 @@ public class RefoldNucleusAction extends SingleDatasetResultAction {
 			// call the finish
 			if (!hasRemainingDatasetsToProcess()) {
 				countdownLatch();
-				RefoldNucleusAction.super.finished();
+				CreateConsensusAction.super.finished();
 
 			} else {
 				// otherwise analyse the next item in the list
 				cancel(); // remove progress bar
-				Runnable task = new RefoldNucleusAction(getRemainingDatasetsToProcess(),
+				Runnable task = new CreateConsensusAction(getRemainingDatasetsToProcess(),
 						progressAcceptors.get(0),
 						getLatch().get());
 				task.run();

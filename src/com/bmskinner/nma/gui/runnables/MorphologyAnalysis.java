@@ -8,7 +8,7 @@ import com.bmskinner.nma.analysis.profiles.DatasetSegmentationMethod.MorphologyA
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.gui.ProgressBarAcceptor;
 import com.bmskinner.nma.gui.actions.ExportDatasetAction;
-import com.bmskinner.nma.gui.actions.RefoldNucleusAction;
+import com.bmskinner.nma.gui.actions.CreateConsensusAction;
 import com.bmskinner.nma.gui.actions.RunProfilingAction;
 import com.bmskinner.nma.gui.actions.RunSegmentationAction;
 import com.bmskinner.nma.gui.actions.SingleDatasetResultAction;
@@ -69,7 +69,7 @@ public class MorphologyAnalysis implements Runnable {
 			try {
 				segmentLatch.await();
 				LOGGER.finer("Starting refolding action");
-				new RefoldNucleusAction(datasets, pa, refoldLatch).run();
+				new CreateConsensusAction(datasets, pa, refoldLatch).run();
 			} catch (InterruptedException e) {
 				Thread.currentThread().interrupt();
 				return;

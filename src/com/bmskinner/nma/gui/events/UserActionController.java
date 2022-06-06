@@ -57,7 +57,7 @@ import com.bmskinner.nma.gui.actions.MergeCollectionAction;
 import com.bmskinner.nma.gui.actions.MergeSignalsAction;
 import com.bmskinner.nma.gui.actions.MergeSourceExtractionAction;
 import com.bmskinner.nma.gui.actions.NewAnalysisAction;
-import com.bmskinner.nma.gui.actions.RefoldNucleusAction;
+import com.bmskinner.nma.gui.actions.CreateConsensusAction;
 import com.bmskinner.nma.gui.actions.RelocateFromFileAction;
 import com.bmskinner.nma.gui.actions.ReplaceSourceImageDirectoryAction;
 import com.bmskinner.nma.gui.actions.RunGLCMAction;
@@ -334,7 +334,7 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 			return () -> {
 				final CountDownLatch refoldLatch = new CountDownLatch(1);
 				new Thread(() -> { // run refolding
-					Runnable task = new RefoldNucleusAction(event.getDatasets(), acceptor,
+					Runnable task = new CreateConsensusAction(event.getDatasets(), acceptor,
 							refoldLatch);
 					task.run();
 				}).start();
