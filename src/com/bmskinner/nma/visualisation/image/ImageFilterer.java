@@ -24,11 +24,10 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nma.analysis.image.CannyEdgeDetector;
 import com.bmskinner.nma.analysis.image.ColourThresholder;
-import com.bmskinner.nma.analysis.image.Kuwahara_Filter;
+import com.bmskinner.nma.analysis.image.KuwaharaFilter;
 import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.stats.Stats;
 
-import ij.ImagePlus;
 import ij.plugin.filter.EDM;
 import ij.process.ByteProcessor;
 import ij.process.FloatProcessor;
@@ -91,13 +90,7 @@ public class ImageFilterer extends AbstractImageFilterer {
 	 * @return the processed image
 	 */
 	public static ImageProcessor kuwaharaFilter(ImageProcessor ip, int kernelRadius) {
-		LOGGER.finest("Running Kuwahara filter");
-		Kuwahara_Filter kw = new Kuwahara_Filter();
-		ImagePlus img = new ImagePlus("", ip);
-		kw.setup("", img);
-		ImageProcessor result = ip.duplicate();
-		kw.filter(result, kernelRadius);
-		return result;
+		return KuwaharaFilter.filter(ip, kernelRadius);
 	}
 
 	/**
