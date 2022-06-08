@@ -21,6 +21,7 @@ import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Window;
+import java.awt.event.KeyEvent;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.File;
@@ -46,6 +47,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButtonMenuItem;
+import javax.swing.KeyStroke;
 
 import com.bmskinner.nma.components.Version;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
@@ -167,6 +169,7 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 
 	private ContextualMenu createFileMenu() {
 		ContextualMenu menu = fact.makeMenu(FILE_MENU_LBL, ContextEnabled.ALWAYS_ACTIVE);
+		menu.setMnemonic(KeyEvent.VK_F);
 
 		ContextualMenu newMenu = fact.makeMenu(NEW_ANALYSIS_MENU_LBL, ContextEnabled.ALWAYS_ACTIVE);
 
@@ -175,6 +178,7 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 		i1.addActionListener(
 				e -> new NewAnalysisAction(
 						UserActionController.getInstance().getProgressBarAcceptor()).run());
+		i1.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, KeyEvent.CTRL_DOWN_MASK));
 		newMenu.add(i1);
 
 		newMenu.add(fact.makeItem(NEW_ANALYSIS_SAVED_LBL, UserActionEvent.IMPORT_WORKFLOW_PREFIX,
@@ -195,6 +199,7 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 		o1.addActionListener(e -> UserActionController.getInstance()
 				.fileImportRequested(new FileImportEvent(this, null,
 						IAnalysisDataset.XML_ANALYSIS_DATASET, null)));
+		o1.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, KeyEvent.CTRL_DOWN_MASK));
 		openMenu.add(o1);
 
 		JMenuItem o2 = fact.new ContextualMenuItem(OPEN_WORKSPACE_LBL, "",
@@ -210,6 +215,7 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 		ContextualMenuItem saveData = fact.makeItem(SAVE_DATASETS_LBL,
 				UserActionEvent.SAVE_SELECTED_DATASETS,
 				ContextEnabled.ONLY_DATASETS, SAVE_DATASETS_TOOLTIP);
+		saveData.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_DOWN_MASK));
 		menu.add(saveData);
 
 		ContextualMenuItem saveAllData = fact.makeItem(SAVE_ALL_DATASETS_LBL,
@@ -242,6 +248,7 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 
 	private ContextualMenu createViewMenu() {
 		ContextualMenu menu = fact.makeMenu(VIEW_MENU_LBL, ContextEnabled.ALWAYS_ACTIVE);
+		menu.setMnemonic(KeyEvent.VK_V);
 
 		JMenu scaleMenu = new JMenu(SCALE_ITEM_LBL);
 
@@ -364,6 +371,7 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 
 	private ContextualMenu createHelpMenu() {
 		ContextualMenu menu = fact.makeMenu(HELP_MENU_LBL, ContextEnabled.ALWAYS_ACTIVE);
+		menu.setMnemonic(KeyEvent.VK_H);
 
 		JMenuItem userGuideItem = new JMenuItem("Open user guide");
 		userGuideItem.addActionListener(e -> loadUserGuide());
@@ -423,6 +431,7 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 
 	private ContextualMenu createDatasetMenu() {
 		ContextualMenu menu = fact.makeMenu(DATASETS_MENU_LBL, ContextEnabled.ONLY_DATASETS);
+		menu.setMnemonic(KeyEvent.VK_D);
 
 		ContextualMenu addSubMenu = fact.makeMenu(Labels.Populations.ADD,
 				ContextEnabled.ACTIVE_ON_ROOT_DATASET
