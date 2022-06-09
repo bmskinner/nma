@@ -19,7 +19,9 @@ import com.bmskinner.nma.components.datasets.ICellCollection;
 import com.bmskinner.nma.components.generic.FloatPoint;
 import com.bmskinner.nma.components.generic.IPoint;
 import com.bmskinner.nma.components.measure.Measurement;
+import com.bmskinner.nma.components.measure.MeasurementScale;
 import com.bmskinner.nma.components.signals.INuclearSignal;
+import com.bmskinner.nma.visualisation.options.ChartOptions;
 
 /**
  * An XY dataset mapping signals and nuclei to their XY coordinates
@@ -34,11 +36,14 @@ public class NuclearSignalXYDataset extends ComponentXYDataset<Nucleus> {
 	private List<List<INuclearSignal>> signalList = new ArrayList<>();
 
 	private IAnalysisDataset d;
+	private ChartOptions options;
 
-	public NuclearSignalXYDataset(@NonNull IAnalysisDataset d)
+	public NuclearSignalXYDataset(@NonNull ChartOptions options)
 			throws ChartDatasetCreationException {
 		super();
-		this.d = d;
+		this.d = options.firstDataset();
+		this.options = options;
+
 		ICellCollection collection = d.getCollection();
 		try {
 			Nucleus consensus = collection.getConsensus();
@@ -105,7 +110,7 @@ public class NuclearSignalXYDataset extends ComponentXYDataset<Nucleus> {
 
 					// ellipses are drawn starting from x y at upper left.
 					// Provide an offset from the centre
-					double offset = n.getMeasurement(Measurement.RADIUS);
+					double offset = n.getMeasurement(Measurement.RADIUS, options.getScale());
 
 					result.add(new Ellipse2D.Double(p.getX() - offset, p.getY() - offset,
 							offset * 2, offset * 2));
@@ -134,11 +139,13 @@ public class NuclearSignalXYDataset extends ComponentXYDataset<Nucleus> {
 		double fractionalDistance = n.getMeasurement(Measurement.FRACT_DISTANCE_FROM_COM);
 
 		// determine the distance to the border at this angle
-		double distanceToBorder = ComponentMeasurer.getDistanceFromCoMToBorderAtAngle(outline,
-				angle).getLengthTo(outline.getCentreOfMass());
+		IPoint borderPoint = ComponentMeasurer.getDistanceFromCoMToBorderAtAngle(outline,
+				angle);
+		double distanceToBorder = borderPoint.getLengthTo(outline.getCentreOfMass());
 
-//		return ComponentMeasurer.getDistanceFromCoMToBorderAtAngle(outline,
-//				angle);
+		// Adjust for scale if needed
+		if (MeasurementScale.MICRONS.equals(options.getScale()))
+			distanceToBorder /= outline.getScale();
 
 		// convert to fractional distance to signal
 		double distanceFromCoM = distanceToBorder * fractionalDistance;
