@@ -27,13 +27,18 @@ import java.awt.Rectangle;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.generic.FloatPoint;
 import com.bmskinner.nma.components.generic.IPoint;
+import com.bmskinner.nma.components.measure.Measurement;
+import com.bmskinner.nma.components.options.HashOptions;
+import com.bmskinner.nma.visualisation.image.ImageFilterer;
 
 import ij.ImagePlus;
 import ij.Prefs;
@@ -64,20 +69,20 @@ import ij.process.ShortStatistics;
  * @author bms41
  *
  */
-public abstract class Detector {
+public class Detector {
 
 	private static final Logger LOGGER = Logger.getLogger(Detector.class.getName());
 
 	public static final int CLOSED_OBJECTS = 0; // Flags to allow detection of
 	// open or closed objects
-	public static final int OPEN_OBJECTS   = 1;
+	public static final int OPEN_OBJECTS = 1;
 
 	public static final String COM_X = "XM";
 	public static final String COM_Y = "YM";
 
 	public static final String RESULT_TABLE_PERIM = "Perim.";
 
-	private static final String NO_DETECTION_PARAMS_ERR ="Detection parameters not set";
+	private static final String NO_DETECTION_PARAMS_ERR = "Detection parameters not set";
 	private static final String SIZE_MISMATCH_ERR = "Minimum size >= maximum size";
 	private static final String CIRC_MISMATCH_ERR = "Minimum circularity >= maximum circularity";
 
@@ -89,7 +94,83 @@ public abstract class Detector {
 	private boolean includeHoles = true;
 	private boolean excludeEdges = true;
 
+	private boolean isWatershed = false;
+
 	private int threshold = 128;
+
+	/**
+	 * Detect rois in the image at the default threshold with no size or circularity
+	 * parameters set
+	 * 
+	 * @param ip
+	 * @return
+	 */
+	public Map<Roi, IPoint> getAllRois(ImageProcessor ip) {
+		minCirc = 0;
+		maxCirc = 1;
+		minSize = 1;
+		maxSize = ip.getWidth() * ip.getHeight(); // object cannot be larger than the image
+		return detectRois(ip);
+	}
+
+	/**
+	 * Detect ROIs in the image that match the given options
+	 * 
+	 * @param ip      the image to search
+	 * @param options the detection options
+	 * @return
+	 */
+	public Map<Roi, IPoint> getValidRois(ImageProcessor ip, HashOptions options) {
+		if (options.hasDouble(HashOptions.MAX_SIZE_PIXELS))
+			maxSize = options.getDouble(HashOptions.MAX_SIZE_PIXELS);
+		else
+			maxSize = ip.getWidth() * ip.getHeight();
+		minSize = options.getInt(HashOptions.MIN_SIZE_PIXELS);
+		minCirc = options.getDouble(HashOptions.MIN_CIRC);
+		maxCirc = options.getDouble(HashOptions.MAX_CIRC);
+		threshold = options.getInt(HashOptions.THRESHOLD);
+		isWatershed = options.getBoolean(HashOptions.IS_USE_WATERSHED);
+		return detectRois(ip);
+	}
+
+	/**
+	 * Detect ROIs in the image that match the given options, and are within the
+	 * given nucleus ROI
+	 * 
+	 * @param ip      the image to search
+	 * @param options the detection options
+	 * @param n       a nucleus to constrain the search within
+	 * @return
+	 */
+	public Map<Roi, IPoint> getValidRois(ImageProcessor ip, HashOptions options, Nucleus n) {
+
+		if (options.hasDouble(HashOptions.SIGNAL_MAX_FRACTION)) {
+			maxSize = n.getMeasurement(Measurement.AREA)
+					* options.getDouble(HashOptions.SIGNAL_MAX_FRACTION);
+		} else {
+
+			if (options.hasDouble(HashOptions.MAX_SIZE_PIXELS))
+				maxSize = options.getDouble(HashOptions.MAX_SIZE_PIXELS);
+			else
+				maxSize = ip.getWidth() * ip.getHeight();
+		}
+
+		minSize = options.getInt(HashOptions.MIN_SIZE_PIXELS);
+		minCirc = options.getDouble(HashOptions.MIN_CIRC);
+		maxCirc = options.getDouble(HashOptions.MAX_CIRC);
+		threshold = options.getInt(HashOptions.THRESHOLD);
+		isWatershed = options.getBoolean(HashOptions.IS_USE_WATERSHED);
+
+		Map<Roi, IPoint> rois = detectRois(ip);
+		Map<Roi, IPoint> result = new HashMap<>();
+		for (Entry<Roi, IPoint> entry : rois.entrySet()) {
+			if (n.containsOriginalPoint(entry.getValue())) {
+				result.put(entry.getKey(), entry.getValue());
+			}
+		}
+
+		return result;
+	}
 
 	/**
 	 * Set the minimum and maximum size ROIs to detect
@@ -113,14 +194,6 @@ public abstract class Detector {
 		maxCirc = max;
 	}
 
-	protected double getMinSize() {
-		return minSize;
-	}
-
-	protected double getMaxSize() {
-		return maxSize;
-	}
-
 	public void setMinSize(double d) {
 		this.minSize = d;
 	}
@@ -142,8 +215,8 @@ public abstract class Detector {
 	}
 
 	/**
-	 * Set whether the ROIs should include holes - i.e. should holes be flood
-	 * filled before detection
+	 * Set whether the ROIs should include holes - i.e. should holes be flood filled
+	 * before detection
 	 * 
 	 * @param b
 	 */
@@ -152,9 +225,9 @@ public abstract class Detector {
 	}
 
 	/**
-	 * Set whether the ROIs should include holes - i.e. should holes be flood
-	 * filled before detection
-
+	 * Set whether the ROIs should include holes - i.e. should holes be flood filled
+	 * before detection
+	 * 
 	 * @param b
 	 */
 	public void setExcludeEdges(boolean b) {
@@ -163,10 +236,11 @@ public abstract class Detector {
 
 	/**
 	 * Detect and measure ROIs in this image
+	 * 
 	 * @param image
 	 * @return a map of ROIs and their CoMs
 	 */
-	protected synchronized Map<Roi, IPoint> detectRois(@NonNull ImageProcessor image){
+	private Map<Roi, IPoint> detectRois(@NonNull ImageProcessor image) {
 		if (Double.isNaN(this.minSize) || Double.isNaN(this.maxSize) || Double.isNaN(this.minCirc)
 				|| Double.isNaN(this.maxCirc))
 			throw new IllegalArgumentException(NO_DETECTION_PARAMS_ERR);
@@ -174,12 +248,17 @@ public abstract class Detector {
 		if (this.minSize >= this.maxSize)
 			throw new IllegalArgumentException(SIZE_MISMATCH_ERR);
 		if (this.minCirc >= this.maxCirc)
-			throw new IllegalArgumentException(CIRC_MISMATCH_ERR);                
+			throw new IllegalArgumentException(CIRC_MISMATCH_ERR);
 		if (!(image instanceof ByteProcessor || image instanceof ShortProcessor))
 			throw new IllegalArgumentException("Processor must be byte or short");
 
 		ImageProcessor searchProcessor = image.duplicate();
 		searchProcessor.threshold(threshold);
+
+		// Watershed if needed
+		if (isWatershed) {
+			searchProcessor = ImageFilterer.watershed(searchProcessor);
+		}
 
 		Map<Roi, IPoint> result = new HashMap<>();
 
@@ -188,11 +267,10 @@ public abstract class Detector {
 		// anything touching the edge
 		int options = 0;
 
-		if(excludeEdges)
-			options = options | ParticleAnalyzer.EXCLUDE_EDGE_PARTICLES;        
+		if (excludeEdges)
+			options = options | ParticleAnalyzer.EXCLUDE_EDGE_PARTICLES;
 		if (includeHoles)
 			options = options | ParticleAnalyzer.INCLUDE_HOLES;
-
 
 		// Run particle analysis on the thresholded binary image
 		ParticleAnalyzer pa = new ParticleAnalyzer(options);
@@ -203,36 +281,35 @@ public abstract class Detector {
 
 		// Run measurements on the original image
 		// to ensure CoM detection is accurate
-		for(Roi r : pa.getRois())
+		for (Roi r : pa.getRois())
 			result.put(r, measure(r, image));
 
 		return result;
 	}
 
 	/**
-	 * Get the CoM for the region covered by the given roi. 	 * 
-	 * @param roi the region to measure
+	 * Get the CoM for the region covered by the given roi. *
+	 * 
+	 * @param roi   the region to measure
 	 * @param image the image to measure in
 	 * @return
 	 */
 	private synchronized IPoint measure(@NonNull Roi roi, @NonNull ImageProcessor image) {
 
-		ImageProcessor searchProcessor = image.duplicate();
-		ImagePlus imp = new ImagePlus(null, searchProcessor);
+//		ImageProcessor searchProcessor = image.duplicate();
+		ImagePlus imp = new ImagePlus(null, image);
 		imp.setRoi(roi);
 		ResultsTable rt = new ResultsTable();
 		Analyzer analyser = new Analyzer(imp,
 				Measurements.CENTER_OF_MASS, rt);
-		analyser.measure();		
+		analyser.measure();
 		return new FloatPoint(rt.getValue(COM_X, 0), rt.getValue(COM_Y, 0));
 	}
 
-
-
 	/**
-	 * This recapitulates the basic function of the ImageJ particle
-	 * analyzer without using the static roi manager. It works better for
-	 * multithreading.
+	 * This recapitulates the basic function of the ImageJ particle analyzer without
+	 * using the static roi manager. It works better for multithreading.
+	 * 
 	 * @author bms41
 	 * @since 1.13.8
 	 *
@@ -248,7 +325,7 @@ public abstract class Detector {
 		/** Use 4-connected particle tracing. */
 		private static final int FOUR_CONNECTED = 8192;
 
-		private static final int BYTE=0, SHORT=1, FLOAT=2, RGB=3;
+		private static final int BYTE = 0, SHORT = 1, FLOAT = 2, RGB = 3;
 
 		private boolean excludeEdgeParticles, floodFill;
 
@@ -277,14 +354,16 @@ public abstract class Detector {
 
 		private final Set<Roi> rois = new HashSet<>();
 
-
-		/** Constructs a ParticleAnalyzer.
-            @param options  a flag word created by Oring SHOW_RESULTS, EXCLUDE_EDGE_PARTICLES, etc.
+		/**
+		 * Constructs a ParticleAnalyzer.
+		 * 
+		 * @param options a flag word created by Oring SHOW_RESULTS,
+		 *                EXCLUDE_EDGE_PARTICLES, etc.
 		 */
-		public ParticleAnalyzer(int options) { 
+		public ParticleAnalyzer(int options) {
 			this.measurements = Measurements.FERET;
 
-			if ((options&FOUR_CONNECTED)!=0) {
+			if ((options & FOUR_CONNECTED) != 0) {
 				wandMode = Wand.FOUR_CONNECTED;
 				options |= INCLUDE_HOLES;
 			}
@@ -294,35 +373,40 @@ public abstract class Detector {
 
 		/**
 		 * Get the detected Rois
+		 * 
 		 * @return
 		 */
-		public Set<Roi> getRois(){
+		public Set<Roi> getRois() {
 			return rois;
 		}
 
-
-		/** Performs particle analysis on the specified ImagePlus and
-            ImageProcessor. Returns false if there is an error. */
+		/**
+		 * Performs particle analysis on the specified ImagePlus and ImageProcessor.
+		 * Returns false if there is an error.
+		 */
 		public boolean analyze(ImageProcessor ip) {
 			rois.clear();
 
-			excludeEdgeParticles = (options&EXCLUDE_EDGE_PARTICLES)!=0;
-			floodFill = (options&INCLUDE_HOLES)==0;
+			excludeEdgeParticles = (options & EXCLUDE_EDGE_PARTICLES) != 0;
+			floodFill = (options & INCLUDE_HOLES) == 0;
 
 			ip.snapshot();
 
 			if (!setThresholdLevels(ip))
 				return false;
-			
+
 			width = ip.getWidth();
 
 			byte[] pixels = null;
 			if (ip instanceof ByteProcessor)
-				pixels = (byte[])ip.getPixels();
-			if (r==null) {
+				pixels = (byte[]) ip.getPixels();
+			if (r == null) {
 				r = ip.getRoi();
 			}
-			minX=r.x; maxX=r.x+r.width; minY=r.y; maxY=r.y+r.height;
+			minX = r.x;
+			maxX = r.x + r.width;
+			minY = r.y;
+			maxY = r.y + r.height;
 
 			int offset;
 			double value;
@@ -332,27 +416,26 @@ public abstract class Detector {
 			if (floodFill) {
 				ImageProcessor ipf = ip.duplicate();
 				ipf.setValue(fillColor);
-				ff = new FloodFiller(ipf);                
+				ff = new FloodFiller(ipf);
 			}
-			roiType = Wand.allPoints()?Roi.FREEROI:Roi.TRACED_ROI;
+			roiType = Wand.allPoints() ? Roi.FREEROI : Roi.TRACED_ROI;
 
 			boolean done = false;
-			for (int y=r.y; y<(r.y+r.height); y++) {
-				offset = y*width;
-				for (int x=r.x; x<(r.x+r.width); x++) {
-					if (pixels!=null)
-						value = pixels[offset+x]&255;
-					else if (imageType==SHORT)
+			for (int y = r.y; y < (r.y + r.height); y++) {
+				offset = y * width;
+				for (int x = r.x; x < (r.x + r.width); x++) {
+					if (pixels != null)
+						value = pixels[offset + x] & 255;
+					else if (imageType == SHORT)
 						value = ip.getPixel(x, y);
 					else
 						value = ip.getPixelValue(x, y);
-					if (value>=level1 && value<=level2 && !done) {
+					if (value >= level1 && value <= level2 && !done) {
 						analyzeParticle(x, y, ip);
-						done = level1==0.0&&level2==255.0;
+						done = level1 == 0.0 && level2 == 255.0;
 					}
 				}
 			}
-
 
 			ip.resetRoi();
 			ip.reset();
@@ -361,8 +444,8 @@ public abstract class Detector {
 		}
 
 		/**
-		 * Choose how to threshold the input image based on the image
-		 * type.
+		 * Choose how to threshold the input image based on the image type.
+		 * 
 		 * @param ip
 		 * @return
 		 */
@@ -376,9 +459,9 @@ public abstract class Detector {
 				imageType = FLOAT;
 			else
 				imageType = BYTE;
-			if (t1==ImageProcessor.NO_THRESHOLD) {
+			if (t1 == ImageProcessor.NO_THRESHOLD) {
 
-				if (imageType!=BYTE)
+				if (imageType != BYTE)
 					return false;
 
 				boolean threshold255 = false;
@@ -396,17 +479,17 @@ public abstract class Detector {
 			} else {
 				level1 = t1;
 				level2 = t2;
-				if (imageType==BYTE) {
-					if (level1>0)
+				if (imageType == BYTE) {
+					if (level1 > 0)
 						fillColor = 0;
-					else if (level2<255)
+					else if (level2 < 255)
 						fillColor = 255;
-				} else if (imageType==SHORT) {
-					if (level1>0)
+				} else if (imageType == SHORT) {
+					if (level1 > 0)
 						fillColor = 0;
-					else if (level2<65535)
+					else if (level2 < 65535)
 						fillColor = 65535;
-				} else if (imageType==FLOAT)
+				} else if (imageType == FLOAT)
 					fillColor = -Float.MAX_VALUE;
 				else
 					return false;
@@ -419,38 +502,45 @@ public abstract class Detector {
 		private void analyzeParticle(int x, int y, ImageProcessor ip) {
 
 			wand.autoOutline(x, y, level1, level2, wandMode);
-			if (wand.npoints==0){
+			if (wand.npoints == 0) {
 				return;
 			}
-			
+
 			Roi roi = new PolygonRoi(wand.xpoints, wand.ypoints, wand.npoints, roiType);
 			Rectangle r = roi.getBounds();
-			if (r.width>1 && r.height>1) {
-				PolygonRoi proi = (PolygonRoi)roi;
-				pf.setPolygon(proi.getXCoordinates(), proi.getYCoordinates(), proi.getNCoordinates());
+			if (r.width > 1 && r.height > 1) {
+				PolygonRoi proi = (PolygonRoi) roi;
+				pf.setPolygon(proi.getXCoordinates(), proi.getYCoordinates(),
+						proi.getNCoordinates());
 				ip.setMask(pf.getMask(r.width, r.height));
-				if (floodFill) ff.particleAnalyzerFill(x, y, level1, level2, ip.getMask(), r);
+				if (floodFill)
+					ff.particleAnalyzerFill(x, y, level1, level2, ip.getMask(), r);
 			}
 			ip.setRoi(r);
 			ip.setValue(fillColor);
 			ImageStatistics stats = getStatistics(ip, measurements);
 			boolean include = true;
 
-			if (excludeEdgeParticles && (r.x==minX||r.y==minY||r.x+r.width==maxX||r.y+r.height==maxY))
+			if (excludeEdgeParticles && (r.x == minX || r.y == minY || r.x + r.width == maxX
+					|| r.y + r.height == maxY))
 				include = false;
 
 			ImageProcessor mask = ip.getMask();
-			if (minCirc>0.0 || maxCirc<1.0) {
+			if (minCirc > 0.0 || maxCirc < 1.0) {
 				double perimeter = roi.getLength();
-				double circularity = perimeter==0.0?0.0:4.0*Math.PI*(stats.pixelCount/(perimeter*perimeter));
-				if (circularity>1.0) circularity = 1.0;
+				double circularity = perimeter == 0.0 ? 0.0
+						: 4.0 * Math.PI * (stats.pixelCount / (perimeter * perimeter));
+				if (circularity > 1.0)
+					circularity = 1.0;
 
-				if (circularity<minCirc || circularity>maxCirc) include = false;
+				if (circularity < minCirc || circularity > maxCirc)
+					include = false;
 			}
 
-			if (stats.pixelCount>=minSize && stats.pixelCount<=maxSize && include) {
-				stats.xstart=x; stats.ystart=y;
-				rois.add( (Roi) roi.clone());
+			if (stats.pixelCount >= minSize && stats.pixelCount <= maxSize && include) {
+				stats.xstart = x;
+				stats.ystart = y;
+				rois.add((Roi) roi.clone());
 			}
 
 			ip.fill(mask);
@@ -472,7 +562,6 @@ public abstract class Detector {
 				return null;
 			}
 		}
-
 
 	}
 }

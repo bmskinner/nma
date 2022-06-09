@@ -28,7 +28,6 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nma.components.ComponentBuilderFactory;
 import com.bmskinner.nma.components.ComponentBuilderFactory.NucleusBuilderFactory;
-import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.cells.DefaultCell;
 import com.bmskinner.nma.components.cells.ICell;
@@ -62,7 +61,7 @@ public class FluorescentNucleusFinder extends CellFinder {
 		if (op.getRuleSetCollection() == null)
 			throw new IllegalArgumentException("No ruleset provided");
 
-		nuclOptions = options.getDetectionOptions(CellularComponent.NUCLEUS)
+		nuclOptions = options.getNucleusDetectionOptions()
 				.orElseThrow(() -> new IllegalArgumentException("No nucleus options"));
 
 		factory = ComponentBuilderFactory.createNucleusBuilderFactory(op.getRuleSetCollection(),
@@ -119,22 +118,20 @@ public class FluorescentNucleusFinder extends CellFinder {
 		}
 
 		LOGGER.finer("Detecting ROIs in " + imageFile.getName());
-		GenericDetector gd = new GenericDetector();
+		Detector gd = new Detector();
 
-		gd.setSize(nuclOptions.getInt(HashOptions.MIN_SIZE_PIXELS),
-				nuclOptions.getInt(HashOptions.MAX_SIZE_PIXELS));
-
-		ImageProcessor img = filt.toProcessor();
-
-		Map<Roi, IPoint> rois = gd.getRois(img.duplicate());
+		Map<Roi, IPoint> rois = gd.getValidRois(filt.toProcessor(), nuclOptions);
 		LOGGER.finer(() -> "Image: " + imageFile.getName() + ": " + rois.size() + " rois");
 
 		for (Entry<Roi, IPoint> entry : rois.entrySet()) {
 			try {
 
-				Nucleus n = factory.newBuilder().fromRoi(entry.getKey()).withFile(imageFile)
+				Nucleus n = factory.newBuilder()
+						.fromRoi(entry.getKey())
+						.withFile(imageFile)
 						.withChannel(nuclOptions.getInt(HashOptions.CHANNEL))
-						.withCoM(entry.getValue()).build();
+						.withCoM(entry.getValue())
+						.build();
 
 				list.add(n);
 			} catch (ComponentCreationException e) {
@@ -219,25 +216,25 @@ public class FluorescentNucleusFinder extends CellFinder {
 			}
 		}
 
-		GenericDetector gd = new GenericDetector();
+		Detector gd = new Detector();
 
 		// Display passing and failing size nuclei
 		ImageProcessor original = importer
 				.importImageAndInvert(nuclOptions.getInt(HashOptions.CHANNEL)).convertToRGB();
 
-		// do not use the minimum nucleus size - we want the roi outlined in red
-		gd.setSize(MIN_PROFILABLE_OBJECT_SIZE, original.getWidth() * original.getHeight());
-
 		ImageProcessor img = filt.toProcessor();
 
-		Map<Roi, IPoint> rois = gd.getRois(img.duplicate());
+		Map<Roi, IPoint> rois = gd.getAllRois(img.duplicate());
 		LOGGER.finer(() -> "Image: " + imageFile.getName() + ": " + rois.size() + " rois");
 
 		for (Entry<Roi, IPoint> entry : rois.entrySet()) {
 			try {
-				list.add(factory.newBuilder().fromRoi(entry.getKey()).withFile(imageFile)
+				list.add(factory.newBuilder()
+						.fromRoi(entry.getKey())
+						.withFile(imageFile)
 						.withChannel(nuclOptions.getInt(HashOptions.CHANNEL))
-						.withCoM(entry.getValue()).build());
+						.withCoM(entry.getValue())
+						.build());
 			} catch (ComponentCreationException e) {
 				LOGGER.log(Loggable.STACK,
 						"Unable to create nucleus from roi: " + e.getMessage() + "; skipping", e);

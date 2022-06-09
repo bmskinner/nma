@@ -4,22 +4,27 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
-import java.util.List;
+import java.util.Map;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.junit.Test;
 
+import com.bmskinner.nma.analysis.detection.Detector;
 import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
+import com.bmskinner.nma.components.generic.IPoint;
 import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.options.OptionsFactory;
-import com.bmskinner.nma.components.signals.INuclearSignal;
+import com.bmskinner.nma.io.ImageImporter;
 import com.bmskinner.nma.io.SampleDatasetReader;
 import com.bmskinner.nma.logging.ConsoleFormatter;
 import com.bmskinner.nma.logging.ConsoleHandler;
 import com.bmskinner.nma.logging.Loggable;
+
+import ij.gui.Roi;
+import ij.process.ImageProcessor;
 
 /**
  * Test that the signal detector is able to find signals in test images
@@ -55,7 +60,7 @@ public class SignalDetectorTest {
 				.withValue(HashOptions.SIGNAL_MAX_FRACTION, 0.5)
 				.build();
 
-		SignalDetector sd = new SignalDetector(o);
+		SignalThresholdChooser sd = new SignalThresholdChooser(o);
 
 		File testFile = d.getCollection().getImageFiles().stream()
 				.filter(f -> f.getName().equals("P104.tiff"))
@@ -67,8 +72,11 @@ public class SignalDetectorTest {
 		int signals = 0;
 		for (Nucleus n : d.getCollection().getNuclei(testFile)) {
 			assertTrue(testFile.exists());
-			List<INuclearSignal> s = sd.detectSignal(testFile.getAbsoluteFile(), n);
-			signals += s.size();
+			ImageProcessor ip = new ImageImporter(testFile)
+					.importImage(o.getInt(HashOptions.CHANNEL));
+
+			Map<Roi, IPoint> rois = new Detector().getValidRois(ip, o);
+			signals += rois.size();
 		}
 
 		assertEquals("File should have signals", 3, signals);

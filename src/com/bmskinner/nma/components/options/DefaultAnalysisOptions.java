@@ -142,7 +142,7 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
 	}
 
 	@Override
-	public Optional<File> getDetectionFolder(String key) {
+	public Optional<File> getDetectionFolder(@NonNull String key) {
 		if (detectionFolders.containsKey(key)) {
 			return Optional.of(detectionFolders.get(key));
 		}
@@ -155,7 +155,12 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
 	}
 
 	@Override
-	public void setDetectionFolder(String key, File folder) {
+	public void setNucleusDetectionFolder(@NonNull File folder) {
+		setDetectionFolder(CellularComponent.NUCLEUS, folder);
+	}
+
+	@Override
+	public void setDetectionFolder(@NonNull String key, @NonNull File folder) {
 		detectionFolders.put(key, folder);
 	}
 
@@ -170,7 +175,7 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
 	}
 
 	@Override
-	public void setRuleSetCollection(RuleSetCollection rsc) {
+	public void setRuleSetCollection(@NonNull RuleSetCollection rsc) {
 		rulesets = rsc;
 	}
 
@@ -180,12 +185,12 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
 	}
 
 	@Override
-	public boolean hasDetectionOptions(String type) {
+	public boolean hasDetectionOptions(@NonNull String type) {
 		return detectionOptions.containsKey(type);
 	}
 
 	@Override
-	public Optional<HashOptions> getSecondaryOptions(String key) {
+	public Optional<HashOptions> getSecondaryOptions(@NonNull String key) {
 		if (secondaryOptions.containsKey(key)) {
 			return Optional.of(secondaryOptions.get(key));
 		}
@@ -198,7 +203,7 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
 	}
 
 	@Override
-	public boolean hasSecondaryOptions(String key) {
+	public boolean hasSecondaryOptions(@NonNull String key) {
 		return secondaryOptions.containsKey(key);
 	}
 
@@ -234,12 +239,12 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
 	}
 
 	@Override
-	public void setNuclearSignalDetectionOptions(HashOptions options) {
+	public void setNuclearSignalDetectionOptions(@NonNull HashOptions options) {
 		setDetectionOptions(SIGNAL_GROUP + options.getString(HashOptions.SIGNAL_GROUP_ID), options);
 	}
 
 	@Override
-	public void setNuclearSignalDetectionFolder(@NonNull UUID id, File folder) {
+	public void setNuclearSignalDetectionFolder(@NonNull UUID id, @NonNull File folder) {
 		setDetectionFolder(SIGNAL_GROUP + id.toString(), folder);
 	}
 
@@ -259,12 +264,12 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
 	}
 
 	@Override
-	public void setDetectionOptions(String key, HashOptions options) {
+	public void setDetectionOptions(@NonNull String key, @NonNull HashOptions options) {
 		detectionOptions.put(key, options);
 	}
 
 	@Override
-	public void setSecondaryOptions(String key, HashOptions options) {
+	public void setSecondaryOptions(@NonNull String key, @NonNull HashOptions options) {
 		secondaryOptions.put(key, options);
 	}
 
@@ -280,9 +285,6 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
 			Optional<HashOptions> op = template.getDetectionOptions(key);
 			if (op.isPresent()) {
 				setDetectionOptions(key, op.get().duplicate());
-				Optional<File> opFile = template.getDetectionFolder(key);
-				if (opFile.isPresent())
-					detectionFolders.put(key, opFile.get());
 			}
 		}
 

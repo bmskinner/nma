@@ -17,6 +17,7 @@ import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.signals.IShellResult;
+import com.bmskinner.nma.core.GlobalOptions;
 import com.bmskinner.nma.gui.Labels;
 import com.bmskinner.nma.gui.components.ImageThumbnailGenerator;
 import com.bmskinner.nma.gui.events.ChartSetEventListener;
@@ -51,7 +52,7 @@ public class SignalConsensusPanel extends ChartDetailPanel
 	private JButton mergeButton;
 
 	/** Show signal radius or just CoM */
-	boolean isShowAnnotations = false;
+	boolean isShowRadii = false;
 
 	/** Messages to clarify when UI is disabled */
 	private JLabel headerText;
@@ -117,9 +118,9 @@ public class SignalConsensusPanel extends ChartDetailPanel
 		panel.add(mergeButton);
 
 		JCheckBox showAnnotationsBox = new JCheckBox(Labels.Signals.SHOW_SIGNAL_RADII_LBL,
-				isShowAnnotations);
+				isShowRadii);
 		showAnnotationsBox.addActionListener(e -> {
-			isShowAnnotations = showAnnotationsBox.isSelected();
+			isShowRadii = showAnnotationsBox.isSelected();
 			refreshCache(getDatasets());
 		});
 		panel.add(showAnnotationsBox);
@@ -200,10 +201,11 @@ public class SignalConsensusPanel extends ChartDetailPanel
 		ChartOptions options = new ChartOptionsBuilder()
 				.setDatasets(getDatasets())
 				.setShowWarp(false)
+				.setScale(GlobalOptions.getInstance().getScale())
 				.setTarget(chartPanel)
 				.setShowXAxis(false)
 				.setShowYAxis(false)
-				.setShowAnnotations(isShowAnnotations).build();
+				.setShowAnnotations(isShowRadii).build();
 
 		setChart(options);
 	}

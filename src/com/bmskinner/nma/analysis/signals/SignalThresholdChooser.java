@@ -17,31 +17,20 @@
 package com.bmskinner.nma.analysis.signals;
 
 import java.awt.Rectangle;
-import java.io.File;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nma.analysis.detection.Detector;
-import com.bmskinner.nma.components.ComponentBuilderFactory;
-import com.bmskinner.nma.components.ComponentBuilderFactory.SignalBuilderFactory;
 import com.bmskinner.nma.components.cells.Nucleus;
-import com.bmskinner.nma.components.generic.IPoint;
 import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.profiles.BooleanProfile;
 import com.bmskinner.nma.components.profiles.DefaultProfile;
 import com.bmskinner.nma.components.profiles.IProfile;
-import com.bmskinner.nma.components.signals.INuclearSignal;
-import com.bmskinner.nma.io.ImageImporter;
 import com.bmskinner.nma.io.ImageImporter.ImageImportException;
 
-import ij.gui.Roi;
 import ij.measure.Calibration;
 import ij.measure.Measurements;
 import ij.process.FloatPolygon;
@@ -54,14 +43,12 @@ import ij.process.ImageStatistics;
  * @author bms41
  *
  */
-public class SignalDetector extends Detector {
+public class SignalThresholdChooser {
 
-	private static final Logger LOGGER = Logger.getLogger(SignalDetector.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(SignalThresholdChooser.class.getName());
 
 	private HashOptions options;
 	private int minThreshold;
-
-	private final SignalBuilderFactory factory;
 
 	/**
 	 * Create a detector with the desired options
@@ -69,7 +56,7 @@ public class SignalDetector extends Detector {
 	 * @param options the size and circularity parameters
 	 * @param channel the RGB channel
 	 */
-	public SignalDetector(@NonNull HashOptions options) {
+	public SignalThresholdChooser(@NonNull HashOptions options) {
 		if (!options.hasInt(HashOptions.CHANNEL))
 			throw new IllegalArgumentException("Channel not present in detection options");
 		if (!options.hasInt(HashOptions.THRESHOLD))
@@ -80,12 +67,11 @@ public class SignalDetector extends Detector {
 
 		if (minThreshold < 0)
 			throw new IllegalArgumentException("Min threshold must be greater or equal to 0");
-
-		factory = ComponentBuilderFactory.createSignalBuilderFactory();
 	}
 
 	/**
-	 * Call the appropriate signal detection method based on the analysis options
+	 * find the appropriate signal detection threshold for this image based on the
+	 * analysis options
 	 * 
 	 * @param sourceFile the file the image came from
 	 * @param stack      the imagestack
@@ -93,98 +79,46 @@ public class SignalDetector extends Detector {
 	 * @throws ImageImportException
 	 * @throws Exception
 	 */
-	public List<INuclearSignal> detectSignal(@NonNull File sourceFile, @NonNull Nucleus n)
-			throws ImageImportException {
-
+	public int chooseThreshold(@NonNull ImageProcessor ip, @NonNull Nucleus n) {
 		if (options.getString(HashOptions.SIGNAL_DETECTION_MODE_KEY)
 				.equals(SignalDetectionMode.FORWARD.name())) {
 			LOGGER.finer("Running forward detection");
-			return detectForwardThresholdSignal(sourceFile, n);
+			return chooseForwardThresholdSignal(ip, n);
 		}
 
 		if (options.getString(HashOptions.SIGNAL_DETECTION_MODE_KEY)
 				.equals(SignalDetectionMode.REVERSE.name())) {
 			LOGGER.finer("Running reverse detection");
-			return detectReverseThresholdSignal(sourceFile, n);
+			return chooseReverseThresholdSignal(ip, n);
 		}
 
 		if (options.getString(HashOptions.SIGNAL_DETECTION_MODE_KEY)
 				.equals(SignalDetectionMode.ADAPTIVE.name())) {
 			LOGGER.finer("Running adaptive detection");
-			return detectHistogramThresholdSignal(sourceFile, n);
+			return chooseHistogramThresholdSignal(ip, n);
 		}
 		throw new IllegalArgumentException("No detection mode found");
 	}
 
-	/**
-	 * Detect a signal in a given stack by standard forward thresholding and add to
-	 * the given nucleus
-	 * 
-	 * @param sourceFile the file the image came from
-	 * @param stack      the imagestack
-	 * @param n          the nucleus
-	 * @throws ImageImportException
-	 * @throws Exception
-	 */
-	private List<INuclearSignal> detectForwardThresholdSignal(@NonNull File sourceFile,
-			@NonNull Nucleus n) throws ImageImportException {
-
-		// Open the image
-		ImageProcessor ip = new ImageImporter(sourceFile)
-				.importImage(options.getInt(HashOptions.CHANNEL));
-
-		// Set up the detector
-		setMaxSize(n.getMeasurement(Measurement.AREA)
-				* options.getDouble(HashOptions.SIGNAL_MAX_FRACTION));
-		setMinSize(options.getInt(HashOptions.MIN_SIZE_PIXELS));
-		setMinCirc(options.getDouble(HashOptions.MIN_CIRC));
-		setMaxCirc(options.getDouble(HashOptions.MAX_CIRC));
-		setThreshold(minThreshold); // may have been updated in reverse or histogram method
-
-		// Run the detection of all potential signal ROIs
-		Map<Roi, IPoint> rois = detectRois(ip);
-		List<INuclearSignal> signals = new ArrayList<>();
-
-		for (Entry<Roi, IPoint> entry : rois.entrySet()) {
-			Roi r = entry.getKey();
-
-			// only keep the roi if it is within the nucleus
-			if (!n.containsOriginalPoint(entry.getValue()))
-				continue;
-
-			INuclearSignal s = factory.newBuilder()
-					.fromRoi(r)
-					.withFile(sourceFile)
-					.withChannel(options.getInt(HashOptions.CHANNEL))
-					.withCoM(entry.getValue())
-					.withScale(n.getScale())
-					.build();
-
-			signals.add(s);
-		}
-		return signals;
+	private int chooseForwardThresholdSignal(@NonNull ImageProcessor ip,
+			@NonNull Nucleus n) {
+		return minThreshold;
 	}
 
 	/**
-	 * Detect a signal in a given stack by reverse thresholding and add to the given
-	 * nucleus. Find the brightest pixels in the nuclear roi. If <
-	 * maxSignalFraction, get dimmer pixels and remeasure. Continue until signal
-	 * size is met. Works best with maxSignalFraction of ~0.1 for a chromosome paint
-	 * TODO: assumes there is only one signal. Check that the detector picks up an
-	 * object of MIN_SIGNAL_SIZE before setting the threshold.
+	 * Find the brightest pixels in the nuclear roi. If < maxSignalFraction, get
+	 * dimmer pixels and remeasure. Continue until signal size is met. Works best
+	 * with maxSignalFraction of ~0.1 for a chromosome paint TODO: assumes there is
+	 * only one signal. Check that the detector picks up an object of
+	 * MIN_SIGNAL_SIZE before setting the threshold.
 	 * 
 	 * @param sourceFile the file the image came from
 	 * @param n          the nucleus
 	 * @throws ImageImportException
 	 * @throws Exception
 	 */
-	private List<INuclearSignal> detectReverseThresholdSignal(File sourceFile, Nucleus n)
-			throws ImageImportException {
-
-		// Open the image
-		ImageProcessor ip = new ImageImporter(sourceFile)
-				.importImage(options.getInt(HashOptions.CHANNEL));
-
+	private int chooseReverseThresholdSignal(@NonNull ImageProcessor ip,
+			@NonNull Nucleus n) {
 		FloatPolygon polygon = n.toOriginalPolygon();
 
 		// map brightness to count
@@ -230,8 +164,7 @@ public class SignalDetector extends Detector {
 
 		// now we have the reverse threshold value, do the thresholding
 		// and find signal rois
-		return detectForwardThresholdSignal(sourceFile, n);
-
+		return chooseForwardThresholdSignal(ip, n);
 	}
 
 	/**
@@ -244,12 +177,8 @@ public class SignalDetector extends Detector {
 	 * 
 	 * @throws Exception
 	 */
-	private List<INuclearSignal> detectHistogramThresholdSignal(@NonNull final File sourceFile,
-			@NonNull final Nucleus n) throws ImageImportException {
-
-		// Open the image
-		ImageProcessor ip = new ImageImporter(sourceFile)
-				.importImage(options.getInt(HashOptions.CHANNEL));
+	private int chooseHistogramThresholdSignal(@NonNull final ImageProcessor ip,
+			@NonNull final Nucleus n) {
 
 		Rectangle boundingBox = new Rectangle(n.getXBase(),
 				n.getYBase(), (int) n.getWidth(), (int) n.getHeight());
@@ -306,7 +235,7 @@ public class SignalDetector extends Detector {
 		maxIndex += 10;
 
 		minThreshold = maxIndex;
-		return detectForwardThresholdSignal(sourceFile, n);
+		return chooseForwardThresholdSignal(ip, n);
 	}
 
 	private BooleanProfile getLocalMinimaWithRangeThreshold(IProfile p, int window,

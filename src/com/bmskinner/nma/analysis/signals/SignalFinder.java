@@ -20,14 +20,21 @@ import java.awt.Color;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nma.analysis.detection.AbstractFinder;
+import com.bmskinner.nma.analysis.detection.Detector;
+import com.bmskinner.nma.analysis.detection.FinderDisplayType;
+import com.bmskinner.nma.components.ComponentBuilderFactory;
+import com.bmskinner.nma.components.ComponentBuilderFactory.SignalBuilderFactory;
 import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.datasets.ICellCollection;
+import com.bmskinner.nma.components.generic.IPoint;
 import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.options.IAnalysisOptions;
@@ -39,6 +46,7 @@ import com.bmskinner.nma.visualisation.image.ImageAnnotator;
 import com.bmskinner.nma.visualisation.image.ImageConverter;
 
 import ij.ImageStack;
+import ij.gui.Roi;
 import ij.process.ImageProcessor;
 
 /**
@@ -56,6 +64,10 @@ public class SignalFinder extends AbstractFinder<List<INuclearSignal>> {
 
 	private final HashOptions signalOptions;
 	private final ICellCollection collection;
+	private final SignalBuilderFactory factory = ComponentBuilderFactory
+			.createSignalBuilderFactory();
+	private final FinderDisplayType displayType;
+	private final SignalThresholdChooser thresholdChooser;
 
 	/**
 	 * Create a signal detector for a dataset using the given options
@@ -66,10 +78,12 @@ public class SignalFinder extends AbstractFinder<List<INuclearSignal>> {
 	 */
 	public SignalFinder(@NonNull IAnalysisOptions analysisOptions,
 			@NonNull HashOptions signalOptions,
-			@NonNull ICellCollection collection) {
+			@NonNull ICellCollection collection, @NonNull FinderDisplayType t) {
 		super(analysisOptions);
 		this.signalOptions = signalOptions;
 		this.collection = collection;
+		this.displayType = t;
+		thresholdChooser = new SignalThresholdChooser(signalOptions);
 	}
 
 	@Override
@@ -95,30 +109,38 @@ public class SignalFinder extends AbstractFinder<List<INuclearSignal>> {
 
 	@Override
 	public List<INuclearSignal> findInImage(@NonNull File imageFile) throws ImageImportException {
+		List<INuclearSignal> list = new ArrayList<>();
+		try {
+			if (FinderDisplayType.PREVIEW.equals(displayType)) {
+				// Get all objects and annotate if passing filters
+				list = detectPreview(imageFile);
+			}
+
+			if (FinderDisplayType.PIPELINE.equals(displayType)) {
+				// Get only objects matching filters
+				list = detectPipeline(imageFile);
+			}
+		} finally {
+			fireProgressEvent();
+		}
+		return list;
+	}
+
+	private List<INuclearSignal> detectPreview(@NonNull File imageFile)
+			throws ImageImportException {
 
 		List<INuclearSignal> list = new ArrayList<>();
 
-		// We need to find all possible signals so we can highlight which
-		// ones pass filters, so we must relax the size thresholds.
-		// Store them in a new options object to preserve the original.
-		HashOptions testOptions = signalOptions.duplicate();
-		testOptions.setInt(HashOptions.MIN_SIZE_PIXELS, 5);
-		testOptions.setDouble(HashOptions.SIGNAL_MAX_FRACTION, 1d);
-		SignalDetector detector = new SignalDetector(testOptions);
-
+		// Import the image processor
+		// Note we are checking stack size to avoid exceptions in the preview windows
+		// when the image does not have the default selected channel
 		ImageStack stack = new ImageImporter(imageFile).importToStack();
-
-		// Find the processor number in the stack to use
 		int stackNumber = ImageImporter.rgbToStack(signalOptions.getInt(HashOptions.CHANNEL));
-
 		// Ignore incorrect channel selections
 		if (stack.getSize() < stackNumber) {
 			LOGGER.finer("Channel not present in image");
 			return list;
 		}
-
-		LOGGER.finer("Converting image");
-		// Get the greyscale processor for the signal channel
 		ImageProcessor greyProcessor = stack.getProcessor(stackNumber);
 
 		// Convert to an RGB processor for annotation
@@ -147,8 +169,29 @@ public class SignalFinder extends AbstractFinder<List<INuclearSignal>> {
 
 		for (Nucleus n : nuclei) {
 			try {
-				// The detector also creates and adds the signals currently
-				List<INuclearSignal> temp = detector.detectSignal(imageFile, n);
+
+				List<INuclearSignal> temp = new ArrayList<>();
+				int threshold = thresholdChooser.chooseThreshold(greyProcessor, n);
+
+				Detector d = new Detector();
+				d.setThreshold(threshold);
+				Map<Roi, IPoint> rois = d.getAllRois(greyProcessor);
+
+				for (Entry<Roi, IPoint> entry : rois.entrySet()) {
+
+					if (n.containsOriginalPoint(entry.getValue())) {
+
+						INuclearSignal s = factory.newBuilder()
+								.fromRoi(entry.getKey())
+								.withFile(imageFile)
+								.withChannel(signalOptions.getInt(HashOptions.CHANNEL))
+								.withCoM(entry.getValue())
+								.withScale(n.getScale())
+								.build();
+
+						temp.add(s);
+					}
+				}
 
 				if (hasDetectionListeners()) {
 					LOGGER.finer("Drawing signals for " + n.getNameAndNumber());
@@ -177,31 +220,56 @@ public class SignalFinder extends AbstractFinder<List<INuclearSignal>> {
 		return list;
 	}
 
-	/**
-	 * Find nuclear signals within the given image, for the given nucleus
-	 * 
-	 * @param imageFile the image to search
-	 * @param n         the nucleus the signals should belong to
-	 * @return
-	 * @throws ImageImportException
-	 */
-	public List<INuclearSignal> findInImage(@NonNull File imageFile, @NonNull Nucleus n)
+	private List<INuclearSignal> detectPipeline(@NonNull File imageFile)
 			throws ImageImportException {
 
-		SignalDetector sd = new SignalDetector(signalOptions);
-
 		List<INuclearSignal> list = new ArrayList<>();
-		try {
-			// The detector also creates the signals currently
-			List<INuclearSignal> temp = sd.detectSignal(imageFile, n);
-			for (INuclearSignal s : temp)
-				if (isValid(s, n))
+
+		// Import the image processor
+		ImageProcessor greyProcessor = new ImageImporter(imageFile)
+				.importImage(signalOptions.getInt(HashOptions.CHANNEL));
+
+		// The given image file may not be the same image that the nucleus was
+		// detected in.
+		// Take the image name only, and add onto the DAPI folder name.
+		// This requires that the signal file name is identical to the dapi file
+		// name
+
+		String imageName = imageFile.getName();
+		File dapiFolder = options.getNucleusDetectionFolder().get();
+
+		File dapiFile = new File(dapiFolder, imageName);
+
+		// Get the nuclei corresponding to the DAPI image
+		Set<Nucleus> nuclei = collection.getNuclei(dapiFile);
+
+		LOGGER.finer("Detecting signals in " + nuclei.size() + " nuclei");
+
+		for (Nucleus n : nuclei) {
+			try {
+
+				List<INuclearSignal> temp = new ArrayList<>();
+				int threshold = thresholdChooser.chooseThreshold(greyProcessor, n);
+
+				Detector d = new Detector();
+				d.setThreshold(threshold);
+				Map<Roi, IPoint> rois = d.getValidRois(greyProcessor, signalOptions, n);
+				for (Entry<Roi, IPoint> entry : rois.entrySet()) {
+
+					INuclearSignal s = factory.newBuilder()
+							.fromRoi(entry.getKey())
+							.withFile(imageFile)
+							.withChannel(signalOptions.getInt(HashOptions.CHANNEL))
+							.withCoM(entry.getValue())
+							.withScale(n.getScale())
+							.build();
 					list.add(s);
-		} catch (IllegalArgumentException e) {
-			LOGGER.warning("Unable to find images in image " + imageFile.getAbsolutePath() + ": "
-					+ e.getMessage());
-			LOGGER.log(Loggable.STACK,
-					"Error in detector with image " + imageFile.getAbsolutePath(), e);
+
+				}
+
+			} catch (Exception e) {
+				LOGGER.log(Loggable.STACK, "Error in detector", e);
+			}
 		}
 		return list;
 	}
@@ -236,8 +304,9 @@ public class SignalFinder extends AbstractFinder<List<INuclearSignal>> {
 	 * @return
 	 */
 	private boolean isValid(@NonNull INuclearSignal s, @NonNull Nucleus n) {
-		return (s.getMeasurement(Measurement.AREA) >= signalOptions
-				.getInt(HashOptions.MIN_SIZE_PIXELS)
+		return (n.containsOriginalPoint(s.getOriginalCentreOfMass())
+				&& s.getMeasurement(Measurement.AREA) >= signalOptions
+						.getInt(HashOptions.MIN_SIZE_PIXELS)
 				&& s.getMeasurement(Measurement.AREA) <= (signalOptions
 						.getDouble(HashOptions.SIGNAL_MAX_FRACTION)
 						* n.getMeasurement(Measurement.AREA)));

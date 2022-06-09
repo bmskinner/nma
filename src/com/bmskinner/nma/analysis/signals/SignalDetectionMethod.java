@@ -22,12 +22,14 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nma.analysis.DefaultAnalysisResult;
 import com.bmskinner.nma.analysis.IAnalysisResult;
 import com.bmskinner.nma.analysis.SingleDatasetAnalysisMethod;
+import com.bmskinner.nma.analysis.detection.FinderDisplayType;
 import com.bmskinner.nma.components.MissingLandmarkException;
 import com.bmskinner.nma.components.UnavailableBorderPointException;
 import com.bmskinner.nma.components.cells.ComponentCreationException;
@@ -117,7 +119,7 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
 		int originalMinThreshold = options.getInt(HashOptions.THRESHOLD);
 
 		SignalFinder finder = new SignalFinder(dataset.getAnalysisOptions().get(), options,
-				dataset.getCollection());
+				dataset.getCollection(), FinderDisplayType.PIPELINE);
 
 		dataset.getCollection().getCells()
 				.forEach(c -> detectInCell(c, finder, originalMinThreshold));
@@ -146,13 +148,19 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
 
 		try {
 
-			List<INuclearSignal> signals = finder.findInImage(imageFile, n);
+			// Get all the signals in the image
+			List<INuclearSignal> signals = finder.findInImage(imageFile);
+
+			// Restrict to signals in the current nucleus of interest
+			List<INuclearSignal> signalsInNucleus = signals.stream()
+					.filter(s -> s.containsOriginalPoint(s.getOriginalCentreOfMass()))
+					.collect(Collectors.toList());
 
 			// No need to add a group to a nucleus if there were no signals
-			if (!signals.isEmpty()) {
+			if (!signalsInNucleus.isEmpty()) {
 
 				ISignalCollection signalCollection = n.getSignalCollection();
-				signalCollection.addSignalGroup(signals,
+				signalCollection.addSignalGroup(signalsInNucleus,
 						options.getUUID(HashOptions.SIGNAL_GROUP_ID));
 
 				// Measure the detected signals in the nucleus

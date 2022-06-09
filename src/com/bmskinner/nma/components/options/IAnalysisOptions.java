@@ -68,7 +68,7 @@ public interface IAnalysisOptions extends XmlSerializable {
 	 * @param key the component to detect
 	 * @return the detection options for the component
 	 */
-	Optional<File> getDetectionFolder(String key);
+	Optional<File> getDetectionFolder(@NonNull String key);
 
 	/**
 	 * Set the given detection folder
@@ -76,7 +76,7 @@ public interface IAnalysisOptions extends XmlSerializable {
 	 * @param key    a value from CellularComponent, or a group id
 	 * @param folder
 	 */
-	void setDetectionFolder(String key, File folder);
+	void setDetectionFolder(@NonNull String key, @NonNull File folder);
 
 	/**
 	 * Fetch the options used to detect the nucleus, if present. This is a shortcut
@@ -95,6 +95,14 @@ public interface IAnalysisOptions extends XmlSerializable {
 	Optional<File> getNucleusDetectionFolder();
 
 	/**
+	 * Set the folder of images used to detect nuclei. This is a shortcut for
+	 * {@code IAnalysisOptions::setDetectionFolder(CellularComponent.NUCLEUS, folder)}
+	 * 
+	 * @param folder the folder
+	 */
+	void setNucleusDetectionFolder(@NonNull File folder);
+
+	/**
 	 * Get the type of detection options stored
 	 * 
 	 * @return
@@ -107,7 +115,7 @@ public interface IAnalysisOptions extends XmlSerializable {
 	 * @param type the name to check
 	 * @return true if present, false otherwise
 	 */
-	boolean hasDetectionOptions(String type);
+	boolean hasDetectionOptions(@NonNull String type);
 
 	/**
 	 * Get secondary options for a given key
@@ -115,7 +123,7 @@ public interface IAnalysisOptions extends XmlSerializable {
 	 * @param key the type of options
 	 * @return the options
 	 */
-	Optional<HashOptions> getSecondaryOptions(String key);
+	Optional<HashOptions> getSecondaryOptions(@NonNull String key);
 
 	/**
 	 * Get the types of secondary options stored
@@ -130,7 +138,7 @@ public interface IAnalysisOptions extends XmlSerializable {
 	 * @param key the key to check
 	 * @return true if present, false otherwise
 	 */
-	boolean hasSecondaryOptions(String key);
+	boolean hasSecondaryOptions(@NonNull String key);
 
 	/**
 	 * Get the proportion of the nucleus perimeter to use for shape profiling
@@ -151,8 +159,13 @@ public interface IAnalysisOptions extends XmlSerializable {
 	 * 
 	 * @param rsc
 	 */
-	void setRuleSetCollection(RuleSetCollection rsc);
+	void setRuleSetCollection(@NonNull RuleSetCollection rsc);
 
+	/**
+	 * Get the IDs of signal groups
+	 * 
+	 * @return
+	 */
 	Set<UUID> getNuclearSignalGroups();
 
 	/**
@@ -176,7 +189,7 @@ public interface IAnalysisOptions extends XmlSerializable {
 	 * @param key
 	 * @param options
 	 */
-	void setNuclearSignalDetectionOptions(HashOptions options);
+	void setNuclearSignalDetectionOptions(@NonNull HashOptions options);
 
 	/**
 	 * Set the detection folder for a nuclear signal
@@ -184,7 +197,7 @@ public interface IAnalysisOptions extends XmlSerializable {
 	 * @param id
 	 * @param folder
 	 */
-	void setNuclearSignalDetectionFolder(@NonNull UUID id, File folder);
+	void setNuclearSignalDetectionFolder(@NonNull UUID id, @NonNull File folder);
 
 	/**
 	 * Check if the given type name is already present
@@ -212,7 +225,7 @@ public interface IAnalysisOptions extends XmlSerializable {
 	 * @param key
 	 * @param options
 	 */
-	void setDetectionOptions(String key, HashOptions options);
+	void setDetectionOptions(@NonNull String key, @NonNull HashOptions options);
 
 	/**
 	 * Set the secondary options for the given key
@@ -220,7 +233,7 @@ public interface IAnalysisOptions extends XmlSerializable {
 	 * @param key     the options key
 	 * @param options the options
 	 */
-	void setSecondaryOptions(String key, HashOptions options);
+	void setSecondaryOptions(@NonNull String key, @NonNull HashOptions options);
 
 	/**
 	 * Set the proportion of the perimeter to use when profiling nuclei
@@ -230,7 +243,8 @@ public interface IAnalysisOptions extends XmlSerializable {
 	void setAngleWindowProportion(double proportion);
 
 	/**
-	 * Set the values in this options to match the given options
+	 * Set the values in this options to match the given options. Note that
+	 * detection folders will not be added.
 	 * 
 	 * @param o
 	 */

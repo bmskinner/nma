@@ -27,6 +27,7 @@ import javax.swing.JPanel;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nma.analysis.detection.Finder;
+import com.bmskinner.nma.analysis.detection.FinderDisplayType;
 import com.bmskinner.nma.analysis.signals.SignalFinder;
 import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
@@ -82,7 +83,8 @@ public class SignalImageProber extends IntegratedImageProber {
 			// make the panel
 			optionsSettingsPanel = new SignalDetectionSettingsPanel(folder, op.get(), options);
 
-			Finder<?> finder = new SignalFinder(op.get(), options, dataset.getCollection());
+			Finder<?> finder = new SignalFinder(op.get(), options, dataset.getCollection(),
+					FinderDisplayType.PREVIEW);
 			imageProberPanel = new GenericImageProberPanel(folder, finder, this);
 			JPanel footerPanel = createFooter();
 
