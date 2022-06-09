@@ -77,15 +77,15 @@ public class CopyNucleusDetectionSettingsFromOpenDatasetPanel extends CopyFromOp
 
 				// Ensure the folder is not overwritten by the new options
 				File folder = parent.getNucleusDetectionFolder().get();
-//				File folder = new File(options.getString(HashOptions.DETECTION_FOLDER));
+
 				Optional<IAnalysisOptions> op = sourceDataset.getAnalysisOptions();
 				if (op.isPresent()) {
 					op.get().setDetectionFolder(CellularComponent.NUCLEUS,
 							folder.getAbsoluteFile());
-					Optional<HashOptions> srcOptions = op.get()
-							.getDetectionOptions(CellularComponent.NUCLEUS);
+					Optional<HashOptions> srcOptions = op.get().getNucleusDetectionOptions();
 					options.set(srcOptions.get());
 					parent.setRuleSetCollection(op.get().getRuleSetCollection());
+					parent.setNucleusDetectionFolder(folder);
 				}
 
 				fireOptionsChangeEvent();
@@ -103,7 +103,7 @@ public class CopyNucleusDetectionSettingsFromOpenDatasetPanel extends CopyFromOp
 
 			try {
 				IAnalysisOptions o = XMLReader.readAnalysisOptions(f);
-				options.set(o.getDetectionOptions(CellularComponent.NUCLEUS).get());
+				options.set(o.getNucleusDetectionOptions().get());
 				parent.setRuleSetCollection(o.getRuleSetCollection());
 				parent.setAngleWindowProportion(o.getProfileWindowProportion());
 

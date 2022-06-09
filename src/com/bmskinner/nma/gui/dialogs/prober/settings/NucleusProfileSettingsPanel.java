@@ -69,6 +69,8 @@ public class NucleusProfileSettingsPanel extends SettingsPanel {
 
 	private JComboBox<String> typeBox;
 
+	private String[] availableRules = getAvailableRulesets();
+
 	public NucleusProfileSettingsPanel(final IAnalysisOptions op) {
 		super();
 		options = op;
@@ -101,8 +103,6 @@ public class NucleusProfileSettingsPanel extends SettingsPanel {
 				.getString(GlobalOptions.DEFAULT_RULESET_KEY);
 
 		LOGGER.finer("Default type: " + defaultNucleusType);
-
-		String[] availableRules = getAvailableRulesets();
 
 		typeBox = new JComboBox<>(availableRules);
 
@@ -186,7 +186,11 @@ public class NucleusProfileSettingsPanel extends SettingsPanel {
 	@Override
 	protected void update() {
 		super.update();
+		availableRules = getAvailableRulesets();
 		profileWindow.setValue(options.getProfileWindowProportion());
+		String rulesetName = options.getRuleSetCollection().getName();
+		if (Arrays.stream(availableRules).anyMatch(r -> r.equals(rulesetName)))
+			typeBox.setSelectedItem(rulesetName);
 	}
 
 	@Override
