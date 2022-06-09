@@ -16,6 +16,7 @@ import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.options.IAnalysisOptions;
 import com.bmskinner.nma.gui.Labels;
 import com.bmskinner.nma.gui.components.ColourSelecter;
+import com.bmskinner.nma.io.Io;
 import com.bmskinner.nma.visualisation.datasets.SignalTableCell;
 
 public class NuclearSignalDetectionTableModel extends DatasetTableModel {
@@ -109,8 +110,8 @@ public class NuclearSignalDetectionTableModel extends DatasetTableModel {
 				rowData[baseIndex + 0][c] = Labels.Signals.SIGNAL_COLOUR_LABEL;
 				rowData[baseIndex + 1][c] = cell;
 				rowData[baseIndex + 2][c] = makeChannelLabel(d, ns);
-				rowData[baseIndex + 3][c] = makeSignalThresholdLabel(d, ns, signalGroup);
-				rowData[baseIndex + 4][c] = makeSignalFolderLabel(d, signalGroup, op, ns);
+				rowData[baseIndex + 3][c] = makeSignalFolderLabel(d, signalGroup, op, ns);
+				rowData[baseIndex + 4][c] = makeSignalThresholdLabel(d, ns, signalGroup);
 				rowData[baseIndex + 5][c] = makeMinSizeLabel(d, ns);
 				rowData[baseIndex + 6][c] = makeMaxFractionLabel(d, ns);
 				rowData[baseIndex + 7][c] = makeMinCircLabel(d, ns);
@@ -183,11 +184,15 @@ public class NuclearSignalDetectionTableModel extends DatasetTableModel {
 	}
 
 	private Object makeDetctionModeLabel(IAnalysisDataset d, HashOptions ns) {
+		String result = VALUE_MISSING_LBL;
+
 		if (ns.hasString(HashOptions.SIGNAL_DETECTION_MODE_KEY))
-			return ns.getString(HashOptions.SIGNAL_DETECTION_MODE_KEY);
+			result = ns.getString(HashOptions.SIGNAL_DETECTION_MODE_KEY);
+		if (ns.getBoolean(HashOptions.IS_USE_WATERSHED))
+			result += Io.NEWLINE + "Watershed";
 		if (d.hasMergeSources())
 			return Labels.NA_MERGE;
-		return VALUE_MISSING_LBL;
+		return result;
 	}
 
 	private Object makeSignalFolderLabel(IAnalysisDataset d, UUID signalGroup,
