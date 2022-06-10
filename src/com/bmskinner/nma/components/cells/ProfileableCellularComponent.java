@@ -238,7 +238,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 	public void createProfiles(double proportion) throws ComponentCreationException {
 		if (proportion <= 0 || proportion >= 1)
 			throw new ComponentCreationException("Must have a value between 0-1");
-		LOGGER.finer("Beginning create profiles");
+
 		windowProportion = proportion;
 
 		try {
@@ -250,7 +250,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 			segments.add(
 					new DefaultProfileSegment(0, 0, this.getBorderLength(),
 							IProfileCollection.DEFAULT_SEGMENT_ID));
-		} catch (ProfileException e) {
+		} catch (ProfileException | IllegalArgumentException e) {
 			throw new ComponentCreationException(
 					"Could not calculate profiles due to " + e.getMessage(), e);
 		}

@@ -166,9 +166,10 @@ public class ComponentBuilderFactory {
 				}
 
 				n.setScale(scale);
-				n.createProfiles(windowProp);
 
 				try {
+					n.createProfiles(windowProp);
+
 					ProfileIndexFinder.assignLandmarks(n, rsc);
 
 					if (ProfileIndexFinder.shouldReverseProfile(n)) {

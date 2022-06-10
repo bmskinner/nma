@@ -97,8 +97,9 @@ public class DefaultProfileSegment implements IProfileSegment {
 		// ensure that the segment meets minimum length requirements
 		if (!IProfileSegment.isLongEnough(startIndex, endIndex, total))
 			throw new IllegalArgumentException(
-					String.format("Cannot create segment %s - %s: shorter than %s", startIndex,
-							endIndex, MINIMUM_SEGMENT_LENGTH));
+					String.format(
+							"Cannot create default segment of length %s: shorter than minimum (%s)",
+							total, MINIMUM_SEGMENT_LENGTH));
 
 		if (startIndex != endIndex && !IProfileSegment.isShortEnough(startIndex, endIndex, total))
 			throw new IllegalArgumentException(
