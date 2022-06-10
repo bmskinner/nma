@@ -1236,9 +1236,7 @@ public class VirtualDataset extends AbstractAnalysisDataset
 
 	@Override
 	public void setAnalysisOptions(@NonNull IAnalysisOptions analysisOptions) {
-		if (this.analysisOptions == null)
-			this.analysisOptions = new DefaultAnalysisOptions();
-		this.analysisOptions.set(analysisOptions);
+		this.analysisOptions = new DefaultAnalysisOptions(analysisOptions);
 	}
 
 	@Override

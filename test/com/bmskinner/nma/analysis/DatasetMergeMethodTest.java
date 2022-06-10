@@ -74,6 +74,59 @@ public class DatasetMergeMethodTest {
 				.call();
 	}
 
+	/**
+	 * Ensure that detection folders and full analysis options are present in merge
+	 * source datasets and are equal to their original datasets
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void testMergeSourcesHaveAnalysisOptions() throws Exception {
+		File f1 = TestResources.MOUSE_CLUSTERS_DATASET;
+		File f2 = TestResources.MOUSE_TEST_DATASET;
+		File f3 = new File(MERGED_DATASET_FILE);
+
+		// Open the template datasets
+		IAnalysisDataset d1 = SampleDatasetReader.openDataset(f1);
+		IAnalysisDataset d2 = SampleDatasetReader.openDataset(f2);
+
+		List<IAnalysisDataset> datasets = new ArrayList<>();
+		datasets.add(d1);
+		datasets.add(d2);
+
+		// Merge the datasets
+		DatasetMergeMethod dm = new DatasetMergeMethod(datasets, BooleanOperation.OR, f3);
+		IAnalysisDataset merged = dm.call().getFirstDataset();
+
+		new DatasetProfilingMethod(merged)
+				.then(new DatasetSegmentationMethod(merged,
+						MorphologyAnalysisMode.SEGMENT_FROM_SCRATCH))
+				.call();
+
+		// Get the merge sources
+		IAnalysisDataset r1 = merged.getAllMergeSources().stream()
+				.filter(d -> d.getName().equals(d1.getName()))
+				.findFirst().orElseThrow(Exception::new);
+		IAnalysisDataset r2 = merged.getAllMergeSources().stream()
+				.filter(d -> d.getName().equals(d2.getName()))
+				.findFirst().orElseThrow(Exception::new);
+
+		for (ICell c : d1.getCollection()) {
+			assertTrue(r1.getCollection().contains(c));
+		}
+
+		for (ICell c : d2.getCollection()) {
+			assertTrue(r2.getCollection().contains(c));
+		}
+
+		assertEquals(d1.getCollection().size(), r1.getCollection().size());
+		assertEquals(d2.getCollection().size(), r2.getCollection().size());
+
+		assertEquals(d1.getAnalysisOptions(), r1.getAnalysisOptions());
+		assertEquals(d2.getAnalysisOptions(), r2.getAnalysisOptions());
+
+	}
+
 	@Test
 	public void testLandmarksArePresentInMergedDatasetAfterResegmentation() throws Exception {
 

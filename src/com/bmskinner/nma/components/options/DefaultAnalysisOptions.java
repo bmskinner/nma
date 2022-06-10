@@ -91,7 +91,17 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
 	 * @param template the options to use as a template
 	 */
 	public DefaultAnalysisOptions(@NonNull IAnalysisOptions template) {
+		// Set all options except for detection folders
 		set(template);
+
+		// Copy the detection folders
+		for (String key : template.getDetectionOptionTypes()) {
+			Optional<File> file = template.getDetectionFolder(key);
+			if (file.isPresent()) {
+				setDetectionFolder(key, file.get());
+			}
+		}
+
 		analysisTime = template.getAnalysisTime();
 	}
 
@@ -325,6 +335,7 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
 		b.append("Run at: " + analysisTime + Io.NEWLINE);
 		for (Entry<String, HashOptions> e : detectionOptions.entrySet()) {
 			b.append(e.getKey() + Io.NEWLINE);
+			b.append(detectionFolders.get(e.getKey()) + Io.NEWLINE);
 			b.append(e.getValue().toString());
 		}
 		b.append(Io.NEWLINE + windowProp);
