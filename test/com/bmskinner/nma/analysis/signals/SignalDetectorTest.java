@@ -75,7 +75,9 @@ public class SignalDetectorTest {
 			ImageProcessor ip = new ImageImporter(testFile)
 					.importImage(o.getInt(HashOptions.CHANNEL));
 
-			Map<Roi, IPoint> rois = new Detector().getValidRois(ip, o);
+			ip.threshold(o.getInt(HashOptions.THRESHOLD));
+
+			Map<Roi, IPoint> rois = new Detector().getValidRois(ip, o, n);
 			signals += rois.size();
 		}
 

@@ -133,7 +133,7 @@ public class SignalFinder extends AbstractFinder<List<INuclearSignal>> {
 
 		// Import the image processor
 		// Note we are checking stack size to avoid exceptions in the preview windows
-		// when the image does not have the default selected channel
+		// when the image does n
 		ImageStack stack = new ImageImporter(imageFile).importToStack();
 		int stackNumber = ImageImporter.rgbToStack(signalOptions.getInt(HashOptions.CHANNEL));
 		// Ignore incorrect channel selections
@@ -173,8 +173,10 @@ public class SignalFinder extends AbstractFinder<List<INuclearSignal>> {
 				List<INuclearSignal> temp = new ArrayList<>();
 				int threshold = thresholdChooser.chooseThreshold(greyProcessor, n);
 
+				ImageProcessor gp = greyProcessor.duplicate();
+				gp.threshold(threshold);
+
 				Detector d = new Detector();
-				d.setThreshold(threshold);
 				Map<Roi, IPoint> rois = d.getAllRois(greyProcessor);
 
 				for (Entry<Roi, IPoint> entry : rois.entrySet()) {
@@ -206,7 +208,7 @@ public class SignalFinder extends AbstractFinder<List<INuclearSignal>> {
 				}
 
 			} catch (Exception e) {
-				LOGGER.log(Loggable.STACK, "Error in detector", e);
+				LOGGER.log(Loggable.STACK, "Error in signal detector", e);
 			}
 		}
 
@@ -243,17 +245,18 @@ public class SignalFinder extends AbstractFinder<List<INuclearSignal>> {
 		// Get the nuclei corresponding to the DAPI image
 		Set<Nucleus> nuclei = collection.getNuclei(dapiFile);
 
-		LOGGER.finer("Detecting signals in " + nuclei.size() + " nuclei");
-
 		for (Nucleus n : nuclei) {
 			try {
 
-				List<INuclearSignal> temp = new ArrayList<>();
+				// Since thresholding can be unique for each nucleus, we duplicate the processor
 				int threshold = thresholdChooser.chooseThreshold(greyProcessor, n);
 
+				ImageProcessor ip = greyProcessor.duplicate();
+				ip.threshold(threshold);
+
 				Detector d = new Detector();
-				d.setThreshold(threshold);
-				Map<Roi, IPoint> rois = d.getValidRois(greyProcessor, signalOptions, n);
+				Map<Roi, IPoint> rois = d.getValidRois(ip, signalOptions, n);
+
 				for (Entry<Roi, IPoint> entry : rois.entrySet()) {
 
 					INuclearSignal s = factory.newBuilder()

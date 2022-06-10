@@ -29,6 +29,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -71,6 +72,8 @@ import ij.process.ShortStatistics;
  */
 public class Detector {
 
+	public static final int MINIMUM_OBJECT_SIZE_PIXELS = 5;
+
 	private static final Logger LOGGER = Logger.getLogger(Detector.class.getName());
 
 	public static final int CLOSED_OBJECTS = 0; // Flags to allow detection of
@@ -96,7 +99,7 @@ public class Detector {
 
 	private boolean isWatershed = false;
 
-	private int threshold = 128;
+//	private int threshold = 128;
 
 	/**
 	 * Detect rois in the image at the default threshold with no size or circularity
@@ -108,7 +111,7 @@ public class Detector {
 	public Map<Roi, IPoint> getAllRois(ImageProcessor ip) {
 		minCirc = 0;
 		maxCirc = 1;
-		minSize = 1;
+		minSize = MINIMUM_OBJECT_SIZE_PIXELS;
 		maxSize = ip.getWidth() * ip.getHeight(); // object cannot be larger than the image
 		return detectRois(ip);
 	}
@@ -116,7 +119,7 @@ public class Detector {
 	/**
 	 * Detect ROIs in the image that match the given options
 	 * 
-	 * @param ip      the image to search
+	 * @param ip      the image to search. Should be binarised
 	 * @param options the detection options
 	 * @return
 	 */
@@ -128,7 +131,6 @@ public class Detector {
 		minSize = options.getInt(HashOptions.MIN_SIZE_PIXELS);
 		minCirc = options.getDouble(HashOptions.MIN_CIRC);
 		maxCirc = options.getDouble(HashOptions.MAX_CIRC);
-		threshold = options.getInt(HashOptions.THRESHOLD);
 		isWatershed = options.getBoolean(HashOptions.IS_USE_WATERSHED);
 		return detectRois(ip);
 	}
@@ -158,10 +160,11 @@ public class Detector {
 		minSize = options.getInt(HashOptions.MIN_SIZE_PIXELS);
 		minCirc = options.getDouble(HashOptions.MIN_CIRC);
 		maxCirc = options.getDouble(HashOptions.MAX_CIRC);
-		threshold = options.getInt(HashOptions.THRESHOLD);
+
 		isWatershed = options.getBoolean(HashOptions.IS_USE_WATERSHED);
 
 		Map<Roi, IPoint> rois = detectRois(ip);
+
 		Map<Roi, IPoint> result = new HashMap<>();
 		for (Entry<Roi, IPoint> entry : rois.entrySet()) {
 			if (n.containsOriginalPoint(entry.getValue())) {
@@ -210,9 +213,9 @@ public class Detector {
 		this.maxCirc = d;
 	}
 
-	public void setThreshold(int i) {
-		this.threshold = i;
-	}
+//	public void setThreshold(int i) {
+//		this.threshold = i;
+//	}
 
 	/**
 	 * Set whether the ROIs should include holes - i.e. should holes be flood filled
@@ -253,7 +256,6 @@ public class Detector {
 			throw new IllegalArgumentException("Processor must be byte or short");
 
 		ImageProcessor searchProcessor = image.duplicate();
-		searchProcessor.threshold(threshold);
 
 		// Watershed if needed
 		if (isWatershed) {
@@ -276,7 +278,7 @@ public class Detector {
 		ParticleAnalyzer pa = new ParticleAnalyzer(options);
 		boolean success = pa.analyze(searchProcessor);
 		if (!success) {
-			LOGGER.warning("Unable to perform particle analysis");
+			LOGGER.log(Level.FINE, "Unable to perform particle analysis on object");
 		}
 
 		// Run measurements on the original image
@@ -296,7 +298,6 @@ public class Detector {
 	 */
 	private synchronized IPoint measure(@NonNull Roi roi, @NonNull ImageProcessor image) {
 
-//		ImageProcessor searchProcessor = image.duplicate();
 		ImagePlus imp = new ImagePlus(null, image);
 		imp.setRoi(roi);
 		ResultsTable rt = new ResultsTable();

@@ -153,7 +153,7 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
 
 			// Restrict to signals in the current nucleus of interest
 			List<INuclearSignal> signalsInNucleus = signals.stream()
-					.filter(s -> s.containsOriginalPoint(s.getOriginalCentreOfMass()))
+					.filter(s -> n.containsOriginalPoint(s.getOriginalCentreOfMass()))
 					.collect(Collectors.toList());
 
 			// No need to add a group to a nucleus if there were no signals
