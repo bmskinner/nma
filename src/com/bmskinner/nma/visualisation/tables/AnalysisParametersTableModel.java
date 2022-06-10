@@ -175,9 +175,12 @@ public class AnalysisParametersTableModel extends DatasetTableModel {
 			builder.append("Kernel width: " + options.getInt(HashOptions.CANNY_KERNEL_WIDTH_INT)
 					+ Io.NEWLINE);
 			builder.append(
-					"Closing radius: " + options.getInt(HashOptions.CANNY_CLOSING_RADIUS_INT));
+					"Closing radius: " + options.getInt(HashOptions.GAP_CLOSING_RADIUS_INT));
 		} else {
 			builder.append("Threshold: " + options.getInt(HashOptions.THRESHOLD));
+			if (options.getBoolean(HashOptions.IS_USE_GAP_CLOSING))
+				builder.append(Io.NEWLINE + "Closing radius: "
+						+ options.getInt(HashOptions.GAP_CLOSING_RADIUS_INT));
 		}
 
 		if (options.getBoolean(HashOptions.IS_USE_WATERSHED)) {

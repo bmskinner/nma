@@ -102,7 +102,7 @@ public class CannySettingsPanel extends SettingsPanel implements ActionListener 
 				.setValue((double) options.getFloat(HashOptions.CANNY_HIGH_THRESHOLD_FLT));
 		cannyKernelRadius.setValue((double) options.getFloat(HashOptions.CANNY_KERNEL_RADIUS_FLT));
 		cannyKernelWidth.setValue(options.getInt(HashOptions.CANNY_KERNEL_WIDTH_INT));
-		closingObjectRadiusSpinner.setValue(options.getInt(HashOptions.CANNY_CLOSING_RADIUS_INT));
+		closingObjectRadiusSpinner.setValue(options.getInt(HashOptions.GAP_CLOSING_RADIUS_INT));
 
 		cannyAutoThresholdCheckBox
 				.setSelected(options.getBoolean(HashOptions.CANNY_IS_AUTO_THRESHOLD));
@@ -140,7 +140,7 @@ public class CannySettingsPanel extends SettingsPanel implements ActionListener 
 
 		closingObjectRadiusSpinner = new JSpinner(
 				new SpinnerNumberModel(
-						Integer.valueOf(options.getInt(HashOptions.CANNY_CLOSING_RADIUS_INT)),
+						Integer.valueOf(options.getInt(HashOptions.GAP_CLOSING_RADIUS_INT)),
 						CLOSING_RADIUS_MIN,
 						CLOSING_RADIUS_MAX, CLOSING_RADIUS_STEP));
 
@@ -218,7 +218,7 @@ public class CannySettingsPanel extends SettingsPanel implements ActionListener 
 			try {
 				JSpinner j = (JSpinner) e.getSource();
 				j.commitEdit();
-				options.setInt(HashOptions.CANNY_CLOSING_RADIUS_INT, (int) j.getValue());
+				options.setInt(HashOptions.GAP_CLOSING_RADIUS_INT, (int) j.getValue());
 				fireOptionsChangeEvent();
 			} catch (ParseException e1) {
 				LOGGER.warning("Parsing exception");

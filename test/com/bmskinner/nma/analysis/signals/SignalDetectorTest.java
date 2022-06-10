@@ -60,8 +60,6 @@ public class SignalDetectorTest {
 				.withValue(HashOptions.SIGNAL_MAX_FRACTION, 0.5)
 				.build();
 
-		SignalThresholdChooser sd = new SignalThresholdChooser(o);
-
 		File testFile = d.getCollection().getImageFiles().stream()
 				.filter(f -> f.getName().equals("P104.tiff"))
 				.findFirst().orElseThrow(Exception::new);

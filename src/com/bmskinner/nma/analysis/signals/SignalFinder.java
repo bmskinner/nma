@@ -44,6 +44,7 @@ import com.bmskinner.nma.io.ImageImporter.ImageImportException;
 import com.bmskinner.nma.logging.Loggable;
 import com.bmskinner.nma.visualisation.image.ImageAnnotator;
 import com.bmskinner.nma.visualisation.image.ImageConverter;
+import com.bmskinner.nma.visualisation.image.ImageFilterer;
 
 import ij.ImageStack;
 import ij.gui.Roi;
@@ -83,7 +84,7 @@ public class SignalFinder extends AbstractFinder<List<INuclearSignal>> {
 		this.signalOptions = signalOptions;
 		this.collection = collection;
 		this.displayType = t;
-		thresholdChooser = new SignalThresholdChooser(signalOptions);
+		thresholdChooser = new SignalThresholdChooser();
 	}
 
 	@Override
@@ -167,17 +168,43 @@ public class SignalFinder extends AbstractFinder<List<INuclearSignal>> {
 
 		LOGGER.finer("Detecting signals in " + nuclei.size() + " nuclei");
 
+		int i = 0;
 		for (Nucleus n : nuclei) {
 			try {
 
 				List<INuclearSignal> temp = new ArrayList<>();
-				int threshold = thresholdChooser.chooseThreshold(greyProcessor, n);
+				int threshold = thresholdChooser.chooseThreshold(greyProcessor, n, signalOptions);
 
 				ImageProcessor gp = greyProcessor.duplicate();
 				gp.threshold(threshold);
+				if (hasDetectionListeners() && i == 0) {
+					ImageProcessor gpp = gp.duplicate();
+					gpp.invert();
+					fireDetectionEvent(gpp, "Thresholded");
+				}
+
+				if (signalOptions.getBoolean(HashOptions.IS_USE_GAP_CLOSING)) {
+					gp = ImageFilterer.close(gp,
+							signalOptions.getInt(HashOptions.GAP_CLOSING_RADIUS_INT));
+
+					if (hasDetectionListeners() && i == 0) {
+						ImageProcessor gpp = gp.duplicate();
+						gpp.invert();
+						fireDetectionEvent(gpp, "Gap closed");
+					}
+				}
+
+				if (signalOptions.getBoolean(HashOptions.IS_USE_WATERSHED)) {
+					gp = ImageFilterer.watershed(gp);
+					if (hasDetectionListeners()) {
+						ImageProcessor gpp = gp.duplicate();
+						gpp.invert();
+						fireDetectionEvent(gpp, "Watershed");
+					}
+				}
 
 				Detector d = new Detector();
-				Map<Roi, IPoint> rois = d.getAllRois(greyProcessor);
+				Map<Roi, IPoint> rois = d.getAllRois(gp);
 
 				for (Entry<Roi, IPoint> entry : rois.entrySet()) {
 
@@ -206,6 +233,7 @@ public class SignalFinder extends AbstractFinder<List<INuclearSignal>> {
 						list.add(s);
 					}
 				}
+				i++;
 
 			} catch (Exception e) {
 				LOGGER.log(Loggable.STACK, "Error in signal detector", e);
@@ -249,10 +277,15 @@ public class SignalFinder extends AbstractFinder<List<INuclearSignal>> {
 			try {
 
 				// Since thresholding can be unique for each nucleus, we duplicate the processor
-				int threshold = thresholdChooser.chooseThreshold(greyProcessor, n);
+				int threshold = thresholdChooser.chooseThreshold(greyProcessor, n, signalOptions);
 
 				ImageProcessor ip = greyProcessor.duplicate();
 				ip.threshold(threshold);
+
+				if (signalOptions.getBoolean(HashOptions.IS_USE_GAP_CLOSING)) {
+					ip = ImageFilterer.close(ip,
+							signalOptions.getInt(HashOptions.GAP_CLOSING_RADIUS_INT));
+				}
 
 				Detector d = new Detector();
 				Map<Roi, IPoint> rois = d.getValidRois(ip, signalOptions, n);

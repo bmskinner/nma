@@ -60,6 +60,9 @@ public class OptionsFactory {
 						HashOptions.DEFAULT_NORMALISE_CONTRAST)
 				.withValue(HashOptions.IS_RGB, HashOptions.DEFAULT_IS_RGB)
 				.withValue(HashOptions.IS_USE_WATERSHED, false)
+				.withValue(HashOptions.IS_USE_GAP_CLOSING, HashOptions.DEFAULT_IS_USE_GAP_CLOSING)
+				.withValue(HashOptions.GAP_CLOSING_RADIUS_INT,
+						HashOptions.DEFAULT_GAP_CLOSING_RADIUS)
 				.setAll(OptionsFactory.makeCannyOptions().build())
 				.setAll(OptionsFactory.makePreprocessingOptions().build());
 	}
@@ -85,8 +88,9 @@ public class OptionsFactory {
 				.withValue(HashOptions.CANNY_KERNEL_WIDTH_INT,
 						HashOptions.DEFAULT_CANNY_KERNEL_WIDTH)
 
-				.withValue(HashOptions.CANNY_CLOSING_RADIUS_INT,
-						HashOptions.DEFAULT_CANNY_CLOSING_RADIUS)
+				.withValue(HashOptions.IS_USE_GAP_CLOSING, HashOptions.DEFAULT_IS_USE_GAP_CLOSING)
+				.withValue(HashOptions.GAP_CLOSING_RADIUS_INT,
+						HashOptions.DEFAULT_GAP_CLOSING_RADIUS)
 				.withValue(HashOptions.CANNY_IS_ADD_BORDER,
 						HashOptions.DEFAULT_IS_CANNY_ADD_BORDER);
 	}
@@ -128,6 +132,9 @@ public class OptionsFactory {
 				.withValue(HashOptions.MAX_CIRC, HashOptions.DEFAULT_MAX_CIRC)
 				.withValue(HashOptions.CHANNEL, HashOptions.DEFAULT_SIGNAL_CHANNEL)
 				.withValue(HashOptions.THRESHOLD, HashOptions.DEFAULT_SIGNAL_THRESHOLD)
+				.withValue(HashOptions.IS_USE_GAP_CLOSING, false)
+				.withValue(HashOptions.GAP_CLOSING_RADIUS_INT,
+						HashOptions.DEFAULT_GAP_CLOSING_RADIUS)
 				.withValue(HashOptions.SCALE, GlobalOptions.getInstance().getImageScale());
 	}
 

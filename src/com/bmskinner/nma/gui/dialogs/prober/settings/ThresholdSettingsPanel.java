@@ -40,11 +40,20 @@ public class ThresholdSettingsPanel extends DetectionSettingsPanel {
 	private static final Integer MAX_RANGE = Integer.valueOf(255);
 	private static final Integer STEP = Integer.valueOf(1);
 
+	public static final Integer CLOSING_RADIUS_MIN = Integer.valueOf(1);
+	public static final Integer CLOSING_RADIUS_MAX = Integer.valueOf(100);
+	public static final Integer CLOSING_RADIUS_STEP = Integer.valueOf(1);
+
 	private static final String THRESHOLD_LBL = "Threshold";
 	private static final String WATERSHED_LBL = "Watershed";
+	private static final String IS_CLOSE_LBL = "Close gaps";
+	private static final String CLOSING_RADIUS_LBL = "Gap closing radius";
 
 	private JSpinner thresholdSpinner;
 	private JCheckBox watershedBtn = new JCheckBox();
+
+	private JCheckBox gapCloseCheckBox = new JCheckBox("", true);
+	private JSpinner gapCloseSpinner;
 
 	public ThresholdSettingsPanel(final HashOptions options) {
 		super(options);
@@ -71,6 +80,33 @@ public class ThresholdSettingsPanel extends DetectionSettingsPanel {
 			}
 		});
 
+		gapCloseCheckBox.setSelected(options.getBoolean(HashOptions.IS_USE_GAP_CLOSING));
+		gapCloseCheckBox.addActionListener(e -> {
+			options.setBoolean(HashOptions.IS_USE_GAP_CLOSING, gapCloseCheckBox.isSelected());
+			gapCloseSpinner.setEnabled(gapCloseCheckBox.isSelected());
+			fireOptionsChangeEvent();
+		});
+
+		gapCloseSpinner = new JSpinner(
+				new SpinnerNumberModel(
+						Integer.valueOf(options.getInt(HashOptions.GAP_CLOSING_RADIUS_INT)),
+						CLOSING_RADIUS_MIN,
+						CLOSING_RADIUS_MAX, CLOSING_RADIUS_STEP));
+		gapCloseSpinner.setValue(options.getInt(HashOptions.GAP_CLOSING_RADIUS_INT));
+
+		gapCloseSpinner.addChangeListener(e -> {
+			try {
+				JSpinner j = (JSpinner) e.getSource();
+				j.commitEdit();
+				options.setInt(HashOptions.GAP_CLOSING_RADIUS_INT, (int) j.getValue());
+				fireOptionsChangeEvent();
+			} catch (ParseException e1) {
+				LOGGER.warning("Parsing exception");
+				LOGGER.log(Loggable.STACK, "Parsing error in JSpinner", e1);
+			}
+
+		});
+
 		watershedBtn.addActionListener(e -> {
 			options.setBoolean(HashOptions.IS_USE_WATERSHED, watershedBtn.isSelected());
 			fireOptionsChangeEvent();
@@ -80,11 +116,15 @@ public class ThresholdSettingsPanel extends DetectionSettingsPanel {
 		List<JComponent> fieldList = new ArrayList<>();
 
 		labelList.add(new JLabel(THRESHOLD_LBL));
+		labelList.add(new JLabel(IS_CLOSE_LBL));
+		labelList.add(new JLabel(CLOSING_RADIUS_LBL));
 		labelList.add(new JLabel(WATERSHED_LBL));
 
 		JLabel[] labels = labelList.toArray(new JLabel[0]);
 
 		fieldList.add(thresholdSpinner);
+		fieldList.add(gapCloseCheckBox);
+		fieldList.add(gapCloseSpinner);
 		fieldList.add(watershedBtn);
 
 		JComponent[] fields = fieldList.toArray(new JComponent[0]);

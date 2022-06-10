@@ -51,22 +51,10 @@ public class SignalThresholdChooser {
 	private int minThreshold;
 
 	/**
-	 * Create a detector with the desired options
-	 * 
-	 * @param options the size and circularity parameters
-	 * @param channel the RGB channel
+	 * Create
 	 */
-	public SignalThresholdChooser(@NonNull HashOptions options) {
-		if (!options.hasInt(HashOptions.CHANNEL))
-			throw new IllegalArgumentException("Channel not present in detection options");
-		if (!options.hasInt(HashOptions.THRESHOLD))
-			throw new IllegalArgumentException("Threshold not present in detection options");
+	public SignalThresholdChooser() {
 
-		this.options = options;
-		this.minThreshold = options.getInt(HashOptions.THRESHOLD);
-
-		if (minThreshold < 0)
-			throw new IllegalArgumentException("Min threshold must be greater or equal to 0");
 	}
 
 	/**
@@ -79,7 +67,18 @@ public class SignalThresholdChooser {
 	 * @throws ImageImportException
 	 * @throws Exception
 	 */
-	public int chooseThreshold(@NonNull ImageProcessor ip, @NonNull Nucleus n) {
+	public int chooseThreshold(@NonNull ImageProcessor ip, @NonNull Nucleus n,
+			@NonNull HashOptions options) {
+
+		if (!options.hasInt(HashOptions.THRESHOLD))
+			throw new IllegalArgumentException("Threshold not present in detection options");
+
+		this.options = options;
+		this.minThreshold = options.getInt(HashOptions.THRESHOLD);
+
+		if (minThreshold < 0)
+			throw new IllegalArgumentException("Min threshold must be greater or equal to 0");
+
 		if (options.getString(HashOptions.SIGNAL_DETECTION_MODE_KEY)
 				.equals(SignalDetectionMode.FORWARD.name())) {
 			LOGGER.finer("Running forward detection");

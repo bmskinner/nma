@@ -96,7 +96,9 @@ public interface HashOptions extends Serializable, XmlSerializable {
 	String CANNY_HIGH_THRESHOLD_FLT = "Canny high threshold";
 	String CANNY_KERNEL_RADIUS_FLT = "Canny kernel radius";
 	String CANNY_KERNEL_WIDTH_INT = "Canny kernel width";
-	String CANNY_CLOSING_RADIUS_INT = "Closing radius";
+
+	String IS_USE_GAP_CLOSING = "Close gaps";
+	String GAP_CLOSING_RADIUS_INT = "Closing radius";
 
 	String CANNY_IS_AUTO_THRESHOLD = "Use auto threshold";
 	String CANNY_IS_ADD_BORDER = "Add border";
@@ -107,12 +109,13 @@ public interface HashOptions extends Serializable, XmlSerializable {
 	float DEFAULT_CANNY_TAIL_HIGH_THRESHOLD = 0.5f;
 	float DEFAULT_CANNY_KERNEL_RADIUS = 3;
 	int DEFAULT_CANNY_KERNEL_WIDTH = 16;
-	int DEFAULT_CANNY_CLOSING_RADIUS = 5;
+	int DEFAULT_GAP_CLOSING_RADIUS = 5;
 	int DEFAULT_TAIL_CLOSING_OBJECT_RADIUS = 3;
 
 	boolean DEFAULT_IS_USE_CANNY = true;
 	boolean DEFAULT_IS_CANNY_AUTO_THRESHOLD = false;
 	boolean DEFAULT_IS_CANNY_ADD_BORDER = false;
+	boolean DEFAULT_IS_USE_GAP_CLOSING = true;
 
 	/** Constants relating to preprocessing options **/
 	String IS_USE_GAUSSIAN = "Use Gaussian blur";

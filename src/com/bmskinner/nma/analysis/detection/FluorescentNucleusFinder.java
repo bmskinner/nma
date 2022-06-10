@@ -107,10 +107,13 @@ public class FluorescentNucleusFinder extends CellFinder {
 
 		if (nuclOptions.getBoolean(HashOptions.IS_USE_CANNY)) {
 			filt.cannyEdgeDetection(nuclOptions);
-			filt.close(nuclOptions.getInt(HashOptions.CANNY_CLOSING_RADIUS_INT));
+			filt.close(nuclOptions.getInt(HashOptions.GAP_CLOSING_RADIUS_INT));
 
 		} else {
 			filt.threshold(nuclOptions.getInt(HashOptions.THRESHOLD));
+			if (nuclOptions.getBoolean(HashOptions.IS_USE_GAP_CLOSING)) {
+				filt.close(nuclOptions.getInt(HashOptions.GAP_CLOSING_RADIUS_INT));
+			}
 		}
 
 		if (nuclOptions.getBoolean(HashOptions.IS_USE_WATERSHED)) {
@@ -191,7 +194,7 @@ public class FluorescentNucleusFinder extends CellFinder {
 				fireDetectionEvent(ip.duplicate(), "Edge detection");
 			}
 
-			filt.close(nuclOptions.getInt(HashOptions.CANNY_CLOSING_RADIUS_INT));
+			filt.close(nuclOptions.getInt(HashOptions.GAP_CLOSING_RADIUS_INT));
 			if (hasDetectionListeners()) {
 				ip = filt.toProcessor().duplicate();
 				ip.invert();
@@ -200,10 +203,21 @@ public class FluorescentNucleusFinder extends CellFinder {
 
 		} else {
 			filt.threshold(nuclOptions.getInt(HashOptions.THRESHOLD));
+
 			if (hasDetectionListeners()) {
 				ip = filt.toProcessor().duplicate();
 				ip.invert();
 				fireDetectionEvent(ip.duplicate(), "Thresholded");
+			}
+
+			if (nuclOptions.getBoolean(HashOptions.IS_USE_GAP_CLOSING)) {
+
+				filt.close(nuclOptions.getInt(HashOptions.GAP_CLOSING_RADIUS_INT));
+				if (hasDetectionListeners()) {
+					ip = filt.toProcessor().duplicate();
+					ip.invert();
+					fireDetectionEvent(ip.duplicate(), "Gap closing");
+				}
 			}
 		}
 

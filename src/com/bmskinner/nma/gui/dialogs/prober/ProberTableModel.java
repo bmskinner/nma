@@ -30,76 +30,79 @@ import com.bmskinner.nma.visualisation.image.ImageFilterer;
 import ij.process.ImageProcessor;
 
 public class ProberTableModel extends DefaultTableModel implements DetectionEventListener {
-	
+
 	private static final Logger LOGGER = Logger.getLogger(ProberTableModel.class.getName());
 
-    private static final long serialVersionUID = 1L;
-    
-    private final int maxDimension;
-    
-    public static final int DEFAULT_MAX_DIMENSION = 200;
-    
-    /**
-     * Default constructor with two columns. Images will be drawn at the size best
-     * fitting {@link DEFAULT_MAX_DIMENSION}
-     */
-    public ProberTableModel() {
-        this(DEFAULT_MAX_DIMENSION);
-    }
+	private static final long serialVersionUID = 1L;
 
-    /**
-     * Default constructor with two columns 
-     * @param maxDimension the maximum width or height an image in the table will be drawn, preserving aspect ratio
-     */
-    public ProberTableModel(int maxDimension) {
-        super();
-        this.maxDimension = maxDimension;
-        this.setColumnCount(2);
-    }
-    
-    public int getMaxDimension() {
-    	return maxDimension;
-    }
+	private final int maxDimension;
 
-    @Override
-    public void detectionEventReceived(DetectionEvent e) {
-        ProberTableCell cell = makeIconCell(e.getProcessor(), e.getMessage(), true);
-        ProberTableCell blank = makeIconCell(ImageConverter.createBlankImage(maxDimension, maxDimension), "", true);
+	public static final int DEFAULT_MAX_DIMENSION = 250;
 
-        if (getRowCount() == 0) {
-            addRow(new ProberTableCell[] { cell, blank });
-            return;
-        }
+	/**
+	 * Default constructor with two columns. Images will be drawn at the size best
+	 * fitting {@link DEFAULT_MAX_DIMENSION}
+	 */
+	public ProberTableModel() {
+		this(DEFAULT_MAX_DIMENSION);
+	}
 
-        ProberTableCell existing = (ProberTableCell) getValueAt(getRowCount() - 1, 1);
+	/**
+	 * Default constructor with two columns
+	 * 
+	 * @param maxDimension the maximum width or height an image in the table will be
+	 *                     drawn, preserving aspect ratio
+	 */
+	public ProberTableModel(int maxDimension) {
+		super();
+		this.maxDimension = maxDimension;
+		this.setColumnCount(2);
+	}
 
-        if (existing.toString().equals("")) { // Blank processor
-            this.setValueAt(cell, getRowCount() - 1, 1);
-        } else {
-            addRow(new ProberTableCell[] { cell, blank });
-        }
+	public int getMaxDimension() {
+		return maxDimension;
+	}
 
-    }
+	@Override
+	public void detectionEventReceived(DetectionEvent e) {
+		ProberTableCell cell = makeIconCell(e.getProcessor(), e.getMessage(), true);
+		ProberTableCell blank = makeIconCell(
+				ImageConverter.createBlankImage(maxDimension, maxDimension), "", true);
 
-    /**
-     * Create a table cell from the given image, specifying the image type and
-     * enabled
-     * 
-     * @param ip the image processor
-     * @param label the label for the cell
-     * @param enabled is the cell enabled
-     * @return a table cell for the image prober
-     */
-    protected ProberTableCell makeIconCell(ImageProcessor ip, String label, boolean enabled) {
+		if (getRowCount() == 0) {
+			addRow(new ProberTableCell[] { cell, blank });
+			return;
+		}
 
-        ImageFilterer filt = new ImageFilterer(ip);
-        ImageIcon ic = filt.toImageIcon();
-        ProberTableCell iconCell = new ProberTableCell(ic, label, enabled);
-        filt.resizeKeepingAspect(maxDimension, maxDimension);
-        ImageIcon small = filt.toImageIcon();
+		ProberTableCell existing = (ProberTableCell) getValueAt(getRowCount() - 1, 1);
 
-        iconCell.setSmallIcon(small);
-        return iconCell;
-    }
+		if (existing.toString().equals("")) { // Blank processor
+			this.setValueAt(cell, getRowCount() - 1, 1);
+		} else {
+			addRow(new ProberTableCell[] { cell, blank });
+		}
+
+	}
+
+	/**
+	 * Create a table cell from the given image, specifying the image type and
+	 * enabled
+	 * 
+	 * @param ip      the image processor
+	 * @param label   the label for the cell
+	 * @param enabled is the cell enabled
+	 * @return a table cell for the image prober
+	 */
+	protected ProberTableCell makeIconCell(ImageProcessor ip, String label, boolean enabled) {
+
+		ImageFilterer filt = new ImageFilterer(ip);
+		ImageIcon ic = filt.toImageIcon();
+		ProberTableCell iconCell = new ProberTableCell(ic, label, enabled);
+		filt.resizeKeepingAspect(maxDimension, maxDimension);
+		ImageIcon small = filt.toImageIcon();
+
+		iconCell.setSmallIcon(small);
+		return iconCell;
+	}
 
 }

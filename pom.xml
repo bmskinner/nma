@@ -10,7 +10,7 @@
 	<properties>
 		<project.full.name>Nuclear_Morphology_Analysis</project.full.name>
 		<version>${project.version}</version>
-		<version.suffix>_beta_4</version.suffix>
+		<version.suffix></version.suffix>
 		<project.build.sourceEncoding>ISO-8859-1</project.build.sourceEncoding>
 		<jar.finalName>${project.full.name}_${project.version}${version.suffix}</jar.finalName>
 		<project.template.directory>templates</project.template.directory>

@@ -408,6 +408,19 @@ public class ImageFilterer extends AbstractImageFilterer {
 	 * @return a new ByteProcessor containing the closed image
 	 */
 	public ImageFilterer close(int closingRadius) {
+		ip = close(ip, closingRadius);
+		return this;
+	}
+
+	/**
+	 * Close holes in the given image using a circular structure element
+	 * 
+	 * @param ip            the image processor. It must be convertible to a
+	 *                      ByteProcessor
+	 * @param closingRadius the radius for enlargement
+	 * @return a new ByteProcessor containing the closed image
+	 */
+	public static ImageProcessor close(ImageProcessor ip, int closingRadius) {
 		// using the MorphoLibJ library
 		ImageProcessor result = ip.convertToByteProcessor();
 
@@ -416,8 +429,7 @@ public class ImageFilterer extends AbstractImageFilterer {
 
 		fill(result);
 		result = strel.erosion(result);
-		ip = result;
-		return this;
+		return result;
 	}
 
 	/**
@@ -446,9 +458,7 @@ public class ImageFilterer extends AbstractImageFilterer {
 	 * 
 	 * @param ip the image to fill
 	 */
-	private void fill(ImageProcessor ip) {
-		LOGGER.finest("Running fill");
-
+	private static void fill(ImageProcessor ip) {
 		int foreground = 255;
 		int background = 0;
 
@@ -476,7 +486,6 @@ public class ImageFilterer extends AbstractImageFilterer {
 			else
 				pixels[i] = (byte) foreground;
 		}
-		LOGGER.finest("Ran fill");
 	}
 
 	/**
