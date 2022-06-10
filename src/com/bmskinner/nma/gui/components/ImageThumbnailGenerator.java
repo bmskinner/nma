@@ -35,23 +35,17 @@ public class ImageThumbnailGenerator implements ChartMouseListener {
 
 	private static final Logger LOGGER = Logger.getLogger(ImageThumbnailGenerator.class.getName());
 
-	public static final boolean COLOUR_RGB = true;
-	public static final boolean COLOUR_GREYSCALE = false;
-
 	private final ChartPanel chartPanel;
 	private XYItemEntity currentEntity = null; // allow chart to repaint whenever entity changes
-	private boolean isRgb = COLOUR_GREYSCALE; // should we draw the RGB image or greyscale?
 
 	/**
 	 * Create a thumbnail generator for the given chart panel. Specify if the
 	 * thumbnails should be greyscale or RGB colour.
 	 * 
 	 * @param chartPanel the chart panel to draw on
-	 * @param isRgb      true if the thumbnails should be RGB, false otherwise
 	 */
-	public ImageThumbnailGenerator(final @NonNull ChartPanel chartPanel, boolean isRgb) {
+	public ImageThumbnailGenerator(final @NonNull ChartPanel chartPanel) {
 		this.chartPanel = chartPanel;
-		this.isRgb = isRgb;
 	}
 
 	@Override
@@ -74,7 +68,8 @@ public class ImageThumbnailGenerator implements ChartMouseListener {
 
 		currentEntity = entity;
 
-		if (!(entity.getDataset() instanceof ComponentXYDataset)) // only use datasets of the desired class
+		if (!(entity.getDataset() instanceof ComponentXYDataset)) // only use datasets of the
+																	// desired class
 			return;
 
 		ComponentXYDataset<? extends CellularComponent> ds = (ComponentXYDataset<? extends CellularComponent>) entity
@@ -104,12 +99,12 @@ public class ImageThumbnailGenerator implements ChartMouseListener {
 		String labelText = n.getNameAndNumber();
 
 		Color nucleusColour = Color.WHITE;
-		Color signalColour = isRgb ? Color.ORANGE : Color.WHITE;
+		Color signalColour = Color.ORANGE;
 
-		ImageProcessor ip = isRgb ? ImageImporter.importFileTo24bit(n.getSourceFile())
-				: ImageImporter.importFullImageTo24bit(n);
+		ImageProcessor ip = ImageImporter.importFullImageTo24bit(n);
 
-		ImageAnnotator an = new ImageAnnotator(ip).drawBorder(n, nucleusColour).drawBorder(ns, signalColour);
+		ImageAnnotator an = new ImageAnnotator(ip).drawBorder(n, nucleusColour).drawBorder(ns,
+				signalColour);
 		an.crop(n);
 		an.resizeKeepingAspect(150, 150);
 		ip = an.toProcessor();
@@ -123,7 +118,7 @@ public class ImageThumbnailGenerator implements ChartMouseListener {
 		g2.drawImage(ip.createImage(), leftStart, topStart, ip.getWidth(), ip.getHeight(), null);
 		Color c = g2.getColor();
 
-		Color textColour = isRgb ? Color.WHITE : Color.BLACK;
+		Color textColour = Color.WHITE;
 		g2.setColor(textColour);
 		g2.drawString(labelText, leftStart + 4, topStart + ip.getHeight() - 4);
 		g2.setColor(Color.DARK_GRAY);
@@ -135,9 +130,8 @@ public class ImageThumbnailGenerator implements ChartMouseListener {
 	private void drawNucleus(Nucleus n, int x, int y) {
 		String labelText = n.getNameAndNumber();
 
-		Color annotationColour = isRgb ? Color.WHITE : Color.ORANGE;
-		ImageProcessor ip = isRgb ? ImageImporter.importFileTo24bit(n.getSourceFile())
-				: ImageImporter.importFullImageTo24bit(n);
+		Color annotationColour = Color.WHITE;
+		ImageProcessor ip = ImageImporter.importFullImageTo24bit(n);
 
 		ImageAnnotator an = new ImageAnnotator(ip).drawBorder(n, annotationColour);
 		an.crop(n);
@@ -153,7 +147,7 @@ public class ImageThumbnailGenerator implements ChartMouseListener {
 		g2.drawImage(ip.createImage(), leftStart, topStart, ip.getWidth(), ip.getHeight(), null);
 		Color c = g2.getColor();
 
-		Color textColour = isRgb ? Color.WHITE : Color.BLACK;
+		Color textColour = Color.WHITE;
 		g2.setColor(textColour);
 		g2.drawString(labelText, leftStart + 4, topStart + ip.getHeight() - 4);
 		g2.setColor(Color.DARK_GRAY);

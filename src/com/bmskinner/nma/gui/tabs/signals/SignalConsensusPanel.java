@@ -92,7 +92,7 @@ public class SignalConsensusPanel extends ChartDetailPanel
 		chartPanel.setFillConsensus(false);
 
 		chartPanel.addChartMouseListener(
-				new ImageThumbnailGenerator(chartPanel, ImageThumbnailGenerator.COLOUR_RGB));
+				new ImageThumbnailGenerator(chartPanel));
 
 		checkboxPanel = createSignalCheckboxPanel();
 

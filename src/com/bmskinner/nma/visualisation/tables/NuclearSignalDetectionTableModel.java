@@ -192,6 +192,10 @@ public class NuclearSignalDetectionTableModel extends DatasetTableModel {
 		else
 			builder.append(VALUE_MISSING_LBL);
 
+		if (ns.getBoolean(HashOptions.IS_USE_GAP_CLOSING))
+			builder.append(
+					" + Gap closing (" + ns.getInt(HashOptions.GAP_CLOSING_RADIUS_INT) + ")");
+
 		if (ns.getBoolean(HashOptions.IS_USE_WATERSHED))
 			builder.append(" + Watershed");
 
