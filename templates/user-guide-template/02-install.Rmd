@@ -53,7 +53,7 @@ You can also download a set of images suitable for testing the software from [ht
 
 ## Reporting issues
 
-If you find a bug in the software, you can report it in the [issue tracker](https://bitbucket.org/bmskinner/nuclear_morphology/issues?status=open). No account is needed to report issues.
+If you find a bug in the software, you can report it in the [issue tracker](https://bitbucket.org/bmskinner/nuclear_morphology/issues?status=open). You will need to register a free account to post new issues.
 
 ## Configuration and user data
 
