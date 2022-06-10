@@ -80,7 +80,7 @@ public class NuclearSignalDetectionTableModel extends DatasetTableModel {
 
 			for (UUID signalGroup : collection.getSignalManager().getSignalGroupIDs()) {
 
-				LOGGER.fine("Making for signal group " + signalGroup);
+				LOGGER.finer("Making for signal group " + signalGroup);
 
 				int baseIndex = signalGroupNumber * ROW_NAMES.size() + 1;
 
@@ -100,7 +100,7 @@ public class NuclearSignalDetectionTableModel extends DatasetTableModel {
 				}
 
 				for (String s : op.get().getDetectionOptionTypes()) {
-					LOGGER.fine("Dataset has " + s);
+					LOGGER.finer("Dataset has " + s);
 				}
 
 				HashOptions ns = op.get().getNuclearSignalOptions(signalGroup)
