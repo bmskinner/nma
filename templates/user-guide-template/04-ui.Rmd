@@ -1,6 +1,6 @@
 # User interface guide {#ui-guide}
 
-This section gives an overall guide to the elements of the user interface and the actions that can be performed in each section.
+This section gives an overall guide to the elements of the user interface and the actions that can be performed in each. The main tabs in the lower half of the UI can be dragged out as separate views if you want to look at more than one tab at the same time.
 
 ## Main menu bar {#main-menu}
 
