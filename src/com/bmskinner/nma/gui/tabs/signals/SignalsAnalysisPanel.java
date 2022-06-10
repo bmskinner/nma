@@ -21,14 +21,15 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.List;
 
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.gui.Labels;
 import com.bmskinner.nma.gui.components.ExportableTable;
+import com.bmskinner.nma.gui.components.renderers.JTextAreaCellRenderer;
 import com.bmskinner.nma.gui.events.NuclearSignalUpdatedListener;
 import com.bmskinner.nma.gui.events.UIController;
 import com.bmskinner.nma.gui.tabs.TableDetailPanel;
@@ -43,21 +44,19 @@ public class SignalsAnalysisPanel extends TableDetailPanel implements NuclearSig
 
 	private static final String PANEL_TITLE_LBL = "Detection settings";
 	private ExportableTable table; // table for analysis parameters
-	private JScrollPane scrollPane;
 
 	public SignalsAnalysisPanel() {
 		super(PANEL_TITLE_LBL);
 		this.setLayout(new BorderLayout());
 		uiController.addNuclearSignalUpdatedListener(this);
 
-		table = new ExportableTable(new DefaultTableModel());
+		table = new ExportableTable();
+		table.setModel(AbstractTableCreator.createBlankTable());
 		table.setEnabled(false);
 		table.addMouseListener(new MouseAdapter() {
 
 			@Override
 			public void mouseClicked(MouseEvent e) {
-
-				JTable table = (JTable) e.getSource();
 
 				int row = table.rowAtPoint(e.getPoint());
 				int column = table.columnAtPoint(e.getPoint());
@@ -107,8 +106,17 @@ public class SignalsAnalysisPanel extends TableDetailPanel implements NuclearSig
 
 			}
 		});
-		scrollPane = new JScrollPane(table);
-		this.add(scrollPane, BorderLayout.CENTER);
+
+		table.setDefaultRenderer(Object.class, new JTextAreaCellRenderer());
+
+		JScrollPane scrollPane = new JScrollPane(table);
+
+		JPanel tablePanel = new JPanel(new BorderLayout());
+
+		tablePanel.add(scrollPane, BorderLayout.CENTER);
+		tablePanel.add(table.getTableHeader(), BorderLayout.NORTH);
+
+		this.add(tablePanel, BorderLayout.CENTER);
 	}
 
 	private SignalTableCell getSignalGroupFromTable(JTable table, int row, int column) {
@@ -121,7 +129,9 @@ public class SignalsAnalysisPanel extends TableDetailPanel implements NuclearSig
 	@Override
 	protected void updateSingle() {
 
-		TableOptions options = new TableOptionsBuilder().setDatasets(getDatasets()).setTarget(table)
+		TableOptions options = new TableOptionsBuilder()
+				.setDatasets(getDatasets())
+				.setTarget(table)
 				.setColumnRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN,
 						new SignalDetectionSettingsTableCellRenderer())
 				.build();

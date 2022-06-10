@@ -16,7 +16,6 @@ import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.options.IAnalysisOptions;
 import com.bmskinner.nma.gui.Labels;
 import com.bmskinner.nma.gui.components.ColourSelecter;
-import com.bmskinner.nma.io.Io;
 import com.bmskinner.nma.visualisation.datasets.SignalTableCell;
 
 public class NuclearSignalDetectionTableModel extends DatasetTableModel {
@@ -184,15 +183,19 @@ public class NuclearSignalDetectionTableModel extends DatasetTableModel {
 	}
 
 	private Object makeDetctionModeLabel(IAnalysisDataset d, HashOptions ns) {
-		String result = VALUE_MISSING_LBL;
-
-		if (ns.hasString(HashOptions.SIGNAL_DETECTION_MODE_KEY))
-			result = ns.getString(HashOptions.SIGNAL_DETECTION_MODE_KEY);
-		if (ns.getBoolean(HashOptions.IS_USE_WATERSHED))
-			result += Io.NEWLINE + "Watershed";
 		if (d.hasMergeSources())
 			return Labels.NA_MERGE;
-		return result;
+		StringBuilder builder = new StringBuilder();
+
+		if (ns.hasString(HashOptions.SIGNAL_DETECTION_MODE_KEY))
+			builder.append(ns.getString(HashOptions.SIGNAL_DETECTION_MODE_KEY));
+		else
+			builder.append(VALUE_MISSING_LBL);
+
+		if (ns.getBoolean(HashOptions.IS_USE_WATERSHED))
+			builder.append(" + Watershed");
+
+		return builder.toString();
 	}
 
 	private Object makeSignalFolderLabel(IAnalysisDataset d, UUID signalGroup,
