@@ -17,6 +17,7 @@
 package com.bmskinner.nma.core;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.logging.Level;
@@ -113,8 +114,32 @@ public class NuclearMorphologyAnalysis {
 
 			// First invokation of the thread manager will log available resources
 			ThreadManager.getInstance();
+
+			// Clean up log files from older versions
+			// 1.x.x stored logs in ~/.nma, rather than ~/.nma/logs
+			removeV1Logs();
+
 		} catch (SecurityException e) {
 			LOGGER.log(Level.SEVERE, "Error initialising logger", e);
+		}
+	}
+
+	private void removeV1Logs() {
+		try {
+			FilenameFilter filter = new FilenameFilter() {
+				@Override
+				public boolean accept(File dir, String name) {
+					String lowercaseName = name.toLowerCase();
+					return (lowercaseName.endsWith(".log"));
+				}
+			};
+
+			for (File oldLog : Io.getConfigDir().listFiles(filter)) {
+				Files.deleteIfExists(oldLog.toPath());
+				LOGGER.fine("Removed v1 log file: " + oldLog.getName());
+			}
+		} catch (IOException e) {
+			LOGGER.log(Loggable.STACK, "Unable to delete old v1 log file", e);
 		}
 	}
 
