@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
-import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -44,116 +43,114 @@ import com.bmskinner.nma.logging.Loggable;
  */
 @SuppressWarnings("serial")
 public class ImageChannelSettingsPanel extends DetectionSettingsPanel {
-	
-	private static final Logger LOGGER = Logger.getLogger(ImageChannelSettingsPanel.class.getName());
-	
-    private static final double SCALE_STEP_SIZE = 1;
-    private static final double SCALE_MIN       = 1;
-    private static final double SCALE_MAX       = 100000;
 
-//    private static final String H_AND_E_LBL = "H&E";
-    private static final String CHANNEL_LBL = "Channel";
-    private static final String SCALE_LBL   = "Scale (pixels/micron)";
+	private static final Logger LOGGER = Logger
+			.getLogger(ImageChannelSettingsPanel.class.getName());
 
-    private static final boolean DEFAULT_H_AND_E = false;
+	private static final double SCALE_STEP_SIZE = 1;
+	private static final double SCALE_MIN = 1;
+	private static final double SCALE_MAX = 100000;
 
-    private JComboBox<String> channelBox    = new JComboBox<>(channelOptionStrings);
-    private JSpinner          scaleSpinner;
-    private JCheckBox         hAndECheckBox = new JCheckBox("", DEFAULT_H_AND_E);
+	private static final String CHANNEL_LBL = "Channel";
+	private static final String SCALE_LBL = "Scale (pixels/micron)";
 
-    public ImageChannelSettingsPanel(final HashOptions options) {
-        super(options);
-        this.add(createPanel(), BorderLayout.CENTER);
+	private JComboBox<String> channelBox = new JComboBox<>(channelOptionStrings);
+	private JSpinner scaleSpinner;
 
-    }
+	public ImageChannelSettingsPanel(final HashOptions options) {
+		super(options);
+		this.add(createPanel(), BorderLayout.CENTER);
 
-    /**
-     * Create the settings spinners based on the input options
-     */
-    private void createSpinners() {
+	}
 
-    	channelBox.setSelectedItem(ImageImporter.channelIntToName(options.getInt(HashOptions.CHANNEL)));
-        channelBox.addActionListener(e -> {
-        	
-        	int channel = 0;
-        	switch(channelBox.getSelectedItem().toString()) {
-	        	case "Red":   channel = ImageImporter.RGB_RED; break;
-	        	case "Green": channel = ImageImporter.RGB_GREEN; break;
-	        	default:      channel = ImageImporter.RGB_BLUE;
-        	}
-        	updateOptions(HashOptions.CHANNEL, channel);
-        });
+	/**
+	 * Create the settings spinners based on the input options
+	 */
+	private void createSpinners() {
 
-        scaleSpinner = new JSpinner(new SpinnerNumberModel(options.getDouble(HashOptions.SCALE),
-        		SCALE_MIN, SCALE_MAX, SCALE_STEP_SIZE));
+		channelBox.setSelectedItem(
+				ImageImporter.channelIntToName(options.getInt(HashOptions.CHANNEL)));
+		channelBox.addActionListener(e -> {
 
-        scaleSpinner.addChangeListener(e -> {
+			int channel = 0;
+			switch (channelBox.getSelectedItem().toString()) {
+			case "Red":
+				channel = ImageImporter.RGB_RED;
+				break;
+			case "Green":
+				channel = ImageImporter.RGB_GREEN;
+				break;
+			default:
+				channel = ImageImporter.RGB_BLUE;
+			}
+			updateOptions(HashOptions.CHANNEL, channel);
+		});
 
-            try {
+		scaleSpinner = new JSpinner(new SpinnerNumberModel(options.getDouble(HashOptions.SCALE),
+				SCALE_MIN, SCALE_MAX, SCALE_STEP_SIZE));
 
-                JSpinner j = (JSpinner) e.getSource();
-                j.commitEdit();
-                
-                // Note we don't use updateOptions here becuase we don't need to
-                // reload all the images when setting scale
-                options.setDouble(HashOptions.SCALE, (Double) j.getValue());
+		scaleSpinner.addChangeListener(e -> {
 
-            } catch (ParseException e1) {
-                LOGGER.log(Loggable.STACK, "Parsing error in JSpinner", e1);
-            }
-        });
-    }
+			try {
 
-    /**
-     * Create the panel containing the settings spinners
-     * 
-     * @return
-     */
-    private JPanel createPanel() {
+				JSpinner j = (JSpinner) e.getSource();
+				j.commitEdit();
 
-        this.createSpinners();
+				// Note we don't use updateOptions here becuase we don't need to
+				// reload all the images when setting scale
+				options.setDouble(HashOptions.SCALE, (Double) j.getValue());
 
-        JPanel panel = new JPanel();
+			} catch (ParseException e1) {
+				LOGGER.log(Loggable.STACK, "Parsing error in JSpinner", e1);
+			}
+		});
+	}
 
-        panel.setLayout(new GridBagLayout());
+	/**
+	 * Create the panel containing the settings spinners
+	 * 
+	 * @return
+	 */
+	private JPanel createPanel() {
 
-        List<JLabel> labels = new ArrayList<>();
+		this.createSpinners();
 
-        labels.add(new JLabel(CHANNEL_LBL));
-        labels.add(new JLabel(SCALE_LBL));
+		JPanel panel = new JPanel();
 
-        List<Component> fields = new ArrayList<>();
+		panel.setLayout(new GridBagLayout());
 
-        fields.add(channelBox);
-        fields.add(scaleSpinner);
+		List<JLabel> labels = new ArrayList<>();
 
-        addLabelTextRows(labels, fields, panel);
+		labels.add(new JLabel(CHANNEL_LBL));
+		labels.add(new JLabel(SCALE_LBL));
 
-        return panel;
-    }
+		List<Component> fields = new ArrayList<>();
 
-    /**
-     * Update the spinners to current options values
-     */
-    @Override
-    protected void update() {
-        super.update();
-        isUpdating = true;
-        channelBox.setSelectedItem(ImageImporter.channelIntToName(options.getInt(HashOptions.CHANNEL)));
-        scaleSpinner.setValue(options.getDouble(HashOptions.SCALE));
-        isUpdating = false;
-    }
+		fields.add(channelBox);
+		fields.add(scaleSpinner);
 
-    @Override
-    public void setEnabled(boolean b) {
-        super.setEnabled(b);
-        hAndECheckBox.setEnabled(b);
-        if (hAndECheckBox.isSelected()) {
-            channelBox.setEnabled(false);
-        } else {
-            channelBox.setEnabled(b);
-        }
-        scaleSpinner.setEnabled(b);
+		addLabelTextRows(labels, fields, panel);
 
-    }
+		return panel;
+	}
+
+	/**
+	 * Update the spinners to current options values
+	 */
+	@Override
+	protected void update() {
+		super.update();
+		isUpdating = true;
+		channelBox.setSelectedItem(
+				ImageImporter.channelIntToName(options.getInt(HashOptions.CHANNEL)));
+		scaleSpinner.setValue(options.getDouble(HashOptions.SCALE));
+		isUpdating = false;
+	}
+
+	@Override
+	public void setEnabled(boolean b) {
+		super.setEnabled(b);
+		scaleSpinner.setEnabled(b);
+		channelBox.setEnabled(b);
+	}
 }
