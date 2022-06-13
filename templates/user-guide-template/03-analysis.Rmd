@@ -90,7 +90,7 @@ Min and max circ | constraint on [circularity](https://en.wikipedia.org/wiki/Rou
 
 Setting | Controls
 --------|----------
-Nucleus type | A dropdown list to select the type of nucleus being analysed. The choice of nucleus type determines the rules that will be used to identify landmarks in the nucleus. The rulesets listed correspond tothe files in the [rulesets folder](#config-rulesets). Custom rule definitions can be added by the user.
+Nucleus type | A dropdown list to select the type of nucleus being analysed. The choice of nucleus type determines the rules that will be used to identify landmarks in the nucleus. The rulesets listed correspond to the files in the [rulesets folder](#config-rulesets). Custom rule definitions can be added by the user.
 Profile window | The window size used to generate morphology profiles. Too low, and you won't detect any features of interest. Too high, and you get enough resolution. The profile window is set as a faction of the perimeter of each nucleus, from zero to one. The default value is 5% of the perimeter, 0.05. The effect of the window size can be seen in the angle window explorer via the [Editing tab](#editing-tab). The angle window can be altered after an analysis has been run.
 
 ### Start the analysis

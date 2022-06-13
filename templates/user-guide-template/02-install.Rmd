@@ -51,7 +51,7 @@ You can also download a set of images suitable for testing the software from [ht
 - Delete the folder containing the program.
 - Nuclear Morphology Analysis also creates a folder in your home directory called `.nma`. Delete this folder too to remove all traces of the program.
 
-## Reporting issues
+## Reporting issues {#issue-tracker}
 
 If you find a bug in the software, you can report it in the [issue tracker](https://bitbucket.org/bmskinner/nuclear_morphology/issues?status=open). You will need to register a free account to post new issues.
 
@@ -68,7 +68,7 @@ You can open the configuration folder via `Help > Open config directory`.
 
 ### Logs
 
-The system state is logged when NMA is started in case debugging is needed. None of the logged data leaves your computer unless you explicitly send it. If you do find a bug or have a problem, you can send the latest log file to me and it may help me track down the problem. There will be up to 5 log files, with `nma.0.log` containing the most recent logs. 
+The system state is logged when NMA is started in case debugging is needed. None of the logged data leaves your computer unless you explicitly send it. If you do find a bug or have a problem, and get in touch via the [issue tracker](#issue-tracker) you can upload a log file and it may help me track down the problem. There will be up to 5 log files, with `nma.0.log` containing the most recent logs. 
 
 ### Rulesets {#config-rulesets}
 
@@ -106,9 +106,9 @@ A ruleset needs to describe the landmarks in the nucleus, how we find them, whic
 </RuleSetCollection>
 ```
 
-It contains one landmark, called `Longest axis`. This is defined as the point with the maximum value in the diameter profile. The landmark is used to specify three orientation marks: `BOTTOM`, `Y`, and `REFERENCE`. The `REFERENCE` point is the point from which profiles start. `BOTTOM` and `Y` indicate points that should be used to orient the nucleus, by rotating the nucleus such that this point is diretly below the centre of mass. 
+It contains one landmark, called `Longest axis`. This is defined as the point with the maximum value in the diameter profile. The landmark is used to specify three orientation marks: `BOTTOM`, `Y`, and `REFERENCE`. The `REFERENCE` point is the point from which profiles start. `BOTTOM` and `Y` indicate points that should be used to orient the nucleus, by rotating the nucleus such that this point is directly below the centre of mass. 
 
-The `Measurement` values show the standard measures that will be calculated when nuclei are detected; several of these (e.g. aspect ratio) rely on the nucleus being orientatble, which is why it is important to have at least one landmark that can be used for orientation.
+The `Measurement` values show the standard measures that will be calculated when nuclei are detected; several of these (e.g. aspect ratio) rely on the nucleus being orientable, which is why it is important to have at least one landmark that can be used for orientation.
 
 #### Elements
 

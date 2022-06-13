@@ -32,7 +32,7 @@ This section covers the basic principle of the analyses, and what we can measure
 
 ## Angle profiling
 
-The method for morphological analysis, described in [our paper](https://academic.oup.com/biolreprod/advance-article/doi/10.1093/biolre/ioz013/5315749)), allows us to automatically identify nuclei in microscopy images, and then find key landmarks for orientation and measurement. This is performed by generating an _angle profile_, that describes the shape of the nucleus by measuring internal angles around its perimeter:
+The method for morphological analysis, described in [our paper](https://academic.oup.com/biolreprod/advance-article/doi/10.1093/biolre/ioz013/5315749), allows us to automatically identify nuclei in microscopy images, and then find key landmarks for orientation and measurement. This is performed by generating an _angle profile_, that describes the shape of the nucleus by measuring internal angles around its perimeter:
 
 ```{r, out.width="50%", out.height="50%", echo=F, fig.align='center'}
 knitr::include_graphics("img/gifs/Angle_profiling.gif")
@@ -44,7 +44,7 @@ No matter the orientation of the nucleus in the image, we can see features such 
 knitr::include_graphics("img/Profiles.png")
 ```
 
-Local minima and maxima define corners in the nuclear outline, and allow the key landmarks of interest to be found no matter the orientation of the nucleus. These profiles can then be aligned against each other. Here, we have angle profiles from ~400 mosue sperm nuclei aligned against each other, shown in grey, with the median of these values in the black line.
+Local minima and maxima define corners in the nuclear outline, and allow the key landmarks of interest to be found no matter the orientation of the nucleus. These profiles can then be aligned against each other. Here, we have angle profiles from ~400 mouse sperm nuclei aligned against each other, shown in grey, with the median of these values in the black line.
 
 ```{r, echo=F, message=F, warning=F, fig.height=3}
 library(tidyverse)
@@ -118,6 +118,22 @@ Statistic | Dimension | Description
 Area | Area | the area of the signal
 Perimeter | Length | the length of the nuclear perimeter
 Angle | Angle | the angle of the signal from the orientation point
-Distance from CoM | Length | the absolute distance of the signal centre of mass from the nucleus centre of mass
+Distance from CoM (centre of mass) | Length | the absolute distance of the signal centre of mass from the nucleus centre of mass. The centre of mass is similar to the centroid, but weighted by pixel intensities
 Fractional distance from CoM | Fraction | the distance from CoM as a propotion of the total distance from the nucleus CoM through the signal CoM to the nucleus border
 Radius | Length | the radius of the circle that has the same area as the signal
+
+## Citing
+
+If you use the software, please cite an appropriate paper:
+
+For the morphological analysis:
+
+[Skinner BM, Rathje CC, Bacon J, Johnson EEP, Larson EL, Kopania EEK, Good JM, Yousafzai G, Affara NA, Ellis PJI. A high-throughput method for unbiased quantitation and categorisation of nuclear morphology. _Biol Reprod_ 2019. doi:10.1093/biolre/ioz013.](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6497523/)
+
+For signal warping:
+
+[Skinner BM, Bacon J, Rathje CC, Larson EL, Kopania EEK, Good JM, Affara NA, Ellis PJI. Automated Nuclear Cartography Reveals Conserved Sperm Chromosome Territory Localization across 2 Million Years of Mouse Evolution. _Genes_ 2019; 10:109. doi:10.3390/genes10020109](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6409866/)
+
+## Contact
+
+Find my current contact details [here](https://bitbucket.org/bmskinner/nuclear_morphology/wiki/Frequently%20Asked%20Questions)
