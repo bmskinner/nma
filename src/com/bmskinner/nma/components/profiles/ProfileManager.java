@@ -221,8 +221,13 @@ public class ProfileManager {
 				OrientationMark.REFERENCE, Stats.MEDIAN);
 
 		IProfileSegment seg = oldProfile.getSegment(id);
-		seg.clearMergeSources();
-
+		
+		// Remove merge sources from the template
+		if(seg.hasMergeSources()) {
+			seg.clearMergeSources();
+			LOGGER.fine("Removed merge sources from "+collection.getName()+" segment "+id);
+		}
+		
 		// Select the new endpoints for the segment
 		int newStart = index;
 		int newEnd = seg.getEndIndex();

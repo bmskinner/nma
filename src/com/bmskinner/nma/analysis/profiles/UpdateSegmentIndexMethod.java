@@ -149,10 +149,6 @@ public class UpdateSegmentIndexMethod extends SingleDatasetAnalysisMethod {
 
 			fireProgressEvent();
 		}
-
-		// Lock all the segments except the one to change
-		dataset.getCollection().getProfileManager().setLockOnAllNucleusSegments(true);
-		dataset.getCollection().getProfileManager().setLockOnSegment(segmentId, false);
 	}
 
 }

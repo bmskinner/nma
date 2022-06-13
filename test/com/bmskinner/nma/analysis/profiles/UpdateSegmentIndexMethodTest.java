@@ -176,8 +176,8 @@ public class UpdateSegmentIndexMethodTest {
 	}
 
 	/**
-	 * Check that if a merged segment has a start index update, the merge source
-	 * segments are also updated as needed
+	 * Check that if a merged segment has a start index update,  merge source
+	 * segments are removed
 	 * 
 	 * @throws Exception
 	 */
@@ -189,9 +189,12 @@ public class UpdateSegmentIndexMethodTest {
 		IProfileSegment seg0 = profile.getSegmentContaining(profile.size() / 2);
 		IProfileSegment seg1 = seg0.nextSegment();
 
+		// Merge the segments
 		new SegmentMergeMethod(dataset, seg0.getID(), seg1.getID()).call();
 
 		if (dataset.isRoot()) {
+			
+			// Segment count drops by one
 			assertEquals("Segment should be merged", profile.getSegmentCount() - 1,
 					dataset.getCollection().getProfileManager().getSegmentCount());
 
@@ -210,6 +213,17 @@ public class UpdateSegmentIndexMethodTest {
 
 			if (!dv.validate(dataset))
 				fail("Dataset should validate: " + dv.getSummary() + " " + dv.getErrors());
+			
+			ISegmentedProfile updatedProfile = dataset.getCollection().getProfileCollection()
+					.getSegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE,
+							Stats.MEDIAN);
+			IProfileSegment updatedSeg = updatedProfile.getSegment(newSegId);
+			assertFalse(updatedSeg.hasMergeSources());
+			
+		} else {
+			// Segment count is constant, segments not merged
+						assertEquals("Segment should not be merged in child dataset", profile.getSegmentCount(),
+								dataset.getCollection().getProfileManager().getSegmentCount());
 		}
 
 	}
