@@ -189,13 +189,17 @@ public class GenericImageProberPanel extends JPanel implements ProberReloadEvent
 		((ProberTableModel) table.getModel()).setRowCount(0);
 		Runnable r = () -> {
 			try {
+				LOGGER.finer("Importing "+openImage);
 				importAndDisplayImage(openImage);
 			} catch (Exception e) {
 				LOGGER.warning("Error in prober");
 				LOGGER.log(Loggable.STACK, "Error in prober", e);
 			}
 		};
-		ThreadManager.getInstance().submit(r);
+		// Note that if only one method thread is available, this will hang when
+		// dispatched via the thread manager. Use a separate UI thread
+		//new Thread(r).start();
+		ThreadManager.getInstance().submitUIUpdate(r);
 	}
 
 	protected Window getWindow() {

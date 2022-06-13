@@ -133,6 +133,16 @@ public class ThreadManager {
 	public String toString() {
 		return uiQueue.toString();
 	}
+	
+	/**
+	 * Submit the given runnable to the UI update thread pool
+	 * @param r
+	 * @return
+	 */
+	public synchronized Future<?> submitUIUpdate(Runnable r) {
+		TrackedRunnable t = new TrackedRunnable(r);
+		return uiExecutorService.submit(t);
+	}
 
 	public synchronized Future<?> submit(Runnable r) {
 		TrackedRunnable t = new TrackedRunnable(r);
