@@ -49,6 +49,8 @@ import com.bmskinner.nma.components.options.MissingOptionException;
 import com.bmskinner.nma.components.signals.ISignalGroup;
 import com.bmskinner.nma.gui.components.SelectableCellIcon;
 import com.bmskinner.nma.gui.events.UIController;
+import com.bmskinner.nma.gui.events.UserActionController;
+import com.bmskinner.nma.gui.events.UserActionEvent;
 import com.bmskinner.nma.io.ImageImportWorker;
 import com.bmskinner.nma.io.ImageImporter;
 import com.bmskinner.nma.io.ImageImporter.ImageImportException;
@@ -178,9 +180,12 @@ public class ManualCurationDialog extends AbstractCellCollectionDialog {
 
 		curateBtn.addActionListener(e -> {
 			Optional<IAnalysisDataset> newDataset = model.makeNewCollectionFromSelected();
-			if (newDataset.isPresent())
+			if (newDataset.isPresent()) {
+				UserActionController.getInstance().userActionEventReceived(
+						new UserActionEvent(this, UserActionEvent.REFOLD_CONSENSUS,
+								newDataset.get()));
 				UIController.getInstance().fireDatasetAdded(newDataset.get());
-			else
+			} else
 				LOGGER.info("No cells added to new dataset; not creating");
 		});
 		header.add(curateBtn);
