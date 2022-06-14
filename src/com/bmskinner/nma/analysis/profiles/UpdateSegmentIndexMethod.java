@@ -50,9 +50,9 @@ public class UpdateSegmentIndexMethod extends SingleDatasetAnalysisMethod {
 	/**
 	 * Create a segment index update
 	 * 
-	 * @param dataset  the dataset to update
-	 * @param lm       the landmark to update
-	 * @param newIndex the new index in the median profile
+	 * @param dataset   the dataset to update
+	 * @param segmentId the segment to update
+	 * @param newIndex  the new index in the median profile
 	 */
 	public UpdateSegmentIndexMethod(@NonNull IAnalysisDataset dataset, @NonNull UUID segmentId,
 			int newIndex) {

@@ -176,7 +176,7 @@ public class UpdateSegmentIndexMethodTest {
 	}
 
 	/**
-	 * Check that if a merged segment has a start index update,  merge source
+	 * Check that if a merged segment has a start index update, merge source
 	 * segments are removed
 	 * 
 	 * @throws Exception
@@ -189,86 +189,100 @@ public class UpdateSegmentIndexMethodTest {
 		IProfileSegment seg0 = profile.getSegmentContaining(profile.size() / 2);
 		IProfileSegment seg1 = seg0.nextSegment();
 
-		// Merge the segments
-		new SegmentMergeMethod(dataset, seg0.getID(), seg1.getID()).call();
-
-		if (dataset.isRoot()) {
-			
-			// Segment count drops by one
-			assertEquals("Segment should be merged", profile.getSegmentCount() - 1,
-					dataset.getCollection().getProfileManager().getSegmentCount());
-
-			// Get the id of the newly added segment
-			UUID newSegId = dataset.getCollection().getProfileCollection().getSegmentIDs().stream()
-					.filter(
-							id -> !profile.getSegmentIDs().contains(id))
-					.findFirst().orElseThrow(Exception::new);
-
-			ISegmentedProfile newProfile = dataset.getCollection().getProfileCollection()
-					.getSegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE,
-							Stats.MEDIAN);
-			IProfileSegment newSeg = newProfile.getSegment(newSegId);
-			assertTrue(newSeg.hasMergeSources());
-			new UpdateSegmentIndexMethod(dataset, newSegId, newSeg.getStartIndex() + 10).call();
-
-			if (!dv.validate(dataset))
-				fail("Dataset should validate: " + dv.getSummary() + " " + dv.getErrors());
-			
-			ISegmentedProfile updatedProfile = dataset.getCollection().getProfileCollection()
-					.getSegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE,
-							Stats.MEDIAN);
-			IProfileSegment updatedSeg = updatedProfile.getSegment(newSegId);
-			assertFalse(updatedSeg.hasMergeSources());
-			
-		} else {
-			// Segment count is constant, segments not merged
-						assertEquals("Segment should not be merged in child dataset", profile.getSegmentCount(),
-								dataset.getCollection().getProfileManager().getSegmentCount());
-		}
-
-	}
-
-	/**
-	 * Check that if a merged segment has a start index update, the merge source
-	 * segments are cleared
-	 * 
-	 * @throws Exception
-	 */
-	@Test
-	public void testUpdateSegmentStartIndexCorrectlyHandlesMergedSegmentInRealDataset()
-			throws Exception {
-
-		// Merge two segments that are not at the RP
-		IProfileSegment s0 = dataset.getCollection().getProfileCollection()
-				.getSegmentContaining(OrientationMark.REFERENCE);
-		IProfileSegment s1 = s0.nextSegment();
-		IProfileSegment s2 = s1.nextSegment();
-
 		UUID newSegId = UUID.randomUUID();
 
-		new SegmentMergeMethod(dataset, s1.getID(), s2.getID(), newSegId).call();
+		// Merge the segments
+		new SegmentMergeMethod(dataset, seg0.getID(), seg1.getID(), newSegId).call();
 
 		ISegmentedProfile newProfile = dataset.getCollection().getProfileCollection()
 				.getSegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE,
 						Stats.MEDIAN);
 
 		if (dataset.isRoot()) {
+
+			// Segment count drops by one
+			assertEquals("Segment should be merged", profile.getSegmentCount() - 1,
+					dataset.getCollection().getProfileManager().getSegmentCount());
+
 			IProfileSegment newSeg = newProfile.getSegment(newSegId);
 			assertTrue(newSeg.hasMergeSources());
-			new UpdateSegmentIndexMethod(dataset, newSegId, newSeg.getStartIndex() + 20).call();
+
+			// Now we are sure we have the correct test profile, test the index update
+			new UpdateSegmentIndexMethod(dataset, newSegId, newSeg.getStartIndex() + 10).call();
 
 			if (!dv.validate(dataset))
 				fail("Dataset should validate: " + dv.getSummary() + " " + dv.getErrors());
 
-			// check if the merge sources were cleared properly
-			newProfile = dataset.getCollection().getProfileCollection()
+			ISegmentedProfile updatedProfile = dataset.getCollection().getProfileCollection()
 					.getSegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE,
 							Stats.MEDIAN);
-			newSeg = newProfile.getSegment(newSegId);
-			assertFalse(newSeg.hasMergeSources());
+			IProfileSegment updatedSeg = updatedProfile.getSegment(newSegId);
+			assertFalse(updatedSeg.hasMergeSources());
+
+		} else {
+			// Segment count is constant, segments not merged
+			assertEquals("Segment should not be merged in child dataset", profile.getSegmentCount(),
+					dataset.getCollection().getProfileManager().getSegmentCount());
+			assertFalse(newProfile.hasSegment(newSegId));
 		}
 
-		else {
+	}
+
+	/**
+	 * Check that if a merged segment has a start index update, the merge source
+	 * segments of the previous segment are cleared
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void testUpdateSegmentStartIndexRemovesSegmentsFromPreceedingSegment()
+			throws Exception {
+
+		ISegmentedProfile profile = dataset.getCollection().getProfileCollection()
+				.getSegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE, Stats.MEDIAN);
+
+		IProfileSegment seg0 = profile.getSegmentContaining(0);
+		IProfileSegment seg1 = seg0.nextSegment();
+
+		UUID newSegId = UUID.randomUUID();
+
+		// The id of the segment to index update
+		UUID nextId = seg1.nextSegment().getID();
+
+		// Merge the segments
+		new SegmentMergeMethod(dataset, seg0.getID(), seg1.getID(), newSegId).call();
+
+		ISegmentedProfile newProfile = dataset.getCollection().getProfileCollection()
+				.getSegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE,
+						Stats.MEDIAN);
+
+		if (dataset.isRoot()) {
+
+			// Segment count drops by one
+			assertEquals("Segment should be merged", profile.getSegmentCount() - 1,
+					dataset.getCollection().getProfileManager().getSegmentCount());
+
+			IProfileSegment newSeg = newProfile.getSegment(newSegId);
+			assertTrue(newSeg.hasMergeSources());
+
+			IProfileSegment indexSeg = newProfile.getSegment(nextId);
+
+			// Now we are sure we have the correct test profile, test the index update
+			new UpdateSegmentIndexMethod(dataset, nextId, indexSeg.getStartIndex() - 2).call();
+
+			if (!dv.validate(dataset))
+				fail("Dataset should validate: " + dv.getSummary() + " " + dv.getErrors());
+
+			ISegmentedProfile updatedProfile = dataset.getCollection().getProfileCollection()
+					.getSegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE,
+							Stats.MEDIAN);
+			IProfileSegment updatedSeg = updatedProfile.getSegment(newSegId);
+			assertFalse(updatedSeg.hasMergeSources());
+
+		} else {
+			// Segment count is constant, segments not merged
+			assertEquals("Segment should not be merged in child dataset", profile.getSegmentCount(),
+					dataset.getCollection().getProfileManager().getSegmentCount());
 			assertFalse(newProfile.hasSegment(newSegId));
 		}
 
