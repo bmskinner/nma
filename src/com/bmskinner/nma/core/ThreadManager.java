@@ -68,9 +68,7 @@ public class ThreadManager {
 		if (maxThreads > 2) // if this is a dual core machine, we can't afford to be nice
 			maxThreads -= 1; // otherwise, leave something for the OS, EDT etc.
 
-		int maxMethodThreads = 1; // if on a low core system, just have one thread
-		if (maxThreads > 4)
-			maxMethodThreads = 2; // if we have more than 4 cores, up to two
+		int maxMethodThreads = 2; // if on a low core system, have two threads to prevent blocking
 		if (maxThreads > 10)
 			maxMethodThreads = maxThreads / 3; // if we're on a server, go wild
 
@@ -78,12 +76,15 @@ public class ThreadManager {
 		int maxUiThreads = Math.max(1, maxThreads - maxMethodThreads);
 
 		int maxForkJoinThreads = Math.max(1, maxUiThreads - 1); // ensure FJPs don't block the ui
-		System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism", String.valueOf(maxForkJoinThreads));
+		System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism",
+				String.valueOf(maxForkJoinThreads));
 
 		// Create the thread pools
-		methodExecutorService = new ThreadPoolExecutor(maxMethodThreads, maxMethodThreads, keepAliveTime,
+		methodExecutorService = new ThreadPoolExecutor(maxMethodThreads, maxMethodThreads,
+				keepAliveTime,
 				TimeUnit.MILLISECONDS, methodQueue);
-		uiExecutorService = new ThreadPoolExecutor(maxUiThreads, maxUiThreads, keepAliveTime, TimeUnit.MILLISECONDS,
+		uiExecutorService = new ThreadPoolExecutor(maxUiThreads, maxUiThreads, keepAliveTime,
+				TimeUnit.MILLISECONDS,
 				uiQueue);
 
 		LOGGER.config(String.format("Thread manager: Allowed processors: %s", maxThreads));
@@ -101,7 +102,8 @@ public class ThreadManager {
 		}
 
 		LOGGER.config(
-				String.format("Thread manager: Maximum memory: %s %s (%s bytes)", maxMemoryHuman, units, maxMemory));
+				String.format("Thread manager: Maximum memory: %s %s (%s bytes)", maxMemoryHuman,
+						units, maxMemory));
 	}
 
 	/**
@@ -133,9 +135,10 @@ public class ThreadManager {
 	public String toString() {
 		return uiQueue.toString();
 	}
-	
+
 	/**
 	 * Submit the given runnable to the UI update thread pool
+	 * 
 	 * @param r
 	 * @return
 	 */
