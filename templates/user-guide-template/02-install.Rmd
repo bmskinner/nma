@@ -4,7 +4,7 @@ This section contains information on installing, removing and customising the pr
 
 ## Installing
 
-Nuclear Morphology Analysis is designed to be runnable on Windows, Linux and MacOs, though it has been primarily designed and used on Windows. Since it requires a Java runtime, there are two ways to run the software
+Nuclear Morphology Analysis is designed to be runnable on Windows, Linux and MacOS, though it has been primarily designed and used on Windows. Since it requires a Java runtime, there are two ways to run the software
 
 - with an included packaged Java runtime
 - with a user installed version of Java (16 or higher)
