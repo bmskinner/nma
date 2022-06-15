@@ -4,7 +4,7 @@ This section contains information on installing, removing and customising the pr
 
 ## Installing
 
-Nuclear Morphology Analysis is designed to be runnable on Windows, Linux and MacOs, though it has been primarily designed and used on Windows. Since it requires a Java runtime, there are two ways to run the software
+Nuclear Morphology Analysis is designed to be runnable on Windows, Linux and MacOS, though it has been primarily designed and used on Windows. Since it requires a Java runtime, there are two ways to run the software
 
 - with an included packaged Java runtime
 - with a user installed version of Java (16 or higher)
@@ -64,7 +64,7 @@ You can open the configuration folder via `Help > Open config directory`.
 
 ### Logs
 
-The system state is logged when NMA is started in case debugging is needed. None of the logged data leaves your computer unless you explicitly send it. If you do find a bug or have a problem, you can send the latest log file to me and it may help me track down the problem. There will be up to 5 log files, with `nma.0.log` containing the most recent logs. 
+The system state is logged when NMA is started in case debugging is needed. None of the logged data leaves your computer unless you explicitly send it. If you do find a bug or have a problem, and get in touch via the [issue tracker](https://bitbucket.org/bmskinner/nuclear_morphology/issues?status=new&status=open) you can upload a log file and it may help me track down the problem. There will be up to 5 log files, with `nma.0.log` containing the most recent logs. 
 
 ### Rulesets {#config-rulesets}
 
