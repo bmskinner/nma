@@ -19,6 +19,6 @@ echo "./bin/Nuclear\ Morphology\ Analysis" > ./Nuclear\ Morphology\ Analysis/lau
 chmod +x ./Nuclear\ Morphology\ Analysis/launch.sh
 
 # Make a tar
-tar -czf /mnt/nma/target/Nuclear_Morphology_Analysis-${project.version}-x86_64-linux.tar.gz ./Nuclear\ Morphology\ Analysis
+tar -czf /mnt/nma/target/Nuclear_Morphology_Analysis-${project.version}-linux.tar.gz ./Nuclear\ Morphology\ Analysis
 
-#cp Nuclear_Morphology_Analysis_${project.version}.tar.gz /mnt/nma/target/Nuclear_Morphology_Analysis-${project.version}-x86_64-linux.tar.gz
+#cp Nuclear_Morphology_Analysis_${project.version}.tar.gz /mnt/nma/target/Nuclear_Morphology_Analysis-${project.version}-linux.tar.gz

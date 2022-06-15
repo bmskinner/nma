@@ -13,8 +13,8 @@ Nuclear Morphology Analysis is designed to be runnable on Windows, Linux and Mac
 
 Option | Link | Info
 -------|------|------
-Portable | [Nuclear Morphology Analysis-${project.version}-x86_64-windows.zip](https://bitbucket.org/bmskinner/nuclear_morphology/downloads/Nuclear_Morphology_Analysis-${project.version}-x86_64-windows.zip) | Software and Java runtime in a portable format. Unzip the folder wherever you like and run 'Nuclear_Morphology_Analysis.exe'.
-Installer | [Nuclear_Morphology_Analysis-${project.version}-x86_64-windows.msi](https://bitbucket.org/bmskinner/nuclear_morphology/downloads/Nuclear_Morphology_Analysis-${project.version}-x86_64-windows.msi) | Software and Java runtime in an installer for Windows. This will add the software to your list of installed programs, and create a start menu entry. May require administrator privileges depending on where you install.
+Portable | [Nuclear Morphology Analysis-${project.version}-windows.zip](https://bitbucket.org/bmskinner/nuclear_morphology/downloads/Nuclear_Morphology_Analysis-${project.version}-windows.zip) | Software and Java runtime in a portable format. Unzip the folder wherever you like and run 'Nuclear_Morphology_Analysis.exe'.
+Installer | [Nuclear_Morphology_Analysis-${project.version}-windows.msi](https://bitbucket.org/bmskinner/nuclear_morphology/downloads/Nuclear_Morphology_Analysis-${project.version}-windows.msi) | Software and Java runtime in an installer for Windows. This will add the software to your list of installed programs, and create a start menu entry. May require administrator privileges depending on where you install.
 Standalone Jar file | [Nuclear_Morphology_Analysis_${project.version}_standalone.jar](https://bitbucket.org/bmskinner/nuclear_morphology/downloads/Nuclear_Morphology_Analysis_${project.version}_standalone.jar)  | The jar file with all dependencies for users who want to use their own Java install.
 
 You can also download a set of images suitable for testing the software from [https://bitbucket.org/bmskinner/nuclear_morphology/downloads/Testing_mouse_image_set.zip](https://bitbucket.org/bmskinner/nuclear_morphology/downloads/Testing_mouse_image_set.zip).
@@ -23,7 +23,7 @@ You can also download a set of images suitable for testing the software from [ht
  
 Option | Link | Info
 -------|------|------
-Linux portable | [Nuclear_Morphology_Analysis-${project.version}-x86_64-linux.tar.gz](https://bitbucket.org/bmskinner/nuclear_morphology/downloads/Nuclear_Morphology_Analysis-${project.version}-x86_64-linux.tar.gz) | Software and Java runtime in a portable format. Unzip the folder wherever you like and run 'launch.sh'. This version was packaged on Debian 11 with glibc 2.31. If you have issues with the packaged version, install Java 16 or higher and use the standalone jar below.
+Linux portable | [Nuclear_Morphology_Analysis-${project.version}-linux.tar.gz](https://bitbucket.org/bmskinner/nuclear_morphology/downloads/Nuclear_Morphology_Analysis-${project.version}-linux.tar.gz) | Software and Java runtime in a portable format. Extract the folder wherever you like and run 'launch.sh'. This version was packaged on Debian 11 with glibc 2.31. If you have issues with the packaged version, install Java 16 or higher and use the standalone jar below.
 Standalone Jar file | [Nuclear_Morphology_Analysis_${project.version}_standalone.jar](https://bitbucket.org/bmskinner/nuclear_morphology/downloads/Nuclear_Morphology_Analysis_${project.version}_standalone.jar)  | The jar file with all dependencies for users who want to use their own Java install.
 
 You can also download a set of images suitable for testing the software from [https://bitbucket.org/bmskinner/nuclear_morphology/downloads/Testing_mouse_image_set.zip](https://bitbucket.org/bmskinner/nuclear_morphology/downloads/Testing_mouse_image_set.zip).
@@ -82,7 +82,8 @@ Key        | Allowed Values | Effect
 ``DEFAULT_DIR`` | *directory with backslashes escaped* e.g. `C:\\path\\to\\folder`    | Sets the default folder for exporting data
 ``DEFAULT_DISPLAY_SCALE`` | ``PIXELS`` ``MICRONS`` | Sets the default scale to display in charts and tables
 ``REFOLD_OVERRIDE`` |  ``true`` ``false``| If true, the 'best-fit nucleus' method will always be used instead of the position averaging method
-``USE_ANTIALIASING`` | ``true`` ``false`` | Sets the default value for the 'Use anti-aliasing' option. False makes charts faster to render, but not as pretty.
-``USE_DEBUG_INTERFACE`` | ``true`` ``false`` | If true, shows debugging information in some charts
-``USE_GLCM_INTERFACE`` | ``true`` ``false`` | If true, allows GLCM measurements for nuclei
-``FILL_CONSENSUS`` | ``true`` ``false`` | Sets the default value for the 'Fill consensus' checkbox in the view menu 
+`USE_ANTIALIASING` | `true` `false` | Sets the default value for the 'Use anti-aliasing' option. False makes charts faster to render, but not as pretty.
+`USE_DEBUG_INTERFACE` | `true` `false` | If true, shows debugging information in some charts
+`USE_GLCM_INTERFACE` | `true` `false` | If true, allows GLCM measurements for nuclei
+`FILL_CONSENSUS` | `true` `false` | Sets the default value for the 'Fill consensus' checkbox in the view menu 
+`CHECK_FOR_UPDATES` | `true` `false` | If true, the software will check for new versions on launch. If false, updates can still be checked manually via `Help > Check for updates`
