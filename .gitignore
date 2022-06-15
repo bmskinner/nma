@@ -5,7 +5,6 @@
 .settings/*
 
 # Generated files
-README.md
 bin/*
 doc/*
 res/user-guide/*
