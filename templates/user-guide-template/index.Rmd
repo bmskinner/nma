@@ -122,7 +122,7 @@ Distance from CoM (centre of mass) | Length | the absolute distance of the signa
 Fractional distance from CoM | Fraction | the distance from CoM as a propotion of the total distance from the nucleus CoM through the signal CoM to the nucleus border
 Radius | Length | the radius of the circle that has the same area as the signal
 
-## Citing
+## Citing and contact
 
 If you use the software, please cite an appropriate paper:
 
@@ -133,7 +133,5 @@ For the morphological analysis:
 For signal warping:
 
 [Skinner BM, Bacon J, Rathje CC, Larson EL, Kopania EEK, Good JM, Affara NA, Ellis PJI. Automated Nuclear Cartography Reveals Conserved Sperm Chromosome Territory Localization across 2 Million Years of Mouse Evolution. _Genes_ 2019; 10:109. doi:10.3390/genes10020109](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6409866/)
-
-## Contact
 
 Find my current contact details [here](https://bitbucket.org/bmskinner/nuclear_morphology/wiki/Frequently%20Asked%20Questions)
