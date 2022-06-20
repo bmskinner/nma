@@ -25,7 +25,6 @@ import java.util.logging.Logger;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.workspaces.IWorkspace;
 import com.bmskinner.nma.core.DatasetListManager;
-import com.bmskinner.nma.core.GlobalOptions;
 import com.bmskinner.nma.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nma.gui.DefaultInputSupplier;
 import com.bmskinner.nma.gui.actions.ExportDatasetAction;
@@ -62,7 +61,8 @@ public class MainWindowCloseAdapter extends WindowAdapter {
 
 			try {
 				int save = new DefaultInputSupplier().requestOptionAllVisible(options, 0,
-						"Datasets or workspaces have changed since last save!", "Save datasets and workspaces?");
+						"Datasets or workspaces have changed since last save!",
+						"Save datasets and workspaces?");
 
 				switch (save) {
 				case 0:
@@ -90,10 +90,6 @@ public class MainWindowCloseAdapter extends WindowAdapter {
 	}
 
 	public void close() {
-		LOGGER.config("Clearing loaded datasets");
-		DatasetListManager.getInstance().clear();
-		GlobalOptions.getInstance().setDefaults();
-
 		mw.dispose();
 		LOGGER.config("Disposed GUI; quitting JVM");
 		System.exit(0);
@@ -110,7 +106,8 @@ public class MainWindowCloseAdapter extends WindowAdapter {
 		// Run saves
 		Runnable r = () -> {
 
-			for (IAnalysisDataset root : DatasetListManager.getInstance().getUnsavedRootDatasets()) {
+			for (IAnalysisDataset root : DatasetListManager.getInstance()
+					.getUnsavedRootDatasets()) {
 				final CountDownLatch cl = new CountDownLatch(1);
 				Runnable task = new ExportDatasetAction(root,
 						UserActionController.getInstance().getProgressBarAcceptor(), cl, false);
