@@ -128,6 +128,10 @@ public class ClusterGroupTableModel extends DatasetTableModel {
 			if (op.getBoolean(stat.toString()))
 				builder.append(stat.toString() + Io.NEWLINE);
 
+		for (Measurement stat : Measurement.getGlcmStats())
+			if (op.getBoolean(stat.toString()))
+				builder.append(stat.toString() + Io.NEWLINE);
+
 		for (String s : op.getStringKeys()) {
 			try {
 				UUID id = UUID.fromString(s);
