@@ -19,6 +19,8 @@ package com.bmskinner.nma.gui.tabs;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -119,8 +121,17 @@ public abstract class AbstractScatterPanel extends DetailPanel {
 	}
 
 	private JPanel createHeader() {
-		statABox = new JComboBox<>(Measurement.getStats(component));
-		statBBox = new JComboBox<>(Measurement.getStats(component));
+
+		List<Measurement> stats = new ArrayList<>();
+
+		stats.addAll(Arrays.stream(Measurement.getStats(component)).toList());
+
+		if (GlobalOptions.getInstance().getBoolean(GlobalOptions.IS_GLCM_INTERFACE_KEY)) {
+			stats.addAll(Measurement.getGlcmStats());
+		}
+
+		statABox = new JComboBox<>(stats.toArray(Measurement[]::new));
+		statBBox = new JComboBox<>(stats.toArray(Measurement[]::new));
 
 		statABox.setSelectedItem(
 				component.equals(CellularComponent.NUCLEAR_SIGNAL)
