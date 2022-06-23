@@ -161,6 +161,23 @@ public final class DatasetListManager implements DatasetAddedListener {
 	}
 
 	/**
+	 * Test if the given dataset is a merge source for another dataset.
+	 * 
+	 * @param d
+	 * @return
+	 */
+	public final boolean isMergeSource(@NonNull final IAnalysisDataset d) {
+		for (IAnalysisDataset r : rootDatasets) {
+			if (r.hasMergeSource(d))
+				return true;
+			for (IAnalysisDataset c : r.getAllChildDatasets())
+				if (c.hasMergeSource(d))
+					return true;
+		}
+		return false;
+	}
+
+	/**
 	 * Test if any datasets are selected
 	 * 
 	 * @return true if at least one dataset is selected, false otherwise

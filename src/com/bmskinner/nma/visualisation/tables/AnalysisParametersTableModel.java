@@ -8,7 +8,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -122,13 +121,9 @@ public class AnalysisParametersTableModel extends DatasetTableModel {
 	 * @return
 	 */
 	private boolean hasMergeSource(@NonNull List<IAnalysisDataset> datasets) {
-
-		Set<IAnalysisDataset> all = DatasetListManager.getInstance().getAllDatasets();
-
 		for (IAnalysisDataset d : datasets) {
-			for (IAnalysisDataset p : all)
-				if (p.hasMergeSource(d))
-					return true;
+			if (DatasetListManager.getInstance().isMergeSource(d))
+				return true;
 		}
 		return false;
 	}
