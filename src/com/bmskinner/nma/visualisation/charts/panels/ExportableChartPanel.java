@@ -17,6 +17,8 @@
 package com.bmskinner.nma.visualisation.charts.panels;
 
 import java.awt.Component;
+import java.awt.Graphics;
+import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
@@ -24,9 +26,12 @@ import java.awt.datatransfer.StringSelection;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -41,6 +46,8 @@ import javax.swing.JPopupMenu;
 import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.encoders.EncoderUtil;
+import org.jfree.chart.encoders.ImageFormat;
 import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.general.DatasetUtils;
@@ -51,6 +58,7 @@ import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYZDataset;
 import org.jfree.svg.SVGGraphics2D;
+import org.jfree.svg.SVGUnits;
 import org.jfree.svg.SVGUtils;
 
 import com.bmskinner.nma.core.DatasetListManager;
@@ -80,8 +88,19 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 
 	private static final Logger LOGGER = Logger.getLogger(ExportableChartPanel.class.getName());
 
+	private static final double DEFAULT_SCREEN_DPI = 96;
+	private static final double DEFAULT_EXPORT_DPI = 300;
+	private static final double DPI_SCALE = DEFAULT_SCREEN_DPI / DEFAULT_EXPORT_DPI;
+
 	private static final String EXPORT_LBL = "Export data";
+
+	private static final String EXPORT_PNG = "PNG...";
+	private static final String EXPORT_SINGLE_PANEL_PNG = "PNG (single column)...";
+	private static final String EXPORT_DOUBLE_PANEL_PNG = "PNG (double column)...";
+
 	private static final String EXPORT_SVG = "SVG...";
+	private static final String EXPORT_SINGLE_PANEL_SVG = "SVG (single column)...";
+	private static final String EXPORT_DOUBLE_PANEL_SVG = "SVG (double column)...";
 	private static final String COPY_LBL = "Copy data";
 
 	protected final List<Object> listeners = new ArrayList<>();
@@ -117,14 +136,43 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 		exportItem.setEnabled(true);
 		popup.add(exportItem);
 
+		JMenuItem exportPNGItem = new JMenuItem(EXPORT_PNG);
+		exportPNGItem.addActionListener(e -> exportPNG((int) (this.getWidth() / DPI_SCALE),
+				(int) (this.getHeight() / DPI_SCALE)));
+		exportPNGItem.setEnabled(true);
+
+		JMenuItem exportSinglePNGItem = new JMenuItem(EXPORT_SINGLE_PANEL_PNG);
+		exportSinglePNGItem.addActionListener(e -> exportPNG(1004, 1004));
+		exportSinglePNGItem.setEnabled(true);
+
+		JMenuItem exportDoublePNGItem = new JMenuItem(EXPORT_DOUBLE_PANEL_PNG);
+		exportDoublePNGItem.addActionListener(e -> exportPNG(2008, 1004));
+		exportDoublePNGItem.setEnabled(true);
+
 		JMenuItem exportSvgItem = new JMenuItem(EXPORT_SVG);
-		exportSvgItem.addActionListener(e -> exportSVG());
+		exportSvgItem.addActionListener(e -> exportSVG((int) (this.getWidth() / DPI_SCALE),
+				(int) (this.getHeight() / DPI_SCALE)));
 		exportSvgItem.setEnabled(true);
+
+		JMenuItem exportSingleSvgItem = new JMenuItem(EXPORT_SINGLE_PANEL_SVG);
+		exportSingleSvgItem.addActionListener(e -> exportSVG(1004, 1004));
+		exportSingleSvgItem.setEnabled(true);
+
+		JMenuItem exportDoubleSvgItem = new JMenuItem(EXPORT_DOUBLE_PANEL_SVG);
+		exportDoubleSvgItem.addActionListener(e -> exportSVG(2008, 1004));
+		exportDoubleSvgItem.setEnabled(true);
 
 		// Put the SVG export with the other save as items
 		for (Component c : popup.getComponents()) {
-			if (c instanceof JMenuItem t && t.getText().equals("Save as"))
+			if (c instanceof JMenuItem t && t.getText().equals("Save as")) {
+				t.removeAll(); // Remove the default PNG export item
+				t.add(exportPNGItem);
+				t.add(exportSinglePNGItem);
+				t.add(exportDoublePNGItem);
 				t.add(exportSvgItem);
+				t.add(exportSingleSvgItem);
+				t.add(exportDoubleSvgItem);
+			}
 		}
 
 		// Ensure that the chart text and images are redrawn to
@@ -422,12 +470,69 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 	}
 
 	/**
-	 * Export the chart in this panel as SVG
+	 * Export as a png with the given final pixel dimensions.
+	 * 
+	 * The image will be drawn at smaller dimensions, assuming a default 96 DPI,
+	 * then scaled up to the final image size, so that text elements are readable in
+	 * the final image. Note that this will result in blurrier images than ideal,
+	 * and a better solution should be found.
+	 * 
+	 * @param w
+	 * @param h
 	 */
-	private void exportSVG() {
+	private void exportPNG(int w, int h) {
+		try {
+			File file = new DefaultInputSupplier().requestFileSave(
+					FileUtils.commonPathOfDatasets(
+							DatasetListManager.getInstance().getSelectedDatasets()),
+					"Chart export", Io.PNG_FILE_EXTENSION_NODOT);
+
+			if (file.exists()
+					&& !new DefaultInputSupplier().requestApproval("File exists. Overwrite?",
+							"Overwrite existing file?"))
+				return;
+
+			try (OutputStream os = new FileOutputStream(file)) {
+
+				int w_px = (int) (w * DPI_SCALE);
+				int h_px = (int) (h * DPI_SCALE);
+
+				BufferedImage bufferedImage = getChart().createBufferedImage(w_px, h_px, null);
+
+				Image scaled = bufferedImage.getScaledInstance(w, h, Image.SCALE_SMOOTH);
+
+				BufferedImage bi = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
+				Graphics bg = bi.getGraphics();
+				bg.drawImage(scaled, 0, 0, null);
+				bg.dispose();
+
+				EncoderUtil.writeBufferedImage(bi, ImageFormat.PNG, os);
+
+			} catch (IOException e) {
+				LOGGER.fine("Unable to export chart as png");
+			}
+
+		} catch (RequestCancelledException e) {
+			// User cancelled, no action
+		}
+
+	}
+
+	/**
+	 * Export the chart in this panel as SVG of the given dimensions
+	 * 
+	 * @param w the width of the output in pixels
+	 * @param h the height of the output in pixels
+	 */
+	private void exportSVG(int w, int h) {
+
+		int w_px = (int) (w * DPI_SCALE);
+		int h_px = (int) (h * DPI_SCALE);
+
 		JFreeChart chart = this.getChart();
-		SVGGraphics2D g2 = new SVGGraphics2D(this.getWidth(), this.getHeight());
-		Rectangle r = new Rectangle(0, 0, this.getWidth(), this.getHeight());
+		SVGGraphics2D g2 = new SVGGraphics2D(w_px, h_px, SVGUnits.PX);
+
+		Rectangle r = new Rectangle(0, 0, w_px, h_px);
 		chart.draw(g2, r);
 		try {
 			File file = new DefaultInputSupplier().requestFileSave(
