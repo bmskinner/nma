@@ -42,6 +42,7 @@ import com.bmskinner.nma.gui.events.UserActionController;
 import com.bmskinner.nma.gui.events.UserActionEvent;
 import com.bmskinner.nma.io.Io;
 import com.bmskinner.nma.logging.Loggable;
+import com.bmskinner.nma.utility.FileUtils;
 
 /**
  * Trigger methods to perform boolean operations on datasets
@@ -69,7 +70,7 @@ public class BooleanOperationAction extends MultiDatasetResultAction {
 		try {
 			// Try to find a sensible ancestor dir of the datasets
 			// Otherwise default to the home dir
-			File dir = IAnalysisDataset.commonPathOfFiles(datasets);
+			File dir = FileUtils.commonPathOfDatasets(datasets);
 			if (!dir.exists() || !dir.isDirectory())
 				dir = GlobalOptions.getInstance().getDefaultDir();
 

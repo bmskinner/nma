@@ -33,6 +33,7 @@ import com.bmskinner.nma.gui.ProgressBarAcceptor;
 import com.bmskinner.nma.gui.components.FileSelector;
 import com.bmskinner.nma.io.Io;
 import com.bmskinner.nma.io.XMLWriter;
+import com.bmskinner.nma.utility.FileUtils;
 
 /**
  * Export the options stored in a dataset
@@ -94,7 +95,7 @@ public class ExportOptionsAction extends MultiDatasetResultAction {
 
 			// More than one dataset, choose folder only
 			try {
-				File folder = is.requestFolder(IAnalysisDataset.commonPathOfFiles(datasets));
+				File folder = is.requestFolder(FileUtils.commonPathOfDatasets(datasets));
 				Runnable r = () -> {
 					for (IAnalysisDataset d : datasets) {
 						File f = new File(folder, d.getName() + Io.XML_FILE_EXTENSION);

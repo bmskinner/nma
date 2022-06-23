@@ -18,7 +18,6 @@ package com.bmskinner.nma.components.datasets;
 
 import java.awt.Color;
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -36,7 +35,6 @@ import com.bmskinner.nma.components.profiles.MissingProfileException;
 import com.bmskinner.nma.components.profiles.ProfileException;
 import com.bmskinner.nma.components.rules.RuleSetCollection;
 import com.bmskinner.nma.io.XmlSerializable;
-import com.bmskinner.nma.utility.FileUtils;
 
 /**
  * This describes an analysis dataset, which packages a collection of cells with
@@ -528,22 +526,6 @@ public interface IAnalysisDataset extends XmlSerializable {
 
 		}
 		return ok;
-	}
-
-	/**
-	 * Get the most recent common ancestor of the dataset save file paths
-	 * 
-	 * @param datasets the list of datasets.
-	 * @return a file for the common directory. Check that the path exists and is a
-	 *         directory before using this.
-	 */
-	static File commonPathOfFiles(@NonNull Collection<IAnalysisDataset> datasets) {
-		List<File> files = new ArrayList<>(datasets.size());
-		for (IAnalysisDataset d : datasets) {
-			files.add(d.getSavePath().getParentFile());
-		}
-		return FileUtils.commonPathOfFiles(files);
-
 	}
 
 }

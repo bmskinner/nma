@@ -30,11 +30,12 @@ import com.bmskinner.nma.core.ThreadManager;
 import com.bmskinner.nma.gui.DefaultInputSupplier;
 import com.bmskinner.nma.gui.ProgressBarAcceptor;
 import com.bmskinner.nma.gui.actions.AddNuclearSignalAction;
+import com.bmskinner.nma.gui.actions.BooleanOperationAction;
 import com.bmskinner.nma.gui.actions.BuildHierarchicalTreeAction;
 import com.bmskinner.nma.gui.actions.ClusterAutomaticAction;
 import com.bmskinner.nma.gui.actions.ClusterFileAssignmentAction;
 import com.bmskinner.nma.gui.actions.ClusterManualAction;
-import com.bmskinner.nma.gui.actions.BooleanOperationAction;
+import com.bmskinner.nma.gui.actions.CreateConsensusAction;
 import com.bmskinner.nma.gui.actions.DatasetScaleChangeAction;
 import com.bmskinner.nma.gui.actions.ExportCellLocationsAction;
 import com.bmskinner.nma.gui.actions.ExportDatasetAction;
@@ -57,7 +58,6 @@ import com.bmskinner.nma.gui.actions.MergeCollectionAction;
 import com.bmskinner.nma.gui.actions.MergeSignalsAction;
 import com.bmskinner.nma.gui.actions.MergeSourceExtractionAction;
 import com.bmskinner.nma.gui.actions.NewAnalysisAction;
-import com.bmskinner.nma.gui.actions.CreateConsensusAction;
 import com.bmskinner.nma.gui.actions.RelocateFromFileAction;
 import com.bmskinner.nma.gui.actions.ReplaceSourceImageDirectoryAction;
 import com.bmskinner.nma.gui.actions.RunGLCMAction;
@@ -78,6 +78,7 @@ import com.bmskinner.nma.gui.runnables.SaveAllDatasets;
 import com.bmskinner.nma.io.GenericFileImporter;
 import com.bmskinner.nma.io.Io;
 import com.bmskinner.nma.io.SVGWriter;
+import com.bmskinner.nma.utility.FileUtils;
 
 /**
  * Controller for all user actions
@@ -656,7 +657,7 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 		String defaultFileName = datasets.size() > 1
 				? "Outlines"
 				: datasets.get(0).getName();
-		File defaultFolder = IAnalysisDataset.commonPathOfFiles(datasets);
+		File defaultFolder = FileUtils.commonPathOfDatasets(datasets);
 
 		try {
 			File exportFile = new DefaultInputSupplier().requestFileSave(defaultFolder,

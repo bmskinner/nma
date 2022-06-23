@@ -53,7 +53,6 @@ import org.jfree.data.xy.XYZDataset;
 import org.jfree.svg.SVGGraphics2D;
 import org.jfree.svg.SVGUtils;
 
-import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.core.DatasetListManager;
 import com.bmskinner.nma.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nma.gui.DefaultInputSupplier;
@@ -61,6 +60,7 @@ import com.bmskinner.nma.gui.components.FileSelector;
 import com.bmskinner.nma.gui.events.ChartSetEventListener;
 import com.bmskinner.nma.io.Io;
 import com.bmskinner.nma.logging.Loggable;
+import com.bmskinner.nma.utility.FileUtils;
 import com.bmskinner.nma.visualisation.datasets.ExportableBoxAndWhiskerCategoryDataset;
 import com.bmskinner.nma.visualisation.datasets.FloatXYDataset;
 import com.bmskinner.nma.visualisation.datasets.ShellResultDataset;
@@ -431,7 +431,7 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 		chart.draw(g2, r);
 		try {
 			File file = new DefaultInputSupplier().requestFileSave(
-					IAnalysisDataset.commonPathOfFiles(
+					FileUtils.commonPathOfDatasets(
 							DatasetListManager.getInstance().getSelectedDatasets()),
 					"Chart export", Io.SVG_FILE_EXTENSION_NODOT);
 

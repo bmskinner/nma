@@ -22,6 +22,8 @@ import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nma.components.datasets.IAnalysisDataset;
+
 /**
  * File handling utility methods
  * 
@@ -37,6 +39,22 @@ public class FileUtils {
 	 * Private constructor, all methods are static
 	 */
 	private FileUtils() {
+	}
+
+	/**
+	 * Get the most recent common ancestor of the dataset save file paths
+	 * 
+	 * @param datasets the list of datasets.
+	 * @return a file for the common directory. Check that the path exists and is a
+	 *         directory before using this.
+	 */
+	public static File commonPathOfDatasets(@NonNull Collection<IAnalysisDataset> datasets) {
+		List<File> files = new ArrayList<>(datasets.size());
+		for (IAnalysisDataset d : datasets) {
+			files.add(d.getSavePath().getParentFile());
+		}
+		return FileUtils.commonPathOfFiles(files);
+
 	}
 
 	/**

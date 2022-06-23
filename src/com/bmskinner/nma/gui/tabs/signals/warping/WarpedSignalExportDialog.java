@@ -31,6 +31,7 @@ import com.bmskinner.nma.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nma.gui.DefaultInputSupplier;
 import com.bmskinner.nma.gui.dialogs.SettingsDialog;
 import com.bmskinner.nma.io.Io;
+import com.bmskinner.nma.utility.FileUtils;
 import com.bmskinner.nma.visualisation.image.ImageAnnotator;
 import com.bmskinner.nma.visualisation.image.ImageConverter;
 import com.bmskinner.nma.visualisation.image.ImageFilterer;
@@ -48,7 +49,8 @@ public class WarpedSignalExportDialog extends SettingsDialog {
 
 	private static final String TITLE = "Export warped image";
 
-	private static final String[] COLOUR_PAIRS = { "Red-Green", "Blue-Yellow", "Green-Magenta", "Existing" };
+	private static final String[] COLOUR_PAIRS = { "Red-Green", "Blue-Yellow", "Green-Magenta",
+			"Existing" };
 
 	private static final boolean IS_MODAL = true;
 
@@ -72,9 +74,11 @@ public class WarpedSignalExportDialog extends SettingsDialog {
 		this.signals.addAll(signals);
 
 		JPanel infoPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-		infoPanel.add(new JLabel("<html>Select a colour pair for signals; the preset options will<br>"
-				+ " remain distinct even if the current signal pseudocolours are similar."
-				+ "<br>Use your own colours with the 'Existing' option.</html>", SwingConstants.CENTER));
+		infoPanel.add(new JLabel(
+				"<html>Select a colour pair for signals; the preset options will<br>"
+						+ " remain distinct even if the current signal pseudocolours are similar."
+						+ "<br>Use your own colours with the 'Existing' option.</html>",
+				SwingConstants.CENTER));
 
 		JPanel btnpanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
 
@@ -133,12 +137,14 @@ public class WarpedSignalExportDialog extends SettingsDialog {
 			for (IWarpedSignal s : signals)
 				datasets.add(DatasetListManager.getInstance().getDataset(s.sourceDatasetId()));
 
-			File defaultFolder = IAnalysisDataset.commonPathOfFiles(datasets);
+			File defaultFolder = FileUtils.commonPathOfDatasets(datasets);
 
-			File saveFile = new DefaultInputSupplier().requestFileSave(defaultFolder, warpedImage.getTitle(),
+			File saveFile = new DefaultInputSupplier().requestFileSave(defaultFolder,
+					warpedImage.getTitle(),
 					Io.TIFF_FILE_EXTENSION_NODOT);
 			if (saveFile.exists()) {
-				doSave = new DefaultInputSupplier().requestApproval("Overwrite existing file?", "Overwrite?");
+				doSave = new DefaultInputSupplier().requestApproval("Overwrite existing file?",
+						"Overwrite?");
 			}
 			if (doSave)
 				IJ.saveAsTiff(warpedImage, saveFile.getAbsolutePath());
@@ -237,8 +243,10 @@ public class WarpedSignalExportDialog extends SettingsDialog {
 
 		List<Nucleus> targets = signals.stream().map(IWarpedSignal::target).distinct().toList();
 
-		String imageName = s0.sourceDatasetName() + "-" + s0.sourceSignalGroupName() + "_(" + colToName(colour1)
-				+ ")_vs_" + s1.sourceDatasetName() + "-" + s1.sourceSignalGroupName() + "_(" + colToName(colour2)
+		String imageName = s0.sourceDatasetName() + "-" + s0.sourceSignalGroupName() + "_("
+				+ colToName(colour1)
+				+ ")_vs_" + s1.sourceDatasetName() + "-" + s1.sourceSignalGroupName() + "_("
+				+ colToName(colour2)
 				+ ")_on_" + s0.targetName();
 
 		if (includeConsensus)
@@ -259,7 +267,8 @@ public class WarpedSignalExportDialog extends SettingsDialog {
 		ColorProcessor ip2 = new ColorProcessor(ip.getWidth(), ip.getHeight());
 		ip2.setChannel(colour1 + 1, ip);
 
-		String imageName = s.sourceDatasetName() + "-" + s.sourceSignalGroupName() + "_on_" + s.targetName();
+		String imageName = s.sourceDatasetName() + "-" + s.sourceSignalGroupName() + "_on_"
+				+ s.targetName();
 
 		// Add a border so we don't drop outline pixels at the edge
 		int buffer = 10;
@@ -285,7 +294,8 @@ public class WarpedSignalExportDialog extends SettingsDialog {
 		ip = ImageConverter.expandCanvas(ip, buffer, Color.white);
 		List<Nucleus> targets = signals.stream().map(IWarpedSignal::target).distinct().toList();
 
-		String imageName = s.sourceDatasetName() + "-" + s.sourceSignalGroupName() + "_on_" + s.targetName();
+		String imageName = s.sourceDatasetName() + "-" + s.sourceSignalGroupName() + "_on_"
+				+ s.targetName();
 
 		if (includeConsensus)
 			return drawConsensusOnImage(ip, targets, Color.black, imageName);
@@ -308,7 +318,8 @@ public class WarpedSignalExportDialog extends SettingsDialog {
 		ip = ImageConverter.expandCanvas(ip, buffer, Color.white);
 		List<Nucleus> targets = signals.stream().map(IWarpedSignal::target).distinct().toList();
 
-		String imageName = s0.sourceDatasetName() + "-" + s0.sourceSignalGroupName() + "_vs_" + s1.sourceDatasetName()
+		String imageName = s0.sourceDatasetName() + "-" + s0.sourceSignalGroupName() + "_vs_"
+				+ s1.sourceDatasetName()
 				+ "-" + s1.sourceSignalGroupName() + "_on_" + s0.targetName();
 
 		if (includeConsensus)
@@ -317,7 +328,8 @@ public class WarpedSignalExportDialog extends SettingsDialog {
 		return new ImagePlus(imageName, ip);
 	}
 
-	private ImagePlus drawConsensusOnImage(ImageProcessor ip, List<Nucleus> targets, Color colour, String imageName) {
+	private ImagePlus drawConsensusOnImage(ImageProcessor ip, List<Nucleus> targets, Color colour,
+			String imageName) {
 
 		try {
 			for (Nucleus target : targets) {
@@ -331,7 +343,8 @@ public class WarpedSignalExportDialog extends SettingsDialog {
 
 				// CoM starts at 0, 0; offset to image coordinates
 				target.moveCentreOfMass(
-						new FloatPoint(Math.abs(target.getMinX()) + wBuffer, Math.abs(target.getMinY()) + hBuffer));
+						new FloatPoint(Math.abs(target.getMinX()) + wBuffer,
+								Math.abs(target.getMinY()) + hBuffer));
 				ip.setColor(colour);
 
 				// Draw the border

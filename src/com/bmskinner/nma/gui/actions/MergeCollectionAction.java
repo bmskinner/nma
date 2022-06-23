@@ -41,6 +41,7 @@ import com.bmskinner.nma.gui.events.UserActionController;
 import com.bmskinner.nma.gui.events.UserActionEvent;
 import com.bmskinner.nma.io.Io;
 import com.bmskinner.nma.logging.Loggable;
+import com.bmskinner.nma.utility.FileUtils;
 
 /**
  * Carry out a merge of datasets
@@ -71,7 +72,7 @@ public class MergeCollectionAction extends MultiDatasetResultAction {
 
 		// Try to find a sensible ancestor dir of the datasets
 		// Otherwise default to the home dir
-		File dir = IAnalysisDataset.commonPathOfFiles(datasets);
+		File dir = FileUtils.commonPathOfDatasets(datasets);
 		if (!dir.exists() || !dir.isDirectory())
 			dir = GlobalOptions.getInstance().getDefaultDir();
 

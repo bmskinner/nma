@@ -34,6 +34,7 @@ import com.bmskinner.nma.components.options.IAnalysisOptions;
 import com.bmskinner.nma.core.GlobalOptions;
 import com.bmskinner.nma.io.Io;
 import com.bmskinner.nma.io.Io.Importer;
+import com.bmskinner.nma.utility.FileUtils;
 
 /**
  * Provides methods for selecting import and export files
@@ -84,7 +85,7 @@ public class FileSelector {
 			dir = datasets.get(0).getSavePath().getParentFile();
 			defaultName = datasets.get(0).getName() + "_" + suffix + Io.TAB_FILE_EXTENSION;
 		} else {
-			dir = IAnalysisDataset.commonPathOfFiles(datasets);
+			dir = FileUtils.commonPathOfDatasets(datasets);
 
 			if (!dir.exists() || !dir.isDirectory()) {
 				dir = GlobalOptions.getInstance().getDefaultDir();
@@ -281,7 +282,7 @@ public class FileSelector {
 
 		} else {
 			fileName = "Workspace" + Importer.WRK_FILE_EXTENSION;
-			dir = IAnalysisDataset.commonPathOfFiles(datasets);
+			dir = FileUtils.commonPathOfDatasets(datasets);
 			if (!dir.exists() || !dir.isDirectory()) {
 				dir = new File(System.getProperty("user.home"));
 			}

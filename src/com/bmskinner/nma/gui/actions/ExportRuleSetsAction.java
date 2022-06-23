@@ -14,6 +14,7 @@ import com.bmskinner.nma.core.ThreadManager;
 import com.bmskinner.nma.gui.ProgressBarAcceptor;
 import com.bmskinner.nma.io.Io;
 import com.bmskinner.nma.io.XMLWriter;
+import com.bmskinner.nma.utility.FileUtils;
 
 /**
  * Action to export ruleset collections as XML
@@ -37,7 +38,7 @@ public class ExportRuleSetsAction extends MultiDatasetResultAction {
 	public void run() {
 		setProgressBarIndeterminate();
 		try {
-			File folder = is.requestFolder(IAnalysisDataset.commonPathOfFiles(datasets));
+			File folder = is.requestFolder(FileUtils.commonPathOfDatasets(datasets));
 
 			if (datasets.size() == 1) {
 
