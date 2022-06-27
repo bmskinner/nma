@@ -321,8 +321,8 @@
 
 
 			<!--Take screenshots. The screenshotter is a test class, and will create 
-				the required sample datasets. Full tests can be run
-				by including the test/RunAllTests suite. -->
+				the required sample datasets. Full tests can be run by including the test/RunAllTests 
+				suite. -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
@@ -330,7 +330,7 @@
 				<configuration>
 					<includes>
 						<include>com.bmskinner.nma.MakeScreenshots</include>
-<!-- 						<include>com.bmskinner.nma.RunAllTests</include> -->
+						<!-- <include>com.bmskinner.nma.RunAllTests</include> -->
 					</includes>
 				</configuration>
 			</plugin>
@@ -422,10 +422,10 @@
 			<artifactId>MorphoLibJ_</artifactId>
 			<version>1.3.2</version>
 		</dependency>
-		
-		<!--Not available in Maven Central - download from  https://sourceforge.net/projects/jebl/
-			and add to maven with:
-			mvn install:install-file -Dfile="/path/to/jebl-0.4.jar" -DgroupId=jebl -DartifactId=jebl -Dversion=0.4 -Dpackaging=jar -DlocalRepositoryPath="path/to/local/maven/repo"-->
+
+		<!--Not available in Maven Central - download from https://sourceforge.net/projects/jebl/ 
+			and add to maven with: mvn install:install-file -Dfile="/path/to/jebl-0.4.jar" 
+			-DgroupId=jebl -DartifactId=jebl -Dversion=0.4 -Dpackaging=jar -DlocalRepositoryPath="path/to/local/maven/repo" -->
 		<dependency>
 			<groupId>jebl</groupId>
 			<artifactId>jebl</artifactId>
@@ -512,6 +512,41 @@
 			<artifactId>maven-jar-plugin</artifactId>
 			<version>3.2.2</version>
 		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.apache.xmlgraphics/batik-transcoder 
+			Exclusions required to avoid duplication of xml apis -->
+		<dependency>
+			<groupId>org.apache.xmlgraphics</groupId>
+			<artifactId>batik-transcoder</artifactId>
+			<version>1.14</version>
+			<exclusions>
+				<exclusion>
+					<groupId>xml-apis</groupId>
+					<artifactId>xml-apis</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>java.xml</groupId>
+					<artifactId>java.xml</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<!-- Missing dependency from batik required for PNG transcoder -->
+		<dependency>
+			<groupId>org.apache.xmlgraphics</groupId>
+			<artifactId>batik-codec</artifactId>
+			<version>1.7</version>
+			<exclusions>
+				<exclusion>
+					<groupId>xml-apis</groupId>
+					<artifactId>xml-apis</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>java.xml</groupId>
+					<artifactId>java.xml</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
 	</dependencies>
 	<name>Nuclear Morphology Analysis</name>
 	<url>https://bitbucket.org/bmskinner/nuclear_morphology/wiki/Home</url>

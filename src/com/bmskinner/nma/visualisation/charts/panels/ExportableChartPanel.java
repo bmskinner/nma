@@ -17,8 +17,6 @@
 package com.bmskinner.nma.visualisation.charts.panels;
 
 import java.awt.Component;
-import java.awt.Graphics;
-import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
@@ -27,12 +25,15 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.io.StringReader;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -40,9 +41,15 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Logger;
 
+import javax.imageio.ImageIO;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 
+import org.apache.batik.transcoder.SVGAbstractTranscoder;
+import org.apache.batik.transcoder.TranscoderException;
+import org.apache.batik.transcoder.TranscoderInput;
+import org.apache.batik.transcoder.TranscoderOutput;
+import org.apache.batik.transcoder.image.PNGTranscoder;
 import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -88,9 +95,11 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 
 	private static final Logger LOGGER = Logger.getLogger(ExportableChartPanel.class.getName());
 
-	private static final double DEFAULT_SCREEN_DPI = 96;
+	private static final double DEFAULT_SCREEN_DPI = 100;
 	private static final double DEFAULT_EXPORT_DPI = 300;
 	private static final double DPI_SCALE = DEFAULT_SCREEN_DPI / DEFAULT_EXPORT_DPI;
+
+	private static final float PIXEL_SCALE_300_DPI = 0.084672f;
 
 	private static final String EXPORT_LBL = "Export data";
 
@@ -494,28 +503,51 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 
 			try (OutputStream os = new FileOutputStream(file)) {
 
-				int w_px = (int) (w * DPI_SCALE);
-				int h_px = (int) (h * DPI_SCALE);
-
-				BufferedImage bufferedImage = getChart().createBufferedImage(w_px, h_px, null);
-
-				Image scaled = bufferedImage.getScaledInstance(w, h, Image.SCALE_SMOOTH);
-
-				BufferedImage bi = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
-				Graphics bg = bi.getGraphics();
-				bg.drawImage(scaled, 0, 0, null);
-				bg.dispose();
+				BufferedImage bi = createPNG(w, h);
 
 				EncoderUtil.writeBufferedImage(bi, ImageFormat.PNG, os);
+				LOGGER.info("Chart saved as '" + file.getName() + "'");
 
 			} catch (IOException e) {
-				LOGGER.fine("Unable to export chart as png");
+				LOGGER.log(Loggable.STACK, "Unable to save chart as png", e);
+			} catch (TranscoderException e) {
+				LOGGER.log(Loggable.STACK, "Unable to transcode chart to png", e);
 			}
 
 		} catch (RequestCancelledException e) {
 			// User cancelled, no action
 		}
 
+	}
+
+	private BufferedImage createPNG(int w, int h) throws TranscoderException, IOException {
+//		int w_px = (int) (w * DPI_SCALE);
+//		int h_px = (int) (h * DPI_SCALE);
+//
+//		BufferedImage bufferedImage = getChart().createBufferedImage(w_px, h_px, null);
+//
+//		Image scaled = bufferedImage.getScaledInstance(w, h, Image.SCALE_SMOOTH);
+//
+//		BufferedImage bi = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
+//		Graphics bg = bi.getGraphics();
+//		bg.drawImage(scaled, 0, 0, null);
+//		bg.dispose();
+//		return bi;
+
+		String svg = createSVG(w, h);
+		return convertSVGToPNG(svg, w);
+	}
+
+	private String createSVG(int w, int h) {
+		int w_px = (int) (w * DPI_SCALE);
+		int h_px = (int) (h * DPI_SCALE);
+
+		JFreeChart chart = this.getChart();
+		SVGGraphics2D g2 = new SVGGraphics2D(w_px, h_px, SVGUnits.PX);
+
+		Rectangle r = new Rectangle(0, 0, w_px, h_px);
+		chart.draw(g2, r);
+		return g2.getSVGDocument();
 	}
 
 	/**
@@ -526,14 +558,6 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 	 */
 	private void exportSVG(int w, int h) {
 
-		int w_px = (int) (w * DPI_SCALE);
-		int h_px = (int) (h * DPI_SCALE);
-
-		JFreeChart chart = this.getChart();
-		SVGGraphics2D g2 = new SVGGraphics2D(w_px, h_px, SVGUnits.PX);
-
-		Rectangle r = new Rectangle(0, 0, w_px, h_px);
-		chart.draw(g2, r);
 		try {
 			File file = new DefaultInputSupplier().requestFileSave(
 					FileUtils.commonPathOfDatasets(
@@ -544,7 +568,10 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 					&& !new DefaultInputSupplier().requestApproval("File exists. Overwrite?",
 							"Overwrite existing file?"))
 				return;
-			SVGUtils.writeToSVG(file, g2.getSVGElement());
+
+			String svg = createSVG(w, h);
+
+			SVGUtils.writeToSVG(file, svg);
 			LOGGER.info("Chart saved as '" + file.getName() + "'");
 
 		} catch (RequestCancelledException e) {
@@ -552,7 +579,26 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 		} catch (IOException e) {
 			LOGGER.fine("Unable to export chart");
 		}
+	}
 
+	private static BufferedImage convertSVGToPNG(String svg, int wPixels)
+			throws TranscoderException, IOException {
+
+		TranscoderInput transcoderInput = new TranscoderInput(new StringReader(svg));
+
+		ByteArrayOutputStream resultByteStream = new ByteArrayOutputStream();
+
+		TranscoderOutput transcoderOutput = new TranscoderOutput(resultByteStream);
+
+		PNGTranscoder pngTranscoder = new PNGTranscoder();
+		pngTranscoder.addTranscodingHint(SVGAbstractTranscoder.KEY_WIDTH, (float) wPixels);
+		pngTranscoder.addTranscodingHint(SVGAbstractTranscoder.KEY_PIXEL_UNIT_TO_MILLIMETER,
+				PIXEL_SCALE_300_DPI);
+		pngTranscoder.transcode(transcoderInput, transcoderOutput);
+
+		resultByteStream.flush();
+
+		return ImageIO.read(new ByteArrayInputStream(resultByteStream.toByteArray()));
 	}
 
 	private String getHeatMapData() throws ClassCastException {
