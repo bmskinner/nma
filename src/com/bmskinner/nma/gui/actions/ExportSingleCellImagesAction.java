@@ -3,12 +3,16 @@ package com.bmskinner.nma.gui.actions;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.GridBagLayout;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JSpinner;
+import javax.swing.SpinnerNumberModel;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -29,6 +33,9 @@ import com.bmskinner.nma.io.CellImageExportMethod;
  *
  */
 public class ExportSingleCellImagesAction extends MultiDatasetResultAction {
+
+	private static final Logger LOGGER = Logger
+			.getLogger(ExportSingleCellImagesAction.class.getName());
 
 	private static final String PROGRESS_LBL = "Exporting single cells";
 
@@ -67,7 +74,8 @@ public class ExportSingleCellImagesAction extends MultiDatasetResultAction {
 		 * @param dataset the dataset
 		 * @param title
 		 */
-		protected CellImageSetupDialog(final @NonNull List<IAnalysisDataset> datasets, final String title) {
+		protected CellImageSetupDialog(final @NonNull List<IAnalysisDataset> datasets,
+				final String title) {
 			super(datasets, title);
 			setDefaults();
 			createUI();
@@ -93,11 +101,60 @@ public class ExportSingleCellImagesAction extends MultiDatasetResultAction {
 			List<Component> fields = new ArrayList<>();
 
 			JCheckBox maskBox = new JCheckBox();
-			maskBox.setSelected(o.getBoolean(CellImageExportMethod.MASK_BACKGROUND));
-			maskBox.addActionListener(e -> o.setBoolean(CellImageExportMethod.MASK_BACKGROUND, maskBox.isSelected()));
+			maskBox.setSelected(o.getBoolean(CellImageExportMethod.MASK_BACKGROUND_KEY));
+			maskBox.addActionListener(
+					e -> o.setBoolean(CellImageExportMethod.MASK_BACKGROUND_KEY,
+							maskBox.isSelected()));
 
 			labels.add(new JLabel("Mask background"));
 			fields.add(maskBox);
+
+			JCheckBox rgbBox = new JCheckBox();
+			rgbBox.setSelected(
+					o.getBoolean(CellImageExportMethod.SINGLE_CELL_IMAGE_IS_RGB_KEY));
+			rgbBox.addActionListener(
+					e -> o.setBoolean(CellImageExportMethod.SINGLE_CELL_IMAGE_IS_RGB_KEY,
+							rgbBox.isSelected()));
+			labels.add(new JLabel("Export all channels"));
+			fields.add(rgbBox);
+
+			// Set normalised image size
+			JSpinner sizeSelector = new JSpinner(
+					new SpinnerNumberModel(CellImageExportMethod.SINGLE_CELL_IMAGE_WIDTH_DEFAULT,
+							50, 10000, 1));
+			sizeSelector.setEnabled(
+					o.getBoolean(CellImageExportMethod.SINGLE_CELL_IMAGE_IS_NORMALISE_WIDTH_KEY));
+			sizeSelector.addChangeListener(e -> {
+				try {
+					sizeSelector.commitEdit();
+					o.setInt(CellImageExportMethod.SINGLE_CELL_IMAGE_WIDTH_KEY,
+							(int) sizeSelector.getValue());
+				} catch (ParseException e1) {
+					LOGGER.warning("Error setting size value: " + e1.getMessage());
+				}
+			});
+
+			// Should image size be normalised
+			JCheckBox sizeBox = new JCheckBox();
+			sizeBox.setSelected(o.getBoolean(
+					CellImageExportMethod.SINGLE_CELL_IMAGE_IS_NORMALISE_WIDTH_KEY));
+
+			sizeBox.addActionListener(e -> {
+				o.setBoolean(
+						CellImageExportMethod.SINGLE_CELL_IMAGE_IS_NORMALISE_WIDTH_KEY,
+						sizeBox.isSelected());
+				sizeSelector.setEnabled(sizeBox.isSelected());
+				if (sizeBox.isSelected()) {
+					o.setInt(CellImageExportMethod.SINGLE_CELL_IMAGE_WIDTH_KEY,
+							(int) sizeSelector.getValue());
+				}
+			});
+
+			labels.add(new JLabel("Fixed size image"));
+			fields.add(sizeBox);
+
+			labels.add(new JLabel("Image size (pixels)"));
+			fields.add(sizeSelector);
 
 			this.addLabelTextRows(labels, fields, layout, optionsPanel);
 
@@ -106,7 +163,14 @@ public class ExportSingleCellImagesAction extends MultiDatasetResultAction {
 
 		@Override
 		protected void setDefaults() {
-			o.setBoolean(CellImageExportMethod.MASK_BACKGROUND, CellImageExportMethod.DEAULT_MASK_BACKGROUND);
+			o.setBoolean(CellImageExportMethod.MASK_BACKGROUND_KEY,
+					CellImageExportMethod.MASK_BACKGROUND_DEFAULT);
+			o.setBoolean(CellImageExportMethod.SINGLE_CELL_IMAGE_IS_RGB_KEY,
+					CellImageExportMethod.SINGLE_CELL_IMAGE_IS_RGB_DEFAULT);
+			o.setBoolean(CellImageExportMethod.SINGLE_CELL_IMAGE_IS_NORMALISE_WIDTH_KEY,
+					CellImageExportMethod.SINGLE_CELL_IMAGE_IS_NORMALISE_WIDTH_DEFAULT);
+			o.setInt(CellImageExportMethod.SINGLE_CELL_IMAGE_WIDTH_KEY,
+					CellImageExportMethod.SINGLE_CELL_IMAGE_WIDTH_DEFAULT);
 		}
 
 		@Override
