@@ -49,7 +49,7 @@ public class SegmentMergeMethod extends SingleDatasetAnalysisMethod {
 	 * @param seg0Id  the first segment to merge
 	 * @param seg1Id  the second segment to merge
 	 */
-	public SegmentMergeMethod(IAnalysisDataset dataset, @NonNull UUID seg0Id,
+	public SegmentMergeMethod(@NonNull IAnalysisDataset dataset, @NonNull UUID seg0Id,
 			@NonNull UUID seg1Id) {
 		this(dataset, seg0Id, seg1Id, null);
 	}
@@ -62,7 +62,7 @@ public class SegmentMergeMethod extends SingleDatasetAnalysisMethod {
 	 * @param seg1Id  the second segment to merge
 	 * @param newId   the id of the segment to create
 	 */
-	public SegmentMergeMethod(IAnalysisDataset dataset, @NonNull UUID seg0Id,
+	public SegmentMergeMethod(@NonNull IAnalysisDataset dataset, @NonNull UUID seg0Id,
 			@NonNull UUID seg1Id, @Nullable UUID newId) {
 		super(dataset);
 		this.seg0Id = seg0Id;

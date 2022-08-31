@@ -131,17 +131,24 @@ public class DefaultProfileSegment implements IProfileSegment {
 	}
 
 	public DefaultProfileSegment(Element e) {
-		uuid = UUID.fromString(e.getAttributeValue("id"));
-		startIndex = Integer.parseInt(e.getAttributeValue("start"));
-		endIndex = Integer.parseInt(e.getAttributeValue("end"));
-		totalLength = Integer.parseInt(e.getAttributeValue("total"));
 
-		isLocked = e.getAttributeValue("lock") != null;
+		try {
+			uuid = UUID.fromString(e.getAttributeValue("id"));
+			startIndex = Integer.parseInt(e.getAttributeValue("start"));
+			endIndex = Integer.parseInt(e.getAttributeValue("end"));
+			totalLength = Integer.parseInt(e.getAttributeValue("total"));
 
-		List<Element> merges = e.getChildren("MergeSource");
-		if (!merges.isEmpty()) {
-			mergeSourceA = new DefaultProfileSegment(merges.get(0));
-			mergeSourceB = new DefaultProfileSegment(merges.get(1));
+			isLocked = e.getAttributeValue("lock") != null;
+
+			List<Element> merges = e.getChildren("MergeSource");
+			if (!merges.isEmpty()) {
+				mergeSourceA = new DefaultProfileSegment(merges.get(0).getChild("Segment"));
+				mergeSourceB = new DefaultProfileSegment(merges.get(1).getChild("Segment"));
+			}
+		} catch (NumberFormatException | NullPointerException e1) {
+			LOGGER.warning("Unable to parse segment XML: " + e1.getMessage());
+			LOGGER.fine(e.toString());
+			throw e1;
 		}
 
 		if (totalLength <= 0)
