@@ -104,7 +104,7 @@ public class ShellDetectorTest {
      * @throws UnloadableImageException
      */
     private static ImageProcessor drawShells(CellularComponent template, ShellDetector sd) throws UnloadableImageException{
-    	ImageProcessor ip = ImageImporter.importFullImageTo24bit(template);
+    	ImageProcessor ip = ImageImporter.importFullImageTo24bitGreyscale(template);
     	
     	ip.setLineWidth(2);
     	List<Shell> shells = sd.getShells();

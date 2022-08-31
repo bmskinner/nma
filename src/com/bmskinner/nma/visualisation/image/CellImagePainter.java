@@ -220,14 +220,14 @@ public class CellImagePainter implements ImagePainter {
 		try {
 
 			if (!isOriented) {
-				BufferedImage input = ImageImporter.importCroppedImageTo24bit(cell, component)
+				BufferedImage input = ImageImporter.importCroppedImageTo24bitGreyscale(cell, component)
 						.getBufferedImage();
 				originalWidth = input.getWidth();
 				originalHeight = input.getHeight();
 				return scalePreservingAspect(input, w, h);
 			}
 
-			BufferedImage input = ImageImporter.importFullImageTo24bit(cell.getPrimaryNucleus())
+			BufferedImage input = ImageImporter.importFullImageTo24bitGreyscale(cell.getPrimaryNucleus())
 					.getBufferedImage();
 			originalWidth = input.getWidth();
 			originalHeight = input.getHeight();
@@ -269,7 +269,7 @@ public class CellImagePainter implements ImagePainter {
 			return scalePreservingAspect(copyOfImage, w, h);
 		} catch (Exception e) {
 			LOGGER.log(Level.SEVERE, "Unable to paint: " + e.getMessage(), e);
-			BufferedImage input = ImageImporter.importCroppedImageTo24bit(cell, component)
+			BufferedImage input = ImageImporter.importCroppedImageTo24bitGreyscale(cell, component)
 					.getBufferedImage();
 			originalWidth = input.getWidth();
 			originalHeight = input.getHeight();

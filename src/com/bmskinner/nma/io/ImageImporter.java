@@ -43,377 +43,431 @@ import ij.process.ImageProcessor;
  *
  */
 public class ImageImporter implements Importer {
-	
+
 	private static final Logger LOGGER = Logger.getLogger(ImageImporter.class.getName());
-	
+
 	private static final String SOURCE_IMAGE_IS_NOT_AVAILABLE = "Source image is not available";
 
-    private static final int[] IMAGE_TYPES_PROCESSED = { ImagePlus.GRAY8, ImagePlus.COLOR_RGB, ImagePlus.GRAY16 };
+	private static final int[] IMAGE_TYPES_PROCESSED = { ImagePlus.GRAY8, ImagePlus.COLOR_RGB,
+			ImagePlus.GRAY16 };
 
-    // The file types that the program will try to open
-    protected static final String[] IMPORTABLE_FILE_TYPES = { ".tif", ".tiff", ".jpg" };
+	// The file types that the program will try to open
+	protected static final String[] IMPORTABLE_FILE_TYPES = { ".tif", ".tiff", ".jpg" };
 
-    // The prefix to use when exporting images
-    public static final String IMAGE_PREFIX = "export.";
+	// The prefix to use when exporting images
+	public static final String IMAGE_PREFIX = "export.";
 
-    // Images with these prefixes are ignored by the image importer
-    protected static final String[] PREFIXES_TO_IGNORE = { IMAGE_PREFIX, "composite", "plot", "._" };
+	// Images with these prefixes are ignored by the image importer
+	protected static final String[] PREFIXES_TO_IGNORE = { IMAGE_PREFIX, "composite", "plot",
+			"._" };
 
-    // RGB colour channels
-    public static final int RGB_RED   = 0;
-    public static final int RGB_GREEN = 1;
-    public static final int RGB_BLUE  = 2;
+	// RGB colour channels
+	public static final int RGB_RED = 0;
+	public static final int RGB_GREEN = 1;
+	public static final int RGB_BLUE = 2;
 
-    // imported images - stack positions
-    public static final int COUNTERSTAIN         = 1; // ImageStack slices are
-                                                      // numbered from 1; first
-                                                      // slice is blue
-    public static final int FIRST_SIGNAL_CHANNEL = 2; // ImageStack slices are
-                                                      // numbered from 1; first
-                                                      // slice is blue
+	// imported images - stack positions
+	public static final int COUNTERSTAIN = 1; // ImageStack slices are
+												// numbered from 1; first
+												// slice is blue
+	public static final int FIRST_SIGNAL_CHANNEL = 2; // ImageStack slices are
+														// numbered from 1; first
+														// slice is blue
 
-    private static final int EIGHT_BIT = 8;
-    
-    private final File f;
+	private static final int EIGHT_BIT = 8;
 
-    /**
-     * Construct from a file. Checks that the given File object is valid, and
-     * throws an IllegalArgumentException if not.
-     * 
-     * @param f the file to import
-     */
-    public ImageImporter(final File f) {
-        if (!Importer.isSuitableImportFile(f)) 
-            throw new IllegalArgumentException(f.getAbsolutePath() + ": " + Importer.whyIsUnsuitableImportFile(f));
-        this.f = f;
-    }
-    
-    /**
-     * Get the image for the given cellular component,
-     * and crop it to the bounds of the given cell. If the 
-     * image cannot be imported, a white colour processor
-     * is returned of sufficient dimensions to contain the 
-     * cell.
-     * @param cell
-     * @param c
-     * @return
-     */
-    public static ImageProcessor importCroppedImageTo24bit(@NonNull ICell cell, @NonNull CellularComponent c) {
-    	ImageProcessor ip = importFullImageTo24bit(c);
+	private final File f;
+
+	/**
+	 * Construct from a file. Checks that the given File object is valid, and throws
+	 * an IllegalArgumentException if not.
+	 * 
+	 * @param f the file to import
+	 */
+	public ImageImporter(final File f) {
+		if (!Importer.isSuitableImportFile(f))
+			throw new IllegalArgumentException(
+					f.getAbsolutePath() + ": " + Importer.whyIsUnsuitableImportFile(f));
+		this.f = f;
+	}
+
+	/**
+	 * Get the image for the given cellular component, and crop it to the bounds of
+	 * the given cell. If the image cannot be imported, a white colour processor is
+	 * returned of sufficient dimensions to contain the cell.
+	 * 
+	 * @param cell
+	 * @param c
+	 * @return
+	 */
+	public static ImageProcessor importCroppedImageTo24bitGreyscale(@NonNull ICell cell,
+			@NonNull CellularComponent c) {
+		ImageProcessor ip = importFullImageTo24bitGreyscale(c);
 		return AbstractImageFilterer.crop(ip, cell);
-    }
-    
-    /**
-     * Get the image for the given cellular component. If the 
-     * image cannot be imported, a white colour processor
-     * is returned of sufficient dimensions to contain the 
-     * component. The 8-bit image is converted to 24bit RGB to
-     * allow coloured annotations. The image is then cropped to 
-     * the bounds of the component.
-     * @param c the component to import
-     * @return an RGB greyscale image cropped to the component
-     */
-    public static ImageProcessor importCroppedImageTo24bit(@NonNull CellularComponent c) {
-    	ImageProcessor ip = importFullImageTo24bit(c);
-        return AbstractImageFilterer.crop(ip, c);
-    }
-    
-    /**
-     * Get the image for the given cellular component. If the 
-     * image cannot be imported, a white colour processor
-     * is returned of sufficient dimensions to contain the 
-     * component. The 8-bit image is converted to 24bit RGB to
-     * allow coloured annotations. No cropping is performed
-     * @param c the component to import
-     * @return an RGB greyscale image containing the component
-     */
-    public static ImageProcessor importFullImageTo24bit(@NonNull CellularComponent c) {
-        if (!c.getSourceFile().exists()) {
-        	return AbstractImageFilterer.createWhiteColorProcessor(
-					(int)c.getMaxX()+Imageable.COMPONENT_BUFFER, 
-					(int)c.getMaxY()+Imageable.COMPONENT_BUFFER);
-        }
-        try {
-        	ImageProcessor ip = new ImageImporter(c.getSourceFile()).importImage(c.getChannel());
-        	return new ImageConverter(ip).convertToRGBGreyscale().invert().toProcessor();
-        } catch (ImageImportException e) {
-        	return AbstractImageFilterer.createWhiteColorProcessor(
-					(int)c.getMaxX()+Imageable.COMPONENT_BUFFER, 
-					(int)c.getMaxY()+Imageable.COMPONENT_BUFFER);
+	}
+
+	/**
+	 * Get the image for the given cellular component. If the image cannot be
+	 * imported, a white colour processor is returned of sufficient dimensions to
+	 * contain the component. The 8-bit image is converted to 24bit RGB to allow
+	 * coloured annotations. The image is then cropped to the bounds of the
+	 * component.
+	 * 
+	 * @param c the component to import
+	 * @return an RGB greyscale image cropped to the component
+	 */
+	public static ImageProcessor importCroppedImageTo24bitGreyscale(@NonNull CellularComponent c) {
+		ImageProcessor ip = importFullImageTo24bitGreyscale(c);
+		return AbstractImageFilterer.crop(ip, c);
+	}
+
+	/**
+	 * Get the image for the given cellular component. If the image cannot be
+	 * imported, a white colour processor is returned of sufficient dimensions to
+	 * contain the component. All RGB channels are imported. The image is then
+	 * cropped to the bounds of the component.
+	 * 
+	 * @param c the component to import
+	 * @return an RGB image cropped to the bounds of the component
+	 */
+	public static ImageProcessor importCroppedImageTo24bitRGB(@NonNull CellularComponent c) {
+		ImageProcessor ip = importFullImageTo24bitRGB(c);
+		return AbstractImageFilterer.crop(ip, c);
+	}
+
+	/**
+	 * Get the image for the given cellular component. If the image cannot be
+	 * imported, a white colour processor is returned of sufficient dimensions to
+	 * contain the component. The 8-bit image is converted to 24bit RGB to allow
+	 * coloured annotations. No cropping is performed
+	 * 
+	 * @param c the component to import
+	 * @return an RGB greyscale image containing the component
+	 */
+	public static ImageProcessor importFullImageTo24bitGreyscale(@NonNull CellularComponent c) {
+		if (!c.getSourceFile().exists()) {
+			return AbstractImageFilterer.createWhiteColorProcessor(
+					(int) c.getMaxX() + Imageable.COMPONENT_BUFFER,
+					(int) c.getMaxY() + Imageable.COMPONENT_BUFFER);
 		}
-    }
-        
-    /**
-     * Get the image from which the component was detected. Opens the image and fetches
-     * the appropriate channel. This will return the 8-bit greyscale image used for
-     * object detection.
-     * 
-     * @return an 8-bit greyscale image
-     * @throws UnloadableImageException if the image can't be loaded
-     */
-    public static ImageProcessor importFullImageTo8bit(@NonNull CellularComponent c) throws UnloadableImageException {
-    	if (!c.getSourceFile().exists())
-            throw new UnloadableImageException("Source image is not available: "+c.getSourceFile().getAbsolutePath());
+		try {
+			ImageProcessor ip = new ImageImporter(c.getSourceFile()).importImage(c.getChannel());
+			return new ImageConverter(ip).convertToRGBGreyscale().invert().toProcessor();
+		} catch (ImageImportException e) {
+			return AbstractImageFilterer.createWhiteColorProcessor(
+					(int) c.getMaxX() + Imageable.COMPONENT_BUFFER,
+					(int) c.getMaxY() + Imageable.COMPONENT_BUFFER);
+		}
+	}
 
-        // Get the stack, make greyscale and invert
-        int stack = ImageImporter.rgbToStack(c.getChannel());
+	/**
+	 * Get the image for the given cellular component. If the image cannot be
+	 * imported, a white colour processor is returned of sufficient dimensions to
+	 * contain the component. All RGB channels are imported.
+	 * 
+	 * @param c the component to import
+	 * @return an RGB image containing the component
+	 */
+	public static ImageProcessor importFullImageTo24bitRGB(@NonNull CellularComponent c) {
+		if (!c.getSourceFile().exists()) {
+			return AbstractImageFilterer.createWhiteColorProcessor(
+					(int) c.getMaxX() + Imageable.COMPONENT_BUFFER,
+					(int) c.getMaxY() + Imageable.COMPONENT_BUFFER);
+		}
 
-        try {
-            ImageStack imageStack = new ImageImporter(c.getSourceFile()).importToStack();
-            return imageStack.getProcessor(stack);
-        } catch (ImageImportException e) {
-            LOGGER.log(Loggable.STACK, "Error importing source image " + c.getSourceFile().getAbsolutePath(), e);
-            throw new UnloadableImageException(SOURCE_IMAGE_IS_NOT_AVAILABLE);
-        }
-    }
-    
-    /**
-     * Get the image from which the component was detected. Opens the image and fetches
-     * the appropriate channel. This will return the 8-bit greyscale image used for
-     * object detection. The image is then cropped to the component bounds.
-     * 
-     * @return an 8-bit greyscale image cropped to the component bounds
-     * @throws UnloadableImageException if the image can't be loaded
-     */
-    public static ImageProcessor importCroppedImageTo8bit(@NonNull CellularComponent c) throws UnloadableImageException {
-        ImageProcessor ip = importFullImageTo8bit(c);
-        return AbstractImageFilterer.crop(ip, c);
-    }
+		return importFileTo24bit(c.getSourceFile());
+	}
 
-    /**
-     * Checks that the given file is suitable for analysis. Is the file an
-     * image. Also check if it is in the 'banned list'. These are prefixes that
-     * are attached to exported images at later stages of analysis. This
-     * prevents exported images from previous runs being analysed.
-     *
-     * @param file the File to check
-     * @return a true or false of whether the file passed checks
-     */
-    public static boolean fileIsImportable(File file) {
-    	if(file==null)
-    		return false;
-        if (!file.isFile())
-            return false;
-        String fileName = file.getName();
+	/**
+	 * Get the image from which the component was detected. Opens the image and
+	 * fetches the appropriate channel. This will return the 8-bit greyscale image
+	 * used for object detection.
+	 * 
+	 * @return an 8-bit greyscale image
+	 * @throws UnloadableImageException if the image can't be loaded
+	 */
+	public static ImageProcessor importFullImageTo8bit(@NonNull CellularComponent c)
+			throws UnloadableImageException {
+		if (!c.getSourceFile().exists())
+			throw new UnloadableImageException(
+					"Source image is not available: " + c.getSourceFile().getAbsolutePath());
 
-        for (String prefix : PREFIXES_TO_IGNORE) 
-            if (fileName.startsWith(prefix))
-                return false;
-        
-        for (String fileType : IMPORTABLE_FILE_TYPES)
-            if (fileName.endsWith(fileType))
-                return true;
-        
-        return false;
-    }
+		// Get the stack, make greyscale and invert
+		int stack = ImageImporter.rgbToStack(c.getChannel());
 
-    /**
-     * Given an RGB channel, get the ImageStack stack for internal use
-     * 
-     * @param channel the channel
-     * @return the stack
-     */
-    public static int rgbToStack(int channel) {
-        if (channel < 0)
-            throw new IllegalArgumentException(CHANNEL_BELOW_ZERO_ERROR);
-        
-        switch(channel) {
-	        case RGB_RED: return FIRST_SIGNAL_CHANNEL;
-	        case RGB_GREEN: return FIRST_SIGNAL_CHANNEL+1;
-	        default: return COUNTERSTAIN;
-        }
-    }
+		try {
+			ImageStack imageStack = new ImageImporter(c.getSourceFile()).importToStack();
+			return imageStack.getProcessor(stack);
+		} catch (ImageImportException e) {
+			LOGGER.log(Loggable.STACK,
+					"Error importing source image " + c.getSourceFile().getAbsolutePath(), e);
+			throw new UnloadableImageException(SOURCE_IMAGE_IS_NOT_AVAILABLE);
+		}
+	}
 
-    /**
-     * Given a channel integer, return the name of the channel. Handles red (0),
-     * green (1) and blue(2). Other ints will return a null string.
-     * 
-     * @param channel
-     * @return
-     */
-    public static String channelIntToName(int channel) {
-        if (channel < 0)
-            throw new IllegalArgumentException(CHANNEL_BELOW_ZERO_ERROR);
+	/**
+	 * Get the image from which the component was detected. Opens the image and
+	 * fetches the appropriate channel. This will return the 8-bit greyscale image
+	 * used for object detection. The image is then cropped to the component bounds.
+	 * 
+	 * @return an 8-bit greyscale image cropped to the component bounds
+	 * @throws UnloadableImageException if the image can't be loaded
+	 */
+	public static ImageProcessor importCroppedImageTo8bit(@NonNull CellularComponent c)
+			throws UnloadableImageException {
+		ImageProcessor ip = importFullImageTo8bit(c);
+		return AbstractImageFilterer.crop(ip, c);
+	}
 
-        switch(channel) {
-        	case RGB_RED:   return "Red";
-        	case RGB_GREEN: return "Green";
-        	case RGB_BLUE:  return "Blue";
-        	default:        return "Octarine";
-        }
-    }
+	/**
+	 * Checks that the given file is suitable for analysis. Is the file an image.
+	 * Also check if it is in the 'banned list'. These are prefixes that are
+	 * attached to exported images at later stages of analysis. This prevents
+	 * exported images from previous runs being analysed.
+	 *
+	 * @param file the File to check
+	 * @return a true or false of whether the file passed checks
+	 */
+	public static boolean fileIsImportable(File file) {
+		if (file == null)
+			return false;
+		if (!file.isFile())
+			return false;
+		String fileName = file.getName();
 
-    /**
-     * Import and convert the image in the given file to an ImageStack
-     * 
-     * @return the ImageStack
-     */
-    public ImageStack importToStack() throws ImageImportException {
+		for (String prefix : PREFIXES_TO_IGNORE)
+			if (fileName.startsWith(prefix))
+				return false;
 
-        ImagePlus image = new ImagePlus(f.getAbsolutePath());
+		for (String fileType : IMPORTABLE_FILE_TYPES)
+			if (fileName.endsWith(fileType))
+				return true;
 
-        ImageStack stack = convertToStack(image);
-        image.close();
-        return stack;
-    }
+		return false;
+	}
 
-    /**
-     * Import and convert the image in the given file to a ColorProcessor
-     * 
-     * @return the processor
-     */
-    public static ImageProcessor importFileTo24bit(@NonNull File f) {
-    	return new ImagePlus(f.getAbsolutePath()).getProcessor();
-    }
+	/**
+	 * Given an RGB channel, get the ImageStack stack for internal use
+	 * 
+	 * @param channel the channel
+	 * @return the stack
+	 */
+	public static int rgbToStack(int channel) {
+		if (channel < 0)
+			throw new IllegalArgumentException(CHANNEL_BELOW_ZERO_ERROR);
 
-    /**
-     * Import the image in the defined file as a stack, and return an image
-     * converter
-     * 
-     * @return
-     * @throws ImageImportException
-     */
-    public ImageConverter toConverter() throws ImageImportException {
-    	ImageProcessor ip = importFileTo24bit(f);
-        return new ImageConverter(ip);
-    }
+		switch (channel) {
+		case RGB_RED:
+			return FIRST_SIGNAL_CHANNEL;
+		case RGB_GREEN:
+			return FIRST_SIGNAL_CHANNEL + 1;
+		default:
+			return COUNTERSTAIN;
+		}
+	}
 
-    /**
-     * Import the image in the given file, and return an image processor for the
-     * channel requested. Inverts the greyscale image.
-     * 
-     * @param channel
-     * @return
-     */
-    public ImageProcessor importImageAndInvert(int channel) throws ImageImportException {
-    	ImageProcessor ip = importImage(channel);
-    	ip.invert();
-    	return ip;
-    }
-    
-    /**
-     * Import the image in the given file, and return an image processor for the
-     * channel requested.  
-     * @param channel
-     * @return
-     */
-    public ImageProcessor importImage(int channel) throws ImageImportException {
-        ImageStack s = importToStack();
-        int stack = rgbToStack(channel);
-        if(stack>s.getSize())
-        	throw new ImageImportException(f.getAbsolutePath()+" has only "+s.getSize()+" slices; trying to fetch slice "+stack);
-        return s.getProcessor(stack);
-    }
-    
+	/**
+	 * Given a channel integer, return the name of the channel. Handles red (0),
+	 * green (1) and blue(2). Other ints will return a null string.
+	 * 
+	 * @param channel
+	 * @return
+	 */
+	public static String channelIntToName(int channel) {
+		if (channel < 0)
+			throw new IllegalArgumentException(CHANNEL_BELOW_ZERO_ERROR);
 
-    /**
-     * Test if the given image can be read by this program
-     * 
-     * @param image
-     * @return
-     */
-    private boolean isImportable(@NonNull ImagePlus image) {
-        for (int i : IMAGE_TYPES_PROCESSED)
-            if (i == image.getType())
-                return true;
-        return false;
-    }
+		switch (channel) {
+		case RGB_RED:
+			return "Red";
+		case RGB_GREEN:
+			return "Green";
+		case RGB_BLUE:
+			return "Blue";
+		default:
+			return "Octarine";
+		}
+	}
 
-    /**
-     * Create an ImageStack from the input image
-     * 
-     * @param image the image to be converted to a stack
-     * @return the stack with counterstain in slice 1, and other channels following 
-     */
-    private ImageStack convertToStack(@NonNull ImagePlus image) throws ImageImportException {
-        if (!isImportable(image))
-            throw new ImageImportException("Cannot handle image type: " + image.getType());
+	/**
+	 * Import and convert the image in the given file to an ImageStack
+	 * 
+	 * @return the ImageStack
+	 */
+	public ImageStack importToStack() throws ImageImportException {
 
-        switch (image.getType()) {
-	        case ImagePlus.GRAY8:     return convert8bitToStack(image);
-	        case ImagePlus.COLOR_RGB: return convert24bitToStack(image);
-	        case ImagePlus.GRAY16:    return convert16bitTo8bit(image);
-	
-	        default: { // Should never occur given the test in isImportable(), but shows intent
-	            throw new ImageImportException("Unsupported image type: " + image.getType());
-	        }
-        }
-    }
+		ImagePlus image = new ImagePlus(f.getAbsolutePath());
 
-    /**
-     * @param image the image to convert
-     * @return a stack with the input image as position 0
-     */
-    private ImageStack convert8bitToStack(@NonNull final ImagePlus image) {
-    	if(image==null)
-    		throw new IllegalArgumentException("Image cannot be null");
-        ImageStack result = ImageStack.create(image.getWidth(), image.getHeight(), 0, EIGHT_BIT);
-        result.addSlice("counterstain", image.getProcessor());
-        result.deleteSlice(1); // remove the blank first slice
-        return result;
-    }
+		ImageStack stack = convertToStack(image);
+		image.close();
+		return stack;
+	}
 
-    /**
-     * Given an RGB image, convert it to a stack, with the blue channel first
-     * 
-     * @param image the image to convert to a stack
-     * @return the stack
-     */
-    private ImageStack convert24bitToStack(@NonNull final ImagePlus image) {
-    	
-        int imageDepth = 0; // number of images in the stack to begin
-        int bitDepth = 8; // default 8 bit images
+	/**
+	 * Import and convert the image in the given file to a ColorProcessor
+	 * 
+	 * @return the processor
+	 */
+	public static ImageProcessor importFileTo24bit(@NonNull File f) {
+		return new ImagePlus(f.getAbsolutePath()).getProcessor();
+	}
 
-        // Create a new empty stack. There will be a blank image in the
-        // stack at index 1. NB stacks do not use zero indexing.
-        ImageStack result = ImageStack.create(image.getWidth(), image.getHeight(), imageDepth, bitDepth);
+	/**
+	 * Import the image in the defined file as a stack, and return an image
+	 * converter
+	 * 
+	 * @return
+	 * @throws ImageImportException
+	 */
+	public ImageConverter toConverter() throws ImageImportException {
+		ImageProcessor ip = importFileTo24bit(f);
+		return new ImageConverter(ip);
+	}
 
-        // split out colour channel
-        ImagePlus[] channels = ChannelSplitter.split(image);
+	/**
+	 * Import the image in the given file, and return an image processor for the
+	 * channel requested. Inverts the greyscale image.
+	 * 
+	 * @param channel
+	 * @return
+	 */
+	public ImageProcessor importImageAndInvert(int channel) throws ImageImportException {
+		ImageProcessor ip = importImage(channel);
+		ip.invert();
+		return ip;
+	}
 
-        // Put each channel into the correct stack position
-        result.addSlice("counterstain", channels[RGB_BLUE].getProcessor());
-        result.addSlice(channels[RGB_RED].getProcessor());
-        result.addSlice(channels[RGB_GREEN].getProcessor());
-        result.deleteSlice(1); // remove the blank first slice
-        return result;
-    }
+	/**
+	 * Import the image in the given file, and return an image processor for the
+	 * channel requested.
+	 * 
+	 * @param channel
+	 * @return
+	 */
+	public ImageProcessor importImage(int channel) throws ImageImportException {
+		ImageStack s = importToStack();
+		int stack = rgbToStack(channel);
+		if (stack > s.getSize())
+			throw new ImageImportException(f.getAbsolutePath() + " has only " + s.getSize()
+					+ " slices; trying to fetch slice " + stack);
+		return s.getProcessor(stack);
+	}
 
-    /**
-     * Convert a 16 bit greyscale image. For now, this just down converts to an
-     * 8 bit image.
-     * 
-     * @param image the 16 bit image to convert
-     * @return the stack
-     */
-    private ImageStack convert16bitTo8bit(ImagePlus image) {
-        // this is the ij.process.ImageConverter, not my
-        // analysis.image.ImageConverter
-    	ij.process.ImageConverter converter = new ij.process.ImageConverter(image);
-        converter.convertToGray8();
-        return convert8bitToStack(image);
-    }
+	/**
+	 * Test if the given image can be read by this program
+	 * 
+	 * @param image
+	 * @return
+	 */
+	private boolean isImportable(@NonNull ImagePlus image) {
+		for (int i : IMAGE_TYPES_PROCESSED)
+			if (i == image.getType())
+				return true;
+		return false;
+	}
 
-    /**
-     * Thrown when a conversion fails or a file is not convertible
-     * 
-     * @author ben
-     *
-     */
-    public class ImageImportException extends Exception {
-        private static final long serialVersionUID = 1L;
+	/**
+	 * Create an ImageStack from the input image
+	 * 
+	 * @param image the image to be converted to a stack
+	 * @return the stack with counterstain in slice 1, and other channels following
+	 */
+	private ImageStack convertToStack(@NonNull ImagePlus image) throws ImageImportException {
+		if (!isImportable(image))
+			throw new ImageImportException("Cannot handle image type: " + image.getType());
 
-        public ImageImportException() {
-            super();
-        }
-        public ImageImportException(String message) {
-            super(message);
-        }
-        public ImageImportException(String message, Throwable cause) {
-            super(message, cause);
-        }
-        public ImageImportException(Throwable cause) {
-            super(cause);
-        }
-    }
+		switch (image.getType()) {
+		case ImagePlus.GRAY8:
+			return convert8bitToStack(image);
+		case ImagePlus.COLOR_RGB:
+			return convert24bitToStack(image);
+		case ImagePlus.GRAY16:
+			return convert16bitTo8bit(image);
+
+		default: { // Should never occur given the test in isImportable(), but shows intent
+			throw new ImageImportException("Unsupported image type: " + image.getType());
+		}
+		}
+	}
+
+	/**
+	 * @param image the image to convert
+	 * @return a stack with the input image as position 0
+	 */
+	private ImageStack convert8bitToStack(@NonNull final ImagePlus image) {
+		if (image == null)
+			throw new IllegalArgumentException("Image cannot be null");
+		ImageStack result = ImageStack.create(image.getWidth(), image.getHeight(), 0, EIGHT_BIT);
+		result.addSlice("counterstain", image.getProcessor());
+		result.deleteSlice(1); // remove the blank first slice
+		return result;
+	}
+
+	/**
+	 * Given an RGB image, convert it to a stack, with the blue channel first
+	 * 
+	 * @param image the image to convert to a stack
+	 * @return the stack
+	 */
+	private ImageStack convert24bitToStack(@NonNull final ImagePlus image) {
+
+		int imageDepth = 0; // number of images in the stack to begin
+		int bitDepth = 8; // default 8 bit images
+
+		// Create a new empty stack. There will be a blank image in the
+		// stack at index 1. NB stacks do not use zero indexing.
+		ImageStack result = ImageStack.create(image.getWidth(), image.getHeight(), imageDepth,
+				bitDepth);
+
+		// split out colour channel
+		ImagePlus[] channels = ChannelSplitter.split(image);
+
+		// Put each channel into the correct stack position
+		result.addSlice("counterstain", channels[RGB_BLUE].getProcessor());
+		result.addSlice(channels[RGB_RED].getProcessor());
+		result.addSlice(channels[RGB_GREEN].getProcessor());
+		result.deleteSlice(1); // remove the blank first slice
+		return result;
+	}
+
+	/**
+	 * Convert a 16 bit greyscale image. For now, this just down converts to an 8
+	 * bit image.
+	 * 
+	 * @param image the 16 bit image to convert
+	 * @return the stack
+	 */
+	private ImageStack convert16bitTo8bit(ImagePlus image) {
+		// this is the ij.process.ImageConverter, not my
+		// analysis.image.ImageConverter
+		ij.process.ImageConverter converter = new ij.process.ImageConverter(image);
+		converter.convertToGray8();
+		return convert8bitToStack(image);
+	}
+
+	/**
+	 * Thrown when a conversion fails or a file is not convertible
+	 * 
+	 * @author ben
+	 *
+	 */
+	public class ImageImportException extends Exception {
+		private static final long serialVersionUID = 1L;
+
+		public ImageImportException() {
+			super();
+		}
+
+		public ImageImportException(String message) {
+			super(message);
+		}
+
+		public ImageImportException(String message, Throwable cause) {
+			super(message, cause);
+		}
+
+		public ImageImportException(Throwable cause) {
+			super(cause);
+		}
+	}
 }

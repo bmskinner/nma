@@ -25,11 +25,10 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
+import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.cells.ICell;
 import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.io.ImageImporter;
-import com.bmskinner.nma.io.UnloadableImageException;
-import com.bmskinner.nma.logging.Loggable;
 import com.bmskinner.nma.visualisation.image.ImageAnnotator;
 import com.bmskinner.nma.visualisation.image.ImageFilterer;
 
@@ -77,26 +76,43 @@ public class AnnotatedNucleusPanel extends JPanel {
 	/**
 	 * Display the given cell cropped
 	 * 
-	 * @param c
+	 * @param c           the cell to display
+	 * @param isAnnotated if true, draw the cell border or nuclear segments
+	 * @param isRGB       if true, import the RGB image of the cell, otherwise
+	 *                    import the nucleus image channel as 24bit greyscale
 	 * @throws Exception
 	 */
-	public void showOnlyCell(ICell c, boolean annotated) throws Exception {
+	public void showOnlyCell(ICell c, boolean isAnnotated, boolean isRGB) throws Exception {
 		this.cell = c;
 		ImageProcessor ip;
 
-		try {
-			if (c.hasCytoplasm()) {
-				ip = ImageImporter.importCroppedImageTo24bit(c.getCytoplasm());
-			} else {
-				ip = ImageImporter.importCroppedImageTo8bit(c.getPrimaryNucleus());
-			}
+		CellularComponent component = c.hasCytoplasm() ? c.getCytoplasm() : c.getPrimaryNucleus();
 
-		} catch (UnloadableImageException e) {
-			LOGGER.log(Loggable.STACK, "Cannot load image for component", e);
-			return;
+		if (isRGB) {
+			ip = ImageImporter.importCroppedImageTo24bitRGB(component);
+		} else {
+			ip = ImageImporter.importCroppedImageTo24bitGreyscale(component);
 		}
 
-		if (annotated) {
+//	try
+//
+//	{
+//		if (c.hasCytoplasm()) {
+//			ip = ImageImporter.importCroppedImageTo24bitGreyscale(c.getCytoplasm());
+//		} else {
+//			ip = ImageImporter.importCroppedImageTo8bit(c.getPrimaryNucleus());
+//		}
+//
+//	}catch(
+//	UnloadableImageException e)
+//	{
+//		LOGGER.log(Loggable.STACK, "Cannot load image for component", e);
+//		return;
+//	}
+
+		if (isAnnotated)
+
+		{
 
 			ImageAnnotator an = new ImageAnnotator(ip);
 			if (c.hasCytoplasm()) {
@@ -127,8 +143,8 @@ public class AnnotatedNucleusPanel extends JPanel {
 		}
 
 		ImageProcessor openProcessor = useRGB
-				? ImageImporter.importCroppedImageTo24bit(cell.getCytoplasm())
-				: ImageImporter.importCroppedImageTo24bit(cell.getPrimaryNucleus());
+				? ImageImporter.importCroppedImageTo24bitGreyscale(cell.getCytoplasm())
+				: ImageImporter.importCroppedImageTo24bitGreyscale(cell.getPrimaryNucleus());
 
 		ImageAnnotator an = new ImageAnnotator(openProcessor);
 

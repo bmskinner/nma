@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JPanel;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -73,6 +74,7 @@ public class ClusterManualAction extends SingleDatasetResultAction {
 	private class ManualClusteringDialog extends SubAnalysisSetupDialog {
 
 		private AnnotatedNucleusPanel panel;
+		private JCheckBox isRGBBox = new JCheckBox("All channels");
 
 		public class ManualGroup {
 
@@ -126,9 +128,13 @@ public class ClusterManualAction extends SingleDatasetResultAction {
 
 		@Override
 		protected void createUI() {
-			this.panel = new AnnotatedNucleusPanel(true);
-			openCell(0);
 			this.setLayout(new BorderLayout());
+			this.panel = new AnnotatedNucleusPanel(true);
+			openCell(cellNumber);
+
+			this.add(isRGBBox, BorderLayout.NORTH);
+			isRGBBox.addChangeListener(e -> openCell(cellNumber)); // reopen on toggle
+
 			this.add(panel, BorderLayout.CENTER);
 			this.add(createGroupPanel(clusterNames), BorderLayout.SOUTH);
 		}
@@ -219,7 +225,7 @@ public class ClusterManualAction extends SingleDatasetResultAction {
 			ICell c = cells.get(i);
 			try {
 				boolean annotateCellImage = false;
-				panel.showOnlyCell(c, annotateCellImage);
+				panel.showOnlyCell(c, annotateCellImage, isRGBBox.isSelected());
 			} catch (Exception e) {
 				LOGGER.fine("Error displaying cell in manual clustering: " + e.getMessage());
 			}

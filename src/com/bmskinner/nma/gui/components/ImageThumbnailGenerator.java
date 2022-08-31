@@ -101,7 +101,7 @@ public class ImageThumbnailGenerator implements ChartMouseListener {
 		Color nucleusColour = Color.WHITE;
 		Color signalColour = Color.ORANGE;
 
-		ImageProcessor ip = ImageImporter.importFullImageTo24bit(n);
+		ImageProcessor ip = ImageImporter.importFullImageTo24bitGreyscale(n);
 
 		ImageAnnotator an = new ImageAnnotator(ip).drawBorder(n, nucleusColour).drawBorder(ns,
 				signalColour);
@@ -131,7 +131,7 @@ public class ImageThumbnailGenerator implements ChartMouseListener {
 		String labelText = n.getNameAndNumber();
 
 		Color annotationColour = Color.WHITE;
-		ImageProcessor ip = ImageImporter.importFullImageTo24bit(n);
+		ImageProcessor ip = ImageImporter.importFullImageTo24bitGreyscale(n);
 
 		ImageAnnotator an = new ImageAnnotator(ip).drawBorder(n, annotationColour);
 		an.crop(n);

@@ -225,7 +225,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 							options.firstDataset().getCollection().getConsensus(), mesh1);
 
 					ImageProcessor nucleusIP = ImageImporter
-							.importFullImageTo24bit(options.getComponent().get(0));
+							.importFullImageTo24bitGreyscale(options.getComponent().get(0));
 
 					// Create a mesh image from the nucleus
 					MeshImage im = new DefaultMeshImage(mesh1, nucleusIP);

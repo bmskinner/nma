@@ -148,9 +148,9 @@ public class ShellOverviewDialog extends AbstractCellCollectionDialog {
 		ImageProcessor ip;
 
 		if (c.hasCytoplasm()) {
-			ip = ImageImporter.importFullImageTo24bit(c.getCytoplasm());
+			ip = ImageImporter.importFullImageTo24bitGreyscale(c.getCytoplasm());
 		} else {
-			ip = ImageImporter.importFullImageTo24bit(c.getPrimaryNucleus());
+			ip = ImageImporter.importFullImageTo24bitGreyscale(c.getPrimaryNucleus());
 		}
 
 		if (!dataset.getCollection().getSignalManager().hasShellResult())

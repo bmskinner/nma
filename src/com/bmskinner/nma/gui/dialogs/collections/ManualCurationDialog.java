@@ -297,7 +297,7 @@ public class ManualCurationDialog extends AbstractCellCollectionDialog {
 		private ImageProcessor importCytoplasm(ICell c) throws UnloadableImageException {
 			if (!c.hasCytoplasm())
 				return ImageFilterer.createWhiteColorProcessor(ROW_IMAGE_HEIGHT, ROW_IMAGE_HEIGHT);
-			ImageProcessor ip = ImageImporter.importCroppedImageTo24bit(c.getCytoplasm());
+			ImageProcessor ip = ImageImporter.importCroppedImageTo24bitGreyscale(c.getCytoplasm());
 			ImageAnnotator an = new ImageAnnotator(ip);
 			an = an.annotateBorder(c.getCytoplasm(), c.getCytoplasm(), Color.CYAN);
 			for (Nucleus n : c.getNuclei()) {
@@ -309,7 +309,7 @@ public class ManualCurationDialog extends AbstractCellCollectionDialog {
 		}
 
 		private ImageProcessor importNucleus(ICell c) throws UnloadableImageException {
-			ImageProcessor ip = ImageImporter.importFullImageTo24bit(c.getPrimaryNucleus());
+			ImageProcessor ip = ImageImporter.importFullImageTo24bitGreyscale(c.getPrimaryNucleus());
 			ImageAnnotator an = new ImageAnnotator(ip);
 			for (Nucleus n : c.getNuclei()) {
 				an = an.drawSegments(n);

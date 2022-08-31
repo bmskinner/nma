@@ -44,7 +44,7 @@ public class WarpedCellPainter implements ImagePainter {
 
 	@Override
 	public BufferedImage paintRaw(int w, int h) {
-		ImageProcessor ip = ImageImporter.importFullImageTo24bit(cell.getPrimaryNucleus());
+		ImageProcessor ip = ImageImporter.importFullImageTo24bitGreyscale(cell.getPrimaryNucleus());
 		try {
 			Mesh consensusMesh = new DefaultMesh(dataset.getCollection().getConsensus());
 			for(Nucleus n : cell.getNuclei()) {
