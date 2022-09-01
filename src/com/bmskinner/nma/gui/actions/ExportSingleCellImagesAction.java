@@ -149,12 +149,24 @@ public class ExportSingleCellImagesAction extends MultiDatasetResultAction {
 							(int) sizeSelector.getValue());
 				}
 			});
+			
+			
+			JCheckBox keypointBox = new JCheckBox();
+			keypointBox.setSelected(o.getBoolean(
+					CellImageExportMethod.SINGLE_CELL_IMAGE_IS_EXPORT_KEYPOINTS_KEY));
+			keypointBox.addActionListener(
+					e -> o.setBoolean(CellImageExportMethod.SINGLE_CELL_IMAGE_IS_EXPORT_KEYPOINTS_KEY,
+							keypointBox.isSelected()));
+			
 
 			labels.add(new JLabel("Fixed size image"));
 			fields.add(sizeBox);
 
 			labels.add(new JLabel("Image size (pixels)"));
 			fields.add(sizeSelector);
+			
+			labels.add(new JLabel("Export keypoints"));
+			fields.add(keypointBox);
 
 			this.addLabelTextRows(labels, fields, layout, optionsPanel);
 
@@ -171,6 +183,8 @@ public class ExportSingleCellImagesAction extends MultiDatasetResultAction {
 					CellImageExportMethod.SINGLE_CELL_IMAGE_IS_NORMALISE_WIDTH_DEFAULT);
 			o.setInt(CellImageExportMethod.SINGLE_CELL_IMAGE_WIDTH_KEY,
 					CellImageExportMethod.SINGLE_CELL_IMAGE_WIDTH_DEFAULT);
+			o.setBoolean(CellImageExportMethod.SINGLE_CELL_IMAGE_IS_EXPORT_KEYPOINTS_KEY, 
+					CellImageExportMethod.SINGLE_CELL_IMAGE_IS_EXPORT_KEYPOINTS_DEFAULT);
 		}
 
 		@Override
