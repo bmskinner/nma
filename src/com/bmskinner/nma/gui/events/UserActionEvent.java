@@ -46,6 +46,7 @@ public class UserActionEvent extends EventObject {
 	public static final String EXPORT_OPTIONS = "ExportOptionsAction";
 	public static final String EXPORT_RULESETS = "ExportRulesetsAction";
 	public static final String EXPORT_SINGLE_CELL_IMAGES = "ExportSingleCellImagesAction";
+	public static final String EXPORT_KEYPOINTS = "ExportKeypointsAction";
 
 	public static final String CHANGE_SCALE = "ChangeScaleAction";
 	public static final String RELOCATE_CELLS = "RelocateCellsAction";

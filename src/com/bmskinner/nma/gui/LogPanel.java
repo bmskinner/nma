@@ -330,6 +330,7 @@ public class LogPanel extends DetailPanel implements ProgressBarAcceptor {
 		private static final String HELP_CMD = "help";
 		private static final String CLEAR_CMD = "clear";
 		private static final String GLCM_CMD = "glcm";
+		private static final String KEYPOINT_CMD = "keypoints";
 		private static final String LIST_CMD = "list";
 		private static final String KILL_CMD = "kill";
 		private static final String TASKS_CMD = "tasks";
@@ -402,6 +403,11 @@ public class LogPanel extends DetailPanel implements ProgressBarAcceptor {
 					() -> UserActionController.getInstance()
 							.userActionEventReceived(new UserActionEvent(this,
 									UserActionEvent.RUN_GLCM_ANALYSIS,
+									DatasetListManager.getInstance().getSelectedDatasets())));
+			runnableCommands.put(KEYPOINT_CMD,
+					() -> UserActionController.getInstance()
+							.userActionEventReceived(new UserActionEvent(this,
+									UserActionEvent.EXPORT_KEYPOINTS,
 									DatasetListManager.getInstance().getSelectedDatasets())));
 		}
 

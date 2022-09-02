@@ -39,6 +39,7 @@ import com.bmskinner.nma.gui.actions.CreateConsensusAction;
 import com.bmskinner.nma.gui.actions.DatasetScaleChangeAction;
 import com.bmskinner.nma.gui.actions.ExportCellLocationsAction;
 import com.bmskinner.nma.gui.actions.ExportDatasetAction;
+import com.bmskinner.nma.gui.actions.ExportKeypointsAction;
 import com.bmskinner.nma.gui.actions.ExportOptionsAction;
 import com.bmskinner.nma.gui.actions.ExportRuleSetsAction;
 import com.bmskinner.nma.gui.actions.ExportSingleCellImagesAction;
@@ -203,6 +204,9 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 
 		if (event.type().equals(UserActionEvent.EXPORT_SINGLE_CELL_IMAGES))
 			return new ExportSingleCellImagesAction(event.getDatasets(), acceptor);
+
+		if (event.type().equals(UserActionEvent.EXPORT_KEYPOINTS))
+			return new ExportKeypointsAction(event.getDatasets(), acceptor);
 
 		if (event.type().equals(UserActionEvent.MERGE_DATASETS_ACTION))
 			return new MergeCollectionAction(event.getDatasets(),
