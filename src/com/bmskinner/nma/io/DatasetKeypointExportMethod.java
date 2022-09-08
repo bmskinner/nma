@@ -33,6 +33,9 @@ public class DatasetKeypointExportMethod extends MultipleDatasetAnalysisMethod i
 
 	private File outputFolder;
 
+	/**
+	 * Options are kept for future use even if not used at present
+	 */
 	private final HashOptions options;
 
 	/**
@@ -102,13 +105,6 @@ public class DatasetKeypointExportMethod extends MultipleDatasetAnalysisMethod i
 					bb.add("[%s, %s, %s, %s]".formatted(p1.getXAsInt(), p1.getYAsInt(), x2, y2));
 					kk.add("[[%s, %s, 1], [%s, %s, 1]]".formatted(rp.getXAsInt(), rp.getYAsInt(),
 							op.getXAsInt(), op.getYAsInt()));
-
-//					return """
-//							{"bboxes":[[%s, %s, %s, %s]], "keypoints":[[[%s, %s, 1], [%s, %s, 1]]]}
-//							""".formatted(p1.getXAsInt(), p1.getYAsInt(), x2, y2, rp.getXAsInt(),
-//							rp.getYAsInt(), op.getXAsInt(),
-//							op.getYAsInt());
-
 				}
 			}
 
