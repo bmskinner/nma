@@ -213,6 +213,7 @@
 										<include>packageDMG.sh</include>
 										<include>uploadFilesToBitbucket.bat</include>
 										<include>renderUserGuide.bat</include>
+										<include>renderUserGuide.sh</include>
 									</includes>
 									<filtering>true</filtering>
 								</resource>
