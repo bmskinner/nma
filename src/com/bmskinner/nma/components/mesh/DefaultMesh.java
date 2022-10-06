@@ -243,9 +243,14 @@ public class DefaultMesh implements Mesh {
 					return f;
 				}
 			}
-			MeshFace f = new DefaultMeshFace(v1, v2, v3);
-			faces.add(f);
-			return f;
+
+			try {
+				MeshFace f = new DefaultMeshFace(v1, v2, v3);
+				faces.add(f);
+				return f;
+			} catch (IllegalArgumentException e) {
+				LOGGER.fine("Mesh face could not be created: " + e.getMessage());
+			}
 
 		}
 		return null;
@@ -345,7 +350,8 @@ public class DefaultMesh implements Mesh {
 		if (!this.isComparableTo(mesh))
 			throw new IllegalArgumentException("Cannot compare meshes");
 
-		LOGGER.finest("Comparing this mesh " + this.getComponentName() + " to " + mesh.getComponentName());
+		LOGGER.finest("Comparing this mesh " + this.getComponentName() + " to "
+				+ mesh.getComponentName());
 		LOGGER.finest("Mesh has " + mesh.getFaceCount() + " faces");
 
 		DefaultMesh result = new DefaultMesh(this);
@@ -439,7 +445,8 @@ public class DefaultMesh implements Mesh {
 		LOGGER.finest("Determining vertex proportions");
 
 		try {
-			List<IProfileSegment> segments = component.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE)
+			List<IProfileSegment> segments = component
+					.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE)
 					.getOrderedSegments();
 
 			for (int segNumber = 0; segNumber < segments.size(); segNumber++) {
@@ -480,7 +487,8 @@ public class DefaultMesh implements Mesh {
 	private void createPeripheralVertices() throws MeshCreationException {
 		LOGGER.finest("Creating peripheral vertices");
 		try {
-			List<IProfileSegment> list = component.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE)
+			List<IProfileSegment> list = component
+					.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE)
 					.getOrderedSegments();
 
 			Set<Integer> segs = segmentVertexProportions.keySet();
@@ -497,7 +505,8 @@ public class DefaultMesh implements Mesh {
 					 * The segment is too small for each vertex to have a separate point. Usually
 					 * caused when mapping a poorly segmented nucleus onto a template mesh.
 					 */
-					throw new IllegalArgumentException("Segment " + segIndex + " is too small to fit mesh");
+					throw new IllegalArgumentException(
+							"Segment " + segIndex + " is too small to fit mesh");
 				}
 
 				// Now go through the segment and take the point at each determined proportion
@@ -509,11 +518,13 @@ public class DefaultMesh implements Mesh {
 					// Since the segments have been offset to the RP, correct back to the actual
 					// nucleus index
 					int correctedIndex = CellularComponent.wrapIndex(
-							index + component.getBorderIndex(OrientationMark.REFERENCE), segment.getProfileLength());
+							index + component.getBorderIndex(OrientationMark.REFERENCE),
+							segment.getProfileLength());
 
 					LOGGER.finest("Fetching point at index " + correctedIndex);
 
-					int vertIndex = addVertex(component.getOriginalBorderPoint(correctedIndex), IS_PERIPERHAL);
+					int vertIndex = addVertex(component.getOriginalBorderPoint(correctedIndex),
+							IS_PERIPERHAL);
 
 					// Add the vertex to the map with the segment.
 					MeshVertex v = peripheralVertices.get(vertIndex);
@@ -669,9 +680,11 @@ public class DefaultMesh implements Mesh {
 			getEdge(peripheralVertices.get(1), internalVertices.get(0));
 			getEdge(peripheralVertices.get(peripheralVertices.size() - 1), internalVertices.get(0));
 
-			this.getFace(peripheralVertices.get(0), peripheralVertices.get(1), internalVertices.get(0));
+			this.getFace(peripheralVertices.get(0), peripheralVertices.get(1),
+					internalVertices.get(0));
 
-			this.getFace(peripheralVertices.get(0), peripheralVertices.get(peripheralVertices.size() - 1),
+			this.getFace(peripheralVertices.get(0),
+					peripheralVertices.get(peripheralVertices.size() - 1),
 					internalVertices.get(0));
 
 			LOGGER.finest("Created top face set");
@@ -709,7 +722,8 @@ public class DefaultMesh implements Mesh {
 //    	faces.stream().filter(f->f.isPeripheral()&&f.getPeripheralVertices().stream().allMatch(v->vertices.contains(v)));
 
 		return edges.stream().filter(e -> {
-			return (vertices.contains(e.getV1())) && (vertices.contains(e.getV2()) || e.getV2().isInternal());
+			return (vertices.contains(e.getV1()))
+					&& (vertices.contains(e.getV2()) || e.getV2().isInternal());
 		}).flatMap(e -> faces.stream().filter(f -> f.contains(e))).collect(Collectors.toSet());
 	}
 

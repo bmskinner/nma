@@ -22,6 +22,7 @@
 
 	<!-- Define custom repositories outside Maven central -->
 	<repositories>
+		<!-- Jitpack allows building of jars direct from e.g. Github -->
 		<repository>
 			<id>jitpack.io</id>
 			<url>https://jitpack.io</url>
@@ -286,15 +287,16 @@
 				</executions>
 			</plugin>
 
-			<!-- Run a script to render the user guide and copy the rendered files 
-				to the target directory so they will be included in the jar. This must occur 
-				after the user guide has been rendered. Requires Rscript and pandoc on the 
-				PATH -->
+			<!-- Execute scripts created from templates -->
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>exec-maven-plugin</artifactId>
 				<version>1.2.1</version>
 				<executions>
+					<!-- Run a script to render the user guide and copy the rendered files 
+						to the target directory so they will be included in the jar. This must occur 
+						after the user guide has been rendered. Requires Rscript and pandoc on the 
+						PATH -->
 					<execution>
 						<id>render-user-guide</id>
 						<phase>prepare-package</phase>
@@ -304,6 +306,20 @@
 						<configuration>
 							<executable>${project.basedir}/scripts/renderUserGuide.bat</executable>
 							<workingDirectory>${project.basedir}/res/user-guide</workingDirectory>
+						</configuration>
+					</execution>
+
+					<!-- Run a script to package the jar into an appimage. Requires jpackage, 
+						jlink and 7z on the PATH -->
+					<execution>
+						<id>make-appimage</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>exec</goal>
+						</goals>
+						<configuration>
+							<executable>${project.basedir}/scripts/packageAppImage.bat</executable>
+							<workingDirectory>${project.basedir}/scripts</workingDirectory>
 						</configuration>
 					</execution>
 				</executions>
@@ -320,9 +336,9 @@
 			</plugin>
 
 
-			<!--Take screenshots. The screenshotter is a test class, and will create 
-				the required sample datasets. Full tests can be run
-				by including the test/RunAllTests suite. -->
+			<!--Take screenshots and run tests. The screenshotter is a test class, 
+				and will create the required sample datasets. Full tests can be run by including 
+				the test/RunAllTests suite. -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
@@ -330,7 +346,7 @@
 				<configuration>
 					<includes>
 						<include>com.bmskinner.nma.MakeScreenshots</include>
-<!-- 						<include>com.bmskinner.nma.RunAllTests</include> -->
+						<include>com.bmskinner.nma.RunAllTests</include>
 					</includes>
 				</configuration>
 			</plugin>
@@ -339,6 +355,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
+				<version>3.3.0</version>
 				<configuration>
 					<archive>
 						<manifestEntries>
@@ -376,27 +393,6 @@
 				</executions>
 			</plugin>
 
-			<!-- Run a script to package the jar into an appimage. Requires jpackage, 
-				jlink and 7z on the PATH -->
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>exec-maven-plugin</artifactId>
-				<version>1.2.1</version>
-				<executions>
-					<execution>
-						<id>make-appimage</id>
-						<phase>verify</phase>
-						<goals>
-							<goal>exec</goal>
-						</goals>
-						<configuration>
-							<executable>${project.basedir}/scripts/packageAppImage.bat</executable>
-							<workingDirectory>${project.basedir}/scripts</workingDirectory>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-
 		</plugins>
 	</build>
 
@@ -417,15 +413,16 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+
 		<dependency>
-			<groupId>fr.inra.ijpb</groupId>
-			<artifactId>MorphoLibJ_</artifactId>
-			<version>1.3.2</version>
+			<groupId>com.github.ijpb</groupId>
+			<artifactId>MorphoLibJ</artifactId>
+			<version>v1.3.2</version>
 		</dependency>
-		
-		<!--Not available in Maven Central - download from  https://sourceforge.net/projects/jebl/
-			and add to maven with:
-			mvn install:install-file -Dfile="/path/to/jebl-0.4.jar" -DgroupId=jebl -DartifactId=jebl -Dversion=0.4 -Dpackaging=jar -DlocalRepositoryPath="path/to/local/maven/repo"-->
+
+		<!--Not available in Maven Central - download from https://sourceforge.net/projects/jebl/ 
+			and add to maven with: mvn install:install-file -Dfile="/path/to/jebl-0.4.jar" 
+			-DgroupId=jebl -DartifactId=jebl -Dversion=0.4 -Dpackaging=jar -DlocalRepositoryPath="path/to/local/maven/repo" -->
 		<dependency>
 			<groupId>jebl</groupId>
 			<artifactId>jebl</artifactId>
