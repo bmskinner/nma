@@ -8,11 +8,3 @@ REM Create windows installer
 jpackage --name "Nuclear Morphology Analysis" --app-version ${project.version} --icon ..\res\icons\icon.ico --input ..\target\standalone --dest ..\target\msi --type msi --description "Morphometric analysis software" --vendor "Ben Skinner" --copyright "Ben Skinner 2015-${build.year}" --win-dir-chooser --win-menu --win-per-user-install --win-menu-group "Nuclear Morphology Analysis" --main-jar ${jar.finalName}_standalone.jar --main-class com.bmskinner.nma.core.NuclearMorphologyAnalysis
 
 copy "..\target\msi\Nuclear Morphology Analysis-${project.version}.msi" "..\target\Nuclear_Morphology_Analysis-${project.version}-windows.msi"
-
-REM Make folder structure for packaging in Linux
-mkdir ..\target\linux
-mkdir ..\target\linux\standalone
-
-REM copy ..\scripts\packageAppImage.sh ..\target\linux\packageAppImage.sh
-copy ..\target\standalone\\${jar.finalName}_standalone.jar ..\target\linux\standalone\\${jar.finalName}_standalone.jar
-Xcopy /E /I "../res" "../target/linux/res"
