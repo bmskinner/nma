@@ -131,6 +131,10 @@ public class LogPanel extends DetailPanel implements ProgressBarAcceptor {
 		this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(
 				KeyStroke.getKeyStroke(KeyEvent.VK_F12, 0),
 				SHOW_CONSOLE_ACTION);
+		// Backup if F12 is mapped to something globally
+		this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_F11, 0),
+				SHOW_CONSOLE_ACTION);
+
 		this.getActionMap().put(SHOW_CONSOLE_ACTION, new ShowConsoleAction());
 		return panel;
 	}
