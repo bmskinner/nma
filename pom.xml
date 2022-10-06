@@ -5,7 +5,7 @@
 	<groupId>com.bmskinner</groupId>
 	<artifactId>nma</artifactId>
 	<version>2.0.0</version>
-
+	
 	<!-- Define custom properties to be exported -->
 	<properties>
 		<project.full.name>Nuclear_Morphology_Analysis</project.full.name>
@@ -19,6 +19,66 @@
 		<project.wiki.directory>wiki</project.wiki.directory>
 		<maven.build.timestamp.format>yyyy</maven.build.timestamp.format>
 	</properties>
+
+	<!-- Define custom properties depending on the OS. This allows a switch 
+		between Windows bat scripts and Linux shell scripts depending on the platform 
+		used to compile -->
+	<profiles>
+		<profile>
+			<id>Windows</id>
+			<activation>
+				<os>
+					<family>Windows</family>
+				</os>
+			</activation>
+			<properties>
+				<script.executor>cmd.exe</script.executor>
+				<script.args>/C</script.args> <!--- 'call' flag to use bat files -->
+				<script.packaging>packageAppImage.bat</script.packaging>
+				<script.rendering>renderUserGuide.bat</script.rendering>
+			</properties>
+		</profile>
+
+		<profile>
+			<id>unix</id>
+			<activation>
+				<os>
+					<family>unix</family>
+					<name>Linux</name>
+				</os>
+			</activation>
+			<properties>
+				<script.executor>bash</script.executor>
+				<script.args></script.args> <!--- intentionally blank, used in Win only -->
+				<script.packaging>packageAppImage.sh</script.packaging>
+				<script.rendering>renderUserGuide.sh</script.rendering>
+			</properties>
+		</profile>
+
+		<profile>
+			<id>mac</id>
+			<activation>
+				<os>
+					<family>mac</family>
+				</os>
+			</activation>
+			<properties>
+				<script.executor>bash</script.executor>
+				<script.args></script.args> <!--- intentionally blank, used in Win only -->
+				<script.packaging>packageDMG.sh</script.packaging>
+				<script.rendering>renderUserGuide.sh</script.rendering>
+			</properties>
+		</profile>
+		<profile>
+			<id>our-default-profile</id>
+			<activation>
+				<property>
+					<name>!unsetDefaultProfile</name>
+				</property>
+			</activation>
+		</profile>
+	</profiles>
+
 
 	<!-- Define custom repositories outside Maven central -->
 	<repositories>
@@ -214,6 +274,7 @@
 										<include>packageDMG.sh</include>
 										<include>uploadFilesToBitbucket.bat</include>
 										<include>renderUserGuide.bat</include>
+										<include>renderUserGuide.sh</include>
 									</includes>
 									<filtering>true</filtering>
 								</resource>
@@ -304,7 +365,8 @@
 							<goal>exec</goal>
 						</goals>
 						<configuration>
-							<executable>${project.basedir}/scripts/renderUserGuide.bat</executable>
+							<executable>${script.executor}</executable>
+							<commandlineArgs>${script.args} ${project.basedir}/scripts/${script.rendering}</commandlineArgs>
 							<workingDirectory>${project.basedir}/res/user-guide</workingDirectory>
 						</configuration>
 					</execution>
@@ -318,7 +380,8 @@
 							<goal>exec</goal>
 						</goals>
 						<configuration>
-							<executable>${project.basedir}/scripts/packageAppImage.bat</executable>
+							<executable>${script.executor}</executable>
+							<commandlineArgs>${script.args} ${script.packaging}</commandlineArgs>
 							<workingDirectory>${project.basedir}/scripts</workingDirectory>
 						</configuration>
 					</execution>
@@ -417,7 +480,7 @@
 		<dependency>
 			<groupId>com.github.ijpb</groupId>
 			<artifactId>MorphoLibJ</artifactId>
-			<version>v1.3.2</version>
+			<version>v1.5.1</version>
 		</dependency>
 
 		<!--Not available in Maven Central - download from https://sourceforge.net/projects/jebl/ 

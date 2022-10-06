@@ -1,2 +1,2 @@
-# Create a dmg to install on MacOS
-jpackage --name "Nuclear Morphology Analysis" --app-version ${jar.finalName} --icon ../res/icons/icon.ico --input ./standalone --dest ./appimage --type dmg --main-jar Nuclear_Morphology_Analysis_${jar.finalName}_standalone.jar --main-class com.bmskinner.nma.core.NuclearMorphologyAnalysis
+# Create a dmg installer on MacOS
+jpackage --name "Nuclear Morphology Analysis" --app-version ${project.version} --icon ${project.basedir}/res/icons/icon.png --input ${project.basedir}/target/standalone --dest .${project.basedir}/target --type dmg --main-jar Nuclear_Morphology_Analysis_${jar.finalName}_standalone.jar --main-class com.bmskinner.nma.core.NuclearMorphologyAnalysis
