@@ -12,7 +12,10 @@ res/screens/*
 scripts/*
 target/*
 wiki/*
-test/samples/*
+test/samples/datasets/*
+test/samples/images/*
+*.nmd
+*.bak
 
 # Non-project related files
 maven.bat
