@@ -9,7 +9,9 @@ bin/*
 doc/*
 res/user-guide/*
 res/screens/*
-scripts/*
+scripts/package*
+scripts/render*
+scripts/upload*
 target/*
 wiki/*
 test/samples/datasets/*

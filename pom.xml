@@ -36,6 +36,7 @@
 				<script.args>/C</script.args> <!--- 'call' flag to use bat files -->
 				<script.packaging>packageAppImage.bat</script.packaging>
 				<script.rendering>renderUserGuide.bat</script.rendering>
+				<script.dependencies>installDependencies.bat</script.dependencies>
 			</properties>
 		</profile>
 
@@ -52,6 +53,7 @@
 				<script.args></script.args> <!--- intentionally blank, used in Win only -->
 				<script.packaging>packageAppImage.sh</script.packaging>
 				<script.rendering>renderUserGuide.sh</script.rendering>
+				<script.dependencies>installDependencies.sh</script.dependencies>
 			</properties>
 		</profile>
 
@@ -67,6 +69,7 @@
 				<script.args></script.args> <!--- intentionally blank, used in Win only -->
 				<script.packaging>packageDMG.sh</script.packaging>
 				<script.rendering>renderUserGuide.sh</script.rendering>
+				<script.dependencies>installDependencies.sh</script.dependencies>
 			</properties>
 		</profile>
 		<profile>
@@ -354,6 +357,22 @@
 				<artifactId>exec-maven-plugin</artifactId>
 				<version>1.2.1</version>
 				<executions>
+				
+				<!-- Run a script to download dependency jars that are not available in Maven Central
+				or other repos -->
+					<execution>
+						<id>install-dependencies</id>
+						<phase>initialize</phase>
+						<goals>
+							<goal>exec</goal>
+						</goals>
+						<configuration>
+							<executable>${script.executor}</executable>
+							<commandlineArgs>${script.args} ${project.basedir}/scripts/${script.dependencies}</commandlineArgs>
+							<workingDirectory>${project.basedir}</workingDirectory>
+						</configuration>
+					</execution>
+				
 					<!-- Run a script to render the user guide and copy the rendered files 
 						to the target directory so they will be included in the jar. This must occur 
 						after the user guide has been rendered. Requires Rscript and pandoc on the 
