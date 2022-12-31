@@ -42,6 +42,8 @@ public class LogPanelFormatter extends Formatter {
         StringBuilder buffer = new StringBuilder();
 
         String date = calcDate(record.getMillis());
+        
+        String formattedMsg = formatMessage(record);
 
         buffer.append(date);
         buffer.append(" ");
@@ -59,7 +61,7 @@ public class LogPanelFormatter extends Formatter {
             buffer.append(" ");
             buffer.append(t.getClass().getSimpleName());
             buffer.append(": ");
-            buffer.append(t.getMessage());
+            buffer.append(formattedMsg);
             buffer.append(NEWLINE);
         }
         return buffer.toString();
