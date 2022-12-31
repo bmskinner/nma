@@ -22,6 +22,7 @@ import java.awt.FlowLayout;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.JButton;
@@ -97,7 +98,8 @@ public abstract class AbstractScatterPanel extends DetailPanel {
 
 	protected JButton gateButton;
 
-	protected JComboBox<Measurement> statABox, statBBox;
+	protected JComboBox<Measurement> statABox;
+	protected JComboBox<Measurement> statBBox;
 	protected String component;
 
 	protected AbstractScatterPanel(String component) {
@@ -182,7 +184,7 @@ public abstract class AbstractScatterPanel extends DetailPanel {
 			super();
 
 			this.setLayout(new BorderLayout());
-			JFreeChart chart = ScatterChartFactory.createEmptyChart();
+			JFreeChart chart = AbstractChartFactory.createEmptyChart();
 
 			chartPanel = new ExportableChartPanel(chart);
 			chartPanel.getChartRenderingInfo().setEntityCollection(null);
@@ -224,8 +226,7 @@ public abstract class AbstractScatterPanel extends DetailPanel {
 			if (result == 0)
 				return;
 
-			LOGGER.finer("Filtering datasets on " + statABox.getSelectedItem().toString() + " and "
-					+ statBBox.getSelectedItem().toString());
+			LOGGER.log(Level.FINER, "Filtering datasets on {0} and {1}", new Object[] {statABox.getSelectedItem(),  statBBox.getSelectedItem() });
 
 			MeasurementScale scale = GlobalOptions.getInstance().getScale();
 
@@ -262,12 +263,11 @@ public abstract class AbstractScatterPanel extends DetailPanel {
 					UIController.getInstance().fireDatasetAdded(child);
 				} catch (CollectionFilteringException | ProfileException | MissingProfileException
 						| MissingLandmarkException e1) {
-					LOGGER.log(Loggable.STACK, "Unable to filter collection for " + d.getName(),
-							e1);
+					LOGGER.log(Loggable.STACK, e1, ()->"Unable to filter collection for {0} " + d.getName());
 				}
 			}
 
-			LOGGER.info(String.format("Filtered datasets by %s and %s", statA, statB));
+			LOGGER.log(Level.INFO, "Filtered datasets by {0} and {1}", new Object[] {statA, statB});
 		}
 
 		@Override
@@ -318,7 +318,7 @@ public abstract class AbstractScatterPanel extends DetailPanel {
 
 		@Override
 		public void colourUpdated(IAnalysisDataset dataset) {
-			refreshCache(dataset);
+			super.refreshCache(dataset);
 		}
 
 		@Override
@@ -356,7 +356,7 @@ public abstract class AbstractScatterPanel extends DetailPanel {
 
 			JPanel panel = new JPanel(new BorderLayout());
 
-			TableModel model = AnalysisDatasetTableCreator.createBlankTable();
+			TableModel model = AbstractTableCreator.createBlankTable();
 			rhoTable = new ExportableTable(model);
 			rhoTable.setEnabled(false);
 

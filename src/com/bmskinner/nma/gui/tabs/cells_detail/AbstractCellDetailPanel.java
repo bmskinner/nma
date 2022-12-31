@@ -28,7 +28,7 @@ public abstract class AbstractCellDetailPanel extends DetailPanel
 	private static final Logger LOGGER = Logger.getLogger(AbstractCellDetailPanel.class.getName());
 	private CellViewModel model;
 
-	public AbstractCellDetailPanel(final CellViewModel model, String title) {
+	protected AbstractCellDetailPanel(final CellViewModel model, String title) {
 		super(title);
 		this.model = model;
 	}

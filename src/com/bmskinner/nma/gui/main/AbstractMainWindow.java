@@ -20,6 +20,7 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowStateListener;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.JFrame;
@@ -68,9 +69,7 @@ public abstract class AbstractMainWindow extends JFrame implements MainView {
 
 		// Add a listener for panel size changes. This will cause
 		// charts to redraw at the new aspect ratio rather than stretch.
-		this.addWindowStateListener(new WindowStateListener() {
-			@Override
-			public void windowStateChanged(WindowEvent e) {
+		this.addWindowStateListener((e) -> {
 
 				Runnable r = () -> {
 					try {
@@ -79,6 +78,8 @@ public abstract class AbstractMainWindow extends JFrame implements MainView {
 						// ratio
 						Thread.sleep(100);
 					} catch (InterruptedException e1) {
+						LOGGER.log(Level.WARNING, "Error in window state listener", e1);
+						Thread.currentThread().interrupt();
 						return;
 					}
 					for (TabPanel d : detailPanels)
@@ -86,17 +87,12 @@ public abstract class AbstractMainWindow extends JFrame implements MainView {
 				};
 				ThreadManager.getInstance().submit(r);
 
-			}
+			
 		});
 
 		this.setDropTarget(new MainDragAndDropTarget());
 	}
 
 	protected abstract void createUI();
-
-	@Override
-	public void dispose() {
-		super.dispose();
-	}
 
 }

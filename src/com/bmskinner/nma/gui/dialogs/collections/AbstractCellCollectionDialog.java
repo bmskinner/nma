@@ -27,6 +27,7 @@ import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
+import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableCellRenderer;
 
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
@@ -61,7 +62,7 @@ public abstract class AbstractCellCollectionDialog extends LoadingIconDialog imp
      * Construct with a dataset to display
      * @param dataset
      */
-    public AbstractCellCollectionDialog(IAnalysisDataset dataset) {
+    protected AbstractCellCollectionDialog(IAnalysisDataset dataset) {
         super();
         this.dataset = dataset;
 
@@ -152,9 +153,9 @@ public abstract class AbstractCellCollectionDialog extends LoadingIconDialog imp
 
             SelectableCellIcon info = (SelectableCellIcon) value;
             setIcon(info);
-            setHorizontalAlignment(JLabel.CENTER);
-            setHorizontalTextPosition(JLabel.CENTER);
-            setVerticalTextPosition(JLabel.BOTTOM);
+            setHorizontalAlignment(SwingConstants.CENTER);
+            setHorizontalTextPosition(SwingConstants.CENTER);
+            setVerticalTextPosition(SwingConstants.BOTTOM);
 
             if (info.isSelected()) {
                 setBackground(Color.GREEN);

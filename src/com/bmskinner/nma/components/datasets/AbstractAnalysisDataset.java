@@ -345,7 +345,7 @@ public abstract class AbstractAnalysisDataset implements IAnalysisDataset {
 				if (m.find()) {
 					String s = m.group(1);
 
-					int n = Integer.valueOf(s);
+					int n = Integer.parseInt(s);
 					if (n > number) {
 						number = n;
 					}
@@ -371,7 +371,7 @@ public abstract class AbstractAnalysisDataset implements IAnalysisDataset {
 
 	@Override
 	public List<UUID> getClusterIDs() {
-		List<UUID> result = new ArrayList<UUID>();
+		List<UUID> result = new ArrayList<>();
 		for (IClusterGroup g : this.clusterGroups) {
 			result.addAll(g.getUUIDs());
 		}
@@ -380,7 +380,7 @@ public abstract class AbstractAnalysisDataset implements IAnalysisDataset {
 
 	@Override
 	public boolean hasClusters() {
-		return this.clusterGroups != null && this.clusterGroups.size() > 0;
+		return this.clusterGroups != null && !this.clusterGroups.isEmpty();
 	}
 
 	@Override
@@ -458,7 +458,7 @@ public abstract class AbstractAnalysisDataset implements IAnalysisDataset {
 		mergeSource.addAll(dataset.getCollection().getCells());
 
 		// May not be present
-		if (dataset.hasAnalysisOptions())
+		if (dataset.getAnalysisOptions().isPresent())
 			mergeSource.setAnalysisOptions(dataset.getAnalysisOptions().get().duplicate());
 
 		// Ensure profile collection copied over
