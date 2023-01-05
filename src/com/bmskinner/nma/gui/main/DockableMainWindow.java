@@ -136,8 +136,7 @@ public class DockableMainWindow extends AbstractMainWindow {
 			dockModel.getFloatDock(this).setChildDockFactory(floatFactory); // ensure floating docks
 																			// are not converted
 																			// to tab docks
-			LogPanel logPanel = new LogPanel();
-			logPanel.setBorder(BorderFactory.createEmptyBorder());
+
 			DatasetSelectionPanel populationsPanel = new DatasetSelectionPanel();
 			populationsPanel.setBorder(BorderFactory.createEmptyBorder());
 			ConsensusNucleusPanel consensusNucleusPanel = new ConsensusNucleusPanel();
@@ -145,6 +144,7 @@ public class DockableMainWindow extends AbstractMainWindow {
 
 			detailPanels.add(consensusNucleusPanel);
 
+			LogPanel logPanel = createLogPanel();
 			JPanel topPanel = createTopPanel(logPanel, populationsPanel, consensusNucleusPanel);
 
 			tabDock = createTabs();
@@ -162,6 +162,24 @@ public class DockableMainWindow extends AbstractMainWindow {
 		}
 	}
 
+	/**
+	 * Create the log panel and register the handler with the logger
+	 * 
+	 * @return
+	 */
+	private LogPanel createLogPanel() {
+		LogPanel logPanel = new LogPanel();
+		logPanel.setBorder(BorderFactory.createEmptyBorder());
+
+		// Set up the log panel
+		UserActionController.getInstance().setProgressBarAcceptor(logPanel);
+		LogPanelHandler textHandler = new LogPanelHandler(logPanel);
+		textHandler.setLevel(Level.INFO);
+		textHandler.setFormatter(new LogPanelFormatter());
+		Logger.getLogger(Loggable.PROJECT_LOGGER).addHandler(textHandler);
+		return logPanel;
+	}
+
 	private JPanel createTopPanel(LogPanel logPanel, DatasetSelectionPanel populationsPanel,
 			ConsensusNucleusPanel consensusNucleusPanel) {
 
@@ -170,13 +188,6 @@ public class DockableMainWindow extends AbstractMainWindow {
 		logPanel.setMinimumSize(minimumSize);
 		populationsPanel.setMinimumSize(minimumSize);
 		consensusNucleusPanel.setMaximumSize(minimumSize);
-
-		// Set up the log panel
-		UserActionController.getInstance().setProgressBarAcceptor(logPanel);
-		LogPanelHandler textHandler = new LogPanelHandler(logPanel);
-		textHandler.setLevel(Level.INFO);
-		textHandler.setFormatter(new LogPanelFormatter());
-		Logger.getLogger(Loggable.PROJECT_LOGGER).addHandler(textHandler);
 
 		// Create a container for the datasets and consensus panels
 		JPanel dataPanel = new JPanel();
