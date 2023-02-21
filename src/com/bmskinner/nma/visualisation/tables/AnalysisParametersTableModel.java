@@ -215,7 +215,7 @@ public class AnalysisParametersTableModel extends DatasetTableModel {
 			Instant inst = Instant.ofEpochMilli(analysisTime);
 			LocalDateTime anTime = LocalDateTime.ofInstant(inst, ZoneOffset.systemDefault());
 
-			String date = anTime.format(DateTimeFormatter.ofPattern("dd MMMM YYYY"));
+			String date = anTime.format(DateTimeFormatter.ofPattern("dd MMMM yyyy"));
 			String time = anTime.format(DateTimeFormatter.ofPattern("HH:mm:ss"));
 			builder.append(date + Io.NEWLINE + time);
 		} else { // fall back to folder name method

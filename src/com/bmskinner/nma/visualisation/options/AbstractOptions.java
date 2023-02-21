@@ -66,7 +66,7 @@ public abstract class AbstractOptions extends DefaultOptions implements DisplayO
 	 * 
 	 * @param list the datasets to display
 	 */
-	public AbstractOptions(List<IAnalysisDataset> list) {
+	protected AbstractOptions(List<IAnalysisDataset> list) {
 		if (list == null) {
 			return;
 		}

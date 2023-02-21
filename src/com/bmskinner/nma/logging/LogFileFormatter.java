@@ -35,6 +35,8 @@ public class LogFileFormatter extends Formatter {
 
     	String date = calcDate(record.getMillis());
     	
+    	String formattedMsg = formatMessage(record);
+    	
     	buffer.append(date);
     	buffer.append(SEPARATOR);
     	buffer.append(record.getLevel());
@@ -51,7 +53,7 @@ public class LogFileFormatter extends Formatter {
     			.append(SEPARATOR)
     			.append(STACK)
     			.append(SEPARATOR)
-    			.append(t.getMessage())
+    			.append(formattedMsg)
     			.append(NEWLINE);
 
     			for (StackTraceElement el : t.getStackTrace()) {

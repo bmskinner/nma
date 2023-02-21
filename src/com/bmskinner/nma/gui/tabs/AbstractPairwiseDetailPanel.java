@@ -69,9 +69,11 @@ public abstract class AbstractPairwiseDetailPanel extends TableDetailPanel {
 		JPanel infoPanel = new JPanel();
 		infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
 
-		String infoString = "Pairwise comparisons between populations using Mann-Whitney U test (aka Wilcoxon rank sum test)\n"
-				+ "Above the diagonal: Mann-Whitney U statistics\n" + "Below the diagonal: p-values\n"
-				+ "Significant values at 5% and 1% levels after Bonferroni correction are highlighted in yellow and green";
+		String infoString = """
+				Pairwise comparisons between populations using Mann-Whitney U test (aka Wilcoxon rank sum test)
+				Above the diagonal: Mann-Whitney U statistics
+				Below the diagonal: p-values
+				Significant values at 5% and 1% levels after Bonferroni correction are highlighted in yellow and green""";
 
 		infoPanel.add(new WrappedLabel(infoString));
 		return infoPanel;

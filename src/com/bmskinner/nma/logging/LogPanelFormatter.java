@@ -19,7 +19,6 @@ package com.bmskinner.nma.logging;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.util.logging.Formatter;
-import java.util.logging.Level;
 import java.util.logging.LogRecord;
 
 /**
@@ -31,10 +30,7 @@ public class LogPanelFormatter extends Formatter {
 
     private static final String NEWLINE = System.getProperty("line.separator");
 
-    private static final String SEPARATOR = " | ";
-
-    private static final String INFO_LEVEL_LBL = "log";
-    private static final String FINE_LEVEL_LBL = "fine";
+	private static final String SEPARATOR = "\t";
 
     @Override
     public String format(LogRecord record) {
@@ -42,66 +38,13 @@ public class LogPanelFormatter extends Formatter {
         StringBuilder buffer = new StringBuilder();
 
         String date = calcDate(record.getMillis());
+        
+        String formattedMsg = formatMessage(record);
 
         buffer.append(date);
-        buffer.append(" ");
-
-        if (record.getLevel() == Level.FINE || 
-        	record.getLevel() == Level.FINER || 
-        	record.getLevel() == Level.FINEST) {
-            buffer.append(formatFinest(record));
-        } else {
-            buffer.append(record.getMessage());
-        }
-
-        if (record.getThrown() != null) {
-            Throwable t = record.getThrown();
-            buffer.append(" ");
-            buffer.append(t.getClass().getSimpleName());
-            buffer.append(": ");
-            buffer.append(t.getMessage());
-            buffer.append(NEWLINE);
-        }
-        return buffer.toString();
-    }
-
-    private String formatFinest(LogRecord record) {
-
-        String sourceMethod = record.getSourceMethodName();
-        String sourceClass = record.getSourceClassName();
-
-        if (sourceMethod.equals(INFO_LEVEL_LBL) || sourceMethod.startsWith(FINE_LEVEL_LBL)) {
-            // work back to the actual calling method
-            // this should be before the Loggable call
-
-            StackTraceElement[] array = Thread.currentThread().getStackTrace();
-
-            // find the array index with the source method
-            boolean useLine = false;
-            int useIndex = 0;
-            for (int i = 0; i < array.length; i++) {
-                if (useLine) {
-                    continue;
-                }
-                StackTraceElement e = array[i];
-                if (e.getClassName().equals("com.bmskinner.nma.logging.Loggable")) {
-                    useIndex = i;
-                    useLine = true;
-                }
-            }
-
-            sourceMethod = array[useIndex + 1].getMethodName();
-            sourceClass = array[useIndex + 1].getClassName();
-        }
-
-        StringBuffer buffer = new StringBuffer();
-
-        buffer.append(record.getMessage());
-        buffer.append(SEPARATOR);
-        buffer.append(sourceClass);
-        buffer.append(SEPARATOR);
-        buffer.append(sourceMethod);
-
+		buffer.append(SEPARATOR);
+		buffer.append(formattedMsg);
+		buffer.append(NEWLINE);
         return buffer.toString();
     }
 

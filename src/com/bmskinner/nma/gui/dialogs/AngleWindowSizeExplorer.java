@@ -25,6 +25,7 @@ import java.awt.FlowLayout;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.util.Optional;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.JButton;
@@ -148,11 +149,8 @@ public class AngleWindowSizeExplorer extends LoadingIconDialog implements Change
 
 		runButton = new JButton("Run");
 		runButton.addActionListener(e -> {
-			Runnable r = () -> {
-				runAnalysis();
-			};
+			Runnable r = this::runAnalysis;
 			ThreadManager.getInstance().submit(r);
-
 		});
 		panel.add(runButton);
 
@@ -211,11 +209,11 @@ public class AngleWindowSizeExplorer extends LoadingIconDialog implements Change
 		// Clear the old chart
 		chartPanel.setChart(ProfileChartFactory.createEmptyChart(ProfileType.ANGLE));
 
-		LOGGER.fine("Testing " + windowSizeMin + " - " + windowSizeMax);
+		LOGGER.log(Level.FINE, "Testing {0} - {1}", new Object[] { windowSizeMin , windowSizeMax});
 
 		try {
 			for (double i = windowSizeMin; i <= windowSizeMax; i += stepSize) {
-				LOGGER.finest("Calculating " + i + "...");
+				LOGGER.log(Level.FINEST, "Calculating {0}...", i);
 				final double j = i;
 				// make a duplicate collection
 				final ICellCollection duplicateCollection = new DefaultCellCollection(
@@ -311,8 +309,7 @@ public class AngleWindowSizeExplorer extends LoadingIconDialog implements Change
 		g = g > 255 ? 255 : g < 0 ? 0 : g;
 		b = b > 255 ? 255 : b < 0 ? 0 : b;
 
-		Color result = new Color(r, g, b);
-		return result;
+		return new Color(r, g, b);
 
 	}
 

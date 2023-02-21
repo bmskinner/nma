@@ -20,6 +20,7 @@ import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.ImageIcon;
@@ -27,6 +28,7 @@ import javax.swing.ImageIcon;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nma.components.ComponentOrienter;
+import com.bmskinner.nma.components.Imageable;
 import com.bmskinner.nma.components.MissingLandmarkException;
 import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.cells.ComponentCreationException;
@@ -385,14 +387,17 @@ public abstract class AbstractImageFilterer {
      * from Michael Schmid
      * https://imagej.nih.gov/ij/plugins/blend-images.html
      * @param ip1 the first image
+     * @param weight1  how much image 1 should contribute (does not need to sum to 1 with weight2)
      * @param ip2 the second image
+     * @param weight2 how much image 2 should contribute  (does not need to sum to 1 with weight1)
      * @return
      */
     public static ImageProcessor blendImages(ImageProcessor ip1, float weight1, ImageProcessor ip2, float weight2) {
     	ip1.invert();
     	ip2.invert();
     	ImageProcessor result = ip1.duplicate();
-    	FloatProcessor fp1 = null, fp2 = null;  // non-float images will be converted to these
+    	FloatProcessor fp1 = null; 
+    	FloatProcessor fp2 = null;  // non-float images will be converted to these
         for (int i=0; i<ip1.getNChannels(); i++) { //grayscale: once. RBG: once per color, i.e., 3 times
             fp1 = ip1.toFloat(i, fp1);           // convert image or color channel to float (unless float already)
             fp2 = ip2.toFloat(i, fp2);
@@ -474,10 +479,10 @@ public abstract class AbstractImageFilterer {
     	if (ip == null)
             throw new IllegalArgumentException("Image processor is null");
         // Choose a clip for the image (an enlargement of the original nucleus ROI
-        int wideW = (int)c.getWidth() + CellularComponent.COMPONENT_BUFFER*2;
-        int wideH = (int)c.getHeight() + CellularComponent.COMPONENT_BUFFER*2;
-        int wideX = c.getXBase() - CellularComponent.COMPONENT_BUFFER;
-        int wideY = c.getYBase() - CellularComponent.COMPONENT_BUFFER;
+        int wideW = (int)c.getWidth() + Imageable.COMPONENT_BUFFER*2;
+        int wideH = (int)c.getHeight() + Imageable.COMPONENT_BUFFER*2;
+        int wideX = c.getXBase() - Imageable.COMPONENT_BUFFER;
+        int wideY = c.getYBase() - Imageable.COMPONENT_BUFFER;
 
         wideX = wideX < 0 ? 0 : wideX;
         wideY = wideY < 0 ? 0 : wideY;
@@ -843,7 +848,7 @@ public abstract class AbstractImageFilterer {
     	ImageProcessor result = new ShortProcessor(w, h);
     	
     	if(maxValue > Short.MAX_VALUE) {
-    		LOGGER.fine(String.format("Rescaling pixels with max value %s to fit short range", maxValue));
+    		LOGGER.log(Level.FINE, "Rescaling pixels with max value {0} to fit short range", maxValue);
     		for (int x = 0; x < w; x++) {
     			for (int y = 0; y < h; y++) {
     				pixelValues[x][y] = (int) ((((double)pixelValues[x][y])/(double)maxValue) * (double)Short.MAX_VALUE);

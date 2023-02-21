@@ -54,7 +54,7 @@ public abstract class AbstractProfileDisplayPanel extends ChartDetailPanel
 
 	protected ProfileType type;
 
-	public AbstractProfileDisplayPanel(ProfileType type) {
+	protected AbstractProfileDisplayPanel(ProfileType type) {
 		super();
 		this.type = type;
 
@@ -122,26 +122,26 @@ public abstract class AbstractProfileDisplayPanel extends ChartDetailPanel
 	}
 
 	@Override
-	protected void updateSingle() {
+	protected synchronized void updateSingle() {
 
 		this.setEnabled(true);
 
 	}
 
 	@Override
-	protected void updateMultiple() {
+	protected synchronized void updateMultiple() {
 		// Don't allow marker selection for multiple datasets
 		this.setEnabled(true);
 		profileMarkersOptionsPanel.setEnabled(false);
 	}
 
 	@Override
-	protected void updateNull() {
+	protected synchronized void updateNull() {
 		this.setEnabled(false);
 	}
 
 	@Override
-	public void setLoading() {
+	public synchronized void setLoading() {
 		super.setLoading();
 		chartPanel.setChart(AbstractChartFactory.createLoadingChart());
 
