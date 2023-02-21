@@ -140,7 +140,7 @@ public class Screenshotter {
 					TestResources.MOUSE_CLUSTERS_DATASET, rootFolder);
 		}
 
-		nma.clp.mw.dispose();
+		nma.clp.mw.setVisible(false);
 	}
 
 	/**

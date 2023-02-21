@@ -5,7 +5,7 @@
 	<groupId>com.bmskinner</groupId>
 	<artifactId>nma</artifactId>
 	<version>2.0.0</version>
-
+	
 	<!-- Define custom properties to be exported -->
 	<properties>
 		<project.full.name>Nuclear_Morphology_Analysis</project.full.name>
@@ -20,8 +20,72 @@
 		<maven.build.timestamp.format>yyyy</maven.build.timestamp.format>
 	</properties>
 
+	<!-- Define custom properties depending on the OS. This allows a switch 
+		between Windows bat scripts and Linux shell scripts depending on the platform 
+		used to compile -->
+	<profiles>
+		<profile>
+			<id>Windows</id>
+			<activation>
+				<os>
+					<family>Windows</family>
+				</os>
+			</activation>
+			<properties>
+				<script.executor>cmd.exe</script.executor>
+				<script.args>/C</script.args> <!--- 'call' flag to use bat files -->
+				<script.packaging>packageAppImage.bat</script.packaging>
+				<script.rendering>renderUserGuide.bat</script.rendering>
+				<script.dependencies>installDependencies.bat</script.dependencies>
+			</properties>
+		</profile>
+
+		<profile>
+			<id>unix</id>
+			<activation>
+				<os>
+					<family>unix</family>
+					<name>Linux</name>
+				</os>
+			</activation>
+			<properties>
+				<script.executor>bash</script.executor>
+				<script.args></script.args> <!--- intentionally blank, used in Win only -->
+				<script.packaging>packageAppImage.sh</script.packaging>
+				<script.rendering>renderUserGuide.sh</script.rendering>
+				<script.dependencies>installDependencies.sh</script.dependencies>
+			</properties>
+		</profile>
+
+		<profile>
+			<id>mac</id>
+			<activation>
+				<os>
+					<family>mac</family>
+				</os>
+			</activation>
+			<properties>
+				<script.executor>bash</script.executor>
+				<script.args></script.args> <!--- intentionally blank, used in Win only -->
+				<script.packaging>packageDMG.sh</script.packaging>
+				<script.rendering>renderUserGuide.sh</script.rendering>
+				<script.dependencies>installDependencies.sh</script.dependencies>
+			</properties>
+		</profile>
+		<profile>
+			<id>our-default-profile</id>
+			<activation>
+				<property>
+					<name>!unsetDefaultProfile</name>
+				</property>
+			</activation>
+		</profile>
+	</profiles>
+
+
 	<!-- Define custom repositories outside Maven central -->
 	<repositories>
+		<!-- Jitpack allows building of jars direct from e.g. Github -->
 		<repository>
 			<id>jitpack.io</id>
 			<url>https://jitpack.io</url>
@@ -287,15 +351,32 @@
 				</executions>
 			</plugin>
 
-			<!-- Run a script to render the user guide and copy the rendered files 
-				to the target directory so they will be included in the jar. This must occur 
-				after the user guide has been rendered. Requires Rscript and pandoc on the 
-				PATH -->
+			<!-- Execute scripts created from templates -->
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>exec-maven-plugin</artifactId>
 				<version>1.2.1</version>
 				<executions>
+				
+				<!-- Run a script to download dependency jars that are not available in Maven Central
+				or other repos -->
+					<execution>
+						<id>install-dependencies</id>
+						<phase>initialize</phase>
+						<goals>
+							<goal>exec</goal>
+						</goals>
+						<configuration>
+							<executable>${script.executor}</executable>
+							<commandlineArgs>${script.args} ${project.basedir}/scripts/${script.dependencies}</commandlineArgs>
+							<workingDirectory>${project.basedir}</workingDirectory>
+						</configuration>
+					</execution>
+				
+					<!-- Run a script to render the user guide and copy the rendered files 
+						to the target directory so they will be included in the jar. This must occur 
+						after the user guide has been rendered. Requires Rscript and pandoc on the 
+						PATH -->
 					<execution>
 						<id>render-user-guide</id>
 						<phase>prepare-package</phase>
@@ -303,8 +384,24 @@
 							<goal>exec</goal>
 						</goals>
 						<configuration>
-							<executable>${project.basedir}/scripts/renderUserGuide.bat</executable>
+							<executable>${script.executor}</executable>
+							<commandlineArgs>${script.args} ${project.basedir}/scripts/${script.rendering}</commandlineArgs>
 							<workingDirectory>${project.basedir}/res/user-guide</workingDirectory>
+						</configuration>
+					</execution>
+
+					<!-- Run a script to package the jar into an appimage. Requires jpackage, 
+						jlink and 7z on the PATH -->
+					<execution>
+						<id>make-appimage</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>exec</goal>
+						</goals>
+						<configuration>
+							<executable>${script.executor}</executable>
+							<commandlineArgs>${script.args} ${script.packaging}</commandlineArgs>
+							<workingDirectory>${project.basedir}/scripts</workingDirectory>
 						</configuration>
 					</execution>
 				</executions>
@@ -321,9 +418,9 @@
 			</plugin>
 
 
-			<!--Take screenshots. The screenshotter is a test class, and will create 
-				the required sample datasets. Full tests can be run by including the test/RunAllTests 
-				suite. -->
+			<!--Take screenshots and run tests. The screenshotter is a test class, 
+				and will create the required sample datasets. Full tests can be run by including 
+				the test/RunAllTests suite. -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
@@ -331,7 +428,7 @@
 				<configuration>
 					<includes>
 						<include>com.bmskinner.nma.MakeScreenshots</include>
-						<!-- <include>com.bmskinner.nma.RunAllTests</include> -->
+						<include>com.bmskinner.nma.RunAllTests</include>
 					</includes>
 				</configuration>
 			</plugin>
@@ -340,6 +437,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
+				<version>3.3.0</version>
 				<configuration>
 					<archive>
 						<manifestEntries>
@@ -377,27 +475,6 @@
 				</executions>
 			</plugin>
 
-			<!-- Run a script to package the jar into an appimage. Requires jpackage, 
-				jlink and 7z on the PATH -->
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>exec-maven-plugin</artifactId>
-				<version>1.2.1</version>
-				<executions>
-					<execution>
-						<id>make-appimage</id>
-						<phase>verify</phase>
-						<goals>
-							<goal>exec</goal>
-						</goals>
-						<configuration>
-							<executable>${project.basedir}/scripts/packageAppImage.bat</executable>
-							<workingDirectory>${project.basedir}/scripts</workingDirectory>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-
 		</plugins>
 	</build>
 
@@ -418,10 +495,11 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+
 		<dependency>
-			<groupId>fr.inra.ijpb</groupId>
-			<artifactId>MorphoLibJ_</artifactId>
-			<version>1.3.2</version>
+			<groupId>com.github.ijpb</groupId>
+			<artifactId>MorphoLibJ</artifactId>
+			<version>v1.5.1</version>
 		</dependency>
 
 		<!--Not available in Maven Central - download from https://sourceforge.net/projects/jebl/ 

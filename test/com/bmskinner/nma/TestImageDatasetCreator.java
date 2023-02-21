@@ -92,7 +92,7 @@ public class TestImageDatasetCreator {
 			return;
 		for (File file : f.listFiles()) {
 			if (file.isDirectory())
-				deleteContents(f);
+				deleteContents(file);
 			Files.delete(file.toPath());
 		}
 	}

@@ -1,5 +1,3 @@
-
-
 REM Render the user guide from markdown
 Rscript -e "bookdown::render_book('index.Rmd', clean = FALSE)"
 
