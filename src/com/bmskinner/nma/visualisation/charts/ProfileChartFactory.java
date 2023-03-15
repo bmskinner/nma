@@ -207,7 +207,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
 		if (options.isShowAnnotations()) {
 			LOGGER.finest("Adding segment annotations");
 			try {
-				ISegmentedProfile profile = n.getProfile(options.getType(), options.getTag());
+				ISegmentedProfile profile = n.getProfile(options.getType(), options.getOrientationMark());
 				addSegmentTextAnnotations(profile, chart.getXYPlot());
 			} catch (ProfileException | MissingLandmarkException | MissingProfileException e) {
 				LOGGER.log(Loggable.STACK, "Error adding segment annotations", e);
@@ -293,7 +293,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
 			try {
 				ISegmentedProfile profile = collection.getProfileCollection().getSegmentedProfile(
 						options.getType(),
-						options.getTag(), Stats.MEDIAN);
+						options.getOrientationMark(), Stats.MEDIAN);
 				addSegmentTextAnnotations(profile, plot);
 			} catch (ProfileException | MissingComponentException e) {
 				LOGGER.log(Loggable.STACK, "Error adding segment annotations", e);
@@ -480,7 +480,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
 				int index = n.getBorderIndex(tag);
 
 				// Correct to start from RP
-				int offset = n.getBorderIndex(options.getTag());
+				int offset = n.getBorderIndex(options.getOrientationMark());
 
 				// adjust the index to the offset
 				index = n.wrapIndex(index - offset);

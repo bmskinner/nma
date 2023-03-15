@@ -75,11 +75,11 @@ public interface ChartOptions extends DisplayOptions {
 	double getModalityPosition();
 
 	/**
-	 * Get the tag
+	 * Get the orientation mark
 	 * 
 	 * @return
 	 */
-	OrientationMark getTag();
+	OrientationMark getOrientationMark();
 
 	/**
 	 * Check if markers should be displayed on profile panels at border tag

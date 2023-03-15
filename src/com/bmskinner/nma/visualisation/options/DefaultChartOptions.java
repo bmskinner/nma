@@ -138,7 +138,7 @@ public class DefaultChartOptions extends AbstractOptions implements ChartOptions
 	}
 
 	@Override
-	public OrientationMark getTag() {
+	public OrientationMark getOrientationMark() {
 		return tag;
 	}
 
