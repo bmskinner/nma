@@ -17,15 +17,48 @@
 package com.bmskinner.nma.gui.tabs.nuclear;
 
 import java.awt.BorderLayout;
+import java.util.List;
 
 import com.bmskinner.nma.components.cells.CellularComponent;
+import com.bmskinner.nma.components.datasets.IAnalysisDataset;
+import com.bmskinner.nma.gui.events.ScaleUpdatedListener;
+import com.bmskinner.nma.gui.events.SwatchUpdatedListener;
 import com.bmskinner.nma.gui.tabs.AbstractScatterPanel;
 
 @SuppressWarnings("serial")
-public class NuclearScatterChartPanel extends AbstractScatterPanel {
+public class NuclearScatterChartPanel extends AbstractScatterPanel
+		implements ScaleUpdatedListener, SwatchUpdatedListener {
 
 	public NuclearScatterChartPanel() {
 		super(CellularComponent.NUCLEUS);
 		this.add(headerPanel, BorderLayout.NORTH);
+
+		uiController.addScaleUpdatedListener(this);
+		uiController.addSwatchUpdatedListener(this);
+	}
+
+	@Override
+	public void scaleUpdated(List<IAnalysisDataset> datasets) {
+		refreshCache(datasets);
+	}
+
+	@Override
+	public void scaleUpdated(IAnalysisDataset dataset) {
+		refreshCache(dataset);
+	}
+
+	@Override
+	public void scaleUpdated() {
+		update(getDatasets());
+	}
+
+	@Override
+	public void globalPaletteUpdated() {
+		update(getDatasets());
+	}
+
+	@Override
+	public void colourUpdated(IAnalysisDataset dataset) {
+		refreshCache(dataset);
 	}
 }
