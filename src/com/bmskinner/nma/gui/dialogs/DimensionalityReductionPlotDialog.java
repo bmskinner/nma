@@ -41,6 +41,7 @@ public class DimensionalityReductionPlotDialog extends MessagingDialog {
 		this.dataset = dataset;
 		this.group = group;
 
+		chartPanel.setFixedAspectRatio(true);
 		chartPanel.addChartMouseListener(new ImageThumbnailGenerator(chartPanel));
 
 		updateTitle();

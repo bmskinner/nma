@@ -16,4 +16,18 @@ public class ArrayUtils {
         return arr;
 	}
 
+	public static float[] floatArray(int length, float value) {
+		float[] f = new float[length];
+		for (int i = 0; i < f.length; i++)
+			f[i] = value;
+		return f;
+	}
+
+	public static byte[] byteArray(int length, byte value) {
+		byte[] f = new byte[length];
+		for (int i = 0; i < f.length; i++)
+			f[i] = value;
+		return f;
+	}
+
 }

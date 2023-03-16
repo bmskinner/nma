@@ -16,9 +16,7 @@
  ******************************************************************************/
 package com.bmskinner.nma.visualisation.charts;
 
-import java.awt.AlphaComposite;
 import java.awt.Color;
-import java.awt.Graphics2D;
 import java.awt.Paint;
 import java.awt.Shape;
 import java.awt.image.BufferedImage;
@@ -313,12 +311,20 @@ public class ScatterChartFactory extends AbstractChartFactory {
 		BufferedImage image = ip.getBufferedImage();
 
 		// Make the image partly transparent
-		BufferedImage tmpImg = new BufferedImage(image.getWidth(), image.getHeight(),
-				BufferedImage.TYPE_INT_ARGB);
-		Graphics2D g2d = (Graphics2D) tmpImg.getGraphics();
-		g2d.setComposite(AlphaComposite.SrcOver.derive(0.5f));
-		// set the transparency level in range 0.0f - 1.0f
-		g2d.drawImage(image, 0, 0, null);
+		BufferedImage tmpImg = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_ARGB);
+
+		for (int by = 0; by < image.getHeight(); by++) {
+			for (int bx = 0; bx < image.getWidth(); bx++) {
+				int argb = image.getRGB(bx, by);
+				int blue = (argb >> 0) & 0xff;// isolate blue channel from ARGB
+				int alpha = 255 - blue; // make alpha vary with blue intensity (RGB greyscale, so blue should correlate
+										// well)
+				argb &= 0x00ffffff; // remove old alpha info
+				argb |= (alpha << 24); // add new alpha info
+
+				tmpImg.setRGB(bx, by, argb);
+			}
+		}
 		image = tmpImg;
 
 		// Scale to the dimensionally reduced coordinates

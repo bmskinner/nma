@@ -130,7 +130,7 @@ public class ImageThumbnailGenerator implements ChartMouseListener {
 	private void drawNucleus(Nucleus n, int x, int y) {
 		String labelText = n.getNameAndNumber();
 
-		Color annotationColour = Color.WHITE;
+		Color annotationColour = Color.ORANGE;
 		ImageProcessor ip = ImageImporter.importFullImageTo24bitGreyscale(n);
 
 		ImageAnnotator an = new ImageAnnotator(ip).drawBorder(n, annotationColour);
@@ -147,7 +147,7 @@ public class ImageThumbnailGenerator implements ChartMouseListener {
 		g2.drawImage(ip.createImage(), leftStart, topStart, ip.getWidth(), ip.getHeight(), null);
 		Color c = g2.getColor();
 
-		Color textColour = Color.WHITE;
+		Color textColour = Color.ORANGE;
 		g2.setColor(textColour);
 		g2.drawString(labelText, leftStart + 4, topStart + ip.getHeight() - 4);
 		g2.setColor(Color.DARK_GRAY);

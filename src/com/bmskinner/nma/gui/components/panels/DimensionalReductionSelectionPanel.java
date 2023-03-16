@@ -28,6 +28,7 @@ import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.options.OptionsFactory;
 import com.bmskinner.nma.gui.Labels;
 import com.bmskinner.nma.logging.Loggable;
+import com.bmskinner.nma.utility.NumberTools;
 
 public class DimensionalReductionSelectionPanel extends OptionsPanel {
 
@@ -208,6 +209,7 @@ public class DimensionalReductionSelectionPanel extends OptionsPanel {
 	 */
 	private JSpinner makeUmapNeighbourSpinner() {
 		int initialValue = options.getInt(UMAPMethod.N_NEIGHBOUR_KEY);
+		initialValue = NumberTools.constrain(initialValue, MIN_UMAP_NEIGHBOUR, dataset.getCollection().size());
 		SpinnerModel model = new SpinnerNumberModel(initialValue, MIN_UMAP_NEIGHBOUR,
 				dataset.getCollection().size(), STEP_UMAP_NEIGHBOUR);
 
@@ -258,6 +260,8 @@ public class DimensionalReductionSelectionPanel extends OptionsPanel {
 	 */
 	private JSpinner makeMaxIterationsSpinner() {
 		int initialIterations = options.getInt(TsneMethod.MAX_ITERATIONS_KEY);
+		initialIterations = NumberTools.constrain(initialIterations, MIN_ITERATIONS, MAX_ITERATIONS);
+
 		SpinnerModel iterationsModel = new SpinnerNumberModel(initialIterations, MIN_ITERATIONS,
 				MAX_ITERATIONS, STEP_ITERATIONS);
 

@@ -557,7 +557,7 @@ public abstract class AbstractImageFilterer {
         int yBase = (h - ip.getHeight()) >> 1;
 
         LOGGER.finer( String.format("New image %sx%s from %sx%s : Rot: %s", w, h, ip.getWidth(), ip.getHeight(), degrees));
-        ImageProcessor newIp = new ColorProcessor(w, h);
+        ColorProcessor newIp = new ColorProcessor(w, h);
 
         newIp.setColor(Color.WHITE); // fill current space with white
         newIp.fill();
