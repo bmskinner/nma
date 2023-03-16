@@ -340,10 +340,16 @@ public class ImageAnnotator extends AbstractImageFilterer {
 	}
 
 	private ImageAnnotator annotatePolygon(@NonNull PolygonRoi p, @NonNull Color c) {
+		ip = annotatePolygon(ip, p, c);
+		return this;
+	}
+
+	private static ImageProcessor annotatePolygon(ImageProcessor ip, @NonNull PolygonRoi p,
+			@NonNull Color c) {
 		ip.setColor(c);
 		ip.setLineWidth(2);
 		ip.draw(p);
-		return this;
+		return ip;
 	}
 
 	private ImageAnnotator annotateRoi(@NonNull Roi p, @NonNull Color c, int width) {
@@ -393,6 +399,13 @@ public class ImageAnnotator extends AbstractImageFilterer {
 		PolygonRoi roi = new PolygonRoi(p, PolygonRoi.POLYGON);
 
 		return annotatePolygon(roi, c);
+	}
+
+	public static ImageProcessor drawBorder(ImageProcessor ip, @NonNull final CellularComponent n,
+			final Color c) {
+		FloatPolygon p = n.toOriginalPolygon();
+		PolygonRoi roi = new PolygonRoi(p, PolygonRoi.POLYGON);
+		return annotatePolygon(ip, roi, c);
 	}
 
 	/**

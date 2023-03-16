@@ -22,12 +22,16 @@ import java.util.logging.Logger;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nma.components.Imageable;
+import com.bmskinner.nma.components.MissingLandmarkException;
 import com.bmskinner.nma.components.cells.CellularComponent;
+import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.cells.ICell;
+import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.io.Io.Importer;
 import com.bmskinner.nma.logging.Loggable;
 import com.bmskinner.nma.visualisation.image.AbstractImageFilterer;
 import com.bmskinner.nma.visualisation.image.ImageConverter;
+import com.bmskinner.nma.visualisation.image.ImageFilterer;
 
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -119,6 +123,25 @@ public class ImageImporter implements Importer {
 	public static ImageProcessor importCroppedImageTo24bitGreyscale(@NonNull CellularComponent c) {
 		ImageProcessor ip = importFullImageTo24bitGreyscale(c);
 		return AbstractImageFilterer.crop(ip, c);
+	}
+
+	/**
+	 * Get the image for the given cellular component. If the image cannot be
+	 * imported, a white colour processor is returned of sufficient dimensions to
+	 * contain the component. The 8-bit image is converted to 24bit RGB to allow
+	 * coloured annotations. Orient the image according to the component's rules,
+	 * then the image is then cropped to the bounds of the oriented component.
+	 * 
+	 * @param c the component to import
+	 * @return an RGB greyscale image cropped to the component
+	 * @throws MissingLandmarkException
+	 * @throws ComponentCreationException
+	 */
+	public static ImageProcessor importCroppedOrientedImageTo24bitGreyscale(
+			@NonNull Nucleus c) throws MissingLandmarkException, ComponentCreationException {
+		ImageProcessor ip = importCroppedImageTo24bitGreyscale(c);
+		ip.flipVertical(); // Y axis needs inverting
+		return ImageFilterer.orientImage(ip, c);
 	}
 
 	/**
