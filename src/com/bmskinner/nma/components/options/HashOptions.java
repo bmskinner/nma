@@ -177,6 +177,7 @@ public interface HashOptions extends Serializable, XmlSerializable {
 	String CLUSTER_INCLUDE_MESH_KEY = "INCLUDE_MESH";
 	String CLUSTER_PROFILE_TYPE_KEY = "PROFILE_TYPE";
 	String CLUSTER_USE_TSNE_KEY = "Use t-SNE";
+	String CLUSTER_USE_UMAP_KEY = "Use UMAP";
 	String CLUSTER_USE_PCA_KEY = "Use PCA";
 	String CLUSTER_NUM_PCS_KEY = "Number of PCs";
 
@@ -191,6 +192,7 @@ public interface HashOptions extends Serializable, XmlSerializable {
 	boolean DEFAULT_INCLUDE_PROFILE = true;
 	boolean DEFAULT_INCLUDE_MESH = false;
 	boolean DEFAULT_USE_TSNE = false;
+	boolean DEFAULT_USE_UMAP = false;
 	boolean DEFAULT_USE_PCA = false;
 
 	/**

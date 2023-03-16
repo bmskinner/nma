@@ -42,6 +42,7 @@ public interface IAnalysisOptions extends XmlSerializable {
 
 	// Standard secondary options
 	String TSNE = "t-SNE";
+	String UMAP = "UMAP";
 
 	boolean DEFAULT_REFOLD = true;
 	boolean DEFAULT_KEEP_FAILED = false;

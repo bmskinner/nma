@@ -26,7 +26,7 @@ import com.bmskinner.nma.visualisation.charts.panels.ExportableChartPanel;
  * @since 1.16.0
  *
  */
-public class TsneDialog extends MessagingDialog {
+public class DimensionalityReductionPlotDialog extends MessagingDialog {
 
 	private static final String COLOUR_BY_LBL = "Colour by:";
 	private static final String COLOUR_MERGE_SOURCE = "Merge sources";
@@ -37,7 +37,7 @@ public class TsneDialog extends MessagingDialog {
 	private final ExportableChartPanel chartPanel = new ExportableChartPanel(
 			ScatterChartFactory.createEmptyChart());
 
-	public TsneDialog(final @NonNull IAnalysisDataset dataset, final @NonNull IClusterGroup group) {
+	public DimensionalityReductionPlotDialog(final @NonNull IAnalysisDataset dataset, final @NonNull IClusterGroup group) {
 		this.dataset = dataset;
 		this.group = group;
 
@@ -102,7 +102,7 @@ public class TsneDialog extends MessagingDialog {
 	}
 
 	private void updateChart(ColourByType type, IClusterGroup colourGroup) {
-		chartPanel.setChart(ScatterChartFactory.createTsneChart(dataset, type, group, colourGroup));
+		chartPanel.setChart(ScatterChartFactory.createDimensionalityReductionChart(dataset, type, group, colourGroup));
 	}
 
 	private void updateTitle() {

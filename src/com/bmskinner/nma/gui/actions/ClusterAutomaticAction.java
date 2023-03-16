@@ -28,6 +28,7 @@ import com.bmskinner.nma.analysis.IAnalysisWorker;
 import com.bmskinner.nma.analysis.classification.NucleusClusteringMethod;
 import com.bmskinner.nma.analysis.classification.PrincipalComponentAnalysis;
 import com.bmskinner.nma.analysis.classification.TsneMethod;
+import com.bmskinner.nma.analysis.classification.UMAPMethod;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.core.ThreadManager;
@@ -69,6 +70,11 @@ public class ClusterAutomaticAction extends SingleDatasetResultAction {
 				runTsne(setupOptions);
 			}
 
+			if (setupOptions.getBoolean(HashOptions.CLUSTER_USE_UMAP_KEY)) {
+				canRunClusteringDirectly = false;
+				runUmap(setupOptions);
+			}
+
 			if (clusterSetup.getOptions().getBoolean(HashOptions.CLUSTER_USE_PCA_KEY)) {
 				canRunClusteringDirectly = false;
 				runPca(setupOptions);
@@ -91,6 +97,22 @@ public class ClusterAutomaticAction extends SingleDatasetResultAction {
 	 */
 	private void runTsne(HashOptions setupOptions) {
 		IAnalysisMethod m = new TsneMethod(dataset, setupOptions);
+		worker = new DefaultAnalysisWorker(m);
+		worker.addPropertyChangeListener(e -> {
+			if (e.getPropertyName().equals(IAnalysisWorker.FINISHED_MSG)) {
+				runClustering(setupOptions);
+			}
+		});
+		ThreadManager.getInstance().submit(worker);
+	}
+
+	/**
+	 * Run a UMAP method with the given options
+	 * 
+	 * @param setupOptions
+	 */
+	private void runUmap(HashOptions setupOptions) {
+		IAnalysisMethod m = new UMAPMethod(dataset, setupOptions);
 		worker = new DefaultAnalysisWorker(m);
 		worker.addPropertyChangeListener(e -> {
 			if (e.getPropertyName().equals(IAnalysisWorker.FINISHED_MSG)) {

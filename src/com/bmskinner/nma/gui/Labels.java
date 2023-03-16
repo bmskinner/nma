@@ -277,6 +277,10 @@ public class Labels {
 		public static final String TSNE_PERPLEXITY = "Perplexity";
 		public static final String TSNE_MAX_ITER = "Max iterations";
 
+		public static final String UMAP = "UMAP";
+		public static final String UMAP_N_NEIGHTBOURS = "Nearest neighbours";
+		public static final String UMAP_MIN_DIST = "Min distance";
+
 		public static final String PCA = "PCA";
 		public static final String PCA_VARIANCE = "Variance";
 		public static final String PCA_NUM_PCS = "Number of PCs";

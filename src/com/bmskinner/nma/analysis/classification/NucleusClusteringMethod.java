@@ -116,41 +116,72 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
 
 		// Move tSNE values to their cluster group if needed
 		if (options.getBoolean(HashOptions.CLUSTER_USE_TSNE_KEY)) {
-			for (ICell c : dataset.getCollection()) {
-				for (Nucleus n : c.getNuclei()) {
-					n.setMeasurement(
-							new DefaultMeasurement("TSNE_1_" + group.getId(),
-									MeasurementDimension.NONE),
-							n.getMeasurement(Measurement.TSNE_1));
-					n.setMeasurement(
-							new DefaultMeasurement("TSNE_2_" + group.getId(),
-									MeasurementDimension.NONE),
-							n.getMeasurement(Measurement.TSNE_2));
-					n.clearMeasurement(Measurement.TSNE_1);
-					n.clearMeasurement(Measurement.TSNE_2);
-				}
-			}
+			appendClusterIdToDimensionalityMeasurements(Measurement.TSNE_1, Measurement.TSNE_2,
+					group);
+		}
+
+		// Move UMAP values to their cluster group if needed
+		if (options.getBoolean(HashOptions.CLUSTER_USE_UMAP_KEY)) {
+			appendClusterIdToDimensionalityMeasurements(Measurement.UMAP_1, Measurement.UMAP_2,
+					group);
 		}
 
 		// Move PCA values to their cluster group if needed
 		if (options.getBoolean(HashOptions.CLUSTER_USE_PCA_KEY)) {
-			for (ICell c : dataset.getCollection()) {
-				for (Nucleus n : c.getNuclei()) {
-					int nPcs = (int) n.getMeasurement(Measurement.PCA_N);
-
-					n.setMeasurement(Measurement.makePrincipalComponentNumber(group.getId()), nPcs);
-					n.clearMeasurement(Measurement.PCA_N);
-					for (int i = 1; i <= nPcs; i++) {
-						n.setMeasurement(Measurement.makePrincipalComponent(i, group.getId()),
-								n.getMeasurement(Measurement.makePrincipalComponent(i)));
-						n.clearMeasurement(Measurement.makePrincipalComponent(i));
-					}
-				}
-			}
+			appendClusterIdToPCA(group);
 		}
 
 		dataset.addClusterGroup(group);
 		return new ClusterAnalysisResult(result, group);
+	}
+
+	/**
+	 * The TSNE, UMAP values are stored in the nucleus meaurements, but will be
+	 * overwritten if another clustering is performed. Append the clustergroup id to
+	 * the measurement so we can store values across different clustering instances
+	 * 
+	 */
+	private void appendClusterIdToDimensionalityMeasurements(Measurement dim1, Measurement dim2,
+			IClusterGroup group) {
+		for (ICell c : dataset.getCollection()) {
+			for (Nucleus n : c.getNuclei()) {
+				n.setMeasurement(
+						new DefaultMeasurement(
+								dim1.name().replace(" ", "_") + "_" + group.getId(),
+								MeasurementDimension.NONE),
+						n.getMeasurement(dim1));
+				n.setMeasurement(
+						new DefaultMeasurement(dim2.name().replace(" ", "_") + "_" + group.getId(),
+								MeasurementDimension.NONE),
+						n.getMeasurement(dim2));
+				n.clearMeasurement(dim1);
+				n.clearMeasurement(dim2);
+			}
+		}
+	}
+
+	/**
+	 * The principal components are stored in the nucleus measurements, but will be
+	 * overwritten if another clustering is performed. Append the cluster group id
+	 * to the measurement so we can store values across different clustering
+	 * instances
+	 * 
+	 * @param group
+	 */
+	private void appendClusterIdToPCA(IClusterGroup group) {
+		for (ICell c : dataset.getCollection()) {
+			for (Nucleus n : c.getNuclei()) {
+				int nPcs = (int) n.getMeasurement(Measurement.PCA_N);
+
+				n.setMeasurement(Measurement.makePrincipalComponentNumber(group.getId()), nPcs);
+				n.clearMeasurement(Measurement.PCA_N);
+				for (int i = 1; i <= nPcs; i++) {
+					n.setMeasurement(Measurement.makePrincipalComponent(i, group.getId()),
+							n.getMeasurement(Measurement.makePrincipalComponent(i)));
+					n.clearMeasurement(Measurement.makePrincipalComponent(i));
+				}
+			}
+		}
 	}
 
 	/**
@@ -208,7 +239,7 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
 
 		int numberOfClusters = clusterer.numberOfClusters();
 
-		LOGGER.finer("Clustering found " + numberOfClusters + " clusters");
+		LOGGER.finer(() -> "Clustering found %s clusters".formatted(numberOfClusters));
 
 		// Create new empty collections to hold the cells for each cluster
 		for (int i = 0; i < numberOfClusters; i++) {
@@ -225,7 +256,7 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
 			if (collection.getCell(cellID) != null) {
 				cluster.add(collection.getCell(cellID));
 			} else {
-				LOGGER.warning("Error: cell with ID " + cellID + " is not found");
+				LOGGER.warning(() -> "Error: cell with ID %s is not found".formatted(cellID));
 			}
 			fireProgressEvent();
 		}

@@ -71,6 +71,8 @@ public interface Measurement extends XmlSerializable {
 		static final String DISPLACEMENT = "Displacement";
 		static final String TSNE_1 = "t-SNE 1";
 		static final String TSNE_2 = "t-SNE 2";
+		static final String UMAP_1 = "UMAP 1";
+		static final String UMAP_2 = "UMAP 2";
 		static final String PCA_N = "Number of PCs";
 		static final String PCA_1 = "PC1";
 		static final String PCA_2 = "PC2";
@@ -151,6 +153,11 @@ public interface Measurement extends XmlSerializable {
 	Measurement TSNE_1 = new DefaultMeasurement(Names.TSNE_1, MeasurementDimension.NONE);
 	@NonNull
 	Measurement TSNE_2 = new DefaultMeasurement(Names.TSNE_2, MeasurementDimension.NONE);
+
+	@NonNull
+	Measurement UMAP_1 = new DefaultMeasurement(Names.UMAP_1, MeasurementDimension.NONE);
+	@NonNull
+	Measurement UMAP_2 = new DefaultMeasurement(Names.UMAP_2, MeasurementDimension.NONE);
 
 	@NonNull
 	Measurement PCA_1 = new DefaultMeasurement(Names.PCA_1, MeasurementDimension.NONE);

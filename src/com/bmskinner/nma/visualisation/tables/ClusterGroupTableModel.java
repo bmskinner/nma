@@ -12,6 +12,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import com.bmskinner.nma.analysis.classification.ClusteringMethod;
 import com.bmskinner.nma.analysis.classification.PrincipalComponentAnalysis;
 import com.bmskinner.nma.analysis.classification.TsneMethod;
+import com.bmskinner.nma.analysis.classification.UMAPMethod;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.datasets.IClusterGroup;
 import com.bmskinner.nma.components.measure.Measurement;
@@ -99,6 +100,7 @@ public class ClusterGroupTableModel extends DatasetTableModel {
 
 		HashOptions op = opn.get();
 		if (op.getBoolean(HashOptions.CLUSTER_USE_TSNE_KEY)
+				|| op.getBoolean(HashOptions.CLUSTER_USE_UMAP_KEY)
 				|| op.getBoolean(HashOptions.CLUSTER_USE_PCA_KEY)) {
 			builder.append(Labels.Clusters.VIEW_PLOT);
 		}
@@ -165,6 +167,18 @@ public class ClusterGroupTableModel extends DatasetTableModel {
 							+ Io.NEWLINE);
 			builder.append(Labels.Clusters.TSNE_MAX_ITER + ": "
 					+ op.getInt(TsneMethod.MAX_ITERATIONS_KEY));
+		}
+
+		if (op.getBoolean(HashOptions.CLUSTER_USE_UMAP_KEY)) {
+			builder.append(Labels.Clusters.UMAP + Io.NEWLINE);
+			builder.append(
+					Labels.Clusters.UMAP_N_NEIGHTBOURS + ": "
+							+ op.getInt(UMAPMethod.N_NEIGHBOUR_KEY)
+							+ Io.NEWLINE);
+			builder.append(
+					Labels.Clusters.UMAP_MIN_DIST + ": "
+							+ op.getFloat(UMAPMethod.MIN_DISTANCE_KEY)
+							+ Io.NEWLINE);
 		}
 
 		if (op.getBoolean(HashOptions.CLUSTER_USE_PCA_KEY)) {

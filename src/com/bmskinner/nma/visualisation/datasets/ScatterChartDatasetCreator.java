@@ -40,7 +40,7 @@ import com.bmskinner.nma.components.rules.OrientationMark;
 import com.bmskinner.nma.components.signals.INuclearSignal;
 import com.bmskinner.nma.components.signals.ISignalGroup;
 import com.bmskinner.nma.components.signals.SignalManager;
-import com.bmskinner.nma.gui.dialogs.TsneDialog.ColourByType;
+import com.bmskinner.nma.gui.dialogs.DimensionalityReductionPlotDialog.ColourByType;
 import com.bmskinner.nma.logging.Loggable;
 import com.bmskinner.nma.visualisation.options.ChartOptions;
 
@@ -51,225 +51,253 @@ import com.bmskinner.nma.visualisation.options.ChartOptions;
  *
  */
 public class ScatterChartDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
-	
-	private static final Logger LOGGER = Logger.getLogger(ScatterChartDatasetCreator.class.getName());
-	
-    /**
-     * Construct with an options
-     * 
-     * @param options the chart options
-     */
-    public ScatterChartDatasetCreator(@NonNull final ChartOptions options) {
-        super(options);
-    }
 
-    /**
-     * Create a scatter dataset for the given statistics for each analysis
-     * dataset
-     * 
-     * @return a charting dataset
-     * @throws ChartDatasetCreationException
-     */
-    public XYDataset createScatterDataset(String component) throws ChartDatasetCreationException {
+	private static final Logger LOGGER = Logger
+			.getLogger(ScatterChartDatasetCreator.class.getName());
 
-        if (CellularComponent.NUCLEUS.equals(component)) {
-            return createNucleusScatterDataset();
-        }
+	/**
+	 * Construct with an options
+	 * 
+	 * @param options the chart options
+	 */
+	public ScatterChartDatasetCreator(@NonNull final ChartOptions options) {
+		super(options);
+	}
 
-        if (CellularComponent.NUCLEAR_SIGNAL.equals(component)) {
-            return createSignalScatterDataset();
-        }
+	/**
+	 * Create a scatter dataset for the given statistics for each analysis dataset
+	 * 
+	 * @return a charting dataset
+	 * @throws ChartDatasetCreationException
+	 */
+	public XYDataset createScatterDataset(String component) throws ChartDatasetCreationException {
 
-        throw new ChartDatasetCreationException("Component not recognised: " + component);
+		if (CellularComponent.NUCLEUS.equals(component)) {
+			return createNucleusScatterDataset();
+		}
 
-    }
+		if (CellularComponent.NUCLEAR_SIGNAL.equals(component)) {
+			return createSignalScatterDataset();
+		}
 
-    /**
-     * Get a boxplot dataset for the given statistic for each collection
-     * 
-     * @param options the charting options
-     * @return
-     * @throws ChartDatasetCreationException
-     */
-    private XYDataset createNucleusScatterDataset() throws ChartDatasetCreationException {
+		throw new ChartDatasetCreationException("Component not recognised: " + component);
 
-        DefaultXYDataset ds = new DefaultXYDataset();
+	}
 
-        if (!options.hasDatasets())
-            return ds;
+	/**
+	 * Get a boxplot dataset for the given statistic for each collection
+	 * 
+	 * @param options the charting options
+	 * @return
+	 * @throws ChartDatasetCreationException
+	 */
+	private XYDataset createNucleusScatterDataset() throws ChartDatasetCreationException {
 
-        List<IAnalysisDataset> datasets = options.getDatasets();
+		DefaultXYDataset ds = new DefaultXYDataset();
 
-        MeasurementScale scale = options.getScale();
+		if (!options.hasDatasets())
+			return ds;
 
-        Measurement statA = options.getStat(0);
-        Measurement statB = options.getStat(1);
+		List<IAnalysisDataset> datasets = options.getDatasets();
 
-        for (int i = 0; i < datasets.size(); i++) {
+		MeasurementScale scale = options.getScale();
 
-            ICellCollection c = datasets.get(i).getCollection();
-            
-            // to make charts more responsive, only take n nuclei
-            int count = Math.min(c.getNucleusCount(), MAX_SCATTER_CHART_ITEMS);
-            double[] xpoints = new double[count];
-            double[] ypoints = new double[count];
-            
-            List<Nucleus> nuclei = new ArrayList<>();
-            nuclei.addAll(c.getNuclei());
-            Collections.shuffle(nuclei);
-            
-            for(int j=0; j<count; j++) {
-            	Nucleus n = nuclei.get(j);
-                double statAValue;
-                double statBValue;
+		Measurement statA = options.getStat(0);
+		Measurement statB = options.getStat(1);
 
-                try {
+		for (int i = 0; i < datasets.size(); i++) {
 
-                    if (statA.equals(Measurement.VARIABILITY))
-                        statAValue = c.getNormalisedDifferenceToMedian(OrientationMark.REFERENCE, n);
-                    else
-                        statAValue = n.getMeasurement(statA, scale);
-                    
+			ICellCollection c = datasets.get(i).getCollection();
 
-                    if (statB.equals(Measurement.VARIABILITY))
-                        statBValue = c.getNormalisedDifferenceToMedian(OrientationMark.REFERENCE, n);
-                    else
-                        statBValue = n.getMeasurement(statB, scale);
-                    
-                } catch (MissingLandmarkException e) {
-                    LOGGER.log(Loggable.STACK, "Tag not present in cell", e);
-                    statAValue = Statistical.ERROR_CALCULATING_STAT;
-                    statBValue = Statistical.ERROR_CALCULATING_STAT;
-                }
+			// to make charts more responsive, only take n nuclei
+			int count = Math.min(c.getNucleusCount(), MAX_SCATTER_CHART_ITEMS);
+			double[] xpoints = new double[count];
+			double[] ypoints = new double[count];
 
-                xpoints[j] = statAValue;
-                ypoints[j] = statBValue;
-            }
+			List<Nucleus> nuclei = new ArrayList<>();
+			nuclei.addAll(c.getNuclei());
+			Collections.shuffle(nuclei);
 
-            double[][] data = { xpoints, ypoints };
-            ds.addSeries(c.getName(), data);
+			for (int j = 0; j < count; j++) {
+				Nucleus n = nuclei.get(j);
+				double statAValue;
+				double statBValue;
 
-        }
+				try {
 
-        return ds;
-    }
+					if (statA.equals(Measurement.VARIABILITY))
+						statAValue = c.getNormalisedDifferenceToMedian(OrientationMark.REFERENCE,
+								n);
+					else
+						statAValue = n.getMeasurement(statA, scale);
 
-    /**
-     * Get a boxplot dataset for the given statistic for each collection
-     * 
-     * @param options the charting options
-     * @return
-     * @throws ChartDatasetCreationException
-     * @throws Exception
-     */
-    private SignalXYDataset createSignalScatterDataset() throws ChartDatasetCreationException {
-        List<IAnalysisDataset> datasets = options.getDatasets();
+					if (statB.equals(Measurement.VARIABILITY))
+						statBValue = c.getNormalisedDifferenceToMedian(OrientationMark.REFERENCE,
+								n);
+					else
+						statBValue = n.getMeasurement(statB, scale);
 
-        List<Measurement> stats = options.getStats();
+				} catch (MissingLandmarkException e) {
+					LOGGER.log(Loggable.STACK, "Tag not present in cell", e);
+					statAValue = Statistical.ERROR_CALCULATING_STAT;
+					statBValue = Statistical.ERROR_CALCULATING_STAT;
+				}
 
-        MeasurementScale scale = options.getScale();
+				xpoints[j] = statAValue;
+				ypoints[j] = statBValue;
+			}
 
-        Measurement statA = stats.get(0);
-        Measurement statB = stats.get(1);
+			double[][] data = { xpoints, ypoints };
+			ds.addSeries(c.getName(), data);
 
-        SignalXYDataset ds = new SignalXYDataset();
+		}
 
-        for (int i = 0; i < datasets.size(); i++) {
+		return ds;
+	}
 
-            ICellCollection c = datasets.get(i).getCollection();
-            SignalManager m = c.getSignalManager();
+	/**
+	 * Get a boxplot dataset for the given statistic for each collection
+	 * 
+	 * @param options the charting options
+	 * @return
+	 * @throws ChartDatasetCreationException
+	 * @throws Exception
+	 */
+	private SignalXYDataset createSignalScatterDataset() throws ChartDatasetCreationException {
+		List<IAnalysisDataset> datasets = options.getDatasets();
 
-            for (@NonNull UUID id : m.getSignalGroupIDs()) {
+		List<Measurement> stats = options.getStats();
 
-                ISignalGroup gp = c.getSignalGroup(id).get();
+		MeasurementScale scale = options.getScale();
 
-                int signalCount = m.getSignalCount(id);
+		Measurement statA = stats.get(0);
+		Measurement statB = stats.get(1);
 
-                double[] xpoints = new double[signalCount];
-                double[] ypoints = new double[signalCount];
+		SignalXYDataset ds = new SignalXYDataset();
 
-                List<INuclearSignal> list = m.getSignals(id);
+		for (int i = 0; i < datasets.size(); i++) {
 
-                for (int j = 0; j < signalCount; j++) {
-                    xpoints[j] = list.get(j).getMeasurement(statA, scale);
-                    ypoints[j] = list.get(j).getMeasurement(statB, scale);
-                }
+			ICellCollection c = datasets.get(i).getCollection();
+			SignalManager m = c.getSignalManager();
 
-                double[][] data = { xpoints, ypoints };
+			for (@NonNull
+			UUID id : m.getSignalGroupIDs()) {
 
-                String seriesKey = c.getName() + "_" + gp.getGroupName();
-                ds.addSeries(seriesKey, data);
-                ds.addDataset(datasets.get(i), seriesKey);
-                ds.addSignalGroup(gp, seriesKey);
-                ds.addSignalId(id, seriesKey);
+				ISignalGroup gp = c.getSignalGroup(id).get();
 
-            }
+				int signalCount = m.getSignalCount(id);
 
-        }
+				double[] xpoints = new double[signalCount];
+				double[] ypoints = new double[signalCount];
 
-        return ds;
-    }
+				List<INuclearSignal> list = m.getSignals(id);
 
-    /**
-     * A temporary method to create tSNE and PCA plots
-     * @param r
-     * @return
-     * @throws ChartDatasetCreationException
-     */
-    public static XYDataset createTsneScatterDataset(IAnalysisDataset d, ColourByType type, IClusterGroup plotGroup, IClusterGroup colourGroup) throws ChartDatasetCreationException {
-    	ComponentXYDataset<Nucleus> ds = new ComponentXYDataset<>();
-    	
-    	//TODO: add an input parameter for which method we want to display
-    	String prefix1 = plotGroup.getOptions().get().getBoolean(HashOptions.CLUSTER_USE_PCA_KEY) ? "PC1_" : "TSNE_1_";
-    	String prefix2 = plotGroup.getOptions().get().getBoolean(HashOptions.CLUSTER_USE_PCA_KEY) ? "PC2_" : "TSNE_2_";
-    	
-    	if(type.equals(ColourByType.CLUSTER) && colourGroup==null)
-    		type = ColourByType.NONE;
-    	
-    	if(type.equals(ColourByType.MERGE_SOURCE) && !d.hasMergeSources())
-    		type = ColourByType.NONE;
-    	
-    	if(type.equals(ColourByType.MERGE_SOURCE)) {
-    		for(IAnalysisDataset mergeSource : d.getMergeSources()) {
-    			List<Nucleus> nuclei = new ArrayList<>(mergeSource.getCollection().getNuclei());
-    			double[][] data = createTsneValues(nuclei, prefix1+plotGroup.getId(), prefix2+plotGroup.getId());
-    	    	ds.addSeries(mergeSource.getName(), data, nuclei);
-    		}
-    		return ds;
-    	}
-    	
-    	if(type.equals(ColourByType.NONE)) {
-    		List<Nucleus> nuclei = new ArrayList<>(d.getCollection().getNuclei());
-    		double[][] data = createTsneValues(nuclei, prefix1+plotGroup.getId(), prefix2+plotGroup.getId());
-    		ds.addSeries("All nuclei", data, nuclei);
-    		return ds;
-    	}
-    	
-    	if(type.equals(ColourByType.CLUSTER)) {
-    		// colourGroup cannot be null here, we changed type earlier if it was
-    		for(UUID childId : colourGroup.getUUIDs()) {
-    			IAnalysisDataset childDataset = d.getChildDataset(childId);
-    			List<Nucleus> nuclei = new ArrayList<>(childDataset.getCollection().getNuclei());
-    			double[][] data = createTsneValues(nuclei, prefix1+plotGroup.getId(), prefix2+plotGroup.getId());
-    	    	ds.addSeries(childDataset.getName(), data, nuclei);
-    		}
-    		return ds;
-    	}
-    	return ds;
-    }
-    
-    private static double[][] createTsneValues(List<Nucleus> nuclei, String xStatName, String yStatName){
-    	double[] xpoints = new double[nuclei.size()];
-        double[] ypoints = new double[nuclei.size()];
-        
-        // need to transpose the matrix
-        for(int i=0; i<nuclei.size(); i++) {
-        	Nucleus n = nuclei.get(i);
-        	Measurement tsne1 = n.getMeasurements().stream().filter(s->s.name().equals(xStatName)).findFirst().orElse(Measurement.TSNE_1);
-        	Measurement tsne2 = n.getMeasurements().stream().filter(s->s.name().equals(yStatName)).findFirst().orElse(Measurement.TSNE_2);
-        	xpoints[i] = n.getMeasurement(tsne1);
-        	ypoints[i] = n.getMeasurement(tsne2);
-        }
-    	return new double[][] { xpoints, ypoints };
-    }
+				for (int j = 0; j < signalCount; j++) {
+					xpoints[j] = list.get(j).getMeasurement(statA, scale);
+					ypoints[j] = list.get(j).getMeasurement(statB, scale);
+				}
+
+				double[][] data = { xpoints, ypoints };
+
+				String seriesKey = c.getName() + "_" + gp.getGroupName();
+				ds.addSeries(seriesKey, data);
+				ds.addDataset(datasets.get(i), seriesKey);
+				ds.addSignalGroup(gp, seriesKey);
+				ds.addSignalId(id, seriesKey);
+
+			}
+
+		}
+
+		return ds;
+	}
+
+	/**
+	 * A temporary method to create tSNE and PCA plots
+	 * 
+	 * @param r
+	 * @return
+	 * @throws ChartDatasetCreationException
+	 */
+	public static XYDataset createDimensionalityReductionScatterDataset(IAnalysisDataset d,
+			ColourByType type,
+			IClusterGroup plotGroup, IClusterGroup colourGroup)
+			throws ChartDatasetCreationException {
+		ComponentXYDataset<Nucleus> ds = new ComponentXYDataset<>();
+
+		boolean isUMAP = plotGroup.getOptions().get()
+				.getBoolean(HashOptions.CLUSTER_USE_UMAP_KEY);
+		boolean isTsne = plotGroup.getOptions().get()
+				.getBoolean(HashOptions.CLUSTER_USE_TSNE_KEY);
+		boolean isPca = plotGroup.getOptions().get()
+				.getBoolean(HashOptions.CLUSTER_USE_PCA_KEY);
+
+		// TODO: add an input parameter for which method we want to display
+		String prefix1 = isUMAP ? Measurement.UMAP_1.name().replace(" ", "_") + "_"
+				: isTsne ? "TSNE_1_" : "PC1_";
+		String prefix2 = isUMAP ? Measurement.UMAP_2.name().replace(" ", "_") + "_"
+				: isTsne ? "TSNE_2_" : "PC2_";
+
+		if (type.equals(ColourByType.CLUSTER) && colourGroup == null)
+			type = ColourByType.NONE;
+
+		if (type.equals(ColourByType.MERGE_SOURCE) && !d.hasMergeSources())
+			type = ColourByType.NONE;
+
+		if (type.equals(ColourByType.MERGE_SOURCE)) {
+			for (IAnalysisDataset mergeSource : d.getMergeSources()) {
+				List<Nucleus> nuclei = new ArrayList<>(mergeSource.getCollection().getNuclei());
+				double[][] data = createDimensionalityReductionValues(nuclei,
+						prefix1 + plotGroup.getId(),
+						prefix2 + plotGroup.getId());
+				ds.addSeries(mergeSource.getName(), data, nuclei);
+			}
+			return ds;
+		}
+
+		if (type.equals(ColourByType.NONE)) {
+			List<Nucleus> nuclei = new ArrayList<>(d.getCollection().getNuclei());
+			double[][] data = createDimensionalityReductionValues(nuclei,
+					prefix1 + plotGroup.getId(),
+					prefix2 + plotGroup.getId());
+			ds.addSeries("All nuclei", data, nuclei);
+			return ds;
+		}
+
+		if (type.equals(ColourByType.CLUSTER)) {
+			// colourGroup cannot be null here, we changed type earlier if it was
+			for (UUID childId : colourGroup.getUUIDs()) {
+				IAnalysisDataset childDataset = d.getChildDataset(childId);
+				List<Nucleus> nuclei = new ArrayList<>(childDataset.getCollection().getNuclei());
+				double[][] data = createDimensionalityReductionValues(nuclei,
+						prefix1 + plotGroup.getId(),
+						prefix2 + plotGroup.getId());
+				ds.addSeries(childDataset.getName(), data, nuclei);
+			}
+			return ds;
+		}
+		return ds;
+	}
+
+	private static double[][] createDimensionalityReductionValues(List<Nucleus> nuclei,
+			String xStatName,
+			String yStatName) {
+		double[] xpoints = new double[nuclei.size()];
+		double[] ypoints = new double[nuclei.size()];
+
+		// need to transpose the matrix
+		for (int i = 0; i < nuclei.size(); i++) {
+			Nucleus n = nuclei.get(i);
+			Measurement dim1 = n.getMeasurements().stream().filter(s -> s.name().equals(xStatName))
+					.findFirst()
+					.orElseThrow(() -> new IllegalArgumentException(
+							"No measurement called " + xStatName));
+			Measurement dim2 = n.getMeasurements().stream().filter(s -> s.name().equals(yStatName))
+					.findFirst().orElseThrow(() -> new IllegalArgumentException(
+							"No measurement called " + yStatName));
+			xpoints[i] = n.getMeasurement(dim1);
+			ypoints[i] = n.getMeasurement(dim2);
+		}
+		return new double[][] { xpoints, ypoints };
+	}
 }

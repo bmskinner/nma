@@ -38,7 +38,7 @@ import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.signals.ISignalGroup;
 import com.bmskinner.nma.gui.components.ColourSelecter;
-import com.bmskinner.nma.gui.dialogs.TsneDialog.ColourByType;
+import com.bmskinner.nma.gui.dialogs.DimensionalityReductionPlotDialog.ColourByType;
 import com.bmskinner.nma.logging.Loggable;
 import com.bmskinner.nma.visualisation.ChartComponents;
 import com.bmskinner.nma.visualisation.datasets.ChartDatasetCreationException;
@@ -48,210 +48,225 @@ import com.bmskinner.nma.visualisation.options.ChartOptions;
 
 /**
  * Factory for creating scatter plots from a given options set
+ * 
  * @author Ben Skinner
  *
  */
 public class ScatterChartFactory extends AbstractChartFactory {
-	
+
 	private static final Logger LOGGER = Logger.getLogger(ScatterChartFactory.class.getName());
 
-    /**
-     * Create with options describing the chart to be built
-     * @param o
-     */
-    public ScatterChartFactory(@NonNull ChartOptions o) {
-        super(o);
-    }
+	/**
+	 * Create with options describing the chart to be built
+	 * 
+	 * @param o
+	 */
+	public ScatterChartFactory(@NonNull ChartOptions o) {
+		super(o);
+	}
 
+	/**
+	 * Create a scatter plot of two nucleus statistics
+	 * 
+	 * @param options
+	 * @return
+	 */
+	public JFreeChart createScatterChart(String component) {
 
-    /**
-     * Create a scatter plot of two nucleus statistics
-     * 
-     * @param options
-     * @return
-     */
-    public JFreeChart createScatterChart(String component) {
-    	
-    	try {
+		try {
 
-        if (!options.hasDatasets())
-            return createEmptyChart();
+			if (!options.hasDatasets())
+				return createEmptyChart();
 
-        if (options.getStats().size() != 2)
-            return createTextAnnotatedEmptyChart("Only one variable selected");
+			if (options.getStats().size() != 2)
+				return createTextAnnotatedEmptyChart("Only one variable selected");
 
-        Measurement firstStat = options.getMeasurement();
+			Measurement firstStat = options.getMeasurement();
 
-        for (Measurement stat : options.getStats()) {
-            if (!stat.getClass().equals(firstStat.getClass())) {
-                LOGGER.fine("Statistic classes are different");
-                return createTextAnnotatedEmptyChart("Variable classes are different");
-            }
-        }
+			for (Measurement stat : options.getStats()) {
+				if (!stat.getClass().equals(firstStat.getClass())) {
+					LOGGER.fine("Statistic classes are different");
+					return createTextAnnotatedEmptyChart("Variable classes are different");
+				}
+			}
 
-        if (CellularComponent.NUCLEUS.equals(component))
-            return createNucleusStatisticScatterChart();
+			if (CellularComponent.NUCLEUS.equals(component))
+				return createNucleusStatisticScatterChart();
 
-        if (CellularComponent.NUCLEAR_SIGNAL.equals(component))
-            return createSignalStatisticScatterChart();
-        
-    	} catch(ChartDatasetCreationException e) {
-    		LOGGER.log(Loggable.STACK, e.getMessage(), e);
-    		return createErrorChart();
-    	}
+			if (CellularComponent.NUCLEAR_SIGNAL.equals(component))
+				return createSignalStatisticScatterChart();
 
-        return createEmptyChart();
-    }
+		} catch (ChartDatasetCreationException e) {
+			LOGGER.log(Loggable.STACK, e.getMessage(), e);
+			return createErrorChart();
+		}
 
-    /**
-     * Create a scatter plot of two nucleus statistics
-     * @return
-     */
-    public JFreeChart createNucleusStatisticScatterChart() throws ChartDatasetCreationException {
+		return createEmptyChart();
+	}
 
-        XYDataset ds = new ScatterChartDatasetCreator(options).createScatterDataset(CellularComponent.NUCLEUS);
+	/**
+	 * Create a scatter plot of two nucleus statistics
+	 * 
+	 * @return
+	 */
+	public JFreeChart createNucleusStatisticScatterChart() throws ChartDatasetCreationException {
 
-        String xLabel = options.getStat(0).label(options.getScale());
-        String yLabel = options.getStat(1).label(options.getScale());
+		XYDataset ds = new ScatterChartDatasetCreator(options)
+				.createScatterDataset(CellularComponent.NUCLEUS);
 
-        JFreeChart chart = createBaseXYChart(xLabel, yLabel, ds);
+		String xLabel = options.getStat(0).label(options.getScale());
+		String yLabel = options.getStat(1).label(options.getScale());
 
-        XYPlot plot = chart.getXYPlot();
+		JFreeChart chart = createBaseXYChart(xLabel, yLabel, ds);
 
-        NumberAxis yAxis = (NumberAxis) plot.getRangeAxis();
-        yAxis.setAutoRangeIncludesZero(false);
+		XYPlot plot = chart.getXYPlot();
 
-        XYItemRenderer renderer = new ScatterChartRenderer();
-        plot.setRenderer(renderer);
+		NumberAxis yAxis = (NumberAxis) plot.getRangeAxis();
+		yAxis.setAutoRangeIncludesZero(false);
 
-        applySingleXYDatasetColours(plot);
+		XYItemRenderer renderer = new ScatterChartRenderer();
+		plot.setRenderer(renderer);
 
-        return chart;
-    }
+		applySingleXYDatasetColours(plot);
 
-    /**
-     * Create a scatter plot of two nucleus statistics
-     * 
-     * @param options
-     * @return
-     */
-    public JFreeChart createSignalStatisticScatterChart() {
+		return chart;
+	}
 
-        SignalXYDataset ds;
-        try {
-            ds = (SignalXYDataset) new ScatterChartDatasetCreator(options)
-                    .createScatterDataset(CellularComponent.NUCLEAR_SIGNAL);
-        } catch (ChartDatasetCreationException e) {
-            LOGGER.log(Loggable.STACK, "Error creating scatter dataset", e);
-            return createErrorChart();
-        }
+	/**
+	 * Create a scatter plot of two nucleus statistics
+	 * 
+	 * @param options
+	 * @return
+	 */
+	public JFreeChart createSignalStatisticScatterChart() {
 
-        String xLabel = options.getStat(0).label(options.getScale());
-        String yLabel = options.getStat(1).label(options.getScale());
+		SignalXYDataset ds;
+		try {
+			ds = (SignalXYDataset) new ScatterChartDatasetCreator(options)
+					.createScatterDataset(CellularComponent.NUCLEAR_SIGNAL);
+		} catch (ChartDatasetCreationException e) {
+			LOGGER.log(Loggable.STACK, "Error creating scatter dataset", e);
+			return createErrorChart();
+		}
 
-        JFreeChart chart = createBaseXYChart(xLabel, yLabel, ds);
+		String xLabel = options.getStat(0).label(options.getScale());
+		String yLabel = options.getStat(1).label(options.getScale());
 
-        XYPlot plot = chart.getXYPlot();
+		JFreeChart chart = createBaseXYChart(xLabel, yLabel, ds);
 
-        NumberAxis yAxis = (NumberAxis) plot.getRangeAxis();
-        yAxis.setAutoRangeIncludesZero(false);
+		XYPlot plot = chart.getXYPlot();
 
-        XYItemRenderer renderer = new ScatterChartRenderer();
+		NumberAxis yAxis = (NumberAxis) plot.getRangeAxis();
+		yAxis.setAutoRangeIncludesZero(false);
 
-        plot.setRenderer(renderer);
+		XYItemRenderer renderer = new ScatterChartRenderer();
 
-        int seriesCount = plot.getDataset().getSeriesCount();
+		plot.setRenderer(renderer);
 
-        for (int i = 0; i < seriesCount; i++) {
+		int seriesCount = plot.getDataset().getSeriesCount();
 
-            String seriesKey = ds.getSeriesKey(i).toString();
-            ds.getSignalGroup(seriesKey);
+		for (int i = 0; i < seriesCount; i++) {
 
-            IAnalysisDataset d = ds.getDataset(seriesKey);
-            UUID id = ds.getSignalId(seriesKey);
-            Optional<ISignalGroup> g = d.getCollection().getSignalGroup(id);
-            if(g.isPresent()){
-            	Paint colour = g.get().getGroupColour().orElse(ColourSelecter.getColor(i));
-            	renderer.setSeriesPaint(i, colour);
-            }
-        }
-        return chart;
-    }
+			String seriesKey = ds.getSeriesKey(i).toString();
+			ds.getSignalGroup(seriesKey);
 
-   
-    /**
-     * Temporary method to create tSNE plots
-     * @param r
-     * @return
-     * @throws ChartDatasetCreationException
-     */
-    public static JFreeChart createTsneChart(IAnalysisDataset d, ColourByType type, IClusterGroup plotGroup, IClusterGroup colourGroup)  {
-    	
-    	try {
-    		XYDataset ds = ScatterChartDatasetCreator.createTsneScatterDataset(d, type, plotGroup, colourGroup);
-    		
-    		//TODO: add an input parameter for which method we want to display
-    		String prefix = plotGroup.getOptions().get().getBoolean(HashOptions.CLUSTER_USE_PCA_KEY) ? "PC " : "t-SNE ";
-    		
-    		String xLabel = prefix+"1";
-    		String yLabel = prefix+"2";
+			IAnalysisDataset d = ds.getDataset(seriesKey);
+			UUID id = ds.getSignalId(seriesKey);
+			Optional<ISignalGroup> g = d.getCollection().getSignalGroup(id);
+			if (g.isPresent()) {
+				Paint colour = g.get().getGroupColour().orElse(ColourSelecter.getColor(i));
+				renderer.setSeriesPaint(i, colour);
+			}
+		}
+		return chart;
+	}
 
-    		JFreeChart chart = createBaseXYChart(xLabel, yLabel, ds);
+	/**
+	 * Temporary method to create tSNE plots
+	 * 
+	 * @param r
+	 * @return
+	 * @throws ChartDatasetCreationException
+	 */
+	public static JFreeChart createDimensionalityReductionChart(IAnalysisDataset d,
+			ColourByType type,
+			IClusterGroup plotGroup, IClusterGroup colourGroup) {
 
-    		XYPlot plot = chart.getXYPlot();
+		try {
+			XYDataset ds = ScatterChartDatasetCreator.createDimensionalityReductionScatterDataset(d,
+					type, plotGroup,
+					colourGroup);
 
-    		NumberAxis yAxis = (NumberAxis) plot.getRangeAxis();
-    		yAxis.setAutoRangeIncludesZero(false);
+			// TODO: add an input parameter for which method we want to display
 
-    		XYItemRenderer renderer = new ScatterChartRenderer();
-    		plot.setRenderer(renderer);
-    		
-    		for (int i = 0; i < plot.getDataset().getSeriesCount(); i++) {
-    			Paint colour = ColourSelecter.getColor(i);
-    			renderer.setSeriesPaint(i, colour);
-    		}
+			boolean isUMAP = plotGroup.getOptions().get()
+					.getBoolean(HashOptions.CLUSTER_USE_UMAP_KEY);
+			boolean isTsne = plotGroup.getOptions().get()
+					.getBoolean(HashOptions.CLUSTER_USE_TSNE_KEY);
+			boolean isPca = plotGroup.getOptions().get()
+					.getBoolean(HashOptions.CLUSTER_USE_PCA_KEY);
 
-    		// Add a legend
-    		chart.addLegend(new LegendTitle(plot));
+			String prefix = isUMAP ? "UMAP " : isTsne ? "t-SNE " : "PC";
 
-    		return chart;
-    	} catch(ChartDatasetCreationException e) {
-    		return createErrorChart();
-    	}
-    }
-    
-    /**
-     * Overrides the methods of the DefaultXYItemRenderer to use a consistent
-     * point shape and not display lines.
-     * 
-     * @author ben
-     * @since 1.13.4
-     *
-     */
-    private static class ScatterChartRenderer extends DefaultXYItemRenderer {
+			String xLabel = prefix + "1";
+			String yLabel = prefix + "2";
 
-        private static final long serialVersionUID = 1L;
+			JFreeChart chart = createBaseXYChart(xLabel, yLabel, ds);
 
-        public ScatterChartRenderer() {
-            super();
-            setDefaultShapesVisible(true);
-            setDefaultShape(ChartComponents.DEFAULT_POINT_SHAPE);
-        }
+			XYPlot plot = chart.getXYPlot();
 
-        @Override
-        public Boolean getSeriesLinesVisible(int series) {
-            return false;
-        }
+			NumberAxis yAxis = (NumberAxis) plot.getRangeAxis();
+			yAxis.setAutoRangeIncludesZero(false);
 
-        @Override
-        public Boolean getSeriesVisibleInLegend(int series) {
-            return false;
-        }
+			XYItemRenderer renderer = new ScatterChartRenderer();
+			plot.setRenderer(renderer);
 
-        @Override
-        public Shape getSeriesShape(int series) {
-            return this.getDefaultShape();
-        }
+			for (int i = 0; i < plot.getDataset().getSeriesCount(); i++) {
+				Paint colour = ColourSelecter.getColor(i);
+				renderer.setSeriesPaint(i, colour);
+			}
 
-    }
+			// Add a legend
+			chart.addLegend(new LegendTitle(plot));
+
+			return chart;
+		} catch (ChartDatasetCreationException e) {
+			return createErrorChart();
+		}
+	}
+
+	/**
+	 * Overrides the methods of the DefaultXYItemRenderer to use a consistent point
+	 * shape and not display lines.
+	 * 
+	 * @author ben
+	 * @since 1.13.4
+	 *
+	 */
+	private static class ScatterChartRenderer extends DefaultXYItemRenderer {
+
+		private static final long serialVersionUID = 1L;
+
+		public ScatterChartRenderer() {
+			super();
+			setDefaultShapesVisible(true);
+			setDefaultShape(ChartComponents.DEFAULT_POINT_SHAPE);
+		}
+
+		@Override
+		public Boolean getSeriesLinesVisible(int series) {
+			return false;
+		}
+
+		@Override
+		public Boolean getSeriesVisibleInLegend(int series) {
+			return false;
+		}
+
+		@Override
+		public Shape getSeriesShape(int series) {
+			return this.getDefaultShape();
+		}
+
+	}
 }

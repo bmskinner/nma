@@ -146,6 +146,17 @@ public class TreeBuildingMethod extends CellClusteringMethod {
 		return true;
 	}
 
+	private ArrayList<Attribute> makeUmapAttributes() {
+		ArrayList<Attribute> attributes = new ArrayList<>();
+		attributes.add(new Attribute("UMAP_X"));
+		attributes.add(new Attribute("UMAP_Y"));
+		if (ClusteringMethod.from(options).equals(ClusteringMethod.HIERARCHICAL)) {
+			Attribute name = new Attribute("name", (List<String>) null);
+			attributes.add(name);
+		}
+		return attributes;
+	}
+
 	private ArrayList<Attribute> makeTsneAttributes() {
 		ArrayList<Attribute> attributes = new ArrayList<>();
 		attributes.add(new Attribute("tSNE_X"));
@@ -186,6 +197,10 @@ public class TreeBuildingMethod extends CellClusteringMethod {
 		LOGGER.finer("Checking if PCA clustering is set");
 		if (options.getBoolean(HashOptions.CLUSTER_USE_PCA_KEY))
 			return makePCAttributes();
+
+		LOGGER.finer("Checking if UMAP clustering is set");
+		if (options.getBoolean(HashOptions.CLUSTER_USE_UMAP_KEY))
+			return (makeUmapAttributes());
 
 		LOGGER.finer("Creating attribute count on values directly");
 		// Determine the number of attributes required
@@ -354,6 +369,25 @@ public class TreeBuildingMethod extends CellClusteringMethod {
 
 	}
 
+	private void addUMAPNucleus(ICell c, Nucleus n, ArrayList<Attribute> attributes,
+			Instances instances) {
+		int attNumber = 0;
+		Instance inst = new SparseInstance(attributes.size());
+		Attribute attX = attributes.get(attNumber++);
+		inst.setValue(attX, n.getMeasurement(Measurement.UMAP_1));
+		Attribute attY = attributes.get(attNumber++);
+		inst.setValue(attY, n.getMeasurement(Measurement.UMAP_2));
+
+		if (ClusteringMethod.from(options).equals(ClusteringMethod.HIERARCHICAL)) {
+			String uniqueName = c.getId().toString();
+			Attribute att = attributes.get(attNumber++);
+			inst.setValue(att, uniqueName);
+		}
+		instances.add(inst);
+		cellToInstanceMap.put(inst, c.getId());
+		fireProgressEvent();
+	}
+
 	private void addTsneNucleus(ICell c, Nucleus n, ArrayList<Attribute> attributes,
 			Instances instances) {
 		int attNumber = 0;
@@ -400,6 +434,7 @@ public class TreeBuildingMethod extends CellClusteringMethod {
 			double windowProportion)
 			throws ProfileException, MeshCreationException, MissingComponentException {
 
+		// Shortcuts if dimensionality reduction is used first
 		if (options.getBoolean(HashOptions.CLUSTER_USE_TSNE_KEY)) {
 			addTsneNucleus(c, n, attributes, instances);
 			return;
@@ -407,6 +442,11 @@ public class TreeBuildingMethod extends CellClusteringMethod {
 
 		if (options.getBoolean(HashOptions.CLUSTER_USE_PCA_KEY)) {
 			addPCANucleus(c, n, attributes, instances);
+			return;
+		}
+
+		if (options.getBoolean(HashOptions.CLUSTER_USE_UMAP_KEY)) {
+			addUMAPNucleus(c, n, attributes, instances);
 			return;
 		}
 

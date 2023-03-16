@@ -42,7 +42,7 @@ import com.bmskinner.nma.gui.Labels;
 import com.bmskinner.nma.gui.components.ExportableTable;
 import com.bmskinner.nma.gui.components.renderers.JTextAreaCellRenderer;
 import com.bmskinner.nma.gui.dialogs.ClusterTreeDialog;
-import com.bmskinner.nma.gui.dialogs.TsneDialog;
+import com.bmskinner.nma.gui.dialogs.DimensionalityReductionPlotDialog;
 import com.bmskinner.nma.gui.events.ClusterGroupsUpdatedListener;
 import com.bmskinner.nma.gui.events.UIController;
 import com.bmskinner.nma.visualisation.options.TableOptions;
@@ -159,7 +159,7 @@ public class ClusterDetailPanel extends TableDetailPanel implements ClusterGroup
 				if (table.getValueAt(row, 0).equals(Labels.Clusters.CLUSTER_DIM_PLOT)
 						&& !table.getValueAt(row, col).equals(Labels.NA)) {
 					Runnable r = () -> {
-						new TsneDialog(d, group);
+						new DimensionalityReductionPlotDialog(d, group);
 					};
 					new Thread(r).start();
 				}

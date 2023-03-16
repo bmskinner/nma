@@ -19,6 +19,7 @@ package com.bmskinner.nma.components.options;
 import java.io.File;
 
 import com.bmskinner.nma.analysis.classification.TsneMethod;
+import com.bmskinner.nma.analysis.classification.UMAPMethod;
 import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.profiles.ProfileType;
@@ -260,6 +261,12 @@ public class OptionsFactory {
 		return new OptionsBuilder().withValue(TsneMethod.PERPLEXITY_KEY, 5)
 				.withValue(TsneMethod.MAX_ITERATIONS_KEY, 1000)
 				.withValue(TsneMethod.PROFILE_TYPE_KEY, ProfileType.ANGLE.toString());
+	}
+
+	public static OptionsBuilder makeDefaultUmapOptions() {
+		return new OptionsBuilder().withValue(UMAPMethod.N_NEIGHBOUR_KEY, 15)
+				.withValue(UMAPMethod.PROFILE_TYPE_KEY, ProfileType.ANGLE.toString())
+				.withValue(UMAPMethod.MIN_DISTANCE_KEY, 0.1f);
 	}
 
 }
