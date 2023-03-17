@@ -24,6 +24,9 @@ import java.awt.datatransfer.StringSelection;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.geom.Point2D;
@@ -116,6 +119,8 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 	/** Control if the axis scales should be set to maintain aspect ratio */
 	protected boolean isFixedAspectRatio = false;
 
+	protected boolean isPannable = false;
+
 	/** Used for subclasses with mouse listeners */
 	protected volatile boolean mouseIsDown = false;
 
@@ -198,6 +203,8 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 		// Add a scroll listener for zooming the chart
 		this.addMouseWheelListener(new ScrollWheelZoomListener());
 
+		this.setPannable(false);
+
 	}
 
 	private int calcHeightFromWidth(int w) {
@@ -244,6 +251,25 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 	 */
 	public boolean isFixedAspectRatio() {
 		return isFixedAspectRatio;
+	}
+
+	public void setPannable(boolean b) {
+		this.isPannable = b;
+		if (b) {
+
+			for (MouseListener l : this.getMouseListeners()) {
+				this.removeMouseListener(l);
+			}
+			MousePanListener mpl = new MousePanListener();
+			this.addMouseListener(mpl);
+			this.addMouseMotionListener(mpl);
+
+		} else {
+			for (MouseListener l : this.getMouseListeners()) {
+				if (l instanceof MousePanListener)
+					this.removeMouseListener(l);
+			}
+		}
 	}
 
 	/**
@@ -816,6 +842,80 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 		public void componentResized(ComponentEvent e) {
 			restoreAutoBounds();
 		}
+	}
+
+	public class MousePanListener implements MouseListener, MouseMotionListener {
+
+		Point2D startPoint = null;
+
+		@Override
+		public void mouseClicked(MouseEvent e) {
+			// TODO Auto-generated method stub
+
+		}
+
+		@Override
+		public void mousePressed(MouseEvent e) {
+			startPoint = getChartValuePosition(e.getPoint());
+
+		}
+
+		@Override
+		public void mouseReleased(MouseEvent e) {
+			startPoint = null;
+
+		}
+
+		@Override
+		public void mouseEntered(MouseEvent e) {
+			// TODO Auto-generated method stub
+
+		}
+
+		@Override
+		public void mouseExited(MouseEvent e) {
+			// TODO Auto-generated method stub
+
+		}
+
+		@Override
+		public void mouseDragged(MouseEvent e) {
+			if (getChart() == null)
+				return;
+
+			if (!(getChart().getPlot() instanceof XYPlot)) {
+				return;
+			}
+
+			XYPlot plot = getChart().getXYPlot();
+
+			XYDataset d = plot.getDataset();
+			if (d == null)
+				return;
+
+			if (startPoint != null) {
+
+				Point2D p = getChartValuePosition(e.getPoint());
+				double dx = startPoint.getX() - p.getX();
+				double dy = startPoint.getY() - p.getY();
+
+				Range xoriginal = plot.getDomainAxis().getRange();
+				Range yoriginal = plot.getRangeAxis().getRange();
+
+				plot.getDomainAxis().setRange(xoriginal.getLowerBound() + dx,
+						xoriginal.getUpperBound() + dx);
+				plot.getRangeAxis().setRange(yoriginal.getLowerBound() + dy,
+						yoriginal.getUpperBound() + dy);
+			}
+
+		}
+
+		@Override
+		public void mouseMoved(MouseEvent e) {
+			// TODO Auto-generated method stub
+
+		}
+
 	}
 
 	/**

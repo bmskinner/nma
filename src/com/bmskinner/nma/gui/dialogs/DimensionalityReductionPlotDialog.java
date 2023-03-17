@@ -37,11 +37,13 @@ public class DimensionalityReductionPlotDialog extends MessagingDialog {
 	private final ExportableChartPanel chartPanel = new ExportableChartPanel(
 			ScatterChartFactory.createEmptyChart());
 
-	public DimensionalityReductionPlotDialog(final @NonNull IAnalysisDataset dataset, final @NonNull IClusterGroup group) {
+	public DimensionalityReductionPlotDialog(final @NonNull IAnalysisDataset dataset,
+			final @NonNull IClusterGroup group) {
 		this.dataset = dataset;
 		this.group = group;
 
 		chartPanel.setFixedAspectRatio(true);
+		chartPanel.setPannable(true);
 		chartPanel.addChartMouseListener(new ImageThumbnailGenerator(chartPanel));
 
 		updateTitle();
@@ -103,7 +105,8 @@ public class DimensionalityReductionPlotDialog extends MessagingDialog {
 	}
 
 	private void updateChart(ColourByType type, IClusterGroup colourGroup) {
-		chartPanel.setChart(ScatterChartFactory.createDimensionalityReductionChart(dataset, type, group, colourGroup));
+		chartPanel.setChart(ScatterChartFactory.createDimensionalityReductionChart(dataset, type,
+				group, colourGroup));
 	}
 
 	private void updateTitle() {
