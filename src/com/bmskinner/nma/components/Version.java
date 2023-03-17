@@ -42,7 +42,7 @@ public class Version implements Serializable {
 	 * guaranteed between major version increments.
 	 */
 	public static final int VERSION_MAJOR = 2;
-	public static final int VERSION_MINOR = 0;
+	public static final int VERSION_MINOR = 1;
 	public static final int VERSION_REVISION = 0;
 
 	private final int major;
