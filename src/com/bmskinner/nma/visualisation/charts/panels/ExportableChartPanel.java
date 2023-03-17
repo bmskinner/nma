@@ -17,12 +17,17 @@
 package com.bmskinner.nma.visualisation.charts.panels;
 
 import java.awt.Component;
+import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
+import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -48,6 +53,7 @@ import org.jfree.chart.encoders.EncoderUtil;
 import org.jfree.chart.encoders.ImageFormat;
 import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.XYPlot;
+import org.jfree.data.Range;
 import org.jfree.data.general.DatasetUtils;
 import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
 import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
@@ -189,6 +195,9 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 			}
 		});
 
+		// Add a scroll listener for zooming the chart
+		this.addMouseWheelListener(new ScrollWheelZoomListener());
+
 	}
 
 	private int calcHeightFromWidth(int w) {
@@ -316,11 +325,7 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 			}
 
 			// Calculate the panel aspect ratio
-
 			double aspectRatio = chartWidth / chartHeight;
-
-			LOGGER.finest(
-					"Plot w: " + chartWidth + "; h: " + chartHeight + "; asp: " + aspectRatio);
 
 			// start with impossible values, before finding the real chart
 			// values
@@ -777,6 +782,35 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 		listeners.remove(l);
 	}
 
+	@Override
+	public void chartSetEventReceived(ChartSetEvent e) {
+		// TODO Auto-generated method stub
+
+	}
+
+	/**
+	 * Get the position of the given point in chart value coordinates
+	 * 
+	 * @param panelPoint
+	 * @return
+	 */
+	protected Point2D getChartValuePosition(Point panelPoint) {
+
+		// Translate the panel location on screen to a Java2D point
+		Point2D p = translateScreenToJava2D(panelPoint);
+
+		// Get the area covered by the panel
+		Rectangle2D plotArea = getChartRenderingInfo().getPlotInfo().getDataArea();
+
+		XYPlot plot = (XYPlot) getChart().getPlot();
+
+		double x = plot.getDomainAxis().java2DToValue(p.getX(), plotArea, plot.getDomainAxisEdge());
+		double y = plot.getRangeAxis().java2DToValue(p.getY(), plotArea, plot.getRangeAxisEdge());
+
+		return new Point2D.Double(x, y);
+
+	}
+
 	public class FixedAspectAdapter extends ComponentAdapter {
 		@Override
 		public void componentResized(ComponentEvent e) {
@@ -784,9 +818,73 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 		}
 	}
 
-	@Override
-	public void chartSetEventReceived(ChartSetEvent e) {
-		// TODO Auto-generated method stub
+	/**
+	 * Change the zoom of the chart based on scrolling
+	 * 
+	 * @author bs19022
+	 *
+	 */
+	public class ScrollWheelZoomListener implements MouseWheelListener {
+
+		@Override
+		public void mouseWheelMoved(MouseWheelEvent e) {
+			if (getChart() == null)
+				return;
+
+			if (!(getChart().getPlot() instanceof XYPlot)) {
+				return;
+			}
+
+			XYPlot plot = getChart().getXYPlot();
+
+			XYDataset d = plot.getDataset();
+			if (d == null)
+				return;
+
+			Point2D p = getChartValuePosition(e.getPoint());
+			if (e.getUnitsToScroll() < 0) { // Zoom in
+
+				Range xoriginal = plot.getDomainAxis().getRange();
+				Range yoriginal = plot.getRangeAxis().getRange();
+
+				// The new range lengths to be covered
+				double xr = xoriginal.getLength() / 3;
+				double yr = yoriginal.getLength() / 3;
+
+				// We want the point under the cursor to remain under the cursor
+				// after zooming and not jump to the middle of the screen.
+				// To do this, calculate the fractional position of the cursor
+				// and preserve this in the new range.
+
+				double fx = (p.getX() - xoriginal.getLowerBound()) / xoriginal.getLength();
+				double fy = (p.getY() - yoriginal.getLowerBound()) / yoriginal.getLength();
+
+				plot.getDomainAxis().setRange(p.getX() - (fx * xr), p.getX() + (1 - fx) * xr);
+				plot.getRangeAxis().setRange(p.getY() - (fy * yr), p.getY() + (1 - fy) * yr);
+
+			} else { // Zoom out
+
+				Range xoriginal = plot.getDomainAxis().getRange();
+				Range yoriginal = plot.getRangeAxis().getRange();
+
+				double xr = plot.getDomainAxis().getRange().getLength() * 1.5;
+				double yr = plot.getRangeAxis().getRange().getLength() * 1.5;
+
+				// Find the values range plus 10%
+				Range domainRange = Range.expand(DatasetUtils.findDomainBounds(d), 0.1, 0.1);
+				Range rangeRange = Range.expand(DatasetUtils.findRangeBounds(d), 0.1, 0.1);
+
+				double fx = (p.getX() - xoriginal.getLowerBound()) / xoriginal.getLength();
+				double fy = (p.getY() - yoriginal.getLowerBound()) / yoriginal.getLength();
+
+				// Ensure we only zoom out to the extent of the data
+				plot.getDomainAxis().setRange(domainRange.constrain(p.getX() - (fx * xr)),
+						domainRange.constrain(p.getX() + (1 - fx) * xr));
+
+				plot.getRangeAxis().setRange(rangeRange.constrain(p.getY() - (fy * yr)),
+						rangeRange.constrain(p.getY() + (1 - fy) * yr));
+			}
+		}
 
 	}
 

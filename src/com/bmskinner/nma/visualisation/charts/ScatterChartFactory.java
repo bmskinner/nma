@@ -311,13 +311,15 @@ public class ScatterChartFactory extends AbstractChartFactory {
 		BufferedImage image = ip.getBufferedImage();
 
 		// Make the image partly transparent
-		BufferedImage tmpImg = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_ARGB);
+		BufferedImage tmpImg = new BufferedImage(image.getWidth(), image.getHeight(),
+				BufferedImage.TYPE_INT_ARGB);
 
 		for (int by = 0; by < image.getHeight(); by++) {
 			for (int bx = 0; bx < image.getWidth(); bx++) {
 				int argb = image.getRGB(bx, by);
-				int blue = (argb >> 0) & 0xff;// isolate blue channel from ARGB
-				int alpha = 255 - blue; // make alpha vary with blue intensity (RGB greyscale, so blue should correlate
+				int blue = argb & 0xff;// isolate blue channel from ARGB
+				int alpha = 255 - blue; // make alpha vary with blue intensity (RGB greyscale, so
+										// blue should correlate
 										// well)
 				argb &= 0x00ffffff; // remove old alpha info
 				argb |= (alpha << 24); // add new alpha info

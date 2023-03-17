@@ -23,7 +23,6 @@ import java.awt.Graphics2D;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Line2D;
-import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.List;
@@ -164,38 +163,20 @@ public class SelectableChartPanel extends ExportableChartPanel implements ChartM
 					marker.setPaint(new Color(128, 128, 128, 255));
 					marker.setAlpha(0.5f);
 					plot.addDomainMarker(marker, Layer.BACKGROUND);
-
-					if (!markerEnd.isNaN()) {
-//						fireSignalChangeEvent("MarkerPositionUpdated");
-					}
 				}
 
 			}
 		}
 
-		private Double getPosition(MouseEvent e) {
-
-			// Translate the panel location on screen to a Java2D point
-			Point2D p = panel.translateScreenToJava2D(e.getPoint());
-
-			// Get the area covered by the panel
-			Rectangle2D plotArea = panel.getChartRenderingInfo().getPlotInfo().getDataArea();
-
-			XYPlot plot = (XYPlot) chart.getPlot();
-
-			return plot.getDomainAxis().java2DToValue(p.getX(), plotArea, plot.getDomainAxisEdge());
-		}
-
 		@Override
 		public void mouseReleased(MouseEvent e) {
-			markerEnd = getPosition(e);
-			// IJ.log("Mouse up: marker end "+markerEnd);
+			markerEnd = getChartValuePosition(e.getPoint()).getX();
 			updateMarker();
 		}
 
 		@Override
 		public void mousePressed(MouseEvent e) {
-			markerStart = getPosition(e);
+			markerStart = getChartValuePosition(e.getPoint()).getY();
 		}
 	}
 
