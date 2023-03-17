@@ -201,6 +201,8 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 		});
 
 		// Add a scroll listener for zooming the chart
+		// Unlike the default zoom listener, this constrains
+		// the max zoom out to the data values
 		this.addMouseWheelListener(new ScrollWheelZoomListener());
 
 		this.setPannable(false);
@@ -253,8 +255,14 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 		return isFixedAspectRatio;
 	}
 
+	/**
+	 * Replace the default JFreeChart listener with a panning listener
+	 * 
+	 * @param b
+	 */
 	public void setPannable(boolean b) {
 		this.isPannable = b;
+
 		if (b) {
 
 			for (MouseListener l : this.getMouseListeners()) {
@@ -530,6 +538,7 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 	private void exportPNG(int w) {
 
 		int h = calcHeightFromWidth(w);
+
 		try {
 			File file = new DefaultInputSupplier().requestFileSave(
 					FileUtils.commonPathOfDatasets(
@@ -850,8 +859,7 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 
 		@Override
 		public void mouseClicked(MouseEvent e) {
-			// TODO Auto-generated method stub
-
+			ExportableChartPanel.this.mouseClicked(e);
 		}
 
 		@Override
@@ -863,6 +871,10 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 		@Override
 		public void mouseReleased(MouseEvent e) {
 			startPoint = null;
+			if (e.isPopupTrigger()) {
+				ExportableChartPanel.this.mouseReleased(e);
+
+			}
 
 		}
 
@@ -941,6 +953,19 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 			if (d == null)
 				return;
 
+			// Find the full data range
+			Range domainRange = DatasetUtils.findDomainBounds(d);
+			Range rangeRange = DatasetUtils.findRangeBounds(d);
+
+			if (plot.getDatasetCount() > 1) {
+				for (int i = 0; i < plot.getDatasetCount(); i++) {
+					domainRange = Range.combine(domainRange,
+							DatasetUtils.findDomainBounds(plot.getDataset(i)));
+					rangeRange = Range.combine(rangeRange,
+							DatasetUtils.findRangeBounds(plot.getDataset(i)));
+				}
+			}
+
 			Point2D p = getChartValuePosition(e.getPoint());
 			if (e.getUnitsToScroll() < 0) { // Zoom in
 
@@ -948,8 +973,8 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 				Range yoriginal = plot.getRangeAxis().getRange();
 
 				// The new range lengths to be covered
-				double xr = xoriginal.getLength() / 3;
-				double yr = yoriginal.getLength() / 3;
+				double xr = xoriginal.getLength() / 1.5;
+				double yr = yoriginal.getLength() / 1.5;
 
 				// We want the point under the cursor to remain under the cursor
 				// after zooming and not jump to the middle of the screen.
@@ -967,13 +992,14 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 				Range xoriginal = plot.getDomainAxis().getRange();
 				Range yoriginal = plot.getRangeAxis().getRange();
 
-				double xr = plot.getDomainAxis().getRange().getLength() * 1.5;
-				double yr = plot.getRangeAxis().getRange().getLength() * 1.5;
+				double xr = plot.getDomainAxis().getRange().getLength() * 1.2;
+				double yr = plot.getRangeAxis().getRange().getLength() * 1.2;
 
-				// Find the values range plus 10%
-				Range domainRange = Range.expand(DatasetUtils.findDomainBounds(d), 0.1, 0.1);
-				Range rangeRange = Range.expand(DatasetUtils.findRangeBounds(d), 0.1, 0.1);
+				// Find the values range plus 10% to constrain zoom out
+				domainRange = Range.expand(domainRange, 0.05, 0.05);
+				rangeRange = Range.expand(rangeRange, 0.05, 0.05);
 
+				// Zoom out from anchor point
 				double fx = (p.getX() - xoriginal.getLowerBound()) / xoriginal.getLength();
 				double fy = (p.getY() - yoriginal.getLowerBound()) / yoriginal.getLength();
 

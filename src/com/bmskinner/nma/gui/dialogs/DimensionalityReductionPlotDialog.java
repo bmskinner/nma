@@ -15,6 +15,7 @@ import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.datasets.IClusterGroup;
 import com.bmskinner.nma.gui.components.ImageThumbnailGenerator;
 import com.bmskinner.nma.gui.components.panels.ClusterGroupSelectionPanel;
+import com.bmskinner.nma.visualisation.charts.DimensionalityChartFactory;
 import com.bmskinner.nma.visualisation.charts.ScatterChartFactory;
 import com.bmskinner.nma.visualisation.charts.panels.ExportableChartPanel;
 
@@ -105,8 +106,9 @@ public class DimensionalityReductionPlotDialog extends MessagingDialog {
 	}
 
 	private void updateChart(ColourByType type, IClusterGroup colourGroup) {
-		chartPanel.setChart(ScatterChartFactory.createDimensionalityReductionChart(dataset, type,
-				group, colourGroup));
+		chartPanel.setChart(
+				DimensionalityChartFactory.createDimensionalityReductionChart(dataset, type,
+						group, colourGroup));
 	}
 
 	private void updateTitle() {

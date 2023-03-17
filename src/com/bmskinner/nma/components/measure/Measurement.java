@@ -216,6 +216,14 @@ public interface Measurement extends XmlSerializable {
 		return new DefaultMeasurement(Names.PCA_N + "_" + id, MeasurementDimension.NONE);
 	}
 
+	static Measurement makeTSNE(int dim, UUID id) {
+		return new DefaultMeasurement("t-SNE_" + dim + "_" + id, MeasurementDimension.NONE);
+	}
+
+	static Measurement makeUMAP(int dim, UUID id) {
+		return new DefaultMeasurement("UMAP_" + dim + "_" + id, MeasurementDimension.NONE);
+	}
+
 	/**
 	 * All available stats
 	 * 

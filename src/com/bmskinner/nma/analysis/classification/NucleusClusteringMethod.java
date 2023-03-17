@@ -136,9 +136,10 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
 	}
 
 	/**
-	 * The TSNE, UMAP values are stored in the nucleus meaurements, but will be
-	 * overwritten if another clustering is performed. Append the clustergroup id to
-	 * the measurement so we can store values across different clustering instances
+	 * The TSNE, UMAP values are stored in the nucleus measurements, but will be
+	 * overwritten if another clustering is performed. Append the cluster group id
+	 * to the measurement so we can store values across different clustering
+	 * instances
 	 * 
 	 */
 	private void appendClusterIdToDimensionalityMeasurements(Measurement dim1, Measurement dim2,
