@@ -551,7 +551,7 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 				return;
 
 			try (OutputStream os = new FileOutputStream(file)) {
-
+//				LOGGER.fine("Creating image %smm by %smm".formatted(w, h));
 				BufferedImage bi = ChartImageConverter.createPNG(getChart(), w, h,
 						DEFAULT_EXPORT_DPI);
 
@@ -865,6 +865,10 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 		@Override
 		public void mousePressed(MouseEvent e) {
 			startPoint = getChartValuePosition(e.getPoint());
+			if (e.isPopupTrigger()) {
+				ExportableChartPanel.this.mousePressed(e);
+
+			}
 
 		}
 

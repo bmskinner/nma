@@ -5,8 +5,9 @@ import java.awt.Color;
 import java.awt.Paint;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 import java.util.UUID;
 import java.util.logging.Logger;
 
@@ -36,7 +37,6 @@ import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.gui.components.ColourSelecter;
 import com.bmskinner.nma.gui.dialogs.DimensionalityReductionPlotDialog.ColourByType;
 import com.bmskinner.nma.io.ImageImporter;
-import com.bmskinner.nma.stats.Stats;
 import com.bmskinner.nma.visualisation.charts.ScatterChartFactory.ScatterChartRenderer;
 import com.bmskinner.nma.visualisation.datasets.ChartDatasetCreationException;
 import com.bmskinner.nma.visualisation.datasets.ComponentOutlineDataset;
@@ -102,6 +102,7 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 			for (int i = 0; i < plot.getDataset().getSeriesCount(); i++) {
 				Paint colour = ColourSelecter.getColor(i);
 				renderer.setSeriesPaint(i, colour);
+//				renderer.setSeriesVisible(i, false);
 			}
 
 			// Add a legend
@@ -134,17 +135,34 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 		// Find the centroid of the cluster
 		// Each cluster group is a series in the first dataset
 		int items = chart.getXYPlot().getDataset(0).getItemCount(dataset - 1);
-		double[] xvals = new double[items];
-		double[] yvals = new double[items];
-		for (int i = 0; i < items; i++) {
-			xvals[i] = chart.getXYPlot().getDataset(0).getXValue(dataset - 1, i);
-			yvals[i] = chart.getXYPlot().getDataset(0).getYValue(dataset - 1, i);
-		}
-		double xcent = Stats.quartile(xvals, Stats.MEDIAN);
-		double ycent = Stats.quartile(yvals, Stats.MEDIAN);
 
-		return new Point2D.Double(xcent, ycent);
+		double xmax = -Double.MAX_VALUE;
+		double xmin = Double.MAX_VALUE;
+		double ymax = -Double.MAX_VALUE;
+		double ymin = Double.MAX_VALUE;
+
+		for (int i = 0; i < items; i++) {
+
+			double x = chart.getXYPlot().getDataset(0).getXValue(dataset - 1, i);
+			double y = chart.getXYPlot().getDataset(0).getYValue(dataset - 1, i);
+			
+			xmax = x > xmax ? x : xmax;
+			xmin = x < xmin ? x : xmin;
+			ymax = y > ymax ? y : ymax;
+			ymin = y < ymin ? y : ymin;
+		}
+
+		double dx = xmax - xmin;
+		double dy = ymax - ymin;
+		return new Point2D.Double(xmin + (dx / 2), ymin + (dy / 2));
 	}
+	
+	private record ConsensusCentroidLink(UUID datasetId, Point2D centroid, int datasetIndex) {
+		double getY() {
+			return centroid.getY();
+		}
+	}
+	
 
 	/**
 	 * Add the consenusus nuclei of the clusters
@@ -170,53 +188,106 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 		double scale = 1200 / Math.max(xRange.getLength(), yRange.getLength());
 
 		// Calculate centroids for sorting consenusus nuclei
-		Map<UUID, Point2D> clusterCentroids = new HashMap<>();
+		List<ConsensusCentroidLink> leftCentroids = new ArrayList<>();
+		List<ConsensusCentroidLink> rightCentroids = new ArrayList<>();
 		int dataset = 1;
 		for (UUID clusterId : plotGroup.getUUIDs()) {
-			clusterCentroids.put(clusterId, findCentroid(dataset++, chart));
-		}
-
-		dataset = 1;
-		for (UUID clusterId : plotGroup.getUUIDs()) {
-
-			Point2D centroid = clusterCentroids.get(clusterId);
-
-			Nucleus n = d.getChildDataset(clusterId).getCollection().getConsensus();
-
-			// Place the consensus somewhere sensible
-			n.setScale(scale);
-
-			double nx = centroid.getX() < xRange.getCentralValue()
-					? (xRange.getLowerBound() - xRange.getLength() * 0.1)
-					: (xRange.getUpperBound() + xRange.getLength() * 0.1);
-			double ny = (yRange.getUpperBound()
-					- dataset * (yRange.getLength() * (1d / plotGroup.size())));
-
-			n.moveCentreOfMass(new FloatPoint(nx * scale, ny * scale));
-
-			// Make the consensus dataset. Use the micron scaling to force the point to fit
-			// the umap
-			ComponentOutlineDataset cd = new ComponentOutlineDataset(n, false,
-					MeasurementScale.MICRONS);
-
-			chart.getXYPlot().setDataset(dataset, cd);
-			DefaultXYItemRenderer renderer = new DefaultXYItemRenderer();
-			renderer.setDefaultLinesVisible(true);
-			renderer.setDefaultShapesVisible(false);
-			renderer.setDefaultSeriesVisibleInLegend(false);
-
-			for (int i = 0; i < cd.getSeriesCount(); i++) {
-				renderer.setSeriesPaint(i, ColourSelecter.getColor(dataset - 1));
-				renderer.setSeriesStroke(i, new BasicStroke(2.0f));
-			}
-			chart.getXYPlot().setRenderer(dataset, renderer);
-
-			// Draw a line from the consensus to the centroid of the cluster
-			XYLineAnnotation line = new XYLineAnnotation(centroid.getX(), centroid.getY(),
-					nx, ny, new BasicStroke(2.0f), ColourSelecter.getColor(dataset - 1));
-			chart.getXYPlot().addAnnotation(line);
+			Point2D centroid = findCentroid(dataset, chart);
+			ConsensusCentroidLink ccl = new ConsensusCentroidLink(clusterId, centroid, dataset);
+			if (centroid.getX() < xRange.getCentralValue())
+				leftCentroids.add(ccl);
+			else
+				rightCentroids.add(ccl);
 			dataset++;
 		}
+
+		// Sort by y descending
+		leftCentroids.sort(Comparator.comparingDouble(ConsensusCentroidLink::getY).reversed());
+		rightCentroids.sort(Comparator.comparingDouble(ConsensusCentroidLink::getY).reversed());
+
+		// Draw each consensus at a y location. Y values are steps of 1/n+1
+		// to make even spacing
+		int yOrder = 0;
+		double separations = 1d / (leftCentroids.size() + 1);
+		for (ConsensusCentroidLink ccl : leftCentroids) {
+			plotConsensus(d, ccl, chart, scale, yOrder, separations);
+			yOrder++;
+		}
+
+		yOrder = 0;
+		separations = 1d / (rightCentroids.size() + 1);
+		for (ConsensusCentroidLink ccl : rightCentroids) {
+			plotConsensus(d, ccl, chart, scale, yOrder, separations);
+			yOrder++;
+		}
+	}
+
+	/**
+	 * Draw the consensus nucleus at an appropriate position on the chart and add a
+	 * line to the cluster centroid
+	 * 
+	 * @param d
+	 * @param ccl
+	 * @param chart
+	 * @param scale
+	 * @param index
+	 * @param separations
+	 * @throws MissingLandmarkException
+	 * @throws ComponentCreationException
+	 * @throws ChartDatasetCreationException
+	 */
+	private static void plotConsensus(IAnalysisDataset d, ConsensusCentroidLink ccl, JFreeChart chart, double scale,
+			int index, double separations)
+			throws MissingLandmarkException, ComponentCreationException, ChartDatasetCreationException {
+		Range xRange = DatasetUtils.findDomainBounds(chart.getXYPlot().getDataset());
+		Range yRange = DatasetUtils.findRangeBounds(chart.getXYPlot().getDataset());
+
+		Nucleus n = d.getChildDataset(ccl.datasetId()).getCollection().getConsensus();
+
+		// Place the consensus somewhere sensible
+		n.setScale(scale);
+
+		boolean isLeft = ccl.centroid().getX() < xRange.getCentralValue();
+
+		double nx = isLeft ? (xRange.getLowerBound() - xRange.getLength() * 0.15)
+				: (xRange.getUpperBound() + xRange.getLength() * 0.15);
+		double fny = separations * (index + 1);
+		double ny = (yRange.getUpperBound() - (yRange.getLength() * fny));
+
+		n.moveCentreOfMass(new FloatPoint(nx * scale, ny * scale));
+
+		// Make the consensus dataset. Use the micron scaling to force the point to fit
+		// the umap
+		ComponentOutlineDataset cd = new ComponentOutlineDataset(n, false, MeasurementScale.MICRONS);
+		chart.getXYPlot().setDataset(ccl.datasetIndex(), cd);
+		DefaultXYItemRenderer renderer = new DefaultXYItemRenderer();
+		renderer.setDefaultLinesVisible(true);
+		renderer.setDefaultShapesVisible(false);
+		renderer.setDefaultSeriesVisibleInLegend(false);
+
+		for (int i = 0; i < cd.getSeriesCount(); i++) {
+			renderer.setSeriesPaint(i, ColourSelecter.getColor(ccl.datasetIndex() - 1));
+			renderer.setSeriesStroke(i, new BasicStroke(2.0f));
+		}
+		chart.getXYPlot().setRenderer(ccl.datasetIndex(), renderer);
+
+		// Get the x boundary for the line
+		double xBound = isLeft ? DatasetUtils.findDomainBounds(cd).getUpperBound() + (xRange.getLength() * 0.01)
+				: DatasetUtils.findDomainBounds(cd).getLowerBound() - (xRange.getLength() * 0.01);
+
+		// Get the y boundaries fro the line
+		Range yRangeCd = DatasetUtils.findRangeBounds(cd);
+
+		// Draw a line from the consensus to the centroid of the cluster
+		XYLineAnnotation line = new XYLineAnnotation(ccl.centroid().getX(), ccl.centroid().getY(), xBound, ny,
+				new BasicStroke(2.0f), ColourSelecter.getColor(ccl.datasetIndex() - 1));
+		chart.getXYPlot().addAnnotation(line);
+
+		// Make a line defining the x bound
+		XYLineAnnotation xline = new XYLineAnnotation(xBound, yRangeCd.getUpperBound(), xBound,
+				yRangeCd.getLowerBound(),
+				new BasicStroke(2.0f), ColourSelecter.getColor(ccl.datasetIndex() - 1));
+		chart.getXYPlot().addAnnotation(xline);
 	}
 
 	private static void addAnnotatedNucleusImages(IAnalysisDataset d, IClusterGroup plotGroup,
@@ -237,10 +308,16 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 		XYPlot plot = chart.getXYPlot();
 
 		double scale = Math.sqrt(d.getCollection().size());
-		d.getCollection().getNuclei().parallelStream().forEach(n -> {
-			createDimensionalityReductionImageAnnotation(n, prefix1 + plotGroup.getId(),
-					prefix2 + plotGroup.getId(), plot, scale);
-		});
+
+		int dataset = 0;
+		for (UUID id : plotGroup.getUUIDs()) {
+			final int index = dataset;
+			d.getChildDataset(id).getCollection().getNuclei().parallelStream().forEach(n -> {
+				createDimensionalityReductionImageAnnotation(n, prefix1 + plotGroup.getId(),
+						prefix2 + plotGroup.getId(), plot, scale, ColourSelecter.getColor(index));
+			});
+			dataset++;
+		}
 
 	}
 
@@ -254,7 +331,7 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 	 */
 	private static void createDimensionalityReductionImageAnnotation(Nucleus n,
 			String xStatName,
-			String yStatName, XYPlot plot, double scaleFactor) {
+			String yStatName, XYPlot plot, double scaleFactor, Color col) {
 
 		Measurement dim1 = n.getMeasurements().stream().filter(s -> s.name().equals(xStatName))
 				.findFirst()
@@ -273,7 +350,7 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 
 		ImageProcessor ip = ImageAnnotator.drawBorder(
 				ImageImporter.importFullImageTo24bitGreyscale(n), n,
-				Color.ORANGE);
+				col);
 
 		ip = AbstractImageFilterer.crop(ip, n);
 		ip.flipVertical(); // Y axis needs inverting
@@ -285,15 +362,25 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 		BufferedImage tmpImg = new BufferedImage(image.getWidth(), image.getHeight(),
 				BufferedImage.TYPE_INT_ARGB);
 
+
+		int borderCol = col.getRGB();
+
 		for (int by = 0; by < image.getHeight(); by++) {
 			for (int bx = 0; bx < image.getWidth(); bx++) {
 				int argb = image.getRGB(bx, by);
-				int blue = argb & 0xff;// isolate blue channel from ARGB
-				int alpha = 255 - blue; // make alpha vary with blue intensity (RGB greyscale, so
-										// blue should correlate
-										// well)
-				argb &= 0x00ffffff; // remove old alpha info
-				argb |= (alpha << 24); // add new alpha info
+				if (argb == borderCol) { // ignore pixels that are part of the nucleus outline
+					int alpha = 255; // set full opaque
+					argb &= 0x00ffffff; // remove old alpha info
+					argb |= (alpha << 24); // add new alpha info
+
+				} else {
+					int blue = (argb >> 8) & 0xff;// isolate green channel from ARGB
+					int alpha = 255 - blue; // make alpha vary with blue intensity (RGB greyscale, so
+											// blue should correlate
+											// well)
+					argb &= 0x00ffffff; // remove old alpha info
+					argb |= (alpha << 24); // add new alpha info
+				}
 
 				tmpImg.setRGB(bx, by, argb);
 			}
@@ -305,7 +392,7 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 		int ih = image.getHeight();
 		double aspect = (double) iw / ih;
 
-		// allow each image to be at most 1/20 of image
+		// constrain each image dimensions when drawn to avoid overlapping nuclei
 		double xr = ((xmax - xmin) / scaleFactor) * aspect;
 		double yr = ((ymax - ymin) / scaleFactor);
 		double xrh = xr / 2;

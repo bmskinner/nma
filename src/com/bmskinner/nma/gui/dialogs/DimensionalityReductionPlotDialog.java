@@ -51,7 +51,7 @@ public class DimensionalityReductionPlotDialog extends MessagingDialog {
 		updateChart(ColourByType.CLUSTER, group);
 		setLayout(new BorderLayout());
 
-		add(createHeader(), BorderLayout.NORTH);
+//		add(createHeader(), BorderLayout.NORTH);
 
 		add(chartPanel, BorderLayout.CENTER);
 

@@ -44,8 +44,8 @@ public class ChartImageConverter {
 	 * Create a PNG representation of the given chart at 300 DPI
 	 * 
 	 * @param chart the chart to draw
-	 * @param w     the desired width in pixels
-	 * @param h     the desired height in pixels
+	 * @param w     the desired width in mm
+	 * @param h     the desired height in mm
 	 * @return
 	 * @throws TranscoderException
 	 * @throws IOException
@@ -55,7 +55,8 @@ public class ChartImageConverter {
 
 		String svg = ChartImageConverter.createSVG(chart, wmm, hmm, dpi);
 
-		int w_px = mmToPixels(wmm, dpi);
+//		LOGGER.fine("Converted width %smm to %s pixels".formatted(wmm, w_px));
+
 		return ChartImageConverter.convertSVGToPNG(svg, wmm, dpi);
 	}
 
@@ -109,9 +110,10 @@ public class ChartImageConverter {
 			screenDpi = Toolkit.getDefaultToolkit().getScreenResolution();
 		} catch (HeadlessException e) {
 			// no monitors present to report, just use the default
+			screenDpi = DEFAULT_SCREEN_DPI;
 		}
 
-		double dpiScale = screenDpi / dpi;
+		double dpiScale = (double) screenDpi / dpi;
 
 		int w_px = mmToPixels(wmm, dpi);
 		int h_px = mmToPixels(hmm, dpi);
@@ -122,6 +124,7 @@ public class ChartImageConverter {
 
 //		LOGGER.fine("Desired dimensions " + wmm + "mm x " + hmm + "mm");
 //		LOGGER.fine("Pixel dimensions   " + w_px + "px x " + h_px + "px");
+//		LOGGER.fine("SCreen DPI: %s, Desired DPI: %s, DPI scale: %s".formatted(screenDpi, dpi, dpiScale));
 //		LOGGER.fine("Scaled dimensions  " + w + "px x " + h + "px");
 
 		SVGGraphics2D g2 = new SVGGraphics2D(w, h, SVGUnits.PX);
