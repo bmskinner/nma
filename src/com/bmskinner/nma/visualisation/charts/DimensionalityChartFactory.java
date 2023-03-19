@@ -5,11 +5,15 @@ import java.awt.Color;
 import java.awt.Paint;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 import java.util.logging.Logger;
+import java.util.stream.IntStream;
+
+import javax.swing.SwingUtilities;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
@@ -37,6 +41,7 @@ import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.gui.components.ColourSelecter;
 import com.bmskinner.nma.gui.dialogs.DimensionalityReductionPlotDialog.ColourByType;
 import com.bmskinner.nma.io.ImageImporter;
+import com.bmskinner.nma.logging.Loggable;
 import com.bmskinner.nma.visualisation.charts.ScatterChartFactory.ScatterChartRenderer;
 import com.bmskinner.nma.visualisation.datasets.ChartDatasetCreationException;
 import com.bmskinner.nma.visualisation.datasets.ComponentOutlineDataset;
@@ -48,6 +53,11 @@ import com.bmskinner.nma.visualisation.options.ChartOptions;
 import ij.process.ImageProcessor;
 
 public class DimensionalityChartFactory extends AbstractChartFactory {
+
+	/**
+	 * Number of images to be loaded per batch
+	 */
+	private static final int BATCH_SIZE = 50;
 
 	private static final Logger LOGGER = Logger
 			.getLogger(DimensionalityChartFactory.class.getName());
@@ -102,17 +112,10 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 			for (int i = 0; i < plot.getDataset().getSeriesCount(); i++) {
 				Paint colour = ColourSelecter.getColor(i);
 				renderer.setSeriesPaint(i, colour);
-//				renderer.setSeriesVisible(i, false);
 			}
 
 			// Add a legend
 			chart.addLegend(new LegendTitle(plot));
-
-			if (d.getCollection().size() < 5000) { // otherwise it will get too crowded
-				LOGGER.fine("Adding annotated nucleus images");
-				addAnnotatedNucleusImages(d, plotGroup, chart);
-				LOGGER.fine("Annotated nucleus images complete");
-			}
 
 			addClusterGroupConsensusNuclei(d, plotGroup, chart);
 
@@ -239,6 +242,10 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 	private static void plotConsensus(IAnalysisDataset d, ConsensusCentroidLink ccl, JFreeChart chart, double scale,
 			int index, double separations)
 			throws MissingLandmarkException, ComponentCreationException, ChartDatasetCreationException {
+
+		if (!d.getChildDataset(ccl.datasetId()).getCollection().hasConsensus())
+			return;
+
 		Range xRange = DatasetUtils.findDomainBounds(chart.getXYPlot().getDataset());
 		Range yRange = DatasetUtils.findRangeBounds(chart.getXYPlot().getDataset());
 
@@ -290,7 +297,14 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 		chart.getXYPlot().addAnnotation(xline);
 	}
 
-	private static void addAnnotatedNucleusImages(IAnalysisDataset d, IClusterGroup plotGroup,
+	/**
+	 * Draw the given nuclei on the chart
+	 * 
+	 * @param d
+	 * @param plotGroup
+	 * @param chart
+	 */
+	public static void addAnnotatedNucleusImages(IAnalysisDataset d, IClusterGroup plotGroup,
 			JFreeChart chart) {
 
 		boolean isUMAP = plotGroup.getOptions().get()
@@ -305,20 +319,65 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 		String prefix2 = isUMAP ? Measurement.UMAP_2.name().replace(" ", "_") + "_"
 				: isTsne ? "TSNE_2_" : "PC2_";
 
-		XYPlot plot = chart.getXYPlot();
+		// Scale the images to the dimensions of the chart
+		// Large datasets will have wider ranges and smaller nuclei
+		Range xRange = DatasetUtils.findDomainBounds(chart.getXYPlot().getDataset());
+		Range yRange = DatasetUtils.findRangeBounds(chart.getXYPlot().getDataset());
 
-		double scale = Math.sqrt(d.getCollection().size());
+		double scale = Math.max(xRange.getLength(), yRange.getLength()) / 1;
 
 		int dataset = 0;
+
+		// Add each cluster group nuclei
 		for (UUID id : plotGroup.getUUIDs()) {
 			final int index = dataset;
-			d.getChildDataset(id).getCollection().getNuclei().parallelStream().forEach(n -> {
-				createDimensionalityReductionImageAnnotation(n, prefix1 + plotGroup.getId(),
-						prefix2 + plotGroup.getId(), plot, scale, ColourSelecter.getColor(index));
-			});
+
+			List<Nucleus> nList = d.getChildDataset(id).getCollection().getNuclei();
+
+			// Add in batches to allow the user to see they are loading
+			IntStream.range(0, (nList.size() + BATCH_SIZE - 1) / BATCH_SIZE)
+					.mapToObj(i -> nList.subList(i * BATCH_SIZE, Math.min(nList.size(), (i + 1) * BATCH_SIZE)))
+					.forEach(batch -> processBatch(batch, d, plotGroup, chart, prefix1, prefix2, index, scale));
+
 			dataset++;
 		}
+	}
 
+	/**
+	 * Add a batch of nucleus images to the chart
+	 * 
+	 * @param list      the nuclei to add
+	 * @param d         the dataset the nuclei belong to
+	 * @param plotGroup the cluster group to plot (for colour)
+	 * @param chart     the chart to add the nuclei to
+	 * @param prefix1   the measurement name prefix for x axis
+	 * @param prefix2   the measurement name prefix for y axis
+	 * @param index     the dataset index
+	 * @param scale     the nucleus scale
+	 */
+	private static synchronized void processBatch(List<Nucleus> list, IAnalysisDataset d, IClusterGroup plotGroup,
+			JFreeChart chart, String prefix1, String prefix2, int index, double scale) {
+
+		// Disable notifications while the batch is processed
+		chart.setNotify(false);
+		List<XYDataImageAnnotation> anns = new ArrayList<>();
+		
+		for (Nucleus n : list) {
+			anns.add(createDimensionalityReductionImageAnnotation(n, prefix1 + plotGroup.getId(),
+					prefix2 + plotGroup.getId(), chart.getXYPlot(), scale, ColourSelecter.getColor(index)));
+		}
+
+		try {
+			SwingUtilities.invokeAndWait(() -> {
+				for (XYDataImageAnnotation ann : anns) {
+					chart.getXYPlot().getRenderer().addAnnotation(ann, Layer.FOREGROUND);
+				}
+			});
+		} catch (InvocationTargetException | InterruptedException e) {
+			LOGGER.log(Loggable.STACK, "Error adding annotation to chart", e);
+		}
+
+		chart.setNotify(true);
 	}
 
 	/**
@@ -329,7 +388,7 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 	 * @param yStatName
 	 * @return
 	 */
-	private static void createDimensionalityReductionImageAnnotation(Nucleus n,
+	private static XYDataImageAnnotation createDimensionalityReductionImageAnnotation(Nucleus n,
 			String xStatName,
 			String yStatName, XYPlot plot, double scaleFactor, Color col) {
 
@@ -343,10 +402,13 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 		double x = n.getMeasurement(dim1);
 		double y = n.getMeasurement(dim2);
 
-		double xmax = plot.getDomainAxis().getRange().getUpperBound();
-		double xmin = plot.getDomainAxis().getRange().getLowerBound();
-		double ymin = plot.getRangeAxis().getRange().getLowerBound();
-		double ymax = plot.getRangeAxis().getRange().getUpperBound();
+		Range xRange = DatasetUtils.findDomainBounds(plot.getDataset());
+		Range yRange = DatasetUtils.findRangeBounds(plot.getDataset());
+
+		double xmax = xRange.getUpperBound();
+		double xmin = xRange.getLowerBound();
+		double ymin = yRange.getLowerBound();
+		double ymax = yRange.getUpperBound();
 
 		ImageProcessor ip = ImageAnnotator.drawBorder(
 				ImageImporter.importFullImageTo24bitGreyscale(n), n,
@@ -398,9 +460,9 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 		double xrh = xr / 2;
 		double yrh = yr / 2;
 
-		XYDataImageAnnotation ann = new XYDataImageAnnotation(image, x - xrh, y - yrh, xr,
+		return new XYDataImageAnnotation(image, x - xrh, y - yrh, xr,
 				yr, true);
-		plot.getRenderer().addAnnotation(ann, Layer.FOREGROUND);
+
 
 	}
 }

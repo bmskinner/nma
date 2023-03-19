@@ -59,6 +59,9 @@ public class DimensionalityReductionPlotDialog extends MessagingDialog {
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 		setVisible(true);
+
+		// Run this after the chart is visible
+		DimensionalityChartFactory.addAnnotatedNucleusImages(dataset, group, chartPanel.getChart());
 	}
 
 	public enum ColourByType {
