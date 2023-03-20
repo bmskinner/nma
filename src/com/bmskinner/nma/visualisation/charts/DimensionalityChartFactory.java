@@ -7,6 +7,7 @@ import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
@@ -57,7 +58,8 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 	/**
 	 * Number of images to be loaded per batch
 	 */
-	private static final int BATCH_SIZE = 100;
+	private static final int BATCH_SIZE = 50;
+	private static final int MAX_NUCLEI_PER_CLUSTER = 200;
 
 	private static final Logger LOGGER = Logger
 			.getLogger(DimensionalityChartFactory.class.getName());
@@ -110,7 +112,8 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 			plot.setRenderer(renderer);
 
 			for (int i = 0; i < plot.getDataset().getSeriesCount(); i++) {
-				Paint colour = ColourSelecter.getColor(i);
+				Paint colour = type.equals(ColourByType.CLUSTER) ? ColourSelecter.getColor(i)
+						: Color.WHITE;
 				renderer.setSeriesPaint(i, colour);
 			}
 
@@ -324,11 +327,12 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 				: isTsne ? "TSNE_2_" : "PC2_";
 
 		// Scale the images to the dimensions of the chart
-		// Large datasets will have wider ranges and smaller nuclei
+		// Large datasets should have smaller nuclei
 		Range xRange = DatasetUtils.findDomainBounds(chart.getXYPlot().getDataset());
 		Range yRange = DatasetUtils.findRangeBounds(chart.getXYPlot().getDataset());
 
-		double scale = Math.max(xRange.getLength(), yRange.getLength()) / 1;
+		double scale = Math.max(xRange.getLength(), yRange.getLength())
+				* Math.log10(d.getCollection().size());
 
 		int dataset = 0;
 
@@ -336,12 +340,22 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 		for (UUID id : plotGroup.getUUIDs()) {
 			final int index = dataset;
 
-			List<Nucleus> nList = d.getChildDataset(id).getCollection().getNuclei();
+			List<Nucleus> nList = new ArrayList<>();
+			nList.addAll(d.getChildDataset(id).getCollection().getNuclei());
+
+			// If the number of nuclei is high, there is no point drawing them all
+			// so pick a random subset
+			if (nList.size() > MAX_NUCLEI_PER_CLUSTER) {
+				Collections.shuffle(nList);
+				nList = nList.subList(0, MAX_NUCLEI_PER_CLUSTER);
+			}
+
+			final List<Nucleus> batchList = nList;
 
 			// Add in batches to allow the user to see they are loading
-			IntStream.range(0, (nList.size() + BATCH_SIZE - 1) / BATCH_SIZE)
-					.mapToObj(i -> nList.subList(i * BATCH_SIZE,
-							Math.min(nList.size(), (i + 1) * BATCH_SIZE)))
+			IntStream.range(0, (batchList.size() + BATCH_SIZE - 1) / BATCH_SIZE)
+					.mapToObj(i -> batchList.subList(i * BATCH_SIZE,
+							Math.min(batchList.size(), (i + 1) * BATCH_SIZE)))
 					.forEach(batch -> processBatch(batch, d, plotGroup, chart, prefix1, prefix2,
 							index, scale));
 
@@ -457,13 +471,9 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 		}
 		image = tmpImg;
 
-		// Scale to the dimensionally reduced coordinates
-		int iw = image.getWidth();
-		int ih = image.getHeight();
-		double aspect = (double) iw / ih;
-
-		// constrain each image dimensions when drawn to avoid overlapping nuclei
-		double xr = ((xmax - xmin) / scaleFactor) * aspect;
+		// the image needs to be scaled to fit in the dimensionally reduced
+		// coordinates without overlapping nuclei too much
+		double xr = ((xmax - xmin) / scaleFactor);
 		double yr = ((ymax - ymin) / scaleFactor);
 		double xrh = xr / 2;
 		double yrh = yr / 2;

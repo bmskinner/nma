@@ -1021,7 +1021,16 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 
 				// Find the values range plus 10% to constrain zoom out
 				domainRange = Range.expand(domainRange, 0.10, 0.10);
-				rangeRange = Range.expand(rangeRange, 0.10, 0.10);
+
+				// If we need a consistent aspect ratio, set the range length based on domain
+				// otherwise just clip at 10% also
+				if (isFixedAspectRatio) {
+					double rangeLength = domainRange.getLength() / getPanelAspectRatio();
+					rangeRange = new Range(rangeRange.getCentralValue() - rangeLength / 2,
+							rangeRange.getCentralValue() + rangeLength / 2);
+				} else {
+					rangeRange = Range.expand(rangeRange, 0.10, 0.10);
+				}
 
 				// Ensure we only zoom out to the extent of the data
 				double xMin = domainRange.constrain(p.getX() - (fx * xr));
