@@ -284,6 +284,8 @@ public class Labels {
 		public static final String PCA = "PCA";
 		public static final String PCA_VARIANCE = "Variance";
 		public static final String PCA_NUM_PCS = "Number of PCs";
+
+		public static final String USE_FOR_CLUSTERING = "Use for clustering";
 	}
 
 	public static class Cells {

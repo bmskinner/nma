@@ -36,168 +36,169 @@ import com.bmskinner.nma.components.options.HashOptions;
  */
 public class DefaultClusterGroup implements IClusterGroup {
 
-    private static final long  serialVersionUID = 1L;
-    
-    /** Dataset IDs in the cluster */
-    private List<UUID> ids = new ArrayList<>();
-    
-    /** Options used to generate the cluster */
-    private HashOptions options = null;
-    private String name;
-    private String newickTree = null;
-    private UUID id;
+	private static final long serialVersionUID = 1L;
 
-    /**
-     * Create a new cluster group
-     * 
-     * @param name the group name (informal)
-     * @param options the options used to create the cluster
-     */
-    public DefaultClusterGroup(@NonNull String name, @NonNull HashOptions options) {
-        this.name = name;
-        this.options = options;
-        this.id = UUID.randomUUID();
-    }
-    
-    public DefaultClusterGroup(@NonNull Element e) { 
-    	id = UUID.fromString(e.getAttributeValue("id"));
-    	name = e.getAttributeValue("name");
-    	
-    	if(e.getChild("NewickTree")!=null)
-    		newickTree = e.getChildText("NewickTree");
-    	
-    	options = new DefaultOptions(e.getChild("Options"));
-    	
-    	for(Element el : e.getChildren("DatasetId"))
-    		ids.add(UUID.fromString(el.getText()));
-    	
-    }
-    
-    private DefaultClusterGroup(DefaultClusterGroup g) {
-    	ids.addAll(g.ids);
-    	options = g.options.duplicate();
-    	name = new String(g.name);
-    	newickTree = new String(g.newickTree);
-    	id = g.id;
-    }
+	/** Dataset IDs in the cluster */
+	private List<UUID> ids = new ArrayList<>();
 
-    @Override
-	public Element toXmlElement() {
-    	Element e = new Element("ClusterGroup").setAttribute("id", id.toString()).setAttribute("name", name);
-    	
-    	e.addContent(options.toXmlElement());
-    	
-    	if(newickTree!=null)
-    		e.addContent(new Element("NewickTree").setText(newickTree));
-    	
-    	for(UUID i : ids)
-    		e.addContent(new Element("DatasetId").setText(i.toString()));
-    	
-    	return e;
-	}
-
-
+	/** Options used to generate the cluster */
+	private HashOptions options = null;
+	private String name;
+	private String newickTree = null;
+	private UUID id;
 
 	/**
-     * Create a new cluster group with a tree
-     * 
-     * @param name the group name (informal)
-     * @param options the options used to create the cluster
-     * @param tree the Newick tree for the cluster as a String
-     */
-    public DefaultClusterGroup(@NonNull String name, @NonNull HashOptions options, @NonNull String tree) {
-        this(name, options);
-        this.newickTree = tree;
-    }
+	 * Create a new cluster group
+	 * 
+	 * @param name    the group name (informal)
+	 * @param options the options used to create the cluster
+	 */
+	public DefaultClusterGroup(@NonNull String name, @NonNull HashOptions options) {
+		this.name = name;
+		this.options = options;
+		this.id = UUID.randomUUID();
+	}
 
-    /**
-     * Create a cluster group from a template
-     * @param template
-     */
-    public DefaultClusterGroup(@NonNull IClusterGroup template) {
-    	if(template.getOptions().isPresent()){
-    		options = template.getOptions().get().duplicate();
-    	} else {
-    		options = null;
-    	}
+	public DefaultClusterGroup(@NonNull Element e) {
+		id = UUID.fromString(e.getAttributeValue("id"));
+		name = e.getAttributeValue("name");
 
-        this.name = template.getName();
-        this.newickTree = template.getTree();
-        this.ids = template.getUUIDs();
-        this.id = template.getId();
-    }
-    
-    @Override
-    public UUID getId() {
-    	return id;
-    }
+		if (e.getChild("NewickTree") != null)
+			newickTree = e.getChildText("NewickTree");
 
-    @Override
-    public String getName() {
-        return this.name;
-    }
-    
-    @Override
-    public void setName(String s) {
-        name = s;
-    }
+		options = new DefaultOptions(e.getChild("Options"));
 
-    @Override
-    public int size() {
-        return this.ids.size();
-    }
+		for (Element el : e.getChildren("DatasetId"))
+			ids.add(UUID.fromString(el.getText()));
 
-    @Override
-    public String getTree() {
-        return this.newickTree;
-    }
+	}
 
-    @Override
-    public List<UUID> getUUIDs() {
-        return this.ids;
-    }
+	private DefaultClusterGroup(DefaultClusterGroup g) {
+		ids.addAll(g.ids);
+		options = g.options.duplicate();
+		name = new String(g.name);
+		newickTree = new String(g.newickTree);
+		id = g.id;
+	}
 
-    @Override
-    public void addDataset(final IAnalysisDataset dataset) {
-        this.ids.add(dataset.getId());
-    }
+	@Override
+	public Element toXmlElement() {
+		Element e = new Element("ClusterGroup").setAttribute("id", id.toString())
+				.setAttribute("name", name);
 
-    @Override
-    public void addDataset(final ICellCollection collection) {
-        this.ids.add(collection.getId());
-    }
+		e.addContent(options.toXmlElement());
 
-    @Override
-    public void removeDataset(final IAnalysisDataset dataset) {
-        removeDataset(dataset.getId());
-    }
+		if (newickTree != null)
+			e.addContent(new Element("NewickTree").setText(newickTree));
 
-    @Override
-    public void removeDataset(final UUID id) {
-        this.ids.remove(id);
-    }
+		for (UUID i : ids)
+			e.addContent(new Element("DatasetId").setText(i.toString()));
 
-    @Override
-    public Optional<HashOptions> getOptions() {
-        return Optional.ofNullable(options);
-    }
+		return e;
+	}
 
-    @Override
-    public boolean hasDataset(final UUID id) {
-        return ids.contains(id);
-    }
+	/**
+	 * Create a new cluster group with a tree
+	 * 
+	 * @param name    the group name (informal)
+	 * @param options the options used to create the cluster
+	 * @param tree    the Newick tree for the cluster as a String
+	 */
+	public DefaultClusterGroup(@NonNull String name, @NonNull HashOptions options,
+			@NonNull String tree) {
+		this(name, options);
+		this.newickTree = tree;
+	}
 
-    @Override
-    public boolean hasTree() {
-        return newickTree != null;
-    }
+	/**
+	 * Create a cluster group from a template
+	 * 
+	 * @param template
+	 */
+	public DefaultClusterGroup(@NonNull IClusterGroup template) {
+		if (template.getOptions().isPresent()) {
+			options = template.getOptions().get().duplicate();
+		} else {
+			options = null;
+		}
 
-    @Override
-    public String toString() {
-        return this.name;
-    }
+		this.name = template.getName();
+		this.newickTree = template.getTree();
+		this.ids = template.getUUIDs();
+		this.id = template.getId();
+	}
 
-    @Override
+	@Override
+	public UUID getId() {
+		return id;
+	}
+
+	@Override
+	public String getName() {
+		return this.name;
+	}
+
+	@Override
+	public void setName(String s) {
+		name = s;
+	}
+
+	@Override
+	public int size() {
+		return this.ids.size();
+	}
+
+	@Override
+	public String getTree() {
+		return this.newickTree;
+	}
+
+	@Override
+	public List<UUID> getUUIDs() {
+		return this.ids;
+	}
+
+	@Override
+	public void addDataset(final IAnalysisDataset dataset) {
+		this.ids.add(dataset.getId());
+	}
+
+	@Override
+	public void addDataset(final ICellCollection collection) {
+		this.ids.add(collection.getId());
+	}
+
+	@Override
+	public void removeDataset(final IAnalysisDataset dataset) {
+		removeDataset(dataset.getId());
+	}
+
+	@Override
+	public void removeDataset(final UUID id) {
+		this.ids.remove(id);
+	}
+
+	@Override
+	public Optional<HashOptions> getOptions() {
+		return Optional.ofNullable(options);
+	}
+
+	@Override
+	public boolean hasDataset(final UUID id) {
+		return ids.contains(id);
+	}
+
+	@Override
+	public boolean hasTree() {
+		return newickTree != null;
+	}
+
+	@Override
+	public String toString() {
+		return this.name;
+	}
+
+	@Override
 	public int hashCode() {
 		return Objects.hash(id, ids, name, newickTree, options);
 	}
@@ -211,19 +212,22 @@ public class DefaultClusterGroup implements IClusterGroup {
 		if (getClass() != obj.getClass())
 			return false;
 		DefaultClusterGroup other = (DefaultClusterGroup) obj;
-		return Objects.equals(id, other.id) && Objects.equals(ids, other.ids) && Objects.equals(name, other.name)
-				&& Objects.equals(newickTree, other.newickTree) && Objects.equals(options, other.options);
+		return Objects.equals(id, other.id) && Objects.equals(ids, other.ids)
+				&& Objects.equals(name, other.name)
+				&& Objects.equals(newickTree, other.newickTree)
+				&& Objects.equals(options, other.options);
 	}
 
-	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-        in.defaultReadObject();
-        if(id==null)
-        	id = UUID.randomUUID();
-    }
+	private void readObject(java.io.ObjectInputStream in)
+			throws IOException, ClassNotFoundException {
+		in.defaultReadObject();
+		if (id == null)
+			id = UUID.randomUUID();
+	}
 
-    private void writeObject(java.io.ObjectOutputStream out) throws IOException {
-        out.defaultWriteObject();
-    }
+	private void writeObject(java.io.ObjectOutputStream out) throws IOException {
+		out.defaultWriteObject();
+	}
 
 	@Override
 	public IClusterGroup duplicate() {

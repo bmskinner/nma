@@ -160,7 +160,10 @@ public class ClusterGroupTableModel extends DatasetTableModel {
 		}
 
 		HashOptions op = opn.get();
+
+		boolean hasDimRed = false;
 		if (op.getBoolean(HashOptions.CLUSTER_USE_TSNE_KEY)) {
+			hasDimRed = true;
 			builder.append(Labels.Clusters.TSNE + Io.NEWLINE);
 			builder.append(
 					Labels.Clusters.TSNE_PERPLEXITY + ": " + op.getDouble(TsneMethod.PERPLEXITY_KEY)
@@ -170,6 +173,7 @@ public class ClusterGroupTableModel extends DatasetTableModel {
 		}
 
 		if (op.getBoolean(HashOptions.CLUSTER_USE_UMAP_KEY)) {
+			hasDimRed = true;
 			builder.append(Labels.Clusters.UMAP + Io.NEWLINE);
 			builder.append(
 					Labels.Clusters.UMAP_N_NEIGHTBOURS + ": "
@@ -182,6 +186,7 @@ public class ClusterGroupTableModel extends DatasetTableModel {
 		}
 
 		if (op.getBoolean(HashOptions.CLUSTER_USE_PCA_KEY)) {
+			hasDimRed = true;
 			builder.append(Labels.Clusters.PCA + Io.NEWLINE);
 			builder.append(Labels.Clusters.PCA_VARIANCE + ": "
 					+ op.getDouble(PrincipalComponentAnalysis.PROPORTION_VARIANCE_KEY)
@@ -189,6 +194,14 @@ public class ClusterGroupTableModel extends DatasetTableModel {
 			builder.append(
 					Labels.Clusters.PCA_NUM_PCS + ": " + op.getInt(HashOptions.CLUSTER_NUM_PCS_KEY)
 							+ Io.NEWLINE);
+		}
+
+		if (hasDimRed) {
+			if (op.getBoolean(HashOptions.CLUSTER_USE_DIM_RED_KEY)) {
+				builder.append("Values used for clustering" + Io.NEWLINE);
+			} else {
+				builder.append("Values used for display only" + Io.NEWLINE);
+			}
 		}
 
 		String s = builder.toString();

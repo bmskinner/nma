@@ -28,10 +28,13 @@ import com.bmskinner.nma.analysis.AbstractAnalysisMethod;
 import com.bmskinner.nma.analysis.AnalysisMethodException;
 import com.bmskinner.nma.analysis.DefaultAnalysisResult;
 import com.bmskinner.nma.analysis.IAnalysisResult;
+import com.bmskinner.nma.components.Version;
 import com.bmskinner.nma.components.datasets.DatasetCreator;
 import com.bmskinner.nma.components.datasets.DatasetRepairer;
 import com.bmskinner.nma.components.datasets.DatasetValidator;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
+import com.bmskinner.nma.components.datasets.IClusterGroup;
+import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.io.Io.Importer;
 import com.bmskinner.nma.logging.Loggable;
 
@@ -104,11 +107,46 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
 			// datasets
 			dataset = DatasetCreator.createRoot(doc.getRootElement());
 
+			if (dataset.getVersionLastSaved().isOlderThan(Version.currentVersion())) {
+				convertDatasetToLatestVersion();
+			}
+
 			validateDataset();
 
 		} catch (Exception e) {
 			LOGGER.log(Loggable.STACK, "Error in dataset import", e);
 			throw new UnloadableDatasetException("Not valid XML dataset for this version", e);
+		}
+	}
+
+	/**
+	 * Some alterations may need to be made to datasets on import
+	 * 
+	 */
+	private void convertDatasetToLatestVersion() {
+
+		if (dataset.getVersionLastSaved().equals(new Version(2, 0, 0))) {
+			// Need to update the dimensionality reduction options for display
+			// Before 2.1.0 all clustering with dim red used the values for clustering
+			// After this, the values can be computed for display only
+			for (IAnalysisDataset d : dataset.getAllChildDatasets()) {
+				for (IClusterGroup g : d.getClusterGroups()) {
+					HashOptions op = g.getOptions().get();
+					if (op.getBoolean(HashOptions.CLUSTER_USE_PCA_KEY) ||
+							op.getBoolean(HashOptions.CLUSTER_USE_UMAP_KEY) ||
+							op.getBoolean(HashOptions.CLUSTER_USE_TSNE_KEY))
+						op.setBoolean(HashOptions.CLUSTER_USE_DIM_RED_KEY, true);
+				}
+			}
+
+			for (IClusterGroup g : dataset.getClusterGroups()) {
+				HashOptions op = g.getOptions().get();
+				if (op.getBoolean(HashOptions.CLUSTER_USE_PCA_KEY) ||
+						op.getBoolean(HashOptions.CLUSTER_USE_UMAP_KEY) ||
+						op.getBoolean(HashOptions.CLUSTER_USE_TSNE_KEY))
+					op.setBoolean(HashOptions.CLUSTER_USE_DIM_RED_KEY, true);
+			}
+
 		}
 	}
 

@@ -107,6 +107,17 @@ public class DimensionalReductionSelectionPanel extends OptionsPanel {
 		labels.add(noneLabel);
 		fields.add(noneBox);
 
+		// control if the dim red values are used for clustering or just computed for
+		// display
+		JCheckBox useForClusteringBox = new JCheckBox();
+		useForClusteringBox.setForeground(Color.DARK_GRAY);
+		useForClusteringBox.setSelected(options.getBoolean(HashOptions.CLUSTER_USE_DIM_RED_KEY));
+		useForClusteringBox.setEnabled(!noneBox.isSelected());
+		useForClusteringBox.addChangeListener(e -> {
+			options.setBoolean(HashOptions.CLUSTER_USE_DIM_RED_KEY,
+					useForClusteringBox.isSelected());
+		});
+
 		// Add options for UMAP
 		JCheckBox umapBox = new JCheckBox();
 		umapBox.setForeground(Color.DARK_GRAY);
@@ -135,6 +146,7 @@ public class DimensionalReductionSelectionPanel extends OptionsPanel {
 			options.setBoolean(HashOptions.CLUSTER_USE_UMAP_KEY, umapBox.isSelected());
 			neighbourSpinner.setEnabled(umapBox.isSelected());
 			minDistSpinner.setEnabled(umapBox.isSelected());
+			useForClusteringBox.setEnabled(!noneBox.isSelected());
 		});
 
 		// Add checkbox listeners last so we can reference the spinners
@@ -142,7 +154,10 @@ public class DimensionalReductionSelectionPanel extends OptionsPanel {
 			options.setBoolean(HashOptions.CLUSTER_USE_TSNE_KEY, tSNEBox.isSelected());
 			iterationsSpinner.setEnabled(tSNEBox.isSelected());
 			perplexitySpinner.setEnabled(tSNEBox.isSelected());
+			useForClusteringBox.setEnabled(!noneBox.isSelected());
 		});
+
+		JLabel useForClusteringLbl = new JLabel(Labels.Clusters.USE_FOR_CLUSTERING);
 
 		noneBox.addActionListener(e -> {
 			options.setBoolean(HashOptions.CLUSTER_USE_PCA_KEY, false);
@@ -152,6 +167,7 @@ public class DimensionalReductionSelectionPanel extends OptionsPanel {
 			minDistSpinner.setEnabled(umapBox.isSelected());
 			iterationsSpinner.setEnabled(tSNEBox.isSelected());
 			perplexitySpinner.setEnabled(tSNEBox.isSelected());
+			useForClusteringBox.setEnabled(!noneBox.isSelected());
 		});
 
 		// Add UMAP elements
@@ -198,6 +214,9 @@ public class DimensionalReductionSelectionPanel extends OptionsPanel {
 		labels.add(new JLabel(PrincipalComponentAnalysis.PROPORTION_VARIANCE_KEY));
 		fields.add(pcaSpinner);
 
+		labels.add(useForClusteringLbl);
+		fields.add(useForClusteringBox);
+
 		addLabelTextRows(labels, fields, layout, panel);
 		return panel;
 	}
@@ -209,7 +228,8 @@ public class DimensionalReductionSelectionPanel extends OptionsPanel {
 	 */
 	private JSpinner makeUmapNeighbourSpinner() {
 		int initialValue = options.getInt(UMAPMethod.N_NEIGHBOUR_KEY);
-		initialValue = NumberTools.constrain(initialValue, MIN_UMAP_NEIGHBOUR, dataset.getCollection().size());
+		initialValue = NumberTools.constrain(initialValue, MIN_UMAP_NEIGHBOUR,
+				dataset.getCollection().size());
 		SpinnerModel model = new SpinnerNumberModel(initialValue, MIN_UMAP_NEIGHBOUR,
 				dataset.getCollection().size(), STEP_UMAP_NEIGHBOUR);
 
@@ -260,7 +280,8 @@ public class DimensionalReductionSelectionPanel extends OptionsPanel {
 	 */
 	private JSpinner makeMaxIterationsSpinner() {
 		int initialIterations = options.getInt(TsneMethod.MAX_ITERATIONS_KEY);
-		initialIterations = NumberTools.constrain(initialIterations, MIN_ITERATIONS, MAX_ITERATIONS);
+		initialIterations = NumberTools.constrain(initialIterations, MIN_ITERATIONS,
+				MAX_ITERATIONS);
 
 		SpinnerModel iterationsModel = new SpinnerNumberModel(initialIterations, MIN_ITERATIONS,
 				MAX_ITERATIONS, STEP_ITERATIONS);

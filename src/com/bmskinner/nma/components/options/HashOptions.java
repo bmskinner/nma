@@ -179,6 +179,7 @@ public interface HashOptions extends Serializable, XmlSerializable {
 	String CLUSTER_USE_TSNE_KEY = "Use t-SNE";
 	String CLUSTER_USE_UMAP_KEY = "Use UMAP";
 	String CLUSTER_USE_PCA_KEY = "Use PCA";
+	String CLUSTER_USE_DIM_RED_KEY = "Use dimensionally reduced values for clustering";
 	String CLUSTER_NUM_PCS_KEY = "Number of PCs";
 
 	int DEFAULT_MANUAL_CLUSTER_NUMBER = 2;
@@ -194,6 +195,7 @@ public interface HashOptions extends Serializable, XmlSerializable {
 	boolean DEFAULT_USE_TSNE = false;
 	boolean DEFAULT_USE_UMAP = false;
 	boolean DEFAULT_USE_PCA = false;
+	boolean DEFAULT_USE_DIM_RED = true;
 
 	/**
 	 * Store the original signal ids in merged dataset signal options

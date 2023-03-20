@@ -190,18 +190,21 @@ public class TreeBuildingMethod extends CellClusteringMethod {
 	protected ArrayList<Attribute> makeAttributes() throws AnalysisMethodException {
 
 		// Shortcuts if dimensional reduction is chosen
-		LOGGER.finer("Checking if tSNE clustering is set");
-		if (options.getBoolean(HashOptions.CLUSTER_USE_TSNE_KEY))
-			return makeTsneAttributes();
+		if (options.getBoolean(HashOptions.CLUSTER_USE_DIM_RED_KEY)) {
 
-		LOGGER.finer("Checking if PCA clustering is set");
-		if (options.getBoolean(HashOptions.CLUSTER_USE_PCA_KEY))
-			return makePCAttributes();
+			LOGGER.finer("Checking if tSNE clustering is set");
+			if (options.getBoolean(HashOptions.CLUSTER_USE_TSNE_KEY))
+				return makeTsneAttributes();
 
-		LOGGER.finer("Checking if UMAP clustering is set");
-		if (options.getBoolean(HashOptions.CLUSTER_USE_UMAP_KEY))
-			return (makeUmapAttributes());
+			LOGGER.finer("Checking if PCA clustering is set");
+			if (options.getBoolean(HashOptions.CLUSTER_USE_PCA_KEY))
+				return makePCAttributes();
 
+			LOGGER.finer("Checking if UMAP clustering is set");
+			if (options.getBoolean(HashOptions.CLUSTER_USE_UMAP_KEY))
+				return (makeUmapAttributes());
+
+		}
 		LOGGER.finer("Creating attribute count on values directly");
 		// Determine the number of attributes required
 		int attributeCount = 0;
@@ -438,19 +441,22 @@ public class TreeBuildingMethod extends CellClusteringMethod {
 			throws ProfileException, MeshCreationException, MissingComponentException {
 
 		// Shortcuts if dimensionality reduction is used first
-		if (options.getBoolean(HashOptions.CLUSTER_USE_TSNE_KEY)) {
-			addTsneNucleus(c, n, attributes, instances);
-			return;
-		}
+		if (options.getBoolean(HashOptions.CLUSTER_USE_DIM_RED_KEY)) {
 
-		if (options.getBoolean(HashOptions.CLUSTER_USE_PCA_KEY)) {
-			addPCANucleus(c, n, attributes, instances);
-			return;
-		}
+			if (options.getBoolean(HashOptions.CLUSTER_USE_TSNE_KEY)) {
+				addTsneNucleus(c, n, attributes, instances);
+				return;
+			}
 
-		if (options.getBoolean(HashOptions.CLUSTER_USE_UMAP_KEY)) {
-			addUMAPNucleus(c, n, attributes, instances);
-			return;
+			if (options.getBoolean(HashOptions.CLUSTER_USE_PCA_KEY)) {
+				addPCANucleus(c, n, attributes, instances);
+				return;
+			}
+
+			if (options.getBoolean(HashOptions.CLUSTER_USE_UMAP_KEY)) {
+				addUMAPNucleus(c, n, attributes, instances);
+				return;
+			}
 		}
 
 		int attNumber = 0;
