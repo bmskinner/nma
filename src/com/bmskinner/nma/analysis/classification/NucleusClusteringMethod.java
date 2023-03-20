@@ -240,7 +240,7 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
 
 		int numberOfClusters = clusterer.numberOfClusters();
 
-		LOGGER.finer(() -> "Clustering found %s clusters".formatted(numberOfClusters));
+		LOGGER.fine(() -> "Clustering found %s clusters".formatted(numberOfClusters));
 
 		// Create new empty collections to hold the cells for each cluster
 		for (int i = 0; i < numberOfClusters; i++) {

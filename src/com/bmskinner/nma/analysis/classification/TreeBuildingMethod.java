@@ -384,6 +384,7 @@ public class TreeBuildingMethod extends CellClusteringMethod {
 			inst.setValue(att, uniqueName);
 		}
 		instances.add(inst);
+		inst.setDataset(instances);
 		cellToInstanceMap.put(inst, c.getId());
 		fireProgressEvent();
 	}
@@ -403,6 +404,7 @@ public class TreeBuildingMethod extends CellClusteringMethod {
 			inst.setValue(att, uniqueName);
 		}
 		instances.add(inst);
+		inst.setDataset(instances);
 		cellToInstanceMap.put(inst, c.getId());
 		fireProgressEvent();
 	}
@@ -425,6 +427,7 @@ public class TreeBuildingMethod extends CellClusteringMethod {
 			inst.setValue(att, uniqueName);
 		}
 		instances.add(inst);
+		inst.setDataset(instances);
 		cellToInstanceMap.put(inst, c.getId());
 		fireProgressEvent();
 	}
@@ -515,6 +518,7 @@ public class TreeBuildingMethod extends CellClusteringMethod {
 		}
 
 		instances.add(inst);
+		inst.setDataset(instances);
 		cellToInstanceMap.put(inst, c.getId());
 		fireProgressEvent();
 	}
