@@ -136,6 +136,67 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 	}
 
 	/**
+	 * Draw the given nuclei on the chart
+	 * 
+	 * @param d
+	 * @param plotGroup
+	 * @param chart
+	 */
+	public static void addAnnotatedNucleusImages(IAnalysisDataset d, IClusterGroup plotGroup,
+			JFreeChart chart) {
+
+		boolean isUMAP = plotGroup.getOptions().get()
+				.getBoolean(HashOptions.CLUSTER_USE_UMAP_KEY);
+		boolean isTsne = plotGroup.getOptions().get()
+				.getBoolean(HashOptions.CLUSTER_USE_TSNE_KEY);
+		boolean isPca = plotGroup.getOptions().get()
+				.getBoolean(HashOptions.CLUSTER_USE_PCA_KEY);
+
+		String prefix1 = isUMAP ? Measurement.UMAP_1.name().replace(" ", "_") + "_"
+				: isTsne ? "TSNE_1_" : "PC1_";
+		String prefix2 = isUMAP ? Measurement.UMAP_2.name().replace(" ", "_") + "_"
+				: isTsne ? "TSNE_2_" : "PC2_";
+
+		// Scale the images to the dimensions of the chart
+		// Large datasets should have smaller nuclei
+		Range xRange = DatasetUtils.findDomainBounds(chart.getXYPlot().getDataset());
+		Range yRange = DatasetUtils.findRangeBounds(chart.getXYPlot().getDataset());
+
+		double scale = Math.log10(d.getCollection().size()) * 4;
+
+		int dataset = 0;
+
+		// Add each cluster group nuclei
+		for (UUID id : plotGroup.getUUIDs()) {
+			final int index = dataset;
+			IAnalysisDataset childDataset = d.getChildDataset(id);
+			List<Nucleus> nList = new ArrayList<>();
+			nList.addAll(childDataset.getCollection().getNuclei());
+
+			final Color colour = childDataset.getDatasetColour()
+					.orElse(ColourSelecter.getColor(dataset));
+
+			// If the number of nuclei is high, there is no point drawing them all
+			// so pick a random subset
+			if (nList.size() > MAX_NUCLEI_PER_CLUSTER) {
+				Collections.shuffle(nList);
+				nList = nList.subList(0, MAX_NUCLEI_PER_CLUSTER);
+			}
+
+			final List<Nucleus> batchList = nList;
+
+			// Add in batches to allow the user to see they are loading
+			IntStream.range(0, (batchList.size() + BATCH_SIZE - 1) / BATCH_SIZE)
+					.mapToObj(i -> batchList.subList(i * BATCH_SIZE,
+							Math.min(batchList.size(), (i + 1) * BATCH_SIZE)))
+					.forEach(batch -> processBatch(batch, d, plotGroup, chart, prefix1, prefix2,
+							colour, scale));
+
+			dataset++;
+		}
+	}
+
+	/**
 	 * Find the centroid of the points in the given dataset
 	 * 
 	 * @param dataset
@@ -315,68 +376,6 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 	}
 
 	/**
-	 * Draw the given nuclei on the chart
-	 * 
-	 * @param d
-	 * @param plotGroup
-	 * @param chart
-	 */
-	public static void addAnnotatedNucleusImages(IAnalysisDataset d, IClusterGroup plotGroup,
-			JFreeChart chart) {
-
-		boolean isUMAP = plotGroup.getOptions().get()
-				.getBoolean(HashOptions.CLUSTER_USE_UMAP_KEY);
-		boolean isTsne = plotGroup.getOptions().get()
-				.getBoolean(HashOptions.CLUSTER_USE_TSNE_KEY);
-		boolean isPca = plotGroup.getOptions().get()
-				.getBoolean(HashOptions.CLUSTER_USE_PCA_KEY);
-
-		String prefix1 = isUMAP ? Measurement.UMAP_1.name().replace(" ", "_") + "_"
-				: isTsne ? "TSNE_1_" : "PC1_";
-		String prefix2 = isUMAP ? Measurement.UMAP_2.name().replace(" ", "_") + "_"
-				: isTsne ? "TSNE_2_" : "PC2_";
-
-		// Scale the images to the dimensions of the chart
-		// Large datasets should have smaller nuclei
-		Range xRange = DatasetUtils.findDomainBounds(chart.getXYPlot().getDataset());
-		Range yRange = DatasetUtils.findRangeBounds(chart.getXYPlot().getDataset());
-
-		double scale = Math.max(xRange.getLength(), yRange.getLength())
-				* Math.log10(d.getCollection().size());
-
-		int dataset = 0;
-
-		// Add each cluster group nuclei
-		for (UUID id : plotGroup.getUUIDs()) {
-			final int index = dataset;
-			IAnalysisDataset childDataset = d.getChildDataset(id);
-			List<Nucleus> nList = new ArrayList<>();
-			nList.addAll(childDataset.getCollection().getNuclei());
-
-			final Color colour = childDataset.getDatasetColour()
-					.orElse(ColourSelecter.getColor(dataset));
-
-			// If the number of nuclei is high, there is no point drawing them all
-			// so pick a random subset
-			if (nList.size() > MAX_NUCLEI_PER_CLUSTER) {
-				Collections.shuffle(nList);
-				nList = nList.subList(0, MAX_NUCLEI_PER_CLUSTER);
-			}
-
-			final List<Nucleus> batchList = nList;
-
-			// Add in batches to allow the user to see they are loading
-			IntStream.range(0, (batchList.size() + BATCH_SIZE - 1) / BATCH_SIZE)
-					.mapToObj(i -> batchList.subList(i * BATCH_SIZE,
-							Math.min(batchList.size(), (i + 1) * BATCH_SIZE)))
-					.forEach(batch -> processBatch(batch, d, plotGroup, chart, prefix1, prefix2,
-							colour, scale));
-
-			dataset++;
-		}
-	}
-
-	/**
 	 * Add a batch of nucleus images to the chart
 	 * 
 	 * @param list      the nuclei to add
@@ -486,7 +485,11 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 
 		// the image needs to be scaled to fit in the dimensionally reduced
 		// coordinates without overlapping nuclei too much
-		double xr = ((xmax - xmin) / scaleFactor);
+		// Note that the coordinates we draw on are a rectangle within the min and max
+		// range of the data, so set the aspect ratio manually
+		double aspect = xRange.getLength() / yRange.getLength();
+
+		double xr = (((xmax - xmin) / scaleFactor)) / aspect;
 		double yr = ((ymax - ymin) / scaleFactor);
 		double xrh = xr / 2;
 		double yrh = yr / 2;

@@ -375,7 +375,6 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 				XYDataset dataset = plot.getDataset(i);
 
 				if (dataset == null) { // No dataset, skip
-					LOGGER.finest("Null dataset " + i);
 					continue;
 				}
 
@@ -960,7 +959,7 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 			if (d == null)
 				return;
 
-			// Find the full data range
+			// Find the full data range of all values in the chart
 			Range domainRange = DatasetUtils.findDomainBounds(d);
 			Range rangeRange = DatasetUtils.findRangeBounds(d);
 
@@ -1020,23 +1019,13 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 				}
 
 				// Find the values range plus 10% to constrain zoom out
-				domainRange = Range.expand(domainRange, 0.10, 0.10);
+				ChartRanges minZoomRanges = findMinimumZoomAxisRanges();
 
-				// If we need a consistent aspect ratio, set the range length based on domain
-				// otherwise just clip at 10% also
-				if (isFixedAspectRatio) {
-					double rangeLength = domainRange.getLength() / getPanelAspectRatio();
-					rangeRange = new Range(rangeRange.getCentralValue() - rangeLength / 2,
-							rangeRange.getCentralValue() + rangeLength / 2);
-				} else {
-					rangeRange = Range.expand(rangeRange, 0.10, 0.10);
-				}
-
-				// Ensure we only zoom out to the extent of the data
-				double xMin = domainRange.constrain(p.getX() - (fx * xr));
-				double xMax = domainRange.constrain(p.getX() + (1 - fx) * xr);
-				double yMin = rangeRange.constrain(p.getY() - (fy * yr));
-				double yMax = rangeRange.constrain(p.getY() + (1 - fy) * yr);
+				// Ensure we only zoom out but only to the extent of the data
+				double xMin = minZoomRanges.xRange.constrain(p.getX() - (fx * xr));
+				double xMax = minZoomRanges.xRange.constrain(p.getX() + (1 - fx) * xr);
+				double yMin = minZoomRanges.yRange.constrain(p.getY() - (fy * yr));
+				double yMax = minZoomRanges.yRange.constrain(p.getY() + (1 - fy) * yr);
 
 				// Update the range
 				plot.getDomainAxis().setRange(xMin, xMax);
@@ -1044,6 +1033,58 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 			}
 		}
 
+	}
+
+	/**
+	 * Find the ranges that should constrain the minimum zoom level for the loaded
+	 * chart
+	 * 
+	 * @return
+	 */
+	private ChartRanges findMinimumZoomAxisRanges() {
+
+		XYPlot plot = getChart().getXYPlot();
+		// Find the full data range of all values in the chart
+		Range domainRange = DatasetUtils.findDomainBounds(plot.getDataset());
+		Range rangeRange = DatasetUtils.findRangeBounds(plot.getDataset());
+
+		if (plot.getDatasetCount() > 1) {
+			for (int i = 0; i < plot.getDatasetCount(); i++) {
+				domainRange = Range.combine(domainRange,
+						DatasetUtils.findDomainBounds(plot.getDataset(i)));
+				rangeRange = Range.combine(rangeRange,
+						DatasetUtils.findRangeBounds(plot.getDataset(i)));
+			}
+		}
+
+		// The maximum range depends on whether the chart is aspect ratio constrained.
+
+		if (!isFixedAspectRatio) {
+			return new ChartRanges(Range.expand(domainRange, 0.10, 0.10),
+					Range.expand(rangeRange, 0.10, 0.10));
+		}
+
+		double expandedRangeLength = Range.expand(rangeRange, 0.10, 0.10).getLength();
+
+		if (domainRange.getLength() > expandedRangeLength) {
+
+			domainRange = Range.expand(domainRange, 0.10, 0.10);
+			double rangeLength = domainRange.getLength() / getPanelAspectRatio();
+			rangeRange = new Range(rangeRange.getCentralValue() - rangeLength / 2,
+					rangeRange.getCentralValue() + rangeLength / 2);
+
+		} else {
+			rangeRange = Range.expand(rangeRange, 0.10, 0.10);
+			double domainLength = rangeRange.getLength() * getPanelAspectRatio();
+			domainRange = new Range(domainRange.getCentralValue() - domainLength / 2,
+					domainRange.getCentralValue() + domainLength / 2);
+
+		}
+
+		return new ChartRanges(domainRange, rangeRange);
+	}
+
+	private record ChartRanges(Range xRange, Range yRange) {
 	}
 
 }
