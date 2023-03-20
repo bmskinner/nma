@@ -4,9 +4,12 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.Paint;
+import java.util.List;
+import java.util.UUID;
 import java.util.logging.Logger;
 
 import javax.swing.JCheckBox;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -34,10 +37,7 @@ public class DimensionalityReductionPlotDialog extends MessagingDialog {
 	private static final Logger LOGGER = Logger
 			.getLogger(DimensionalityReductionPlotDialog.class.getName());
 
-	private static final String COLOUR_BY_LBL = "Colour by:";
-	private static final String COLOUR_MERGE_SOURCE = "Merge sources";
-	private static final String COLOUR_CLUSTERS = "Clusters";
-	private static final String COLOUR_NONE = "None";
+	private static final String HELP_LBL = "Scroll to zoom, click and drag the chart to move";
 	private final IAnalysisDataset dataset;
 	private final IClusterGroup group;
 	private final ExportableChartPanel chartPanel = new ExportableChartPanel(
@@ -97,6 +97,7 @@ public class DimensionalityReductionPlotDialog extends MessagingDialog {
 			}
 		});
 
+		panel.add(new JLabel(HELP_LBL));
 		panel.add(showImagesBox);
 		panel.add(showPointsBox);
 
@@ -105,8 +106,11 @@ public class DimensionalityReductionPlotDialog extends MessagingDialog {
 
 	private void updateChart(ColourByType type) {
 		XYPlot plot = chartPanel.getChart().getXYPlot();
+		List<UUID> childIds = group.getUUIDs();
 		for (int i = 0; i < plot.getDataset().getSeriesCount(); i++) {
-			Paint colour = ColourByType.CLUSTER.equals(type) ? ColourSelecter.getColor(i)
+			IAnalysisDataset childDataset = dataset.getChildDataset(childIds.get(i));
+			Paint colour = ColourByType.CLUSTER.equals(type)
+					? childDataset.getDatasetColour().orElse(ColourSelecter.getColor(i))
 					: Color.WHITE;
 			plot.getRenderer().setSeriesPaint(i, colour);
 		}

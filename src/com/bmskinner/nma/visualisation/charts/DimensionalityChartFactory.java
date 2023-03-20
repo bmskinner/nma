@@ -111,9 +111,15 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 			XYItemRenderer renderer = new ScatterChartRenderer();
 			plot.setRenderer(renderer);
 
+			List<UUID> clusterIds = colourGroup.getUUIDs();
 			for (int i = 0; i < plot.getDataset().getSeriesCount(); i++) {
-				Paint colour = type.equals(ColourByType.CLUSTER) ? ColourSelecter.getColor(i)
-						: Color.WHITE;
+
+				// If we are colouring the points, use the dataset colour if set,
+				// otherwise pick a sensible colour
+				IAnalysisDataset childDataset = d.getChildDataset(clusterIds.get(i));
+				Paint colour = type.equals(ColourByType.NONE) ? Color.WHITE
+						: childDataset.hasDatasetColour() ? childDataset.getDatasetColour().get()
+								: ColourSelecter.getColor(i);
 				renderer.setSeriesPaint(i, colour);
 			}
 
@@ -250,6 +256,10 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 		if (!d.getChildDataset(ccl.datasetId()).getCollection().hasConsensus())
 			return;
 
+		IAnalysisDataset childDataset = d.getChildDataset(ccl.datasetId());
+		Paint colour = childDataset.hasDatasetColour() ? childDataset.getDatasetColour().get()
+				: ColourSelecter.getColor(ccl.datasetIndex() - 1);
+
 		Range xRange = DatasetUtils.findDomainBounds(chart.getXYPlot().getDataset());
 		Range yRange = DatasetUtils.findRangeBounds(chart.getXYPlot().getDataset());
 
@@ -278,7 +288,7 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 		renderer.setDefaultSeriesVisibleInLegend(false);
 
 		for (int i = 0; i < cd.getSeriesCount(); i++) {
-			renderer.setSeriesPaint(i, ColourSelecter.getColor(ccl.datasetIndex() - 1));
+			renderer.setSeriesPaint(i, colour);
 			renderer.setSeriesStroke(i, new BasicStroke(2.0f));
 		}
 		chart.getXYPlot().setRenderer(ccl.datasetIndex(), renderer);
@@ -294,13 +304,13 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 		// Draw a line from the consensus to the centroid of the cluster
 		XYLineAnnotation line = new XYLineAnnotation(ccl.centroid().getX(), ccl.centroid().getY(),
 				xBound, ny,
-				new BasicStroke(2.0f), ColourSelecter.getColor(ccl.datasetIndex() - 1));
+				new BasicStroke(2.0f), colour);
 		chart.getXYPlot().addAnnotation(line);
 
 		// Make a line defining the x bound
 		XYLineAnnotation xline = new XYLineAnnotation(xBound, yRangeCd.getUpperBound(), xBound,
 				yRangeCd.getLowerBound(),
-				new BasicStroke(2.0f), ColourSelecter.getColor(ccl.datasetIndex() - 1));
+				new BasicStroke(2.0f), colour);
 		chart.getXYPlot().addAnnotation(xline);
 	}
 
@@ -339,9 +349,12 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 		// Add each cluster group nuclei
 		for (UUID id : plotGroup.getUUIDs()) {
 			final int index = dataset;
-
+			IAnalysisDataset childDataset = d.getChildDataset(id);
 			List<Nucleus> nList = new ArrayList<>();
-			nList.addAll(d.getChildDataset(id).getCollection().getNuclei());
+			nList.addAll(childDataset.getCollection().getNuclei());
+
+			final Color colour = childDataset.getDatasetColour()
+					.orElse(ColourSelecter.getColor(dataset));
 
 			// If the number of nuclei is high, there is no point drawing them all
 			// so pick a random subset
@@ -357,7 +370,7 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 					.mapToObj(i -> batchList.subList(i * BATCH_SIZE,
 							Math.min(batchList.size(), (i + 1) * BATCH_SIZE)))
 					.forEach(batch -> processBatch(batch, d, plotGroup, chart, prefix1, prefix2,
-							index, scale));
+							colour, scale));
 
 			dataset++;
 		}
@@ -377,7 +390,7 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 	 */
 	private static synchronized void processBatch(List<Nucleus> list, IAnalysisDataset d,
 			IClusterGroup plotGroup,
-			JFreeChart chart, String prefix1, String prefix2, int index, double scale) {
+			JFreeChart chart, String prefix1, String prefix2, Color col, double scale) {
 
 		// Disable notifications while the batch is processed
 		chart.setNotify(false);
@@ -386,7 +399,7 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 		for (Nucleus n : list) {
 			anns.add(createDimensionalityReductionImageAnnotation(n, prefix1 + plotGroup.getId(),
 					prefix2 + plotGroup.getId(), chart.getXYPlot(), scale,
-					ColourSelecter.getColor(index)));
+					col));
 		}
 
 		try {
