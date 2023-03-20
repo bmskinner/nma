@@ -12,6 +12,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 import java.util.logging.Logger;
+import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 
 import javax.swing.SwingUtilities;
@@ -205,29 +206,40 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 	 */
 	private static Point2D findCentroid(int dataset, JFreeChart chart) {
 
-		// Find the centroid of the cluster
+		// Find the centre of mass of the cluster
 		// Each cluster group is a series in the first dataset
 		int items = chart.getXYPlot().getDataset(0).getItemCount(dataset - 1);
 
-		double xmax = -Double.MAX_VALUE;
-		double xmin = Double.MAX_VALUE;
-		double ymax = -Double.MAX_VALUE;
-		double ymin = Double.MAX_VALUE;
+//		double xmax = -Double.MAX_VALUE;
+//		double xmin = Double.MAX_VALUE;
+//		double ymax = -Double.MAX_VALUE;
+//		double ymin = Double.MAX_VALUE;
+
+		double[] xvals = new double[items];
+		double[] yvals = new double[items];
 
 		for (int i = 0; i < items; i++) {
 
 			double x = chart.getXYPlot().getDataset(0).getXValue(dataset - 1, i);
 			double y = chart.getXYPlot().getDataset(0).getYValue(dataset - 1, i);
 
-			xmax = x > xmax ? x : xmax;
-			xmin = x < xmin ? x : xmin;
-			ymax = y > ymax ? y : ymax;
-			ymin = y < ymin ? y : ymin;
+			xvals[i] = x;
+			yvals[i] = y;
+//
+//			xmax = x > xmax ? x : xmax;
+//			xmin = x < xmin ? x : xmin;
+//			ymax = y > ymax ? y : ymax;
+//			ymin = y < ymin ? y : ymin;
 		}
 
-		double dx = xmax - xmin;
-		double dy = ymax - ymin;
-		return new Point2D.Double(xmin + (dx / 2), ymin + (dy / 2));
+		double xmean = DoubleStream.of(xvals).average().orElse(0);
+		double ymean = DoubleStream.of(yvals).average().orElse(0);
+
+		return new Point2D.Double(xmean, ymean);
+
+//		double dx = xmax - xmin;
+//		double dy = ymax - ymin;
+//		return new Point2D.Double(xmin + (dx / 2), ymin + (dy / 2));
 	}
 
 	private record ConsensusCentroidLink(UUID datasetId, Point2D centroid, int datasetIndex) {
