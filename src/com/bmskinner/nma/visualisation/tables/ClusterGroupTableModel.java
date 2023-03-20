@@ -169,7 +169,7 @@ public class ClusterGroupTableModel extends DatasetTableModel {
 					Labels.Clusters.TSNE_PERPLEXITY + ": " + op.getDouble(TsneMethod.PERPLEXITY_KEY)
 							+ Io.NEWLINE);
 			builder.append(Labels.Clusters.TSNE_MAX_ITER + ": "
-					+ op.getInt(TsneMethod.MAX_ITERATIONS_KEY));
+					+ op.getInt(TsneMethod.MAX_ITERATIONS_KEY) + Io.NEWLINE);
 		}
 
 		if (op.getBoolean(HashOptions.CLUSTER_USE_UMAP_KEY)) {

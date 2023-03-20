@@ -69,8 +69,8 @@ public interface Measurement extends XmlSerializable {
 		static final String RADIUS = "Radius";
 		static final String LENGTH = "Length";
 		static final String DISPLACEMENT = "Displacement";
-		static final String TSNE_1 = "t-SNE 1";
-		static final String TSNE_2 = "t-SNE 2";
+		static final String TSNE_1 = "TSNE_1";
+		static final String TSNE_2 = "TSNE_2";
 		static final String UMAP_1 = "UMAP 1";
 		static final String UMAP_2 = "UMAP 2";
 		static final String PCA_N = "Number of PCs";

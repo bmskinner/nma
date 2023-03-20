@@ -234,9 +234,9 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator<ChartOpti
 
 		// TODO: add an input parameter for which method we want to display
 		String prefix1 = isUMAP ? Measurement.UMAP_1.name().replace(" ", "_") + "_"
-				: isTsne ? Measurement.TSNE_1.name().replace(" ", "_") : "PC1_";
+				: isTsne ? Measurement.TSNE_1.name() + "_" : "PC1_";
 		String prefix2 = isUMAP ? Measurement.UMAP_2.name().replace(" ", "_") + "_"
-				: isTsne ? Measurement.TSNE_2.name().replace(" ", "_") : "PC2_";
+				: isTsne ? Measurement.TSNE_2.name() + "_" : "PC2_";
 
 		if (type.equals(ColourByType.CLUSTER) && colourGroup == null)
 			type = ColourByType.NONE;
