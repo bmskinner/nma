@@ -942,6 +942,9 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 	 */
 	public class ScrollWheelZoomListener implements MouseWheelListener {
 
+		private static final double ZOOM_IN_FACTOR = 1.5d;
+		private static final double ZOOM_OUT_FACTOR = 1.2d;
+
 		@Override
 		public void mouseWheelMoved(MouseWheelEvent e) {
 			if (getChart() == null)
@@ -970,49 +973,65 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 				}
 			}
 
+			// Find the anchor point for the zoom
 			Point2D p = getChartValuePosition(e.getPoint());
+
+			Range xoriginal = plot.getDomainAxis().getRange();
+			Range yoriginal = plot.getRangeAxis().getRange();
+
+			// We want the point under the cursor to remain under the cursor
+			// after zooming and not jump to the middle of the screen.
+			// To do this, calculate the fractional position of the cursor
+			// and preserve this in the new range.
+
+			double fx = (p.getX() - xoriginal.getLowerBound()) / xoriginal.getLength();
+			double fy = (p.getY() - yoriginal.getLowerBound()) / yoriginal.getLength();
+
+			// Zoom the range
 			if (e.getUnitsToScroll() < 0) { // Zoom in
 
-				Range xoriginal = plot.getDomainAxis().getRange();
-				Range yoriginal = plot.getRangeAxis().getRange();
-
 				// The new range lengths to be covered
-				double xr = xoriginal.getLength() / 1.5;
-				double yr = yoriginal.getLength() / 1.5;
+				double xr = xoriginal.getLength() / ZOOM_IN_FACTOR;
+				double yr = yoriginal.getLength() / ZOOM_IN_FACTOR;
 
-				// We want the point under the cursor to remain under the cursor
-				// after zooming and not jump to the middle of the screen.
-				// To do this, calculate the fractional position of the cursor
-				// and preserve this in the new range.
+				// Correct for aspect ratio
+				if (isFixedAspectRatio) {
+					yr = xr / getPanelAspectRatio();
+				}
 
-				double fx = (p.getX() - xoriginal.getLowerBound()) / xoriginal.getLength();
-				double fy = (p.getY() - yoriginal.getLowerBound()) / yoriginal.getLength();
+				// Set min and max of range from fraction position of anchor
+				double xMin = p.getX() - (fx * xr);
+				double xMax = p.getX() + (1 - fx) * xr;
+				double yMin = p.getY() - (fy * yr);
+				double yMax = p.getY() + (1 - fy) * yr;
 
-				plot.getDomainAxis().setRange(p.getX() - (fx * xr), p.getX() + (1 - fx) * xr);
-				plot.getRangeAxis().setRange(p.getY() - (fy * yr), p.getY() + (1 - fy) * yr);
+				// Update the range
+				plot.getDomainAxis().setRange(xMin, xMax);
+				plot.getRangeAxis().setRange(yMin, yMax);
 
 			} else { // Zoom out
 
-				Range xoriginal = plot.getDomainAxis().getRange();
-				Range yoriginal = plot.getRangeAxis().getRange();
+				double xr = xoriginal.getLength() * ZOOM_OUT_FACTOR;
+				double yr = yoriginal.getLength() * ZOOM_OUT_FACTOR;
 
-				double xr = plot.getDomainAxis().getRange().getLength() * 1.2;
-				double yr = plot.getRangeAxis().getRange().getLength() * 1.2;
+				// Correct for aspect ratio
+				if (isFixedAspectRatio) {
+					yr = xr / getPanelAspectRatio();
+				}
 
 				// Find the values range plus 10% to constrain zoom out
-				domainRange = Range.expand(domainRange, 0.05, 0.05);
-				rangeRange = Range.expand(rangeRange, 0.05, 0.05);
-
-				// Zoom out from anchor point
-				double fx = (p.getX() - xoriginal.getLowerBound()) / xoriginal.getLength();
-				double fy = (p.getY() - yoriginal.getLowerBound()) / yoriginal.getLength();
+				domainRange = Range.expand(domainRange, 0.10, 0.10);
+				rangeRange = Range.expand(rangeRange, 0.10, 0.10);
 
 				// Ensure we only zoom out to the extent of the data
-				plot.getDomainAxis().setRange(domainRange.constrain(p.getX() - (fx * xr)),
-						domainRange.constrain(p.getX() + (1 - fx) * xr));
+				double xMin = domainRange.constrain(p.getX() - (fx * xr));
+				double xMax = domainRange.constrain(p.getX() + (1 - fx) * xr);
+				double yMin = rangeRange.constrain(p.getY() - (fy * yr));
+				double yMax = rangeRange.constrain(p.getY() + (1 - fy) * yr);
 
-				plot.getRangeAxis().setRange(rangeRange.constrain(p.getY() - (fy * yr)),
-						rangeRange.constrain(p.getY() + (1 - fy) * yr));
+				// Update the range
+				plot.getDomainAxis().setRange(xMin, xMax);
+				plot.getRangeAxis().setRange(yMin, yMax);
 			}
 		}
 

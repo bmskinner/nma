@@ -57,7 +57,7 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 	/**
 	 * Number of images to be loaded per batch
 	 */
-	private static final int BATCH_SIZE = 50;
+	private static final int BATCH_SIZE = 100;
 
 	private static final Logger LOGGER = Logger
 			.getLogger(DimensionalityChartFactory.class.getName());
@@ -148,7 +148,7 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 
 			double x = chart.getXYPlot().getDataset(0).getXValue(dataset - 1, i);
 			double y = chart.getXYPlot().getDataset(0).getYValue(dataset - 1, i);
-			
+
 			xmax = x > xmax ? x : xmax;
 			xmin = x < xmin ? x : xmin;
 			ymax = y > ymax ? y : ymax;
@@ -159,13 +159,12 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 		double dy = ymax - ymin;
 		return new Point2D.Double(xmin + (dx / 2), ymin + (dy / 2));
 	}
-	
+
 	private record ConsensusCentroidLink(UUID datasetId, Point2D centroid, int datasetIndex) {
 		double getY() {
 			return centroid.getY();
 		}
 	}
-	
 
 	/**
 	 * Add the consenusus nuclei of the clusters
@@ -239,9 +238,11 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 	 * @throws ComponentCreationException
 	 * @throws ChartDatasetCreationException
 	 */
-	private static void plotConsensus(IAnalysisDataset d, ConsensusCentroidLink ccl, JFreeChart chart, double scale,
+	private static void plotConsensus(IAnalysisDataset d, ConsensusCentroidLink ccl,
+			JFreeChart chart, double scale,
 			int index, double separations)
-			throws MissingLandmarkException, ComponentCreationException, ChartDatasetCreationException {
+			throws MissingLandmarkException, ComponentCreationException,
+			ChartDatasetCreationException {
 
 		if (!d.getChildDataset(ccl.datasetId()).getCollection().hasConsensus())
 			return;
@@ -265,7 +266,8 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 
 		// Make the consensus dataset. Use the micron scaling to force the point to fit
 		// the umap
-		ComponentOutlineDataset cd = new ComponentOutlineDataset(n, false, MeasurementScale.MICRONS);
+		ComponentOutlineDataset cd = new ComponentOutlineDataset(n, false,
+				MeasurementScale.MICRONS);
 		chart.getXYPlot().setDataset(ccl.datasetIndex(), cd);
 		DefaultXYItemRenderer renderer = new DefaultXYItemRenderer();
 		renderer.setDefaultLinesVisible(true);
@@ -279,14 +281,16 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 		chart.getXYPlot().setRenderer(ccl.datasetIndex(), renderer);
 
 		// Get the x boundary for the line
-		double xBound = isLeft ? DatasetUtils.findDomainBounds(cd).getUpperBound() + (xRange.getLength() * 0.01)
+		double xBound = isLeft
+				? DatasetUtils.findDomainBounds(cd).getUpperBound() + (xRange.getLength() * 0.01)
 				: DatasetUtils.findDomainBounds(cd).getLowerBound() - (xRange.getLength() * 0.01);
 
 		// Get the y boundaries fro the line
 		Range yRangeCd = DatasetUtils.findRangeBounds(cd);
 
 		// Draw a line from the consensus to the centroid of the cluster
-		XYLineAnnotation line = new XYLineAnnotation(ccl.centroid().getX(), ccl.centroid().getY(), xBound, ny,
+		XYLineAnnotation line = new XYLineAnnotation(ccl.centroid().getX(), ccl.centroid().getY(),
+				xBound, ny,
 				new BasicStroke(2.0f), ColourSelecter.getColor(ccl.datasetIndex() - 1));
 		chart.getXYPlot().addAnnotation(line);
 
@@ -336,8 +340,10 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 
 			// Add in batches to allow the user to see they are loading
 			IntStream.range(0, (nList.size() + BATCH_SIZE - 1) / BATCH_SIZE)
-					.mapToObj(i -> nList.subList(i * BATCH_SIZE, Math.min(nList.size(), (i + 1) * BATCH_SIZE)))
-					.forEach(batch -> processBatch(batch, d, plotGroup, chart, prefix1, prefix2, index, scale));
+					.mapToObj(i -> nList.subList(i * BATCH_SIZE,
+							Math.min(nList.size(), (i + 1) * BATCH_SIZE)))
+					.forEach(batch -> processBatch(batch, d, plotGroup, chart, prefix1, prefix2,
+							index, scale));
 
 			dataset++;
 		}
@@ -355,16 +361,18 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 	 * @param index     the dataset index
 	 * @param scale     the nucleus scale
 	 */
-	private static synchronized void processBatch(List<Nucleus> list, IAnalysisDataset d, IClusterGroup plotGroup,
+	private static synchronized void processBatch(List<Nucleus> list, IAnalysisDataset d,
+			IClusterGroup plotGroup,
 			JFreeChart chart, String prefix1, String prefix2, int index, double scale) {
 
 		// Disable notifications while the batch is processed
 		chart.setNotify(false);
 		List<XYDataImageAnnotation> anns = new ArrayList<>();
-		
+
 		for (Nucleus n : list) {
 			anns.add(createDimensionalityReductionImageAnnotation(n, prefix1 + plotGroup.getId(),
-					prefix2 + plotGroup.getId(), chart.getXYPlot(), scale, ColourSelecter.getColor(index)));
+					prefix2 + plotGroup.getId(), chart.getXYPlot(), scale,
+					ColourSelecter.getColor(index)));
 		}
 
 		try {
@@ -424,7 +432,6 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 		BufferedImage tmpImg = new BufferedImage(image.getWidth(), image.getHeight(),
 				BufferedImage.TYPE_INT_ARGB);
 
-
 		int borderCol = col.getRGB();
 
 		for (int by = 0; by < image.getHeight(); by++) {
@@ -437,7 +444,8 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 
 				} else {
 					int blue = (argb >> 8) & 0xff;// isolate green channel from ARGB
-					int alpha = 255 - blue; // make alpha vary with blue intensity (RGB greyscale, so
+					int alpha = 255 - blue; // make alpha vary with blue intensity (RGB greyscale,
+											// so
 											// blue should correlate
 											// well)
 					argb &= 0x00ffffff; // remove old alpha info
@@ -462,7 +470,6 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 
 		return new XYDataImageAnnotation(image, x - xrh, y - yrh, xr,
 				yr, true);
-
 
 	}
 }

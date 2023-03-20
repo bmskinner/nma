@@ -2,19 +2,16 @@ package com.bmskinner.nma.gui.dialogs;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
-import java.awt.event.ActionListener;
 
-import javax.swing.ButtonGroup;
-import javax.swing.JLabel;
+import javax.swing.JCheckBox;
 import javax.swing.JPanel;
-import javax.swing.JRadioButton;
 
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.datasets.IClusterGroup;
+import com.bmskinner.nma.core.ThreadManager;
 import com.bmskinner.nma.gui.components.ImageThumbnailGenerator;
-import com.bmskinner.nma.gui.components.panels.ClusterGroupSelectionPanel;
 import com.bmskinner.nma.visualisation.charts.DimensionalityChartFactory;
 import com.bmskinner.nma.visualisation.charts.ScatterChartFactory;
 import com.bmskinner.nma.visualisation.charts.panels.ExportableChartPanel;
@@ -51,7 +48,7 @@ public class DimensionalityReductionPlotDialog extends MessagingDialog {
 		updateChart(ColourByType.CLUSTER, group);
 		setLayout(new BorderLayout());
 
-//		add(createHeader(), BorderLayout.NORTH);
+		add(createHeader(), BorderLayout.NORTH);
 
 		add(chartPanel, BorderLayout.CENTER);
 
@@ -71,40 +68,54 @@ public class DimensionalityReductionPlotDialog extends MessagingDialog {
 	private JPanel createHeader() {
 		JPanel panel = new JPanel(new FlowLayout());
 
-		// How should cells be coloured?
+		JCheckBox showImagesBox = new JCheckBox("Load images", true);
+		showImagesBox.addActionListener(l -> {
+			updateChart(ColourByType.CLUSTER, group);
+			if (showImagesBox.isSelected()) {
+				Runnable r = () -> DimensionalityChartFactory.addAnnotatedNucleusImages(dataset,
+						group,
+						chartPanel.getChart());
+				ThreadManager.getInstance().submit(r);
 
-		final ButtonGroup colourGroup = new ButtonGroup();
-		JRadioButton byNoneBtn = new JRadioButton(COLOUR_NONE);
-		JRadioButton byClusterBtn = new JRadioButton(COLOUR_CLUSTERS);
-		JRadioButton byMergeSourceBtn = new JRadioButton(COLOUR_MERGE_SOURCE);
-		colourGroup.add(byNoneBtn);
-		colourGroup.add(byClusterBtn);
-		colourGroup.add(byMergeSourceBtn);
+			}
 
-		byClusterBtn.setSelected(true);
+		});
 
-		ClusterGroupSelectionPanel clustersBox = new ClusterGroupSelectionPanel(
-				dataset.getClusterGroups());
-		clustersBox.setEnabled(group != null);
-		clustersBox.setSelectedGroup(group);
+		panel.add(showImagesBox);
 
-		ActionListener colourListener = e -> {
-			ColourByType type = byNoneBtn.isSelected() ? ColourByType.NONE
-					: byClusterBtn.isSelected() ? ColourByType.CLUSTER : ColourByType.MERGE_SOURCE;
-			clustersBox.setEnabled(byClusterBtn.isSelected());
-			updateChart(type, clustersBox.getSelectedItem());
-		};
-
-		byNoneBtn.addActionListener(colourListener);
-		byClusterBtn.addActionListener(colourListener);
-		byMergeSourceBtn.addActionListener(colourListener);
-		clustersBox.addActionListener(colourListener);
-
-		panel.add(new JLabel(COLOUR_BY_LBL));
-		panel.add(byNoneBtn);
-		panel.add(byClusterBtn);
-		panel.add(clustersBox);
-		panel.add(byMergeSourceBtn);
+//		// How should cells be coloured?
+//		final ButtonGroup colourGroup = new ButtonGroup();
+//		JRadioButton byNoneBtn = new JRadioButton(COLOUR_NONE);
+//		JRadioButton byClusterBtn = new JRadioButton(COLOUR_CLUSTERS);
+//		JRadioButton byMergeSourceBtn = new JRadioButton(COLOUR_MERGE_SOURCE);
+//		colourGroup.add(byNoneBtn);
+//		colourGroup.add(byClusterBtn);
+//		colourGroup.add(byMergeSourceBtn);
+//
+//		byClusterBtn.setSelected(true);
+//
+//		ClusterGroupSelectionPanel clustersBox = new ClusterGroupSelectionPanel(
+//				dataset.getClusterGroups());
+//		clustersBox.setEnabled(group != null);
+//		clustersBox.setSelectedGroup(group);
+//
+//		ActionListener colourListener = e -> {
+//			ColourByType type = byNoneBtn.isSelected() ? ColourByType.NONE
+//					: byClusterBtn.isSelected() ? ColourByType.CLUSTER : ColourByType.MERGE_SOURCE;
+//			clustersBox.setEnabled(byClusterBtn.isSelected());
+//			updateChart(type, clustersBox.getSelectedItem());
+//		};
+//
+//		byNoneBtn.addActionListener(colourListener);
+//		byClusterBtn.addActionListener(colourListener);
+//		byMergeSourceBtn.addActionListener(colourListener);
+//		clustersBox.addActionListener(colourListener);
+//
+//		panel.add(new JLabel(COLOUR_BY_LBL));
+//		panel.add(byNoneBtn);
+//		panel.add(byClusterBtn);
+//		panel.add(clustersBox);
+//		panel.add(byMergeSourceBtn);
 		return panel;
 	}
 
