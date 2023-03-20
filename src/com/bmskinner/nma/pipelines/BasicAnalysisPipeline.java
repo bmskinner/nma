@@ -81,11 +81,11 @@ public class BasicAnalysisPipeline {
 				.exists())
 			throw new IllegalArgumentException("Detection folder does not exist");
 
-		LOGGER.info("Analysing folder:" + folder);
+		LOGGER.info("Analysing folder: " + folder);
 
 		File statsFile = new File(saveFile.getParentFile(),
 				saveFile.getName() + Io.TAB_FILE_EXTENSION);
-		LOGGER.info("Saving to :" + statsFile.getAbsolutePath());
+		LOGGER.info("Saving to: " + statsFile.getAbsolutePath());
 
 		IAnalysisDataset obs = new NucleusDetectionMethod(folder, op)
 				.call().getFirstDataset();

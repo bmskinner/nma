@@ -18,6 +18,8 @@ package com.bmskinner.nma.core;
 
 import java.awt.EventQueue;
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -28,6 +30,7 @@ import com.bmskinner.nma.gui.events.UserActionController;
 import com.bmskinner.nma.gui.main.DockableMainWindow;
 import com.bmskinner.nma.io.ConfigFileReader;
 import com.bmskinner.nma.pipelines.BasicAnalysisPipeline;
+import com.bmskinner.nma.pipelines.ExportDataPipeline;
 import com.bmskinner.nma.pipelines.SavedOptionsAnalysisPipeline;
 
 import ij.IJ;
@@ -62,42 +65,75 @@ public class CommandLineParser {
 	 */
 	private void execute(String[] arr) {
 
-		boolean headless = false;
-		File folder = null;
-		File options = null;
-		for (String s : arr) {
-			LOGGER.config("Argument: " + s);
-
-			if (s.startsWith("-h")) {
-				LOGGER.config("Arguments:");
-				LOGGER.config("\t-folder=<image_folder>");
-				LOGGER.config("\t-options=<xml_options>");
-				System.exit(0);
-			}
-
-			if (s.startsWith("-folder=")) {
-				headless = true;
-				String path = s.replace("-folder=", "").replace("\"", "");
-				folder = new File(path);
-			}
-
-			if (s.startsWith("-options=")) {
-				headless = true;
-				String path = s.replace("-options=", "").replace("\"", "");
-				options = new File(path);
-			}
-
-		}
 		// load the config file
 		new ConfigFileReader();
 		int ijThreads = GlobalOptions.getInstance().getInt(GlobalOptions.NUM_IMAGEJ_THREADS_KEY);
 		Prefs.setThreads(ijThreads);
 		LOGGER.config("Internal ImageJ PluginFilter thread count set to " + ijThreads);
 
-		if (headless) {
-			runHeadless(folder, options);
-		} else {
+		// No arguments provided, launch the GUI
+		if (arr == null || arr.length == 0) {
 			runWithGUI();
+			return;
+		}
+
+		// Arguments given, run headless
+
+		Map<String, File> commands = new HashMap<>();
+		for (String s : arr) {
+			LOGGER.info("Argument: " + s);
+
+			if (s.startsWith("-h")) {
+				LOGGER.config("Arguments:");
+				LOGGER.config("\t-folder=<image_folder>");
+				LOGGER.config("\t-options=<xml_options>");
+				LOGGER.config("\t-nmd=<nmd_file>");
+				System.exit(0);
+			}
+
+			if (s.startsWith("-folder=")) {
+				String path = s.replace("-folder=", "").replace("\"", "");
+				commands.put("folder", new File(path));
+			}
+
+			if (s.startsWith("-options=")) {
+				String path = s.replace("-options=", "").replace("\"", "");
+				commands.put("options", new File(path));
+			}
+
+			// Provide an nmd, just export the stats
+			if (s.startsWith("-nmd=")) {
+				String nmdFile = s.replace("-nmd=", "").replace("\"", "");
+				commands.put("nmd", new File(nmdFile));
+			}
+		}
+
+		LOGGER.info("Parsed arguments");
+
+		if (commands.containsKey("folder")) {
+			LOGGER.info("Running pipeline analysis");
+			runHeadless(commands.get("folder"), commands.get("options"));
+		}
+
+		if (commands.containsKey("nmd")) {
+			LOGGER.info("Running export");
+			runExport(commands.get("nmd"));
+		}
+
+	}
+
+	private void runExport(File nmdFile) {
+
+		if (!nmdFile.exists()) {
+			LOGGER.warning(
+					() -> "The file '%s' does not exist".formatted(nmdFile.getAbsolutePath()));
+			System.exit(1);
+		}
+		LOGGER.info("Exporting data from file");
+		try {
+			new ExportDataPipeline(nmdFile);
+		} catch (Exception e) {
+			LOGGER.log(Level.SEVERE, "Error running pipeline", e);
 		}
 	}
 
@@ -121,7 +157,8 @@ public class CommandLineParser {
 					LOGGER.info("Running with saved options: " + options.getAbsolutePath());
 					new SavedOptionsAnalysisPipeline(folder, options).call();
 				} else {
-					LOGGER.info("No analysis options provided, using defaults");
+					LOGGER.info(
+							"No analysis options provided, using defaults and assuming these are mouse sperm");
 					new BasicAnalysisPipeline(folder);
 				}
 
@@ -135,6 +172,7 @@ public class CommandLineParser {
 	 * Load the program user interface
 	 */
 	private void runWithGUI() {
+
 		try {
 			Runnable r = new RunWithGui();
 			EventQueue.invokeLater(r);
