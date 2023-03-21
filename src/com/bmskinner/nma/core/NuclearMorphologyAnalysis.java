@@ -149,7 +149,6 @@ public class NuclearMorphologyAnalysis {
 		}
 
 		// Arguments given, run headless
-
 		if (opt.folder != null) {
 			instance.runHeadless(opt.folder, opt.options);
 		}
@@ -344,25 +343,38 @@ public class NuclearMorphologyAnalysis {
 	}
 
 	/**
-	 * Hold command line options
+	 * Store the options provided to the program via the command line
 	 * 
-	 * @author bs19022
+	 * @author ben
+	 * @since 2.1.0
 	 *
 	 */
 	private static class CommandOptions {
-
-		@Arg(dest = "folder")
-		public File folder = null;
+		@Arg(dest = "directory")
+		public File folder;
 
 		@Arg(dest = "options")
-		public File options = null;
+		public File options;
 
-		@Arg(dest = "nmd")
-		public File nmd = null;
+		@Arg(dest = "file")
+		public File nmd;
+
+		public CommandOptions() {
+		}
 
 		public boolean hasOptions() {
 			return folder != null || options != null || nmd != null;
 		}
-	}
 
+		public String toString() {
+			StringBuilder sb = new StringBuilder();
+			if (folder != null)
+				sb.append(folder.getAbsolutePath() + Io.NEWLINE);
+			if (options != null)
+				sb.append(options.getAbsolutePath() + Io.NEWLINE);
+			if (nmd != null)
+				sb.append(nmd.getAbsolutePath() + Io.NEWLINE);
+			return sb.toString();
+		}
+	}
 }

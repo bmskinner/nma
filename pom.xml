@@ -498,20 +498,23 @@
 			</exclusions>
 		</dependency>
 
+		<!--Not available in Maven Central; no tagged versions on Github, using 
+			latest commit available -->
 		<dependency>
 			<groupId>net.sourceforge.argparse4j</groupId>
 			<artifactId>argparse4j</artifactId>
 			<version>0.9.0</version>
 		</dependency>
 
-		<!--Not available in Maven Central; no tagged versions on Github, using 
-			latest commit available -->
+
 		<dependency>
 			<groupId>com.github.ijpb</groupId>
 			<artifactId>MorphoLibJ</artifactId>
 			<version>v1.5.1</version>
 		</dependency>
 
+		<!--Not available in Maven Central; no tagged versions on Github, using 
+			latest commit available -->
 		<dependency>
 			<groupId>com.github.tag-bio</groupId>
 			<artifactId>umap-java</artifactId>
