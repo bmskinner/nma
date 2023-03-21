@@ -1,4 +1,4 @@
-package com.bmskinner.nma.api;
+package com.bmskinner.nma.pipelines;
 
 import static org.junit.Assert.fail;
 

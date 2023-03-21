@@ -17,7 +17,7 @@
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
 
-package com.bmskinner.nma.api;
+package com.bmskinner.nma.pipelines;
 
 import static org.junit.Assert.assertEquals;
 

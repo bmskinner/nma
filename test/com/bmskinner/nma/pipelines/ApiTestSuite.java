@@ -1,4 +1,4 @@
-package com.bmskinner.nma.api;
+package com.bmskinner.nma.pipelines;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
