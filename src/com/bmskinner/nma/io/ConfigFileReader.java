@@ -42,7 +42,8 @@ public class ConfigFileReader {
 	public ConfigFileReader() {
 		try {
 			File ini = Io.getConfigFile();
-			LOGGER.config("Config file: " + ini.getAbsolutePath());
+			LOGGER.config(
+					() -> "Configuration file read from: %s".formatted(ini.getAbsolutePath()));
 
 			if (ini.exists()) {
 				// Read the properties
@@ -101,7 +102,7 @@ public class ConfigFileReader {
 
 			String value = properties.getProperty(key);
 
-			LOGGER.config("Assigning global option " + key + ": " + value);
+			LOGGER.config(() -> "Assigning global option %s: %s".formatted(key, value));
 
 			if (GlobalOptions.DEFAULT_DIR_KEY.equals(key))
 				op.setDefaultDir(new File(value));

@@ -140,7 +140,7 @@ public class Screenshotter {
 					TestResources.MOUSE_CLUSTERS_DATASET, rootFolder);
 		}
 
-		nma.clp.mw.setVisible(false);
+		nma.mw.setVisible(false);
 	}
 
 	/**
@@ -200,7 +200,7 @@ public class Screenshotter {
 	 * @param dp
 	 */
 	private void selectSingleDataset() {
-		Point listPos = nma.clp.mw.getLocationOnScreen();
+		Point listPos = nma.mw.getLocationOnScreen();
 		robot.mouseMove(listPos.x + 400, listPos.y + 90);
 		robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
 		try {
@@ -217,7 +217,7 @@ public class Screenshotter {
 	 * @param dp
 	 */
 	private void selectMultipleDatasets() {
-		Point listPos = nma.clp.mw.getLocationOnScreen();
+		Point listPos = nma.mw.getLocationOnScreen();
 		robot.mouseMove(listPos.x + 400, listPos.y + 90);
 		robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
 		try {
@@ -242,9 +242,9 @@ public class Screenshotter {
 		File outputFolder = new File(rootFolder, prefix);
 		outputFolder.mkdirs();
 
-		TabPanelSwitcher s = new TabPanelSwitcher(nma.clp.mw);
+		TabPanelSwitcher s = new TabPanelSwitcher(nma.mw);
 
-		DetailPanelScreenshotter dps = new DetailPanelScreenshotter(nma.clp.mw, robot);
+		DetailPanelScreenshotter dps = new DetailPanelScreenshotter(nma.mw, robot);
 		while (s.hasNext()) {
 			DetailPanel d = s.nextTab();
 			Thread.sleep(SLEEP_TIME_MILLIS);

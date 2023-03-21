@@ -5,12 +5,12 @@
 	<groupId>com.bmskinner</groupId>
 	<artifactId>nma</artifactId>
 	<version>2.1.0</version>
-	
+
 	<!-- Define custom properties to be exported -->
 	<properties>
 		<project.full.name>Nuclear_Morphology_Analysis</project.full.name>
 		<version>${project.version}</version>
-		<version.suffix></version.suffix>
+		<version.suffix>-beta_2</version.suffix>
 		<project.build.sourceEncoding>ISO-8859-1</project.build.sourceEncoding>
 		<jar.finalName>${project.full.name}_${project.version}${version.suffix}</jar.finalName>
 		<project.template.directory>templates</project.template.directory>
@@ -357,9 +357,9 @@
 				<artifactId>exec-maven-plugin</artifactId>
 				<version>1.2.1</version>
 				<executions>
-				
-				<!-- Run a script to download dependency jars that are not available in Maven Central
-				or other repos -->
+
+					<!-- Run a script to download dependency jars that are not available 
+						in Maven Central or other repos -->
 					<execution>
 						<id>install-dependencies</id>
 						<phase>initialize</phase>
@@ -368,11 +368,12 @@
 						</goals>
 						<configuration>
 							<executable>${script.executor}</executable>
-							<commandlineArgs>${script.args} ${project.basedir}/scripts/${script.dependencies}</commandlineArgs>
+							<commandlineArgs>${script.args}
+								${project.basedir}/scripts/${script.dependencies}</commandlineArgs>
 							<workingDirectory>${project.basedir}</workingDirectory>
 						</configuration>
 					</execution>
-				
+
 					<!-- Run a script to render the user guide and copy the rendered files 
 						to the target directory so they will be included in the jar. This must occur 
 						after the user guide has been rendered. Requires Rscript and pandoc on the 
@@ -385,7 +386,8 @@
 						</goals>
 						<configuration>
 							<executable>${script.executor}</executable>
-							<commandlineArgs>${script.args} ${project.basedir}/scripts/${script.rendering}</commandlineArgs>
+							<commandlineArgs>${script.args}
+								${project.basedir}/scripts/${script.rendering}</commandlineArgs>
 							<workingDirectory>${project.basedir}/res/user-guide</workingDirectory>
 						</configuration>
 					</execution>
@@ -496,13 +498,20 @@
 			</exclusions>
 		</dependency>
 
-<!--Not available in Maven Central; no tagged versions on Github, using latest commit available -->
+		<dependency>
+			<groupId>net.sourceforge.argparse4j</groupId>
+			<artifactId>argparse4j</artifactId>
+			<version>0.9.0</version>
+		</dependency>
+
+		<!--Not available in Maven Central; no tagged versions on Github, using 
+			latest commit available -->
 		<dependency>
 			<groupId>com.github.ijpb</groupId>
 			<artifactId>MorphoLibJ</artifactId>
 			<version>v1.5.1</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>com.github.tag-bio</groupId>
 			<artifactId>umap-java</artifactId>

@@ -16,6 +16,7 @@
  ******************************************************************************/
 package com.bmskinner.nma.core;
 
+import java.awt.EventQueue;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
@@ -24,11 +25,28 @@ import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
+import javax.swing.UIManager;
+
 import com.bmskinner.nma.components.Version;
 import com.bmskinner.nma.components.rules.RuleSetCollection;
+import com.bmskinner.nma.gui.events.UIController;
+import com.bmskinner.nma.gui.events.UserActionController;
+import com.bmskinner.nma.gui.main.DockableMainWindow;
+import com.bmskinner.nma.io.ConfigFileReader;
 import com.bmskinner.nma.io.Io;
 import com.bmskinner.nma.io.XMLWriter;
 import com.bmskinner.nma.logging.Loggable;
+import com.bmskinner.nma.pipelines.BasicAnalysisPipeline;
+import com.bmskinner.nma.pipelines.ExportDataPipeline;
+import com.bmskinner.nma.pipelines.SavedOptionsAnalysisPipeline;
+
+import ij.IJ;
+import ij.Prefs;
+import net.sourceforge.argparse4j.ArgumentParsers;
+import net.sourceforge.argparse4j.annotation.Arg;
+import net.sourceforge.argparse4j.impl.Arguments;
+import net.sourceforge.argparse4j.inf.ArgumentParser;
+import net.sourceforge.argparse4j.inf.ArgumentParserException;
 
 /**
  * This is the main class that runs the program.
@@ -40,8 +58,7 @@ import com.bmskinner.nma.logging.Loggable;
 public class NuclearMorphologyAnalysis {
 
 	private static NuclearMorphologyAnalysis instance = null;
-
-	public CommandLineParser clp = null;
+	public DockableMainWindow mw = null;
 
 	/** Initialise the logger for the project namespace */
 	private static final Logger LOGGER = Logger.getLogger(Loggable.PROJECT_LOGGER);
@@ -64,10 +81,14 @@ public class NuclearMorphologyAnalysis {
 		}
 	}
 
+	/**
+	 * Get the current instance of NMA. Used for e.g screenshotting
+	 * 
+	 * @return
+	 */
 	public static NuclearMorphologyAnalysis getInstance() {
 		if (instance == null) {
-			String[] args = {};
-			instance = new NuclearMorphologyAnalysis(args);
+			instance = new NuclearMorphologyAnalysis(new CommandOptions());
 		}
 		return instance;
 	}
@@ -77,10 +98,9 @@ public class NuclearMorphologyAnalysis {
 	 * 
 	 * @param args
 	 */
-	private NuclearMorphologyAnalysis(String[] args) {
+	private NuclearMorphologyAnalysis(CommandOptions opt) {
 		configureLogging();
 		configureSettingsFiles();
-		clp = new CommandLineParser(args);
 	}
 
 	/**
@@ -89,7 +109,54 @@ public class NuclearMorphologyAnalysis {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		instance = new NuclearMorphologyAnalysis(args);
+
+		ArgumentParser parser = ArgumentParsers.newFor("Nuclear_Morphology_Analysis")
+				.build()
+				.defaultHelp(true)
+				.description("Analyse nuclear morphometric data");
+		parser.addArgument("-d", "--directory")
+				.type(Arguments.fileType().verifyIsDirectory().verifyCanRead())
+				.help("Directory of images to analyse");
+		parser.addArgument("-o", "--options")
+				.type(Arguments.fileType().verifyIsFile().verifyCanRead())
+				.help("File of analysis options to use (.xml)");
+		parser.addArgument("-f", "--file")
+				.type(Arguments.fileType().verifyIsFile().verifyCanRead())
+				.help("File with existing data (.nmd)");
+
+		CommandOptions opt = new CommandOptions();
+
+		try {
+			parser.parseArgs(args, opt);
+		} catch (ArgumentParserException e) {
+			parser.handleError(e);
+			System.exit(1);
+		}
+
+		instance = new NuclearMorphologyAnalysis(opt);
+
+		// load the config file
+		new ConfigFileReader();
+		int ijThreads = GlobalOptions.getInstance().getInt(GlobalOptions.NUM_IMAGEJ_THREADS_KEY);
+		Prefs.setThreads(ijThreads);
+		LOGGER.finer(
+				() -> "Internal ImageJ PluginFilter thread count set to %s".formatted(ijThreads));
+
+		// No arguments provided, launch the GUI
+		if (!opt.hasOptions()) {
+			instance.runWithGUI();
+			return;
+		}
+
+		// Arguments given, run headless
+
+		if (opt.folder != null) {
+			instance.runHeadless(opt.folder, opt.options);
+		}
+
+		if (opt.nmd != null)
+			instance.runExport(opt.nmd);
+
 	}
 
 	/**
@@ -99,18 +166,19 @@ public class NuclearMorphologyAnalysis {
 	private void configureLogging() {
 
 		try {
-			LOGGER.config("Log file location: " + Io.getLogDir().getAbsolutePath());
+			LOGGER.config(
+					() -> "Log file location: %s".formatted(Io.getLogDir().getAbsolutePath()));
 
 			GlobalOptions.getInstance().setString(GlobalOptions.LOG_DIRECTORY_KEY,
 					Io.getLogDir().getAbsolutePath());
 
-			LOGGER.config("OS: " + System.getProperty("os.name") + ", version "
-					+ System.getProperty("os.version")
-					+ ", " + System.getProperty("os.arch"));
-			LOGGER.config(
-					"JVM: " + System.getProperty("java.vendor") + ", version "
-							+ System.getProperty("java.version"));
-			LOGGER.config("NMA version: " + Version.currentVersion());
+			LOGGER.config(() -> "OS: %s, version %s, %s"
+					.formatted(System.getProperty("os.name"),
+							System.getProperty("os.version"),
+							System.getProperty("os.arch")));
+			LOGGER.config(() -> "JVM: %s, version %s".formatted(System.getProperty("java.vendor"),
+					System.getProperty("java.version")));
+			LOGGER.config(() -> "NMA version: %s".formatted(Version.currentVersion()));
 
 			// First invokation of the thread manager will log available resources
 			ThreadManager.getInstance();
@@ -153,7 +221,8 @@ public class NuclearMorphologyAnalysis {
 			try {
 				Files.createDirectories(Io.getRulesetDir().toPath());
 			} catch (IOException e) {
-				LOGGER.log(Level.SEVERE, "Error creating ruleset dir", e);
+				LOGGER.log(Level.SEVERE,
+						"Error creating ruleset directory: %s".formatted(e.getMessage()), e);
 			}
 
 		ensureRuleSetFileExists(RuleSetCollection.mouseSpermRuleSetCollection(), "Mouse sperm.xml");
@@ -177,8 +246,123 @@ public class NuclearMorphologyAnalysis {
 			try {
 				XMLWriter.writeXML(rsc.toXmlElement(), ruleFile);
 			} catch (IOException e) {
-				LOGGER.log(Level.SEVERE, "Unable to create default ruleset", e);
+				LOGGER.log(Level.SEVERE,
+						"Error creating default ruleset: %s".formatted(e.getMessage()), e);
 			}
 		}
 	}
+
+	private void runExport(File nmdFile) {
+
+		if (!nmdFile.exists()) {
+			LOGGER.warning(
+					() -> "The file '%s' does not exist".formatted(nmdFile.getAbsolutePath()));
+			System.exit(1);
+		}
+		LOGGER.info("Exporting data from file");
+		try {
+			new ExportDataPipeline(nmdFile);
+		} catch (Exception e) {
+			LOGGER.log(Level.SEVERE, "Error running pipeline: %s".formatted(e.getMessage()), e);
+		}
+	}
+
+	/**
+	 * Run in headless mode, specifying a folder of images, and a file of options
+	 * 
+	 * @param folder  the folder of images
+	 * @param options
+	 */
+	private void runHeadless(final File folder, final File options) {
+		LOGGER.config("Running headless");
+		if (folder != null) {
+			LOGGER.info("Running on folder: " + folder.getAbsolutePath());
+
+			if (!folder.isDirectory()) {
+				LOGGER.warning("A directory is required in the '-folder' argument");
+				return;
+			}
+			try {
+				if (options != null) {
+					LOGGER.info("Running with saved options: " + options.getAbsolutePath());
+					new SavedOptionsAnalysisPipeline(folder, options).call();
+				} else {
+					LOGGER.info(
+							"No analysis options provided, using defaults and assuming these are mouse sperm");
+					new BasicAnalysisPipeline(folder);
+				}
+
+			} catch (Exception e) {
+				LOGGER.log(Level.SEVERE, "Error running pipeline: %s".formatted(e.getMessage()), e);
+			}
+		}
+	}
+
+	/**
+	 * Load the program user interface
+	 */
+	private void runWithGUI() {
+
+		try {
+			Runnable r = new RunWithGui();
+			EventQueue.invokeLater(r);
+		} catch (Exception e) {
+			LOGGER.log(Level.SEVERE, "Error loading GUI: %s".formatted(e.getMessage()), e);
+		}
+	}
+
+	/**
+	 * Runnable launcher that can be sent to the EDT
+	 * 
+	 * @author Ben Skinner
+	 * @since 1.18.0
+	 *
+	 */
+	private class RunWithGui implements Runnable {
+
+		@Override
+		public void run() {
+			IJ.setBackgroundColor(0, 0, 0); // default background is black
+			try {
+				String lAndF = UIManager.getSystemLookAndFeelClassName();
+				UIManager.setLookAndFeel(lAndF);
+				LOGGER.config("Set UI look and feel to " + UIManager.getLookAndFeel().getName());
+
+			} catch (Exception e) {
+				LOGGER.log(Level.SEVERE, "Unable to set look and feel", e);
+			}
+
+			// Ensure singleton instances created
+			UserActionController.getInstance();
+			DatasetListManager dlm = DatasetListManager.getInstance();
+			UIController.getInstance().addDatasetAddedListener(dlm);
+
+			mw = new DockableMainWindow();
+			mw.setVisible(true);
+		}
+
+	}
+
+	/**
+	 * Hold command line options
+	 * 
+	 * @author bs19022
+	 *
+	 */
+	private static class CommandOptions {
+
+		@Arg(dest = "folder")
+		public File folder = null;
+
+		@Arg(dest = "options")
+		public File options = null;
+
+		@Arg(dest = "nmd")
+		public File nmd = null;
+
+		public boolean hasOptions() {
+			return folder != null || options != null || nmd != null;
+		}
+	}
+
 }

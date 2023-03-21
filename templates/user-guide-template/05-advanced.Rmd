@@ -1,0 +1,26 @@
+# Other topics
+
+This section contains information on more advanced use of NMA.
+
+## Command line use
+
+Nuclear Morphology Analysis is designed to be runnable via the command line for a new analysis or to export nuclear measurements from an existing `nmd` file.
+
+The examples below use the cross platform standalone jar with a system installation of Java. 
+
+To see all options:
+```
+java -jar Nuclear_Morphology_Analysis_${project.version}_standalone.jar -h
+```
+
+To run a new analysis:
+
+```
+java -jar Nuclear_Morphology_Analysis_${project.version}_standalone.jar -d /path/to/image/directory -o /path/to/options/file
+```
+
+To export data from an `.nmd` file:
+
+```
+java -jar Nuclear_Morphology_Analysis_${project.version}_standalone.jar -n /path/to/nmd/file
+```

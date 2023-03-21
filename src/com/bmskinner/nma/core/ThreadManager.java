@@ -87,9 +87,8 @@ public class ThreadManager {
 				TimeUnit.MILLISECONDS,
 				uiQueue);
 
-		LOGGER.config(String.format("Thread manager: Allowed processors: %s", maxThreads));
-		LOGGER.config(String.format("Thread manager: UI threads: %s", maxUiThreads));
-		LOGGER.config(String.format("Thread manager: Method threads: %s", maxMethodThreads));
+		LOGGER.config("Allowed processors: %d, split %d for UI, %d for methods".formatted(
+				maxThreads, maxUiThreads, maxMethodThreads));
 
 		long maxMemory = Runtime.getRuntime().maxMemory();
 		long maxMemoryHuman = maxMemory / (1024 * 1024);
@@ -101,9 +100,8 @@ public class ThreadManager {
 			units = "GiB";
 		}
 
-		LOGGER.config(
-				String.format("Thread manager: Maximum memory: %s %s (%s bytes)", maxMemoryHuman,
-						units, maxMemory));
+		LOGGER.config(String.format("Maximum memory: %s %s (%s bytes)", maxMemoryHuman,
+				units, maxMemory));
 	}
 
 	/**
