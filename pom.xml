@@ -412,7 +412,7 @@
 			<!-- Compile to desired java version -->
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.5.1</version>
+				<version>3.11.0</version>
 				<configuration>
 					<source>16</source>
 					<target>16</target>
