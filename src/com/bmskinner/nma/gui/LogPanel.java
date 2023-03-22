@@ -88,17 +88,17 @@ public class LogPanel extends DetailPanel implements ProgressBarAcceptor {
 
 	private final Console console = new Console();
 
-	private JPanel logPanel; // messages and errors
+	private JPanel mainPanel; // messages and errors
 	private JPanel progressPanel; // progress bars for analyses
 	private SimpleAttributeSet attrs; // the styling attributes
 
 	public LogPanel() {
 		super();
 		this.setLayout(new BorderLayout());
-		this.logPanel = createLogPanel();
+		this.mainPanel = createLogPanel();
 
 		textArea.setDropTarget(new MainDragAndDropTarget());
-		this.add(logPanel, BorderLayout.CENTER);
+		this.add(mainPanel, BorderLayout.CENTER);
 	}
 
 	@Override

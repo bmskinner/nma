@@ -23,36 +23,41 @@ import java.util.logging.LogRecord;
 
 /**
  * Format log records for display in the log panel
+ * 
  * @author ben
  *
  */
 public class LogPanelFormatter extends Formatter {
 
-    private static final String NEWLINE = System.getProperty("line.separator");
+	private static final String NEWLINE = System.getProperty("line.separator");
 
-	private static final String SEPARATOR = "\t";
+	/**
+	 * The log panel controls the paragraph indent for the text. We don't need to
+	 * use a tab.
+	 */
+	private static final String SEPARATOR = " ";
 
-    @Override
-    public String format(LogRecord record) {
+	@Override
+	public String format(LogRecord record) {
 
-        StringBuilder buffer = new StringBuilder();
+		StringBuilder buffer = new StringBuilder();
 
-        String date = calcDate(record.getMillis());
-        
-        String formattedMsg = formatMessage(record);
+		String date = calcDate(record.getMillis());
 
-        buffer.append(date);
+		String formattedMsg = formatMessage(record);
+
+		buffer.append(date);
 		buffer.append(SEPARATOR);
 		buffer.append(formattedMsg);
 		buffer.append(NEWLINE);
-        return buffer.toString();
-    }
+		return buffer.toString();
+	}
 
-    private String calcDate(long millisecs) {
+	private String calcDate(long millisecs) {
 
-        SimpleDateFormat df = new SimpleDateFormat("HH:mm:ss");
-        Date date = new Date(millisecs);
-        return df.format(date);
-    }
+		SimpleDateFormat df = new SimpleDateFormat("HH:mm:ss");
+		Date date = new Date(millisecs);
+		return df.format(date);
+	}
 
 }
