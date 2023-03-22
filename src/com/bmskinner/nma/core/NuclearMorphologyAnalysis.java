@@ -39,6 +39,7 @@ import com.bmskinner.nma.io.ConfigFileReader;
 import com.bmskinner.nma.io.Io;
 import com.bmskinner.nma.io.XMLWriter;
 import com.bmskinner.nma.logging.Loggable;
+import com.bmskinner.nma.pipelines.AnalyseDataPipeline;
 import com.bmskinner.nma.pipelines.BasicAnalysisPipeline;
 import com.bmskinner.nma.pipelines.ExportDataPipeline;
 import com.bmskinner.nma.pipelines.SavedOptionsAnalysisPipeline;
@@ -140,9 +141,11 @@ public class NuclearMorphologyAnalysis {
 				.build()
 				.version(Version.currentVersion().toString())
 				.defaultHelp(true)
-				.description("Analyse nuclear morphometric data");
+				.description("Analyse nuclear morphometric data from microscope images");
 
-		parser.addArgument("-v", "--version").action(Arguments.version());
+		parser.addArgument("-v", "--version")
+				.action(Arguments.version())
+				.help("print the program version and exit");
 
 		// Each type of functionality should have a separate command. Options can be
 		// provided for each command specifically
@@ -153,8 +156,37 @@ public class NuclearMorphologyAnalysis {
 				.dest("runMode")
 				.help("run <subcommand> -h for full options");
 
-		// Sub parser for analysing new samples
-		Subparser analyseParser = subparsers.addParser("analyse")
+		// Sub parser for detecting nuclei in images
+		createDetectParser(subparsers);
+
+		// Sub parser for exporting data from an nmd
+		createExportParser(subparsers);
+
+		// Sub parser for analysing data in an nmd
+		createAnalyseParser(subparsers);
+
+		// Store any options
+		CommandOptions opt = new CommandOptions();
+
+		try {
+			parser.parseArgs(args, opt);
+
+		} catch (ArgumentParserException e) {
+			parser.handleError(e);
+			System.exit(1);
+		} catch (IllegalArgumentException e) {
+			System.out.println(Arrays.toString(args));
+			System.out.println(opt.toString());
+			e.printStackTrace();
+			System.exit(1);
+		}
+
+		loadConfigAndLaunch(opt);
+
+	}
+
+	private static void createDetectParser(Subparsers subparsers) {
+		Subparser analyseParser = subparsers.addParser("detect")
 				.help("Analyse images using a saved options file");
 
 		analyseParser.addArgument("-d", "--directory")
@@ -166,8 +198,10 @@ public class NuclearMorphologyAnalysis {
 				.type(Arguments.fileType().verifyIsFile().verifyCanRead())
 				.dest("options")
 				.help("File of analysis options to use (.xml)");
+	}
 
-		// Sub parser for exporting data from an nmd
+	private static void createExportParser(Subparsers subparsers) {
+
 		Subparser exportParser = subparsers.addParser("export")
 				.help("Export data from an nmd file");
 
@@ -232,23 +266,22 @@ public class NuclearMorphologyAnalysis {
 				.dest("all")
 				.help("Export all the above from the dataset except for single cell images");
 
-		// Store any options
-		CommandOptions opt = new CommandOptions();
+	}
 
-		try {
-			parser.parseArgs(args, opt);
+	private static void createAnalyseParser(Subparsers subparsers) {
+		Subparser parser = subparsers.addParser("analyse")
+				.help("Analyse data in an nmd file");
 
-		} catch (ArgumentParserException e) {
-			parser.handleError(e);
-			System.exit(1);
-		} catch (IllegalArgumentException e) {
-			System.out.println(Arrays.toString(args));
-			System.out.println(opt.toString());
-			e.printStackTrace();
-			System.exit(1);
-		}
+		parser.addArgument("-f", "--file")
+				.type(Arguments.fileType().verifyIsFile().verifyCanRead())
+				.required(true)
+				.dest("file")
+				.help("File with existing data (.nmd)");
 
-		loadConfigAndLaunch(opt);
+		parser.addArgument("--cluster-file")
+				.type(Arguments.fileType().verifyIsFile().verifyCanRead())
+				.dest("cluster-file")
+				.help("File with clusters to import");
 
 	}
 
@@ -267,14 +300,19 @@ public class NuclearMorphologyAnalysis {
 		LOGGER.finer(
 				() -> "Internal ImageJ PluginFilter thread count set to %s".formatted(ijThreads));
 
-		if ("analyse".equals(opt.runMode)) {
+		if ("detect".equals(opt.runMode)) {
 			// Arguments given, run headless
-			instance.runHeadlessAnalyse(opt);
+			instance.runHeadlessDetect(opt);
 			return;
 		}
 
 		if ("export".equals(opt.runMode)) {
 			instance.runHeadlessExport(opt);
+			return;
+		}
+
+		if ("analyse".equals(opt.runMode)) {
+			instance.runHeadlessAnalyse(opt);
 			return;
 		}
 
@@ -397,7 +435,7 @@ public class NuclearMorphologyAnalysis {
 	 * @param opt the options
 	 */
 
-	private void runHeadlessAnalyse(final CommandOptions opt) {
+	private void runHeadlessDetect(final CommandOptions opt) {
 
 		LOGGER.info("Running on folder: " + opt.directory.getAbsolutePath());
 
@@ -411,6 +449,23 @@ public class NuclearMorphologyAnalysis {
 				new BasicAnalysisPipeline(opt.directory);
 			}
 
+		} catch (Exception e) {
+			LOGGER.log(Level.SEVERE, "Error running pipeline: %s".formatted(e.getMessage()), e);
+		}
+
+	}
+
+	/**
+	 * Run in headless mode, analysing the data in an nmd
+	 * 
+	 * @param opt the options
+	 */
+
+	private void runHeadlessAnalyse(final CommandOptions opt) {
+
+		try {
+			LOGGER.info("Running analysis function");
+			new AnalyseDataPipeline(opt);
 		} catch (Exception e) {
 			LOGGER.log(Level.SEVERE, "Error running pipeline: %s".formatted(e.getMessage()), e);
 		}

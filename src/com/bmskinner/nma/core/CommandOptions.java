@@ -20,6 +20,8 @@ public class CommandOptions {
 
 	private static final Logger LOGGER = Logger.getLogger(CommandOptions.class.getName());
 
+	// Detect arguments
+
 	@Arg(dest = "runMode")
 	public String runMode;
 
@@ -28,6 +30,8 @@ public class CommandOptions {
 
 	@Arg(dest = "options")
 	public File options;
+
+	// Export arguments
 
 	@Arg(dest = "file")
 	public File file;
@@ -64,6 +68,11 @@ public class CommandOptions {
 
 	@Arg(dest = "cell-locations")
 	public boolean isCellLocations = false;
+
+	// Analyse arguments
+
+	@Arg(dest = "cluster-file")
+	public File clusterFile;
 
 	public CommandOptions() {
 		// no data needed

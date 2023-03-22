@@ -43,8 +43,7 @@ public class ExportDataPipeline {
 	/**
 	 * Build a pipeline covering all the options within the given file
 	 * 
-	 * @param rootFolder the root folder
-	 * @param xmlFile    the options for analysis
+	 * @param xmlFile the options for analysis
 	 * @throws Exception
 	 */
 
