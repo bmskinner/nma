@@ -1,6 +1,8 @@
 package com.bmskinner.nma.pipelines;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.Optional;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -8,17 +10,28 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.options.DefaultOptions;
 import com.bmskinner.nma.components.options.HashOptions;
+import com.bmskinner.nma.components.options.IAnalysisOptions;
+import com.bmskinner.nma.components.rules.RuleSetCollection;
+import com.bmskinner.nma.core.CommandOptions;
+import com.bmskinner.nma.io.CellImageExportMethod;
 import com.bmskinner.nma.io.DatasetImportMethod;
+import com.bmskinner.nma.io.DatasetOutlinesExporter;
+import com.bmskinner.nma.io.DatasetProfileExporter;
+import com.bmskinner.nma.io.DatasetShellsExporter;
+import com.bmskinner.nma.io.DatasetSignalsExporter;
 import com.bmskinner.nma.io.DatasetStatsExporter;
 import com.bmskinner.nma.io.Io;
 import com.bmskinner.nma.io.XMLImportMethod;
+import com.bmskinner.nma.io.XMLWriter;
 
 public class ExportDataPipeline {
 
 	private static final Logger LOGGER = Logger
 			.getLogger(ExportDataPipeline.class.getName());
 
-	private File nmdFile;
+	private CommandOptions opt;
+
+	private IAnalysisDataset d;
 
 	/**
 	 * Build a pipeline covering all the options within the given file
@@ -27,30 +40,142 @@ public class ExportDataPipeline {
 	 * @param xmlFile    the options for analysis
 	 * @throws Exception
 	 */
-	public ExportDataPipeline(@NonNull final File nmdFile)
+	public ExportDataPipeline(@NonNull final CommandOptions opt)
 			throws Exception {
-		this.nmdFile = nmdFile;
-		run();
+		this.opt = opt;
+
+		d = readDataset();
+
+		LOGGER.info("Read dataset from file");
+
+		if (opt.isMeasurements || opt.isAll)
+			exportMeasurements();
+
+		if (opt.isProfiles || opt.isAll)
+			exportProfiles();
+
+		if (opt.isOutlines || opt.isAll)
+			exportOutlines();
+
+		if (opt.isSignals || opt.isAll)
+			exportSignals();
+
+		if (opt.isShells || opt.isAll)
+			exportShells();
+
+		if (opt.isSingleCellImages || opt.isAll)
+			exportSingleCellImages();
+
+		if (opt.isAnalysisOptions || opt.isAll)
+			exportAnalysisOptions();
+
+		if (opt.isRulesets || opt.isAll)
+			exportRulesets();
+
+		LOGGER.info("Export complete");
+
 	}
 
-	public void run() throws Exception {
-		XMLImportMethod m = new XMLImportMethod(nmdFile);
+	private IAnalysisDataset readDataset() throws Exception {
+		XMLImportMethod m = new XMLImportMethod(opt.file);
 		m.call();
+		return new DatasetImportMethod(m.getXMLDocument()).call().getFirstDataset();
+	}
 
-		LOGGER.info("Read xml file");
-
-		IAnalysisDataset d = new DatasetImportMethod(m.getXMLDocument()).call().getFirstDataset();
-
-		LOGGER.info("Created dataset");
-
+	private void exportMeasurements() throws Exception {
 		File statsFile = new File(d.getSavePath().getParentFile(),
 				d.getSavePath().getName() + Io.TAB_FILE_EXTENSION);
-		LOGGER.info("Exporting data to :" + statsFile.getAbsolutePath());
+		LOGGER.info("Exporting data to: " + statsFile.getAbsolutePath());
 
 		HashOptions exportOptions = new DefaultOptions();
 		exportOptions.setInt(Io.PROFILE_SAMPLES_KEY, 100);
-		new DatasetStatsExporter(statsFile, d, exportOptions)
-				.call();
+		new DatasetStatsExporter(statsFile, d, exportOptions).call();
 	}
 
+	private void exportProfiles() throws Exception {
+		File statsFile = new File(d.getSavePath().getParentFile(),
+				d.getSavePath().getName() + ".profiles" + Io.TAB_FILE_EXTENSION);
+		LOGGER.info("Exporting profiles to: " + statsFile.getAbsolutePath());
+		new DatasetProfileExporter(statsFile, d).call();
+	}
+
+	private void exportOutlines() throws Exception {
+		File statsFile = new File(d.getSavePath().getParentFile(),
+				d.getSavePath().getName() + ".outlines" + Io.TAB_FILE_EXTENSION);
+		LOGGER.info("Exporting outlines to: " + statsFile.getAbsolutePath());
+
+		new DatasetOutlinesExporter(statsFile, d).call();
+	}
+
+	private void exportSignals() throws Exception {
+		File statsFile = new File(d.getSavePath().getParentFile(),
+				d.getSavePath().getName() + ".signals" + Io.TAB_FILE_EXTENSION);
+		LOGGER.info("Exporting signals to: " + statsFile.getAbsolutePath());
+
+		new DatasetSignalsExporter(statsFile, d).call();
+	}
+
+	private void exportShells() throws Exception {
+		File statsFile = new File(d.getSavePath().getParentFile(),
+				d.getSavePath().getName() + ".shells" + Io.TAB_FILE_EXTENSION);
+		LOGGER.info("Exporting shells to: " + statsFile.getAbsolutePath());
+
+		new DatasetShellsExporter(statsFile, d).call();
+	}
+
+	private void exportSingleCellImages() throws Exception {
+
+		LOGGER.info("Exporting single cell images");
+
+		HashOptions exportOptions = new DefaultOptions();
+		exportOptions.setBoolean(CellImageExportMethod.MASK_BACKGROUND_KEY, false);
+		exportOptions.setBoolean(CellImageExportMethod.SINGLE_CELL_IMAGE_IS_NORMALISE_WIDTH_KEY,
+				false);
+		exportOptions.setInt(CellImageExportMethod.SINGLE_CELL_IMAGE_WIDTH_KEY, 255);
+		exportOptions.setBoolean(CellImageExportMethod.SINGLE_CELL_IMAGE_IS_RGB_KEY,
+				false);
+		exportOptions.setBoolean(CellImageExportMethod.SINGLE_CELL_IMAGE_IS_EXPORT_KEYPOINTS_KEY,
+				true);
+		new CellImageExportMethod(d, exportOptions).call();
+	}
+
+	private void exportAnalysisOptions() {
+		File outFile = new File(d.getSavePath().getParentFile(),
+				d.getSavePath().getName() + ".analysis-options" + Io.XML_FILE_EXTENSION);
+		LOGGER.info("Exporting analysis options to: " + outFile.getAbsolutePath());
+
+		Optional<IAnalysisOptions> op = d.getAnalysisOptions();
+		if (op.isEmpty())
+			return;
+
+		// Remove any folders from the export
+		// The point of this is to make a reusable analysis,
+		// not replicate existing datasets
+		IAnalysisOptions op2 = op.get().duplicate();
+		for (String s : op2.getDetectionOptionTypes()) {
+			op2.getDetectionOptions(s).get().remove(HashOptions.DETECTION_FOLDER);
+		}
+
+		// Also remove the analysis time so we don't use the same output folder
+		op2.clearAnalysisTime();
+
+		try {
+			XMLWriter.writeXML(op2.toXmlElement(), outFile);
+		} catch (IOException e) {
+			LOGGER.warning("Unable to write options to file");
+		}
+	}
+
+	private void exportRulesets() throws Exception {
+		File outFile = new File(d.getSavePath().getParentFile(),
+				d.getSavePath().getName() + ".rulesets" + Io.XML_FILE_EXTENSION);
+		LOGGER.info("Exporting rulesets to: " + outFile.getAbsolutePath());
+
+		RuleSetCollection rsc = d.getCollection().getRuleSetCollection();
+		try {
+			XMLWriter.writeXML(rsc.toXmlElement(), outFile);
+		} catch (IOException e) {
+			LOGGER.warning("Unable to write rulesets to file");
+		}
+	}
 }

@@ -4,23 +4,89 @@ This section contains information on more advanced use of NMA.
 
 ## Command line use
 
-Nuclear Morphology Analysis is designed to be runnable via the command line for a new analysis or to export nuclear measurements from an existing `nmd` file.
+Nuclear Morphology Analysis is designed to be runnable via the command line for a new analysis or to export data from an existing `nmd` file.
 
-The examples below use the cross platform standalone jar with a system installation of Java. 
+The examples below use the cross platform standalone jar with a system installation of Java. Note that these arguments will not work with the Windows exe version.
 
-To see all options:
+To see the sub-commands:
 ```
 java -jar Nuclear_Morphology_Analysis_${project.version}_standalone.jar -h
+```
+
+There are two sub-commands: `analyse` and `export`. 
+
+Use the `analyse` command to analyse a directory of images.
+
+Use the `export` command to export data from an nmd file.
+
+
+### `analyse` 
+
+To see all the analyse options:
+```
+java -jar Nuclear_Morphology_Analysis_${project.version}_standalone.jar analyse -h
+```
+
+This will print the following output:
+
+```
+usage: Nuclear_Morphology_Analysis_${project.version}_standalone.jar
+       analyse [-h] -d DIRECTORY [-o OPTIONS]
+
+named arguments:
+  -h, --help             show this help message and exit
+  -d DIRECTORY, --directory DIRECTORY
+                         Directory of images to analyse
+  -o OPTIONS, --options OPTIONS
+                         File of analysis options to use (.xml)
 ```
 
 To run a new analysis:
 
 ```
-java -jar Nuclear_Morphology_Analysis_${project.version}_standalone.jar -d /path/to/image/directory -o /path/to/options/file
+java -jar Nuclear_Morphology_Analysis_${project.version}_standalone.jar analyse --directory /path/to/image/directory --options /path/to/options/file.xml
 ```
 
-To export data from an `.nmd` file:
+### `export`
+
+These commands correspond to the UI menu options in `Dataset > Export...`. 
+To see all the export options:
+```
+java -jar Nuclear_Morphology_Analysis_${project.version}_standalone.jar export -h
+```
+
+This will print the following output:
 
 ```
-java -jar Nuclear_Morphology_Analysis_${project.version}_standalone.jar -n /path/to/nmd/file
+usage: Nuclear_Morphology_Analysis_${project.version}_standalone.jar
+       export [-h] -f FILE [--measurements] [--profiles] [--outlines]
+       [--signals] [--shells] [--single-cell-images] [--analysis-options]
+       [--rulesets] [--all]
+
+named arguments:
+  -h, --help             show this help message and exit
+  -f FILE, --file FILE   File with existing data (.nmd)
+  --measurements         Export nuclear measurements
+  --profiles             Export full nuclear profiles
+  --outlines             Export full nuclear outlines
+  --signals              Export nuclear signal measurements
+  --shells               Export nuclear signal shells
+  --single-cell-images   Export each cell in a cropped image
+  --analysis-options     Export the analysis options for this dataset
+  --rulesets             Export the landmark rulesets for this dataset
+  --all                  Export all the above data from the dataset
 ```
+
+To export nuclear measurements from an `.nmd` file:
+
+```
+java -jar Nuclear_Morphology_Analysis_${project.version}_standalone.jar export --file /path/to/file.nmd --measurements
+```
+
+Export options can be combined. To export nuclear signal measurements and nuclear measurements:
+
+```
+java -jar Nuclear_Morphology_Analysis_${project.version}_standalone.jar export --file /path/to/file.nmd --measurements --signals
+```
+
+Exported data files will be created in the same directory as the `nmd` file.

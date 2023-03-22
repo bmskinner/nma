@@ -1,6 +1,6 @@
 package com.bmskinner.nma.pipelines;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 
@@ -8,7 +8,6 @@ import org.junit.Test;
 
 import com.bmskinner.nma.TestResources;
 import com.bmskinner.nma.io.Io;
-import com.bmskinner.nma.pipelines.ExportDataPipeline;
 
 /**
  * Test the export pipeline is working
@@ -24,8 +23,9 @@ public class ExportDataPipelineTest {
 				TestResources.MOUSE_TEST_DATASET.getAbsolutePath() + Io.TAB_FILE_EXTENSION);
 		if (outputFile.exists())
 			outputFile.delete();
-		new ExportDataPipeline(TestResources.MOUSE_TEST_DATASET).run();
-		assertTrue(outputFile.exists());
+//		new ExportDataPipeline(TestResources.MOUSE_TEST_DATASET).run();
+//		assertTrue(outputFile.exists());
+		fail("In progress");
 	}
 
 }

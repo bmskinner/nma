@@ -21,6 +21,9 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
@@ -43,10 +46,11 @@ import com.bmskinner.nma.pipelines.SavedOptionsAnalysisPipeline;
 import ij.IJ;
 import ij.Prefs;
 import net.sourceforge.argparse4j.ArgumentParsers;
-import net.sourceforge.argparse4j.annotation.Arg;
 import net.sourceforge.argparse4j.impl.Arguments;
 import net.sourceforge.argparse4j.inf.ArgumentParser;
 import net.sourceforge.argparse4j.inf.ArgumentParserException;
+import net.sourceforge.argparse4j.inf.Subparser;
+import net.sourceforge.argparse4j.inf.Subparsers;
 
 /**
  * This is the main class that runs the program.
@@ -88,7 +92,7 @@ public class NuclearMorphologyAnalysis {
 	 */
 	public static NuclearMorphologyAnalysis getInstance() {
 		if (instance == null) {
-			instance = new NuclearMorphologyAnalysis(new CommandOptions());
+			instance = new NuclearMorphologyAnalysis();
 		}
 		return instance;
 	}
@@ -98,7 +102,7 @@ public class NuclearMorphologyAnalysis {
 	 * 
 	 * @param args
 	 */
-	private NuclearMorphologyAnalysis(CommandOptions opt) {
+	private NuclearMorphologyAnalysis() {
 		configureLogging();
 		configureSettingsFiles();
 	}
@@ -110,30 +114,141 @@ public class NuclearMorphologyAnalysis {
 	 */
 	public static void main(String[] args) {
 
-		ArgumentParser parser = ArgumentParsers.newFor("Nuclear_Morphology_Analysis")
+		// If the program is launched without arguments, we launch the GUI
+		// To do this, use a basic parser and check there are no arguments
+		ArgumentParser uiParser = ArgumentParsers
+				.newFor("Nuclear_Morphology_Analysis_" + Version.currentVersion()
+						+ "_standalone.jar")
+				.addHelp(false)
+				.build();
+
+		try {
+			Map<String, Object> argMap = new HashMap<>();
+			uiParser.parseArgs(args, argMap);
+			if (argMap.isEmpty()) {
+				loadConfigAndLaunch(new CommandOptions()); // options will be empty
+				return;
+			}
+		} catch (ArgumentParserException e) {
+			// ignore errors and move to the next parser
+		}
+
+		// If arguments were passed, we want to handle them with a dedicated parser
+		ArgumentParser parser = ArgumentParsers
+				.newFor("Nuclear_Morphology_Analysis_" + Version.currentVersion()
+						+ "_standalone.jar")
 				.build()
+				.version(Version.currentVersion().toString())
 				.defaultHelp(true)
 				.description("Analyse nuclear morphometric data");
-		parser.addArgument("-d", "--directory")
+
+		parser.addArgument("-v", "--version").action(Arguments.version());
+
+		Subparsers subparsers = parser.addSubparsers()
+				.title("subcommands")
+				.description("valid subcommands")
+				.metavar("COMMAND")
+				.dest("runMode")
+				.help("run <subcommand> -h for full options");
+
+		Subparser analyseParser = subparsers.addParser("analyse")
+				.help("Analyse images using a saved options file");
+
+		analyseParser.addArgument("-d", "--directory")
 				.type(Arguments.fileType().verifyIsDirectory().verifyCanRead())
+				.dest("directory")
+				.required(true)
 				.help("Directory of images to analyse");
-		parser.addArgument("-o", "--options")
+		analyseParser.addArgument("-o", "--options")
 				.type(Arguments.fileType().verifyIsFile().verifyCanRead())
+				.dest("options")
 				.help("File of analysis options to use (.xml)");
-		parser.addArgument("-f", "--file")
+
+		Subparser exportParser = subparsers.addParser("export")
+				.help("Export data from an nmd file");
+
+		exportParser.addArgument("-f", "--file")
 				.type(Arguments.fileType().verifyIsFile().verifyCanRead())
+				.required(true)
+				.dest("file")
 				.help("File with existing data (.nmd)");
 
+		exportParser.addArgument("--measurements")
+				.action(Arguments.storeTrue())
+				.dest("measurements")
+				.help("Export nuclear measurements");
+
+		exportParser.addArgument("--profiles")
+				.action(Arguments.storeTrue())
+				.dest("profiles")
+				.help("Export full nuclear profiles");
+
+		exportParser.addArgument("--outlines")
+				.action(Arguments.storeTrue())
+				.dest("outlines")
+				.help("Export full nuclear outlines");
+
+		exportParser.addArgument("--signals")
+				.action(Arguments.storeTrue())
+				.dest("signals")
+				.help("Export nuclear signal measurements");
+
+		exportParser.addArgument("--shells")
+				.action(Arguments.storeTrue())
+				.dest("shells")
+				.help("Export nuclear signal shells");
+
+		exportParser.addArgument("--single-cell-images")
+				.action(Arguments.storeTrue())
+				.dest("single-cell-images")
+				.help("Export each cell in a cropped image");
+
+		exportParser.addArgument("--analysis-options")
+				.action(Arguments.storeTrue())
+				.dest("analysis-options")
+				.help("Export the analysis options for this dataset");
+
+		exportParser.addArgument("--rulesets")
+				.action(Arguments.storeTrue())
+				.dest("rulesets")
+				.help("Export the landmark rulesets for this dataset");
+
+		exportParser.addArgument("--all")
+				.action(Arguments.storeTrue())
+				.dest("all")
+				.help("Export all the above data from the dataset");
+
+		// Store any options
 		CommandOptions opt = new CommandOptions();
 
 		try {
 			parser.parseArgs(args, opt);
+
+			System.out.println(Arrays.toString(args));
+			System.out.println(opt.toString());
+
 		} catch (ArgumentParserException e) {
+//			LOGGER.log(Level.SEVERE, "Error parsing input arguments", e);
 			parser.handleError(e);
+			System.exit(1);
+		} catch (IllegalArgumentException e) {
+			System.out.println(Arrays.toString(args));
+			System.out.println(opt.toString());
+			e.printStackTrace();
 			System.exit(1);
 		}
 
-		instance = new NuclearMorphologyAnalysis(opt);
+		loadConfigAndLaunch(opt);
+
+	}
+
+	/**
+	 * Given the input commands, run the appropriate action
+	 * 
+	 * @param opt
+	 */
+	private static void loadConfigAndLaunch(CommandOptions opt) {
+		instance = new NuclearMorphologyAnalysis();
 
 		// load the config file
 		new ConfigFileReader();
@@ -142,26 +257,26 @@ public class NuclearMorphologyAnalysis {
 		LOGGER.finer(
 				() -> "Internal ImageJ PluginFilter thread count set to %s".formatted(ijThreads));
 
-		// No arguments provided, launch the GUI
-		if (!opt.hasOptions()) {
-			instance.runWithGUI();
+		if ("analyse".equals(opt.runMode)) {
+			// Arguments given, run headless
+			instance.runHeadlessAnalyse(opt);
 			return;
 		}
 
-		// Arguments given, run headless
-		if (opt.folder != null) {
-			instance.runHeadless(opt.folder, opt.options);
+		if ("export".equals(opt.runMode)) {
+			instance.runHeadlessExport(opt);
+			return;
 		}
 
-		if (opt.nmd != null)
-			instance.runExport(opt.nmd);
-
+		// No arguments provided, launch the GUI
+		instance.runWithGUI();
 	}
 
 	/**
 	 * Log the program status handlers and files and configure the logging options
 	 * 
 	 */
+
 	private void configureLogging() {
 
 		try {
@@ -214,6 +329,7 @@ public class NuclearMorphologyAnalysis {
 	 * Ensure all default settings files are present by creating if needed from
 	 * inbuilt defaults
 	 */
+
 	private void configureSettingsFiles() {
 
 		if (!Io.getRulesetDir().exists())
@@ -251,16 +367,15 @@ public class NuclearMorphologyAnalysis {
 		}
 	}
 
-	private void runExport(File nmdFile) {
-
-		if (!nmdFile.exists()) {
-			LOGGER.warning(
-					() -> "The file '%s' does not exist".formatted(nmdFile.getAbsolutePath()));
-			System.exit(1);
-		}
-		LOGGER.info("Exporting data from file");
+	/**
+	 * Run in headless mode, specifying an nmd file and what to export
+	 * 
+	 * @param opt the options
+	 */
+	private void runHeadlessExport(final CommandOptions opt) {
 		try {
-			new ExportDataPipeline(nmdFile);
+			LOGGER.info("Running export function");
+			new ExportDataPipeline(opt);
 		} catch (Exception e) {
 			LOGGER.log(Level.SEVERE, "Error running pipeline: %s".formatted(e.getMessage()), e);
 		}
@@ -269,39 +384,35 @@ public class NuclearMorphologyAnalysis {
 	/**
 	 * Run in headless mode, specifying a folder of images, and a file of options
 	 * 
-	 * @param folder  the folder of images
-	 * @param options
+	 * @param opt the options
 	 */
-	private void runHeadless(final File folder, final File options) {
-		LOGGER.config("Running headless");
-		if (folder != null) {
-			LOGGER.info("Running on folder: " + folder.getAbsolutePath());
 
-			if (!folder.isDirectory()) {
-				LOGGER.warning("A directory is required in the '-folder' argument");
-				return;
-			}
-			try {
-				if (options != null) {
-					LOGGER.info("Running with saved options: " + options.getAbsolutePath());
-					new SavedOptionsAnalysisPipeline(folder, options).call();
-				} else {
-					LOGGER.info(
-							"No analysis options provided, using defaults and assuming these are mouse sperm");
-					new BasicAnalysisPipeline(folder);
-				}
+	private void runHeadlessAnalyse(final CommandOptions opt) {
 
-			} catch (Exception e) {
-				LOGGER.log(Level.SEVERE, "Error running pipeline: %s".formatted(e.getMessage()), e);
+		LOGGER.info("Running on folder: " + opt.directory.getAbsolutePath());
+
+		try {
+			if (opt.options != null) {
+				LOGGER.info("Running with saved options: " + opt.options.getAbsolutePath());
+				new SavedOptionsAnalysisPipeline(opt.directory, opt.options).call();
+			} else {
+				LOGGER.info(
+						"No analysis options provided, using defaults and assuming these are mouse sperm");
+				new BasicAnalysisPipeline(opt.directory);
 			}
+
+		} catch (Exception e) {
+			LOGGER.log(Level.SEVERE, "Error running pipeline: %s".formatted(e.getMessage()), e);
 		}
+
 	}
 
 	/**
 	 * Load the program user interface
 	 */
-	private void runWithGUI() {
 
+	private void runWithGUI() {
+		LOGGER.info("Loading user interface");
 		try {
 			Runnable r = new RunWithGui();
 			EventQueue.invokeLater(r);
@@ -342,39 +453,4 @@ public class NuclearMorphologyAnalysis {
 
 	}
 
-	/**
-	 * Store the options provided to the program via the command line
-	 * 
-	 * @author ben
-	 * @since 2.1.0
-	 *
-	 */
-	private static class CommandOptions {
-		@Arg(dest = "directory")
-		public File folder;
-
-		@Arg(dest = "options")
-		public File options;
-
-		@Arg(dest = "file")
-		public File nmd;
-
-		public CommandOptions() {
-		}
-
-		public boolean hasOptions() {
-			return folder != null || options != null || nmd != null;
-		}
-
-		public String toString() {
-			StringBuilder sb = new StringBuilder();
-			if (folder != null)
-				sb.append(folder.getAbsolutePath() + Io.NEWLINE);
-			if (options != null)
-				sb.append(options.getAbsolutePath() + Io.NEWLINE);
-			if (nmd != null)
-				sb.append(nmd.getAbsolutePath() + Io.NEWLINE);
-			return sb.toString();
-		}
-	}
 }
