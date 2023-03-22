@@ -59,6 +59,12 @@ public class CommandOptions {
 	@Arg(dest = "all")
 	public boolean isAll = false;
 
+	@Arg(dest = "consensus")
+	public boolean isConsensus = false;
+
+	@Arg(dest = "cell-locations")
+	public boolean isCellLocations = false;
+
 	public CommandOptions() {
 		// no data needed
 	}

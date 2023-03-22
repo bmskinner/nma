@@ -144,6 +144,8 @@ public class NuclearMorphologyAnalysis {
 
 		parser.addArgument("-v", "--version").action(Arguments.version());
 
+		// Each type of functionality should have a separate command. Options can be
+		// provided for each command specifically
 		Subparsers subparsers = parser.addSubparsers()
 				.title("subcommands")
 				.description("valid subcommands")
@@ -151,6 +153,7 @@ public class NuclearMorphologyAnalysis {
 				.dest("runMode")
 				.help("run <subcommand> -h for full options");
 
+		// Sub parser for analysing new samples
 		Subparser analyseParser = subparsers.addParser("analyse")
 				.help("Analyse images using a saved options file");
 
@@ -164,6 +167,7 @@ public class NuclearMorphologyAnalysis {
 				.dest("options")
 				.help("File of analysis options to use (.xml)");
 
+		// Sub parser for exporting data from an nmd
 		Subparser exportParser = subparsers.addParser("export")
 				.help("Export data from an nmd file");
 
@@ -187,6 +191,16 @@ public class NuclearMorphologyAnalysis {
 				.action(Arguments.storeTrue())
 				.dest("outlines")
 				.help("Export full nuclear outlines");
+
+		exportParser.addArgument("--cell-locations")
+				.action(Arguments.storeTrue())
+				.dest("cell-locations")
+				.help("Export the cell centre-of-mass locations in their source images");
+
+		exportParser.addArgument("--consensus")
+				.action(Arguments.storeTrue())
+				.dest("consensus")
+				.help("Export consensus nucleus as SVG");
 
 		exportParser.addArgument("--signals")
 				.action(Arguments.storeTrue())
@@ -224,11 +238,7 @@ public class NuclearMorphologyAnalysis {
 		try {
 			parser.parseArgs(args, opt);
 
-			System.out.println(Arrays.toString(args));
-			System.out.println(opt.toString());
-
 		} catch (ArgumentParserException e) {
-//			LOGGER.log(Level.SEVERE, "Error parsing input arguments", e);
 			parser.handleError(e);
 			System.exit(1);
 		} catch (IllegalArgumentException e) {

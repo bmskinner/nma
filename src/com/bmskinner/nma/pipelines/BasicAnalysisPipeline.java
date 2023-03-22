@@ -25,18 +25,16 @@ import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nma.analysis.nucleus.ConsensusAveragingMethod;
 import com.bmskinner.nma.analysis.nucleus.NucleusDetectionMethod;
 import com.bmskinner.nma.analysis.profiles.DatasetProfilingMethod;
 import com.bmskinner.nma.analysis.profiles.DatasetSegmentationMethod;
 import com.bmskinner.nma.analysis.profiles.DatasetSegmentationMethod.MorphologyAnalysisMode;
 import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
-import com.bmskinner.nma.components.options.DefaultOptions;
-import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.options.IAnalysisOptions;
 import com.bmskinner.nma.components.options.OptionsFactory;
 import com.bmskinner.nma.io.DatasetExportMethod;
-import com.bmskinner.nma.io.DatasetStatsExporter;
 import com.bmskinner.nma.io.Io;
 
 /**
@@ -57,47 +55,41 @@ public class BasicAnalysisPipeline {
 
 		Instant inst = Instant.ofEpochMilli(op.getAnalysisTime());
 		LocalDateTime anTime = LocalDateTime.ofInstant(inst, ZoneOffset.systemDefault());
-		String outputFolderName = anTime.format(DateTimeFormatter.ofPattern("YYYY-MM-dd_HH-mm-ss"));
+		String outputFolderName = anTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss"));
 		File outFolder = new File(folder, outputFolderName);
 		outFolder.mkdirs();
 		File saveFile = new File(outFolder, folder.getName() + Io.NMD_FILE_EXTENSION);
-		runNewAnalysis(folder, op, saveFile);
+		runNewAnalysis(outFolder, op, saveFile);
 	}
 
 	/**
 	 * Run a new analysis on the images using the given options.
 	 * 
-	 * @param folder   the name of the output folder for the nmd file
-	 * @param op       the detection options
-	 * @param saveFile the full path to the nmd file
+	 * @param outFolder the name of the output folder for the nmd file
+	 * @param op        the detection options
+	 * @param saveFile  the full path to the nmd file
 	 * @return the new dataset
 	 * @throws Exception
 	 */
-	private void runNewAnalysis(File folder, IAnalysisOptions op, File saveFile)
+	private void runNewAnalysis(@NonNull File outFolder, IAnalysisOptions op,
+			@NonNull File saveFile)
 			throws Exception {
 
 		if (!op.getDetectionFolder(CellularComponent.NUCLEUS)
 				.orElseThrow(() -> new IllegalArgumentException("Non nucleus detection options"))
 				.exists())
-			throw new IllegalArgumentException("Detection folder does not exist");
+			throw new IllegalArgumentException("Detection image folder does not exist");
 
-		LOGGER.info("Analysing folder: " + folder);
+		LOGGER.info(() -> "Outputting data to folder: %s".formatted(outFolder.getAbsolutePath()));
 
-		File statsFile = new File(saveFile.getParentFile(),
-				saveFile.getName() + Io.TAB_FILE_EXTENSION);
-		LOGGER.info("Saving to: " + statsFile.getAbsolutePath());
-
-		IAnalysisDataset obs = new NucleusDetectionMethod(folder, op)
+		IAnalysisDataset obs = new NucleusDetectionMethod(outFolder, op)
 				.call().getFirstDataset();
-
-		HashOptions exportOptions = new DefaultOptions();
-		exportOptions.setInt(Io.PROFILE_SAMPLES_KEY, 100);
 
 		new DatasetProfilingMethod(obs)
 				.then(new DatasetSegmentationMethod(obs,
 						MorphologyAnalysisMode.SEGMENT_FROM_SCRATCH))
+				.then(new ConsensusAveragingMethod(obs))
 				.then(new DatasetExportMethod(obs, saveFile))
-				.then(new DatasetStatsExporter(statsFile, obs, exportOptions))
 				.call();
 	}
 
