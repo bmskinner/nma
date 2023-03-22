@@ -207,15 +207,15 @@ public class NuclearMorphologyAnalysis {
 				.dest("signals")
 				.help("Export nuclear signal measurements");
 
-		exportParser.addArgument("--shells")
-				.action(Arguments.storeTrue())
-				.dest("shells")
-				.help("Export nuclear signal shells");
-
 		exportParser.addArgument("--single-cell-images")
 				.action(Arguments.storeTrue())
 				.dest("single-cell-images")
 				.help("Export each cell in a cropped image");
+
+		exportParser.addArgument("--shells")
+				.action(Arguments.storeTrue())
+				.dest("shells")
+				.help("Export nuclear signal shells");
 
 		exportParser.addArgument("--analysis-options")
 				.action(Arguments.storeTrue())
@@ -230,7 +230,7 @@ public class NuclearMorphologyAnalysis {
 		exportParser.addArgument("--all")
 				.action(Arguments.storeTrue())
 				.dest("all")
-				.help("Export all the above data from the dataset");
+				.help("Export all the above from the dataset except for single cell images");
 
 		// Store any options
 		CommandOptions opt = new CommandOptions();

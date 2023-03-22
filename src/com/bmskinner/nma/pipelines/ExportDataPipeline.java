@@ -9,6 +9,7 @@ import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nma.analysis.nucleus.ConsensusAveragingMethod;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.measure.MeasurementScale;
 import com.bmskinner.nma.components.options.DefaultOptions;
@@ -106,7 +107,7 @@ public class ExportDataPipeline {
 
 	private void exportMeasurements() throws Exception {
 		File statsFile = new File(root.getSavePath().getParentFile(),
-				root.getSavePath().getName() + Io.TAB_FILE_EXTENSION);
+				root.getSavePath().getName() + ".measurements" + Io.TAB_FILE_EXTENSION);
 		LOGGER.info("Exporting data to: " + statsFile.getAbsolutePath());
 
 		HashOptions exportOptions = new DefaultOptions();
@@ -208,11 +209,16 @@ public class ExportDataPipeline {
 				root.getSavePath().getName() + ".consensus" + Io.SVG_FILE_EXTENSION);
 		LOGGER.info("Exporting consensus nucleus to: " + outFile.getAbsolutePath());
 
+		// Ensure all datasets have a consensus
+		for (IAnalysisDataset ds : datasets) {
+			if (!ds.getCollection().hasConsensus())
+				new ConsensusAveragingMethod(ds).call();
+		}
+
 		new SVGWriter(outFile).exportConsensusOutlines(datasets, MeasurementScale.MICRONS);
 	}
 
 	private void exportCellLocations() throws Exception {
-		LOGGER.info("Exporting cell locations");
 		new CellFileExporter(datasets).call();
 	}
 }
