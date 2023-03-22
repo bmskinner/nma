@@ -2,6 +2,7 @@ package com.bmskinner.nma.core;
 
 import java.io.File;
 import java.lang.reflect.Field;
+import java.util.List;
 import java.util.logging.Logger;
 
 import com.bmskinner.nma.io.Io;
@@ -73,6 +74,12 @@ public class CommandOptions {
 
 	@Arg(dest = "cluster-file")
 	public File clusterFile;
+
+	@Arg(dest = "merge-sources")
+	public List<File> mergeSources;
+
+	@Arg(dest = "output")
+	public File output;
 
 	public CommandOptions() {
 		// no data needed

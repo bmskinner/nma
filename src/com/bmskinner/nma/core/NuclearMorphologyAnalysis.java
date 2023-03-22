@@ -274,7 +274,6 @@ public class NuclearMorphologyAnalysis {
 
 		parser.addArgument("-f", "--file")
 				.type(Arguments.fileType().verifyIsFile().verifyCanRead())
-				.required(true)
 				.dest("file")
 				.help("File with existing data (.nmd)");
 
@@ -282,6 +281,17 @@ public class NuclearMorphologyAnalysis {
 				.type(Arguments.fileType().verifyIsFile().verifyCanRead())
 				.dest("cluster-file")
 				.help("File with clusters to import");
+		
+		parser.addArgument("--merge-sources")
+				.type(Arguments.fileType().verifyIsFile().verifyCanRead())
+				.nargs("*")
+				.dest("merge-sources")
+				.help("Files to be merged into one nmd");
+
+		parser.addArgument("--output")
+				.type(Arguments.fileType().verifyNotExists().verifyCanCreate())
+				.dest("output")
+				.help("Output file for merged data");
 
 	}
 
