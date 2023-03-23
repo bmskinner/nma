@@ -41,162 +41,161 @@ import com.bmskinner.nma.logging.Loggable;
  *
  */
 public class CellFileExporter extends MultipleDatasetAnalysisMethod implements Io {
-	
+
 	private static final Logger LOGGER = Logger.getLogger(CellFileExporter.class.getName());
-	
+
 	/**
-     * Create specifying the folder cell files will be exported into
-     * 
-     * @param folder
-     */
-    public CellFileExporter(@NonNull List<IAnalysisDataset> list) {
-        super(list);
-    }
+	 * Create specifying the folder cell files will be exported into
+	 * 
+	 * @param folder
+	 */
+	public CellFileExporter(@NonNull List<IAnalysisDataset> list) {
+		super(list);
+	}
 
-    /**
-     * Create specifying the folder cell files will be exported into
-     * 
-     * @param folder
-     */
-    public CellFileExporter(@NonNull IAnalysisDataset dataset) {
-        super(dataset);
-    }
+	/**
+	 * Create specifying the folder cell files will be exported into
+	 * 
+	 * @param folder
+	 */
+	public CellFileExporter(@NonNull IAnalysisDataset dataset) {
+		super(dataset);
+	}
 
-    @Override
-    public IAnalysisResult call() throws Exception {
-    	for(IAnalysisDataset d :  datasets) {
-    		exportCellLocations(d);
-    	}
-        return new DefaultAnalysisResult(datasets);
-    }
+	@Override
+	public IAnalysisResult call() throws Exception {
+		for (IAnalysisDataset d : datasets) {
+			exportCellLocations(d);
+		}
+		return new DefaultAnalysisResult(datasets);
+	}
 
-    private boolean exportCellLocations(IAnalysisDataset d) {
+	private boolean exportCellLocations(IAnalysisDataset d) {
 
-        String fileName = d.getName() + "." + Importer.LOC_FILE_EXTENSION;
-        File exportFile = new File(d.getSavePath().getParent(), fileName);
-        
-        if (!exportFile.getParentFile().isDirectory()) {
-            // the desired output folder does not exist
-            LOGGER.warning("The intended export folder does not exist");
+		String fileName = d.getName() + "." + Io.LOC_FILE_EXTENSION;
+		File exportFile = new File(d.getSavePath().getParent(), fileName);
 
-            File folder = GlobalOptions.getInstance().getDefaultDir();
-            exportFile = new File(folder, fileName);
-        }
+		if (!exportFile.getParentFile().isDirectory()) {
+			// the desired output folder does not exist
+			LOGGER.warning("The intended export folder does not exist");
 
-        LOGGER.info("Exporting cells to " + exportFile.getAbsolutePath());
+			File folder = GlobalOptions.getInstance().getDefaultDir();
+			exportFile = new File(folder, fileName);
+		}
 
-        if (exportFile.exists())
-            exportFile.delete();
+		LOGGER.info("Exporting cells to " + exportFile.getAbsolutePath());
 
-        StringBuilder builder = new StringBuilder();
+		if (exportFile.exists())
+			exportFile.delete();
 
-        /*
-         * Add the cells from the root dataset
-         */
-        builder.append(makeDatasetHeaderString(d, d.getId()));
-        builder.append(makeDatasetCellsString(d));
+		StringBuilder builder = new StringBuilder();
 
-        /*
-         * Add cells from all child datasets
-         */
-        builder.append(makeChildString(d));
+		/*
+		 * Add the cells from the root dataset
+		 */
+		builder.append(makeDatasetHeaderString(d, d.getId()));
+		builder.append(makeDatasetCellsString(d));
 
-        try {
-            export(builder.toString(), exportFile);
-        } catch (FileNotFoundException e) {
-            LOGGER.log(Loggable.STACK, e.getMessage(), e);
-            return false;
-        }
-        return true;
-    }
+		/*
+		 * Add cells from all child datasets
+		 */
+		builder.append(makeChildString(d));
 
-    /**
-     * Add the cells from all child datasets recursively
-     * 
-     * @param d
-     * @return
-     */
-    private static String makeChildString(IAnalysisDataset d) {
-        StringBuilder builder = new StringBuilder();
+		try {
+			export(builder.toString(), exportFile);
+		} catch (FileNotFoundException e) {
+			LOGGER.log(Loggable.STACK, e.getMessage(), e);
+			return false;
+		}
+		return true;
+	}
 
-        for (IAnalysisDataset child : d.getChildDatasets()) {
-            builder.append(makeDatasetHeaderString(child, d.getId()));
-            builder.append(makeDatasetCellsString(child));
+	/**
+	 * Add the cells from all child datasets recursively
+	 * 
+	 * @param d
+	 * @return
+	 */
+	private static String makeChildString(IAnalysisDataset d) {
+		StringBuilder builder = new StringBuilder();
 
-            if (child.hasChildren()) {
-                builder.append(makeChildString(child));
-            }
-        }
+		for (IAnalysisDataset child : d.getChildDatasets()) {
+			builder.append(makeDatasetHeaderString(child, d.getId()));
+			builder.append(makeDatasetCellsString(child));
 
-        return builder.toString();
-    }
+			if (child.hasChildren()) {
+				builder.append(makeChildString(child));
+			}
+		}
 
-    /**
-     * Add the cell positions and image names
-     * 
-     * @param d
-     * @return
-     */
-    private static String makeDatasetCellsString(IAnalysisDataset d) {
-        StringBuilder builder = new StringBuilder();
+		return builder.toString();
+	}
 
-        for (ICell c : d.getCollection().getCells()) {
+	/**
+	 * Add the cell positions and image names
+	 * 
+	 * @param d
+	 * @return
+	 */
+	private static String makeDatasetCellsString(IAnalysisDataset d) {
+		StringBuilder builder = new StringBuilder();
 
+		for (ICell c : d.getCollection().getCells()) {
 
-            IPoint com = c.getPrimaryNucleus().getCentreOfMass();
+			IPoint com = c.getPrimaryNucleus().getCentreOfMass();
 
-            double x = com.getX() + c.getPrimaryNucleus().getXBase();
-            double y = com.getY() + c.getPrimaryNucleus().getYBase();
+			double x = com.getX() + c.getPrimaryNucleus().getXBase();
+			double y = com.getY() + c.getPrimaryNucleus().getYBase();
 
-            try {
+			try {
 
-                if (c.getPrimaryNucleus().getSourceFile() != null) {
-                    builder.append(c.getPrimaryNucleus().getSourceFile().getAbsolutePath());
-                    builder.append("\t");
-                    builder.append(x);
-                    builder.append("-");
-                    builder.append(y);
-                    builder.append(NEWLINE);
-                }
-            } catch (Exception e) {
-                return null;
-            }
+				if (c.getPrimaryNucleus().getSourceFile() != null) {
+					builder.append(c.getPrimaryNucleus().getSourceFile().getAbsolutePath());
+					builder.append("\t");
+					builder.append(x);
+					builder.append("-");
+					builder.append(y);
+					builder.append(NEWLINE);
+				}
+			} catch (Exception e) {
+				return null;
+			}
 
-        }
-        return builder.toString();
-    }
+		}
+		return builder.toString();
+	}
 
-    /**
-     * Add the dataset id, name, and parent
-     * 
-     * @param child
-     * @param parent
-     * @return
-     */
-    private static String makeDatasetHeaderString(IAnalysisDataset child, UUID parent) {
-        StringBuilder builder = new StringBuilder();
+	/**
+	 * Add the dataset id, name, and parent
+	 * 
+	 * @param child
+	 * @param parent
+	 * @return
+	 */
+	private static String makeDatasetHeaderString(IAnalysisDataset child, UUID parent) {
+		StringBuilder builder = new StringBuilder();
 
-        builder.append("UUID\t");
-        builder.append(child.getId().toString());
-        builder.append(NEWLINE);
+		builder.append("UUID\t");
+		builder.append(child.getId().toString());
+		builder.append(NEWLINE);
 
-        builder.append("Name\t");
-        builder.append(child.getName());
-        builder.append(NEWLINE);
+		builder.append("Name\t");
+		builder.append(child.getName());
+		builder.append(NEWLINE);
 
-        builder.append("ChildOf\t");
-        builder.append(parent.toString());
-        builder.append(NEWLINE);
-        return builder.toString();
-    }
+		builder.append("ChildOf\t");
+		builder.append(parent.toString());
+		builder.append(NEWLINE);
+		return builder.toString();
+	}
 
-    private static void export(String s, File f) throws FileNotFoundException {
+	private static void export(String s, File f) throws FileNotFoundException {
 
-        PrintWriter out;
-        out = new PrintWriter(f);
-        out.print(s);
-        out.close();
+		PrintWriter out;
+		out = new PrintWriter(f);
+		out.print(s);
+		out.close();
 
-    }
+	}
 
 }

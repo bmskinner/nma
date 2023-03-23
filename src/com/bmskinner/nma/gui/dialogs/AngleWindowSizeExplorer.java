@@ -166,8 +166,7 @@ public class AngleWindowSizeExplorer extends LoadingIconDialog implements Change
 		if (b) {
 			this.setEnabled(false);
 			for (Component c : this.getComponents()) {
-				c.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR)); // new
-																				// Cursor(Cursor.WAIT_CURSOR));
+				c.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 			}
 
 			this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));

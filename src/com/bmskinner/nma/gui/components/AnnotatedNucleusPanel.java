@@ -23,6 +23,7 @@ import java.util.logging.Logger;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 
 import com.bmskinner.nma.components.cells.CellularComponent;
@@ -54,11 +55,10 @@ public class AnnotatedNucleusPanel extends JPanel {
 		this.setLayout(new BorderLayout());
 		this.setBorder(new EmptyBorder(5, 5, 5, 5));
 		this.add(imageLabel, BorderLayout.CENTER);
-		imageLabel.setHorizontalTextPosition(JLabel.CENTER);
-		imageLabel.setVerticalTextPosition(JLabel.BOTTOM);
-		imageLabel.setVerticalAlignment(JLabel.CENTER);
-		imageLabel.setHorizontalAlignment(JLabel.CENTER);
-
+		imageLabel.setHorizontalTextPosition(SwingConstants.CENTER);
+		imageLabel.setVerticalTextPosition(SwingConstants.BOTTOM);
+		imageLabel.setVerticalAlignment(SwingConstants.CENTER);
+		imageLabel.setHorizontalAlignment(SwingConstants.CENTER);
 	}
 
 	/**
@@ -142,8 +142,7 @@ public class AnnotatedNucleusPanel extends JPanel {
 			useRGB = true;
 		}
 
-		ImageProcessor openProcessor = useRGB
-				? ImageImporter.importCroppedImageTo24bitGreyscale(cell.getCytoplasm())
+		ImageProcessor openProcessor = useRGB ? ImageImporter.importCroppedImageTo24bitGreyscale(cell.getCytoplasm())
 				: ImageImporter.importCroppedImageTo24bitGreyscale(cell.getPrimaryNucleus());
 
 		ImageAnnotator an = new ImageAnnotator(openProcessor);
@@ -177,8 +176,7 @@ public class AnnotatedNucleusPanel extends JPanel {
 		if (fixedDim)
 			icon = new ImageIcon(ip.getBufferedImage());
 		else
-			icon = new ImageIcon(ImageFilterer.fitToScreen(ip, 0.8)
-					.getBufferedImage());
+			icon = new ImageIcon(ImageFilterer.fitToScreen(ip, 0.8).getBufferedImage());
 
 		imageLabel.setIcon(icon);
 		imageLabel.revalidate();
