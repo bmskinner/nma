@@ -288,6 +288,7 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod
 				.collect(Collectors.toList());
 
 		for (HashOptions cluster : clusterOptions) {
+			LOGGER.fine("Adding clustering option");
 			for (IAnalysisDataset dataset : datasets) {
 				methodsToRun.add(new NucleusClusteringMethod(dataset, cluster));
 			}

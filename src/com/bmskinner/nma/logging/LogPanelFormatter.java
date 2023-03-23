@@ -49,7 +49,6 @@ public class LogPanelFormatter extends Formatter {
 		buffer.append(date);
 		buffer.append(SEPARATOR);
 		buffer.append(formattedMsg);
-		buffer.append(NEWLINE);
 		return buffer.toString();
 	}
 

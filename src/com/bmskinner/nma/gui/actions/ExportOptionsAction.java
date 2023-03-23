@@ -25,6 +25,7 @@ import java.util.logging.Logger;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
+import com.bmskinner.nma.components.datasets.IClusterGroup;
 import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.options.IAnalysisOptions;
 import com.bmskinner.nma.core.InputSupplier.RequestCancelledException;
@@ -77,6 +78,12 @@ public class ExportOptionsAction extends MultiDatasetResultAction {
 				IAnalysisOptions op = opt.get().duplicate();
 				for (String s : op.getDetectionOptionTypes()) {
 					op.getDetectionOptions(s).get().remove(HashOptions.DETECTION_FOLDER);
+				}
+
+				// Put clustering options into the main analysis options
+				for (IClusterGroup g : datasets.get(0).getClusterGroups()) {
+					op.setSecondaryOptions(HashOptions.CLUSTER_SUB_OPTIONS_KEY + "_" + g.getName(),
+							g.getOptions().get());
 				}
 
 				// Also remove the analysis time so we don't use the same output folder
