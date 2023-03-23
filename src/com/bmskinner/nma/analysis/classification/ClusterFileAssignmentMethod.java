@@ -196,12 +196,13 @@ public class ClusterFileAssignmentMethod extends SingleDatasetAnalysisMethod {
 		// since we don't know how they were made. Make an empty
 		// options object
 		HashOptions clusterOptions = new OptionsBuilder()
+				.withValue(HashOptions.CLUSTER_GROUP_ID_KEY, UUID.randomUUID())
 				.withValue(HashOptions.CLUSTER_METHOD_KEY, ClusteringMethod.IMPORTED.toString())
 				.build();
 
 		IClusterGroup group = new DefaultClusterGroup(
 				IClusterGroup.CLUSTER_GROUP_PREFIX + "_" + clusterNumber,
-				clusterOptions);
+				clusterOptions, clusterOptions.getUUID(HashOptions.CLUSTER_GROUP_ID_KEY));
 
 		// Make collections for the new clusters
 		long nClusters = cellMap.values().stream().distinct().count();

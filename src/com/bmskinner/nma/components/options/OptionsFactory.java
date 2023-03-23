@@ -17,6 +17,7 @@
 package com.bmskinner.nma.components.options;
 
 import java.io.File;
+import java.util.UUID;
 
 import com.bmskinner.nma.analysis.classification.TsneMethod;
 import com.bmskinner.nma.analysis.classification.UMAPMethod;
@@ -230,6 +231,7 @@ public class OptionsFactory {
 	 */
 	public static OptionsBuilder makeDefaultClusteringOptions() {
 		OptionsBuilder ob = new OptionsBuilder()
+				.withValue(HashOptions.CLUSTER_GROUP_ID_KEY, UUID.randomUUID())
 				.withValue(HashOptions.CLUSTER_METHOD_KEY,
 						HashOptions.DEFAULT_CLUSTER_METHOD.name())
 				.withValue(HashOptions.CLUSTER_HIERARCHICAL_METHOD_KEY,

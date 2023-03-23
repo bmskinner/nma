@@ -35,9 +35,11 @@ import com.bmskinner.nma.analysis.DefaultAnalysisResult;
 import com.bmskinner.nma.analysis.IAnalysisMethod;
 import com.bmskinner.nma.analysis.IAnalysisResult;
 import com.bmskinner.nma.analysis.classification.NucleusClusteringMethod;
+import com.bmskinner.nma.analysis.classification.PrincipalComponentAnalysis;
+import com.bmskinner.nma.analysis.classification.TsneMethod;
+import com.bmskinner.nma.analysis.classification.UMAPMethod;
 import com.bmskinner.nma.analysis.nucleus.ConsensusAveragingMethod;
 import com.bmskinner.nma.analysis.nucleus.NucleusDetectionMethod;
-import com.bmskinner.nma.analysis.nucleus.ProfileRefoldMethod;
 import com.bmskinner.nma.analysis.profiles.DatasetProfilingMethod;
 import com.bmskinner.nma.analysis.profiles.DatasetSegmentationMethod;
 import com.bmskinner.nma.analysis.profiles.DatasetSegmentationMethod.MorphologyAnalysisMode;
@@ -176,6 +178,8 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod
 						imageFolder);
 				createRefoldingMethod(datasets);
 				createSignalDetectionMethods(datasets, options, imageFolder);
+
+				createDimensionalityReductionMethods(datasets, options);
 				createClusteringMethods(datasets, options);
 
 				for (IAnalysisDataset dataset : datasets)
@@ -211,21 +215,10 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod
 		for (IAnalysisDataset dataset : datasets) {
 			if (dataset.getCollection().getRuleSetCollection()
 					.equals(RuleSetCollection.roundRuleSetCollection())) {
-//				createProfileRefoldMethod(datasets);
 				createAveragingMethod(datasets);
 			} else {
 				createAveragingMethod(datasets);
 			}
-		}
-	}
-
-	private void createProfileRefoldMethod(List<IAnalysisDataset> datasets) {
-		for (IAnalysisDataset dataset : datasets) {
-			if (!dataset.getCollection().hasConsensus())
-				methodsToRun.add(new ProfileRefoldMethod(dataset));
-			for (IAnalysisDataset d : dataset.getAllChildDatasets())
-				if (!d.getCollection().hasConsensus())
-					methodsToRun.add(new ProfileRefoldMethod(d));
 		}
 	}
 
@@ -278,6 +271,43 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod
 		}
 	}
 
+	/**
+	 * Create methods needed for dimensionality reduction for clusters
+	 * 
+	 * @param datasets
+	 * @param options
+	 */
+	private void createDimensionalityReductionMethods(List<IAnalysisDataset> datasets,
+			@NonNull IAnalysisOptions options) {
+		// Get all the sub-options starting with the cluster options key
+		List<HashOptions> clusterOptions = options.getSecondaryOptionKeys().stream()
+				.filter(s -> s.startsWith(HashOptions.CLUSTER_SUB_OPTIONS_KEY))
+				.map(s -> options.getSecondaryOptions(s).orElseThrow())
+				.collect(Collectors.toList());
+
+		for (HashOptions ops : clusterOptions) {
+
+			if (ops.getBoolean(HashOptions.CLUSTER_USE_PCA_KEY)) {
+				for (IAnalysisDataset dataset : datasets) {
+					methodsToRun.add(new PrincipalComponentAnalysis(dataset, ops));
+				}
+			}
+
+			if (ops.getBoolean(HashOptions.CLUSTER_USE_TSNE_KEY)) {
+				for (IAnalysisDataset dataset : datasets) {
+					methodsToRun.add(new TsneMethod(dataset, ops));
+				}
+			}
+
+			if (ops.getBoolean(HashOptions.CLUSTER_USE_UMAP_KEY)) {
+				for (IAnalysisDataset dataset : datasets) {
+					methodsToRun.add(new UMAPMethod(dataset, ops));
+				}
+			}
+
+		}
+	}
+
 	private void createClusteringMethods(List<IAnalysisDataset> datasets,
 			@NonNull IAnalysisOptions options) throws Exception {
 
@@ -287,10 +317,10 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod
 				.map(s -> options.getSecondaryOptions(s).orElseThrow())
 				.collect(Collectors.toList());
 
-		for (HashOptions cluster : clusterOptions) {
+		for (HashOptions ops : clusterOptions) {
 			LOGGER.fine("Adding clustering option");
 			for (IAnalysisDataset dataset : datasets) {
-				methodsToRun.add(new NucleusClusteringMethod(dataset, cluster));
+				methodsToRun.add(new NucleusClusteringMethod(dataset, ops));
 			}
 		}
 	}

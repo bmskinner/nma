@@ -69,10 +69,12 @@ public interface Measurement extends XmlSerializable {
 		static final String RADIUS = "Radius";
 		static final String LENGTH = "Length";
 		static final String DISPLACEMENT = "Displacement";
+		static final String TSNE = "TSNE";
 		static final String TSNE_1 = "TSNE_1";
 		static final String TSNE_2 = "TSNE_2";
-		static final String UMAP_1 = "UMAP 1";
-		static final String UMAP_2 = "UMAP 2";
+		static final String UMAP = "UMAP";
+		static final String UMAP_1 = "UMAP_1";
+		static final String UMAP_2 = "UMAP_2";
 		static final String PCA_N = "Number of PCs";
 		static final String PCA_1 = "PC1";
 		static final String PCA_2 = "PC2";
@@ -190,9 +192,9 @@ public interface Measurement extends XmlSerializable {
 	 * @param pc the number of the component, from 1 to n
 	 * @return the stat for the component
 	 */
-	static Measurement makePrincipalComponent(int pc) {
-		return new DefaultMeasurement("PC" + pc, MeasurementDimension.NONE);
-	}
+//	static Measurement makePrincipalComponent(int pc) {
+//		return new DefaultMeasurement("PC" + pc, MeasurementDimension.NONE);
+//	}
 
 	/**
 	 * Create a statistic for a principal component with a cluster group
@@ -216,12 +218,26 @@ public interface Measurement extends XmlSerializable {
 		return new DefaultMeasurement(Names.PCA_N + "_" + id, MeasurementDimension.NONE);
 	}
 
+	/**
+	 * Create a measurement for the given tSNE dimension and cluster id
+	 * 
+	 * @param dim
+	 * @param id
+	 * @return
+	 */
 	static Measurement makeTSNE(int dim, UUID id) {
-		return new DefaultMeasurement("t-SNE_" + dim + "_" + id, MeasurementDimension.NONE);
+		return new DefaultMeasurement(Names.TSNE + "_" + dim + "_" + id, MeasurementDimension.NONE);
 	}
 
+	/**
+	 * Create a measurement for the given UMAP dimension and cluster id
+	 * 
+	 * @param dim
+	 * @param id
+	 * @return
+	 */
 	static Measurement makeUMAP(int dim, UUID id) {
-		return new DefaultMeasurement("UMAP_" + dim + "_" + id, MeasurementDimension.NONE);
+		return new DefaultMeasurement(Names.UMAP + "_" + dim + "_" + id, MeasurementDimension.NONE);
 	}
 
 	/**

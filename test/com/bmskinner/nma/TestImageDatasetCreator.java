@@ -34,8 +34,8 @@ import com.bmskinner.nma.components.options.OptionsFactory;
 import com.bmskinner.nma.components.rules.RuleSetCollection;
 import com.bmskinner.nma.gui.tabs.signals.warping.SignalWarpingRunSettings;
 import com.bmskinner.nma.io.DatasetExportMethod;
+import com.bmskinner.nma.io.DatasetOptionsExportMethod;
 import com.bmskinner.nma.io.SampleDatasetReader;
-import com.bmskinner.nma.io.XMLWriter;
 import com.bmskinner.nma.logging.ConsoleFormatter;
 import com.bmskinner.nma.logging.ConsoleHandler;
 import com.bmskinner.nma.logging.Loggable;
@@ -355,6 +355,7 @@ public class TestImageDatasetCreator {
 		assertFalse("Expecting output file to be deleted: " + saveFile.getAbsolutePath(),
 				saveFile.exists());
 		new DatasetExportMethod(d, saveFile).call();
+
 		assertTrue("Expecting file saved to " + saveFile.getAbsolutePath(), saveFile.exists());
 
 		// Copy the saved file into backup file for comparison and conversion testing in
@@ -373,12 +374,16 @@ public class TestImageDatasetCreator {
 
 		// Create an xml representation of the analysis options for pipeline testing
 		String xmlName = saveFile.getAbsolutePath().replaceAll(".nmd$", ".options.xml");
+
 		File xmlFile = new File(xmlName);
 		if (xmlFile.exists())
 			xmlFile.delete();
+
 		assertFalse("Expecting xml file to be deleted: " + xmlFile.getAbsolutePath(),
 				xmlFile.exists());
-		XMLWriter.writeXML(d.getAnalysisOptions().get().toXmlElement(), xmlFile);
+
+		new DatasetOptionsExportMethod(d, xmlFile).call();
+
 		assertTrue("Expecting xml exported to " + xmlFile.getAbsolutePath(), xmlFile.exists());
 	}
 

@@ -82,14 +82,6 @@ public class ParameterSelectionPanel extends OptionsPanel {
 			options.setBoolean(t.toString(), false);
 
 		options.setBoolean(ProfileType.ANGLE.toString(), true);
-
-		try {
-			for (IProfileSegment s : dataset.getCollection().getProfileCollection()
-					.getSegments(OrientationMark.REFERENCE.REFERENCE))
-				options.setBoolean(s.getID().toString(), false);
-		} catch (ProfileException | MissingLandmarkException e) {
-			LOGGER.log(Loggable.STACK, "Unable to get segments", e);
-		}
 	}
 
 	private JPanel createStatsPanel() {

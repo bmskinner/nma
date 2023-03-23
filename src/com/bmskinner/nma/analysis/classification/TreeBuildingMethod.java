@@ -18,7 +18,6 @@ package com.bmskinner.nma.analysis.classification;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -78,7 +77,7 @@ public class TreeBuildingMethod extends CellClusteringMethod {
 		int clusterNumber = dataset.getMaxClusterGroupNumber() + 1;
 		IClusterGroup group = new DefaultClusterGroup(
 				IClusterGroup.CLUSTER_GROUP_PREFIX + "_" + clusterNumber, options,
-				newickTree);
+				newickTree, options.getUUID(HashOptions.CLUSTER_GROUP_ID_KEY));
 		return new ClusterAnalysisResult(dataset, group);
 	}
 
@@ -295,14 +294,6 @@ public class TreeBuildingMethod extends CellClusteringMethod {
 			}
 		}
 
-		for (UUID segID : getSegmentIds()) {
-			if (options.getBoolean(segID.toString())) {
-				LOGGER.finer("Creating attribute for segment" + segID.toString());
-				Attribute a = new Attribute("att_" + segID.toString());
-				attributes.add(a);
-			}
-		}
-
 		if (options.getBoolean(HashOptions.CLUSTER_INCLUDE_MESH_KEY) && collection.hasConsensus()
 				&& mesh != null) {
 
@@ -319,18 +310,6 @@ public class TreeBuildingMethod extends CellClusteringMethod {
 			attributes.add(name);
 		}
 		return attributes;
-	}
-
-	private List<UUID> getSegmentIds() {
-		List<UUID> list = new ArrayList<>();
-		for (String s : options.getStringKeys()) {
-			try {
-				list.add(UUID.fromString(s));
-			} catch (IllegalArgumentException e) {
-				// not a UUID
-			}
-		}
-		return list;
 	}
 
 	/**
@@ -377,9 +356,11 @@ public class TreeBuildingMethod extends CellClusteringMethod {
 		int attNumber = 0;
 		Instance inst = new SparseInstance(attributes.size());
 		Attribute attX = attributes.get(attNumber++);
-		inst.setValue(attX, n.getMeasurement(Measurement.UMAP_1));
+		inst.setValue(attX, n.getMeasurement(
+				Measurement.makeUMAP(1, options.getUUID(HashOptions.CLUSTER_GROUP_ID_KEY))));
 		Attribute attY = attributes.get(attNumber++);
-		inst.setValue(attY, n.getMeasurement(Measurement.UMAP_2));
+		inst.setValue(attY, n.getMeasurement(
+				Measurement.makeUMAP(2, options.getUUID(HashOptions.CLUSTER_GROUP_ID_KEY))));
 
 		if (ClusteringMethod.from(options).equals(ClusteringMethod.HIERARCHICAL)) {
 			String uniqueName = c.getId().toString();
@@ -397,9 +378,11 @@ public class TreeBuildingMethod extends CellClusteringMethod {
 		int attNumber = 0;
 		Instance inst = new SparseInstance(attributes.size());
 		Attribute attX = attributes.get(attNumber++);
-		inst.setValue(attX, n.getMeasurement(Measurement.TSNE_1));
+		inst.setValue(attX, n.getMeasurement(
+				Measurement.makeTSNE(1, options.getUUID(HashOptions.CLUSTER_GROUP_ID_KEY))));
 		Attribute attY = attributes.get(attNumber++);
-		inst.setValue(attY, n.getMeasurement(Measurement.TSNE_2));
+		inst.setValue(attX, n.getMeasurement(
+				Measurement.makeTSNE(2, options.getUUID(HashOptions.CLUSTER_GROUP_ID_KEY))));
 
 		if (ClusteringMethod.from(options).equals(ClusteringMethod.HIERARCHICAL)) {
 			String uniqueName = c.getId().toString();
@@ -420,7 +403,9 @@ public class TreeBuildingMethod extends CellClusteringMethod {
 		int nPcs = (int) n.getMeasurement(Measurement.PCA_N);
 		for (int i = 1; i <= nPcs; i++) {
 			Attribute att = attributes.get(attNumber++);
-			double pc = n.getMeasurement(Measurement.makePrincipalComponent(i));
+			Measurement pcm = Measurement.makePrincipalComponent(i,
+					options.getUUID(HashOptions.CLUSTER_GROUP_ID_KEY));
+			double pc = n.getMeasurement(pcm);
 			inst.setValue(att, pc);
 		}
 
@@ -497,14 +482,6 @@ public class TreeBuildingMethod extends CellClusteringMethod {
 			if (options.getBoolean(stat.toString())) {
 				Attribute att = attributes.get(attNumber++);
 				inst.setValue(att, n.getMeasurement(stat, MeasurementScale.MICRONS));
-			}
-		}
-
-		for (UUID segID : getSegmentIds()) {
-			if (options.getBoolean(segID.toString())) {
-				Attribute att = attributes.get(attNumber++);
-				double length = n.getProfile(ProfileType.ANGLE).getSegment(segID).length();
-				inst.setValue(att, length);
 			}
 		}
 

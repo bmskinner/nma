@@ -53,10 +53,11 @@ public class DefaultClusterGroup implements IClusterGroup {
 	 * @param name    the group name (informal)
 	 * @param options the options used to create the cluster
 	 */
-	public DefaultClusterGroup(@NonNull String name, @NonNull HashOptions options) {
+	public DefaultClusterGroup(@NonNull String name, @NonNull HashOptions options,
+			@NonNull UUID id) {
 		this.name = name;
 		this.options = options;
-		this.id = UUID.randomUUID();
+		this.id = id;
 	}
 
 	public DefaultClusterGroup(@NonNull Element e) {
@@ -81,22 +82,6 @@ public class DefaultClusterGroup implements IClusterGroup {
 		id = g.id;
 	}
 
-	@Override
-	public Element toXmlElement() {
-		Element e = new Element("ClusterGroup").setAttribute("id", id.toString())
-				.setAttribute("name", name);
-
-		e.addContent(options.toXmlElement());
-
-		if (newickTree != null)
-			e.addContent(new Element("NewickTree").setText(newickTree));
-
-		for (UUID i : ids)
-			e.addContent(new Element("DatasetId").setText(i.toString()));
-
-		return e;
-	}
-
 	/**
 	 * Create a new cluster group with a tree
 	 * 
@@ -105,9 +90,10 @@ public class DefaultClusterGroup implements IClusterGroup {
 	 * @param tree    the Newick tree for the cluster as a String
 	 */
 	public DefaultClusterGroup(@NonNull String name, @NonNull HashOptions options,
-			@NonNull String tree) {
-		this(name, options);
+			@NonNull String tree, @NonNull UUID id) {
+		this(name, options, id);
 		this.newickTree = tree;
+		this.id = id;
 	}
 
 	/**
@@ -126,6 +112,22 @@ public class DefaultClusterGroup implements IClusterGroup {
 		this.newickTree = template.getTree();
 		this.ids = template.getUUIDs();
 		this.id = template.getId();
+	}
+
+	@Override
+	public Element toXmlElement() {
+		Element e = new Element("ClusterGroup").setAttribute("id", id.toString())
+				.setAttribute("name", name);
+
+		e.addContent(options.toXmlElement());
+
+		if (newickTree != null)
+			e.addContent(new Element("NewickTree").setText(newickTree));
+
+		for (UUID i : ids)
+			e.addContent(new Element("DatasetId").setText(i.toString()));
+
+		return e;
 	}
 
 	@Override

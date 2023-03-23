@@ -544,7 +544,7 @@ public class ClusterTreeDialog extends MessagingDialog {
 		int clusterNumber = dataset.getMaxClusterGroupNumber() + 1;
 		IClusterGroup newGroup = new DefaultClusterGroup(
 				IClusterGroup.CLUSTER_GROUP_PREFIX + "_" + clusterNumber,
-				newOptions, group.getTree());
+				newOptions, group.getTree(), UUID.randomUUID());
 		return newGroup;
 	}
 

@@ -11,18 +11,15 @@ import com.bmskinner.nma.analysis.DefaultAnalysisResult;
 import com.bmskinner.nma.analysis.IAnalysisResult;
 import com.bmskinner.nma.analysis.SingleDatasetAnalysisMethod;
 import com.bmskinner.nma.components.MissingComponentException;
-import com.bmskinner.nma.components.MissingLandmarkException;
 import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.options.IAnalysisOptions;
 import com.bmskinner.nma.components.profiles.IProfile;
-import com.bmskinner.nma.components.profiles.IProfileSegment;
 import com.bmskinner.nma.components.profiles.ProfileException;
 import com.bmskinner.nma.components.profiles.ProfileType;
 import com.bmskinner.nma.components.rules.OrientationMark;
-import com.bmskinner.nma.logging.Loggable;
 
 import tagbio.umap.Umap;
 
@@ -77,18 +74,29 @@ public class UMAPMethod extends SingleDatasetAnalysisMethod {
 
 		final double[][] umapResult = umap.fitTransform(profileMatrix);
 
-		// store this in the cell collection, attached to each cell. This is a temporary
-		// store -
-		// if used for clustering, it should be attached to the cluster id
+		// store this in the cell collection, attached to each cell. It is attached to
+		// the cluster id
 		for (int i = 0; i < nuclei.size(); i++) {
 			Nucleus n = nuclei.get(i);
-			n.setMeasurement(Measurement.UMAP_1, umapResult[i][0]);
-			n.setMeasurement(Measurement.UMAP_2, umapResult[i][1]);
+
+			Measurement m1 = Measurement.makeUMAP(1,
+					options.getUUID(HashOptions.CLUSTER_GROUP_ID_KEY));
+
+			Measurement m2 = Measurement.makeUMAP(2,
+					options.getUUID(HashOptions.CLUSTER_GROUP_ID_KEY));
+
+			n.setMeasurement(m1, umapResult[i][0]);
+			n.setMeasurement(m2, umapResult[i][1]);
 		}
 
 		Optional<IAnalysisOptions> analysisOptions = dataset.getAnalysisOptions();
-		if (analysisOptions.isPresent())
-			analysisOptions.get().setSecondaryOptions(IAnalysisOptions.UMAP, options);
+		if (analysisOptions.isPresent()) {
+			// We may run several clustering runs; ensure they are all stored appropriately
+			// with the cluster id
+			String optionsKey = IAnalysisOptions.UMAP + "_"
+					+ options.getUUID(HashOptions.CLUSTER_GROUP_ID_KEY);
+			analysisOptions.get().setSecondaryOptions(optionsKey, options);
+		}
 
 		return new DefaultAnalysisResult(dataset);
 	}
@@ -124,18 +132,6 @@ public class UMAPMethod extends SingleDatasetAnalysisMethod {
 					continue;
 				matrix[i][j++] = n.getMeasurement(stat);
 			}
-
-			for (IProfileSegment s : dataset.getCollection().getProfileCollection()
-					.getSegments(OrientationMark.REFERENCE)) {
-				if (!options.getBoolean(s.getID().toString()))
-					continue;
-
-				IProfileSegment seg = n.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE)
-						.getSegment(s.getID());
-				double proportionPerimeter = (double) seg.length()
-						/ (double) seg.getProfileLength();
-				matrix[i][j++] = n.getMeasurement(Measurement.PERIMETER) * proportionPerimeter;
-			}
 		}
 		return matrix;
 	}
@@ -154,17 +150,6 @@ public class UMAPMethod extends SingleDatasetAnalysisMethod {
 		for (ProfileType t : ProfileType.displayValues())
 			if (options.getBoolean(t.toString()))
 				dimensions += 100;
-
-		try {
-			for (IProfileSegment s : dataset.getCollection().getProfileCollection()
-					.getSegments(OrientationMark.REFERENCE))
-				if (options.getBoolean(s.getID().toString()))
-					dimensions++;
-
-		} catch (ProfileException | MissingLandmarkException e) {
-			LOGGER.log(Loggable.STACK, "Unable to get segments", e);
-		}
-
 		return dimensions;
 
 	}

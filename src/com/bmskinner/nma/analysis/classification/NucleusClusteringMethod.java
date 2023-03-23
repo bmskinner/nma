@@ -30,14 +30,10 @@ import com.bmskinner.nma.analysis.AnalysisMethodException;
 import com.bmskinner.nma.analysis.ClusterAnalysisResult;
 import com.bmskinner.nma.analysis.IAnalysisResult;
 import com.bmskinner.nma.components.cells.ICell;
-import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.datasets.DefaultClusterGroup;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.datasets.IClusterGroup;
 import com.bmskinner.nma.components.datasets.VirtualDataset;
-import com.bmskinner.nma.components.measure.DefaultMeasurement;
-import com.bmskinner.nma.components.measure.Measurement;
-import com.bmskinner.nma.components.measure.MeasurementDimension;
 import com.bmskinner.nma.components.options.HashOptions;
 
 import weka.clusterers.Clusterer;
@@ -92,7 +88,7 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
 		// Create a group to store the clustered cells
 		IClusterGroup group = new DefaultClusterGroup(
 				IClusterGroup.CLUSTER_GROUP_PREFIX + "_" + clusterNumber, options,
-				newickTree);
+				newickTree, options.getUUID(HashOptions.CLUSTER_GROUP_ID_KEY));
 
 		// Make the child datasets for each cluster
 		for (Entry<Integer, List<ICell>> entry : clusterMap.entrySet()) {
@@ -115,21 +111,21 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
 		}
 
 		// Move tSNE values to their cluster group if needed
-		if (options.getBoolean(HashOptions.CLUSTER_USE_TSNE_KEY)) {
-			appendClusterIdToDimensionalityMeasurements(Measurement.TSNE_1, Measurement.TSNE_2,
-					group);
-		}
+//		if (options.getBoolean(HashOptions.CLUSTER_USE_TSNE_KEY)) {
+//			appendClusterIdToDimensionalityMeasurements(Measurement.TSNE_1, Measurement.TSNE_2,
+//					group);
+//		}
 
 		// Move UMAP values to their cluster group if needed
-		if (options.getBoolean(HashOptions.CLUSTER_USE_UMAP_KEY)) {
-			appendClusterIdToDimensionalityMeasurements(Measurement.UMAP_1, Measurement.UMAP_2,
-					group);
-		}
+//		if (options.getBoolean(HashOptions.CLUSTER_USE_UMAP_KEY)) {
+//			appendClusterIdToDimensionalityMeasurements(Measurement.UMAP_1, Measurement.UMAP_2,
+//					group);
+//		}
 
 		// Move PCA values to their cluster group if needed
-		if (options.getBoolean(HashOptions.CLUSTER_USE_PCA_KEY)) {
-			appendClusterIdToPCA(group);
-		}
+//		if (options.getBoolean(HashOptions.CLUSTER_USE_PCA_KEY)) {
+//			appendClusterIdToPCA(group);
+//		}
 
 		dataset.addClusterGroup(group);
 		return new ClusterAnalysisResult(result, group);
@@ -141,25 +137,37 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
 	 * to the measurement so we can store values across different clustering
 	 * instances
 	 * 
+	 * @throws AnalysisMethodException
+	 * 
 	 */
-	private void appendClusterIdToDimensionalityMeasurements(Measurement dim1, Measurement dim2,
-			IClusterGroup group) {
-		for (ICell c : dataset.getCollection()) {
-			for (Nucleus n : c.getNuclei()) {
-				n.setMeasurement(
-						new DefaultMeasurement(
-								dim1.name().replace(" ", "_") + "_" + group.getId(),
-								MeasurementDimension.NONE),
-						n.getMeasurement(dim1));
-				n.setMeasurement(
-						new DefaultMeasurement(dim2.name().replace(" ", "_") + "_" + group.getId(),
-								MeasurementDimension.NONE),
-						n.getMeasurement(dim2));
-				n.clearMeasurement(dim1);
-				n.clearMeasurement(dim2);
-			}
-		}
-	}
+//	private void appendClusterIdToDimensionalityMeasurements(Measurement dim1, Measurement dim2,
+//			IClusterGroup group) throws AnalysisMethodException {
+//		for (ICell c : dataset.getCollection()) {
+//			for (Nucleus n : c.getNuclei()) {
+//
+//				double d1 = n.getMeasurement(dim1);
+//				double d2 = n.getMeasurement(dim2);
+//				if (Statistical.ERROR_CALCULATING_STAT == d1)
+//					throw new AnalysisMethodException("Value not present: " + dim1);
+//				if (Statistical.ERROR_CALCULATING_STAT == d2)
+//					throw new AnalysisMethodException("Value not present: " + dim2);
+//
+//				Measurement m1 = new DefaultMeasurement(
+//						dim1.name().replace(" ", "_") + "_" + group.getId(),
+//						MeasurementDimension.NONE);
+//				n.setMeasurement(m1, d1);
+//
+//				Measurement m2 = new DefaultMeasurement(
+//						dim2.name().replace(" ", "_") + "_" + group.getId(),
+//						MeasurementDimension.NONE);
+//				n.setMeasurement(m2, d2);
+//
+//				// remove the temporary measurement
+//				n.clearMeasurement(dim1);
+//				n.clearMeasurement(dim2);
+//			}
+//		}
+//	}
 
 	/**
 	 * The principal components are stored in the nucleus measurements, but will be
@@ -169,21 +177,21 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
 	 * 
 	 * @param group
 	 */
-	private void appendClusterIdToPCA(IClusterGroup group) {
-		for (ICell c : dataset.getCollection()) {
-			for (Nucleus n : c.getNuclei()) {
-				int nPcs = (int) n.getMeasurement(Measurement.PCA_N);
-
-				n.setMeasurement(Measurement.makePrincipalComponentNumber(group.getId()), nPcs);
-				n.clearMeasurement(Measurement.PCA_N);
-				for (int i = 1; i <= nPcs; i++) {
-					n.setMeasurement(Measurement.makePrincipalComponent(i, group.getId()),
-							n.getMeasurement(Measurement.makePrincipalComponent(i)));
-					n.clearMeasurement(Measurement.makePrincipalComponent(i));
-				}
-			}
-		}
-	}
+//	private void appendClusterIdToPCA(IClusterGroup group) {
+//		for (ICell c : dataset.getCollection()) {
+//			for (Nucleus n : c.getNuclei()) {
+//				int nPcs = (int) n.getMeasurement(Measurement.PCA_N);
+//
+//				n.setMeasurement(Measurement.makePrincipalComponentNumber(group.getId()), nPcs);
+//				n.clearMeasurement(Measurement.PCA_N);
+//				for (int i = 1; i <= nPcs; i++) {
+//					n.setMeasurement(Measurement.makePrincipalComponent(i, group.getId()),
+//							n.getMeasurement(Measurement.makePrincipalComponent(i)));
+//					n.clearMeasurement(Measurement.makePrincipalComponent(i));
+//				}
+//			}
+//		}
+//	}
 
 	/**
 	 * Run the clustering on a collection
