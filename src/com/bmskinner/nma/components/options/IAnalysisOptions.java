@@ -80,6 +80,11 @@ public interface IAnalysisOptions extends XmlSerializable {
 	void setDetectionFolder(@NonNull String key, @NonNull File folder);
 
 	/**
+	 * Remove the given detection folder from this options
+	 */
+	void removeDetectionFolder(@NonNull String key);
+
+	/**
 	 * Fetch the options used to detect the nucleus, if present. This is a shortcut
 	 * for {@code IAnalysisOptions::getDetectionOptions(CellularComponent.NUCLEUS)}
 	 * 

@@ -82,7 +82,7 @@ public class DatasetOptionsExportMethod extends MultipleDatasetAnalysisMethod im
 		// The point of this is to make a reusable analysis,
 		// not replicate existing datasets
 		for (String s : op.getDetectionOptionTypes()) {
-			op.getDetectionOptions(s).get().remove(HashOptions.DETECTION_FOLDER);
+			op.removeDetectionFolder(s);
 		}
 
 		// Put clustering options into the main analysis options
@@ -95,7 +95,7 @@ public class DatasetOptionsExportMethod extends MultipleDatasetAnalysisMethod im
 		op.clearAnalysisTime();
 
 		try {
-			XMLWriter.writeXML(d.getAnalysisOptions().get().toXmlElement(), f);
+			XMLWriter.writeXML(op.toXmlElement(), f);
 		} catch (IOException e) {
 			LOGGER.warning("Unable to write options to file");
 		}

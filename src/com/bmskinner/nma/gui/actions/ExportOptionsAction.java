@@ -18,6 +18,7 @@ package com.bmskinner.nma.gui.actions;
 
 import java.io.File;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -56,7 +57,16 @@ public class ExportOptionsAction extends MultiDatasetResultAction {
 			File file = datasets.size() == 1 ? FileSelector.chooseOptionsExportFile(datasets.get(0))
 					: is.requestFolder(FileUtils.commonPathOfDatasets(datasets));
 
-			ThreadManager.getInstance().submit(new DatasetOptionsExportMethod(datasets, file));
+			Runnable r = () -> {
+				try {
+					new DatasetOptionsExportMethod(datasets, file).call();
+				} catch (Exception e) {
+					LOGGER.log(Level.SEVERE, "Error exporting options", e);
+				}
+				finished();
+			};
+
+			ThreadManager.getInstance().submit(r);
 		} catch (RequestCancelledException e) {
 			// user cancelled, no action
 		}

@@ -165,6 +165,11 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
 	}
 
 	@Override
+	public void removeDetectionFolder(@NonNull String key) {
+		detectionFolders.remove(key);
+	}
+
+	@Override
 	public void setNucleusDetectionFolder(@NonNull File folder) {
 		setDetectionFolder(CellularComponent.NUCLEUS, folder);
 	}
