@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -14,12 +13,12 @@ import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.measure.MeasurementScale;
 import com.bmskinner.nma.components.options.DefaultOptions;
 import com.bmskinner.nma.components.options.HashOptions;
-import com.bmskinner.nma.components.options.IAnalysisOptions;
 import com.bmskinner.nma.components.rules.RuleSetCollection;
 import com.bmskinner.nma.core.CommandOptions;
 import com.bmskinner.nma.io.CellFileExporter;
 import com.bmskinner.nma.io.CellImageExportMethod;
 import com.bmskinner.nma.io.DatasetImportMethod;
+import com.bmskinner.nma.io.DatasetOptionsExportMethod;
 import com.bmskinner.nma.io.DatasetOutlinesExporter;
 import com.bmskinner.nma.io.DatasetProfileExporter;
 import com.bmskinner.nma.io.DatasetShellsExporter;
@@ -163,31 +162,12 @@ public class ExportDataPipeline {
 		new CellImageExportMethod(datasets, exportOptions).call();
 	}
 
-	private void exportAnalysisOptions() {
+	private void exportAnalysisOptions() throws Exception {
 		File outFile = new File(root.getSavePath().getParentFile(),
 				root.getSavePath().getName() + ".analysis-options" + Io.XML_FILE_EXTENSION);
 		LOGGER.info("Exporting analysis options to: " + outFile.getAbsolutePath());
 
-		Optional<IAnalysisOptions> op = root.getAnalysisOptions();
-		if (op.isEmpty())
-			return;
-
-		// Remove any folders from the export
-		// The point of this is to make a reusable analysis,
-		// not replicate existing datasets
-		IAnalysisOptions op2 = op.get().duplicate();
-		for (String s : op2.getDetectionOptionTypes()) {
-			op2.getDetectionOptions(s).get().remove(HashOptions.DETECTION_FOLDER);
-		}
-
-		// Also remove the analysis time so we don't use the same output folder
-		op2.clearAnalysisTime();
-
-		try {
-			XMLWriter.writeXML(op2.toXmlElement(), outFile);
-		} catch (IOException e) {
-			LOGGER.warning("Unable to write options to file");
-		}
+		new DatasetOptionsExportMethod(root, outFile).call();
 	}
 
 	private void exportRulesets() throws Exception {
