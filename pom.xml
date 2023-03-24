@@ -19,6 +19,19 @@
 		<project.wiki.directory>wiki</project.wiki.directory>
 		<maven.build.timestamp.format>yyyy</maven.build.timestamp.format>
 	</properties>
+	
+	<!-- People who have worked on this project -->
+	<developers>
+		<developer>
+			<id>ben</id>
+			<name>Ben Skinner</name>
+			<roles>
+				<role>architect</role>
+				<role>developer</role>
+			</roles>
+			<timezone>Europe/London</timezone>
+		</developer>
+	</developers>
 
 	<!-- Define custom properties depending on the OS. This allows a switch 
 		between Windows bat scripts and Linux shell scripts depending on the platform 

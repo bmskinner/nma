@@ -4,7 +4,7 @@ This section contains information on more advanced use of NMA.
 
 ## Command line use
 
-Nuclear Morphology Analysis is designed to be runnable via the command line for a new analysis or to export data from an existing `nmd` file.
+Nuclear Morphology Analysis is designed to be runnable via the command line for *some* of the available functions. Things that require visual interaction such as moving landmarks obviously don't have a neat CLI equivalent, but you can create new analyses and export data from lots of datasets more easily than going through the UI.
 
 The examples below use the cross platform standalone jar with a system installation of Java. Note that these arguments will not work with the Windows exe version.
 
@@ -13,13 +13,14 @@ To see the sub-commands:
 java -jar Nuclear_Morphology_Analysis_${project.version}_standalone.jar -h
 ```
 
-There are three sub-commands: `detect`,  `export` and `analyse`. 
+The available sub-commands are:
 
 Command | Use to...
 --------|-----------
 `detect`| create a new nmd file by detecting nuclei in directory of images and apply clustering or signal detection according to a predefined options file. An options file can be exported from a dataset you have already created and analysed via the UI.
 `export`| export data from an existing nmd file for use in other programs
-`analyse` | add new data to an existing nmd file
+`modify` | add new data to an existing nmd file
+`merge` | merge existing nmd files into a new nmd file
 
 ### `detect` 
 
@@ -56,15 +57,47 @@ java -jar Nuclear_Morphology_Analysis_${project.version}_standalone.jar export -
 
 Exported data files will be created in the same directory as the `nmd` file.
 
-### `analyse`
+### `modify`
 
 These commands correspond to the UI menu options in `Dataset`. 
-To see all the analyse options:
+To see all the modify options:
 
 ```
-java -jar Nuclear_Morphology_Analysis_${project.version}_standalone.jar analyse -h
+java -jar Nuclear_Morphology_Analysis_${project.version}_standalone.jar modify -h
 ```
 
 There are currently two operations available:
 
-1. Adding clusters to an nmd file that have been defined externally. For example, you exported nuclear measurements, clustered them in another stats package, and now you want to look at the consensus shape of each cluster. This is described for the UI.
+1. Adding clusters to an nmd file that have been defined externally. For example, you exported nuclear measurements, clustered them in another stats package, exported a [cluster format file](#import-cluster-method), and now you want to look at the consensus shape of each cluster:
+
+```
+java -jar Nuclear_Morphology_Analysis_${project.version}_standalone.jar modify --file /path/to/existing.nmd --cluster-file /path/to/cluster/file
+```
+
+2. Adding data based on analysis options. For example, you have an nmd file and you want to add nuclear signals or clusters according to the options from another dataset.
+
+```
+java -jar Nuclear_Morphology_Analysis_${project.version}_standalone.jar modify --file /path/to/existing.nmd --options /path/to/options/file.xml
+```
+
+### `merge`
+
+These commands correspond to the UI menu options in `Dataset>Merge`.
+
+To see all the merge options:
+
+```
+java -jar Nuclear_Morphology_Analysis_${project.version}_standalone.jar merge -h
+```
+
+This can be used to merge existing nmd files into one larger dataset. The individual files must all have the same nucleus type:
+
+```
+java -jar Nuclear_Morphology_Analysis_${project.version}_standalone.jar merge --output /path/to/new.nmd --input /path/to/input1.nmd /path/to/input2.nmd
+```
+
+Note above you can list multiple nmd files after the `--input` argument. You can also use standard shell wildcards to merge arbitrary numbers of nmd files:
+
+```
+java -jar Nuclear_Morphology_Analysis_${project.version}_standalone.jar merge --output /path/to/new.nmd --input *.nmd
+```

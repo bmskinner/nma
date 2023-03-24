@@ -128,10 +128,12 @@ If you use the software, please cite an appropriate paper:
 
 For the morphological analysis:
 
-[Skinner BM, Rathje CC, Bacon J, Johnson EEP, Larson EL, Kopania EEK, Good JM, Yousafzai G, Affara NA, Ellis PJI. A high-throughput method for unbiased quantitation and categorisation of nuclear morphology. _Biol Reprod_ 2019. doi:10.1093/biolre/ioz013.](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6497523/)
+Skinner BM, Rathje CC, Bacon J, Johnson EEP, Larson EL, Kopania EEK, Good JM, Yousafzai G, Affara NA, Ellis PJI. A high-throughput method for unbiased quantitation and categorisation of nuclear morphology. _Biol Reprod_ 2019. [doi:10.1093/biolre/ioz013.](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6497523/)
+
+Skinner BM. Nuclear Morphology Analysis 2.0.0: Improved image analysis software for measuring nuclear shape. _Journal of Open Source Software_ 2022; **7**:79 4767. [10.21105/joss.04767](https://joss.theoj.org/papers/10.21105/joss.04767)
 
 For signal warping:
 
-[Skinner BM, Bacon J, Rathje CC, Larson EL, Kopania EEK, Good JM, Affara NA, Ellis PJI. Automated Nuclear Cartography Reveals Conserved Sperm Chromosome Territory Localization across 2 Million Years of Mouse Evolution. _Genes_ 2019; 10:109. doi:10.3390/genes10020109](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6409866/)
+Skinner BM, Bacon J, Rathje CC, Larson EL, Kopania EEK, Good JM, Affara NA, Ellis PJI. Automated Nuclear Cartography Reveals Conserved Sperm Chromosome Territory Localization across 2 Million Years of Mouse Evolution. _Genes_ 2019; 10:109. [doi:10.3390/genes10020109](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6409866/)
 
 Find my current contact details [here](https://bitbucket.org/bmskinner/nuclear_morphology/wiki/Frequently%20Asked%20Questions)

@@ -39,9 +39,10 @@ import com.bmskinner.nma.io.ConfigFileReader;
 import com.bmskinner.nma.io.Io;
 import com.bmskinner.nma.io.XMLWriter;
 import com.bmskinner.nma.logging.Loggable;
-import com.bmskinner.nma.pipelines.AnalyseDataPipeline;
 import com.bmskinner.nma.pipelines.BasicAnalysisPipeline;
 import com.bmskinner.nma.pipelines.ExportDataPipeline;
+import com.bmskinner.nma.pipelines.MergeFilesPipeline;
+import com.bmskinner.nma.pipelines.ModifyDataPipeline;
 import com.bmskinner.nma.pipelines.SavedOptionsAnalysisPipeline;
 
 import ij.IJ;
@@ -162,8 +163,11 @@ public class NuclearMorphologyAnalysis {
 		// Sub parser for exporting data from an nmd
 		createExportParser(subparsers);
 
-		// Sub parser for analysing data in an nmd
-		createAnalyseParser(subparsers);
+		// Sub parser for modifying data in an nmd
+		createModifyParser(subparsers);
+
+		// Sub parser for merging nmd files
+		createMergeParser(subparsers);
 
 		// Store any options
 		CommandOptions opt = new CommandOptions();
@@ -268,9 +272,9 @@ public class NuclearMorphologyAnalysis {
 
 	}
 
-	private static void createAnalyseParser(Subparsers subparsers) {
-		Subparser parser = subparsers.addParser("analyse")
-				.help("Analyse data in an nmd file");
+	private static void createModifyParser(Subparsers subparsers) {
+		Subparser parser = subparsers.addParser("modify")
+				.help("Modify data in an existing nmd file");
 
 		parser.addArgument("-f", "--file")
 				.type(Arguments.fileType().verifyIsFile().verifyCanRead())
@@ -280,18 +284,28 @@ public class NuclearMorphologyAnalysis {
 		parser.addArgument("--cluster-file")
 				.type(Arguments.fileType().verifyIsFile().verifyCanRead())
 				.dest("cluster-file")
-				.help("File with clusters to import");
-		
-		parser.addArgument("--merge-sources")
+				.help("File with clusters to import (tab-separated cell UUID and integer cluster number)");
+
+		parser.addArgument("-o", "--options")
 				.type(Arguments.fileType().verifyIsFile().verifyCanRead())
-				.nargs("*")
-				.dest("merge-sources")
-				.help("Files to be merged into one nmd");
+				.dest("options")
+				.help("File with analysis options to run on this file");
+	}
+
+	private static void createMergeParser(Subparsers subparsers) {
+		Subparser parser = subparsers.addParser("merge")
+				.help("Merge existing nmd files");
 
 		parser.addArgument("--output")
 				.type(Arguments.fileType().verifyNotExists().verifyCanCreate())
 				.dest("output")
-				.help("Output file for merged data");
+				.help("Output nmd file for merged data");
+
+		parser.addArgument("--input")
+				.type(Arguments.fileType().verifyIsFile().verifyCanRead())
+				.nargs("*")
+				.dest("merge-sources")
+				.help("Files to be merged into one nmd");
 
 	}
 
@@ -321,8 +335,13 @@ public class NuclearMorphologyAnalysis {
 			return;
 		}
 
-		if ("analyse".equals(opt.runMode)) {
-			instance.runHeadlessAnalyse(opt);
+		if ("modify".equals(opt.runMode)) {
+			instance.runHeadlessModify(opt);
+			return;
+		}
+
+		if ("merge".equals(opt.runMode)) {
+			instance.runHeadlessMerge(opt);
 			return;
 		}
 
@@ -471,11 +490,28 @@ public class NuclearMorphologyAnalysis {
 	 * @param opt the options
 	 */
 
-	private void runHeadlessAnalyse(final CommandOptions opt) {
+	private void runHeadlessModify(final CommandOptions opt) {
 
 		try {
 			LOGGER.info("Running analysis function");
-			new AnalyseDataPipeline(opt);
+			new ModifyDataPipeline(opt);
+		} catch (Exception e) {
+			LOGGER.log(Level.SEVERE, "Error running pipeline: %s".formatted(e.getMessage()), e);
+		}
+
+	}
+
+	/**
+	 * Run in headless mode, merging nmd files
+	 * 
+	 * @param opt the options
+	 */
+
+	private void runHeadlessMerge(final CommandOptions opt) {
+
+		try {
+			LOGGER.info("Running merge function");
+			new MergeFilesPipeline(opt);
 		} catch (Exception e) {
 			LOGGER.log(Level.SEVERE, "Error running pipeline: %s".formatted(e.getMessage()), e);
 		}
