@@ -10,7 +10,7 @@
 	<properties>
 		<project.full.name>Nuclear_Morphology_Analysis</project.full.name>
 		<version>${project.version}</version>
-		<version.suffix>-beta_3</version.suffix>
+		<version.suffix>-beta_4</version.suffix>
 		<project.build.sourceEncoding>ISO-8859-1</project.build.sourceEncoding>
 		<jar.finalName>${project.full.name}_${project.version}${version.suffix}</jar.finalName>
 		<project.template.directory>templates</project.template.directory>
@@ -169,7 +169,7 @@
 				</executions>
 			</plugin>
 
-			<!-- Create a file in the jar with custom project properties -->
+			<!-- Create a file in the jar with the custom project properties. This ensures they are accessible when needed-->
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>properties-maven-plugin</artifactId>
@@ -187,7 +187,7 @@
 				</executions>
 			</plugin>
 
-			<!-- Create a year variable -->
+			<!-- Create a year variable used in the copyright section -->
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>buildnumber-maven-plugin</artifactId>
@@ -206,7 +206,7 @@
 				</configuration>
 			</plugin>
 
-			<!-- Create files from templates with variables -->
+			<!-- Create files from templates using the custom variables -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-resources-plugin</artifactId>
@@ -461,7 +461,7 @@
 							<goal>single</goal>
 						</goals>
 						<configuration>
-							<finalName>${jar.finalName}_standalone</finalName>
+							<finalName>${jar.finalName}</finalName>
 							<outputDirectory>${project.build.directory}/standalone</outputDirectory>
 							<descriptorRefs>
 								<descriptorRef>jar-with-dependencies</descriptorRef>
