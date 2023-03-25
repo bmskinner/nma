@@ -78,6 +78,7 @@ public class SegmentSplitAction extends SingleDatasetResultAction {
 	@Override
 	public void finished() {
 		UIController.getInstance().fireProfilesUpdated(dataset);
+		UIController.getInstance().fireProfilesUpdated(dataset.getAllChildDatasets());
 		super.finished();
 	}
 

@@ -95,8 +95,9 @@ public class SegmentMergeMethod extends SingleDatasetAnalysisMethod {
 		}
 
 		LOGGER.fine(
-				"Merging segments " + seg0Id + " and " + seg1Id + " in dataset " + dataset.getName()
-						+ " to new segment " + newId);
+				() ->
+				"Merging segments %s and %s in %s to new segment %s".formatted(seg0Id, seg1Id, dataset.getName(),
+						newId));
 
 		ISegmentedProfile medianProfile = dataset.getCollection().getProfileCollection()
 				.getSegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE, Stats.MEDIAN);

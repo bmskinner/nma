@@ -377,17 +377,17 @@ public class ConsensusNucleusPanel extends ChartDetailPanel
 
 	@Override
 	public void consensusUpdated(IAnalysisDataset dataset) {
-		refreshCache(dataset);
+		clearCache(dataset);
 	}
 
 	@Override
 	public void scaleUpdated(List<IAnalysisDataset> datasets) {
-		refreshCache(datasets);
+		clearCache(datasets);
 	}
 
 	@Override
 	public void scaleUpdated(IAnalysisDataset dataset) {
-		refreshCache(dataset);
+		clearCache(dataset);
 	}
 
 	@Override
@@ -412,13 +412,12 @@ public class ConsensusNucleusPanel extends ChartDetailPanel
 
 	@Override
 	public void profilesUpdated(List<IAnalysisDataset> datasets) {
-		refreshCache(datasets);
-
+		clearCache(datasets);
 	}
 
 	@Override
 	public void profilesUpdated(IAnalysisDataset dataset) {
-		refreshCache(dataset);
+		clearCache(dataset);
 	}
 
 }
