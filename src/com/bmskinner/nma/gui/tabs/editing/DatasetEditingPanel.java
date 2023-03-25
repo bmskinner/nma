@@ -26,6 +26,7 @@ import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
+import javax.swing.SwingConstants;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.ChartMouseEvent;
@@ -79,6 +80,7 @@ import com.bmskinner.nma.visualisation.charts.panels.ConsensusNucleusChartPanel;
 import com.bmskinner.nma.visualisation.options.ChartOptions;
 import com.bmskinner.nma.visualisation.options.ChartOptionsBuilder;
 
+@SuppressWarnings("serial")
 public class DatasetEditingPanel extends ChartDetailPanel
 		implements ConsensusUpdatedListener, ScaleUpdatedListener,
 		SwatchUpdatedListener, ProfilesUpdatedListener, ChartMouseListener {
@@ -86,7 +88,7 @@ public class DatasetEditingPanel extends ChartDetailPanel
 
 	private static final String PANEL_TITLE_LBL = "Editing";
 
-	private JLabel buttonStateLbl = new JLabel(" ", JLabel.CENTER);
+	private JLabel buttonStateLbl = new JLabel(" ", SwingConstants.CENTER);
 
 	private JButton segmentButton;
 	private JButton mergeButton;
@@ -110,6 +112,9 @@ public class DatasetEditingPanel extends ChartDetailPanel
 	private static final String STR_SET_WINDOW_SIZE = "Set window size";
 	private static final String STR_SHOW_WINDOW_SIZES = "Explore window size";
 
+	/**
+	 * Create the editing panel
+	 */
 	public DatasetEditingPanel() {
 		super(PANEL_TITLE_LBL);
 		this.setLayout(new BorderLayout());
@@ -163,7 +168,9 @@ public class DatasetEditingPanel extends ChartDetailPanel
 									List.of(activeDataset())));
 				}
 			} catch (RequestCancelledException e1) {
+				// user cancelled, no action
 			}
+
 
 		});
 		panel.add(segmentButton);
@@ -212,7 +219,6 @@ public class DatasetEditingPanel extends ChartDetailPanel
 			return;
 		}
 
-		ICellCollection collection = activeDataset().getCollection();
 		chartPanel.restoreAutoBounds();
 	}
 
@@ -268,7 +274,7 @@ public class DatasetEditingPanel extends ChartDetailPanel
 		// Check if there are any merged segments
 		// If there are no merged segments, don't allow unmerging
 		unmergeButton.setEnabled(
-				medianProfile.getSegments().stream().anyMatch(s -> s.hasMergeSources()));
+				medianProfile.getSegments().stream().anyMatch(IProfileSegment::hasMergeSources));
 
 		// set child dataset options
 		if (!options.firstDataset().isRoot()) {
@@ -278,7 +284,7 @@ public class DatasetEditingPanel extends ChartDetailPanel
 			updatewindowButton.setEnabled(false);
 			windowSizeButton.setEnabled(false);
 			buttonStateLbl.setText(
-					"Cannot merge, unmerge pr split child dataset segments - try the root dataset");
+					"Cannot merge, unmerge or split child dataset segments - try the root dataset");
 		} else {
 			buttonStateLbl.setText("Click a point on the border to update landmarks or segments");
 		}
@@ -331,7 +337,7 @@ public class DatasetEditingPanel extends ChartDetailPanel
 		} catch (RequestCancelledException e) {
 			LOGGER.fine("User cancelled segment merge request");
 		} catch (MissingLandmarkException | MissingProfileException | ProfileException e1) {
-			LOGGER.warning("Unable to get median profile: " + e1.getMessage());
+			LOGGER.warning(() -> "Unable to get median profile: %s".formatted(e1.getMessage()));
 		}
 	}
 
@@ -629,7 +635,6 @@ public class DatasetEditingPanel extends ChartDetailPanel
 
 				// Colour the menu item by tag colour
 				JMenuItem item = new JMenuItem("Move " + lm.toString().toLowerCase() + " here");
-//				item.setBorder(BorderFactory.createLineBorder(ColourSelecter.getColour(tag), 2));
 				item.setBackground(Color.DARK_GRAY);
 				item.setBorderPainted(true);
 				item.setForeground(Color.WHITE);
@@ -732,7 +737,7 @@ public class DatasetEditingPanel extends ChartDetailPanel
 				IPoint lmPoint = n.getBorderPoint(lm);
 				Landmark l = n.getLandmark(lm);
 
-				if (clicked.getLengthTo(lmPoint) < distanceLimit) {
+				if (clicked.getLengthTo(lmPoint) < distanceLimit && l != null) {
 					changeLandmarkOverlay(l.toString(), lmPoint.getX(), lmPoint.getY(), textSize);
 				}
 			}
