@@ -438,13 +438,13 @@ public class FishRemappingProberPanel extends GenericImageProberPanel {
 
 		} else {
 
-			if ((e.getModifiers() & InputEvent.BUTTON3_MASK) == InputEvent.BUTTON3_MASK) { // right
+			if ((e.getModifiersEx() & InputEvent.BUTTON3_DOWN_MASK) == InputEvent.BUTTON3_DOWN_MASK) { // right
 																							// button
 				selectedNucleiRight.add(c.getId());
 				selectedNucleiLeft.remove(c.getId());
 			}
 
-			if ((e.getModifiers() & InputEvent.BUTTON1_MASK) == InputEvent.BUTTON1_MASK) { // left
+			if ((e.getModifiersEx() & InputEvent.BUTTON1_DOWN_MASK) == InputEvent.BUTTON1_DOWN_MASK) { // left
 																							// button
 				selectedNucleiLeft.add(c.getId());
 				selectedNucleiRight.remove(c.getId());

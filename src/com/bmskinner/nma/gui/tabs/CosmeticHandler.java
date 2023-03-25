@@ -215,6 +215,7 @@ public class CosmeticHandler {
 					oldName);
 			group.setGroupName(newName);
 		} catch (RequestCancelledException e) {
+			// user cancelled, no action
 		}
 	}
 

@@ -16,16 +16,12 @@
  ******************************************************************************/
 package com.bmskinner.nma.gui.tabs.signals;
 
-import java.util.logging.Logger;
-
 import javax.swing.BoxLayout;
 
 import com.bmskinner.nma.gui.tabs.DetailPanel;
 
 @SuppressWarnings("serial")
 public class SignalsOverviewPanel extends DetailPanel {
-
-	private static final Logger LOGGER = Logger.getLogger(SignalsOverviewPanel.class.getName());
 
 	private static final String PANEL_TITLE_LBL = "Overview";
 

@@ -31,6 +31,7 @@ import org.jfree.data.xy.XYDataset;
  * Modified from the JFreeChart DefaultXYDataset
  *
  */
+@SuppressWarnings("serial")
 public class FloatXYDataset extends AbstractXYDataset 
     implements XYDataset, PublicCloneable {
 
@@ -38,7 +39,7 @@ public class FloatXYDataset extends AbstractXYDataset
          * Storage for the series keys.  This list must be kept in sync with the
          * seriesList.
          */
-        private List seriesKeys;
+		private transient List<Comparable<?>> seriesKeys;
         private List<Integer> datasetIndexes;
         
         /** 
@@ -46,16 +47,16 @@ public class FloatXYDataset extends AbstractXYDataset
          * order of the series is significant.  This list must be kept in sync 
          * with the seriesKeys list.
          */ 
-        private List seriesList;
+        private List<float[][]> seriesList;
 
         /**
          * Creates a new <code>FloatXYDataset</code> instance, initially 
          * containing no data.
          */
         public FloatXYDataset() {
-        	seriesKeys     = new ArrayList(); 
+			seriesKeys = new ArrayList<>();
         	datasetIndexes = new ArrayList<>(); 
-            seriesList     = new ArrayList();    
+			seriesList = new ArrayList<>();
         }
 
         /**
@@ -83,7 +84,7 @@ public class FloatXYDataset extends AbstractXYDataset
 		public Comparable<?> getSeriesKey(int series) {
             if (series < 0 || series >= getSeriesCount())
                 throw new IllegalArgumentException("Series index out of bounds");
-            return (Comparable<?>) this.seriesKeys.get(series);
+			return this.seriesKeys.get(series);
         }
         
         public int getDatasetIndex(Comparable<?> seriesKey) {
@@ -130,8 +131,7 @@ public class FloatXYDataset extends AbstractXYDataset
 		public int getItemCount(int series) {
             if (series < 0 || series >= getSeriesCount())
                 throw new IllegalArgumentException("Series index out of bounds");
-            float[][] seriesArray = (float[][]) this.seriesList.get(series);
-            return seriesArray[0].length;
+			return seriesList.get(series)[0].length;
         }
 
         /**
@@ -153,8 +153,7 @@ public class FloatXYDataset extends AbstractXYDataset
          */
         @Override
 		public double getXValue(int series, int item) {
-            float[][] seriesData = (float[][]) this.seriesList.get(series);
-            return seriesData[0][item];
+			return seriesList.get(series)[0][item];
         }
 
         /**
@@ -176,7 +175,7 @@ public class FloatXYDataset extends AbstractXYDataset
          */
         @Override
 		public Number getX(int series, int item) {
-            return new Double(getXValue(series, item));
+			return getXValue(series, item);
         }
 
         /**
@@ -198,8 +197,7 @@ public class FloatXYDataset extends AbstractXYDataset
          */
         @Override
 		public double getYValue(int series, int item) {
-            float[][] seriesData = (float[][]) this.seriesList.get(series);
-            return seriesData[1][item];
+			return seriesList.get(series)[1][item];
         }
 
         /**
@@ -221,7 +219,7 @@ public class FloatXYDataset extends AbstractXYDataset
          */
         @Override
 		public Number getY(int series, int item) {
-            return new Double(getYValue(series, item));
+			return getYValue(series, item);
         }
 
         /**
@@ -298,8 +296,8 @@ public class FloatXYDataset extends AbstractXYDataset
             if (!this.seriesKeys.equals(that.seriesKeys))
                 return false;
             for (int i = 0; i < this.seriesList.size(); i++) {
-                float[][] d1 = (float[][]) this.seriesList.get(i);
-                float[][] d2 = (float[][]) that.seriesList.get(i);
+				float[][] d1 = this.seriesList.get(i);
+				float[][] d2 = that.seriesList.get(i);
                 float[] d1x = d1[0];
                 float[] d2x = d2[0];
                 if (!Arrays.equals(d1x, d2x)) {
@@ -339,11 +337,11 @@ public class FloatXYDataset extends AbstractXYDataset
         @Override
 		public Object clone() throws CloneNotSupportedException {
             FloatXYDataset clone = (FloatXYDataset) super.clone();
-            clone.seriesKeys = new ArrayList(this.seriesKeys);
-            clone.seriesList = new ArrayList(this.seriesList.size());
-            clone.datasetIndexes = new ArrayList(seriesList);
+            clone.seriesKeys = new ArrayList<>(this.seriesKeys);
+			clone.seriesList = new ArrayList<>(this.seriesList.size());
+			clone.datasetIndexes = new ArrayList<>(this.datasetIndexes);
             for (int i = 0; i < this.seriesList.size(); i++) {
-                float[][] data = (float[][]) this.seriesList.get(i);
+				float[][] data = this.seriesList.get(i);
                 float[] x = data[0];
                 float[] y = data[1];
                 float[] xx = new float[x.length];

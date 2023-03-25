@@ -121,13 +121,13 @@ public class SignalsAnalysisPanel extends TableDetailPanel implements NuclearSig
 
 	private SignalTableCell getSignalGroupFromTable(JTable table, int row, int column) {
 		Object o = table.getModel().getValueAt(row, column);
-		if (o instanceof SignalTableCell)
-			return (SignalTableCell) o;
+		if (o instanceof SignalTableCell stc)
+			return stc;
 		return null;
 	}
 
 	@Override
-	protected void updateSingle() {
+	protected synchronized void updateSingle() {
 
 		TableOptions options = new TableOptionsBuilder()
 				.setDatasets(getDatasets())
@@ -140,12 +140,12 @@ public class SignalsAnalysisPanel extends TableDetailPanel implements NuclearSig
 	}
 
 	@Override
-	protected void updateMultiple() {
+	protected synchronized void updateMultiple() {
 		updateSingle();
 	}
 
 	@Override
-	protected void updateNull() {
+	protected synchronized void updateNull() {
 
 		TableOptions options = new TableOptionsBuilder().setDatasets(null).build();
 

@@ -20,7 +20,6 @@ import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.util.List;
-import java.util.logging.Logger;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -56,7 +55,7 @@ public class ConsensusNucleusPanel extends ChartDetailPanel
 		implements ChangeListener, ConsensusUpdatedListener,
 		ScaleUpdatedListener, SwatchUpdatedListener, ProfilesUpdatedListener {
 
-	private static final Logger LOGGER = Logger.getLogger(ConsensusNucleusPanel.class.getName());
+
 
 	private static final String MESH_FACES_LBL = "Mesh faces";
 	private static final String MESH_EDGES_LBL = "Mesh edges";
@@ -76,7 +75,6 @@ public class ConsensusNucleusPanel extends ChartDetailPanel
 	private JCheckBox showMeshVerticesBox;
 	private JCheckBox showMeshEdgesBox;
 	private JCheckBox showMeshFacesBox;
-	private JSpinner meshSizeSpinner;
 
 	public ConsensusNucleusPanel() {
 		super();
@@ -150,7 +148,7 @@ public class ConsensusNucleusPanel extends ChartDetailPanel
 		showMeshBox.addChangeListener(this);
 
 		SpinnerNumberModel meshSizeModel = new SpinnerNumberModel(10, 2, 100, 1);
-		meshSizeSpinner = new JSpinner(meshSizeModel);
+		JSpinner meshSizeSpinner = new JSpinner(meshSizeModel);
 		meshSizeSpinner.addChangeListener(this);
 		meshSizeSpinner.setToolTipText(MESH_SIZE_LBL);
 		JSpinner.NumberEditor meshNumberEditor = new JSpinner.NumberEditor(meshSizeSpinner, "0");

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.DoubleStream;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.bmskinner.nma.components.cells.CellularComponent;
@@ -22,14 +23,17 @@ public class NucleusMeasurementsTableModel extends DatasetTableModel {
 	private String[] colNames;
 	private String[][] rowData;
 
-	@SuppressWarnings("null")
 	public NucleusMeasurementsTableModel(@Nullable List<IAnalysisDataset> datasets) {
 
 		if (datasets == null) {
 			makeEmptyTable();
 			return;
 		}
+		createTable(datasets);
 
+	}
+
+	private void createTable(@NonNull List<IAnalysisDataset> datasets) {
 		colNames = makeColNames(datasets);
 		int colCount = colNames.length;
 

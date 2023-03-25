@@ -32,22 +32,4 @@ public interface EditingTabPanel extends TabPanel {
 	 */
 	void checkCellLock();
 
-	/**
-	 * Update the border tag in the median profile to the given index, and update
-	 * individual nuclei to match.
-	 * 
-	 * @param tag
-	 * @param newTagIndex
-	 */
-//	void setBorderTagAction(@NonNull Landmark tag, int newTagIndex);
-
-	/**
-	 * Update the start index of the given segment to the given index in the median
-	 * profile, and update individual nuclei to match
-	 * 
-	 * @param id
-	 * @param index
-	 * @throws Exception
-	 */
-//	void updateSegmentStartIndexAction(@NonNull UUID id, int index) throws Exception;
 }

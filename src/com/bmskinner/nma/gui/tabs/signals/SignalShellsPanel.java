@@ -65,6 +65,7 @@ import com.bmskinner.nma.gui.components.panels.WrappedLabel;
 import com.bmskinner.nma.gui.dialogs.SettingsDialog;
 import com.bmskinner.nma.gui.dialogs.collections.ShellOverviewDialog;
 import com.bmskinner.nma.gui.events.NuclearSignalUpdatedListener;
+import com.bmskinner.nma.gui.events.UIController;
 import com.bmskinner.nma.gui.tabs.ChartDetailPanel;
 import com.bmskinner.nma.gui.tabs.DetailPanel;
 import com.bmskinner.nma.gui.tabs.TableDetailPanel;
@@ -77,7 +78,6 @@ import com.bmskinner.nma.visualisation.options.ChartOptionsBuilder;
 import com.bmskinner.nma.visualisation.options.TableOptions;
 import com.bmskinner.nma.visualisation.options.TableOptionsBuilder;
 import com.bmskinner.nma.visualisation.tables.AbstractTableCreator;
-import com.bmskinner.nma.visualisation.tables.AnalysisDatasetTableCreator;
 import com.bmskinner.nma.visualisation.tables.NuclearSignalTableCreator;
 
 /**
@@ -96,13 +96,12 @@ public class SignalShellsPanel extends DetailPanel
 	private static final String PANEL_TITLE_LBL = "Shells";
 	private static final String WITHIN_SIGNALS_LBL = "Within signals";
 	private static final String WITHIN_NUCLEI_LBL = "Within nuclei";
-//	private static final String RUN_ANALYSIS_LBL = "Run new";
+
 	private static final String DAPI_NORM_LBL = "DAPI normalise";
 	private static final String SHOW_RANDOM_LBL = "Show random";
 	private static final String SHOW_SHELLS_LBL = "Show nuclei";
 	private static final String FILTER_LBL = "Filter nuclei";
 
-//	private static final String RUN_ANALYSIS_TOOLTIP = "Run a shell analysis on all signal groups, replacing any existing analysis";
 	private static final String WITHIN_SIGNALS_TOOLTIP = "Analyse only pixels that are within defined signals";
 	private static final String WITHIN_NUCLEI_TOOLTIP = "Analyse any pixels that are within the nucleus";
 	private static final String DAPI_NORM_TOOLTIP = "Apply a correction for nuclear flattening based on the DNA counterstain";
@@ -113,7 +112,6 @@ public class SignalShellsPanel extends DetailPanel
 	private JRadioButton withinNucleiBtn = new JRadioButton(WITHIN_NUCLEI_LBL);
 	private ButtonGroup coverageGroup = new ButtonGroup();
 
-//	private JButton newAnalysis = new JButton(RUN_ANALYSIS_LBL);
 	private JButton showNuclei = new JButton(SHOW_SHELLS_LBL);
 
 	private JButton filterBtn = new JButton(FILTER_LBL);
@@ -142,7 +140,6 @@ public class SignalShellsPanel extends DetailPanel
 
 	@Override
 	public void setEnabled(boolean b) {
-//		newAnalysis.setEnabled(b);
 		withinNucleiBtn.setEnabled(b);
 		withinSignalsBtn.setEnabled(b);
 		dapiNormalise.setEnabled(b);
@@ -214,14 +211,6 @@ public class SignalShellsPanel extends DetailPanel
 	private JPanel createHeader() {
 		JPanel panel = new JPanel();
 
-//		newAnalysis.addActionListener(e -> UserActionController.getInstance()
-//				.userActionEventReceived(new UserActionEvent(this,
-//						UserActionEvent.RUN_SHELL_ANALYSIS, getDatasets())));
-
-//		newAnalysis.setToolTipText(RUN_ANALYSIS_TOOLTIP);
-
-//		panel.add(newAnalysis);
-
 		// Add the coverage options
 
 		coverageGroup.add(withinSignalsBtn);
@@ -246,11 +235,8 @@ public class SignalShellsPanel extends DetailPanel
 		showRandomCheckbox.setToolTipText(SHOW_RANDOM_TOOLTIP);
 		panel.add(showRandomCheckbox);
 
-		showNuclei.addActionListener(e ->
+		showNuclei.addActionListener(e -> new ShellOverviewDialog(activeDataset()));
 
-		{
-			new ShellOverviewDialog(activeDataset());
-		});
 		showNuclei.setToolTipText(SHOW_NUCLEI_TOOLTIP);
 		panel.add(showNuclei);
 
@@ -270,7 +256,6 @@ public class SignalShellsPanel extends DetailPanel
 				LOGGER.log(Level.WARNING, "Unable to generate report");
 			}
 		});
-//        panel.add(reportBtn);
 
 		setEnabled(false);
 
@@ -282,12 +267,9 @@ public class SignalShellsPanel extends DetailPanel
 		setEnabled(false);
 		if (activeDataset() == null)
 			return;
-		if (activeDataset().getCollection().getSignalManager().hasSignals()) {
-//			newAnalysis.setEnabled(true);
-			if (activeDataset().getCollection().getSignalManager().hasShellResult())
+		if (activeDataset().getCollection().getSignalManager().hasSignals()
+				&& activeDataset().getCollection().getSignalManager().hasShellResult())
 				setEnabled(true);
-		}
-
 	}
 
 	@Override
@@ -324,7 +306,7 @@ public class SignalShellsPanel extends DetailPanel
 
 		private static final String DIALOG_TITLE = "Shell filtering options";
 
-		private final IAnalysisDataset dataset;
+		private final transient IAnalysisDataset dataset;
 
 		private double proportion = 0.5d;
 		private int shell = 0;
@@ -345,10 +327,10 @@ public class SignalShellsPanel extends DetailPanel
 		 * @param mw
 		 * @param title
 		 */
-		protected ShellFilteringSetupDialog(@NonNull final IAnalysisDataset dataset,
+		protected ShellFilteringSetupDialog(@NonNull final IAnalysisDataset d,
 				@NonNull final String title) {
 			super(true);
-			this.dataset = dataset;
+			this.dataset = d;
 			createUI();
 			setTitle(title);
 			pack();
@@ -372,16 +354,18 @@ public class SignalShellsPanel extends DetailPanel
 					return;
 				}
 
-				LOGGER.info("Found " + filtered.size() + " cells");
+				LOGGER.info(() -> "Found %d cells".formatted(filtered.size()));
 				ICellCollection virt = new VirtualDataset(dataset, "Filtered_on_shell");
 				filtered.getCells().forEach(virt::addCell);
 				dataset.getCollection().getProfileManager().copySegmentsAndLandmarksTo(virt);
 				dataset.addChildCollection(virt);
 
-				// TODO: alert populations panel that there is a new dataset
+				// alert that there is a new dataset
+				UIController.getInstance().fireDatasetAdded(dataset.getChildDataset(virt.getId()));
+
 			} catch (ProfileException | CollectionFilteringException | MissingProfileException
 					| MissingLandmarkException e1) {
-				LOGGER.log(Loggable.STACK, "Unable to filter collection for " + dataset.getName(),
+				LOGGER.log(Loggable.STACK, "Unable to filter collection for %s".formatted(dataset.getName()),
 						e1);
 			}
 		}
@@ -472,7 +456,7 @@ public class SignalShellsPanel extends DetailPanel
 		@Override
 		protected synchronized void updateSingle() {
 			updateChart();
-			setEnabled(false);
+			super.setEnabled(false);
 
 		}
 
@@ -484,7 +468,7 @@ public class SignalShellsPanel extends DetailPanel
 
 		@Override
 		protected synchronized void updateNull() {
-			setEnabled(false);
+			super.setEnabled(false);
 			updateChart();
 
 		}
@@ -542,7 +526,7 @@ public class SignalShellsPanel extends DetailPanel
 					"Comparisons to random distribution by chi-square with Bonferroni correction");
 
 			tablePanel.add(textArea, BorderLayout.NORTH);
-			TableModel model = AnalysisDatasetTableCreator.createBlankTable();
+			TableModel model = AbstractTableCreator.createBlankTable();
 			table = new ExportableTable(model);
 			table.setEnabled(false);
 
@@ -564,7 +548,7 @@ public class SignalShellsPanel extends DetailPanel
 		@Override
 		protected synchronized void updateSingle() {
 			updateTable();
-			setEnabled(false);
+			super.setEnabled(false);
 
 		}
 
@@ -576,7 +560,7 @@ public class SignalShellsPanel extends DetailPanel
 
 		@Override
 		protected synchronized void updateNull() {
-			setEnabled(false);
+			super.setEnabled(false);
 			updateTable();
 
 		}
@@ -624,7 +608,7 @@ public class SignalShellsPanel extends DetailPanel
 					"Pairwise comparisons of shell results by chi-square with Bonferroni correction");
 
 			tablePanel.add(textArea, BorderLayout.NORTH);
-			TableModel model = AnalysisDatasetTableCreator.createBlankTable();
+			TableModel model = AbstractTableCreator.createBlankTable();
 			table = new ExportableTable(model);
 			table.setEnabled(false);
 
@@ -646,7 +630,7 @@ public class SignalShellsPanel extends DetailPanel
 		@Override
 		protected synchronized void updateSingle() {
 			updateTable();
-			setEnabled(false);
+			super.setEnabled(false);
 
 		}
 
@@ -658,7 +642,7 @@ public class SignalShellsPanel extends DetailPanel
 
 		@Override
 		protected synchronized void updateNull() {
-			setEnabled(false);
+			super.setEnabled(false);
 			updateTable();
 		}
 

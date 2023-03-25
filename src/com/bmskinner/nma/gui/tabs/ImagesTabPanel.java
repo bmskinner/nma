@@ -182,33 +182,33 @@ public class ImagesTabPanel extends DetailPanel implements FilePathUpdatedListen
 			}
 		}
 
-	}
-
-	private void saveImage(IAnalysisDataset dataset, String fileName) {
-
-		try {
-			File f = new DefaultInputSupplier().requestFileSave(dataset.getSavePath(), fileName,
-					"png");
-
-			BufferedImage img = new BufferedImage(label.getWidth(), label.getHeight(),
-					BufferedImage.TYPE_INT_ARGB);
-			Graphics2D g2d = img.createGraphics();
-			label.printAll(g2d);
+		private void saveImage(IAnalysisDataset dataset, String fileName) {
 
 			try {
-				ImageIO.write(img, "png", f);
-			} catch (IOException e) {
-				LOGGER.warning("Cannot save image: " + e.getMessage());
-				LOGGER.log(Loggable.STACK, "Error saving annotated image", e);
-			} finally {
-				g2d.dispose();
-			}
+				File f = new DefaultInputSupplier().requestFileSave(dataset.getSavePath(), fileName,
+						"png");
 
-		} catch (RequestCancelledException e1) {
-			// User cancelled
-			return;
+				BufferedImage img = new BufferedImage(label.getWidth(), label.getHeight(),
+						BufferedImage.TYPE_INT_ARGB);
+				Graphics2D g2d = img.createGraphics();
+				label.printAll(g2d);
+
+				try {
+					ImageIO.write(img, "png", f);
+				} catch (IOException e) {
+					LOGGER.warning("Cannot save image: " + e.getMessage());
+					LOGGER.log(Loggable.STACK, "Error saving annotated image", e);
+				} finally {
+					g2d.dispose();
+				}
+
+			} catch (RequestCancelledException e1) {
+				// User cancelled
+			}
 		}
+
 	}
+
 
 	/**
 	 * Trigger an update with a given dataset.
@@ -261,8 +261,7 @@ public class ImagesTabPanel extends DetailPanel implements FilePathUpdatedListen
 		List<File> files = new ArrayList<>(dataset.getCollection().getImageFiles());
 
 		// Each folder of images should be a node. Find the unique folders
-		List<File> parents = files.stream().map(File::getParentFile).distinct().sorted()
-				.collect(Collectors.toList());
+		List<File> parents = files.stream().map(File::getParentFile).distinct().sorted().toList();
 
 		ImageTreeNode datasetRoot = new ImageTreeNode(
 				dataset.getName() + " (" + files.size() + ")");
@@ -351,13 +350,10 @@ public class ImagesTabPanel extends DetailPanel implements FilePathUpdatedListen
 
 			InterfaceUpdater r = () -> {
 				try {
+
+					// TODO - check space needed by cells
 					ImageProcessor ip = f.exists() ? ImageImporter.importFileTo24bit(f)
-							: AbstractImageFilterer.createWhiteColorProcessor(1500, 1500); // TODO -
-																							// check
-																							// space
-																							// needed
-																							// by
-																							// cells
+							: AbstractImageFilterer.createWhiteColorProcessor(1500, 1500);
 
 					// If an 8bit image was read in, make it colour greyscale
 					ImageConverter cn = new ImageConverter(ip);
@@ -368,7 +364,7 @@ public class ImagesTabPanel extends DetailPanel implements FilePathUpdatedListen
 					Optional<IAnalysisDataset> dataset = getDataset(data);
 					dataset.ifPresent(
 							d -> d.getCollection().getCells(f).stream()
-									.forEach(c -> an.annotateCellBorders(c)));
+									.forEach(an::annotateCellBorders));
 
 					ImageFilterer ic = new ImageFilterer(an.toProcessor());
 					ic.resizeKeepingAspect(imagePanel.getWidth(), imagePanel.getHeight());
@@ -377,7 +373,7 @@ public class ImagesTabPanel extends DetailPanel implements FilePathUpdatedListen
 				} catch (Exception e1) {
 					label.setIcon(null);
 					LOGGER.log(Level.SEVERE,
-							"Error fetching image " + f.getAbsolutePath() + ": " + e1.getMessage(),
+							"Error fetching image %s: %s".formatted(f.getAbsolutePath(), e1.getMessage()),
 							e);
 				}
 			};
@@ -415,7 +411,6 @@ public class ImagesTabPanel extends DetailPanel implements FilePathUpdatedListen
 				updateImageFolder(node);
 
 				tree.repaint();
-//    	        getInterfaceEventHandler().fire(InterfaceEvent.of(this, InterfaceMethod.RECACHE_CHARTS));
 			}
 
 		};
@@ -456,7 +451,7 @@ public class ImagesTabPanel extends DetailPanel implements FilePathUpdatedListen
 
 	private class ImageTreeNode extends DefaultMutableTreeNode {
 
-		private IAnalysisDataset dataset;
+		private transient IAnalysisDataset dataset;
 		private String name;
 		boolean isFile = false;
 

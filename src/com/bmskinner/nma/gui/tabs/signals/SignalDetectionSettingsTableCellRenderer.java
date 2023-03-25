@@ -64,10 +64,9 @@ public class SignalDetectionSettingsTableCellRenderer extends ConsistentRowTable
 
 				// get the value in the first column of the row below
 				String nextRowHeader = getFirstColumnText(row + 1, table);
-//                String nextRowHeader = table.getModel().getValueAt(row + 1, 0).toString();
 
 				int signalGroupCount = Integer
-						.valueOf(table.getModel().getValueAt(0, column).toString());
+						.parseInt(table.getModel().getValueAt(0, column).toString());
 
 				if (nextRowHeader.equals(Labels.Signals.SIGNAL_GROUP_LABEL)) {
 

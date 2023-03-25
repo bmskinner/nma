@@ -89,13 +89,13 @@ public class SignalsBoxplotPanel extends BoxplotsTabPanel
 	}
 
 	@Override
-	protected void updateSingle() {
+	protected synchronized void updateSingle() {
 		updateMultiple();
 
 	}
 
 	@Override
-	protected void updateMultiple() {
+	protected synchronized void updateMultiple() {
 
 		for (Measurement stat : Measurement.getSignalStats()) {
 
@@ -111,7 +111,7 @@ public class SignalsBoxplotPanel extends BoxplotsTabPanel
 	}
 
 	@Override
-	protected void updateNull() {
+	protected synchronized void updateNull() {
 		updateMultiple();
 	}
 

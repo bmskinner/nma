@@ -21,6 +21,7 @@ import com.bmskinner.nma.visualisation.TableCache;
 import com.bmskinner.nma.visualisation.options.TableOptions;
 import com.bmskinner.nma.visualisation.tables.AbstractTableCreator;
 
+@SuppressWarnings("serial")
 public abstract class TableDetailPanel extends DetailPanel {
 
 	private static final Logger LOGGER = Logger.getLogger(TableDetailPanel.class.getName());
@@ -60,12 +61,10 @@ public abstract class TableDetailPanel extends DetailPanel {
 			if (options.getTarget() != null) {
 				options.getTarget().setModel(model);
 				setRenderers(options);
-//				options.getTarget().updateRowHeights();
-				if (options.getTarget() instanceof ExportableTable) {
-					EventQueue.invokeLater(() -> ((ExportableTable) options.getTarget()).updateRowHeights());
 
+				if (options.getTarget() instanceof ExportableTable et) {
+					EventQueue.invokeLater(et::updateRowHeights);
 				}
-
 			}
 
 		} else { // No cached chart
@@ -109,8 +108,7 @@ public abstract class TableDetailPanel extends DetailPanel {
 			try {
 				model = createPanelTableType(options);
 			} catch (Exception e) {
-				LOGGER.log(Level.WARNING, "Error creating table: " + this.getClass().getSimpleName());
-				LOGGER.log(Loggable.STACK, this.getClass().getName() + ": Error creating table", e);
+				LOGGER.log(Loggable.STACK, "Error creating table", e);
 				model = AbstractTableCreator.createBlankTable();
 			}
 			cache.add(options, model);

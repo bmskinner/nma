@@ -2,7 +2,6 @@ package com.bmskinner.nma.gui.events;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -20,7 +19,7 @@ import com.bmskinner.nma.gui.events.CellUpdatedEventListener.CellUpdatedEvent;
  */
 public class UIController {
 
-	private static final Logger LOGGER = Logger.getLogger(UIController.class.getName());
+
 
 	private static final UIController instance = new UIController();
 
@@ -163,11 +162,21 @@ public class UIController {
 			l.datasetAdded(datasets);
 	}
 
+	/**
+	 * Inform listeners that a new dataset has been added for display
+	 * 
+	 * @param d
+	 */
 	public void fireDatasetAdded(@NonNull IAnalysisDataset d) {
 		for (DatasetAddedListener l : datasetAddedListeners)
 			l.datasetAdded(d);
 	}
 
+	/**
+	 * Inform listeners that a dataset has been removed from display
+	 * 
+	 * @param d
+	 */
 	public void fireDatasetDeleted(@NonNull List<IAnalysisDataset> datasets) {
 		for (DatasetAddedListener l : datasetAddedListeners)
 			l.datasetDeleted(datasets);

@@ -20,6 +20,7 @@ import java.awt.BorderLayout;
 import java.util.logging.Logger;
 
 import javax.swing.JTabbedPane;
+import javax.swing.SwingConstants;
 
 import com.bmskinner.nma.gui.tabs.DetailPanel;
 import com.bmskinner.nma.gui.tabs.signals.warping.SignalWarpingMainPanel;
@@ -48,7 +49,7 @@ public class SignalsDetailPanel extends DetailPanel {
 
 			this.setLayout(new BorderLayout());
 
-			signalsTabPane = new JTabbedPane(JTabbedPane.TOP);
+			signalsTabPane = new JTabbedPane(SwingConstants.TOP);
 
 			DetailPanel overviewPanel = new SignalsOverviewPanel();
 			DetailPanel countsPanel = new SignalCountsPanel();

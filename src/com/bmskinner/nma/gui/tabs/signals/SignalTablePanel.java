@@ -5,7 +5,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.List;
 import java.util.UUID;
-import java.util.logging.Logger;
 
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -35,7 +34,7 @@ public class SignalTablePanel extends TableDetailPanel
 
 	private static final long serialVersionUID = 1L;
 
-	private static final Logger LOGGER = Logger.getLogger(SignalTablePanel.class.getName());
+
 
 	private static final String PANEL_TITLE_LBL = "Signal stats";
 
@@ -128,7 +127,8 @@ public class SignalTablePanel extends TableDetailPanel
 				}
 
 			} catch (RequestCancelledException e1) {
-			} // no action
+				// no action
+			}
 		}
 
 		@Override

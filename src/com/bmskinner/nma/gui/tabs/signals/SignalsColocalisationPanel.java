@@ -27,7 +27,6 @@ import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.core.GlobalOptions;
-import com.bmskinner.nma.core.InputSupplier;
 import com.bmskinner.nma.gui.events.NuclearSignalUpdatedListener;
 import com.bmskinner.nma.gui.tabs.ChartDetailPanel;
 import com.bmskinner.nma.visualisation.charts.AbstractChartFactory;
@@ -107,10 +106,7 @@ public class SignalsColocalisationPanel extends ChartDetailPanel implements Nucl
 
 	@Override
 	protected synchronized void updateMultiple() {
-		ChartOptions chartOptions = new ChartOptionsBuilder().setDatasets(getDatasets())
-				.setScale(GlobalOptions.getInstance().getScale()).setTarget(violinChart).build();
-
-		setChart(chartOptions);
+		updateSingle();
 	}
 
 	@Override
@@ -130,10 +126,6 @@ public class SignalsColocalisationPanel extends ChartDetailPanel implements Nucl
 		return new ViolinChartFactory(options).createSignalColocalisationViolinChart();
 	}
 
-//	@Override
-//	protected synchronized TableModel createPanelTableType(@NonNull TableOptions options) {
-//		return new NuclearSignalTableCreator(options).createSignalColocalisationTable();
-//	}
 
 	@Override
 	public void nuclearSignalUpdated(List<IAnalysisDataset> datasets) {

@@ -3,7 +3,6 @@ package com.bmskinner.nma.gui.tabs.signals;
 import java.awt.BorderLayout;
 import java.util.List;
 import java.util.UUID;
-import java.util.logging.Logger;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -33,9 +32,10 @@ import com.bmskinner.nma.visualisation.charts.panels.ExportableChartPanel;
 import com.bmskinner.nma.visualisation.options.ChartOptions;
 import com.bmskinner.nma.visualisation.options.ChartOptionsBuilder;
 
+@SuppressWarnings("serial")
 public class SignalConsensusPanel extends ChartDetailPanel
 		implements ChartSetEventListener, ConsensusUpdatedListener, NuclearSignalUpdatedListener {
-	private static final Logger LOGGER = Logger.getLogger(SignalsOverviewPanel.class.getName());
+
 
 	private static final String PANEL_TITLE_LBL = "Signal consensus";
 
@@ -83,11 +83,11 @@ public class SignalConsensusPanel extends ChartDetailPanel
 	private JPanel createConsensusPanel() {
 
 		final JPanel panel = new JPanel(new BorderLayout());
-		JFreeChart chart = OutlineChartFactory.createEmptyChart();
+		JFreeChart chart = AbstractChartFactory.createEmptyChart();
 
 		// the chart is inside a chartPanel; the chartPanel is inside a JPanel
 		// this allows a checkbox panel to be added to the JPanel later
-		chartPanel = new ConsensusNucleusChartPanel(chart);// {
+		chartPanel = new ConsensusNucleusChartPanel(chart);
 		panel.add(chartPanel, BorderLayout.CENTER);
 		chartPanel.setFillConsensus(false);
 
@@ -110,10 +110,9 @@ public class SignalConsensusPanel extends ChartDetailPanel
 		panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
 
 		mergeButton = new JButton(Labels.Signals.MERGE_BTN_LBL);
-		mergeButton.addActionListener(e -> {
-			UserActionController.getInstance().userActionEventReceived(new UserActionEvent(this,
-					UserActionEvent.MERGE_SIGNALS_ACTION, activeDataset()));
-		});
+		mergeButton.addActionListener(
+				e -> UserActionController.getInstance().userActionEventReceived(new UserActionEvent(this,
+						UserActionEvent.MERGE_SIGNALS_ACTION, activeDataset())));
 		mergeButton.setEnabled(false);
 		panel.add(mergeButton);
 
@@ -211,26 +210,26 @@ public class SignalConsensusPanel extends ChartDetailPanel
 	}
 
 	@Override
-	protected void updateSingle() {
+	protected synchronized void updateSingle() {
 		updateMultiple();
 
 	}
 
 	@Override
-	protected void updateMultiple() {
+	protected synchronized void updateMultiple() {
 
 		updateCheckboxPanel();
 		updateSignalConsensusChart();
 	}
 
 	@Override
-	protected void updateNull() {
+	protected synchronized void updateNull() {
 		updateMultiple();
 
 	}
 
 	@Override
-	public void setLoading() {
+	public synchronized void setLoading() {
 		super.setLoading();
 		chartPanel.setChart(AbstractChartFactory.createLoadingChart());
 	}

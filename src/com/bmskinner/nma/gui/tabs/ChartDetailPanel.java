@@ -18,6 +18,7 @@ import com.bmskinner.nma.visualisation.ChartCache;
 import com.bmskinner.nma.visualisation.charts.AbstractChartFactory;
 import com.bmskinner.nma.visualisation.options.ChartOptions;
 
+@SuppressWarnings("serial")
 public abstract class ChartDetailPanel extends DetailPanel {
 
 	private static final Logger LOGGER = Logger.getLogger(ChartDetailPanel.class.getName());
@@ -111,12 +112,9 @@ public abstract class ChartDetailPanel extends DetailPanel {
 					options.getTarget().setCursor(Cursor.getDefaultCursor());
 				}
 			} catch (InterruptedException e) {
-				LOGGER.log(Level.WARNING, "Interruption to charting in " + ChartDetailPanel.this.getClass().getName());
 				LOGGER.log(Loggable.STACK, "Interruption to charting", e);
 				Thread.currentThread().interrupt();
 			} catch (ExecutionException e) {
-				LOGGER.log(Level.WARNING,
-						"Excecution error in charting in " + ChartDetailPanel.this.getClass().getName());
 				LOGGER.log(Loggable.STACK, "Excecution error charting", e);
 			}
 		}

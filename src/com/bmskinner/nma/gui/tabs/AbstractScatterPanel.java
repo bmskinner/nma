@@ -69,7 +69,6 @@ import com.bmskinner.nma.visualisation.options.ChartOptionsBuilder;
 import com.bmskinner.nma.visualisation.options.TableOptions;
 import com.bmskinner.nma.visualisation.options.TableOptionsBuilder;
 import com.bmskinner.nma.visualisation.tables.AbstractTableCreator;
-import com.bmskinner.nma.visualisation.tables.AnalysisDatasetTableCreator;
 import com.bmskinner.nma.visualisation.tables.ScatterTableDatasetCreator;
 
 /**

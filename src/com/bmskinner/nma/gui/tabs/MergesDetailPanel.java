@@ -122,7 +122,7 @@ public class MergesDetailPanel extends TableDetailPanel {
 					IAnalysisDataset mergeSource = (IAnalysisDataset) table
 							.getValueAt(row, col);
 					LOGGER.fine(
-							String.format("Extracting merge source '%s'", mergeSource.getName()));
+							() -> String.format("Extracting merge source '%s'", mergeSource.getName()));
 
 					UserActionController.getInstance().userActionEventReceived(
 							new UserActionEvent(this, UserActionEvent.EXTRACT_MERGE_SOURCE,

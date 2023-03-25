@@ -54,7 +54,7 @@ public abstract class DetailPanel extends JPanel
 	private static final Logger LOGGER = Logger.getLogger(DetailPanel.class.getName());
 
 	/** Handle UI update requests */
-	protected final UIController uiController;
+	protected final transient UIController uiController;
 
 	protected static final int SINGLE_CLICK = 1;
 	protected static final int DOUBLE_CLICK = 2;
@@ -148,7 +148,7 @@ public abstract class DetailPanel extends JPanel
 		return isUpdating.get();
 	}
 
-	protected void setUpdating(boolean b) {
+	protected synchronized void setUpdating(boolean b) {
 		this.isUpdating.set(b);
 	}
 
@@ -356,7 +356,7 @@ public abstract class DetailPanel extends JPanel
 	public synchronized void refreshCache(final List<IAnalysisDataset> list) {
 		Runnable r = () -> {
 			clearCache(list);
-			if (getDatasets().stream().anyMatch(d -> list.contains(d)))
+			if (getDatasets().stream().anyMatch(list::contains))
 				update(getDatasets());
 		};
 		ThreadManager.getInstance().execute(r);

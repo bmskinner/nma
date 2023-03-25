@@ -21,7 +21,6 @@ import java.awt.Component;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.List;
-import java.util.logging.Logger;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -62,15 +61,10 @@ import com.bmskinner.nma.visualisation.tables.ClusterGroupTableModel;
 @SuppressWarnings("serial")
 public class ClusterDetailPanel extends TableDetailPanel implements ClusterGroupsUpdatedListener {
 
-	private static final Logger LOGGER = Logger.getLogger(ClusterDetailPanel.class.getName());
+
 
 	private static final String PANEL_TITLE_LBL = "Clusters";
-	private static final String NEW_CLUSTER_LBL = "Cluster automatically";
-	private static final String NEW_TREE_LBL = "Create tree";
-	private static final String NEW_CLASS_LBL = "Create classifier";
 	private static final String NO_CLUSTERS_LBL = "No clusters present";
-	private static final String MAN_CLUSTER_LBL = "Cluster manually";
-	private static final String FILE_CLUSTER_LBL = "Import from file";
 
 	private JLabel statusLabel = new JLabel(NO_CLUSTERS_LBL, SwingConstants.CENTER);
 	private JPanel statusPanel = new JPanel(new BorderLayout());
@@ -150,17 +144,13 @@ public class ClusterDetailPanel extends TableDetailPanel implements ClusterGroup
 
 				if (table.getValueAt(row, 0).equals(Labels.Clusters.TREE)
 						&& !table.getValueAt(row, col).equals(Labels.NA)) {
-					Runnable r = () -> {
-						new ClusterTreeDialog(d, group);
-					};
+					Runnable r = () -> new ClusterTreeDialog(d, group);
 					new Thread(r).start();
 				}
 
 				if (table.getValueAt(row, 0).equals(Labels.Clusters.CLUSTER_DIM_PLOT)
 						&& !table.getValueAt(row, col).equals(Labels.NA)) {
-					Runnable r = () -> {
-						new DimensionalityReductionPlotDialog(d, group);
-					};
+					Runnable r = () -> new DimensionalityReductionPlotDialog(d, group);
 					new Thread(r).start();
 				}
 
@@ -282,9 +272,14 @@ public class ClusterDetailPanel extends TableDetailPanel implements ClusterGroup
 		public Component getTableCellRendererComponent(JTable table, Object value,
 				boolean isSelected, boolean hasFocus,
 				int row, int column) {
-			String text = value == null ? ""
-					: value instanceof IClusterGroup ? Labels.Clusters.CLUSTER_SHOW_TREE
-							: value.toString();
+
+			String text = "";
+			if (null != value) {
+				text = value instanceof IClusterGroup
+						? Labels.Clusters.CLUSTER_SHOW_TREE
+						: value.toString();
+			}
+
 			setText(text);
 			setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 			return this;

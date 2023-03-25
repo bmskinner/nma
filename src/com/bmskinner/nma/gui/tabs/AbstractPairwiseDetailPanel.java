@@ -36,7 +36,7 @@ public abstract class AbstractPairwiseDetailPanel extends TableDetailPanel {
 	protected JPanel tablePanel;
 	protected JScrollPane scrollPane = new JScrollPane();
 
-	public AbstractPairwiseDetailPanel() {
+	protected AbstractPairwiseDetailPanel() {
 		super();
 
 		this.setLayout(new BorderLayout());
@@ -49,12 +49,11 @@ public abstract class AbstractPairwiseDetailPanel extends TableDetailPanel {
 	}
 
 	@Override
-	public void setLoading() {
+	public synchronized void setLoading() {
 		super.setLoading();
 		for (Component c : this.getComponents()) {
-			if (c instanceof JTable) {
-
-				((JTable) c).setModel(AbstractTableCreator.createLoadingTable());
+			if (c instanceof JTable jt) {
+				jt.setModel(AbstractTableCreator.createLoadingTable());
 			}
 		}
 

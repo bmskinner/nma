@@ -51,7 +51,7 @@ public abstract class BoxplotsTabPanel extends ChartDetailPanel implements Actio
 	private static final Logger LOGGER = Logger.getLogger(BoxplotsTabPanel.class.getName());
 
 	private static final String PANEL_TITLE_LBL = "Violin plots";
-	protected Map<String, ExportableChartPanel> chartPanels = new HashMap<>();
+	protected transient Map<String, ExportableChartPanel> chartPanels = new HashMap<>();
 
 	protected JPanel mainPanel; // hold the charts
 	protected JPanel headerPanel; // hold buttons

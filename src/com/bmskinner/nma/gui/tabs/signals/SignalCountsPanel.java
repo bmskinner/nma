@@ -36,8 +36,8 @@ import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nma.analysis.nucleus.CellCollectionFilterBuilder;
 import com.bmskinner.nma.analysis.nucleus.CellCollectionFilterer;
-import com.bmskinner.nma.analysis.nucleus.FilteringOptions;
 import com.bmskinner.nma.analysis.nucleus.CellCollectionFilterer.CollectionFilteringException;
+import com.bmskinner.nma.analysis.nucleus.FilteringOptions;
 import com.bmskinner.nma.analysis.nucleus.FilteringOptions.FilterMatchType;
 import com.bmskinner.nma.components.MissingLandmarkException;
 import com.bmskinner.nma.components.cells.CellularComponent;
@@ -51,6 +51,7 @@ import com.bmskinner.nma.core.GlobalOptions;
 import com.bmskinner.nma.gui.components.panels.SignalGroupSelectionPanel;
 import com.bmskinner.nma.gui.dialogs.SettingsDialog;
 import com.bmskinner.nma.gui.events.NuclearSignalUpdatedListener;
+import com.bmskinner.nma.gui.events.UIController;
 import com.bmskinner.nma.gui.tabs.ChartDetailPanel;
 import com.bmskinner.nma.logging.Loggable;
 import com.bmskinner.nma.visualisation.charts.AbstractChartFactory;
@@ -113,7 +114,7 @@ public class SignalCountsPanel extends ChartDetailPanel implements NuclearSignal
 	}
 
 	@Override
-	protected void updateSingle() {
+	protected synchronized void updateSingle() {
 		updateMultiple();
 		if (activeDataset() != null
 				&& activeDataset().getCollection().getSignalManager().hasSignals())
@@ -121,7 +122,7 @@ public class SignalCountsPanel extends ChartDetailPanel implements NuclearSignal
 	}
 
 	@Override
-	protected void updateMultiple() {
+	protected synchronized void updateMultiple() {
 		filterBtn.setEnabled(false);
 		ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets())
 				.addStatistic(Measurement.NUCLEUS_SIGNAL_COUNT)
@@ -132,13 +133,13 @@ public class SignalCountsPanel extends ChartDetailPanel implements NuclearSignal
 	}
 
 	@Override
-	protected void updateNull() {
+	protected synchronized void updateNull() {
 		updateMultiple();
 		filterBtn.setEnabled(false);
 	}
 
 	@Override
-	public void setLoading() {
+	public synchronized void setLoading() {
 		super.setLoading();
 		chartPanel.setChart(AbstractChartFactory.createLoadingChart());
 
@@ -154,7 +155,7 @@ public class SignalCountsPanel extends ChartDetailPanel implements NuclearSignal
 
 		private static final String DIALOG_TITLE = "Signal filtering options";
 
-		private final IAnalysisDataset dataset;
+		private final transient IAnalysisDataset dataset;
 
 		private int minSignals;
 		private int maxSignals;
@@ -204,17 +205,19 @@ public class SignalCountsPanel extends ChartDetailPanel implements NuclearSignal
 				ICellCollection filtered = CellCollectionFilterer.filter(dataset.getCollection(),
 						options);
 				ICellCollection virt = new VirtualDataset(dataset, filtered.getName());
-				filtered.getCells().forEach(c -> virt.addCell(c));
+				filtered.getCells().forEach(virt::addCell);
 				virt.setName(
 						"Filtered_signal_count_" + groupPanel.getSelectedGroup().getGroupName());
 
 				dataset.getCollection().getProfileManager().copySegmentsAndLandmarksTo(virt);
 				dataset.addChildCollection(virt);
 
-				// TODO: fire a dataset added update
+				// Alert new dataset has been added
+				UIController.getInstance().fireDatasetAdded(dataset.getChildDataset(virt.getId()));
+
 			} catch (CollectionFilteringException | ProfileException | MissingProfileException
 					| MissingLandmarkException e1) {
-				LOGGER.log(Loggable.STACK, "Unable to filter collection for " + dataset.getName(),
+				LOGGER.log(Loggable.STACK, "Unable to filter collection for %s".formatted(dataset.getName()),
 						e1);
 			}
 		}
@@ -243,7 +246,7 @@ public class SignalCountsPanel extends ChartDetailPanel implements NuclearSignal
 
 			int max = dataset.getCollection().getNuclei().stream()
 					.flatMap(n -> n.getSignalCollection().getSignals().stream())
-					.mapToInt(l -> l.size()).max()
+					.mapToInt(List::size).max()
 					.orElse(0);
 
 			maxSignals = max;

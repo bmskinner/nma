@@ -54,7 +54,6 @@ public class IterativeSegmentFitter {
      * @param profile the template profile with segments to be fitted
      * @throws ProfileException if the template profile cannot be copied
      */
-    @SuppressWarnings("null")
 	public IterativeSegmentFitter(@NonNull final ISegmentedProfile template) throws ProfileException {
         templateProfile = template.duplicate();
     }
