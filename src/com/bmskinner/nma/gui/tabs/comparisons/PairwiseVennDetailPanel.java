@@ -28,10 +28,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.table.TableModel;
 
-import org.eclipse.jdt.annotation.NonNull;
-
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
-import com.bmskinner.nma.core.InputSupplier;
 import com.bmskinner.nma.gui.components.ExportableTable;
 import com.bmskinner.nma.gui.tabs.TableDetailPanel;
 import com.bmskinner.nma.logging.Loggable;

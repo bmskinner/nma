@@ -15,7 +15,6 @@ import org.junit.rules.ExpectedException;
 import com.bmskinner.nma.TestResources;
 import com.bmskinner.nma.analysis.AnalysisMethodException;
 import com.bmskinner.nma.analysis.IAnalysisResult;
-import com.bmskinner.nma.analysis.nucleus.NucleusDetectionMethod;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.options.DefaultAnalysisOptions;
 import com.bmskinner.nma.components.options.IAnalysisOptions;

@@ -9,10 +9,6 @@ import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
 import org.junit.Test;
 
-import com.bmskinner.nma.components.options.DefaultOptions;
-import com.bmskinner.nma.components.options.HashOptions;
-import com.bmskinner.nma.components.options.OptionsFactory;
-
 public class DefaultOptionsTest {
 
 	@Test

@@ -24,12 +24,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import com.bmskinner.nma.components.profiles.DefaultProfile;
-import com.bmskinner.nma.components.profiles.DefaultProfileAggregate;
-import com.bmskinner.nma.components.profiles.IProfile;
-import com.bmskinner.nma.components.profiles.IProfileAggregate;
-import com.bmskinner.nma.components.profiles.ProfileException;
-
 public class DefaultProfileAggregateTest {
 	
 	@Rule

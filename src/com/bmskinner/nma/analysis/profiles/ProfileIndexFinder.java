@@ -33,9 +33,9 @@ import com.bmskinner.nma.components.profiles.ProfileException;
 import com.bmskinner.nma.components.profiles.ProfileType;
 import com.bmskinner.nma.components.rules.OrientationMark;
 import com.bmskinner.nma.components.rules.Rule;
+import com.bmskinner.nma.components.rules.Rule.RuleType;
 import com.bmskinner.nma.components.rules.RuleSet;
 import com.bmskinner.nma.components.rules.RuleSetCollection;
-import com.bmskinner.nma.components.rules.Rule.RuleType;
 import com.bmskinner.nma.logging.Loggable;
 import com.bmskinner.nma.stats.Stats;
 

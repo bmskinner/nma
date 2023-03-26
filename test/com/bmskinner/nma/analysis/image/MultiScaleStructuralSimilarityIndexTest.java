@@ -8,7 +8,6 @@ import java.util.logging.Logger;
 import org.junit.Test;
 
 import com.bmskinner.nma.TestResources;
-import com.bmskinner.nma.analysis.image.MultiScaleStructuralSimilarityIndex;
 import com.bmskinner.nma.analysis.image.MultiScaleStructuralSimilarityIndex.MSSIMScore;
 
 import ij.IJ;

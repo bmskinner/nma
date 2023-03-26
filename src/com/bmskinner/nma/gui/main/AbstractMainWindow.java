@@ -16,8 +16,6 @@
  ******************************************************************************/
 package com.bmskinner.nma.gui.main;
 
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowStateListener;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;

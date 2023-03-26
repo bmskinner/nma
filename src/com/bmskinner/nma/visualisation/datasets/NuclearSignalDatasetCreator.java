@@ -31,18 +31,18 @@ import org.jfree.data.xy.DefaultXYZDataset;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYZDataset;
 
-import com.bmskinner.nma.analysis.signals.shells.ShellDetector;
 import com.bmskinner.nma.analysis.signals.shells.ShellAnalysisMethod.ShellAnalysisException;
+import com.bmskinner.nma.analysis.signals.shells.ShellDetector;
 import com.bmskinner.nma.analysis.signals.shells.ShellDetector.Shell;
 import com.bmskinner.nma.components.MissingLandmarkException;
 import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.datasets.ICellCollection;
 import com.bmskinner.nma.components.signals.IShellResult;
-import com.bmskinner.nma.components.signals.ISignalGroup;
 import com.bmskinner.nma.components.signals.IShellResult.Aggregation;
 import com.bmskinner.nma.components.signals.IShellResult.Normalisation;
 import com.bmskinner.nma.components.signals.IShellResult.ShrinkType;
+import com.bmskinner.nma.components.signals.ISignalGroup;
 import com.bmskinner.nma.logging.Loggable;
 import com.bmskinner.nma.visualisation.options.ChartOptions;
 

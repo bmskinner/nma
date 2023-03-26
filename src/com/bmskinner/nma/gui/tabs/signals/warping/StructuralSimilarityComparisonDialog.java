@@ -59,7 +59,6 @@ public class StructuralSimilarityComparisonDialog extends LoadingIconDialog {
 		JPanel centrePanel = createCentrePanel();
 
 		setLayout(new BorderLayout());
-//		add(headerPanel, BorderLayout.NORTH);
 		add(centrePanel, BorderLayout.CENTER);
 
 		setTitle(DIALOG_TITLE);
@@ -95,7 +94,6 @@ public class StructuralSimilarityComparisonDialog extends LoadingIconDialog {
 
 		JPanel tablePanel = new JPanel(new BorderLayout());
 		JPanel centrePanel = new JPanel(new BorderLayout());
-//		JPanel perCellPanel = createPerCellPanel();
 
 		JScrollPane scrollPane = new JScrollPane(comparisonTable);
 		scrollPane.setColumnHeaderView(comparisonTable.getTableHeader());
@@ -104,100 +102,7 @@ public class StructuralSimilarityComparisonDialog extends LoadingIconDialog {
 		tablePanel.add(createHeaderPanel(), BorderLayout.NORTH);
 
 		centrePanel.add(tablePanel, BorderLayout.CENTER);
-//		centrePanel.add(perCellPanel, BorderLayout.EAST);
 
 		return centrePanel;
 	}
-
-//	private JPanel createPerCellPanel() {
-//		JPanel panel = new JPanel(new BorderLayout());
-//		panel.add(createPerCellHeaderPanel(), BorderLayout.NORTH);
-//		panel.add(chartPanel, BorderLayout.CENTER);
-//		return panel;
-//
-//	}
-
-//	private JPanel createPerCellHeaderPanel() {
-//		JPanel panel = new JPanel();
-//		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-//
-//		JPanel headerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-//		JLabel compareLabel = new JLabel(
-//				"If the dataset has >1 signal group, generate MS-SSIM* scores per-cell " + "between each signal group");
-//		JButton runPerCellBtn = new JButton("Run");
-//		runPerCellBtn.addActionListener(e -> makePerCellCharts());
-//
-//		headerPanel.add(runPerCellBtn);
-//		headerPanel.add(compareLabel);
-//
-//		panel.add(headerPanel);
-//
-//		JPanel progressPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-//		progressPanel.add(getLoadingLabel());
-//		progressPanel.add(progressBar);
-//		progressBar.setVisible(false);
-//
-//		panel.add(progressPanel);
-//		return panel;
-//	}
-
-//	private void makePerCellCharts() {
-//		LOGGER.fine("Creating per cell charts");
-//
-//		chartPanel.setChart(ViolinChartFactory.createLoadingChart());
-//		progressBar.setVisible(true);
-//		PerCellMSSSIMCalculationMethod calc = new PerCellMSSSIMCalculationMethod(model);
-//		calc.addPropertyChangeListener(evt -> {
-//			if (evt.getNewValue() instanceof Integer) {
-//				int percent = (Integer) evt.getNewValue(); // should be percent
-//				if (percent >= 0 && percent <= 100) {
-//					if (progressBar.isIndeterminate()) {
-//						progressBar.setIndeterminate(false);
-//					}
-//					progressBar.setValue(percent);
-//				}
-//			}
-//
-//			if (IAnalysisWorker.FINISHED_MSG.equals(evt.getPropertyName())) {
-//				progressBar.setValue(0);
-//				progressBar.setVisible(false);
-//				setLoadingLabelText("");
-//
-//				Map<ViolinKey, List<MSSIMScore>> scores;
-//				try {
-//					scores = calc.get();
-//					chartPanel.setChart(makeCharts(scores));
-//				} catch (InterruptedException | ExecutionException e) {
-//					LOGGER.log(Loggable.STACK, "Error making per cell MS-SSIM* scores", e);
-//					chartPanel.setChart(ViolinChartFactory.createErrorChart());
-//				}
-//
-//			}
-//		});
-//		setLoadingLabelText("Generating pairwise comparison plots...");
-//		LOGGER.fine("Executing pairwise method");
-//		ThreadManager.getInstance().execute(calc);
-//
-//	}
-
-//	private JFreeChart makeCharts(Map<ViolinKey, List<MSSIMScore>> scores) {
-//
-//		if (scores.isEmpty())
-//			return AbstractChartFactory.createEmptyChart();
-//
-//		ViolinCategoryDataset ds = new ViolinCategoryDataset();
-//		for (ViolinKey key : scores.keySet()) {
-//			List<Double> msssims = scores.get(key).stream().map(s -> s.msSsimIndex).collect(Collectors.toList());
-//			ds.add(msssims, key.colKey, key.rowKey);
-//		}
-//
-//		ViolinRenderer renderer = new ViolinRenderer();
-//		CategoryAxis categoryAxis = new CategoryAxis("Sample");
-//		NumberAxis valueAxis = new NumberAxis("Score");
-//		valueAxis.setAutoRangeIncludesZero(true);
-//		CategoryPlot plot = new CategoryPlot(ds, categoryAxis, valueAxis, renderer);
-//		valueAxis.setRange(0, 1);
-//		return new JFreeChart("", JFreeChart.DEFAULT_TITLE_FONT, plot, true);
-//	}
-
 }

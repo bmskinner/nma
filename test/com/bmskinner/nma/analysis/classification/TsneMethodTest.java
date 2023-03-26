@@ -9,7 +9,6 @@ import org.junit.Test;
 
 import com.bmskinner.nma.ComponentTester;
 import com.bmskinner.nma.TestDatasetBuilder;
-import com.bmskinner.nma.analysis.classification.TsneMethod;
 import com.bmskinner.nma.components.Statistical;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.measure.Measurement;

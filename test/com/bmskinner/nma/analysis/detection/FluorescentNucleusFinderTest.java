@@ -1,6 +1,6 @@
 package com.bmskinner.nma.analysis.detection;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.io.File;
 import java.util.List;
@@ -13,8 +13,6 @@ import org.junit.Test;
 
 import com.bmskinner.nma.ComponentTester;
 import com.bmskinner.nma.TestResources;
-import com.bmskinner.nma.analysis.detection.FinderDisplayType;
-import com.bmskinner.nma.analysis.detection.FluorescentNucleusFinder;
 import com.bmskinner.nma.analysis.profiles.ProfileCreator;
 import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.cells.ComponentCreationException;

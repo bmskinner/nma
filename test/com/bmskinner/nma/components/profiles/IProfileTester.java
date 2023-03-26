@@ -21,12 +21,6 @@ import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 
 import com.bmskinner.nma.components.cells.CellularComponent;
-import com.bmskinner.nma.components.profiles.BooleanProfile;
-import com.bmskinner.nma.components.profiles.DefaultProfile;
-import com.bmskinner.nma.components.profiles.DefaultProfileSegment;
-import com.bmskinner.nma.components.profiles.IProfile;
-import com.bmskinner.nma.components.profiles.IProfileSegment;
-import com.bmskinner.nma.components.profiles.ProfileException;
 import com.bmskinner.nma.samples.dummy.DummySegmentedCellularComponent;
 
 /**

@@ -15,9 +15,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import com.bmskinner.nma.components.generic.FloatPoint;
-import com.bmskinner.nma.components.generic.IPoint;
-
 /**
  * @author ben
  *

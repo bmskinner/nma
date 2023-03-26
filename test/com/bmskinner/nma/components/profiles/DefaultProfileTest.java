@@ -28,8 +28,6 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import com.bmskinner.nma.ComponentTester;
-import com.bmskinner.nma.components.profiles.DefaultProfile;
-import com.bmskinner.nma.components.profiles.IProfile;
 
 
 public class DefaultProfileTest {

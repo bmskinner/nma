@@ -43,7 +43,7 @@ public abstract class ComponentTester extends FloatArrayTester {
 	private static final Logger LOGGER = Logger.getLogger(ComponentTester.class.getName());
 
 	/** Classes that we have custom code to inspect **/
-	private static final List<Class> SPECIAL_CLASSES = List.of(HashMap.class,
+	private static final List<Class<?>> SPECIAL_CLASSES = List.of(HashMap.class,
 			ConcurrentHashMap.class,
 			LinkedHashMap.class, Map.class, HashSet.class, ArrayList.class);
 
@@ -165,22 +165,22 @@ public abstract class ComponentTester extends FloatArrayTester {
 
 			if (oValue != null && dValue != null) {
 
-				Class oClass = oValue.getClass();
+				Class<?> oClass = oValue.getClass();
 				if (SPECIAL_CLASSES.contains(oClass)) {
 
 					if (oClass.equals(Map.class) || oClass.equals(ConcurrentHashMap.class)
 							|| oClass.equals(LinkedHashMap.class) || oClass.equals(HashMap.class)) {
-						testHashMapsByField(msg + "->" + f.getName(), f, (Map) oValue,
-								(Map) dValue);
+						testHashMapsByField(msg + "->" + f.getName(), f, (Map<?, ?>) oValue,
+								(Map<?, ?>) dValue);
 					}
 
 					if (oClass.equals(HashSet.class)) {
-						testHashSetsByField(msg + "->" + f.getName(), f, (HashSet) oValue,
-								(HashSet) dValue);
+						testHashSetsByField(msg + "->" + f.getName(), f, (HashSet<?>) oValue,
+								(HashSet<?>) dValue);
 					}
 					if (oClass.equals(ArrayList.class)) {
-						testListEqualityByField(msg + "->" + f.getName(), f, (List) oValue,
-								(List) dValue,
+						testListEqualityByField(msg + "->" + f.getName(), f, (List<?>) oValue,
+								(List<?>) dValue,
 								fieldsToSkip);
 					}
 
@@ -223,14 +223,14 @@ public abstract class ComponentTester extends FloatArrayTester {
 	// Issue with arrays in hashmaps: Object.hashcode()
 	// depends on reference, so is not equal between two
 	// arrays. Need to use Arrays.hashcode().
-	private static void testHashMapsByField(String msg, Field f, Map o, Map d) {
+	private static void testHashMapsByField(String msg, Field f, Map<?, ?> o, Map<?, ?> d) {
 		assertTrue(msg + " Hashmaps should not both be null in " + f.getName(),
 				o != null && d != null);
 		assertEquals(msg + " Maps should contain same number of elements in field '" + f.getName()
 				+ "'; original: " + o
 				+ " duplicate: " + d, o.size(), d.size());
 
-		List<Class> arrayClasses = List.of(byte[].class, float[].class, long[].class, int[].class,
+		List<Class<?>> arrayClasses = List.of(byte[].class, float[].class, long[].class, int[].class,
 				double[].class);
 
 		for (Object e : o.keySet()) {
@@ -275,7 +275,7 @@ public abstract class ComponentTester extends FloatArrayTester {
 		}
 	}
 
-	private static void testHashSetsByField(String msg, Field f, HashSet o, HashSet d) {
+	private static void testHashSetsByField(String msg, Field f, HashSet<?> o, HashSet<?> d) {
 		assertTrue(msg + " Hashsets should not both be null", o != null && d != null);
 		assertEquals(msg + " Hashsets should contain same number of elements", o.size(), d.size());
 
@@ -293,7 +293,7 @@ public abstract class ComponentTester extends FloatArrayTester {
 	 * @param d the duplicate list
 	 * @throws Exception
 	 */
-	private static void testListEqualityByField(String msg, Field f, List o, List d,
+	private static void testListEqualityByField(String msg, Field f, List<?> o, List<?> d,
 			Set<String> fieldsToSkip)
 			throws Exception {
 		assertTrue(msg + " Field '" + f.getName() + "' lists should not both be null",

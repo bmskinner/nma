@@ -8,7 +8,6 @@ import java.util.List;
 import org.junit.Test;
 
 import com.bmskinner.nma.TestDatasetBuilder;
-import com.bmskinner.nma.analysis.profiles.RepresentativeMedianFinder;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.profiles.IProfile;
 import com.bmskinner.nma.components.profiles.ISegmentedProfile;

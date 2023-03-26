@@ -41,9 +41,9 @@ import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.xy.XYZDataset;
 
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
-import com.bmskinner.nma.components.signals.ISignalGroup;
 import com.bmskinner.nma.components.signals.IShellResult.Aggregation;
 import com.bmskinner.nma.components.signals.IShellResult.Normalisation;
+import com.bmskinner.nma.components.signals.ISignalGroup;
 import com.bmskinner.nma.gui.Labels;
 import com.bmskinner.nma.gui.components.ColourSelecter;
 import com.bmskinner.nma.visualisation.ChartComponents;

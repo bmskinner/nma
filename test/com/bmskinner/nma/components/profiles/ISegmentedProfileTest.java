@@ -90,7 +90,7 @@ public class ISegmentedProfileTest {
 	}
 
 	@Parameters
-	public static Iterable<Class> arguments() {
+	public static Iterable<Class<?>> arguments() {
 
 		// Since the objects created here persist throughout all tests,
 		// we're making class references. The actual objects under test

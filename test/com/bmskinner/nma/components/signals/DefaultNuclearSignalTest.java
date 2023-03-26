@@ -3,7 +3,6 @@ package com.bmskinner.nma.components.signals;
 import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 
 import org.jdom2.Element;
 import org.jdom2.output.Format;
@@ -15,8 +14,6 @@ import com.bmskinner.nma.ComponentTester;
 import com.bmskinner.nma.TestDatasetBuilder;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.rules.RuleSetCollection;
-import com.bmskinner.nma.components.signals.DefaultNuclearSignal;
-import com.bmskinner.nma.components.signals.INuclearSignal;
 
 /**
  * Tests for the default nuclear signal class

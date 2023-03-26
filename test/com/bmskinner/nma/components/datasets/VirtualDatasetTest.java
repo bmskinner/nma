@@ -2,7 +2,6 @@ package com.bmskinner.nma.components.datasets;
 
 import static org.junit.Assert.assertEquals;
 
-import java.io.PrintWriter;
 import java.util.UUID;
 
 import org.jdom2.Element;
@@ -13,9 +12,6 @@ import org.junit.Test;
 
 import com.bmskinner.nma.ComponentTester;
 import com.bmskinner.nma.TestDatasetBuilder;
-import com.bmskinner.nma.components.datasets.DatasetCreator;
-import com.bmskinner.nma.components.datasets.IAnalysisDataset;
-import com.bmskinner.nma.components.datasets.VirtualDataset;
 import com.bmskinner.nma.components.rules.RuleSetCollection;
 
 public class VirtualDatasetTest extends ComponentTester {

@@ -32,8 +32,6 @@ import org.junit.Test;
 
 import com.bmskinner.nma.components.generic.FloatPoint;
 import com.bmskinner.nma.components.generic.IPoint;
-import com.bmskinner.nma.components.measure.DoubleEquation;
-import com.bmskinner.nma.components.measure.LineEquation;
 
 /**
  * @author bms41

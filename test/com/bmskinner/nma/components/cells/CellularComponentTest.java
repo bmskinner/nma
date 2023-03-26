@@ -15,8 +15,6 @@ import org.junit.runners.Parameterized.Parameters;
 
 import com.bmskinner.nma.ComponentTester;
 import com.bmskinner.nma.TestDatasetBuilder;
-import com.bmskinner.nma.components.cells.CellularComponent;
-import com.bmskinner.nma.components.cells.DefaultNucleus;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.rules.RuleSetCollection;
 

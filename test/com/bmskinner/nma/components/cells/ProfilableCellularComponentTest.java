@@ -14,8 +14,6 @@ import org.junit.Test;
 
 import com.bmskinner.nma.ComponentTester;
 import com.bmskinner.nma.components.TestComponentFactory;
-import com.bmskinner.nma.components.cells.ICell;
-import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.profiles.IProfileSegment;
 import com.bmskinner.nma.components.profiles.ISegmentedProfile;
 import com.bmskinner.nma.components.profiles.ProfileType;

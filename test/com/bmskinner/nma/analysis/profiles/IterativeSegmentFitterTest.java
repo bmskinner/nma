@@ -12,7 +12,6 @@ import org.junit.rules.ExpectedException;
 
 import com.bmskinner.nma.ComponentTester;
 import com.bmskinner.nma.TestDatasetBuilder;
-import com.bmskinner.nma.analysis.profiles.IterativeSegmentFitter;
 import com.bmskinner.nma.charting.ChartFactoryTest;
 import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;

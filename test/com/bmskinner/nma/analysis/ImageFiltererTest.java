@@ -1,7 +1,6 @@
 package com.bmskinner.nma.analysis;
 
 import ij.process.ByteProcessor;
-import ij.process.ImageProcessor;
 
 /**
  * Tests for image filterer
@@ -130,24 +129,6 @@ public class ImageFiltererTest {
 		return createProcessor(pixels);
 	}
 				
-	private void printPixelArray(ImageProcessor ip){
-		for(int x = 0; x<ip.getWidth(); x++){
-			for( int y=0; y<ip.getHeight(); y++){
-				System.out.print(pad(ip.get(x, y))+" ");
-			}
-			System.out.print("\n");
-		}
-	}
-	
-	private void printPixelArray(int[][] array){
-		for(int x = 0; x<3; x++){
-			for( int y=0; y<3; y++){
-				System.out.print(pad(array[x][y])+" ");
-			}
-			System.out.print("\n");
-		}
-	}
-	
 	public static String pad(int s) {
 		if(s>=100){
 			return String.valueOf(s);

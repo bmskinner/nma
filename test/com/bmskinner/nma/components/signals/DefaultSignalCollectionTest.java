@@ -14,8 +14,6 @@ import com.bmskinner.nma.ComponentTester;
 import com.bmskinner.nma.TestDatasetBuilder;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.rules.RuleSetCollection;
-import com.bmskinner.nma.components.signals.DefaultSignalCollection;
-import com.bmskinner.nma.components.signals.ISignalCollection;
 
 /**
  * Tests for the default signal collection class

@@ -13,8 +13,6 @@ import com.bmskinner.nma.ComponentTester;
 import com.bmskinner.nma.components.TestComponentFactory;
 import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.rules.RuleSetCollection;
-import com.bmskinner.nma.components.signals.DefaultWarpedSignal;
-import com.bmskinner.nma.components.signals.IWarpedSignal;
 
 import ij.process.ByteProcessor;
 

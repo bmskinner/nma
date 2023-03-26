@@ -17,7 +17,6 @@ import com.bmskinner.nma.io.Io;
 import com.bmskinner.nma.logging.ConsoleFormatter;
 import com.bmskinner.nma.logging.ConsoleHandler;
 import com.bmskinner.nma.logging.Loggable;
-import com.bmskinner.nma.pipelines.SavedOptionsAnalysisPipeline;
 
 import ij.Prefs;
 

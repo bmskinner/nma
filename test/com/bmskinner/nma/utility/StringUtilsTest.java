@@ -6,8 +6,6 @@ import java.util.Arrays;
 
 import org.junit.Test;
 
-import com.bmskinner.nma.utility.StringUtils;
-
 public class StringUtilsTest {
 	
 	@Test

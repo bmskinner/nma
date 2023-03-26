@@ -1,6 +1,6 @@
 package com.bmskinner.nma.components.signals;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.util.UUID;
 
@@ -8,8 +8,6 @@ import org.jdom2.Element;
 import org.junit.Test;
 
 import com.bmskinner.nma.components.cells.ComponentCreationException;
-import com.bmskinner.nma.components.signals.ShellCount;
-import com.bmskinner.nma.components.signals.ShellKey;
 
 public class ShellCountTest {
 

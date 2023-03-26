@@ -9,8 +9,8 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nma.ComponentTester;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
-import com.bmskinner.nma.io.PackageReplacementObjectInputStream;
 import com.bmskinner.nma.io.DatasetImportMethod.UnloadableDatasetException;
+import com.bmskinner.nma.io.PackageReplacementObjectInputStream;
 
 /**
  * This class tests the conversions between component

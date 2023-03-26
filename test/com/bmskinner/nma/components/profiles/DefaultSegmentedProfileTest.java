@@ -31,15 +31,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import com.bmskinner.nma.components.profiles.DefaultProfile;
-import com.bmskinner.nma.components.profiles.DefaultProfileSegment;
-import com.bmskinner.nma.components.profiles.DefaultSegmentedProfile;
-import com.bmskinner.nma.components.profiles.IProfile;
-import com.bmskinner.nma.components.profiles.IProfileCollection;
-import com.bmskinner.nma.components.profiles.IProfileSegment;
-import com.bmskinner.nma.components.profiles.ISegmentedProfile;
-import com.bmskinner.nma.components.profiles.ProfileException;
-
 /**
  * Tests for the methods specific to the segmented float profile. Common methods are
  * tested by {@link ISegmentedProfileTest}

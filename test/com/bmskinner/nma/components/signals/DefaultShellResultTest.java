@@ -24,7 +24,6 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.UUID;
 
@@ -39,8 +38,6 @@ import com.bmskinner.nma.ComponentTester;
 import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.cells.ICell;
 import com.bmskinner.nma.components.cells.Nucleus;
-import com.bmskinner.nma.components.signals.DefaultShellResult;
-import com.bmskinner.nma.components.signals.INuclearSignal;
 import com.bmskinner.nma.components.signals.IShellResult.Aggregation;
 import com.bmskinner.nma.components.signals.IShellResult.CountType;
 import com.bmskinner.nma.components.signals.IShellResult.Normalisation;
