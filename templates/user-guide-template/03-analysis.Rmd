@@ -152,10 +152,10 @@ The available options are:
 
 Operation | Condition
 -------|-------
-```AND``` | the cell is present in both datasets
-```OR``` | the cell is present in either dataset (same as [merging datasets](#merge-method))
-```NOT``` | the cell is in dataset one, but not dataset two
-```XOR``` | the cell is in either dataset one or dataset two, but not both
+`AND` | the cell is present in both datasets
+`OR` | the cell is present in either dataset (same as [merging datasets](#merge-method))
+`NOT` | the cell is in dataset one, but not dataset two
+`XOR` | the cell is in either dataset one or dataset two, but not both
 
 
 
@@ -177,7 +177,7 @@ Allows nuclei to be manually assigned to clusters.
 - Choose the number of clusters you want to make, and their names
 - Each nucleus will be displayed with a button to choose which cluster to put it in
 
-```{r, out.width="100%", out.height="100%", fig.show='hold', echo=F}
+```{r, out.width="100%", out.height="100%", fig.show='hold', fig.align='center', echo=F}
 knitr::include_graphics("img/gifs/Cluster_manual.gif")
 ```
 
@@ -190,7 +190,7 @@ Allows nuclei to be assigned to clusters based on their shape, or other measurem
 - Choose whether to perform dimensionality reduction
 - Choose the clustering method
 
-```{r, out.width="100%", out.height="100%", fig.show='hold', echo=F}
+```{r, out.width="100%", out.height="100%", fig.show='hold', fig.align='center', echo=F}
 knitr::include_graphics("img/gifs/Cluster_automatic.gif")
 ```
 
@@ -198,17 +198,26 @@ The default clustering is on the profile angles within each nucleus. Checkboxes 
 
 #### Dimensionality reduction
 
-Dimensionality reduction can be optionally applied before clustering. PCA and tSNE are provided; however, for reproducibile analysis it is recommended that you export the measurements and run these in your preferred stats package. tSNE especially makes use of a random number generator, and so generates a slightly different plot every time you run it. This can be controlled with fixed seeds in stats programs like R.
+Dimensionality reduction can be optionally applied before clustering. PCA, tSNE and UMAP are provided; however, for reproducibile analysis it is recommended that you export the measurements and run these in your preferred stats package. tSNE especially makes use of a random number generator, and so generates a slightly different plot every time you run it. This can be controlled with fixed seeds in stats programs like R.
 
-If dimensionality reduction was applied, after clustering is complete, the first two dimensions can be viewed in a scatter plot by clicking the `View plot` button in the cluster parameters table.
+You can choose whether or not to use the dimensionality reduction values for clustering. The default is to cluster directly on the parameters, and use the dimensionality reduction purely for visualisation.
+
+If dimensionality reduction was applied, after clustering is complete, the first two dimensions can be viewed in a scatter plot by clicking the `View plot` button in the cluster parameters table. This will also display the consensus nuclei of each cluster, and overlay a random subset of nucleus images to help you see what actually separates your clusters.
+
+```{r, out.width="80%", out.height="80%", fig.show='hold', fig.align='center', echo=F}
+knitr::include_graphics("img/Clusters_UMAP.PNG")
+```
 
 #### Clustering method
 
-Clustering can be performed using [hierarchical clustering](https://en.wikipedia.org/wiki/Hierarchical_clustering) or [expectation maximisation](https://en.wikipedia.org/wiki/Expectation%E2%80%93maximization_algorithm) clustering.
+Clustering can be performed using [hierarchical clustering](https://en.wikipedia.org/wiki/Hierarchical_clustering) or [expectation maximisation](https://en.wikipedia.org/wiki/Expectation%E2%80%93maximization_algorithm) clustering. 
+
+- Hierarchical clustering will link the cells that are most similar, building a tree. The number of clusters you get is pre-determined; cluster assignments for $n$ clusters are made by slicing the tree at the point where there are $n$ branches. This may be more useful if you know the number of groups you expect to find.
+- EM clustering is a variant of K-means clustering that tries to determine the best number of clusters itself. This may be more useful if you are trying to discover novel variation in a sample.
 
 Once clustering is complete, if hierarchical clustering was selected, a `Show tree` button will be available. Clicking this button will launch the tree viewer.
 
-```{r, out.width="100%", out.height="100%", fig.show='hold', echo=F}
+```{r, out.width="80%", out.height="80%", fig.show='hold', fig.align='center', echo=F}
 knitr::include_graphics("img/Clusters_tree_view.png")
 ```
 
