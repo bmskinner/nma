@@ -21,6 +21,7 @@ import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Window;
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
@@ -125,11 +126,11 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 
 	private static final String OPEN_CONFIG_FILE_LBL = "Open config file";
 
-	private final MainView mw;
+	private final transient MainView mw;
 
 	private final JPanel monitorPanel;
 
-	private MenuFactory fact = new MenuFactory();
+	private transient MenuFactory fact = new MenuFactory();
 
 	public MainWindowMenuBar(MainView mw) {
 		super();
@@ -148,23 +149,23 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 	}
 
 	private JPanel createMonitorPanel() {
-		JPanel monitorPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-		monitorPanel.add(new JLabel(TASK_QUEUE_LBL));
-		monitorPanel.add(Box.createHorizontalStrut(5));
+		JPanel panel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+		panel.add(new JLabel(TASK_QUEUE_LBL));
+		panel.add(Box.createHorizontalStrut(5));
 		TaskListMonitor t = new TaskListMonitor();
 		t.setPreferredSize(new Dimension(100, t.getPreferredSize().height));
 		t.setBorder(BorderFactory.createBevelBorder(1));
-		monitorPanel.add(t);
-		monitorPanel.add(Box.createHorizontalStrut(10));
-		monitorPanel.add(new JLabel(MEMORY_LBL));
-		monitorPanel.add(Box.createHorizontalStrut(5));
+		panel.add(t);
+		panel.add(Box.createHorizontalStrut(10));
+		panel.add(new JLabel(MEMORY_LBL));
+		panel.add(Box.createHorizontalStrut(5));
 		MemoryIndicator m = new MemoryIndicator();
 		m.setPreferredSize(new Dimension(100, m.getPreferredSize().height));
 		m.setBorder(BorderFactory.createBevelBorder(1));
-		monitorPanel.add(m);
-		monitorPanel.setVisible(false);
-		monitorPanel.setOpaque(false);
-		return monitorPanel;
+		panel.add(m);
+		panel.setVisible(false);
+		panel.setOpaque(false);
+		return panel;
 	}
 
 	private ContextualMenu createFileMenu() {
@@ -178,7 +179,7 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 		i1.addActionListener(
 				e -> new NewAnalysisAction(
 						UserActionController.getInstance().getProgressBarAcceptor()).run());
-		i1.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, KeyEvent.CTRL_DOWN_MASK));
+		i1.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.CTRL_DOWN_MASK));
 		newMenu.add(i1);
 
 		newMenu.add(fact.makeItem(NEW_ANALYSIS_SAVED_LBL, UserActionEvent.IMPORT_WORKFLOW_PREFIX,
@@ -199,7 +200,7 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 		o1.addActionListener(e -> UserActionController.getInstance()
 				.fileImportRequested(new FileImportEvent(this, null,
 						IAnalysisDataset.XML_ANALYSIS_DATASET, null)));
-		o1.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, KeyEvent.CTRL_DOWN_MASK));
+		o1.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_DOWN_MASK));
 		openMenu.add(o1);
 
 		JMenuItem o2 = fact.new ContextualMenuItem(OPEN_WORKSPACE_LBL, "",
@@ -215,7 +216,7 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 		ContextualMenuItem saveData = fact.makeItem(SAVE_DATASETS_LBL,
 				UserActionEvent.SAVE_SELECTED_DATASETS,
 				ContextEnabled.ONLY_DATASETS, SAVE_DATASETS_TOOLTIP);
-		saveData.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_DOWN_MASK));
+		saveData.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK));
 		menu.add(saveData);
 
 		ContextualMenuItem saveAllData = fact.makeItem(SAVE_ALL_DATASETS_LBL,
@@ -332,12 +333,12 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 					if (src != null) {
 						File jarFile = new File(src.getLocation().toURI().getPath());
 
-						LOGGER.fine("Copying help files from jar at: " + jarFile.toString());
+						LOGGER.fine(() -> "Copying help files from jar at: %s".formatted(jarFile.toString()));
 						URL fileSysUrl = new URL(
 								"jar:file:" + jarFile.getAbsolutePath() + "!/user-guide");
 
 						// Create a jar URL connection object
-						LOGGER.fine("Copying help files from url at: " + fileSysUrl.toString());
+						LOGGER.fine(() -> "Copying help files from url at: %s".formatted(fileSysUrl.toString()));
 						JarURLConnection jarURLConn = (JarURLConnection) fileSysUrl
 								.openConnection();
 						FileUtils.copyJarResourcesRecursively(userGuideDir, jarURLConn);
@@ -356,14 +357,14 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 					loadUserGuide();
 
 				} else {
-					LOGGER.fine("Opening " + mainHelpFile.toURI().toString());
+					LOGGER.fine(() -> "Opening %s".formatted(mainHelpFile.toURI().toString()));
 					Desktop desktop = Desktop.getDesktop();
 					desktop.browse(mainHelpFile.toURI());
 				}
 
 			} catch (Exception e) {
 				LOGGER.warning("Unable to open user guide; see log for details");
-				LOGGER.log(Loggable.STACK, "Error extracting user guide: " + e.getMessage(), e);
+				LOGGER.log(Loggable.STACK, "Error extracting user guide: %s".formatted(e.getMessage()), e);
 			}
 		};
 		ThreadManager.getInstance().execute(r);
@@ -400,7 +401,7 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 			try {
 				Desktop.getDesktop().open(Io.getConfigFile());
 			} catch (IOException e1) {
-				LOGGER.log(Level.SEVERE, "Unable to open config file", e);
+				LOGGER.log(Level.SEVERE, "Unable to open config file", e1);
 			}
 		});
 

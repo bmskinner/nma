@@ -97,7 +97,7 @@ public class DockableMainWindow extends AbstractMainWindow {
 		if (GlobalOptions.getInstance().getBoolean(GlobalOptions.ALLOW_UPDATE_CHECK_KEY)) {
 			Version latestVersion = UpdateChecker.fetchLatestVersion();
 			if (latestVersion.isNewerThan(Version.currentVersion())) {
-				LOGGER.info("New version " + latestVersion + " available");
+				LOGGER.info(() -> "New version %s available".formatted(latestVersion));
 			}
 		} else {
 			LOGGER.fine(
@@ -158,7 +158,7 @@ public class DockableMainWindow extends AbstractMainWindow {
 			this.pack();
 			consensusNucleusPanel.restoreAutoBounds();
 		} catch (Exception e) {
-			LOGGER.log(Level.SEVERE, "Error initialising main view: " + e.getMessage(), e);
+			LOGGER.log(Level.SEVERE, "Error initialising main view: %s".formatted(e.getMessage()), e);
 		}
 	}
 

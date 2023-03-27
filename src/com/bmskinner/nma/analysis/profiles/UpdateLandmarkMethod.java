@@ -69,7 +69,7 @@ public class UpdateLandmarkMethod extends SingleDatasetAnalysisMethod {
 	}
 
 	private void run() throws MissingLandmarkException, MissingProfileException,
-			IndexOutOfBoundsException, ProfileException, ComponentCreationException {
+			IndexOutOfBoundsException, ProfileException {
 		Landmark rp = dataset.getCollection().getRuleSetCollection()
 				.getLandmark(OrientationMark.REFERENCE).get();
 
@@ -78,7 +78,7 @@ public class UpdateLandmarkMethod extends SingleDatasetAnalysisMethod {
 			return;
 		}
 
-		LOGGER.fine(String.format("Updating '%s' to index %d in '%s'", lm, newIndex,
+		LOGGER.fine(() -> String.format("Updating '%s' to index %d in '%s'", lm, newIndex,
 				dataset.getName()));
 
 		// Try updating to an existing tag index. If this
@@ -101,7 +101,7 @@ public class UpdateLandmarkMethod extends SingleDatasetAnalysisMethod {
 					.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE, Stats.MEDIAN)
 					.getIndexOfFraction(prop);
 
-			LOGGER.fine(String.format("Updating '%s' to index %d in '%s'", lm, childIndex,
+			LOGGER.fine(() -> String.format("Updating '%s' to index %d in '%s'", lm, childIndex,
 					child.getName()));
 
 			updateLandmark(child.getCollection(), childIndex);
@@ -126,12 +126,13 @@ public class UpdateLandmarkMethod extends SingleDatasetAnalysisMethod {
 	 */
 	private synchronized boolean couldUpdateLandmarkToExistingInDataset(Landmark tag, int index)
 			throws MissingLandmarkException, MissingProfileException, ProfileException,
-			IndexOutOfBoundsException,
-			ComponentCreationException {
+			IndexOutOfBoundsException {
 		List<OrientationMark> tags = dataset.getCollection().getProfileCollection()
 				.getOrientationMarks();
+
 		for (OrientationMark existingTag : tags) {
-			if (existingTag.equals(tag))
+			Landmark lm = dataset.getCollection().getProfileCollection().getLandmark(existingTag);
+			if (lm.equals(tag))
 				continue;
 			int existingTagIndex = dataset.getCollection().getProfileCollection()
 					.getLandmarkIndex(existingTag);
@@ -167,8 +168,10 @@ public class UpdateLandmarkMethod extends SingleDatasetAnalysisMethod {
 
 		List<OrientationMark> tags = collection.getProfileCollection().getOrientationMarks();
 		for (OrientationMark existingTag : tags) {
-			if (existingTag.equals(lm))
+			Landmark lmo = dataset.getCollection().getProfileCollection().getLandmark(existingTag);
+			if (lmo.equals(lm))
 				continue;
+
 			int existingTagIndex = collection.getProfileCollection().getLandmarkIndex(existingTag);
 			if (newIndex == existingTagIndex) {
 				int newIndexOffset = CellularComponent.wrapIndex(newIndex,
@@ -212,7 +215,7 @@ public class UpdateLandmarkMethod extends SingleDatasetAnalysisMethod {
 	 */
 	private void updateLandmark(@NonNull ICellCollection collection, int index)
 			throws ProfileException, MissingLandmarkException, MissingProfileException,
-			IndexOutOfBoundsException, ComponentCreationException {
+			IndexOutOfBoundsException {
 
 		Landmark rp = collection.getRuleSetCollection().getLandmark(OrientationMark.REFERENCE)
 				.orElseThrow(MissingLandmarkException::new);
@@ -240,7 +243,7 @@ public class UpdateLandmarkMethod extends SingleDatasetAnalysisMethod {
 	 */
 	private void updateReferencePointIndex(@NonNull ICellCollection collection, int index)
 			throws MissingLandmarkException, ProfileException, MissingProfileException,
-			IndexOutOfBoundsException, ComponentCreationException {
+			IndexOutOfBoundsException {
 
 		// Get the median zeroed on the RP
 		ISegmentedProfile oldMedian = collection.getProfileCollection().getSegmentedProfile(
@@ -269,7 +272,7 @@ public class UpdateLandmarkMethod extends SingleDatasetAnalysisMethod {
 			int newIndex = CellularComponent
 					.wrapIndex(oldIndex - index, collection.getMedianArrayLength());
 
-			LOGGER.fine(String.format("Moving %s from %d to %d", l, oldIndex, newIndex));
+			LOGGER.fine(() -> String.format("Moving %s from %d to %d", l, oldIndex, newIndex));
 			collection.getProfileCollection().setLandmark(l, newIndex);
 		}
 
@@ -295,8 +298,7 @@ public class UpdateLandmarkMethod extends SingleDatasetAnalysisMethod {
 	private void updateNonReferencePoint(@NonNull ICellCollection collection,
 			int index)
 			throws ProfileException,
-			MissingLandmarkException, MissingProfileException, IndexOutOfBoundsException,
-			ComponentCreationException {
+			MissingLandmarkException, MissingProfileException, IndexOutOfBoundsException {
 
 		// If the new index for the landmark is the same as another, set directly
 		// and return
@@ -346,7 +348,7 @@ public class UpdateLandmarkMethod extends SingleDatasetAnalysisMethod {
 	private void updateNucleiLandmarkToBestFit(@NonNull ICellCollection collection,
 			@NonNull Landmark lm, @NonNull ProfileType type, @NonNull IProfile template)
 			throws MissingProfileException, ProfileException, MissingLandmarkException,
-			IndexOutOfBoundsException, ComponentCreationException {
+			IndexOutOfBoundsException {
 
 		for (Nucleus n : collection.getNuclei()) {
 			if (n.isLocked())

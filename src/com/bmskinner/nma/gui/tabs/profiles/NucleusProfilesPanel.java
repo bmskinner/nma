@@ -20,6 +20,7 @@ import java.awt.BorderLayout;
 import java.util.List;
 
 import javax.swing.JTabbedPane;
+import javax.swing.SwingConstants;
 
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.profiles.ProfileType;
@@ -38,7 +39,7 @@ public class NucleusProfilesPanel extends DetailPanel
 	public NucleusProfilesPanel() {
 		super(PANEL_TITLE_LBL);
 		this.setLayout(new BorderLayout());
-		tabPanel = new JTabbedPane(JTabbedPane.TOP);
+		tabPanel = new JTabbedPane(SwingConstants.TOP);
 
 		for (ProfileType type : ProfileType.displayValues()) {
 
