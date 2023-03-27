@@ -168,17 +168,17 @@ public class FileUtils {
 
 		if (!toCopy.isDirectory()) {
 			return FileUtils.copyFile(toCopy, new File(destDir, toCopy.getName()));
-		} else {
-			final File newDestDir = new File(destDir, toCopy.getName());
-			if (!newDestDir.exists() && !newDestDir.mkdir()) {
+		}
+		final File newDestDir = new File(destDir, toCopy.getName());
+		if (!newDestDir.exists() && !newDestDir.mkdir()) {
+			return false;
+		}
+		for (final File child : toCopy.listFiles()) {
+			if (!FileUtils.copyFilesRecusively(child, newDestDir)) {
 				return false;
 			}
-			for (final File child : toCopy.listFiles()) {
-				if (!FileUtils.copyFilesRecusively(child, newDestDir)) {
-					return false;
-				}
-			}
 		}
+
 		return true;
 	}
 
@@ -219,10 +219,10 @@ public class FileUtils {
 			if (urlConnection instanceof JarURLConnection jarUrlConnection) {
 				return FileUtils.copyJarResourcesRecursively(destination,
 						jarUrlConnection);
-			} else {
-				return FileUtils.copyFilesRecusively(new File(originUrl.getPath()),
-						destination);
 			}
+			return FileUtils.copyFilesRecusively(new File(originUrl.getPath()),
+					destination);
+
 		} catch (final IOException e) {
 			LOGGER.fine(String.format("Unable to copy files from %s to %s: %s",
 					originUrl.toString(), destination.getAbsolutePath(), e.getMessage()));

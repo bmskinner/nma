@@ -52,7 +52,7 @@ public class CellSignalStatsPanel extends TableDetailPanel implements CellEditin
 
 	private JScrollPane scrollPane;
 
-	private CellViewModel model;
+	private transient CellViewModel model;
 
 	public CellSignalStatsPanel(CellViewModel model) {
 		super(PANEL_TITLE_LBL);
@@ -124,17 +124,17 @@ public class CellSignalStatsPanel extends TableDetailPanel implements CellEditin
 	}
 
 	@Override
-	protected void updateSingle() {
+	protected synchronized void updateSingle() {
 		update();
 	}
 
 	@Override
-	protected void updateMultiple() {
+	protected synchronized void updateMultiple() {
 		updateNull();
 	}
 
 	@Override
-	protected void updateNull() {
+	protected synchronized void updateNull() {
 		table.setModel(AbstractTableCreator.createBlankTable());
 
 	}
@@ -142,12 +142,12 @@ public class CellSignalStatsPanel extends TableDetailPanel implements CellEditin
 	@Override
 	protected TableModel createPanelTableType(@NonNull TableOptions options) {
 
-		if (model.hasCell()) {
+		if (model.hasCell())
 			return new CellTableDatasetCreator(options, model.getCell())
 					.createPairwiseSignalDistanceTable();
-		} else {
-			return AbstractTableCreator.createBlankTable();
-		}
+
+		return AbstractTableCreator.createBlankTable();
+
 	}
 
 	/**

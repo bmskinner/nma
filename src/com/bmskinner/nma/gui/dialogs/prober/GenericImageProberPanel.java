@@ -523,9 +523,8 @@ public class GenericImageProberPanel extends JPanel implements ProberReloadEvent
 				if (info == null) {
 					setText("");
 					return this;
-				} else {
-					setText(info.toString());
 				}
+				setText(info.toString());
 
 				if (info.hasSmallIcon()) {
 					setIcon(info.getSmallIcon());

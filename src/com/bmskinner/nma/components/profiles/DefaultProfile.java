@@ -18,7 +18,6 @@ package com.bmskinner.nma.components.profiles;
 
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.logging.Logger;
 import java.util.stream.IntStream;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -39,8 +38,6 @@ public class DefaultProfile implements IProfile {
 
 	private static final String CANNOT_ADD_NAN_OR_INFINITY = "Cannot add NaN or infinity";
 
-	private static final Logger LOGGER = Logger.getLogger(DefaultProfile.class.getName());
-
 	private static final String XML_PROFILE = "Profile";
 
 	protected final float[] array;
@@ -53,7 +50,8 @@ public class DefaultProfile implements IProfile {
 	public DefaultProfile(final float[] values) {
 
 		if (values == null || values.length == 0)
-			throw new IllegalArgumentException("Input array has zero length in profile constructor");
+			throw new IllegalArgumentException(
+					"Input array has zero length in profile constructor");
 		this.array = values;
 	}
 
@@ -242,10 +240,10 @@ public class DefaultProfile implements IProfile {
 		if (array.length > arr2.length) {
 			arr2 = interpolate(arr2, array.length);
 			return CellularComponent.squareDifference(array, arr2);
-		} else {
-			float[] arr1 = interpolate(array, arr2.length);
-			return CellularComponent.squareDifference(arr1, arr2);
 		}
+		float[] arr1 = interpolate(array, arr2.length);
+		return CellularComponent.squareDifference(arr1, arr2);
+
 	}
 
 	/**
@@ -396,7 +394,8 @@ public class DefaultProfile implements IProfile {
 	public IProfile interpolate(int newLength) throws ProfileException {
 		if (newLength < MINIMUM_PROFILE_LENGTH)
 			throw new IllegalArgumentException(
-					String.format("New length %d below minimum %d", newLength, MINIMUM_PROFILE_LENGTH));
+					String.format("New length %d below minimum %d", newLength,
+							MINIMUM_PROFILE_LENGTH));
 		if (newLength == size())
 			return this;
 		return new DefaultProfile(interpolate(array, newLength));
@@ -408,7 +407,8 @@ public class DefaultProfile implements IProfile {
 	}
 
 	@Override
-	public int findBestFitOffset(@NonNull IProfile testProfile, int minOffset, int maxOffset) throws ProfileException {
+	public int findBestFitOffset(@NonNull IProfile testProfile, int minOffset, int maxOffset)
+			throws ProfileException {
 		float[] test = testProfile.toFloatArray();
 		if (array.length != test.length)
 			test = interpolate(test, array.length);
@@ -429,7 +429,8 @@ public class DefaultProfile implements IProfile {
 	public BooleanProfile getLocalMinima(int windowSize) {
 
 		if (windowSize < 1)
-			throw new IllegalArgumentException("Window size must be a positive integer greater than 0");
+			throw new IllegalArgumentException(
+					"Window size must be a positive integer greater than 0");
 
 		// go through angle array (with tip at start)
 		// look at 1-2-3-4-5 points ahead and behind.
@@ -498,7 +499,8 @@ public class DefaultProfile implements IProfile {
 	public BooleanProfile getLocalMaxima(int windowSize) {
 
 		if (windowSize < 1)
-			throw new IllegalArgumentException("Window size must be a positive integer greater than 0");
+			throw new IllegalArgumentException(
+					"Window size must be a positive integer greater than 0");
 
 		boolean[] result = new boolean[this.size()];
 
@@ -574,32 +576,35 @@ public class DefaultProfile implements IProfile {
 
 		if (indexStart >= array.length)
 			throw new IllegalArgumentException(
-					String.format("Start index (%d) is beyond array length (%d)", indexStart, array.length));
+					String.format("Start index (%d) is beyond array length (%d)", indexStart,
+							array.length));
 		if (indexEnd >= array.length)
 			throw new IllegalArgumentException(
-					String.format("End index (%d) is beyond array length (%d)", indexEnd, array.length));
+					String.format("End index (%d) is beyond array length (%d)", indexEnd,
+							array.length));
 		if (indexStart < 0 || indexEnd < 0)
 			throw new IllegalArgumentException(
-					String.format("Start (%d) or end index (%d) is below zero", indexStart, indexEnd));
+					String.format("Start (%d) or end index (%d) is below zero", indexStart,
+							indexEnd));
 		if (indexStart < indexEnd) {
 			return new DefaultProfile(Arrays.copyOfRange(array, indexStart, indexEnd + 1));
 
-		} else { // case when array wraps
-
-			float[] resultA = Arrays.copyOfRange(array, indexStart, array.length);
-			float[] resultB = Arrays.copyOfRange(array, 0, indexEnd + 1);
-			float[] result = new float[resultA.length + resultB.length];
-			int index = 0;
-			for (float d : resultA) {
-				result[index++] = d;
-			}
-
-			for (float d : resultB) {
-				result[index++] = d;
-			}
-
-			return new DefaultProfile(result);
 		}
+
+		float[] resultA = Arrays.copyOfRange(array, indexStart, array.length);
+		float[] resultB = Arrays.copyOfRange(array, 0, indexEnd + 1);
+		float[] result = new float[resultA.length + resultB.length];
+		int index = 0;
+		for (float d : resultA) {
+			result[index++] = d;
+		}
+
+		for (float d : resultB) {
+			result[index++] = d;
+		}
+
+		return new DefaultProfile(result);
+
 	}
 
 	@Override
@@ -630,7 +635,8 @@ public class DefaultProfile implements IProfile {
 					delta += (array[i] - prevValues[k]) + (nextValues[k] - array[i]);
 
 				} else {
-					delta += (prevValues[k - 1] - prevValues[k]) + (nextValues[k] - nextValues[k - 1]);
+					delta += (prevValues[k - 1] - prevValues[k])
+							+ (nextValues[k] - nextValues[k - 1]);
 				}
 
 			}
@@ -812,8 +818,7 @@ public class DefaultProfile implements IProfile {
 		if (getClass() != obj.getClass())
 			return false;
 		DefaultProfile other = (DefaultProfile) obj;
-		if (!Arrays.equals(array, other.array))
-			return false;
-		return true;
+
+		return (Arrays.equals(array, other.array));
 	}
 }

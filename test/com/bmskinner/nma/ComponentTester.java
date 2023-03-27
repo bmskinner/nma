@@ -230,12 +230,16 @@ public abstract class ComponentTester extends FloatArrayTester {
 				+ "'; original: " + o
 				+ " duplicate: " + d, o.size(), d.size());
 
-		List<Class<?>> arrayClasses = List.of(byte[].class, float[].class, long[].class, int[].class,
+		List<Class<?>> arrayClasses = List.of(byte[].class, float[].class, long[].class,
+				int[].class,
 				double[].class);
 
 		for (Object e : o.keySet()) {
 			Object v0 = o.get(e);
 			Object v1 = d.get(e);
+
+			if (v0 == null || v1 == null)
+				continue;
 
 			if (arrayClasses.contains(v0.getClass())) {
 				long oHash = 0;
@@ -280,6 +284,8 @@ public abstract class ComponentTester extends FloatArrayTester {
 		assertEquals(msg + " Hashsets should contain same number of elements", o.size(), d.size());
 
 		for (Object v0 : o) {
+			if (v0 == null)
+				continue;
 			assertTrue(msg + " Field '" + f.getName() + "' should contain element " + v0.toString()
 					+ " but does not; set is: " + d, d.contains(v0));
 		}

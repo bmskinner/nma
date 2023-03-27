@@ -561,11 +561,10 @@ public class ProfileIndexFinder {
 					result[1] = end;
 					return result;
 
-				} else { // otherwise, reset the counter
-
-					start = -1;
-					end = -1;
 				}
+				// otherwise, reset the counter
+				start = -1;
+				end = -1;
 
 			}
 		}

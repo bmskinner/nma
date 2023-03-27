@@ -1,5 +1,6 @@
 package com.bmskinner.nma.visualisation.datasets;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,12 +14,13 @@ import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
  * @author ben
  *
  */
+@SuppressWarnings("serial")
 public class ExportableBoxAndWhiskerCategoryDataset extends DefaultBoxAndWhiskerCategoryDataset {
 
 	/**
 	 * The raw chart data, stored under the row and column keys
 	 */
-	private Map<Comparable<?>, Map<Comparable<?>, List<?>>> rawData = new HashMap<Comparable<?>, Map<Comparable<?>, List<?>>>();
+	private transient Map<Comparable<?>, Map<Comparable<?>, List<?>>> rawData = new HashMap<>();
 
 	public ExportableBoxAndWhiskerCategoryDataset() {
 		super();
@@ -27,21 +29,15 @@ public class ExportableBoxAndWhiskerCategoryDataset extends DefaultBoxAndWhisker
 	@Override
 	public void add(List list, Comparable rowKey, Comparable columnKey) {
 		super.add(list, rowKey, columnKey);
-		Map<Comparable<?>, List<?>> row;
-		if (rawData.get(rowKey) == null) {
-			row = new HashMap<Comparable<?>, List<?>>();
-			rawData.put(rowKey, row);
-		}
-		row = rawData.get(rowKey);
-		row.put(columnKey, list);
+		rawData.computeIfAbsent(rowKey, (k) -> new HashMap<Comparable<?>, List<?>>());
+		rawData.get(rowKey).put(columnKey, list);
 	}
 
 	public List<?> getRawData(Comparable<?> rowKey, Comparable<?> columnKey) {
-		if (rawData.get(rowKey) == null) {
-			return null;
-		} else {
-			return rawData.get(rowKey).get(columnKey);
-		}
+		if (rawData.get(rowKey) == null)
+			return new ArrayList<>();
+
+		return rawData.get(rowKey).get(columnKey);
 	}
 
 }

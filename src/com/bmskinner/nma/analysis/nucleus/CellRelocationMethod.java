@@ -115,7 +115,6 @@ public class CellRelocationMethod extends SingleDatasetAnalysisMethod {
 			} catch (ProfileException | MissingProfileException | MissingLandmarkException e) {
 				LOGGER.warning("Unable to profile new collections");
 				LOGGER.log(Loggable.STACK, "Unable to profile new collections", e);
-				return;
 			}
 		}
 
@@ -254,13 +253,13 @@ public class CellRelocationMethod extends SingleDatasetAnalysisMethod {
 				IPoint com = getPosition(line);
 
 				return copyCellFromRoot(savedFile, com);
-			} else {
-				throw new CellRelocationException(
-						"No nuclear detection options - cannot check directory path");
 			}
-		} else {
-			throw new CellRelocationException("No analysis options - cannot check directory path");
+			throw new CellRelocationException(
+					"No nuclear detection options - cannot check directory path");
+
 		}
+		throw new CellRelocationException("No analysis options - cannot check directory path");
+
 	}
 
 	/**

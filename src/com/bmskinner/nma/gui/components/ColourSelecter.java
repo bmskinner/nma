@@ -33,25 +33,29 @@ public class ColourSelecter {
 	public static final Color DEFAULT_CELL_OUTLINE = Color.CYAN;
 	public static final Color DEFAULT_LOBE_OUTLINE = Color.GREEN;
 
-	public static Color[] segmentColourList = {
+	protected static Color[] segmentColourList = {
 
-			Color.BLUE, Color.ORANGE, Color.GREEN, Color.MAGENTA, Color.DARK_GRAY, Color.CYAN, Color.RED, Color.YELLOW,
+			Color.BLUE, Color.ORANGE, Color.GREEN, Color.MAGENTA, Color.DARK_GRAY, Color.CYAN,
+			Color.RED, Color.YELLOW,
 			Color.PINK, new Color(0, 153, 0), // lime green
 			new Color(135, 206, 235) // sky blue
 	};
 
 	// Colours for FISH signals in nuclei
-	public static Color[] signalColourList = { Color.RED, Color.GREEN, Color.CYAN, Color.MAGENTA, Color.YELLOW,
+	protected static Color[] signalColourList = { Color.RED, Color.GREEN, Color.CYAN, Color.MAGENTA,
+			Color.YELLOW,
 			Color.LIGHT_GRAY };
 
 	// Color blind friendly swatch
 	// See http://optional.is/required/2011/06/20/accessible-color-swatches/
-	public static Color[] optimisedSwatchList = { Color.decode("#fff200"), Color.decode("#006f45"),
-			Color.decode("#f7941e"), Color.decode("#008fd5"), Color.decode("#abd69c"), Color.decode("#741472") };
+	protected static Color[] optimisedSwatchList = { Color.decode("#fff200"),
+			Color.decode("#006f45"),
+			Color.decode("#f7941e"), Color.decode("#008fd5"), Color.decode("#abd69c"),
+			Color.decode("#741472") };
 
 	// AI generated colour names from a neural network:
 	// http://lewisandquark.tumblr.com/post/160776374467/new-paint-colors-invented-by-neural-network
-	public static Color[] aiSwatchList = { new Color(48, 94, 83), // Grade Bat
+	protected static Color[] aiSwatchList = { new Color(48, 94, 83), // Grade Bat
 			new Color(112, 113, 84), // Clardic Fug
 			new Color(216, 200, 185), // Stummy Beige
 			new Color(61, 63, 66), // Dorkwood
@@ -63,7 +67,7 @@ public class ColourSelecter {
 
 	};
 
-	public static Color[] blackList = { Color.BLACK };
+	protected static Color[] blackList = { Color.BLACK };
 
 	/**
 	 * The available colour choices, used for default dataset, segment and signal
@@ -119,7 +123,8 @@ public class ColourSelecter {
 	 */
 	public static Color getColour(OrientationMark tag) {
 
-		if (OrientationMark.BOTTOM.equals(tag) || OrientationMark.TOP.equals(tag) || OrientationMark.LEFT.equals(tag)
+		if (OrientationMark.BOTTOM.equals(tag) || OrientationMark.TOP.equals(tag)
+				|| OrientationMark.LEFT.equals(tag)
 				|| OrientationMark.RIGHT.equals(tag))
 			return (Color.GREEN);
 
@@ -130,17 +135,6 @@ public class ColourSelecter {
 			return Color.BLUE;
 
 		return Color.BLACK;
-	}
-
-	/**
-	 * Get an appropriate colour for the given number from the AI colour set. Loops
-	 * through 8 colours.
-	 * 
-	 * @param i the number of the colour to return
-	 * @return a colour
-	 */
-	private static Color getAIColor(int i) {
-		return ColourSelecter.aiSwatchList[i % ColourSelecter.aiSwatchList.length];
 	}
 
 	/**
@@ -163,8 +157,8 @@ public class ColourSelecter {
 	 * @return a colour
 	 */
 	private static Color getOptimisedColor(int i) {
-		Color color = ColourSelecter.optimisedSwatchList[i % ColourSelecter.optimisedSwatchList.length];
-		return color;
+		return ColourSelecter.optimisedSwatchList[i
+				% ColourSelecter.optimisedSwatchList.length];
 	}
 
 	/**
@@ -178,8 +172,11 @@ public class ColourSelecter {
 	 */
 	public static Color getSignalColour(int channel, boolean transparent, int defaultAlpha) {
 		Color result;
-		Color color = ColourSelecter.signalColourList[channel % ColourSelecter.signalColourList.length];
-		result = transparent ? new Color(color.getRed(), color.getGreen(), color.getBlue(), defaultAlpha) : color;
+		Color color = ColourSelecter.signalColourList[channel
+				% ColourSelecter.signalColourList.length];
+		result = transparent
+				? new Color(color.getRed(), color.getGreen(), color.getBlue(), defaultAlpha)
+				: color;
 		return result;
 	}
 
@@ -215,20 +212,14 @@ public class ColourSelecter {
 		ColourSwatch swatch = GlobalOptions.getInstance().getSwatch();
 
 		if (ColourSwatch.ACCESSIBLE_SWATCH.equals(swatch)) {
-
-			if (group == 0) {
+			if (group == 0)
 				return Color.CYAN;
-			} else {
-				return Color.ORANGE;
-			}
+			return Color.ORANGE;
 
-		} else {
-			if (group == 0) {
-				return Color.GREEN;
-			} else {
-				return Color.RED;
-			}
 		}
+		if (group == 0)
+			return Color.GREEN;
+		return Color.RED;
 
 	}
 
@@ -241,8 +232,8 @@ public class ColourSelecter {
 	 * @return the new colour
 	 */
 	public static Color getTransparentColour(Color c, boolean transparent, int defaultAlpha) {
-		Color result = transparent ? new Color(c.getRed(), c.getGreen(), c.getBlue(), defaultAlpha) : c;
-		return result;
+		return transparent ? new Color(c.getRed(), c.getGreen(), c.getBlue(), defaultAlpha)
+				: c;
 	}
 
 	/**

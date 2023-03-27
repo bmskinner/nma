@@ -179,8 +179,8 @@ public class NuclearMorphologyAnalysis {
 			parser.handleError(e);
 			System.exit(1);
 		} catch (IllegalArgumentException e) {
-			System.out.println(Arrays.toString(args));
-			System.out.println(opt.toString());
+			System.err.println(Arrays.toString(args));
+			System.err.println(opt.toString());
 			e.printStackTrace();
 			System.exit(1);
 		}
@@ -385,12 +385,9 @@ public class NuclearMorphologyAnalysis {
 
 	private void removeV1Logs() {
 		try {
-			FilenameFilter filter = new FilenameFilter() {
-				@Override
-				public boolean accept(File dir, String name) {
-					String lowercaseName = name.toLowerCase();
-					return (lowercaseName.endsWith(".log"));
-				}
+			FilenameFilter filter = (dir, name) -> {
+				String lowercaseName = name.toLowerCase();
+				return (lowercaseName.endsWith(".log"));
 			};
 
 			for (File oldLog : Io.getConfigDir().listFiles(filter)) {
