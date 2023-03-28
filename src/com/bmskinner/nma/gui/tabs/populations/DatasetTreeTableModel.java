@@ -42,8 +42,11 @@ public class DatasetTreeTableModel extends AbstractTreeTableModel {
 	 */
 	public TreePath addDataset(@NonNull IAnalysisDataset dataset) {
 
-		if (hasNode(dataset))
-			return null; // ignore datasets already present in the model
+		// don't re-add datasets already present in the model
+		if (hasNode(dataset)) {
+			MutableTreeTableNode node = this.getNode(dataset);
+			return new TreePath(getPathToRoot(node));
+		}
 
 		// If dataset is root, parent will be the same dataset
 		IAnalysisDataset parent = DatasetListManager.getInstance().getParent(dataset);
@@ -69,8 +72,11 @@ public class DatasetTreeTableModel extends AbstractTreeTableModel {
 	 */
 	public TreePath addClusterGroup(@NonNull IClusterGroup group) {
 
-		if (hasNode(group))
-			return null; // ignore groups already present in the model
+		// don't re-add groups already present in the model
+		if (hasNode(group)) {
+			MutableTreeTableNode node = this.getNode(group);
+			return new TreePath(getPathToRoot(node));
+		}
 
 		for (IAnalysisDataset d : DatasetListManager.getInstance().getAllDatasets()) {
 			if (d.hasClusterGroup(group)) {
@@ -88,8 +94,11 @@ public class DatasetTreeTableModel extends AbstractTreeTableModel {
 
 	public TreePath addWorkspace(@NonNull IWorkspace ws) {
 
-		if (this.getNode(ws) != null)
-			return null; // ignore workspaces already present
+		// don't re-add workspaces already present in the model
+		if (hasNode(ws)) {
+			MutableTreeTableNode node = this.getNode(ws);
+			return new TreePath(getPathToRoot(node));
+		}
 
 		MutableTreeTableNode parentNode = (MutableTreeTableNode) this.getRoot();
 		MutableTreeTableNode newNode = createNode(ws);
@@ -302,7 +311,7 @@ public class DatasetTreeTableModel extends AbstractTreeTableModel {
 	 * @param g
 	 * @return
 	 */
-	private MutableTreeTableNode getNode(@NonNull Object obj) {
+	public MutableTreeTableNode getNode(@NonNull Object obj) {
 		return getNode((MutableTreeTableNode) root, obj);
 	}
 
@@ -311,7 +320,7 @@ public class DatasetTreeTableModel extends AbstractTreeTableModel {
 
 		while (en.hasMoreElements()) {
 			MutableTreeTableNode p = en.nextElement();
-			if (p != null && obj == p.getUserObject())
+			if (p != null && obj.equals(p.getUserObject()))
 				return p;
 			MutableTreeTableNode n = getNode(p, obj);
 			if (n != null)

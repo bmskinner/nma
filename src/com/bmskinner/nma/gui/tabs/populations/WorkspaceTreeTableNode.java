@@ -137,4 +137,9 @@ public class WorkspaceTreeTableNode implements MutableTreeTableNode {
 		if (this != newParent)
 			parent = newParent;
 	}
+
+	@Override
+	public String toString() {
+		return workspace.getName();
+	}
 }

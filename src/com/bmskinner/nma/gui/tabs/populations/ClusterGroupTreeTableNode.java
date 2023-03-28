@@ -138,4 +138,9 @@ public class ClusterGroupTreeTableNode implements MutableTreeTableNode {
 			parent = newParent;
 	}
 
+	@Override
+	public String toString() {
+		return group.getName();
+	}
+
 }

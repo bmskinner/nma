@@ -94,6 +94,7 @@ public class DatasetTreeTableNode implements MutableTreeTableNode {
 
 	@Override
 	public boolean isLeaf() {
+		// May be a leaf, if there are no children
 		return !children.isEmpty();
 	}
 
@@ -140,6 +141,11 @@ public class DatasetTreeTableNode implements MutableTreeTableNode {
 	public void setParent(MutableTreeTableNode newParent) {
 		if (this != newParent)
 			parent = newParent;
+	}
+
+	@Override
+	public String toString() {
+		return dataset.getName();
 	}
 
 }

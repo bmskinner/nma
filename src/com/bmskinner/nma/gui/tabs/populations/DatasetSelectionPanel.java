@@ -14,9 +14,10 @@ import javax.swing.BorderFactory;
 import javax.swing.JScrollPane;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
-import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
+
+import org.jdesktop.swingx.treetable.TreeTableNode;
 
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.datasets.IClusterGroup;
@@ -123,23 +124,49 @@ public class DatasetSelectionPanel extends DetailPanel
 	 */
 	private synchronized void addDataset(final List<IAnalysisDataset> datasets) {
 		for (IAnalysisDataset d : datasets) {
-			TreePath path = model.addDataset(d);
+
+			// The first item in the path is the root node - don't expand this
+			model.addDataset(d);
+
+			// Get the path for the dataset node to expand
+			TreePath path = new TreePath(model.getPathToRoot(model.getNode(d)));
 			expandAll(path);
 		}
 	}
 
+	/**
+	 * Expand all the nodes on the given path
+	 * 
+	 * @param parent
+	 */
 	private void expandAll(TreePath parent) {
-		// Traverse children
-		if (parent != null) {
-			TreeNode node = (TreeNode) parent.getLastPathComponent();
-			if (node.getChildCount() >= 0) {
-				for (Enumeration<?> e = node.children(); e.hasMoreElements();) {
-					TreeNode n = (TreeNode) e.nextElement();
-					expandAll(parent.pathByAddingChild(n));
-				}
+
+		if (parent == null)
+			return;
+
+		TreeTableNode lastNode = (TreeTableNode) parent.getLastPathComponent();
+		// expand the node
+		expandNode(lastNode);
+
+		// Traverse children and expand
+		if (lastNode.getChildCount() > 0) {
+
+			for (Enumeration<?> e = lastNode.children(); e.hasMoreElements();) {
+
+				TreeTableNode n = (TreeTableNode) e.nextElement();
+				if (n == null)
+					continue;
+
+				expandAll(new TreePath(model.getPathToRoot(n)));
 			}
-			treeTable.expandPath(parent);
 		}
+
+	}
+
+	private void expandNode(TreeTableNode node) {
+		TreeTableNode[] nodes = model.getPathToRoot(node);
+		TreePath tp = new TreePath(nodes);
+		treeTable.expandPath(tp);
 	}
 
 	@Override
@@ -262,7 +289,7 @@ public class DatasetSelectionPanel extends DetailPanel
 			int[] selectedRows = lsm.getSelectionRows();
 			List<IAnalysisDataset> datasets = new ArrayList<>();
 			for (int i = 0; i < selectedRows.length; i++) {
-//				LOGGER.fine("Selected row " + selectedRows[i]);
+
 				if (treeTable.getValueAt(selectedRows[i], 0)instanceof IAnalysisDataset d) {
 					datasets.add(d);
 					if (!datasetSelectionOrder.contains(d))
