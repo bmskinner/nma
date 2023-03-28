@@ -153,6 +153,22 @@ public interface Io {
 	}
 
 	/**
+	 * Get the most recent log file read at launch
+	 * 
+	 * @return
+	 */
+	static File getLogFile() {
+		File dir = getLogDir();
+
+		File[] files = dir.listFiles((d, name) -> name.endsWith("0.log"));
+
+		if (files == null || files.length == 0)
+			return null;
+
+		return files[0];
+	}
+
+	/**
 	 * Static methods for exporting data
 	 * 
 	 * @author ben

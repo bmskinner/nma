@@ -116,7 +116,8 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 
 	private static final String VIEW_MENU_LBL = "View";
 	private static final String CHECK_FOR_UPDATES_ITEM_LBL = "Check for updates";
-	private static final String OPEN_LOG_DIR_LBL = "Open config directory";
+	private static final String OPEN_CONFIG_DIR_LBL = "Open config directory";
+	private static final String OPEN_LOG_FILE_LBL = "Open log file";
 	private static final String ABOUT_ITEM_LBL = "About";
 	private static final String HELP_MENU_LBL = "Help";
 	private static final String TASK_MONITOR_ITEM_LBL = "Task monitor";
@@ -333,12 +334,14 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 					if (src != null) {
 						File jarFile = new File(src.getLocation().toURI().getPath());
 
-						LOGGER.fine(() -> "Copying help files from jar at: %s".formatted(jarFile.toString()));
+						LOGGER.fine(() -> "Copying help files from jar at: %s"
+								.formatted(jarFile.toString()));
 						URL fileSysUrl = new URL(
 								"jar:file:" + jarFile.getAbsolutePath() + "!/user-guide");
 
 						// Create a jar URL connection object
-						LOGGER.fine(() -> "Copying help files from url at: %s".formatted(fileSysUrl.toString()));
+						LOGGER.fine(() -> "Copying help files from url at: %s"
+								.formatted(fileSysUrl.toString()));
 						JarURLConnection jarURLConn = (JarURLConnection) fileSysUrl
 								.openConnection();
 						FileUtils.copyJarResourcesRecursively(userGuideDir, jarURLConn);
@@ -364,7 +367,8 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 
 			} catch (Exception e) {
 				LOGGER.warning("Unable to open user guide; see log for details");
-				LOGGER.log(Loggable.STACK, "Error extracting user guide: %s".formatted(e.getMessage()), e);
+				LOGGER.log(Loggable.STACK,
+						"Error extracting user guide: %s".formatted(e.getMessage()), e);
 			}
 		};
 		ThreadManager.getInstance().execute(r);
@@ -394,6 +398,7 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 			};
 			ThreadManager.getInstance().submit(r);
 		});
+
 		menu.add(checkItem);
 
 		JMenuItem configFileItem = new JMenuItem(OPEN_CONFIG_FILE_LBL);
@@ -404,10 +409,19 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 				LOGGER.log(Level.SEVERE, "Unable to open config file", e1);
 			}
 		});
-
 		menu.add(configFileItem);
 
-		JMenuItem logItem = new JMenuItem(OPEN_LOG_DIR_LBL);
+		JMenuItem logFileItem = new JMenuItem(OPEN_LOG_FILE_LBL);
+		logFileItem.addActionListener(e -> {
+			try {
+				Desktop.getDesktop().open(Io.getLogFile());
+			} catch (IOException e1) {
+				LOGGER.log(Level.SEVERE, "Unable to open log file", e1);
+			}
+		});
+		menu.add(logFileItem);
+
+		JMenuItem logItem = new JMenuItem(OPEN_CONFIG_DIR_LBL);
 		logItem.addActionListener(e -> {
 			Runnable r = () -> {
 				try {
