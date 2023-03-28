@@ -17,7 +17,9 @@
 package com.bmskinner.nma.analysis.detection;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Logger;
@@ -30,6 +32,7 @@ import com.bmskinner.nma.components.cells.ICell;
 import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.options.IAnalysisOptions;
+import com.bmskinner.nma.core.GlobalOptions;
 import com.bmskinner.nma.io.ImageImporter;
 import com.bmskinner.nma.io.ImageImporter.ImageImportException;
 import com.bmskinner.nma.logging.Loggable;
@@ -52,7 +55,6 @@ public abstract class CellFinder extends AbstractFinder<Collection<ICell>> {
 	 */
 	protected CellFinder(@NonNull final IAnalysisOptions op) {
 		super(op);
-
 	}
 
 	@Override
@@ -63,23 +65,50 @@ public abstract class CellFinder extends AbstractFinder<Collection<ICell>> {
 		if (arr == null)
 			return list;
 
-		// single threaded for use in testing only
-//		for (File f : arr) {
-//			if (Thread.interrupted())
-//				continue;
-//			if (f.isDirectory())
-//				continue;
-//			if (!ImageImporter.fileIsImportable(f))
-//				continue;
-//			try {
-//				list.addAll(findInImage(f));
-//			} catch (ImageImportException e) {
-//				LOGGER.log(Loggable.STACK, "Error searching image", e);
-//			}
-//			LOGGER.finer("Found images in " + f.getName());
-//		}
+		if (GlobalOptions.getInstance().getBoolean(GlobalOptions.IS_SINGLE_THREADED_DETECTION))
+			// single threaded for use in testing
+			return singleThreaded(arr);
 
 		// Submitted to the FJP::commonPool, which is thread limited by the ThreadManger
+		return multiThreaded(arr);
+	}
+
+	/**
+	 * Detect cells in images using a single thread
+	 * 
+	 * @param arr
+	 * @return
+	 */
+	private Collection<ICell> singleThreaded(File[] arr) {
+		final List<ICell> list = new ArrayList<>();
+
+		for (File f : arr) {
+
+			// Check we are good to use this file
+			if (Thread.interrupted() || f.isDirectory() || !ImageImporter.fileIsImportable(f))
+				continue;
+
+			try {
+				list.addAll(findInImage(f));
+				LOGGER.finer(() -> "Found images in %s".formatted(f.getName()));
+			} catch (ImageImportException e) {
+				LOGGER.log(Loggable.STACK, "Error searching image", e);
+			}
+		}
+		return list;
+	}
+
+	/**
+	 * Detect cells in images using a multiple threads. Files are submitted to the
+	 * FJP::commonPool, which is thread limited by the ThreadManger
+	 * 
+	 * @param arr
+	 * @return
+	 */
+	private Collection<ICell> multiThreaded(File[] arr) {
+
+		final Queue<ICell> list = new ConcurrentLinkedQueue<>();
+
 		Stream.of(arr).parallel().forEach(f -> {
 
 			if (Thread.interrupted())
@@ -90,15 +119,15 @@ public abstract class CellFinder extends AbstractFinder<Collection<ICell>> {
 				return;
 			try {
 				list.addAll(findInImage(f));
+				LOGGER.finer(() -> "Found images in %s".formatted(f.getName()));
 			} catch (ImageImportException e) {
 				LOGGER.log(Loggable.STACK, "Error searching image", e);
 			} catch (Exception e) {
 				LOGGER.log(Loggable.STACK, "Error detecting cell", e);
 				throw (e);
 			}
-			LOGGER.finer("Found images in " + f.getName());
-		});
 
+		});
 		return list;
 	}
 

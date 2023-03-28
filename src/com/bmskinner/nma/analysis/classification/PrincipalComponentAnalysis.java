@@ -16,6 +16,7 @@
  ******************************************************************************/
 package com.bmskinner.nma.analysis.classification;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -45,7 +46,6 @@ import com.bmskinner.nma.components.rules.OrientationMark;
 
 import weka.attributeSelection.PrincipalComponents;
 import weka.core.Attribute;
-import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.SparseInstance;
@@ -80,8 +80,10 @@ public class PrincipalComponentAnalysis extends SingleDatasetAnalysisMethod {
 		PrincipalComponents pca = new PrincipalComponents();
 		pca.setVarianceCovered(options.getDouble(PROPORTION_VARIANCE_KEY));
 		pca.buildEvaluator(inst);
-		double var = pca.getVarianceCovered();
-		LOGGER.fine("Variance covered: " + var);
+
+		// Calculate variance for each eigenvector
+		double variance = pca.getVarianceCovered();
+		LOGGER.fine(() -> "Variance covered: %s".formatted(variance));
 
 		int expectedPcs = 0;
 
@@ -92,8 +94,8 @@ public class PrincipalComponentAnalysis extends SingleDatasetAnalysisMethod {
 				.map(d -> d / totalEigenValues)
 				.sorted()
 				.toArray();
-		LOGGER.fine(
-				"Variance explained by each eigenvector: " + Arrays.toString(varianceExplained));
+		LOGGER.finer(() -> "Variance explained by each eigenvector: %s"
+				.formatted(Arrays.toString(varianceExplained)));
 
 		for (int i = 0; i < inst.numInstances(); i++) {
 			Instance instance = inst.instance(i);
@@ -135,19 +137,19 @@ public class PrincipalComponentAnalysis extends SingleDatasetAnalysisMethod {
 		return new DefaultAnalysisResult(dataset);
 	}
 
-	private FastVector createAttributes() {
+	private ArrayList<Attribute> createAttributes() {
 
 		double profileWindow = Taggable.DEFAULT_PROFILE_WINDOW_PROPORTION;
 		if (dataset.hasAnalysisOptions())
 			profileWindow = dataset.getAnalysisOptions().get().getProfileWindowProportion();
 
-		FastVector attributes = new FastVector();
+		ArrayList<Attribute> attributes = new ArrayList<>();
 
 		for (ProfileType t : ProfileType.displayValues()) {
 			if (options.getBoolean(t.toString())) {
 				int nProfileAtttributes = (int) Math.floor(1d / profileWindow);
 				for (int i = 0; i < nProfileAtttributes; i++) {
-					attributes.addElement(new Attribute(t.toString() + i));
+					attributes.add(new Attribute(t.toString() + i));
 				}
 			}
 		}
@@ -155,7 +157,7 @@ public class PrincipalComponentAnalysis extends SingleDatasetAnalysisMethod {
 		for (Measurement stat : Measurement.getNucleusStats()) {
 			if (options.getBoolean(stat.toString())) {
 				Attribute a = new Attribute(stat.toString());
-				attributes.addElement(a);
+				attributes.add(a);
 			}
 		}
 		return attributes;
@@ -167,7 +169,7 @@ public class PrincipalComponentAnalysis extends SingleDatasetAnalysisMethod {
 		if (dataset.hasAnalysisOptions())// Merged datasets may not have options
 			windowProportion = dataset.getAnalysisOptions().get().getProfileWindowProportion();
 
-		FastVector attributes = createAttributes();
+		ArrayList<Attribute> attributes = createAttributes();
 
 		Instances instances = new Instances(dataset.getName(),
 				attributes,
@@ -188,7 +190,7 @@ public class PrincipalComponentAnalysis extends SingleDatasetAnalysisMethod {
 
 	}
 
-	private void addNucleus(Nucleus n, FastVector attributes, Instances instances,
+	private void addNucleus(Nucleus n, ArrayList<Attribute> attributes, Instances instances,
 			double windowProportion) throws MissingLandmarkException, MissingProfileException,
 			ProfileException {
 
@@ -202,7 +204,7 @@ public class PrincipalComponentAnalysis extends SingleDatasetAnalysisMethod {
 			if (options.getBoolean(t.toString())) {
 				IProfile p = n.getProfile(t, OrientationMark.REFERENCE);
 				for (int i = 0; i < pointsToSample; i++) {
-					Attribute att = (Attribute) attributes.elementAt(i);
+					Attribute att = attributes.get(i);
 					inst.setValue(att, p.get(i * windowProportion));
 					attNumber++;
 				}
@@ -212,7 +214,7 @@ public class PrincipalComponentAnalysis extends SingleDatasetAnalysisMethod {
 		for (Measurement stat : Measurement.getNucleusStats()) {
 
 			if (options.getBoolean(stat.toString())) {
-				Attribute att = (Attribute) attributes.elementAt(attNumber++);
+				Attribute att = attributes.get(attNumber++);
 				inst.setValue(att, n.getMeasurement(stat, MeasurementScale.MICRONS));
 			}
 		}

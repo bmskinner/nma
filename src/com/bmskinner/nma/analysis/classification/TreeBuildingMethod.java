@@ -110,7 +110,7 @@ public class TreeBuildingMethod extends CellClusteringMethod {
 			o[1] = String.valueOf(options.getInt(HashOptions.CLUSTER_EM_ITERATIONS_KEY));
 			return o;
 		}
-		return null;
+		return new String[0];
 	}
 
 	/**
@@ -351,6 +351,14 @@ public class TreeBuildingMethod extends CellClusteringMethod {
 
 	}
 
+	/**
+	 * Add UMAP values from a nucleus to an instance and add to the instances
+	 * 
+	 * @param c
+	 * @param n
+	 * @param attributes
+	 * @param instances
+	 */
 	private void addUMAPNucleus(ICell c, Nucleus n, ArrayList<Attribute> attributes,
 			Instances instances) {
 		int attNumber = 0;
@@ -358,6 +366,7 @@ public class TreeBuildingMethod extends CellClusteringMethod {
 		Attribute attX = attributes.get(attNumber++);
 		inst.setValue(attX, n.getMeasurement(
 				Measurement.makeUMAP(1, options.getUUID(HashOptions.CLUSTER_GROUP_ID_KEY))));
+
 		Attribute attY = attributes.get(attNumber++);
 		inst.setValue(attY, n.getMeasurement(
 				Measurement.makeUMAP(2, options.getUUID(HashOptions.CLUSTER_GROUP_ID_KEY))));
@@ -373,6 +382,14 @@ public class TreeBuildingMethod extends CellClusteringMethod {
 		fireProgressEvent();
 	}
 
+	/**
+	 * Add tSNE values from a nucleus to an instance and add to the instances
+	 * 
+	 * @param c
+	 * @param n
+	 * @param attributes
+	 * @param instances
+	 */
 	private void addTsneNucleus(ICell c, Nucleus n, ArrayList<Attribute> attributes,
 			Instances instances) {
 		int attNumber = 0;
@@ -380,8 +397,9 @@ public class TreeBuildingMethod extends CellClusteringMethod {
 		Attribute attX = attributes.get(attNumber++);
 		inst.setValue(attX, n.getMeasurement(
 				Measurement.makeTSNE(1, options.getUUID(HashOptions.CLUSTER_GROUP_ID_KEY))));
+
 		Attribute attY = attributes.get(attNumber++);
-		inst.setValue(attX, n.getMeasurement(
+		inst.setValue(attY, n.getMeasurement(
 				Measurement.makeTSNE(2, options.getUUID(HashOptions.CLUSTER_GROUP_ID_KEY))));
 
 		if (ClusteringMethod.from(options).equals(ClusteringMethod.HIERARCHICAL)) {

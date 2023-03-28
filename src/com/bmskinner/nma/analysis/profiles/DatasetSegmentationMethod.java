@@ -70,12 +70,18 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 
 	private MorphologyAnalysisMode mode = MorphologyAnalysisMode.SEGMENT_FROM_SCRATCH;
 
+	/**
+	 * The types of segmentation that can be performed
+	 * 
+	 * @author bs19022
+	 *
+	 */
 	public enum MorphologyAnalysisMode {
 
 		/** Segment the median and update nuclei to match */
 		SEGMENT_FROM_SCRATCH,
 
-		/** Copy the segments from another dataset and update nuclei to match */
+		/** Copy the segment pattern from another dataset and update nuclei to match */
 		COPY_FROM_OTHER_DATASET,
 
 		/** Keep the current median segmentation, and update nuclei to match */
@@ -271,12 +277,11 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 
 		// choose the best subset of nuclei and make a median profile from them
 		LOGGER.finer("Collection median length " + collection.getMedianArrayLength());
-//		LOGGER.finer("Profile collection length "+collection.getProfileCollection().length());
 
 		RepresentativeMedianFinder finder = new RepresentativeMedianFinder(collection);
 
-		IProfile median = finder.findMedian();
-		LOGGER.finer("Representative median length " + median.size());
+		final IProfile median = finder.findMedian();
+		LOGGER.finer(() -> "Representative median length %d".formatted(median.size()));
 
 		ProfileSegmenter segmenter = new ProfileSegmenter(median);
 		List<IProfileSegment> segments = segmenter.segment();

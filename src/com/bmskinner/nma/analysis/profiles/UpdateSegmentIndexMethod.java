@@ -11,7 +11,6 @@ import com.bmskinner.nma.analysis.DefaultAnalysisResult;
 import com.bmskinner.nma.analysis.IAnalysisResult;
 import com.bmskinner.nma.analysis.SingleDatasetAnalysisMethod;
 import com.bmskinner.nma.components.MissingComponentException;
-import com.bmskinner.nma.components.MissingLandmarkException;
 import com.bmskinner.nma.components.cells.ICell;
 import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.datasets.DatasetValidator;
@@ -73,11 +72,9 @@ public class UpdateSegmentIndexMethod extends SingleDatasetAnalysisMethod {
 		return new DefaultAnalysisResult(dataset);
 	}
 
-	private void run() throws MissingLandmarkException, MissingProfileException,
-			MissingComponentException, ProfileException, SegmentUpdateException {
-		LOGGER.fine("Requested update of segment " + segmentId + " to index " + newIndex
-				+ " in dataset "
-				+ dataset.getName());
+	private void run() throws MissingComponentException, ProfileException, SegmentUpdateException {
+		LOGGER.fine(() -> "Requested update of segment %s to index %d in dataset %s".formatted(
+				segmentId, newIndex, dataset.getName()));
 
 //			Don't update segment boundaries at the reference point. This should only be performed by moving the RP directly
 		IProfileSegment segToUpdate = dataset.getCollection().getProfileCollection()

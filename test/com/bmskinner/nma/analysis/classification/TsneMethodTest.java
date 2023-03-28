@@ -2,6 +2,7 @@ package com.bmskinner.nma.analysis.classification;
 
 import static org.junit.Assert.assertTrue;
 
+import java.util.UUID;
 import java.util.logging.Logger;
 
 import org.junit.Before;
@@ -19,6 +20,7 @@ import com.bmskinner.nma.components.rules.RuleSetCollection;
 
 /**
  * Tests for tSNE
+ * 
  * @author bms41
  * @since 1.16.0
  *
@@ -26,9 +28,9 @@ import com.bmskinner.nma.components.rules.RuleSetCollection;
 public class TsneMethodTest extends ComponentTester {
 
 	private static final Logger LOGGER = Logger.getLogger(TsneMethodTest.class.getName());
-	
+
 	private IAnalysisDataset dataset;
-	
+
 	@Before
 	public void setUp() throws Exception {
 		dataset = new TestDatasetBuilder(RNG_SEED).cellCount(50)
@@ -41,32 +43,39 @@ public class TsneMethodTest extends ComponentTester {
 
 	@Test
 	public void testAllNucleiGetTsneValues() throws Exception {
-		
-		// Check tSNE stats are empty 
+
+		// Check tSNE stats are empty
 		boolean isPresent = dataset.getCollection().getNuclei()
 				.stream()
-				.allMatch(m->m.getMeasurement(Measurement.TSNE_1)==Statistical.ERROR_CALCULATING_STAT
-				|| m.getMeasurement(Measurement.TSNE_2)==Statistical.ERROR_CALCULATING_STAT);
+				.allMatch(m -> m
+						.getMeasurement(Measurement.TSNE_1) == Statistical.ERROR_CALCULATING_STAT
+						|| m.getMeasurement(
+								Measurement.TSNE_2) == Statistical.ERROR_CALCULATING_STAT);
 		assertTrue(isPresent);
-		
-		
+
 		// Run the tSNE on angle profiles
 		HashOptions options = new DefaultOptions();
 		options.setBoolean(ProfileType.ANGLE.toString(), true);
-		
+
 		options.setInt(TsneMethod.MAX_ITERATIONS_KEY, 1000);
 		options.setDouble(TsneMethod.PERPLEXITY_KEY, 10);
-		
+
+		UUID clusterID = UUID.randomUUID();
+		options.setUUID(HashOptions.CLUSTER_GROUP_ID_KEY, clusterID);
+
 		TsneMethod tSNE = new TsneMethod(dataset, options);
 		tSNE.call();
-			
-		
+
 		// Test that tSNE stats have been set
 		isPresent = dataset.getCollection().getNuclei()
 				.stream()
-				.noneMatch(m->m.getMeasurement(Measurement.TSNE_1)==Statistical.ERROR_CALCULATING_STAT
-				|| m.getMeasurement(Measurement.TSNE_2)==Statistical.ERROR_CALCULATING_STAT);
+				.noneMatch(m -> m
+						.getMeasurement(Measurement.makeTSNE(1,
+								clusterID)) == Statistical.ERROR_CALCULATING_STAT
+						|| m.getMeasurement(
+								Measurement.makeTSNE(2,
+										clusterID)) == Statistical.ERROR_CALCULATING_STAT);
 		assertTrue(isPresent);
-		
+
 	}
 }

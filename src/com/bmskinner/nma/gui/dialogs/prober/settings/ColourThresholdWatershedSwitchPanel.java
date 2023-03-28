@@ -63,7 +63,7 @@ public class ColourThresholdWatershedSwitchPanel extends DetectionSettingsPanel 
     }
 
     private JPanel makeCardPanel() {
-        JPanel cardPanel = new JPanel(new CardLayout());
+        JPanel panel = new JPanel(new CardLayout());
 
         SettingsPanel thresholdPanel = new ColourThresholdingSettingsPanel(options);
         SettingsPanel watershedPanel = new WatershedSettingsPanel(options);
@@ -71,16 +71,16 @@ public class ColourThresholdWatershedSwitchPanel extends DetectionSettingsPanel 
         this.addSubPanel(thresholdPanel);
         this.addSubPanel(watershedPanel);
 
-        cardPanel.add(thresholdPanel, THRESHOLD_LBL);
-        cardPanel.add(watershedPanel, WATERSHED_LBL);
-        CardLayout cl = (CardLayout) (cardPanel.getLayout());
+        panel.add(thresholdPanel, THRESHOLD_LBL);
+        panel.add(watershedPanel, WATERSHED_LBL);
+        CardLayout cl = (CardLayout) (panel.getLayout());
         if (options.getBoolean(HashOptions.IS_USE_WATERSHED)) {
-            cl.show(cardPanel, WATERSHED_LBL);
+            cl.show(panel, WATERSHED_LBL);
         } else {
-            cl.show(cardPanel, THRESHOLD_LBL);
+            cl.show(panel, THRESHOLD_LBL);
         }
 
-        return cardPanel;
+        return panel;
     }
 
     /**

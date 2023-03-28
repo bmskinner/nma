@@ -24,265 +24,264 @@ import com.bmskinner.nma.components.generic.IPoint;
 
 public class FloatEquation implements LineEquation {
 
-    final float m, c;
-    final boolean isVert;
-    
-    float xf; // fixed value vertical
+	final float m, c;
+	final boolean isVert;
 
-    /**
-     * Constructor using gradient and intercept.
-     *
-     * @param m the gradient of the line
-     * @param c  the y-intercept of the line
-     */
-    public FloatEquation(final float m, final float c) {
+	float xf; // fixed value vertical
 
-        if (Float.valueOf(m) == null || Float.valueOf(c) == null) {
-            throw new IllegalArgumentException("m or c is null");
-        }
-        if (Float.isInfinite(m) || Float.isInfinite(c)) {
-            throw new IllegalArgumentException("m or c is infinite");
-        }
-        
-        this.m = m;
-        this.c = c;
-        this.isVert=false;
-    }
+	/**
+	 * Constructor using gradient and intercept.
+	 *
+	 * @param m the gradient of the line
+	 * @param c the y-intercept of the line
+	 */
+	public FloatEquation(final float m, final float c) {
 
+		if (Float.valueOf(m) == null || Float.valueOf(c) == null) {
+			throw new IllegalArgumentException("m or c is null");
+		}
+		if (Float.isInfinite(m) || Float.isInfinite(c)) {
+			throw new IllegalArgumentException("m or c is infinite");
+		}
 
-    /**
-     * Constructor using two points.
-     *
-     * @param a the first point
-     * @param b the second point
-     */
-    public FloatEquation(IPoint a, IPoint b) {
-        this(a.toPoint2D(), b.toPoint2D());
-    }
-    
-    public FloatEquation(Point2D a, Point2D b) {
+		this.m = m;
+		this.c = c;
+		this.isVert = false;
+	}
 
-        if (a == null || b == null)
-            throw new IllegalArgumentException("Point a or b is null");
-        
-        if(a.getX()==b.getX() && a.getY()==b.getY())
-            throw new IllegalArgumentException("Point a and b are identical: "+a.toString());
-        
-        float aX = (float) a.getX();
-        float bX = (float) b.getX();
-                
-        // y=mx+c
-        float deltaX = aX - bX;
-        float deltaY = (float) (a.getY() - b.getY());
-        
-        
+	/**
+	 * Constructor using two points.
+	 *
+	 * @param a the first point
+	 * @param b the second point
+	 */
+	public FloatEquation(IPoint a, IPoint b) {
+		this(a.toPoint2D(), b.toPoint2D());
+	}
 
-        isVert=deltaX==0;
-        xf = aX;
-        
-        this.m = deltaY / deltaX;
+	public FloatEquation(Point2D a, Point2D b) {
 
-        // y - y1 = m(x - x1)
-        this.c = (float) (a.getY() - (m * aX));
-    }
+		if (a == null || b == null)
+			throw new IllegalArgumentException("Point a or b is null");
 
-    @Override
-    public double getX(double y) {
-        // x = (y-c)/m
-        return isVert?xf:(y - c) / m;
-    }
+		if (a.getX() == b.getX() && a.getY() == b.getY())
+			throw new IllegalArgumentException("Point a and b are identical: " + a.toString());
 
-    @Override
-    public double getY(double x) {
-        return (this.m * x) + this.c;
-    }
+		float aX = (float) a.getX();
+		float bX = (float) b.getX();
 
-    @Override
-    public double getM() {
-        return this.m;
-    }
+		// y=mx+c
+		float deltaX = aX - bX;
+		float deltaY = (float) (a.getY() - b.getY());
 
-    @Override
-    public double getC() {
-        return this.c;
-    }
+		isVert = deltaX == 0;
+		xf = aX;
 
+		this.m = deltaY / deltaX;
 
-    @Override
-    public boolean isOnLine(IPoint p) {
-        return isVert?Math.abs(p.getX()-xf)<0.0000001:Math.abs(p.getY() - ((m * p.getX()) + c)) < .0000001;
-    }
+		// y - y1 = m(x - x1)
+		this.c = (float) (a.getY() - (m * aX));
+	}
 
+	@Override
+	public double getX(double y) {
+		// x = (y-c)/m
+		return isVert ? xf : (y - c) / m;
+	}
 
-    @Override
-    public IPoint getPointOnLine(IPoint p, double distance) {
-        if(isVert) return new FloatPoint(p.getX(), p.getY()+distance);
-        double xA = p.getX();
+	@Override
+	public double getY(double x) {
+		return (this.m * x) + this.c;
+	}
 
-        /*
-         * d^2 = dx^2 + m.dx^2 // dy is a function of dx d^2 = (m^2+1)*dx^2 d^2
-         * / (m^2+1) = dx^2 root( d^2 / (m^2+1)) = dx
-         */
+	@Override
+	public double getM() {
+		return this.m;
+	}
 
-        double dx = Math.sqrt(Math.pow(distance, 2) / (Math.pow(m, 2) + 1));
+	@Override
+	public double getC() {
+		return this.c;
+	}
 
-        double newX = distance > 0 ? xA + dx : xA - dx;
-        double newY = this.getY(newX);
-        return new FloatPoint(newX, newY);
-    }
+	@Override
+	public boolean isOnLine(IPoint p) {
+		return isVert ? Math.abs(p.getX() - xf) < 0.0000001
+				: Math.abs(p.getY() - ((m * p.getX()) + c)) < .0000001;
+	}
 
-    @Override
-    public LineEquation getPerpendicular(IPoint p) {
+	@Override
+	public IPoint getPointOnLine(IPoint p, double distance) {
+		if (isVert)
+			return new FloatPoint(p.getX(), p.getY() + distance);
+		double xA = p.getX();
 
-        if(isVert) return new FloatEquation(0, (float) p.getY());
-        
-        if ((int) p.getY() != (int) this.getY(p.getX())) {
-            return new DoubleEquation(0, 0);
-        }
-        double pM = 0 - (1 / m); // invert and flip sign
+		/*
+		 * d^2 = dx^2 + m.dx^2 // dy is a function of dx d^2 = (m^2+1)*dx^2 d^2 /
+		 * (m^2+1) = dx^2 root( d^2 / (m^2+1)) = dx
+		 */
 
-        // find new c
-        // y = pM.x + c
-        // y -(pM.x) = c
-        double pC = p.getY() - (pM * p.getX());
-        return new DoubleEquation(pM, pC);
-    }
+		double dx = Math.sqrt(Math.pow(distance, 2) / (Math.pow(m, 2) + 1));
 
-    @Override
-    public LineEquation translate(IPoint p) {
-        if(isVert) return this;
-        
-        double oldY = this.getY(p.getX());
-        double desiredY = p.getY();
+		double newX = distance > 0 ? xA + dx : xA - dx;
+		double newY = this.getY(newX);
+		return new FloatPoint(newX, newY);
+	}
 
-        double dy = oldY - desiredY;
-        double newC = this.c - dy;
-        return new DoubleEquation(this.m, newC);
+	@Override
+	public LineEquation getPerpendicular(IPoint p) {
 
-    }
+		if (isVert)
+			return new FloatEquation(0, (float) p.getY());
 
-    @Override
-    public IPoint getIntercept(LineEquation eq) {
-        // (this.m * x) + this.c = (eq.m * x) + eq.c
+		if ((int) p.getY() != (int) this.getY(p.getX())) {
+			return new DoubleEquation(0, 0);
+		}
+		double pM = 0 - (1 / m); // invert and flip sign
 
-        // (this.m * x) - (eq.m * x) + this.c = eq.c
-        // (this.m * x) - (eq.m * x) = eq.c - this.c
-        // (this.m -eq.m) * x = eq.c - this.c
-        // x = (eq.c - this.c) / (this.m -eq.m)
+		// find new c
+		// y = pM.x + c
+		// y -(pM.x) = c
+		double pC = p.getY() - (pM * p.getX());
+		return new DoubleEquation(pM, pC);
+	}
 
-        double x = (eq.getC() - this.c) / (this.m - eq.getM());
-        double y = this.getY(x);
-        return new FloatPoint(x, y);
-    }
+	@Override
+	public LineEquation translate(IPoint p) {
+		if (isVert)
+			return this;
 
-    @Override
-    public boolean intersects(DoubleEquation eq) {
-        if (Math.abs(m - eq.m) < 0.000001) { // they are parallel
-            return Math.abs(c - eq.c) < 0.000001;
-        }
-        return true;
-    }
+		double oldY = this.getY(p.getX());
+		double desiredY = p.getY();
 
-    /**
-     * Get the point that lies proportion of the way between points start and
-     * end
-     * 
-     * @param start
-     * @param end
-     * @param proportion
-     * @return
-     */
-    public static IPoint getProportionalDistance(IPoint start, IPoint end, double proportion) {
+		double dy = oldY - desiredY;
+		double newC = this.c - dy;
+		return new DoubleEquation(this.m, newC);
 
-        LineEquation eq = new DoubleEquation(start, end);
-        double totalLength = start.getLengthTo(end);
-        double propLength = totalLength * proportion;
+	}
 
-        IPoint p = eq.getPointOnLine(start, propLength);
+	@Override
+	public IPoint getIntercept(LineEquation eq) {
+		// (this.m * x) + this.c = (eq.m * x) + eq.c
 
-        // check direction of the line
-        if (p.getLengthTo(end) > totalLength) {
-            p = eq.getPointOnLine(start, -propLength);
-        }
+		// (this.m * x) - (eq.m * x) + this.c = eq.c
+		// (this.m * x) - (eq.m * x) = eq.c - this.c
+		// (this.m -eq.m) * x = eq.c - this.c
+		// x = (eq.c - this.c) / (this.m -eq.m)
 
-        return p;
-    }
+		double x = (eq.getC() - this.c) / (this.m - eq.getM());
+		double y = this.getY(x);
+		return new FloatPoint(x, y);
+	}
 
-    @Override
-    public double getClosestDistanceToPoint(IPoint p) {
+	@Override
+	public boolean intersects(DoubleEquation eq) {
+		if (Math.abs(m - eq.m) < 0.000001) { // they are parallel
+			return Math.abs(c - eq.c) < 0.000001;
+		}
+		return true;
+	}
 
-        // translate the equation to p
-        LineEquation tr = this.translate(p);
+	/**
+	 * Get the point that lies proportion of the way between points start and end
+	 * 
+	 * @param start
+	 * @param end
+	 * @param proportion
+	 * @return
+	 */
+	public static IPoint getProportionalDistance(IPoint start, IPoint end, double proportion) {
 
-        // get the orthogonal line, which will intersect the original equation
-        LineEquation orth = tr.getPerpendicular(p);
+		LineEquation eq = new DoubleEquation(start, end);
+		double totalLength = start.getLengthTo(end);
+		double propLength = totalLength * proportion;
 
-        // find the point of intercept
-        IPoint intercept = this.getIntercept(orth);
-        // IJ.log("Intercept: "+intercept.toString());
+		IPoint p = eq.getPointOnLine(start, propLength);
 
-        // measure the distance between p and the intercept
-        double distance = p.getLengthTo(intercept);
-        return distance;
-    }
+		// check direction of the line
+		if (p.getLengthTo(end) > totalLength) {
+			p = eq.getPointOnLine(start, -propLength);
+		}
 
-    /**
-     * Find the best fit to the points using the least square method
-     * 
-     * @param points
-     * @return
-     */
-    public static LineEquation calculateBestFitLine(List<IPoint> points) {
+		return p;
+	}
 
-        // Find the means of x and y
-        double xMean = 0;
-        double yMean = 0;
+	@Override
+	public double getClosestDistanceToPoint(IPoint p) {
 
-        for (IPoint p : points) {
-            xMean += p.getX();
-            yMean += p.getY();
-        }
+		// translate the equation to p
+		LineEquation tr = this.translate(p);
 
-        xMean /= points.size();
-        yMean /= points.size();
+		// get the orthogonal line, which will intersect the original equation
+		LineEquation orth = tr.getPerpendicular(p);
 
-        /*
-         * Find the slope of the line
-         * 
-         * m = sumof( (x - xMean) (y-yMean) ) --------------------------------
-         * sumof( (x - xMean)^2 )
-         * 
-         */
+		// find the point of intercept
+		IPoint intercept = this.getIntercept(orth);
+		// IJ.log("Intercept: "+intercept.toString());
 
-        double sumDiffs = 0;
-        double sumSquare = 0;
+		// measure the distance between p and the intercept
+		double distance = p.getLengthTo(intercept);
+		return distance;
+	}
 
-        for (IPoint p : points) {
+	/**
+	 * Find the best fit to the points using the least square method
+	 * 
+	 * @param points
+	 * @return
+	 */
+	public static LineEquation calculateBestFitLine(List<IPoint> points) {
 
-            double x = p.getX() - xMean;
-            double y = p.getY() - yMean;
-            double x2 = x * x;
-            sumDiffs += x * y;
-            sumSquare += x2;
-        }
+		// Find the means of x and y
+		double xMean = 0;
+		double yMean = 0;
 
-        double m = sumDiffs / sumSquare;
+		for (IPoint p : points) {
+			xMean += p.getX();
+			yMean += p.getY();
+		}
 
-        // Calculate the intercept: b = yMean - m*xMean
-        double c = yMean - (m * xMean);
+		xMean /= points.size();
+		yMean /= points.size();
 
-        // Return the equation
-        LineEquation eq = new DoubleEquation(m, c);
-        return eq;
-    }
+		/*
+		 * Find the slope of the line
+		 * 
+		 * m = sumof( (x - xMean) (y-yMean) ) -------------------------------- sumof( (x
+		 * - xMean)^2 )
+		 * 
+		 */
 
-    /**
-     * Returns the equation as a string as y=mx+c
-     *
-     * @return The Equation of the line
-     */
-    public String toString() {
-        return String.format("y = %f.x+%f", m, c);
-    }
+		double sumDiffs = 0;
+		double sumSquare = 0;
+
+		for (IPoint p : points) {
+
+			double x = p.getX() - xMean;
+			double y = p.getY() - yMean;
+			double x2 = x * x;
+			sumDiffs += x * y;
+			sumSquare += x2;
+		}
+
+		double m = sumDiffs / sumSquare;
+
+		// Calculate the intercept: b = yMean - m*xMean
+		double c = yMean - (m * xMean);
+
+		// Return the equation
+		LineEquation eq = new DoubleEquation(m, c);
+		return eq;
+	}
+
+	/**
+	 * Returns the equation as a string as y=mx+c
+	 *
+	 * @return The Equation of the line
+	 */
+	@Override
+	public String toString() {
+		return String.format("y = %f.x+%f", m, c);
+	}
 
 }

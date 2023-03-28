@@ -89,7 +89,8 @@ public class ConfigFileReader {
 				String.valueOf(op.getBoolean(GlobalOptions.IS_GLCM_INTERFACE_KEY)));
 		properties.setProperty(GlobalOptions.ALLOW_UPDATE_CHECK_KEY,
 				String.valueOf(op.getBoolean(GlobalOptions.ALLOW_UPDATE_CHECK_KEY)));
-
+		properties.setProperty(GlobalOptions.IS_SINGLE_THREADED_DETECTION,
+				String.valueOf(op.getBoolean(GlobalOptions.IS_SINGLE_THREADED_DETECTION)));
 		return properties;
 
 	}
@@ -139,6 +140,9 @@ public class ConfigFileReader {
 
 			if (GlobalOptions.ALLOW_UPDATE_CHECK_KEY.equals(key))
 				op.setBoolean(GlobalOptions.ALLOW_UPDATE_CHECK_KEY, Boolean.valueOf(value));
+
+			if (GlobalOptions.IS_SINGLE_THREADED_DETECTION.equals(key))
+				op.setBoolean(GlobalOptions.IS_SINGLE_THREADED_DETECTION, Boolean.valueOf(value));
 
 		}
 	}

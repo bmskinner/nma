@@ -56,8 +56,10 @@ public class DefaultWarpedSignal implements XmlSerializable, IWarpedSignal {
 	private int displayThreshold = 255; // show all by default
 
 	public DefaultWarpedSignal(@NonNull Nucleus target, String targetName, String sourceDatasetName,
-			String sourceSignalGroupName, UUID source, boolean isCellsWithSignals, int threshold, boolean isBinarised,
-			boolean isNormalised, byte[] image, int imageWidth, Color pseudoColour, int displayThreshold) {
+			String sourceSignalGroupName, UUID source, boolean isCellsWithSignals, int threshold,
+			boolean isBinarised,
+			boolean isNormalised, byte[] image, int imageWidth, Color pseudoColour,
+			int displayThreshold) {
 		this.target = target;
 		this.targetName = targetName;
 		this.sourceDatasetName = sourceDatasetName;
@@ -101,9 +103,12 @@ public class DefaultWarpedSignal implements XmlSerializable, IWarpedSignal {
 
 	@Override
 	public IWarpedSignal duplicate() {
-		return new DefaultWarpedSignal(this.target.duplicate(), this.targetName, this.sourceDatasetName,
-				this.sourceSignalGroupName, this.sourceDatasetId, isCellsWithSignals, this.threshold, this.isBinarised,
-				this.isNormalised, this.image, this.imageWidth, this.pseudoColour, this.displayThreshold);
+		return new DefaultWarpedSignal(this.target.duplicate(), this.targetName,
+				this.sourceDatasetName,
+				this.sourceSignalGroupName, this.sourceDatasetId, isCellsWithSignals,
+				this.threshold, this.isBinarised,
+				this.isNormalised, this.image, this.imageWidth, this.pseudoColour,
+				this.displayThreshold);
 	}
 
 	@Override
@@ -218,7 +223,8 @@ public class DefaultWarpedSignal implements XmlSerializable, IWarpedSignal {
 
 	@Override
 	public String toString() {
-		return "Hash: " + hashCode() + target.getID() + " " + isCellsWithSignals + " " + threshold + " " + isBinarised
+		return "Hash: " + hashCode() + target.getID() + " " + isCellsWithSignals + " " + threshold
+				+ " " + isBinarised
 				+ " " + isNormalised;
 	}
 
@@ -251,10 +257,7 @@ public class DefaultWarpedSignal implements XmlSerializable, IWarpedSignal {
 			return false;
 		if (isNormalised != other.isNormalised)
 			return false;
-		if (target.getID() == null) {
-			if (other.target.getID() != null)
-				return false;
-		} else if (!target.getID().equals(other.target.getID()))
+		if (!target.getID().equals(other.target.getID()))
 			return false;
 		if (!Arrays.equals(image, other.image))
 			return false;

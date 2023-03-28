@@ -99,8 +99,6 @@ public class Detector {
 
 	private boolean isWatershed = false;
 
-//	private int threshold = 128;
-
 	/**
 	 * Detect rois in the image at the default threshold with no size or circularity
 	 * parameters set

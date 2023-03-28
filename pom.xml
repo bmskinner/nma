@@ -19,7 +19,7 @@
 		<project.wiki.directory>wiki</project.wiki.directory>
 		<maven.build.timestamp.format>yyyy</maven.build.timestamp.format>
 	</properties>
-	
+
 	<!-- People who have worked on this project -->
 	<developers>
 		<developer>
@@ -182,7 +182,8 @@
 				</executions>
 			</plugin>
 
-			<!-- Create a file in the jar with the custom project properties. This ensures they are accessible when needed-->
+			<!-- Create a file in the jar with the custom project properties. This 
+				ensures they are accessible when needed -->
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>properties-maven-plugin</artifactId>
@@ -374,6 +375,7 @@
 					<!-- Run a script to download dependency jars that are not available 
 						in Maven Central or other repos -->
 					<execution>
+						<?m2e ignore?> <!-- m2eclipse plugin does not know this plugin's abilities, don't run on build in Eclipse: https://stackoverflow.com/questions/57767896/plugin-execution-not-covered-by-lifecycle-configuration-org-codehaus-mojo -->
 						<id>install-dependencies</id>
 						<phase>initialize</phase>
 						<goals>
@@ -499,8 +501,8 @@
 	</reporting>
 
 	<dependencies>
-	
-	<!--Not available in Maven Central, fetch from Github-->
+
+		<!--Not available in Maven Central, fetch from Github -->
 		<dependency>
 			<groupId>com.github.lejon</groupId>
 			<artifactId>T-SNE-Java</artifactId>
@@ -513,13 +515,13 @@
 			</exclusions>
 		</dependency>
 
-		<!--Not available in Maven Central, fetch from Github-->
+		<!--Not available in Maven Central, fetch from Github -->
 		<dependency>
 			<groupId>com.github.ijpb</groupId>
 			<artifactId>MorphoLibJ</artifactId>
 			<version>v1.5.1</version>
 		</dependency>
-		
+
 
 		<!--Not available in Maven Central; no tagged versions on Github, using 
 			latest commit available -->
@@ -537,13 +539,13 @@
 			<artifactId>jebl</artifactId>
 			<version>0.4</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>net.sourceforge.argparse4j</groupId>
 			<artifactId>argparse4j</artifactId>
 			<version>0.9.0</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>net.imagej</groupId>
 			<artifactId>ij</artifactId>

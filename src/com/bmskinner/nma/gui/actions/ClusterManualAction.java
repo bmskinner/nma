@@ -40,7 +40,8 @@ public class ClusterManualAction extends SingleDatasetResultAction {
 
 	private static final @NonNull String PROGRESS_BAR_LABEL = "Clustering cells";
 
-	public ClusterManualAction(IAnalysisDataset dataset, @NonNull ProgressBarAcceptor acceptor) {
+	public ClusterManualAction(@NonNull IAnalysisDataset dataset,
+			@NonNull ProgressBarAcceptor acceptor) {
 		super(dataset, PROGRESS_BAR_LABEL, acceptor);
 	}
 
@@ -63,15 +64,15 @@ public class ClusterManualAction extends SingleDatasetResultAction {
 
 			// blocks until closed
 			if (mc.isReadyToRun()) {
-//				UIController.getInstance().fireClusterGroupsUpdated(dataset);
+				// no action, all handled within the clusterer
 			}
 			cancel();
 		} catch (RequestCancelledException e1) {
 			cancel();
-			return;
 		}
 	}
 
+	@SuppressWarnings("serial")
 	private class ManualClusteringDialog extends SubAnalysisSetupDialog {
 
 		private AnnotatedNucleusPanel panel;
@@ -98,12 +99,12 @@ public class ClusterManualAction extends SingleDatasetResultAction {
 		}
 
 		/** Nuclei assigned to groups */
-		private List<ManualGroup> groups = new ArrayList<>();
-		List<String> clusterNames = new ArrayList<>();
+		private transient List<ManualGroup> groups = new ArrayList<>();
+		private transient List<String> clusterNames = new ArrayList<>();
 		private List<JButton> buttons = new ArrayList<>();
 		private int cellNumber = 0;
 
-		private final List<ICell> cells;
+		private final transient List<ICell> cells;
 
 		public ManualClusteringDialog(@NonNull final IAnalysisDataset dataset,
 				List<String> groupNames) {
@@ -118,7 +119,6 @@ public class ClusterManualAction extends SingleDatasetResultAction {
 
 		@Override
 		public IAnalysisMethod getMethod() {
-			// TODO Auto-generated method stub
 			return null;
 		}
 
@@ -142,7 +142,7 @@ public class ClusterManualAction extends SingleDatasetResultAction {
 
 		@Override
 		protected void setDefaults() {
-			// TODO Auto-generated method stub
+			// no defaults
 		}
 
 		protected void createGroups() {
@@ -169,15 +169,15 @@ public class ClusterManualAction extends SingleDatasetResultAction {
 
 			for (int i = 0; i < groups.size(); i++) {
 
-				List<ICell> cells = groups.get(i).selectedCells;
+				List<ICell> cellList = groups.get(i).selectedCells;
 
-				if (!cells.isEmpty()) {
+				if (!cellList.isEmpty()) {
 
 					try {
 
 						IAnalysisDataset c = new VirtualDataset(dataset,
 								group.getName() + "_" + groups.get(i).clusterName, null,
-								cells);
+								cellList);
 
 						IAnalysisDataset d = dataset.addChildDataset(c);
 

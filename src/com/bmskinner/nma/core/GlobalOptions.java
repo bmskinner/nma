@@ -71,6 +71,8 @@ public class GlobalOptions extends DefaultOptions {
 
 	public static final String ALLOW_UPDATE_CHECK_KEY = "CHECK_FOR_UPDATES";
 
+	public static final String IS_SINGLE_THREADED_DETECTION = "USE_SINGLE_THREAD_DETECTION";
+
 	private File defaultDir; // where to fall back to for finding images or
 								// saving files
 
@@ -117,6 +119,7 @@ public class GlobalOptions extends DefaultOptions {
 		this.setBoolean(IS_GLCM_INTERFACE_KEY, false);
 		setString(DEFAULT_RULESET_KEY, DEFAULT_RULESET);
 		setBoolean(ALLOW_UPDATE_CHECK_KEY, true);
+		setBoolean(IS_SINGLE_THREADED_DETECTION, false);
 	}
 
 	public synchronized MeasurementScale getScale() {

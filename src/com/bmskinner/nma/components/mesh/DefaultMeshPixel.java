@@ -25,30 +25,31 @@ package com.bmskinner.nma.components.mesh;
  */
 public class DefaultMeshPixel implements MeshPixel {
 
-    final int                value;
-    final MeshFaceCoordinate coordinate;
+	final int value;
+	final MeshFaceCoordinate coordinate;
 
-    public DefaultMeshPixel(final MeshFaceCoordinate c, final int v) {
+	public DefaultMeshPixel(final MeshFaceCoordinate c, final int v) {
 
-        if (v < 0) {
-            throw new IllegalArgumentException("Pixel value is below zero");
-        }
-        value = v;
-        coordinate = c;
-    }
+		if (v < 0) {
+			throw new IllegalArgumentException("Pixel value is below zero");
+		}
+		value = v;
+		coordinate = c;
+	}
 
-    @Override
-    public int getValue() {
-        return value;
-    }
+	@Override
+	public int getValue() {
+		return value;
+	}
 
-    @Override
-    public MeshFaceCoordinate getCoordinate() {
-        return coordinate;
-    }
+	@Override
+	public MeshFaceCoordinate getCoordinate() {
+		return coordinate;
+	}
 
-    public String toString() {
-        return coordinate.toString() + " - " + value;
-    }
+	@Override
+	public String toString() {
+		return coordinate.toString() + " - " + value;
+	}
 
 }

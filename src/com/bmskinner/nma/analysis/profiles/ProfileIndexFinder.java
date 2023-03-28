@@ -77,10 +77,10 @@ public class ProfileIndexFinder {
 				for (RuleSet rule : rulesets) {
 					IProfile p = n.getProfile(rule.getType());
 					int index = identifyIndex(p, rule);
-					LOGGER.finer(n.getNameAndNumber() + ": Setting " + lm + " to " + index);
+
 					n.setLandmark(lm, index);
 				}
-			} catch (MissingProfileException e) {
+			} catch (MissingProfileException | ProfileException e) {
 				LOGGER.log(Loggable.STACK, "Error getting profile type", e);
 			} catch (NoDetectedIndexException e) {
 				LOGGER.finer(n.getNameAndNumber() + ": Unable to detect " + lm
@@ -93,8 +93,6 @@ public class ProfileIndexFinder {
 					LOGGER.log(Loggable.STACK, "Error setting landmark to zero", e);
 
 				} // default to the zero index
-			} catch (ProfileException e) {
-				LOGGER.log(Loggable.STACK, "Error getting profile type", e);
 			} catch (IndexOutOfBoundsException e) {
 				LOGGER.log(Loggable.STACK, "Index out of bounds", e);
 			} catch (MissingLandmarkException e) {
@@ -206,9 +204,9 @@ public class ProfileIndexFinder {
 
 	/**
 	 * Use the provided RuleSets to identify an index within profiles of an object.
-	 * Returns the first matching index in the profile. On error or no hit, return
-	 * -1. Note that this ignores the RuleSet's ProfileType preference, and works
-	 * directly on the given profile
+	 * Returns the first matching index in the profile. On error or no hit, throw an
+	 * exception.Note that this ignores the RuleSet's ProfileType preference, and
+	 * works directly on the given profile
 	 * 
 	 * @param t    the object to detect on
 	 * @param list the rulesets to use
@@ -221,8 +219,9 @@ public class ProfileIndexFinder {
 	public static int identifyIndex(@NonNull final Taggable t, @NonNull final List<RuleSet> list)
 			throws NoDetectedIndexException, MissingProfileException, ProfileException,
 			MissingLandmarkException {
-		if (list == null || list.isEmpty())
+		if (list.isEmpty())
 			throw new IllegalArgumentException(RULESET_EMPTY_ERROR);
+
 		BooleanProfile indexes = new BooleanProfile(t.getBorderLength(), true);
 		for (RuleSet r : list) {
 			IProfile p = t.getProfile(r.getType());

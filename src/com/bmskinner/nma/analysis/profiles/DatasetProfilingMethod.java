@@ -36,6 +36,7 @@ import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.datasets.ICellCollection;
 import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.measure.MeasurementScale;
+import com.bmskinner.nma.components.options.MissingOptionException;
 import com.bmskinner.nma.components.profiles.IProfile;
 import com.bmskinner.nma.components.profiles.Landmark;
 import com.bmskinner.nma.components.profiles.MissingProfileException;
@@ -108,7 +109,9 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 			return;
 		}
 
-		RuleApplicationType ruleType = dataset.getAnalysisOptions().get().getRuleSetCollection()
+		RuleApplicationType ruleType = dataset.getAnalysisOptions()
+				.orElseThrow(MissingOptionException::new)
+				.getRuleSetCollection()
 				.getApplicationType();
 
 		if (RuleApplicationType.VIA_MEDIAN.equals(ruleType))
@@ -123,10 +126,13 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 	 * Detect border tags in nuclei using the dataset rulesets, and also apply rules
 	 * to the median profile. The median is not used for back-propogation of tags.
 	 * 
+	 * @throws MissingOptionException
+	 * 
 	 * @throws Exception
 	 */
 	private void runPerNucleus()
-			throws ProfileException, MissingProfileException, MissingLandmarkException {
+			throws ProfileException, MissingProfileException, MissingLandmarkException,
+			MissingOptionException {
 		ICellCollection collection = dataset.getCollection();
 
 		collection.getProfileCollection().calculateProfiles();
@@ -139,30 +145,34 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 		// For each tag in the dataset ruleset collection, identify the tag in nuclei
 		Set<Landmark> tags = collection.getRuleSetCollection().getLandmarks();
 
-		Landmark rp = collection.getRuleSetCollection().getLandmark(OrientationMark.REFERENCE)
+		Landmark rp = collection.getRuleSetCollection()
+				.getLandmark(OrientationMark.REFERENCE)
 				.orElseThrow(MissingLandmarkException::new);
 
-		for (Landmark t : tags) {
-			if (rp.equals(t)) // Already set
+		for (Landmark lm : tags) {
+			if (rp.equals(lm)) // Already set
 				continue;
-			List<RuleSet> ruleSets = collection.getRuleSetCollection().getRuleSets(t);
+			List<RuleSet> ruleSets = collection.getRuleSetCollection().getRuleSets(lm);
 			for (Nucleus n : collection.getNuclei()) {
 				int index = 0;
 				try {
 					index = ProfileIndexFinder.identifyIndex(n, ruleSets);
 				} catch (NoDetectedIndexException e) {
-					LOGGER.fine("Cannot identify " + t + " in nucleus " + n.getNucleusNumber()
+					LOGGER.fine("Cannot identify " + lm + " in nucleus " + n.getNucleusNumber()
 							+ ", using index 0");
 					// Fall back to zero index, correct manually
 				}
 				if (!n.isLocked()) {
-					n.setLandmark(t, index);
+					n.setLandmark(lm, index);
 				} else {
-					LOGGER.fine(
-							"Nucleus " + n.getNameAndNumber() + " is locked, not changing " + t);
+					LOGGER.fine(() -> "Nucleus %s is locked, not changing %s".formatted(
+							n.getNameAndNumber(),
+							lm));
 				}
 
-				for (Measurement m : dataset.getAnalysisOptions().get().getRuleSetCollection()
+				for (Measurement m : dataset.getAnalysisOptions()
+						.orElseThrow(MissingOptionException::new)
+						.getRuleSetCollection()
 						.getMeasurableValues()) {
 					n.setMeasurement(m, ComponentMeasurer.calculate(m, n));
 				}
@@ -173,9 +183,9 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 			try {
 				medianIndex = ProfileIndexFinder.identifyIndex(collection, ruleSets);
 			} catch (NoDetectedIndexException e) {
-				LOGGER.fine("Cannot identify " + t + " in median, using index 0");
+				LOGGER.fine("Cannot identify " + lm + " in median, using index 0");
 			}
-			collection.getProfileCollection().setLandmark(t,
+			collection.getProfileCollection().setLandmark(lm,
 					CellularComponent.wrapIndex(medianIndex, collection.getMedianArrayLength()));
 		}
 	}
@@ -203,7 +213,9 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 		// in each nucleus since some measurements use the landmarks
 		// for orientation
 		for (Nucleus n : dataset.getCollection().getNuclei()) {
-			for (Measurement m : dataset.getAnalysisOptions().get().getRuleSetCollection()
+			for (Measurement m : dataset.getAnalysisOptions()
+					.orElseThrow(MissingOptionException::new)
+					.getRuleSetCollection()
 					.getMeasurableValues()) {
 				n.setMeasurement(m, ComponentMeasurer.calculate(m, n));
 			}
@@ -212,7 +224,9 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 		// Clear all calculated median values in the collection and
 		// recalculate. This ensures any values dependent on landmarks
 		// (e.g. bounding dimensions) are correct
-		for (Measurement m : dataset.getAnalysisOptions().get().getRuleSetCollection()
+		for (Measurement m : dataset.getAnalysisOptions()
+				.orElseThrow(MissingOptionException::new)
+				.getRuleSetCollection()
 				.getMeasurableValues()) {
 			collection.clear(m, CellularComponent.NUCLEUS);
 			// Force recalculation
@@ -234,8 +248,7 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 	 */
 	private synchronized void identifyRP(@NonNull ICellCollection collection)
 			throws MissingLandmarkException, MissingProfileException, ProfileException,
-			NoDetectedIndexException,
-			IndexOutOfBoundsException, ComponentCreationException {
+			NoDetectedIndexException, IndexOutOfBoundsException {
 		// Build the profile collection based on the current RP
 		// positions in each nucleus
 		collection.getProfileCollection().calculateProfiles();
@@ -277,8 +290,6 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 		if (coercionCounter == MAX_COERCION_ATTEMPTS && rpIndex != 0)
 			LOGGER.fine("Unable to coerce RP to index zero");
 
-//		LOGGER.fine( "Best RP in final median is located at index " + rpIndex);
-
 		if (!dv.validate(dataset))
 			throw new ProfileException(
 					"Dataset does not validate after finding RP: " + dv.getSummary()
@@ -296,18 +307,21 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 	 * @throws ProfileException
 	 * @throws ComponentCreationException
 	 * @throws IndexOutOfBoundsException
+	 * @throws MissingOptionException
 	 */
 	private synchronized void identifyOtherLandmarks(ICellCollection collection)
 			throws MissingLandmarkException, MissingProfileException, ProfileException,
-			NoDetectedIndexException,
-			IndexOutOfBoundsException, ComponentCreationException {
+			NoDetectedIndexException, IndexOutOfBoundsException, MissingOptionException {
 		// Identify the border tags in the median profile
 
 		// Which landmarks do we care about? Those defined in the dataset options.
-		Set<Landmark> lms = dataset.getAnalysisOptions().get().getRuleSetCollection()
+		Set<Landmark> lms = dataset.getAnalysisOptions()
+				.orElseThrow(MissingOptionException::new)
+				.getRuleSetCollection()
 				.getLandmarks();
 
-		Landmark rp = collection.getRuleSetCollection().getLandmark(OrientationMark.REFERENCE)
+		Landmark rp = collection.getRuleSetCollection()
+				.getLandmark(OrientationMark.REFERENCE)
 				.orElseThrow(MissingLandmarkException::new);
 
 		for (Landmark om : lms) {
@@ -345,8 +359,7 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 	 */
 	private int coerceRPToZero(ICellCollection collection)
 			throws NoDetectedIndexException, MissingLandmarkException,
-			MissingProfileException, ProfileException, IndexOutOfBoundsException,
-			ComponentCreationException {
+			MissingProfileException, ProfileException, IndexOutOfBoundsException {
 
 		Landmark rp = collection.getRuleSetCollection().getLandmark(OrientationMark.REFERENCE)
 				.orElseThrow(MissingLandmarkException::new);
@@ -399,7 +412,7 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 			@NonNull ProfileType type,
 			@NonNull IProfile median)
 			throws MissingProfileException, ProfileException, MissingLandmarkException,
-			IndexOutOfBoundsException, ComponentCreationException {
+			IndexOutOfBoundsException {
 
 		for (Nucleus n : collection.getNuclei()) {
 			if (n.isLocked())

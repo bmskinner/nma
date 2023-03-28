@@ -33,35 +33,36 @@ import com.bmskinner.nma.stats.SignificanceTest;
  */
 public class WilcoxonTableCellRenderer extends PairwiseTableCellRenderer {
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-    public Component getTableCellRendererComponent(JTable table, Object value,
-            boolean isSelected, boolean hasFocus, int row, int column) {
+	@Override
+	public Component getTableCellRendererComponent(JTable table, Object value,
+			boolean isSelected, boolean hasFocus, int row, int column) {
 
-    	Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-    	Color bg = c.getBackground();
-    	
-    
-        String cellContents = ((JLabel)c).getText();
-        if (cellContents != null && !cellContents.equals("")) { // ensure value
+		Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row,
+				column);
+		Color bg = c.getBackground();
 
-            NumberFormat nf = NumberFormat.getInstance();
-            double pvalue = 1;
+		String cellContents = ((JLabel) c).getText();
+		if (cellContents != null && !cellContents.equals("")) { // ensure value
 
-            try {
-                pvalue = nf.parse(cellContents).doubleValue();
-            } catch (ParseException e) { 
-            	e.printStackTrace();
-            }
+			NumberFormat nf = NumberFormat.getInstance();
+			double pvalue = 1;
 
-            if (pvalue <= SignificanceTest.FIVE_PERCENT_SIGNIFICANCE_LEVEL)
-            	bg = Color.YELLOW;
+			try {
+				pvalue = nf.parse(cellContents).doubleValue();
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}
 
-            if (pvalue <= SignificanceTest.ONE_PERCENT_SIGNIFICANCE_LEVEL)
-            	bg = Color.GREEN;
-            
-        }
-        c.setBackground(bg);
-        return c;
-    }
+			if (pvalue <= SignificanceTest.FIVE_PERCENT_SIGNIFICANCE_LEVEL)
+				bg = Color.YELLOW;
+
+			if (pvalue <= SignificanceTest.ONE_PERCENT_SIGNIFICANCE_LEVEL)
+				bg = Color.GREEN;
+
+		}
+		c.setBackground(bg);
+		return c;
+	}
 }

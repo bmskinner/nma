@@ -110,88 +110,9 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
 			result.add(clusterDataset);
 		}
 
-		// Move tSNE values to their cluster group if needed
-//		if (options.getBoolean(HashOptions.CLUSTER_USE_TSNE_KEY)) {
-//			appendClusterIdToDimensionalityMeasurements(Measurement.TSNE_1, Measurement.TSNE_2,
-//					group);
-//		}
-
-		// Move UMAP values to their cluster group if needed
-//		if (options.getBoolean(HashOptions.CLUSTER_USE_UMAP_KEY)) {
-//			appendClusterIdToDimensionalityMeasurements(Measurement.UMAP_1, Measurement.UMAP_2,
-//					group);
-//		}
-
-		// Move PCA values to their cluster group if needed
-//		if (options.getBoolean(HashOptions.CLUSTER_USE_PCA_KEY)) {
-//			appendClusterIdToPCA(group);
-//		}
-
 		dataset.addClusterGroup(group);
 		return new ClusterAnalysisResult(result, group);
 	}
-
-	/**
-	 * The TSNE, UMAP values are stored in the nucleus measurements, but will be
-	 * overwritten if another clustering is performed. Append the cluster group id
-	 * to the measurement so we can store values across different clustering
-	 * instances
-	 * 
-	 * @throws AnalysisMethodException
-	 * 
-	 */
-//	private void appendClusterIdToDimensionalityMeasurements(Measurement dim1, Measurement dim2,
-//			IClusterGroup group) throws AnalysisMethodException {
-//		for (ICell c : dataset.getCollection()) {
-//			for (Nucleus n : c.getNuclei()) {
-//
-//				double d1 = n.getMeasurement(dim1);
-//				double d2 = n.getMeasurement(dim2);
-//				if (Statistical.ERROR_CALCULATING_STAT == d1)
-//					throw new AnalysisMethodException("Value not present: " + dim1);
-//				if (Statistical.ERROR_CALCULATING_STAT == d2)
-//					throw new AnalysisMethodException("Value not present: " + dim2);
-//
-//				Measurement m1 = new DefaultMeasurement(
-//						dim1.name().replace(" ", "_") + "_" + group.getId(),
-//						MeasurementDimension.NONE);
-//				n.setMeasurement(m1, d1);
-//
-//				Measurement m2 = new DefaultMeasurement(
-//						dim2.name().replace(" ", "_") + "_" + group.getId(),
-//						MeasurementDimension.NONE);
-//				n.setMeasurement(m2, d2);
-//
-//				// remove the temporary measurement
-//				n.clearMeasurement(dim1);
-//				n.clearMeasurement(dim2);
-//			}
-//		}
-//	}
-
-	/**
-	 * The principal components are stored in the nucleus measurements, but will be
-	 * overwritten if another clustering is performed. Append the cluster group id
-	 * to the measurement so we can store values across different clustering
-	 * instances
-	 * 
-	 * @param group
-	 */
-//	private void appendClusterIdToPCA(IClusterGroup group) {
-//		for (ICell c : dataset.getCollection()) {
-//			for (Nucleus n : c.getNuclei()) {
-//				int nPcs = (int) n.getMeasurement(Measurement.PCA_N);
-//
-//				n.setMeasurement(Measurement.makePrincipalComponentNumber(group.getId()), nPcs);
-//				n.clearMeasurement(Measurement.PCA_N);
-//				for (int i = 1; i <= nPcs; i++) {
-//					n.setMeasurement(Measurement.makePrincipalComponent(i, group.getId()),
-//							n.getMeasurement(Measurement.makePrincipalComponent(i)));
-//					n.clearMeasurement(Measurement.makePrincipalComponent(i));
-//				}
-//			}
-//		}
-//	}
 
 	/**
 	 * Run the clustering on a collection

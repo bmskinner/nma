@@ -21,31 +21,33 @@ import javax.swing.JCheckBox;
 @SuppressWarnings("serial")
 public class GenericCheckboxPanel extends EnumeratedOptionsPanel {
 
-    private JCheckBox checkBox = new JCheckBox();
+	private JCheckBox checkBox = new JCheckBox();
 
-    /**
-     * Construct with a text label
-     * @param label the text to display by the checkbox
-     */
-    public GenericCheckboxPanel(String label) {
-        super();
-        checkBox.setSelected(false);
-        checkBox.addActionListener(this);
-        checkBox.setText(label);
-        this.add(checkBox);
+	/**
+	 * Construct with a text label
+	 * 
+	 * @param label the text to display by the checkbox
+	 */
+	public GenericCheckboxPanel(String label) {
+		super();
+		checkBox.setSelected(false);
+		checkBox.addActionListener(this);
+		checkBox.setText(label);
+		this.add(checkBox);
 
-    }
+	}
 
-    public boolean isSelected() {
-        return this.checkBox.isSelected();
-    }
+	public boolean isSelected() {
+		return this.checkBox.isSelected();
+	}
 
-    public void setEnabled(boolean b) {
-        checkBox.setEnabled(b);
-    }
+	@Override
+	public void setEnabled(boolean b) {
+		checkBox.setEnabled(b);
+	}
 
-    public void setText(String s) {
-        checkBox.setText(s);
-    }
+	public void setText(String s) {
+		checkBox.setText(s);
+	}
 
 }

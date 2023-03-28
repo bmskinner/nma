@@ -97,23 +97,15 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> {
 						? m.getCellsWithNuclearSignals(warpingOptions.signalId(), true)
 						: warpingOptions.templateDataset().getCollection().getCells();
 		totalCells = cells.size();
-		LOGGER.fine(String.format(
+		LOGGER.fine(() -> String.format(
 				"Created signal warper for %s signal group %s with %s cells, min threshold %s ",
 				warpingOptions.templateDataset().getName(), warpingOptions.signalId(), totalCells,
 				warpingOptions.getInt(SignalWarpingRunSettings.MIN_THRESHOLD_KEY)));
 
 		try {
 
-			Nucleus target = warpingOptions.targetDataset().getCollection().getConsensus(); // Issue
-																							// here
-																							// when
-																							// using
-																							// '.duplicate()'
-																							// -
-																							// causes
-																							// image
-																							// sizing
-																							// issue
+			// Issue here if using ::duplicate - causes image sizing problem
+			Nucleus target = warpingOptions.targetDataset().getCollection().getConsensus();
 
 			// Create the consensus mesh to warp each cell onto
 			meshConsensus = new DefaultMesh(target);
@@ -310,16 +302,13 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> {
 					.getAnalysisOptions().get()
 					.getNuclearSignalOptions(warpingOptions.signalId())
 					.orElseThrow(MissingOptionException::new);
-		} else {
+		}
+		Optional<IAnalysisOptions> analysisOptions = warpingOptions.templateDataset()
+				.getAnalysisOptions();
 
-			Optional<IAnalysisOptions> analysisOptions = warpingOptions.templateDataset()
-					.getAnalysisOptions();
-
-			if (analysisOptions.isPresent()) {
-				return analysisOptions.get().getNuclearSignalOptions(warpingOptions.signalId())
-						.orElseThrow(MissingOptionException::new);
-
-			}
+		if (analysisOptions.isPresent()) {
+			return analysisOptions.get().getNuclearSignalOptions(warpingOptions.signalId())
+					.orElseThrow(MissingOptionException::new);
 		}
 
 		return null;

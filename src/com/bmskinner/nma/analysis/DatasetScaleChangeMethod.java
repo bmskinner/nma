@@ -19,11 +19,23 @@ public class DatasetScaleChangeMethod extends MultipleDatasetAnalysisMethod {
 
 	private final double newScale;
 
-	public DatasetScaleChangeMethod(IAnalysisDataset dataset, double newScale) {
+	/**
+	 * Create with the dataset to update, and the new scale
+	 * 
+	 * @param dataset  the dataset to update
+	 * @param newScale the new scale in pixels per micron
+	 */
+	public DatasetScaleChangeMethod(@NonNull IAnalysisDataset dataset, double newScale) {
 		super(dataset);
 		this.newScale = newScale;
 	}
 
+	/**
+	 * Create with the datasets to update, and the new scale
+	 * 
+	 * @param dataset  the datasets to update
+	 * @param newScale the new scale in pixels per micron
+	 */
 	public DatasetScaleChangeMethod(@NonNull List<IAnalysisDataset> datasets, double newScale) {
 		super(datasets);
 		this.newScale = newScale;
@@ -35,10 +47,10 @@ public class DatasetScaleChangeMethod extends MultipleDatasetAnalysisMethod {
 		return new DefaultAnalysisResult(datasets);
 	}
 
-	private void run() throws Exception {
+	private void run() {
 
 		if (newScale <= 0) {
-			LOGGER.warning(String.format("New scale (%d) is not valid", newScale));
+			LOGGER.warning(() -> "New scale (%d) is not valid, ignoring".formatted(newScale));
 			return;
 		}
 

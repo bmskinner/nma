@@ -73,7 +73,7 @@ public class ProfileCreator {
 				return calculateAngleProfile(target);
 			}
 		} catch (UnavailableBorderPointException e) {
-			LOGGER.log(Loggable.STACK, "Cannot create profile " + e.getMessage(), e);
+			LOGGER.log(Loggable.STACK, "Cannot create profile %s".formatted(e.getMessage()), e);
 			LOGGER.warning("Cannot create " + type.toString() + "" + e.getMessage());
 			throw new ProfileException("Cannot create profile " + type, e);
 		}
@@ -89,7 +89,7 @@ public class ProfileCreator {
 	 * @throws ProfileException
 	 */
 	private static IProfile calculateAngleProfile(@NonNull Taggable target)
-			throws UnavailableBorderPointException, ProfileException {
+			throws UnavailableBorderPointException {
 
 		float[] angles = new float[target.getBorderLength()];
 
@@ -207,8 +207,7 @@ public class ProfileCreator {
 		return new DefaultProfile(p.divide(max));
 	}
 
-	private static IProfile calculateRadiusProfile(@NonNull Taggable target)
-			throws ProfileException {
+	private static IProfile calculateRadiusProfile(@NonNull Taggable target) {
 
 		float[] profile = new float[target.getBorderLength()];
 

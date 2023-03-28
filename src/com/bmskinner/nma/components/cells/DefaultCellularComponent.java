@@ -727,20 +727,20 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	 * @return
 	 */
 	private FloatPolygon toOffsetPolygon(float xOffset, float yOffset) {
-		float[] xpoints = new float[borderList.length + 1];
-		float[] ypoints = new float[borderList.length + 1];
+		float[] xp = new float[borderList.length + 1];
+		float[] yp = new float[borderList.length + 1];
 
 		for (int i = 0; i < borderList.length; i++) {
 			IPoint p = borderList[i];
-			xpoints[i] = (float) p.getX() + xOffset;
-			ypoints[i] = (float) p.getY() + yOffset;
+			xp[i] = (float) p.getX() + xOffset;
+			yp[i] = (float) p.getY() + yOffset;
 		}
 
 		// Ensure the polygon is closed
-		xpoints[borderList.length] = (float) borderList[0].getX() + xOffset;
-		ypoints[borderList.length] = (float) borderList[0].getY() + yOffset;
+		xp[borderList.length] = (float) borderList[0].getX() + xOffset;
+		yp[borderList.length] = (float) borderList[0].getY() + yOffset;
 
-		return new FloatPolygon(xpoints, ypoints);
+		return new FloatPolygon(xp, yp);
 	}
 
 	@Override
@@ -750,11 +750,9 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	}
 
 	@Override
-	public Shape toShape(MeasurementScale scale) {
-
-		// Converts whatever coordinates are in the border
-		// to a shape
-		return toOffsetShape(0, 0, scale);
+	public Shape toShape(MeasurementScale sc) {
+		// Converts whatever coordinates are in the border to a shape
+		return toOffsetShape(0, 0, sc);
 	}
 
 	@Override
@@ -791,15 +789,15 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	 * 
 	 * @param xOffset
 	 * @param yOffset
-	 * @param scale
+	 * @param ms
 	 * @return
 	 */
-	private Shape toOffsetShape(double xOffset, double yOffset, MeasurementScale scale) {
+	private Shape toOffsetShape(double xOffset, double yOffset, MeasurementScale ms) {
 
 		if (borderList.length == 0)
 			throw new IllegalArgumentException("Border list is empty");
 
-		double sc = scale.equals(MeasurementScale.MICRONS) ? this.scale : 1;
+		double sc = MeasurementScale.MICRONS.equals(ms) ? this.scale : 1;
 
 		Path2D.Double path = new Path2D.Double();
 
@@ -870,14 +868,13 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 
 		// Look for the point at which the direct distance between the two points is
 		// closest to the sum of their respective distances to the centre of mass
-		IPoint opp = Arrays.stream(borderList)
+		return Arrays.stream(borderList)
 				.filter(point -> point.getLengthTo(p) > distToCom)
 				.min(Comparator
 						.comparing(point -> Math.abs(point.getLengthTo(centreOfMass)
 								+ distToCom
 								- point.getLengthTo(p))))
 				.orElse(p);
-		return opp;
 	}
 
 	@Override
@@ -1015,7 +1012,6 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 				&& channel == other.channel
 				&& Objects.equals(id, other.id)
 				&& Objects.equals(originalCentreOfMass, other.originalCentreOfMass)
-//				&& Objects.equals(xBase, other.xBase) && Objects.equals(yBase, other.yBase)
 				&& Double.doubleToLongBits(scale) == Double.doubleToLongBits(other.scale)
 				&& Arrays.equals(xpoints, other.xpoints) && Arrays.equals(ypoints, other.ypoints);
 	}

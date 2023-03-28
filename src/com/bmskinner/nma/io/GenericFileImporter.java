@@ -108,19 +108,19 @@ public class GenericFileImporter extends VoidResultAction implements Importer {
 
 			FileNameExtensionFilter filter = switch (fileType) {
 			case IWorkspace.XML_WORKSPACE -> new FileNameExtensionFilter(WORKSPACE_FILE_TYPE,
-					Importer.WRK_FILE_EXTENSION_NODOT);
+					Io.WRK_FILE_EXTENSION_NODOT);
 
 			case IAnalysisDataset.XML_ANALYSIS_DATASET -> new FileNameExtensionFilter(
 					DATASET_FILE_TYPE,
-					Importer.NMD_FILE_EXTENSION_NODOT);
+					Io.NMD_FILE_EXTENSION_NODOT);
 
 			case IAnalysisOptions.XML_ANALYSIS_OPTIONS -> new FileNameExtensionFilter(
 					OPTIONS_FILE_TYPE,
-					Importer.XML_FILE_EXTENSION_NODOT);
+					Io.XML_FILE_EXTENSION_NODOT);
 
 			default -> new FileNameExtensionFilter(
 					DATASET_FILE_TYPE,
-					Importer.NMD_FILE_EXTENSION_NODOT);
+					Io.NMD_FILE_EXTENSION_NODOT);
 			};
 			fc.setFileFilter(filter);
 		}
@@ -136,7 +136,8 @@ public class GenericFileImporter extends VoidResultAction implements Importer {
 	}
 
 	/**
-	 * Check the first four bytes for the old NMD signature
+	 * Check the first four bytes for the old NMD signature. This is the magic
+	 * number for serialised Java classes
 	 * 
 	 * @return
 	 */
@@ -162,8 +163,9 @@ public class GenericFileImporter extends VoidResultAction implements Importer {
 			String vString = doc.getRootElement().getChildText("VersionCreated");
 			Version v = Version.fromString(vString);
 			if (!Version.versionIsSupported(v)) {
-				LOGGER.info("File is from NMA version " + v
-						+ ", and cannot be opened in this version.");
+				LOGGER.info(
+						() -> "File was created in NMA version %s, and cannot be opened in this version."
+								.formatted(v));
 				return true;
 			}
 		}

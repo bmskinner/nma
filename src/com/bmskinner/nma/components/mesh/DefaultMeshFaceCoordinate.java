@@ -33,16 +33,16 @@ public class DefaultMeshFaceCoordinate implements MeshFaceCoordinate {
 
 	// edge opposite peripheral vertex with lower number
 	// Value runs from 0 at internal vertex to 1 at peripheral vertex
-	final private double p1;
+	private final double p1;
 
 	// edge opposite peripheral vertex with higher number
 	// Value runs from 0 at internal vertex to 1 at peripheral vertex
-	final private double p2;
+	private final double p2;
 
 	// edge opposite internal vertex
 	// Value runs from 0 at peripheral vertex with lower number to 1 at
 	// peripheral vertex with higher number
-	final private double i1;
+	private final double i1;
 
 	/**
 	 * Constructor. The values should be between 0 and 1 and describe the proportion
@@ -75,9 +75,6 @@ public class DefaultMeshFaceCoordinate implements MeshFaceCoordinate {
 	 */
 	@Override
 	public IPoint getCartesianCoordinate(@NonNull final MeshFace face) {
-
-		if (face == null)
-			throw new IllegalArgumentException("Face is null when getting cartesian coordinate");
 
 		// Identify the vertices
 		boolean usePeripheral = face.getPeripheralVertexCount() == 2;

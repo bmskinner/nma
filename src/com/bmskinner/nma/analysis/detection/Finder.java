@@ -38,129 +38,130 @@ import ij.process.ImageProcessor;
  */
 public interface Finder<E> {
 
-    /**
-     * Find elements using the options given in the setup
-     * 
-     * @return the cells detected in the folder of images
-     * @throws Exception if detection fails
-     */
-    E find() throws Exception;
+	/**
+	 * Find elements using the options given in the setup
+	 * 
+	 * @return the cells detected in the folder of images
+	 * @throws Exception if detection fails
+	 */
+	E find() throws Exception;
 
-    /**
-     * Find cells using the options given in the setup in the given folder
-     * 
-     * @param folder
-     * @return
-     * @throws ImageImportException
-     * @throws ComponentCreationException
-     */
-    E findInFolder(@NonNull File folder) throws ImageImportException;
+	/**
+	 * Find cells using the options given in the setup in the given folder
+	 * 
+	 * @param folder
+	 * @return
+	 * @throws ImageImportException
+	 * @throws ComponentCreationException
+	 */
+	E findInFolder(@NonNull File folder) throws ImageImportException;
 
-    /**
-     * Find cells using the options given in the setup in the given image
-     * 
-     * @param imageFile
-     * @return
-     * @throws ImageImportException
-     * @throws ComponentCreationException
-     */
-    E findInImage(@NonNull File imageFile) throws ImageImportException;
+	/**
+	 * Find cells using the options given in the setup in the given image
+	 * 
+	 * @param imageFile
+	 * @return
+	 * @throws ImageImportException
+	 * @throws ComponentCreationException
+	 */
+	E findInImage(@NonNull File imageFile) throws ImageImportException;
 
-    /**
-     * Add a listener for progress through the detection.
-     * 
-     * @param l
-     */
-    void addProgressListener(ProgressListener l);
+	/**
+	 * Add a listener for progress through the detection.
+	 * 
+	 * @param l
+	 */
+	void addProgressListener(ProgressListener l);
 
-    /**
-     * Remove the progress listener from the finder
-     * 
-     * @param l
-     */
-    void removeProgressListener(ProgressListener l);
+	/**
+	 * Remove the progress listener from the finder
+	 * 
+	 * @param l
+	 */
+	void removeProgressListener(ProgressListener l);
 
-    /**
-     * Add the given event listener to the finder
-     * 
-     * @param l
-     */
-    void addDetectionEventListener(DetectionEventListener l);
+	/**
+	 * Add the given event listener to the finder
+	 * 
+	 * @param l
+	 */
+	void addDetectionEventListener(DetectionEventListener l);
 
-    /**
-     * Remove the event listener from the finder
-     * 
-     * @param l
-     */
-    void removeDetectionEventListener(DetectionEventListener l);
+	/**
+	 * Remove the event listener from the finder
+	 * 
+	 * @param l
+	 */
+	void removeDetectionEventListener(DetectionEventListener l);
 
-    /**
-     * Remove all event listeners from the finder
-     */
-    void removeAllDetectionEventListeners();
+	/**
+	 * Remove all event listeners from the finder
+	 */
+	void removeAllDetectionEventListeners();
 
-    /**
-     * Fire a detection event with the given image and message
-     * 
-     * @param ip
-     * @param message
-     */
-    void fireDetectionEvent(ImageProcessor ip, String message);
+	/**
+	 * Fire a detection event with the given image and message
+	 * 
+	 * @param ip
+	 * @param message
+	 */
+	void fireDetectionEvent(ImageProcessor ip, String message);
 
-    /**
-     * Interface implemented by probers to be notified that a new image is
-     * available for display
-     * 
-     * @author ben
-     * @since 1.13.5
-     *
-     */
-    interface DetectionEventListener {
+	/**
+	 * Interface implemented by probers to be notified that a new image is available
+	 * for display
+	 * 
+	 * @author ben
+	 * @since 1.13.5
+	 *
+	 */
+	interface DetectionEventListener {
 
-        /**
-         * Respond to a detection event
-         * 
-         * @param e
-         */
-        void detectionEventReceived(DetectionEvent e);
-    }
+		/**
+		 * Respond to a detection event
+		 * 
+		 * @param e
+		 */
+		void detectionEventReceived(DetectionEvent e);
+	}
 
-    /**
-     * Fired when an image has been processed to detect components.
-     * 
-     * @author ben
-     * @since 1.13.5
-     *
-     */
-    class DetectionEvent extends EventObject {
+	/**
+	 * Fired when an image has been processed to detect components.
+	 * 
+	 * @author ben
+	 * @since 1.13.5
+	 *
+	 */
+	@SuppressWarnings("serial")
+	class DetectionEvent extends EventObject {
 
-        private final ImageProcessor ip;
-        private final String         message;
+		private final ImageProcessor ip;
+		private final String message;
 
-        public DetectionEvent(final Object source, final ImageProcessor ip, final String message) {
-            super(source);
-            this.ip = ip;
-            this.message = message;
-        }
+		public DetectionEvent(final Object source, final ImageProcessor ip, final String message) {
+			super(source);
+			this.ip = ip;
+			this.message = message;
+		}
 
-        /**
-         * Get the image processor in this event
-         * 
-         * @return
-         */
-        public ImageProcessor getProcessor() {
-            return ip;
-        }
+		/**
+		 * Get the image processor in this event
+		 * 
+		 * @return
+		 */
+		public ImageProcessor getProcessor() {
+			return ip;
+		}
 
-        /**
-         * Get the message in this event
-         * 
-         * @return
-         */
-        public String getMessage() {
-            return message;
-        }
+		/**
+		 * Get the message in this event
+		 * 
+		 * @return
+		 */
+		public String getMessage() {
+			return message;
+		}
 
-    }
+	}
 
 }

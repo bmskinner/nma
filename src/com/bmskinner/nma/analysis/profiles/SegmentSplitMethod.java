@@ -33,7 +33,7 @@ import com.bmskinner.nma.stats.Stats;
  */
 public class SegmentSplitMethod extends SingleDatasetAnalysisMethod {
 
-	private static final Logger LOGGER = Logger.getLogger(SegmentUnmergeMethod.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(SegmentSplitMethod.class.getName());
 	private static final String SEGMENTS_ARE_OUT_OF_SYNC_WITH_MEDIAN_LBL = "Segments are out of sync with median";
 
 	private DatasetValidator dv = new DatasetValidator();
@@ -65,7 +65,7 @@ public class SegmentSplitMethod extends SingleDatasetAnalysisMethod {
 
 	private void run() throws ProfileException, MissingComponentException {
 		if (!dataset.isRoot()) {
-			LOGGER.fine(String.format("'%s': Cannot split segments in a virtual dataset",
+			LOGGER.fine(() -> String.format("'%s': Cannot split segments in a virtual dataset",
 					dataset.getName()));
 			return;
 		}
@@ -85,7 +85,7 @@ public class SegmentSplitMethod extends SingleDatasetAnalysisMethod {
 		UUID newID1 = UUID.randomUUID();
 		UUID newID2 = UUID.randomUUID();
 
-		LOGGER.fine(String.format("Splitting segment %s in root '%s' into %s and %s", segId,
+		LOGGER.fine(() -> String.format("Splitting segment %s in root '%s' into %s and %s", segId,
 				dataset.getName(), newID1, newID2));
 		boolean ok = splitSegment(dataset.getCollection(), seg, newID1,
 				newID2);
@@ -94,19 +94,19 @@ public class SegmentSplitMethod extends SingleDatasetAnalysisMethod {
 		if (ok) {
 			// Child datasets should all be virtual
 			for (IAnalysisDataset child : dataset.getAllChildDatasets()) {
-				LOGGER.fine(
-						String.format("Splitting segment  %s in child '%s'", seg.getID(),
-								child.getName()));
+				LOGGER.fine(() -> String.format("Splitting segment  %s in child '%s'", seg.getID(),
+						child.getName()));
 				boolean cOk = splitSegment(child.getCollection(), seg,
 						newID1, newID2);
 				fireProgressEvent();
 				if (!cOk)
-					LOGGER.warning(
-							String.format("Splitting segment %s failed in child '%s'", seg.getID(),
-									child.getName()));
+					LOGGER.warning(() -> String.format("Splitting segment %s failed in child '%s'",
+							seg.getID(),
+							child.getName()));
 			}
 		} else {
-			LOGGER.warning(String.format("Splitting segment in '%s' failed", dataset.getName()));
+			LOGGER.warning(
+					() -> String.format("Splitting segment in '%s' failed", dataset.getName()));
 		}
 
 	}
@@ -213,7 +213,7 @@ public class SegmentSplitMethod extends SingleDatasetAnalysisMethod {
 	 */
 	private boolean isCollectionSplittable(@NonNull ICellCollection collection, @NonNull UUID id,
 			double proportion)
-			throws ProfileException, MissingComponentException, UnsegmentedProfileException {
+			throws ProfileException, MissingComponentException {
 
 		if (collection.isVirtual())
 			return false;

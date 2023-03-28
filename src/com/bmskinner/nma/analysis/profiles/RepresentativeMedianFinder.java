@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Random;
-import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -49,8 +48,6 @@ import com.bmskinner.nma.stats.Stats;
  */
 public class RepresentativeMedianFinder {
 
-	private static final Logger LOGGER = Logger.getLogger(RepresentativeMedianFinder.class.getName());
-
 	private static final int SAMPLE_LIMIT = 2000;
 	private final ICellCollection collection;
 	private final List<Nucleus> nuclei;
@@ -64,7 +61,6 @@ public class RepresentativeMedianFinder {
 		collection = c;
 		// We need consistent ordering, but a random sample of at least
 		// 200 nuclei (if present) should be enough
-//		nuclei = getSubList(new ArrayList<>(collection.getNuclei()));
 		nuclei = conventionalSelectN(new ArrayList<>(collection.getNuclei()), SAMPLE_LIMIT);
 	}
 
@@ -101,7 +97,8 @@ public class RepresentativeMedianFinder {
 	 * @throws MissingProfileException
 	 * @throws ProfileException
 	 */
-	public IProfile findMedian() throws MissingLandmarkException, MissingProfileException, ProfileException {
+	public IProfile findMedian()
+			throws MissingLandmarkException, MissingProfileException, ProfileException {
 		// Get normalised pairwise differences between nuclei profiles
 		float[][] differences = buildDifferenceMatrix();
 
@@ -112,7 +109,8 @@ public class RepresentativeMedianFinder {
 		int index = findIndexOfLowestValue(deviations);
 
 		// Get this best profile
-		IProfile bestProfile = nuclei.get(index).getUnsegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE);
+		IProfile bestProfile = nuclei.get(index).getUnsegmentedProfile(ProfileType.ANGLE,
+				OrientationMark.REFERENCE);
 
 		// Find the other nuclei in the collection that are similar to this one
 		List<IProfile> profiles = findBestProfiles(bestProfile);
@@ -152,7 +150,7 @@ public class RepresentativeMedianFinder {
 	}
 
 	private IProfile buildMedianFromProfiles(@NonNull final List<IProfile> profiles, int length)
-			throws MissingLandmarkException, MissingProfileException, ProfileException {
+			throws ProfileException {
 		DefaultProfileAggregate agg = new DefaultProfileAggregate(length, profiles.size());
 		for (IProfile p : profiles)
 			agg.addValues(p);
@@ -184,7 +182,8 @@ public class RepresentativeMedianFinder {
 			throws MissingLandmarkException, MissingProfileException, ProfileException {
 		float[] result = new float[nuclei.size()];
 		for (int i = 0; i < result.length; i++) {
-			result[i] = (float) nuclei.get(i).getUnsegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE)
+			result[i] = (float) nuclei.get(i)
+					.getUnsegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE)
 					.absoluteSquareDifference(template);
 		}
 		return result;
@@ -203,23 +202,17 @@ public class RepresentativeMedianFinder {
 			throws MissingLandmarkException, MissingProfileException, ProfileException {
 		float[][] matrix = new float[nuclei.size()][nuclei.size()];
 
-//		for (int i = 0; i < nuclei.size(); i++) {
-//			IProfile pI = nuclei.get(i).getUnsegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE);
-//			for (int j = 0; j < nuclei.size(); j++) {
-//				matrix[i][j] = (float) pI.absoluteSquareDifference(
-//						nuclei.get(j).getUnsegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE));
-//			}
-//		}
-
 		// Handle the two diagonals of the matrix simultaneously
 		for (int i = 0; i < nuclei.size(); i++) {
-			IProfile pI = nuclei.get(i).getUnsegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE);
+			IProfile pI = nuclei.get(i).getUnsegmentedProfile(ProfileType.ANGLE,
+					OrientationMark.REFERENCE);
 			for (int j = 0; j < nuclei.size(); j++) {
 				if (j <= i) {
 					matrix[i][j] = matrix[j][i];
 				} else {
 					float v = (float) pI.absoluteSquareDifference(
-							nuclei.get(j).getUnsegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE));
+							nuclei.get(j).getUnsegmentedProfile(ProfileType.ANGLE,
+									OrientationMark.REFERENCE));
 					matrix[i][j] = v;
 				}
 			}
