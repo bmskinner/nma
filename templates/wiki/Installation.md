@@ -13,9 +13,9 @@ Nuclear Morphology Analysis is designed to be runnable on Windows, Linux and Mac
 
 Option | Link | Info
 -------|------|------
-Portable | [Nuclear Morphology Analysis-${project.version}-windows.zip](https://bitbucket.org/bmskinner/nuclear_morphology/downloads/Nuclear_Morphology_Analysis-${project.version}-windows.zip) | Software and Java runtime in a portable format. Unzip the folder wherever you like and run 'Nuclear_Morphology_Analysis.exe'.
-Installer | [Nuclear_Morphology_Analysis-${project.version}-windows.msi](https://bitbucket.org/bmskinner/nuclear_morphology/downloads/Nuclear_Morphology_Analysis-${project.version}-windows.msi) | Software and Java runtime in an installer for Windows. This will add the software to your list of installed programs, and create a start menu entry. May require administrator privileges depending on where you install.
-Standalone Jar file | [Nuclear_Morphology_Analysis_${project.version}_standalone.jar](https://bitbucket.org/bmskinner/nuclear_morphology/downloads/Nuclear_Morphology_Analysis_${project.version}_standalone.jar)  | The jar file with all dependencies for users who want to use their own Java install.
+Portable | [${jar.finalName}-windows.zip](https://bitbucket.org/bmskinner/nuclear_morphology/downloads/${jar.finalName}-windows.zip) | Software and Java runtime in a portable format. Unzip the folder wherever you like and run 'Nuclear_Morphology_Analysis.exe'.
+Installer | [${jar.finalName}-windows.msi](https://bitbucket.org/bmskinner/nuclear_morphology/downloads/${jar.finalName}-windows.msi) | Software and Java runtime in an installer for Windows. This will add the software to your list of installed programs, and create a start menu entry. May require administrator privileges depending on where you install.
+Standalone Jar file | [${jar.finalName}.jar](https://bitbucket.org/bmskinner/nuclear_morphology/downloads/${jar.finalName}.jar)  | The jar file with all dependencies for users who want to use their own Java install.
 
 You can also download a set of images suitable for testing the software from [https://bitbucket.org/bmskinner/nuclear_morphology/downloads/Testing_mouse_image_set.zip](https://bitbucket.org/bmskinner/nuclear_morphology/downloads/Testing_mouse_image_set.zip).
 
@@ -23,8 +23,8 @@ You can also download a set of images suitable for testing the software from [ht
  
 Option | Link | Info
 -------|------|------
-Linux portable | [Nuclear_Morphology_Analysis-${project.version}-linux.tar.gz](https://bitbucket.org/bmskinner/nuclear_morphology/downloads/Nuclear_Morphology_Analysis-${project.version}-linux.tar.gz) | Software and Java runtime in a portable format. Extract the folder wherever you like and run 'launch.sh'. This version was packaged on Debian 11 with glibc 2.31. If you have issues with the packaged version, install Java 16 or higher and use the standalone jar below.
-Standalone Jar file | [Nuclear_Morphology_Analysis_${project.version}_standalone.jar](https://bitbucket.org/bmskinner/nuclear_morphology/downloads/Nuclear_Morphology_Analysis_${project.version}_standalone.jar)  | The jar file with all dependencies for users who want to use their own Java install.
+Linux portable | [${jar.finalName}-linux.tar.gz](https://bitbucket.org/bmskinner/nuclear_morphology/downloads/Nuclear_Morphology_Analysis-${project.version}-linux.tar.gz) | Software and Java runtime in a portable format. Extract the folder wherever you like and run 'launch.sh'. This version was packaged on Debian 11 with glibc 2.31. If you have issues with the packaged version, install Java 16 or higher and use the standalone jar below.
+Standalone Jar file | [${jar.finalName}.jar](https://bitbucket.org/bmskinner/nuclear_morphology/downloads/${jar.finalName}.jar)  | The jar file with all dependencies for users who want to use their own Java install.
 
 You can also download a set of images suitable for testing the software from [https://bitbucket.org/bmskinner/nuclear_morphology/downloads/Testing_mouse_image_set.zip](https://bitbucket.org/bmskinner/nuclear_morphology/downloads/Testing_mouse_image_set.zip).
 
@@ -33,9 +33,9 @@ You can also download a set of images suitable for testing the software from [ht
 The software is not currently available packaged with the Java runtime. You will need to:
 
 - Install Java 16 or higher on your Mac; an open source JDK can be downloaded and installed from the [Eclipse Temurin website](https://adoptium.net/temurin/releases/)
-- Download [Nuclear_Morphology_Analysis_${project.version}_standalone.jar](https://bitbucket.org/bmskinner/nuclear_morphology/downloads/Nuclear_Morphology_Analysis_${project.version}_standalone.jar) 
+- Download [${jar.finalName}.jar](https://bitbucket.org/bmskinner/nuclear_morphology/downloads/${jar.finalName}.jar) 
 
-Due to security permissions in recent versions of MacOS (Catalina and above) the program won't have access to user folders if launched by double-clicking the jar file. You should launch from the Terminal; open the Terminal, navigate to the directory containing the jar file, and launch the jar using `java -jar Nuclear_Morphology_Analysis_${project.version}_standalone.jar`.
+Due to security permissions in recent versions of MacOS (Catalina and above) the program won't have access to user folders if launched by double-clicking the jar file. You should launch from the Terminal; open the Terminal, navigate to the directory containing the jar file, and launch the jar using `java -jar ${jar.finalName}.jar`.
 
 You can also download a set of images suitable for testing the software from [https://bitbucket.org/bmskinner/nuclear_morphology/downloads/Testing_mouse_image_set.zip](https://bitbucket.org/bmskinner/nuclear_morphology/downloads/Testing_mouse_image_set.zip).
 
@@ -87,3 +87,4 @@ Key        | Allowed Values | Effect
 `USE_GLCM_INTERFACE` | `true` `false` | If true, allows GLCM measurements for nuclei
 `FILL_CONSENSUS` | `true` `false` | Sets the default value for the 'Fill consensus' checkbox in the view menu 
 `CHECK_FOR_UPDATES` | `true` `false` | If true, the software will check for new versions on launch. If false, updates can still be checked manually via `Help > Check for updates`
+`USE_SINGLE_THREAD_DETECTION` | `true` `false` | If true, the software will only read a single image at a time. If false, several images will be analysed in parallel

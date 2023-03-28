@@ -24,15 +24,15 @@ import com.bmskinner.nma.gui.events.UIController;
 public class SegmentSplitAction extends SingleDatasetResultAction {
 
 
-	private static final @NonNull String PROGRESS_BAR_LABEL = "Merging segments";
+	private static final @NonNull String PROGRESS_BAR_LABEL = "Splitting segments";
 
 	private final UUID segId;
 
 	/**
-	 * Create a segment unmerge action
+	 * Create a segment split action
 	 * 
 	 * @param dataset  the dataset to update
-	 * @param segId    the segment to unmerge
+	 * @param segId    the segment to split
 	 * @param acceptor the progress bar container
 	 */
 	public SegmentSplitAction(@NonNull IAnalysisDataset dataset, @NonNull UUID segId,
@@ -41,10 +41,10 @@ public class SegmentSplitAction extends SingleDatasetResultAction {
 	}
 
 	/**
-	 * Create a segment unmerge action
+	 * Create a segment split action
 	 * 
 	 * @param dataset  the dataset to update
-	 * @param segId    the segment to unmerge
+	 * @param segId    the segment to split
 	 * @param acceptor the progress bar container
 	 * @param latch    a countdown latch
 	 */

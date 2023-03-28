@@ -32,9 +32,9 @@ public class SegmentMergeAction extends SingleDatasetResultAction {
 	 * Create a segment merge action
 	 * 
 	 * @param dataset  the dataset to update
-	 * @param lm       the landmark to update
-	 * @param newIndex the new index in the median profile
 	 * @param acceptor the progress bar container
+	 * @param segId0   the first segment
+	 * @param segId1   the second segment
 	 */
 	public SegmentMergeAction(@NonNull IAnalysisDataset dataset, @NonNull UUID segId0,
 			UUID segId1, @NonNull ProgressBarAcceptor acceptor) {
@@ -42,12 +42,12 @@ public class SegmentMergeAction extends SingleDatasetResultAction {
 	}
 
 	/**
-	 * Create a landmark update
+	 * Create a segment merge action
 	 * 
 	 * @param dataset  the dataset to update
-	 * @param lm       the landmark to update
-	 * @param newIndex the new index in the median profile
 	 * @param acceptor the progress bar container
+	 * @param segId0   the first segment
+	 * @param segId1   the second segment
 	 * @param latch    a countdown latch
 	 */
 	public SegmentMergeAction(@NonNull IAnalysisDataset dataset,
