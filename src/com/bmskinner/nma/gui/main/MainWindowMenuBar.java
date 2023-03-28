@@ -81,6 +81,7 @@ import com.bmskinner.nma.utility.FileUtils;
  * @author Ben Skinner
  *
  */
+@SuppressWarnings("serial")
 public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdatedListener {
 
 	private static final Logger LOGGER = Logger.getLogger(MainWindowMenuBar.class.getName());
