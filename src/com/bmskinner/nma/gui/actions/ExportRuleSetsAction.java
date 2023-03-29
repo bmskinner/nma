@@ -25,7 +25,7 @@ import com.bmskinner.nma.utility.FileUtils;
  */
 public class ExportRuleSetsAction extends MultiDatasetResultAction {
 
-	private static final Logger LOGGER = Logger.getLogger(ExportOptionsAction.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(ExportRuleSetsAction.class.getName());
 
 	private static final String PROGRESS_LBL = "Exporting options";
 
@@ -68,7 +68,7 @@ public class ExportRuleSetsAction extends MultiDatasetResultAction {
 						} catch (IOException e) {
 							LOGGER.warning("Unable to write rulesets to file");
 						}
-						LOGGER.info(String.format("Exported %s rulesets to %s", d.getName(),
+						LOGGER.info(() -> String.format("Exported %s rulesets to %s", d.getName(),
 								f.getAbsolutePath()));
 					}
 					super.finished();

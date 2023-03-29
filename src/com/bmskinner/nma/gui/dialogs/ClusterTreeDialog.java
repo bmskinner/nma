@@ -48,7 +48,6 @@ import javax.swing.SwingConstants;
 
 import org.virion.jam.controlpanels.BasicControlPalette;
 
-import com.bmskinner.nma.components.MissingLandmarkException;
 import com.bmskinner.nma.components.cells.ICell;
 import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.datasets.DefaultClusterGroup;
@@ -57,6 +56,7 @@ import com.bmskinner.nma.components.datasets.ICellCollection;
 import com.bmskinner.nma.components.datasets.IClusterGroup;
 import com.bmskinner.nma.components.datasets.VirtualDataset;
 import com.bmskinner.nma.components.options.HashOptions;
+import com.bmskinner.nma.components.profiles.MissingLandmarkException;
 import com.bmskinner.nma.components.profiles.MissingProfileException;
 import com.bmskinner.nma.components.profiles.ProfileException;
 import com.bmskinner.nma.core.InputSupplier.RequestCancelledException;

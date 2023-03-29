@@ -30,21 +30,21 @@ import com.bmskinner.nma.analysis.DefaultAnalysisResult;
 import com.bmskinner.nma.analysis.IAnalysisResult;
 import com.bmskinner.nma.analysis.SingleDatasetAnalysisMethod;
 import com.bmskinner.nma.analysis.detection.FinderDisplayType;
-import com.bmskinner.nma.components.MissingLandmarkException;
-import com.bmskinner.nma.components.UnavailableBorderPointException;
 import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.cells.ICell;
 import com.bmskinner.nma.components.cells.Nucleus;
+import com.bmskinner.nma.components.cells.UnavailableBorderPointException;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.datasets.VirtualDataset;
 import com.bmskinner.nma.components.options.HashOptions;
+import com.bmskinner.nma.components.profiles.MissingLandmarkException;
 import com.bmskinner.nma.components.profiles.MissingProfileException;
 import com.bmskinner.nma.components.profiles.ProfileException;
 import com.bmskinner.nma.components.signals.DefaultSignalGroup;
 import com.bmskinner.nma.components.signals.INuclearSignal;
 import com.bmskinner.nma.components.signals.ISignalCollection;
 import com.bmskinner.nma.components.signals.ISignalGroup;
-import com.bmskinner.nma.components.signals.UnavailableSignalGroupException;
+import com.bmskinner.nma.components.signals.MissingSignalGroupException;
 import com.bmskinner.nma.gui.components.ColourSelecter;
 import com.bmskinner.nma.io.ImageImporter.ImageImportException;
 import com.bmskinner.nma.logging.Loggable;
@@ -70,7 +70,7 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
 	 * @param d       the dataset to add signals to
 	 * @param options the analysis options
 	 * @param group   the signal group to add signals to
-	 * @throws UnavailableSignalGroupException if the group is not present in the
+	 * @throws MissingSignalGroupException if the group is not present in the
 	 *                                         dataset
 	 */
 

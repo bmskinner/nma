@@ -6,13 +6,13 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.bmskinner.nma.components.MissingLandmarkException;
 import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.mesh.DefaultMesh;
 import com.bmskinner.nma.components.mesh.Mesh;
 import com.bmskinner.nma.components.mesh.MeshCreationException;
+import com.bmskinner.nma.components.profiles.MissingLandmarkException;
 import com.bmskinner.nma.io.SampleDatasetReader;
 
 /**

@@ -5,6 +5,7 @@ import java.util.List;
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.bmskinner.nma.components.profiles.Landmark;
+import com.bmskinner.nma.components.profiles.MissingLandmarkException;
 import com.bmskinner.nma.components.rules.OrientationMark;
 import com.bmskinner.nma.components.rules.PriorityAxis;
 

@@ -22,15 +22,15 @@ import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nma.components.MissingLandmarkException;
-import com.bmskinner.nma.components.UnavailableBorderPointException;
 import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.cells.Nucleus;
+import com.bmskinner.nma.components.cells.UnavailableBorderPointException;
 import com.bmskinner.nma.components.generic.FloatPoint;
 import com.bmskinner.nma.components.generic.IPoint;
 import com.bmskinner.nma.components.measure.DoubleEquation;
 import com.bmskinner.nma.components.measure.LineEquation;
 import com.bmskinner.nma.components.measure.Measurement;
+import com.bmskinner.nma.components.profiles.MissingLandmarkException;
 import com.bmskinner.nma.components.signals.INuclearSignal;
 import com.bmskinner.nma.components.signals.ISignalCollection;
 

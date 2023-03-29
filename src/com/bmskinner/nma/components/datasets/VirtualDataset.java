@@ -25,7 +25,6 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.jdom2.Element;
 
 import com.bmskinner.nma.components.MissingComponentException;
-import com.bmskinner.nma.components.MissingLandmarkException;
 import com.bmskinner.nma.components.Statistical;
 import com.bmskinner.nma.components.Taggable;
 import com.bmskinner.nma.components.Version.UnsupportedVersionException;
@@ -53,6 +52,7 @@ import com.bmskinner.nma.components.profiles.IProfileCollection;
 import com.bmskinner.nma.components.profiles.IProfileSegment;
 import com.bmskinner.nma.components.profiles.ISegmentedProfile;
 import com.bmskinner.nma.components.profiles.Landmark;
+import com.bmskinner.nma.components.profiles.MissingLandmarkException;
 import com.bmskinner.nma.components.profiles.MissingProfileException;
 import com.bmskinner.nma.components.profiles.ProfileException;
 import com.bmskinner.nma.components.profiles.ProfileManager;

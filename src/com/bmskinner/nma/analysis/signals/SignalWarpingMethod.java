@@ -14,7 +14,6 @@ import com.bmskinner.nma.analysis.DefaultAnalysisResult;
 import com.bmskinner.nma.analysis.IAnalysisResult;
 import com.bmskinner.nma.analysis.SingleDatasetAnalysisMethod;
 import com.bmskinner.nma.components.MissingComponentException;
-import com.bmskinner.nma.components.MissingLandmarkException;
 import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.cells.ICell;
 import com.bmskinner.nma.components.cells.Nucleus;
@@ -29,6 +28,7 @@ import com.bmskinner.nma.components.mesh.UncomparableMeshImageException;
 import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.options.IAnalysisOptions;
 import com.bmskinner.nma.components.options.MissingOptionException;
+import com.bmskinner.nma.components.profiles.MissingLandmarkException;
 import com.bmskinner.nma.components.signals.DefaultWarpedSignal;
 import com.bmskinner.nma.components.signals.ISignalGroup;
 import com.bmskinner.nma.components.signals.IWarpedSignal;
@@ -258,19 +258,19 @@ public class SignalWarpingMethod extends SingleDatasetAnalysisMethod {
 
 			return options.templateDataset().getAllMergeSources().stream()
 					.filter(d -> d.getCollection().contains(n))
-					.findFirst().get().getAnalysisOptions().get()
+					.findFirst().get().getAnalysisOptions()
+					.orElseThrow(MissingOptionException::new)
 					.getNuclearSignalOptions(options.signalId())
 					.orElseThrow(MissingOptionException::new);
-		} else {
+		}
 
-			Optional<IAnalysisOptions> analysisOptions = options.templateDataset()
-					.getAnalysisOptions();
+		Optional<IAnalysisOptions> analysisOptions = options.templateDataset()
+				.getAnalysisOptions();
 
-			if (analysisOptions.isPresent()) {
-				return analysisOptions.get().getNuclearSignalOptions(options.signalId())
-						.orElseThrow(MissingOptionException::new);
+		if (analysisOptions.isPresent()) {
+			return analysisOptions.get().getNuclearSignalOptions(options.signalId())
+					.orElseThrow(MissingOptionException::new);
 
-			}
 		}
 
 		return null;

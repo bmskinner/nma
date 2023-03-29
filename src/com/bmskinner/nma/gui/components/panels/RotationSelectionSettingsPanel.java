@@ -27,39 +27,40 @@ import com.bmskinner.nma.gui.RotationMode;
 @SuppressWarnings("serial")
 public class RotationSelectionSettingsPanel extends EnumeratedOptionsPanel {
 
-    private Map<RotationMode, JRadioButton> map = new HashMap<RotationMode, JRadioButton>();
+	private Map<RotationMode, JRadioButton> map = new HashMap<RotationMode, JRadioButton>();
 
-    public RotationSelectionSettingsPanel() {
-        super();
+	public RotationSelectionSettingsPanel() {
+		super();
 
-        final ButtonGroup group = new ButtonGroup();
+		final ButtonGroup group = new ButtonGroup();
 
-        for (RotationMode type : RotationMode.values()) {
-            JRadioButton button = new JRadioButton(type.toString());
-            button.setActionCommand(type.toString());
-            button.addActionListener(this);
-            this.add(button);
-            group.add(button);
-            map.put(type, button);
-        }
-        // Set the default
-        map.get(RotationMode.ACTUAL).setSelected(true);
-    }
+		for (RotationMode type : RotationMode.values()) {
+			JRadioButton button = new JRadioButton(type.toString());
+			button.setActionCommand(type.toString());
+			button.addActionListener(this);
+			this.add(button);
+			group.add(button);
+			map.put(type, button);
+		}
+		// Set the default
+		map.get(RotationMode.ACTUAL).setSelected(true);
+	}
 
-    public RotationMode getSelected() {
-        for (RotationMode type : RotationMode.values()) {
-            JRadioButton button = map.get(type);
-            if (button.isSelected()) {
-                return type;
-            }
-        }
-        return null;
-    }
+	public RotationMode getSelected() {
+		for (RotationMode type : RotationMode.values()) {
+			JRadioButton button = map.get(type);
+			if (button.isSelected()) {
+				return type;
+			}
+		}
+		return null;
+	}
 
-    public void setEnabled(boolean b) {
+	@Override
+	public void setEnabled(boolean b) {
 
-        for (RotationMode type : RotationMode.values()) {
-            map.get(type).setEnabled(b);
-        }
-    }
+		for (RotationMode type : RotationMode.values()) {
+			map.get(type).setEnabled(b);
+		}
+	}
 }

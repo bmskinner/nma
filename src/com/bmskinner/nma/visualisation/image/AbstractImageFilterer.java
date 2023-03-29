@@ -29,11 +29,11 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nma.components.ComponentOrienter;
 import com.bmskinner.nma.components.Imageable;
-import com.bmskinner.nma.components.MissingLandmarkException;
 import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.cells.ICell;
 import com.bmskinner.nma.components.cells.Nucleus;
+import com.bmskinner.nma.components.profiles.MissingLandmarkException;
 import com.bmskinner.nma.components.rules.PriorityAxis;
 
 import ij.ImagePlus;

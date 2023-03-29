@@ -32,7 +32,7 @@ import com.bmskinner.nma.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nma.core.ThreadManager;
 import com.bmskinner.nma.gui.ProgressBarAcceptor;
 import com.bmskinner.nma.gui.events.UIController;
-import com.bmskinner.nma.io.Io.Importer;
+import com.bmskinner.nma.io.Io;
 import com.bmskinner.nma.logging.Loggable;
 import com.bmskinner.nma.pipelines.AnalysisPipeline.AnalysisPipelineException;
 import com.bmskinner.nma.pipelines.SavedOptionsAnalysisPipeline;
@@ -43,7 +43,6 @@ public class ImportWorkflowAction extends VoidResultAction {
 
 	private File file;
 	private static final @NonNull String PROGRESS_BAR_LABEL = "Running workflow...";
-	private static final String DEFAULT_FILE_TYPE = "Nuclear morphology workflow";
 
 	/**
 	 * Create an import action for the given main window. Specify the file to be
@@ -66,7 +65,7 @@ public class ImportWorkflowAction extends VoidResultAction {
 		try {
 			if (file == null)
 				file = is.requestFile("Choose analysis options", null,
-						Importer.XML_FILE_EXTENSION_NODOT,
+						Io.XML_FILE_EXTENSION_NODOT,
 						"Analysis options file");
 
 			File folder = is.requestFolder("Choose image folder", file.getParentFile());
@@ -101,6 +100,7 @@ public class ImportWorkflowAction extends VoidResultAction {
 		} catch (InterruptedException e) {
 			LOGGER.warning("Interruption to swing worker");
 			LOGGER.log(Loggable.STACK, "Interruption to swing worker", e);
+			Thread.currentThread().interrupt();
 		} catch (ExecutionException e) {
 			LOGGER.warning("Execution error in swing worker");
 			LOGGER.log(Loggable.STACK, "Execution error in swing worker", e);

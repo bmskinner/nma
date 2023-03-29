@@ -35,7 +35,6 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nma.analysis.ClusterAnalysisResult;
 import com.bmskinner.nma.analysis.IAnalysisResult;
 import com.bmskinner.nma.analysis.SingleDatasetAnalysisMethod;
-import com.bmskinner.nma.components.MissingLandmarkException;
 import com.bmskinner.nma.components.cells.ICell;
 import com.bmskinner.nma.components.datasets.DefaultClusterGroup;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
@@ -44,6 +43,7 @@ import com.bmskinner.nma.components.datasets.IClusterGroup;
 import com.bmskinner.nma.components.datasets.VirtualDataset;
 import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.options.OptionsBuilder;
+import com.bmskinner.nma.components.profiles.MissingLandmarkException;
 import com.bmskinner.nma.components.profiles.MissingProfileException;
 import com.bmskinner.nma.components.profiles.ProfileException;
 import com.bmskinner.nma.logging.Loggable;
@@ -206,7 +206,7 @@ public class ClusterFileAssignmentMethod extends SingleDatasetAnalysisMethod {
 
 		// Make collections for the new clusters
 		long nClusters = cellMap.values().stream().distinct().count();
-		LOGGER.fine("Creating " + nClusters + " child datasets");
+		LOGGER.fine(() -> "Creating %s child datasets".formatted(nClusters));
 		for (int i = 1; i <= nClusters; i++) {
 			clusterMap.put(i, new ArrayList<>());
 		}
@@ -219,10 +219,8 @@ public class ClusterFileAssignmentMethod extends SingleDatasetAnalysisMethod {
 		// Add all the cells to clusters
 		for (Entry<UUID, Integer> entry : cellMap.entrySet()) {
 			int cluster = entry.getValue();
-//			LOGGER.fine("Assigning " + entry.getKey().toString() + " to cluster " + cluster);
 			ICell cell = dataset.getCollection().getCell(entry.getKey());
 			if (cell == null) {
-//				LOGGER.fine("Cell not found " + entry.getKey().toString());
 				continue;
 			}
 
@@ -233,8 +231,6 @@ public class ClusterFileAssignmentMethod extends SingleDatasetAnalysisMethod {
 			if (clusterMap.containsKey(cluster)) {
 				clusterMap.get(cluster).add(cell);
 			} else {
-//				LOGGER.fine("No cluster defined for " + entry.getKey().toString() + ": expected "
-//						+ cluster);
 				unmappedCells.add(cell);
 			}
 		}
@@ -245,7 +241,7 @@ public class ClusterFileAssignmentMethod extends SingleDatasetAnalysisMethod {
 		// Assign profiles to the new cluster collections
 		int cellsInClusters = 0;
 
-		List<IAnalysisDataset> result = new ArrayList<>();
+		List<IAnalysisDataset> output = new ArrayList<>();
 
 		for (Entry<Integer, List<ICell>> entry : clusterMap.entrySet()) {
 
@@ -261,7 +257,7 @@ public class ClusterFileAssignmentMethod extends SingleDatasetAnalysisMethod {
 					IAnalysisDataset clusterDataset = dataset.addChildCollection(c);
 
 					group.addDataset(clusterDataset);
-					result.add(clusterDataset);
+					output.add(clusterDataset);
 
 					// set shared counts
 					c.setSharedCount(dataset.getCollection(), c.size());
@@ -279,6 +275,6 @@ public class ClusterFileAssignmentMethod extends SingleDatasetAnalysisMethod {
 		LOGGER.fine("Clusters contain " + cellsInClusters + " cells compared to "
 				+ dataset.getCollection().size() + " in parent");
 
-		return new ClusterAnalysisResult(result, group);
+		return new ClusterAnalysisResult(output, group);
 	}
 }

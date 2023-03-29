@@ -2,7 +2,6 @@ package com.bmskinner.nma.gui.actions;
 
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
-import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -10,7 +9,6 @@ import com.bmskinner.nma.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nma.analysis.IAnalysisMethod;
 import com.bmskinner.nma.analysis.image.GLCMCalculationMethod;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
-import com.bmskinner.nma.core.EventHandler;
 import com.bmskinner.nma.core.ThreadManager;
 import com.bmskinner.nma.gui.ProgressBarAcceptor;
 import com.bmskinner.nma.gui.events.UIController;
@@ -23,8 +21,6 @@ import com.bmskinner.nma.gui.events.UIController;
  */
 public class RunGLCMAction extends SingleDatasetResultAction {
 
-	private static final Logger LOGGER = Logger.getLogger(RunGLCMAction.class.getName());
-
 	private static final @NonNull String PROGRESS_BAR_LABEL = "Calculating GLCM";
 
 	public RunGLCMAction(@NonNull List<IAnalysisDataset> datasets, @NonNull CountDownLatch latch,
@@ -33,9 +29,7 @@ public class RunGLCMAction extends SingleDatasetResultAction {
 		this.setLatch(latch);
 	}
 
-	public RunGLCMAction(@NonNull IAnalysisDataset dataset, int noFlag,
-			@NonNull ProgressBarAcceptor acceptor,
-			@NonNull EventHandler eh) {
+	public RunGLCMAction(@NonNull IAnalysisDataset dataset, @NonNull ProgressBarAcceptor acceptor) {
 		super(dataset, dataset.getName() + ": " + PROGRESS_BAR_LABEL, acceptor);
 	}
 

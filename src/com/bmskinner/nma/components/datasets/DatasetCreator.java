@@ -4,9 +4,9 @@ import java.util.logging.Logger;
 
 import org.jdom2.Element;
 
-import com.bmskinner.nma.components.MissingLandmarkException;
 import com.bmskinner.nma.components.Version.UnsupportedVersionException;
 import com.bmskinner.nma.components.cells.ComponentCreationException;
+import com.bmskinner.nma.components.profiles.MissingLandmarkException;
 import com.bmskinner.nma.components.profiles.MissingProfileException;
 import com.bmskinner.nma.components.profiles.ProfileException;
 

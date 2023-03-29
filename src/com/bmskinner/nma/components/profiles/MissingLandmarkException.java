@@ -14,31 +14,33 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package com.bmskinner.nma.components;
+package com.bmskinner.nma.components.profiles;
+
+import com.bmskinner.nma.components.MissingComponentException;
 
 /**
- * Thrown when the requested border point is not present in a cellular component
+ * Thrown when the requested border tag is not present in a Taggable object
  * 
  * @author bms41
- * @since 1.13.4
+ * @since 1.13.3
  *
  */
-public class UnavailableBorderPointException extends MissingComponentException {
+public class MissingLandmarkException extends MissingComponentException {
     private static final long serialVersionUID = 1L;
 
-    public UnavailableBorderPointException() {
+    public MissingLandmarkException() {
         super();
     }
 
-    public UnavailableBorderPointException(String message) {
+    public MissingLandmarkException(String message) {
         super(message);
     }
 
-    public UnavailableBorderPointException(String message, Throwable cause) {
+    public MissingLandmarkException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public UnavailableBorderPointException(Throwable cause) {
+    public MissingLandmarkException(Throwable cause) {
         super(cause);
     }
 }

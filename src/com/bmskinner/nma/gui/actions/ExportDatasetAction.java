@@ -81,7 +81,6 @@ public class ExportDatasetAction extends SingleDatasetResultAction {
 						dataset.getName(), "nmd");
 			} catch (RequestCancelledException e) {
 				cancel();
-				return;
 			}
 		} else {
 			saveFile = dataset.getSavePath();

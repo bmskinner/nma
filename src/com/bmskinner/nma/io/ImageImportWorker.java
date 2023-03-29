@@ -27,12 +27,12 @@ import javax.swing.table.TableModel;
 
 import com.bmskinner.nma.analysis.IAnalysisWorker;
 import com.bmskinner.nma.components.ComponentOrienter;
-import com.bmskinner.nma.components.MissingLandmarkException;
 import com.bmskinner.nma.components.cells.ICell;
 import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.generic.FloatPoint;
 import com.bmskinner.nma.components.generic.IPoint;
+import com.bmskinner.nma.components.profiles.MissingLandmarkException;
 import com.bmskinner.nma.gui.components.SelectableCellIcon;
 import com.bmskinner.nma.gui.dialogs.collections.ManualCurationDialog;
 import com.bmskinner.nma.logging.Loggable;

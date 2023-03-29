@@ -42,8 +42,8 @@ public class DraggableTreeViewer extends TreeViewer {
         super();
     }
 
-    public DraggableTreeViewer(ControlPalette controlPalette, int CONTROL_PALETTE_ALIGNMENT) {
-        super(controlPalette, CONTROL_PALETTE_ALIGNMENT);
+    public DraggableTreeViewer(ControlPalette controlPalette, int alignment) {
+        super(controlPalette, alignment);
     }
 
     

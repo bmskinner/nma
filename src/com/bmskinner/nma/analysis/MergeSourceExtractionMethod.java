@@ -26,7 +26,6 @@ import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nma.components.MissingLandmarkException;
 import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.cells.ICell;
 import com.bmskinner.nma.components.cells.Nucleus;
@@ -39,6 +38,7 @@ import com.bmskinner.nma.components.datasets.VirtualDataset;
 import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.options.IAnalysisOptions;
 import com.bmskinner.nma.components.options.MissingOptionException;
+import com.bmskinner.nma.components.profiles.MissingLandmarkException;
 import com.bmskinner.nma.components.profiles.MissingProfileException;
 import com.bmskinner.nma.components.profiles.ProfileException;
 import com.bmskinner.nma.components.signals.DefaultSignalGroup;
@@ -76,7 +76,7 @@ public class MergeSourceExtractionMethod extends MultipleDatasetAnalysisMethod {
 
 	private List<IAnalysisDataset> extractSourceDatasets() throws ComponentCreationException {
 		LOGGER.fine("Extracting merge sources");
-		List<IAnalysisDataset> result = new ArrayList<>();
+		List<IAnalysisDataset> output = new ArrayList<>();
 
 		DatasetValidator dv = new DatasetValidator();
 
@@ -91,7 +91,7 @@ public class MergeSourceExtractionMethod extends MultipleDatasetAnalysisMethod {
 					LOGGER.fine(dv.getErrors().stream().collect(Collectors.joining("\n")));
 				}
 
-				result.add(extracted);
+				output.add(extracted);
 			} catch (MissingOptionException | MissingLandmarkException e) {
 				LOGGER.warning("Missing analysis options or landmark; skipping "
 						+ virtualMergeSource.getName());
@@ -101,7 +101,7 @@ public class MergeSourceExtractionMethod extends MultipleDatasetAnalysisMethod {
 
 		}
 		LOGGER.fine("Finished extracting merge sources");
-		return result;
+		return output;
 	}
 
 	/**
@@ -229,7 +229,7 @@ public class MergeSourceExtractionMethod extends MultipleDatasetAnalysisMethod {
 				if (oldGroup.hasShellResult())
 					newGroup.setShellResult(oldGroup.getShellResult().get());
 				if (oldGroup.hasWarpedSignals())
-					oldGroup.getWarpedSignals().forEach(w -> newGroup.addWarpedSignal(w));
+					oldGroup.getWarpedSignals().forEach(newGroup::addWarpedSignal);
 				newDataset.getCollection().addSignalGroup(newGroup);
 			}
 		}

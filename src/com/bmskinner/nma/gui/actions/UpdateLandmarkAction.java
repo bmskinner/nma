@@ -1,7 +1,6 @@
 package com.bmskinner.nma.gui.actions;
 
 import java.util.concurrent.CountDownLatch;
-import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
@@ -18,7 +17,6 @@ import com.bmskinner.nma.gui.events.UIController;
 import com.bmskinner.nma.gui.runnables.SegmentAndRefold;
 
 public class UpdateLandmarkAction extends SingleDatasetResultAction {
-	private static final Logger LOGGER = Logger.getLogger(UpdateLandmarkAction.class.getName());
 
 	private static final @NonNull String PROGRESS_BAR_LABEL = "Updating landmark";
 

@@ -80,7 +80,7 @@ public class ImportWorkspaceAction extends VoidResultAction {
 					ThreadManager.getInstance().execute(worker);
 
 					try {
-						IAnalysisResult r = worker.get();
+						worker.get();
 
 						// Now unmarshall the XML file into a dataset
 						Document datasetDoc = method.getXMLDocument();
@@ -88,7 +88,7 @@ public class ImportWorkspaceAction extends VoidResultAction {
 						worker = new DefaultAnalysisWorker(importMethod);
 						ThreadManager.getInstance().execute(worker);
 
-						r = worker.get();
+						IAnalysisResult r = worker.get();
 						IAnalysisDataset d = r.getFirstDataset();
 						// Update the save file to the file we just opened, in case it has moved
 						d.setSavePath(dataFile);
@@ -105,6 +105,7 @@ public class ImportWorkspaceAction extends VoidResultAction {
 			}
 		} catch (InterruptedException e) {
 			LOGGER.fine("Import workspace interrupted: " + e.getMessage());
+
 		} finally {
 			super.finished();
 		}

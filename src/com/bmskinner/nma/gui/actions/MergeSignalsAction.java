@@ -77,9 +77,9 @@ public class MergeSignalsAction extends SingleDatasetResultAction {
 		try {
 			worker.get();
 		} catch (InterruptedException | ExecutionException e) {
-			LOGGER.warning("Error merging signals");
 			LOGGER.log(Loggable.STACK, "Error merging signals", e);
 			this.cancel();
+			Thread.currentThread().interrupt();
 			return;
 		}
 		UIController.getInstance().fireDatasetAdded(dataset);

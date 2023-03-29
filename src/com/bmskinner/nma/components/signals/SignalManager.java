@@ -30,7 +30,6 @@ import java.util.stream.Collectors;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nma.analysis.signals.SignalMeasurer;
-import com.bmskinner.nma.components.MissingLandmarkException;
 import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.cells.ICell;
 import com.bmskinner.nma.components.cells.Nucleus;
@@ -38,6 +37,7 @@ import com.bmskinner.nma.components.datasets.ICellCollection;
 import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.measure.MeasurementDimension;
 import com.bmskinner.nma.components.measure.MeasurementScale;
+import com.bmskinner.nma.components.profiles.MissingLandmarkException;
 import com.bmskinner.nma.components.signals.IShellResult.ShrinkType;
 import com.bmskinner.nma.io.UnloadableImageException;
 import com.bmskinner.nma.stats.Stats;
@@ -143,7 +143,7 @@ public class SignalManager {
 	 * 
 	 * @param signalGroupId the signal group
 	 * @return the signal group name, if set
-	 * @throws UnavailableSignalGroupException if the group is not present
+	 * @throws MissingSignalGroupException if the group is not present
 	 */
 	public String getSignalGroupName(@NonNull final UUID signalGroupId) {
 		Optional<ISignalGroup> g = collection.getSignalGroup(signalGroupId);

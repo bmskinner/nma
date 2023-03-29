@@ -11,7 +11,6 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nma.analysis.DefaultAnalysisResult;
 import com.bmskinner.nma.analysis.IAnalysisResult;
 import com.bmskinner.nma.analysis.SingleDatasetAnalysisMethod;
-import com.bmskinner.nma.components.MissingLandmarkException;
 import com.bmskinner.nma.components.Taggable;
 import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.cells.Nucleus;
@@ -21,6 +20,7 @@ import com.bmskinner.nma.components.mesh.DefaultMesh;
 import com.bmskinner.nma.components.mesh.Mesh;
 import com.bmskinner.nma.components.mesh.MeshCreationException;
 import com.bmskinner.nma.components.mesh.MeshVertex;
+import com.bmskinner.nma.components.profiles.MissingLandmarkException;
 import com.bmskinner.nma.logging.Loggable;
 
 import ij.IJ;

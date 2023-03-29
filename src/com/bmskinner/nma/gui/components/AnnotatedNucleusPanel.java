@@ -18,7 +18,6 @@ package com.bmskinner.nma.gui.components;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.util.logging.Logger;
 
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
@@ -44,9 +43,7 @@ import ij.process.ImageProcessor;
 @SuppressWarnings("serial")
 public class AnnotatedNucleusPanel extends JPanel {
 
-	private static final Logger LOGGER = Logger.getLogger(AnnotatedNucleusPanel.class.getName());
-
-	private ICell cell;
+	private transient ICell cell;
 	private JLabel imageLabel = new JLabel();
 	private boolean fixedDim = false;
 
@@ -88,31 +85,16 @@ public class AnnotatedNucleusPanel extends JPanel {
 
 		CellularComponent component = c.hasCytoplasm() ? c.getCytoplasm() : c.getPrimaryNucleus();
 
+		if (component == null)
+			return;
+
 		if (isRGB) {
 			ip = ImageImporter.importCroppedImageTo24bitRGB(component);
 		} else {
 			ip = ImageImporter.importCroppedImageTo24bitGreyscale(component);
 		}
 
-//	try
-//
-//	{
-//		if (c.hasCytoplasm()) {
-//			ip = ImageImporter.importCroppedImageTo24bitGreyscale(c.getCytoplasm());
-//		} else {
-//			ip = ImageImporter.importCroppedImageTo8bit(c.getPrimaryNucleus());
-//		}
-//
-//	}catch(
-//	UnloadableImageException e)
-//	{
-//		LOGGER.log(Loggable.STACK, "Cannot load image for component", e);
-//		return;
-//	}
-
-		if (isAnnotated)
-
-		{
+		if (isAnnotated) {
 
 			ImageAnnotator an = new ImageAnnotator(ip);
 			if (c.hasCytoplasm()) {
@@ -142,7 +124,8 @@ public class AnnotatedNucleusPanel extends JPanel {
 			useRGB = true;
 		}
 
-		ImageProcessor openProcessor = useRGB ? ImageImporter.importCroppedImageTo24bitGreyscale(cell.getCytoplasm())
+		ImageProcessor openProcessor = useRGB
+				? ImageImporter.importCroppedImageTo24bitGreyscale(cell.getCytoplasm())
 				: ImageImporter.importCroppedImageTo24bitGreyscale(cell.getPrimaryNucleus());
 
 		ImageAnnotator an = new ImageAnnotator(openProcessor);

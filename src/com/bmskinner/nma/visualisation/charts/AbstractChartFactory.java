@@ -42,13 +42,13 @@ import org.jfree.data.xy.XYDataset;
 
 import com.bmskinner.nma.components.ComponentOrienter;
 import com.bmskinner.nma.components.Imageable;
-import com.bmskinner.nma.components.MissingLandmarkException;
 import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.cells.ICell;
 import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.generic.IPoint;
 import com.bmskinner.nma.components.profiles.Landmark;
+import com.bmskinner.nma.components.profiles.MissingLandmarkException;
 import com.bmskinner.nma.core.GlobalOptions;
 import com.bmskinner.nma.gui.RotationMode;
 import com.bmskinner.nma.gui.components.ColourSelecter;
@@ -91,7 +91,7 @@ public abstract class AbstractChartFactory {
 	protected static final boolean DEFAULT_CREATE_URLS = false;
 
 	/** The options that will be used for chart generation */
-	protected final ChartOptions options;
+	protected final @NonNull ChartOptions options;
 
 	/**
 	 * Create with options for the chart to be created

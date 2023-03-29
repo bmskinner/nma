@@ -22,6 +22,7 @@ import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.cells.Consensus;
 import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.generic.IPoint;
+import com.bmskinner.nma.components.profiles.MissingLandmarkException;
 
 /**
  * Provides methods relating to the abillity to refold consensus shapes for a

@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
 
+import com.bmskinner.nma.components.MissingComponentException;
 import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.cells.ICell;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
@@ -28,112 +29,114 @@ import com.bmskinner.nma.components.datasets.ICellCollection;
 import com.bmskinner.nma.components.datasets.VirtualDataset;
 import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.measure.MeasurementScale;
+import com.bmskinner.nma.components.profiles.ProfileException;
 
 public class RandomSamplingMethod extends SingleDatasetAnalysisMethod {
-	
+
 	private static final Logger LOGGER = Logger.getLogger(RandomSamplingMethod.class.getName());
-	
-	private List<Double>       magnitudes = new ArrayList<>();
-    private int                iterations;
-    private Measurement stat;
-    
-    // the number of cells in the first subset
-    private int                first;
-    
- // the number of cells in the second subset
-    private int                second;
-    
-    /**
-     * Constructor
-     * @param dataset the dataset to investigate
-     * @param stat the stat to measure
-     * @param iterations the number of iterations to run
-     * @param first the size of the first subgroup 
-     * @param second the size of the second subgroup 
-     */
-    public RandomSamplingMethod(IAnalysisDataset dataset, Measurement stat, int iterations, int first, int second) {
-        super(dataset);
-        this.stat = stat;
-        this.iterations = iterations;
-        this.first = first;
-        this.second = second;
 
-    }
-    
+	private List<Double> magnitudes = new ArrayList<>();
+	private int iterations;
+	private Measurement stat;
 
-    @Override
-    public IAnalysisResult call() throws Exception {
+	// the number of cells in the first subset
+	private int first;
 
-        run();
-        return new RandomSamplingResult(dataset, magnitudes);
-    }
-    
-    public void run() throws Exception {
+	// the number of cells in the second subset
+	private int second;
 
-        // for each iteration
-        LOGGER.fine("Beginning sampling");
-        for (int i = 0; i < iterations; i++) {
-            LOGGER.finest( "Sample " + i);
-            // make a new collection randomly sampled to teh correct proportion
-            ICellCollection[] collections = makeRandomSampledCollection(first, second);
-            LOGGER.finest( "Made collection");
+	/**
+	 * Constructor
+	 * 
+	 * @param dataset    the dataset to investigate
+	 * @param stat       the stat to measure
+	 * @param iterations the number of iterations to run
+	 * @param first      the size of the first subgroup
+	 * @param second     the size of the second subgroup
+	 */
+	public RandomSamplingMethod(IAnalysisDataset dataset, Measurement stat, int iterations,
+			int first, int second) {
+		super(dataset);
+		this.stat = stat;
+		this.iterations = iterations;
+		this.first = first;
+		this.second = second;
 
-            // get the stat magnitude
-            double value1 = collections[0].getMedian(stat, CellularComponent.NUCLEUS, MeasurementScale.PIXELS);
-            double value2 = collections[1].getMedian(stat, CellularComponent.NUCLEUS, MeasurementScale.PIXELS);
+	}
 
-            double magnitude = value2 / value1;
-            LOGGER.finest( "Found value");
-            // add to a list
-            magnitudes.add(magnitude);
-                fireProgressEvent();
-        }
+	@Override
+	public IAnalysisResult call() throws Exception {
 
-    }
+		run();
+		return new RandomSamplingResult(dataset, magnitudes);
+	}
 
-    private ICellCollection[] makeRandomSampledCollection(int firstSize, int secondSize) throws Exception {
-        ICellCollection[] result = new ICellCollection[2];
+	public void run() throws Exception {
 
-        ICellCollection first = new VirtualDataset(dataset, "first");
-        ICellCollection second = new VirtualDataset(dataset, "second");
-        LOGGER.finer( "Created new collections");
+		// for each iteration
+		LOGGER.fine("Beginning sampling");
+		for (int i = 0; i < iterations; i++) {
+			LOGGER.finest("Sample " + i);
+			// make a new collection randomly sampled to teh correct proportion
+			ICellCollection[] collections = makeRandomSampledCollection(first, second);
+			LOGGER.finest("Made collection");
 
-        List<ICell> cells = new ArrayList<>(dataset.getCollection().getCells());
-        Collections.shuffle(cells);
-        LOGGER.finer( "Shuffled cells");
+			// get the stat magnitude
+			double value1 = collections[0].getMedian(stat, CellularComponent.NUCLEUS,
+					MeasurementScale.PIXELS);
+			double value2 = collections[1].getMedian(stat, CellularComponent.NUCLEUS,
+					MeasurementScale.PIXELS);
 
-        for (int i = 0; i < firstSize; i++) {
-            first.addCell(cells.get(i));
-        }
-        LOGGER.finer( "Added first set");
-        for (int i = firstSize; i < firstSize + secondSize; i++) {
-            second.addCell(cells.get(i));
-        }
-        LOGGER.finer( "Added second set");
-        
-        if(stat.equals(Measurement.VARIABILITY)) {
-        	first.getProfileCollection().calculateProfiles();
-        	second.getProfileCollection().calculateProfiles();
-        }
-        
-        result[0] = first;
-        result[1] = second;
+			double magnitude = value2 / value1;
+			LOGGER.finest("Found value");
+			// add to a list
+			magnitudes.add(magnitude);
+			fireProgressEvent();
+		}
 
-        return result;
+	}
 
-    }
-    
-    public class RandomSamplingResult extends DefaultAnalysisResult {
-    	private List<Double> values = new ArrayList<>();
+	private ICellCollection[] makeRandomSampledCollection(int firstSize, int secondSize)
+			throws MissingComponentException, ProfileException {
+
+		ICellCollection c1 = new VirtualDataset(dataset, "first");
+		ICellCollection c2 = new VirtualDataset(dataset, "second");
+		LOGGER.finer("Created new collections");
+
+		List<ICell> cells = new ArrayList<>(dataset.getCollection().getCells());
+		Collections.shuffle(cells);
+		LOGGER.finer("Shuffled cells");
+
+		for (int i = 0; i < firstSize; i++) {
+			c1.addCell(cells.get(i));
+		}
+		LOGGER.finer("Added first set");
+		for (int i = firstSize; i < firstSize + secondSize; i++) {
+			c2.addCell(cells.get(i));
+		}
+		LOGGER.finer("Added second set");
+
+		if (stat.equals(Measurement.VARIABILITY)) {
+			c1.getProfileCollection().calculateProfiles();
+			c2.getProfileCollection().calculateProfiles();
+		}
+
+		return new ICellCollection[] { c1, c2 };
+
+	}
+
+	public class RandomSamplingResult extends DefaultAnalysisResult {
+		private List<Double> values = new ArrayList<>();
+
 		public RandomSamplingResult(IAnalysisDataset d, List<Double> values) {
 			super(d);
 			this.values = values;
 		}
-		
-		public List<Double> getValues(){
+
+		public List<Double> getValues() {
 			return values;
 		}
-    	
-    }
+
+	}
 
 }

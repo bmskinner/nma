@@ -22,11 +22,11 @@ import java.util.logging.Logger;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nma.components.Imageable;
-import com.bmskinner.nma.components.MissingLandmarkException;
 import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.cells.ICell;
 import com.bmskinner.nma.components.cells.Nucleus;
+import com.bmskinner.nma.components.profiles.MissingLandmarkException;
 import com.bmskinner.nma.io.Io.Importer;
 import com.bmskinner.nma.logging.Loggable;
 import com.bmskinner.nma.visualisation.image.AbstractImageFilterer;
@@ -418,8 +418,6 @@ public class ImageImporter implements Importer {
 	 * @return a stack with the input image as position 0
 	 */
 	private ImageStack convert8bitToStack(@NonNull final ImagePlus image) {
-		if (image == null)
-			throw new IllegalArgumentException("Image cannot be null");
 		ImageStack result = ImageStack.create(image.getWidth(), image.getHeight(), 0, EIGHT_BIT);
 		result.addSlice("counterstain", image.getProcessor());
 		result.deleteSlice(1); // remove the blank first slice

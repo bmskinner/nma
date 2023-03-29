@@ -63,9 +63,7 @@ public class ExportWorkspaceAction extends VoidResultAction {
 
 			if (w.getSaveFile() == null) {
 				try {
-					File defaultFolder = w.getFiles().size() > 0
-							? FileUtils.commonPathOfFiles(w.getFiles())
-							: null;
+					File defaultFolder = FileUtils.commonPathOfFiles(w.getFiles());
 					File f = is.requestFileSave(defaultFolder, w.getName(),
 							Io.WRK_FILE_EXTENSION_NODOT);
 					w.setSaveFile(f);

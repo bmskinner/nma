@@ -16,6 +16,7 @@ import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.options.IAnalysisOptions;
+import com.bmskinner.nma.components.signals.MissingSignalGroupException;
 import com.bmskinner.nma.core.DatasetListManager;
 import com.bmskinner.nma.gui.components.FileSelector;
 import com.bmskinner.nma.io.XMLReader;
@@ -52,13 +53,21 @@ public class CopySignalDetectionSettingsFromOpenDatasetPanel extends CopyFromOpe
 
 	@Override
 	protected ActionListener createCopyActionListener() {
-		return (e) -> {
+		return e -> {
 
 			final record Pair(IAnalysisDataset d, UUID signalGroupId) {
 				@Override
 				public String toString() {
-					return d.getName() + " - "
-							+ d.getCollection().getSignalGroup(signalGroupId).get().getGroupName();
+					try {
+						return "%s - %s".formatted(d.getName(),
+								d.getCollection().getSignalGroup(signalGroupId)
+										.orElseThrow(MissingSignalGroupException::new)
+										.getGroupName());
+					} catch (MissingSignalGroupException e) {
+						LOGGER.log(Loggable.STACK,
+								"No signal group with id %s".formatted(signalGroupId), e);
+						return "%s - No signal id".formatted(d.getName());
+					}
 				}
 			}
 
@@ -79,7 +88,7 @@ public class CopySignalDetectionSettingsFromOpenDatasetPanel extends CopyFromOpe
 
 			if (choice != null) {
 
-				LOGGER.fine("Copying options from: " + choice);
+				LOGGER.fine(() -> "Copying options from: %s".formatted(choice));
 
 				if (choice.d.getAnalysisOptions().isPresent()) {
 					Optional<HashOptions> op = choice.d.getAnalysisOptions().get()
@@ -100,9 +109,9 @@ public class CopySignalDetectionSettingsFromOpenDatasetPanel extends CopyFromOpe
 
 	@Override
 	protected ActionListener createOpenActionListener() {
-		return (e) -> {
-			File folder = new File(options.getString(HashOptions.DETECTION_FOLDER));
-			File f = FileSelector.chooseOptionsImportFile(folder);
+		return e -> {
+			File detectionFolder = new File(options.getString(HashOptions.DETECTION_FOLDER));
+			File f = FileSelector.chooseOptionsImportFile(detectionFolder);
 			if (f == null)
 				return;
 
@@ -127,10 +136,10 @@ public class CopySignalDetectionSettingsFromOpenDatasetPanel extends CopyFromOpe
 					return;
 
 				// Get the first option set matching the channel
-				int channel = Integer.parseInt(choice.replaceAll("Channel ", ""));
+				int channel = Integer.parseInt(choice.replace("Channel ", ""));
 
 				o.getNuclearSignalGroups().stream()
-						.map(id -> o.getNuclearSignalOptions(id))
+						.map(o::getNuclearSignalOptions)
 						.filter(Optional::isPresent)
 						.map(Optional::get)
 						.filter(op -> op.getInt(HashOptions.CHANNEL) == channel)

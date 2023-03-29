@@ -18,7 +18,6 @@ package com.bmskinner.nma.gui.actions;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -33,8 +32,6 @@ import com.bmskinner.nma.gui.ProgressBarAcceptor;
  *
  */
 public abstract class SingleDatasetResultAction extends VoidResultAction {
-
-	private static final Logger LOGGER = Logger.getLogger(SingleDatasetResultAction.class.getName());
 
 	// Flags to pass to ProgressableActions to determine the analyses
 	// to carry out in subsequently
@@ -61,7 +58,8 @@ public abstract class SingleDatasetResultAction extends VoidResultAction {
 	 * @param barMessage the progress bar message
 	 * @param mw         the main window for analysis
 	 */
-	protected SingleDatasetResultAction(@NonNull IAnalysisDataset dataset, @NonNull String barMessage,
+	protected SingleDatasetResultAction(@NonNull IAnalysisDataset dataset,
+			@NonNull String barMessage,
 			@NonNull ProgressBarAcceptor acceptor) {
 		super(barMessage, acceptor);
 		this.dataset = dataset;
@@ -75,7 +73,8 @@ public abstract class SingleDatasetResultAction extends VoidResultAction {
 	 * @param barMessage
 	 * @param mw
 	 */
-	protected SingleDatasetResultAction(@NonNull List<IAnalysisDataset> list, @NonNull String barMessage,
+	protected SingleDatasetResultAction(@NonNull List<IAnalysisDataset> list,
+			@NonNull String barMessage,
 			@NonNull ProgressBarAcceptor acceptor) {
 		this(list.get(0), barMessage, acceptor);
 		processList.addAll(list);
@@ -91,7 +90,8 @@ public abstract class SingleDatasetResultAction extends VoidResultAction {
 	 * @param mw
 	 * @param flag
 	 */
-	protected SingleDatasetResultAction(@NonNull List<IAnalysisDataset> list, @NonNull String barMessage,
+	protected SingleDatasetResultAction(@NonNull List<IAnalysisDataset> list,
+			@NonNull String barMessage,
 			@NonNull ProgressBarAcceptor acceptor, int flag) {
 		this(list, barMessage, acceptor);
 		this.downFlag = flag;
@@ -105,7 +105,8 @@ public abstract class SingleDatasetResultAction extends VoidResultAction {
 	 * @param mw
 	 * @param flag
 	 */
-	protected SingleDatasetResultAction(@NonNull IAnalysisDataset dataset, @NonNull String barMessage,
+	protected SingleDatasetResultAction(@NonNull IAnalysisDataset dataset,
+			@NonNull String barMessage,
 			@NonNull ProgressBarAcceptor acceptor, int flag) {
 		this(dataset, barMessage, acceptor);
 		this.downFlag = flag;

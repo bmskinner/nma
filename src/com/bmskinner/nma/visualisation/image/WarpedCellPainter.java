@@ -3,7 +3,6 @@ package com.bmskinner.nma.visualisation.image;
 import java.awt.image.BufferedImage;
 import java.util.logging.Logger;
 
-import com.bmskinner.nma.components.MissingLandmarkException;
 import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.cells.ICell;
 import com.bmskinner.nma.components.cells.Nucleus;
@@ -15,6 +14,7 @@ import com.bmskinner.nma.components.mesh.MeshCreationException;
 import com.bmskinner.nma.components.mesh.MeshImage;
 import com.bmskinner.nma.components.mesh.MeshImageCreationException;
 import com.bmskinner.nma.components.mesh.UncomparableMeshImageException;
+import com.bmskinner.nma.components.profiles.MissingLandmarkException;
 import com.bmskinner.nma.io.ImageImporter;
 import com.bmskinner.nma.logging.Loggable;
 

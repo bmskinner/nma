@@ -27,7 +27,6 @@ import java.util.stream.Stream;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nma.components.Filterable;
-import com.bmskinner.nma.components.MissingLandmarkException;
 import com.bmskinner.nma.components.Refoldable;
 import com.bmskinner.nma.components.StatisticalCollection;
 import com.bmskinner.nma.components.Taggable;
@@ -35,6 +34,7 @@ import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.cells.ICell;
 import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.profiles.IProfileCollection;
+import com.bmskinner.nma.components.profiles.MissingLandmarkException;
 import com.bmskinner.nma.components.profiles.MissingProfileException;
 import com.bmskinner.nma.components.profiles.ProfileException;
 import com.bmskinner.nma.components.profiles.ProfileManager;

@@ -6,7 +6,6 @@ import java.awt.Dimension;
 import java.awt.GridBagLayout;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
 
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
@@ -35,11 +34,10 @@ import com.bmskinner.nma.gui.tabs.signals.warping.SignalWarpingRunSettings;
 
 public class SignalWarpingAction extends SingleDatasetResultAction {
 
-	private static final Logger LOGGER = Logger.getLogger(SignalWarpingAction.class.getName());
-
 	private static final @NonNull String PROGRESS_BAR_LABEL = "Warping signals";
 
-	public SignalWarpingAction(@NonNull IAnalysisDataset dataset, @NonNull ProgressBarAcceptor acceptor) {
+	public SignalWarpingAction(@NonNull IAnalysisDataset dataset,
+			@NonNull ProgressBarAcceptor acceptor) {
 		super(dataset, PROGRESS_BAR_LABEL, acceptor);
 	}
 
@@ -82,10 +80,6 @@ public class SignalWarpingAction extends SingleDatasetResultAction {
 		private static final String BINARISE_TOOLTIP = "Binarise images so intra-image intensities are not included";
 		private static final String NORMALISE_TOOLTIP = "Normalise signal against the counterstain before warping";
 
-		private static final String SOURCE_HELP = "Choose the signals to be warped:";
-		private static final String IMAGE_HELP = "Choose how to pre-process images:";
-		private static final String TARGET_HELP = "Choose the shape to warp images onto:";
-
 		private DatasetSelectionPanel datasetBoxTwo;
 
 		private SignalGroupSelectionPanel signalBox;
@@ -116,14 +110,18 @@ public class SignalWarpingAction extends SingleDatasetResultAction {
 
 		@Override
 		public SignalWarpingRunSettings getOptions() {
-			SignalWarpingRunSettings options = new SignalWarpingRunSettings(dataset, datasetBoxTwo.getSelectedDataset(),
+			SignalWarpingRunSettings options = new SignalWarpingRunSettings(dataset,
+					datasetBoxTwo.getSelectedDataset(),
 					signalBox.getSelectedID());
 
-			options.setBoolean(SignalWarpingRunSettings.IS_BINARISE_SIGNALS_KEY, binariseBox.isSelected());
-			options.setBoolean(SignalWarpingRunSettings.IS_NORMALISE_TO_COUNTERSTAIN_KEY, normaliseBox.isSelected());
+			options.setBoolean(SignalWarpingRunSettings.IS_BINARISE_SIGNALS_KEY,
+					binariseBox.isSelected());
+			options.setBoolean(SignalWarpingRunSettings.IS_NORMALISE_TO_COUNTERSTAIN_KEY,
+					normaliseBox.isSelected());
 			options.setBoolean(SignalWarpingRunSettings.IS_ONLY_CELLS_WITH_SIGNALS_KEY,
 					cellsWithSignalsBox.isSelected());
-			options.setInt(SignalWarpingRunSettings.MIN_THRESHOLD_KEY, (int) minThresholdSpinner.getValue());
+			options.setInt(SignalWarpingRunSettings.MIN_THRESHOLD_KEY,
+					(int) minThresholdSpinner.getValue());
 
 			return options;
 		}
@@ -165,7 +163,8 @@ public class SignalWarpingAction extends SingleDatasetResultAction {
 				} else {
 					setSignalSettingsEnabled(true);
 					int threshold = dataset.getAnalysisOptions().get()
-							.getNuclearSignalOptions(signalBox.getSelectedID()).get().getInt(HashOptions.THRESHOLD);
+							.getNuclearSignalOptions(signalBox.getSelectedID()).get()
+							.getInt(HashOptions.THRESHOLD);
 					minThresholdSpinner.setValue(threshold);
 				}
 			});
@@ -176,7 +175,8 @@ public class SignalWarpingAction extends SingleDatasetResultAction {
 			// Set the initial value to the signal detection threshold of the initial
 			// selected signal group
 			int threshold = dataset.getAnalysisOptions().isPresent()
-					? dataset.getAnalysisOptions().get().getNuclearSignalOptions(signalBox.getSelectedID()).get()
+					? dataset.getAnalysisOptions().get()
+							.getNuclearSignalOptions(signalBox.getSelectedID()).get()
 							.getInt(HashOptions.THRESHOLD)
 					: 0;
 			SpinnerModel minThresholdModel = new SpinnerNumberModel(threshold, 0, 255, 1);
@@ -236,8 +236,10 @@ public class SignalWarpingAction extends SingleDatasetResultAction {
 
 		private List<IAnalysisDataset> chooseCompatibleTargetDatasets() {
 			return DatasetListManager.getInstance().getAllDatasets().stream()
-					.filter(d -> d.getCollection().hasConsensus()).filter(d -> d.getCollection().getProfileManager()
-							.getSegmentCount() == dataset.getCollection().getProfileManager().getSegmentCount())
+					.filter(d -> d.getCollection().hasConsensus())
+					.filter(d -> d.getCollection().getProfileManager()
+							.getSegmentCount() == dataset.getCollection().getProfileManager()
+									.getSegmentCount())
 					.toList();
 		}
 	}

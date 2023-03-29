@@ -22,9 +22,9 @@ import java.util.logging.Logger;
 
 import org.jdom2.Element;
 
-import com.bmskinner.nma.components.MissingLandmarkException;
 import com.bmskinner.nma.components.generic.FloatPoint;
 import com.bmskinner.nma.components.generic.IPoint;
+import com.bmskinner.nma.components.profiles.MissingLandmarkException;
 import com.bmskinner.nma.components.profiles.UnprofilableObjectException;
 import com.bmskinner.nma.io.XmlSerializable;
 import com.bmskinner.nma.logging.Loggable;

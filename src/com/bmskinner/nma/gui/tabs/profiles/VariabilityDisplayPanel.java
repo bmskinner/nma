@@ -57,7 +57,6 @@ public class VariabilityDisplayPanel extends ChartDetailPanel
 	private static final String PANEL_TITLE_LBL = "Variability";
 	private JPanel buttonPanel = new JPanel(new FlowLayout());
 	protected ExportableChartPanel chartPanel;
-//	private JSpinner pvalueSpinner;
 
 	private ProfileTypeOptionsPanel profileCollectionTypeSettingsPanel = new ProfileTypeOptionsPanel();
 
@@ -74,26 +73,6 @@ public class VariabilityDisplayPanel extends ChartDetailPanel
 		chartPanel = new ExportableChartPanel(chart);
 		chartPanel.getChartRenderingInfo().setEntityCollection(null);
 		this.add(chartPanel, BorderLayout.CENTER);
-
-//		pvalueSpinner = new JSpinner(
-//				new SpinnerNumberModel(SignificanceTest.FIVE_PERCENT_SIGNIFICANCE_LEVEL, 0d, 1d, 0.001d));
-//		pvalueSpinner.setEnabled(false);
-//		pvalueSpinner.addChangeListener(e -> {
-//			try {
-//				pvalueSpinner.commitEdit();
-//				update(getDatasets());
-//			} catch (ParseException e1) {
-//				LOGGER.fine("Error setting p-value spinner: " + e1.getMessage());
-//			}
-//		});
-//		JComponent field = (pvalueSpinner.getEditor());
-//		Dimension prefSize = field.getPreferredSize();
-//		prefSize = new Dimension(50, prefSize.height);
-//		field.setPreferredSize(prefSize);
-
-		// add extra fields to the header panel
-//		buttonPanel.add(new JLabel("Dip test p-value:"));
-//		buttonPanel.add(pvalueSpinner);
 
 		profileCollectionTypeSettingsPanel.addActionListener(e -> update(getDatasets()));
 		profileCollectionTypeSettingsPanel.setEnabled(false);
@@ -114,10 +93,8 @@ public class VariabilityDisplayPanel extends ChartDetailPanel
 
 	@Override
 	public void setEnabled(boolean b) {
-		// borderTagOptionsPanel.setEnabled(b);
 		profileCollectionTypeSettingsPanel.setEnabled(b);
 		profileMarkersOptionsPanel.setEnabled(b);
-//		pvalueSpinner.setEnabled(b);
 	}
 
 	/**
@@ -132,18 +109,20 @@ public class VariabilityDisplayPanel extends ChartDetailPanel
 	}
 
 	@Override
-	protected void updateSingle() {
+	protected synchronized void updateSingle() {
 
 		this.setEnabled(true);
 		boolean showMarkers = profileMarkersOptionsPanel.isShowAnnotations();
 		ProfileType type = profileCollectionTypeSettingsPanel.getSelected();
 
-		ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets())
+		ChartOptions options = new ChartOptionsBuilder()
+				.setDatasets(getDatasets())
 				.setNormalised(true)
-				.setAlignment(ProfileAlignment.LEFT).setLandmark(OrientationMark.REFERENCE)
+				.setAlignment(ProfileAlignment.LEFT)
+				.setLandmark(OrientationMark.REFERENCE)
 				.setShowMarkers(showMarkers)
-//				.setModalityPosition((Double) pvalueSpinner.getValue())
-				.setSwatch(GlobalOptions.getInstance().getSwatch()).setProfileType(type)
+				.setSwatch(GlobalOptions.getInstance().getSwatch())
+				.setProfileType(type)
 				.setTarget(chartPanel).build();
 
 		updateProfiles(options);
@@ -151,21 +130,20 @@ public class VariabilityDisplayPanel extends ChartDetailPanel
 	}
 
 	@Override
-	protected void updateMultiple() {
+	protected synchronized void updateMultiple() {
 		updateSingle();
 		// Don't allow marker selection for multiple datasets
 		profileMarkersOptionsPanel.setEnabled(false);
-//		pvalueSpinner.setEnabled(false);
 	}
 
 	@Override
-	protected void updateNull() {
+	protected synchronized void updateNull() {
 		updateSingle();
 		this.setEnabled(false);
 	}
 
 	@Override
-	public void setLoading() {
+	public synchronized void setLoading() {
 		super.setLoading();
 		chartPanel.setChart(AbstractChartFactory.createLoadingChart());
 	}

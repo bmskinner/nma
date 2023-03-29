@@ -16,9 +16,9 @@
  ******************************************************************************/
 package com.bmskinner.nma.components.cells;
 
-import com.bmskinner.nma.components.MissingLandmarkException;
 import com.bmskinner.nma.components.Orientable;
 import com.bmskinner.nma.components.Taggable;
+import com.bmskinner.nma.components.profiles.MissingLandmarkException;
 import com.bmskinner.nma.components.signals.ISignalCollection;
 
 /**

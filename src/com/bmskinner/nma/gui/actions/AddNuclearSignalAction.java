@@ -66,24 +66,27 @@ public class AddNuclearSignalAction extends SingleDatasetResultAction {
 
 	@Override
 	public void run() {
+
+		File defaultDir = null;
+		Optional<IAnalysisOptions> op = dataset.getAnalysisOptions();
+		if (op.isPresent()) {
+			Optional<File> of = op.get().getNucleusDetectionFolder();
+			if (of.isPresent())
+				defaultDir = of.get();
+		}
+
+		File folder = null;
+
 		try {
-			File defaultDir = null;
-			Optional<IAnalysisOptions> op = dataset.getAnalysisOptions();
-			if (op.isPresent()) {
-				Optional<File> of = op.get().getNucleusDetectionFolder();
-				if (of.isPresent())
-					defaultDir = of.get();
-			}
+			folder = is.requestFolder("Choose FISH signal image folder", defaultDir);
+		} catch (RequestCancelledException e) {
+			super.finished();
+			return;
+		}
 
-			File folder = null;
+		// We have a folder of images, proceed
 
-			try {
-				folder = is.requestFolder("Choose FISH signal image folder", defaultDir);
-			} catch (RequestCancelledException e) {
-				super.finished();
-				return;
-			}
-
+		try {
 			// add dialog for non-default detection options
 			SignalImageProber analysisSetup = new SignalImageProber(dataset, folder);
 

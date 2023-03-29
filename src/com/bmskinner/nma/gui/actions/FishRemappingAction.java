@@ -40,15 +40,17 @@ public class FishRemappingAction extends SingleDatasetResultAction {
 
 	private static final String PROGRESS_LBL = "Remapping";
 
-	private File fishDir;
-
-	public FishRemappingAction(final List<IAnalysisDataset> datasets, @NonNull final ProgressBarAcceptor acceptor) {
+	public FishRemappingAction(@NonNull final List<IAnalysisDataset> datasets,
+			@NonNull final ProgressBarAcceptor acceptor) {
 		super(datasets, PROGRESS_LBL, acceptor);
 
 	}
 
 	@Override
 	public void run() {
+
+		if (dataset == null)
+			return;
 		try {
 
 			if (dataset.hasMergeSources()) {
@@ -57,7 +59,7 @@ public class FishRemappingAction extends SingleDatasetResultAction {
 				return;
 			}
 
-			fishDir = FileSelector.choosePostFISHDirectory(dataset);
+			File fishDir = FileSelector.choosePostFISHDirectory(dataset);
 			if (fishDir == null) {
 				LOGGER.info("Remapping cancelled");
 				cancel();
@@ -80,17 +82,17 @@ public class FishRemappingAction extends SingleDatasetResultAction {
 				LOGGER.info("Reapplying morphology...");
 
 				CountDownLatch latch = new CountDownLatch(1);
-				new RunSegmentationAction(newList, dataset, NO_FLAG, progressAcceptors.get(0), latch).run();
+				new RunSegmentationAction(newList, dataset, NO_FLAG, progressAcceptors.get(0),
+						latch).run();
 				new Thread(() -> {
 					try {
 						latch.await();
 						UIController.getInstance().fireDatasetAdded(newList);
 						finished();
 					} catch (InterruptedException e) {
-
+						Thread.currentThread().interrupt();
 					}
 				}).start();
-				;
 
 			} else {
 				LOGGER.info("Remapping cancelled");
@@ -98,8 +100,7 @@ public class FishRemappingAction extends SingleDatasetResultAction {
 			}
 
 		} catch (Exception e) {
-			LOGGER.warning("Error in FISH remapping: " + e.getMessage());
-			LOGGER.log(Loggable.STACK, "Error in FISH remapping: " + e.getMessage(), e);
+			LOGGER.log(Loggable.STACK, "Error in FISH remapping: %s".formatted(e.getMessage()), e);
 		}
 	}
 

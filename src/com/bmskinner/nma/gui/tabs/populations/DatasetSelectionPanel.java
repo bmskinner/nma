@@ -31,19 +31,20 @@ import com.bmskinner.nma.gui.events.WorkspaceAddedListener;
 import com.bmskinner.nma.gui.tabs.DetailPanel;
 import com.bmskinner.nma.logging.Loggable;
 
+@SuppressWarnings("serial")
 public class DatasetSelectionPanel extends DetailPanel
 		implements DatasetAddedListener, SwatchUpdatedListener, ClusterGroupsUpdatedListener,
 		WorkspaceAddedListener {
 
 	private static final Logger LOGGER = Logger.getLogger(DatasetSelectionPanel.class.getName());
 
-	private final DatasetTreeTable treeTable;
+	private final transient DatasetTreeTable treeTable;
 
-	private final DatasetTreeTableModel model = new DatasetTreeTableModel();
+	private final transient DatasetTreeTableModel model = new DatasetTreeTableModel();
 
-	private final TreeSelectionHandler treeListener = new TreeSelectionHandler();
+	private final transient TreeSelectionHandler treeListener = new TreeSelectionHandler();
 
-	private CtrlPressedListener ctrlPress = new CtrlPressedListener(this);
+	private transient CtrlPressedListener ctrlPress = new CtrlPressedListener(this);
 
 	public DatasetSelectionPanel() {
 		super();
@@ -72,10 +73,8 @@ public class DatasetSelectionPanel extends DetailPanel
 
 	@Override
 	public void datasetSelectionUpdated(List<IAnalysisDataset> d) {
-		// no action if dataset selection is not different to current
-//		if (!treeListener.datasetSelectionOrder.equals(d)) {
-//			model.get
-//		}
+		// no action, is this deprecated?
+		// TODO remove this if the tbale model no longer requires this
 	}
 
 	@Override
@@ -210,7 +209,7 @@ public class DatasetSelectionPanel extends DetailPanel
 				if (o instanceof IClusterGroup g)
 					cosmeticHandler.renameClusterGroup(g);
 				if (o instanceof IAnalysisDataset d)
-					datasetClicked(d, row, col);
+					datasetClicked(d, col);
 				if (o instanceof IWorkspace w)
 					cosmeticHandler.renameWorkspace(w);
 			}
@@ -220,7 +219,7 @@ public class DatasetSelectionPanel extends DetailPanel
 			}
 		}
 
-		private void datasetClicked(IAnalysisDataset d, int row, int column) {
+		private void datasetClicked(IAnalysisDataset d, int column) {
 			if (column == 0)
 				cosmeticHandler.renameDataset(d);
 

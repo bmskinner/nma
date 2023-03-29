@@ -2,7 +2,6 @@ package com.bmskinner.nma.gui.actions;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -19,7 +18,6 @@ import com.bmskinner.nma.gui.ProgressBarAcceptor;
 import com.bmskinner.nma.gui.events.UIController;
 
 public class DatasetScaleChangeAction extends MultiDatasetResultAction {
-	private static final Logger LOGGER = Logger.getLogger(DatasetScaleChangeAction.class.getName());
 
 	private static final @NonNull String PROGRESS_BAR_LABEL = "Updating scale";
 

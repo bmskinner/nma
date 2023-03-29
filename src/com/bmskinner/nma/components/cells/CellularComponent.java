@@ -26,7 +26,6 @@ import com.bmskinner.nma.components.Imageable;
 import com.bmskinner.nma.components.MissingComponentException;
 import com.bmskinner.nma.components.Rotatable;
 import com.bmskinner.nma.components.Statistical;
-import com.bmskinner.nma.components.UnavailableBorderPointException;
 import com.bmskinner.nma.components.generic.IPoint;
 import com.bmskinner.nma.components.measure.MeasurementScale;
 import com.bmskinner.nma.components.profiles.ProfileException;

@@ -34,10 +34,10 @@ import javax.swing.SpinnerNumberModel;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nma.components.MissingLandmarkException;
 import com.bmskinner.nma.components.cells.ICell;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.datasets.VirtualDataset;
+import com.bmskinner.nma.components.profiles.MissingLandmarkException;
 import com.bmskinner.nma.components.profiles.MissingProfileException;
 import com.bmskinner.nma.components.profiles.ProfileException;
 import com.bmskinner.nma.gui.ProgressBarAcceptor;
@@ -103,6 +103,7 @@ public class ExtractRandomCellsAction extends SingleDatasetResultAction {
 		cancel();
 	}
 
+	@SuppressWarnings("serial")
 	private class ExtractNucleiSetupDialog extends SettingsDialog implements ActionListener {
 
 		private JSpinner spinner;
@@ -114,7 +115,6 @@ public class ExtractRandomCellsAction extends SingleDatasetResultAction {
 			setSize(450, 300);
 			this.setLocationRelativeTo(null);
 			createGUI();
-			// this.pack();
 			this.setVisible(true);
 		}
 

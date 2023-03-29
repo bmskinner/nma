@@ -58,14 +58,17 @@ public class FileUtils {
 	}
 
 	/**
-	 * Given a list of files, find the component of their paths that is shared
+	 * Given a collection of files, find the component of their paths that is shared
 	 * amongst them; i.e. their most recent common ancestor.
 	 * 
 	 * @param files the files to compare
-	 * @return the section of their path in common, or the default system directory
-	 *         if there is no common path
+	 * @return the section of their path in common, the default system directory if
+	 *         there is no common path, or null if no files are provided
 	 */
 	public static File commonPathOfFiles(@NonNull Collection<File> files) {
+
+		if (files.isEmpty())
+			return null;
 
 		String[][] folders = new String[files.size()][];
 

@@ -25,22 +25,22 @@ import com.bmskinner.nma.components.MissingComponentException;
  * @since 1.13.3
  *
  */
-public class UnavailableSignalGroupException extends MissingComponentException {
+public class MissingSignalGroupException extends MissingComponentException {
     private static final long serialVersionUID = 1L;
 
-    public UnavailableSignalGroupException() {
+    public MissingSignalGroupException() {
         super();
     }
 
-    public UnavailableSignalGroupException(String message) {
+    public MissingSignalGroupException(String message) {
         super(message);
     }
 
-    public UnavailableSignalGroupException(String message, Throwable cause) {
+    public MissingSignalGroupException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public UnavailableSignalGroupException(Throwable cause) {
+    public MissingSignalGroupException(Throwable cause) {
         super(cause);
     }
 }

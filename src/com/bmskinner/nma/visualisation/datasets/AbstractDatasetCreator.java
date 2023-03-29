@@ -29,7 +29,7 @@ import com.bmskinner.nma.visualisation.options.DisplayOptions;
  */
 public abstract class AbstractDatasetCreator<E extends DisplayOptions> {
 
-	protected final E options;
+	protected final @NonNull E options;
 
 	public static final String TAG_PREFIX = "Tag_";
 	public static final String SEGMENT_SERIES_PREFIX = "Seg_";

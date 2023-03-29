@@ -153,8 +153,7 @@ public class ExportableTable extends JTable {
 		@Override
 		public void mousePressed(MouseEvent e) {
 			// capture start of resize
-			if (e.getSource() instanceof JTableHeader) {
-				JTableHeader header = (JTableHeader) e.getSource();
+			if (e.getSource()instanceof JTableHeader header) {
 				TableColumn tc = header.getResizingColumn();
 				if (tc != null) {
 					resizing = true;
@@ -180,8 +179,7 @@ public class ExportableTable extends JTable {
 
 			// column resized
 			if (resizing) {
-				if (e.getSource() instanceof JTableHeader) {
-					JTableHeader header = (JTableHeader) e.getSource();
+				if (e.getSource()instanceof JTableHeader header) {
 					TableColumn tc = header.getColumnModel().getColumn(resizingColumn);
 					if (tc != null) {
 						int newWidth = tc.getPreferredWidth();

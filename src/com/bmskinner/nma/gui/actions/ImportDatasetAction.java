@@ -122,9 +122,11 @@ public class ImportDatasetAction extends VoidResultAction {
 			LOGGER.warning(
 					"Unable to unmarshall dataset '" + doc.getRootElement().getName() + "': "
 							+ e.getMessage());
+			Thread.currentThread().interrupt();
 		} catch (ExecutionException e) {
 			LOGGER.warning("Unable to unmarshall dataset '" + doc.getRootElement().getName() + "': "
 					+ e.getMessage());
+			Thread.currentThread().interrupt();
 		} finally {
 			if (getLatch().isPresent())
 				getLatch().get().countDown();

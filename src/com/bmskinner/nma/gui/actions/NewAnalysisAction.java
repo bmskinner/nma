@@ -19,7 +19,7 @@ package com.bmskinner.nma.gui.actions;
 import java.io.File;
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
@@ -115,10 +115,10 @@ public class NewAnalysisAction extends VoidResultAction {
 			LOGGER.info("Directory: " + detectionFolder.get().getName());
 
 			Instant inst = Instant.ofEpochMilli(options.getAnalysisTime());
-			LocalDateTime anTime = LocalDateTime.ofInstant(inst, ZoneOffset.systemDefault());
+			LocalDateTime anTime = LocalDateTime.ofInstant(inst, ZoneId.systemDefault());
 
 			File outputFolder = new File(detectionFolder.get(), anTime
-					.format(DateTimeFormatter.ofPattern("YYYY-MM-dd_HH-mm-ss")));
+					.format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss")));
 
 			try {
 				IAnalysisMethod m = new NucleusDetectionMethod(outputFolder, options);
@@ -156,6 +156,7 @@ public class NewAnalysisAction extends VoidResultAction {
 		} catch (InterruptedException e) {
 			LOGGER.warning("Interruption to swing worker");
 			LOGGER.log(Loggable.STACK, "Interruption to swing worker", e);
+			Thread.currentThread().interrupt();
 		} catch (ExecutionException e) {
 			LOGGER.warning("Execution error in swing worker");
 			LOGGER.log(Loggable.STACK, "Execution error in swing worker", e);

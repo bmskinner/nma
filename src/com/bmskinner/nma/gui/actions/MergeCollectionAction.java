@@ -154,6 +154,7 @@ public class MergeCollectionAction extends MultiDatasetResultAction {
 			LOGGER.warning("Error merging datasets");
 			LOGGER.log(Loggable.STACK, "Error merging datasets", e);
 			this.cancel();
+			Thread.currentThread().interrupt();
 			return;
 		}
 		List<IAnalysisDataset> result = r.getDatasets();

@@ -564,14 +564,14 @@ public class DefaultProfileSegment implements IProfileSegment {
 
 				if (!prevSegment.wraps() && prevSegment.wraps(startIndex, endIndex))
 					throw new SegmentUpdateException(
-							String.format("Previous segment would convert to wrapping"));
+							"Previous segment would convert to wrapping");
 
 				// another wrapping test - if the new positions induce a wrap,
 				// the segment should contain 0
 				if (prevSegment.wraps(startIndex, endIndex)
 						&& !IProfileSegment.contains(startIndex, endIndex, 0, totalLength))
-					throw new SegmentUpdateException(String
-							.format("Segment would convert to wrapping but does not contain zero"));
+					throw new SegmentUpdateException(
+							"Segment would convert to wrapping but does not contain zero");
 			}
 		}
 
@@ -588,15 +588,15 @@ public class DefaultProfileSegment implements IProfileSegment {
 				// an inversion must have occurred. Prevent.
 				if (!nextSegment.wraps() && nextSegment.wraps(startIndex, endIndex)) {
 					throw new SegmentUpdateException(
-							String.format("Next segment would convert to wrapping"));
+							"Next segment would convert to wrapping");
 				}
 
 				// another wrapping test - if the new positions induce a wrap,
 				// the segment should contain 0
 				if (nextSegment.wraps(startIndex, endIndex)
 						&& !IProfileSegment.contains(startIndex, endIndex, 0, totalLength)) {
-					throw new SegmentUpdateException(String
-							.format("Segment would convert to wrapping but does not contain zero"));
+					throw new SegmentUpdateException(
+							"Segment would convert to wrapping but does not contain zero");
 				}
 			}
 		}

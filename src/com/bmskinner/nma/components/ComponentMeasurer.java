@@ -25,9 +25,11 @@ import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.cells.ICell;
 import com.bmskinner.nma.components.cells.Nucleus;
+import com.bmskinner.nma.components.cells.UnavailableBorderPointException;
 import com.bmskinner.nma.components.generic.FloatPoint;
 import com.bmskinner.nma.components.generic.IPoint;
 import com.bmskinner.nma.components.measure.Measurement;
+import com.bmskinner.nma.components.profiles.MissingLandmarkException;
 import com.bmskinner.nma.components.profiles.MissingProfileException;
 import com.bmskinner.nma.components.profiles.ProfileException;
 import com.bmskinner.nma.components.profiles.ProfileType;
@@ -84,7 +86,7 @@ public final class ComponentMeasurer {
 	 * @param c the component to measure
 	 * @return
 	 */
-	public static double calculate(Measurement m, CellularComponent c) {
+	public static double calculate(@NonNull Measurement m, @NonNull CellularComponent c) {
 		if (Measurement.CIRCULARITY.equals(m))
 			return calculateCircularity(c);
 

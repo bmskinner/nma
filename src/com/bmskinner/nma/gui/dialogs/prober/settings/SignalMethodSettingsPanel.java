@@ -60,14 +60,14 @@ public class SignalMethodSettingsPanel extends SettingsPanel {
 
     private JPanel createCardPanel() {
         CardLayout cl = new CardLayout();
-        JPanel cardPanel = new JPanel(cl);
-        cardPanel.add(new JLabel(FORWARD_DESC_LABEL), FORWARD_DESC_LABEL);
-        cardPanel.add(new JLabel(REVERSE_DESC_LABEL), REVERSE_DESC_LABEL);
-        cardPanel.add(new JLabel(ADAPTIVE_DESC_LABEL), ADAPTIVE_DESC_LABEL);
+        JPanel panel = new JPanel(cl);
+        panel.add(new JLabel(FORWARD_DESC_LABEL), FORWARD_DESC_LABEL);
+        panel.add(new JLabel(REVERSE_DESC_LABEL), REVERSE_DESC_LABEL);
+        panel.add(new JLabel(ADAPTIVE_DESC_LABEL), ADAPTIVE_DESC_LABEL);
 
-        cl.show(cardPanel, FORWARD_DESC_LABEL);
+        cl.show(panel, FORWARD_DESC_LABEL);
 
-        return cardPanel;
+        return panel;
     }
 
     private JPanel createPanel() {

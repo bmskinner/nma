@@ -1,7 +1,6 @@
 package com.bmskinner.nma.gui.actions;
 
 import java.util.List;
-import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -20,9 +19,6 @@ import com.bmskinner.nma.io.DatasetKeypointExportMethod;
  *
  */
 public class ExportKeypointsAction extends MultiDatasetResultAction {
-
-	private static final Logger LOGGER = Logger
-			.getLogger(ExportSingleCellImagesAction.class.getName());
 
 	private static final String PROGRESS_LBL = "Exporting keypoints";
 

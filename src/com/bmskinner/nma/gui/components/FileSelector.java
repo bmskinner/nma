@@ -20,7 +20,6 @@ import java.io.File;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.logging.Logger;
 
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
@@ -33,7 +32,6 @@ import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.options.IAnalysisOptions;
 import com.bmskinner.nma.core.GlobalOptions;
 import com.bmskinner.nma.io.Io;
-import com.bmskinner.nma.io.Io.Importer;
 import com.bmskinner.nma.utility.FileUtils;
 
 /**
@@ -44,8 +42,6 @@ import com.bmskinner.nma.utility.FileUtils;
  *
  */
 public class FileSelector {
-
-	private static final Logger LOGGER = Logger.getLogger(FileSelector.class.getName());
 
 	private FileSelector() {
 	}
@@ -77,7 +73,6 @@ public class FileSelector {
 	public static @Nullable File chooseStatsExportFile(@NonNull List<IAnalysisDataset> datasets,
 			@Nullable String suffix) {
 
-//		LOGGER.fine(datasets.size() + " datasets to export");
 		File dir = null;
 		suffix = suffix == null ? "stats" : suffix;
 		String defaultName = "";
@@ -149,7 +144,7 @@ public class FileSelector {
 	public static @Nullable File chooseRemappingFile(@NonNull IAnalysisDataset dataset) {
 
 		FileNameExtensionFilter filter = new FileNameExtensionFilter("Remapping file",
-				Importer.LOC_FILE_EXTENSION);
+				Io.LOC_FILE_EXTENSION);
 
 		Optional<IAnalysisOptions> op = dataset.getAnalysisOptions();
 		if (!op.isPresent())
@@ -278,10 +273,10 @@ public class FileSelector {
 		File dir = null;
 		if (datasets.size() == 1) {
 			dir = datasets.get(0).getSavePath().getParentFile();
-			fileName = datasets.get(0).getName() + Importer.WRK_FILE_EXTENSION;
+			fileName = datasets.get(0).getName() + Io.WRK_FILE_EXTENSION;
 
 		} else {
-			fileName = "Workspace" + Importer.WRK_FILE_EXTENSION;
+			fileName = "Workspace" + Io.WRK_FILE_EXTENSION;
 			dir = FileUtils.commonPathOfDatasets(datasets);
 			if (!dir.exists() || !dir.isDirectory()) {
 				dir = new File(System.getProperty("user.home"));
@@ -300,8 +295,8 @@ public class FileSelector {
 		File file = fc.getSelectedFile();
 
 		// Add extension if needed
-		if (!file.getAbsolutePath().endsWith(Importer.WRK_FILE_EXTENSION)) {
-			file = new File(file.getAbsolutePath() + Importer.WRK_FILE_EXTENSION);
+		if (!file.getAbsolutePath().endsWith(Io.WRK_FILE_EXTENSION)) {
+			file = new File(file.getAbsolutePath() + Io.WRK_FILE_EXTENSION);
 		}
 
 		return file;
@@ -374,28 +369,4 @@ public class FileSelector {
 
 		return fc.getSelectedFile();
 	}
-
-	/**
-	 * Check if the given folder has files (not just directories)
-	 * 
-	 * @param folder
-	 * @return
-	 */
-	private static boolean containsFiles(File folder) {
-
-		File[] files = folder.listFiles();
-
-		// There must be items in the folder
-		if (files == null || files.length == 0)
-			return false;
-
-		int countFiles = 0;
-
-		// Some of the items must be files
-		for (File f : files)
-			if (f.isFile())
-				countFiles++;
-		return countFiles > 0;
-	}
-
 }

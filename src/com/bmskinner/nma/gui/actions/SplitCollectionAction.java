@@ -36,7 +36,8 @@ public class SplitCollectionAction extends SingleDatasetResultAction {
 
 	private static final @NonNull String PROGRESS_BAR_LABEL = "Splitting collection";
 
-	public SplitCollectionAction(IAnalysisDataset dataset, @NonNull final ProgressBarAcceptor acceptor) {
+	public SplitCollectionAction(IAnalysisDataset dataset,
+			@NonNull final ProgressBarAcceptor acceptor) {
 		super(dataset, PROGRESS_BAR_LABEL, acceptor);
 	}
 
@@ -47,10 +48,12 @@ public class SplitCollectionAction extends SingleDatasetResultAction {
 			if (dataset.hasChildren()) {
 				LOGGER.info("Splitting collection...");
 
-				IAnalysisDataset[] names = dataset.getAllChildDatasets().toArray(new IAnalysisDataset[0]);
+				IAnalysisDataset[] names = dataset.getAllChildDatasets()
+						.toArray(new IAnalysisDataset[0]);
 
 				IAnalysisDataset negative = (IAnalysisDataset) JOptionPane.showInputDialog(null,
-						"Give me nuclei that are NOT present within the following population", "Split population",
+						"Give me nuclei that are NOT present within the following population",
+						"Split population",
 						JOptionPane.PLAIN_MESSAGE, null, names, names[0]);
 
 				if (negative != null) {
@@ -58,7 +61,8 @@ public class SplitCollectionAction extends SingleDatasetResultAction {
 					// prepare a new collection
 					ICellCollection collection = dataset.getCollection();
 
-					ICellCollection newCollection = new DefaultCellCollection(dataset, "Subtraction");
+					ICellCollection newCollection = new DefaultCellCollection(dataset,
+							"Subtraction");
 
 					for (ICell c : collection)
 						if (!negative.getCollection().contains(c))
@@ -68,14 +72,16 @@ public class SplitCollectionAction extends SingleDatasetResultAction {
 
 					dataset.addChildCollection(newCollection);
 
-					if (newCollection.size() > 0) {
+					if (!newCollection.isEmpty()) {
 
 						LOGGER.info("Reapplying morphology...");
 
 						int flag = 0;
-						IAnalysisDataset newDataset = dataset.getChildDataset(newCollection.getId());
+						IAnalysisDataset newDataset = dataset
+								.getChildDataset(newCollection.getId());
 						final CountDownLatch latch = new CountDownLatch(1);
-						new RunSegmentationAction(newDataset, dataset, flag, progressAcceptors.get(0), latch);
+						new RunSegmentationAction(newDataset, dataset, flag,
+								progressAcceptors.get(0), latch);
 					}
 				} else {
 					LOGGER.fine("User cancelled split");
