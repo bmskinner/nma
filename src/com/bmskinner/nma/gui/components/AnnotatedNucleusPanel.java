@@ -29,8 +29,8 @@ import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.cells.ICell;
 import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.io.ImageImporter;
-import com.bmskinner.nma.visualisation.image.ImageAnnotator;
 import com.bmskinner.nma.visualisation.image.ImageFilterer;
+import com.bmskinner.nma.visualisation.image.ImageAnnotator;
 
 import ij.process.ImageProcessor;
 

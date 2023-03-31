@@ -39,7 +39,7 @@ import ij.process.ImageProcessor;
  * @author Ben Skinner
  *
  */
-public class ImageConverter extends AbstractImageFilterer {
+public class ImageConverter extends ImageFilterer {
 
     public ImageConverter(@NonNull ImageProcessor ip) {
         super(ip);

@@ -29,9 +29,8 @@ import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.profiles.MissingLandmarkException;
 import com.bmskinner.nma.io.Io.Importer;
 import com.bmskinner.nma.logging.Loggable;
-import com.bmskinner.nma.visualisation.image.AbstractImageFilterer;
-import com.bmskinner.nma.visualisation.image.ImageConverter;
 import com.bmskinner.nma.visualisation.image.ImageFilterer;
+import com.bmskinner.nma.visualisation.image.ImageConverter;
 
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -107,7 +106,7 @@ public class ImageImporter implements Importer {
 	public static ImageProcessor importCroppedImageTo24bitGreyscale(@NonNull ICell cell,
 			@NonNull CellularComponent c) {
 		ImageProcessor ip = importFullImageTo24bitGreyscale(c);
-		return AbstractImageFilterer.crop(ip, cell);
+		return ImageFilterer.crop(ip, cell);
 	}
 
 	/**
@@ -122,7 +121,7 @@ public class ImageImporter implements Importer {
 	 */
 	public static ImageProcessor importCroppedImageTo24bitGreyscale(@NonNull CellularComponent c) {
 		ImageProcessor ip = importFullImageTo24bitGreyscale(c);
-		return AbstractImageFilterer.crop(ip, c);
+		return ImageFilterer.crop(ip, c);
 	}
 
 	/**
@@ -155,7 +154,7 @@ public class ImageImporter implements Importer {
 	 */
 	public static ImageProcessor importCroppedImageTo24bitRGB(@NonNull CellularComponent c) {
 		ImageProcessor ip = importFullImageTo24bitRGB(c);
-		return AbstractImageFilterer.crop(ip, c);
+		return ImageFilterer.crop(ip, c);
 	}
 
 	/**
@@ -169,7 +168,7 @@ public class ImageImporter implements Importer {
 	 */
 	public static ImageProcessor importFullImageTo24bitGreyscale(@NonNull CellularComponent c) {
 		if (!c.getSourceFile().exists()) {
-			return AbstractImageFilterer.createWhiteColorProcessor(
+			return ImageFilterer.createWhiteColorProcessor(
 					(int) c.getMaxX() + Imageable.COMPONENT_BUFFER,
 					(int) c.getMaxY() + Imageable.COMPONENT_BUFFER);
 		}
@@ -177,7 +176,7 @@ public class ImageImporter implements Importer {
 			ImageProcessor ip = new ImageImporter(c.getSourceFile()).importImage(c.getChannel());
 			return new ImageConverter(ip).convertToRGBGreyscale().invert().toProcessor();
 		} catch (ImageImportException e) {
-			return AbstractImageFilterer.createWhiteColorProcessor(
+			return ImageFilterer.createWhiteColorProcessor(
 					(int) c.getMaxX() + Imageable.COMPONENT_BUFFER,
 					(int) c.getMaxY() + Imageable.COMPONENT_BUFFER);
 		}
@@ -193,7 +192,7 @@ public class ImageImporter implements Importer {
 	 */
 	public static ImageProcessor importFullImageTo24bitRGB(@NonNull CellularComponent c) {
 		if (!c.getSourceFile().exists()) {
-			return AbstractImageFilterer.createWhiteColorProcessor(
+			return ImageFilterer.createWhiteColorProcessor(
 					(int) c.getMaxX() + Imageable.COMPONENT_BUFFER,
 					(int) c.getMaxY() + Imageable.COMPONENT_BUFFER);
 		}
@@ -239,7 +238,7 @@ public class ImageImporter implements Importer {
 	public static ImageProcessor importCroppedImageTo8bit(@NonNull CellularComponent c)
 			throws UnloadableImageException {
 		ImageProcessor ip = importFullImageTo8bit(c);
-		return AbstractImageFilterer.crop(ip, c);
+		return ImageFilterer.crop(ip, c);
 	}
 
 	/**

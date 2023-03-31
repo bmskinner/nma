@@ -24,8 +24,8 @@ import javax.swing.table.DefaultTableModel;
 import com.bmskinner.nma.analysis.detection.Finder.DetectionEvent;
 import com.bmskinner.nma.analysis.detection.Finder.DetectionEventListener;
 import com.bmskinner.nma.gui.dialogs.prober.GenericImageProberPanel.ProberTableCell;
-import com.bmskinner.nma.visualisation.image.ImageConverter;
 import com.bmskinner.nma.visualisation.image.ImageFilterer;
+import com.bmskinner.nma.visualisation.image.ImageConverter;
 
 import ij.process.ImageProcessor;
 

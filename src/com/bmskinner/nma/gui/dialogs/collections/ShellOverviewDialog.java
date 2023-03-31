@@ -49,8 +49,8 @@ import com.bmskinner.nma.io.ImageImportWorker;
 import com.bmskinner.nma.io.ImageImporter;
 import com.bmskinner.nma.io.Io;
 import com.bmskinner.nma.logging.Loggable;
-import com.bmskinner.nma.visualisation.image.ImageAnnotator;
 import com.bmskinner.nma.visualisation.image.ImageFilterer;
+import com.bmskinner.nma.visualisation.image.ImageAnnotator;
 
 import ij.ImagePlus;
 import ij.io.FileSaver;

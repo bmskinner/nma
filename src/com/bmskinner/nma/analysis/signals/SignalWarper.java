@@ -148,6 +148,7 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> {
 		} catch (InterruptedException e) {
 			LOGGER.log(Loggable.STACK, "Interruption error in worker", e);
 			firePropertyChange("Error", getProgress(), IAnalysisWorker.ERROR);
+			Thread.currentThread().interrupt();
 		} catch (ExecutionException e) {
 			LOGGER.log(Loggable.STACK, "Execution error in worker", e);
 			firePropertyChange("Error", getProgress(), IAnalysisWorker.ERROR);

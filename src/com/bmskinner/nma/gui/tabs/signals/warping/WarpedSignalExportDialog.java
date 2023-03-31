@@ -32,9 +32,9 @@ import com.bmskinner.nma.gui.DefaultInputSupplier;
 import com.bmskinner.nma.gui.dialogs.SettingsDialog;
 import com.bmskinner.nma.io.Io;
 import com.bmskinner.nma.utility.FileUtils;
+import com.bmskinner.nma.visualisation.image.ImageFilterer;
 import com.bmskinner.nma.visualisation.image.ImageAnnotator;
 import com.bmskinner.nma.visualisation.image.ImageConverter;
-import com.bmskinner.nma.visualisation.image.ImageFilterer;
 
 import ij.IJ;
 import ij.ImagePlus;

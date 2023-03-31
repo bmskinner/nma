@@ -30,6 +30,7 @@ import com.bmskinner.nma.components.profiles.BooleanProfile;
 import com.bmskinner.nma.components.profiles.DefaultProfile;
 import com.bmskinner.nma.components.profiles.IProfile;
 import com.bmskinner.nma.io.ImageImporter.ImageImportException;
+import com.bmskinner.nma.utility.ArrayUtils;
 
 import ij.measure.Calibration;
 import ij.measure.Measurements;
@@ -187,19 +188,14 @@ public class SignalThresholdChooser {
 				new Calibration());
 		long[] histogram = statistics.getHistogram();
 
-		float[] d = new float[histogram.length];
-
-		for (int i = 0; i < histogram.length; i++) {
-			d[i] = histogram[i];
-
-		}
+		float[] d = ArrayUtils.toFloat(histogram);
 
 		/*
 		 * trim the histogram to the minimum signal intensity. No point looking lower,
 		 * and the black pixels increase the total range making it harder to carry out
 		 * the range based minima detection below
 		 */
-		LOGGER.finest("Initial histo threshold: " + minThreshold);
+		LOGGER.finest(() -> "Initial histo threshold: %d".formatted(minThreshold));
 
 		IProfile histogramProfile = new DefaultProfile(d);
 		IProfile trimmedHisto = histogramProfile.getSubregion(minThreshold, 255);

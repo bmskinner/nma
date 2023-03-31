@@ -39,8 +39,8 @@ import com.bmskinner.nma.components.options.IAnalysisOptions;
 import com.bmskinner.nma.io.ImageImporter;
 import com.bmskinner.nma.io.ImageImporter.ImageImportException;
 import com.bmskinner.nma.logging.Loggable;
-import com.bmskinner.nma.visualisation.image.ImageAnnotator;
 import com.bmskinner.nma.visualisation.image.ImageFilterer;
+import com.bmskinner.nma.visualisation.image.ImageAnnotator;
 
 import ij.gui.Roi;
 import ij.process.ImageProcessor;

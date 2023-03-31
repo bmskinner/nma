@@ -37,6 +37,7 @@ import com.bmskinner.nma.components.cells.UnavailableBorderPointException;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.datasets.VirtualDataset;
 import com.bmskinner.nma.components.options.HashOptions;
+import com.bmskinner.nma.components.options.MissingOptionException;
 import com.bmskinner.nma.components.profiles.MissingLandmarkException;
 import com.bmskinner.nma.components.profiles.MissingProfileException;
 import com.bmskinner.nma.components.profiles.ProfileException;
@@ -44,7 +45,6 @@ import com.bmskinner.nma.components.signals.DefaultSignalGroup;
 import com.bmskinner.nma.components.signals.INuclearSignal;
 import com.bmskinner.nma.components.signals.ISignalCollection;
 import com.bmskinner.nma.components.signals.ISignalGroup;
-import com.bmskinner.nma.components.signals.MissingSignalGroupException;
 import com.bmskinner.nma.gui.components.ColourSelecter;
 import com.bmskinner.nma.io.ImageImporter.ImageImportException;
 import com.bmskinner.nma.logging.Loggable;
@@ -70,12 +70,12 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
 	 * @param d       the dataset to add signals to
 	 * @param options the analysis options
 	 * @param group   the signal group to add signals to
-	 * @throws MissingSignalGroupException if the group is not present in the
-	 *                                         dataset
+	 * @throws MissingOptionException if dataset analysis options are not present
 	 */
 
 	public SignalDetectionMethod(@NonNull final IAnalysisDataset d,
-			@NonNull final HashOptions options, @NonNull File folder) {
+			@NonNull final HashOptions options, @NonNull File folder)
+			throws MissingOptionException {
 		super(d);
 
 		if (!d.getAnalysisOptions().isPresent())
@@ -98,9 +98,11 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
 
 		dataset.getCollection().addSignalGroup(group);
 
-		dataset.getAnalysisOptions().get().setNuclearSignalDetectionOptions(options);
-		dataset.getAnalysisOptions().get().setNuclearSignalDetectionFolder(
-				options.getUUID(HashOptions.SIGNAL_GROUP_ID), folder);
+		dataset.getAnalysisOptions().orElseThrow(MissingOptionException::new)
+				.setNuclearSignalDetectionOptions(options);
+		dataset.getAnalysisOptions().orElseThrow(MissingOptionException::new)
+				.setNuclearSignalDetectionFolder(
+						options.getUUID(HashOptions.SIGNAL_GROUP_ID), folder);
 	}
 
 	@Override
@@ -112,13 +114,16 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
 		return new DefaultAnalysisResult(signalChild.get());
 	}
 
-	protected void run() {
+	protected void run() throws MissingOptionException {
 
-		LOGGER.fine("Beginning signal detection in channel " + channel);
+		LOGGER.fine(() -> "Beginning signal detection in channel %d".formatted(channel));
 
 		int originalMinThreshold = options.getInt(HashOptions.THRESHOLD);
 
-		SignalFinder finder = new SignalFinder(dataset.getAnalysisOptions().get(), options,
+		SignalFinder finder = new SignalFinder(
+				dataset.getAnalysisOptions()
+						.orElseThrow(MissingOptionException::new),
+				options,
 				dataset.getCollection(), FinderDisplayType.PIPELINE);
 
 		dataset.getCollection().getCells()

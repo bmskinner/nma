@@ -48,7 +48,7 @@ import com.bmskinner.nma.visualisation.charts.ScatterChartFactory.ScatterChartRe
 import com.bmskinner.nma.visualisation.datasets.ChartDatasetCreationException;
 import com.bmskinner.nma.visualisation.datasets.ComponentOutlineDataset;
 import com.bmskinner.nma.visualisation.datasets.ScatterChartDatasetCreator;
-import com.bmskinner.nma.visualisation.image.AbstractImageFilterer;
+import com.bmskinner.nma.visualisation.image.ImageFilterer;
 import com.bmskinner.nma.visualisation.image.ImageAnnotator;
 import com.bmskinner.nma.visualisation.options.ChartOptions;
 
@@ -428,9 +428,9 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 
 		ImageProcessor ip = ImageAnnotator.drawBorder(ImageImporter.importFullImageTo24bitGreyscale(n), n, col);
 
-		ip = AbstractImageFilterer.crop(ip, n);
+		ip = ImageFilterer.crop(ip, n);
 		ip.flipVertical(); // Y axis needs inverting
-		ip = AbstractImageFilterer.orientImage(ip, n);
+		ip = ImageFilterer.orientImage(ip, n);
 
 		BufferedImage image = ip.getBufferedImage();
 

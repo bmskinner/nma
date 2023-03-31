@@ -55,8 +55,8 @@ import com.bmskinner.nma.io.ImageImportWorker;
 import com.bmskinner.nma.io.ImageImporter;
 import com.bmskinner.nma.io.ImageImporter.ImageImportException;
 import com.bmskinner.nma.io.UnloadableImageException;
-import com.bmskinner.nma.visualisation.image.ImageAnnotator;
 import com.bmskinner.nma.visualisation.image.ImageFilterer;
+import com.bmskinner.nma.visualisation.image.ImageAnnotator;
 
 import ij.process.ImageProcessor;
 
@@ -289,14 +289,16 @@ public class ManualCurationDialog extends AbstractCellCollectionDialog {
 				ip = ImageFilterer.orientImage(ip, c.getPrimaryNucleus());
 			}
 			// Rescale the resulting image
-			ip = new ImageFilterer(ip).resizeKeepingAspect(ROW_IMAGE_HEIGHT, ROW_IMAGE_HEIGHT)
+			ip = new ImageFilterer(ip)
+					.resizeKeepingAspect(ROW_IMAGE_HEIGHT, ROW_IMAGE_HEIGHT)
 					.toProcessor();
 			return ip;
 		}
 
 		private ImageProcessor importCytoplasm(ICell c) throws UnloadableImageException {
 			if (!c.hasCytoplasm())
-				return ImageFilterer.createWhiteColorProcessor(ROW_IMAGE_HEIGHT, ROW_IMAGE_HEIGHT);
+				return ImageFilterer.createWhiteColorProcessor(ROW_IMAGE_HEIGHT,
+						ROW_IMAGE_HEIGHT);
 			ImageProcessor ip = ImageImporter.importCroppedImageTo24bitGreyscale(c.getCytoplasm());
 			ImageAnnotator an = new ImageAnnotator(ip);
 			an = an.annotateBorder(c.getCytoplasm(), c.getCytoplasm(), Color.CYAN);
@@ -309,7 +311,8 @@ public class ManualCurationDialog extends AbstractCellCollectionDialog {
 		}
 
 		private ImageProcessor importNucleus(ICell c) throws UnloadableImageException {
-			ImageProcessor ip = ImageImporter.importFullImageTo24bitGreyscale(c.getPrimaryNucleus());
+			ImageProcessor ip = ImageImporter
+					.importFullImageTo24bitGreyscale(c.getPrimaryNucleus());
 			ImageAnnotator an = new ImageAnnotator(ip);
 			for (Nucleus n : c.getNuclei()) {
 				an = an.drawSegments(n);
@@ -383,7 +386,8 @@ public class ManualCurationDialog extends AbstractCellCollectionDialog {
 
 			} catch (UnloadableImageException | ImageImportException | MissingOptionException e) {
 				LOGGER.fine("Cannot load image for component: " + e.getMessage());
-				return new SelectableCellIcon(ImageFilterer.createBlackColorProcessor(150, 150), c);
+				return new SelectableCellIcon(
+						ImageFilterer.createBlackColorProcessor(150, 150), c);
 			}
 
 		}

@@ -129,7 +129,8 @@ public class DefaultMeshImage implements MeshImage {
 	 * @param yOffset
 	 * @return
 	 */
-	private int drawFaceToImage(MeshFace templateFace, MeshFace targetFace, ImageProcessor ip, int xOffset,
+	private int drawFaceToImage(MeshFace templateFace, MeshFace targetFace, ImageProcessor ip,
+			int xOffset,
 			int yOffset) {
 
 		int missingPixels = 0;
@@ -275,7 +276,8 @@ public class DefaultMeshImage implements MeshImage {
 		Rectangle bounds = template.getComponent().toOriginalShape().getBounds();
 
 		for (int x = 0; x < ip.getWidth(); x++) {
-			if (x < bounds.getMinX() || x > bounds.getMaxX()) // skip pixels outside the object bounds
+			if (x < bounds.getMinX() || x > bounds.getMaxX()) // skip pixels outside the object
+																// bounds
 				continue;
 
 			for (int y = 0; y < ip.getHeight(); y++) {
@@ -317,7 +319,8 @@ public class DefaultMeshImage implements MeshImage {
 					value = value & 0xff;
 
 				if (value < 0)
-					throw new MeshImageCreationException("Pixel value is negative at " + x + ", " + y + ": " + value);
+					throw new MeshImageCreationException(
+							"Pixel value is negative at " + x + ", " + y + ": " + value);
 
 				List<MeshPixel> pixels = map.get(face);
 

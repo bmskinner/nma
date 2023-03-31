@@ -18,7 +18,6 @@ package com.bmskinner.nma.analysis.signals;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -43,7 +42,9 @@ import com.bmskinner.nma.components.signals.ISignalCollection;
  */
 public class SignalMeasurer {
 
-	private static final Logger LOGGER = Logger.getLogger(SignalMeasurer.class.getName());
+	private SignalMeasurer() {
+		// static use only
+	}
 
 	/**
 	 * Measure signal angles. Accounts for orientation by measuring in the oriented
@@ -83,7 +84,6 @@ public class SignalMeasurer {
 					double angle = oriented.getCentreOfMass().findAbsoluteAngle(p,
 							s1.getCentreOfMass());
 
-//					LOGGER.fine(n.getNameAndNumber() + ": " + angle);
 					s.setMeasurement(Measurement.ANGLE, angle);
 				}
 			}

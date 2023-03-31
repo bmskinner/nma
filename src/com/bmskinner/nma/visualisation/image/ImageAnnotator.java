@@ -67,7 +67,7 @@ import ij.process.ImageProcessor;
  * @author ben
  *
  */
-public class ImageAnnotator extends AbstractImageFilterer {
+public class ImageAnnotator extends ImageFilterer {
 
 	private static final Logger LOGGER = Logger.getLogger(ImageAnnotator.class.getName());
 

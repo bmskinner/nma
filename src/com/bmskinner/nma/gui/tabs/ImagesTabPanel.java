@@ -71,10 +71,9 @@ import com.bmskinner.nma.gui.events.UIController;
 import com.bmskinner.nma.io.ImageImporter;
 import com.bmskinner.nma.logging.Loggable;
 import com.bmskinner.nma.utility.FileUtils;
-import com.bmskinner.nma.visualisation.image.AbstractImageFilterer;
+import com.bmskinner.nma.visualisation.image.ImageFilterer;
 import com.bmskinner.nma.visualisation.image.ImageAnnotator;
 import com.bmskinner.nma.visualisation.image.ImageConverter;
-import com.bmskinner.nma.visualisation.image.ImageFilterer;
 
 import ij.process.ImageProcessor;
 
@@ -208,7 +207,6 @@ public class ImagesTabPanel extends DetailPanel implements FilePathUpdatedListen
 		}
 
 	}
-
 
 	/**
 	 * Trigger an update with a given dataset.
@@ -353,7 +351,7 @@ public class ImagesTabPanel extends DetailPanel implements FilePathUpdatedListen
 
 					// TODO - check space needed by cells
 					ImageProcessor ip = f.exists() ? ImageImporter.importFileTo24bit(f)
-							: AbstractImageFilterer.createWhiteColorProcessor(1500, 1500);
+							: ImageFilterer.createWhiteColorProcessor(1500, 1500);
 
 					// If an 8bit image was read in, make it colour greyscale
 					ImageConverter cn = new ImageConverter(ip);
@@ -373,7 +371,8 @@ public class ImagesTabPanel extends DetailPanel implements FilePathUpdatedListen
 				} catch (Exception e1) {
 					label.setIcon(null);
 					LOGGER.log(Level.SEVERE,
-							"Error fetching image %s: %s".formatted(f.getAbsolutePath(), e1.getMessage()),
+							"Error fetching image %s: %s".formatted(f.getAbsolutePath(),
+									e1.getMessage()),
 							e);
 				}
 			};
