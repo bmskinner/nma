@@ -166,15 +166,6 @@ public class ThreadManager {
 	public synchronized void execute(Runnable r) {
 		// if a new update is requested, clear older queued updates
 		if (r instanceof InterfaceUpdater) {
-			uiQueue.removeIf(e -> {
-//    			if(e instanceof TrackedRunnable) {
-//    				boolean b = ((TrackedRunnable)e).getSubmittedRunnable() instanceof PanelUpdater; // cancel entire update batches, not individual updates
-//    				if(b) 
-//    					uiQueueLength.decrementAndGet();
-//    				return b;
-//    			}
-				return false;
-			});
 			uiExecutorService.execute(new TrackedRunnable(r));
 		} else {
 			methodExecutorService.execute(new TrackedRunnable(r));

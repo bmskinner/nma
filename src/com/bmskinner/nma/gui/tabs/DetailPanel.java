@@ -208,23 +208,31 @@ public abstract class DetailPanel extends JPanel
 	@Override
 	public synchronized void update() {
 
-		setUpdating(true);
-		List<IAnalysisDataset> list = DatasetListManager.getInstance().getSelectedDatasets();
-		updateDetail(list);
+		Runnable r = () -> {
+			setUpdating(true);
+			List<IAnalysisDataset> list = DatasetListManager.getInstance().getSelectedDatasets();
+			updateDetail(list);
+		};
+		ThreadManager.getInstance().submitUIUpdate(r);
 
 	}
 
 	@Override
 	public synchronized void update(final List<IAnalysisDataset> list) {
-		setUpdating(true);
-		updateDetail(list);
+
+		Runnable r = () -> {
+			setUpdating(true);
+			updateDetail(list);
+		};
+		ThreadManager.getInstance().submitUIUpdate(r);
 	}
 
 	/**
 	 * This method sets which of the overriden handling methods are run by extending
 	 * classes.
 	 */
-	private synchronized void updateDetail(@NonNull final List<IAnalysisDataset> list) {
+	private void updateDetail(@NonNull final List<IAnalysisDataset> list) {
+
 		try {
 			if (list.isEmpty()) {
 				updateNull();
@@ -239,12 +247,14 @@ public abstract class DetailPanel extends JPanel
 
 		} catch (Exception e) {
 			LOGGER.fine("Error updating panel " + this.getClass().getName());
-			LOGGER.log(Loggable.STACK, "Error updating panel", e); // save detail for fine logging
+			LOGGER.log(Loggable.STACK, "Error updating panel", e); // save detail for fine
+																	// logging
 
 			try {
 				updateNull();
 			} catch (Exception e1) {
-				LOGGER.fine(this.getClass().getName() + ": Error recovering from error updating panel");
+				LOGGER.fine(this.getClass().getName()
+						+ ": Error recovering from error updating panel");
 				LOGGER.log(Loggable.STACK, "Error recovering from error updating panel", e1);
 			}
 		} finally {
@@ -323,7 +333,7 @@ public abstract class DetailPanel extends JPanel
 			clearCache();
 			update(getDatasets());
 		};
-		ThreadManager.getInstance().execute(r);
+		ThreadManager.getInstance().submitUIUpdate(r);
 	}
 
 	/**
@@ -341,7 +351,7 @@ public abstract class DetailPanel extends JPanel
 			if (getDatasets().stream().anyMatch(d -> dataset.getId().equals(d.getId())))
 				update(getDatasets());
 		};
-		ThreadManager.getInstance().execute(r);
+		ThreadManager.getInstance().submitUIUpdate(r);
 	}
 
 	/**
@@ -359,7 +369,7 @@ public abstract class DetailPanel extends JPanel
 			if (getDatasets().stream().anyMatch(list::contains))
 				update(getDatasets());
 		};
-		ThreadManager.getInstance().execute(r);
+		ThreadManager.getInstance().submitUIUpdate(r);
 	}
 
 	/*
