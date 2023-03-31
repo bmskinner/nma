@@ -409,9 +409,8 @@ public class DatasetTreeTableModel extends AbstractTreeTableModel {
 			node = node.getParent();
 		}
 
-//		if (node == root) {
-//			path.add(0, node);
-//		}
+		// ensure root node is added
+		path.add(0, node);
 
 		return path.toArray(new MutableTreeTableNode[0]);
 	}
