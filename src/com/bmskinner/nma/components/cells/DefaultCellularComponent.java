@@ -866,9 +866,18 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		// Find the point that is closest to 180 degrees across the CoM
 		double distToCom = p.getLengthTo(centreOfMass);
 
-		// Look for the point at which the direct distance between the two points is
-		// closest to the sum of their respective distances to the centre of mass
+		boolean isLeft = p.isLeftOf(centreOfMass);
+		boolean isAbove = p.isAbove(centreOfMass);
+
 		return Arrays.stream(borderList)
+
+				// First, we can simplify the search by excluding points that are on the wrong
+				// side of the CoM in x and y
+				.filter(point -> isLeft ? point.isRightOf(centreOfMass) : point.isLeftOf(centreOfMass))
+				.filter(point -> isAbove ? point.isBelow(centreOfMass) : point.isAbove(centreOfMass))
+
+				// Look for the point at which the direct distance between the two points is
+				// closest to the sum of their respective distances to the centre of mass
 				.filter(point -> point.getLengthTo(p) > distToCom)
 				.min(Comparator
 						.comparing(point -> Math.abs(point.getLengthTo(centreOfMass)

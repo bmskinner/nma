@@ -405,8 +405,13 @@ public final class DatasetListManager implements DatasetAddedListener {
 	public final synchronized void addDataset(@NonNull IAnalysisDataset d) {
 		if (d.isRoot() && !rootDatasets.contains(d)) {
 			rootDatasets.add(d);
-			datasetHashcodeMap.put(d.getId(), d.hashCode());
-			LOGGER.fine("Added dataset  " + d.getName() + ": " + d.hashCode());
+			LOGGER.fine(() -> "Added dataset %s".formatted(d.getName()));
+
+			// Calculating the hash can take time, ensure it is not on the EDT
+			Runnable r = () -> datasetHashcodeMap.put(d.getId(), d.hashCode());
+
+			ThreadManager.getInstance().submit(r);
+
 		}
 	}
 

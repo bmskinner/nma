@@ -206,7 +206,7 @@ public abstract class DetailPanel extends JPanel
 	}
 
 	@Override
-	public synchronized void update() {
+	public void update() {
 
 		Runnable r = () -> {
 			setUpdating(true);
@@ -218,7 +218,7 @@ public abstract class DetailPanel extends JPanel
 	}
 
 	@Override
-	public synchronized void update(final List<IAnalysisDataset> list) {
+	public void update(final List<IAnalysisDataset> list) {
 
 		Runnable r = () -> {
 			setUpdating(true);

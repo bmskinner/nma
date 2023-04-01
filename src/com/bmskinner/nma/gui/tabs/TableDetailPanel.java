@@ -58,13 +58,27 @@ public abstract class TableDetailPanel extends DetailPanel {
 		if (cache.has(options)) {
 			TableModel model = cache.get(options);
 
-			if (options.getTarget() != null) {
-				options.getTarget().setModel(model);
-				setRenderers(options);
+			JTable target = options.getTarget();
 
-				if (options.getTarget() instanceof ExportableTable et) {
-					EventQueue.invokeLater(et::updateRowHeights);
-				}
+			if (target != null) {
+
+				// Do not invoke on the EDT
+				Runnable r = ()->{
+					target.setModel(model);
+					setRenderers(options);
+					if (target instanceof ExportableTable et) {
+						et.updateRowHeights();
+					}
+				};
+				
+				EventQueue.invokeLater(r);
+
+//				options.getTarget().setModel(model);
+//				setRenderers(options);
+//
+//				if (options.getTarget() instanceof ExportableTable et) {
+//					EventQueue.invokeLater(et::updateRowHeights);
+//				}
 			}
 
 		} else { // No cached chart

@@ -71,9 +71,9 @@ import com.bmskinner.nma.gui.events.UIController;
 import com.bmskinner.nma.io.ImageImporter;
 import com.bmskinner.nma.logging.Loggable;
 import com.bmskinner.nma.utility.FileUtils;
-import com.bmskinner.nma.visualisation.image.ImageFilterer;
 import com.bmskinner.nma.visualisation.image.ImageAnnotator;
 import com.bmskinner.nma.visualisation.image.ImageConverter;
+import com.bmskinner.nma.visualisation.image.ImageFilterer;
 
 import ij.process.ImageProcessor;
 
@@ -297,20 +297,26 @@ public class ImagesTabPanel extends DetailPanel implements FilePathUpdatedListen
 		Comparator<File> defaultComp = (f1, f2) -> f1.compareTo(f2);
 
 		for (File parent : parents) {
-			List<File> inParent = files.stream().filter(f -> f.getParentFile().equals(parent))
-					.collect(Collectors.toList());
 
-			try {
-				inParent.sort(comp);
-			} catch (IllegalArgumentException e) { // not the expected format
-				inParent.sort(defaultComp);
-			}
-			ImageTreeNode parentNode = new ImageTreeNode(parent, dataset);
+				List<File> inParent = files.stream()
+						.filter(f -> f.getParentFile() != null && f.getParentFile().equals(parent))
+						.collect(Collectors.toList());
 
-			for (File f : inParent)
-				parentNode.add(new ImageTreeNode(f, dataset));
+				try {
+					inParent.sort(comp);
+				} catch (IllegalArgumentException e) { // not the expected format
+					inParent.sort(defaultComp);
+				}
 
-			datasetRoot.add(parentNode);
+				if (parent != null) {
+					ImageTreeNode parentNode = new ImageTreeNode(parent, dataset);
+
+					for (File f : inParent)
+						parentNode.add(new ImageTreeNode(f, dataset));
+
+					datasetRoot.add(parentNode);
+				}
+
 		}
 
 		root.add(datasetRoot);
@@ -483,6 +489,8 @@ public class ImagesTabPanel extends DetailPanel implements FilePathUpdatedListen
 
 		public void setFile(File f) {
 			isFile = true;
+			if (f == null)
+				return;
 			name = f.getAbsolutePath();
 
 			// Update each file within the node to the new folder
