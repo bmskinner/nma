@@ -16,7 +16,9 @@
  ******************************************************************************/
 package com.bmskinner.nma.visualisation.datasets;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -305,9 +307,13 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 			}
 
 			if (isShowNuclei) {
-				// add the first n individual nuclei - avoid slowing the UI with too many cells
-				List<Nucleus> nuclei = collection.getNuclei().stream()
-						.limit(MAX_PROFILE_CHART_ITEMS).toList();
+				// add random sample of n individual nuclei - avoid slowing the UI with too many
+				// cells
+				List<Nucleus> nuclei = new ArrayList<>(collection.getNuclei());
+				Collections.shuffle(nuclei);
+				nuclei = collection.getNuclei().stream()
+						.limit(MAX_PROFILE_CHART_ITEMS)
+						.toList();
 				for (int j = 0; j < nuclei.size(); j++) {
 					Nucleus n = nuclei.get(j);
 

@@ -85,6 +85,13 @@ public class ProfileChartFactory extends AbstractChartFactory {
 
 	private static final int DEFAULT_EMPTY_PROFILE_LENGTH = 1000;
 
+	/**
+	 * We can't display thousands of individual nuclei in profile charts; they
+	 * become meaningless. Beyond this number of cells in a dataset, the chart will
+	 * be drawn with the ribbon style median+IQR of multiple datasets
+	 */
+	private static final int MAX_CELLS_FOR_INDIVIDUAL_PROFILE_CHART = 2000;
+
 	public ProfileChartFactory(@NonNull final ChartOptions o) {
 		super(o);
 	}

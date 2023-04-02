@@ -18,6 +18,7 @@ package com.bmskinner.nma.visualisation.datasets;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nma.visualisation.charts.ProfileChartFactory;
 import com.bmskinner.nma.visualisation.options.DisplayOptions;
 
 /**
@@ -42,15 +43,19 @@ public abstract class AbstractDatasetCreator<E extends DisplayOptions> {
 
 	/**
 	 * The maximum number of points from a single dataset that will be displayed in
-	 * a chart
+	 * a scatter chart
 	 */
 	protected static final int MAX_SCATTER_CHART_ITEMS = 2000;
 
 	/**
 	 * The maximum number of nucleus profiles from a single dataset that will be
-	 * displayed in a chart
+	 * displayed in a chart. This is separate from the
+	 * {@link ProfileChartFactory.MAX_CELLS_FOR_INDIVIDUAL_PROFILE_CHART}, which
+	 * controls the switchover between individual nuclei and ribbons. A dataset with
+	 * 1500 cells would display individual nuclei, but only
+	 * {@code MAX_PROFILE_CHART_ITEMS} will be drawn
 	 */
-	protected static final int MAX_PROFILE_CHART_ITEMS = 500;
+	protected static final int MAX_PROFILE_CHART_ITEMS = 150;
 
 	/** Default format for numbers */
 	public static final String DEFAULT_DECIMAL_FORMAT = "#0.00";
