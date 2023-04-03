@@ -75,6 +75,8 @@ import com.bmskinner.nma.io.UpdateChecker;
 import com.bmskinner.nma.logging.Loggable;
 import com.bmskinner.nma.utility.FileUtils;
 
+import ij.plugin.BrowserLauncher;
+
 /**
  * Menu bar for the main window
  * 
@@ -363,7 +365,15 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 				} else {
 					LOGGER.fine(() -> "Opening %s".formatted(mainHelpFile.toURI().toString()));
 					Desktop desktop = Desktop.getDesktop();
-					desktop.browse(mainHelpFile.toURI());
+
+					// Especially on Linux, Desktop::browse may not be available. If so, fall back
+					// to ImageJ's implementation of BrowserLauncher
+					if (desktop.isSupported(Desktop.Action.BROWSE)) {
+						desktop.browse(mainHelpFile.toURI());
+					} else {
+						BrowserLauncher.openURL(mainHelpFile.toURI().toString());
+					}
+
 				}
 
 			} catch (Exception e) {
