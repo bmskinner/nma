@@ -863,27 +863,32 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 
 	@Override
 	public IPoint findOppositeBorder(@NonNull IPoint p) {
-		// Find the point that is closest to 180 degrees across the CoM
+
 		double distToCom = p.getLengthTo(centreOfMass);
 
-		boolean isLeft = p.isLeftOf(centreOfMass);
-		boolean isAbove = p.isAbove(centreOfMass);
+		int mini = 0;
+		double l = Double.MAX_VALUE;
 
-		return Arrays.stream(borderList)
+		for (int i = 0; i < borderList.length; i++) {
+			// Look for the points at which the direct distance between the two points is
+			// closest to the sum of their respective distances to the centre of mass
+			IPoint point = borderList[i];
 
-				// First, we can simplify the search by excluding points that are on the wrong
-				// side of the CoM in x and y
-				.filter(point -> isLeft ? point.isRightOf(centreOfMass) : point.isLeftOf(centreOfMass))
-				.filter(point -> isAbove ? point.isBelow(centreOfMass) : point.isAbove(centreOfMass))
+			double p2p = point.getLengthTo(p);
 
-				// Look for the point at which the direct distance between the two points is
-				// closest to the sum of their respective distances to the centre of mass
-				.filter(point -> point.getLengthTo(p) > distToCom)
-				.min(Comparator
-						.comparing(point -> Math.abs(point.getLengthTo(centreOfMass)
-								+ distToCom
-								- point.getLengthTo(p))))
-				.orElse(p);
+			if (p2p <= distToCom)
+				continue;
+
+			double d = Math.abs(point.getLengthTo(centreOfMass)
+					+ distToCom
+					- p2p);
+
+			if (d < l) {
+				l = d;
+				mini = i;
+			}
+		}
+		return borderList[mini];
 	}
 
 	@Override

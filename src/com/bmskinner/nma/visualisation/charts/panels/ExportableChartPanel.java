@@ -38,9 +38,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Logger;
@@ -59,7 +57,6 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.Range;
 import org.jfree.data.general.DatasetUtils;
 import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
-import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
 import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
@@ -70,11 +67,11 @@ import com.bmskinner.nma.core.DatasetListManager;
 import com.bmskinner.nma.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nma.gui.DefaultInputSupplier;
 import com.bmskinner.nma.gui.events.ChartSetEventListener;
+import com.bmskinner.nma.io.ChartDataExporter;
 import com.bmskinner.nma.io.Io;
 import com.bmskinner.nma.logging.Loggable;
 import com.bmskinner.nma.utility.FileUtils;
 import com.bmskinner.nma.visualisation.ChartImageConverter;
-import com.bmskinner.nma.visualisation.datasets.ExportableBoxAndWhiskerCategoryDataset;
 import com.bmskinner.nma.visualisation.datasets.FloatXYDataset;
 import com.bmskinner.nma.visualisation.datasets.ShellResultDataset;
 
@@ -119,6 +116,7 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 	/** Control if the axis scales should be set to maintain aspect ratio */
 	protected boolean isFixedAspectRatio = false;
 
+	/** Control if the chart can be panned with the mouse */
 	protected boolean isPannable = false;
 
 	/** Used for subclasses with mouse listeners */
@@ -134,7 +132,7 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 	protected static final double DEFAULT_AUTO_RANGE = 10;
 
 	public ExportableChartPanel(@NonNull JFreeChart chart) {
-		super(chart, false);
+		super(chart, true);
 
 		JPopupMenu popup = this.getPopupMenu();
 		popup.addSeparator();
@@ -463,19 +461,19 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 			if (this.getChart().getPlot() instanceof CategoryPlot) {
 				CategoryPlot plot = this.getChart().getCategoryPlot();
 				if (plot.getDataset() instanceof ShellResultDataset)
-					return getShellData();
+					return ChartDataExporter.getShellData(this.getChart());
 				if (plot.getDataset() instanceof BoxAndWhiskerCategoryDataset)
-					return getBoxplotData();
+					return ChartDataExporter.getBoxplotData(this.getChart());
 
 			} else {
 				XYPlot plot = getChart().getXYPlot();
 				if (plot.getDataset() instanceof XYZDataset)
-					return getHeatMapData();
+					return ChartDataExporter.getHeatMapData(this.getChart());
 				if (plot.getDataset() instanceof FloatXYDataset
 						|| plot.getDataset() instanceof DefaultXYDataset)
-					return getXYData();
+					return ChartDataExporter.getXYData(this.getChart());
 				if (plot.getDataset() instanceof HistogramDataset)
-					return getHistogramData();
+					return ChartDataExporter.getHistogramData(this.getChart());
 
 			}
 
@@ -599,189 +597,6 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 		} catch (IOException e) {
 			LOGGER.fine("Unable to export chart");
 		}
-	}
-
-	private String getHeatMapData() throws ClassCastException {
-		XYPlot plot = this.getChart().getXYPlot();
-		StringBuilder builder = new StringBuilder();
-		DecimalFormat df = new DecimalFormat("#0.0000");
-
-		int datasetCount = plot.getDatasetCount();
-		// header
-		builder.append("Dataset");
-		int shells = plot.getDataset(0).getItemCount(0);
-
-		for (int i = 0; i < shells; i++)
-			builder.append(Io.TAB + "Shell_" + i);
-		builder.append(Io.NEWLINE);
-
-		for (int dataset = 0; dataset < datasetCount; dataset++) {
-			XYZDataset ds = (XYZDataset) plot.getDataset(dataset);
-
-			for (int series = 0; series < ds.getSeriesCount(); series++) {
-				String columnName = ds.getSeriesKey(series).toString();
-				builder.append(columnName);
-
-				for (int item = 0; item < ds.getItemCount(series); item++) {
-					double value = ds.getZValue(series, item);
-					builder.append(Io.TAB + df.format(value));
-				}
-				builder.append(Io.NEWLINE);
-			}
-		}
-		return builder.toString();
-	}
-
-	private String getShellData() throws ClassCastException {
-		CategoryPlot plot = this.getChart().getCategoryPlot();
-		StringBuilder builder = new StringBuilder();
-		DecimalFormat df = new DecimalFormat("#0.0000");
-
-		int datasetCount = plot.getDatasetCount();
-		// header
-		builder.append("Dataset");
-		int shells = plot.getDataset(0).getColumnCount();
-		for (int i = 0; i < shells; i++)
-			builder.append(Io.TAB + "Shell_" + i);
-		builder.append(Io.NEWLINE);
-
-		for (int dataset = 0; dataset < datasetCount; dataset++) {
-			ShellResultDataset ds = (ShellResultDataset) plot.getDataset(dataset);
-			for (int row = 0; row < ds.getRowCount(); row++) {
-
-				String datasetKey = ds.getRowKey(row).toString();
-				builder.append(datasetKey);
-				for (int column = 0; column < shells; column++) {
-					double value = ds.getValue(row, column).doubleValue();
-					builder.append(Io.TAB + df.format(value));
-				}
-				builder.append(Io.NEWLINE);
-			}
-		}
-		return builder.toString();
-	}
-
-	// Invoke when dealing with an XY chart
-	private String getXYData() throws ClassCastException {
-		XYPlot plot = this.getChart().getXYPlot();
-		String xAxisName = plot.getDomainAxis().getLabel();
-		String yAxisName = plot.getRangeAxis().getLabel();
-
-		StringBuilder builder = new StringBuilder(
-				"Series" + Io.TAB + xAxisName + Io.TAB + yAxisName + Io.NEWLINE);
-		DecimalFormat df = new DecimalFormat("#0.00");
-
-		for (int dataset = 0; dataset < plot.getDatasetCount(); dataset++) {
-
-			XYDataset ds = plot.getDataset(dataset);
-
-			for (int series = 0; series < ds.getSeriesCount(); series++) {
-
-				String seriesName = ds.getSeriesKey(series).toString();
-
-				for (int i = 0; i < ds.getItemCount(series); i++) {
-					double x = ds.getXValue(series, i);
-					double y = ds.getYValue(series, i);
-
-					builder.append(seriesName + Io.TAB + df.format(x) + Io.TAB + df.format(y)
-							+ Io.NEWLINE);
-				}
-			}
-		}
-
-		return builder.toString();
-	}
-
-	private String getBoxplotData() throws ClassCastException {
-
-		CategoryPlot plot = this.getChart().getCategoryPlot();
-		StringBuilder builder = new StringBuilder();
-		DecimalFormat df = new DecimalFormat("#0.000");
-
-		builder.append("Row_name" + Io.TAB + "Column_name" + Io.TAB + "ValueType" + Io.TAB + "Value"
-				+ Io.NEWLINE);
-
-		for (int dataset = 0; dataset < plot.getDatasetCount(); dataset++) {
-
-			DefaultBoxAndWhiskerCategoryDataset ds = (DefaultBoxAndWhiskerCategoryDataset) plot
-					.getDataset(dataset);
-
-			if (ds instanceof ExportableBoxAndWhiskerCategoryDataset) {
-
-				for (int column = 0; column < ds.getColumnCount(); column++) {
-
-					String columnName = ds.getColumnKey(column).toString();
-					for (int row = 0; row < ds.getRowCount(); row++) {
-						String rowName = ds.getRowKey(row).toString();
-						Number number = ds.getValue(row, column);
-						double value = Double.NaN;
-						if (number != null)
-							value = number.doubleValue();
-
-						List rawData = ((ExportableBoxAndWhiskerCategoryDataset) ds)
-								.getRawData(rowName, columnName);
-						if (rawData == null)
-							continue;
-
-						Collections.sort(rawData);
-
-						builder.append(rowName + Io.TAB + columnName + Io.TAB + "Min_value" + Io.TAB
-								+ df.format(rawData.get(0)) + Io.NEWLINE);
-						builder.append(rowName + Io.TAB + columnName + Io.TAB + "Lower_whisker"
-								+ Io.TAB
-								+ df.format(ds.getMinRegularValue(row, column)) + Io.NEWLINE);
-						builder.append(
-								rowName + Io.TAB + columnName + Io.TAB + "Lower_quartile" + Io.TAB
-										+ df.format(ds.getQ1Value(row, column)) + Io.NEWLINE);
-						builder.append(rowName + Io.TAB + columnName + Io.TAB + "Median" + Io.TAB
-								+ df.format(value)
-								+ Io.NEWLINE);
-						builder.append(
-								rowName + Io.TAB + columnName + Io.TAB + "Upper_quartile" + Io.TAB
-										+ df.format(ds.getQ3Value(row, column)) + Io.NEWLINE);
-						builder.append(rowName + Io.TAB + columnName + Io.TAB + "Upper_whisker"
-								+ Io.TAB
-								+ df.format(ds.getMaxRegularValue(row, column)) + Io.NEWLINE);
-						builder.append(rowName + Io.TAB + columnName + Io.TAB + "Max_value" + Io.TAB
-								+ df.format(rawData.get(rawData.size() - 1)) + Io.NEWLINE);
-
-						for (Object o : rawData)
-							builder.append(rowName + Io.TAB + columnName + Io.TAB + "Raw_value"
-									+ Io.TAB + o.toString()
-									+ Io.NEWLINE);
-
-					}
-				}
-			}
-		}
-		return builder.toString();
-	}
-
-	private String getHistogramData() throws ClassCastException {
-
-		XYPlot plot = this.getChart().getXYPlot();
-		DecimalFormat df = new DecimalFormat("#0.00");
-		StringBuilder builder = new StringBuilder();
-
-		for (int dataset = 0; dataset < plot.getDatasetCount(); dataset++) {
-
-			HistogramDataset ds = (HistogramDataset) plot.getDataset(dataset);
-
-			for (int series = 0; series < ds.getSeriesCount(); series++) {
-
-				String seriesName = ds.getSeriesKey(series).toString();
-				builder.append(seriesName + ":" + Io.NEWLINE);
-
-				for (int i = 0; i < ds.getItemCount(series); i++) {
-
-					double x = ds.getXValue(series, i);
-					double y = ds.getYValue(series, i);
-					builder.append(Io.TAB + df.format(x) + Io.TAB + df.format(y) + Io.NEWLINE);
-				}
-				builder.append(Io.NEWLINE);
-			}
-		}
-		return builder.toString();
 	}
 
 	/**
