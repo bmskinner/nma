@@ -205,7 +205,7 @@ You can choose whether or not to use the dimensionality reduction values for clu
 If dimensionality reduction was applied, after clustering is complete, the first two dimensions can be viewed in a scatter plot by clicking the `View plot` button in the cluster parameters table. This will also display the consensus nuclei of each cluster, and overlay a random subset of nucleus images to help you see what actually separates your clusters.
 
 ```{r, out.width="80%", out.height="80%", fig.show='hold', fig.align='center', echo=F}
-knitr::include_graphics("img/Clusters_UMAP.PNG")
+knitr::include_graphics("img/Clusters_UMAP.png")
 ```
 
 #### Clustering method
