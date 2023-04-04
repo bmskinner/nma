@@ -138,6 +138,11 @@ public class Console extends JPanel implements ActionListener {
 						.userActionEventReceived(new UserActionEvent(this,
 								UserActionEvent.EXPORT_KEYPOINTS,
 								DatasetListManager.getInstance().getSelectedDatasets())));
+
+		runnableCommands.put(HELP_CMD, () -> {
+			for (String s : runnableCommands.keySet())
+				logPanel.println(s);
+		});
 	}
 
 	/**
