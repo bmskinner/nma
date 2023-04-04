@@ -32,11 +32,13 @@ import java.awt.event.MouseWheelListener;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -61,13 +63,12 @@ import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYZDataset;
-import org.jfree.svg.SVGUtils;
 
 import com.bmskinner.nma.core.DatasetListManager;
 import com.bmskinner.nma.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nma.gui.DefaultInputSupplier;
 import com.bmskinner.nma.gui.events.ChartSetEventListener;
-import com.bmskinner.nma.io.ChartDataExporter;
+import com.bmskinner.nma.io.ChartDataExtracter;
 import com.bmskinner.nma.io.Io;
 import com.bmskinner.nma.logging.Loggable;
 import com.bmskinner.nma.utility.FileUtils;
@@ -99,6 +100,7 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 
 	private static final int SINGLE_COL_WIDTH_MM = 85;
 	private static final int DOUBLE_COL_WIDTH_MM = 170;
+	private static final int MAX_A4_HEIGHT_MM = 220;
 
 	private static final String EXPORT_LBL = "Export data";
 
@@ -147,33 +149,48 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 		exportItem.setEnabled(true);
 		popup.add(exportItem);
 
+		// Export in the dimensions on screen
 		JMenuItem exportPNGItem = new JMenuItem(EXPORT_PNG);
 		exportPNGItem
 				.addActionListener(
-						e -> exportPNG(
-								ChartImageConverter.pixelsToMM((int) (getWidth() / DPI_SCALE),
-										300)));
+						e -> {
+
+							int w = ChartImageConverter.pixelsToMM((int) (getWidth() / DPI_SCALE),
+									300);
+							int h = Math.min(calcHeightFromWidth(w), MAX_A4_HEIGHT_MM);
+							exportPNG(w, h);
+						});
 		exportPNGItem.setEnabled(true);
 
+		// Export scaled to one panel
 		JMenuItem exportSinglePNGItem = new JMenuItem(EXPORT_SINGLE_PANEL_PNG);
-		exportSinglePNGItem.addActionListener(e -> exportPNG(SINGLE_COL_WIDTH_MM));
+		exportSinglePNGItem
+				.addActionListener(e -> exportPNG(SINGLE_COL_WIDTH_MM, SINGLE_COL_WIDTH_MM));
 		exportSinglePNGItem.setEnabled(true);
 
+		// Export scaled to two panels
 		JMenuItem exportDoublePNGItem = new JMenuItem(EXPORT_DOUBLE_PANEL_PNG);
-		exportDoublePNGItem.addActionListener(e -> exportPNG(DOUBLE_COL_WIDTH_MM));
+		exportDoublePNGItem
+				.addActionListener(e -> exportPNG(DOUBLE_COL_WIDTH_MM, SINGLE_COL_WIDTH_MM));
 		exportDoublePNGItem.setEnabled(true);
 
 		JMenuItem exportSvgItem = new JMenuItem(EXPORT_SVG);
-		exportSvgItem.addActionListener(e -> exportSVG(
-				ChartImageConverter.pixelsToMM((int) (getWidth() / DPI_SCALE), 300)));
+		exportSvgItem.addActionListener(e -> {
+			int w = ChartImageConverter.pixelsToMM((int) (getWidth() / DPI_SCALE),
+					300);
+			int h = Math.min(calcHeightFromWidth(w), MAX_A4_HEIGHT_MM);
+			exportSVG(w, h);
+		});
 		exportSvgItem.setEnabled(true);
 
 		JMenuItem exportSingleSvgItem = new JMenuItem(EXPORT_SINGLE_PANEL_SVG);
-		exportSingleSvgItem.addActionListener(e -> exportSVG(SINGLE_COL_WIDTH_MM));
+		exportSingleSvgItem
+				.addActionListener(e -> exportSVG(SINGLE_COL_WIDTH_MM, SINGLE_COL_WIDTH_MM));
 		exportSingleSvgItem.setEnabled(true);
 
 		JMenuItem exportDoubleSvgItem = new JMenuItem(EXPORT_DOUBLE_PANEL_SVG);
-		exportDoubleSvgItem.addActionListener(e -> exportSVG(DOUBLE_COL_WIDTH_MM));
+		exportDoubleSvgItem
+				.addActionListener(e -> exportSVG(DOUBLE_COL_WIDTH_MM, SINGLE_COL_WIDTH_MM));
 		exportDoubleSvgItem.setEnabled(true);
 
 		// Put the SVG export with the other save as items
@@ -461,19 +478,19 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 			if (this.getChart().getPlot() instanceof CategoryPlot) {
 				CategoryPlot plot = this.getChart().getCategoryPlot();
 				if (plot.getDataset() instanceof ShellResultDataset)
-					return ChartDataExporter.getShellData(this.getChart());
+					return ChartDataExtracter.getShellData(this.getChart());
 				if (plot.getDataset() instanceof BoxAndWhiskerCategoryDataset)
-					return ChartDataExporter.getBoxplotData(this.getChart());
+					return ChartDataExtracter.getBoxplotData(this.getChart());
 
 			} else {
 				XYPlot plot = getChart().getXYPlot();
 				if (plot.getDataset() instanceof XYZDataset)
-					return ChartDataExporter.getHeatMapData(this.getChart());
+					return ChartDataExtracter.getHeatMapData(this.getChart());
 				if (plot.getDataset() instanceof FloatXYDataset
 						|| plot.getDataset() instanceof DefaultXYDataset)
-					return ChartDataExporter.getXYData(this.getChart());
+					return ChartDataExtracter.getXYData(this.getChart());
 				if (plot.getDataset() instanceof HistogramDataset)
-					return ChartDataExporter.getHistogramData(this.getChart());
+					return ChartDataExtracter.getHistogramData(this.getChart());
 
 			}
 
@@ -532,9 +549,7 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 	 * 
 	 * @param w the width of the output in mm
 	 */
-	private void exportPNG(int w) {
-
-		int h = calcHeightFromWidth(w);
+	private void exportPNG(int w, int h) {
 
 		try {
 			File file = new DefaultInputSupplier().requestFileSave(
@@ -548,7 +563,6 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 				return;
 
 			try (OutputStream os = new FileOutputStream(file)) {
-//				LOGGER.fine("Creating image %smm by %smm".formatted(w, h));
 				BufferedImage bi = ChartImageConverter.createPNG(getChart(), w, h,
 						DEFAULT_EXPORT_DPI);
 
@@ -571,10 +585,9 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 	 * Export the chart in this panel as SVG of the given dimensions
 	 * 
 	 * @param w the width of the output in mm
+	 * @param h the height of the output in mm
 	 */
-	private void exportSVG(int w) {
-
-		int h = calcHeightFromWidth(w);
+	private void exportSVG(int w, int h) {
 
 		try {
 			File file = new DefaultInputSupplier().requestFileSave(
@@ -589,13 +602,40 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 
 			String svg = ChartImageConverter.createSVG(getChart(), w, h, DEFAULT_EXPORT_DPI);
 
-			SVGUtils.writeToSVG(file, svg);
+			writeToSVG(file, svg);
 			LOGGER.info("Chart saved as '" + file.getName() + "'");
 
 		} catch (RequestCancelledException e) {
 			// User cancelled, no action
 		} catch (IOException e) {
 			LOGGER.fine("Unable to export chart");
+		}
+	}
+
+	/**
+	 * Write the given svg to file. Modified from SVGUtils to avoid adding a second
+	 * XML header
+	 * 
+	 * @param file
+	 * @param svgElement
+	 * @throws IOException
+	 */
+	private static void writeToSVG(File file, String svgElement)
+			throws IOException {
+		BufferedWriter writer = null;
+		try (OutputStream os = new FileOutputStream(file);
+				OutputStreamWriter osw = new OutputStreamWriter(os, "UTF-8");) {
+			writer = new BufferedWriter(osw);
+			writer.write(svgElement + "\n");
+			writer.flush();
+		} finally {
+			try {
+				if (writer != null) {
+					writer.close();
+				}
+			} catch (IOException ex) {
+				throw new RuntimeException(ex);
+			}
 		}
 	}
 

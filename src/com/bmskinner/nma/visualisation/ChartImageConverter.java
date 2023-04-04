@@ -55,8 +55,6 @@ public class ChartImageConverter {
 
 		String svg = ChartImageConverter.createSVG(chart, wmm, hmm, dpi);
 
-//		LOGGER.fine("Converted width %smm to %s pixels".formatted(wmm, w_px));
-
 		return ChartImageConverter.convertSVGToPNG(svg, wmm, dpi);
 	}
 
@@ -121,11 +119,6 @@ public class ChartImageConverter {
 		// Adjust for scaling of chart elements
 		int w = (int) (w_px * dpiScale);
 		int h = (int) (h_px * dpiScale);
-
-//		LOGGER.fine("Desired dimensions " + wmm + "mm x " + hmm + "mm");
-//		LOGGER.fine("Pixel dimensions   " + w_px + "px x " + h_px + "px");
-//		LOGGER.fine("SCreen DPI: %s, Desired DPI: %s, DPI scale: %s".formatted(screenDpi, dpi, dpiScale));
-//		LOGGER.fine("Scaled dimensions  " + w + "px x " + h + "px");
 
 		SVGGraphics2D g2 = new SVGGraphics2D(w, h, SVGUnits.PX);
 

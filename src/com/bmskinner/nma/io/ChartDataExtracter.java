@@ -15,9 +15,9 @@ import org.jfree.data.xy.XYZDataset;
 import com.bmskinner.nma.visualisation.datasets.ExportableBoxAndWhiskerCategoryDataset;
 import com.bmskinner.nma.visualisation.datasets.ShellResultDataset;
 
-public class ChartDataExporter {
+public class ChartDataExtracter {
 
-	private ChartDataExporter() {
+	private ChartDataExtracter() {
 		// static use only
 	}
 
