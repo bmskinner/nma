@@ -54,6 +54,7 @@ import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.generic.FloatPoint;
 import com.bmskinner.nma.components.generic.IPoint;
+import com.bmskinner.nma.components.measure.MeasurementScale;
 import com.bmskinner.nma.components.profiles.IProfileSegment;
 import com.bmskinner.nma.components.profiles.Landmark;
 import com.bmskinner.nma.components.profiles.MissingLandmarkException;
@@ -101,8 +102,10 @@ public class CellOutlinePanel extends AbstractCellDetailPanel
 	private GenericCheckboxPanel warpMeshPanel = new GenericCheckboxPanel(
 			"Warp image to consensus shape");
 
+	/** Overlay to show landmark names */
 	private ShapeOverlay lmOverlay = new ShapeOverlay();
 
+	/** Overlay to show highlighted border by mouse position */
 	private EllipticalOverlay bOverlay = new EllipticalOverlay(new EllipticalOverlayObject(
 			Double.NaN, 2, Double.NaN, 2,
 			ChartComponents.MARKER_STROKE, Color.decode("#0066CC"), Color.decode("#0066CC")));
@@ -191,6 +194,7 @@ public class CellOutlinePanel extends AbstractCellDetailPanel
 				.setCell(cell)
 				.setDatasets(activeDataset())
 				.addCellularComponent(component)
+				.setScale(MeasurementScale.PIXELS) // we are showing the image, no sense scaling
 				.setRotationMode(rm)
 				.setShowWarp(warpMeshPanel.isSelected())
 				.setShowXAxis(false)
