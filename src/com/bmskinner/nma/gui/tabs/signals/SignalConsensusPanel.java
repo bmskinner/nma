@@ -36,7 +36,6 @@ import com.bmskinner.nma.visualisation.options.ChartOptionsBuilder;
 public class SignalConsensusPanel extends ChartDetailPanel
 		implements ChartSetEventListener, ConsensusUpdatedListener, NuclearSignalUpdatedListener {
 
-
 	private static final String PANEL_TITLE_LBL = "Signal consensus";
 
 	/** Consensus nucleus with signals overlaid */
@@ -89,7 +88,6 @@ public class SignalConsensusPanel extends ChartDetailPanel
 		// this allows a checkbox panel to be added to the JPanel later
 		chartPanel = new ConsensusNucleusChartPanel(chart);
 		panel.add(chartPanel, BorderLayout.CENTER);
-		chartPanel.setFillConsensus(false);
 
 		chartPanel.addChartMouseListener(
 				new ImageThumbnailGenerator(chartPanel));
@@ -111,8 +109,9 @@ public class SignalConsensusPanel extends ChartDetailPanel
 
 		mergeButton = new JButton(Labels.Signals.MERGE_BTN_LBL);
 		mergeButton.addActionListener(
-				e -> UserActionController.getInstance().userActionEventReceived(new UserActionEvent(this,
-						UserActionEvent.MERGE_SIGNALS_ACTION, activeDataset())));
+				e -> UserActionController.getInstance()
+						.userActionEventReceived(new UserActionEvent(this,
+								UserActionEvent.MERGE_SIGNALS_ACTION, activeDataset())));
 		mergeButton.setEnabled(false);
 		panel.add(mergeButton);
 
@@ -202,6 +201,7 @@ public class SignalConsensusPanel extends ChartDetailPanel
 				.setShowWarp(false)
 				.setScale(GlobalOptions.getInstance().getScale())
 				.setTarget(chartPanel)
+				.setFillConsensus(false)
 				.setShowXAxis(false)
 				.setShowYAxis(false)
 				.setShowAnnotations(isShowRadii).build();

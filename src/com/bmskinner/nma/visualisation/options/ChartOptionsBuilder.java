@@ -67,7 +67,7 @@ public class ChartOptionsBuilder {
 	}
 
 	public ChartOptionsBuilder setDatasets(IAnalysisDataset dataset) {
-		List<IAnalysisDataset> list = new ArrayList<IAnalysisDataset>();
+		List<IAnalysisDataset> list = new ArrayList<>();
 		list.add(dataset);
 		return this.setDatasets(list);
 	}
@@ -144,6 +144,11 @@ public class ChartOptionsBuilder {
 
 	public ChartOptionsBuilder setProfileType(ProfileType type) {
 		options.setType(type);
+		return this;
+	}
+
+	public ChartOptionsBuilder setFillConsensus(boolean b) {
+		options.setFillConsensus(b);
 		return this;
 	}
 

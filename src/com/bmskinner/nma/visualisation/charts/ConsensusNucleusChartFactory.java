@@ -19,12 +19,14 @@ package com.bmskinner.nma.visualisation.charts;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Paint;
+import java.awt.Shape;
 import java.util.List;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.annotations.XYShapeAnnotation;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
@@ -454,10 +456,10 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 
 			for (int d = 0; d < ls.size(); d++) {
 				XYLineAndShapeRenderer rend = new XYLineAndShapeRenderer();
+				Color colour = options.getDatasets().get(d).getDatasetColour()
+						.orElse(ColourSelecter.getColor(d));
 				for (int i = 0; i < plot.getSeriesCount(); i++) {
 
-					Paint colour = options.getDatasets().get(d).getDatasetColour()
-							.orElse(ColourSelecter.getColor(d));
 					rend.setSeriesLinesVisible(i, true);
 					rend.setSeriesShapesVisible(i, false);
 					rend.setSeriesVisibleInLegend(i, false);
@@ -465,7 +467,20 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 					rend.setSeriesPaint(i, colour);
 					plot.setRenderer(d, rend);
 				}
+
+				// Create shape annotations to fill the consensus nuclei if needed
+				if (options.isFillConsensus()) {
+					Shape s = options.getDatasets().get(d).getCollection().getConsensus()
+							.toShape(options.getScale());
+
+					Color transparent = ColourSelecter.makeTransparent(colour, 128);
+
+					plot.addAnnotation(
+							new XYShapeAnnotation(s, ChartComponents.MARKER_STROKE, null,
+									transparent));
+				}
 			}
+
 			return chart;
 
 		} catch (ChartDatasetCreationException | MissingLandmarkException

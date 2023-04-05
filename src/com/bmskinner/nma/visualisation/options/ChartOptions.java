@@ -127,6 +127,13 @@ public interface ChartOptions extends DisplayOptions {
 	boolean isShowAnnotations();
 
 	/**
+	 * If true, fill consensus nuclei
+	 * 
+	 * @return
+	 */
+	boolean isFillConsensus();
+
+	/**
 	 * Get the profile type from a profile chart
 	 * 
 	 * @return

@@ -31,7 +31,6 @@ public class SignalWarpingChartPanel extends ChartDetailPanel
 
 		JFreeChart chart = OutlineChartFactory.createEmptyChart();
 		chartPanel = new ConsensusNucleusChartPanel(chart);
-		chartPanel.setFillConsensus(false);
 		add(chartPanel, BorderLayout.CENTER);
 	}
 
@@ -84,8 +83,10 @@ public class SignalWarpingChartPanel extends ChartDetailPanel
 					.setShowXAxis(false)
 					.setShowYAxis(false)
 					.setShowBounds(false)
+					.setFillConsensus(false)
 					.setTarget(chartPanel)
-					.setWarpedSignals(images).build();
+					.setWarpedSignals(images)
+					.build();
 			setChart(options);
 		}
 	}
@@ -100,8 +101,10 @@ public class SignalWarpingChartPanel extends ChartDetailPanel
 					.setShowXAxis(false)
 					.setShowYAxis(false)
 					.setShowBounds(false)
+					.setFillConsensus(false)
 					.setTarget(chartPanel)
-					.setWarpedSignals(images).build();
+					.setWarpedSignals(images)
+					.build();
 
 			this.cache.clear(images);
 			setChart(options);

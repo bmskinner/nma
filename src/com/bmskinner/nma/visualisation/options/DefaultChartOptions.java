@@ -57,6 +57,8 @@ public class DefaultChartOptions extends AbstractOptions implements ChartOptions
 										// cell
 										// outlines
 
+	private boolean isFillConsensus = true;
+
 	// Options for nucleus mesh creation
 	private boolean showMesh = false;
 	private boolean showMeshVertices = false;
@@ -126,6 +128,15 @@ public class DefaultChartOptions extends AbstractOptions implements ChartOptions
 
 	public void setAlignment(ProfileAlignment alignment) {
 		this.alignment = alignment;
+	}
+
+	@Override
+	public boolean isFillConsensus() {
+		return this.isFillConsensus;
+	}
+
+	public void setFillConsensus(boolean b) {
+		isFillConsensus = b;
 	}
 
 	@Override
@@ -388,18 +399,28 @@ public class DefaultChartOptions extends AbstractOptions implements ChartOptions
 	@Override
 	public String toString() {
 		String newline = System.getProperty("line.separator");
-		return new StringBuilder("Options:" + newline).append("Datasets: " + this.datasetCount() + newline)
-				.append("Cell: " + this.hasCell() + newline).append("Normalised: " + normalised + newline)
-				.append("Alignment: " + alignment + newline).append("Hide profiles: " + hideProfiles + newline)
-				.append("Show points: " + showPoints + newline).append("Show lines: " + showLines + newline)
-				.append("Show IQR: " + isShowIQR + newline).append("Show annotations: " + showAnnotations + newline)
-				.append("Show markers: " + showMarkers + newline).append("Show mesh: " + showMesh + newline)
-				.append("Show x axis: " + showXAxis + newline).append("Show y axis: " + showYAxis + newline)
-				.append("Invert x axis: " + invertXAxis + newline).append("Invert y axis: " + invertYAxis + newline)
+		return new StringBuilder("Options:" + newline)
+				.append("Datasets: " + this.datasetCount() + newline)
+				.append("Cell: " + this.hasCell() + newline)
+				.append("Normalised: " + normalised + newline)
+				.append("Alignment: " + alignment + newline)
+				.append("Hide profiles: " + hideProfiles + newline)
+				.append("Show points: " + showPoints + newline)
+				.append("Show lines: " + showLines + newline)
+				.append("Show IQR: " + isShowIQR + newline)
+				.append("Show annotations: " + showAnnotations + newline)
+				.append("Show markers: " + showMarkers + newline)
+				.append("Show mesh: " + showMesh + newline)
+				.append("Show x axis: " + showXAxis + newline)
+				.append("Show y axis: " + showYAxis + newline)
+				.append("Invert x axis: " + invertXAxis + newline)
+				.append("Invert y axis: " + invertYAxis + newline)
 				.append("Tag: " + tag + newline).append("Type: " + type + newline)
 				.append("Show border tags: " + showBorderTags + newline)
-				.append("Show signals: " + showSignals + newline).append("Signal group: " + signalGroup + newline)
-				.append("Rotate mode: " + rotateMode + newline).append("Use density: " + useDensity + newline)
+				.append("Show signals: " + showSignals + newline)
+				.append("Signal group: " + signalGroup + newline)
+				.append("Rotate mode: " + rotateMode + newline)
+				.append("Use density: " + useDensity + newline)
 				.append("Show warp: " + showWarp + newline).toString();
 	}
 
@@ -467,7 +488,8 @@ public class DefaultChartOptions extends AbstractOptions implements ChartOptions
 		DefaultChartOptions other = (DefaultChartOptions) obj;
 		if (alignment != other.alignment)
 			return false;
-		if (Double.doubleToLongBits(modalityPosition) != Double.doubleToLongBits(other.modalityPosition))
+		if (Double.doubleToLongBits(modalityPosition) != Double
+				.doubleToLongBits(other.modalityPosition))
 			return false;
 
 		if (normalised != other.normalised)

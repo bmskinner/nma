@@ -55,8 +55,6 @@ public class ConsensusNucleusPanel extends ChartDetailPanel
 		implements ChangeListener, ConsensusUpdatedListener,
 		ScaleUpdatedListener, SwatchUpdatedListener, ProfilesUpdatedListener {
 
-
-
 	private static final String MESH_FACES_LBL = "Mesh faces";
 	private static final String MESH_EDGES_LBL = "Mesh edges";
 	private static final String MESH_VERTICES_LBL = "Mesh vertices";
@@ -318,6 +316,7 @@ public class ConsensusNucleusPanel extends ChartDetailPanel
 				.setShowMeshFaces(showMeshFacesBox.isSelected())
 				.setStraightenMesh(false)
 				.setShowAnnotations(false)
+				.setFillConsensus(GlobalOptions.getInstance().isFillConsensus())
 				.setShowXAxis(false)
 				.setShowYAxis(false)
 				.setTarget(consensusChartPanel).build();
@@ -342,9 +341,11 @@ public class ConsensusNucleusPanel extends ChartDetailPanel
 
 		ChartOptions options = new ChartOptionsBuilder()
 				.setDatasets(getDatasets())
+				.setFillConsensus(GlobalOptions.getInstance().isFillConsensus())
 				.setScale(GlobalOptions.getInstance().getScale())
 				.setSwatch(GlobalOptions.getInstance().getSwatch())
-				.setTarget(consensusChartPanel).build();
+				.setTarget(consensusChartPanel)
+				.build();
 
 		setChart(options);
 

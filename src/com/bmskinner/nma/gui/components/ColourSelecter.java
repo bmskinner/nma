@@ -224,6 +224,17 @@ public class ColourSelecter {
 	}
 
 	/**
+	 * Make the given colour transparent
+	 * 
+	 * @param c
+	 * @param alpha
+	 * @return
+	 */
+	public static Color makeTransparent(Color c, int alpha) {
+		return new Color(c.getRed(), c.getGreen(), c.getBlue(), alpha);
+	}
+
+	/**
 	 * Get a transparent version of a paint
 	 * 
 	 * @param c            the input colour

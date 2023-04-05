@@ -16,9 +16,6 @@
  ******************************************************************************/
 package com.bmskinner.nma.visualisation.charts.panels;
 
-import java.awt.Color;
-import java.awt.Paint;
-
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
@@ -26,20 +23,12 @@ import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.plot.XYPlot;
 
-import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
-import com.bmskinner.nma.components.measure.MeasurementScale;
 import com.bmskinner.nma.core.DatasetListManager;
-import com.bmskinner.nma.core.GlobalOptions;
 import com.bmskinner.nma.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nma.gui.DefaultInputSupplier;
-import com.bmskinner.nma.gui.components.ColourSelecter;
 import com.bmskinner.nma.gui.events.UserActionController;
-import com.bmskinner.nma.visualisation.charts.overlays.ShapeOverlay;
-import com.bmskinner.nma.visualisation.charts.overlays.ShapeOverlayObject;
-import com.bmskinner.nma.visualisation.datasets.ComponentOutlineDataset;
 
 @SuppressWarnings("serial")
 public class ConsensusNucleusChartPanel extends ExportableChartPanel {
@@ -58,10 +47,6 @@ public class ConsensusNucleusChartPanel extends ExportableChartPanel {
 
 	public static final String EXPORT_SVG_LBL = "Export SVG";
 
-	private boolean fillConsensus = true;
-
-	private ShapeOverlay consensusOverlay = null;
-
 	private UserActionController uac = UserActionController.getInstance();
 
 	public ConsensusNucleusChartPanel(JFreeChart chart) {
@@ -71,76 +56,6 @@ public class ConsensusNucleusChartPanel extends ExportableChartPanel {
 		this.setPopupMenu(popup);
 		this.validate();
 		this.setFixedAspectRatio(true);
-		consensusOverlay = new ShapeOverlay();
-		this.addOverlay(consensusOverlay);
-
-	}
-
-	/**
-	 * Provide an override to the GlobalOptions for this panel. If this is false,
-	 * the consensus will never be filled. If this is true, the consensus will be
-	 * filled then the GlobalOptions is also true
-	 * 
-	 * @return
-	 */
-	public void setFillConsensus(boolean b) {
-		fillConsensus = b;
-	}
-
-	/**
-	 * Check if this panel is overriding the global options
-	 * 
-	 * @return
-	 */
-	public boolean isFillConsensus() {
-		return fillConsensus;
-	}
-
-	@Override
-	public synchronized void setChart(JFreeChart chart) {
-
-		super.setChart(chart);
-
-		MeasurementScale scale = GlobalOptions.getInstance().getScale();
-
-		// Clear the overlay
-		if (consensusOverlay != null) {
-			consensusOverlay.clearShapes();
-
-			if (!GlobalOptions.getInstance().isFillConsensus())
-				return;
-
-			// Per panel override in case this panel should always be outline only
-			if (!fillConsensus)
-				return;
-
-			if (!(chart.getPlot() instanceof XYPlot))
-				return;
-
-			if (!(chart.getXYPlot().getDataset() instanceof ComponentOutlineDataset))
-				return;
-
-			int n = chart.getXYPlot().getDatasetCount();
-
-			for (int series = 0; series < n; series++) {
-
-				ComponentOutlineDataset ds = (ComponentOutlineDataset) chart.getXYPlot()
-						.getDataset(series);
-
-				CellularComponent comp = ds.getComponent();
-				Paint c = chart.getXYPlot().getRenderer(series).getSeriesPaint(0);
-
-				if (comp != null) {
-					c = ColourSelecter.getTransparentColour((Color) c, true, 128);
-
-					ShapeOverlayObject o = new ShapeOverlayObject(comp.toShape(scale), null, null,
-							c);
-					consensusOverlay.addShape(o);
-				}
-			}
-
-		}
-
 	}
 
 	private JPopupMenu createPopupMenu() {
