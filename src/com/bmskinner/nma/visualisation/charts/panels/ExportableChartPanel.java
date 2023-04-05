@@ -340,6 +340,9 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 
 	@Override
 	public void restoreAutoBounds() {
+		if (getChart() == null) {
+			return;
+		}
 
 		// Only carry out if the flag is set
 		if (!isFixedAspectRatio) {
@@ -466,7 +469,10 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 
 		} catch (Exception e) {
 			LOGGER.log(Loggable.STACK, "Error restoring auto bounds, falling back to default", e);
-			super.restoreAutoBounds();
+			if (getChart() != null) {
+				super.restoreAutoBounds();
+			}
+
 		}
 
 	}
@@ -893,61 +899,61 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 			}
 		}
 
-	}
+		/**
+		 * Find the ranges that should constrain the minimum zoom level for the loaded
+		 * chart
+		 * 
+		 * @return
+		 */
+		private ChartRanges findMinimumZoomAxisRanges() {
 
-	/**
-	 * Find the ranges that should constrain the minimum zoom level for the loaded
-	 * chart
-	 * 
-	 * @return
-	 */
-	private ChartRanges findMinimumZoomAxisRanges() {
+			XYPlot plot = getChart().getXYPlot();
+			// Find the full data range of all values in the chart
+			Range domainRange = DatasetUtils.findDomainBounds(plot.getDataset());
+			Range rangeRange = DatasetUtils.findRangeBounds(plot.getDataset());
 
-		XYPlot plot = getChart().getXYPlot();
-		// Find the full data range of all values in the chart
-		Range domainRange = DatasetUtils.findDomainBounds(plot.getDataset());
-		Range rangeRange = DatasetUtils.findRangeBounds(plot.getDataset());
+			if (plot.getDatasetCount() > 1) {
 
-		if (plot.getDatasetCount() > 1) {
+				for (int i = 0; i < plot.getDatasetCount(); i++) {
 
-			for (int i = 0; i < plot.getDatasetCount(); i++) {
+					if (plot.getDataset(i) == null) {
+						continue;
+					}
 
-				if (plot.getDataset(i) == null) {
-					continue;
+					domainRange = Range.combine(domainRange,
+							DatasetUtils.findDomainBounds(plot.getDataset(i)));
+					rangeRange = Range.combine(rangeRange,
+							DatasetUtils.findRangeBounds(plot.getDataset(i)));
 				}
-
-				domainRange = Range.combine(domainRange,
-						DatasetUtils.findDomainBounds(plot.getDataset(i)));
-				rangeRange = Range.combine(rangeRange,
-						DatasetUtils.findRangeBounds(plot.getDataset(i)));
 			}
+
+			// The maximum range depends on whether the chart is aspect ratio constrained.
+
+			if (!isFixedAspectRatio) {
+				return new ChartRanges(Range.expand(domainRange, 0.10, 0.10),
+						Range.expand(rangeRange, 0.10, 0.10));
+			}
+
+			double expandedRangeLength = Range.expand(rangeRange, 0.10, 0.10).getLength();
+
+			if (domainRange.getLength() > expandedRangeLength) {
+
+				domainRange = Range.expand(domainRange, 0.10, 0.10);
+				double rangeLength = domainRange.getLength() / getPanelAspectRatio();
+				rangeRange = new Range(rangeRange.getCentralValue() - rangeLength / 2,
+						rangeRange.getCentralValue() + rangeLength / 2);
+
+			} else {
+				rangeRange = Range.expand(rangeRange, 0.10, 0.10);
+				double domainLength = rangeRange.getLength() * getPanelAspectRatio();
+				domainRange = new Range(domainRange.getCentralValue() - domainLength / 2,
+						domainRange.getCentralValue() + domainLength / 2);
+
+			}
+
+			return new ChartRanges(domainRange, rangeRange);
 		}
 
-		// The maximum range depends on whether the chart is aspect ratio constrained.
-
-		if (!isFixedAspectRatio) {
-			return new ChartRanges(Range.expand(domainRange, 0.10, 0.10),
-					Range.expand(rangeRange, 0.10, 0.10));
-		}
-
-		double expandedRangeLength = Range.expand(rangeRange, 0.10, 0.10).getLength();
-
-		if (domainRange.getLength() > expandedRangeLength) {
-
-			domainRange = Range.expand(domainRange, 0.10, 0.10);
-			double rangeLength = domainRange.getLength() / getPanelAspectRatio();
-			rangeRange = new Range(rangeRange.getCentralValue() - rangeLength / 2,
-					rangeRange.getCentralValue() + rangeLength / 2);
-
-		} else {
-			rangeRange = Range.expand(rangeRange, 0.10, 0.10);
-			double domainLength = rangeRange.getLength() * getPanelAspectRatio();
-			domainRange = new Range(domainRange.getCentralValue() - domainLength / 2,
-					domainRange.getCentralValue() + domainLength / 2);
-
-		}
-
-		return new ChartRanges(domainRange, rangeRange);
 	}
 
 	private record ChartRanges(Range xRange, Range yRange) {

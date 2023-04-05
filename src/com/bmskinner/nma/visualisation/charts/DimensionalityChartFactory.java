@@ -48,8 +48,8 @@ import com.bmskinner.nma.visualisation.charts.ScatterChartFactory.ScatterChartRe
 import com.bmskinner.nma.visualisation.datasets.ChartDatasetCreationException;
 import com.bmskinner.nma.visualisation.datasets.ComponentOutlineDataset;
 import com.bmskinner.nma.visualisation.datasets.ScatterChartDatasetCreator;
-import com.bmskinner.nma.visualisation.image.ImageFilterer;
 import com.bmskinner.nma.visualisation.image.ImageAnnotator;
+import com.bmskinner.nma.visualisation.image.ImageFilterer;
 import com.bmskinner.nma.visualisation.options.ChartOptions;
 
 import ij.process.ImageProcessor;
@@ -61,7 +61,8 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 	 */
 	private static final int BATCH_SIZE = 50;
 
-	private static final Logger LOGGER = Logger.getLogger(DimensionalityChartFactory.class.getName());
+	private static final Logger LOGGER = Logger
+			.getLogger(DimensionalityChartFactory.class.getName());
 
 	/**
 	 * Create with options describing the chart to be built
@@ -79,16 +80,21 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 	 * @return
 	 * @throws ChartDatasetCreationException
 	 */
-	public static JFreeChart createDimensionalityReductionChart(IAnalysisDataset d, ColourByType type,
+	public static JFreeChart createDimensionalityReductionChart(IAnalysisDataset d,
+			ColourByType type,
 			IClusterGroup plotGroup, IClusterGroup colourGroup) {
 
 		try {
-			XYDataset ds = ScatterChartDatasetCreator.createDimensionalityReductionScatterDataset(d, type, plotGroup,
+			XYDataset ds = ScatterChartDatasetCreator.createDimensionalityReductionScatterDataset(d,
+					type, plotGroup,
 					colourGroup);
 
-			boolean isUMAP = plotGroup.getOptions().get().getBoolean(HashOptions.CLUSTER_USE_UMAP_KEY);
-			boolean isTsne = plotGroup.getOptions().get().getBoolean(HashOptions.CLUSTER_USE_TSNE_KEY);
-			boolean isPca = plotGroup.getOptions().get().getBoolean(HashOptions.CLUSTER_USE_PCA_KEY);
+			boolean isUMAP = plotGroup.getOptions().get()
+					.getBoolean(HashOptions.CLUSTER_USE_UMAP_KEY);
+			boolean isTsne = plotGroup.getOptions().get()
+					.getBoolean(HashOptions.CLUSTER_USE_TSNE_KEY);
+			boolean isPca = plotGroup.getOptions().get()
+					.getBoolean(HashOptions.CLUSTER_USE_PCA_KEY);
 
 			String prefix = isUMAP ? "UMAP " : isTsne ? "t-SNE " : "PC";
 
@@ -123,7 +129,8 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 			addClusterGroupConsensusNuclei(d, plotGroup, chart);
 
 			return chart;
-		} catch (ChartDatasetCreationException | MissingLandmarkException | ComponentCreationException e) {
+		} catch (ChartDatasetCreationException | MissingLandmarkException
+				| ComponentCreationException e) {
 			return createErrorChart();
 		}
 	}
@@ -135,15 +142,18 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 	 * @param plotGroup
 	 * @param chart
 	 */
-	public static void addAnnotatedNucleusImages(IAnalysisDataset d, IClusterGroup plotGroup, JFreeChart chart,
+	public static void addAnnotatedNucleusImages(IAnalysisDataset d, IClusterGroup plotGroup,
+			JFreeChart chart,
 			int maxImagePerCluster) {
 
 		boolean isUMAP = plotGroup.getOptions().get().getBoolean(HashOptions.CLUSTER_USE_UMAP_KEY);
 		boolean isTsne = plotGroup.getOptions().get().getBoolean(HashOptions.CLUSTER_USE_TSNE_KEY);
 		boolean isPca = plotGroup.getOptions().get().getBoolean(HashOptions.CLUSTER_USE_PCA_KEY);
 
-		String prefix1 = isUMAP ? Measurement.UMAP_1.name().replace(" ", "_") + "_" : isTsne ? "TSNE_1_" : "PC1_";
-		String prefix2 = isUMAP ? Measurement.UMAP_2.name().replace(" ", "_") + "_" : isTsne ? "TSNE_2_" : "PC2_";
+		String prefix1 = isUMAP ? Measurement.UMAP_1.name().replace(" ", "_") + "_"
+				: isTsne ? "TSNE_1_" : "PC1_";
+		String prefix2 = isUMAP ? Measurement.UMAP_2.name().replace(" ", "_") + "_"
+				: isTsne ? "TSNE_2_" : "PC2_";
 
 		// Scale the images to the dimensions of the chart
 		// Large datasets should have smaller nuclei
@@ -161,7 +171,8 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 			List<Nucleus> nList = new ArrayList<>();
 			nList.addAll(childDataset.getCollection().getNuclei());
 
-			final Color colour = childDataset.getDatasetColour().orElse(ColourSelecter.getColor(dataset));
+			final Color colour = childDataset.getDatasetColour()
+					.orElse(ColourSelecter.getColor(dataset));
 
 			// If the number of nuclei is high, there is no point drawing them all
 			// so pick a random subset
@@ -174,8 +185,10 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 
 			// Add in batches to allow the user to see they are loading
 			IntStream.range(0, (batchList.size() + BATCH_SIZE - 1) / BATCH_SIZE)
-					.mapToObj(i -> batchList.subList(i * BATCH_SIZE, Math.min(batchList.size(), (i + 1) * BATCH_SIZE)))
-					.forEach(batch -> processBatch(batch, d, plotGroup, chart, prefix1, prefix2, colour, scale));
+					.mapToObj(i -> batchList.subList(i * BATCH_SIZE,
+							Math.min(batchList.size(), (i + 1) * BATCH_SIZE)))
+					.forEach(batch -> processBatch(batch, d, plotGroup, chart, prefix1, prefix2,
+							colour, scale));
 
 			dataset++;
 		}
@@ -242,8 +255,10 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 	 * @throws ComponentCreationException
 	 * @throws ChartDatasetCreationException
 	 */
-	private static void addClusterGroupConsensusNuclei(IAnalysisDataset d, IClusterGroup plotGroup, JFreeChart chart)
-			throws MissingLandmarkException, ComponentCreationException, ChartDatasetCreationException {
+	private static void addClusterGroupConsensusNuclei(IAnalysisDataset d, IClusterGroup plotGroup,
+			JFreeChart chart)
+			throws MissingLandmarkException, ComponentCreationException,
+			ChartDatasetCreationException {
 
 		// Choose a sensible scale for the consensus nuclei based on the
 		// range of the plot
@@ -252,6 +267,8 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 		Range yRange = DatasetUtils.findRangeBounds(chart.getXYPlot().getDataset());
 
 		double scale = 1200 / Math.max(xRange.getLength(), yRange.getLength());
+		LOGGER.fine("Domain is " + xRange.getLength() + "; Range is " + yRange.getLength()
+				+ "; Scale is " + scale);
 
 		// Calculate centroids for sorting consenusus nuclei
 		List<ConsensusCentroidLink> leftCentroids = new ArrayList<>();
@@ -302,23 +319,26 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 	 * @throws ComponentCreationException
 	 * @throws ChartDatasetCreationException
 	 */
-	private static void plotConsensus(IAnalysisDataset d, ConsensusCentroidLink ccl, JFreeChart chart, double scale,
+	private static void plotConsensus(IAnalysisDataset d, ConsensusCentroidLink ccl,
+			JFreeChart chart, double scale,
 			int index, double separations)
-			throws MissingLandmarkException, ComponentCreationException, ChartDatasetCreationException {
+			throws MissingLandmarkException, ComponentCreationException,
+			ChartDatasetCreationException {
 
 		if (!d.getChildDataset(ccl.datasetId()).getCollection().hasConsensus())
 			return;
 
 		IAnalysisDataset childDataset = d.getChildDataset(ccl.datasetId());
-		Paint colour = childDataset.hasDatasetColour() ? childDataset.getDatasetColour().get()
-				: ColourSelecter.getColor(ccl.datasetIndex() - 1);
+		Paint colour = childDataset.getDatasetColour()
+				.orElse(ColourSelecter.getColor(ccl.datasetIndex() - 1));
 
 		Range xRange = DatasetUtils.findDomainBounds(chart.getXYPlot().getDataset());
 		Range yRange = DatasetUtils.findRangeBounds(chart.getXYPlot().getDataset());
 
+		// Place the consensus somewhere sensible. Scale here has been chosen to reflect
+		// the ranges of the plot; this should avoid making the consensus too small or
+		// too large for the chart
 		Nucleus n = d.getChildDataset(ccl.datasetId()).getCollection().getConsensus();
-
-		// Place the consensus somewhere sensible
 		n.setScale(scale);
 
 		boolean isLeft = ccl.centroid().getX() < xRange.getCentralValue();
@@ -330,9 +350,10 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 
 		n.moveCentreOfMass(new FloatPoint(nx * scale, ny * scale));
 
-		// Make the consensus dataset. Use the micron scaling to force the point to fit
-		// the umap
-		ComponentOutlineDataset cd = new ComponentOutlineDataset(n, false, MeasurementScale.MICRONS);
+		// Make the consensus dataset. Use the micron scaling to force the consensus to
+		// fit the plot
+		ComponentOutlineDataset cd = new ComponentOutlineDataset(n, false,
+				MeasurementScale.MICRONS);
 		chart.getXYPlot().setDataset(ccl.datasetIndex(), cd);
 		DefaultXYItemRenderer renderer = new DefaultXYItemRenderer();
 		renderer.setDefaultLinesVisible(true);
@@ -346,14 +367,16 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 		chart.getXYPlot().setRenderer(ccl.datasetIndex(), renderer);
 
 		// Get the x boundary for the line
-		double xBound = isLeft ? DatasetUtils.findDomainBounds(cd).getUpperBound() + (xRange.getLength() * 0.01)
+		double xBound = isLeft
+				? DatasetUtils.findDomainBounds(cd).getUpperBound() + (xRange.getLength() * 0.01)
 				: DatasetUtils.findDomainBounds(cd).getLowerBound() - (xRange.getLength() * 0.01);
 
 		// Get the y boundaries fro the line
 		Range yRangeCd = DatasetUtils.findRangeBounds(cd);
 
 		// Draw a line from the consensus to the centroid of the cluster
-		XYLineAnnotation line = new XYLineAnnotation(ccl.centroid().getX(), ccl.centroid().getY(), xBound, ny,
+		XYLineAnnotation line = new XYLineAnnotation(ccl.centroid().getX(), ccl.centroid().getY(),
+				xBound, ny,
 				new BasicStroke(2.0f), colour);
 		chart.getXYPlot().addAnnotation(line);
 
@@ -375,7 +398,8 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 	 * @param index     the dataset index
 	 * @param scale     the nucleus scale
 	 */
-	private static synchronized void processBatch(List<Nucleus> list, IAnalysisDataset d, IClusterGroup plotGroup,
+	private static synchronized void processBatch(List<Nucleus> list, IAnalysisDataset d,
+			IClusterGroup plotGroup,
 			JFreeChart chart, String prefix1, String prefix2, Color col, double scale) {
 
 		// Disable notifications while the batch is processed
@@ -408,13 +432,18 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 	 * @param yStatName
 	 * @return
 	 */
-	private static XYDataImageAnnotation createDimensionalityReductionImageAnnotation(Nucleus n, String xStatName,
+	private static XYDataImageAnnotation createDimensionalityReductionImageAnnotation(Nucleus n,
+			String xStatName,
 			String yStatName, XYPlot plot, double scaleFactor, Color col) {
 
-		Measurement dim1 = n.getMeasurements().stream().filter(s -> s.name().equals(xStatName)).findFirst()
-				.orElseThrow(() -> new IllegalArgumentException("No measurement called " + xStatName));
-		Measurement dim2 = n.getMeasurements().stream().filter(s -> s.name().equals(yStatName)).findFirst()
-				.orElseThrow(() -> new IllegalArgumentException("No measurement called " + yStatName));
+		Measurement dim1 = n.getMeasurements().stream().filter(s -> s.name().equals(xStatName))
+				.findFirst()
+				.orElseThrow(
+						() -> new IllegalArgumentException("No measurement called " + xStatName));
+		Measurement dim2 = n.getMeasurements().stream().filter(s -> s.name().equals(yStatName))
+				.findFirst()
+				.orElseThrow(
+						() -> new IllegalArgumentException("No measurement called " + yStatName));
 		double x = n.getMeasurement(dim1);
 		double y = n.getMeasurement(dim2);
 
@@ -426,7 +455,8 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 		double ymin = yRange.getLowerBound();
 		double ymax = yRange.getUpperBound();
 
-		ImageProcessor ip = ImageAnnotator.drawBorder(ImageImporter.importFullImageTo24bitGreyscale(n), n, col);
+		ImageProcessor ip = ImageAnnotator
+				.drawBorder(ImageImporter.importFullImageTo24bitGreyscale(n), n, col);
 
 		ip = ImageFilterer.crop(ip, n);
 		ip.flipVertical(); // Y axis needs inverting
@@ -435,7 +465,8 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 		BufferedImage image = ip.getBufferedImage();
 
 		// Make the image partly transparent
-		BufferedImage tmpImg = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_ARGB);
+		BufferedImage tmpImg = new BufferedImage(image.getWidth(), image.getHeight(),
+				BufferedImage.TYPE_INT_ARGB);
 
 		int borderCol = col.getRGB();
 

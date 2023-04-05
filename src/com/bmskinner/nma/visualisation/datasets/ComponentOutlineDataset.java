@@ -17,6 +17,7 @@
 package com.bmskinner.nma.visualisation.datasets;
 
 import java.util.List;
+import java.util.logging.Logger;
 
 import org.jfree.data.xy.DefaultXYDataset;
 
@@ -40,6 +41,9 @@ import com.bmskinner.nma.components.rules.OrientationMark;
  */
 @SuppressWarnings("serial")
 public class ComponentOutlineDataset extends DefaultXYDataset {
+
+	private static final Logger LOGGER = Logger
+			.getLogger(ComponentOutlineDataset.class.getName());
 
 	private static final String UNABLE_TO_GET_BORDER_POINT_ERROR = "Unable to get border point";
 
@@ -123,14 +127,16 @@ public class ComponentOutlineDataset extends DefaultXYDataset {
 		double[] ypoints = new double[c.getBorderLength() + 1];
 
 		try {
+
 			for (int i = 0; i < c.getBorderLength(); i++) {
 				IPoint p = c.getBorderPoint(i);
 				double x = p.getX();
 				double y = p.getY();
 
 				if (MeasurementScale.MICRONS.equals(scale)) {
-					x = Measurement.lengthToMicrons(p.getX(), c.getScale());
-					y = Measurement.lengthToMicrons(p.getY(), c.getScale());
+					x = Measurement.lengthToMicrons(x, c.getScale());
+					y = Measurement.lengthToMicrons(y, c.getScale());
+
 				}
 				xpoints[i] = x;
 				ypoints[i] = y;

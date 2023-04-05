@@ -53,7 +53,8 @@ public class DefaultConsensusNucleus extends DefaultNucleus implements Consensus
 	 * @throws UnprofilableObjectException
 	 * @throws ComponentCreationException
 	 */
-	public DefaultConsensusNucleus(Nucleus n) throws UnprofilableObjectException, ComponentCreationException {
+	public DefaultConsensusNucleus(Nucleus n)
+			throws UnprofilableObjectException, ComponentCreationException {
 		super(n);
 	}
 
@@ -64,7 +65,8 @@ public class DefaultConsensusNucleus extends DefaultNucleus implements Consensus
 	 * @throws UnprofilableObjectException
 	 * @throws ComponentCreationException
 	 */
-	public DefaultConsensusNucleus(Consensus n) throws UnprofilableObjectException, ComponentCreationException {
+	public DefaultConsensusNucleus(Consensus n)
+			throws UnprofilableObjectException, ComponentCreationException {
 		super(n);
 		xOffset = n.currentOffset().getX();
 		yOffset = n.currentOffset().getY();
@@ -92,7 +94,8 @@ public class DefaultConsensusNucleus extends DefaultNucleus implements Consensus
 		Element e = super.toXmlElement().setName("ConsensusNucleus");
 
 		e.addContent(new Element("Offset").setAttribute("x", String.valueOf(xOffset))
-				.setAttribute("y", String.valueOf(yOffset)).setAttribute("r", String.valueOf(rOffset)));
+				.setAttribute("y", String.valueOf(yOffset))
+				.setAttribute("r", String.valueOf(rOffset)));
 		return e;
 	}
 
@@ -101,12 +104,6 @@ public class DefaultConsensusNucleus extends DefaultNucleus implements Consensus
 		this.xOffset = xOffset;
 		this.yOffset = yOffset;
 	}
-
-//	@Override
-//	public void offset(double xOffset, double yOffset) {
-//		this.xOffset = xOffset;
-//		this.yOffset = yOffset;
-//	}
 
 	@Override
 	public void addRotation(double angle) {
@@ -131,7 +128,8 @@ public class DefaultConsensusNucleus extends DefaultNucleus implements Consensus
 	}
 
 	@Override
-	public Nucleus getOrientedNucleus() throws MissingLandmarkException, ComponentCreationException {
+	public Nucleus getOrientedNucleus()
+			throws MissingLandmarkException, ComponentCreationException {
 		Nucleus n = this.duplicate();
 		n.orient();
 		n.rotate(rOffset);

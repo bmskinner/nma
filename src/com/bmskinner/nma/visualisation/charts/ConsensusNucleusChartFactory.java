@@ -470,21 +470,25 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 
 				// Create shape annotations to fill the consensus nuclei if needed
 				if (options.isFillConsensus()) {
-					Shape s = options.getDatasets().get(d).getCollection().getConsensus()
-							.toShape(options.getScale());
+					if (options.getDatasets().get(d).getCollection().hasConsensus()) {
 
-					Color transparent = ColourSelecter.makeTransparent(colour, 128);
+						Shape s = options.getDatasets().get(d).getCollection().getConsensus()
+								.toShape(options.getScale());
 
-					plot.addAnnotation(
-							new XYShapeAnnotation(s, ChartComponents.MARKER_STROKE, null,
-									transparent));
+						Color transparent = ColourSelecter.makeTransparent(colour, 128);
+
+						plot.addAnnotation(
+								new XYShapeAnnotation(s, ChartComponents.MARKER_STROKE, null,
+										transparent));
+					}
 				}
 			}
 
 			return chart;
 
-		} catch (ChartDatasetCreationException | MissingLandmarkException
-				| ComponentCreationException e) {
+		} catch (ChartDatasetCreationException | MissingLandmarkException |
+
+				ComponentCreationException e) {
 			LOGGER.log(Loggable.STACK, "Error making consensus dataset", e);
 			return createErrorChart();
 		}
