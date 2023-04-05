@@ -820,6 +820,11 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 
 			if (plot.getDatasetCount() > 1) {
 				for (int i = 0; i < plot.getDatasetCount(); i++) {
+
+					if (plot.getDataset(i) == null) {
+						continue;
+					}
+
 					domainRange = Range.combine(domainRange,
 							DatasetUtils.findDomainBounds(plot.getDataset(i)));
 					rangeRange = Range.combine(rangeRange,
@@ -904,7 +909,13 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 		Range rangeRange = DatasetUtils.findRangeBounds(plot.getDataset());
 
 		if (plot.getDatasetCount() > 1) {
+
 			for (int i = 0; i < plot.getDatasetCount(); i++) {
+
+				if (plot.getDataset(i) == null) {
+					continue;
+				}
+
 				domainRange = Range.combine(domainRange,
 						DatasetUtils.findDomainBounds(plot.getDataset(i)));
 				rangeRange = Range.combine(rangeRange,
