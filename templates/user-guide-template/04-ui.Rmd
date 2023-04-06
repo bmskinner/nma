@@ -25,7 +25,7 @@ Option | Action
 Scale | Choose the display units for charts and tables. `Pixels` is the default unless overridden in the configuration file. Displaying measurements in `Microns` requires the image scale to be set for the dataset.
 Colour palette | Set the colour palette to use for colouring datasets and drawing segments in profiles. These palettes are:       `Regular` - a set of bright exciting colours; `No colour` - all colours are black; `Accessible` - a set of colours chosen to be distinguishable in three major types of color blindness: deutranopia, protanopia and tritanopia 
 Fill consensus | Fill consensus nuclei with a semi-transparent version of the dataset colour, rather than just showing an outline
-Task monitor | Toggle the task queue and memory displays. The first shows the queue of tasks waiting to be performed (e.g. drawing charts, running analyses). The second shows the amount of memory being used by the program. Free memory is green. Memory reserved by the Java Virtual Machine is orange, and memory actually in use is red. The percentage displays the memory actually in use (the red section). Hover the mouse over the monitor to see the total available memory (or look at the log file).
+Task monitor | Toggle the task queue and memory displays. The task queue shows the tasks waiting to be performed, separated into UI tasks (e.g. drawing charts) / analysis tasks (e.g. detecting nuclei). The second shows the amount of memory being used by the program. Free memory is green. Memory reserved by the Java Virtual Machine is orange, and memory actually in use is red. The percentage displays the memory actually in use (the red section). Hover the mouse over the monitor to see the total available memory (or look at the configuration settings recorded in the log file on startup).
 
 ### Dataset {#dataset-menu}
 
@@ -78,9 +78,10 @@ Landmark rulesets | The rules used to detect landmarks, so you can make your own
 
 Option | Action
 -------|--------
-Show documentation | open this file
+Open user guide | Open this document
 Check for updates | Check if an updated version is available for download
 Open config file | Open the configuration file in the default text editor. Allows you to set some default options (e.g. image scale, scale display, default folders)
+Open log file | Open the log in the default text editor. This shows the program configuration and key events used in debugging errors
 Open config directory | Open the folder containing the program log files, configuration options and landmark detection rulesets
 About | Version and license information 
 

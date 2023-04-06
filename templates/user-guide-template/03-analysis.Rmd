@@ -484,12 +484,12 @@ library(dendextend)
 data <- read.csv("Exported_data.tsv", sep="\t", header=T, stringsAsFactors = F)
 
 # Take just the angle profile columns
-profiles <- data %>% dplyr::select(one_of(paste0("Angle_profile_", seq(0,99,1))))
+profiles <- data %>% dplyr::select(starts_with("Angle_profile"))
   
 # Set the rownames of the data using the cell id and the strain for convenience
 rownames(profiles) <- data$CellID
 
-# Set the random number generator with a seed for reproducilble results
+# Set the random number generator with a seed for reproducible results
 set.seed(42)
 
 # Run a tSNE on the profile data - the Rtsne function requires a matrix
@@ -520,7 +520,7 @@ tsne.values$agnes <- clusters
 
 # Plot the tSNE results coloured by cluster
 ggplot(tsne.values, aes(x=V1, y=V2, col=agnes))+
-geom_point()
+  geom_point()
 
 ```
 
