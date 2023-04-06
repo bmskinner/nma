@@ -35,21 +35,22 @@ public class NucleusProfilesPanel extends DetailPanel
 	JTabbedPane tabPanel;
 
 	private static final String PANEL_TITLE_LBL = "Nuclear profiles";
+	private static final String PANEL_DESC_LBL = "View angle profiles and other profiles";
 
 	public NucleusProfilesPanel() {
-		super(PANEL_TITLE_LBL);
+		super(PANEL_TITLE_LBL, PANEL_DESC_LBL);
 		this.setLayout(new BorderLayout());
 		tabPanel = new JTabbedPane(SwingConstants.TOP);
 
 		for (ProfileType type : ProfileType.displayValues()) {
 
-			DetailPanel panel = new ProfileDisplayPanel(type);
-			tabPanel.addTab(panel.getPanelTitle(), panel);
+			DetailPanel panel = new ProfileDisplayPanel(type, type.getLabel(), type.getLabel());
+			addPanel(tabPanel, panel);
 		}
 
 		DetailPanel variabilityChartPanel = new VariabilityDisplayPanel();
+		addPanel(tabPanel, variabilityChartPanel);
 
-		tabPanel.addTab(variabilityChartPanel.getPanelTitle(), variabilityChartPanel);
 		this.add(tabPanel, BorderLayout.CENTER);
 
 		uiController.addProfilesUpdatedListener(this);

@@ -38,13 +38,14 @@ public class SignalsDetailPanel extends DetailPanel {
 	private static final Logger LOGGER = Logger.getLogger(SignalsDetailPanel.class.getName());
 
 	private static final String PANEL_TITLE_LBL = "Nuclear signals";
+	private static final String PANEL_DESC_LBL = "Display FISH signals / other detected objects";
 	private JTabbedPane signalsTabPane;
 
 	/**
 	 * Create the panel.
 	 */
 	public SignalsDetailPanel() {
-		super(PANEL_TITLE_LBL);
+		super(PANEL_TITLE_LBL, PANEL_DESC_LBL);
 		try {
 
 			this.setLayout(new BorderLayout());
@@ -60,15 +61,15 @@ public class SignalsDetailPanel extends DetailPanel {
 			DetailPanel colocalistionPanel = new SignalsColocalisationPanel();
 			DetailPanel warpingPanel = new SignalWarpingMainPanel();
 
-			signalsTabPane.addTab(overviewPanel.getPanelTitle(), overviewPanel);
-			signalsTabPane.addTab(detectionSettingsPanel.getPanelTitle(), detectionSettingsPanel);
-			signalsTabPane.addTab(countsPanel.getPanelTitle(), countsPanel);
-			signalsTabPane.addTab(boxplotPanel.getPanelTitle(), boxplotPanel);
+			addPanel(signalsTabPane, overviewPanel);
+			addPanel(signalsTabPane, detectionSettingsPanel);
+			addPanel(signalsTabPane, countsPanel);
+			addPanel(signalsTabPane, boxplotPanel);
 
-			signalsTabPane.addTab(signalScatterChartPanel.getPanelTitle(), signalScatterChartPanel);
-			signalsTabPane.addTab(shellsPanel.getPanelTitle(), shellsPanel);
-			signalsTabPane.addTab(colocalistionPanel.getPanelTitle(), colocalistionPanel);
-			signalsTabPane.addTab(warpingPanel.getPanelTitle(), warpingPanel);
+			addPanel(signalsTabPane, signalScatterChartPanel);
+			addPanel(signalsTabPane, shellsPanel);
+			addPanel(signalsTabPane, colocalistionPanel);
+			addPanel(signalsTabPane, warpingPanel);
 
 			this.add(signalsTabPane, BorderLayout.CENTER);
 

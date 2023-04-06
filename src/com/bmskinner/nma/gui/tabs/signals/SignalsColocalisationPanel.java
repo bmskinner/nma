@@ -43,7 +43,8 @@ import com.bmskinner.nma.visualisation.options.ChartOptionsBuilder;
  *
  */
 @SuppressWarnings("serial")
-public class SignalsColocalisationPanel extends ChartDetailPanel implements NuclearSignalUpdatedListener {
+public class SignalsColocalisationPanel extends ChartDetailPanel
+		implements NuclearSignalUpdatedListener {
 
 	private static final String PANEL_TITLE_LBL = "Colocalisation";
 	private static final String HEADER_LBL = "Pairwise distances between the closest signal pairs centres-of-mass";
@@ -51,7 +52,7 @@ public class SignalsColocalisationPanel extends ChartDetailPanel implements Nucl
 	private ExportableChartPanel violinChart;
 
 	public SignalsColocalisationPanel() {
-		super();
+		super(PANEL_TITLE_LBL, HEADER_LBL);
 		this.setLayout(new BorderLayout());
 
 		JPanel header = createHeader();
@@ -125,7 +126,6 @@ public class SignalsColocalisationPanel extends ChartDetailPanel implements Nucl
 	protected synchronized JFreeChart createPanelChartType(@NonNull ChartOptions options) {
 		return new ViolinChartFactory(options).createSignalColocalisationViolinChart();
 	}
-
 
 	@Override
 	public void nuclearSignalUpdated(List<IAnalysisDataset> datasets) {

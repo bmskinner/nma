@@ -87,6 +87,7 @@ public class DatasetEditingPanel extends ChartDetailPanel
 	private static final Logger LOGGER = Logger.getLogger(DatasetEditingPanel.class.getName());
 
 	private static final String PANEL_TITLE_LBL = "Editing";
+	private static final String PANEL_DESC_LBL = "Change landmarks or segmentation patterns";
 
 	private JLabel buttonStateLbl = new JLabel(" ", SwingConstants.CENTER);
 
@@ -116,7 +117,7 @@ public class DatasetEditingPanel extends ChartDetailPanel
 	 * Create the editing panel
 	 */
 	public DatasetEditingPanel() {
-		super(PANEL_TITLE_LBL);
+		super(PANEL_TITLE_LBL, PANEL_DESC_LBL);
 		this.setLayout(new BorderLayout());
 
 		JFreeChart chart = ConsensusNucleusChartFactory.createEmptyChart();
@@ -170,7 +171,6 @@ public class DatasetEditingPanel extends ChartDetailPanel
 			} catch (RequestCancelledException e1) {
 				// user cancelled, no action
 			}
-
 
 		});
 		panel.add(segmentButton);

@@ -40,9 +40,10 @@ import com.bmskinner.nma.visualisation.tables.AnalysisDatasetTableCreator;
 public class NucleusMagnitudePanel extends AbstractPairwiseDetailPanel {
 
 	private static final String PANEL_TITLE_LBL = "Magnitude";
+	private static final String PANEL_DESC_LBL = "Pairwise differences between datasets";
 
 	public NucleusMagnitudePanel() {
-		super();
+		super(PANEL_TITLE_LBL, PANEL_DESC_LBL);
 	}
 
 	@Override

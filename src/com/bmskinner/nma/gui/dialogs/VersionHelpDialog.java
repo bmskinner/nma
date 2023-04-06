@@ -38,6 +38,7 @@ import ij.plugin.BrowserLauncher;
  * @since 1.15.0
  *
  */
+@SuppressWarnings("serial")
 public class VersionHelpDialog extends SettingsDialog {
 
 	private static final String LABEL_FONT = "Label.font";

@@ -24,6 +24,7 @@ import java.awt.event.ActionListener;
 
 import javax.swing.JPanel;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.general.DatasetUtils;
@@ -54,8 +55,9 @@ public abstract class AbstractProfileDisplayPanel extends ChartDetailPanel
 
 	protected ProfileType type;
 
-	protected AbstractProfileDisplayPanel(ProfileType type) {
-		super();
+	protected AbstractProfileDisplayPanel(ProfileType type, @NonNull String panelTitle,
+			@NonNull String panelDesc) {
+		super(panelTitle, panelDesc);
 		this.type = type;
 
 		this.setLayout(new BorderLayout());

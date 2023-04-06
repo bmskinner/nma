@@ -59,7 +59,6 @@ import com.javadocking.dock.Position;
 import com.javadocking.dock.TabDock;
 import com.javadocking.dock.factory.SingleDockFactory;
 import com.javadocking.dockable.DefaultDockable;
-import com.javadocking.dockable.Dockable;
 import com.javadocking.dockable.DockingMode;
 import com.javadocking.model.FloatDockModel;
 
@@ -158,7 +157,8 @@ public class DockableMainWindow extends AbstractMainWindow {
 			this.pack();
 			consensusNucleusPanel.restoreAutoBounds();
 		} catch (Exception e) {
-			LOGGER.log(Level.SEVERE, "Error initialising main view: %s".formatted(e.getMessage()), e);
+			LOGGER.log(Level.SEVERE, "Error initialising main view: %s".formatted(e.getMessage()),
+					e);
 		}
 	}
 
@@ -263,8 +263,9 @@ public class DockableMainWindow extends AbstractMainWindow {
 
 			DetailPanel p = (DetailPanel) t;
 			p.setMaximumSize(Toolkit.getDefaultToolkit().getScreenSize());
-			Dockable d = new DefaultDockable(p.getPanelTitle(), p, p.getPanelTitle(), null,
+			DefaultDockable d = new DefaultDockable(p.getPanelTitle(), p, p.getPanelTitle(), null,
 					DockingMode.ALL);
+			d.setDescription(p.getPanelDescription());
 			tabDock.addDockable(d, new Position(i++));
 		}
 

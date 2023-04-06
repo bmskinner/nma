@@ -61,9 +61,9 @@ import com.bmskinner.nma.visualisation.tables.ClusterGroupTableModel;
 @SuppressWarnings("serial")
 public class ClusterDetailPanel extends TableDetailPanel implements ClusterGroupsUpdatedListener {
 
-
-
 	private static final String PANEL_TITLE_LBL = "Clusters";
+	private static final String PANEL_DESC_LBL = "Show clustering parameters and display cluster outputs";
+
 	private static final String NO_CLUSTERS_LBL = "No clusters present";
 
 	private JLabel statusLabel = new JLabel(NO_CLUSTERS_LBL, SwingConstants.CENTER);
@@ -73,7 +73,7 @@ public class ClusterDetailPanel extends TableDetailPanel implements ClusterGroup
 	private ExportableTable table;
 
 	public ClusterDetailPanel() {
-		super();
+		super(PANEL_TITLE_LBL, PANEL_DESC_LBL);
 
 		this.setLayout(new BorderLayout());
 
@@ -87,11 +87,6 @@ public class ClusterDetailPanel extends TableDetailPanel implements ClusterGroup
 
 		UIController.getInstance().addClusterGroupsUpdatedListener(this);
 
-	}
-
-	@Override
-	public String getPanelTitle() {
-		return PANEL_TITLE_LBL;
 	}
 
 	/**

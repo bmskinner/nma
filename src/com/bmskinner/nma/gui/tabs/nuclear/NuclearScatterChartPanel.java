@@ -29,8 +29,11 @@ import com.bmskinner.nma.gui.tabs.AbstractScatterPanel;
 public class NuclearScatterChartPanel extends AbstractScatterPanel
 		implements ScaleUpdatedListener, SwatchUpdatedListener {
 
+	private static final String PANEL_TITLE_LBL = "Scatter";
+	private static final String PANEL_DESC_LBL = "Relationships between measured parameters";
+
 	public NuclearScatterChartPanel() {
-		super(CellularComponent.NUCLEUS);
+		super(CellularComponent.NUCLEUS, PANEL_TITLE_LBL, PANEL_DESC_LBL);
 		this.add(headerPanel, BorderLayout.NORTH);
 
 		uiController.addScaleUpdatedListener(this);

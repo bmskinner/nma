@@ -44,8 +44,11 @@ public class SignalsBoxplotPanel extends BoxplotsTabPanel
 
 	private static final Logger LOGGER = Logger.getLogger(SignalsBoxplotPanel.class.getName());
 
+	private static final String PANEL_TITLE_LBL = "Violin plots";
+	private static final String PANEL_DESC_LBL = "Distributions of measured values with boxplots";
+
 	public SignalsBoxplotPanel() {
-		super(CellularComponent.NUCLEAR_SIGNAL);
+		super(CellularComponent.NUCLEAR_SIGNAL, PANEL_TITLE_LBL, PANEL_DESC_LBL);
 		createUI();
 		uiController.addNuclearSignalUpdatedListener(this);
 		uiController.addScaleUpdatedListener(this);
@@ -60,12 +63,14 @@ public class SignalsBoxplotPanel extends BoxplotsTabPanel
 		for (Measurement stat : Measurement.getSignalStats()) {
 
 			ChartOptions options = new ChartOptionsBuilder().addStatistic(stat)
-					.setScale(GlobalOptions.getInstance().getScale()).setSwatch(GlobalOptions.getInstance().getSwatch())
+					.setScale(GlobalOptions.getInstance().getScale())
+					.setSwatch(GlobalOptions.getInstance().getSwatch())
 					.build();
 
 			JFreeChart chart = null;
 			try {
-				chart = new ViolinChartFactory(options).createStatisticPlot(CellularComponent.NUCLEAR_SIGNAL);
+				chart = new ViolinChartFactory(options)
+						.createStatisticPlot(CellularComponent.NUCLEAR_SIGNAL);
 			} catch (Exception e) {
 				LOGGER.log(Loggable.STACK, "Error creating boxplots panel", e);
 			}
@@ -101,8 +106,10 @@ public class SignalsBoxplotPanel extends BoxplotsTabPanel
 
 			ExportableChartPanel panel = chartPanels.get(stat.toString());
 
-			ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets()).addStatistic(stat)
-					.setScale(GlobalOptions.getInstance().getScale()).setSwatch(GlobalOptions.getInstance().getSwatch())
+			ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets())
+					.addStatistic(stat)
+					.setScale(GlobalOptions.getInstance().getScale())
+					.setSwatch(GlobalOptions.getInstance().getSwatch())
 					.setTarget(panel).build();
 
 			setChart(options);

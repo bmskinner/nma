@@ -45,14 +45,10 @@ public class SegmentWilcoxonPanel extends AbstractPairwiseDetailPanel {
 	private static final Logger LOGGER = Logger.getLogger(SegmentWilcoxonPanel.class.getName());
 
 	private static final String PANEL_TITLE_LBL = "Wilcoxon";
+	private static final String PANEL_DESC_LBL = "Pairwise detection of significant differences in measured values";
 
 	public SegmentWilcoxonPanel() {
-		super();
-	}
-
-	@Override
-	public String getPanelTitle() {
-		return PANEL_TITLE_LBL;
+		super(PANEL_TITLE_LBL, PANEL_DESC_LBL);
 	}
 
 	@Override
@@ -78,7 +74,8 @@ public class SegmentWilcoxonPanel extends AbstractPairwiseDetailPanel {
 
 			List<IProfileSegment> segments;
 			try {
-				segments = activeDataset().getCollection().getProfileCollection().getSegments(OrientationMark.REFERENCE);
+				segments = activeDataset().getCollection().getProfileCollection()
+						.getSegments(OrientationMark.REFERENCE);
 			} catch (MissingLandmarkException | ProfileException e) {
 				LOGGER.warning("Cannot get segments");
 				LOGGER.log(Loggable.STACK, "Cannot get segments", e);
@@ -92,11 +89,14 @@ public class SegmentWilcoxonPanel extends AbstractPairwiseDetailPanel {
 
 					String segName = seg.getName();
 
-					ExportableTable table = new ExportableTable(AbstractTableCreator.createLoadingTable());
+					ExportableTable table = new ExportableTable(
+							AbstractTableCreator.createLoadingTable());
 
-					TableOptions options = new TableOptionsBuilder().setDatasets(getDatasets()).addStatistic(stat)
+					TableOptions options = new TableOptionsBuilder().setDatasets(getDatasets())
+							.addStatistic(stat)
 							.setSegPosition(seg.getPosition()).setTarget(table)
-							.setColumnRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN, new WilcoxonTableCellRenderer())
+							.setColumnRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN,
+									new WilcoxonTableCellRenderer())
 							.build();
 
 					addWilconxonTable(tablePanel, table, stat.toString() + " - " + segName);

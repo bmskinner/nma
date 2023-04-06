@@ -59,7 +59,7 @@ public abstract class SettingsDialog extends JDialog {
 	 * 
 	 * @param programLogger
 	 */
-	public SettingsDialog() {
+	protected SettingsDialog() {
 		this.setLocationRelativeTo(null);
 	}
 
@@ -68,7 +68,7 @@ public abstract class SettingsDialog extends JDialog {
 	 * 
 	 * @param modal
 	 */
-	public SettingsDialog(boolean modal) {
+	protected SettingsDialog(boolean modal) {
 		this();
 		this.setModal(modal);
 	}
@@ -79,13 +79,12 @@ public abstract class SettingsDialog extends JDialog {
 	 * @param owner the frame
 	 * @param modal is the dialog modal
 	 */
-	public SettingsDialog(Frame owner, boolean modal) {
+	protected SettingsDialog(Frame owner, boolean modal) {
 		super(owner, modal);
-		LOGGER.fine("Making settings dialog");
 		this.setLocationRelativeTo(null);
 	}
 
-	public SettingsDialog(Dialog owner, boolean modal) {
+	protected SettingsDialog(Dialog owner, boolean modal) {
 		super(owner, modal);
 		this.setLocationRelativeTo(null);
 	}
@@ -136,7 +135,8 @@ public abstract class SettingsDialog extends JDialog {
 	 * @param gridbag   the layout
 	 * @param container the container to add the labels and fields to
 	 */
-	protected void addLabelTextRows(List<JLabel> labels, List<Component> fields, GridBagLayout gridbag,
+	protected void addLabelTextRows(List<JLabel> labels, List<Component> fields,
+			GridBagLayout gridbag,
 			Container container) {
 		JLabel[] labelArray = labels.toArray(new JLabel[0]);
 		Component[] fieldArray = fields.toArray(new Component[0]);
@@ -151,7 +151,8 @@ public abstract class SettingsDialog extends JDialog {
 	 * @param gridbag   the layout
 	 * @param container the container to add the labels and fields to
 	 */
-	protected void addLabelTextRows(JLabel[] labels, Component[] fields, GridBagLayout gridbag, Container container) {
+	protected void addLabelTextRows(JLabel[] labels, Component[] fields, GridBagLayout gridbag,
+			Container container) {
 		GridBagConstraints c = new GridBagConstraints();
 		c.anchor = GridBagConstraints.EAST;
 		int numLabels = labels.length;
@@ -202,8 +203,7 @@ public abstract class SettingsDialog extends JDialog {
 			spinner.commitEdit();
 			options.setInt(key, (Integer) spinner.getValue());
 		} catch (Exception e) {
-			LOGGER.warning("Error reading value in spinner");
-			LOGGER.log(Loggable.STACK, e.getMessage(), e);
+			LOGGER.log(Loggable.STACK, "Error reading value in spinner", e);
 		}
 	}
 

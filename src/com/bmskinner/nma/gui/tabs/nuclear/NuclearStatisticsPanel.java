@@ -28,11 +28,12 @@ import com.bmskinner.nma.gui.tabs.DetailPanel;
 public class NuclearStatisticsPanel extends DetailPanel {
 
 	private static final String PANEL_TITLE_LBL = "Nuclear charts";
+	private static final String PANEL_DESC_LBL = "View measurements from nuclei and filter datasets";
 
 	private JTabbedPane tabPane;
 
 	public NuclearStatisticsPanel() {
-		super();
+		super(PANEL_TITLE_LBL, PANEL_DESC_LBL);
 
 		this.setLayout(new BorderLayout());
 		tabPane = new JTabbedPane(SwingConstants.TOP);
@@ -44,32 +45,17 @@ public class NuclearStatisticsPanel extends DetailPanel {
 
 		DetailPanel nuclearScatterChartPanel = new NuclearScatterChartPanel();
 
-		addPanel(nuclearStatsPanel);
-		addPanel(boxplotPanel);
-		addPanel(wilcoxonPanel);
-		addPanel(nucleusMagnitudePanel);
-		addPanel(nuclearScatterChartPanel);
+		addPanel(tabPane, nuclearStatsPanel);
+		addPanel(tabPane, boxplotPanel);
+		addPanel(tabPane, wilcoxonPanel);
+		addPanel(tabPane, nucleusMagnitudePanel);
+		addPanel(tabPane, nuclearScatterChartPanel);
 
 		if (GlobalOptions.getInstance().getBoolean(GlobalOptions.IS_GLCM_INTERFACE_KEY)) {
 			DetailPanel nuclearGlcmPanel = new NuclearGlcmPanel();
-			addPanel(nuclearGlcmPanel);
+			addPanel(tabPane, nuclearGlcmPanel);
 		}
 
 		this.add(tabPane, BorderLayout.CENTER);
 	}
-
-	/**
-	 * Register a sub panel and add to the tab pane
-	 * 
-	 * @param panel
-	 */
-	private void addPanel(DetailPanel panel) {
-		tabPane.addTab(panel.getPanelTitle(), panel);
-	}
-
-	@Override
-	public String getPanelTitle() {
-		return PANEL_TITLE_LBL;
-	}
-
 }

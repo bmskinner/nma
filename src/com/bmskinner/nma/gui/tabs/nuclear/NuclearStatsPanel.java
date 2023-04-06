@@ -43,10 +43,12 @@ public class NuclearStatsPanel extends TableDetailPanel implements ScaleUpdatedL
 	private static final Logger LOGGER = Logger.getLogger(NuclearStatsPanel.class.getName());
 
 	private static final String PANEL_TITLE_LBL = "Measurements";
+	private static final String PANEL_DESC_LBL = "Table of aggregate measurements";
+
 	private ExportableTable tablePopulationStats;
 
 	public NuclearStatsPanel() {
-		super();
+		super(PANEL_TITLE_LBL, PANEL_DESC_LBL);
 
 		this.setLayout(new BorderLayout());
 
@@ -60,11 +62,6 @@ public class NuclearStatsPanel extends TableDetailPanel implements ScaleUpdatedL
 
 		UIController.getInstance().addScaleUpdatedListener(this);
 
-	}
-
-	@Override
-	public String getPanelTitle() {
-		return PANEL_TITLE_LBL;
 	}
 
 	@Override
@@ -110,7 +107,8 @@ public class NuclearStatsPanel extends TableDetailPanel implements ScaleUpdatedL
 		LOGGER.finest("Updating stats panel");
 
 		TableOptions options = new TableOptionsBuilder().setDatasets(getDatasets())
-				.setScale(GlobalOptions.getInstance().getScale()).setTarget(tablePopulationStats).build();
+				.setScale(GlobalOptions.getInstance().getScale()).setTarget(tablePopulationStats)
+				.build();
 
 		setTable(options);
 		LOGGER.finest("Set table model");

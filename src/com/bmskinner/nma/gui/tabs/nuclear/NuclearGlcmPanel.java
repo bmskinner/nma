@@ -49,10 +49,12 @@ public class NuclearGlcmPanel extends BoxplotsTabPanel
 		implements SwatchUpdatedListener, GLCMUpdateListener {
 
 	private static final Logger LOGGER = Logger.getLogger(NuclearGlcmPanel.class.getName());
+
 	private static final String PANEL_TITLE_LBL = "GLCM";
+	private static final String PANEL_DESC_LBL = "Grey level co-ocurrance matrix measurements of image texture";
 
 	public NuclearGlcmPanel() {
-		super(CellularComponent.NUCLEUS, PANEL_TITLE_LBL);
+		super(CellularComponent.NUCLEUS, PANEL_TITLE_LBL, PANEL_DESC_LBL);
 
 		Dimension preferredSize = new Dimension(200, 300);
 

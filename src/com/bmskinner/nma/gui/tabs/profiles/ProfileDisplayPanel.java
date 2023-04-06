@@ -18,6 +18,7 @@ package com.bmskinner.nma.gui.tabs.profiles;
 
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
@@ -38,8 +39,9 @@ import com.bmskinner.nma.visualisation.options.ChartOptionsBuilder;
 @SuppressWarnings("serial")
 public class ProfileDisplayPanel extends AbstractProfileDisplayPanel {
 
-	public ProfileDisplayPanel(ProfileType type) {
-		super(type);
+	public ProfileDisplayPanel(ProfileType type, @NonNull String panelTitle,
+			@NonNull String panelDesc) {
+		super(type, panelTitle, panelDesc);
 
 		JFreeChart chart = ProfileChartFactory.createEmptyChart(type);
 		chartPanel.setChart(chart);

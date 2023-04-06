@@ -25,12 +25,29 @@ public abstract class ChartDetailPanel extends DetailPanel {
 
 	private static final String DEFAULT_TAB_TITLE = "Default";
 
+	/**
+	 * Create with default title.
+	 */
 	protected ChartDetailPanel() {
 		this(DEFAULT_TAB_TITLE);
 	}
 
+	/**
+	 * Create with a title. The panel description will use the title also.
+	 * 
+	 * @param title
+	 */
 	protected ChartDetailPanel(@NonNull final String title) {
-		super(title);
+		this(title, title);
+	}
+
+	/**
+	 * Create with a title and description for tooltips.
+	 * 
+	 * @param title
+	 */
+	protected ChartDetailPanel(@NonNull final String title, @NonNull final String description) {
+		super(title, description);
 		cache = new ChartCache();
 	}
 

@@ -43,8 +43,11 @@ public class NuclearBoxplotsPanel extends BoxplotsTabPanel
 
 	private static final Logger LOGGER = Logger.getLogger(NuclearBoxplotsPanel.class.getName());
 
+	private static final String PANEL_TITLE_LBL = "Violin plots";
+	private static final String PANEL_DESC_LBL = "Distributions of measured values with boxplots";
+
 	public NuclearBoxplotsPanel() {
-		super(CellularComponent.NUCLEUS);
+		super(CellularComponent.NUCLEUS, PANEL_TITLE_LBL, PANEL_DESC_LBL);
 
 		Dimension preferredSize = new Dimension(200, 300);
 

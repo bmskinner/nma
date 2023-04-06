@@ -55,6 +55,8 @@ public class VariabilityDisplayPanel extends ChartDetailPanel
 	private static final Logger LOGGER = Logger.getLogger(VariabilityDisplayPanel.class.getName());
 
 	private static final String PANEL_TITLE_LBL = "Variability";
+	private static final String PANEL_DESC_LBL = "Which parts of a profile are most variable between nuclei";
+
 	private JPanel buttonPanel = new JPanel(new FlowLayout());
 	protected ExportableChartPanel chartPanel;
 
@@ -63,7 +65,7 @@ public class VariabilityDisplayPanel extends ChartDetailPanel
 	private ProfileMarkersOptionsPanel profileMarkersOptionsPanel = new ProfileMarkersOptionsPanel();
 
 	public VariabilityDisplayPanel() {
-		super();
+		super(PANEL_TITLE_LBL, PANEL_DESC_LBL);
 		this.setLayout(new BorderLayout());
 
 		ChartOptions options = new ChartOptionsBuilder().setProfileType(ProfileType.ANGLE).build();
@@ -84,11 +86,6 @@ public class VariabilityDisplayPanel extends ChartDetailPanel
 
 		uiController.addProfilesUpdatedListener(this);
 		uiController.addSwatchUpdatedListener(this);
-	}
-
-	@Override
-	public String getPanelTitle() {
-		return PANEL_TITLE_LBL;
 	}
 
 	@Override

@@ -59,10 +59,13 @@ public class SegmentBoxplotsPanel extends BoxplotsTabPanel
 
 	private static final Logger LOGGER = Logger.getLogger(SegmentBoxplotsPanel.class.getName());
 
+	private static final String PANEL_TITLE_LBL = "Violin plots";
+	private static final String PANEL_DESC_LBL = "Distributions of measured values with boxplots";
+
 	private Dimension preferredSize = new Dimension(200, 300);
 
 	public SegmentBoxplotsPanel() {
-		super(CellularComponent.NUCLEAR_BORDER_SEGMENT);
+		super(CellularComponent.NUCLEAR_BORDER_SEGMENT, PANEL_TITLE_LBL, PANEL_DESC_LBL);
 
 		JFreeChart chart = AbstractChartFactory.createEmptyChart();
 

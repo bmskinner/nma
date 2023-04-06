@@ -13,9 +13,10 @@ public class SignalWarpingMainPanel extends DetailPanel {
 	private static final Logger LOGGER = Logger.getLogger(SignalWarpingMainPanel.class.getName());
 
 	private static final @NonNull String PANEL_TITLE_LBL = "Warping";
+	private static final String PANEL_DESC_LBL = "Locations of signals warped to the consensus shape";
 
 	public SignalWarpingMainPanel() {
-		super(PANEL_TITLE_LBL);
+		super(PANEL_TITLE_LBL, PANEL_DESC_LBL);
 		setLayout(new GridBagLayout());
 		GridBagConstraints constraints = new GridBagConstraints();
 		constraints.fill = GridBagConstraints.BOTH;

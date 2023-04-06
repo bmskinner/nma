@@ -43,13 +43,15 @@ public class PairwiseVennDetailPanel extends TableDetailPanel {
 	private static final Logger LOGGER = Logger.getLogger(PairwiseVennDetailPanel.class.getName());
 
 	private static final String PANEL_TITLE_LBL = "Detailed Venn";
+	private static final String PANEL_DESC_LBL = "Full comparison of cells shared between datasets";
+
 	private static final String HEADER_LBL = "Shows a dataset by dataset comparison of shared and non-shared nuclei";
 	private JPanel mainPanel = new JPanel();
 
 	private ExportableTable pairwiseVennTable;
 
 	public PairwiseVennDetailPanel() {
-		super(PANEL_TITLE_LBL);
+		super(PANEL_TITLE_LBL, PANEL_DESC_LBL);
 		this.setLayout(new BorderLayout());
 		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 
@@ -93,8 +95,11 @@ public class PairwiseVennDetailPanel extends TableDetailPanel {
 
 	@Override
 	protected void updateMultiple() {
-		TableOptions options = new TableOptionsBuilder().setDatasets(getDatasets()).setTarget(pairwiseVennTable)
-				.setColumnRenderer(TableOptions.ALL_COLUMNS, new PairwiseVennTableCellRenderer(getDatasets())).build();
+		TableOptions options = new TableOptionsBuilder().setDatasets(getDatasets())
+				.setTarget(pairwiseVennTable)
+				.setColumnRenderer(TableOptions.ALL_COLUMNS,
+						new PairwiseVennTableCellRenderer(getDatasets()))
+				.build();
 
 		setTable(options);
 	}
@@ -134,13 +139,15 @@ public class PairwiseVennDetailPanel extends TableDetailPanel {
 		}
 
 		@Override
-		public java.awt.Component getTableCellRendererComponent(javax.swing.JTable table, java.lang.Object value,
+		public java.awt.Component getTableCellRendererComponent(javax.swing.JTable table,
+				java.lang.Object value,
 				boolean isSelected, boolean hasFocus, int row, int column) {
 
 			Color backColour = Color.WHITE;
 			Color foreColour = Color.BLACK;
 
-			JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+			JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected,
+					hasFocus, row, column);
 
 			String cellContents = l.getText();
 
@@ -153,7 +160,8 @@ public class PairwiseVennDetailPanel extends TableDetailPanel {
 					NumberFormat nf = NumberFormat.getInstance();
 					pct = nf.parse(cellContents).doubleValue();
 				} catch (Exception e) {
-					LOGGER.fine("Error getting value: " + cellContents + " in column " + columnName + ": "
+					LOGGER.fine("Error getting value: " + cellContents + " in column " + columnName
+							+ ": "
 							+ e.getMessage());
 					pct = 0;
 				}

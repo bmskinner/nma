@@ -41,13 +41,15 @@ public class VennDetailPanel extends TableDetailPanel {
 	private static final Logger LOGGER = Logger.getLogger(VennDetailPanel.class.getName());
 
 	private static final String PANEL_TITLE_LBL = "Venn";
+	private static final String PANEL_DESC_LBL = "Pairwise comparison of cells shared between datasets";
+
 	private static final String HEADER_LBL = "Shows the percentage of cells in each dataset column shared with each other dataset";
 	private JPanel mainPanel = new JPanel();
 
 	private ExportableTable vennTable;
 
 	public VennDetailPanel() {
-		super(PANEL_TITLE_LBL);
+		super(PANEL_TITLE_LBL, PANEL_DESC_LBL);
 		this.setLayout(new BorderLayout());
 		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 
@@ -87,8 +89,11 @@ public class VennDetailPanel extends TableDetailPanel {
 
 	@Override
 	protected void updateMultiple() {
-		TableOptions options = new TableOptionsBuilder().setDatasets(getDatasets()).setTarget(vennTable)
-				.setColumnRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN, new VennTableCellRenderer()).build();
+		TableOptions options = new TableOptionsBuilder().setDatasets(getDatasets())
+				.setTarget(vennTable)
+				.setColumnRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN,
+						new VennTableCellRenderer())
+				.build();
 
 		setTable(options);
 
@@ -111,13 +116,15 @@ public class VennDetailPanel extends TableDetailPanel {
 	class VennTableCellRenderer extends javax.swing.table.DefaultTableCellRenderer {
 
 		@Override
-		public java.awt.Component getTableCellRendererComponent(javax.swing.JTable table, java.lang.Object value,
+		public java.awt.Component getTableCellRendererComponent(javax.swing.JTable table,
+				java.lang.Object value,
 				boolean isSelected, boolean hasFocus, int row, int column) {
 
 			Color backColour = Color.WHITE;
 			Color foreColour = Color.BLACK;
 
-			JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+			JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected,
+					hasFocus, row, column);
 
 			String cellContents = l.getText();
 
@@ -137,7 +144,8 @@ public class VennDetailPanel extends TableDetailPanel {
 					pct = nf.parse(pctString).doubleValue();
 
 				} catch (ParseException e) {
-					LOGGER.fine("Error getting value: " + cellContents + " in column " + columnName + ": "
+					LOGGER.fine("Error getting value: " + cellContents + " in column " + columnName
+							+ ": "
 							+ e.getMessage());
 					pct = 0;
 				}

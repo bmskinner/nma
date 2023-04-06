@@ -28,9 +28,10 @@ public class ComparisonDetailPanel extends DetailPanel {
 	JTabbedPane tabPanel;
 
 	private static final String PANEL_TITLE_LBL = "Comparisons";
+	private static final String PANEL_DESC_LBL = "Find which cells are common between datasets";
 
 	public ComparisonDetailPanel() {
-		super(PANEL_TITLE_LBL);
+		super(PANEL_TITLE_LBL, PANEL_DESC_LBL);
 
 		this.setLayout(new BorderLayout());
 
@@ -39,8 +40,8 @@ public class ComparisonDetailPanel extends DetailPanel {
 		DetailPanel vennPanel = new VennDetailPanel();
 		DetailPanel pairwiseVennPanel = new PairwiseVennDetailPanel();
 
-		tabPanel.addTab(vennPanel.getPanelTitle(), vennPanel);
-		tabPanel.addTab(pairwiseVennPanel.getPanelTitle(), pairwiseVennPanel);
+		addPanel(tabPanel, vennPanel);
+		addPanel(tabPanel, pairwiseVennPanel);
 
 		this.add(tabPanel, BorderLayout.CENTER);
 	}

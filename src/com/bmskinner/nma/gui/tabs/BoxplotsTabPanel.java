@@ -67,7 +67,7 @@ public abstract class BoxplotsTabPanel extends ChartDetailPanel implements Actio
 	 * @param component
 	 */
 	protected BoxplotsTabPanel(String component) {
-		this(component, PANEL_TITLE_LBL);
+		this(component, PANEL_TITLE_LBL, PANEL_TITLE_LBL);
 	}
 
 	/**
@@ -76,8 +76,9 @@ public abstract class BoxplotsTabPanel extends ChartDetailPanel implements Actio
 	 * @param context
 	 * @param component
 	 */
-	protected BoxplotsTabPanel(String component, String panelTitle) {
-		super(panelTitle);
+	protected BoxplotsTabPanel(String component, @NonNull String panelTitle,
+			@NonNull String panelDesc) {
+		super(panelTitle, panelDesc);
 		this.component = component;
 		this.setLayout(new BorderLayout());
 
@@ -93,7 +94,8 @@ public abstract class BoxplotsTabPanel extends ChartDetailPanel implements Actio
 			scrollPane = new JScrollPane(mainPanel);
 
 			Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-			Dimension preferredFloatingDimension = new Dimension((int) (screenSize.getWidth() * 0.25),
+			Dimension preferredFloatingDimension = new Dimension(
+					(int) (screenSize.getWidth() * 0.25),
 					(int) (screenSize.getHeight() * 0.25));
 			scrollPane.setPreferredSize(preferredFloatingDimension);
 

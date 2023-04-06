@@ -27,9 +27,10 @@ import com.bmskinner.nma.gui.tabs.DetailPanel;
 public class SegmentsDetailPanel extends DetailPanel {
 
 	private static final String PANEL_TITLE_LBL = "Nuclear segments";
+	private static final String PANEL_DESC_LBL = "View segment lengths across nuclei";
 
 	public SegmentsDetailPanel() {
-		super();
+		super(PANEL_TITLE_LBL, PANEL_DESC_LBL);
 		this.setLayout(new BorderLayout());
 
 		JTabbedPane tabPanel = new JTabbedPane(JTabbedPane.TOP);
@@ -37,27 +38,18 @@ public class SegmentsDetailPanel extends DetailPanel {
 		DetailPanel segmentBoxplotsPanel = new SegmentBoxplotsPanel();
 		DetailPanel segmentWilcoxonPanel = new SegmentWilcoxonPanel();
 		DetailPanel segmentMagnitudePanel = new SegmentMagnitudePanel();
-//		DetailPanel segmentStatsPanel = new SegmentStatsPanel();
 
 		Dimension minimumChartSize = new Dimension(100, 100);
 
 		segmentBoxplotsPanel.setMinimumSize(minimumChartSize);
 		segmentWilcoxonPanel.setMinimumSize(minimumChartSize);
 		segmentMagnitudePanel.setMinimumSize(minimumChartSize);
-//		segmentStatsPanel.setMinimumSize(minimumChartSize);
 
-//		tabPanel.addTab(segmentStatsPanel.getPanelTitle(), segmentStatsPanel);
-		tabPanel.addTab(segmentBoxplotsPanel.getPanelTitle(), segmentBoxplotsPanel);
-		tabPanel.addTab(segmentWilcoxonPanel.getPanelTitle(), segmentWilcoxonPanel);
-		tabPanel.addTab(segmentMagnitudePanel.getPanelTitle(), segmentMagnitudePanel);
+		addPanel(tabPanel, segmentBoxplotsPanel);
+		addPanel(tabPanel, segmentWilcoxonPanel);
+		addPanel(tabPanel, segmentMagnitudePanel);
 
 		this.add(tabPanel, BorderLayout.CENTER);
 
 	}
-
-	@Override
-	public String getPanelTitle() {
-		return PANEL_TITLE_LBL;
-	}
-
 }

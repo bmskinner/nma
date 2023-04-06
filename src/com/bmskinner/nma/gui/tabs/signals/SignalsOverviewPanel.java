@@ -24,6 +24,7 @@ import com.bmskinner.nma.gui.tabs.DetailPanel;
 public class SignalsOverviewPanel extends DetailPanel {
 
 	private static final String PANEL_TITLE_LBL = "Overview";
+	private static final String PANEL_DESC_LBL = "Locations of signals in the consensus nucleus";
 
 	/**
 	 * Create with an input supplier
@@ -31,17 +32,11 @@ public class SignalsOverviewPanel extends DetailPanel {
 	 * @param inputSupplier the input supplier
 	 */
 	public SignalsOverviewPanel() {
-		super();
+		super(PANEL_TITLE_LBL, PANEL_DESC_LBL);
 
 		setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 
 		add(new SignalTablePanel());
 		add(new SignalConsensusPanel());
 	}
-
-	@Override
-	public String getPanelTitle() {
-		return PANEL_TITLE_LBL;
-	}
-
 }

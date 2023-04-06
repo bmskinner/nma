@@ -102,7 +102,16 @@ public abstract class AbstractScatterPanel extends DetailPanel {
 	protected String component;
 
 	protected AbstractScatterPanel(String component) {
-		super();
+		this(component, PANEL_TITLE_LBL, PANEL_TITLE_LBL);
+	}
+
+	protected AbstractScatterPanel(String component, @NonNull final String title) {
+		this(component, title, PANEL_TITLE_LBL);
+	}
+
+	protected AbstractScatterPanel(String component, @NonNull final String title,
+			@NonNull final String description) {
+		super(title, description);
 		this.component = component;
 
 		this.setLayout(new BorderLayout());
@@ -225,7 +234,8 @@ public abstract class AbstractScatterPanel extends DetailPanel {
 			if (result == 0)
 				return;
 
-			LOGGER.log(Level.FINER, "Filtering datasets on {0} and {1}", new Object[] {statABox.getSelectedItem(),  statBBox.getSelectedItem() });
+			LOGGER.log(Level.FINER, "Filtering datasets on {0} and {1}",
+					new Object[] { statABox.getSelectedItem(), statBBox.getSelectedItem() });
 
 			MeasurementScale scale = GlobalOptions.getInstance().getScale();
 
@@ -262,11 +272,13 @@ public abstract class AbstractScatterPanel extends DetailPanel {
 					UIController.getInstance().fireDatasetAdded(child);
 				} catch (CollectionFilteringException | ProfileException | MissingProfileException
 						| MissingLandmarkException e1) {
-					LOGGER.log(Loggable.STACK, e1, ()->"Unable to filter collection for {0} " + d.getName());
+					LOGGER.log(Loggable.STACK, e1,
+							() -> "Unable to filter collection for {0} " + d.getName());
 				}
 			}
 
-			LOGGER.log(Level.INFO, "Filtered datasets by {0} and {1}", new Object[] {statA, statB});
+			LOGGER.log(Level.INFO, "Filtered datasets by {0} and {1}",
+					new Object[] { statA, statB });
 		}
 
 		@Override

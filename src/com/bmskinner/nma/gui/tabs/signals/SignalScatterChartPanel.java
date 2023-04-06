@@ -24,10 +24,14 @@ import com.bmskinner.nma.gui.events.NuclearSignalUpdatedListener;
 import com.bmskinner.nma.gui.tabs.AbstractScatterPanel;
 
 @SuppressWarnings("serial")
-public class SignalScatterChartPanel extends AbstractScatterPanel implements NuclearSignalUpdatedListener {
+public class SignalScatterChartPanel extends AbstractScatterPanel
+		implements NuclearSignalUpdatedListener {
+
+	private static final String PANEL_TITLE_LBL = "Scatter";
+	private static final String PANEL_DESC_LBL = "Relationships between measured parameters";
 
 	public SignalScatterChartPanel() {
-		super(CellularComponent.NUCLEAR_SIGNAL);
+		super(CellularComponent.NUCLEAR_SIGNAL, PANEL_TITLE_LBL, PANEL_DESC_LBL);
 		uiController.addNuclearSignalUpdatedListener(this);
 	}
 

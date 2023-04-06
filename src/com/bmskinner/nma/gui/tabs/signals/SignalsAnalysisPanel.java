@@ -43,10 +43,12 @@ import com.bmskinner.nma.visualisation.tables.NuclearSignalTableCreator;
 public class SignalsAnalysisPanel extends TableDetailPanel implements NuclearSignalUpdatedListener {
 
 	private static final String PANEL_TITLE_LBL = "Detection settings";
+	private static final String PANEL_DESC_LBL = "Settings used to detect signals";
+
 	private ExportableTable table; // table for analysis parameters
 
 	public SignalsAnalysisPanel() {
-		super(PANEL_TITLE_LBL);
+		super(PANEL_TITLE_LBL, PANEL_DESC_LBL);
 		this.setLayout(new BorderLayout());
 		uiController.addNuclearSignalUpdatedListener(this);
 

@@ -66,21 +66,18 @@ public class MergesDetailPanel extends TableDetailPanel {
 	private JLabel headerLabel = new JLabel(Labels.NULL_DATASETS);
 
 	private static final String RECOVER_BUTTON_TEXT = "Recover source";
+
 	private static final String PANEL_TITLE_LBL = "Merges";
+	private static final String PANEL_DESC_LBL = "Show the sources for merged datasets";
 
 	public MergesDetailPanel() {
-		super();
+		super(PANEL_TITLE_LBL, PANEL_DESC_LBL);
 
 		try {
 			createUI();
 		} catch (Exception e) {
 			LOGGER.log(Loggable.STACK, "Error creating merge panel", e);
 		}
-	}
-
-	@Override
-	public String getPanelTitle() {
-		return PANEL_TITLE_LBL;
 	}
 
 	private void createUI() {
@@ -122,7 +119,8 @@ public class MergesDetailPanel extends TableDetailPanel {
 					IAnalysisDataset mergeSource = (IAnalysisDataset) table
 							.getValueAt(row, col);
 					LOGGER.fine(
-							() -> String.format("Extracting merge source '%s'", mergeSource.getName()));
+							() -> String.format("Extracting merge source '%s'",
+									mergeSource.getName()));
 
 					UserActionController.getInstance().userActionEventReceived(
 							new UserActionEvent(this, UserActionEvent.EXTRACT_MERGE_SOURCE,

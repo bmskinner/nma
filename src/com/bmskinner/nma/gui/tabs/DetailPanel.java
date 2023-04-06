@@ -24,6 +24,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Logger;
 
 import javax.swing.JPanel;
+import javax.swing.JTabbedPane;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -65,7 +66,12 @@ public abstract class DetailPanel extends JPanel
 	protected transient Cache cache;
 
 	private static final String DEFAULT_TAB_TITLE = "Default";
+
+	/** Panel title */
 	private final String panelTabTitleLbl;
+
+	/** What the panel is for; used in tooltips */
+	private final String panelTabDescription;
 
 	/** Track if the panel is currently in the process of updating */
 	private AtomicBoolean isUpdating = new AtomicBoolean(false);
@@ -75,12 +81,30 @@ public abstract class DetailPanel extends JPanel
 
 	private boolean isCellUpdateMade = false; // for editing panels to batch UI update requests
 
+	/**
+	 * Create with the default title.
+	 * 
+	 */
 	protected DetailPanel() {
 		this(DEFAULT_TAB_TITLE);
 	}
 
+	/**
+	 * Create with a title. The panel description will use the title also.
+	 * 
+	 */
 	protected DetailPanel(@NonNull final String title) {
+		this(title, title);
+	}
+
+	/**
+	 * Create with a title and description for tooltips.
+	 * 
+	 * @param title
+	 */
+	protected DetailPanel(@NonNull final String title, @NonNull final String description) {
 		panelTabTitleLbl = title;
+		panelTabDescription = description;
 
 		uiController = UIController.getInstance();
 		uiController.addDatasetSelectionUpdatedListener(this);
@@ -95,9 +119,27 @@ public abstract class DetailPanel extends JPanel
 		return panelTabTitleLbl;
 	}
 
+	/**
+	 * Get the description of the panel for use in tooltips
+	 * 
+	 * @return the description
+	 */
+	public String getPanelDescription() {
+		return panelTabDescription;
+	}
+
 	@Override
 	public InputSupplier getInputSupplier() {
 		return inputSupplier;
+	}
+
+	/**
+	 * Add a panel to a tab pane
+	 * 
+	 * @param panel
+	 */
+	protected static void addPanel(JTabbedPane tabPane, DetailPanel panel) {
+		tabPane.addTab(panel.getPanelTitle(), null, panel, panel.getPanelDescription());
 	}
 
 	/**

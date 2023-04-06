@@ -94,6 +94,8 @@ public class SignalShellsPanel extends DetailPanel
 	private static final Logger LOGGER = Logger.getLogger(SignalShellsPanel.class.getName());
 
 	private static final String PANEL_TITLE_LBL = "Shells";
+	private static final String PANEL_DESC_LBL = "Internal/peripheral positions of signals in nuclei";
+
 	private static final String WITHIN_SIGNALS_LBL = "Within signals";
 	private static final String WITHIN_NUCLEI_LBL = "Within nuclei";
 
@@ -125,7 +127,7 @@ public class SignalShellsPanel extends DetailPanel
 	private ShellPairwiseTablePanel shellPairwiseTablePanel;
 
 	public SignalShellsPanel() {
-		super(PANEL_TITLE_LBL);
+		super(PANEL_TITLE_LBL, PANEL_DESC_LBL);
 		this.setLayout(new BorderLayout());
 
 		JPanel header = createHeader();
@@ -269,7 +271,7 @@ public class SignalShellsPanel extends DetailPanel
 			return;
 		if (activeDataset().getCollection().getSignalManager().hasSignals()
 				&& activeDataset().getCollection().getSignalManager().hasShellResult())
-				setEnabled(true);
+			setEnabled(true);
 	}
 
 	@Override
@@ -365,7 +367,8 @@ public class SignalShellsPanel extends DetailPanel
 
 			} catch (ProfileException | CollectionFilteringException | MissingProfileException
 					| MissingLandmarkException e1) {
-				LOGGER.log(Loggable.STACK, "Unable to filter collection for %s".formatted(dataset.getName()),
+				LOGGER.log(Loggable.STACK,
+						"Unable to filter collection for %s".formatted(dataset.getName()),
 						e1);
 			}
 		}

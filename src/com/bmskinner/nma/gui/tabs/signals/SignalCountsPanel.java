@@ -75,13 +75,14 @@ public class SignalCountsPanel extends ChartDetailPanel implements NuclearSignal
 	private static final String FILTER_LBL = "Filter nuclei";
 
 	private static final String PANEL_TITLE_LBL = "Signal counts";
+	private static final String PANEL_DESC_LBL = "Number of signals per cell";
 
 	private JButton filterBtn = new JButton(FILTER_LBL);
 
 	private ExportableChartPanel chartPanel;
 
 	public SignalCountsPanel() {
-		super(PANEL_TITLE_LBL);
+		super(PANEL_TITLE_LBL, PANEL_DESC_LBL);
 		createUI();
 		uiController.addNuclearSignalUpdatedListener(this);
 	}
@@ -217,7 +218,8 @@ public class SignalCountsPanel extends ChartDetailPanel implements NuclearSignal
 
 			} catch (CollectionFilteringException | ProfileException | MissingProfileException
 					| MissingLandmarkException e1) {
-				LOGGER.log(Loggable.STACK, "Unable to filter collection for %s".formatted(dataset.getName()),
+				LOGGER.log(Loggable.STACK,
+						"Unable to filter collection for %s".formatted(dataset.getName()),
 						e1);
 			}
 		}

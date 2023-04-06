@@ -95,6 +95,8 @@ public class ImagesTabPanel extends DetailPanel implements FilePathUpdatedListen
 
 	private static final String IMAGES_LBL = "Images in dataset";
 	private static final String PANEL_TITLE_LBL = "Images";
+	private static final String PANEL_DESC_LBL = "Show image files annotated with detected cells";
+
 	private static final String HEADER_LBL = "Double click a folder to update image paths";
 
 	/** Store the last folder opened when changing paths */
@@ -104,17 +106,12 @@ public class ImagesTabPanel extends DetailPanel implements FilePathUpdatedListen
 	 * Create the panel.
 	 */
 	public ImagesTabPanel() {
-		super();
+		super(PANEL_TITLE_LBL, PANEL_DESC_LBL);
 
 		this.setLayout(new BorderLayout());
 		UIController.getInstance().addFilePathUpdatedListener(this);
 
 		createUI();
-	}
-
-	@Override
-	public String getPanelTitle() {
-		return PANEL_TITLE_LBL;
 	}
 
 	private void createUI() {
@@ -298,24 +295,24 @@ public class ImagesTabPanel extends DetailPanel implements FilePathUpdatedListen
 
 		for (File parent : parents) {
 
-				List<File> inParent = files.stream()
-						.filter(f -> f.getParentFile() != null && f.getParentFile().equals(parent))
-						.collect(Collectors.toList());
+			List<File> inParent = files.stream()
+					.filter(f -> f.getParentFile() != null && f.getParentFile().equals(parent))
+					.collect(Collectors.toList());
 
-				try {
-					inParent.sort(comp);
-				} catch (IllegalArgumentException e) { // not the expected format
-					inParent.sort(defaultComp);
-				}
+			try {
+				inParent.sort(comp);
+			} catch (IllegalArgumentException e) { // not the expected format
+				inParent.sort(defaultComp);
+			}
 
-				if (parent != null) {
-					ImageTreeNode parentNode = new ImageTreeNode(parent, dataset);
+			if (parent != null) {
+				ImageTreeNode parentNode = new ImageTreeNode(parent, dataset);
 
-					for (File f : inParent)
-						parentNode.add(new ImageTreeNode(f, dataset));
+				for (File f : inParent)
+					parentNode.add(new ImageTreeNode(f, dataset));
 
-					datasetRoot.add(parentNode);
-				}
+				datasetRoot.add(parentNode);
+			}
 
 		}
 

@@ -32,11 +32,11 @@ import com.bmskinner.nma.logging.Loggable;
 @SuppressWarnings("serial")
 public class IndividualCellDetailPanel extends DetailPanel {
 
-	private static final Logger LOGGER = Logger.getLogger(IndividualCellDetailPanel.class.getName());
-
-//	private JTabbedPane tabPane;
+	private static final Logger LOGGER = Logger
+			.getLogger(IndividualCellDetailPanel.class.getName());
 
 	private static final String PANEL_TITLE_LBL = "Cells";
+	private static final String PANEL_DESC_LBL = "Display individual cells and their landmarks";
 
 	/** Cells in the active dataset */
 	private CellsListPanel cellsListPanel;
@@ -48,8 +48,8 @@ public class IndividualCellDetailPanel extends DetailPanel {
 	private CellViewModel model = new CellViewModel(null, null);
 
 	public IndividualCellDetailPanel() {
+		super(PANEL_TITLE_LBL, PANEL_DESC_LBL);
 
-		super();
 		try {
 
 			createSubPanels();
@@ -72,12 +72,8 @@ public class IndividualCellDetailPanel extends DetailPanel {
 		}
 	}
 
-	@Override
-	public String getPanelTitle() {
-		return PANEL_TITLE_LBL;
-	}
-
 	private void createSubPanels() {
+		// no actions
 
 	}
 

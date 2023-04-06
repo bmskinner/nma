@@ -37,9 +37,10 @@ import com.bmskinner.nma.visualisation.tables.AnalysisDatasetTableCreator;
 public class WilcoxonDetailPanel extends AbstractPairwiseDetailPanel {
 
 	private static final String PANEL_TITLE_LBL = "Wilcoxon";
+	private static final String PANEL_DESC_LBL = "Pairwise detection of significant differences in measured values";
 
 	public WilcoxonDetailPanel() {
-		super();
+		super(PANEL_TITLE_LBL, PANEL_DESC_LBL);
 	}
 
 	@Override
@@ -56,11 +57,6 @@ public class WilcoxonDetailPanel extends AbstractPairwiseDetailPanel {
 	}
 
 	@Override
-	public String getPanelTitle() {
-		return PANEL_TITLE_LBL;
-	}
-
-	@Override
 	protected void updateMultiple() {
 		scrollPane.setColumnHeaderView(null);
 		tablePanel = createTablePanel();
@@ -69,9 +65,12 @@ public class WilcoxonDetailPanel extends AbstractPairwiseDetailPanel {
 
 			ExportableTable table = new ExportableTable(AbstractTableCreator.createLoadingTable());
 
-			TableOptions options = new TableOptionsBuilder().setDatasets(getDatasets()).addStatistic(stat)
+			TableOptions options = new TableOptionsBuilder().setDatasets(getDatasets())
+					.addStatistic(stat)
 					.setTarget(table)
-					.setColumnRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN, new WilcoxonTableCellRenderer()).build();
+					.setColumnRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN,
+							new WilcoxonTableCellRenderer())
+					.build();
 
 			addWilconxonTable(tablePanel, table, stat.toString());
 			scrollPane.setColumnHeaderView(table.getTableHeader());
@@ -98,6 +97,7 @@ public class WilcoxonDetailPanel extends AbstractPairwiseDetailPanel {
 
 	@Override
 	protected TableModel createPanelTableType(TableOptions options) {
-		return new AnalysisDatasetTableCreator(options).createWilcoxonStatisticTable(CellularComponent.NUCLEUS);
+		return new AnalysisDatasetTableCreator(options)
+				.createWilcoxonStatisticTable(CellularComponent.NUCLEUS);
 	}
 }

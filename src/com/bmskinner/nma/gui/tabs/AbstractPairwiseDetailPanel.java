@@ -27,6 +27,8 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nma.gui.components.panels.WrappedLabel;
 import com.bmskinner.nma.visualisation.tables.AbstractTableCreator;
 
@@ -36,8 +38,19 @@ public abstract class AbstractPairwiseDetailPanel extends TableDetailPanel {
 	protected JPanel tablePanel;
 	protected JScrollPane scrollPane = new JScrollPane();
 
+	private static final String PANEL_TITLE_LBL = "Pairwise";
+
 	protected AbstractPairwiseDetailPanel() {
-		super();
+		this(PANEL_TITLE_LBL, PANEL_TITLE_LBL);
+	}
+
+	protected AbstractPairwiseDetailPanel(@NonNull final String title) {
+		this(title, PANEL_TITLE_LBL);
+	}
+
+	protected AbstractPairwiseDetailPanel(@NonNull final String title,
+			@NonNull final String description) {
+		super(title, description);
 
 		this.setLayout(new BorderLayout());
 
