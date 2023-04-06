@@ -18,6 +18,7 @@ import org.apache.batik.transcoder.TranscoderInput;
 import org.apache.batik.transcoder.TranscoderOutput;
 import org.apache.batik.transcoder.image.PNGTranscoder;
 import org.jfree.chart.JFreeChart;
+import org.jfree.data.Range;
 import org.jfree.svg.SVGGraphics2D;
 import org.jfree.svg.SVGUnits;
 
@@ -50,10 +51,11 @@ public class ChartImageConverter {
 	 * @throws TranscoderException
 	 * @throws IOException
 	 */
-	public static BufferedImage createPNG(JFreeChart chart, int wmm, int hmm, int dpi)
+	public static BufferedImage createPNG(JFreeChart chart, int wmm, int hmm, int dpi,
+			boolean isFixedAspect)
 			throws TranscoderException, IOException {
 
-		String svg = ChartImageConverter.createSVG(chart, wmm, hmm, dpi);
+		String svg = ChartImageConverter.createSVG(chart, wmm, hmm, dpi, isFixedAspect);
 
 		return ChartImageConverter.convertSVGToPNG(svg, wmm, dpi);
 	}
@@ -100,7 +102,11 @@ public class ChartImageConverter {
 	 * @param dpi   the resolution of the output image
 	 * @return
 	 */
-	public static String createSVG(JFreeChart chart, int wmm, int hmm, int dpi) {
+	public static String createSVG(JFreeChart chart, int wmm, int hmm, int dpi,
+			boolean isFixedAspect) {
+
+		if (isFixedAspect)
+			chart = fixAspect(chart, wmm, hmm);
 
 		// Get the DPI of the display
 		int screenDpi = DEFAULT_SCREEN_DPI;
@@ -113,18 +119,66 @@ public class ChartImageConverter {
 
 		double dpiScale = (double) screenDpi / dpi;
 
-		int w_px = mmToPixels(wmm, dpi);
-		int h_px = mmToPixels(hmm, dpi);
+		int wpx = mmToPixels(wmm, dpi);
+		int hpx = mmToPixels(hmm, dpi);
 
 		// Adjust for scaling of chart elements
-		int w = (int) (w_px * dpiScale);
-		int h = (int) (h_px * dpiScale);
+		int w = (int) (wpx * dpiScale);
+		int h = (int) (hpx * dpiScale);
 
 		SVGGraphics2D g2 = new SVGGraphics2D(w, h, SVGUnits.PX);
-
 		Rectangle r = new Rectangle(0, 0, w, h);
 		chart.draw(g2, r);
 		return g2.getSVGDocument();
+	}
+
+	/**
+	 * Given a chart with the desired output dimensions, change the axis ranges such
+	 * that the exported image has a fixed aspect ratio. This will only ever
+	 * increase the range of one axis.
+	 * 
+	 * @param chart the chart
+	 * @param wmm   the output width
+	 * @param hmm   the output height
+	 * @return
+	 */
+	private static JFreeChart fixAspect(JFreeChart c, int wmm, int hmm) {
+		try {
+			JFreeChart chart = (JFreeChart) c.clone();
+
+			double desiredAspect = (double) wmm / hmm;
+
+			Range xRange = chart.getXYPlot().getDomainAxis().getRange();
+			Range yRange = chart.getXYPlot().getRangeAxis().getRange();
+			double actualAspect = xRange.getLength() / yRange.getLength();
+
+			if (actualAspect < desiredAspect) { // y longer than x, increase x range
+
+				double newX = yRange.getLength() * desiredAspect;
+				double diff = newX - xRange.getLength();
+
+				// Fraction of range to expand by
+				double margin = (diff / xRange.getLength()) / 2;
+
+				xRange = Range.expand(xRange, margin, margin);
+				chart.getXYPlot().getDomainAxis().setRange(xRange);
+
+			} else { // increase y range
+				double newY = xRange.getLength() / desiredAspect;
+				double diff = newY - yRange.getLength();
+
+				// Fraction of range to expand by
+				double margin = (diff / yRange.getLength()) / 2;
+
+				yRange = Range.expand(yRange, margin, margin);
+				chart.getXYPlot().getRangeAxis().setRange(yRange);
+			}
+
+			return chart;
+
+		} catch (CloneNotSupportedException e) {
+			return c;
+		}
 	}
 
 	/**
