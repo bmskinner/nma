@@ -233,9 +233,11 @@ public class AnalysisParametersTableModel extends DatasetTableModel {
 			return dataset.getAllMergeSources().stream()
 					.map(d -> d.getAnalysisOptions().get())
 					.map(o -> o.getNucleusDetectionFolder().get().getAbsolutePath())
-					.collect(Collectors.joining(Io.NEWLINE));
+					.collect(Collectors.joining(Io.NEWLINE)) + Io.NEWLINE;
 		}
-		return options.getNucleusDetectionFolder().get().getAbsolutePath();
+		// Note we add a newline so there is vertical room for word wrapping in the
+		// table
+		return options.getNucleusDetectionFolder().get().getAbsolutePath() + Io.NEWLINE;
 	}
 
 	private String createPixelScaleString(@NonNull IAnalysisDataset dataset) {

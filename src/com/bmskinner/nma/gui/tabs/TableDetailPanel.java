@@ -63,22 +63,18 @@ public abstract class TableDetailPanel extends DetailPanel {
 			if (target != null) {
 
 				// Do not invoke on the EDT
-				Runnable r = ()->{
+				Runnable r = () -> {
 					target.setModel(model);
 					setRenderers(options);
 					if (target instanceof ExportableTable et) {
 						et.updateRowHeights();
 					}
-				};
-				
-				EventQueue.invokeLater(r);
 
-//				options.getTarget().setModel(model);
-//				setRenderers(options);
-//
-//				if (options.getTarget() instanceof ExportableTable et) {
-//					EventQueue.invokeLater(et::updateRowHeights);
-//				}
+					if (options.getScrollPane() != null)
+						options.getScrollPane().scrollRectToVisible(getVisibleRect());
+				};
+
+				EventQueue.invokeLater(r);
 			}
 
 		} else { // No cached chart
@@ -97,7 +93,8 @@ public abstract class TableDetailPanel extends DetailPanel {
 	 * 
 	 * @param table
 	 */
-	protected synchronized void setRenderer(@NonNull JTable table, @NonNull TableCellRenderer renderer) {
+	protected synchronized void setRenderer(@NonNull JTable table,
+			@NonNull TableCellRenderer renderer) {
 		int columns = table.getColumnModel().getColumnCount();
 		if (columns > 1) {
 			for (int i = 1; i < columns; i++) {

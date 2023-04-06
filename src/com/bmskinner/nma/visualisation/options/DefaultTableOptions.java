@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
 
@@ -34,75 +35,86 @@ import com.bmskinner.nma.components.datasets.IAnalysisDataset;
  */
 public class DefaultTableOptions extends AbstractOptions implements TableOptions {
 
-    private ICell cell = null;
+	private ICell cell = null;
 
-    private JTable target = null;
+	private JTable target = null;
 
-    private Map<Integer, TableCellRenderer> renderer = new HashMap<>(1);
+	private JScrollPane scrollPane = null;
 
-    public DefaultTableOptions(List<IAnalysisDataset> list) {
-        super(list);
-    }
+	private Map<Integer, TableCellRenderer> renderer = new HashMap<>(1);
 
-    @Override
-    public ICell getCell() {
-        return cell;
-    }
+	public DefaultTableOptions(List<IAnalysisDataset> list) {
+		super(list);
+	}
 
-    @Override
-    public void setCell(ICell cell) {
-        this.cell = cell;
-    }
+	@Override
+	public ICell getCell() {
+		return cell;
+	}
 
-    public void setTarget(JTable target) {
-        this.target = target;
-    }
+	@Override
+	public void setCell(ICell cell) {
+		this.cell = cell;
+	}
 
-    @Override
-    public JTable getTarget() {
-        return this.target;
-    }
+	public void setTarget(JTable target) {
+		this.target = target;
+	}
 
-    @Override
-    public boolean hasTarget() {
-        return this.target != null;
-    }
+	public void setScrollPane(JScrollPane scrollPane) {
+		this.scrollPane = scrollPane;
+	}
 
-    public void setRenderer(int column, TableCellRenderer r) {
-        renderer.put(column, r);
+	@Override
+	public JScrollPane getScrollPane() {
+		return this.scrollPane;
+	}
 
-    }
+	@Override
+	public JTable getTarget() {
+		return this.target;
+	}
 
-    @Override
-    public TableCellRenderer getRenderer(int i) {
-        return renderer.get(i);
-    }
+	@Override
+	public boolean hasTarget() {
+		return this.target != null;
+	}
 
-    @Override
-    public Set<Integer> getRendererColumns() {
-        return renderer.keySet();
-    }
+	public void setRenderer(int column, TableCellRenderer r) {
+		renderer.put(column, r);
 
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = super.hashCode();
-        result = prime * result + ((cell == null) ? 0 : cell.hashCode());
-        return result;
-    }
+	}
 
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (!super.equals(obj))
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        DefaultTableOptions other = (DefaultTableOptions) obj;
-        if (cell != other.cell)
-            return false;
-        return true;
-    }
+	@Override
+	public TableCellRenderer getRenderer(int i) {
+		return renderer.get(i);
+	}
+
+	@Override
+	public Set<Integer> getRendererColumns() {
+		return renderer.keySet();
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((cell == null) ? 0 : cell.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		DefaultTableOptions other = (DefaultTableOptions) obj;
+		if (cell != other.cell)
+			return false;
+		return true;
+	}
 
 }

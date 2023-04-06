@@ -18,6 +18,7 @@ package com.bmskinner.nma.visualisation.options;
 
 import java.util.Set;
 
+import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
 
@@ -32,53 +33,59 @@ import com.bmskinner.nma.components.options.HashOptions;
  */
 public interface TableOptions extends DisplayOptions, HashOptions {
 
-    /**
-     * A renderer is applied to all columns in a table
-     */
-    static final int ALL_COLUMNS = 0;
+	/**
+	 * A renderer is applied to all columns in a table
+	 */
+	static final int ALL_COLUMNS = 0;
 
-    /**
-     * A renderer is applied to only the first column in a table
-     */
-    static final int FIRST_COLUMN = -1;
+	/**
+	 * A renderer is applied to only the first column in a table
+	 */
+	static final int FIRST_COLUMN = -1;
 
-    /**
-     * A renderer is applied to all columns in a table apart from the first
-     * column
-     */
-    static final int ALL_EXCEPT_FIRST_COLUMN = -2;
+	/**
+	 * A renderer is applied to all columns in a table apart from the first column
+	 */
+	static final int ALL_EXCEPT_FIRST_COLUMN = -2;
 
-    /**
-     * Get the table the resulting model should be loaded into. Used by the
-     * TableFactoryWorker in a DetailPanel
-     * 
-     * @return
-     */
-    JTable getTarget();
+	/**
+	 * Get the table the resulting model should be loaded into. Used by the
+	 * TableFactoryWorker in a DetailPanel
+	 * 
+	 * @return
+	 */
+	JTable getTarget();
 
-    /**
-     * Check if a target has been set for the table model created from this
-     * options
-     * 
-     * @return
-     */
-    boolean hasTarget();
+	/**
+	 * Get the scroll pane the table is embedded within if present
+	 * 
+	 * @return
+	 */
+	JScrollPane getScrollPane();
 
-    /**
-     * Get the renderer for the given column to apply to the final table model
-     * 
-     * @return
-     */
-    TableCellRenderer getRenderer(int i);
+	/**
+	 * Check if a target has been set for the table model created from this options
+	 * 
+	 * @return
+	 */
+	boolean hasTarget();
 
-    /**
-     * Get the rendering options. These are detailed as the column index, with special
-     * indices for {@code ALL_COLUMNS}, {@code FIRST_COLUMN}, and {@code ALL_EXCEPT_FIRST_COLUMN}
-     * 
-     * @return
-     */
-    Set<Integer> getRendererColumns();
-        
-    boolean isNormalised();
+	/**
+	 * Get the renderer for the given column to apply to the final table model
+	 * 
+	 * @return
+	 */
+	TableCellRenderer getRenderer(int i);
+
+	/**
+	 * Get the rendering options. These are detailed as the column index, with
+	 * special indices for {@code ALL_COLUMNS}, {@code FIRST_COLUMN}, and
+	 * {@code ALL_EXCEPT_FIRST_COLUMN}
+	 * 
+	 * @return
+	 */
+	Set<Integer> getRendererColumns();
+
+	boolean isNormalised();
 
 }

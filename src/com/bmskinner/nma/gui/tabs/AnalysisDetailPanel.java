@@ -47,6 +47,7 @@ public class AnalysisDetailPanel extends TableDetailPanel implements ScaleUpdate
 	private static final String PANEL_TITLE_LBL = "Analysis info";
 	private static final String HEADER_LBL = "Green rows have the same value in all columns";
 	private ExportableTable table;
+	JScrollPane scrollPane;
 
 	public AnalysisDetailPanel() {
 		super(PANEL_TITLE_LBL);
@@ -72,7 +73,7 @@ public class AnalysisDetailPanel extends TableDetailPanel implements ScaleUpdate
 
 		table.setEnabled(false);
 		table.setDefaultRenderer(Object.class, new JTextAreaCellRenderer());
-		JScrollPane scrollPane = new JScrollPane(table);
+		scrollPane = new JScrollPane(table);
 
 		JPanel tablePanel = new JPanel(new BorderLayout());
 
@@ -118,6 +119,7 @@ public class AnalysisDetailPanel extends TableDetailPanel implements ScaleUpdate
 		TableOptions options = new TableOptionsBuilder()
 				.setDatasets(getDatasets())
 				.setTarget(table)
+				.setScrollPane(scrollPane)
 				.setBoolean(AbstractOptions.IS_MERGE_SOURCE_OPTIONS_TABLE, false)
 				.build();
 

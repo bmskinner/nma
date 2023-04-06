@@ -17,7 +17,8 @@
 package com.bmskinner.nma.gui.components;
 
 import java.awt.Component;
-import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
@@ -28,11 +29,13 @@ import java.io.File;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.JTable;
+import javax.swing.JTextArea;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.TableColumnModelEvent;
 import javax.swing.event.TableColumnModelListener;
 import javax.swing.table.JTableHeader;
+import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
 
@@ -115,19 +118,28 @@ public class ExportableTable extends JTable {
 	}
 
 	/**
-	 * Ensure rows are high enough to fill all text. Get the bounding box for each
-	 * cell and set row height to the maximum cell height in that row
+	 * Ensure rows are high enough to fill all text. Get the number of text lines
+	 * per cell and set row height to the maximum cell height in that row
 	 */
 	public void updateRowHeights() {
 		for (int row = 0; row < getRowCount(); row++) {
-			int h = 0;
+			int h = 20;
 			for (int col = 0; col < getColumnCount(); col++) {
-				Component comp = prepareRenderer(getCellRenderer(row, col), row, col);
-				Dimension d = comp.getPreferredSize();
-				comp.setSize(
-						new Dimension(this.getColumnModel().getColumn(col).getWidth(), d.height));
-				d = comp.getPreferredSize();
-				h = Math.max(h, d.height);
+
+				// Find the component at the given cell
+				TableCellRenderer tcr = getCellRenderer(row, col);
+
+				Component c = tcr.getTableCellRendererComponent(this,
+						this.getValueAt(row, col), false, false, row, col);
+
+				if (c instanceof JTextArea jta) {
+					int lineCount = jta.getLineCount() + 1;
+					Font f = c.getFont();
+					FontMetrics fm = c.getFontMetrics(f);
+					int fheight = fm.getHeight();
+					int rowHeight = lineCount * fheight;
+					h = Math.max(h, rowHeight);
+				}
 			}
 			setRowHeight(row, h);
 		}

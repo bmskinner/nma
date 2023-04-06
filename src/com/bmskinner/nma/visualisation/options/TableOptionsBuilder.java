@@ -19,6 +19,7 @@ package com.bmskinner.nma.visualisation.options;
 import java.util.List;
 import java.util.UUID;
 
+import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
 
@@ -87,6 +88,17 @@ public class TableOptionsBuilder {
 
 	public TableOptionsBuilder setTarget(JTable target) {
 		options.setTarget(target);
+		return this;
+	}
+
+	/**
+	 * Set the scroll pane containing the table
+	 * 
+	 * @param scrollPane
+	 * @return
+	 */
+	public TableOptionsBuilder setScrollPane(JScrollPane scrollPane) {
+		options.setScrollPane(scrollPane);
 		return this;
 	}
 
