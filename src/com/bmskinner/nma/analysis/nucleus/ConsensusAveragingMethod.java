@@ -243,11 +243,21 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
 
 	}
 
+	/**
+	 * Calculate the average position of points evenly spaced around the nuclear
+	 * perimeters. The points are returned in micron coordinates in case nuclei in
+	 * the dataset have cells at different scales.
+	 * 
+	 * @return
+	 */
 	private List<IPoint> calculatePointAverage() {
 
 		final Map<Double, List<IPoint>> perimeterPoints = new HashMap<>();
 
-		IPoint zeroCoM = new FloatPoint(0, 0);
+//		final List<IPoint>[] arr = new ArrayList[1000];
+//		Arrays.setAll(arr, e -> new ArrayList<IPoint>());
+
+		IPoint zeroCoM = IPoint.atOrigin();
 
 		try {
 			// Make a list of points at equivalent positions in each nucleus
@@ -262,15 +272,19 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
 
 					double fractionOfPerimeter = i / PROFILE_LENGTH;
 
-					if (perimeterPoints.get(fractionOfPerimeter) == null)
-						perimeterPoints.put(fractionOfPerimeter, new ArrayList<>());
-					List<IPoint> list = perimeterPoints.get(fractionOfPerimeter);
+					List<IPoint> list = perimeterPoints.computeIfAbsent(fractionOfPerimeter,
+							k -> new ArrayList<>());
 
 					int indexInProfile = p.getIndexOfFraction(fractionOfPerimeter);
 					int borderIndex = v.getIndexRelativeTo(OrientationMark.REFERENCE,
 							indexInProfile);
 					IPoint point = v.getBorderPoint(borderIndex);
-					list.add(point.duplicate());
+
+					// Scale the point to microns
+					IPoint micronPoint = point.divide(n.getScale());
+					list.add(micronPoint);
+
+//					arr[i].add(micronPoint);
 				}
 				// Put the oriented nucleus back where it belongs
 				v.moveCentreOfMass(oldCoM);
