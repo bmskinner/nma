@@ -27,11 +27,11 @@ import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.core.GlobalOptions;
+import com.bmskinner.nma.gui.components.panels.ExportableChartPanel;
 import com.bmskinner.nma.gui.events.NuclearSignalUpdatedListener;
 import com.bmskinner.nma.gui.tabs.ChartDetailPanel;
 import com.bmskinner.nma.visualisation.charts.AbstractChartFactory;
 import com.bmskinner.nma.visualisation.charts.ViolinChartFactory;
-import com.bmskinner.nma.visualisation.charts.panels.ExportableChartPanel;
 import com.bmskinner.nma.visualisation.options.ChartOptions;
 import com.bmskinner.nma.visualisation.options.ChartOptionsBuilder;
 

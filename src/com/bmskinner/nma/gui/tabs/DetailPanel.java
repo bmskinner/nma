@@ -33,12 +33,12 @@ import com.bmskinner.nma.core.DatasetListManager;
 import com.bmskinner.nma.core.InputSupplier;
 import com.bmskinner.nma.core.ThreadManager;
 import com.bmskinner.nma.gui.DefaultInputSupplier;
+import com.bmskinner.nma.gui.components.panels.ExportableChartPanel;
 import com.bmskinner.nma.gui.events.CellUpdatedEventListener;
 import com.bmskinner.nma.gui.events.DatasetSelectionUpdatedListener;
 import com.bmskinner.nma.gui.events.UIController;
 import com.bmskinner.nma.logging.Loggable;
 import com.bmskinner.nma.visualisation.Cache;
-import com.bmskinner.nma.visualisation.charts.panels.ExportableChartPanel;
 
 /**
  * The DetailPanels hold chart and table caches, and track other DetailPanels

@@ -33,10 +33,10 @@ import javax.swing.JScrollPane;
 import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
+import com.bmskinner.nma.gui.components.panels.ExportableChartPanel;
 import com.bmskinner.nma.logging.Loggable;
 import com.bmskinner.nma.visualisation.charts.AbstractChartFactory;
 import com.bmskinner.nma.visualisation.charts.ViolinChartFactory;
-import com.bmskinner.nma.visualisation.charts.panels.ExportableChartPanel;
 import com.bmskinner.nma.visualisation.options.ChartOptions;
 
 /**

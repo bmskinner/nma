@@ -21,9 +21,9 @@ import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.profiles.IProfile;
 import com.bmskinner.nma.components.profiles.ProfileType;
 import com.bmskinner.nma.components.rules.OrientationMark;
+import com.bmskinner.nma.gui.components.panels.ExportableChartPanel;
 import com.bmskinner.nma.visualisation.charts.ConsensusNucleusChartFactory;
 import com.bmskinner.nma.visualisation.charts.ProfileChartFactory;
-import com.bmskinner.nma.visualisation.charts.panels.ExportableChartPanel;
 import com.bmskinner.nma.visualisation.options.ChartOptions;
 import com.bmskinner.nma.visualisation.options.ChartOptionsBuilder;
 

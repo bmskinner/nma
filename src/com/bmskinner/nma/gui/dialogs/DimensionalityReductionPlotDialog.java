@@ -23,10 +23,10 @@ import com.bmskinner.nma.components.datasets.IClusterGroup;
 import com.bmskinner.nma.core.ThreadManager;
 import com.bmskinner.nma.gui.components.ColourSelecter;
 import com.bmskinner.nma.gui.components.ImageThumbnailGenerator;
+import com.bmskinner.nma.gui.components.panels.ExportableChartPanel;
 import com.bmskinner.nma.logging.Loggable;
 import com.bmskinner.nma.visualisation.charts.DimensionalityChartFactory;
 import com.bmskinner.nma.visualisation.charts.ScatterChartFactory;
-import com.bmskinner.nma.visualisation.charts.panels.ExportableChartPanel;
 
 /**
  * Display tSNE results. This is a temporary class for testing. It can display

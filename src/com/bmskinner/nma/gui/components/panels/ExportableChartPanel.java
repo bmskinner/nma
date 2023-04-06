@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package com.bmskinner.nma.visualisation.charts.panels;
+package com.bmskinner.nma.gui.components.panels;
 
 import java.awt.Component;
 import java.awt.Point;
@@ -570,7 +570,7 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 
 			try (OutputStream os = new FileOutputStream(file)) {
 				BufferedImage bi = ChartImageConverter.createPNG(getChart(), w, h,
-						DEFAULT_EXPORT_DPI);
+						DEFAULT_EXPORT_DPI, this.isFixedAspectRatio);
 
 				EncoderUtil.writeBufferedImage(bi, ImageFormat.PNG, os);
 				LOGGER.info("Chart saved as '" + file.getName() + "'");
@@ -606,7 +606,8 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 							"Overwrite existing file?"))
 				return;
 
-			String svg = ChartImageConverter.createSVG(getChart(), w, h, DEFAULT_EXPORT_DPI);
+			String svg = ChartImageConverter.createSVG(getChart(), w, h, DEFAULT_EXPORT_DPI,
+					this.isFixedAspectRatio);
 
 			writeToSVG(file, svg);
 			LOGGER.info("Chart saved as '" + file.getName() + "'");

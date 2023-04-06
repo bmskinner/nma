@@ -54,6 +54,7 @@ import com.bmskinner.nma.components.rules.OrientationMark;
 import com.bmskinner.nma.core.GlobalOptions;
 import com.bmskinner.nma.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nma.gui.components.ColourSelecter;
+import com.bmskinner.nma.gui.components.panels.ConsensusNucleusChartPanel;
 import com.bmskinner.nma.gui.dialogs.AngleWindowSizeExplorer;
 import com.bmskinner.nma.gui.events.ConsensusUpdatedListener;
 import com.bmskinner.nma.gui.events.LandmarkUpdateEvent;
@@ -76,7 +77,6 @@ import com.bmskinner.nma.visualisation.charts.overlays.EllipticalOverlay;
 import com.bmskinner.nma.visualisation.charts.overlays.EllipticalOverlayObject;
 import com.bmskinner.nma.visualisation.charts.overlays.ShapeOverlay;
 import com.bmskinner.nma.visualisation.charts.overlays.ShapeOverlayObject;
-import com.bmskinner.nma.visualisation.charts.panels.ConsensusNucleusChartPanel;
 import com.bmskinner.nma.visualisation.options.ChartOptions;
 import com.bmskinner.nma.visualisation.options.ChartOptionsBuilder;
 

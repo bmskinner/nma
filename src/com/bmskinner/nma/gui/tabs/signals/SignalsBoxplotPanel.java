@@ -28,13 +28,13 @@ import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.core.GlobalOptions;
+import com.bmskinner.nma.gui.components.panels.ExportableChartPanel;
+import com.bmskinner.nma.gui.components.panels.ViolinChartPanel;
 import com.bmskinner.nma.gui.events.NuclearSignalUpdatedListener;
 import com.bmskinner.nma.gui.events.ScaleUpdatedListener;
 import com.bmskinner.nma.gui.tabs.BoxplotsTabPanel;
 import com.bmskinner.nma.logging.Loggable;
 import com.bmskinner.nma.visualisation.charts.ViolinChartFactory;
-import com.bmskinner.nma.visualisation.charts.panels.ExportableChartPanel;
-import com.bmskinner.nma.visualisation.charts.panels.ViolinChartPanel;
 import com.bmskinner.nma.visualisation.options.ChartOptions;
 import com.bmskinner.nma.visualisation.options.ChartOptionsBuilder;
 

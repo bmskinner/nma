@@ -9,12 +9,12 @@ import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.signals.IWarpedSignal;
+import com.bmskinner.nma.gui.components.panels.ConsensusNucleusChartPanel;
 import com.bmskinner.nma.gui.events.ConsensusUpdatedListener;
 import com.bmskinner.nma.gui.tabs.ChartDetailPanel;
 import com.bmskinner.nma.visualisation.charts.AbstractChartFactory;
 import com.bmskinner.nma.visualisation.charts.OutlineChartFactory;
 import com.bmskinner.nma.visualisation.charts.WarpedSignalChartFactory;
-import com.bmskinner.nma.visualisation.charts.panels.ConsensusNucleusChartPanel;
 import com.bmskinner.nma.visualisation.options.ChartOptions;
 import com.bmskinner.nma.visualisation.options.ChartOptionsBuilder;
 

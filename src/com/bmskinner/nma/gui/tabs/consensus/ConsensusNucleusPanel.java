@@ -37,6 +37,7 @@ import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.datasets.ICellCollection;
 import com.bmskinner.nma.core.GlobalOptions;
 import com.bmskinner.nma.gui.Labels;
+import com.bmskinner.nma.gui.components.panels.ConsensusNucleusChartPanel;
 import com.bmskinner.nma.gui.events.ConsensusUpdatedListener;
 import com.bmskinner.nma.gui.events.ProfilesUpdatedListener;
 import com.bmskinner.nma.gui.events.ScaleUpdatedListener;
@@ -46,7 +47,6 @@ import com.bmskinner.nma.gui.events.UserActionEvent;
 import com.bmskinner.nma.gui.tabs.ChartDetailPanel;
 import com.bmskinner.nma.visualisation.charts.AbstractChartFactory;
 import com.bmskinner.nma.visualisation.charts.ConsensusNucleusChartFactory;
-import com.bmskinner.nma.visualisation.charts.panels.ConsensusNucleusChartPanel;
 import com.bmskinner.nma.visualisation.options.ChartOptions;
 import com.bmskinner.nma.visualisation.options.ChartOptionsBuilder;
 

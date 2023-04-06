@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package com.bmskinner.nma.visualisation.charts.panels;
+package com.bmskinner.nma.gui.components.panels;
 
 import java.awt.BasicStroke;
 import java.awt.Color;

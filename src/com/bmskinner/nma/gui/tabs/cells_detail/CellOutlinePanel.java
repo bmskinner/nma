@@ -64,6 +64,7 @@ import com.bmskinner.nma.components.profiles.ProfileType;
 import com.bmskinner.nma.components.rules.OrientationMark;
 import com.bmskinner.nma.gui.RotationMode;
 import com.bmskinner.nma.gui.components.ColourSelecter;
+import com.bmskinner.nma.gui.components.panels.ExportableChartPanel;
 import com.bmskinner.nma.gui.components.panels.GenericCheckboxPanel;
 import com.bmskinner.nma.gui.events.CellUpdatedEventListener;
 import com.bmskinner.nma.gui.events.SegmentStartIndexUpdateEvent;
@@ -77,7 +78,6 @@ import com.bmskinner.nma.visualisation.charts.overlays.EllipticalOverlay;
 import com.bmskinner.nma.visualisation.charts.overlays.EllipticalOverlayObject;
 import com.bmskinner.nma.visualisation.charts.overlays.ShapeOverlay;
 import com.bmskinner.nma.visualisation.charts.overlays.ShapeOverlayObject;
-import com.bmskinner.nma.visualisation.charts.panels.ExportableChartPanel;
 import com.bmskinner.nma.visualisation.options.ChartOptions;
 import com.bmskinner.nma.visualisation.options.ChartOptionsBuilder;
 

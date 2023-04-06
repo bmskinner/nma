@@ -59,11 +59,11 @@ import com.bmskinner.nma.components.profiles.ProfileType;
 import com.bmskinner.nma.components.rules.OrientationMark;
 import com.bmskinner.nma.core.ThreadManager;
 import com.bmskinner.nma.gui.components.ColourSelecter;
+import com.bmskinner.nma.gui.components.panels.ExportableChartPanel;
 import com.bmskinner.nma.logging.Loggable;
 import com.bmskinner.nma.stats.Stats;
 import com.bmskinner.nma.visualisation.ChartComponents;
 import com.bmskinner.nma.visualisation.charts.ProfileChartFactory;
-import com.bmskinner.nma.visualisation.charts.panels.ExportableChartPanel;
 
 @SuppressWarnings("serial")
 public class AngleWindowSizeExplorer extends LoadingIconDialog implements ChangeListener {

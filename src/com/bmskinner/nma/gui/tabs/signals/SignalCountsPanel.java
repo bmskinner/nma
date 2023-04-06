@@ -48,6 +48,7 @@ import com.bmskinner.nma.components.profiles.MissingLandmarkException;
 import com.bmskinner.nma.components.profiles.MissingProfileException;
 import com.bmskinner.nma.components.profiles.ProfileException;
 import com.bmskinner.nma.core.GlobalOptions;
+import com.bmskinner.nma.gui.components.panels.ExportableChartPanel;
 import com.bmskinner.nma.gui.components.panels.SignalGroupSelectionPanel;
 import com.bmskinner.nma.gui.dialogs.SettingsDialog;
 import com.bmskinner.nma.gui.events.NuclearSignalUpdatedListener;
@@ -56,7 +57,6 @@ import com.bmskinner.nma.gui.tabs.ChartDetailPanel;
 import com.bmskinner.nma.logging.Loggable;
 import com.bmskinner.nma.visualisation.charts.AbstractChartFactory;
 import com.bmskinner.nma.visualisation.charts.ViolinChartFactory;
-import com.bmskinner.nma.visualisation.charts.panels.ExportableChartPanel;
 import com.bmskinner.nma.visualisation.options.ChartOptions;
 import com.bmskinner.nma.visualisation.options.ChartOptionsBuilder;
 

@@ -19,6 +19,8 @@ import com.bmskinner.nma.components.signals.IShellResult;
 import com.bmskinner.nma.core.GlobalOptions;
 import com.bmskinner.nma.gui.Labels;
 import com.bmskinner.nma.gui.components.ImageThumbnailGenerator;
+import com.bmskinner.nma.gui.components.panels.ConsensusNucleusChartPanel;
+import com.bmskinner.nma.gui.components.panels.ExportableChartPanel;
 import com.bmskinner.nma.gui.events.ChartSetEventListener;
 import com.bmskinner.nma.gui.events.ConsensusUpdatedListener;
 import com.bmskinner.nma.gui.events.NuclearSignalUpdatedListener;
@@ -27,8 +29,6 @@ import com.bmskinner.nma.gui.events.UserActionEvent;
 import com.bmskinner.nma.gui.tabs.ChartDetailPanel;
 import com.bmskinner.nma.visualisation.charts.AbstractChartFactory;
 import com.bmskinner.nma.visualisation.charts.OutlineChartFactory;
-import com.bmskinner.nma.visualisation.charts.panels.ConsensusNucleusChartPanel;
-import com.bmskinner.nma.visualisation.charts.panels.ExportableChartPanel;
 import com.bmskinner.nma.visualisation.options.ChartOptions;
 import com.bmskinner.nma.visualisation.options.ChartOptionsBuilder;
 

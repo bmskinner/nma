@@ -40,6 +40,8 @@ import com.bmskinner.nma.components.profiles.ProfileException;
 import com.bmskinner.nma.components.rules.OrientationMark;
 import com.bmskinner.nma.core.GlobalOptions;
 import com.bmskinner.nma.gui.Labels;
+import com.bmskinner.nma.gui.components.panels.ExportableChartPanel;
+import com.bmskinner.nma.gui.components.panels.ViolinChartPanel;
 import com.bmskinner.nma.gui.events.ChartSetEventListener;
 import com.bmskinner.nma.gui.events.ProfilesUpdatedListener;
 import com.bmskinner.nma.gui.events.ScaleUpdatedListener;
@@ -47,8 +49,6 @@ import com.bmskinner.nma.gui.events.SwatchUpdatedListener;
 import com.bmskinner.nma.gui.tabs.BoxplotsTabPanel;
 import com.bmskinner.nma.logging.Loggable;
 import com.bmskinner.nma.visualisation.charts.AbstractChartFactory;
-import com.bmskinner.nma.visualisation.charts.panels.ExportableChartPanel;
-import com.bmskinner.nma.visualisation.charts.panels.ViolinChartPanel;
 import com.bmskinner.nma.visualisation.options.ChartOptions;
 import com.bmskinner.nma.visualisation.options.ChartOptionsBuilder;
 

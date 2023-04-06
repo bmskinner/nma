@@ -32,13 +32,13 @@ import org.jfree.data.xy.XYDataset;
 
 import com.bmskinner.nma.components.measure.MeasurementDimension;
 import com.bmskinner.nma.components.profiles.ProfileType;
+import com.bmskinner.nma.gui.components.panels.ExportableChartPanel;
 import com.bmskinner.nma.gui.components.panels.ProfileAlignmentOptionsPanel;
 import com.bmskinner.nma.gui.components.panels.ProfileMarkersOptionsPanel;
 import com.bmskinner.nma.gui.events.ProfilesUpdatedListener;
 import com.bmskinner.nma.gui.events.SwatchUpdatedListener;
 import com.bmskinner.nma.gui.tabs.ChartDetailPanel;
 import com.bmskinner.nma.visualisation.charts.AbstractChartFactory;
-import com.bmskinner.nma.visualisation.charts.panels.ExportableChartPanel;
 
 @SuppressWarnings("serial")
 public abstract class AbstractProfileDisplayPanel extends ChartDetailPanel

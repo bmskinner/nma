@@ -20,9 +20,9 @@ import com.bmskinner.nma.analysis.image.MultiScaleStructuralSimilarityIndex;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.core.ThreadManager;
 import com.bmskinner.nma.gui.components.ExportableTable;
+import com.bmskinner.nma.gui.components.panels.ExportableChartPanel;
 import com.bmskinner.nma.gui.dialogs.LoadingIconDialog;
 import com.bmskinner.nma.visualisation.charts.ViolinChartFactory;
-import com.bmskinner.nma.visualisation.charts.panels.ExportableChartPanel;
 import com.bmskinner.nma.visualisation.tables.AbstractTableCreator;
 import com.bmskinner.nma.visualisation.tables.SSIMTableModel;
 

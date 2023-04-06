@@ -30,6 +30,7 @@ import com.bmskinner.nma.components.profiles.ProfileType;
 import com.bmskinner.nma.components.rules.OrientationMark;
 import com.bmskinner.nma.core.GlobalOptions;
 import com.bmskinner.nma.gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
+import com.bmskinner.nma.gui.components.panels.ExportableChartPanel;
 import com.bmskinner.nma.gui.components.panels.ProfileMarkersOptionsPanel;
 import com.bmskinner.nma.gui.components.panels.ProfileTypeOptionsPanel;
 import com.bmskinner.nma.gui.events.ProfilesUpdatedListener;
@@ -38,7 +39,6 @@ import com.bmskinner.nma.gui.tabs.ChartDetailPanel;
 import com.bmskinner.nma.logging.Loggable;
 import com.bmskinner.nma.visualisation.charts.AbstractChartFactory;
 import com.bmskinner.nma.visualisation.charts.ProfileChartFactory;
-import com.bmskinner.nma.visualisation.charts.panels.ExportableChartPanel;
 import com.bmskinner.nma.visualisation.options.ChartOptions;
 import com.bmskinner.nma.visualisation.options.ChartOptionsBuilder;
 
