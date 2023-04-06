@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
+import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.options.IAnalysisOptions;
@@ -36,7 +37,8 @@ public class AnalysisParametersTableModel extends DatasetTableModel {
 			Labels.AnalysisParameters.NUCLEUS_DETECTION, Labels.AnalysisParameters.NUCLEUS_SIZE,
 			Labels.AnalysisParameters.NUCLEUS_CIRCULARITY, Labels.AnalysisParameters.RUN_TIME,
 			Labels.AnalysisParameters.COLLECTION_SOURCE, Labels.AnalysisParameters.RULESET_USED,
-			Labels.AnalysisParameters.PROFILE_WINDOW, Labels.AnalysisParameters.SOFTWARE_VERSION);
+			Labels.AnalysisParameters.PROFILE_WINDOW, Labels.AnalysisParameters.PIXEL_SCALE,
+			Labels.AnalysisParameters.SOFTWARE_VERSION);
 
 	private String[] colNames;
 	private Object[][] rowData;
@@ -102,8 +104,9 @@ public class AnalysisParametersTableModel extends DatasetTableModel {
 			case 5 -> createSourceFolderString(datasets.get(c - 1), mainOptions);
 			case 6 -> mainOptions.getRuleSetCollection().getName();
 			case 7 -> String.valueOf(mainOptions.getProfileWindowProportion());
-			case 8 -> datasets.get(c - 1).getVersionCreated().toString();
-			case 9 -> datasets.get(c - 1); // only used in merge source table
+			case 8 -> createPixelScaleString(datasets.get(c - 1));
+			case 9 -> datasets.get(c - 1).getVersionCreated().toString();
+			case 10 -> datasets.get(c - 1); // only used in merge source table
 			default -> EMPTY_STRING;
 			};
 		} catch (Exception e) {
@@ -233,6 +236,15 @@ public class AnalysisParametersTableModel extends DatasetTableModel {
 					.collect(Collectors.joining(Io.NEWLINE));
 		}
 		return options.getNucleusDetectionFolder().get().getAbsolutePath();
+	}
+
+	private String createPixelScaleString(@NonNull IAnalysisDataset dataset) {
+		String s = dataset.getCollection().getNuclei().stream()
+				.map(Nucleus::getScale)
+				.map(Object::toString)
+				.distinct()
+				.collect(Collectors.joining(", "));
+		return s + " pixels per micron";
 	}
 
 	@Override

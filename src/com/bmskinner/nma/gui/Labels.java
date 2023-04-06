@@ -311,6 +311,7 @@ public class Labels {
 		public static final String NUCLEUS_CIRCULARITY = "Nucleus circularity";
 		public static final String NUCLEUS_SIZE = "Nucleus area";
 		public static final String COLLECTION_SOURCE = "Image source";
+		public static final String PIXEL_SCALE = "Pixel scale";
 		public static final String RUN_TIME = "Run time";
 		public static final String RULESET_USED = "Landmark ruleset";
 		public static final String SOFTWARE_VERSION = "Created in";

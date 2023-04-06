@@ -17,6 +17,7 @@
 package com.bmskinner.nma.gui.tabs;
 
 import java.awt.BorderLayout;
+import java.util.List;
 
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
@@ -26,8 +27,10 @@ import javax.swing.table.TableModel;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.gui.components.ExportableTable;
 import com.bmskinner.nma.gui.components.renderers.JTextAreaCellRenderer;
+import com.bmskinner.nma.gui.events.ScaleUpdatedListener;
 import com.bmskinner.nma.visualisation.options.AbstractOptions;
 import com.bmskinner.nma.visualisation.options.TableOptions;
 import com.bmskinner.nma.visualisation.options.TableOptionsBuilder;
@@ -39,7 +42,7 @@ import com.bmskinner.nma.visualisation.tables.AnalysisDatasetTableCreator;
  *
  */
 @SuppressWarnings("serial")
-public class AnalysisDetailPanel extends TableDetailPanel {
+public class AnalysisDetailPanel extends TableDetailPanel implements ScaleUpdatedListener {
 
 	private static final String PANEL_TITLE_LBL = "Analysis info";
 	private static final String HEADER_LBL = "Green rows have the same value in all columns";
@@ -55,6 +58,8 @@ public class AnalysisDetailPanel extends TableDetailPanel {
 
 		this.add(header, BorderLayout.NORTH);
 		this.add(createTablePanel(), BorderLayout.CENTER);
+
+		uiController.addScaleUpdatedListener(this);
 
 	}
 
@@ -118,6 +123,25 @@ public class AnalysisDetailPanel extends TableDetailPanel {
 
 		setTable(options);
 
+	}
+
+	@Override
+	public void scaleUpdated(List<IAnalysisDataset> datasets) {
+		clearCache(datasets);
+		update(datasets);
+
+	}
+
+	@Override
+	public void scaleUpdated(IAnalysisDataset dataset) {
+		clearCache(dataset);
+		update(List.of(dataset));
+	}
+
+	@Override
+	public void scaleUpdated() {
+		clearCache();
+		update();
 	}
 
 }
