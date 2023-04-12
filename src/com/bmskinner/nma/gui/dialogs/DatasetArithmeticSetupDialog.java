@@ -59,7 +59,7 @@ public class DatasetArithmeticSetupDialog extends SettingsDialog {
 
 		this.setTitle("Dataset boolean options");
 		this.setLocationRelativeTo(null);
-		createGUI(list);
+		createGUI();
 		this.pack();
 		this.setVisible(true);
 	}
@@ -68,7 +68,7 @@ public class DatasetArithmeticSetupDialog extends SettingsDialog {
 		return (BooleanOperation) operatorBox.getSelectedItem();
 	}
 
-	private void createGUI(List<IAnalysisDataset> list) {
+	private void createGUI() {
 
 		setLayout(new BorderLayout());
 

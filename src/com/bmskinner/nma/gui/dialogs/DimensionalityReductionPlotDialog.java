@@ -25,8 +25,8 @@ import com.bmskinner.nma.gui.components.ColourSelecter;
 import com.bmskinner.nma.gui.components.ImageThumbnailGenerator;
 import com.bmskinner.nma.gui.components.panels.ExportableChartPanel;
 import com.bmskinner.nma.logging.Loggable;
+import com.bmskinner.nma.visualisation.charts.AbstractChartFactory;
 import com.bmskinner.nma.visualisation.charts.DimensionalityChartFactory;
-import com.bmskinner.nma.visualisation.charts.ScatterChartFactory;
 
 /**
  * Display tSNE results. This is a temporary class for testing. It can display
@@ -36,6 +36,7 @@ import com.bmskinner.nma.visualisation.charts.ScatterChartFactory;
  * @since 1.16.0
  *
  */
+@SuppressWarnings("serial")
 public class DimensionalityReductionPlotDialog extends MessagingDialog {
 
 	private static final Logger LOGGER = Logger
@@ -50,7 +51,7 @@ public class DimensionalityReductionPlotDialog extends MessagingDialog {
 	private static final double MAX_NUCLEI_PER_CLUSTER = 200;
 
 	private final ExportableChartPanel chartPanel = new ExportableChartPanel(
-			ScatterChartFactory.createEmptyChart());
+			AbstractChartFactory.createEmptyChart());
 
 	public DimensionalityReductionPlotDialog(final @NonNull IAnalysisDataset dataset,
 			final @NonNull IClusterGroup group) {
@@ -73,10 +74,6 @@ public class DimensionalityReductionPlotDialog extends MessagingDialog {
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 		setVisible(true);
-
-		// Run this after the chart is visible
-		DimensionalityChartFactory.addAnnotatedNucleusImages(dataset, group, chartPanel.getChart(),
-				((Double) imageSpinner.getValue()).intValue());
 	}
 
 	public enum ColourByType {
@@ -88,7 +85,7 @@ public class DimensionalityReductionPlotDialog extends MessagingDialog {
 
 		imageSpinner = createMaxImageSpinner();
 
-		JCheckBox showImagesBox = new JCheckBox("Show images", true);
+		JCheckBox showImagesBox = new JCheckBox("Show images", false);
 		showImagesBox.addActionListener(l -> {
 			if (showImagesBox.isSelected()) {
 				Runnable r = () -> DimensionalityChartFactory.addAnnotatedNucleusImages(dataset,

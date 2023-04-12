@@ -66,7 +66,7 @@ import com.bmskinner.nma.visualisation.ChartComponents;
 import com.bmskinner.nma.visualisation.charts.ProfileChartFactory;
 
 @SuppressWarnings("serial")
-public class AngleWindowSizeExplorer extends LoadingIconDialog implements ChangeListener {
+public class AngleWindowSizeExplorer extends MessagingDialog implements ChangeListener {
 
 	private static final Logger LOGGER = Logger.getLogger(AngleWindowSizeExplorer.class.getName());
 
@@ -208,7 +208,7 @@ public class AngleWindowSizeExplorer extends LoadingIconDialog implements Change
 		// Clear the old chart
 		chartPanel.setChart(ProfileChartFactory.createEmptyChart(ProfileType.ANGLE));
 
-		LOGGER.log(Level.FINE, "Testing {0} - {1}", new Object[] { windowSizeMin , windowSizeMax});
+		LOGGER.log(Level.FINE, "Testing {0} - {1}", new Object[] { windowSizeMin, windowSizeMax });
 
 		try {
 			for (double i = windowSizeMin; i <= windowSizeMax; i += stepSize) {

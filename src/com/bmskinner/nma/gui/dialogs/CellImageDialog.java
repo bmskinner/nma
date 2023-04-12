@@ -31,7 +31,7 @@ import com.bmskinner.nma.logging.Loggable;
  *
  */
 @SuppressWarnings("serial")
-public class CellImageDialog extends LoadingIconDialog {
+public class CellImageDialog extends MessagingDialog {
 
 	private static final Logger LOGGER = Logger.getLogger(CellImageDialog.class.getName());
 

@@ -47,7 +47,7 @@ import com.bmskinner.nma.gui.components.panels.SignalGroupSelectionPanel;
  *
  */
 @SuppressWarnings("serial")
-public class SignalPairMergingDialog extends LoadingIconDialog {
+public class SignalPairMergingDialog extends MessagingDialog {
 
 	private static final Logger LOGGER = Logger.getLogger(SignalPairMergingDialog.class.getName());
 
@@ -72,6 +72,7 @@ public class SignalPairMergingDialog extends LoadingIconDialog {
 	private PairedSignalGroups pairedSignalGroups = new PairedSignalGroups();
 
 	public SignalPairMergingDialog(List<IAnalysisDataset> datasets) {
+		super();
 		this.datasets = datasets;
 		createUI();
 

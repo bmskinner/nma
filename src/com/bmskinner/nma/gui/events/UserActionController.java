@@ -31,7 +31,6 @@ import com.bmskinner.nma.gui.DefaultInputSupplier;
 import com.bmskinner.nma.gui.ProgressBarAcceptor;
 import com.bmskinner.nma.gui.actions.AddNuclearSignalAction;
 import com.bmskinner.nma.gui.actions.BooleanOperationAction;
-import com.bmskinner.nma.gui.actions.BuildHierarchicalTreeAction;
 import com.bmskinner.nma.gui.actions.ClusterAutomaticAction;
 import com.bmskinner.nma.gui.actions.ClusterFileAssignmentAction;
 import com.bmskinner.nma.gui.actions.ClusterManualAction;
@@ -368,10 +367,6 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 
 		if (event.type().equals(UserActionEvent.RELOCATE_CELLS))
 			return new RelocateFromFileAction(selectedDataset, acceptor, new CountDownLatch(1));
-
-		if (event.type().equals(UserActionEvent.CLUSTER_AUTOMATICALLY)) {
-			return new BuildHierarchicalTreeAction(selectedDataset, acceptor);
-		}
 
 		if (event.type().equals(UserActionEvent.RUN_SHELL_ANALYSIS)) {
 			return new ShellAnalysisAction(selectedDataset, acceptor);

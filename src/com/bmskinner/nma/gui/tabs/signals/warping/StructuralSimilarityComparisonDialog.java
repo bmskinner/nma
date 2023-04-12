@@ -21,7 +21,7 @@ import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.core.ThreadManager;
 import com.bmskinner.nma.gui.components.ExportableTable;
 import com.bmskinner.nma.gui.components.panels.ExportableChartPanel;
-import com.bmskinner.nma.gui.dialogs.LoadingIconDialog;
+import com.bmskinner.nma.gui.dialogs.MessagingDialog;
 import com.bmskinner.nma.visualisation.charts.ViolinChartFactory;
 import com.bmskinner.nma.visualisation.tables.AbstractTableCreator;
 import com.bmskinner.nma.visualisation.tables.SSIMTableModel;
@@ -33,11 +33,12 @@ import com.bmskinner.nma.visualisation.tables.SSIMTableModel;
  * @since 1.15.0
  *
  */
-public class StructuralSimilarityComparisonDialog extends LoadingIconDialog {
+public class StructuralSimilarityComparisonDialog extends MessagingDialog {
 
 	private static final long serialVersionUID = 1L;
 
-	private static final Logger LOGGER = Logger.getLogger(StructuralSimilarityComparisonDialog.class.getName());
+	private static final Logger LOGGER = Logger
+			.getLogger(StructuralSimilarityComparisonDialog.class.getName());
 
 	private static final String DIALOG_TITLE = "MS-SSIM* scores";
 
@@ -80,13 +81,13 @@ public class StructuralSimilarityComparisonDialog extends LoadingIconDialog {
 		pack();
 		setLocationRelativeTo(null);
 		centerOnScreen();
-		LOGGER.finer("Showing MS-SSIM dialog");
 		setVisible(true);
 	}
 
 	private JPanel createHeaderPanel() {
 		JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		panel.add(new JLabel("Showing full MS-SSIM* values for all possible warped image comparisons"));
+		panel.add(new JLabel(
+				"Showing full MS-SSIM* values for all possible warped image comparisons"));
 		return panel;
 	}
 

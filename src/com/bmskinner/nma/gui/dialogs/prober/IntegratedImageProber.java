@@ -22,7 +22,7 @@ import javax.swing.JButton;
 import javax.swing.JPanel;
 
 import com.bmskinner.nma.components.options.IAnalysisOptions;
-import com.bmskinner.nma.gui.dialogs.LoadingIconDialog;
+import com.bmskinner.nma.gui.dialogs.MessagingDialog;
 import com.bmskinner.nma.gui.dialogs.prober.settings.SettingsPanel;
 
 /**
@@ -33,59 +33,59 @@ import com.bmskinner.nma.gui.dialogs.prober.settings.SettingsPanel;
  *
  */
 @SuppressWarnings("serial")
-public abstract class IntegratedImageProber extends LoadingIconDialog {
+public abstract class IntegratedImageProber extends MessagingDialog {
 
-    private static final String PROCEED_LBL = "Proceed with detection";
+	private static final String PROCEED_LBL = "Proceed with detection";
 
-    protected IAnalysisOptions options; // the active options
+	protected IAnalysisOptions options; // the active options
 
-    protected SettingsPanel optionsSettingsPanel; // settings
+	protected SettingsPanel optionsSettingsPanel; // settings
 
-    protected GenericImageProberPanel imageProberPanel; // result
+	protected GenericImageProberPanel imageProberPanel; // result
 
-    protected boolean ok = false;
+	protected boolean ok = false;
 
-    private JButton okButton = new JButton(PROCEED_LBL);
+	private JButton okButton = new JButton(PROCEED_LBL);
 
-    /**
-     * Make the footer panel, with ok and cancel buttons
-     * 
-     * @return
-     */
-    protected JPanel createFooter() {
-        JPanel panel = new JPanel();
-        panel.setLayout(new FlowLayout(FlowLayout.RIGHT));
+	/**
+	 * Make the footer panel, with ok and cancel buttons
+	 * 
+	 * @return
+	 */
+	protected JPanel createFooter() {
+		JPanel panel = new JPanel();
+		panel.setLayout(new FlowLayout(FlowLayout.RIGHT));
 
-        okButton.addActionListener(e -> {
-            okButtonClicked();
-            ok = true;
-            setVisible(false);
-        });
-        panel.add(okButton);
+		okButton.addActionListener(e -> {
+			okButtonClicked();
+			ok = true;
+			setVisible(false);
+		});
+		panel.add(okButton);
 
-        getRootPane().setDefaultButton(okButton);
+		getRootPane().setDefaultButton(okButton);
 
-        return panel;
-    }
+		return panel;
+	}
 
-    /**
-     * Allow overriding of the "Proceed" button label
-     * 
-     * @param s
-     */
-    protected void setOkButtonText(String s) {
-        okButton.setText(s);
-    }
+	/**
+	 * Allow overriding of the "Proceed" button label
+	 * 
+	 * @param s
+	 */
+	protected void setOkButtonText(String s) {
+		okButton.setText(s);
+	}
 
-    /**
-     * Check if the analysis is ready to run
-     * 
-     * @return
-     */
-    public boolean isOk() {
-        return ok;
-    }
+	/**
+	 * Check if the analysis is ready to run
+	 * 
+	 * @return
+	 */
+	public boolean isOk() {
+		return ok;
+	}
 
-    protected abstract void okButtonClicked();
+	protected abstract void okButtonClicked();
 
 }

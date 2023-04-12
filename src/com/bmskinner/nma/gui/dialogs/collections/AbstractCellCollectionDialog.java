@@ -32,138 +32,140 @@ import javax.swing.table.DefaultTableCellRenderer;
 
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.gui.components.SelectableCellIcon;
-import com.bmskinner.nma.gui.dialogs.LoadingIconDialog;
+import com.bmskinner.nma.gui.dialogs.MessagingDialog;
 import com.bmskinner.nma.io.ImageImportWorker;
 import com.bmskinner.nma.logging.Loggable;
 
 /**
- * Display collections of images from a dataset. Uses a SwingWorker
- * to import the images.
+ * Display collections of images from a dataset. Uses a SwingWorker to import
+ * the images.
+ * 
  * @author ben
  * @since 1.13.7
  *
  */
-public abstract class AbstractCellCollectionDialog extends LoadingIconDialog implements PropertyChangeListener {
-	
-	private static final Logger LOGGER = Logger.getLogger(AbstractCellCollectionDialog.class.getName());
+public abstract class AbstractCellCollectionDialog extends MessagingDialog
+		implements PropertyChangeListener {
 
-    public static final int COLUMN_COUNT = 3;
+	private static final Logger LOGGER = Logger
+			.getLogger(AbstractCellCollectionDialog.class.getName());
 
-    
-    protected static final String LOADING_LBL = "Loading";
+	public static final int COLUMN_COUNT = 3;
 
-    protected IAnalysisDataset dataset;
-    protected JTable           table;
-    protected JProgressBar     progressBar;
-    protected ImageImportWorker worker;
-    protected CellCollectionModel model;
+	protected static final String LOADING_LBL = "Loading";
 
-    /**
-     * Construct with a dataset to display
-     * @param dataset
-     */
-    protected AbstractCellCollectionDialog(IAnalysisDataset dataset) {
-        super();
-        this.dataset = dataset;
+	protected IAnalysisDataset dataset;
+	protected JTable table;
+	protected JProgressBar progressBar;
+	protected ImageImportWorker worker;
+	protected CellCollectionModel model;
 
-        createUI();
-        createWorker();
+	/**
+	 * Construct with a dataset to display
+	 * 
+	 * @param dataset
+	 */
+	protected AbstractCellCollectionDialog(IAnalysisDataset dataset) {
+		super();
+		this.dataset = dataset;
 
-        this.setModal(false);
-        this.pack();
-        this.setVisible(true);
-    }
-    
-    
-    /**
-     * Create the table to display cells in the underlying model
-     * 
-     */
-    protected void createTable() {
-    	table = new JTable(model) {
-            // Returning the Class of each column will allow different
-            // renderers to be used based on Class
-            @Override
+		createUI();
+		createWorker();
+
+		this.setModal(false);
+		this.pack();
+		this.setVisible(true);
+	}
+
+	/**
+	 * Create the table to display cells in the underlying model
+	 * 
+	 */
+	protected void createTable() {
+		table = new JTable(model) {
+			// Returning the Class of each column will allow different
+			// renderers to be used based on Class
+			@Override
 			public Class<?> getColumnClass(int column) {
-                return JLabel.class;
-            }
-        };
+				return JLabel.class;
+			}
+		};
 
-        for (int col = 0; col < COLUMN_COUNT; col++) {
-            table.getColumnModel().getColumn(col).setCellRenderer(new SelectableTableCellRenderer());
-        }
+		for (int col = 0; col < COLUMN_COUNT; col++) {
+			table.getColumnModel().getColumn(col)
+					.setCellRenderer(new SelectableTableCellRenderer());
+		}
 
-        table.setRowHeight(180);
-        table.setCellSelectionEnabled(true);
-        table.setRowSelectionAllowed(false);
-        table.setColumnSelectionAllowed(false);
-        table.setTableHeader(null);
+		table.setRowHeight(180);
+		table.setCellSelectionEnabled(true);
+		table.setRowSelectionAllowed(false);
+		table.setColumnSelectionAllowed(false);
+		table.setTableHeader(null);
 
-        ListSelectionModel cellSelectionModel = table.getSelectionModel();
-        cellSelectionModel.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-    }
-    
-    /**
-     * Create the image import worker needed to import and
-     * annotate images.
-     */
-    protected abstract void createWorker();
-    
-    /**
-     * Create the UI of the dialog
-     */
-    protected abstract void createUI();
-    
-    
-    protected abstract JPanel createHeader();
-        
-    @Override
-    public void propertyChange(PropertyChangeEvent evt) {
-        int value = 0;
-        try {
-            Object newValue = evt.getNewValue();
+		ListSelectionModel cellSelectionModel = table.getSelectionModel();
+		cellSelectionModel.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+	}
 
-            if (newValue.getClass().isAssignableFrom(Integer.class)) {
-                value = (int) newValue;
+	/**
+	 * Create the image import worker needed to import and annotate images.
+	 */
+	protected abstract void createWorker();
 
-            }
-            if (value >= 0 && value <= 100) {
-                progressBar.setValue(value);
-            }
+	/**
+	 * Create the UI of the dialog
+	 */
+	protected abstract void createUI();
 
-            if (evt.getPropertyName().equals("Finished")) {
-                LOGGER.finest( "Worker signaled finished");
-                progressBar.setVisible(false);
+	protected abstract JPanel createHeader();
 
-            }
+	@Override
+	public void propertyChange(PropertyChangeEvent evt) {
+		int value = 0;
+		try {
+			Object newValue = evt.getNewValue();
 
-        } catch (Exception e) {
-            LOGGER.log(Loggable.STACK, "Error getting value from property change", e);
-        }
+			if (newValue.getClass().isAssignableFrom(Integer.class)) {
+				value = (int) newValue;
 
-    }
+			}
+			if (value >= 0 && value <= 100) {
+				progressBar.setValue(value);
+			}
 
- // @SuppressWarnings("serial")
-    public class SelectableTableCellRenderer extends DefaultTableCellRenderer {
-        @Override
-        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
-                int row, int column) {
+			if (evt.getPropertyName().equals("Finished")) {
+				LOGGER.finest("Worker signaled finished");
+				progressBar.setVisible(false);
 
-            super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+			}
 
-            SelectableCellIcon info = (SelectableCellIcon) value;
-            setIcon(info);
-            setHorizontalAlignment(SwingConstants.CENTER);
-            setHorizontalTextPosition(SwingConstants.CENTER);
-            setVerticalTextPosition(SwingConstants.BOTTOM);
+		} catch (Exception e) {
+			LOGGER.log(Loggable.STACK, "Error getting value from property change", e);
+		}
 
-            if (info.isSelected()) {
-                setBackground(Color.GREEN);
-            } else {
-                setBackground(Color.WHITE);
-            }
+	}
 
-            return this;
-        }
-    }
+	// @SuppressWarnings("serial")
+	public class SelectableTableCellRenderer extends DefaultTableCellRenderer {
+		@Override
+		public Component getTableCellRendererComponent(JTable table, Object value,
+				boolean isSelected, boolean hasFocus,
+				int row, int column) {
+
+			super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+
+			SelectableCellIcon info = (SelectableCellIcon) value;
+			setIcon(info);
+			setHorizontalAlignment(SwingConstants.CENTER);
+			setHorizontalTextPosition(SwingConstants.CENTER);
+			setVerticalTextPosition(SwingConstants.BOTTOM);
+
+			if (info.isSelected()) {
+				setBackground(Color.GREEN);
+			} else {
+				setBackground(Color.WHITE);
+			}
+
+			return this;
+		}
+	}
 }

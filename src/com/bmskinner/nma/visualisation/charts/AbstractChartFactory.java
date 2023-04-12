@@ -107,6 +107,7 @@ public abstract class AbstractChartFactory {
 	 * 
 	 * @return an empty chart
 	 */
+	@NonNull
 	public static JFreeChart createEmptyChart() {
 		JFreeChart c = createBaseXYChart();
 		XYPlot plot = c.getXYPlot();
