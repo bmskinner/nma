@@ -17,17 +17,35 @@
 package com.bmskinner.nma.gui.dialogs.prober;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
 import java.io.File;
+import java.text.DecimalFormat;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.logging.Logger;
 
+import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
 
 import com.bmskinner.nma.analysis.detection.Finder;
+import com.bmskinner.nma.analysis.detection.Finder.DetectedObjectEvent;
+import com.bmskinner.nma.analysis.detection.Finder.DetectedObjectListener;
 import com.bmskinner.nma.analysis.detection.FinderDisplayType;
 import com.bmskinner.nma.analysis.detection.FluorescentNucleusFinder;
 import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.cells.ICell;
+import com.bmskinner.nma.components.cells.Nucleus;
+import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.options.IAnalysisOptions;
 import com.bmskinner.nma.gui.dialogs.prober.settings.ConstructableSettingsPanel;
 import com.bmskinner.nma.logging.Loggable;
@@ -40,67 +58,208 @@ import com.bmskinner.nma.logging.Loggable;
  *
  */
 @SuppressWarnings("serial")
-public class NucleusImageProber extends IntegratedImageProber {
-	
+public class NucleusImageProber extends IntegratedImageProber
+		implements DetectedObjectListener<Collection<ICell>> {
+
 	private static final Logger LOGGER = Logger.getLogger(NucleusImageProber.class.getName());
 
-    private static final String DIALOG_TITLE_BAR_LBL = "Nucleus detection settings";
+	private static final String DIALOG_TITLE_BAR_LBL = "Nucleus detection settings";
 
-    /**
-     * Construct with a folder of images to probe, and the initial options
-     * 
-     * @param folder
-     * @param o
-     */
-    public NucleusImageProber(final File folder, final IAnalysisOptions o) {
+	private JTable detectedObjectsTable;
 
-        try {
-            this.options = o;
+	/**
+	 * Construct with a folder of images to probe, and the initial options
+	 * 
+	 * @param folder
+	 * @param o
+	 */
+	public NucleusImageProber(final File folder, final IAnalysisOptions o) {
 
-            optionsSettingsPanel = new ConstructableSettingsPanel(options)
-                    .addCopyFromOpenPanel(CellularComponent.NUCLEUS)
-                    .addImageChannelPanel(CellularComponent.NUCLEUS)
-                    .addImageProcessingPanel(CellularComponent.NUCLEUS)
-                    .addEdgeThresholdSwitchPanel(CellularComponent.NUCLEUS)
-                    .addSizePanel(CellularComponent.NUCLEUS)
-                    .addNucleusProfilePanel(CellularComponent.NUCLEUS)
-                    .build();
-            optionsSettingsPanel.setEnabled(false);
+		try {
+			this.options = o;
 
-            Finder<Collection<ICell>> finder = new FluorescentNucleusFinder(options, FinderDisplayType.PREVIEW);
-            imageProberPanel = new GenericImageProberPanel(folder, finder, this);
+			optionsSettingsPanel = new ConstructableSettingsPanel(options)
+					.addCopyFromOpenPanel(CellularComponent.NUCLEUS)
+					.addImageChannelPanel(CellularComponent.NUCLEUS)
+					.addImageProcessingPanel(CellularComponent.NUCLEUS)
+					.addEdgeThresholdSwitchPanel(CellularComponent.NUCLEUS)
+					.addSizePanel(CellularComponent.NUCLEUS)
+					.addNucleusProfilePanel(CellularComponent.NUCLEUS)
+					.build();
+			optionsSettingsPanel.setEnabled(false);
 
-            JPanel footerPanel = createFooter();
+			Finder<Collection<ICell>> finder = new FluorescentNucleusFinder(options,
+					FinderDisplayType.PREVIEW);
 
-            this.add(optionsSettingsPanel, BorderLayout.WEST);
-            this.add(imageProberPanel, BorderLayout.CENTER);
-            this.add(footerPanel, BorderLayout.SOUTH);
+			imageProberPanel = new GenericImageProberPanel(folder, finder, this);
 
-            this.setTitle(DIALOG_TITLE_BAR_LBL);
+			JPanel footerPanel = createFooter();
 
-            optionsSettingsPanel.addProberReloadEventListener(imageProberPanel);
-            imageProberPanel.addPanelUpdatingEventListener(optionsSettingsPanel);
+			detectedObjectsTable = new JTable(createEmptyDetectedObjectTable());
+			detectedObjectsTable.setDefaultRenderer(Object.class, new ObjectTableRenderer());
 
-        } catch (Exception e) {
-            LOGGER.warning("Error launching analysis window");
-            LOGGER.log(Loggable.STACK, e.getMessage(), e);
-            this.dispose();
-        }
+			JScrollPane scrollPane = new JScrollPane(detectedObjectsTable);
+			scrollPane.setColumnHeaderView(detectedObjectsTable.getTableHeader());
 
-        this.pack();
-        this.setModal(true);
-        this.setLocationRelativeTo(null); // centre on screen
-        this.setVisible(true);
-    }
+			JPanel westPanel = new JPanel();
+			westPanel.setLayout(new BoxLayout(westPanel, BoxLayout.Y_AXIS));
 
-    public IAnalysisOptions getOptions() {
-        return options;
-    }
+			JPanel tablePanel = new JPanel(new BorderLayout());
+			tablePanel.setBorder(BorderFactory.createTitledBorder("Detected objects"));
+			tablePanel.add(scrollPane, BorderLayout.CENTER);
 
-    @Override
-    protected void okButtonClicked() {
-        // no other action here
+			// Ensure the table panel does not stretch wider than the options panel
+			tablePanel.setPreferredSize(
+					new Dimension(optionsSettingsPanel.getPreferredSize().width, 200));
 
-    }
+			westPanel.add(optionsSettingsPanel);
+			westPanel.add(tablePanel);
+
+			this.add(westPanel, BorderLayout.WEST);
+
+			this.add(imageProberPanel, BorderLayout.CENTER);
+			this.add(footerPanel, BorderLayout.SOUTH);
+
+			this.setTitle(DIALOG_TITLE_BAR_LBL);
+
+			// Options will listen for image updating, and blank out
+			optionsSettingsPanel.addProberReloadEventListener(imageProberPanel);
+
+			// Prober will run when an update is heard from the options
+			imageProberPanel.addPanelUpdatingEventListener(optionsSettingsPanel);
+
+			// Detected objects from previews are returned in event objects. Add size and
+			// circularity to a table
+			finder.addDetectedObjectEventListener(this);
+
+		} catch (Exception e) {
+			LOGGER.warning("Error launching analysis window");
+			LOGGER.log(Loggable.STACK, e.getMessage(), e);
+			this.dispose();
+		}
+
+		this.pack();
+		this.setModal(true);
+		this.setLocationRelativeTo(null);
+		this.centerOnScreen();
+		this.setVisible(true);
+	}
+
+	private TableModel createEmptyDetectedObjectTable() {
+		DefaultTableModel model = new DefaultTableModel();
+		model.addColumn("Area");
+		model.addColumn("Circularity");
+		return model;
+
+	}
+
+	public IAnalysisOptions getOptions() {
+		return options;
+	}
+
+	@Override
+	protected void okButtonClicked() {
+		// no other action here
+	}
+
+	@Override
+	public void detectedObjectEventReceived(DetectedObjectEvent<Collection<ICell>> e) {
+		TableModel model = new ObjectTableModel(e.getValidObjects(), e.getInvalidObjects());
+		detectedObjectsTable.setModel(model);
+	}
+
+	/**
+	 * Table model for valid and invalid cells. Shows only area and circularity
+	 * measurements
+	 * 
+	 * @author bs19022
+	 *
+	 */
+	private class ObjectTableModel extends AbstractTableModel {
+
+		private ICell[] cells;
+		private boolean[] isValid;
+
+		public ObjectTableModel(Collection<ICell> valid, Collection<ICell> invalid) {
+			cells = new ICell[valid.size() + invalid.size()];
+			isValid = new boolean[valid.size() + invalid.size()];
+			int i = 0;
+			Iterator<ICell> vi = valid.iterator();
+			while (vi.hasNext()) {
+				cells[i] = vi.next();
+				isValid[i++] = true;
+
+			}
+			Iterator<ICell> ivi = invalid.iterator();
+			while (ivi.hasNext()) {
+				cells[i] = ivi.next();
+				isValid[i++] = false;
+			}
+		}
+
+		public boolean isValid(int rowIndex) {
+			return isValid[rowIndex];
+		}
+
+		@Override
+		public String getColumnName(int column) {
+			if (column == 0)
+				return "Area";
+			return "Circularity";
+		}
+
+		@Override
+		public int getRowCount() {
+			return cells.length;
+		}
+
+		@Override
+		public int getColumnCount() {
+			return 2;
+		}
+
+		@Override
+		public Object getValueAt(int rowIndex, int columnIndex) {
+			Nucleus n = cells[rowIndex].getPrimaryNucleus();
+
+			if (columnIndex == 0)
+				return n.getMeasurement(Measurement.AREA);
+			return n.getMeasurement(Measurement.CIRCULARITY);
+		}
+
+	}
+
+	/**
+	 * Display for valid and invalid cells table.
+	 * 
+	 * @author bs19022
+	 *
+	 */
+	private class ObjectTableRenderer extends DefaultTableCellRenderer {
+
+		protected static final String DEFAULT_DECIMAL_FORMAT = "#0.00";
+		protected static final DecimalFormat DF = new DecimalFormat(DEFAULT_DECIMAL_FORMAT);
+
+		@Override
+		public Component getTableCellRendererComponent(JTable table,
+				Object value,
+				boolean isSelected, boolean hasFocus, int row, int column) {
+
+			JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected,
+					hasFocus, row, column);
+
+			if (value instanceof Double d) {
+				l.setText(DF.format(d));
+			}
+
+			boolean isValid = ((ObjectTableModel) table.getModel()).isValid(row);
+			if (isValid) {
+				l.setForeground(Color.BLACK);
+			} else {
+				l.setForeground(Color.RED);
+			}
+			return l;
+		}
+	}
 
 }

@@ -39,8 +39,8 @@ import com.bmskinner.nma.components.options.IAnalysisOptions;
 import com.bmskinner.nma.io.ImageImporter;
 import com.bmskinner.nma.io.ImageImporter.ImageImportException;
 import com.bmskinner.nma.logging.Loggable;
-import com.bmskinner.nma.visualisation.image.ImageFilterer;
 import com.bmskinner.nma.visualisation.image.ImageAnnotator;
+import com.bmskinner.nma.visualisation.image.ImageFilterer;
 
 import ij.gui.Roi;
 import ij.process.ImageProcessor;
@@ -270,11 +270,20 @@ public class FluorescentNucleusFinder extends CellFinder {
 		fireDetectionEvent(ann.toProcessor().duplicate(), "Annotated objects");
 
 		List<ICell> result = new ArrayList<>();
+		List<ICell> invalid = new ArrayList<>();
 		for (Nucleus n : list) {
 			if (isValid(nuclOptions, n)) {
 				result.add(new DefaultCell(n));
+			} else {
+				invalid.add(new DefaultCell(n));
 			}
 		}
+
+		// Return all the cells, whether valid or not for display only
+		if (hasDetectionListeners()) {
+			fireDetectedObjectEvent(result, invalid, "Detected objects");
+		}
+
 		return result;
 	}
 

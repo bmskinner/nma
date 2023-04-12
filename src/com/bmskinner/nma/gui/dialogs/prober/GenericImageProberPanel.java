@@ -86,7 +86,7 @@ public class GenericImageProberPanel extends JPanel implements ProberReloadEvent
 	private JLabel imageLabel;
 	private JLabel headerLabel; // Basic info. Default to HEADER_LBL
 
-	private List<PanelUpdatingEventListener> updatingListeners = new ArrayList<>();
+	private transient List<PanelUpdatingEventListener> updatingListeners = new ArrayList<>();
 
 	protected Finder<?> finder;
 
@@ -95,7 +95,7 @@ public class GenericImageProberPanel extends JPanel implements ProberReloadEvent
 
 	protected JProgressBar progressBar;
 	protected JTable table;
-	protected List<File> imageFiles; // the list of image files
+	protected transient List<File> imageFiles; // the list of image files
 	protected File openImage; // the image currently open
 	protected int fileIndex = 0; // the index of the open file
 

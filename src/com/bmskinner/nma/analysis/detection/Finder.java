@@ -108,6 +108,34 @@ public interface Finder<E> {
 	void fireDetectionEvent(ImageProcessor ip, String message);
 
 	/**
+	 * Add the given event listener to the finder
+	 * 
+	 * @param l
+	 */
+	void addDetectedObjectEventListener(DetectedObjectListener<E> l);
+
+	/**
+	 * Add the given event listener to the finder
+	 * 
+	 * @param l
+	 */
+	void removeDetectedObjectEventListener(DetectedObjectListener<E> l);
+
+	/**
+	 * Remove all event listeners from the finder
+	 */
+	void removeAllDetectedObjectEventListeners();
+
+	/**
+	 * Fire a detection event with the given objects and message
+	 * 
+	 * @param valid   objects that pass filtering
+	 * @param invalid objects that did not pass filtering
+	 * @param message any message
+	 */
+	void fireDetectedObjectEvent(E valid, E invalid, String message);
+
+	/**
 	 * Interface implemented by probers to be notified that a new image is available
 	 * for display
 	 * 
@@ -151,6 +179,66 @@ public interface Finder<E> {
 		 */
 		public ImageProcessor getProcessor() {
 			return ip;
+		}
+
+		/**
+		 * Get the message in this event
+		 * 
+		 * @return
+		 */
+		public String getMessage() {
+			return message;
+		}
+
+	}
+
+	interface DetectedObjectListener<E> {
+		/**
+		 * Respond to a detection event
+		 * 
+		 * @param e
+		 */
+		void detectedObjectEventReceived(DetectedObjectEvent<E> e);
+	}
+
+	/**
+	 * Fired when an image has been processed to detect components.
+	 * 
+	 * @author ben
+	 * @since 1.13.5
+	 *
+	 */
+	@SuppressWarnings("serial")
+	class DetectedObjectEvent<E> extends EventObject {
+
+		private final transient E valid;
+		private final transient E invalid;
+		private final String message;
+
+		public DetectedObjectEvent(final Object source, final E valid, final E invalid,
+				final String message) {
+			super(source);
+			this.valid = valid;
+			this.invalid = invalid;
+			this.message = message;
+		}
+
+		/**
+		 * Get the valid objects detected in this event
+		 * 
+		 * @return
+		 */
+		public E getValidObjects() {
+			return valid;
+		}
+
+		/**
+		 * Get the invalid objects detected in this event
+		 * 
+		 * @return
+		 */
+		public E getInvalidObjects() {
+			return invalid;
 		}
 
 		/**

@@ -95,6 +95,7 @@ public abstract class CellFinder extends AbstractFinder<Collection<ICell>> {
 				LOGGER.log(Loggable.STACK, "Error searching image", e);
 			}
 		}
+
 		return list;
 	}
 

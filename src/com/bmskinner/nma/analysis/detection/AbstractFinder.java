@@ -37,111 +37,134 @@ import ij.process.ImageProcessor;
  * An abstract implementation of the {@link Finder} interface.
  * 
  * @author bms41
- * @param <E>
- *            the element to find
+ * @param <E> the element to find
  * @since 1.13.5
  *
  */
-public abstract class AbstractFinder<E> implements Finder<E>{
+public abstract class AbstractFinder<E> implements Finder<E> {
 
-    protected IAnalysisOptions             options;
-    protected List<DetectionEventListener> detectionlisteners = new ArrayList<>();
-    protected List<ProgressListener>       progressListeners  = new ArrayList<>();
+	protected IAnalysisOptions options;
+	protected List<DetectionEventListener> detectionlisteners = new ArrayList<>();
+	protected List<DetectedObjectListener<E>> objectlisteners = new ArrayList<>();
+	protected List<ProgressListener> progressListeners = new ArrayList<>();
 
-    /**
-     * The minimum size of an object to detect for {@link Profileable} objects
-     */
-    public static final int MIN_PROFILABLE_OBJECT_SIZE = 50;
+	/**
+	 * The minimum size of an object to detect for {@link Profileable} objects
+	 */
+	public static final int MIN_PROFILABLE_OBJECT_SIZE = 50;
 
-    /**
-     * Construct with an analysis options
-     * 
-     * @param op the analysis options
-     */
-    protected AbstractFinder(@NonNull final IAnalysisOptions op) {
-        options = op;
-    }
+	/**
+	 * Construct with an analysis options
+	 * 
+	 * @param op the analysis options
+	 */
+	protected AbstractFinder(@NonNull final IAnalysisOptions op) {
+		options = op;
+	}
 
-    /*
-     * METHODS IMPLEMENTING THE FINDER INTERFACE
-     * 
-     */
+	/*
+	 * METHODS IMPLEMENTING THE FINDER INTERFACE
+	 * 
+	 */
 
-    @Override
-    public E find() throws Exception {
+	@Override
+	public E find() throws Exception {
 
-    	Optional<HashOptions> op = options.getDetectionOptions(CellularComponent.CYTOPLASM);
-    	if(!op.isPresent())
-    		throw new MissingOptionException("No cytoplasm options");
-    	
-    	return findInFolder(new File(op.get().getString(HashOptions.DETECTION_FOLDER)));
-    }
+		Optional<HashOptions> op = options.getDetectionOptions(CellularComponent.CYTOPLASM);
+		if (!op.isPresent())
+			throw new MissingOptionException("No cytoplasm options");
 
-    /*
-     * EVENT HANDLING
-     * 
-     */
-    @Override
-    public void addDetectionEventListener(DetectionEventListener l) {
-        detectionlisteners.add(l);
-    }
+		return findInFolder(new File(op.get().getString(HashOptions.DETECTION_FOLDER)));
+	}
 
-    @Override
-    public void removeDetectionEventListener(DetectionEventListener l) {
-        detectionlisteners.remove(l);
-    }
+	/*
+	 * EVENT HANDLING
+	 * 
+	 */
+	@Override
+	public void addDetectionEventListener(DetectionEventListener l) {
+		detectionlisteners.add(l);
+	}
 
-    @Override
-    public void fireDetectionEvent(ImageProcessor ip, String message) {
-        for (DetectionEventListener l : detectionlisteners) {
-            l.detectionEventReceived(new DetectionEvent(this, ip, message));
-        }
+	@Override
+	public void removeDetectionEventListener(DetectionEventListener l) {
+		detectionlisteners.remove(l);
+	}
 
-    }
+	@Override
+	public void fireDetectionEvent(ImageProcessor ip, String message) {
+		for (DetectionEventListener l : detectionlisteners) {
+			l.detectionEventReceived(new DetectionEvent(this, ip, message));
+		}
+	}
 
-    @Override
-    public void removeAllDetectionEventListeners() {
-        detectionlisteners.clear();
-    }
+	@Override
+	public void removeAllDetectionEventListeners() {
+		detectionlisteners.clear();
+	}
 
-    /**
-     * Are there registered listenters for detection events? These allow display
-     * of images from within the pipeline.
-     * 
-     * @return
-     */
-    protected boolean hasDetectionListeners() {
-        return !detectionlisteners.isEmpty();
-    }
+	/**
+	 * Are there registered listenters for detection events? These allow display of
+	 * images from within the pipeline.
+	 * 
+	 * @return
+	 */
+	protected boolean hasDetectionListeners() {
+		return !detectionlisteners.isEmpty();
+	}
 
-    /*
-     * PROGRESS HANDLING
-     * 
-     */
+	// Detected objects handling
 
-    @Override
+	@Override
+	public void addDetectedObjectEventListener(DetectedObjectListener<E> l) {
+		objectlisteners.add(l);
+	}
+
+	@Override
+	public void removeDetectedObjectEventListener(DetectedObjectListener<E> l) {
+		objectlisteners.remove(l);
+	}
+
+	@Override
+	public void removeAllDetectedObjectEventListeners() {
+		objectlisteners.clear();
+	}
+
+	@Override
+	public void fireDetectedObjectEvent(E valid, E invalid, String message) {
+		for (DetectedObjectListener<E> l : objectlisteners) {
+			l.detectedObjectEventReceived(new DetectedObjectEvent<>(this, valid, invalid, message));
+		}
+	}
+
+	/*
+	 * PROGRESS HANDLING
+	 * 
+	 */
+
+	@Override
 	public synchronized void addProgressListener(ProgressListener l) {
-        progressListeners.add(l);
-    }
+		progressListeners.add(l);
+	}
 
-    @Override
+	@Override
 	public synchronized void removeProgressListener(ProgressListener l) {
-        progressListeners.remove(l);
-    }
+		progressListeners.remove(l);
+	}
 
-    protected boolean hasProgressListeners() {
-        return !progressListeners.isEmpty();
-    }
+	protected boolean hasProgressListeners() {
+		return !progressListeners.isEmpty();
+	}
 
-    /**
-     * Signal that a stage in an analysis has completed.
-     */
-    protected synchronized void fireProgressEvent() {
+	/**
+	 * Signal that a stage in an analysis has completed.
+	 */
+	protected synchronized void fireProgressEvent() {
 
-        ProgressEvent event = new ProgressEvent(this);
-        Iterator<ProgressListener> iterator = progressListeners.iterator();
-        while (iterator.hasNext())
-            iterator.next().progressEventReceived(event);
-    }
+		ProgressEvent event = new ProgressEvent(this);
+		Iterator<ProgressListener> iterator = progressListeners.iterator();
+		while (iterator.hasNext())
+			iterator.next().progressEventReceived(event);
+	}
 
 }
