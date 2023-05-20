@@ -1,5 +1,5 @@
 #!/bin/bash
-Rscript -e "bookdown::render_book('index.Rmd', clean = FALSE)"
+Rscript -e "library(bookdown); library(tidyverse); bookdown::render_book('index.Rmd', clean = FALSE)"
 
 # Copy the user guide to the target folder for inclusion in the jar
 mv "./_book" "${project.basedir}/target/classes/user-guide"

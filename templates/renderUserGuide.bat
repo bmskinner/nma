@@ -1,5 +1,5 @@
 REM Render the user guide from markdown
-Rscript -e "bookdown::render_book('index.Rmd', clean = FALSE)"
+Rscript -e "library(bookdown); library(tidyverse); bookdown::render_book('index.Rmd', clean = FALSE)"
 
 REM Copy the user guide to the target folder for inclusion in the jar
 Xcopy /E /I ".\\_book" "..\\..\\target\\classes\\user-guide"
