@@ -102,6 +102,7 @@ public class DockableMainWindow extends AbstractMainWindow {
 			LOGGER.fine(
 					"Skipping update check because config setting CHECK_FOR_UPDATES is false");
 		}
+		centerOnScreen();
 
 	}
 
@@ -156,10 +157,26 @@ public class DockableMainWindow extends AbstractMainWindow {
 
 			this.pack();
 			consensusNucleusPanel.restoreAutoBounds();
+
+
 		} catch (Exception e) {
 			LOGGER.log(Level.SEVERE, "Error initialising main view: %s".formatted(e.getMessage()),
 					e);
 		}
+	}
+
+	/**
+	 * Centre the dialog on the screen. Note this should be invoked after packing or
+	 * location will be incorrect.
+	 */
+	public void centerOnScreen() {
+		final int width = getWidth();
+		final int height = getHeight();
+		final Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+		int x = (screenSize.width / 2) - (width / 2);
+		int y = (screenSize.height / 2) - (height / 2);
+
+		setLocation(x, y);
 	}
 
 	/**
