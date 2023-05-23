@@ -64,7 +64,7 @@ import net.sourceforge.argparse4j.inf.Subparsers;
 public class NuclearMorphologyAnalysis {
 
 	private static NuclearMorphologyAnalysis instance = null;
-	public DockableMainWindow mw = null;
+	public static DockableMainWindow mw = null;
 
 	/** Initialise the logger for the project namespace */
 	private static final Logger LOGGER = Logger.getLogger(Loggable.PROJECT_LOGGER);
@@ -521,12 +521,16 @@ public class NuclearMorphologyAnalysis {
 	 */
 
 	public void runWithGUI() {
-		LOGGER.info("Loading user interface");
-		try {
-			Runnable r = new RunWithGui();
-			EventQueue.invokeLater(r);
-		} catch (Exception e) {
-			LOGGER.log(Level.SEVERE, "Error loading GUI: %s".formatted(e.getMessage()), e);
+
+		if (mw == null) {
+			try {
+				Runnable r = new RunWithGui();
+				EventQueue.invokeLater(r);
+			} catch (Exception e) {
+				LOGGER.log(Level.SEVERE, "Error loading GUI: %s".formatted(e.getMessage()), e);
+			}
+		} else {
+			LOGGER.fine("Existing GUI instance");
 		}
 	}
 
@@ -556,6 +560,7 @@ public class NuclearMorphologyAnalysis {
 			DatasetListManager dlm = DatasetListManager.getInstance();
 			UIController.getInstance().addDatasetAddedListener(dlm);
 
+			// We need to create the JFrame after the look and feel has been set
 			mw = new DockableMainWindow();
 			mw.setVisible(true);
 		}

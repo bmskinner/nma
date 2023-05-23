@@ -103,7 +103,6 @@ public class DockableMainWindow extends AbstractMainWindow {
 					"Skipping update check because config setting CHECK_FOR_UPDATES is false");
 		}
 		centerOnScreen();
-
 	}
 
 	private void loadImageIcon() {
@@ -157,7 +156,6 @@ public class DockableMainWindow extends AbstractMainWindow {
 
 			this.pack();
 			consensusNucleusPanel.restoreAutoBounds();
-
 
 		} catch (Exception e) {
 			LOGGER.log(Level.SEVERE, "Error initialising main view: %s".formatted(e.getMessage()),

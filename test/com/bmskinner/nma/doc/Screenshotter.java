@@ -1,5 +1,7 @@
 package com.bmskinner.nma.doc;
 
+import static org.junit.Assert.assertTrue;
+
 /*******************************************************************************
  * Copyright (C) 2018 Ben Skinner
  * 
@@ -27,8 +29,6 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.swing.UIManager;
-
 import org.apache.commons.io.FileUtils;
 import org.eclipse.jdt.annotation.NonNull;
 import org.junit.Test;
@@ -40,8 +40,6 @@ import com.bmskinner.nma.core.NuclearMorphologyAnalysis;
 import com.bmskinner.nma.gui.events.FileImportEventListener.FileImportEvent;
 import com.bmskinner.nma.gui.events.UserActionController;
 import com.bmskinner.nma.gui.tabs.DetailPanel;
-
-import ij.IJ;
 
 /**
  * Walk through the UI, taking screenshots of each window for documentation
@@ -60,7 +58,7 @@ public class Screenshotter {
 	/** Sleep time after loading a dataset */
 	private static final int LOAD_TIME_MILLIS = 2000;
 
-	private static final String SCREENSHOT_FOLDER = "res/screens/";
+	private static final String SCREENSHOT_FOLDER = "res/screens/" + System.getProperty("os.name");
 
 	private final Robot robot;
 
@@ -78,31 +76,20 @@ public class Screenshotter {
 		dlm = DatasetListManager.getInstance();
 	}
 
-	@Test
-	public void testScreenShotsCreated() throws InterruptedException, AWTException, IOException {
-		String[] args = {};
-		main(args);
-	}
-
 	/**
-	 * Launch the screenshotter
+	 * Launch the screenshotter as a test class
 	 * 
-	 * @param args
 	 * @throws InterruptedException
 	 * @throws AWTException
 	 * @throws IOException
 	 */
-	public static void main(String[] args) throws InterruptedException, AWTException, IOException {
+	@Test
+	public void testScreenShotsCreated() throws InterruptedException, AWTException, IOException {
+		assertTrue(setup());
+	}
 
-		IJ.setBackgroundColor(0, 0, 0); // default background is black
-		try {
-			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-		} catch (Exception e) {
-			System.err.println("Error setting UI look and feel");
-			e.printStackTrace();
-		}
-		Screenshotter s = new Screenshotter();
-		s.run();
+	private static boolean setup() throws InterruptedException, IOException, AWTException {
+		return new Screenshotter().run();
 	}
 
 	public boolean allFilesExist() {
@@ -123,7 +110,7 @@ public class Screenshotter {
 		return true;
 	}
 
-	private void run() throws InterruptedException, IOException {
+	private boolean run() throws InterruptedException, IOException {
 
 		// clear previous runs
 		File rootFolder = new File(SCREENSHOT_FOLDER);
@@ -139,9 +126,12 @@ public class Screenshotter {
 
 			takeMultiDatasetScreenshots(TestResources.MOUSE_TEST_DATASET,
 					TestResources.MOUSE_CLUSTERS_DATASET, rootFolder);
+		} else {
+			return false;
 		}
 
 		nma.mw.setVisible(false);
+		return true;
 	}
 
 	/**
