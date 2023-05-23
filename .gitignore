@@ -13,6 +13,7 @@ scripts/package*
 scripts/render*
 scripts/upload*
 target/*
+packages/*
 wiki/*
 test/samples/datasets/*
 test/samples/images/*

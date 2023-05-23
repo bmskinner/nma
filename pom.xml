@@ -14,7 +14,6 @@
 		<project.build.sourceEncoding>ISO-8859-1</project.build.sourceEncoding>
 		<jar.finalName>${project.full.name}_${project.version}${version.suffix}</jar.finalName>
 		<project.template.directory>templates</project.template.directory>
-		<project.screenshot.directory>res/screens</project.screenshot.directory>
 		<project.scripts.directory>scripts</project.scripts.directory>
 		<project.wiki.directory>wiki</project.wiki.directory>
 		<maven.build.timestamp.format>yyyy</maven.build.timestamp.format>
@@ -50,6 +49,8 @@
 				<script.packaging>packageAppImage.bat</script.packaging>
 				<script.rendering>renderUserGuide.bat</script.rendering>
 				<script.dependencies>installDependencies.bat</script.dependencies>
+				
+				<project.screenshot.directory>res/screens/Windows 10</project.screenshot.directory>
 			</properties>
 		</profile>
 
@@ -67,6 +68,8 @@
 				<script.packaging>packageAppImage.sh</script.packaging>
 				<script.rendering>renderUserGuide.sh</script.rendering>
 				<script.dependencies>installDependencies.sh</script.dependencies>
+				
+				<project.screenshot.directory>res/screens/Linux</project.screenshot.directory>
 			</properties>
 		</profile>
 
@@ -83,6 +86,8 @@
 				<script.packaging>packageDMG.sh</script.packaging>
 				<script.rendering>renderUserGuide.sh</script.rendering>
 				<script.dependencies>installDependencies.sh</script.dependencies>
+				
+				<project.screenshot.directory>res/screens/MacOS</project.screenshot.directory>
 			</properties>
 		</profile>
 		<profile>
@@ -384,7 +389,7 @@
 						<configuration>
 							<executable>${script.executor}</executable>
 							<commandlineArgs>${script.args}
-								${project.basedir}/scripts/${script.dependencies}</commandlineArgs>
+								${project.basedir}/${project.scripts.directory}/${script.dependencies}</commandlineArgs>
 							<workingDirectory>${project.basedir}</workingDirectory>
 						</configuration>
 					</execution>
@@ -402,7 +407,7 @@
 						<configuration>
 							<executable>${script.executor}</executable>
 							<commandlineArgs>${script.args}
-								${project.basedir}/scripts/${script.rendering}</commandlineArgs>
+								${project.basedir}/${project.scripts.directory}/${script.rendering}</commandlineArgs>
 							<workingDirectory>${project.basedir}/res/user-guide</workingDirectory>
 						</configuration>
 					</execution>
@@ -418,7 +423,7 @@
 						<configuration>
 							<executable>${script.executor}</executable>
 							<commandlineArgs>${script.args} ${script.packaging}</commandlineArgs>
-							<workingDirectory>${project.basedir}/scripts</workingDirectory>
+							<workingDirectory>${project.basedir}/${project.scripts.directory}</workingDirectory>
 						</configuration>
 					</execution>
 				</executions>

@@ -9,4 +9,4 @@ printf "#!/bin/bash\n./bin/Nuclear\ Morphology\ Analysis" > ${project.basedir}/t
 chmod +x ${project.basedir}/target/appimage-linux/Nuclear\ Morphology\ Analysis/launch.sh
 
 # Make a zipped tar
-tar -czf ${project.basedir}/target/${jar.finalName}-linux.tar.gz -C ${project.basedir}/target/appimage-linux Nuclear\ Morphology\ Analysis 
+tar -czf ${project.basedir}/packages/${jar.finalName}-linux.tar.gz -C ${project.basedir}/target/appimage-linux Nuclear\ Morphology\ Analysis 
