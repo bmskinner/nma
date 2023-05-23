@@ -516,10 +516,11 @@ public class NuclearMorphologyAnalysis {
 	}
 
 	/**
-	 * Load the program user interface
+	 * Load the program user interface. This is public so we can create the UI for
+	 * screenshotting.
 	 */
 
-	private void runWithGUI() {
+	public void runWithGUI() {
 		LOGGER.info("Loading user interface");
 		try {
 			Runnable r = new RunWithGui();

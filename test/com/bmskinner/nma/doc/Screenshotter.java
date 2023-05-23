@@ -71,8 +71,9 @@ public class Screenshotter {
 	public Screenshotter() throws AWTException, InterruptedException {
 		robot = new Robot();
 		nma = NuclearMorphologyAnalysis.getInstance();
+		nma.runWithGUI();
 		Thread.sleep(LOAD_TIME_MILLIS);
-		LOGGER.fine("Getting UAC");
+
 		uac = UserActionController.getInstance();
 		dlm = DatasetListManager.getInstance();
 	}
