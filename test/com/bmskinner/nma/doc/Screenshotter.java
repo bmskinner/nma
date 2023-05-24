@@ -21,12 +21,9 @@ import static org.junit.Assert.assertTrue;
 //package com.bmskinner.nma.documentation;
 
 import java.awt.AWTException;
-import java.awt.Point;
 import java.awt.Robot;
-import java.awt.event.InputEvent;
 import java.io.File;
 import java.io.IOException;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.commons.io.FileUtils;
@@ -85,11 +82,7 @@ public class Screenshotter {
 	 */
 	@Test
 	public void testScreenShotsCreated() throws InterruptedException, AWTException, IOException {
-		assertTrue(setup());
-	}
-
-	private static boolean setup() throws InterruptedException, IOException, AWTException {
-		return new Screenshotter().run();
+		assertTrue(new Screenshotter().run());
 	}
 
 	public boolean allFilesExist() {
@@ -155,7 +148,7 @@ public class Screenshotter {
 		// Wait for the dataset to load
 		Thread.sleep(LOAD_TIME_MILLIS);
 
-		selectSingleDataset();
+		dlm.setSelectedDatasets(dlm.getRootDatasets());
 
 		takeScreenshots(rootFolder, file.getName());
 
@@ -178,46 +171,11 @@ public class Screenshotter {
 		// Wait for the dataset to load
 		Thread.sleep(LOAD_TIME_MILLIS);
 
-		selectMultipleDatasets();
+		dlm.setSelectedDatasets(dlm.getAllDatasets().stream().toList());
 
 		takeScreenshots(rootFolder, "Multi");
 
 		dlm.clear();
-	}
-
-	/**
-	 * Select a single cell in the cells list panel
-	 * 
-	 * @param dp
-	 */
-	private void selectSingleDataset() {
-		Point listPos = nma.mw.getLocationOnScreen();
-		robot.mouseMove(listPos.x + 400, listPos.y + 90);
-		robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
-		try {
-			Thread.sleep(20);
-		} catch (InterruptedException e) {
-			LOGGER.log(Level.SEVERE, e.getMessage(), e);
-		}
-		robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
-	}
-
-	/**
-	 * Select a single cell in the cells list panel
-	 * 
-	 * @param dp
-	 */
-	private void selectMultipleDatasets() {
-		Point listPos = nma.mw.getLocationOnScreen();
-		robot.mouseMove(listPos.x + 400, listPos.y + 90);
-		robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
-		try {
-			Thread.sleep(20);
-		} catch (InterruptedException e) {
-			LOGGER.log(Level.SEVERE, e.getMessage(), e);
-		}
-		robot.mouseMove(listPos.x + 400, listPos.y + 160);
-		robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
 	}
 
 	/**

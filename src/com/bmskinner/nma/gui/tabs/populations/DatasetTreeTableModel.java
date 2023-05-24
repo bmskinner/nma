@@ -329,6 +329,17 @@ public class DatasetTreeTableModel extends AbstractTreeTableModel {
 		return null;
 	}
 
+	/**
+	 * Get the path from the root node to the node containing the desired object
+	 * 
+	 * @param obj the object to find
+	 * @return
+	 */
+	public TreePath getPath(@NonNull Object obj) {
+		MutableTreeTableNode node = getNode(obj);
+		return new TreePath(getPathToRoot(node));
+	}
+
 	@Override
 	public String getColumnName(int column) {
 		return COL_NAMES[column];

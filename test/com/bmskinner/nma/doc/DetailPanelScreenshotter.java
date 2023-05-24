@@ -76,6 +76,17 @@ public class DetailPanelScreenshotter {
 	}
 
 	/**
+	 * Create a rectangle encompassing the given component
+	 * 
+	 * @param c
+	 * @return
+	 */
+	private Rectangle makeBounds(Component c) {
+		Point p = c.getLocationOnScreen();
+		return new Rectangle(p.x, p.y, c.getWidth(), c.getHeight());
+	}
+
+	/**
 	 * Take screenshots of the given panel
 	 * 
 	 * @param panel  the panel to image
@@ -87,7 +98,6 @@ public class DetailPanelScreenshotter {
 	public void takeScreenShots(DetailPanel panel, File folder, String title)
 			throws IOException, InterruptedException {
 
-//		LOGGER.fine("Imaging " + panel.getPanelTitle());
 		Thread.sleep(100); // give time for panel to load
 
 		boolean hasTabPane = Arrays.stream(panel.getComponents())
@@ -142,7 +152,18 @@ public class DetailPanelScreenshotter {
 	 * @throws IOException
 	 */
 	private void takeScreenShot(File folder, String title) throws IOException {
-		BufferedImage img = robot.createScreenCapture(makeCroppedBounds(mw));
+
+		String platform = System.getProperty("os.name");
+
+		// On Windows, bounds include some background pixels. Crop them out
+		Rectangle regionToCapture = null;
+		if (platform.startsWith("Windows")) {
+			regionToCapture = makeCroppedBounds(mw);
+		} else {
+			regionToCapture = makeBounds(mw);
+		}
+
+		BufferedImage img = robot.createScreenCapture(regionToCapture);
 		File outputfile = new File(folder, title + Io.PNG_FILE_EXTENSION);
 		ImageIO.write(img, "png", outputfile);
 	}

@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import javax.swing.BorderFactory;
+import javax.swing.DefaultListSelectionModel;
 import javax.swing.JScrollPane;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
@@ -72,9 +73,21 @@ public class DatasetSelectionPanel extends DetailPanel
 	}
 
 	@Override
-	public void datasetSelectionUpdated(List<IAnalysisDataset> d) {
-		// no action, is this deprecated?
-		// TODO remove this if the tbale model no longer requires this
+	public void datasetSelectionUpdated(List<IAnalysisDataset> datasets) {
+
+		// don't get caught in infinite loops
+		if (treeListener.datasetSelectionOrder.equals(datasets))
+			return;
+
+		DefaultListSelectionModel tsm = new DefaultListSelectionModel();
+
+		for (IAnalysisDataset d : datasets) {
+
+			int i = treeTable.getRowForPath(model.getPath(d));
+			tsm.addSelectionInterval(i, i);
+		}
+		treeTable.setSelectionModel(tsm);
+
 	}
 
 	@Override
@@ -239,7 +252,7 @@ public class DatasetSelectionPanel extends DetailPanel
 		 * This tracks which datasets are currently selected, and the order in which
 		 * they were selected.
 		 */
-		private final List<IAnalysisDataset> datasetSelectionOrder = new ArrayList<>();
+		public final List<IAnalysisDataset> datasetSelectionOrder = new ArrayList<>();
 
 		@Override
 		public void valueChanged(TreeSelectionEvent e) {
