@@ -8,5 +8,6 @@ jpackage --name "Nuclear Morphology Analysis" --app-version ${project.version} -
 printf "#!/bin/bash\n./bin/Nuclear\ Morphology\ Analysis" > ${project.basedir}/target/appimage-linux/Nuclear\ Morphology\ Analysis/launch.sh
 chmod +x ${project.basedir}/target/appimage-linux/Nuclear\ Morphology\ Analysis/launch.sh
 
-# Make a zipped tar
-tar -czf ${project.basedir}/packages/${jar.finalName}-linux.tar.gz -C ${project.basedir}/target/appimage-linux Nuclear\ Morphology\ Analysis 
+# Make a zipped tar of the NMA directory (excluding higher level dirs)
+mkdir -p ${project.basedir}/packages
+tar -czf ${project.basedir}/packages/${jar.finalName}-linux.tar.gz --directory ${project.basedir}/target/appimage-linux . 
