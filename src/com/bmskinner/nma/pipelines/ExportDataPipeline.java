@@ -119,7 +119,7 @@ public class ExportDataPipeline {
 		File statsFile = new File(root.getSavePath().getParentFile(),
 				root.getSavePath().getName() + ".profiles" + Io.TAB_FILE_EXTENSION);
 		LOGGER.info("Exporting profiles to: " + statsFile.getAbsolutePath());
-		new DatasetProfileExporter(statsFile, datasets).call();
+		new DatasetProfileExporter(statsFile, datasets, new DefaultOptions()).call();
 	}
 
 	private void exportOutlines() throws Exception {
@@ -127,7 +127,7 @@ public class ExportDataPipeline {
 				root.getSavePath().getName() + ".outlines" + Io.TAB_FILE_EXTENSION);
 		LOGGER.info("Exporting outlines to: " + statsFile.getAbsolutePath());
 
-		new DatasetOutlinesExporter(statsFile, datasets).call();
+		new DatasetOutlinesExporter(statsFile, datasets, new DefaultOptions()).call();
 	}
 
 	private void exportSignals() throws Exception {
@@ -135,7 +135,7 @@ public class ExportDataPipeline {
 				root.getSavePath().getName() + ".signals" + Io.TAB_FILE_EXTENSION);
 		LOGGER.info("Exporting signals to: " + statsFile.getAbsolutePath());
 
-		new DatasetSignalsExporter(statsFile, datasets).call();
+		new DatasetSignalsExporter(statsFile, datasets, new DefaultOptions()).call();
 	}
 
 	private void exportShells() throws Exception {
@@ -143,7 +143,7 @@ public class ExportDataPipeline {
 				root.getSavePath().getName() + ".shells" + Io.TAB_FILE_EXTENSION);
 		LOGGER.info("Exporting shells to: " + statsFile.getAbsolutePath());
 
-		new DatasetShellsExporter(statsFile, datasets).call();
+		new DatasetShellsExporter(statsFile, datasets, new DefaultOptions()).call();
 	}
 
 	private void exportSingleCellImages() throws Exception {

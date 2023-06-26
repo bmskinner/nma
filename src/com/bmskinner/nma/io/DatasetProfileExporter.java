@@ -11,6 +11,7 @@ import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.cells.ICell;
 import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
+import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.profiles.IProfile;
 import com.bmskinner.nma.components.profiles.MissingLandmarkException;
 import com.bmskinner.nma.components.profiles.MissingProfileException;
@@ -30,21 +31,27 @@ public class DatasetProfileExporter extends StatsExporter {
 	private static final Logger LOGGER = Logger.getLogger(DatasetProfileExporter.class.getName());
 
 	/**
-	 * Create specifying the folder profiles will be exported into
+	 * Create specifying the file or directory profiles will be exported into
 	 * 
-	 * @param folder
+	 * @param file    the output file or directory for the export
+	 * @param list    the datasets to export
+	 * @param options other options for the export
 	 */
-	public DatasetProfileExporter(@NonNull File file, @NonNull List<IAnalysisDataset> list) {
-		super(file, list);
+	public DatasetProfileExporter(@NonNull File file, @NonNull List<IAnalysisDataset> list,
+			HashOptions options) {
+		super(file, list, options);
 	}
 
 	/**
-	 * Create specifying the folder profiles will be exported into
+	 * Create specifying the file or directory profiles will be exported into
 	 * 
-	 * @param folder
+	 * @param file    the output file or directory for the export
+	 * @param dataset the dataset to export
+	 * @param options other options for the export
 	 */
-	public DatasetProfileExporter(@NonNull File file, @NonNull IAnalysisDataset dataset) {
-		super(file, dataset);
+	public DatasetProfileExporter(@NonNull File file, @NonNull IAnalysisDataset dataset,
+			HashOptions options) {
+		super(file, dataset, options);
 	}
 
 	@Override
@@ -63,7 +70,8 @@ public class DatasetProfileExporter extends StatsExporter {
 	 * @throws ProfileException
 	 */
 	@Override
-	protected void append(@NonNull IAnalysisDataset d, @NonNull StringBuilder outLine) throws Exception {
+	protected void append(@NonNull IAnalysisDataset d, @NonNull StringBuilder outLine)
+			throws Exception {
 
 		for (ICell cell : d.getCollection().getCells()) {
 

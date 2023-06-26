@@ -29,6 +29,7 @@ import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.cells.ICell;
 import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
+import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.options.MissingOptionException;
 import com.bmskinner.nma.components.profiles.MissingLandmarkException;
 import com.bmskinner.nma.components.profiles.MissingProfileException;
@@ -50,21 +51,27 @@ import com.bmskinner.nma.components.signals.SignalManager;
 public class DatasetShellsExporter extends StatsExporter {
 
 	/**
-	 * Create specifying the folder stats will be exported into
+	 * Create specifying the file or directory profiles will be exported into
 	 * 
-	 * @param folder
+	 * @param file    the output file or directory for the export
+	 * @param list    the datasets to export
+	 * @param options other options for the export
 	 */
-	public DatasetShellsExporter(@NonNull File file, @NonNull List<IAnalysisDataset> list) {
-		super(file, list);
+	public DatasetShellsExporter(@NonNull File file, @NonNull List<IAnalysisDataset> list,
+			@NonNull HashOptions options) {
+		super(file, list, options);
 	}
 
 	/**
-	 * Create specifying the folder stats will be exported into
+	 * Create specifying the file or directory profiles will be exported into
 	 * 
-	 * @param folder
+	 * @param file    the output file or directory for the export
+	 * @param dataset the dataset to export
+	 * @param options other options for the export
 	 */
-	public DatasetShellsExporter(@NonNull File file, @NonNull IAnalysisDataset dataset) {
-		super(file, dataset);
+	public DatasetShellsExporter(@NonNull File file, @NonNull IAnalysisDataset dataset,
+			@NonNull HashOptions options) {
+		super(file, dataset, options);
 	}
 
 	/**
@@ -73,7 +80,7 @@ public class DatasetShellsExporter extends StatsExporter {
 	 * @param outLine
 	 */
 	@Override
-	protected void appendHeader(StringBuilder outLine) {
+	protected void appendHeader(@NonNull StringBuilder outLine) {
 
 		String[] headers = {
 				"Dataset",

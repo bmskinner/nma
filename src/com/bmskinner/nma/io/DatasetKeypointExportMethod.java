@@ -102,7 +102,10 @@ public class DatasetKeypointExportMethod extends MultipleDatasetAnalysisMethod i
 					int x2 = (int) (p1.getXAsInt() + n.getWidth());
 					int y2 = (int) (p1.getYAsInt() + n.getHeight());
 
+					// x & y min & max
 					bb.add("[%s, %s, %s, %s]".formatted(p1.getXAsInt(), p1.getYAsInt(), x2, y2));
+
+					// x, y, visibility
 					kk.add("[[%s, %s, 1], [%s, %s, 1]]".formatted(rp.getXAsInt(), rp.getYAsInt(),
 							op.getXAsInt(), op.getYAsInt()));
 				}

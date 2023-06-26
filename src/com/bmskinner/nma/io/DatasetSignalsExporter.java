@@ -30,6 +30,7 @@ import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.measure.MeasurementScale;
+import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.options.MissingOptionException;
 import com.bmskinner.nma.components.profiles.MissingLandmarkException;
 import com.bmskinner.nma.components.profiles.MissingProfileException;
@@ -40,21 +41,27 @@ import com.bmskinner.nma.components.signals.ISignalGroup;
 public class DatasetSignalsExporter extends StatsExporter {
 
 	/**
-	 * Create specifying the folder stats will be exported into
+	 * Create specifying the file or directory profiles will be exported into
 	 * 
-	 * @param folder
+	 * @param file    the output file or directory for the export
+	 * @param list    the datasets to export
+	 * @param options other options for the export
 	 */
-	public DatasetSignalsExporter(@NonNull File file, @NonNull List<IAnalysisDataset> list) {
-		super(file, list);
+	public DatasetSignalsExporter(@NonNull File file, @NonNull List<IAnalysisDataset> list,
+			@NonNull HashOptions options) {
+		super(file, list, options);
 	}
 
 	/**
-	 * Create specifying the folder stats will be exported into
+	 * Create specifying the file or directory profiles will be exported into
 	 * 
-	 * @param folder
+	 * @param file    the output file or directory for the export
+	 * @param dataset the dataset to export
+	 * @param options other options for the export
 	 */
-	public DatasetSignalsExporter(@NonNull File file, @NonNull IAnalysisDataset dataset) {
-		super(file, dataset);
+	public DatasetSignalsExporter(@NonNull File file, @NonNull IAnalysisDataset dataset,
+			@NonNull HashOptions options) {
+		super(file, dataset, options);
 	}
 
 	/**

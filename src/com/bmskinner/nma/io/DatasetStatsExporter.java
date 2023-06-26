@@ -79,7 +79,7 @@ public class DatasetStatsExporter extends StatsExporter {
 	 */
 	public DatasetStatsExporter(@NonNull File file, @NonNull List<IAnalysisDataset> list,
 			HashOptions options) {
-		super(file, list);
+		super(file, list, options);
 		segCount = list.get(0).getCollection().getProfileManager().getSegmentCount();
 		if (list.size() == 1) {
 			isIncludeSegments = true;
@@ -108,7 +108,7 @@ public class DatasetStatsExporter extends StatsExporter {
 	 */
 	public DatasetStatsExporter(@NonNull File file, @NonNull IAnalysisDataset dataset,
 			HashOptions options) {
-		super(file, dataset);
+		super(file, dataset, options);
 		segCount = dataset.getCollection().getProfileManager().getSegmentCount();
 		isIncludeSegments = true;
 		profileSamples = options.getInt(Io.PROFILE_SAMPLES_KEY);

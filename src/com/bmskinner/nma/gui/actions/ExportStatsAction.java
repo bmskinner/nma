@@ -35,6 +35,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nma.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nma.analysis.IAnalysisMethod;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
+import com.bmskinner.nma.components.options.DefaultOptions;
 import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.options.OptionsBuilder;
 import com.bmskinner.nma.core.ThreadManager;
@@ -59,7 +60,7 @@ public abstract class ExportStatsAction extends MultiDatasetResultAction {
 
 	private static final Logger LOGGER = Logger.getLogger(ExportStatsAction.class.getName());
 
-	public ExportStatsAction(@NonNull final List<IAnalysisDataset> datasets,
+	protected ExportStatsAction(@NonNull final List<IAnalysisDataset> datasets,
 			@NonNull final String label,
 			@NonNull final ProgressBarAcceptor acceptor) {
 		super(datasets, label, acceptor);
@@ -192,7 +193,7 @@ public abstract class ExportStatsAction extends MultiDatasetResultAction {
 				return;
 			}
 
-			IAnalysisMethod m = new DatasetProfileExporter(file, datasets);
+			IAnalysisMethod m = new DatasetProfileExporter(file, datasets, new DefaultOptions());
 			worker = new DefaultAnalysisWorker(m, datasets.size());
 			worker.addPropertyChangeListener(this);
 			this.setProgressMessage("Exporting profiles");
@@ -228,7 +229,7 @@ public abstract class ExportStatsAction extends MultiDatasetResultAction {
 				return;
 			}
 
-			IAnalysisMethod m = new DatasetOutlinesExporter(file, datasets);
+			IAnalysisMethod m = new DatasetOutlinesExporter(file, datasets, new DefaultOptions());
 			worker = new DefaultAnalysisWorker(m, datasets.size());
 			worker.addPropertyChangeListener(this);
 			this.setProgressMessage("Exporting outlines");
@@ -264,7 +265,7 @@ public abstract class ExportStatsAction extends MultiDatasetResultAction {
 				return;
 			}
 
-			IAnalysisMethod m = new DatasetShellsExporter(file, datasets);
+			IAnalysisMethod m = new DatasetShellsExporter(file, datasets, new DefaultOptions());
 			worker = new DefaultAnalysisWorker(m, datasets.size());
 			worker.addPropertyChangeListener(this);
 			this.setProgressMessage("Exporting stats");
@@ -300,7 +301,7 @@ public abstract class ExportStatsAction extends MultiDatasetResultAction {
 				return;
 			}
 
-			IAnalysisMethod m = new DatasetSignalsExporter(file, datasets);
+			IAnalysisMethod m = new DatasetSignalsExporter(file, datasets, new DefaultOptions());
 			worker = new DefaultAnalysisWorker(m, datasets.size());
 			worker.addPropertyChangeListener(this);
 			this.setProgressMessage("Exporting stats");

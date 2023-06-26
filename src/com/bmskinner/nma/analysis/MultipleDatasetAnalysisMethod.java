@@ -24,32 +24,35 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 
 /**
- * An abstract class of analysis method designed for handling multiple analysis datasets
- * e.g. merging datasets together.
+ * An abstract class of analysis method designed for handling multiple analysis
+ * datasets e.g. merging datasets together.
+ * 
  * @author bms41
  * @since 1.13.8
  *
  */
 public abstract class MultipleDatasetAnalysisMethod extends AbstractAnalysisMethod {
-    
-    protected final List<IAnalysisDataset> datasets = new ArrayList<>();
-    
-    /**
-     * Construct with a list of datasets to be analysed
-     * @param datasets
-     */
-    public MultipleDatasetAnalysisMethod(@NonNull List<IAnalysisDataset> datasets) {
-        super();
-        this.datasets.addAll(datasets);
-    }
-    
-    /**
-     * Construct with a single dataset to be analysed
-     * @param datasets
-     */
-    public MultipleDatasetAnalysisMethod(@NonNull IAnalysisDataset dataset) {
-        super();
-        datasets.add(dataset);
-    }
+
+	protected final List<IAnalysisDataset> datasets = new ArrayList<>();
+
+	/**
+	 * Construct with a list of datasets to be analysed
+	 * 
+	 * @param datasets
+	 */
+	protected MultipleDatasetAnalysisMethod(@NonNull List<IAnalysisDataset> datasets) {
+		super();
+		this.datasets.addAll(datasets);
+	}
+
+	/**
+	 * Construct with a single dataset to be analysed
+	 * 
+	 * @param datasets
+	 */
+	protected MultipleDatasetAnalysisMethod(@NonNull IAnalysisDataset dataset) {
+		super();
+		datasets.add(dataset);
+	}
 
 }
