@@ -24,6 +24,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
@@ -38,6 +40,7 @@ import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.options.DefaultOptions;
 import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.options.OptionsBuilder;
+import com.bmskinner.nma.components.rules.OrientationMark;
 import com.bmskinner.nma.core.ThreadManager;
 import com.bmskinner.nma.gui.ProgressBarAcceptor;
 import com.bmskinner.nma.gui.components.FileSelector;
@@ -193,14 +196,14 @@ public abstract class ExportStatsAction extends MultiDatasetResultAction {
 				return;
 			}
 
-			IAnalysisMethod m = new DatasetProfileExporter(file, datasets, new DefaultOptions());
+			IAnalysisMethod m = new DatasetProfileExporter(file, datasets,
+					new DefaultOptions());
 			worker = new DefaultAnalysisWorker(m, datasets.size());
 			worker.addPropertyChangeListener(this);
 			this.setProgressMessage("Exporting profiles");
 			ThreadManager.getInstance().submit(worker);
 
 		}
-
 	}
 
 	/**
@@ -222,18 +225,124 @@ public abstract class ExportStatsAction extends MultiDatasetResultAction {
 		@Override
 		public void run() {
 
-			File file = FileSelector.chooseStatsExportFile(datasets, "outlines");
+			SubAnalysisSetupDialog optionsPanel = new ExportOutlinesOptionsDialog(datasets);
+			if (optionsPanel.isReadyToRun()) {
 
-			if (file == null) {
+				File file = FileSelector.chooseStatsExportFile(datasets, "outlines");
+
+				if (file == null) {
+					cancel();
+					return;
+				}
+
+				IAnalysisMethod m = new DatasetOutlinesExporter(file, datasets,
+						optionsPanel.getOptions());
+				worker = new DefaultAnalysisWorker(m, datasets.size());
+				worker.addPropertyChangeListener(this);
+				this.setProgressMessage("Exporting outlines");
+				ThreadManager.getInstance().submit(worker);
+			} else {
 				cancel();
-				return;
 			}
 
-			IAnalysisMethod m = new DatasetOutlinesExporter(file, datasets, new DefaultOptions());
-			worker = new DefaultAnalysisWorker(m, datasets.size());
-			worker.addPropertyChangeListener(this);
-			this.setProgressMessage("Exporting outlines");
-			ThreadManager.getInstance().submit(worker);
+		}
+
+		/**
+		 * Configure the exported parameters
+		 * 
+		 * @author ben
+		 * @since 2.1.1
+		 *
+		 */
+		@SuppressWarnings("serial")
+		private class ExportOutlinesOptionsDialog extends SubAnalysisSetupDialog {
+
+			private HashOptions options = new OptionsBuilder().build();
+			private static final String IS_SAMPLE_LBL = "Sample fixed number of points";
+			private static final String PROFILE_SAMPLE_LBL = "Number of points";
+			private static final String OM_LBL = "Orientation mark to start from";
+
+			public ExportOutlinesOptionsDialog(final List<IAnalysisDataset> datasets) {
+				super(datasets, "Export options");
+				setDefaults();
+				createUI();
+				packAndDisplay();
+			}
+
+			@Override
+			public IAnalysisMethod getMethod() {
+				// Not used here, we need to select a file first
+				return null;
+			}
+
+			@Override
+			public HashOptions getOptions() {
+				return options;
+			}
+
+			@Override
+			protected void createUI() {
+				JPanel panel = new JPanel();
+				GridBagLayout layout = new GridBagLayout();
+				panel.setLayout(layout);
+				List<JLabel> labels = new ArrayList<>();
+				List<Component> fields = new ArrayList<>();
+
+				// If downsamping, number of points to export
+
+				SpinnerModel model = new SpinnerNumberModel(100, // initial
+						10, // min
+						1000, // max
+						1); // step
+				JSpinner spinner = new JSpinner(model);
+
+				spinner.addChangeListener(
+						e -> addIntToOptions(spinner, options,
+								DefaultOptions.EXPORT_OUTLINE_N_SAMPLES_KEY));
+				spinner.setEnabled(false);
+
+				// Checkbox for whether to downsample
+
+				JCheckBox useSampling = new JCheckBox("", false);
+				useSampling.addChangeListener(e -> {
+					options.setBoolean(DefaultOptions.EXPORT_OUTLINE_IS_NORMALISED_KEY,
+							useSampling.isSelected());
+
+					spinner.setEnabled(useSampling.isSelected());
+				});
+
+				// Dropdown for which orientation point to index on
+				JComboBox<OrientationMark> omBox = new JComboBox<>(OrientationMark.values());
+				omBox.setSelectedItem(OrientationMark.REFERENCE);
+
+				omBox.addActionListener(e -> {
+					options.setString(DefaultOptions.EXPORT_OUTLINE_STARTING_LANDMARK_KEY,
+							((OrientationMark) omBox.getSelectedItem()).name());
+				});
+
+				// Add elements in order
+
+				labels.add(new JLabel(IS_SAMPLE_LBL));
+				fields.add(useSampling);
+
+				labels.add(new JLabel(PROFILE_SAMPLE_LBL));
+				fields.add(spinner);
+
+				labels.add(new JLabel(OM_LBL));
+				fields.add(omBox);
+
+				addLabelTextRows(labels, fields, layout, panel);
+				add(panel, BorderLayout.CENTER);
+				add(createFooter(), BorderLayout.SOUTH);
+			}
+
+			@Override
+			protected void setDefaults() {
+				options.setBoolean(DefaultOptions.EXPORT_OUTLINE_IS_NORMALISED_KEY, false);
+				options.setString(DefaultOptions.EXPORT_OUTLINE_STARTING_LANDMARK_KEY,
+						OrientationMark.REFERENCE.name());
+				options.setInt(DefaultOptions.EXPORT_OUTLINE_N_SAMPLES_KEY, 100);
+			}
 
 		}
 

@@ -13,14 +13,13 @@ import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.generic.FloatPoint;
 import com.bmskinner.nma.components.generic.IPoint;
-import com.bmskinner.nma.components.options.DefaultOptions;
 import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.profiles.DefaultProfile;
 import com.bmskinner.nma.components.profiles.IProfile;
-import com.bmskinner.nma.components.profiles.Landmark;
 import com.bmskinner.nma.components.profiles.MissingLandmarkException;
 import com.bmskinner.nma.components.profiles.MissingProfileException;
 import com.bmskinner.nma.components.profiles.ProfileException;
+import com.bmskinner.nma.components.rules.OrientationMark;
 import com.bmskinner.nma.utility.ArrayUtils;
 
 /**
@@ -107,10 +106,10 @@ public class DatasetOutlinesExporter extends StatsExporter {
 		try {
 
 			// If a landmark to offset has been specified, lmOffset will not be null
-			Landmark lmOffset = null;
-			for (Landmark lm : n.getLandmarks()) {
-				if (lm.getName().equals(
-						options.getString(DefaultOptions.EXPORT_OUTLINE_STARTING_LANDMARK_KEY))) {
+			OrientationMark lmOffset = null;
+			for (OrientationMark lm : n.getOrientationMarks()) {
+				if (lm.name().equals(
+						options.getString(HashOptions.EXPORT_OUTLINE_STARTING_LANDMARK_KEY))) {
 					lmOffset = lm;
 				}
 			}
@@ -120,9 +119,9 @@ public class DatasetOutlinesExporter extends StatsExporter {
 					: n.getBorderList(lmOffset);
 
 			// Normalise border list - if required - to given number of points
-			if (options.getBoolean(DefaultOptions.EXPORT_OUTLINE_IS_NORMALISED_KEY)) {
+			if (options.getBoolean(HashOptions.EXPORT_OUTLINE_IS_NORMALISED_KEY)) {
 				borderList = normaliseBorderList(borderList,
-						options.getInt(DefaultOptions.EXPORT_OUTLINE_N_SAMPLES_KEY));
+						options.getInt(HashOptions.EXPORT_OUTLINE_N_SAMPLES_KEY));
 			}
 
 			for (IPoint p : borderList) {

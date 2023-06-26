@@ -21,7 +21,6 @@ import com.bmskinner.nma.components.generic.IPoint;
 import com.bmskinner.nma.components.options.DefaultOptions;
 import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.options.OptionsBuilder;
-import com.bmskinner.nma.components.profiles.Landmark;
 import com.bmskinner.nma.components.rules.OrientationMark;
 
 /**
@@ -112,12 +111,10 @@ public class DatasetOutlinesExporterTest {
 		IAnalysisDataset d = SampleDatasetReader
 				.openDataset(TestResources.MOUSE_TEST_DATASET);
 
-		Landmark rp = d.getCollection().getProfileCollection()
-				.getLandmark(OrientationMark.REFERENCE);
-
 		HashOptions o = new OptionsBuilder()
 				.withValue(DefaultOptions.EXPORT_OUTLINE_IS_NORMALISED_KEY, false)
-				.withValue(DefaultOptions.EXPORT_OUTLINE_STARTING_LANDMARK_KEY, rp.getName())
+				.withValue(DefaultOptions.EXPORT_OUTLINE_STARTING_LANDMARK_KEY,
+						OrientationMark.REFERENCE.name())
 				.build();
 
 		File outFile = new File(d.getSavePath().getParent(), d.getName() + "_outlines.txt");
@@ -133,7 +130,7 @@ public class DatasetOutlinesExporterTest {
 		List<IPoint> border = ps.borders().get(0);
 
 		// Correct landmark selected and correct number of points exported
-		assertEquals(n.getBorderPoint(rp), border.get(0));
+		assertEquals(n.getBorderPoint(OrientationMark.REFERENCE), border.get(0));
 		assertEquals(n.getBorderLength(), border.size());
 	}
 
@@ -146,9 +143,6 @@ public class DatasetOutlinesExporterTest {
 	public void testNormalisedExportSucceedsWithNoLandmark() throws Exception {
 		IAnalysisDataset d = SampleDatasetReader
 				.openDataset(TestResources.MOUSE_TEST_DATASET);
-
-		Landmark rp = d.getCollection().getProfileCollection()
-				.getLandmark(OrientationMark.REFERENCE);
 
 		HashOptions o = new OptionsBuilder()
 				.withValue(DefaultOptions.EXPORT_OUTLINE_IS_NORMALISED_KEY, true)
@@ -182,13 +176,11 @@ public class DatasetOutlinesExporterTest {
 		IAnalysisDataset d = SampleDatasetReader
 				.openDataset(TestResources.MOUSE_TEST_DATASET);
 
-		Landmark rp = d.getCollection().getProfileCollection()
-				.getLandmark(OrientationMark.REFERENCE);
-
 		HashOptions o = new OptionsBuilder()
 				.withValue(DefaultOptions.EXPORT_OUTLINE_IS_NORMALISED_KEY, true)
 				.withValue(DefaultOptions.EXPORT_OUTLINE_N_SAMPLES_KEY, 100)
-				.withValue(DefaultOptions.EXPORT_OUTLINE_STARTING_LANDMARK_KEY, rp.getName())
+				.withValue(DefaultOptions.EXPORT_OUTLINE_STARTING_LANDMARK_KEY,
+						OrientationMark.REFERENCE.name())
 				.build();
 
 		File outFile = new File(d.getSavePath().getParent(), d.getName() + "_outlines.txt");
@@ -204,7 +196,7 @@ public class DatasetOutlinesExporterTest {
 		List<IPoint> border = ps.borders().get(0);
 
 		// Correct landmark selected and correct number of points exported
-		assertEquals(n.getBorderPoint(rp), border.get(0));
+		assertEquals(n.getBorderPoint(OrientationMark.REFERENCE), border.get(0));
 		assertEquals(100, border.size());
 	}
 }
