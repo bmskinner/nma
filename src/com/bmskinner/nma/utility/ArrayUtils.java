@@ -29,6 +29,22 @@ public class ArrayUtils {
 	}
 
 	/**
+	 * Convert a double array to a float array
+	 * 
+	 * @param arr the array to be converted
+	 * @return
+	 */
+	public static float[] toFloat(double[] arr) {
+		float[] f = new float[arr.length];
+
+		for (int i = 0; i < arr.length; i++) {
+			f[i] = (float) arr[i];
+
+		}
+		return f;
+	}
+
+	/**
 	 * Reverse the given array
 	 * 
 	 * @param arr

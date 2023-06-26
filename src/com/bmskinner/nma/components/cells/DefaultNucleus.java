@@ -281,6 +281,12 @@ public class DefaultNucleus extends ProfileableCellularComponent
 	}
 
 	@Override
+	public List<Landmark> getLandmarks() {
+		return getOrientationMarks().stream().map(om -> getLandmark(om))
+				.distinct().toList();
+	}
+
+	@Override
 	public void flipHorizontal(@NonNull IPoint p) {
 		super.flipHorizontal(p);
 

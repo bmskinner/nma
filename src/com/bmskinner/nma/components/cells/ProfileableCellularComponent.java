@@ -372,6 +372,40 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 	}
 
 	@Override
+	public List<IPoint> getBorderList(@NonNull Landmark lm) throws MissingLandmarkException {
+		List<IPoint> result = new ArrayList<>();
+
+		int lmIndex = this.getBorderIndex(lm);
+
+		for (int i = lmIndex; i < this.getBorderLength(); i++) {
+			result.add(this.getBorderPoint(i));
+		}
+
+		for (int i = 0; i < lmIndex; i++) {
+			result.add(this.getBorderPoint(i));
+		}
+
+		return result;
+	}
+
+	@Override
+	public List<IPoint> getBorderList(@NonNull OrientationMark om) throws MissingLandmarkException {
+		List<IPoint> result = new ArrayList<>();
+
+		int lmIndex = this.getBorderIndex(om);
+
+		for (int i = lmIndex; i < this.getBorderLength(); i++) {
+			result.add(this.getBorderPoint(i));
+		}
+
+		for (int i = 0; i < lmIndex; i++) {
+			result.add(this.getBorderPoint(i));
+		}
+
+		return result;
+	}
+
+	@Override
 	public void setOrientationMark(@NonNull OrientationMark om, int i)
 			throws IndexOutOfBoundsException, MissingProfileException, ProfileException,
 			MissingLandmarkException {

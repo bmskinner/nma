@@ -38,6 +38,13 @@ public interface Orientable {
 	List<OrientationMark> getOrientationMarks();
 
 	/**
+	 * Get the landmarks currently set in the object
+	 * 
+	 * @return
+	 */
+	List<Landmark> getLandmarks();
+
+	/**
 	 * Orient the object. This will use the landmarks and priorities defined by the
 	 * rulesets used when creating the nucleus. This affects this object and does
 	 * not create a copy.

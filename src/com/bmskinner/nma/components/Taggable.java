@@ -107,17 +107,6 @@ public interface Taggable extends CellularComponent, Orientable {
 			throws ProfileException, MissingLandmarkException, MissingProfileException;
 
 	/**
-	 * A quicker alternative to getProfile when segments are not needed
-	 * 
-	 * @param type
-	 * @return
-	 * @throws ProfileException
-	 * @throws MissingLandmarkException
-	 */
-//	IProfile getUnsegmentedProfile(@NonNull ProfileType type, @NonNull Landmark lm)
-//			throws ProfileException, MissingLandmarkException;
-
-	/**
 	 * Get a copy of the profile offset to start at the given point
 	 * 
 	 * @param type profile type to fetch
@@ -284,14 +273,6 @@ public interface Taggable extends CellularComponent, Orientable {
 			MissingLandmarkException;
 
 	/**
-	 * Get a copy of the mapping of landmarks to index positions within the border
-	 * list of the nucleus
-	 * 
-	 * @return
-	 */
-//	Map<Landmark, Integer> getLandmarks();
-
-	/**
 	 * Get the indexes of orientation marks within the border of this object
 	 * 
 	 * @return
@@ -306,5 +287,22 @@ public interface Taggable extends CellularComponent, Orientable {
 	 */
 	@Override
 	Landmark getLandmark(OrientationMark om);
+
+	/**
+	 * Get the border of the object starting from the given landmark
+	 * 
+	 * @param lm the landmark to be the first index in the object
+	 * @return
+	 * @throws MissingLandmarkException
+	 */
+	List<IPoint> getBorderList(@NonNull Landmark lm) throws MissingLandmarkException;
+
+	/**
+	 * Get the border of the object starting from the given orientation mark
+	 * 
+	 * @param om the orientation mark to be the first index in the object
+	 * @return
+	 */
+	List<IPoint> getBorderList(@NonNull OrientationMark om) throws MissingLandmarkException;
 
 }

@@ -67,8 +67,6 @@ import ij.process.FloatPolygon;
  */
 public abstract class DefaultCellularComponent implements CellularComponent {
 
-//	private static final String SOURCE_IMAGE_IS_NOT_AVAILABLE = "Source image is not available";
-
 	private static final String XML_REVERSE = "reverse";
 
 	private static final String XML_YPOINTS = "ypoints";

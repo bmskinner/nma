@@ -157,4 +157,10 @@ public class DummySegmentedCellularComponent extends ProfileableCellularComponen
 
 	}
 
+	@Override
+	public List<Landmark> getLandmarks() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

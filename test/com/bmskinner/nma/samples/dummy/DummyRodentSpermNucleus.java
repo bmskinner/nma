@@ -339,4 +339,19 @@ public class DummyRodentSpermNucleus extends DummyCellularComponent implements N
 		return nucleus.getBorderPoint(tag);
 	}
 
+	@Override
+	public List<Landmark> getLandmarks() {
+		return nucleus.getLandmarks();
+	}
+
+	@Override
+	public List<IPoint> getBorderList(@NonNull Landmark lm) throws MissingLandmarkException {
+		return nucleus.getBorderList(lm);
+	}
+
+	@Override
+	public List<IPoint> getBorderList(@NonNull OrientationMark om) throws MissingLandmarkException {
+		return nucleus.getBorderList(om);
+	}
+
 }

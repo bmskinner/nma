@@ -204,6 +204,29 @@ public interface HashOptions extends Serializable, XmlSerializable {
 	 */
 	String ORIGINAL_SIGNAL_PREFIX = "Original_signal_id_";
 
+	// Export options
+
+	/**
+	 * Should the exported outline be normalised to a consistent number of points or
+	 * export all points?
+	 */
+	String EXPORT_OUTLINE_IS_NORMALISED_KEY = "EXPORT_OUTLINE_IS_NORMALISED";
+
+	/**
+	 * Number of points to export if normalising outlines
+	 */
+	String EXPORT_OUTLINE_N_SAMPLES_KEY = "EXPORT_OUTLINE_N_SAMPLES";
+
+	/**
+	 * Landmark for first index of outlines
+	 */
+	String EXPORT_OUTLINE_STARTING_LANDMARK_KEY = "EXPORT_OUTLINE_STARTING_LANDMARK";
+
+	/**
+	 * Should outlines be offset so the CoM is at the origin 0, 0?
+	 */
+	String EXPORT_OUTLINE_IS_OFFSET_COM_KEY = "EXPORT_OUTLINE_IS_OFFSET_COM";
+
 	/**
 	 * Create a copy of this options object
 	 * 
