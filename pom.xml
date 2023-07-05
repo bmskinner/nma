@@ -49,7 +49,7 @@
 				<script.packaging>packageAppImage.bat</script.packaging>
 				<script.rendering>renderUserGuide.bat</script.rendering>
 				<script.dependencies>installDependencies.bat</script.dependencies>
-				
+
 				<project.screenshot.directory>res/screens/Windows 10</project.screenshot.directory>
 			</properties>
 		</profile>
@@ -68,7 +68,7 @@
 				<script.packaging>packageAppImage.sh</script.packaging>
 				<script.rendering>renderUserGuide.sh</script.rendering>
 				<script.dependencies>installDependencies.sh</script.dependencies>
-				
+
 				<project.screenshot.directory>res/screens/Linux</project.screenshot.directory>
 			</properties>
 		</profile>
@@ -86,7 +86,7 @@
 				<script.packaging>packageDMG.sh</script.packaging>
 				<script.rendering>renderUserGuide.sh</script.rendering>
 				<script.dependencies>installDependencies.sh</script.dependencies>
-				
+
 				<project.screenshot.directory>res/screens/MacOS</project.screenshot.directory>
 			</properties>
 		</profile>
@@ -370,7 +370,8 @@
 					<!-- Run a script to download dependency jars that are not available 
 						in Maven Central or other repos -->
 					<execution>
-						<?m2e ignore?> <!-- m2eclipse plugin does not know this plugin's abilities, don't run on build in Eclipse: https://stackoverflow.com/questions/57767896/plugin-execution-not-covered-by-lifecycle-configuration-org-codehaus-mojo -->
+						<?m2e ignore?> <!-- m2eclipse plugin does not know this plugin's abilities, don't run on 
+							build in Eclipse: https://stackoverflow.com/questions/57767896/plugin-execution-not-covered-by-lifecycle-configuration-org-codehaus-mojo -->
 						<id>install-dependencies</id>
 						<phase>initialize</phase>
 						<goals>
@@ -502,18 +503,18 @@
 			<id>jitpack.io</id>
 			<url>https://jitpack.io</url>
 		</repository>
-		
-	<!-- T-SNE is in this repo. via https://github.com/lejon/T-SNE-Java/issues/24 -->
-    <repository>
-        <id>scijava.public</id>
-        <url>https://maven.scijava.org/content/groups/public</url>
-    </repository>
+
+		<!-- T-SNE is in this repo. via https://github.com/lejon/T-SNE-Java/issues/24 -->
+		<repository>
+			<id>scijava.public</id>
+			<url>https://maven.scijava.org/content/groups/public</url>
+		</repository>
 
 	</repositories>
 
 	<dependencies>
 
-		<!--Not available in Maven Central-->
+		<!--Not available in Maven Central -->
 		<dependency>
 			<groupId>com.github.lejon</groupId>
 			<artifactId>T-SNE-Java</artifactId>
@@ -672,6 +673,26 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/ome/bio-formats -->
+		<!--<dependency>
+			<groupId>ome</groupId>
+			<artifactId>bio-formats</artifactId>
+			<version>5.0.0-rc2</version>
+		</dependency>-->
+
+		<!-- https://mvnrepository.com/artifact/ome/bio-formats_plugins 
+		<!-- <dependency>
+			<groupId>ome</groupId>
+			<artifactId>bio-formats_plugins</artifactId>
+			<version>6.13.0</version>
+			<exclusions>
+				<exclusion>
+					<groupId>javax.xml</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>-->
+
 
 	</dependencies>
 	<name>Nuclear Morphology Analysis</name>

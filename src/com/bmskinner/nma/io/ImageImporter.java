@@ -17,6 +17,8 @@
 package com.bmskinner.nma.io;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -29,13 +31,17 @@ import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.profiles.MissingLandmarkException;
 import com.bmskinner.nma.io.Io.Importer;
 import com.bmskinner.nma.logging.Loggable;
-import com.bmskinner.nma.visualisation.image.ImageFilterer;
 import com.bmskinner.nma.visualisation.image.ImageConverter;
+import com.bmskinner.nma.visualisation.image.ImageFilterer;
 
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.plugin.ChannelSplitter;
 import ij.process.ImageProcessor;
+import loci.formats.ChannelSeparator;
+import loci.formats.FormatException;
+import loci.plugins.util.ImageProcessorReader;
+import loci.plugins.util.LociPrefs;
 
 /**
  * This class takes any given input image, and will convert it to the ImageStack
@@ -55,7 +61,7 @@ public class ImageImporter implements Importer {
 			ImagePlus.GRAY16 };
 
 	// The file types that the program will try to open
-	protected static final String[] IMPORTABLE_FILE_TYPES = { ".tif", ".tiff", ".jpg" };
+	protected static final String[] IMPORTABLE_FILE_TYPES = { ".tif", ".tiff", ".jpg", ".nd2" };
 
 	// The prefix to use when exporting images
 	public static final String IMAGE_PREFIX = "export.";
@@ -311,6 +317,33 @@ public class ImageImporter implements Importer {
 		}
 	}
 
+	private ImageStack importND2ToStack() throws ImageImportException {
+		ImageProcessorReader r = new ImageProcessorReader(
+				new ChannelSeparator(LociPrefs.makeImageReader()));
+
+		try {
+			r.setId(f.getAbsolutePath());
+
+			int num = r.getImageCount();
+			int width = r.getSizeX();
+			int height = r.getSizeY();
+			ImageStack stack = new ImageStack(width, height);
+			byte[][][] lookupTable = new byte[r.getSizeC()][][];
+			for (int i = 0; i < num; i++) {
+				ImageProcessor ip = r.openProcessors(i)[0];
+				stack.addSlice("" + (i + 1), ip);
+				int channel = r.getZCTCoords(i)[1];
+				lookupTable[channel] = r.get8BitLookupTable();
+			}
+
+			return stack;
+
+		} catch (FormatException | IOException e) {
+			LOGGER.log(Level.SEVERE, "Error opening .nd2 file", e);
+		}
+		return null;
+	}
+
 	/**
 	 * Import and convert the image in the given file to an ImageStack
 	 * 
@@ -318,6 +351,11 @@ public class ImageImporter implements Importer {
 	 */
 	public ImageStack importToStack() throws ImageImportException {
 
+		// Need to use BioFormats for nd2
+		if (f.getName().endsWith(".nd2"))
+			return importND2ToStack();
+
+		// otherwise ImageJ can do it alone
 		ImagePlus image = new ImagePlus(f.getAbsolutePath());
 
 		ImageStack stack = convertToStack(image);
