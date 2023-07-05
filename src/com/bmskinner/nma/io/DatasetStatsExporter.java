@@ -145,8 +145,13 @@ public class DatasetStatsExporter extends StatsExporter {
 	 */
 	@Override
 	protected void appendHeader(@NonNull StringBuilder outLine) {
-
-		outLine.append("Dataset\tFile\tCellID\tComponent\tFolder\tImage\tCentre_of_mass\t");
+		outLine.append("Dataset").append(TAB)
+				.append("File").append(TAB)
+				.append("CellID").append(TAB)
+				.append("Component").append(TAB)
+				.append("Folder").append(TAB)
+				.append("Image").append(TAB)
+				.append("Centre_of_mass").append(TAB);
 
 		for (Measurement s : measurements) {
 

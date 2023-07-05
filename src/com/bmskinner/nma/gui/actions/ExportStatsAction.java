@@ -41,6 +41,7 @@ import com.bmskinner.nma.components.options.DefaultOptions;
 import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.options.OptionsBuilder;
 import com.bmskinner.nma.components.rules.OrientationMark;
+import com.bmskinner.nma.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nma.core.ThreadManager;
 import com.bmskinner.nma.gui.ProgressBarAcceptor;
 import com.bmskinner.nma.gui.components.FileSelector;
@@ -91,19 +92,22 @@ public abstract class ExportStatsAction extends MultiDatasetResultAction {
 			SubAnalysisSetupDialog optionsPanel = new ExportOptionsDialog(datasets);
 			if (optionsPanel.isReadyToRun()) {
 
-				File file = FileSelector.chooseStatsExportFile(datasets, "stats");
+				try {
+					File file = FileSelector.chooseStatsExportFile(datasets, "stats");
+					if (is.fileIsOKForSave(file)) {
 
-				if (file == null) {
+						IAnalysisMethod m = new DatasetStatsExporter(file, datasets,
+								optionsPanel.getOptions());
+						worker = new DefaultAnalysisWorker(m, datasets.size());
+						worker.addPropertyChangeListener(this);
+						this.setProgressMessage("Exporting stats");
+						ThreadManager.getInstance().submit(worker);
+					} else {
+						cancel();
+					}
+				} catch (RequestCancelledException e) {
 					cancel();
-					return;
 				}
-
-				IAnalysisMethod m = new DatasetStatsExporter(file, datasets,
-						optionsPanel.getOptions());
-				worker = new DefaultAnalysisWorker(m, datasets.size());
-				worker.addPropertyChangeListener(this);
-				this.setProgressMessage("Exporting stats");
-				ThreadManager.getInstance().submit(worker);
 			} else {
 				cancel();
 			}
@@ -188,21 +192,22 @@ public abstract class ExportStatsAction extends MultiDatasetResultAction {
 
 		@Override
 		public void run() {
+			try {
+				File file = FileSelector.chooseStatsExportFile(datasets, "profiles");
+				if (is.fileIsOKForSave(file)) {
 
-			File file = FileSelector.chooseStatsExportFile(datasets, "profiles");
-
-			if (file == null) {
+					IAnalysisMethod m = new DatasetProfileExporter(file, datasets,
+							new DefaultOptions());
+					worker = new DefaultAnalysisWorker(m, datasets.size());
+					worker.addPropertyChangeListener(this);
+					this.setProgressMessage("Exporting profiles");
+					ThreadManager.getInstance().submit(worker);
+				} else {
+					cancel();
+				}
+			} catch (RequestCancelledException e) {
 				cancel();
-				return;
 			}
-
-			IAnalysisMethod m = new DatasetProfileExporter(file, datasets,
-					new DefaultOptions());
-			worker = new DefaultAnalysisWorker(m, datasets.size());
-			worker.addPropertyChangeListener(this);
-			this.setProgressMessage("Exporting profiles");
-			ThreadManager.getInstance().submit(worker);
-
 		}
 	}
 
@@ -227,20 +232,23 @@ public abstract class ExportStatsAction extends MultiDatasetResultAction {
 
 			SubAnalysisSetupDialog optionsPanel = new ExportOutlinesOptionsDialog(datasets);
 			if (optionsPanel.isReadyToRun()) {
+				try {
+					File file = FileSelector.chooseStatsExportFile(datasets, "outlines");
+					if (is.fileIsOKForSave(file)) {
+						IAnalysisMethod m = new DatasetOutlinesExporter(file, datasets,
+								optionsPanel.getOptions());
+						worker = new DefaultAnalysisWorker(m, datasets.size());
+						worker.addPropertyChangeListener(this);
+						this.setProgressMessage("Exporting outlines");
+						ThreadManager.getInstance().submit(worker);
+					} else {
+						cancel();
+					}
 
-				File file = FileSelector.chooseStatsExportFile(datasets, "outlines");
-
-				if (file == null) {
+				} catch (RequestCancelledException e) {
 					cancel();
-					return;
 				}
 
-				IAnalysisMethod m = new DatasetOutlinesExporter(file, datasets,
-						optionsPanel.getOptions());
-				worker = new DefaultAnalysisWorker(m, datasets.size());
-				worker.addPropertyChangeListener(this);
-				this.setProgressMessage("Exporting outlines");
-				ThreadManager.getInstance().submit(worker);
 			} else {
 				cancel();
 			}
@@ -367,18 +375,22 @@ public abstract class ExportStatsAction extends MultiDatasetResultAction {
 		@Override
 		public void run() {
 
-			File file = FileSelector.chooseStatsExportFile(datasets, "shells");
+			try {
+				File file = FileSelector.chooseStatsExportFile(datasets, "shells");
+				if (is.fileIsOKForSave(file)) {
 
-			if (file == null) {
+					IAnalysisMethod m = new DatasetShellsExporter(file, datasets,
+							new DefaultOptions());
+					worker = new DefaultAnalysisWorker(m, datasets.size());
+					worker.addPropertyChangeListener(this);
+					this.setProgressMessage("Exporting stats");
+					ThreadManager.getInstance().submit(worker);
+				} else {
+					cancel();
+				}
+			} catch (RequestCancelledException e) {
 				cancel();
-				return;
 			}
-
-			IAnalysisMethod m = new DatasetShellsExporter(file, datasets, new DefaultOptions());
-			worker = new DefaultAnalysisWorker(m, datasets.size());
-			worker.addPropertyChangeListener(this);
-			this.setProgressMessage("Exporting stats");
-			ThreadManager.getInstance().submit(worker);
 
 		}
 
@@ -403,19 +415,22 @@ public abstract class ExportStatsAction extends MultiDatasetResultAction {
 		@Override
 		public void run() {
 
-			File file = FileSelector.chooseStatsExportFile(datasets, "signals");
+			try {
+				File file = FileSelector.chooseStatsExportFile(datasets, "signals");
+				if (is.fileIsOKForSave(file)) {
 
-			if (file == null) {
+					IAnalysisMethod m = new DatasetSignalsExporter(file, datasets,
+							new DefaultOptions());
+					worker = new DefaultAnalysisWorker(m, datasets.size());
+					worker.addPropertyChangeListener(this);
+					this.setProgressMessage("Exporting stats");
+					ThreadManager.getInstance().submit(worker);
+				} else {
+					cancel();
+				}
+			} catch (RequestCancelledException e) {
 				cancel();
-				return;
 			}
-
-			IAnalysisMethod m = new DatasetSignalsExporter(file, datasets, new DefaultOptions());
-			worker = new DefaultAnalysisWorker(m, datasets.size());
-			worker.addPropertyChangeListener(this);
-			this.setProgressMessage("Exporting stats");
-			ThreadManager.getInstance().submit(worker);
-
 		}
 
 	}

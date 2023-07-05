@@ -4,10 +4,12 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nma.components.cells.CellularComponent;
+import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.cells.ICell;
 import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
@@ -55,8 +57,14 @@ public class DatasetOutlinesExporter extends StatsExporter {
 
 	@Override
 	protected void appendHeader(@NonNull StringBuilder outLine) {
-		outLine.append("Dataset\tCellID\tComponent\tFolder\tImage\tCoordinates");
-		outLine.append(NEWLINE);
+		outLine.append("Dataset").append(TAB)
+				.append("CellID").append(TAB)
+				.append("Component").append(TAB)
+				.append("Folder").append(TAB)
+				.append("Image").append(TAB)
+				.append("RawCoordinates").append(TAB)
+				.append("OrientedCoordinates")
+				.append(NEWLINE);
 	}
 
 	/**
@@ -104,38 +112,47 @@ public class DatasetOutlinesExporter extends StatsExporter {
 	private void appendNucleusOutline(StringBuilder outLine, Nucleus n) {
 
 		try {
+			// Add the outline coordinates to the output line
+			String borderString = createOutlineString(n);
+			outLine.append(borderString).append(TAB);
 
-			// If a landmark to offset has been specified, lmOffset will not be null
-			OrientationMark lmOffset = null;
-			for (OrientationMark lm : n.getOrientationMarks()) {
-				if (lm.name().equals(
-						options.getString(HashOptions.EXPORT_OUTLINE_STARTING_LANDMARK_KEY))) {
-					lmOffset = lm;
-				}
-			}
+			// Add the oriented outline coordinates to the output line
+			Nucleus o = n.getOrientedNucleus();
+			o.moveCentreOfMass(IPoint.atOrigin());
+			String orientedString = createOutlineString(o);
+			outLine.append(orientedString).append(NEWLINE);
 
-			// Get the borders offset to requested landmark (if present in options)
-			List<IPoint> borderList = lmOffset == null ? n.getBorderList()
-					: n.getBorderList(lmOffset);
-
-			// Normalise border list - if required - to given number of points
-			if (options.getBoolean(HashOptions.EXPORT_OUTLINE_IS_NORMALISED_KEY)) {
-				borderList = normaliseBorderList(borderList,
-						options.getInt(HashOptions.EXPORT_OUTLINE_N_SAMPLES_KEY));
-			}
-
-			for (IPoint p : borderList) {
-				outLine.append(p.getX() + PIPE + p.getY() + COMMA);
-			}
-			// Remove final separator and add newline
-			if (outLine.length() > 0)
-				outLine.setLength(outLine.length() - 1);
-
-			outLine.append(NEWLINE);
-		} catch (MissingLandmarkException | ProfileException e) {
+		} catch (MissingLandmarkException | ProfileException | ComponentCreationException e) {
 			LOGGER.warning(() -> "Error creating outline to export for " + n.getNameAndNumber());
 			outLine.append(NEWLINE);
 		}
+	}
+
+	private String createOutlineString(Nucleus n)
+			throws ProfileException, MissingLandmarkException {
+		// If a landmark to offset has been specified, lmOffset will not be null
+		OrientationMark lmOffset = null;
+		for (OrientationMark lm : n.getOrientationMarks()) {
+			if (lm.name().equals(
+					options.getString(HashOptions.EXPORT_OUTLINE_STARTING_LANDMARK_KEY))) {
+				lmOffset = lm;
+			}
+		}
+
+		// Get the borders offset to requested landmark (if present in options)
+		List<IPoint> borderList = lmOffset == null ? n.getBorderList()
+				: n.getBorderList(lmOffset);
+
+		// Normalise border list - if required - to given number of points
+		if (options.getBoolean(HashOptions.EXPORT_OUTLINE_IS_NORMALISED_KEY)) {
+			borderList = normaliseBorderList(borderList,
+					options.getInt(HashOptions.EXPORT_OUTLINE_N_SAMPLES_KEY));
+		}
+
+		// Add the outline coordinates to the output line
+		return borderList.stream()
+				.map(p -> p.getX() + PIPE + p.getY())
+				.collect(Collectors.joining(COMMA));
 	}
 
 	/**
@@ -175,13 +192,11 @@ public class DatasetOutlinesExporter extends StatsExporter {
 
 	private void appendCytoplasmOutline(StringBuilder outLine, CellularComponent c) {
 
-		for (IPoint p : c.getBorderList()) {
-			outLine.append(p.getX() + PIPE + p.getY() + COMMA);
-		}
-		// Remove final separator and add newline
-		if (outLine.length() > 0)
-			outLine.setLength(outLine.length() - 1);
+		String borderString = c.getBorderList().stream()
+				.map(p -> p.getX() + PIPE + p.getY())
+				.collect(Collectors.joining(COMMA));
 
+		outLine.append(borderString);
 		outLine.append(NEWLINE);
 	}
 

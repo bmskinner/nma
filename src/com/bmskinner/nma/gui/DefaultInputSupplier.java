@@ -18,6 +18,7 @@ package com.bmskinner.nma.gui;
 
 import java.awt.Color;
 import java.io.File;
+import java.util.Objects;
 import java.util.logging.Logger;
 
 import javax.swing.JColorChooser;
@@ -51,7 +52,8 @@ public class DefaultInputSupplier implements InputSupplier {
 	@Override
 	public String requestString(@NonNull String message, @Nullable String existingValue)
 			throws RequestCancelledException {
-		Object s = JOptionPane.showInputDialog(null, message, message, JOptionPane.INFORMATION_MESSAGE, null, null,
+		Object s = JOptionPane.showInputDialog(null, message, message,
+				JOptionPane.INFORMATION_MESSAGE, null, null,
 				existingValue);
 
 		if (s == null)
@@ -65,14 +67,16 @@ public class DefaultInputSupplier implements InputSupplier {
 	}
 
 	@Override
-	public double requestDouble(@NonNull String message, double start, double min, double max, double step)
+	public double requestDouble(@NonNull String message, double start, double min, double max,
+			double step)
 			throws RequestCancelledException {
 
 		SpinnerNumberModel sModel = new SpinnerNumberModel(start, min, max, step);
 
 		JSpinner spinner = new JSpinner(sModel);
 
-		int option = JOptionPane.showOptionDialog(null, spinner, message, JOptionPane.OK_CANCEL_OPTION,
+		int option = JOptionPane.showOptionDialog(null, spinner, message,
+				JOptionPane.OK_CANCEL_OPTION,
 				JOptionPane.QUESTION_MESSAGE, null, null, null);
 
 		if (option == JOptionPane.OK_OPTION)
@@ -92,7 +96,8 @@ public class DefaultInputSupplier implements InputSupplier {
 
 		JSpinner spinner = new JSpinner(sModel);
 
-		int option = JOptionPane.showOptionDialog(null, spinner, message, JOptionPane.OK_CANCEL_OPTION,
+		int option = JOptionPane.showOptionDialog(null, spinner, message,
+				JOptionPane.OK_CANCEL_OPTION,
 				JOptionPane.QUESTION_MESSAGE, null, null, null);
 
 		if (option == JOptionPane.OK_OPTION)
@@ -101,7 +106,8 @@ public class DefaultInputSupplier implements InputSupplier {
 	}
 
 	@Override
-	public Color requestColor(@NonNull String message, @Nullable Color oldColor) throws RequestCancelledException {
+	public Color requestColor(@NonNull String message, @Nullable Color oldColor)
+			throws RequestCancelledException {
 		Color newColor = JColorChooser.showDialog(null, message, oldColor);
 		if (newColor == null)
 			throw new RequestCancelledException();
@@ -122,7 +128,8 @@ public class DefaultInputSupplier implements InputSupplier {
 	}
 
 	@Override
-	public File requestFile(@Nullable String message, @Nullable File defaultFolder, @Nullable String extension,
+	public File requestFile(@Nullable String message, @Nullable File defaultFolder,
+			@Nullable String extension,
 			@Nullable String extensionMessage) throws RequestCancelledException {
 		FileNameExtensionFilter filter = null;
 		if (extension != null)
@@ -159,7 +166,8 @@ public class DefaultInputSupplier implements InputSupplier {
 	}
 
 	@Override
-	public File requestFolder(@Nullable String message, @Nullable File defaultFolder) throws RequestCancelledException {
+	public File requestFolder(@Nullable String message, @Nullable File defaultFolder)
+			throws RequestCancelledException {
 		if (defaultFolder != null)
 			LOGGER.finer("Requesting folder, default: " + defaultFolder.getAbsolutePath());
 		File f = FileSelector.chooseFolder(message, defaultFolder);
@@ -174,12 +182,14 @@ public class DefaultInputSupplier implements InputSupplier {
 	}
 
 	@Override
-	public int requestOption(Object[] options, String message, String title) throws RequestCancelledException {
+	public int requestOption(Object[] options, String message, String title)
+			throws RequestCancelledException {
 		return requestOption(options, 0, message, title);
 	}
 
 	@Override
-	public int requestOption(Object[] options, int defaultOption, String message) throws RequestCancelledException {
+	public int requestOption(Object[] options, int defaultOption, String message)
+			throws RequestCancelledException {
 		return requestOption(options, defaultOption, message, message);
 	}
 
@@ -187,7 +197,8 @@ public class DefaultInputSupplier implements InputSupplier {
 	public int requestOption(Object[] options, int defaultOption, String message, String title)
 			throws RequestCancelledException {
 
-		Object result = JOptionPane.showInputDialog(null, message, title, JOptionPane.QUESTION_MESSAGE, null, options,
+		Object result = JOptionPane.showInputDialog(null, message, title,
+				JOptionPane.QUESTION_MESSAGE, null, options,
 				options[defaultOption]);
 
 		if (result == null)
@@ -208,7 +219,8 @@ public class DefaultInputSupplier implements InputSupplier {
 	}
 
 	@Override
-	public int requestOptionAllVisible(Object[] options, int defaultOption, String message, String title)
+	public int requestOptionAllVisible(Object[] options, int defaultOption, String message,
+			String title)
 			throws RequestCancelledException {
 		int result = JOptionPane.showOptionDialog(null, message, title, JOptionPane.DEFAULT_OPTION,
 				JOptionPane.QUESTION_MESSAGE, null, options, options[defaultOption]);
@@ -223,6 +235,16 @@ public class DefaultInputSupplier implements InputSupplier {
 		if (result == 2)
 			throw new RequestCancelledException();
 		return result == 0;
+	}
+
+	@Override
+	public boolean fileIsOKForSave(File file) throws RequestCancelledException {
+
+		if (Objects.isNull(file))
+			return false;
+
+		return !file.exists() || requestApproval("File exists. Overwrite existing file?",
+				"Overwrite file?");
 	}
 
 }

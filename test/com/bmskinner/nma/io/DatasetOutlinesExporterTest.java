@@ -8,6 +8,7 @@ import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -31,7 +32,8 @@ import com.bmskinner.nma.components.rules.OrientationMark;
  */
 public class DatasetOutlinesExporterTest {
 
-	private record ParsedOutline(List<UUID> cellIds, List<List<IPoint>> borders) {
+	private record ParsedOutline(List<UUID> cellIds, List<List<IPoint>> rawBorders,
+			List<List<IPoint>> orientedBorders) {
 
 	}
 
@@ -44,30 +46,55 @@ public class DatasetOutlinesExporterTest {
 			String strLine;
 
 			List<UUID> uuids = new ArrayList<>();
-			List<List<IPoint>> borders = new ArrayList<>();
+			List<List<IPoint>> rawBorders = new ArrayList<>();
+			List<List<IPoint>> orientedBorders = new ArrayList<>();
+
+			int cellIdIndex = 0;
+			int rawIndex = 0;
+			int orientedIndex = 0;
 
 			while ((strLine = br.readLine()) != null) {
 				String[] arr = strLine.split("\t");
-				if (arr[0].equals("Dataset")) // skip first header line
+				if (arr[0].equals("Dataset")) { // find which columns contain the data we need
+					for (int i = 1; i < arr.length; i++) {
+						if (arr[i].equals("CellID"))
+							cellIdIndex = i;
+						if (arr[i].equals("RawCoordinates"))
+							rawIndex = i;
+						if (arr[i].equals("OrientedCoordinates"))
+							orientedIndex = i;
+					}
 					continue;
+				}
 
 				if (strLine.isEmpty())
 					continue;
 
-				UUID cellid = UUID.fromString(arr[1]);
+				UUID cellid = UUID.fromString(arr[cellIdIndex]);
 				uuids.add(cellid);
-				String[] coordArr = arr[5].split(",");
+				String[] coordArr = arr[rawIndex].split(",");
+				String[] orientedArr = arr[orientedIndex].split(",");
 
-				List<IPoint> points = new ArrayList<>();
-				for (String s : coordArr) {
-					String[] xy = s.split("\\|");
-					points.add(new FloatPoint(Float.valueOf(xy[0]), Float.valueOf(xy[1])));
-				}
-				borders.add(points);
+				rawBorders.add(toList(coordArr));
+				orientedBorders.add(toList(orientedArr));
 			}
-			return new ParsedOutline(uuids, borders);
+			return new ParsedOutline(uuids, rawBorders, orientedBorders);
 		}
 
+	}
+
+	/**
+	 * Given an array of pipe delimited xy coordinates, convert to a list of points
+	 * 
+	 * @param coordArr
+	 * @return
+	 */
+	private List<IPoint> toList(String[] coordArr) {
+		return Arrays.stream(coordArr).map(s -> {
+			String[] xy = s.split("\\|");
+			return (IPoint) new FloatPoint(Float.valueOf(xy[0]),
+					Float.valueOf(xy[1]));
+		}).toList();
 	}
 
 	/**
@@ -94,7 +121,7 @@ public class DatasetOutlinesExporterTest {
 
 		Nucleus n = d.getCollection().getCell(cellOne).getPrimaryNucleus();
 
-		List<IPoint> border = ps.borders().get(0);
+		List<IPoint> border = ps.rawBorders().get(0);
 
 		// Correct landmark selected and correct number of points exported
 		assertEquals(n.getBorderPoint(0), border.get(0));
@@ -127,7 +154,7 @@ public class DatasetOutlinesExporterTest {
 
 		Nucleus n = d.getCollection().getCell(cellOne).getPrimaryNucleus();
 
-		List<IPoint> border = ps.borders().get(0);
+		List<IPoint> border = ps.rawBorders().get(0);
 
 		// Correct landmark selected and correct number of points exported
 		assertEquals(n.getBorderPoint(OrientationMark.REFERENCE), border.get(0));
@@ -159,7 +186,7 @@ public class DatasetOutlinesExporterTest {
 
 		Nucleus n = d.getCollection().getCell(cellOne).getPrimaryNucleus();
 
-		List<IPoint> border = ps.borders().get(0);
+		List<IPoint> border = ps.rawBorders().get(0);
 
 		// Correct landmark selected and correct number of points exported
 		assertEquals(n.getBorderPoint(0), border.get(0));
@@ -193,7 +220,143 @@ public class DatasetOutlinesExporterTest {
 
 		Nucleus n = d.getCollection().getCell(cellOne).getPrimaryNucleus();
 
-		List<IPoint> border = ps.borders().get(0);
+		List<IPoint> border = ps.rawBorders().get(0);
+
+		// Correct landmark selected and correct number of points exported
+		assertEquals(n.getBorderPoint(OrientationMark.REFERENCE), border.get(0));
+		assertEquals(100, border.size());
+	}
+
+	/**
+	 * Can we export non-normalised oriented values correctly with no landmark
+	 * indexing?
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void testNonNormalisedOrientedExportSucceedsWithNoLandmark() throws Exception {
+		IAnalysisDataset d = SampleDatasetReader
+				.openDataset(TestResources.MOUSE_TEST_DATASET);
+
+		HashOptions o = new OptionsBuilder()
+				.withValue(DefaultOptions.EXPORT_OUTLINE_IS_NORMALISED_KEY, false)
+				.build();
+
+		File outFile = new File(d.getSavePath().getParent(), d.getName() + "_outlines.txt");
+		new DatasetOutlinesExporter(outFile, d, o).call();
+
+		// Read the file and check the first item is correct
+		ParsedOutline ps = readOutlineFile(outFile);
+
+		UUID cellOne = ps.cellIds().get(0);
+
+		Nucleus n = d.getCollection().getCell(cellOne).getPrimaryNucleus().getOrientedNucleus();
+		n.moveCentreOfMass(IPoint.atOrigin());
+
+		List<IPoint> border = ps.orientedBorders().get(0);
+
+		// Correct landmark selected and correct number of points exported
+		assertEquals(n.getBorderPoint(0), border.get(0));
+		assertEquals(n.getBorderLength(), border.size());
+	}
+
+	/**
+	 * Can we export non-normalised oriented values correctly from the reference
+	 * point?
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void testNonNormalisedOrientedExportSucceedsWithLandmark() throws Exception {
+		IAnalysisDataset d = SampleDatasetReader
+				.openDataset(TestResources.MOUSE_TEST_DATASET);
+
+		HashOptions o = new OptionsBuilder()
+				.withValue(DefaultOptions.EXPORT_OUTLINE_IS_NORMALISED_KEY, false)
+				.withValue(DefaultOptions.EXPORT_OUTLINE_STARTING_LANDMARK_KEY,
+						OrientationMark.REFERENCE.name())
+				.build();
+
+		File outFile = new File(d.getSavePath().getParent(), d.getName() + "_outlines.txt");
+		new DatasetOutlinesExporter(outFile, d, o).call();
+
+		// Read the file and check the first item is correct
+		ParsedOutline ps = readOutlineFile(outFile);
+
+		UUID cellOne = ps.cellIds().get(0);
+
+		Nucleus n = d.getCollection().getCell(cellOne).getPrimaryNucleus().getOrientedNucleus();
+		n.moveCentreOfMass(IPoint.atOrigin());
+
+		List<IPoint> border = ps.orientedBorders().get(0);
+
+		// Correct landmark selected and correct number of points exported
+		assertEquals(n.getBorderPoint(OrientationMark.REFERENCE), border.get(0));
+		assertEquals(n.getBorderLength(), border.size());
+	}
+
+	/**
+	 * Can we export normalised oriented values correctly with no landmark indexing?
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void testNormalisedOrientedExportSucceedsWithNoLandmark() throws Exception {
+		IAnalysisDataset d = SampleDatasetReader
+				.openDataset(TestResources.MOUSE_TEST_DATASET);
+
+		HashOptions o = new OptionsBuilder()
+				.withValue(DefaultOptions.EXPORT_OUTLINE_IS_NORMALISED_KEY, true)
+				.withValue(DefaultOptions.EXPORT_OUTLINE_N_SAMPLES_KEY, 100)
+				.build();
+
+		File outFile = new File(d.getSavePath().getParent(), d.getName() + "_outlines.txt");
+		new DatasetOutlinesExporter(outFile, d, o).call();
+
+		// Read the file and check the first item is correct
+		ParsedOutline ps = readOutlineFile(outFile);
+
+		UUID cellOne = ps.cellIds().get(0);
+
+		Nucleus n = d.getCollection().getCell(cellOne).getPrimaryNucleus().getOrientedNucleus();
+		n.moveCentreOfMass(IPoint.atOrigin());
+
+		List<IPoint> border = ps.orientedBorders().get(0);
+
+		// Correct landmark selected and correct number of points exported
+		assertEquals(n.getBorderPoint(0), border.get(0));
+		assertEquals(100, border.size());
+	}
+
+	/**
+	 * Can we export normalised oriented values correctly from the reference point?
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void testNormalisedOrientedExportSucceedsWithLandmark() throws Exception {
+		IAnalysisDataset d = SampleDatasetReader
+				.openDataset(TestResources.MOUSE_TEST_DATASET);
+
+		HashOptions o = new OptionsBuilder()
+				.withValue(DefaultOptions.EXPORT_OUTLINE_IS_NORMALISED_KEY, true)
+				.withValue(DefaultOptions.EXPORT_OUTLINE_N_SAMPLES_KEY, 100)
+				.withValue(DefaultOptions.EXPORT_OUTLINE_STARTING_LANDMARK_KEY,
+						OrientationMark.REFERENCE.name())
+				.build();
+
+		File outFile = new File(d.getSavePath().getParent(), d.getName() + "_outlines.txt");
+		new DatasetOutlinesExporter(outFile, d, o).call();
+
+		// Read the file and check the first item is correct
+		ParsedOutline ps = readOutlineFile(outFile);
+
+		UUID cellOne = ps.cellIds().get(0);
+
+		Nucleus n = d.getCollection().getCell(cellOne).getPrimaryNucleus().getOrientedNucleus();
+		n.moveCentreOfMass(IPoint.atOrigin());
+
+		List<IPoint> border = ps.orientedBorders().get(0);
 
 		// Correct landmark selected and correct number of points exported
 		assertEquals(n.getBorderPoint(OrientationMark.REFERENCE), border.get(0));
