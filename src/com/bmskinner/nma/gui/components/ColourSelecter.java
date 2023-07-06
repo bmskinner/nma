@@ -226,8 +226,8 @@ public class ColourSelecter {
 	/**
 	 * Make the given colour transparent
 	 * 
-	 * @param c
-	 * @param alpha
+	 * @param c     the colour to make transparent
+	 * @param alpha the alpha level in the range 0-255
 	 * @return
 	 */
 	public static Color makeTransparent(Color c, int alpha) {
