@@ -56,10 +56,9 @@ public class VennChartFactory extends AbstractChartFactory {
 			rend.setUseFillPaint(false);
 			plot.setRenderer(rend);
 
-			// Draw annotated circles at the series item locations
+			// Draw filled circles at the series item locations
 			List<IAnalysisDataset> allDatasets = options.getDatasets();
 
-			double radius = 0.7;
 			for (int series = 0; series < d.getSeriesCount(); series++) {
 				if (d.getSeriesKey(series).equals("Sentinals")) // no annotations of these points
 					continue;
@@ -77,12 +76,44 @@ public class VennChartFactory extends AbstractChartFactory {
 
 					double x = d.getXValue(series, item);
 					double y = d.getYValue(series, item);
+					double radius = d.getRadius(series, item);
 
+					// Draw a filled shape as backround
 					XYShapeAnnotation a = new XYShapeAnnotation(
 							new Ellipse2D.Double(x - radius, y - radius, radius + radius,
 									radius + radius),
-							ChartComponents.MARKER_STROKE, datasetColour,
+							null, null,
 							ColourSelecter.makeTransparent(datasetColour, 30));
+					plot.addAnnotation(a);
+				}
+
+			}
+
+			// Draw the strokes above the transparent fills
+			for (int series = 0; series < d.getSeriesCount(); series++) {
+				if (d.getSeriesKey(series).equals("Sentinals")) // no annotations of these points
+					continue;
+
+				List<IAnalysisDataset> datasets = d.getDatasets(d.getSeriesKey(series));
+
+				// Add each of the venn circles
+				for (int item = 0; item < d.getItemCount(series); item++) {
+
+					// Check the colour of the dataset from the original selection
+					IAnalysisDataset dataset = datasets.get(item);
+					int colourIndex = allDatasets.indexOf(dataset);
+					Color datasetColour = dataset.getDatasetColour()
+							.orElse(ColourSelecter.getColor(colourIndex));
+
+					double x = d.getXValue(series, item);
+					double y = d.getYValue(series, item);
+					double radius = d.getRadius(series, item);
+
+					// Draw an unfilled circle
+					XYShapeAnnotation a = new XYShapeAnnotation(
+							new Ellipse2D.Double(x - radius, y - radius, radius + radius,
+									radius + radius),
+							ChartComponents.MARKER_STROKE, datasetColour);
 					plot.addAnnotation(a);
 				}
 
