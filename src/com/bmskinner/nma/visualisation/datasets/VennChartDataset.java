@@ -21,7 +21,7 @@ public class VennChartDataset extends DefaultXYDataset {
 
 	private static final Logger LOGGER = Logger.getLogger(VennChartDataset.class.getName());
 
-	private static final int X_OFFSET = 3;
+	private static final int X_OFFSET = 4;
 
 	// Sentinal values allow the autoscale to work even though the circles drawn are
 	// outside the range of values in this dataset
@@ -95,16 +95,12 @@ public class VennChartDataset extends DefaultXYDataset {
 		return labels;
 	}
 
-	/**
-	 * Create the shared nucleus counts for each cluster
-	 * 
-	 * @param cluster the datasets to calculate shared counts for
-	 * @param xOffset the location of the datasets in the plot
-	 */
-	private void createCounts(List<IAnalysisDataset> cluster, double xOffset) {
+	private Map<String, Integer> calculateCounts(List<IAnalysisDataset> cluster) {
+
+		Map<String, Integer> result = new HashMap<>();
 
 		if (cluster.size() == 1) {
-			labels.add(new Label(xOffset, 0, cluster.get(0).getCollection().size() + ""));
+			result.put("d1", cluster.get(0).getCollection().size());
 		}
 
 		if (cluster.size() == 2) {
@@ -112,9 +108,9 @@ public class VennChartDataset extends DefaultXYDataset {
 			int d1 = cluster.get(0).getCollection().size() - d1d2;
 			int d2 = cluster.get(1).getCollection().size() - d1d2;
 
-			labels.add(new Label(xOffset - 0.1, 0, d1 + ""));
-			labels.add(new Label(xOffset + 1.1, 0, d2 + ""));
-			labels.add(new Label(xOffset + 0.5, 0, d1d2 + ""));
+			result.put("d1d2", d1d2);
+			result.put("d1", d1);
+			result.put("d2", d2);
 		}
 
 		if (cluster.size() == 3) {
@@ -153,16 +149,135 @@ public class VennChartDataset extends DefaultXYDataset {
 			d3s.removeAll(d2d3);
 			d3s.removeAll(d1d2d3);
 
-			labels.add(new Label(xOffset + 0.5, 0.2, d1d2d3.size() + ""));
-			labels.add(new Label(xOffset + 0.5, -0.3, d1d2.size() + ""));
-			labels.add(new Label(xOffset + 0.1, 0.3, d1d3.size() + ""));
-			labels.add(new Label(xOffset - 0.3, -0.3, d1s.size() + ""));
-			labels.add(new Label(xOffset + 0.9, 0.3, d2d3.size() + ""));
-			labels.add(new Label(xOffset + 1.3, -0.3, d2s.size() + ""));
-			labels.add(new Label(xOffset + 0.5, 1, d3s.size() + ""));
-
+			result.put("d1d2d3", d1d2d3.size());
+			result.put("d1d2", d1d2.size());
+			result.put("d1d3", d1d3.size());
+			result.put("d1", d1s.size());
+			result.put("d2d3", d2d3.size());
+			result.put("d2", d2s.size());
+			result.put("d3", d3s.size());
 		}
 
+		return result;
+	}
+
+	/**
+	 * Create the shared nucleus count labels for each cluster
+	 * 
+	 * @param counts  the number of shared cells for each dataset combination
+	 * @param cluster the datasets to create labels for
+	 * @param xOffset the location of the datasets in the plot
+	 */
+	private void createLabels(Map<String, Integer> counts, List<IAnalysisDataset> cluster,
+			double xOffset) {
+
+		if (cluster.size() == 1) {
+			labels.add(new Label(xOffset, 0, String.valueOf(counts.get("d1"))));
+		}
+
+		if (cluster.size() == 2) {
+			labels.add(new Label(xOffset - 0.1, 0, String.valueOf(counts.get("d1"))));
+			labels.add(new Label(xOffset + 1.1, 0, String.valueOf(counts.get("d2"))));
+			labels.add(new Label(xOffset + 0.5, 0, String.valueOf(counts.get("d1d2"))));
+		}
+
+		if (cluster.size() == 3) {
+
+			// Are we making flat or folded chart (do all datasets share cells)?
+			if ((counts.get("d1d2") == 0 || counts.get("d1d3") == 0 || counts.get("d2d3") == 0)
+					&& counts.get("d1d2d3") == 0) {
+
+				if (counts.get("d1d2") == 0) { // d3 is in the middle
+					labels.add(new Label(xOffset + 0.5, 0, String.valueOf(counts.get("d1d3"))));
+					labels.add(new Label(xOffset - 0.3, 0, String.valueOf(counts.get("d1"))));
+					labels.add(new Label(xOffset + 1.5, 0, String.valueOf(counts.get("d2d3"))));
+					labels.add(new Label(xOffset + 2.2, 0, String.valueOf(counts.get("d2"))));
+					labels.add(new Label(xOffset + 1, 0, String.valueOf(counts.get("d3"))));
+				}
+
+				if (counts.get("d1d3") == 0) { // d2 is in the middle
+					labels.add(new Label(xOffset + 0.5, 0, String.valueOf(counts.get("d1d2"))));
+					labels.add(new Label(xOffset - 0.3, 0, String.valueOf(counts.get("d1"))));
+					labels.add(new Label(xOffset + 1.5, 0, String.valueOf(counts.get("d2d3"))));
+					labels.add(new Label(xOffset + 2.2, 0, String.valueOf(counts.get("d3"))));
+					labels.add(new Label(xOffset + 1, 0, String.valueOf(counts.get("d2"))));
+				}
+
+				if (counts.get("d2d3") == 0) { // d1 is in the middle
+					labels.add(new Label(xOffset + 0.5, 0, String.valueOf(counts.get("d1d2"))));
+					labels.add(new Label(xOffset - 0.3, 0, String.valueOf(counts.get("d2"))));
+					labels.add(new Label(xOffset + 1.5, 0, String.valueOf(counts.get("d1d3"))));
+					labels.add(new Label(xOffset + 2.2, 0, String.valueOf(counts.get("d3"))));
+					labels.add(new Label(xOffset + 1, 0, String.valueOf(counts.get("d1"))));
+				}
+
+			} else {
+
+				labels.add(new Label(xOffset + 0.5, 0.2, String.valueOf(counts.get("d1d2d3"))));
+				labels.add(new Label(xOffset + 0.5, -0.3, String.valueOf(counts.get("d1d2"))));
+				labels.add(new Label(xOffset + 0.1, 0.3, String.valueOf(counts.get("d1d3"))));
+				labels.add(new Label(xOffset - 0.3, -0.3, String.valueOf(counts.get("d1"))));
+				labels.add(new Label(xOffset + 0.9, 0.3, String.valueOf(counts.get("d2d3"))));
+				labels.add(new Label(xOffset + 1.3, -0.3, String.valueOf(counts.get("d2"))));
+				labels.add(new Label(xOffset + 0.5, 1, String.valueOf(counts.get("d3"))));
+			}
+		}
+
+	}
+
+	/**
+	 * Create the Venn circle centroids for a cluster
+	 * 
+	 * @param counts  the number of shared cells for each dataset combination
+	 * @param cluster the datasets to create centroids for
+	 * @param xOffset the location of the datasets in the plot
+	 */
+	private double[][] createCentroids(Map<String, Integer> counts, List<IAnalysisDataset> cluster,
+			double xStart) {
+
+		int yStart = 0;
+
+		double[][] datasetPos = new double[2][cluster.size()];
+
+		// Set the centre for each dataset circle in the cluster
+
+		if (cluster.size() == 1) {
+			datasetPos[0] = new double[] { xStart };
+			datasetPos[1] = new double[] { yStart };
+		}
+
+		if (cluster.size() == 2) {
+			datasetPos[0] = new double[] { xStart, xStart + 1 };
+			datasetPos[1] = new double[] { yStart, yStart };
+		}
+
+		if (cluster.size() == 3) {
+
+			if ((counts.get("d1d2") == 0 || counts.get("d1d3") == 0 || counts.get("d2d3") == 0)
+					&& counts.get("d1d2d3") == 0) {
+
+				if (counts.get("d1d2") == 0) { // d3 is in the middle
+					datasetPos[0] = new double[] { xStart, xStart + 2, xStart + 1 };
+					datasetPos[1] = new double[] { yStart, yStart, yStart };
+				}
+
+				if (counts.get("d1d3") == 0) { // d2 is in the middle
+					datasetPos[0] = new double[] { xStart, xStart + 1, xStart + 2 };
+					datasetPos[1] = new double[] { yStart, yStart, yStart };
+				}
+
+				if (counts.get("d2d3") == 0) { // d1 is in the middle
+					datasetPos[0] = new double[] { xStart + 1, xStart, xStart + 2 };
+					datasetPos[1] = new double[] { yStart, yStart, yStart };
+				}
+
+			} else { // make a triangle
+				datasetPos[0] = new double[] { xStart, xStart + 1, xStart + 0.5 };
+				datasetPos[1] = new double[] { yStart, yStart, yStart + 0.6 };
+			}
+		}
+
+		return datasetPos;
 	}
 
 	/**
@@ -202,36 +317,13 @@ public class VennChartDataset extends DefaultXYDataset {
 
 	private void createSeries() {
 		int xStart = 0;
-		int yStart = 0;
 
 		for (Entry<Comparable<?>, List<IAnalysisDataset>> entry : clusters.entrySet()) {
 			List<IAnalysisDataset> datasets = entry.getValue();
 
-			double[][] datasetPos = new double[2][datasets.size()];
+			Map<String, Integer> counts = calculateCounts(datasets);
 
-			// Set the centre for each dataset circle in the cluster
-
-			switch (datasets.size()) {
-			case 1:
-				datasetPos[0] = new double[] { xStart };
-				datasetPos[1] = new double[] { yStart };
-				break;
-			case 2:
-				datasetPos[0] = new double[] { xStart, xStart + 1 };
-				datasetPos[1] = new double[] { yStart, yStart };
-				break;
-			case 3:
-				datasetPos[0] = new double[] { xStart, xStart + 1, xStart + 0.5 };
-				datasetPos[1] = new double[] { yStart, yStart, yStart + 0.6 };
-				break;
-			case 4:
-				datasetPos[0] = new double[] { xStart, xStart + 1, xStart + 0.5, xStart + 0.5 };
-				datasetPos[1] = new double[] { yStart, yStart, yStart + 0.6, yStart - 0.6 };
-				break;
-			default:
-				datasetPos[0] = new double[] { xStart };
-				datasetPos[1] = new double[] { yStart };
-			}
+			double[][] datasetPos = createCentroids(counts, datasets, xStart);
 
 			this.addSeries(entry.getKey(), datasetPos);
 
@@ -243,7 +335,7 @@ public class VennChartDataset extends DefaultXYDataset {
 			}
 
 			// Create counts of overlaps, and their coordinates
-			createCounts(datasets, xStart);
+			createLabels(counts, datasets, xStart);
 
 			xStart += X_OFFSET;
 		}

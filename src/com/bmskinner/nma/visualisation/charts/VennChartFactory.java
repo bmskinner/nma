@@ -82,7 +82,7 @@ public class VennChartFactory extends AbstractChartFactory {
 							new Ellipse2D.Double(x - radius, y - radius, radius + radius,
 									radius + radius),
 							ChartComponents.MARKER_STROKE, datasetColour,
-							ColourSelecter.makeTransparent(datasetColour, 20));
+							ColourSelecter.makeTransparent(datasetColour, 30));
 					plot.addAnnotation(a);
 				}
 
