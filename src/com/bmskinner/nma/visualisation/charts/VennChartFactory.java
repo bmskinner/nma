@@ -39,7 +39,7 @@ public class VennChartFactory extends AbstractChartFactory {
 
 			if (!d.isValid())
 				return createTextAnnotatedEmptyChart(
-						"Cannot display more than three overlapping datasets");
+						"Cannot display more than four overlapping datasets");
 
 			JFreeChart chart = ChartFactory.createScatterPlot(null, null, null, d,
 					PlotOrientation.VERTICAL,
@@ -76,12 +76,13 @@ public class VennChartFactory extends AbstractChartFactory {
 
 					double x = d.getXValue(series, item);
 					double y = d.getYValue(series, item);
-					double radius = d.getRadius(series, item);
+					double xRadius = d.getXRadius(series, item);
+					double yRadius = d.getYRadius(series, item);
 
 					// Draw a filled shape as backround
 					XYShapeAnnotation a = new XYShapeAnnotation(
-							new Ellipse2D.Double(x - radius, y - radius, radius + radius,
-									radius + radius),
+							new Ellipse2D.Double(x - xRadius, y - yRadius, xRadius + xRadius,
+									yRadius + yRadius),
 							null, null,
 							ColourSelecter.makeTransparent(datasetColour, 30));
 					plot.addAnnotation(a);
@@ -107,12 +108,13 @@ public class VennChartFactory extends AbstractChartFactory {
 
 					double x = d.getXValue(series, item);
 					double y = d.getYValue(series, item);
-					double radius = d.getRadius(series, item);
+					double xRadius = d.getXRadius(series, item);
+					double yRadius = d.getYRadius(series, item);
 
 					// Draw an unfilled circle
 					XYShapeAnnotation a = new XYShapeAnnotation(
-							new Ellipse2D.Double(x - radius, y - radius, radius + radius,
-									radius + radius),
+							new Ellipse2D.Double(x - xRadius, y - yRadius, xRadius + xRadius,
+									yRadius + yRadius),
 							ChartComponents.MARKER_STROKE, datasetColour);
 					plot.addAnnotation(a);
 				}

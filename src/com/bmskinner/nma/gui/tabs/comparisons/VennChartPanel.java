@@ -27,6 +27,7 @@ public class VennChartPanel extends ChartDetailPanel {
 		setLayout(new BorderLayout());
 		chartPanel = new ExportableChartPanel(VennChartFactory.createEmptyChart());
 		chartPanel.setFixedAspectRatio(true);
+		chartPanel.setPannable(true);
 		this.add(chartPanel, BorderLayout.CENTER);
 	}
 

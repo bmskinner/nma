@@ -32,6 +32,7 @@ public class VennChartDataset extends DefaultXYDataset {
 	private static final double Y_START = 0;
 
 	private static final double DEFAULT_RADIUS = 0.7;
+	private static final double HALF_RADIUS = 0.35;
 	private static final double SUBSET_RADIUS = 0.17;
 
 	/**
@@ -42,7 +43,8 @@ public class VennChartDataset extends DefaultXYDataset {
 	/**
 	 * Store the radii of Venn circles
 	 */
-	private Map<Comparable<?>, List<Double>> radii = new HashMap<>();
+	private Map<Comparable<?>, List<Double>> xRadii = new HashMap<>();
+	private Map<Comparable<?>, List<Double>> yRadii = new HashMap<>();
 
 	/**
 	 * The locations of annotations with the shared counts
@@ -84,12 +86,17 @@ public class VennChartDataset extends DefaultXYDataset {
 	 * @return true if we can draw the dataset, false otherwise
 	 */
 	public boolean isValid() {
-		return clusters.values().stream().allMatch(l -> l.size() <= 3);
+		return clusters.values().stream().allMatch(l -> l.size() <= 4);
 	}
 
-	public double getRadius(int series, int item) {
+	public double getXRadius(int series, int item) {
 		Comparable<?> key = this.getSeriesKey(series);
-		return radii.get(key).get(item);
+		return xRadii.get(key).get(item);
+	}
+
+	public double getYRadius(int series, int item) {
+		Comparable<?> key = this.getSeriesKey(series);
+		return yRadii.get(key).get(item);
 	}
 
 	/**
@@ -110,6 +117,11 @@ public class VennChartDataset extends DefaultXYDataset {
 		return labels;
 	}
 
+	/**
+	 * Create the shared nucleus counts for each cluster
+	 * 
+	 * @param cluster the datasets to create labels for
+	 */
 	private Map<String, Integer> calculateCounts(List<IAnalysisDataset> cluster) {
 
 		Map<String, Integer> result = new HashMap<>();
@@ -173,72 +185,148 @@ public class VennChartDataset extends DefaultXYDataset {
 			result.put("d3", d3s.size());
 		}
 
+		if (cluster.size() == 4) {
+			Set<UUID> d1 = cluster.get(0).getCollection().getCellIDs();
+			Set<UUID> d2 = cluster.get(1).getCollection().getCellIDs();
+			Set<UUID> d3 = cluster.get(2).getCollection().getCellIDs();
+			Set<UUID> d4 = cluster.get(3).getCollection().getCellIDs();
+
+			// 1 combo of 4 shared
+			Set<UUID> d1d2d3d4 = new HashSet<>(d1);
+			d1d2d3d4.retainAll(d2);
+			d1d2d3d4.retainAll(d3);
+			d1d2d3d4.retainAll(d4);
+			result.put("d1d2d3d4", d1d2d3d4.size());
+
+			// 4 combos of 3 shared
+			Set<UUID> d1d2d3 = new HashSet<>(d1);
+			d1d2d3.retainAll(d2);
+			d1d2d3.retainAll(d3);
+			d1d2d3.removeAll(d1d2d3d4);
+			result.put("d1d2d3", d1d2d3.size());
+
+			Set<UUID> d1d2d4 = new HashSet<>(d1);
+			d1d2d4.retainAll(d2);
+			d1d2d4.retainAll(d4);
+			d1d2d4.removeAll(d1d2d3d4);
+			result.put("d1d2d4", d1d2d4.size());
+
+			Set<UUID> d1d3d4 = new HashSet<>(d1);
+			d1d3d4.retainAll(d3);
+			d1d3d4.retainAll(d4);
+			d1d3d4.removeAll(d1d2d3d4);
+			result.put("d1d3d4", d1d3d4.size());
+
+			Set<UUID> d2d3d4 = new HashSet<>(d2);
+			d2d3d4.retainAll(d3);
+			d2d3d4.retainAll(d4);
+			d2d3d4.removeAll(d1d2d3d4);
+			result.put("d2d3d4", d2d3d4.size());
+
+			// 6 combos of 2 shared
+			Set<UUID> d1d2 = new HashSet<>(d1);
+			d1d2.retainAll(d2);
+			d1d2.removeAll(d1d2d3);
+			d1d2.removeAll(d1d2d4);
+			d1d2.removeAll(d1d2d3d4);
+			result.put("d1d2", d1d2.size());
+
+			Set<UUID> d1d3 = new HashSet<>(d1);
+			d1d3.retainAll(d3);
+			d1d3.removeAll(d1d2d3);
+			d1d3.removeAll(d1d3d4);
+			d1d3.removeAll(d1d2d3d4);
+			result.put("d1d3", d1d3.size());
+
+			Set<UUID> d1d4 = new HashSet<>(d1);
+			d1d4.retainAll(d4);
+			d1d4.removeAll(d1d2d4);
+			d1d4.removeAll(d1d3d4);
+			d1d4.removeAll(d1d2d3d4);
+			result.put("d1d4", d1d4.size());
+
+			Set<UUID> d2d3 = new HashSet<>(d2);
+			d2d3.retainAll(d3);
+			d2d3.removeAll(d1d2d3);
+			d2d3.removeAll(d2d3d4);
+			d2d3.removeAll(d1d2d3d4);
+			result.put("d2d3", d2d3.size());
+
+			Set<UUID> d2d4 = new HashSet<>(d2);
+			d2d4.retainAll(d4);
+			d2d4.removeAll(d1d2d4);
+			d2d4.removeAll(d2d3d4);
+			d2d4.removeAll(d1d2d3d4);
+			result.put("d2d4", d2d4.size());
+
+			Set<UUID> d3d4 = new HashSet<>(d3);
+			d3d4.retainAll(d4);
+			d3d4.removeAll(d1d3d4);
+			d3d4.removeAll(d2d3d4);
+			d3d4.removeAll(d1d2d3d4);
+			result.put("d3d4", d3d4.size());
+
+			// 4 combos of single
+			Set<UUID> d1s = new HashSet<>(d1);
+			d1s.removeAll(d1d2);
+			d1s.removeAll(d1d3);
+			d1s.removeAll(d1d4);
+			d1s.removeAll(d1d2d3);
+			d1s.removeAll(d1d2d4);
+			d1s.removeAll(d1d3d4);
+			d1s.removeAll(d1d2d3d4);
+			result.put("d1", d1s.size());
+
+			Set<UUID> d2s = new HashSet<>(d2);
+			d2s.removeAll(d1d2);
+			d2s.removeAll(d2d3);
+			d2s.removeAll(d2d4);
+			d2s.removeAll(d1d2d3);
+			d2s.removeAll(d1d2d4);
+			d2s.removeAll(d2d3d4);
+			d2s.removeAll(d1d2d3d4);
+			result.put("d2", d2s.size());
+
+			Set<UUID> d3s = new HashSet<>(d3);
+			d3s.removeAll(d1d3);
+			d3s.removeAll(d2d3);
+			d3s.removeAll(d3d4);
+			d3s.removeAll(d1d2d3);
+			d3s.removeAll(d1d3d4);
+			d3s.removeAll(d2d3d4);
+			d3s.removeAll(d1d2d3d4);
+			result.put("d3", d3s.size());
+
+			Set<UUID> d4s = new HashSet<>(d4);
+			d4s.removeAll(d1d4);
+			d4s.removeAll(d2d4);
+			d4s.removeAll(d3d4);
+			d4s.removeAll(d1d2d4);
+			d4s.removeAll(d1d3d4);
+			d4s.removeAll(d2d3d4);
+			d4s.removeAll(d1d2d3d4);
+			result.put("d4", d4s.size());
+
+		}
+
 		return result;
 	}
 
-	/**
-	 * Create the shared nucleus count labels for each cluster
-	 * 
-	 * @param counts  the number of shared cells for each dataset combination
-	 * @param cluster the datasets to create labels for
-	 * @param xOffset the location of the datasets in the plot
-	 */
-//	private void createLabels(Map<String, Integer> counts, List<IAnalysisDataset> cluster,
-//			double xOffset) {
+//	private Map<String, Integer> createCombo(List<IAnalysisDataset> cluster, int... datasets) {
+//		Map<String, Integer> result = new HashMap<>();
+//		if (datasets.length == 2) {
+//			Set<UUID> da = cluster.get(datasets[0] - 1).getCollection().getCellIDs();
+//			Set<UUID> db = cluster.get(datasets[1] - 1).getCollection().getCellIDs();
+//			Set<UUID> dadb = new HashSet<>(da);
+//			dadb.retainAll(db);
+//			result.put("d" + (datasets[0] - 1) + "d" + (datasets[1] - 1), dadb.size());
+//			result.put("d" + (datasets[0] - 1), da.size() - dadb.size());
+//			result.put("d" + (datasets[1] - 1), db.size() - dadb.size());
 //
-//		if (cluster.size() == 1) {
-//			labels.add(new Label(xOffset, 0, String.valueOf(counts.get("d1"))));
 //		}
-//
-//		if (cluster.size() == 2) {
-//			labels.add(new Label(xOffset - 0.1, 0, String.valueOf(counts.get("d1"))));
-//			labels.add(new Label(xOffset + 1.1, 0, String.valueOf(counts.get("d2"))));
-//			labels.add(new Label(xOffset + 0.5, 0, String.valueOf(counts.get("d1d2"))));
-//		}
-//
-//		if (cluster.size() == 3) {
-//
-//			// Are we making flat or folded chart (do all datasets share cells)?
-//			if ((counts.get("d1d2") == 0 || counts.get("d1d3") == 0 || counts.get("d2d3") == 0)
-//					&& counts.get("d1d2d3") == 0) {
-//
-//				if (counts.get("d1d2") == 0) { // d3 is in the middle
-//					labels.add(new Label(xOffset + 0.5, 0, String.valueOf(counts.get("d1d3"))));
-//					labels.add(new Label(xOffset - 0.3, 0, String.valueOf(counts.get("d1"))));
-//					labels.add(new Label(xOffset + 1.5, 0, String.valueOf(counts.get("d2d3"))));
-//					labels.add(new Label(xOffset + 2.2, 0, String.valueOf(counts.get("d2"))));
-//					labels.add(new Label(xOffset + 1, 0, String.valueOf(counts.get("d3"))));
-//				}
-//
-//				if (counts.get("d1d3") == 0) { // d2 is in the middle
-//					labels.add(new Label(xOffset + 0.5, 0, String.valueOf(counts.get("d1d2"))));
-//					labels.add(new Label(xOffset - 0.3, 0, String.valueOf(counts.get("d1"))));
-//					labels.add(new Label(xOffset + 1.5, 0, String.valueOf(counts.get("d2d3"))));
-//					labels.add(new Label(xOffset + 2.2, 0, String.valueOf(counts.get("d3"))));
-//					labels.add(new Label(xOffset + 1, 0, String.valueOf(counts.get("d2"))));
-//				}
-//
-//				if (counts.get("d2d3") == 0) { // d1 is in the middle
-//					labels.add(new Label(xOffset + 0.5, 0, String.valueOf(counts.get("d1d2"))));
-//					labels.add(new Label(xOffset - 0.3, 0, String.valueOf(counts.get("d2"))));
-//					labels.add(new Label(xOffset + 1.5, 0, String.valueOf(counts.get("d1d3"))));
-//					labels.add(new Label(xOffset + 2.2, 0, String.valueOf(counts.get("d3"))));
-//					labels.add(new Label(xOffset + 1, 0, String.valueOf(counts.get("d1"))));
-//				}
-//
-//			} else {
-//
-//				labels.add(new Label(xOffset + 0.5, 0.2, String.valueOf(counts.get("d1d2d3"))));
-//				labels.add(new Label(xOffset + 0.5, -0.3, String.valueOf(counts.get("d1d2"))));
-//				labels.add(new Label(xOffset + 0.1, 0.3, String.valueOf(counts.get("d1d3"))));
-//				labels.add(new Label(xOffset - 0.3, -0.3, String.valueOf(counts.get("d1"))));
-//				labels.add(new Label(xOffset + 0.9, 0.3, String.valueOf(counts.get("d2d3"))));
-//				labels.add(new Label(xOffset + 1.3, -0.3, String.valueOf(counts.get("d2"))));
-//				labels.add(new Label(xOffset + 0.5, 1, String.valueOf(counts.get("d3"))));
-//			}
-//		}
-//
+//		return result;
 //	}
+
 
 	/**
 	 * Create the Venn circle centroids for a cluster
@@ -265,79 +353,79 @@ public class VennChartDataset extends DefaultXYDataset {
 			datasetPos = createThreeDatasetCentroids(counts, cluster, xStart, key);
 		}
 
-		this.addSeries(key, datasetPos);
+		if (cluster.size() == 4) {
+			datasetPos = createFourDatasetCentroids(counts, cluster, xStart, key);
+		}
 
-		// Add dataset name annotations
-//		for (int i = 0; i < datasetPos[0].length; i++) {
-//			double x = datasetPos[0][i];
-//			double y = datasetPos[1][i] == 0 ? i % 2 == 0 ? -1 : -0.8 : 1.5;
-//			labels.add(new Label(x, y, cluster.get(i).getName()));
-//		}
+		this.addSeries(key, datasetPos);
 	}
 
 	private double[][] createOneDatasetCentroids(Map<String, Integer> counts,
 			List<IAnalysisDataset> cluster,
 			double xStart, Comparable<?> key) {
-		List<Double> radiusList = radii.computeIfAbsent(key, k -> new ArrayList<>());
+		List<Double> xRadiusList = xRadii.computeIfAbsent(key, k -> new ArrayList<>());
+		List<Double> yRadiusList = yRadii.computeIfAbsent(key, k -> new ArrayList<>());
 		double[][] datasetPos = new double[2][cluster.size()];
 		datasetPos[0] = new double[] { xStart };
 		datasetPos[1] = new double[] { Y_START };
-		radiusList.add(DEFAULT_RADIUS);
+		xRadiusList.add(DEFAULT_RADIUS);
+		yRadiusList.add(DEFAULT_RADIUS);
 		labels.add(new Label(xStart, 0, String.valueOf(counts.get("d1"))));
+		labels.add(new Label(xStart, -1, cluster.get(0).getName()));
 		return datasetPos;
 	}
 
 	private double[][] createTwoDatasetCentroids(Map<String, Integer> counts,
 			List<IAnalysisDataset> cluster,
 			double xStart, Comparable<?> key) {
-		return layoutDoubleFlat(counts, cluster, xStart, key, 1, 2);
-	}
-
-	private double[][] layoutDoubleFlat(Map<String, Integer> counts,
-			List<IAnalysisDataset> cluster,
-			double xStart, Comparable<?> key, int a, int b) {
-
-		List<Double> radiusList = radii.computeIfAbsent(key, k -> new ArrayList<>());
+		List<Double> xRadiusList = xRadii.computeIfAbsent(key, k -> new ArrayList<>());
+		List<Double> yRadiusList = yRadii.computeIfAbsent(key, k -> new ArrayList<>());
 		double[][] datasetPos = new double[2][cluster.size()];
 
-		String da = "d" + a;
-		String db = "d" + b;
-		String dab = a < b ? da + db : db + da;
+		String da = "d1";
+		String db = "d2";
+		String dab = da + db;
 
 		if (counts.get(da) == 0) { // a entirely within b
 			datasetPos[0] = new double[] { xStart + 0.5, xStart + 1 };
 			datasetPos[1] = new double[] { Y_START, Y_START };
-			radiusList.add(SUBSET_RADIUS);
-			radiusList.add(DEFAULT_RADIUS);
+			xRadiusList.add(SUBSET_RADIUS);
+			xRadiusList.add(DEFAULT_RADIUS);
+			yRadiusList.add(SUBSET_RADIUS);
+			yRadiusList.add(DEFAULT_RADIUS);
 			labels.add(new Label(xStart + 1.1, 0, String.valueOf(counts.get(db))));
 			labels.add(new Label(xStart + 0.5, 0, String.valueOf(counts.get(dab))));
-			labels.add(new Label(xStart + 1.1, -1, cluster.get(b - 1).getName()));
-			labels.add(new Label(xStart + 0.5, -0.8, cluster.get(a - 1).getName()));
+			labels.add(new Label(xStart + 1.1, -1, cluster.get(1).getName()));
+			labels.add(new Label(xStart + 0.5, -0.8, cluster.get(0).getName()));
 
 		} else if (counts.get(db) == 0) { // b entirely within a
 			datasetPos[0] = new double[] { xStart, xStart + 0.5 };
 			datasetPos[1] = new double[] { Y_START, Y_START };
-			radiusList.add(DEFAULT_RADIUS);
-			radiusList.add(SUBSET_RADIUS);
+			xRadiusList.add(DEFAULT_RADIUS);
+			xRadiusList.add(SUBSET_RADIUS);
+			yRadiusList.add(DEFAULT_RADIUS);
+			yRadiusList.add(SUBSET_RADIUS);
+
 			labels.add(new Label(xStart, 0, String.valueOf(counts.get(da))));
 			labels.add(new Label(xStart + 0.5, 0, String.valueOf(counts.get(dab))));
-			labels.add(new Label(xStart, -1, cluster.get(a - 1).getName()));
-			labels.add(new Label(xStart + 0.5, -0.8, cluster.get(b - 1).getName()));
+			labels.add(new Label(xStart, -1, cluster.get(0).getName()));
+			labels.add(new Label(xStart + 0.5, -0.8, cluster.get(1).getName()));
 
 		} else { // some shared
 
 			datasetPos[0] = new double[] { xStart, xStart + 1, xStart + 2 };
 			datasetPos[1] = new double[] { Y_START, Y_START, Y_START };
 
-			radiusList.add(DEFAULT_RADIUS);
-			radiusList.add(DEFAULT_RADIUS);
-
+			xRadiusList.add(DEFAULT_RADIUS);
+			xRadiusList.add(DEFAULT_RADIUS);
+			yRadiusList.add(DEFAULT_RADIUS);
+			yRadiusList.add(DEFAULT_RADIUS);
 			labels.add(new Label(xStart - 0.3, 0, String.valueOf(counts.get(da))));
 			labels.add(new Label(xStart + 0.5, 0, String.valueOf(counts.get(dab))));
 			labels.add(new Label(xStart + 1, 0, String.valueOf(counts.get(db))));
 
-			labels.add(new Label(xStart - 0.3, -1, cluster.get(a - 1).getName()));
-			labels.add(new Label(xStart + 1, -1, cluster.get(b - 1).getName()));
+			labels.add(new Label(xStart - 0.3, -1, cluster.get(0).getName()));
+			labels.add(new Label(xStart + 1, -1, cluster.get(1).getName()));
 
 		}
 		return datasetPos;
@@ -346,7 +434,8 @@ public class VennChartDataset extends DefaultXYDataset {
 	private double[][] createThreeDatasetCentroids(Map<String, Integer> counts,
 			List<IAnalysisDataset> cluster,
 			double xStart, Comparable<?> key) {
-		List<Double> radiusList = radii.computeIfAbsent(key, k -> new ArrayList<>());
+		List<Double> xRadiusList = xRadii.computeIfAbsent(key, k -> new ArrayList<>());
+		List<Double> yRadiusList = yRadii.computeIfAbsent(key, k -> new ArrayList<>());
 		double[][] datasetPos = new double[2][cluster.size()];
 
 		if ((counts.get("d1d2") == 0 || counts.get("d1d3") == 0 || counts.get("d2d3") == 0)
@@ -362,39 +451,15 @@ public class VennChartDataset extends DefaultXYDataset {
 
 			if (counts.get("d2d3") == 0) { // d1 is in the middle
 				datasetPos = layoutTripleFlat(counts, cluster, xStart, key, 2, 1, 3);
-//
-//				radiusList.add(DEFAULT_RADIUS);
-//
-//				double d2x = counts.get("d2") == 0 ? xStart + 0.5 : xStart;
-//				double d3x = counts.get("d3") == 0 ? xStart + 1.5 : xStart + 2;
-//
-//				if (counts.get("d2") == 0) {
-//					radiusList.add(SUBSET_RADIUS);
-//				} else {
-//					radiusList.add(DEFAULT_RADIUS);
-//					labels.add(new Label(xStart - 0.3, 0, String.valueOf(counts.get("d2"))));
-//				}
-//
-//				if (counts.get("d3") == 0) {
-//					radiusList.add(SUBSET_RADIUS);
-//				} else {
-//					radiusList.add(DEFAULT_RADIUS);
-//					labels.add(new Label(xStart + 2.2, 0, String.valueOf(counts.get("d3"))));
-//				}
-//
-//				datasetPos[0] = new double[] { xStart + 1, d2x, d3x };
-//				datasetPos[1] = new double[] { Y_START, Y_START, Y_START };
-//
-//				labels.add(new Label(xStart + 0.5, 0, String.valueOf(counts.get("d1d2"))));
-//				labels.add(new Label(xStart + 1.5, 0, String.valueOf(counts.get("d1d3"))));
-//
-//				labels.add(new Label(xStart + 1, 0, String.valueOf(counts.get("d1"))));
 			}
 
 		} else { // make a triangle
-			radiusList.add(DEFAULT_RADIUS);
-			radiusList.add(DEFAULT_RADIUS);
-			radiusList.add(DEFAULT_RADIUS);
+			xRadiusList.add(DEFAULT_RADIUS);
+			xRadiusList.add(DEFAULT_RADIUS);
+			xRadiusList.add(DEFAULT_RADIUS);
+			yRadiusList.add(DEFAULT_RADIUS);
+			yRadiusList.add(DEFAULT_RADIUS);
+			yRadiusList.add(DEFAULT_RADIUS);
 			datasetPos[0] = new double[] { xStart, xStart + 1, xStart + 0.5 };
 			datasetPos[1] = new double[] { Y_START, Y_START, Y_START + 0.6 };
 			labels.add(new Label(xStart + 0.5, 0.2, String.valueOf(counts.get("d1d2d3"))));
@@ -412,11 +477,72 @@ public class VennChartDataset extends DefaultXYDataset {
 		return datasetPos;
 	}
 
+	private double[][] createFourDatasetCentroids(Map<String, Integer> counts,
+			List<IAnalysisDataset> cluster,
+			double xStart, Comparable<?> key) {
+		List<Double> xRadiusList = xRadii.computeIfAbsent(key, k -> new ArrayList<>());
+		List<Double> yRadiusList = yRadii.computeIfAbsent(key, k -> new ArrayList<>());
+		double[][] datasetPos = new double[2][cluster.size()];
+
+		xRadiusList.add(HALF_RADIUS);
+		xRadiusList.add(HALF_RADIUS);
+		xRadiusList.add(DEFAULT_RADIUS);
+		xRadiusList.add(DEFAULT_RADIUS);
+
+
+		yRadiusList.add(DEFAULT_RADIUS);
+		yRadiusList.add(DEFAULT_RADIUS);
+		yRadiusList.add(HALF_RADIUS);
+		yRadiusList.add(HALF_RADIUS);
+
+		datasetPos[0] = new double[] { xStart, xStart + 0.5, xStart + 0.5, xStart + 0.5 };
+		datasetPos[1] = new double[] { Y_START, Y_START, Y_START - 0.5, Y_START };
+
+		labels.add(new Label(xStart + 0.25, -0.25, String.valueOf(counts.get("d1d2d3d4"))));
+
+		labels.add(new Label(xStart + 0.25, -0.4, String.valueOf(counts.get("d1d2d3"))));
+		labels.add(new Label(xStart + 0.25, 0.05, String.valueOf(counts.get("d1d2d4"))));
+		labels.add(new Label(xStart + 0.1, -0.25, String.valueOf(counts.get("d1d3d4"))));
+		labels.add(new Label(xStart + 0.5, -0.25, String.valueOf(counts.get("d2d3d4"))));
+
+		labels.add(new Label(xStart + 0.25, 0.38, String.valueOf(counts.get("d1d2"))));
+		labels.add(new Label(xStart, -0.5, String.valueOf(counts.get("d1d3"))));
+		labels.add(new Label(xStart, 0.05, String.valueOf(counts.get("d1d4"))));
+		labels.add(new Label(xStart + 0.5, -0.5, String.valueOf(counts.get("d2d3"))));
+		labels.add(new Label(xStart + 0.5, 0.05, String.valueOf(counts.get("d2d4"))));
+		labels.add(new Label(xStart + 0.88, -0.25, String.valueOf(counts.get("d3d4"))));
+
+		labels.add(new Label(xStart, 0.38, String.valueOf(counts.get("d1"))));
+		labels.add(new Label(xStart + 0.5, 0.38, String.valueOf(counts.get("d2"))));
+		labels.add(new Label(xStart + 0.88, -0.5, String.valueOf(counts.get("d3"))));
+		labels.add(new Label(xStart + 1, 0.05, String.valueOf(counts.get("d4"))));
+
+		labels.add(new Label(xStart, -1, cluster.get(0).getName()));
+		labels.add(new Label(xStart + 0.5, 0.9, cluster.get(1).getName()));
+		labels.add(new Label(xStart + 0.75, -1, cluster.get(2).getName()));
+		labels.add(new Label(xStart + 1.2, 0.5, cluster.get(3).getName()));
+
+		return datasetPos;
+	}
+
+	/**
+	 * Layout three circles with overlaps only between 1-2 and 2-3.
+	 * 
+	 * @param counts
+	 * @param cluster
+	 * @param xStart
+	 * @param key
+	 * @param a       the index of the first circle
+	 * @param b       the index of the second circle
+	 * @param c       the index of the third circle
+	 * @return
+	 */
 	private double[][] layoutTripleFlat(Map<String, Integer> counts,
 			List<IAnalysisDataset> cluster,
 			double xStart, Comparable<?> key, int a, int b, int c) {
 
-		List<Double> radiusList = radii.computeIfAbsent(key, k -> new ArrayList<>());
+		List<Double> xRadiusList = xRadii.computeIfAbsent(key, k -> new ArrayList<>());
+		List<Double> yRadiusList = yRadii.computeIfAbsent(key, k -> new ArrayList<>());
 		double[][] datasetPos = new double[2][cluster.size()];
 
 		String da = "d" + a;
@@ -431,9 +557,13 @@ public class VennChartDataset extends DefaultXYDataset {
 		datasetPos[0] = new double[] { ax, xStart + 1, cx };
 		datasetPos[1] = new double[] { Y_START, Y_START, Y_START };
 
-		radiusList.add(counts.get(da) == 0 ? SUBSET_RADIUS : DEFAULT_RADIUS);
-		radiusList.add(DEFAULT_RADIUS);
-		radiusList.add(counts.get(dc) == 0 ? SUBSET_RADIUS : DEFAULT_RADIUS);
+		xRadiusList.add(counts.get(da) == 0 ? SUBSET_RADIUS : DEFAULT_RADIUS);
+		xRadiusList.add(DEFAULT_RADIUS);
+		xRadiusList.add(counts.get(dc) == 0 ? SUBSET_RADIUS : DEFAULT_RADIUS);
+
+		yRadiusList.add(counts.get(da) == 0 ? SUBSET_RADIUS : DEFAULT_RADIUS);
+		yRadiusList.add(DEFAULT_RADIUS);
+		yRadiusList.add(counts.get(dc) == 0 ? SUBSET_RADIUS : DEFAULT_RADIUS);
 
 		if (counts.get(da) > 0)
 			labels.add(new Label(ax - 0.3, 0, String.valueOf(counts.get(da))));
@@ -445,12 +575,9 @@ public class VennChartDataset extends DefaultXYDataset {
 		if (counts.get(dc) > 0)
 			labels.add(new Label(cx, 0, String.valueOf(counts.get(dc))));
 
-		labels.add(new Label(ax - 0.3, -0.8, cluster.get(a - 1).getName()));
+		labels.add(new Label(ax, -0.8, cluster.get(a - 1).getName()));
 		labels.add(new Label(xStart + 1, -1, cluster.get(b - 1).getName()));
 		labels.add(new Label(cx, -0.8, cluster.get(c - 1).getName()));
-
-		// TODO: add subsetting for datasets entirely contained within another
-
 		return datasetPos;
 	}
 
