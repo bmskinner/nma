@@ -1,16 +1,17 @@
 package com.bmskinner.nma.visualisation.datasets;
 
+import java.awt.Color;
+import java.awt.Stroke;
+import java.awt.geom.Ellipse2D;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
-import java.util.UUID;
 import java.util.logging.Logger;
 
+import org.jfree.chart.annotations.XYShapeAnnotation;
 import org.jfree.data.general.DatasetUtils;
 import org.jfree.data.xy.DefaultXYDataset;
 
@@ -20,6 +21,18 @@ import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 public class VennChartDataset extends DefaultXYDataset {
 
 	private static final Logger LOGGER = Logger.getLogger(VennChartDataset.class.getName());
+
+	public record VennCircle(IAnalysisDataset dataset, double x, double y, double rx, double ry) {
+
+		public XYShapeAnnotation toAnnotation(Color fill, Color outline,
+				Stroke stroke) {
+			return new XYShapeAnnotation(
+					new Ellipse2D.Double(x - rx, y - ry, x + rx,
+							y + ry),
+					stroke, outline, fill);
+		}
+
+	}
 
 	private static final int X_OFFSET = 4;
 
@@ -43,6 +56,7 @@ public class VennChartDataset extends DefaultXYDataset {
 	/**
 	 * Store the radii of Venn circles
 	 */
+	private List<VennCircle> circles = new ArrayList<>();
 	private Map<Comparable<?>, List<Double>> xRadii = new HashMap<>();
 	private Map<Comparable<?>, List<Double>> yRadii = new HashMap<>();
 
@@ -89,6 +103,10 @@ public class VennChartDataset extends DefaultXYDataset {
 		return clusters.values().stream().allMatch(l -> l.size() <= 4);
 	}
 
+	public List<VennCircle> getCircles() {
+		return circles;
+	}
+
 	public double getXRadius(int series, int item) {
 		Comparable<?> key = this.getSeriesKey(series);
 		return xRadii.get(key).get(item);
@@ -118,225 +136,14 @@ public class VennChartDataset extends DefaultXYDataset {
 	}
 
 	/**
-	 * Create the shared nucleus counts for each cluster
-	 * 
-	 * @param cluster the datasets to create labels for
-	 */
-	private Map<String, Integer> calculateCounts(List<IAnalysisDataset> cluster) {
-
-		Map<String, Integer> result = new HashMap<>();
-
-		if (cluster.size() == 1) {
-			result.put("d1", cluster.get(0).getCollection().size());
-		}
-
-		if (cluster.size() == 2) {
-			int d1d2 = cluster.get(0).getCollection().countShared(cluster.get(1));
-			int d1 = cluster.get(0).getCollection().size() - d1d2;
-			int d2 = cluster.get(1).getCollection().size() - d1d2;
-
-			result.put("d1d2", d1d2);
-			result.put("d1", d1);
-			result.put("d2", d2);
-		}
-
-		if (cluster.size() == 3) {
-			Set<UUID> d1 = cluster.get(0).getCollection().getCellIDs();
-			Set<UUID> d2 = cluster.get(1).getCollection().getCellIDs();
-			Set<UUID> d3 = cluster.get(2).getCollection().getCellIDs();
-
-			Set<UUID> d1d2d3 = new HashSet<>(d1);
-			d1d2d3.retainAll(d2);
-			d1d2d3.retainAll(d3);
-
-			Set<UUID> d1d2 = new HashSet<>(d1);
-			d1d2.retainAll(d2);
-			d1d2.removeAll(d1d2d3);
-
-			Set<UUID> d1d3 = new HashSet<>(d1);
-			d1d3.retainAll(d3);
-			d1d3.removeAll(d1d2d3);
-
-			Set<UUID> d1s = new HashSet<>(d1);
-			d1s.removeAll(d1d2d3);
-			d1s.removeAll(d1d2);
-			d1s.removeAll(d1d3);
-
-			Set<UUID> d2d3 = new HashSet<>(d2);
-			d2d3.retainAll(d3);
-			d2d3.removeAll(d1d2d3);
-
-			Set<UUID> d2s = new HashSet<>(d2);
-			d2s.removeAll(d1d2);
-			d2s.removeAll(d2d3);
-			d2s.removeAll(d1d2d3);
-
-			Set<UUID> d3s = new HashSet<>(d3);
-			d3s.removeAll(d1d3);
-			d3s.removeAll(d2d3);
-			d3s.removeAll(d1d2d3);
-
-			result.put("d1d2d3", d1d2d3.size());
-			result.put("d1d2", d1d2.size());
-			result.put("d1d3", d1d3.size());
-			result.put("d1", d1s.size());
-			result.put("d2d3", d2d3.size());
-			result.put("d2", d2s.size());
-			result.put("d3", d3s.size());
-		}
-
-		if (cluster.size() == 4) {
-			Set<UUID> d1 = cluster.get(0).getCollection().getCellIDs();
-			Set<UUID> d2 = cluster.get(1).getCollection().getCellIDs();
-			Set<UUID> d3 = cluster.get(2).getCollection().getCellIDs();
-			Set<UUID> d4 = cluster.get(3).getCollection().getCellIDs();
-
-			// 1 combo of 4 shared
-			Set<UUID> d1d2d3d4 = new HashSet<>(d1);
-			d1d2d3d4.retainAll(d2);
-			d1d2d3d4.retainAll(d3);
-			d1d2d3d4.retainAll(d4);
-			result.put("d1d2d3d4", d1d2d3d4.size());
-
-			// 4 combos of 3 shared
-			Set<UUID> d1d2d3 = new HashSet<>(d1);
-			d1d2d3.retainAll(d2);
-			d1d2d3.retainAll(d3);
-			d1d2d3.removeAll(d1d2d3d4);
-			result.put("d1d2d3", d1d2d3.size());
-
-			Set<UUID> d1d2d4 = new HashSet<>(d1);
-			d1d2d4.retainAll(d2);
-			d1d2d4.retainAll(d4);
-			d1d2d4.removeAll(d1d2d3d4);
-			result.put("d1d2d4", d1d2d4.size());
-
-			Set<UUID> d1d3d4 = new HashSet<>(d1);
-			d1d3d4.retainAll(d3);
-			d1d3d4.retainAll(d4);
-			d1d3d4.removeAll(d1d2d3d4);
-			result.put("d1d3d4", d1d3d4.size());
-
-			Set<UUID> d2d3d4 = new HashSet<>(d2);
-			d2d3d4.retainAll(d3);
-			d2d3d4.retainAll(d4);
-			d2d3d4.removeAll(d1d2d3d4);
-			result.put("d2d3d4", d2d3d4.size());
-
-			// 6 combos of 2 shared
-			Set<UUID> d1d2 = new HashSet<>(d1);
-			d1d2.retainAll(d2);
-			d1d2.removeAll(d1d2d3);
-			d1d2.removeAll(d1d2d4);
-			d1d2.removeAll(d1d2d3d4);
-			result.put("d1d2", d1d2.size());
-
-			Set<UUID> d1d3 = new HashSet<>(d1);
-			d1d3.retainAll(d3);
-			d1d3.removeAll(d1d2d3);
-			d1d3.removeAll(d1d3d4);
-			d1d3.removeAll(d1d2d3d4);
-			result.put("d1d3", d1d3.size());
-
-			Set<UUID> d1d4 = new HashSet<>(d1);
-			d1d4.retainAll(d4);
-			d1d4.removeAll(d1d2d4);
-			d1d4.removeAll(d1d3d4);
-			d1d4.removeAll(d1d2d3d4);
-			result.put("d1d4", d1d4.size());
-
-			Set<UUID> d2d3 = new HashSet<>(d2);
-			d2d3.retainAll(d3);
-			d2d3.removeAll(d1d2d3);
-			d2d3.removeAll(d2d3d4);
-			d2d3.removeAll(d1d2d3d4);
-			result.put("d2d3", d2d3.size());
-
-			Set<UUID> d2d4 = new HashSet<>(d2);
-			d2d4.retainAll(d4);
-			d2d4.removeAll(d1d2d4);
-			d2d4.removeAll(d2d3d4);
-			d2d4.removeAll(d1d2d3d4);
-			result.put("d2d4", d2d4.size());
-
-			Set<UUID> d3d4 = new HashSet<>(d3);
-			d3d4.retainAll(d4);
-			d3d4.removeAll(d1d3d4);
-			d3d4.removeAll(d2d3d4);
-			d3d4.removeAll(d1d2d3d4);
-			result.put("d3d4", d3d4.size());
-
-			// 4 combos of single
-			Set<UUID> d1s = new HashSet<>(d1);
-			d1s.removeAll(d1d2);
-			d1s.removeAll(d1d3);
-			d1s.removeAll(d1d4);
-			d1s.removeAll(d1d2d3);
-			d1s.removeAll(d1d2d4);
-			d1s.removeAll(d1d3d4);
-			d1s.removeAll(d1d2d3d4);
-			result.put("d1", d1s.size());
-
-			Set<UUID> d2s = new HashSet<>(d2);
-			d2s.removeAll(d1d2);
-			d2s.removeAll(d2d3);
-			d2s.removeAll(d2d4);
-			d2s.removeAll(d1d2d3);
-			d2s.removeAll(d1d2d4);
-			d2s.removeAll(d2d3d4);
-			d2s.removeAll(d1d2d3d4);
-			result.put("d2", d2s.size());
-
-			Set<UUID> d3s = new HashSet<>(d3);
-			d3s.removeAll(d1d3);
-			d3s.removeAll(d2d3);
-			d3s.removeAll(d3d4);
-			d3s.removeAll(d1d2d3);
-			d3s.removeAll(d1d3d4);
-			d3s.removeAll(d2d3d4);
-			d3s.removeAll(d1d2d3d4);
-			result.put("d3", d3s.size());
-
-			Set<UUID> d4s = new HashSet<>(d4);
-			d4s.removeAll(d1d4);
-			d4s.removeAll(d2d4);
-			d4s.removeAll(d3d4);
-			d4s.removeAll(d1d2d4);
-			d4s.removeAll(d1d3d4);
-			d4s.removeAll(d2d3d4);
-			d4s.removeAll(d1d2d3d4);
-			result.put("d4", d4s.size());
-
-		}
-
-		return result;
-	}
-
-//	private Map<String, Integer> createCombo(List<IAnalysisDataset> cluster, int... datasets) {
-//		Map<String, Integer> result = new HashMap<>();
-//		if (datasets.length == 2) {
-//			Set<UUID> da = cluster.get(datasets[0] - 1).getCollection().getCellIDs();
-//			Set<UUID> db = cluster.get(datasets[1] - 1).getCollection().getCellIDs();
-//			Set<UUID> dadb = new HashSet<>(da);
-//			dadb.retainAll(db);
-//			result.put("d" + (datasets[0] - 1) + "d" + (datasets[1] - 1), dadb.size());
-//			result.put("d" + (datasets[0] - 1), da.size() - dadb.size());
-//			result.put("d" + (datasets[1] - 1), db.size() - dadb.size());
-//
-//		}
-//		return result;
-//	}
-
-
-	/**
 	 * Create the Venn circle centroids for a cluster
 	 * 
 	 * @param counts  the number of shared cells for each dataset combination
 	 * @param cluster the datasets to create centroids for
 	 * @param xOffset the location of the datasets in the plot
 	 */
-	private void createCentroids(Map<String, Integer> counts, List<IAnalysisDataset> cluster,
-			double xStart, Comparable<?> key) {
+	private void createCentroids(Map<String, Integer> counts, List<IAnalysisDataset> cluster, double xStart,
+			Comparable<?> key) {
 
 		double[][] datasetPos = new double[2][cluster.size()];
 
@@ -360,23 +167,24 @@ public class VennChartDataset extends DefaultXYDataset {
 		this.addSeries(key, datasetPos);
 	}
 
-	private double[][] createOneDatasetCentroids(Map<String, Integer> counts,
-			List<IAnalysisDataset> cluster,
+	private double[][] createOneDatasetCentroids(Map<String, Integer> counts, List<IAnalysisDataset> cluster,
 			double xStart, Comparable<?> key) {
 		List<Double> xRadiusList = xRadii.computeIfAbsent(key, k -> new ArrayList<>());
 		List<Double> yRadiusList = yRadii.computeIfAbsent(key, k -> new ArrayList<>());
+
+		circles.add(new VennCircle(cluster.get(0), xStart, Y_START, DEFAULT_RADIUS, DEFAULT_RADIUS));
+
 		double[][] datasetPos = new double[2][cluster.size()];
 		datasetPos[0] = new double[] { xStart };
 		datasetPos[1] = new double[] { Y_START };
 		xRadiusList.add(DEFAULT_RADIUS);
 		yRadiusList.add(DEFAULT_RADIUS);
-		labels.add(new Label(xStart, 0, String.valueOf(counts.get("d1"))));
+		labels.add(new Label(xStart, Y_START, String.valueOf(counts.get("d1"))));
 		labels.add(new Label(xStart, -1, cluster.get(0).getName()));
 		return datasetPos;
 	}
 
-	private double[][] createTwoDatasetCentroids(Map<String, Integer> counts,
-			List<IAnalysisDataset> cluster,
+	private double[][] createTwoDatasetCentroids(Map<String, Integer> counts, List<IAnalysisDataset> cluster,
 			double xStart, Comparable<?> key) {
 		List<Double> xRadiusList = xRadii.computeIfAbsent(key, k -> new ArrayList<>());
 		List<Double> yRadiusList = yRadii.computeIfAbsent(key, k -> new ArrayList<>());
@@ -387,6 +195,7 @@ public class VennChartDataset extends DefaultXYDataset {
 		String dab = da + db;
 
 		if (counts.get(da) == 0) { // a entirely within b
+
 			datasetPos[0] = new double[] { xStart + 0.5, xStart + 1 };
 			datasetPos[1] = new double[] { Y_START, Y_START };
 			xRadiusList.add(SUBSET_RADIUS);
@@ -431,8 +240,7 @@ public class VennChartDataset extends DefaultXYDataset {
 		return datasetPos;
 	}
 
-	private double[][] createThreeDatasetCentroids(Map<String, Integer> counts,
-			List<IAnalysisDataset> cluster,
+	private double[][] createThreeDatasetCentroids(Map<String, Integer> counts, List<IAnalysisDataset> cluster,
 			double xStart, Comparable<?> key) {
 		List<Double> xRadiusList = xRadii.computeIfAbsent(key, k -> new ArrayList<>());
 		List<Double> yRadiusList = yRadii.computeIfAbsent(key, k -> new ArrayList<>());
@@ -477,8 +285,7 @@ public class VennChartDataset extends DefaultXYDataset {
 		return datasetPos;
 	}
 
-	private double[][] createFourDatasetCentroids(Map<String, Integer> counts,
-			List<IAnalysisDataset> cluster,
+	private double[][] createFourDatasetCentroids(Map<String, Integer> counts, List<IAnalysisDataset> cluster,
 			double xStart, Comparable<?> key) {
 		List<Double> xRadiusList = xRadii.computeIfAbsent(key, k -> new ArrayList<>());
 		List<Double> yRadiusList = yRadii.computeIfAbsent(key, k -> new ArrayList<>());
@@ -488,7 +295,6 @@ public class VennChartDataset extends DefaultXYDataset {
 		xRadiusList.add(HALF_RADIUS);
 		xRadiusList.add(DEFAULT_RADIUS);
 		xRadiusList.add(DEFAULT_RADIUS);
-
 
 		yRadiusList.add(DEFAULT_RADIUS);
 		yRadiusList.add(DEFAULT_RADIUS);
@@ -537,9 +343,8 @@ public class VennChartDataset extends DefaultXYDataset {
 	 * @param c       the index of the third circle
 	 * @return
 	 */
-	private double[][] layoutTripleFlat(Map<String, Integer> counts,
-			List<IAnalysisDataset> cluster,
-			double xStart, Comparable<?> key, int a, int b, int c) {
+	private double[][] layoutTripleFlat(Map<String, Integer> counts, List<IAnalysisDataset> cluster, double xStart,
+			Comparable<?> key, int a, int b, int c) {
 
 		List<Double> xRadiusList = xRadii.computeIfAbsent(key, k -> new ArrayList<>());
 		List<Double> yRadiusList = yRadii.computeIfAbsent(key, k -> new ArrayList<>());
@@ -597,8 +402,7 @@ public class VennChartDataset extends DefaultXYDataset {
 		// Check if we can add the dataset to an existing cluster
 		boolean wasAdded = false;
 		for (List<IAnalysisDataset> cluster : clusters.values()) {
-			boolean addToCluster = cluster.stream()
-					.anyMatch(d -> d.getCollection().countShared(dataset) > 0);
+			boolean addToCluster = cluster.stream().anyMatch(d -> d.getCollection().countShared(dataset) > 0);
 
 			if (addToCluster) {
 				cluster.add(dataset);
@@ -622,7 +426,8 @@ public class VennChartDataset extends DefaultXYDataset {
 		for (Entry<Comparable<?>, List<IAnalysisDataset>> entry : clusters.entrySet()) {
 			List<IAnalysisDataset> datasets = entry.getValue();
 
-			Map<String, Integer> counts = calculateCounts(datasets);
+			VennCounter vc = new VennCounter(datasets);
+			Map<String, Integer> counts = vc.getCounts();
 
 			createCentroids(counts, datasets, xStart, entry.getKey());
 
@@ -663,8 +468,7 @@ public class VennChartDataset extends DefaultXYDataset {
 				}
 
 				boolean matchFound = entry1.getValue().stream().anyMatch(
-						d -> entry2.getValue().stream()
-								.anyMatch(d2 -> d.getCollection().countShared(d2) > 0));
+						d -> entry2.getValue().stream().anyMatch(d2 -> d.getCollection().countShared(d2) > 0));
 
 				if (matchFound) {
 					entry1.getValue().addAll(entry2.getValue());
@@ -680,8 +484,7 @@ public class VennChartDataset extends DefaultXYDataset {
 		// Remove entry2 from consideration if absorbed into entry1
 		for (Entry<Comparable<?>, Boolean> entry : includeInFinal.entrySet()) {
 			if (entry.getValue()) {
-				replacementClusters.put("Cluster_" + replacementClusters.size(),
-						clusters.get(entry.getKey()));
+				replacementClusters.put("Cluster_" + replacementClusters.size(), clusters.get(entry.getKey()));
 			}
 		}
 
