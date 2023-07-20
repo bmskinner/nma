@@ -11,7 +11,7 @@ import org.junit.Test;
 import com.bmskinner.nma.TestResources;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.io.SampleDatasetReader;
-import com.bmskinner.nma.visualisation.datasets.VennCounter.VennCircle;
+import com.bmskinner.nma.visualisation.datasets.VennCounter.VennIntersection;
 
 public class VennCounterTest {
 
@@ -27,9 +27,9 @@ public class VennCounterTest {
 
 		assertEquals("0010", vc.getType());
 
-		assertEquals(63, vc.getCount(VennCircle.AB));
-		assertEquals(0, vc.getCount(VennCircle.A));
-		assertEquals(0, vc.getCount(VennCircle.B));
+		assertEquals(63, vc.getCount(VennIntersection.AB));
+		assertEquals(0, vc.getCount(VennIntersection.A));
+		assertEquals(0, vc.getCount(VennIntersection.B));
 
 	}
 
@@ -44,9 +44,9 @@ public class VennCounterTest {
 		VennCounter vc = new VennCounter(cluster);
 
 		assertEquals("0011", vc.getType());
-		assertEquals(56, vc.getCount(VennCircle.AB));
-		assertEquals(7, vc.getCount(VennCircle.A));
-		assertEquals(0, vc.getCount(VennCircle.B));
+		assertEquals(56, vc.getCount(VennIntersection.AB));
+		assertEquals(7, vc.getCount(VennIntersection.A));
+		assertEquals(0, vc.getCount(VennIntersection.B));
 	}
 
 	@Test
@@ -65,13 +65,13 @@ public class VennCounterTest {
 		VennCounter vc = new VennCounter(cluster);
 
 		assertEquals("0020", vc.getType());
-		assertEquals(0, vc.getCount(VennCircle.ABC));
-		assertEquals(56, vc.getCount(VennCircle.AB));
-		assertEquals(0, vc.getCount(VennCircle.AC));
-		assertEquals(7, vc.getCount(VennCircle.BC));
-		assertEquals(0, vc.getCount(VennCircle.A));
-		assertEquals(0, vc.getCount(VennCircle.B));
-		assertEquals(0, vc.getCount(VennCircle.C));
+		assertEquals(0, vc.getCount(VennIntersection.ABC));
+		assertEquals(56, vc.getCount(VennIntersection.AB));
+		assertEquals(0, vc.getCount(VennIntersection.AC));
+		assertEquals(7, vc.getCount(VennIntersection.BC));
+		assertEquals(0, vc.getCount(VennIntersection.A));
+		assertEquals(0, vc.getCount(VennIntersection.B));
+		assertEquals(0, vc.getCount(VennIntersection.C));
 	}
 
 }

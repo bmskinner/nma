@@ -14,6 +14,7 @@ import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.gui.components.ColourSelecter;
+import com.bmskinner.nma.logging.Loggable;
 import com.bmskinner.nma.visualisation.ChartComponents;
 import com.bmskinner.nma.visualisation.datasets.VennChartDataset;
 import com.bmskinner.nma.visualisation.datasets.VennChartDataset.Label;
@@ -55,7 +56,7 @@ public class VennChartFactory extends AbstractChartFactory {
 			rend.setUseFillPaint(false);
 			plot.setRenderer(rend);
 
-			// Draw filled circles at the series item locations
+			// Draw circles
 			List<IAnalysisDataset> allDatasets = options.getDatasets();
 
 			for (VennCircle c : d.getCircles()) {
@@ -67,36 +68,6 @@ public class VennChartFactory extends AbstractChartFactory {
 						ChartComponents.MARKER_STROKE));
 			}
 
-//			for (int series = 0; series < d.getSeriesCount(); series++) {
-//				if (d.getSeriesKey(series).equals("Sentinals")) // no annotations of these points
-//					continue;
-//
-//				List<IAnalysisDataset> datasets = d.getDatasets(d.getSeriesKey(series));
-//
-//				// Add each of the venn circles
-//				for (int item = 0; item < d.getItemCount(series); item++) {
-//
-//					// Check the colour of the dataset from the original selection
-//					IAnalysisDataset dataset = datasets.get(item);
-//					int colourIndex = allDatasets.indexOf(dataset);
-//					Color datasetColour = dataset.getDatasetColour()
-//							.orElse(ColourSelecter.getColor(colourIndex));
-//
-//					double x = d.getXValue(series, item);
-//					double y = d.getYValue(series, item);
-//					double xRadius = d.getXRadius(series, item);
-//					double yRadius = d.getYRadius(series, item);
-//
-//					// Draw a filled shape as backround
-//					XYShapeAnnotation a = new XYShapeAnnotation(
-//							new Ellipse2D.Double(x - xRadius, y - yRadius, xRadius + xRadius,
-//									yRadius + yRadius),
-//							null, null);
-//					plot.addAnnotation(a);
-//				}
-//
-//			}
-
 			// Add shared counts and labels
 			for (Label a : d.getLabels()) {
 				plot.addAnnotation(new XYTextAnnotation(a.label(), a.x(), a.y()));
@@ -106,6 +77,7 @@ public class VennChartFactory extends AbstractChartFactory {
 			return chart;
 
 		} catch (Exception e) {
+			LOGGER.log(Loggable.STACK, "Error making venn chart: " + e.getMessage(), e);
 			return createErrorChart();
 		}
 	}

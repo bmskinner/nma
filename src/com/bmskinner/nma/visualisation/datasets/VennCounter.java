@@ -1,6 +1,7 @@
 package com.bmskinner.nma.visualisation.datasets;
 
 import java.util.Arrays;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -9,6 +10,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -24,18 +26,83 @@ public class VennCounter {
 
 	private static final int FOUR_DATASETS = 8;
 
-	private Map<String, Integer> result = new HashMap<>();
+	public static final String D1 = "d1";
+	public static final String D2 = "d2";
+	public static final String D3 = "d3";
+	public static final String D4 = "d4";
 
-	// Which datasets d1 - d4 correspond to venn circles
-	private String a;
-	private String b;
-	private String c;
-	private String d;
+	// uses "d1" syntax - track counts
+	private static final Map<String, Integer> counts = new HashMap<>();
+
+	// uses "d1" syntax - track which dataset has which position
+	private static final Map<VennDatasetPosition, String> positions = new EnumMap<>(VennDatasetPosition.class);
+
+	// uses "d1" syntax - track which position has which dataset
+	private Map<String, IAnalysisDataset> datasets = new HashMap<>();
 
 	private int nDatasets = -1;
 
-	public enum VennCircle {
-		ABCD, ABC, ABD, ACD, BCD, AB, AC, AD, BC, BD, CD, A, B, C, D
+	/**
+	 * Link analysis datasets to a venn circle for positioning
+	 * 
+	 * @author ben
+	 *
+	 */
+	public enum VennDatasetPosition {
+		A, B, C, D
+	}
+
+	/**
+	 * Links counts to intersections
+	 * 
+	 * @author ben
+	 *
+	 */
+	public enum VennIntersection {
+		ABCD(VennDatasetPosition.A, VennDatasetPosition.B, VennDatasetPosition.C, VennDatasetPosition.D),
+
+		ABC(VennDatasetPosition.A, VennDatasetPosition.B, VennDatasetPosition.C),
+		ABD(VennDatasetPosition.A, VennDatasetPosition.B, VennDatasetPosition.D),
+		ACD(VennDatasetPosition.A, VennDatasetPosition.C, VennDatasetPosition.D),
+		BCD(VennDatasetPosition.B, VennDatasetPosition.C, VennDatasetPosition.D),
+
+		AB(VennDatasetPosition.A, VennDatasetPosition.B),
+		AC(VennDatasetPosition.A, VennDatasetPosition.C),
+		AD(VennDatasetPosition.A, VennDatasetPosition.D),
+		BC(VennDatasetPosition.B, VennDatasetPosition.C),
+		BD(VennDatasetPosition.B, VennDatasetPosition.D),
+		CD(VennDatasetPosition.C, VennDatasetPosition.D),
+
+		A(VennDatasetPosition.A),
+		B(VennDatasetPosition.B),
+		C(VennDatasetPosition.C),
+		D(VennDatasetPosition.D);
+		
+		private VennDatasetPosition[] vdp;
+
+		/**
+		 * Given strings of datasets (e.g. d2d1d3), order them by dataset number (e.g.
+		 * d1d2d3)
+		 * 
+		 * @return the numerically sorted dataset string
+		 */
+		private VennIntersection(VennDatasetPosition... vdp) {
+			this.vdp = vdp;
+		}
+
+		public int getValue() {
+			String out = "d" + Stream.of(vdp).map(p -> positions.get(p))
+					.flatMap(s -> s.chars().mapToObj(i -> (char) i))
+					.filter(c -> c != "d".charAt(0)).sorted()
+					.map(c -> c.toString())
+					.collect(Collectors.joining("d"));
+
+			if (!counts.containsKey(out)) {
+				throw new IllegalArgumentException(
+						"No key '" + out + "' in count data for position " + Arrays.toString(vdp));
+			}
+			return counts.get(out);
+		}
 	}
 
 	/**
@@ -44,9 +111,21 @@ public class VennCounter {
 	 * @param cluster
 	 */
 	public VennCounter(List<IAnalysisDataset> cluster) {
+		positions.clear();
+		counts.clear();
 		nDatasets = cluster.size();
+
+		// Store the datasets with the "d" key
+		for (int i = 0; i < cluster.size(); i++) {
+			datasets.put("d" + (i + 1), cluster.get(i));
+		}
+
 		createCounts(cluster);
 		assignDatasets();
+	}
+
+	public int size() {
+		return nDatasets;
 	}
 
 	/**
@@ -56,7 +135,7 @@ public class VennCounter {
 	 */
 	private void createCounts(List<IAnalysisDataset> cluster) {
 		if (cluster.size() == 1) {
-			result.put("d1", cluster.get(0).getCollection().size());
+			counts.put("d1", cluster.get(0).getCollection().size());
 		}
 
 		if (cluster.size() == 2) {
@@ -64,9 +143,9 @@ public class VennCounter {
 			int d1 = cluster.get(0).getCollection().size() - d1d2;
 			int d2 = cluster.get(1).getCollection().size() - d1d2;
 
-			result.put("d1d2", d1d2);
-			result.put("d1", d1);
-			result.put("d2", d2);
+			counts.put("d1d2", d1d2);
+			counts.put("d1", d1);
+			counts.put("d2", d2);
 		}
 
 		if (cluster.size() == 3) {
@@ -105,13 +184,13 @@ public class VennCounter {
 			d3s.removeAll(d2d3);
 			d3s.removeAll(d1d2d3);
 
-			result.put("d1d2d3", d1d2d3.size());
-			result.put("d1d2", d1d2.size());
-			result.put("d1d3", d1d3.size());
-			result.put("d1", d1s.size());
-			result.put("d2d3", d2d3.size());
-			result.put("d2", d2s.size());
-			result.put("d3", d3s.size());
+			counts.put("d1d2d3", d1d2d3.size());
+			counts.put("d1d2", d1d2.size());
+			counts.put("d1d3", d1d3.size());
+			counts.put("d1", d1s.size());
+			counts.put("d2d3", d2d3.size());
+			counts.put("d2", d2s.size());
+			counts.put("d3", d3s.size());
 		}
 
 		if (cluster.size() == 4) {
@@ -125,32 +204,32 @@ public class VennCounter {
 			d1d2d3d4.retainAll(d2);
 			d1d2d3d4.retainAll(d3);
 			d1d2d3d4.retainAll(d4);
-			result.put("d1d2d3d4", d1d2d3d4.size());
+			counts.put("d1d2d3d4", d1d2d3d4.size());
 
 			// 4 combos of 3 shared
 			Set<UUID> d1d2d3 = new HashSet<>(d1);
 			d1d2d3.retainAll(d2);
 			d1d2d3.retainAll(d3);
 			d1d2d3.removeAll(d1d2d3d4);
-			result.put("d1d2d3", d1d2d3.size());
+			counts.put("d1d2d3", d1d2d3.size());
 
 			Set<UUID> d1d2d4 = new HashSet<>(d1);
 			d1d2d4.retainAll(d2);
 			d1d2d4.retainAll(d4);
 			d1d2d4.removeAll(d1d2d3d4);
-			result.put("d1d2d4", d1d2d4.size());
+			counts.put("d1d2d4", d1d2d4.size());
 
 			Set<UUID> d1d3d4 = new HashSet<>(d1);
 			d1d3d4.retainAll(d3);
 			d1d3d4.retainAll(d4);
 			d1d3d4.removeAll(d1d2d3d4);
-			result.put("d1d3d4", d1d3d4.size());
+			counts.put("d1d3d4", d1d3d4.size());
 
 			Set<UUID> d2d3d4 = new HashSet<>(d2);
 			d2d3d4.retainAll(d3);
 			d2d3d4.retainAll(d4);
 			d2d3d4.removeAll(d1d2d3d4);
-			result.put("d2d3d4", d2d3d4.size());
+			counts.put("d2d3d4", d2d3d4.size());
 
 			// 6 combos of 2 shared
 			Set<UUID> d1d2 = new HashSet<>(d1);
@@ -158,42 +237,42 @@ public class VennCounter {
 			d1d2.removeAll(d1d2d3);
 			d1d2.removeAll(d1d2d4);
 			d1d2.removeAll(d1d2d3d4);
-			result.put("d1d2", d1d2.size());
+			counts.put("d1d2", d1d2.size());
 
 			Set<UUID> d1d3 = new HashSet<>(d1);
 			d1d3.retainAll(d3);
 			d1d3.removeAll(d1d2d3);
 			d1d3.removeAll(d1d3d4);
 			d1d3.removeAll(d1d2d3d4);
-			result.put("d1d3", d1d3.size());
+			counts.put("d1d3", d1d3.size());
 
 			Set<UUID> d1d4 = new HashSet<>(d1);
 			d1d4.retainAll(d4);
 			d1d4.removeAll(d1d2d4);
 			d1d4.removeAll(d1d3d4);
 			d1d4.removeAll(d1d2d3d4);
-			result.put("d1d4", d1d4.size());
+			counts.put("d1d4", d1d4.size());
 
 			Set<UUID> d2d3 = new HashSet<>(d2);
 			d2d3.retainAll(d3);
 			d2d3.removeAll(d1d2d3);
 			d2d3.removeAll(d2d3d4);
 			d2d3.removeAll(d1d2d3d4);
-			result.put("d2d3", d2d3.size());
+			counts.put("d2d3", d2d3.size());
 
 			Set<UUID> d2d4 = new HashSet<>(d2);
 			d2d4.retainAll(d4);
 			d2d4.removeAll(d1d2d4);
 			d2d4.removeAll(d2d3d4);
 			d2d4.removeAll(d1d2d3d4);
-			result.put("d2d4", d2d4.size());
+			counts.put("d2d4", d2d4.size());
 
 			Set<UUID> d3d4 = new HashSet<>(d3);
 			d3d4.retainAll(d4);
 			d3d4.removeAll(d1d3d4);
 			d3d4.removeAll(d2d3d4);
 			d3d4.removeAll(d1d2d3d4);
-			result.put("d3d4", d3d4.size());
+			counts.put("d3d4", d3d4.size());
 
 			// 4 combos of single
 			Set<UUID> d1s = new HashSet<>(d1);
@@ -204,7 +283,7 @@ public class VennCounter {
 			d1s.removeAll(d1d2d4);
 			d1s.removeAll(d1d3d4);
 			d1s.removeAll(d1d2d3d4);
-			result.put("d1", d1s.size());
+			counts.put("d1", d1s.size());
 
 			Set<UUID> d2s = new HashSet<>(d2);
 			d2s.removeAll(d1d2);
@@ -214,7 +293,7 @@ public class VennCounter {
 			d2s.removeAll(d1d2d4);
 			d2s.removeAll(d2d3d4);
 			d2s.removeAll(d1d2d3d4);
-			result.put("d2", d2s.size());
+			counts.put("d2", d2s.size());
 
 			Set<UUID> d3s = new HashSet<>(d3);
 			d3s.removeAll(d1d3);
@@ -224,7 +303,7 @@ public class VennCounter {
 			d3s.removeAll(d1d3d4);
 			d3s.removeAll(d2d3d4);
 			d3s.removeAll(d1d2d3d4);
-			result.put("d3", d3s.size());
+			counts.put("d3", d3s.size());
 
 			Set<UUID> d4s = new HashSet<>(d4);
 			d4s.removeAll(d1d4);
@@ -234,7 +313,7 @@ public class VennCounter {
 			d4s.removeAll(d1d3d4);
 			d4s.removeAll(d2d3d4);
 			d4s.removeAll(d1d2d3d4);
-			result.put("d4", d4s.size());
+			counts.put("d4", d4s.size());
 		}
 
 	}
@@ -243,6 +322,9 @@ public class VennCounter {
 	 * Determine which dataset belongs in which venn circle
 	 */
 	private void assignDatasets() {
+		if (nDatasets == 1)
+			positions.put(VennDatasetPosition.A, D1);
+
 		if (nDatasets == 2)
 			assignTwoDatasets();
 
@@ -255,49 +337,50 @@ public class VennCounter {
 	}
 
 	/**
-	 * Choose the mapping of datasets to venn circle positions
+	 * Choose the mapping of datasets to venn circles
 	 */
 	private void assignTwoDatasets() {
 		String type = getType();
 
 		if ("0010".equals(type)) {
-			a = "d1";
-			b = "d2";
+			positions.put(VennDatasetPosition.A, D1);
+			positions.put(VennDatasetPosition.B, D2);
 		}
 
 		if ("0011".equals(type)) {
-			a = result.get("d1") == 0 ? "d2" : "d1";
-			b = result.get("d1") == 0 ? "d1" : "d2";
+			String a = counts.get(D1) == 0 ? D2 : D1;
+			String b = counts.get(D1) == 0 ? D1 : D2;
+			positions.put(VennDatasetPosition.A, a);
+			positions.put(VennDatasetPosition.B, b);
 		}
 
 		if ("0012".equals(type)) {
-			a = "d1";
-			b = "d2";
+			positions.put(VennDatasetPosition.A, D1);
+			positions.put(VennDatasetPosition.B, D2);
 		}
-
 	}
 
 	private void assignThreeDatasets() {
 		String type = getType();
 
-		if ("0133".equals(type)) { // triangle
-			a = "d1";
-			b = "d2";
-			c = "d3";
-		}
+		// Default to triangle if the type is not found
+		String a = D1;
+		String b = D2;
+		String c = D3;
 
 		if ("0023".equals(type)) { // triple flat
 			b = findDatasetsWithCount(3).get(0);
-
 			List<String> sides = findDatasetsWithCount(2);
 			a = sides.get(0);
 			c = sides.get(1);
 		}
 
 		if ("0022".equals(type)) {
-			b = findDatasetsWithCount(3).get(0);
-			a = findDatasetsWithCount(2).get(0);
-			c = findDatasetsWithCount(1).get(0);
+			List<String> all = findDatasetsWithCount(2);
+			b = all.stream().filter(s -> counts.get(s) == 0).findFirst().orElse(D1);
+			all.remove(b);
+			a = all.get(0);
+			c = all.get(1);
 		}
 
 		if ("0021".equals(type)) {
@@ -311,10 +394,31 @@ public class VennCounter {
 			a = findDatasetsWithCount(1).get(0);
 			c = findDatasetsWithCount(1).get(1);
 		}
+
+		positions.put(VennDatasetPosition.A, a);
+		positions.put(VennDatasetPosition.B, b);
+		positions.put(VennDatasetPosition.C, c);
 	}
 
 	private void assignFourDatasets() {
 		String type = getType();
+
+		String a = D1;
+		String b = D2;
+		String c = D3;
+		String d = D4;
+
+		if ("0030".equals(type) || "0033".equals(type)) {
+			b = findDatasetsWithCount(3).get(0);
+			a = findDatasetsWithCount(1).get(0);
+			c = findDatasetsWithCount(1).get(1);
+			d = findDatasetsWithCount(1).get(2);
+		}
+
+		positions.put(VennDatasetPosition.A, a);
+		positions.put(VennDatasetPosition.B, b);
+		positions.put(VennDatasetPosition.C, c);
+		positions.put(VennDatasetPosition.D, d);
 	}
 
 	/**
@@ -325,7 +429,7 @@ public class VennCounter {
 	 * @return
 	 */
 	private List<String> findDatasetsWithCount(int k) {
-		return result.entrySet().stream().filter(e -> e.getValue() > 0) // get combinations present
+		return counts.entrySet().stream().filter(e -> e.getValue() > 0) // get combinations present
 				.flatMap(e -> e.getKey().chars().mapToObj(i -> (char) i)) // turn into char stream so we can
 				.filter(c -> c != "d".charAt(0)) // remove d's
 				.collect(Collectors.groupingBy(Function.identity(), Collectors.counting())) // count occurances
@@ -336,104 +440,41 @@ public class VennCounter {
 	}
 
 	public Map<String, Integer> getCounts() {
-		return result;
+		return counts;
 	}
 
 	/**
-	 * Get a value from the counts map, or -1 if missing
-	 * 
-	 * @param s
-	 * @return
-	 */
-	private int getValue(String s) {
-		if (result.containsKey(s))
-			return result.get(s);
-		return -1;
-	}
-
-	/**
-	 * Get the value to be displayed atthe given intersection of venn circles
+	 * Get the value at the given intersection of venn circles
 	 * 
 	 * @param k
 	 * @return
 	 */
-	public int getCount(@NonNull VennCircle k) {
-		// identify which input datasset corresponds to the venn circle
-		if (VennCircle.ABCD.equals(k))
-			return getValue(arrange(a, b, c, d));
+	public int getCount(@NonNull VennIntersection k) {
+		return k.getValue();
+	}
 
-		if (VennCircle.ABC.equals(k))
-			return getValue(arrange(a, b, c));
 
-		if (VennCircle.ABD.equals(k))
-			return getValue(arrange(a, b, d));
-
-		if (VennCircle.ACD.equals(k))
-			return getValue(arrange(a, c, d));
-
-		if (VennCircle.BCD.equals(k))
-			return getValue(arrange(b, c, d));
-
-		if (VennCircle.AB.equals(k))
-			return getValue(arrange(a, b));
-
-		if (VennCircle.AC.equals(k))
-			return getValue(arrange(a, c));
-
-		if (VennCircle.AD.equals(k))
-			return getValue(arrange(a, d));
-
-		if (VennCircle.BC.equals(k))
-			return getValue(arrange(b, c));
-
-		if (VennCircle.BD.equals(k))
-			return getValue(arrange(b, d));
-
-		if (VennCircle.CD.equals(k))
-			return getValue(arrange(c, d));
-
-		if (VennCircle.A.equals(k))
-			return getValue(a);
-
-		if (VennCircle.B.equals(k))
-			return getValue(b);
-
-		if (VennCircle.C.equals(k))
-			return getValue(c);
-
-		if (VennCircle.D.equals(k))
-			return getValue(d);
-
-		return -1;
-
+	public IAnalysisDataset getDataset(@NonNull VennDatasetPosition k) {
+		String d = positions.get(k);
+		return datasets.get(d);
 	}
 
 	/**
-	 * Given strings of datasets, order them by dataset number
+	 * Find the type of the cluster (a string definition of the number of
+	 * intersecting circles)
 	 * 
 	 * @return
 	 */
-	private String arrange(String... names) {
-
-		String out = Arrays.stream(names)
-				.flatMap(s -> s.chars().mapToObj(i -> (char) i))
-				.filter(c -> c != "d".charAt(0)).sorted()
-				.map(c -> c.toString())
-				.collect(Collectors.joining("d"));
-
-		return "d" + out;
-	}
-
 	public String getType() {
 
-		String r = "";
+		StringBuilder r = new StringBuilder();
 		for (int i = FOUR_DATASETS; i > 0; i -= 2) {
 			int j = i;
-			long c = result.entrySet().stream().filter(e -> e.getKey().length() == j && e.getValue() > 0)
+			long l = counts.entrySet().stream().filter(e -> e.getKey().length() == j && e.getValue() > 0)
 					.collect(Collectors.counting());
-			r += c;
+			r.append(l);
 		}
-		return r;
+		return r.toString();
 	}
 
 }

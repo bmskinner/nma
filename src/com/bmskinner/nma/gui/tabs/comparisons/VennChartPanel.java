@@ -44,8 +44,8 @@ public class VennChartPanel extends ChartDetailPanel {
 				.setFillConsensus(GlobalOptions.getInstance().isFillConsensus())
 				.setScale(GlobalOptions.getInstance().getScale())
 				.setSwatch(GlobalOptions.getInstance().getSwatch())
-				.setShowXAxis(false)
-				.setShowYAxis(false)
+//				.setShowXAxis(false)
+//				.setShowYAxis(false)
 				.setTarget(chartPanel)
 				.build();
 

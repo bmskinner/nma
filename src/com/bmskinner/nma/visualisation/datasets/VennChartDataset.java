@@ -2,7 +2,9 @@ package com.bmskinner.nma.visualisation.datasets;
 
 import java.awt.Color;
 import java.awt.Stroke;
+import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
+import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -12,35 +14,111 @@ import java.util.Map.Entry;
 import java.util.logging.Logger;
 
 import org.jfree.chart.annotations.XYShapeAnnotation;
-import org.jfree.data.general.DatasetUtils;
 import org.jfree.data.xy.DefaultXYDataset;
 
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
+import com.bmskinner.nma.visualisation.datasets.VennChartDataset.VennCircle.VennShape;
+import com.bmskinner.nma.visualisation.datasets.VennCounter.VennDatasetPosition;
+import com.bmskinner.nma.visualisation.datasets.VennCounter.VennIntersection;
 
 @SuppressWarnings("serial")
 public class VennChartDataset extends DefaultXYDataset {
 
 	private static final Logger LOGGER = Logger.getLogger(VennChartDataset.class.getName());
 
-	public record VennCircle(IAnalysisDataset dataset, double x, double y, double rx, double ry) {
+	/**
+	 * @param dataset the dataset being displayed
+	 * @param xCentre the x centre position
+	 * @param yCentre the y centre position
+	 * @param rx      the x radius
+	 * @param ry      the y radius
+	 * @author ben
+	 *
+	 */
+	public record VennCircle(IAnalysisDataset dataset, double xCentre, double yCentre, double rx, double ry,
+			VennShape shape) {
+
+		public enum VennShape {
+			CIRCLE, HALF_CIRCLE_LEFT, HALF_CIRCLE_RIGHT;
+		}
+
+		public VennCircle(IAnalysisDataset dataset, double xCentre, double yCentre, double rx, double ry) {
+			this(dataset, xCentre, yCentre, rx, ry, VennShape.CIRCLE);
+		}
+
+		public VennCircle {
+			if (dataset == null)
+				throw new IllegalArgumentException("Dataset is null creating circle");
+		}
+
+		public double yBottom() {
+			return (yCentre - ry) * 1.1;
+		}
+
+		public double yTop() {
+			return (yCentre + ry) * 1.1;
+		}
+
+		public double xDiameter() {
+			return rx + rx;
+		}
+
+		public double yDiameter() {
+			return ry + ry;
+		}
+
+		public double xMax() {
+			return xCentre + rx;
+		}
+
+		public double xMin() {
+			return xCentre - rx;
+		}
+
+		public double yMin() {
+			return yCentre - ry;
+		}
+
+		public double yMax() {
+			return yCentre + ry;
+		}
+
+		/**
+		 * Get the x coordinate at given fraction of the diameter
+		 * 
+		 * @param f
+		 * @return
+		 */
+		public double xFraction(double f) {
+			return (xDiameter() * f) + xMin();
+		}
+
+		public double yFraction(double f) {
+			return (yDiameter() * f) + yMin();
+		}
 
 		public XYShapeAnnotation toAnnotation(Color fill, Color outline,
 				Stroke stroke) {
-			return new XYShapeAnnotation(
-					new Ellipse2D.Double(x - rx, y - ry, x + rx,
-							y + ry),
-					stroke, outline, fill);
+			
+			Area s = new Area(new Ellipse2D.Double(xCentre - rx, yCentre - ry, rx + rx,
+					ry + ry));
+
+			if (VennShape.HALF_CIRCLE_LEFT.equals(shape)) {
+				Area ra = new Area(new Rectangle2D.Double(xCentre, yCentre - ry, rx, ry + ry));
+				s.subtract(ra);
+			}
+
+			if (VennShape.HALF_CIRCLE_RIGHT.equals(shape)) {
+				Area ra = new Area(new Rectangle2D.Double(xCentre - rx, yCentre - ry, rx, ry + ry));
+				s.subtract(ra);
+			}
+
+			return new XYShapeAnnotation(s, stroke, outline, fill);
 		}
 
 	}
 
 	private static final int X_OFFSET = 4;
-
-	// Sentinal values allow the autoscale to work even though the circles drawn are
-	// outside the range of values in this dataset
-	private static final double SENTINAL_X_MIN = -1.2;
-	private static final double SENTINAL_Y_MIN = -1.2;
-	private static final double SENTINAL_Y_MAX = 1.5;
 
 	private static final double Y_START = 0;
 
@@ -48,21 +126,13 @@ public class VennChartDataset extends DefaultXYDataset {
 	private static final double HALF_RADIUS = 0.35;
 	private static final double SUBSET_RADIUS = 0.17;
 
-	/**
-	 * Store the distinct clusters of datasets with shared cells
-	 */
+	/** Store the distinct clusters of datasets with shared cells */
 	private Map<Comparable<?>, List<IAnalysisDataset>> clusters = new HashMap<>();
 
-	/**
-	 * Store the radii of Venn circles
-	 */
+	/** Store the radii of Venn circles */
 	private List<VennCircle> circles = new ArrayList<>();
-	private Map<Comparable<?>, List<Double>> xRadii = new HashMap<>();
-	private Map<Comparable<?>, List<Double>> yRadii = new HashMap<>();
 
-	/**
-	 * The locations of annotations with the shared counts
-	 */
+	/** The locations of annotations with the shared counts */
 	private List<Label> labels = new ArrayList<>();
 
 	/**
@@ -72,6 +142,11 @@ public class VennChartDataset extends DefaultXYDataset {
 	 *
 	 */
 	public record Label(double x, double y, String label) {
+
+		public Label(double x, double y, int i) {
+			this(x, y, String.valueOf(i));
+		}
+
 		@Override
 		public String toString() {
 			return x + ", " + y + ": " + label;
@@ -88,13 +163,11 @@ public class VennChartDataset extends DefaultXYDataset {
 		for (IAnalysisDataset d : datasets) {
 			addDataset(d);
 		}
-
-		// Add the centre points of the datasets in each cluster as a series
 		createSeries();
 	}
 
 	/**
-	 * We can only display a cluster of up to 3 circles. Checks the dataset can be
+	 * We can only display a cluster of up to n circles. Checks the dataset can be
 	 * drawn.
 	 * 
 	 * @return true if we can draw the dataset, false otherwise
@@ -107,16 +180,6 @@ public class VennChartDataset extends DefaultXYDataset {
 		return circles;
 	}
 
-	public double getXRadius(int series, int item) {
-		Comparable<?> key = this.getSeriesKey(series);
-		return xRadii.get(key).get(item);
-	}
-
-	public double getYRadius(int series, int item) {
-		Comparable<?> key = this.getSeriesKey(series);
-		return yRadii.get(key).get(item);
-	}
-
 	/**
 	 * Get the analysis datasets in the given cluster
 	 * 
@@ -127,264 +190,492 @@ public class VennChartDataset extends DefaultXYDataset {
 		return clusters.get(clusterKey);
 	}
 
-	public double getMaxDomainValue() {
-		return DatasetUtils.findMaximumDomainValue(this).doubleValue() + 1.4;
-	}
-
 	public List<Label> getLabels() {
 		return labels;
 	}
 
 	/**
-	 * Create the Venn circle centroids for a cluster
+	 * Create the Venn circles for a cluster
 	 * 
-	 * @param counts  the number of shared cells for each dataset combination
-	 * @param cluster the datasets to create centroids for
-	 * @param xOffset the location of the datasets in the plot
+	 * @param vc     the shared cell counts
+	 * @param xStart the location of the datasets in the plot
 	 */
-	private void createCentroids(Map<String, Integer> counts, List<IAnalysisDataset> cluster, double xStart,
-			Comparable<?> key) {
+	private void createLayout(VennCounter vc, double xStart) {
 
-		double[][] datasetPos = new double[2][cluster.size()];
-
+		LOGGER.fine(vc.getType());
 		// Set the centre for each dataset circle in the cluster
-		if (cluster.size() == 1) {
-			datasetPos = createOneDatasetCentroids(counts, cluster, xStart, key);
+		if (vc.size() == 1) {
+			layoutType0001(vc, xStart);
 		}
 
-		if (cluster.size() == 2) {
-			datasetPos = createTwoDatasetCentroids(counts, cluster, xStart, key);
+		if (vc.size() == 2) {
+			switch (vc.getType()) {
+			case "0011":
+				layoutType0011(vc, xStart);
+				break;
+			default:
+				layoutType0012(vc, xStart);
+			}
 		}
 
-		if (cluster.size() == 3) {
-			datasetPos = createThreeDatasetCentroids(counts, cluster, xStart, key);
-		}
-
-		if (cluster.size() == 4) {
-			datasetPos = createFourDatasetCentroids(counts, cluster, xStart, key);
-		}
-
-		this.addSeries(key, datasetPos);
-	}
-
-	private double[][] createOneDatasetCentroids(Map<String, Integer> counts, List<IAnalysisDataset> cluster,
-			double xStart, Comparable<?> key) {
-		List<Double> xRadiusList = xRadii.computeIfAbsent(key, k -> new ArrayList<>());
-		List<Double> yRadiusList = yRadii.computeIfAbsent(key, k -> new ArrayList<>());
-
-		circles.add(new VennCircle(cluster.get(0), xStart, Y_START, DEFAULT_RADIUS, DEFAULT_RADIUS));
-
-		double[][] datasetPos = new double[2][cluster.size()];
-		datasetPos[0] = new double[] { xStart };
-		datasetPos[1] = new double[] { Y_START };
-		xRadiusList.add(DEFAULT_RADIUS);
-		yRadiusList.add(DEFAULT_RADIUS);
-		labels.add(new Label(xStart, Y_START, String.valueOf(counts.get("d1"))));
-		labels.add(new Label(xStart, -1, cluster.get(0).getName()));
-		return datasetPos;
-	}
-
-	private double[][] createTwoDatasetCentroids(Map<String, Integer> counts, List<IAnalysisDataset> cluster,
-			double xStart, Comparable<?> key) {
-		List<Double> xRadiusList = xRadii.computeIfAbsent(key, k -> new ArrayList<>());
-		List<Double> yRadiusList = yRadii.computeIfAbsent(key, k -> new ArrayList<>());
-		double[][] datasetPos = new double[2][cluster.size()];
-
-		String da = "d1";
-		String db = "d2";
-		String dab = da + db;
-
-		if (counts.get(da) == 0) { // a entirely within b
-
-			datasetPos[0] = new double[] { xStart + 0.5, xStart + 1 };
-			datasetPos[1] = new double[] { Y_START, Y_START };
-			xRadiusList.add(SUBSET_RADIUS);
-			xRadiusList.add(DEFAULT_RADIUS);
-			yRadiusList.add(SUBSET_RADIUS);
-			yRadiusList.add(DEFAULT_RADIUS);
-			labels.add(new Label(xStart + 1.1, 0, String.valueOf(counts.get(db))));
-			labels.add(new Label(xStart + 0.5, 0, String.valueOf(counts.get(dab))));
-			labels.add(new Label(xStart + 1.1, -1, cluster.get(1).getName()));
-			labels.add(new Label(xStart + 0.5, -0.8, cluster.get(0).getName()));
-
-		} else if (counts.get(db) == 0) { // b entirely within a
-			datasetPos[0] = new double[] { xStart, xStart + 0.5 };
-			datasetPos[1] = new double[] { Y_START, Y_START };
-			xRadiusList.add(DEFAULT_RADIUS);
-			xRadiusList.add(SUBSET_RADIUS);
-			yRadiusList.add(DEFAULT_RADIUS);
-			yRadiusList.add(SUBSET_RADIUS);
-
-			labels.add(new Label(xStart, 0, String.valueOf(counts.get(da))));
-			labels.add(new Label(xStart + 0.5, 0, String.valueOf(counts.get(dab))));
-			labels.add(new Label(xStart, -1, cluster.get(0).getName()));
-			labels.add(new Label(xStart + 0.5, -0.8, cluster.get(1).getName()));
-
-		} else { // some shared
-
-			datasetPos[0] = new double[] { xStart, xStart + 1, xStart + 2 };
-			datasetPos[1] = new double[] { Y_START, Y_START, Y_START };
-
-			xRadiusList.add(DEFAULT_RADIUS);
-			xRadiusList.add(DEFAULT_RADIUS);
-			yRadiusList.add(DEFAULT_RADIUS);
-			yRadiusList.add(DEFAULT_RADIUS);
-			labels.add(new Label(xStart - 0.3, 0, String.valueOf(counts.get(da))));
-			labels.add(new Label(xStart + 0.5, 0, String.valueOf(counts.get(dab))));
-			labels.add(new Label(xStart + 1, 0, String.valueOf(counts.get(db))));
-
-			labels.add(new Label(xStart - 0.3, -1, cluster.get(0).getName()));
-			labels.add(new Label(xStart + 1, -1, cluster.get(1).getName()));
-
-		}
-		return datasetPos;
-	}
-
-	private double[][] createThreeDatasetCentroids(Map<String, Integer> counts, List<IAnalysisDataset> cluster,
-			double xStart, Comparable<?> key) {
-		List<Double> xRadiusList = xRadii.computeIfAbsent(key, k -> new ArrayList<>());
-		List<Double> yRadiusList = yRadii.computeIfAbsent(key, k -> new ArrayList<>());
-		double[][] datasetPos = new double[2][cluster.size()];
-
-		if ((counts.get("d1d2") == 0 || counts.get("d1d3") == 0 || counts.get("d2d3") == 0)
-				&& counts.get("d1d2d3") == 0) {
-
-			if (counts.get("d1d2") == 0) { // d3 is in the middle
-				datasetPos = layoutTripleFlat(counts, cluster, xStart, key, 1, 3, 2);
+		if (vc.size() == 3) {
+			switch (vc.getType()) {
+			case "0020":
+				layoutType0020(vc, xStart);
+				break;
+			case "0021":
+				layoutType0021(vc, xStart);
+				break;
+			case "0022":
+				layoutType0023(vc, xStart);
+				break;
+			case "0023":
+				layoutType0023(vc, xStart);
+				break;
+			default:
+				layoutType0133(vc, xStart);
 			}
 
-			if (counts.get("d1d3") == 0) { // d2 is in the middle
-				datasetPos = layoutTripleFlat(counts, cluster, xStart, key, 1, 2, 3);
-			}
-
-			if (counts.get("d2d3") == 0) { // d1 is in the middle
-				datasetPos = layoutTripleFlat(counts, cluster, xStart, key, 2, 1, 3);
-			}
-
-		} else { // make a triangle
-			xRadiusList.add(DEFAULT_RADIUS);
-			xRadiusList.add(DEFAULT_RADIUS);
-			xRadiusList.add(DEFAULT_RADIUS);
-			yRadiusList.add(DEFAULT_RADIUS);
-			yRadiusList.add(DEFAULT_RADIUS);
-			yRadiusList.add(DEFAULT_RADIUS);
-			datasetPos[0] = new double[] { xStart, xStart + 1, xStart + 0.5 };
-			datasetPos[1] = new double[] { Y_START, Y_START, Y_START + 0.6 };
-			labels.add(new Label(xStart + 0.5, 0.2, String.valueOf(counts.get("d1d2d3"))));
-			labels.add(new Label(xStart + 0.5, -0.3, String.valueOf(counts.get("d1d2"))));
-			labels.add(new Label(xStart + 0.1, 0.3, String.valueOf(counts.get("d1d3"))));
-			labels.add(new Label(xStart - 0.3, -0.3, String.valueOf(counts.get("d1"))));
-			labels.add(new Label(xStart + 0.9, 0.3, String.valueOf(counts.get("d2d3"))));
-			labels.add(new Label(xStart + 1.3, -0.3, String.valueOf(counts.get("d2"))));
-			labels.add(new Label(xStart + 0.5, 1, String.valueOf(counts.get("d3"))));
-
-			labels.add(new Label(xStart - 0.3, -1, cluster.get(0).getName()));
-			labels.add(new Label(xStart + 0.5, 1.4, cluster.get(1).getName()));
-			labels.add(new Label(xStart + 1.3, -1, cluster.get(2).getName()));
 		}
-		return datasetPos;
-	}
 
-	private double[][] createFourDatasetCentroids(Map<String, Integer> counts, List<IAnalysisDataset> cluster,
-			double xStart, Comparable<?> key) {
-		List<Double> xRadiusList = xRadii.computeIfAbsent(key, k -> new ArrayList<>());
-		List<Double> yRadiusList = yRadii.computeIfAbsent(key, k -> new ArrayList<>());
-		double[][] datasetPos = new double[2][cluster.size()];
+		if (vc.size() == 4) {
 
-		xRadiusList.add(HALF_RADIUS);
-		xRadiusList.add(HALF_RADIUS);
-		xRadiusList.add(DEFAULT_RADIUS);
-		xRadiusList.add(DEFAULT_RADIUS);
+			switch (vc.getType()) {
+			case "0030":
+				layoutType0030(vc, xStart);
+				break;
+			case "0033":
+				layoutType0033(vc, xStart);
+				break;
+			default:
+				layoutType1464(vc, xStart);
+			}
 
-		yRadiusList.add(DEFAULT_RADIUS);
-		yRadiusList.add(DEFAULT_RADIUS);
-		yRadiusList.add(HALF_RADIUS);
-		yRadiusList.add(HALF_RADIUS);
-
-		datasetPos[0] = new double[] { xStart, xStart + 0.5, xStart + 0.5, xStart + 0.5 };
-		datasetPos[1] = new double[] { Y_START, Y_START, Y_START - 0.5, Y_START };
-
-		labels.add(new Label(xStart + 0.25, -0.25, String.valueOf(counts.get("d1d2d3d4"))));
-
-		labels.add(new Label(xStart + 0.25, -0.4, String.valueOf(counts.get("d1d2d3"))));
-		labels.add(new Label(xStart + 0.25, 0.05, String.valueOf(counts.get("d1d2d4"))));
-		labels.add(new Label(xStart + 0.1, -0.25, String.valueOf(counts.get("d1d3d4"))));
-		labels.add(new Label(xStart + 0.5, -0.25, String.valueOf(counts.get("d2d3d4"))));
-
-		labels.add(new Label(xStart + 0.25, 0.38, String.valueOf(counts.get("d1d2"))));
-		labels.add(new Label(xStart, -0.5, String.valueOf(counts.get("d1d3"))));
-		labels.add(new Label(xStart, 0.05, String.valueOf(counts.get("d1d4"))));
-		labels.add(new Label(xStart + 0.5, -0.5, String.valueOf(counts.get("d2d3"))));
-		labels.add(new Label(xStart + 0.5, 0.05, String.valueOf(counts.get("d2d4"))));
-		labels.add(new Label(xStart + 0.88, -0.25, String.valueOf(counts.get("d3d4"))));
-
-		labels.add(new Label(xStart, 0.38, String.valueOf(counts.get("d1"))));
-		labels.add(new Label(xStart + 0.5, 0.38, String.valueOf(counts.get("d2"))));
-		labels.add(new Label(xStart + 0.88, -0.5, String.valueOf(counts.get("d3"))));
-		labels.add(new Label(xStart + 1, 0.05, String.valueOf(counts.get("d4"))));
-
-		labels.add(new Label(xStart, -1, cluster.get(0).getName()));
-		labels.add(new Label(xStart + 0.5, 0.9, cluster.get(1).getName()));
-		labels.add(new Label(xStart + 0.75, -1, cluster.get(2).getName()));
-		labels.add(new Label(xStart + 1.2, 0.5, cluster.get(3).getName()));
-
-		return datasetPos;
+		}
 	}
 
 	/**
-	 * Layout three circles with overlaps only between 1-2 and 2-3.
+	 * Single circle
 	 * 
-	 * @param counts
-	 * @param cluster
+	 * @param vc
 	 * @param xStart
-	 * @param key
-	 * @param a       the index of the first circle
-	 * @param b       the index of the second circle
-	 * @param c       the index of the third circle
-	 * @return
 	 */
-	private double[][] layoutTripleFlat(Map<String, Integer> counts, List<IAnalysisDataset> cluster, double xStart,
-			Comparable<?> key, int a, int b, int c) {
+	private void layoutType0001(VennCounter vc, double xStart) {
 
-		List<Double> xRadiusList = xRadii.computeIfAbsent(key, k -> new ArrayList<>());
-		List<Double> yRadiusList = yRadii.computeIfAbsent(key, k -> new ArrayList<>());
-		double[][] datasetPos = new double[2][cluster.size()];
+		VennCircle circ = new VennCircle(vc.getDataset(VennDatasetPosition.A),
+				xStart, Y_START, DEFAULT_RADIUS, DEFAULT_RADIUS);
+		circles.add(circ);
 
-		String da = "d" + a;
-		String db = "d" + b;
-		String dc = "d" + c;
-		String dab = a < b ? da + db : db + da;
-		String dbc = b < c ? db + dc : dc + db;
+		// Count
+		labels.add(new Label(circ.xCentre(), circ.yCentre(), String.valueOf(vc.getCount(VennIntersection.A))));
 
-		double ax = counts.get(da) == 0 ? xStart + 0.5 : xStart;
-		double cx = counts.get(dc) == 0 ? xStart + 1.5 : xStart + 2;
-
-		datasetPos[0] = new double[] { ax, xStart + 1, cx };
-		datasetPos[1] = new double[] { Y_START, Y_START, Y_START };
-
-		xRadiusList.add(counts.get(da) == 0 ? SUBSET_RADIUS : DEFAULT_RADIUS);
-		xRadiusList.add(DEFAULT_RADIUS);
-		xRadiusList.add(counts.get(dc) == 0 ? SUBSET_RADIUS : DEFAULT_RADIUS);
-
-		yRadiusList.add(counts.get(da) == 0 ? SUBSET_RADIUS : DEFAULT_RADIUS);
-		yRadiusList.add(DEFAULT_RADIUS);
-		yRadiusList.add(counts.get(dc) == 0 ? SUBSET_RADIUS : DEFAULT_RADIUS);
-
-		if (counts.get(da) > 0)
-			labels.add(new Label(ax - 0.3, 0, String.valueOf(counts.get(da))));
-
-		labels.add(new Label(xStart + 0.5, 0, String.valueOf(counts.get(dab))));
-		labels.add(new Label(xStart + 1, 0, String.valueOf(counts.get(db))));
-		labels.add(new Label(xStart + 1.5, 0, String.valueOf(counts.get(dbc))));
-
-		if (counts.get(dc) > 0)
-			labels.add(new Label(cx, 0, String.valueOf(counts.get(dc))));
-
-		labels.add(new Label(ax, -0.8, cluster.get(a - 1).getName()));
-		labels.add(new Label(xStart + 1, -1, cluster.get(b - 1).getName()));
-		labels.add(new Label(cx, -0.8, cluster.get(c - 1).getName()));
-		return datasetPos;
+		// Name
+		labels.add(new Label(circ.xCentre(), circ.yBottom(), vc.getDataset(VennDatasetPosition.A).getName()));
 	}
+
+	/**
+	 * Two circles, one entirely within the other
+	 * 
+	 * @param vc
+	 * @param xStart
+	 */
+	private void layoutType0011(VennCounter vc, double xStart) {
+		VennCircle a = new VennCircle(vc.getDataset(VennDatasetPosition.A),
+				xStart, Y_START, DEFAULT_RADIUS, DEFAULT_RADIUS);
+
+		double fOverlapOfA = Math.max(vc.getCount(VennIntersection.AB) / (double) (vc.getCount(VennIntersection.A)
+				+ vc.getCount(VennIntersection.B) + vc.getCount(VennIntersection.AB)) * 0.9, 0.1);
+
+		VennCircle b = new VennCircle(vc.getDataset(VennDatasetPosition.B),
+				xStart, Y_START, fOverlapOfA * DEFAULT_RADIUS, fOverlapOfA * DEFAULT_RADIUS);
+
+		circles.add(a);
+		circles.add(b);
+
+		Label cA = new Label((b.xMin() + a.xMin()) / 2, a.yCentre(), vc.getCount(VennIntersection.A));
+		Label cAB = new Label(b.xCentre(), b.yCentre(), vc.getCount(VennIntersection.AB));
+
+		labels.add(cA);
+		labels.add(cAB);
+
+		labels.add(new Label(cA.x(), a.yBottom(), vc.getDataset(VennDatasetPosition.A).getName()));
+		labels.add(new Label(cAB.x(), a.yTop(), vc.getDataset(VennDatasetPosition.B).getName()));
+
+	}
+
+	/**
+	 * Two circles, partly overlapping
+	 * 
+	 * @param vc
+	 * @param xStart
+	 */
+	private void layoutType0012(VennCounter vc, double xStart) {
+
+		VennCircle a = new VennCircle(vc.getDataset(VennDatasetPosition.A),
+				xStart, Y_START, DEFAULT_RADIUS, DEFAULT_RADIUS);
+
+		double fOverlapOfA = vc.getCount(VennIntersection.AB) / (double) (vc.getCount(VennIntersection.A)
+				+ vc.getCount(VennIntersection.B) + vc.getCount(VennIntersection.AB)) * 0.9;
+
+		// Scale x overlap position by the fraction of overlapping cells
+		double bxCentre = a.xCentre() + (a.xDiameter() * (1 - fOverlapOfA));
+		VennCircle b = new VennCircle(vc.getDataset(VennDatasetPosition.B),
+				bxCentre, Y_START, DEFAULT_RADIUS, DEFAULT_RADIUS);
+
+		circles.add(a);
+		circles.add(b);
+
+		// Place count labels in the centre of the space between circles
+		Label cA = new Label((b.xMin() + a.xMin()) / 2,
+				a.yCentre(),
+				String.valueOf(vc.getCount(VennIntersection.A)));
+
+		Label cB = new Label((b.xMax() + a.xMax()) / 2,
+				b.yCentre(),
+				String.valueOf(vc.getCount(VennIntersection.B)));
+		
+		Label cAB = new Label((b.xMin() + a.xMax()) / 2, a.yCentre(),
+				String.valueOf(vc.getCount(VennIntersection.AB)));
+
+		labels.add(cA);
+		labels.add(cB);
+		labels.add(cAB);
+		
+		labels.add(new Label(cA.x(), a.yBottom(), vc.getDataset(VennDatasetPosition.A).getName()));
+		labels.add(new Label(cB.x(), b.yBottom(), vc.getDataset(VennDatasetPosition.B).getName()));
+
+	}
+
+	/**
+	 * Three circles, two entirely within the third, no unique cells in the outer
+	 * 
+	 * @param vc
+	 * @param xStart
+	 */
+	private void layoutType0020(VennCounter vc, double xStart) {
+
+		VennCircle b = new VennCircle(vc.getDataset(VennDatasetPosition.B),
+				xStart, Y_START, DEFAULT_RADIUS, DEFAULT_RADIUS);
+
+		VennCircle a = new VennCircle(vc.getDataset(VennDatasetPosition.A),
+				xStart - 0.01, Y_START, DEFAULT_RADIUS * 0.96, DEFAULT_RADIUS * 0.96, VennShape.HALF_CIRCLE_LEFT);
+
+		VennCircle c = new VennCircle(vc.getDataset(VennDatasetPosition.C),
+				xStart + 0.01, Y_START, DEFAULT_RADIUS * 0.96, DEFAULT_RADIUS * 0.96, VennShape.HALF_CIRCLE_RIGHT);
+
+		circles.add(a);
+		circles.add(b);
+		circles.add(c);
+
+		Label cAB = new Label(a.xFraction(0.25), a.yCentre(), vc.getCount(VennIntersection.AB));
+		Label cBC = new Label(c.xFraction(0.75), b.yCentre(), vc.getCount(VennIntersection.BC));
+
+		labels.add(cAB);
+		labels.add(cBC);
+
+		labels.add(new Label(cAB.x(), b.yTop(), vc.getDataset(VennDatasetPosition.A).getName()));
+		labels.add(new Label(b.xCentre(), b.yBottom(), vc.getDataset(VennDatasetPosition.B).getName()));
+		labels.add(new Label(cBC.x(), b.yTop(), vc.getDataset(VennDatasetPosition.C).getName()));
+	}
+
+	/**
+	 * Three circles, two entirely within the third
+	 * 
+	 * @param vc
+	 * @param xStart
+	 */
+	private void layoutType0021(VennCounter vc, double xStart) {
+
+
+		VennCircle b = new VennCircle(vc.getDataset(VennDatasetPosition.B),
+				xStart, Y_START, DEFAULT_RADIUS, DEFAULT_RADIUS);
+
+		VennCircle a = new VennCircle(vc.getDataset(VennDatasetPosition.A),
+				xStart - 0.3, Y_START, SUBSET_RADIUS, SUBSET_RADIUS);
+
+		VennCircle c = new VennCircle(vc.getDataset(VennDatasetPosition.C),
+				xStart + 0.3, Y_START, SUBSET_RADIUS, SUBSET_RADIUS);
+
+		circles.add(a);
+		circles.add(b);
+		circles.add(c);
+
+
+		Label cB = new Label(b.xCentre(), b.yCentre(), vc.getCount(VennIntersection.B));
+		Label cAB = new Label(a.xCentre(), a.yCentre(), vc.getCount(VennIntersection.AB));
+		Label cBC = new Label(c.xCentre(), b.yCentre(), vc.getCount(VennIntersection.BC));
+
+		labels.add(cB);
+		labels.add(cAB);
+		labels.add(cBC);
+
+		labels.add(new Label(cAB.x(), b.yTop(), vc.getDataset(VennDatasetPosition.A).getName()));
+		labels.add(new Label(cB.x(), b.yBottom(), vc.getDataset(VennDatasetPosition.B).getName()));
+		labels.add(new Label(cBC.x(), b.yTop(), vc.getDataset(VennDatasetPosition.C).getName()));
+	}
+
+	/**
+	 * Three circles, flat
+	 * 
+	 * @param vc
+	 * @param xStart
+	 */
+	private void layoutType0023(VennCounter vc, double xStart) {
+		VennCircle a = new VennCircle(vc.getDataset(VennDatasetPosition.A),
+				xStart, Y_START, DEFAULT_RADIUS, DEFAULT_RADIUS);
+
+		VennCircle b = new VennCircle(vc.getDataset(VennDatasetPosition.B),
+				a.xCentre() + 0.8, Y_START, DEFAULT_RADIUS, DEFAULT_RADIUS);
+
+		VennCircle c = new VennCircle(vc.getDataset(VennDatasetPosition.C),
+				b.xCentre() + 0.8, Y_START, DEFAULT_RADIUS, DEFAULT_RADIUS);
+
+		circles.add(a);
+		circles.add(b);
+		circles.add(c);
+		
+		Label cA = new Label((b.xMin() + a.xMin()) / 2,
+				a.yCentre(),
+				vc.getCount(VennIntersection.A));
+		
+		Label cB = new Label(b.xCentre(),
+				b.yCentre(),
+				vc.getCount(VennIntersection.B));
+
+		Label cC = new Label((b.xMax() + c.xMax()) / 2,
+				c.yCentre(),
+				vc.getCount(VennIntersection.C));
+
+		Label cAB = new Label((b.xMin() + a.xMax()) / 2,
+				a.yCentre(),
+				vc.getCount(VennIntersection.AB));
+
+		Label cBC = new Label((c.xMin() + b.xMax()) / 2,
+				b.yCentre(),
+				vc.getCount(VennIntersection.BC));
+
+		labels.add(cA);
+		labels.add(cB);
+		labels.add(cC);
+		labels.add(cAB);
+		labels.add(cBC);
+
+		labels.add(new Label(cA.x(), a.yBottom(), vc.getDataset(VennDatasetPosition.A).getName()));
+		labels.add(new Label(cB.x(), b.yBottom(), vc.getDataset(VennDatasetPosition.B).getName()));
+		labels.add(new Label(cC.x(), a.yBottom(), vc.getDataset(VennDatasetPosition.C).getName()));
+	}
+
+	/**
+	 * Three circles, triangle
+	 * 
+	 * @param vc
+	 * @param xStart
+	 */
+	private void layoutType0133(VennCounter vc, double xStart) {
+
+		VennCircle a = new VennCircle(vc.getDataset(VennDatasetPosition.A),
+				xStart, Y_START, DEFAULT_RADIUS, DEFAULT_RADIUS);
+
+		VennCircle b = new VennCircle(vc.getDataset(VennDatasetPosition.B),
+				a.xCentre() + 0.8, Y_START, DEFAULT_RADIUS, DEFAULT_RADIUS);
+
+		VennCircle c = new VennCircle(vc.getDataset(VennDatasetPosition.C),
+				(a.xCentre + b.xCentre) / 2, Y_START + 0.6, DEFAULT_RADIUS, DEFAULT_RADIUS);
+
+		circles.add(a);
+		circles.add(b);
+		circles.add(c);
+		
+		// Need to redraw all label positions
+		labels.clear();
+
+		Label cA = new Label((b.xMin() + a.xMin()) / 2,
+				(a.yMin() + c.yMin()) / 2,
+				String.valueOf(vc.getCount(VennIntersection.A)));
+
+		Label cB = new Label((b.xMax() + a.xMax()) / 2,
+				(b.yMin() + c.yMin()) / 2,
+				String.valueOf(vc.getCount(VennIntersection.B)));
+
+		Label cC = new Label(c.xCentre,
+				(a.yMax() + c.yMax()) / 2,
+				String.valueOf(vc.getCount(VennIntersection.C)));
+
+		Label cAB = new Label((b.xMin() + a.xMax()) / 2, (a.yMin() + c.yMin()) / 2,
+				String.valueOf(vc.getCount(VennIntersection.AB)));
+
+		Label cAC = new Label((c.xMin() + b.xMin()) / 2,
+						(c.yMin() + a.yMax()) / 2,
+						String.valueOf(vc.getCount(VennIntersection.AC)));
+
+		Label cBC = new Label((c.xMax() + a.xMax()) / 2,
+				(c.yMin() + b.yMax()) / 2,
+				String.valueOf(vc.getCount(VennIntersection.BC)));
+
+		Label cABC = new Label((a.xMax() + b.xMin()) / 2,
+				(c.yMin() + a.yMax()) / 2,
+				String.valueOf(vc.getCount(VennIntersection.ABC)));
+
+		labels.add(cA);
+		labels.add(cB);
+		labels.add(cC);
+		labels.add(cAB);
+		labels.add(cAC);
+		labels.add(cBC);
+		labels.add(cABC);
+
+
+		labels.add(new Label(cA.x(), a.yBottom(), vc.getDataset(VennDatasetPosition.A).getName()));
+		labels.add(new Label(cB.x(), b.yBottom(), vc.getDataset(VennDatasetPosition.B).getName()));
+		labels.add(new Label(c.xCentre(), c.yTop(), vc.getDataset(VennDatasetPosition.C).getName()));
+
+
+	}
+
+	/**
+	 * Four circles, all intersecting
+	 * 
+	 * @param vc
+	 * @param xStart
+	 */
+	private void layoutType1464(VennCounter vc, double xStart) {
+
+		VennCircle a = new VennCircle(vc.getDataset(VennDatasetPosition.A),
+				xStart, Y_START, HALF_RADIUS, DEFAULT_RADIUS);
+
+		VennCircle b = new VennCircle(vc.getDataset(VennDatasetPosition.B),
+				xStart + 0.5, Y_START, HALF_RADIUS, DEFAULT_RADIUS);
+
+		VennCircle c = new VennCircle(vc.getDataset(VennDatasetPosition.C),
+				xStart + 0.5, Y_START - 0.5, DEFAULT_RADIUS, HALF_RADIUS);
+
+		VennCircle d = new VennCircle(vc.getDataset(VennDatasetPosition.D),
+				xStart + 0.5, Y_START, DEFAULT_RADIUS, HALF_RADIUS);
+
+		circles.add(a);
+		circles.add(b);
+		circles.add(c);
+		circles.add(d);
+
+		Label cA = new Label(a.xCentre(), a.yFraction(0.9), vc.getCount(VennIntersection.A));
+		Label cB = new Label(b.xCentre(), b.yFraction(0.9), vc.getCount(VennIntersection.B));
+		Label cC = new Label(c.xFraction(0.9), c.yCentre(), vc.getCount(VennIntersection.C));
+		Label cD = new Label(d.xFraction(0.9), d.yCentre(), vc.getCount(VennIntersection.D));
+
+		Label cAB = new Label((b.xMin() + a.xMax()) / 2, a.yFraction(0.775), vc.getCount(VennIntersection.AB));
+		Label cAC = new Label(a.xCentre(), c.yCentre(), vc.getCount(VennIntersection.AC));
+		Label cAD = new Label(a.xCentre(), d.yCentre(), vc.getCount(VennIntersection.AD));
+		Label cBC = new Label(b.xCentre(), c.yCentre(), vc.getCount(VennIntersection.BC));
+		Label cBD = new Label(b.xCentre(), d.yCentre(), vc.getCount(VennIntersection.BD));
+		Label cCD = new Label(c.xFraction(0.775), (d.yMin() + c.yMax()) / 2, vc.getCount(VennIntersection.CD));
+
+		Label cABC = new Label((b.xMin() + a.xMax()) / 2, a.yFraction(0.225), vc.getCount(VennIntersection.ABC));
+		Label cABD = new Label((b.xMin() + a.xMax()) / 2, d.yCentre(), vc.getCount(VennIntersection.ABD));
+		Label cACD = new Label(a.xFraction(0.65), (d.yMin() + c.yMax()) / 2, vc.getCount(VennIntersection.ACD));
+		Label cBCD = new Label(b.xCentre(), (d.yMin() + c.yMax()) / 2, vc.getCount(VennIntersection.BCD));
+
+		Label cABCD = new Label((b.xMin() + a.xMax()) / 2, (d.yMin() + c.yMax()) / 2,
+				vc.getCount(VennIntersection.ABCD));
+
+		labels.add(cA);
+		labels.add(cB);
+		labels.add(cC);
+		labels.add(cD);
+
+		labels.add(cAB);
+		labels.add(cAC);
+		labels.add(cAD);
+		labels.add(cBC);
+		labels.add(cBD);
+		labels.add(cCD);
+
+		labels.add(cABC);
+		labels.add(cABD);
+		labels.add(cACD);
+		labels.add(cBCD);
+
+		labels.add(cABCD);
+	}
+
+	/**
+	 * Four circles, three entirely within the fourth, but not overlapping
+	 * 
+	 * @param vc
+	 * @param xStart
+	 */
+	private void layoutType0030(VennCounter vc, double xStart) {
+
+		VennCircle b = new VennCircle(vc.getDataset(VennDatasetPosition.B),
+				xStart, Y_START, DEFAULT_RADIUS, DEFAULT_RADIUS);
+
+		VennCircle a = new VennCircle(vc.getDataset(VennDatasetPosition.A),
+				xStart - 0.3, Y_START - 0.3, SUBSET_RADIUS, SUBSET_RADIUS);
+
+		VennCircle c = new VennCircle(vc.getDataset(VennDatasetPosition.C),
+				xStart + 0.3, Y_START - 0.3, SUBSET_RADIUS, SUBSET_RADIUS);
+
+		VennCircle d = new VennCircle(vc.getDataset(VennDatasetPosition.D),
+				xStart, Y_START + 0.3, SUBSET_RADIUS, SUBSET_RADIUS);
+
+		circles.add(a);
+		circles.add(b);
+		circles.add(c);
+		circles.add(d);
+
+		Label cAB = new Label(a.xCentre(), a.yCentre(), vc.getCount(VennIntersection.AB));
+		Label cBC = new Label(c.xCentre(), c.yCentre(), vc.getCount(VennIntersection.BC));
+		Label cBD = new Label(d.xCentre(), d.yCentre(), vc.getCount(VennIntersection.BD));
+
+		labels.add(cAB);
+		labels.add(cBC);
+		labels.add(cBD);
+	}
+
+	/**
+	 * Four circles, one central intersecting the others once
+	 * 
+	 * @param vc
+	 * @param xStart
+	 */
+	private void layoutType0033(VennCounter vc, double xStart) {
+
+		VennCircle b = new VennCircle(vc.getDataset(VennDatasetPosition.B),
+				xStart, Y_START, DEFAULT_RADIUS, DEFAULT_RADIUS);
+
+		VennCircle a = new VennCircle(vc.getDataset(VennDatasetPosition.A),
+				xStart - 1, Y_START - 0.4, DEFAULT_RADIUS, DEFAULT_RADIUS);
+
+		VennCircle c = new VennCircle(vc.getDataset(VennDatasetPosition.C),
+				xStart + 1, Y_START - 0.4, DEFAULT_RADIUS, DEFAULT_RADIUS);
+
+		VennCircle d = new VennCircle(vc.getDataset(VennDatasetPosition.D),
+				xStart, Y_START + 1, DEFAULT_RADIUS, DEFAULT_RADIUS);
+
+		circles.add(a);
+		circles.add(b);
+		circles.add(c);
+		circles.add(d);
+
+		Label cA = new Label(a.xCentre(), a.yCentre(), vc.getCount(VennIntersection.A));
+		Label cB = new Label(b.xCentre(), b.yCentre(), vc.getCount(VennIntersection.B));
+		Label cC = new Label(c.xCentre(), c.yCentre(), vc.getCount(VennIntersection.C));
+		Label cD = new Label(d.xCentre(), d.yCentre(), vc.getCount(VennIntersection.D));
+
+		Label cAB = new Label((a.xMax() + b.xMin()) / 2, (a.yMax() + b.yMin()) / 2, vc.getCount(VennIntersection.AB));
+		Label cBC = new Label((b.xMax() + c.xMin()) / 2, (c.yMax() + b.yMin()) / 2, vc.getCount(VennIntersection.BC));
+		Label cBD = new Label(b.xCentre(), (b.yMin() + d.yMax()) / 2, vc.getCount(VennIntersection.BD));
+
+		labels.add(cA);
+		labels.add(cB);
+		labels.add(cC);
+		labels.add(cD);
+
+		labels.add(cAB);
+		labels.add(cBC);
+		labels.add(cBD);
+	}
+
+
 
 	/**
 	 * Add a new analysis dataset to this charting dataset
@@ -427,23 +718,21 @@ public class VennChartDataset extends DefaultXYDataset {
 			List<IAnalysisDataset> datasets = entry.getValue();
 
 			VennCounter vc = new VennCounter(datasets);
-			Map<String, Integer> counts = vc.getCounts();
 
-			createCentroids(counts, datasets, xStart, entry.getKey());
-
+//			LOGGER.fine(vc.getType());
+			createLayout(vc, xStart);
 			xStart += X_OFFSET;
 		}
 
 		// Create sentinal points to allow aspect ratio scaling of chart without
 		// clipping annotated Venn circle outlines. These are points outside the range
 		// of the circles.
-		Number xVal = DatasetUtils.findMaximumDomainValue(this);
-		double xMax = xVal == null ? 1.2 : xVal.doubleValue() + 1.2;
 
-		double[][] sentinals = new double[2][2];
-		sentinals[0] = new double[] { SENTINAL_X_MIN, xMax };
-		sentinals[1] = new double[] { SENTINAL_Y_MIN, SENTINAL_Y_MAX };
-		addSeries("Sentinals", sentinals);
+		double xMax = circles.stream().mapToDouble(VennCircle::xMax).max().orElse(1) * 1.1;
+		double xMin = circles.stream().mapToDouble(VennCircle::xMin).min().orElse(1) * 1.1;
+		double yMax = circles.stream().mapToDouble(VennCircle::yMax).max().orElse(1) * 1.1;
+		double yMin = circles.stream().mapToDouble(VennCircle::yMin).min().orElse(1) * 1.1;
+		addSeries("Sentinals", new double[][] { { xMin, xMax }, { yMin, yMax } });
 	}
 
 	/**
