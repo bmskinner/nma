@@ -2,6 +2,7 @@ package com.bmskinner.nma.visualisation.datasets;
 
 import java.awt.Color;
 import java.awt.Stroke;
+import java.awt.geom.Arc2D;
 import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
@@ -39,7 +40,7 @@ public class VennChartDataset extends DefaultXYDataset {
 			VennShape shape) {
 
 		public enum VennShape {
-			CIRCLE, HALF_CIRCLE_LEFT, HALF_CIRCLE_RIGHT;
+			CIRCLE, HALF_CIRCLE_LEFT, HALF_CIRCLE_RIGHT, THIRD_CIRCLE_UPPER, THIRD_CIRCLE_LEFT, THIRD_CIRCLE_RIGHT;
 		}
 
 		public VennCircle(IAnalysisDataset dataset, double xCentre, double yCentre, double rx, double ry) {
@@ -111,6 +112,18 @@ public class VennChartDataset extends DefaultXYDataset {
 			if (VennShape.HALF_CIRCLE_RIGHT.equals(shape)) {
 				Area ra = new Area(new Rectangle2D.Double(xCentre - rx, yCentre - ry, rx, ry + ry));
 				s.subtract(ra);
+			}
+
+			if (VennShape.THIRD_CIRCLE_UPPER.equals(shape)) {
+				s = new Area(new Arc2D.Double(xCentre - rx, yCentre - rx, rx + rx, ry + ry, -150, 120, Arc2D.PIE));
+			}
+
+			if (VennShape.THIRD_CIRCLE_LEFT.equals(shape)) {
+				s = new Area(new Arc2D.Double(xCentre - rx, yCentre - rx, rx + rx, ry + ry, -270, 120, Arc2D.PIE));
+			}
+
+			if (VennShape.THIRD_CIRCLE_RIGHT.equals(shape)) {
+				s = new Area(new Arc2D.Double(xCentre - rx, yCentre - rx, rx + rx, ry + ry, -30, 120, Arc2D.PIE));
 			}
 
 			return new XYShapeAnnotation(s, stroke, outline, fill);
@@ -598,7 +611,7 @@ public class VennChartDataset extends DefaultXYDataset {
 	}
 
 	/**
-	 * Four circles, three entirely within the fourth, but not overlapping
+	 * Four circles, three entirely within the fourth, no unique cells in the outer
 	 * 
 	 * @param vc
 	 * @param xStart
@@ -609,26 +622,32 @@ public class VennChartDataset extends DefaultXYDataset {
 				xStart, Y_START, DEFAULT_RADIUS, DEFAULT_RADIUS);
 
 		VennCircle a = new VennCircle(vc.getDataset(VennDatasetPosition.A),
-				xStart - 0.3, Y_START - 0.3, SUBSET_RADIUS, SUBSET_RADIUS);
+				xStart, Y_START + 0.01, DEFAULT_RADIUS * 0.96, DEFAULT_RADIUS * 0.96, VennShape.THIRD_CIRCLE_UPPER);
 
 		VennCircle c = new VennCircle(vc.getDataset(VennDatasetPosition.C),
-				xStart + 0.3, Y_START - 0.3, SUBSET_RADIUS, SUBSET_RADIUS);
+				xStart - 0.005, Y_START, DEFAULT_RADIUS * 0.96, DEFAULT_RADIUS * 0.96, VennShape.THIRD_CIRCLE_LEFT);
 
 		VennCircle d = new VennCircle(vc.getDataset(VennDatasetPosition.D),
-				xStart, Y_START + 0.3, SUBSET_RADIUS, SUBSET_RADIUS);
+				xStart + 0.005, Y_START, DEFAULT_RADIUS * 0.96, DEFAULT_RADIUS * 0.96, VennShape.THIRD_CIRCLE_RIGHT);
 
 		circles.add(a);
 		circles.add(b);
 		circles.add(c);
 		circles.add(d);
 
-		Label cAB = new Label(a.xCentre(), a.yCentre(), vc.getCount(VennIntersection.AB));
-		Label cBC = new Label(c.xCentre(), c.yCentre(), vc.getCount(VennIntersection.BC));
-		Label cBD = new Label(d.xCentre(), d.yCentre(), vc.getCount(VennIntersection.BD));
+		Label cAB = new Label(a.xCentre(), a.yFraction(0.75), vc.getCount(VennIntersection.AB));
+		Label cBC = new Label(c.xFraction(0.25), c.yFraction(0.33), vc.getCount(VennIntersection.BC));
+		Label cBD = new Label(d.xFraction(0.75), d.yFraction(0.33), vc.getCount(VennIntersection.BD));
 
 		labels.add(cAB);
 		labels.add(cBC);
 		labels.add(cBD);
+
+		labels.add(new Label(b.xCentre(), b.yBottom(), vc.getDataset(VennDatasetPosition.B).getName()));
+
+		labels.add(new Label(cAB.x(), b.yTop(), vc.getDataset(VennDatasetPosition.A).getName()));
+		labels.add(new Label(cBC.x() - 0.1, c.yBottom(), vc.getDataset(VennDatasetPosition.C).getName()));
+		labels.add(new Label(cBD.x() + 0.1, d.yBottom(), vc.getDataset(VennDatasetPosition.D).getName()));
 	}
 
 	/**
