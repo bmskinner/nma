@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -24,6 +25,8 @@ import com.bmskinner.nma.components.datasets.IAnalysisDataset;
  */
 public class VennCounter {
 
+	private static final Logger LOGGER = Logger.getLogger(VennCounter.class.getName());
+
 	private static final int FOUR_DATASETS = 8;
 
 	public static final String D1 = "d1";
@@ -35,7 +38,8 @@ public class VennCounter {
 	private static final Map<String, Integer> counts = new HashMap<>();
 
 	// uses "d1" syntax - track which dataset has which position
-	private static final Map<VennDatasetPosition, String> positions = new EnumMap<>(VennDatasetPosition.class);
+	private static final Map<VennDatasetPosition, String> positions = new EnumMap<>(
+			VennDatasetPosition.class);
 
 	// uses "d1" syntax - track which position has which dataset
 	private Map<String, IAnalysisDataset> datasets = new HashMap<>();
@@ -59,7 +63,8 @@ public class VennCounter {
 	 *
 	 */
 	public enum VennIntersection {
-		ABCD(VennDatasetPosition.A, VennDatasetPosition.B, VennDatasetPosition.C, VennDatasetPosition.D),
+		ABCD(VennDatasetPosition.A, VennDatasetPosition.B, VennDatasetPosition.C,
+				VennDatasetPosition.D),
 
 		ABC(VennDatasetPosition.A, VennDatasetPosition.B, VennDatasetPosition.C),
 		ABD(VennDatasetPosition.A, VennDatasetPosition.B, VennDatasetPosition.D),
@@ -77,7 +82,7 @@ public class VennCounter {
 		B(VennDatasetPosition.B),
 		C(VennDatasetPosition.C),
 		D(VennDatasetPosition.D);
-		
+
 		private VennDatasetPosition[] vdp;
 
 		/**
@@ -322,6 +327,10 @@ public class VennCounter {
 	 * Determine which dataset belongs in which venn circle
 	 */
 	private void assignDatasets() {
+
+		LOGGER.fine(getType());
+		LOGGER.fine(getCountInfo());
+
 		if (nDatasets == 1)
 			positions.put(VennDatasetPosition.A, D1);
 
@@ -375,7 +384,7 @@ public class VennCounter {
 			c = sides.get(1);
 		}
 
-		if ("0022".equals(type)) {
+		if ("0022".equals(type)) { // triple flat
 			List<String> all = findDatasetsWithCount(2);
 			b = all.stream().filter(s -> counts.get(s) == 0).findFirst().orElse(D1);
 			all.remove(b);
@@ -383,13 +392,13 @@ public class VennCounter {
 			c = all.get(1);
 		}
 
-		if ("0021".equals(type)) {
+		if ("0021".equals(type)) { // two unshared within third
 			b = findDatasetsWithCount(3).get(0);
 			a = findDatasetsWithCount(1).get(0);
 			c = findDatasetsWithCount(1).get(1);
 		}
 
-		if ("0020".equals(type)) {
+		if ("0020".equals(type)) { // two unshared within third, none only in third
 			b = findDatasetsWithCount(2).get(0);
 			a = findDatasetsWithCount(1).get(0);
 			c = findDatasetsWithCount(1).get(1);
@@ -408,11 +417,37 @@ public class VennCounter {
 		String c = D3;
 		String d = D4;
 
-		if ("0030".equals(type) || "0033".equals(type)) {
+		if ("0030".equals(type)) { // three unshared within fourth, none only in fourth
 			b = findDatasetsWithCount(3).get(0);
 			a = findDatasetsWithCount(1).get(0);
 			c = findDatasetsWithCount(1).get(1);
 			d = findDatasetsWithCount(1).get(2);
+		}
+
+		if ("0031".equals(type)) { // three unshared within fourth
+			b = findDatasetsWithCount(3).get(0);
+			a = findDatasetsWithCount(2).get(0);
+			c = findDatasetsWithCount(2).get(1);
+			d = findDatasetsWithCount(2).get(2);
+		}
+
+		if ("0033".equals(type)) { // triple flat, with subset in middle
+
+		}
+
+		if ("0131".equals(type)) { // all within fourth, one and two shared, third unshared
+
+		}
+
+		if ("1331".equals(type)) { // all within fourth, other three are triangle
+
+		}
+
+		if ("0231".equals(type)) { // all within fourth, other three are triple flat
+			a = findDatasetsWithCount(6).get(0);
+			b = findDatasetsWithCount(3).get(0);
+			c = findDatasetsWithCount(2).get(0);
+			d = findDatasetsWithCount(2).get(1);
 		}
 
 		positions.put(VennDatasetPosition.A, a);
@@ -430,13 +465,27 @@ public class VennCounter {
 	 */
 	private List<String> findDatasetsWithCount(int k) {
 		return counts.entrySet().stream().filter(e -> e.getValue() > 0) // get combinations present
-				.flatMap(e -> e.getKey().chars().mapToObj(i -> (char) i)) // turn into char stream so we can
+				.flatMap(e -> e.getKey().chars().mapToObj(i -> (char) i)) // turn into char stream
+																			// so we can
 				.filter(c -> c != "d".charAt(0)) // remove d's
-				.collect(Collectors.groupingBy(Function.identity(), Collectors.counting())) // count occurances
+				.collect(Collectors.groupingBy(Function.identity(), Collectors.counting())) // count
+																							// occurances
 				.entrySet().stream()
 				.filter(e -> e.getValue() == k) // find the dataset with k entries in the map
 				.map(e -> "d" + e.getKey()) // add d back
 				.collect(Collectors.toList());
+	}
+
+	private String getCountInfo() {
+		return counts.entrySet().stream().filter(e -> e.getValue() > 0) // get combinations present
+				.flatMap(e -> e.getKey().chars().mapToObj(i -> (char) i)) // turn into char stream
+																			// so we can
+				.filter(c -> c != "d".charAt(0)) // remove d's
+				.collect(Collectors.groupingBy(Function.identity(), Collectors.counting())) // count
+																							// occurances
+				.entrySet().stream()
+				.map(e -> "d" + e.getKey() + ": " + e.getValue()) // add d back
+				.collect(Collectors.joining(", "));
 	}
 
 	public Map<String, Integer> getCounts() {
@@ -453,7 +502,6 @@ public class VennCounter {
 		return k.getValue();
 	}
 
-
 	public IAnalysisDataset getDataset(@NonNull VennDatasetPosition k) {
 		String d = positions.get(k);
 		return datasets.get(d);
@@ -461,7 +509,9 @@ public class VennCounter {
 
 	/**
 	 * Find the type of the cluster (a string definition of the number of
-	 * intersecting circles)
+	 * intersecting circles). Digit 0 = number of 4 dataset comparisons Digit 1 =
+	 * number of 3 dataset comparisons Digit 2 = number of 2 dataset comparisons
+	 * Digit 3 = number of 1 dataset comparisons
 	 * 
 	 * @return
 	 */
@@ -470,7 +520,8 @@ public class VennCounter {
 		StringBuilder r = new StringBuilder();
 		for (int i = FOUR_DATASETS; i > 0; i -= 2) {
 			int j = i;
-			long l = counts.entrySet().stream().filter(e -> e.getKey().length() == j && e.getValue() > 0)
+			long l = counts.entrySet().stream()
+					.filter(e -> e.getKey().length() == j && e.getValue() > 0)
 					.collect(Collectors.counting());
 			r.append(l);
 		}
