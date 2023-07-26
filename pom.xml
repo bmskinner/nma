@@ -675,23 +675,38 @@
 		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/ome/bio-formats -->
-		<!--<dependency>
+		<dependency>
 			<groupId>ome</groupId>
 			<artifactId>bio-formats</artifactId>
 			<version>5.0.0-rc2</version>
-		</dependency>-->
+			<exclusions>
+				<exclusion>
+					<groupId>xml-apis</groupId>
+					<artifactId>xml-apis</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>java.xml</groupId>
+					<artifactId>java.xml</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
 
-		<!-- https://mvnrepository.com/artifact/ome/bio-formats_plugins 
-		<!-- <dependency>
+		<!-- https://mvnrepository.com/artifact/ome/bio-formats_plugins  -->
+		<dependency>
 			<groupId>ome</groupId>
 			<artifactId>bio-formats_plugins</artifactId>
 			<version>6.13.0</version>
 			<exclusions>
 				<exclusion>
-					<groupId>javax.xml</groupId>
+					<groupId>xml-apis</groupId>
+					<artifactId>xml-apis</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>java.xml</groupId>
+					<artifactId>java.xml</artifactId>
 				</exclusion>
 			</exclusions>
-		</dependency>-->
+		</dependency>
 
 
 	</dependencies>

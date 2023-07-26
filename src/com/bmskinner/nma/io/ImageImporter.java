@@ -318,6 +318,7 @@ public class ImageImporter implements Importer {
 	}
 
 	private ImageStack importND2ToStack() throws ImageImportException {
+
 		ImageProcessorReader r = new ImageProcessorReader(
 				new ChannelSeparator(LociPrefs.makeImageReader()));
 
