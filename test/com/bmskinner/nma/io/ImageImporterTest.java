@@ -10,8 +10,8 @@ import org.junit.Test;
 import com.bmskinner.nma.TestResources;
 import com.bmskinner.nma.io.ImageImporter.ImageImportException;
 
-import ij.ImagePlus;
 import ij.ImageStack;
+import ij.process.ImageProcessor;
 
 public class ImageImporterTest {
 
@@ -24,14 +24,26 @@ public class ImageImporterTest {
 
 		assertTrue(nd2File.exists());
 
-		ImageStack ip = new ImageImporter(nd2File).importToStack();
+		ImageStack ip = ImageImporter.importToStack(nd2File);
 
-		ImagePlus img = new ImagePlus("title", ip);
-		img.show();
-
-		assertEquals(16, ip.getBitDepth());
 		assertEquals(1004, ip.getWidth());
 		assertEquals(1002, ip.getHeight());
+	}
+
+	@Test
+	public void testND2Is8Bit() throws ImageImportException, InterruptedException {
+
+		File testFolder = new File(TestResources.IMAGE_FOLDER_BASE, "ND2");
+
+		File nd2File = new File(testFolder, "LS1.nd2");
+
+		assertTrue(nd2File.exists());
+
+		ImageStack is = ImageImporter.importToStack(nd2File);
+
+		ImageProcessor ip = is.getProcessor(1);
+
+		assertEquals("Should be 8 bit", 8, ip.getBitDepth());
 	}
 
 }
