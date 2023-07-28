@@ -43,6 +43,7 @@ import loci.formats.ChannelSeparator;
 import loci.formats.FormatException;
 import loci.plugins.util.ImageProcessorReader;
 import loci.plugins.util.LociPrefs;
+import ome.scifio.common.DebugTools;
 
 /**
  * This class takes any given input image, and will convert it to the ImageStack
@@ -311,7 +312,18 @@ public class ImageImporter implements Importer {
 		}
 	}
 
+	/**
+	 * Read an ND2 file and convert to 8-bit stack. Will only work on ND2 files with
+	 * a single image.
+	 * 
+	 * @param f the file to read
+	 * @return
+	 * @throws ImageImportException if the ND2 file contains more than one image
+	 */
 	private static ImageStack importND2ToStack(@NonNull File f) throws ImageImportException {
+
+		// Suppress Bio-formats logging
+		DebugTools.enableLogging("OFF");
 
 		ImageProcessorReader r = new ImageProcessorReader(
 				new ChannelSeparator(LociPrefs.makeImageReader()));
@@ -319,18 +331,18 @@ public class ImageImporter implements Importer {
 		try {
 			r.setId(f.getAbsolutePath());
 
-			int num = r.getImageCount();
+			if (r.getImageCount() > 1)
+				throw new ImageImportException("Cannot open ND2 with more than one image");
+
 			int width = r.getSizeX();
 			int height = r.getSizeY();
 			ImageStack stack = new ImageStack(width, height);
 
-			for (int i = 0; i < num; i++) {
-				ImageProcessor[] channels = r.openProcessors(i);
+			ImageProcessor[] channels = r.openProcessors(0);
 
-				for (int c = 0; c < channels.length; c++) {
-					ImageProcessor ip = r.openProcessors(i)[c].convertToByte(true);
-					stack.addSlice("" + (i + 1), ip);
-				}
+			for (int c = 0; c < channels.length; c++) {
+				ImageProcessor ip = channels[c].convertToByte(true);
+				stack.addSlice("" + (c + 1), ip);
 			}
 
 			return stack;
