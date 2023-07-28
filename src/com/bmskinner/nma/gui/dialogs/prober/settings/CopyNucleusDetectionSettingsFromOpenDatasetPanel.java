@@ -23,7 +23,6 @@ import java.util.logging.Logger;
 
 import javax.swing.JOptionPane;
 
-import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.options.HashOptions;
@@ -51,8 +50,8 @@ public class CopyNucleusDetectionSettingsFromOpenDatasetPanel extends CopyFromOp
 	/**
 	 * Create with an analysis options and the detection options to copy to
 	 * 
-	 * @param parent
-	 * @param op
+	 * @param parent the analysis options to copy to
+	 * @param op     the analysis options to copy from
 	 */
 	public CopyNucleusDetectionSettingsFromOpenDatasetPanel(IAnalysisOptions parent,
 			HashOptions op) {
@@ -66,6 +65,7 @@ public class CopyNucleusDetectionSettingsFromOpenDatasetPanel extends CopyFromOp
 					.getRootDatasets()
 					.toArray(new IAnalysisDataset[0]);
 
+			// Choose the dataset the options should come from
 			IAnalysisDataset sourceDataset = (IAnalysisDataset) JOptionPane.showInputDialog(null,
 					CHOOSE_DATASET_MSG_LBL, CHOOSE_DATASET_TTL_LBL, JOptionPane.QUESTION_MESSAGE,
 					null, nameArray,
@@ -78,13 +78,12 @@ public class CopyNucleusDetectionSettingsFromOpenDatasetPanel extends CopyFromOp
 				// Ensure the folder is not overwritten by the new options
 				File folder = parent.getNucleusDetectionFolder().get();
 
-				Optional<IAnalysisOptions> op = sourceDataset.getAnalysisOptions();
-				if (op.isPresent()) {
-					op.get().setDetectionFolder(CellularComponent.NUCLEUS,
-							folder.getAbsoluteFile());
-					Optional<HashOptions> srcOptions = op.get().getNucleusDetectionOptions();
+				Optional<IAnalysisOptions> sourceOptions = sourceDataset.getAnalysisOptions();
+				if (sourceOptions.isPresent()) {
+					Optional<HashOptions> srcOptions = sourceOptions.get()
+							.getNucleusDetectionOptions();
 					options.set(srcOptions.get());
-					parent.setRuleSetCollection(op.get().getRuleSetCollection());
+					parent.setRuleSetCollection(sourceOptions.get().getRuleSetCollection());
 					parent.setNucleusDetectionFolder(folder);
 				}
 
