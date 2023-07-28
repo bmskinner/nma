@@ -21,9 +21,12 @@ public class NuclearSignalMeasurementsTableModel extends DatasetTableModel {
 
 	private static final long serialVersionUID = 1l;
 
-	private static final Logger LOGGER = Logger.getLogger(NuclearSignalMeasurementsTableModel.class.getName());
+	private static final Logger LOGGER = Logger
+			.getLogger(NuclearSignalMeasurementsTableModel.class.getName());
 
-	private static final List<String> ROW_NAMES = List.of(EMPTY_STRING, Labels.Signals.SIGNAL_GROUP_LABEL,
+	private static final List<String> ROW_NAMES = List.of(EMPTY_STRING,
+			Labels.Signals.SIGNAL_GROUP_LABEL,
+			Labels.Signals.SIGNAL_ID_LABEL,
 			Labels.Signals.SIGNALS_LABEL, Labels.Signals.SIGNALS_PER_NUCLEUS);
 
 	private String[] colNames;
@@ -38,7 +41,8 @@ public class NuclearSignalMeasurementsTableModel extends DatasetTableModel {
 
 		// find the collection with the most channels
 		// this defines the number of rows
-		int maxChannels = datasets.stream().mapToInt(d -> d.getCollection().getSignalManager().getSignalGroupCount())
+		int maxChannels = datasets.stream()
+				.mapToInt(d -> d.getCollection().getSignalManager().getSignalGroupCount())
 				.max().orElse(0);
 
 		if (maxChannels == 0) {
@@ -85,18 +89,23 @@ public class NuclearSignalMeasurementsTableModel extends DatasetTableModel {
 						? collection.getSignalGroup(id).get().getGroupColour().get()
 						: ColourSelecter.getColor(signalGroupNumber);
 
-				SignalTableCell cell = new SignalTableCell(id, collection.getSignalManager().getSignalGroupName(id),
+				SignalTableCell cell = new SignalTableCell(id,
+						collection.getSignalManager().getSignalGroupName(id),
 						colour);
 
 				rowData[baseIndex + 0][c] = Labels.Signals.SIGNAL_COLOUR_LABEL;
 				rowData[baseIndex + 1][c] = cell;
-				rowData[baseIndex + 2][c] = String.valueOf(collection.getSignalManager().getSignalCount(id));
-				rowData[baseIndex + 3][c] = df.format(collection.getSignalManager().getSignalCountPerNucleus(id));
+				rowData[baseIndex + 2][c] = id;
+				rowData[baseIndex + 3][c] = String
+						.valueOf(collection.getSignalManager().getSignalCount(id));
+				rowData[baseIndex + 4][c] = df
+						.format(collection.getSignalManager().getSignalCountPerNucleus(id));
 
 				List<Measurement> measurements = Measurement.getSignalStats();
 				for (int m = 0; m < measurements.size(); m++) {
-					rowData[baseIndex + 4 + m][c] = df.format(
-							collection.getSignalManager().getMedianSignalStatistic(measurements.get(m), scale, id));
+					rowData[baseIndex + 5 + m][c] = df.format(
+							collection.getSignalManager()
+									.getMedianSignalStatistic(measurements.get(m), scale, id));
 				}
 
 				signalGroupNumber++;
@@ -110,7 +119,8 @@ public class NuclearSignalMeasurementsTableModel extends DatasetTableModel {
 			if (signalGroupNumber < signalGroupsInDataset) {
 
 				// There will be empty rows in the table. Fill the blanks
-				for (int i = signalGroupNumber * ROW_NAMES.size() + 1; i <= signalGroupsInDataset; i++) {
+				for (int i = signalGroupNumber * ROW_NAMES.size()
+						+ 1; i <= signalGroupsInDataset; i++) {
 					rowData[i][c] = EMPTY_STRING;
 
 				}
