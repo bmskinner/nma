@@ -27,12 +27,13 @@ public class VennCounter {
 
 	private static final Logger LOGGER = Logger.getLogger(VennCounter.class.getName());
 
-	private static final int FOUR_DATASETS = 8;
+	private static final int FIVE_DATASETS = 10;
 
 	public static final String D1 = "d1";
 	public static final String D2 = "d2";
 	public static final String D3 = "d3";
 	public static final String D4 = "d4";
+	public static final String D5 = "d5";
 
 	// uses "d1" syntax - track counts
 	private static final Map<String, Integer> counts = new HashMap<>();
@@ -53,7 +54,7 @@ public class VennCounter {
 	 *
 	 */
 	public enum VennDatasetPosition {
-		A, B, C, D
+		A, B, C, D, E
 	}
 
 	/**
@@ -63,13 +64,32 @@ public class VennCounter {
 	 *
 	 */
 	public enum VennIntersection {
+
+		ABCDE(VennDatasetPosition.A, VennDatasetPosition.B, VennDatasetPosition.C,
+				VennDatasetPosition.D, VennDatasetPosition.E),
+
 		ABCD(VennDatasetPosition.A, VennDatasetPosition.B, VennDatasetPosition.C,
 				VennDatasetPosition.D),
+		ABCE(VennDatasetPosition.A, VennDatasetPosition.B, VennDatasetPosition.C,
+				VennDatasetPosition.E),
+		ABDE(VennDatasetPosition.A, VennDatasetPosition.B, VennDatasetPosition.D,
+				VennDatasetPosition.E),
+		ACDE(VennDatasetPosition.A, VennDatasetPosition.C, VennDatasetPosition.D,
+				VennDatasetPosition.E),
+		BCDE(VennDatasetPosition.B, VennDatasetPosition.C, VennDatasetPosition.D,
+				VennDatasetPosition.E),
 
 		ABC(VennDatasetPosition.A, VennDatasetPosition.B, VennDatasetPosition.C),
 		ABD(VennDatasetPosition.A, VennDatasetPosition.B, VennDatasetPosition.D),
 		ACD(VennDatasetPosition.A, VennDatasetPosition.C, VennDatasetPosition.D),
 		BCD(VennDatasetPosition.B, VennDatasetPosition.C, VennDatasetPosition.D),
+
+		ABE(VennDatasetPosition.A, VennDatasetPosition.B, VennDatasetPosition.E),
+		ACE(VennDatasetPosition.A, VennDatasetPosition.C, VennDatasetPosition.E),
+		ADE(VennDatasetPosition.A, VennDatasetPosition.D, VennDatasetPosition.E),
+		BCE(VennDatasetPosition.B, VennDatasetPosition.C, VennDatasetPosition.E),
+		BDE(VennDatasetPosition.B, VennDatasetPosition.D, VennDatasetPosition.E),
+		CDE(VennDatasetPosition.C, VennDatasetPosition.D, VennDatasetPosition.E),
 
 		AB(VennDatasetPosition.A, VennDatasetPosition.B),
 		AC(VennDatasetPosition.A, VennDatasetPosition.C),
@@ -78,10 +98,16 @@ public class VennCounter {
 		BD(VennDatasetPosition.B, VennDatasetPosition.D),
 		CD(VennDatasetPosition.C, VennDatasetPosition.D),
 
+		AE(VennDatasetPosition.A, VennDatasetPosition.E),
+		BE(VennDatasetPosition.B, VennDatasetPosition.E),
+		CE(VennDatasetPosition.C, VennDatasetPosition.E),
+		DE(VennDatasetPosition.D, VennDatasetPosition.E),
+
 		A(VennDatasetPosition.A),
 		B(VennDatasetPosition.B),
 		C(VennDatasetPosition.C),
-		D(VennDatasetPosition.D);
+		D(VennDatasetPosition.D),
+		E(VennDatasetPosition.E);
 
 		private VennDatasetPosition[] vdp;
 
@@ -154,173 +180,430 @@ public class VennCounter {
 		}
 
 		if (cluster.size() == 3) {
-			Set<UUID> d1 = cluster.get(0).getCollection().getCellIDs();
-			Set<UUID> d2 = cluster.get(1).getCollection().getCellIDs();
-			Set<UUID> d3 = cluster.get(2).getCollection().getCellIDs();
-
-			Set<UUID> d1d2d3 = new HashSet<>(d1);
-			d1d2d3.retainAll(d2);
-			d1d2d3.retainAll(d3);
-
-			Set<UUID> d1d2 = new HashSet<>(d1);
-			d1d2.retainAll(d2);
-			d1d2.removeAll(d1d2d3);
-
-			Set<UUID> d1d3 = new HashSet<>(d1);
-			d1d3.retainAll(d3);
-			d1d3.removeAll(d1d2d3);
-
-			Set<UUID> d1s = new HashSet<>(d1);
-			d1s.removeAll(d1d2d3);
-			d1s.removeAll(d1d2);
-			d1s.removeAll(d1d3);
-
-			Set<UUID> d2d3 = new HashSet<>(d2);
-			d2d3.retainAll(d3);
-			d2d3.removeAll(d1d2d3);
-
-			Set<UUID> d2s = new HashSet<>(d2);
-			d2s.removeAll(d1d2);
-			d2s.removeAll(d2d3);
-			d2s.removeAll(d1d2d3);
-
-			Set<UUID> d3s = new HashSet<>(d3);
-			d3s.removeAll(d1d3);
-			d3s.removeAll(d2d3);
-			d3s.removeAll(d1d2d3);
-
-			counts.put("d1d2d3", d1d2d3.size());
-			counts.put("d1d2", d1d2.size());
-			counts.put("d1d3", d1d3.size());
-			counts.put("d1", d1s.size());
-			counts.put("d2d3", d2d3.size());
-			counts.put("d2", d2s.size());
-			counts.put("d3", d3s.size());
+			createThreeDatasetCounts(cluster);
 		}
 
 		if (cluster.size() == 4) {
-			Set<UUID> d1 = cluster.get(0).getCollection().getCellIDs();
-			Set<UUID> d2 = cluster.get(1).getCollection().getCellIDs();
-			Set<UUID> d3 = cluster.get(2).getCollection().getCellIDs();
-			Set<UUID> d4 = cluster.get(3).getCollection().getCellIDs();
-
-			// 1 combo of 4 shared
-			Set<UUID> d1d2d3d4 = new HashSet<>(d1);
-			d1d2d3d4.retainAll(d2);
-			d1d2d3d4.retainAll(d3);
-			d1d2d3d4.retainAll(d4);
-			counts.put("d1d2d3d4", d1d2d3d4.size());
-
-			// 4 combos of 3 shared
-			Set<UUID> d1d2d3 = new HashSet<>(d1);
-			d1d2d3.retainAll(d2);
-			d1d2d3.retainAll(d3);
-			d1d2d3.removeAll(d1d2d3d4);
-			counts.put("d1d2d3", d1d2d3.size());
-
-			Set<UUID> d1d2d4 = new HashSet<>(d1);
-			d1d2d4.retainAll(d2);
-			d1d2d4.retainAll(d4);
-			d1d2d4.removeAll(d1d2d3d4);
-			counts.put("d1d2d4", d1d2d4.size());
-
-			Set<UUID> d1d3d4 = new HashSet<>(d1);
-			d1d3d4.retainAll(d3);
-			d1d3d4.retainAll(d4);
-			d1d3d4.removeAll(d1d2d3d4);
-			counts.put("d1d3d4", d1d3d4.size());
-
-			Set<UUID> d2d3d4 = new HashSet<>(d2);
-			d2d3d4.retainAll(d3);
-			d2d3d4.retainAll(d4);
-			d2d3d4.removeAll(d1d2d3d4);
-			counts.put("d2d3d4", d2d3d4.size());
-
-			// 6 combos of 2 shared
-			Set<UUID> d1d2 = new HashSet<>(d1);
-			d1d2.retainAll(d2);
-			d1d2.removeAll(d1d2d3);
-			d1d2.removeAll(d1d2d4);
-			d1d2.removeAll(d1d2d3d4);
-			counts.put("d1d2", d1d2.size());
-
-			Set<UUID> d1d3 = new HashSet<>(d1);
-			d1d3.retainAll(d3);
-			d1d3.removeAll(d1d2d3);
-			d1d3.removeAll(d1d3d4);
-			d1d3.removeAll(d1d2d3d4);
-			counts.put("d1d3", d1d3.size());
-
-			Set<UUID> d1d4 = new HashSet<>(d1);
-			d1d4.retainAll(d4);
-			d1d4.removeAll(d1d2d4);
-			d1d4.removeAll(d1d3d4);
-			d1d4.removeAll(d1d2d3d4);
-			counts.put("d1d4", d1d4.size());
-
-			Set<UUID> d2d3 = new HashSet<>(d2);
-			d2d3.retainAll(d3);
-			d2d3.removeAll(d1d2d3);
-			d2d3.removeAll(d2d3d4);
-			d2d3.removeAll(d1d2d3d4);
-			counts.put("d2d3", d2d3.size());
-
-			Set<UUID> d2d4 = new HashSet<>(d2);
-			d2d4.retainAll(d4);
-			d2d4.removeAll(d1d2d4);
-			d2d4.removeAll(d2d3d4);
-			d2d4.removeAll(d1d2d3d4);
-			counts.put("d2d4", d2d4.size());
-
-			Set<UUID> d3d4 = new HashSet<>(d3);
-			d3d4.retainAll(d4);
-			d3d4.removeAll(d1d3d4);
-			d3d4.removeAll(d2d3d4);
-			d3d4.removeAll(d1d2d3d4);
-			counts.put("d3d4", d3d4.size());
-
-			// 4 combos of single
-			Set<UUID> d1s = new HashSet<>(d1);
-			d1s.removeAll(d1d2);
-			d1s.removeAll(d1d3);
-			d1s.removeAll(d1d4);
-			d1s.removeAll(d1d2d3);
-			d1s.removeAll(d1d2d4);
-			d1s.removeAll(d1d3d4);
-			d1s.removeAll(d1d2d3d4);
-			counts.put("d1", d1s.size());
-
-			Set<UUID> d2s = new HashSet<>(d2);
-			d2s.removeAll(d1d2);
-			d2s.removeAll(d2d3);
-			d2s.removeAll(d2d4);
-			d2s.removeAll(d1d2d3);
-			d2s.removeAll(d1d2d4);
-			d2s.removeAll(d2d3d4);
-			d2s.removeAll(d1d2d3d4);
-			counts.put("d2", d2s.size());
-
-			Set<UUID> d3s = new HashSet<>(d3);
-			d3s.removeAll(d1d3);
-			d3s.removeAll(d2d3);
-			d3s.removeAll(d3d4);
-			d3s.removeAll(d1d2d3);
-			d3s.removeAll(d1d3d4);
-			d3s.removeAll(d2d3d4);
-			d3s.removeAll(d1d2d3d4);
-			counts.put("d3", d3s.size());
-
-			Set<UUID> d4s = new HashSet<>(d4);
-			d4s.removeAll(d1d4);
-			d4s.removeAll(d2d4);
-			d4s.removeAll(d3d4);
-			d4s.removeAll(d1d2d4);
-			d4s.removeAll(d1d3d4);
-			d4s.removeAll(d2d3d4);
-			d4s.removeAll(d1d2d3d4);
-			counts.put("d4", d4s.size());
+			createFourDatasetCounts(cluster);
 		}
 
+		if (cluster.size() == 5) {
+			createFiveDatasetCounts(cluster);
+		}
+
+	}
+
+	private void createThreeDatasetCounts(List<IAnalysisDataset> cluster) {
+		Set<UUID> d1 = cluster.get(0).getCollection().getCellIDs();
+		Set<UUID> d2 = cluster.get(1).getCollection().getCellIDs();
+		Set<UUID> d3 = cluster.get(2).getCollection().getCellIDs();
+
+		Set<UUID> d1d2d3 = new HashSet<>(d1);
+		d1d2d3.retainAll(d2);
+		d1d2d3.retainAll(d3);
+
+		Set<UUID> d1d2 = new HashSet<>(d1);
+		d1d2.retainAll(d2);
+		d1d2.removeAll(d1d2d3);
+
+		Set<UUID> d1d3 = new HashSet<>(d1);
+		d1d3.retainAll(d3);
+		d1d3.removeAll(d1d2d3);
+
+		Set<UUID> d1s = new HashSet<>(d1);
+		d1s.removeAll(d1d2d3);
+		d1s.removeAll(d1d2);
+		d1s.removeAll(d1d3);
+
+		Set<UUID> d2d3 = new HashSet<>(d2);
+		d2d3.retainAll(d3);
+		d2d3.removeAll(d1d2d3);
+
+		Set<UUID> d2s = new HashSet<>(d2);
+		d2s.removeAll(d1d2);
+		d2s.removeAll(d2d3);
+		d2s.removeAll(d1d2d3);
+
+		Set<UUID> d3s = new HashSet<>(d3);
+		d3s.removeAll(d1d3);
+		d3s.removeAll(d2d3);
+		d3s.removeAll(d1d2d3);
+
+		counts.put("d1d2d3", d1d2d3.size());
+		counts.put("d1d2", d1d2.size());
+		counts.put("d1d3", d1d3.size());
+		counts.put("d1", d1s.size());
+		counts.put("d2d3", d2d3.size());
+		counts.put("d2", d2s.size());
+		counts.put("d3", d3s.size());
+	}
+
+	private void createFourDatasetCounts(List<IAnalysisDataset> cluster) {
+		Set<UUID> d1 = cluster.get(0).getCollection().getCellIDs();
+		Set<UUID> d2 = cluster.get(1).getCollection().getCellIDs();
+		Set<UUID> d3 = cluster.get(2).getCollection().getCellIDs();
+		Set<UUID> d4 = cluster.get(3).getCollection().getCellIDs();
+
+		// 1 combo of 4 shared
+		Set<UUID> d1d2d3d4 = new HashSet<>(d1);
+		d1d2d3d4.retainAll(d2);
+		d1d2d3d4.retainAll(d3);
+		d1d2d3d4.retainAll(d4);
+		counts.put("d1d2d3d4", d1d2d3d4.size());
+
+		// 4 combos of 3 shared
+		Set<UUID> d1d2d3 = new HashSet<>(d1);
+		d1d2d3.retainAll(d2);
+		d1d2d3.retainAll(d3);
+		d1d2d3.removeAll(d1d2d3d4);
+		counts.put("d1d2d3", d1d2d3.size());
+
+		Set<UUID> d1d2d4 = new HashSet<>(d1);
+		d1d2d4.retainAll(d2);
+		d1d2d4.retainAll(d4);
+		d1d2d4.removeAll(d1d2d3d4);
+		counts.put("d1d2d4", d1d2d4.size());
+
+		Set<UUID> d1d3d4 = new HashSet<>(d1);
+		d1d3d4.retainAll(d3);
+		d1d3d4.retainAll(d4);
+		d1d3d4.removeAll(d1d2d3d4);
+		counts.put("d1d3d4", d1d3d4.size());
+
+		Set<UUID> d2d3d4 = new HashSet<>(d2);
+		d2d3d4.retainAll(d3);
+		d2d3d4.retainAll(d4);
+		d2d3d4.removeAll(d1d2d3d4);
+		counts.put("d2d3d4", d2d3d4.size());
+
+		// 6 combos of 2 shared
+		Set<UUID> d1d2 = new HashSet<>(d1);
+		d1d2.retainAll(d2);
+		d1d2.removeAll(d1d2d3);
+		d1d2.removeAll(d1d2d4);
+		d1d2.removeAll(d1d2d3d4);
+		counts.put("d1d2", d1d2.size());
+
+		Set<UUID> d1d3 = new HashSet<>(d1);
+		d1d3.retainAll(d3);
+		d1d3.removeAll(d1d2d3);
+		d1d3.removeAll(d1d3d4);
+		d1d3.removeAll(d1d2d3d4);
+		counts.put("d1d3", d1d3.size());
+
+		Set<UUID> d1d4 = new HashSet<>(d1);
+		d1d4.retainAll(d4);
+		d1d4.removeAll(d1d2d4);
+		d1d4.removeAll(d1d3d4);
+		d1d4.removeAll(d1d2d3d4);
+		counts.put("d1d4", d1d4.size());
+
+		Set<UUID> d2d3 = new HashSet<>(d2);
+		d2d3.retainAll(d3);
+		d2d3.removeAll(d1d2d3);
+		d2d3.removeAll(d2d3d4);
+		d2d3.removeAll(d1d2d3d4);
+		counts.put("d2d3", d2d3.size());
+
+		Set<UUID> d2d4 = new HashSet<>(d2);
+		d2d4.retainAll(d4);
+		d2d4.removeAll(d1d2d4);
+		d2d4.removeAll(d2d3d4);
+		d2d4.removeAll(d1d2d3d4);
+		counts.put("d2d4", d2d4.size());
+
+		Set<UUID> d3d4 = new HashSet<>(d3);
+		d3d4.retainAll(d4);
+		d3d4.removeAll(d1d3d4);
+		d3d4.removeAll(d2d3d4);
+		d3d4.removeAll(d1d2d3d4);
+		counts.put("d3d4", d3d4.size());
+
+		// 4 combos of single
+		Set<UUID> d1s = new HashSet<>(d1);
+		d1s.removeAll(d1d2);
+		d1s.removeAll(d1d3);
+		d1s.removeAll(d1d4);
+		d1s.removeAll(d1d2d3);
+		d1s.removeAll(d1d2d4);
+		d1s.removeAll(d1d3d4);
+		d1s.removeAll(d1d2d3d4);
+		counts.put("d1", d1s.size());
+
+		Set<UUID> d2s = new HashSet<>(d2);
+		d2s.removeAll(d1d2);
+		d2s.removeAll(d2d3);
+		d2s.removeAll(d2d4);
+		d2s.removeAll(d1d2d3);
+		d2s.removeAll(d1d2d4);
+		d2s.removeAll(d2d3d4);
+		d2s.removeAll(d1d2d3d4);
+		counts.put("d2", d2s.size());
+
+		Set<UUID> d3s = new HashSet<>(d3);
+		d3s.removeAll(d1d3);
+		d3s.removeAll(d2d3);
+		d3s.removeAll(d3d4);
+		d3s.removeAll(d1d2d3);
+		d3s.removeAll(d1d3d4);
+		d3s.removeAll(d2d3d4);
+		d3s.removeAll(d1d2d3d4);
+		counts.put("d3", d3s.size());
+
+		Set<UUID> d4s = new HashSet<>(d4);
+		d4s.removeAll(d1d4);
+		d4s.removeAll(d2d4);
+		d4s.removeAll(d3d4);
+		d4s.removeAll(d1d2d4);
+		d4s.removeAll(d1d3d4);
+		d4s.removeAll(d2d3d4);
+		d4s.removeAll(d1d2d3d4);
+		counts.put("d4", d4s.size());
+	}
+
+	private void createFiveDatasetCounts(List<IAnalysisDataset> cluster) {
+		Set<UUID> d1 = cluster.get(0).getCollection().getCellIDs();
+		Set<UUID> d2 = cluster.get(1).getCollection().getCellIDs();
+		Set<UUID> d3 = cluster.get(2).getCollection().getCellIDs();
+		Set<UUID> d4 = cluster.get(3).getCollection().getCellIDs();
+		Set<UUID> d5 = cluster.get(4).getCollection().getCellIDs();
+
+		// 1 combo of 5 shared
+		Set<UUID> d1d2d3d4d5 = new HashSet<>(d1);
+		d1d2d3d4d5.retainAll(d2);
+		d1d2d3d4d5.retainAll(d3);
+		d1d2d3d4d5.retainAll(d4);
+		d1d2d3d4d5.retainAll(d5);
+		d1.removeAll(d1d2d3d4d5);
+		d2.removeAll(d1d2d3d4d5);
+		d3.removeAll(d1d2d3d4d5);
+		d4.removeAll(d1d2d3d4d5);
+		d5.removeAll(d1d2d3d4d5);
+		counts.put("d1d2d3d4d5", d1d2d3d4d5.size());
+
+		// 5 combos of 4 shared
+		Set<UUID> d1d2d3d4 = new HashSet<>(d1);
+		d1d2d3d4.retainAll(d2);
+		d1d2d3d4.retainAll(d3);
+		d1d2d3d4.retainAll(d4);
+		d1.removeAll(d1d2d3d4);
+		d2.removeAll(d1d2d3d4);
+		d3.removeAll(d1d2d3d4);
+		d4.removeAll(d1d2d3d4);
+		d5.removeAll(d1d2d3d4);
+		counts.put("d1d2d3d4", d1d2d3d4.size());
+
+		Set<UUID> d1d2d3d5 = new HashSet<>(d1);
+		d1d2d3d5.retainAll(d2);
+		d1d2d3d5.retainAll(d3);
+		d1d2d3d5.retainAll(d5);
+		d1.removeAll(d1d2d3d5);
+		d2.removeAll(d1d2d3d5);
+		d3.removeAll(d1d2d3d5);
+		d4.removeAll(d1d2d3d5);
+		d5.removeAll(d1d2d3d5);
+		counts.put("d1d2d3d5", d1d2d3d5.size());
+
+		Set<UUID> d1d2d4d5 = new HashSet<>(d1);
+		d1d2d4d5.retainAll(d2);
+		d1d2d4d5.retainAll(d4);
+		d1d2d4d5.retainAll(d5);
+		d1.removeAll(d1d2d4d5);
+		d2.removeAll(d1d2d4d5);
+		d3.removeAll(d1d2d4d5);
+		d4.removeAll(d1d2d4d5);
+		d5.removeAll(d1d2d4d5);
+		counts.put("d1d2d4d5", d1d2d4d5.size());
+
+		Set<UUID> d1d3d4d5 = new HashSet<>(d1);
+		d1d3d4d5.retainAll(d3);
+		d1d3d4d5.retainAll(d4);
+		d1d3d4d5.retainAll(d5);
+		d1.removeAll(d1d3d4d5);
+		d2.removeAll(d1d3d4d5);
+		d3.removeAll(d1d3d4d5);
+		d4.removeAll(d1d3d4d5);
+		d5.removeAll(d1d3d4d5);
+		counts.put("d1d3d4d5", d1d3d4d5.size());
+
+		Set<UUID> d2d3d4d5 = new HashSet<>(d2);
+		d2d3d4d5.retainAll(d3);
+		d2d3d4d5.retainAll(d4);
+		d2d3d4d5.retainAll(d5);
+		d1.removeAll(d2d3d4d5);
+		d2.removeAll(d2d3d4d5);
+		d3.removeAll(d2d3d4d5);
+		d4.removeAll(d2d3d4d5);
+		d5.removeAll(d2d3d4d5);
+		counts.put("d2d3d4d5", d2d3d4d5.size());
+
+		// 10 combos of 3 shared
+		Set<UUID> d1d2d3 = new HashSet<>(d1);
+		d1d2d3.retainAll(d2);
+		d1d2d3.retainAll(d3);
+		d1.removeAll(d1d2d3);
+		d2.removeAll(d1d2d3);
+		d3.removeAll(d1d2d3);
+		d4.removeAll(d1d2d3);
+		d5.removeAll(d1d2d3);
+		counts.put("d1d2d3", d1d2d3.size());
+
+		Set<UUID> d1d2d4 = new HashSet<>(d1);
+		d1d2d4.retainAll(d2);
+		d1d2d4.retainAll(d4);
+		d1.removeAll(d1d2d4);
+		d2.removeAll(d1d2d4);
+		d3.removeAll(d1d2d4);
+		d4.removeAll(d1d2d4);
+		d5.removeAll(d1d2d4);
+		counts.put("d1d2d4", d1d2d4.size());
+
+		Set<UUID> d1d2d5 = new HashSet<>(d1);
+		d1d2d5.retainAll(d2);
+		d1d2d5.retainAll(d5);
+		d1.removeAll(d1d2d5);
+		d2.removeAll(d1d2d5);
+		d3.removeAll(d1d2d5);
+		d4.removeAll(d1d2d5);
+		d5.removeAll(d1d2d5);
+		counts.put("d1d2d5", d1d2d5.size());
+
+		Set<UUID> d1d3d4 = new HashSet<>(d1);
+		d1d3d4.retainAll(d3);
+		d1d3d4.retainAll(d4);
+		d1.removeAll(d1d3d4);
+		d2.removeAll(d1d3d4);
+		d3.removeAll(d1d3d4);
+		d4.removeAll(d1d3d4);
+		d5.removeAll(d1d3d4);
+		counts.put("d1d3d4", d1d3d4.size());
+
+		Set<UUID> d1d3d5 = new HashSet<>(d1);
+		d1d3d5.retainAll(d3);
+		d1d3d5.retainAll(d5);
+		d1.removeAll(d1d3d5);
+		d2.removeAll(d1d3d5);
+		d3.removeAll(d1d3d5);
+		d4.removeAll(d1d3d5);
+		d5.removeAll(d1d3d5);
+		counts.put("d1d3d5", d1d3d5.size());
+
+		Set<UUID> d1d4d5 = new HashSet<>(d1);
+		d1d4d5.retainAll(d4);
+		d1d4d5.retainAll(d5);
+		d1.removeAll(d1d4d5);
+		d2.removeAll(d1d4d5);
+		d3.removeAll(d1d4d5);
+		d4.removeAll(d1d4d5);
+		d5.removeAll(d1d4d5);
+		counts.put("d1d4d5", d1d4d5.size());
+
+		Set<UUID> d2d3d4 = new HashSet<>(d2);
+		d2d3d4.retainAll(d3);
+		d2d3d4.retainAll(d4);
+		d1.removeAll(d2d3d4);
+		d2.removeAll(d2d3d4);
+		d3.removeAll(d2d3d4);
+		d4.removeAll(d2d3d4);
+		d5.removeAll(d2d3d4);
+		counts.put("d2d3d4", d2d3d4.size());
+
+		Set<UUID> d2d3d5 = new HashSet<>(d2);
+		d2d3d5.retainAll(d3);
+		d2d3d5.retainAll(d5);
+		d1.removeAll(d2d3d5);
+		d2.removeAll(d2d3d5);
+		d3.removeAll(d2d3d5);
+		d4.removeAll(d2d3d5);
+		d5.removeAll(d2d3d5);
+		counts.put("d2d3d5", d2d3d5.size());
+
+		Set<UUID> d2d4d5 = new HashSet<>(d2);
+		d2d4d5.retainAll(d4);
+		d2d4d5.retainAll(d5);
+		d1.removeAll(d2d4d5);
+		d2.removeAll(d2d4d5);
+		d3.removeAll(d2d4d5);
+		d4.removeAll(d2d4d5);
+		d5.removeAll(d2d4d5);
+		counts.put("d2d4d5", d2d4d5.size());
+
+		Set<UUID> d3d4d5 = new HashSet<>(d3);
+		d3d4d5.retainAll(d4);
+		d3d4d5.retainAll(d5);
+		d1.removeAll(d3d4d5);
+		d2.removeAll(d3d4d5);
+		d3.removeAll(d3d4d5);
+		d4.removeAll(d3d4d5);
+		d5.removeAll(d3d4d5);
+		counts.put("d3d4d5", d3d4d5.size());
+
+		// 10 combos of 2 shared
+		Set<UUID> d1d2 = new HashSet<>(d1);
+		d1d2.retainAll(d2);
+		d1.removeAll(d1d2);
+		d2.removeAll(d1d2);
+		counts.put("d1d2", d1d2.size());
+
+		Set<UUID> d1d3 = new HashSet<>(d1);
+		d1d3.retainAll(d3);
+		d1.removeAll(d1d3);
+		d3.removeAll(d1d3);
+		counts.put("d1d3", d1d3.size());
+
+		Set<UUID> d1d4 = new HashSet<>(d1);
+		d1d4.retainAll(d4);
+		d1.removeAll(d1d4);
+		d4.removeAll(d1d4);
+		counts.put("d1d4", d1d4.size());
+
+		Set<UUID> d1d5 = new HashSet<>(d1);
+		d1d5.retainAll(d5);
+		d1.removeAll(d1d5);
+		d5.removeAll(d1d5);
+		counts.put("d1d5", d1d5.size());
+
+		Set<UUID> d2d3 = new HashSet<>(d2);
+		d2d3.retainAll(d3);
+		d2.removeAll(d2d3);
+		d3.removeAll(d2d3);
+		counts.put("d2d3", d2d3.size());
+
+		Set<UUID> d2d4 = new HashSet<>(d2);
+		d2d4.retainAll(d4);
+		d2.removeAll(d2d4);
+		d4.removeAll(d2d4);
+		counts.put("d2d4", d2d4.size());
+
+		Set<UUID> d2d5 = new HashSet<>(d2);
+		d2d5.retainAll(d5);
+		d2.removeAll(d2d5);
+		d5.removeAll(d2d5);
+		counts.put("d2d5", d2d5.size());
+
+		Set<UUID> d3d4 = new HashSet<>(d3);
+		d3d4.retainAll(d4);
+		d3.removeAll(d3d4);
+		d4.removeAll(d3d4);
+		counts.put("d3d4", d3d4.size());
+
+		Set<UUID> d3d5 = new HashSet<>(d3);
+		d3d5.retainAll(d5);
+		d3.removeAll(d3d5);
+		d5.removeAll(d3d5);
+		counts.put("d3d5", d3d5.size());
+
+		Set<UUID> d4d5 = new HashSet<>(d4);
+		d4d5.retainAll(d5);
+		d4.removeAll(d4d5);
+		d5.removeAll(d4d5);
+		counts.put("d4d5", d4d5.size());
+
+		counts.put("d1", d1.size());
+		counts.put("d2", d2.size());
+		counts.put("d3", d3.size());
+		counts.put("d4", d4.size());
+		counts.put("d5", d5.size());
 	}
 
 	/**
@@ -343,6 +626,9 @@ public class VennCounter {
 		if (nDatasets == 4)
 			assignFourDatasets();
 
+		if (nDatasets == 5)
+			assignFiveDatasets();
+
 	}
 
 	/**
@@ -351,19 +637,19 @@ public class VennCounter {
 	private void assignTwoDatasets() {
 		String type = getType();
 
-		if ("0010".equals(type)) {
+		if ("00010".equals(type)) {
 			positions.put(VennDatasetPosition.A, D1);
 			positions.put(VennDatasetPosition.B, D2);
 		}
 
-		if ("0011".equals(type)) {
+		if ("00011".equals(type)) {
 			String a = counts.get(D1) == 0 ? D2 : D1;
 			String b = counts.get(D1) == 0 ? D1 : D2;
 			positions.put(VennDatasetPosition.A, a);
 			positions.put(VennDatasetPosition.B, b);
 		}
 
-		if ("0012".equals(type)) {
+		if ("00012".equals(type)) {
 			positions.put(VennDatasetPosition.A, D1);
 			positions.put(VennDatasetPosition.B, D2);
 		}
@@ -377,14 +663,14 @@ public class VennCounter {
 		String b = D2;
 		String c = D3;
 
-		if ("0023".equals(type)) { // triple flat
+		if ("00023".equals(type)) { // triple flat
 			b = findDatasetsWithCount(3).get(0);
 			List<String> sides = findDatasetsWithCount(2);
 			a = sides.get(0);
 			c = sides.get(1);
 		}
 
-		if ("0022".equals(type)) { // triple flat
+		if ("00022".equals(type)) { // triple flat
 			List<String> all = findDatasetsWithCount(2);
 			b = all.stream().filter(s -> counts.get(s) == 0).findFirst().orElse(D1);
 			all.remove(b);
@@ -392,13 +678,13 @@ public class VennCounter {
 			c = all.get(1);
 		}
 
-		if ("0021".equals(type)) { // two unshared within third
+		if ("00021".equals(type)) { // two unshared within third
 			b = findDatasetsWithCount(3).get(0);
 			a = findDatasetsWithCount(1).get(0);
 			c = findDatasetsWithCount(1).get(1);
 		}
 
-		if ("0020".equals(type)) { // two unshared within third, none only in third
+		if ("00020".equals(type)) { // two unshared within third, none only in third
 			b = findDatasetsWithCount(2).get(0);
 			a = findDatasetsWithCount(1).get(0);
 			c = findDatasetsWithCount(1).get(1);
@@ -417,33 +703,37 @@ public class VennCounter {
 		String c = D3;
 		String d = D4;
 
-		if ("0030".equals(type)) { // three unshared within fourth, none only in fourth
+		if ("00030".equals(type)) { // three unshared within fourth, none only in fourth
 			b = findDatasetsWithCount(3).get(0);
 			a = findDatasetsWithCount(1).get(0);
 			c = findDatasetsWithCount(1).get(1);
 			d = findDatasetsWithCount(1).get(2);
 		}
 
-		if ("0031".equals(type)) { // three unshared within fourth
+		if ("00031".equals(type)) { // three unshared within fourth
 			b = findDatasetsWithCount(3).get(0);
 			a = findDatasetsWithCount(2).get(0);
 			c = findDatasetsWithCount(2).get(1);
 			d = findDatasetsWithCount(2).get(2);
 		}
 
-		if ("0033".equals(type)) { // triple flat, with subset in middle
+		if ("00033".equals(type)) { // three separate, linked by one
+			b = findDatasetsWithCount(3).get(0);
+			a = findDatasetsWithCount(2).get(0);
+			c = findDatasetsWithCount(2).get(1);
+			d = findDatasetsWithCount(2).get(2);
 
 		}
 
-		if ("0131".equals(type)) { // all within fourth, one and two shared, third unshared
-
+		if ("00131".equals(type)) { // all within fourth, one and two shared, third unshared
+			// TODO
 		}
 
-		if ("1331".equals(type)) { // all within fourth, other three are triangle
-
+		if ("01331".equals(type)) { // all within fourth, other three are triangle
+			// TODO
 		}
 
-		if ("0231".equals(type)) { // all within fourth, other three are triple flat
+		if ("00231".equals(type)) { // all within fourth, other three are triple flat
 			a = findDatasetsWithCount(6).get(0);
 			b = findDatasetsWithCount(3).get(0);
 			c = findDatasetsWithCount(2).get(0);
@@ -454,6 +744,22 @@ public class VennCounter {
 		positions.put(VennDatasetPosition.B, b);
 		positions.put(VennDatasetPosition.C, c);
 		positions.put(VennDatasetPosition.D, d);
+	}
+
+	private void assignFiveDatasets() {
+		String type = getType();
+
+		String a = D1;
+		String b = D2;
+		String c = D3;
+		String d = D4;
+		String e = D5;
+
+		positions.put(VennDatasetPosition.A, a);
+		positions.put(VennDatasetPosition.B, b);
+		positions.put(VennDatasetPosition.C, c);
+		positions.put(VennDatasetPosition.D, d);
+		positions.put(VennDatasetPosition.E, e);
 	}
 
 	/**
@@ -518,7 +824,7 @@ public class VennCounter {
 	public String getType() {
 
 		StringBuilder r = new StringBuilder();
-		for (int i = FOUR_DATASETS; i > 0; i -= 2) {
+		for (int i = FIVE_DATASETS; i > 0; i -= 2) {
 			int j = i;
 			long l = counts.entrySet().stream()
 					.filter(e -> e.getKey().length() == j && e.getValue() > 0)

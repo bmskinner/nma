@@ -1,7 +1,9 @@
 package com.bmskinner.nma.visualisation.datasets;
 
 import java.awt.Color;
+import java.awt.Shape;
 import java.awt.Stroke;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Arc2D;
 import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
@@ -33,12 +35,14 @@ public class VennChartDataset extends DefaultXYDataset {
 	 * @param yCentre the y centre position
 	 * @param rx      the x radius
 	 * @param ry      the y radius
+	 * @param shape   the shape to draw
+	 * @param rot     the rotation angle in radians
 	 * @author ben
 	 *
 	 */
 	public record VennCircle(IAnalysisDataset dataset, double xCentre, double yCentre, double rx,
 			double ry,
-			VennShape shape) {
+			VennShape shape, double rot) {
 
 		public enum VennShape {
 			CIRCLE, HALF_CIRCLE_LEFT, HALF_CIRCLE_RIGHT, THIRD_CIRCLE_UPPER, THIRD_CIRCLE_LEFT,
@@ -47,7 +51,12 @@ public class VennChartDataset extends DefaultXYDataset {
 
 		public VennCircle(IAnalysisDataset dataset, double xCentre, double yCentre, double rx,
 				double ry) {
-			this(dataset, xCentre, yCentre, rx, ry, VennShape.CIRCLE);
+			this(dataset, xCentre, yCentre, rx, ry, VennShape.CIRCLE, 0);
+		}
+
+		public VennCircle(IAnalysisDataset dataset, double xCentre, double yCentre, double rx,
+				double ry, VennShape shape) {
+			this(dataset, xCentre, yCentre, rx, ry, shape, 0);
 		}
 
 		public VennCircle {
@@ -56,35 +65,35 @@ public class VennChartDataset extends DefaultXYDataset {
 		}
 
 		public double yBottom() {
-			return (yCentre - ry) * 1.1;
+			return toShape().getBounds2D().getMinY() * 1.1;
 		}
 
 		public double yTop() {
-			return (yCentre + ry) * 1.1;
+			return toShape().getBounds2D().getMaxY() * 1.1;
 		}
 
 		public double xDiameter() {
-			return rx + rx;
+			return xMax() - xMin();
 		}
 
 		public double yDiameter() {
-			return ry + ry;
+			return yMax() - yMin();
 		}
 
 		public double xMax() {
-			return xCentre + rx;
+			return toShape().getBounds2D().getMaxX();
 		}
 
 		public double xMin() {
-			return xCentre - rx;
+			return toShape().getBounds2D().getMinX();
 		}
 
 		public double yMin() {
-			return yCentre - ry;
+			return toShape().getBounds2D().getMinY();
 		}
 
 		public double yMax() {
-			return yCentre + ry;
+			return toShape().getBounds2D().getMaxY();
 		}
 
 		/**
@@ -101,9 +110,7 @@ public class VennChartDataset extends DefaultXYDataset {
 			return (yDiameter() * f) + yMin();
 		}
 
-		public XYShapeAnnotation toAnnotation(Color fill, Color outline,
-				Stroke stroke) {
-
+		private Shape toShape() {
 			Area s = new Area(new Ellipse2D.Double(xCentre - rx, yCentre - ry, rx + rx,
 					ry + ry));
 
@@ -132,7 +139,15 @@ public class VennChartDataset extends DefaultXYDataset {
 						120, Arc2D.PIE));
 			}
 
-			return new XYShapeAnnotation(s, stroke, outline, fill);
+			if (rot != 0)
+				s.transform(AffineTransform.getRotateInstance(rot));
+
+			return s;
+		}
+
+		public XYShapeAnnotation toAnnotation(Color fill, Color outline,
+				Stroke stroke) {
+			return new XYShapeAnnotation(toShape(), stroke, outline, fill);
 		}
 
 	}
@@ -192,7 +207,7 @@ public class VennChartDataset extends DefaultXYDataset {
 	 * @return true if we can draw the dataset, false otherwise
 	 */
 	public boolean isValid() {
-		return clusters.values().stream().allMatch(l -> l.size() <= 4);
+		return clusters.values().stream().allMatch(l -> l.size() <= 5);
 	}
 
 	public List<VennCircle> getCircles() {
@@ -228,7 +243,7 @@ public class VennChartDataset extends DefaultXYDataset {
 
 		if (vc.size() == 2) {
 			switch (vc.getType()) {
-			case "0011":
+			case "00011":
 				layoutType0011(vc, xStart);
 				break;
 			default:
@@ -238,16 +253,16 @@ public class VennChartDataset extends DefaultXYDataset {
 
 		if (vc.size() == 3) {
 			switch (vc.getType()) {
-			case "0020":
+			case "00020":
 				layoutType0020(vc, xStart);
 				break;
-			case "0021":
+			case "00021":
 				layoutType0021(vc, xStart);
 				break;
-			case "0022":
+			case "00022":
 				layoutType0023(vc, xStart);
 				break;
-			case "0023":
+			case "00023":
 				layoutType0023(vc, xStart);
 				break;
 			default:
@@ -259,14 +274,14 @@ public class VennChartDataset extends DefaultXYDataset {
 		if (vc.size() == 4) {
 
 			switch (vc.getType()) {
-			case "0030":
+			case "00030":
 				layoutType0030(vc, xStart);
 				break;
-			case "0033":
+			case "00033":
 				layoutType0033(vc, xStart);
 				break;
 
-			case "0231":
+			case "00231":
 				layoutType0231(vc, xStart);
 				break;
 			default:
@@ -274,6 +289,14 @@ public class VennChartDataset extends DefaultXYDataset {
 			}
 
 		}
+
+		if (vc.size() == 5) {
+			switch (vc.getType()) {
+			default:
+				layoutTypeFiveFull(vc, xStart);
+			}
+		}
+
 	}
 
 	/**
@@ -786,6 +809,185 @@ public class VennChartDataset extends DefaultXYDataset {
 		labels.add(new Label(cAB.x(), a.yTop(), vc.getDataset(VennDatasetPosition.B).getName()));
 		labels.add(new Label(c.xMin(), a.yTop(), vc.getDataset(VennDatasetPosition.C).getName()));
 		labels.add(new Label(d.xMax(), a.yTop(), vc.getDataset(VennDatasetPosition.D).getName()));
+	}
+
+	private void layoutTypeFiveFull(VennCounter vc, double xStart) {
+
+		VennCircle a = new VennCircle(vc.getDataset(VennDatasetPosition.A),
+				xStart - 0.1, Y_START, DEFAULT_RADIUS, DEFAULT_RADIUS * 0.66, VennShape.CIRCLE, -Math.PI / 2);
+
+		VennCircle b = new VennCircle(vc.getDataset(VennDatasetPosition.B),
+				xStart + 0.1, Y_START, DEFAULT_RADIUS, DEFAULT_RADIUS * 0.66, VennShape.CIRCLE, Math.PI / 7);
+		VennCircle c = new VennCircle(vc.getDataset(VennDatasetPosition.C),
+				xStart + 0.1, Y_START - 0.05, DEFAULT_RADIUS, DEFAULT_RADIUS * 0.66, VennShape.CIRCLE, -Math.PI / 3);
+
+		VennCircle d = new VennCircle(vc.getDataset(VennDatasetPosition.D),
+				xStart - 0.1, Y_START + 0.1, DEFAULT_RADIUS, DEFAULT_RADIUS * 0.66, VennShape.CIRCLE, Math.PI / 3);
+
+		VennCircle e = new VennCircle(vc.getDataset(VennDatasetPosition.E),
+				xStart - 0.22, Y_START + 0.12, DEFAULT_RADIUS, DEFAULT_RADIUS * 0.66, VennShape.CIRCLE, -Math.PI / 8);
+
+		circles.add(a);
+		circles.add(b);
+		circles.add(c);
+		circles.add(d);
+		circles.add(e);
+
+		Label cA = new Label((a.xMax() + a.xMin()) / 2,
+				a.yMax() * 0.85,
+				vc.getCount(VennIntersection.A));
+
+		Label cB = new Label(b.xFraction(0.9),
+				b.yFraction(0.75),
+				vc.getCount(VennIntersection.B));
+
+		Label cC = new Label(c.xFraction(0.85),
+				c.yFraction(0.15),
+				vc.getCount(VennIntersection.C));
+
+		Label cD = new Label(d.xFraction(0.2),
+				d.yFraction(0.1),
+				vc.getCount(VennIntersection.D));
+
+		Label cE = new Label(e.xFraction(0.15),
+				e.yFraction(0.75),
+				vc.getCount(VennIntersection.E));
+
+		Label cAB = new Label(a.xFraction(0.9),
+				b.yFraction(0.9),
+				vc.getCount(VennIntersection.AB));
+
+		Label cAC = new Label(a.xFraction(0.7),
+				a.yFraction(0.075),
+				vc.getCount(VennIntersection.AC));
+
+		Label cAD = new Label(a.xFraction(0.67),
+				d.yFraction(0.97),
+				vc.getCount(VennIntersection.AD));
+
+		Label cAE = new Label(a.xFraction(0.3),
+				a.yFraction(0.87),
+				vc.getCount(VennIntersection.AE));
+
+		Label cBC = new Label(c.xFraction(0.95),
+				c.yFraction(0.42),
+				vc.getCount(VennIntersection.BC));
+
+		Label cBD = new Label(b.xFraction(0.075),
+				b.yFraction(0.2),
+				vc.getCount(VennIntersection.BD));
+		
+		Label cBE = new Label(e.xFraction(0.98),
+				e.yFraction(0.33),
+				vc.getCount(VennIntersection.BE));
+
+		Label cCD = new Label(d.xFraction(0.45),
+				d.yFraction(0.1),
+				vc.getCount(VennIntersection.CD));
+
+		Label cCE = new Label(e.xFraction(0.29),
+				e.yFraction(0.68),
+				vc.getCount(VennIntersection.CE));
+
+		Label cDE = new Label(e.xFraction(0.19),
+				e.yFraction(0.33),
+				vc.getCount(VennIntersection.DE));
+
+		Label cABC = new Label(c.xFraction(0.8),
+				c.yFraction(0.35),
+				vc.getCount(VennIntersection.ABC));
+
+		Label cABD = new Label(a.xFraction(0.77),
+				d.yFraction(0.925),
+				vc.getCount(VennIntersection.ABD));
+
+		Label cABE = new Label(a.xFraction(0.97),
+				a.yFraction(0.53),
+				vc.getCount(VennIntersection.ABE));
+
+		Label cACD = new Label(a.xFraction(0.40),
+				d.yFraction(0.12),
+				vc.getCount(VennIntersection.ACD));
+
+		Label cACE = new Label(a.xFraction(0.10),
+				a.yFraction(0.75),
+				vc.getCount(VennIntersection.ACE));
+
+		Label cADE = new Label(a.xFraction(0.50),
+				d.yFraction(0.96),
+				vc.getCount(VennIntersection.ADE));
+
+		Label cBCD = new Label(b.xFraction(0.12),
+				b.yFraction(0.2),
+				vc.getCount(VennIntersection.BCD));
+
+		Label cBCE = new Label(e.xFraction(0.97),
+				e.yFraction(0.24),
+				vc.getCount(VennIntersection.BCE));
+
+		Label cBDE = new Label(d.xFraction(0.12),
+				d.yFraction(0.47),
+				vc.getCount(VennIntersection.BDE));
+
+		Label cCDE = new Label(e.xFraction(0.26),
+				e.yFraction(0.50),
+				vc.getCount(VennIntersection.CDE));
+
+		Label cABCD = new Label(b.xFraction(0.4),
+				b.yFraction(0.1),
+				vc.getCount(VennIntersection.ABCD));
+
+		Label cABCE = new Label(e.xFraction(0.92),
+				e.yFraction(0.24),
+				vc.getCount(VennIntersection.ABCE));
+
+		Label cABDE = new Label(a.xFraction(0.77),
+				d.yFraction(0.85),
+				vc.getCount(VennIntersection.ABDE));
+
+		Label cACDE = new Label(e.xFraction(0.43),
+				e.yFraction(0.72),
+				vc.getCount(VennIntersection.ACDE));
+
+		Label cBCDE = new Label(e.xFraction(0.25),
+				e.yFraction(0.33),
+				vc.getCount(VennIntersection.BCDE));
+
+		Label cABCDE = new Label(a.xFraction(0.5),
+				a.yFraction(0.45),
+				vc.getCount(VennIntersection.ABCDE));
+
+		labels.add(cA);
+		labels.add(cB);
+		labels.add(cC);
+		labels.add(cD);
+		labels.add(cE);
+		labels.add(cAB);
+		labels.add(cAC);
+		labels.add(cAD);
+		labels.add(cAE);
+		labels.add(cBC);
+		labels.add(cBD);
+		labels.add(cBE);
+		labels.add(cCD);
+		labels.add(cCE);
+		labels.add(cDE);
+		labels.add(cABC);
+		labels.add(cABD);
+		labels.add(cABE);
+		labels.add(cACD);
+		labels.add(cACE);
+		labels.add(cADE);
+		labels.add(cBCD);
+		labels.add(cBCE);
+		labels.add(cBDE);
+		labels.add(cCDE);
+		labels.add(cABCD);
+		labels.add(cABCE);
+		labels.add(cABDE);
+		labels.add(cACDE);
+		labels.add(cBCDE);
+		labels.add(cABCDE);
 	}
 
 	/**
