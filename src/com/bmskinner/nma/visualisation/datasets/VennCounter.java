@@ -733,6 +733,13 @@ public class VennCounter {
 			// TODO
 		}
 
+		if ("00042".equals(type)) { // A overlaps CD, B overlaps CD
+			a = findDatasetsWithCount(3).get(0);
+			b = findDatasetsWithCount(3).get(1);
+			c = findDatasetsWithCount(2).get(0);
+			d = findDatasetsWithCount(2).get(1);
+		}
+
 		if ("00231".equals(type)) { // all within fourth, other three are triple flat
 			a = findDatasetsWithCount(6).get(0);
 			b = findDatasetsWithCount(3).get(0);
@@ -754,6 +761,22 @@ public class VennCounter {
 		String c = D3;
 		String d = D4;
 		String e = D5;
+
+		if ("00420".equals(type)) {
+			a = findDatasetsWithCount(6).get(0);
+			b = findDatasetsWithCount(3).get(0);
+			c = findDatasetsWithCount(3).get(1);
+			d = findDatasetsWithCount(2).get(0);
+			e = findDatasetsWithCount(2).get(1);
+		}
+
+		if ("00060".equals(type)) { // A overlaps C, D, E. B overlaps C, D, E
+			a = findDatasetsWithCount(3).get(0);
+			b = findDatasetsWithCount(3).get(1);
+			c = findDatasetsWithCount(2).get(0);
+			d = findDatasetsWithCount(2).get(1);
+			e = findDatasetsWithCount(2).get(2);
+		}
 
 		positions.put(VennDatasetPosition.A, a);
 		positions.put(VennDatasetPosition.B, b);

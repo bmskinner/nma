@@ -281,6 +281,10 @@ public class VennChartDataset extends DefaultXYDataset {
 				layoutType0033(vc, xStart);
 				break;
 
+			case "00042":
+				layoutType00042(vc, xStart);
+				break;
+
 			case "00231":
 				layoutType0231(vc, xStart);
 				break;
@@ -292,6 +296,14 @@ public class VennChartDataset extends DefaultXYDataset {
 
 		if (vc.size() == 5) {
 			switch (vc.getType()) {
+
+			case "00060":
+				layoutType00060(vc, xStart);
+				break;
+			case "00420":
+				layoutType00420(vc, xStart);
+				break;
+
 			default:
 				layoutTypeFiveFull(vc, xStart);
 			}
@@ -811,21 +823,268 @@ public class VennChartDataset extends DefaultXYDataset {
 		labels.add(new Label(d.xMax(), a.yTop(), vc.getDataset(VennDatasetPosition.D).getName()));
 	}
 
+	/**
+	 * A and B do not overlap, C and D do not overlap
+	 * 
+	 * @param vc
+	 * @param xStart
+	 */
+	private void layoutType00042(VennCounter vc, double xStart) {
+
+		VennCircle a = new VennCircle(vc.getDataset(VennDatasetPosition.A),
+				xStart - 0.25, Y_START, DEFAULT_RADIUS / 3, DEFAULT_RADIUS / 3);
+
+		VennCircle b = new VennCircle(vc.getDataset(VennDatasetPosition.B),
+				xStart + 0.25, Y_START, DEFAULT_RADIUS / 3, DEFAULT_RADIUS / 3);
+
+		VennCircle c = new VennCircle(vc.getDataset(VennDatasetPosition.C),
+				xStart, Y_START + 0.25, DEFAULT_RADIUS / 3, DEFAULT_RADIUS / 3);
+
+		VennCircle d = new VennCircle(vc.getDataset(VennDatasetPosition.D),
+				xStart, Y_START - 0.25, DEFAULT_RADIUS / 3, DEFAULT_RADIUS / 3);
+
+		circles.add(a);
+		circles.add(b);
+		circles.add(c);
+		circles.add(d);
+
+		Label cA = new Label(a.xCentre(),
+				a.yCentre(),
+				vc.getCount(VennIntersection.A));
+
+		Label cB = new Label(b.xCentre(),
+				b.yCentre(),
+				vc.getCount(VennIntersection.B));
+
+		Label cC = new Label(c.xCentre(),
+				c.yCentre(),
+				vc.getCount(VennIntersection.C));
+
+		Label cD = new Label(d.xCentre(),
+				d.yCentre(),
+				vc.getCount(VennIntersection.D));
+
+		Label cAD = new Label((a.xMax() + d.xMin()) / 2,
+				(a.yMax() + d.yMin()) / 2,
+				vc.getCount(VennIntersection.AD));
+
+		Label cAC = new Label((c.xMin() + a.xMax()) / 2,
+				(c.yMax() + a.yMin()) / 2,
+				vc.getCount(VennIntersection.AC));
+
+		Label cBD = new Label((b.xMax() + d.xMin()) / 2,
+				(b.yMin() + d.yMax()) / 2,
+				vc.getCount(VennIntersection.BD));
+
+		Label cBC = new Label((c.xMin() + b.xMax()) / 2,
+				(c.yMin() + b.yMax()) / 2,
+				vc.getCount(VennIntersection.BC));
+
+		labels.add(cA);
+		labels.add(cB);
+		labels.add(cC);
+		labels.add(cD);
+
+		labels.add(cAD);
+		labels.add(cAC);
+		labels.add(cBD);
+		labels.add(cBC);
+	}
+
+	/**
+	 * Four contained within fifth, partial overlaps within
+	 * 
+	 * @param vc
+	 * @param xStart
+	 */
+	private void layoutType00060(VennCounter vc, double xStart) {
+		// A is large upper ellipse
+		VennCircle a = new VennCircle(vc.getDataset(VennDatasetPosition.A),
+				xStart, Y_START + 0.3, DEFAULT_RADIUS, DEFAULT_RADIUS / 3);
+
+		// A is large lower ellipse
+		VennCircle b = new VennCircle(vc.getDataset(VennDatasetPosition.B),
+				xStart, Y_START - 0.3, DEFAULT_RADIUS, DEFAULT_RADIUS / 3);
+
+		// C overlaps A & B, no other
+		VennCircle c = new VennCircle(vc.getDataset(VennDatasetPosition.C),
+				xStart - 0.5, Y_START, DEFAULT_RADIUS / 3, DEFAULT_RADIUS / 3);
+
+		// C overlaps A & B, no other
+		VennCircle d = new VennCircle(vc.getDataset(VennDatasetPosition.D),
+				xStart, Y_START, DEFAULT_RADIUS / 3, DEFAULT_RADIUS / 3);
+
+		// C overlaps A & B, no other
+		VennCircle e = new VennCircle(vc.getDataset(VennDatasetPosition.E),
+				xStart + 0.5, Y_START, DEFAULT_RADIUS / 3, DEFAULT_RADIUS / 3);
+
+		circles.add(a);
+		circles.add(b);
+		circles.add(c);
+		circles.add(d);
+		circles.add(e);
+
+		Label cA = new Label(a.xCentre(),
+				a.yFraction(0.8),
+				vc.getCount(VennIntersection.A));
+
+		Label cB = new Label(b.xCentre(),
+				b.yFraction(0.2),
+				vc.getCount(VennIntersection.B));
+
+		Label cC = new Label(c.xCentre(),
+				c.yCentre(),
+				vc.getCount(VennIntersection.C));
+
+		Label cD = new Label(d.xCentre(),
+				d.yCentre(),
+				vc.getCount(VennIntersection.D));
+		Label cE = new Label(e.xCentre(),
+				e.yCentre(),
+				vc.getCount(VennIntersection.E));
+
+		labels.add(cA);
+		labels.add(cB);
+		labels.add(cC);
+		labels.add(cD);
+		labels.add(cE);
+
+		Label cAC = new Label((c.xMax() + a.xMin()) / 2,
+				c.yFraction(0.9),
+				vc.getCount(VennIntersection.AC));
+
+		Label cBC = new Label((c.xMax() + b.xMin()) / 2,
+				c.yFraction(0.1),
+				vc.getCount(VennIntersection.BC));
+
+		Label cAD = new Label(d.xCentre(),
+				d.yFraction(0.8),
+				vc.getCount(VennIntersection.AD));
+
+		Label cBD = new Label(d.xCentre(),
+				d.yFraction(0.2),
+				vc.getCount(VennIntersection.BD));
+
+		Label cAE = new Label((a.xMax() + e.xMin()) / 2,
+				e.yFraction(0.9),
+				vc.getCount(VennIntersection.AE));
+
+		Label cBE = new Label((b.xMax() + e.xMin()) / 2,
+				e.yFraction(0.1),
+				vc.getCount(VennIntersection.BE));
+
+		labels.add(cAC);
+		labels.add(cBC);
+		labels.add(cAD);
+		labels.add(cBD);
+
+		labels.add(cAE);
+		labels.add(cBE);
+
+	}
+
+	/**
+	 * Four contained within fifth, partial overlaps within
+	 * 
+	 * @param vc
+	 * @param xStart
+	 */
+	private void layoutType00420(VennCounter vc, double xStart) {
+		// A is overall container
+		VennCircle a = new VennCircle(vc.getDataset(VennDatasetPosition.A),
+				xStart, Y_START, DEFAULT_RADIUS, DEFAULT_RADIUS);
+
+		// B overlaps D & E, not C
+		VennCircle b = new VennCircle(vc.getDataset(VennDatasetPosition.B),
+				xStart - 0.25, Y_START, DEFAULT_RADIUS / 3, DEFAULT_RADIUS / 3);
+
+		// C overlaps D & E, not B
+		VennCircle c = new VennCircle(vc.getDataset(VennDatasetPosition.C),
+				xStart + 0.25, Y_START, DEFAULT_RADIUS / 3, DEFAULT_RADIUS / 3);
+//
+//		// D overlaps B & C, not E
+		VennCircle d = new VennCircle(vc.getDataset(VennDatasetPosition.D),
+				xStart, Y_START + 0.25, DEFAULT_RADIUS / 3, DEFAULT_RADIUS / 3);
+//
+//		// E overlaps B & C, not D
+		VennCircle e = new VennCircle(vc.getDataset(VennDatasetPosition.E),
+				xStart, Y_START - 0.25, DEFAULT_RADIUS / 3, DEFAULT_RADIUS / 3);
+
+		circles.add(a);
+		circles.add(b);
+		circles.add(c);
+		circles.add(d);
+		circles.add(e);
+
+		Label cA = new Label(a.xCentre(),
+				a.yFraction(0.9),
+				vc.getCount(VennIntersection.A));
+
+		Label cB = new Label(b.xCentre(),
+				b.yCentre(),
+				vc.getCount(VennIntersection.AB));
+
+		Label cC = new Label(c.xCentre(),
+				c.yCentre(),
+				vc.getCount(VennIntersection.AC));
+
+		Label cD = new Label(d.xCentre(),
+				d.yCentre(),
+				vc.getCount(VennIntersection.AD));
+
+		Label cE = new Label(e.xCentre(),
+				e.yCentre(),
+				vc.getCount(VennIntersection.AE));
+
+		Label cABD = new Label((b.xMax() + d.xMin()) / 2,
+				(b.yMax() + d.yMin()) / 2,
+				vc.getCount(VennIntersection.ABD));
+
+		Label cACD = new Label((c.xMin() + d.xMax()) / 2,
+				(c.yMax() + d.yMin()) / 2,
+				vc.getCount(VennIntersection.ACD));
+
+		Label cABE = new Label((b.xMax() + e.xMin()) / 2,
+				(b.yMin() + e.yMax()) / 2,
+				vc.getCount(VennIntersection.ABE));
+
+		Label cACE = new Label((c.xMin() + e.xMax()) / 2,
+				(c.yMin() + e.yMax()) / 2,
+				vc.getCount(VennIntersection.ACE));
+
+		labels.add(cA);
+		labels.add(cB);
+		labels.add(cC);
+		labels.add(cD);
+		labels.add(cE);
+
+		labels.add(cABD);
+		labels.add(cACD);
+		labels.add(cABE);
+		labels.add(cACE);
+
+	}
+
 	private void layoutTypeFiveFull(VennCounter vc, double xStart) {
 
 		VennCircle a = new VennCircle(vc.getDataset(VennDatasetPosition.A),
-				xStart - 0.1, Y_START, DEFAULT_RADIUS, DEFAULT_RADIUS * 0.66, VennShape.CIRCLE, -Math.PI / 2);
+				xStart - 0.1, Y_START, DEFAULT_RADIUS, DEFAULT_RADIUS * 0.66, VennShape.CIRCLE,
+				-Math.PI / 2);
 
 		VennCircle b = new VennCircle(vc.getDataset(VennDatasetPosition.B),
-				xStart + 0.1, Y_START, DEFAULT_RADIUS, DEFAULT_RADIUS * 0.66, VennShape.CIRCLE, Math.PI / 7);
+				xStart + 0.1, Y_START, DEFAULT_RADIUS, DEFAULT_RADIUS * 0.66, VennShape.CIRCLE,
+				Math.PI / 7);
 		VennCircle c = new VennCircle(vc.getDataset(VennDatasetPosition.C),
-				xStart + 0.1, Y_START - 0.05, DEFAULT_RADIUS, DEFAULT_RADIUS * 0.66, VennShape.CIRCLE, -Math.PI / 3);
+				xStart + 0.1, Y_START - 0.05, DEFAULT_RADIUS, DEFAULT_RADIUS * 0.66,
+				VennShape.CIRCLE, -Math.PI / 3);
 
 		VennCircle d = new VennCircle(vc.getDataset(VennDatasetPosition.D),
-				xStart - 0.1, Y_START + 0.1, DEFAULT_RADIUS, DEFAULT_RADIUS * 0.66, VennShape.CIRCLE, Math.PI / 3);
+				xStart - 0.1, Y_START + 0.1, DEFAULT_RADIUS, DEFAULT_RADIUS * 0.66,
+				VennShape.CIRCLE, Math.PI / 3);
 
 		VennCircle e = new VennCircle(vc.getDataset(VennDatasetPosition.E),
-				xStart - 0.22, Y_START + 0.12, DEFAULT_RADIUS, DEFAULT_RADIUS * 0.66, VennShape.CIRCLE, -Math.PI / 8);
+				xStart - 0.22, Y_START + 0.12, DEFAULT_RADIUS, DEFAULT_RADIUS * 0.66,
+				VennShape.CIRCLE, -Math.PI / 8);
 
 		circles.add(a);
 		circles.add(b);
@@ -876,7 +1135,7 @@ public class VennChartDataset extends DefaultXYDataset {
 		Label cBD = new Label(b.xFraction(0.075),
 				b.yFraction(0.2),
 				vc.getCount(VennIntersection.BD));
-		
+
 		Label cBE = new Label(e.xFraction(0.98),
 				e.yFraction(0.33),
 				vc.getCount(VennIntersection.BE));
