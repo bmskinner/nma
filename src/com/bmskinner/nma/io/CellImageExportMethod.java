@@ -61,6 +61,18 @@ public class CellImageExportMethod extends MultipleDatasetAnalysisMethod impleme
 
 	/**
 	 * When exporting single cell images this option determines whether the output
+	 * images are masked for pixels within the nuclear border. If true, pixels
+	 * within the nucleus will be set to 255 (white). All other pixels in the image
+	 * will retain their original value. If false, all pixels within the nucleus
+	 * will be written with their original value. The default value for this option
+	 * is {@link CellImageExportMethod.MASK_FOREGROUND_DEFAULT}.
+	 * 
+	 */
+	public static final String MASK_FOREGROUND_KEY = "Mask foreground";
+	public static final boolean MASK_FOREGROUND_DEFAULT = false;
+
+	/**
+	 * When exporting single cell images this option determines whether the output
 	 * images should be of fixed dimensions. If true, all images have the same width
 	 * and height (specified by
 	 * {@link CellImageExportMethod.SINGLE_CELL_IMAGE_WIDTH_KEY}. If false, each
@@ -87,17 +99,18 @@ public class CellImageExportMethod extends MultipleDatasetAnalysisMethod impleme
 	 */
 	public static final String SINGLE_CELL_IMAGE_IS_RGB_KEY = "SINGLE_CELL_IMAGE_IS_RGB";
 	public static final boolean SINGLE_CELL_IMAGE_IS_RGB_DEFAULT = true;
-	
+
 	/**
-	 * If true, the keypoints for the nucleus are exported in JSON format suitable for training
-	 * an R-CNN. The landmarks and bounding box coordinates will be exported.
+	 * If true, the keypoints for the nucleus are exported in JSON format suitable
+	 * for training an R-CNN. The landmarks and bounding box coordinates will be
+	 * exported.
 	 */
 	public static final String SINGLE_CELL_IMAGE_IS_EXPORT_KEYPOINTS_KEY = "SINGLE_CELL_IMAGE_IS_EXPORT_KEYPOINTS";
 	public static final boolean SINGLE_CELL_IMAGE_IS_EXPORT_KEYPOINTS_DEFAULT = false;
-	
 
 	/**
 	 * Create with a dataset of cells to export and options
+	 * 
 	 * @param dataset
 	 * @param options
 	 */
@@ -108,6 +121,7 @@ public class CellImageExportMethod extends MultipleDatasetAnalysisMethod impleme
 
 	/**
 	 * Create with datasets of cells to export and options
+	 * 
 	 * @param datasets
 	 * @param options
 	 */
@@ -126,6 +140,7 @@ public class CellImageExportMethod extends MultipleDatasetAnalysisMethod impleme
 
 	/**
 	 * Export all images in the given dataset
+	 * 
 	 * @param d
 	 */
 	private void exportImages(IAnalysisDataset d) {
@@ -148,7 +163,8 @@ public class CellImageExportMethod extends MultipleDatasetAnalysisMethod impleme
 					LOGGER.log(Loggable.STACK,
 							"Unable to load image for nucleus " + n.getNameAndNumber(), e);
 				} catch (MissingLandmarkException e) {
-					LOGGER.log(Loggable.STACK, "Unable to save keypoints for nucleus " + n.getNameAndNumber(), e);
+					LOGGER.log(Loggable.STACK,
+							"Unable to save keypoints for nucleus " + n.getNameAndNumber(), e);
 				}
 			}
 		}
@@ -165,7 +181,8 @@ public class CellImageExportMethod extends MultipleDatasetAnalysisMethod impleme
 	 * @throws UnloadableImageException
 	 * @throws MissingLandmarkException
 	 */
-	private ImageProcessor cropToSquare(ICell c, Nucleus n) throws UnloadableImageException, MissingLandmarkException {
+	private ImageProcessor cropToSquare(ICell c, Nucleus n)
+			throws UnloadableImageException, MissingLandmarkException {
 
 		// Choose whether to use the RGB or greyscale image
 		ImageProcessor ip = options.getBoolean(SINGLE_CELL_IMAGE_IS_RGB_KEY)
@@ -178,7 +195,6 @@ public class CellImageExportMethod extends MultipleDatasetAnalysisMethod impleme
 		int y = 0;
 
 		int totalWidth = 0;
-		
 
 		// Should we normalise to a constant export size, or let each cell be a square
 		// of independent size?
@@ -240,6 +256,23 @@ public class CellImageExportMethod extends MultipleDatasetAnalysisMethod impleme
 			}
 		}
 
+		if (options.getBoolean(MASK_FOREGROUND_KEY)) {
+			// mask out everything not inside the nucleus ROI
+			// Only check the region we are cropping to
+			Roi roi = n.toOriginalRoi();
+			for (int xx = x; xx < x + totalWidth; xx++) {
+				if (xx >= ip.getWidth())
+					continue;
+				for (int yy = y; yy < y + totalWidth; yy++) {
+					if (yy >= ip.getHeight())
+						continue;
+					if (!roi.contains(xx, yy))
+						continue;
+					ip.set(xx, yy, 255);
+				}
+			}
+		}
+
 		ip.setRoi(x, y, totalWidth, totalWidth);
 		return ip.crop();
 	}
@@ -253,7 +286,8 @@ public class CellImageExportMethod extends MultipleDatasetAnalysisMethod impleme
 	 * @param offset the x and y offset to apply
 	 * @throws MissingLandmarkException
 	 */
-	private void makeKeypointJson(ICell c, Nucleus n, IPoint offset) throws MissingLandmarkException {
+	private void makeKeypointJson(ICell c, Nucleus n, IPoint offset)
+			throws MissingLandmarkException {
 		// TODO - expand beyond rodent sperm keypoints
 		IPoint rp = n.getBorderPoint(OrientationMark.REFERENCE).minus(offset);
 		IPoint op = n.getBorderPoint(OrientationMark.Y).minus(offset);
@@ -261,10 +295,11 @@ public class CellImageExportMethod extends MultipleDatasetAnalysisMethod impleme
 		IPoint p1 = n.getBase().minus(offset);
 		int x2 = (int) (p1.getXAsInt() + n.getWidth());
 		int y2 = (int) (p1.getYAsInt() + n.getHeight());
-		
+
 		String bbox = """
 				{"bboxes":[[%s, %s, %s, %s]], "keypoints":[[[%s, %s, 1], [%s, %s, 1]]]}
-				""".formatted(p1.getXAsInt(), p1.getYAsInt(), x2, y2, rp.getXAsInt(), rp.getYAsInt(), op.getXAsInt(),
+				""".formatted(p1.getXAsInt(), p1.getYAsInt(), x2, y2, rp.getXAsInt(),
+				rp.getYAsInt(), op.getXAsInt(),
 				op.getYAsInt());
 		String fileName = String.format("%s_%s.json", n.getNameAndNumber(), c.getId());
 

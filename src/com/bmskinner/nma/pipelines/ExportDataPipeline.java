@@ -152,6 +152,7 @@ public class ExportDataPipeline {
 
 		HashOptions exportOptions = new DefaultOptions();
 		exportOptions.setBoolean(CellImageExportMethod.MASK_BACKGROUND_KEY, false);
+		exportOptions.setBoolean(CellImageExportMethod.MASK_FOREGROUND_KEY, false);
 		exportOptions.setBoolean(CellImageExportMethod.SINGLE_CELL_IMAGE_IS_NORMALISE_WIDTH_KEY,
 				false);
 		exportOptions.setInt(CellImageExportMethod.SINGLE_CELL_IMAGE_WIDTH_KEY, 255);

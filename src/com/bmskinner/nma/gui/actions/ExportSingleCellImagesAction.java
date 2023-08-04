@@ -48,13 +48,22 @@ public class ExportSingleCellImagesAction extends MultiDatasetResultAction {
 	public void run() {
 		setProgressBarIndeterminate();
 
-		IAnalysisMethod m = new CellImageSetupDialog(datasets).getMethod();
+		SubAnalysisSetupDialog dialog = new CellImageSetupDialog(datasets);
 
-		int nNuclei = datasets.stream().mapToInt(d -> d.getCollection().getNucleusCount()).sum();
+		if (dialog.isReadyToRun()) {
+			IAnalysisMethod m = dialog.getMethod();
 
-		worker = new DefaultAnalysisWorker(m, nNuclei);
-		worker.addPropertyChangeListener(this);
-		ThreadManager.getInstance().submit(worker);
+			int nNuclei = datasets.stream().mapToInt(d -> d.getCollection().getNucleusCount())
+					.sum();
+
+			worker = new DefaultAnalysisWorker(m, nNuclei);
+			worker.addPropertyChangeListener(this);
+			ThreadManager.getInstance().submit(worker);
+		} else {
+			// User cancelled
+			this.cancel();
+		}
+
 	}
 
 	@SuppressWarnings("serial")
@@ -106,8 +115,17 @@ public class ExportSingleCellImagesAction extends MultiDatasetResultAction {
 					e -> o.setBoolean(CellImageExportMethod.MASK_BACKGROUND_KEY,
 							maskBox.isSelected()));
 
-			labels.add(new JLabel("Mask background"));
+			labels.add(new JLabel("Mask pixels outside nucleus as black"));
 			fields.add(maskBox);
+
+			JCheckBox foreMaskBox = new JCheckBox();
+			foreMaskBox.setSelected(o.getBoolean(CellImageExportMethod.MASK_FOREGROUND_KEY));
+			foreMaskBox.addActionListener(
+					e -> o.setBoolean(CellImageExportMethod.MASK_FOREGROUND_KEY,
+							foreMaskBox.isSelected()));
+
+			labels.add(new JLabel("Mask pixels inside nucleus as white"));
+			fields.add(foreMaskBox);
 
 			JCheckBox rgbBox = new JCheckBox();
 			rgbBox.setSelected(
@@ -115,7 +133,7 @@ public class ExportSingleCellImagesAction extends MultiDatasetResultAction {
 			rgbBox.addActionListener(
 					e -> o.setBoolean(CellImageExportMethod.SINGLE_CELL_IMAGE_IS_RGB_KEY,
 							rgbBox.isSelected()));
-			labels.add(new JLabel("Export all channels"));
+			labels.add(new JLabel("Export all colour channels"));
 			fields.add(rgbBox);
 
 			// Set normalised image size
@@ -149,22 +167,21 @@ public class ExportSingleCellImagesAction extends MultiDatasetResultAction {
 							(int) sizeSelector.getValue());
 				}
 			});
-			
-			
+
 			JCheckBox keypointBox = new JCheckBox();
 			keypointBox.setSelected(o.getBoolean(
 					CellImageExportMethod.SINGLE_CELL_IMAGE_IS_EXPORT_KEYPOINTS_KEY));
 			keypointBox.addActionListener(
-					e -> o.setBoolean(CellImageExportMethod.SINGLE_CELL_IMAGE_IS_EXPORT_KEYPOINTS_KEY,
+					e -> o.setBoolean(
+							CellImageExportMethod.SINGLE_CELL_IMAGE_IS_EXPORT_KEYPOINTS_KEY,
 							keypointBox.isSelected()));
-			
 
-			labels.add(new JLabel("Fixed size image"));
+			labels.add(new JLabel("Scale output image to a fixed (square) size"));
 			fields.add(sizeBox);
 
-			labels.add(new JLabel("Image size (pixels)"));
+			labels.add(new JLabel("Image width & height (pixels)"));
 			fields.add(sizeSelector);
-			
+
 			labels.add(new JLabel("Export keypoints"));
 			fields.add(keypointBox);
 
@@ -177,13 +194,15 @@ public class ExportSingleCellImagesAction extends MultiDatasetResultAction {
 		protected void setDefaults() {
 			o.setBoolean(CellImageExportMethod.MASK_BACKGROUND_KEY,
 					CellImageExportMethod.MASK_BACKGROUND_DEFAULT);
+			o.setBoolean(CellImageExportMethod.MASK_FOREGROUND_KEY,
+					CellImageExportMethod.MASK_FOREGROUND_DEFAULT);
 			o.setBoolean(CellImageExportMethod.SINGLE_CELL_IMAGE_IS_RGB_KEY,
 					CellImageExportMethod.SINGLE_CELL_IMAGE_IS_RGB_DEFAULT);
 			o.setBoolean(CellImageExportMethod.SINGLE_CELL_IMAGE_IS_NORMALISE_WIDTH_KEY,
 					CellImageExportMethod.SINGLE_CELL_IMAGE_IS_NORMALISE_WIDTH_DEFAULT);
 			o.setInt(CellImageExportMethod.SINGLE_CELL_IMAGE_WIDTH_KEY,
 					CellImageExportMethod.SINGLE_CELL_IMAGE_WIDTH_DEFAULT);
-			o.setBoolean(CellImageExportMethod.SINGLE_CELL_IMAGE_IS_EXPORT_KEYPOINTS_KEY, 
+			o.setBoolean(CellImageExportMethod.SINGLE_CELL_IMAGE_IS_EXPORT_KEYPOINTS_KEY,
 					CellImageExportMethod.SINGLE_CELL_IMAGE_IS_EXPORT_KEYPOINTS_DEFAULT);
 		}
 
