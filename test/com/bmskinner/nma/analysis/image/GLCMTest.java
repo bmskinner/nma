@@ -145,12 +145,13 @@ public class GLCMTest {
 
 	@Test
 	public void testRunningOnComponent() throws Exception {
-		GLCM glcm = new GLCM();
+		GLCM glcm = new GLCM(GLCM.defaultOptions());
 
 		IAnalysisDataset d = SampleDatasetReader.openTestMouseDataset();
 
 		for (ICell cell : d.getCollection()) {
-			ImageProcessor ip = ImageImporter.importCroppedImageTo24bitGreyscale(cell.getPrimaryNucleus())
+			ImageProcessor ip = ImageImporter
+					.importCroppedImageTo24bitGreyscale(cell.getPrimaryNucleus())
 					.convertToByte(false);
 			GLCMTile result1 = glcm.calculate(ip);
 			GLCMTile result = glcm.calculate(cell.getPrimaryNucleus());
@@ -170,7 +171,8 @@ public class GLCMTest {
 		IAnalysisDataset d = SampleDatasetReader.openTestMouseDataset();
 
 		for (ICell cell : d.getCollection()) {
-			ImageProcessor ip = ImageImporter.importCroppedImageTo24bitGreyscale(cell.getPrimaryNucleus())
+			ImageProcessor ip = ImageImporter
+					.importCroppedImageTo24bitGreyscale(cell.getPrimaryNucleus())
 					.convertToByte(false);
 			GLCMTile result1 = glcm.calculate(ip);
 			GLCMTile result = glcm.calculate(cell.getPrimaryNucleus());

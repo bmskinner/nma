@@ -94,7 +94,7 @@ public class DatasetStatsExporter extends StatsExporter {
 		isIncludeGlcm = list.stream()
 				.allMatch(d -> d.getCollection().getCells().stream().noneMatch(c -> c
 						.getPrimaryNucleus().getMeasurement(
-								GLCMParameter.SUM.toStat()) == Statistical.ERROR_CALCULATING_STAT));
+								GLCMParameter.SUM.toMeasurement()) == Statistical.ERROR_CALCULATING_STAT));
 
 		normProfileLength = chooseNormalisedProfileLength();
 
@@ -116,7 +116,7 @@ public class DatasetStatsExporter extends StatsExporter {
 		isIncludeGlcm = dataset.getCollection().getCells().stream()
 				.noneMatch(c -> c.getPrimaryNucleus()
 						.getMeasurement(
-								GLCMParameter.SUM.toStat()) == Statistical.ERROR_CALCULATING_STAT);
+								GLCMParameter.SUM.toMeasurement()) == Statistical.ERROR_CALCULATING_STAT);
 
 		normProfileLength = chooseNormalisedProfileLength();
 
