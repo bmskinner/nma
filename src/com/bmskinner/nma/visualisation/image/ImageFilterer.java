@@ -29,7 +29,6 @@ import javax.swing.ImageIcon;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nma.analysis.image.CannyEdgeDetector;
-import com.bmskinner.nma.analysis.image.ColourThresholder;
 import com.bmskinner.nma.analysis.image.KuwaharaFilter;
 import com.bmskinner.nma.components.ComponentOrienter;
 import com.bmskinner.nma.components.Imageable;
@@ -1146,26 +1145,6 @@ public class ImageFilterer {
 			if (result.get(i) < threshold)
 				result.set(i, threshold);
 		}
-		ip = result;
-		return this;
-	}
-
-	/**
-	 * Threshold based on HSV
-	 * 
-	 * @return this filterer
-	 */
-	public ImageFilterer colorThreshold(int minHue, int maxHue, int minSat, int maxSat,
-			int minBri,
-			int maxBri) {
-
-		ColourThresholder ct = new ColourThresholder();
-
-		ct.setHue(minHue, maxHue);
-		ct.setBri(minBri, maxBri);
-		ct.setSat(minSat, maxSat);
-
-		ImageProcessor result = ct.threshold(ip);
 		ip = result;
 		return this;
 	}
