@@ -5,10 +5,10 @@ import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -55,11 +55,10 @@ public class Console extends JPanel implements ActionListener {
 	private static final String GLCM_CMD = "glcm";
 	private static final String KEYPOINT_CMD = "keypoints";
 	private static final String LIST_CMD = "list";
-	private static final String KILL_CMD = "kill";
 	private static final String TASKS_CMD = "tasks";
 	private static final String HASH_CMD = "hash";
 
-	private final Map<String, Runnable> runnableCommands = new HashMap<>();
+	private final List<Command> runnableCommands = new ArrayList<>();
 
 	/**
 	 * Create with a log panel to display on
@@ -106,43 +105,80 @@ public class Console extends JPanel implements ActionListener {
 	}
 
 	/**
+	 * A command name, its help description and the runnable
+	 * 
+	 * @author bs19022
+	 *
+	 */
+	private record Command(String name, String desc, Runnable func) {
+	}
+
+	/**
 	 * Make the list of local commands to run
 	 */
 	private void makeCommandList() {
-		runnableCommands.put(HIST_CMD, () -> {
-			LOGGER.info("History: ");
-			for (String s : history)
-				LOGGER.info("\t" + s);
-		});
 
-		runnableCommands.put(HASH_CMD, () -> {
-			Set<IAnalysisDataset> datasets = DatasetListManager.getInstance().getAllDatasets();
+		runnableCommands.add(new Command(HELP_CMD,
+				"show this help message",
+				() -> {
+					logPanel.println("Available commands:");
+					for (Command s : runnableCommands)
+						logPanel.println(s.name + " - " + s.desc);
+				}));
 
-			for (IAnalysisDataset d : datasets)
-				LOGGER.info(d.getName() + ": " + d.hashCode());
+		runnableCommands.add(new Command(HIST_CMD,
+				"show the previous commands",
+				() -> {
+					LOGGER.info("History: ");
+					for (String s : history)
+						LOGGER.info("\t" + s);
+				}));
 
-		});
+		runnableCommands.add(new Command(HASH_CMD,
+				"display the hashes of all open datasets",
+				() -> {
+					Set<IAnalysisDataset> datasets = DatasetListManager.getInstance()
+							.getAllDatasets();
 
-		runnableCommands.put(CHECK_CMD, () -> validateDatasets(false));
-		runnableCommands.put(CHECK_DETAIL_CMD, () -> validateDatasets(true));
-		runnableCommands.put(CLEAR_CMD, logPanel::clear);
-		runnableCommands.put(LIST_CMD, this::listDatasets);
-		runnableCommands.put(TASKS_CMD, this::listTasks);
-		runnableCommands.put(GLCM_CMD,
+					for (IAnalysisDataset d : datasets)
+						LOGGER.info(d.getName() + ": " + d.hashCode());
+
+				}));
+
+		runnableCommands.add(new Command(CHECK_CMD,
+				"check all datasets are valid, quietly",
+				() -> validateDatasets(false)));
+
+		runnableCommands.add(new Command(CHECK_DETAIL_CMD,
+				"check all datasets are valid, verbosely",
+				() -> validateDatasets(true)));
+
+		runnableCommands.add(new Command(CLEAR_CMD,
+				"clear the console",
+				logPanel::clear));
+
+		runnableCommands.add(new Command(LIST_CMD,
+				"list all open datasets",
+				this::listDatasets));
+
+		runnableCommands.add(new Command(TASKS_CMD,
+				"list all queued tasks",
+				this::listTasks));
+
+		runnableCommands.add(new Command(GLCM_CMD,
+				"run GLCM on all selected datasets",
 				() -> UserActionController.getInstance()
 						.userActionEventReceived(new UserActionEvent(this,
 								UserActionEvent.RUN_GLCM_ANALYSIS,
-								DatasetListManager.getInstance().getSelectedDatasets())));
-		runnableCommands.put(KEYPOINT_CMD,
+								DatasetListManager.getInstance().getSelectedDatasets()))));
+
+		runnableCommands.add(new Command(KEYPOINT_CMD,
+				"export keypoints from all selected datasets",
 				() -> UserActionController.getInstance()
 						.userActionEventReceived(new UserActionEvent(this,
 								UserActionEvent.EXPORT_KEYPOINTS,
-								DatasetListManager.getInstance().getSelectedDatasets())));
+								DatasetListManager.getInstance().getSelectedDatasets()))));
 
-		runnableCommands.put(HELP_CMD, () -> {
-			for (String s : runnableCommands.keySet())
-				logPanel.println(s);
-		});
 	}
 
 	/**
@@ -151,11 +187,13 @@ public class Console extends JPanel implements ActionListener {
 	 * @param command
 	 */
 	private void runCommand(String command) {
-		if (runnableCommands.containsKey(command)) {
-			runnableCommands.get(command).run();
-		} else {
+		Optional<Command> f = runnableCommands.stream().filter(c -> c.name.equals(command))
+				.findFirst();
+
+		if (f.isPresent())
+			f.get().func.run();
+		else
 			LOGGER.info(() -> String.format("Command '%s' not recognised", command));
-		}
 	}
 
 	/*
