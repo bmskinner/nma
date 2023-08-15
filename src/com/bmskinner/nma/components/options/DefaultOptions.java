@@ -326,6 +326,24 @@ public class DefaultOptions implements HashOptions {
 	}
 
 	@Override
+	public <A> A get(String key) {
+		if (intMap.containsKey(key))
+			return (A) intMap.get(key);
+		if (dblMap.containsKey(key))
+			return (A) dblMap.get(key);
+		if (boolMap.containsKey(key))
+			return (A) boolMap.get(key);
+		if (fltMap.containsKey(key))
+			return (A) fltMap.get(key);
+		if (stringMap.containsKey(key))
+			return (A) stringMap.get(key);
+		if (subMap.containsKey(key))
+			return (A) subMap.get(key);
+		return (A) "N/A";
+
+	}
+
+	@Override
 	public void set(String key, Object value) {
 		if (value instanceof Integer i)
 			setInt(key, i);

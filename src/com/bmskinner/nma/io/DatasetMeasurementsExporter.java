@@ -92,7 +92,7 @@ public class DatasetMeasurementsExporter extends StatsExporter {
 	 * @param folder
 	 */
 	public DatasetMeasurementsExporter(@NonNull File file, @NonNull List<IAnalysisDataset> list,
-			HashOptions options) {
+			@NonNull HashOptions options) {
 		super(file, list, options);
 		segCount = list.get(0).getCollection().getProfileManager().getSegmentCount();
 		if (list.size() == 1) {
@@ -102,12 +102,12 @@ public class DatasetMeasurementsExporter extends StatsExporter {
 					.allMatch(d -> d.getCollection().getProfileManager()
 							.getSegmentCount() == segCount);
 		}
-		profileSamples = options.getInt(HashOptions.EXPORT_PROFILE_INTERPOLATION_LENGTH);
-		outlineSamples = options.getInt(HashOptions.EXPORT_OUTLINE_N_SAMPLES_KEY);
+		profileSamples = options.get(HashOptions.EXPORT_PROFILE_INTERPOLATION_LENGTH);
+		outlineSamples = options.get(HashOptions.EXPORT_OUTLINE_N_SAMPLES_KEY);
 
-		isIncludeMeasurements = options.getBoolean(HashOptions.EXPORT_MEASUREMENTS_KEY);
-		isIncludeOutlines = options.getBoolean(HashOptions.EXPORT_OUTLINES_KEY);
-		isIncludeProfiles = options.getBoolean(HashOptions.EXPORT_PROFILES_KEY);
+		isIncludeMeasurements = options.get(HashOptions.EXPORT_MEASUREMENTS_KEY);
+		isIncludeOutlines = options.get(HashOptions.EXPORT_OUTLINES_KEY);
+		isIncludeProfiles = options.get(HashOptions.EXPORT_PROFILES_KEY);
 
 		// Only include if present in all cells of all datasets
 		isIncludeGlcm = list.stream()
@@ -127,14 +127,14 @@ public class DatasetMeasurementsExporter extends StatsExporter {
 	 * @param folder
 	 */
 	public DatasetMeasurementsExporter(@NonNull File file, @NonNull IAnalysisDataset dataset,
-			HashOptions options) {
+			@NonNull HashOptions options) {
 		super(file, dataset, options);
 		segCount = dataset.getCollection().getProfileManager().getSegmentCount();
 		isIncludeSegments = true;
-		profileSamples = options.getInt(HashOptions.EXPORT_PROFILE_INTERPOLATION_LENGTH);
-		isIncludeMeasurements = options.getBoolean(HashOptions.EXPORT_MEASUREMENTS_KEY);
-		isIncludeOutlines = options.getBoolean(HashOptions.EXPORT_OUTLINES_KEY);
-		isIncludeProfiles = options.getBoolean(HashOptions.EXPORT_PROFILES_KEY);
+		profileSamples = options.get(HashOptions.EXPORT_PROFILE_INTERPOLATION_LENGTH);
+		isIncludeMeasurements = options.get(HashOptions.EXPORT_MEASUREMENTS_KEY);
+		isIncludeOutlines = options.get(HashOptions.EXPORT_OUTLINES_KEY);
+		isIncludeProfiles = options.get(HashOptions.EXPORT_PROFILES_KEY);
 
 		isIncludeGlcm = dataset.getCollection().getCells().stream()
 				.noneMatch(c -> c.getPrimaryNucleus()

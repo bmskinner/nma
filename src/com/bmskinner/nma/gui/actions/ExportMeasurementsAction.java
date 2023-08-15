@@ -158,7 +158,7 @@ public abstract class ExportMeasurementsAction extends MultiDatasetResultAction 
 
 				JCheckBox isExportMeasurementsBox = new JCheckBox("", true);
 				isExportMeasurementsBox.addChangeListener(e -> {
-					options.setBoolean(DefaultOptions.EXPORT_MEASUREMENTS_KEY,
+					options.set(DefaultOptions.EXPORT_MEASUREMENTS_KEY,
 							isExportMeasurementsBox.isSelected());
 				});
 
@@ -173,7 +173,7 @@ public abstract class ExportMeasurementsAction extends MultiDatasetResultAction 
 								HashOptions.EXPORT_PROFILE_INTERPOLATION_LENGTH));
 
 				JCheckBox isExportProfilesBox = new JCheckBox("", true);
-				JCheckBox isExportOutlinesBox = new JCheckBox("", true);
+				JCheckBox isExportOutlinesBox = new JCheckBox("", false);
 
 				isExportProfilesBox.addChangeListener(e -> {
 					options.setBoolean(DefaultOptions.EXPORT_PROFILES_KEY,
@@ -204,7 +204,7 @@ public abstract class ExportMeasurementsAction extends MultiDatasetResultAction 
 				});
 
 				isExportOutlinesBox.addChangeListener(e -> {
-					options.setBoolean(DefaultOptions.EXPORT_OUTLINES_KEY,
+					options.set(DefaultOptions.EXPORT_OUTLINES_KEY,
 							isExportOutlinesBox.isSelected());
 					outlineInterpolationSpinner.setEnabled(isExportOutlinesBox.isSelected());
 					omBox.setEnabled(isExportOutlinesBox.isSelected());
@@ -238,15 +238,15 @@ public abstract class ExportMeasurementsAction extends MultiDatasetResultAction 
 
 			@Override
 			protected void setDefaults() {
-				options.setBoolean(HashOptions.EXPORT_MEASUREMENTS_KEY, true);
-				options.setBoolean(HashOptions.EXPORT_PROFILES_KEY, true);
-				options.setBoolean(HashOptions.EXPORT_OUTLINES_KEY, false);
+				options.set(HashOptions.EXPORT_MEASUREMENTS_KEY, true);
+				options.set(HashOptions.EXPORT_PROFILES_KEY, true);
+				options.set(HashOptions.EXPORT_OUTLINES_KEY, false);
 
-				options.setInt(HashOptions.EXPORT_PROFILE_INTERPOLATION_LENGTH, 100);
-				options.setBoolean(HashOptions.EXPORT_OUTLINE_IS_NORMALISED_KEY, true);
-				options.setString(HashOptions.EXPORT_OUTLINE_STARTING_LANDMARK_KEY,
+				options.set(HashOptions.EXPORT_PROFILE_INTERPOLATION_LENGTH, 100);
+				options.set(HashOptions.EXPORT_OUTLINE_IS_NORMALISED_KEY, true);
+				options.set(HashOptions.EXPORT_OUTLINE_STARTING_LANDMARK_KEY,
 						OrientationMark.REFERENCE.name());
-				options.setInt(HashOptions.EXPORT_OUTLINE_N_SAMPLES_KEY, 100);
+				options.set(HashOptions.EXPORT_OUTLINE_N_SAMPLES_KEY, 100);
 			}
 
 		}
@@ -425,10 +425,10 @@ public abstract class ExportMeasurementsAction extends MultiDatasetResultAction 
 
 			@Override
 			protected void setDefaults() {
-				options.setBoolean(DefaultOptions.EXPORT_OUTLINE_IS_NORMALISED_KEY, false);
-				options.setString(DefaultOptions.EXPORT_OUTLINE_STARTING_LANDMARK_KEY,
+				options.set(DefaultOptions.EXPORT_OUTLINE_IS_NORMALISED_KEY, false);
+				options.set(DefaultOptions.EXPORT_OUTLINE_STARTING_LANDMARK_KEY,
 						OrientationMark.REFERENCE.name());
-				options.setInt(DefaultOptions.EXPORT_OUTLINE_N_SAMPLES_KEY, 100);
+				options.set(DefaultOptions.EXPORT_OUTLINE_N_SAMPLES_KEY, 100);
 			}
 
 		}

@@ -471,6 +471,16 @@ public interface HashOptions extends Serializable, XmlSerializable {
 	Object getValue(String key);
 
 	/**
+	 * Get the object stored with the given key and cast to the appropriate type.
+	 * This is a shortcut to {@link HashOptions::getValue}
+	 * 
+	 * @param <A> the return type
+	 * @param key the key to fetch
+	 * @return the object under they key, or "N/A" if not present
+	 */
+	<A> A get(String key);
+
+	/**
 	 * Set to the values in the given options. Shared keys will be updated, keys not
 	 * present will be added. Keys not shared will be unaffected.
 	 * 
