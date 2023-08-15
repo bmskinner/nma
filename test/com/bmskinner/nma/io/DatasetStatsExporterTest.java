@@ -51,11 +51,11 @@ public class DatasetStatsExporterTest {
 		// If this operation fails, the interpolation logic did not succeed
 
 		HashOptions op = new DefaultOptions();
-		op.setInt(Io.PROFILE_SAMPLES_KEY, 10);
+		op.setInt(HashOptions.EXPORT_PROFILE_INTERPOLATION_LENGTH, 10);
 
 		File outFile = new File("test");
 
-		DatasetStatsExporter dse = new DatasetStatsExporter(outFile, d, op);
+		DatasetMeasurementsExporter dse = new DatasetMeasurementsExporter(outFile, d, op);
 		StringBuilder outLine = new StringBuilder();
 		dse.append(d, outLine);
 	}

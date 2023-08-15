@@ -18,12 +18,12 @@ import com.bmskinner.nma.core.CommandOptions;
 import com.bmskinner.nma.io.CellFileExporter;
 import com.bmskinner.nma.io.CellImageExportMethod;
 import com.bmskinner.nma.io.DatasetImportMethod;
+import com.bmskinner.nma.io.DatasetMeasurementsExporter;
 import com.bmskinner.nma.io.DatasetOptionsExportMethod;
 import com.bmskinner.nma.io.DatasetOutlinesExporter;
 import com.bmskinner.nma.io.DatasetProfileExporter;
 import com.bmskinner.nma.io.DatasetShellsExporter;
 import com.bmskinner.nma.io.DatasetSignalsExporter;
-import com.bmskinner.nma.io.DatasetStatsExporter;
 import com.bmskinner.nma.io.Io;
 import com.bmskinner.nma.io.SVGWriter;
 import com.bmskinner.nma.io.XMLImportMethod;
@@ -109,9 +109,9 @@ public class ExportDataPipeline {
 		LOGGER.info("Exporting data to: " + statsFile.getAbsolutePath());
 
 		HashOptions exportOptions = new DefaultOptions();
-		exportOptions.setInt(Io.PROFILE_SAMPLES_KEY, 100);
+		exportOptions.setInt(HashOptions.EXPORT_PROFILE_INTERPOLATION_LENGTH, 100);
 
-		new DatasetStatsExporter(statsFile, datasets, exportOptions)
+		new DatasetMeasurementsExporter(statsFile, datasets, exportOptions)
 				.call();
 	}
 

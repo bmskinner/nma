@@ -206,6 +206,18 @@ public interface HashOptions extends Serializable, XmlSerializable {
 
 	// Export options
 
+	/** Should measurements be exported */
+	String EXPORT_MEASUREMENTS_KEY = "EXPORT_MEASUREMENTS";
+
+	/** Should profiles be exported */
+	String EXPORT_PROFILES_KEY = "EXPORT_PROFILES";
+
+	/** Interpolation length for profiles */
+	String EXPORT_PROFILE_INTERPOLATION_LENGTH = "EXPORT_PROFILE_INTERPOLATION_LENGTH";
+
+	/** Should nuclear outlines be exported */
+	String EXPORT_OUTLINES_KEY = "EXPORT_OUTLINES";
+
 	/**
 	 * Should the exported outline be normalised to a consistent number of points or
 	 * export all points?
