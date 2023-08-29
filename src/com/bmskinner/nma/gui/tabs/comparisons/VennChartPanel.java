@@ -6,15 +6,17 @@ import java.util.logging.Logger;
 import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
+import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.core.GlobalOptions;
 import com.bmskinner.nma.gui.components.panels.ExportableChartPanel;
+import com.bmskinner.nma.gui.events.SwatchUpdatedListener;
 import com.bmskinner.nma.gui.tabs.ChartDetailPanel;
 import com.bmskinner.nma.visualisation.charts.AbstractChartFactory;
-import com.bmskinner.nma.visualisation.charts.VennChartFactory;
 import com.bmskinner.nma.visualisation.options.ChartOptions;
 import com.bmskinner.nma.visualisation.options.ChartOptionsBuilder;
+import com.bmskinner.nma.visualisation.venn.VennChartFactory;
 
-public class VennChartPanel extends ChartDetailPanel {
+public class VennChartPanel extends ChartDetailPanel implements SwatchUpdatedListener {
 
 	private static final Logger LOGGER = Logger.getLogger(VennChartPanel.class.getName());
 	private static final String PANEL_TITLE_LBL = "Venn chart";
@@ -29,6 +31,8 @@ public class VennChartPanel extends ChartDetailPanel {
 		chartPanel.setFixedAspectRatio(true);
 		chartPanel.setPannable(true);
 		this.add(chartPanel, BorderLayout.CENTER);
+
+		uiController.addSwatchUpdatedListener(this);
 	}
 
 	@Override
@@ -71,6 +75,16 @@ public class VennChartPanel extends ChartDetailPanel {
 	@Override
 	protected synchronized JFreeChart createPanelChartType(@NonNull ChartOptions options) {
 		return new VennChartFactory(options).makeVennChart();
+	}
+
+	@Override
+	public void globalPaletteUpdated() {
+		update(getDatasets());
+	}
+
+	@Override
+	public void colourUpdated(IAnalysisDataset dataset) {
+		refreshCache(dataset);
 	}
 
 }

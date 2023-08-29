@@ -1,4 +1,4 @@
-package com.bmskinner.nma.visualisation.charts;
+package com.bmskinner.nma.visualisation.venn;
 
 import java.awt.Color;
 import java.util.List;
@@ -16,10 +16,9 @@ import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.gui.components.ColourSelecter;
 import com.bmskinner.nma.logging.Loggable;
 import com.bmskinner.nma.visualisation.ChartComponents;
-import com.bmskinner.nma.visualisation.datasets.VennChartDataset;
-import com.bmskinner.nma.visualisation.datasets.VennChartDataset.Label;
-import com.bmskinner.nma.visualisation.datasets.VennChartDataset.VennCircle;
+import com.bmskinner.nma.visualisation.charts.AbstractChartFactory;
 import com.bmskinner.nma.visualisation.options.ChartOptions;
+import com.bmskinner.nma.visualisation.venn.VennChartDataset.Label;
 
 public class VennChartFactory extends AbstractChartFactory {
 
@@ -59,12 +58,13 @@ public class VennChartFactory extends AbstractChartFactory {
 			// Draw circles
 			List<IAnalysisDataset> allDatasets = options.getDatasets();
 
-			for (VennCircle c : d.getCircles()) {
+			for (VennShape c : d.getCircles()) {
 				int colourIndex = allDatasets.indexOf(c.dataset());
 				Color datasetColour = c.dataset().getDatasetColour()
 						.orElse(ColourSelecter.getColor(colourIndex));
 
-				plot.addAnnotation(c.toAnnotation(ColourSelecter.makeTransparent(datasetColour, 30), datasetColour,
+				plot.addAnnotation(c.toAnnotation(ColourSelecter.makeTransparent(datasetColour, 30),
+						datasetColour,
 						ChartComponents.MARKER_STROKE));
 			}
 

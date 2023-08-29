@@ -203,10 +203,10 @@ public class MagnifiableImagePanel extends JPanel {
 			if ((e.getModifiersEx() & InputEvent.CTRL_DOWN_MASK) ==
 					InputEvent.CTRL_DOWN_MASK){
 				int temp = smallRadius +( SMALL_MULTIPLIER*e.getWheelRotation());
-				smallRadius = NumberTools.constrain(temp, SMALL_MIN_RADIUS, SMALL_MAX_RADIUS);
+				smallRadius = NumberTools.clamp(temp, SMALL_MIN_RADIUS, SMALL_MAX_RADIUS);
 			} else {
 				int temp = bigRadius +( LARGE_MULTIPLIER * e.getWheelRotation());
-				bigRadius = NumberTools.constrain(temp, LARGE_MIN_RADIUS, LARGE_MAX_RADIUS);
+				bigRadius = NumberTools.clamp(temp, LARGE_MIN_RADIUS, LARGE_MAX_RADIUS);
 			}
 			IPoint p = translatePanelLocationToRenderedImage(e); 
 			updateImage(p.getXAsInt(), p.getYAsInt());

@@ -1,4 +1,4 @@
-package com.bmskinner.nma.visualisation.datasets;
+package com.bmskinner.nma.visualisation.venn;
 
 import java.util.Arrays;
 import java.util.EnumMap;
@@ -662,6 +662,12 @@ public class VennCounter {
 		String a = D1;
 		String b = D2;
 		String c = D3;
+
+		if ("00111".equals(type)) { // turducken
+			a = findDatasetsWithCount(3).get(0);
+			b = findDatasetsWithCount(2).get(0);
+			c = findDatasetsWithCount(1).get(0);
+		}
 
 		if ("00023".equals(type)) { // triple flat
 			b = findDatasetsWithCount(3).get(0);

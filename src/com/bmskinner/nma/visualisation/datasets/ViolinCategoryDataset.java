@@ -80,7 +80,7 @@ public class ViolinCategoryDataset extends ExportableBoxAndWhiskerCategoryDatase
 	 */
 	public boolean hasProbabilities(@NonNull Comparable<?> r, @NonNull Comparable<?> c) {
 		double[] values = (double[]) pdfData.getObject(r, c);
-		return values != null && values.length > 0;
+		return values != null && values.length > 1;
 	}
 
 	/**
@@ -95,7 +95,7 @@ public class ViolinCategoryDataset extends ExportableBoxAndWhiskerCategoryDatase
 			return false;
 
 		double[] values = (double[]) pdfData.getObject(r, c);
-		return values != null && values.length > 0;
+		return values != null && values.length > 1;
 	}
 
 	/**
@@ -114,7 +114,7 @@ public class ViolinCategoryDataset extends ExportableBoxAndWhiskerCategoryDatase
 					total += values.length;
 			}
 		}
-		return total > 0;
+		return total > 1;
 	}
 
 	/**
@@ -141,10 +141,13 @@ public class ViolinCategoryDataset extends ExportableBoxAndWhiskerCategoryDatase
 
 		for (Object c : ranges.getColumnKeys()) {
 
-			for (Object r : ranges.getRowKeys()) {
+			Comparable<?> cc = (Comparable<?>) c;
 
-				Range range = (Range) ranges.getObject((Comparable<?>) r, (Comparable<?>) c);
-				if (range != null) {
+			for (Object r : ranges.getRowKeys()) {
+				Comparable<?> rr = (Comparable<?>) r;
+
+				Range range = (Range) ranges.getObject(rr, cc);
+				if (range != null && hasProbabilities(rr, cc)) {
 					if (range.getLowerBound() < min) {
 						min = range.getLowerBound();
 					}
@@ -313,14 +316,22 @@ public class ViolinCategoryDataset extends ExportableBoxAndWhiskerCategoryDatase
 		if (colKey == null)
 			throw new IllegalArgumentException("Null 'columnKey' argument.");
 
-		double[] pdfValues = new double[STEP_COUNT + 1];
-
 		if (list.isEmpty()) {
 			Range r = new Range(0, 0);
 			addProbabilityRange(r, rowKey, colKey);
-			addProbabilities(pdfValues, rowKey, colKey);
+			addProbabilities(new double[] {}, rowKey, colKey);
 			return;
 		}
+
+		if (list.size() == 1) {
+			Range r = new Range(0, 0);
+			addProbabilityRange(r, rowKey, colKey);
+			addProbabilities(new double[] {}, rowKey, colKey); // empty array makes hasProbabilities
+																// // false
+			return;
+		}
+
+		double[] pdfValues = new double[STEP_COUNT + 1];
 
 		double total = list.stream().mapToDouble(Number::doubleValue).sum();
 		double min = list.stream().mapToDouble(Number::doubleValue).min().orElse(0);

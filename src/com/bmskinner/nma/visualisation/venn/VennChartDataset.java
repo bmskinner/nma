@@ -1,13 +1,5 @@
-package com.bmskinner.nma.visualisation.datasets;
+package com.bmskinner.nma.visualisation.venn;
 
-import java.awt.Color;
-import java.awt.Shape;
-import java.awt.Stroke;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Arc2D;
-import java.awt.geom.Area;
-import java.awt.geom.Ellipse2D;
-import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -16,141 +8,18 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.logging.Logger;
 
-import org.jfree.chart.annotations.XYShapeAnnotation;
 import org.jfree.data.xy.DefaultXYDataset;
 
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
-import com.bmskinner.nma.visualisation.datasets.VennChartDataset.VennCircle.VennShape;
-import com.bmskinner.nma.visualisation.datasets.VennCounter.VennDatasetPosition;
-import com.bmskinner.nma.visualisation.datasets.VennCounter.VennIntersection;
+import com.bmskinner.nma.utility.NumberTools;
+import com.bmskinner.nma.visualisation.venn.VennCounter.VennDatasetPosition;
+import com.bmskinner.nma.visualisation.venn.VennCounter.VennIntersection;
+import com.bmskinner.nma.visualisation.venn.VennShape.VennShapeType;
 
 @SuppressWarnings("serial")
 public class VennChartDataset extends DefaultXYDataset {
 
 	private static final Logger LOGGER = Logger.getLogger(VennChartDataset.class.getName());
-
-	/**
-	 * @param dataset the dataset being displayed
-	 * @param xCentre the x centre position
-	 * @param yCentre the y centre position
-	 * @param rx      the x radius
-	 * @param ry      the y radius
-	 * @param shape   the shape to draw
-	 * @param rot     the rotation angle in radians
-	 * @author ben
-	 *
-	 */
-	public record VennCircle(IAnalysisDataset dataset, double xCentre, double yCentre, double rx,
-			double ry,
-			VennShape shape, double rot) {
-
-		public enum VennShape {
-			CIRCLE, HALF_CIRCLE_LEFT, HALF_CIRCLE_RIGHT, THIRD_CIRCLE_UPPER, THIRD_CIRCLE_LEFT,
-			THIRD_CIRCLE_RIGHT;
-		}
-
-		public VennCircle(IAnalysisDataset dataset, double xCentre, double yCentre, double rx,
-				double ry) {
-			this(dataset, xCentre, yCentre, rx, ry, VennShape.CIRCLE, 0);
-		}
-
-		public VennCircle(IAnalysisDataset dataset, double xCentre, double yCentre, double rx,
-				double ry, VennShape shape) {
-			this(dataset, xCentre, yCentre, rx, ry, shape, 0);
-		}
-
-		public VennCircle {
-			if (dataset == null)
-				throw new IllegalArgumentException("Dataset is null creating circle");
-		}
-
-		public double yBottom() {
-			return toShape().getBounds2D().getMinY() * 1.1;
-		}
-
-		public double yTop() {
-			return toShape().getBounds2D().getMaxY() * 1.1;
-		}
-
-		public double xDiameter() {
-			return xMax() - xMin();
-		}
-
-		public double yDiameter() {
-			return yMax() - yMin();
-		}
-
-		public double xMax() {
-			return toShape().getBounds2D().getMaxX();
-		}
-
-		public double xMin() {
-			return toShape().getBounds2D().getMinX();
-		}
-
-		public double yMin() {
-			return toShape().getBounds2D().getMinY();
-		}
-
-		public double yMax() {
-			return toShape().getBounds2D().getMaxY();
-		}
-
-		/**
-		 * Get the x coordinate at given fraction of the diameter
-		 * 
-		 * @param f
-		 * @return
-		 */
-		public double xFraction(double f) {
-			return (xDiameter() * f) + xMin();
-		}
-
-		public double yFraction(double f) {
-			return (yDiameter() * f) + yMin();
-		}
-
-		private Shape toShape() {
-			Area s = new Area(new Ellipse2D.Double(xCentre - rx, yCentre - ry, rx + rx,
-					ry + ry));
-
-			if (VennShape.HALF_CIRCLE_LEFT.equals(shape)) {
-				Area ra = new Area(new Rectangle2D.Double(xCentre, yCentre - ry, rx, ry + ry));
-				s.subtract(ra);
-			}
-
-			if (VennShape.HALF_CIRCLE_RIGHT.equals(shape)) {
-				Area ra = new Area(new Rectangle2D.Double(xCentre - rx, yCentre - ry, rx, ry + ry));
-				s.subtract(ra);
-			}
-
-			if (VennShape.THIRD_CIRCLE_UPPER.equals(shape)) {
-				s = new Area(new Arc2D.Double(xCentre - rx, yCentre - rx, rx + rx, ry + ry, -150,
-						120, Arc2D.PIE));
-			}
-
-			if (VennShape.THIRD_CIRCLE_LEFT.equals(shape)) {
-				s = new Area(new Arc2D.Double(xCentre - rx, yCentre - rx, rx + rx, ry + ry, -270,
-						120, Arc2D.PIE));
-			}
-
-			if (VennShape.THIRD_CIRCLE_RIGHT.equals(shape)) {
-				s = new Area(new Arc2D.Double(xCentre - rx, yCentre - rx, rx + rx, ry + ry, -30,
-						120, Arc2D.PIE));
-			}
-
-			if (rot != 0)
-				s.transform(AffineTransform.getRotateInstance(rot));
-
-			return s;
-		}
-
-		public XYShapeAnnotation toAnnotation(Color fill, Color outline,
-				Stroke stroke) {
-			return new XYShapeAnnotation(toShape(), stroke, outline, fill);
-		}
-
-	}
 
 	private static final int X_OFFSET = 4;
 
@@ -164,7 +33,7 @@ public class VennChartDataset extends DefaultXYDataset {
 	private Map<Comparable<?>, List<IAnalysisDataset>> clusters = new HashMap<>();
 
 	/** Store the radii of Venn circles */
-	private List<VennCircle> circles = new ArrayList<>();
+	private List<VennShape> circles = new ArrayList<>();
 
 	/** The locations of annotations with the shared counts */
 	private List<Label> labels = new ArrayList<>();
@@ -210,7 +79,7 @@ public class VennChartDataset extends DefaultXYDataset {
 		return clusters.values().stream().allMatch(l -> l.size() <= 5);
 	}
 
-	public List<VennCircle> getCircles() {
+	public List<VennShape> getCircles() {
 		return circles;
 	}
 
@@ -253,6 +122,9 @@ public class VennChartDataset extends DefaultXYDataset {
 
 		if (vc.size() == 3) {
 			switch (vc.getType()) {
+			case "00111":
+				layoutType00111(vc, xStart);
+				break;
 			case "00020":
 				layoutType0020(vc, xStart);
 				break;
@@ -319,7 +191,7 @@ public class VennChartDataset extends DefaultXYDataset {
 	 */
 	private void layoutType0001(VennCounter vc, double xStart) {
 
-		VennCircle circ = new VennCircle(vc.getDataset(VennDatasetPosition.A),
+		VennShape circ = new VennShape(vc.getDataset(VennDatasetPosition.A),
 				xStart, Y_START, DEFAULT_RADIUS, DEFAULT_RADIUS);
 		circles.add(circ);
 
@@ -339,16 +211,16 @@ public class VennChartDataset extends DefaultXYDataset {
 	 * @param xStart
 	 */
 	private void layoutType0011(VennCounter vc, double xStart) {
-		VennCircle a = new VennCircle(vc.getDataset(VennDatasetPosition.A),
+		VennShape a = new VennShape(vc.getDataset(VennDatasetPosition.A),
 				xStart, Y_START, DEFAULT_RADIUS, DEFAULT_RADIUS);
 
-		double fOverlapOfA = Math.max(
+		double fBOverlapOfA = NumberTools.clamp(
 				vc.getCount(VennIntersection.AB) / (double) (vc.getCount(VennIntersection.A)
-						+ vc.getCount(VennIntersection.B) + vc.getCount(VennIntersection.AB)) * 0.9,
-				0.1);
+						+ vc.getCount(VennIntersection.B) + vc.getCount(VennIntersection.AB)),
+				0.1, 0.9);
 
-		VennCircle b = new VennCircle(vc.getDataset(VennDatasetPosition.B),
-				xStart, Y_START, fOverlapOfA * DEFAULT_RADIUS, fOverlapOfA * DEFAULT_RADIUS);
+		VennShape b = new VennShape(vc.getDataset(VennDatasetPosition.B),
+				xStart, Y_START, a.xRadius() * fBOverlapOfA, a.yRadius() * fBOverlapOfA);
 
 		circles.add(a);
 		circles.add(b);
@@ -373,17 +245,17 @@ public class VennChartDataset extends DefaultXYDataset {
 	 */
 	private void layoutType0012(VennCounter vc, double xStart) {
 
-		VennCircle a = new VennCircle(vc.getDataset(VennDatasetPosition.A),
+		VennShape a = new VennShape(vc.getDataset(VennDatasetPosition.A),
 				xStart, Y_START, DEFAULT_RADIUS, DEFAULT_RADIUS);
 
-		double fOverlapOfA = vc.getCount(VennIntersection.AB)
-				/ (double) (vc.getCount(VennIntersection.A)
-						+ vc.getCount(VennIntersection.B) + vc.getCount(VennIntersection.AB))
-				* 0.9;
+		double fBOverlapOfA = NumberTools.clamp(
+				vc.getCount(VennIntersection.AB) / (double) (vc.getCount(VennIntersection.A)
+						+ vc.getCount(VennIntersection.B) + vc.getCount(VennIntersection.AB)),
+				0.1, 0.9);
 
 		// Scale x overlap position by the fraction of overlapping cells
-		double bxCentre = a.xCentre() + (a.xDiameter() * (1 - fOverlapOfA));
-		VennCircle b = new VennCircle(vc.getDataset(VennDatasetPosition.B),
+		double bxCentre = a.xCentre() + (a.xDiameter() * (1 - fBOverlapOfA));
+		VennShape b = new VennShape(vc.getDataset(VennDatasetPosition.B),
 				bxCentre, Y_START, DEFAULT_RADIUS, DEFAULT_RADIUS);
 
 		circles.add(a);
@@ -411,6 +283,52 @@ public class VennChartDataset extends DefaultXYDataset {
 	}
 
 	/**
+	 * Three circles,turducken style
+	 * 
+	 * @param vc
+	 * @param xStart
+	 */
+	private void layoutType00111(VennCounter vc, double xStart) {
+
+		VennShape a = new VennShape(vc.getDataset(VennDatasetPosition.A),
+				xStart, Y_START, DEFAULT_RADIUS, DEFAULT_RADIUS);
+
+		double aAlone = vc.getCount(VennIntersection.A);
+		double ab = vc.getCount(VennIntersection.AB);
+		double abc = vc.getCount(VennIntersection.ABC);
+		double aAndB = ab + abc;
+
+		double fBOverlapOfA = NumberTools.clamp((aAndB / (aAlone + aAndB)), 0.1, 0.9);
+		double fCOverlapOfAB = NumberTools.clamp((abc / aAndB), 0.1, 0.9);
+
+		VennShape b = new VennShape(vc.getDataset(VennDatasetPosition.B),
+				xStart, Y_START, fBOverlapOfA * a.xRadius(), fBOverlapOfA * a.yRadius());
+
+		VennShape c = new VennShape(vc.getDataset(VennDatasetPosition.C),
+				xStart, Y_START, b.yRadius() * fCOverlapOfAB,
+				b.yRadius() * fCOverlapOfAB);
+
+		circles.add(a);
+		circles.add(b);
+		circles.add(c);
+
+		Label cA = new Label((b.xMin() + a.xMin()) / 2, a.yCentre(),
+				vc.getCount(VennIntersection.A));
+		Label cAB = new Label((b.xMax() + c.xMax()) / 2, b.yCentre(),
+				vc.getCount(VennIntersection.AB));
+
+		Label cABC = new Label(c.xCentre(), c.yCentre(), vc.getCount(VennIntersection.ABC));
+
+		labels.add(cA);
+		labels.add(cAB);
+		labels.add(cABC);
+
+		labels.add(new Label(cA.x(), a.yBottom(), vc.getDataset(VennDatasetPosition.A).getName()));
+		labels.add(new Label(cAB.x(), a.yBottom(), vc.getDataset(VennDatasetPosition.B).getName()));
+		labels.add(new Label(cABC.x(), a.yTop(), vc.getDataset(VennDatasetPosition.C).getName()));
+	}
+
+	/**
 	 * Three circles, two entirely within the third, no unique cells in the outer
 	 * 
 	 * @param vc
@@ -418,16 +336,16 @@ public class VennChartDataset extends DefaultXYDataset {
 	 */
 	private void layoutType0020(VennCounter vc, double xStart) {
 
-		VennCircle b = new VennCircle(vc.getDataset(VennDatasetPosition.B),
+		VennShape b = new VennShape(vc.getDataset(VennDatasetPosition.B),
 				xStart, Y_START, DEFAULT_RADIUS, DEFAULT_RADIUS);
 
-		VennCircle a = new VennCircle(vc.getDataset(VennDatasetPosition.A),
+		VennShape a = new VennShape(vc.getDataset(VennDatasetPosition.A),
 				xStart - 0.01, Y_START, DEFAULT_RADIUS * 0.96, DEFAULT_RADIUS * 0.96,
-				VennShape.HALF_CIRCLE_LEFT);
+				VennShapeType.HALF_CIRCLE_LEFT);
 
-		VennCircle c = new VennCircle(vc.getDataset(VennDatasetPosition.C),
+		VennShape c = new VennShape(vc.getDataset(VennDatasetPosition.C),
 				xStart + 0.01, Y_START, DEFAULT_RADIUS * 0.96, DEFAULT_RADIUS * 0.96,
-				VennShape.HALF_CIRCLE_RIGHT);
+				VennShapeType.HALF_CIRCLE_RIGHT);
 
 		circles.add(a);
 		circles.add(b);
@@ -453,13 +371,13 @@ public class VennChartDataset extends DefaultXYDataset {
 	 */
 	private void layoutType0021(VennCounter vc, double xStart) {
 
-		VennCircle b = new VennCircle(vc.getDataset(VennDatasetPosition.B),
+		VennShape b = new VennShape(vc.getDataset(VennDatasetPosition.B),
 				xStart, Y_START, DEFAULT_RADIUS, DEFAULT_RADIUS);
 
-		VennCircle a = new VennCircle(vc.getDataset(VennDatasetPosition.A),
+		VennShape a = new VennShape(vc.getDataset(VennDatasetPosition.A),
 				xStart - 0.3, Y_START, SUBSET_RADIUS, SUBSET_RADIUS);
 
-		VennCircle c = new VennCircle(vc.getDataset(VennDatasetPosition.C),
+		VennShape c = new VennShape(vc.getDataset(VennDatasetPosition.C),
 				xStart + 0.3, Y_START, SUBSET_RADIUS, SUBSET_RADIUS);
 
 		circles.add(a);
@@ -486,13 +404,13 @@ public class VennChartDataset extends DefaultXYDataset {
 	 * @param xStart
 	 */
 	private void layoutType0023(VennCounter vc, double xStart) {
-		VennCircle a = new VennCircle(vc.getDataset(VennDatasetPosition.A),
+		VennShape a = new VennShape(vc.getDataset(VennDatasetPosition.A),
 				xStart, Y_START, DEFAULT_RADIUS, DEFAULT_RADIUS);
 
-		VennCircle b = new VennCircle(vc.getDataset(VennDatasetPosition.B),
+		VennShape b = new VennShape(vc.getDataset(VennDatasetPosition.B),
 				a.xCentre() + 0.8, Y_START, DEFAULT_RADIUS, DEFAULT_RADIUS);
 
-		VennCircle c = new VennCircle(vc.getDataset(VennDatasetPosition.C),
+		VennShape c = new VennShape(vc.getDataset(VennDatasetPosition.C),
 				b.xCentre() + 0.8, Y_START, DEFAULT_RADIUS, DEFAULT_RADIUS);
 
 		circles.add(a);
@@ -538,14 +456,14 @@ public class VennChartDataset extends DefaultXYDataset {
 	 */
 	private void layoutType0133(VennCounter vc, double xStart) {
 
-		VennCircle a = new VennCircle(vc.getDataset(VennDatasetPosition.A),
+		VennShape a = new VennShape(vc.getDataset(VennDatasetPosition.A),
 				xStart, Y_START, DEFAULT_RADIUS, DEFAULT_RADIUS);
 
-		VennCircle b = new VennCircle(vc.getDataset(VennDatasetPosition.B),
+		VennShape b = new VennShape(vc.getDataset(VennDatasetPosition.B),
 				a.xCentre() + 0.8, Y_START, DEFAULT_RADIUS, DEFAULT_RADIUS);
 
-		VennCircle c = new VennCircle(vc.getDataset(VennDatasetPosition.C),
-				(a.xCentre + b.xCentre) / 2, Y_START + 0.6, DEFAULT_RADIUS, DEFAULT_RADIUS);
+		VennShape c = new VennShape(vc.getDataset(VennDatasetPosition.C),
+				(a.xCentre() + b.xCentre()) / 2, Y_START + 0.6, DEFAULT_RADIUS, DEFAULT_RADIUS);
 
 		circles.add(a);
 		circles.add(b);
@@ -562,7 +480,7 @@ public class VennChartDataset extends DefaultXYDataset {
 				(b.yMin() + c.yMin()) / 2,
 				String.valueOf(vc.getCount(VennIntersection.B)));
 
-		Label cC = new Label(c.xCentre,
+		Label cC = new Label(c.xCentre(),
 				(a.yMax() + c.yMax()) / 2,
 				String.valueOf(vc.getCount(VennIntersection.C)));
 
@@ -604,16 +522,16 @@ public class VennChartDataset extends DefaultXYDataset {
 	 */
 	private void layoutType1464(VennCounter vc, double xStart) {
 
-		VennCircle a = new VennCircle(vc.getDataset(VennDatasetPosition.A),
+		VennShape a = new VennShape(vc.getDataset(VennDatasetPosition.A),
 				xStart, Y_START, HALF_RADIUS, DEFAULT_RADIUS);
 
-		VennCircle b = new VennCircle(vc.getDataset(VennDatasetPosition.B),
+		VennShape b = new VennShape(vc.getDataset(VennDatasetPosition.B),
 				xStart + 0.5, Y_START, HALF_RADIUS, DEFAULT_RADIUS);
 
-		VennCircle c = new VennCircle(vc.getDataset(VennDatasetPosition.C),
+		VennShape c = new VennShape(vc.getDataset(VennDatasetPosition.C),
 				xStart + 0.5, Y_START - 0.5, DEFAULT_RADIUS, HALF_RADIUS);
 
-		VennCircle d = new VennCircle(vc.getDataset(VennDatasetPosition.D),
+		VennShape d = new VennShape(vc.getDataset(VennDatasetPosition.D),
 				xStart + 0.5, Y_START, DEFAULT_RADIUS, HALF_RADIUS);
 
 		circles.add(a);
@@ -675,20 +593,20 @@ public class VennChartDataset extends DefaultXYDataset {
 	 */
 	private void layoutType0030(VennCounter vc, double xStart) {
 
-		VennCircle b = new VennCircle(vc.getDataset(VennDatasetPosition.B),
+		VennShape b = new VennShape(vc.getDataset(VennDatasetPosition.B),
 				xStart, Y_START, DEFAULT_RADIUS, DEFAULT_RADIUS);
 
-		VennCircle a = new VennCircle(vc.getDataset(VennDatasetPosition.A),
+		VennShape a = new VennShape(vc.getDataset(VennDatasetPosition.A),
 				xStart, Y_START + 0.01, DEFAULT_RADIUS * 0.96, DEFAULT_RADIUS * 0.96,
-				VennShape.THIRD_CIRCLE_UPPER);
+				VennShapeType.THIRD_CIRCLE_UPPER);
 
-		VennCircle c = new VennCircle(vc.getDataset(VennDatasetPosition.C),
+		VennShape c = new VennShape(vc.getDataset(VennDatasetPosition.C),
 				xStart - 0.005, Y_START, DEFAULT_RADIUS * 0.96, DEFAULT_RADIUS * 0.96,
-				VennShape.THIRD_CIRCLE_LEFT);
+				VennShapeType.THIRD_CIRCLE_LEFT);
 
-		VennCircle d = new VennCircle(vc.getDataset(VennDatasetPosition.D),
+		VennShape d = new VennShape(vc.getDataset(VennDatasetPosition.D),
 				xStart + 0.005, Y_START, DEFAULT_RADIUS * 0.96, DEFAULT_RADIUS * 0.96,
-				VennShape.THIRD_CIRCLE_RIGHT);
+				VennShapeType.THIRD_CIRCLE_RIGHT);
 
 		circles.add(a);
 		circles.add(b);
@@ -723,16 +641,16 @@ public class VennChartDataset extends DefaultXYDataset {
 	 */
 	private void layoutType0033(VennCounter vc, double xStart) {
 
-		VennCircle b = new VennCircle(vc.getDataset(VennDatasetPosition.B),
+		VennShape b = new VennShape(vc.getDataset(VennDatasetPosition.B),
 				xStart, Y_START, DEFAULT_RADIUS, DEFAULT_RADIUS);
 
-		VennCircle a = new VennCircle(vc.getDataset(VennDatasetPosition.A),
+		VennShape a = new VennShape(vc.getDataset(VennDatasetPosition.A),
 				xStart - 1, Y_START - 0.4, DEFAULT_RADIUS, DEFAULT_RADIUS);
 
-		VennCircle c = new VennCircle(vc.getDataset(VennDatasetPosition.C),
+		VennShape c = new VennShape(vc.getDataset(VennDatasetPosition.C),
 				xStart + 1, Y_START - 0.4, DEFAULT_RADIUS, DEFAULT_RADIUS);
 
-		VennCircle d = new VennCircle(vc.getDataset(VennDatasetPosition.D),
+		VennShape d = new VennShape(vc.getDataset(VennDatasetPosition.D),
 				xStart, Y_START + 1, DEFAULT_RADIUS, DEFAULT_RADIUS);
 
 		circles.add(a);
@@ -769,16 +687,16 @@ public class VennChartDataset extends DefaultXYDataset {
 	 * @param xStart
 	 */
 	private void layoutType0231(VennCounter vc, double xStart) {
-		VennCircle a = new VennCircle(vc.getDataset(VennDatasetPosition.A),
+		VennShape a = new VennShape(vc.getDataset(VennDatasetPosition.A),
 				xStart, Y_START, DEFAULT_RADIUS, DEFAULT_RADIUS);
 
-		VennCircle b = new VennCircle(vc.getDataset(VennDatasetPosition.B),
+		VennShape b = new VennShape(vc.getDataset(VennDatasetPosition.B),
 				a.xCentre(), Y_START, SUBSET_RADIUS, SUBSET_RADIUS);
 
-		VennCircle c = new VennCircle(vc.getDataset(VennDatasetPosition.C),
+		VennShape c = new VennShape(vc.getDataset(VennDatasetPosition.C),
 				b.xCentre() - 0.25, Y_START, SUBSET_RADIUS, SUBSET_RADIUS);
 
-		VennCircle d = new VennCircle(vc.getDataset(VennDatasetPosition.D),
+		VennShape d = new VennShape(vc.getDataset(VennDatasetPosition.D),
 				b.xCentre() + 0.25, Y_START, SUBSET_RADIUS, SUBSET_RADIUS);
 
 		circles.add(a);
@@ -831,16 +749,16 @@ public class VennChartDataset extends DefaultXYDataset {
 	 */
 	private void layoutType00042(VennCounter vc, double xStart) {
 
-		VennCircle a = new VennCircle(vc.getDataset(VennDatasetPosition.A),
+		VennShape a = new VennShape(vc.getDataset(VennDatasetPosition.A),
 				xStart - 0.25, Y_START, DEFAULT_RADIUS / 3, DEFAULT_RADIUS / 3);
 
-		VennCircle b = new VennCircle(vc.getDataset(VennDatasetPosition.B),
+		VennShape b = new VennShape(vc.getDataset(VennDatasetPosition.B),
 				xStart + 0.25, Y_START, DEFAULT_RADIUS / 3, DEFAULT_RADIUS / 3);
 
-		VennCircle c = new VennCircle(vc.getDataset(VennDatasetPosition.C),
+		VennShape c = new VennShape(vc.getDataset(VennDatasetPosition.C),
 				xStart, Y_START + 0.25, DEFAULT_RADIUS / 3, DEFAULT_RADIUS / 3);
 
-		VennCircle d = new VennCircle(vc.getDataset(VennDatasetPosition.D),
+		VennShape d = new VennShape(vc.getDataset(VennDatasetPosition.D),
 				xStart, Y_START - 0.25, DEFAULT_RADIUS / 3, DEFAULT_RADIUS / 3);
 
 		circles.add(a);
@@ -899,23 +817,23 @@ public class VennChartDataset extends DefaultXYDataset {
 	 */
 	private void layoutType00060(VennCounter vc, double xStart) {
 		// A is large upper ellipse
-		VennCircle a = new VennCircle(vc.getDataset(VennDatasetPosition.A),
+		VennShape a = new VennShape(vc.getDataset(VennDatasetPosition.A),
 				xStart, Y_START + 0.3, DEFAULT_RADIUS, DEFAULT_RADIUS / 3);
 
 		// A is large lower ellipse
-		VennCircle b = new VennCircle(vc.getDataset(VennDatasetPosition.B),
+		VennShape b = new VennShape(vc.getDataset(VennDatasetPosition.B),
 				xStart, Y_START - 0.3, DEFAULT_RADIUS, DEFAULT_RADIUS / 3);
 
 		// C overlaps A & B, no other
-		VennCircle c = new VennCircle(vc.getDataset(VennDatasetPosition.C),
+		VennShape c = new VennShape(vc.getDataset(VennDatasetPosition.C),
 				xStart - 0.5, Y_START, DEFAULT_RADIUS / 3, DEFAULT_RADIUS / 3);
 
 		// C overlaps A & B, no other
-		VennCircle d = new VennCircle(vc.getDataset(VennDatasetPosition.D),
+		VennShape d = new VennShape(vc.getDataset(VennDatasetPosition.D),
 				xStart, Y_START, DEFAULT_RADIUS / 3, DEFAULT_RADIUS / 3);
 
 		// C overlaps A & B, no other
-		VennCircle e = new VennCircle(vc.getDataset(VennDatasetPosition.E),
+		VennShape e = new VennShape(vc.getDataset(VennDatasetPosition.E),
 				xStart + 0.5, Y_START, DEFAULT_RADIUS / 3, DEFAULT_RADIUS / 3);
 
 		circles.add(a);
@@ -991,23 +909,23 @@ public class VennChartDataset extends DefaultXYDataset {
 	 */
 	private void layoutType00420(VennCounter vc, double xStart) {
 		// A is overall container
-		VennCircle a = new VennCircle(vc.getDataset(VennDatasetPosition.A),
+		VennShape a = new VennShape(vc.getDataset(VennDatasetPosition.A),
 				xStart, Y_START, DEFAULT_RADIUS, DEFAULT_RADIUS);
 
 		// B overlaps D & E, not C
-		VennCircle b = new VennCircle(vc.getDataset(VennDatasetPosition.B),
+		VennShape b = new VennShape(vc.getDataset(VennDatasetPosition.B),
 				xStart - 0.25, Y_START, DEFAULT_RADIUS / 3, DEFAULT_RADIUS / 3);
 
 		// C overlaps D & E, not B
-		VennCircle c = new VennCircle(vc.getDataset(VennDatasetPosition.C),
+		VennShape c = new VennShape(vc.getDataset(VennDatasetPosition.C),
 				xStart + 0.25, Y_START, DEFAULT_RADIUS / 3, DEFAULT_RADIUS / 3);
 //
 //		// D overlaps B & C, not E
-		VennCircle d = new VennCircle(vc.getDataset(VennDatasetPosition.D),
+		VennShape d = new VennShape(vc.getDataset(VennDatasetPosition.D),
 				xStart, Y_START + 0.25, DEFAULT_RADIUS / 3, DEFAULT_RADIUS / 3);
 //
 //		// E overlaps B & C, not D
-		VennCircle e = new VennCircle(vc.getDataset(VennDatasetPosition.E),
+		VennShape e = new VennShape(vc.getDataset(VennDatasetPosition.E),
 				xStart, Y_START - 0.25, DEFAULT_RADIUS / 3, DEFAULT_RADIUS / 3);
 
 		circles.add(a);
@@ -1067,24 +985,24 @@ public class VennChartDataset extends DefaultXYDataset {
 
 	private void layoutTypeFiveFull(VennCounter vc, double xStart) {
 
-		VennCircle a = new VennCircle(vc.getDataset(VennDatasetPosition.A),
-				xStart - 0.1, Y_START, DEFAULT_RADIUS, DEFAULT_RADIUS * 0.66, VennShape.CIRCLE,
+		VennShape a = new VennShape(vc.getDataset(VennDatasetPosition.A),
+				xStart - 0.1, Y_START, DEFAULT_RADIUS, DEFAULT_RADIUS * 0.66, VennShapeType.CIRCLE,
 				-Math.PI / 2);
 
-		VennCircle b = new VennCircle(vc.getDataset(VennDatasetPosition.B),
-				xStart + 0.1, Y_START, DEFAULT_RADIUS, DEFAULT_RADIUS * 0.66, VennShape.CIRCLE,
+		VennShape b = new VennShape(vc.getDataset(VennDatasetPosition.B),
+				xStart + 0.1, Y_START, DEFAULT_RADIUS, DEFAULT_RADIUS * 0.66, VennShapeType.CIRCLE,
 				Math.PI / 7);
-		VennCircle c = new VennCircle(vc.getDataset(VennDatasetPosition.C),
+		VennShape c = new VennShape(vc.getDataset(VennDatasetPosition.C),
 				xStart + 0.1, Y_START - 0.05, DEFAULT_RADIUS, DEFAULT_RADIUS * 0.66,
-				VennShape.CIRCLE, -Math.PI / 3);
+				VennShapeType.CIRCLE, -Math.PI / 3);
 
-		VennCircle d = new VennCircle(vc.getDataset(VennDatasetPosition.D),
+		VennShape d = new VennShape(vc.getDataset(VennDatasetPosition.D),
 				xStart - 0.1, Y_START + 0.1, DEFAULT_RADIUS, DEFAULT_RADIUS * 0.66,
-				VennShape.CIRCLE, Math.PI / 3);
+				VennShapeType.CIRCLE, Math.PI / 3);
 
-		VennCircle e = new VennCircle(vc.getDataset(VennDatasetPosition.E),
+		VennShape e = new VennShape(vc.getDataset(VennDatasetPosition.E),
 				xStart - 0.22, Y_START + 0.12, DEFAULT_RADIUS, DEFAULT_RADIUS * 0.66,
-				VennShape.CIRCLE, -Math.PI / 8);
+				VennShapeType.CIRCLE, -Math.PI / 8);
 
 		circles.add(a);
 		circles.add(b);
@@ -1292,7 +1210,6 @@ public class VennChartDataset extends DefaultXYDataset {
 
 			VennCounter vc = new VennCounter(datasets);
 
-//			LOGGER.fine(vc.getType());
 			createLayout(vc, xStart);
 			xStart += X_OFFSET;
 		}
@@ -1301,10 +1218,14 @@ public class VennChartDataset extends DefaultXYDataset {
 		// clipping annotated Venn circle outlines. These are points outside the range
 		// of the circles.
 
-		double xMax = circles.stream().mapToDouble(VennCircle::xMax).max().orElse(1) * 1.1;
-		double xMin = circles.stream().mapToDouble(VennCircle::xMin).min().orElse(1) * 1.1;
-		double yMax = circles.stream().mapToDouble(VennCircle::yMax).max().orElse(1) * 1.1;
-		double yMin = circles.stream().mapToDouble(VennCircle::yMin).min().orElse(1) * 1.1;
+		double xMax = circles.stream().mapToDouble(VennShape::xMax).max().orElse(1) * 1.1;
+		double xMin = circles.stream().mapToDouble(VennShape::xMin).min().orElse(1) * 1.1; // will
+																							// be
+																							// negative
+		double yMax = circles.stream().mapToDouble(VennShape::yMax).max().orElse(1) * 1.1;
+		double yMin = circles.stream().mapToDouble(VennShape::yMin).min().orElse(1) * 1.1; // will
+																							// be
+																							// negative
 		addSeries("Sentinals", new double[][] { { xMin, xMax }, { yMin, yMax } });
 	}
 
