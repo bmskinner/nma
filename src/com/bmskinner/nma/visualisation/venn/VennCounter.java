@@ -740,10 +740,17 @@ public class VennCounter {
 		}
 
 		if ("00042".equals(type)) { // A overlaps CD, B overlaps CD
-			a = findDatasetsWithCount(3).get(0);
-			b = findDatasetsWithCount(3).get(1);
-			c = findDatasetsWithCount(2).get(0);
-			d = findDatasetsWithCount(2).get(1);
+			d = findDatasetsWithCount(3).get(0);
+			a = findDatasetsWithCount(3).get(1);
+			b = findDatasetsWithCount(2).get(0);
+			c = findDatasetsWithCount(2).get(1);
+		}
+
+		if ("00201".equals(type)) { // 00020 inside a fourth
+			a = findDatasetsWithCount(2).get(0);
+			b = findDatasetsWithCount(1).get(0);
+			c = findDatasetsWithCount(1).get(1);
+			d = findDatasetsWithCount(3).get(0);
 		}
 
 		if ("00231".equals(type)) { // all within fourth, other three are triple flat
@@ -835,6 +842,10 @@ public class VennCounter {
 	 */
 	public int getCount(@NonNull VennIntersection k) {
 		return k.getValue();
+	}
+
+	public double total() {
+		return counts.values().stream().collect(Collectors.summingInt(Integer::intValue));
 	}
 
 	public IAnalysisDataset getDataset(@NonNull VennDatasetPosition k) {

@@ -11,7 +11,8 @@ import org.junit.Test;
 import com.bmskinner.nma.TestResources;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.io.SampleDatasetReader;
-import com.bmskinner.nma.visualisation.datasets.VennCounter.VennIntersection;
+import com.bmskinner.nma.visualisation.venn.VennCounter;
+import com.bmskinner.nma.visualisation.venn.VennCounter.VennIntersection;
 
 public class VennCounterTest {
 
@@ -25,9 +26,10 @@ public class VennCounterTest {
 
 		VennCounter vc = new VennCounter(cluster);
 
-		assertEquals("0010", vc.getType());
+		assertEquals("00010", vc.getType());
 
-		assertEquals(63, vc.getCount(VennIntersection.AB));
+		assertEquals(63,
+				vc.getCount(VennIntersection.AB));
 		assertEquals(0, vc.getCount(VennIntersection.A));
 		assertEquals(0, vc.getCount(VennIntersection.B));
 
@@ -43,7 +45,7 @@ public class VennCounterTest {
 
 		VennCounter vc = new VennCounter(cluster);
 
-		assertEquals("0011", vc.getType());
+		assertEquals("00011", vc.getType());
 		assertEquals(56, vc.getCount(VennIntersection.AB));
 		assertEquals(7, vc.getCount(VennIntersection.A));
 		assertEquals(0, vc.getCount(VennIntersection.B));
@@ -64,7 +66,7 @@ public class VennCounterTest {
 
 		VennCounter vc = new VennCounter(cluster);
 
-		assertEquals("0020", vc.getType());
+		assertEquals("00020", vc.getType());
 		assertEquals(0, vc.getCount(VennIntersection.ABC));
 		assertEquals(56, vc.getCount(VennIntersection.AB));
 		assertEquals(0, vc.getCount(VennIntersection.AC));

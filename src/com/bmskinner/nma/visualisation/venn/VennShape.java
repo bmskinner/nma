@@ -48,6 +48,7 @@ public class VennShape {
 		this.rot = rot;
 		this.rx = rx;
 		this.ry = ry;
+		this.shape = shape;
 
 	}
 

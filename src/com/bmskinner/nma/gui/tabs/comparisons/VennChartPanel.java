@@ -16,6 +16,7 @@ import com.bmskinner.nma.visualisation.options.ChartOptions;
 import com.bmskinner.nma.visualisation.options.ChartOptionsBuilder;
 import com.bmskinner.nma.visualisation.venn.VennChartFactory;
 
+@SuppressWarnings("serial")
 public class VennChartPanel extends ChartDetailPanel implements SwatchUpdatedListener {
 
 	private static final Logger LOGGER = Logger.getLogger(VennChartPanel.class.getName());

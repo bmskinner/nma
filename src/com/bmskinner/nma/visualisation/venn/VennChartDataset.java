@@ -32,7 +32,7 @@ public class VennChartDataset extends DefaultXYDataset {
 	/** Store the distinct clusters of datasets with shared cells */
 	private Map<Comparable<?>, List<IAnalysisDataset>> clusters = new HashMap<>();
 
-	/** Store the radii of Venn circles */
+	/** Store the Venn shapes */
 	private List<VennShape> circles = new ArrayList<>();
 
 	/** The locations of annotations with the shared counts */
@@ -107,16 +107,16 @@ public class VennChartDataset extends DefaultXYDataset {
 
 		// Set the centre for each dataset circle in the cluster
 		if (vc.size() == 1) {
-			layoutType0001(vc, xStart);
+			layoutType00001(vc, xStart);
 		}
 
 		if (vc.size() == 2) {
 			switch (vc.getType()) {
 			case "00011":
-				layoutType0011(vc, xStart);
+				layoutType00011(vc, xStart);
 				break;
 			default:
-				layoutType0012(vc, xStart);
+				layoutType00012(vc, xStart);
 			}
 		}
 
@@ -126,19 +126,19 @@ public class VennChartDataset extends DefaultXYDataset {
 				layoutType00111(vc, xStart);
 				break;
 			case "00020":
-				layoutType0020(vc, xStart);
+				layoutType00020(vc, xStart);
 				break;
 			case "00021":
-				layoutType0021(vc, xStart);
+				layoutType00021(vc, xStart);
 				break;
 			case "00022":
-				layoutType0023(vc, xStart);
+				layoutType00023(vc, xStart);
 				break;
 			case "00023":
-				layoutType0023(vc, xStart);
+				layoutType00023(vc, xStart);
 				break;
 			default:
-				layoutType0133(vc, xStart);
+				layoutType00133(vc, xStart);
 			}
 
 		}
@@ -147,21 +147,23 @@ public class VennChartDataset extends DefaultXYDataset {
 
 			switch (vc.getType()) {
 			case "00030":
-				layoutType0030(vc, xStart);
+				layoutType00030(vc, xStart);
 				break;
 			case "00033":
-				layoutType0033(vc, xStart);
+				layoutType00033(vc, xStart);
 				break;
 
 			case "00042":
 				layoutType00042(vc, xStart);
 				break;
-
+			case "00201":
+				layoutType00201(vc, xStart);
+				break;
 			case "00231":
-				layoutType0231(vc, xStart);
+				layoutType00231(vc, xStart);
 				break;
 			default:
-				layoutType1464(vc, xStart);
+				layoutType01464(vc, xStart);
 			}
 
 		}
@@ -189,7 +191,7 @@ public class VennChartDataset extends DefaultXYDataset {
 	 * @param vc
 	 * @param xStart
 	 */
-	private void layoutType0001(VennCounter vc, double xStart) {
+	private void layoutType00001(VennCounter vc, double xStart) {
 
 		VennShape circ = new VennShape(vc.getDataset(VennDatasetPosition.A),
 				xStart, Y_START, DEFAULT_RADIUS, DEFAULT_RADIUS);
@@ -210,7 +212,7 @@ public class VennChartDataset extends DefaultXYDataset {
 	 * @param vc
 	 * @param xStart
 	 */
-	private void layoutType0011(VennCounter vc, double xStart) {
+	private void layoutType00011(VennCounter vc, double xStart) {
 		VennShape a = new VennShape(vc.getDataset(VennDatasetPosition.A),
 				xStart, Y_START, DEFAULT_RADIUS, DEFAULT_RADIUS);
 
@@ -243,7 +245,7 @@ public class VennChartDataset extends DefaultXYDataset {
 	 * @param vc
 	 * @param xStart
 	 */
-	private void layoutType0012(VennCounter vc, double xStart) {
+	private void layoutType00012(VennCounter vc, double xStart) {
 
 		VennShape a = new VennShape(vc.getDataset(VennDatasetPosition.A),
 				xStart, Y_START, DEFAULT_RADIUS, DEFAULT_RADIUS);
@@ -329,20 +331,24 @@ public class VennChartDataset extends DefaultXYDataset {
 	}
 
 	/**
-	 * Three circles, two entirely within the third, no unique cells in the outer
+	 * Three circles, two entirely within the third, no unique cells in the outer.
+	 * No overlap between inner
 	 * 
 	 * @param vc
 	 * @param xStart
 	 */
-	private void layoutType0020(VennCounter vc, double xStart) {
+	private void layoutType00020(VennCounter vc, double xStart) {
 
+		// outer
 		VennShape b = new VennShape(vc.getDataset(VennDatasetPosition.B),
 				xStart, Y_START, DEFAULT_RADIUS, DEFAULT_RADIUS);
 
+		// left
 		VennShape a = new VennShape(vc.getDataset(VennDatasetPosition.A),
 				xStart - 0.01, Y_START, DEFAULT_RADIUS * 0.96, DEFAULT_RADIUS * 0.96,
 				VennShapeType.HALF_CIRCLE_LEFT);
 
+		// right
 		VennShape c = new VennShape(vc.getDataset(VennDatasetPosition.C),
 				xStart + 0.01, Y_START, DEFAULT_RADIUS * 0.96, DEFAULT_RADIUS * 0.96,
 				VennShapeType.HALF_CIRCLE_RIGHT);
@@ -369,7 +375,7 @@ public class VennChartDataset extends DefaultXYDataset {
 	 * @param vc
 	 * @param xStart
 	 */
-	private void layoutType0021(VennCounter vc, double xStart) {
+	private void layoutType00021(VennCounter vc, double xStart) {
 
 		VennShape b = new VennShape(vc.getDataset(VennDatasetPosition.B),
 				xStart, Y_START, DEFAULT_RADIUS, DEFAULT_RADIUS);
@@ -403,7 +409,7 @@ public class VennChartDataset extends DefaultXYDataset {
 	 * @param vc
 	 * @param xStart
 	 */
-	private void layoutType0023(VennCounter vc, double xStart) {
+	private void layoutType00023(VennCounter vc, double xStart) {
 		VennShape a = new VennShape(vc.getDataset(VennDatasetPosition.A),
 				xStart, Y_START, DEFAULT_RADIUS, DEFAULT_RADIUS);
 
@@ -449,12 +455,67 @@ public class VennChartDataset extends DefaultXYDataset {
 	}
 
 	/**
+	 * Four circles, three entirely within fourth. Type 00020 within an outer circle
+	 * 
+	 * @param vc
+	 * @param xStart
+	 */
+	private void layoutType00201(VennCounter vc, double xStart) {
+
+		// outer
+		VennShape d = new VennShape(vc.getDataset(VennDatasetPosition.D),
+				xStart, Y_START, DEFAULT_RADIUS, DEFAULT_RADIUS);
+
+		double fInner = NumberTools.clamp(
+				(vc.total() - vc.getCount(VennIntersection.D)) / vc.total(),
+				0.1, 0.9);
+
+		// inner outer
+		VennShape a = new VennShape(vc.getDataset(VennDatasetPosition.A),
+				xStart, Y_START, d.xRadius() * fInner, d.yRadius() * fInner);
+
+		// left
+		VennShape b = new VennShape(vc.getDataset(VennDatasetPosition.B),
+				xStart - 0.01, Y_START, a.xRadius() * 0.96, a.xRadius() * 0.96,
+				VennShapeType.HALF_CIRCLE_LEFT);
+
+		// right
+		VennShape c = new VennShape(vc.getDataset(VennDatasetPosition.C),
+				xStart + 0.01, Y_START, a.xRadius() * 0.96, a.xRadius() * 0.96,
+				VennShapeType.HALF_CIRCLE_RIGHT);
+
+		circles.add(a);
+		circles.add(b);
+		circles.add(c);
+		circles.add(d);
+
+		Label cAB = new Label(a.xFraction(0.25), a.yCentre(), vc.getCount(VennIntersection.ABD));
+		Label cBC = new Label(c.xFraction(0.75), b.yCentre(), vc.getCount(VennIntersection.ACD));
+		Label cD = new Label(d.xCentre(), (d.yMax() + a.yMax()) / 2,
+				vc.getCount(VennIntersection.D));
+
+		labels.add(cAB);
+		labels.add(cBC);
+		labels.add(cD);
+
+		labels.add(new Label(d.xFraction(0.1), d.yFraction(0.95),
+				vc.getDataset(VennDatasetPosition.B).getName()));
+		labels.add(new Label(b.xCentre(), d.yBottom(),
+				vc.getDataset(VennDatasetPosition.A).getName()));
+		labels.add(new Label(d.xFraction(0.9), d.yFraction(0.95),
+				vc.getDataset(VennDatasetPosition.C).getName()));
+		labels.add(
+				new Label(d.xCentre(), d.yTop(),
+						vc.getDataset(VennDatasetPosition.D).getName()));
+	}
+
+	/**
 	 * Three circles, triangle
 	 * 
 	 * @param vc
 	 * @param xStart
 	 */
-	private void layoutType0133(VennCounter vc, double xStart) {
+	private void layoutType00133(VennCounter vc, double xStart) {
 
 		VennShape a = new VennShape(vc.getDataset(VennDatasetPosition.A),
 				xStart, Y_START, DEFAULT_RADIUS, DEFAULT_RADIUS);
@@ -520,7 +581,7 @@ public class VennChartDataset extends DefaultXYDataset {
 	 * @param vc
 	 * @param xStart
 	 */
-	private void layoutType1464(VennCounter vc, double xStart) {
+	private void layoutType01464(VennCounter vc, double xStart) {
 
 		VennShape a = new VennShape(vc.getDataset(VennDatasetPosition.A),
 				xStart, Y_START, HALF_RADIUS, DEFAULT_RADIUS);
@@ -591,7 +652,7 @@ public class VennChartDataset extends DefaultXYDataset {
 	 * @param vc
 	 * @param xStart
 	 */
-	private void layoutType0030(VennCounter vc, double xStart) {
+	private void layoutType00030(VennCounter vc, double xStart) {
 
 		VennShape b = new VennShape(vc.getDataset(VennDatasetPosition.B),
 				xStart, Y_START, DEFAULT_RADIUS, DEFAULT_RADIUS);
@@ -639,7 +700,7 @@ public class VennChartDataset extends DefaultXYDataset {
 	 * @param vc
 	 * @param xStart
 	 */
-	private void layoutType0033(VennCounter vc, double xStart) {
+	private void layoutType00033(VennCounter vc, double xStart) {
 
 		VennShape b = new VennShape(vc.getDataset(VennDatasetPosition.B),
 				xStart, Y_START, DEFAULT_RADIUS, DEFAULT_RADIUS);
@@ -686,7 +747,7 @@ public class VennChartDataset extends DefaultXYDataset {
 	 * @param vc
 	 * @param xStart
 	 */
-	private void layoutType0231(VennCounter vc, double xStart) {
+	private void layoutType00231(VennCounter vc, double xStart) {
 		VennShape a = new VennShape(vc.getDataset(VennDatasetPosition.A),
 				xStart, Y_START, DEFAULT_RADIUS, DEFAULT_RADIUS);
 
