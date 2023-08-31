@@ -3,8 +3,6 @@ package com.bmskinner.nma.io;
 import java.io.File;
 import java.io.IOException;
 
-import javax.xml.XMLConstants;
-
 import org.jdom2.Document;
 import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder;
@@ -41,9 +39,6 @@ public abstract class XMLReader {
 	 */
 	protected static Document readDocument(File file) throws XMLReadingException {
 		SAXBuilder saxBuilder = new SAXBuilder();
-		saxBuilder.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
-		saxBuilder.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
-
 		try {
 			return saxBuilder.build(file);
 		} catch (JDOMException | IOException e) {

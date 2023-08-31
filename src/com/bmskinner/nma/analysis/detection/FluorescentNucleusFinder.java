@@ -92,9 +92,8 @@ public class FluorescentNucleusFinder extends CellFinder {
 			throws ImageImportException {
 		List<Nucleus> list = new ArrayList<>();
 
-		ImageImporter importer = new ImageImporter(imageFile);
-
-		ImageProcessor ip = importer.importImage(nuclOptions.getInt(HashOptions.CHANNEL));
+		ImageProcessor ip = ImageImporter.importImage(imageFile,
+				nuclOptions.getInt(HashOptions.CHANNEL));
 
 		ImageFilterer filt = new ImageFilterer(ip.duplicate());
 		if (nuclOptions.getBoolean(HashOptions.IS_USE_KUWAHARA)) {
@@ -163,9 +162,8 @@ public class FluorescentNucleusFinder extends CellFinder {
 
 		List<Nucleus> list = new ArrayList<>();
 
-		ImageImporter importer = new ImageImporter(imageFile);
-
-		ImageProcessor ip = importer.importImage(nuclOptions.getInt(HashOptions.CHANNEL));
+		ImageProcessor ip = ImageImporter.importImage(imageFile,
+				nuclOptions.getInt(HashOptions.CHANNEL));
 
 		ImageFilterer filt = new ImageFilterer(ip.duplicate());
 		if (nuclOptions.getBoolean(HashOptions.IS_USE_KUWAHARA)) {
@@ -233,8 +231,9 @@ public class FluorescentNucleusFinder extends CellFinder {
 		Detector gd = new Detector();
 
 		// Display passing and failing size nuclei
-		ImageProcessor original = importer
-				.importImageAndInvert(nuclOptions.getInt(HashOptions.CHANNEL)).convertToRGB();
+		ImageProcessor original = ImageImporter
+				.importImageAndInvert(imageFile, nuclOptions.getInt(HashOptions.CHANNEL))
+				.convertToRGB();
 
 		ImageProcessor img = filt.toProcessor();
 

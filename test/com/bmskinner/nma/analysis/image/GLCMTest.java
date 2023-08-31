@@ -36,7 +36,7 @@ public class GLCMTest {
 		options.setString(GLCM.ANGLE_KEY, GLCMStepAngle.NORTH.toString());
 
 		File f = TestResources.GLCM_SAMPLE_IMAGE;
-		ImageProcessor ip = new ImageImporter(f).importImage(ImageImporter.RGB_BLUE);
+		ImageProcessor ip = ImageImporter.importImage(f, ImageImporter.RGB_BLUE);
 
 		// Default parameters
 		GLCM glcm = new GLCM(options);
@@ -65,7 +65,7 @@ public class GLCMTest {
 		options.setString(GLCM.ANGLE_KEY, GLCMStepAngle.NORTHEAST.toString());
 
 		File f = TestResources.GLCM_SAMPLE_IMAGE;
-		ImageProcessor ip = new ImageImporter(f).importImage(ImageImporter.RGB_BLUE);
+		ImageProcessor ip = ImageImporter.importImage(f, ImageImporter.RGB_BLUE);
 
 		GLCM glcm = new GLCM(options);
 		GLCMTile result = glcm.calculate(ip);
@@ -93,7 +93,7 @@ public class GLCMTest {
 		options.setString(GLCM.ANGLE_KEY, GLCMStepAngle.EAST.toString());
 
 		File f = TestResources.GLCM_SAMPLE_IMAGE;
-		ImageProcessor ip = new ImageImporter(f).importImage(ImageImporter.RGB_BLUE);
+		ImageProcessor ip = ImageImporter.importImage(f, ImageImporter.RGB_BLUE);
 
 		GLCM glcm = new GLCM(options);
 		GLCMTile result = glcm.calculate(ip);
@@ -121,7 +121,7 @@ public class GLCMTest {
 		options.setString(GLCM.ANGLE_KEY, GLCMStepAngle.SOUTHEAST.toString());
 
 		File f = TestResources.GLCM_SAMPLE_IMAGE;
-		ImageProcessor ip = new ImageImporter(f).importImage(ImageImporter.RGB_BLUE);
+		ImageProcessor ip = ImageImporter.importImage(f, ImageImporter.RGB_BLUE);
 
 		GLCM glcm = new GLCM(options);
 		GLCMTile result = glcm.calculate(ip);

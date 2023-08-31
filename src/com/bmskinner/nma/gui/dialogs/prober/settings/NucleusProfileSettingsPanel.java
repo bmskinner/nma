@@ -90,7 +90,8 @@ public class NucleusProfileSettingsPanel extends SettingsPanel {
 		try {
 			options.setRuleSetCollection(XMLReader.readRulesetCollection(f));
 		} catch (XMLReadingException | ComponentCreationException e1) {
-			LOGGER.log(Loggable.STACK, e1, () -> "Unable to read XML file: " + f.getAbsolutePath());
+			LOGGER.log(Loggable.STACK, e1, () -> "Unable to read XML file: " + f.getAbsolutePath()
+					+ ": " + e1.getMessage());
 		}
 	}
 

@@ -55,8 +55,8 @@ import com.bmskinner.nma.io.ImageImportWorker;
 import com.bmskinner.nma.io.ImageImporter;
 import com.bmskinner.nma.io.ImageImporter.ImageImportException;
 import com.bmskinner.nma.io.UnloadableImageException;
-import com.bmskinner.nma.visualisation.image.ImageFilterer;
 import com.bmskinner.nma.visualisation.image.ImageAnnotator;
+import com.bmskinner.nma.visualisation.image.ImageFilterer;
 
 import ij.process.ImageProcessor;
 
@@ -341,8 +341,8 @@ public class ManualCurationDialog extends AbstractCellCollectionDialog {
 				return ImageFilterer.createWhiteColorProcessor(150, 150);
 			}
 
-			ImageProcessor ip = new ImageImporter(signalFile)
-					.importImage(signalOptions.getInt(HashOptions.CHANNEL));
+			ImageProcessor ip = ImageImporter
+					.importImage(signalFile, signalOptions.getInt(HashOptions.CHANNEL));
 			ip.invert();
 			ImageAnnotator an = new ImageAnnotator(ip);
 			an.convertToColorProcessor();

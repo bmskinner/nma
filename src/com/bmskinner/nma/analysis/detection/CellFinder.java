@@ -85,7 +85,7 @@ public abstract class CellFinder extends AbstractFinder<Collection<ICell>> {
 		for (File f : arr) {
 
 			// Check we are good to use this file
-			if (Thread.interrupted() || f.isDirectory() || !ImageImporter.fileIsImportable(f))
+			if (Thread.interrupted() || f.isDirectory() || !ImageImporter.isFileImportable(f))
 				continue;
 
 			try {
@@ -116,7 +116,7 @@ public abstract class CellFinder extends AbstractFinder<Collection<ICell>> {
 				return;
 			if (f.isDirectory())
 				return;
-			if (!ImageImporter.fileIsImportable(f))
+			if (!ImageImporter.isFileImportable(f))
 				return;
 			try {
 				list.addAll(findInImage(f));

@@ -21,6 +21,7 @@ import com.bmskinner.nma.components.generic.IPoint;
 import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.profiles.MissingLandmarkException;
 import com.bmskinner.nma.components.rules.OrientationMark;
+import com.bmskinner.nma.io.ImageImporter.ImageImportException;
 import com.bmskinner.nma.logging.Loggable;
 
 import ij.IJ;
@@ -159,7 +160,7 @@ public class CellImageExportMethod extends MultipleDatasetAnalysisMethod impleme
 					IJ.saveAsTiff(imp, new File(outputFolder, fileName).getAbsolutePath());
 					fireProgressEvent();
 
-				} catch (UnloadableImageException e) {
+				} catch (UnloadableImageException | ImageImportException e) {
 					LOGGER.log(Loggable.STACK,
 							"Unable to load image for nucleus " + n.getNameAndNumber(), e);
 				} catch (MissingLandmarkException e) {
@@ -180,9 +181,10 @@ public class CellImageExportMethod extends MultipleDatasetAnalysisMethod impleme
 	 * @return
 	 * @throws UnloadableImageException
 	 * @throws MissingLandmarkException
+	 * @throws ImageImportException
 	 */
 	private ImageProcessor cropToSquare(ICell c, Nucleus n)
-			throws UnloadableImageException, MissingLandmarkException {
+			throws UnloadableImageException, MissingLandmarkException, ImageImportException {
 
 		// Choose whether to use the RGB or greyscale image
 		ImageProcessor ip = options.getBoolean(SINGLE_CELL_IMAGE_IS_RGB_KEY)

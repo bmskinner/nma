@@ -268,8 +268,8 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> {
 					File imageFolder = warpingOptions.templateDataset().getAnalysisOptions().get()
 							.getDetectionFolder(warpingOptions.signalId().toString()).get();
 					File imageFile = new File(imageFolder, n.getSourceFileName());
-					ip = new ImageImporter(imageFile)
-							.importImage(signalOptions.getInt(HashOptions.CHANNEL));
+					ip = ImageImporter
+							.importImage(imageFile, signalOptions.getInt(HashOptions.CHANNEL));
 
 				} else {
 					return createEmptyProcessor();

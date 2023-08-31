@@ -6,8 +6,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.logging.Logger;
 
-import javax.xml.XMLConstants;
-
 import org.eclipse.jdt.annotation.NonNull;
 import org.jdom2.Document;
 import org.jdom2.JDOMException;
@@ -18,6 +16,7 @@ import com.bmskinner.nma.analysis.DefaultAnalysisResult;
 import com.bmskinner.nma.analysis.IAnalysisResult;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.io.Io.Importer;
+import com.bmskinner.nma.logging.Loggable;
 
 public class XMLImportMethod extends AbstractAnalysisMethod implements Importer {
 
@@ -50,14 +49,14 @@ public class XMLImportMethod extends AbstractAnalysisMethod implements Importer 
 
 			cis.addCountListener((l) -> fireProgressEvent(l));
 			SAXBuilder saxBuilder = new SAXBuilder();
-			saxBuilder.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
-			saxBuilder.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+//			saxBuilder.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+//			saxBuilder.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
 			doc = saxBuilder.build(cis);
-
 			fireIndeterminateState(); // TODO: hook the indeterminate state to the end of file
 										// reading,
 		} catch (IOException | JDOMException e) {
-			LOGGER.fine("Could not parse file as XML: " + file.getName());
+			LOGGER.log(Loggable.STACK,
+					"Could not parse file as XML: " + file.getName() + ": " + e.getMessage(), e);
 		}
 	}
 
