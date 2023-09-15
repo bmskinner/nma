@@ -78,6 +78,7 @@ public interface Measurement extends XmlSerializable {
 		static final String PCA_N = "Number of PCs";
 		static final String PCA_1 = "PC1";
 		static final String PCA_2 = "PC2";
+		static final String PIXEL_HISTOGRAM = "Pixel histogram";
 
 	}
 
@@ -241,6 +242,16 @@ public interface Measurement extends XmlSerializable {
 	}
 
 	/**
+	 * Create a measurement for a level of the pixel histogram.
+	 * 
+	 * @param dim the grey level measured
+	 * @return
+	 */
+	static Measurement makePixelHistogram(int dim) {
+		return new DefaultMeasurement(Names.PIXEL_HISTOGRAM + "_" + dim, MeasurementDimension.NONE);
+	}
+
+	/**
 	 * All available stats
 	 * 
 	 * @return
@@ -344,6 +355,18 @@ public interface Measurement extends XmlSerializable {
 		List<Measurement> list = new ArrayList<>();
 		for (Measurement s : GLCMParameter.toStats())
 			list.add(s);
+		return list;
+	}
+
+	/**
+	 * Get the measurement keys for each grey level of an image histogram
+	 * 
+	 * @return the 256 grey level measurements
+	 */
+	static List<Measurement> getPixelHistogramMeasurements() {
+		List<Measurement> list = new ArrayList<>();
+		for (int i = 0; i < 256; i++)
+			list.add(Measurement.makePixelHistogram(i));
 		return list;
 	}
 

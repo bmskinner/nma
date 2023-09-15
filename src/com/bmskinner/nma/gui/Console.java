@@ -53,6 +53,7 @@ public class Console extends JPanel implements ActionListener {
 	private static final String HELP_CMD = "help";
 	private static final String CLEAR_CMD = "clear";
 	private static final String GLCM_CMD = "glcm";
+	private static final String HISTOGRAM_CMD = "histogram";
 	private static final String KEYPOINT_CMD = "keypoints";
 	private static final String LIST_CMD = "list";
 	private static final String TASKS_CMD = "tasks";
@@ -133,6 +134,13 @@ public class Console extends JPanel implements ActionListener {
 					for (String s : history)
 						LOGGER.info("\t" + s);
 				}));
+
+		runnableCommands.add(new Command(HISTOGRAM_CMD,
+				"calculate pixel histograms",
+				() -> UserActionController.getInstance()
+						.userActionEventReceived(new UserActionEvent(this,
+								UserActionEvent.RUN_HISTOGRAM_CALC,
+								DatasetListManager.getInstance().getSelectedDatasets()))));
 
 		runnableCommands.add(new Command(HASH_CMD,
 				"display the hashes of all open datasets",

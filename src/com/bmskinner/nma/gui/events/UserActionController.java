@@ -31,6 +31,7 @@ import com.bmskinner.nma.gui.DefaultInputSupplier;
 import com.bmskinner.nma.gui.ProgressBarAcceptor;
 import com.bmskinner.nma.gui.actions.AddNuclearSignalAction;
 import com.bmskinner.nma.gui.actions.BooleanOperationAction;
+import com.bmskinner.nma.gui.actions.CalculateCellHistogramAction;
 import com.bmskinner.nma.gui.actions.ClusterAutomaticAction;
 import com.bmskinner.nma.gui.actions.ClusterFileAssignmentAction;
 import com.bmskinner.nma.gui.actions.ClusterManualAction;
@@ -39,14 +40,14 @@ import com.bmskinner.nma.gui.actions.DatasetScaleChangeAction;
 import com.bmskinner.nma.gui.actions.ExportCellLocationsAction;
 import com.bmskinner.nma.gui.actions.ExportDatasetAction;
 import com.bmskinner.nma.gui.actions.ExportKeypointsAction;
-import com.bmskinner.nma.gui.actions.ExportOptionsAction;
-import com.bmskinner.nma.gui.actions.ExportRuleSetsAction;
-import com.bmskinner.nma.gui.actions.ExportSingleCellImagesAction;
 import com.bmskinner.nma.gui.actions.ExportMeasurementsAction.ExportNuclearOutlinesAction;
 import com.bmskinner.nma.gui.actions.ExportMeasurementsAction.ExportNuclearProfilesAction;
 import com.bmskinner.nma.gui.actions.ExportMeasurementsAction.ExportNuclearStatsAction;
 import com.bmskinner.nma.gui.actions.ExportMeasurementsAction.ExportShellsAction;
 import com.bmskinner.nma.gui.actions.ExportMeasurementsAction.ExportSignalsAction;
+import com.bmskinner.nma.gui.actions.ExportOptionsAction;
+import com.bmskinner.nma.gui.actions.ExportRuleSetsAction;
+import com.bmskinner.nma.gui.actions.ExportSingleCellImagesAction;
 import com.bmskinner.nma.gui.actions.ExportTPSAction;
 import com.bmskinner.nma.gui.actions.ExportWorkspaceAction;
 import com.bmskinner.nma.gui.actions.ExtractRandomCellsAction;
@@ -328,6 +329,13 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 			return () -> {
 				final CountDownLatch latch = new CountDownLatch(1);
 				new RunGLCMAction(event.getDatasets(), latch, acceptor).run();
+			};
+		}
+
+		if (event.type().equals(UserActionEvent.RUN_HISTOGRAM_CALC)) {
+			return () -> {
+				final CountDownLatch latch = new CountDownLatch(1);
+				new CalculateCellHistogramAction(event.getDatasets(), latch, acceptor).run();
 			};
 		}
 

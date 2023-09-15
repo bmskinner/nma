@@ -69,6 +69,7 @@ public class DatasetMeasurementsExporter extends StatsExporter {
 	private boolean isIncludeOutlines = false;
 	private boolean isIncludeSegments = false;
 	private boolean isIncludeGlcm = false;
+	private boolean isIncludePixelHistogram = false;
 
 	/** How many samples should be taken from each profile? */
 	private int profileSamples = 100;
@@ -116,6 +117,14 @@ public class DatasetMeasurementsExporter extends StatsExporter {
 								GLCMParameter.SUM
 										.toMeasurement()) == Statistical.ERROR_CALCULATING_STAT));
 
+		// Only include if present in all cells of all datasets
+		isIncludePixelHistogram = list.stream()
+				.allMatch(d -> d.getCollection().getCells().stream() // all datasets should agree
+						.noneMatch(c -> c // no cells should have a missing value
+						.getPrimaryNucleus()
+								// Only check for the first pixel value - if one is present, all are present
+						.getMeasurement(Measurement.makePixelHistogram(0)) == Statistical.ERROR_CALCULATING_STAT));
+
 		normProfileLength = chooseNormalisedProfileLength();
 
 		measurements = chooseMeasurementsToExport();
@@ -128,23 +137,7 @@ public class DatasetMeasurementsExporter extends StatsExporter {
 	 */
 	public DatasetMeasurementsExporter(@NonNull File file, @NonNull IAnalysisDataset dataset,
 			@NonNull HashOptions options) {
-		super(file, dataset, options);
-		segCount = dataset.getCollection().getProfileManager().getSegmentCount();
-		isIncludeSegments = true;
-		profileSamples = options.get(HashOptions.EXPORT_PROFILE_INTERPOLATION_LENGTH);
-		isIncludeMeasurements = options.get(HashOptions.EXPORT_MEASUREMENTS_KEY);
-		isIncludeOutlines = options.get(HashOptions.EXPORT_OUTLINES_KEY);
-		isIncludeProfiles = options.get(HashOptions.EXPORT_PROFILES_KEY);
-
-		isIncludeGlcm = dataset.getCollection().getCells().stream()
-				.noneMatch(c -> c.getPrimaryNucleus()
-						.getMeasurement(
-								GLCMParameter.SUM
-										.toMeasurement()) == Statistical.ERROR_CALCULATING_STAT);
-
-		normProfileLength = chooseNormalisedProfileLength();
-
-		measurements = chooseMeasurementsToExport();
+		this(file, List.of(dataset), options);
 	}
 
 	/**
@@ -204,6 +197,14 @@ public class DatasetMeasurementsExporter extends StatsExporter {
 					String label = s.label(MeasurementScale.PIXELS).replace(" ", "_").replace("__",
 							"_");
 					outLine.append("GLCM_" + label + TAB);
+				}
+			}
+
+			if (isIncludePixelHistogram) {
+				for (Measurement m : Measurement.getPixelHistogramMeasurements()) {
+					String label = m.label(MeasurementScale.PIXELS).replace(" ", "_").replace("__",
+							"_");
+					outLine.append(label + TAB);
 				}
 			}
 
@@ -338,6 +339,13 @@ public class DatasetMeasurementsExporter extends StatsExporter {
 				outLine.append(c.getMeasurement(s) + TAB);
 			}
 		}
+
+		if (isIncludePixelHistogram) {
+			for (Measurement m : Measurement.getPixelHistogramMeasurements()) {
+				outLine.append(c.getMeasurement(m) + TAB);
+			}
+		}
+
 	}
 
 	/**
