@@ -58,6 +58,7 @@ public class Console extends JPanel implements ActionListener {
 	private static final String LIST_CMD = "list";
 	private static final String TASKS_CMD = "tasks";
 	private static final String HASH_CMD = "hash";
+	private static final String EDGE_CMD = "edge";
 
 	private final List<Command> runnableCommands = new ArrayList<>();
 
@@ -126,6 +127,13 @@ public class Console extends JPanel implements ActionListener {
 					for (Command s : runnableCommands)
 						logPanel.println(s.name + " - " + s.desc);
 				}));
+
+		runnableCommands.add(new Command(EDGE_CMD,
+				"filter poor edge detection",
+				() -> UserActionController.getInstance()
+						.userActionEventReceived(new UserActionEvent(this,
+								UserActionEvent.FILTER_POOR_EDGE_DETECTION,
+								DatasetListManager.getInstance().getSelectedDatasets()))));
 
 		runnableCommands.add(new Command(HIST_CMD,
 				"show the previous commands",

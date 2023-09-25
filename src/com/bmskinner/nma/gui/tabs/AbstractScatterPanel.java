@@ -40,14 +40,14 @@ import org.jfree.data.Range;
 import com.bmskinner.nma.analysis.nucleus.CellCollectionFilterBuilder;
 import com.bmskinner.nma.analysis.nucleus.CellCollectionFilterer;
 import com.bmskinner.nma.analysis.nucleus.CellCollectionFilterer.CollectionFilteringException;
-import com.bmskinner.nma.analysis.nucleus.FilteringOptions;
-import com.bmskinner.nma.analysis.nucleus.FilteringOptions.FilterMatchType;
 import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.datasets.ICellCollection;
 import com.bmskinner.nma.components.datasets.VirtualDataset;
 import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.measure.MeasurementScale;
+import com.bmskinner.nma.components.options.FilteringOptions;
+import com.bmskinner.nma.components.options.FilteringOptions.FilterMatchType;
 import com.bmskinner.nma.components.profiles.MissingLandmarkException;
 import com.bmskinner.nma.components.profiles.MissingProfileException;
 import com.bmskinner.nma.components.profiles.ProfileException;
@@ -255,7 +255,7 @@ public abstract class AbstractScatterPanel extends DetailPanel {
 
 					// Get the filtered cells as a real collection
 					ICellCollection filtered = CellCollectionFilterer.filter(d.getCollection(),
-							options);
+							options.getPredicate(d.getCollection()));
 
 					// Put them into a virtual collection
 					IAnalysisDataset virt = new VirtualDataset(d, "Filtered_" + statA + "_" + statB,

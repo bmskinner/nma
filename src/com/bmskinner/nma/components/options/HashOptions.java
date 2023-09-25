@@ -476,9 +476,18 @@ public interface HashOptions extends Serializable, XmlSerializable {
 	 * 
 	 * @param <A> the return type
 	 * @param key the key to fetch
-	 * @return the object under they key, or "N/A" if not present
+	 * @return the object under the key, or "N/A" if not present
 	 */
 	<A> A get(String key);
+
+	/**
+	 * Test if the options has any value with the given key. Beware of namespace
+	 * collisions with different value types
+	 * 
+	 * @param key
+	 * @return
+	 */
+	boolean has(String key);
 
 	/**
 	 * Set to the values in the given options. Shared keys will be updated, keys not

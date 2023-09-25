@@ -304,7 +304,7 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
 		}
 
 		windowProp = template.getProfileWindowProportion();
-		rulesets = template.getRuleSetCollection();
+		rulesets = template.getRuleSetCollection().duplicate();
 	}
 
 	@Override

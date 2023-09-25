@@ -5,10 +5,11 @@ import java.util.UUID;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
-import com.bmskinner.nma.analysis.nucleus.FilteringOptions.FilterMatchType;
 import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.measure.MeasurementScale;
 import com.bmskinner.nma.components.options.DefaultFilteringOptions;
+import com.bmskinner.nma.components.options.FilteringOptions;
+import com.bmskinner.nma.components.options.FilteringOptions.FilterMatchType;
 
 /**
  * Simplify creation of filtering options

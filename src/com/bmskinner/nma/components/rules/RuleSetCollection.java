@@ -35,8 +35,11 @@ import org.jdom2.Element;
 import com.bmskinner.nma.components.Version;
 import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.measure.Measurement;
+import com.bmskinner.nma.components.options.DefaultOptions;
+import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.profiles.DefaultLandmark;
 import com.bmskinner.nma.components.profiles.Landmark;
+import com.bmskinner.nma.components.profiles.ProfileType;
 import com.bmskinner.nma.io.XMLReader.XMLReadingException;
 import com.bmskinner.nma.io.XmlSerializable;
 
@@ -54,23 +57,54 @@ import com.bmskinner.nma.io.XmlSerializable;
  */
 public class RuleSetCollection implements XmlSerializable {
 
-	private static final String XML_VALUE = "value";
-
+	/** XML identifier for a valid measurement in this cell type */
 	private static final String XML_MEASUREMENT = "Measurement";
 
+	/** XML identifier for mapping an orientation to a landmark */
 	private static final String XML_ORIENT = "Orient";
 
+	/**
+	 * XML identifier for a priority axis (is horizontal or vertical more
+	 * important?)
+	 */
 	private static final String XML_PRIORITY_AXIS = "axis";
 
+	/** XML identifier for a rule application type */
 	private static final String XML_RULE_APPLICATION_TYPE = "application";
+
+	/** XML identifier for a rule version */
 	private static final String XML_RULE_VERSION = "version";
 
+	/** XML identifier for a ruleset collection */
 	private static final String XML_RULE_SET_COLLECTION = "RuleSetCollection";
+
+	/** XML identifier for a ruleset */
 	private static final String XML_RULESET = "Ruleset";
 
+	/** XML identifier for landmarks collection */
 	private static final String XML_LANDMARK = "Landmark";
 
-	private static final String XML_NAME = "name";
+	/**
+	 * Options identifier for whether to filter on poor edge detection by default
+	 */
+	public static final String RULESET_IS_EDGE_FILTER = "isEdgeFilter";
+
+	/**
+	 * Options identifier for whether to filter on poor edge detection by default
+	 */
+	public static final String RULESET_EDGE_FILTER_PROFILE = "edgeFilterProfile";
+
+	/** Options identifier for how to filter poor edge detection */
+	public static final String RULESET_EDGE_FILTER_THRESHOLD_MAX = "edgeFilterThresholdMax";
+
+	/** Options identifier for how to filter poor edge detection */
+	public static final String RULESET_EDGE_FILTER_THRESHOLD_MIN = "edgeFilterThresholdMin";
+
+	/**
+	 * Options identifier for max change in profile value expected in proper edge
+	 * detection
+	 */
+	public static final String RULESET_EDGE_FILTER_THRESHOLD_DELTA_MAX = "edgeFilterThresholdDeltaMax";
 
 	private static final Logger LOGGER = Logger.getLogger(RuleSetCollection.class.getName());
 
@@ -89,6 +123,8 @@ public class RuleSetCollection implements XmlSerializable {
 
 	private final RuleApplicationType ruleApplicationType;
 
+	private final HashOptions otherOptions = new DefaultOptions();
+
 	/**
 	 * Create a new empty collection. Specify the landmarks that should be used
 	 * preferentially by nuclei for orientation
@@ -97,7 +133,7 @@ public class RuleSetCollection implements XmlSerializable {
 			@Nullable Landmark right, @Nullable Landmark top, @Nullable Landmark bottom,
 			@Nullable Landmark seondaryX,
 			@Nullable Landmark seondaryY, @Nullable PriorityAxis priorityAxis,
-			RuleApplicationType type) {
+			RuleApplicationType type, @NonNull HashOptions otherOptions) {
 		this.name = name;
 
 		orientationMarks.put(OrientationMark.REFERENCE, rp);
@@ -122,6 +158,7 @@ public class RuleSetCollection implements XmlSerializable {
 
 		this.priorityAxis = priorityAxis;
 		this.ruleApplicationType = type;
+		this.otherOptions.set(otherOptions);
 	}
 
 	protected RuleSetCollection(RuleSetCollection rsc) {
@@ -143,6 +180,8 @@ public class RuleSetCollection implements XmlSerializable {
 
 		priorityAxis = rsc.priorityAxis;
 		ruleApplicationType = rsc.ruleApplicationType;
+
+		otherOptions.set(rsc.otherOptions);
 	}
 
 	/**
@@ -184,6 +223,13 @@ public class RuleSetCollection implements XmlSerializable {
 			validMeasurements.add(Measurement.of(m.getText()));
 		}
 
+		// Other options added in 2.2.0, may be null
+		Element other = e.getChild(XML_OPTIONS);
+		if (other != null) {
+			DefaultOptions op = new DefaultOptions(other);
+			otherOptions.set(op); // ensure always in valid state
+		}
+
 	}
 
 	public RuleSetCollection duplicate() {
@@ -194,16 +240,40 @@ public class RuleSetCollection implements XmlSerializable {
 		return name;
 	}
 
+	/**
+	 * Get the measurements that can be made for this cell type
+	 * 
+	 * @return
+	 */
 	public Set<Measurement> getMeasurableValues() {
 		return validMeasurements;
 	}
 
+	/**
+	 * Add a kind of measurement that can be made for this cell type
+	 * 
+	 * @return
+	 */
 	public void addMeasurableValue(Measurement m) {
 		validMeasurements.add(m);
 	}
 
+	/**
+	 * Get the rule application type
+	 * 
+	 * @return
+	 */
 	public RuleApplicationType getApplicationType() {
 		return ruleApplicationType;
+	}
+
+	/**
+	 * Get other options associated with this ruleset collection
+	 * 
+	 * @return
+	 */
+	public HashOptions getOtherOptions() {
+		return otherOptions;
 	}
 
 	/**
@@ -393,12 +463,15 @@ public class RuleSetCollection implements XmlSerializable {
 			rootElement.addContent(new Element(XML_MEASUREMENT).setText(m.name()));
 		}
 
+		rootElement.addContent(otherOptions.toXmlElement());
+
 		return rootElement;
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(map, name, orientationMarks, priorityAxis, ruleApplicationType);
+		return Objects.hash(map, name, orientationMarks, priorityAxis, ruleApplicationType,
+				otherOptions);
 	}
 
 	@Override
@@ -413,7 +486,8 @@ public class RuleSetCollection implements XmlSerializable {
 		return Objects.equals(map, other.map) && Objects.equals(name, other.name)
 				&& Objects.equals(orientationMarks, other.orientationMarks)
 				&& priorityAxis == other.priorityAxis
-				&& ruleApplicationType == other.ruleApplicationType;
+				&& ruleApplicationType == other.ruleApplicationType
+				&& Objects.equals(otherOptions, other.otherOptions);
 	}
 
 	/**
@@ -428,9 +502,17 @@ public class RuleSetCollection implements XmlSerializable {
 		Landmark bv = new DefaultLandmark("Ventral lower");
 		Landmark op = new DefaultLandmark("Tail socket");
 
+		HashOptions other = new DefaultOptions();
+		other.set(RULESET_IS_EDGE_FILTER, false);
+		other.set(RULESET_EDGE_FILTER_PROFILE, ProfileType.ANGLE);
+		other.set(RULESET_EDGE_FILTER_THRESHOLD_MAX, 280f);
+		other.set(RULESET_EDGE_FILTER_THRESHOLD_MIN, 10f);
+		other.set(RULESET_EDGE_FILTER_THRESHOLD_DELTA_MAX, 40f);
+
 		RuleSetCollection r = new RuleSetCollection("Mouse sperm", rp, rp, null, tv, bv, null, op,
 				PriorityAxis.Y,
-				RuleApplicationType.VIA_MEDIAN);
+				RuleApplicationType.VIA_MEDIAN,
+				other);
 
 		r.addRuleSet(OrientationMark.REFERENCE, RuleSet.mouseSpermRPRuleSet());
 		r.addRuleSet(OrientationMark.Y, RuleSet.mouseSpermOPRuleSet());
@@ -454,10 +536,18 @@ public class RuleSetCollection implements XmlSerializable {
 
 		Landmark rp = new DefaultLandmark("Tail socket");
 
+		HashOptions other = new DefaultOptions();
+		other.set(RULESET_IS_EDGE_FILTER, false);
+		other.set(RULESET_EDGE_FILTER_PROFILE, ProfileType.ANGLE);
+		other.set(RULESET_EDGE_FILTER_THRESHOLD_MAX, 280f);
+		other.set(RULESET_EDGE_FILTER_THRESHOLD_MIN, 10f);
+		other.set(RULESET_EDGE_FILTER_THRESHOLD_DELTA_MAX, 40f);
+
 		RuleSetCollection r = new RuleSetCollection("Pig sperm", rp, null, null, null, null, null,
 				rp,
 				PriorityAxis.Y,
-				RuleApplicationType.VIA_MEDIAN);
+				RuleApplicationType.VIA_MEDIAN,
+				other);
 
 		r.addRuleSet(OrientationMark.REFERENCE, RuleSet.pigSpermRPRuleSet());
 
@@ -476,9 +566,17 @@ public class RuleSetCollection implements XmlSerializable {
 
 		Landmark rp = new DefaultLandmark("Longest axis");
 
+		HashOptions other = new DefaultOptions();
+		other.set(RULESET_IS_EDGE_FILTER, false);
+		other.set(RULESET_EDGE_FILTER_PROFILE, ProfileType.ANGLE);
+		other.set(RULESET_EDGE_FILTER_THRESHOLD_MAX, 280f);
+		other.set(RULESET_EDGE_FILTER_THRESHOLD_MIN, 10f);
+		other.set(RULESET_EDGE_FILTER_THRESHOLD_DELTA_MAX, 40f);
+
 		RuleSetCollection r = new RuleSetCollection("Round", rp, null, null, null, rp, null, rp,
 				PriorityAxis.Y,
-				RuleApplicationType.VIA_MEDIAN);
+				RuleApplicationType.VIA_MEDIAN,
+				other);
 
 		r.addRuleSet(OrientationMark.REFERENCE, RuleSet.roundRPRuleSet());
 

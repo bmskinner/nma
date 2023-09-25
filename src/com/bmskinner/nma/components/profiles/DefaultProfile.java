@@ -647,6 +647,16 @@ public class DefaultProfile implements IProfile {
 	}
 
 	@Override
+	public IProfile calculateDerivative() {
+		float[] diff = new float[array.length];
+
+		for (int i = 0; i < array.length; i++) {
+			diff[i] = array[i] - array[wrapIndex(i + 1)];
+		}
+		return new DefaultProfile(diff);
+	}
+
+	@Override
 	public IProfile toPowerOf(double exponent) {
 		float[] values = new float[this.size()];
 

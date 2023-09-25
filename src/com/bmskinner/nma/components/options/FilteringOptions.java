@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package com.bmskinner.nma.analysis.nucleus;
+package com.bmskinner.nma.components.options;
 
 import java.util.UUID;
 import java.util.function.Predicate;

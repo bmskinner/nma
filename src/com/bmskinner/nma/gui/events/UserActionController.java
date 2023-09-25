@@ -51,6 +51,7 @@ import com.bmskinner.nma.gui.actions.ExportSingleCellImagesAction;
 import com.bmskinner.nma.gui.actions.ExportTPSAction;
 import com.bmskinner.nma.gui.actions.ExportWorkspaceAction;
 import com.bmskinner.nma.gui.actions.ExtractRandomCellsAction;
+import com.bmskinner.nma.gui.actions.FilterPoorEdgeDetectionCellsAction;
 import com.bmskinner.nma.gui.actions.FishRemappingAction;
 import com.bmskinner.nma.gui.actions.ImportDatasetAction;
 import com.bmskinner.nma.gui.actions.ImportWorkflowAction;
@@ -173,6 +174,9 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 
 		if (event.type().equals(UserActionEvent.EXTRACT_SUBSET))
 			return new ExtractRandomCellsAction(selectedDataset, acceptor);
+
+		if (event.type().equals(UserActionEvent.FILTER_POOR_EDGE_DETECTION))
+			return new FilterPoorEdgeDetectionCellsAction(selectedDataset, acceptor);
 
 		if (event.type().equals(UserActionEvent.POST_FISH_MAPPING))
 			return new FishRemappingAction(event.getDatasets(), acceptor);
