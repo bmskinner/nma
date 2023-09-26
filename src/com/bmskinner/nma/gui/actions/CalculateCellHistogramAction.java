@@ -9,9 +9,10 @@ import com.bmskinner.nma.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nma.analysis.IAnalysisMethod;
 import com.bmskinner.nma.analysis.image.CellHistogramCalculationMethod;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
+import com.bmskinner.nma.components.options.HashOptions;
+import com.bmskinner.nma.components.options.OptionsBuilder;
 import com.bmskinner.nma.core.ThreadManager;
 import com.bmskinner.nma.gui.ProgressBarAcceptor;
-import com.bmskinner.nma.gui.events.UIController;
 
 /**
  * Create an action to run histogram calculation and signal the UI
@@ -23,19 +24,29 @@ public class CalculateCellHistogramAction extends SingleDatasetResultAction {
 
 	private static final @NonNull String PROGRESS_BAR_LABEL = "Calculating histograms";
 
-	public CalculateCellHistogramAction(@NonNull List<IAnalysisDataset> datasets, @NonNull CountDownLatch latch,
+	public CalculateCellHistogramAction(@NonNull List<IAnalysisDataset> datasets,
+			@NonNull CountDownLatch latch,
 			@NonNull ProgressBarAcceptor acceptor) {
 		super(datasets, PROGRESS_BAR_LABEL, acceptor);
 		this.setLatch(latch);
 	}
 
-	public CalculateCellHistogramAction(@NonNull IAnalysisDataset dataset, @NonNull ProgressBarAcceptor acceptor) {
+	public CalculateCellHistogramAction(@NonNull IAnalysisDataset dataset,
+			@NonNull ProgressBarAcceptor acceptor) {
 		super(dataset, dataset.getName() + ": " + PROGRESS_BAR_LABEL, acceptor);
 	}
 
 	@Override
 	public void run() {
-		IAnalysisMethod m = new CellHistogramCalculationMethod(dataset);
+
+		// Default is to use the nucleus detection channel. TODO - allow selection
+		HashOptions options = new OptionsBuilder()
+				.withValue(HashOptions.CHANNEL,
+						dataset.getAnalysisOptions().get().getNucleusDetectionOptions().get()
+								.getInt(HashOptions.CHANNEL))
+				.build();
+
+		IAnalysisMethod m = new CellHistogramCalculationMethod(dataset, options);
 		worker = new DefaultAnalysisWorker(m, dataset.getCollection().size());
 		worker.addPropertyChangeListener(this);
 		ThreadManager.getInstance().submit(worker);
@@ -43,7 +54,6 @@ public class CalculateCellHistogramAction extends SingleDatasetResultAction {
 
 	@Override
 	public void finished() {
-		UIController.getInstance().fireGLCMDataAdded(List.of(dataset));
 		if (!hasRemainingDatasetsToProcess()) {
 			super.finished();
 			countdownLatch();

@@ -2,6 +2,8 @@ package com.bmskinner.nma.analysis.image;
 
 import java.io.File;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nma.analysis.DefaultAnalysisResult;
 import com.bmskinner.nma.analysis.IAnalysisResult;
 import com.bmskinner.nma.analysis.SingleDatasetAnalysisMethod;
@@ -16,8 +18,19 @@ import ij.gui.Roi;
 import ij.process.ImageProcessor;
 
 public class CellHistogramCalculationMethod extends SingleDatasetAnalysisMethod {
-	public CellHistogramCalculationMethod(IAnalysisDataset dataset) {
+
+	private final HashOptions options;
+
+	/**
+	 * Create with a dataset to measure and an options object
+	 * 
+	 * @param dataset
+	 * @param options
+	 */
+	public CellHistogramCalculationMethod(@NonNull IAnalysisDataset dataset,
+			@NonNull HashOptions options) {
 		super(dataset);
+		this.options = options;
 	}
 
 	@Override
@@ -27,13 +40,13 @@ public class CellHistogramCalculationMethod extends SingleDatasetAnalysisMethod 
 	}
 
 	/**
-	 * Calculate the GLCM value across the entire nucleus image
+	 * Calculate the histogram value across the entire nucleus image
 	 * 
 	 * @throws Exception
 	 */
 	private void run() throws Exception {
 
-		int channel = dataset.getAnalysisOptions().get().getNucleusDetectionOptions().get().getInt(HashOptions.CHANNEL);
+		int channel = options.get(HashOptions.CHANNEL);
 
 		for (File f : dataset.getCollection().getImageFiles()) {
 
@@ -58,7 +71,7 @@ public class CellHistogramCalculationMethod extends SingleDatasetAnalysisMethod 
 							}
 						}
 					}
-					
+
 					// Add the measurments to the nucleus
 					for (int i = 0; i < histogram.length; i++) {
 						Measurement m = Measurement.makePixelHistogram(i);
