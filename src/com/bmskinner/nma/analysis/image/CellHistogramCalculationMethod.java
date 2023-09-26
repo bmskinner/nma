@@ -74,7 +74,7 @@ public class CellHistogramCalculationMethod extends SingleDatasetAnalysisMethod 
 
 					// Add the measurments to the nucleus
 					for (int i = 0; i < histogram.length; i++) {
-						Measurement m = Measurement.makePixelHistogram(i);
+						Measurement m = Measurement.makePixelHistogram(channel, i);
 						n.setMeasurement(m, histogram[i]);
 					}
 
