@@ -331,7 +331,7 @@ public class DefaultOptions implements HashOptions {
 	}
 
 	@Override
-	public <A> A get(String key) {
+	public <A> A get(String key) throws MissingOptionException {
 		if (intMap.containsKey(key))
 			return (A) intMap.get(key);
 		if (dblMap.containsKey(key))
@@ -345,9 +345,8 @@ public class DefaultOptions implements HashOptions {
 		if (subMap.containsKey(key))
 			return (A) subMap.get(key);
 
-		LOGGER.warning(() -> "Cannot find value with key '%s' in options".formatted(key));
-		return (A) "N/A";
-
+		throw new MissingOptionException(
+				"Cannot find value with key '%s' in options".formatted(key));
 	}
 
 	@Override

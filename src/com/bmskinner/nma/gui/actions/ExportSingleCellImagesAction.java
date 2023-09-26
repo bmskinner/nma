@@ -6,6 +6,7 @@ import java.awt.GridBagLayout;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.JCheckBox;
@@ -20,6 +21,7 @@ import com.bmskinner.nma.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nma.analysis.IAnalysisMethod;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.options.HashOptions;
+import com.bmskinner.nma.components.options.MissingOptionException;
 import com.bmskinner.nma.components.options.OptionsBuilder;
 import com.bmskinner.nma.core.ThreadManager;
 import com.bmskinner.nma.gui.ProgressBarAcceptor;
@@ -48,19 +50,25 @@ public class ExportSingleCellImagesAction extends MultiDatasetResultAction {
 	public void run() {
 		setProgressBarIndeterminate();
 
-		SubAnalysisSetupDialog dialog = new CellImageSetupDialog(datasets);
+		try {
 
-		if (dialog.isReadyToRun()) {
-			IAnalysisMethod m = dialog.getMethod();
+			SubAnalysisSetupDialog dialog = new CellImageSetupDialog(datasets);
 
-			int nNuclei = datasets.stream().mapToInt(d -> d.getCollection().getNucleusCount())
-					.sum();
+			if (dialog.isReadyToRun()) {
+				IAnalysisMethod m = dialog.getMethod();
 
-			worker = new DefaultAnalysisWorker(m, nNuclei);
-			worker.addPropertyChangeListener(this);
-			ThreadManager.getInstance().submit(worker);
-		} else {
-			// User cancelled
+				int nNuclei = datasets.stream().mapToInt(d -> d.getCollection().getNucleusCount())
+						.sum();
+
+				worker = new DefaultAnalysisWorker(m, nNuclei);
+				worker.addPropertyChangeListener(this);
+				ThreadManager.getInstance().submit(worker);
+			} else {
+				// User cancelled
+				this.cancel();
+			}
+		} catch (MissingOptionException e) {
+			LOGGER.log(Level.SEVERE, "Cannot create UI:" + e.getMessage(), e);
 			this.cancel();
 		}
 
@@ -73,18 +81,20 @@ public class ExportSingleCellImagesAction extends MultiDatasetResultAction {
 
 		HashOptions o = new OptionsBuilder().build();
 
-		public CellImageSetupDialog(final @NonNull List<IAnalysisDataset> datasets) {
+		public CellImageSetupDialog(final @NonNull List<IAnalysisDataset> datasets)
+				throws MissingOptionException {
 			this(datasets, DIALOG_TITLE);
 		}
 
 		/**
-		 * Constructor that does not make panel visible
+		 * Construct from datasets
 		 * 
-		 * @param dataset the dataset
-		 * @param title
+		 * @param datasets the datasets
+		 * @param title    the dialog title
+		 * @throws MissingOptionException
 		 */
 		protected CellImageSetupDialog(final @NonNull List<IAnalysisDataset> datasets,
-				final String title) {
+				final String title) throws MissingOptionException {
 			super(datasets, title);
 			setDefaults();
 			createUI();
@@ -97,7 +107,7 @@ public class ExportSingleCellImagesAction extends MultiDatasetResultAction {
 		}
 
 		@Override
-		protected void createUI() {
+		protected void createUI() throws MissingOptionException {
 
 			getContentPane().add(createHeader(), BorderLayout.NORTH);
 			getContentPane().add(createFooter(), BorderLayout.SOUTH);
@@ -110,7 +120,7 @@ public class ExportSingleCellImagesAction extends MultiDatasetResultAction {
 			List<Component> fields = new ArrayList<>();
 
 			JCheckBox maskBox = new JCheckBox();
-			maskBox.setSelected(o.getBoolean(CellImageExportMethod.MASK_BACKGROUND_KEY));
+			maskBox.setSelected(o.get(CellImageExportMethod.MASK_BACKGROUND_KEY));
 			maskBox.addActionListener(
 					e -> o.setBoolean(CellImageExportMethod.MASK_BACKGROUND_KEY,
 							maskBox.isSelected()));
@@ -119,7 +129,7 @@ public class ExportSingleCellImagesAction extends MultiDatasetResultAction {
 			fields.add(maskBox);
 
 			JCheckBox foreMaskBox = new JCheckBox();
-			foreMaskBox.setSelected(o.getBoolean(CellImageExportMethod.MASK_FOREGROUND_KEY));
+			foreMaskBox.setSelected(o.get(CellImageExportMethod.MASK_FOREGROUND_KEY));
 			foreMaskBox.addActionListener(
 					e -> o.setBoolean(CellImageExportMethod.MASK_FOREGROUND_KEY,
 							foreMaskBox.isSelected()));
@@ -129,7 +139,7 @@ public class ExportSingleCellImagesAction extends MultiDatasetResultAction {
 
 			JCheckBox rgbBox = new JCheckBox();
 			rgbBox.setSelected(
-					o.getBoolean(CellImageExportMethod.SINGLE_CELL_IMAGE_IS_RGB_KEY));
+					o.get(CellImageExportMethod.SINGLE_CELL_IMAGE_IS_RGB_KEY));
 			rgbBox.addActionListener(
 					e -> o.setBoolean(CellImageExportMethod.SINGLE_CELL_IMAGE_IS_RGB_KEY,
 							rgbBox.isSelected()));
@@ -141,7 +151,7 @@ public class ExportSingleCellImagesAction extends MultiDatasetResultAction {
 					new SpinnerNumberModel(CellImageExportMethod.SINGLE_CELL_IMAGE_WIDTH_DEFAULT,
 							50, 10000, 1));
 			sizeSelector.setEnabled(
-					o.getBoolean(CellImageExportMethod.SINGLE_CELL_IMAGE_IS_NORMALISE_WIDTH_KEY));
+					o.get(CellImageExportMethod.SINGLE_CELL_IMAGE_IS_NORMALISE_WIDTH_KEY));
 			sizeSelector.addChangeListener(e -> {
 				try {
 					sizeSelector.commitEdit();
@@ -154,7 +164,7 @@ public class ExportSingleCellImagesAction extends MultiDatasetResultAction {
 
 			// Should image size be normalised
 			JCheckBox sizeBox = new JCheckBox();
-			sizeBox.setSelected(o.getBoolean(
+			sizeBox.setSelected(o.get(
 					CellImageExportMethod.SINGLE_CELL_IMAGE_IS_NORMALISE_WIDTH_KEY));
 
 			sizeBox.addActionListener(e -> {
@@ -169,7 +179,7 @@ public class ExportSingleCellImagesAction extends MultiDatasetResultAction {
 			});
 
 			JCheckBox keypointBox = new JCheckBox();
-			keypointBox.setSelected(o.getBoolean(
+			keypointBox.setSelected(o.get(
 					CellImageExportMethod.SINGLE_CELL_IMAGE_IS_EXPORT_KEYPOINTS_KEY));
 			keypointBox.addActionListener(
 					e -> o.setBoolean(

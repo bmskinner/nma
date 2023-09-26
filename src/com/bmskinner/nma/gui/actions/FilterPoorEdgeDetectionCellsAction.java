@@ -15,6 +15,7 @@ import com.bmskinner.nma.analysis.nucleus.CellCollectionFilteringMethod;
 import com.bmskinner.nma.analysis.nucleus.PoorEdgeDetectionProfilePredicate;
 import com.bmskinner.nma.components.cells.ICell;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
+import com.bmskinner.nma.components.options.MissingOptionException;
 import com.bmskinner.nma.core.ThreadManager;
 import com.bmskinner.nma.gui.ProgressBarAcceptor;
 import com.bmskinner.nma.gui.events.UIController;
@@ -53,7 +54,7 @@ public class FilterPoorEdgeDetectionCellsAction extends SingleDatasetResultActio
 			worker = new DefaultAnalysisWorker(m, dataset.getCollection().size());
 			worker.addPropertyChangeListener(this);
 			ThreadManager.getInstance().submit(worker);
-		} catch (IllegalArgumentException e) {
+		} catch (IllegalArgumentException | MissingOptionException e) {
 			LOGGER.log(Level.SEVERE, "Unable to create edge filterer: %s".formatted(e.getMessage()),
 					e);
 			cancel();

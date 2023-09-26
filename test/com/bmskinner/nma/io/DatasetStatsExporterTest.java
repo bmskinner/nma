@@ -9,8 +9,8 @@ import org.junit.Test;
 import com.bmskinner.nma.TestDatasetBuilder;
 import com.bmskinner.nma.analysis.profiles.SegmentSplitMethod;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
-import com.bmskinner.nma.components.options.DefaultOptions;
 import com.bmskinner.nma.components.options.HashOptions;
+import com.bmskinner.nma.components.options.OptionsBuilder;
 import com.bmskinner.nma.components.profiles.IProfileSegment;
 import com.bmskinner.nma.components.rules.OrientationMark;
 import com.bmskinner.nma.components.rules.RuleSetCollection;
@@ -49,9 +49,12 @@ public class DatasetStatsExporterTest {
 
 		// Interpolation length should be chosen to be at least the current length
 		// If this operation fails, the interpolation logic did not succeed
-
-		HashOptions op = new DefaultOptions();
-		op.setInt(HashOptions.EXPORT_PROFILE_INTERPOLATION_LENGTH, 10);
+		HashOptions op = new OptionsBuilder()
+				.withValue(HashOptions.EXPORT_MEASUREMENTS_KEY, false)
+				.withValue(HashOptions.EXPORT_OUTLINES_KEY, false)
+				.withValue(HashOptions.EXPORT_PROFILES_KEY, false)
+				.withValue(HashOptions.EXPORT_PROFILE_INTERPOLATION_LENGTH, 10)
+				.build();
 
 		File outFile = new File("test");
 

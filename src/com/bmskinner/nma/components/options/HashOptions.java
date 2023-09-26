@@ -463,7 +463,8 @@ public interface HashOptions extends Serializable, XmlSerializable {
 	Map<String, Object> getEntries();
 
 	/**
-	 * Get the object stored with the given key
+	 * Get the object stored with the given key. If no object is found, the method
+	 * will return a string with the value "N/A"
 	 * 
 	 * @param key
 	 * @return
@@ -477,8 +478,9 @@ public interface HashOptions extends Serializable, XmlSerializable {
 	 * @param <A> the return type
 	 * @param key the key to fetch
 	 * @return the object under the key, or "N/A" if not present
+	 * @throws MissingOptionException
 	 */
-	<A> A get(String key);
+	<A> A get(String key) throws MissingOptionException;
 
 	/**
 	 * Test if the options has any value with the given key. Beware of namespace

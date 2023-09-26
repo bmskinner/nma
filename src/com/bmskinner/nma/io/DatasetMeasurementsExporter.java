@@ -40,6 +40,7 @@ import com.bmskinner.nma.components.generic.IPoint;
 import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.measure.MeasurementScale;
 import com.bmskinner.nma.components.options.HashOptions;
+import com.bmskinner.nma.components.options.MissingOptionException;
 import com.bmskinner.nma.components.profiles.DefaultProfile;
 import com.bmskinner.nma.components.profiles.IProfile;
 import com.bmskinner.nma.components.profiles.IProfileSegment;
@@ -91,9 +92,10 @@ public class DatasetMeasurementsExporter extends StatsExporter {
 	 * Create specifying the folder stats will be exported into
 	 * 
 	 * @param folder
+	 * @throws MissingOptionException
 	 */
 	public DatasetMeasurementsExporter(@NonNull File file, @NonNull List<IAnalysisDataset> list,
-			@NonNull HashOptions options) {
+			@NonNull HashOptions options) throws MissingOptionException {
 		super(file, list, options);
 		segCount = list.get(0).getCollection().getProfileManager().getSegmentCount();
 		if (list.size() == 1) {
@@ -103,12 +105,16 @@ public class DatasetMeasurementsExporter extends StatsExporter {
 					.allMatch(d -> d.getCollection().getProfileManager()
 							.getSegmentCount() == segCount);
 		}
-		profileSamples = options.get(HashOptions.EXPORT_PROFILE_INTERPOLATION_LENGTH);
-		outlineSamples = options.get(HashOptions.EXPORT_OUTLINE_N_SAMPLES_KEY);
 
 		isIncludeMeasurements = options.get(HashOptions.EXPORT_MEASUREMENTS_KEY);
 		isIncludeOutlines = options.get(HashOptions.EXPORT_OUTLINES_KEY);
 		isIncludeProfiles = options.get(HashOptions.EXPORT_PROFILES_KEY);
+
+		if (isIncludeOutlines)
+			outlineSamples = options.get(HashOptions.EXPORT_OUTLINE_N_SAMPLES_KEY);
+
+		if (isIncludeProfiles)
+			profileSamples = options.get(HashOptions.EXPORT_PROFILE_INTERPOLATION_LENGTH);
 
 		// Only include if present in all cells of all datasets
 		isIncludeGlcm = list.stream()
@@ -121,9 +127,11 @@ public class DatasetMeasurementsExporter extends StatsExporter {
 		isIncludePixelHistogram = list.stream()
 				.allMatch(d -> d.getCollection().getCells().stream() // all datasets should agree
 						.noneMatch(c -> c // no cells should have a missing value
-						.getPrimaryNucleus()
-								// Only check for the first pixel value - if one is present, all are present
-						.getMeasurement(Measurement.makePixelHistogram(0)) == Statistical.ERROR_CALCULATING_STAT));
+								.getPrimaryNucleus()
+								// Only check for the first pixel value - if one is present, all are
+								// present
+								.getMeasurement(Measurement.makePixelHistogram(
+										0)) == Statistical.ERROR_CALCULATING_STAT));
 
 		normProfileLength = chooseNormalisedProfileLength();
 
@@ -134,9 +142,10 @@ public class DatasetMeasurementsExporter extends StatsExporter {
 	 * Create specifying the folder stats will be exported into
 	 * 
 	 * @param folder
+	 * @throws MissingOptionException
 	 */
 	public DatasetMeasurementsExporter(@NonNull File file, @NonNull IAnalysisDataset dataset,
-			@NonNull HashOptions options) {
+			@NonNull HashOptions options) throws MissingOptionException {
 		this(file, List.of(dataset), options);
 	}
 

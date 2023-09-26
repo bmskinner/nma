@@ -93,8 +93,7 @@ public class NucleusTest {
 	 */
 	@Test
 	public void testMinDiameter() throws Exception {
-		double max = Math.sqrt(100 * 100 * 2);
-		double expected = 100 / max;
+		double expected = 100;
 		double epsilon = 0.01; // the amount of difference permitted
 		assertEquals(expected, nucleus.getMeasurement(Measurement.MIN_DIAMETER), epsilon);
 	}

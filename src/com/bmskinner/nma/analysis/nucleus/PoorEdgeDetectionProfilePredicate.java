@@ -9,6 +9,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nma.components.cells.ICell;
 import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.options.HashOptions;
+import com.bmskinner.nma.components.options.MissingOptionException;
 import com.bmskinner.nma.components.profiles.IProfile;
 import com.bmskinner.nma.components.profiles.MissingLandmarkException;
 import com.bmskinner.nma.components.profiles.MissingProfileException;
@@ -39,24 +40,10 @@ public class PoorEdgeDetectionProfilePredicate implements Predicate<ICell> {
 	 * RuleSetCollection
 	 * 
 	 * @param options
+	 * @throws MissingOptionException
 	 */
-	public PoorEdgeDetectionProfilePredicate(@NonNull HashOptions options) {
-
-		if (!options.has(RuleSetCollection.RULESET_EDGE_FILTER_PROFILE)) {
-			throw new IllegalArgumentException("Options does not have edge filter profile set");
-		}
-
-		if (!options.has(RuleSetCollection.RULESET_EDGE_FILTER_THRESHOLD_MIN)) {
-			throw new IllegalArgumentException("Options does not have edge filter min set");
-		}
-
-		if (!options.has(RuleSetCollection.RULESET_EDGE_FILTER_THRESHOLD_MAX)) {
-			throw new IllegalArgumentException("Options does not have edge filter max set");
-		}
-
-		if (!options.has(RuleSetCollection.RULESET_EDGE_FILTER_THRESHOLD_DELTA_MAX)) {
-			throw new IllegalArgumentException("Options does not have edge filter delta max set");
-		}
+	public PoorEdgeDetectionProfilePredicate(@NonNull HashOptions options)
+			throws MissingOptionException {
 
 		this.profileType = ProfileType
 				.fromString(options.get(RuleSetCollection.RULESET_EDGE_FILTER_PROFILE));
