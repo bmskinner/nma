@@ -1,6 +1,7 @@
 package com.bmskinner.nma.analysis.nucleus;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 
@@ -12,6 +13,7 @@ import com.bmskinner.nma.TestDatasetBuilder;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.datasets.ICellCollection;
 import com.bmskinner.nma.components.rules.RuleSetCollection;
+import com.bmskinner.nma.io.SampleDatasetReader;
 
 public class CellCollectionFiltererTest extends ComponentTester {
 
@@ -36,6 +38,18 @@ public class CellCollectionFiltererTest extends ComponentTester {
 
 		assertEquals("Adding duplicate collection should include all cells",
 				d1.getCollection().size(), result.size());
+	}
+
+	@Test
+	public void testPoorEdgeDetectorFilterRemovesCells() throws Exception {
+		IAnalysisDataset d = SampleDatasetReader.openTestMouseDataset();
+		ICellCollection result = CellCollectionFilterer.filter(d.getCollection(),
+				new PoorEdgeDetectionProfilePredicate(
+						d.getAnalysisOptions().get().getRuleSetCollection().getOtherOptions()));
+
+		assertTrue("Poor edge filter should remove cells",
+				result.size() < d.getCollection().size());
+
 	}
 
 }
