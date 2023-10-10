@@ -181,8 +181,8 @@ public class AnalysisRulesetsTableModel extends DatasetTableModel {
 		}
 
 		try {
-			rowData[r][c] = oms.get(omRow).toString() + Io.NEWLINE
-					+ rsc.getLandmark(oms.get(omRow));
+			rowData[r][c] = oms.get(omRow).toString() + ": " +
+					rsc.getLandmark(oms.get(omRow)).get().getName();
 
 		} catch (Exception e) {
 			LOGGER.fine("Error making analysis rulesets table row " + r + " col " + c + " of "

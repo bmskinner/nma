@@ -35,12 +35,12 @@ import com.bmskinner.nma.components.Version;
 import com.bmskinner.nma.core.GlobalOptions;
 import com.bmskinner.nma.gui.LogPanel;
 import com.bmskinner.nma.gui.events.UserActionController;
-import com.bmskinner.nma.gui.tabs.AnalysisDetailPanel;
 import com.bmskinner.nma.gui.tabs.ClusterDetailPanel;
 import com.bmskinner.nma.gui.tabs.DetailPanel;
 import com.bmskinner.nma.gui.tabs.ImagesTabPanel;
 import com.bmskinner.nma.gui.tabs.MergesDetailPanel;
 import com.bmskinner.nma.gui.tabs.TabPanel;
+import com.bmskinner.nma.gui.tabs.analysis_info.AnalysisInfoDetailPanel;
 import com.bmskinner.nma.gui.tabs.cells_detail.IndividualCellDetailPanel;
 import com.bmskinner.nma.gui.tabs.comparisons.ComparisonDetailPanel;
 import com.bmskinner.nma.gui.tabs.consensus.ConsensusNucleusPanel;
@@ -241,7 +241,7 @@ public class DockableMainWindow extends AbstractMainWindow {
 		tabDock = new TabDock();
 
 		// Create the top level tabs in the UI
-		DetailPanel analysisDetailPanel = new AnalysisDetailPanel();
+		DetailPanel analysisDetailPanel = new AnalysisInfoDetailPanel();
 		DetailPanel nucleusProfilesPanel = new NucleusProfilesPanel(); // the angle profiles
 		DetailPanel cellsDetailPanel = new IndividualCellDetailPanel();
 		DetailPanel nuclearChartsPanel = new NuclearStatisticsPanel();

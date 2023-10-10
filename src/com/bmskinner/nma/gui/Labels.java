@@ -317,12 +317,22 @@ public class Labels {
 		public static final String NUCLEUS_DETECTION = "Nucleus detection";
 		public static final String NUCLEUS_CIRCULARITY = "Nucleus circularity";
 		public static final String NUCLEUS_SIZE = "Nucleus area";
-		public static final String COLLECTION_SOURCE = "Image source";
+		public static final String COLLECTION_SOURCE = "Original image source";
 		public static final String PIXEL_SCALE = "Pixel scale";
 		public static final String RUN_TIME = "Run time";
 		public static final String RULESET_USED = "Landmark ruleset";
 		public static final String SOFTWARE_VERSION = "Created in";
+	}
+
+	public static class AnalysisRulesets {
+		public static final String RULESET_NAME = "Landmark ruleset";
 		public static final String RULE_APPLICATON_TYPE = "Rule type";
+		public static final String RULESET_PROFILE = "Profile type";
+		public static final String RULE_NAME = "Rule";
+		public static final String LANDMARK_NAME = "Landmark";
+		public static final String ORIENTATION_NAME = "Orientation";
+		public static final String MEASUREMENT_NAME = "Measureable value";
+		public static final String RULE_VALUES = "Values";
 
 	}
 
