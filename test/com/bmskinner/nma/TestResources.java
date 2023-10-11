@@ -21,7 +21,7 @@ public class TestResources {
 	 */
 	private static final File DATASET_FOLDER_BASE = new File("test/samples/datasets/");
 
-	private static final String UNIT_TEST_FOLDERNAME = "UnitTest_" + Version.currentVersion();
+	private static final String UNIT_TEST_FOLDERNAME = unitTestFolderName(Version.currentVersion());
 
 	/** Folder for saving general output files */
 	public static final File DATASET_FOLDER = new File(DATASET_FOLDER_BASE,
@@ -126,5 +126,26 @@ public class TestResources {
 
 	public static final File WARPING_NORMALISATION_IMAGE = new File(WARPING_FOLDER,
 			"Gradient.tiff");
+
+	/**
+	 * Return the unit test folder name for the given version
+	 * 
+	 * @param version
+	 * @return
+	 */
+	public static final String unitTestFolderName(Version version) {
+		return "UnitTest_" + version;
+	}
+
+	/**
+	 * Return the unit test output folder for the given image set and version
+	 * 
+	 * @param imageset the image set e.g. Mouse
+	 * @param version  the software version
+	 * @return
+	 */
+	public static final File outputFolder(String imageset, Version version) {
+		return new File(imageset, unitTestFolderName(version));
+	}
 
 }

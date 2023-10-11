@@ -57,20 +57,20 @@ public class PoorEdgeDetectionProfilePredicate implements Predicate<ICell> {
 	@Override
 	public boolean test(ICell t) {
 
-		boolean allPass = true;
+		boolean cellPasses = true;
 		for (Nucleus n : t.getNuclei()) {
 			try {
 
 				// Check profile values are within tolerances
 				IProfile p = n.getProfile(profileType);
-				allPass &= p.getMin() >= min && p.getMax() <= max;
-				if (!allPass)
+				cellPasses &= p.getMin() >= min && p.getMax() <= max;
+				if (!cellPasses)
 					return false;
 
-				// Calculate changes over a small window size
-				// A poor edge detection can vary wildly
-				IProfile deltas = p.calculateDerivative();
-				allPass &= deltas.getMax() <= deltaMax && deltas.getMin() >= -deltaMax;
+				// Calculate first derivative and take absolute value
+				// Poor edge detection should show as rapid changes in angle
+				IProfile deltas = p.calculateDerivative().absolute();
+				cellPasses &= deltas.getMax() <= deltaMax;
 
 			} catch (MissingProfileException | MissingLandmarkException | ProfileException e) {
 				LOGGER.log(Level.SEVERE, "Unable to get profile in nucleus", e);
@@ -78,7 +78,7 @@ public class PoorEdgeDetectionProfilePredicate implements Predicate<ICell> {
 			}
 		}
 
-		return allPass;
+		return cellPasses;
 	}
 
 	@Override

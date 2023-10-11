@@ -13,9 +13,11 @@ import com.bmskinner.nma.analysis.IAnalysisMethod;
 import com.bmskinner.nma.analysis.IAnalysisResult;
 import com.bmskinner.nma.analysis.nucleus.CellCollectionFilteringMethod;
 import com.bmskinner.nma.analysis.nucleus.PoorEdgeDetectionProfilePredicate;
+import com.bmskinner.nma.components.Version;
 import com.bmskinner.nma.components.cells.ICell;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.options.MissingOptionException;
+import com.bmskinner.nma.components.rules.RuleSetCollection;
 import com.bmskinner.nma.core.ThreadManager;
 import com.bmskinner.nma.gui.ProgressBarAcceptor;
 import com.bmskinner.nma.gui.events.UIController;
@@ -46,8 +48,19 @@ public class FilterPoorEdgeDetectionCellsAction extends SingleDatasetResultActio
 
 		LOGGER.fine("Filtering on poor edge detection");
 		try {
+
+			RuleSetCollection rsc = dataset.getAnalysisOptions().get().getRuleSetCollection();
+
+			if (rsc.getRulesetVersion().isOlderThan(Version.V_2_2_0)) {
+				LOGGER.warning(
+						"The ruleset for this dataset is from version %s, and does not have edge detection values set"
+								.formatted(rsc.getRulesetVersion()));
+				cancel();
+				return;
+			}
+
 			Predicate<ICell> profilePredicate = new PoorEdgeDetectionProfilePredicate(
-					dataset.getAnalysisOptions().get().getRuleSetCollection().getOtherOptions());
+					rsc.getOtherOptions());
 
 			IAnalysisMethod m = new CellCollectionFilteringMethod(dataset, profilePredicate,
 					dataset.getName() + "_passing_edge_detection");

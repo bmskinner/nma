@@ -108,6 +108,8 @@ public class RuleSetCollection implements XmlSerializable {
 
 	private static final Logger LOGGER = Logger.getLogger(RuleSetCollection.class.getName());
 
+	private final Version versionCreated;
+
 	private final String name;
 
 	private final Map<Landmark, List<RuleSet>> map = new HashMap<>();
@@ -159,6 +161,7 @@ public class RuleSetCollection implements XmlSerializable {
 		this.priorityAxis = priorityAxis;
 		this.ruleApplicationType = type;
 		this.otherOptions.set(otherOptions);
+		this.versionCreated = Version.currentVersion();
 	}
 
 	protected RuleSetCollection(RuleSetCollection rsc) {
@@ -182,6 +185,7 @@ public class RuleSetCollection implements XmlSerializable {
 		ruleApplicationType = rsc.ruleApplicationType;
 
 		otherOptions.set(rsc.otherOptions);
+		versionCreated = rsc.versionCreated;
 	}
 
 	/**
@@ -197,6 +201,8 @@ public class RuleSetCollection implements XmlSerializable {
 		priorityAxis = PriorityAxis.valueOf(e.getAttributeValue(XML_PRIORITY_AXIS));
 		ruleApplicationType = RuleApplicationType
 				.valueOf(e.getAttributeValue(XML_RULE_APPLICATION_TYPE));
+
+		versionCreated = Version.fromString(e.getAttributeValue(XML_RULE_VERSION));
 
 		// Add the rulesets
 		for (Element t : e.getChildren(XML_LANDMARK)) {
@@ -408,6 +414,15 @@ public class RuleSetCollection implements XmlSerializable {
 	}
 
 	/**
+	 * Return the NMA version used to create this ruleset collection
+	 * 
+	 * @return
+	 */
+	public Version getRulesetVersion() {
+		return versionCreated;
+	}
+
+	/**
 	 * Test if the collection is empty
 	 * 
 	 * @return
@@ -436,7 +451,7 @@ public class RuleSetCollection implements XmlSerializable {
 		Element rootElement = new Element(XML_RULE_SET_COLLECTION)
 				.setAttribute(XML_NAME, getName())
 				.setAttribute(XML_RULE_APPLICATION_TYPE, getApplicationType().toString())
-				.setAttribute(XML_RULE_VERSION, Version.currentVersion().toString());
+				.setAttribute(XML_RULE_VERSION, versionCreated.toString());
 
 		if (priorityAxis != null)
 			rootElement.setAttribute(XML_PRIORITY_AXIS, priorityAxis.toString());
