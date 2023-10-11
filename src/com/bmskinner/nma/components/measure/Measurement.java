@@ -78,7 +78,7 @@ public interface Measurement extends XmlSerializable {
 		static final String PCA_N = "Number of PCs";
 		static final String PCA_1 = "PC1";
 		static final String PCA_2 = "PC2";
-		static final String PIXEL_HISTOGRAM = "Pixel histogram";
+		public static final String PIXEL_HISTOGRAM = "Pixel histogram";
 
 	}
 
@@ -247,8 +247,9 @@ public interface Measurement extends XmlSerializable {
 	 * @param dim the grey level measured
 	 * @return
 	 */
-	static Measurement makePixelHistogram(int dim) {
-		return new DefaultMeasurement(Names.PIXEL_HISTOGRAM + "_" + dim, MeasurementDimension.NONE);
+	static Measurement makePixelHistogram(int channel, int dim) {
+		return new DefaultMeasurement(Names.PIXEL_HISTOGRAM + "_" + dim + "_channel_" + channel,
+				MeasurementDimension.NONE);
 	}
 
 	/**
@@ -363,10 +364,10 @@ public interface Measurement extends XmlSerializable {
 	 * 
 	 * @return the 256 grey level measurements
 	 */
-	static List<Measurement> getPixelHistogramMeasurements() {
+	static List<Measurement> getPixelHistogramMeasurements(int channel) {
 		List<Measurement> list = new ArrayList<>();
 		for (int i = 0; i < 256; i++)
-			list.add(Measurement.makePixelHistogram(i));
+			list.add(Measurement.makePixelHistogram(channel, i));
 		return list;
 	}
 

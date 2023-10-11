@@ -52,7 +52,7 @@ public abstract class SettingsDialog extends JDialog {
 	protected static final String OK_LBL = "OK";
 	protected static final String CANCEL_LBL = "Cancel";
 
-	protected String[] channelOptionStrings = { "Greyscale", "Red", "Green", "Blue" };
+	protected static final String[] channelOptionStrings = { "Greyscale", "Red", "Green", "Blue" };
 
 	/**
 	 * Constructor for generic dialogs not attached to a frame

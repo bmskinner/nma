@@ -488,33 +488,45 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 		addSubMenu.add(fact.makeItem(Labels.Populations.POST_FISH_MAPPING_LBL,
 				UserActionEvent.POST_FISH_MAPPING,
 				ContextEnabled.ACTIVE_ON_ROOT_DATASET
-						| ContextEnabled.ACTIVE_ON_SINGLE_OBJECT));
+						| ContextEnabled.ACTIVE_ON_SINGLE_OBJECT,
+				Labels.Populations.POST_FISH_MAPPING_TOOLTIP));
 
 		addSubMenu.add(fact.makeItem(Labels.Populations.ADD_CHILD_CELLS_LBL,
 				UserActionEvent.RELOCATE_CELLS,
 				ContextEnabled.ACTIVE_ON_ROOT_DATASET
 						| ContextEnabled.ACTIVE_ON_CHILD_DATASET
-						| ContextEnabled.ACTIVE_ON_SINGLE_OBJECT));
+						| ContextEnabled.ACTIVE_ON_SINGLE_OBJECT,
+				Labels.Populations.ADD_CHILD_CELLS_TOOLTIP));
 
-		addSubMenu.add(fact.makeItem(Labels.Populations.ADD_CLUSTER_MANUAL_LBL,
+		menu.add(addSubMenu);
+
+		ContextualMenu clusterSubMenu = fact.makeMenu(Labels.Populations.CLUSTER,
+				ContextEnabled.ACTIVE_ON_ROOT_DATASET
+						| ContextEnabled.ACTIVE_ON_CHILD_DATASET
+						| ContextEnabled.ACTIVE_ON_SINGLE_OBJECT);
+
+		clusterSubMenu.add(fact.makeItem(Labels.Populations.ADD_CLUSTER_MANUAL_LBL,
 				UserActionEvent.CLUSTER_MANUALLY,
 				ContextEnabled.ACTIVE_ON_ROOT_DATASET
 						| ContextEnabled.ACTIVE_ON_CHILD_DATASET
-						| ContextEnabled.ACTIVE_ON_SINGLE_OBJECT));
+						| ContextEnabled.ACTIVE_ON_SINGLE_OBJECT,
+				Labels.Populations.ADD_CLUSTER_MANUAL_TOOLTIP));
 
-		addSubMenu.add(fact.makeItem(Labels.Populations.ADD_CLUSTER_AUTO_LBL,
+		clusterSubMenu.add(fact.makeItem(Labels.Populations.ADD_CLUSTER_AUTO_LBL,
 				UserActionEvent.CLUSTER_AUTOMATICALLY,
 				ContextEnabled.ACTIVE_ON_ROOT_DATASET
 						| ContextEnabled.ACTIVE_ON_CHILD_DATASET
-						| ContextEnabled.ACTIVE_ON_SINGLE_OBJECT));
+						| ContextEnabled.ACTIVE_ON_SINGLE_OBJECT,
+				Labels.Populations.ADD_CLUSTER_AUTO_TOOLTIP));
 
-		addSubMenu.add(fact.makeItem(Labels.Populations.ADD_CLUSTER_FILE_LBL,
+		clusterSubMenu.add(fact.makeItem(Labels.Populations.ADD_CLUSTER_FILE_LBL,
 				UserActionEvent.CLUSTER_FROM_FILE,
 				ContextEnabled.ACTIVE_ON_ROOT_DATASET
 						| ContextEnabled.ACTIVE_ON_CHILD_DATASET
-						| ContextEnabled.ACTIVE_ON_SINGLE_OBJECT));
+						| ContextEnabled.ACTIVE_ON_SINGLE_OBJECT,
+				Labels.Populations.ADD_CLUSTER_FILE_TOOLTIP));
 
-		menu.add(addSubMenu);
+		menu.add(clusterSubMenu);
 
 		menu.addSeparator();
 

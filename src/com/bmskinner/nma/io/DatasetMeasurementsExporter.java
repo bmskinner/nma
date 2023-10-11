@@ -40,7 +40,6 @@ import com.bmskinner.nma.components.generic.IPoint;
 import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.measure.MeasurementScale;
 import com.bmskinner.nma.components.options.HashOptions;
-import com.bmskinner.nma.components.options.MissingOptionException;
 import com.bmskinner.nma.components.profiles.DefaultProfile;
 import com.bmskinner.nma.components.profiles.IProfile;
 import com.bmskinner.nma.components.profiles.IProfileSegment;
@@ -72,6 +71,9 @@ public class DatasetMeasurementsExporter extends StatsExporter {
 	private boolean isIncludeGlcm = false;
 	private boolean isIncludePixelHistogram = false;
 
+	/** Which image channels have pixel histogram values? */
+	private int[] pixelHistogramChannels = null;
+
 	/** How many samples should be taken from each profile? */
 	private int profileSamples = 100;
 
@@ -92,10 +94,9 @@ public class DatasetMeasurementsExporter extends StatsExporter {
 	 * Create specifying the folder stats will be exported into
 	 * 
 	 * @param folder
-	 * @throws MissingOptionException
 	 */
 	public DatasetMeasurementsExporter(@NonNull File file, @NonNull List<IAnalysisDataset> list,
-			@NonNull HashOptions options) throws MissingOptionException {
+			@NonNull HashOptions options) {
 		super(file, list, options);
 		segCount = list.get(0).getCollection().getProfileManager().getSegmentCount();
 		if (list.size() == 1) {
@@ -105,16 +106,12 @@ public class DatasetMeasurementsExporter extends StatsExporter {
 					.allMatch(d -> d.getCollection().getProfileManager()
 							.getSegmentCount() == segCount);
 		}
+		profileSamples = options.get(HashOptions.EXPORT_PROFILE_INTERPOLATION_LENGTH);
+		outlineSamples = options.get(HashOptions.EXPORT_OUTLINE_N_SAMPLES_KEY);
 
 		isIncludeMeasurements = options.get(HashOptions.EXPORT_MEASUREMENTS_KEY);
 		isIncludeOutlines = options.get(HashOptions.EXPORT_OUTLINES_KEY);
 		isIncludeProfiles = options.get(HashOptions.EXPORT_PROFILES_KEY);
-
-		if (isIncludeOutlines)
-			outlineSamples = options.get(HashOptions.EXPORT_OUTLINE_N_SAMPLES_KEY);
-
-		if (isIncludeProfiles)
-			profileSamples = options.get(HashOptions.EXPORT_PROFILE_INTERPOLATION_LENGTH);
 
 		// Only include if present in all cells of all datasets
 		isIncludeGlcm = list.stream()
@@ -124,14 +121,23 @@ public class DatasetMeasurementsExporter extends StatsExporter {
 										.toMeasurement()) == Statistical.ERROR_CALCULATING_STAT));
 
 		// Only include if present in all cells of all datasets
-		isIncludePixelHistogram = list.stream()
-				.allMatch(d -> d.getCollection().getCells().stream() // all datasets should agree
-						.noneMatch(c -> c // no cells should have a missing value
-								.getPrimaryNucleus()
-								// Only check for the first pixel value - if one is present, all are
-								// present
-								.getMeasurement(Measurement.makePixelHistogram(
-										0)) == Statistical.ERROR_CALCULATING_STAT));
+		isIncludePixelHistogram = hasPixelHistogramsInChannel(list);
+
+		// Determine which image channels need pixel histogram data exporting
+		if (isIncludePixelHistogram) {
+			pixelHistogramChannels = list.stream()
+					.flatMap(d -> d.getCollection().getCells().stream())
+					.flatMap(c -> c.getNuclei().stream())
+					.flatMap(c -> c.getMeasurements().stream()) // get all cells in all datasets
+					.filter(m -> m.name().startsWith(Measurement.Names.PIXEL_HISTOGRAM))
+					.map(m -> m.name() // in the pixel measurements, find the distinct channels
+							.replaceAll(
+									Measurement.Names.PIXEL_HISTOGRAM + "_\\d+_channel_",
+									""))
+					.mapToInt(Integer::parseInt)
+					.distinct()
+					.toArray();
+		}
 
 		normProfileLength = chooseNormalisedProfileLength();
 
@@ -142,11 +148,19 @@ public class DatasetMeasurementsExporter extends StatsExporter {
 	 * Create specifying the folder stats will be exported into
 	 * 
 	 * @param folder
-	 * @throws MissingOptionException
 	 */
 	public DatasetMeasurementsExporter(@NonNull File file, @NonNull IAnalysisDataset dataset,
-			@NonNull HashOptions options) throws MissingOptionException {
+			@NonNull HashOptions options) {
 		this(file, List.of(dataset), options);
+	}
+
+	private boolean hasPixelHistogramsInChannel(List<IAnalysisDataset> list) {
+		return list.stream().anyMatch(
+				d -> d.getCollection().getCells().stream()
+						.flatMap(c -> c.getNuclei().stream()) // all datasets should agree
+						.flatMap(n -> n.getMeasurements().stream())
+						.filter(m -> m.name().startsWith(Measurement.Names.PIXEL_HISTOGRAM))
+						.count() > 0); // at least one histogram measurement in a cell
 	}
 
 	/**
@@ -210,11 +224,15 @@ public class DatasetMeasurementsExporter extends StatsExporter {
 			}
 
 			if (isIncludePixelHistogram) {
-				for (Measurement m : Measurement.getPixelHistogramMeasurements()) {
-					String label = m.label(MeasurementScale.PIXELS).replace(" ", "_").replace("__",
-							"_");
-					outLine.append(label + TAB);
+				for (int channel : pixelHistogramChannels) {
+					for (Measurement m : Measurement.getPixelHistogramMeasurements(channel)) {
+						String label = m.label(MeasurementScale.PIXELS).replace(" ", "_").replace(
+								"__",
+								"_");
+						outLine.append(label + TAB);
+					}
 				}
+
 			}
 
 			if (isIncludeSegments) {
@@ -350,8 +368,11 @@ public class DatasetMeasurementsExporter extends StatsExporter {
 		}
 
 		if (isIncludePixelHistogram) {
-			for (Measurement m : Measurement.getPixelHistogramMeasurements()) {
-				outLine.append(c.getMeasurement(m) + TAB);
+			for (int channel : pixelHistogramChannels) {
+				for (Measurement m : Measurement.getPixelHistogramMeasurements(channel)) {
+					// if there is no value, returns 0
+					outLine.append(c.getMeasurement(m) + TAB);
+				}
 			}
 		}
 
